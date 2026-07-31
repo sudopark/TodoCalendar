@@ -1,0 +1,562 @@
+/*
+  Localizable.strings
+  Extensions
+
+  Created by sudo.park on 7/31/26.
+  Copyright © 2026 com.sudo.park. All rights reserved.
+*/
+
+
+// MARK: - common
+"common::and" = " ja";
+"common::wait:message" = "Odota hetki...";
+"common::back" = "Takaisin";
+"common.remove" = "Poista";
+"common.confirm" = "Vahvista";
+"common.cancel" = "Peruuta";
+"common.close" = "Sulje";
+"common.yes" = "Kyllä";
+"common.no" = "Ei";
+"common.save" = "Tallenna";
+"common.info" = "Tietoja";
+"common.search" = "Haku";
+"common.clear" = "Tyhjennä";
+"common.send" = "Lähetä";
+"common.done" = "Valmis";
+"common.errorMessage" = "Tilapäinen virhe tapahtui.\nIlmoita, jos ongelma jatkuu.";
+"common.update" = "Päivitä";
+"common.go_to_settings" = "Siirry asetuksiin";
+
+// MARK: - date form
+"date_form::HH:mm" = "HH:mm";
+"date_form::a_h:mm" = "h:mm a";
+"date_form::MM_d__HH:mm" = "d.M, HH:mm";
+"date_form::MM_d" = "d.M";
+"date_form::MM_dd" = "dd.MM";
+"date_form::24off_h:mm" = "h:mm";
+"date_form::24on_H:mm" = "H:mm";
+"date_form::d_E_" = "d (E)";
+"date_form::MMM_d_HH:mm" = "d. MMM HH:mm";
+"date_form::MMM_d" = "d. MMM";
+"date_form::yyyy_MM_dd_E_" = "dd.MM.yyyy (E)";
+"date_form:yyyy.MM_dd_hh:mm" = "dd.MM.yyyy HH:mm";
+"date_form:yyyy.MM_dd_h:mm" = "dd.MM.yyyy h:mm a";
+"date_form.yyyy" = "yyyy";
+"date_form.MMM_dd_E" = "dd. MMM (E)";
+"date_form.HH:mm" = "HH:mm";
+"date_form.yyyy_MM_dd" = "dd.MM.yyyy";
+"date_form.yyyy_MMM_dd" = "d. MMM yyyy";
+"date_form.MMM" = "MMM";
+"date_form.MMMM" = "MMMM";
+"date_form.EEEE" = "EEEE";
+"date_form.EEE_MMM_d" = "EEE d. MMM";
+"date_form.MMM_yyyy" = "MMM yyyy";
+"tomorrow" = "Huomenna";
+
+// MARK: - event
+
+"dayname::sunday" = "Sunnuntai";
+"dayname::monday" = "Maanantai";
+"dayname::tuesday" = "Tiistai";
+"dayname::wednesday" = "Keskiviikko";
+"dayname::thursday" = "Torstai";
+"dayname::friday" = "Perjantai";
+"dayname::saturday" = "Lauantai";
+
+"dayname::sunday:short" = "SU";
+"dayname::monday:short" = "MA";
+"dayname::tuesday:short" = "TI";
+"dayname::wednesday:short" = "KE";
+"dayname::thursday:short" = "TO";
+"dayname::friday:short" = "PE";
+"dayname::saturday:short" = "LA";
+
+"dayname::sunday:very_short" = "S";
+"dayname::monday:very_short" = "M";
+"dayname::tuesday:very_short" = "T";
+"dayname::wednesday:very_short" = "K";
+"dayname::thursday:very_short" = "T";
+"dayname::friday:very_short" = "P";
+"dayname::saturday:very_short" = "L";
+
+
+// MARK: - event notification
+
+"event_notification::today:title" = "Tämän päivän tapahtumat";
+"event_notification::todo:prefix" = "Tehtävä";
+"event_notification::today:prefix" = "Tänään";
+"event_notification::tomorrow:prefix" = "Huomenna";
+"event_notification::allday_today" = "Koko päivän tänään";
+"event_notification::allday_tomorrow" = "Koko päivän huomenna";
+"event_notification::some_allday" = "%@ koko päivän";
+"event_notification_setting::option_title::no_notification" = "Ei ilmoituksia";
+"event_notification_setting::option_title::at_time" = "Tapahtuman alkaessa";
+"event_notification_setting::option_title::allday_9am" = "Klo 9 samana päivänä";
+"event_notification_setting::option_title::allday_12pm" = "Keskipäivällä samana päivänä";
+"event_notification_setting::option_title::customTime" = "Mukautettu ajankohta: %@";
+"event_notification_setting::option_title::custimTime_fallback" = "Mukautettu ajankohta";
+"event_notification_setting::option_title::before_minutes" = "%d minuuttia ennen tapahtumaa";
+"event_notification_setting::option_title::before_hours" = "%d tuntia ennen tapahtumaa";
+"event_notification_setting::option_title::before_days" = "%d päivää ennen tapahtumaa";
+"event_notification_setting::option_title::before_weeks" = "%d viikkoa ennen tapahtumaa";
+"event_notification_setting::option_title::allday_9am_before_days" = "Klo 9.00, %d päivää etukäteen";
+"event_notification_setting::option_title::allday_9am_before_weeks" = "Klo 9.00, %d viikkoa etukäteen";
+"event_notification_setting::need_permission_message" = "Tapahtumailmoitusten käyttö edellyttää ilmoituslupaa.\nSiirry järjestelmän sovellusasetuksiin ja salli ilmoitukset.";
+"event_notification_setting::need_permission::go_setting" = "Siirry asetuksiin";
+"event_notification_setting::need_permission_title" = "Tietoja";
+"event_notification_setting::permission_denied" = "Tapahtumamuistutusten käyttö edellyttää sovelluksen ilmoituslupaa.";
+
+
+
+// MARK: - calendar
+
+"calendar::foremostevent:title" = "Tärkein tapahtuma";
+"calendar::uncompletedTodos:title" = "Keskeneräiset tehtävät";
+"calendar::event_time::todo" = "Tehtävä";
+"calendar::event_time::allday" = "Koko päivä";
+"calendar::event_time::allday::with" = "%@ koko päivän";
+"calendar::event_time::period:some_days" = "%d päivää";
+"calendar::event_time::period:some_minutes" = "%d minuuttia";
+"calendar::event_time::period:some_hours" = "%d tuntia";
+"calendar::event_time::period:some_days:some_hours" = "%d päivää %d tuntia";
+"calendar::event::more_action::remove:title" = "Poista tapahtuma";
+"calendar::event::more_action::foremost_event:title" = "Tärkein tapahtuma";
+"calendar::event::more_action::remove_only_thistime:message" = "Haluatko poistaa vain tämän tapahtuman kaikista toistuvista tapahtumista?";
+"calendar::event::more_action::remove:message" = "Haluatko poistaa tämän tapahtuman?";
+"calendar::event::more_action::mark_as_foremost" = "Haluatko merkitä tämän tapahtuman tärkeimmäksi tapahtumaksesi?";
+"calendar::event::more_action::unmark_as_foremost" = "Haluatko poistaa tämän tapahtuman merkinnän tärkeimpänä tapahtumana?";
+"calendar::event::more_action::mark_as_foremost::unavail" = "Toistuvaa aikataulutapahtumaa ei voi merkitä tärkeimmäksi tapahtumaksi.";
+"calendar::event::more_action:remove_only_thistime:item_name" = "Poista vain tämä tapahtuma";
+"calendar::event::more_action:remove:item_name" = "Poista tapahtuma";
+"calendar::event::more_action:foremost:mark:item_name" = "Merkitse tärkeimmäksi";
+"calendar::event::more_action:foremost:unmark:item_name" = "Poista tärkeimmän merkintä";
+"calendar::event::more_action:dday_candidate:register:item_name" = "Lisää Lähtölaskenta-widgetiin";
+"calendar::event::more_action:dday_candidate:unregister:item_name" = "Poista Lähtölaskenta-widgetistä";
+"calendar::event::more_action:dday_candidate:title" = "Lähtölaskenta-widgetin ehdokas";
+"calendar::event::more_action:dday_candidate:register:message" = "Lisätäänkö tämä tapahtuma Lähtölaskenta-widgetin ehdokkaaksi? Se näkyy listan ylimpänä, kun muokkaat widgetiä.";
+"calendar::event::more_action:dday_candidate:unregister:message" = "Poistetaanko tämä tapahtuma Lähtölaskenta-widgetin ehdokkaista?";
+"calendar::event::more_action:copy:item_name" = "Kopioi tapahtuma";
+"calendar::event::more_action:transform_to::schedule" = "Muunna aikatauluksi";
+"calendar::event::more_action:transform_to::todo" = "Muunna tehtäväksi";
+"calendar::event::more_action:edit:item_name" = "Muokkaa";
+"calednar::event::add_new" = "Lisää uusi tapahtuma";
+"calednar::event::add_new:place_holder" = "Lisää uusi tehtävä nopeasti.";
+"calednar::event::skip_todo" = "Ohita tämä tehtävä";
+"calednar::event::skip_todo_until" = "Valitse ajankohta, johon asti tämä tehtävä ohitetaan";
+"calednar::event::copy" = "Kopioi tapahtuma";
+"calendar::move_date" = "Siirrä päivämäärää";
+"calednar::event::google::edit" = "Muokkaa Google-kalenterin tapahtumaa";
+
+
+// MARK: - event detail
+
+"eventDetail.messages.selectTimeFirst" = "Valitse ensin tapahtuman ajankohta.";
+"eventDetail.messages.selectValidTime" = "Valitse kelvollinen tapahtuman ajankohta.";
+"eventDetail.notification.custom_eventTime:title" = "Mukautettu";
+"eventDetail.notification.title" = "Tapahtumailmoituksen ajankohta";
+"eventDetail.repeating.title" = "Toistuminen";
+"eventDetail.repeating.notRepeating::title" = "Ei toistoa";
+"eventDetail.repeating.starttime:form" = "d.M.yyyy";
+"eventDetail.repeating.starttime:title" = "Toiston alkamisaika";
+"eventDetail.repeating.everyDay:title" = "Joka päivä";
+"eventDetail.repeating.everyWeek:title" = "Joka viikko";
+"eventDetail.repeating.everyWeekSomeDay:title" = "Joka %@";
+"eventDetail.repeating.everySomeWeek:title" = "Joka %d. viikko";
+"eventDetail.repeating.everyWeekDays:title" = "Jokaisena arkipäivänä";
+"eventDetail.repeating.everySomeWeekSomeDay:title" = "Joka %d. viikko, %@";
+"eventDetail.repeating.everyMonth:title" = "Joka kuukausi";
+"eventDetail.repeating.everyMonth_someDay:title" = "%@ joka kuukausi.";
+"eventDetail.repeating.everyYear:title" = "Joka vuosi";
+"eventDetail.repeating.lunarCalendar_everyYear:title" = "Joka vuosi (kuukalenteri)";
+"eventDetail.repeating.everyYearSomeDay:title" = "Joka vuosi %@";
+"eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "Joka vuosi %@ (kuukalenteri)";
+"eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "Kuukauden viimeisen viikon kaikki päivät";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "Kuukauden ensimmäinen %@";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "Kuukauden toinen %@";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "Kuukauden kolmas %@";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "Kuukauden neljäs %@";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "Kuukauden viides %@";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "Kuukauden kuudes %@";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "Kuukauden seitsemäs %@";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "Kuukauden viimeinen %@";
+"eventDetail.repeating.endtime::title" = "Toisto päättyy";
+"eventDetail.repeating.endtime::option::never" = "Ei koskaan";
+"eventDetail.repeating.endtime::option::on" = "Päivänä";
+"eventDetail.repeating.endtime::option::after" = "Kun toistoja";
+"eventDetail.repeating.endtime::option::after_occurrences" = "kertaa";
+"eventDetail.repeating.endtime::shouldFutureThanStartTime" = "Toiston päättymisajan on oltava myöhemmin kuin alkamisajan.\n(Toiston alkamispäivä: %@)";
+"eventDetail.repeating::period_endcount" = "Alkaen %@, %d kertaa";
+
+"eventDetail.repeating.everyNDays:title" = "Joka %d. päivä";
+"eventDetail.repeating.last" = "Viimeinen";
+"eventDetail.repeating.everyNMonths:title" = "Joka %d. kuukausi";
+"eventDetail.repeating.everyNYears:title" = "Joka %d. vuosi";
+"eventDetail.repeating::endoption_until" = "kunnes %@";
+"eventDetail.repeating::endoption_times" = "%d kertaa";
+
+"eventDetail.place::placeholder" = "Sijainti";
+"eventDetail.place::remove_button" = "Poista sijainti";
+"eventDetail.place::no_map_app" = "Valittua karttasovellusta ei ole asennettu.";
+"eventDetail.place::select_map_app" = "Valitse kartta";
+"eventDetail.place::always_select_this_map" = "Avaa aina tällä sovelluksella.";
+
+"eventDetail.add_new_todo::message" = "Uusi tehtävä on lisätty.";
+"eventDetail.add_new_schedule::message" = "Uusi aikataulutapahtuma on lisätty.";
+"eventDetail.scheduleEvent_removed::message" = "Aikataulutapahtuma on poistettu.";
+"eventDetail.edit::repeating::confirm::ttile" = "Muokkaa tapahtumaa";
+"eventDetail.edit::repeating::confirm::message" = "Tämä tapahtuma on toistuva tapahtuma.\nValitse, mihin toistuvan tapahtuman osaan muokkaus kohdistuu.";
+"eventDetail.edit::repeating::confirm::all::button" = "Kaikki tapahtumat";
+"eventDetail.edit::repeating::confirm::fromNow::button" = "Tästä hetkestä alkaen";
+"eventDetail.edit::repeating::confirm::onlyThisTime::button" = "Vain tämä kerta";
+"eventDetail.scheduleEvent_saved::message" = "Aikataulutapahtuma on tallennettu.";
+"eventDetail.todoEvent_removed::message" = "Tehtävä on poistettu.";
+"eventDetail.todoEvent_saved::message" = "Tehtävä on tallennettu.";
+"eventDetail.cancel_edit::title" = "Muokkaa tapahtumaa";
+"eventDetail.cancel_edit::message" = "Haluatko hylätä nämä muutokset?";
+"eventDetail.cancel_edit::continue::button" = "Jatka";
+
+"eventDetail.edit::add_new_name::placeholder" = "Lisää uuden tapahtuman nimi";
+"eventDetail.edit::clearEventTime::button" = "Tyhjennä tapahtuman ajankohta";
+"eventDetail.edit::noEventTime::button" = "Ei päättymisaikaa";
+"eventDetail.edit::memo" = "Muistiinpano";
+"eventDetail.edit::urlPreview" = "URL-esikatselu";
+
+"eventDetail.edit::make::case" = "Onko tämä tehtävä?";
+"eventDetail.edit::todo::case" = "Tehtävä";
+"eventDetail.edit::schedule::case" = "Aikataulutapahtuma";
+"eventDetail.edit::holiday::case" = "Yleinen vapaapäivä alueella %@";
+
+"eventDetail.notSupport::holiday" = "Tietojen muokkaustoimintoa ei tueta yleisinä vapaapäivinä.";
+
+"eventDetail:todo:guide:message1" = "Tehtävä kuvaa jotain, joka pitää tehdä.";
+"eventDetail:todo:guide:message2" = "Toisin kuin tavalliset, tiettynä ajankohtana (tai ajanjaksona) kalenterissa näkyvät aikataulutapahtumat, tehtävät voi merkitä valmiiksi.";
+"eventDetail:todo:guide:message3" = "Voit lisätä tehtävän myös ilman ajankohtaa. Voit esimerkiksi kirjata pian, mutta ei heti, tehtävän asian.";
+"eventDetail:todo:guide:process:message" = "Kun toistoasetus on käytössä, tehtävät toimivat eri tavalla kuin tavalliset aikataulutapahtumat:";
+"eventDetail:todo:guide:process:bullet1" = "Kalenterissa näkyvät nykyiset tai menneet toistuvat tehtävät, joita ei ole vielä merkitty valmiiksi.";
+"eventDetail:todo:guide:process:bullet2" = "Kun tehtävä merkitään valmiiksi, se siirtyy valmiiden tapahtumien luetteloon, ja seuraava toisto lisätään uutena kalenteriin.";
+"eventDetail:todo:guide:process:bullet3" = "Jos toiston päättymisajan vuoksi seuraavaa toistoa ei ole, toistuva tehtävä päättyy.";
+"eventDetail:foremost:guide:message1" = "Merkitse tapahtuma tärkeimmäksi korostaaksesi, että se on merkittävin tapahtumasi.\nTärkein tapahtuma näkyy aina kalenterissa, ja sille on oma widget.";
+"eventDetail:foremost:guide:supports:message" = "Seuraavat tapahtumatyypit voidaan asettaa tärkeimmäksi tapahtumaksi:";
+"eventDetail:foremost:guide:supports:todo" = "Tehtävä";
+"eventDetail:foremost:guide:supports:notRepeating_schedule" = "Toistumattomat aikataulutapahtumat";
+
+"eventDetail:isSaving:toast:message" = "Tallennetaan muutoksia. Odota hetki.";
+"eventDetail:hasChanges:confirm:message" = "Sinulla on tallentamattomia muutoksia. Haluatko hylätä ne?";
+"eventDetail:hasChanges:confirm:continue" = "Jatka muokkaamista";
+
+"eventDetail.unavailto_transform_withoutName" = "Anna nimi muuntaaksesi tapahtuman.";
+"eventDetail.todoEvent_unavailto_transform_withoutTime" = "Aikataulutapahtumaksi muuntaminen edellyttää ajankohtatietoja.";
+"eventDetail.todoEvent::transform::schedule_title" = "Muunna";
+"eventDetail.todoEvent::transform::schedule_message" = "Haluatko muuntaa tämän tehtävän aikataulutapahtumaksi?";
+"eventDetail.scheduleEvent::transform::todo" = "Muunna";
+"eventDetail.scheduleEvent::transform::todo_message" = "Haluatko muuntaa tämän aikataulutapahtuman tehtäväksi?";
+
+"eventDetail::revert" = "Kumoa valmiiksi merkintä";
+
+// MARK: - Google calendar event
+
+"eventDetail::gogoleEvent::viewOnCalendar" = "Näytä Google-kalenterissa";
+"eventDetail::gogoleEvent::calendar" = "Kalenteri";
+"eventDetail::gogoleEvent::calendar::event" = "Google-kalenterin tapahtuma";
+"eventDetail::gogoleEvent::attendee::unknown" = "Tuntematon";
+"eventDetail::gogoleEvent::attendees" = "Osallistujat (%d henkilöä)";
+"eventDetail::gogoleEvent::attendees::organizer" = "Järjestäjä";
+"eventDetail::gogoleEvent::conference::accessCode" = "Pääsykoodi";
+"eventDetail::gogoleEvent::conference::meetingCode" = "Kokouskoodi";
+"eventDetail::gogoleEvent::conference::passCode" = "Tunnuskoodi";
+"eventDetail::gogoleEvent::conference::password" = "Salasana";
+"eventDetail::gogoleEvent::copy::message" = "Kopioitu leikepöydälle.";
+"eventDetail::gogoleEvent::canceled::message" = "Tämä tapahtuma on peruttu.";
+
+// MARK: - Apple calendar event
+"eventDetail::appleCalendarEvent::viewOnCalendar" = "Näytä Apple-kalenterissa";
+"eventDetail::appleCalendarEvent::calendar::event" = "Apple-kalenterin tapahtuma";
+"eventDetail::appleCalendarEvent::attendees" = "Osallistujat (%d henkilöä)";
+"eventDetail::appleCalendarEvent::attendees::organizer" = "Järjestäjä";
+
+// MARK: - event tag
+
+"eventTag.title" = "Tapahtumatyyppi";
+"eventTag.list::title" = "Tapahtumatyypit";
+"eventTag.defaults.default::name" = "Oletus";
+"eventTag.defaults.holiday::name" = "Vapaapäivä";
+"eventTag.addNew::placeholder" = "Lisää uusi tapahtumatyyppi";
+"eventTag.allEventTypes" = "Kaikki tapahtumatyypit >";
+"eventTag.remove::confirm::message" = "Haluatko poistaa vain tämän tapahtumatyypin vai myös siihen liittyvät tapahtumat?";
+"eventTag.remove::only_tag" = "Poista vain tapahtumatyyppi";
+"eventTag.remove::tag_and_evets" = "Poista myös liittyvät tapahtumat";
+"eventTag.removed::message" = "Tämä tapahtumatyyppi on poistettu.";
+"eventTag.removed_with_events::message" = "Tämä tapahtumatyyppi ja siihen liittyvät tapahtumat on poistettu.";
+"eventTag.color::changed::message" = "Väri on vaihdettu.";
+"eventTag.changed::message" = "Tapahtumatyyppiä on muokattu.";
+"eventTag.makeNew::message" = "Uusi tapahtumatyyppi on luotu.";
+"eventTag.default::title" = "Oletustapahtumatyyppi";
+"eventTag.default::selection::explain" = "Tämä on tapahtumatyyppi, joka valitaan oletuksena tapahtumaa luotaessa.";
+"eventTag.externalCalendar::integrate_button" = "Yhdistä kalenteri";
+
+
+// MARK: - event list
+
+"eventList::today::title" = "Tänään";
+"eventList::yesterday::title" = "Eilen";
+"eventList::thisMonth::title" = "Tämä kuukausi";
+"eventList::done_todos::title" = "Valmiiden tehtävien luettelo";
+"eventList::done_todos::eventTime" = "Tapahtuman aika:";
+"eventList::done_todos::doneAt" = "Valmistumisaika:";
+"eventList::remove::confirm::message" = "Poista valmiiden tehtävien luettelo";
+"eventList::remove::confirm::button::all" = "Kaikki valmiit tehtävät";
+"eventList::remove::confirm::button::olderThan1m" = "Yli 1 kuukausi vanhat";
+"eventList::remove::confirm::button::olderThan3m" = "Yli 3 kuukautta vanhat";
+"eventList::remove::confirm::button::olderThan6m" = "Yli 6 kuukautta vanhat";
+"eventList::remove::confirm::button::olderThan1y" = "Yli 1 vuosi vanhat";
+
+
+// MARK: - account
+
+"manage_account::title" = "Tilin hallinta";
+"manage_account::login_method" = "Kirjautumistapa";
+"manage_account::email" = "Sähköposti";
+"manage_account::last_signedIn_at" = "Viimeisin kirjautumisaika";
+"manage_account::migration::title" = "Väliaikaisten käyttäjätietojen siirto";
+"manage_account::migration::description" = "Kaikki ennen kirjautumista luodut tapahtumat (%d tapahtumaa) siirretään tilillesi.\nTiliisi linkitetyt tapahtumat ovat käytettävissä miltä tahansa laitteelta.";
+"manage_account::migration_finished::message" = "Siirto on valmis!";
+"manage_account::signout_button::title" = "Kirjaudu ulos";
+"manage_account::sign_out::confirm::title" = "Kirjaudu ulos";
+"manage_account::sign_out::confirm::message" = "Haluatko kirjautua ulos nykyisestä tilistäsi?";
+"manage_account::delete_account_button::title" = "Poista tili";
+"manage_account::delete_account_button::confirm:message" = "Haluatko varmasti poistaa tilisi?";
+"manage_account::delete_account_button::description" = "Kun olet pyytänyt tilin poistamista, tili poistetaan.\nPoistettuja tilitietoja ei voi palauttaa.";
+"signIn::title" = "Kirjaudu sisään";
+"signIn:description" = "Varmuuskopioi tapahtumaluettelosi ja synkronoi se muiden iOS-laitteiden kanssa\n(Tuettuja alustoja laajennetaan.)";
+
+
+// MARK: - setting
+"event_setting::title" = "Tapahtuma-asetukset";
+"event_setting::eventType" = "Tapahtumatyyppi";
+"event_setting::eventPeriod" = "Tapahtuman ajanjakso";
+"event_setting::defaultMapApp" = "Avaa karttasovellus";
+"event_setting::defaultMapApp_select" = "Valitse";
+
+"event_setting::eventSync" = "Tapahtumien synkronointi";
+"event_setting::eventSync::readyToSync::description" = "Synkronoi varmuuskopioidut käyttäjän tapahtumat.";
+"event_setting::eventSync::syncInProgress::description" = "Synkronoidaan varmuuskopioituja käyttäjän tapahtumia...";
+"event_setting::eventSync::lastTime" = "Viimeisin synkronoitu tieto: %@";
+"event_setting::eventSync::force" = "Pakota synkronointi";
+
+"event_notification_setting::title::forAllDay" = "Koko päivä";
+"event_notification_setting::title::NotforAllDay" = "Ilmoituksen ajankohta";
+"event_setting::external_calendar::title" = "Ulkoiset kalenterit";
+"event_setting::external_calendar::connected::account" = "Yhdistetty: %@";
+"event_setting::external_calendar::start" = "Yhdistä";
+"event_setting::external_calendar::start::message" = "Yhdistetty ulkoiseen kalenteriin.";
+"event_setting::external_calendar::stop" = "Katkaise yhteys";
+"event_setting::external_calendar::stop::message" = "Yhteys ulkoiseen kalenteriin on katkaistu.";
+"event_setting::external_calendar::google::serviceName" = "Google-kalenteri";
+"event_setting::external_calendar::apple::serviceName" = "Apple-kalenteri";
+"event_setting::apple_calendar::permission_denied::message" = "Kalenterin käyttöoikeus on evätty. Ota se käyttöön Asetuksissa käyttääksesi Apple-kalenteria.";
+"event_setting::apple_calendar::restricted::message" = "Kalenterin käyttö on rajoitettua tällä laitteella.";
+"setting.title" = "Asetukset";
+"setting.appearance.title" = "Ulkoasu";
+"setting.appearance.calendar.samplemonth::march" = "MAALISKUU";
+"setting.appearance.calendar.startDayOfWeek" = "Viikon ensimmäinen päivä";
+"setting.appearance.calendar.accentDay" = "Korostetut päivät";
+"setting.appearance.calendar.accentDay::holiday" = "Vapaapäivä";
+"setting.appearance.calendar.accentDay::saturday" = "Lauantai";
+"setting.appearance.calendar.accentDay::sunday" = "Sunnuntai";
+"setting.appearance.calendar.colorTheme" = "Väriteema";
+"setting.appearance.calendar.colorTheme::system" = "Järjestelmä";
+"setting.appearance.calendar.colorTheme::light" = "Vaalea";
+"setting.appearance.calendar.colorTheme::dark" = "Tumma";
+"setting.appearance.calendar.underline" = "Alleviivaus tapahtumapäivinä";
+"setting.appearance.event.edit::name_old" = "Muokkaa tapahtumaa";
+"setting.appearance.event.edit::name" = "Tapahtuma-asetukset ja ulkoiset kalenterit";
+"setting.appearance.day_row_height" = "Tapahtuman tietojen näyttötaso";
+"setting.appearance.day_row_height::small::text" = "Minimaalinen";
+"setting.appearance.day_row_height::medium::text" = "Keskitaso";
+"setting.appearance.day_row_height::large::text" = "Täysi";
+"setting.appearance.event.fontSize" = "Tapahtuman tekstin fonttikoko";
+"setting.appearance.event.show_holidayName" = "Näytä vapaapäivän nimi";
+"setting.appearance.event.show_lunar" = "Kuukalenteri";
+"setting.appearance.event._24form" = "24 tunnin muoto";
+"setting.appearance.event.sample::name" = "🥗 Tapahtuman nimi";
+"setting.appearance.event.sample::description" = "kuvaus";
+"setting.appearance.event.sample::christmas" = "Joulu";
+"setting.appearance.event.sample::first" = "ensimmäinen tapahtuma";
+"setting.appearance.event.sample::second" = "toinen tapahtuma";
+"setting.appearance.event.sample::uncompleted_todo::toggle" = "Näytä keskeneräiset tehtävät";
+"setting.appearance.widget::title" = "Widgetin teema";
+"setting.appearance.widget::useSystemTheme::title" = "Käytä järjestelmän teemaa";
+"setting.appearance.widget::useSystemTheme::background" = "Widgetin taustaväri";
+"setting.appearance.widget::useCustomTheme::title" = "Valitse oma väri";
+"setting.appearance.widget::sample::eventName" = "Widget-tapahtuma";
+"setting.appearance.event.boldText" = "Lihavoitu teksti";
+"setting.appearance.event.eventColor" = "Tapahtuman väri";
+"setting.timezone::title" = "Aikavyöhyke";
+"setting.timezone::systemTimeZone::name" = "Järjestelmän aikavyöhyke";
+"setting.timezone::systemTime::name" = "Järjestelmän aika";
+"setting.haptic::name" = "Haptinen palaute";
+"setting.minimize_animation::name" = "Vähennä animaatiotehosteita";
+"setting.holiday.title" = "Vapaapäivät";
+"setting.holiday.item::name" = "Vapaapäivien asetukset";
+"setting.holiday.list::sectionTitle" = "Vapaapäivät";
+"setting.holiday.country.title" = "Maa";
+"setting.holiday.country.current::title" = "Nykyinen maa";
+"setting.holiday.country.current::placeHolder" = "Valitse maa";
+"setting.holiday.country.changeConfirm::title" = "Vaihda maa";
+"setting.holiday.country.changeConfirm::message" = "Haluatko vaihtaa kalenterisi maan?";
+"setting.holiday.country.changed::message" = "Maa on vaihdettu.";
+"setting.holiday.hide::button" = "Piilota";
+"setting.holiday.hide::confirm::title" = "Piilota vapaapäivä";
+"setting.holiday.hide::confirm::message" = "Piilotetaanko tämä vapaapäivä joka vuosi?\nVoit näyttää sen uudelleen kohdassa Asetukset > Vapaapäivät.";
+"setting.holiday.hidden::sectionTitle" = "Piilotetut vapaapäivät";
+"setting.holiday.show::button" = "Näytä";
+"setting.feedback::name" = "Palaute";
+"setting.help::name" = "Ohje";
+"setting.share::name" = "Jaa sovellus";
+"setting.write_review::name" = "Kirjoita sovellusarvostelu";
+"setting.account.signedIn::manageAccount" = "Tili";
+"setting.account.needSignIn" = "Kirjaudu sisään";
+"setting.suggest::readmind::appName" = "Readminds";
+"setting.suggest::readmind::message" = "Hallitse lukulistaasi";
+"setting.section.support::name" = "Tuki";
+"setting.section.app::name" = "Sovellus";
+"setting.section.suggest::name" = "Ehdotukset";
+"feedback::guide:message" = "Lähetä rohkeasti palautetta, mukaan lukien vikailmoitukset, kommentit ja palveluehdotukset.\nHuomiosi auttavat meitä suuresti parantamaan palveluamme.";
+"feedback::enterMessage::placeholder" = "Kirjoita viesti";
+"feedback::contact::placeholder" = "Vastauksen sähköpostiosoite";
+"feedback::posted:message" = "Palautteesi on rekisteröity onnistuneesti.";
+
+// MARK: - external service
+
+"external_service.name::google" = "Google-kalenteri";
+"external_service.expired::message" = "%@-integraatio on vanhentunut. Siirry Asetuksiin ja yritä uudelleen.";
+"external_service::google::hidden_event" = "Piilotettu";
+"external_service::google::unknown_event" = "Tuntematon";
+
+
+// MARK: - widget
+
+"widget.common::explain" = "Näytä tulevat tapahtumasi.";
+"widget.doubleMonth::name" = "Kalenteri + Kalenteri";
+"widget.eventAndMonth::name" = "Tapahtumat + Kalenteri";
+"widget.todayAndMonth::name" = "TÄNÄÄN + Kalenteri";
+"widget.eventAndForesmot::name" = "Tapahtumat + Tärkein";
+"widget.events::name" = "Tapahtumat";
+"widget.events.noEvents::message" = "Ei tapahtumia.";
+"widget.events.currentTodos" = "Nykyinen tehtäväluettelo";
+"widget.events.sample::check_mailbox" = "Tarkista postilaatikko";
+"widget.events.sample::example" = "Vapaapäivä";
+"widget.events.sample::running" = "Juoksu";
+"widget.events.sample::luch" = "Lounas";
+"widget.events.sample::luch_appointment" = "Lounastapaaminen (ei saa myöhästyä)";
+"widget.events.sample::call" = "Soita Saralle";
+"widget.events.sample::surfing" = "Surffaus";
+"widget.events.sample::moving" = "Muuttopäivä";
+"widget.events.sample::meeting" = "Päivittäinen palaveri";
+"widget.events.sample::deposit_remain" = "Siirrä loppusaldo";
+"widget.events.sample::recycle" = "Kierrätys";
+"widget.events.sample::take_medicine" = "Ota lääke";
+"widget.events.sample::watering" = "Kastele ruukkukasvi";
+"widget.events.sample::june3" = "TI 3.6.";
+"widget.events.sample::july16" = "SU 16.7.";
+"widget.events.sample::july21" = "PE 21.7.";
+"widget.events.sample::july29" = "LA 29.7.";
+"widget.events.sample::aug2" = "KE 2.8.";
+"widget.events.sample::aug3" = "TO 3.8.";
+"widget.events.sample::oct10" = "MA 10.10.";
+"widget.events.foremost" = "Tärkein tapahtuma";
+"widget.events.foremost::allFinished::message" = "Lisää tapahtuma, jota et voi jättää väliin.";
+"widget.events.foremost::sample::message" = "Ota sateenvarjo mukaan! ⛱️";
+"widget.events.calendar" = "Kalenteri";
+"widget.events.today" = "TÄNÄÄN";
+"widget.events.today::sample::sunday" = "SUNNUNTAI";
+"widget.events.today::sample::march2024" = "MAALISKUU 2024";
+"total::event::count" = "%d tapahtumaa";
+"todo::count" = "%d tehtävää";
+"schedule::count" = "%d aikataulutapahtumaa";
+"widget.weeks.lastMonth" = "Edellinen kuukausi";
+"widget.weeks.thisMonth" = "Tämä kuukausi";
+"widget.weeks.nextMonth" = "Seuraava kuukausi";
+"widget.weeks.thisWeek" = "Tämä viikko";
+"widget.weeks.twoWeek" = "2 viikkoa";
+"widget.weeks.threeWeek" = "3 viikkoa";
+"widget.weeks.fourWeek" = "4 viikkoa";
+"widget.weeks.sample::feb" = "HELMIKUU";
+"widget.weeks.sample::march" = "MAALISKUU";
+"widget.weeks.sample::april" = "HUHTIKUU";
+"widget.weeks.sample::hiking" = "🏔️ Vaellus";
+"widget.weeks.sample::lunch" = "🥗 Lounas";
+"widget.weeks.sample::call" = "📞 Soita Saralle";
+"widget.weeks.sample::holiday" = "Vapaapäivä";
+"widget.weeks.sample::golf" = "⛳️ Golf";
+"widget.weeks.sample::workout" = "🔥 Treeni";
+"widget.weeks.sample::launch" = "🚀 Julkaisu";
+"widget.fail.message" = "Tilapäinen virhe tapahtui.\nYritä käynnistää sovellus uudelleen.";
+"widget.next.noEvent" = "Ei seuraavaa tapahtumaa.";
+"widget.next.sample" = "🔥 Treeni";
+"widget.next.title" = "Seuraava tapahtuma";
+"widget.next.rect_widget::title" = "Tämän päivän seuraava tapahtuma.";
+"widget.next.title::remains" = "Tämän päivän tulevat tapahtumat.";
+"widget.next.title::future" = "Tänään ja mitä seuraavaksi";
+"widget.next.title::more_todos" = "%d tehtävää lisää";
+"widget.next.title::more_events" = "%d aikataulutapahtumaa lisää";
+"widget.next.title::more_events_with_todo" = "%1$d tehtävää ja %2$d aikataulutapahtumaa lisää";
+"widget.next.title::uncompleted::todo" = "%1$@ ei ole valmis";
+"widget.next.title::uncompleted::todos" = "%1$@ ja %2$d muuta keskeneräistä tehtävää";
+"widget.next.no_events_today" = "Ei tapahtumia tänään";
+"widget.next.no_events" = "Ei tulevia tapahtumia";
+
+"widget.dday::name" = "Lähtölaskenta";
+"widget.dday::noTarget" = "Valitse tapahtuma";
+"widget.dday.sample::title" = "Työpaja";
+"widget.dday.target::repeating" = "Toistuva";
+"widget.dday.target::registered" = "Kiinnitetty";
+"widget.dday.turn::name" = "Kierros %d";
+
+// MARK: - link
+
+"deeplink::invalid_link_message" = "Tätä linkkimuotoa ei tueta.\nPäivitä sovellus uusimpaan versioon.";
+
+// MARK: - force update
+
+"force_update.title" = "Päivitys vaaditaan";
+"force_update.message" = "Uusi versio on saatavilla.\nPäivitä jatkaaksesi sovelluksen käyttöä.";
+"recommend_update.title" = "Päivitys suositellaan";
+"recommend_update.message" = "Uusi versio on saatavilla.\nSuosittelemme päivittämään paremman käyttökokemuksen saamiseksi.";
+
+
+// MARK: - ai agent
+
+"aiAgent::voice::listening" = "Kuunnellaan…";
+"aiAgent::keyboard" = "Näppäimistö";
+"aiAgent::voice" = "Ääni";
+"aiAgent::send" = "Lähetä";
+"aiAgent::input::placeholder" = "Miten voin auttaa?";
+"aiAgent::permission::title" = "Mikrofoni- ja puheentunnistusoikeus tarvitaan";
+"aiAgent::permission::message" = "Salli käyttöoikeus Asetuksissa tai kirjoita sen sijaan";
+"aiAgent::permission::keyboard" = "Kirjoita sen sijaan";
+"aiAgent::permission::setting" = "Avaa Asetukset";
+"aiAgent::state::processing" = "Käsitellään";
+"aiAgent::state::confirm" = "Vahvistus tarvitaan";
+"aiAgent::state::confirmExpired" = "Vanhentunut";
+"aiAgent::state::done" = "Komento suoritettu";
+"aiAgent::state::failed" = "Komento epäonnistui";
+"aiAgent::done::default" = "Valmis";
+"aiAgent::failed::default" = "Tätä ei voitu suorittaa";
+"aiAgent::retry" = "Yritä uudelleen";
+"aiAgent::needSignIn::title" = "Kirjautuminen vaaditaan";
+"aiAgent::needSignIn::message" = "Kirjaudu sisään käyttääksesi AI-pikasyöttöä.";
+"aiAgent::title" = "AI-pikasyöttö";
+"aiAgent::keyboard::stop" = "Pysäytä";
+"aiAgent::keyboard::send" = "Lähetä";
+"aiAgent::stop" = "Pysäytä";
+"aiAgent::usage" = "%@ / %@ krediittiä";
+"aiAgent::plan::free" = "Ilmainen";
+"aiAgent::plan::standard" = "Vakio";
+"aiAgent::plan::lifetime" = "Elinikäinen";
+"aiAgent::usage::topupRemaining" = "%@ lisäkrediittiä jäljellä";
+"aiAgent::usage::planChangeScheduled" = "Vaihto %2$@-pakettiin %1$@";
+"aiAgent::stop::confirm::title" = "Pysäytetäänkö käsittely?";
+"aiAgent::stop::confirm::message" = "Pysäyttäminen hylkää käynnissä olevan komennon, eikä sitä voi jatkaa.";
+"aiAgent::confirm::countdown" = "aikaa hyväksyä";
+"aiAgent::confirm::expired::message" = "Aika loppui. Pyydä uudelleen.";

@@ -1,0 +1,3 @@
+"NSCalendarsFullAccessUsageDescription" = "Prístup ku kalendáru je vyžadovaný na zobrazenie udalostí a synchronizáciu s Apple Kalendárom.";
+"NSMicrophoneUsageDescription" = "Prístup k mikrofónu je vyžadovaný na hlasové zadávanie udalostí a úloh.";
+"NSSpeechRecognitionUsageDescription" = "Rozpoznávanie reči je vyžadované na prevod vášho hlasu na udalosti a úlohy.";

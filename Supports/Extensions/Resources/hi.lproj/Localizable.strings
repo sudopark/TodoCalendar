@@ -1,0 +1,562 @@
+/*
+  Localizable.strings
+  Extensions
+
+  Created by sudo.park on 7/31/26.
+  Copyright © 2026 com.sudo.park. All rights reserved.
+*/
+
+
+// MARK: - common
+"common::and" = " और";
+"common::wait:message" = "कृपया प्रतीक्षा करें...";
+"common::back" = "वापस";
+"common.remove" = "हटाएं";
+"common.confirm" = "पुष्टि करें";
+"common.cancel" = "रद्द करें";
+"common.close" = "बंद करें";
+"common.yes" = "हां";
+"common.no" = "नहीं";
+"common.save" = "सहेजें";
+"common.info" = "जानकारी";
+"common.search" = "खोजें";
+"common.clear" = "साफ़ करें";
+"common.send" = "भेजें";
+"common.done" = "पूर्ण";
+"common.errorMessage" = "एक अस्थायी त्रुटि हुई है।\nसमस्या बनी रहने पर कृपया रिपोर्ट करें।";
+"common.update" = "अपडेट करें";
+"common.go_to_settings" = "सेटिंग्स में जाएं";
+
+// MARK: - date form
+"date_form::HH:mm" = "HH:mm";
+"date_form::a_h:mm" = "h:mm a";
+"date_form::MM_d__HH:mm" = "d/M, HH:mm";
+"date_form::MM_d" = "d/M";
+"date_form::MM_dd" = "dd/MM";
+"date_form::24off_h:mm" = "h:mm";
+"date_form::24on_H:mm" = "H:mm";
+"date_form::d_E_" = "d (E)";
+"date_form::MMM_d_HH:mm" = "d MMM HH:mm";
+"date_form::MMM_d" = "d MMM";
+"date_form::yyyy_MM_dd_E_" = "dd/MM/yyyy (E)";
+"date_form:yyyy.MM_dd_hh:mm" = "dd/MM/yyyy HH:mm";
+"date_form:yyyy.MM_dd_h:mm" = "dd/MM/yyyy h:mm a";
+"date_form.yyyy" = "yyyy";
+"date_form.MMM_dd_E" = "dd MMM (E)";
+"date_form.HH:mm" = "HH:mm";
+"date_form.yyyy_MM_dd" = "dd/MM/yyyy";
+"date_form.yyyy_MMM_dd" = "d MMM yyyy";
+"date_form.MMM" = "MMM";
+"date_form.MMMM" = "MMMM";
+"date_form.EEEE" = "EEEE";
+"date_form.EEE_MMM_d" = "EEE, d MMM";
+"date_form.MMM_yyyy" = "MMM yyyy";
+"tomorrow" = "कल";
+
+// MARK: - event
+
+"dayname::sunday" = "रविवार";
+"dayname::monday" = "सोमवार";
+"dayname::tuesday" = "मंगलवार";
+"dayname::wednesday" = "बुधवार";
+"dayname::thursday" = "गुरुवार";
+"dayname::friday" = "शुक्रवार";
+"dayname::saturday" = "शनिवार";
+
+"dayname::sunday:short" = "रवि";
+"dayname::monday:short" = "सोम";
+"dayname::tuesday:short" = "मंगल";
+"dayname::wednesday:short" = "बुध";
+"dayname::thursday:short" = "गुरु";
+"dayname::friday:short" = "शुक्र";
+"dayname::saturday:short" = "शनि";
+
+"dayname::sunday:very_short" = "र";
+"dayname::monday:very_short" = "सो";
+"dayname::tuesday:very_short" = "मं";
+"dayname::wednesday:very_short" = "बु";
+"dayname::thursday:very_short" = "गु";
+"dayname::friday:very_short" = "शु";
+"dayname::saturday:very_short" = "श";
+
+
+// MARK: - event notification
+
+"event_notification::today:title" = "आज के इवेंट";
+"event_notification::todo:prefix" = "कार्य";
+"event_notification::today:prefix" = "आज";
+"event_notification::tomorrow:prefix" = "कल";
+"event_notification::allday_today" = "आज पूरे दिन";
+"event_notification::allday_tomorrow" = "कल पूरे दिन";
+"event_notification::some_allday" = "%@ पूरे दिन";
+"event_notification_setting::option_title::no_notification" = "कोई सूचना नहीं";
+"event_notification_setting::option_title::at_time" = "इवेंट के समय पर";
+"event_notification_setting::option_title::allday_9am" = "उस दिन सुबह 9 बजे";
+"event_notification_setting::option_title::allday_12pm" = "उस दिन दोपहर को";
+"event_notification_setting::option_title::customTime" = "कस्टम समय: %@";
+"event_notification_setting::option_title::custimTime_fallback" = "कस्टम समय";
+"event_notification_setting::option_title::before_minutes" = "इवेंट से %d मिनट पहले";
+"event_notification_setting::option_title::before_hours" = "इवेंट से %d घंटे पहले";
+"event_notification_setting::option_title::before_days" = "इवेंट से %d दिन पहले";
+"event_notification_setting::option_title::before_weeks" = "इवेंट से %d सप्ताह पहले";
+"event_notification_setting::option_title::allday_9am_before_days" = "सुबह 9:00 बजे, %d दिन पहले";
+"event_notification_setting::option_title::allday_9am_before_weeks" = "सुबह 9:00 बजे, %d सप्ताह पहले";
+"event_notification_setting::need_permission_message" = "इवेंट सूचना सुविधा का उपयोग करने के लिए सूचना अनुमति आवश्यक है।\nसिस्टम सेटिंग्स में जाएं और सूचनाओं की अनुमति दें।";
+"event_notification_setting::need_permission::go_setting" = "सेटिंग्स में जाएं";
+"event_notification_setting::need_permission_title" = "जानकारी";
+"event_notification_setting::permission_denied" = "इवेंट रिमाइंडर सुविधा का उपयोग करने के लिए ऐप सूचना अनुमति आवश्यक है।";
+
+
+
+// MARK: - calendar
+
+"calendar::foremostevent:title" = "सबसे महत्वपूर्ण इवेंट";
+"calendar::uncompletedTodos:title" = "अधूरे कार्य";
+"calendar::event_time::todo" = "कार्य";
+"calendar::event_time::allday" = "पूरे दिन";
+"calendar::event_time::allday::with" = "%@ पूरे दिन";
+"calendar::event_time::period:some_days" = "%d दिन";
+"calendar::event_time::period:some_minutes" = "%d मिनट";
+"calendar::event_time::period:some_hours" = "%d घंटे";
+"calendar::event_time::period:some_days:some_hours" = "%d दिन %d घंटे";
+"calendar::event::more_action::remove:title" = "इवेंट हटाएं";
+"calendar::event::more_action::foremost_event:title" = "सबसे महत्वपूर्ण इवेंट";
+"calendar::event::more_action::remove_only_thistime:message" = "क्या आप सभी दोहराए जाने वाले इवेंट में से केवल इस इवेंट को हटाना चाहते हैं?";
+"calendar::event::more_action::remove:message" = "क्या आप इस इवेंट को हटाना चाहते हैं?";
+"calendar::event::more_action::mark_as_foremost" = "क्या आप इस इवेंट को अपने सबसे महत्वपूर्ण इवेंट के रूप में चिह्नित करना चाहते हैं?";
+"calendar::event::more_action::unmark_as_foremost" = "क्या आप इस इवेंट से सबसे महत्वपूर्ण का चिह्न हटाना चाहते हैं?";
+"calendar::event::more_action::mark_as_foremost::unavail" = "दोहराई जाने वाली अनुसूची इवेंट को सबसे महत्वपूर्ण इवेंट के रूप में चिह्नित नहीं किया जा सकता।";
+"calendar::event::more_action:remove_only_thistime:item_name" = "केवल यह इवेंट हटाएं";
+"calendar::event::more_action:remove:item_name" = "इवेंट हटाएं";
+"calendar::event::more_action:foremost:mark:item_name" = "सबसे महत्वपूर्ण के रूप में चिह्नित करें";
+"calendar::event::more_action:foremost:unmark:item_name" = "सबसे महत्वपूर्ण का चिह्न हटाएं";
+"calendar::event::more_action:dday_candidate:register:item_name" = "डी-डे विजेट में जोड़ें";
+"calendar::event::more_action:dday_candidate:unregister:item_name" = "डी-डे विजेट से हटाएं";
+"calendar::event::more_action:dday_candidate:title" = "डी-डे विजेट उम्मीदवार";
+"calendar::event::more_action:dday_candidate:register:message" = "इस इवेंट को डी-डे विजेट के उम्मीदवार के रूप में जोड़ें? विजेट संपादित करते समय यह सूची में सबसे ऊपर दिखेगा।";
+"calendar::event::more_action:dday_candidate:unregister:message" = "इस इवेंट को डी-डे विजेट के उम्मीदवारों से हटाएं?";
+"calendar::event::more_action:copy:item_name" = "इवेंट कॉपी करें";
+"calendar::event::more_action:transform_to::schedule" = "अनुसूची में बदलें";
+"calendar::event::more_action:transform_to::todo" = "कार्य में बदलें";
+"calendar::event::more_action:edit:item_name" = "संपादित करें";
+"calednar::event::add_new" = "नया इवेंट जोड़ें";
+"calednar::event::add_new:place_holder" = "जल्दी से एक नया कार्य जोड़ें।";
+"calednar::event::skip_todo" = "इस कार्य को छोड़ें";
+"calednar::event::skip_todo_until" = "इस कार्य को छोड़ने के लिए एक समय चुनें";
+"calednar::event::copy" = "इवेंट कॉपी करें";
+"calendar::move_date" = "तारीख बदलें";
+"calednar::event::google::edit" = "Google कैलेंडर इवेंट संपादित करें";
+
+
+// MARK: - event detail
+
+"eventDetail.messages.selectTimeFirst" = "कृपया पहले इवेंट का समय चुनें।";
+"eventDetail.messages.selectValidTime" = "कृपया इवेंट का वैध समय चुनें।";
+"eventDetail.notification.custom_eventTime:title" = "कस्टम";
+"eventDetail.notification.title" = "इवेंट सूचना समय";
+"eventDetail.repeating.title" = "दोहराव";
+"eventDetail.repeating.notRepeating::title" = "दोहराव नहीं";
+"eventDetail.repeating.starttime:form" = "d/M/yyyy";
+"eventDetail.repeating.starttime:title" = "दोहराव शुरू होने का समय";
+"eventDetail.repeating.everyDay:title" = "हर दिन";
+"eventDetail.repeating.everyWeek:title" = "हर सप्ताह";
+"eventDetail.repeating.everyWeekSomeDay:title" = "हर %@";
+"eventDetail.repeating.everySomeWeek:title" = "हर %d सप्ताह में";
+"eventDetail.repeating.everyWeekDays:title" = "हर कार्यदिवस";
+"eventDetail.repeating.everySomeWeekSomeDay:title" = "हर %d सप्ताह में %@";
+"eventDetail.repeating.everyMonth:title" = "हर महीने";
+"eventDetail.repeating.everyMonth_someDay:title" = "हर महीने की %@ तारीख को।";
+"eventDetail.repeating.everyYear:title" = "हर साल";
+"eventDetail.repeating.lunarCalendar_everyYear:title" = "हर साल (चंद्र कैलेंडर)";
+"eventDetail.repeating.everyYearSomeDay:title" = "हर साल %@";
+"eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "हर साल %@ (चंद्र कैलेंडर)";
+"eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "हर महीने के अंतिम सप्ताह के सभी दिन";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "हर महीने का पहला %@";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "हर महीने का दूसरा %@";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "हर महीने का तीसरा %@";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "हर महीने का चौथा %@";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "हर महीने का पांचवां %@";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "हर महीने का छठा %@";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "हर महीने का सातवां %@";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "हर महीने का अंतिम %@";
+"eventDetail.repeating.endtime::title" = "दोहराव समाप्ति";
+"eventDetail.repeating.endtime::option::never" = "कभी नहीं";
+"eventDetail.repeating.endtime::option::on" = "तारीख को";
+"eventDetail.repeating.endtime::option::after" = "बाद में";
+"eventDetail.repeating.endtime::option::after_occurrences" = "बार";
+"eventDetail.repeating.endtime::shouldFutureThanStartTime" = "दोहराव समाप्ति समय शुरुआत के समय से बाद का होना चाहिए।\n(दोहराव शुरू होने की तारीख: %@)";
+"eventDetail.repeating::period_endcount" = "%@ से शुरू, %d बार";
+
+"eventDetail.repeating.everyNDays:title" = "हर %d दिन में";
+"eventDetail.repeating.last" = "अंतिम";
+"eventDetail.repeating.everyNMonths:title" = "हर %d महीने में";
+"eventDetail.repeating.everyNYears:title" = "हर %d साल में";
+"eventDetail.repeating::endoption_until" = "%@ तक";
+"eventDetail.repeating::endoption_times" = "%d बार";
+
+"eventDetail.place::placeholder" = "स्थान";
+"eventDetail.place::remove_button" = "स्थान हटाएं";
+"eventDetail.place::no_map_app" = "चयनित मानचित्र ऐप इंस्टॉल नहीं है।";
+"eventDetail.place::select_map_app" = "एक मानचित्र चुनें";
+"eventDetail.place::always_select_this_map" = "हमेशा इस ऐप से खोलें।";
+
+"eventDetail.add_new_todo::message" = "एक नया कार्य जोड़ा गया है।";
+"eventDetail.add_new_schedule::message" = "एक नई अनुसूची जोड़ी गई है।";
+"eventDetail.scheduleEvent_removed::message" = "अनुसूची हटा दी गई है।";
+"eventDetail.edit::repeating::confirm::ttile" = "इवेंट संपादित करें";
+"eventDetail.edit::repeating::confirm::message" = "यह एक दोहराया जाने वाला इवेंट है।\nजिस दायरे को आप संपादित करना चाहते हैं उसे चुनें।";
+"eventDetail.edit::repeating::confirm::all::button" = "सभी इवेंट";
+"eventDetail.edit::repeating::confirm::fromNow::button" = "अभी से";
+"eventDetail.edit::repeating::confirm::onlyThisTime::button" = "केवल इस बार";
+"eventDetail.scheduleEvent_saved::message" = "अनुसूची सहेजी गई है।";
+"eventDetail.todoEvent_removed::message" = "कार्य हटा दिया गया है।";
+"eventDetail.todoEvent_saved::message" = "कार्य सहेजा गया है।";
+"eventDetail.cancel_edit::title" = "इवेंट संपादित करें";
+"eventDetail.cancel_edit::message" = "क्या आप इन परिवर्तनों को छोड़ना चाहते हैं?";
+"eventDetail.cancel_edit::continue::button" = "जारी रखें";
+
+"eventDetail.edit::add_new_name::placeholder" = "नया इवेंट नाम जोड़ें";
+"eventDetail.edit::clearEventTime::button" = "इवेंट का समय साफ़ करें";
+"eventDetail.edit::noEventTime::button" = "कोई समाप्ति समय नहीं";
+"eventDetail.edit::memo" = "मेमो";
+"eventDetail.edit::urlPreview" = "URL पूर्वावलोकन";
+
+"eventDetail.edit::make::case" = "क्या यह कार्य इवेंट है?";
+"eventDetail.edit::todo::case" = "कार्य इवेंट";
+"eventDetail.edit::schedule::case" = "अनुसूची इवेंट";
+"eventDetail.edit::holiday::case" = "%@ में सार्वजनिक अवकाश";
+
+"eventDetail.notSupport::holiday" = "सार्वजनिक अवकाश के लिए जानकारी बदलने की सुविधा समर्थित नहीं है।";
+
+"eventDetail:todo:guide:message1" = "कार्य उस चीज़ को दर्शाता है जिसे पूरा करने की आवश्यकता है।";
+"eventDetail:todo:guide:message2" = "किसी निश्चित समय (या अवधि) के साथ कैलेंडर पर दिखाई जाने वाली सामान्य अनुसूची से अलग, कार्य यह जांचने की सुविधा देता है कि वह पूरा हुआ है या नहीं।";
+"eventDetail:todo:guide:message3" = "आप बिना किसी निश्चित समय जानकारी के एक कार्य जोड़ सकते हैं। उदाहरण के लिए, आप ऐसा काम दर्ज कर सकते हैं जो जल्द ही करना है, लेकिन अभी नहीं।";
+"eventDetail:todo:guide:process:message" = "जब दोहराव विकल्प चालू होता है, तो कार्य सामान्य अनुसूची से अलग व्यवहार करते हैं:";
+"eventDetail:todo:guide:process:bullet1" = "वर्तमान या पिछले दोहराए जाने वाले कार्य जो अभी तक पूरे नहीं हुए हैं, कैलेंडर पर दिखाए जाते हैं।";
+"eventDetail:todo:guide:process:bullet2" = "जब कोई कार्य पूरा हो जाता है, तो इवेंट पूर्ण इवेंट की सूची में जोड़ दिया जाता है और अगला दोहराव कैलेंडर में नया जोड़ा जाता है।";
+"eventDetail:todo:guide:process:bullet3" = "यदि दोहराव समाप्ति समय के कारण कोई अगला दोहराव नहीं है, तो दोहराया जाने वाला कार्य समाप्त हो जाता है।";
+"eventDetail:foremost:guide:message1" = "किसी इवेंट को सबसे महत्वपूर्ण के रूप में चिह्नित करें ताकि यह उजागर हो कि यह आपका सबसे महत्वपूर्ण इवेंट है।\nसबसे महत्वपूर्ण इवेंट हमेशा कैलेंडर में दिखाई देता है और एक अलग विजेट का समर्थन करता है।";
+"eventDetail:foremost:guide:supports:message" = "निम्नलिखित इवेंट प्रकारों को सबसे महत्वपूर्ण इवेंट के रूप में सेट किया जा सकता है:";
+"eventDetail:foremost:guide:supports:todo" = "कार्य इवेंट";
+"eventDetail:foremost:guide:supports:notRepeating_schedule" = "दोहराई न जाने वाली अनुसूची इवेंट";
+
+"eventDetail:isSaving:toast:message" = "परिवर्तन सहेजे जा रहे हैं। कृपया प्रतीक्षा करें।";
+"eventDetail:hasChanges:confirm:message" = "परिवर्तन हैं। क्या आप उन्हें छोड़ना चाहते हैं?";
+"eventDetail:hasChanges:confirm:continue" = "संपादन जारी रखें";
+
+"eventDetail.unavailto_transform_withoutName" = "इवेंट बदलने के लिए कृपया एक नाम दर्ज करें।";
+"eventDetail.todoEvent_unavailto_transform_withoutTime" = "अनुसूची में बदलने के लिए समय जानकारी आवश्यक है।";
+"eventDetail.todoEvent::transform::schedule_title" = "बदलें";
+"eventDetail.todoEvent::transform::schedule_message" = "क्या आप इस कार्य को अनुसूची में बदलना चाहते हैं?";
+"eventDetail.scheduleEvent::transform::todo" = "बदलें";
+"eventDetail.scheduleEvent::transform::todo_message" = "क्या आप इस अनुसूची को कार्य में बदलना चाहते हैं?";
+
+"eventDetail::revert" = "पूर्णता वापस लें";
+
+// MARK: - Google calendar event
+
+"eventDetail::gogoleEvent::viewOnCalendar" = "Google कैलेंडर में देखें";
+"eventDetail::gogoleEvent::calendar" = "कैलेंडर";
+"eventDetail::gogoleEvent::calendar::event" = "Google कैलेंडर इवेंट";
+"eventDetail::gogoleEvent::attendee::unknown" = "अज्ञात";
+"eventDetail::gogoleEvent::attendees" = "उपस्थित लोग (%d लोग)";
+"eventDetail::gogoleEvent::attendees::organizer" = "आयोजक";
+"eventDetail::gogoleEvent::conference::accessCode" = "एक्सेस कोड";
+"eventDetail::gogoleEvent::conference::meetingCode" = "मीटिंग कोड";
+"eventDetail::gogoleEvent::conference::passCode" = "पास कोड";
+"eventDetail::gogoleEvent::conference::password" = "पासवर्ड";
+"eventDetail::gogoleEvent::copy::message" = "क्लिपबोर्ड पर कॉपी हो गया।";
+"eventDetail::gogoleEvent::canceled::message" = "यह इवेंट रद्द कर दिया गया है।";
+
+// MARK: - Apple calendar event
+"eventDetail::appleCalendarEvent::viewOnCalendar" = "Apple कैलेंडर में देखें";
+"eventDetail::appleCalendarEvent::calendar::event" = "Apple कैलेंडर इवेंट";
+"eventDetail::appleCalendarEvent::attendees" = "उपस्थित लोग (%d लोग)";
+"eventDetail::appleCalendarEvent::attendees::organizer" = "आयोजक";
+
+// MARK: - event tag
+
+"eventTag.title" = "इवेंट प्रकार";
+"eventTag.list::title" = "इवेंट प्रकार";
+"eventTag.defaults.default::name" = "डिफ़ॉल्ट";
+"eventTag.defaults.holiday::name" = "अवकाश";
+"eventTag.addNew::placeholder" = "नया इवेंट प्रकार जोड़ें";
+"eventTag.allEventTypes" = "सभी इवेंट प्रकार >";
+"eventTag.remove::confirm::message" = "क्या आप केवल इस इवेंट प्रकार को हटाना चाहते हैं, या संबंधित सभी इवेंट को भी हटाना चाहते हैं?";
+"eventTag.remove::only_tag" = "केवल इवेंट प्रकार हटाएं";
+"eventTag.remove::tag_and_evets" = "संबंधित इवेंट के साथ हटाएं";
+"eventTag.removed::message" = "यह इवेंट प्रकार हटा दिया गया है।";
+"eventTag.removed_with_events::message" = "यह इवेंट प्रकार और संबंधित इवेंट हटा दिए गए हैं।";
+"eventTag.color::changed::message" = "रंग बदल दिया गया है।";
+"eventTag.changed::message" = "इवेंट प्रकार संशोधित किया गया है।";
+"eventTag.makeNew::message" = "एक नया इवेंट प्रकार बनाया गया है।";
+"eventTag.default::title" = "डिफ़ॉल्ट इवेंट प्रकार";
+"eventTag.default::selection::explain" = "यह वह इवेंट प्रकार है जो इवेंट बनाते समय डिफ़ॉल्ट रूप से चुना जाएगा।";
+"eventTag.externalCalendar::integrate_button" = "कैलेंडर कनेक्ट करें";
+
+
+// MARK: - event list
+
+"eventList::today::title" = "आज";
+"eventList::yesterday::title" = "कल (बीता)";
+"eventList::thisMonth::title" = "इस महीने";
+"eventList::done_todos::title" = "पूर्ण कार्य सूची";
+"eventList::done_todos::eventTime" = "इवेंट समय:";
+"eventList::done_todos::doneAt" = "पूर्णता समय:";
+"eventList::remove::confirm::message" = "पूर्ण कार्य सूची हटाएं";
+"eventList::remove::confirm::button::all" = "सभी पूर्ण कार्य";
+"eventList::remove::confirm::button::olderThan1m" = "1 महीने से पुराने";
+"eventList::remove::confirm::button::olderThan3m" = "3 महीने से पुराने";
+"eventList::remove::confirm::button::olderThan6m" = "6 महीने से पुराने";
+"eventList::remove::confirm::button::olderThan1y" = "1 साल से पुराने";
+
+
+// MARK: - account
+
+"manage_account::title" = "खाता प्रबंधन";
+"manage_account::login_method" = "लॉगिन तरीका";
+"manage_account::email" = "ईमेल";
+"manage_account::last_signedIn_at" = "अंतिम लॉगिन समय";
+"manage_account::migration::title" = "अस्थायी उपयोगकर्ता डेटा माइग्रेट करें";
+"manage_account::migration::description" = "लॉगिन से पहले बनाए गए सभी इवेंट (%d इवेंट) आपके खाते में माइग्रेट किए जा रहे हैं।\nआपके खाते से जुड़े इवेंट किसी भी डिवाइस से एक्सेस किए जा सकते हैं।";
+"manage_account::migration_finished::message" = "माइग्रेशन पूर्ण हुआ!";
+"manage_account::signout_button::title" = "लॉगआउट";
+"manage_account::sign_out::confirm::title" = "लॉगआउट";
+"manage_account::sign_out::confirm::message" = "क्या आप वर्तमान खाते से लॉगआउट करना चाहते हैं?";
+"manage_account::delete_account_button::title" = "खाता हटाएं";
+"manage_account::delete_account_button::confirm:message" = "क्या आप वाकई अपना खाता हटाना चाहते हैं?";
+"manage_account::delete_account_button::description" = "खाता हटाने का अनुरोध करने के बाद, आपका खाता हटा दिया जाएगा।\nहटाने के बाद, खाते की जानकारी पुनर्प्राप्त नहीं की जा सकती।";
+"signIn::title" = "लॉगिन";
+"signIn:description" = "अपनी इवेंट सूची का बैकअप लें और इसे अन्य iOS डिवाइस पर सिंक करें\n(समर्थित प्लेटफ़ॉर्म का विस्तार किया जाएगा।)";
+
+
+// MARK: - setting
+"event_setting::title" = "इवेंट सेटिंग्स";
+"event_setting::eventType" = "इवेंट प्रकार";
+"event_setting::eventPeriod" = "इवेंट अवधि";
+"event_setting::defaultMapApp" = "मानचित्र ऐप खोलें";
+"event_setting::defaultMapApp_select" = "चुनें";
+
+"event_setting::eventSync" = "इवेंट सिंक";
+"event_setting::eventSync::readyToSync::description" = "बैकअप किए गए उपयोगकर्ता इवेंट को सिंक करें।";
+"event_setting::eventSync::syncInProgress::description" = "बैकअप किए गए उपयोगकर्ता इवेंट सिंक हो रहे हैं...";
+"event_setting::eventSync::lastTime" = "अंतिम सिंक किया गया डेटा समय: %@";
+"event_setting::eventSync::force" = "जबरन सिंक करें";
+
+"event_notification_setting::title::forAllDay" = "पूरे दिन";
+"event_notification_setting::title::NotforAllDay" = "सूचना समय";
+"event_setting::external_calendar::title" = "बाहरी कैलेंडर";
+"event_setting::external_calendar::connected::account" = "कनेक्टेड: %@";
+"event_setting::external_calendar::start" = "कनेक्ट करें";
+"event_setting::external_calendar::start::message" = "एक बाहरी कैलेंडर से कनेक्ट किया गया।";
+"event_setting::external_calendar::stop" = "डिस्कनेक्ट करें";
+"event_setting::external_calendar::stop::message" = "बाहरी कैलेंडर कनेक्शन डिस्कनेक्ट कर दिया गया है।";
+"event_setting::external_calendar::google::serviceName" = "Google कैलेंडर";
+"event_setting::external_calendar::apple::serviceName" = "Apple कैलेंडर";
+"event_setting::apple_calendar::permission_denied::message" = "कैलेंडर एक्सेस अस्वीकार कर दिया गया है। Apple कैलेंडर का उपयोग करने के लिए कृपया सेटिंग्स में इसे सक्षम करें।";
+"event_setting::apple_calendar::restricted::message" = "इस डिवाइस पर कैलेंडर एक्सेस प्रतिबंधित है।";
+"setting.title" = "सेटिंग्स";
+"setting.appearance.title" = "रूप-रंग";
+"setting.appearance.calendar.samplemonth::march" = "मार्च";
+"setting.appearance.calendar.startDayOfWeek" = "सप्ताह का प्रारंभिक दिन";
+"setting.appearance.calendar.accentDay" = "हाइलाइट किए गए दिन";
+"setting.appearance.calendar.accentDay::holiday" = "अवकाश";
+"setting.appearance.calendar.accentDay::saturday" = "शनिवार";
+"setting.appearance.calendar.accentDay::sunday" = "रविवार";
+"setting.appearance.calendar.colorTheme" = "रंग थीम";
+"setting.appearance.calendar.colorTheme::system" = "सिस्टम";
+"setting.appearance.calendar.colorTheme::light" = "लाइट";
+"setting.appearance.calendar.colorTheme::dark" = "डार्क";
+"setting.appearance.calendar.underline" = "इवेंट वाले दिनों को अंडरलाइन करें";
+"setting.appearance.event.edit::name_old" = "इवेंट संपादित करें";
+"setting.appearance.event.edit::name" = "इवेंट सेटिंग्स और बाहरी कैलेंडर";
+"setting.appearance.day_row_height" = "इवेंट विवरण प्रदर्शन स्तर";
+"setting.appearance.day_row_height::small::text" = "न्यूनतम";
+"setting.appearance.day_row_height::medium::text" = "मध्यम";
+"setting.appearance.day_row_height::large::text" = "पूर्ण";
+"setting.appearance.event.fontSize" = "इवेंट टेक्स्ट फ़ॉन्ट आकार";
+"setting.appearance.event.show_holidayName" = "अवकाश का नाम दिखाएं";
+"setting.appearance.event.show_lunar" = "चंद्र कैलेंडर";
+"setting.appearance.event._24form" = "24 घंटे प्रारूप";
+"setting.appearance.event.sample::name" = "🥗 इवेंट नाम";
+"setting.appearance.event.sample::description" = "विवरण";
+"setting.appearance.event.sample::christmas" = "क्रिसमस";
+"setting.appearance.event.sample::first" = "पहला इवेंट";
+"setting.appearance.event.sample::second" = "दूसरा इवेंट";
+"setting.appearance.event.sample::uncompleted_todo::toggle" = "अधूरे कार्य दिखाएं";
+"setting.appearance.widget::title" = "विजेट थीम";
+"setting.appearance.widget::useSystemTheme::title" = "सिस्टम थीम का उपयोग करें";
+"setting.appearance.widget::useSystemTheme::background" = "विजेट पृष्ठभूमि रंग";
+"setting.appearance.widget::useCustomTheme::title" = "कस्टम रंग चुनें";
+"setting.appearance.widget::sample::eventName" = "विजेट इवेंट";
+"setting.appearance.event.boldText" = "बोल्ड टेक्स्ट";
+"setting.appearance.event.eventColor" = "इवेंट रंग";
+"setting.timezone::title" = "समय क्षेत्र";
+"setting.timezone::systemTimeZone::name" = "सिस्टम समय क्षेत्र";
+"setting.timezone::systemTime::name" = "सिस्टम समय";
+"setting.haptic::name" = "हैप्टिक फ़ीडबैक";
+"setting.minimize_animation::name" = "एनिमेशन प्रभाव कम करें";
+"setting.holiday.title" = "अवकाश";
+"setting.holiday.item::name" = "अवकाश सेटिंग";
+"setting.holiday.list::sectionTitle" = "अवकाश";
+"setting.holiday.country.title" = "देश";
+"setting.holiday.country.current::title" = "वर्तमान देश";
+"setting.holiday.country.current::placeHolder" = "देश चुनें";
+"setting.holiday.country.changeConfirm::title" = "देश बदलें";
+"setting.holiday.country.changeConfirm::message" = "क्या आप अपने कैलेंडर का देश बदलना चाहते हैं?";
+"setting.holiday.country.changed::message" = "देश बदल दिया गया है।";
+"setting.holiday.hide::button" = "छिपाएं";
+"setting.holiday.hide::confirm::title" = "अवकाश छिपाएं";
+"setting.holiday.hide::confirm::message" = "क्या हर साल इस अवकाश को छिपाना है?\nआप इसे सेटिंग्स > अवकाश में फिर से दिखा सकते हैं।";
+"setting.holiday.hidden::sectionTitle" = "छिपाए गए अवकाश";
+"setting.holiday.show::button" = "दिखाएं";
+"setting.feedback::name" = "फ़ीडबैक";
+"setting.help::name" = "सहायता";
+"setting.share::name" = "ऐप साझा करें";
+"setting.write_review::name" = "ऐप समीक्षा लिखें";
+"setting.account.signedIn::manageAccount" = "खाता";
+"setting.account.needSignIn" = "लॉगिन";
+"setting.suggest::readmind::appName" = "Readminds";
+"setting.suggest::readmind::message" = "अपनी पठन सूची प्रबंधित करें";
+"setting.section.support::name" = "सहायता";
+"setting.section.app::name" = "ऐप";
+"setting.section.suggest::name" = "सुझाव";
+"feedback::guide:message" = "बग रिपोर्ट, टिप्पणियों और सेवा सुझावों सहित अपना फ़ीडबैक बेझिझक भेजें।\nआपकी टिप्पणियां हमारी सेवा को बेहतर बनाने में बहुत मदद करेंगी।";
+"feedback::enterMessage::placeholder" = "एक संदेश दर्ज करें";
+"feedback::contact::placeholder" = "जवाब के लिए ईमेल पता";
+"feedback::posted:message" = "आपका फ़ीडबैक सफलतापूर्वक दर्ज किया गया है।";
+
+// MARK: - external service
+
+"external_service.name::google" = "Google कैलेंडर";
+"external_service.expired::message" = "%@ एकीकरण समाप्त हो गया है। कृपया सेटिंग्स में जाकर पुनः प्रयास करें।";
+"external_service::google::hidden_event" = "छिपा हुआ";
+"external_service::google::unknown_event" = "अज्ञात";
+
+
+// MARK: - widget
+
+"widget.common::explain" = "अपने आगामी इवेंट देखें।";
+"widget.doubleMonth::name" = "कैलेंडर + कैलेंडर";
+"widget.eventAndMonth::name" = "इवेंट + कैलेंडर";
+"widget.todayAndMonth::name" = "आज + कैलेंडर";
+"widget.eventAndForesmot::name" = "इवेंट + सबसे महत्वपूर्ण";
+"widget.events::name" = "इवेंट";
+"widget.events.noEvents::message" = "कोई इवेंट नहीं है।";
+"widget.events.currentTodos" = "वर्तमान कार्य सूची";
+"widget.events.sample::check_mailbox" = "मेलबॉक्स जांचें";
+"widget.events.sample::example" = "अवकाश";
+"widget.events.sample::running" = "दौड़ना";
+"widget.events.sample::luch" = "दोपहर का भोजन";
+"widget.events.sample::luch_appointment" = "दोपहर के भोजन की अपॉइंटमेंट (देर नहीं हो सकती)";
+"widget.events.sample::call" = "सारा को कॉल करें";
+"widget.events.sample::surfing" = "सर्फिंग";
+"widget.events.sample::moving" = "स्थानांतरण का दिन";
+"widget.events.sample::meeting" = "दैनिक मीटिंग";
+"widget.events.sample::deposit_remain" = "बचा हुआ बैलेंस ट्रांसफर करें";
+"widget.events.sample::recycle" = "रीसाइकल";
+"widget.events.sample::take_medicine" = "दवा लें";
+"widget.events.sample::watering" = "गमले में पानी देना";
+"widget.events.sample::june3" = "मंगल, 3 जून";
+"widget.events.sample::july16" = "रवि, 16 जुला";
+"widget.events.sample::july21" = "शुक्र, 21 जुला";
+"widget.events.sample::july29" = "शनि, 29 जुला";
+"widget.events.sample::aug2" = "बुध, 2 अग";
+"widget.events.sample::aug3" = "गुरु, 3 अग";
+"widget.events.sample::oct10" = "सोम, 10 अक्टू";
+"widget.events.foremost" = "सबसे महत्वपूर्ण इवेंट";
+"widget.events.foremost::allFinished::message" = "एक ऐसा इवेंट जोड़ें जिसे चूकना नहीं है।";
+"widget.events.foremost::sample::message" = "छाता ले जाएं! ⛱️";
+"widget.events.calendar" = "कैलेंडर";
+"widget.events.today" = "आज";
+"widget.events.today::sample::sunday" = "रविवार";
+"widget.events.today::sample::march2024" = "मार्च 2024";
+"total::event::count" = "%d इवेंट";
+"todo::count" = "%d कार्य";
+"schedule::count" = "%d अनुसूची";
+"widget.weeks.lastMonth" = "पिछला महीना";
+"widget.weeks.thisMonth" = "इस महीने";
+"widget.weeks.nextMonth" = "अगला महीना";
+"widget.weeks.thisWeek" = "इस सप्ताह";
+"widget.weeks.twoWeek" = "2 सप्ताह";
+"widget.weeks.threeWeek" = "3 सप्ताह";
+"widget.weeks.fourWeek" = "4 सप्ताह";
+"widget.weeks.sample::feb" = "फरवरी";
+"widget.weeks.sample::march" = "मार्च";
+"widget.weeks.sample::april" = "अप्रैल";
+"widget.weeks.sample::hiking" = "🏔️ हाइकिंग";
+"widget.weeks.sample::lunch" = "🥗 दोपहर का भोजन";
+"widget.weeks.sample::call" = "📞 सारा को कॉल करें";
+"widget.weeks.sample::holiday" = "अवकाश";
+"widget.weeks.sample::golf" = "⛳️ गोल्फ़";
+"widget.weeks.sample::workout" = "🔥 वर्कआउट";
+"widget.weeks.sample::launch" = "🚀 लॉन्च";
+"widget.fail.message" = "एक अस्थायी त्रुटि हुई है।\nकृपया ऐप को फिर से चलाने का प्रयास करें।";
+"widget.next.noEvent" = "कोई अगला इवेंट नहीं है।";
+"widget.next.sample" = "🔥 वर्कआउट";
+"widget.next.title" = "अगला इवेंट";
+"widget.next.rect_widget::title" = "आज का अगला इवेंट।";
+"widget.next.title::remains" = "आज के शेष इवेंट।";
+"widget.next.title::future" = "आज और आगे क्या है";
+"widget.next.title::more_todos" = "%d और कार्य";
+"widget.next.title::more_events" = "%d और अनुसूचियां";
+"widget.next.title::more_events_with_todo" = "%1$d और कार्य और %2$d और अनुसूचियां";
+"widget.next.title::uncompleted::todo" = "%1$@ पूरा नहीं हुआ है";
+"widget.next.title::uncompleted::todos" = "%1$@ और %2$d और अधूरे कार्य";
+"widget.next.no_events_today" = "आज कोई इवेंट नहीं है";
+"widget.next.no_events" = "कोई आगामी इवेंट नहीं है";
+
+"widget.dday::name" = "डी-डे";
+"widget.dday::noTarget" = "एक इवेंट चुनें";
+"widget.dday.sample::title" = "कार्यशाला";
+"widget.dday.target::repeating" = "दोहराया जा रहा";
+"widget.dday.target::registered" = "पिन किया गया";
+"widget.dday.turn::name" = "चक्र %d";
+
+// MARK: - link
+
+"deeplink::invalid_link_message" = "यह लिंक प्रारूप समर्थित नहीं है।\nकृपया ऐप को नवीनतम संस्करण में अपडेट करें।";
+
+// MARK: - force update
+
+"force_update.title" = "अपडेट आवश्यक है";
+"force_update.message" = "एक नया संस्करण उपलब्ध है।\nऐप का उपयोग जारी रखने के लिए कृपया अपडेट करें।";
+"recommend_update.title" = "अपडेट की सिफ़ारिश की जाती है";
+"recommend_update.message" = "एक नया संस्करण उपलब्ध है।\nबेहतर अनुभव के लिए हम अपडेट करने की सलाह देते हैं।";
+
+
+// MARK: - ai agent
+
+"aiAgent::voice::listening" = "सुन रहा है…";
+"aiAgent::keyboard" = "कीबोर्ड";
+"aiAgent::voice" = "आवाज़";
+"aiAgent::send" = "भेजें";
+"aiAgent::input::placeholder" = "मैं कैसे मदद कर सकता हूं?";
+"aiAgent::permission::title" = "माइक्रोफ़ोन और वाणी पहुंच आवश्यक है";
+"aiAgent::permission::message" = "सेटिंग्स में एक्सेस की अनुमति दें, या इसके बजाय टाइप करें";
+"aiAgent::permission::keyboard" = "इसके बजाय टाइप करें";
+"aiAgent::permission::setting" = "सेटिंग्स खोलें";
+"aiAgent::state::processing" = "प्रोसेस हो रहा है";
+"aiAgent::state::confirm" = "पुष्टि आवश्यक है";
+"aiAgent::state::confirmExpired" = "समय समाप्त";
+"aiAgent::state::done" = "निर्देश पूर्ण हुआ";
+"aiAgent::state::failed" = "निर्देश विफल हुआ";
+"aiAgent::done::default" = "पूर्ण";
+"aiAgent::failed::default" = "इसे पूरा नहीं किया जा सका";
+"aiAgent::retry" = "फिर से प्रयास करें";
+"aiAgent::needSignIn::title" = "लॉगिन आवश्यक है";
+"aiAgent::needSignIn::message" = "AI क्विक इनपुट का उपयोग करने के लिए लॉगिन करें।";
+"aiAgent::title" = "AI क्विक इनपुट";
+"aiAgent::keyboard::stop" = "रोकें";
+"aiAgent::keyboard::send" = "भेजें";
+"aiAgent::stop" = "रोकें";
+"aiAgent::usage" = "%@ / %@ क्रेडिट";
+"aiAgent::plan::free" = "फ्री";
+"aiAgent::plan::standard" = "स्टैंडर्ड";
+"aiAgent::plan::lifetime" = "लाइफटाइम";
+"aiAgent::usage::topupRemaining" = "%@ अतिरिक्त क्रेडिट बचे हैं";
+"aiAgent::usage::planChangeScheduled" = "%1$@ को %2$@ प्लान में बदलाव होगा";
+"aiAgent::stop::confirm::title" = "प्रोसेसिंग रोकें?";
+"aiAgent::stop::confirm::message" = "रोकने से जारी निर्देश छोड़ दिया जाएगा, और इसे फिर से शुरू नहीं किया जा सकेगा।";
+"aiAgent::confirm::countdown" = "स्वीकृति के लिए शेष";
+"aiAgent::confirm::expired::message" = "समय समाप्त हो गया। कृपया फिर से अनुरोध करें।";

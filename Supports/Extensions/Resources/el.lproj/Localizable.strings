@@ -1,0 +1,562 @@
+/*
+  Localizable.strings
+  Extensions
+
+  Created by sudo.park on 7/31/26.
+  Copyright © 2026 com.sudo.park. All rights reserved.
+*/
+
+
+// MARK: - common
+"common::and" = " και";
+"common::wait:message" = "Παρακαλώ περιμένετε...";
+"common::back" = "Πίσω";
+"common.remove" = "Αφαίρεση";
+"common.confirm" = "Επιβεβαίωση";
+"common.cancel" = "Ακύρωση";
+"common.close" = "Κλείσιμο";
+"common.yes" = "Ναι";
+"common.no" = "Όχι";
+"common.save" = "Αποθήκευση";
+"common.info" = "Πληροφορίες";
+"common.search" = "Αναζήτηση";
+"common.clear" = "Απαλοιφή";
+"common.send" = "Αποστολή";
+"common.done" = "Έγινε";
+"common.errorMessage" = "Παρουσιάστηκε προσωρινό σφάλμα.\nΠαρακαλούμε αναφέρετέ το αν το πρόβλημα επιμένει.";
+"common.update" = "Ενημέρωση";
+"common.go_to_settings" = "Μετάβαση στις ρυθμίσεις";
+
+// MARK: - date form
+"date_form::HH:mm" = "HH:mm";
+"date_form::a_h:mm" = "h:mm a";
+"date_form::MM_d__HH:mm" = "d/M, HH:mm";
+"date_form::MM_d" = "d/M";
+"date_form::MM_dd" = "dd/MM";
+"date_form::24off_h:mm" = "h:mm";
+"date_form::24on_H:mm" = "H:mm";
+"date_form::d_E_" = "d (E)";
+"date_form::MMM_d_HH:mm" = "d MMM HH:mm";
+"date_form::MMM_d" = "d MMM";
+"date_form::yyyy_MM_dd_E_" = "dd/MM/yyyy (E)";
+"date_form:yyyy.MM_dd_hh:mm" = "dd/MM/yyyy HH:mm";
+"date_form:yyyy.MM_dd_h:mm" = "dd/MM/yyyy h:mm a";
+"date_form.yyyy" = "yyyy";
+"date_form.MMM_dd_E" = "dd MMM (E)";
+"date_form.HH:mm" = "HH:mm";
+"date_form.yyyy_MM_dd" = "dd/MM/yyyy";
+"date_form.yyyy_MMM_dd" = "d MMM yyyy";
+"date_form.MMM" = "MMM";
+"date_form.MMMM" = "MMMM";
+"date_form.EEEE" = "EEEE";
+"date_form.EEE_MMM_d" = "EEE, d MMM";
+"date_form.MMM_yyyy" = "MMM yyyy";
+"tomorrow" = "Αύριο";
+
+// MARK: - event
+
+"dayname::sunday" = "Κυριακή";
+"dayname::monday" = "Δευτέρα";
+"dayname::tuesday" = "Τρίτη";
+"dayname::wednesday" = "Τετάρτη";
+"dayname::thursday" = "Πέμπτη";
+"dayname::friday" = "Παρασκευή";
+"dayname::saturday" = "Σάββατο";
+
+"dayname::sunday:short" = "ΚΥΡ";
+"dayname::monday:short" = "ΔΕΥ";
+"dayname::tuesday:short" = "ΤΡΙ";
+"dayname::wednesday:short" = "ΤΕΤ";
+"dayname::thursday:short" = "ΠΕΜ";
+"dayname::friday:short" = "ΠΑΡ";
+"dayname::saturday:short" = "ΣΑΒ";
+
+"dayname::sunday:very_short" = "Κ";
+"dayname::monday:very_short" = "Δ";
+"dayname::tuesday:very_short" = "Τ";
+"dayname::wednesday:very_short" = "Τ";
+"dayname::thursday:very_short" = "Π";
+"dayname::friday:very_short" = "Π";
+"dayname::saturday:very_short" = "Σ";
+
+
+// MARK: - event notification
+
+"event_notification::today:title" = "Συμβάντα σήμερα";
+"event_notification::todo:prefix" = "Εργασία";
+"event_notification::today:prefix" = "Σήμερα";
+"event_notification::tomorrow:prefix" = "Αύριο";
+"event_notification::allday_today" = "Όλη μέρα σήμερα";
+"event_notification::allday_tomorrow" = "Όλη μέρα αύριο";
+"event_notification::some_allday" = "%@ όλη μέρα";
+"event_notification_setting::option_title::no_notification" = "Χωρίς ειδοποιήσεις";
+"event_notification_setting::option_title::at_time" = "Την ώρα του συμβάντος";
+"event_notification_setting::option_title::allday_9am" = "Στις 9:00 π.μ. εκείνη την ημέρα";
+"event_notification_setting::option_title::allday_12pm" = "Το μεσημέρι εκείνη την ημέρα";
+"event_notification_setting::option_title::customTime" = "Προσαρμοσμένη ώρα: %@";
+"event_notification_setting::option_title::custimTime_fallback" = "Προσαρμοσμένη ώρα";
+"event_notification_setting::option_title::before_minutes" = "%d λεπτά πριν το συμβάν";
+"event_notification_setting::option_title::before_hours" = "%d ώρες πριν το συμβάν";
+"event_notification_setting::option_title::before_days" = "%d ημέρες πριν το συμβάν";
+"event_notification_setting::option_title::before_weeks" = "%d εβδομάδες πριν το συμβάν";
+"event_notification_setting::option_title::allday_9am_before_days" = "Στις 9:00, %d ημέρες πριν";
+"event_notification_setting::option_title::allday_9am_before_weeks" = "Στις 9:00, %d εβδομάδες πριν";
+"event_notification_setting::need_permission_message" = "Για να χρησιμοποιήσετε τις ειδοποιήσεις συμβάντων, απαιτείται άδεια ειδοποιήσεων.\nΜεταβείτε στις ρυθμίσεις συστήματος της εφαρμογής και ενεργοποιήστε τις ειδοποιήσεις.";
+"event_notification_setting::need_permission::go_setting" = "Μετάβαση στις ρυθμίσεις";
+"event_notification_setting::need_permission_title" = "Πληροφορίες";
+"event_notification_setting::permission_denied" = "Για να χρησιμοποιήσετε τη λειτουργία υπενθύμισης συμβάντων, απαιτείται άδεια ειδοποιήσεων της εφαρμογής.";
+
+
+
+// MARK: - calendar
+
+"calendar::foremostevent:title" = "Κύριο συμβάν";
+"calendar::uncompletedTodos:title" = "Ημιτελείς εργασίες";
+"calendar::event_time::todo" = "Εργασία";
+"calendar::event_time::allday" = "Όλη μέρα";
+"calendar::event_time::allday::with" = "%@ όλη μέρα";
+"calendar::event_time::period:some_days" = "%d ημέρες";
+"calendar::event_time::period:some_minutes" = "%d λεπτά";
+"calendar::event_time::period:some_hours" = "%d ώρες";
+"calendar::event_time::period:some_days:some_hours" = "%d ημέρες %d ώρες";
+"calendar::event::more_action::remove:title" = "Αφαίρεση συμβάντος";
+"calendar::event::more_action::foremost_event:title" = "Κύριο συμβάν";
+"calendar::event::more_action::remove_only_thistime:message" = "Θέλετε να αφαιρέσετε μόνο αυτό το συμβάν από όλα τα επαναλαμβανόμενα συμβάντα;";
+"calendar::event::more_action::remove:message" = "Θέλετε να αφαιρέσετε αυτό το συμβάν;";
+"calendar::event::more_action::mark_as_foremost" = "Θέλετε να επισημάνετε αυτό το συμβάν ως το πιο σημαντικό σας;";
+"calendar::event::more_action::unmark_as_foremost" = "Θέλετε να καταργήσετε την επισήμανση αυτού του συμβάντος ως το πιο σημαντικό;";
+"calendar::event::more_action::mark_as_foremost::unavail" = "Ένα επαναλαμβανόμενο ραντεβού δεν μπορεί να επισημανθεί ως το πιο σημαντικό συμβάν.";
+"calendar::event::more_action:remove_only_thistime:item_name" = "Αφαίρεση μόνο αυτού του συμβάντος";
+"calendar::event::more_action:remove:item_name" = "Αφαίρεση συμβάντος";
+"calendar::event::more_action:foremost:mark:item_name" = "Επισήμανση ως κύριο";
+"calendar::event::more_action:foremost:unmark:item_name" = "Κατάργηση επισήμανσης κύριου";
+"calendar::event::more_action:dday_candidate:register:item_name" = "Προσθήκη στο widget Αντίστροφη μέτρηση";
+"calendar::event::more_action:dday_candidate:unregister:item_name" = "Αφαίρεση από το widget Αντίστροφη μέτρηση";
+"calendar::event::more_action:dday_candidate:title" = "Υποψήφιο για το widget Αντίστροφη μέτρηση";
+"calendar::event::more_action:dday_candidate:register:message" = "Να προστεθεί αυτό το συμβάν ως υποψήφιο για το widget Αντίστροφη μέτρηση; Θα εμφανίζεται στην κορυφή της λίστας όταν επεξεργάζεστε το widget.";
+"calendar::event::more_action:dday_candidate:unregister:message" = "Να αφαιρεθεί αυτό το συμβάν από τα υποψήφια για το widget Αντίστροφη μέτρηση;";
+"calendar::event::more_action:copy:item_name" = "Αντιγραφή συμβάντος";
+"calendar::event::more_action:transform_to::schedule" = "Μετατροπή σε ραντεβού";
+"calendar::event::more_action:transform_to::todo" = "Μετατροπή σε εργασία";
+"calendar::event::more_action:edit:item_name" = "Επεξεργασία";
+"calednar::event::add_new" = "Προσθήκη νέου συμβάντος";
+"calednar::event::add_new:place_holder" = "Προσθέστε γρήγορα μια νέα εργασία.";
+"calednar::event::skip_todo" = "Παράλειψη αυτής της εργασίας";
+"calednar::event::skip_todo_until" = "Επιλέξτε ώρα μέχρι την οποία θα παραλειφθεί αυτή η εργασία";
+"calednar::event::copy" = "Αντιγραφή συμβάντος";
+"calendar::move_date" = "Μετακίνηση ημερομηνίας";
+"calednar::event::google::edit" = "Επεξεργασία συμβάντος Google Ημερολογίου";
+
+
+// MARK: - event detail
+
+"eventDetail.messages.selectTimeFirst" = "Επιλέξτε πρώτα την ώρα του συμβάντος.";
+"eventDetail.messages.selectValidTime" = "Επιλέξτε μια έγκυρη ώρα συμβάντος.";
+"eventDetail.notification.custom_eventTime:title" = "Προσαρμοσμένο";
+"eventDetail.notification.title" = "Ώρα ειδοποίησης συμβάντος";
+"eventDetail.repeating.title" = "Επανάληψη";
+"eventDetail.repeating.notRepeating::title" = "Χωρίς επανάληψη";
+"eventDetail.repeating.starttime:form" = "d/M/yyyy";
+"eventDetail.repeating.starttime:title" = "Ώρα έναρξης επανάληψης";
+"eventDetail.repeating.everyDay:title" = "Κάθε μέρα";
+"eventDetail.repeating.everyWeek:title" = "Κάθε εβδομάδα";
+"eventDetail.repeating.everyWeekSomeDay:title" = "Κάθε %@";
+"eventDetail.repeating.everySomeWeek:title" = "Κάθε %d εβδομάδες";
+"eventDetail.repeating.everyWeekDays:title" = "Κάθε εργάσιμη ημέρα";
+"eventDetail.repeating.everySomeWeekSomeDay:title" = "Κάθε %d εβδομάδες, %@";
+"eventDetail.repeating.everyMonth:title" = "Κάθε μήνα";
+"eventDetail.repeating.everyMonth_someDay:title" = "%@ κάθε μήνα.";
+"eventDetail.repeating.everyYear:title" = "Κάθε χρόνο";
+"eventDetail.repeating.lunarCalendar_everyYear:title" = "Κάθε χρόνο (σεληνιακό ημερολόγιο)";
+"eventDetail.repeating.everyYearSomeDay:title" = "Κάθε χρόνο %@";
+"eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "Κάθε χρόνο %@ (σεληνιακό ημερολόγιο)";
+"eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "Όλες οι ημέρες της τελευταίας εβδομάδας κάθε μήνα";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "Η πρώτη %@ κάθε μήνα";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "Η δεύτερη %@ κάθε μήνα";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "Η τρίτη %@ κάθε μήνα";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "Η τέταρτη %@ κάθε μήνα";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "Η πέμπτη %@ κάθε μήνα";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "Η έκτη %@ κάθε μήνα";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "Η έβδομη %@ κάθε μήνα";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "Η τελευταία %@ κάθε μήνα";
+"eventDetail.repeating.endtime::title" = "Λήξη επανάληψης";
+"eventDetail.repeating.endtime::option::never" = "Ποτέ";
+"eventDetail.repeating.endtime::option::on" = "Στις";
+"eventDetail.repeating.endtime::option::after" = "Μετά";
+"eventDetail.repeating.endtime::option::after_occurrences" = "επαναλήψεις";
+"eventDetail.repeating.endtime::shouldFutureThanStartTime" = "Η ώρα λήξης της επανάληψης πρέπει να είναι μεταγενέστερη από την ώρα έναρξης.\n(Ημερομηνία έναρξης επανάληψης: %@)";
+"eventDetail.repeating::period_endcount" = "Από %@, %d φορές";
+
+"eventDetail.repeating.everyNDays:title" = "Κάθε %d ημέρες";
+"eventDetail.repeating.last" = "Τελευταίο";
+"eventDetail.repeating.everyNMonths:title" = "Κάθε %d μήνες";
+"eventDetail.repeating.everyNYears:title" = "Κάθε %d χρόνια";
+"eventDetail.repeating::endoption_until" = "έως %@";
+"eventDetail.repeating::endoption_times" = "%d φορές";
+
+"eventDetail.place::placeholder" = "Τοποθεσία";
+"eventDetail.place::remove_button" = "Αφαίρεση τοποθεσίας";
+"eventDetail.place::no_map_app" = "Η επιλεγμένη εφαρμογή χαρτών δεν είναι εγκατεστημένη.";
+"eventDetail.place::select_map_app" = "Επιλέξτε χάρτη";
+"eventDetail.place::always_select_this_map" = "Άνοιγμα πάντα με αυτήν την εφαρμογή.";
+
+"eventDetail.add_new_todo::message" = "Προστέθηκε νέα εργασία.";
+"eventDetail.add_new_schedule::message" = "Προστέθηκε νέο ραντεβού.";
+"eventDetail.scheduleEvent_removed::message" = "Το ραντεβού αφαιρέθηκε.";
+"eventDetail.edit::repeating::confirm::ttile" = "Επεξεργασία συμβάντος";
+"eventDetail.edit::repeating::confirm::message" = "Αυτό είναι ένα επαναλαμβανόμενο συμβάν.\nΕπιλέξτε το εύρος του επαναλαμβανόμενου συμβάντος που θέλετε να επεξεργαστείτε.";
+"eventDetail.edit::repeating::confirm::all::button" = "Όλα τα συμβάντα";
+"eventDetail.edit::repeating::confirm::fromNow::button" = "Από τώρα";
+"eventDetail.edit::repeating::confirm::onlyThisTime::button" = "Μόνο αυτή τη φορά";
+"eventDetail.scheduleEvent_saved::message" = "Το ραντεβού αποθηκεύτηκε.";
+"eventDetail.todoEvent_removed::message" = "Η εργασία αφαιρέθηκε.";
+"eventDetail.todoEvent_saved::message" = "Η εργασία αποθηκεύτηκε.";
+"eventDetail.cancel_edit::title" = "Επεξεργασία συμβάντος";
+"eventDetail.cancel_edit::message" = "Θέλετε να απορρίψετε αυτές τις αλλαγές;";
+"eventDetail.cancel_edit::continue::button" = "Συνέχεια";
+
+"eventDetail.edit::add_new_name::placeholder" = "Προσθέστε όνομα για το νέο συμβάν";
+"eventDetail.edit::clearEventTime::button" = "Απαλοιφή ώρας συμβάντος";
+"eventDetail.edit::noEventTime::button" = "Χωρίς ώρα λήξης";
+"eventDetail.edit::memo" = "Σημείωση";
+"eventDetail.edit::urlPreview" = "Προεπισκόπηση URL";
+
+"eventDetail.edit::make::case" = "Είναι εργασία;";
+"eventDetail.edit::todo::case" = "Εργασία";
+"eventDetail.edit::schedule::case" = "Ραντεβού";
+"eventDetail.edit::holiday::case" = "Επίσημη αργία στις %@";
+
+"eventDetail.notSupport::holiday" = "Η λειτουργία τροποποίησης πληροφοριών δεν υποστηρίζεται για επίσημες αργίες.";
+
+"eventDetail:todo:guide:message1" = "Η εργασία αντιπροσωπεύει κάτι που πρέπει να γίνει.";
+"eventDetail:todo:guide:message2" = "Σε αντίθεση με τα κανονικά συμβάντα που εμφανίζονται στο ημερολόγιο με συγκεκριμένη ώρα (ή περίοδο), οι εργασίες παρέχουν τη δυνατότητα να ελέγξετε αν έχουν ολοκληρωθεί.";
+"eventDetail:todo:guide:message3" = "Μπορείτε να προσθέσετε μια εργασία χωρίς καθορισμένες πληροφορίες ώρας. Για παράδειγμα, μπορείτε να καταγράψετε κάτι που πρέπει να γίνει σύντομα, αλλά όχι αμέσως.";
+"eventDetail:todo:guide:process:message" = "Οι εργασίες συμπεριφέρονται διαφορετικά από τα κανονικά συμβάντα όταν είναι ενεργοποιημένη η επανάληψη:";
+"eventDetail:todo:guide:process:bullet1" = "Οι τρέχουσες ή προηγούμενες επαναλαμβανόμενες εργασίες που δεν έχουν ολοκληρωθεί ακόμη εμφανίζονται στο ημερολόγιο.";
+"eventDetail:todo:guide:process:bullet2" = "Όταν μια εργασία ολοκληρωθεί, προστίθεται στη λίστα ολοκληρωμένων συμβάντων και προστίθεται νέα επανάληψη στο ημερολόγιο.";
+"eventDetail:todo:guide:process:bullet3" = "Αν δεν υπάρχει επόμενη επανάληψη λόγω της λήξης της επανάληψης, η επαναλαμβανόμενη εργασία ολοκληρώνεται.";
+"eventDetail:foremost:guide:message1" = "Επισημάνετε ένα συμβάν ως κύριο για να τονίσετε ότι είναι το πιο σημαντικό συμβάν.\nΤο κύριο συμβάν είναι πάντα ορατό στο ημερολόγιο και υποστηρίζει ξεχωριστό widget.";
+"eventDetail:foremost:guide:supports:message" = "Οι παρακάτω τύποι συμβάντων μπορούν να οριστούν ως κύριο συμβάν:";
+"eventDetail:foremost:guide:supports:todo" = "Εργασία";
+"eventDetail:foremost:guide:supports:notRepeating_schedule" = "Μη επαναλαμβανόμενα ραντεβού";
+
+"eventDetail:isSaving:toast:message" = "Αποθήκευση αλλαγών. Παρακαλώ περιμένετε.";
+"eventDetail:hasChanges:confirm:message" = "Υπάρχουν αλλαγές. Θέλετε να τις απορρίψετε;";
+"eventDetail:hasChanges:confirm:continue" = "Συνέχιση επεξεργασίας";
+
+"eventDetail.unavailto_transform_withoutName" = "Εισαγάγετε ένα όνομα για να μετατρέψετε το συμβάν.";
+"eventDetail.todoEvent_unavailto_transform_withoutTime" = "Απαιτούνται πληροφορίες ώρας για μετατροπή σε ραντεβού.";
+"eventDetail.todoEvent::transform::schedule_title" = "Μετατροπή";
+"eventDetail.todoEvent::transform::schedule_message" = "Θέλετε να μετατρέψετε αυτή την εργασία σε ραντεβού;";
+"eventDetail.scheduleEvent::transform::todo" = "Μετατροπή";
+"eventDetail.scheduleEvent::transform::todo_message" = "Θέλετε να μετατρέψετε αυτό το ραντεβού σε εργασία;";
+
+"eventDetail::revert" = "Αναίρεση ολοκλήρωσης";
+
+// MARK: - Google calendar event
+
+"eventDetail::gogoleEvent::viewOnCalendar" = "Προβολή στο Google Ημερολόγιο";
+"eventDetail::gogoleEvent::calendar" = "Ημερολόγιο";
+"eventDetail::gogoleEvent::calendar::event" = "Συμβάν Google Ημερολογίου";
+"eventDetail::gogoleEvent::attendee::unknown" = "Άγνωστο";
+"eventDetail::gogoleEvent::attendees" = "Συμμετέχοντες (%d άτομα)";
+"eventDetail::gogoleEvent::attendees::organizer" = "Διοργανωτής";
+"eventDetail::gogoleEvent::conference::accessCode" = "Κωδικός πρόσβασης";
+"eventDetail::gogoleEvent::conference::meetingCode" = "Κωδικός συνάντησης";
+"eventDetail::gogoleEvent::conference::passCode" = "Κωδικός εισόδου";
+"eventDetail::gogoleEvent::conference::password" = "Κωδικός";
+"eventDetail::gogoleEvent::copy::message" = "Αντιγράφηκε στο πρόχειρο.";
+"eventDetail::gogoleEvent::canceled::message" = "Αυτό το συμβάν έχει ακυρωθεί.";
+
+// MARK: - Apple calendar event
+"eventDetail::appleCalendarEvent::viewOnCalendar" = "Προβολή στο Apple Ημερολόγιο";
+"eventDetail::appleCalendarEvent::calendar::event" = "Συμβάν Apple Ημερολογίου";
+"eventDetail::appleCalendarEvent::attendees" = "Συμμετέχοντες (%d άτομα)";
+"eventDetail::appleCalendarEvent::attendees::organizer" = "Διοργανωτής";
+
+// MARK: - event tag
+
+"eventTag.title" = "Τύπος συμβάντος";
+"eventTag.list::title" = "Τύποι συμβάντων";
+"eventTag.defaults.default::name" = "Προεπιλογή";
+"eventTag.defaults.holiday::name" = "Αργία";
+"eventTag.addNew::placeholder" = "Προσθήκη νέου τύπου συμβάντος";
+"eventTag.allEventTypes" = "Όλοι οι τύποι συμβάντων >";
+"eventTag.remove::confirm::message" = "Θέλετε να αφαιρέσετε μόνο αυτόν τον τύπο συμβάντος ή και τα σχετικά συμβάντα;";
+"eventTag.remove::only_tag" = "Αφαίρεση μόνο του τύπου συμβάντος";
+"eventTag.remove::tag_and_evets" = "Αφαίρεση μαζί με τα σχετικά συμβάντα";
+"eventTag.removed::message" = "Αυτός ο τύπος συμβάντος αφαιρέθηκε.";
+"eventTag.removed_with_events::message" = "Αυτός ο τύπος συμβάντος και τα σχετικά συμβάντα αφαιρέθηκαν.";
+"eventTag.color::changed::message" = "Το χρώμα άλλαξε.";
+"eventTag.changed::message" = "Ο τύπος συμβάντος τροποποιήθηκε.";
+"eventTag.makeNew::message" = "Δημιουργήθηκε νέος τύπος συμβάντος.";
+"eventTag.default::title" = "Προεπιλεγμένος τύπος συμβάντος";
+"eventTag.default::selection::explain" = "Αυτός είναι ο τύπος συμβάντος που θα επιλέγεται από προεπιλογή κατά τη δημιουργία συμβάντος.";
+"eventTag.externalCalendar::integrate_button" = "Σύνδεση ημερολογίου";
+
+
+// MARK: - event list
+
+"eventList::today::title" = "Σήμερα";
+"eventList::yesterday::title" = "Χθες";
+"eventList::thisMonth::title" = "Αυτόν τον μήνα";
+"eventList::done_todos::title" = "Λίστα ολοκληρωμένων εργασιών";
+"eventList::done_todos::eventTime" = "Ώρα συμβάντος:";
+"eventList::done_todos::doneAt" = "Ώρα ολοκλήρωσης:";
+"eventList::remove::confirm::message" = "Διαγραφή λίστας ολοκληρωμένων εργασιών";
+"eventList::remove::confirm::button::all" = "Όλες οι ολοκληρωμένες εργασίες";
+"eventList::remove::confirm::button::olderThan1m" = "Παλαιότερες από 1 μήνα";
+"eventList::remove::confirm::button::olderThan3m" = "Παλαιότερες από 3 μήνες";
+"eventList::remove::confirm::button::olderThan6m" = "Παλαιότερες από 6 μήνες";
+"eventList::remove::confirm::button::olderThan1y" = "Παλαιότερες από 1 χρόνο";
+
+
+// MARK: - account
+
+"manage_account::title" = "Διαχείριση λογαριασμού";
+"manage_account::login_method" = "Μέθοδος σύνδεσης";
+"manage_account::email" = "Email";
+"manage_account::last_signedIn_at" = "Ώρα τελευταίας σύνδεσης";
+"manage_account::migration::title" = "Μεταφορά προσωρινών δεδομένων χρήστη";
+"manage_account::migration::description" = "Όλα τα συμβάντα που δημιουργήθηκαν πριν τη σύνδεση (%d συμβάντα) μεταφέρονται στον λογαριασμό σας.\nΤα συμβάντα που συνδέονται με τον λογαριασμό σας είναι προσβάσιμα από οποιαδήποτε συσκευή.";
+"manage_account::migration_finished::message" = "Η μεταφορά ολοκληρώθηκε!";
+"manage_account::signout_button::title" = "Αποσύνδεση";
+"manage_account::sign_out::confirm::title" = "Αποσύνδεση";
+"manage_account::sign_out::confirm::message" = "Θέλετε να αποσυνδεθείτε από τον τρέχοντα λογαριασμό;";
+"manage_account::delete_account_button::title" = "Διαγραφή λογαριασμού";
+"manage_account::delete_account_button::confirm:message" = "Είστε βέβαιοι ότι θέλετε να διαγράψετε τον λογαριασμό σας;";
+"manage_account::delete_account_button::description" = "Μετά την αίτηση διαγραφής, ο λογαριασμός θα διαγραφεί.\nΜετά τη διαγραφή, τα δεδομένα του λογαριασμού δεν μπορούν να ανακτηθούν.";
+"signIn::title" = "Σύνδεση";
+"signIn:description" = "Δημιουργήστε αντίγραφο ασφαλείας της λίστας συμβάντων σας και συγχρονίστε την με άλλες συσκευές iOS\n(Οι υποστηριζόμενες πλατφόρμες θα επεκταθούν.)";
+
+
+// MARK: - setting
+"event_setting::title" = "Ρυθμίσεις συμβάντων";
+"event_setting::eventType" = "Τύπος συμβάντος";
+"event_setting::eventPeriod" = "Περίοδος συμβάντος";
+"event_setting::defaultMapApp" = "Άνοιγμα εφαρμογής χαρτών";
+"event_setting::defaultMapApp_select" = "Επιλογή";
+
+"event_setting::eventSync" = "Συγχρονισμός συμβάντων";
+"event_setting::eventSync::readyToSync::description" = "Συγχρονισμός δεδομένων αντιγράφου ασφαλείας συμβάντων χρήστη.";
+"event_setting::eventSync::syncInProgress::description" = "Συγχρονισμός δεδομένων αντιγράφου ασφαλείας συμβάντων χρήστη...";
+"event_setting::eventSync::lastTime" = "Ώρα τελευταίου συγχρονισμού: %@";
+"event_setting::eventSync::force" = "Εξαναγκασμένος συγχρονισμός";
+
+"event_notification_setting::title::forAllDay" = "Όλη μέρα";
+"event_notification_setting::title::NotforAllDay" = "Ώρα ειδοποίησης";
+"event_setting::external_calendar::title" = "Εξωτερικά ημερολόγια";
+"event_setting::external_calendar::connected::account" = "Συνδεδεμένο: %@";
+"event_setting::external_calendar::start" = "Σύνδεση";
+"event_setting::external_calendar::start::message" = "Συνδέθηκε με εξωτερικό ημερολόγιο.";
+"event_setting::external_calendar::stop" = "Αποσύνδεση";
+"event_setting::external_calendar::stop::message" = "Η σύνδεση με το εξωτερικό ημερολόγιο διακόπηκε.";
+"event_setting::external_calendar::google::serviceName" = "Google Ημερολόγιο";
+"event_setting::external_calendar::apple::serviceName" = "Apple Ημερολόγιο";
+"event_setting::apple_calendar::permission_denied::message" = "Η πρόσβαση στο ημερολόγιο απορρίφθηκε. Ενεργοποιήστε την στις Ρυθμίσεις για να χρησιμοποιήσετε το Apple Ημερολόγιο.";
+"event_setting::apple_calendar::restricted::message" = "Η πρόσβαση στο ημερολόγιο είναι περιορισμένη σε αυτήν τη συσκευή.";
+"setting.title" = "Ρυθμίσεις";
+"setting.appearance.title" = "Εμφάνιση";
+"setting.appearance.calendar.samplemonth::march" = "ΜΑΡΤΙΟΣ";
+"setting.appearance.calendar.startDayOfWeek" = "Πρώτη ημέρα της εβδομάδας";
+"setting.appearance.calendar.accentDay" = "Επισημασμένες ημέρες";
+"setting.appearance.calendar.accentDay::holiday" = "Αργία";
+"setting.appearance.calendar.accentDay::saturday" = "Σάββατο";
+"setting.appearance.calendar.accentDay::sunday" = "Κυριακή";
+"setting.appearance.calendar.colorTheme" = "Θέμα χρωμάτων";
+"setting.appearance.calendar.colorTheme::system" = "Σύστημα";
+"setting.appearance.calendar.colorTheme::light" = "Φωτεινό";
+"setting.appearance.calendar.colorTheme::dark" = "Σκοτεινό";
+"setting.appearance.calendar.underline" = "Υπογράμμιση ημερών με συμβάντα";
+"setting.appearance.event.edit::name_old" = "Επεξεργασία συμβάντος";
+"setting.appearance.event.edit::name" = "Ρυθμίσεις συμβάντων και εξωτερικά ημερολόγια";
+"setting.appearance.day_row_height" = "Επίπεδο εμφάνισης λεπτομερειών συμβάντος";
+"setting.appearance.day_row_height::small::text" = "Ελάχιστο";
+"setting.appearance.day_row_height::medium::text" = "Μεσαίο";
+"setting.appearance.day_row_height::large::text" = "Πλήρες";
+"setting.appearance.event.fontSize" = "Μέγεθος γραμματοσειράς κειμένου συμβάντος";
+"setting.appearance.event.show_holidayName" = "Εμφάνιση ονόματος αργίας";
+"setting.appearance.event.show_lunar" = "Σεληνιακό ημερολόγιο";
+"setting.appearance.event._24form" = "Μορφή 24 ωρών";
+"setting.appearance.event.sample::name" = "🥗 Όνομα συμβάντος";
+"setting.appearance.event.sample::description" = "περιγραφή";
+"setting.appearance.event.sample::christmas" = "Χριστούγεννα";
+"setting.appearance.event.sample::first" = "πρώτο συμβάν";
+"setting.appearance.event.sample::second" = "δεύτερο συμβάν";
+"setting.appearance.event.sample::uncompleted_todo::toggle" = "Εμφάνιση μη ολοκληρωμένων εργασιών";
+"setting.appearance.widget::title" = "Θέμα widget";
+"setting.appearance.widget::useSystemTheme::title" = "Χρήση θέματος συστήματος";
+"setting.appearance.widget::useSystemTheme::background" = "Χρώμα φόντου widget";
+"setting.appearance.widget::useCustomTheme::title" = "Επιλογή προσαρμοσμένου χρώματος";
+"setting.appearance.widget::sample::eventName" = "Συμβάν widget";
+"setting.appearance.event.boldText" = "Έντονο κείμενο";
+"setting.appearance.event.eventColor" = "Χρώμα συμβάντος";
+"setting.timezone::title" = "Ζώνη ώρας";
+"setting.timezone::systemTimeZone::name" = "Ζώνη ώρας συστήματος";
+"setting.timezone::systemTime::name" = "Ώρα συστήματος";
+"setting.haptic::name" = "Απτική ανάδραση";
+"setting.minimize_animation::name" = "Ελαχιστοποίηση εφέ κίνησης";
+"setting.holiday.title" = "Αργίες";
+"setting.holiday.item::name" = "Ρύθμιση αργιών";
+"setting.holiday.list::sectionTitle" = "Αργίες";
+"setting.holiday.country.title" = "Χώρα";
+"setting.holiday.country.current::title" = "Τρέχουσα χώρα";
+"setting.holiday.country.current::placeHolder" = "Επιλέξτε χώρα";
+"setting.holiday.country.changeConfirm::title" = "Αλλαγή χώρας";
+"setting.holiday.country.changeConfirm::message" = "Θέλετε να αλλάξετε τη χώρα του ημερολογίου σας;";
+"setting.holiday.country.changed::message" = "Η χώρα άλλαξε.";
+"setting.holiday.hide::button" = "Απόκρυψη";
+"setting.holiday.hide::confirm::title" = "Απόκρυψη αργίας";
+"setting.holiday.hide::confirm::message" = "Απόκρυψη αυτής της αργίας κάθε χρόνο;\nΜπορείτε να την εμφανίσετε ξανά στις Ρυθμίσεις > Αργίες.";
+"setting.holiday.hidden::sectionTitle" = "Κρυφές αργίες";
+"setting.holiday.show::button" = "Εμφάνιση";
+"setting.feedback::name" = "Σχόλια";
+"setting.help::name" = "Βοήθεια";
+"setting.share::name" = "Κοινοποίηση εφαρμογής";
+"setting.write_review::name" = "Γράψτε μια κριτική για την εφαρμογή";
+"setting.account.signedIn::manageAccount" = "Λογαριασμός";
+"setting.account.needSignIn" = "Σύνδεση";
+"setting.suggest::readmind::appName" = "Readminds";
+"setting.suggest::readmind::message" = "Διαχειριστείτε τη λίστα ανάγνωσής σας";
+"setting.section.support::name" = "Υποστήριξη";
+"setting.section.app::name" = "Εφαρμογή";
+"setting.section.suggest::name" = "Προτάσεις";
+"feedback::guide:message" = "Παρακαλούμε στείλτε μας σχόλια, συμπεριλαμβανομένων αναφορών σφαλμάτων, σχολίων και προτάσεων για την υπηρεσία.\nΤα σχόλιά σας θα μας βοηθήσουν πολύ να βελτιώσουμε την υπηρεσία μας.";
+"feedback::enterMessage::placeholder" = "Εισαγάγετε ένα μήνυμα";
+"feedback::contact::placeholder" = "Διεύθυνση email για απάντηση";
+"feedback::posted:message" = "Τα σχόλιά σας καταχωρήθηκαν με επιτυχία.";
+
+// MARK: - external service
+
+"external_service.name::google" = "Google Ημερολόγιο";
+"external_service.expired::message" = "Η ενσωμάτωση %@ έληξε. Παρακαλώ μεταβείτε στις Ρυθμίσεις και δοκιμάστε ξανά.";
+"external_service::google::hidden_event" = "Κρυφό";
+"external_service::google::unknown_event" = "Άγνωστο";
+
+
+// MARK: - widget
+
+"widget.common::explain" = "Δείτε τα επερχόμενα συμβάντα σας.";
+"widget.doubleMonth::name" = "Ημερολόγιο + Ημερολόγιο";
+"widget.eventAndMonth::name" = "Συμβάντα + Ημερολόγιο";
+"widget.todayAndMonth::name" = "ΣΗΜΕΡΑ + Ημερολόγιο";
+"widget.eventAndForesmot::name" = "Συμβάντα + Κύριο";
+"widget.events::name" = "Συμβάντα";
+"widget.events.noEvents::message" = "Δεν υπάρχουν συμβάντα.";
+"widget.events.currentTodos" = "Τρέχουσα λίστα εργασιών";
+"widget.events.sample::check_mailbox" = "Έλεγχος γραμματοκιβωτίου";
+"widget.events.sample::example" = "Αργία";
+"widget.events.sample::running" = "Τρέξιμο";
+"widget.events.sample::luch" = "Μεσημεριανό";
+"widget.events.sample::luch_appointment" = "Μεσημεριανό ραντεβού (δεν μπορεί να αργήσει)";
+"widget.events.sample::call" = "Τηλεφώνημα στη Σάρα";
+"widget.events.sample::surfing" = "Σερφ";
+"widget.events.sample::moving" = "Ημέρα μετακόμισης";
+"widget.events.sample::meeting" = "Καθημερινή συνάντηση";
+"widget.events.sample::deposit_remain" = "Μεταφορά τελικού υπολοίπου";
+"widget.events.sample::recycle" = "Ανακύκλωση";
+"widget.events.sample::take_medicine" = "Λήψη φαρμάκου";
+"widget.events.sample::watering" = "Πότισμα γλάστρας";
+"widget.events.sample::june3" = "ΤΡΙ, 3 ΙΟΥΝ";
+"widget.events.sample::july16" = "ΚΥΡ, 16 ΙΟΥΛ";
+"widget.events.sample::july21" = "ΠΑΡ, 21 ΙΟΥΛ";
+"widget.events.sample::july29" = "ΣΑΒ, 29 ΙΟΥΛ";
+"widget.events.sample::aug2" = "ΤΕΤ, 2 ΑΥΓ";
+"widget.events.sample::aug3" = "ΠΕΜ, 3 ΑΥΓ";
+"widget.events.sample::oct10" = "ΔΕΥ, 10 ΟΚΤ";
+"widget.events.foremost" = "Κύριο συμβάν";
+"widget.events.foremost::allFinished::message" = "Προσθέστε ένα συμβάν που δεν πρέπει να χάσετε.";
+"widget.events.foremost::sample::message" = "Πάρτε ομπρέλα! ⛱️";
+"widget.events.calendar" = "Ημερολόγιο";
+"widget.events.today" = "ΣΗΜΕΡΑ";
+"widget.events.today::sample::sunday" = "ΚΥΡΙΑΚΗ";
+"widget.events.today::sample::march2024" = "ΜΑΡΤΙΟΣ 2024";
+"total::event::count" = "%d συμβάντα";
+"todo::count" = "%d εργασίες";
+"schedule::count" = "%d ραντεβού";
+"widget.weeks.lastMonth" = "Προηγούμενος μήνας";
+"widget.weeks.thisMonth" = "Αυτός ο μήνας";
+"widget.weeks.nextMonth" = "Επόμενος μήνας";
+"widget.weeks.thisWeek" = "Αυτή η εβδομάδα";
+"widget.weeks.twoWeek" = "2 εβδομάδες";
+"widget.weeks.threeWeek" = "3 εβδομάδες";
+"widget.weeks.fourWeek" = "4 εβδομάδες";
+"widget.weeks.sample::feb" = "ΦΕΒΡΟΥΑΡΙΟΣ";
+"widget.weeks.sample::march" = "ΜΑΡΤΙΟΣ";
+"widget.weeks.sample::april" = "ΑΠΡΙΛΙΟΣ";
+"widget.weeks.sample::hiking" = "🏔️ Πεζοπορία";
+"widget.weeks.sample::lunch" = "🥗 Μεσημεριανό";
+"widget.weeks.sample::call" = "📞 Τηλεφώνημα στη Σάρα";
+"widget.weeks.sample::holiday" = "Αργία";
+"widget.weeks.sample::golf" = "⛳️ Γκολφ";
+"widget.weeks.sample::workout" = "🔥 Προπόνηση";
+"widget.weeks.sample::launch" = "🚀 Εκκίνηση";
+"widget.fail.message" = "Παρουσιάστηκε προσωρινό σφάλμα.\nΔοκιμάστε να εκκινήσετε ξανά την εφαρμογή.";
+"widget.next.noEvent" = "Δεν υπάρχει επόμενο συμβάν.";
+"widget.next.sample" = "🔥 Προπόνηση";
+"widget.next.title" = "Επόμενο συμβάν";
+"widget.next.rect_widget::title" = "Το επόμενο συμβάν σήμερα.";
+"widget.next.title::remains" = "Τα επόμενα συμβάντα σήμερα.";
+"widget.next.title::future" = "Σήμερα και τι ακολουθεί";
+"widget.next.title::more_todos" = "%d ακόμη εργασίες";
+"widget.next.title::more_events" = "%d ακόμη ραντεβού";
+"widget.next.title::more_events_with_todo" = "%1$d ακόμη εργασίες και %2$d ακόμη ραντεβού";
+"widget.next.title::uncompleted::todo" = "Το %1$@ δεν έχει ολοκληρωθεί";
+"widget.next.title::uncompleted::todos" = "%1$@ και %2$d ακόμη μη ολοκληρωμένες εργασίες";
+"widget.next.no_events_today" = "Κανένα συμβάν σήμερα";
+"widget.next.no_events" = "Κανένα επερχόμενο συμβάν";
+
+"widget.dday::name" = "Αντίστροφη μέτρηση";
+"widget.dday::noTarget" = "Επιλέξτε συμβάν";
+"widget.dday.sample::title" = "Εργαστήριο";
+"widget.dday.target::repeating" = "Επαναλαμβανόμενο";
+"widget.dday.target::registered" = "Καρφιτσωμένο";
+"widget.dday.turn::name" = "Γύρος %d";
+
+// MARK: - link
+
+"deeplink::invalid_link_message" = "Αυτή η μορφή συνδέσμου δεν υποστηρίζεται.\nΠαρακαλούμε ενημερώστε την εφαρμογή στην τελευταία έκδοση.";
+
+// MARK: - force update
+
+"force_update.title" = "Απαιτείται ενημέρωση";
+"force_update.message" = "Διατίθεται νέα έκδοση.\nΠαρακαλούμε ενημερώστε για να συνεχίσετε να χρησιμοποιείτε την εφαρμογή.";
+"recommend_update.title" = "Προτείνεται ενημέρωση";
+"recommend_update.message" = "Διατίθεται νέα έκδοση.\nΣας συνιστούμε να ενημερώσετε για καλύτερη εμπειρία.";
+
+
+// MARK: - ai agent
+
+"aiAgent::voice::listening" = "Ακούω…";
+"aiAgent::keyboard" = "Πληκτρολόγιο";
+"aiAgent::voice" = "Φωνή";
+"aiAgent::send" = "Αποστολή";
+"aiAgent::input::placeholder" = "Πώς μπορώ να βοηθήσω;";
+"aiAgent::permission::title" = "Απαιτείται πρόσβαση σε μικρόφωνο και αναγνώριση ομιλίας";
+"aiAgent::permission::message" = "Επιτρέψτε την πρόσβαση στις Ρυθμίσεις ή πληκτρολογήστε αντ' αυτού";
+"aiAgent::permission::keyboard" = "Πληκτρολόγηση";
+"aiAgent::permission::setting" = "Άνοιγμα Ρυθμίσεων";
+"aiAgent::state::processing" = "Επεξεργασία";
+"aiAgent::state::confirm" = "Απαιτείται επιβεβαίωση";
+"aiAgent::state::confirmExpired" = "Έληξε";
+"aiAgent::state::done" = "Η εντολή ολοκληρώθηκε";
+"aiAgent::state::failed" = "Η εντολή απέτυχε";
+"aiAgent::done::default" = "Έγινε";
+"aiAgent::failed::default" = "Δεν ήταν δυνατή η ολοκλήρωση";
+"aiAgent::retry" = "Επανάληψη";
+"aiAgent::needSignIn::title" = "Απαιτείται σύνδεση";
+"aiAgent::needSignIn::message" = "Συνδεθείτε για να χρησιμοποιήσετε τη γρήγορη εισαγωγή AI.";
+"aiAgent::title" = "Γρήγορη εισαγωγή AI";
+"aiAgent::keyboard::stop" = "Διακοπή";
+"aiAgent::keyboard::send" = "Αποστολή";
+"aiAgent::stop" = "Διακοπή";
+"aiAgent::usage" = "%@ / %@ μονάδες";
+"aiAgent::plan::free" = "Δωρεάν";
+"aiAgent::plan::standard" = "Βασικό";
+"aiAgent::plan::lifetime" = "Διά βίου";
+"aiAgent::usage::topupRemaining" = "Απομένουν %@ επιπλέον μονάδες";
+"aiAgent::usage::planChangeScheduled" = "Μετάβαση στο πρόγραμμα %2$@ στις %1$@";
+"aiAgent::stop::confirm::title" = "Διακοπή επεξεργασίας;";
+"aiAgent::stop::confirm::message" = "Η διακοπή απορρίπτει την εντολή που εκτελείται και δεν θα μπορεί να συνεχιστεί.";
+"aiAgent::confirm::countdown" = "απομένουν για έγκριση";
+"aiAgent::confirm::expired::message" = "Ο χρόνος έληξε. Παρακαλώ κάντε ξανά το αίτημα.";

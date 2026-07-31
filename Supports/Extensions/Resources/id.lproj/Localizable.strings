@@ -1,0 +1,562 @@
+/*
+  Localizable.strings
+  Extensions
+
+  Created by sudo.park on 7/31/26.
+  Copyright © 2026 com.sudo.park. All rights reserved.
+*/
+
+
+// MARK: - common
+"common::and" = " dan";
+"common::wait:message" = "Mohon tunggu...";
+"common::back" = "Kembali";
+"common.remove" = "Hapus";
+"common.confirm" = "Konfirmasi";
+"common.cancel" = "Batal";
+"common.close" = "Tutup";
+"common.yes" = "Ya";
+"common.no" = "Tidak";
+"common.save" = "Simpan";
+"common.info" = "Info";
+"common.search" = "Cari";
+"common.clear" = "Bersihkan";
+"common.send" = "Kirim";
+"common.done" = "Selesai";
+"common.errorMessage" = "Terjadi kesalahan sementara.\nMohon laporkan jika masalah berlanjut.";
+"common.update" = "Perbarui";
+"common.go_to_settings" = "Buka Pengaturan";
+
+// MARK: - date form
+"date_form::HH:mm" = "HH:mm";
+"date_form::a_h:mm" = "h:mm a";
+"date_form::MM_d__HH:mm" = "d/M, HH:mm";
+"date_form::MM_d" = "d/M";
+"date_form::MM_dd" = "dd/MM";
+"date_form::24off_h:mm" = "h:mm";
+"date_form::24on_H:mm" = "H:mm";
+"date_form::d_E_" = "d (E)";
+"date_form::MMM_d_HH:mm" = "d MMM HH:mm";
+"date_form::MMM_d" = "d MMM";
+"date_form::yyyy_MM_dd_E_" = "dd/MM/yyyy (E)";
+"date_form:yyyy.MM_dd_hh:mm" = "dd/MM/yyyy HH:mm";
+"date_form:yyyy.MM_dd_h:mm" = "dd/MM/yyyy h:mm a";
+"date_form.yyyy" = "yyyy";
+"date_form.MMM_dd_E" = "dd MMM (E)";
+"date_form.HH:mm" = "HH:mm";
+"date_form.yyyy_MM_dd" = "dd/MM/yyyy";
+"date_form.yyyy_MMM_dd" = "d MMM yyyy";
+"date_form.MMM" = "MMM";
+"date_form.MMMM" = "MMMM";
+"date_form.EEEE" = "EEEE";
+"date_form.EEE_MMM_d" = "EEE, d MMM";
+"date_form.MMM_yyyy" = "MMM yyyy";
+"tomorrow" = "Besok";
+
+// MARK: - event
+
+"dayname::sunday" = "Minggu";
+"dayname::monday" = "Senin";
+"dayname::tuesday" = "Selasa";
+"dayname::wednesday" = "Rabu";
+"dayname::thursday" = "Kamis";
+"dayname::friday" = "Jumat";
+"dayname::saturday" = "Sabtu";
+
+"dayname::sunday:short" = "MIN";
+"dayname::monday:short" = "SEN";
+"dayname::tuesday:short" = "SEL";
+"dayname::wednesday:short" = "RAB";
+"dayname::thursday:short" = "KAM";
+"dayname::friday:short" = "JUM";
+"dayname::saturday:short" = "SAB";
+
+"dayname::sunday:very_short" = "M";
+"dayname::monday:very_short" = "S";
+"dayname::tuesday:very_short" = "S";
+"dayname::wednesday:very_short" = "R";
+"dayname::thursday:very_short" = "K";
+"dayname::friday:very_short" = "J";
+"dayname::saturday:very_short" = "S";
+
+
+// MARK: - event notification
+
+"event_notification::today:title" = "Acara hari ini";
+"event_notification::todo:prefix" = "Tugas";
+"event_notification::today:prefix" = "Hari ini";
+"event_notification::tomorrow:prefix" = "Besok";
+"event_notification::allday_today" = "Sepanjang hari ini";
+"event_notification::allday_tomorrow" = "Sepanjang hari besok";
+"event_notification::some_allday" = "%@ sepanjang hari";
+"event_notification_setting::option_title::no_notification" = "Tanpa notifikasi";
+"event_notification_setting::option_title::at_time" = "Saat waktu acara";
+"event_notification_setting::option_title::allday_9am" = "Pukul 9 pagi hari itu";
+"event_notification_setting::option_title::allday_12pm" = "Pada siang hari itu";
+"event_notification_setting::option_title::customTime" = "Waktu khusus: %@";
+"event_notification_setting::option_title::custimTime_fallback" = "Waktu khusus";
+"event_notification_setting::option_title::before_minutes" = "%d menit sebelum acara";
+"event_notification_setting::option_title::before_hours" = "%d jam sebelum acara";
+"event_notification_setting::option_title::before_days" = "%d hari sebelum acara";
+"event_notification_setting::option_title::before_weeks" = "%d minggu sebelum acara";
+"event_notification_setting::option_title::allday_9am_before_days" = "Pukul 9:00, %d hari sebelumnya";
+"event_notification_setting::option_title::allday_9am_before_weeks" = "Pukul 9:00, %d minggu sebelumnya";
+"event_notification_setting::need_permission_message" = "Untuk menggunakan fitur notifikasi acara, Anda perlu memberikan izin notifikasi.\nBuka Pengaturan Sistem dan izinkan notifikasi.";
+"event_notification_setting::need_permission::go_setting" = "Buka pengaturan";
+"event_notification_setting::need_permission_title" = "Info";
+"event_notification_setting::permission_denied" = "Izin notifikasi aplikasi diperlukan untuk menggunakan fitur pengingat acara.";
+
+
+
+// MARK: - calendar
+
+"calendar::foremostevent:title" = "Acara Terpenting";
+"calendar::uncompletedTodos:title" = "Tugas Belum Selesai";
+"calendar::event_time::todo" = "Tugas";
+"calendar::event_time::allday" = "Sepanjang hari";
+"calendar::event_time::allday::with" = "%@ sepanjang hari";
+"calendar::event_time::period:some_days" = "%d hari";
+"calendar::event_time::period:some_minutes" = "%d menit";
+"calendar::event_time::period:some_hours" = "%d jam";
+"calendar::event_time::period:some_days:some_hours" = "%d hari %d jam";
+"calendar::event::more_action::remove:title" = "Hapus Acara";
+"calendar::event::more_action::foremost_event:title" = "Acara terpenting";
+"calendar::event::more_action::remove_only_thistime:message" = "Apakah Anda ingin menghapus acara ini saja dari semua acara berulang?";
+"calendar::event::more_action::remove:message" = "Apakah Anda ingin menghapus acara ini?";
+"calendar::event::more_action::mark_as_foremost" = "Apakah Anda ingin menandai acara ini sebagai acara terpenting Anda?";
+"calendar::event::more_action::unmark_as_foremost" = "Apakah Anda ingin menghapus tanda acara terpenting dari acara ini?";
+"calendar::event::more_action::mark_as_foremost::unavail" = "Acara jadwal yang berulang tidak dapat ditandai sebagai acara terpenting.";
+"calendar::event::more_action:remove_only_thistime:item_name" = "Hapus acara ini saja";
+"calendar::event::more_action:remove:item_name" = "Hapus acara";
+"calendar::event::more_action:foremost:mark:item_name" = "Tandai sebagai terpenting";
+"calendar::event::more_action:foremost:unmark:item_name" = "Hapus tanda terpenting";
+"calendar::event::more_action:dday_candidate:register:item_name" = "Tambahkan ke widget H-Day";
+"calendar::event::more_action:dday_candidate:unregister:item_name" = "Hapus dari widget H-Day";
+"calendar::event::more_action:dday_candidate:title" = "Kandidat widget H-Day";
+"calendar::event::more_action:dday_candidate:register:message" = "Tambahkan acara ini sebagai kandidat widget H-Day? Acara ini akan muncul di bagian atas daftar saat Anda mengedit widget.";
+"calendar::event::more_action:dday_candidate:unregister:message" = "Hapus acara ini dari kandidat widget H-Day?";
+"calendar::event::more_action:copy:item_name" = "Salin acara";
+"calendar::event::more_action:transform_to::schedule" = "Ubah menjadi jadwal";
+"calendar::event::more_action:transform_to::todo" = "Ubah menjadi tugas";
+"calendar::event::more_action:edit:item_name" = "Edit";
+"calednar::event::add_new" = "Tambah acara baru";
+"calednar::event::add_new:place_holder" = "Tambahkan tugas baru dengan cepat.";
+"calednar::event::skip_todo" = "Lewati tugas ini";
+"calednar::event::skip_todo_until" = "Pilih waktu untuk melewati tugas ini";
+"calednar::event::copy" = "Salin acara";
+"calendar::move_date" = "Pindahkan tanggal";
+"calednar::event::google::edit" = "Edit Acara Google Kalender";
+
+
+// MARK: - event detail
+
+"eventDetail.messages.selectTimeFirst" = "Mohon pilih waktu acara terlebih dahulu.";
+"eventDetail.messages.selectValidTime" = "Mohon pilih waktu acara yang valid.";
+"eventDetail.notification.custom_eventTime:title" = "Khusus";
+"eventDetail.notification.title" = "Waktu notifikasi acara";
+"eventDetail.repeating.title" = "Pengulangan";
+"eventDetail.repeating.notRepeating::title" = "Tidak berulang";
+"eventDetail.repeating.starttime:form" = "d/M/yyyy";
+"eventDetail.repeating.starttime:title" = "Waktu mulai pengulangan";
+"eventDetail.repeating.everyDay:title" = "Setiap hari";
+"eventDetail.repeating.everyWeek:title" = "Setiap minggu";
+"eventDetail.repeating.everyWeekSomeDay:title" = "Setiap %@";
+"eventDetail.repeating.everySomeWeek:title" = "Setiap %d minggu";
+"eventDetail.repeating.everyWeekDays:title" = "Setiap hari kerja";
+"eventDetail.repeating.everySomeWeekSomeDay:title" = "Setiap %d minggu pada %@";
+"eventDetail.repeating.everyMonth:title" = "Setiap bulan";
+"eventDetail.repeating.everyMonth_someDay:title" = "Tanggal %@ setiap bulan.";
+"eventDetail.repeating.everyYear:title" = "Setiap tahun";
+"eventDetail.repeating.lunarCalendar_everyYear:title" = "Setiap tahun (kalender lunar)";
+"eventDetail.repeating.everyYearSomeDay:title" = "Setiap tahun %@";
+"eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "Setiap tahun %@ (kalender lunar)";
+"eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "Semua hari di minggu terakhir setiap bulan";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "%@ pertama setiap bulan";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "%@ kedua setiap bulan";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "%@ ketiga setiap bulan";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "%@ keempat setiap bulan";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "%@ kelima setiap bulan";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "%@ keenam setiap bulan";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "%@ ketujuh setiap bulan";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "%@ terakhir setiap bulan";
+"eventDetail.repeating.endtime::title" = "Akhir Pengulangan";
+"eventDetail.repeating.endtime::option::never" = "Tidak pernah";
+"eventDetail.repeating.endtime::option::on" = "Pada tanggal";
+"eventDetail.repeating.endtime::option::after" = "Setelah";
+"eventDetail.repeating.endtime::option::after_occurrences" = "kali";
+"eventDetail.repeating.endtime::shouldFutureThanStartTime" = "Waktu akhir pengulangan harus lebih akhir dari waktu mulai.\n(Tanggal mulai pengulangan: %@)";
+"eventDetail.repeating::period_endcount" = "Mulai %@, %d kali";
+
+"eventDetail.repeating.everyNDays:title" = "Setiap %d hari";
+"eventDetail.repeating.last" = "Terakhir";
+"eventDetail.repeating.everyNMonths:title" = "Setiap %d bulan";
+"eventDetail.repeating.everyNYears:title" = "Setiap %d tahun";
+"eventDetail.repeating::endoption_until" = "hingga %@";
+"eventDetail.repeating::endoption_times" = "%d kali";
+
+"eventDetail.place::placeholder" = "Lokasi";
+"eventDetail.place::remove_button" = "Hapus lokasi";
+"eventDetail.place::no_map_app" = "Aplikasi peta yang dipilih belum terpasang.";
+"eventDetail.place::select_map_app" = "Pilih peta";
+"eventDetail.place::always_select_this_map" = "Selalu buka dengan aplikasi ini.";
+
+"eventDetail.add_new_todo::message" = "Tugas baru telah ditambahkan.";
+"eventDetail.add_new_schedule::message" = "Jadwal baru telah ditambahkan.";
+"eventDetail.scheduleEvent_removed::message" = "Jadwal telah dihapus.";
+"eventDetail.edit::repeating::confirm::ttile" = "Edit acara";
+"eventDetail.edit::repeating::confirm::message" = "Acara ini adalah acara berulang.\nPilih cakupan acara berulang yang ingin Anda edit.";
+"eventDetail.edit::repeating::confirm::all::button" = "Semua acara";
+"eventDetail.edit::repeating::confirm::fromNow::button" = "Mulai dari sekarang";
+"eventDetail.edit::repeating::confirm::onlyThisTime::button" = "Hanya kali ini";
+"eventDetail.scheduleEvent_saved::message" = "Jadwal telah disimpan.";
+"eventDetail.todoEvent_removed::message" = "Tugas telah dihapus.";
+"eventDetail.todoEvent_saved::message" = "Tugas telah disimpan.";
+"eventDetail.cancel_edit::title" = "Edit acara";
+"eventDetail.cancel_edit::message" = "Apakah Anda ingin membatalkan perubahan ini?";
+"eventDetail.cancel_edit::continue::button" = "Lanjutkan";
+
+"eventDetail.edit::add_new_name::placeholder" = "Tambah nama acara baru";
+"eventDetail.edit::clearEventTime::button" = "Hapus waktu acara";
+"eventDetail.edit::noEventTime::button" = "Tanpa waktu selesai";
+"eventDetail.edit::memo" = "Catatan";
+"eventDetail.edit::urlPreview" = "Pratinjau URL";
+
+"eventDetail.edit::make::case" = "Apakah ini acara tugas?";
+"eventDetail.edit::todo::case" = "Acara Tugas";
+"eventDetail.edit::schedule::case" = "Acara Jadwal";
+"eventDetail.edit::holiday::case" = "Hari Libur Nasional di %@";
+
+"eventDetail.notSupport::holiday" = "Fungsi ubah informasi tidak didukung untuk hari libur nasional.";
+
+"eventDetail:todo:guide:message1" = "Tugas mewakili sesuatu yang perlu dilakukan.";
+"eventDetail:todo:guide:message2" = "Berbeda dari jadwal biasa yang ditampilkan di kalender dengan waktu (atau periode) tertentu, tugas menyediakan kemampuan untuk memeriksa apakah sudah selesai.";
+"eventDetail:todo:guide:message3" = "Anda dapat menambahkan tugas tanpa informasi waktu tertentu. Misalnya, Anda dapat mencatat pekerjaan yang perlu dilakukan segera, tetapi belum harus dilakukan sekarang.";
+"eventDetail:todo:guide:process:message" = "Tugas berperilaku berbeda dari jadwal biasa saat opsi pengulangan diaktifkan:";
+"eventDetail:todo:guide:process:bullet1" = "Tugas berulang saat ini atau masa lalu yang belum selesai ditampilkan di kalender.";
+"eventDetail:todo:guide:process:bullet2" = "Saat tugas selesai, acara tersebut ditambahkan ke daftar acara yang telah selesai dan pengulangan berikutnya ditambahkan baru ke kalender.";
+"eventDetail:todo:guide:process:bullet3" = "Jika tidak ada pengulangan berikutnya karena telah mencapai waktu akhir pengulangan, tugas berulang tersebut berakhir.";
+"eventDetail:foremost:guide:message1" = "Tandai acara sebagai terpenting untuk menekankan bahwa itu adalah acara terpenting Anda.\nAcara terpenting selalu terlihat di kalender dan mendukung widget terpisah.";
+"eventDetail:foremost:guide:supports:message" = "Jenis acara berikut dapat diatur sebagai acara terpenting:";
+"eventDetail:foremost:guide:supports:todo" = "Acara tugas";
+"eventDetail:foremost:guide:supports:notRepeating_schedule" = "Acara jadwal yang tidak berulang";
+
+"eventDetail:isSaving:toast:message" = "Menyimpan perubahan. Mohon tunggu.";
+"eventDetail:hasChanges:confirm:message" = "Ada perubahan. Apakah Anda ingin membatalkannya?";
+"eventDetail:hasChanges:confirm:continue" = "Lanjutkan mengedit";
+
+"eventDetail.unavailto_transform_withoutName" = "Mohon masukkan nama untuk mengubah acara.";
+"eventDetail.todoEvent_unavailto_transform_withoutTime" = "Informasi waktu diperlukan untuk mengubah menjadi jadwal.";
+"eventDetail.todoEvent::transform::schedule_title" = "Ubah";
+"eventDetail.todoEvent::transform::schedule_message" = "Apakah Anda ingin mengubah tugas ini menjadi jadwal?";
+"eventDetail.scheduleEvent::transform::todo" = "Ubah";
+"eventDetail.scheduleEvent::transform::todo_message" = "Apakah Anda ingin mengubah jadwal ini menjadi tugas?";
+
+"eventDetail::revert" = "Batalkan penyelesaian";
+
+// MARK: - Google calendar event
+
+"eventDetail::gogoleEvent::viewOnCalendar" = "Lihat di Google Kalender";
+"eventDetail::gogoleEvent::calendar" = "Kalender";
+"eventDetail::gogoleEvent::calendar::event" = "Acara Google Kalender";
+"eventDetail::gogoleEvent::attendee::unknown" = "Tidak diketahui";
+"eventDetail::gogoleEvent::attendees" = "Peserta (%d orang)";
+"eventDetail::gogoleEvent::attendees::organizer" = "Penyelenggara";
+"eventDetail::gogoleEvent::conference::accessCode" = "Kode Akses";
+"eventDetail::gogoleEvent::conference::meetingCode" = "Kode Rapat";
+"eventDetail::gogoleEvent::conference::passCode" = "Kode Sandi";
+"eventDetail::gogoleEvent::conference::password" = "Kata Sandi";
+"eventDetail::gogoleEvent::copy::message" = "Disalin ke papan klip.";
+"eventDetail::gogoleEvent::canceled::message" = "Acara ini telah dibatalkan.";
+
+// MARK: - Apple calendar event
+"eventDetail::appleCalendarEvent::viewOnCalendar" = "Lihat di Apple Kalender";
+"eventDetail::appleCalendarEvent::calendar::event" = "Acara Apple Kalender";
+"eventDetail::appleCalendarEvent::attendees" = "Peserta (%d orang)";
+"eventDetail::appleCalendarEvent::attendees::organizer" = "Penyelenggara";
+
+// MARK: - event tag
+
+"eventTag.title" = "Jenis Acara";
+"eventTag.list::title" = "Jenis Acara";
+"eventTag.defaults.default::name" = "Default";
+"eventTag.defaults.holiday::name" = "Hari Libur";
+"eventTag.addNew::placeholder" = "Tambah jenis acara baru";
+"eventTag.allEventTypes" = "Semua jenis acara >";
+"eventTag.remove::confirm::message" = "Apakah Anda ingin menghapus jenis acara ini saja, atau ingin menghapus semua acara terkait juga?";
+"eventTag.remove::only_tag" = "Hapus jenis acara saja";
+"eventTag.remove::tag_and_evets" = "Hapus beserta acara terkait";
+"eventTag.removed::message" = "Jenis acara ini telah dihapus.";
+"eventTag.removed_with_events::message" = "Jenis acara ini dan acara terkait telah dihapus.";
+"eventTag.color::changed::message" = "Warna telah diubah.";
+"eventTag.changed::message" = "Jenis acara telah diubah.";
+"eventTag.makeNew::message" = "Jenis acara baru telah dibuat.";
+"eventTag.default::title" = "Jenis Acara Default";
+"eventTag.default::selection::explain" = "Ini adalah jenis acara yang akan dipilih secara default saat membuat acara.";
+"eventTag.externalCalendar::integrate_button" = "Hubungkan kalender";
+
+
+// MARK: - event list
+
+"eventList::today::title" = "Hari ini";
+"eventList::yesterday::title" = "Kemarin";
+"eventList::thisMonth::title" = "Bulan ini";
+"eventList::done_todos::title" = "Daftar Tugas Selesai";
+"eventList::done_todos::eventTime" = "Waktu acara:";
+"eventList::done_todos::doneAt" = "Waktu selesai:";
+"eventList::remove::confirm::message" = "Hapus daftar tugas yang telah selesai";
+"eventList::remove::confirm::button::all" = "Semua tugas yang telah selesai";
+"eventList::remove::confirm::button::olderThan1m" = "Lebih lama dari 1 bulan";
+"eventList::remove::confirm::button::olderThan3m" = "Lebih lama dari 3 bulan";
+"eventList::remove::confirm::button::olderThan6m" = "Lebih lama dari 6 bulan";
+"eventList::remove::confirm::button::olderThan1y" = "Lebih lama dari 1 tahun";
+
+
+// MARK: - account
+
+"manage_account::title" = "Kelola Akun";
+"manage_account::login_method" = "Metode masuk";
+"manage_account::email" = "Email";
+"manage_account::last_signedIn_at" = "Waktu masuk terakhir";
+"manage_account::migration::title" = "Migrasikan data pengguna sementara";
+"manage_account::migration::description" = "Semua acara yang dibuat sebelum masuk (%d acara) sedang dimigrasikan ke akun Anda.\nAcara yang terhubung ke akun Anda dapat diakses dari perangkat mana pun.";
+"manage_account::migration_finished::message" = "Migrasi selesai!";
+"manage_account::signout_button::title" = "Keluar";
+"manage_account::sign_out::confirm::title" = "Keluar";
+"manage_account::sign_out::confirm::message" = "Apakah Anda ingin keluar dari akun saat ini?";
+"manage_account::delete_account_button::title" = "Hapus Akun";
+"manage_account::delete_account_button::confirm:message" = "Apakah Anda yakin ingin menghapus akun Anda?";
+"manage_account::delete_account_button::description" = "Setelah meminta penghapusan akun, akun Anda akan dihapus.\nSetelah dihapus, informasi akun tidak dapat dipulihkan.";
+"signIn::title" = "Masuk";
+"signIn:description" = "Cadangkan daftar acara Anda dan sinkronkan dengan perangkat iOS lain\n(Platform yang didukung akan diperluas.)";
+
+
+// MARK: - setting
+"event_setting::title" = "Pengaturan Acara";
+"event_setting::eventType" = "Jenis Acara";
+"event_setting::eventPeriod" = "Periode Acara";
+"event_setting::defaultMapApp" = "Buka aplikasi Peta";
+"event_setting::defaultMapApp_select" = "Pilih";
+
+"event_setting::eventSync" = "Sinkronisasi Acara";
+"event_setting::eventSync::readyToSync::description" = "Sinkronkan acara pengguna yang telah dicadangkan.";
+"event_setting::eventSync::syncInProgress::description" = "Menyinkronkan acara pengguna yang telah dicadangkan...";
+"event_setting::eventSync::lastTime" = "Waktu data sinkronisasi terakhir: %@";
+"event_setting::eventSync::force" = "Sinkronisasi Paksa";
+
+"event_notification_setting::title::forAllDay" = "Sepanjang hari";
+"event_notification_setting::title::NotforAllDay" = "Waktu Notifikasi";
+"event_setting::external_calendar::title" = "Kalender eksternal";
+"event_setting::external_calendar::connected::account" = "Terhubung: %@";
+"event_setting::external_calendar::start" = "Hubungkan";
+"event_setting::external_calendar::start::message" = "Terhubung ke kalender eksternal.";
+"event_setting::external_calendar::stop" = "Putuskan Hubungan";
+"event_setting::external_calendar::stop::message" = "Hubungan kalender eksternal telah diputuskan.";
+"event_setting::external_calendar::google::serviceName" = "Google Kalender";
+"event_setting::external_calendar::apple::serviceName" = "Apple Kalender";
+"event_setting::apple_calendar::permission_denied::message" = "Akses kalender ditolak. Mohon aktifkan di Pengaturan untuk menggunakan Apple Kalender.";
+"event_setting::apple_calendar::restricted::message" = "Akses kalender dibatasi di perangkat ini.";
+"setting.title" = "Pengaturan";
+"setting.appearance.title" = "Tampilan";
+"setting.appearance.calendar.samplemonth::march" = "MARET";
+"setting.appearance.calendar.startDayOfWeek" = "Hari awal minggu";
+"setting.appearance.calendar.accentDay" = "Hari yang Ditonjolkan";
+"setting.appearance.calendar.accentDay::holiday" = "Hari Libur";
+"setting.appearance.calendar.accentDay::saturday" = "Sabtu";
+"setting.appearance.calendar.accentDay::sunday" = "Minggu";
+"setting.appearance.calendar.colorTheme" = "Tema warna";
+"setting.appearance.calendar.colorTheme::system" = "Sistem";
+"setting.appearance.calendar.colorTheme::light" = "Terang";
+"setting.appearance.calendar.colorTheme::dark" = "Gelap";
+"setting.appearance.calendar.underline" = "Garis bawah pada hari dengan acara";
+"setting.appearance.event.edit::name_old" = "Edit Acara";
+"setting.appearance.event.edit::name" = "Pengaturan acara dan kalender eksternal";
+"setting.appearance.day_row_height" = "Tingkat tampilan detail acara";
+"setting.appearance.day_row_height::small::text" = "Minimal";
+"setting.appearance.day_row_height::medium::text" = "Sedang";
+"setting.appearance.day_row_height::large::text" = "Penuh";
+"setting.appearance.event.fontSize" = "Ukuran font teks acara";
+"setting.appearance.event.show_holidayName" = "Tampilkan nama hari libur";
+"setting.appearance.event.show_lunar" = "Kalender lunar";
+"setting.appearance.event._24form" = "Format 24 jam";
+"setting.appearance.event.sample::name" = "🥗 Nama acara";
+"setting.appearance.event.sample::description" = "deskripsi";
+"setting.appearance.event.sample::christmas" = "Natal";
+"setting.appearance.event.sample::first" = "acara pertama";
+"setting.appearance.event.sample::second" = "acara kedua";
+"setting.appearance.event.sample::uncompleted_todo::toggle" = "Tampilkan tugas belum selesai";
+"setting.appearance.widget::title" = "Tema widget";
+"setting.appearance.widget::useSystemTheme::title" = "Gunakan tema sistem";
+"setting.appearance.widget::useSystemTheme::background" = "Warna latar belakang widget";
+"setting.appearance.widget::useCustomTheme::title" = "Pilih warna kustom";
+"setting.appearance.widget::sample::eventName" = "Acara Widget";
+"setting.appearance.event.boldText" = "Teks tebal";
+"setting.appearance.event.eventColor" = "Warna acara";
+"setting.timezone::title" = "Zona Waktu";
+"setting.timezone::systemTimeZone::name" = "Zona Waktu Sistem";
+"setting.timezone::systemTime::name" = "Waktu Sistem";
+"setting.haptic::name" = "Umpan balik haptik";
+"setting.minimize_animation::name" = "Kurangi efek animasi";
+"setting.holiday.title" = "Hari Libur";
+"setting.holiday.item::name" = "Pengaturan Hari Libur";
+"setting.holiday.list::sectionTitle" = "Hari Libur";
+"setting.holiday.country.title" = "Negara";
+"setting.holiday.country.current::title" = "Negara Saat Ini";
+"setting.holiday.country.current::placeHolder" = "Pilih negara";
+"setting.holiday.country.changeConfirm::title" = "Ubah negara";
+"setting.holiday.country.changeConfirm::message" = "Apakah Anda ingin mengubah negara kalender Anda?";
+"setting.holiday.country.changed::message" = "Negara telah diubah.";
+"setting.holiday.hide::button" = "Sembunyikan";
+"setting.holiday.hide::confirm::title" = "Sembunyikan hari libur";
+"setting.holiday.hide::confirm::message" = "Sembunyikan hari libur ini setiap tahun?\nAnda dapat menampilkannya kembali di Pengaturan > Hari Libur.";
+"setting.holiday.hidden::sectionTitle" = "Hari Libur Tersembunyi";
+"setting.holiday.show::button" = "Tampilkan";
+"setting.feedback::name" = "Masukan";
+"setting.help::name" = "Bantuan";
+"setting.share::name" = "Bagikan Aplikasi";
+"setting.write_review::name" = "Tulis ulasan aplikasi";
+"setting.account.signedIn::manageAccount" = "Akun";
+"setting.account.needSignIn" = "Masuk";
+"setting.suggest::readmind::appName" = "Readminds";
+"setting.suggest::readmind::message" = "Kelola daftar bacaan Anda";
+"setting.section.support::name" = "Dukungan";
+"setting.section.app::name" = "Aplikasi";
+"setting.section.suggest::name" = "Saran";
+"feedback::guide:message" = "Jangan ragu untuk memberikan masukan, termasuk laporan bug, komentar, dan saran layanan.\nKomentar Anda akan sangat membantu kami meningkatkan layanan ini.";
+"feedback::enterMessage::placeholder" = "Masukkan pesan";
+"feedback::contact::placeholder" = "Alamat email untuk balasan";
+"feedback::posted:message" = "Masukan Anda telah berhasil dikirim.";
+
+// MARK: - external service
+
+"external_service.name::google" = "Google Kalender";
+"external_service.expired::message" = "Integrasi %@ telah kedaluwarsa. Mohon buka Pengaturan dan coba lagi.";
+"external_service::google::hidden_event" = "Disembunyikan";
+"external_service::google::unknown_event" = "Tidak diketahui";
+
+
+// MARK: - widget
+
+"widget.common::explain" = "Lihat acara mendatang Anda.";
+"widget.doubleMonth::name" = "Kalender + Kalender";
+"widget.eventAndMonth::name" = "Acara + Kalender";
+"widget.todayAndMonth::name" = "HARI INI + Kalender";
+"widget.eventAndForesmot::name" = "Acara + Terpenting";
+"widget.events::name" = "Acara";
+"widget.events.noEvents::message" = "Tidak ada acara.";
+"widget.events.currentTodos" = "Daftar Tugas Saat Ini";
+"widget.events.sample::check_mailbox" = "Periksa kotak surat";
+"widget.events.sample::example" = "Hari Libur";
+"widget.events.sample::running" = "Lari";
+"widget.events.sample::luch" = "Makan siang";
+"widget.events.sample::luch_appointment" = "Janji makan siang (tidak boleh terlambat)";
+"widget.events.sample::call" = "Telepon Sara";
+"widget.events.sample::surfing" = "Selancar";
+"widget.events.sample::moving" = "Hari pindahan";
+"widget.events.sample::meeting" = "Rapat harian";
+"widget.events.sample::deposit_remain" = "Transfer Saldo Akhir";
+"widget.events.sample::recycle" = "Daur ulang";
+"widget.events.sample::take_medicine" = "Minum obat";
+"widget.events.sample::watering" = "Menyiram pot bunga";
+"widget.events.sample::june3" = "SEL, 3 JUN";
+"widget.events.sample::july16" = "MIN, 16 JUL";
+"widget.events.sample::july21" = "JUM, 21 JUL";
+"widget.events.sample::july29" = "SAB, 29 JUL";
+"widget.events.sample::aug2" = "RAB, 2 AGU";
+"widget.events.sample::aug3" = "KAM, 3 AGU";
+"widget.events.sample::oct10" = "SEN, 10 OKT";
+"widget.events.foremost" = "Acara Terpenting";
+"widget.events.foremost::allFinished::message" = "Tambahkan acara yang tidak boleh terlewat.";
+"widget.events.foremost::sample::message" = "Bawa payung! ⛱️";
+"widget.events.calendar" = "Kalender";
+"widget.events.today" = "HARI INI";
+"widget.events.today::sample::sunday" = "MINGGU";
+"widget.events.today::sample::march2024" = "MARET 2024";
+"total::event::count" = "%d Acara";
+"todo::count" = "%d Tugas";
+"schedule::count" = "%d Jadwal";
+"widget.weeks.lastMonth" = "Bulan lalu";
+"widget.weeks.thisMonth" = "Bulan ini";
+"widget.weeks.nextMonth" = "Bulan depan";
+"widget.weeks.thisWeek" = "Minggu ini";
+"widget.weeks.twoWeek" = "2 minggu";
+"widget.weeks.threeWeek" = "3 minggu";
+"widget.weeks.fourWeek" = "4 minggu";
+"widget.weeks.sample::feb" = "FEBRUARI";
+"widget.weeks.sample::march" = "MARET";
+"widget.weeks.sample::april" = "APRIL";
+"widget.weeks.sample::hiking" = "🏔️ Mendaki";
+"widget.weeks.sample::lunch" = "🥗 Makan siang";
+"widget.weeks.sample::call" = "📞 Telepon Sara";
+"widget.weeks.sample::holiday" = "Hari Libur";
+"widget.weeks.sample::golf" = "⛳️ Golf";
+"widget.weeks.sample::workout" = "🔥 Latihan";
+"widget.weeks.sample::launch" = "🚀 Peluncuran";
+"widget.fail.message" = "Terjadi kesalahan sementara.\nMohon coba jalankan ulang aplikasi.";
+"widget.next.noEvent" = "Tidak ada acara berikutnya.";
+"widget.next.sample" = "🔥 Latihan";
+"widget.next.title" = "Acara berikutnya";
+"widget.next.rect_widget::title" = "Acara berikutnya hari ini.";
+"widget.next.title::remains" = "Acara yang tersisa hari ini.";
+"widget.next.title::future" = "Hari Ini dan Selanjutnya";
+"widget.next.title::more_todos" = "%d tugas lainnya";
+"widget.next.title::more_events" = "%d jadwal lainnya";
+"widget.next.title::more_events_with_todo" = "%1$d tugas dan %2$d jadwal lainnya";
+"widget.next.title::uncompleted::todo" = "%1$@ belum selesai";
+"widget.next.title::uncompleted::todos" = "%1$@ dan %2$d tugas lainnya yang belum selesai";
+"widget.next.no_events_today" = "Tidak ada acara hari ini";
+"widget.next.no_events" = "Tidak ada acara mendatang";
+
+"widget.dday::name" = "H-Day";
+"widget.dday::noTarget" = "Pilih acara";
+"widget.dday.sample::title" = "Lokakarya";
+"widget.dday.target::repeating" = "Berulang";
+"widget.dday.target::registered" = "Disematkan";
+"widget.dday.turn::name" = "Putaran %d";
+
+// MARK: - link
+
+"deeplink::invalid_link_message" = "Format tautan ini tidak didukung.\nMohon perbarui aplikasi ke versi terbaru.";
+
+// MARK: - force update
+
+"force_update.title" = "Pembaruan Diperlukan";
+"force_update.message" = "Versi baru tersedia.\nMohon perbarui untuk terus menggunakan aplikasi.";
+"recommend_update.title" = "Pembaruan Disarankan";
+"recommend_update.message" = "Versi baru tersedia.\nKami menyarankan pembaruan untuk pengalaman yang lebih baik.";
+
+
+// MARK: - ai agent
+
+"aiAgent::voice::listening" = "Mendengarkan…";
+"aiAgent::keyboard" = "Papan Ketik";
+"aiAgent::voice" = "Suara";
+"aiAgent::send" = "Kirim";
+"aiAgent::input::placeholder" = "Ada yang bisa dibantu?";
+"aiAgent::permission::title" = "Akses mikrofon & pengenalan suara diperlukan";
+"aiAgent::permission::message" = "Izinkan akses di Pengaturan, atau ketik saja";
+"aiAgent::permission::keyboard" = "Ketik saja";
+"aiAgent::permission::setting" = "Buka Pengaturan";
+"aiAgent::state::processing" = "Memproses";
+"aiAgent::state::confirm" = "Perlu konfirmasi";
+"aiAgent::state::confirmExpired" = "Kedaluwarsa";
+"aiAgent::state::done" = "Perintah selesai";
+"aiAgent::state::failed" = "Perintah gagal";
+"aiAgent::done::default" = "Selesai";
+"aiAgent::failed::default" = "Tidak bisa menyelesaikan itu";
+"aiAgent::retry" = "Coba lagi";
+"aiAgent::needSignIn::title" = "Perlu masuk";
+"aiAgent::needSignIn::message" = "Masuk untuk menggunakan input cepat AI.";
+"aiAgent::title" = "Input Cepat AI";
+"aiAgent::keyboard::stop" = "Hentikan";
+"aiAgent::keyboard::send" = "Kirim";
+"aiAgent::stop" = "Hentikan";
+"aiAgent::usage" = "%@ / %@ kredit";
+"aiAgent::plan::free" = "Gratis";
+"aiAgent::plan::standard" = "Standar";
+"aiAgent::plan::lifetime" = "Seumur Hidup";
+"aiAgent::usage::topupRemaining" = "Sisa %@ kredit tambahan";
+"aiAgent::usage::planChangeScheduled" = "Beralih ke paket %2$@ pada %1$@";
+"aiAgent::stop::confirm::title" = "Hentikan proses?";
+"aiAgent::stop::confirm::message" = "Menghentikan akan membatalkan perintah yang sedang berjalan, dan tidak dapat dilanjutkan.";
+"aiAgent::confirm::countdown" = "tersisa untuk menyetujui";
+"aiAgent::confirm::expired::message" = "Waktu habis. Mohon minta lagi.";

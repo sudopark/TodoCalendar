@@ -1,0 +1,3 @@
+"NSCalendarsFullAccessUsageDescription" = "Etkinlikleri görüntülemek ve Apple Takvim ile senkronize etmek için takvim erişimi gereklidir.";
+"NSMicrophoneUsageDescription" = "Etkinlik ve görevleri sesle girmek için mikrofon erişimi gereklidir.";
+"NSSpeechRecognitionUsageDescription" = "Sesinizi etkinlik ve görevlere dönüştürmek için konuşma tanıma gereklidir.";

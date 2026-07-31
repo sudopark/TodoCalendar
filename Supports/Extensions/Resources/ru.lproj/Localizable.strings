@@ -1,0 +1,562 @@
+/*
+  Localizable.strings
+  Extensions
+
+  Created by sudo.park on 7/31/26.
+  Copyright © 2026 com.sudo.park. All rights reserved.
+*/
+
+
+// MARK: - common
+"common::and" = " и";
+"common::wait:message" = "Пожалуйста, подождите...";
+"common::back" = "Назад";
+"common.remove" = "Удалить";
+"common.confirm" = "Подтвердить";
+"common.cancel" = "Отмена";
+"common.close" = "Закрыть";
+"common.yes" = "Да";
+"common.no" = "Нет";
+"common.save" = "Сохранить";
+"common.info" = "Инфо";
+"common.search" = "Поиск";
+"common.clear" = "Очистить";
+"common.send" = "Отправить";
+"common.done" = "Готово";
+"common.errorMessage" = "Произошла временная ошибка.\nПожалуйста, сообщите, если проблема повторяется.";
+"common.update" = "Обновить";
+"common.go_to_settings" = "Перейти в настройки";
+
+// MARK: - date form
+"date_form::HH:mm" = "HH:mm";
+"date_form::a_h:mm" = "h:mm a";
+"date_form::MM_d__HH:mm" = "d.M, HH:mm";
+"date_form::MM_d" = "d.M";
+"date_form::MM_dd" = "dd.MM";
+"date_form::24off_h:mm" = "h:mm";
+"date_form::24on_H:mm" = "H:mm";
+"date_form::d_E_" = "d (E)";
+"date_form::MMM_d_HH:mm" = "d MMM HH:mm";
+"date_form::MMM_d" = "d MMM";
+"date_form::yyyy_MM_dd_E_" = "dd.MM.yyyy (E)";
+"date_form:yyyy.MM_dd_hh:mm" = "dd.MM.yyyy HH:mm";
+"date_form:yyyy.MM_dd_h:mm" = "dd.MM.yyyy h:mm a";
+"date_form.yyyy" = "yyyy";
+"date_form.MMM_dd_E" = "dd MMM (E)";
+"date_form.HH:mm" = "HH:mm";
+"date_form.yyyy_MM_dd" = "dd.MM.yyyy";
+"date_form.yyyy_MMM_dd" = "d MMM yyyy";
+"date_form.MMM" = "MMM";
+"date_form.MMMM" = "MMMM";
+"date_form.EEEE" = "EEEE";
+"date_form.EEE_MMM_d" = "EEE, d MMM";
+"date_form.MMM_yyyy" = "MMM yyyy";
+"tomorrow" = "Завтра";
+
+// MARK: - event
+
+"dayname::sunday" = "Воскресенье";
+"dayname::monday" = "Понедельник";
+"dayname::tuesday" = "Вторник";
+"dayname::wednesday" = "Среда";
+"dayname::thursday" = "Четверг";
+"dayname::friday" = "Пятница";
+"dayname::saturday" = "Суббота";
+
+"dayname::sunday:short" = "ВС";
+"dayname::monday:short" = "ПН";
+"dayname::tuesday:short" = "ВТ";
+"dayname::wednesday:short" = "СР";
+"dayname::thursday:short" = "ЧТ";
+"dayname::friday:short" = "ПТ";
+"dayname::saturday:short" = "СБ";
+
+"dayname::sunday:very_short" = "В";
+"dayname::monday:very_short" = "П";
+"dayname::tuesday:very_short" = "В";
+"dayname::wednesday:very_short" = "С";
+"dayname::thursday:very_short" = "Ч";
+"dayname::friday:very_short" = "П";
+"dayname::saturday:very_short" = "С";
+
+
+// MARK: - event notification
+
+"event_notification::today:title" = "События сегодня";
+"event_notification::todo:prefix" = "Задача";
+"event_notification::today:prefix" = "Сегодня";
+"event_notification::tomorrow:prefix" = "Завтра";
+"event_notification::allday_today" = "Весь день сегодня";
+"event_notification::allday_tomorrow" = "Весь день завтра";
+"event_notification::some_allday" = "%@ весь день";
+"event_notification_setting::option_title::no_notification" = "Без уведомлений";
+"event_notification_setting::option_title::at_time" = "Во время события";
+"event_notification_setting::option_title::allday_9am" = "В 9:00 в этот день";
+"event_notification_setting::option_title::allday_12pm" = "В полдень в этот день";
+"event_notification_setting::option_title::customTime" = "Своё время: %@";
+"event_notification_setting::option_title::custimTime_fallback" = "Своё время";
+"event_notification_setting::option_title::before_minutes" = "За %d минут до события";
+"event_notification_setting::option_title::before_hours" = "За %d часов до события";
+"event_notification_setting::option_title::before_days" = "За %d дней до события";
+"event_notification_setting::option_title::before_weeks" = "За %d недель до события";
+"event_notification_setting::option_title::allday_9am_before_days" = "В 9:00, за %d дней";
+"event_notification_setting::option_title::allday_9am_before_weeks" = "В 9:00, за %d недель";
+"event_notification_setting::need_permission_message" = "Для использования уведомлений о событиях требуется разрешение на уведомления.\nПерейдите в системные настройки приложения и разрешите уведомления.";
+"event_notification_setting::need_permission::go_setting" = "Перейти в настройки";
+"event_notification_setting::need_permission_title" = "Инфо";
+"event_notification_setting::permission_denied" = "Для использования функции напоминаний о событиях требуется разрешение на уведомления приложения.";
+
+
+
+// MARK: - calendar
+
+"calendar::foremostevent:title" = "Главное событие";
+"calendar::uncompletedTodos:title" = "Невыполненные задачи";
+"calendar::event_time::todo" = "Задача";
+"calendar::event_time::allday" = "Весь день";
+"calendar::event_time::allday::with" = "%@ весь день";
+"calendar::event_time::period:some_days" = "%d дн.";
+"calendar::event_time::period:some_minutes" = "%d мин.";
+"calendar::event_time::period:some_hours" = "%d ч.";
+"calendar::event_time::period:some_days:some_hours" = "%d дн. %d ч.";
+"calendar::event::more_action::remove:title" = "Удалить событие";
+"calendar::event::more_action::foremost_event:title" = "Главное событие";
+"calendar::event::more_action::remove_only_thistime:message" = "Удалить только это событие из всех повторяющихся событий?";
+"calendar::event::more_action::remove:message" = "Удалить это событие?";
+"calendar::event::more_action::mark_as_foremost" = "Отметить это событие как самое важное?";
+"calendar::event::more_action::unmark_as_foremost" = "Снять отметку этого события как самого важного?";
+"calendar::event::more_action::mark_as_foremost::unavail" = "Повторяющееся событие расписания нельзя отметить как самое важное.";
+"calendar::event::more_action:remove_only_thistime:item_name" = "Удалить только это событие";
+"calendar::event::more_action:remove:item_name" = "Удалить событие";
+"calendar::event::more_action:foremost:mark:item_name" = "Отметить как главное";
+"calendar::event::more_action:foremost:unmark:item_name" = "Снять отметку главного";
+"calendar::event::more_action:dday_candidate:register:item_name" = "Добавить в виджет обратного отсчёта";
+"calendar::event::more_action:dday_candidate:unregister:item_name" = "Удалить из виджета обратного отсчёта";
+"calendar::event::more_action:dday_candidate:title" = "Кандидат для виджета обратного отсчёта";
+"calendar::event::more_action:dday_candidate:register:message" = "Добавить это событие как кандидата для виджета обратного отсчёта? Оно появится вверху списка при редактировании виджета.";
+"calendar::event::more_action:dday_candidate:unregister:message" = "Удалить это событие из кандидатов для виджета обратного отсчёта?";
+"calendar::event::more_action:copy:item_name" = "Копировать событие";
+"calendar::event::more_action:transform_to::schedule" = "Преобразовать во встречу";
+"calendar::event::more_action:transform_to::todo" = "Преобразовать в задачу";
+"calendar::event::more_action:edit:item_name" = "Изменить";
+"calednar::event::add_new" = "Добавить новое событие";
+"calednar::event::add_new:place_holder" = "Быстро добавьте новую задачу.";
+"calednar::event::skip_todo" = "Пропустить эту задачу";
+"calednar::event::skip_todo_until" = "Выберите время, до которого пропустить эту задачу";
+"calednar::event::copy" = "Копировать событие";
+"calendar::move_date" = "Перенести дату";
+"calednar::event::google::edit" = "Изменить событие Google Календаря";
+
+
+// MARK: - event detail
+
+"eventDetail.messages.selectTimeFirst" = "Сначала выберите время события.";
+"eventDetail.messages.selectValidTime" = "Выберите допустимое время события.";
+"eventDetail.notification.custom_eventTime:title" = "Своё";
+"eventDetail.notification.title" = "Время уведомления о событии";
+"eventDetail.repeating.title" = "Повтор";
+"eventDetail.repeating.notRepeating::title" = "Без повтора";
+"eventDetail.repeating.starttime:form" = "dd.MM.yyyy";
+"eventDetail.repeating.starttime:title" = "Время начала повтора";
+"eventDetail.repeating.everyDay:title" = "Каждый день";
+"eventDetail.repeating.everyWeek:title" = "Каждую неделю";
+"eventDetail.repeating.everyWeekSomeDay:title" = "Каждое %@";
+"eventDetail.repeating.everySomeWeek:title" = "Каждые %d нед.";
+"eventDetail.repeating.everyWeekDays:title" = "Каждый будний день";
+"eventDetail.repeating.everySomeWeekSomeDay:title" = "Каждые %d нед. по %@";
+"eventDetail.repeating.everyMonth:title" = "Каждый месяц";
+"eventDetail.repeating.everyMonth_someDay:title" = "%@ каждого месяца.";
+"eventDetail.repeating.everyYear:title" = "Каждый год";
+"eventDetail.repeating.lunarCalendar_everyYear:title" = "Каждый год (лунный календарь)";
+"eventDetail.repeating.everyYearSomeDay:title" = "Каждый год %@";
+"eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "Каждый год %@ (лунный календарь)";
+"eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "Все дни последней недели каждого месяца";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "Первое %@ каждого месяца";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "Второе %@ каждого месяца";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "Третье %@ каждого месяца";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "Четвёртое %@ каждого месяца";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "Пятое %@ каждого месяца";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "Шестое %@ каждого месяца";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "Седьмое %@ каждого месяца";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "Последнее %@ каждого месяца";
+"eventDetail.repeating.endtime::title" = "Окончание повтора";
+"eventDetail.repeating.endtime::option::never" = "Никогда";
+"eventDetail.repeating.endtime::option::on" = "В дату";
+"eventDetail.repeating.endtime::option::after" = "После";
+"eventDetail.repeating.endtime::option::after_occurrences" = "повторений";
+"eventDetail.repeating.endtime::shouldFutureThanStartTime" = "Время окончания повтора должно быть позже времени начала.\n(Дата начала повтора: %@)";
+"eventDetail.repeating::period_endcount" = "С %@, %d раз";
+
+"eventDetail.repeating.everyNDays:title" = "Каждые %d дн.";
+"eventDetail.repeating.last" = "Последний";
+"eventDetail.repeating.everyNMonths:title" = "Каждые %d мес.";
+"eventDetail.repeating.everyNYears:title" = "Каждые %d лет";
+"eventDetail.repeating::endoption_until" = "до %@";
+"eventDetail.repeating::endoption_times" = "%d раз";
+
+"eventDetail.place::placeholder" = "Место";
+"eventDetail.place::remove_button" = "Удалить место";
+"eventDetail.place::no_map_app" = "Выбранное приложение карт не установлено.";
+"eventDetail.place::select_map_app" = "Выберите карту";
+"eventDetail.place::always_select_this_map" = "Всегда открывать этим приложением.";
+
+"eventDetail.add_new_todo::message" = "Добавлена новая задача.";
+"eventDetail.add_new_schedule::message" = "Добавлена новая встреча.";
+"eventDetail.scheduleEvent_removed::message" = "Встреча удалена.";
+"eventDetail.edit::repeating::confirm::ttile" = "Изменить событие";
+"eventDetail.edit::repeating::confirm::message" = "Это повторяющееся событие.\nВыберите область повторяющегося события, которую хотите изменить.";
+"eventDetail.edit::repeating::confirm::all::button" = "Все события";
+"eventDetail.edit::repeating::confirm::fromNow::button" = "С этого момента";
+"eventDetail.edit::repeating::confirm::onlyThisTime::button" = "Только в этот раз";
+"eventDetail.scheduleEvent_saved::message" = "Встреча сохранена.";
+"eventDetail.todoEvent_removed::message" = "Задача удалена.";
+"eventDetail.todoEvent_saved::message" = "Задача сохранена.";
+"eventDetail.cancel_edit::title" = "Изменить событие";
+"eventDetail.cancel_edit::message" = "Отменить эти изменения?";
+"eventDetail.cancel_edit::continue::button" = "Продолжить";
+
+"eventDetail.edit::add_new_name::placeholder" = "Добавить название нового события";
+"eventDetail.edit::clearEventTime::button" = "Очистить время события";
+"eventDetail.edit::noEventTime::button" = "Без времени окончания";
+"eventDetail.edit::memo" = "Заметка";
+"eventDetail.edit::urlPreview" = "Просмотр URL";
+
+"eventDetail.edit::make::case" = "Это задача?";
+"eventDetail.edit::todo::case" = "Задача";
+"eventDetail.edit::schedule::case" = "Встреча";
+"eventDetail.edit::holiday::case" = "Праздник в %@";
+
+"eventDetail.notSupport::holiday" = "Изменение информации не поддерживается для праздников.";
+
+"eventDetail:todo:guide:message1" = "Задача — это то, что нужно сделать.";
+"eventDetail:todo:guide:message2" = "В отличие от обычных событий, которые отображаются в календаре с конкретным временем (или периодом), задачи позволяют отмечать их выполнение.";
+"eventDetail:todo:guide:message3" = "Вы можете добавить задачу без указания времени. Например, можно записать дело, которое нужно сделать в ближайшее время, но не прямо сейчас.";
+"eventDetail:todo:guide:process:message" = "При включённом повторе задачи ведут себя иначе, чем обычные события:";
+"eventDetail:todo:guide:process:bullet1" = "Текущие или прошедшие повторяющиеся задачи, которые ещё не выполнены, отображаются в календаре.";
+"eventDetail:todo:guide:process:bullet2" = "Когда задача выполнена, она добавляется в список завершённых событий, а в календаре добавляется новое повторение.";
+"eventDetail:todo:guide:process:bullet3" = "Если из-за окончания повтора следующего повторения нет, повторяющаяся задача завершается.";
+"eventDetail:foremost:guide:message1" = "Отметьте событие как главное, чтобы подчеркнуть, что это самое важное событие.\nГлавное событие всегда видно в календаре и поддерживает отдельный виджет.";
+"eventDetail:foremost:guide:supports:message" = "В качестве главного события можно установить следующие типы событий:";
+"eventDetail:foremost:guide:supports:todo" = "Задача";
+"eventDetail:foremost:guide:supports:notRepeating_schedule" = "Неповторяющиеся встречи";
+
+"eventDetail:isSaving:toast:message" = "Сохранение изменений. Пожалуйста, подождите.";
+"eventDetail:hasChanges:confirm:message" = "Есть изменения. Отменить их?";
+"eventDetail:hasChanges:confirm:continue" = "Продолжить редактирование";
+
+"eventDetail.unavailto_transform_withoutName" = "Введите название, чтобы преобразовать событие.";
+"eventDetail.todoEvent_unavailto_transform_withoutTime" = "Для преобразования во встречу требуется указать время.";
+"eventDetail.todoEvent::transform::schedule_title" = "Преобразовать";
+"eventDetail.todoEvent::transform::schedule_message" = "Преобразовать эту задачу во встречу?";
+"eventDetail.scheduleEvent::transform::todo" = "Преобразовать";
+"eventDetail.scheduleEvent::transform::todo_message" = "Преобразовать эту встречу в задачу?";
+
+"eventDetail::revert" = "Отменить выполнение";
+
+// MARK: - Google calendar event
+
+"eventDetail::gogoleEvent::viewOnCalendar" = "Открыть в Google Календаре";
+"eventDetail::gogoleEvent::calendar" = "Календарь";
+"eventDetail::gogoleEvent::calendar::event" = "Событие Google Календаря";
+"eventDetail::gogoleEvent::attendee::unknown" = "Неизвестно";
+"eventDetail::gogoleEvent::attendees" = "Участники (%d чел.)";
+"eventDetail::gogoleEvent::attendees::organizer" = "Организатор";
+"eventDetail::gogoleEvent::conference::accessCode" = "Код доступа";
+"eventDetail::gogoleEvent::conference::meetingCode" = "Код встречи";
+"eventDetail::gogoleEvent::conference::passCode" = "Код пропуска";
+"eventDetail::gogoleEvent::conference::password" = "Пароль";
+"eventDetail::gogoleEvent::copy::message" = "Скопировано в буфер обмена.";
+"eventDetail::gogoleEvent::canceled::message" = "Это событие отменено.";
+
+// MARK: - Apple calendar event
+"eventDetail::appleCalendarEvent::viewOnCalendar" = "Открыть в Apple Календаре";
+"eventDetail::appleCalendarEvent::calendar::event" = "Событие Apple Календаря";
+"eventDetail::appleCalendarEvent::attendees" = "Участники (%d чел.)";
+"eventDetail::appleCalendarEvent::attendees::organizer" = "Организатор";
+
+// MARK: - event tag
+
+"eventTag.title" = "Тип события";
+"eventTag.list::title" = "Типы событий";
+"eventTag.defaults.default::name" = "По умолчанию";
+"eventTag.defaults.holiday::name" = "Праздник";
+"eventTag.addNew::placeholder" = "Добавить новый тип события";
+"eventTag.allEventTypes" = "Все типы событий >";
+"eventTag.remove::confirm::message" = "Удалить только этот тип события или также связанные события?";
+"eventTag.remove::only_tag" = "Удалить только тип события";
+"eventTag.remove::tag_and_evets" = "Удалить вместе со связанными событиями";
+"eventTag.removed::message" = "Этот тип события удалён.";
+"eventTag.removed_with_events::message" = "Этот тип события и связанные события удалены.";
+"eventTag.color::changed::message" = "Цвет изменён.";
+"eventTag.changed::message" = "Тип события изменён.";
+"eventTag.makeNew::message" = "Создан новый тип события.";
+"eventTag.default::title" = "Тип события по умолчанию";
+"eventTag.default::selection::explain" = "Это тип события, который будет выбран по умолчанию при создании события.";
+"eventTag.externalCalendar::integrate_button" = "Подключить календарь";
+
+
+// MARK: - event list
+
+"eventList::today::title" = "Сегодня";
+"eventList::yesterday::title" = "Вчера";
+"eventList::thisMonth::title" = "Этот месяц";
+"eventList::done_todos::title" = "Список выполненных задач";
+"eventList::done_todos::eventTime" = "Время события:";
+"eventList::done_todos::doneAt" = "Время выполнения:";
+"eventList::remove::confirm::message" = "Удалить список выполненных задач";
+"eventList::remove::confirm::button::all" = "Все выполненные задачи";
+"eventList::remove::confirm::button::olderThan1m" = "Старше 1 месяца";
+"eventList::remove::confirm::button::olderThan3m" = "Старше 3 месяцев";
+"eventList::remove::confirm::button::olderThan6m" = "Старше 6 месяцев";
+"eventList::remove::confirm::button::olderThan1y" = "Старше 1 года";
+
+
+// MARK: - account
+
+"manage_account::title" = "Управление аккаунтом";
+"manage_account::login_method" = "Способ входа";
+"manage_account::email" = "Эл. почта";
+"manage_account::last_signedIn_at" = "Время последнего входа";
+"manage_account::migration::title" = "Перенос временных данных пользователя";
+"manage_account::migration::description" = "Все события, созданные до входа (%d событий), переносятся в ваш аккаунт.\nСобытия, связанные с вашим аккаунтом, доступны с любого устройства.";
+"manage_account::migration_finished::message" = "Перенос завершён!";
+"manage_account::signout_button::title" = "Выйти";
+"manage_account::sign_out::confirm::title" = "Выйти";
+"manage_account::sign_out::confirm::message" = "Выйти из текущего аккаунта?";
+"manage_account::delete_account_button::title" = "Удалить аккаунт";
+"manage_account::delete_account_button::confirm:message" = "Вы уверены, что хотите удалить свой аккаунт?";
+"manage_account::delete_account_button::description" = "После запроса на удаление аккаунт будет удалён.\nПосле удаления данные аккаунта нельзя восстановить.";
+"signIn::title" = "Вход";
+"signIn:description" = "Создавайте резервную копию списка событий и синхронизируйте его с другими устройствами iOS\n(Список поддерживаемых платформ будет расширяться.)";
+
+
+// MARK: - setting
+"event_setting::title" = "Настройки событий";
+"event_setting::eventType" = "Тип события";
+"event_setting::eventPeriod" = "Период события";
+"event_setting::defaultMapApp" = "Открыть приложение карт";
+"event_setting::defaultMapApp_select" = "Выбрать";
+
+"event_setting::eventSync" = "Синхронизация событий";
+"event_setting::eventSync::readyToSync::description" = "Синхронизировать резервную копию событий пользователя.";
+"event_setting::eventSync::syncInProgress::description" = "Синхронизация резервной копии событий пользователя...";
+"event_setting::eventSync::lastTime" = "Время последней синхронизации: %@";
+"event_setting::eventSync::force" = "Принудительная синхронизация";
+
+"event_notification_setting::title::forAllDay" = "Весь день";
+"event_notification_setting::title::NotforAllDay" = "Время уведомления";
+"event_setting::external_calendar::title" = "Внешние календари";
+"event_setting::external_calendar::connected::account" = "Подключено: %@";
+"event_setting::external_calendar::start" = "Подключить";
+"event_setting::external_calendar::start::message" = "Подключено к внешнему календарю.";
+"event_setting::external_calendar::stop" = "Отключить";
+"event_setting::external_calendar::stop::message" = "Подключение к внешнему календарю отключено.";
+"event_setting::external_calendar::google::serviceName" = "Google Календарь";
+"event_setting::external_calendar::apple::serviceName" = "Apple Календарь";
+"event_setting::apple_calendar::permission_denied::message" = "Доступ к календарю запрещён. Разрешите его в настройках, чтобы использовать Apple Календарь.";
+"event_setting::apple_calendar::restricted::message" = "Доступ к календарю ограничен на этом устройстве.";
+"setting.title" = "Настройки";
+"setting.appearance.title" = "Внешний вид";
+"setting.appearance.calendar.samplemonth::march" = "МАРТ";
+"setting.appearance.calendar.startDayOfWeek" = "Первый день недели";
+"setting.appearance.calendar.accentDay" = "Выделенные дни";
+"setting.appearance.calendar.accentDay::holiday" = "Праздник";
+"setting.appearance.calendar.accentDay::saturday" = "Суббота";
+"setting.appearance.calendar.accentDay::sunday" = "Воскресенье";
+"setting.appearance.calendar.colorTheme" = "Цветовая тема";
+"setting.appearance.calendar.colorTheme::system" = "Системная";
+"setting.appearance.calendar.colorTheme::light" = "Светлая";
+"setting.appearance.calendar.colorTheme::dark" = "Тёмная";
+"setting.appearance.calendar.underline" = "Подчёркивание дней с событиями";
+"setting.appearance.event.edit::name_old" = "Изменить событие";
+"setting.appearance.event.edit::name" = "Настройки событий и внешние календари";
+"setting.appearance.day_row_height" = "Уровень отображения деталей события";
+"setting.appearance.day_row_height::small::text" = "Минимальный";
+"setting.appearance.day_row_height::medium::text" = "Средний";
+"setting.appearance.day_row_height::large::text" = "Полный";
+"setting.appearance.event.fontSize" = "Размер шрифта текста события";
+"setting.appearance.event.show_holidayName" = "Показывать название праздника";
+"setting.appearance.event.show_lunar" = "Лунный календарь";
+"setting.appearance.event._24form" = "24-часовой формат";
+"setting.appearance.event.sample::name" = "🥗 Название события";
+"setting.appearance.event.sample::description" = "описание";
+"setting.appearance.event.sample::christmas" = "Рождество";
+"setting.appearance.event.sample::first" = "первое событие";
+"setting.appearance.event.sample::second" = "второе событие";
+"setting.appearance.event.sample::uncompleted_todo::toggle" = "Показывать невыполненные задачи";
+"setting.appearance.widget::title" = "Тема виджета";
+"setting.appearance.widget::useSystemTheme::title" = "Использовать системную тему";
+"setting.appearance.widget::useSystemTheme::background" = "Цвет фона виджета";
+"setting.appearance.widget::useCustomTheme::title" = "Выбрать свой цвет";
+"setting.appearance.widget::sample::eventName" = "Событие виджета";
+"setting.appearance.event.boldText" = "Жирный текст";
+"setting.appearance.event.eventColor" = "Цвет события";
+"setting.timezone::title" = "Часовой пояс";
+"setting.timezone::systemTimeZone::name" = "Системный часовой пояс";
+"setting.timezone::systemTime::name" = "Системное время";
+"setting.haptic::name" = "Тактильная отдача";
+"setting.minimize_animation::name" = "Уменьшить эффекты анимации";
+"setting.holiday.title" = "Праздники";
+"setting.holiday.item::name" = "Настройка праздников";
+"setting.holiday.list::sectionTitle" = "Праздники";
+"setting.holiday.country.title" = "Страна";
+"setting.holiday.country.current::title" = "Текущая страна";
+"setting.holiday.country.current::placeHolder" = "Выберите страну";
+"setting.holiday.country.changeConfirm::title" = "Изменить страну";
+"setting.holiday.country.changeConfirm::message" = "Изменить страну вашего календаря?";
+"setting.holiday.country.changed::message" = "Страна изменена.";
+"setting.holiday.hide::button" = "Скрыть";
+"setting.holiday.hide::confirm::title" = "Скрыть праздник";
+"setting.holiday.hide::confirm::message" = "Скрывать этот праздник каждый год?\nВы можете снова показать его в Настройки > Праздники.";
+"setting.holiday.hidden::sectionTitle" = "Скрытые праздники";
+"setting.holiday.show::button" = "Показать";
+"setting.feedback::name" = "Обратная связь";
+"setting.help::name" = "Помощь";
+"setting.share::name" = "Поделиться приложением";
+"setting.write_review::name" = "Написать отзыв о приложении";
+"setting.account.signedIn::manageAccount" = "Аккаунт";
+"setting.account.needSignIn" = "Вход";
+"setting.suggest::readmind::appName" = "Readminds";
+"setting.suggest::readmind::message" = "Управляйте своим списком для чтения";
+"setting.section.support::name" = "Поддержка";
+"setting.section.app::name" = "Приложение";
+"setting.section.suggest::name" = "Рекомендации";
+"feedback::guide:message" = "Пожалуйста, оставляйте отзывы, включая сообщения об ошибках, комментарии и предложения по улучшению сервиса.\nВаши отзывы очень помогут нам улучшить сервис.";
+"feedback::enterMessage::placeholder" = "Введите сообщение";
+"feedback::contact::placeholder" = "Адрес эл. почты для ответа";
+"feedback::posted:message" = "Ваш отзыв успешно отправлен.";
+
+// MARK: - external service
+
+"external_service.name::google" = "Google Календарь";
+"external_service.expired::message" = "Срок действия интеграции %@ истёк. Перейдите в настройки и повторите попытку.";
+"external_service::google::hidden_event" = "Скрыто";
+"external_service::google::unknown_event" = "Неизвестно";
+
+
+// MARK: - widget
+
+"widget.common::explain" = "Просматривайте свои предстоящие события.";
+"widget.doubleMonth::name" = "Календарь + Календарь";
+"widget.eventAndMonth::name" = "События + Календарь";
+"widget.todayAndMonth::name" = "СЕГОДНЯ + Календарь";
+"widget.eventAndForesmot::name" = "События + Главное";
+"widget.events::name" = "События";
+"widget.events.noEvents::message" = "Нет событий.";
+"widget.events.currentTodos" = "Текущий список задач";
+"widget.events.sample::check_mailbox" = "Проверить почтовый ящик";
+"widget.events.sample::example" = "Праздник";
+"widget.events.sample::running" = "Пробежка";
+"widget.events.sample::luch" = "Обед";
+"widget.events.sample::luch_appointment" = "Обед (нельзя опаздывать)";
+"widget.events.sample::call" = "Позвонить Саре";
+"widget.events.sample::surfing" = "Сёрфинг";
+"widget.events.sample::moving" = "День переезда";
+"widget.events.sample::meeting" = "Ежедневная встреча";
+"widget.events.sample::deposit_remain" = "Перевести остаток баланса";
+"widget.events.sample::recycle" = "Переработка отходов";
+"widget.events.sample::take_medicine" = "Принять лекарство";
+"widget.events.sample::watering" = "Полить цветочный горшок";
+"widget.events.sample::june3" = "ВТ, 3 ИЮН";
+"widget.events.sample::july16" = "ВС, 16 ИЮЛ";
+"widget.events.sample::july21" = "ПТ, 21 ИЮЛ";
+"widget.events.sample::july29" = "СБ, 29 ИЮЛ";
+"widget.events.sample::aug2" = "СР, 2 АВГ";
+"widget.events.sample::aug3" = "ЧТ, 3 АВГ";
+"widget.events.sample::oct10" = "ПН, 10 ОКТ";
+"widget.events.foremost" = "Главное событие";
+"widget.events.foremost::allFinished::message" = "Добавьте событие, которое нельзя пропустить.";
+"widget.events.foremost::sample::message" = "Возьмите зонт! ⛱️";
+"widget.events.calendar" = "Календарь";
+"widget.events.today" = "СЕГОДНЯ";
+"widget.events.today::sample::sunday" = "ВОСКРЕСЕНЬЕ";
+"widget.events.today::sample::march2024" = "МАРТ 2024";
+"total::event::count" = "%d событий";
+"todo::count" = "%d задач";
+"schedule::count" = "%d встреч";
+"widget.weeks.lastMonth" = "Прошлый месяц";
+"widget.weeks.thisMonth" = "Этот месяц";
+"widget.weeks.nextMonth" = "Следующий месяц";
+"widget.weeks.thisWeek" = "Эта неделя";
+"widget.weeks.twoWeek" = "2 недели";
+"widget.weeks.threeWeek" = "3 недели";
+"widget.weeks.fourWeek" = "4 недели";
+"widget.weeks.sample::feb" = "ФЕВРАЛЬ";
+"widget.weeks.sample::march" = "МАРТ";
+"widget.weeks.sample::april" = "АПРЕЛЬ";
+"widget.weeks.sample::hiking" = "🏔️ Поход";
+"widget.weeks.sample::lunch" = "🥗 Обед";
+"widget.weeks.sample::call" = "📞 Позвонить Саре";
+"widget.weeks.sample::holiday" = "Праздник";
+"widget.weeks.sample::golf" = "⛳️ Гольф";
+"widget.weeks.sample::workout" = "🔥 Тренировка";
+"widget.weeks.sample::launch" = "🚀 Запуск";
+"widget.fail.message" = "Произошла временная ошибка.\nПопробуйте запустить приложение снова.";
+"widget.next.noEvent" = "Нет следующего события.";
+"widget.next.sample" = "🔥 Тренировка";
+"widget.next.title" = "Следующее событие";
+"widget.next.rect_widget::title" = "Следующее событие сегодня.";
+"widget.next.title::remains" = "Следующие события сегодня.";
+"widget.next.title::future" = "Сегодня и что дальше";
+"widget.next.title::more_todos" = "Ещё %d задач";
+"widget.next.title::more_events" = "Ещё %d встреч";
+"widget.next.title::more_events_with_todo" = "Ещё %1$d задач и %2$d встреч";
+"widget.next.title::uncompleted::todo" = "%1$@ не выполнено";
+"widget.next.title::uncompleted::todos" = "%1$@ и ещё %2$d невыполненных задач";
+"widget.next.no_events_today" = "Сегодня нет событий";
+"widget.next.no_events" = "Нет предстоящих событий";
+
+"widget.dday::name" = "Обратный отсчёт";
+"widget.dday::noTarget" = "Выберите событие";
+"widget.dday.sample::title" = "Воркшоп";
+"widget.dday.target::repeating" = "Повторяющееся";
+"widget.dday.target::registered" = "Закреплено";
+"widget.dday.turn::name" = "Повтор %d";
+
+// MARK: - link
+
+"deeplink::invalid_link_message" = "Этот формат ссылки не поддерживается.\nПожалуйста, обновите приложение до последней версии.";
+
+// MARK: - force update
+
+"force_update.title" = "Требуется обновление";
+"force_update.message" = "Доступна новая версия.\nПожалуйста, обновите приложение, чтобы продолжить использование.";
+"recommend_update.title" = "Рекомендуется обновление";
+"recommend_update.message" = "Доступна новая версия.\nРекомендуем обновить для улучшенного опыта.";
+
+
+// MARK: - ai agent
+
+"aiAgent::voice::listening" = "Слушаю…";
+"aiAgent::keyboard" = "Клавиатура";
+"aiAgent::voice" = "Голос";
+"aiAgent::send" = "Отправить";
+"aiAgent::input::placeholder" = "Чем я могу помочь?";
+"aiAgent::permission::title" = "Требуется доступ к микрофону и распознаванию речи";
+"aiAgent::permission::message" = "Разрешите доступ в настройках или введите текст вручную";
+"aiAgent::permission::keyboard" = "Ввести текст";
+"aiAgent::permission::setting" = "Открыть настройки";
+"aiAgent::state::processing" = "Обработка";
+"aiAgent::state::confirm" = "Требуется подтверждение";
+"aiAgent::state::confirmExpired" = "Истекло";
+"aiAgent::state::done" = "Команда выполнена";
+"aiAgent::state::failed" = "Команда не выполнена";
+"aiAgent::done::default" = "Готово";
+"aiAgent::failed::default" = "Не удалось выполнить";
+"aiAgent::retry" = "Повторить";
+"aiAgent::needSignIn::title" = "Требуется вход";
+"aiAgent::needSignIn::message" = "Войдите, чтобы использовать быстрый ввод ИИ.";
+"aiAgent::title" = "Быстрый ввод ИИ";
+"aiAgent::keyboard::stop" = "Стоп";
+"aiAgent::keyboard::send" = "Отправить";
+"aiAgent::stop" = "Стоп";
+"aiAgent::usage" = "%@ / %@ кредитов";
+"aiAgent::plan::free" = "Бесплатный";
+"aiAgent::plan::standard" = "Стандарт";
+"aiAgent::plan::lifetime" = "Пожизненный";
+"aiAgent::usage::topupRemaining" = "Осталось %@ доп. кредитов";
+"aiAgent::usage::planChangeScheduled" = "Переход на план «%2$@» %1$@";
+"aiAgent::stop::confirm::title" = "Остановить обработку?";
+"aiAgent::stop::confirm::message" = "Остановка отменяет выполняемую команду, и её нельзя будет возобновить.";
+"aiAgent::confirm::countdown" = "осталось на подтверждение";
+"aiAgent::confirm::expired::message" = "Время истекло. Пожалуйста, повторите запрос.";

@@ -1,0 +1,3 @@
+"NSCalendarsFullAccessUsageDescription" = "Доступ к календарю необходим для отображения событий и синхронизации с Apple Календарём.";
+"NSMicrophoneUsageDescription" = "Доступ к микрофону необходим для голосового ввода событий и задач.";
+"NSSpeechRecognitionUsageDescription" = "Распознавание речи необходимо для преобразования вашего голоса в события и задачи.";

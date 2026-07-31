@@ -1,0 +1,562 @@
+/*
+  Localizable.strings
+  Extensions
+
+  Created by sudo.park on 7/31/26.
+  Copyright © 2026 com.sudo.park. All rights reserved.
+*/
+
+
+// MARK: - common
+"common::and" = " és";
+"common::wait:message" = "Kérjük, várjon...";
+"common::back" = "Vissza";
+"common.remove" = "Eltávolítás";
+"common.confirm" = "Megerősítés";
+"common.cancel" = "Mégse";
+"common.close" = "Bezárás";
+"common.yes" = "Igen";
+"common.no" = "Nem";
+"common.save" = "Mentés";
+"common.info" = "Info";
+"common.search" = "Keresés";
+"common.clear" = "Törlés";
+"common.send" = "Küldés";
+"common.done" = "Kész";
+"common.errorMessage" = "Átmeneti hiba történt.\nKérjük, jelezze, ha a probléma továbbra is fennáll.";
+"common.update" = "Frissítés";
+"common.go_to_settings" = "Ugrás a beállításokhoz";
+
+// MARK: - date form
+"date_form::HH:mm" = "HH:mm";
+"date_form::a_h:mm" = "a h:mm";
+"date_form::MM_d__HH:mm" = "M. d., HH:mm";
+"date_form::MM_d" = "M. d.";
+"date_form::MM_dd" = "MM. dd.";
+"date_form::24off_h:mm" = "h:mm";
+"date_form::24on_H:mm" = "H:mm";
+"date_form::d_E_" = "d. (E)";
+"date_form::MMM_d_HH:mm" = "MMM d. HH:mm";
+"date_form::MMM_d" = "MMM d.";
+"date_form::yyyy_MM_dd_E_" = "yyyy. MM. dd. (E)";
+"date_form:yyyy.MM_dd_hh:mm" = "yyyy. MM. dd. HH:mm";
+"date_form:yyyy.MM_dd_h:mm" = "yyyy. MM. dd. a h:mm";
+"date_form.yyyy" = "yyyy";
+"date_form.MMM_dd_E" = "MMM dd. (E)";
+"date_form.HH:mm" = "HH:mm";
+"date_form.yyyy_MM_dd" = "yyyy. MM. dd.";
+"date_form.yyyy_MMM_dd" = "yyyy. MMM d.";
+"date_form.MMM" = "MMM";
+"date_form.MMMM" = "MMMM";
+"date_form.EEEE" = "EEEE";
+"date_form.EEE_MMM_d" = "EEE, MMM d.";
+"date_form.MMM_yyyy" = "yyyy. MMM";
+"tomorrow" = "Holnap";
+
+// MARK: - event
+
+"dayname::sunday" = "Vasárnap";
+"dayname::monday" = "Hétfő";
+"dayname::tuesday" = "Kedd";
+"dayname::wednesday" = "Szerda";
+"dayname::thursday" = "Csütörtök";
+"dayname::friday" = "Péntek";
+"dayname::saturday" = "Szombat";
+
+"dayname::sunday:short" = "VAS";
+"dayname::monday:short" = "HÉT";
+"dayname::tuesday:short" = "KED";
+"dayname::wednesday:short" = "SZE";
+"dayname::thursday:short" = "CSÜ";
+"dayname::friday:short" = "PÉN";
+"dayname::saturday:short" = "SZO";
+
+"dayname::sunday:very_short" = "V";
+"dayname::monday:very_short" = "H";
+"dayname::tuesday:very_short" = "K";
+"dayname::wednesday:very_short" = "Sz";
+"dayname::thursday:very_short" = "Cs";
+"dayname::friday:very_short" = "P";
+"dayname::saturday:very_short" = "Sz";
+
+
+// MARK: - event notification
+
+"event_notification::today:title" = "Mai események";
+"event_notification::todo:prefix" = "Feladat";
+"event_notification::today:prefix" = "Ma";
+"event_notification::tomorrow:prefix" = "Holnap";
+"event_notification::allday_today" = "Ma egész nap";
+"event_notification::allday_tomorrow" = "Holnap egész nap";
+"event_notification::some_allday" = "%@ egész nap";
+"event_notification_setting::option_title::no_notification" = "Nincs értesítés";
+"event_notification_setting::option_title::at_time" = "Az esemény időpontjában";
+"event_notification_setting::option_title::allday_9am" = "Aznap reggel 9-kor";
+"event_notification_setting::option_title::allday_12pm" = "Aznap délben";
+"event_notification_setting::option_title::customTime" = "Egyéni időpont: %@";
+"event_notification_setting::option_title::custimTime_fallback" = "Egyéni időpont";
+"event_notification_setting::option_title::before_minutes" = "%d perccel az esemény előtt";
+"event_notification_setting::option_title::before_hours" = "%d órával az esemény előtt";
+"event_notification_setting::option_title::before_days" = "%d nappal az esemény előtt";
+"event_notification_setting::option_title::before_weeks" = "%d héttel az esemény előtt";
+"event_notification_setting::option_title::allday_9am_before_days" = "Reggel 9:00-kor, %d nappal korábban";
+"event_notification_setting::option_title::allday_9am_before_weeks" = "Reggel 9:00-kor, %d héttel korábban";
+"event_notification_setting::need_permission_message" = "Az eseményértesítés funkció használatához értesítési engedélyre van szükség.\nMenjen a rendszerbeállításokhoz, és engedélyezze az értesítéseket.";
+"event_notification_setting::need_permission::go_setting" = "Ugrás a beállításokhoz";
+"event_notification_setting::need_permission_title" = "Info";
+"event_notification_setting::permission_denied" = "Az eseményemlékeztető funkció használatához az alkalmazás értesítési engedélye szükséges.";
+
+
+
+// MARK: - calendar
+
+"calendar::foremostevent:title" = "Legfontosabb esemény";
+"calendar::uncompletedTodos:title" = "Befejezetlen feladatok";
+"calendar::event_time::todo" = "Feladat";
+"calendar::event_time::allday" = "Egész nap";
+"calendar::event_time::allday::with" = "%@ egész nap";
+"calendar::event_time::period:some_days" = "%d nap";
+"calendar::event_time::period:some_minutes" = "%d perc";
+"calendar::event_time::period:some_hours" = "%d óra";
+"calendar::event_time::period:some_days:some_hours" = "%d nap %d óra";
+"calendar::event::more_action::remove:title" = "Esemény eltávolítása";
+"calendar::event::more_action::foremost_event:title" = "Legfontosabb esemény";
+"calendar::event::more_action::remove_only_thistime:message" = "Csak ezt az eseményt szeretné törölni az összes ismétlődő esemény közül?";
+"calendar::event::more_action::remove:message" = "Szeretné eltávolítani ezt az eseményt?";
+"calendar::event::more_action::mark_as_foremost" = "Szeretné a legfontosabb eseményeként megjelölni ezt az eseményt?";
+"calendar::event::more_action::unmark_as_foremost" = "Szeretné megszüntetni ennek az eseménynek a legfontosabbként való megjelölését?";
+"calendar::event::more_action::mark_as_foremost::unavail" = "Ismétlődő program nem jelölhető meg legfontosabb eseményként.";
+"calendar::event::more_action:remove_only_thistime:item_name" = "Csak ezt az eseményt távolítsa el";
+"calendar::event::more_action:remove:item_name" = "Esemény eltávolítása";
+"calendar::event::more_action:foremost:mark:item_name" = "Megjelölés legfontosabbként";
+"calendar::event::more_action:foremost:unmark:item_name" = "Legfontosabb jelölés megszüntetése";
+"calendar::event::more_action:dday_candidate:register:item_name" = "Hozzáadás a Visszaszámlálás widgethez";
+"calendar::event::more_action:dday_candidate:unregister:item_name" = "Eltávolítás a Visszaszámlálás widgetből";
+"calendar::event::more_action:dday_candidate:title" = "Visszaszámlálás widget jelölt";
+"calendar::event::more_action:dday_candidate:register:message" = "Hozzáadja ezt az eseményt a Visszaszámlálás widget jelöltjeként? A widget szerkesztésekor a lista tetején jelenik meg.";
+"calendar::event::more_action:dday_candidate:unregister:message" = "Eltávolítja ezt az eseményt a Visszaszámlálás widget jelöltjei közül?";
+"calendar::event::more_action:copy:item_name" = "Esemény másolása";
+"calendar::event::more_action:transform_to::schedule" = "Átalakítás programmá";
+"calendar::event::more_action:transform_to::todo" = "Átalakítás feladattá";
+"calendar::event::more_action:edit:item_name" = "Szerkesztés";
+"calednar::event::add_new" = "Új esemény hozzáadása";
+"calednar::event::add_new:place_holder" = "Gyorsan adjon hozzá egy új feladatot.";
+"calednar::event::skip_todo" = "Feladat kihagyása";
+"calednar::event::skip_todo_until" = "Válassza ki, meddig hagyja ki ezt a feladatot";
+"calednar::event::copy" = "Esemény másolása";
+"calendar::move_date" = "Dátum áthelyezése";
+"calednar::event::google::edit" = "Google Naptár esemény szerkesztése";
+
+
+// MARK: - event detail
+
+"eventDetail.messages.selectTimeFirst" = "Először válassza ki az esemény időpontját.";
+"eventDetail.messages.selectValidTime" = "Válasszon érvényes esemény-időpontot.";
+"eventDetail.notification.custom_eventTime:title" = "Egyéni";
+"eventDetail.notification.title" = "Esemény-értesítés időpontja";
+"eventDetail.repeating.title" = "Ismétlés";
+"eventDetail.repeating.notRepeating::title" = "Nincs ismétlés";
+"eventDetail.repeating.starttime:form" = "yyyy. M. d.";
+"eventDetail.repeating.starttime:title" = "Ismétlés kezdő időpontja";
+"eventDetail.repeating.everyDay:title" = "Minden nap";
+"eventDetail.repeating.everyWeek:title" = "Minden héten";
+"eventDetail.repeating.everyWeekSomeDay:title" = "Minden %@";
+"eventDetail.repeating.everySomeWeek:title" = "Minden %d. héten";
+"eventDetail.repeating.everyWeekDays:title" = "Minden munkanapon";
+"eventDetail.repeating.everySomeWeekSomeDay:title" = "Minden %d. héten, %@";
+"eventDetail.repeating.everyMonth:title" = "Minden hónapban";
+"eventDetail.repeating.everyMonth_someDay:title" = "Minden hónap %@";
+"eventDetail.repeating.everyYear:title" = "Minden évben";
+"eventDetail.repeating.lunarCalendar_everyYear:title" = "Minden évben (holdnaptár szerint)";
+"eventDetail.repeating.everyYearSomeDay:title" = "Minden évben %@";
+"eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "Minden évben %@ (holdnaptár szerint)";
+"eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "Minden hónap utolsó hetének minden napja";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "Minden hónap első %@";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "Minden hónap második %@";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "Minden hónap harmadik %@";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "Minden hónap negyedik %@";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "Minden hónap ötödik %@";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "Minden hónap hatodik %@";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "Minden hónap hetedik %@";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "Minden hónap utolsó %@";
+"eventDetail.repeating.endtime::title" = "Ismétlés vége";
+"eventDetail.repeating.endtime::option::never" = "Soha";
+"eventDetail.repeating.endtime::option::on" = "Ekkor";
+"eventDetail.repeating.endtime::option::after" = "Ezután";
+"eventDetail.repeating.endtime::option::after_occurrences" = "alkalom";
+"eventDetail.repeating.endtime::shouldFutureThanStartTime" = "Az ismétlés befejező időpontjának későbbinek kell lennie, mint a kezdő időpont.\n(Ismétlés kezdő dátuma: %@)";
+"eventDetail.repeating::period_endcount" = "%@-tól kezdve, %d alkalommal";
+
+"eventDetail.repeating.everyNDays:title" = "Minden %d. napon";
+"eventDetail.repeating.last" = "Utolsó";
+"eventDetail.repeating.everyNMonths:title" = "Minden %d. hónapban";
+"eventDetail.repeating.everyNYears:title" = "Minden %d. évben";
+"eventDetail.repeating::endoption_until" = "eddig: %@";
+"eventDetail.repeating::endoption_times" = "%d alkalommal";
+
+"eventDetail.place::placeholder" = "Helyszín";
+"eventDetail.place::remove_button" = "Helyszín eltávolítása";
+"eventDetail.place::no_map_app" = "A kiválasztott térképalkalmazás nincs telepítve.";
+"eventDetail.place::select_map_app" = "Válasszon térképet";
+"eventDetail.place::always_select_this_map" = "Mindig ezzel az alkalmazással nyissa meg.";
+
+"eventDetail.add_new_todo::message" = "Új feladat került hozzáadásra.";
+"eventDetail.add_new_schedule::message" = "Új program került hozzáadásra.";
+"eventDetail.scheduleEvent_removed::message" = "A program eltávolításra került.";
+"eventDetail.edit::repeating::confirm::ttile" = "Esemény szerkesztése";
+"eventDetail.edit::repeating::confirm::message" = "Ez az esemény ismétlődő esemény.\nVálassza ki, hogy a szerkesztés az ismétlődő esemény mely körére vonatkozzon.";
+"eventDetail.edit::repeating::confirm::all::button" = "Minden esemény";
+"eventDetail.edit::repeating::confirm::fromNow::button" = "Mostantól kezdve";
+"eventDetail.edit::repeating::confirm::onlyThisTime::button" = "Csak ez alkalommal";
+"eventDetail.scheduleEvent_saved::message" = "A program mentésre került.";
+"eventDetail.todoEvent_removed::message" = "A feladat eltávolításra került.";
+"eventDetail.todoEvent_saved::message" = "A feladat mentésre került.";
+"eventDetail.cancel_edit::title" = "Esemény szerkesztése";
+"eventDetail.cancel_edit::message" = "El szeretné vetni ezeket a módosításokat?";
+"eventDetail.cancel_edit::continue::button" = "Folytatás";
+
+"eventDetail.edit::add_new_name::placeholder" = "Adja meg az új esemény nevét";
+"eventDetail.edit::clearEventTime::button" = "Esemény időpontjának törlése";
+"eventDetail.edit::noEventTime::button" = "Nincs befejező időpont";
+"eventDetail.edit::memo" = "Jegyzet";
+"eventDetail.edit::urlPreview" = "URL-előnézet";
+
+"eventDetail.edit::make::case" = "Ez egy feladat?";
+"eventDetail.edit::todo::case" = "Feladat";
+"eventDetail.edit::schedule::case" = "Program";
+"eventDetail.edit::holiday::case" = "Munkaszüneti nap itt: %@";
+
+"eventDetail.notSupport::holiday" = "Az információmódosítás funkció munkaszüneti napokon nem támogatott.";
+
+"eventDetail:todo:guide:message1" = "A feladat egy elvégzendő teendőt jelöl.";
+"eventDetail:todo:guide:message2" = "A naptárban konkrét időponttal (vagy időszakkal) megjelenő szokásos programoktól eltérően a feladatok lehetővé teszik annak nyomon követését, hogy elkészültek-e.";
+"eventDetail:todo:guide:message3" = "Feladatot időpont megadása nélkül is hozzáadhat. Például rögzíthet egy teendőt, amelyet hamarosan, de nem azonnal kell elvégezni.";
+"eventDetail:todo:guide:process:message" = "Ha az ismétlés be van kapcsolva, a feladatok másképp viselkednek, mint a szokásos programok:";
+"eventDetail:todo:guide:process:bullet1" = "A naptárban megjelennek azok az aktuális vagy korábbi ismétlődő feladatok, amelyek még nem készültek el.";
+"eventDetail:todo:guide:process:bullet2" = "Ha egy feladat elkészül, bekerül a befejezett események listájába, és a naptárban újonnan létrejön a következő ismétlődés.";
+"eventDetail:todo:guide:process:bullet3" = "Ha az ismétlés befejező időpontja miatt nincs következő ismétlődés, az ismétlődő feladat véget ér.";
+"eventDetail:foremost:guide:message1" = "Jelölje meg az eseményt legfontosabbként, hogy kiemelje, ez a legjelentősebb esemény.\nA legfontosabb esemény mindig látható a naptárban, és külön widgetet is támogat.";
+"eventDetail:foremost:guide:supports:message" = "A következő eseménytípusok állíthatók be legfontosabb eseményként:";
+"eventDetail:foremost:guide:supports:todo" = "Feladat";
+"eventDetail:foremost:guide:supports:notRepeating_schedule" = "Nem ismétlődő programok";
+
+"eventDetail:isSaving:toast:message" = "Módosítások mentése folyamatban. Kérjük, várjon.";
+"eventDetail:hasChanges:confirm:message" = "Vannak módosítások. El szeretné vetni azokat?";
+"eventDetail:hasChanges:confirm:continue" = "Szerkesztés folytatása";
+
+"eventDetail.unavailto_transform_withoutName" = "Adjon meg egy nevet az esemény átalakításához.";
+"eventDetail.todoEvent_unavailto_transform_withoutTime" = "Programmá alakításhoz időinformáció szükséges.";
+"eventDetail.todoEvent::transform::schedule_title" = "Átalakítás";
+"eventDetail.todoEvent::transform::schedule_message" = "Szeretné ezt a feladatot programmá alakítani?";
+"eventDetail.scheduleEvent::transform::todo" = "Átalakítás";
+"eventDetail.scheduleEvent::transform::todo_message" = "Szeretné ezt a programot feladattá alakítani?";
+
+"eventDetail::revert" = "Befejezés visszavonása";
+
+// MARK: - Google calendar event
+
+"eventDetail::gogoleEvent::viewOnCalendar" = "Megtekintés a Google Naptárban";
+"eventDetail::gogoleEvent::calendar" = "Naptár";
+"eventDetail::gogoleEvent::calendar::event" = "Google Naptár esemény";
+"eventDetail::gogoleEvent::attendee::unknown" = "Ismeretlen";
+"eventDetail::gogoleEvent::attendees" = "Résztvevők (%d fő)";
+"eventDetail::gogoleEvent::attendees::organizer" = "Szervező";
+"eventDetail::gogoleEvent::conference::accessCode" = "Hozzáférési kód";
+"eventDetail::gogoleEvent::conference::meetingCode" = "Értekezletkód";
+"eventDetail::gogoleEvent::conference::passCode" = "Belépőkód";
+"eventDetail::gogoleEvent::conference::password" = "Jelszó";
+"eventDetail::gogoleEvent::copy::message" = "Vágólapra másolva.";
+"eventDetail::gogoleEvent::canceled::message" = "Ez az esemény törölve lett.";
+
+// MARK: - Apple calendar event
+"eventDetail::appleCalendarEvent::viewOnCalendar" = "Megtekintés az Apple Naptárban";
+"eventDetail::appleCalendarEvent::calendar::event" = "Apple Naptár esemény";
+"eventDetail::appleCalendarEvent::attendees" = "Résztvevők (%d fő)";
+"eventDetail::appleCalendarEvent::attendees::organizer" = "Szervező";
+
+// MARK: - event tag
+
+"eventTag.title" = "Eseménytípus";
+"eventTag.list::title" = "Eseménytípusok";
+"eventTag.defaults.default::name" = "Alapértelmezett";
+"eventTag.defaults.holiday::name" = "Ünnep";
+"eventTag.addNew::placeholder" = "Új eseménytípus hozzáadása";
+"eventTag.allEventTypes" = "Minden eseménytípus >";
+"eventTag.remove::confirm::message" = "Csak ezt az eseménytípust szeretné eltávolítani, vagy az összes kapcsolódó eseményt is?";
+"eventTag.remove::only_tag" = "Csak az eseménytípus eltávolítása";
+"eventTag.remove::tag_and_evets" = "Eltávolítás a kapcsolódó eseményekkel együtt";
+"eventTag.removed::message" = "Ez az eseménytípus eltávolításra került.";
+"eventTag.removed_with_events::message" = "Ez az eseménytípus és a kapcsolódó események eltávolításra kerültek.";
+"eventTag.color::changed::message" = "A szín megváltozott.";
+"eventTag.changed::message" = "Az eseménytípus módosításra került.";
+"eventTag.makeNew::message" = "Új eseménytípus jött létre.";
+"eventTag.default::title" = "Alapértelmezett eseménytípus";
+"eventTag.default::selection::explain" = "Ez az eseménytípus lesz alapértelmezésként kiválasztva esemény létrehozásakor.";
+"eventTag.externalCalendar::integrate_button" = "Naptár összekapcsolása";
+
+
+// MARK: - event list
+
+"eventList::today::title" = "Ma";
+"eventList::yesterday::title" = "Tegnap";
+"eventList::thisMonth::title" = "Ebben a hónapban";
+"eventList::done_todos::title" = "Befejezett feladatok listája";
+"eventList::done_todos::eventTime" = "Esemény időpontja:";
+"eventList::done_todos::doneAt" = "Befejezés időpontja:";
+"eventList::remove::confirm::message" = "Befejezett feladatlista törlése";
+"eventList::remove::confirm::button::all" = "Minden befejezett feladat";
+"eventList::remove::confirm::button::olderThan1m" = "1 hónapnál régebbi";
+"eventList::remove::confirm::button::olderThan3m" = "3 hónapnál régebbi";
+"eventList::remove::confirm::button::olderThan6m" = "6 hónapnál régebbi";
+"eventList::remove::confirm::button::olderThan1y" = "1 évnél régebbi";
+
+
+// MARK: - account
+
+"manage_account::title" = "Fiókkezelés";
+"manage_account::login_method" = "Bejelentkezési mód";
+"manage_account::email" = "E-mail";
+"manage_account::last_signedIn_at" = "Utolsó bejelentkezés időpontja";
+"manage_account::migration::title" = "Ideiglenes felhasználói adatok átvitele";
+"manage_account::migration::description" = "A bejelentkezés előtt létrehozott összes esemény (%d esemény) átvitele folyamatban van a fiókjába.\nA fiókjához kapcsolt események bármely eszközről elérhetők.";
+"manage_account::migration_finished::message" = "Az átvitel befejeződött!";
+"manage_account::signout_button::title" = "Kijelentkezés";
+"manage_account::sign_out::confirm::title" = "Kijelentkezés";
+"manage_account::sign_out::confirm::message" = "Szeretne kijelentkezni a jelenlegi fiókjából?";
+"manage_account::delete_account_button::title" = "Fiók törlése";
+"manage_account::delete_account_button::confirm:message" = "Biztosan törölni szeretné a fiókját?";
+"manage_account::delete_account_button::description" = "A fiók törlésének kérelmezése után a fiók törlésre kerül.\nA törlés után a fiók adatai nem állíthatók helyre.";
+"signIn::title" = "Bejelentkezés";
+"signIn:description" = "Készítsen biztonsági másolatot eseménylistájáról, és szinkronizálja azt más iOS-eszközök között\n(A támogatott platformok köre bővülni fog.)";
+
+
+// MARK: - setting
+"event_setting::title" = "Eseménybeállítások";
+"event_setting::eventType" = "Eseménytípus";
+"event_setting::eventPeriod" = "Esemény időtartama";
+"event_setting::defaultMapApp" = "Térképalkalmazás megnyitása";
+"event_setting::defaultMapApp_select" = "Kiválasztás";
+
+"event_setting::eventSync" = "Eseményszinkronizálás";
+"event_setting::eventSync::readyToSync::description" = "A biztonsági mentésű felhasználói események szinkronizálása.";
+"event_setting::eventSync::syncInProgress::description" = "A biztonsági mentésű felhasználói események szinkronizálása folyamatban...";
+"event_setting::eventSync::lastTime" = "Utolsó szinkronizált adat időpontja: %@";
+"event_setting::eventSync::force" = "Szinkronizálás kényszerítése";
+
+"event_notification_setting::title::forAllDay" = "Egész nap";
+"event_notification_setting::title::NotforAllDay" = "Értesítés időpontja";
+"event_setting::external_calendar::title" = "Külső naptárak";
+"event_setting::external_calendar::connected::account" = "Csatlakoztatva: %@";
+"event_setting::external_calendar::start" = "Csatlakoztatás";
+"event_setting::external_calendar::start::message" = "Csatlakoztatva egy külső naptárhoz.";
+"event_setting::external_calendar::stop" = "Leválasztás";
+"event_setting::external_calendar::stop::message" = "A külső naptárral való kapcsolat megszakadt.";
+"event_setting::external_calendar::google::serviceName" = "Google Naptár";
+"event_setting::external_calendar::apple::serviceName" = "Apple Naptár";
+"event_setting::apple_calendar::permission_denied::message" = "A naptárhoz való hozzáférés megtagadva. Az Apple Naptár használatához engedélyezze azt a Beállításokban.";
+"event_setting::apple_calendar::restricted::message" = "A naptárhoz való hozzáférés korlátozott ezen az eszközön.";
+"setting.title" = "Beállítások";
+"setting.appearance.title" = "Megjelenés";
+"setting.appearance.calendar.samplemonth::march" = "MÁRCIUS";
+"setting.appearance.calendar.startDayOfWeek" = "A hét első napja";
+"setting.appearance.calendar.accentDay" = "Kiemelt napok";
+"setting.appearance.calendar.accentDay::holiday" = "Ünnep";
+"setting.appearance.calendar.accentDay::saturday" = "Szombat";
+"setting.appearance.calendar.accentDay::sunday" = "Vasárnap";
+"setting.appearance.calendar.colorTheme" = "Színtéma";
+"setting.appearance.calendar.colorTheme::system" = "Rendszer";
+"setting.appearance.calendar.colorTheme::light" = "Világos";
+"setting.appearance.calendar.colorTheme::dark" = "Sötét";
+"setting.appearance.calendar.underline" = "Aláhúzás az eseményes napokon";
+"setting.appearance.event.edit::name_old" = "Esemény szerkesztése";
+"setting.appearance.event.edit::name" = "Eseménybeállítások és külső naptárak";
+"setting.appearance.day_row_height" = "Esemény részletezettségi szintje";
+"setting.appearance.day_row_height::small::text" = "Minimális";
+"setting.appearance.day_row_height::medium::text" = "Közepes";
+"setting.appearance.day_row_height::large::text" = "Teljes";
+"setting.appearance.event.fontSize" = "Esemény szövegének betűmérete";
+"setting.appearance.event.show_holidayName" = "Ünnep nevének megjelenítése";
+"setting.appearance.event.show_lunar" = "Holdnaptár";
+"setting.appearance.event._24form" = "24 órás formátum";
+"setting.appearance.event.sample::name" = "🥗 Esemény neve";
+"setting.appearance.event.sample::description" = "leírás";
+"setting.appearance.event.sample::christmas" = "Karácsony";
+"setting.appearance.event.sample::first" = "első esemény";
+"setting.appearance.event.sample::second" = "második esemény";
+"setting.appearance.event.sample::uncompleted_todo::toggle" = "Befejezetlen feladatok megjelenítése";
+"setting.appearance.widget::title" = "Widget témája";
+"setting.appearance.widget::useSystemTheme::title" = "Rendszertéma használata";
+"setting.appearance.widget::useSystemTheme::background" = "Widget háttérszíne";
+"setting.appearance.widget::useCustomTheme::title" = "Egyéni szín kiválasztása";
+"setting.appearance.widget::sample::eventName" = "Widget esemény";
+"setting.appearance.event.boldText" = "Félkövér szöveg";
+"setting.appearance.event.eventColor" = "Esemény színe";
+"setting.timezone::title" = "Időzóna";
+"setting.timezone::systemTimeZone::name" = "Rendszer időzónája";
+"setting.timezone::systemTime::name" = "Rendszeridő";
+"setting.haptic::name" = "Rezgő visszajelzés";
+"setting.minimize_animation::name" = "Animációs effektek csökkentése";
+"setting.holiday.title" = "Ünnepek";
+"setting.holiday.item::name" = "Ünnepbeállítás";
+"setting.holiday.list::sectionTitle" = "Ünnepek";
+"setting.holiday.country.title" = "Ország";
+"setting.holiday.country.current::title" = "Jelenlegi ország";
+"setting.holiday.country.current::placeHolder" = "Válasszon országot";
+"setting.holiday.country.changeConfirm::title" = "Ország módosítása";
+"setting.holiday.country.changeConfirm::message" = "Szeretné módosítani a naptár országát?";
+"setting.holiday.country.changed::message" = "Az ország módosításra került.";
+"setting.holiday.hide::button" = "Elrejtés";
+"setting.holiday.hide::confirm::title" = "Ünnep elrejtése";
+"setting.holiday.hide::confirm::message" = "Elrejti ezt az ünnepet minden évben?\nA Beállítások > Ünnepek menüpontban újra megjelenítheti.";
+"setting.holiday.hidden::sectionTitle" = "Elrejtett ünnepek";
+"setting.holiday.show::button" = "Megjelenítés";
+"setting.feedback::name" = "Visszajelzés";
+"setting.help::name" = "Súgó";
+"setting.share::name" = "Alkalmazás megosztása";
+"setting.write_review::name" = "Alkalmazás értékelése";
+"setting.account.signedIn::manageAccount" = "Fiók";
+"setting.account.needSignIn" = "Bejelentkezés";
+"setting.suggest::readmind::appName" = "Readminds";
+"setting.suggest::readmind::message" = "Kezelje olvasási listáját";
+"setting.section.support::name" = "Támogatás";
+"setting.section.app::name" = "Alkalmazás";
+"setting.section.suggest::name" = "Javaslatok";
+"feedback::guide:message" = "Bátran küldjön visszajelzést, beleértve a hibajelentéseket, megjegyzéseket és szolgáltatási javaslatokat.\nÉszrevételei nagyban segítenek szolgáltatásunk fejlesztésében.";
+"feedback::enterMessage::placeholder" = "Írjon üzenetet";
+"feedback::contact::placeholder" = "Válasz e-mail-címe";
+"feedback::posted:message" = "Visszajelzését sikeresen rögzítettük.";
+
+// MARK: - external service
+
+"external_service.name::google" = "Google Naptár";
+"external_service.expired::message" = "A(z) %@ integráció lejárt. Kérjük, menjen a Beállításokhoz, és próbálja újra.";
+"external_service::google::hidden_event" = "Elrejtve";
+"external_service::google::unknown_event" = "Ismeretlen";
+
+
+// MARK: - widget
+
+"widget.common::explain" = "Tekintse meg közelgő eseményeit.";
+"widget.doubleMonth::name" = "Naptár + Naptár";
+"widget.eventAndMonth::name" = "Események + Naptár";
+"widget.todayAndMonth::name" = "MA + Naptár";
+"widget.eventAndForesmot::name" = "Események + Legfontosabb";
+"widget.events::name" = "Események";
+"widget.events.noEvents::message" = "Nincsenek események.";
+"widget.events.currentTodos" = "Aktuális feladatlista";
+"widget.events.sample::check_mailbox" = "Postaláda ellenőrzése";
+"widget.events.sample::example" = "Ünnep";
+"widget.events.sample::running" = "Futás";
+"widget.events.sample::luch" = "Ebéd";
+"widget.events.sample::luch_appointment" = "Ebédmeghívás (nem lehet elkésni)";
+"widget.events.sample::call" = "Hívja fel Sárát";
+"widget.events.sample::surfing" = "Szörfözés";
+"widget.events.sample::moving" = "Költözés napja";
+"widget.events.sample::meeting" = "Napi megbeszélés";
+"widget.events.sample::deposit_remain" = "Végső egyenleg átutalása";
+"widget.events.sample::recycle" = "Újrahasznosítás";
+"widget.events.sample::take_medicine" = "Gyógyszer bevétele";
+"widget.events.sample::watering" = "Virágcserép locsolása";
+"widget.events.sample::june3" = "KE, JÚN 3.";
+"widget.events.sample::july16" = "VAS, JÚL 16.";
+"widget.events.sample::july21" = "PÉN, JÚL 21.";
+"widget.events.sample::july29" = "SZO, JÚL 29.";
+"widget.events.sample::aug2" = "SZE, AUG 2.";
+"widget.events.sample::aug3" = "CSÜ, AUG 3.";
+"widget.events.sample::oct10" = "HÉT, OKT 10.";
+"widget.events.foremost" = "Legfontosabb esemény";
+"widget.events.foremost::allFinished::message" = "Adjon hozzá egy eseményt, amelyről nem maradhat le.";
+"widget.events.foremost::sample::message" = "Vigyen esernyőt! ⛱️";
+"widget.events.calendar" = "Naptár";
+"widget.events.today" = "MA";
+"widget.events.today::sample::sunday" = "VASÁRNAP";
+"widget.events.today::sample::march2024" = "2024. MÁRCIUS";
+"total::event::count" = "%d esemény";
+"todo::count" = "%d feladat";
+"schedule::count" = "%d program";
+"widget.weeks.lastMonth" = "Előző hónap";
+"widget.weeks.thisMonth" = "Ez a hónap";
+"widget.weeks.nextMonth" = "Következő hónap";
+"widget.weeks.thisWeek" = "Ez a hét";
+"widget.weeks.twoWeek" = "2 hét";
+"widget.weeks.threeWeek" = "3 hét";
+"widget.weeks.fourWeek" = "4 hét";
+"widget.weeks.sample::feb" = "FEBRUÁR";
+"widget.weeks.sample::march" = "MÁRCIUS";
+"widget.weeks.sample::april" = "ÁPRILIS";
+"widget.weeks.sample::hiking" = "🏔️ Túrázás";
+"widget.weeks.sample::lunch" = "🥗 Ebéd";
+"widget.weeks.sample::call" = "📞 Hívja fel Sárát";
+"widget.weeks.sample::holiday" = "Ünnep";
+"widget.weeks.sample::golf" = "⛳️ Golf";
+"widget.weeks.sample::workout" = "🔥 Edzés";
+"widget.weeks.sample::launch" = "🚀 Indítás";
+"widget.fail.message" = "Átmeneti hiba történt.\nKérjük, próbálja újra elindítani az alkalmazást.";
+"widget.next.noEvent" = "Nincs következő esemény.";
+"widget.next.sample" = "🔥 Edzés";
+"widget.next.title" = "Következő esemény";
+"widget.next.rect_widget::title" = "A mai nap következő eseménye.";
+"widget.next.title::remains" = "A mai nap következő eseményei.";
+"widget.next.title::future" = "Ma és ami ezután következik";
+"widget.next.title::more_todos" = "Még %d feladat";
+"widget.next.title::more_events" = "Még %d program";
+"widget.next.title::more_events_with_todo" = "Még %1$d feladat és %2$d program";
+"widget.next.title::uncompleted::todo" = "%1$@ nincs befejezve";
+"widget.next.title::uncompleted::todos" = "%1$@ és még %2$d befejezetlen feladat";
+"widget.next.no_events_today" = "Ma nincs esemény";
+"widget.next.no_events" = "Nincs közelgő esemény";
+
+"widget.dday::name" = "Visszaszámlálás";
+"widget.dday::noTarget" = "Válasszon eseményt";
+"widget.dday.sample::title" = "Workshop";
+"widget.dday.target::repeating" = "Ismétlődő";
+"widget.dday.target::registered" = "Kitűzve";
+"widget.dday.turn::name" = "%d. forduló";
+
+// MARK: - link
+
+"deeplink::invalid_link_message" = "Ez a hivatkozásformátum nem támogatott.\nKérjük, frissítse az alkalmazást a legújabb verzióra.";
+
+// MARK: - force update
+
+"force_update.title" = "Frissítés szükséges";
+"force_update.message" = "Új verzió érhető el.\nKérjük, frissítsen az alkalmazás további használatához.";
+"recommend_update.title" = "Frissítés ajánlott";
+"recommend_update.message" = "Új verzió érhető el.\nA jobb élmény érdekében javasoljuk a frissítést.";
+
+
+// MARK: - ai agent
+
+"aiAgent::voice::listening" = "Hallgatás…";
+"aiAgent::keyboard" = "Billentyűzet";
+"aiAgent::voice" = "Hang";
+"aiAgent::send" = "Küldés";
+"aiAgent::input::placeholder" = "Miben segíthetek?";
+"aiAgent::permission::title" = "Mikrofon- és beszédfelismerési hozzáférés szükséges";
+"aiAgent::permission::message" = "Engedélyezze a hozzáférést a Beállításokban, vagy gépeljen inkább";
+"aiAgent::permission::keyboard" = "Gépelés helyette";
+"aiAgent::permission::setting" = "Beállítások megnyitása";
+"aiAgent::state::processing" = "Feldolgozás";
+"aiAgent::state::confirm" = "Megerősítés szükséges";
+"aiAgent::state::confirmExpired" = "Lejárt";
+"aiAgent::state::done" = "Parancs teljesítve";
+"aiAgent::state::failed" = "Parancs sikertelen";
+"aiAgent::done::default" = "Kész";
+"aiAgent::failed::default" = "Nem sikerült elvégezni";
+"aiAgent::retry" = "Újrapróbálás";
+"aiAgent::needSignIn::title" = "Bejelentkezés szükséges";
+"aiAgent::needSignIn::message" = "Jelentkezzen be az AI gyorsbevitel használatához.";
+"aiAgent::title" = "AI gyorsbevitel";
+"aiAgent::keyboard::stop" = "Leállítás";
+"aiAgent::keyboard::send" = "Küldés";
+"aiAgent::stop" = "Leállítás";
+"aiAgent::usage" = "%@ / %@ kredit";
+"aiAgent::plan::free" = "Ingyenes";
+"aiAgent::plan::standard" = "Standard";
+"aiAgent::plan::lifetime" = "Örökös";
+"aiAgent::usage::topupRemaining" = "%@ extra kredit maradt";
+"aiAgent::usage::planChangeScheduled" = "%1$@-tól a(z) %2$@ csomagra vált";
+"aiAgent::stop::confirm::title" = "Leállítja a feldolgozást?";
+"aiAgent::stop::confirm::message" = "A leállítás elveti a folyamatban lévő parancsot, és az nem folytatható.";
+"aiAgent::confirm::countdown" = "van hátra a jóváhagyáshoz";
+"aiAgent::confirm::expired::message" = "Lejárt az idő. Kérjük, kérje újra.";

@@ -1,0 +1,3 @@
+"NSCalendarsFullAccessUsageDescription" = "Accesul la calendar este necesar pentru a afișa evenimente și a sincroniza cu Apple Calendar.";
+"NSMicrophoneUsageDescription" = "Accesul la microfon este necesar pentru a introduce evenimente și sarcini prin voce.";
+"NSSpeechRecognitionUsageDescription" = "Recunoașterea vocală este necesară pentru a converti vocea dvs. în evenimente și sarcini.";

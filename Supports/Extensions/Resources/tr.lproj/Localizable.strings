@@ -1,0 +1,562 @@
+/*
+  Localizable.strings
+  Extensions
+
+  Created by sudo.park on 7/31/26.
+  Copyright © 2026 com.sudo.park. All rights reserved.
+*/
+
+
+// MARK: - common
+"common::and" = " ve";
+"common::wait:message" = "Lütfen bekleyin...";
+"common::back" = "Geri";
+"common.remove" = "Kaldır";
+"common.confirm" = "Onayla";
+"common.cancel" = "İptal";
+"common.close" = "Kapat";
+"common.yes" = "Evet";
+"common.no" = "Hayır";
+"common.save" = "Kaydet";
+"common.info" = "Bilgi";
+"common.search" = "Ara";
+"common.clear" = "Temizle";
+"common.send" = "Gönder";
+"common.done" = "Tamam";
+"common.errorMessage" = "Geçici bir hata oluştu.\nSorun devam ederse lütfen bildirin.";
+"common.update" = "Güncelle";
+"common.go_to_settings" = "Ayarlara git";
+
+// MARK: - date form
+"date_form::HH:mm" = "HH:mm";
+"date_form::a_h:mm" = "h:mm a";
+"date_form::MM_d__HH:mm" = "d.M, HH:mm";
+"date_form::MM_d" = "d.M";
+"date_form::MM_dd" = "dd.MM";
+"date_form::24off_h:mm" = "h:mm";
+"date_form::24on_H:mm" = "H:mm";
+"date_form::d_E_" = "d (E)";
+"date_form::MMM_d_HH:mm" = "d MMM HH:mm";
+"date_form::MMM_d" = "d MMM";
+"date_form::yyyy_MM_dd_E_" = "dd.MM.yyyy (E)";
+"date_form:yyyy.MM_dd_hh:mm" = "dd.MM.yyyy HH:mm";
+"date_form:yyyy.MM_dd_h:mm" = "dd.MM.yyyy h:mm a";
+"date_form.yyyy" = "yyyy";
+"date_form.MMM_dd_E" = "dd MMM (E)";
+"date_form.HH:mm" = "HH:mm";
+"date_form.yyyy_MM_dd" = "dd.MM.yyyy";
+"date_form.yyyy_MMM_dd" = "d MMM yyyy";
+"date_form.MMM" = "MMM";
+"date_form.MMMM" = "MMMM";
+"date_form.EEEE" = "EEEE";
+"date_form.EEE_MMM_d" = "EEE, d MMM";
+"date_form.MMM_yyyy" = "MMM yyyy";
+"tomorrow" = "Yarın";
+
+// MARK: - event
+
+"dayname::sunday" = "Pazar";
+"dayname::monday" = "Pazartesi";
+"dayname::tuesday" = "Salı";
+"dayname::wednesday" = "Çarşamba";
+"dayname::thursday" = "Perşembe";
+"dayname::friday" = "Cuma";
+"dayname::saturday" = "Cumartesi";
+
+"dayname::sunday:short" = "PAZ";
+"dayname::monday:short" = "PZT";
+"dayname::tuesday:short" = "SAL";
+"dayname::wednesday:short" = "ÇAR";
+"dayname::thursday:short" = "PER";
+"dayname::friday:short" = "CUM";
+"dayname::saturday:short" = "CMT";
+
+"dayname::sunday:very_short" = "P";
+"dayname::monday:very_short" = "P";
+"dayname::tuesday:very_short" = "S";
+"dayname::wednesday:very_short" = "Ç";
+"dayname::thursday:very_short" = "P";
+"dayname::friday:very_short" = "C";
+"dayname::saturday:very_short" = "C";
+
+
+// MARK: - event notification
+
+"event_notification::today:title" = "Bugünün etkinlikleri";
+"event_notification::todo:prefix" = "Görev";
+"event_notification::today:prefix" = "Bugün";
+"event_notification::tomorrow:prefix" = "Yarın";
+"event_notification::allday_today" = "Bugün tüm gün";
+"event_notification::allday_tomorrow" = "Yarın tüm gün";
+"event_notification::some_allday" = "%@ tüm gün";
+"event_notification_setting::option_title::no_notification" = "Bildirim yok";
+"event_notification_setting::option_title::at_time" = "Etkinlik saatinde";
+"event_notification_setting::option_title::allday_9am" = "O gün saat 09:00'da";
+"event_notification_setting::option_title::allday_12pm" = "O gün öğlen";
+"event_notification_setting::option_title::customTime" = "Özel zaman: %@";
+"event_notification_setting::option_title::custimTime_fallback" = "Özel zaman";
+"event_notification_setting::option_title::before_minutes" = "Etkinlikten %d dakika önce";
+"event_notification_setting::option_title::before_hours" = "Etkinlikten %d saat önce";
+"event_notification_setting::option_title::before_days" = "Etkinlikten %d gün önce";
+"event_notification_setting::option_title::before_weeks" = "Etkinlikten %d hafta önce";
+"event_notification_setting::option_title::allday_9am_before_days" = "%d gün önce, saat 09:00'da";
+"event_notification_setting::option_title::allday_9am_before_weeks" = "%d hafta önce, saat 09:00'da";
+"event_notification_setting::need_permission_message" = "Etkinlik bildirimi özelliğini kullanmak için bildirim izni gerekiyor.\nSistem Ayarları'na gidip bildirimlere izin verin.";
+"event_notification_setting::need_permission::go_setting" = "Ayarlara git";
+"event_notification_setting::need_permission_title" = "Bilgi";
+"event_notification_setting::permission_denied" = "Etkinlik hatırlatma özelliğini kullanmak için uygulama bildirim izni gereklidir.";
+
+
+
+// MARK: - calendar
+
+"calendar::foremostevent:title" = "En Önemli Etkinlik";
+"calendar::uncompletedTodos:title" = "Tamamlanmamış Görevler";
+"calendar::event_time::todo" = "Görev";
+"calendar::event_time::allday" = "Tüm gün";
+"calendar::event_time::allday::with" = "%@ tüm gün";
+"calendar::event_time::period:some_days" = "%d gün";
+"calendar::event_time::period:some_minutes" = "%d dakika";
+"calendar::event_time::period:some_hours" = "%d saat";
+"calendar::event_time::period:some_days:some_hours" = "%d gün %d saat";
+"calendar::event::more_action::remove:title" = "Etkinliği Kaldır";
+"calendar::event::more_action::foremost_event:title" = "En önemli etkinlik";
+"calendar::event::more_action::remove_only_thistime:message" = "Bu etkinliği yalnızca tüm tekrarlayan etkinliklerden mi kaldırmak istiyorsunuz?";
+"calendar::event::more_action::remove:message" = "Bu etkinliği kaldırmak istiyor musunuz?";
+"calendar::event::more_action::mark_as_foremost" = "Bu etkinliği en önemli etkinliğiniz olarak işaretlemek istiyor musunuz?";
+"calendar::event::more_action::unmark_as_foremost" = "Bu etkinliğin en önemli etkinlik işaretini kaldırmak istiyor musunuz?";
+"calendar::event::more_action::mark_as_foremost::unavail" = "Tekrarlayan bir randevu etkinliği en önemli etkinlik olarak işaretlenemez.";
+"calendar::event::more_action:remove_only_thistime:item_name" = "Yalnızca bu etkinliği kaldır";
+"calendar::event::more_action:remove:item_name" = "Etkinliği kaldır";
+"calendar::event::more_action:foremost:mark:item_name" = "En önemli olarak işaretle";
+"calendar::event::more_action:foremost:unmark:item_name" = "En önemli işaretini kaldır";
+"calendar::event::more_action:dday_candidate:register:item_name" = "Geri Sayım widget'ına ekle";
+"calendar::event::more_action:dday_candidate:unregister:item_name" = "Geri Sayım widget'ından kaldır";
+"calendar::event::more_action:dday_candidate:title" = "Geri Sayım widget adayı";
+"calendar::event::more_action:dday_candidate:register:message" = "Bu etkinlik Geri Sayım widget'ına aday olarak eklensin mi? Widget'ı düzenlerken listenin en üstünde görünür.";
+"calendar::event::more_action:dday_candidate:unregister:message" = "Bu etkinlik Geri Sayım widget'ı adaylarından kaldırılsın mı?";
+"calendar::event::more_action:copy:item_name" = "Etkinliği kopyala";
+"calendar::event::more_action:transform_to::schedule" = "Randevuya dönüştür";
+"calendar::event::more_action:transform_to::todo" = "Göreve dönüştür";
+"calendar::event::more_action:edit:item_name" = "Düzenle";
+"calednar::event::add_new" = "Yeni etkinlik ekle";
+"calednar::event::add_new:place_holder" = "Hızlıca yeni bir görev ekleyin.";
+"calednar::event::skip_todo" = "Bu görevi atla";
+"calednar::event::skip_todo_until" = "Bu görevi atlamak için bir zaman seçin";
+"calednar::event::copy" = "Etkinliği kopyala";
+"calendar::move_date" = "Tarihi taşı";
+"calednar::event::google::edit" = "Google Takvim Etkinliğini Düzenle";
+
+
+// MARK: - event detail
+
+"eventDetail.messages.selectTimeFirst" = "Lütfen önce etkinlik saatini seçin.";
+"eventDetail.messages.selectValidTime" = "Lütfen geçerli etkinlik saatini seçin.";
+"eventDetail.notification.custom_eventTime:title" = "Özel";
+"eventDetail.notification.title" = "Etkinlik bildirim zamanı";
+"eventDetail.repeating.title" = "Tekrarlama";
+"eventDetail.repeating.notRepeating::title" = "Tekrarlama yok";
+"eventDetail.repeating.starttime:form" = "d.M.yyyy";
+"eventDetail.repeating.starttime:title" = "Tekrarlama başlangıç zamanı";
+"eventDetail.repeating.everyDay:title" = "Her gün";
+"eventDetail.repeating.everyWeek:title" = "Her hafta";
+"eventDetail.repeating.everyWeekSomeDay:title" = "Her %@";
+"eventDetail.repeating.everySomeWeek:title" = "Her %d haftada bir";
+"eventDetail.repeating.everyWeekDays:title" = "Her hafta içi gün";
+"eventDetail.repeating.everySomeWeekSomeDay:title" = "Her %d haftada bir %@";
+"eventDetail.repeating.everyMonth:title" = "Her ay";
+"eventDetail.repeating.everyMonth_someDay:title" = "Her ayın %@ günü.";
+"eventDetail.repeating.everyYear:title" = "Her yıl";
+"eventDetail.repeating.lunarCalendar_everyYear:title" = "Her yıl (ay takvimi)";
+"eventDetail.repeating.everyYearSomeDay:title" = "Her yıl %@";
+"eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "Her yıl %@ (ay takvimi)";
+"eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "Her ayın son haftasının tüm günleri";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "Her ayın ilk %@ günü";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "Her ayın ikinci %@ günü";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "Her ayın üçüncü %@ günü";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "Her ayın dördüncü %@ günü";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "Her ayın beşinci %@ günü";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "Her ayın altıncı %@ günü";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "Her ayın yedinci %@ günü";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "Her ayın son %@ günü";
+"eventDetail.repeating.endtime::title" = "Tekrarlama Bitişi";
+"eventDetail.repeating.endtime::option::never" = "Asla";
+"eventDetail.repeating.endtime::option::on" = "Tarihte";
+"eventDetail.repeating.endtime::option::after" = "Sonra";
+"eventDetail.repeating.endtime::option::after_occurrences" = "tekrar";
+"eventDetail.repeating.endtime::shouldFutureThanStartTime" = "Tekrarlama bitiş zamanı, başlangıç zamanından sonra olmalıdır.\n(Tekrarlama başlangıç tarihi: %@)";
+"eventDetail.repeating::period_endcount" = "%@ tarihinden itibaren %d kez";
+
+"eventDetail.repeating.everyNDays:title" = "Her %d günde bir";
+"eventDetail.repeating.last" = "Son";
+"eventDetail.repeating.everyNMonths:title" = "Her %d ayda bir";
+"eventDetail.repeating.everyNYears:title" = "Her %d yılda bir";
+"eventDetail.repeating::endoption_until" = "%@ tarihine kadar";
+"eventDetail.repeating::endoption_times" = "%d kez";
+
+"eventDetail.place::placeholder" = "Konum";
+"eventDetail.place::remove_button" = "Konumu kaldır";
+"eventDetail.place::no_map_app" = "Seçilen harita uygulaması yüklü değil.";
+"eventDetail.place::select_map_app" = "Bir harita seçin";
+"eventDetail.place::always_select_this_map" = "Her zaman bu uygulamayla aç.";
+
+"eventDetail.add_new_todo::message" = "Yeni bir görev eklendi.";
+"eventDetail.add_new_schedule::message" = "Yeni bir randevu eklendi.";
+"eventDetail.scheduleEvent_removed::message" = "Randevu kaldırıldı.";
+"eventDetail.edit::repeating::confirm::ttile" = "Etkinliği düzenle";
+"eventDetail.edit::repeating::confirm::message" = "Bu etkinlik tekrarlayan bir etkinliktir.\nDüzenlemek istediğiniz tekrarlayan etkinliğin kapsamını seçin.";
+"eventDetail.edit::repeating::confirm::all::button" = "Tüm etkinlikler";
+"eventDetail.edit::repeating::confirm::fromNow::button" = "Bu andan itibaren";
+"eventDetail.edit::repeating::confirm::onlyThisTime::button" = "Yalnızca bu sefer";
+"eventDetail.scheduleEvent_saved::message" = "Randevu kaydedildi.";
+"eventDetail.todoEvent_removed::message" = "Görev kaldırıldı.";
+"eventDetail.todoEvent_saved::message" = "Görev kaydedildi.";
+"eventDetail.cancel_edit::title" = "Etkinliği düzenle";
+"eventDetail.cancel_edit::message" = "Bu değişiklikleri iptal etmek istiyor musunuz?";
+"eventDetail.cancel_edit::continue::button" = "Devam et";
+
+"eventDetail.edit::add_new_name::placeholder" = "Yeni etkinlik adı ekle";
+"eventDetail.edit::clearEventTime::button" = "Etkinlik saatini temizle";
+"eventDetail.edit::noEventTime::button" = "Bitiş zamanı yok";
+"eventDetail.edit::memo" = "Not";
+"eventDetail.edit::urlPreview" = "URL Önizlemesi";
+
+"eventDetail.edit::make::case" = "Görev etkinliği mi?";
+"eventDetail.edit::todo::case" = "Görev Etkinliği";
+"eventDetail.edit::schedule::case" = "Randevu Etkinliği";
+"eventDetail.edit::holiday::case" = "%@ için resmi tatil";
+
+"eventDetail.notSupport::holiday" = "Bilgi değiştirme işlevi resmi tatillerde desteklenmez.";
+
+"eventDetail:todo:guide:message1" = "Görev, yapılması gereken bir şeyi temsil eder.";
+"eventDetail:todo:guide:message2" = "Takvimde belirli bir saatle (veya süreyle) gösterilen normal randevulardan farklı olarak görevler, tamamlanıp tamamlanmadığının kontrol edilmesini sağlar.";
+"eventDetail:todo:guide:message3" = "Zaman bilgisi belirtmeden bir görev ekleyebilirsiniz. Örneğin, yakında yapılması gereken ama hemen yapılması gerekmeyen bir işi kaydedebilirsiniz.";
+"eventDetail:todo:guide:process:message" = "Tekrarlama seçeneği açıkken görevler normal randevulardan farklı davranır:";
+"eventDetail:todo:guide:process:bullet1" = "Henüz tamamlanmamış, güncel veya geçmiş tekrarlayan görevler takvimde gösterilir.";
+"eventDetail:todo:guide:process:bullet2" = "Bir görev tamamlandığında, etkinlik tamamlanan etkinlikler listesine eklenir ve bir sonraki tekrar takvime yeni olarak eklenir.";
+"eventDetail:todo:guide:process:bullet3" = "Tekrarlama bitiş zamanı nedeniyle bir sonraki tekrar yoksa, tekrarlayan görev sona erer.";
+"eventDetail:foremost:guide:message1" = "En önemli etkinliğiniz olduğunu vurgulamak için bir etkinliği en önemli olarak işaretleyin.\nEn önemli etkinlik takvimde her zaman görünür ve ayrı bir widget'ı destekler.";
+"eventDetail:foremost:guide:supports:message" = "Aşağıdaki etkinlik türleri en önemli etkinlik olarak ayarlanabilir:";
+"eventDetail:foremost:guide:supports:todo" = "Görev etkinliği";
+"eventDetail:foremost:guide:supports:notRepeating_schedule" = "Tekrarlamayan randevu etkinlikleri";
+
+"eventDetail:isSaving:toast:message" = "Değişiklikler kaydediliyor. Lütfen bekleyin.";
+"eventDetail:hasChanges:confirm:message" = "Değişiklikler var. Bunları iptal etmek istiyor musunuz?";
+"eventDetail:hasChanges:confirm:continue" = "Düzenlemeye devam et";
+
+"eventDetail.unavailto_transform_withoutName" = "Etkinliği dönüştürmek için lütfen bir ad girin.";
+"eventDetail.todoEvent_unavailto_transform_withoutTime" = "Randevuya dönüştürmek için zaman bilgisi gereklidir.";
+"eventDetail.todoEvent::transform::schedule_title" = "Dönüştür";
+"eventDetail.todoEvent::transform::schedule_message" = "Bu görevi randevuya dönüştürmek istiyor musunuz?";
+"eventDetail.scheduleEvent::transform::todo" = "Dönüştür";
+"eventDetail.scheduleEvent::transform::todo_message" = "Bu randevuyu göreve dönüştürmek istiyor musunuz?";
+
+"eventDetail::revert" = "Tamamlamayı geri al";
+
+// MARK: - Google calendar event
+
+"eventDetail::gogoleEvent::viewOnCalendar" = "Google Takvim'de görüntüle";
+"eventDetail::gogoleEvent::calendar" = "Takvim";
+"eventDetail::gogoleEvent::calendar::event" = "Google Takvim Etkinliği";
+"eventDetail::gogoleEvent::attendee::unknown" = "Bilinmiyor";
+"eventDetail::gogoleEvent::attendees" = "Katılımcılar (%d kişi)";
+"eventDetail::gogoleEvent::attendees::organizer" = "Organizatör";
+"eventDetail::gogoleEvent::conference::accessCode" = "Erişim Kodu";
+"eventDetail::gogoleEvent::conference::meetingCode" = "Toplantı Kodu";
+"eventDetail::gogoleEvent::conference::passCode" = "Geçiş Kodu";
+"eventDetail::gogoleEvent::conference::password" = "Şifre";
+"eventDetail::gogoleEvent::copy::message" = "Panoya kopyalandı.";
+"eventDetail::gogoleEvent::canceled::message" = "Bu etkinlik iptal edildi.";
+
+// MARK: - Apple calendar event
+"eventDetail::appleCalendarEvent::viewOnCalendar" = "Apple Takvim'de görüntüle";
+"eventDetail::appleCalendarEvent::calendar::event" = "Apple Takvim Etkinliği";
+"eventDetail::appleCalendarEvent::attendees" = "Katılımcılar (%d kişi)";
+"eventDetail::appleCalendarEvent::attendees::organizer" = "Organizatör";
+
+// MARK: - event tag
+
+"eventTag.title" = "Etkinlik Türü";
+"eventTag.list::title" = "Etkinlik Türleri";
+"eventTag.defaults.default::name" = "Varsayılan";
+"eventTag.defaults.holiday::name" = "Tatil";
+"eventTag.addNew::placeholder" = "Yeni etkinlik türü ekle";
+"eventTag.allEventTypes" = "Tüm etkinlik türleri >";
+"eventTag.remove::confirm::message" = "Bu etkinlik türünü kaldırmak mı istiyorsunuz, yoksa ilgili tüm etkinlikleri de kaldırmak mı istiyorsunuz?";
+"eventTag.remove::only_tag" = "Yalnızca etkinlik türünü kaldır";
+"eventTag.remove::tag_and_evets" = "İlgili etkinliklerle birlikte kaldır";
+"eventTag.removed::message" = "Bu etkinlik türü kaldırıldı.";
+"eventTag.removed_with_events::message" = "Bu etkinlik türü ve ilgili etkinlikler kaldırıldı.";
+"eventTag.color::changed::message" = "Renk değiştirildi.";
+"eventTag.changed::message" = "Etkinlik türü değiştirildi.";
+"eventTag.makeNew::message" = "Yeni bir etkinlik türü oluşturuldu.";
+"eventTag.default::title" = "Varsayılan Etkinlik Türü";
+"eventTag.default::selection::explain" = "Bu, bir etkinlik oluştururken varsayılan olarak seçilecek etkinlik türüdür.";
+"eventTag.externalCalendar::integrate_button" = "Takvimi bağla";
+
+
+// MARK: - event list
+
+"eventList::today::title" = "Bugün";
+"eventList::yesterday::title" = "Dün";
+"eventList::thisMonth::title" = "Bu ay";
+"eventList::done_todos::title" = "Tamamlanan Görev Listesi";
+"eventList::done_todos::eventTime" = "Etkinlik saati:";
+"eventList::done_todos::doneAt" = "Tamamlanma zamanı:";
+"eventList::remove::confirm::message" = "Tamamlanan görev listesini sil";
+"eventList::remove::confirm::button::all" = "Tüm tamamlanan görevler";
+"eventList::remove::confirm::button::olderThan1m" = "1 aydan eski";
+"eventList::remove::confirm::button::olderThan3m" = "3 aydan eski";
+"eventList::remove::confirm::button::olderThan6m" = "6 aydan eski";
+"eventList::remove::confirm::button::olderThan1y" = "1 yıldan eski";
+
+
+// MARK: - account
+
+"manage_account::title" = "Hesap Yönetimi";
+"manage_account::login_method" = "Giriş yöntemi";
+"manage_account::email" = "E-posta";
+"manage_account::last_signedIn_at" = "Son giriş zamanı";
+"manage_account::migration::title" = "Geçici kullanıcı verilerini taşı";
+"manage_account::migration::description" = "Giriş yapmadan önce oluşturulan tüm etkinlikler (%d etkinlik) hesabınıza taşınıyor.\nHesabınıza bağlı etkinliklere herhangi bir cihazdan erişebilirsiniz.";
+"manage_account::migration_finished::message" = "Taşıma tamamlandı!";
+"manage_account::signout_button::title" = "Çıkış Yap";
+"manage_account::sign_out::confirm::title" = "Çıkış Yap";
+"manage_account::sign_out::confirm::message" = "Mevcut hesaptan çıkış yapmak istiyor musunuz?";
+"manage_account::delete_account_button::title" = "Hesabı Sil";
+"manage_account::delete_account_button::confirm:message" = "Hesabınızı silmek istediğinizden emin misiniz?";
+"manage_account::delete_account_button::description" = "Hesap silme talebinde bulunduktan sonra hesabınız silinecektir.\nSilindikten sonra hesap bilgileri kurtarılamaz.";
+"signIn::title" = "Giriş Yap";
+"signIn:description" = "Etkinlik listenizi yedekleyin ve diğer iOS cihazlarıyla senkronize edin\n(Desteklenen platformlar genişletilecektir.)";
+
+
+// MARK: - setting
+"event_setting::title" = "Etkinlik Ayarları";
+"event_setting::eventType" = "Etkinlik Türü";
+"event_setting::eventPeriod" = "Etkinlik Süresi";
+"event_setting::defaultMapApp" = "Harita uygulamasını aç";
+"event_setting::defaultMapApp_select" = "Seç";
+
+"event_setting::eventSync" = "Etkinlik Senkronizasyonu";
+"event_setting::eventSync::readyToSync::description" = "Yedeklenen kullanıcı etkinliklerini senkronize edin.";
+"event_setting::eventSync::syncInProgress::description" = "Yedeklenen kullanıcı etkinlikleri senkronize ediliyor...";
+"event_setting::eventSync::lastTime" = "Son senkronize edilen veri zamanı: %@";
+"event_setting::eventSync::force" = "Zorla Senkronize Et";
+
+"event_notification_setting::title::forAllDay" = "Tüm gün";
+"event_notification_setting::title::NotforAllDay" = "Bildirim Zamanı";
+"event_setting::external_calendar::title" = "Harici takvimler";
+"event_setting::external_calendar::connected::account" = "Bağlı: %@";
+"event_setting::external_calendar::start" = "Bağla";
+"event_setting::external_calendar::start::message" = "Harici bir takvime bağlanıldı.";
+"event_setting::external_calendar::stop" = "Bağlantıyı Kes";
+"event_setting::external_calendar::stop::message" = "Harici takvim bağlantısı kesildi.";
+"event_setting::external_calendar::google::serviceName" = "Google Takvim";
+"event_setting::external_calendar::apple::serviceName" = "Apple Takvim";
+"event_setting::apple_calendar::permission_denied::message" = "Takvim erişimi reddedildi. Apple Takvim'i kullanmak için lütfen Ayarlar'dan izin verin.";
+"event_setting::apple_calendar::restricted::message" = "Bu cihazda takvim erişimi kısıtlanmış.";
+"setting.title" = "Ayarlar";
+"setting.appearance.title" = "Görünüm";
+"setting.appearance.calendar.samplemonth::march" = "MART";
+"setting.appearance.calendar.startDayOfWeek" = "Haftanın başlangıç günü";
+"setting.appearance.calendar.accentDay" = "Vurgulanan Günler";
+"setting.appearance.calendar.accentDay::holiday" = "Tatil";
+"setting.appearance.calendar.accentDay::saturday" = "Cumartesi";
+"setting.appearance.calendar.accentDay::sunday" = "Pazar";
+"setting.appearance.calendar.colorTheme" = "Renk teması";
+"setting.appearance.calendar.colorTheme::system" = "Sistem";
+"setting.appearance.calendar.colorTheme::light" = "Açık";
+"setting.appearance.calendar.colorTheme::dark" = "Koyu";
+"setting.appearance.calendar.underline" = "Etkinlik olan günleri alt çizgiyle göster";
+"setting.appearance.event.edit::name_old" = "Etkinliği Düzenle";
+"setting.appearance.event.edit::name" = "Etkinlik ayarları ve harici takvimler";
+"setting.appearance.day_row_height" = "Etkinlik detay gösterim seviyesi";
+"setting.appearance.day_row_height::small::text" = "Minimal";
+"setting.appearance.day_row_height::medium::text" = "Orta";
+"setting.appearance.day_row_height::large::text" = "Tam";
+"setting.appearance.event.fontSize" = "Etkinlik metni yazı tipi boyutu";
+"setting.appearance.event.show_holidayName" = "Tatil adını göster";
+"setting.appearance.event.show_lunar" = "Ay takvimi";
+"setting.appearance.event._24form" = "24 saat biçimi";
+"setting.appearance.event.sample::name" = "🥗 Etkinlik adı";
+"setting.appearance.event.sample::description" = "açıklama";
+"setting.appearance.event.sample::christmas" = "Noel";
+"setting.appearance.event.sample::first" = "birinci etkinlik";
+"setting.appearance.event.sample::second" = "ikinci etkinlik";
+"setting.appearance.event.sample::uncompleted_todo::toggle" = "Tamamlanmamış görevleri göster";
+"setting.appearance.widget::title" = "Widget teması";
+"setting.appearance.widget::useSystemTheme::title" = "Sistem temasını kullan";
+"setting.appearance.widget::useSystemTheme::background" = "Widget arka plan rengi";
+"setting.appearance.widget::useCustomTheme::title" = "Özel renk seç";
+"setting.appearance.widget::sample::eventName" = "Widget Etkinliği";
+"setting.appearance.event.boldText" = "Kalın metin";
+"setting.appearance.event.eventColor" = "Etkinlik rengi";
+"setting.timezone::title" = "Saat Dilimi";
+"setting.timezone::systemTimeZone::name" = "Sistem Saat Dilimi";
+"setting.timezone::systemTime::name" = "Sistem Saati";
+"setting.haptic::name" = "Dokunsal geri bildirim";
+"setting.minimize_animation::name" = "Animasyon efektini azalt";
+"setting.holiday.title" = "Tatil";
+"setting.holiday.item::name" = "Tatil Ayarı";
+"setting.holiday.list::sectionTitle" = "Tatiller";
+"setting.holiday.country.title" = "Ülke";
+"setting.holiday.country.current::title" = "Mevcut Ülke";
+"setting.holiday.country.current::placeHolder" = "Ülke seçin";
+"setting.holiday.country.changeConfirm::title" = "Ülkeyi değiştir";
+"setting.holiday.country.changeConfirm::message" = "Takviminizin ülkesini değiştirmek istiyor musunuz?";
+"setting.holiday.country.changed::message" = "Ülke değiştirildi.";
+"setting.holiday.hide::button" = "Gizle";
+"setting.holiday.hide::confirm::title" = "Tatili gizle";
+"setting.holiday.hide::confirm::message" = "Bu tatil her yıl gizlensin mi?\nAyarlar > Tatil bölümünden tekrar gösterebilirsiniz.";
+"setting.holiday.hidden::sectionTitle" = "Gizli Tatiller";
+"setting.holiday.show::button" = "Göster";
+"setting.feedback::name" = "Geri Bildirim";
+"setting.help::name" = "Yardım";
+"setting.share::name" = "Uygulamayı Paylaş";
+"setting.write_review::name" = "Uygulama değerlendirmesi yaz";
+"setting.account.signedIn::manageAccount" = "Hesap";
+"setting.account.needSignIn" = "Giriş Yap";
+"setting.suggest::readmind::appName" = "Readminds";
+"setting.suggest::readmind::message" = "Okuma listenizi yönetin";
+"setting.section.support::name" = "Destek";
+"setting.section.app::name" = "Uygulama";
+"setting.section.suggest::name" = "Öneriler";
+"feedback::guide:message" = "Hata bildirimleri, yorumlar ve hizmet önerileri dahil olmak üzere geri bildirimlerinizi bize iletmekten çekinmeyin.\nYorumlarınız hizmetimizi geliştirmemize büyük katkı sağlayacaktır.";
+"feedback::enterMessage::placeholder" = "Bir mesaj girin";
+"feedback::contact::placeholder" = "Yanıt e-posta adresi";
+"feedback::posted:message" = "Geri bildiriminiz başarıyla kaydedildi.";
+
+// MARK: - external service
+
+"external_service.name::google" = "Google Takvim";
+"external_service.expired::message" = "%@ entegrasyonunun süresi doldu. Lütfen Ayarlar'a gidip tekrar deneyin.";
+"external_service::google::hidden_event" = "Gizli";
+"external_service::google::unknown_event" = "Bilinmiyor";
+
+
+// MARK: - widget
+
+"widget.common::explain" = "Yaklaşan etkinliklerinizi görüntüleyin.";
+"widget.doubleMonth::name" = "Takvim + Takvim";
+"widget.eventAndMonth::name" = "Etkinlikler + Takvim";
+"widget.todayAndMonth::name" = "BUGÜN + Takvim";
+"widget.eventAndForesmot::name" = "Etkinlikler + En Önemli";
+"widget.events::name" = "Etkinlikler";
+"widget.events.noEvents::message" = "Etkinlik yok.";
+"widget.events.currentTodos" = "Güncel Görev Listesi";
+"widget.events.sample::check_mailbox" = "Posta kutusunu kontrol et";
+"widget.events.sample::example" = "Tatil";
+"widget.events.sample::running" = "Koşu";
+"widget.events.sample::luch" = "Öğle yemeği";
+"widget.events.sample::luch_appointment" = "Öğle yemeği randevusu (geç kalınamaz)";
+"widget.events.sample::call" = "Sara'yı ara";
+"widget.events.sample::surfing" = "Sörf";
+"widget.events.sample::moving" = "Taşınma günü";
+"widget.events.sample::meeting" = "Günlük toplantı";
+"widget.events.sample::deposit_remain" = "Kalan bakiyeyi transfer et";
+"widget.events.sample::recycle" = "Geri dönüşüm";
+"widget.events.sample::take_medicine" = "İlaç al";
+"widget.events.sample::watering" = "Saksıyı sula";
+"widget.events.sample::june3" = "SAL, 3 HAZ";
+"widget.events.sample::july16" = "PAZ, 16 TEM";
+"widget.events.sample::july21" = "CUM, 21 TEM";
+"widget.events.sample::july29" = "CMT, 29 TEM";
+"widget.events.sample::aug2" = "ÇAR, 2 AĞU";
+"widget.events.sample::aug3" = "PER, 3 AĞU";
+"widget.events.sample::oct10" = "PZT, 10 EKİ";
+"widget.events.foremost" = "En Önemli Etkinlik";
+"widget.events.foremost::allFinished::message" = "Kaçırılmaması gereken bir etkinlik ekleyin.";
+"widget.events.foremost::sample::message" = "Şemsiyeni al! ⛱️";
+"widget.events.calendar" = "Takvim";
+"widget.events.today" = "BUGÜN";
+"widget.events.today::sample::sunday" = "PAZAR";
+"widget.events.today::sample::march2024" = "MART 2024";
+"total::event::count" = "%d Etkinlik";
+"todo::count" = "%d Görev";
+"schedule::count" = "%d Randevu";
+"widget.weeks.lastMonth" = "Geçen ay";
+"widget.weeks.thisMonth" = "Bu ay";
+"widget.weeks.nextMonth" = "Gelecek ay";
+"widget.weeks.thisWeek" = "Bu hafta";
+"widget.weeks.twoWeek" = "2 hafta";
+"widget.weeks.threeWeek" = "3 hafta";
+"widget.weeks.fourWeek" = "4 hafta";
+"widget.weeks.sample::feb" = "ŞUBAT";
+"widget.weeks.sample::march" = "MART";
+"widget.weeks.sample::april" = "NİSAN";
+"widget.weeks.sample::hiking" = "🏔️ Doğa yürüyüşü";
+"widget.weeks.sample::lunch" = "🥗 Öğle yemeği";
+"widget.weeks.sample::call" = "📞 Sara'yı ara";
+"widget.weeks.sample::holiday" = "Tatil";
+"widget.weeks.sample::golf" = "⛳️ Golf";
+"widget.weeks.sample::workout" = "🔥 Antrenman";
+"widget.weeks.sample::launch" = "🚀 Lansman";
+"widget.fail.message" = "Geçici bir hata oluştu.\nLütfen uygulamayı yeniden çalıştırmayı deneyin.";
+"widget.next.noEvent" = "Sonraki etkinlik yok.";
+"widget.next.sample" = "🔥 Antrenman";
+"widget.next.title" = "Sonraki etkinlik";
+"widget.next.rect_widget::title" = "Bugünün sonraki etkinliği.";
+"widget.next.title::remains" = "Bugünün kalan etkinlikleri.";
+"widget.next.title::future" = "Bugün ve Sıradakiler";
+"widget.next.title::more_todos" = "%d görev daha";
+"widget.next.title::more_events" = "%d randevu daha";
+"widget.next.title::more_events_with_todo" = "%1$d görev ve %2$d randevu daha";
+"widget.next.title::uncompleted::todo" = "%1$@ tamamlanmadı";
+"widget.next.title::uncompleted::todos" = "%1$@ ve %2$d tamamlanmamış görev daha";
+"widget.next.no_events_today" = "Bugün etkinlik yok";
+"widget.next.no_events" = "Yaklaşan etkinlik yok";
+
+"widget.dday::name" = "Geri Sayım";
+"widget.dday::noTarget" = "Bir etkinlik seçin";
+"widget.dday.sample::title" = "Çalıştay";
+"widget.dday.target::repeating" = "Tekrarlayan";
+"widget.dday.target::registered" = "Sabitlendi";
+"widget.dday.turn::name" = "%d. tur";
+
+// MARK: - link
+
+"deeplink::invalid_link_message" = "Bu bağlantı biçimi desteklenmiyor.\nLütfen uygulamayı en son sürüme güncelleyin.";
+
+// MARK: - force update
+
+"force_update.title" = "Güncelleme Gerekli";
+"force_update.message" = "Yeni bir sürüm mevcut.\nUygulamayı kullanmaya devam etmek için lütfen güncelleyin.";
+"recommend_update.title" = "Güncelleme Önerilir";
+"recommend_update.message" = "Yeni bir sürüm mevcut.\nDaha iyi bir deneyim için güncellemenizi öneririz.";
+
+
+// MARK: - ai agent
+
+"aiAgent::voice::listening" = "Dinleniyor…";
+"aiAgent::keyboard" = "Klavye";
+"aiAgent::voice" = "Ses";
+"aiAgent::send" = "Gönder";
+"aiAgent::input::placeholder" = "Nasıl yardımcı olabilirim?";
+"aiAgent::permission::title" = "Mikrofon ve konuşma erişimi gerekli";
+"aiAgent::permission::message" = "Ayarlar'dan erişime izin verin veya yazarak girin";
+"aiAgent::permission::keyboard" = "Bunun yerine yaz";
+"aiAgent::permission::setting" = "Ayarları Aç";
+"aiAgent::state::processing" = "İşleniyor";
+"aiAgent::state::confirm" = "Onay gerekiyor";
+"aiAgent::state::confirmExpired" = "Süresi doldu";
+"aiAgent::state::done" = "İşlem tamamlandı";
+"aiAgent::state::failed" = "İşlem başarısız";
+"aiAgent::done::default" = "Tamamlandı";
+"aiAgent::failed::default" = "Bu tamamlanamadı";
+"aiAgent::retry" = "Tekrar dene";
+"aiAgent::needSignIn::title" = "Giriş gerekli";
+"aiAgent::needSignIn::message" = "Hızlı AI girişini kullanmak için giriş yapın.";
+"aiAgent::title" = "Hızlı AI Girişi";
+"aiAgent::keyboard::stop" = "Durdur";
+"aiAgent::keyboard::send" = "Gönder";
+"aiAgent::stop" = "Durdur";
+"aiAgent::usage" = "%@ / %@ kredi";
+"aiAgent::plan::free" = "Ücretsiz";
+"aiAgent::plan::standard" = "Standart";
+"aiAgent::plan::lifetime" = "Ömür Boyu";
+"aiAgent::usage::topupRemaining" = "%@ ek kredi kaldı";
+"aiAgent::usage::planChangeScheduled" = "%1$@ tarihinde %2$@ planına geçiş";
+"aiAgent::stop::confirm::title" = "İşlem durdurulsun mu?";
+"aiAgent::stop::confirm::message" = "Durdurmak, devam eden işlemi iptal eder ve geri alınamaz.";
+"aiAgent::confirm::countdown" = "onaylamak için kaldı";
+"aiAgent::confirm::expired::message" = "Süre doldu. Lütfen tekrar talep edin.";
