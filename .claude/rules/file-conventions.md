@@ -3,6 +3,7 @@ description: 새 소스 파일 생성 시 전 레이어 공통 관례 — 파일
 paths:
   - "Domain/**"
   - "Repository/**"
+  - "Services/**"
   - "Presentations/**"
   - "TodoCalendarApp/**"
   - "Supports/**"
