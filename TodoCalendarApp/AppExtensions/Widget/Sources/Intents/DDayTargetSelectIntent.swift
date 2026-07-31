@@ -407,8 +407,7 @@ struct DDayTargetTurnQuery: EntityQuery, @unchecked Sendable {
                     DDayTargetDateFormatter.dateText(of: turn.time, in: timeZone),
                     DDayTargetDateFormatter.timeText(of: turn.time, in: timeZone)
                 ]
-                .filter { !$0.isEmpty }
-                .joined(separator: " ")
+                .joinedNonEmpty(separator: " ")
             )
         }
     }

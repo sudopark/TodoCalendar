@@ -48,15 +48,13 @@ private extension DDayWidgetViewModel {
     /// 소형 하단 한 줄 — "매주 월 · 3/15 오전 7:00". 빈 조각은 뺀다.
     var compactDetailText: String {
         return [self.repeatText, self.dateText, self.timeText]
-            .filter { !$0.isEmpty }
-            .joined(separator: " · ")
+            .joinedNonEmpty(separator: " · ")
     }
 
     /// 중형 우측 둘째 줄 — "오전 7:00 · 매주 월".
     var detailText: String {
         return [self.timeText, self.repeatText]
-            .filter { !$0.isEmpty }
-            .joined(separator: " · ")
+            .joinedNonEmpty(separator: " · ")
     }
 }
 
@@ -141,6 +139,71 @@ struct DDayMediumWidgetView: View {
 }
 
 
+// MARK: - 잠금화면
+
+/// 잠금화면은 시스템이 단색 렌더링을 적용하므로 색을 직접 지정하지 않는다.
+/// `.primary`/`.secondary`까지만 쓰고, 위젯 배경 설정은 여기서 의미가 없다.
+struct DDayCircularWidgetView: View {
+
+    private let model: DDayWidgetViewModel
+    init(model: DDayWidgetViewModel) {
+        self.model = model
+    }
+
+    var body: some View {
+        ZStack {
+            AccessoryWidgetBackground()
+
+            Text(model.ddayText)
+                .font(.system(size: 17, weight: .bold))
+                .minimumScaleFactor(0.5)
+                .lineLimit(1)
+                .padding(2)
+        }
+    }
+}
+
+struct DDayRectangularWidgetView: View {
+
+    private let model: DDayWidgetViewModel
+    init(model: DDayWidgetViewModel) {
+        self.model = model
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 1) {
+            DDayTitleView(model: model, fontSize: 13, lineLimit: 1)
+
+            Text(model.ddayText)
+                .font(.system(size: 18, weight: .bold))
+                .minimumScaleFactor(0.7)
+                .lineLimit(1)
+                .foregroundStyle(.primary)
+
+            if !model.dateText.isEmpty {
+                Text(model.dateText)
+                    .font(.system(size: 11))
+                    .lineLimit(1)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+struct DDayInlineWidgetView: View {
+
+    private let model: DDayWidgetViewModel
+    init(model: DDayWidgetViewModel) {
+        self.model = model
+    }
+
+    var body: some View {
+        Text(model.lockScreenInlineText)
+    }
+}
+
+
 // MARK: - EntryView
 
 struct DDayWidgetEntryView: View {
@@ -155,6 +218,19 @@ struct DDayWidgetEntryView: View {
 
     var body: some View {
         switch self.entry.result {
+        // accessory 케이스는 포괄 `.success`보다 앞에 둔다 — 뒤에 두면 소형 뷰가 잠금화면에 나온다
+        case .success(let model) where family == .accessoryCircular:
+            DDayCircularWidgetView(model: model)
+                .widgetURL(model.link)
+
+        case .success(let model) where family == .accessoryRectangular:
+            DDayRectangularWidgetView(model: model)
+                .widgetURL(model.link)
+
+        case .success(let model) where family == .accessoryInline:
+            DDayInlineWidgetView(model: model)
+                .widgetURL(model.link)
+
         case .success(let model) where family == .systemMedium:
             DDayMediumWidgetView(model: model)
                 .widgetURL(model.link)
@@ -185,7 +261,10 @@ struct DDayWidget: Widget {
             DDayWidgetEntryView(entry: entry)
                 .containerBackground(entry.backgroundShape, for: .widget)
         }
-        .supportedFamilies([.systemSmall, .systemMedium])
+        .supportedFamilies([
+            .systemSmall, .systemMedium,
+            .accessoryCircular, .accessoryRectangular, .accessoryInline
+        ])
         .configurationDisplayName("widget.dday::name".localized())
         .description("widget.common::explain".localized())
     }
@@ -207,6 +286,15 @@ struct DDayWidgetView_Provider: PreviewProvider {
             DDayWidgetEntryView(entry: entry)
                 .previewContext(WidgetPreviewContext(family: .systemMedium))
                 .containerBackground(.background, for: .widget)
+
+            DDayWidgetEntryView(entry: entry)
+                .previewContext(WidgetPreviewContext(family: .accessoryCircular))
+
+            DDayWidgetEntryView(entry: entry)
+                .previewContext(WidgetPreviewContext(family: .accessoryRectangular))
+
+            DDayWidgetEntryView(entry: entry)
+                .previewContext(WidgetPreviewContext(family: .accessoryInline))
         }
     }
 }

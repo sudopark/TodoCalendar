@@ -314,3 +314,56 @@ extension DDayWidgetViewModelProviderTests {
         #expect(model.link == nil)
     }
 }
+
+
+// MARK: - 잠금화면 표시 문구
+
+extension DDayWidgetViewModelProviderTests {
+
+    private func makeModel(title: String, dday: String) -> DDayWidgetViewModel {
+        return DDayWidgetViewModel(
+            eventTitle: title,
+            ddayText: dday,
+            dateText: "3월 15일 (월)",
+            timeText: "",
+            repeatText: ""
+        )
+    }
+
+    @Test("inline 문구는 D-n으로 시작한다 — 잠금화면은 뒤에서부터 잘린다")
+    func lockScreenInlineText_startsWithDDay() {
+        // given
+        let model = self.makeModel(title: "워크숍", dday: "D-14")
+
+        // when
+        let text = model.lockScreenInlineText
+
+        // then
+        #expect(text.hasPrefix("D-14") == true)
+        #expect(text.contains("워크숍") == true)
+    }
+
+    @Test("제목이 비어 있으면 D-n만 낸다")
+    func lockScreenInlineText_whenTitleIsEmpty_ddayOnly() {
+        // given
+        let model = self.makeModel(title: "", dday: "D-14")
+
+        // when
+        let text = model.lockScreenInlineText
+
+        // then
+        #expect(text == "D-14")
+    }
+
+    @Test("대상이 없으면 안내 문구를 낸다")
+    func lockScreenInlineText_whenNoTarget_usesGuide() {
+        // given
+        let model = DDayWidgetViewModel.noTarget()
+
+        // when
+        let text = model.lockScreenInlineText
+
+        // then
+        #expect(text.contains(model.eventTitle) == true)
+    }
+}

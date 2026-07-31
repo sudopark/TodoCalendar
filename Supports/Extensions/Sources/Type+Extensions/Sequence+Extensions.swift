@@ -33,8 +33,18 @@ extension Sequence {
 }
 
 
+extension Sequence where Element == String {
+
+    /// 빈 조각을 빼고 잇는다 — 표시 문구 조각 중 일부가 비었을 때
+    /// 구분자만 덩그러니 남는("· 3/15") 걸 막는다.
+    public func joinedNonEmpty(separator: String) -> String {
+        return self.filter { !$0.isEmpty }.joined(separator: separator)
+    }
+}
+
+
 extension Array {
-    
+
     public subscript(safe index: Int) -> Element? {
         get {
             guard (0..<self.count) ~= index else { return nil }
