@@ -20,18 +20,27 @@ PAIRS = [
     "TodoCalendarApp/Resources/Localize/{}.lproj/InfoPlist.strings",
 ]
 ENTRY = re.compile(r'"((?:[^"\\]|\\.)+)"\s*=\s*"((?:[^"\\]|\\.)*)"\s*;')
-SPEC = re.compile(r'%(?:\d+\$)?[@dDuUxXoOfeEgGcsSaAF]|%(?:\d+\$)?l[du]')
+SPEC = re.compile(r'%(?:\d+\$)?[-#0+ ]*\d*(?:\.\d+)?(?:hh?|ll?|q|z|t|L)?[@dDuUxXoOfeEgGcsSaAF]')
 
 def entries(path):
     text = Path(path).read_text(encoding="utf-8")
     text = re.sub(r'/\*.*?\*/', '', text, flags=re.S)
-    text = re.sub(r'//[^\n]*', '', text)
+    text = re.sub(r'^\s*//[^\n]*', '', text, flags=re.M)
     found = ENTRY.findall(text)
     dup = [k for k, c in collections.Counter(k for k, _ in found).items() if c > 1]
     return dict(found), dup
 
 def specs(value):
     return sorted(re.sub(r'\d+\$', '', m) for m in SPEC.findall(value))
+
+def check_en():
+    ok = True
+    for tpl in PAIRS:
+        _, dup = entries(ROOT / tpl.format("en"))
+        if dup:
+            print(f"[en] {tpl.format('en')} duplicate keys: {dup[:10]}")
+            ok = False
+    return ok
 
 def check(lang):
     ok = True
@@ -61,7 +70,7 @@ def main(args):
     langs = args or sorted(
         p.name.removesuffix(".lproj") for p in MAIN_DIR.glob("*.lproj") if p.name != "en.lproj"
     )
-    results = [check(lang) for lang in langs]
+    results = [check_en()] + [check(lang) for lang in langs]
     sys.exit(0 if all(results) else 1)
 
 if __name__ == "__main__":
