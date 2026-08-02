@@ -74,6 +74,7 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.spyEventSyncUsecase = nil
         self.spyEventUploadService = nil
         self.stubOrchestration = nil
+        FeatureFlag.disable(.aiAgent)
     }
     
     private func makeViewModel(
@@ -195,8 +196,9 @@ extension CalendarViewModelImpleTests {
         XCTAssertEqual(isForemostEventPrepared, [false, true])
     }
 
-    func testViewModel_whenPrepare_callsOrchestrationPrepare() async throws {
+    func testViewModel_whenAIAgentFlagOn_prepareCallsOrchestrationPrepare() async throws {
         // given
+        FeatureFlag.enable(.aiAgent)
         let viewModel = self.makeViewModel()
 
         // when
@@ -205,6 +207,18 @@ extension CalendarViewModelImpleTests {
         // then
         try await Task.sleep(for: .milliseconds(10))
         XCTAssertEqual(self.stubOrchestration.didPrepare, true)
+    }
+
+    func testViewModel_whenAIAgentFlagOff_prepareNotCallsOrchestrationPrepare() async throws {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when
+        viewModel.prepare()
+
+        // then
+        try await Task.sleep(for: .milliseconds(10))
+        XCTAssertNil(self.stubOrchestration.didPrepare)
     }
 
     private func makeViewModelWithInitialSetup(_ today: CalendarComponent.Day) -> CalendarViewModelImple {
@@ -969,6 +983,7 @@ extension CalendarViewModelImpleTests {
 
     func testViewModel_whenAIEntersCommandPhase_routesToAICommand() {
         // given
+        FeatureFlag.enable(.aiAgent)
         let viewModel = self.makeViewModel()
         viewModel.prepare()
 
@@ -982,6 +997,7 @@ extension CalendarViewModelImpleTests {
 
     func testViewModel_whenStayInCommandPhase_routesOnlyOncePerEntry() {
         // given
+        FeatureFlag.enable(.aiAgent)
         let viewModel = self.makeViewModel()
         viewModel.prepare()
 

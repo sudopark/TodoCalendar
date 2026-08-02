@@ -51,6 +51,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.spyRouter = nil
         self.spyListener = nil
         self.stubOrchestrationUsecase = nil
+        FeatureFlag.disable(.aiAgent)
     }
 
     private var stubOrchestrationUsecase: StubAIAgentOrchestrationUsecase!
@@ -1059,6 +1060,30 @@ extension DayEventListViewModelImpleTests {
 // MARK: - AI agent entry mode
 
 extension DayEventListViewModelImpleTests {
+
+    // 피처플래그 off(릴리즈 기본값): AI 진입 버튼 비노출
+    func testViewModel_whenAIAgentFlagOff_aiAgentEntryIsNotEnabled() {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when
+        let isEnabled = viewModel.isAIAgentEnabled
+
+        // then
+        XCTAssertEqual(isEnabled, false)
+    }
+
+    func testViewModel_whenAIAgentFlagOn_aiAgentEntryIsEnabled() {
+        // given
+        FeatureFlag.enable(.aiAgent)
+        let viewModel = self.makeViewModel()
+
+        // when
+        let isEnabled = viewModel.isAIAgentEnabled
+
+        // then
+        XCTAssertEqual(isEnabled, true)
+    }
 
     func testViewModel_whenAgentNotifiesListeningMode_emitsListeningState() {
         // given

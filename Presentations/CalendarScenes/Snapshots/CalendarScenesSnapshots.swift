@@ -215,6 +215,9 @@ private final class FakeDayEventListViewModel: DayEventListViewModel, @unchecked
         self.stubAIAgentState = aiAgentState
     }
 
+    // 스냅샷 카탈로그는 AI 상태 화면까지 캡처해야 하므로 항상 노출
+    var isAIAgentEnabled: Bool { true }
+
     var foremostEventModel: AnyPublisher<(any EventCellViewModel)?, Never> {
         Just(self.foremostModel).eraseToAnyPublisher()
     }
