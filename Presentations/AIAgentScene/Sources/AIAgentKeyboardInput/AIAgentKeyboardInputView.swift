@@ -15,6 +15,7 @@ import CommonPresentation
     fileprivate var text: String = ""
     fileprivate var actionTaken: Bool = false
     var usage: AIAgentUsage?
+    var userPlan: BillingUserPlan?
     @ObservationIgnored private var didBind = false
     @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
 
@@ -25,6 +26,11 @@ import CommonPresentation
         viewModel.usage
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] in self?.usage = $0 })
+            .store(in: &self.cancellables)
+
+        viewModel.currentUserPlan
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] in self?.userPlan = $0 })
             .store(in: &self.cancellables)
     }
 }
@@ -107,7 +113,7 @@ private struct AIAgentKeyboardInputView: View {
                     }
 
                 if let usage = state.usage, usage.dailyLimit > 0 {
-                    AIAgentUsageGaugeView(usage: usage)
+                    AIAgentUsageGaugeView(usage: usage, userPlan: state.userPlan)
                 }
 
                 TextField(

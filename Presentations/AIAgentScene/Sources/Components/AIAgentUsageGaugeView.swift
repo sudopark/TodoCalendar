@@ -18,11 +18,14 @@ struct AIAgentUsageGaugeView: View {
     @Environment(ViewAppearance.self) private var appearance
 
     private let usage: AIAgentUsage
+    // 플랜 정보 정본은 billingUserPlan 키 — usage 에서 흡수하지 않고 별도로 받는다 (#739)
+    private let userPlan: BillingUserPlan?
     // 사용률 90% 이상은 경고 틴트 — 한도 임박 알림을 게이지가 겸한다
     private static let warnThreshold: Double = 0.9
 
-    init(usage: AIAgentUsage) {
+    init(usage: AIAgentUsage, userPlan: BillingUserPlan?) {
         self.usage = usage
+        self.userPlan = userPlan
     }
 
     private var isNearLimit: Bool { self.usage.usedRatio >= Self.warnThreshold }
@@ -59,18 +62,18 @@ struct AIAgentUsageGaugeView: View {
 
                 Spacer()
 
-                if let plan = self.usage.plan {
+                if let plan = self.userPlan?.planId {
                     self.planChipView(plan)
                 }
             }
 
-            if let remaining = self.usage.topupRemaining, remaining > 0 {
+            if let remaining = self.userPlan?.topupRemaining, remaining > 0 {
                 Text("aiAgent::usage::topupRemaining".localized(with: remaining.formatted()))
                     .font(self.appearance.fontSet.size(12).asFont)
                     .foregroundStyle(self.appearance.colorSet.text2.asColor)
             }
 
-            if let change = self.usage.scheduledPlanChange {
+            if let change = self.userPlan?.scheduledChange {
                 self.scheduledChangeView(change)
             }
         }

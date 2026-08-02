@@ -163,6 +163,8 @@ struct AIJobDataMutationMapper {
 struct AIAgentUsageMapper {
 
     let usage: AIAgentUsage
+    // 플랜 정보는 AIAgentUsage 에 흡수시키지 않고 그대로 내보낸다 — 정본은 billingUserPlan 키 하나 (#739)
+    let userPlan: BillingUserPlan?
 
     init(json: [String: Any]) throws {
         guard let input = json["input_tokens"] as? Int,
@@ -170,17 +172,13 @@ struct AIAgentUsageMapper {
               let limit = json["daily_limit"] as? Int
         else { throw RuntimeError("invalid usage response") }
 
-        let topupRemaining = json["topup_remaining"] as? Int
-        let userPlan = (json["plan"] as? [String: Any])
-            .map { BillingUserPlanMapper(json: $0, topupRemaining: topupRemaining).userPlan }
+        self.userPlan = (json["plan"] as? [String: Any])
+            .map { BillingUserPlanMapper(json: $0, topupRemaining: json["topup_remaining"] as? Int).userPlan }
 
         self.usage = AIAgentUsage(input: input, output: output, limit: limit)
             |> \.date .~ (json["date"] as? String)
             |> \.creditsUsed .~ (json["credits_used"] as? Int)
             |> \.resetsAt .~ RemoteDateParser.parse(json["resets_at"])
             |> \.updatedAt .~ RemoteDateParser.parse(json["updated_at"])
-            |> \.plan .~ userPlan?.planId
-            |> \.scheduledPlanChange .~ userPlan?.scheduledChange
-            |> \.topupRemaining .~ topupRemaining
     }
 }

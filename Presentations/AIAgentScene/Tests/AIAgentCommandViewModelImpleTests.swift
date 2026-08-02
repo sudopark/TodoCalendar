@@ -8,6 +8,8 @@
 
 import XCTest
 import Combine
+import Prelude
+import Optics
 import Domain
 import UnitTestHelpKit
 
@@ -32,8 +34,11 @@ class AIAgentCommandViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.spyRouter = nil
     }
 
-    private func makeViewModel() -> AIAgentCommandViewModelImple {
-        let viewModel = AIAgentCommandViewModelImple(orchestrationUsecase: self.stubAgent)
+    private func makeViewModel(userPlan: BillingUserPlan? = nil) -> AIAgentCommandViewModelImple {
+        let viewModel = AIAgentCommandViewModelImple(
+            orchestrationUsecase: self.stubAgent,
+            billingUsecase: StubBillingUsecase(stubUserPlan: userPlan)
+        )
         viewModel.router = self.spyRouter
         return viewModel
     }
@@ -250,5 +255,24 @@ extension AIAgentCommandViewModelImpleTests {
         // then
         XCTAssertEqual(self.stubAgent.didLoadUsage, false)
         _ = observe
+    }
+}
+
+
+// MARK: - currentUserPlan 릴레이 (#739)
+
+extension AIAgentCommandViewModelImpleTests {
+
+    // seeding 전(prepend nil) + billingUsecase 값 순서로 방출
+    func test_currentUserPlan_relaysBillingUsecase() {
+        // given
+        let viewModel = self.makeViewModel(userPlan: BillingUserPlan() |> \.planId .~ .standard)
+        var plans: [BillingUserPlan?] = []
+        // when
+        viewModel.currentUserPlan
+            .sink(receiveValue: { plans.append($0) })
+            .store(in: &self.cancelBag)
+        // then
+        XCTAssertEqual(plans.map { $0?.planId }, [nil, .standard])
     }
 }

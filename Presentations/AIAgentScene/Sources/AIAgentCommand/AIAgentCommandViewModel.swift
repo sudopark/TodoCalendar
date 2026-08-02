@@ -39,6 +39,7 @@ public protocol AIAgentCommandViewModel: AnyObject, Sendable {
 
     var commandState: AnyPublisher<AIAgentCommandState?, Never> { get }
     var usage: AnyPublisher<AIAgentUsage, Never> { get }
+    var currentUserPlan: AnyPublisher<BillingUserPlan?, Never> { get }
 }
 
 
@@ -47,10 +48,15 @@ public protocol AIAgentCommandViewModel: AnyObject, Sendable {
 final class AIAgentCommandViewModelImple: AIAgentCommandViewModel, @unchecked Sendable {
 
     private let orchestrationUsecase: any AIAgentOrchestrationUsecase
+    private let billingUsecase: any BillingUsecase
     var router: (any AIAgentRouting)?
 
-    init(orchestrationUsecase: any AIAgentOrchestrationUsecase) {
+    init(
+        orchestrationUsecase: any AIAgentOrchestrationUsecase,
+        billingUsecase: any BillingUsecase
+    ) {
         self.orchestrationUsecase = orchestrationUsecase
+        self.billingUsecase = billingUsecase
     }
 }
 
@@ -136,5 +142,15 @@ extension AIAgentCommandViewModelImple {
 
     var usage: AnyPublisher<AIAgentUsage, Never> {
         return self.orchestrationUsecase.usage
+    }
+
+    // seeding 전엔 currentUserPlan 이 무방출(.compactMap { $0 }) 이라 첫 값을 prepend 해
+    // 뷰가 플랜 없는 상태부터 그릴 수 있게 한다. usage 와 CombineLatest 로 합성하지 않는다 —
+    // 두 값은 독립 릴레이라 ViewState 가 각각 받으면 되고, 합성하면 한쪽이 안 오면 둘 다 막힌다 (#739)
+    var currentUserPlan: AnyPublisher<BillingUserPlan?, Never> {
+        return self.billingUsecase.currentUserPlan
+            .map { $0 as BillingUserPlan? }
+            .prepend(nil)
+            .eraseToAnyPublisher()
     }
 }
