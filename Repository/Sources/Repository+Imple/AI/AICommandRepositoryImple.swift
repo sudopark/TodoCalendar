@@ -95,9 +95,10 @@ extension AICommandRepositoryImple {
 
 extension AICommandRepositoryImple {
 
-    public func loadUsage() async throws -> AIAgentUsage {
+    public func loadUsage() async throws -> AIAgentUsageLoadResult {
         let json = try await self.requestJson(.get, AIAPIEndpoints.usage)
-        return try AIAgentUsageMapper(json: json).usage
+        let mapper = try AIAgentUsageMapper(json: json)
+        return AIAgentUsageLoadResult(usage: mapper.usage, userPlan: mapper.userPlan)
     }
 }
 

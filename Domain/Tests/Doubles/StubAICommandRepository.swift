@@ -84,7 +84,7 @@ class BaseStubAICommandRepository: AICommandRepository, @unchecked Sendable {
         self.stubProcessingCommand = nil
     }
     
-    func loadUsage() async throws -> AIAgentUsage {
+    func loadUsage() async throws -> AIAgentUsageLoadResult {
         throw RuntimeError("not imple")
     }
 }

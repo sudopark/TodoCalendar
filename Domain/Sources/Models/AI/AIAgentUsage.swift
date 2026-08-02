@@ -20,12 +20,6 @@ public struct AIAgentUsage: Sendable {
     // 일일 한도 리셋 시각 (UTC 자정)
     public var resetsAt: Date?
     public var updatedAt: Date?
-    // 서버가 내려준 플랜. 미배포 응답·미지 id 는 nil
-    public var plan: BillingPlanId?
-    // 하향 예약 — 다음 차수부터 적용될 플랜 변경
-    public var scheduledPlanChange: BillingUserPlan.ScheduledChange?
-    // top-up 잔량. daily_limit 과 합산되지 않는 별도 풀
-    public var topupRemaining: Int?
 
     public init(
         input: Int, output: Int, limit: Int
@@ -49,5 +43,21 @@ public extension AIAgentUsage {
     var usedRatio: Double {
         guard self.dailyLimit > 0 else { return 0 }
         return min(Double(self.usedCredits) / Double(self.dailyLimit), 1.0)
+    }
+}
+
+
+// MARK: - AIAgentUsageLoadResult
+
+// GET /v1/ai/usage 응답 하나가 usage 와 plan 두 정보를 함께 내려주지만,
+// 플랜 정보의 정본은 billingUserPlan 키 하나 — usage 에 흡수시키지 않고 나란히 반환한다 (#739)
+public struct AIAgentUsageLoadResult: Sendable {
+
+    public let usage: AIAgentUsage
+    public let userPlan: BillingUserPlan?
+
+    public init(usage: AIAgentUsage, userPlan: BillingUserPlan?) {
+        self.usage = usage
+        self.userPlan = userPlan
     }
 }

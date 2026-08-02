@@ -66,13 +66,21 @@ extension AIAgentUsageUsecaseImple {
     }
     
     public func loadUsage() async throws -> AIAgentUsage {
-        let usage = try await self.repository.loadUsage()
+        let result = try await self.repository.loadUsage()
         self.sharedDataStore.put(
             AIAgentUsage.self,
             key: ShareDataKeys.aiAgentUsage.rawValue,
-            usage
+            result.usage
         )
-        return usage
+        // nil 이면 put 하지 않는다 — 기존 값을 덮어 구매로 갱신된 최신 플랜을 지우면 안 된다 (#739)
+        if let userPlan = result.userPlan {
+            self.sharedDataStore.put(
+                BillingUserPlan.self,
+                key: ShareDataKeys.billingUserPlan.rawValue,
+                userPlan
+            )
+        }
+        return result.usage
     }
     
     public var currentUsage: AnyPublisher<AIAgentUsage, Never> {

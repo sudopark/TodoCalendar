@@ -107,9 +107,10 @@ final class AIAgentSceneSnapshots: XCTestCase {
             state.commandState = .done(command: "일정 추가", message: "추가했어요")
             state.usage = AIAgentUsage(input: 1234, output: 0, limit: 20000)
                 |> \.creditsUsed .~ 1234
-                |> \.plan .~ .standard
+            state.userPlan = BillingUserPlan()
+                |> \.planId .~ .standard
                 |> \.topupRemaining .~ 12300
-                |> \.scheduledPlanChange .~ .init(
+                |> \.scheduledChange .~ .init(
                     planId: .free, effectiveAt: Date(timeIntervalSince1970: 1787702400)
                 )
             return AIAgentCommandStageView()

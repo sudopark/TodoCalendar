@@ -22,6 +22,7 @@ import CommonPresentation
 
     var commandState: AIAgentCommandState?
     var usage: AIAgentUsage?
+    var userPlan: BillingUserPlan?
 
     func bind(_ viewModel: any AIAgentCommandViewModel) {
         guard self.didBind == false else { return }
@@ -35,6 +36,11 @@ import CommonPresentation
         viewModel.usage
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] in self?.usage = $0 })
+            .store(in: &self.cancellables)
+
+        viewModel.currentUserPlan
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] in self?.userPlan = $0 })
             .store(in: &self.cancellables)
     }
 }
@@ -138,7 +144,7 @@ struct AIAgentCommandStageView: View {
                         }
 
                     if let usage = state.usage, usage.dailyLimit > 0 {
-                        AIAgentUsageGaugeView(usage: usage)
+                        AIAgentUsageGaugeView(usage: usage, userPlan: state.userPlan)
                     }
 
                     Group {

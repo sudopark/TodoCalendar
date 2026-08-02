@@ -127,14 +127,14 @@ private final class PrivateStubRepository: BaseStubAICommandRepository, @uncheck
 
     var stubResults: [Result<AIAgentUsage, any Error>] = []
 
-    override func loadUsage() async throws -> AIAgentUsage {
+    override func loadUsage() async throws -> AIAgentUsageLoadResult {
         guard !self.stubResults.isEmpty
         else {
             throw RuntimeError("failed")
         }
         let first = self.stubResults.removeFirst()
         switch first {
-        case .success(let usage): return usage
+        case .success(let usage): return AIAgentUsageLoadResult(usage: usage, userPlan: nil)
         case .failure(let error): throw error
         }
     }

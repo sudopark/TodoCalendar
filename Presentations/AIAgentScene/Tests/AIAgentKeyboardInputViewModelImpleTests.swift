@@ -8,6 +8,8 @@
 
 import Testing
 import Combine
+import Prelude
+import Optics
 import Domain
 import UnitTestHelpKit
 
@@ -19,9 +21,10 @@ final class AIAgentKeyboardInputViewModelImpleTests: PublisherWaitable {
     var cancelBag: Set<AnyCancellable>! = .init()
     private let stubAgent: StubAIAgentOrchestrationUsecase = .init()
 
-    private func makeViewModel() -> AIAgentKeyboardInputViewModelImple {
+    private func makeViewModel(userPlan: BillingUserPlan? = nil) -> AIAgentKeyboardInputViewModelImple {
         return AIAgentKeyboardInputViewModelImple(
-            aiAgentOrchestrationUsecase: self.stubAgent
+            aiAgentOrchestrationUsecase: self.stubAgent,
+            billingUsecase: StubBillingUsecase(stubUserPlan: userPlan)
         )
     }
 }
@@ -51,5 +54,23 @@ extension AIAgentKeyboardInputViewModelImpleTests {
         #expect(usage?.inputTokens == 100)
         #expect(usage?.outputTokens == 200)
         #expect(usage?.dailyLimit == 5000)
+    }
+}
+
+
+// MARK: - currentUserPlan 릴레이 (#739)
+
+extension AIAgentKeyboardInputViewModelImpleTests {
+
+    // seeding 전(prepend nil) + billingUsecase 값 순서로 방출
+    @Test func viewModel_relaysCurrentUserPlan() async throws {
+        // given
+        let expect = expectConfirm("currentUserPlan 을 릴레이한다")
+        expect.count = 2
+        let viewModel = self.makeViewModel(userPlan: BillingUserPlan() |> \.planId .~ .standard)
+        // when
+        let plans = try await self.outputs(expect, for: viewModel.currentUserPlan)
+        // then
+        #expect(plans.map { $0?.planId } == [nil, .standard])
     }
 }

@@ -252,21 +252,21 @@ extension AICommandRepositoryImpleTests {
         let repository = self.makeRepository()
 
         // when
-        let usage = try await repository.loadUsage()
+        let result = try await repository.loadUsage()
 
         // then
-        XCTAssertEqual(usage.date, "2026-06-01")
-        XCTAssertEqual(usage.inputTokens, 1250)
-        XCTAssertEqual(usage.outputTokens, 320)
-        XCTAssertEqual(usage.dailyLimit, 5000)
-        XCTAssertNotNil(usage.updatedAt)
-        XCTAssertEqual(usage.creditsUsed, 1400)
-        XCTAssertEqual(usage.resetsAt?.timeIntervalSince1970, 1780358400)
-        XCTAssertEqual(usage.plan, .standard)
-        XCTAssertEqual(usage.topupRemaining, 12300)
-        XCTAssertEqual(usage.scheduledPlanChange?.planId, .free)
+        XCTAssertEqual(result.usage.date, "2026-06-01")
+        XCTAssertEqual(result.usage.inputTokens, 1250)
+        XCTAssertEqual(result.usage.outputTokens, 320)
+        XCTAssertEqual(result.usage.dailyLimit, 5000)
+        XCTAssertNotNil(result.usage.updatedAt)
+        XCTAssertEqual(result.usage.creditsUsed, 1400)
+        XCTAssertEqual(result.usage.resetsAt?.timeIntervalSince1970, 1780358400)
+        XCTAssertEqual(result.userPlan?.planId, .standard)
+        XCTAssertEqual(result.userPlan?.topupRemaining, 12300)
+        XCTAssertEqual(result.userPlan?.scheduledChange?.planId, .free)
         XCTAssertEqual(
-            usage.scheduledPlanChange?.effectiveAt.timeIntervalSince1970, 1787702400
+            result.userPlan?.scheduledChange?.effectiveAt.timeIntervalSince1970, 1787702400
         )
     }
 
@@ -275,15 +275,13 @@ extension AICommandRepositoryImpleTests {
         let repository = self.makeRepositoryWithLegacyUsageResponse()
 
         // when
-        let usage = try await repository.loadUsage()
+        let result = try await repository.loadUsage()
 
         // then
-        XCTAssertNil(usage.creditsUsed)
-        XCTAssertNil(usage.resetsAt)
-        XCTAssertEqual(usage.dailyLimit, 5000)
-        XCTAssertNil(usage.plan)
-        XCTAssertNil(usage.scheduledPlanChange)
-        XCTAssertNil(usage.topupRemaining)
+        XCTAssertNil(result.usage.creditsUsed)
+        XCTAssertNil(result.usage.resetsAt)
+        XCTAssertEqual(result.usage.dailyLimit, 5000)
+        XCTAssertNil(result.userPlan)
     }
 
     // 모르는 플랜 id는 파싱 실패로 두고 나머지 필드는 살린다 — 칩만 안 뜨고 게이지는 정상
@@ -293,13 +291,14 @@ extension AICommandRepositoryImpleTests {
         let repository = self.makeRepositoryWithUnknownPlanResponse()
 
         // when
-        let usage = try await repository.loadUsage()
+        let result = try await repository.loadUsage()
 
         // then
-        XCTAssertNil(usage.plan)
-        XCTAssertEqual(usage.topupRemaining, 500)
-        XCTAssertEqual(usage.creditsUsed, 1400)
-        XCTAssertNil(usage.scheduledPlanChange)
+        XCTAssertNotNil(result.userPlan)
+        XCTAssertNil(result.userPlan?.planId)
+        XCTAssertEqual(result.userPlan?.topupRemaining, 500)
+        XCTAssertEqual(result.usage.creditsUsed, 1400)
+        XCTAssertNil(result.userPlan?.scheduledChange)
     }
 }
 

@@ -31,5 +31,5 @@ public protocol AICommandRepository: AnyObject, Sendable {
     func loadProcessingAICommand() async throws -> ProcessingAICommand?
     func clearProcessingAICommand() async throws
     
-    func loadUsage() async throws -> AIAgentUsage
+    func loadUsage() async throws -> AIAgentUsageLoadResult
 }
