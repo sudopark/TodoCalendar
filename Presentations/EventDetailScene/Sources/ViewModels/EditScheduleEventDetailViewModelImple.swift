@@ -91,7 +91,10 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
     func prepare() {
         
         self.subject.isLoading.send(true)
-        self.ddayCandidateUsecase.refresh()
+        // 플래그가 꺼져 있으면 후보 목록을 읽지 않는다 (#741 배포 보류)
+        if FeatureFlag.isEnable(.ddayWidget) {
+            self.ddayCandidateUsecase.refresh()
+        }
 
         let handlePrepared: (EventDetailBasicData, EventDetailData) -> Void = { [weak self] basic, addition in
             self?.subject.basicData.send(
@@ -543,36 +546,45 @@ extension EditScheduleEventDetailViewModelImple {
     var moreActions: AnyPublisher<[[EventDetailMoreAction]], Never> {
         let scheduleId = self.scheduleId
         let targetTime = self.repeatingEventTargetTime
+        // #741 D-day 위젯이 배포 보류라 플래그가 꺼진 동안은 후보 등록 메뉴를 감춘다 —
+        // 위젯 없이 후보만 등록하게 두면 갈 곳 없는 기능이 된다. 처리 로직은 살아 있다
+        let isDDayWidgetEnabled = FeatureFlag.isEnable(.ddayWidget)
         let transform: (
             EventDetailBasicData, (any ForemostMarkableEvent)?, [DDayCandidate]
         ) -> [[EventDetailMoreAction]] = { basic, foremostEvent, candidates in
             let isRepeating = basic.isRepeatingEvent
             let isForemost = foremostEvent?.eventId == scheduleId
-            let isDDayCandidate = candidates.contains(
-                DDayCandidate(
-                    scheduleId: scheduleId, targetTime: targetTime, isRepeating: isRepeating
-                )
-            )
             let removeActions: [EventDetailMoreAction] = isRepeating
                 ? [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)]
                 : [.remove(onlyThisEvent: false)]
+            let ddayActions: [EventDetailMoreAction] = isDDayWidgetEnabled
+                ? [
+                    .toggleDDayCandidate(
+                        isRegistered: candidates.contains(
+                            DDayCandidate(
+                                scheduleId: scheduleId,
+                                targetTime: targetTime,
+                                isRepeating: isRepeating
+                            )
+                        )
+                    )
+                ]
+                : []
             // TODO: share 기능 일단 비활성화
             let otherActions: [EventDetailMoreAction] = isRepeating
 //                ? [.share]
 //                : [.toggleTo(isForemost: !isForemost), .share]
-                ? [.toggleDDayCandidate(isRegistered: isDDayCandidate), .copy, .transformToTodo]
-                : [
-                    .toggleTo(isForemost: !isForemost),
-                    .toggleDDayCandidate(isRegistered: isDDayCandidate),
-                    .copy,
-                    .transformToTodo
-                ]
+                ? ddayActions + [.copy, .transformToTodo]
+                : [.toggleTo(isForemost: !isForemost)] + ddayActions + [.copy, .transformToTodo]
             return [removeActions, otherActions]
         }
         return Publishers.CombineLatest3(
             self.subject.basicData.compactMap { $0?.origin },
             self.foremostEventUsecase.foremostEvent,
-            self.ddayCandidateUsecase.candidates
+            // 플래그가 꺼져 있으면 후보 목록을 조회·구독하지 않는다
+            isDDayWidgetEnabled
+                ? self.ddayCandidateUsecase.candidates
+                : Just<[DDayCandidate]>([]).eraseToAnyPublisher()
         )
         .map(transform)
         .removeDuplicates()
