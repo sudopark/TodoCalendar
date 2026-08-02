@@ -78,7 +78,12 @@ public protocol AIAgentUsecaseFactory {
     func makeSpeechRecognizeUsecase() -> any SpeechRecognizeUsecase
 }
 
-public protocol UsecaseFactory: AccountUsecaseFactory, CalendarUsecaseFactory, EventUsecaseFactory, NotificationUsecaseFactory, SettingUsecaseFactory, CommonUsecaseFactory, SupportUsecaseFactory, ExternalCalendarUsecaseFactory, AIAgentUsecaseFactory {
+public protocol BillingUsecaseFactory {
+
+    var billingUsecase: any BillingUsecase { get }
+}
+
+public protocol UsecaseFactory: AccountUsecaseFactory, CalendarUsecaseFactory, EventUsecaseFactory, NotificationUsecaseFactory, SettingUsecaseFactory, CommonUsecaseFactory, SupportUsecaseFactory, ExternalCalendarUsecaseFactory, AIAgentUsecaseFactory, BillingUsecaseFactory {
 
     var eventNotifyService: SharedEventNotifyService { get }
 }
