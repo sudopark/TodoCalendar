@@ -13,6 +13,9 @@ public final class FeatureFlag: @unchecked Sendable {
     
     public enum Flags: Sendable {
         case reservedFlag
+        /// D-day 위젯(#741) — 배포 보류 중. 켜면 일정 상세에 후보 등록 메뉴가 다시 노출된다.
+        /// 위젯 갤러리 노출은 `TodoCalendarWidgetBundle`에서 별도로 막혀 있다.
+        case ddayWidget
     }
     
     private var enableFlags: Set<Flags> = []
