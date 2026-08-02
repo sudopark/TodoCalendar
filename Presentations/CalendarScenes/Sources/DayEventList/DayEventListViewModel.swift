@@ -68,6 +68,7 @@ protocol DayEventListViewModel: AnyObject, Sendable, DayEventListSceneInteractor
     func attachListener(_ listener: any DayEventListSceneListener)
 
     // presenter
+    var isAIAgentEnabled: Bool { get }
     var foremostEventModel: AnyPublisher<(any EventCellViewModel)?, Never> { get }
     var uncompletedTodoEventModels: AnyPublisher<[TodoEventCellViewModel], Never> { get }
     var selectedDay: AnyPublisher<SelectedDayModel, Never> { get }
@@ -393,6 +394,11 @@ extension DayEventListViewModelImple {
 
     var foremostEventMarkingStatus: AnyPublisher<ForemostMarkingStatus, Never> {
         return self.foremostEventUsecase.foremostEventMarkingStatus
+    }
+
+    // 세션 중 불변 플래그라 publisher가 아닌 스냅샷 Bool로 노출
+    var isAIAgentEnabled: Bool {
+        return FeatureFlag.isEnable(.aiAgent)
     }
 
     var aiAgentState: AnyPublisher<AIAgentState, Never> {

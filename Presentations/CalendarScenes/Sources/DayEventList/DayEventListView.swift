@@ -42,6 +42,7 @@ private enum AICommandBadge: Equatable {
     fileprivate var dayModel: SelectedDayModel?
     fileprivate var cellViewModels: [any EventCellViewModel] = []
     fileprivate var foremostEventMarkingStatus: ForemostMarkingStatus = .idle
+    fileprivate var isAIAgentEnabled: Bool = false
     fileprivate var aiAgentState: AIAgentState = .idle
     fileprivate var recognizingText: String = ""
     fileprivate var voiceLevel: Float = 0
@@ -74,6 +75,8 @@ private enum AICommandBadge: Equatable {
 
         guard self.didBind == false else { return }
         self.didBind = true
+
+        self.isAIAgentEnabled = viewModel.isAIAgentEnabled
 
         viewModel.foremostEventModel
             .receive(on: RunLoop.main)
@@ -511,9 +514,11 @@ private struct QuickAddNewTodoView: View {
             }
             .opacity(self.inputDimOpacity)
 
-            AIAgentEntryButton(badge: self.state.aiCommandBadge) {
-                self.isFocusInput = false
-                self.eventHandler.handleAIEntryButtonTap()
+            if self.state.isAIAgentEnabled {
+                AIAgentEntryButton(badge: self.state.aiCommandBadge) {
+                    self.isFocusInput = false
+                    self.eventHandler.handleAIEntryButtonTap()
+                }
             }
         }
     }
