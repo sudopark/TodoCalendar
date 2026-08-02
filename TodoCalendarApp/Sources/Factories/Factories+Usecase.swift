@@ -80,10 +80,16 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
     var eventNotifyService: SharedEventNotifyService {
         return self.applicationBase.eventNotifyService
     }
+
+    // 미로그인 유저는 진입점이 숨겨지지만(Task 6) 프로토콜 충족을 위해 필요.
+    // 로그인 전 카탈로그 조회도 같은 앱 수명 인스턴스로 돈다 (#739)
+    var billingUsecase: any BillingUsecase {
+        return self.applicationBase.billingUsecase
+    }
 }
 
 extension NonLoginUsecaseFactoryImple {
-    
+
     func makeCalendarSettingUsecase() -> any CalendarSettingUsecase {
         let settingRepository = CalendarSettingRepositoryImple(
             environmentStorage: applicationBase.userDefaultEnvironmentStorage
@@ -394,7 +400,6 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
     let eventUploadService: any EventUploadService
     let appUpdateCheckUsecase: any AppUpdateCheckUsecase
     let aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
-    let billingUsecase: any BillingUsecase
     private let applicationBase: ApplicationBase
 
     init(
@@ -494,19 +499,15 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
             speechRecognizeUsecase: speech,
             eventSyncUsecase: self.eventSyncUsecase
         )
-
-        let billingUsecase = BillingUsecaseImple(
-            repository: BillingRepositoryImple(remote: applicationBase.remoteAPI),
-            appStoreService: AppStoreBillingServiceImple(),
-            sharedDataStore: applicationBase.sharedDataStore
-        )
-        // 앱 밖 갱신·환불·승인대기 통과와 미반영 트랜잭션은 이 리스너로만 들어온다
-        billingUsecase.startObservingTransactions()
-        self.billingUsecase = billingUsecase
     }
 
     var eventNotifyService: SharedEventNotifyService {
         return self.applicationBase.eventNotifyService
+    }
+
+    // 트랜잭션 리스너는 앱 수명 단일 인스턴스 — ApplicationBase 소유를 그대로 노출 (#739)
+    var billingUsecase: any BillingUsecase {
+        return self.applicationBase.billingUsecase
     }
 }
 
