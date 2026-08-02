@@ -8,6 +8,8 @@
 
 import Foundation
 import StoreKit
+import Prelude
+import Optics
 import Domain
 import Extensions
 
@@ -56,6 +58,7 @@ extension AppStoreBillingServiceImple {
                 displayName: $0.displayName,
                 displayPrice: $0.displayPrice
             )
+            |> \.kind .~ productKind($0)
         }
     }
 }
@@ -106,6 +109,24 @@ private func verifiedTransaction(
         )
     case .unverified:
         throw RuntimeError("unverified app store transaction")
+    }
+}
+
+// 타입 멤버가 아닌 파일 스코프 함수 — 상태를 안 쓰는 순수 변환이다.
+// 자동갱신 구독만 구독으로 취급한다. 비갱신 구독·비소모품·소모품은 전부 1회 결제 고지 대상
+private func productKind(_ product: StoreKit.Product) -> BillingProductKind {
+    guard product.type == .autoRenewable, let subscription = product.subscription
+    else { return .oneTime }
+    return .subscription(period: subscriptionPeriod(subscription.subscriptionPeriod))
+}
+
+private func subscriptionPeriod(_ period: StoreKit.Product.SubscriptionPeriod) -> BillingSubscriptionPeriod? {
+    switch (period.unit, period.value) {
+    case (.week, 1):  return .weekly
+    case (.month, 1): return .monthly
+    case (.year, 1):  return .yearly
+    // 2주·3개월 같은 변칙 주기는 표기 문구가 없다 — 알 수 없음으로 두고 화면이 기간을 생략한다
+    default:          return nil
     }
 }
 
