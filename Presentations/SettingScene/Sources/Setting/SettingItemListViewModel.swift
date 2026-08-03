@@ -27,6 +27,7 @@ struct SettingItemModel: SettingItemModelType {
         case shareApp
         case addReview
         case sourceCode
+        case billingPlan
     }
     
     let itemId: ItemId
@@ -60,6 +61,9 @@ struct SettingItemModel: SettingItemModelType {
         case .sourceCode:
             self.iconNamge = "pc"
             self.text = "Source Code"
+        case .billingPlan:
+            self.iconNamge = "creditcard"
+            self.text = "setting.billing.plan::name".localized()
         }
     }
     
@@ -248,6 +252,9 @@ extension SettingItemListViewModelImple {
             
         case .sourceCode:
             self.router?.openSafari("https://github.com/sudopark/TodoCalendar")
+
+        case .billingPlan:
+            self.router?.routeToPaywall()
         }
     }
     
@@ -274,11 +281,13 @@ extension SettingItemListViewModelImple {
     var sectionModels: AnyPublisher<[any SettingSectionModelType], Never> {
 
         let transform: (AccountInfo?, DeviceInfo?, Bool) -> [any SettingSectionModelType] = { account, device, isUpdateAvailable in
+            // 미로그인·플래그 off 둘 다 진입점을 숨긴다 — 미로그인 숨김은 이 항목이 유일한 예외 선례 (#739)
+            let showsBillingPlan = account != nil && FeatureFlag.isEnable(.billingPaywall)
             let baseSectionItems: [SettingItemModel] = [
                 .init(.appearance),
                 .init(.editEvent),
                 .init(.holidaySetting)
-            ]
+            ] + (showsBillingPlan ? [.init(.billingPlan)] : [])
             let accountItem = AccountSettingItemModel(account)
             let baseSection = SettingSectionModel(
                 headerText: nil,

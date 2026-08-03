@@ -19,4 +19,9 @@ final class SpyAIAgentRouter: BaseSpyRouter, AIAgentRouting, @unchecked Sendable
     func openSystemSetting() {
         self.didOpenSystemSetting = true
     }
+
+    var didRouteToPaywall: Bool?
+    func routeToPaywall() {
+        self.didRouteToPaywall = true
+    }
 }

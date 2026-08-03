@@ -54,7 +54,8 @@ final class SettingSceneSnapshots: XCTestCase {
                     SettingItemModel(.appearance),
                     SettingItemModel(.editEvent),
                     SettingItemModel(.holidaySetting),
-                    AccountSettingItemModel(nil)
+                    SettingItemModel(.billingPlan),
+                    AccountSettingItemModel(AccountInfo("some"))
                 ]
             )
             let supportSection = SettingSectionModel(

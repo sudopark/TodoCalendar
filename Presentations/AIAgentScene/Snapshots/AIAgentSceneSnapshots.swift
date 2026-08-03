@@ -139,6 +139,7 @@ final class AIAgentSceneSnapshots: XCTestCase {
             let state = AIAgentCommandViewState()
             state.commandState = .failed(command: "일정 삭제", reason: "오늘 사용량을 모두 썼어요. 내일 다시 시도해 주세요.", errorCode: .dailyLimitExceeded)
             state.usage = .init(input: 5000, output: 0, limit: 5000)
+            state.isPaywallAvailable = true
             return AIAgentCommandStageView()
                 .environment(state)
                 .environment(AIAgentCommandViewEventHandler())

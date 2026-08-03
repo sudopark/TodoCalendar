@@ -414,6 +414,7 @@
 "setting.help::name" = "Help";
 "setting.share::name" = "Share App";
 "setting.write_review::name" = "Write an app review";
+"setting.billing.plan::name" = "Plan";
 "setting.account.signedIn::manageAccount" = "Account";
 "setting.account.needSignIn" = "Login";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -557,6 +558,7 @@
 "aiAgent::stop::confirm::message" = "Stopping discards the task in progress, and it can't be resumed.";
 "aiAgent::confirm::countdown" = "left to approve";
 "aiAgent::confirm::expired::message" = "Time expired. Please request again.";
+"aiAgent::failed::showPlans" = "View Plans";
 
 // MARK: - billing
 

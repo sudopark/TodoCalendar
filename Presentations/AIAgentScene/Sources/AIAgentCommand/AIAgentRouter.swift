@@ -15,12 +15,21 @@ import CommonPresentation
 
 protocol AIAgentRouting: Routing, Sendable {
     func openSystemSetting()
+    func routeToPaywall()
 }
 
 
 // MARK: - AIAgentRouter
 
-final class AIAgentRouter: BaseRouterImple, AIAgentRouting, @unchecked Sendable { }
+final class AIAgentRouter: BaseRouterImple, AIAgentRouting, @unchecked Sendable {
+
+    private let paywallSceneBuilder: any PaywallSceneBuilder
+
+    init(paywallSceneBuilder: any PaywallSceneBuilder) {
+        self.paywallSceneBuilder = paywallSceneBuilder
+        super.init()
+    }
+}
 
 extension AIAgentRouter {
 
@@ -30,6 +39,14 @@ extension AIAgentRouter {
                   UIApplication.shared.canOpenURL(url)
             else { return }
             UIApplication.shared.open(url)
+        }
+    }
+
+    // 한도 초과 실패 화면의 "플랜 보기" — 전체화면으로 열어 시트 위에도 뜨게 한다 (#739)
+    func routeToPaywall() {
+        Task { @MainActor in
+            let next = self.paywallSceneBuilder.makePaywallScene()
+            self.showFullScreen(next)
         }
     }
 }

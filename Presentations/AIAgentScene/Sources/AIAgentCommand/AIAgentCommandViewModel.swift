@@ -36,10 +36,12 @@ public protocol AIAgentCommandViewModel: AnyObject, Sendable {
     func cancel()
     func acknowledge()
     func close()
+    func showPlans()
 
     var commandState: AnyPublisher<AIAgentCommandState?, Never> { get }
     var usage: AnyPublisher<AIAgentUsage, Never> { get }
     var currentUserPlan: AnyPublisher<BillingUserPlan?, Never> { get }
+    var isPaywallAvailable: Bool { get }
 }
 
 
@@ -103,6 +105,12 @@ extension AIAgentCommandViewModelImple {
     func close() {                         // 숨김 — 상태 보존, 재진입 가능
         self.router?.closeScene()
     }
+
+    // 한도 초과 실패 화면의 "플랜 보기" — 노출 여부는 View가 errorCode·isPaywallAvailable로
+    // 이미 걸렀으므로 여기선 라우팅만 위임 (#739)
+    func showPlans() {
+        self.router?.routeToPaywall()
+    }
 }
 
 
@@ -152,5 +160,10 @@ extension AIAgentCommandViewModelImple {
             .map { $0 as BillingUserPlan? }
             .prepend(nil)
             .eraseToAnyPublisher()
+    }
+
+    // 세션 중 불변 플래그라 publisher가 아닌 스냅샷 Bool로 노출 (DayEventListViewModelImple.isAIAgentEnabled 선례, #739)
+    var isPaywallAvailable: Bool {
+        return FeatureFlag.isEnable(.billingPaywall)
     }
 }

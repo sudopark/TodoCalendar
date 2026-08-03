@@ -26,30 +26,34 @@ protocol SettingItemListRouting: Routing, Sendable {
     func routeToAccountManage()
     func routeToSignIn()
     func openShare(link path: String)
+    func routeToPaywall()
 }
 
 // MARK: - Router
 
-final class SettingItemListRouter: BaseRouterImple, SettingItemListRouting, @unchecked Sendable { 
-    
+final class SettingItemListRouter: BaseRouterImple, SettingItemListRouting, @unchecked Sendable {
+
     private let appearanceSceneBuilder: any AppearanceSettingSceneBuiler
     private let eventSettingSceneBuilder: any EventSettingSceneBuiler
     private let holidayListSceneBuilder: any HolidayListSceneBuiler
     private let memberSceneBuilder: any MemberSceneBuilder
     private let feedbackPostSceneBuiler: any FeedbackPostSceneBuiler
-    
+    private let paywallSceneBuilder: any PaywallSceneBuilder
+
     init(
         appearanceSceneBuilder: any AppearanceSettingSceneBuiler,
         eventSettingSceneBuilder: any EventSettingSceneBuiler,
         holidayListSceneBuilder: any HolidayListSceneBuiler,
         memberSceneBuilder: any MemberSceneBuilder,
-        feedbackPostSceneBuiler: any FeedbackPostSceneBuiler
+        feedbackPostSceneBuiler: any FeedbackPostSceneBuiler,
+        paywallSceneBuilder: any PaywallSceneBuilder
     ) {
         self.appearanceSceneBuilder = appearanceSceneBuilder
         self.eventSettingSceneBuilder = eventSettingSceneBuilder
         self.holidayListSceneBuilder = holidayListSceneBuilder
         self.memberSceneBuilder = memberSceneBuilder
         self.feedbackPostSceneBuiler = feedbackPostSceneBuiler
+        self.paywallSceneBuilder = paywallSceneBuilder
     }
 }
 
@@ -124,6 +128,14 @@ extension SettingItemListRouter {
             )
             activityViewController.popoverPresentationController?.sourceView = self.currentScene?.view
             self.currentScene?.present(activityViewController, animated: true)
+        }
+    }
+
+    // 전체화면으로 열어 시트 위에도 뜨게 한다 (#739)
+    func routeToPaywall() {
+        Task { @MainActor in
+            let next = self.paywallSceneBuilder.makePaywallScene()
+            self.showFullScreen(next)
         }
     }
 }

@@ -13,13 +13,16 @@ public final class AIAgentCommandBuilderImple: AIAgentCommandSceneBuilder {
 
     private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
+    private let paywallSceneBuilder: any PaywallSceneBuilder
 
     public init(
         usecaseFactory: any UsecaseFactory,
-        viewAppearance: ViewAppearance
+        viewAppearance: ViewAppearance,
+        paywallSceneBuilder: any PaywallSceneBuilder
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
+        self.paywallSceneBuilder = paywallSceneBuilder
     }
 
     @MainActor
@@ -32,7 +35,7 @@ public final class AIAgentCommandBuilderImple: AIAgentCommandSceneBuilder {
             viewModel: viewModel,
             viewAppearance: self.viewAppearance
         )
-        let router = AIAgentRouter()
+        let router = AIAgentRouter(paywallSceneBuilder: self.paywallSceneBuilder)
         router.scene = viewController
         viewModel.router = router
         return viewController
