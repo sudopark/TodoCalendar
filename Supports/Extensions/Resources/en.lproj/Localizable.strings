@@ -130,6 +130,11 @@
 "calendar::event::more_action:remove:item_name" = "Remove event";
 "calendar::event::more_action:foremost:mark:item_name" = "Mark as foremost";
 "calendar::event::more_action:foremost:unmark:item_name" = "Unmark as foremost";
+"calendar::event::more_action:dday_candidate:register:item_name" = "Add to D-day widget";
+"calendar::event::more_action:dday_candidate:unregister:item_name" = "Remove from D-day widget";
+"calendar::event::more_action:dday_candidate:title" = "D-day widget candidate";
+"calendar::event::more_action:dday_candidate:register:message" = "Add this event as a D-day widget candidate? It will appear at the top of the list when you edit the widget.";
+"calendar::event::more_action:dday_candidate:unregister:message" = "Remove this event from D-day widget candidates?";
 "calendar::event::more_action:copy:item_name" = "Copy event";
 "calendar::event::more_action:transform_to::schedule" = "Convert to schedule";
 "calendar::event::more_action:transform_to::todo" = "Convert to to-do";
@@ -501,6 +506,13 @@
 "widget.next.no_events_today" = "No events today";
 "widget.next.no_events" = "No upcoming events";
 
+"widget.dday::name" = "D-Day";
+"widget.dday::noTarget" = "Select an event";
+"widget.dday.sample::title" = "Workshop";
+"widget.dday.target::repeating" = "Repeating";
+"widget.dday.target::registered" = "Pinned";
+"widget.dday.turn::name" = "Turn %d";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "This link format is not supported.\nPlease update the app to the latest version.";
@@ -511,3 +523,40 @@
 "force_update.message" = "A new version is available.\nPlease update to continue using the app.";
 "recommend_update.title" = "Update Recommended";
 "recommend_update.message" = "A new version is available.\nWe recommend updating for a better experience.";
+
+
+// MARK: - ai agent
+
+"aiAgent::voice::listening" = "Listening…";
+"aiAgent::keyboard" = "Keyboard";
+"aiAgent::voice" = "Voice";
+"aiAgent::send" = "Send";
+"aiAgent::input::placeholder" = "How can I help?";
+"aiAgent::permission::title" = "Microphone & speech access needed";
+"aiAgent::permission::message" = "Allow access in Settings, or type instead";
+"aiAgent::permission::keyboard" = "Type instead";
+"aiAgent::permission::setting" = "Open Settings";
+"aiAgent::state::processing" = "Processing";
+"aiAgent::state::confirm" = "Confirmation needed";
+"aiAgent::state::confirmExpired" = "Expired";
+"aiAgent::state::done" = "Task complete";
+"aiAgent::state::failed" = "Task failed";
+"aiAgent::done::default" = "Done";
+"aiAgent::failed::default" = "Couldn't complete that";
+"aiAgent::retry" = "Retry";
+"aiAgent::needSignIn::title" = "Sign in required";
+"aiAgent::needSignIn::message" = "Sign in to use AI quick input.";
+"aiAgent::title" = "AI Quick Input";
+"aiAgent::keyboard::stop" = "Stop";
+"aiAgent::keyboard::send" = "Send";
+"aiAgent::stop" = "Stop";
+"aiAgent::usage" = "%@ / %@ credits";
+"aiAgent::plan::free" = "Free";
+"aiAgent::plan::standard" = "Standard";
+"aiAgent::plan::lifetime" = "Lifetime";
+"aiAgent::usage::topupRemaining" = "%@ extra credits left";
+"aiAgent::usage::planChangeScheduled" = "Switching to the %2$@ plan on %1$@";
+"aiAgent::stop::confirm::title" = "Stop processing?";
+"aiAgent::stop::confirm::message" = "Stopping discards the task in progress, and it can't be resumed.";
+"aiAgent::confirm::countdown" = "left to approve";
+"aiAgent::confirm::expired::message" = "Time expired. Please request again.";

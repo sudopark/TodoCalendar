@@ -399,8 +399,8 @@ private class FakeOAuthUsecaseProvider: OAuth2ServiceUsecaseProvider, @unchecked
             return StubGoogleOAuth2Usecase(shouldFailOAuth: shouldFailOAuth)
             
         case let apple as AppleOAuth2ServiceProvider:
-            return AppleOAuth2ServiceUsecaseImple(preHandleResult: apple.appleSignInResult)
-            
+            return StubAppleOAuth2Usecase(preHandleResult: apple.appleSignInResult)
+
         default: return nil
         }
     }
@@ -436,6 +436,35 @@ private class StubGoogleOAuth2Usecase: OAuth2ServiceUsecase, @unchecked Sendable
     
     func handle(open url: URL) -> Bool {
         return true
+    }
+}
+
+private final class StubAppleOAuth2Usecase: OAuth2ServiceUsecase, @unchecked Sendable {
+    typealias CredentialType = AppleOAuth2Credential
+    private let preHandleResult: Result<AppleOAuth2ServiceProvider.AppleLoginIDTokenWithMetaData, any Error>?
+    init(preHandleResult: Result<AppleOAuth2ServiceProvider.AppleLoginIDTokenWithMetaData, any Error>?) {
+        self.preHandleResult = preHandleResult
+    }
+
+    // AppleOAuth2ServiceUsecaseImple과 동일 동작 (AccountUsecase 플로우 검증용 복제)
+    @MainActor
+    func requestAuthentication() async throws -> AppleOAuth2Credential {
+        switch self.preHandleResult {
+        case .success(let data):
+            return AppleOAuth2Credential(
+                provider: "apple.com",
+                idToken: data.appleIDToken,
+                nonce: data.nonce
+            )
+        case .failure(let error):
+            throw error
+        case .none:
+            throw RuntimeError("apple login not handled")
+        }
+    }
+
+    func handle(open url: URL) -> Bool {
+        return false
     }
 }
 

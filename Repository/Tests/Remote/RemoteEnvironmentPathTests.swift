@@ -19,7 +19,8 @@ struct RemoteEnvironmentPathTests {
     private let env = RemoteEnvironment(
         calendarAPIHost: "https://api.example.com",
         csAPI: "https://cs.example.com",
-        deviceId: "device_id"
+        deviceId: "device_id",
+        acceptLanguage: { "en" }
     )
 }
 
@@ -65,5 +66,12 @@ extension RemoteEnvironmentPathTests {
         let path = self.env.path(EventSyncEndPoints.check)
         // then
         #expect(path == "https://api.example.com/v2/sync/check")
+    }
+
+    @Test func path_billingEndpoint_returnsV1BillingURL() {
+        // when
+        let path = self.env.path(BillingAPIEndpoints.purchases)
+        // then
+        #expect(path == "https://api.example.com/v1/billing/purchases")
     }
 }

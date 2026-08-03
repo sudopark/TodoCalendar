@@ -23,8 +23,6 @@ let project = Project.framework(
         .external(name: "GoogleSignIn"),
         .external(name: "GoogleSignInSwift"),
         .external(name: "KeychainSwift"),
-        .external(name: "CombineExt"),
-        .external(name: "SwiftLinkPreview")
-    ],
-    customSetting: .init().otherLinkerFlags(["-ObjC"])
+        .external(name: "CombineExt")
+    ]
 )

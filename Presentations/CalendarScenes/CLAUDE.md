@@ -6,64 +6,6 @@
 
 ---
 
-## 폴더 구조
-
-```
-CalendarScenes/
-├── Sources/
-│   ├── CalendarViewController.swift          — UIPageViewController (메인 진입점)
-│   ├── CalendarViewModel.swift               — CalendarViewModelImple
-│   ├── CalendarViewRouter.swift              — CalendarViewRouterImple
-│   ├── CalendarSceneBuilderImple.swift        — 전체 Scene 조립
-│   ├── CalendarDeepLinkHandlerImple.swift     — 캘린더 딥링크 처리
-│   │
-│   ├── CalendarPaper/                        — 단일 월 컨테이너 (Month + DayEventList)
-│   │   ├── CalendarPaperScene+Builder.swift
-│   │   ├── CalendarPaperBuilderImple.swift
-│   │   ├── CalendarPaperViewController.swift  — UIHostingController
-│   │   ├── CalendarPaperViewModel.swift
-│   │   ├── CalendarPaperView.swift
-│   │   ├── CalendarPaperRouter.swift
-│   │   ├── ForemostEventView.swift           — 강조 이벤트 뷰
-│   │   └── UncompletedTodoView.swift         — 미완료 할일 뷰
-│   │
-│   ├── Month/                                — 달력 그리드 (Component)
-│   │   ├── MonthScene+Builder.swift
-│   │   ├── MonthSceneBuilderImple.swift
-│   │   ├── MonthViewModel.swift
-│   │   ├── MonthView.swift
-│   │   └── WeekEventStackBuilder.swift       — 주간 이벤트 스택 계산
-│   │
-│   ├── DayEventList/                         — 선택일 이벤트 목록 (Component)
-│   │   ├── DayEventListScene+Builder.swift
-│   │   ├── DayEventListBuilderImple.swift
-│   │   ├── DayEventListViewModel.swift
-│   │   ├── DayEventListView.swift
-│   │   └── DayEventListRouter.swift
-│   │
-│   ├── SelectDay/                            — 날짜 선택 다이얼로그 (모달)
-│   │   ├── SelectDayDialogViewController.swift
-│   │   ├── SelectDayDialogViewModel.swift
-│   │   ├── SelectDayDialogView.swift
-│   │   └── SelectDateDialogRouter.swift
-│   │
-│   └── Common/
-│       ├── CalendarEvents/
-│       │   ├── CalendarEvent.swift            — 이벤트 프로토콜 계층
-│       │   └── CalendarEventListhUsecase.swift — 통합 이벤트 Usecase
-│       └── EventListCell/
-│           ├── EventListCellEventHanleViewModelBuilder.swift
-│           ├── EventListCellEventHanleViewModel.swift  — 셀 이벤트 처리
-│           ├── EventListCellEventHanleRouter.swift      — 이벤트 상세 라우팅
-│           ├── EventCellViewModel.swift                 — 셀 UI 모델
-│           ├── EventListCellView.swift                  — 셀 SwiftUI 뷰
-│           └── EventDeepLinkHandlerImple.swift          — 이벤트 딥링크 처리
-│
-└── Tests/
-```
-
----
-
 ## Scene 구성
 
 ### 복합 Scene 계층
@@ -186,6 +128,16 @@ graph LR
     CDL -->|이벤트| EDL[EventDeepLinkHandler]
     EDL -->|todo/schedule/holiday/google| ECR[EventListCellRouter]
 ```
+
+---
+
+## 프레임워크 스코프 컴포넌트 (`Sources/Common/`)
+
+| 컴포넌트 | 역할 | 사용처 |
+|---|---|---|
+| `EventListCellView` (`Common/EventListCell/`) | 모든 이벤트(할일/일정/휴일/구글)를 렌더링하는 이벤트 셀 공용 뷰 — 완료 처리·상세 이동·more 액션 콜백 포함. 동반 UI 모델 `EventCellViewModel` 프로토콜도 공유 | DayEventListView, ForemostEventView, UncompletedTodoView |
+
+주의: `ForemostEventView`·`UncompletedTodoView`는 `CalendarPaper/` 폴더에 있으나 실제 소비는 `DayEventList/` — 배치·사용처 불일치 알려짐 (#659 리스트업 16번 메모).
 
 ---
 

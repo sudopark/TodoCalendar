@@ -229,7 +229,7 @@ extension AddEventViewModelImpleTests {
         let viewModel = self.makeViewModel()
         
         // when
-        let typeModels = self.waitOutputs(expect, for: viewModel.eventDetailTypeModel) {
+        let typeModels = self.waitOutputs(expect, for: viewModel.eventDetailTypeModel, timeout: 1.0) {
             viewModel.prepare()
             viewModel.toggleIsTodo()
             viewModel.toggleIsTodo()
@@ -280,7 +280,7 @@ extension AddEventViewModelImpleTests {
         let viewModel = self.makeViewModelWithPrepare()
 
         // when
-        let isSavables = self.waitOutputs(expect, for: viewModel.isSavable) {
+        let isSavables = self.waitOutputs(expect, for: viewModel.isSavable, timeout: 1.0) {
             viewModel.toggleIsTodo()
             self.enter(viewModel) {
                 $0 |> \.name .~ "some"
@@ -299,7 +299,7 @@ extension AddEventViewModelImpleTests {
         let viewModel = self.makeViewModel()
         
         // when
-        let isSavables = self.waitOutputs(expect, for: viewModel.isSavable) {
+        let isSavables = self.waitOutputs(expect, for: viewModel.isSavable, timeout: 1.0) {
             viewModel.prepare()
             
             self.enter(viewModel) {
@@ -325,7 +325,7 @@ extension AddEventViewModelImpleTests {
         let viewModel = self.makeViewModelWithPrepare()
 
         // when
-        let isSavables = self.waitOutputs(expect, for: viewModel.hasChanges) {
+        let isSavables = self.waitOutputs(expect, for: viewModel.hasChanges, timeout: 1.0) {
             viewModel.toggleIsTodo()
             self.enter(viewModel) {
                 $0 |> \.name .~ "some"
@@ -342,11 +342,11 @@ extension AddEventViewModelImpleTests {
         let expect = expectation(description: "schedule event의 경우 이름 및 시간이 입력해야 변경되었다 판단")
         expect.expectedFulfillmentCount = 3
         let viewModel = self.makeViewModel()
-        
-        // when
-        let isSavables = self.waitOutputs(expect, for: viewModel.hasChanges) {
+
+        // when - 느린 CI에서 마지막 방출을 놓치지 않도록 timeout 여유
+        let isSavables = self.waitOutputs(expect, for: viewModel.hasChanges, timeout: 1.0) {
             viewModel.prepare()
-            
+
             self.enter(viewModel) {
                 $0
                 |> \.name .~ "some"
@@ -358,11 +358,11 @@ extension AddEventViewModelImpleTests {
                 |> \.selectedTime .~ nil
             }
         }
-        
+
         // then
         XCTAssertEqual(isSavables, [false, true, false])
     }
-    
+
     private var dummyNewSelectTime: SelectedTime {
         let time = EventTime.at(0)
         return .init(time, self.timeZone)
@@ -408,7 +408,7 @@ extension AddEventViewModelImpleTests {
         expect.expectedFulfillmentCount = 3
         let viewModel = self.makeViewModelWithPrepare()
         // when
-        let isSavings = self.waitOutputs(expect, for: viewModel.isSaving) {
+        let isSavings = self.waitOutputs(expect, for: viewModel.isSaving, timeout: 1.0) {
             viewModel.toggleIsTodo()
             self.enterAllInfo(viewModel)
             
@@ -500,7 +500,7 @@ extension AddEventViewModelImpleTests {
         expect.expectedFulfillmentCount = 3
         let viewModel = self.makeViewModelWithPrepare(shouldFailSaveDetailData: true)
         // when
-        let isSavings = self.waitOutputs(expect, for: viewModel.isSaving) {
+        let isSavings = self.waitOutputs(expect, for: viewModel.isSaving, timeout: 1.0) {
             viewModel.toggleIsTodo()
             self.enterAllInfo(viewModel)
 

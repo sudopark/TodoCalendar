@@ -168,7 +168,7 @@ struct SelectEventNotificationTimeView: View {
                                 Text(R.String.EventDetail.Notification.customEventTimeTitle)
                                     .font(appearance.fontSet.bigBold.asFont)
                                     .foregroundStyle(appearance.colorSet.text0.asColor)
-                                    .padding(.leading, 20)
+                                    .padding(.leading, spacing: .xlarge)
                                 Spacer()
                             }
                             Spacer()
@@ -216,18 +216,18 @@ struct SelectEventNotificationTimeView: View {
             )
             .font(appearance.fontSet.normal.asFont)
             .foregroundStyle(appearance.colorSet.text0.asColor)
-            
+
             Spacer(minLength: 20)
-            
+
             if state.isSelectedDefaultModel(model?.option) {
                 Image(systemName: "checkmark")
                     .font(appearance.fontSet.normal.asFont)
                     .foregroundStyle(appearance.colorSet.text0.asColor)
             }
         }
-        .padding(.vertical, 12).padding(.horizontal, 12)
+        .padding(.vertical, spacing: .regular).padding(.horizontal, spacing: .regular)
         .background {
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: Metric.Radius.regular)
                 .fill(appearance.colorSet.bg1.asColor)
         }
         .onTapGesture {
@@ -241,16 +241,16 @@ struct SelectEventNotificationTimeView: View {
             Text(model.timeText)
                 .font(appearance.fontSet.normal.asFont)
                 .foregroundStyle(appearance.colorSet.text0.asColor)
-            
+
             Spacer(minLength: 20)
-            
+
             Image(systemName: "checkmark")
                 .font(appearance.fontSet.normal.asFont)
                 .foregroundStyle(appearance.colorSet.text0.asColor)
         }
-        .padding(.vertical, 12).padding(.horizontal, 12)
+        .padding(.vertical, spacing: .regular).padding(.horizontal, spacing: .regular)
         .background {
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: Metric.Radius.regular)
                 .fill(appearance.colorSet.bg1.asColor)
         }
         .onTapGesture {
@@ -286,23 +286,23 @@ struct SelectEventNotificationTimeView: View {
                     .foregroundStyle(appearance.colorSet.accent.asColor)
             }
         }
-        .padding(.vertical, 8).padding(.horizontal, 12)
+        .padding(.vertical, spacing: .small).padding(.horizontal, spacing: .regular)
         .background {
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: Metric.Radius.regular)
                 .fill(appearance.colorSet.bg1.asColor)
         }
     }
-    
+
     private var permissionNeedView: some View {
         VStack(spacing: 0) {
-            
+
 //            Spacer()
-            
+
             Rectangle()
                 .fill(appearance.colorSet.line.asColor)
                 .frame(height: 0.5)
-            
-            VStack(spacing: 16) {
+
+            VStack(spacing: Metric.Spacing.large) {
                 Text("event_notification_setting::need_permission_message".localized())
                     .multilineTextAlignment(.center)
                     .font(appearance.fontSet.normal.asFont)

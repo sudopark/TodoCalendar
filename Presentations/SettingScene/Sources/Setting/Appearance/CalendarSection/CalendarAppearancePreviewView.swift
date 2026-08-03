@@ -101,7 +101,7 @@ struct CalendarAppearanceSampleView: View {
     var body: some View {
         HStack {
             Spacer()
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: Metric.Spacing.xsmall) {
                 Text("setting.appearance.calendar.samplemonth::march".localized())
                     .font(self.appearance.fontSet.size(12, weight: .semibold).asFont)
                     .foregroundStyle(self.appearance.colorSet.text0.asColor)
@@ -124,10 +124,10 @@ struct CalendarAppearanceSampleView: View {
                     }
                 }
             }
-            .padding(.vertical, 12)
-            .padding(.horizontal, 14)
+            .padding(.vertical, spacing: .regular)
+            .padding(.horizontal, spacing: .large)
             .background(
-                RoundedRectangle(cornerRadius: 10)
+                RoundedRectangle(cornerRadius: Metric.Radius.large)
                     .fill(self.appearance.colorSet.dayBackground.asColor)
                     .shadow(
                         color: appearance.colorSet.text0.withAlphaComponent(0.4).asColor,
@@ -136,7 +136,7 @@ struct CalendarAppearanceSampleView: View {
             )
             Spacer()
         }
-        .padding(.bottom, 18)
+        .padding(.bottom, spacing: .xlarge)
     }
     
     private func dayTextView(_ day: CalendarAppearanceModel.DayModel?) -> some View {
@@ -212,8 +212,8 @@ struct CalendarSectionAppearanceSettingView: View {
         
         VStack {
             CalendarAppearanceSampleView(model: state.calendarModel)
-            
-            VStack(spacing: 8) {
+
+            VStack(spacing: Metric.Spacing.small) {
                 AppearanceRow("setting.appearance.calendar.startDayOfWeek".localized(), pickerView)
                     .onChange(of: state.selectedWeekDay) { _, new in
                         eventHandlers.weekStartDaySelected(new)
@@ -237,7 +237,7 @@ struct CalendarSectionAppearanceSettingView: View {
                     }
             }
         }
-        .padding(.top, 20)
+        .padding(.top, spacing: .xlarge)
         .onAppear {
             self.stateBinding(self.state)
             self.eventHandlers.onAppear()
@@ -264,7 +264,7 @@ extension CalendarSectionAppearanceSettingView {
                 EmptyView()
             }
         } label: {
-            HStack(spacing: 4) {
+            HStack(spacing: Metric.Spacing.xsmall) {
                 Text(state.selectedWeekDay.text)
                     .font(self.appearance.fontSet.normal.asFont)
                     .foregroundStyle(appearance.colorSet.text2.asColor)
@@ -289,16 +289,16 @@ extension CalendarSectionAppearanceSettingView {
             : .clear
         
         return Text(day.text)
-            .padding(.vertical, 4)
-            .padding(.horizontal, 8)
+            .padding(.vertical, spacing: .xsmall)
+            .padding(.horizontal, spacing: .small)
             .font(self.appearance.fontSet.size(10).asFont)
             .foregroundStyle(textColor.asColor)
             .background(
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                RoundedRectangle(cornerRadius: Metric.Radius.regular, style: .continuous)
                     .fill(backgroundColor.asColor)
             )
             .overlay {
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                RoundedRectangle(cornerRadius: Metric.Radius.regular, style: .continuous)
                     .stroke(lineColor.asColor, lineWidth: 1)
             }
             .onTapGesture {

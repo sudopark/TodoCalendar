@@ -185,10 +185,10 @@ struct HolidayListView: View {
                     .font(self.appearance.fontSet.size(8).asFont)
                     .foregroundStyle(self.appearance.colorSet.text1.asColor)
             }
-            .padding(.vertical, 12)
-            .padding(.horizontal, 16)
+            .padding(.vertical, spacing: .regular)
+            .padding(.horizontal, spacing: .large)
             .background(
-                RoundedRectangle(cornerRadius: 8)
+                RoundedRectangle(cornerRadius: Metric.Radius.regular)
                     .fill(self.appearance.colorSet.bg1.asColor)
             )
             .onTapGesture {
@@ -197,40 +197,40 @@ struct HolidayListView: View {
             }
         }
     }
-    
+
     private var holidayListSectionView: some View {
-        
+
         VStack(alignment: .leading) {
             Text("setting.holiday.list::sectionTitle".localized())
                 .font(self.appearance.fontSet.subNormal.asFont)
                 .foregroundStyle(self.appearance.colorSet.text2.asColor)
-            
+
             ForEach(self.state.holidays) { item in
-                
-                HStack(spacing: 8) {
+
+                HStack(spacing: Metric.Spacing.small) {
                     
                     RoundedRectangle(cornerRadius: 2)
                         .fill(self.appearance.tagColors.holiday.asColor)
                         .frame(width: 4)
-                        .padding(.vertical, 5)
+                        .padding(.vertical, spacing: .xsmall)
                     
-                    VStack(alignment: .leading, spacing: 4) {
+                    VStack(alignment: .leading, spacing: Metric.Spacing.xsmall) {
                         Text(item.name)
                             .minimumScaleFactor(0.7)
                             .font(self.appearance.fontSet.size(16).asFont)
                             .foregroundStyle(self.appearance.colorSet.text0.asColor)
-                        
+
                         Text(item.dateText)
                             .font(self.appearance.fontSet.size(12).asFont)
                             .foregroundStyle(self.appearance.colorSet.text2.asColor)
                     }
-                    
+
                     Spacer()
                 }
-                .padding(.vertical, 8)
-                .padding(.horizontal, 16)
+                .padding(.vertical, spacing: .small)
+                .padding(.horizontal, spacing: .large)
                 .background(
-                    RoundedRectangle(cornerRadius: 8)
+                    RoundedRectangle(cornerRadius: Metric.Radius.regular)
                         .fill(self.appearance.colorSet.bg1.asColor)
                 )
             }
@@ -246,7 +246,7 @@ struct HolidayListView: View {
 
             ForEach(self.state.hiddenHolidayNames, id: \.self) { name in
 
-                HStack(spacing: 8) {
+                HStack(spacing: Metric.Spacing.small) {
 
                     Text(name)
                         .minimumScaleFactor(0.7)
@@ -259,10 +259,10 @@ struct HolidayListView: View {
                         .font(self.appearance.fontSet.size(14).asFont)
                         .foregroundStyle(self.appearance.colorSet.accent.asColor)
                 }
-                .padding(.vertical, 8)
-                .padding(.horizontal, 16)
+                .padding(.vertical, spacing: .small)
+                .padding(.horizontal, spacing: .large)
                 .background(
-                    RoundedRectangle(cornerRadius: 8)
+                    RoundedRectangle(cornerRadius: Metric.Radius.regular)
                         .fill(self.appearance.colorSet.bg1.asColor)
                 )
                 .onTapGesture {

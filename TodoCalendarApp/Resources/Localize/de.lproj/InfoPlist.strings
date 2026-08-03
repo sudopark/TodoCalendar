@@ -1,0 +1,3 @@
+"NSCalendarsFullAccessUsageDescription" = "Der Kalenderzugriff ist erforderlich, um Ereignisse anzuzeigen und mit Apple Kalender zu synchronisieren.";
+"NSMicrophoneUsageDescription" = "Der Mikrofonzugriff ist erforderlich, um Ereignisse und Aufgaben per Sprache einzugeben.";
+"NSSpeechRecognitionUsageDescription" = "Die Spracherkennung ist erforderlich, um Ihre Sprache in Ereignisse und Aufgaben umzuwandeln.";

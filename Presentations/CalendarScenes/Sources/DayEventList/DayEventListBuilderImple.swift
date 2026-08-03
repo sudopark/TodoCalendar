@@ -1,5 +1,5 @@
 //
-//  
+//
 //  DayEventListBuilderImple.swift
 //  CalendarScenes
 //
@@ -8,6 +8,7 @@
 //
 
 import UIKit
+import Domain
 import Scenes
 import CommonPresentation
 
@@ -20,23 +21,32 @@ final class DayEventListSceneBuilerImple {
     private let viewAppearance: ViewAppearance
     private let eventDetailSceneBuilder: any EventDetailSceneBuilder
     private let eventListSceneBuilder: any EventListSceneBuiler
-    
+    private let accountUsecase: any AccountUsecase
+    private let memberSceneBuilder: any MemberSceneBuilder
+    private let aiKeyboardInputSceneBuilder: any AIAgentKeyboardInputSceneBuilder
+
     init(
         usecaseFactory: any UsecaseFactory,
         viewAppearance: ViewAppearance,
         eventDetailSceneBuilder: any EventDetailSceneBuilder,
-        eventListSceneBuilder: any EventListSceneBuiler
+        eventListSceneBuilder: any EventListSceneBuiler,
+        accountUsecase: any AccountUsecase,
+        memberSceneBuilder: any MemberSceneBuilder,
+        aiKeyboardInputSceneBuilder: any AIAgentKeyboardInputSceneBuilder
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
         self.eventDetailSceneBuilder = eventDetailSceneBuilder
         self.eventListSceneBuilder = eventListSceneBuilder
+        self.accountUsecase = accountUsecase
+        self.memberSceneBuilder = memberSceneBuilder
+        self.aiKeyboardInputSceneBuilder = aiKeyboardInputSceneBuilder
     }
 }
 
 
 extension DayEventListSceneBuilerImple: DayEventListSceneBuiler {
-    
+
     func makeSceneComponent() -> DayEventListSceneComponent {
         let calendarSettingUsecase = self.usecaseFactory.makeCalendarSettingUsecase()
         let todoEventUsecase = self.usecaseFactory.makeTodoEventUsecase()
@@ -58,11 +68,16 @@ extension DayEventListSceneBuilerImple: DayEventListSceneBuiler {
             eventListUsecase: eventListUsecase,
             todoEventUsecase: todoEventUsecase,
             foremostEventUsecase: foremostEventUsecase,
-            uiSettingUsecase: uiSettingUsecase
+            uiSettingUsecase: uiSettingUsecase,
+            accountUsecase: self.accountUsecase,
+            aiAgentOrchestrationUsecase: self.usecaseFactory.aiAgentOrchestrationUsecase
         )
         let router = DayEventListRouter(
             eventDetailSceneBuilder: self.eventDetailSceneBuilder,
-            eventListSceneBuilder: self.eventListSceneBuilder
+            eventListSceneBuilder: self.eventListSceneBuilder,
+            memberSceneBuilder: self.memberSceneBuilder,
+            aiKeyboardInputSceneBuilder: self.aiKeyboardInputSceneBuilder,
+            viewAppearance: self.viewAppearance
         )
         viewModel.router = router
         return .init(viewModel: viewModel, router: router)

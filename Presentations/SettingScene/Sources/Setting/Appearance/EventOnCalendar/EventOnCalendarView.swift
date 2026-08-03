@@ -88,8 +88,8 @@ struct EventOnCalendarViewPreviewView: View {
                     .foregroundStyle(appearance.colorSet.weekDayText.asColor)
                 
                 if appearance.rowHeightOnCalendar == RowHeightOnCalendar.small {
-                    
-                    HStack(spacing: 2) {
+
+                    HStack(spacing: Metric.Spacing.xxsmall) {
                         Circle()
                             .fill(
                                 appearance.colorOnCalendar(
@@ -115,8 +115,8 @@ struct EventOnCalendarViewPreviewView: View {
                     .frame(width: 52, alignment: .center)
                 } else {
                     // ev1
-                    HStack(spacing: 2) {
-                        RoundedRectangle(cornerRadius: 12)
+                    HStack(spacing: Metric.Spacing.xxsmall) {
+                        RoundedRectangle(cornerRadius: Metric.Radius.large)
                             .fill(appearance.colorOnCalendar(.holiday).asColor)
                             .frame(width: 3, height: 12)
                             .padding(.leading, 1)
@@ -133,8 +133,8 @@ struct EventOnCalendarViewPreviewView: View {
                     )
                     
                     // ev2
-                    HStack(spacing: 2) {
-                        RoundedRectangle(cornerRadius: 12)
+                    HStack(spacing: Metric.Spacing.xxsmall) {
+                        RoundedRectangle(cornerRadius: Metric.Radius.large)
                             .fill(appearance.colorOnCalendar(.default).asColor)
                             .frame(width: 3, height: 12)
                             .padding(.leading, 1)
@@ -152,8 +152,8 @@ struct EventOnCalendarViewPreviewView: View {
                             .font(appearance.fontSet.size(8).asFont)
                             .foregroundStyle(appearance.colorSet.eventText.asColor)
                     } else {
-                        HStack(spacing: 2) {
-                            RoundedRectangle(cornerRadius: 12)
+                        HStack(spacing: Metric.Spacing.xxsmall) {
+                            RoundedRectangle(cornerRadius: Metric.Radius.large)
                                 .fill(appearance.colorOnCalendar(.default).asColor)
                                 .frame(width: 3, height: 12)
                                 .padding(.leading, 1)
@@ -167,11 +167,11 @@ struct EventOnCalendarViewPreviewView: View {
                     }
                 }
             }
-            .padding(.vertical, 12)
-            .padding(.horizontal, 6)
+            .padding(.vertical, spacing: .regular)
+            .padding(.horizontal, spacing: .small)
 //            .frame(height: appearance.rowHeightOnCalendar.cgValue)
             .background(
-                RoundedRectangle(cornerRadius: 10)
+                RoundedRectangle(cornerRadius: Metric.Radius.large)
                     .fill(self.appearance.colorSet.dayBackground.asColor)
                     .shadow(
                         color: appearance.colorSet.text0.withAlphaComponent(0.4).asColor,
@@ -181,7 +181,7 @@ struct EventOnCalendarViewPreviewView: View {
             
             Spacer()
         }
-        .padding(.bottom, 18)
+        .padding(.bottom, spacing: .xlarge)
     }
 }
 
@@ -200,8 +200,8 @@ struct EventOnCalendarView: View {
     var body: some View {
         VStack {
             EventOnCalendarViewPreviewView()
-            
-            VStack(spacing: 8) {
+
+            VStack(spacing: Metric.Spacing.small) {
                 
                 AppearanceRow("setting.appearance.day_row_height".localized(), rowHeightSelectView)
                     .onChange(of: state.selectedRowHeight) { _, new in
@@ -221,7 +221,7 @@ struct EventOnCalendarView: View {
                     }
             }
         }
-        .padding(.top, 20)
+        .padding(.top, spacing: .xlarge)
         .onAppear {
             self.stateBinding(self.state)
             self.eventHandler.onAppear()
@@ -242,7 +242,7 @@ struct EventOnCalendarView: View {
                 EmptyView()
             }
         } label: {
-            HStack(spacing: 4) {
+            HStack(spacing: Metric.Spacing.xsmall) {
                 Text(state.selectedRowHeight.text)
                     .font(self.appearance.fontSet.normal.asFont)
                     .foregroundStyle(appearance.colorSet.text2.asColor)
@@ -255,13 +255,13 @@ struct EventOnCalendarView: View {
     }
     
     private var fontSizeSettingView: some View {
-        HStack(spacing: 8) {
-            
+        HStack(spacing: Metric.Spacing.small) {
+
             Text(state.additionalFontSizeModel.sizeText)
                 .font(appearance.fontSet.size(12).asFont)
                 .foregroundStyle(appearance.colorSet.text2.asColor)
-            
-            HStack(spacing: 2) {
+
+            HStack(spacing: Metric.Spacing.xxsmall) {
                 
                 Button {
                     eventHandler.decreaseFontSize()
@@ -269,8 +269,8 @@ struct EventOnCalendarView: View {
                     Text(" - ")
                         .font(appearance.fontSet.normal.asFont)
                         .foregroundStyle(appearance.colorSet.text0.asColor)
-                        .padding(.vertical, 2)
-                        .padding(.leading, 8).padding(.trailing, 2)
+                        .padding(.vertical, spacing: .xxsmall)
+                        .padding(.leading, spacing: .small).padding(.trailing, 2)
                 }
                 .buttonStyle(.plain)
                 .disabled(!state.additionalFontSizeModel.isDescreasable)
@@ -284,14 +284,14 @@ struct EventOnCalendarView: View {
                     Text(" + ")
                         .font(appearance.fontSet.normal.asFont)
                         .foregroundStyle(appearance.colorSet.text0.asColor)
-                        .padding(.vertical, 2)
-                        .padding(.leading, 2).padding(.trailing, 8)
+                        .padding(.vertical, spacing: .xxsmall)
+                        .padding(.leading, spacing: .xxsmall).padding(.trailing, 8)
                 }
                 .buttonStyle(.plain)
                 .disabled(!state.additionalFontSizeModel.isIncreasable)
             }
             .background(
-                RoundedRectangle(cornerRadius: 8)
+                RoundedRectangle(cornerRadius: Metric.Radius.regular)
                     .fill(appearance.colorSet.dayBackground.asColor)
             )
         }

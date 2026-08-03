@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import UIKit
 
 // MARK: - ExternalCalendarService
 
@@ -23,36 +22,6 @@ public protocol ExternalCalendarService: Sendable {
 public protocol ExternalCalendarOAuthUsecaseProvider: Sendable {
 
     func usecase(for service: any ExternalCalendarService) -> (any OAuth2ServiceUsecase)?
-}
-
-public final class ExternalCalendarOAuthUsecaseProviderImple: ExternalCalendarOAuthUsecaseProvider, @unchecked Sendable {
-
-    private let topViewControllerFinding: () -> UIViewController?
-    private let appleCalendarPermissionChecker: any AppleCalendarPermissionChecker
-
-    public init(
-        topViewControllerFinding: @escaping () -> UIViewController?,
-        appleCalendarPermissionChecker: any AppleCalendarPermissionChecker
-    ) {
-        self.topViewControllerFinding = topViewControllerFinding
-        self.appleCalendarPermissionChecker = appleCalendarPermissionChecker
-    }
-
-    public func usecase(for service: any ExternalCalendarService) -> (any OAuth2ServiceUsecase)? {
-        switch service {
-        case let google as GoogleCalendarService:
-            return GoogleOAuth2ServiceUsecaseImple(
-                additionalScope: google.scopes.map { $0.rawValue },
-                topViewControllerFinding: self.topViewControllerFinding
-            )
-
-        case is AppleCalendarService:
-            return AppleCalendarOAuth2ServiceUsecaseImple(permissionChecker: appleCalendarPermissionChecker)
-
-        default:
-            return nil
-        }
-    }
 }
 
 

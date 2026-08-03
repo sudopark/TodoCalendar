@@ -2,6 +2,7 @@
 description: Domain 레이어에서 모델·프로토콜·Usecase 작성 시 지킬 규칙
 paths:
   - "Domain/**"
+  - "Services/**"
 ---
 
 # Domain 레이어 규칙

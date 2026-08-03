@@ -1,0 +1,3 @@
+"NSCalendarsFullAccessUsageDescription" = "Kalenterin käyttöoikeus tarvitaan tapahtumien näyttämiseen ja synkronointiin Apple-kalenterin kanssa.";
+"NSMicrophoneUsageDescription" = "Mikrofonin käyttöoikeus tarvitaan tapahtumien ja tehtävien syöttämiseen äänellä.";
+"NSSpeechRecognitionUsageDescription" = "Puheentunnistus tarvitaan äänesi muuntamiseen tapahtumiksi ja tehtäviksi.";

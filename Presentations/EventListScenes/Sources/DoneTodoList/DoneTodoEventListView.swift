@@ -154,8 +154,8 @@ struct DoneTodoEventListView: View {
             Text(section.sectionTitle)
                 .foregroundStyle(appearance.colorSet.text0.asColor)
                 .font(appearance.fontSet.big.asFont)
-                .padding(.vertical, 12)
-                .padding(.horizontal, 20)
+                .padding(.vertical, spacing: .regular)
+                .padding(.horizontal, spacing: .xlarge)
             Spacer()
         }
         .background(appearance.colorSet.bg0.asColor)
@@ -163,16 +163,16 @@ struct DoneTodoEventListView: View {
     }
     
     private func cellView(_ cell: DoneTodoCellViewModel) -> some View {
-        HStack(spacing: 16) {
+        HStack(spacing: Metric.Spacing.large) {
             revertDoneButton(cell.uuid)
-            
-            VStack(alignment: .leading, spacing: 4) {
+
+            VStack(alignment: .leading, spacing: Metric.Spacing.xsmall) {
                 Text(cell.name)
                     .foregroundStyle(appearance.colorSet.text2.asColor)
                     .font(appearance.fontSet.normal.asFont)
                 
                 if let eventTime = cell.eventTimeText {
-                    HStack(spacing: 2) {
+                    HStack(spacing: Metric.Spacing.xxsmall) {
                         Text("eventList::done_todos::eventTime".localized())
                             .foregroundStyle(appearance.colorSet.text2.asColor)
                             .font(appearance.fontSet.subNormal.asFont)
@@ -181,7 +181,7 @@ struct DoneTodoEventListView: View {
                             .font(appearance.fontSet.subNormal.asFont)
                     }
                 }
-                HStack(spacing: 2) {
+                HStack(spacing: Metric.Spacing.xxsmall) {
                     Text("eventList::done_todos::doneAt".localized())
                         .foregroundStyle(appearance.colorSet.text2.asColor)
                         .font(appearance.fontSet.subNormal.asFont)
@@ -190,7 +190,7 @@ struct DoneTodoEventListView: View {
                         .font(appearance.fontSet.subNormal.asFont)
                 }
             }
-            .padding(.bottom, 4)
+            .padding(.bottom, spacing: .xsmall)
             .onTapGesture {
                 self.eventHandlers.selectDoneTodo(cell.uuid)
             }

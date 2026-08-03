@@ -14,8 +14,8 @@ public struct DescriptionView: View {
     private let descriptions: [String]
     private let spacing: CGFloat
     @Environment(ViewAppearance.self) private var appearance
-    
-    public init(descriptions: [String], spacing: CGFloat = 4) {
+
+    public init(descriptions: [String], spacing: CGFloat = Metric.Spacing.xsmall) {
         self.descriptions = descriptions
         self.spacing = spacing
     }
@@ -29,7 +29,7 @@ public struct DescriptionView: View {
     }
     
     private func tipView(_ description: String) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 4) {
+        HStack(alignment: .firstTextBaseline, spacing: Metric.Spacing.xsmall) {
             Text("•")
             Text(description)
                 .multilineTextAlignment(.leading)

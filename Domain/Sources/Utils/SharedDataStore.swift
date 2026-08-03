@@ -33,6 +33,9 @@ public enum ShareDataKeys: String {
     case foremostMarkingStatus
     case appleCalendarTags
     case appleCalendarEvents
+    case aiAgentUsage
+    case billingUserPlan
+    case ddayCandidates
 }
 
 

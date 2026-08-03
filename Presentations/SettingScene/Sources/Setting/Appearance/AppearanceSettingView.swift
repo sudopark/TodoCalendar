@@ -29,7 +29,7 @@ struct AppearanceRow< Content: View>: View {
     
     var body: some View {
         HStack {
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: Metric.Spacing.xxsmall) {
                 Text(title)
                     .font(self.appearance.fontSet.normal.asFont)
                     .foregroundStyle(appearance.colorSet.text0.asColor)
@@ -45,10 +45,10 @@ struct AppearanceRow< Content: View>: View {
             
             content
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
+        .padding(.horizontal, spacing: .large)
+        .padding(.vertical, spacing: .regular)
         .background(
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: Metric.Radius.regular)
                 .fill(appearance.colorSet.bg1.asColor)
         )
     }
@@ -258,7 +258,7 @@ struct AppearanceSettingView: View {
                     appearanceSettingEventHandler.toggleAnimationEffect(new)
                 }
         }
-        .padding(.top, 20)
+        .padding(.top, spacing: .xlarge)
         .onAppear {
             self.appearanceSettingStateBinding(self.appearanceState)
             appearanceSettingEventHandler.onAppear()

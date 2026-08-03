@@ -135,7 +135,7 @@ struct ManageAccountView: View {
         NavigationStack {
             
             ScrollView {
-                VStack(spacing: 8) {
+                VStack(spacing: Metric.Spacing.small) {
                     loginInfoView("manage_account::login_method".localized(), self.state.accountInfo?.signInMethod)
                     loginInfoView("manage_account::email".localized(), self.state.accountInfo?.emailAddress)
                     loginInfoView("manage_account::last_signedIn_at".localized(), self.state.accountInfo?.lastSignedIn)
@@ -149,10 +149,10 @@ struct ManageAccountView: View {
                     
                     Spacer()
                         .frame(height: 20)
-                    
-                    VStack(spacing: 20) {
+
+                    VStack(spacing: Metric.Spacing.xlarge) {
                         signOutButton()
-                        VStack(spacing: 8) {
+                        VStack(spacing: Metric.Spacing.small) {
                             deleteAccountButton()
                             deleteAccountDescription()
                         }
@@ -185,17 +185,17 @@ struct ManageAccountView: View {
                 .font(self.appearance.fontSet.normal.asFont)
                 .foregroundStyle(self.appearance.colorSet.text0.asColor)
         }
-        .padding(.vertical, 8)
-        .padding(.horizontal, 16)
+        .padding(.vertical, spacing: .small)
+        .padding(.horizontal, spacing: .large)
         .background(
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: Metric.Radius.regular)
                 .fill(self.appearance.colorSet.bg1.asColor)
         )
     }
-    
+
     private func migrationView(_ count: Int) -> some View {
         HStack {
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: Metric.Spacing.small) {
                 Text("manage_account::migration::title".localized())
                     .font(self.appearance.fontSet.normal.asFont)
                     .foregroundStyle(self.appearance.colorSet.text0.asColor)
@@ -206,7 +206,7 @@ struct ManageAccountView: View {
             }
             
             Spacer(minLength: 50)
-            
+
             if self.state.isMigrating {
                 LoadingCircleView(appearance.colorSet.accent.asColor, lineWidth: 1)
                     .frame(width: 24, height: 24)
@@ -216,10 +216,10 @@ struct ManageAccountView: View {
                     .foregroundStyle(appearance.colorSet.text0.asColor)
             }
         }
-        .padding(.vertical, 8)
-        .padding(.horizontal, 16)
+        .padding(.vertical, spacing: .small)
+        .padding(.horizontal, spacing: .large)
         .background(
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: Metric.Radius.regular)
                 .fill(self.appearance.colorSet.bg1.asColor)
         )
         .onTapGesture(perform: self.eventHandlers.handleMigration)
@@ -237,9 +237,9 @@ struct ManageAccountView: View {
                 .font(appearance.fontSet.normal.asFont)
                 .foregroundStyle(appearance.colorSet.secondaryBtnText.asColor)
                 .frame(maxWidth: .infinity)
-                .padding(12)
+                .padding(spacing: .regular)
                 .background(
-                    RoundedRectangle(cornerRadius: 8)
+                    RoundedRectangle(cornerRadius: Metric.Radius.regular)
                         .fill(
                             appearance.colorSet.secondaryBtnBackground.asColor
                                 .opacity(
@@ -263,9 +263,9 @@ struct ManageAccountView: View {
                 .font(appearance.fontSet.normal.asFont)
                 .foregroundStyle(appearance.colorSet.negativeBtnText.asColor)
                 .frame(maxWidth: .infinity)
-                .padding(12)
+                .padding(spacing: .regular)
                 .background(
-                    RoundedRectangle(cornerRadius: 8)
+                    RoundedRectangle(cornerRadius: Metric.Radius.regular)
                         .fill(
                             appearance.colorSet.negativeBtnBackground.asColor
                                 .opacity(

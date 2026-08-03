@@ -143,7 +143,8 @@ extension RemoteAPIImple {
     
     private func defaultHeader() -> [String: String] {
         return [
-            "device_id": self.environment.deviceId
+            "device_id": self.environment.deviceId,
+            "Accept-Language": self.environment.acceptLanguage()
         ]
     }
 }

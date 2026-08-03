@@ -1,0 +1,562 @@
+/*
+  Localizable.strings
+  Extensions
+
+  Created by sudo.park on 7/31/26.
+  Copyright © 2026 com.sudo.park. All rights reserved.
+*/
+
+
+// MARK: - common
+"common::and" = "、";
+"common::wait:message" = "しばらくお待ちください…";
+"common::back" = "戻る";
+"common.remove" = "削除";
+"common.confirm" = "確認";
+"common.cancel" = "キャンセル";
+"common.close" = "閉じる";
+"common.yes" = "はい";
+"common.no" = "いいえ";
+"common.save" = "保存";
+"common.info" = "お知らせ";
+"common.search" = "検索";
+"common.clear" = "クリア";
+"common.send" = "送信";
+"common.done" = "完了";
+"common.errorMessage" = "一時的なエラーが発生しました。\n問題が続く場合はご報告ください。";
+"common.update" = "アップデート";
+"common.go_to_settings" = "設定に移動";
+
+// MARK: - date form
+"date_form::HH:mm" = "HH:mm";
+"date_form::a_h:mm" = "a h:mm";
+"date_form::MM_d__HH:mm" = "M月d日 HH:mm";
+"date_form::MM_d" = "M月d日";
+"date_form::MM_dd" = "M月dd日";
+"date_form::24off_h:mm" = "h:mm";
+"date_form::24on_H:mm" = "H:mm";
+"date_form::d_E_" = "d日(E)";
+"date_form::MMM_d_HH:mm" = "M月d日 HH:mm";
+"date_form::MMM_d" = "M月d日";
+"date_form::yyyy_MM_dd_E_" = "yyyy/MM/dd(E)";
+"date_form:yyyy.MM_dd_hh:mm" = "yyyy/MM/dd HH:mm";
+"date_form:yyyy.MM_dd_h:mm" = "yyyy/MM/dd a h:mm";
+"date_form.yyyy" = "yyyy";
+"date_form.MMM_dd_E" = "M月d日(E)";
+"date_form.HH:mm" = "HH:mm";
+"date_form.yyyy_MM_dd" = "yyyy/MM/dd";
+"date_form.yyyy_MMM_dd" = "yyyy年M月d日";
+"date_form.MMM" = "MMM";
+"date_form.MMMM" = "MMMM";
+"date_form.EEEE" = "EEEE";
+"date_form.EEE_MMM_d" = "M月d日(E)";
+"date_form.MMM_yyyy" = "yyyy年M月";
+"tomorrow" = "明日";
+
+// MARK: - event
+
+"dayname::sunday" = "日曜日";
+"dayname::monday" = "月曜日";
+"dayname::tuesday" = "火曜日";
+"dayname::wednesday" = "水曜日";
+"dayname::thursday" = "木曜日";
+"dayname::friday" = "金曜日";
+"dayname::saturday" = "土曜日";
+
+"dayname::sunday:short" = "日";
+"dayname::monday:short" = "月";
+"dayname::tuesday:short" = "火";
+"dayname::wednesday:short" = "水";
+"dayname::thursday:short" = "木";
+"dayname::friday:short" = "金";
+"dayname::saturday:short" = "土";
+
+"dayname::sunday:very_short" = "日";
+"dayname::monday:very_short" = "月";
+"dayname::tuesday:very_short" = "火";
+"dayname::wednesday:very_short" = "水";
+"dayname::thursday:very_short" = "木";
+"dayname::friday:very_short" = "金";
+"dayname::saturday:very_short" = "土";
+
+
+// MARK: - event notification
+
+"event_notification::today:title" = "今日のイベント";
+"event_notification::todo:prefix" = "タスク";
+"event_notification::today:prefix" = "今日";
+"event_notification::tomorrow:prefix" = "明日";
+"event_notification::allday_today" = "本日は終日";
+"event_notification::allday_tomorrow" = "明日は終日";
+"event_notification::some_allday" = "%@終日";
+"event_notification_setting::option_title::no_notification" = "通知しない";
+"event_notification_setting::option_title::at_time" = "予定の時刻に";
+"event_notification_setting::option_title::allday_9am" = "当日の午前9時に";
+"event_notification_setting::option_title::allday_12pm" = "当日の正午に";
+"event_notification_setting::option_title::customTime" = "カスタム時刻: %@";
+"event_notification_setting::option_title::custimTime_fallback" = "カスタム時刻";
+"event_notification_setting::option_title::before_minutes" = "予定の%d分前";
+"event_notification_setting::option_title::before_hours" = "予定の%d時間前";
+"event_notification_setting::option_title::before_days" = "予定の%d日前";
+"event_notification_setting::option_title::before_weeks" = "予定の%d週間前";
+"event_notification_setting::option_title::allday_9am_before_days" = "%d日前の午前9時に";
+"event_notification_setting::option_title::allday_9am_before_weeks" = "%d週間前の午前9時に";
+"event_notification_setting::need_permission_message" = "予定の通知機能を使用するには、通知の許可が必要です。\n設定アプリで通知を許可してください。";
+"event_notification_setting::need_permission::go_setting" = "設定へ移動";
+"event_notification_setting::need_permission_title" = "お知らせ";
+"event_notification_setting::permission_denied" = "予定のリマインダー機能を使用するには、アプリの通知許可が必要です。";
+
+
+
+// MARK: - calendar
+
+"calendar::foremostevent:title" = "最重要イベント";
+"calendar::uncompletedTodos:title" = "未完了のタスク";
+"calendar::event_time::todo" = "タスク";
+"calendar::event_time::allday" = "終日";
+"calendar::event_time::allday::with" = "%@終日";
+"calendar::event_time::period:some_days" = "%d日間";
+"calendar::event_time::period:some_minutes" = "%d分";
+"calendar::event_time::period:some_hours" = "%d時間";
+"calendar::event_time::period:some_days:some_hours" = "%d日%d時間";
+"calendar::event::more_action::remove:title" = "イベントを削除";
+"calendar::event::more_action::foremost_event:title" = "最重要イベント";
+"calendar::event::more_action::remove_only_thistime:message" = "繰り返しイベントの中からこの回だけ削除しますか？";
+"calendar::event::more_action::remove:message" = "このイベントを削除しますか？";
+"calendar::event::more_action::mark_as_foremost" = "このイベントを最重要イベントに設定しますか？";
+"calendar::event::more_action::unmark_as_foremost" = "このイベントの最重要設定を解除しますか？";
+"calendar::event::more_action::mark_as_foremost::unavail" = "繰り返しの予定は最重要イベントに設定できません。";
+"calendar::event::more_action:remove_only_thistime:item_name" = "この回だけ削除";
+"calendar::event::more_action:remove:item_name" = "イベントを削除";
+"calendar::event::more_action:foremost:mark:item_name" = "最重要イベントに設定";
+"calendar::event::more_action:foremost:unmark:item_name" = "最重要設定を解除";
+"calendar::event::more_action:dday_candidate:register:item_name" = "D-Dayウィジェットに追加";
+"calendar::event::more_action:dday_candidate:unregister:item_name" = "D-Dayウィジェットから削除";
+"calendar::event::more_action:dday_candidate:title" = "D-Dayウィジェットの候補";
+"calendar::event::more_action:dday_candidate:register:message" = "このイベントをD-Dayウィジェットの候補として追加しますか？ウィジェットを編集する際、リストの一番上に表示されます。";
+"calendar::event::more_action:dday_candidate:unregister:message" = "このイベントをD-Dayウィジェットの候補から削除しますか？";
+"calendar::event::more_action:copy:item_name" = "イベントを複製";
+"calendar::event::more_action:transform_to::schedule" = "予定に変換";
+"calendar::event::more_action:transform_to::todo" = "タスクに変換";
+"calendar::event::more_action:edit:item_name" = "編集";
+"calednar::event::add_new" = "新しいイベントを追加";
+"calednar::event::add_new:place_holder" = "新しいタスクをすばやく追加。";
+"calednar::event::skip_todo" = "このタスクをスキップ";
+"calednar::event::skip_todo_until" = "スキップする日時を選択";
+"calednar::event::copy" = "イベントを複製";
+"calendar::move_date" = "日付を移動";
+"calednar::event::google::edit" = "Googleカレンダーのイベントを編集";
+
+
+// MARK: - event detail
+
+"eventDetail.messages.selectTimeFirst" = "先にイベントの時刻を選択してください。";
+"eventDetail.messages.selectValidTime" = "有効なイベント時刻を選択してください。";
+"eventDetail.notification.custom_eventTime:title" = "カスタム";
+"eventDetail.notification.title" = "通知時刻";
+"eventDetail.repeating.title" = "繰り返し";
+"eventDetail.repeating.notRepeating::title" = "繰り返しなし";
+"eventDetail.repeating.starttime:form" = "yyyy年M月d日";
+"eventDetail.repeating.starttime:title" = "繰り返し開始日";
+"eventDetail.repeating.everyDay:title" = "毎日";
+"eventDetail.repeating.everyWeek:title" = "毎週";
+"eventDetail.repeating.everyWeekSomeDay:title" = "毎週%@";
+"eventDetail.repeating.everySomeWeek:title" = "%d週ごと";
+"eventDetail.repeating.everyWeekDays:title" = "平日毎日";
+"eventDetail.repeating.everySomeWeekSomeDay:title" = "%d週ごとの%@";
+"eventDetail.repeating.everyMonth:title" = "毎月";
+"eventDetail.repeating.everyMonth_someDay:title" = "毎月%@";
+"eventDetail.repeating.everyYear:title" = "毎年";
+"eventDetail.repeating.lunarCalendar_everyYear:title" = "毎年（旧暦）";
+"eventDetail.repeating.everyYearSomeDay:title" = "毎年%@";
+"eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "毎年%@（旧暦）";
+"eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "毎月最終週のすべての曜日";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "毎月第1%@";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "毎月第2%@";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "毎月第3%@";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "毎月第4%@";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "毎月第5%@";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "毎月第6%@";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "毎月第7%@";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "毎月最終%@";
+"eventDetail.repeating.endtime::title" = "繰り返しの終了";
+"eventDetail.repeating.endtime::option::never" = "しない";
+"eventDetail.repeating.endtime::option::on" = "日付指定";
+"eventDetail.repeating.endtime::option::after" = "回数指定";
+"eventDetail.repeating.endtime::option::after_occurrences" = "回";
+"eventDetail.repeating.endtime::shouldFutureThanStartTime" = "繰り返しの終了日時は開始日時より後である必要があります。\n（繰り返し開始日: %@）";
+"eventDetail.repeating::period_endcount" = "%@から%d回";
+
+"eventDetail.repeating.everyNDays:title" = "%d日ごと";
+"eventDetail.repeating.last" = "最終";
+"eventDetail.repeating.everyNMonths:title" = "%dヶ月ごと";
+"eventDetail.repeating.everyNYears:title" = "%d年ごと";
+"eventDetail.repeating::endoption_until" = "%@まで";
+"eventDetail.repeating::endoption_times" = "%d回";
+
+"eventDetail.place::placeholder" = "場所";
+"eventDetail.place::remove_button" = "場所を削除";
+"eventDetail.place::no_map_app" = "選択した地図アプリがインストールされていません。";
+"eventDetail.place::select_map_app" = "地図アプリを選択";
+"eventDetail.place::always_select_this_map" = "常にこのアプリで開く";
+
+"eventDetail.add_new_todo::message" = "新しいタスクを追加しました。";
+"eventDetail.add_new_schedule::message" = "新しい予定を追加しました。";
+"eventDetail.scheduleEvent_removed::message" = "予定を削除しました。";
+"eventDetail.edit::repeating::confirm::ttile" = "イベントを編集";
+"eventDetail.edit::repeating::confirm::message" = "このイベントは繰り返しイベントです。\n編集する範囲を選択してください。";
+"eventDetail.edit::repeating::confirm::all::button" = "すべてのイベント";
+"eventDetail.edit::repeating::confirm::fromNow::button" = "今回から";
+"eventDetail.edit::repeating::confirm::onlyThisTime::button" = "今回のみ";
+"eventDetail.scheduleEvent_saved::message" = "予定を保存しました。";
+"eventDetail.todoEvent_removed::message" = "タスクを削除しました。";
+"eventDetail.todoEvent_saved::message" = "タスクを保存しました。";
+"eventDetail.cancel_edit::title" = "イベントを編集";
+"eventDetail.cancel_edit::message" = "変更内容を破棄しますか？";
+"eventDetail.cancel_edit::continue::button" = "編集を続ける";
+
+"eventDetail.edit::add_new_name::placeholder" = "イベント名を入力";
+"eventDetail.edit::clearEventTime::button" = "イベント時刻をクリア";
+"eventDetail.edit::noEventTime::button" = "終了時刻なし";
+"eventDetail.edit::memo" = "メモ";
+"eventDetail.edit::urlPreview" = "URLプレビュー";
+
+"eventDetail.edit::make::case" = "タスクにしますか？";
+"eventDetail.edit::todo::case" = "タスク";
+"eventDetail.edit::schedule::case" = "予定";
+"eventDetail.edit::holiday::case" = "%@の祝日";
+
+"eventDetail.notSupport::holiday" = "祝日は情報の編集に対応していません。";
+
+"eventDetail:todo:guide:message1" = "タスクは、やるべきことを表すイベントです。";
+"eventDetail:todo:guide:message2" = "特定の時刻（または期間）でカレンダーに表示される通常の予定とは異なり、タスクは完了したかどうかを確認できます。";
+"eventDetail:todo:guide:message3" = "時刻情報を指定せずにタスクを追加することもできます。たとえば、今すぐではないが近いうちに済ませたい用事を記録するのに使えます。";
+"eventDetail:todo:guide:process:message" = "繰り返しをオンにすると、タスクは通常の予定とは異なる動作をします。";
+"eventDetail:todo:guide:process:bullet1" = "現在または過去の繰り返しタスクのうち、未完了のものはカレンダーに表示されます。";
+"eventDetail:todo:guide:process:bullet2" = "タスクを完了すると、そのイベントは完了リストに追加され、次の回のイベントが新しくカレンダーに追加されます。";
+"eventDetail:todo:guide:process:bullet3" = "繰り返しの終了条件により次の回がない場合、繰り返しタスクは終了します。";
+"eventDetail:foremost:guide:message1" = "最も重要なイベントには最重要イベントを設定できます。\n最重要イベントは常にカレンダーに表示され、専用のウィジェットにも対応しています。";
+"eventDetail:foremost:guide:supports:message" = "最重要イベントに設定できるイベントの種類は次のとおりです。";
+"eventDetail:foremost:guide:supports:todo" = "タスク";
+"eventDetail:foremost:guide:supports:notRepeating_schedule" = "繰り返しのない予定";
+
+"eventDetail:isSaving:toast:message" = "変更を保存しています。しばらくお待ちください。";
+"eventDetail:hasChanges:confirm:message" = "変更内容があります。破棄しますか？";
+"eventDetail:hasChanges:confirm:continue" = "編集を続ける";
+
+"eventDetail.unavailto_transform_withoutName" = "変換するにはイベント名を入力してください。";
+"eventDetail.todoEvent_unavailto_transform_withoutTime" = "予定に変換するには時刻情報が必要です。";
+"eventDetail.todoEvent::transform::schedule_title" = "変換";
+"eventDetail.todoEvent::transform::schedule_message" = "このタスクを予定に変換しますか？";
+"eventDetail.scheduleEvent::transform::todo" = "変換";
+"eventDetail.scheduleEvent::transform::todo_message" = "この予定をタスクに変換しますか？";
+
+"eventDetail::revert" = "完了を取り消す";
+
+// MARK: - Google calendar event
+
+"eventDetail::gogoleEvent::viewOnCalendar" = "Googleカレンダーで見る";
+"eventDetail::gogoleEvent::calendar" = "カレンダー";
+"eventDetail::gogoleEvent::calendar::event" = "Googleカレンダーのイベント";
+"eventDetail::gogoleEvent::attendee::unknown" = "不明";
+"eventDetail::gogoleEvent::attendees" = "参加者（%d人）";
+"eventDetail::gogoleEvent::attendees::organizer" = "主催者";
+"eventDetail::gogoleEvent::conference::accessCode" = "アクセスコード";
+"eventDetail::gogoleEvent::conference::meetingCode" = "会議コード";
+"eventDetail::gogoleEvent::conference::passCode" = "パスコード";
+"eventDetail::gogoleEvent::conference::password" = "パスワード";
+"eventDetail::gogoleEvent::copy::message" = "クリップボードにコピーしました。";
+"eventDetail::gogoleEvent::canceled::message" = "このイベントはキャンセルされました。";
+
+// MARK: - Apple calendar event
+"eventDetail::appleCalendarEvent::viewOnCalendar" = "Appleカレンダーで見る";
+"eventDetail::appleCalendarEvent::calendar::event" = "Appleカレンダーのイベント";
+"eventDetail::appleCalendarEvent::attendees" = "参加者（%d人）";
+"eventDetail::appleCalendarEvent::attendees::organizer" = "主催者";
+
+// MARK: - event tag
+
+"eventTag.title" = "イベントタイプ";
+"eventTag.list::title" = "イベントタイプ";
+"eventTag.defaults.default::name" = "デフォルト";
+"eventTag.defaults.holiday::name" = "祝日";
+"eventTag.addNew::placeholder" = "新しいイベントタイプを追加";
+"eventTag.allEventTypes" = "すべてのイベントタイプ >";
+"eventTag.remove::confirm::message" = "このイベントタイプを削除しますか？関連するイベントもすべて削除しますか？";
+"eventTag.remove::only_tag" = "イベントタイプのみ削除";
+"eventTag.remove::tag_and_evets" = "関連イベントも一緒に削除";
+"eventTag.removed::message" = "イベントタイプを削除しました。";
+"eventTag.removed_with_events::message" = "イベントタイプと関連イベントを削除しました。";
+"eventTag.color::changed::message" = "色を変更しました。";
+"eventTag.changed::message" = "イベントタイプを変更しました。";
+"eventTag.makeNew::message" = "新しいイベントタイプを作成しました。";
+"eventTag.default::title" = "デフォルトのイベントタイプ";
+"eventTag.default::selection::explain" = "イベント作成時にデフォルトで選択されるイベントタイプです。";
+"eventTag.externalCalendar::integrate_button" = "カレンダーを連携";
+
+
+// MARK: - event list
+
+"eventList::today::title" = "今日";
+"eventList::yesterday::title" = "昨日";
+"eventList::thisMonth::title" = "今月";
+"eventList::done_todos::title" = "完了したタスク一覧";
+"eventList::done_todos::eventTime" = "イベント時刻:";
+"eventList::done_todos::doneAt" = "完了時刻:";
+"eventList::remove::confirm::message" = "完了したタスクを削除";
+"eventList::remove::confirm::button::all" = "完了したすべてのタスク";
+"eventList::remove::confirm::button::olderThan1m" = "1ヶ月以上前";
+"eventList::remove::confirm::button::olderThan3m" = "3ヶ月以上前";
+"eventList::remove::confirm::button::olderThan6m" = "6ヶ月以上前";
+"eventList::remove::confirm::button::olderThan1y" = "1年以上前";
+
+
+// MARK: - account
+
+"manage_account::title" = "アカウント管理";
+"manage_account::login_method" = "ログイン方法";
+"manage_account::email" = "メールアドレス";
+"manage_account::last_signedIn_at" = "最終ログイン日時";
+"manage_account::migration::title" = "一時ユーザーデータの移行";
+"manage_account::migration::description" = "ログイン前に作成したすべてのイベント（%d件）をアカウントに移行しています。\nアカウントに紐づいたイベントはどの端末からでもアクセスできます。";
+"manage_account::migration_finished::message" = "移行が完了しました！";
+"manage_account::signout_button::title" = "ログアウト";
+"manage_account::sign_out::confirm::title" = "ログアウト";
+"manage_account::sign_out::confirm::message" = "現在のアカウントからログアウトしますか？";
+"manage_account::delete_account_button::title" = "アカウント削除";
+"manage_account::delete_account_button::confirm:message" = "本当にアカウントを削除しますか？";
+"manage_account::delete_account_button::description" = "アカウント削除をリクエストすると、アカウントが削除されます。\n削除されたアカウント情報は復元できません。";
+"signIn::title" = "ログイン";
+"signIn:description" = "イベントリストをバックアップして、他のiOSデバイスと同期しましょう\n（対応プラットフォームは今後拡大予定です。）";
+
+
+// MARK: - setting
+"event_setting::title" = "イベント設定";
+"event_setting::eventType" = "イベントタイプ";
+"event_setting::eventPeriod" = "イベント期間";
+"event_setting::defaultMapApp" = "地図アプリを開く";
+"event_setting::defaultMapApp_select" = "選択";
+
+"event_setting::eventSync" = "イベント同期";
+"event_setting::eventSync::readyToSync::description" = "バックアップ済みのイベントを同期します。";
+"event_setting::eventSync::syncInProgress::description" = "バックアップ済みのイベントを同期しています…";
+"event_setting::eventSync::lastTime" = "最終同期日時: %@";
+"event_setting::eventSync::force" = "強制同期";
+
+"event_notification_setting::title::forAllDay" = "終日";
+"event_notification_setting::title::NotforAllDay" = "通知時刻";
+"event_setting::external_calendar::title" = "外部カレンダー";
+"event_setting::external_calendar::connected::account" = "連携中: %@";
+"event_setting::external_calendar::start" = "連携する";
+"event_setting::external_calendar::start::message" = "外部カレンダーと連携しました。";
+"event_setting::external_calendar::stop" = "連携を解除";
+"event_setting::external_calendar::stop::message" = "外部カレンダーとの連携を解除しました。";
+"event_setting::external_calendar::google::serviceName" = "Googleカレンダー";
+"event_setting::external_calendar::apple::serviceName" = "Appleカレンダー";
+"event_setting::apple_calendar::permission_denied::message" = "カレンダーへのアクセスが拒否されています。Appleカレンダーを使用するには、設定でアクセスを許可してください。";
+"event_setting::apple_calendar::restricted::message" = "この端末ではカレンダーへのアクセスが制限されています。";
+"setting.title" = "設定";
+"setting.appearance.title" = "外観";
+"setting.appearance.calendar.samplemonth::march" = "3月";
+"setting.appearance.calendar.startDayOfWeek" = "週の開始曜日";
+"setting.appearance.calendar.accentDay" = "強調する曜日";
+"setting.appearance.calendar.accentDay::holiday" = "祝日";
+"setting.appearance.calendar.accentDay::saturday" = "土曜日";
+"setting.appearance.calendar.accentDay::sunday" = "日曜日";
+"setting.appearance.calendar.colorTheme" = "カラーテーマ";
+"setting.appearance.calendar.colorTheme::system" = "システム";
+"setting.appearance.calendar.colorTheme::light" = "ライト";
+"setting.appearance.calendar.colorTheme::dark" = "ダーク";
+"setting.appearance.calendar.underline" = "イベントがある日に下線を表示";
+"setting.appearance.event.edit::name_old" = "イベントを編集";
+"setting.appearance.event.edit::name" = "イベント設定と外部カレンダー";
+"setting.appearance.day_row_height" = "イベント表示の詳細度";
+"setting.appearance.day_row_height::small::text" = "最小限";
+"setting.appearance.day_row_height::medium::text" = "標準";
+"setting.appearance.day_row_height::large::text" = "すべて";
+"setting.appearance.event.fontSize" = "イベント文字サイズ";
+"setting.appearance.event.show_holidayName" = "祝日名を表示";
+"setting.appearance.event.show_lunar" = "旧暦を表示";
+"setting.appearance.event._24form" = "24時間表示";
+"setting.appearance.event.sample::name" = "🥗 イベント名";
+"setting.appearance.event.sample::description" = "説明";
+"setting.appearance.event.sample::christmas" = "クリスマス";
+"setting.appearance.event.sample::first" = "最初のイベント";
+"setting.appearance.event.sample::second" = "2番目のイベント";
+"setting.appearance.event.sample::uncompleted_todo::toggle" = "未完了のタスクを表示";
+"setting.appearance.widget::title" = "ウィジェットテーマ";
+"setting.appearance.widget::useSystemTheme::title" = "システムテーマを使用";
+"setting.appearance.widget::useSystemTheme::background" = "ウィジェットの背景色";
+"setting.appearance.widget::useCustomTheme::title" = "カスタムカラーを選択";
+"setting.appearance.widget::sample::eventName" = "ウィジェットイベント";
+"setting.appearance.event.boldText" = "太字";
+"setting.appearance.event.eventColor" = "イベントカラー";
+"setting.timezone::title" = "タイムゾーン";
+"setting.timezone::systemTimeZone::name" = "システムのタイムゾーン";
+"setting.timezone::systemTime::name" = "システム時刻";
+"setting.haptic::name" = "触覚フィードバック";
+"setting.minimize_animation::name" = "アニメーション効果を減らす";
+"setting.holiday.title" = "祝日";
+"setting.holiday.item::name" = "祝日設定";
+"setting.holiday.list::sectionTitle" = "祝日";
+"setting.holiday.country.title" = "国";
+"setting.holiday.country.current::title" = "現在の国";
+"setting.holiday.country.current::placeHolder" = "国を選択してください";
+"setting.holiday.country.changeConfirm::title" = "国を変更";
+"setting.holiday.country.changeConfirm::message" = "カレンダーに適用する国を変更しますか？";
+"setting.holiday.country.changed::message" = "国を変更しました。";
+"setting.holiday.hide::button" = "非表示";
+"setting.holiday.hide::confirm::title" = "祝日を非表示";
+"setting.holiday.hide::confirm::message" = "この祝日を毎年非表示にしますか？\n設定 > 祝日でいつでも再表示できます。";
+"setting.holiday.hidden::sectionTitle" = "非表示の祝日";
+"setting.holiday.show::button" = "表示";
+"setting.feedback::name" = "フィードバック";
+"setting.help::name" = "ヘルプ";
+"setting.share::name" = "アプリを共有";
+"setting.write_review::name" = "アプリのレビューを書く";
+"setting.account.signedIn::manageAccount" = "アカウント";
+"setting.account.needSignIn" = "ログイン";
+"setting.suggest::readmind::appName" = "Readminds";
+"setting.suggest::readmind::message" = "読書リストを管理しましょう";
+"setting.section.support::name" = "サポート";
+"setting.section.app::name" = "アプリ";
+"setting.section.suggest::name" = "おすすめ";
+"feedback::guide:message" = "不具合報告やご意見、サービスへのご要望など、お気軽にフィードバックをお送りください。\nいただいたご意見はサービス改善の大きな力になります。";
+"feedback::enterMessage::placeholder" = "メッセージを入力";
+"feedback::contact::placeholder" = "返信用メールアドレス";
+"feedback::posted:message" = "フィードバックを送信しました。";
+
+// MARK: - external service
+
+"external_service.name::google" = "Googleカレンダー";
+"external_service.expired::message" = "%@との連携の有効期限が切れました。設定画面でもう一度お試しください。";
+"external_service::google::hidden_event" = "非表示";
+"external_service::google::unknown_event" = "不明";
+
+
+// MARK: - widget
+
+"widget.common::explain" = "今後の予定を確認できます。";
+"widget.doubleMonth::name" = "カレンダー＋カレンダー";
+"widget.eventAndMonth::name" = "イベント＋カレンダー";
+"widget.todayAndMonth::name" = "TODAY＋カレンダー";
+"widget.eventAndForesmot::name" = "イベント＋最重要";
+"widget.events::name" = "イベント";
+"widget.events.noEvents::message" = "イベントがありません。";
+"widget.events.currentTodos" = "現在のタスク";
+"widget.events.sample::check_mailbox" = "郵便受けを確認";
+"widget.events.sample::example" = "祝日";
+"widget.events.sample::running" = "ランニング";
+"widget.events.sample::luch" = "ランチ";
+"widget.events.sample::luch_appointment" = "ランチの約束（遅刻厳禁）";
+"widget.events.sample::call" = "サラに電話";
+"widget.events.sample::surfing" = "サーフィン";
+"widget.events.sample::moving" = "引っ越し日";
+"widget.events.sample::meeting" = "毎日のミーティング";
+"widget.events.sample::deposit_remain" = "残金を振り込む";
+"widget.events.sample::recycle" = "資源ごみを出す";
+"widget.events.sample::take_medicine" = "薬を飲む";
+"widget.events.sample::watering" = "植木鉢に水をやる";
+"widget.events.sample::june3" = "6月3日(火)";
+"widget.events.sample::july16" = "7月16日(日)";
+"widget.events.sample::july21" = "7月21日(金)";
+"widget.events.sample::july29" = "7月29日(土)";
+"widget.events.sample::aug2" = "8月2日(水)";
+"widget.events.sample::aug3" = "8月3日(木)";
+"widget.events.sample::oct10" = "10月10日(月)";
+"widget.events.foremost" = "最重要イベント";
+"widget.events.foremost::allFinished::message" = "絶対に見逃せないイベントを追加しましょう。";
+"widget.events.foremost::sample::message" = "傘を持って行こう！⛱️";
+"widget.events.calendar" = "カレンダー";
+"widget.events.today" = "TODAY";
+"widget.events.today::sample::sunday" = "日曜日";
+"widget.events.today::sample::march2024" = "2024年3月";
+"total::event::count" = "%d件のイベント";
+"todo::count" = "%d件のタスク";
+"schedule::count" = "%d件の予定";
+"widget.weeks.lastMonth" = "先月";
+"widget.weeks.thisMonth" = "今月";
+"widget.weeks.nextMonth" = "来月";
+"widget.weeks.thisWeek" = "今週";
+"widget.weeks.twoWeek" = "2週間";
+"widget.weeks.threeWeek" = "3週間";
+"widget.weeks.fourWeek" = "4週間";
+"widget.weeks.sample::feb" = "2月";
+"widget.weeks.sample::march" = "3月";
+"widget.weeks.sample::april" = "4月";
+"widget.weeks.sample::hiking" = "🏔️ 登山";
+"widget.weeks.sample::lunch" = "🥗 ランチ";
+"widget.weeks.sample::call" = "📞 サラに電話";
+"widget.weeks.sample::holiday" = "祝日";
+"widget.weeks.sample::golf" = "⛳️ ゴルフ";
+"widget.weeks.sample::workout" = "🔥 ワークアウト";
+"widget.weeks.sample::launch" = "🚀 ローンチ";
+"widget.fail.message" = "一時的なエラーが発生しました。\nアプリを再度起動してお試しください。";
+"widget.next.noEvent" = "次の予定はありません。";
+"widget.next.sample" = "🔥 ワークアウト";
+"widget.next.title" = "次の予定";
+"widget.next.rect_widget::title" = "本日の次の予定";
+"widget.next.title::remains" = "本日の残りの予定";
+"widget.next.title::future" = "今日とこれからの予定";
+"widget.next.title::more_todos" = "他%d件のタスク";
+"widget.next.title::more_events" = "他%d件の予定";
+"widget.next.title::more_events_with_todo" = "他%1$d件のタスクと%2$d件の予定";
+"widget.next.title::uncompleted::todo" = "%1$@が未完了です";
+"widget.next.title::uncompleted::todos" = "%1$@ほか%2$d件のタスクが未完了です";
+"widget.next.no_events_today" = "本日の予定はありません";
+"widget.next.no_events" = "今後の予定はありません";
+
+"widget.dday::name" = "D-Day";
+"widget.dday::noTarget" = "イベントを選択してください";
+"widget.dday.sample::title" = "ワークショップ";
+"widget.dday.target::repeating" = "繰り返し";
+"widget.dday.target::registered" = "ピン留め済み";
+"widget.dday.turn::name" = "第%d回";
+
+// MARK: - link
+
+"deeplink::invalid_link_message" = "このリンク形式には対応していません。\nアプリを最新バージョンに更新してください。";
+
+// MARK: - force update
+
+"force_update.title" = "アップデートが必要です";
+"force_update.message" = "新しいバージョンが利用可能です。\nアプリを引き続き使用するにはアップデートしてください。";
+"recommend_update.title" = "アップデートのお願い";
+"recommend_update.message" = "新しいバージョンが利用可能です。\nより快適にご利用いただくためアップデートをおすすめします。";
+
+
+// MARK: - ai agent
+
+"aiAgent::voice::listening" = "聞いています…";
+"aiAgent::keyboard" = "キーボード";
+"aiAgent::voice" = "音声";
+"aiAgent::send" = "送信";
+"aiAgent::input::placeholder" = "どのようにお手伝いしましょうか？";
+"aiAgent::permission::title" = "マイクと音声認識の権限が必要です";
+"aiAgent::permission::message" = "設定でアクセスを許可するか、キーボードで入力してください";
+"aiAgent::permission::keyboard" = "キーボードで入力";
+"aiAgent::permission::setting" = "設定を開く";
+"aiAgent::state::processing" = "処理中";
+"aiAgent::state::confirm" = "確認が必要です";
+"aiAgent::state::confirmExpired" = "期限切れ";
+"aiAgent::state::done" = "コマンド完了";
+"aiAgent::state::failed" = "コマンド失敗";
+"aiAgent::done::default" = "完了しました";
+"aiAgent::failed::default" = "処理できませんでした";
+"aiAgent::retry" = "再試行";
+"aiAgent::needSignIn::title" = "ログインが必要です";
+"aiAgent::needSignIn::message" = "AIクイック入力を使用するにはログインしてください。";
+"aiAgent::title" = "AIクイック入力";
+"aiAgent::keyboard::stop" = "停止";
+"aiAgent::keyboard::send" = "送信";
+"aiAgent::stop" = "停止";
+"aiAgent::usage" = "%@ / %@ クレジット";
+"aiAgent::plan::free" = "無料";
+"aiAgent::plan::standard" = "スタンダード";
+"aiAgent::plan::lifetime" = "永久";
+"aiAgent::usage::topupRemaining" = "追加クレジット残り%@";
+"aiAgent::usage::planChangeScheduled" = "%1$@に%2$@プランへ切り替わります";
+"aiAgent::stop::confirm::title" = "処理を中止しますか？";
+"aiAgent::stop::confirm::message" = "中止すると進行中のコマンドは破棄され、再開できません。";
+"aiAgent::confirm::countdown" = "以内に承認してください";
+"aiAgent::confirm::expired::message" = "時間が過ぎました。もう一度リクエストしてください。";

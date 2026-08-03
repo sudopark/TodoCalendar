@@ -102,7 +102,7 @@ struct WidgetAppearanceSettingView: View {
                 VStack {
                  
                     WidgetAppearanceSampleView(background: state.background)
-                        .padding(.vertical, 20)
+                        .padding(.vertical, spacing: .xlarge)
                     
                     VStack {
                         
@@ -117,7 +117,7 @@ struct WidgetAppearanceSettingView: View {
                         }
                         
                     }
-                    .padding(.horizontal, 20)
+                    .padding(.horizontal, spacing: .xlarge)
                 }
             }
             .background(
@@ -218,14 +218,14 @@ struct WidgetAppearanceSampleView: View {
                     .foregroundStyle(colorSet.text0.asColor)
                 
                 Spacer().frame(width: 24)
-                
+
                 Image(systemName: "circle")
                     .font(.system(size: 18))
                     .foregroundStyle(colorSet.accent.asColor)
             }
-            .padding(.vertical, 12)
-            .padding(.horizontal, 14)
-            .background(backgroundShape, in: RoundedRectangle(cornerRadius: 10))
+            .padding(.vertical, spacing: .regular)
+            .padding(.horizontal, spacing: .large)
+            .background(backgroundShape, in: RoundedRectangle(cornerRadius: Metric.Radius.large))
             
             Spacer()
             

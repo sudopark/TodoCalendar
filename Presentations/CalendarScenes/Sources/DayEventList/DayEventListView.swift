@@ -1,5 +1,5 @@
 //
-//  
+//
 //  DayEventListView.swift
 //  CalendarScenes
 //
@@ -10,31 +10,74 @@
 
 import SwiftUI
 import Combine
+import AudioToolbox
 import Prelude
 import Optics
 import Domain
+import Scenes
 import Extensions
 import CommonPresentation
+
+
+// MARK: - AICommandBadge
+
+private enum AICommandBadge: Equatable {
+    case processing
+    case needConfirm(expireTime: Date?)
+    case expired
+    case done
+    case failed
+}
 
 
 // MARK: - DayEventListViewController
 
 @Observable final class DayEventListViewState {
-    
+
     @ObservationIgnored private var didBind = false
     @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
-    
+
     fileprivate var foremostModel: (any EventCellViewModel)?
     fileprivate var uncompletedTodos: [TodoEventCellViewModel] = []
     fileprivate var dayModel: SelectedDayModel?
     fileprivate var cellViewModels: [any EventCellViewModel] = []
     fileprivate var foremostEventMarkingStatus: ForemostMarkingStatus = .idle
-    
+    fileprivate var isAIAgentEnabled: Bool = false
+    fileprivate var aiAgentState: AIAgentState = .idle
+    fileprivate var recognizingText: String = ""
+    fileprivate var voiceLevel: Float = 0
+
+    // 음성 리스닝 UI(파형·네온 테두리·AI pill)는 음성 입력일 때만 켠다.
+    // 키보드 입력(.listening(.keyboard)) 중엔 뒤 배경을 평소 상태로 둬야
+    // 키보드 시트가 닫힐 때 파형 잔상이 노출되지 않는다.
+    fileprivate var isVoiceListening: Bool {
+        if case .listening(.voice) = aiAgentState { return true }
+        return false
+    }
+
+    fileprivate var isAIIdle: Bool {
+        if case .idle = aiAgentState { return true }
+        return false
+    }
+
+    // 만료 여부는 여기서 파생하지 않는다 — needConfirm(expireTime)을 그대로 실어 AIAgentEntryButton이 렌더 시점(TimelineView)에 파생.
+    fileprivate var aiCommandBadge: AICommandBadge? {
+        switch self.aiAgentState {
+        case .processing: return .processing
+        case .confirm(_, _, _, let expireTime): return .needConfirm(expireTime: expireTime)
+        case .done: return .done
+        case .failed: return .failed
+        case .idle, .listening: return nil
+        }
+    }
+
     func bind(_ viewModel: any DayEventListViewModel, _ appearance: ViewAppearance) {
-        
+
         guard self.didBind == false else { return }
         self.didBind = true
-        
+
+        self.isAIAgentEnabled = viewModel.isAIAgentEnabled
+
         viewModel.foremostEventModel
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self, weak appearance] model in
@@ -43,7 +86,7 @@ import CommonPresentation
                 }
             })
             .store(in: &self.cancellables)
-        
+
         viewModel.uncompletedTodoEventModels
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self, weak appearance] models in
@@ -52,14 +95,14 @@ import CommonPresentation
                 }
             })
             .store(in: &self.cancellables)
-        
+
         viewModel.selectedDay
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] model in
                 self?.dayModel = model
             })
             .store(in: &self.cancellables)
-        
+
         viewModel.cellViewModels
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self, weak appearance] cellViewModels in
@@ -68,7 +111,7 @@ import CommonPresentation
                 }
             })
             .store(in: &self.cancellables)
-        
+
         viewModel.foremostEventMarkingStatus
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self, weak appearance] status in
@@ -76,6 +119,23 @@ import CommonPresentation
                     self?.foremostEventMarkingStatus = status
                 }
             })
+            .store(in: &self.cancellables)
+
+        viewModel.aiAgentState
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] state in
+                self?.aiAgentState = state
+            })
+            .store(in: &self.cancellables)
+
+        viewModel.recognizingText
+            .receive(on: RunLoop.main)
+            .sink { [weak self] text in self?.recognizingText = text }
+            .store(in: &self.cancellables)
+
+        viewModel.voiceLevel
+            .receive(on: RunLoop.main)
+            .sink { [weak self] level in self?.voiceLevel = level }
             .store(in: &self.cancellables)
     }
 }
@@ -91,7 +151,14 @@ final class DayEventListViewEventHandler: Observable {
     var showDoneTodoList: () -> Void = { }
     var handleMoreAction: (any EventCellViewModel, EventListMoreAction) -> Void = { _, _ in }
     var refreshUncompletedTodos: () -> Void = { }
-    
+    var enterVoiceInput: () -> Void = { }
+    var finishVoiceInput: () -> Void = { }
+    var enterKeyboardInput: () -> Void = { }
+    var stopAIAgentInput: () -> Void = { }
+    var submitAIAgent: (String) -> Void = { _ in }
+    var handleAIEntryButtonTap: () -> Void = { }
+    var showAIGuide: () -> Void = { }
+
     func bind(
         _ viewModel: any DayEventListViewModel,
         _ eventListCellEventHandleViewModel: any EventListCellEventHanleViewModel
@@ -108,6 +175,13 @@ final class DayEventListViewEventHandler: Observable {
         self.showDoneTodoList = viewModel.showDoneTodoList
         self.handleMoreAction = eventListCellEventHandleViewModel.handleMoreAction(_:_:)
         self.refreshUncompletedTodos = viewModel.refreshUncompletedTodoEvents
+        self.enterVoiceInput = viewModel.enterVoiceInput
+        self.finishVoiceInput = viewModel.finishVoiceInput
+        self.enterKeyboardInput = viewModel.enterKeyboardInput
+        self.stopAIAgentInput = viewModel.stopAIAgentInput
+        self.submitAIAgent = viewModel.submitAIAgent(_:)
+        self.handleAIEntryButtonTap = viewModel.handleAIEntryButtonTap
+        self.showAIGuide = viewModel.showAIGuide
     }
 }
 
@@ -115,14 +189,14 @@ final class DayEventListViewEventHandler: Observable {
 // MARK: - DayEventListContainerView
 
 struct DayEventListContainerView: View {
-    
+
     @State private var state: DayEventListViewState = .init()
     private let viewAppearance: ViewAppearance
     private let eventHandler: DayEventListViewEventHandler
     private let pendingDoneState: PendingCompleteTodoState
-    
+
     var stateBinding: (DayEventListViewState) -> Void = { _ in }
-    
+
     init(
         viewAppearance: ViewAppearance,
         eventHandler: DayEventListViewEventHandler,
@@ -132,7 +206,7 @@ struct DayEventListContainerView: View {
         self.eventHandler = eventHandler
         self.pendingDoneState = pendingDoneState
     }
-    
+
     var body: some View {
         return DayEventListView()
             .onAppear {
@@ -148,38 +222,40 @@ struct DayEventListContainerView: View {
 // MARK: - DayEventListView
 
 struct DayEventListView: View {
-    
+
     @Environment(DayEventListViewState.self) private var state
     @Environment(PendingCompleteTodoState.self) private var pendingDoneState
     @Environment(DayEventListViewEventHandler.self) private var eventHandler
     @Environment(ViewAppearance.self) private var appearance
     @FocusState var isFocusInput: Bool
-    
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-         
+        VStack(alignment: .leading, spacing: Metric.Spacing.large) {
+
             if let foremost = self.state.foremostModel {
                 self.foremostSectionView(foremost)
             }
-            
+
             if !self.state.uncompletedTodos.isEmpty {
                 self.uncompletedTodosSectionView(self.state.uncompletedTodos)
             }
-         
+
             // 날짜 및 이벤트 목록
-            VStack(alignment: .leading, spacing: 6) {
-                
+            VStack(alignment: .leading, spacing: Metric.Spacing.small) {
+
                 // 상단 날짜 표시 헤더
                 self.dateInfoView()
-                
+
                 // 이벤트 리스트
                 self.eventListView()
-                
-                QuickAddNewTodoView(isFocusInput: $isFocusInput)
-                    .eventHandler(\.addNewTodoQuickly, eventHandler.addNewTodoQuickly)
-                    .eventHandler(\.makeNewTodoWithGivenNameAndDetails, eventHandler.makeNewTodoWithGivenNameAndDetails)
-                
-                addNewButton()
+
+                VStack(alignment: .leading, spacing: Metric.Spacing.small) {
+                    QuickAddNewTodoView(isFocusInput: $isFocusInput)
+                        .eventHandler(\.addNewTodoQuickly, eventHandler.addNewTodoQuickly)
+                        .eventHandler(\.makeNewTodoWithGivenNameAndDetails, eventHandler.makeNewTodoWithGivenNameAndDetails)
+                    addNewButton()
+                }
+                .animation(.easeInOut(duration: 0.3), value: self.state.isVoiceListening)
             }
         }
         .onTapGesture {
@@ -187,8 +263,13 @@ struct DayEventListView: View {
         }
         .padding()
         .background(self.appearance.colorSet.bg0.asColor)
+        .onChange(of: self.state.isVoiceListening) { _, listening in
+            // listening on/off 전환에 반대되는 세기의 햅틱 + 녹음 시작/종료 시스템 사운드.
+            self.appearance.impactIfNeed(listening ? .medium : .soft)
+            AudioServicesPlaySystemSound(listening ? 1113 : 1114)
+        }
     }
-    
+
     private func addNewButton() -> some View {
         return HStack {
             Button {
@@ -204,12 +285,12 @@ struct DayEventListView: View {
                         .foregroundColor(self.appearance.colorSet.text0.asColor)
                     Spacer()
                 }
-                .padding(.leading, 16)
+                .padding(.leading, spacing: .large)
                 .frame(height: 50)
                 .frame(maxWidth: .infinity)
                 .backgroundAsRoundedRectForEventList(self.appearance)
             }
-            
+
             // TODO: 템플릿 추가버튼 임시 비활성화
 //            Button {
 //                self.eventHandler.requestAddNewEventWhetherUsingTemplate(true)
@@ -221,7 +302,7 @@ struct DayEventListView: View {
 //            }
         }
     }
-    
+
     private func foremostSectionView(_ foremost: any EventCellViewModel) -> some View {
         ForemostEventView(viewModel: foremost, foremostEventMarkingStatus: state.foremostEventMarkingStatus)
             .eventHandler(\.requestDoneTodo) {
@@ -241,7 +322,7 @@ struct DayEventListView: View {
                 eventHandler.handleMoreAction($0, $1)
             }
     }
-    
+
     private func uncompletedTodosSectionView(_ models: [TodoEventCellViewModel]) -> some View {
         UncompletedTodoView(models, state.foremostEventMarkingStatus)
             .eventHandler(\.requestDoneTodo) {
@@ -266,24 +347,24 @@ struct DayEventListView: View {
                 eventHandler.refreshUncompletedTodos()
             }
     }
-    
+
     private func dateInfoView() -> some View {
         VStack(alignment: .leading) {
-            
+
             if let holidayName = self.state.dayModel?.holidayName, self.appearance.showHoliday {
                 Text(holidayName)
                     .font(appearance.eventSubNormalTextFontOnList().asFont)
                     .foregroundStyle(appearance.colorSet.holidayOrWeekEndWithAccent.asColor)
             }
-            
+
             // 상단 날짜표시 헤더 - 날짜 및 음력 표시
             HStack {
-                
+
                 Text(self.state.dayModel?.dateText ?? "")
                     .font(self.appearance.fontSet.size(22+appearance.eventTextAdditionalSize, weight: .semibold).asFont)
                     .foregroundColor(self.appearance.colorSet.text0.asColor)
-                    
-                
+
+
                 if self.appearance.showLunarCalendarDate {
                     Text(self.state.dayModel?.lunarDateText ?? "")
                         .font(
@@ -291,9 +372,9 @@ struct DayEventListView: View {
                         )
                         .foregroundColor(self.appearance.colorSet.text2.asColor)
                 }
-                
+
                 Spacer()
-                
+
                 Button {
                     self.isFocusInput = false
                     self.eventHandler.showDoneTodoList()
@@ -301,14 +382,14 @@ struct DayEventListView: View {
                     Image(systemName: "checklist.checked")
                 }
             }
-            .padding(.bottom, 3)
+            .padding(.bottom, spacing: .xsmall)
         }
     }
-    
+
     private func eventListView() -> some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: Metric.Spacing.small) {
             ForEach(self.state.cellViewModels, id: \.eventIdentifier) { cellViewModel in
-                
+
                 EventListCellView(cellViewModel: cellViewModel, foremostEventMarkingStatus: state.foremostEventMarkingStatus)
                     .eventHandler(\.requestDoneTodo) {
                         self.isFocusInput = false
@@ -333,75 +414,337 @@ struct DayEventListView: View {
 }
 
 private struct QuickAddNewTodoView: View {
-    
+
     @Environment(DayEventListViewState.self) private var state
+    @Environment(DayEventListViewEventHandler.self) private var eventHandler
     @Environment(ViewAppearance.self) private var appearance
-    
+
     @State private var newTodoName: String = ""
     @FocusState.Binding var isFocusInput: Bool
     private var isEntering: Bool { !self.newTodoName.isEmpty }
-    
+
     private func resetStates() {
         self.newTodoName = ""
         self.isFocusInput = false
     }
-    
+
     fileprivate var addNewTodoQuickly: (String) -> Void = { _ in }
     fileprivate var makeNewTodoWithGivenNameAndDetails: (String) -> Void = { _ in }
-    
+
+    // 입력 전 todo 필드만 흐리게. AI 진입 버튼은 딤 대상 아님.
+    private var inputDimOpacity: Double {
+        (self.state.isVoiceListening || self.isEntering) ? 1.0 : 0.5
+    }
+
     var body: some View {
-        HStack(spacing: 8) {
-            
+        quickAddField()
+            .padding(.vertical, spacing: .xsmall).padding(.horizontal, spacing: .small)
+            .frame(height: 50)
+            .backgroundAsRoundedRectForEventList(self.appearance)
+            .overlay {
+                if self.state.isVoiceListening {
+                    NeonListeningBorder(cornerRadius: 5)
+                        .transition(.opacity)
+                }
+            }
+    }
+
+    private func quickAddField() -> some View {
+        HStack(spacing: Metric.Spacing.small) {
+
+            self.leadingLabel()
+                .frame(width: 52)
+                .opacity(self.inputDimOpacity)
+
+            if self.state.isVoiceListening {
+                self.listeningContent()
+            } else {
+                self.defaultContent()
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func leadingLabel() -> some View {
+        if self.state.isVoiceListening {
+            // pill + 테두리로 "누르면 설명" affordance. 탭 시 안내 표시.
+            Button {
+                self.eventHandler.showAIGuide()
+            } label: {
+                HStack(alignment: .center, spacing: 3) {
+                    Text("AI")
+                        .font(
+                            self.appearance.fontSet.size(12, weight: .bold).asFont
+                        )
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 13, weight: .semibold))
+                }
+                .minimumScaleFactor(0.7)
+                .foregroundColor(self.appearance.colorSet.text0.asColor)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(
+                    Capsule()
+                        .fill(self.appearance.colorSet.accentAI.withAlphaComponent(0.15).asColor)
+                )
+                .overlay(
+                    Capsule()
+                        .strokeBorder(self.appearance.colorSet.accentAI.asColor.opacity(0.6), lineWidth: 1)
+                )
+            }
+        } else {
             Text(R.String.calendarEventTimeTodo)
                 .minimumScaleFactor(0.7)
                 .font(
                     self.appearance.fontSet.size(15+appearance.eventTextAdditionalSize, weight: .regular).asFont
                 )
                 .foregroundColor(self.appearance.colorSet.text0.asColor)
-                .frame(width: 52)
-            
-            RoundedRectangle(cornerRadius: 3)
-                .fill(self.appearance.tagColors.defaultColor.asColor)
-                .frame(width: 6)
-            
-            HStack(spacing: 8) {
-                TextField(
-                    "",
-                    text: $newTodoName,
-                    prompt: Text(
-                        R.String.calednarEventAddNewPlaceHolder
-                    ).foregroundStyle(appearance.colorSet.placeHolder.asColor)
-                )
-                .focused($isFocusInput, equals: true)
-                .autocorrectionDisabled()
-                .foregroundStyle(self.appearance.colorSet.text0.asColor)
-                .textInputAutocapitalization(.never)
-                .onSubmit {
-                    guard !self.newTodoName.isEmpty else { return }
-                    self.addNewTodoQuickly(self.newTodoName)
-                    self.resetStates()
-                }
-                .submitLabel(.done)
-                
-                if !self.newTodoName.isEmpty {
-                    Button {
-                        let newName = self.newTodoName
-                        self.resetStates()
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-                            self.makeNewTodoWithGivenNameAndDetails(newName)
-                        }
-                    } label: {
-                        Image(systemName: "info.circle")
-                    }
+        }
+    }
+
+    // 평소: 색상바 + todo 직접 입력 + AI 음성 진입 버튼
+    private func defaultContent() -> some View {
+        HStack(spacing: Metric.Spacing.small) {
+            HStack(spacing: Metric.Spacing.small) {
+                RoundedRectangle(cornerRadius: 3)
+                    .fill(self.appearance.tagColors.defaultColor.asColor)
+                    .frame(width: 6)
+
+                self.todoInputField()
+            }
+            .opacity(self.inputDimOpacity)
+
+            if self.state.isAIAgentEnabled {
+                AIAgentEntryButton(badge: self.state.aiCommandBadge) {
+                    self.isFocusInput = false
+                    self.eventHandler.handleAIEntryButtonTap()
                 }
             }
         }
-        .opacity(self.isEntering ? 1.0 : 0.5)
-        .padding(.vertical, 4).padding(.horizontal, 8)
-        .frame(height: 50)
-        .backgroundAsRoundedRectForEventList(self.appearance)
+    }
+
+    // listening: WAVE + 키보드 전환 + 중지 + 전송
+    private func listeningContent() -> some View {
+        HStack(spacing: 8) {
+            VoiceWaveformView(
+                // raw voiceLevel은 실기기 마이크 dynamic range가 좁아 변동이 작다.
+                // sqrt로 파형을 시각 증폭한다 (표현 관심사라 도메인 아닌 여기서).
+                level: sqrt(self.state.voiceLevel),
+                tintColor: self.appearance.colorSet.text1.asColor
+            )
+            .frame(maxWidth: .infinity)
+
+            self.circleControlButton(icon: "keyboard", isPrimary: false) {
+                self.eventHandler.enterKeyboardInput()
+            }
+            self.circleControlButton(icon: "stop.fill", isPrimary: false) {
+                self.eventHandler.stopAIAgentInput()
+            }
+            self.circleControlButton(icon: "arrow.up", isPrimary: true) {
+                self.eventHandler.finishVoiceInput()
+            }
+        }
+    }
+
+    private func circleControlButton(
+        icon: String,
+        isPrimary: Bool,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            Circle()
+                .fill(
+                    isPrimary
+                    ? self.appearance.colorSet.accentAI.asColor
+                    : self.appearance.colorSet.secondaryBtnBackground.asColor
+                )
+                .frame(width: 36, height: 36)
+                .overlay(
+                    Image(systemName: icon)
+                        .foregroundColor(
+                            isPrimary
+                            ? self.appearance.colorSet.primaryBtnText.asColor
+                            : self.appearance.colorSet.secondaryBtnText.asColor
+                        )
+                )
+        }
+    }
+
+    private func todoInputField() -> some View {
+        HStack(spacing: Metric.Spacing.small) {
+            TextField(
+                "",
+                text: $newTodoName,
+                prompt: Text(
+                    R.String.calednarEventAddNewPlaceHolder
+                ).foregroundStyle(appearance.colorSet.placeHolder.asColor)
+            )
+            .focused($isFocusInput, equals: true)
+            .autocorrectionDisabled()
+            .foregroundStyle(self.appearance.colorSet.text0.asColor)
+            .textInputAutocapitalization(.never)
+            .onSubmit {
+                guard !self.newTodoName.isEmpty else { return }
+                self.addNewTodoQuickly(self.newTodoName)
+                self.resetStates()
+            }
+            .submitLabel(.done)
+
+            if !self.newTodoName.isEmpty {
+                Button {
+                    let newName = self.newTodoName
+                    self.resetStates()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                        self.makeNewTodoWithGivenNameAndDetails(newName)
+                    }
+                } label: {
+                    Image(systemName: "info.circle")
+                }
+            }
+        }
+    }
+
+}
+
+
+// MARK: - NeonListeningBorder
+
+// listening 중 입력창을 감싸는 네온 그라데이션 테두리. Siri 입력처럼 색이 흐른다.
+private struct NeonListeningBorder: View {
+
+    let cornerRadius: CGFloat
+
+    private var neonColors: [Color] {
+        [0xbd93f9, 0xff79c6, 0x8be9fd, 0x6272a4, 0xbd93f9]
+            .map { UIColor(rgb: $0).asColor }
+    }
+
+    var body: some View {
+        TimelineView(.animation) { context in
+            let t = context.date.timeIntervalSinceReferenceDate
+            let angle = Angle.degrees((t * 70).truncatingRemainder(dividingBy: 360))
+            RoundedRectangle(cornerRadius: self.cornerRadius)
+                .strokeBorder(
+                    AngularGradient(
+                        gradient: Gradient(colors: self.neonColors),
+                        center: .center,
+                        angle: angle
+                    ),
+                    lineWidth: 2
+                )
+                .shadow(color: UIColor(rgb: 0xbd93f9).asColor.opacity(0.5), radius: 4)
+        }
     }
 }
+
+
+// MARK: - AIAgentEntryButton
+
+private struct AIAgentEntryButton: View {
+
+    @Environment(ViewAppearance.self) private var appearance
+
+    let badge: AICommandBadge?
+    var onTap: () -> Void = { }
+
+    // needConfirm(expireTime)일 때만 그 만료 시각에 재렌더 — 그 외엔 최초 1회 렌더로 충분(값 변화 없음)
+    private var confirmExpireSchedule: [Date] {
+        if case .needConfirm(let expireTime) = self.badge, let expireTime {
+            return [expireTime]
+        }
+        return []
+    }
+
+    var body: some View {
+        TimelineView(.explicit(self.confirmExpireSchedule)) { context in
+            let displayBadge = self.displayBadge(at: context.date)
+            Button {
+                self.onTap()
+            } label: {
+                self.buttonShape(displayBadge)
+                    .overlay(alignment: .topTrailing) {
+                        if let displayBadge, displayBadge != .processing {
+                            self.badgeView(displayBadge)
+                        }
+                    }
+                    .animation(.easeInOut(duration: 0.2), value: displayBadge)
+            }
+        }
+    }
+
+    // needConfirm(expireTime)이고 만료 시각이 과거면 .expired로 파생 — 상태가 아니라 렌더 시점 값.
+    private func displayBadge(at date: Date) -> AICommandBadge? {
+        guard case .needConfirm(let expireTime) = self.badge, let expireTime, date >= expireTime
+        else { return self.badge }
+        return .expired
+    }
+
+    // confirm 대기 중 + 만료 전 + 만료 시각을 알 때만 원형 → 카운트다운 캡슐로 확장.
+    // 만료(.expired)됐거나 만료 시각 불명(exp 파싱 실패)이면 카운트다운 없이 기존 원형 유지.
+    @ViewBuilder
+    private func buttonShape(_ displayBadge: AICommandBadge?) -> some View {
+        if case .needConfirm(let expireTime) = displayBadge, let expireTime {
+            self.countdownCapsule(expireTime)
+        } else {
+            Circle()
+                .fill(self.appearance.colorSet.accentAI.asColor)
+                .frame(width: 36, height: 36)
+                .overlay { self.entryButtonIcon() }
+        }
+    }
+
+    private func countdownCapsule(_ expireTime: Date) -> some View {
+        HStack(spacing: Metric.Spacing.xsmall) {
+            Image(systemName: "sparkles")
+                .font(.system(size: 13))
+            Text(timerInterval: Date()...max(Date(), expireTime), countsDown: true)
+                .font(self.appearance.fontSet.size(14, weight: .bold).asFont)
+                .monospacedDigit()
+        }
+        .foregroundColor(self.appearance.colorSet.primaryBtnText.asColor)
+        .padding(.horizontal, spacing: .regular)
+        .frame(height: 36)
+        .background(Capsule().fill(self.appearance.colorSet.accentAI.asColor))
+    }
+
+    @ViewBuilder
+    private func entryButtonIcon() -> some View {
+        if self.badge == .processing {
+            // 부모(인라인 바)가 키보드 avoidance로 위치를 바꿀 때, LoadingCircleView의
+            // repeatForever 애니가 그 위치 변화까지 보간해 인디케이터가 "떨어지듯" 움직인다.
+            // geometryGroup으로 부모 geometry 변화를 격리해 편승을 끊는다.
+            LoadingCircleView(self.appearance.colorSet.primaryBtnText.asColor, lineWidth: 2)
+                .frame(width: 18, height: 18)
+                .geometryGroup()
+        } else {
+            Image(systemName: "sparkles")
+                .foregroundColor(self.appearance.colorSet.primaryBtnText.asColor)
+        }
+    }
+
+    private func badgeView(_ badge: AICommandBadge) -> some View {
+        let style = self.badgeStyle(badge)
+        return Image(systemName: style.symbol)
+            .font(.system(size: 11, weight: .heavy))
+            .foregroundColor(style.color)
+            .frame(width: 18, height: 18)
+            .background(Circle().fill(self.appearance.colorSet.bg0.asColor))
+            .overlay(Circle().stroke(style.color, lineWidth: 1.5))
+            .offset(x: 5, y: -5)
+    }
+
+    private func badgeStyle(_ badge: AICommandBadge) -> (symbol: String, color: Color) {
+        switch badge {
+        case .processing, .needConfirm:
+            return ("questionmark", self.appearance.colorSet.accentInfo.asColor)
+        case .done:
+            return ("checkmark", self.appearance.colorSet.accent.asColor)
+        case .expired, .failed:
+            return ("exclamationmark", self.appearance.colorSet.accentWarn.asColor)
+        }
+    }
+}
+
 
 // MARK: - preview
 
@@ -432,7 +775,7 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
                 // 완료처리 실패하게 하던지
                 withAnimation {
 //                    state.requestDoneTodoIds = []
-                    
+
                     // 혹은 완료처리 성공 이후 셀 목록 업데이트 시뮬레이션
                     let newCells = state.cellViewModels.filter { $0.todoEventId != id }
                     state.cellViewModels = newCells
@@ -442,16 +785,16 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
         eventHandler.addNewTodoQuickly = { name in
             let pending = PendingTodoEventCellViewModel(name: name, defaultTagId: nil)
             let index = state.cellViewModels.firstIndex(where: { !$0.name.starts(with: "current todo") })!
-            
+
             withAnimation {
                 state.cellViewModels.insert(pending, at: index)
-                
+
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                     if let index = state.cellViewModels.firstIndex(where: { $0.eventIdentifier == pending.eventIdentifier }) {
                         withAnimation {
                             // 삭제하여 실패했을때 가정
 //                                state.cellViewModels.remove(at: index)
-                            
+
                             // 추가하여 성공했을때 가정
                             let newCell = TodoEventCellViewModel("new-current-todo", name: name)
                                 |> \.periodText .~ .singleText(.init(text: "Todo".localized()))
@@ -468,7 +811,7 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
             .environment(viewAppearance)
         return containerView
     }
-    
+
     private static func dummyUncompleteds() -> [TodoEventCellViewModel] {
         return [
             .init("uncompleted-todo1", name: "uncompleted - todo1")
@@ -484,7 +827,7 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
                 |> \.periodDescription .~ "Sep 7 00:00 ~ Sep 10 23:59(3days 23hours)",
         ]
     }
-    
+
     private static func makeDummyCells() -> [any EventCellViewModel] {
         let currentTodoCells: [TodoEventCellViewModel] = [
             .init("current-todo1", name: "current todo 1")
@@ -555,18 +898,101 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
                 )
                 |> \.periodDescription .~ "Sep 7 00:00 ~ Sep 10 23:59(3days 23hours)"
         ]
-        
+
         let holidayCell = HolidayEventCellViewModel(
             HolidayCalendarEvent(.init(uuid: "hd", dateString: "2023-09-30", name: "추석"), in: TimeZone.current)!
         )
-        
+
         let google = GoogleCalendar.Event("some", "cal", accountId: "preview@gmail.com", name: "google event", colorId: "colorId", time: .at(100))
         let googleEvent = GoogleCalendarEvent(google, in: TimeZone.current)
         let googleCell = GoogleCalendarEventCellViewModel(googleEvent, in: 0..<200, TimeZone.current, true)
-        
+
         let basicCells: [any EventCellViewModel] = currentTodoCells + scheduleCells
 //        + todoCells
         return basicCells + [holidayCell] + [googleCell!]
 //        .shuffled()
+    }
+}
+
+
+// MARK: - AI Command Badge Preview
+
+struct DayEventListBadgePreviewProvider: PreviewProvider {
+
+    static var previews: some View {
+        let calendar = CalendarAppearanceSettings(
+            colorSetKey: .defaultLight,
+            fontSetKey: .systemDefault
+        )
+        let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")
+        let setting = AppearanceSettings(calendar: calendar, defaultTagColor: tag)
+        let viewAppearance = ViewAppearance(setting: setting, isSystemDarkTheme: false)
+        let eventHandler = DayEventListViewEventHandler()
+
+        func makeView(state: DayEventListViewState, label: String) -> some View {
+            DayEventListView()
+                .environment(state)
+                .environment(eventHandler)
+                .environment(PendingCompleteTodoState())
+                .environment(viewAppearance)
+                .previewDisplayName(label)
+        }
+
+        let processingState = DayEventListViewState()
+        processingState.aiAgentState = .processing(command: "내일 오전 9시 회의 추가")
+
+        let confirmState = DayEventListViewState()
+        confirmState.aiAgentState = .confirm(
+            command: "내일 오전 9시 회의 추가",
+            message: "확인이 필요합니다",
+            action: AIConfirmCommandAction(),
+            expireTime: Date().addingTimeInterval(4 * 60 + 30)
+        )
+
+        let doneState = DayEventListViewState()
+        doneState.aiAgentState = .done(command: "회의 추가", message: "이벤트가 추가됐어요")
+
+        let failedState = DayEventListViewState()
+        failedState.aiAgentState = .failed(command: "회의 추가", reason: "처리 실패", errorCode: nil)
+
+        let idleState = DayEventListViewState()
+
+        return Group {
+            makeView(state: processingState, label: "Badge - processing")
+            makeView(state: confirmState, label: "Badge - confirm")
+            makeView(state: doneState, label: "Badge - done")
+            makeView(state: failedState, label: "Badge - failed")
+            makeView(state: idleState, label: "Badge - idle (no badge)")
+        }
+    }
+}
+
+
+// MARK: - AIAgentInlineInputView Preview (listening state)
+
+struct DayEventListInlineInputPreviewProvider: PreviewProvider {
+
+    static var previews: some View {
+        let calendar = CalendarAppearanceSettings(
+            colorSetKey: .defaultLight,
+            fontSetKey: .systemDefault
+        )
+        let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")
+        let setting = AppearanceSettings(calendar: calendar, defaultTagColor: tag)
+        let viewAppearance = ViewAppearance(setting: setting, isSystemDarkTheme: false)
+        let eventHandler = DayEventListViewEventHandler()
+
+        let listeningState = DayEventListViewState()
+        listeningState.dayModel = .init(dateText: "2020년 9월 15일(금)", lunarDateText: "6월 4일")
+        listeningState.aiAgentState = .listening(.voice)
+        listeningState.voiceLevel = 0.0
+        listeningState.recognizingText = "내일 오전 9시 회의 추가"
+
+        return DayEventListView()
+            .environment(listeningState)
+            .environment(eventHandler)
+            .environment(PendingCompleteTodoState())
+            .environment(viewAppearance)
+            .previewDisplayName("Inline input - listening")
     }
 }

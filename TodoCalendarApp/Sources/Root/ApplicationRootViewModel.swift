@@ -25,6 +25,7 @@ final class ApplicationRootViewModelImple: @unchecked Sendable {
     private let externalCalendarServiceUsecase: any ExternalCalendarIntegrationUsecase
     private let userNotificationUsecase: any UserNotificationUsecase
     private let backgroundEventSyncUsecase: any BackgroundEventSyncUsecase
+    private let aiJobRefreshUsecase: any AIJobRefreshUsecase
     private let appUpdateCheckUsecase: any AppUpdateCheckUsecase
     var router: ApplicationRootRouter?
 
@@ -36,6 +37,7 @@ final class ApplicationRootViewModelImple: @unchecked Sendable {
         externalCalendarServiceUsecase: any ExternalCalendarIntegrationUsecase,
         userNotificationUsecase: any UserNotificationUsecase,
         backgroundEventSyncUsecase: any BackgroundEventSyncUsecase,
+        aiJobRefreshUsecase: any AIJobRefreshUsecase,
         appUpdateCheckUsecase: any AppUpdateCheckUsecase
     ) {
         self.authUsecase = authUsecase
@@ -45,6 +47,7 @@ final class ApplicationRootViewModelImple: @unchecked Sendable {
         self.externalCalendarServiceUsecase = externalCalendarServiceUsecase
         self.userNotificationUsecase = userNotificationUsecase
         self.backgroundEventSyncUsecase = backgroundEventSyncUsecase
+        self.aiJobRefreshUsecase = aiJobRefreshUsecase
         self.appUpdateCheckUsecase = appUpdateCheckUsecase
 
         self.bindAccountStatusChanged()
@@ -191,6 +194,7 @@ extension ApplicationRootViewModelImple {
 
     private func handleWillEnterForeground() {
         self.appUpdateCheckUsecase.checkUpdateIsNeed()
+        self.aiJobRefreshUsecase.refreshProcessingJobIfNeeded()
     }
 
     private func bindUpdateRequirement() {
@@ -249,5 +253,22 @@ extension ApplicationRootViewModelImple {
             }
         }
         .store(in: &self.cancellables)
+    }
+}
+
+
+// MARK: - 푸시 수신
+
+extension ApplicationRootViewModelImple {
+
+    func handleReceivePushNotification(userInfo: [AnyHashable: Any]) {
+
+        // AI job 상태 변경 — data.jobId로 식별 (서버 aiFront 스펙)
+        if let jobId = userInfo["jobId"] as? String {
+            self.aiJobRefreshUsecase.handleJobStatusChanged(jobId)
+            return
+        }
+
+        // 그 외 푸시(이벤트 리마인더 등)는 현재 앱에서 별도 처리 없음 — 표시만 된다.
     }
 }

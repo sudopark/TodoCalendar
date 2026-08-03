@@ -72,6 +72,7 @@ public final class AppDataMigrationImple: @unchecked Sendable {
             try? db.createTableOrNot(TodoToggleStateTable.self)
             try? db.createTableOrNot(EventUploadPendingQueueTable.self)
             try? db.createTableOrNot(EventNotificationIdTable.self)
+            try? db.createTableOrNot(ProcessingAICommandTable.self)
         }
     }
 }

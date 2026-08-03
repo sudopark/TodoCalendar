@@ -101,7 +101,7 @@ struct MonthContainerView: View {
 }
 
 
-private enum Metric {
+private enum Layout {
     static let eventRowHeightWithSpacing: CGFloat = 12
     static let eventTopMargin: CGFloat = 24
     static let eventInterspacing: CGFloat = 2
@@ -241,7 +241,7 @@ private struct WeekRowView: View {
                 .font(self.appearance.fontSet.day.asFont)
                 .foregroundColor(textColor)
                 .frame(maxWidth: .infinity)
-                .padding(.top, 4)
+                .padding(.top, spacing: .xsmall)
             if showUnderLine {
                 Divider()
                     .background(lineColor)
@@ -250,7 +250,7 @@ private struct WeekRowView: View {
             Spacer(minLength: expectSize.height-17)
         }
         .background(
-            RoundedRectangle(cornerRadius: 10)
+            RoundedRectangle(cornerRadius: Metric.Radius.large)
                 .fill(backgroundColor)
         )
         .opacity(opacity)
@@ -269,7 +269,7 @@ private struct WeekRowView: View {
                 return eventDotsView(day, eventsPerDays[safe: seq] ?? [])
             }
         }
-        .padding(.top, Metric.eventTopMargin*2)
+        .padding(.top, Layout.eventTopMargin*2)
         .frame(height: 4, alignment: .center)
     }
     private func eventDotsView(
@@ -308,8 +308,8 @@ private struct WeekRowView: View {
                 .foregroundStyle(textColor)
         }
 
-        return HStack(spacing: 2) {
-            
+        return HStack(spacing: Metric.Spacing.xxsmall) {
+
             ForEach(0..<prefix.count, id: \.self) { index in
                 Circle()
                     .fill(selectColor(prefix[index]))
@@ -324,9 +324,9 @@ private struct WeekRowView: View {
     }
     
     private func eventStackView() -> some View {
-        
-        let totalHeight = self.expectSize.height - Metric.eventTopMargin
-        let drawableRowCount = Int(totalHeight / Metric.eventRowHeightWithSpacing)
+
+        let totalHeight = self.expectSize.height - Layout.eventTopMargin
+        let drawableRowCount = Int(totalHeight / Layout.eventRowHeightWithSpacing)
         let maxDrawableEventRowCount = drawableRowCount - 1
         guard maxDrawableEventRowCount > 0 else { return EmptyView().asAnyView() }
         
@@ -341,13 +341,13 @@ private struct WeekRowView: View {
             eventMoreViews(eventStackModel.eventMores(with: size)).asAnyView()
         }
         
-        return VStack(alignment: .leading, spacing: 2) {
+        return VStack(alignment: .leading, spacing: Metric.Spacing.xxsmall) {
             ForEach(0..<size, id: \.self) {
                 return eventRowView(self.eventStackModel.linesStack[$0])
             }
             bottomView
         }
-        .padding(.top, Metric.eventTopMargin)
+        .padding(.top, Layout.eventTopMargin)
         .asAnyView()
     }
     
@@ -361,8 +361,8 @@ private struct WeekRowView: View {
     }
     
     private func eventLineView(_ line: EventOnWeek) -> some View {
-        let offsetX = CGFloat(line.daysSequence.lowerBound-1) * dayWidth + Metric.eventInterspacing
-        let width = CGFloat(line.daysSequence.count) * dayWidth - Metric.eventInterspacing
+        let offsetX = CGFloat(line.daysSequence.lowerBound-1) * dayWidth + Layout.eventInterspacing
+        let width = CGFloat(line.daysSequence.count) * dayWidth - Layout.eventInterspacing
         let lineColor = {
             switch line.colorSource {
             case let google as GoogleCalendarEventColorSource:
@@ -388,8 +388,8 @@ private struct WeekRowView: View {
             ? self.appearance.colorSet.eventTextSelected.asColor
             : self.appearance.colorSet.eventText.asColor
         }()
-        return HStack(spacing: 2) {
-             RoundedRectangle(cornerRadius: 12)
+        return HStack(spacing: Metric.Spacing.xxsmall) {
+             RoundedRectangle(cornerRadius: Metric.Radius.large)
                  .fill(lineColor)
                  .frame(width: 3, height: 12)
                  .padding(.leading, 1)
@@ -423,7 +423,7 @@ private struct WeekRowView: View {
                     .frame(width: dayWidth)
                     .offset(x: offsetX($0))
             }
-            .padding(.top, 2)
+            .padding(.top, spacing: .xxsmall)
         }
     }
 }

@@ -263,6 +263,46 @@ public enum AppEndpoints: Endpoint {
 }
 
 
+// MARK: - AI
+
+enum AIAPIEndpoints: Endpoint {
+    case command
+    case confirmCommand
+    case rejectCommand
+    case cancelCommand
+    case job(id: String)
+    case usage
+
+    var subPath: String {
+        switch self {
+        case .command: return "command"
+        case .confirmCommand: return "command/confirm"
+        case .rejectCommand: return "command/reject"
+        case .cancelCommand: return "command/cancel"
+        case .job(let id): return "jobs/\(id)"
+        case .usage: return "usage"
+        }
+    }
+}
+
+
+// MARK: - Billing
+
+enum BillingAPIEndpoints: Endpoint {
+    case plans
+    case topups
+    case purchases
+
+    var subPath: String {
+        switch self {
+        case .plans: return "plans"
+        case .topups: return "topups"
+        case .purchases: return "purchases"
+        }
+    }
+}
+
+
 // MARK: - google account endpoint
 
 enum GoogleAuthEndpoint: Endpoint {
@@ -305,14 +345,17 @@ public struct RemoteEnvironment: Sendable {
     let calendarAPIHost: String
     private let csAPI: String
     let deviceId: String
+    let acceptLanguage: @Sendable () -> String
     public init(
         calendarAPIHost: String,
         csAPI: String,
-        deviceId: String
+        deviceId: String,
+        acceptLanguage: @escaping @Sendable () -> String
     ) {
         self.calendarAPIHost = calendarAPIHost
         self.csAPI = csAPI
         self.deviceId = deviceId
+        self.acceptLanguage = acceptLanguage
     }
     
     func path(_ endpoint: any Endpoint) -> String? {
@@ -380,6 +423,14 @@ public struct RemoteEnvironment: Sendable {
         case let app as AppEndpoints:
             let prefix = "https://raw.githubusercontent.com/sudopark/TodoCalendar/develop/app-config"
             return appendSubpathIfNotEmpty(prefix, app.subPath)
+
+        case let ai as AIAPIEndpoints:
+            let prefix = "\(calendarAPIHost)/v1/ai"
+            return appendSubpathIfNotEmpty(prefix, ai.subPath)
+
+        case let billing as BillingAPIEndpoints:
+            let prefix = "\(calendarAPIHost)/v1/billing"
+            return appendSubpathIfNotEmpty(prefix, billing.subPath)
 
         default: return nil
         }

@@ -166,7 +166,7 @@ struct AppleCalendarEventDetailView: View {
 
                     self.eventTypeView
 
-                    VStack(spacing: 16) {
+                    VStack(spacing: Metric.Spacing.large) {
                         if let timeText = self.state.timeText {
                             self.timeView(timeText)
                         }
@@ -196,10 +196,10 @@ struct AppleCalendarEventDetailView: View {
                             self.calendarNameView(tagModel)
                         }
                     }
-                    .padding(.top, 20)
+                    .padding(.top, spacing: .xlarge)
                 }
             }
-            .padding(.horizontal, 12)
+            .padding(.horizontal, spacing: .regular)
 
             VStack {
                 Spacer()
@@ -211,7 +211,7 @@ struct AppleCalendarEventDetailView: View {
     }
 
     private var eventTypeView: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: Metric.Spacing.small) {
             Image("apple_calendar_icon")
                 .resizable()
                 .scaledToFill()
@@ -243,7 +243,7 @@ struct AppleCalendarEventDetailView: View {
     }
 
     private func timeView(_ timeText: SelectedTime) -> some View {
-        HStack(spacing: 16) {
+        HStack(spacing: Metric.Spacing.large) {
             Image(systemName: "calendar")
                 .font(.system(size: 16, weight: .light))
                 .foregroundStyle(self.appearance.colorSet.text1.asColor)
@@ -253,7 +253,7 @@ struct AppleCalendarEventDetailView: View {
                 timeTextView(text)
                     .asAnyView()
             case .period(let start, let end):
-                HStack(spacing: 8) {
+                HStack(spacing: Metric.Spacing.small) {
                     timeTextView(start)
                     Image(systemName: "chevron.right")
                         .foregroundStyle(appearance.colorSet.text1.asColor)
@@ -264,7 +264,7 @@ struct AppleCalendarEventDetailView: View {
                 timeTextView(day)
                     .asAnyView()
             case .alldayPeriod(let start, let end):
-                HStack(spacing: 8) {
+                HStack(spacing: Metric.Spacing.small) {
                     timeTextView(start)
                     Image(systemName: "chevron.right")
                         .foregroundStyle(appearance.colorSet.text1.asColor)
@@ -278,25 +278,11 @@ struct AppleCalendarEventDetailView: View {
     }
 
     private func timeTextView(_ text: SelectTimeText) -> some View {
-        VStack(alignment: .leading) {
-            if let year = text.year {
-                Text(year)
-                    .font(appearance.fontSet.size(14).asFont)
-                    .foregroundStyle(appearance.colorSet.text0.asColor)
-            }
-            Text(text.day)
-                .font(appearance.fontSet.size(14).asFont)
-                .foregroundStyle(appearance.colorSet.text0.asColor)
-            if let time = text.time {
-                Text(time)
-                    .font(appearance.fontSet.size(16, weight: .semibold).asFont)
-                    .foregroundStyle(appearance.colorSet.text0.asColor)
-            }
-        }
+        EventTimeTextView(text, dayLineLimit: nil)
     }
 
     private var ddayView: some View {
-        HStack(spacing: 16) {
+        HStack(spacing: Metric.Spacing.large) {
             Image(systemName: "sun.horizon.fill")
                 .font(.system(size: 16, weight: .light))
                 .foregroundStyle(self.appearance.colorSet.text1.asColor)
@@ -310,7 +296,7 @@ struct AppleCalendarEventDetailView: View {
     }
 
     private func repeatView(_ repeatText: String) -> some View {
-        HStack(spacing: 16) {
+        HStack(spacing: Metric.Spacing.large) {
             Image(systemName: "repeat")
                 .font(.system(size: 16, weight: .light))
                 .foregroundStyle(self.appearance.colorSet.text1.asColor)
@@ -324,8 +310,8 @@ struct AppleCalendarEventDetailView: View {
     }
 
     private func attendeesView(_ attendees: [AppleCalendar.Attendee]) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 16) {
+        VStack(alignment: .leading, spacing: Metric.Spacing.small) {
+            HStack(spacing: Metric.Spacing.large) {
                 Image(systemName: "person.2")
                     .font(.system(size: 16, weight: .light))
                     .foregroundStyle(self.appearance.colorSet.text1.asColor)
@@ -344,14 +330,14 @@ struct AppleCalendarEventDetailView: View {
     }
 
     private func attendeeView(_ attendee: AppleCalendar.Attendee) -> some View {
-        HStack(spacing: 8) {
+        HStack(spacing: Metric.Spacing.small) {
             Image(systemName: attendee.status == .accepted ? "checkmark.circle.fill" : "circle")
                 .font(.system(size: 14))
                 .foregroundStyle(attendee.status == .accepted
                     ? appearance.colorSet.accent.asColor
                     : appearance.colorSet.text1.asColor)
 
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: Metric.Spacing.xxsmall) {
                 Text(attendee.name ?? attendee.email ?? "")
                     .font(appearance.fontSet.normal.asFont)
                     .foregroundStyle(appearance.colorSet.text0.asColor)
@@ -367,19 +353,19 @@ struct AppleCalendarEventDetailView: View {
                 Text("eventDetail::appleCalendarEvent::attendees::organizer".localized())
                     .font(appearance.fontSet.size(12).asFont)
                     .foregroundStyle(appearance.colorSet.text1.asColor)
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
+                    .padding(.horizontal, spacing: .small)
+                    .padding(.vertical, spacing: .xxsmall)
                     .background(appearance.colorSet.bg1.asColor)
                     .clipShape(Capsule())
             }
 
             Spacer()
         }
-        .padding(.leading, 32)
+        .padding(.leading, spacing: .indent)
     }
 
     private func locationView(_ location: String) -> some View {
-        HStack(spacing: 16) {
+        HStack(spacing: Metric.Spacing.large) {
             Image(systemName: "location.fill")
                 .font(.system(size: 16, weight: .light))
                 .foregroundStyle(self.appearance.colorSet.text1.asColor)
@@ -393,7 +379,7 @@ struct AppleCalendarEventDetailView: View {
     }
 
     private func urlView(_ urlString: String) -> some View {
-        HStack(spacing: 16) {
+        HStack(spacing: Metric.Spacing.large) {
             Image(systemName: "link")
                 .font(.system(size: 16, weight: .light))
                 .foregroundStyle(self.appearance.colorSet.text1.asColor)
@@ -410,7 +396,7 @@ struct AppleCalendarEventDetailView: View {
     }
 
     private func notesView(_ notes: String) -> some View {
-        HStack(alignment: .top, spacing: 16) {
+        HStack(alignment: .top, spacing: Metric.Spacing.large) {
             Image(systemName: "doc.text")
                 .font(.system(size: 16, weight: .light))
                 .foregroundStyle(self.appearance.colorSet.text1.asColor)
@@ -424,7 +410,7 @@ struct AppleCalendarEventDetailView: View {
     }
 
     private func calendarNameView(_ tagModel: AppleCalendarTagModel) -> some View {
-        HStack(spacing: 16) {
+        HStack(spacing: Metric.Spacing.large) {
             Image(systemName: "calendar.badge.checkmark")
                 .font(.system(size: 16, weight: .light))
                 .foregroundStyle(self.appearance.colorSet.text1.asColor)

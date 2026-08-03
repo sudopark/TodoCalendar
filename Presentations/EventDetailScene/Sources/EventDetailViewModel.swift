@@ -72,6 +72,7 @@ enum EventDetailMoreAction: Equatable {
     case transformToTodo
     case addToTemplate  // 이후 구현 예정
     case toggleTo(isForemost: Bool)
+    case toggleDDayCandidate(isRegistered: Bool)
     case share
 }
 
@@ -96,20 +97,4 @@ protocol EventDetailViewModel: Sendable, AnyObject {
     var isSavable: AnyPublisher<Bool, Never> { get }
     var isSaving: AnyPublisher<Bool, Never> { get }
     var moreActions: AnyPublisher<[[EventDetailMoreAction]], Never> { get }
-}
-
-
-struct DDayText {
-    
-    let text: String
-    init(_ interval: Int) {
-        switch interval {
-        case ..<0:
-            self.text = "D+\(abs(interval))"
-        case 0:
-            self.text = "D-Day"
-        default:
-            self.text = "D-\(interval)"
-        }
-    }
 }

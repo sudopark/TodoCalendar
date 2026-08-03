@@ -5,22 +5,7 @@ import PackageDescription
 import ProjectDescription
 
 let packageSettings = PackageSettings(
-    productTypes: [
-        "Alamofire": .framework,
-        "Kingfisher": .framework,
-        "Prelude": .framework,
-        "Optics": .framework,
-        "Pulse": .framework,
-        "PulseUI": .framework,
-        "CombineCocoa": .framework,
-        "AsyncAlgorithms": .framework,
-        "AsyncFlatMap": .framework,
-        "SQLiteService": .framework,
-        "Toaster": .framework,
-        "KeychainSwift": .framework,
-        "CombineExt": .framework,
-        "SwiftLinkPreview": .framework,
-    ]
+    productTypes: [:]
 )
 #endif
 
@@ -41,5 +26,6 @@ let package = Package(
         .package(url: "https://github.com/CombineCommunity/CombineExt.git", from: "1.8.1"),
         .package(url: "https://github.com/LeonardoCardoso/SwiftLinkPreview.git", from: "3.4.0"),
         .package(url: "https://github.com/devxoul/Toaster.git", branch: "master"),
+        .package(url: "https://github.com/pointfreeco/swift-snapshot-testing.git", from: "1.18.0"),
     ]
 )

@@ -55,6 +55,34 @@ let project = Project.app(
         .project(
             target: "EventListScenes",
             path: .relativeToCurrentFile("../Presentations/EventListScenes")
+        ),
+        .project(
+            target: "AIAgentScene",
+            path: .relativeToCurrentFile("../Presentations/AIAgentScene")
+        ),
+        .project(
+            target: "FirstPartyServices",
+            path: .relativeToCurrentFile("../Services/FirstPartyServices")
+        ),
+        .project(
+            target: "SpeechService",
+            path: .relativeToCurrentFile("../Services/SpeechService")
+        ),
+        .project(
+            target: "PlaceService",
+            path: .relativeToCurrentFile("../Services/PlaceService")
+        ),
+        .project(
+            target: "AuthService",
+            path: .relativeToCurrentFile("../Services/AuthService")
+        ),
+        .project(
+            target: "ExternalServices",
+            path: .relativeToCurrentFile("../Services/ExternalServices")
+        ),
+        .project(
+            target: "StoreKitService",
+            path: .relativeToCurrentFile("../Services/StoreKitService")
         )
       ],
     extensionTargets:

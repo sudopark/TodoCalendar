@@ -135,7 +135,7 @@ struct EventTagListView: View {
                     Section {
                         self.externalSectionView(section)
                     }
-                    .padding(.top, 16)
+                    .padding(.top, spacing: .large)
                     .listRowSeparator(.hidden)
                     .listRowInsets(.init(top: 5, leading: 20, bottom: 5, trailing: 20))
                     .listRowBackground(appearance.colorSet.bg0.asColor)
@@ -157,7 +157,7 @@ struct EventTagListView: View {
                     }
                 } else {
                     ToolbarItemGroup(placement: .topBarTrailing) {
-                        HStack(spacing: 8) {
+                        HStack(spacing: Metric.Spacing.small) {
                             self.addButton
                             CloseButton()
                                 .eventHandler(\.onTap, self.eventHandlers.closeScene)
@@ -216,14 +216,14 @@ struct EventTagListView: View {
                 }
             }
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
+        .padding(.horizontal, spacing: .regular)
+        .padding(.vertical, spacing: .small)
         .background(
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: Metric.Radius.regular)
                 .fill(self.appearance.colorSet.bg1.asColor)
         )
     }
-    
+
     private func externalSectionView(_ section: ExternalCalendarEventTagListSectionModel) -> some View {
         
         VStack(alignment: .leading) {
@@ -256,7 +256,7 @@ struct EventTagListView: View {
             .font(appearance.fontSet.normal.asFont)
             .foregroundStyle(appearance.colorSet.primaryBtnBackground.asColor)
         }
-        .padding(.top, 8)
+        .padding(.top, spacing: .small)
     }
 
     private func externalCellView(_ cellViewModel: ExternalCalendarEventTagCellViewModel) -> some View {
@@ -283,7 +283,7 @@ struct EventTagListView: View {
                     self.eventHandlers.toggleEventTagViewingIsOn(cellViewModel.id)
                 }
             
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: Metric.Spacing.xxsmall) {
                 Text(cellViewModel.name)
                     .lineLimit(1)
                     .font(self.appearance.fontSet.normal.asFont)
@@ -298,10 +298,10 @@ struct EventTagListView: View {
 
             Spacer()
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 12)
+        .padding(.horizontal, spacing: .regular)
+        .padding(.vertical, spacing: .regular)
         .background(
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: Metric.Radius.regular)
                 .fill(self.appearance.colorSet.bg1.asColor)
         )
     }

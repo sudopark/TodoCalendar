@@ -1,0 +1,562 @@
+/* 
+  Localizable.strings
+  Extensions
+
+  Created by sudo.park on 7/31/26.
+  Copyright © 2026 com.sudo.park. All rights reserved.
+*/
+
+
+// MARK: - common
+"common::and" = " và";
+"common::wait:message" = "Vui lòng đợi...";
+"common::back" = "Quay lại";
+"common.remove" = "Xóa";
+"common.confirm" = "Xác nhận";
+"common.cancel" = "Hủy";
+"common.close" = "Đóng";
+"common.yes" = "Có";
+"common.no" = "Không";
+"common.save" = "Lưu";
+"common.info" = "Thông tin";
+"common.search" = "Tìm kiếm";
+"common.clear" = "Đặt lại";
+"common.send" = "Gửi";
+"common.done" = "Xong";
+"common.errorMessage" = "Đã xảy ra lỗi tạm thời.\nVui lòng báo cáo nếu sự cố vẫn tiếp diễn.";
+"common.update" = "Cập nhật";
+"common.go_to_settings" = "Đi tới Cài đặt";
+
+// MARK: - date form
+"date_form::HH:mm" = "HH:mm";
+"date_form::a_h:mm" = "h:mm a";
+"date_form::MM_d__HH:mm" = "d/M, HH:mm";
+"date_form::MM_d" = "d/M";
+"date_form::MM_dd" = "dd/MM";
+"date_form::24off_h:mm" = "h:mm";
+"date_form::24on_H:mm" = "H:mm";
+"date_form::d_E_" = "d (E)";
+"date_form::MMM_d_HH:mm" = "d MMM HH:mm";
+"date_form::MMM_d" = "d MMM";
+"date_form::yyyy_MM_dd_E_" = "dd/MM/yyyy (E)";
+"date_form:yyyy.MM_dd_hh:mm" = "dd/MM/yyyy HH:mm";
+"date_form:yyyy.MM_dd_h:mm" = "dd/MM/yyyy h:mm a";
+"date_form.yyyy" = "yyyy";
+"date_form.MMM_dd_E" = "dd MMM (E)";
+"date_form.HH:mm" = "HH:mm";
+"date_form.yyyy_MM_dd" = "dd/MM/yyyy";
+"date_form.yyyy_MMM_dd" = "d MMM, yyyy";
+"date_form.MMM" = "MMM";
+"date_form.MMMM" = "MMMM";
+"date_form.EEEE" = "EEEE";
+"date_form.EEE_MMM_d" = "EEE, d MMM";
+"date_form.MMM_yyyy" = "MMM yyyy";
+"tomorrow" = "Ngày mai";
+ 
+// MARK: - event
+
+"dayname::sunday" = "Chủ nhật";
+"dayname::monday" = "Thứ Hai";
+"dayname::tuesday" = "Thứ Ba";
+"dayname::wednesday" = "Thứ Tư";
+"dayname::thursday" = "Thứ Năm";
+"dayname::friday" = "Thứ Sáu";
+"dayname::saturday" = "Thứ Bảy";
+
+"dayname::sunday:short" = "CN";
+"dayname::monday:short" = "T2";
+"dayname::tuesday:short" = "T3";
+"dayname::wednesday:short" = "T4";
+"dayname::thursday:short" = "T5";
+"dayname::friday:short" = "T6";
+"dayname::saturday:short" = "T7";
+
+"dayname::sunday:very_short" = "CN";
+"dayname::monday:very_short" = "2";
+"dayname::tuesday:very_short" = "3";
+"dayname::wednesday:very_short" = "4";
+"dayname::thursday:very_short" = "5";
+"dayname::friday:very_short" = "6";
+"dayname::saturday:very_short" = "7";
+
+
+// MARK: - event notification
+
+"event_notification::today:title" = "Sự kiện hôm nay";
+"event_notification::todo:prefix" = "Việc cần làm";
+"event_notification::today:prefix" = "Hôm nay";
+"event_notification::tomorrow:prefix" = "Ngày mai";
+"event_notification::allday_today" = "Cả ngày hôm nay";
+"event_notification::allday_tomorrow" = "Cả ngày mai";
+"event_notification::some_allday" = "%@ cả ngày";
+"event_notification_setting::option_title::no_notification" = "Không thông báo";
+"event_notification_setting::option_title::at_time" = "Vào thời điểm diễn ra sự kiện";
+"event_notification_setting::option_title::allday_9am" = "Lúc 9 giờ sáng hôm đó";
+"event_notification_setting::option_title::allday_12pm" = "Lúc giữa trưa hôm đó";
+"event_notification_setting::option_title::customTime" = "Thời gian tùy chỉnh: %@";
+"event_notification_setting::option_title::custimTime_fallback" = "Thời gian tùy chỉnh";
+"event_notification_setting::option_title::before_minutes" = "%d phút trước sự kiện";
+"event_notification_setting::option_title::before_hours" = "%d giờ trước sự kiện";
+"event_notification_setting::option_title::before_days" = "%d ngày trước sự kiện";
+"event_notification_setting::option_title::before_weeks" = "%d tuần trước sự kiện";
+"event_notification_setting::option_title::allday_9am_before_days" = "Lúc 9:00 sáng, %d ngày trước";
+"event_notification_setting::option_title::allday_9am_before_weeks" = "Lúc 9:00 sáng, %d tuần trước";
+"event_notification_setting::need_permission_message" = "Để sử dụng tính năng thông báo sự kiện, bạn cần cấp quyền thông báo.\nHãy vào Cài đặt hệ thống và cho phép thông báo.";
+"event_notification_setting::need_permission::go_setting" = "Đi tới cài đặt";
+"event_notification_setting::need_permission_title" = "Thông tin";
+"event_notification_setting::permission_denied" = "Cần cấp quyền thông báo cho ứng dụng để sử dụng tính năng nhắc nhở sự kiện.";
+
+
+
+// MARK: - calendar
+
+"calendar::foremostevent:title" = "Sự kiện quan trọng nhất";
+"calendar::uncompletedTodos:title" = "Việc chưa hoàn thành";
+"calendar::event_time::todo" = "Việc cần làm";
+"calendar::event_time::allday" = "Cả ngày";
+"calendar::event_time::allday::with" = "%@ cả ngày";
+"calendar::event_time::period:some_days" = "%d ngày";
+"calendar::event_time::period:some_minutes" = "%d phút";
+"calendar::event_time::period:some_hours" = "%d giờ";
+"calendar::event_time::period:some_days:some_hours" = "%d ngày %d giờ";
+"calendar::event::more_action::remove:title" = "Xóa sự kiện";
+"calendar::event::more_action::foremost_event:title" = "Sự kiện quan trọng nhất";
+"calendar::event::more_action::remove_only_thistime:message" = "Bạn có muốn chỉ xóa sự kiện này trong toàn bộ chuỗi sự kiện lặp lại không?";
+"calendar::event::more_action::remove:message" = "Bạn có muốn xóa sự kiện này không?";
+"calendar::event::more_action::mark_as_foremost" = "Bạn có muốn đánh dấu sự kiện này là sự kiện quan trọng nhất không?";
+"calendar::event::more_action::unmark_as_foremost" = "Bạn có muốn bỏ đánh dấu sự kiện này khỏi sự kiện quan trọng nhất không?";
+"calendar::event::more_action::mark_as_foremost::unavail" = "Sự kiện lịch trình lặp lại không thể được đánh dấu là sự kiện quan trọng nhất.";
+"calendar::event::more_action:remove_only_thistime:item_name" = "Chỉ xóa lần này";
+"calendar::event::more_action:remove:item_name" = "Xóa sự kiện";
+"calendar::event::more_action:foremost:mark:item_name" = "Đánh dấu quan trọng nhất";
+"calendar::event::more_action:foremost:unmark:item_name" = "Bỏ đánh dấu quan trọng nhất";
+"calendar::event::more_action:dday_candidate:register:item_name" = "Thêm vào tiện ích D-Day";
+"calendar::event::more_action:dday_candidate:unregister:item_name" = "Xóa khỏi tiện ích D-Day";
+"calendar::event::more_action:dday_candidate:title" = "Ứng viên tiện ích D-Day";
+"calendar::event::more_action:dday_candidate:register:message" = "Thêm sự kiện này làm ứng viên cho tiện ích D-Day? Sự kiện sẽ hiển thị đầu danh sách khi bạn chỉnh sửa tiện ích.";
+"calendar::event::more_action:dday_candidate:unregister:message" = "Xóa sự kiện này khỏi danh sách ứng viên tiện ích D-Day?";
+"calendar::event::more_action:copy:item_name" = "Sao chép sự kiện";
+"calendar::event::more_action:transform_to::schedule" = "Chuyển thành lịch trình";
+"calendar::event::more_action:transform_to::todo" = "Chuyển thành việc cần làm";
+"calendar::event::more_action:edit:item_name" = "Chỉnh sửa";
+"calednar::event::add_new" = "Thêm sự kiện mới";
+"calednar::event::add_new:place_holder" = "Nhanh chóng thêm một việc cần làm mới.";
+"calednar::event::skip_todo" = "Bỏ qua việc cần làm này";
+"calednar::event::skip_todo_until" = "Chọn thời gian để bỏ qua việc cần làm này";
+"calednar::event::copy" = "Sao chép sự kiện";
+"calendar::move_date" = "Di chuyển ngày";
+"calednar::event::google::edit" = "Chỉnh sửa sự kiện Google Calendar";
+
+
+// MARK: - event detail
+
+"eventDetail.messages.selectTimeFirst" = "Vui lòng chọn thời gian sự kiện trước.";
+"eventDetail.messages.selectValidTime" = "Vui lòng chọn thời gian sự kiện hợp lệ.";
+"eventDetail.notification.custom_eventTime:title" = "Tùy chỉnh";
+"eventDetail.notification.title" = "Thời gian thông báo sự kiện";
+"eventDetail.repeating.title" = "Lặp lại";
+"eventDetail.repeating.notRepeating::title" = "Không lặp lại";
+"eventDetail.repeating.starttime:form" = "d MMM, yyyy";
+"eventDetail.repeating.starttime:title" = "Thời gian bắt đầu lặp lại";
+"eventDetail.repeating.everyDay:title" = "Mỗi ngày";
+"eventDetail.repeating.everyWeek:title" = "Mỗi tuần";
+"eventDetail.repeating.everyWeekSomeDay:title" = "Mỗi %@";
+"eventDetail.repeating.everySomeWeek:title" = "Mỗi %d tuần";
+"eventDetail.repeating.everyWeekDays:title" = "Mỗi ngày trong tuần";
+"eventDetail.repeating.everySomeWeekSomeDay:title" = "Mỗi %d tuần vào %@";
+"eventDetail.repeating.everyMonth:title" = "Mỗi tháng";
+"eventDetail.repeating.everyMonth_someDay:title" = "Ngày %@ mỗi tháng.";
+"eventDetail.repeating.everyYear:title" = "Mỗi năm";
+"eventDetail.repeating.lunarCalendar_everyYear:title" = "Mỗi năm (âm lịch)";
+"eventDetail.repeating.everyYearSomeDay:title" = "Mỗi năm %@";
+"eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "Mỗi năm %@ (âm lịch)";
+"eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "Tất cả các ngày của tuần cuối mỗi tháng";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "%@ đầu tiên của mỗi tháng";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "%@ thứ hai của mỗi tháng";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "%@ thứ ba của mỗi tháng";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "%@ thứ tư của mỗi tháng";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "%@ thứ năm của mỗi tháng";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "%@ thứ sáu của mỗi tháng";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "%@ thứ bảy của mỗi tháng";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "%@ cuối cùng của mỗi tháng";
+"eventDetail.repeating.endtime::title" = "Kết thúc lặp lại";
+"eventDetail.repeating.endtime::option::never" = "Không bao giờ";
+"eventDetail.repeating.endtime::option::on" = "Vào ngày";
+"eventDetail.repeating.endtime::option::after" = "Sau";
+"eventDetail.repeating.endtime::option::after_occurrences" = "lần";
+"eventDetail.repeating.endtime::shouldFutureThanStartTime" = "Thời gian kết thúc lặp lại phải muộn hơn thời gian bắt đầu.\n(Ngày bắt đầu lặp lại: %@)";
+"eventDetail.repeating::period_endcount" = "Bắt đầu từ %@, %d lần";
+
+"eventDetail.repeating.everyNDays:title" = "Mỗi %d ngày";
+"eventDetail.repeating.last" = "Cuối cùng";
+"eventDetail.repeating.everyNMonths:title" = "Mỗi %d tháng";
+"eventDetail.repeating.everyNYears:title" = "Mỗi %d năm";
+"eventDetail.repeating::endoption_until" = "đến %@";
+"eventDetail.repeating::endoption_times" = "%d lần";
+
+"eventDetail.place::placeholder" = "Vị trí";
+"eventDetail.place::remove_button" = "Xóa vị trí";
+"eventDetail.place::no_map_app" = "Ứng dụng bản đồ đã chọn chưa được cài đặt.";
+"eventDetail.place::select_map_app" = "Chọn bản đồ";
+"eventDetail.place::always_select_this_map" = "Luôn mở bằng ứng dụng này.";
+
+"eventDetail.add_new_todo::message" = "Đã thêm một việc cần làm mới.";
+"eventDetail.add_new_schedule::message" = "Đã thêm một lịch trình mới.";
+"eventDetail.scheduleEvent_removed::message" = "Đã xóa lịch trình.";
+"eventDetail.edit::repeating::confirm::ttile" = "Chỉnh sửa sự kiện";
+"eventDetail.edit::repeating::confirm::message" = "Đây là một sự kiện lặp lại.\nChọn phạm vi của sự kiện lặp lại bạn muốn chỉnh sửa.";
+"eventDetail.edit::repeating::confirm::all::button" = "Tất cả sự kiện";
+"eventDetail.edit::repeating::confirm::fromNow::button" = "Từ lần này trở đi";
+"eventDetail.edit::repeating::confirm::onlyThisTime::button" = "Chỉ lần này";
+"eventDetail.scheduleEvent_saved::message" = "Đã lưu lịch trình.";
+"eventDetail.todoEvent_removed::message" = "Đã xóa việc cần làm.";
+"eventDetail.todoEvent_saved::message" = "Đã lưu việc cần làm.";
+"eventDetail.cancel_edit::title" = "Chỉnh sửa sự kiện";
+"eventDetail.cancel_edit::message" = "Bạn có muốn hủy bỏ những thay đổi này không?";
+"eventDetail.cancel_edit::continue::button" = "Tiếp tục";
+
+"eventDetail.edit::add_new_name::placeholder" = "Thêm tên sự kiện mới";
+"eventDetail.edit::clearEventTime::button" = "Xóa thời gian sự kiện";
+"eventDetail.edit::noEventTime::button" = "Không có thời gian kết thúc";
+"eventDetail.edit::memo" = "Ghi chú";
+"eventDetail.edit::urlPreview" = "Xem trước URL";
+
+"eventDetail.edit::make::case" = "Đây có phải là việc cần làm không?";
+"eventDetail.edit::todo::case" = "Việc cần làm";
+"eventDetail.edit::schedule::case" = "Lịch trình";
+"eventDetail.edit::holiday::case" = "Ngày lễ ở %@";
+
+"eventDetail.notSupport::holiday" = "Chức năng chỉnh sửa thông tin không được hỗ trợ đối với ngày lễ.";
+
+"eventDetail:todo:guide:message1" = "Việc cần làm thể hiện điều gì đó cần được thực hiện.";
+"eventDetail:todo:guide:message2" = "Khác với lịch trình thông thường được hiển thị trên lịch với thời gian (hoặc khoảng thời gian) cụ thể, việc cần làm cung cấp khả năng kiểm tra xem đã hoàn thành hay chưa.";
+"eventDetail:todo:guide:message3" = "Bạn có thể thêm một việc cần làm mà không cần thông tin thời gian cụ thể. Ví dụ, bạn có thể ghi lại một việc cần thực hiện trong thời gian tới, nhưng chưa cần làm ngay.";
+"eventDetail:todo:guide:process:message" = "Việc cần làm hoạt động khác với lịch trình thông thường khi bật tùy chọn lặp lại:";
+"eventDetail:todo:guide:process:bullet1" = "Các việc cần làm lặp lại ở hiện tại hoặc trong quá khứ chưa hoàn thành sẽ được hiển thị trên lịch.";
+"eventDetail:todo:guide:process:bullet2" = "Khi một việc cần làm được hoàn thành, sự kiện đó sẽ được thêm vào danh sách các sự kiện đã hoàn thành và sự kiện lặp lại tiếp theo sẽ được thêm mới vào lịch.";
+"eventDetail:todo:guide:process:bullet3" = "Nếu không có lần lặp lại tiếp theo do đã đến thời gian kết thúc lặp lại, việc cần làm lặp lại sẽ kết thúc.";
+"eventDetail:foremost:guide:message1" = "Đánh dấu một sự kiện là quan trọng nhất để nhấn mạnh rằng đây là sự kiện quan trọng nhất.\nSự kiện quan trọng nhất luôn hiển thị trên lịch và hỗ trợ một tiện ích riêng.";
+"eventDetail:foremost:guide:supports:message" = "Các loại sự kiện sau có thể được đặt làm sự kiện quan trọng nhất:";
+"eventDetail:foremost:guide:supports:todo" = "Việc cần làm";
+"eventDetail:foremost:guide:supports:notRepeating_schedule" = "Lịch trình không lặp lại";
+
+"eventDetail:isSaving:toast:message" = "Đang lưu thay đổi. Vui lòng đợi.";
+"eventDetail:hasChanges:confirm:message" = "Có thay đổi chưa lưu. Bạn có muốn hủy bỏ chúng không?";
+"eventDetail:hasChanges:confirm:continue" = "Tiếp tục chỉnh sửa";
+
+"eventDetail.unavailto_transform_withoutName" = "Vui lòng nhập tên để chuyển đổi sự kiện.";
+"eventDetail.todoEvent_unavailto_transform_withoutTime" = "Cần có thông tin thời gian để chuyển đổi thành lịch trình.";
+"eventDetail.todoEvent::transform::schedule_title" = "Chuyển đổi";
+"eventDetail.todoEvent::transform::schedule_message" = "Bạn có muốn chuyển việc cần làm này thành lịch trình không?";
+"eventDetail.scheduleEvent::transform::todo" = "Chuyển đổi";
+"eventDetail.scheduleEvent::transform::todo_message" = "Bạn có muốn chuyển lịch trình này thành việc cần làm không?";
+
+"eventDetail::revert" = "Hoàn tác hoàn thành";
+
+// MARK: - Google calendar event
+
+"eventDetail::gogoleEvent::viewOnCalendar" = "Xem trong Google Calendar";
+"eventDetail::gogoleEvent::calendar" = "Lịch";
+"eventDetail::gogoleEvent::calendar::event" = "Sự kiện Google Calendar";
+"eventDetail::gogoleEvent::attendee::unknown" = "Không xác định";
+"eventDetail::gogoleEvent::attendees" = "Người tham dự (%d người)";
+"eventDetail::gogoleEvent::attendees::organizer" = "Người tổ chức";
+"eventDetail::gogoleEvent::conference::accessCode" = "Mã truy cập";
+"eventDetail::gogoleEvent::conference::meetingCode" = "Mã cuộc họp";
+"eventDetail::gogoleEvent::conference::passCode" = "Mã số";
+"eventDetail::gogoleEvent::conference::password" = "Mật khẩu";
+"eventDetail::gogoleEvent::copy::message" = "Đã sao chép vào bộ nhớ tạm.";
+"eventDetail::gogoleEvent::canceled::message" = "Sự kiện này đã bị hủy.";
+
+// MARK: - Apple calendar event
+"eventDetail::appleCalendarEvent::viewOnCalendar" = "Xem trong Apple Calendar";
+"eventDetail::appleCalendarEvent::calendar::event" = "Sự kiện Apple Calendar";
+"eventDetail::appleCalendarEvent::attendees" = "Người tham dự (%d người)";
+"eventDetail::appleCalendarEvent::attendees::organizer" = "Người tổ chức";
+
+// MARK: - event tag
+
+"eventTag.title" = "Loại sự kiện";
+"eventTag.list::title" = "Loại sự kiện";
+"eventTag.defaults.default::name" = "Mặc định";
+"eventTag.defaults.holiday::name" = "Ngày lễ";
+"eventTag.addNew::placeholder" = "Thêm loại sự kiện mới";
+"eventTag.allEventTypes" = "Tất cả loại sự kiện >";
+"eventTag.remove::confirm::message" = "Bạn có muốn xóa loại sự kiện này không? Hay muốn xóa luôn tất cả sự kiện liên quan?";
+"eventTag.remove::only_tag" = "Chỉ xóa loại sự kiện";
+"eventTag.remove::tag_and_evets" = "Xóa cùng với sự kiện liên quan";
+"eventTag.removed::message" = "Loại sự kiện này đã bị xóa.";
+"eventTag.removed_with_events::message" = "Loại sự kiện này và các sự kiện liên quan đã bị xóa.";
+"eventTag.color::changed::message" = "Màu sắc đã được thay đổi.";
+"eventTag.changed::message" = "Loại sự kiện đã được chỉnh sửa.";
+"eventTag.makeNew::message" = "Đã tạo loại sự kiện mới.";
+"eventTag.default::title" = "Loại sự kiện mặc định";
+"eventTag.default::selection::explain" = "Đây là loại sự kiện sẽ được chọn mặc định khi tạo sự kiện.";
+"eventTag.externalCalendar::integrate_button" = "Kết nối lịch";
+
+
+// MARK: - event list
+
+"eventList::today::title" = "Hôm nay";
+"eventList::yesterday::title" = "Hôm qua";
+"eventList::thisMonth::title" = "Tháng này";
+"eventList::done_todos::title" = "Danh sách việc đã hoàn thành";
+"eventList::done_todos::eventTime" = "Thời gian sự kiện:";
+"eventList::done_todos::doneAt" = "Thời gian hoàn thành:";
+"eventList::remove::confirm::message" = "Xóa danh sách việc cần làm đã hoàn thành";
+"eventList::remove::confirm::button::all" = "Tất cả việc cần làm đã hoàn thành";
+"eventList::remove::confirm::button::olderThan1m" = "Cũ hơn 1 tháng";
+"eventList::remove::confirm::button::olderThan3m" = "Cũ hơn 3 tháng";
+"eventList::remove::confirm::button::olderThan6m" = "Cũ hơn 6 tháng";
+"eventList::remove::confirm::button::olderThan1y" = "Cũ hơn 1 năm";
+
+
+// MARK: - account
+
+"manage_account::title" = "Quản lý tài khoản";
+"manage_account::login_method" = "Phương thức đăng nhập";
+"manage_account::email" = "Email";
+"manage_account::last_signedIn_at" = "Thời gian đăng nhập gần nhất";
+"manage_account::migration::title" = "Chuyển dữ liệu người dùng tạm thời";
+"manage_account::migration::description" = "Tất cả sự kiện được tạo trước khi đăng nhập (%d sự kiện) đang được chuyển vào tài khoản của bạn.\nCác sự kiện liên kết với tài khoản có thể truy cập từ bất kỳ thiết bị nào.";
+"manage_account::migration_finished::message" = "Đã hoàn tất chuyển dữ liệu!";
+"manage_account::signout_button::title" = "Đăng xuất";
+"manage_account::sign_out::confirm::title" = "Đăng xuất";
+"manage_account::sign_out::confirm::message" = "Bạn có muốn đăng xuất khỏi tài khoản hiện tại không?";
+"manage_account::delete_account_button::title" = "Xóa tài khoản";
+"manage_account::delete_account_button::confirm:message" = "Bạn có chắc chắn muốn xóa tài khoản không?";
+"manage_account::delete_account_button::description" = "Sau khi yêu cầu xóa tài khoản, tài khoản của bạn sẽ bị xóa.\nMột khi đã xóa, thông tin tài khoản không thể khôi phục.";
+"signIn::title" = "Đăng nhập";
+"signIn:description" = "Sao lưu danh sách sự kiện của bạn và đồng bộ trên các thiết bị iOS khác\n(Các nền tảng hỗ trợ sẽ được mở rộng.)";
+
+
+// MARK: - setting
+"event_setting::title" = "Cài đặt sự kiện";
+"event_setting::eventType" = "Loại sự kiện";
+"event_setting::eventPeriod" = "Khoảng thời gian sự kiện";
+"event_setting::defaultMapApp" = "Mở ứng dụng Bản đồ";
+"event_setting::defaultMapApp_select" = "Chọn";
+
+"event_setting::eventSync" = "Đồng bộ sự kiện";
+"event_setting::eventSync::readyToSync::description" = "Đồng bộ các sự kiện của người dùng đã sao lưu.";
+"event_setting::eventSync::syncInProgress::description" = "Đang đồng bộ các sự kiện của người dùng đã sao lưu...";
+"event_setting::eventSync::lastTime" = "Thời gian dữ liệu đồng bộ mới nhất: %@";
+"event_setting::eventSync::force" = "Đồng bộ ngay";
+
+"event_notification_setting::title::forAllDay" = "Cả ngày";
+"event_notification_setting::title::NotforAllDay" = "Thời gian thông báo";
+"event_setting::external_calendar::title" = "Lịch bên ngoài";
+"event_setting::external_calendar::connected::account" = "Đã kết nối: %@";
+"event_setting::external_calendar::start" = "Kết nối";
+"event_setting::external_calendar::start::message" = "Đã kết nối với lịch bên ngoài.";
+"event_setting::external_calendar::stop" = "Ngắt kết nối";
+"event_setting::external_calendar::stop::message" = "Đã ngắt kết nối với lịch bên ngoài.";
+"event_setting::external_calendar::google::serviceName" = "Google Calendar";
+"event_setting::external_calendar::apple::serviceName" = "Apple Calendar";
+"event_setting::apple_calendar::permission_denied::message" = "Quyền truy cập lịch đã bị từ chối. Vui lòng bật quyền trong Cài đặt để sử dụng Apple Calendar.";
+"event_setting::apple_calendar::restricted::message" = "Quyền truy cập lịch bị hạn chế trên thiết bị này.";
+"setting.title" = "Cài đặt";
+"setting.appearance.title" = "Giao diện";
+"setting.appearance.calendar.samplemonth::march" = "THÁNG 3";
+"setting.appearance.calendar.startDayOfWeek" = "Ngày bắt đầu tuần";
+"setting.appearance.calendar.accentDay" = "Ngày nhấn mạnh";
+"setting.appearance.calendar.accentDay::holiday" = "Ngày lễ";
+"setting.appearance.calendar.accentDay::saturday" = "Thứ Bảy";
+"setting.appearance.calendar.accentDay::sunday" = "Chủ nhật";
+"setting.appearance.calendar.colorTheme" = "Chủ đề màu";
+"setting.appearance.calendar.colorTheme::system" = "Hệ thống";
+"setting.appearance.calendar.colorTheme::light" = "Sáng";
+"setting.appearance.calendar.colorTheme::dark" = "Tối";
+"setting.appearance.calendar.underline" = "Gạch chân ngày có sự kiện";
+"setting.appearance.event.edit::name_old" = "Chỉnh sửa sự kiện";
+"setting.appearance.event.edit::name" = "Cài đặt sự kiện và lịch bên ngoài";
+"setting.appearance.day_row_height" = "Mức hiển thị chi tiết sự kiện";
+"setting.appearance.day_row_height::small::text" = "Tối thiểu";
+"setting.appearance.day_row_height::medium::text" = "Trung bình";
+"setting.appearance.day_row_height::large::text" = "Đầy đủ";
+"setting.appearance.event.fontSize" = "Cỡ chữ sự kiện";
+"setting.appearance.event.show_holidayName" = "Hiện tên ngày lễ";
+"setting.appearance.event.show_lunar" = "Âm lịch";
+"setting.appearance.event._24form" = "Định dạng 24 giờ";
+"setting.appearance.event.sample::name" = "🥗 Tên sự kiện";
+"setting.appearance.event.sample::description" = "mô tả";
+"setting.appearance.event.sample::christmas" = "Giáng sinh";
+"setting.appearance.event.sample::first" = "sự kiện đầu tiên";
+"setting.appearance.event.sample::second" = "sự kiện thứ hai";
+"setting.appearance.event.sample::uncompleted_todo::toggle" = "Hiện việc chưa hoàn thành";
+"setting.appearance.widget::title" = "Chủ đề tiện ích";
+"setting.appearance.widget::useSystemTheme::title" = "Dùng chủ đề hệ thống";
+"setting.appearance.widget::useSystemTheme::background" = "Màu nền tiện ích";
+"setting.appearance.widget::useCustomTheme::title" = "Chọn màu tùy chỉnh";
+"setting.appearance.widget::sample::eventName" = "Sự kiện tiện ích";
+"setting.appearance.event.boldText" = "Chữ đậm";
+"setting.appearance.event.eventColor" = "Màu sự kiện";
+"setting.timezone::title" = "Múi giờ";
+"setting.timezone::systemTimeZone::name" = "Múi giờ hệ thống";
+"setting.timezone::systemTime::name" = "Giờ hệ thống";
+"setting.haptic::name" = "Phản hồi rung";
+"setting.minimize_animation::name" = "Giảm thiểu hiệu ứng chuyển động";
+"setting.holiday.title" = "Ngày lễ";
+"setting.holiday.item::name" = "Cài đặt ngày lễ";
+"setting.holiday.list::sectionTitle" = "Ngày lễ";
+"setting.holiday.country.title" = "Quốc gia";
+"setting.holiday.country.current::title" = "Quốc gia hiện tại";
+"setting.holiday.country.current::placeHolder" = "Chọn quốc gia";
+"setting.holiday.country.changeConfirm::title" = "Đổi quốc gia";
+"setting.holiday.country.changeConfirm::message" = "Bạn có muốn thay đổi quốc gia của lịch không?";
+"setting.holiday.country.changed::message" = "Quốc gia đã được thay đổi.";
+"setting.holiday.hide::button" = "Ẩn";
+"setting.holiday.hide::confirm::title" = "Ẩn ngày lễ";
+"setting.holiday.hide::confirm::message" = "Ẩn ngày lễ này mỗi năm?\nBạn có thể hiện lại trong Cài đặt > Ngày lễ.";
+"setting.holiday.hidden::sectionTitle" = "Ngày lễ đã ẩn";
+"setting.holiday.show::button" = "Hiện";
+"setting.feedback::name" = "Phản hồi";
+"setting.help::name" = "Trợ giúp";
+"setting.share::name" = "Chia sẻ ứng dụng";
+"setting.write_review::name" = "Viết đánh giá ứng dụng";
+"setting.account.signedIn::manageAccount" = "Tài khoản";
+"setting.account.needSignIn" = "Đăng nhập";
+"setting.suggest::readmind::appName" = "Readminds";
+"setting.suggest::readmind::message" = "Quản lý danh sách đọc của bạn";
+"setting.section.support::name" = "Hỗ trợ";
+"setting.section.app::name" = "Ứng dụng";
+"setting.section.suggest::name" = "Đề xuất";
+"feedback::guide:message" = "Vui lòng thoải mái gửi phản hồi, bao gồm báo lỗi, ý kiến và đề xuất dịch vụ.\nÝ kiến của bạn sẽ giúp ích rất nhiều cho việc cải thiện dịch vụ của chúng tôi.";
+"feedback::enterMessage::placeholder" = "Nhập nội dung";
+"feedback::contact::placeholder" = "Địa chỉ email để phản hồi";
+"feedback::posted:message" = "Phản hồi của bạn đã được ghi nhận thành công.";
+
+// MARK: - external service
+
+"external_service.name::google" = "Google Calendar";
+"external_service.expired::message" = "Kết nối với %@ đã hết hạn. Vui lòng vào Cài đặt và thử lại.";
+"external_service::google::hidden_event" = "Đã ẩn";
+"external_service::google::unknown_event" = "Không xác định";
+
+
+// MARK: - widget
+
+"widget.common::explain" = "Xem các sự kiện sắp tới của bạn.";
+"widget.doubleMonth::name" = "Lịch + Lịch";
+"widget.eventAndMonth::name" = "Sự kiện + Lịch";
+"widget.todayAndMonth::name" = "HÔM NAY + Lịch";
+"widget.eventAndForesmot::name" = "Sự kiện + Quan trọng nhất";
+"widget.events::name" = "Sự kiện";
+"widget.events.noEvents::message" = "Không có sự kiện nào.";
+"widget.events.currentTodos" = "Việc cần làm hiện tại";
+"widget.events.sample::check_mailbox" = "Kiểm tra hộp thư";
+"widget.events.sample::example" = "Ngày lễ";
+"widget.events.sample::running" = "Chạy bộ";
+"widget.events.sample::luch" = "Ăn trưa";
+"widget.events.sample::luch_appointment" = "Hẹn ăn trưa (không được trễ)";
+"widget.events.sample::call" = "Gọi cho Sara";
+"widget.events.sample::surfing" = "Lướt sóng";
+"widget.events.sample::moving" = "Ngày chuyển nhà";
+"widget.events.sample::meeting" = "Họp hàng ngày";
+"widget.events.sample::deposit_remain" = "Chuyển số dư còn lại";
+"widget.events.sample::recycle" = "Tái chế";
+"widget.events.sample::take_medicine" = "Uống thuốc";
+"widget.events.sample::watering" = "Tưới cây";
+"widget.events.sample::june3" = "T3, 3 THG 6";
+"widget.events.sample::july16" = "CN, 16 THG 7";
+"widget.events.sample::july21" = "T6, 21 THG 7";
+"widget.events.sample::july29" = "T7, 29 THG 7";
+"widget.events.sample::aug2" = "T4, 2 THG 8";
+"widget.events.sample::aug3" = "T5, 3 THG 8";
+"widget.events.sample::oct10" = "T2, 10 THG 10";
+"widget.events.foremost" = "Sự kiện quan trọng nhất";
+"widget.events.foremost::allFinished::message" = "Thêm một việc không thể bỏ lỡ.";
+"widget.events.foremost::sample::message" = "Nhớ mang theo ô! ⛱️";
+"widget.events.calendar" = "Lịch";
+"widget.events.today" = "HÔM NAY";
+"widget.events.today::sample::sunday" = "CHỦ NHẬT";
+"widget.events.today::sample::march2024" = "THÁNG 3, 2024";
+"total::event::count" = "%d sự kiện";
+"todo::count" = "%d việc cần làm";
+"schedule::count" = "%d lịch trình";
+"widget.weeks.lastMonth" = "Tháng trước";
+"widget.weeks.thisMonth" = "Tháng này";
+"widget.weeks.nextMonth" = "Tháng sau";
+"widget.weeks.thisWeek" = "Tuần này";
+"widget.weeks.twoWeek" = "2 tuần";
+"widget.weeks.threeWeek" = "3 tuần";
+"widget.weeks.fourWeek" = "4 tuần";
+"widget.weeks.sample::feb" = "THÁNG 2";
+"widget.weeks.sample::march" = "THÁNG 3";
+"widget.weeks.sample::april" = "THÁNG 4";
+"widget.weeks.sample::hiking" = "🏔️ Leo núi";
+"widget.weeks.sample::lunch" = "🥗 Ăn trưa";
+"widget.weeks.sample::call" = "📞 Gọi cho Sara";
+"widget.weeks.sample::holiday" = "Ngày lễ";
+"widget.weeks.sample::golf" = "⛳️ Golf";
+"widget.weeks.sample::workout" = "🔥 Tập luyện";
+"widget.weeks.sample::launch" = "🚀 Ra mắt";
+"widget.fail.message" = "Đã xảy ra lỗi tạm thời.\nVui lòng thử chạy lại ứng dụng.";
+"widget.next.noEvent" = "Không có sự kiện tiếp theo.";
+"widget.next.sample" = "🔥 Tập luyện";
+"widget.next.title" = "Sự kiện tiếp theo";
+"widget.next.rect_widget::title" = "Sự kiện tiếp theo hôm nay.";
+"widget.next.title::remains" = "Các sự kiện còn lại hôm nay.";
+"widget.next.title::future" = "Hôm nay và sắp tới";
+"widget.next.title::more_todos" = "%d việc cần làm khác";
+"widget.next.title::more_events" = "%d lịch trình khác";
+"widget.next.title::more_events_with_todo" = "%1$d việc cần làm và %2$d lịch trình khác";
+"widget.next.title::uncompleted::todo" = "%1$@ chưa hoàn thành";
+"widget.next.title::uncompleted::todos" = "%1$@ và %2$d việc chưa hoàn thành khác";
+"widget.next.no_events_today" = "Không có sự kiện hôm nay";
+"widget.next.no_events" = "Không có sự kiện sắp tới";
+
+"widget.dday::name" = "D-Day";
+"widget.dday::noTarget" = "Chọn một sự kiện";
+"widget.dday.sample::title" = "Hội thảo";
+"widget.dday.target::repeating" = "Lặp lại";
+"widget.dday.target::registered" = "Đã ghim";
+"widget.dday.turn::name" = "Lần %d";
+
+// MARK: - link
+
+"deeplink::invalid_link_message" = "Định dạng liên kết này không được hỗ trợ.\nVui lòng cập nhật ứng dụng lên phiên bản mới nhất.";
+
+// MARK: - force update
+
+"force_update.title" = "Cần cập nhật";
+"force_update.message" = "Đã có phiên bản mới.\nVui lòng cập nhật để tiếp tục sử dụng ứng dụng.";
+"recommend_update.title" = "Nên cập nhật";
+"recommend_update.message" = "Đã có phiên bản mới.\nChúng tôi khuyên bạn nên cập nhật để có trải nghiệm tốt hơn.";
+
+
+// MARK: - ai agent
+
+"aiAgent::voice::listening" = "Đang nghe…";
+"aiAgent::keyboard" = "Bàn phím";
+"aiAgent::voice" = "Giọng nói";
+"aiAgent::send" = "Gửi";
+"aiAgent::input::placeholder" = "Tôi có thể giúp gì cho bạn?";
+"aiAgent::permission::title" = "Cần quyền micro và nhận dạng giọng nói";
+"aiAgent::permission::message" = "Cho phép quyền trong Cài đặt, hoặc nhập bằng bàn phím";
+"aiAgent::permission::keyboard" = "Nhập bằng bàn phím";
+"aiAgent::permission::setting" = "Mở Cài đặt";
+"aiAgent::state::processing" = "Đang xử lý";
+"aiAgent::state::confirm" = "Cần xác nhận";
+"aiAgent::state::confirmExpired" = "Đã hết hạn";
+"aiAgent::state::done" = "Hoàn thành";
+"aiAgent::state::failed" = "Thất bại";
+"aiAgent::done::default" = "Xong";
+"aiAgent::failed::default" = "Không thể hoàn thành";
+"aiAgent::retry" = "Thử lại";
+"aiAgent::needSignIn::title" = "Cần đăng nhập";
+"aiAgent::needSignIn::message" = "Đăng nhập để sử dụng nhập nhanh bằng AI.";
+"aiAgent::title" = "Nhập nhanh AI";
+"aiAgent::keyboard::stop" = "Dừng";
+"aiAgent::keyboard::send" = "Gửi";
+"aiAgent::stop" = "Dừng";
+"aiAgent::usage" = "%@ / %@ credit";
+"aiAgent::plan::free" = "Miễn phí";
+"aiAgent::plan::standard" = "Tiêu chuẩn";
+"aiAgent::plan::lifetime" = "Trọn đời";
+"aiAgent::usage::topupRemaining" = "Còn lại %@ credit bổ sung";
+"aiAgent::usage::planChangeScheduled" = "Sẽ chuyển sang gói %2$@ vào %1$@";
+"aiAgent::stop::confirm::title" = "Dừng xử lý?";
+"aiAgent::stop::confirm::message" = "Dừng lại sẽ hủy bỏ tác vụ đang thực hiện và không thể tiếp tục.";
+"aiAgent::confirm::countdown" = "để xác nhận";
+"aiAgent::confirm::expired::message" = "Đã hết thời gian. Vui lòng yêu cầu lại.";

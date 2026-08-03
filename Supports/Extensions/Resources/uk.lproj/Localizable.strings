@@ -1,0 +1,562 @@
+/*
+  Localizable.strings
+  Extensions
+
+  Created by sudo.park on 7/31/26.
+  Copyright © 2026 com.sudo.park. All rights reserved.
+*/
+
+
+// MARK: - common
+"common::and" = " і";
+"common::wait:message" = "Будь ласка, зачекайте...";
+"common::back" = "Назад";
+"common.remove" = "Видалити";
+"common.confirm" = "Підтвердити";
+"common.cancel" = "Скасувати";
+"common.close" = "Закрити";
+"common.yes" = "Так";
+"common.no" = "Ні";
+"common.save" = "Зберегти";
+"common.info" = "Інфо";
+"common.search" = "Пошук";
+"common.clear" = "Очистити";
+"common.send" = "Надіслати";
+"common.done" = "Готово";
+"common.errorMessage" = "Сталася тимчасова помилка.\nБудь ласка, повідомте, якщо проблема повторюється.";
+"common.update" = "Оновити";
+"common.go_to_settings" = "Перейти до налаштувань";
+
+// MARK: - date form
+"date_form::HH:mm" = "HH:mm";
+"date_form::a_h:mm" = "h:mm a";
+"date_form::MM_d__HH:mm" = "d.M, HH:mm";
+"date_form::MM_d" = "d.M";
+"date_form::MM_dd" = "dd.MM";
+"date_form::24off_h:mm" = "h:mm";
+"date_form::24on_H:mm" = "H:mm";
+"date_form::d_E_" = "d (E)";
+"date_form::MMM_d_HH:mm" = "d MMM HH:mm";
+"date_form::MMM_d" = "d MMM";
+"date_form::yyyy_MM_dd_E_" = "dd.MM.yyyy (E)";
+"date_form:yyyy.MM_dd_hh:mm" = "dd.MM.yyyy HH:mm";
+"date_form:yyyy.MM_dd_h:mm" = "dd.MM.yyyy h:mm a";
+"date_form.yyyy" = "yyyy";
+"date_form.MMM_dd_E" = "dd MMM (E)";
+"date_form.HH:mm" = "HH:mm";
+"date_form.yyyy_MM_dd" = "dd.MM.yyyy";
+"date_form.yyyy_MMM_dd" = "d MMM yyyy";
+"date_form.MMM" = "MMM";
+"date_form.MMMM" = "MMMM";
+"date_form.EEEE" = "EEEE";
+"date_form.EEE_MMM_d" = "EEE, d MMM";
+"date_form.MMM_yyyy" = "MMM yyyy";
+"tomorrow" = "Завтра";
+
+// MARK: - event
+
+"dayname::sunday" = "Неділя";
+"dayname::monday" = "Понеділок";
+"dayname::tuesday" = "Вівторок";
+"dayname::wednesday" = "Середа";
+"dayname::thursday" = "Четвер";
+"dayname::friday" = "П'ятниця";
+"dayname::saturday" = "Субота";
+
+"dayname::sunday:short" = "НД";
+"dayname::monday:short" = "ПН";
+"dayname::tuesday:short" = "ВТ";
+"dayname::wednesday:short" = "СР";
+"dayname::thursday:short" = "ЧТ";
+"dayname::friday:short" = "ПТ";
+"dayname::saturday:short" = "СБ";
+
+"dayname::sunday:very_short" = "Н";
+"dayname::monday:very_short" = "П";
+"dayname::tuesday:very_short" = "В";
+"dayname::wednesday:very_short" = "С";
+"dayname::thursday:very_short" = "Ч";
+"dayname::friday:very_short" = "П";
+"dayname::saturday:very_short" = "С";
+
+
+// MARK: - event notification
+
+"event_notification::today:title" = "Події сьогодні";
+"event_notification::todo:prefix" = "Завдання";
+"event_notification::today:prefix" = "Сьогодні";
+"event_notification::tomorrow:prefix" = "Завтра";
+"event_notification::allday_today" = "Увесь день сьогодні";
+"event_notification::allday_tomorrow" = "Увесь день завтра";
+"event_notification::some_allday" = "%@ увесь день";
+"event_notification_setting::option_title::no_notification" = "Без сповіщень";
+"event_notification_setting::option_title::at_time" = "У час події";
+"event_notification_setting::option_title::allday_9am" = "О 9:00 того дня";
+"event_notification_setting::option_title::allday_12pm" = "Опівдні того дня";
+"event_notification_setting::option_title::customTime" = "Свій час: %@";
+"event_notification_setting::option_title::custimTime_fallback" = "Свій час";
+"event_notification_setting::option_title::before_minutes" = "За %d хв до події";
+"event_notification_setting::option_title::before_hours" = "За %d год до події";
+"event_notification_setting::option_title::before_days" = "За %d дн до події";
+"event_notification_setting::option_title::before_weeks" = "За %d тижнів до події";
+"event_notification_setting::option_title::allday_9am_before_days" = "О 9:00, за %d дн";
+"event_notification_setting::option_title::allday_9am_before_weeks" = "О 9:00, за %d тижнів";
+"event_notification_setting::need_permission_message" = "Для використання сповіщень про події потрібен дозвіл на сповіщення.\nПерейдіть до системних налаштувань додатка і дозвольте сповіщення.";
+"event_notification_setting::need_permission::go_setting" = "Перейти до налаштувань";
+"event_notification_setting::need_permission_title" = "Інфо";
+"event_notification_setting::permission_denied" = "Для використання функції нагадувань про події потрібен дозвіл на сповіщення додатка.";
+
+
+
+// MARK: - calendar
+
+"calendar::foremostevent:title" = "Головна подія";
+"calendar::uncompletedTodos:title" = "Невиконані завдання";
+"calendar::event_time::todo" = "Завдання";
+"calendar::event_time::allday" = "Увесь день";
+"calendar::event_time::allday::with" = "%@ увесь день";
+"calendar::event_time::period:some_days" = "%d дн.";
+"calendar::event_time::period:some_minutes" = "%d хв";
+"calendar::event_time::period:some_hours" = "%d год";
+"calendar::event_time::period:some_days:some_hours" = "%d дн. %d год";
+"calendar::event::more_action::remove:title" = "Видалити подію";
+"calendar::event::more_action::foremost_event:title" = "Головна подія";
+"calendar::event::more_action::remove_only_thistime:message" = "Видалити тільки цю подію з усіх повторюваних подій?";
+"calendar::event::more_action::remove:message" = "Видалити цю подію?";
+"calendar::event::more_action::mark_as_foremost" = "Позначити цю подію як найважливішу?";
+"calendar::event::more_action::unmark_as_foremost" = "Зняти позначку цієї події як найважливішої?";
+"calendar::event::more_action::mark_as_foremost::unavail" = "Повторювану подію розкладу не можна позначити як найважливішу.";
+"calendar::event::more_action:remove_only_thistime:item_name" = "Видалити тільки цю подію";
+"calendar::event::more_action:remove:item_name" = "Видалити подію";
+"calendar::event::more_action:foremost:mark:item_name" = "Позначити як головну";
+"calendar::event::more_action:foremost:unmark:item_name" = "Зняти позначку головної";
+"calendar::event::more_action:dday_candidate:register:item_name" = "Додати до віджета зворотного відліку";
+"calendar::event::more_action:dday_candidate:unregister:item_name" = "Видалити з віджета зворотного відліку";
+"calendar::event::more_action:dday_candidate:title" = "Кандидат для віджета зворотного відліку";
+"calendar::event::more_action:dday_candidate:register:message" = "Додати цю подію як кандидата для віджета зворотного відліку? Вона з'явиться вгорі списку під час редагування віджета.";
+"calendar::event::more_action:dday_candidate:unregister:message" = "Видалити цю подію з кандидатів для віджета зворотного відліку?";
+"calendar::event::more_action:copy:item_name" = "Копіювати подію";
+"calendar::event::more_action:transform_to::schedule" = "Перетворити на зустріч";
+"calendar::event::more_action:transform_to::todo" = "Перетворити на завдання";
+"calendar::event::more_action:edit:item_name" = "Редагувати";
+"calednar::event::add_new" = "Додати нову подію";
+"calednar::event::add_new:place_holder" = "Швидко додайте нове завдання.";
+"calednar::event::skip_todo" = "Пропустити це завдання";
+"calednar::event::skip_todo_until" = "Виберіть час, до якого пропустити це завдання";
+"calednar::event::copy" = "Копіювати подію";
+"calendar::move_date" = "Перенести дату";
+"calednar::event::google::edit" = "Редагувати подію Google Календаря";
+
+
+// MARK: - event detail
+
+"eventDetail.messages.selectTimeFirst" = "Спочатку виберіть час події.";
+"eventDetail.messages.selectValidTime" = "Виберіть дійсний час події.";
+"eventDetail.notification.custom_eventTime:title" = "Свій";
+"eventDetail.notification.title" = "Час сповіщення про подію";
+"eventDetail.repeating.title" = "Повторення";
+"eventDetail.repeating.notRepeating::title" = "Без повторення";
+"eventDetail.repeating.starttime:form" = "dd.MM.yyyy";
+"eventDetail.repeating.starttime:title" = "Час початку повторення";
+"eventDetail.repeating.everyDay:title" = "Щодня";
+"eventDetail.repeating.everyWeek:title" = "Щотижня";
+"eventDetail.repeating.everyWeekSomeDay:title" = "Щотижня в %@";
+"eventDetail.repeating.everySomeWeek:title" = "Кожні %d тиж.";
+"eventDetail.repeating.everyWeekDays:title" = "Щобудня";
+"eventDetail.repeating.everySomeWeekSomeDay:title" = "Кожні %d тиж. у %@";
+"eventDetail.repeating.everyMonth:title" = "Щомісяця";
+"eventDetail.repeating.everyMonth_someDay:title" = "%@ щомісяця.";
+"eventDetail.repeating.everyYear:title" = "Щороку";
+"eventDetail.repeating.lunarCalendar_everyYear:title" = "Щороку (місячний календар)";
+"eventDetail.repeating.everyYearSomeDay:title" = "Щороку %@";
+"eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "Щороку %@ (місячний календар)";
+"eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "Усі дні останнього тижня кожного місяця";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "Перший %@ кожного місяця";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "Другий %@ кожного місяця";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "Третій %@ кожного місяця";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "Четвертий %@ кожного місяця";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "П'ятий %@ кожного місяця";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "Шостий %@ кожного місяця";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "Сьомий %@ кожного місяця";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "Останній %@ кожного місяця";
+"eventDetail.repeating.endtime::title" = "Закінчення повторення";
+"eventDetail.repeating.endtime::option::never" = "Ніколи";
+"eventDetail.repeating.endtime::option::on" = "У дату";
+"eventDetail.repeating.endtime::option::after" = "Після";
+"eventDetail.repeating.endtime::option::after_occurrences" = "повторень";
+"eventDetail.repeating.endtime::shouldFutureThanStartTime" = "Час закінчення повторення має бути пізніше за час початку.\n(Дата початку повторення: %@)";
+"eventDetail.repeating::period_endcount" = "З %@, %d разів";
+
+"eventDetail.repeating.everyNDays:title" = "Кожні %d дн.";
+"eventDetail.repeating.last" = "Останній";
+"eventDetail.repeating.everyNMonths:title" = "Кожні %d міс.";
+"eventDetail.repeating.everyNYears:title" = "Кожні %d років";
+"eventDetail.repeating::endoption_until" = "до %@";
+"eventDetail.repeating::endoption_times" = "%d разів";
+
+"eventDetail.place::placeholder" = "Місце";
+"eventDetail.place::remove_button" = "Видалити місце";
+"eventDetail.place::no_map_app" = "Вибраний додаток карт не встановлено.";
+"eventDetail.place::select_map_app" = "Виберіть карту";
+"eventDetail.place::always_select_this_map" = "Завжди відкривати цим додатком.";
+
+"eventDetail.add_new_todo::message" = "Додано нове завдання.";
+"eventDetail.add_new_schedule::message" = "Додано нову зустріч.";
+"eventDetail.scheduleEvent_removed::message" = "Зустріч видалено.";
+"eventDetail.edit::repeating::confirm::ttile" = "Редагувати подію";
+"eventDetail.edit::repeating::confirm::message" = "Ця подія є повторюваною.\nВиберіть діапазон повторюваної події, яку хочете редагувати.";
+"eventDetail.edit::repeating::confirm::all::button" = "Усі події";
+"eventDetail.edit::repeating::confirm::fromNow::button" = "З цього моменту";
+"eventDetail.edit::repeating::confirm::onlyThisTime::button" = "Тільки цього разу";
+"eventDetail.scheduleEvent_saved::message" = "Зустріч збережено.";
+"eventDetail.todoEvent_removed::message" = "Завдання видалено.";
+"eventDetail.todoEvent_saved::message" = "Завдання збережено.";
+"eventDetail.cancel_edit::title" = "Редагувати подію";
+"eventDetail.cancel_edit::message" = "Скасувати ці зміни?";
+"eventDetail.cancel_edit::continue::button" = "Продовжити";
+
+"eventDetail.edit::add_new_name::placeholder" = "Додайте назву нової події";
+"eventDetail.edit::clearEventTime::button" = "Очистити час події";
+"eventDetail.edit::noEventTime::button" = "Без часу завершення";
+"eventDetail.edit::memo" = "Нотатка";
+"eventDetail.edit::urlPreview" = "Перегляд URL";
+
+"eventDetail.edit::make::case" = "Це завдання?";
+"eventDetail.edit::todo::case" = "Завдання";
+"eventDetail.edit::schedule::case" = "Зустріч";
+"eventDetail.edit::holiday::case" = "Свято в %@";
+
+"eventDetail.notSupport::holiday" = "Функція зміни інформації не підтримується для державних свят.";
+
+"eventDetail:todo:guide:message1" = "Завдання — це те, що потрібно зробити.";
+"eventDetail:todo:guide:message2" = "На відміну від звичайних подій, які відображаються в календарі з конкретним часом (або періодом), завдання дають змогу перевіряти, чи вони виконані.";
+"eventDetail:todo:guide:message3" = "Ви можете додати завдання без вказання часу. Наприклад, можна записати справу, яку потрібно зробити найближчим часом, але не одразу.";
+"eventDetail:todo:guide:process:message" = "Коли ввімкнено повторення, завдання поводяться інакше, ніж звичайні події:";
+"eventDetail:todo:guide:process:bullet1" = "Поточні або минулі повторювані завдання, які ще не виконано, відображаються в календарі.";
+"eventDetail:todo:guide:process:bullet2" = "Коли завдання виконано, воно додається до списку завершених подій, а в календарі додається нове повторення.";
+"eventDetail:todo:guide:process:bullet3" = "Якщо через закінчення повторення наступного повторення немає, повторюване завдання завершується.";
+"eventDetail:foremost:guide:message1" = "Позначте подію як головну, щоб підкреслити, що це найважливіша подія.\nГоловна подія завжди видима в календарі та підтримує окремий віджет.";
+"eventDetail:foremost:guide:supports:message" = "Як головну подію можна встановити такі типи подій:";
+"eventDetail:foremost:guide:supports:todo" = "Завдання";
+"eventDetail:foremost:guide:supports:notRepeating_schedule" = "Неповторювані зустрічі";
+
+"eventDetail:isSaving:toast:message" = "Збереження змін. Будь ласка, зачекайте.";
+"eventDetail:hasChanges:confirm:message" = "Є незбережені зміни. Скасувати їх?";
+"eventDetail:hasChanges:confirm:continue" = "Продовжити редагування";
+
+"eventDetail.unavailto_transform_withoutName" = "Введіть назву, щоб перетворити подію.";
+"eventDetail.todoEvent_unavailto_transform_withoutTime" = "Для перетворення на зустріч потрібно вказати час.";
+"eventDetail.todoEvent::transform::schedule_title" = "Перетворити";
+"eventDetail.todoEvent::transform::schedule_message" = "Перетворити це завдання на зустріч?";
+"eventDetail.scheduleEvent::transform::todo" = "Перетворити";
+"eventDetail.scheduleEvent::transform::todo_message" = "Перетворити цю зустріч на завдання?";
+
+"eventDetail::revert" = "Скасувати виконання";
+
+// MARK: - Google calendar event
+
+"eventDetail::gogoleEvent::viewOnCalendar" = "Переглянути в Google Календарі";
+"eventDetail::gogoleEvent::calendar" = "Календар";
+"eventDetail::gogoleEvent::calendar::event" = "Подія Google Календаря";
+"eventDetail::gogoleEvent::attendee::unknown" = "Невідомо";
+"eventDetail::gogoleEvent::attendees" = "Учасники (%d осіб)";
+"eventDetail::gogoleEvent::attendees::organizer" = "Організатор";
+"eventDetail::gogoleEvent::conference::accessCode" = "Код доступу";
+"eventDetail::gogoleEvent::conference::meetingCode" = "Код зустрічі";
+"eventDetail::gogoleEvent::conference::passCode" = "Код перепустки";
+"eventDetail::gogoleEvent::conference::password" = "Пароль";
+"eventDetail::gogoleEvent::copy::message" = "Скопійовано в буфер обміну.";
+"eventDetail::gogoleEvent::canceled::message" = "Цю подію скасовано.";
+
+// MARK: - Apple calendar event
+"eventDetail::appleCalendarEvent::viewOnCalendar" = "Переглянути в Apple Календарі";
+"eventDetail::appleCalendarEvent::calendar::event" = "Подія Apple Календаря";
+"eventDetail::appleCalendarEvent::attendees" = "Учасники (%d осіб)";
+"eventDetail::appleCalendarEvent::attendees::organizer" = "Організатор";
+
+// MARK: - event tag
+
+"eventTag.title" = "Тип події";
+"eventTag.list::title" = "Типи подій";
+"eventTag.defaults.default::name" = "За замовчуванням";
+"eventTag.defaults.holiday::name" = "Свято";
+"eventTag.addNew::placeholder" = "Додати новий тип події";
+"eventTag.allEventTypes" = "Усі типи подій >";
+"eventTag.remove::confirm::message" = "Видалити тільки цей тип події чи також пов'язані події?";
+"eventTag.remove::only_tag" = "Видалити тільки тип події";
+"eventTag.remove::tag_and_evets" = "Видалити разом із пов'язаними подіями";
+"eventTag.removed::message" = "Цей тип події видалено.";
+"eventTag.removed_with_events::message" = "Цей тип події та пов'язані події видалено.";
+"eventTag.color::changed::message" = "Колір змінено.";
+"eventTag.changed::message" = "Тип події змінено.";
+"eventTag.makeNew::message" = "Створено новий тип події.";
+"eventTag.default::title" = "Тип події за замовчуванням";
+"eventTag.default::selection::explain" = "Це тип події, який буде вибрано за замовчуванням під час створення події.";
+"eventTag.externalCalendar::integrate_button" = "Підключити календар";
+
+
+// MARK: - event list
+
+"eventList::today::title" = "Сьогодні";
+"eventList::yesterday::title" = "Учора";
+"eventList::thisMonth::title" = "Цей місяць";
+"eventList::done_todos::title" = "Список виконаних завдань";
+"eventList::done_todos::eventTime" = "Час події:";
+"eventList::done_todos::doneAt" = "Час виконання:";
+"eventList::remove::confirm::message" = "Видалити список виконаних завдань";
+"eventList::remove::confirm::button::all" = "Усі виконані завдання";
+"eventList::remove::confirm::button::olderThan1m" = "Старші за 1 місяць";
+"eventList::remove::confirm::button::olderThan3m" = "Старші за 3 місяці";
+"eventList::remove::confirm::button::olderThan6m" = "Старші за 6 місяців";
+"eventList::remove::confirm::button::olderThan1y" = "Старші за 1 рік";
+
+
+// MARK: - account
+
+"manage_account::title" = "Керування обліковим записом";
+"manage_account::login_method" = "Спосіб входу";
+"manage_account::email" = "Ел. пошта";
+"manage_account::last_signedIn_at" = "Час останнього входу";
+"manage_account::migration::title" = "Перенесення тимчасових даних користувача";
+"manage_account::migration::description" = "Усі події, створені до входу (%d подій), переносяться до вашого облікового запису.\nПодії, пов'язані з вашим обліковим записом, доступні з будь-якого пристрою.";
+"manage_account::migration_finished::message" = "Перенесення завершено!";
+"manage_account::signout_button::title" = "Вийти";
+"manage_account::sign_out::confirm::title" = "Вийти";
+"manage_account::sign_out::confirm::message" = "Вийти з поточного облікового запису?";
+"manage_account::delete_account_button::title" = "Видалити обліковий запис";
+"manage_account::delete_account_button::confirm:message" = "Ви впевнені, що хочете видалити свій обліковий запис?";
+"manage_account::delete_account_button::description" = "Після запиту на видалення обліковий запис буде видалено.\nПісля видалення дані облікового запису неможливо відновити.";
+"signIn::title" = "Вхід";
+"signIn:description" = "Резервуйте копію списку подій і синхронізуйте його з іншими пристроями iOS\n(Перелік підтримуваних платформ буде розширено.)";
+
+
+// MARK: - setting
+"event_setting::title" = "Налаштування подій";
+"event_setting::eventType" = "Тип події";
+"event_setting::eventPeriod" = "Період події";
+"event_setting::defaultMapApp" = "Відкрити додаток карт";
+"event_setting::defaultMapApp_select" = "Вибрати";
+
+"event_setting::eventSync" = "Синхронізація подій";
+"event_setting::eventSync::readyToSync::description" = "Синхронізувати резервну копію подій користувача.";
+"event_setting::eventSync::syncInProgress::description" = "Синхронізація резервної копії подій користувача...";
+"event_setting::eventSync::lastTime" = "Час останньої синхронізації: %@";
+"event_setting::eventSync::force" = "Примусова синхронізація";
+
+"event_notification_setting::title::forAllDay" = "Увесь день";
+"event_notification_setting::title::NotforAllDay" = "Час сповіщення";
+"event_setting::external_calendar::title" = "Зовнішні календарі";
+"event_setting::external_calendar::connected::account" = "Підключено: %@";
+"event_setting::external_calendar::start" = "Підключити";
+"event_setting::external_calendar::start::message" = "Підключено до зовнішнього календаря.";
+"event_setting::external_calendar::stop" = "Відключити";
+"event_setting::external_calendar::stop::message" = "Підключення до зовнішнього календаря відключено.";
+"event_setting::external_calendar::google::serviceName" = "Google Календар";
+"event_setting::external_calendar::apple::serviceName" = "Apple Календар";
+"event_setting::apple_calendar::permission_denied::message" = "Доступ до календаря заборонено. Дозвольте його в налаштуваннях, щоб використовувати Apple Календар.";
+"event_setting::apple_calendar::restricted::message" = "Доступ до календаря обмежено на цьому пристрої.";
+"setting.title" = "Налаштування";
+"setting.appearance.title" = "Вигляд";
+"setting.appearance.calendar.samplemonth::march" = "БЕРЕЗЕНЬ";
+"setting.appearance.calendar.startDayOfWeek" = "Перший день тижня";
+"setting.appearance.calendar.accentDay" = "Виділені дні";
+"setting.appearance.calendar.accentDay::holiday" = "Свято";
+"setting.appearance.calendar.accentDay::saturday" = "Субота";
+"setting.appearance.calendar.accentDay::sunday" = "Неділя";
+"setting.appearance.calendar.colorTheme" = "Кольорова тема";
+"setting.appearance.calendar.colorTheme::system" = "Системна";
+"setting.appearance.calendar.colorTheme::light" = "Світла";
+"setting.appearance.calendar.colorTheme::dark" = "Темна";
+"setting.appearance.calendar.underline" = "Підкреслення днів із подіями";
+"setting.appearance.event.edit::name_old" = "Редагувати подію";
+"setting.appearance.event.edit::name" = "Налаштування подій і зовнішні календарі";
+"setting.appearance.day_row_height" = "Рівень відображення деталей події";
+"setting.appearance.day_row_height::small::text" = "Мінімальний";
+"setting.appearance.day_row_height::medium::text" = "Середній";
+"setting.appearance.day_row_height::large::text" = "Повний";
+"setting.appearance.event.fontSize" = "Розмір шрифту тексту події";
+"setting.appearance.event.show_holidayName" = "Показувати назву свята";
+"setting.appearance.event.show_lunar" = "Місячний календар";
+"setting.appearance.event._24form" = "24-годинний формат";
+"setting.appearance.event.sample::name" = "🥗 Назва події";
+"setting.appearance.event.sample::description" = "опис";
+"setting.appearance.event.sample::christmas" = "Різдво";
+"setting.appearance.event.sample::first" = "перша подія";
+"setting.appearance.event.sample::second" = "друга подія";
+"setting.appearance.event.sample::uncompleted_todo::toggle" = "Показувати невиконані завдання";
+"setting.appearance.widget::title" = "Тема віджета";
+"setting.appearance.widget::useSystemTheme::title" = "Використовувати системну тему";
+"setting.appearance.widget::useSystemTheme::background" = "Колір фону віджета";
+"setting.appearance.widget::useCustomTheme::title" = "Вибрати свій колір";
+"setting.appearance.widget::sample::eventName" = "Подія віджета";
+"setting.appearance.event.boldText" = "Жирний текст";
+"setting.appearance.event.eventColor" = "Колір події";
+"setting.timezone::title" = "Часовий пояс";
+"setting.timezone::systemTimeZone::name" = "Системний часовий пояс";
+"setting.timezone::systemTime::name" = "Системний час";
+"setting.haptic::name" = "Тактильний відгук";
+"setting.minimize_animation::name" = "Зменшити ефекти анімації";
+"setting.holiday.title" = "Свята";
+"setting.holiday.item::name" = "Налаштування свят";
+"setting.holiday.list::sectionTitle" = "Свята";
+"setting.holiday.country.title" = "Країна";
+"setting.holiday.country.current::title" = "Поточна країна";
+"setting.holiday.country.current::placeHolder" = "Виберіть країну";
+"setting.holiday.country.changeConfirm::title" = "Змінити країну";
+"setting.holiday.country.changeConfirm::message" = "Змінити країну вашого календаря?";
+"setting.holiday.country.changed::message" = "Країну змінено.";
+"setting.holiday.hide::button" = "Приховати";
+"setting.holiday.hide::confirm::title" = "Приховати свято";
+"setting.holiday.hide::confirm::message" = "Приховувати це свято щороку?\nВи можете знову показати його в Налаштування > Свята.";
+"setting.holiday.hidden::sectionTitle" = "Приховані свята";
+"setting.holiday.show::button" = "Показати";
+"setting.feedback::name" = "Зворотний зв'язок";
+"setting.help::name" = "Довідка";
+"setting.share::name" = "Поділитися додатком";
+"setting.write_review::name" = "Написати відгук про додаток";
+"setting.account.signedIn::manageAccount" = "Обліковий запис";
+"setting.account.needSignIn" = "Вхід";
+"setting.suggest::readmind::appName" = "Readminds";
+"setting.suggest::readmind::message" = "Керуйте своїм списком для читання";
+"setting.section.support::name" = "Підтримка";
+"setting.section.app::name" = "Додаток";
+"setting.section.suggest::name" = "Рекомендації";
+"feedback::guide:message" = "Будь ласка, залишайте відгуки, зокрема повідомлення про помилки, коментарі та пропозиції щодо покращення сервісу.\nВаші відгуки дуже допоможуть нам покращити сервіс.";
+"feedback::enterMessage::placeholder" = "Введіть повідомлення";
+"feedback::contact::placeholder" = "Адреса ел. пошти для відповіді";
+"feedback::posted:message" = "Ваш відгук успішно надіслано.";
+
+// MARK: - external service
+
+"external_service.name::google" = "Google Календар";
+"external_service.expired::message" = "Термін дії інтеграції %@ закінчився. Перейдіть до налаштувань і спробуйте ще раз.";
+"external_service::google::hidden_event" = "Приховано";
+"external_service::google::unknown_event" = "Невідомо";
+
+
+// MARK: - widget
+
+"widget.common::explain" = "Переглядайте свої майбутні події.";
+"widget.doubleMonth::name" = "Календар + Календар";
+"widget.eventAndMonth::name" = "Події + Календар";
+"widget.todayAndMonth::name" = "СЬОГОДНІ + Календар";
+"widget.eventAndForesmot::name" = "Події + Головна";
+"widget.events::name" = "Події";
+"widget.events.noEvents::message" = "Немає подій.";
+"widget.events.currentTodos" = "Поточний список завдань";
+"widget.events.sample::check_mailbox" = "Перевірити поштову скриньку";
+"widget.events.sample::example" = "Свято";
+"widget.events.sample::running" = "Пробіжка";
+"widget.events.sample::luch" = "Обід";
+"widget.events.sample::luch_appointment" = "Обід (не можна запізнюватися)";
+"widget.events.sample::call" = "Подзвонити Сарі";
+"widget.events.sample::surfing" = "Серфінг";
+"widget.events.sample::moving" = "День переїзду";
+"widget.events.sample::meeting" = "Щоденна нарада";
+"widget.events.sample::deposit_remain" = "Перевести залишок балансу";
+"widget.events.sample::recycle" = "Переробка відходів";
+"widget.events.sample::take_medicine" = "Прийняти ліки";
+"widget.events.sample::watering" = "Полити вазон";
+"widget.events.sample::june3" = "ВТ, 3 ЧЕР";
+"widget.events.sample::july16" = "НД, 16 ЛИП";
+"widget.events.sample::july21" = "ПТ, 21 ЛИП";
+"widget.events.sample::july29" = "СБ, 29 ЛИП";
+"widget.events.sample::aug2" = "СР, 2 СЕР";
+"widget.events.sample::aug3" = "ЧТ, 3 СЕР";
+"widget.events.sample::oct10" = "ПН, 10 ЖОВ";
+"widget.events.foremost" = "Головна подія";
+"widget.events.foremost::allFinished::message" = "Додайте подію, яку не можна пропустити.";
+"widget.events.foremost::sample::message" = "Візьміть парасольку! ⛱️";
+"widget.events.calendar" = "Календар";
+"widget.events.today" = "СЬОГОДНІ";
+"widget.events.today::sample::sunday" = "НЕДІЛЯ";
+"widget.events.today::sample::march2024" = "БЕРЕЗЕНЬ 2024";
+"total::event::count" = "%d подій";
+"todo::count" = "%d завдань";
+"schedule::count" = "%d зустрічей";
+"widget.weeks.lastMonth" = "Минулий місяць";
+"widget.weeks.thisMonth" = "Цей місяць";
+"widget.weeks.nextMonth" = "Наступний місяць";
+"widget.weeks.thisWeek" = "Цей тиждень";
+"widget.weeks.twoWeek" = "2 тижні";
+"widget.weeks.threeWeek" = "3 тижні";
+"widget.weeks.fourWeek" = "4 тижні";
+"widget.weeks.sample::feb" = "ЛЮТИЙ";
+"widget.weeks.sample::march" = "БЕРЕЗЕНЬ";
+"widget.weeks.sample::april" = "КВІТЕНЬ";
+"widget.weeks.sample::hiking" = "🏔️ Похід";
+"widget.weeks.sample::lunch" = "🥗 Обід";
+"widget.weeks.sample::call" = "📞 Подзвонити Сарі";
+"widget.weeks.sample::holiday" = "Свято";
+"widget.weeks.sample::golf" = "⛳️ Гольф";
+"widget.weeks.sample::workout" = "🔥 Тренування";
+"widget.weeks.sample::launch" = "🚀 Запуск";
+"widget.fail.message" = "Сталася тимчасова помилка.\nСпробуйте запустити додаток знову.";
+"widget.next.noEvent" = "Немає наступної події.";
+"widget.next.sample" = "🔥 Тренування";
+"widget.next.title" = "Наступна подія";
+"widget.next.rect_widget::title" = "Наступна подія сьогодні.";
+"widget.next.title::remains" = "Наступні події сьогодні.";
+"widget.next.title::future" = "Сьогодні і що далі";
+"widget.next.title::more_todos" = "Ще %d завдань";
+"widget.next.title::more_events" = "Ще %d зустрічей";
+"widget.next.title::more_events_with_todo" = "Ще %1$d завдань і %2$d зустрічей";
+"widget.next.title::uncompleted::todo" = "%1$@ не виконано";
+"widget.next.title::uncompleted::todos" = "%1$@ і ще %2$d невиконаних завдань";
+"widget.next.no_events_today" = "Сьогодні немає подій";
+"widget.next.no_events" = "Немає майбутніх подій";
+
+"widget.dday::name" = "Зворотний відлік";
+"widget.dday::noTarget" = "Виберіть подію";
+"widget.dday.sample::title" = "Воркшоп";
+"widget.dday.target::repeating" = "Повторюване";
+"widget.dday.target::registered" = "Закріплено";
+"widget.dday.turn::name" = "Повтор %d";
+
+// MARK: - link
+
+"deeplink::invalid_link_message" = "Цей формат посилання не підтримується.\nБудь ласка, оновіть додаток до останньої версії.";
+
+// MARK: - force update
+
+"force_update.title" = "Потрібне оновлення";
+"force_update.message" = "Доступна нова версія.\nБудь ласка, оновіть додаток, щоб продовжити використання.";
+"recommend_update.title" = "Рекомендоване оновлення";
+"recommend_update.message" = "Доступна нова версія.\nРекомендуємо оновити для кращого досвіду.";
+
+
+// MARK: - ai agent
+
+"aiAgent::voice::listening" = "Слухаю…";
+"aiAgent::keyboard" = "Клавіатура";
+"aiAgent::voice" = "Голос";
+"aiAgent::send" = "Надіслати";
+"aiAgent::input::placeholder" = "Чим я можу допомогти?";
+"aiAgent::permission::title" = "Потрібен доступ до мікрофона й розпізнавання мовлення";
+"aiAgent::permission::message" = "Дозвольте доступ у налаштуваннях або введіть текст вручну";
+"aiAgent::permission::keyboard" = "Ввести текст";
+"aiAgent::permission::setting" = "Відкрити налаштування";
+"aiAgent::state::processing" = "Обробка";
+"aiAgent::state::confirm" = "Потрібне підтвердження";
+"aiAgent::state::confirmExpired" = "Минув термін";
+"aiAgent::state::done" = "Команду виконано";
+"aiAgent::state::failed" = "Команду не виконано";
+"aiAgent::done::default" = "Готово";
+"aiAgent::failed::default" = "Не вдалося виконати";
+"aiAgent::retry" = "Повторити";
+"aiAgent::needSignIn::title" = "Потрібен вхід";
+"aiAgent::needSignIn::message" = "Увійдіть, щоб використовувати швидке введення ШІ.";
+"aiAgent::title" = "Швидке введення ШІ";
+"aiAgent::keyboard::stop" = "Стоп";
+"aiAgent::keyboard::send" = "Надіслати";
+"aiAgent::stop" = "Стоп";
+"aiAgent::usage" = "%@ / %@ кредитів";
+"aiAgent::plan::free" = "Безкоштовний";
+"aiAgent::plan::standard" = "Стандарт";
+"aiAgent::plan::lifetime" = "Довічний";
+"aiAgent::usage::topupRemaining" = "Залишилось %@ додаткових кредитів";
+"aiAgent::usage::planChangeScheduled" = "Перехід на план «%2$@» %1$@";
+"aiAgent::stop::confirm::title" = "Зупинити обробку?";
+"aiAgent::stop::confirm::message" = "Зупинення скасовує команду, що виконується, і її не можна буде відновити.";
+"aiAgent::confirm::countdown" = "залишилося на підтвердження";
+"aiAgent::confirm::expired::message" = "Час минув. Будь ласка, повторіть запит.";

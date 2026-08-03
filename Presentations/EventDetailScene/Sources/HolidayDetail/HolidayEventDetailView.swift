@@ -125,7 +125,7 @@ struct HolidayEventDetailView: View {
                 Spacer(minLength: 5)
                 self.nameView
 
-                VStack(spacing: 16) {
+                VStack(spacing: Metric.Spacing.large) {
                     if let model = self.state.countryModel {
                         self.countryInfoView(model)
                     }
@@ -134,10 +134,10 @@ struct HolidayEventDetailView: View {
 
                     self.ddayView
                 }
-                .padding(.top, 20)
+                .padding(.top, spacing: .xlarge)
             }
         }
-        .padding(.horizontal, 12)
+        .padding(.horizontal, spacing: .regular)
         .background(appearance.colorSet.bg0.asColor)
         .safeAreaInset(edge: .bottom) {
             self.bottomButtons
@@ -145,7 +145,7 @@ struct HolidayEventDetailView: View {
     }
 
     private var bottomButtons: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: Metric.Spacing.small) {
             ConfirmButton(title: "common.close".localized())
                 .eventHandler(\.onTap, self.eventHandlers.close)
 
@@ -166,7 +166,7 @@ struct HolidayEventDetailView: View {
                     .frame(width: 20, height: 20)
                     .padding()
                     .background {
-                        RoundedRectangle(cornerRadius: 8)
+                        RoundedRectangle(cornerRadius: Metric.Radius.regular)
                             .fill(self.appearance.colorSet.secondaryBtnBackground.asColor)
                     }
             }
@@ -195,21 +195,21 @@ struct HolidayEventDetailView: View {
     }
     
     private var dateView: some View {
-        HStack(spacing: 16) {
+        HStack(spacing: Metric.Spacing.large) {
             Image(systemName: "calendar")
                 .font(.system(size: 16, weight: .light))
                 .foregroundStyle(self.appearance.colorSet.text1.asColor)
-            
+
             Text(self.state.dateText)
                 .font(appearance.fontSet.normal.asFont)
                 .foregroundStyle(appearance.colorSet.text0.asColor)
-            
+
             Spacer()
         }
     }
-    
+
     private var ddayView: some View {
-        HStack(spacing: 16) {
+        HStack(spacing: Metric.Spacing.large) {
             Image(systemName: "sun.horizon.fill")
                 .font(.system(size: 16, weight: .light))
                 .foregroundStyle(self.appearance.colorSet.text1.asColor)
@@ -223,8 +223,8 @@ struct HolidayEventDetailView: View {
     }
     
     private func countryInfoView(_ model: CountryModel) -> some View {
-        HStack(spacing: 16) {
-            
+        HStack(spacing: Metric.Spacing.large) {
+
             RemoteImageView(model.thumbnailUrl)
                 .resize()
                 .scaledToFill()

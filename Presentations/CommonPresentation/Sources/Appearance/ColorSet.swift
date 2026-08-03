@@ -62,7 +62,12 @@ public protocol ColorSet: Sendable {
     var accent: UIColor { get }
     var accentInfo: UIColor { get }
     var accentWarn: UIColor { get }
-    
+    var accentAI: UIColor { get }
+
+    // AI chat bubble (유저 메시지 말풍선)
+    var aiUserBubbleBackground: UIColor { get }
+    var aiUserBubbleText: UIColor { get }
+
     // line + background
     var line: UIColor { get }
     var bg0: UIColor { get }
@@ -107,8 +112,12 @@ public struct DefaultLightColorSet: ColorSet {
     public let accent: UIColor = .systemBlue
     public let accentInfo: UIColor = UIColor(rgb: 0xff7417)
     public let accentWarn: UIColor = UIColor(rgb: 0xea4444)
-    
-    
+    public let accentAI: UIColor = UIColor(rgb: 0x6272a4)
+
+    // AI chat bubble (유저 메시지 말풍선)
+    public let aiUserBubbleBackground: UIColor = UIColor(rgb: 0x44475a)
+    public let aiUserBubbleText: UIColor = .white
+
     // line + background
     public let line: UIColor = UIColor.black.withAlphaComponent(0.2)
     public let bg0: UIColor = .white
@@ -155,8 +164,12 @@ public struct DefaultDarkColorSet: ColorSet {
     public let accent: UIColor = .systemBlue
     public let accentInfo: UIColor = UIColor(rgb: 0xff7417)
     public let accentWarn: UIColor = UIColor(rgb: 0xea4444)
-    
-    
+    public let accentAI: UIColor = UIColor(rgb: 0x6272a4)
+
+    // AI chat bubble (유저 메시지 말풍선)
+    public let aiUserBubbleBackground: UIColor = UIColor(rgb: 0xccd0dc)
+    public let aiUserBubbleText: UIColor = UIColor(rgb: 0x1a153d)
+
     // line + background
     public let line: UIColor = UIColor.white.withAlphaComponent(0.2)
     public let bg0: UIColor = UIColor(rgb: 0x18181a)

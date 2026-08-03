@@ -25,7 +25,7 @@ class CalendarAPIAutenticatorTests: BaseTestCase {
     private var spyListener: SpyAutenticatorTokenRefreshListener?
     
     override func setUpWithError() throws {
-        self.remoteEnvironment = .init(calendarAPIHost: "https://calendar.come", csAPI: "cs_api", deviceId: "device_id")
+        self.remoteEnvironment = .init(calendarAPIHost: "https://calendar.come", csAPI: "cs_api", deviceId: "device_id", acceptLanguage: { "en" })
         self.spyAuthStore = .init()
         self.stubFirebaseService = .init()
         self.spyListener = .init()
@@ -94,6 +94,35 @@ extension CalendarAPIAutenticatorTests {
         )
         parameterizeTest(
             EventSyncEndPoints.check, method: .get, expecthasToken: true
+        )
+        // 회귀: AI Front API도 인증 토큰이 붙어야 한다 (whitelist 누락 수정)
+        parameterizeTest(
+            AIAPIEndpoints.command, method: .post, expecthasToken: true
+        )
+        parameterizeTest(
+            AIAPIEndpoints.confirmCommand, method: .post, expecthasToken: true
+        )
+        parameterizeTest(
+            AIAPIEndpoints.rejectCommand, method: .post, expecthasToken: true
+        )
+        parameterizeTest(
+            AIAPIEndpoints.cancelCommand, method: .post, expecthasToken: true
+        )
+        parameterizeTest(
+            AIAPIEndpoints.job(id: "job-1"), method: .get, expecthasToken: true
+        )
+        parameterizeTest(
+            AIAPIEndpoints.usage, method: .get, expecthasToken: true
+        )
+        // 회귀: billing API도 인증 토큰이 붙어야 한다 (whitelist 누락)
+        parameterizeTest(
+            BillingAPIEndpoints.plans, method: .get, expecthasToken: true
+        )
+        parameterizeTest(
+            BillingAPIEndpoints.topups, method: .get, expecthasToken: true
+        )
+        parameterizeTest(
+            BillingAPIEndpoints.purchases, method: .post, expecthasToken: true
         )
     }
 }

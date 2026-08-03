@@ -6,9 +6,13 @@
 //
 
 import Foundation
-import UserNotifications
 import Domain
+import FirstPartyServices
+import SpeechService
+import PlaceService
+import ExternalServices
 import Repository
+import StoreKitService
 import Scenes
 
 // MARK: - NonLoginUsecaseFactoryImple
@@ -22,6 +26,7 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
     let eventSyncUsecase: any EventSyncUsecase
     let eventUploadService: any EventUploadService = NotNeedEventUploadService()
     let appUpdateCheckUsecase: any AppUpdateCheckUsecase
+    let aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
     private let applicationBase: ApplicationBase
 
     init(
@@ -39,8 +44,39 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
         self.appUpdateCheckUsecase = appUpdateCheckUsecase
         self.eventSyncUsecase = NotNeedEventSyncUsecase()
         self.applicationBase = applicationBase
+
+        let aiLocalStorage = AICommandLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
+        let aiRepository = AICommandRepositoryImple(
+            remote: applicationBase.remoteAPI,
+            localStorage: aiLocalStorage
+        )
+        let calendarSettingRepository = CalendarSettingRepositoryImple(
+            environmentStorage: applicationBase.userDefaultEnvironmentStorage
+        )
+        let calendarSettingUsecase = CalendarSettingUsecaseImple(
+            settingRepository: calendarSettingRepository,
+            shareDataStore: applicationBase.sharedDataStore
+        )
+        let aiCommandUsecase = AICommandUsecaseImple(
+            repository: aiRepository,
+            calendarSettingUsecase: calendarSettingUsecase
+        )
+        let aiUsageUsecase = AIAgentUsageUsecaseImple(
+            repository: aiRepository,
+            sharedDataStore: applicationBase.sharedDataStore
+        )
+        let speech = SpeechRecognizeUsecaseImple(
+            service: SpeechRecognizeServiceImple(),
+            permissionChecker: SpeechRecognizePermissionCheckerImple()
+        )
+        self.aiAgentOrchestrationUsecase = AIAgentOrchestrationUsecaseImple(
+            commandUsecase: aiCommandUsecase,
+            usageUsecase: aiUsageUsecase,
+            speechRecognizeUsecase: speech,
+            eventSyncUsecase: self.eventSyncUsecase
+        )
     }
-    
+
     var eventNotifyService: SharedEventNotifyService {
         return self.applicationBase.eventNotifyService
     }
@@ -192,7 +228,16 @@ extension NonLoginUsecaseFactoryImple {
             eventNotifyService: applicationBase.eventNotifyService
         )
     }
-    
+
+    func makeDDayCandidateUsecase() -> any DDayCandidateUsecase {
+        return DDayCandidateUsecaseImple(
+            repository: DDayCandidateLocalRepositoryImple(
+                environmentStorage: applicationBase.userDefaultEnvironmentStorage
+            ),
+            sharedDataStore: applicationBase.sharedDataStore
+        )
+    }
+
     func makeDaysIntervalCountUsecase() -> any DaysIntervalCountUsecase {
         let repository = CalendarSettingRepositoryImple(
             environmentStorage: applicationBase.userDefaultEnvironmentStorage
@@ -218,7 +263,8 @@ extension NonLoginUsecaseFactoryImple {
         return EventNotificationUsecaseImple(
             todoEventUsecase: self.makeTodoEventUsecase(),
             scheduleEventUescase: self.makeScheduleEventUsecase(),
-            notificationRepository: notificaitonRepository
+            notificationRepository: notificaitonRepository,
+            notificationService: UNLocalNotificationServiceImple()
         )
     }
 }
@@ -247,7 +293,7 @@ extension NonLoginUsecaseFactoryImple {
     
     func makeNotificationPermissionUsecase() -> NotificationPermissionUsecase {
         return NotificationPermissionUsecaseImple(
-            notificationService: UNUserNotificationCenter.current()
+            notificationService: UNLocalNotificationServiceImple()
         )
     }
     
@@ -269,8 +315,8 @@ extension NonLoginUsecaseFactoryImple {
 extension NonLoginUsecaseFactoryImple {
     
     func makeLinkPreviewFetchUsecase() -> any LinkPreviewFetchUsecase {
-        return LinkPreviewFetchUsecaesImple(
-            previewEngine: applicationBase.linkPreviewEngine
+        return LinkPreviewFetchUsecaseImple(
+            previewEngine: applicationBase.linkPreviewFetchEngine
         )
     }
     
@@ -293,6 +339,16 @@ extension NonLoginUsecaseFactoryImple {
             accountUsecase: self.accountUescase,
             feedbackRepository: feedbackRepository,
             deviceInfoFetchService: DeviceInfoFetchServiceImple()
+        )
+    }
+}
+
+extension NonLoginUsecaseFactoryImple {
+
+    func makeSpeechRecognizeUsecase() -> any SpeechRecognizeUsecase {
+        return SpeechRecognizeUsecaseImple(
+            service: SpeechRecognizeServiceImple(),
+            permissionChecker: SpeechRecognizePermissionCheckerImple()
         )
     }
 }
@@ -337,6 +393,8 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
     let eventSyncUsecase: any EventSyncUsecase
     let eventUploadService: any EventUploadService
     let appUpdateCheckUsecase: any AppUpdateCheckUsecase
+    let aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
+    let billingUsecase: any BillingUsecase
     private let applicationBase: ApplicationBase
 
     init(
@@ -405,15 +463,55 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
             eventSyncMediator: mediator
         )
         self.eventUploadService = uploadService
+
+        let aiLocalStorage = AICommandLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
+        let aiRepository = AICommandRepositoryImple(
+            remote: applicationBase.remoteAPI,
+            localStorage: aiLocalStorage
+        )
+        let calendarSettingRepository = CalendarSettingRepositoryImple(
+            environmentStorage: applicationBase.userDefaultEnvironmentStorage
+        )
+        let calendarSettingUsecase = CalendarSettingUsecaseImple(
+            settingRepository: calendarSettingRepository,
+            shareDataStore: applicationBase.sharedDataStore
+        )
+        let aiCommandUsecase = AICommandUsecaseImple(
+            repository: aiRepository,
+            calendarSettingUsecase: calendarSettingUsecase
+        )
+        let aiUsageUsecase = AIAgentUsageUsecaseImple(
+            repository: aiRepository,
+            sharedDataStore: applicationBase.sharedDataStore
+        )
+        let speech = SpeechRecognizeUsecaseImple(
+            service: SpeechRecognizeServiceImple(),
+            permissionChecker: SpeechRecognizePermissionCheckerImple()
+        )
+        self.aiAgentOrchestrationUsecase = AIAgentOrchestrationUsecaseImple(
+            commandUsecase: aiCommandUsecase,
+            usageUsecase: aiUsageUsecase,
+            speechRecognizeUsecase: speech,
+            eventSyncUsecase: self.eventSyncUsecase
+        )
+
+        let billingUsecase = BillingUsecaseImple(
+            repository: BillingRepositoryImple(remote: applicationBase.remoteAPI),
+            appStoreService: AppStoreBillingServiceImple(),
+            sharedDataStore: applicationBase.sharedDataStore
+        )
+        // 앱 밖 갱신·환불·승인대기 통과와 미반영 트랜잭션은 이 리스너로만 들어온다
+        billingUsecase.startObservingTransactions()
+        self.billingUsecase = billingUsecase
     }
-    
+
     var eventNotifyService: SharedEventNotifyService {
         return self.applicationBase.eventNotifyService
     }
 }
 
 extension LoginUsecaseFactoryImple {
-    
+
     func makeCalendarSettingUsecase() -> any CalendarSettingUsecase {
         let settingRepository = CalendarSettingRepositoryImple(
             environmentStorage: applicationBase.userDefaultEnvironmentStorage
@@ -579,12 +677,22 @@ extension LoginUsecaseFactoryImple {
             cacheStorage: cache
         )
         return ForemostEventUsecaseImple(
-            repository: repository, 
+            repository: repository,
             sharedDataStore: applicationBase.sharedDataStore,
             eventNotifyService: applicationBase.eventNotifyService
         )
     }
-    
+
+    /// 후보는 로컬(App Group) 전용이라 로그인 여부와 무관하게 같은 조립이다.
+    func makeDDayCandidateUsecase() -> any DDayCandidateUsecase {
+        return DDayCandidateUsecaseImple(
+            repository: DDayCandidateLocalRepositoryImple(
+                environmentStorage: applicationBase.userDefaultEnvironmentStorage
+            ),
+            sharedDataStore: applicationBase.sharedDataStore
+        )
+    }
+
     func makeDaysIntervalCountUsecase() -> any DaysIntervalCountUsecase {
         let repository = CalendarSettingRepositoryImple(
             environmentStorage: applicationBase.userDefaultEnvironmentStorage
@@ -635,7 +743,8 @@ extension LoginUsecaseFactoryImple {
         return EventNotificationUsecaseImple(
             todoEventUsecase: self.makeTodoEventUsecase(),
             scheduleEventUescase: self.makeScheduleEventUsecase(),
-            notificationRepository: notificaitonRepository
+            notificationRepository: notificaitonRepository,
+            notificationService: UNLocalNotificationServiceImple()
         )
     }
 }
@@ -665,7 +774,7 @@ extension LoginUsecaseFactoryImple {
     
     func makeNotificationPermissionUsecase() -> any NotificationPermissionUsecase {
         return NotificationPermissionUsecaseImple(
-            notificationService: UNUserNotificationCenter.current()
+            notificationService: UNLocalNotificationServiceImple()
         )
     }
     
@@ -684,8 +793,8 @@ extension LoginUsecaseFactoryImple {
 extension LoginUsecaseFactoryImple {
     
     func makeLinkPreviewFetchUsecase() -> any LinkPreviewFetchUsecase {
-        return LinkPreviewFetchUsecaesImple(
-            previewEngine: applicationBase.linkPreviewEngine
+        return LinkPreviewFetchUsecaseImple(
+            previewEngine: applicationBase.linkPreviewFetchEngine
         )
     }
     
@@ -712,6 +821,16 @@ extension LoginUsecaseFactoryImple {
     }
 }
 
+
+extension LoginUsecaseFactoryImple {
+
+    func makeSpeechRecognizeUsecase() -> any SpeechRecognizeUsecase {
+        return SpeechRecognizeUsecaseImple(
+            service: SpeechRecognizeServiceImple(),
+            permissionChecker: SpeechRecognizePermissionCheckerImple()
+        )
+    }
+}
 
 extension LoginUsecaseFactoryImple {
 

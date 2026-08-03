@@ -33,6 +33,7 @@ public protocol EventUsecaseFactory {
     func makeDoneTodoDetailDataUsecase() -> any EventDetailDataUsecase
     func makeDoneTodoPagingUsecase() -> any DoneTodoEventsPagingUsecase
     func makeForemostEventUsecase() -> any ForemostEventUsecase
+    func makeDDayCandidateUsecase() -> any DDayCandidateUsecase
     func makeDaysIntervalCountUsecase() -> any DaysIntervalCountUsecase
     var eventSyncUsecase: any EventSyncUsecase { get }
     var eventUploadService: any EventUploadService { get }
@@ -71,7 +72,13 @@ public protocol ExternalCalendarUsecaseFactory {
     func makeAppleCalendarUsecase() -> any AppleCalendarUsecase
 }
 
-public protocol UsecaseFactory: AccountUsecaseFactory, CalendarUsecaseFactory, EventUsecaseFactory, NotificationUsecaseFactory, SettingUsecaseFactory, CommonUsecaseFactory, SupportUsecaseFactory, ExternalCalendarUsecaseFactory {
-    
+public protocol AIAgentUsecaseFactory {
+
+    var aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase { get }
+    func makeSpeechRecognizeUsecase() -> any SpeechRecognizeUsecase
+}
+
+public protocol UsecaseFactory: AccountUsecaseFactory, CalendarUsecaseFactory, EventUsecaseFactory, NotificationUsecaseFactory, SettingUsecaseFactory, CommonUsecaseFactory, SupportUsecaseFactory, ExternalCalendarUsecaseFactory, AIAgentUsecaseFactory {
+
     var eventNotifyService: SharedEventNotifyService { get }
 }

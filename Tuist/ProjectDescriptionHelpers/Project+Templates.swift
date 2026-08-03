@@ -48,15 +48,25 @@ extension Project {
         destinations: Destinations,
         iOSTargetVersion: String,
         resources: ResourceFileElements? = nil,
+        snapshotTests: Bool = false,
         dependencies: [TargetDependency] = []
     ) -> Project {
-        let targets = makeFrameworkTargetsWithTest(
+        var targets = makeFrameworkTargetsWithTest(
             name: name,
             destinations: destinations,
             iOSTargetVersion: iOSTargetVersion,
             resources: resources,
             dependencies: dependencies
         )
+        if snapshotTests {
+            targets.append(
+                makeSnapshotsTarget(
+                    name: name,
+                    destinations: destinations,
+                    iOSTargetVersion: iOSTargetVersion
+                )
+            )
+        }
         return Project(
             name: name,
             organizationName: organizationName,
@@ -69,10 +79,11 @@ extension Project {
         destinations: Destinations,
         iOSTargetVersion: String,
         withSourceFile: Bool = true,
+        snapshotTests: Bool = false,
         dependencies: [TargetDependency] = [],
         customSetting: [String: SettingValue] = [:]
     ) -> Project {
-        let targets = makeFrameworkTargets(
+        var targets = makeFrameworkTargets(
             name: name,
             destinations: destinations,
             iOSTargetVersion: iOSTargetVersion,
@@ -80,12 +91,41 @@ extension Project {
             dependencies: dependencies,
             customSetting: customSetting
         )
+        if snapshotTests {
+            targets.append(
+                makeSnapshotsTarget(
+                    name: name,
+                    destinations: destinations,
+                    iOSTargetVersion: iOSTargetVersion
+                )
+            )
+        }
         return Project(name: name,
                        organizationName: organizationName,
                        targets: targets)
     }
 
     // MARK: - Private
+
+    private static func makeSnapshotsTarget(
+        name: String,
+        destinations: Destinations,
+        iOSTargetVersion: String
+    ) -> Target {
+        return Target.target(name: "\(name)Snapshots",
+                             destinations: destinations,
+                             product: .unitTests,
+                             bundleId: "\(organizationName).\(name)Snapshots",
+                             deploymentTargets: .iOS(iOSTargetVersion),
+                             infoPlist: .default,
+                             sources: ["Snapshots/**"],
+                             resources: [],
+                             dependencies: [
+                                .target(name: name),
+                                .project(target: "SnapshotTestHelpKit", path: .relativeToCurrentFile("../../Supports/SnapshotTestHelpKit")),
+                                .project(target: "TestDoubles", path: .relativeToCurrentFile("../../Supports/TestDoubles")),
+                             ])
+    }
 
     /// Helper function to create a framework target and an associated unit test target
     private static func makeFrameworkTargetsWithTest(
@@ -99,7 +139,7 @@ extension Project {
     {
         let sources = Target.target(name: name,
                              destinations: destinations,
-                             product: .framework,
+                             product: .staticFramework,
                              bundleId: "\(organizationName).\(name)",
                              deploymentTargets: .iOS(iOSTargetVersion),
                              infoPlist: .default,
@@ -142,7 +182,7 @@ extension Project {
         let settingDict = customSetting.swiftVersion("6.0")
         let sources = Target.target(name: name,
                              destinations: destinations,
-                             product: .framework,
+                             product: .staticFramework,
                              bundleId: "\(organizationName).\(name)",
                              deploymentTargets: .iOS(iOSTargetVersion),
                              infoPlist: .default,
@@ -219,7 +259,9 @@ extension Project {
                     "com.sudo.park.TodoCalendarApp.bgSync"
                 ],
                 "UIBackgroundModes": ["fetch"],
-                "NSCalendarsFullAccessUsageDescription": "Calendar access is required to display events and sync with Apple Calendar."
+                "NSCalendarsFullAccessUsageDescription": "Calendar access is required to display events and sync with Apple Calendar.",
+                "NSMicrophoneUsageDescription": "Microphone access is required to enter events and to-dos by voice.",
+                "NSSpeechRecognitionUsageDescription": "Speech recognition is required to convert your voice into events and to-dos."
             ]),
             sources: [
                 "Sources/**",
@@ -290,7 +332,9 @@ extension Project {
             entitlements: Entitlements.file(path: "./AppExtensions/\(extensionName)/\(targetName).entitlements"),
             dependencies: dependencies,
             settings: .settings(
-                base: .init().swiftVersion("6.0"),
+                base: .init()
+                    .swiftVersion("6.0")
+                    .otherLinkerFlags(["-ObjC"]),
                 configurations: signingConfigures + [
 
                 ]

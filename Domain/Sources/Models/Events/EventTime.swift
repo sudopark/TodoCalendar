@@ -129,7 +129,17 @@ public enum EventTime: Comparable, Sendable, Hashable {
             return "\(Int(range.lowerBound))..<\(Int(range.upperBound))+\(Int(secondsFromGMT))"
         }
     }
-    
+
+    /// `customKey`가 지목하는 회차의 시작 시각.
+    ///
+    /// 반복 열거는 시간순 전진이라, 어떤 회차를 키로 찾을 때 "이미 이 시각을 지났으면 없는 회차"로
+    /// 판정할 수 있다. `customKey`의 세 형태 모두 시작 시각으로 시작하므로 앞쪽 정수만 읽는다 —
+    /// customKey 포맷을 바꾸면 이 파서도 함께 갱신해야 한다.
+    public static func lowerBound(fromCustomKey key: String) -> TimeInterval? {
+        let head = key.prefix { $0.isNumber || $0 == "-" }
+        return Int(head).map { TimeInterval($0) }
+    }
+
     public func rangeWithShifttingifNeed(on timeZone: TimeZone) -> Range<TimeInterval> {
         switch self {
         case .at(let time): return time..<time

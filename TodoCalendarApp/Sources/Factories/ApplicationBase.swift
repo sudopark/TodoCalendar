@@ -15,7 +15,7 @@ import Extensions
 import FirebaseAuth
 import Alamofire
 import SQLiteService
-import SwiftLinkPreview
+import ExternalServices
 
 
 final class ApplicationBase {
@@ -68,9 +68,7 @@ final class ApplicationBase {
         )
     }()
     
-    let linkPreviewEngine: SwiftLinkPreview = {
-       return SwiftLinkPreview(cache: InMemoryCache())
-    }()
+    let linkPreviewFetchEngine: any LinkPreviewFetchEngine = SwiftLinkPreviewBaseFetchEngineImple()
     
     private lazy var remoteEnvironment: RemoteEnvironment = {
         
@@ -89,7 +87,8 @@ final class ApplicationBase {
         let environment = RemoteEnvironment(
             calendarAPIHost: host ?? "https://dummy.com",
             csAPI: csAPi ?? "https://dummy.com",
-            deviceId: AppEnvironment.deviceId(userDefaultEnvironmentStorage)
+            deviceId: AppEnvironment.deviceId(userDefaultEnvironmentStorage),
+            acceptLanguage: { AcceptLanguage.headerValue(from: Locale.preferredLanguages) }
         )
         return environment
     }()

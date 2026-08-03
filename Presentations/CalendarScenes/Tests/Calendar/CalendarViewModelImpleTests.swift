@@ -35,6 +35,7 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var spyListener: SpyListener!
     private var spyEventSyncUsecase: PrivateStubEventSyncUsecase!
     private var spyEventUploadService: StubEventUploadService!
+    private var stubOrchestration: StubAIAgentOrchestrationUsecase!
     
     override func setUpWithError() throws {
         self.cancelBag = .init()
@@ -52,6 +53,7 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.spyListener = .init()
         self.spyEventSyncUsecase = .init()
         self.spyEventUploadService = .init()
+        self.stubOrchestration = .init()
     }
 
     override func tearDownWithError() throws {
@@ -71,6 +73,8 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.spyListener = nil
         self.spyEventSyncUsecase = nil
         self.spyEventUploadService = nil
+        self.stubOrchestration = nil
+        FeatureFlag.disable(.aiAgent)
     }
     
     private func makeViewModel(
@@ -93,7 +97,8 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
             googleCalendarUsecase: self.spyGoogleCalednarUsecase,
             appleCalendarUsecase: self.spyAppleCalendarUsecase,
             eventUploadService: self.spyEventUploadService,
-            eventSyncUsecase: self.spyEventSyncUsecase
+            eventSyncUsecase: self.spyEventSyncUsecase,
+            aiAgentOrchestrationUsecase: self.stubOrchestration
         )
         viewModel.router = self.spyRouter
         viewModel.listener = self.spyListener
@@ -180,17 +185,42 @@ extension CalendarViewModelImpleTests {
         let expect = expectation(description: "prepare시에 foremostEvent 업데이트")
         expect.expectedFulfillmentCount = 2
         let viewModel = self.makeViewModel()
-        
+
         // when
         let events = self.waitOutputs(expect, for: self.spyForemostEventUsecase.foremostEvent) {
             viewModel.prepare()
         }
-        
+
         // then
         let isForemostEventPrepared = events.map { $0 != nil }
         XCTAssertEqual(isForemostEventPrepared, [false, true])
     }
-    
+
+    func testViewModel_whenAIAgentFlagOn_prepareCallsOrchestrationPrepare() async throws {
+        // given
+        FeatureFlag.enable(.aiAgent)
+        let viewModel = self.makeViewModel()
+
+        // when
+        viewModel.prepare()
+
+        // then
+        try await Task.sleep(for: .milliseconds(10))
+        XCTAssertEqual(self.stubOrchestration.didPrepare, true)
+    }
+
+    func testViewModel_whenAIAgentFlagOff_prepareNotCallsOrchestrationPrepare() async throws {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when
+        viewModel.prepare()
+
+        // then
+        try await Task.sleep(for: .milliseconds(10))
+        XCTAssertNil(self.stubOrchestration.didPrepare)
+    }
+
     private func makeViewModelWithInitialSetup(_ today: CalendarComponent.Day) -> CalendarViewModelImple {
         // given
         let expect = expectation(description: "초기 월 세팅 대기")
@@ -946,6 +976,51 @@ extension CalendarViewModelImpleTests {
     }
 }
 
+
+// MARK: - AI command 결과 시트 자동 present (단일 인스턴스 책임)
+
+extension CalendarViewModelImpleTests {
+
+    func testViewModel_whenAIEntersCommandPhase_routesToAICommand() {
+        // given
+        FeatureFlag.enable(.aiAgent)
+        let viewModel = self.makeViewModel()
+        viewModel.prepare()
+
+        // when
+        self.stubOrchestration.stateSubject.send(.idle)
+        self.stubOrchestration.stateSubject.send(.processing(command: "회의"))
+
+        // then
+        XCTAssertEqual(self.spyRouter.didRouteToAICommandCount, 1)
+    }
+
+    func testViewModel_whenStayInCommandPhase_routesOnlyOncePerEntry() {
+        // given
+        FeatureFlag.enable(.aiAgent)
+        let viewModel = self.makeViewModel()
+        viewModel.prepare()
+
+        // when — command phase 진입 후 같은 phase 내 전이
+        self.stubOrchestration.stateSubject.send(.processing(command: "회의"))
+        self.stubOrchestration.stateSubject.send(.done(command: "회의", message: "완료"))
+
+        // then — 진입 edge에서만 1회
+        XCTAssertEqual(self.spyRouter.didRouteToAICommandCount, 1)
+    }
+
+    func testViewModel_whenDayEventListRequestsShowCommand_routesToAICommand() {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when — 하위 DayEventList 진입 버튼 재진입을 위임받음
+        viewModel.calendarPaperDidRequestShowAICommand()
+
+        // then
+        XCTAssertEqual(self.spyRouter.didRouteToAICommandCount, 1)
+    }
+}
+
 private extension CalendarViewModelImpleTests {
     
     class SpyRouter: BaseSpyRouter, CalendarViewRouting, @unchecked Sendable {
@@ -962,6 +1037,11 @@ private extension CalendarViewModelImpleTests {
         var didChangedFocusIndex: Int?
         func changeFocus(at index: Int) {
             self.didChangedFocusIndex = index
+        }
+
+        var didRouteToAICommandCount: Int = 0
+        func routeToAICommand() {
+            self.didRouteToAICommandCount += 1
         }
     }
     
@@ -991,6 +1071,7 @@ private extension CalendarViewModelImpleTests {
         }
         
         func monthScene(didChange currentSelectedDay: CurrentSelectDayModel, and eventsThatDay: [any CalendarEvent]) { }
+        func dayEventListDidRequestShowAICommand() { }
     }
     
     final class SpyListener: CalendarSceneListener, @unchecked Sendable {

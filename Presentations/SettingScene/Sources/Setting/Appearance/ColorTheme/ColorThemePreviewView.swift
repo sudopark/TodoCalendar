@@ -14,18 +14,18 @@ import CommonPresentation
 
 struct ColorThemePreviewView: View {
     
-    struct Metric {
+    struct Layout {
         let fontSize: CGFloat
         let circleSize: CGFloat
         let circlePadding: CGFloat
     }
     
     private let model: ColorThemeModel
-    private let metric: Metric
+    private let metric: Layout
     private let colorSet: ColorSet
     @Environment(ViewAppearance.self) private var appearance
     
-    init(model: ColorThemeModel, metric: Metric, isSystemDark: Bool) {
+    init(model: ColorThemeModel, metric: Layout, isSystemDark: Bool) {
         self.model = model
         self.metric = metric
         self.colorSet = model.key.convert(isSystemDarkTheme: isSystemDark)
@@ -53,7 +53,7 @@ struct ColorThemePreviewView: View {
             }
         }
         .background(
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: Metric.Radius.regular)
                 .fill(colorSet.bg0.asColor)
                 .shadow(
                     color: appearance.colorSet.text0.withAlphaComponent(0.1).asColor,
@@ -74,7 +74,7 @@ struct ColorThemeItemView: View {
     }
     
     var body: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: Metric.Spacing.xlarge) {
             
             ColorThemePreviewView(
                 model: model,
@@ -90,9 +90,9 @@ struct ColorThemeItemView: View {
                     ? appearance.colorSet.primaryBtnText.asColor
                     : appearance.colorSet.weekDayText.asColor
                 )
-                .padding(6)
+                .padding(spacing: .small)
                 .background(
-                    RoundedRectangle(cornerRadius: 4)
+                    RoundedRectangle(cornerRadius: Metric.Radius.chip)
                         .fill(
                             model.isSelected 
                             ? appearance.colorSet.primaryBtnBackground.asColor

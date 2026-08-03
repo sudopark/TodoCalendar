@@ -160,7 +160,7 @@ struct EventNotificationDefaultTimeOptionView: View {
                 .fill(appearance.colorSet.line.asColor)
                 .frame(height: 0.5)
             
-            VStack(spacing: 16) {
+            VStack(spacing: Metric.Spacing.large) {
                 Text("event_notification_setting::need_permission_message".localized())
                     .multilineTextAlignment(.center)
                     .font(appearance.fontSet.normal.asFont)
@@ -192,10 +192,10 @@ struct EventNotificationDefaultTimeOptionView: View {
                     .foregroundStyle(appearance.colorSet.text0.asColor)
             }
         }
-        .padding(.vertical, 12)
-        .padding(.horizontal, 12)
+        .padding(.vertical, spacing: .regular)
+        .padding(.horizontal, spacing: .regular)
         .background {
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: Metric.Radius.regular)
                 .fill(appearance.colorSet.bg1.asColor)
         }
         .onTapGesture {

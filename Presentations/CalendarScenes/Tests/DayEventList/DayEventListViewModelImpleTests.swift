@@ -28,7 +28,8 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var stubTagUsecase: StubEventTagUsecase!
     private var stubUISettingUsecase: StubUISettingUsecase!
     private var spyRouter: SpyRouter!
-    
+    private var spyListener: SpyListener!
+
     override func setUpWithError() throws {
         self.cancelBag = .init()
         self.stubTodoUsecase = .init()
@@ -36,8 +37,10 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubTagUsecase = .init()
         self.stubUISettingUsecase = .init()
         self.spyRouter = .init()
+        self.spyListener = .init()
+        self.stubOrchestrationUsecase = .init()
     }
-    
+
     override func tearDownWithError() throws {
         self.cancelBag = nil
         self.stubTodoUsecase = nil
@@ -46,14 +49,20 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubTagUsecase = nil
         self.stubUISettingUsecase = nil
         self.spyRouter = nil
+        self.spyListener = nil
+        self.stubOrchestrationUsecase = nil
+        FeatureFlag.disable(.aiAgent)
     }
-    
+
+    private var stubOrchestrationUsecase: StubAIAgentOrchestrationUsecase!
+
     // 9-10일: current-todo-1, current-todo-2, todo-with-time, not-repeating-schedule, repeating-schedule(turn 4)
     // 9-11일: current-todo-1, current-todo-2
     private func makeViewModel(
         foremostEventId: ForemostEventId? = nil,
         shouldFailDoneTodo: Bool = false,
-        shouldFailMakeTodo: Bool = false
+        shouldFailMakeTodo: Bool = false,
+        isSignedIn: Bool = true
     ) -> DayEventListViewModelImple {
         let currentTodos: [TodoEvent] = [
             .init(uuid: "current-todo-1", name: "current-todo-1") |> \.creatTimeStamp .~ 100,
@@ -89,15 +98,19 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
             uiSettingUsecase: self.stubUISettingUsecase
         )
         
+        let account: AccountInfo? = isSignedIn ? AccountInfo("uid") : nil
         let viewModel = DayEventListViewModelImple(
             calendarUsecase: StubCalendarUsecase(),
             calendarSettingUsecase: calendarSettingUsecase,
             eventListUsecase: eventListUsecase,
             todoEventUsecase: self.stubTodoUsecase,
             foremostEventUsecase: self.stubForemostEventUsecase,
-            uiSettingUsecase: self.stubUISettingUsecase
+            uiSettingUsecase: self.stubUISettingUsecase,
+            accountUsecase: StubAccountUsecase(account),
+            aiAgentOrchestrationUsecase: self.stubOrchestrationUsecase
         )
         viewModel.router = self.spyRouter
+        viewModel.attachListener(self.spyListener)
         return viewModel
     }
     
@@ -999,26 +1012,238 @@ extension DayEventListViewModelImpleTests {
 }
 
 extension DayEventListViewModelImpleTests {
-    
+
     private class SpyRouter: BaseSpyRouter, DayEventListRouting, @unchecked Sendable {
-        
+
         var didRouteToMakeNewEventWithParams: MakeEventParams?
         func routeToMakeNewEvent(_ withParams: MakeEventParams) {
             self.didRouteToMakeNewEventWithParams = withParams
         }
-        
+
         func routeToMakeNewEvent() {
-            
+
         }
-        
+
         func routeToSelectTemplateForMakeEvent() {
-            
+
         }
-        
+
         var didShowDoneTodoList: Bool?
         func showDoneTodoList() {
             self.didShowDoneTodoList = true
         }
+
+        var didRouteToSignIn: Bool?
+        func routeToSignIn() {
+            self.didRouteToSignIn = true
+        }
+
+        var didRouteToAIKeyboardInput: Bool?
+        func routeToAIKeyboardInput() {
+            self.didRouteToAIKeyboardInput = true
+        }
+
+        var didRouteToAIGuide: Bool?
+        func routeToAIGuide() {
+            self.didRouteToAIGuide = true
+        }
+    }
+
+    private final class SpyListener: DayEventListSceneListener, @unchecked Sendable {
+        var didRequestShowAICommand: Bool?
+        func dayEventListDidRequestShowAICommand() {
+            self.didRequestShowAICommand = true
+        }
+    }
+}
+
+// MARK: - AI agent entry mode
+
+extension DayEventListViewModelImpleTests {
+
+    // 피처플래그 off(릴리즈 기본값): AI 진입 버튼 비노출
+    func testViewModel_whenAIAgentFlagOff_aiAgentEntryIsNotEnabled() {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when
+        let isEnabled = viewModel.isAIAgentEnabled
+
+        // then
+        XCTAssertEqual(isEnabled, false)
+    }
+
+    func testViewModel_whenAIAgentFlagOn_aiAgentEntryIsEnabled() {
+        // given
+        FeatureFlag.enable(.aiAgent)
+        let viewModel = self.makeViewModel()
+
+        // when
+        let isEnabled = viewModel.isAIAgentEnabled
+
+        // then
+        XCTAssertEqual(isEnabled, true)
+    }
+
+    func testViewModel_whenAgentNotifiesListeningMode_emitsListeningState() {
+        // given
+        let expect = expectation(description: "listening state 방출")
+        let viewModel = self.makeViewModel()
+
+        // when
+        let state = self.waitFirstOutput(expect, for: viewModel.aiAgentState) {
+            self.stubOrchestrationUsecase.stateSubject.send(.listening(.voice))
+        }
+
+        // then
+        if case .listening = state {
+            XCTAssertTrue(true)
+        } else {
+            XCTFail("expected listening state")
+        }
+    }
+
+    // 미로그인: 진입 시 confirm 팝업, AI interactor로 위임 안 함
+    func testViewModel_whenNotSignedIn_enterVoiceInput_showsSignInConfirm() {
+        // given
+        let viewModel = self.makeViewModel(isSignedIn: false)
+        self.spyRouter.shouldConfirmNotCancel = false
+
+        // when
+        viewModel.enterVoiceInput()
+
+        // then
+        XCTAssertNotNil(self.spyRouter.didShowConfirmWith)
+        XCTAssertNil(self.stubOrchestrationUsecase.didEnterVoiceInput)
+    }
+
+    // 미로그인: confirm 확인 콜백 → SignIn 라우팅
+    func testViewModel_whenNotSignedIn_confirmSignIn_routesToSignIn() {
+        // given
+        let viewModel = self.makeViewModel(isSignedIn: false)
+
+        // when
+        // shouldConfirmNotCancel is true by default — showConfirm auto-calls confirmed?()
+        viewModel.enterVoiceInput()
+
+        // then (confirmed?() was already called by SpyRouter.showConfirm)
+        XCTAssertEqual(self.spyRouter.didRouteToSignIn, true)
+    }
+
+    // 로그인: confirm 없이 AI interactor로 위임
+    func testViewModel_whenSignedIn_enterVoiceInput_forwardsToInteractor() {
+        // given
+        let viewModel = self.makeViewModel(isSignedIn: true)
+        // when
+        viewModel.enterVoiceInput()
+
+        // then
+        XCTAssertNil(self.spyRouter.didShowConfirmWith)
+        XCTAssertEqual(self.stubOrchestrationUsecase.didEnterVoiceInput, true)
+    }
+}
+
+// MARK: - AI Agent Inline Input Tests
+
+extension DayEventListViewModelImpleTests {
+
+    func testViewModel_voiceLevel_publisher_emits_when_listener_called() {
+        // given
+        let expect = expectation(description: "voiceLevel 방출")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModel()
+
+        // when
+        let emitted = self.waitOutputs(expect, for: viewModel.voiceLevel) {
+            self.stubOrchestrationUsecase.voiceLevelSubject.send(0.5)
+            self.stubOrchestrationUsecase.voiceLevelSubject.send(0.9)
+        }
+
+        // then
+        XCTAssertEqual(emitted, [0.5, 0.9])
+    }
+
+    func testViewModel_recognizingText_publisher_emits_when_listener_called() {
+        // given
+        let expect = expectation(description: "recognizingText 방출")
+        let viewModel = self.makeViewModel()
+
+        // when
+        let text = self.waitFirstOutput(expect, for: viewModel.recognizingText, timeout: 0.1) {
+            self.stubOrchestrationUsecase.recognizingTextSubject.send("안녕하세요")
+        }
+
+        // then
+        XCTAssertEqual(text, "안녕하세요")
+    }
+
+    func testViewModel_enterKeyboardInput_delegatesToInteractorAndRoutesToKeyboardSheet() {
+        // given
+        let viewModel = self.makeViewModel(isSignedIn: true)
+        // when
+        viewModel.enterKeyboardInput()
+
+        // then — 키보드 입력으로 전환(usecase) + 바텀시트 present(router)
+        XCTAssertEqual(self.stubOrchestrationUsecase.didEnterKeyboardInput, true)
+        XCTAssertEqual(self.spyRouter.didRouteToAIKeyboardInput, true)
+    }
+
+    func testViewModel_finishVoiceInput_delegates_to_interactor() {
+        // given
+        let viewModel = self.makeViewModel(isSignedIn: true)
+        // when
+        viewModel.finishVoiceInput()
+
+        // then
+        XCTAssertEqual(self.stubOrchestrationUsecase.didFinishVoiceInput, true)
+    }
+
+    func testViewModel_stopAIAgentInput_delegates_to_interactor() {
+        // given
+        let viewModel = self.makeViewModel(isSignedIn: true)
+        // when
+        viewModel.stopAIAgentInput()
+
+        // then
+        XCTAssertEqual(self.stubOrchestrationUsecase.didStopInput, true)
+    }
+
+    func testViewModel_submitAIAgent_delegates_to_interactor() {
+        // given
+        let viewModel = self.makeViewModel(isSignedIn: true)
+        // when
+        viewModel.submitAIAgent("hello world")
+
+        // then
+        XCTAssertEqual(self.stubOrchestrationUsecase.didSubmit, "hello world")
+    }
+
+}
+
+// MARK: - AI command 진입 버튼 분기
+// (command phase 자동 시트 present는 단일 CalendarViewModel 책임으로 이관 → CalendarViewModelImpleTests)
+
+extension DayEventListViewModelImpleTests {
+
+    func test_entryButtonTap_whenCommandPhase_requestsShowCommandViaListener() {
+        // given
+        let viewModel = self.makeViewModel()
+        self.stubOrchestrationUsecase.stateSubject.send(.done(command: "회의", message: "완료"))
+        // when — 닫았다가 버튼 재탭
+        viewModel.handleAIEntryButtonTap()
+        // then — 직접 present하지 않고 listener로 상위에 위임
+        XCTAssertEqual(self.spyListener.didRequestShowAICommand, true)
+        XCTAssertNil(self.stubOrchestrationUsecase.didEnterVoiceInput)   // voice 아님
+    }
+
+    func test_entryButtonTap_whenIdle_entersVoice() {
+        // given — 로그인 상태
+        let viewModel = self.makeViewModel(isSignedIn: true)
+        self.stubOrchestrationUsecase.stateSubject.send(.idle)
+        // when
+        viewModel.handleAIEntryButtonTap()
+        // then
+        XCTAssertEqual(self.stubOrchestrationUsecase.didEnterVoiceInput, true)
     }
 }
 

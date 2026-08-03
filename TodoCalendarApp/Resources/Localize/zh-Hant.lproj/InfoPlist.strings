@@ -1,0 +1,3 @@
+"NSCalendarsFullAccessUsageDescription" = "需要日曆存取權限，才能顯示活動並與 Apple 日曆同步。";
+"NSMicrophoneUsageDescription" = "需要麥克風存取權限，才能以語音輸入活動與待辦事項。";
+"NSSpeechRecognitionUsageDescription" = "需要語音辨識權限，才能將您的語音轉換為活動與待辦事項。";

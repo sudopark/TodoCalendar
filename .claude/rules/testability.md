@@ -4,6 +4,7 @@ paths:
   - "Domain/**"
   - "Repository/**"
   - "Presentations/**"
+  - "Services/**"
 ---
 
 # 테스트 작성 규칙
@@ -12,10 +13,10 @@ production 코드는 테스트 때문에 훼손하지 않는다.
 
 ## 1. 테스트 프레임워크
 
-두 프레임워크를 상황에 따라 사용한다.
+**새로 만드는 테스트 파일은 Swift Testing으로 작성한다. XCTest 신규 파일 금지.**
 
-- **XCTest** — 기존 테스트 대다수. `UnitTestHelpKit.BaseTestCase` 상속. `setUpWithError` / `tearDownWithError` + `func testXxx_...()` 패턴.
-- **Swift Testing** (신규) — `XCTestCase` 상속 없이 `PublisherWaitable` 직접 채택. `@Test` + `#expect` 매크로.
+- **Swift Testing** (신규 파일 기본값) — `XCTestCase` 상속 없이 `PublisherWaitable` 직접 채택. `@Test` + `#expect` 매크로.
+- **XCTest** (레거시 유지보수 전용) — 기존 테스트 대다수. `UnitTestHelpKit.BaseTestCase` 상속. `setUpWithError` / `tearDownWithError` + `func testXxx_...()` 패턴. **기존 XCTest 파일에 케이스를 추가할 때만** 그 파일의 스타일을 따른다 — 한 파일에 두 프레임워크 혼재 금지.
 
 ```swift
 // Swift Testing 예시
@@ -192,3 +193,13 @@ extension AppDataMigrationImpleTests {
 |---|---|
 | `UnitTestHelpKit` | `BaseTestCase`, `PublisherWaitable`, `BaseStub`, `TestError` |
 | `TestDoubles` | 공유 Stub repositories / stub usecases |
+| `SnapshotTestHelpKit` | `captureSnapshotPair`·`SnapshotTheme`·`catalogSnapshotDirectory` — 스냅샷 캡처 (snapshot-check 스킬) |
+
+---
+
+## 8. 테스트 파일 배치·네이밍
+
+- 테스트 소스는 각 프레임워크의 `Tests/` 밑 — Tuist 팩토리가 테스트 타겟 소스를 `Tests/**`로 고정한다. **예외: 스냅샷 캡처 스위트**는 프레임워크 최상위 `Snapshots/`에 배치 (팩토리 `snapshotTests` 옵션의 소스가 `Snapshots/**` — 상세는 snapshot-check 스킬). **`Domain/DomainTests/`는 폐기된 폴더 — 새 테스트 금지, `Domain/Tests/` 사용.**
+- `Tests/`는 `Sources/`의 폴더 구조를 미러링한다 (예: `Sources/Usecases/…` → `Tests/Usecases/…`).
+- 구현체 테스트 파일명은 대상 타입명 + `Tests`: `XxxImpleTests.swift` (예: `EventTagDetailViewModelImpleTests.swift`).
+- 테스트 더블은 해당 프레임워크 `Tests/Doubles/`에. 여러 프레임워크가 공유하면 `TestDoubles` 모듈에 (§7).

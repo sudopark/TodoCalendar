@@ -108,9 +108,9 @@ struct SignInView: View {
     var body: some View {
         
         ZStack {
-         
+
             BottomSlideView {
-                VStack(spacing: 18) {
+                VStack(spacing: Metric.Spacing.xlarge) {
                     
                     Text("🧐")
                         .font(appearance.fontSet.size(30).asFont)
@@ -131,7 +131,7 @@ struct SignInView: View {
                         .foregroundStyle(appearance.colorSet.text1.asColor)
                         .multilineTextAlignment(.center)
                     
-                    VStack(spacing: 10) {
+                    VStack(spacing: Metric.Spacing.regular) {
                         ForEach(state.supportOAuthServices, id: \.identifier) { provider in
                             self.makeButtonView(provider)
                         }
@@ -187,9 +187,9 @@ private struct FakeSignInButtonProvider: SignInButtonProvider {
     func button(_ provider: OAuth2ServiceProvider, _ action: @escaping () -> Void) -> any View {
         return Text("fake button")
             .frame(maxWidth: .infinity)
-            .padding(8)
+            .padding(spacing: .small)
             .background(
-                RoundedRectangle(cornerRadius: 10).fill(.red)
+                RoundedRectangle(cornerRadius: Metric.Radius.large).fill(.red)
             )
             .onTapGesture(perform: action)
     }

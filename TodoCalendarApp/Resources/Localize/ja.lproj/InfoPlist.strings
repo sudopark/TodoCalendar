@@ -1,0 +1,3 @@
+"NSCalendarsFullAccessUsageDescription" = "イベントを表示し、Appleカレンダーと同期するためにカレンダーへのアクセスが必要です。";
+"NSMicrophoneUsageDescription" = "音声でイベントやタスクを入力するためにマイクへのアクセスが必要です。";
+"NSSpeechRecognitionUsageDescription" = "音声をイベントやタスクに変換するために音声認識が必要です。";

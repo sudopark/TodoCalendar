@@ -177,8 +177,8 @@ struct DoneTodoDetailView: View {
                     memoView(memo)
                 }
             }
-            .padding(.top, 20)
-            .padding(.horizontal, 12)
+            .padding(.top, spacing: .xlarge)
+            .padding(.horizontal, spacing: .regular)
             .padding(.bottom, 120)
         }
         .safeAreaInset(edge: .bottom) {
@@ -203,7 +203,7 @@ struct DoneTodoDetailView: View {
     }
     
     private var doneTimeView: some View {
-        HStack(spacing: 16) {
+        HStack(spacing: Metric.Spacing.large) {
             Image(systemName: "flag.fill")
                 .font(.system(size: 16, weight: .light))
                 .foregroundStyle(appearance.colorSet.text0.asColor)
@@ -215,7 +215,7 @@ struct DoneTodoDetailView: View {
     }
     
     private var eventTimeView: some View {
-        HStack(spacing: 16) {
+        HStack(spacing: Metric.Spacing.large) {
             Image(systemName: "clock")
                 .font(.system(size: 16, weight: .light))
                 .foregroundStyle(appearance.colorSet.text1.asColor)
@@ -231,28 +231,7 @@ struct DoneTodoDetailView: View {
     private func timeView(_ time: SelectedTime?) -> some View {
         
         func timeLabelView(_ timeText: SelectTimeText, _ position: TimeSelecting) -> some View {
-            
-            let textColor: Color = appearance.colorSet.text0.asColor
-            
-            return VStack(alignment: .leading) {
-                
-                if let year = timeText.year {
-                    Text(year)
-                        .font(self.appearance.fontSet.size(14).asFont)
-                        .foregroundStyle(textColor)
-                }
-                
-                Text(timeText.day)
-                    .lineLimit(1)
-                    .font(self.appearance.fontSet.size(14).asFont)
-                    .foregroundStyle(textColor)
-                
-                if let time = timeText.time {
-                    Text(time)
-                        .font(self.appearance.fontSet.size(16, weight: .semibold).asFont)
-                        .foregroundStyle(textColor)
-                }
-            }
+            EventTimeTextView(timeText)
         }
         
         func emptyLabelView(_ position: TimeSelecting) -> some View {
@@ -264,7 +243,7 @@ struct DoneTodoDetailView: View {
         
         switch time {
         case .none:
-            return HStack(spacing: 16) {
+            return HStack(spacing: Metric.Spacing.large) {
                 emptyLabelView(.start)
                 Image(systemName: "chevron.right")
                     .foregroundStyle(self.appearance.colorSet.text1.asColor)
@@ -273,7 +252,7 @@ struct DoneTodoDetailView: View {
             .asAnyView()
             
         case .at(let time):
-            return HStack(spacing: 16) {
+            return HStack(spacing: Metric.Spacing.large) {
                 timeLabelView(time, .start)
                 Image(systemName: "chevron.right")
                     .foregroundStyle(self.appearance.colorSet.text1.asColor)
@@ -282,7 +261,7 @@ struct DoneTodoDetailView: View {
             .asAnyView()
             
         case .period(let from, let to):
-            return HStack(spacing: 16) {
+            return HStack(spacing: Metric.Spacing.large) {
                 timeLabelView(from, .start)
                 Image(systemName: "chevron.right")
                     .foregroundStyle(self.appearance.colorSet.text1.asColor)
@@ -291,7 +270,7 @@ struct DoneTodoDetailView: View {
             .asAnyView()
             
         case .singleAllDay(let time):
-            return HStack(spacing: 16) {
+            return HStack(spacing: Metric.Spacing.large) {
                 timeLabelView(time, .start)
                 Image(systemName: "chevron.right")
                     .foregroundStyle(self.appearance.colorSet.text1.asColor)
@@ -299,7 +278,7 @@ struct DoneTodoDetailView: View {
             }
             .asAnyView()
         case .alldayPeriod(let from, let to):
-            return HStack(spacing: 16) {
+            return HStack(spacing: Metric.Spacing.large) {
                 timeLabelView(from, .start)
                 Image(systemName: "chevron.right")
                     .foregroundStyle(self.appearance.colorSet.text1.asColor)
@@ -310,7 +289,7 @@ struct DoneTodoDetailView: View {
     }
     
     private var eventTagView: some View {
-        HStack(spacing: 16) {
+        HStack(spacing: Metric.Spacing.large) {
             Image(systemName: "calendar")
                 .font(.system(size: 16, weight: .light))
                 .foregroundStyle(appearance.colorSet.text1.asColor)
@@ -326,14 +305,14 @@ struct DoneTodoDetailView: View {
                     .font(self.appearance.fontSet.subNormal.asFont)
                     .foregroundStyle(self.appearance.colorSet.text0.asColor)
             }
-            .padding(8)
+            .padding(spacing: .small)
         
             Spacer()
         }
     }
     
     private var notificationView: some View {
-        HStack(spacing: 16) {
+        HStack(spacing: Metric.Spacing.large) {
             Image(systemName: "bell.fill")
                 .font(.system(size: 16, weight: .light))
                 .foregroundStyle(self.appearance.colorSet.text1.asColor)
@@ -346,14 +325,14 @@ struct DoneTodoDetailView: View {
                 .foregroundStyle(
                     self.appearance.colorSet.text0.asColor
                 )
-                .padding(8)
+                .padding(spacing: .small)
                 
             Spacer()
         }
     }
     
     private func placeView(_ place: SelectedPlaceModel) -> some View {
-        HStack(spacing: 16) {
+        HStack(spacing: Metric.Spacing.large) {
             Image(systemName: "location.circle")
                 .font(.system(size: 16, weight: .light))
                 .foregroundStyle(self.appearance.colorSet.text1.asColor)
@@ -377,26 +356,7 @@ struct DoneTodoDetailView: View {
     }
     
     private func landmarkView(_ landmark: SelectedPlaceModel.LandmarkModel) -> some View {
-        
-        HStack {
-            VStack(alignment: .leading) {
-                Text(landmark.name)
-                    .multilineTextAlignment(.leading)
-                    .foregroundStyle(self.appearance.colorSet.text0.asColor)
-                    .font(self.appearance.fontSet.size(14).asFont)
-                
-                if let address = landmark.address {
-                    Text(address)
-                        .multilineTextAlignment(.leading)
-                        .foregroundStyle(self.appearance.colorSet.text2.asColor)
-                        .font(self.appearance.fontSet.size(12).asFont)
-                }
-            }
-            
-            Image(systemName: "xmark.circle.fill")
-                .foregroundStyle(self.appearance.colorSet.text2.asColor)
-                .font(self.appearance.fontSet.size(14).asFont)
-        }
+        LandmarkLabelView(landmark)
     }
     
     private func customPlaceView(_ name: String) -> some View {
@@ -406,7 +366,7 @@ struct DoneTodoDetailView: View {
     }
     
     private func linkView(_ url: String) -> some View {
-        HStack(spacing: 16) {
+        HStack(spacing: Metric.Spacing.large) {
             Image(systemName: "link")
                 .font(.system(size: 16, weight: .light))
                 .foregroundStyle(self.appearance.colorSet.text1.asColor)
@@ -429,11 +389,11 @@ struct DoneTodoDetailView: View {
     }
     
     private func memoView(_ memo: String) -> some View {
-        HStack(alignment: .top, spacing: 16) {
+        HStack(alignment: .top, spacing: Metric.Spacing.large) {
             Image(systemName: "doc.text")
                 .font(.system(size: 16, weight: .light))
                 .foregroundStyle(self.appearance.colorSet.text1.asColor)
-                .padding(.top, 8)
+                .padding(.top, spacing: .small)
             
             Text(memo)
                 .foregroundStyle(self.appearance.colorSet.text0.asColor)

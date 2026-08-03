@@ -20,7 +20,24 @@ public struct ServerErrorModel: Error, @unchecked Sendable, Decodable {
     public enum ErrorCode: String, Sendable, Decodable {
         case unauthorized = "Unauthorized"
         case invalidAccessKey = "InvalidAccessKey"
+        case forbidden = "Forbidden"
+        case notFound = "NotFound"
         case cancelled
+        case tokenCapExceeded = "TokenCapExceeded"
+        case loopCapExceeded = "LoopCapExceeded"
+        case dailyLimitExceeded = "DailyLimitExceeded"
+        case noToolUse = "NoToolUse"
+        case multipleToolUses = "MultipleToolUses"
+        case unknownFinalize = "UnknownFinalize"
+        case confirmExpired = "ConfirmExpired"
+        case confirmArgsMismatch = "ConfirmArgsMismatch"
+        case unexpectedConfirmRequired = "UnexpectedConfirmRequired"
+        case agentLoopThrow = "AgentLoopThrow"
+        case agentError = "AgentError"
+        case invalidTransaction = "InvalidTransaction"
+        case unknownProduct = "UnknownProduct"
+        case topupRequiresPaidPlan = "TopupRequiresPaidPlan"
+        case planChangeNotAllowed = "PlanChangeNotAllowed"
     }
     
     public var code: ErrorCode?
