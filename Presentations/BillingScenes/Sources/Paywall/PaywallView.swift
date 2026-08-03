@@ -1,0 +1,385 @@
+//
+//  PaywallView.swift
+//  BillingScenes
+//
+//  Created by sudo.park on 8/3/26.
+//  Copyright © 2026 com.sudo.park. All rights reserved.
+//
+
+import SwiftUI
+import Combine
+import Domain
+import CommonPresentation
+
+
+// MARK: - ViewState
+
+@Observable final class PaywallViewState {
+
+    @ObservationIgnored private var didBind = false
+    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+
+    var currentPlan: BillingPlanId?
+    var currentPlanDescription: String = ""
+    var catalogState: PaywallCatalogState = .loading
+    var cellModels: [PaywallPlanCellModel] = []
+    var selectedPlanId: BillingPlanId?
+    var selectedPlanDetail: PaywallPlanDetailModel?
+    var isPurchasing: Bool = false
+
+    func bind(_ viewModel: any PaywallViewModel) {
+        guard self.didBind == false else { return }
+        self.didBind = true
+
+        viewModel.currentPlan
+            .receive(on: RunLoop.main)
+            .sink { [weak self] in self?.currentPlan = $0 }
+            .store(in: &self.cancellables)
+
+        viewModel.currentPlanDescription
+            .receive(on: RunLoop.main)
+            .sink { [weak self] in self?.currentPlanDescription = $0 }
+            .store(in: &self.cancellables)
+
+        viewModel.catalogState
+            .receive(on: RunLoop.main)
+            .sink { [weak self] in self?.catalogState = $0 }
+            .store(in: &self.cancellables)
+
+        viewModel.cellModels
+            .receive(on: RunLoop.main)
+            .sink { [weak self] in self?.cellModels = $0 }
+            .store(in: &self.cancellables)
+
+        viewModel.selectedPlanId
+            .receive(on: RunLoop.main)
+            .sink { [weak self] in self?.selectedPlanId = $0 }
+            .store(in: &self.cancellables)
+
+        viewModel.selectedPlanDetail
+            .receive(on: RunLoop.main)
+            .sink { [weak self] in self?.selectedPlanDetail = $0 }
+            .store(in: &self.cancellables)
+
+        viewModel.isPurchasing
+            .receive(on: RunLoop.main)
+            .sink { [weak self] in self?.isPurchasing = $0 }
+            .store(in: &self.cancellables)
+    }
+}
+
+
+// MARK: - EventHandler
+
+final class PaywallViewEventHandler: Observable {
+
+    var onAppear: () -> Void = { }
+    var selectPlan: (BillingPlanId) -> Void = { _ in }
+    var purchase: () -> Void = { }
+    var restore: () -> Void = { }
+    var openTerms: () -> Void = { }
+    var openPrivacyPolicy: () -> Void = { }
+    var close: () -> Void = { }
+
+    func bind(_ viewModel: any PaywallViewModel) {
+        self.onAppear = viewModel.prepare
+        self.selectPlan = viewModel.selectPlan(_:)
+        self.purchase = viewModel.purchase
+        self.restore = viewModel.restore
+        self.openTerms = viewModel.openTerms
+        self.openPrivacyPolicy = viewModel.openPrivacyPolicy
+        self.close = viewModel.close
+    }
+}
+
+
+// MARK: - ContainerView
+
+struct PaywallContainerView: View {
+
+    @State private var state: PaywallViewState = .init()
+    private let viewAppearance: ViewAppearance
+    private let eventHandlers: PaywallViewEventHandler
+
+    var stateBinding: (PaywallViewState) -> Void = { _ in }
+
+    init(
+        viewAppearance: ViewAppearance,
+        eventHandlers: PaywallViewEventHandler
+    ) {
+        self.viewAppearance = viewAppearance
+        self.eventHandlers = eventHandlers
+    }
+
+    var body: some View {
+        PaywallView()
+            .onAppear {
+                self.stateBinding(self.state)
+                self.eventHandlers.onAppear()
+            }
+            .environment(state)
+            .environment(eventHandlers)
+            .environment(viewAppearance)
+    }
+}
+
+
+// MARK: - View
+
+private struct PaywallView: View {
+
+    @Environment(ViewAppearance.self) private var appearance
+    @Environment(PaywallViewState.self) private var state
+    @Environment(PaywallViewEventHandler.self) private var eventHandlers
+
+    var body: some View {
+        VStack(spacing: 0) {
+            SheetHeaderView(title: "billing::paywall::title".localized())
+                .eventHandler(\.onClose) { self.eventHandlers.close() }
+                .padding(.horizontal, spacing: .xlarge)
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: Metric.Spacing.large) {
+                    self.currentPlanStrip
+                    self.planCards
+                    Divider()
+                    self.featureSection
+                    self.linksRow
+                }
+                .padding(.horizontal, spacing: .xlarge)
+                .padding(.top, spacing: .regular)
+            }
+
+            BottomConfirmButton(
+                title: self.state.selectedPlanDetail?.ctaTitle
+                    ?? "billing::paywall::cta::unavailable".localized(),
+                isEnable: self.state.selectedPlanId != nil,
+                isProcessing: self.state.isPurchasing
+            )
+            .eventHandler(\.onTap) { self.eventHandlers.purchase() }
+        }
+        .background(self.appearance.colorSet.bg0.asColor.ignoresSafeArea())
+    }
+
+    // MARK: - 현재 플랜 스트립
+
+    private var currentPlanStrip: some View {
+        HStack(spacing: Metric.Spacing.small) {
+            BillingPlanChipView(plan: self.state.currentPlan ?? .free)
+            Text(self.state.currentPlanDescription)
+                .font(self.appearance.fontSet.subNormal.asFont)
+                .foregroundStyle(self.appearance.colorSet.text2.asColor)
+        }
+    }
+
+    // MARK: - 플랜 카드
+
+    private var planCards: some View {
+        VStack(spacing: Metric.Spacing.small) {
+            ForEach(self.state.cellModels, id: \.planId) { cell in
+                PaywallPlanCellView(
+                    model: cell,
+                    isSelected: cell.planId == self.state.selectedPlanId
+                )
+                .eventHandler(\.onTap) { self.eventHandlers.selectPlan(cell.planId) }
+            }
+        }
+    }
+
+    // MARK: - 선택 플랜 기능 섹션
+
+    // selectedPlanDetail == nil 은 "아직 안 불러옴"·"로드 실패"·"구매 가능 플랜 없음"을 겸하지
+    // 않는다 — catalogState 로 먼저 로딩/실패를 가르고, loaded 안에서만 상세/폴백을 가른다 (#739)
+    @ViewBuilder
+    private var featureSection: some View {
+        switch self.state.catalogState {
+        case .loading:
+            self.catalogLoadingView
+
+        case .failed:
+            Text("common.errorMessage".localized())
+                .font(self.appearance.fontSet.subNormal.asFont)
+                .foregroundStyle(self.appearance.colorSet.accentWarn.asColor)
+
+        case .loaded:
+            self.loadedFeatureSection
+        }
+    }
+
+    private var catalogLoadingView: some View {
+        HStack {
+            Spacer()
+            LoadingCircleView(self.appearance.colorSet.accentAI.asColor, lineWidth: 2)
+                .frame(width: 24, height: 24)
+            Spacer()
+        }
+    }
+
+    @ViewBuilder
+    private var loadedFeatureSection: some View {
+        if let detail = self.state.selectedPlanDetail {
+            VStack(alignment: .leading, spacing: Metric.Spacing.small) {
+                Text(detail.sectionTitle)
+                    .font(self.appearance.fontSet.subNormalWithBold.asFont)
+                    .foregroundStyle(self.appearance.colorSet.text0.asColor)
+
+                ForEach(detail.features, id: \.self) { feature in
+                    HStack(alignment: .firstTextBaseline, spacing: Metric.Spacing.xsmall) {
+                        Image(systemName: "checkmark")
+                            .foregroundStyle(self.appearance.colorSet.accentAI.asColor)
+                        Text(feature)
+                            .font(self.appearance.fontSet.subNormal.asFont)
+                            .foregroundStyle(self.appearance.colorSet.text1.asColor)
+                    }
+                }
+
+                Text(detail.disclosure)
+                    .font(self.appearance.fontSet.subSubNormal.asFont)
+                    .foregroundStyle(self.appearance.colorSet.text2.asColor)
+            }
+        } else if self.state.cellModels.contains(where: { $0.isCovered == false }) {
+            // 구매 가능해야 할 카드가 있는데도 선택된 게 없다 — 스토어 조회가 실패해 가격이 없는 상태
+            Text("billing::paywall::disclosure::storeUnavailable".localized())
+                .font(self.appearance.fontSet.subNormal.asFont)
+                .foregroundStyle(self.appearance.colorSet.text2.asColor)
+        } else {
+            // 구매 가능한 플랜이 없다(평생 보유) — 안내 문구로 대체
+            Text("billing::paywall::allPlansOwned".localized())
+                .font(self.appearance.fontSet.subNormal.asFont)
+                .foregroundStyle(self.appearance.colorSet.text2.asColor)
+        }
+    }
+
+    // MARK: - 약관·개인정보·복원 링크
+
+    private var linksRow: some View {
+        HStack(spacing: Metric.Spacing.xsmall) {
+            Text("billing::paywall::terms".localized())
+                .onTapGesture { self.eventHandlers.openTerms() }
+            Text("·")
+            Text("billing::paywall::privacyPolicy".localized())
+                .onTapGesture { self.eventHandlers.openPrivacyPolicy() }
+            Text("·")
+            Text("billing::paywall::restore".localized())
+                .onTapGesture { self.eventHandlers.restore() }
+        }
+        .font(self.appearance.fontSet.subSubNormal.asFont)
+        .foregroundStyle(self.appearance.colorSet.text2.asColor)
+    }
+}
+
+
+// MARK: - PaywallPlanCellView
+
+private struct PaywallPlanCellView: View {
+
+    @Environment(ViewAppearance.self) private var appearance
+    private let model: PaywallPlanCellModel
+    private let isSelected: Bool
+
+    var onTap: () -> Void = { }
+
+    init(model: PaywallPlanCellModel, isSelected: Bool) {
+        self.model = model
+        self.isSelected = isSelected
+    }
+
+    private var borderColor: Color {
+        return self.isSelected
+            ? self.appearance.colorSet.accentAI.asColor
+            : self.appearance.colorSet.line.asColor
+    }
+
+    private var backgroundColor: Color {
+        return self.isSelected
+            ? self.appearance.colorSet.bg1.asColor
+            : self.appearance.colorSet.bg0.asColor
+    }
+
+    var body: some View {
+        HStack(alignment: .top, spacing: Metric.Spacing.small) {
+            Image(
+                systemName: self.model.isOwned
+                    ? "checkmark.circle.fill"
+                    : (self.isSelected ? "largecircle.fill.circle" : "circle")
+            )
+            .foregroundStyle(
+                self.model.isCovered
+                    ? self.appearance.colorSet.text2.asColor
+                    : self.borderColor
+            )
+
+            VStack(alignment: .leading, spacing: Metric.Spacing.xxsmall) {
+                HStack(spacing: Metric.Spacing.xsmall) {
+                    Text(self.model.name)
+                        .font(self.appearance.fontSet.subNormalWithBold.asFont)
+                        .foregroundStyle(self.appearance.colorSet.text0.asColor)
+
+                    if self.model.isRecommended {
+                        self.badge(
+                            "billing::paywall::badge::recommended".localized(),
+                            background: self.appearance.colorSet.accentAI.asColor,
+                            text: self.appearance.colorSet.primaryBtnText.asColor
+                        )
+                    }
+
+                    if self.model.isOwned {
+                        Text("billing::paywall::badge::owned".localized())
+                            .font(self.appearance.fontSet.size(10, weight: .semibold).asFont)
+                            .foregroundStyle(self.appearance.colorSet.text2.asColor)
+                    }
+
+                    Spacer()
+
+                    self.priceView
+                }
+
+                Text(self.model.metricText)
+                    .font(self.appearance.fontSet.subSubNormal.asFont)
+                    .foregroundStyle(self.appearance.colorSet.text2.asColor)
+            }
+        }
+        .padding(spacing: .regular)
+        .background(
+            RoundedRectangle(cornerRadius: Metric.Radius.large)
+                .fill(self.backgroundColor)
+                .overlay(
+                    RoundedRectangle(cornerRadius: Metric.Radius.large)
+                        .stroke(self.borderColor, lineWidth: 1)
+                )
+        )
+        .onTapGesture { self.onTap() }
+    }
+
+    @ViewBuilder
+    private var priceView: some View {
+        if let price = self.model.priceText {
+            HStack(spacing: Metric.Spacing.xxsmall) {
+                Text(price)
+                    .font(self.appearance.fontSet.subNormalWithBold.asFont)
+                    .foregroundStyle(self.appearance.colorSet.text0.asColor)
+                if let period = self.model.periodText {
+                    Text(period)
+                        .font(self.appearance.fontSet.subSubNormal.asFont)
+                        .foregroundStyle(self.appearance.colorSet.text2.asColor)
+                }
+            }
+        } else {
+            Text("billing::paywall::price::unavailable".localized())
+                .font(self.appearance.fontSet.subSubNormal.asFont)
+                .foregroundStyle(self.appearance.colorSet.accentWarn.asColor)
+        }
+    }
+
+    private func badge(_ text: String, background: Color, text textColor: Color) -> some View {
+        Text(text)
+            .font(self.appearance.fontSet.size(10, weight: .semibold).asFont)
+            .foregroundStyle(textColor)
+            .padding(.horizontal, spacing: .xsmall)
+            .padding(.vertical, spacing: .xxsmall)
+            .background(
+                RoundedRectangle(cornerRadius: Metric.Radius.chip)
+                    .fill(background)
+            )
+    }
+}

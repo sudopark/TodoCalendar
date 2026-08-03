@@ -9,8 +9,8 @@
 #   impact-check.sh --stdin          # "STATUS<TAB>PATH" 라인들을 stdin으로 (테스트용)
 set -o pipefail
 
-ALL_SCHEMES="Domain Repository AuthService CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene TodoCalendarApp TodoCalendarAppWidget"
-ALL_PRESENTATION="CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene"
+ALL_SCHEMES="Domain Repository AuthService BillingScenes CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene TodoCalendarApp TodoCalendarAppWidget"
+ALL_PRESENTATION="BillingScenes CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene"
 
 MODE="git"; BASE="develop"
 while [ $# -gt 0 ]; do
@@ -73,6 +73,9 @@ if printf '%s\n' "$FILES" | grep -q "^Presentations/CommonPresentation/"; then
 fi
 if printf '%s\n' "$FILES" | grep -q "^Presentations/Scenes/"; then
   schemes+=($ALL_PRESENTATION "TodoCalendarApp")
+fi
+if printf '%s\n' "$FILES" | grep -q "^Presentations/BillingScenes/"; then
+  schemes+=("BillingScenes")
 fi
 if printf '%s\n' "$FILES" | grep -q "^Presentations/CalendarScenes/"; then
   schemes+=("CalendarScenes" "TodoCalendarApp" "TodoCalendarAppWidget")

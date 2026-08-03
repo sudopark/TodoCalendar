@@ -551,12 +551,43 @@
 "aiAgent::keyboard::send" = "Send";
 "aiAgent::stop" = "Stop";
 "aiAgent::usage" = "%@ / %@ credits";
-"aiAgent::plan::free" = "Free";
-"aiAgent::plan::standard" = "Standard";
-"aiAgent::plan::lifetime" = "Lifetime";
 "aiAgent::usage::topupRemaining" = "%@ extra credits left";
 "aiAgent::usage::planChangeScheduled" = "Switching to the %2$@ plan on %1$@";
 "aiAgent::stop::confirm::title" = "Stop processing?";
 "aiAgent::stop::confirm::message" = "Stopping discards the task in progress, and it can't be resumed.";
 "aiAgent::confirm::countdown" = "left to approve";
 "aiAgent::confirm::expired::message" = "Time expired. Please request again.";
+
+// MARK: - billing
+
+"billing::plan::free" = "Free";
+"billing::plan::standard" = "Standard";
+"billing::plan::lifetime" = "Lifetime";
+
+"billing::paywall::title" = "Upgrade Plan";
+"billing::paywall::current::description" = "%@ credits a day";
+"billing::paywall::metric::dailyCredits" = "%@ credits / day";
+"billing::paywall::period::weekly" = "/wk";
+"billing::paywall::period::monthly" = "/mo";
+"billing::paywall::period::yearly" = "/yr";
+"billing::paywall::price::unavailable" = "Price unavailable";
+"billing::paywall::badge::recommended" = "Recommended";
+"billing::paywall::badge::owned" = "Current plan";
+"billing::paywall::features::title" = "%@ includes";
+"billing::paywall::feature::dailyCredits" = "%@ credits a day";
+"billing::paywall::feature::topup" = "Top-up available when credits run out";
+"billing::paywall::disclosure::subscription" = "Your subscription renews automatically each month unless you cancel at least 24 hours before the current period ends. You can cancel anytime in App Store settings.";
+"billing::paywall::disclosure::oneTime" = "Pay once and keep it. This does not renew.";
+"billing::paywall::disclosure::storeUnavailable" = "Couldn't reach the App Store. Please try again later.";
+"billing::paywall::cta::subscribe" = "Subscribe to %@";
+"billing::paywall::cta::buy" = "Get %@";
+"billing::paywall::cta::unavailable" = "Unavailable";
+"billing::paywall::allPlansOwned" = "You already own the best plan.";
+"billing::paywall::terms" = "Terms of Service";
+"billing::paywall::privacyPolicy" = "Privacy Policy";
+"billing::paywall::restore" = "Restore Purchases";
+"billing::paywall::restored" = "Purchases restored";
+"billing::paywall::restore::empty" = "No purchases to restore.";
+"billing::paywall::purchase::applied" = "Plan updated";
+"billing::paywall::pending::title" = "Approval pending";
+"billing::paywall::pending::message" = "Ask a family organizer to approve this purchase. It'll apply automatically once approved.";

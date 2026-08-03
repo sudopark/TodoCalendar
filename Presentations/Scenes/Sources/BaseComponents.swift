@@ -200,6 +200,14 @@ open class BaseRouterImple: Routing, @unchecked Sendable {
         slide.attachBottomSlideDismiss(interactor: manager.interactor)
         self.scene?.present(slide, animated: true)
     }
+
+    // 전체화면 모달. 바텀시트 위에서도 띄울 수 있고, 밑에 깔린 시트는 그대로 살아 있다.
+    // overFullScreen 이라 dismiss 하면 아래 화면이 재생성 없이 그대로 드러난다
+    @MainActor
+    public func showFullScreen(_ next: UIViewController) {
+        next.modalPresentationStyle = .overFullScreen
+        self.scene?.present(next, animated: true)
+    }
     
     @MainActor
     private func prepareBottomSlideTransition() -> BottomSlideTransitionAnimationManager {
