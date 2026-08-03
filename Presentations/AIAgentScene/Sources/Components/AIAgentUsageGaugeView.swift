@@ -63,7 +63,7 @@ struct AIAgentUsageGaugeView: View {
                 Spacer()
 
                 if let plan = self.userPlan?.planId {
-                    self.planChipView(plan)
+                    BillingPlanChipView(plan: plan)
                 }
             }
 
@@ -76,44 +76,6 @@ struct AIAgentUsageGaugeView: View {
             if let change = self.userPlan?.scheduledChange {
                 self.scheduledChangeView(change)
             }
-        }
-    }
-}
-
-
-// MARK: - plan chip
-
-private extension AIAgentUsageGaugeView {
-
-    func planChipView(_ plan: BillingPlanId) -> some View {
-        Text(plan.name)
-            .font(self.appearance.fontSet.size(10, weight: .semibold).asFont)
-            .foregroundStyle(
-                plan == .free
-                    ? self.appearance.colorSet.text2.asColor
-                    : self.appearance.colorSet.primaryBtnText.asColor
-            )
-            .padding(.horizontal, spacing: .xsmall)
-            .padding(.vertical, spacing: .xxsmall)
-            .background(
-                RoundedRectangle(cornerRadius: Metric.Radius.chip)
-                    .fill(
-                        plan == .free
-                            ? self.appearance.colorSet.bg1.asColor
-                            : self.appearance.colorSet.accentAI.asColor
-                    )
-            )
-    }
-
-}
-
-private extension BillingPlanId {
-
-    var name: String {
-        switch self {
-        case .free:     return "aiAgent::plan::free".localized()
-        case .standard: return "aiAgent::plan::standard".localized()
-        case .lifetime: return "aiAgent::plan::lifetime".localized()
         }
     }
 }

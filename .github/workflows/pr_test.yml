@@ -33,8 +33,8 @@ jobs:
         run: |
           FILES="${{ steps.changed.outputs.files }}"
 
-          ALL_SCHEMES="Domain Repository AuthService CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene TodoCalendarApp TodoCalendarAppWidget"
-          ALL_PRESENTATION="CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene"
+          ALL_SCHEMES="Domain Repository AuthService BillingScenes CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene TodoCalendarApp TodoCalendarAppWidget"
+          ALL_PRESENTATION="BillingScenes CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene"
 
           schemes=()
 
@@ -106,6 +106,9 @@ jobs:
           fi
 
           # === Presentation 개별 Scene ===
+          if echo "$FILES" | grep -q "^Presentations/BillingScenes/"; then
+            schemes+=("BillingScenes")
+          fi
           if echo "$FILES" | grep -q "^Presentations/CalendarScenes/"; then
             schemes+=("CalendarScenes" "TodoCalendarApp" "TodoCalendarAppWidget")
           fi
@@ -218,6 +221,18 @@ jobs:
           xcodebuild test \
             -workspace TodoCalendar.xcworkspace \
             -scheme AuthService \
+            -derivedDataPath ./DerivedData \
+            -destination "$DESTINATION" \
+            -testLanguage en -testRegion en_US \
+            | xcpretty
+
+      - name: Test BillingScenes
+        if: contains(needs.detect-changes.outputs.schemes, ' BillingScenes ')
+        run: |
+          set -euo pipefail
+          xcodebuild test \
+            -workspace TodoCalendar.xcworkspace \
+            -scheme BillingScenes \
             -derivedDataPath ./DerivedData \
             -destination "$DESTINATION" \
             -testLanguage en -testRegion en_US \

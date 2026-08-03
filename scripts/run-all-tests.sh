@@ -24,6 +24,7 @@ ALL_SCHEMES=(
   "Domain"
   "Repository"
   "AuthService"
+  "BillingScenes"
   "CalendarScenes"
   "EventDetailScene"
   "EventListScenes"
