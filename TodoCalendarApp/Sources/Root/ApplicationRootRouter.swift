@@ -17,6 +17,7 @@ import EventListScenes
 import SettingScene
 import MemberScenes
 import AIAgentScene
+import BillingScenes
 import SQLiteService
 
 
@@ -442,7 +443,16 @@ extension ApplicationRootRouter {
             supportExternalCalendarServices: AppEnvironment.supportExternalCalendarServices,
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearanceStore.appearance,
-            memberSceneBuilder: self.memberSceneBuilder()
+            memberSceneBuilder: self.memberSceneBuilder(),
+            paywallSceneBuilder: self.paywallSceneBuilder()
+        )
+    }
+
+    // PaywallBuilderImple은 상태를 갖지 않아 호출마다 새 인스턴스를 만들어도 무해하다 (#739)
+    private func paywallSceneBuilder() -> any PaywallSceneBuilder {
+        return PaywallBuilderImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearanceStore.appearance
         )
     }
     
@@ -456,7 +466,8 @@ extension ApplicationRootRouter {
     private func aiAgentCommandSceneBuilder() -> any AIAgentCommandSceneBuilder {
         return AIAgentCommandBuilderImple(
             usecaseFactory: self.usecaseFactory,
-            viewAppearance: self.viewAppearanceStore.appearance
+            viewAppearance: self.viewAppearanceStore.appearance,
+            paywallSceneBuilder: self.paywallSceneBuilder()
         )
     }
 

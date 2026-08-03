@@ -18,19 +18,22 @@ public final class SettingSceneBuilderImple: SettingSceneBuiler {
     private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
     private let memberSceneBuilder: any MemberSceneBuilder
-    
+    private let paywallSceneBuilder: any PaywallSceneBuilder
+
     public init(
         appstoreLinkPath: String,
         supportExternalCalendarServices: [any ExternalCalendarService],
         usecaseFactory: any UsecaseFactory,
         viewAppearance: ViewAppearance,
-        memberSceneBuilder: any MemberSceneBuilder
+        memberSceneBuilder: any MemberSceneBuilder,
+        paywallSceneBuilder: any PaywallSceneBuilder
     ) {
         self.appstoreLinkPath = appstoreLinkPath
         self.supportExternalCalendarServices = supportExternalCalendarServices
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
         self.memberSceneBuilder = memberSceneBuilder
+        self.paywallSceneBuilder = paywallSceneBuilder
     }
 }
 
@@ -127,7 +130,8 @@ extension SettingSceneBuilderImple {
             eventSettingSceneBuilder: eventSettingSceneBuilder,
             holidayListSceneBuilder: holidayListSceneBuilder,
             memberSceneBuilder: self.memberSceneBuilder,
-            feedbackPostSceneBuiler: feedbackSceneBuilder
+            feedbackPostSceneBuiler: feedbackSceneBuilder,
+            paywallSceneBuilder: self.paywallSceneBuilder
         )
         return builder.makeSettingItemListScene()
     }

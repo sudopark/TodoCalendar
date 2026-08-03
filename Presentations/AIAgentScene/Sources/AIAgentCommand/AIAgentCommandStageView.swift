@@ -23,10 +23,14 @@ import CommonPresentation
     var commandState: AIAgentCommandState?
     var usage: AIAgentUsage?
     var userPlan: BillingUserPlan?
+    // 세션 중 불변 플래그 — publisher 아닌 스냅샷 값으로 bind 시점에 1회 반영 (#739)
+    var isPaywallAvailable: Bool = false
 
     func bind(_ viewModel: any AIAgentCommandViewModel) {
         guard self.didBind == false else { return }
         self.didBind = true
+
+        self.isPaywallAvailable = viewModel.isPaywallAvailable
 
         viewModel.commandState
             .receive(on: RunLoop.main)
@@ -56,6 +60,7 @@ final class AIAgentCommandViewEventHandler: Observable {
     var cancel: () -> Void = { }
     var acknowledge: () -> Void = { }
     var close: () -> Void = { }
+    var showPlans: () -> Void = { }
 
     func bind(_ viewModel: any AIAgentCommandViewModel) {
         self.prepare = viewModel.prepare
@@ -64,6 +69,7 @@ final class AIAgentCommandViewEventHandler: Observable {
         self.cancel = viewModel.cancel
         self.acknowledge = viewModel.acknowledge
         self.close = viewModel.close
+        self.showPlans = viewModel.showPlans
     }
 }
 
@@ -408,10 +414,26 @@ private extension AIAgentCommandStageView {
                 }
             }
 
-            // 실패를 확인 → reset(idle) 후 닫힘
+            // 한도 초과 + paywall 플래그가 켜졌을 때만 "플랜 보기" 진입 — 플래그 판정은 ViewModel이 해서
+            // 여기선 스냅샷 값(state.isPaywallAvailable)만 읽는다 (#739)
+            let showsPlansCTA = errorCode == .dailyLimitExceeded && self.state.isPaywallAvailable
+            if showsPlansCTA {
+                ConfirmButton(
+                    title: "aiAgent::failed::showPlans".localized(),
+                    backgroundColor: appearance.colorSet.accentAI.asColor
+                )
+                .eventHandler(\.onTap, eventHandlers.showPlans)
+                .padding(.top, spacing: .xsmall)
+            }
+
+            // 실패를 확인 → reset(idle) 후 닫힘. 전환 CTA가 함께 있을 땐 그쪽이 1순위라
+            // 이 버튼은 보조 스타일로 낮춰 위계를 분리(#739), 단독 액션일 땐 기존대로 accentAI 유지
             ConfirmButton(
                 title: "common.confirm".localized(),
-                backgroundColor: appearance.colorSet.accentAI.asColor
+                textColor: showsPlansCTA ? appearance.colorSet.secondaryBtnText.asColor : nil,
+                backgroundColor: showsPlansCTA
+                    ? appearance.colorSet.secondaryBtnBackground.asColor
+                    : appearance.colorSet.accentAI.asColor
             )
             .eventHandler(\.onTap, eventHandlers.acknowledge)
             .padding(.top, spacing: .xsmall)
