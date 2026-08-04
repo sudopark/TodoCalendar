@@ -56,6 +56,28 @@ enum PaywallCatalogState: Equatable {
 }
 
 
+// MARK: - 화면 렌더 게이트
+
+// 유저 플랜 조회 상태 — currentPlanId(SharedDataStore 미러링)만으로는 "이번 prepare()에서
+// refreshUserPlan()이 성공했는지"를 구분할 수 없다(과거 캐시된 값일 수 있어서). 화면 렌더
+// 게이트 전용으로 별도 축을 둔다 (#739)
+enum PaywallUserPlanLoadState: Equatable {
+    case loading
+    case failed
+    case loaded
+}
+
+// 화면 전체 렌더 게이트 — userPlanState가 loaded여야만 본문(플랜 카드·CTA·고지문)을 그린다.
+// catalogState(카탈로그 축)는 유저 플랜이 확인된 뒤에만 의미가 있어 .ready 안에 실린다.
+// 두 축을 mutable var로 손으로 합치지 않고 CombineLatest로 선언적으로 합성한다
+// (여러 상태 합성은 선언적으로 — presentations-rules.md §5, #739)
+enum PaywallScreenState: Equatable {
+    case loading
+    case userPlanLoadFailed
+    case ready(PaywallCatalogState)
+}
+
+
 // MARK: - PaywallViewModel
 
 protocol PaywallViewModel: AnyObject, Sendable, PaywallSceneInteractor {
@@ -72,6 +94,7 @@ protocol PaywallViewModel: AnyObject, Sendable, PaywallSceneInteractor {
     // presenter
     var currentPlan: AnyPublisher<BillingPlanId?, Never> { get }
     var currentPlanDescription: AnyPublisher<String, Never> { get }
+    var screenState: AnyPublisher<PaywallScreenState, Never> { get }
     var catalogState: AnyPublisher<PaywallCatalogState, Never> { get }
     var cellModels: AnyPublisher<[PaywallPlanCellModel], Never> { get }
     var selectedPlanId: AnyPublisher<BillingPlanId?, Never> { get }
@@ -89,6 +112,9 @@ final class PaywallViewModelImple: PaywallViewModel, @unchecked Sendable {
 
     private struct Subject {
         let catalogState = CurrentValueSubject<PaywallCatalogState, Never>(.loading)
+        // 화면 렌더 게이트 축 — prepare()의 refreshUserPlan() 결과만 반영. currentPlanId와
+        // 별개다(과거 캐시값과 이번 조회 성공을 구분해야 해서, #739)
+        let userPlanState = CurrentValueSubject<PaywallUserPlanLoadState, Never>(.loading)
         // billingUsecase.currentUserPlan(비동기 스트림)을 동기로 들여다볼 수 있게 로컬 미러링
         // — selectPlan()/purchase() 같은 command가 "지금 보유 플랜이 뭔지"를 즉시 참조해야 한다
         let currentPlanId = CurrentValueSubject<BillingPlanId?, Never>(nil)
@@ -120,20 +146,41 @@ final class PaywallViewModelImple: PaywallViewModel, @unchecked Sendable {
 
 extension PaywallViewModelImple {
 
+    // 유저 플랜 재조회(refreshUserPlan)와 카탈로그 조회(loadPlanOfferings)를 동시에 태운다.
+    // 전자가 화면 전체 렌더 게이트(screenState)이고 후자는 게이트 통과 후에만 의미가 있는
+    // 하위 축이라 서로 값을 참조하지 않는 독립 실행 — async let으로 병렬화 (#739)
     func prepare() {
+        self.subject.userPlanState.send(.loading)
         self.subject.catalogState.send(.loading)
         Task { [weak self] in
             guard let self else { return }
-            do {
-                // 여기서 catch 하는 건 서버 카탈로그 요청(loadPlans) 실패다 — StoreKit 상품 조회
-                // 실패는 loadPlanOfferings 내부(try?)가 이미 삼켜 product만 nil로 온다. 성격이
-                // 다른 실패라 같은 근거로 묻지 않는다 (#739)
-                let offerings = try await self.billingUsecase.loadPlanOfferings()
-                self.subject.catalogState.send(.loaded(offerings))
-            } catch {
-                self.subject.catalogState.send(.failed)
-                self.router?.showError(error)
-            }
+            async let planLoad: Void = self.loadUserPlan()
+            async let catalogLoad: Void = self.loadCatalog()
+            _ = await (planLoad, catalogLoad)
+        }
+    }
+
+    // 실패해도 router.showError로 알리지 않는다 — 전면 에러 상태(screenState)가 이미 실패를
+    // 드러내므로 토스트·알림까지 겹치면 중복 통지다 (#739)
+    private func loadUserPlan() async {
+        do {
+            try await self.billingUsecase.refreshUserPlan()
+            self.subject.userPlanState.send(.loaded)
+        } catch {
+            self.subject.userPlanState.send(.failed)
+        }
+    }
+
+    private func loadCatalog() async {
+        do {
+            // 여기서 catch 하는 건 서버 카탈로그 요청(loadPlans) 실패다 — StoreKit 상품 조회
+            // 실패는 loadPlanOfferings 내부(try?)가 이미 삼켜 product만 nil로 온다. 성격이
+            // 다른 실패라 같은 근거로 묻지 않는다 (#739)
+            let offerings = try await self.billingUsecase.loadPlanOfferings()
+            self.subject.catalogState.send(.loaded(offerings))
+        } catch {
+            self.subject.catalogState.send(.failed)
+            self.router?.showError(error)
         }
     }
 
@@ -229,11 +276,11 @@ extension PaywallViewModelImple {
 extension PaywallViewModelImple {
 
     var currentPlan: AnyPublisher<BillingPlanId?, Never> {
-        return self.subject.currentPlanId.eraseToAnyPublisher()
+        return self.currentPlanIdPublisher
     }
 
     var currentPlanDescription: AnyPublisher<String, Never> {
-        return Publishers.CombineLatest(self.subject.currentPlanId, self.offeringsPublisher)
+        return Publishers.CombineLatest(self.currentPlanIdPublisher, self.offeringsPublisher)
             .map { [weak self] currentPlanId, offerings -> String in
                 self?.currentPlanDescriptionText(planId: currentPlanId, offerings: offerings) ?? ""
             }
@@ -244,8 +291,22 @@ extension PaywallViewModelImple {
         return self.catalogStatePublisher
     }
 
+    // userPlanState(화면 렌더 게이트)와 catalogState(하위 축)를 한 곳에서 순수 합성한다.
+    // 두 subject를 mutable var로 손으로 갱신·수동 통지하지 않고 CombineLatest로 — 어느 축이
+    // 바뀌든 자동 재계산돼 통지 누락이 없다 (presentations-rules.md §5, #739)
+    var screenState: AnyPublisher<PaywallScreenState, Never> {
+        return Publishers.CombineLatest(self.subject.userPlanState, self.catalogStatePublisher)
+            .map { [weak self] userPlanState, catalogState -> PaywallScreenState in
+                self?.resolveScreenState(userPlanState: userPlanState, catalogState: catalogState) ?? .loading
+            }
+            // catalogState가 바뀌어도 userPlanState가 loaded가 아니면 결과값(.loading/.userPlanLoadFailed)은
+            // 그대로다 — 같은 값 연속 방출로 다운스트림이 헛도는 걸 막는다 (catalogStatePublisher와 동일 근거)
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+
     var cellModels: AnyPublisher<[PaywallPlanCellModel], Never> {
-        return Publishers.CombineLatest(self.subject.currentPlanId, self.offeringsPublisher)
+        return Publishers.CombineLatest(self.currentPlanIdPublisher, self.offeringsPublisher)
             .map { [weak self] currentPlanId, offerings -> [PaywallPlanCellModel] in
                 self?.makeCellModels(currentPlanId: currentPlanId, offerings: offerings) ?? []
             }
@@ -254,7 +315,7 @@ extension PaywallViewModelImple {
 
     var selectedPlanId: AnyPublisher<BillingPlanId?, Never> {
         return Publishers.CombineLatest3(
-            self.subject.userSelectedPlanId, self.subject.currentPlanId, self.offeringsPublisher
+            self.subject.userSelectedPlanId, self.currentPlanIdPublisher, self.offeringsPublisher
         )
         // self?.resolve(...) ?? userSelected 로 쓰면 "self 가 nil" 과 "선택이 무효라 nil" 이
         // 같은 nil 로 뭉개져, 커버된 선택이 userSelected 로 되살아난다 (C1, #739)
@@ -288,6 +349,14 @@ extension PaywallViewModelImple {
         return self.subject.catalogState.removeDuplicates().eraseToAnyPublisher()
     }
 
+    // SharedDataStore.put은 값이 같아도 항상 재통지한다(dedupe 없음) — refreshUserPlan()이
+    // 매 prepare()마다 같은 플랜을 재확인만 해도 currentUserPlan이 다시 방출되고, 그 미러(subject.
+    // currentPlanId)도 같은 값을 재전송한다. 이 값을 그대로 CombineLatest에 흘리면 cellModels 등이
+    // 값 변화 없이도 재계산·재방출된다 — 여기서 한 번 걸러 다운스트림엔 실제 변화만 전달한다 (#739)
+    private var currentPlanIdPublisher: AnyPublisher<BillingPlanId?, Never> {
+        return self.subject.currentPlanId.removeDuplicates().eraseToAnyPublisher()
+    }
+
     // cellModels/selectedPlanId 등 여러 publisher 가 "로드된 오퍼링 배열"만 필요로 해서
     // catalogState 에서 그 부분만 순수하게 뽑아 재사용한다 (loading/failed 는 빈 배열)
     private var offeringsPublisher: AnyPublisher<[BillingPlanOffering], Never> {
@@ -301,6 +370,17 @@ extension PaywallViewModelImple {
 // MARK: - 표시 모델 조립
 
 extension PaywallViewModelImple {
+
+    // userPlanState/catalogState 합성 순수 함수 — CombineLatest.map이 이 함수 하나만 부른다
+    private func resolveScreenState(
+        userPlanState: PaywallUserPlanLoadState, catalogState: PaywallCatalogState
+    ) -> PaywallScreenState {
+        switch userPlanState {
+        case .loading: return .loading
+        case .failed: return .userPlanLoadFailed
+        case .loaded: return .ready(catalogState)
+        }
+    }
 
     private func makeCellModels(
         currentPlanId: BillingPlanId?, offerings: [BillingPlanOffering]

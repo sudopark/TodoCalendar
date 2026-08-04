@@ -19,23 +19,28 @@ final class StubBillingUsecase: BillingUsecase, @unchecked Sendable {
     private let stubPurchaseResult: Result<BillingPurchaseResult, any Error>
     // restorePurchases() 가 반환할 값. nil 이면 "복원할 구매 없음"
     private let restoreResult: BillingUserPlan?
+    // refreshUserPlan() 실패를 시뮬레이션 — nil이면 성공 (#739)
+    private let userPlanLoadError: (any Error)?
     private let userPlanSubject: CurrentValueSubject<BillingUserPlan?, Never>
 
     // 호출 기록 — 검증은 테스트 케이스가 한다
     var didPurchasedProductId: String?
     var didRestoreCalled: Bool = false
+    var didRefreshUserPlanCalled: Bool = false
 
     init(
         offerings: [BillingPlanOffering] = [],
         catalogLoadError: (any Error)? = nil,
         purchaseResult: Result<BillingPurchaseResult, any Error> = .success(.cancelled),
         userPlan: BillingUserPlan? = nil,
-        restoreResult: BillingUserPlan? = nil
+        restoreResult: BillingUserPlan? = nil,
+        userPlanLoadError: (any Error)? = nil
     ) {
         self.stubOfferings = offerings
         self.catalogLoadError = catalogLoadError
         self.stubPurchaseResult = purchaseResult
         self.restoreResult = restoreResult
+        self.userPlanLoadError = userPlanLoadError
         self.userPlanSubject = .init(userPlan)
     }
 
@@ -59,6 +64,17 @@ final class StubBillingUsecase: BillingUsecase, @unchecked Sendable {
             self.userPlanSubject.send(restoreResult)
         }
         return self.restoreResult
+    }
+
+    // paywall 진입 시 유저 플랜을 재조회한다 — 실패하면 화면 렌더 게이트(PaywallScreenState)가
+    // 본문을 막는다. 성공 값은 restorePurchases()와 동일하게 subject 에 push해 currentUserPlan
+    // 릴레이(currentPlanId 미러링)까지 재현한다 (#739)
+    func refreshUserPlan() async throws -> BillingUserPlan {
+        self.didRefreshUserPlanCalled = true
+        if let userPlanLoadError { throw userPlanLoadError }
+        let plan = self.userPlanSubject.value ?? BillingUserPlan()
+        self.userPlanSubject.send(plan)
+        return plan
     }
 
     func startObservingTransactions() { }
