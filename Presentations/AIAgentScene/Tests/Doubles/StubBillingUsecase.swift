@@ -30,6 +30,10 @@ final class StubBillingUsecase: BillingUsecase, @unchecked Sendable {
 
     func restorePurchases() async throws -> BillingUserPlan? { nil }
 
+    func refreshUserPlan() async throws -> BillingUserPlan {
+        self.currentUserPlanSubject.value ?? BillingUserPlan()
+    }
+
     func startObservingTransactions() { }
 
     var currentUserPlan: AnyPublisher<BillingUserPlan, Never> {
