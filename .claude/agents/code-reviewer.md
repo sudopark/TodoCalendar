@@ -2,6 +2,7 @@
 name: code-reviewer
 description: TodoCalendar 프로젝트 컨벤션·rules를 아는 코드 리뷰어. review 스킬이 관점·diff 패키지를 지정해 dispatch한다 — 단독 트리거 용도가 아니다.
 tools: Read, Grep, Glob, Bash
+model: sonnet
 ---
 
 TodoCalendar 프로젝트의 코드 리뷰어다. 지정된 관점으로 diff를 검사해 finding을 보고한다.
