@@ -118,11 +118,12 @@ extension AICommandUsecaseImpleTests {
         let statuses = jobs.map { $0.status }
         #expect(statuses == [.pending, .running, .running, .done])
         #expect(jobs.last?.isFinish == true)
-        
+
+        // job이 끝나도 유저가 결과를 확인하기 전까지 처리중 기록은 남는다
         let processingCmd = try await self.stubRepository.loadProcessingAICommand()
-        #expect(processingCmd == nil)
+        #expect(processingCmd != nil)
     }
-    
+
     // 커맨드 처리시 fcm 메세지 받으면 작업상태 확인해서 완료 정보 반환
     @Test func usecase_whenReceiveJobFinishNotification_loadFinishedJob() async throws {
         // given
@@ -284,9 +285,10 @@ extension AICommandUsecaseImpleTests {
         let statuses = jobs.map { $0.status }
         #expect(statuses == [.pending, .running, .running, .done])
         #expect(jobs.last?.isFinish == true)
-        
+
+        // job이 끝나도 유저가 결과를 확인하기 전까지 처리중 기록은 남는다
         let processingCmd = try await self.stubRepository.loadProcessingAICommand()
-        #expect(processingCmd == nil)
+        #expect(processingCmd != nil)
     }
 
     // 컨펌 커맨드 처리시 fcm 메세지 받으면 작업상태 확인해서 완료 정보 반환
@@ -469,17 +471,18 @@ extension AICommandUsecaseImpleTests {
         expect.count = 2
         expect.timeout = .seconds(1)
         let usecase = try await self.makeUsecaseWithProcessingCmd(isConfirm: false)
-        
+
         // when
         let restore = usecase.restoreCommandifNeed()
         let jobs = try await self.outputs(expect, for: restore)
-        
+
         // then
         let statuses = jobs.compactMap { $0?.status }
         #expect(statuses == [.running, .done])
-        
+
+        // 복원해 결과를 보여준 것만으로는 지우지 않는다 — 유저 확인이 지우는 시점이다
         let processingCmd = try await self.stubRepository.loadProcessingAICommand()
-        #expect(processingCmd == nil)
+        #expect(processingCmd != nil)
     }
     
     // 커맨드 복원: confirm 커맨드 복원 및 폴링
@@ -489,17 +492,18 @@ extension AICommandUsecaseImpleTests {
         expect.count = 2
         expect.timeout = .seconds(1)
         let usecase = try await self.makeUsecaseWithProcessingCmd(isConfirm: true)
-        
+
         // when
         let restore = usecase.restoreCommandifNeed()
         let jobs = try await self.outputs(expect, for: restore)
-        
+
         // then
         let statuses = jobs.compactMap { $0?.status }
         #expect(statuses == [.running, .done])
-        
+
+        // 복원해 결과를 보여준 것만으로는 지우지 않는다 — 유저 확인이 지우는 시점이다
         let processingCmd = try await self.stubRepository.loadProcessingAICommand()
-        #expect(processingCmd == nil)
+        #expect(processingCmd != nil)
     }
     
     // 커맨드 복원: 복원 실패

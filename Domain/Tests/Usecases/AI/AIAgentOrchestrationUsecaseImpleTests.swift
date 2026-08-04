@@ -572,6 +572,39 @@ extension AIAgentOrchestrationUsecaseImpleTests {
 }
 
 
+// MARK: - 유저가 결과를 확인하면 미확인 요청 기록을 지운다
+
+extension AIAgentOrchestrationUsecaseImpleTests {
+
+    @Test func usecase_whenReset_clearProcessingCommand() async throws {
+        // given
+        var done = AIJobResult.DoneResult()
+        done.text = "완료"
+        let usecase = self.makeUsecaseWithCommandJob(self.dummyJob(.done(done)))
+        try? usecase.submit("회의")
+        try await Task.sleep(for: .milliseconds(30))
+
+        // when
+        usecase.reset()
+
+        // then
+        #expect(self.stubCommand.didClearProcessingCommand == true)
+    }
+
+    @Test func usecase_whenDecline_clearProcessingCommand() async throws {
+        // given
+        let usecase = self.makeUsecaseInConfirm(token: "reject-tk")
+        try await Task.sleep(for: .milliseconds(30))
+
+        // when
+        usecase.decline()
+
+        // then
+        #expect(self.stubCommand.didClearProcessingCommand == true)
+    }
+}
+
+
 // MARK: - job 종료 시 mutation 기반 event sync 트리거
 
 // submit은 동기 흐름(Just 방출 → handleJobResult 즉시 실행)이라 submit 반환 시점에
@@ -720,6 +753,7 @@ private final class StubAICommandUsecase: AICommandUsecase, @unchecked Sendable 
     var didRestore: Bool = false
     var didCancelJobId: String?
     var didProcessConfirmToken: String?
+    var didClearProcessingCommand: Bool = false
 
     func processCommand(_ commandText: String) -> AnyPublisher<AIJob, any Error> {
         self.didProcessCommand = commandText
@@ -734,6 +768,9 @@ private final class StubAICommandUsecase: AICommandUsecase, @unchecked Sendable 
     }
     func cancelOngoingCommand(_ jobId: String) {
         self.didCancelJobId = jobId
+    }
+    func clearProcessingCommand() {
+        self.didClearProcessingCommand = true
     }
     func restoreCommandifNeed() -> AnyPublisher<AIJob?, any Error> {
         self.didRestore = true

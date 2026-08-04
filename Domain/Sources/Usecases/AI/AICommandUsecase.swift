@@ -25,6 +25,9 @@ public protocol AICommandUsecase: AnyObject, Sendable {
 
     func restoreCommandifNeed() -> AnyPublisher<AIJob?, any Error>
 
+    /// 유저가 결과를 확인해 더 이상 복원할 필요가 없어졌을 때 호출한다.
+    func clearProcessingCommand()
+
     func refreshJobStatus(_ jobId: String)
 }
 
@@ -98,7 +101,7 @@ extension AICommandUsecaseImple {
             }
 
         return waitJobUntilFinish
-            .handleClearProcessingCommand(repository)
+            .handleClearProcessingCommandOnError(repository)
             .eraseToAnyPublisher()
     }
 
@@ -120,7 +123,7 @@ extension AICommandUsecaseImple {
             }
 
         return waitUntilFinish
-            .handleClearProcessingCommand(repository)
+            .handleClearProcessingCommandOnError(repository)
             .eraseToAnyPublisher()
     }
     
@@ -211,13 +214,18 @@ extension AICommandUsecaseImple {
                 }
 
                 return self.checkJob(cmd.jobId, immediateCheck: true)
-                    .handleClearProcessingCommand(self.repository)
+                    .handleClearProcessingCommandOnError(self.repository)
                     .map { Optional($0) }
                     .eraseToAnyPublisher()
             }
             .eraseToAnyPublisher()
     }
     
+    public func clearProcessingCommand() {
+        let repository = self.repository
+        Task { try? await repository.clearProcessingAICommand() }
+    }
+
     private func loadProcessingCommand() -> some Publisher<ProcessingAICommand?, any Error> {
         let repository = self.repository
         return Publishers.create(do: {
@@ -256,23 +264,19 @@ private extension Publisher where Output == AIJob, Failure == any Error {
             }
     }
     
-    func handleClearProcessingCommand(
+    // ProcessingAICommand는 "유저가 아직 확인하지 않은 요청"을 뜻한다.
+    // job이 끝났다는 것만으로는 지우지 않는다 — 유저 확인(reset/decline)이 지우는 시점이다.
+    // 다만 job 자체가 404/만료로 죽었으면 영구 차단을 막기 위해 여기서 정리한다.
+    func handleClearProcessingCommandOnError(
         _ repository: AICommandRepository
     ) -> some Publisher<AIJob, Failure> {
-        
-        let handleOutput: (AIJob) -> Void = { job in
-            guard job.isFinish else { return }
-            Task { try await repository.clearProcessingAICommand() }
-        }
-        
+
+
         let handleError: (Subscribers.Completion<any Error>) -> Void = { completion in
             guard case .failure = completion else { return }
             Task { try await repository.clearProcessingAICommand() }
         }
-        
-        return self.handleEvents(
-            receiveOutput: handleOutput,
-            receiveCompletion: handleError
-        )
+
+        return self.handleEvents(receiveCompletion: handleError)
     }
 }

@@ -277,6 +277,7 @@ extension AIAgentOrchestrationUsecaseImple {
         self.commandCancellable?.cancel()
         self.commandCancellable = nil
         self.currentProcessingJobId = nil
+        self.commandUsecase.clearProcessingCommand()
         self.subject.state.send(.idle)
     }
 
@@ -288,6 +289,7 @@ extension AIAgentOrchestrationUsecaseImple {
         if let jobId {
             self.commandUsecase.cancelOngoingCommand(jobId)
         }
+        self.commandUsecase.clearProcessingCommand()
         self.subject.state.send(.idle)
     }
 
