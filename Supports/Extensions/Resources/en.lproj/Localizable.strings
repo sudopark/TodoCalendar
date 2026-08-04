@@ -594,3 +594,5 @@
 "billing::paywall::purchase::applied" = "Plan updated";
 "billing::paywall::pending::title" = "Approval pending";
 "billing::paywall::pending::message" = "Ask a family organizer to approve this purchase. It'll apply automatically once approved.";
+"billing::paywall::userPlan::loadFailed" = "Couldn't load your plan. Please try again.";
+"billing::paywall::retry" = "Retry";

@@ -21,6 +21,7 @@ import CommonPresentation
 
     var currentPlan: BillingPlanId?
     var currentPlanDescription: String = ""
+    var screenState: PaywallScreenState = .loading
     var catalogState: PaywallCatalogState = .loading
     var cellModels: [PaywallPlanCellModel] = []
     var selectedPlanId: BillingPlanId?
@@ -39,6 +40,11 @@ import CommonPresentation
         viewModel.currentPlanDescription
             .receive(on: RunLoop.main)
             .sink { [weak self] in self?.currentPlanDescription = $0 }
+            .store(in: &self.cancellables)
+
+        viewModel.screenState
+            .receive(on: RunLoop.main)
+            .sink { [weak self] in self?.screenState = $0 }
             .store(in: &self.cancellables)
 
         viewModel.catalogState
@@ -74,6 +80,7 @@ import CommonPresentation
 final class PaywallViewEventHandler: Observable {
 
     var onAppear: () -> Void = { }
+    var retry: () -> Void = { }
     var selectPlan: (BillingPlanId) -> Void = { _ in }
     var purchase: () -> Void = { }
     var restore: () -> Void = { }
@@ -83,6 +90,9 @@ final class PaywallViewEventHandler: Observable {
 
     func bind(_ viewModel: any PaywallViewModel) {
         self.onAppear = viewModel.prepare
+        // 재시도 버튼도 prepare()와 같은 로드를 다시 태운다 — onAppear와 동일 메서드지만
+        // 유발 지점(생명주기 vs 유저 탭)이 달라 별도 클로저로 이름을 분리한다 (#739)
+        self.retry = viewModel.prepare
         self.selectPlan = viewModel.selectPlan(_:)
         self.purchase = viewModel.purchase
         self.restore = viewModel.restore
@@ -132,12 +142,31 @@ private struct PaywallView: View {
     @Environment(PaywallViewState.self) private var state
     @Environment(PaywallViewEventHandler.self) private var eventHandlers
 
+    // 유저 플랜이 확인돼야 paywall을 그린다 — screenState가 .ready가 아니면 본문(플랜 카드·
+    // CTA·고지문)은 일절 그리지 않고 전면 로딩/에러로 대체한다. 헤더(닫기 버튼)는 게이트와
+    // 무관하게 항상 노출해 유저가 언제든 나갈 수 있게 한다 (#739)
     var body: some View {
         VStack(spacing: 0) {
             SheetHeaderView(title: "billing::paywall::title".localized())
                 .eventHandler(\.onClose) { self.eventHandlers.close() }
                 .padding(.horizontal, spacing: .xlarge)
 
+            switch self.state.screenState {
+            case .loading:
+                self.screenLoadingView
+            case .userPlanLoadFailed:
+                self.screenLoadFailedView
+            case .ready:
+                self.readyBody
+            }
+        }
+        .background(self.appearance.colorSet.bg0.asColor.ignoresSafeArea())
+    }
+
+    // MARK: - 본문 (유저 플랜 확인 완료)
+
+    private var readyBody: some View {
+        VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: Metric.Spacing.large) {
                     self.currentPlanStrip
@@ -158,7 +187,38 @@ private struct PaywallView: View {
             )
             .eventHandler(\.onTap) { self.eventHandlers.purchase() }
         }
-        .background(self.appearance.colorSet.bg0.asColor.ignoresSafeArea())
+    }
+
+    // MARK: - 유저 플랜 조회 게이트 (로딩·전면 에러)
+
+    private var screenLoadingView: some View {
+        VStack {
+            Spacer()
+            LoadingCircleView(self.appearance.colorSet.accentAI.asColor, lineWidth: 2)
+                .frame(width: 32, height: 32)
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private var screenLoadFailedView: some View {
+        VStack(spacing: Metric.Spacing.regular) {
+            Spacer()
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.system(size: 32))
+                .foregroundStyle(self.appearance.colorSet.accentWarn.asColor)
+            Text("billing::paywall::userPlan::loadFailed".localized())
+                .font(self.appearance.fontSet.normal.asFont)
+                .foregroundStyle(self.appearance.colorSet.text1.asColor)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, spacing: .xlarge)
+            ConfirmButton(title: "billing::paywall::retry".localized())
+                .eventHandler(\.onTap) { self.eventHandlers.retry() }
+                .padding(.horizontal, spacing: .xlarge)
+                .padding(.top, spacing: .small)
+            Spacer()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     // MARK: - 현재 플랜 스트립

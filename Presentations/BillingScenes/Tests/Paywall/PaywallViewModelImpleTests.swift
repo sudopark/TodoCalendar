@@ -26,14 +26,16 @@ final class PaywallViewModelImpleTests: PublisherWaitable {
         catalogLoadError: (any Error)? = nil,
         purchaseResult: Result<BillingPurchaseResult, any Error> = .success(.cancelled),
         userPlan: BillingUserPlan? = nil,
-        restoreResult: BillingUserPlan? = nil
+        restoreResult: BillingUserPlan? = nil,
+        userPlanLoadError: (any Error)? = nil
     ) -> (PaywallViewModelImple, StubBillingUsecase, SpyPaywallRouter) {
         let stub = StubBillingUsecase(
             offerings: offerings,
             catalogLoadError: catalogLoadError,
             purchaseResult: purchaseResult,
             userPlan: userPlan,
-            restoreResult: restoreResult
+            restoreResult: restoreResult,
+            userPlanLoadError: userPlanLoadError
         )
         let viewModel = PaywallViewModelImple(billingUsecase: stub)
         let router = SpyPaywallRouter()
@@ -479,5 +481,108 @@ extension PaywallViewModelImpleTests {
         // then: 세 번째 값이 첫 호출 Task 완료의 false 다 — 두 번째 호출이 별도로
         // true 를 재전송하지 않았다
         #expect(states == [false, true, false])
+    }
+}
+
+
+// MARK: - 화면 렌더 게이트 (유저 플랜 조회, #739)
+
+extension PaywallViewModelImpleTests {
+
+    @Test func viewModel_beforePrepared_screenStateIsLoading() async throws {
+        // given
+        let (viewModel, _, _) = self.makeViewModel()
+
+        // when
+        let expect = expectConfirm("초기 상태")
+        let state = try await self.firstOutput(expect, for: viewModel.screenState)
+
+        // then
+        #expect(state == .loading)
+    }
+
+    // 유저 플랜 조회(refreshUserPlan) 실패 → 전면 에러 상태로 게이트가 막힌다.
+    // 카탈로그 조회는 기본(성공)이라 두 축이 독립적으로 판정됨을 함께 확인
+    @Test func viewModel_whenUserPlanLoadFails_screenStateIsUserPlanLoadFailed() async throws {
+        // given
+        let (viewModel, _, _) = self.makeViewModel(userPlanLoadError: TestError())
+
+        // when — 초기 .loading + 최종 .userPlanLoadFailed(카탈로그 축 변화는 같은 결과라 dedupe됨)
+        let expect = expectConfirm("유저 플랜 조회 실패")
+        expect.count = 2
+        let states = try await self.outputs(expect, for: viewModel.screenState) {
+            viewModel.prepare()
+        }
+
+        // then
+        #expect(states.last == .userPlanLoadFailed)
+    }
+
+    // 재시도(prepare() 재호출)는 같은 로드를 다시 태워 로딩 상태를 다시 거친다 — 재시도 중엔
+    // 이전 실패 화면이 아니라 로딩이 보여야 한다
+    @Test func viewModel_retryAfterUserPlanLoadFailed_reentersLoadingBeforeFailingAgain() async throws {
+        // given: 첫 prepare()로 실패 상태를 만든다
+        let (viewModel, _, _) = self.makeViewModel(userPlanLoadError: TestError())
+        let firstExpect = expectConfirm("첫 로드 실패")
+        firstExpect.count = 2
+        _ = try await self.outputs(firstExpect, for: viewModel.screenState) { viewModel.prepare() }
+
+        // when: 재시도 — 새 구독은 CombineLatest 특성상 직전 정착 상태(.userPlanLoadFailed)를
+        // 먼저 리플레이하고, prepare()가 그 뒤로 .loading → .userPlanLoadFailed 순서로 이어진다
+        let retryExpect = expectConfirm("재시도")
+        retryExpect.count = 3
+        let states = try await self.outputs(retryExpect, for: viewModel.screenState) {
+            viewModel.prepare()
+        }
+
+        // then — 가운데 값이 재시도가 로딩을 다시 거쳤다는 증거
+        #expect(states == [.userPlanLoadFailed, .loading, .userPlanLoadFailed])
+    }
+
+    // 유저 플랜 조회 성공 + 카탈로그 조회 성공 → 본문이 렌더되는 .ready(.loaded) 로 안착한다.
+    // retry 버튼도 prepare() 를 그대로 재호출하므로(EventHandler.retry == onAppear) 이 성공
+    // 경로가 "재시도 성공 → 본문 렌더" 계약을 동일하게 검증한다
+    @Test func viewModel_whenUserPlanAndCatalogLoadSucceed_screenStateBecomesReady() async throws {
+        // given
+        let standard = self.purchasableOffering(.standard, productId: "product.standard")
+        let (viewModel, _, _) = self.makeViewModel(offerings: [standard])
+
+        // when
+        viewModel.prepare()
+        var final: PaywallScreenState = .loading
+        for _ in 0..<100 {
+            let expect = expectConfirm("poll screenState")
+            final = try await self.firstOutput(expect, for: viewModel.screenState) ?? .loading
+            if case .ready = final { break }
+            try await Task.sleep(for: .milliseconds(20))
+        }
+
+        // then
+        guard case .ready(.loaded(let offerings)) = final else {
+            Issue.record("expected .ready(.loaded) but got \(final)")
+            return
+        }
+        #expect(offerings.map { $0.plan.id } == [.standard])
+    }
+
+    // 유저 플랜 조회는 성공했는데 카탈로그만 실패하는 조합 — 화면은 그려지되(.ready) 카탈로그
+    // 축은 기존 .failed 처리를 그대로 물려받는다(이번 스코프에서 바뀌지 않는 계약)
+    @Test func viewModel_whenUserPlanSucceedsButCatalogFails_screenStateIsReadyWithFailedCatalog() async throws {
+        // given
+        let (viewModel, _, router) = self.makeViewModel(catalogLoadError: TestError())
+
+        // when
+        viewModel.prepare()
+        var final: PaywallScreenState = .loading
+        for _ in 0..<100 {
+            let expect = expectConfirm("poll screenState")
+            final = try await self.firstOutput(expect, for: viewModel.screenState) ?? .loading
+            if case .ready = final { break }
+            try await Task.sleep(for: .milliseconds(20))
+        }
+
+        // then
+        #expect(final == .ready(.failed))
+        #expect(router.didShowError is TestError)
     }
 }
