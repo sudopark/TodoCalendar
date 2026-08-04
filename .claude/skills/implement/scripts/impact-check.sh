@@ -44,6 +44,9 @@ fi
 if printf '%s\n' "$FILES" | grep -qE "^Supports/(Common3rdParty|Extensions/Sources|UnitTestHelpKit/Sources)/"; then
   schemes+=($ALL_SCHEMES)
 fi
+if printf '%s\n' "$FILES" | grep -q "^Supports/Extensions/"; then
+  schemes+=("Extensions")
+fi
 if printf '%s\n' "$FILES" | grep -q "^Supports/TestDoubles/Sources/"; then
   schemes+=("Repository" $ALL_PRESENTATION "TodoCalendarApp" "TodoCalendarAppWidget")
 fi

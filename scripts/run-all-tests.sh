@@ -21,6 +21,7 @@ else
 fi
 
 ALL_SCHEMES=(
+  "Extensions"
   "Domain"
   "Repository"
   "AuthService"

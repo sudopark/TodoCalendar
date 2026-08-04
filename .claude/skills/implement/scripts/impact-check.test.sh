@@ -47,6 +47,10 @@ assert_eq "Widget → Widget만" "TodoCalendarAppWidget" "$(schemes_for 'M\tTodo
 assert_eq "docs만 → 테스트 무관" "(테스트 무관 변경)" "$(schemes_for 'M\tdocs/spec/foo.md')"
 assert_eq "복수 영역 합산·중복 제거" "AIAgentScene Repository TodoCalendarApp TodoCalendarAppWidget" "$(schemes_for 'M\tRepository/Sources/A.swift\nM\tPresentations/AIAgentScene/Sources/B.swift')"
 
+ALL_WITH_EXTENSIONS="AIAgentScene AuthService BillingScenes CalendarScenes Domain EventDetailScene EventListScenes Extensions MemberScenes Repository SettingScene TodoCalendarApp TodoCalendarAppWidget"
+assert_eq "Extensions/Sources → 전체+Extensions" "$ALL_WITH_EXTENSIONS" "$(schemes_for 'M\tSupports/Extensions/Sources/Foo.swift')"
+assert_eq "Extensions/Tests → Extensions만" "Extensions" "$(schemes_for 'M\tSupports/Extensions/Tests/FooTests.swift')"
+
 # --- tuist generate 감지 ---
 assert_eq "수정만 → 불필요" "불필요" "$(tuist_for 'M\tDomain/Sources/Foo.swift')"
 assert_contains "추가 → 필요" "필요" "$(tuist_for 'A\tDomain/Sources/New.swift')"

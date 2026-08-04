@@ -56,6 +56,11 @@ jobs:
             schemes+=($ALL_SCHEMES)
           fi
 
+          # Extensions 자체 테스트: Extensions 경로(Sources·Tests) 변경 시에만
+          if echo "$FILES" | grep -q "^Supports/Extensions/"; then
+            schemes+=("Extensions")
+          fi
+
           # UnitTestHelpKit: 테스트 인프라 → 모든 테스트 스킴
           if echo "$FILES" | grep -q "^Supports/UnitTestHelpKit/Sources/"; then
             schemes+=($ALL_SCHEMES)
@@ -189,6 +194,18 @@ jobs:
         run: |
           set -euo pipefail
           rm -rf ./DerivedData
+
+      - name: Test Extensions
+        if: contains(needs.detect-changes.outputs.schemes, ' Extensions ')
+        run: |
+          set -euo pipefail
+          xcodebuild test \
+            -workspace TodoCalendar.xcworkspace \
+            -scheme Extensions \
+            -derivedDataPath ./DerivedData \
+            -destination "$DESTINATION" \
+            -testLanguage en -testRegion en_US \
+            | xcpretty
 
       - name: Test Domain
         if: contains(needs.detect-changes.outputs.schemes, ' Domain ')
