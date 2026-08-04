@@ -1,0 +1,167 @@
+{
+  "identifier" : "88CE63FC-9C4D-4FA8-99AE-EB866DAC3402",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "39000",
+      "familyShareable" : false,
+      "internalID" : "F7209EB6-48D6-42B3-B770-CFDE31F263DB",
+      "localizations" : [
+        {
+          "description" : "Unlock all premium features permanently with a single purchase.",
+          "displayName" : "Lifetime Plan",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "plan.lifetime",
+      "referenceName" : "Lifetime Plan",
+      "type" : "NonConsumable"
+    },
+    {
+      "displayPrice" : "1200",
+      "familyShareable" : false,
+      "internalID" : "F22C4EF8-F1F7-483C-A910-6BE2F898DE32",
+      "localizations" : [
+        {
+          "description" : "Add a small amount of AI command credits.",
+          "displayName" : "Top-up Tier 1",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "topup.tier.1",
+      "referenceName" : "Top-up Tier 1",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "2900",
+      "familyShareable" : false,
+      "internalID" : "4FF2B0AC-1B06-4A95-AEFD-038A399BD6CB",
+      "localizations" : [
+        {
+          "description" : "Add a medium amount of AI command credits.",
+          "displayName" : "Top-up Tier 2",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "topup.tier.2",
+      "referenceName" : "Top-up Tier 2",
+      "type" : "Consumable"
+    },
+    {
+      "displayPrice" : "5900",
+      "familyShareable" : false,
+      "internalID" : "845E09E0-87E7-4AE5-9077-E4F8C379F91A",
+      "localizations" : [
+        {
+          "description" : "Add a large amount of AI command credits.",
+          "displayName" : "Top-up Tier 3",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "topup.tier.3",
+      "referenceName" : "Top-up Tier 3",
+      "type" : "Consumable"
+    }
+  ],
+  "settings" : {
+    "_askToBuyEnabled" : false,
+    "_billingIssuesEnabled" : false,
+    "_disableDialogs" : false,
+    "_failTransactionsEnabled" : false,
+    "_locale" : "ko_KR",
+    "_negativeReviewsEnabled" : false,
+    "_storeKitErrors" : [
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Load Products"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Purchase"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Verification"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Store Sync"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Subscription Status"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "App Transaction"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Manage Subscriptions Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Refund Request Sheet"
+      },
+      {
+        "current" : null,
+        "enabled" : false,
+        "name" : "Offer Code Redeem Sheet"
+      }
+    ],
+    "_storefront" : "KOR"
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "EEED14AC-46C6-4446-9D89-E9020B28E4D3",
+      "localizations" : [
+
+      ],
+      "name" : "Standard",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "4900",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "C2B87CBB-20C6-4673-ACEB-39A1861026AC",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Monthly subscription unlocking all premium features.",
+              "displayName" : "Standard Monthly",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "plan.standard.monthly",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Standard Monthly",
+          "subscriptionGroupID" : "EEED14AC-46C6-4446-9D89-E9020B28E4D3",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

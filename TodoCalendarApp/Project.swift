@@ -188,5 +188,18 @@ let project = Project.app(
             )
         ],
         withTest: false
-    )
+    ),
+    schemes: [
+        .scheme(
+            name: "TodoCalendarApp-StoreKit",
+            shared: true,
+            buildAction: .buildAction(targets: ["TodoCalendarApp"]),
+            runAction: .runAction(
+                executable: .executable(.target("TodoCalendarApp")),
+                options: .options(
+                    storeKitConfigurationPath: .relativeToRoot("TodoCalendarApp/Resources/Billing.storekit")
+                )
+            )
+        )
+    ]
 )
