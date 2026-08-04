@@ -9,6 +9,7 @@
 import Foundation
 import Domain
 import Repository
+import CommonPresentation
 
 
 struct ShareUsecaseFactory {
@@ -43,6 +44,19 @@ extension ShareUsecaseFactory {
         return ShareCommandSubmitService(
             repository: self.makeAICommandRepository(),
             authStore: self.base.authStore
+        )
+    }
+
+    // 공유 시트도 앱에서 고른 테마·폰트 스케일을 따른다 — 위젯과 같은 조립(UserDefaults 저장값)
+    func makeViewAppearance(isSystemDarkTheme: Bool) -> ViewAppearance {
+        let repository = AppSettingLocalRepositoryImple(
+            storage: AppSettingLocalStorage(
+                environmentStorage: self.base.userDefaultEnvironmentStorage
+            )
+        )
+        return ViewAppearance(
+            setting: repository.loadSavedViewAppearance(),
+            isSystemDarkTheme: isSystemDarkTheme
         )
     }
 }

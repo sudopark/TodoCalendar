@@ -596,3 +596,12 @@
 "billing::paywall::pending::message" = "Bitte einen Familienorganisator, diesen Kauf zu genehmigen. Er wird nach der Genehmigung automatisch angewendet.";
 "billing::paywall::userPlan::loadFailed" = "Dein Tarif konnte nicht geladen werden. Bitte versuche es erneut.";
 "billing::paywall::retry" = "Erneut versuchen";
+
+// MARK: - share extension
+
+"share.ai::title" = "An die KI senden";
+"share.ai::instruction::placeholder" = "Anweisung hinzufügen (optional)";
+"share.ai::needSignIn" = "Melden Sie sich in der App an, um die KI-Schnelleingabe zu nutzen.";
+"share.ai::pending" = "Eine frühere Anfrage steht noch aus. Öffnen Sie die App, um Fortschritt oder Ergebnis zu sehen.";
+"share.ai::sent" = "Gesendet. Das Ergebnis sehen Sie in der App.";
+"share.ai::failed" = "Senden fehlgeschlagen. Bitte versuchen Sie es erneut.";

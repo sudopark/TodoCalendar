@@ -596,3 +596,12 @@
 "billing::paywall::pending::message" = "Demana a un organitzador familiar que aprovi aquesta compra. S'aplicarà automàticament quan s'aprovi.";
 "billing::paywall::userPlan::loadFailed" = "No s'ha pogut carregar el teu pla. Torna-ho a provar.";
 "billing::paywall::retry" = "Torna-ho a provar";
+
+// MARK: - share extension
+
+"share.ai::title" = "Envia a la IA";
+"share.ai::instruction::placeholder" = "Afegiu una instrucció (opcional)";
+"share.ai::needSignIn" = "Inicieu sessió a l'app per utilitzar l'entrada ràpida amb IA.";
+"share.ai::pending" = "Una sol·licitud anterior encara està pendent. Obriu l'app per veure'n el progrés o el resultat.";
+"share.ai::sent" = "Enviat. Podeu veure el resultat a l'app.";
+"share.ai::failed" = "No s'ha pogut enviar. Torneu-ho a provar.";

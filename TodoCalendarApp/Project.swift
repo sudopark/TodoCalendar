@@ -228,6 +228,10 @@ let project = Project.app(
             .project(
                 target: "Repository",
                 path: .relativeToCurrentFile("../Repository")
+            ),
+            .project(
+                target: "CommonPresentation",
+                path: .relativeToCurrentFile("../Presentations/CommonPresentation")
             )
         ],
         signingConfigures: [

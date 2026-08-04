@@ -596,3 +596,12 @@
 "billing::paywall::pending::message" = "請等候家人共享的管理者核准此購買項目，核准後將自動套用。";
 "billing::paywall::userPlan::loadFailed" = "無法載入您的方案，請重試。";
 "billing::paywall::retry" = "重試";
+
+// MARK: - share extension
+
+"share.ai::title" = "傳送給 AI";
+"share.ai::instruction::placeholder" = "新增指示（選填）";
+"share.ai::needSignIn" = "請先在 App 中登入，以使用 AI 快速輸入。";
+"share.ai::pending" = "上一個請求尚未處理完成。請在 App 中查看進度或結果。";
+"share.ai::sent" = "已傳送。可在 App 中查看結果。";
+"share.ai::failed" = "傳送失敗。請再試一次。";

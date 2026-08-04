@@ -596,3 +596,12 @@
 "billing::paywall::pending::message" = "Pyydä perheen järjestäjää hyväksymään tämä ostos. Se otetaan käyttöön automaattisesti hyväksynnän jälkeen.";
 "billing::paywall::userPlan::loadFailed" = "Tilaustasi ei voitu ladata. Yritä uudelleen.";
 "billing::paywall::retry" = "Yritä uudelleen";
+
+// MARK: - share extension
+
+"share.ai::title" = "Lähetä tekoälylle";
+"share.ai::instruction::placeholder" = "Lisää ohje (valinnainen)";
+"share.ai::needSignIn" = "Kirjaudu sisään sovelluksessa käyttääksesi AI-pikasyöttöä.";
+"share.ai::pending" = "Aiempi pyyntö on yhä kesken. Avaa sovellus nähdäksesi sen etenemisen tai tuloksen.";
+"share.ai::sent" = "Lähetetty. Näet tuloksen sovelluksessa.";
+"share.ai::failed" = "Lähetys epäonnistui. Yritä uudelleen.";

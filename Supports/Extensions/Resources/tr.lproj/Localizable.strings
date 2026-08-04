@@ -596,3 +596,12 @@
 "billing::paywall::pending::message" = "Bu satın alımı onaylaması için bir aile organizatöründen isteyin. Onaylandığında otomatik olarak uygulanır.";
 "billing::paywall::userPlan::loadFailed" = "Planınız yüklenemedi. Lütfen tekrar deneyin.";
 "billing::paywall::retry" = "Tekrar dene";
+
+// MARK: - share extension
+
+"share.ai::title" = "AI'ya gönder";
+"share.ai::instruction::placeholder" = "Bir yönerge ekleyin (isteğe bağlı)";
+"share.ai::needSignIn" = "Hızlı AI girişini kullanmak için uygulamada giriş yapın.";
+"share.ai::pending" = "Önceki bir istek hâlâ bekliyor. İlerlemesini veya sonucunu görmek için uygulamayı açın.";
+"share.ai::sent" = "Gönderildi. Sonucu uygulamada görebilirsiniz.";
+"share.ai::failed" = "Gönderilemedi. Lütfen tekrar deneyin.";

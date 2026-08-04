@@ -596,3 +596,12 @@
 "billing::paywall::pending::message" = "Kérd meg a családszervezőt, hogy hagyja jóvá ezt a vásárlást. Jóváhagyás után automatikusan érvénybe lép.";
 "billing::paywall::userPlan::loadFailed" = "Nem sikerült betölteni a csomagodat. Kérjük, próbáld újra.";
 "billing::paywall::retry" = "Újrapróbálás";
+
+// MARK: - share extension
+
+"share.ai::title" = "Küldés az AI-nak";
+"share.ai::instruction::placeholder" = "Utasítás hozzáadása (opcionális)";
+"share.ai::needSignIn" = "Jelentkezzen be az alkalmazásban az AI gyorsbevitel használatához.";
+"share.ai::pending" = "Egy korábbi kérés még függőben van. Nyissa meg az alkalmazást a folyamat vagy az eredmény megtekintéséhez.";
+"share.ai::sent" = "Elküldve. Az eredményt az alkalmazásban tekintheti meg.";
+"share.ai::failed" = "Nem sikerült elküldeni. Próbálja újra.";

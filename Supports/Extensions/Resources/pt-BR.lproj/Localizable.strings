@@ -596,3 +596,12 @@
 "billing::paywall::pending::message" = "Peça a um organizador familiar para aprovar esta compra. Ela será aplicada automaticamente assim que for aprovada.";
 "billing::paywall::userPlan::loadFailed" = "Não foi possível carregar seu plano. Tente novamente.";
 "billing::paywall::retry" = "Tentar novamente";
+
+// MARK: - share extension
+
+"share.ai::title" = "Enviar para a IA";
+"share.ai::instruction::placeholder" = "Adicione uma instrução (opcional)";
+"share.ai::needSignIn" = "Faça login no app para usar a entrada rápida por IA.";
+"share.ai::pending" = "Uma solicitação anterior ainda está pendente. Abra o app para ver o andamento ou o resultado.";
+"share.ai::sent" = "Enviado. Você pode ver o resultado no app.";
+"share.ai::failed" = "Não foi possível enviar. Tente novamente.";

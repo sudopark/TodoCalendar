@@ -596,3 +596,12 @@
 "billing::paywall::pending::message" = "Minta penganjur keluarga meluluskan pembelian ini. Ia akan digunakan secara automatik setelah diluluskan.";
 "billing::paywall::userPlan::loadFailed" = "Tidak dapat memuatkan pelan anda. Sila cuba lagi.";
 "billing::paywall::retry" = "Cuba lagi";
+
+// MARK: - share extension
+
+"share.ai::title" = "Hantar ke AI";
+"share.ai::instruction::placeholder" = "Tambah arahan (pilihan)";
+"share.ai::needSignIn" = "Log masuk dalam aplikasi untuk menggunakan input pantas AI.";
+"share.ai::pending" = "Permintaan sebelumnya masih menunggu. Buka aplikasi untuk melihat kemajuan atau hasilnya.";
+"share.ai::sent" = "Dihantar. Anda boleh melihat hasilnya dalam aplikasi.";
+"share.ai::failed" = "Tidak dapat menghantar. Sila cuba lagi.";
