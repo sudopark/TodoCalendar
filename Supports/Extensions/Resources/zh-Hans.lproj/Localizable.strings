@@ -579,6 +579,7 @@
 "billing::paywall::feature::dailyCredits" = "每天 %@ 积分";
 "billing::paywall::feature::topup" = "积分用完后可追加购买";
 "billing::paywall::disclosure::subscription" = "订阅将每月自动续订，除非您在当前订阅期结束前至少24小时取消。您可以随时在App Store设置中取消订阅。";
+"billing::paywall::disclosure::subscription::generic" = "订阅将在每个计费周期结束时自动续订，除非您在该周期结束前至少24小时取消。您可以随时在App Store设置中取消订阅。";
 "billing::paywall::disclosure::oneTime" = "一次性付款，永久使用，不会自动续订。";
 "billing::paywall::disclosure::storeUnavailable" = "无法连接到App Store，请稍后再试。";
 "billing::paywall::cta::subscribe" = "订阅%@";

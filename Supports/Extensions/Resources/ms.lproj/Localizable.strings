@@ -579,6 +579,7 @@
 "billing::paywall::feature::dailyCredits" = "%@ kredit sehari";
 "billing::paywall::feature::topup" = "Boleh beli tambahan apabila kredit habis";
 "billing::paywall::disclosure::subscription" = "Langganan anda akan diperbaharui secara automatik setiap bulan melainkan anda membatalkannya sekurang-kurangnya 24 jam sebelum tempoh semasa tamat. Anda boleh membatalkannya pada bila-bila masa dalam tetapan App Store.";
+"billing::paywall::disclosure::subscription::generic" = "Langganan anda akan diperbaharui secara automatik pada akhir setiap tempoh pengebilan, melainkan anda membatalkannya sekurang-kurangnya 24 jam sebelum tempoh itu tamat. Anda boleh membatalkannya pada bila-bila masa dalam tetapan App Store.";
 "billing::paywall::disclosure::oneTime" = "Bayar sekali dan gunakan selama-lamanya. Ini tidak diperbaharui secara automatik.";
 "billing::paywall::disclosure::storeUnavailable" = "Tidak dapat menyambung ke App Store. Sila cuba lagi kemudian.";
 "billing::paywall::cta::subscribe" = "Langgan %@";

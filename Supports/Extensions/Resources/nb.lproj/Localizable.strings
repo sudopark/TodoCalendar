@@ -579,6 +579,7 @@
 "billing::paywall::feature::dailyCredits" = "%@ credits per dag";
 "billing::paywall::feature::topup" = "Du kan kjøpe flere når credits er brukt opp";
 "billing::paywall::disclosure::subscription" = "Abonnementet fornyes automatisk hver måned med mindre du sier det opp minst 24 timer før inneværende periode utløper. Du kan si opp når som helst i innstillingene for App Store.";
+"billing::paywall::disclosure::subscription::generic" = "Abonnementet fornyes automatisk ved slutten av hver faktureringsperiode med mindre du sier det opp minst 24 timer før den utløper. Du kan si opp når som helst i innstillingene for App Store.";
 "billing::paywall::disclosure::oneTime" = "Betal én gang og behold det for alltid. Dette fornyes ikke automatisk.";
 "billing::paywall::disclosure::storeUnavailable" = "Kunne ikke koble til App Store. Prøv igjen senere.";
 "billing::paywall::cta::subscribe" = "Abonner på %@";

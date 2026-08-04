@@ -25,13 +25,15 @@ final class PaywallViewModelImpleTests: PublisherWaitable {
         offerings: [BillingPlanOffering] = [],
         catalogLoadError: (any Error)? = nil,
         purchaseResult: Result<BillingPurchaseResult, any Error> = .success(.cancelled),
-        userPlan: BillingUserPlan? = nil
+        userPlan: BillingUserPlan? = nil,
+        restoreResult: BillingUserPlan? = nil
     ) -> (PaywallViewModelImple, StubBillingUsecase, SpyPaywallRouter) {
         let stub = StubBillingUsecase(
             offerings: offerings,
             catalogLoadError: catalogLoadError,
             purchaseResult: purchaseResult,
-            userPlan: userPlan
+            userPlan: userPlan,
+            restoreResult: restoreResult
         )
         let viewModel = PaywallViewModelImple(billingUsecase: stub)
         let router = SpyPaywallRouter()
@@ -39,15 +41,15 @@ final class PaywallViewModelImpleTests: PublisherWaitable {
         return (viewModel, stub, router)
     }
 
-    // restore()는 별도 퍼블리셔 토글이 없어(purchase()의 isPurchasing 같은 신호가 없다),
-    // 라우터에 결과가 반영될 때까지 짧게 폴링해 async Task 완료를 기다린다.
-    private func waitUntil(
-        timeout: Duration = .seconds(1), _ condition: @Sendable () -> Bool
+    // purchase()·restore() 둘 다 isPurchasing 을 true → false 로 토글한다(I4 — restore() 도
+    // 재진입 가드 겸 진행 신호로 이 subject 를 공유한다, #739). 3회(초기 false → true →
+    // 완료 후 false) 관찰해 Task 완료(=stub 호출 반영)까지 기다린다.
+    private func waitProcessingCompleted(
+        _ viewModel: any PaywallViewModel, action: @escaping () -> Void
     ) async throws {
-        let deadline = ContinuousClock.now + timeout
-        while condition() == false, ContinuousClock.now < deadline {
-            try await Task.sleep(for: .milliseconds(5))
-        }
+        let expect = expectConfirm("처리 완료")
+        expect.count = 3
+        _ = try await self.outputs(expect, for: viewModel.isPurchasing) { action() }
     }
 
     private func purchasableOffering(
@@ -263,24 +265,38 @@ extension PaywallViewModelImpleTests {
         // then
         #expect(detail?.disclosure == "billing::paywall::disclosure::oneTime".localized())
     }
+
+    // C2 회귀 — 월간(monthly) 이외의 구독 주기는 "매월"로 고정된 문구가 아니라 기간을
+    // 단정하지 않는 공용 고지문을 써야 한다. 안 그러면 연간 상품에 "매월 자동 갱신됩니다"가
+    // 붙어 구독 기간을 잘못 표기하게 된다(App Store 리젝 사유). 변칙 주기(period == nil)도 동일
+    @Test(
+        "월간 외 구독 주기는 공용 고지문",
+        arguments: [BillingSubscriptionPeriod?.some(.weekly), .some(.yearly), .none]
+    )
+    func viewModel_whenNonMonthlySubscriptionSelected_showsGenericDisclosure(
+        _ period: BillingSubscriptionPeriod?
+    ) async throws {
+        // given
+        let standard = self.purchasableOffering(
+            .standard, productId: "product.standard", kind: .subscription(period: period)
+        )
+        let (viewModel, _, _) = self.makeViewModel(offerings: [standard])
+
+        // when
+        _ = try await self.waitOfferingsLoaded(viewModel)
+        viewModel.selectPlan(.standard)
+        let detailExpect = expectConfirm("공용 고지문")
+        let detail = try await self.firstOutput(detailExpect, for: viewModel.selectedPlanDetail) ?? nil
+
+        // then
+        #expect(detail?.disclosure == "billing::paywall::disclosure::subscription::generic".localized())
+    }
 }
 
 
 // MARK: - 구매
 
 extension PaywallViewModelImpleTests {
-
-    // purchase() 는 isPurchasing 을 true → false 로 토글한다. 3회(초기 false → true →
-    // 완료 후 false) 관찰해 Task 완료(=stub 호출 반영)까지 기다린다.
-    private func waitPurchaseCompleted(
-        _ viewModel: any PaywallViewModel
-    ) async throws {
-        let expect = expectConfirm("purchase 완료")
-        expect.count = 3
-        _ = try await self.outputs(expect, for: viewModel.isPurchasing) {
-            viewModel.purchase()
-        }
-    }
 
     @Test func viewModel_purchase_passesSelectedPlanProductId() async throws {
         // given
@@ -292,7 +308,7 @@ extension PaywallViewModelImpleTests {
         viewModel.selectPlan(.standard)
 
         // when
-        try await self.waitPurchaseCompleted(viewModel)
+        try await self.waitProcessingCompleted(viewModel) { viewModel.purchase() }
 
         // then
         #expect(stub.didPurchasedProductId == "product.standard")
@@ -308,7 +324,7 @@ extension PaywallViewModelImpleTests {
         viewModel.selectPlan(.standard)
 
         // when
-        try await self.waitPurchaseCompleted(viewModel)
+        try await self.waitProcessingCompleted(viewModel) { viewModel.purchase() }
 
         // then
         #expect(router.didClosed == nil)
@@ -324,7 +340,7 @@ extension PaywallViewModelImpleTests {
         viewModel.selectPlan(.standard)
 
         // when
-        try await self.waitPurchaseCompleted(viewModel)
+        try await self.waitProcessingCompleted(viewModel) { viewModel.purchase() }
 
         // then
         #expect(router.didShowConfirmWith?.title == "billing::paywall::pending::title".localized())
@@ -341,7 +357,7 @@ extension PaywallViewModelImpleTests {
         viewModel.selectPlan(.standard)
 
         // when
-        try await self.waitPurchaseCompleted(viewModel)
+        try await self.waitProcessingCompleted(viewModel) { viewModel.purchase() }
 
         // then
         #expect(router.didShowError is TestError)
@@ -359,11 +375,56 @@ extension PaywallViewModelImpleTests {
         viewModel.selectPlan(.standard)
 
         // when
-        try await self.waitPurchaseCompleted(viewModel)
+        try await self.waitProcessingCompleted(viewModel) { viewModel.purchase() }
 
         // then
         #expect(router.didShowToastWithMessage == "billing::paywall::purchase::applied".localized())
         #expect(router.didClosed == true)
+    }
+
+    // C1 회귀 — 선택 시점엔 구매 가능했더라도, 그 뒤 복원 등으로 보유 플랜이 선택 플랜을
+    // 커버하게 되면 CTA(selectedPlanId)가 무효화되고 purchase() 는 청구를 시도하지 않는다.
+    // 구 코드는 userSelectedPlanId 를 재검증 없이 그대로 신뢰해 이미 보유한 상위 플랜에
+    // 하위 플랜을 중복 청구했다
+    @Test func viewModel_whenSelectedPlanBecomesCoveredAfterRestore_blocksPurchase() async throws {
+        // given: free 로 진입해 standard 선택
+        let standard = self.purchasableOffering(.standard, productId: "product.standard")
+        let lifetime = self.purchasableOffering(.lifetime, productId: "product.lifetime", kind: .oneTime)
+        let (viewModel, stub, router) = self.makeViewModel(
+            offerings: [standard, lifetime],
+            restoreResult: BillingUserPlan() |> \.planId .~ .lifetime
+        )
+        _ = try await self.waitOfferingsLoaded(viewModel)
+        viewModel.selectPlan(.standard)
+
+        // when: 복원으로 lifetime 이 잡힌다 — standard 는 이제 covered.
+        // 같은 구독으로 선택 직후 값과 복원 후 값을 함께 관찰해, "복원 완료를 먼저 기다린 뒤
+        // 새로 구독"하는 2단계 방식의 타이밍 경합 없이 상태 전이를 그대로 잡아낸다
+        viewModel.restore()
+
+        var currentAfter: BillingPlanId?? = .some(nil)
+        for _ in 0..<100 {
+            let expect = expectConfirm("poll currentPlan")
+            currentAfter = try await self.firstOutput(expect, for: viewModel.currentPlan)
+            if currentAfter == .some(.lifetime) { break }
+            try await Task.sleep(for: .milliseconds(20))
+        }
+        #expect(currentAfter == .some(.lifetime))
+
+        var selectedAfter: BillingPlanId?? = .some(.standard)
+        for _ in 0..<100 {
+            let expect = expectConfirm("poll selectedPlanId")
+            selectedAfter = try await self.firstOutput(expect, for: viewModel.selectedPlanId)
+            if selectedAfter == .some(nil) { break }
+            try await Task.sleep(for: .milliseconds(20))
+        }
+        // then: 선택 직후엔 standard, 복원 후엔 covered 라 무효화된다
+        #expect(selectedAfter == .some(nil))
+
+        // and: purchase() 를 눌러도 청구를 시도하지 않는다
+        viewModel.purchase()
+        #expect(stub.didPurchasedProductId == nil)
+        #expect(router.didClosed == nil)
     }
 }
 
@@ -375,12 +436,11 @@ extension PaywallViewModelImpleTests {
     @Test func viewModel_restore_whenPurchaseFound_showsRestoredToast() async throws {
         // given
         let (viewModel, stub, router) = self.makeViewModel(
-            userPlan: BillingUserPlan() |> \.planId .~ .standard
+            restoreResult: BillingUserPlan() |> \.planId .~ .standard
         )
 
         // when
-        viewModel.restore()
-        try await self.waitUntil { router.didShowToastWithMessage != nil }
+        try await self.waitProcessingCompleted(viewModel) { viewModel.restore() }
 
         // then
         #expect(stub.didRestoreCalled == true)
@@ -388,15 +448,36 @@ extension PaywallViewModelImpleTests {
     }
 
     @Test func viewModel_restore_whenNothingToRestore_showsEmptyGuide() async throws {
-        // given: 복원할 구매가 없음(userPlan nil)
-        let (viewModel, stub, router) = self.makeViewModel(userPlan: nil)
+        // given: 복원할 구매가 없음(restoreResult nil)
+        let (viewModel, stub, router) = self.makeViewModel(restoreResult: nil)
 
         // when
-        viewModel.restore()
-        try await self.waitUntil { router.didShowToastWithMessage != nil }
+        try await self.waitProcessingCompleted(viewModel) { viewModel.restore() }
 
         // then
         #expect(stub.didRestoreCalled == true)
         #expect(router.didShowToastWithMessage == "billing::paywall::restore::empty".localized())
+    }
+
+    // I4 회귀 — 진행 중 재호출은 무시된다(AppStore.sync() 병렬 실행 방지).
+    // 가드가 없다면 두 번째 호출도 곧바로 true 를 재전송해 (false, true, true) 로 3회가
+    // 동기적으로 채워지고, 첫 호출의 완료(defer 의 false)를 기다리지 않게 된다
+    @Test func viewModel_restore_whenAlreadyInProgress_ignoresDuplicateCall() async throws {
+        // given
+        let (viewModel, _, _) = self.makeViewModel(
+            restoreResult: BillingUserPlan() |> \.planId .~ .standard
+        )
+
+        // when
+        let expect = expectConfirm("재호출 무시")
+        expect.count = 3
+        let states = try await self.outputs(expect, for: viewModel.isPurchasing) {
+            viewModel.restore()
+            viewModel.restore()
+        }
+
+        // then: 세 번째 값이 첫 호출 Task 완료의 false 다 — 두 번째 호출이 별도로
+        // true 를 재전송하지 않았다
+        #expect(states == [false, true, false])
     }
 }

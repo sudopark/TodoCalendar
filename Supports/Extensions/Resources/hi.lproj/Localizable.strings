@@ -579,6 +579,7 @@
 "billing::paywall::feature::dailyCredits" = "रोज़ %@ क्रेडिट";
 "billing::paywall::feature::topup" = "क्रेडिट खत्म होने पर और खरीदे जा सकते हैं";
 "billing::paywall::disclosure::subscription" = "आपकी सदस्यता हर महीने अपने आप नवीनीकृत होती है, जब तक कि आप मौजूदा अवधि समाप्त होने से कम से कम 24 घंटे पहले इसे रद्द न करें। आप App Store सेटिंग्स में कभी भी इसे रद्द कर सकते हैं।";
+"billing::paywall::disclosure::subscription::generic" = "आपकी सदस्यता हर बिलिंग अवधि के अंत में अपने आप नवीनीकृत होती है, जब तक कि आप उसके समाप्त होने से कम से कम 24 घंटे पहले उसे रद्द न करें। आप App Store सेटिंग्स में कभी भी इसे रद्द कर सकते हैं।";
 "billing::paywall::disclosure::oneTime" = "एक बार भुगतान करें और हमेशा के लिए इस्तेमाल करें। यह अपने आप नवीनीकृत नहीं होता।";
 "billing::paywall::disclosure::storeUnavailable" = "App Store से कनेक्ट नहीं हो सका। कृपया बाद में फिर से कोशिश करें।";
 "billing::paywall::cta::subscribe" = "%@ की सदस्यता लें";

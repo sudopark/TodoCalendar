@@ -579,6 +579,7 @@
 "billing::paywall::feature::dailyCredits" = "%@ кредитів на день";
 "billing::paywall::feature::topup" = "Можна докупити кредити, коли вони закінчаться";
 "billing::paywall::disclosure::subscription" = "Підписка автоматично поновлюється щомісяця, якщо ви не скасуєте її щонайменше за 24 години до завершення поточного періоду. Скасувати підписку можна будь-коли в налаштуваннях App Store.";
+"billing::paywall::disclosure::subscription::generic" = "Підписка автоматично поновлюється в кінці кожного розрахункового періоду, якщо ви не скасуєте її щонайменше за 24 години до його завершення. Скасувати підписку можна будь-коли в налаштуваннях App Store.";
 "billing::paywall::disclosure::oneTime" = "Заплатіть один раз і користуйтеся назавжди. Автоматичне поновлення відсутнє.";
 "billing::paywall::disclosure::storeUnavailable" = "Не вдалося підключитися до App Store. Спробуйте пізніше.";
 "billing::paywall::cta::subscribe" = "Підписатися на %@";

@@ -579,6 +579,7 @@
 "billing::paywall::feature::dailyCredits" = "%@ credits per dag";
 "billing::paywall::feature::topup" = "Extra credits bijkopen als ze op zijn";
 "billing::paywall::disclosure::subscription" = "Je abonnement wordt elke maand automatisch verlengd, tenzij je minstens 24 uur voor het einde van de huidige periode opzegt. Je kunt op elk moment opzeggen via de App Store-instellingen.";
+"billing::paywall::disclosure::subscription::generic" = "Je abonnement wordt automatisch verlengd aan het einde van elke factureringsperiode, tenzij je minstens 24 uur van tevoren opzegt. Je kunt op elk moment opzeggen via de App Store-instellingen.";
 "billing::paywall::disclosure::oneTime" = "Betaal eenmalig en behoud het voorgoed. Dit wordt niet automatisch verlengd.";
 "billing::paywall::disclosure::storeUnavailable" = "Kan geen verbinding maken met de App Store. Probeer het later opnieuw.";
 "billing::paywall::cta::subscribe" = "Abonneer op %@";
