@@ -414,6 +414,7 @@
 "setting.help::name" = "Yardım";
 "setting.share::name" = "Uygulamayı Paylaş";
 "setting.write_review::name" = "Uygulama değerlendirmesi yaz";
+"setting.billing.plan::name" = "Plan";
 "setting.account.signedIn::manageAccount" = "Hesap";
 "setting.account.needSignIn" = "Giriş Yap";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -551,12 +552,44 @@
 "aiAgent::keyboard::send" = "Gönder";
 "aiAgent::stop" = "Durdur";
 "aiAgent::usage" = "%@ / %@ kredi";
-"aiAgent::plan::free" = "Ücretsiz";
-"aiAgent::plan::standard" = "Standart";
-"aiAgent::plan::lifetime" = "Ömür Boyu";
 "aiAgent::usage::topupRemaining" = "%@ ek kredi kaldı";
 "aiAgent::usage::planChangeScheduled" = "%1$@ tarihinde %2$@ planına geçiş";
 "aiAgent::stop::confirm::title" = "İşlem durdurulsun mu?";
 "aiAgent::stop::confirm::message" = "Durdurmak, devam eden işlemi iptal eder ve geri alınamaz.";
 "aiAgent::confirm::countdown" = "onaylamak için kaldı";
 "aiAgent::confirm::expired::message" = "Süre doldu. Lütfen tekrar talep edin.";
+"aiAgent::failed::showPlans" = "Planları görüntüle";
+
+// MARK: - billing
+
+"billing::plan::free" = "Ücretsiz";
+"billing::plan::standard" = "Standart";
+"billing::plan::lifetime" = "Ömür Boyu";
+
+"billing::paywall::title" = "Planı yükselt";
+"billing::paywall::current::description" = "günde %@ kredi";
+"billing::paywall::metric::dailyCredits" = "%@ kredi/gün";
+"billing::paywall::period::weekly" = "/hf";
+"billing::paywall::period::monthly" = "/ay";
+"billing::paywall::period::yearly" = "/yıl";
+"billing::paywall::price::unavailable" = "Fiyat alınamadı";
+"billing::paywall::badge::recommended" = "Önerilen";
+"billing::paywall::badge::owned" = "Mevcut plan";
+"billing::paywall::features::title" = "%@ neler içerir";
+"billing::paywall::feature::dailyCredits" = "günde %@ kredi";
+"billing::paywall::feature::topup" = "Krediler tükendiğinde ek satın alma yapılabilir";
+"billing::paywall::disclosure::subscription" = "Aboneliğiniz, mevcut dönem sona ermeden en az 24 saat önce iptal etmediğiniz sürece her ay otomatik olarak yenilenir. Aboneliğinizi App Store ayarlarından istediğiniz zaman iptal edebilirsiniz.";
+"billing::paywall::disclosure::oneTime" = "Bir kez ödeyin ve süresiz kullanın. Bu, otomatik olarak yenilenmez.";
+"billing::paywall::disclosure::storeUnavailable" = "App Store'a bağlanılamadı. Lütfen daha sonra tekrar deneyin.";
+"billing::paywall::cta::subscribe" = "%@ Aboneliği Başlat";
+"billing::paywall::cta::buy" = "%@ Satın Al";
+"billing::paywall::cta::unavailable" = "Kullanılamıyor";
+"billing::paywall::allPlansOwned" = "Zaten en iyi plana sahipsiniz.";
+"billing::paywall::terms" = "Hizmet Şartları";
+"billing::paywall::privacyPolicy" = "Gizlilik Politikası";
+"billing::paywall::restore" = "Satın Alımları Geri Yükle";
+"billing::paywall::restored" = "Satın alımlar geri yüklendi";
+"billing::paywall::restore::empty" = "Geri yüklenecek satın alma yok.";
+"billing::paywall::purchase::applied" = "Plan güncellendi";
+"billing::paywall::pending::title" = "Onay bekleniyor";
+"billing::paywall::pending::message" = "Bu satın alımı onaylaması için bir aile organizatöründen isteyin. Onaylandığında otomatik olarak uygulanır.";

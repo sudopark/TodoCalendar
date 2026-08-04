@@ -414,6 +414,7 @@
 "setting.help::name" = "सहायता";
 "setting.share::name" = "ऐप साझा करें";
 "setting.write_review::name" = "ऐप समीक्षा लिखें";
+"setting.billing.plan::name" = "प्लान";
 "setting.account.signedIn::manageAccount" = "खाता";
 "setting.account.needSignIn" = "लॉगिन";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -551,12 +552,44 @@
 "aiAgent::keyboard::send" = "भेजें";
 "aiAgent::stop" = "रोकें";
 "aiAgent::usage" = "%@ / %@ क्रेडिट";
-"aiAgent::plan::free" = "फ्री";
-"aiAgent::plan::standard" = "स्टैंडर्ड";
-"aiAgent::plan::lifetime" = "लाइफटाइम";
 "aiAgent::usage::topupRemaining" = "%@ अतिरिक्त क्रेडिट बचे हैं";
 "aiAgent::usage::planChangeScheduled" = "%1$@ को %2$@ प्लान में बदलाव होगा";
 "aiAgent::stop::confirm::title" = "प्रोसेसिंग रोकें?";
 "aiAgent::stop::confirm::message" = "रोकने से जारी निर्देश छोड़ दिया जाएगा, और इसे फिर से शुरू नहीं किया जा सकेगा।";
 "aiAgent::confirm::countdown" = "स्वीकृति के लिए शेष";
 "aiAgent::confirm::expired::message" = "समय समाप्त हो गया। कृपया फिर से अनुरोध करें।";
+"aiAgent::failed::showPlans" = "प्लान देखें";
+
+// MARK: - billing
+
+"billing::plan::free" = "फ्री";
+"billing::plan::standard" = "स्टैंडर्ड";
+"billing::plan::lifetime" = "लाइफटाइम";
+
+"billing::paywall::title" = "प्लान अपग्रेड करें";
+"billing::paywall::current::description" = "रोज़ %@ क्रेडिट";
+"billing::paywall::metric::dailyCredits" = "%@ क्रेडिट/दिन";
+"billing::paywall::period::weekly" = "/सप्ताह";
+"billing::paywall::period::monthly" = "/माह";
+"billing::paywall::period::yearly" = "/वर्ष";
+"billing::paywall::price::unavailable" = "कीमत लोड नहीं हो सकी";
+"billing::paywall::badge::recommended" = "अनुशंसित";
+"billing::paywall::badge::owned" = "मौजूदा प्लान";
+"billing::paywall::features::title" = "%@ में क्या शामिल है";
+"billing::paywall::feature::dailyCredits" = "रोज़ %@ क्रेडिट";
+"billing::paywall::feature::topup" = "क्रेडिट खत्म होने पर और खरीदे जा सकते हैं";
+"billing::paywall::disclosure::subscription" = "आपकी सदस्यता हर महीने अपने आप नवीनीकृत होती है, जब तक कि आप मौजूदा अवधि समाप्त होने से कम से कम 24 घंटे पहले इसे रद्द न करें। आप App Store सेटिंग्स में कभी भी इसे रद्द कर सकते हैं।";
+"billing::paywall::disclosure::oneTime" = "एक बार भुगतान करें और हमेशा के लिए इस्तेमाल करें। यह अपने आप नवीनीकृत नहीं होता।";
+"billing::paywall::disclosure::storeUnavailable" = "App Store से कनेक्ट नहीं हो सका। कृपया बाद में फिर से कोशिश करें।";
+"billing::paywall::cta::subscribe" = "%@ की सदस्यता लें";
+"billing::paywall::cta::buy" = "%@ प्राप्त करें";
+"billing::paywall::cta::unavailable" = "अनुपलब्ध";
+"billing::paywall::allPlansOwned" = "आपके पास पहले से ही सबसे अच्छा प्लान है।";
+"billing::paywall::terms" = "सेवा की शर्तें";
+"billing::paywall::privacyPolicy" = "गोपनीयता नीति";
+"billing::paywall::restore" = "खरीदारी पुनर्स्थापित करें";
+"billing::paywall::restored" = "खरीदारी पुनर्स्थापित की गई";
+"billing::paywall::restore::empty" = "पुनर्स्थापित करने के लिए कोई खरीदारी नहीं है।";
+"billing::paywall::purchase::applied" = "प्लान अपडेट हो गया";
+"billing::paywall::pending::title" = "स्वीकृति लंबित";
+"billing::paywall::pending::message" = "इस खरीदारी को स्वीकृत करने के लिए किसी पारिवारिक व्यवस्थापक से कहें। स्वीकृत होते ही यह अपने आप लागू हो जाएगी।";

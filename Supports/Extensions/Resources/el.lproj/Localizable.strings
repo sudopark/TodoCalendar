@@ -414,6 +414,7 @@
 "setting.help::name" = "Βοήθεια";
 "setting.share::name" = "Κοινοποίηση εφαρμογής";
 "setting.write_review::name" = "Γράψτε μια κριτική για την εφαρμογή";
+"setting.billing.plan::name" = "Πρόγραμμα";
 "setting.account.signedIn::manageAccount" = "Λογαριασμός";
 "setting.account.needSignIn" = "Σύνδεση";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -551,12 +552,44 @@
 "aiAgent::keyboard::send" = "Αποστολή";
 "aiAgent::stop" = "Διακοπή";
 "aiAgent::usage" = "%@ / %@ μονάδες";
-"aiAgent::plan::free" = "Δωρεάν";
-"aiAgent::plan::standard" = "Βασικό";
-"aiAgent::plan::lifetime" = "Διά βίου";
 "aiAgent::usage::topupRemaining" = "Απομένουν %@ επιπλέον μονάδες";
 "aiAgent::usage::planChangeScheduled" = "Μετάβαση στο πρόγραμμα %2$@ στις %1$@";
 "aiAgent::stop::confirm::title" = "Διακοπή επεξεργασίας;";
 "aiAgent::stop::confirm::message" = "Η διακοπή απορρίπτει την εντολή που εκτελείται και δεν θα μπορεί να συνεχιστεί.";
 "aiAgent::confirm::countdown" = "απομένουν για έγκριση";
 "aiAgent::confirm::expired::message" = "Ο χρόνος έληξε. Παρακαλώ κάντε ξανά το αίτημα.";
+"aiAgent::failed::showPlans" = "Προβολή προγραμμάτων";
+
+// MARK: - billing
+
+"billing::plan::free" = "Δωρεάν";
+"billing::plan::standard" = "Βασικό";
+"billing::plan::lifetime" = "Διά βίου";
+
+"billing::paywall::title" = "Αναβάθμιση προγράμματος";
+"billing::paywall::current::description" = "%@ μονάδες την ημέρα";
+"billing::paywall::metric::dailyCredits" = "%@ μονάδες/ημέρα";
+"billing::paywall::period::weekly" = "/εβδ.";
+"billing::paywall::period::monthly" = "/μήνα";
+"billing::paywall::period::yearly" = "/έτος";
+"billing::paywall::price::unavailable" = "Δεν ήταν δυνατή η φόρτωση της τιμής";
+"billing::paywall::badge::recommended" = "Προτείνεται";
+"billing::paywall::badge::owned" = "Τρέχον πρόγραμμα";
+"billing::paywall::features::title" = "Τι περιλαμβάνει το %@";
+"billing::paywall::feature::dailyCredits" = "%@ μονάδες την ημέρα";
+"billing::paywall::feature::topup" = "Μπορείτε να αγοράσετε επιπλέον όταν εξαντληθούν οι μονάδες";
+"billing::paywall::disclosure::subscription" = "Η συνδρομή σας ανανεώνεται αυτόματα κάθε μήνα, εκτός εάν την ακυρώσετε τουλάχιστον 24 ώρες πριν από τη λήξη της τρέχουσας περιόδου. Μπορείτε να την ακυρώσετε ανά πάσα στιγμή από τις ρυθμίσεις του App Store.";
+"billing::paywall::disclosure::oneTime" = "Πληρώστε μία φορά και κρατήστε το για πάντα. Δεν ανανεώνεται αυτόματα.";
+"billing::paywall::disclosure::storeUnavailable" = "Δεν ήταν δυνατή η σύνδεση με το App Store. Δοκιμάστε ξανά αργότερα.";
+"billing::paywall::cta::subscribe" = "Εγγραφή στο %@";
+"billing::paywall::cta::buy" = "Αγορά %@";
+"billing::paywall::cta::unavailable" = "Μη διαθέσιμο";
+"billing::paywall::allPlansOwned" = "Έχετε ήδη το καλύτερο πρόγραμμα.";
+"billing::paywall::terms" = "Όροι υπηρεσίας";
+"billing::paywall::privacyPolicy" = "Πολιτική απορρήτου";
+"billing::paywall::restore" = "Επαναφορά αγορών";
+"billing::paywall::restored" = "Οι αγορές επαναφέρθηκαν";
+"billing::paywall::restore::empty" = "Δεν υπάρχουν αγορές προς επαναφορά.";
+"billing::paywall::purchase::applied" = "Το πρόγραμμα ενημερώθηκε";
+"billing::paywall::pending::title" = "Εκκρεμεί έγκριση";
+"billing::paywall::pending::message" = "Ζητήστε από τον οργανωτή οικογένειας να εγκρίνει αυτήν την αγορά. Θα εφαρμοστεί αυτόματα μόλις εγκριθεί.";

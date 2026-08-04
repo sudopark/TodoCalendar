@@ -414,6 +414,7 @@
 "setting.help::name" = "Hjälp";
 "setting.share::name" = "Dela appen";
 "setting.write_review::name" = "Skriv en recension av appen";
+"setting.billing.plan::name" = "Plan";
 "setting.account.signedIn::manageAccount" = "Konto";
 "setting.account.needSignIn" = "Logga in";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -551,12 +552,44 @@
 "aiAgent::keyboard::send" = "Skicka";
 "aiAgent::stop" = "Stopp";
 "aiAgent::usage" = "%@ / %@ krediter";
-"aiAgent::plan::free" = "Gratis";
-"aiAgent::plan::standard" = "Standard";
-"aiAgent::plan::lifetime" = "Livstid";
 "aiAgent::usage::topupRemaining" = "%@ extra krediter kvar";
 "aiAgent::usage::planChangeScheduled" = "Byte till planen %2$@ den %1$@";
 "aiAgent::stop::confirm::title" = "Avbryta bearbetningen?";
 "aiAgent::stop::confirm::message" = "Om du avbryter kasseras den pågående åtgärden, och den kan inte återupptas.";
 "aiAgent::confirm::countdown" = "kvar för att godkänna";
 "aiAgent::confirm::expired::message" = "Tiden har gått ut. Begär igen.";
+"aiAgent::failed::showPlans" = "Visa planer";
+
+// MARK: - billing
+
+"billing::plan::free" = "Gratis";
+"billing::plan::standard" = "Standard";
+"billing::plan::lifetime" = "Livstid";
+
+"billing::paywall::title" = "Uppgradera plan";
+"billing::paywall::current::description" = "%@ krediter per dag";
+"billing::paywall::metric::dailyCredits" = "%@ krediter/dag";
+"billing::paywall::period::weekly" = "/vecka";
+"billing::paywall::period::monthly" = "/mån";
+"billing::paywall::period::yearly" = "/år";
+"billing::paywall::price::unavailable" = "Priset kunde inte hämtas";
+"billing::paywall::badge::recommended" = "Rekommenderas";
+"billing::paywall::badge::owned" = "Nuvarande plan";
+"billing::paywall::features::title" = "%@ innehåller";
+"billing::paywall::feature::dailyCredits" = "%@ krediter per dag";
+"billing::paywall::feature::topup" = "Du kan köpa fler krediter när de tar slut";
+"billing::paywall::disclosure::subscription" = "Din prenumeration förnyas automatiskt varje månad om du inte säger upp den minst 24 timmar innan den aktuella perioden slutar. Du kan säga upp den när som helst i App Store-inställningarna.";
+"billing::paywall::disclosure::oneTime" = "Betala en gång och behåll den för alltid. Den förnyas inte automatiskt.";
+"billing::paywall::disclosure::storeUnavailable" = "Det gick inte att ansluta till App Store. Försök igen senare.";
+"billing::paywall::cta::subscribe" = "Prenumerera på %@";
+"billing::paywall::cta::buy" = "Skaffa %@";
+"billing::paywall::cta::unavailable" = "Inte tillgänglig";
+"billing::paywall::allPlansOwned" = "Du har redan den bästa planen.";
+"billing::paywall::terms" = "Användarvillkor";
+"billing::paywall::privacyPolicy" = "Integritetspolicy";
+"billing::paywall::restore" = "Återställ köp";
+"billing::paywall::restored" = "Köp återställda";
+"billing::paywall::restore::empty" = "Inga köp att återställa.";
+"billing::paywall::purchase::applied" = "Planen har uppdaterats";
+"billing::paywall::pending::title" = "Väntar på godkännande";
+"billing::paywall::pending::message" = "Be en familjeorganisatör att godkänna det här köpet. Det tillämpas automatiskt när det har godkänts.";

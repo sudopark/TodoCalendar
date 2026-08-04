@@ -414,6 +414,7 @@
 "setting.help::name" = "ヘルプ";
 "setting.share::name" = "アプリを共有";
 "setting.write_review::name" = "アプリのレビューを書く";
+"setting.billing.plan::name" = "プラン";
 "setting.account.signedIn::manageAccount" = "アカウント";
 "setting.account.needSignIn" = "ログイン";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -551,12 +552,44 @@
 "aiAgent::keyboard::send" = "送信";
 "aiAgent::stop" = "停止";
 "aiAgent::usage" = "%@ / %@ クレジット";
-"aiAgent::plan::free" = "無料";
-"aiAgent::plan::standard" = "スタンダード";
-"aiAgent::plan::lifetime" = "永久";
 "aiAgent::usage::topupRemaining" = "追加クレジット残り%@";
 "aiAgent::usage::planChangeScheduled" = "%1$@に%2$@プランへ切り替わります";
 "aiAgent::stop::confirm::title" = "処理を中止しますか？";
 "aiAgent::stop::confirm::message" = "中止すると進行中のコマンドは破棄され、再開できません。";
 "aiAgent::confirm::countdown" = "以内に承認してください";
 "aiAgent::confirm::expired::message" = "時間が過ぎました。もう一度リクエストしてください。";
+"aiAgent::failed::showPlans" = "プランを見る";
+
+// MARK: - billing
+
+"billing::plan::free" = "無料";
+"billing::plan::standard" = "スタンダード";
+"billing::plan::lifetime" = "永久";
+
+"billing::paywall::title" = "プランをアップグレード";
+"billing::paywall::current::description" = "1日%@クレジット";
+"billing::paywall::metric::dailyCredits" = "1日%@クレジット";
+"billing::paywall::period::weekly" = "/週";
+"billing::paywall::period::monthly" = "/月";
+"billing::paywall::period::yearly" = "/年";
+"billing::paywall::price::unavailable" = "価格を取得できません";
+"billing::paywall::badge::recommended" = "おすすめ";
+"billing::paywall::badge::owned" = "現在のプラン";
+"billing::paywall::features::title" = "%@に含まれる機能";
+"billing::paywall::feature::dailyCredits" = "1日%@クレジット";
+"billing::paywall::feature::topup" = "クレジットがなくなったら追加購入できます";
+"billing::paywall::disclosure::subscription" = "サブスクリプションは毎月自動更新されます。現在の期間終了の24時間前までに解約しない限り、同じ料金で更新されます。解約はいつでもApp Storeの設定から行えます。";
+"billing::paywall::disclosure::oneTime" = "一度のお支払いでずっと使えます。自動更新はされません。";
+"billing::paywall::disclosure::storeUnavailable" = "App Storeに接続できませんでした。しばらくしてからもう一度お試しください。";
+"billing::paywall::cta::subscribe" = "%@を購読する";
+"billing::paywall::cta::buy" = "%@を購入";
+"billing::paywall::cta::unavailable" = "購入不可";
+"billing::paywall::allPlansOwned" = "すでに最上位のプランをご利用中です。";
+"billing::paywall::terms" = "利用規約";
+"billing::paywall::privacyPolicy" = "プライバシーポリシー";
+"billing::paywall::restore" = "購入を復元";
+"billing::paywall::restored" = "購入を復元しました";
+"billing::paywall::restore::empty" = "復元できる購入はありません。";
+"billing::paywall::purchase::applied" = "プランを適用しました";
+"billing::paywall::pending::title" = "承認待ち";
+"billing::paywall::pending::message" = "ファミリーの管理者に購入の承認を依頼してください。承認されると自動的に反映されます。";

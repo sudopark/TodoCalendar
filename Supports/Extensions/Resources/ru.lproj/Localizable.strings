@@ -414,6 +414,7 @@
 "setting.help::name" = "Помощь";
 "setting.share::name" = "Поделиться приложением";
 "setting.write_review::name" = "Написать отзыв о приложении";
+"setting.billing.plan::name" = "Тариф";
 "setting.account.signedIn::manageAccount" = "Аккаунт";
 "setting.account.needSignIn" = "Вход";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -551,12 +552,44 @@
 "aiAgent::keyboard::send" = "Отправить";
 "aiAgent::stop" = "Стоп";
 "aiAgent::usage" = "%@ / %@ кредитов";
-"aiAgent::plan::free" = "Бесплатный";
-"aiAgent::plan::standard" = "Стандарт";
-"aiAgent::plan::lifetime" = "Пожизненный";
 "aiAgent::usage::topupRemaining" = "Осталось %@ доп. кредитов";
 "aiAgent::usage::planChangeScheduled" = "Переход на план «%2$@» %1$@";
 "aiAgent::stop::confirm::title" = "Остановить обработку?";
 "aiAgent::stop::confirm::message" = "Остановка отменяет выполняемую команду, и её нельзя будет возобновить.";
 "aiAgent::confirm::countdown" = "осталось на подтверждение";
 "aiAgent::confirm::expired::message" = "Время истекло. Пожалуйста, повторите запрос.";
+"aiAgent::failed::showPlans" = "Посмотреть тарифы";
+
+// MARK: - billing
+
+"billing::plan::free" = "Бесплатный";
+"billing::plan::standard" = "Стандарт";
+"billing::plan::lifetime" = "Пожизненный";
+
+"billing::paywall::title" = "Улучшить тариф";
+"billing::paywall::current::description" = "%@ кредитов в день";
+"billing::paywall::metric::dailyCredits" = "%@ кредитов/день";
+"billing::paywall::period::weekly" = "/нед";
+"billing::paywall::period::monthly" = "/мес";
+"billing::paywall::period::yearly" = "/год";
+"billing::paywall::price::unavailable" = "Не удалось загрузить цену";
+"billing::paywall::badge::recommended" = "Рекомендуется";
+"billing::paywall::badge::owned" = "Текущий тариф";
+"billing::paywall::features::title" = "Что включено в %@";
+"billing::paywall::feature::dailyCredits" = "%@ кредитов в день";
+"billing::paywall::feature::topup" = "Можно докупить кредиты после их исчерпания";
+"billing::paywall::disclosure::subscription" = "Подписка продлевается автоматически каждый месяц, если вы не отмените её как минимум за 24 часа до окончания текущего периода. Отменить подписку можно в любое время в настройках App Store.";
+"billing::paywall::disclosure::oneTime" = "Оплатите один раз и пользуйтесь без ограничений. Автоматическое продление отсутствует.";
+"billing::paywall::disclosure::storeUnavailable" = "Не удалось подключиться к App Store. Повторите попытку позже.";
+"billing::paywall::cta::subscribe" = "Оформить подписку на %@";
+"billing::paywall::cta::buy" = "Купить %@";
+"billing::paywall::cta::unavailable" = "Недоступно";
+"billing::paywall::allPlansOwned" = "У вас уже лучший тариф.";
+"billing::paywall::terms" = "Условия использования";
+"billing::paywall::privacyPolicy" = "Политика конфиденциальности";
+"billing::paywall::restore" = "Восстановить покупки";
+"billing::paywall::restored" = "Покупки восстановлены";
+"billing::paywall::restore::empty" = "Нет покупок для восстановления.";
+"billing::paywall::purchase::applied" = "Тариф обновлён";
+"billing::paywall::pending::title" = "Ожидает одобрения";
+"billing::paywall::pending::message" = "Попросите организатора семейного доступа одобрить эту покупку. После одобрения она будет применена автоматически.";

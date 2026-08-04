@@ -414,6 +414,7 @@
 "setting.help::name" = "도움말";
 "setting.share::name" = "앱 공유";
 "setting.write_review::name" = "앱 리뷰쓰기";
+"setting.billing.plan::name" = "플랜";
 "setting.account.signedIn::manageAccount" = "계정";
 "setting.account.needSignIn" = "로그인";
 "setting.suggest::readmind::appName" = "Readmind";
@@ -551,12 +552,44 @@
 "aiAgent::keyboard::send" = "전송";
 "aiAgent::stop" = "중지";
 "aiAgent::usage" = "%@ / %@ 크레딧";
-"aiAgent::plan::free" = "무료";
-"aiAgent::plan::standard" = "스탠다드";
-"aiAgent::plan::lifetime" = "평생";
 "aiAgent::usage::topupRemaining" = "추가 크레딧 %@ 남음";
 "aiAgent::usage::planChangeScheduled" = "%1$@부터 %2$@ 플랜으로 바뀌어요";
 "aiAgent::stop::confirm::title" = "처리를 중지할까요?";
 "aiAgent::stop::confirm::message" = "중지하면 진행 중인 작업이 사라지고 다시 시작할 수 없어요.";
 "aiAgent::confirm::countdown" = "안에 승인해 주세요";
 "aiAgent::confirm::expired::message" = "시간이 만료됐어요. 다시 요청해 주세요.";
+"aiAgent::failed::showPlans" = "플랜 보기";
+
+// MARK: - billing
+
+"billing::plan::free" = "무료";
+"billing::plan::standard" = "스탠다드";
+"billing::plan::lifetime" = "평생";
+
+"billing::paywall::title" = "플랜 업그레이드";
+"billing::paywall::current::description" = "하루 %@ 크레딧";
+"billing::paywall::metric::dailyCredits" = "하루 %@ 크레딧";
+"billing::paywall::period::weekly" = "/주";
+"billing::paywall::period::monthly" = "/월";
+"billing::paywall::period::yearly" = "/년";
+"billing::paywall::price::unavailable" = "가격을 불러올 수 없어요";
+"billing::paywall::badge::recommended" = "추천";
+"billing::paywall::badge::owned" = "이용 중인 플랜";
+"billing::paywall::features::title" = "%@에 포함된 기능";
+"billing::paywall::feature::dailyCredits" = "하루 %@ 크레딧";
+"billing::paywall::feature::topup" = "크레딧 소진 시 추가 구매 가능";
+"billing::paywall::disclosure::subscription" = "구독은 매월 자동 갱신되며, 현재 기간이 끝나기 24시간 전까지 해지하지 않으면 같은 금액으로 갱신됩니다. 해지는 App Store 설정에서 언제든 할 수 있어요.";
+"billing::paywall::disclosure::oneTime" = "한 번 결제하면 계속 사용할 수 있어요. 자동 갱신되지 않습니다.";
+"billing::paywall::disclosure::storeUnavailable" = "App Store에 연결하지 못했어요. 잠시 후 다시 시도해주세요.";
+"billing::paywall::cta::subscribe" = "%@ 구독하기";
+"billing::paywall::cta::buy" = "%@ 구매하기";
+"billing::paywall::cta::unavailable" = "구매 불가";
+"billing::paywall::allPlansOwned" = "이미 최고 플랜을 이용 중이에요.";
+"billing::paywall::terms" = "이용약관";
+"billing::paywall::privacyPolicy" = "개인정보처리방침";
+"billing::paywall::restore" = "구입 복원";
+"billing::paywall::restored" = "구입을 복원했어요";
+"billing::paywall::restore::empty" = "복원할 구입 내역이 없어요.";
+"billing::paywall::purchase::applied" = "플랜이 적용됐어요";
+"billing::paywall::pending::title" = "승인 대기 중";
+"billing::paywall::pending::message" = "가족 구성원 관리자의 구매 승인을 기다리고 있어요. 승인되면 자동으로 반영됩니다.";

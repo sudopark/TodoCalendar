@@ -414,6 +414,7 @@
 "setting.help::name" = "Bantuan";
 "setting.share::name" = "Kongsi Aplikasi";
 "setting.write_review::name" = "Tulis ulasan aplikasi";
+"setting.billing.plan::name" = "Pelan";
 "setting.account.signedIn::manageAccount" = "Akaun";
 "setting.account.needSignIn" = "Log Masuk";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -551,12 +552,44 @@
 "aiAgent::keyboard::send" = "Hantar";
 "aiAgent::stop" = "Henti";
 "aiAgent::usage" = "%@ / %@ kredit";
-"aiAgent::plan::free" = "Percuma";
-"aiAgent::plan::standard" = "Standard";
-"aiAgent::plan::lifetime" = "Seumur Hidup";
 "aiAgent::usage::topupRemaining" = "Baki %@ kredit tambahan";
 "aiAgent::usage::planChangeScheduled" = "Bertukar ke pelan %2$@ pada %1$@";
 "aiAgent::stop::confirm::title" = "Hentikan pemprosesan?";
 "aiAgent::stop::confirm::message" = "Menghentikan akan membuang arahan yang sedang berjalan, dan ia tidak boleh disambung semula.";
 "aiAgent::confirm::countdown" = "berbaki untuk meluluskan";
 "aiAgent::confirm::expired::message" = "Masa telah tamat. Sila mohon semula.";
+"aiAgent::failed::showPlans" = "Lihat pelan";
+
+// MARK: - billing
+
+"billing::plan::free" = "Percuma";
+"billing::plan::standard" = "Standard";
+"billing::plan::lifetime" = "Seumur Hidup";
+
+"billing::paywall::title" = "Naik taraf pelan";
+"billing::paywall::current::description" = "%@ kredit sehari";
+"billing::paywall::metric::dailyCredits" = "%@ kredit/hari";
+"billing::paywall::period::weekly" = "/mgu";
+"billing::paywall::period::monthly" = "/bln";
+"billing::paywall::period::yearly" = "/thn";
+"billing::paywall::price::unavailable" = "Harga tidak dapat dimuatkan";
+"billing::paywall::badge::recommended" = "Disyorkan";
+"billing::paywall::badge::owned" = "Pelan semasa";
+"billing::paywall::features::title" = "%@ merangkumi";
+"billing::paywall::feature::dailyCredits" = "%@ kredit sehari";
+"billing::paywall::feature::topup" = "Boleh beli tambahan apabila kredit habis";
+"billing::paywall::disclosure::subscription" = "Langganan anda akan diperbaharui secara automatik setiap bulan melainkan anda membatalkannya sekurang-kurangnya 24 jam sebelum tempoh semasa tamat. Anda boleh membatalkannya pada bila-bila masa dalam tetapan App Store.";
+"billing::paywall::disclosure::oneTime" = "Bayar sekali dan gunakan selama-lamanya. Ini tidak diperbaharui secara automatik.";
+"billing::paywall::disclosure::storeUnavailable" = "Tidak dapat menyambung ke App Store. Sila cuba lagi kemudian.";
+"billing::paywall::cta::subscribe" = "Langgan %@";
+"billing::paywall::cta::buy" = "Dapatkan %@";
+"billing::paywall::cta::unavailable" = "Tidak tersedia";
+"billing::paywall::allPlansOwned" = "Anda sudah memiliki pelan terbaik.";
+"billing::paywall::terms" = "Terma Perkhidmatan";
+"billing::paywall::privacyPolicy" = "Dasar Privasi";
+"billing::paywall::restore" = "Pulihkan Pembelian";
+"billing::paywall::restored" = "Pembelian dipulihkan";
+"billing::paywall::restore::empty" = "Tiada pembelian untuk dipulihkan.";
+"billing::paywall::purchase::applied" = "Pelan dikemas kini";
+"billing::paywall::pending::title" = "Menunggu kelulusan";
+"billing::paywall::pending::message" = "Minta penganjur keluarga meluluskan pembelian ini. Ia akan digunakan secara automatik setelah diluluskan.";

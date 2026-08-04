@@ -414,6 +414,7 @@
 "setting.help::name" = "Pomoć";
 "setting.share::name" = "Podijeli aplikaciju";
 "setting.write_review::name" = "Napišite recenziju aplikacije";
+"setting.billing.plan::name" = "Plan";
 "setting.account.signedIn::manageAccount" = "Račun";
 "setting.account.needSignIn" = "Prijava";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -551,12 +552,44 @@
 "aiAgent::keyboard::send" = "Pošalji";
 "aiAgent::stop" = "Zaustavi";
 "aiAgent::usage" = "%@ / %@ kredita";
-"aiAgent::plan::free" = "Besplatni";
-"aiAgent::plan::standard" = "Standardni";
-"aiAgent::plan::lifetime" = "Doživotni";
 "aiAgent::usage::topupRemaining" = "Preostalo %@ dodatnih kredita";
 "aiAgent::usage::planChangeScheduled" = "Prelazak na plan %2$@ %1$@";
 "aiAgent::stop::confirm::title" = "Zaustaviti obradu?";
 "aiAgent::stop::confirm::message" = "Zaustavljanje odbacuje naredbu u tijeku i ona se neće moći nastaviti.";
 "aiAgent::confirm::countdown" = "preostalo za odobrenje";
 "aiAgent::confirm::expired::message" = "Vrijeme je isteklo. Ponovite zahtjev.";
+"aiAgent::failed::showPlans" = "Prikaži planove";
+
+// MARK: - billing
+
+"billing::plan::free" = "Besplatni";
+"billing::plan::standard" = "Standardni";
+"billing::plan::lifetime" = "Doživotni";
+
+"billing::paywall::title" = "Nadogradi plan";
+"billing::paywall::current::description" = "%@ bodova dnevno";
+"billing::paywall::metric::dailyCredits" = "%@ bodova/dan";
+"billing::paywall::period::weekly" = "/tj.";
+"billing::paywall::period::monthly" = "/mj.";
+"billing::paywall::period::yearly" = "/god.";
+"billing::paywall::price::unavailable" = "Cijena nije dostupna";
+"billing::paywall::badge::recommended" = "Preporučeno";
+"billing::paywall::badge::owned" = "Trenutačni plan";
+"billing::paywall::features::title" = "%@ uključuje";
+"billing::paywall::feature::dailyCredits" = "%@ bodova dnevno";
+"billing::paywall::feature::topup" = "Kad bodovi ponestanu, možete kupiti dodatne";
+"billing::paywall::disclosure::subscription" = "Pretplata se automatski obnavlja svaki mjesec, osim ako je otkažete najmanje 24 sata prije isteka trenutačnog razdoblja. Otkazati je možete bilo kada u postavkama App Storea.";
+"billing::paywall::disclosure::oneTime" = "Platite jednom i zadržite zauvijek. Ovo se ne obnavlja automatski.";
+"billing::paywall::disclosure::storeUnavailable" = "Povezivanje s App Storeom nije uspjelo. Pokušajte ponovno kasnije.";
+"billing::paywall::cta::subscribe" = "Pretplati se na %@";
+"billing::paywall::cta::buy" = "Nabavi %@";
+"billing::paywall::cta::unavailable" = "Nedostupno";
+"billing::paywall::allPlansOwned" = "Već imate najbolji plan.";
+"billing::paywall::terms" = "Uvjeti korištenja";
+"billing::paywall::privacyPolicy" = "Pravila o privatnosti";
+"billing::paywall::restore" = "Vrati kupnje";
+"billing::paywall::restored" = "Kupnje vraćene";
+"billing::paywall::restore::empty" = "Nema kupnji za vraćanje.";
+"billing::paywall::purchase::applied" = "Plan ažuriran";
+"billing::paywall::pending::title" = "Čeka odobrenje";
+"billing::paywall::pending::message" = "Zamolite organizatora obitelji da odobri ovu kupnju. Automatski će se primijeniti nakon odobrenja.";

@@ -414,6 +414,7 @@
 "setting.help::name" = "Pomocník";
 "setting.share::name" = "Zdieľať aplikáciu";
 "setting.write_review::name" = "Napísať recenziu aplikácie";
+"setting.billing.plan::name" = "Plán";
 "setting.account.signedIn::manageAccount" = "Účet";
 "setting.account.needSignIn" = "Prihlásiť sa";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -551,12 +552,44 @@
 "aiAgent::keyboard::send" = "Odoslať";
 "aiAgent::stop" = "Zastaviť";
 "aiAgent::usage" = "%@ / %@ kreditov";
-"aiAgent::plan::free" = "Zadarmo";
-"aiAgent::plan::standard" = "Štandardný";
-"aiAgent::plan::lifetime" = "Doživotný";
 "aiAgent::usage::topupRemaining" = "Zostáva %@ ďalších kreditov";
 "aiAgent::usage::planChangeScheduled" = "Prechod na plán %2$@ dňa %1$@";
 "aiAgent::stop::confirm::title" = "Zastaviť spracovanie?";
 "aiAgent::stop::confirm::message" = "Zastavením sa zruší prebiehajúci príkaz a nebude ho možné obnoviť.";
 "aiAgent::confirm::countdown" = "zostáva na potvrdenie";
 "aiAgent::confirm::expired::message" = "Čas vypršal. Skúste to, prosím, znova.";
+"aiAgent::failed::showPlans" = "Zobraziť plány";
+
+// MARK: - billing
+
+"billing::plan::free" = "Zadarmo";
+"billing::plan::standard" = "Štandardný";
+"billing::plan::lifetime" = "Doživotný";
+
+"billing::paywall::title" = "Vylepšiť plán";
+"billing::paywall::current::description" = "%@ kreditov denne";
+"billing::paywall::metric::dailyCredits" = "%@ kreditov/deň";
+"billing::paywall::period::weekly" = "/týž.";
+"billing::paywall::period::monthly" = "/mes.";
+"billing::paywall::period::yearly" = "/rok";
+"billing::paywall::price::unavailable" = "Cenu sa nepodarilo načítať";
+"billing::paywall::badge::recommended" = "Odporúčané";
+"billing::paywall::badge::owned" = "Aktuálny plán";
+"billing::paywall::features::title" = "%@ obsahuje";
+"billing::paywall::feature::dailyCredits" = "%@ kreditov denne";
+"billing::paywall::feature::topup" = "Po vyčerpaní kreditov si môžete dokúpiť ďalšie";
+"billing::paywall::disclosure::subscription" = "Predplatné sa automaticky obnovuje každý mesiac, pokiaľ ho nezrušíte aspoň 24 hodín pred koncom aktuálneho obdobia. Zrušiť ho môžete kedykoľvek v nastaveniach App Store.";
+"billing::paywall::disclosure::oneTime" = "Zaplaťte raz a používajte navždy. Toto sa automaticky neobnovuje.";
+"billing::paywall::disclosure::storeUnavailable" = "Nepodarilo sa pripojiť k App Store. Skúste to prosím neskôr.";
+"billing::paywall::cta::subscribe" = "Predplatiť %@";
+"billing::paywall::cta::buy" = "Kúpiť %@";
+"billing::paywall::cta::unavailable" = "Nedostupné";
+"billing::paywall::allPlansOwned" = "Už máte najlepší plán.";
+"billing::paywall::terms" = "Podmienky používania služby";
+"billing::paywall::privacyPolicy" = "Zásady ochrany osobných údajov";
+"billing::paywall::restore" = "Obnoviť nákupy";
+"billing::paywall::restored" = "Nákupy obnovené";
+"billing::paywall::restore::empty" = "Žiadne nákupy na obnovenie.";
+"billing::paywall::purchase::applied" = "Plán aktualizovaný";
+"billing::paywall::pending::title" = "Čaká na schválenie";
+"billing::paywall::pending::message" = "Požiadajte rodinného organizátora o schválenie tohto nákupu. Po schválení sa automaticky uplatní.";

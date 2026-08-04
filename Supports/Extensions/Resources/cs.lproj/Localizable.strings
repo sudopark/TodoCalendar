@@ -414,6 +414,7 @@
 "setting.help::name" = "Nápověda";
 "setting.share::name" = "Sdílet aplikaci";
 "setting.write_review::name" = "Napsat recenzi aplikace";
+"setting.billing.plan::name" = "Plán";
 "setting.account.signedIn::manageAccount" = "Účet";
 "setting.account.needSignIn" = "Přihlásit se";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -551,12 +552,44 @@
 "aiAgent::keyboard::send" = "Odeslat";
 "aiAgent::stop" = "Zastavit";
 "aiAgent::usage" = "%@ / %@ kreditů";
-"aiAgent::plan::free" = "Zdarma";
-"aiAgent::plan::standard" = "Standardní";
-"aiAgent::plan::lifetime" = "Doživotní";
 "aiAgent::usage::topupRemaining" = "Zbývá %@ dalších kreditů";
 "aiAgent::usage::planChangeScheduled" = "Přechod na plán %2$@ dne %1$@";
 "aiAgent::stop::confirm::title" = "Zastavit zpracování?";
 "aiAgent::stop::confirm::message" = "Zastavení zruší probíhající příkaz a nebude možné jej obnovit.";
 "aiAgent::confirm::countdown" = "zbývá na potvrzení";
 "aiAgent::confirm::expired::message" = "Čas vypršel. Zkuste to prosím znovu.";
+"aiAgent::failed::showPlans" = "Zobrazit plány";
+
+// MARK: - billing
+
+"billing::plan::free" = "Zdarma";
+"billing::plan::standard" = "Standardní";
+"billing::plan::lifetime" = "Doživotní";
+
+"billing::paywall::title" = "Upgradovat plán";
+"billing::paywall::current::description" = "%@ kreditů denně";
+"billing::paywall::metric::dailyCredits" = "%@ kreditů/den";
+"billing::paywall::period::weekly" = "/týd.";
+"billing::paywall::period::monthly" = "/měs.";
+"billing::paywall::period::yearly" = "/rok";
+"billing::paywall::price::unavailable" = "Cenu se nepodařilo načíst";
+"billing::paywall::badge::recommended" = "Doporučeno";
+"billing::paywall::badge::owned" = "Aktuální plán";
+"billing::paywall::features::title" = "%@ zahrnuje";
+"billing::paywall::feature::dailyCredits" = "%@ kreditů denně";
+"billing::paywall::feature::topup" = "Po vyčerpání kreditů si můžete koupit další";
+"billing::paywall::disclosure::subscription" = "Předplatné se automaticky obnovuje každý měsíc, pokud jej nezrušíte alespoň 24 hodin před koncem aktuálního období. Zrušit jej můžete kdykoli v nastavení App Store.";
+"billing::paywall::disclosure::oneTime" = "Zaplaťte jednou a používejte navždy. Toto se automaticky neobnovuje.";
+"billing::paywall::disclosure::storeUnavailable" = "Nepodařilo se připojit k App Store. Zkuste to prosím později.";
+"billing::paywall::cta::subscribe" = "Předplatit %@";
+"billing::paywall::cta::buy" = "Koupit %@";
+"billing::paywall::cta::unavailable" = "Nedostupné";
+"billing::paywall::allPlansOwned" = "Už máte nejlepší plán.";
+"billing::paywall::terms" = "Podmínky služby";
+"billing::paywall::privacyPolicy" = "Zásady ochrany osobních údajů";
+"billing::paywall::restore" = "Obnovit nákupy";
+"billing::paywall::restored" = "Nákupy obnoveny";
+"billing::paywall::restore::empty" = "Žádné nákupy k obnovení.";
+"billing::paywall::purchase::applied" = "Plán aktualizován";
+"billing::paywall::pending::title" = "Čeká na schválení";
+"billing::paywall::pending::message" = "Požádejte rodinného organizátora o schválení tohoto nákupu. Po schválení bude automaticky použit.";

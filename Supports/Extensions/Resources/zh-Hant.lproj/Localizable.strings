@@ -414,6 +414,7 @@
 "setting.help::name" = "說明";
 "setting.share::name" = "分享應用程式";
 "setting.write_review::name" = "撰寫應用程式評論";
+"setting.billing.plan::name" = "方案";
 "setting.account.signedIn::manageAccount" = "帳號";
 "setting.account.needSignIn" = "登入";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -551,12 +552,44 @@
 "aiAgent::keyboard::send" = "傳送";
 "aiAgent::stop" = "停止";
 "aiAgent::usage" = "%@ / %@ 點數";
-"aiAgent::plan::free" = "免費";
-"aiAgent::plan::standard" = "標準";
-"aiAgent::plan::lifetime" = "永久";
 "aiAgent::usage::topupRemaining" = "還剩%@額外點數";
 "aiAgent::usage::planChangeScheduled" = "將於%1$@切換至%2$@方案";
 "aiAgent::stop::confirm::title" = "是否要停止處理？";
 "aiAgent::stop::confirm::message" = "停止後將會捨棄正在進行的工作，且無法繼續。";
 "aiAgent::confirm::countdown" = "內請核准";
 "aiAgent::confirm::expired::message" = "時間已過期，請重新提出要求。";
+"aiAgent::failed::showPlans" = "查看方案";
+
+// MARK: - billing
+
+"billing::plan::free" = "免費";
+"billing::plan::standard" = "標準";
+"billing::plan::lifetime" = "永久";
+
+"billing::paywall::title" = "升級方案";
+"billing::paywall::current::description" = "每天 %@ 點數";
+"billing::paywall::metric::dailyCredits" = "每天 %@ 點數";
+"billing::paywall::period::weekly" = "/週";
+"billing::paywall::period::monthly" = "/月";
+"billing::paywall::period::yearly" = "/年";
+"billing::paywall::price::unavailable" = "無法取得價格";
+"billing::paywall::badge::recommended" = "推薦";
+"billing::paywall::badge::owned" = "目前方案";
+"billing::paywall::features::title" = "%@ 包含的功能";
+"billing::paywall::feature::dailyCredits" = "每天 %@ 點數";
+"billing::paywall::feature::topup" = "點數用完後可加購";
+"billing::paywall::disclosure::subscription" = "訂閱會每月自動續訂，除非您在目前訂閱週期結束前至少24小時取消。您可以隨時在App Store設定中取消訂閱。";
+"billing::paywall::disclosure::oneTime" = "付款一次即可永久使用，不會自動續訂。";
+"billing::paywall::disclosure::storeUnavailable" = "無法連接App Store，請稍後再試。";
+"billing::paywall::cta::subscribe" = "訂閱%@";
+"billing::paywall::cta::buy" = "購買%@";
+"billing::paywall::cta::unavailable" = "無法購買";
+"billing::paywall::allPlansOwned" = "您已在使用最高等級的方案。";
+"billing::paywall::terms" = "服務條款";
+"billing::paywall::privacyPolicy" = "隱私權政策";
+"billing::paywall::restore" = "恢復購買項目";
+"billing::paywall::restored" = "已恢復購買項目";
+"billing::paywall::restore::empty" = "沒有可恢復的購買項目。";
+"billing::paywall::purchase::applied" = "方案已套用";
+"billing::paywall::pending::title" = "等待核准";
+"billing::paywall::pending::message" = "請等候家人共享的管理者核准此購買項目，核准後將自動套用。";
