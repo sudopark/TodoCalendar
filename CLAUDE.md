@@ -54,6 +54,7 @@ tuist generate --no-open      # 파일 추가/삭제 후 재실행 필수
 | 상황 | 하네스 |
 |---|---|
 | 이슈 기반 작업 착수 | kickoff 스킬 |
+| 분해된 큰 작업의 멀티 PR 실행 | orchestrate 스킬 |
 | 페어 프로그래밍 선언 | pair-programming 스킬 |
 | 방향 수렴 선언 | converge 스킬 |
 | 구현 계획 작성 | plan 스킬 (superpowers writing-plans 컴패니언) |
