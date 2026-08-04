@@ -153,11 +153,11 @@ private struct PaywallView: View {
 
             switch self.state.screenState {
             case .loading:
-                self.screenLoadingView
+                self.userPlanLoadingView
             case .userPlanLoadFailed:
-                self.screenLoadFailedView
+                self.userPlanLoadFailedView
             case .ready:
-                self.readyBody
+                self.planSelectionView
             }
         }
         .background(self.appearance.colorSet.bg0.asColor.ignoresSafeArea())
@@ -165,7 +165,7 @@ private struct PaywallView: View {
 
     // MARK: - 본문 (유저 플랜 확인 완료)
 
-    private var readyBody: some View {
+    private var planSelectionView: some View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: Metric.Spacing.large) {
@@ -191,7 +191,7 @@ private struct PaywallView: View {
 
     // MARK: - 유저 플랜 조회 게이트 (로딩·전면 에러)
 
-    private var screenLoadingView: some View {
+    private var userPlanLoadingView: some View {
         VStack {
             Spacer()
             LoadingCircleView(self.appearance.colorSet.accentAI.asColor, lineWidth: 2)
@@ -201,7 +201,7 @@ private struct PaywallView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
-    private var screenLoadFailedView: some View {
+    private var userPlanLoadFailedView: some View {
         VStack(spacing: Metric.Spacing.regular) {
             Spacer()
             Image(systemName: "exclamationmark.triangle.fill")
