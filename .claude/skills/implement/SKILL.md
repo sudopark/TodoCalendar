@@ -28,6 +28,7 @@ description: Use when writing or modifying code in this project — 구현 착�
 - **플랜 없음** (즉흥 수정) → superpowers TDD + 이 스킬만으로 진행한다. 플랜 단계만 빠질 뿐, rules 확인 → 패턴 파악 → 구현 → 완료 판정은 동일하게 탄다.
 - **페어 프로그래밍 모드** (유저가 명시 선언한 세션) → 턴 규칙·TDD 수준·커밋 시점은 pair-programming 스킬이 이끈다. 이 스킬은 프로젝트 종속 규칙(rules·tuist generate·짝지어진 두 위치·콜사이트 grep) 공급자로만 동작한다.
 - **서브에이전트 dispatch 구현** (subagent-driven-development·병렬 dispatch 등) → 서브에이전트는 이 스킬을 스스로 invoke하지 못한다. dispatch하는 메인 세션이 첫 브리프 작성 전에 이 스킬을 invoke하고, 아래 절차를 브리프로 승계시킨다. "내가 직접 코드를 안 만지니 해당 없음"은 성립하지 않는다 — 코드 diff가 시작되는 주체가 누구든 발동한다. 갭 보고 루프(rules·플랜)의 유저 반문은 메인 세션이 중계한다 — 브리프에 "갭 발견 시 추측으로 채우지 말고 보고 후 중단"을 명시한다. 축1 선언·리팩터 게이트 선언은 브리프 승계와 태스크별 리뷰로 갈음한다 — 컨트롤러가 매 GREEN마다 선언을 재생산하지 않는다 (직접 구현 시에만 선언 관문).
+- SDD 실행 시 태스크별 리뷰는 **플랜의 리뷰 게이트 판정을 따른다** (plan 스킬 §3) — 생략 표기 태스크는 task review 없이 ledger 완료로 넘어간다. 단 실행 중 신호(DONE_WITH_CONCERNS·테스트 불안정·갭 보고)가 뜨면 생략 판정을 뒤집고 리뷰를 돌린다. 최종 whole-branch 리뷰는 생략 대상이 아니다.
 
 시작할 때:
 
