@@ -414,6 +414,7 @@
 "setting.help::name" = "Довідка";
 "setting.share::name" = "Поділитися додатком";
 "setting.write_review::name" = "Написати відгук про додаток";
+"setting.billing.plan::name" = "Тариф";
 "setting.account.signedIn::manageAccount" = "Обліковий запис";
 "setting.account.needSignIn" = "Вхід";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -551,12 +552,44 @@
 "aiAgent::keyboard::send" = "Надіслати";
 "aiAgent::stop" = "Стоп";
 "aiAgent::usage" = "%@ / %@ кредитів";
-"aiAgent::plan::free" = "Безкоштовний";
-"aiAgent::plan::standard" = "Стандарт";
-"aiAgent::plan::lifetime" = "Довічний";
 "aiAgent::usage::topupRemaining" = "Залишилось %@ додаткових кредитів";
 "aiAgent::usage::planChangeScheduled" = "Перехід на план «%2$@» %1$@";
 "aiAgent::stop::confirm::title" = "Зупинити обробку?";
 "aiAgent::stop::confirm::message" = "Зупинення скасовує команду, що виконується, і її не можна буде відновити.";
 "aiAgent::confirm::countdown" = "залишилося на підтвердження";
 "aiAgent::confirm::expired::message" = "Час минув. Будь ласка, повторіть запит.";
+"aiAgent::failed::showPlans" = "Переглянути тарифи";
+
+// MARK: - billing
+
+"billing::plan::free" = "Безкоштовний";
+"billing::plan::standard" = "Стандарт";
+"billing::plan::lifetime" = "Довічний";
+
+"billing::paywall::title" = "Покращити тариф";
+"billing::paywall::current::description" = "%@ кредитів на день";
+"billing::paywall::metric::dailyCredits" = "%@ кредитів/день";
+"billing::paywall::period::weekly" = "/тиж";
+"billing::paywall::period::monthly" = "/міс";
+"billing::paywall::period::yearly" = "/рік";
+"billing::paywall::price::unavailable" = "Не вдалося завантажити ціну";
+"billing::paywall::badge::recommended" = "Рекомендовано";
+"billing::paywall::badge::owned" = "Поточний тариф";
+"billing::paywall::features::title" = "Що входить у %@";
+"billing::paywall::feature::dailyCredits" = "%@ кредитів на день";
+"billing::paywall::feature::topup" = "Можна докупити кредити, коли вони закінчаться";
+"billing::paywall::disclosure::subscription" = "Підписка автоматично поновлюється щомісяця, якщо ви не скасуєте її щонайменше за 24 години до завершення поточного періоду. Скасувати підписку можна будь-коли в налаштуваннях App Store.";
+"billing::paywall::disclosure::oneTime" = "Заплатіть один раз і користуйтеся назавжди. Автоматичне поновлення відсутнє.";
+"billing::paywall::disclosure::storeUnavailable" = "Не вдалося підключитися до App Store. Спробуйте пізніше.";
+"billing::paywall::cta::subscribe" = "Підписатися на %@";
+"billing::paywall::cta::buy" = "Придбати %@";
+"billing::paywall::cta::unavailable" = "Недоступно";
+"billing::paywall::allPlansOwned" = "У вас уже найкращий тариф.";
+"billing::paywall::terms" = "Умови надання послуг";
+"billing::paywall::privacyPolicy" = "Політика конфіденційності";
+"billing::paywall::restore" = "Відновити покупки";
+"billing::paywall::restored" = "Покупки відновлено";
+"billing::paywall::restore::empty" = "Немає покупок для відновлення.";
+"billing::paywall::purchase::applied" = "Тариф оновлено";
+"billing::paywall::pending::title" = "Очікує на схвалення";
+"billing::paywall::pending::message" = "Попросіть організатора родини схвалити цю покупку. Після схвалення вона застосується автоматично.";

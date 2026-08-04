@@ -414,6 +414,7 @@
 "setting.help::name" = "Ajutor";
 "setting.share::name" = "Distribuie aplicația";
 "setting.write_review::name" = "Scrie o recenzie despre aplicație";
+"setting.billing.plan::name" = "Plan";
 "setting.account.signedIn::manageAccount" = "Cont";
 "setting.account.needSignIn" = "Autentificare";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -551,12 +552,44 @@
 "aiAgent::keyboard::send" = "Trimite";
 "aiAgent::stop" = "Stop";
 "aiAgent::usage" = "%@ / %@ credite";
-"aiAgent::plan::free" = "Gratuit";
-"aiAgent::plan::standard" = "Standard";
-"aiAgent::plan::lifetime" = "Pe viață";
 "aiAgent::usage::topupRemaining" = "Mai ai %@ credite suplimentare";
 "aiAgent::usage::planChangeScheduled" = "Treci la planul %2$@ pe %1$@";
 "aiAgent::stop::confirm::title" = "Oprești procesarea?";
 "aiAgent::stop::confirm::message" = "Oprirea anulează comanda în desfășurare, iar aceasta nu va putea fi reluată.";
 "aiAgent::confirm::countdown" = "rămas pentru aprobare";
 "aiAgent::confirm::expired::message" = "Timpul a expirat. Vă rugăm să solicitați din nou.";
+"aiAgent::failed::showPlans" = "Vezi planurile";
+
+// MARK: - billing
+
+"billing::plan::free" = "Gratuit";
+"billing::plan::standard" = "Standard";
+"billing::plan::lifetime" = "Pe viață";
+
+"billing::paywall::title" = "Actualizează planul";
+"billing::paywall::current::description" = "%@ credite pe zi";
+"billing::paywall::metric::dailyCredits" = "%@ credite/zi";
+"billing::paywall::period::weekly" = "/săpt.";
+"billing::paywall::period::monthly" = "/lună";
+"billing::paywall::period::yearly" = "/an";
+"billing::paywall::price::unavailable" = "Prețul nu este disponibil";
+"billing::paywall::badge::recommended" = "Recomandat";
+"billing::paywall::badge::owned" = "Planul actual";
+"billing::paywall::features::title" = "Ce include %@";
+"billing::paywall::feature::dailyCredits" = "%@ credite pe zi";
+"billing::paywall::feature::topup" = "Poți cumpăra mai multe credite când se epuizează";
+"billing::paywall::disclosure::subscription" = "Abonamentul se reînnoiește automat în fiecare lună, dacă nu îl anulezi cu cel puțin 24 de ore înainte de sfârșitul perioadei curente. Îl poți anula oricând din setările App Store.";
+"billing::paywall::disclosure::oneTime" = "Plătește o singură dată și păstrează-l pentru totdeauna. Acesta nu se reînnoiește automat.";
+"billing::paywall::disclosure::storeUnavailable" = "Nu s-a putut realiza conexiunea la App Store. Încearcă din nou mai târziu.";
+"billing::paywall::cta::subscribe" = "Abonează-te la %@";
+"billing::paywall::cta::buy" = "Obține %@";
+"billing::paywall::cta::unavailable" = "Indisponibil";
+"billing::paywall::allPlansOwned" = "Ai deja cel mai bun plan.";
+"billing::paywall::terms" = "Termeni și condiții";
+"billing::paywall::privacyPolicy" = "Politica de confidențialitate";
+"billing::paywall::restore" = "Restaurează achizițiile";
+"billing::paywall::restored" = "Achiziții restaurate";
+"billing::paywall::restore::empty" = "Nu există achiziții de restaurat.";
+"billing::paywall::purchase::applied" = "Plan actualizat";
+"billing::paywall::pending::title" = "Aprobare în așteptare";
+"billing::paywall::pending::message" = "Cere unui organizator al familiei să aprobe această achiziție. Se va aplica automat după aprobare.";

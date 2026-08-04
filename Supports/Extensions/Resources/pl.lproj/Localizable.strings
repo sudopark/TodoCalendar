@@ -414,6 +414,7 @@
 "setting.help::name" = "Pomoc";
 "setting.share::name" = "Udostępnij aplikację";
 "setting.write_review::name" = "Napisz recenzję aplikacji";
+"setting.billing.plan::name" = "Plan";
 "setting.account.signedIn::manageAccount" = "Konto";
 "setting.account.needSignIn" = "Zaloguj się";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -551,12 +552,44 @@
 "aiAgent::keyboard::send" = "Wyślij";
 "aiAgent::stop" = "Zatrzymaj";
 "aiAgent::usage" = "%@ / %@ kredytów";
-"aiAgent::plan::free" = "Darmowy";
-"aiAgent::plan::standard" = "Standardowy";
-"aiAgent::plan::lifetime" = "Dożywotni";
 "aiAgent::usage::topupRemaining" = "Pozostało %@ dodatkowych kredytów";
 "aiAgent::usage::planChangeScheduled" = "Zmiana na plan %2$@ dnia %1$@";
 "aiAgent::stop::confirm::title" = "Zatrzymać przetwarzanie?";
 "aiAgent::stop::confirm::message" = "Zatrzymanie odrzuci bieżące polecenie i nie będzie można go wznowić.";
 "aiAgent::confirm::countdown" = "pozostało na zatwierdzenie";
 "aiAgent::confirm::expired::message" = "Czas upłynął. Spróbuj ponownie.";
+"aiAgent::failed::showPlans" = "Zobacz plany";
+
+// MARK: - billing
+
+"billing::plan::free" = "Darmowy";
+"billing::plan::standard" = "Standardowy";
+"billing::plan::lifetime" = "Dożywotni";
+
+"billing::paywall::title" = "Ulepsz plan";
+"billing::paywall::current::description" = "%@ kredytów dziennie";
+"billing::paywall::metric::dailyCredits" = "%@ kredytów/dzień";
+"billing::paywall::period::weekly" = "/tydz.";
+"billing::paywall::period::monthly" = "/mies.";
+"billing::paywall::period::yearly" = "/rok";
+"billing::paywall::price::unavailable" = "Nie można wczytać ceny";
+"billing::paywall::badge::recommended" = "Polecane";
+"billing::paywall::badge::owned" = "Obecny plan";
+"billing::paywall::features::title" = "%@ zawiera";
+"billing::paywall::feature::dailyCredits" = "%@ kredytów dziennie";
+"billing::paywall::feature::topup" = "Możesz dokupić więcej po wyczerpaniu kredytów";
+"billing::paywall::disclosure::subscription" = "Subskrypcja odnawia się automatycznie co miesiąc, chyba że anulujesz ją co najmniej 24 godziny przed zakończeniem bieżącego okresu. Możesz anulować w dowolnym momencie w ustawieniach App Store.";
+"billing::paywall::disclosure::oneTime" = "Zapłać raz i korzystaj na stałe. Ten zakup się nie odnawia.";
+"billing::paywall::disclosure::storeUnavailable" = "Nie udało się połączyć z App Store. Spróbuj ponownie później.";
+"billing::paywall::cta::subscribe" = "Subskrybuj %@";
+"billing::paywall::cta::buy" = "Kup %@";
+"billing::paywall::cta::unavailable" = "Niedostępne";
+"billing::paywall::allPlansOwned" = "Masz już najlepszy plan.";
+"billing::paywall::terms" = "Warunki korzystania z usługi";
+"billing::paywall::privacyPolicy" = "Polityka prywatności";
+"billing::paywall::restore" = "Przywróć zakupy";
+"billing::paywall::restored" = "Zakupy przywrócone";
+"billing::paywall::restore::empty" = "Brak zakupów do przywrócenia.";
+"billing::paywall::purchase::applied" = "Plan zaktualizowany";
+"billing::paywall::pending::title" = "Oczekuje na zatwierdzenie";
+"billing::paywall::pending::message" = "Poproś organizatora rodziny o zatwierdzenie tego zakupu. Zostanie on zastosowany automatycznie po zatwierdzeniu.";

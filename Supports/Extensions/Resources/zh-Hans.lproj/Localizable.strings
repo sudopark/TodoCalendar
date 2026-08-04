@@ -414,6 +414,7 @@
 "setting.help::name" = "帮助";
 "setting.share::name" = "分享应用";
 "setting.write_review::name" = "撰写应用评价";
+"setting.billing.plan::name" = "套餐";
 "setting.account.signedIn::manageAccount" = "账户";
 "setting.account.needSignIn" = "登录";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -551,12 +552,44 @@
 "aiAgent::keyboard::send" = "发送";
 "aiAgent::stop" = "停止";
 "aiAgent::usage" = "%@ / %@ 额度";
-"aiAgent::plan::free" = "免费";
-"aiAgent::plan::standard" = "标准";
-"aiAgent::plan::lifetime" = "永久";
 "aiAgent::usage::topupRemaining" = "还剩%@附加额度";
 "aiAgent::usage::planChangeScheduled" = "将于%1$@切换至%2$@套餐";
 "aiAgent::stop::confirm::title" = "是否停止处理？";
 "aiAgent::stop::confirm::message" = "停止后将放弃正在进行的任务，且无法恢复。";
 "aiAgent::confirm::countdown" = "内确认";
 "aiAgent::confirm::expired::message" = "时间已到，请重新发起请求。";
+"aiAgent::failed::showPlans" = "查看套餐";
+
+// MARK: - billing
+
+"billing::plan::free" = "免费";
+"billing::plan::standard" = "标准";
+"billing::plan::lifetime" = "永久";
+
+"billing::paywall::title" = "升级套餐";
+"billing::paywall::current::description" = "每天 %@ 积分";
+"billing::paywall::metric::dailyCredits" = "每天 %@ 积分";
+"billing::paywall::period::weekly" = "/周";
+"billing::paywall::period::monthly" = "/月";
+"billing::paywall::period::yearly" = "/年";
+"billing::paywall::price::unavailable" = "无法获取价格";
+"billing::paywall::badge::recommended" = "推荐";
+"billing::paywall::badge::owned" = "当前套餐";
+"billing::paywall::features::title" = "%@ 包含的功能";
+"billing::paywall::feature::dailyCredits" = "每天 %@ 积分";
+"billing::paywall::feature::topup" = "积分用完后可追加购买";
+"billing::paywall::disclosure::subscription" = "订阅将每月自动续订，除非您在当前订阅期结束前至少24小时取消。您可以随时在App Store设置中取消订阅。";
+"billing::paywall::disclosure::oneTime" = "一次性付款，永久使用，不会自动续订。";
+"billing::paywall::disclosure::storeUnavailable" = "无法连接到App Store，请稍后再试。";
+"billing::paywall::cta::subscribe" = "订阅%@";
+"billing::paywall::cta::buy" = "购买%@";
+"billing::paywall::cta::unavailable" = "无法购买";
+"billing::paywall::allPlansOwned" = "您已在使用最高级的套餐。";
+"billing::paywall::terms" = "服务条款";
+"billing::paywall::privacyPolicy" = "隐私政策";
+"billing::paywall::restore" = "恢复购买";
+"billing::paywall::restored" = "已恢复购买";
+"billing::paywall::restore::empty" = "没有可恢复的购买记录。";
+"billing::paywall::purchase::applied" = "套餐已生效";
+"billing::paywall::pending::title" = "等待批准";
+"billing::paywall::pending::message" = "请等待家庭组织者批准此购买，批准后将自动生效。";

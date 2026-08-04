@@ -414,6 +414,7 @@
 "setting.help::name" = "Hjælp";
 "setting.share::name" = "Del appen";
 "setting.write_review::name" = "Skriv en anmeldelse af appen";
+"setting.billing.plan::name" = "Abonnement";
 "setting.account.signedIn::manageAccount" = "Konto";
 "setting.account.needSignIn" = "Login";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -551,12 +552,44 @@
 "aiAgent::keyboard::send" = "Send";
 "aiAgent::stop" = "Stop";
 "aiAgent::usage" = "%@ / %@ kreditter";
-"aiAgent::plan::free" = "Gratis";
-"aiAgent::plan::standard" = "Standard";
-"aiAgent::plan::lifetime" = "Livstid";
 "aiAgent::usage::topupRemaining" = "%@ ekstra kreditter tilbage";
 "aiAgent::usage::planChangeScheduled" = "Skift til planen %2$@ den %1$@";
 "aiAgent::stop::confirm::title" = "Stop behandling?";
 "aiAgent::stop::confirm::message" = "Hvis du stopper, kasseres den igangværende kommando, og den kan ikke genoptages.";
 "aiAgent::confirm::countdown" = "tilbage til at godkende";
 "aiAgent::confirm::expired::message" = "Tiden er udløbet. Anmod venligst igen.";
+"aiAgent::failed::showPlans" = "Se abonnementer";
+
+// MARK: - billing
+
+"billing::plan::free" = "Gratis";
+"billing::plan::standard" = "Standard";
+"billing::plan::lifetime" = "Livstid";
+
+"billing::paywall::title" = "Opgrader abonnement";
+"billing::paywall::current::description" = "%@ credits om dagen";
+"billing::paywall::metric::dailyCredits" = "%@ credits/dag";
+"billing::paywall::period::weekly" = "/uge";
+"billing::paywall::period::monthly" = "/md.";
+"billing::paywall::period::yearly" = "/år";
+"billing::paywall::price::unavailable" = "Prisen kunne ikke hentes";
+"billing::paywall::badge::recommended" = "Anbefalet";
+"billing::paywall::badge::owned" = "Nuværende abonnement";
+"billing::paywall::features::title" = "%@ inkluderer";
+"billing::paywall::feature::dailyCredits" = "%@ credits om dagen";
+"billing::paywall::feature::topup" = "Du kan købe flere, når credits er brugt op";
+"billing::paywall::disclosure::subscription" = "Dit abonnement fornyes automatisk hver måned, medmindre du opsiger det mindst 24 timer før den aktuelle periode slutter. Du kan opsige det når som helst i App Store-indstillinger.";
+"billing::paywall::disclosure::oneTime" = "Betal én gang, og behold det for altid. Dette fornyes ikke automatisk.";
+"billing::paywall::disclosure::storeUnavailable" = "Kunne ikke oprette forbindelse til App Store. Prøv igen senere.";
+"billing::paywall::cta::subscribe" = "Abonnér på %@";
+"billing::paywall::cta::buy" = "Køb %@";
+"billing::paywall::cta::unavailable" = "Ikke tilgængelig";
+"billing::paywall::allPlansOwned" = "Du har allerede det bedste abonnement.";
+"billing::paywall::terms" = "Servicevilkår";
+"billing::paywall::privacyPolicy" = "Privatlivspolitik";
+"billing::paywall::restore" = "Gendan køb";
+"billing::paywall::restored" = "Køb gendannet";
+"billing::paywall::restore::empty" = "Ingen køb at gendanne.";
+"billing::paywall::purchase::applied" = "Abonnement opdateret";
+"billing::paywall::pending::title" = "Afventer godkendelse";
+"billing::paywall::pending::message" = "Bed en familieorganisator om at godkende dette køb. Det anvendes automatisk, når det er godkendt.";

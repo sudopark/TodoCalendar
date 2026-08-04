@@ -414,6 +414,7 @@
 "setting.help::name" = "ช่วยเหลือ";
 "setting.share::name" = "แชร์แอป";
 "setting.write_review::name" = "เขียนรีวิวแอป";
+"setting.billing.plan::name" = "แพ็กเกจ";
 "setting.account.signedIn::manageAccount" = "บัญชี";
 "setting.account.needSignIn" = "เข้าสู่ระบบ";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -551,12 +552,44 @@
 "aiAgent::keyboard::send" = "ส่ง";
 "aiAgent::stop" = "หยุด";
 "aiAgent::usage" = "%@/%@ เครดิต";
-"aiAgent::plan::free" = "ฟรี";
-"aiAgent::plan::standard" = "มาตรฐาน";
-"aiAgent::plan::lifetime" = "ตลอดชีพ";
 "aiAgent::usage::topupRemaining" = "เครดิตเสริมเหลือ %@";
 "aiAgent::usage::planChangeScheduled" = "จะเปลี่ยนเป็นแพ็กเกจ %2$@ ในวันที่ %1$@";
 "aiAgent::stop::confirm::title" = "ต้องการหยุดประมวลผลหรือไม่?";
 "aiAgent::stop::confirm::message" = "การหยุดจะทำให้งานที่กำลังทำอยู่หายไปและไม่สามารถกู้คืนได้";
 "aiAgent::confirm::countdown" = "เหลือเวลาอนุมัติ";
 "aiAgent::confirm::expired::message" = "หมดเวลาแล้ว กรุณาส่งคำขอใหม่อีกครั้ง";
+"aiAgent::failed::showPlans" = "ดูแพ็กเกจ";
+
+// MARK: - billing
+
+"billing::plan::free" = "ฟรี";
+"billing::plan::standard" = "มาตรฐาน";
+"billing::plan::lifetime" = "ตลอดชีพ";
+
+"billing::paywall::title" = "อัปเกรดแพ็กเกจ";
+"billing::paywall::current::description" = "%@ เครดิตต่อวัน";
+"billing::paywall::metric::dailyCredits" = "%@ เครดิต/วัน";
+"billing::paywall::period::weekly" = "/สัปดาห์";
+"billing::paywall::period::monthly" = "/เดือน";
+"billing::paywall::period::yearly" = "/ปี";
+"billing::paywall::price::unavailable" = "ไม่สามารถโหลดราคาได้";
+"billing::paywall::badge::recommended" = "แนะนำ";
+"billing::paywall::badge::owned" = "แพ็กเกจปัจจุบัน";
+"billing::paywall::features::title" = "สิ่งที่รวมอยู่ใน %@";
+"billing::paywall::feature::dailyCredits" = "%@ เครดิตต่อวัน";
+"billing::paywall::feature::topup" = "ซื้อเพิ่มได้เมื่อเครดิตหมด";
+"billing::paywall::disclosure::subscription" = "การสมัครสมาชิกจะต่ออายุอัตโนมัติทุกเดือน เว้นแต่คุณจะยกเลิกอย่างน้อย 24 ชั่วโมงก่อนสิ้นสุดรอบปัจจุบัน คุณสามารถยกเลิกได้ทุกเมื่อในการตั้งค่า App Store";
+"billing::paywall::disclosure::oneTime" = "จ่ายครั้งเดียวแล้วใช้งานได้ตลอดไป ไม่มีการต่ออายุอัตโนมัติ";
+"billing::paywall::disclosure::storeUnavailable" = "ไม่สามารถเชื่อมต่อกับ App Store ได้ โปรดลองอีกครั้งภายหลัง";
+"billing::paywall::cta::subscribe" = "สมัครสมาชิก %@";
+"billing::paywall::cta::buy" = "ซื้อ %@";
+"billing::paywall::cta::unavailable" = "ไม่สามารถซื้อได้";
+"billing::paywall::allPlansOwned" = "คุณใช้แพ็กเกจสูงสุดอยู่แล้ว";
+"billing::paywall::terms" = "ข้อกำหนดในการให้บริการ";
+"billing::paywall::privacyPolicy" = "นโยบายความเป็นส่วนตัว";
+"billing::paywall::restore" = "กู้คืนการซื้อ";
+"billing::paywall::restored" = "กู้คืนการซื้อแล้ว";
+"billing::paywall::restore::empty" = "ไม่มีรายการซื้อให้กู้คืน";
+"billing::paywall::purchase::applied" = "อัปเดตแพ็กเกจแล้ว";
+"billing::paywall::pending::title" = "รอการอนุมัติ";
+"billing::paywall::pending::message" = "ขอให้ผู้จัดการครอบครัวอนุมัติการซื้อนี้ เมื่อได้รับอนุมัติแล้วจะมีผลโดยอัตโนมัติ";

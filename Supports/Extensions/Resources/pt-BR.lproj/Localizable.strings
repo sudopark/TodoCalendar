@@ -414,6 +414,7 @@
 "setting.help::name" = "Ajuda";
 "setting.share::name" = "Compartilhar App";
 "setting.write_review::name" = "Avaliar o app";
+"setting.billing.plan::name" = "Plano";
 "setting.account.signedIn::manageAccount" = "Conta";
 "setting.account.needSignIn" = "Login";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -551,12 +552,44 @@
 "aiAgent::keyboard::send" = "Enviar";
 "aiAgent::stop" = "Parar";
 "aiAgent::usage" = "%@ / %@ créditos";
-"aiAgent::plan::free" = "Gratuito";
-"aiAgent::plan::standard" = "Padrão";
-"aiAgent::plan::lifetime" = "Vitalício";
 "aiAgent::usage::topupRemaining" = "%@ créditos extras restantes";
 "aiAgent::usage::planChangeScheduled" = "Mudança para o plano %2$@ em %1$@";
 "aiAgent::stop::confirm::title" = "Interromper o processamento?";
 "aiAgent::stop::confirm::message" = "Interromper descarta o comando em andamento, e ele não pode ser retomado.";
 "aiAgent::confirm::countdown" = "restante para aprovar";
 "aiAgent::confirm::expired::message" = "Tempo esgotado. Solicite novamente.";
+"aiAgent::failed::showPlans" = "Ver planos";
+
+// MARK: - billing
+
+"billing::plan::free" = "Gratuito";
+"billing::plan::standard" = "Padrão";
+"billing::plan::lifetime" = "Vitalício";
+
+"billing::paywall::title" = "Atualizar plano";
+"billing::paywall::current::description" = "%@ créditos por dia";
+"billing::paywall::metric::dailyCredits" = "%@ créditos/dia";
+"billing::paywall::period::weekly" = "/sem";
+"billing::paywall::period::monthly" = "/mês";
+"billing::paywall::period::yearly" = "/ano";
+"billing::paywall::price::unavailable" = "Preço indisponível";
+"billing::paywall::badge::recommended" = "Recomendado";
+"billing::paywall::badge::owned" = "Plano atual";
+"billing::paywall::features::title" = "%@ inclui";
+"billing::paywall::feature::dailyCredits" = "%@ créditos por dia";
+"billing::paywall::feature::topup" = "Você pode comprar mais quando os créditos acabarem";
+"billing::paywall::disclosure::subscription" = "Sua assinatura é renovada automaticamente todo mês, a menos que você cancele pelo menos 24 horas antes do fim do período atual. Você pode cancelar a qualquer momento nas configurações da App Store.";
+"billing::paywall::disclosure::oneTime" = "Pague uma vez e use para sempre. Isso não é renovado automaticamente.";
+"billing::paywall::disclosure::storeUnavailable" = "Não foi possível conectar à App Store. Tente novamente mais tarde.";
+"billing::paywall::cta::subscribe" = "Assinar %@";
+"billing::paywall::cta::buy" = "Obter %@";
+"billing::paywall::cta::unavailable" = "Indisponível";
+"billing::paywall::allPlansOwned" = "Você já tem o melhor plano.";
+"billing::paywall::terms" = "Termos de Serviço";
+"billing::paywall::privacyPolicy" = "Política de Privacidade";
+"billing::paywall::restore" = "Restaurar compras";
+"billing::paywall::restored" = "Compras restauradas";
+"billing::paywall::restore::empty" = "Não há compras para restaurar.";
+"billing::paywall::purchase::applied" = "Plano atualizado";
+"billing::paywall::pending::title" = "Aprovação pendente";
+"billing::paywall::pending::message" = "Peça a um organizador familiar para aprovar esta compra. Ela será aplicada automaticamente assim que for aprovada.";

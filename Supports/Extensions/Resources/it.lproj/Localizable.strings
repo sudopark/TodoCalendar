@@ -414,6 +414,7 @@
 "setting.help::name" = "Aiuto";
 "setting.share::name" = "Condividi app";
 "setting.write_review::name" = "Scrivi una recensione dell'app";
+"setting.billing.plan::name" = "Piano";
 "setting.account.signedIn::manageAccount" = "Account";
 "setting.account.needSignIn" = "Accedi";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -551,12 +552,44 @@
 "aiAgent::keyboard::send" = "Invia";
 "aiAgent::stop" = "Interrompi";
 "aiAgent::usage" = "%1$@ / %2$@ crediti";
-"aiAgent::plan::free" = "Gratuito";
-"aiAgent::plan::standard" = "Standard";
-"aiAgent::plan::lifetime" = "A vita";
 "aiAgent::usage::topupRemaining" = "%@ crediti extra rimanenti";
 "aiAgent::usage::planChangeScheduled" = "Passaggio al piano %2$@ il %1$@";
 "aiAgent::stop::confirm::title" = "Interrompere l'elaborazione?";
 "aiAgent::stop::confirm::message" = "L'interruzione scarta l'attività in corso e non potrà essere ripresa.";
 "aiAgent::confirm::countdown" = "rimasti per approvare";
 "aiAgent::confirm::expired::message" = "Tempo scaduto. Effettua di nuovo la richiesta.";
+"aiAgent::failed::showPlans" = "Visualizza piani";
+
+// MARK: - billing
+
+"billing::plan::free" = "Gratuito";
+"billing::plan::standard" = "Standard";
+"billing::plan::lifetime" = "A vita";
+
+"billing::paywall::title" = "Aggiorna piano";
+"billing::paywall::current::description" = "%@ crediti al giorno";
+"billing::paywall::metric::dailyCredits" = "%@ crediti/giorno";
+"billing::paywall::period::weekly" = "/sett.";
+"billing::paywall::period::monthly" = "/mese";
+"billing::paywall::period::yearly" = "/anno";
+"billing::paywall::price::unavailable" = "Prezzo non disponibile";
+"billing::paywall::badge::recommended" = "Consigliato";
+"billing::paywall::badge::owned" = "Piano attuale";
+"billing::paywall::features::title" = "%@ include";
+"billing::paywall::feature::dailyCredits" = "%@ crediti al giorno";
+"billing::paywall::feature::topup" = "Puoi acquistarne altri quando i crediti finiscono";
+"billing::paywall::disclosure::subscription" = "L'abbonamento si rinnova automaticamente ogni mese, a meno che tu non lo annulli almeno 24 ore prima della fine del periodo in corso. Puoi annullarlo in qualsiasi momento dalle impostazioni dell'App Store.";
+"billing::paywall::disclosure::oneTime" = "Paga una sola volta e mantienilo per sempre. Non si rinnova automaticamente.";
+"billing::paywall::disclosure::storeUnavailable" = "Impossibile connettersi all'App Store. Riprova più tardi.";
+"billing::paywall::cta::subscribe" = "Abbonati a %@";
+"billing::paywall::cta::buy" = "Ottieni %@";
+"billing::paywall::cta::unavailable" = "Non disponibile";
+"billing::paywall::allPlansOwned" = "Hai già il piano migliore.";
+"billing::paywall::terms" = "Termini di servizio";
+"billing::paywall::privacyPolicy" = "Informativa sulla privacy";
+"billing::paywall::restore" = "Ripristina acquisti";
+"billing::paywall::restored" = "Acquisti ripristinati";
+"billing::paywall::restore::empty" = "Nessun acquisto da ripristinare.";
+"billing::paywall::purchase::applied" = "Piano aggiornato";
+"billing::paywall::pending::title" = "Approvazione in sospeso";
+"billing::paywall::pending::message" = "Chiedi a un organizzatore famiglia di approvare questo acquisto. Verrà applicato automaticamente dopo l'approvazione.";

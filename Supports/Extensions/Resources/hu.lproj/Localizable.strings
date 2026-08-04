@@ -414,6 +414,7 @@
 "setting.help::name" = "Súgó";
 "setting.share::name" = "Alkalmazás megosztása";
 "setting.write_review::name" = "Alkalmazás értékelése";
+"setting.billing.plan::name" = "Csomag";
 "setting.account.signedIn::manageAccount" = "Fiók";
 "setting.account.needSignIn" = "Bejelentkezés";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -551,12 +552,44 @@
 "aiAgent::keyboard::send" = "Küldés";
 "aiAgent::stop" = "Leállítás";
 "aiAgent::usage" = "%@ / %@ kredit";
-"aiAgent::plan::free" = "Ingyenes";
-"aiAgent::plan::standard" = "Standard";
-"aiAgent::plan::lifetime" = "Örökös";
 "aiAgent::usage::topupRemaining" = "%@ extra kredit maradt";
 "aiAgent::usage::planChangeScheduled" = "%1$@-tól a(z) %2$@ csomagra vált";
 "aiAgent::stop::confirm::title" = "Leállítja a feldolgozást?";
 "aiAgent::stop::confirm::message" = "A leállítás elveti a folyamatban lévő parancsot, és az nem folytatható.";
 "aiAgent::confirm::countdown" = "van hátra a jóváhagyáshoz";
 "aiAgent::confirm::expired::message" = "Lejárt az idő. Kérjük, kérje újra.";
+"aiAgent::failed::showPlans" = "Csomagok megtekintése";
+
+// MARK: - billing
+
+"billing::plan::free" = "Ingyenes";
+"billing::plan::standard" = "Standard";
+"billing::plan::lifetime" = "Örökös";
+
+"billing::paywall::title" = "Csomag frissítése";
+"billing::paywall::current::description" = "napi %@ kredit";
+"billing::paywall::metric::dailyCredits" = "%@ kredit/nap";
+"billing::paywall::period::weekly" = "/hét";
+"billing::paywall::period::monthly" = "/hó";
+"billing::paywall::period::yearly" = "/év";
+"billing::paywall::price::unavailable" = "Az ár nem érhető el";
+"billing::paywall::badge::recommended" = "Ajánlott";
+"billing::paywall::badge::owned" = "Jelenlegi csomag";
+"billing::paywall::features::title" = "A(z) %@ tartalma";
+"billing::paywall::feature::dailyCredits" = "napi %@ kredit";
+"billing::paywall::feature::topup" = "Kredit elfogyása esetén további vásárolható";
+"billing::paywall::disclosure::subscription" = "Az előfizetés minden hónapban automatikusan megújul, hacsak nem mondod le legalább 24 órával a jelenlegi időszak vége előtt. Bármikor lemondhatod az App Store beállításaiban.";
+"billing::paywall::disclosure::oneTime" = "Fizess egyszer, és használd örökre. Ez nem újul meg automatikusan.";
+"billing::paywall::disclosure::storeUnavailable" = "Nem sikerült csatlakozni az App Store-hoz. Kérjük, próbáld újra később.";
+"billing::paywall::cta::subscribe" = "%@ előfizetése";
+"billing::paywall::cta::buy" = "%@ beszerzése";
+"billing::paywall::cta::unavailable" = "Nem elérhető";
+"billing::paywall::allPlansOwned" = "Már a legjobb csomagot használod.";
+"billing::paywall::terms" = "Felhasználási feltételek";
+"billing::paywall::privacyPolicy" = "Adatvédelmi irányelvek";
+"billing::paywall::restore" = "Vásárlások visszaállítása";
+"billing::paywall::restored" = "Vásárlások visszaállítva";
+"billing::paywall::restore::empty" = "Nincs visszaállítható vásárlás.";
+"billing::paywall::purchase::applied" = "Csomag frissítve";
+"billing::paywall::pending::title" = "Jóváhagyásra vár";
+"billing::paywall::pending::message" = "Kérd meg a családszervezőt, hogy hagyja jóvá ezt a vásárlást. Jóváhagyás után automatikusan érvénybe lép.";

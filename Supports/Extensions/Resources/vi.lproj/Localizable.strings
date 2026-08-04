@@ -414,6 +414,7 @@
 "setting.help::name" = "Trợ giúp";
 "setting.share::name" = "Chia sẻ ứng dụng";
 "setting.write_review::name" = "Viết đánh giá ứng dụng";
+"setting.billing.plan::name" = "Gói";
 "setting.account.signedIn::manageAccount" = "Tài khoản";
 "setting.account.needSignIn" = "Đăng nhập";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -551,12 +552,44 @@
 "aiAgent::keyboard::send" = "Gửi";
 "aiAgent::stop" = "Dừng";
 "aiAgent::usage" = "%@ / %@ credit";
-"aiAgent::plan::free" = "Miễn phí";
-"aiAgent::plan::standard" = "Tiêu chuẩn";
-"aiAgent::plan::lifetime" = "Trọn đời";
 "aiAgent::usage::topupRemaining" = "Còn lại %@ credit bổ sung";
 "aiAgent::usage::planChangeScheduled" = "Sẽ chuyển sang gói %2$@ vào %1$@";
 "aiAgent::stop::confirm::title" = "Dừng xử lý?";
 "aiAgent::stop::confirm::message" = "Dừng lại sẽ hủy bỏ tác vụ đang thực hiện và không thể tiếp tục.";
 "aiAgent::confirm::countdown" = "để xác nhận";
 "aiAgent::confirm::expired::message" = "Đã hết thời gian. Vui lòng yêu cầu lại.";
+"aiAgent::failed::showPlans" = "Xem các gói";
+
+// MARK: - billing
+
+"billing::plan::free" = "Miễn phí";
+"billing::plan::standard" = "Tiêu chuẩn";
+"billing::plan::lifetime" = "Trọn đời";
+
+"billing::paywall::title" = "Nâng cấp gói";
+"billing::paywall::current::description" = "%@ tín dụng mỗi ngày";
+"billing::paywall::metric::dailyCredits" = "%@ tín dụng/ngày";
+"billing::paywall::period::weekly" = "/tuần";
+"billing::paywall::period::monthly" = "/tháng";
+"billing::paywall::period::yearly" = "/năm";
+"billing::paywall::price::unavailable" = "Không thể tải giá";
+"billing::paywall::badge::recommended" = "Đề xuất";
+"billing::paywall::badge::owned" = "Gói hiện tại";
+"billing::paywall::features::title" = "%@ bao gồm";
+"billing::paywall::feature::dailyCredits" = "%@ tín dụng mỗi ngày";
+"billing::paywall::feature::topup" = "Có thể mua thêm khi hết tín dụng";
+"billing::paywall::disclosure::subscription" = "Gói đăng ký sẽ tự động gia hạn hàng tháng trừ khi bạn hủy trước khi kỳ hiện tại kết thúc ít nhất 24 giờ. Bạn có thể hủy bất cứ lúc nào trong phần cài đặt App Store.";
+"billing::paywall::disclosure::oneTime" = "Thanh toán một lần và sử dụng mãi mãi. Gói này không tự động gia hạn.";
+"billing::paywall::disclosure::storeUnavailable" = "Không thể kết nối với App Store. Vui lòng thử lại sau.";
+"billing::paywall::cta::subscribe" = "Đăng ký %@";
+"billing::paywall::cta::buy" = "Mua %@";
+"billing::paywall::cta::unavailable" = "Không thể mua";
+"billing::paywall::allPlansOwned" = "Bạn đã sử dụng gói cao cấp nhất.";
+"billing::paywall::terms" = "Điều khoản dịch vụ";
+"billing::paywall::privacyPolicy" = "Chính sách quyền riêng tư";
+"billing::paywall::restore" = "Khôi phục giao dịch mua";
+"billing::paywall::restored" = "Đã khôi phục giao dịch mua";
+"billing::paywall::restore::empty" = "Không có giao dịch mua nào để khôi phục.";
+"billing::paywall::purchase::applied" = "Đã áp dụng gói";
+"billing::paywall::pending::title" = "Đang chờ phê duyệt";
+"billing::paywall::pending::message" = "Hãy nhờ người tổ chức gia đình phê duyệt giao dịch mua này. Giao dịch sẽ tự động được áp dụng sau khi được phê duyệt.";

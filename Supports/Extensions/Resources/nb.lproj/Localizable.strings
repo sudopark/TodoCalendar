@@ -414,6 +414,7 @@
 "setting.help::name" = "Hjelp";
 "setting.share::name" = "Del appen";
 "setting.write_review::name" = "Skriv en app-anmeldelse";
+"setting.billing.plan::name" = "Abonnement";
 "setting.account.signedIn::manageAccount" = "Konto";
 "setting.account.needSignIn" = "Logg inn";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -551,12 +552,44 @@
 "aiAgent::keyboard::send" = "Send";
 "aiAgent::stop" = "Stopp";
 "aiAgent::usage" = "%@ / %@ kreditter";
-"aiAgent::plan::free" = "Gratis";
-"aiAgent::plan::standard" = "Standard";
-"aiAgent::plan::lifetime" = "Livstid";
 "aiAgent::usage::topupRemaining" = "%@ ekstra kreditter igjen";
 "aiAgent::usage::planChangeScheduled" = "Bytte til planen %2$@ den %1$@";
 "aiAgent::stop::confirm::title" = "Stoppe behandlingen?";
 "aiAgent::stop::confirm::message" = "Å stoppe forkaster den pågående kommandoen, og den kan ikke gjenopptas.";
 "aiAgent::confirm::countdown" = "igjen til godkjenning";
 "aiAgent::confirm::expired::message" = "Tiden er ute. Vennligst be om dette på nytt.";
+"aiAgent::failed::showPlans" = "Se abonnementer";
+
+// MARK: - billing
+
+"billing::plan::free" = "Gratis";
+"billing::plan::standard" = "Standard";
+"billing::plan::lifetime" = "Livstid";
+
+"billing::paywall::title" = "Oppgrader abonnement";
+"billing::paywall::current::description" = "%@ credits per dag";
+"billing::paywall::metric::dailyCredits" = "%@ credits/dag";
+"billing::paywall::period::weekly" = "/uke";
+"billing::paywall::period::monthly" = "/mnd";
+"billing::paywall::period::yearly" = "/år";
+"billing::paywall::price::unavailable" = "Prisen er ikke tilgjengelig";
+"billing::paywall::badge::recommended" = "Anbefalt";
+"billing::paywall::badge::owned" = "Nåværende abonnement";
+"billing::paywall::features::title" = "%@ inkluderer";
+"billing::paywall::feature::dailyCredits" = "%@ credits per dag";
+"billing::paywall::feature::topup" = "Du kan kjøpe flere når credits er brukt opp";
+"billing::paywall::disclosure::subscription" = "Abonnementet fornyes automatisk hver måned med mindre du sier det opp minst 24 timer før inneværende periode utløper. Du kan si opp når som helst i innstillingene for App Store.";
+"billing::paywall::disclosure::oneTime" = "Betal én gang og behold det for alltid. Dette fornyes ikke automatisk.";
+"billing::paywall::disclosure::storeUnavailable" = "Kunne ikke koble til App Store. Prøv igjen senere.";
+"billing::paywall::cta::subscribe" = "Abonner på %@";
+"billing::paywall::cta::buy" = "Kjøp %@";
+"billing::paywall::cta::unavailable" = "Ikke tilgjengelig";
+"billing::paywall::allPlansOwned" = "Du har allerede det beste abonnementet.";
+"billing::paywall::terms" = "Brukervilkår";
+"billing::paywall::privacyPolicy" = "Personvernerklæring";
+"billing::paywall::restore" = "Gjenopprett kjøp";
+"billing::paywall::restored" = "Kjøp gjenopprettet";
+"billing::paywall::restore::empty" = "Ingen kjøp å gjenopprette.";
+"billing::paywall::purchase::applied" = "Abonnement oppdatert";
+"billing::paywall::pending::title" = "Venter på godkjenning";
+"billing::paywall::pending::message" = "Be en familieorganisator om å godkjenne dette kjøpet. Det tas automatisk i bruk når det er godkjent.";

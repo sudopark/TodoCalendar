@@ -414,6 +414,7 @@
 "setting.help::name" = "Help";
 "setting.share::name" = "App delen";
 "setting.write_review::name" = "Schrijf een app-recensie";
+"setting.billing.plan::name" = "Abonnement";
 "setting.account.signedIn::manageAccount" = "Account";
 "setting.account.needSignIn" = "Inloggen";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -551,12 +552,44 @@
 "aiAgent::keyboard::send" = "Verzenden";
 "aiAgent::stop" = "Stoppen";
 "aiAgent::usage" = "%@ / %@ credits";
-"aiAgent::plan::free" = "Gratis";
-"aiAgent::plan::standard" = "Standaard";
-"aiAgent::plan::lifetime" = "Levenslang";
 "aiAgent::usage::topupRemaining" = "Nog %@ extra credits over";
 "aiAgent::usage::planChangeScheduled" = "Overstap naar het %2$@-plan op %1$@";
 "aiAgent::stop::confirm::title" = "Verwerking stoppen?";
 "aiAgent::stop::confirm::message" = "Stoppen verwerpt de lopende opdracht, en deze kan niet worden hervat.";
 "aiAgent::confirm::countdown" = "resterend om goed te keuren";
 "aiAgent::confirm::expired::message" = "Tijd verlopen. Vraag het opnieuw aan.";
+"aiAgent::failed::showPlans" = "Bekijk abonnementen";
+
+// MARK: - billing
+
+"billing::plan::free" = "Gratis";
+"billing::plan::standard" = "Standaard";
+"billing::plan::lifetime" = "Levenslang";
+
+"billing::paywall::title" = "Abonnement upgraden";
+"billing::paywall::current::description" = "%@ credits per dag";
+"billing::paywall::metric::dailyCredits" = "%@ credits/dag";
+"billing::paywall::period::weekly" = "/wk";
+"billing::paywall::period::monthly" = "/mnd";
+"billing::paywall::period::yearly" = "/jaar";
+"billing::paywall::price::unavailable" = "Prijs niet beschikbaar";
+"billing::paywall::badge::recommended" = "Aanbevolen";
+"billing::paywall::badge::owned" = "Huidig abonnement";
+"billing::paywall::features::title" = "%@ bevat";
+"billing::paywall::feature::dailyCredits" = "%@ credits per dag";
+"billing::paywall::feature::topup" = "Extra credits bijkopen als ze op zijn";
+"billing::paywall::disclosure::subscription" = "Je abonnement wordt elke maand automatisch verlengd, tenzij je minstens 24 uur voor het einde van de huidige periode opzegt. Je kunt op elk moment opzeggen via de App Store-instellingen.";
+"billing::paywall::disclosure::oneTime" = "Betaal eenmalig en behoud het voorgoed. Dit wordt niet automatisch verlengd.";
+"billing::paywall::disclosure::storeUnavailable" = "Kan geen verbinding maken met de App Store. Probeer het later opnieuw.";
+"billing::paywall::cta::subscribe" = "Abonneer op %@";
+"billing::paywall::cta::buy" = "Koop %@";
+"billing::paywall::cta::unavailable" = "Niet beschikbaar";
+"billing::paywall::allPlansOwned" = "Je hebt al het beste abonnement.";
+"billing::paywall::terms" = "Servicevoorwaarden";
+"billing::paywall::privacyPolicy" = "Privacybeleid";
+"billing::paywall::restore" = "Aankopen herstellen";
+"billing::paywall::restored" = "Aankopen hersteld";
+"billing::paywall::restore::empty" = "Geen aankopen om te herstellen.";
+"billing::paywall::purchase::applied" = "Abonnement bijgewerkt";
+"billing::paywall::pending::title" = "Goedkeuring in behandeling";
+"billing::paywall::pending::message" = "Vraag een gezinsbeheerder om deze aankoop goed te keuren. Deze wordt automatisch toegepast zodra hij is goedgekeurd.";
