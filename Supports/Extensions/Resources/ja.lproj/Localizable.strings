@@ -594,3 +594,5 @@
 "billing::paywall::purchase::applied" = "プランを適用しました";
 "billing::paywall::pending::title" = "承認待ち";
 "billing::paywall::pending::message" = "ファミリーの管理者に購入の承認を依頼してください。承認されると自動的に反映されます。";
+"billing::paywall::userPlan::loadFailed" = "プランを読み込めませんでした。もう一度お試しください。";
+"billing::paywall::retry" = "再試行";

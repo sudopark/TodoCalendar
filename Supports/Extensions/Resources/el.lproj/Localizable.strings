@@ -594,3 +594,5 @@
 "billing::paywall::purchase::applied" = "Το πρόγραμμα ενημερώθηκε";
 "billing::paywall::pending::title" = "Εκκρεμεί έγκριση";
 "billing::paywall::pending::message" = "Ζητήστε από τον οργανωτή οικογένειας να εγκρίνει αυτήν την αγορά. Θα εφαρμοστεί αυτόματα μόλις εγκριθεί.";
+"billing::paywall::userPlan::loadFailed" = "Δεν ήταν δυνατή η φόρτωση του προγράμματός σας. Δοκιμάστε ξανά.";
+"billing::paywall::retry" = "Επανάληψη";

@@ -594,3 +594,5 @@
 "billing::paywall::purchase::applied" = "Plan güncellendi";
 "billing::paywall::pending::title" = "Onay bekleniyor";
 "billing::paywall::pending::message" = "Bu satın alımı onaylaması için bir aile organizatöründen isteyin. Onaylandığında otomatik olarak uygulanır.";
+"billing::paywall::userPlan::loadFailed" = "Planınız yüklenemedi. Lütfen tekrar deneyin.";
+"billing::paywall::retry" = "Tekrar dene";

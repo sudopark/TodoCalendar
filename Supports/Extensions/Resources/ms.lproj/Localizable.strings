@@ -594,3 +594,5 @@
 "billing::paywall::purchase::applied" = "Pelan dikemas kini";
 "billing::paywall::pending::title" = "Menunggu kelulusan";
 "billing::paywall::pending::message" = "Minta penganjur keluarga meluluskan pembelian ini. Ia akan digunakan secara automatik setelah diluluskan.";
+"billing::paywall::userPlan::loadFailed" = "Tidak dapat memuatkan pelan anda. Sila cuba lagi.";
+"billing::paywall::retry" = "Cuba lagi";

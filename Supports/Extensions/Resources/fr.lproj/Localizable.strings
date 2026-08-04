@@ -594,3 +594,5 @@
 "billing::paywall::purchase::applied" = "Forfait appliqué";
 "billing::paywall::pending::title" = "Approbation en attente";
 "billing::paywall::pending::message" = "Demandez à un organisateur familial d'approuver cet achat. Il sera appliqué automatiquement une fois approuvé.";
+"billing::paywall::userPlan::loadFailed" = "Impossible de charger votre forfait. Veuillez réessayer.";
+"billing::paywall::retry" = "Réessayer";

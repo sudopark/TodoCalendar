@@ -594,3 +594,5 @@
 "billing::paywall::purchase::applied" = "Plán aktualizován";
 "billing::paywall::pending::title" = "Čeká na schválení";
 "billing::paywall::pending::message" = "Požádejte rodinného organizátora o schválení tohoto nákupu. Po schválení bude automaticky použit.";
+"billing::paywall::userPlan::loadFailed" = "Nepodařilo se načíst váš plán. Zkuste to prosím znovu.";
+"billing::paywall::retry" = "Zkusit znovu";

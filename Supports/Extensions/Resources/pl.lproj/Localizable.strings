@@ -594,3 +594,5 @@
 "billing::paywall::purchase::applied" = "Plan zaktualizowany";
 "billing::paywall::pending::title" = "Oczekuje na zatwierdzenie";
 "billing::paywall::pending::message" = "Poproś organizatora rodziny o zatwierdzenie tego zakupu. Zostanie on zastosowany automatycznie po zatwierdzeniu.";
+"billing::paywall::userPlan::loadFailed" = "Nie udało się wczytać Twojego planu. Spróbuj ponownie.";
+"billing::paywall::retry" = "Spróbuj ponownie";

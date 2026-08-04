@@ -594,3 +594,5 @@
 "billing::paywall::purchase::applied" = "Pla actualitzat";
 "billing::paywall::pending::title" = "Aprovació pendent";
 "billing::paywall::pending::message" = "Demana a un organitzador familiar que aprovi aquesta compra. S'aplicarà automàticament quan s'aprovi.";
+"billing::paywall::userPlan::loadFailed" = "No s'ha pogut carregar el teu pla. Torna-ho a provar.";
+"billing::paywall::retry" = "Torna-ho a provar";

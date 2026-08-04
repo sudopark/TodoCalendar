@@ -594,3 +594,5 @@
 "billing::paywall::purchase::applied" = "Tarif aktualisiert";
 "billing::paywall::pending::title" = "Genehmigung ausstehend";
 "billing::paywall::pending::message" = "Bitte einen Familienorganisator, diesen Kauf zu genehmigen. Er wird nach der Genehmigung automatisch angewendet.";
+"billing::paywall::userPlan::loadFailed" = "Dein Tarif konnte nicht geladen werden. Bitte versuche es erneut.";
+"billing::paywall::retry" = "Erneut versuchen";

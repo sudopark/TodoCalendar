@@ -594,3 +594,5 @@
 "billing::paywall::purchase::applied" = "Тариф обновлён";
 "billing::paywall::pending::title" = "Ожидает одобрения";
 "billing::paywall::pending::message" = "Попросите организатора семейного доступа одобрить эту покупку. После одобрения она будет применена автоматически.";
+"billing::paywall::userPlan::loadFailed" = "Не удалось загрузить ваш тариф. Повторите попытку.";
+"billing::paywall::retry" = "Повторить";

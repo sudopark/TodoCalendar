@@ -594,3 +594,5 @@
 "billing::paywall::purchase::applied" = "Piano aggiornato";
 "billing::paywall::pending::title" = "Approvazione in sospeso";
 "billing::paywall::pending::message" = "Chiedi a un organizzatore famiglia di approvare questo acquisto. Verrà applicato automaticamente dopo l'approvazione.";
+"billing::paywall::userPlan::loadFailed" = "Impossibile caricare il tuo piano. Riprova.";
+"billing::paywall::retry" = "Riprova";

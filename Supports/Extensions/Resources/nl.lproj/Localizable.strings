@@ -594,3 +594,5 @@
 "billing::paywall::purchase::applied" = "Abonnement bijgewerkt";
 "billing::paywall::pending::title" = "Goedkeuring in behandeling";
 "billing::paywall::pending::message" = "Vraag een gezinsbeheerder om deze aankoop goed te keuren. Deze wordt automatisch toegepast zodra hij is goedgekeurd.";
+"billing::paywall::userPlan::loadFailed" = "Kan je abonnement niet laden. Probeer het opnieuw.";
+"billing::paywall::retry" = "Opnieuw proberen";

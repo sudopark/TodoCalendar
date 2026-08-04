@@ -594,3 +594,5 @@
 "billing::paywall::purchase::applied" = "Plan ažuriran";
 "billing::paywall::pending::title" = "Čeka odobrenje";
 "billing::paywall::pending::message" = "Zamolite organizatora obitelji da odobri ovu kupnju. Automatski će se primijeniti nakon odobrenja.";
+"billing::paywall::userPlan::loadFailed" = "Učitavanje vašeg plana nije uspjelo. Pokušajte ponovno.";
+"billing::paywall::retry" = "Pokušaj ponovno";

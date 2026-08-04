@@ -594,3 +594,5 @@
 "billing::paywall::purchase::applied" = "อัปเดตแพ็กเกจแล้ว";
 "billing::paywall::pending::title" = "รอการอนุมัติ";
 "billing::paywall::pending::message" = "ขอให้ผู้จัดการครอบครัวอนุมัติการซื้อนี้ เมื่อได้รับอนุมัติแล้วจะมีผลโดยอัตโนมัติ";
+"billing::paywall::userPlan::loadFailed" = "ไม่สามารถโหลดแพ็กเกจของคุณได้ โปรดลองอีกครั้ง";
+"billing::paywall::retry" = "ลองใหม่";

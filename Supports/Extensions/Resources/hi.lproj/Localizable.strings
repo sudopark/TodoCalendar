@@ -594,3 +594,5 @@
 "billing::paywall::purchase::applied" = "प्लान अपडेट हो गया";
 "billing::paywall::pending::title" = "स्वीकृति लंबित";
 "billing::paywall::pending::message" = "इस खरीदारी को स्वीकृत करने के लिए किसी पारिवारिक व्यवस्थापक से कहें। स्वीकृत होते ही यह अपने आप लागू हो जाएगी।";
+"billing::paywall::userPlan::loadFailed" = "आपका प्लान लोड नहीं हो सका। कृपया फिर से कोशिश करें।";
+"billing::paywall::retry" = "फिर से प्रयास करें";

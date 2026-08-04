@@ -594,3 +594,5 @@
 "billing::paywall::purchase::applied" = "Paket diperbarui";
 "billing::paywall::pending::title" = "Menunggu persetujuan";
 "billing::paywall::pending::message" = "Minta pengelola keluarga untuk menyetujui pembelian ini. Pembelian akan diterapkan secara otomatis setelah disetujui.";
+"billing::paywall::userPlan::loadFailed" = "Tidak dapat memuat paket Anda. Coba lagi.";
+"billing::paywall::retry" = "Coba lagi";

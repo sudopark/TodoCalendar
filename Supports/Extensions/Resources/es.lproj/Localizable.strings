@@ -594,3 +594,5 @@
 "billing::paywall::purchase::applied" = "Plan actualizado";
 "billing::paywall::pending::title" = "Aprobación pendiente";
 "billing::paywall::pending::message" = "Pide a un organizador familiar que apruebe esta compra. Se aplicará automáticamente en cuanto se apruebe.";
+"billing::paywall::userPlan::loadFailed" = "No se pudo cargar tu plan. Inténtalo de nuevo.";
+"billing::paywall::retry" = "Reintentar";

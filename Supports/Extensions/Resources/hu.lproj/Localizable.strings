@@ -594,3 +594,5 @@
 "billing::paywall::purchase::applied" = "Csomag frissítve";
 "billing::paywall::pending::title" = "Jóváhagyásra vár";
 "billing::paywall::pending::message" = "Kérd meg a családszervezőt, hogy hagyja jóvá ezt a vásárlást. Jóváhagyás után automatikusan érvénybe lép.";
+"billing::paywall::userPlan::loadFailed" = "Nem sikerült betölteni a csomagodat. Kérjük, próbáld újra.";
+"billing::paywall::retry" = "Újrapróbálás";
