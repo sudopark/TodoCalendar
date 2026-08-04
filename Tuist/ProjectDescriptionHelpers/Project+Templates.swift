@@ -14,7 +14,8 @@ extension Project {
         destinations: Destinations,
         iOSTargetVersion: String,
         dependencies: [TargetDependency] = [],
-        extensionTargets: [Target] = []
+        extensionTargets: [Target] = [],
+        schemes: [Scheme] = []
     ) -> Project {
         let targets = makeAppTargets(
             name: name,
@@ -39,7 +40,8 @@ extension Project {
                 disableBundleAccessors: true,
                 disableSynthesizedResourceAccessors: true
             ),
-            targets: targets + extensionTargets
+            targets: targets + extensionTargets,
+            schemes: schemes
         )
     }
 
