@@ -18,10 +18,16 @@ final class StubBillingRepository: BillingRepository, @unchecked Sendable {
 
     private let shouldFailPurchase: Bool
     private let failingJWSTokens: Set<String>
+    private let shouldFailLoadUserPlan: Bool
 
-    init(shouldFailPurchase: Bool = false, failingJWSTokens: Set<String> = []) {
+    init(
+        shouldFailPurchase: Bool = false,
+        failingJWSTokens: Set<String> = [],
+        shouldFailLoadUserPlan: Bool = false
+    ) {
         self.shouldFailPurchase = shouldFailPurchase
         self.failingJWSTokens = failingJWSTokens
+        self.shouldFailLoadUserPlan = shouldFailLoadUserPlan
     }
 
     // 기록만 한다 — 검증은 테스트 케이스 책임
@@ -40,6 +46,14 @@ final class StubBillingRepository: BillingRepository, @unchecked Sendable {
         return [
             BillingTopup(productId: "topup.tier.1", credits: 100_000)
         ]
+    }
+
+    func loadUserPlan() async throws -> BillingUserPlan {
+        guard !self.shouldFailLoadUserPlan
+        else { throw RuntimeError("load user plan failed") }
+        return BillingUserPlan()
+            |> \.planId .~ .standard
+            |> \.topupRemaining .~ 45600
     }
 
     func postPurchase(signedTransaction: String) async throws -> BillingUserPlan {

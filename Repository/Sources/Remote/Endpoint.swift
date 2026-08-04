@@ -292,12 +292,14 @@ enum BillingAPIEndpoints: Endpoint {
     case plans
     case topups
     case purchases
+    case userPlan
 
     var subPath: String {
         switch self {
         case .plans: return "plans"
         case .topups: return "topups"
         case .purchases: return "purchases"
+        case .userPlan: return "user-plan"
         }
     }
 }
