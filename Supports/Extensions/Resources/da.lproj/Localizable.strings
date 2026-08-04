@@ -594,3 +594,5 @@
 "billing::paywall::purchase::applied" = "Abonnement opdateret";
 "billing::paywall::pending::title" = "Afventer godkendelse";
 "billing::paywall::pending::message" = "Bed en familieorganisator om at godkende dette køb. Det anvendes automatisk, når det er godkendt.";
+"billing::paywall::userPlan::loadFailed" = "Kunne ikke indlæse dit abonnement. Prøv igen.";
+"billing::paywall::retry" = "Prøv igen";

@@ -594,3 +594,5 @@
 "billing::paywall::purchase::applied" = "方案已套用";
 "billing::paywall::pending::title" = "等待核准";
 "billing::paywall::pending::message" = "請等候家人共享的管理者核准此購買項目，核准後將自動套用。";
+"billing::paywall::userPlan::loadFailed" = "無法載入您的方案，請重試。";
+"billing::paywall::retry" = "重試";

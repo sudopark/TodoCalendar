@@ -594,3 +594,5 @@
 "billing::paywall::purchase::applied" = "套餐已生效";
 "billing::paywall::pending::title" = "等待批准";
 "billing::paywall::pending::message" = "请等待家庭组织者批准此购买，批准后将自动生效。";
+"billing::paywall::userPlan::loadFailed" = "无法加载您的套餐，请重试。";
+"billing::paywall::retry" = "重试";

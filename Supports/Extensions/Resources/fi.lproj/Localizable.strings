@@ -594,3 +594,5 @@
 "billing::paywall::purchase::applied" = "Tilaus päivitetty";
 "billing::paywall::pending::title" = "Odottaa hyväksyntää";
 "billing::paywall::pending::message" = "Pyydä perheen järjestäjää hyväksymään tämä ostos. Se otetaan käyttöön automaattisesti hyväksynnän jälkeen.";
+"billing::paywall::userPlan::loadFailed" = "Tilaustasi ei voitu ladata. Yritä uudelleen.";
+"billing::paywall::retry" = "Yritä uudelleen";

@@ -594,3 +594,5 @@
 "billing::paywall::purchase::applied" = "Plan actualizat";
 "billing::paywall::pending::title" = "Aprobare în așteptare";
 "billing::paywall::pending::message" = "Cere unui organizator al familiei să aprobe această achiziție. Se va aplica automat după aprobare.";
+"billing::paywall::userPlan::loadFailed" = "Nu s-a putut încărca planul tău. Încearcă din nou.";
+"billing::paywall::retry" = "Reîncearcă";

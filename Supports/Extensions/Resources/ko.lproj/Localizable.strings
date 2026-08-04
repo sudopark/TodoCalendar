@@ -594,3 +594,5 @@
 "billing::paywall::purchase::applied" = "플랜이 적용됐어요";
 "billing::paywall::pending::title" = "승인 대기 중";
 "billing::paywall::pending::message" = "가족 구성원 관리자의 구매 승인을 기다리고 있어요. 승인되면 자동으로 반영됩니다.";
+"billing::paywall::userPlan::loadFailed" = "플랜을 불러오지 못했어요. 다시 시도해주세요.";
+"billing::paywall::retry" = "다시";

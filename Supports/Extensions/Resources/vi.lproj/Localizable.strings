@@ -594,3 +594,5 @@
 "billing::paywall::purchase::applied" = "Đã áp dụng gói";
 "billing::paywall::pending::title" = "Đang chờ phê duyệt";
 "billing::paywall::pending::message" = "Hãy nhờ người tổ chức gia đình phê duyệt giao dịch mua này. Giao dịch sẽ tự động được áp dụng sau khi được phê duyệt.";
+"billing::paywall::userPlan::loadFailed" = "Không thể tải gói của bạn. Vui lòng thử lại.";
+"billing::paywall::retry" = "Thử lại";

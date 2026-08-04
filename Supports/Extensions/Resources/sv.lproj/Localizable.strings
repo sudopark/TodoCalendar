@@ -594,3 +594,5 @@
 "billing::paywall::purchase::applied" = "Planen har uppdaterats";
 "billing::paywall::pending::title" = "Väntar på godkännande";
 "billing::paywall::pending::message" = "Be en familjeorganisatör att godkänna det här köpet. Det tillämpas automatiskt när det har godkänts.";
+"billing::paywall::userPlan::loadFailed" = "Det gick inte att läsa in din plan. Försök igen.";
+"billing::paywall::retry" = "Försök igen";
