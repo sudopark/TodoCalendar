@@ -104,6 +104,10 @@ fi
 if printf '%s\n' "$FILES" | grep -q "^TodoCalendarApp/AppExtensions/Widget/"; then
   schemes+=("TodoCalendarAppWidget")
 fi
+# Base(확장 공통 조립)·Share는 앱 타겟에 embed되므로 앱 스킴 빌드로 검증
+if printf '%s\n' "$FILES" | grep -qE "^TodoCalendarApp/AppExtensions/(Base|Share)/"; then
+  schemes+=("TodoCalendarApp")
+fi
 
 # ---- tuist generate (테스트보다 선행 액션 — 첫 섹션으로 출력) ----
 # tuist 재생성 필요: (1) .swift 소스 멤버십 추가/삭제/이동(ADRC), (2) 매니페스트(Project/Workspace/Package/Tuist) 변경(수정 포함).

@@ -140,6 +140,10 @@ jobs:
           if echo "$FILES" | grep -q "^TodoCalendarApp/AppExtensions/Widget/"; then
             schemes+=("TodoCalendarAppWidget")
           fi
+          # Base(확장 공통 조립)·Share는 앱 타겟에 embed되므로 앱 스킴 빌드로 검증
+          if echo "$FILES" | grep -qE "^TodoCalendarApp/AppExtensions/(Base|Share)/"; then
+            schemes+=("TodoCalendarApp")
+          fi
 
           # .github/, scripts/, docs/ 등 → 코드 빌드에 영향 없으므로 테스트 불필요
 
