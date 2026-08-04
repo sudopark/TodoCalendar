@@ -185,12 +185,11 @@ extension PaywallViewModelImple {
     }
 
     func selectPlan(_ planId: BillingPlanId) {
-        let cells = self.makeCellModels(
-            currentPlanId: self.subject.currentPlanId.value,
-            offerings: self.currentOfferings(self.subject.catalogState.value)
-        )
+        let offerings = self.currentOfferings(self.subject.catalogState.value)
         // 구매 불가(보유·커버됨·가격 없음) 카드는 탭 무시
-        guard cells.first(where: { $0.planId == planId })?.isPurchasable == true else { return }
+        guard let offering = offerings.first(where: { $0.plan.id == planId }),
+              self.isPurchasable(offering, currentPlanId: self.subject.currentPlanId.value)
+        else { return }
         self.subject.userSelectedPlanId.send(planId)
     }
 
@@ -438,11 +437,22 @@ extension PaywallViewModelImple {
     private func resolvedSelectedPlanId(
         userSelected: BillingPlanId?, currentPlanId: BillingPlanId?, offerings: [BillingPlanOffering]
     ) -> BillingPlanId? {
-        let cells = self.makeCellModels(currentPlanId: currentPlanId, offerings: offerings)
-        if let userSelected, cells.first(where: { $0.planId == userSelected })?.isPurchasable == true {
+        let purchasables = offerings.filter { self.isPurchasable($0, currentPlanId: currentPlanId) }
+        if let userSelected, purchasables.contains(where: { $0.plan.id == userSelected }) {
             return userSelected
         }
-        return cells.first(where: { $0.isPurchasable })?.planId
+        return purchasables.first?.plan.id
+    }
+
+    // 구매 가능 판정의 유일한 소스 — 셀 모델(표시용 문자열까지 만드는)과 선택 해석이 함께 쓴다
+    private func isPurchasable(
+        _ offering: BillingPlanOffering, currentPlanId: BillingPlanId?
+    ) -> Bool {
+        // 미배포·미로그인 상태는 free 로 취급 — free 는 아무 유료 플랜도 커버하지 않는다
+        let effectiveCurrentId = currentPlanId ?? .free
+        return offering.plan.productId != nil
+            && offering.product?.displayPrice != nil
+            && effectiveCurrentId.covers(offering.plan.id) == false
     }
 
     private func detail(of offering: BillingPlanOffering) -> PaywallPlanDetailModel {

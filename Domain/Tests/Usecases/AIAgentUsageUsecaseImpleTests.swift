@@ -134,40 +134,54 @@ extension AIAgentUsageUsecaseImpleTests {
 
 extension AIAgentUsageUsecaseImpleTests {
 
-    @Test func usecase_whenLoadUsageReturnsUserPlan_seedsBillingUserPlan() async throws {
-        // given
+    private func makeUsecaseSeedingPlan(
+        _ responseUserPlan: BillingPlanId?, seeded: BillingPlanId? = nil
+    ) -> (AIAgentUsageUsecaseImple, SharedDataStore) {
         let sharedDataStore = SharedDataStore()
+        seeded.map {
+            sharedDataStore.put(
+                BillingUserPlan.self,
+                key: ShareDataKeys.billingUserPlan.rawValue,
+                BillingUserPlan() |> \.planId .~ $0
+            )
+        }
         let repository = PrivateStubRepository()
         repository.stubResults = [.success(.init(input: 1, output: 1, limit: 1))]
-        repository.stubUserPlan = BillingUserPlan() |> \.planId .~ .standard
-        let usecase = AIAgentUsageUsecaseImple(repository: repository, sharedDataStore: sharedDataStore)
+        repository.stubUserPlan = responseUserPlan.map { BillingUserPlan() |> \.planId .~ $0 }
+        let usecase = AIAgentUsageUsecaseImple(
+            repository: repository, sharedDataStore: sharedDataStore
+        )
+        return (usecase, sharedDataStore)
+    }
+
+    private func seededPlanId(_ store: SharedDataStore) -> BillingPlanId? {
+        return store.value(
+            BillingUserPlan.self, key: ShareDataKeys.billingUserPlan.rawValue
+        )?.planId
+    }
+
+    @Test func usecase_whenLoadUsageReturnsUserPlan_seedsBillingUserPlan() async throws {
+        // given
+        let (usecase, store) = self.makeUsecaseSeedingPlan(.standard)
 
         // when
         _ = try await usecase.loadUsage()
 
         // then
-        let seeded = sharedDataStore.value(BillingUserPlan.self, key: ShareDataKeys.billingUserPlan.rawValue)
-        #expect(seeded?.planId == .standard)
+        #expect(self.seededPlanId(store) == .standard)
     }
 
     // userPlan 이 nil 인 응답을 그대로 덮어쓰면, 방금 구매로 갱신된 최신 플랜이 다음 usage
     // 재조회 한 번에 지워진다 — nil 은 put 하지 않고 기존 값을 유지해야 한다
     @Test func usecase_whenLoadUsageReturnsNilUserPlan_keepsExistingBillingUserPlan() async throws {
         // given
-        let sharedDataStore = SharedDataStore()
-        let existing = BillingUserPlan() |> \.planId .~ .lifetime
-        sharedDataStore.put(BillingUserPlan.self, key: ShareDataKeys.billingUserPlan.rawValue, existing)
-        let repository = PrivateStubRepository()
-        repository.stubResults = [.success(.init(input: 1, output: 1, limit: 1))]
-        repository.stubUserPlan = nil
-        let usecase = AIAgentUsageUsecaseImple(repository: repository, sharedDataStore: sharedDataStore)
+        let (usecase, store) = self.makeUsecaseSeedingPlan(nil, seeded: .lifetime)
 
         // when
         _ = try await usecase.loadUsage()
 
         // then
-        let kept = sharedDataStore.value(BillingUserPlan.self, key: ShareDataKeys.billingUserPlan.rawValue)
-        #expect(kept?.planId == .lifetime)
+        #expect(self.seededPlanId(store) == .lifetime)
     }
 }
 
