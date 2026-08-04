@@ -5,14 +5,14 @@
 #    "Map changes to test schemes" 스텝을 미러링한다. 한쪽 수정 시 반드시 동기화.
 #
 # Usage:
-#   impact-check.sh [--base <ref>]   # git 변경분(작업트리+커밋 vs ref, 기본 develop) 분석
+#   impact-check.sh [--base <ref>]   # git 변경분(작업트리+커밋 vs ref, 기본 origin/develop) 분석
 #   impact-check.sh --stdin          # "STATUS<TAB>PATH" 라인들을 stdin으로 (테스트용)
 set -o pipefail
 
 ALL_SCHEMES="Domain Repository AuthService BillingScenes CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene TodoCalendarApp TodoCalendarAppWidget"
 ALL_PRESENTATION="BillingScenes CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene"
 
-MODE="git"; BASE="develop"
+MODE="git"; BASE="origin/develop"
 while [ $# -gt 0 ]; do
   case "$1" in
     --stdin) MODE="stdin"; shift ;;

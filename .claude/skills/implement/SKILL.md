@@ -113,7 +113,7 @@ cd tools/complexity-analyzer
 
 아래 전부 충족해야 "구현/수정 끝"으로 판정한다:
 
-1. `bash .claude/skills/implement/scripts/impact-check.sh [--base <ref>]` (기본 develop) 실행 후 3섹션을 순서대로 처리:
+1. `bash .claude/skills/implement/scripts/impact-check.sh [--base <ref>]` (기본 origin/develop) 실행 후 3섹션을 순서대로 처리:
    - **tuist generate** — "필요"인데 아직 안 돌렸으면 `mise exec -- tuist generate --no-open` 먼저. 원칙은 파일 추가/삭제/이동 직후 이미 실행돼 있는 것이고, 여기는 누락 안전망. 테스트는 반드시 generate 반영 후에 돈다
    - **테스트 스킴** — 출력된 스킴 전부 테스트 통과
    - **짝지어진 두 위치** — 각 경고를 해소(대응처 수정)하거나 오탐임을 확인하고 유저에게 보고. 경고를 무시한 채 커밋하지 않는다
