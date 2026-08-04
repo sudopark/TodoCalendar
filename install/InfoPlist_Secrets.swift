@@ -19,11 +19,15 @@ extension Project {
     public static let debugWidgetSigningSetting: SettingsDictionary = [:]
     
     public static let debugAppIntentSigningSetting: SettingsDictionary = [:]
-    
+
+    public static let debugShareSigningSetting: SettingsDictionary = [:]
+
     // release signing
     public static let releaseAppSigningSetting: SettingsDictionary = [:]
     
     public static let releaseWidgetSigningSetting: SettingsDictionary = [:]
     
     public static let releaseAppIntentSigningSetting: SettingsDictionary = [:]
+
+    public static let releaseShareSigningSetting: SettingsDictionary = [:]
 }

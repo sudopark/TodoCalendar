@@ -12,6 +12,9 @@ let project = Project.app(
         .target(
             name: "TodoCalendarAppIntentExtensions", condition: nil
         ),
+        .target(
+            name: "TodoCalendarAppShare", condition: nil
+        ),
         .project(
             target: "CalendarScenes",
             path: .relativeToCurrentFile("../Presentations/CalendarScenes")
@@ -185,6 +188,56 @@ let project = Project.app(
             .release(
                 name: "Release",
                 settings: Project.releaseAppIntentSigningSetting
+            )
+        ],
+        withTest: false
+    )
+    + Project.makeAppExtensionTargets(
+        appName: "TodoCalendarApp",
+        extensionName: "Share",
+        destinations: [.iPhone],
+        iOSTargetVersion: "17.0",
+        infoPlist: [
+            "NSExtension": .dictionary([
+                "NSExtensionAttributes": .dictionary([
+                    "NSExtensionActivationRule": .dictionary([
+                        "NSExtensionActivationSupportsText": .boolean(true),
+                        "NSExtensionActivationSupportsWebURLWithMaxCount": .integer(1)
+                    ])
+                ]),
+                "NSExtensionPointIdentifier": .string("com.apple.share-services"),
+                "NSExtensionPrincipalClass": .string("$(PRODUCT_MODULE_NAME).ShareViewController")
+            ]),
+            "CFBundleDisplayName": "To-do Calendar",
+            "CFBundleShortVersionString": "\(Project.appVersion)",
+            "CFBundleVersion": "\(Project.buildNumber)"
+        ],
+        dependencies: [
+            .project(
+                target: "Extensions",
+                path: .relativeToCurrentFile("../Supports/Extensions")
+            ),
+            .project(
+                target: "Common3rdParty",
+                path: .relativeToCurrentFile("../Supports/Common3rdParty")
+            ),
+            .project(
+                target: "Domain",
+                path: .relativeToCurrentFile("../Domain")
+            ),
+            .project(
+                target: "Repository",
+                path: .relativeToCurrentFile("../Repository")
+            )
+        ],
+        signingConfigures: [
+            .debug(
+                name: "Debug",
+                settings: Project.debugShareSigningSetting
+            ),
+            .release(
+                name: "Release",
+                settings: Project.releaseShareSigningSetting
             )
         ],
         withTest: false
