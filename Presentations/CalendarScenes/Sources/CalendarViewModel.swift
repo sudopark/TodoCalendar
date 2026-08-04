@@ -282,6 +282,7 @@ extension CalendarViewModelImple {
         if FeatureFlag.isEnable(.aiAgent) {
             self.aiAgentOrchestrationUsecase.prepare()
             self.bindShowAICommandResultIfNeed()
+            self.bindRestoreAICommandAfterEnterForeground()
         }
     }
     
@@ -422,6 +423,32 @@ extension CalendarViewModelImple: CalendarPaperSceneListener {
 // MARK: - AI command 결과 시트 자동 표시
 
 extension CalendarViewModelImple {
+
+    // Share Extension·인텐트가 앱 실행 중에 만든 job은 앱 메모리에 없다.
+    // 포그라운드 복귀마다 복원해 in-memory state로 올려야 결과를 보여줄 수 있고,
+    // AIAgentOrchestrationUsecase의 제출 가드도 그 job을 인지해 덮어쓰기를 막는다.
+    private func bindRestoreAICommandAfterEnterForeground() {
+
+        // state는 방출 전(앱 시작 직후)일 수 있어 nil을 선착시킨다 — 그 시점도 복원 대상이다
+        let currentState = self.aiAgentOrchestrationUsecase.state
+            .map { Optional($0) }
+            .prepend(nil)
+
+        NotificationCenter.default.publisher(
+            for: UIApplication.willEnterForegroundNotification
+        )
+        .withLatestFrom(currentState) { $1 }
+        .sink(receiveValue: { [weak self] state in
+            // 입력 중이거나 이미 결과를 보고 있는 중이면 덮지 않는다
+            switch state {
+            case .none, .some(.idle):
+                self?.aiAgentOrchestrationUsecase.restoreIfNeeded()
+            default:
+                break
+            }
+        })
+        .store(in: &self.cancellables)
+    }
 
     private func bindShowAICommandResultIfNeed() {
         self.aiAgentOrchestrationUsecase.state

@@ -32,7 +32,9 @@ public final class StubAIAgentOrchestrationUsecase: AIAgentOrchestrationUsecase,
     public func confirm() {}
     public func decline() {}
     public func reset() { self.stateSubject.send(.idle) }
-    public func restoreIfNeeded() {}
+
+    public private(set) var didRestoreIfNeeded: Bool?
+    public func restoreIfNeeded() { self.didRestoreIfNeeded = true }
     public func loadUsage() {}
 
     public var didHandleJobStatusChangedWith: String?

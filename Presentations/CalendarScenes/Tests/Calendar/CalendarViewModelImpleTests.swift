@@ -57,6 +57,9 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
     }
 
     override func tearDownWithError() throws {
+        // 케이스 종료 후에도 뷰모델이 살아 전역 notification에 반응한다.
+        // 콜백을 끊지 않으면 다음 케이스의 post가 앞 케이스 expectation을 다시 fulfill한다.
+        self.spyTodoUsecase.didRefreshUncompletedTodoCalledCallback = nil
         self.cancelBag = nil
         self.stubCalendarUsecase = nil
         self.spyHolidayUsecase = nil
@@ -1007,6 +1010,39 @@ extension CalendarViewModelImpleTests {
 
         // then — 진입 edge에서만 1회
         XCTAssertEqual(self.spyRouter.didRouteToAICommandCount, 1)
+    }
+
+    // 확장·인텐트가 앱 밖에서 만든 job은 앱 메모리에 없다 — 포그라운드 복귀마다 이어받는다
+    func testViewModel_whenEnterForegroundWithoutOngoingCommand_restoreProcessingCommand() {
+        // given
+        FeatureFlag.enable(.aiAgent)
+        let viewModel = self.makeViewModel()
+        viewModel.prepare()
+
+        // when
+        NotificationCenter.default.post(
+            name: UIApplication.willEnterForegroundNotification, object: nil
+        )
+
+        // then
+        XCTAssertEqual(self.stubOrchestration.didRestoreIfNeeded, true)
+    }
+
+    // 입력 중이거나 이미 결과를 보고 있으면 복원이 화면 상태를 덮는다
+    func testViewModel_whenEnterForegroundDuringCommandPhase_notRestoreProcessingCommand() {
+        // given
+        FeatureFlag.enable(.aiAgent)
+        let viewModel = self.makeViewModel()
+        viewModel.prepare()
+        self.stubOrchestration.stateSubject.send(.processing(command: "회의"))
+
+        // when
+        NotificationCenter.default.post(
+            name: UIApplication.willEnterForegroundNotification, object: nil
+        )
+
+        // then
+        XCTAssertNil(self.stubOrchestration.didRestoreIfNeeded)
     }
 
     func testViewModel_whenDayEventListRequestsShowCommand_routesToAICommand() {
