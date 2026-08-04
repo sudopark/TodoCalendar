@@ -307,3 +307,48 @@ extension BillingScenesSnapshots {
         }
     }
 }
+
+
+// MARK: - 유저 플랜 조회 게이트 로딩 중 — screenState == .loading, 본문 전체가 스피너로 대체 (#739)
+
+extension BillingScenesSnapshots {
+
+    @MainActor
+    func test_paywallUserPlanLoading() {
+        captureSnapshotPair(named: "paywallUserPlanLoading", layout: .fullScreen) { theme in
+            self.makePaywallView(theme) { state in
+                state.currentPlan = nil
+                state.currentPlanDescription = ""
+                state.catalogState = .loading
+                state.screenState = .loading
+                state.cellModels = []
+                state.selectedPlanId = nil
+                state.selectedPlanDetail = nil
+                state.isPurchasing = false
+            }
+        }
+    }
+}
+
+
+// MARK: - 유저 플랜 조회 실패 — screenState == .userPlanLoadFailed, 본문(플랜 카드·CTA·고지문)
+// 없이 전면 에러 안내 + 재시도 버튼으로 대체 (#739)
+
+extension BillingScenesSnapshots {
+
+    @MainActor
+    func test_paywallUserPlanLoadFailed() {
+        captureSnapshotPair(named: "paywallUserPlanLoadFailed", layout: .fullScreen) { theme in
+            self.makePaywallView(theme) { state in
+                state.currentPlan = nil
+                state.currentPlanDescription = ""
+                state.catalogState = .loading
+                state.screenState = .userPlanLoadFailed
+                state.cellModels = []
+                state.selectedPlanId = nil
+                state.selectedPlanDetail = nil
+                state.isPurchasing = false
+            }
+        }
+    }
+}
