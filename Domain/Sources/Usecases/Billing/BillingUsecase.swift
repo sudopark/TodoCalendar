@@ -21,6 +21,11 @@ public protocol BillingUsecase: AnyObject, Sendable {
     func purchase(productId: String) async throws -> BillingPurchaseResult
     func restorePurchases() async throws -> BillingUserPlan?
 
+    // paywall 진입 등에서 현재 플랜을 재확인한다. 성공하면 sharedDataStore 에 반영돼
+    // currentUserPlan 구독자에게 흐른다. 실패는 호출측이 처리 (throws)
+    @discardableResult
+    func refreshUserPlan() async throws -> BillingUserPlan
+
     // 앱 기동(로그인) 시 1회. 이후 생명주기 내내 유지된다.
     // 중복 호출 방어가 락 없는 플래그라 메인에서만 부른다
     func startObservingTransactions()
@@ -111,12 +116,16 @@ extension BillingUsecaseImple {
         // 서버가 믿는 건 서명 payload 안의 값 — 앱이 판단한 productId 는 올리지 않는다
         let userPlan = try await self.repository.postPurchase(signedTransaction: transaction.jws)
         await self.appStoreService.finishTransaction(id: transaction.id)
+        self.updateSharedUserPlan(userPlan)
+        return userPlan
+    }
+
+    private func updateSharedUserPlan(_ userPlan: BillingUserPlan) {
         self.sharedDataStore.put(
             BillingUserPlan.self,
             key: ShareDataKeys.billingUserPlan.rawValue,
             userPlan
         )
-        return userPlan
     }
 
     // 서버가 transactionId ledger 로 멱등이라 전건 재제출이 안전하다.
@@ -132,6 +141,19 @@ extension BillingUsecaseImple {
             latest = try await self.applyAndFinish(transaction)
         }
         return latest
+    }
+}
+
+
+// MARK: - user plan query
+
+extension BillingUsecaseImple {
+
+    @discardableResult
+    public func refreshUserPlan() async throws -> BillingUserPlan {
+        let userPlan = try await self.repository.loadUserPlan()
+        self.updateSharedUserPlan(userPlan)
+        return userPlan
     }
 }
 

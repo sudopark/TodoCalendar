@@ -57,6 +57,23 @@ extension BillingRepositoryImpleTests {
 }
 
 
+// MARK: - 유저 플랜 단독 조회
+
+extension BillingRepositoryImpleTests {
+
+    @Test func repository_loadUserPlan_returnsCurrentPlan() async throws {
+        // given
+        let repository = self.makeRepository()
+        // when
+        let plan = try await repository.loadUserPlan()
+        // then
+        #expect(plan.planId == .standard)
+        #expect(plan.topupRemaining == 45600)
+        #expect(plan.scheduledChange?.planId == .free)
+    }
+}
+
+
 // MARK: - 구매 반영
 
 extension BillingRepositoryImpleTests {
@@ -107,6 +124,17 @@ private struct DummyResponse {
         """
     }
 
+    // GET /v1/ai/usage 의 plan 필드·POST /v1/billing/purchases 응답과 동일 스키마
+    private var userPlanResponse: String {
+        return """
+        {
+            "id": "standard",
+            "scheduled_change": { "plan_id": "free", "effective_at": "2026-08-26T00:00:00.000Z" },
+            "topup_remaining": 45600
+        }
+        """
+    }
+
     var responses: [StubRemoteAPI.Response] {
         return [
             .init(method: .get, endpoint: BillingAPIEndpoints.plans,
@@ -114,7 +142,9 @@ private struct DummyResponse {
             .init(method: .get, endpoint: BillingAPIEndpoints.topups,
                   resultJsonString: .success(self.topupsResponse)),
             .init(method: .post, endpoint: BillingAPIEndpoints.purchases,
-                  resultJsonString: .success(self.purchaseResponse))
+                  resultJsonString: .success(self.purchaseResponse)),
+            .init(method: .get, endpoint: BillingAPIEndpoints.userPlan,
+                  resultJsonString: .success(self.userPlanResponse))
         ]
     }
 }

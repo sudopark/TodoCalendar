@@ -22,12 +22,15 @@ final class BillingUsecaseImpleTests: PublisherWaitable {
         shouldPurchaseBePending: Bool = false,
         shouldFailApply: Bool = false,
         shouldFailLoadProducts: Bool = false,
+        shouldFailLoadUserPlan: Bool = false,
         unfinished: [BillingSignedTransaction] = [],
         restored: [BillingSignedTransaction]? = nil,
         failingJWSTokens: Set<String> = []
     ) -> (BillingUsecaseImple, StubBillingRepository, StubAppStoreBillingService) {
         let repository = StubBillingRepository(
-            shouldFailPurchase: shouldFailApply, failingJWSTokens: failingJWSTokens
+            shouldFailPurchase: shouldFailApply,
+            failingJWSTokens: failingJWSTokens,
+            shouldFailLoadUserPlan: shouldFailLoadUserPlan
         )
         let service = StubAppStoreBillingService(
             shouldCancelPurchase: shouldCancelPurchase,
@@ -162,6 +165,51 @@ extension BillingUsecaseImpleTests {
         }
         // then
         #expect(plan?.planId == .standard)
+    }
+}
+
+
+// MARK: - 유저 플랜 재조회
+
+extension BillingUsecaseImpleTests {
+
+    @Test func usecase_refreshUserPlan_returnsCurrentPlan() async throws {
+        // given
+        let (usecase, _, _) = self.makeUsecase()
+        // when
+        let plan = try await usecase.refreshUserPlan()
+        // then
+        #expect(plan.planId == .standard)
+        #expect(plan.topupRemaining == 45600)
+    }
+
+    @Test func usecase_refreshUserPlan_updatesSharedUserPlan() async throws {
+        // given
+        let expect = expectConfirm("재조회 결과가 공유 상태에 반영된다")
+        let (usecase, _, _) = self.makeUsecase()
+        // when
+        let plan = try await self.firstOutput(expect, for: usecase.currentUserPlan) {
+            try await usecase.refreshUserPlan()
+        }
+        // then
+        #expect(plan?.planId == .standard)
+        #expect(plan?.topupRemaining == 45600)
+    }
+
+    // 실패는 호출측이 처리 — 이전에 반영돼 있던 공유 상태를 지우면 안 된다
+    @Test func usecase_refreshUserPlan_whenFails_keepsExistingSharedPlan() async throws {
+        // given
+        let (usecase, _, _) = self.makeUsecase(shouldFailLoadUserPlan: true)
+        _ = try await usecase.purchase(productId: "plan.standard.monthly")
+        // when
+        await #expect(throws: (any Error).self) {
+            try await usecase.refreshUserPlan()
+        }
+        // then
+        let expect = expectConfirm("기존 공유 상태가 유지된다")
+        let plan = try await self.firstOutput(expect, for: usecase.currentUserPlan)
+        #expect(plan?.planId == .standard)
+        #expect(plan?.topupRemaining == 12300)
     }
 }
 
