@@ -579,6 +579,7 @@
 "billing::paywall::feature::dailyCredits" = "%@ tín dụng mỗi ngày";
 "billing::paywall::feature::topup" = "Có thể mua thêm khi hết tín dụng";
 "billing::paywall::disclosure::subscription" = "Gói đăng ký sẽ tự động gia hạn hàng tháng trừ khi bạn hủy trước khi kỳ hiện tại kết thúc ít nhất 24 giờ. Bạn có thể hủy bất cứ lúc nào trong phần cài đặt App Store.";
+"billing::paywall::disclosure::subscription::generic" = "Gói đăng ký sẽ tự động gia hạn vào cuối mỗi chu kỳ thanh toán, trừ khi bạn hủy trước khi chu kỳ đó kết thúc ít nhất 24 giờ. Bạn có thể hủy bất cứ lúc nào trong phần cài đặt App Store.";
 "billing::paywall::disclosure::oneTime" = "Thanh toán một lần và sử dụng mãi mãi. Gói này không tự động gia hạn.";
 "billing::paywall::disclosure::storeUnavailable" = "Không thể kết nối với App Store. Vui lòng thử lại sau.";
 "billing::paywall::cta::subscribe" = "Đăng ký %@";

@@ -209,7 +209,8 @@ extension BillingScenesSnapshots {
 }
 
 
-// MARK: - 카탈로그 로드 실패 — 스토어 조회 실패로 가격만 대체 문구, CTA 비활성
+// MARK: - 스토어 가격 조회 실패 — 서버 카탈로그는 로드됐지만 StoreKit 상품 조회가 실패해
+// 가격만 대체 문구, CTA 비활성 (catalogState 는 .loaded — .failed 와는 다른 상태다, I5)
 
 extension BillingScenesSnapshots {
 
@@ -270,6 +271,27 @@ extension BillingScenesSnapshots {
                     ctaKey: "billing::paywall::cta::subscribe"
                 )
                 state.isPurchasing = true
+            }
+        }
+    }
+}
+
+
+// MARK: - 서버 카탈로그 요청 실패 — catalogState == .failed, accentWarn 안내 문구로 대체 (I5)
+
+extension BillingScenesSnapshots {
+
+    @MainActor
+    func test_paywallCatalogLoadFailed() {
+        captureSnapshotPair(named: "paywallCatalogLoadFailed", layout: .fullScreen) { theme in
+            self.makePaywallView(theme) { state in
+                state.currentPlan = .free
+                state.currentPlanDescription = "billing::paywall::current::description".localized(with: "20")
+                state.catalogState = .failed
+                state.cellModels = []
+                state.selectedPlanId = nil
+                state.selectedPlanDetail = nil
+                state.isPurchasing = false
             }
         }
     }

@@ -186,8 +186,13 @@ extension PaywallViewModelImple {
     }
 
     func restore() {
+        // AppStore.sync() 는 시스템 로그인 시트를 띄우고 수 초 걸린다 — purchase() 와 같은
+        // isPurchasing 신호로 재진입을 막지 않으면 연타 시 sync() 가 병렬로 돈다 (I4, #739)
+        guard self.subject.isPurchasing.value == false else { return }
+        self.subject.isPurchasing.send(true)
         Task { [weak self] in
             guard let self else { return }
+            defer { self.subject.isPurchasing.send(false) }
             do {
                 // 플랜 반영 자체는 currentUserPlan 릴레이가 자동 처리(#739) — 여기선 유저 피드백만.
                 // 버튼을 눌러도 화면에 아무 변화가 없으면 먹었는지 멈췄는지 유저가 알 수 없다
@@ -251,10 +256,13 @@ extension PaywallViewModelImple {
         return Publishers.CombineLatest3(
             self.subject.userSelectedPlanId, self.subject.currentPlanId, self.offeringsPublisher
         )
+        // self?.resolve(...) ?? userSelected 로 쓰면 "self 가 nil" 과 "선택이 무효라 nil" 이
+        // 같은 nil 로 뭉개져, 커버된 선택이 userSelected 로 되살아난다 (C1, #739)
         .map { [weak self] userSelected, currentPlanId, offerings -> BillingPlanId? in
-            self?.resolvedSelectedPlanId(
+            guard let self else { return userSelected }
+            return self.resolvedSelectedPlanId(
                 userSelected: userSelected, currentPlanId: currentPlanId, offerings: offerings
-            ) ?? userSelected
+            )
         }
         .eraseToAnyPublisher()
     }
@@ -342,12 +350,19 @@ extension PaywallViewModelImple {
     // 유저가 명시 선택한 게 있으면 그걸, 없으면 구매 가능한 첫 셀을 기본 선택으로 — 이 함수가
     // 유일한 소스다. selectedPlanId publisher(리액티브)와 purchase()(동기 command) 양쪽이 재사용해
     // "기본 선택 규칙"이 두 곳에 중복되지 않는다
+    //
+    // userSelected 는 선택 "시점"에만 검증된다(selectPlan(_:) 의 isPurchasable 가드) — 그 뒤 복원·
+    // 가족공유·다른 기기 구매 등으로 보유 플랜이 올라오면 선택은 그대로인데 더 이상 구매 대상이
+    // 아닐 수 있다. 매번 현재 cells 기준으로 재검증해야 CTA 활성·purchase() 가드가 최신 상태를
+    // 따른다 — 안 그러면 이미 커버된 플랜을 다시 청구하게 된다 (C1, #739)
     private func resolvedSelectedPlanId(
         userSelected: BillingPlanId?, currentPlanId: BillingPlanId?, offerings: [BillingPlanOffering]
     ) -> BillingPlanId? {
-        if let userSelected { return userSelected }
-        return self.makeCellModels(currentPlanId: currentPlanId, offerings: offerings)
-            .first(where: { $0.isPurchasable })?.planId
+        let cells = self.makeCellModels(currentPlanId: currentPlanId, offerings: offerings)
+        if let userSelected, cells.first(where: { $0.planId == userSelected })?.isPurchasable == true {
+            return userSelected
+        }
+        return cells.first(where: { $0.isPurchasable })?.planId
     }
 
     private func detail(of offering: BillingPlanOffering) -> PaywallPlanDetailModel {
@@ -367,11 +382,23 @@ extension PaywallViewModelImple {
             return "billing::paywall::disclosure::storeUnavailable".localized()
         }
         switch kind {
-        case .subscription:
-            return "billing::paywall::disclosure::subscription".localized()
+        case .subscription(let period):
+            return self.subscriptionDisclosureKey(for: period).localized()
         case .oneTime:
             return "billing::paywall::disclosure::oneTime".localized()
         }
+    }
+
+    // 월간(monthly)만 기존 키를 쓴다 — "매월 자동 갱신됩니다"가 정확한 유일한 주기라서다.
+    // 주·년 구독이나 변칙 주기(period == nil)에 같은 키를 쓰면 연간 상품에 "매월"이 붙어
+    // 구독 기간을 잘못 표기하게 된다 — App Store 리젝 사유(C2, #739). 카탈로그가 지금은
+    // monthly 하나뿐이라 당장 드러나진 않지만, 서버가 연간 플랜을 추가하는 순간 이 분기가
+    // 코드 변경 없이 올바른 문구로 갈린다
+    private func subscriptionDisclosureKey(for period: BillingSubscriptionPeriod?) -> String {
+        guard period == .monthly else {
+            return "billing::paywall::disclosure::subscription::generic"
+        }
+        return "billing::paywall::disclosure::subscription"
     }
 
     private func ctaTitle(for kind: BillingProductKind?, planName: String) -> String {

@@ -579,6 +579,7 @@
 "billing::paywall::feature::dailyCredits" = "1日%@クレジット";
 "billing::paywall::feature::topup" = "クレジットがなくなったら追加購入できます";
 "billing::paywall::disclosure::subscription" = "サブスクリプションは毎月自動更新されます。現在の期間終了の24時間前までに解約しない限り、同じ料金で更新されます。解約はいつでもApp Storeの設定から行えます。";
+"billing::paywall::disclosure::subscription::generic" = "サブスクリプションは各請求期間の終了時に自動更新されます。終了の24時間前までに解約しない限り、同じ料金で更新されます。解約はいつでもApp Storeの設定から行えます。";
 "billing::paywall::disclosure::oneTime" = "一度のお支払いでずっと使えます。自動更新はされません。";
 "billing::paywall::disclosure::storeUnavailable" = "App Storeに接続できませんでした。しばらくしてからもう一度お試しください。";
 "billing::paywall::cta::subscribe" = "%@を購読する";

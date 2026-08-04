@@ -579,6 +579,7 @@
 "billing::paywall::feature::dailyCredits" = "napi %@ kredit";
 "billing::paywall::feature::topup" = "Kredit elfogyása esetén további vásárolható";
 "billing::paywall::disclosure::subscription" = "Az előfizetés minden hónapban automatikusan megújul, hacsak nem mondod le legalább 24 órával a jelenlegi időszak vége előtt. Bármikor lemondhatod az App Store beállításaiban.";
+"billing::paywall::disclosure::subscription::generic" = "Az előfizetés minden számlázási időszak végén automatikusan megújul, hacsak nem mondod le legalább 24 órával a lejárta előtt. Bármikor lemondhatod az App Store beállításaiban.";
 "billing::paywall::disclosure::oneTime" = "Fizess egyszer, és használd örökre. Ez nem újul meg automatikusan.";
 "billing::paywall::disclosure::storeUnavailable" = "Nem sikerült csatlakozni az App Store-hoz. Kérjük, próbáld újra később.";
 "billing::paywall::cta::subscribe" = "%@ előfizetése";

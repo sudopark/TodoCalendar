@@ -579,6 +579,7 @@
 "billing::paywall::feature::dailyCredits" = "%@ kreditov denne";
 "billing::paywall::feature::topup" = "Po vyčerpaní kreditov si môžete dokúpiť ďalšie";
 "billing::paywall::disclosure::subscription" = "Predplatné sa automaticky obnovuje každý mesiac, pokiaľ ho nezrušíte aspoň 24 hodín pred koncom aktuálneho obdobia. Zrušiť ho môžete kedykoľvek v nastaveniach App Store.";
+"billing::paywall::disclosure::subscription::generic" = "Predplatné sa automaticky obnovuje na konci každého zúčtovacieho obdobia, pokiaľ ho nezrušíte aspoň 24 hodín pred jeho koncom. Zrušiť ho môžete kedykoľvek v nastaveniach App Store.";
 "billing::paywall::disclosure::oneTime" = "Zaplaťte raz a používajte navždy. Toto sa automaticky neobnovuje.";
 "billing::paywall::disclosure::storeUnavailable" = "Nepodarilo sa pripojiť k App Store. Skúste to prosím neskôr.";
 "billing::paywall::cta::subscribe" = "Predplatiť %@";

@@ -579,6 +579,7 @@
 "billing::paywall::feature::dailyCredits" = "%@ krediittiä päivässä";
 "billing::paywall::feature::topup" = "Voit ostaa lisää, kun krediitit loppuvat";
 "billing::paywall::disclosure::subscription" = "Tilaus uusiutuu automaattisesti kuukausittain, ellet peruuta sitä vähintään 24 tuntia ennen kuluvan jakson päättymistä. Voit peruuttaa milloin tahansa App Storen asetuksista.";
+"billing::paywall::disclosure::subscription::generic" = "Tilaus uusiutuu automaattisesti kunkin laskutusjakson lopussa, ellet peruuta sitä vähintään 24 tuntia ennen sen päättymistä. Voit peruuttaa milloin tahansa App Storen asetuksista.";
 "billing::paywall::disclosure::oneTime" = "Maksa kerran ja käytä ikuisesti. Tämä ei uusiudu automaattisesti.";
 "billing::paywall::disclosure::storeUnavailable" = "App Storeen ei saatu yhteyttä. Yritä myöhemmin uudelleen.";
 "billing::paywall::cta::subscribe" = "Tilaa %@";

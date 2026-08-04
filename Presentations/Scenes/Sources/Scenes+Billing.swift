@@ -2,6 +2,9 @@
 //  Scenes+Billing.swift
 //  Scenes
 //
+//  Created by sudo.park on 8/1/26.
+//  Copyright © 2026 com.sudo.park. All rights reserved.
+//
 
 import UIKit
 import Domain

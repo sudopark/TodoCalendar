@@ -579,6 +579,7 @@
 "billing::paywall::feature::dailyCredits" = "%@ crèdits al dia";
 "billing::paywall::feature::topup" = "Pots comprar-ne més quan s'esgotin els crèdits";
 "billing::paywall::disclosure::subscription" = "La subscripció es renova automàticament cada mes, tret que la cancel·lis almenys 24 hores abans que finalitzi el període actual. Pots cancel·lar-la en qualsevol moment des dels ajustos de l'App Store.";
+"billing::paywall::disclosure::subscription::generic" = "La subscripció es renova automàticament al final de cada període de facturació, tret que la cancel·lis almenys 24 hores abans que finalitzi. Pots cancel·lar-la en qualsevol moment des dels ajustos de l'App Store.";
 "billing::paywall::disclosure::oneTime" = "Paga una vegada i queda't-ho per sempre. No es renova automàticament.";
 "billing::paywall::disclosure::storeUnavailable" = "No s'ha pogut connectar amb l'App Store. Torna-ho a provar més tard.";
 "billing::paywall::cta::subscribe" = "Subscriu-te a %@";

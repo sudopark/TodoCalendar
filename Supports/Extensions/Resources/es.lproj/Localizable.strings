@@ -579,6 +579,7 @@
 "billing::paywall::feature::dailyCredits" = "%@ créditos al día";
 "billing::paywall::feature::topup" = "Puedes comprar más si se agotan los créditos";
 "billing::paywall::disclosure::subscription" = "Tu suscripción se renueva automáticamente cada mes, a menos que la canceles al menos 24 horas antes de que finalice el periodo actual. Puedes cancelarla en cualquier momento desde los ajustes de App Store.";
+"billing::paywall::disclosure::subscription::generic" = "Tu suscripción se renueva automáticamente al final de cada periodo de facturación, a menos que la canceles al menos 24 horas antes de que finalice. Puedes cancelarla en cualquier momento desde los ajustes de App Store.";
 "billing::paywall::disclosure::oneTime" = "Paga una vez y consérvalo para siempre. No se renueva automáticamente.";
 "billing::paywall::disclosure::storeUnavailable" = "No se pudo conectar con App Store. Inténtalo de nuevo más tarde.";
 "billing::paywall::cta::subscribe" = "Suscribirse a %@";

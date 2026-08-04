@@ -579,6 +579,7 @@
 "billing::paywall::feature::dailyCredits" = "%@ เครดิตต่อวัน";
 "billing::paywall::feature::topup" = "ซื้อเพิ่มได้เมื่อเครดิตหมด";
 "billing::paywall::disclosure::subscription" = "การสมัครสมาชิกจะต่ออายุอัตโนมัติทุกเดือน เว้นแต่คุณจะยกเลิกอย่างน้อย 24 ชั่วโมงก่อนสิ้นสุดรอบปัจจุบัน คุณสามารถยกเลิกได้ทุกเมื่อในการตั้งค่า App Store";
+"billing::paywall::disclosure::subscription::generic" = "การสมัครสมาชิกจะต่ออายุอัตโนมัติเมื่อสิ้นสุดรอบการเรียกเก็บเงินแต่ละรอบ เว้นแต่คุณจะยกเลิกอย่างน้อย 24 ชั่วโมงก่อนสิ้นสุดรอบนั้น คุณสามารถยกเลิกได้ทุกเมื่อในการตั้งค่า App Store";
 "billing::paywall::disclosure::oneTime" = "จ่ายครั้งเดียวแล้วใช้งานได้ตลอดไป ไม่มีการต่ออายุอัตโนมัติ";
 "billing::paywall::disclosure::storeUnavailable" = "ไม่สามารถเชื่อมต่อกับ App Store ได้ โปรดลองอีกครั้งภายหลัง";
 "billing::paywall::cta::subscribe" = "สมัครสมาชิก %@";

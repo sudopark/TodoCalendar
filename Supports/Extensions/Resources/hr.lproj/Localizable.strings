@@ -579,6 +579,7 @@
 "billing::paywall::feature::dailyCredits" = "%@ bodova dnevno";
 "billing::paywall::feature::topup" = "Kad bodovi ponestanu, možete kupiti dodatne";
 "billing::paywall::disclosure::subscription" = "Pretplata se automatski obnavlja svaki mjesec, osim ako je otkažete najmanje 24 sata prije isteka trenutačnog razdoblja. Otkazati je možete bilo kada u postavkama App Storea.";
+"billing::paywall::disclosure::subscription::generic" = "Pretplata se automatski obnavlja na kraju svakog obračunskog razdoblja, osim ako je otkažete najmanje 24 sata prije nego što istekne. Otkazati je možete bilo kada u postavkama App Storea.";
 "billing::paywall::disclosure::oneTime" = "Platite jednom i zadržite zauvijek. Ovo se ne obnavlja automatski.";
 "billing::paywall::disclosure::storeUnavailable" = "Povezivanje s App Storeom nije uspjelo. Pokušajte ponovno kasnije.";
 "billing::paywall::cta::subscribe" = "Pretplati se na %@";

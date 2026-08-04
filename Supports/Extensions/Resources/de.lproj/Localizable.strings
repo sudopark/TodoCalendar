@@ -579,6 +579,7 @@
 "billing::paywall::feature::dailyCredits" = "%@ Credits pro Tag";
 "billing::paywall::feature::topup" = "Bei aufgebrauchten Credits kannst du weitere kaufen";
 "billing::paywall::disclosure::subscription" = "Dein Abo verlängert sich automatisch jeden Monat, sofern du nicht mindestens 24 Stunden vor Ablauf des aktuellen Zeitraums kündigst. Du kannst jederzeit in den App Store-Einstellungen kündigen.";
+"billing::paywall::disclosure::subscription::generic" = "Dein Abo verlängert sich automatisch am Ende jedes Abrechnungszeitraums, sofern du nicht mindestens 24 Stunden vorher kündigst. Du kannst jederzeit in den App Store-Einstellungen kündigen.";
 "billing::paywall::disclosure::oneTime" = "Einmal zahlen und dauerhaft behalten. Dies verlängert sich nicht automatisch.";
 "billing::paywall::disclosure::storeUnavailable" = "Verbindung zum App Store nicht möglich. Bitte versuche es später erneut.";
 "billing::paywall::cta::subscribe" = "%@ abonnieren";

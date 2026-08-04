@@ -579,6 +579,7 @@
 "billing::paywall::feature::dailyCredits" = "%@ krediter per dag";
 "billing::paywall::feature::topup" = "Du kan köpa fler krediter när de tar slut";
 "billing::paywall::disclosure::subscription" = "Din prenumeration förnyas automatiskt varje månad om du inte säger upp den minst 24 timmar innan den aktuella perioden slutar. Du kan säga upp den när som helst i App Store-inställningarna.";
+"billing::paywall::disclosure::subscription::generic" = "Din prenumeration förnyas automatiskt i slutet av varje faktureringsperiod om du inte säger upp den minst 24 timmar innan den slutar. Du kan säga upp den när som helst i App Store-inställningarna.";
 "billing::paywall::disclosure::oneTime" = "Betala en gång och behåll den för alltid. Den förnyas inte automatiskt.";
 "billing::paywall::disclosure::storeUnavailable" = "Det gick inte att ansluta till App Store. Försök igen senare.";
 "billing::paywall::cta::subscribe" = "Prenumerera på %@";

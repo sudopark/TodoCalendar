@@ -579,6 +579,7 @@
 "billing::paywall::feature::dailyCredits" = "%@ credite pe zi";
 "billing::paywall::feature::topup" = "Poți cumpăra mai multe credite când se epuizează";
 "billing::paywall::disclosure::subscription" = "Abonamentul se reînnoiește automat în fiecare lună, dacă nu îl anulezi cu cel puțin 24 de ore înainte de sfârșitul perioadei curente. Îl poți anula oricând din setările App Store.";
+"billing::paywall::disclosure::subscription::generic" = "Abonamentul se reînnoiește automat la sfârșitul fiecărei perioade de facturare, dacă nu îl anulezi cu cel puțin 24 de ore înainte de încheierea acesteia. Îl poți anula oricând din setările App Store.";
 "billing::paywall::disclosure::oneTime" = "Plătește o singură dată și păstrează-l pentru totdeauna. Acesta nu se reînnoiește automat.";
 "billing::paywall::disclosure::storeUnavailable" = "Nu s-a putut realiza conexiunea la App Store. Încearcă din nou mai târziu.";
 "billing::paywall::cta::subscribe" = "Abonează-te la %@";

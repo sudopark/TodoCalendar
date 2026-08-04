@@ -9,6 +9,8 @@
 import Foundation
 import Testing
 import Combine
+import Prelude
+import Optics
 import Extensions
 import UnitTestHelpKit
 
@@ -123,9 +125,58 @@ extension AIAgentUsageUsecaseImpleTests {
 }
 
 
+// MARK: - billingUserPlan 시딩 (I1)
+//
+// AIAgentUsageUsecaseImple.loadUsage() 가 sharedDataStore 에 넣는 billingUserPlan 은 프로덕션에서
+// paywall 의 currentUserPlan 이 처음 채워지는 유일한 경로다(e1a7ef3c). userPlan 이 있으면 넣고,
+// nil 이면 기존 값을 지우지 않는다는 계약이 테스트 없이 남아 있었다 — 여기 깨지면 유료 유저에게
+// paywall 이 조용히 "무료"를 보여준다
+
+extension AIAgentUsageUsecaseImpleTests {
+
+    @Test func usecase_whenLoadUsageReturnsUserPlan_seedsBillingUserPlan() async throws {
+        // given
+        let sharedDataStore = SharedDataStore()
+        let repository = PrivateStubRepository()
+        repository.stubResults = [.success(.init(input: 1, output: 1, limit: 1))]
+        repository.stubUserPlan = BillingUserPlan() |> \.planId .~ .standard
+        let usecase = AIAgentUsageUsecaseImple(repository: repository, sharedDataStore: sharedDataStore)
+
+        // when
+        _ = try await usecase.loadUsage()
+
+        // then
+        let seeded = sharedDataStore.value(BillingUserPlan.self, key: ShareDataKeys.billingUserPlan.rawValue)
+        #expect(seeded?.planId == .standard)
+    }
+
+    // userPlan 이 nil 인 응답을 그대로 덮어쓰면, 방금 구매로 갱신된 최신 플랜이 다음 usage
+    // 재조회 한 번에 지워진다 — nil 은 put 하지 않고 기존 값을 유지해야 한다
+    @Test func usecase_whenLoadUsageReturnsNilUserPlan_keepsExistingBillingUserPlan() async throws {
+        // given
+        let sharedDataStore = SharedDataStore()
+        let existing = BillingUserPlan() |> \.planId .~ .lifetime
+        sharedDataStore.put(BillingUserPlan.self, key: ShareDataKeys.billingUserPlan.rawValue, existing)
+        let repository = PrivateStubRepository()
+        repository.stubResults = [.success(.init(input: 1, output: 1, limit: 1))]
+        repository.stubUserPlan = nil
+        let usecase = AIAgentUsageUsecaseImple(repository: repository, sharedDataStore: sharedDataStore)
+
+        // when
+        _ = try await usecase.loadUsage()
+
+        // then
+        let kept = sharedDataStore.value(BillingUserPlan.self, key: ShareDataKeys.billingUserPlan.rawValue)
+        #expect(kept?.planId == .lifetime)
+    }
+}
+
+
 private final class PrivateStubRepository: BaseStubAICommandRepository, @unchecked Sendable {
 
     var stubResults: [Result<AIAgentUsage, any Error>] = []
+    // I1 — loadUsage() 응답에 실릴 플랜. nil 이면 "이번 응답엔 플랜 정보 없음"을 시뮬레이션
+    var stubUserPlan: BillingUserPlan?
 
     override func loadUsage() async throws -> AIAgentUsageLoadResult {
         guard !self.stubResults.isEmpty
@@ -134,7 +185,7 @@ private final class PrivateStubRepository: BaseStubAICommandRepository, @uncheck
         }
         let first = self.stubResults.removeFirst()
         switch first {
-        case .success(let usage): return AIAgentUsageLoadResult(usage: usage, userPlan: nil)
+        case .success(let usage): return AIAgentUsageLoadResult(usage: usage, userPlan: self.stubUserPlan)
         case .failure(let error): throw error
         }
     }
