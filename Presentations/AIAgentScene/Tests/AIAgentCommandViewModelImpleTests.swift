@@ -311,3 +311,50 @@ extension AIAgentCommandViewModelImpleTests {
         XCTAssertEqual(self.spyRouter.didRouteToPaywall, true)
     }
 }
+
+
+// MARK: - 구매 후 usage 재조회 릴레이 (#739)
+
+extension AIAgentCommandViewModelImpleTests {
+
+    private func makeViewModelWithBillingStub(
+        userPlan: BillingUserPlan? = nil
+    ) -> (AIAgentCommandViewModelImple, StubBillingUsecase) {
+        let billingStub = StubBillingUsecase(stubUserPlan: userPlan)
+        let viewModel = AIAgentCommandViewModelImple(
+            orchestrationUsecase: self.stubAgent,
+            billingUsecase: billingStub
+        )
+        viewModel.router = self.spyRouter
+        return (viewModel, billingStub)
+    }
+
+    // 화면 진입 시점의 초기 seeding(첫 방출)만으로는 usage 를 재조회하지 않는다 — 안 그러면
+    // 진입마다 불필요한 호출이 나간다
+    func test_currentUserPlanFirstValue_doesNotRefreshUsage() {
+        // given — 구독을 유지하려면 viewModel 을 살려둬야 한다([weak self] 라 dealloc 되면
+        // 뒤이은 send() 가 무시된다)
+        let (viewModel, _) = self.makeViewModelWithBillingStub(
+            userPlan: BillingUserPlan() |> \.planId .~ .free
+        )
+        // when — 구독은 init 시점에 이미 시작됨(CurrentValueSubject 라 첫 값이 즉시 replay)
+        // then
+        XCTAssertFalse(self.stubAgent.didLoadUsage)
+        _ = viewModel
+    }
+
+    // 구매 성공 등으로 보유 플랜이 바뀌면(첫 값 이후) usage 를 재조회해 게이지·dailyLimit 을
+    // 최신화한다 — paywall 이 dismiss 후 onAppear 를 다시 못 태우는 상황(overFullScreen)의 대안
+    func test_currentUserPlanChanged_afterFirstValue_refreshesUsage() {
+        // given
+        let (viewModel, billingStub) = self.makeViewModelWithBillingStub(
+            userPlan: BillingUserPlan() |> \.planId .~ .free
+        )
+        XCTAssertFalse(self.stubAgent.didLoadUsage)
+        // when
+        billingStub.currentUserPlanSubject.send(BillingUserPlan() |> \.planId .~ .standard)
+        // then
+        XCTAssertTrue(self.stubAgent.didLoadUsage)
+        _ = viewModel
+    }
+}
