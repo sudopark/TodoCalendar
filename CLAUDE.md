@@ -59,6 +59,7 @@ tuist generate --no-open      # 파일 추가/삭제 후 재실행 필수
 | 방향 수렴 선언 | converge 스킬 |
 | 구현 계획 작성 | plan 스킬 (superpowers writing-plans 컴패니언) |
 | 코드 작성·수정 | implement 스킬 (superpowers 코딩 절차 컴패니언) |
+| 버그·논리 모순 수정 | troubleshoot 스킬 (superpowers systematic-debugging 컴패니언 — 아카이브 `docs/troubleshooting/`) |
 | 파일·프레임워크 추가 | add-file / add-framework 스킬 |
 | 테스트 실행 | run-tests 스킬 (스킴 목록 정본) |
 | UI 디자인 | design 스킬 |
