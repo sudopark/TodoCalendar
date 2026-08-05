@@ -725,6 +725,7 @@ private final class StubAICommandUsecase: AICommandUsecase, @unchecked Sendable 
         self.didProcessCommand = commandText
         return self.jobPublisher(self.stubCommandJob)
     }
+
     func processConfirmCommand(_ action: AIConfirmCommandAction) -> AnyPublisher<AIJob, any Error> {
         self.didProcessConfirmToken = action.confirmToken
         return self.jobPublisher(self.stubConfirmJob)
@@ -1138,6 +1139,43 @@ extension AIAgentOrchestrationUsecaseImpleTests {
         usecase.handleJobStatusChanged("other_job")
 
         // then
+        #expect(self.stubCommand.didRefreshJobStatusWith == nil)
+    }
+
+    // 회귀: 인텐트·확장이 앱 밖에서 만든 job은 currentProcessingJobId가 nil이라 위 가드에
+    // 걸려 그냥 버려졌다. 앱이 이미 포그라운드면 refreshProcessingJobIfNeeded(포그라운드
+    // 복귀 트리거)도 안 타서 아무도 못 받는다 — idle 상태에서 온 미추적 푸시는 복원으로 이어받는다.
+    @Test("추적 중이 아닌 job 푸시라도 idle 상태면 저장소에서 복원을 시도한다")
+    func usecase_whenPushReceivedForUntrackedJob_whileIdle_restoresFromStorage() async throws {
+        // given — 인텐트가 만든 job(앱 메모리엔 없음), idle 상태
+        let usecase = self.makeUsecaseInIdle()
+
+        // when
+        usecase.handleJobStatusChanged("intent-made-job")
+
+        // then — 추적 대상이 아니므로 즉시 조회가 아니라 복원 경로를 탄다
+        #expect(self.stubCommand.didRefreshJobStatusWith == nil)
+        #expect(self.stubCommand.didRestore == true)
+    }
+
+    // 복원이 화면 상태를 덮으면 안 되는 구간 — refreshProcessingJobIfNeeded의 가드와 동일 기준.
+    @Test("추적 중이 아닌 job 푸시라도 결과를 보고 있는 중이면 복원하지 않는다")
+    func usecase_whenPushReceivedForUntrackedJob_whileShowingResult_doesNotRestore() async throws {
+        // given — 다른 job(job-1)의 결과를 이미 done으로 보여주고 있는 중
+        let expect = expectConfirm("done 진입")
+        expect.count = 2
+        var done = AIJobResult.DoneResult()
+        done.text = "완료"
+        let usecase = self.makeUsecaseWithCommandJob(self.dummyJob(.done(done)))
+        let _ = try await self.outputs(expect, for: usecase.state) {
+            try? usecase.submit("회의")
+        }
+
+        // when — 추적 중이 아닌 다른 job의 푸시
+        usecase.handleJobStatusChanged("intent-made-job")
+
+        // then — done 화면을 덮지 않는다
+        #expect(self.stubCommand.didRestore == false)
         #expect(self.stubCommand.didRefreshJobStatusWith == nil)
     }
 
