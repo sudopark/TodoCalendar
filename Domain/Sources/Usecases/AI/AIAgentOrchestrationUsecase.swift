@@ -302,12 +302,19 @@ extension AIAgentOrchestrationUsecaseImple {
                 },
                 receiveValue: { [weak self] job in
                     guard let self else { return }
-                    if let job {
-                        self.currentProcessingJobId = job.jobId
-                        self.handleJobResult(job)
-                    } else {
+                    guard let job else {
                         self.subject.state.send(.idle)
+                        return
                     }
+                    self.currentProcessingJobId = job.jobId
+                    // 앱 밖에서 만들어진 job은 복원 시점에 아직 진행 중이다.
+                    // handleJobResult는 종료 job만 다루므로 여기서 processing으로 올려야
+                    // 진행 상태가 보이고 canSubmit 가드도 이 job을 인지한다.
+                    guard job.isFinish else {
+                        self.subject.state.send(.processing(command: job.command ?? ""))
+                        return
+                    }
+                    self.handleJobResult(job)
                 }
             )
     }
@@ -331,10 +338,20 @@ extension AIAgentOrchestrationUsecaseImple {
 
     // 포그라운드 복귀 — 백그라운드에서 폴링 Timer가 멈춘 공백을 메운다.
     public func refreshProcessingJobIfNeeded() {
-        guard case .processing = self.subject.state.value,
-              let jobId = self.currentProcessingJobId
-        else { return }
-        self.commandUsecase.refreshJobStatus(jobId)
+        switch self.subject.state.value {
+        case .processing:
+            guard let jobId = self.currentProcessingJobId else { return }
+            self.commandUsecase.refreshJobStatus(jobId)
+
+        case .idle:
+            // 앱이 노는 동안 확장·인텐트가 만든 job은 앱 메모리에 없다 — DB에서 이어받는다.
+            // 그래야 결과를 보여주고, canSubmit 가드도 그 job을 인지해 덮어쓰기를 막는다.
+            self.restoreIfNeeded()
+
+        default:
+            // 미방출(prepare의 복원 진행 중)·입력 중·결과 표시 중이면 화면 상태를 덮지 않는다
+            break
+        }
     }
 }
 
