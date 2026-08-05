@@ -554,6 +554,7 @@
 "aiAgent::usage" = "%@ / %@ kredi";
 "aiAgent::usage::topupRemaining" = "%@ ek kredi kaldı";
 "aiAgent::usage::planChangeScheduled" = "%1$@ tarihinde %2$@ planına geçiş";
+"aiAgent::usage::resetsIn" = "%@ sonra tekrar kullanılabilir";
 "aiAgent::stop::confirm::title" = "İşlem durdurulsun mu?";
 "aiAgent::stop::confirm::message" = "Durdurmak, devam eden işlemi iptal eder ve geri alınamaz.";
 "aiAgent::confirm::countdown" = "onaylamak için kaldı";

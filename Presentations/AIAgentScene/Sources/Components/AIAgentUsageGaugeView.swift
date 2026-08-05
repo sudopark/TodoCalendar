@@ -8,6 +8,7 @@
 
 import SwiftUI
 import Domain
+import Extensions
 import CommonPresentation
 
 
@@ -67,6 +68,10 @@ struct AIAgentUsageGaugeView: View {
                 }
             }
 
+            if self.usage.isLimitExceeded, let resetsAt = self.usage.resetsAt {
+                self.resetCountdownView(resetsAt)
+            }
+
             if let remaining = self.userPlan?.topupRemaining, remaining > 0 {
                 Text("aiAgent::usage::topupRemaining".localized(with: remaining.formatted()))
                     .font(self.appearance.fontSet.size(12).asFont)
@@ -75,6 +80,49 @@ struct AIAgentUsageGaugeView: View {
 
             if let change = self.userPlan?.scheduledChange {
                 self.scheduledChangeView(change)
+            }
+        }
+    }
+}
+
+
+// MARK: - 한도 리셋 카운트다운
+
+extension AIAgentUsageGaugeView {
+
+    // 매 초 도는 대신 표기가 바뀌는 시각에만 다시 그린다
+    struct ResetSchedule: TimelineSchedule {
+
+        private let resetsAt: Date
+
+        init(resetsAt: Date) {
+            self.resetsAt = resetsAt
+        }
+
+        func entries(from startDate: Date, mode: Mode) -> AnySequence<Date> {
+            let resetsAt = self.resetsAt
+            return AnySequence(
+                sequence(first: startDate) { $0.nextCountdownTick(until: resetsAt) }
+            )
+        }
+    }
+}
+
+
+private extension AIAgentUsageGaugeView {
+
+    func resetCountdownView(_ resetsAt: Date) -> some View {
+        TimelineView(ResetSchedule(resetsAt: resetsAt)) { context in
+            // 디스플레이 링크 없는 정적 렌더(스냅샷 캡처)에선 TimelineView 가 미래 스케줄 시각을
+            // context.date 로 줄 수 있어 벽시계로 클램프 — 온스크린에선 현재를 앞서지 않아 no-op
+            let now = min(context.date, Date())
+            if let remainingText = resetsAt.timeIntervalSince(now).countdownText() {
+                HStack(alignment: .top, spacing: Metric.Spacing.xxsmall) {
+                    Image(systemName: "hourglass")
+                    Text("aiAgent::usage::resetsIn".localized(with: remainingText))
+                }
+                .font(self.appearance.fontSet.size(12).asFont)
+                .foregroundStyle(self.appearance.colorSet.accentWarn.asColor)
             }
         }
     }

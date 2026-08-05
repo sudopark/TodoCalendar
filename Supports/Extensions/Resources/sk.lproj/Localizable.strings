@@ -554,6 +554,7 @@
 "aiAgent::usage" = "%@ / %@ kreditov";
 "aiAgent::usage::topupRemaining" = "Zostáva %@ ďalších kreditov";
 "aiAgent::usage::planChangeScheduled" = "Prechod na plán %2$@ dňa %1$@";
+"aiAgent::usage::resetsIn" = "Znova k dispozícii o %@";
 "aiAgent::stop::confirm::title" = "Zastaviť spracovanie?";
 "aiAgent::stop::confirm::message" = "Zastavením sa zruší prebiehajúci príkaz a nebude ho možné obnoviť.";
 "aiAgent::confirm::countdown" = "zostáva na potvrdenie";

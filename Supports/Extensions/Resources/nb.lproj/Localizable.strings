@@ -554,6 +554,7 @@
 "aiAgent::usage" = "%@ / %@ kreditter";
 "aiAgent::usage::topupRemaining" = "%@ ekstra kreditter igjen";
 "aiAgent::usage::planChangeScheduled" = "Bytte til planen %2$@ den %1$@";
+"aiAgent::usage::resetsIn" = "Tilgjengelig igjen om %@";
 "aiAgent::stop::confirm::title" = "Stoppe behandlingen?";
 "aiAgent::stop::confirm::message" = "Å stoppe forkaster den pågående kommandoen, og den kan ikke gjenopptas.";
 "aiAgent::confirm::countdown" = "igjen til godkjenning";
