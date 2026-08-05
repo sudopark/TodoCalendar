@@ -12,20 +12,6 @@ import Domain
 import Extensions
 
 
-// MARK: - ShareCommandStage
-
-enum ShareCommandStage: Equatable {
-    case loading
-    case editing
-    /// 미로그인·앞선 요청이라 전송 자체를 막은 상태 — 되돌아갈 곳이 없다
-    case blocked(message: String)
-    case sending
-    case sent(message: String)
-    /// 전송 실패 — 원문을 그대로 두고 재시도할 수 있다
-    case failed(message: String)
-}
-
-
 // MARK: - ShareCommandViewModel
 
 final class ShareCommandViewModel: @unchecked Sendable {
@@ -44,23 +30,21 @@ final class ShareCommandViewModel: @unchecked Sendable {
         self.onClose = onClose
     }
 
+    // 입력 화면이 화면의 바닥이고, 아래 축들이 그 위에 쌓인다. 한 축의 변화가
+    // 다른 축을 지우지 않으므로 상태 조합이 늘어도 분기를 새로 만들 필요가 없다.
     private struct Subject {
-        let stage = CurrentValueSubject<ShareCommandStage, Never>(.loading)
         let sharedText = CurrentValueSubject<String?, Never>(nil)
+        /// 공유 원문·전송 가능 여부를 아직 확인하는 중
+        let isPreparing = CurrentValueSubject<Bool, Never>(true)
+        /// 미로그인·앞선 요청이라 제출 자체가 불가능하다 — 되돌아갈 곳이 없다
+        let blockedMessage = CurrentValueSubject<String?, Never>(nil)
+        let isSending = CurrentValueSubject<Bool, Never>(false)
+        /// 제출이 끝나 더 할 일이 없다
+        let sentMessage = CurrentValueSubject<String?, Never>(nil)
+        /// 직전 시도가 실패했다 — 원문을 그대로 두고 재시도할 수 있다
+        let failureMessage = CurrentValueSubject<String?, Never>(nil)
     }
     private let subject = Subject()
-}
-
-
-extension ShareCommandStage {
-
-    // 전송 가능한 단계 — 실패 후 재시도는 허용하고 전송 중만 막는다
-    var canSend: Bool {
-        switch self {
-        case .editing, .failed: return true
-        default: return false
-        }
-    }
 }
 
 
@@ -72,47 +56,58 @@ extension ShareCommandViewModel {
         Task { [weak self] in
             guard let self else { return }
             self.subject.sharedText.send(await self.loadSharedText())
-            self.subject.stage.send(await self.resolveInitialStage())
+            self.subject.blockedMessage.send(await self.resolveBlockMessage())
+            self.subject.isPreparing.send(false)
         }
     }
 
-    private func resolveInitialStage() async -> ShareCommandStage {
+    private func resolveBlockMessage() async -> String? {
         switch await self.submitService.checkPrecondition() {
         case .ready:
-            return .editing
+            return nil
         case .needSignIn:
-            return .blocked(message: "share.ai::needSignIn".localized())
+            return "share.ai::needSignIn".localized()
         case .previousRequestPending:
-            return .blocked(message: "share.ai::pending".localized())
+            return "share.ai::pending".localized()
         }
     }
 
     func send(sharedText: String, additionalInstruction: String) {
-        guard self.subject.stage.value.canSend else { return }
+        guard self.canSubmit else { return }
         let command = AIShareCommandText(
             sharedText: sharedText,
             additionalInstruction: additionalInstruction
         )
         guard !command.isEmpty else { return }
 
-        self.subject.stage.send(.sending)
+        self.subject.failureMessage.send(nil)
+        self.subject.isSending.send(true)
         Task { [weak self] in
             guard let self else { return }
             do {
                 try await self.submitService.submit(command)
-                self.subject.stage.send(.sent(message: "share.ai::sent".localized()))
+                self.subject.sentMessage.send("share.ai::sent".localized())
             } catch ShareSubmitFailure.createdButNotTrackable {
                 // job은 서버에 만들어졌지만 앱이 이어받을 기록이 없다 — 보냈다고만 하면 거짓말이 된다
-                self.subject.stage.send(.sent(message: "share.ai::sentButUntracked".localized()))
+                self.subject.sentMessage.send("share.ai::sentButUntracked".localized())
             } catch {
-                self.subject.stage.send(.failed(message: "share.ai::failed".localized()))
+                self.subject.failureMessage.send("share.ai::failed".localized())
             }
+            self.subject.isSending.send(false)
         }
+    }
+
+    // 실패 후 재시도는 허용하고, 확인 전·차단·완료·전송 중만 막는다
+    private var canSubmit: Bool {
+        return self.subject.isPreparing.value == false
+            && self.subject.blockedMessage.value == nil
+            && self.subject.sentMessage.value == nil
+            && self.subject.isSending.value == false
     }
 
     // 전송 중엔 프로세스가 죽으면 in-flight 요청이 사라지므로 닫기를 막는다
     func close() {
-        guard self.subject.stage.value != .sending else { return }
+        guard self.subject.isSending.value == false else { return }
         self.onClose()
     }
 }
@@ -122,11 +117,27 @@ extension ShareCommandViewModel {
 
 extension ShareCommandViewModel {
 
-    var stage: AnyPublisher<ShareCommandStage, Never> {
-        return self.subject.stage.eraseToAnyPublisher()
-    }
-
     var sharedText: AnyPublisher<String, Never> {
         return self.subject.sharedText.compactMap { $0 }.eraseToAnyPublisher()
+    }
+
+    var isPreparing: AnyPublisher<Bool, Never> {
+        return self.subject.isPreparing.eraseToAnyPublisher()
+    }
+
+    var blockedMessage: AnyPublisher<String?, Never> {
+        return self.subject.blockedMessage.eraseToAnyPublisher()
+    }
+
+    var isSending: AnyPublisher<Bool, Never> {
+        return self.subject.isSending.eraseToAnyPublisher()
+    }
+
+    var sentMessage: AnyPublisher<String?, Never> {
+        return self.subject.sentMessage.eraseToAnyPublisher()
+    }
+
+    var failureMessage: AnyPublisher<String?, Never> {
+        return self.subject.failureMessage.eraseToAnyPublisher()
     }
 }
