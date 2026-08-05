@@ -596,3 +596,13 @@
 "billing::paywall::pending::message" = "ファミリーの管理者に購入の承認を依頼してください。承認されると自動的に反映されます。";
 "billing::paywall::userPlan::loadFailed" = "プランを読み込めませんでした。もう一度お試しください。";
 "billing::paywall::retry" = "再試行";
+
+// MARK: - share extension
+
+"share.ai::title" = "AIに送信";
+"share.ai::instruction::placeholder" = "追加の指示（任意）";
+"share.ai::needSignIn" = "AIクイック入力を使用するには、まずアプリでログインしてください。";
+"share.ai::pending" = "前のリクエストがまだ残っています。アプリで進行状況や結果を確認してください。";
+"share.ai::sent" = "送信しました。結果はアプリで確認できます。";
+"share.ai::failed" = "送信できませんでした。もう一度お試しください。";
+"share.ai::sentButUntracked" = "送信しましたが、アプリで結果を追跡できません。しばらくしてからカレンダーをご確認ください。";

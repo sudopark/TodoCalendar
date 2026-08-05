@@ -596,3 +596,13 @@
 "billing::paywall::pending::message" = "Cere unui organizator al familiei să aprobe această achiziție. Se va aplica automat după aprobare.";
 "billing::paywall::userPlan::loadFailed" = "Nu s-a putut încărca planul tău. Încearcă din nou.";
 "billing::paywall::retry" = "Reîncearcă";
+
+// MARK: - share extension
+
+"share.ai::title" = "Trimite către AI";
+"share.ai::instruction::placeholder" = "Adăugați o instrucțiune (opțional)";
+"share.ai::needSignIn" = "Autentificați-vă în aplicație pentru a folosi introducerea rapidă AI.";
+"share.ai::pending" = "O solicitare anterioară este încă în așteptare. Deschideți aplicația pentru a vedea progresul sau rezultatul.";
+"share.ai::sent" = "Trimis. Puteți vedea rezultatul în aplicație.";
+"share.ai::failed" = "Nu s-a putut trimite. Încercați din nou.";
+"share.ai::sentButUntracked" = "Trimis, dar aplicația nu poate urmări rezultatul. Verificați calendarul peste puțin timp.";

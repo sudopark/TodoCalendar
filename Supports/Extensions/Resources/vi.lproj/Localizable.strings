@@ -596,3 +596,13 @@
 "billing::paywall::pending::message" = "Hãy nhờ người tổ chức gia đình phê duyệt giao dịch mua này. Giao dịch sẽ tự động được áp dụng sau khi được phê duyệt.";
 "billing::paywall::userPlan::loadFailed" = "Không thể tải gói của bạn. Vui lòng thử lại.";
 "billing::paywall::retry" = "Thử lại";
+
+// MARK: - share extension
+
+"share.ai::title" = "Gửi tới AI";
+"share.ai::instruction::placeholder" = "Thêm chỉ dẫn (tùy chọn)";
+"share.ai::needSignIn" = "Đăng nhập trong ứng dụng để sử dụng nhập nhanh bằng AI.";
+"share.ai::pending" = "Một yêu cầu trước đó vẫn đang chờ. Hãy mở ứng dụng để xem tiến trình hoặc kết quả.";
+"share.ai::sent" = "Đã gửi. Bạn có thể xem kết quả trong ứng dụng.";
+"share.ai::failed" = "Không thể gửi. Vui lòng thử lại.";
+"share.ai::sentButUntracked" = "Đã gửi, nhưng ứng dụng không theo dõi được kết quả. Hãy kiểm tra lịch sau giây lát.";

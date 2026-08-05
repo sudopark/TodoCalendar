@@ -596,3 +596,13 @@
 "billing::paywall::pending::message" = "Poproś organizatora rodziny o zatwierdzenie tego zakupu. Zostanie on zastosowany automatycznie po zatwierdzeniu.";
 "billing::paywall::userPlan::loadFailed" = "Nie udało się wczytać Twojego planu. Spróbuj ponownie.";
 "billing::paywall::retry" = "Spróbuj ponownie";
+
+// MARK: - share extension
+
+"share.ai::title" = "Wyślij do AI";
+"share.ai::instruction::placeholder" = "Dodaj polecenie (opcjonalnie)";
+"share.ai::needSignIn" = "Zaloguj się w aplikacji, aby korzystać z szybkiego wprowadzania AI.";
+"share.ai::pending" = "Poprzednie żądanie wciąż oczekuje. Otwórz aplikację, aby sprawdzić postęp lub wynik.";
+"share.ai::sent" = "Wysłano. Wynik możesz sprawdzić w aplikacji.";
+"share.ai::failed" = "Nie udało się wysłać. Spróbuj ponownie.";
+"share.ai::sentButUntracked" = "Wysłano, ale aplikacja nie może śledzić wyniku. Sprawdź kalendarz za chwilę.";

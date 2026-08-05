@@ -596,3 +596,13 @@
 "billing::paywall::pending::message" = "Be en familieorganisator om å godkjenne dette kjøpet. Det tas automatisk i bruk når det er godkjent.";
 "billing::paywall::userPlan::loadFailed" = "Kunne ikke laste inn abonnementet ditt. Prøv igjen.";
 "billing::paywall::retry" = "Prøv igjen";
+
+// MARK: - share extension
+
+"share.ai::title" = "Send til AI";
+"share.ai::instruction::placeholder" = "Legg til en instruksjon (valgfritt)";
+"share.ai::needSignIn" = "Logg inn i appen for å bruke AI-hurtiginntasting.";
+"share.ai::pending" = "En tidligere forespørsel venter fortsatt. Åpne appen for å se fremdriften eller resultatet.";
+"share.ai::sent" = "Sendt. Du kan se resultatet i appen.";
+"share.ai::failed" = "Kunne ikke sende. Prøv igjen.";
+"share.ai::sentButUntracked" = "Sendt, men appen kan ikke følge resultatet. Sjekk kalenderen om en liten stund.";

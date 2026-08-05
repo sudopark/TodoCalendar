@@ -596,3 +596,13 @@
 "billing::paywall::pending::message" = "Ask a family organizer to approve this purchase. It'll apply automatically once approved.";
 "billing::paywall::userPlan::loadFailed" = "Couldn't load your plan. Please try again.";
 "billing::paywall::retry" = "Retry";
+
+// MARK: - share extension
+
+"share.ai::title" = "Send to AI";
+"share.ai::instruction::placeholder" = "Add an instruction (optional)";
+"share.ai::needSignIn" = "Sign in to the app first to use AI quick input.";
+"share.ai::pending" = "A previous request is still waiting. Open the app to check its progress or result.";
+"share.ai::sent" = "Sent. You can check the result in the app.";
+"share.ai::failed" = "Couldn't send that. Please try again.";
+"share.ai::sentButUntracked" = "Sent, but the app can't track the result. Check your calendar after a moment.";

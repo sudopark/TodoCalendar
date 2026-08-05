@@ -596,3 +596,13 @@
 "billing::paywall::pending::message" = "ขอให้ผู้จัดการครอบครัวอนุมัติการซื้อนี้ เมื่อได้รับอนุมัติแล้วจะมีผลโดยอัตโนมัติ";
 "billing::paywall::userPlan::loadFailed" = "ไม่สามารถโหลดแพ็กเกจของคุณได้ โปรดลองอีกครั้ง";
 "billing::paywall::retry" = "ลองใหม่";
+
+// MARK: - share extension
+
+"share.ai::title" = "ส่งไปยัง AI";
+"share.ai::instruction::placeholder" = "เพิ่มคำสั่ง (ไม่บังคับ)";
+"share.ai::needSignIn" = "เข้าสู่ระบบในแอปก่อนเพื่อใช้การป้อนข้อมูลด่วนด้วย AI";
+"share.ai::pending" = "คำขอก่อนหน้ายังค้างอยู่ เปิดแอปเพื่อดูความคืบหน้าหรือผลลัพธ์";
+"share.ai::sent" = "ส่งแล้ว ดูผลลัพธ์ได้ในแอป";
+"share.ai::failed" = "ส่งไม่สำเร็จ กรุณาลองอีกครั้ง";
+"share.ai::sentButUntracked" = "ส่งแล้ว แต่แอปติดตามผลลัพธ์ไม่ได้ กรุณาตรวจสอบปฏิทินในอีกสักครู่";

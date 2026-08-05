@@ -596,3 +596,13 @@
 "billing::paywall::pending::message" = "Zamolite organizatora obitelji da odobri ovu kupnju. Automatski će se primijeniti nakon odobrenja.";
 "billing::paywall::userPlan::loadFailed" = "Učitavanje vašeg plana nije uspjelo. Pokušajte ponovno.";
 "billing::paywall::retry" = "Pokušaj ponovno";
+
+// MARK: - share extension
+
+"share.ai::title" = "Pošalji AI-ju";
+"share.ai::instruction::placeholder" = "Dodajte uputu (neobavezno)";
+"share.ai::needSignIn" = "Prijavite se u aplikaciji kako biste koristili brzi AI unos.";
+"share.ai::pending" = "Prethodni zahtjev još je u tijeku. Otvorite aplikaciju da vidite napredak ili rezultat.";
+"share.ai::sent" = "Poslano. Rezultat možete vidjeti u aplikaciji.";
+"share.ai::failed" = "Slanje nije uspjelo. Pokušajte ponovno.";
+"share.ai::sentButUntracked" = "Poslano, ali aplikacija ne može pratiti rezultat. Provjerite kalendar za trenutak.";
