@@ -140,6 +140,15 @@ jobs:
           if echo "$FILES" | grep -q "^TodoCalendarApp/AppExtensions/Widget/"; then
             schemes+=("TodoCalendarAppWidget")
           fi
+          # Base는 embed가 아니라 각 확장 타겟이 소스로 직접 컴파일한다.
+          # 위젯은 테스트 타겟이 있고 그 소스에도 Base가 들어가므로 위젯 스킴까지 켠다.
+          if echo "$FILES" | grep -q "^TodoCalendarApp/AppExtensions/Base/"; then
+            schemes+=("TodoCalendarApp" "TodoCalendarAppWidget")
+          fi
+          # Share는 테스트 타겟이 없어 앱 스킴 빌드로만 검증
+          if echo "$FILES" | grep -q "^TodoCalendarApp/AppExtensions/Share/"; then
+            schemes+=("TodoCalendarApp")
+          fi
 
           # .github/, scripts/, docs/ 등 → 코드 빌드에 영향 없으므로 테스트 불필요
 

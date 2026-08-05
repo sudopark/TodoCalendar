@@ -44,6 +44,8 @@ assert_eq "Tuist/ → 전체" "$ALL" "$(schemes_for 'M\tTuist/ProjectDescription
 assert_eq "TestDoubles → Domain 제외 전체" "AIAgentScene BillingScenes CalendarScenes EventDetailScene EventListScenes MemberScenes Repository SettingScene TodoCalendarApp TodoCalendarAppWidget" "$(schemes_for 'M\tSupports/TestDoubles/Sources/Foo.swift')"
 assert_eq "App Sources → App만" "TodoCalendarApp" "$(schemes_for 'M\tTodoCalendarApp/Sources/Root/Foo.swift')"
 assert_eq "Widget → Widget만" "TodoCalendarAppWidget" "$(schemes_for 'M\tTodoCalendarApp/AppExtensions/Widget/Foo.swift')"
+assert_eq "확장 Base → App+Widget (위젯 테스트 타겟도 Base를 컴파일)" "TodoCalendarApp TodoCalendarAppWidget" "$(schemes_for 'M\tTodoCalendarApp/AppExtensions/Base/Foo.swift')"
+assert_eq "확장 Share → App만 (테스트 타겟 없음)" "TodoCalendarApp" "$(schemes_for 'M\tTodoCalendarApp/AppExtensions/Share/Sources/Foo.swift')"
 assert_eq "docs만 → 테스트 무관" "(테스트 무관 변경)" "$(schemes_for 'M\tdocs/spec/foo.md')"
 assert_eq "복수 영역 합산·중복 제거" "AIAgentScene Repository TodoCalendarApp TodoCalendarAppWidget" "$(schemes_for 'M\tRepository/Sources/A.swift\nM\tPresentations/AIAgentScene/Sources/B.swift')"
 

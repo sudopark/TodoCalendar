@@ -104,6 +104,15 @@ fi
 if printf '%s\n' "$FILES" | grep -q "^TodoCalendarApp/AppExtensions/Widget/"; then
   schemes+=("TodoCalendarAppWidget")
 fi
+# Base는 embed가 아니라 각 확장 타겟이 소스로 직접 컴파일한다(Project+Templates의 sources 글롭).
+# 위젯은 테스트 타겟이 있고 그 소스에도 Base가 들어가므로 위젯 스킴까지 켜야 실행된다.
+if printf '%s\n' "$FILES" | grep -q "^TodoCalendarApp/AppExtensions/Base/"; then
+  schemes+=("TodoCalendarApp" "TodoCalendarAppWidget")
+fi
+# Share는 테스트 타겟이 없어 앱 스킴 빌드로만 검증한다
+if printf '%s\n' "$FILES" | grep -q "^TodoCalendarApp/AppExtensions/Share/"; then
+  schemes+=("TodoCalendarApp")
+fi
 
 # ---- tuist generate (테스트보다 선행 액션 — 첫 섹션으로 출력) ----
 # tuist 재생성 필요: (1) .swift 소스 멤버십 추가/삭제/이동(ADRC), (2) 매니페스트(Project/Workspace/Package/Tuist) 변경(수정 포함).
