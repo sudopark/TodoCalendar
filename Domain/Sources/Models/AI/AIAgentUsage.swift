@@ -39,6 +39,11 @@ public extension AIAgentUsage {
     // 서버가 credit 집계를 안 내려주는 구간(미배포)에선 토큰 합으로 폴백
     var usedCredits: Int { self.creditsUsed ?? (self.inputTokens + self.outputTokens) }
 
+    // 한도 소진 여부 — usedRatio 는 1.0 클램프라 초과를 구분 못 해 별도 파생 (#763)
+    var isLimitExceeded: Bool {
+        return self.dailyLimit > 0 && self.usedCredits >= self.dailyLimit
+    }
+
     // 사용률 0~1 클램프 — 한도 미설정(0)은 0으로 취급
     var usedRatio: Double {
         guard self.dailyLimit > 0 else { return 0 }
