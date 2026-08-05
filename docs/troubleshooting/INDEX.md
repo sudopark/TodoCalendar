@@ -5,3 +5,5 @@
 한 줄 포맷: `- [YYYY-MM-DD 제목](파일.md) — 서브도메인 / resolution(fixed|workaround|non-issue) / 증상 키워드`
 
 <!-- 레코드는 아래에 최신순으로 추가 -->
+
+- [2026-08-06 Share Extension으로 만든 AI job의 결과 푸시가 안 온다](2026-08-06-share-extension-ai-job-no-push.md) — AIAgent / non-issue / 푸시 안옴, device_id, DailyLimitExceeded, share extension
