@@ -49,7 +49,18 @@ final class ShareCommandViewModel: @unchecked Sendable {
         let sharedText = CurrentValueSubject<String?, Never>(nil)
     }
     private let subject = Subject()
-    private var didPrepare = false
+}
+
+
+extension ShareCommandStage {
+
+    // 전송 가능한 단계 — 실패 후 재시도는 허용하고 전송 중만 막는다
+    var canSend: Bool {
+        switch self {
+        case .editing, .failed: return true
+        default: return false
+        }
+    }
 }
 
 
@@ -57,11 +68,7 @@ final class ShareCommandViewModel: @unchecked Sendable {
 
 extension ShareCommandViewModel {
 
-    // onAppear가 다시 불려도 유저가 편집 중인 원문을 덮지 않는다
     func prepare() {
-        guard self.didPrepare == false else { return }
-        self.didPrepare = true
-
         Task { [weak self] in
             guard let self else { return }
             self.subject.sharedText.send(await self.loadSharedText())
@@ -81,7 +88,7 @@ extension ShareCommandViewModel {
     }
 
     func send(sharedText: String, additionalInstruction: String) {
-        guard self.canSend else { return }
+        guard self.subject.stage.value.canSend else { return }
         let command = AIShareCommandText(
             sharedText: sharedText,
             additionalInstruction: additionalInstruction
@@ -91,35 +98,21 @@ extension ShareCommandViewModel {
         self.subject.stage.send(.sending)
         Task { [weak self] in
             guard let self else { return }
-            self.subject.stage.send(await self.submitResult(command))
+            do {
+                try await self.submitService.submit(command)
+                self.subject.stage.send(.sent(message: "share.ai::sent".localized()))
+            } catch ShareSubmitFailure.createdButNotTrackable {
+                // job은 서버에 만들어졌지만 앱이 이어받을 기록이 없다 — 보냈다고만 하면 거짓말이 된다
+                self.subject.stage.send(.sent(message: "share.ai::sentButUntracked".localized()))
+            } catch {
+                self.subject.stage.send(.failed(message: "share.ai::failed".localized()))
+            }
         }
     }
 
-    private func submitResult(_ command: AIShareCommandText) async -> ShareCommandStage {
-        do {
-            try await self.submitService.submit(command)
-            return .sent(message: "share.ai::sent".localized())
-        } catch ShareSubmitFailure.createdButNotTrackable {
-            return .sent(message: "share.ai::sentButUntracked".localized())
-        } catch {
-            return .failed(message: "share.ai::failed".localized())
-        }
-    }
-
-    // 실패 후 재시도를 허용한다 — 전송 중(.sending)만 막으면 된다
-    private var canSend: Bool {
-        switch self.subject.stage.value {
-        case .editing, .failed: return true
-        default: return false
-        }
-    }
-
-    var isCloseable: Bool {
-        return self.subject.stage.value != .sending
-    }
-
+    // 전송 중엔 프로세스가 죽으면 in-flight 요청이 사라지므로 닫기를 막는다
     func close() {
-        guard self.isCloseable else { return }
+        guard self.subject.stage.value != .sending else { return }
         self.onClose()
     }
 }

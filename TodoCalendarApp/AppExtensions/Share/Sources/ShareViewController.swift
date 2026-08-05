@@ -58,6 +58,9 @@ final class ShareViewController: UIViewController {
 
 // MARK: - 공유 항목 읽기
 
+// extensionContext는 UIViewController 자체의 프로퍼티다 (UIKit 제공).
+// Info.plist의 NSExtensionPrincipalClass로 지정된 VC에 시스템이 채워주므로
+// SLComposeServiceViewController 같은 전용 베이스를 상속할 필요가 없다.
 extension ShareViewController {
 
     private func loadSharedText() async -> String {
