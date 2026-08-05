@@ -74,6 +74,23 @@ extension AICommandUsecaseImpleTests {
         // then
         #expect(self.stubRepository.didRejectParentJobId == "parent-job")
     }
+
+    // 거부는 confirm 대기의 종착점이다 — 기록을 남기면 다음 복원에 거부한 confirm이 되살아난다
+    @Test func usecase_rejectConfirmCommand_clearProcessingCommand() async throws {
+        // given
+        let usecase = self.makeUsecase()
+        try await self.stubRepository.updateProcessingAICommand(
+            .init(jobId: "some_job", isConfirmJob: false)
+        )
+
+        // when
+        usecase.rejectConfirmCommand(.init())
+        try await Task.sleep(for: .milliseconds(50))
+
+        // then
+        let processingCmd = try await self.stubRepository.loadProcessingAICommand()
+        #expect(processingCmd == nil)
+    }
 }
 
 
@@ -118,11 +135,31 @@ extension AICommandUsecaseImpleTests {
         let statuses = jobs.map { $0.status }
         #expect(statuses == [.pending, .running, .running, .done])
         #expect(jobs.last?.isFinish == true)
-        
+
         let processingCmd = try await self.stubRepository.loadProcessingAICommand()
         #expect(processingCmd == nil)
     }
-    
+
+    // confirm은 유저 응답 대기 상태다 — 여기서 기록을 지우면 콜드스타트 복원 근거가 사라진다
+    @Test func usecase_whenCommandNeedConfirm_keepProcessingCommand() async throws {
+        // given
+        let expect = expectConfirm("confirm 도달 후에도 처리중 기록 유지")
+        expect.count = 3
+        expect.timeout = .seconds(1)
+        let usecase = self.makeUsecase(customStubLoadJobs: [
+            .dummyPendingJob, .dummyRunningJob, .dummyConfirmJob
+        ])
+
+        // when
+        let jobs = try await self.outputs(expect, for: usecase.processCommand("cmd"))
+
+        // then
+        #expect(jobs.last?.status == .confirm)
+
+        let processingCmd = try await self.stubRepository.loadProcessingAICommand()
+        #expect(processingCmd?.jobId == "some_job")
+    }
+
     // 커맨드 처리시 fcm 메세지 받으면 작업상태 확인해서 완료 정보 반환
     @Test func usecase_whenReceiveJobFinishNotification_loadFinishedJob() async throws {
         // given
