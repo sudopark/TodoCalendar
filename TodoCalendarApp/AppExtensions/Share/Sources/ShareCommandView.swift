@@ -24,6 +24,12 @@ import CommonPresentation
     var sharedText: String = ""
     var additionalInstruction: String = ""
 
+    // 전송 가능 = 단계가 허용 + 원문이 비어있지 않음. 두 축을 다 가진 여기서 합성한다
+    var isSendable: Bool {
+        guard self.stage.canSend else { return false }
+        return !self.sharedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
     func bind(_ viewModel: ShareCommandViewModel) {
         guard self.didBind == false else { return }
         self.didBind = true
@@ -163,7 +169,7 @@ struct ShareCommandView: View {
 
             ConfirmButton(
                 title: "aiAgent::keyboard::send".localized(),
-                isEnable: self.isSendable,
+                isEnable: self.state.isSendable,
                 backgroundColor: self.appearance.colorSet.accentAI.asColor
             )
             .eventHandler(\.onTap) {
@@ -181,10 +187,6 @@ struct ShareCommandView: View {
                 .multilineTextAlignment(.leading)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
-    }
-
-    private var isSendable: Bool {
-        return !self.state.sharedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     private func messageBody(_ message: String) -> some View {
