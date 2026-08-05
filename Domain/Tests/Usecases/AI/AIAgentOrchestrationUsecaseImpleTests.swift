@@ -1059,6 +1059,48 @@ extension AIAgentOrchestrationUsecaseImpleTests {
 }
 
 
+// MARK: - 아직 진행 중인 job 복원
+
+extension AIAgentOrchestrationUsecaseImpleTests {
+
+    // 앱 밖(확장·인텐트)에서 만들어진 job은 복원 시점에 아직 running이다.
+    // processing으로 올려야 유저가 진행 상태를 보고, 제출 가드도 이 job을 인지한다.
+    @Test("복원한 job이 아직 진행 중이면 processing으로 올린다")
+    func usecase_whenRestoredJobIsRunning_enterProcessing() async throws {
+        // given
+        let expect = expectConfirm("running 잔여 job 복원 시 processing 방출")
+        let job = AIJob(jobId: "some_job")
+            |> \.status .~ AIJob.Status.running
+            |> \.command .~ "9월 10일 약속"
+        let usecase = self.makeUsecaseWithRestoredJob(job)
+
+        // when
+        let states = try await self.outputs(expect, for: usecase.state) {
+            usecase.restoreIfNeeded()
+        }
+
+        // then
+        #expect(states.map(self.stateName) == ["processing"])
+    }
+
+    @Test("진행 중인 job을 복원하면 새 command 제출이 막힌다")
+    func usecase_whenRestoredJobIsRunning_blockSubmit() async throws {
+        // given
+        let job = AIJob(jobId: "some_job") |> \.status .~ AIJob.Status.running
+        let usecase = self.makeUsecaseWithRestoredJob(job)
+
+        // when
+        usecase.restoreIfNeeded()
+        try await Task.sleep(for: .milliseconds(30))
+
+        // then
+        #expect(throws: (any Error).self) {
+            try usecase.submit("내일 3시 미팅")
+        }
+    }
+}
+
+
 // MARK: - 외부 트리거로 즉시 조회
 
 extension AIAgentOrchestrationUsecaseImpleTests {
@@ -1099,16 +1141,39 @@ extension AIAgentOrchestrationUsecaseImpleTests {
         #expect(self.stubCommand.didRefreshJobStatusWith == nil)
     }
 
-    @Test("처리 중인 job이 없으면 포그라운드 복귀 새로고침은 아무것도 하지 않는다")
-    func usecase_whenNoProcessingJob_foregroundRefreshDoesNothing() async throws {
+    // 앱이 노는 동안 확장·인텐트가 job을 만들었을 수 있다 — 앱 메모리엔 없으니 DB에서 이어받는다
+    @Test("처리 중인 job이 없으면 포그라운드 복귀 시 DB에서 복원을 시도한다")
+    func usecase_whenIdleOnForeground_restoreFromStorage() async throws {
         // given
         let usecase = self.makeUsecaseInIdle()
 
         // when
         usecase.refreshProcessingJobIfNeeded()
 
+        // then — 즉시 조회가 아니라 복원 경로를 탄다
+        #expect(self.stubCommand.didRefreshJobStatusWith == nil)
+        #expect(self.stubCommand.didRestore == true)
+    }
+
+    // 복원이 화면 상태를 덮으면 안 되는 구간
+    @Test("결과를 보고 있는 중이면 포그라운드 복귀 새로고침은 아무것도 하지 않는다")
+    func usecase_whenShowingResult_foregroundRefreshDoesNothing() async throws {
+        // given
+        let expect = expectConfirm("done 진입")
+        expect.count = 2
+        var done = AIJobResult.DoneResult()
+        done.text = "완료"
+        let usecase = self.makeUsecaseWithCommandJob(self.dummyJob(.done(done)))
+        let _ = try await self.outputs(expect, for: usecase.state) {
+            try? usecase.submit("회의")
+        }
+
+        // when
+        usecase.refreshProcessingJobIfNeeded()
+
         // then
         #expect(self.stubCommand.didRefreshJobStatusWith == nil)
+        #expect(self.stubCommand.didRestore == false)
     }
 
     @Test("처리 중인 job이 있으면 포그라운드 복귀 시 즉시 조회를 트리거한다")
