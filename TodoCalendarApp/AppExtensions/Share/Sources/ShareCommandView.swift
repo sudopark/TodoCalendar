@@ -19,33 +19,64 @@ import CommonPresentation
     @ObservationIgnored private var didBind = false
     @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
 
-    var stage: ShareCommandStage = .loading
     // 공유 원문은 viewModel이 1회 실어주고, 이후엔 유저가 직접 편집한다
     var sharedText: String = ""
     var additionalInstruction: String = ""
 
-    // 전송 가능 = 단계가 허용 + 원문이 비어있지 않음. 두 축을 다 가진 여기서 합성한다
-    var isSendable: Bool {
-        guard self.stage.canSend else { return false }
-        return !self.sharedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    var isPreparing: Bool = true
+    var blockedMessage: String?
+    var isSending: Bool = false
+    var sentMessage: String?
+    var failureMessage: String?
+
+    // 입력 화면을 대신해 안내 문구만 남는 종료 상태 — 제출 불가거나 제출 완료
+    var terminalMessage: String? {
+        return self.blockedMessage ?? self.sentMessage
     }
 
-    var isSending: Bool {
-        return self.stage == .sending
+    // 확인 전·전송 중엔 원문이 갱신되거나 in-flight 요청과 어긋날 수 있어 편집을 막는다
+    var isInputLocked: Bool {
+        return self.isPreparing || self.isSending
+    }
+
+    // 전송 가능 = 막는 축이 하나도 없음 + 원문이 비어있지 않음. 축을 다 가진 여기서 합성한다
+    var isSendable: Bool {
+        guard !self.isInputLocked, self.terminalMessage == nil else { return false }
+        return !self.sharedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
     func bind(_ viewModel: ShareCommandViewModel) {
         guard self.didBind == false else { return }
         self.didBind = true
 
-        viewModel.stage
-            .receive(on: RunLoop.main)
-            .sink(receiveValue: { [weak self] in self?.stage = $0 })
-            .store(in: &self.cancellables)
-
         viewModel.sharedText
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] in self?.sharedText = $0 })
+            .store(in: &self.cancellables)
+
+        viewModel.isPreparing
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] in self?.isPreparing = $0 })
+            .store(in: &self.cancellables)
+
+        viewModel.blockedMessage
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] in self?.blockedMessage = $0 })
+            .store(in: &self.cancellables)
+
+        viewModel.isSending
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] in self?.isSending = $0 })
+            .store(in: &self.cancellables)
+
+        viewModel.sentMessage
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] in self?.sentMessage = $0 })
+            .store(in: &self.cancellables)
+
+        viewModel.failureMessage
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] in self?.failureMessage = $0 })
             .store(in: &self.cancellables)
     }
 }
@@ -113,7 +144,7 @@ struct ShareCommandView: View {
             SheetHeaderView(title: "share.ai::title".localized())
                 .eventHandler(\.onClose, self.eventHandlers.close)
 
-            self.stageBody
+            self.contentBody
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .padding(.horizontal, spacing: .large)
@@ -121,27 +152,14 @@ struct ShareCommandView: View {
         .background(self.appearance.colorSet.bg0.asColor)
     }
 
+    // 입력 화면이 바닥이고 준비·전송 중은 그 위에 덮인다. 되돌아갈 곳이 없는 종료
+    // 상태(제출 불가·제출 완료)만 입력 화면을 대신한다.
     @ViewBuilder
-    private var stageBody: some View {
-        switch self.state.stage {
-        case .loading:
-            self.loadingBody
-
-        // 전송 중에도 편집 화면을 유지한다 — 보낸 내용이 계속 보이고, 실패로 돌아와도 화면이 바뀌지 않는다
-        case .editing, .failed, .sending:
-            self.editingBody
-
-        case .blocked(let message), .sent(let message):
+    private var contentBody: some View {
+        if let message = self.state.terminalMessage {
             self.messageBody(message)
-        }
-    }
-
-    private var loadingBody: some View {
-        VStack {
-            Spacer()
-            LoadingCircleView(self.appearance.colorSet.accentAI.asColor)
-                .frame(width: 32, height: 32)
-            Spacer()
+        } else {
+            self.editingBody
         }
     }
 
@@ -164,9 +182,14 @@ struct ShareCommandView: View {
                     lineLimit: 1...4
                 )
             }
-            // 전송 중엔 입력을 잠근다 — in-flight 요청과 화면 내용이 어긋나지 않게
-            .disabled(self.state.isSending)
-            .opacity(self.state.isSending ? 0.5 : 1.0)
+            .disabled(self.state.isInputLocked)
+            .opacity(self.state.isInputLocked ? 0.5 : 1.0)
+            .overlay {
+                if self.state.isPreparing {
+                    LoadingCircleView(self.appearance.colorSet.accentAI.asColor)
+                        .frame(width: 32, height: 32)
+                }
+            }
 
             self.failureMessageIfNeed
 
@@ -209,7 +232,7 @@ struct ShareCommandView: View {
 
     @ViewBuilder
     private var failureMessageIfNeed: some View {
-        if case .failed(let message) = self.state.stage {
+        if let message = self.state.failureMessage {
             Text(message)
                 .font(self.appearance.fontSet.subNormal.asFont)
                 .foregroundStyle(self.appearance.colorSet.accentWarn.asColor)
