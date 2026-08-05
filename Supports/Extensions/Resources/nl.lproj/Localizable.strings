@@ -596,3 +596,13 @@
 "billing::paywall::pending::message" = "Vraag een gezinsbeheerder om deze aankoop goed te keuren. Deze wordt automatisch toegepast zodra hij is goedgekeurd.";
 "billing::paywall::userPlan::loadFailed" = "Kan je abonnement niet laden. Probeer het opnieuw.";
 "billing::paywall::retry" = "Opnieuw proberen";
+
+// MARK: - share extension
+
+"share.ai::title" = "Naar AI sturen";
+"share.ai::instruction::placeholder" = "Voeg een instructie toe (optioneel)";
+"share.ai::needSignIn" = "Open de app en log in om AI-snelinvoer te gebruiken.";
+"share.ai::pending" = "Een eerder verzoek is nog in behandeling. Open de app om de voortgang of het resultaat te bekijken.";
+"share.ai::sent" = "Verzonden. Je kunt het resultaat in de app bekijken.";
+"share.ai::failed" = "Verzenden mislukt. Probeer het opnieuw.";
+"share.ai::sentButUntracked" = "Verzonden, maar de app kan het resultaat niet volgen. Bekijk je agenda over een moment.";

@@ -596,3 +596,13 @@
 "billing::paywall::pending::message" = "请等待家庭组织者批准此购买，批准后将自动生效。";
 "billing::paywall::userPlan::loadFailed" = "无法加载您的套餐，请重试。";
 "billing::paywall::retry" = "重试";
+
+// MARK: - share extension
+
+"share.ai::title" = "发送给AI";
+"share.ai::instruction::placeholder" = "添加指令（可选）";
+"share.ai::needSignIn" = "请先在应用中登录，以使用AI快捷输入。";
+"share.ai::pending" = "上一个请求尚未处理完毕。请在应用中查看进度或结果。";
+"share.ai::sent" = "已发送。可在应用中查看结果。";
+"share.ai::failed" = "发送失败。请重试。";
+"share.ai::sentButUntracked" = "已发送，但应用无法跟踪结果。请稍后查看日历。";

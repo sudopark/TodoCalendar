@@ -596,3 +596,13 @@
 "billing::paywall::pending::message" = "Demandez à un organisateur familial d'approuver cet achat. Il sera appliqué automatiquement une fois approuvé.";
 "billing::paywall::userPlan::loadFailed" = "Impossible de charger votre forfait. Veuillez réessayer.";
 "billing::paywall::retry" = "Réessayer";
+
+// MARK: - share extension
+
+"share.ai::title" = "Envoyer à l'IA";
+"share.ai::instruction::placeholder" = "Ajouter une instruction (facultatif)";
+"share.ai::needSignIn" = "Connectez-vous dans l'application pour utiliser la saisie rapide par IA.";
+"share.ai::pending" = "Une demande précédente est encore en attente. Ouvrez l'application pour voir sa progression ou son résultat.";
+"share.ai::sent" = "Envoyé. Vous pouvez consulter le résultat dans l'application.";
+"share.ai::failed" = "Impossible d'envoyer. Veuillez réessayer.";
+"share.ai::sentButUntracked" = "Envoyé, mais l'application ne peut pas suivre le résultat. Consultez votre calendrier dans un instant.";

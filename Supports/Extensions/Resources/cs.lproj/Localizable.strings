@@ -596,3 +596,13 @@
 "billing::paywall::pending::message" = "Požádejte rodinného organizátora o schválení tohoto nákupu. Po schválení bude automaticky použit.";
 "billing::paywall::userPlan::loadFailed" = "Nepodařilo se načíst váš plán. Zkuste to prosím znovu.";
 "billing::paywall::retry" = "Zkusit znovu";
+
+// MARK: - share extension
+
+"share.ai::title" = "Odeslat do AI";
+"share.ai::instruction::placeholder" = "Přidat pokyn (volitelné)";
+"share.ai::needSignIn" = "Přihlaste se v aplikaci, abyste mohli použít rychlé zadávání AI.";
+"share.ai::pending" = "Předchozí požadavek stále čeká. Otevřete aplikaci a zkontrolujte průběh nebo výsledek.";
+"share.ai::sent" = "Odesláno. Výsledek najdete v aplikaci.";
+"share.ai::failed" = "Odeslání se nezdařilo. Zkuste to znovu.";
+"share.ai::sentButUntracked" = "Odesláno, ale aplikace nemůže sledovat výsledek. Za chvíli zkontrolujte kalendář.";
