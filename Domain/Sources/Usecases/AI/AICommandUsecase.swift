@@ -125,9 +125,14 @@ extension AICommandUsecaseImple {
     }
     
     public func rejectConfirmCommand(_ action: AIConfirmCommandAction) {
-        let repository = self.repository
         // 서버 거부 API(Functions#243) 미구현 — 준비 전까지 fire-and-forget.
-        Task { try? await repository.rejectConfirmCommand(action) }
+        // 거부는 confirm 대기의 종착점이라 로컬 기록도 함께 정리한다 (cancelOngoingCommand와 대칭).
+        // 안 지우면 거부한 confirm이 다음 복원에 되살아나고, 앱 밖 진입점도 영구 차단된다.
+        let repository = self.repository
+        Task {
+            try? await repository.rejectConfirmCommand(action)
+            try? await repository.clearProcessingAICommand()
+        }
     }
 
     public func cancelOngoingCommand(_ jobId: String) {
@@ -260,8 +265,10 @@ private extension Publisher where Output == AIJob, Failure == any Error {
         _ repository: AICommandRepository
     ) -> some Publisher<AIJob, Failure> {
         
+        // confirm은 종료가 아니라 유저 응답 대기다. 여기서 지우면 콜드스타트 복원 근거가
+        // 사라져 대기 중이던 confirm이 유실된다 — 정리는 응답(confirm/decline/중지)이 한다.
         let handleOutput: (AIJob) -> Void = { job in
-            guard job.isFinish else { return }
+            guard job.isFinish, job.status != .confirm else { return }
             Task { try await repository.clearProcessingAICommand() }
         }
         
