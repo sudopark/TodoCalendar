@@ -325,8 +325,14 @@ extension AIAgentOrchestrationUsecaseImple {
 
     // 푸시가 특정 job을 지목해 도착. 추적 중인 job일 때만 즉시 조회.
     // 콜드 스타트(구독 없음)는 CalendarViewModel.prepare() → restoreIfNeeded()가 커버한다.
+    // 미추적 job(인텐트·확장이 앱 밖에서 만든 job)의 푸시는 저장소 복원으로 이어받는다 —
+    // 앱이 이미 포그라운드라 refreshProcessingJobIfNeeded(willEnterForeground 트리거)를 못 타는 경우를 메운다.
     public func handleJobStatusChanged(_ jobId: String) {
-        guard self.currentProcessingJobId == jobId else { return }
+        guard self.currentProcessingJobId == jobId else {
+            // 추적 중이 아닌 job — 앱 밖(Siri 인텐트·공유 확장)에서 만들어졌다
+            self.restoreIfNeededWhenIdle()
+            return
+        }
         // 만료된 confirm job은 더 조회하지 않는다 — 로컬 종료(추적 해제)로 push 즉시 조회 대상에서 뺀다.
         if case .confirm(_, _, _, let expireTime) = self.subject.state.value ?? .idle,
            let expireTime, expireTime <= Date() {
@@ -334,6 +340,18 @@ extension AIAgentOrchestrationUsecaseImple {
             return
         }
         self.commandUsecase.refreshJobStatus(jobId)
+    }
+
+    // 복원 근거는 앱 메모리가 아니라 저장소의 ProcessingAICommand다 — 여기서 볼 것은
+    // "지금 화면을 덮어도 되는가" 하나뿐이다. 미방출(prepare의 복원 진행 중)·입력 중·
+    // 결과 표시 중이면 보고 있던 화면이 덮인다. refreshProcessingJobIfNeeded의 .idle 분기와 동일 가드.
+    private func restoreIfNeededWhenIdle() {
+        switch self.subject.state.value {
+        case .idle:
+            self.restoreIfNeeded()
+        default:
+            break
+        }
     }
 
     // 포그라운드 복귀 — 백그라운드에서 폴링 Timer가 멈춘 공백을 메운다.

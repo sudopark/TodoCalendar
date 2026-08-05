@@ -6,6 +6,7 @@
 //  Copyright © 2026 com.sudo.park. All rights reserved.
 //
 
+import UIKit
 import Testing
 import Combine
 import Domain
@@ -19,6 +20,7 @@ import UnitTestHelpKit
 final class ApplicationRootViewModelImpleTests {
 
     private let spyAIJobRefreshUsecase = SpyAIJobRefreshUsecase()
+    private let spyAppUpdateCheckUsecase = SpyAppUpdateCheckUsecase()
 
     private func makeViewModel() -> ApplicationRootViewModelImple {
         return ApplicationRootViewModelImple(
@@ -30,7 +32,7 @@ final class ApplicationRootViewModelImpleTests {
             userNotificationUsecase: StubUserNotificationUsecase(),
             backgroundEventSyncUsecase: StubBackgroundEventSyncUsecase(),
             aiJobRefreshUsecase: self.spyAIJobRefreshUsecase,
-            appUpdateCheckUsecase: StubAppUpdateCheckUsecase()
+            appUpdateCheckUsecase: self.spyAppUpdateCheckUsecase
         )
     }
 }
@@ -70,6 +72,65 @@ extension ApplicationRootViewModelImpleTests {
 }
 
 
+// MARK: - 앱 활성 상태 전환
+
+extension ApplicationRootViewModelImpleTests {
+
+    @Test("앱이 활성 상태가 되면 처리중인 AI job을 이어받는다")
+    func viewModel_whenDidBecomeActive_refreshProcessingJob() async {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when
+        NotificationCenter.default.post(
+            name: UIApplication.didBecomeActiveNotification, object: nil
+        )
+        try? await Task.sleep(for: .milliseconds(100))
+
+        // then
+        #expect(self.spyAIJobRefreshUsecase.didRefreshProcessingJobTimes == 1)
+        withExtendedLifetime(viewModel) { }
+    }
+
+    // didBecomeActive는 제어센터·알림센터 여닫기, 권한 다이얼로그 dismiss 등에서도 매번 온다.
+    // 그때마다 재조회하면 job 진행 중 구간에 불필요한 서버 조회가 반복된다.
+    @Test("짧은 간격의 연속 활성 전환은 한 번만 이어받는다")
+    func viewModel_whenDidBecomeActiveRepeatedly_refreshOnlyOnce() async {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when
+        (0..<3).forEach { _ in
+            NotificationCenter.default.post(
+                name: UIApplication.didBecomeActiveNotification, object: nil
+            )
+        }
+        try? await Task.sleep(for: .milliseconds(100))
+
+        // then
+        #expect(self.spyAIJobRefreshUsecase.didRefreshProcessingJobTimes == 1)
+        withExtendedLifetime(viewModel) { }
+    }
+
+    @Test("포그라운드 복귀는 업데이트 체크만 하고 AI job은 이어받지 않는다")
+    func viewModel_whenWillEnterForeground_onlyCheckUpdate() async {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when
+        NotificationCenter.default.post(
+            name: UIApplication.willEnterForegroundNotification, object: nil
+        )
+        try? await Task.sleep(for: .milliseconds(100))
+
+        // then
+        #expect(self.spyAppUpdateCheckUsecase.didCheckUpdateIsNeed == true)
+        #expect(self.spyAIJobRefreshUsecase.didRefreshProcessingJobTimes == 0)
+        withExtendedLifetime(viewModel) { }
+    }
+}
+
+
 // MARK: - doubles
 
 private final class SpyAIJobRefreshUsecase: AIJobRefreshUsecase, @unchecked Sendable {
@@ -79,9 +140,9 @@ private final class SpyAIJobRefreshUsecase: AIJobRefreshUsecase, @unchecked Send
         self.didHandleJobStatusChangedWith = jobId
     }
 
-    var didRefreshProcessingJob: Bool?
+    var didRefreshProcessingJobTimes: Int = 0
     func refreshProcessingJobIfNeeded() {
-        self.didRefreshProcessingJob = true
+        self.didRefreshProcessingJobTimes += 1
     }
 
     var didChangeFactory: Bool?
@@ -127,9 +188,12 @@ private final class StubBackgroundEventSyncUsecase: BackgroundEventSyncUsecase, 
     func registerTask() { }
 }
 
-private final class StubAppUpdateCheckUsecase: AppUpdateCheckUsecase, @unchecked Sendable {
+private final class SpyAppUpdateCheckUsecase: AppUpdateCheckUsecase, @unchecked Sendable {
 
-    func checkUpdateIsNeed() { }
+    var didCheckUpdateIsNeed: Bool?
+    func checkUpdateIsNeed() {
+        self.didCheckUpdateIsNeed = true
+    }
 
     var updateRequirement: AnyPublisher<AppUpdateRequirement, Never> {
         return Empty().eraseToAnyPublisher()

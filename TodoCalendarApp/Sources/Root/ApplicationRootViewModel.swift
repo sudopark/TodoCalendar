@@ -64,6 +64,10 @@ final class ApplicationRootViewModelImple: @unchecked Sendable {
     private var cancellables: Set<AnyCancellable> = []
 }
 
+private enum Constant {
+    static let processingJobRefreshInterval: TimeInterval = 30
+}
+
 
 // MARK: - handle root routing
 
@@ -184,8 +188,20 @@ extension ApplicationRootViewModelImple {
                 self?.handleWillEnterForeground()
             })
             .store(in: &self.cancellables)
+
+        // didBecomeActive는 제어센터·알림센터 여닫기나 권한 다이얼로그 dismiss로도 매번 온다.
+        NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)
+            .throttle(
+                for: .seconds(Constant.processingJobRefreshInterval),
+                scheduler: DispatchQueue.main,
+                latest: false
+            )
+            .sink(receiveValue: { [weak self] _ in
+                self?.handleDidBecomeActive()
+            })
+            .store(in: &self.cancellables)
     }
-    
+
     private func handleDidEnterBackground() {
         self.prepareUsecase.prepareEnterBackground()
         self.backgroundEventSyncUsecase.scheduleTask()
@@ -194,6 +210,11 @@ extension ApplicationRootViewModelImple {
 
     private func handleWillEnterForeground() {
         self.appUpdateCheckUsecase.checkUpdateIsNeed()
+    }
+
+    // Siri 인텐트는 앱을 background로 내리지 않아 포그라운드 복귀 이벤트가 오지 않는다.
+    // active 전환은 그 경우까지 덮는다.
+    private func handleDidBecomeActive() {
         self.aiJobRefreshUsecase.refreshProcessingJobIfNeeded()
     }
 
