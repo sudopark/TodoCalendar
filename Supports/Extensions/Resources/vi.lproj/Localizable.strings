@@ -554,6 +554,7 @@
 "aiAgent::usage" = "%@ / %@ credit";
 "aiAgent::usage::topupRemaining" = "Còn lại %@ credit bổ sung";
 "aiAgent::usage::planChangeScheduled" = "Sẽ chuyển sang gói %2$@ vào %1$@";
+"aiAgent::usage::resetsIn" = "Có thể dùng lại sau %@";
 "aiAgent::stop::confirm::title" = "Dừng xử lý?";
 "aiAgent::stop::confirm::message" = "Dừng lại sẽ hủy bỏ tác vụ đang thực hiện và không thể tiếp tục.";
 "aiAgent::confirm::countdown" = "để xác nhận";

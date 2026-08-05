@@ -554,6 +554,7 @@
 "aiAgent::usage" = "%@ / %@ krediittiä";
 "aiAgent::usage::topupRemaining" = "%@ lisäkrediittiä jäljellä";
 "aiAgent::usage::planChangeScheduled" = "Vaihto %2$@-pakettiin %1$@";
+"aiAgent::usage::resetsIn" = "Käytettävissä taas %@ kuluttua";
 "aiAgent::stop::confirm::title" = "Pysäytetäänkö käsittely?";
 "aiAgent::stop::confirm::message" = "Pysäyttäminen hylkää käynnissä olevan komennon, eikä sitä voi jatkaa.";
 "aiAgent::confirm::countdown" = "aikaa hyväksyä";

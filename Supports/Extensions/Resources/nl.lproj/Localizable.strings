@@ -554,6 +554,7 @@
 "aiAgent::usage" = "%@ / %@ credits";
 "aiAgent::usage::topupRemaining" = "Nog %@ extra credits over";
 "aiAgent::usage::planChangeScheduled" = "Overstap naar het %2$@-plan op %1$@";
+"aiAgent::usage::resetsIn" = "Over %@ weer beschikbaar";
 "aiAgent::stop::confirm::title" = "Verwerking stoppen?";
 "aiAgent::stop::confirm::message" = "Stoppen verwerpt de lopende opdracht, en deze kan niet worden hervat.";
 "aiAgent::confirm::countdown" = "resterend om goed te keuren";

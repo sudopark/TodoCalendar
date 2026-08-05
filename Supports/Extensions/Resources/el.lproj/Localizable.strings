@@ -554,6 +554,7 @@
 "aiAgent::usage" = "%@ / %@ μονάδες";
 "aiAgent::usage::topupRemaining" = "Απομένουν %@ επιπλέον μονάδες";
 "aiAgent::usage::planChangeScheduled" = "Μετάβαση στο πρόγραμμα %2$@ στις %1$@";
+"aiAgent::usage::resetsIn" = "Διαθέσιμο ξανά σε %@";
 "aiAgent::stop::confirm::title" = "Διακοπή επεξεργασίας;";
 "aiAgent::stop::confirm::message" = "Η διακοπή απορρίπτει την εντολή που εκτελείται και δεν θα μπορεί να συνεχιστεί.";
 "aiAgent::confirm::countdown" = "απομένουν για έγκριση";
