@@ -8,7 +8,12 @@ paths:
 
 # 로컬라이제이션 규칙
 
-지원 언어 31개 (en 원문 + 30개 번역: ko ja zh-Hans zh-Hant vi th es fr it pt-BR ca de nl sv da nb fi pl cs sk hu ru uk ro el hr tr id ms hi — #626). 번역 리소스는 3곳: 메인 `Supports/Extensions/Resources`(Localizable.strings), 위젯 `TodoCalendarApp/AppExtensions/Widget/Resources`, 권한 문구 `TodoCalendarApp/Resources/Localize`(InfoPlist.strings).
+지원 언어 31개 (en 원문 + 30개 번역: ko ja zh-Hans zh-Hant vi th es fr it pt-BR ca de nl sv da nb fi pl cs sk hu ru uk ro el hr tr id ms hi — #626). 번역 리소스는 3곳: 메인 `Supports/Extensions/Resources`(Localizable.strings), 위젯 `TodoCalendarApp/AppExtensions/Widget/Resources`(Localizable.strings), 앱 타겟 `TodoCalendarApp/Resources/Localize`.
+
+앱 타겟 항목은 파일 3개를 담는다 — 각각 용도가 다르니 신규 문구를 아무 파일에나 넣지 말 것:
+- `InfoPlist.strings` — 시스템 권한 요청 문구(카메라·마이크 접근 등).
+- `Localizable.strings` — **AppIntents 라벨·다이얼로그**(`title`·`description`·`IntentDialog` 등). AppIntents 문구는 그 인텐트가 속한 타겟 자신의 번들에서 해석되므로, 공유 리소스인 `Supports/Extensions/Resources`에 넣으면 시스템이 못 찾는다 — 앱 타겟(`TodoCalendarApp`) 소속 인텐트는 반드시 여기. **#722에서 데인 함정**: AppIntents 메타데이터는 이 규칙을 몰라 다른 곳에 두면 조용히 원문(en)으로만 보이거나 라벨이 깨진다.
+- `AppShortcuts.strings` — Siri 발화 phrase(`AppShortcutsProvider`).
 
 ## 1. 전 언어 동기화 짝 (CLAUDE.md §1)
 

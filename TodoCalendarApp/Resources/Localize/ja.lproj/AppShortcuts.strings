@@ -1,0 +1,4 @@
+"Add with AI in ${applicationName}" = "${applicationName}でAIに追加";
+"Add a schedule in ${applicationName}" = "${applicationName}で予定を追加";
+"Add a to-do in ${applicationName}" = "${applicationName}でタスクを追加";
+"Add with AI" = "AIで追加";

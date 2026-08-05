@@ -18,6 +18,8 @@ PAIRS = [
     "Supports/Extensions/Resources/{}.lproj/Localizable.strings",
     "TodoCalendarApp/AppExtensions/Widget/Resources/{}.lproj/Localizable.strings",
     "TodoCalendarApp/Resources/Localize/{}.lproj/InfoPlist.strings",
+    "TodoCalendarApp/Resources/Localize/{}.lproj/Localizable.strings",
+    "TodoCalendarApp/Resources/Localize/{}.lproj/AppShortcuts.strings",
 ]
 ENTRY = re.compile(r'"((?:[^"\\]|\\.)+)"\s*=\s*"((?:[^"\\]|\\.)*)"\s*;')
 SPEC = re.compile(r'%(?:\d+\$)?[-#0+ ]*\d*(?:\.\d+)?(?:hh?|ll?|q|z|t|L)?[@dDuUxXoOfeEgGcsSaAF]')
