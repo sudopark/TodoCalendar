@@ -600,6 +600,7 @@
 // MARK: - share extension
 
 "share.ai::title" = "发送给AI";
+"share.ai::text::placeholder" = "要发送的内容";
 "share.ai::instruction::placeholder" = "添加指令（可选）";
 "share.ai::needSignIn" = "请先在应用中登录，以使用AI快捷输入。";
 "share.ai::pending" = "上一个请求尚未处理完毕。请在应用中查看进度或结果。";

@@ -30,6 +30,10 @@ import CommonPresentation
         return !self.sharedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
+    var isSending: Bool {
+        return self.stage == .sending
+    }
+
     func bind(_ viewModel: ShareCommandViewModel) {
         guard self.didBind == false else { return }
         self.didBind = true
@@ -120,10 +124,11 @@ struct ShareCommandView: View {
     @ViewBuilder
     private var stageBody: some View {
         switch self.state.stage {
-        case .loading, .sending:
+        case .loading:
             self.loadingBody
 
-        case .editing, .failed:
+        // 전송 중에도 편집 화면을 유지한다 — 보낸 내용이 계속 보이고, 실패로 돌아와도 화면이 바뀌지 않는다
+        case .editing, .failed, .sending:
             self.editingBody
 
         case .blocked(let message), .sent(let message):
@@ -143,25 +148,25 @@ struct ShareCommandView: View {
     private var editingBody: some View {
         @Bindable var state = self.state
         return VStack(spacing: Metric.Spacing.regular) {
-            TextEditor(text: $state.sharedText)
-                .font(self.appearance.fontSet.normal.asFont)
-                .foregroundStyle(self.appearance.colorSet.text0.asColor)
-                .scrollContentBackground(.hidden)
-                .frame(minHeight: 100)
-                .padding(spacing: .small)
-                .background(self.appearance.colorSet.bg1.asColor)
-                .clipShape(RoundedRectangle(cornerRadius: Metric.Radius.regular))
+            VStack(spacing: Metric.Spacing.regular) {
+                // 원문이 주 입력 — 앱 본체 AI 입력창과 같은 크기·여백으로 같은 기능임을 드러낸다
+                self.inputField(
+                    text: $state.sharedText,
+                    placeholder: "share.ai::text::placeholder".localized(),
+                    font: self.appearance.fontSet.size(16, weight: .regular).asFont,
+                    lineLimit: 3...8
+                )
 
-            TextField(
-                "share.ai::instruction::placeholder".localized(),
-                text: $state.additionalInstruction,
-                axis: .vertical
-            )
-            .font(self.appearance.fontSet.subNormal.asFont)
-            .foregroundStyle(self.appearance.colorSet.text0.asColor)
-            .padding(spacing: .small)
-            .background(self.appearance.colorSet.bg1.asColor)
-            .clipShape(RoundedRectangle(cornerRadius: Metric.Radius.regular))
+                self.inputField(
+                    text: $state.additionalInstruction,
+                    placeholder: "share.ai::instruction::placeholder".localized(),
+                    font: self.appearance.fontSet.normal.asFont,
+                    lineLimit: 1...4
+                )
+            }
+            // 전송 중엔 입력을 잠근다 — in-flight 요청과 화면 내용이 어긋나지 않게
+            .disabled(self.state.isSending)
+            .opacity(self.state.isSending ? 0.5 : 1.0)
 
             self.failureMessageIfNeed
 
@@ -170,12 +175,36 @@ struct ShareCommandView: View {
             ConfirmButton(
                 title: "aiAgent::keyboard::send".localized(),
                 isEnable: self.state.isSendable,
+                isProcessing: self.state.isSending,
                 backgroundColor: self.appearance.colorSet.accentAI.asColor
             )
             .eventHandler(\.onTap) {
                 self.eventHandlers.send(self.state.sharedText, self.state.additionalInstruction)
             }
         }
+    }
+
+    private func inputField(
+        text: Binding<String>,
+        placeholder: String,
+        font: Font,
+        lineLimit: ClosedRange<Int>
+    ) -> some View {
+        return TextField(
+            "", text: text,
+            prompt: Text(placeholder)
+                .font(font)
+                .foregroundStyle(self.appearance.colorSet.placeHolder.asColor),
+            axis: .vertical
+        )
+        .lineLimit(lineLimit)
+        .font(font)
+        .foregroundStyle(self.appearance.colorSet.text0.asColor)
+        .padding(spacing: .regular)
+        .background(
+            RoundedRectangle(cornerRadius: Metric.Radius.chip)
+                .fill(self.appearance.colorSet.bg1.asColor)
+        )
     }
 
     @ViewBuilder

@@ -600,6 +600,7 @@
 // MARK: - share extension
 
 "share.ai::title" = "Naar AI sturen";
+"share.ai::text::placeholder" = "Te verzenden tekst";
 "share.ai::instruction::placeholder" = "Voeg een instructie toe (optioneel)";
 "share.ai::needSignIn" = "Open de app en log in om AI-snelinvoer te gebruiken.";
 "share.ai::pending" = "Een eerder verzoek is nog in behandeling. Open de app om de voortgang of het resultaat te bekijken.";

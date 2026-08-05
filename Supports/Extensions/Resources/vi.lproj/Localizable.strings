@@ -600,6 +600,7 @@
 // MARK: - share extension
 
 "share.ai::title" = "Gửi tới AI";
+"share.ai::text::placeholder" = "Nội dung cần gửi";
 "share.ai::instruction::placeholder" = "Thêm chỉ dẫn (tùy chọn)";
 "share.ai::needSignIn" = "Đăng nhập trong ứng dụng để sử dụng nhập nhanh bằng AI.";
 "share.ai::pending" = "Một yêu cầu trước đó vẫn đang chờ. Hãy mở ứng dụng để xem tiến trình hoặc kết quả.";

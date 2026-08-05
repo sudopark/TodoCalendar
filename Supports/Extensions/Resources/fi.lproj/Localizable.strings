@@ -600,6 +600,7 @@
 // MARK: - share extension
 
 "share.ai::title" = "Lähetä AI:lle";
+"share.ai::text::placeholder" = "Lähetettävä teksti";
 "share.ai::instruction::placeholder" = "Lisää ohje (valinnainen)";
 "share.ai::needSignIn" = "Kirjaudu sisään sovelluksessa käyttääksesi AI-pikasyöttöä.";
 "share.ai::pending" = "Aiempi pyyntö on yhä kesken. Avaa sovellus nähdäksesi sen etenemisen tai tuloksen.";

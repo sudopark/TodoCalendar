@@ -600,6 +600,7 @@
 // MARK: - share extension
 
 "share.ai::title" = "Odoslať do AI";
+"share.ai::text::placeholder" = "Text na odoslanie";
 "share.ai::instruction::placeholder" = "Pridať pokyn (voliteľné)";
 "share.ai::needSignIn" = "Prihláste sa v aplikácii, aby ste mohli použiť rýchle zadávanie AI.";
 "share.ai::pending" = "Predchádzajúca požiadavka stále čaká. Otvorte aplikáciu a skontrolujte priebeh alebo výsledok.";

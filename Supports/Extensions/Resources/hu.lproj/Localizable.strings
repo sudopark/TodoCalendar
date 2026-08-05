@@ -600,6 +600,7 @@
 // MARK: - share extension
 
 "share.ai::title" = "Küldés az AI-nak";
+"share.ai::text::placeholder" = "Elküldendő szöveg";
 "share.ai::instruction::placeholder" = "Utasítás hozzáadása (opcionális)";
 "share.ai::needSignIn" = "Jelentkezzen be az alkalmazásban az AI gyorsbevitel használatához.";
 "share.ai::pending" = "Egy korábbi kérés még függőben van. Nyissa meg az alkalmazást az állapot vagy az eredmény megtekintéséhez.";

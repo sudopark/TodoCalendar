@@ -600,6 +600,7 @@
 // MARK: - share extension
 
 "share.ai::title" = "Kirim ke AI";
+"share.ai::text::placeholder" = "Teks yang akan dikirim";
 "share.ai::instruction::placeholder" = "Tambahkan instruksi (opsional)";
 "share.ai::needSignIn" = "Masuk di aplikasi untuk menggunakan input cepat AI.";
 "share.ai::pending" = "Permintaan sebelumnya masih menunggu. Buka aplikasi untuk melihat progres atau hasilnya.";

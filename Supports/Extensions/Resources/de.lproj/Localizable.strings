@@ -600,6 +600,7 @@
 // MARK: - share extension
 
 "share.ai::title" = "An die KI senden";
+"share.ai::text::placeholder" = "Zu sendender Text";
 "share.ai::instruction::placeholder" = "Anweisung hinzufügen (optional)";
 "share.ai::needSignIn" = "Melden Sie sich in der App an, um die KI-Schnelleingabe zu nutzen.";
 "share.ai::pending" = "Eine frühere Anfrage steht noch aus. Öffnen Sie die App, um Fortschritt oder Ergebnis zu sehen.";

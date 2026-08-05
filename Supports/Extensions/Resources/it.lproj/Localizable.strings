@@ -600,6 +600,7 @@
 // MARK: - share extension
 
 "share.ai::title" = "Invia all'AI";
+"share.ai::text::placeholder" = "Testo da inviare";
 "share.ai::instruction::placeholder" = "Aggiungi un'istruzione (facoltativo)";
 "share.ai::needSignIn" = "Esegui l'accesso nell'app per usare l'inserimento rapido con AI.";
 "share.ai::pending" = "Una richiesta precedente è ancora in attesa. Apri l'app per vederne l'avanzamento o il risultato.";
