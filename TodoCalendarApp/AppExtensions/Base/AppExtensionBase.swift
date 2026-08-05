@@ -127,44 +127,6 @@ final class AppExtensionBase {
     }()
 }
 
-// MARK: - NeverRemoveAuthStorage
-
-struct NeverRemoveAuthStorage: AuthStore, APICredentialStore  {
-    
-    private let storage: AuthStoreImple
-    init(storage: AuthStoreImple) {
-        self.storage = storage
-    }
-    
-    func loadCurrentAuth() -> Domain.Auth? {
-        return self.storage.loadCurrentAuth()
-    }
-    
-    func loadCredential() -> APICredential? {
-        return self.loadCurrentAuth().map { .init(auth: $0) }
-    }
-    
-    func saveCredential(_ credential: APICredential) {
-        self.updateCredential(credential)
-    }
-    
-    func saveAuth(_ auth: Domain.Auth) {
-        self.storage.saveAuth(auth)
-    }
-    
-    func removeAuth() {
-        // not remove auth
-    }
-    
-    func updateCredential(_ credential: APICredential) {
-        self.storage.updateCredential(credential)
-    }
-    
-    func removeCredential() {
-        // not remove credential
-    }
-}
-
 // MARK: - dummy
 
 class DummyFirebaseAuthService: FirebaseAuthService {

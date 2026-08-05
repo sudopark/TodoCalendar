@@ -324,6 +324,7 @@ extension Project {
                 "AppExtensions/Base/**",
                 "AppExtensions/\(extensionName)/Sources/**",
                 "Sources/AppEnvironment.swift",
+                "Sources/NeverRemoveAuthStorage.swift",
                 .glob("Intents/TodoCalendarWidgetIntents.intentdefinition", codeGen: .public)
             ],
             resources: [
@@ -356,6 +357,7 @@ extension Project {
                 "AppExtensions/Base/**",
                 "AppExtensions/\(extensionName)/Sources/**",
                 "Sources/AppEnvironment.swift",
+                "Sources/NeverRemoveAuthStorage.swift",
                 .glob("Intents/TodoCalendarWidgetIntents.intentdefinition", codeGen: .public),
                 "AppExtensions/\(extensionName)/Tests/**"
             ],
