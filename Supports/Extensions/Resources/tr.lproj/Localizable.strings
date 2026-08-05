@@ -600,6 +600,7 @@
 // MARK: - share extension
 
 "share.ai::title" = "AI'ya gönder";
+"share.ai::text::placeholder" = "Gönderilecek metin";
 "share.ai::instruction::placeholder" = "Bir yönerge ekleyin (isteğe bağlı)";
 "share.ai::needSignIn" = "Hızlı AI girişini kullanmak için uygulamada giriş yapın.";
 "share.ai::pending" = "Önceki bir istek hâlâ bekliyor. İlerlemesini veya sonucunu görmek için uygulamayı açın.";

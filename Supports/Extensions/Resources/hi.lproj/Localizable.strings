@@ -600,6 +600,7 @@
 // MARK: - share extension
 
 "share.ai::title" = "AI को भेजें";
+"share.ai::text::placeholder" = "भेजने के लिए टेक्स्ट";
 "share.ai::instruction::placeholder" = "निर्देश जोड़ें (वैकल्पिक)";
 "share.ai::needSignIn" = "AI क्विक इनपुट का उपयोग करने के लिए ऐप में लॉगिन करें।";
 "share.ai::pending" = "पिछला अनुरोध अभी भी लंबित है। प्रगति या परिणाम देखने के लिए ऐप खोलें।";

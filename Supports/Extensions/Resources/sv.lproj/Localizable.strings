@@ -600,6 +600,7 @@
 // MARK: - share extension
 
 "share.ai::title" = "Skicka till AI";
+"share.ai::text::placeholder" = "Text att skicka";
 "share.ai::instruction::placeholder" = "Lägg till en instruktion (valfritt)";
 "share.ai::needSignIn" = "Logga in i appen för att använda AI-snabbinmatning.";
 "share.ai::pending" = "En tidigare förfrågan väntar fortfarande. Öppna appen för att se förloppet eller resultatet.";

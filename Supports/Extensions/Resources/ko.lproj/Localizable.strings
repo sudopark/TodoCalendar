@@ -600,6 +600,7 @@
 // MARK: - share extension
 
 "share.ai::title" = "AI로 보내기";
+"share.ai::text::placeholder" = "보낼 내용";
 "share.ai::instruction::placeholder" = "추가 지시 (선택)";
 "share.ai::needSignIn" = "AI 빠른 입력은 앱에서 로그인 후 이용할 수 있어요.";
 "share.ai::pending" = "앞선 요청이 아직 남아 있어요. 앱에서 진행 상태나 결과를 확인해 주세요.";

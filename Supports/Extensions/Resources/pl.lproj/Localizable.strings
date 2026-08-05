@@ -600,6 +600,7 @@
 // MARK: - share extension
 
 "share.ai::title" = "Wyślij do AI";
+"share.ai::text::placeholder" = "Tekst do wysłania";
 "share.ai::instruction::placeholder" = "Dodaj polecenie (opcjonalnie)";
 "share.ai::needSignIn" = "Zaloguj się w aplikacji, aby korzystać z szybkiego wprowadzania AI.";
 "share.ai::pending" = "Poprzednie żądanie wciąż oczekuje. Otwórz aplikację, aby sprawdzić postęp lub wynik.";

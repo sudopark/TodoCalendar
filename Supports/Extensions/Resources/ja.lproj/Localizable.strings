@@ -600,6 +600,7 @@
 // MARK: - share extension
 
 "share.ai::title" = "AIに送信";
+"share.ai::text::placeholder" = "送信する内容";
 "share.ai::instruction::placeholder" = "追加の指示（任意）";
 "share.ai::needSignIn" = "AIクイック入力を使用するには、まずアプリでログインしてください。";
 "share.ai::pending" = "前のリクエストがまだ残っています。アプリで進行状況や結果を確認してください。";
