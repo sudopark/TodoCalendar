@@ -410,6 +410,7 @@
 "setting.holiday.hide::confirm::message" = "是否每年都隱藏此假日？\n您可以在設定 > 假日中重新顯示。";
 "setting.holiday.hidden::sectionTitle" = "已隱藏的假日";
 "setting.holiday.show::button" = "顯示";
+"setting.aiGuide::name" = "AI 新增 — Siri 與小工具";
 "setting.feedback::name" = "意見回饋";
 "setting.help::name" = "說明";
 "setting.share::name" = "分享應用程式";
@@ -562,6 +563,7 @@
 "aiAgent::stop::confirm::message" = "停止後將會捨棄正在進行的工作，且無法繼續。";
 "aiAgent::confirm::countdown" = "內請核准";
 "aiAgent::confirm::expired::message" = "時間已過期，請重新提出要求。";
+"aiAgent::tip::externalEntry" = "提示：你也可以透過 Siri、操作按鈕或小工具新增。";
 "aiAgent::failed::showPlans" = "查看方案";
 
 // MARK: - billing

@@ -410,6 +410,7 @@
 "setting.holiday.hide::confirm::message" = "ซ่อนวันหยุดนี้ทุกปีหรือไม่?\nสามารถแสดงอีกครั้งได้ที่การตั้งค่า > วันหยุด";
 "setting.holiday.hidden::sectionTitle" = "วันหยุดที่ซ่อนไว้";
 "setting.holiday.show::button" = "แสดง";
+"setting.aiGuide::name" = "เพิ่มด้วย AI — Siri และวิดเจ็ต";
 "setting.feedback::name" = "ข้อเสนอแนะ";
 "setting.help::name" = "ช่วยเหลือ";
 "setting.share::name" = "แชร์แอป";
@@ -562,6 +563,7 @@
 "aiAgent::stop::confirm::message" = "การหยุดจะทำให้งานที่กำลังทำอยู่หายไปและไม่สามารถกู้คืนได้";
 "aiAgent::confirm::countdown" = "เหลือเวลาอนุมัติ";
 "aiAgent::confirm::expired::message" = "หมดเวลาแล้ว กรุณาส่งคำขอใหม่อีกครั้ง";
+"aiAgent::tip::externalEntry" = "เคล็ดลับ: คุณยังเพิ่มได้ด้วย Siri ปุ่มการทำงาน หรือวิดเจ็ต";
 "aiAgent::failed::showPlans" = "ดูแพ็กเกจ";
 
 // MARK: - billing

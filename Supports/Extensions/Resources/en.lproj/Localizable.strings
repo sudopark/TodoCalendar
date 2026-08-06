@@ -410,6 +410,7 @@
 "setting.holiday.hide::confirm::message" = "Hide this holiday every year?\nYou can show it again in Settings > Holiday.";
 "setting.holiday.hidden::sectionTitle" = "Hidden Holidays";
 "setting.holiday.show::button" = "Show";
+"setting.aiGuide::name" = "Add with AI — Siri & widgets";
 "setting.feedback::name" = "Feedback";
 "setting.help::name" = "Help";
 "setting.share::name" = "Share App";
@@ -562,6 +563,7 @@
 "aiAgent::stop::confirm::message" = "Stopping discards the task in progress, and it can't be resumed.";
 "aiAgent::confirm::countdown" = "left to approve";
 "aiAgent::confirm::expired::message" = "Time expired. Please request again.";
+"aiAgent::tip::externalEntry" = "Tip: you can also add by Siri, the Action button, or widgets.";
 "aiAgent::failed::showPlans" = "View Plans";
 
 // MARK: - billing

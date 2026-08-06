@@ -410,6 +410,7 @@
 "setting.holiday.hide::confirm::message" = "Skjule denne helligdagen hvert år?\nDu kan vise den igjen under Innstillinger > Helligdager.";
 "setting.holiday.hidden::sectionTitle" = "Skjulte helligdager";
 "setting.holiday.show::button" = "Vis";
+"setting.aiGuide::name" = "Legg til med AI – Siri & widgets";
 "setting.feedback::name" = "Tilbakemelding";
 "setting.help::name" = "Hjelp";
 "setting.share::name" = "Del appen";
@@ -562,6 +563,7 @@
 "aiAgent::stop::confirm::message" = "Å stoppe forkaster den pågående kommandoen, og den kan ikke gjenopptas.";
 "aiAgent::confirm::countdown" = "igjen til godkjenning";
 "aiAgent::confirm::expired::message" = "Tiden er ute. Vennligst be om dette på nytt.";
+"aiAgent::tip::externalEntry" = "Tips: du kan også legge til via Siri, Handlingsknappen eller widgets.";
 "aiAgent::failed::showPlans" = "Se abonnementer";
 
 // MARK: - billing

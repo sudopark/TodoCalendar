@@ -410,6 +410,7 @@
 "setting.holiday.hide::confirm::message" = "Sembunyikan cuti ini setiap tahun?\nAnda boleh paparkannya semula dalam Tetapan > Cuti.";
 "setting.holiday.hidden::sectionTitle" = "Cuti Tersembunyi";
 "setting.holiday.show::button" = "Papar";
+"setting.aiGuide::name" = "Tambah dengan AI — Siri & widget";
 "setting.feedback::name" = "Maklum Balas";
 "setting.help::name" = "Bantuan";
 "setting.share::name" = "Kongsi Aplikasi";
@@ -562,6 +563,7 @@
 "aiAgent::stop::confirm::message" = "Menghentikan akan membuang arahan yang sedang berjalan, dan ia tidak boleh disambung semula.";
 "aiAgent::confirm::countdown" = "berbaki untuk meluluskan";
 "aiAgent::confirm::expired::message" = "Masa telah tamat. Sila mohon semula.";
+"aiAgent::tip::externalEntry" = "Tip: anda juga boleh menambah melalui Siri, Butang Tindakan atau widget.";
 "aiAgent::failed::showPlans" = "Lihat pelan";
 
 // MARK: - billing

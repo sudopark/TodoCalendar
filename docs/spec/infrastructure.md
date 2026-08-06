@@ -97,6 +97,7 @@ public final class SharedDataStore: @unchecked Sendable {
 |---|---|---|
 | 날짜 이동 | `tc.app://calendar/?select=YYYY_MM_DD` | `select`: `year_month_day` 형식 |
 | 이벤트 상세 | `tc.app://calendar/event/?id=<eventId>&type=<eventType>` | `id`, `type` |
+| AI 입력 진입 | `tc.app://calendar/ai` | 없음 |
 
 ### 2.2 딥링크 처리 구조
 

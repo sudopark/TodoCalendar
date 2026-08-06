@@ -410,6 +410,7 @@
 "setting.holiday.hide::confirm::message" = "Nascondere questa festività ogni anno?\nPuoi mostrarla di nuovo in Impostazioni > Festività.";
 "setting.holiday.hidden::sectionTitle" = "Festività nascoste";
 "setting.holiday.show::button" = "Mostra";
+"setting.aiGuide::name" = "Aggiungi con l'IA: Siri e widget";
 "setting.feedback::name" = "Feedback";
 "setting.help::name" = "Aiuto";
 "setting.share::name" = "Condividi app";
@@ -562,6 +563,7 @@
 "aiAgent::stop::confirm::message" = "L'interruzione scarta l'attività in corso e non potrà essere ripresa.";
 "aiAgent::confirm::countdown" = "rimasti per approvare";
 "aiAgent::confirm::expired::message" = "Tempo scaduto. Effettua di nuovo la richiesta.";
+"aiAgent::tip::externalEntry" = "Suggerimento: puoi anche aggiungere tramite Siri, il tasto Azione o i widget.";
 "aiAgent::failed::showPlans" = "Visualizza piani";
 
 // MARK: - billing

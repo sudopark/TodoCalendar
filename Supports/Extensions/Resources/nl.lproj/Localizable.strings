@@ -410,6 +410,7 @@
 "setting.holiday.hide::confirm::message" = "Deze feestdag elk jaar verbergen?\nJe kunt hem weer tonen via Instellingen > Feestdagen.";
 "setting.holiday.hidden::sectionTitle" = "Verborgen feestdagen";
 "setting.holiday.show::button" = "Tonen";
+"setting.aiGuide::name" = "Toevoegen met AI – Siri & widgets";
 "setting.feedback::name" = "Feedback";
 "setting.help::name" = "Help";
 "setting.share::name" = "App delen";
@@ -562,6 +563,7 @@
 "aiAgent::stop::confirm::message" = "Stoppen verwerpt de lopende opdracht, en deze kan niet worden hervat.";
 "aiAgent::confirm::countdown" = "resterend om goed te keuren";
 "aiAgent::confirm::expired::message" = "Tijd verlopen. Vraag het opnieuw aan.";
+"aiAgent::tip::externalEntry" = "Tip: je kunt ook toevoegen via Siri, de actieknop of widgets.";
 "aiAgent::failed::showPlans" = "Bekijk abonnementen";
 
 // MARK: - billing

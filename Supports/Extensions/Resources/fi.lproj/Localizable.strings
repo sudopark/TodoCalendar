@@ -410,6 +410,7 @@
 "setting.holiday.hide::confirm::message" = "Piilotetaanko tämä vapaapäivä joka vuosi?\nVoit näyttää sen uudelleen kohdassa Asetukset > Vapaapäivät.";
 "setting.holiday.hidden::sectionTitle" = "Piilotetut vapaapäivät";
 "setting.holiday.show::button" = "Näytä";
+"setting.aiGuide::name" = "Lisää tekoälyllä – Siri ja widgetit";
 "setting.feedback::name" = "Palaute";
 "setting.help::name" = "Ohje";
 "setting.share::name" = "Jaa sovellus";
@@ -562,6 +563,7 @@
 "aiAgent::stop::confirm::message" = "Pysäyttäminen hylkää käynnissä olevan komennon, eikä sitä voi jatkaa.";
 "aiAgent::confirm::countdown" = "aikaa hyväksyä";
 "aiAgent::confirm::expired::message" = "Aika loppui. Pyydä uudelleen.";
+"aiAgent::tip::externalEntry" = "Vinkki: voit lisätä myös Sirin, toimintopainikkeen tai widgetien avulla.";
 "aiAgent::failed::showPlans" = "Näytä tilaukset";
 
 // MARK: - billing

@@ -410,6 +410,7 @@
 "setting.holiday.hide::confirm::message" = "Ẩn ngày lễ này mỗi năm?\nBạn có thể hiện lại trong Cài đặt > Ngày lễ.";
 "setting.holiday.hidden::sectionTitle" = "Ngày lễ đã ẩn";
 "setting.holiday.show::button" = "Hiện";
+"setting.aiGuide::name" = "Thêm bằng AI — Siri & widget";
 "setting.feedback::name" = "Phản hồi";
 "setting.help::name" = "Trợ giúp";
 "setting.share::name" = "Chia sẻ ứng dụng";
@@ -562,6 +563,7 @@
 "aiAgent::stop::confirm::message" = "Dừng lại sẽ hủy bỏ tác vụ đang thực hiện và không thể tiếp tục.";
 "aiAgent::confirm::countdown" = "để xác nhận";
 "aiAgent::confirm::expired::message" = "Đã hết thời gian. Vui lòng yêu cầu lại.";
+"aiAgent::tip::externalEntry" = "Mẹo: Bạn cũng có thể thêm bằng Siri, nút Hành động hoặc widget.";
 "aiAgent::failed::showPlans" = "Xem các gói";
 
 // MARK: - billing

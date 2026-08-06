@@ -410,6 +410,7 @@
 "setting.holiday.hide::confirm::message" = "Sembunyikan hari libur ini setiap tahun?\nAnda dapat menampilkannya kembali di Pengaturan > Hari Libur.";
 "setting.holiday.hidden::sectionTitle" = "Hari Libur Tersembunyi";
 "setting.holiday.show::button" = "Tampilkan";
+"setting.aiGuide::name" = "Tambah dengan AI — Siri & widget";
 "setting.feedback::name" = "Masukan";
 "setting.help::name" = "Bantuan";
 "setting.share::name" = "Bagikan Aplikasi";
@@ -562,6 +563,7 @@
 "aiAgent::stop::confirm::message" = "Menghentikan akan membatalkan perintah yang sedang berjalan, dan tidak dapat dilanjutkan.";
 "aiAgent::confirm::countdown" = "tersisa untuk menyetujui";
 "aiAgent::confirm::expired::message" = "Waktu habis. Mohon minta lagi.";
+"aiAgent::tip::externalEntry" = "Tips: kamu juga bisa menambahkan lewat Siri, Tombol Aksi, atau widget.";
 "aiAgent::failed::showPlans" = "Lihat paket";
 
 // MARK: - billing

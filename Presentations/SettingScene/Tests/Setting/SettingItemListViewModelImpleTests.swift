@@ -10,6 +10,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Scenes
 import UnitTestHelpKit
 import TestDoubles
 
@@ -98,20 +99,20 @@ extension SettingItemListViewModelImpleTests {
         let supportSection = sections?[safe: 1]
         let supportItemIds = supportSection?.items.compactMap { $0 as? SettingItemModel }.map { $0.itemId }
         XCTAssertEqual(supportItemIds, [
-            .feedback, .help
+            .aiUsageGuide, .feedback, .help
         ])
-        
+
         let appInfoSection = sections?[safe: 2]
         let infoItemIds = appInfoSection?.items.compactMap { $0 as? SettingItemModel }.map { $0.itemId }
         XCTAssertEqual(infoItemIds, [
             .shareApp, .addReview, .sourceCode
         ])
-        
+
         let suggestSection = sections?[safe: 3]
         let isSuggestItems = suggestSection?.items.map { $0 as? SuggestAppItemModel }.map { $0 != nil }
         XCTAssertEqual(isSuggestItems, [true])
     }
-    
+
     func testViewModel_whenSignIn_provideItemSections() {
         // given
         let expect = expectation(description: "세팅 항목 section 제공")
@@ -140,7 +141,7 @@ extension SettingItemListViewModelImpleTests {
         let supportSection = sections?[safe: 1]
         let supportItemIds = supportSection?.items.compactMap { $0 as? SettingItemModel }.map { $0.itemId }
         XCTAssertEqual(supportItemIds, [
-            .feedback, .help
+            .aiUsageGuide, .feedback, .help
         ])
         
         let appInfoSection = sections?[safe: 2]
@@ -521,6 +522,44 @@ extension SettingItemListViewModelImpleTests {
 
         // then
         XCTAssertEqual(self.spyRouter.didRouteToPaywall, true)
+    }
+}
+
+
+// MARK: - AI 사용법 안내 진입점 (#768)
+
+extension SettingItemListViewModelImpleTests {
+
+    func testViewModel_provideAIUsageGuideItem() {
+        // given
+        let viewModel = self.makeViewModel()
+        let items = self.WaitItemLoaded(viewModel)
+
+        // when
+        let guideItem = items.compactMap { $0 as? SettingItemModel }.first(where: { $0.itemId == .aiUsageGuide })
+
+        // then
+        XCTAssertNotNil(guideItem)
+    }
+
+    func testViewModel_whenSelectAIUsageGuide_openGuidePage() {
+        // given
+        let viewModel = self.makeViewModel()
+        let items = self.WaitItemLoaded(viewModel)
+        guard let guideItem = items.compactMap({ $0 as? SettingItemModel }).first(where: { $0.itemId == .aiUsageGuide })
+        else {
+            XCTAssert(false)
+            return
+        }
+
+        // when
+        viewModel.selectItem(guideItem)
+
+        // then
+        let expectPath = Locale.current.language.languageCode == .korean
+        ? AIUsageGuideLink.koPath
+        : AIUsageGuideLink.enPath
+        XCTAssertEqual(self.spyRouter.didOpenSafariPath, expectPath)
     }
 }
 

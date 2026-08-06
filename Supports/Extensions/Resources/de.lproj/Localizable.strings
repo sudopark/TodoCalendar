@@ -410,6 +410,7 @@
 "setting.holiday.hide::confirm::message" = "Diesen Feiertag jedes Jahr ausblenden?\nSie können ihn in Einstellungen > Feiertage wieder einblenden.";
 "setting.holiday.hidden::sectionTitle" = "Ausgeblendete Feiertage";
 "setting.holiday.show::button" = "Einblenden";
+"setting.aiGuide::name" = "Mit KI hinzufügen – Siri & Widgets";
 "setting.feedback::name" = "Feedback";
 "setting.help::name" = "Hilfe";
 "setting.share::name" = "App teilen";
@@ -562,6 +563,7 @@
 "aiAgent::stop::confirm::message" = "Durch das Stoppen wird der laufende Befehl verworfen und kann nicht fortgesetzt werden.";
 "aiAgent::confirm::countdown" = "verbleibend zur Bestätigung";
 "aiAgent::confirm::expired::message" = "Zeit abgelaufen. Bitte erneut anfordern.";
+"aiAgent::tip::externalEntry" = "Tipp: Du kannst auch per Siri, der Action-Taste oder Widgets hinzufügen.";
 "aiAgent::failed::showPlans" = "Tarife ansehen";
 
 // MARK: - billing

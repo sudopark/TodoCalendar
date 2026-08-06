@@ -410,6 +410,7 @@
 "setting.holiday.hide::confirm::message" = "Ukrywać to święto co roku?\nMożesz je ponownie pokazać w Ustawienia > Święta.";
 "setting.holiday.hidden::sectionTitle" = "Ukryte święta";
 "setting.holiday.show::button" = "Pokaż";
+"setting.aiGuide::name" = "Dodaj z AI – Siri i widżety";
 "setting.feedback::name" = "Opinia";
 "setting.help::name" = "Pomoc";
 "setting.share::name" = "Udostępnij aplikację";
@@ -562,6 +563,7 @@
 "aiAgent::stop::confirm::message" = "Zatrzymanie odrzuci bieżące polecenie i nie będzie można go wznowić.";
 "aiAgent::confirm::countdown" = "pozostało na zatwierdzenie";
 "aiAgent::confirm::expired::message" = "Czas upłynął. Spróbuj ponownie.";
+"aiAgent::tip::externalEntry" = "Wskazówka: możesz też dodawać za pomocą Siri, przycisku Akcji lub widżetów.";
 "aiAgent::failed::showPlans" = "Zobacz plany";
 
 // MARK: - billing

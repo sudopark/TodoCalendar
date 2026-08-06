@@ -410,6 +410,7 @@
 "setting.holiday.hide::confirm::message" = "Skrývať tento sviatok každý rok?\nZnova ho môžete zobraziť v Nastavenia > Sviatky.";
 "setting.holiday.hidden::sectionTitle" = "Skryté sviatky";
 "setting.holiday.show::button" = "Zobraziť";
+"setting.aiGuide::name" = "Pridať pomocou AI – Siri a widgety";
 "setting.feedback::name" = "Spätná väzba";
 "setting.help::name" = "Pomocník";
 "setting.share::name" = "Zdieľať aplikáciu";
@@ -562,6 +563,7 @@
 "aiAgent::stop::confirm::message" = "Zastavením sa zruší prebiehajúci príkaz a nebude ho možné obnoviť.";
 "aiAgent::confirm::countdown" = "zostáva na potvrdenie";
 "aiAgent::confirm::expired::message" = "Čas vypršal. Skúste to, prosím, znova.";
+"aiAgent::tip::externalEntry" = "Tip: pridávať môžete aj pomocou Siri, tlačidla Akcia alebo widgetov.";
 "aiAgent::failed::showPlans" = "Zobraziť plány";
 
 // MARK: - billing
