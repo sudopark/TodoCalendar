@@ -6,5 +6,9 @@
   "axis_leak_count": 3,
   "plugin_prefixes": [
     "superpowers:"
+  ],
+  "excluded_skills": [
+    "handoff-prepare",
+    "open-external"
   ]
 }

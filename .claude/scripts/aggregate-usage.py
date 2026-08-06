@@ -8,6 +8,8 @@
 - (미귀속) 버킷은 --all 진단 표에만 노출 — 스킬이 아니라 정비(improvement 마킹) 소비 경로가 없어 임계 판정에서 제외.
 - plugin_prefixes 매칭 스킬(superpowers: 등)은 조항이 이 레포 밖이라 개정 불가 → partial·correction 임계만 제외.
   누락률은 유지한다 — 종료 레코드 배선은 프로젝트 스킬 소관이라 여전히 고칠 수 있는 신호다.
+- excluded_skills 는 임계 판정에서 통째로 뺀다. 글로벌 스킬(~/.claude/skills)처럼 이 레포가 정본을
+  갖지 않아 정비 경로 자체가 없는 대상용. --all 진단 표에는 그대로 남는다.
 - axis_leak 이벤트는 missed_axis(1/2/3)별로 별도 집계하며, improvement name이 합성 버킷 "axis:<n>" 형식이면 그 ts 이후만 신선 처리(소비 마킹) — 스킬 stats와 섞지 않는다.
 - exit 0 고정: 게이트가 아니라 제안이다. 임계는 usage-thresholds.json.
 """
@@ -100,8 +102,9 @@ def missing_rate(entry):
 def violations(stats, axis_stats, thresholds):
     lines = []
     plugin_prefixes = tuple(thresholds.get("plugin_prefixes", []))
+    excluded = set(thresholds.get("excluded_skills", []))
     for name, entry in sorted(stats.items()):
-        if name == UNATTRIBUTED:
+        if name == UNATTRIBUTED or name in excluded:
             continue
         is_plugin = bool(plugin_prefixes) and name.startswith(plugin_prefixes)
         if not is_plugin and entry["corrections"] >= thresholds["correction_count"]:
