@@ -321,6 +321,8 @@ extension Project {
             "AppExtensions/\(extensionName)/Sources/**",
             "Sources/AppEnvironment.swift",
             "Sources/NeverRemoveAuthStorage.swift",
+            // 컨트롤이 참조하는 AppIntent — 앱을 열려면 앱·확장 양쪽 타겟에 속해야 한다 (Apple 문서 요구)
+            "Sources/AppIntents/OpenAICommandInputIntent.swift",
             .glob("Intents/TodoCalendarWidgetIntents.intentdefinition", codeGen: .public)
         ]
 

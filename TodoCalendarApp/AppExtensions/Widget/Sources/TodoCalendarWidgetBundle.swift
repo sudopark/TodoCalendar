@@ -34,6 +34,9 @@ struct BaseWidgetBundle: WidgetBundle {
         // 받지 못한다(컴파일 실패). 앱 쪽 후보 등록 메뉴는 FeatureFlag.ddayWidget이 가린다.
         // 재개 시 이 줄과 그 플래그를 함께 되살릴 것.
 //        DDayWidget()
+        if #available(iOS 18.0, *) {
+            AICommandControlWidget()
+        }
     }
 }
 
