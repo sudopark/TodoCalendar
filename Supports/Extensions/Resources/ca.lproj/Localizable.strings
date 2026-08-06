@@ -608,3 +608,5 @@
 "share.ai::sent" = "Enviat. Podeu veure el resultat a l'aplicació.";
 "share.ai::failed" = "No s'ha pogut enviar. Torneu-ho a provar.";
 "share.ai::sentButUntracked" = "Enviat, però l'aplicació no pot fer el seguiment del resultat. Reviseu el calendari d'aquí a un moment.";
+"share.ai::textTooLong" = "El text és massa llarg per enviar-lo. Escurceu-lo i torneu-ho a provar.";
+"share.ai::instructionTooLong" = "La vostra instrucció és massa llarga. Escurceu-la.";

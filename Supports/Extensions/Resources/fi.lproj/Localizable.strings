@@ -608,3 +608,5 @@
 "share.ai::sent" = "Lähetetty. Näet tuloksen sovelluksessa.";
 "share.ai::failed" = "Lähetys epäonnistui. Yritä uudelleen.";
 "share.ai::sentButUntracked" = "Lähetetty, mutta sovellus ei voi seurata tulosta. Tarkista kalenterisi hetken kuluttua.";
+"share.ai::textTooLong" = "Teksti on liian pitkä lähetettäväksi. Lyhennä sitä ja yritä uudelleen.";
+"share.ai::instructionTooLong" = "Ohjeesi on liian pitkä. Lyhennä sitä.";

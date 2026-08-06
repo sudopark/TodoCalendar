@@ -608,3 +608,5 @@
 "share.ai::sent" = "Gesendet. Das Ergebnis sehen Sie in der App.";
 "share.ai::failed" = "Senden fehlgeschlagen. Bitte versuchen Sie es erneut.";
 "share.ai::sentButUntracked" = "Gesendet, aber die App kann das Ergebnis nicht verfolgen. Prüfen Sie in Kürze Ihren Kalender.";
+"share.ai::textTooLong" = "Der Text ist zu lang zum Senden. Kürzen Sie ihn und versuchen Sie es erneut.";
+"share.ai::instructionTooLong" = "Ihre Anweisung ist zu lang. Bitte kürzen Sie sie.";

@@ -608,3 +608,5 @@
 "share.ai::sent" = "已傳送。可在應用程式中查看結果。";
 "share.ai::failed" = "傳送失敗。請再試一次。";
 "share.ai::sentButUntracked" = "已傳送，但應用程式無法追蹤結果。請稍後查看行事曆。";
+"share.ai::textTooLong" = "要傳送的內容太長，無法傳送。請縮短後再試一次。";
+"share.ai::instructionTooLong" = "指示太長，請縮短。";

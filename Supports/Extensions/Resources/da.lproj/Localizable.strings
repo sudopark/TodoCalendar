@@ -608,3 +608,5 @@
 "share.ai::sent" = "Sendt. Du kan se resultatet i appen.";
 "share.ai::failed" = "Kunne ikke sende. Prøv igen.";
 "share.ai::sentButUntracked" = "Sendt, men appen kan ikke følge resultatet. Tjek din kalender om lidt.";
+"share.ai::textTooLong" = "Teksten er for lang til at blive sendt. Gør den kortere, og prøv igen.";
+"share.ai::instructionTooLong" = "Din instruktion er for lang. Gør den kortere.";

@@ -608,3 +608,5 @@
 "share.ai::sent" = "Poslano. Rezultat možete vidjeti u aplikaciji.";
 "share.ai::failed" = "Slanje nije uspjelo. Pokušajte ponovno.";
 "share.ai::sentButUntracked" = "Poslano, ali aplikacija ne može pratiti rezultat. Provjerite kalendar za trenutak.";
+"share.ai::textTooLong" = "Tekst je predug za slanje. Skratite ga i pokušajte ponovno.";
+"share.ai::instructionTooLong" = "Vaša uputa je predugačka. Skratite je.";

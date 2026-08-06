@@ -608,3 +608,5 @@
 "share.ai::sent" = "Skickat. Du kan se resultatet i appen.";
 "share.ai::failed" = "Kunde inte skicka. Försök igen.";
 "share.ai::sentButUntracked" = "Skickat, men appen kan inte följa resultatet. Kolla kalendern om en stund.";
+"share.ai::textTooLong" = "Texten är för lång för att skickas. Korta ner den och försök igen.";
+"share.ai::instructionTooLong" = "Din instruktion är för lång. Korta ner den.";

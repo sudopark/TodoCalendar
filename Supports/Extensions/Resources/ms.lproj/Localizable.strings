@@ -608,3 +608,5 @@
 "share.ai::sent" = "Dihantar. Anda boleh melihat hasilnya dalam aplikasi.";
 "share.ai::failed" = "Tidak dapat menghantar. Sila cuba lagi.";
 "share.ai::sentButUntracked" = "Dihantar, tetapi aplikasi tidak dapat menjejaki hasilnya. Sila semak kalendar anda sebentar lagi.";
+"share.ai::textTooLong" = "Teks terlalu panjang untuk dihantar. Pendekkan dan cuba lagi.";
+"share.ai::instructionTooLong" = "Arahan anda terlalu panjang. Sila pendekkan.";
