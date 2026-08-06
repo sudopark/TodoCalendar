@@ -410,6 +410,7 @@
 "setting.holiday.hide::confirm::message" = "Ascundeți această sărbătoare în fiecare an?\nO puteți afișa din nou în Setări > Sărbători.";
 "setting.holiday.hidden::sectionTitle" = "Sărbători ascunse";
 "setting.holiday.show::button" = "Afișează";
+"setting.aiGuide::name" = "Adaugă cu AI – Siri și widget-uri";
 "setting.feedback::name" = "Feedback";
 "setting.help::name" = "Ajutor";
 "setting.share::name" = "Distribuie aplicația";
@@ -562,6 +563,7 @@
 "aiAgent::stop::confirm::message" = "Oprirea anulează comanda în desfășurare, iar aceasta nu va putea fi reluată.";
 "aiAgent::confirm::countdown" = "rămas pentru aprobare";
 "aiAgent::confirm::expired::message" = "Timpul a expirat. Vă rugăm să solicitați din nou.";
+"aiAgent::tip::externalEntry" = "Sfat: poți adăuga și prin Siri, butonul de Acțiune sau widget-uri.";
 "aiAgent::failed::showPlans" = "Vezi planurile";
 
 // MARK: - billing

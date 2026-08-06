@@ -410,6 +410,7 @@
 "setting.holiday.hide::confirm::message" = "Bu tatil her yıl gizlensin mi?\nAyarlar > Tatil bölümünden tekrar gösterebilirsiniz.";
 "setting.holiday.hidden::sectionTitle" = "Gizli Tatiller";
 "setting.holiday.show::button" = "Göster";
+"setting.aiGuide::name" = "Yapay zekâ ile ekle — Siri ve widget'lar";
 "setting.feedback::name" = "Geri Bildirim";
 "setting.help::name" = "Yardım";
 "setting.share::name" = "Uygulamayı Paylaş";
@@ -562,6 +563,7 @@
 "aiAgent::stop::confirm::message" = "Durdurmak, devam eden işlemi iptal eder ve geri alınamaz.";
 "aiAgent::confirm::countdown" = "onaylamak için kaldı";
 "aiAgent::confirm::expired::message" = "Süre doldu. Lütfen tekrar talep edin.";
+"aiAgent::tip::externalEntry" = "İpucu: Siri, Aksiyon Düğmesi veya widget'lar ile de ekleyebilirsin.";
 "aiAgent::failed::showPlans" = "Planları görüntüle";
 
 // MARK: - billing

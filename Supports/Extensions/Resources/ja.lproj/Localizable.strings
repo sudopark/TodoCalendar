@@ -410,6 +410,7 @@
 "setting.holiday.hide::confirm::message" = "この祝日を毎年非表示にしますか？\n設定 > 祝日でいつでも再表示できます。";
 "setting.holiday.hidden::sectionTitle" = "非表示の祝日";
 "setting.holiday.show::button" = "表示";
+"setting.aiGuide::name" = "AIで追加 — Siri・ウィジェット";
 "setting.feedback::name" = "フィードバック";
 "setting.help::name" = "ヘルプ";
 "setting.share::name" = "アプリを共有";
@@ -562,6 +563,7 @@
 "aiAgent::stop::confirm::message" = "中止すると進行中のコマンドは破棄され、再開できません。";
 "aiAgent::confirm::countdown" = "以内に承認してください";
 "aiAgent::confirm::expired::message" = "時間が過ぎました。もう一度リクエストしてください。";
+"aiAgent::tip::externalEntry" = "ヒント: Siri、アクションボタン、ウィジェットからも追加できます。";
 "aiAgent::failed::showPlans" = "プランを見る";
 
 // MARK: - billing

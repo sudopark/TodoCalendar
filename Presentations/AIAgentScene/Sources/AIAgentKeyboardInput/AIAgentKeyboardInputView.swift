@@ -159,6 +159,10 @@ private struct AIAgentKeyboardInputView: View {
                         self.eventHandler.send(self.trimmedText)
                     }
                 }
+
+                Text("aiAgent::tip::externalEntry".localized())
+                    .font(appearance.fontSet.size(12, weight: .regular).asFont)
+                    .foregroundStyle(appearance.colorSet.text2.asColor)
             }
         }
         .eventHandler(\.outsideTap, self.eventHandler.close)

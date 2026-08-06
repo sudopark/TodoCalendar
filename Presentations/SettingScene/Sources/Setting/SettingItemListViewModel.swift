@@ -22,6 +22,7 @@ struct SettingItemModel: SettingItemModelType {
         case appearance
         case editEvent
         case holidaySetting
+        case aiUsageGuide
         case feedback
         case help
         case shareApp
@@ -46,6 +47,9 @@ struct SettingItemModel: SettingItemModelType {
         case .holidaySetting:
             self.iconNamge = "globe"
             self.text = "setting.holiday.item::name".localized()
+        case .aiUsageGuide:
+            self.iconNamge = "sparkles"
+            self.text = "setting.aiGuide::name".localized()
         case .feedback:
             self.iconNamge = "ellipsis.bubble"
             self.text = "setting.feedback::name".localized()
@@ -234,7 +238,10 @@ extension SettingItemListViewModelImple {
             
         case .holidaySetting:
             self.router?.routeToHolidaySetting()
-            
+
+        case .aiUsageGuide:
+            self.router?.openSafari(AIUsageGuideLink.currentPath)
+
         case .feedback:
             self.router?.routeToFeedbackPost()
             
@@ -295,6 +302,7 @@ extension SettingItemListViewModelImple {
             )
 
             let supportSectionItems: [SettingItemModel] = [
+                .init(.aiUsageGuide),
                 .init(.feedback),
                 .init(.help)
             ]

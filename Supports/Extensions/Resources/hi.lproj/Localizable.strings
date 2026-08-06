@@ -410,6 +410,7 @@
 "setting.holiday.hide::confirm::message" = "क्या हर साल इस अवकाश को छिपाना है?\nआप इसे सेटिंग्स > अवकाश में फिर से दिखा सकते हैं।";
 "setting.holiday.hidden::sectionTitle" = "छिपाए गए अवकाश";
 "setting.holiday.show::button" = "दिखाएं";
+"setting.aiGuide::name" = "AI से जोड़ें — Siri और विजेट";
 "setting.feedback::name" = "फ़ीडबैक";
 "setting.help::name" = "सहायता";
 "setting.share::name" = "ऐप साझा करें";
@@ -562,6 +563,7 @@
 "aiAgent::stop::confirm::message" = "रोकने से जारी निर्देश छोड़ दिया जाएगा, और इसे फिर से शुरू नहीं किया जा सकेगा।";
 "aiAgent::confirm::countdown" = "स्वीकृति के लिए शेष";
 "aiAgent::confirm::expired::message" = "समय समाप्त हो गया। कृपया फिर से अनुरोध करें।";
+"aiAgent::tip::externalEntry" = "सुझाव: आप Siri, एक्शन बटन या विजेट से भी जोड़ सकते हैं।";
 "aiAgent::failed::showPlans" = "प्लान देखें";
 
 // MARK: - billing

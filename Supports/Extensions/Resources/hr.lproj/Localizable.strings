@@ -410,6 +410,7 @@
 "setting.holiday.hide::confirm::message" = "Sakriti ovaj blagdan svake godine?\nMožete ga ponovno prikazati u Postavke > Blagdani.";
 "setting.holiday.hidden::sectionTitle" = "Skriveni blagdani";
 "setting.holiday.show::button" = "Prikaži";
+"setting.aiGuide::name" = "Dodaj uz AI — Siri i widgeti";
 "setting.feedback::name" = "Povratne informacije";
 "setting.help::name" = "Pomoć";
 "setting.share::name" = "Podijeli aplikaciju";
@@ -562,6 +563,7 @@
 "aiAgent::stop::confirm::message" = "Zaustavljanje odbacuje naredbu u tijeku i ona se neće moći nastaviti.";
 "aiAgent::confirm::countdown" = "preostalo za odobrenje";
 "aiAgent::confirm::expired::message" = "Vrijeme je isteklo. Ponovite zahtjev.";
+"aiAgent::tip::externalEntry" = "Savjet: možeš dodavati i putem Sirija, gumba Radnja ili widgeta.";
 "aiAgent::failed::showPlans" = "Prikaži planove";
 
 // MARK: - billing

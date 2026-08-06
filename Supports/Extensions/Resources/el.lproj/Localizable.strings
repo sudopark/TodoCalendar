@@ -410,6 +410,7 @@
 "setting.holiday.hide::confirm::message" = "Απόκρυψη αυτής της αργίας κάθε χρόνο;\nΜπορείτε να την εμφανίσετε ξανά στις Ρυθμίσεις > Αργίες.";
 "setting.holiday.hidden::sectionTitle" = "Κρυφές αργίες";
 "setting.holiday.show::button" = "Εμφάνιση";
+"setting.aiGuide::name" = "Προσθήκη με AI — Siri & widget";
 "setting.feedback::name" = "Σχόλια";
 "setting.help::name" = "Βοήθεια";
 "setting.share::name" = "Κοινοποίηση εφαρμογής";
@@ -562,6 +563,7 @@
 "aiAgent::stop::confirm::message" = "Η διακοπή απορρίπτει την εντολή που εκτελείται και δεν θα μπορεί να συνεχιστεί.";
 "aiAgent::confirm::countdown" = "απομένουν για έγκριση";
 "aiAgent::confirm::expired::message" = "Ο χρόνος έληξε. Παρακαλώ κάντε ξανά το αίτημα.";
+"aiAgent::tip::externalEntry" = "Συμβουλή: μπορείς να προσθέσεις και μέσω Siri, του κουμπιού ενέργειας ή των widget.";
 "aiAgent::failed::showPlans" = "Προβολή προγραμμάτων";
 
 // MARK: - billing

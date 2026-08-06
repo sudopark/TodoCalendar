@@ -410,6 +410,7 @@
 "setting.holiday.hide::confirm::message" = "¿Ocultar este día festivo todos los años?\nPuedes volver a mostrarlo en Ajustes > Días festivos.";
 "setting.holiday.hidden::sectionTitle" = "Días festivos ocultos";
 "setting.holiday.show::button" = "Mostrar";
+"setting.aiGuide::name" = "Añadir con IA: Siri y widgets";
 "setting.feedback::name" = "Comentarios";
 "setting.help::name" = "Ayuda";
 "setting.share::name" = "Compartir la app";
@@ -562,6 +563,7 @@
 "aiAgent::stop::confirm::message" = "Al detener se descarta el comando en curso y no se puede reanudar.";
 "aiAgent::confirm::countdown" = "restante para aprobar";
 "aiAgent::confirm::expired::message" = "Se acabó el tiempo. Vuelve a solicitarlo.";
+"aiAgent::tip::externalEntry" = "Consejo: también puedes añadir con Siri, el botón de Acción o los widgets.";
 "aiAgent::failed::showPlans" = "Ver planes";
 
 // MARK: - billing

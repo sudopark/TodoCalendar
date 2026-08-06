@@ -1,4 +1,4 @@
-# 위젯 상세 스펙 (18종)
+# 위젯 상세 스펙 (19종 + ControlWidget 1종)
 
 > Phase 5 고도화: 섹션 9(위젯)의 L1 상세
 
@@ -6,7 +6,7 @@
 
 ## 1. 위젯 카탈로그
 
-### 1.1 BaseWidgetBundle (7종)
+### 1.1 BaseWidgetBundle (8종)
 
 | # | 위젯 | kind | 지원 사이즈 | Configuration |
 |---|---|---|---|---|
@@ -17,27 +17,36 @@
 | 5 | ForemostEventWidget | `ForemostEventWidget` | `.accessoryInline`, `.systemSmall`, `.systemMedium` | Static |
 | 6 | NextEventWidget | `NextEventWidget` | `.accessoryInline`, `.accessoryRectangular` | Static |
 | 7 | NextRemainEventWidget | `NextRemainEventWidget` | `.accessoryRectangular` | Static |
+| 8 | AICommandShortcutWidget | `AICommandShortcutWidget` | `.accessoryCircular`, `.systemSmall` | Static — 잠금화면·홈에서 원탭 AI 입력 진입 (#768) |
 
 ### 1.2 ComposedWidgetBundle (4종)
 
 | # | 위젯 | kind | 지원 사이즈 | Configuration |
 |---|---|---|---|---|
-| 8 | DoubleMonthWidget | `DoubleMonthWidget` | — | Static |
-| 9 | EventAndMonthWidget | `EventAndMonthWidget` | `.systemMedium` | Static |
-| 10 | EventAndForemostWidget | `EventAndForemostWidget` | — | Static |
-| 11 | TodayAndMonthWidget | `TodayAndMonthWidget` | `.systemMedium` | Static |
+| 9 | DoubleMonthWidget | `DoubleMonthWidget` | — | Static |
+| 10 | EventAndMonthWidget | `EventAndMonthWidget` | `.systemMedium` | Static |
+| 11 | EventAndForemostWidget | `EventAndForemostWidget` | — | Static |
+| 12 | TodayAndMonthWidget | `TodayAndMonthWidget` | `.systemMedium` | Static |
 
 ### 1.3 WeeksWidgetBundle (7종)
 
 | # | 위젯 | kind | 범위 | 지원 사이즈 |
 |---|---|---|---|---|
-| 12 | OneWeekEventsWidget | `OneWeekEventsWidget` | 7일 | `.systemMedium` |
-| 13 | TwoWeekEventsWidget | `TwoWeekEventsWidget` | 14일 | `.systemMedium` |
-| 14 | ThreeWeekEventsWidget | `ThreeWeekEventsWidget` | 21일 | `.systemLarge` |
-| 15 | FourWeekEventsWidget | `FourWeekEventsWidget` | 28일 | `.systemLarge` |
-| 16 | CurrentMonthEventsWidget | `CurrentMonthEventsWidget` | 이번 달 | `.systemLarge` |
-| 17 | LastMonthEventsWidget | `LastMonthEventsWidget` | 지난 달 | `.systemLarge` |
-| 18 | NextMonthEventsWidget | `NextMonthEventsWidget` | 다음 달 | `.systemLarge` |
+| 13 | OneWeekEventsWidget | `OneWeekEventsWidget` | 7일 | `.systemMedium` |
+| 14 | TwoWeekEventsWidget | `TwoWeekEventsWidget` | 14일 | `.systemMedium` |
+| 15 | ThreeWeekEventsWidget | `ThreeWeekEventsWidget` | 21일 | `.systemLarge` |
+| 16 | FourWeekEventsWidget | `FourWeekEventsWidget` | 28일 | `.systemLarge` |
+| 17 | CurrentMonthEventsWidget | `CurrentMonthEventsWidget` | 이번 달 | `.systemLarge` |
+| 18 | LastMonthEventsWidget | `LastMonthEventsWidget` | 지난 달 | `.systemLarge` |
+| 19 | NextMonthEventsWidget | `NextMonthEventsWidget` | 다음 달 | `.systemLarge` |
+
+### 1.4 ControlWidget (1종, iOS 18+)
+
+WidgetBundle이 아닌 별도 `ControlWidget` — 컨트롤 센터에 배치.
+
+| # | 위젯 | kind | 배치 | Configuration |
+|---|---|---|---|---|
+| — | AICommandControlWidget | `AICommandControlWidget` | 컨트롤 센터 | Static — `OpenAICommandInputIntent`으로 `tc.app://calendar/ai` 딥링크 진입 (#768) |
 
 ---
 
@@ -236,6 +245,14 @@ tc.app://calendar?select={year}_{month}_{day}
 | 일정 | `tc.app://calendar/event/schedule` | `event_id={scheduleId}` + EventTime 쿼리 |
 | 공휴일 | `tc.app://calendar/event/holiday` | `event_id={holidayId}` |
 | 구글 이벤트 | `tc.app://calendar/event/google` | `event_id={id}&calendar_id={calId}&account_id={email}` |
+
+### 7.3 AI 입력 진입
+
+```
+tc.app://calendar/ai
+```
+
+AICommandShortcutWidget·AICommandControlWidget 탭 시 인앱 AI 버튼과 같은 동선으로 진입 (#768).
 
 ---
 

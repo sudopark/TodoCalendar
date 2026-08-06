@@ -410,6 +410,7 @@
 "setting.holiday.hide::confirm::message" = "Elrejti ezt az ünnepet minden évben?\nA Beállítások > Ünnepek menüpontban újra megjelenítheti.";
 "setting.holiday.hidden::sectionTitle" = "Elrejtett ünnepek";
 "setting.holiday.show::button" = "Megjelenítés";
+"setting.aiGuide::name" = "Hozzáadás AI-val – Siri és widgetek";
 "setting.feedback::name" = "Visszajelzés";
 "setting.help::name" = "Súgó";
 "setting.share::name" = "Alkalmazás megosztása";
@@ -562,6 +563,7 @@
 "aiAgent::stop::confirm::message" = "A leállítás elveti a folyamatban lévő parancsot, és az nem folytatható.";
 "aiAgent::confirm::countdown" = "van hátra a jóváhagyáshoz";
 "aiAgent::confirm::expired::message" = "Lejárt az idő. Kérjük, kérje újra.";
+"aiAgent::tip::externalEntry" = "Tipp: a Sirivel, az Action gombbal vagy widgetekkel is hozzáadhatsz.";
 "aiAgent::failed::showPlans" = "Csomagok megtekintése";
 
 // MARK: - billing

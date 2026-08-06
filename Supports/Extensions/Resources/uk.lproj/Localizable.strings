@@ -410,6 +410,7 @@
 "setting.holiday.hide::confirm::message" = "Приховувати це свято щороку?\nВи можете знову показати його в Налаштування > Свята.";
 "setting.holiday.hidden::sectionTitle" = "Приховані свята";
 "setting.holiday.show::button" = "Показати";
+"setting.aiGuide::name" = "Додати за допомогою ШІ — Siri й віджети";
 "setting.feedback::name" = "Зворотний зв'язок";
 "setting.help::name" = "Довідка";
 "setting.share::name" = "Поділитися додатком";
@@ -562,6 +563,7 @@
 "aiAgent::stop::confirm::message" = "Зупинення скасовує команду, що виконується, і її не можна буде відновити.";
 "aiAgent::confirm::countdown" = "залишилося на підтвердження";
 "aiAgent::confirm::expired::message" = "Час минув. Будь ласка, повторіть запит.";
+"aiAgent::tip::externalEntry" = "Порада: додавати можна також через Siri, кнопку дії або віджети.";
 "aiAgent::failed::showPlans" = "Переглянути тарифи";
 
 // MARK: - billing

@@ -410,6 +410,7 @@
 "setting.holiday.hide::confirm::message" = "Ocultar este feriado todos os anos?\nVocê pode exibi-lo novamente em Ajustes > Feriado.";
 "setting.holiday.hidden::sectionTitle" = "Feriados Ocultos";
 "setting.holiday.show::button" = "Mostrar";
+"setting.aiGuide::name" = "Adicionar com IA: Siri e widgets";
 "setting.feedback::name" = "Feedback";
 "setting.help::name" = "Ajuda";
 "setting.share::name" = "Compartilhar App";
@@ -562,6 +563,7 @@
 "aiAgent::stop::confirm::message" = "Interromper descarta o comando em andamento, e ele não pode ser retomado.";
 "aiAgent::confirm::countdown" = "restante para aprovar";
 "aiAgent::confirm::expired::message" = "Tempo esgotado. Solicite novamente.";
+"aiAgent::tip::externalEntry" = "Dica: você também pode adicionar pela Siri, pelo botão de Ação ou pelos widgets.";
 "aiAgent::failed::showPlans" = "Ver planos";
 
 // MARK: - billing

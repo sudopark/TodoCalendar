@@ -89,7 +89,7 @@ extension DayEventListRouter {
         }
     }
 
-    // TODO: AI 사용 안내 설명(팝업/바텀시트) 표시 — 진입점만 배선. 콘텐츠는 후속.
     func routeToAIGuide() {
+        self.openSafari(AIUsageGuideLink.currentPath)
     }
 }

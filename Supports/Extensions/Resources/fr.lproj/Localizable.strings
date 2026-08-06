@@ -410,6 +410,7 @@
 "setting.holiday.hide::confirm::message" = "Masquer ce jour férié chaque année ?\nVous pouvez le réafficher dans Réglages > Jours fériés.";
 "setting.holiday.hidden::sectionTitle" = "Jours fériés masqués";
 "setting.holiday.show::button" = "Afficher";
+"setting.aiGuide::name" = "Ajouter avec l'IA : Siri et widgets";
 "setting.feedback::name" = "Retour d'expérience";
 "setting.help::name" = "Aide";
 "setting.share::name" = "Partager l'application";
@@ -562,6 +563,7 @@
 "aiAgent::stop::confirm::message" = "L'arrêt annule la commande en cours et elle ne pourra pas être reprise.";
 "aiAgent::confirm::countdown" = "restant pour approuver";
 "aiAgent::confirm::expired::message" = "Délai expiré. Veuillez refaire la demande.";
+"aiAgent::tip::externalEntry" = "Astuce : vous pouvez aussi ajouter via Siri, le bouton Action ou les widgets.";
 "aiAgent::failed::showPlans" = "Voir les forfaits";
 
 // MARK: - billing

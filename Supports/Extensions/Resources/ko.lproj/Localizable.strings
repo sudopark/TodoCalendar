@@ -410,6 +410,7 @@
 "setting.holiday.hide::confirm::message" = "이 공휴일을 매년 숨길까요?\n설정 > 공휴일에서 다시 표시할 수 있어요.";
 "setting.holiday.hidden::sectionTitle" = "숨긴 공휴일";
 "setting.holiday.show::button" = "표시";
+"setting.aiGuide::name" = "AI로 추가 — Siri·위젯";
 "setting.feedback::name" = "피드백";
 "setting.help::name" = "도움말";
 "setting.share::name" = "앱 공유";
@@ -562,6 +563,7 @@
 "aiAgent::stop::confirm::message" = "중지하면 진행 중인 작업이 사라지고 다시 시작할 수 없어요.";
 "aiAgent::confirm::countdown" = "안에 승인해 주세요";
 "aiAgent::confirm::expired::message" = "시간이 만료됐어요. 다시 요청해 주세요.";
+"aiAgent::tip::externalEntry" = "팁: Siri, 액션 버튼, 위젯으로도 추가할 수 있어요.";
 "aiAgent::failed::showPlans" = "플랜 보기";
 
 // MARK: - billing

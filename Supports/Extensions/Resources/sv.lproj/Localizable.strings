@@ -410,6 +410,7 @@
 "setting.holiday.hide::confirm::message" = "Dölj den här helgdagen varje år?\nDu kan visa den igen i Inställningar > Helgdagar.";
 "setting.holiday.hidden::sectionTitle" = "Dolda helgdagar";
 "setting.holiday.show::button" = "Visa";
+"setting.aiGuide::name" = "Lägg till med AI – Siri & widgetar";
 "setting.feedback::name" = "Feedback";
 "setting.help::name" = "Hjälp";
 "setting.share::name" = "Dela appen";
@@ -562,6 +563,7 @@
 "aiAgent::stop::confirm::message" = "Om du avbryter kasseras den pågående åtgärden, och den kan inte återupptas.";
 "aiAgent::confirm::countdown" = "kvar för att godkänna";
 "aiAgent::confirm::expired::message" = "Tiden har gått ut. Begär igen.";
+"aiAgent::tip::externalEntry" = "Tips: du kan även lägga till via Siri, Åtgärdsknappen eller widgetar.";
 "aiAgent::failed::showPlans" = "Visa planer";
 
 // MARK: - billing
