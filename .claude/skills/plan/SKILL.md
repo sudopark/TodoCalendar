@@ -72,3 +72,5 @@ writing-plans 기본 구조(Goal/Architecture/Global Constraints/태스크)에 �
 ## 종료 기록 — skill_end (#715)
 
 플랜 파일이 저장·승인돼 절차가 끝나면 skill_end를 기록한다 (명령·compliance 규칙은 CLAUDE.md §1). 이때 superpowers:writing-plans가 이 런에 실제 발동(invoke)됐으면 같은 시점에 함께 기록한다 — 발동 레코드와 동일한 `superpowers:` prefix 포함 이름으로. 플러그인 스킬은 자체 종료 조항이 없어 여기가 기록 주체다.
+
+**superpowers:brainstorming도 같은 규칙으로 함께 기록한다** — 발산이 끝나고 방향이 플랜으로 확정된 시점이 그 종료다. 플랜을 안 거치고 바로 구현으로 간 런은 implement 스킬이 기록 주체다.

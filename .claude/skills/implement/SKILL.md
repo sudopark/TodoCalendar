@@ -147,5 +147,5 @@ cd tools/complexity-analyzer
 ## 종료 기록 — skill_end (#712)
 
 - **시점: commit 또는 pr 스킬로 전이하는 순간** — 완료 판정을 통과하고 더 만들 diff가 없어 커밋·PR 절차로 넘어갈 때, 해당 스킬 invoke 직전에 `log-record.py skill_end`를 기록한다 (명령·compliance 규칙은 CLAUDE.md §1).
-- **동반 superpowers 코딩 스킬도 같은 시점에 각각 기록 (#715)** — superpowers:subagent-driven-development·superpowers:executing-plans·superpowers:test-driven-development는 자체 종료 조항이 없어 여기가 기록 주체다. 이 런에 실제 발동(invoke)된 것만, 발동 레코드와 동일한 `superpowers:` prefix 포함 이름으로 기록한다 (집계가 문자열 완전일치 버킷팅). compliance는 스킬별 따로 판정 — implement가 full이어도 동반 스킬 절차 이탈이 있으면 그 스킬만 partial.
+- **동반 superpowers 코딩 스킬도 같은 시점에 각각 기록 (#715)** — superpowers:subagent-driven-development·superpowers:executing-plans·superpowers:test-driven-development는 자체 종료 조항이 없어 여기가 기록 주체다. superpowers:brainstorming은 **플랜을 안 거치고 바로 구현으로 온 런에서만** 여기서 기록한다 — 플랜을 거쳤으면 plan 스킬이 이미 기록했다. 이 런에 실제 발동(invoke)된 것만, 발동 레코드와 동일한 `superpowers:` prefix 포함 이름으로 기록한다 (집계가 문자열 완전일치 버킷팅). compliance는 스킬별 따로 판정 — implement가 full이어도 동반 스킬 절차 이탈이 있으면 그 스킬만 partial.
 - **런당 1회** — 기준은 한 작업 단위(플랜 실행 전체·이슈 단위 즉흥 수정)다. 세션 재개·컨텍스트 복원·SDD 태스크 진행으로 이 스킬이 여러 번 재발동돼도, 이어진 런이면 종료 기록은 런을 마무리하는 전이에서 한 번만 남긴다. SDD 중간 태스크의 커밋 전이는 런의 끝이 아니므로 기록하지 않는다.
