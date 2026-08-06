@@ -375,6 +375,49 @@ extension AICommandRepositoryImpleTests {
 }
 
 
+// MARK: - interpret command 전송
+
+extension AICommandRepositoryImpleTests {
+
+    func test_processInterpretCommand_sendsRawTextAndInstruction() async throws {
+        // given
+        let repository = self.makeRepository()
+
+        // when
+        let jobId = try await repository.processInterpretCommand(
+            text: "9월 10일 약속",
+            additionalInstruction: "오후 3시로 잡아줘",
+            timeZone: "Asia/Seoul"
+        )
+
+        // then
+        XCTAssertFalse(jobId.isEmpty)
+        XCTAssertEqual(self.stubRemote.didRequestedParams?["text"] as? String, "9월 10일 약속")
+        XCTAssertEqual(
+            self.stubRemote.didRequestedParams?["additional_instruction"] as? String,
+            "오후 3시로 잡아줘"
+        )
+        XCTAssertEqual(self.stubRemote.didRequestedParams?["timezone"] as? String, "Asia/Seoul")
+        XCTAssertNil(self.stubRemote.didRequestedParams?["command_text"])
+    }
+
+    func test_processInterpretCommand_whenNoInstruction_omitsTheField() async throws {
+        // given
+        let repository = self.makeRepository()
+
+        // when
+        _ = try await repository.processInterpretCommand(
+            text: "9월 10일 약속",
+            additionalInstruction: nil,
+            timeZone: "Asia/Seoul"
+        )
+
+        // then
+        XCTAssertNil(self.stubRemote.didRequestedParams?["additional_instruction"])
+    }
+}
+
+
 // MARK: - DummyResponse
 
 import Prelude
@@ -390,6 +433,11 @@ private struct DummyResponse {
             .init(
                 method: .post,
                 endpoint: AIAPIEndpoints.command,
+                resultJsonString: .success(self.commandJobIdJson)
+            ),
+            .init(
+                method: .post,
+                endpoint: AIAPIEndpoints.interpretCommand,
                 resultJsonString: .success(self.commandJobIdJson)
             ),
             .init(

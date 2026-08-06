@@ -42,6 +42,22 @@ extension AICommandRepositoryImple {
         return try AIJobIdResponseMapper(json: json).jobId
     }
 
+    public func processInterpretCommand(
+        text: String,
+        additionalInstruction: String?,
+        timeZone: String
+    ) async throws -> String {
+        var body: [String: Any] = [
+            "text": text,
+            "timezone": timeZone
+        ]
+        body["additional_instruction"] = additionalInstruction
+        let json = try await self.requestJson(
+            .post, AIAPIEndpoints.interpretCommand, parameters: body
+        )
+        return try AIJobIdResponseMapper(json: json).jobId
+    }
+
     public func processConfirmCommand(
         _ action: AIConfirmCommandAction,
         timeZone: String
