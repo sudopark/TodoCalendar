@@ -474,6 +474,19 @@ private struct TypingIndicator: View {
 
 struct AIAgentCommandStageViewPreviewProvider: PreviewProvider {
 
+    // 여러 줄 + 볼드가 섞인 응답 — 말풍선 스크롤·서식 검증용 (#766)
+    static let sampleMultilineMessage: String = """
+    이번 주 일정을 **3개** 추가하고 겹치는 건 정리했어요.
+
+    - 월요일 10:00 디자인 리뷰 (강남 스타벅스)
+    - 화요일 14:00 팀 스탠드업
+    - 수요일 16:00 스프린트 회고
+
+    기존에 있던 화요일 15:00 1:1 미팅은 팀 스탠드업과 시간이 겹쳐서 **16:30**으로 옮겼어요.
+    알림은 각각 10분 전으로 맞춰뒀고, 참석자는 아직 아무도 초대하지 않았어요.
+    시간대나 장소를 바꾸고 싶으면 다시 말해줘.
+    """
+
     static func makeView(_ commandState: AIAgentCommandState?) -> some View {
         let setting = AppearanceSettings(
             calendar: .init(colorSetKey: .defaultLight, fontSetKey: .systemDefault),
@@ -499,6 +512,7 @@ struct AIAgentCommandStageViewPreviewProvider: PreviewProvider {
             makeView(.confirm(command: "일정 삭제", message: "정말 삭제할까요?", expireTime: Date().addingTimeInterval(4 * 60 + 30))).previewDisplayName("confirm")
             makeView(.confirm(command: "일정 삭제", message: "정말 삭제할까요?", expireTime: Date().addingTimeInterval(-10))).previewDisplayName("confirmExpired")
             makeView(.done(command: "내일 회의 추가", message: "일정을 추가했어요")).previewDisplayName("done")
+            makeView(.done(command: "이번 주 일정 정리해줘", message: sampleMultilineMessage)).previewDisplayName("done-multiline")
             makeView(.failed(command: "내일 회의 추가", reason: "네트워크 오류가 발생했어요", errorCode: nil)).previewDisplayName("failed")
             makeView(.failed(command: "내일 회의 추가", reason: "오늘 사용량을 모두 썼어요. 내일 다시 시도해 주세요.", errorCode: .dailyLimitExceeded)).previewDisplayName("failed-dailyLimit")
         }

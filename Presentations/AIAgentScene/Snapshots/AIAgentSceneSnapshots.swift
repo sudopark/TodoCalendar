@@ -168,4 +168,21 @@ final class AIAgentSceneSnapshots: XCTestCase {
                 .environment(self.makeAppearance(theme))
         }
     }
+
+    // 여러 줄 + 인라인 마크다운 응답 — 말풍선 내부 스크롤·서식·아이콘 상단 정렬 검증 (#766)
+    @MainActor
+    func test_commandDoneMultilineMessage() {
+        captureSnapshotPair(named: "commandDoneMultilineMessage", layout: .fullScreen) { theme in
+            let state = AIAgentCommandViewState()
+            state.commandState = .done(
+                command: "이번 주 일정 정리해줘",
+                message: AIAgentCommandStageViewPreviewProvider.sampleMultilineMessage
+            )
+            state.usage = .init(input: 1234, output: 0, limit: 5000)
+            return AIAgentCommandStageView()
+                .environment(state)
+                .environment(AIAgentCommandViewEventHandler())
+                .environment(self.makeAppearance(theme))
+        }
+    }
 }
