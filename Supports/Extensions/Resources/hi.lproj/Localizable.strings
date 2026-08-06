@@ -514,6 +514,9 @@
 "widget.dday.target::registered" = "पिन किया गया";
 "widget.dday.turn::name" = "चक्र %d";
 
+"widget.aiCommand::title" = "AI से जोड़ें";
+"widget.aiCommand::explain" = "AI इनपुट खोलने के लिए एक बार टैप करें।";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "यह लिंक प्रारूप समर्थित नहीं है।\nकृपया ऐप को नवीनतम संस्करण में अपडेट करें।";

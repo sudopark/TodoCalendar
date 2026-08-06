@@ -514,6 +514,9 @@
 "widget.dday.target::registered" = "已釘選";
 "widget.dday.turn::name" = "第%d次";
 
+"widget.aiCommand::title" = "使用AI新增";
+"widget.aiCommand::explain" = "輕點一下即可開啟AI輸入。";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "不支援此連結格式。\n請將應用程式更新至最新版本。";

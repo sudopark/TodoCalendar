@@ -514,6 +514,9 @@
 "widget.dday.target::registered" = "ปักหมุดแล้ว";
 "widget.dday.turn::name" = "ครั้งที่%d";
 
+"widget.aiCommand::title" = "เพิ่มด้วย AI";
+"widget.aiCommand::explain" = "แตะครั้งเดียวเพื่อเปิดการป้อนข้อมูล AI";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "รูปแบบลิงก์นี้ไม่รองรับ\nกรุณาอัปเดตแอปเป็นเวอร์ชันล่าสุด";

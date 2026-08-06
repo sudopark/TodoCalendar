@@ -514,6 +514,9 @@
 "widget.dday.target::registered" = "Vastgezet";
 "widget.dday.turn::name" = "Beurt %d";
 
+"widget.aiCommand::title" = "Toevoegen met AI";
+"widget.aiCommand::explain" = "Tik één keer om AI-invoer te openen.";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "Dit linkformaat wordt niet ondersteund.\nWerk de app bij naar de nieuwste versie.";

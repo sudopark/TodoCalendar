@@ -514,6 +514,9 @@
 "widget.dday.target::registered" = "Pinned";
 "widget.dday.turn::name" = "Turn %d";
 
+"widget.aiCommand::title" = "Add with AI";
+"widget.aiCommand::explain" = "Open AI input with one tap.";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "This link format is not supported.\nPlease update the app to the latest version.";

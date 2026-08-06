@@ -514,6 +514,9 @@
 "widget.dday.target::registered" = "ピン留め済み";
 "widget.dday.turn::name" = "第%d回";
 
+"widget.aiCommand::title" = "AIで追加";
+"widget.aiCommand::explain" = "タップひとつでAI入力を開きます。";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "このリンク形式には対応していません。\nアプリを最新バージョンに更新してください。";

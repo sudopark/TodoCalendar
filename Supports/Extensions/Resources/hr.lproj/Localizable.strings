@@ -514,6 +514,9 @@
 "widget.dday.target::registered" = "Prikvačeno";
 "widget.dday.turn::name" = "Krug %d";
 
+"widget.aiCommand::title" = "Dodaj pomoću AI";
+"widget.aiCommand::explain" = "Dodirnite jednom da otvorite AI unos.";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "Ovaj format poveznice nije podržan.\nAžurirajte aplikaciju na najnoviju verziju.";

@@ -514,6 +514,9 @@
 "widget.dday.target::registered" = "Fixado";
 "widget.dday.turn::name" = "Volta %d";
 
+"widget.aiCommand::title" = "Adicionar com IA";
+"widget.aiCommand::explain" = "Toque uma vez para abrir a entrada de IA.";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "Este formato de link não é compatível.\nAtualize o app para a versão mais recente.";

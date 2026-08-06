@@ -514,6 +514,9 @@
 "widget.dday.target::registered" = "Закреплено";
 "widget.dday.turn::name" = "Повтор %d";
 
+"widget.aiCommand::title" = "Добавить с помощью ИИ";
+"widget.aiCommand::explain" = "Нажмите один раз, чтобы открыть ввод ИИ.";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "Этот формат ссылки не поддерживается.\nПожалуйста, обновите приложение до последней версии.";

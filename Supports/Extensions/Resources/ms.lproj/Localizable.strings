@@ -514,6 +514,9 @@
 "widget.dday.target::registered" = "Disematkan";
 "widget.dday.turn::name" = "Pusingan %d";
 
+"widget.aiCommand::title" = "Tambah dengan AI";
+"widget.aiCommand::explain" = "Ketik sekali untuk membuka input AI.";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "Format pautan ini tidak disokong.\nSila kemas kini aplikasi ke versi terkini.";

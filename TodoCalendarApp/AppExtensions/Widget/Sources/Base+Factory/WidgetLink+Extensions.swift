@@ -79,12 +79,19 @@ extension EventCellViewModel {
 
 
 extension CalendarDay {
-    
+
     var link: URL? {
         var component = URLComponents(string: "\(AppEnvironment.appScheme)://calendar")
         component?.queryItems = [
             .init(name: "select", value: "\(self.year)_\(self.month.withLeadingZero())_\(self.day.withLeadingZero())")
         ]
         return component?.url
+    }
+}
+
+
+enum AICommandEntryLink {
+    static var url: URL? {
+        return URL(string: "\(AppEnvironment.appScheme)://calendar/ai")
     }
 }
