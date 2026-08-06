@@ -514,6 +514,9 @@
 "widget.dday.target::registered" = "Закріплено";
 "widget.dday.turn::name" = "Повтор %d";
 
+"widget.aiCommand::title" = "Додати за допомогою ШІ";
+"widget.aiCommand::explain" = "Торкніться один раз, щоб відкрити введення ШІ.";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "Цей формат посилання не підтримується.\nБудь ласка, оновіть додаток до останньої версії.";

@@ -514,6 +514,9 @@
 "widget.dday.target::registered" = "Sabitlendi";
 "widget.dday.turn::name" = "%d. tur";
 
+"widget.aiCommand::title" = "AI ile Ekle";
+"widget.aiCommand::explain" = "AI girişini açmak için bir kez dokunun.";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "Bu bağlantı biçimi desteklenmiyor.\nLütfen uygulamayı en son sürüme güncelleyin.";

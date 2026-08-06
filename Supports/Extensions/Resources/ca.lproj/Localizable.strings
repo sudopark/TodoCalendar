@@ -514,6 +514,9 @@
 "widget.dday.target::registered" = "Fixat";
 "widget.dday.turn::name" = "Torn %d";
 
+"widget.aiCommand::title" = "Afegeix amb IA";
+"widget.aiCommand::explain" = "Toqueu una vegada per obrir l'entrada d'IA.";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "Aquest format d'enllaç no és compatible.\nActualitzeu l'aplicació a l'última versió.";

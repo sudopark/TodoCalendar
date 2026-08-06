@@ -514,6 +514,9 @@
 "widget.dday.target::registered" = "Pripnuté";
 "widget.dday.turn::name" = "Kolo %d";
 
+"widget.aiCommand::title" = "Pridať pomocou AI";
+"widget.aiCommand::explain" = "Jedným klepnutím otvoríte zadávanie AI.";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "Tento formát odkazu nie je podporovaný.\nAktualizujte, prosím, aplikáciu na najnovšiu verziu.";

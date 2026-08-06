@@ -514,6 +514,9 @@
 "widget.dday.target::registered" = "Kitűzve";
 "widget.dday.turn::name" = "%d. forduló";
 
+"widget.aiCommand::title" = "Hozzáadás AI-val";
+"widget.aiCommand::explain" = "Koppintson egyet az AI-bevitel megnyitásához.";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "Ez a hivatkozásformátum nem támogatott.\nKérjük, frissítse az alkalmazást a legújabb verzióra.";

@@ -514,6 +514,9 @@
 "widget.dday.target::registered" = "已固定";
 "widget.dday.turn::name" = "第%d次";
 
+"widget.aiCommand::title" = "使用AI添加";
+"widget.aiCommand::explain" = "轻触一次即可打开AI输入。";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "不支持此链接格式。\n请将应用更新到最新版本。";

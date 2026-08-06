@@ -514,6 +514,9 @@
 "widget.dday.target::registered" = "Fäst";
 "widget.dday.turn::name" = "Omgång %d";
 
+"widget.aiCommand::title" = "Lägg till med AI";
+"widget.aiCommand::explain" = "Tryck en gång för att öppna AI-inmatning.";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "Det här länkformatet stöds inte.\nUppdatera appen till den senaste versionen.";

@@ -514,6 +514,9 @@
 "widget.dday.target::registered" = "Épinglé";
 "widget.dday.turn::name" = "Tour %d";
 
+"widget.aiCommand::title" = "Ajouter avec l'IA";
+"widget.aiCommand::explain" = "Appuyez une fois pour ouvrir la saisie IA.";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "Ce format de lien n'est pas pris en charge.\nVeuillez mettre à jour l'application vers la dernière version.";

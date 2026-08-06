@@ -514,6 +514,9 @@
 "widget.dday.target::registered" = "Festet";
 "widget.dday.turn::name" = "Runde %d";
 
+"widget.aiCommand::title" = "Legg til med AI";
+"widget.aiCommand::explain" = "Trykk én gang for å åpne AI-inntasting.";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "Dette lenkeformatet støttes ikke.\nOppdater appen til nyeste versjon.";

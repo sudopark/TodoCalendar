@@ -514,6 +514,9 @@
 "widget.dday.target::registered" = "Đã ghim";
 "widget.dday.turn::name" = "Lần %d";
 
+"widget.aiCommand::title" = "Thêm bằng AI";
+"widget.aiCommand::explain" = "Chạm một lần để mở ô nhập AI.";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "Định dạng liên kết này không được hỗ trợ.\nVui lòng cập nhật ứng dụng lên phiên bản mới nhất.";

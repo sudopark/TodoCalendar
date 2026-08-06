@@ -514,6 +514,9 @@
 "widget.dday.target::registered" = "Kiinnitetty";
 "widget.dday.turn::name" = "Kierros %d";
 
+"widget.aiCommand::title" = "Lisää AI:lla";
+"widget.aiCommand::explain" = "Avaa AI-syöttö yhdellä napautuksella.";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "Tätä linkkimuotoa ei tueta.\nPäivitä sovellus uusimpaan versioon.";

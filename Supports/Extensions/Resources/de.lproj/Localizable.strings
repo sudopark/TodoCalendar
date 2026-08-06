@@ -514,6 +514,9 @@
 "widget.dday.target::registered" = "Angeheftet";
 "widget.dday.turn::name" = "Runde %d";
 
+"widget.aiCommand::title" = "Mit KI hinzufügen";
+"widget.aiCommand::explain" = "Tippen Sie einmal, um die KI-Eingabe zu öffnen.";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "Dieses Linkformat wird nicht unterstützt.\nBitte aktualisieren Sie die App auf die neueste Version.";
