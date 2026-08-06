@@ -10,12 +10,18 @@ import Foundation
 
 
 public protocol AICommandRepository: AnyObject, Sendable {
-    
+
     func processCommand(
         _ commandText: String,
         timeZone: String
     ) async throws -> String
-    
+
+    func processInterpretCommand(
+        text: String,
+        additionalInstruction: String?,
+        timeZone: String
+    ) async throws -> String
+
     func processConfirmCommand(
         _ action: AIConfirmCommandAction,
         timeZone: String

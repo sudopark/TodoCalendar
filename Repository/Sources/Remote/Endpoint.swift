@@ -267,6 +267,7 @@ public enum AppEndpoints: Endpoint {
 
 enum AIAPIEndpoints: Endpoint {
     case command
+    case interpretCommand
     case confirmCommand
     case rejectCommand
     case cancelCommand
@@ -276,6 +277,7 @@ enum AIAPIEndpoints: Endpoint {
     var subPath: String {
         switch self {
         case .command: return "command"
+        case .interpretCommand: return "command/interpret"
         case .confirmCommand: return "command/confirm"
         case .rejectCommand: return "command/reject"
         case .cancelCommand: return "command/cancel"

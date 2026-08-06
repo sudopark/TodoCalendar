@@ -241,6 +241,14 @@ private final class StubAICommandRepository: AICommandRepository, @unchecked Sen
         return "some_job"
     }
 
+    func processInterpretCommand(
+        text: String,
+        additionalInstruction: String?,
+        timeZone: String
+    ) async throws -> String {
+        throw RuntimeError("intent path does not use interpret")
+    }
+
     func loadProcessingAICommand() async throws -> ProcessingAICommand? {
         guard !self.shouldFailLoadPending
         else { throw RuntimeError("failed to load processing command") }

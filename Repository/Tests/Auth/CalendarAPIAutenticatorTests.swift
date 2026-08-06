@@ -100,6 +100,9 @@ extension CalendarAPIAutenticatorTests {
             AIAPIEndpoints.command, method: .post, expecthasToken: true
         )
         parameterizeTest(
+            AIAPIEndpoints.interpretCommand, method: .post, expecthasToken: true
+        )
+        parameterizeTest(
             AIAPIEndpoints.confirmCommand, method: .post, expecthasToken: true
         )
         parameterizeTest(

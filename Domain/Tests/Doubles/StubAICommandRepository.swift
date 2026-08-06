@@ -15,13 +15,29 @@ import Extensions
 
 
 class BaseStubAICommandRepository: AICommandRepository, @unchecked Sendable {
-    
+
     var shouldFailProcessCommand: Bool = false
     func processCommand(_ commandText: String, timeZone: String) async throws -> String {
         guard !self.shouldFailProcessCommand
         else {
             throw RuntimeError("not imple")
         }
+        return "some_job"
+    }
+
+    var didProcessInterpretText: String?
+    var didProcessInterpretAdditionalInstruction: String?
+    func processInterpretCommand(
+        text: String,
+        additionalInstruction: String?,
+        timeZone: String
+    ) async throws -> String {
+        guard !self.shouldFailProcessCommand
+        else {
+            throw RuntimeError("not imple")
+        }
+        self.didProcessInterpretText = text
+        self.didProcessInterpretAdditionalInstruction = additionalInstruction
         return "some_job"
     }
 
