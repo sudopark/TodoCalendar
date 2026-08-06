@@ -177,6 +177,7 @@ struct AIAgentCommandStageView: View {
                 }
             }
         }
+        .eventHandler(\.outsideTap, self.eventHandlers.close)
     }
 }
 

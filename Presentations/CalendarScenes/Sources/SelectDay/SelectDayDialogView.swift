@@ -29,9 +29,11 @@ final class SelectDayDialogEventHandler: Observable {
     
     var daySelected: (Date) -> Void = { _ in }
     var confirmSelect: () -> Void = { }
+    var close: () -> Void = { }
     func bind(_ viewModel: any SelectDayDialogViewModel) {
         self.daySelected = viewModel.select(_:)
         self.confirmSelect = viewModel.confirmSelect
+        self.close = viewModel.close
     }
 }
 
@@ -87,6 +89,7 @@ private struct SelectDayDialogView: View {
                     }
             }
         }
+        .eventHandler(\.outsideTap, self.eventHandler.close)
     }
 }
 

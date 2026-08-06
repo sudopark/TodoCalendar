@@ -16,6 +16,7 @@ protocol SelectDayDialogViewModel: Sendable, AnyObject {
     
     func select(_ date: Date)
     func confirmSelect()
+    func close()
     
     var initialCurrentSelectDate: Date { get }
 }
@@ -77,6 +78,10 @@ extension SelectDayDialogViewModelImple {
         self.router?.closeScene(animate: true) { [weak self] in
             self?.listener?.daySelectDialog(didSelect: selectInfo)
         }
+    }
+
+    func close() {
+        self.router?.closeScene(animate: true, nil)
     }
 }
 

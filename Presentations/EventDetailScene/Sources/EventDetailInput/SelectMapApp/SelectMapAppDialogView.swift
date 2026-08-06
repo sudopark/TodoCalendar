@@ -135,6 +135,7 @@ struct SelectMapAppDialogView: View {
                 .eventHandler(\.onTap, eventHandlers.close)
             }
         }
+        .eventHandler(\.outsideTap, eventHandlers.close)
     }
     
     private func mapAppView(_ app: SupportMapApps) -> some View {

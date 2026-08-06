@@ -161,6 +161,7 @@ private struct AIAgentKeyboardInputView: View {
                 }
             }
         }
+        .eventHandler(\.outsideTap, self.eventHandler.close)
         .onAppear { self.isFocused = true }
         .onDisappear {
             // 전송/중지가 아니라 그냥 닫은(드래그·닫기 버튼) 경우 → 음성 입력으로 복귀

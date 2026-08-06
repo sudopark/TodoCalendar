@@ -27,7 +27,7 @@ paths:
 |---|---|---|
 | `ConfirmButton` | 표준 액션 버튼 — isEnable·isProcessing(로딩) 내장, 색 nil→appearance 폴백 | `.eventHandler(\.onTap)` |
 | `BottomConfirmButton` | 화면 하단 고정 ConfirmButton 래퍼 (패딩+배경+safe-area) | `.eventHandler(\.onTap)` |
-| `BottomSlideView` | 바텀시트 컨테이너 — 딤 영역 탭 닫기, 제네릭 content | `.eventHandler(\.outsideTap)` |
+| `BottomSlideView` | 바텀시트 컨테이너 — 딤 영역 + 제네릭 content. 딤 탭 닫기는 자동 아님(아래 참고) | `.eventHandler(\.outsideTap)` |
 | `SheetHeaderView` | 시트 상단 헤더 — 타이틀+닫기, iOS26 리퀴드 글래스 분기 | `.eventHandler(\.onClose)` |
 | `CloseButton` | `xmark.circle.fill` 닫기 버튼 | `.eventHandler(\.onTap)` |
 | `NavigationBackButton` | chevron 커스텀 뒤로가기 | `init(tapHandler:)` 클로저 |
@@ -44,6 +44,18 @@ paths:
 
 - 이벤트 연결 주류는 `.eventHandler(\.키패스)` (기본값 있는 var 클로저) — 신규 컴포넌트도 이 패턴으로. 표의 예외(init 클로저·render-prop·체이닝)는 기존 API 존중.
 - 카탈로그가 낡았을 수 있다 — `ls Presentations/CommonPresentation/Sources/UIComponents/`로 실물 확인. 표에 없는 파일을 발견하면 이 표를 갱신한다.
+
+#### BottomSlideView — 딤 영역 탭 닫기는 수동 배선
+
+`BottomSlideView`를 쓰는 시트는 **`.eventHandler(\.outsideTap, ...)`를 직접 걸어야 딤 영역 탭에 닫힌다.** 안 걸면 no-op이라 아무 반응이 없다. 닫힘 동작은 다른 닫기 경로(헤더 X·닫기 버튼)와 같은 핸들러로 — ViewModel의 `close()` → `router.closeScene()` (rules §5 Navigation은 Router 경유).
+
+```swift
+BottomSlideView { ... }
+    .eventHandler(\.outsideTap, eventHandlers.close)   // ← 없으면 딤 탭에 안 닫힘
+```
+
+- 반대로 **딤 탭에 닫히면 안 되는 시트**(진행 중 이탈이 위험한 경우 등)는 배선을 걸지 않는다 — 배선 여부가 곧 옵션이다.
+- SwiftUI `@Environment(\.dismiss)`로 닫으려 하지 말 것. 이 시트들은 UIKit `present()`로 띄운 `UIHostingController`라 SwiftUI가 표시 주체를 몰라 no-op이다.
 
 ### 프레임워크 스코프 컴포넌트
 
