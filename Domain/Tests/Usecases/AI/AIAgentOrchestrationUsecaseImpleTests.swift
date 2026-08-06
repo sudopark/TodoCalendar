@@ -762,6 +762,11 @@ private final class StubAICommandUsecase: AICommandUsecase, @unchecked Sendable 
         self.didRefreshJobStatusWith = jobId
     }
 
+    var didClearProcessingCommandRecord: Bool = false
+    func clearProcessingCommandRecord() async {
+        self.didClearProcessingCommandRecord = true
+    }
+
     private func jobPublisher(_ job: AIJob?) -> AnyPublisher<AIJob, any Error> {
         if self.shouldFail {
             return Fail(error: RuntimeError("stub fail")).eraseToAnyPublisher()
@@ -1242,5 +1247,62 @@ extension AIAgentOrchestrationUsecaseImpleTests {
 
         // then
         #expect(self.stubCommand.didRefreshJobStatusWith == "some_job")
+    }
+}
+
+
+// MARK: - 로그아웃
+
+extension AIAgentOrchestrationUsecaseImpleTests {
+
+    private func makeUsecaseWithRunningJob() -> AIAgentOrchestrationUsecaseImple {
+        let running = AIJob(jobId: "some_job")
+            |> \.status .~ AIJob.Status.running
+            |> \.command .~ "9월 10일 약속"
+        let usecase = self.makeUsecaseWithRestoredJob(running)
+        usecase.restoreIfNeeded()
+        return usecase
+    }
+
+    // 서버 job은 살려두고 로컬 복원 근거만 지운다 — 재로그인 시 죽은 job이 되살아나는 걸 막는다
+    @Test("로그아웃하면 서버 취소 없이 로컬 커맨드 기록만 지운다")
+    func usecase_whenSignedOut_clearsLocalRecordWithoutServerCancel() async throws {
+        // given
+        let usecase = self.makeUsecaseWithRunningJob()
+
+        // when
+        await usecase.handleSignedOut()
+
+        // then
+        #expect(self.stubCommand.didClearProcessingCommandRecord == true)
+        #expect(self.stubCommand.didCancelJobId == nil)
+    }
+
+    @Test("로그아웃하면 진행 중이던 상태를 idle로 되돌린다")
+    func usecase_whenSignedOut_backToIdle() async throws {
+        // given
+        let expect = expectConfirm("로그아웃 → idle")
+        let usecase = self.makeUsecaseWithRunningJob()
+
+        // when
+        let states = try await self.outputs(expect, for: usecase.state.dropFirst()) {
+            Task { await usecase.handleSignedOut() }
+        }
+
+        // then
+        #expect(states.map(self.stateName).last == "idle")
+    }
+
+    @Test("로그아웃하면 음성 인식도 중지한다")
+    func usecase_whenSignedOut_stopsListening() async throws {
+        // given
+        let usecase = self.makeUsecase()
+        usecase.enterVoiceInput()
+
+        // when
+        await usecase.handleSignedOut()
+
+        // then
+        #expect(self.stubSpeech.didStopListening == true)
     }
 }

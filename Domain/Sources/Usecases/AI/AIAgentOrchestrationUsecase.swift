@@ -36,6 +36,8 @@ public protocol AIAgentOrchestrationUsecase: AnyObject, Sendable {
 
     func handleJobStatusChanged(_ jobId: String)
     func refreshProcessingJobIfNeeded()
+
+    func handleSignedOut() async
 }
 
 
@@ -274,20 +276,32 @@ extension AIAgentOrchestrationUsecaseImple {
         default:
             break
         }
-        self.commandCancellable?.cancel()
-        self.commandCancellable = nil
-        self.currentProcessingJobId = nil
+        self.stopTrackingJob()
         self.subject.state.send(.idle)
     }
 
     public func reset() {
         let jobId = self.currentProcessingJobId
-        self.commandCancellable?.cancel()
-        self.commandCancellable = nil
-        self.currentProcessingJobId = nil
+        self.stopTrackingJob()
         if let jobId {
             self.commandUsecase.cancelOngoingCommand(jobId)
         }
+        self.subject.state.send(.idle)
+    }
+
+    private func stopTrackingJob() {
+        self.commandCancellable?.cancel()
+        self.commandCancellable = nil
+        self.currentProcessingJobId = nil
+    }
+
+    // 로그아웃 — 폴링·음성 인식을 끊고 로컬 복원 근거를 지운다. 서버 cancel은 부르지 않는다.
+    // async인 이유는 호출자(앱 루트)가 DB를 닫기 전에 삭제 완료를 기다려야 하기 때문.
+    public func handleSignedOut() async {
+        self.stopTrackingJob()
+        self.resetVoiceBinding()
+        self.speechRecognizeUsecase.stopListening()
+        await self.commandUsecase.clearProcessingCommandRecord()
         self.subject.state.send(.idle)
     }
 
