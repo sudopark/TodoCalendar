@@ -18,18 +18,23 @@ protocol CalendarViewRouting: Routing, Sendable {
     func changeFocus(at index: Int)
 
     func routeToAICommand()
+
+    func routeToSignIn()
 }
 
 final class CalendarViewRouterImple: BaseRouterImple, CalendarViewRouting, @unchecked Sendable {
 
     private let paperSceneBuilder: any CalendarPaperSceneBuiler
     private let aiAgentCommandSceneBuilder: any AIAgentCommandSceneBuilder
+    private let memberSceneBuilder: any MemberSceneBuilder
     init(
         _ paperSceneBuilder: any CalendarPaperSceneBuiler,
-        aiAgentCommandSceneBuilder: any AIAgentCommandSceneBuilder
+        aiAgentCommandSceneBuilder: any AIAgentCommandSceneBuilder,
+        memberSceneBuilder: any MemberSceneBuilder
     ) {
         self.paperSceneBuilder = paperSceneBuilder
         self.aiAgentCommandSceneBuilder = aiAgentCommandSceneBuilder
+        self.memberSceneBuilder = memberSceneBuilder
     }
     private var currentScene: (any CalendarScene)? { self.scene as? (any CalendarScene) }
 
@@ -67,5 +72,12 @@ final class CalendarViewRouterImple: BaseRouterImple, CalendarViewRouting, @unch
     private func presentAICommandScene() {
         let next = self.aiAgentCommandSceneBuilder.makeCommandScene()
         self.showBottomSlide(next)
+    }
+
+    func routeToSignIn() {
+        Task { @MainActor in
+            let next = self.memberSceneBuilder.makeSignInScene()
+            self.showBottomSlide(next)
+        }
     }
 }

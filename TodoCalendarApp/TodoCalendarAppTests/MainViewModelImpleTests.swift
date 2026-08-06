@@ -369,8 +369,10 @@ extension MainViewModelImpleTests {
         func moveDay(_ day: CalendarDay, withClearPresented: Bool) {
             self.didRequestMoveDay = day
         }
+
+        func requestAIEntry() { }
     }
-    
+
     private final class SpyEventNotificationUsecase: EventNotificationUsecase, @unchecked Sendable {
         
         var didRunSync: Bool = false

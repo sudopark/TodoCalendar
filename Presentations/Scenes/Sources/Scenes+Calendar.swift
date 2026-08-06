@@ -12,9 +12,10 @@ import Domain
 // MARK: - CalendarScene
 
 public protocol CalendarSceneInteractor: Sendable, AnyObject {
-    
+
     func moveFocusToToday()
     func moveDay(_ day: CalendarDay, withClearPresented: Bool)
+    func requestAIEntry()
 }
 
 extension CalendarSceneInteractor {
