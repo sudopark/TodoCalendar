@@ -206,6 +206,11 @@ private extension AIAgentCommandStageView {
 }
 
 
+private enum Constant {
+    static let bubbleMaxHeight: CGFloat = 200
+}
+
+
 // MARK: - chat bubbles
 
 private extension AIAgentCommandStageView {
@@ -221,7 +226,7 @@ private extension AIAgentCommandStageView {
                     .foregroundStyle(appearance.colorSet.aiUserBubbleText.asColor)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .frame(maxHeight: 200)
+            .frame(maxHeight: Constant.bubbleMaxHeight)
             .fixedSize(horizontal: false, vertical: true)
             .padding(.horizontal, spacing: .large)
             .padding(.vertical, spacing: .regular)
@@ -234,18 +239,8 @@ private extension AIAgentCommandStageView {
     }
 
     // 상대(AI) 말풍선(좌측, bg1) 공통 컨테이너
-    func assistantBubble<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
-        HStack(spacing: 0) {
-            content()
-                .padding(.horizontal, spacing: .large)
-                .padding(.vertical, spacing: .large)
-                .background(
-                    RoundedRectangle(cornerRadius: Metric.Radius.sheet)
-                        .fill(appearance.colorSet.bg1.asColor)
-                )
-
-            Spacer(minLength: 40)
-        }
+    func assistantBubble<Content: View>(@ViewBuilder _ content: @escaping () -> Content) -> some View {
+        AssistantBubble(content: content)
     }
 
     // 처리중 타이핑 말풍선
@@ -366,7 +361,7 @@ private extension AIAgentCommandStageView {
             }
 
             self.assistantBubble {
-                HStack(alignment: .center, spacing: Metric.Spacing.small) {
+                HStack(alignment: .top, spacing: Metric.Spacing.small) {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 20))
                         .foregroundStyle(appearance.colorSet.accent.asColor)
@@ -402,7 +397,7 @@ private extension AIAgentCommandStageView {
             }
 
             self.assistantBubble {
-                HStack(alignment: .center, spacing: Metric.Spacing.small) {
+                HStack(alignment: .top, spacing: Metric.Spacing.small) {
                     // 한도 초과는 모래시계로 구분 — "내일 리셋까지 대기" 의미. 문구는 서버 reason 그대로
                     Image(systemName: errorCode == .dailyLimitExceeded ? "hourglass.circle.fill" : "exclamationmark.triangle.fill")
                         .font(.system(size: 20))
@@ -438,6 +433,75 @@ private extension AIAgentCommandStageView {
             .eventHandler(\.onTap, eventHandlers.acknowledge)
             .padding(.top, spacing: .xsmall)
         }
+    }
+}
+
+
+// MARK: - AssistantBubble
+
+// ScrollView는 가로로도 greedy해 감싸는 순간 말풍선이 전체 폭이 된다 — 숨김 사본이 자연 폭과
+// 상한 안의 높이를 결정하고, 겹쳐놓은 스크롤이 넘치는 만큼을 흡수한다.
+// content는 숨김·스크롤 두 벌로 인스턴스화되므로 사이드이펙트 없는 표시 전용 뷰만 넘길 것
+private struct AssistantBubble<Content: View>: View {
+
+    @Environment(ViewAppearance.self) private var appearance
+    @State private var contentHeight: CGFloat = 0
+
+    @ViewBuilder let content: () -> Content
+
+    private var isOverflowing: Bool {
+        self.contentHeight > Constant.bubbleMaxHeight
+    }
+
+    var body: some View {
+        HStack(spacing: 0) {
+            content()
+                .hidden()
+                .accessibilityHidden(true)
+                .frame(maxHeight: Constant.bubbleMaxHeight)
+                .fixedSize(horizontal: false, vertical: true)
+                .overlay {
+                    ScrollView(.vertical, showsIndicators: false) {
+                        content()
+                            .background {
+                                GeometryReader { proxy in
+                                    Color.clear
+                                        .onAppear { self.contentHeight = proxy.size.height }
+                                        .onChange(of: proxy.size.height) { _, height in
+                                            self.contentHeight = height
+                                        }
+                                }
+                            }
+                    }
+                    .overlay(alignment: .bottom) {
+                        if self.isOverflowing {
+                            self.bottomFade
+                        }
+                    }
+                }
+                .padding(.horizontal, spacing: .large)
+                .padding(.vertical, spacing: .large)
+                .background(
+                    RoundedRectangle(cornerRadius: Metric.Radius.sheet)
+                        .fill(appearance.colorSet.bg1.asColor)
+                )
+
+            Spacer(minLength: 40)
+        }
+    }
+
+    // 상한에서 잘렸을 때만 — 문장이 배경으로 잦아들어 아래에 더 있음을 알린다
+    private var bottomFade: some View {
+        LinearGradient(
+            colors: [
+                appearance.colorSet.bg1.asColor.opacity(0),
+                appearance.colorSet.bg1.asColor
+            ],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+        .frame(height: Metric.Spacing.xlarge)
+        .allowsHitTesting(false)
     }
 }
 
