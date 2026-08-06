@@ -608,3 +608,5 @@
 "share.ai::sent" = "보냈어요. 결과는 앱에서 확인할 수 있어요.";
 "share.ai::failed" = "보내지 못했어요. 다시 시도해 주세요.";
 "share.ai::sentButUntracked" = "보냈지만 앱에서 결과를 추적할 수 없어요. 잠시 후 캘린더를 확인해 주세요.";
+"share.ai::textTooLong" = "보낼 내용이 너무 길어요. 줄여서 다시 시도해 주세요.";
+"share.ai::instructionTooLong" = "지시가 너무 길어요. 줄여 주세요.";

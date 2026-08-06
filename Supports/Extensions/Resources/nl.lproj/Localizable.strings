@@ -608,3 +608,5 @@
 "share.ai::sent" = "Verzonden. Je kunt het resultaat in de app bekijken.";
 "share.ai::failed" = "Verzenden mislukt. Probeer het opnieuw.";
 "share.ai::sentButUntracked" = "Verzonden, maar de app kan het resultaat niet volgen. Bekijk je agenda over een moment.";
+"share.ai::textTooLong" = "De tekst is te lang om te verzenden. Kort hem in en probeer het opnieuw.";
+"share.ai::instructionTooLong" = "Je instructie is te lang. Kort hem in.";

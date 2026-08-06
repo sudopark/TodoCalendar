@@ -608,3 +608,5 @@
 "share.ai::sent" = "Trimis. Puteți vedea rezultatul în aplicație.";
 "share.ai::failed" = "Nu s-a putut trimite. Încercați din nou.";
 "share.ai::sentButUntracked" = "Trimis, dar aplicația nu poate urmări rezultatul. Verificați calendarul peste puțin timp.";
+"share.ai::textTooLong" = "Textul este prea lung pentru a fi trimis. Scurtați-l și încercați din nou.";
+"share.ai::instructionTooLong" = "Instrucțiunea dvs. este prea lungă. Scurtați-o.";

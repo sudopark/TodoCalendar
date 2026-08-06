@@ -608,3 +608,5 @@
 "share.ai::sent" = "Đã gửi. Bạn có thể xem kết quả trong ứng dụng.";
 "share.ai::failed" = "Không thể gửi. Vui lòng thử lại.";
 "share.ai::sentButUntracked" = "Đã gửi, nhưng ứng dụng không theo dõi được kết quả. Hãy kiểm tra lịch sau giây lát.";
+"share.ai::textTooLong" = "Nội dung cần gửi quá dài. Vui lòng rút ngắn rồi thử lại.";
+"share.ai::instructionTooLong" = "Chỉ dẫn của bạn quá dài. Vui lòng rút ngắn.";

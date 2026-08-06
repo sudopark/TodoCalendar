@@ -608,3 +608,5 @@
 "share.ai::sent" = "Wysłano. Wynik możesz sprawdzić w aplikacji.";
 "share.ai::failed" = "Nie udało się wysłać. Spróbuj ponownie.";
 "share.ai::sentButUntracked" = "Wysłano, ale aplikacja nie może śledzić wyniku. Sprawdź kalendarz za chwilę.";
+"share.ai::textTooLong" = "Tekst jest za długi, aby go wysłać. Skróć go i spróbuj ponownie.";
+"share.ai::instructionTooLong" = "Twoje polecenie jest za długie. Skróć je.";

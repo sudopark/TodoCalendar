@@ -608,3 +608,5 @@
 "share.ai::sent" = "Elküldve. Az eredményt az alkalmazásban tekintheti meg.";
 "share.ai::failed" = "Nem sikerült elküldeni. Próbálja újra.";
 "share.ai::sentButUntracked" = "Elküldve, de az alkalmazás nem tudja követni az eredményt. Nézze meg a naptárát kis idő múlva.";
+"share.ai::textTooLong" = "A szöveg túl hosszú a küldéshez. Rövidítse le, és próbálja újra.";
+"share.ai::instructionTooLong" = "Az Ön utasítása túl hosszú. Kérjük, rövidítse le.";

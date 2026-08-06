@@ -608,3 +608,5 @@
 "share.ai::sent" = "Gönderildi. Sonucu uygulamada görebilirsiniz.";
 "share.ai::failed" = "Gönderilemedi. Lütfen tekrar deneyin.";
 "share.ai::sentButUntracked" = "Gönderildi, ancak uygulama sonucu izleyemiyor. Birazdan takviminizi kontrol edin.";
+"share.ai::textTooLong" = "Metin göndermek için çok uzun. Kısaltıp tekrar deneyin.";
+"share.ai::instructionTooLong" = "Yönergeniz çok uzun. Lütfen kısaltın.";
