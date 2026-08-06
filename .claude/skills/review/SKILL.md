@@ -13,7 +13,8 @@ description: Use when the user requests an agent code review of an open pull req
 
 ## 1. 범위 확정 — diff 패키지
 
-- BASE = PR base 브랜치와의 merge-base (`git merge-base develop HEAD` — base가 develop이 아니면 해당 브랜치), HEAD = 리뷰 대상 최신 커밋.
+- **먼저 `git fetch origin develop`** (base가 develop이 아니면 해당 브랜치) — 로컬이 stale이면 merge-base가 뒤로 밀려 남의 커밋이 diff 패키지에 섞인다.
+- BASE = 그 base 브랜치와의 merge-base (`git merge-base origin/develop HEAD`), HEAD = 리뷰 대상 최신 커밋.
 - 스크래치패드에 diff 패키지 파일 하나를 만든다 (리뷰어들이 공유해 Read — 컨트롤러 컨텍스트에 diff를 싣지 않는다):
 
 ```bash
@@ -35,7 +36,7 @@ diff가 크거나 파급이 넓은 변경(공유 컴포넌트·프로토콜/시�
 diff 성격·규모에 맞춰 관점 세트를 고른다. 기본 후보 (고정 목록 아님 — diff에 맞게 재구성):
 
 - **로직 정확성** — 동작 변화가 요구사항 대비 올바른가, 엣지 케이스·상태 경합
-- **컨벤션·rules 정합** — rules 조항, CLAUDE.md 짝지어진 두 위치, 기존 구조 패턴과의 일치
+- **컨벤션·rules 정합** — rules 조항, CLAUDE.md 짝지어진 두 위치, 그리고 **문서화되지 않고 코드에만 존재하는 관례**(형제 컴포넌트의 타입 형태·의존 주입 방식·네이밍). rules에 없다고 관례가 아닌 게 아니다 — 신규 타입·서비스·팩토리가 들어오면 형제를 연다
 - **문서-실물 정합** — 스킬·docs·주석·커밋 메시지가 실물 코드와 일치하는가
 - **테스트 적정성** — testability 규칙 준수, 커버리지 공백, 테스트가 실동작을 검증하는가
 
