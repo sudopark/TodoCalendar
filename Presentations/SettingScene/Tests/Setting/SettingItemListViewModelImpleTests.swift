@@ -307,10 +307,7 @@ extension SettingItemListViewModelImpleTests {
         viewModel.selectItem(help)
         
         // then
-        let expectPath = Locale.current.language.languageCode == .korean
-        ? "https://readmind.notion.site/To-do-Calendar-36cba0bdc84b44de9abdfd7d8721cd91"
-        : "https://readmind.notion.site/To-do-Calendar-Help-a2183ee1a41946faa8e0658640fb4c6a?pvs=4"
-        XCTAssertEqual(self.spyRouter.didOpenSafariPath, expectPath)
+        XCTAssertEqual(self.spyRouter.didOpenSafariPath, HelpLink.currentPath)
     }
     
     func testViewModel_routeToSourceCode() {

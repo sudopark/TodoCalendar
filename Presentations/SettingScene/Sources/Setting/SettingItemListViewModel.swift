@@ -185,14 +185,6 @@ final class SettingItemListViewModelImple: SettingItemListViewModel, @unchecked 
     
     private var cancellables: Set<AnyCancellable> = []
     private let subject = Subject()
-    
-    private var helpPath_ko: String {
-        return "https://readmind.notion.site/To-do-Calendar-36cba0bdc84b44de9abdfd7d8721cd91"
-    }
-    
-    private var helpPath_en: String {
-        return "https://readmind.notion.site/To-do-Calendar-Help-a2183ee1a41946faa8e0658640fb4c6a?pvs=4"
-    }
 }
 
 
@@ -246,10 +238,7 @@ extension SettingItemListViewModelImple {
             self.router?.routeToFeedbackPost()
             
         case .help:
-            let isKorean = Locale.current.language.languageCode == .korean
-            self.router?.openSafari(
-                isKorean ? self.helpPath_ko : self.helpPath_en
-            )
+            self.router?.openSafari(HelpLink.currentPath)
             
         case .shareApp:
             self.router?.openShare(link: self.appstoreLinkPath)
