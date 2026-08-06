@@ -296,8 +296,9 @@ extension AIAgentOrchestrationUsecaseImple {
         self.commandCancellable = self.commandUsecase.restoreCommandifNeed()
             .sink(
                 receiveCompletion: { [weak self] completion in
+                    // 복원은 유저가 낸 커맨드가 아니다 — 실패를 결과 화면으로 띄우지 않는다
                     if case .failure = completion {
-                        self?.subject.state.send(.failed(command: self?.currentCommand ?? "", reason: nil, errorCode: nil))
+                        self?.subject.state.send(.idle)
                     }
                 },
                 receiveValue: { [weak self] job in

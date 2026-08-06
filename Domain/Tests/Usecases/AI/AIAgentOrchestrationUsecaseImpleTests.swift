@@ -528,6 +528,18 @@ extension AIAgentOrchestrationUsecaseImpleTests {
         // then — status 우선 판정으로 confirm 아닌 idle
         #expect(state.map(self.stateName) == "idle")
     }
+
+    @Test func usecase_restoreIfNeeded_whenFailed_staysIdleNotFailed() async throws {
+        // given — 복원 조회 자체가 실패 (로그아웃 직후 401 등)
+        let expect = expectConfirm("복원 실패는 결과 화면 없이 idle")
+        let usecase = self.makeUsecase(shouldFail: true)
+        // when
+        let state = try await self.firstOutput(expect, for: usecase.state) {
+            usecase.restoreIfNeeded()
+        }
+        // then
+        #expect(state.map(self.stateName) == "idle")
+    }
 }
 
 
