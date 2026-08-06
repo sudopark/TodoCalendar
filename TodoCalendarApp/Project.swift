@@ -159,8 +159,8 @@ let project = Project.app(
                 "NSExtensionPrincipalClass": .string("$(PRODUCT_MODULE_NAME).IntentHandler")
             ]),
             "CFBundleDisplayName": "To-do Calendar intent extension",
-            "CFBundleShortVersionString": "1.2.0",
-            "CFBundleVersion": "1"
+            "CFBundleShortVersionString": "\(Project.appVersion)",
+            "CFBundleVersion": "\(Project.buildNumber)"
         ],
         dependencies: [
             .project(
