@@ -9,7 +9,7 @@
 #   impact-check.sh --stdin          # "STATUS<TAB>PATH" 라인들을 stdin으로 (테스트용)
 set -o pipefail
 
-ALL_SCHEMES="Domain Repository AuthService BillingScenes CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene TodoCalendarApp TodoCalendarAppWidget"
+ALL_SCHEMES="Domain Repository AuthService BillingScenes CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene TodoCalendarApp TodoCalendarAppWidget TodoCalendarAppShare"
 ALL_PRESENTATION="BillingScenes CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene"
 
 MODE="git"; BASE="origin/develop"
@@ -48,7 +48,7 @@ if printf '%s\n' "$FILES" | grep -q "^Supports/Extensions/"; then
   schemes+=("Extensions")
 fi
 if printf '%s\n' "$FILES" | grep -q "^Supports/TestDoubles/Sources/"; then
-  schemes+=("Repository" $ALL_PRESENTATION "TodoCalendarApp" "TodoCalendarAppWidget")
+  schemes+=("Repository" $ALL_PRESENTATION "TodoCalendarApp" "TodoCalendarAppWidget" "TodoCalendarAppShare")
 fi
 if printf '%s\n' "$FILES" | grep -q "^Domain/Sources/"; then
   schemes+=($ALL_SCHEMES)
@@ -57,7 +57,7 @@ if printf '%s\n' "$FILES" | grep -q "^Domain/Tests/"; then
   schemes+=("Domain")
 fi
 if printf '%s\n' "$FILES" | grep -q "^Repository/Sources/"; then
-  schemes+=("Repository" "TodoCalendarApp" "TodoCalendarAppWidget")
+  schemes+=("Repository" "TodoCalendarApp" "TodoCalendarAppWidget" "TodoCalendarAppShare")
 fi
 if printf '%s\n' "$FILES" | grep -q "^Repository/Tests/"; then
   schemes+=("Repository")
@@ -72,7 +72,7 @@ if printf '%s\n' "$FILES" | grep -qE "^Services/(FirstPartyServices|SpeechServic
   schemes+=("TodoCalendarApp")
 fi
 if printf '%s\n' "$FILES" | grep -q "^Presentations/CommonPresentation/"; then
-  schemes+=($ALL_PRESENTATION "TodoCalendarApp" "TodoCalendarAppWidget")
+  schemes+=($ALL_PRESENTATION "TodoCalendarApp" "TodoCalendarAppWidget" "TodoCalendarAppShare")
 fi
 if printf '%s\n' "$FILES" | grep -q "^Presentations/Scenes/"; then
   schemes+=($ALL_PRESENTATION "TodoCalendarApp")
@@ -105,13 +105,12 @@ if printf '%s\n' "$FILES" | grep -q "^TodoCalendarApp/AppExtensions/Widget/"; th
   schemes+=("TodoCalendarAppWidget")
 fi
 # Base는 embed가 아니라 각 확장 타겟이 소스로 직접 컴파일한다(Project+Templates의 sources 글롭).
-# 위젯은 테스트 타겟이 있고 그 소스에도 Base가 들어가므로 위젯 스킴까지 켜야 실행된다.
+# 위젯·공유 확장 모두 테스트 타겟이 있고 그 소스에도 Base가 들어가므로 두 스킴까지 켜야 실행된다.
 if printf '%s\n' "$FILES" | grep -q "^TodoCalendarApp/AppExtensions/Base/"; then
-  schemes+=("TodoCalendarApp" "TodoCalendarAppWidget")
+  schemes+=("TodoCalendarApp" "TodoCalendarAppWidget" "TodoCalendarAppShare")
 fi
-# Share는 테스트 타겟이 없어 앱 스킴 빌드로만 검증한다
 if printf '%s\n' "$FILES" | grep -q "^TodoCalendarApp/AppExtensions/Share/"; then
-  schemes+=("TodoCalendarApp")
+  schemes+=("TodoCalendarApp" "TodoCalendarAppShare")
 fi
 
 # ---- tuist generate (테스트보다 선행 액션 — 첫 섹션으로 출력) ----

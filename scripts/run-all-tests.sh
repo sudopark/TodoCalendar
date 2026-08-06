@@ -34,6 +34,7 @@ ALL_SCHEMES=(
   "AIAgentScene"
   "TodoCalendarApp"
   "TodoCalendarAppWidget"
+  "TodoCalendarAppShare"
 )
 
 # 인자가 있으면 해당 스킴만 실행
