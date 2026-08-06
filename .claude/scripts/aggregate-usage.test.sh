@@ -47,6 +47,20 @@ cat > "$FIXTURE" << 'JSONL'
 {"ts":"2026-01-02T09:02:00+09:00","event":"axis_leak","session_id":"s5","missed_axis":1,"finding":"f3","pr":"705"}
 {"ts":"2026-01-02T09:03:00+09:00","event":"axis_leak","session_id":"s5","missed_axis":2,"finding":"g1","pr":""}
 {"ts":"2026-01-02T09:04:00+09:00","event":"axis_leak","session_id":"s5","missed_axis":2,"finding":"g2","pr":""}
+{"ts":"2026-01-01T15:00:00+09:00","event":"skill","session_id":"s10","name":"superpowers:writing-skills"}
+{"ts":"2026-01-01T15:01:00+09:00","event":"skill_end","session_id":"s10","name":"superpowers:writing-skills","compliance":"partial","deviations":[{"clause":"a","reason":"b"}]}
+{"ts":"2026-01-01T15:02:00+09:00","event":"skill_end","session_id":"s11","name":"superpowers:writing-skills","compliance":"partial","deviations":[{"clause":"a","reason":"b"}]}
+{"ts":"2026-01-01T15:03:00+09:00","event":"skill_end","session_id":"s12","name":"superpowers:writing-skills","compliance":"partial","deviations":[{"clause":"a","reason":"b"}]}
+{"ts":"2026-01-01T15:04:00+09:00","event":"correction","session_id":"s10","skills":["superpowers:writing-skills"],"summary":"c1","gist":""}
+{"ts":"2026-01-01T15:05:00+09:00","event":"correction","session_id":"s11","skills":["superpowers:writing-skills"],"summary":"c2","gist":""}
+{"ts":"2026-01-01T15:06:00+09:00","event":"correction","session_id":"s12","skills":["superpowers:writing-skills"],"summary":"c3","gist":""}
+{"ts":"2026-01-01T16:00:00+09:00","event":"skill","session_id":"t1","name":"superpowers:brainstorming"}
+{"ts":"2026-01-01T16:01:00+09:00","event":"skill","session_id":"t2","name":"superpowers:brainstorming"}
+{"ts":"2026-01-01T16:02:00+09:00","event":"skill","session_id":"t3","name":"superpowers:brainstorming"}
+{"ts":"2026-01-01T16:03:00+09:00","event":"skill","session_id":"t4","name":"superpowers:brainstorming"}
+{"ts":"2026-01-01T16:04:00+09:00","event":"skill","session_id":"t5","name":"superpowers:brainstorming"}
+{"ts":"2026-01-01T16:05:00+09:00","event":"skill_end","session_id":"t1","name":"superpowers:brainstorming","compliance":"full","deviations":[]}
+{"ts":"2026-01-01T16:06:00+09:00","event":"skill_end","session_id":"t2","name":"superpowers:brainstorming","compliance":"full","deviations":[]}
 JSONL
 
 OUT=$(python3 aggregate-usage.py)
@@ -68,6 +82,14 @@ assert_eq "미귀속 violations 제외" "0" "$(printf '%s' "$OUT" | grep -c "미
 ALL=$(python3 aggregate-usage.py --all)
 assert_contains "--all에 미귀속 버킷" "(미귀속)" "$ALL"
 assert_contains "--all에 스킬별 카운트" "implement" "$ALL"
+
+# --- 플러그인 스킬(plugin_prefixes 매칭): 조항 개정 경로가 없어 준수 축만 제외 ---
+# superpowers:writing-skills — partial 3·correction 3이어도 violations 미노출
+assert_eq "플러그인 partial·correction 임계 제외" "0" "$(printf '%s' "$OUT" | grep -c "superpowers:writing-skills")"
+# superpowers:brainstorming — 누락률은 기록 배선(프로젝트 스킬 소관) 신호라 유지
+assert_contains "플러그인 누락률은 유지" "superpowers:brainstorming — 종료 레코드 누락률 60%" "$OUT"
+# 제외된 버킷도 --all 진단 표에는 남는다
+assert_contains "--all에 플러그인 버킷" "superpowers:writing-skills" "$ALL"
 
 # --- 축별 누수 집계 ---
 # 축1: 3건 ≥ 임계 3 → 초과, 축2: 2건 < 임계 3 → 미검출, 축3: 0건

@@ -6,6 +6,8 @@
 - 발동/종료는 세션 단위 dedupe (#712) — 세션 재개·SDD로 같은 세션에서 재발동해도 1회로 센다.
   session_id 없는 레코드는 레코드별로 따로 센다.
 - (미귀속) 버킷은 --all 진단 표에만 노출 — 스킬이 아니라 정비(improvement 마킹) 소비 경로가 없어 임계 판정에서 제외.
+- plugin_prefixes 매칭 스킬(superpowers: 등)은 조항이 이 레포 밖이라 개정 불가 → partial·correction 임계만 제외.
+  누락률은 유지한다 — 종료 레코드 배선은 프로젝트 스킬 소관이라 여전히 고칠 수 있는 신호다.
 - axis_leak 이벤트는 missed_axis(1/2/3)별로 별도 집계하며, improvement name이 합성 버킷 "axis:<n>" 형식이면 그 ts 이후만 신선 처리(소비 마킹) — 스킬 stats와 섞지 않는다.
 - exit 0 고정: 게이트가 아니라 제안이다. 임계는 usage-thresholds.json.
 """
@@ -97,12 +99,14 @@ def missing_rate(entry):
 
 def violations(stats, axis_stats, thresholds):
     lines = []
+    plugin_prefixes = tuple(thresholds.get("plugin_prefixes", []))
     for name, entry in sorted(stats.items()):
         if name == UNATTRIBUTED:
             continue
-        if entry["corrections"] >= thresholds["correction_count"]:
+        is_plugin = bool(plugin_prefixes) and name.startswith(plugin_prefixes)
+        if not is_plugin and entry["corrections"] >= thresholds["correction_count"]:
             lines.append(f"⚠️ {name} — correction {entry['corrections']}건 (임계 {thresholds['correction_count']})")
-        if entry["partial"] >= thresholds["partial_count"]:
+        if not is_plugin and entry["partial"] >= thresholds["partial_count"]:
             lines.append(f"⚠️ {name} — 준수 partial {entry['partial']}건 (임계 {thresholds['partial_count']})")
         if entry["invocations"] >= thresholds["min_invocations_for_missing"]:
             rate = missing_rate(entry)
