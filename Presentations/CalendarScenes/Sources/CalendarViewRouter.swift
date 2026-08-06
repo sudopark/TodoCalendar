@@ -32,8 +32,7 @@ final class CalendarViewRouterImple: BaseRouterImple, CalendarViewRouting, @unch
         self.aiAgentCommandSceneBuilder = aiAgentCommandSceneBuilder
     }
     private var currentScene: (any CalendarScene)? { self.scene as? (any CalendarScene) }
-    private weak var presentedAICommandScene: (any Scene)?
-    
+
     @MainActor
     func attachInitialMonths(_ months: [CalendarMonth]) -> [any CalendarPaperSceneInteractor] {
         guard let current = self.currentScene else { return [] }
@@ -53,16 +52,13 @@ final class CalendarViewRouterImple: BaseRouterImple, CalendarViewRouting, @unch
         current.changeFocus(at: index)
     }
 
+    // 진입 시점에 떠 있는 시트는 이전 결과 시트일 수도, 키보드 입력 시트(다른 라우터가 띄운다)일 수도 있다.
+    // 무엇이 떠 있든 닫고 완료 콜백에서 present — 겹쳐 띄우면 UIKit이 예외를 던진다.
+    // 뜬 게 없으면 dismissPresented가 즉시 completion을 부르므로 음성 입력 경로도 그대로 통과한다.
     func routeToAICommand() {
-        Task { @MainActor in
-            // 이미 떠 있는 결과 시트가 있으면 닫고 새로 띄운다.
-            // dismiss 완료 콜백에서 present해 전환 타이밍 충돌을 방지.
-            if self.presentedAICommandScene != nil {
-                self.scene?.dismiss(animated: true) { [weak self] in
-                    self?.presentAICommandScene()
-                }
-            } else {
-                self.presentAICommandScene()
+        self.dismissPresented(animated: true) { [weak self] in
+            Task { @MainActor in
+                self?.presentAICommandScene()
             }
         }
     }
@@ -70,7 +66,6 @@ final class CalendarViewRouterImple: BaseRouterImple, CalendarViewRouting, @unch
     @MainActor
     private func presentAICommandScene() {
         let next = self.aiAgentCommandSceneBuilder.makeCommandScene()
-        self.presentedAICommandScene = next
         self.showBottomSlide(next)
     }
 }
