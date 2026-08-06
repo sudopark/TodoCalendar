@@ -244,7 +244,8 @@ let project = Project.app(
                 settings: Project.releaseShareSigningSetting
             )
         ],
-        withTest: true
+        withTest: true,
+        snapshotTests: true
     ),
     schemes: [
         .scheme(

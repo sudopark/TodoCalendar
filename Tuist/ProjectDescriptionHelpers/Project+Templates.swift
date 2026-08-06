@@ -308,10 +308,21 @@ extension Project {
         infoPlist: [String: Plist.Value] = [:],
         dependencies: [TargetDependency],
         signingConfigures: [ProjectDescription.Configuration],
-        withTest: Bool = true
+        withTest: Bool = true,
+        snapshotTests: Bool = false
     ) -> [Target] {
 
         let targetName = "\(appName)\(extensionName)"
+
+        // 확장 소스는 .appExtension product라 unit test가 host할 수 없다 —
+        // 테스트·스냅샷 타겟 모두 본 타겟과 같은 소스를 다시 컴파일해서 참조한다.
+        let extensionSources: [SourceFileGlob] = [
+            "AppExtensions/Base/**",
+            "AppExtensions/\(extensionName)/Sources/**",
+            "Sources/AppEnvironment.swift",
+            "Sources/NeverRemoveAuthStorage.swift",
+            .glob("Intents/TodoCalendarWidgetIntents.intentdefinition", codeGen: .public)
+        ]
 
         let target = Target.target(
             name: targetName,
@@ -320,13 +331,7 @@ extension Project {
             bundleId: "\(organizationName).\(appName).\(extensionName)",
             deploymentTargets: .iOS(iOSTargetVersion),
             infoPlist: .extendingDefault(with: infoPlist),
-            sources: [
-                "AppExtensions/Base/**",
-                "AppExtensions/\(extensionName)/Sources/**",
-                "Sources/AppEnvironment.swift",
-                "Sources/NeverRemoveAuthStorage.swift",
-                .glob("Intents/TodoCalendarWidgetIntents.intentdefinition", codeGen: .public)
-            ],
+            sources: .init(globs: extensionSources),
             resources: [
                 "AppExtensions/\(extensionName)/Resources/**",
                 "Resources/secrets.json",
@@ -344,8 +349,6 @@ extension Project {
             )
         )
 
-        guard withTest else { return [target] }
-
         let testTarget = Target.target(
             name: "\(targetName)Tests",
             destinations: destinations,
@@ -353,14 +356,7 @@ extension Project {
             bundleId: "\(organizationName).\(appName).\(extensionName)Tests",
             deploymentTargets: .iOS(iOSTargetVersion),
             infoPlist: .default,
-            sources: [
-                "AppExtensions/Base/**",
-                "AppExtensions/\(extensionName)/Sources/**",
-                "Sources/AppEnvironment.swift",
-                "Sources/NeverRemoveAuthStorage.swift",
-                .glob("Intents/TodoCalendarWidgetIntents.intentdefinition", codeGen: .public),
-                "AppExtensions/\(extensionName)/Tests/**"
-            ],
+            sources: .init(globs: extensionSources + ["AppExtensions/\(extensionName)/Tests/**"]),
             dependencies: [
                 .target(name: appName),
                 .project(
@@ -378,6 +374,40 @@ extension Project {
             ]
         )
 
-        return [target, testTarget]
+        var targets: [Target] = [target]
+        if withTest {
+            targets.append(testTarget)
+        }
+
+        if snapshotTests {
+            targets.append(
+                Target.target(
+                    name: "\(targetName)Snapshots",
+                    destinations: destinations,
+                    product: .unitTests,
+                    bundleId: "\(organizationName).\(appName).\(extensionName)Snapshots",
+                    deploymentTargets: .iOS(iOSTargetVersion),
+                    infoPlist: .default,
+                    sources: .init(globs: extensionSources + ["AppExtensions/\(extensionName)/Snapshots/**"]),
+                    dependencies: [
+                        .target(name: appName),
+                        .project(
+                            target: "SnapshotTestHelpKit",
+                            path: .relativeToCurrentFile("../../Supports/SnapshotTestHelpKit")
+                        ),
+                        .project(
+                            target: "TestDoubles",
+                            path: .relativeToCurrentFile("../../Supports/TestDoubles")
+                        ),
+                        .project(
+                            target: "Common3rdParty",
+                            path: .relativeToCurrentFile("../../Supports/Common3rdParty")
+                        )
+                    ]
+                )
+            )
+        }
+
+        return targets
     }
 }
