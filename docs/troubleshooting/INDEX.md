@@ -6,4 +6,5 @@
 
 <!-- 레코드는 아래에 최신순으로 추가 -->
 
+- [2026-08-07 키보드 입력 시트에서 커맨드를 전송하면 present 충돌로 크래시](2026-08-07-ai-command-sheet-present-while-keyboard-sheet-up.md) — AIAgent / fixed / already presenting, 바텀시트 크래시, 키보드 입력 전송
 - [2026-08-06 Share Extension으로 만든 AI job의 결과 푸시가 안 온다](2026-08-06-share-extension-ai-job-no-push.md) — AIAgent / non-issue / 푸시 안옴, device_id, DailyLimitExceeded, share extension
