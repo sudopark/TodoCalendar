@@ -74,22 +74,26 @@ extension ShareCommandViewModel {
 
     func send(sharedText: String, additionalInstruction: String) {
         guard self.canSubmit else { return }
-        let command = AIShareCommandText(
-            sharedText: sharedText,
-            additionalInstruction: additionalInstruction
-        )
-        guard !command.isEmpty else { return }
+        guard !sharedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        else { return }
 
         self.subject.failureMessage.send(nil)
         self.subject.isSending.send(true)
         Task { [weak self] in
             guard let self else { return }
             do {
-                try await self.submitService.submit(command)
+                try await self.submitService.submit(
+                    sharedText: sharedText,
+                    additionalInstruction: additionalInstruction
+                )
                 self.subject.sentMessage.send("share.ai::sent".localized())
             } catch ShareSubmitFailure.createdButNotTrackable {
                 // job은 서버에 만들어졌지만 앱이 이어받을 기록이 없다 — 보냈다고만 하면 거짓말이 된다
                 self.subject.sentMessage.send("share.ai::sentButUntracked".localized())
+            } catch ShareSubmitFailure.sharedTextTooLong {
+                self.subject.failureMessage.send("share.ai::textTooLong".localized())
+            } catch ShareSubmitFailure.additionalInstructionTooLong {
+                self.subject.failureMessage.send("share.ai::instructionTooLong".localized())
             } catch {
                 self.subject.failureMessage.send("share.ai::failed".localized())
             }
