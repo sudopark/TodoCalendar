@@ -250,12 +250,45 @@ private extension AIAgentCommandStageView {
         }
     }
 
+    // AI 응답 본문 공통 — 서버가 실어 보내는 인라인 마크다운(**강조**)을 해석하고 줄바꿈은 원문대로 둔다.
+    // 목록·헤더 같은 블록 문법은 SwiftUI Text가 렌더하지 못해 파싱 대상에서 뺐다 — 마커가 원문 텍스트로 남는다
+    func assistantMessageText(_ text: String) -> some View {
+        Text(self.parsedMarkdown(text))
+            .font(appearance.fontSet.size(16).asFont)
+            .foregroundStyle(appearance.colorSet.text0.asColor)
+            .textSelection(.enabled)
+    }
+
+    // 파싱 실패(깨진 마크다운)는 원문 그대로 폴백 — 응답을 못 읽는 상황을 만들지 않는다
+    func parsedMarkdown(_ text: String) -> AttributedString {
+        let parsed = try? AttributedString(
+            markdown: text,
+            options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)
+        )
+        return parsed ?? AttributedString(text)
+    }
+
     // AI 응답 메시지 말풍선
     func assistantMessageBubble(_ text: String) -> some View {
         self.assistantBubble {
-            Text(text)
-                .font(appearance.fontSet.size(16).asFont)
-                .foregroundStyle(appearance.colorSet.text0.asColor)
+            self.assistantMessageText(text)
+        }
+    }
+
+    // 아이콘 + 메시지 AI 말풍선 (완료·실패 공용)
+    func assistantIconMessageBubble(
+        systemName: String,
+        tint: Color,
+        text: String
+    ) -> some View {
+        self.assistantBubble {
+            HStack(alignment: .top, spacing: Metric.Spacing.small) {
+                Image(systemName: systemName)
+                    .font(.system(size: 20))
+                    .foregroundStyle(tint)
+
+                self.assistantMessageText(text)
+            }
         }
     }
 
@@ -360,17 +393,11 @@ private extension AIAgentCommandStageView {
                 self.userMessageBubble(command)
             }
 
-            self.assistantBubble {
-                HStack(alignment: .top, spacing: Metric.Spacing.small) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 20))
-                        .foregroundStyle(appearance.colorSet.accent.asColor)
-
-                    Text(message?.isEmpty == false ? message! : "aiAgent::done::default".localized())
-                        .font(appearance.fontSet.size(16).asFont)
-                        .foregroundStyle(appearance.colorSet.text0.asColor)
-                }
-            }
+            self.assistantIconMessageBubble(
+                systemName: "checkmark.circle.fill",
+                tint: appearance.colorSet.accent.asColor,
+                text: message.flatMap { $0.isEmpty ? nil : $0 } ?? "aiAgent::done::default".localized()
+            )
 
             // 완료를 명시적으로 확인 → reset(idle) 후 닫힘
             ConfirmButton(
@@ -396,18 +423,12 @@ private extension AIAgentCommandStageView {
                 self.userMessageBubble(command)
             }
 
-            self.assistantBubble {
-                HStack(alignment: .top, spacing: Metric.Spacing.small) {
-                    // 한도 초과는 모래시계로 구분 — "내일 리셋까지 대기" 의미. 문구는 서버 reason 그대로
-                    Image(systemName: errorCode == .dailyLimitExceeded ? "hourglass.circle.fill" : "exclamationmark.triangle.fill")
-                        .font(.system(size: 20))
-                        .foregroundStyle(appearance.colorSet.accentWarn.asColor)
-
-                    Text(reason?.isEmpty == false ? reason! : "aiAgent::failed::default".localized())
-                        .font(appearance.fontSet.size(16).asFont)
-                        .foregroundStyle(appearance.colorSet.text0.asColor)
-                }
-            }
+            // 한도 초과는 모래시계로 구분 — "내일 리셋까지 대기" 의미. 문구는 서버 reason 그대로
+            self.assistantIconMessageBubble(
+                systemName: errorCode == .dailyLimitExceeded ? "hourglass.circle.fill" : "exclamationmark.triangle.fill",
+                tint: appearance.colorSet.accentWarn.asColor,
+                text: reason.flatMap { $0.isEmpty ? nil : $0 } ?? "aiAgent::failed::default".localized()
+            )
 
             // 한도 초과 + paywall 플래그가 켜졌을 때만 "플랜 보기" 진입 — 플래그 판정은 ViewModel이 해서
             // 여기선 스냅샷 값(state.isPaywallAvailable)만 읽는다 (#739)
