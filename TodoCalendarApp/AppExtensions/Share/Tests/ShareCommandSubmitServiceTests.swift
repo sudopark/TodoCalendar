@@ -51,8 +51,9 @@ extension ShareCommandSubmitServiceTests {
     @Test("앞선 요청이 남아있으면 대기중으로 판정한다")
     func checkPrecondition_whenPendingExists() async {
         // given
-        let repository = StubAICommandRepository()
-        repository.stubPendingCommand = .init(jobId: "job", isConfirmJob: false)
+        let repository = makeStubAICommandRepository(
+            pending: .init(jobId: "job", isConfirmJob: false)
+        )
         let (service, _) = self.makeService(repository: repository)
 
         // when
@@ -65,8 +66,7 @@ extension ShareCommandSubmitServiceTests {
     @Test("앞선 요청 유무 확인에 실패하면 통과시키지 않는다 (fail-closed)")
     func checkPrecondition_whenLoadFails_blocks() async {
         // given
-        let repository = StubAICommandRepository()
-        repository.shouldFailLoadPending = true
+        let repository = makeStubAICommandRepository(shouldFailLoadPending: true)
         let (service, _) = self.makeService(repository: repository)
 
         // when
@@ -86,6 +86,174 @@ extension ShareCommandSubmitServiceTests {
 
         // then
         #expect(precondition == .ready)
+    }
+}
+
+
+// MARK: - 제출
+
+extension ShareCommandSubmitServiceTests {
+
+    @Test("원문과 부가지시를 조립 없이 그대로 넘긴다")
+    func submit_passesRawTextAndInstruction() async throws {
+        // given
+        let (service, repository) = self.makeService()
+
+        // when
+        try await service.submit(
+            sharedText: "9월 10일 약속",
+            additionalInstruction: "오후 3시로 잡아줘"
+        )
+
+        // then
+        #expect(repository.didProcessInterpretText == "9월 10일 약속")
+        #expect(repository.didProcessInterpretAdditionalInstruction == "오후 3시로 잡아줘")
+        #expect(repository.didUpdatePendingJobId == "some_job")
+    }
+
+    @Test("앞뒤 공백은 제거하고 넘긴다")
+    func submit_trimsInputs() async throws {
+        // given
+        let (service, repository) = self.makeService()
+
+        // when
+        try await service.submit(
+            sharedText: "  9월 10일 약속\n\n",
+            additionalInstruction: "\t오후 3시로 잡아줘  "
+        )
+
+        // then
+        #expect(repository.didProcessInterpretText == "9월 10일 약속")
+        #expect(repository.didProcessInterpretAdditionalInstruction == "오후 3시로 잡아줘")
+    }
+
+    @Test("부가지시가 공백뿐이면 없는 것으로 넘긴다")
+    func submit_whenInstructionIsBlank_passesNil() async throws {
+        // given
+        let (service, repository) = self.makeService()
+
+        // when
+        try await service.submit(sharedText: "9월 10일 약속", additionalInstruction: "   ")
+
+        // then
+        #expect(repository.didProcessInterpretAdditionalInstruction == nil)
+    }
+
+    @Test("원문이 공백뿐이면 보내지 않는다")
+    func submit_whenTextIsBlank_throws() async {
+        // given
+        let (service, repository) = self.makeService()
+
+        // when
+        let failure = await self.captureFailure {
+            try await service.submit(sharedText: " \n ", additionalInstruction: "")
+        }
+
+        // then
+        #expect(failure as? ShareSubmitFailure == .emptyCommand)
+        #expect(repository.didProcessInterpretText == nil)
+    }
+
+    @Test("원문이 상한을 넘으면 보내지 않는다")
+    func submit_whenTextExceedsLimit_throws() async {
+        // given
+        let (service, repository) = self.makeService()
+        let tooLong = String(repeating: "가", count: 10001)
+
+        // when
+        let failure = await self.captureFailure {
+            try await service.submit(sharedText: tooLong, additionalInstruction: "")
+        }
+
+        // then
+        #expect(failure as? ShareSubmitFailure == .sharedTextTooLong)
+        #expect(repository.didProcessInterpretText == nil)
+    }
+
+    @Test("상한과 같은 길이는 통과한다")
+    func submit_whenTextIsExactlyAtLimit_passes() async throws {
+        // given
+        let (service, repository) = self.makeService()
+        let exact = String(repeating: "가", count: 10000)
+
+        // when
+        try await service.submit(sharedText: exact, additionalInstruction: "")
+
+        // then
+        #expect(repository.didProcessInterpretText?.count == 10000)
+    }
+
+    @Test("부가지시가 상한을 넘으면 보내지 않는다")
+    func submit_whenInstructionExceedsLimit_throws() async {
+        // given
+        let (service, repository) = self.makeService()
+        let tooLong = String(repeating: "가", count: 1001)
+
+        // when
+        let failure = await self.captureFailure {
+            try await service.submit(sharedText: "9월 10일 약속", additionalInstruction: tooLong)
+        }
+
+        // then
+        #expect(failure as? ShareSubmitFailure == .additionalInstructionTooLong)
+        #expect(repository.didProcessInterpretText == nil)
+    }
+
+    @Test("부가지시가 상한과 같은 길이면 통과한다")
+    func submit_whenInstructionIsExactlyAtLimit_passes() async throws {
+        // given
+        let (service, repository) = self.makeService()
+        let exact = String(repeating: "가", count: 1000)
+
+        // when
+        try await service.submit(sharedText: "9월 10일 약속", additionalInstruction: exact)
+
+        // then
+        #expect(repository.didProcessInterpretAdditionalInstruction?.count == 1000)
+    }
+
+    @Test("제출 자체가 실패하면 에러를 그대로 전파한다")
+    func submit_whenProcessFails_throwsUnderlyingError() async {
+        // given
+        let repository = makeStubAICommandRepository(
+            processFailWith: RuntimeError("network is down")
+        )
+        let (service, _) = self.makeService(repository: repository)
+
+        // when
+        let failure = await self.captureFailure {
+            try await service.submit(sharedText: "9월 10일 약속", additionalInstruction: "")
+        }
+
+        // then
+        #expect((failure as? RuntimeError)?.message == "network is down")
+        #expect(repository.didUpdatePendingJobId == nil)
+    }
+
+    @Test("job은 만들어졌는데 기록에 실패하면 추적 불가로 알린다")
+    func submit_whenRecordFails_throwsNotTrackable() async {
+        // given
+        let repository = makeStubAICommandRepository(shouldFailUpdatePending: true)
+        let (service, _) = self.makeService(repository: repository)
+
+        // when
+        let failure = await self.captureFailure {
+            try await service.submit(sharedText: "9월 10일 약속", additionalInstruction: "")
+        }
+
+        // then
+        #expect(failure as? ShareSubmitFailure == .createdButNotTrackable)
+    }
+
+    private func captureFailure(
+        _ action: () async throws -> Void
+    ) async -> (any Error)? {
+        do {
+            try await action()
+            return nil
+        } catch {
+            return error
+        }
     }
 }
 
@@ -142,6 +310,22 @@ final class StubAICommandRepository: AICommandRepository, @unchecked Sendable {
     func cancelCommand(_ jobId: String) async throws { }
     func loadJob(_ jobId: String) async throws -> AIJob { throw RuntimeError("not used") }
     func loadUsage() async throws -> AIAgentUsageLoadResult { throw RuntimeError("not used") }
+}
+
+// ShareCommandSubmitServiceTests·ShareCommandViewModelTests가 공유하는 팩토리 —
+// 테스트 본문에서 stub을 직접 mutate하지 않도록 여기 한 곳에 모은다 (testability.md §2).
+func makeStubAICommandRepository(
+    pending: ProcessingAICommand? = nil,
+    processFailWith error: (any Error)? = nil,
+    shouldFailLoadPending: Bool = false,
+    shouldFailUpdatePending: Bool = false
+) -> StubAICommandRepository {
+    let repository = StubAICommandRepository()
+    repository.stubPendingCommand = pending
+    repository.stubProcessError = error
+    repository.shouldFailLoadPending = shouldFailLoadPending
+    repository.shouldFailUpdatePending = shouldFailUpdatePending
+    return repository
 }
 
 
