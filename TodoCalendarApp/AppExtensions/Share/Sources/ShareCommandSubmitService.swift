@@ -20,7 +20,7 @@ enum ShareSubmitPrecondition {
 }
 
 
-enum ShareSubmitFailure: Error {
+enum ShareSubmitFailure: Error, Equatable {
     case emptyCommand
     /// job은 서버에 만들어졌지만 로컬 기록에 실패해 앱이 결과를 이어받을 수 없다.
     case createdButNotTrackable
