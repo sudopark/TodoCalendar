@@ -61,6 +61,14 @@ cat > "$FIXTURE" << 'JSONL'
 {"ts":"2026-01-01T16:04:00+09:00","event":"skill","session_id":"t5","name":"superpowers:brainstorming"}
 {"ts":"2026-01-01T16:05:00+09:00","event":"skill_end","session_id":"t1","name":"superpowers:brainstorming","compliance":"full","deviations":[]}
 {"ts":"2026-01-01T16:06:00+09:00","event":"skill_end","session_id":"t2","name":"superpowers:brainstorming","compliance":"full","deviations":[]}
+{"ts":"2026-01-01T17:00:00+09:00","event":"skill","session_id":"u1","name":"handoff-prepare"}
+{"ts":"2026-01-01T17:01:00+09:00","event":"skill","session_id":"u2","name":"handoff-prepare"}
+{"ts":"2026-01-01T17:02:00+09:00","event":"skill","session_id":"u3","name":"handoff-prepare"}
+{"ts":"2026-01-01T17:03:00+09:00","event":"skill","session_id":"u4","name":"handoff-prepare"}
+{"ts":"2026-01-01T17:04:00+09:00","event":"skill","session_id":"u5","name":"handoff-prepare"}
+{"ts":"2026-01-01T17:05:00+09:00","event":"correction","session_id":"u1","skills":["handoff-prepare"],"summary":"c1","gist":""}
+{"ts":"2026-01-01T17:06:00+09:00","event":"correction","session_id":"u2","skills":["handoff-prepare"],"summary":"c2","gist":""}
+{"ts":"2026-01-01T17:07:00+09:00","event":"correction","session_id":"u3","skills":["handoff-prepare"],"summary":"c3","gist":""}
 JSONL
 
 OUT=$(python3 aggregate-usage.py)
@@ -90,6 +98,12 @@ assert_eq "플러그인 partial·correction 임계 제외" "0" "$(printf '%s' "$
 assert_contains "플러그인 누락률은 유지" "superpowers:brainstorming — 종료 레코드 누락률 60%" "$OUT"
 # 제외된 버킷도 --all 진단 표에는 남는다
 assert_contains "--all에 플러그인 버킷" "superpowers:writing-skills" "$ALL"
+
+# --- excluded_skills: 이 레포가 정본을 안 가져 정비 경로가 없는 대상은 임계 판정 통째 제외 ---
+# handoff-prepare — 발동 5·종료 0(누락률 100%)·correction 3이어도 violations 미노출
+assert_eq "excluded_skills 임계 판정 전체 제외" "0" "$(printf '%s' "$OUT" | grep -c "handoff-prepare")"
+# 제외해도 --all 진단 표에는 남는다
+assert_contains "--all에 excluded_skills 버킷" "handoff-prepare" "$ALL"
 
 # --- 축별 누수 집계 ---
 # 축1: 3건 ≥ 임계 3 → 초과, 축2: 2건 < 임계 3 → 미검출, 축3: 0건
