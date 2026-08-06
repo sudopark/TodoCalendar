@@ -67,6 +67,7 @@ tuist generate --no-open      # 파일 추가/삭제 후 재실행 필수
 | 코드 분석 (로직·추적·관계·영향도) | analyze 스킬 → code-analyzer subagent |
 | 커밋 / PR / 이슈 | commit / pr / issue 스킬 |
 | 공개 PR 에이전트 리뷰 | review 스킬 → code-reviewer subagent |
+| 하네스 수정분 PR 리뷰 | harness-review 스킬 → harness-reviewer subagent |
 
 > 테스트 작성 원칙: [`.claude/rules/testability.md`](.claude/rules/testability.md) (path 매칭 자동 로드)
 
