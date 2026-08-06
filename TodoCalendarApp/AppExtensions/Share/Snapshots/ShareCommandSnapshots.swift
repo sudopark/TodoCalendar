@@ -42,4 +42,90 @@ final class ShareCommandSnapshots: XCTestCase {
             }
         }
     }
+
+    @MainActor
+    func test_editingWithInstruction() {
+        captureSnapshotPair(named: "editingWithInstruction", layout: .fullScreen) { theme in
+            ShareCommandContainerView(
+                viewAppearance: self.makeAppearance(theme),
+                eventHandlers: ShareCommandViewEventHandler()
+            )
+            .eventHandler(\.stateBinding) { state in
+                state.isPreparing = false
+                state.sharedText = "9월 10일 오후 3시 강남역에서 미팅"
+                state.additionalInstruction = "30분 전에 알림도 걸어줘"
+            }
+        }
+    }
+
+    @MainActor
+    func test_preparing() {
+        captureSnapshotPair(named: "preparing", layout: .fullScreen) { theme in
+            ShareCommandContainerView(
+                viewAppearance: self.makeAppearance(theme),
+                eventHandlers: ShareCommandViewEventHandler()
+            )
+            .eventHandler(\.stateBinding) { state in
+                state.isPreparing = true
+            }
+        }
+    }
+
+    @MainActor
+    func test_sending() {
+        captureSnapshotPair(named: "sending", layout: .fullScreen) { theme in
+            ShareCommandContainerView(
+                viewAppearance: self.makeAppearance(theme),
+                eventHandlers: ShareCommandViewEventHandler()
+            )
+            .eventHandler(\.stateBinding) { state in
+                state.isPreparing = false
+                state.sharedText = "9월 10일 오후 3시 강남역에서 미팅"
+                state.isSending = true
+            }
+        }
+    }
+
+    @MainActor
+    func test_textTooLong() {
+        captureSnapshotPair(named: "textTooLong", layout: .fullScreen) { theme in
+            ShareCommandContainerView(
+                viewAppearance: self.makeAppearance(theme),
+                eventHandlers: ShareCommandViewEventHandler()
+            )
+            .eventHandler(\.stateBinding) { state in
+                state.isPreparing = false
+                state.sharedText = "9월 10일 오후 3시 강남역에서 미팅"
+                state.failureMessage = "share.ai::textTooLong".localized()
+            }
+        }
+    }
+
+    @MainActor
+    func test_blockedByPendingRequest() {
+        captureSnapshotPair(named: "blockedByPendingRequest", layout: .fullScreen) { theme in
+            ShareCommandContainerView(
+                viewAppearance: self.makeAppearance(theme),
+                eventHandlers: ShareCommandViewEventHandler()
+            )
+            .eventHandler(\.stateBinding) { state in
+                state.isPreparing = false
+                state.blockedMessage = "share.ai::pending".localized()
+            }
+        }
+    }
+
+    @MainActor
+    func test_sent() {
+        captureSnapshotPair(named: "sent", layout: .fullScreen) { theme in
+            ShareCommandContainerView(
+                viewAppearance: self.makeAppearance(theme),
+                eventHandlers: ShareCommandViewEventHandler()
+            )
+            .eventHandler(\.stateBinding) { state in
+                state.isPreparing = false
+                state.sentMessage = "share.ai::sent".localized()
+            }
+        }
+    }
 }
