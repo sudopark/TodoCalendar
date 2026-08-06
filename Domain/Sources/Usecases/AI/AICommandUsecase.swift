@@ -23,6 +23,8 @@ public protocol AICommandUsecase: AnyObject, Sendable {
 
     func cancelOngoingCommand(_ jobId: String)
 
+    func clearProcessingCommandRecord() async
+
     func restoreCommandifNeed() -> AnyPublisher<AIJob?, any Error>
 
     func refreshJobStatus(_ jobId: String)
@@ -144,6 +146,12 @@ extension AICommandUsecaseImple {
             try? await repository.cancelCommand(jobId)
             try? await repository.clearProcessingAICommand()
         }
+    }
+
+    // 로그아웃 정리 전용 — 서버 job은 그대로 두고 로컬 복원 근거만 지운다.
+    // 남겨두면 재로그인 시 restoreCommandifNeed가 죽은 job을 이어받아 다시 폴링한다.
+    public func clearProcessingCommandRecord() async {
+        try? await self.repository.clearProcessingAICommand()
     }
 
     public func refreshJobStatus(_ jobId: String) {
