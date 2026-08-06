@@ -17,6 +17,7 @@ public final class CalendarDeepLinkHandlerImple: DeepLinkHandler, @unchecked Sen
     private weak var calendarInteractor: (any CalendarSceneInteractor)?
     private var pendingEventLink: PendingDeepLink?
     private var pendingSelectCalendar: [String: String]?
+    private var pendingAIEntry: Bool = false
     
     public init() { }
 }
@@ -31,11 +32,18 @@ extension CalendarDeepLinkHandlerImple {
         _ = eventHandler.handleLink(pending)
     }
     
+    // 날짜 이동을 먼저 끝낸 뒤 AI 입력을 띄운다 — 순서가 반대면 입력이 뜬 상태에서 뒤늦게 달력이 움직인다.
     func attach(calendarInteractor: any CalendarSceneInteractor) {
         self.calendarInteractor = calendarInteractor
-        guard let pending = self.pendingSelectCalendar else { return }
-        self.pendingSelectCalendar = nil
-        _ = self.handleMoveDate(calendarInteractor, pending)
+
+        if let pending = self.pendingSelectCalendar {
+            self.pendingSelectCalendar = nil
+            _ = self.handleMoveDate(calendarInteractor, pending)
+        }
+
+        guard self.pendingAIEntry else { return }
+        self.pendingAIEntry = false
+        calendarInteractor.requestAIEntry()
     }
     
     public func handleLink(_ link: PendingDeepLink) -> DeepLinkHandleResult {
@@ -50,7 +58,16 @@ extension CalendarDeepLinkHandlerImple {
                 return .handle
             }
             return handler.handleLink(link)
-            
+
+        case "ai":
+            guard let interactor = self.calendarInteractor
+            else {
+                self.pendingAIEntry = true
+                return .handle
+            }
+            interactor.requestAIEntry()
+            return .handle
+
         case nil:
             guard let interactor = self.calendarInteractor
             else {

@@ -68,7 +68,8 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
             appleCalendarUsecase: self.usecaseFactory.makeAppleCalendarUsecase(),
             eventUploadService: self.usecaseFactory.eventUploadService,
             eventSyncUsecase: self.usecaseFactory.eventSyncUsecase,
-            aiAgentOrchestrationUsecase: self.usecaseFactory.aiAgentOrchestrationUsecase
+            aiAgentOrchestrationUsecase: self.usecaseFactory.aiAgentOrchestrationUsecase,
+            accountUsecase: self.accountUsecase
         )
         viewModel.listener = listener
         let viewController = CalendarViewController(
@@ -97,7 +98,6 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
         handleViewModelBuilder.router.attach(viewController)
         self.pendingCompleteTodoState.bind(handleViewModelBuilder.viewModel, viewAppearance)
 
-        self.calendarDeepLinkHandler.attach(calendarInteractor: viewModel)
         self.calendarDeepLinkHandler.attach(eventHandler: self.eventDeepLinkHandler)
         self.eventDeepLinkHandler.attach(router: handleViewModelBuilder.router)
 
@@ -111,10 +111,15 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
         )
         let router = CalendarViewRouterImple(
             paperSceneBuilder,
-            aiAgentCommandSceneBuilder: self.aiAgentCommandSceneBuilder
+            aiAgentCommandSceneBuilder: self.aiAgentCommandSceneBuilder,
+            memberSceneBuilder: self.memberSceneBuilder
         )
         router.scene = viewController
         viewModel.router = router
+
+        // 콜드런치 pending 딥링크 flush(requestAIEntry/moveDay)가 router를 참조하므로,
+        // router 주입 이후에 attach — 순서가 뒤바뀌면 flush 시점에 router가 nil이라 분기가 유실된다.
+        self.calendarDeepLinkHandler.attach(calendarInteractor: viewModel)
 
         return viewController
     }

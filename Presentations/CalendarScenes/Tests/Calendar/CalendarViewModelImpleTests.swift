@@ -79,12 +79,14 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
     }
     
     private func makeViewModel(
-        today: CalendarComponent.Day = .init(year: 2023, month: 02, day: 02, weekDay: 5)
+        today: CalendarComponent.Day = .init(year: 2023, month: 02, day: 02, weekDay: 5),
+        isSignedIn: Bool = true
     ) -> CalendarViewModelImple {
-        
+
         let calendarUsecase = StubCalendarUsecase(today: today)
         self.stubCalendarUsecase = calendarUsecase
-        
+        let account: AccountInfo? = isSignedIn ? AccountInfo("uid") : nil
+
         let viewModel = CalendarViewModelImple(
             calendarUsecase: calendarUsecase,
             calendarSettingUsecase: self.stubSettingUsecase,
@@ -99,7 +101,8 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
             appleCalendarUsecase: self.spyAppleCalendarUsecase,
             eventUploadService: self.spyEventUploadService,
             eventSyncUsecase: self.spyEventSyncUsecase,
-            aiAgentOrchestrationUsecase: self.stubOrchestration
+            aiAgentOrchestrationUsecase: self.stubOrchestration,
+            accountUsecase: StubAccountUsecase(account)
         )
         viewModel.router = self.spyRouter
         viewModel.listener = self.spyListener
@@ -1092,6 +1095,54 @@ extension CalendarViewModelImpleTests {
     }
 }
 
+// MARK: - 외부 진입점의 AI 입력 요청 (requestAIEntry)
+
+extension CalendarViewModelImpleTests {
+
+    func testViewModel_whenRequestAIEntryOnCommandPhase_routeToAICommand() {
+        // given
+        let viewModel = self.makeViewModel()
+        self.stubOrchestration.stateSubject.send(.processing(command: "회의"))
+
+        // when
+        viewModel.requestAIEntry()
+
+        // then
+        XCTAssertEqual(self.spyRouter.didRouteToAICommandCount, 1)
+        XCTAssertNil(self.stubOrchestration.didEnterVoiceInput)
+        XCTAssertNil(self.spyRouter.didShowConfirmWith)
+    }
+
+    func testViewModel_whenRequestAIEntryOnIdleAndSignedIn_enterVoiceInput() {
+        // given
+        let viewModel = self.makeViewModel(isSignedIn: true)
+        self.stubOrchestration.stateSubject.send(.idle)
+
+        // when
+        viewModel.requestAIEntry()
+
+        // then
+        XCTAssertEqual(self.stubOrchestration.didEnterVoiceInput, true)
+        XCTAssertEqual(self.spyRouter.didRouteToAICommandCount, 0)
+        XCTAssertNil(self.spyRouter.didShowConfirmWith)
+    }
+
+    func testViewModel_whenRequestAIEntryWithoutSignIn_askSignIn() {
+        // given
+        let viewModel = self.makeViewModel(isSignedIn: false)
+        self.stubOrchestration.stateSubject.send(.idle)
+
+        // when
+        viewModel.requestAIEntry()
+
+        // then
+        XCTAssertNotNil(self.spyRouter.didShowConfirmWith)
+        XCTAssertNil(self.stubOrchestration.didEnterVoiceInput)
+        // SpyRouter.showConfirm은 기본적으로 confirmed?()를 즉시 실행
+        XCTAssertEqual(self.spyRouter.didRouteToSignIn, true)
+    }
+}
+
 private extension CalendarViewModelImpleTests {
     
     class SpyRouter: BaseSpyRouter, CalendarViewRouting, @unchecked Sendable {
@@ -1113,6 +1164,11 @@ private extension CalendarViewModelImpleTests {
         var didRouteToAICommandCount: Int = 0
         func routeToAICommand() {
             self.didRouteToAICommandCount += 1
+        }
+
+        var didRouteToSignIn: Bool?
+        func routeToSignIn() {
+            self.didRouteToSignIn = true
         }
     }
     

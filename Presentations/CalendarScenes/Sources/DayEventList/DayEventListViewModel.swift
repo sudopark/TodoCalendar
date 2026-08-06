@@ -281,10 +281,9 @@ extension DayEventListViewModelImple {
     }
 
     private func confirmSignInForAIAgent() {
-        let info = ConfirmDialogInfo()
-            |> \.title .~ "aiAgent::needSignIn::title".localized()
-            |> \.message .~ "aiAgent::needSignIn::message".localized()
-            |> \.confirmed .~ { [weak self] in self?.router?.routeToSignIn() }
+        let info = ConfirmDialogInfo.aiAgentNeedSignIn { [weak self] in
+            self?.router?.routeToSignIn()
+        }
         self.router?.showConfirm(dialog: info)
     }
 }

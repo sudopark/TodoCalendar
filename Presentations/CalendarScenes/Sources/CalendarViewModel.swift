@@ -42,6 +42,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
     private let eventUploadService: any EventUploadService
     private let eventSyncUsecase: any EventSyncUsecase
     private let aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
+    private let accountUsecase: any AccountUsecase
     var router: (any CalendarViewRouting)?
     private var calendarPaperInteractors: [any CalendarPaperSceneInteractor]?
     // TODO: calendarVC load 이후 바로 prepare를 할것이기때문에 라이프사이클상 listener는 setter 주입이 아니라 생성시에 받아야 할수도있음
@@ -61,7 +62,8 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         appleCalendarUsecase: any AppleCalendarUsecase,
         eventUploadService: any EventUploadService,
         eventSyncUsecase: any EventSyncUsecase,
-        aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
+        aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase,
+        accountUsecase: any AccountUsecase
     ) {
         self.calendarUsecase = calendarUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
@@ -77,7 +79,8 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         self.eventUploadService = eventUploadService
         self.eventSyncUsecase = eventSyncUsecase
         self.aiAgentOrchestrationUsecase = aiAgentOrchestrationUsecase
-        
+        self.accountUsecase = accountUsecase
+
         self.internalBind()
     }
     
@@ -91,6 +94,8 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
     private struct Subject {
         let monthsInCurrentRange = CurrentValueSubject<TotalMonthsInRange?, Never>(nil)
         let selectedDayPerMonths = CurrentValueSubject<[CalendarMonth: CurrentSelectDayModel], Never>([:])
+        let aiAgentState = CurrentValueSubject<AIAgentState?, Never>(nil)
+        let isSignedIn = CurrentValueSubject<Bool, Never>(false)
     }
     private var cancellables: Set<AnyCancellable> = []
     private let subject = Subject()
@@ -116,6 +121,19 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         self.bindEventUploadService()
         self.bindRefreshEvents()
         self.bindFocusedMonthChanged()
+
+        self.accountUsecase.currentAccountInfo
+            .map { $0 != nil }
+            .sink(receiveValue: { [weak self] isSignedIn in
+                self?.subject.isSignedIn.send(isSignedIn)
+            })
+            .store(in: &self.cancellables)
+
+        self.aiAgentOrchestrationUsecase.state
+            .sink(receiveValue: { [weak self] state in
+                self?.subject.aiAgentState.send(state)
+            })
+            .store(in: &self.cancellables)
     }
     
     private func bindRefreshEvents() {
@@ -474,6 +492,29 @@ extension CalendarViewModelImple {
         switch state {
         case .processing, .confirm, .done, .failed: return true
         case .idle, .listening: return false
+        }
+    }
+}
+
+
+// MARK: - 외부 진입점의 AI 입력 요청
+
+extension CalendarViewModelImple {
+
+    func requestAIEntry() {
+        self.router?.dismissPresented(animated: true) { [weak self] in
+            guard let self = self else { return }
+            let state = self.subject.aiAgentState.value ?? .idle
+            if Self.isAICommandPhase(state) {
+                self.router?.routeToAICommand()
+            } else if self.subject.isSignedIn.value {
+                self.aiAgentOrchestrationUsecase.enterVoiceInput()
+            } else {
+                let info = ConfirmDialogInfo.aiAgentNeedSignIn { [weak self] in
+                    self?.router?.routeToSignIn()
+                }
+                self.router?.showConfirm(dialog: info)
+            }
         }
     }
 }
