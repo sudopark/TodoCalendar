@@ -45,36 +45,9 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
         self.eventSyncUsecase = NotNeedEventSyncUsecase()
         self.applicationBase = applicationBase
 
-        let aiLocalStorage = AICommandLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
-        let aiRepository = AICommandRepositoryImple(
-            remote: applicationBase.remoteAPI,
-            localStorage: aiLocalStorage
-        )
-        let calendarSettingRepository = CalendarSettingRepositoryImple(
-            environmentStorage: applicationBase.userDefaultEnvironmentStorage
-        )
-        let calendarSettingUsecase = CalendarSettingUsecaseImple(
-            settingRepository: calendarSettingRepository,
-            shareDataStore: applicationBase.sharedDataStore
-        )
-        let aiCommandUsecase = AICommandUsecaseImple(
-            repository: aiRepository,
-            calendarSettingUsecase: calendarSettingUsecase
-        )
-        let aiUsageUsecase = AIAgentUsageUsecaseImple(
-            repository: aiRepository,
-            sharedDataStore: applicationBase.sharedDataStore
-        )
-        let speech = SpeechRecognizeUsecaseImple(
-            service: SpeechRecognizeServiceImple(),
-            permissionChecker: SpeechRecognizePermissionCheckerImple()
-        )
-        self.aiAgentOrchestrationUsecase = AIAgentOrchestrationUsecaseImple(
-            commandUsecase: aiCommandUsecase,
-            usageUsecase: aiUsageUsecase,
-            speechRecognizeUsecase: speech,
-            eventSyncUsecase: self.eventSyncUsecase
-        )
+        // AI 기능은 로그인 유저 전용 — 실제 스택을 만들지 않는다 (#772).
+        // 진입점 UI는 그대로 노출되고 탭 시 로그인 유도로 갈린다.
+        self.aiAgentOrchestrationUsecase = NotNeedAIAgentOrchestrationUsecase()
     }
 
     var eventNotifyService: SharedEventNotifyService {
