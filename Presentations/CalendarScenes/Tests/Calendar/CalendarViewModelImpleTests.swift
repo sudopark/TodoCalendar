@@ -6,6 +6,7 @@
 //
 
 import XCTest
+import UIKit
 import Combine
 import Prelude
 import Optics
@@ -1221,6 +1222,64 @@ private extension CalendarViewModelImpleTests {
             return isSyncing.removeDuplicates()
                 .eraseToAnyPublisher()
         }
+    }
+}
+
+// MARK: - 앱 비활성과 음성 입력
+
+extension CalendarViewModelImpleTests {
+
+    private func resignActiveAfterPrepared(
+        aiAgentEnabled: Bool = true,
+        state: AIAgentState?
+    ) async throws {
+        if aiAgentEnabled { FeatureFlag.enable(.aiAgent) }
+        let viewModel = self.makeViewModel()
+        viewModel.prepare()
+        try await Task.sleep(for: .milliseconds(50))
+        state.map { self.stubOrchestration.stateSubject.send($0) }
+
+        NotificationCenter.default.post(
+            name: UIApplication.willResignActiveNotification, object: nil
+        )
+        try await Task.sleep(for: .milliseconds(50))
+        // VM이 해제되면 구독도 끊겨 단언이 무의미해진다
+        withExtendedLifetime(viewModel) { }
+    }
+
+    func testViewModel_whenAppResignsActiveWhileVoiceListening_stopsInput() async throws {
+        // given, when
+        try await self.resignActiveAfterPrepared(state: .listening(.voice))
+
+        // then
+        XCTAssertEqual(self.stubOrchestration.didStopInput, true)
+    }
+
+    // 키보드 입력은 오디오와 무관하므로 앱이 비활성이 돼도 유지된다
+    func testViewModel_whenAppResignsActiveWhileKeyboardListening_keepsInput() async throws {
+        // given, when
+        try await self.resignActiveAfterPrepared(state: .listening(.keyboard))
+
+        // then
+        XCTAssertNil(self.stubOrchestration.didStopInput)
+    }
+
+    func testViewModel_whenAppResignsActiveWhileIdle_keepsInput() async throws {
+        // given, when
+        try await self.resignActiveAfterPrepared(state: .idle)
+
+        // then
+        XCTAssertNil(self.stubOrchestration.didStopInput)
+    }
+
+    func testViewModel_whenAIAgentFlagOff_doesNotStopInput() async throws {
+        // given, when
+        try await self.resignActiveAfterPrepared(
+            aiAgentEnabled: false, state: .listening(.voice)
+        )
+
+        // then
+        XCTAssertNil(self.stubOrchestration.didStopInput)
     }
 }
 

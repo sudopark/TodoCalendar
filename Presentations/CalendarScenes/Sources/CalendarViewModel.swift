@@ -248,6 +248,25 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         })
         .store(in: &self.cancellables)
     }
+
+    // 앱이 가려지면(제어센터·앱 스위처·시스템 다이얼로그 포함) 오디오 세션이 끊겨 계속 들을 수 없다.
+    // 듣던 중이면 입력 자체를 접는다 — 키보드 입력은 오디오와 무관하므로 건드리지 않는다.
+    private func bindVoiceInputLifecycle() {
+
+        NotificationCenter.default
+            .publisher(for: UIApplication.willResignActiveNotification)
+            .withLatestFrom(self.aiAgentOrchestrationUsecase.state) { $1 }
+            .filter { Self.isVoiceListeningPhase($0) }
+            .sink(receiveValue: { [weak self] _ in
+                self?.aiAgentOrchestrationUsecase.stopInput()
+            })
+            .store(in: &self.cancellables)
+    }
+
+    private static func isVoiceListeningPhase(_ state: AIAgentState) -> Bool {
+        guard case .listening(.voice) = state else { return false }
+        return true
+    }
 }
 
 
@@ -282,6 +301,7 @@ extension CalendarViewModelImple {
         if FeatureFlag.isEnable(.aiAgent) {
             self.aiAgentOrchestrationUsecase.prepare()
             self.bindShowAICommandResultIfNeed()
+            self.bindVoiceInputLifecycle()
         }
     }
     
