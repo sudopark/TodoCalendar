@@ -566,6 +566,20 @@
 "aiAgent::tip::externalEntry" = "Порада: додавати можна також через Siri, кнопку дії або віджети.";
 "aiAgent::failed::showPlans" = "Переглянути тарифи";
 
+"aiAgent::image::title" = "Прочитати із зображення";
+"aiAgent::image::sourceSelect::title" = "Додати зображення";
+"aiAgent::image::source::library" = "Вибрати з бібліотеки";
+"aiAgent::image::source::camera" = "Зробити фото";
+"aiAgent::image::recognizing" = "Читання зображення…";
+"aiAgent::image::noText" = "На цьому зображенні не знайдено тексту";
+"aiAgent::image::readText" = "Текст із зображення";
+"aiAgent::image::instruction" = "Додаткові вказівки (необов'язково)";
+"aiAgent::image::instruction::placeholder" = "Напр. Додай це як завдання";
+"aiAgent::image::empty" = "Немає тексту для надсилання";
+"aiAgent::image::textTooLong" = "Текст надто довгий. Скоротіть його і спробуйте ще раз.";
+"aiAgent::image::instructionTooLong" = "Ваші вказівки надто довгі. Скоротіть їх і спробуйте ще раз.";
+"aiAgent::image::busy" = "Інший запит ще виконується";
+
 // MARK: - billing
 
 "billing::plan::free" = "Безкоштовний";

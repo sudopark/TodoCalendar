@@ -566,6 +566,20 @@
 "aiAgent::tip::externalEntry" = "Tip: pridávať môžete aj pomocou Siri, tlačidla Akcia alebo widgetov.";
 "aiAgent::failed::showPlans" = "Zobraziť plány";
 
+"aiAgent::image::title" = "Čítať z obrázka";
+"aiAgent::image::sourceSelect::title" = "Pridať obrázok";
+"aiAgent::image::source::library" = "Vybrať z knižnice";
+"aiAgent::image::source::camera" = "Odfotiť";
+"aiAgent::image::recognizing" = "Číta sa obrázok…";
+"aiAgent::image::noText" = "V tomto obrázku sa nenašiel žiadny text";
+"aiAgent::image::readText" = "Text z obrázka";
+"aiAgent::image::instruction" = "Ďalšie pokyny (voliteľné)";
+"aiAgent::image::instruction::placeholder" = "Napr. Pridať toto ako úlohy";
+"aiAgent::image::empty" = "Nie je čo odoslať";
+"aiAgent::image::textTooLong" = "Text je príliš dlhý. Skráťte ho a skúste to znova.";
+"aiAgent::image::instructionTooLong" = "Vaše pokyny sú príliš dlhé. Skráťte ich a skúste to znova.";
+"aiAgent::image::busy" = "Iná požiadavka stále prebieha";
+
 // MARK: - billing
 
 "billing::plan::free" = "Zadarmo";

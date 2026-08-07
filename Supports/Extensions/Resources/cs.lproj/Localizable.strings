@@ -566,6 +566,20 @@
 "aiAgent::tip::externalEntry" = "Tip: přidávat můžete i pomocí Siri, tlačítka Akce nebo widgetů.";
 "aiAgent::failed::showPlans" = "Zobrazit plány";
 
+"aiAgent::image::title" = "Číst z obrázku";
+"aiAgent::image::sourceSelect::title" = "Přidat obrázek";
+"aiAgent::image::source::library" = "Vybrat z knihovny";
+"aiAgent::image::source::camera" = "Vyfotit";
+"aiAgent::image::recognizing" = "Čtu obrázek…";
+"aiAgent::image::noText" = "V tomto obrázku se nepodařilo najít žádný text";
+"aiAgent::image::readText" = "Text z obrázku";
+"aiAgent::image::instruction" = "Další pokyny (volitelné)";
+"aiAgent::image::instruction::placeholder" = "Např. Přidat jako úkoly";
+"aiAgent::image::empty" = "Není co odeslat";
+"aiAgent::image::textTooLong" = "Text je příliš dlouhý. Zkraťte ho a zkuste to znovu.";
+"aiAgent::image::instructionTooLong" = "Pokyny jsou příliš dlouhé. Zkraťte je a zkuste to znovu.";
+"aiAgent::image::busy" = "Stále probíhá jiný požadavek";
+
 // MARK: - billing
 
 "billing::plan::free" = "Zdarma";

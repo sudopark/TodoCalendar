@@ -566,6 +566,20 @@
 "aiAgent::tip::externalEntry" = "Tip: anda juga boleh menambah melalui Siri, Butang Tindakan atau widget.";
 "aiAgent::failed::showPlans" = "Lihat pelan";
 
+"aiAgent::image::title" = "Baca daripada imej";
+"aiAgent::image::sourceSelect::title" = "Tambah imej";
+"aiAgent::image::source::library" = "Pilih dari perpustakaan";
+"aiAgent::image::source::camera" = "Ambil gambar";
+"aiAgent::image::recognizing" = "Membaca imej…";
+"aiAgent::image::noText" = "Tiada teks ditemui dalam imej ini";
+"aiAgent::image::readText" = "Teks daripada imej";
+"aiAgent::image::instruction" = "Arahan tambahan (pilihan)";
+"aiAgent::image::instruction::placeholder" = "Cth. Tambah ini sebagai tugasan";
+"aiAgent::image::empty" = "Tiada teks untuk dihantar";
+"aiAgent::image::textTooLong" = "Teks terlalu panjang. Pendekkan dan cuba lagi.";
+"aiAgent::image::instructionTooLong" = "Arahan anda terlalu panjang. Pendekkan dan cuba lagi.";
+"aiAgent::image::busy" = "Permintaan lain masih berjalan";
+
 // MARK: - billing
 
 "billing::plan::free" = "Percuma";

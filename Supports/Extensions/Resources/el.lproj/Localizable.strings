@@ -566,6 +566,20 @@
 "aiAgent::tip::externalEntry" = "Συμβουλή: μπορείς να προσθέσεις και μέσω Siri, του κουμπιού ενέργειας ή των widget.";
 "aiAgent::failed::showPlans" = "Προβολή προγραμμάτων";
 
+"aiAgent::image::title" = "Ανάγνωση από εικόνα";
+"aiAgent::image::sourceSelect::title" = "Προσθήκη εικόνας";
+"aiAgent::image::source::library" = "Επιλογή από τη βιβλιοθήκη";
+"aiAgent::image::source::camera" = "Λήψη φωτογραφίας";
+"aiAgent::image::recognizing" = "Ανάγνωση της εικόνας…";
+"aiAgent::image::noText" = "Δεν βρέθηκε κείμενο σε αυτήν την εικόνα";
+"aiAgent::image::readText" = "Κείμενο από την εικόνα";
+"aiAgent::image::instruction" = "Επιπλέον οδηγίες (προαιρετικά)";
+"aiAgent::image::instruction::placeholder" = "π.χ. Προσθήκη αυτών ως εργασίες";
+"aiAgent::image::empty" = "Δεν υπάρχει κείμενο για αποστολή";
+"aiAgent::image::textTooLong" = "Το κείμενο είναι πολύ μεγάλο. Συντομεύστε το και δοκιμάστε ξανά.";
+"aiAgent::image::instructionTooLong" = "Οι οδηγίες σας είναι πολύ μεγάλες. Συντομεύστε τις και δοκιμάστε ξανά.";
+"aiAgent::image::busy" = "Ένα άλλο αίτημα εξακολουθεί να εκτελείται";
+
 // MARK: - billing
 
 "billing::plan::free" = "Δωρεάν";

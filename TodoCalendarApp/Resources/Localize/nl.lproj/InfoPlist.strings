@@ -1,3 +1,4 @@
 "NSCalendarsFullAccessUsageDescription" = "Toegang tot de agenda is vereist om gebeurtenissen weer te geven en te synchroniseren met Apple Calendar.";
 "NSMicrophoneUsageDescription" = "Toegang tot de microfoon is vereist om gebeurtenissen en taken via spraak in te voeren.";
 "NSSpeechRecognitionUsageDescription" = "Spraakherkenning is vereist om je stem om te zetten in gebeurtenissen en taken.";
+"NSCameraUsageDescription" = "Toegang tot de camera is vereist om tekst te lezen uit een foto die je maakt.";

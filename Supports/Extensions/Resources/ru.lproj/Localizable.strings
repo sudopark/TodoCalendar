@@ -566,6 +566,20 @@
 "aiAgent::tip::externalEntry" = "Совет: добавлять можно и через Siri, кнопку действия или виджеты.";
 "aiAgent::failed::showPlans" = "Посмотреть тарифы";
 
+"aiAgent::image::title" = "Считать с изображения";
+"aiAgent::image::sourceSelect::title" = "Добавить изображение";
+"aiAgent::image::source::library" = "Выбрать из библиотеки";
+"aiAgent::image::source::camera" = "Сделать фото";
+"aiAgent::image::recognizing" = "Считывание изображения…";
+"aiAgent::image::noText" = "На этом изображении не найден текст";
+"aiAgent::image::readText" = "Текст с изображения";
+"aiAgent::image::instruction" = "Дополнительные указания (необязательно)";
+"aiAgent::image::instruction::placeholder" = "Например: добавь их как задачи";
+"aiAgent::image::empty" = "Нет текста для отправки";
+"aiAgent::image::textTooLong" = "Текст слишком длинный. Сократите его и попробуйте ещё раз.";
+"aiAgent::image::instructionTooLong" = "Ваши указания слишком длинные. Сократите их и попробуйте ещё раз.";
+"aiAgent::image::busy" = "Ещё выполняется другой запрос";
+
 // MARK: - billing
 
 "billing::plan::free" = "Бесплатный";

@@ -1,3 +1,4 @@
 "NSCalendarsFullAccessUsageDescription" = "Tilgang til kalenderen er nødvendig for å vise hendelser og synkronisere med Apple Kalender.";
 "NSMicrophoneUsageDescription" = "Tilgang til mikrofonen er nødvendig for å legge inn hendelser og oppgaver med stemmen.";
 "NSSpeechRecognitionUsageDescription" = "Talegjenkjenning er nødvendig for å konvertere stemmen din til hendelser og oppgaver.";
+"NSCameraUsageDescription" = "Tilgang til kameraet er nødvendig for å lese tekst fra et bilde du tar.";

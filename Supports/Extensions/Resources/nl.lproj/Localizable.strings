@@ -566,6 +566,20 @@
 "aiAgent::tip::externalEntry" = "Tip: je kunt ook toevoegen via Siri, de actieknop of widgets.";
 "aiAgent::failed::showPlans" = "Bekijk abonnementen";
 
+"aiAgent::image::title" = "Lezen vanuit afbeelding";
+"aiAgent::image::sourceSelect::title" = "Afbeelding toevoegen";
+"aiAgent::image::source::library" = "Kiezen uit bibliotheek";
+"aiAgent::image::source::camera" = "Foto maken";
+"aiAgent::image::recognizing" = "Afbeelding wordt gelezen…";
+"aiAgent::image::noText" = "Geen tekst gevonden in deze afbeelding";
+"aiAgent::image::readText" = "Tekst uit de afbeelding";
+"aiAgent::image::instruction" = "Extra instructies (optioneel)";
+"aiAgent::image::instruction::placeholder" = "Bijv. Voeg deze toe als taken";
+"aiAgent::image::empty" = "Er is geen tekst om te verzenden";
+"aiAgent::image::textTooLong" = "De tekst is te lang. Kort hem in en probeer het opnieuw.";
+"aiAgent::image::instructionTooLong" = "Je instructies zijn te lang. Kort ze in en probeer het opnieuw.";
+"aiAgent::image::busy" = "Er loopt nog een ander verzoek";
+
 // MARK: - billing
 
 "billing::plan::free" = "Gratis";

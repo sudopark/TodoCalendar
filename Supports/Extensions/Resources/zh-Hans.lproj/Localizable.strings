@@ -566,6 +566,20 @@
 "aiAgent::tip::externalEntry" = "提示：你还可以通过 Siri、操作按钮或小组件添加。";
 "aiAgent::failed::showPlans" = "查看套餐";
 
+"aiAgent::image::title" = "从图片读取";
+"aiAgent::image::sourceSelect::title" = "添加图片";
+"aiAgent::image::source::library" = "从相册选择";
+"aiAgent::image::source::camera" = "拍照";
+"aiAgent::image::recognizing" = "正在读取图片…";
+"aiAgent::image::noText" = "未在此图片中找到任何文本";
+"aiAgent::image::readText" = "图片中的文本";
+"aiAgent::image::instruction" = "附加指令（可选）";
+"aiAgent::image::instruction::placeholder" = "例如：将这些添加为待办事项";
+"aiAgent::image::empty" = "没有可发送的文本";
+"aiAgent::image::textTooLong" = "文本太长，请缩短后重试。";
+"aiAgent::image::instructionTooLong" = "指令太长，请缩短后重试。";
+"aiAgent::image::busy" = "另一个请求仍在进行中";
+
 // MARK: - billing
 
 "billing::plan::free" = "免费";

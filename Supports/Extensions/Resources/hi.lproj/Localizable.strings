@@ -566,6 +566,20 @@
 "aiAgent::tip::externalEntry" = "सुझाव: आप Siri, एक्शन बटन या विजेट से भी जोड़ सकते हैं।";
 "aiAgent::failed::showPlans" = "प्लान देखें";
 
+"aiAgent::image::title" = "इमेज से पढ़ें";
+"aiAgent::image::sourceSelect::title" = "इमेज जोड़ें";
+"aiAgent::image::source::library" = "लाइब्रेरी से चुनें";
+"aiAgent::image::source::camera" = "फ़ोटो लें";
+"aiAgent::image::recognizing" = "इमेज पढ़ी जा रही है…";
+"aiAgent::image::noText" = "इस इमेज में कोई टेक्स्ट नहीं मिला";
+"aiAgent::image::readText" = "इमेज का टेक्स्ट";
+"aiAgent::image::instruction" = "अतिरिक्त निर्देश (वैकल्पिक)";
+"aiAgent::image::instruction::placeholder" = "उदा. इन्हें कार्य के रूप में जोड़ें";
+"aiAgent::image::empty" = "भेजने के लिए कोई टेक्स्ट नहीं है";
+"aiAgent::image::textTooLong" = "टेक्स्ट बहुत लंबा है। इसे छोटा करके फिर से प्रयास करें।";
+"aiAgent::image::instructionTooLong" = "आपके निर्देश बहुत लंबे हैं। इन्हें छोटा करके फिर से प्रयास करें।";
+"aiAgent::image::busy" = "एक और अनुरोध अभी भी चल रहा है";
+
 // MARK: - billing
 
 "billing::plan::free" = "फ्री";

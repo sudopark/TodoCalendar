@@ -566,6 +566,20 @@
 "aiAgent::tip::externalEntry" = "Tipp: a Sirivel, az Action gombbal vagy widgetekkel is hozzáadhatsz.";
 "aiAgent::failed::showPlans" = "Csomagok megtekintése";
 
+"aiAgent::image::title" = "Olvasás képből";
+"aiAgent::image::sourceSelect::title" = "Kép hozzáadása";
+"aiAgent::image::source::library" = "Kiválasztás a könyvtárból";
+"aiAgent::image::source::camera" = "Fénykép készítése";
+"aiAgent::image::recognizing" = "Kép olvasása…";
+"aiAgent::image::noText" = "Nem található szöveg ezen a képen";
+"aiAgent::image::readText" = "Szöveg a képből";
+"aiAgent::image::instruction" = "További utasítások (opcionális)";
+"aiAgent::image::instruction::placeholder" = "Pl. Ezek hozzáadása feladatként";
+"aiAgent::image::empty" = "Nincs elküldhető szöveg";
+"aiAgent::image::textTooLong" = "A szöveg túl hosszú. Rövidítse le, és próbálja újra.";
+"aiAgent::image::instructionTooLong" = "Az utasításai túl hosszúak. Rövidítse le őket, és próbálja újra.";
+"aiAgent::image::busy" = "Egy másik kérés még mindig folyamatban van";
+
 // MARK: - billing
 
 "billing::plan::free" = "Ingyenes";

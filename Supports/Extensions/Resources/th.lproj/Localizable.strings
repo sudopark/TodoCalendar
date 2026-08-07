@@ -566,6 +566,20 @@
 "aiAgent::tip::externalEntry" = "เคล็ดลับ: คุณยังเพิ่มได้ด้วย Siri ปุ่มการทำงาน หรือวิดเจ็ต";
 "aiAgent::failed::showPlans" = "ดูแพ็กเกจ";
 
+"aiAgent::image::title" = "อ่านจากรูปภาพ";
+"aiAgent::image::sourceSelect::title" = "เพิ่มรูปภาพ";
+"aiAgent::image::source::library" = "เลือกจากคลังภาพ";
+"aiAgent::image::source::camera" = "ถ่ายภาพ";
+"aiAgent::image::recognizing" = "กำลังอ่านรูปภาพ…";
+"aiAgent::image::noText" = "ไม่พบข้อความในรูปภาพนี้";
+"aiAgent::image::readText" = "ข้อความจากรูปภาพ";
+"aiAgent::image::instruction" = "คำสั่งเพิ่มเติม (ไม่บังคับ)";
+"aiAgent::image::instruction::placeholder" = "เช่น เพิ่มสิ่งเหล่านี้เป็นสิ่งที่ต้องทำ";
+"aiAgent::image::empty" = "ไม่มีข้อความที่จะส่ง";
+"aiAgent::image::textTooLong" = "ข้อความยาวเกินไป กรุณาย่อให้สั้นลงแล้วลองอีกครั้ง";
+"aiAgent::image::instructionTooLong" = "คำสั่งของคุณยาวเกินไป กรุณาย่อให้สั้นลงแล้วลองอีกครั้ง";
+"aiAgent::image::busy" = "มีคำขออื่นที่กำลังทำงานอยู่";
+
 // MARK: - billing
 
 "billing::plan::free" = "ฟรี";

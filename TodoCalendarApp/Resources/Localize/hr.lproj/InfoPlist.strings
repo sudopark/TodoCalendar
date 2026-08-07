@@ -1,3 +1,4 @@
 "NSCalendarsFullAccessUsageDescription" = "Pristup kalendaru potreban je za prikaz događaja i sinkronizaciju s Apple kalendarom.";
 "NSMicrophoneUsageDescription" = "Pristup mikrofonu potreban je za glasovni unos događaja i zadataka.";
 "NSSpeechRecognitionUsageDescription" = "Prepoznavanje govora potrebno je za pretvaranje vašeg glasa u događaje i zadatke.";
+"NSCameraUsageDescription" = "Pristup kameri potreban je za čitanje teksta s fotografije koju snimite.";

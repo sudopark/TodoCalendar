@@ -566,6 +566,20 @@
 "aiAgent::tip::externalEntry" = "Savjet: možeš dodavati i putem Sirija, gumba Radnja ili widgeta.";
 "aiAgent::failed::showPlans" = "Prikaži planove";
 
+"aiAgent::image::title" = "Čitaj iz slike";
+"aiAgent::image::sourceSelect::title" = "Dodaj sliku";
+"aiAgent::image::source::library" = "Odaberi iz knjižnice";
+"aiAgent::image::source::camera" = "Fotografiraj";
+"aiAgent::image::recognizing" = "Čitanje slike…";
+"aiAgent::image::noText" = "U ovoj slici nije pronađen tekst";
+"aiAgent::image::readText" = "Tekst iz slike";
+"aiAgent::image::instruction" = "Dodatne upute (neobavezno)";
+"aiAgent::image::instruction::placeholder" = "Npr. Dodaj ovo kao zadatke";
+"aiAgent::image::empty" = "Nema teksta za slanje";
+"aiAgent::image::textTooLong" = "Tekst je predug. Skratite ga i pokušajte ponovno.";
+"aiAgent::image::instructionTooLong" = "Vaše upute su predugačke. Skratite ih i pokušajte ponovno.";
+"aiAgent::image::busy" = "Drugi zahtjev još uvijek traje";
+
 // MARK: - billing
 
 "billing::plan::free" = "Besplatni";

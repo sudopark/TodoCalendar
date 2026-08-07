@@ -566,6 +566,20 @@
 "aiAgent::tip::externalEntry" = "Tips: kamu juga bisa menambahkan lewat Siri, Tombol Aksi, atau widget.";
 "aiAgent::failed::showPlans" = "Lihat paket";
 
+"aiAgent::image::title" = "Baca dari gambar";
+"aiAgent::image::sourceSelect::title" = "Tambahkan gambar";
+"aiAgent::image::source::library" = "Pilih dari galeri";
+"aiAgent::image::source::camera" = "Ambil foto";
+"aiAgent::image::recognizing" = "Membaca gambar…";
+"aiAgent::image::noText" = "Tidak ditemukan teks pada gambar ini";
+"aiAgent::image::readText" = "Teks dari gambar";
+"aiAgent::image::instruction" = "Instruksi tambahan (opsional)";
+"aiAgent::image::instruction::placeholder" = "Mis. Tambahkan ini sebagai tugas";
+"aiAgent::image::empty" = "Tidak ada teks untuk dikirim";
+"aiAgent::image::textTooLong" = "Teks terlalu panjang. Persingkat dan coba lagi.";
+"aiAgent::image::instructionTooLong" = "Instruksi Anda terlalu panjang. Persingkat dan coba lagi.";
+"aiAgent::image::busy" = "Permintaan lain masih berjalan";
+
 // MARK: - billing
 
 "billing::plan::free" = "Gratis";

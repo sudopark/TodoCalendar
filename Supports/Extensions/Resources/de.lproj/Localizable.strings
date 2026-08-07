@@ -566,6 +566,20 @@
 "aiAgent::tip::externalEntry" = "Tipp: Du kannst auch per Siri, der Action-Taste oder Widgets hinzufügen.";
 "aiAgent::failed::showPlans" = "Tarife ansehen";
 
+"aiAgent::image::title" = "Aus Bild lesen";
+"aiAgent::image::sourceSelect::title" = "Bild hinzufügen";
+"aiAgent::image::source::library" = "Aus Mediathek wählen";
+"aiAgent::image::source::camera" = "Foto aufnehmen";
+"aiAgent::image::recognizing" = "Bild wird gelesen…";
+"aiAgent::image::noText" = "In diesem Bild wurde kein Text gefunden";
+"aiAgent::image::readText" = "Text aus dem Bild";
+"aiAgent::image::instruction" = "Zusätzliche Anweisungen (optional)";
+"aiAgent::image::instruction::placeholder" = "z. B. Als Aufgaben hinzufügen";
+"aiAgent::image::empty" = "Es gibt keinen Text zum Senden";
+"aiAgent::image::textTooLong" = "Der Text ist zu lang. Kürzen Sie ihn und versuchen Sie es erneut.";
+"aiAgent::image::instructionTooLong" = "Ihre Anweisungen sind zu lang. Kürzen Sie sie und versuchen Sie es erneut.";
+"aiAgent::image::busy" = "Eine andere Anfrage läuft noch";
+
 // MARK: - billing
 
 "billing::plan::free" = "Kostenlos";
