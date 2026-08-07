@@ -17,9 +17,12 @@ description: Use when the user requests an agent review of harness changes in an
 - **하네스 경로만** 필터해 스크래치패드에 diff 패키지를 만든다 (리뷰어들이 공유해 Read):
 
 ```bash
-HARNESS_PATHS=".claude CLAUDE.md Domain/CLAUDE.md Repository/CLAUDE.md scripts docs/coding-style-and-philosophy.md docs/scene-spec.md docs/domain-context-map.md"
-{ git log --oneline <BASE>..<HEAD> -- $HARNESS_PATHS; echo '---'; git diff --stat <BASE>..<HEAD> -- $HARNESS_PATHS; echo '---'; git diff -U10 <BASE>..<HEAD> -- $HARNESS_PATHS; } > <scratchpad>/harness-review-<PR번호>.diff
+HARNESS_PATHS=(.claude CLAUDE.md Domain/CLAUDE.md Repository/CLAUDE.md scripts docs/coding-style-and-philosophy.md docs/scene-spec.md docs/domain-context-map.md)
+{ git log --oneline <BASE>..<HEAD> -- "${HARNESS_PATHS[@]}"; echo '---'; git diff --stat <BASE>..<HEAD> -- "${HARNESS_PATHS[@]}"; echo '---'; git diff -U10 <BASE>..<HEAD> -- "${HARNESS_PATHS[@]}"; } > <scratchpad>/harness-review-<PR번호>.diff
+wc -l <scratchpad>/harness-review-<PR번호>.diff
 ```
+
+경로 목록은 배열로 넘긴다 — 공백 구분 문자열을 `-- $VAR`로 풀면 기본 셸(zsh)에서 word split이 일어나지 않아 경로 하나로 붙고, git이 매치 0건을 내며 **빈 패키지가 조용히 만들어진다.** 줄 수를 찍어 확인하고, 변경이 있어야 하는데 비었으면 dispatch하지 말고 원인부터 잡는다.
 
 - **혼합 PR이면 프로덕트 코드 부분은 review 스킬 소관** — 이 스킬은 하네스 파일만 본다. 둘 다 필요하면 각 스킬을 각자 지시로 돈다.
 
