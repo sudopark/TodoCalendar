@@ -566,6 +566,20 @@
 "aiAgent::tip::externalEntry" = "Vinkki: voit lisätä myös Sirin, toimintopainikkeen tai widgetien avulla.";
 "aiAgent::failed::showPlans" = "Näytä tilaukset";
 
+"aiAgent::image::title" = "Lue kuvasta";
+"aiAgent::image::sourceSelect::title" = "Lisää kuva";
+"aiAgent::image::source::library" = "Valitse kirjastosta";
+"aiAgent::image::source::camera" = "Ota kuva";
+"aiAgent::image::recognizing" = "Luetaan kuvaa…";
+"aiAgent::image::noText" = "Tästä kuvasta ei löytynyt tekstiä";
+"aiAgent::image::readText" = "Kuvan teksti";
+"aiAgent::image::instruction" = "Lisäohjeet (valinnainen)";
+"aiAgent::image::instruction::placeholder" = "Esim. Lisää nämä tehtävinä";
+"aiAgent::image::empty" = "Ei lähetettävää tekstiä";
+"aiAgent::image::textTooLong" = "Teksti on liian pitkä. Lyhennä sitä ja yritä uudelleen.";
+"aiAgent::image::instructionTooLong" = "Ohjeesi ovat liian pitkät. Lyhennä niitä ja yritä uudelleen.";
+"aiAgent::image::busy" = "Toinen pyyntö on vielä käynnissä";
+
 // MARK: - billing
 
 "billing::plan::free" = "Ilmainen";

@@ -566,6 +566,20 @@
 "aiAgent::tip::externalEntry" = "ヒント: Siri、アクションボタン、ウィジェットからも追加できます。";
 "aiAgent::failed::showPlans" = "プランを見る";
 
+"aiAgent::image::title" = "画像から読み取る";
+"aiAgent::image::sourceSelect::title" = "画像を追加";
+"aiAgent::image::source::library" = "ライブラリから選択";
+"aiAgent::image::source::camera" = "写真を撮る";
+"aiAgent::image::recognizing" = "画像を読み取っています…";
+"aiAgent::image::noText" = "この画像からテキストが見つかりませんでした";
+"aiAgent::image::readText" = "画像内のテキスト";
+"aiAgent::image::instruction" = "追加の指示（任意）";
+"aiAgent::image::instruction::placeholder" = "例：これらをタスクとして追加";
+"aiAgent::image::empty" = "送信するテキストがありません";
+"aiAgent::image::textTooLong" = "テキストが長すぎます。短くしてもう一度お試しください。";
+"aiAgent::image::instructionTooLong" = "指示が長すぎます。短くしてもう一度お試しください。";
+"aiAgent::image::busy" = "別のリクエストがまだ処理中です";
+
 // MARK: - billing
 
 "billing::plan::free" = "無料";

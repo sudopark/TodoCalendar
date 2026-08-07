@@ -566,6 +566,20 @@
 "aiAgent::tip::externalEntry" = "Tip: du kan også tilføje via Siri, Handlingsknappen eller widgets.";
 "aiAgent::failed::showPlans" = "Se abonnementer";
 
+"aiAgent::image::title" = "Læs fra billede";
+"aiAgent::image::sourceSelect::title" = "Tilføj et billede";
+"aiAgent::image::source::library" = "Vælg fra bibliotek";
+"aiAgent::image::source::camera" = "Tag et billede";
+"aiAgent::image::recognizing" = "Læser billedet…";
+"aiAgent::image::noText" = "Kunne ikke finde nogen tekst i dette billede";
+"aiAgent::image::readText" = "Tekst fra billedet";
+"aiAgent::image::instruction" = "Ekstra instruktioner (valgfrit)";
+"aiAgent::image::instruction::placeholder" = "F.eks. Tilføj disse som opgaver";
+"aiAgent::image::empty" = "Der er ingen tekst at sende";
+"aiAgent::image::textTooLong" = "Teksten er for lang. Gør den kortere, og prøv igen.";
+"aiAgent::image::instructionTooLong" = "Dine instruktioner er for lange. Gør dem kortere, og prøv igen.";
+"aiAgent::image::busy" = "En anden anmodning kører stadig";
+
 // MARK: - billing
 
 "billing::plan::free" = "Gratis";

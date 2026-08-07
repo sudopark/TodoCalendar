@@ -566,6 +566,20 @@
 "aiAgent::tip::externalEntry" = "Wskazówka: możesz też dodawać za pomocą Siri, przycisku Akcji lub widżetów.";
 "aiAgent::failed::showPlans" = "Zobacz plany";
 
+"aiAgent::image::title" = "Odczytaj z obrazu";
+"aiAgent::image::sourceSelect::title" = "Dodaj obraz";
+"aiAgent::image::source::library" = "Wybierz z biblioteki";
+"aiAgent::image::source::camera" = "Zrób zdjęcie";
+"aiAgent::image::recognizing" = "Odczytywanie obrazu…";
+"aiAgent::image::noText" = "Nie znaleziono tekstu na tym obrazie";
+"aiAgent::image::readText" = "Tekst z obrazu";
+"aiAgent::image::instruction" = "Dodatkowe polecenia (opcjonalnie)";
+"aiAgent::image::instruction::placeholder" = "Np. Dodaj to jako zadania";
+"aiAgent::image::empty" = "Brak tekstu do wysłania";
+"aiAgent::image::textTooLong" = "Tekst jest za długi. Skróć go i spróbuj ponownie.";
+"aiAgent::image::instructionTooLong" = "Twoje polecenia są za długie. Skróć je i spróbuj ponownie.";
+"aiAgent::image::busy" = "Inne żądanie nadal trwa";
+
 // MARK: - billing
 
 "billing::plan::free" = "Darmowy";

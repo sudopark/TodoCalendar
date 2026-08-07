@@ -566,6 +566,20 @@
 "aiAgent::tip::externalEntry" = "提示：你也可以透過 Siri、操作按鈕或小工具新增。";
 "aiAgent::failed::showPlans" = "查看方案";
 
+"aiAgent::image::title" = "從圖片讀取";
+"aiAgent::image::sourceSelect::title" = "新增圖片";
+"aiAgent::image::source::library" = "從相簿選擇";
+"aiAgent::image::source::camera" = "拍照";
+"aiAgent::image::recognizing" = "正在讀取圖片…";
+"aiAgent::image::noText" = "在這張圖片中找不到任何文字";
+"aiAgent::image::readText" = "圖片中的文字";
+"aiAgent::image::instruction" = "額外指示（選填）";
+"aiAgent::image::instruction::placeholder" = "例如：將這些新增為待辦事項";
+"aiAgent::image::empty" = "沒有可傳送的文字";
+"aiAgent::image::textTooLong" = "文字太長，請縮短後再試一次。";
+"aiAgent::image::instructionTooLong" = "指示太長，請縮短後再試一次。";
+"aiAgent::image::busy" = "另一個要求仍在進行中";
+
 // MARK: - billing
 
 "billing::plan::free" = "免費";

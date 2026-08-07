@@ -566,6 +566,20 @@
 "aiAgent::tip::externalEntry" = "팁: Siri, 액션 버튼, 위젯으로도 추가할 수 있어요.";
 "aiAgent::failed::showPlans" = "플랜 보기";
 
+"aiAgent::image::title" = "이미지에서 읽기";
+"aiAgent::image::sourceSelect::title" = "이미지 추가";
+"aiAgent::image::source::library" = "라이브러리에서 선택";
+"aiAgent::image::source::camera" = "사진 촬영";
+"aiAgent::image::recognizing" = "이미지를 읽고 있어요…";
+"aiAgent::image::noText" = "이 이미지에서 텍스트를 찾을 수 없어요";
+"aiAgent::image::readText" = "이미지의 텍스트";
+"aiAgent::image::instruction" = "추가 지시 (선택)";
+"aiAgent::image::instruction::placeholder" = "예: 이걸 할 일로 추가해줘";
+"aiAgent::image::empty" = "보낼 텍스트가 없어요";
+"aiAgent::image::textTooLong" = "텍스트가 너무 길어요. 줄여서 다시 시도해 주세요.";
+"aiAgent::image::instructionTooLong" = "지시가 너무 길어요. 줄여서 다시 시도해 주세요.";
+"aiAgent::image::busy" = "다른 요청이 아직 진행 중이에요";
+
 // MARK: - billing
 
 "billing::plan::free" = "무료";

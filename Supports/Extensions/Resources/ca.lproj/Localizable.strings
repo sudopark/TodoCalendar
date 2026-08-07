@@ -566,6 +566,20 @@
 "aiAgent::tip::externalEntry" = "Consell: també pots afegir amb la Siri, el botó d'Acció o els widgets.";
 "aiAgent::failed::showPlans" = "Veure plans";
 
+"aiAgent::image::title" = "Llegeix des d'una imatge";
+"aiAgent::image::sourceSelect::title" = "Afegeix una imatge";
+"aiAgent::image::source::library" = "Tria de la biblioteca";
+"aiAgent::image::source::camera" = "Fes una foto";
+"aiAgent::image::recognizing" = "Llegint la imatge…";
+"aiAgent::image::noText" = "No s'ha trobat text en aquesta imatge";
+"aiAgent::image::readText" = "Text de la imatge";
+"aiAgent::image::instruction" = "Instruccions addicionals (opcional)";
+"aiAgent::image::instruction::placeholder" = "P. ex. Afegeix-ho com a tasques";
+"aiAgent::image::empty" = "No hi ha text per enviar";
+"aiAgent::image::textTooLong" = "El text és massa llarg. Escurceu-lo i torneu-ho a provar.";
+"aiAgent::image::instructionTooLong" = "Les instruccions són massa llargues. Escurceu-les i torneu-ho a provar.";
+"aiAgent::image::busy" = "Encara hi ha una altra sol·licitud en curs";
+
 // MARK: - billing
 
 "billing::plan::free" = "Gratuït";

@@ -566,6 +566,20 @@
 "aiAgent::tip::externalEntry" = "Sfat: poți adăuga și prin Siri, butonul de Acțiune sau widget-uri.";
 "aiAgent::failed::showPlans" = "Vezi planurile";
 
+"aiAgent::image::title" = "Citește dintr-o imagine";
+"aiAgent::image::sourceSelect::title" = "Adaugă o imagine";
+"aiAgent::image::source::library" = "Alege din bibliotecă";
+"aiAgent::image::source::camera" = "Fă o fotografie";
+"aiAgent::image::recognizing" = "Se citește imaginea…";
+"aiAgent::image::noText" = "Nu s-a găsit niciun text în această imagine";
+"aiAgent::image::readText" = "Text din imagine";
+"aiAgent::image::instruction" = "Instrucțiuni suplimentare (opțional)";
+"aiAgent::image::instruction::placeholder" = "Ex. Adaugă-le ca sarcini";
+"aiAgent::image::empty" = "Nu există text de trimis";
+"aiAgent::image::textTooLong" = "Textul este prea lung. Scurtați-l și încercați din nou.";
+"aiAgent::image::instructionTooLong" = "Instrucțiunile dvs. sunt prea lungi. Scurtați-le și încercați din nou.";
+"aiAgent::image::busy" = "O altă solicitare încă rulează";
+
 // MARK: - billing
 
 "billing::plan::free" = "Gratuit";

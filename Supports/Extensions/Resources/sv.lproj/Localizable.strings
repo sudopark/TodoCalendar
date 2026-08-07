@@ -566,6 +566,20 @@
 "aiAgent::tip::externalEntry" = "Tips: du kan även lägga till via Siri, Åtgärdsknappen eller widgetar.";
 "aiAgent::failed::showPlans" = "Visa planer";
 
+"aiAgent::image::title" = "Läs från bild";
+"aiAgent::image::sourceSelect::title" = "Lägg till en bild";
+"aiAgent::image::source::library" = "Välj från bibliotek";
+"aiAgent::image::source::camera" = "Ta en bild";
+"aiAgent::image::recognizing" = "Läser bilden…";
+"aiAgent::image::noText" = "Ingen text hittades i den här bilden";
+"aiAgent::image::readText" = "Text från bilden";
+"aiAgent::image::instruction" = "Ytterligare instruktioner (valfritt)";
+"aiAgent::image::instruction::placeholder" = "T.ex. Lägg till dessa som uppgifter";
+"aiAgent::image::empty" = "Det finns ingen text att skicka";
+"aiAgent::image::textTooLong" = "Texten är för lång. Korta ner den och försök igen.";
+"aiAgent::image::instructionTooLong" = "Dina instruktioner är för långa. Korta ner dem och försök igen.";
+"aiAgent::image::busy" = "En annan begäran pågår fortfarande";
+
 // MARK: - billing
 
 "billing::plan::free" = "Gratis";

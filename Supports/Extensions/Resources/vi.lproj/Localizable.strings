@@ -566,6 +566,20 @@
 "aiAgent::tip::externalEntry" = "Mẹo: Bạn cũng có thể thêm bằng Siri, nút Hành động hoặc widget.";
 "aiAgent::failed::showPlans" = "Xem các gói";
 
+"aiAgent::image::title" = "Đọc từ hình ảnh";
+"aiAgent::image::sourceSelect::title" = "Thêm hình ảnh";
+"aiAgent::image::source::library" = "Chọn từ thư viện";
+"aiAgent::image::source::camera" = "Chụp ảnh";
+"aiAgent::image::recognizing" = "Đang đọc hình ảnh…";
+"aiAgent::image::noText" = "Không tìm thấy văn bản nào trong hình ảnh này";
+"aiAgent::image::readText" = "Văn bản từ hình ảnh";
+"aiAgent::image::instruction" = "Chỉ dẫn thêm (tùy chọn)";
+"aiAgent::image::instruction::placeholder" = "VD: Thêm những mục này dưới dạng việc cần làm";
+"aiAgent::image::empty" = "Không có văn bản để gửi";
+"aiAgent::image::textTooLong" = "Văn bản quá dài. Vui lòng rút ngắn rồi thử lại.";
+"aiAgent::image::instructionTooLong" = "Chỉ dẫn của bạn quá dài. Vui lòng rút ngắn rồi thử lại.";
+"aiAgent::image::busy" = "Một yêu cầu khác vẫn đang xử lý";
+
 // MARK: - billing
 
 "billing::plan::free" = "Miễn phí";

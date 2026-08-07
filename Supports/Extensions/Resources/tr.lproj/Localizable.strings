@@ -566,6 +566,20 @@
 "aiAgent::tip::externalEntry" = "İpucu: Siri, Aksiyon Düğmesi veya widget'lar ile de ekleyebilirsin.";
 "aiAgent::failed::showPlans" = "Planları görüntüle";
 
+"aiAgent::image::title" = "Görselden oku";
+"aiAgent::image::sourceSelect::title" = "Görsel ekle";
+"aiAgent::image::source::library" = "Kitaplıktan seç";
+"aiAgent::image::source::camera" = "Fotoğraf çek";
+"aiAgent::image::recognizing" = "Görsel okunuyor…";
+"aiAgent::image::noText" = "Bu görselde herhangi bir metin bulunamadı";
+"aiAgent::image::readText" = "Görseldeki metin";
+"aiAgent::image::instruction" = "Ek yönergeler (isteğe bağlı)";
+"aiAgent::image::instruction::placeholder" = "Örn. Bunları görev olarak ekle";
+"aiAgent::image::empty" = "Gönderilecek metin yok";
+"aiAgent::image::textTooLong" = "Metin çok uzun. Kısaltıp tekrar deneyin.";
+"aiAgent::image::instructionTooLong" = "Yönergeleriniz çok uzun. Kısaltıp tekrar deneyin.";
+"aiAgent::image::busy" = "Başka bir istek hâlâ devam ediyor";
+
 // MARK: - billing
 
 "billing::plan::free" = "Ücretsiz";

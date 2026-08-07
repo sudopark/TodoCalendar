@@ -566,6 +566,20 @@
 "aiAgent::tip::externalEntry" = "Tip: you can also add by Siri, the Action button, or widgets.";
 "aiAgent::failed::showPlans" = "View Plans";
 
+"aiAgent::image::title" = "Read from image";
+"aiAgent::image::sourceSelect::title" = "Add an image";
+"aiAgent::image::source::library" = "Choose from library";
+"aiAgent::image::source::camera" = "Take a photo";
+"aiAgent::image::recognizing" = "Reading the image…";
+"aiAgent::image::noText" = "Couldn't find any text in this image";
+"aiAgent::image::readText" = "Text from the image";
+"aiAgent::image::instruction" = "Extra instructions (optional)";
+"aiAgent::image::instruction::placeholder" = "e.g. Add these as to-dos";
+"aiAgent::image::empty" = "There's no text to send";
+"aiAgent::image::textTooLong" = "The text is too long. Trim it and try again.";
+"aiAgent::image::instructionTooLong" = "Your instructions are too long. Shorten them and try again.";
+"aiAgent::image::busy" = "Another request is still running";
+
 // MARK: - billing
 
 "billing::plan::free" = "Free";

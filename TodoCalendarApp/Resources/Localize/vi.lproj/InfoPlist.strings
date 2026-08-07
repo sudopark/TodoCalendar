@@ -1,3 +1,4 @@
 "NSCalendarsFullAccessUsageDescription" = "Cần quyền truy cập lịch để hiển thị sự kiện và đồng bộ với Apple Calendar.";
 "NSMicrophoneUsageDescription" = "Cần quyền truy cập micro để nhập sự kiện và việc cần làm bằng giọng nói.";
 "NSSpeechRecognitionUsageDescription" = "Cần nhận dạng giọng nói để chuyển đổi giọng nói của bạn thành sự kiện và việc cần làm.";
+"NSCameraUsageDescription" = "Cần quyền truy cập camera để đọc văn bản từ ảnh bạn chụp.";
