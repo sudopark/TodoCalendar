@@ -1022,6 +1022,76 @@ extension CalendarViewModelImpleTests {
     }
 }
 
+// MARK: - 음성 입력 진입 시 포커스된 달만 스크롤
+
+extension CalendarViewModelImpleTests {
+
+    func testViewModel_whenVoiceInputStarts_scrollsOnlyFocusedMonthPaper() async throws {
+        // given
+        FeatureFlag.enable(.aiAgent)
+        let viewModel = self.makeViewModel()
+        viewModel.prepare()
+        try await Task.sleep(for: .milliseconds(50))
+
+        // when
+        self.stubOrchestration.stateSubject.send(.listening(.voice))
+        try await Task.sleep(for: .milliseconds(50))
+
+        // then — 초기 포커스는 가운데(index 1) 달
+        let counts = self.spyRouter.spyInteractors.map { $0.didScrollToVoiceInputCount }
+        XCTAssertEqual(counts, [0, 1, 0])
+    }
+
+    func testViewModel_whenFocusMovedToOtherMonth_scrollsThatMonthPaper() async throws {
+        // given
+        FeatureFlag.enable(.aiAgent)
+        let viewModel = self.makeViewModel()
+        viewModel.prepare()
+        try await Task.sleep(for: .milliseconds(50))
+
+        // when
+        viewModel.focusChanged(from: 1, to: 2)
+        self.stubOrchestration.stateSubject.send(.listening(.voice))
+        try await Task.sleep(for: .milliseconds(50))
+
+        // then
+        let counts = self.spyRouter.spyInteractors.map { $0.didScrollToVoiceInputCount }
+        XCTAssertEqual(counts, [0, 0, 1])
+    }
+
+    func testViewModel_whenStayInVoiceListening_scrollsOnlyOncePerEntry() async throws {
+        // given
+        FeatureFlag.enable(.aiAgent)
+        let viewModel = self.makeViewModel()
+        viewModel.prepare()
+        try await Task.sleep(for: .milliseconds(50))
+
+        // when — 같은 상태가 반복 방출돼도 진입 edge는 1회
+        self.stubOrchestration.stateSubject.send(.listening(.voice))
+        self.stubOrchestration.stateSubject.send(.listening(.voice))
+        try await Task.sleep(for: .milliseconds(50))
+
+        // then
+        let counts = self.spyRouter.spyInteractors.map { $0.didScrollToVoiceInputCount }
+        XCTAssertEqual(counts, [0, 1, 0])
+    }
+
+    func testViewModel_whenAIAgentFlagOff_doesNotScrollOnVoiceInput() async throws {
+        // given
+        let viewModel = self.makeViewModel()
+        viewModel.prepare()
+        try await Task.sleep(for: .milliseconds(50))
+
+        // when
+        self.stubOrchestration.stateSubject.send(.listening(.voice))
+        try await Task.sleep(for: .milliseconds(50))
+
+        // then
+        let counts = self.spyRouter.spyInteractors.map { $0.didScrollToVoiceInputCount }
+        XCTAssertEqual(counts, [0, 0, 0])
+    }
+}
+
 private extension CalendarViewModelImpleTests {
     
     class SpyRouter: BaseSpyRouter, CalendarViewRouting, @unchecked Sendable {
@@ -1071,6 +1141,11 @@ private extension CalendarViewModelImpleTests {
             self.didSelectDayCallback?()
         }
         
+        var didScrollToVoiceInputCount: Int = 0
+        func scrollToVoiceInput() {
+            self.didScrollToVoiceInputCount += 1
+        }
+
         func monthScene(didChange currentSelectedDay: CurrentSelectDayModel, and eventsThatDay: [any CalendarEvent]) { }
         func dayEventListDidRequestShowAICommand() { }
     }

@@ -19,6 +19,7 @@ protocol CalendarPaperSceneInteractor: Sendable, AnyObject, MonthSceneListener, 
     func updateMonthIfNeed(_ newMonth: CalendarMonth)
     func selectToday()
     func selectDay(_ day: CalendarDay)
+    func scrollToVoiceInput()
 }
 //
 protocol CalendarPaperSceneListener: AnyObject {

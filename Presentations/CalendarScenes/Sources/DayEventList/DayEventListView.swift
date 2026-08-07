@@ -29,6 +29,10 @@ private enum AICommandBadge: Equatable {
     case failed
 }
 
+enum DayEventListScrollAnchor {
+    static let quickAddField: String = "day-event-list-quick-add-field"
+}
+
 
 // MARK: - DayEventListViewController
 
@@ -253,6 +257,7 @@ struct DayEventListView: View {
                     QuickAddNewTodoView(isFocusInput: $isFocusInput)
                         .eventHandler(\.addNewTodoQuickly, eventHandler.addNewTodoQuickly)
                         .eventHandler(\.makeNewTodoWithGivenNameAndDetails, eventHandler.makeNewTodoWithGivenNameAndDetails)
+                        .id(DayEventListScrollAnchor.quickAddField)
                     addNewButton()
                 }
                 .animation(.easeInOut(duration: 0.3), value: self.state.isVoiceListening)
@@ -440,13 +445,31 @@ private struct QuickAddNewTodoView: View {
         quickAddField()
             .padding(.vertical, spacing: .xsmall).padding(.horizontal, spacing: .small)
             .frame(height: 50)
-            .backgroundAsRoundedRectForEventList(self.appearance)
+            .background(self.fieldBackground())
             .overlay {
                 if self.state.isVoiceListening {
                     NeonListeningBorder(cornerRadius: 5)
                         .transition(.opacity)
                 }
             }
+    }
+
+    // listening 중엔 이벤트 셀과 같은 bg1을 벗고 네온 그라데이션을 입어 목록에서 분리된다.
+    @ViewBuilder
+    private func fieldBackground() -> some View {
+        if self.state.isVoiceListening {
+            RoundedRectangle(cornerRadius: Metric.Radius.chip)
+                .fill(
+                    LinearGradient(
+                        colors: self.appearance.colorSet.aiListeningBackground.map { $0.asColor },
+                        startPoint: .init(x: 0, y: 0.15),
+                        endPoint: .init(x: 1, y: 0.85)
+                    )
+                )
+        } else {
+            RoundedRectangle(cornerRadius: Metric.Radius.chip)
+                .fill(self.appearance.colorSet.bg1.asColor)
+        }
     }
 
     private func quickAddField() -> some View {
