@@ -19,14 +19,16 @@ import UnitTestHelpKit
 
 final class ApplicationRootViewModelImpleTests {
 
-    private let spyAIJobRefreshUsecase = SpyAIJobRefreshUsecase()
+    private let callOrder = CallOrderRecorder()
     private let spyAppUpdateCheckUsecase = SpyAppUpdateCheckUsecase()
+    private let fakeAccountUsecase = FakeAccountUsecase()
+    private lazy var spyAIJobRefreshUsecase = SpyAIJobRefreshUsecase(recorder: self.callOrder)
 
     private func makeViewModel() -> ApplicationRootViewModelImple {
         return ApplicationRootViewModelImple(
             authUsecase: StubAuthUsecase(),
-            accountUsecase: StubAccountUsecase(),
-            prepareUsecase: StubApplicationPrepareUsecase(),
+            accountUsecase: self.fakeAccountUsecase,
+            prepareUsecase: StubApplicationPrepareUsecase(recorder: self.callOrder),
             deepLinkHandler: ApplicationDeepLinkHandlerImple(),
             externalCalendarServiceUsecase: StubExternalCalendarIntegrationUsecase([]),
             userNotificationUsecase: StubUserNotificationUsecase(),
@@ -131,9 +133,59 @@ extension ApplicationRootViewModelImpleTests {
 }
 
 
+// MARK: - 로그아웃
+
+extension ApplicationRootViewModelImpleTests {
+
+    // 로컬 AI 커맨드 기록은 로그인 유저의 DB에 있다 — prepareSignedOut이 DB를 닫고
+    // 익명 DB로 갈아끼우기 전에 지워야 재로그인 때 죽은 job이 되살아나지 않는다.
+    @Test("로그아웃하면 DB 정리보다 AI 커맨드 정리를 먼저 끝낸다")
+    func viewModel_whenSignedOut_clearAICommandBeforeDatabaseSwap() async {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when
+        self.fakeAccountUsecase.sendSignOut()
+        try? await Task.sleep(for: .milliseconds(300))
+
+        // then
+        #expect(self.callOrder.calls == ["aiHandleSignedOut", "prepareSignedOut"])
+        withExtendedLifetime(viewModel) { }
+    }
+}
+
+
 // MARK: - doubles
 
+private final class CallOrderRecorder: @unchecked Sendable {
+
+    private(set) var calls: [String] = []
+
+    func record(_ name: String) {
+        self.calls.append(name)
+    }
+}
+
+private final class FakeAccountUsecase: StubAccountUsecase, @unchecked Sendable {
+
+    private let statusSubject = PassthroughSubject<AccountChangedEvent, Never>()
+
+    override var accountStatusChanged: AnyPublisher<AccountChangedEvent, Never> {
+        return self.statusSubject.eraseToAnyPublisher()
+    }
+
+    func sendSignOut() {
+        self.statusSubject.send(.signOut)
+    }
+}
+
 private final class SpyAIJobRefreshUsecase: AIJobRefreshUsecase, @unchecked Sendable {
+
+    private let recorder: CallOrderRecorder
+
+    init(recorder: CallOrderRecorder) {
+        self.recorder = recorder
+    }
 
     var didHandleJobStatusChangedWith: String?
     func handleJobStatusChanged(_ jobId: String) {
@@ -149,9 +201,19 @@ private final class SpyAIJobRefreshUsecase: AIJobRefreshUsecase, @unchecked Send
     func change(factory: any UsecaseFactory) {
         self.didChangeFactory = true
     }
+
+    func handleSignedOut() async {
+        self.recorder.record("aiHandleSignedOut")
+    }
 }
 
 private final class StubApplicationPrepareUsecase: ApplicationPrepareUsecase {
+
+    private let recorder: CallOrderRecorder
+
+    init(recorder: CallOrderRecorder) {
+        self.recorder = recorder
+    }
 
     func prepareLaunch() async throws -> ApplicationPrepareResult {
         return ApplicationPrepareResult(
@@ -167,7 +229,9 @@ private final class StubApplicationPrepareUsecase: ApplicationPrepareUsecase {
 
     func prepareSignedIn(_ auth: Auth) async { }
 
-    func prepareSignedOut() async { }
+    func prepareSignedOut() async {
+        self.recorder.record("prepareSignedOut")
+    }
 
     func prepareExternalCalendarIntegrated(_ serviceId: String) { }
 

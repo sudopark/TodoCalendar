@@ -409,3 +409,49 @@ extension AIAgentOrchestrationUsecaseImple {
         return self.subject.voiceLevel.eraseToAnyPublisher()
     }
 }
+
+
+// MARK: - NotNeedAIAgentOrchestrationUsecase
+
+// AI 기능은 로그인 유저 전용 — 미로그인 세션엔 composition root가 이걸 주입한다.
+// 소비자는 로그인 여부를 모른 채 그대로 호출하고 여기서 전부 무동작으로 끝난다.
+public final class NotNeedAIAgentOrchestrationUsecase: AIAgentOrchestrationUsecase, Sendable {
+
+    public init() { }
+
+    public var state: AnyPublisher<AIAgentState, Never> {
+        return Just(.idle).eraseToAnyPublisher()
+    }
+
+    public var usage: AnyPublisher<AIAgentUsage, Never> {
+        return Empty(completeImmediately: false).eraseToAnyPublisher()
+    }
+
+    public var recognizingText: AnyPublisher<String, Never> {
+        return Empty(completeImmediately: false).eraseToAnyPublisher()
+    }
+
+    public var voiceLevel: AnyPublisher<Float, Never> {
+        return Empty(completeImmediately: false).eraseToAnyPublisher()
+    }
+
+    public func prepare() { }
+    public func enterVoiceInput() { }
+    public func finishVoiceInput() { }
+    public func enterKeyboardInput() { }
+    public func stopInput() { }
+
+    // 진입점이 로그인 가드로 막혀 있어 도달하지 않는다. 도달하면 가드가 뚫린 것이라 드러낸다.
+    public func submit(_ text: String) throws {
+        throw RuntimeError(key: "AIAgent.needSignIn", "ai agent needs sign in")
+    }
+
+    public func confirm() { }
+    public func decline() { }
+    public func reset() { }
+    public func restoreIfNeeded() { }
+    public func loadUsage() { }
+    public func handleJobStatusChanged(_ jobId: String) { }
+    public func refreshProcessingJobIfNeeded() { }
+    public func handleSignedOut() async { }
+}

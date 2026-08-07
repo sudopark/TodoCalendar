@@ -132,6 +132,8 @@ extension ApplicationRootViewModelImple: AutenticatorTokenRefreshListener {
     private func handleUserSignedOut() {
         Task { [weak self] in
             self?.subject.isSignIn.send(false)
+            // DB가 닫히기 전에 로컬 AI 커맨드 기록을 지워야 재로그인 때 되살아나지 않는다
+            await self?.aiJobRefreshUsecase.handleSignedOut()
             await self?.prepareUsecase.prepareSignedOut()
             
             try? await Task.sleep(for: .milliseconds(100))
