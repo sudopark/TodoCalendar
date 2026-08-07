@@ -302,6 +302,7 @@ extension CalendarViewModelImple {
             self.aiAgentOrchestrationUsecase.prepare()
             self.bindShowAICommandResultIfNeed()
             self.bindVoiceInputLifecycle()
+            self.bindScrollToVoiceInputOnFocusedMonth()
         }
     }
     
@@ -450,6 +451,21 @@ extension CalendarViewModelImple {
             .filter { $0 }
             .sink { [weak self] _ in
                 self?.router?.routeToAICommand()
+            }
+            .store(in: &self.cancellables)
+    }
+
+    // 음성 입력 '진입 순간'에만 스크롤한다 — 같은 상태의 반복 방출로는 재스크롤하지 않는다.
+    // paper는 화면당 3개(이전·현재·다음)라 전부에 보내면 안 보이는 달까지 목록 하단으로 내려간다.
+    private func bindScrollToVoiceInputOnFocusedMonth() {
+        self.aiAgentOrchestrationUsecase.state
+            .map { Self.isVoiceListeningPhase($0) }
+            .removeDuplicates()
+            .filter { $0 }
+            .sink { [weak self] _ in
+                guard let focusedIndex = self?.subject.monthsInCurrentRange.value?.focusedIndex
+                else { return }
+                self?.calendarPaperInteractors?[safe: focusedIndex]?.scrollToVoiceInput()
             }
             .store(in: &self.cancellables)
     }

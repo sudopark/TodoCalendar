@@ -19,8 +19,9 @@ protocol CalendarPaperViewModel: AnyObject, Sendable, CalendarPaperSceneInteract
 
     // interactor
     func prepare()
-    
+
     // presenter
+    var requestScrollToVoiceInput: AnyPublisher<Void, Never> { get }
 }
 
 
@@ -46,6 +47,11 @@ final class CalendarPaperViewModelImple: CalendarPaperViewModel, @unchecked Send
     }
     
     private var currentSelectedDayAndEvents: (CurrentSelectDayModel, [any CalendarEvent])?
+
+    private struct Subject {
+        let requestScrollToVoiceInput = PassthroughSubject<Void, Never>()
+    }
+    private let subject = Subject()
 }
 
 
@@ -84,11 +90,19 @@ extension CalendarPaperViewModelImple {
     func dayEventListDidRequestShowAICommand() {
         self.listener?.calendarPaperDidRequestShowAICommand()
     }
+
+    func scrollToVoiceInput() {
+        self.subject.requestScrollToVoiceInput.send(())
+    }
 }
 
 
 // MARK: - CalendarPaperViewModelImple Presenter
 
 extension CalendarPaperViewModelImple {
-    
+
+    var requestScrollToVoiceInput: AnyPublisher<Void, Never> {
+        return self.subject.requestScrollToVoiceInput
+            .eraseToAnyPublisher()
+    }
 }

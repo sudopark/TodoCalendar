@@ -63,6 +63,7 @@ final class CalendarPaperViewController: UIHostingController<CalenarPaperContain
             viewAppearance: viewAppearance,
             eventHandler: eventHandler
         )
+        .eventHandler(\.stateBinding, { $0.bind(viewModel) })
         super.init(rootView: containerView)
     }
     
