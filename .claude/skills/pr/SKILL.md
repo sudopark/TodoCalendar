@@ -1,13 +1,17 @@
 ---
 name: pr
-description: Use when creating or merging a pull request in this project — PR 본문 작성, 브랜치 구성, 머지·머지 후 정리 시점. 본문 서사(문제→접근→남은 과제), rebase 머지 원칙, 머지 후 브랜치 정리(워크트리 제약 우회 포함)를 다룬다. Triggers on "PR 올리자", "PR 만들어", "머지하자", "브랜치 정리해". Does NOT trigger on PR 코드 리뷰 수행(review 스킬 또는 유저 직접), 커밋 메시지 작성(commit 스킬), 이슈 작성(issue 스킬).
+description: Use when creating or merging a pull request in this project — PR 본문 작성, 브랜치 구성, 머지·머지 후 정리 시점. 본문 서사(문제→접근), rebase 머지 원칙, 머지 후 브랜치 정리(워크트리 제약 우회 포함), 머지 후 하네스 신호 보고를 다룬다. Triggers on "PR 올리자", "PR 만들어", "머지하자", "브랜치 정리해". Does NOT trigger on PR 코드 리뷰 수행(review 스킬 또는 유저 직접), 커밋 메시지 작성(commit 스킬), 이슈 작성(issue 스킬).
 ---
 
 # PR — 생성·머지·정리
 
+## 단계
+
+이 스킬은 **PR 생성**과 **머지·정리** 두 단계로 나뉘고, 각각 별도 지시로 발동한다. 발동 지시가 커버하는 단계까지 수행하면 완료다 — 생성만 하고 끝난 런은 이탈이 아니다.
+
 ## 브랜치·올리기 전
 
-- 브랜치명 `features/<이슈번호>-<슬러그>` (`feature/` 아님). develop에서 분기.
+- 브랜치명 `features/<이슈번호>-<슬러그>` (`feature/` 아님). develop에서 분기. 대응 이슈가 없는 작업(하네스 정비 등)은 이슈번호 없이 슬러그만.
 - 페이즈가 나뉘는 작업은 페이즈별 PR — 머지 후 다음 페이즈 착수.
 - WIP 정리는 PR 올리기 전에 (commit 스킬의 흡수 절차) — 리뷰어에게 보이는 커밋은 논리 단위 최종본이어야 한다.
 
@@ -15,14 +19,16 @@ description: Use when creating or merging a pull request in this project — PR 
 
 **기준: 보는 사람이 코드를 까보기 전에 본문만으로 내용을 파악할 수 있어야 한다.**
 
-- 여러 커밋을 엮은 전체 작업의 서사: **문제 → 접근 → 남은 과제**. 개별 커밋은 그 서사의 단위. 파일 목록 나열 금지.
-- "남은 과제"에 이번 PR에서 의도적으로 뺀 것·파생 후속을 명시한다 — 후속 작업의 킥오프가 이 항목을 읽는다.
+- 여러 커밋을 엮은 전체 작업의 서사: **문제 → 접근**. 개별 커밋은 그 서사의 단위. 파일 목록 나열 금지.
+- "남은 과제"는 이번 PR에서 **의도적으로 뺀 게 실제로 있을 때만** 쓴다. 이슈·선행 PR에 이미 적힌 내용을 옮겨 적지 않는다 — 빈 섹션은 군더더기다.
 
 리뷰 수행은 이 스킬 밖이다 — 공개된 PR에 대해 유저가 지시할 때만 review 스킬로 (유저 직접 리뷰도 가능).
 
 ## 머지·정리
 
 - 머지는 `gh pr merge --rebase`, squash 금지 — 단계별 커밋이 develop에 보존돼야 회귀 분석 시 변경 의도를 추적할 수 있다.
-- 머지 후 브랜치(로컬·리모트) 정리 여부를 유저에게 확인한다.
+- 머지 후 브랜치(로컬·리모트) 정리 여부를 유저에게 확인한다. 확인을 요청한 시점이 이 조항의 이행이다 — 답변 대기로 끝나도 이탈이 아니다.
 - 브랜치가 워크트리에 체크아웃돼 있으면 삭제가 거부된다 — 그 워크트리에서 임시 브랜치를 만들어 이동(`git switch -c <임시-브랜치>`)한 뒤 대상 브랜치를 삭제한다.
-- 머지 후 `python3 .claude/scripts/aggregate-usage.py` 실행 — 출력(⚠️ 줄)이 있으면 해당 스킬의 정비를 유저에게 제안한다 (수락 시 improve-skill 스킬). 무출력이면 조용히 넘어간다 (#690 flywheel).
+- 머지 후 `python3 .claude/scripts/aggregate-usage.py` 실행 (#690 flywheel). 무출력이면 조용히 넘어간다.
+  - **보고 전 중복 확인**: `gh issue list --label harness --state open --json number,title,body` — ⚠️ 줄의 **스킬명 + 신호 유형**(partial·correction·누락률·축N)이 이미 열린 이슈에 잡혀 있으면 보고하지 않는다. 이슈로 따둔 건 인지하고 나중에 고치기로 한 것이라, 다시 올리면 노이즈다. 조항 단위까지는 대조하지 않는다 — 집계 출력에 조항명이 없다(`deviations[].clause`는 raw usage-log에만 있다).
+  - 남은 신호만 유저에게 보고한다. 유저가 정비를 지시하면 improve-skill, 이슈로 남기라고 하면 issue 스킬로 생성하고 `harness` 라벨을 붙인다.
