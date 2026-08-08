@@ -26,9 +26,17 @@ public protocol BillingUsecase: AnyObject, Sendable {
     @discardableResult
     func refreshUserPlan() async throws -> BillingUserPlan
 
-    // 앱 기동(로그인) 시 1회. 이후 생명주기 내내 유지된다.
+    // 로그인 세션에 묶여 기동한다. 여기서 처리하는 건 StoreKit.Transaction.updates 뿐이다 —
+    // 미완료 거래 복구는 트리거도 목적도 달라 아래 recoverUnfinishedTransactions 가 맡는다.
     // 중복 호출 방어가 락 없는 플래그라 메인에서만 부른다
     func startObservingTransactions()
+
+    // 로그아웃·팩토리 교체 시. 이전 세션 리스너가 살아 있으면 같은 JWS 가 중복 post 된다
+    func stopObservingTransactions()
+
+    // 서버 반영 전에 앱이 죽어 finish 되지 않은 트랜잭션을 재전송한다.
+    // 한 건이 영구 실패해도 나머지는 진행한다
+    func recoverUnfinishedTransactions() async
 
     var currentUserPlan: AnyPublisher<BillingUserPlan, Never> { get }
 }
@@ -120,6 +128,19 @@ extension BillingUsecaseImple {
         return userPlan
     }
 
+    // 앱이 뒤늦게 발견한 트랜잭션 — 종류를 판별하지 않고 서버에 위임한다.
+    // 200 을 "서버가 확인했다" 로 읽고 그때만 finish 한다
+    private func delegateAndFinish(
+        _ transaction: BillingSignedTransaction
+    ) async throws -> BillingUserPlan {
+        let userPlan = try await self.repository.postTransactionUpdate(
+            signedTransaction: transaction.jws
+        )
+        await self.appStoreService.finishTransaction(id: transaction.id)
+        self.updateSharedUserPlan(userPlan)
+        return userPlan
+    }
+
     private func updateSharedUserPlan(_ userPlan: BillingUserPlan) {
         self.sharedDataStore.put(
             BillingUserPlan.self,
@@ -167,23 +188,26 @@ extension BillingUsecaseImple {
         // 앱 밖 갱신·환불·가족공유·승인대기 통과가 들어오는 유일한 경로
         let updates = self.appStoreService.transactionUpdates
         self.observingTask = Task { [weak self] in
-            // 서버 반영 전에 앱이 죽은 트랜잭션을 먼저 복구한 뒤 스트림을 연다
-            await self?.recoverUnfinishedTransactions()
             // 루프 본문에서만 self 를 잡는다 — 끝나지 않는 스트림을 strong self 로 돌면
-            // deinit 이 영영 오지 않아 아래 cancel 이 죽은 코드가 된다
+            // deinit 이 영영 오지 않아 deinit 의 cancel 이 죽은 코드가 된다
             for await transaction in updates {
                 guard let self else { return }
-                _ = try? await self.applyAndFinish(transaction)
+                _ = try? await self.delegateAndFinish(transaction)
             }
         }
     }
 
+    public func stopObservingTransactions() {
+        self.observingTask?.cancel()
+        self.observingTask = nil
+    }
+
     // 한 건이 영구 실패해도 나머지는 반영돼야 한다 — fail-fast 면 앞의 실패가
-    // 매 기동마다 뒤 트랜잭션을 가려 영영 반영되지 않는다
-    private func recoverUnfinishedTransactions() async {
+    // 매 시도마다 뒤 트랜잭션을 가려 영영 반영되지 않는다
+    public func recoverUnfinishedTransactions() async {
         let transactions = await self.appStoreService.unfinishedTransactions()
         for transaction in transactions {
-            _ = try? await self.applyAndFinish(transaction)
+            _ = try? await self.delegateAndFinish(transaction)
         }
     }
 

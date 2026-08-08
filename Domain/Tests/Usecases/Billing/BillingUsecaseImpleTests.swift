@@ -255,24 +255,92 @@ extension BillingUsecaseImpleTests {
 
 extension BillingUsecaseImpleTests {
 
-    // 서버 반영 전에 앱이 죽은 트랜잭션은 기동 시 복구된다
-    @Test func usecase_startObserving_recoversUnfinishedTransactions() async throws {
+    // 앱 밖에서 일어난 갱신·환불·가족공유가 들어오는 유일한 경로.
+    // 종류를 판별하지 않고 위임 엔드포인트로 올린다 — 구매 확정 경로가 아니다
+    @Test func usecase_startObserving_sendsStreamTransactionToDelegationEndpoint() async throws {
+        // given
+        let expect = expectConfirm("스트림으로 들어온 트랜잭션이 위임 경로로 반영된다")
+        let (usecase, repository, service) = self.makeUsecase()
+        usecase.startObservingTransactions()
+
+        // when
+        _ = try await self.firstOutput(expect, for: usecase.currentUserPlan) {
+            service.sendTransactionUpdate(
+                BillingSignedTransaction(id: "tx:renewal", productId: "plan.standard.monthly", jws: "jws:renewal")
+            )
+        }
+
+        // then
+        #expect(repository.didPostedTransactionUpdates == ["jws:renewal"])
+        #expect(repository.didPostedSignedTransactions == [])
+        #expect(service.didFinishedTransactionIds == ["tx:renewal"])
+    }
+
+    // 복구는 이 루틴에서 떨어져 나갔다 — startObserving 만으로는 미완료 건이 안 올라간다
+    @Test func usecase_startObserving_doesNotRecoverUnfinished() async throws {
+        // given
+        let pending = BillingSignedTransaction(
+            id: "tx:pending", productId: "plan.lifetime", jws: "jws:pending"
+        )
+        let (usecase, repository, service) = self.makeUsecase(unfinished: [pending])
+
+        // when
+        usecase.startObservingTransactions()
+        try await Task.sleep(nanoseconds: 50_000_000)
+
+        // then
+        #expect(repository.didPostedTransactionUpdates == [])
+        #expect(service.didFinishedTransactionIds == [])
+    }
+
+    // 취소 후 도착한 트랜잭션은 처리되지 않는다 — 로그아웃 구간에 이전 세션의
+    // 리스너가 살아 있으면 같은 JWS 가 중복 post 된다
+    @Test func usecase_afterStopObserving_ignoresIncomingTransaction() async throws {
+        // given
+        let (usecase, repository, service) = self.makeUsecase()
+        usecase.startObservingTransactions()
+        try await Task.sleep(nanoseconds: 50_000_000)
+
+        // when
+        usecase.stopObservingTransactions()
+        try await Task.sleep(nanoseconds: 50_000_000)
+        service.sendTransactionUpdate(
+            BillingSignedTransaction(id: "tx:late", productId: "plan.lifetime", jws: "jws:late")
+        )
+        try await Task.sleep(nanoseconds: 100_000_000)
+
+        // then
+        #expect(repository.didPostedTransactionUpdates == [])
+        #expect(service.didFinishedTransactionIds == [])
+    }
+}
+
+
+// MARK: - 미완료 거래 복구
+
+extension BillingUsecaseImpleTests {
+
+    // 서버 반영 전에 앱이 죽은 트랜잭션은 독립 복구 경로로 올라간다
+    @Test func usecase_recoverUnfinished_sendsToDelegationEndpoint() async throws {
         // given
         let pending = BillingSignedTransaction(
             id: "tx:pending", productId: "plan.lifetime", jws: "jws:pending"
         )
         let expect = expectConfirm("미완료 트랜잭션이 복구된다")
-        let (usecase, repository, _) = self.makeUsecase(unfinished: [pending])
+        let (usecase, repository, service) = self.makeUsecase(unfinished: [pending])
+
         // when
         _ = try await self.firstOutput(expect, for: usecase.currentUserPlan) {
-            usecase.startObservingTransactions()
+            Task { await usecase.recoverUnfinishedTransactions() }
         }
+
         // then
-        #expect(repository.didPostedSignedTransactions == ["jws:pending"])
+        #expect(repository.didPostedTransactionUpdates == ["jws:pending"])
+        #expect(service.didFinishedTransactionIds == ["tx:pending"])
     }
 
-    // 앞 건이 영구 실패해도 뒤 건은 반영돼야 한다 — fail-fast 면 매 기동마다 뒤가 가려진다
-    @Test func usecase_startObserving_whenOneUnfinishedFails_stillAppliesTheRest() async throws {
+    // 앞 건이 영구 실패해도 뒤 건은 반영돼야 한다 — fail-fast 면 매 시도마다 뒤가 가려진다
+    @Test func usecase_recoverUnfinished_whenOneFails_stillAppliesTheRest() async throws {
         // given
         let failing = BillingSignedTransaction(
             id: "tx:bad", productId: "plan.lifetime", jws: "jws:bad"
@@ -284,31 +352,16 @@ extension BillingUsecaseImpleTests {
         let (usecase, repository, service) = self.makeUsecase(
             unfinished: [failing, pending], failingJWSTokens: ["jws:bad"]
         )
-        // when
-        _ = try await self.firstOutput(expect, for: usecase.currentUserPlan) {
-            usecase.startObservingTransactions()
-        }
-        // then
-        #expect(repository.didPostedSignedTransactions == ["jws:bad", "jws:pending"])
-        // 서버 반영에 실패한 건은 finish 되지 않아 다음 기동에 다시 잡힌다
-        #expect(service.didFinishedTransactionIds == ["tx:pending"])
-    }
 
-    // 앱 밖에서 일어난 갱신·환불·가족공유가 들어오는 유일한 경로
-    @Test func usecase_startObserving_appliesTransactionFromStream() async throws {
-        // given
-        let expect = expectConfirm("스트림으로 들어온 트랜잭션이 반영된다")
-        let (usecase, repository, service) = self.makeUsecase()
-        usecase.startObservingTransactions()
         // when
         _ = try await self.firstOutput(expect, for: usecase.currentUserPlan) {
-            service.sendTransactionUpdate(
-                BillingSignedTransaction(id: "tx:renewal", productId: "plan.standard.monthly", jws: "jws:renewal")
-            )
+            Task { await usecase.recoverUnfinishedTransactions() }
         }
+
         // then
-        #expect(repository.didPostedSignedTransactions == ["jws:renewal"])
-        #expect(service.didFinishedTransactionIds == ["tx:renewal"])
+        #expect(repository.didPostedTransactionUpdates == ["jws:bad", "jws:pending"])
+        // 서버 반영에 실패한 건은 finish 되지 않아 다음 시도에 다시 잡힌다
+        #expect(service.didFinishedTransactionIds == ["tx:pending"])
     }
 }
 

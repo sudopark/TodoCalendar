@@ -35,6 +35,8 @@ final class StubBillingUsecase: BillingUsecase, @unchecked Sendable {
     }
 
     func startObservingTransactions() { }
+    func stopObservingTransactions() { }
+    func recoverUnfinishedTransactions() async { }
 
     var currentUserPlan: AnyPublisher<BillingUserPlan, Never> {
         self.currentUserPlanSubject.compactMap { $0 }.eraseToAnyPublisher()
