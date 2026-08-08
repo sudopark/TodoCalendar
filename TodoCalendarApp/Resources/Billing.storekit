@@ -5,7 +5,7 @@
   ],
   "products" : [
     {
-      "displayPrice" : "39000",
+      "displayPrice" : "29.99",
       "familyShareable" : false,
       "internalID" : "F7209EB6-48D6-42B3-B770-CFDE31F263DB",
       "localizations" : [
@@ -20,7 +20,7 @@
       "type" : "NonConsumable"
     },
     {
-      "displayPrice" : "1200",
+      "displayPrice" : "0.99",
       "familyShareable" : false,
       "internalID" : "F22C4EF8-F1F7-483C-A910-6BE2F898DE32",
       "localizations" : [
@@ -35,7 +35,7 @@
       "type" : "Consumable"
     },
     {
-      "displayPrice" : "2900",
+      "displayPrice" : "4.99",
       "familyShareable" : false,
       "internalID" : "4FF2B0AC-1B06-4A95-AEFD-038A399BD6CB",
       "localizations" : [
@@ -50,7 +50,7 @@
       "type" : "Consumable"
     },
     {
-      "displayPrice" : "5900",
+      "displayPrice" : "9.99",
       "familyShareable" : false,
       "internalID" : "845E09E0-87E7-4AE5-9077-E4F8C379F91A",
       "localizations" : [
@@ -70,7 +70,7 @@
     "_billingIssuesEnabled" : false,
     "_disableDialogs" : false,
     "_failTransactionsEnabled" : false,
-    "_locale" : "ko_KR",
+    "_locale" : "en_US",
     "_negativeReviewsEnabled" : false,
     "_storeKitErrors" : [
       {
@@ -119,7 +119,7 @@
         "name" : "Offer Code Redeem Sheet"
       }
     ],
-    "_storefront" : "KOR"
+    "_storefront" : "USA"
   },
   "subscriptionGroups" : [
     {
@@ -136,7 +136,7 @@
           "codeOffers" : [
 
           ],
-          "displayPrice" : "4900",
+          "displayPrice" : "0.99",
           "familyShareable" : false,
           "groupNumber" : 1,
           "internalID" : "C2B87CBB-20C6-4673-ACEB-39A1861026AC",
