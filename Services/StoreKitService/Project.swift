@@ -8,15 +8,15 @@ let project = Project.framework(
     dependencies: [
         .project(
             target: "Common3rdParty",
-            path: .relativeToCurrentFile("../../Supports/Common3rdParty")
+            path: .relativeToRoot("Supports/Common3rdParty")
         ),
         .project(
             target: "Domain",
-            path: .relativeToCurrentFile("../../Domain")
+            path: .relativeToRoot("Domain")
         ),
         .project(
             target: "Extensions",
-            path: .relativeToCurrentFile("../../Supports/Extensions")
+            path: .relativeToRoot("Supports/Extensions")
         )
     ]
 )

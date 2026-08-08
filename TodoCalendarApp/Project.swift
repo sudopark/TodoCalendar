@@ -17,79 +17,79 @@ let project = Project.app(
         ),
         .project(
             target: "CalendarScenes",
-            path: .relativeToCurrentFile("../Presentations/CalendarScenes")
+            path: .relativeToRoot("Presentations/CalendarScenes")
         ),
         .project(
             target: "Common3rdParty",
-            path: .relativeToCurrentFile("../Supports/Common3rdParty")
+            path: .relativeToRoot("Supports/Common3rdParty")
         ),
         .project(
             target: "CommonPresentation",
-            path: .relativeToCurrentFile("../Presentations/CommonPresentation")
+            path: .relativeToRoot("Presentations/CommonPresentation")
         ),
         .project(
             target: "Domain",
-            path: .relativeToCurrentFile("../Domain")
+            path: .relativeToRoot("Domain")
         ),
         .project(
             target: "EventDetailScene",
-            path: .relativeToCurrentFile("../Presentations/EventDetailScene")
+            path: .relativeToRoot("Presentations/EventDetailScene")
         ),
         .project(
             target: "Extensions",
-            path: .relativeToCurrentFile("../Supports/Extensions")
+            path: .relativeToRoot("Supports/Extensions")
         ),
         .project(
             target: "Repository",
-            path: .relativeToCurrentFile("../Repository")
+            path: .relativeToRoot("Repository")
         ),
         .project(
             target: "Scenes",
-            path: .relativeToCurrentFile("../Presentations/Scenes")
+            path: .relativeToRoot("Presentations/Scenes")
         ),
         .project(
             target: "SettingScene",
-            path: .relativeToCurrentFile("../Presentations/SettingScene")
+            path: .relativeToRoot("Presentations/SettingScene")
         ),
         .project(
             target: "MemberScenes",
-            path: .relativeToCurrentFile("../Presentations/MemberScenes")
+            path: .relativeToRoot("Presentations/MemberScenes")
         ),
         .project(
             target: "EventListScenes",
-            path: .relativeToCurrentFile("../Presentations/EventListScenes")
+            path: .relativeToRoot("Presentations/EventListScenes")
         ),
         .project(
             target: "AIAgentScene",
-            path: .relativeToCurrentFile("../Presentations/AIAgentScene")
+            path: .relativeToRoot("Presentations/AIAgentScene")
         ),
         .project(
             target: "BillingScenes",
-            path: .relativeToCurrentFile("../Presentations/BillingScenes")
+            path: .relativeToRoot("Presentations/BillingScenes")
         ),
         .project(
             target: "FirstPartyServices",
-            path: .relativeToCurrentFile("../Services/FirstPartyServices")
+            path: .relativeToRoot("Services/FirstPartyServices")
         ),
         .project(
             target: "SpeechService",
-            path: .relativeToCurrentFile("../Services/SpeechService")
+            path: .relativeToRoot("Services/SpeechService")
         ),
         .project(
             target: "PlaceService",
-            path: .relativeToCurrentFile("../Services/PlaceService")
+            path: .relativeToRoot("Services/PlaceService")
         ),
         .project(
             target: "AuthService",
-            path: .relativeToCurrentFile("../Services/AuthService")
+            path: .relativeToRoot("Services/AuthService")
         ),
         .project(
             target: "ExternalServices",
-            path: .relativeToCurrentFile("../Services/ExternalServices")
+            path: .relativeToRoot("Services/ExternalServices")
         ),
         .project(
             target: "StoreKitService",
-            path: .relativeToCurrentFile("../Services/StoreKitService")
+            path: .relativeToRoot("Services/StoreKitService")
         )
       ],
     extensionTargets:
@@ -109,27 +109,27 @@ let project = Project.app(
             dependencies: [
                 .project(
                     target: "Extensions",
-                    path: .relativeToCurrentFile("../Supports/Extensions")
+                    path: .relativeToRoot("Supports/Extensions")
                 ),
                 .project(
                     target: "Common3rdParty",
-                    path: .relativeToCurrentFile("../Supports/Common3rdParty")
+                    path: .relativeToRoot("Supports/Common3rdParty")
                 ),
                 .project(
                     target: "Domain",
-                    path: .relativeToCurrentFile("../Domain")
+                    path: .relativeToRoot("Domain")
                 ),
                 .project(
                     target: "Repository",
-                    path: .relativeToCurrentFile("../Repository")
+                    path: .relativeToRoot("Repository")
                 ),
                 .project(
                     target: "CommonPresentation",
-                    path: .relativeToCurrentFile("../Presentations/CommonPresentation")
+                    path: .relativeToRoot("Presentations/CommonPresentation")
                 ),
                 .project(
                     target: "CalendarScenes",
-                    path: .relativeToCurrentFile("../Presentations/CalendarScenes")
+                    path: .relativeToRoot("Presentations/CalendarScenes")
                 )
             ],
             signingConfigures: [
@@ -165,19 +165,19 @@ let project = Project.app(
         dependencies: [
             .project(
                 target: "Extensions",
-                path: .relativeToCurrentFile("../Supports/Extensions")
+                path: .relativeToRoot("Supports/Extensions")
             ),
             .project(
                 target: "Common3rdParty",
-                path: .relativeToCurrentFile("../Supports/Common3rdParty")
+                path: .relativeToRoot("Supports/Common3rdParty")
             ),
             .project(
                 target: "Domain",
-                path: .relativeToCurrentFile("../Domain")
+                path: .relativeToRoot("Domain")
             ),
             .project(
                 target: "Repository",
-                path: .relativeToCurrentFile("../Repository")
+                path: .relativeToRoot("Repository")
             ),
         ],
         signingConfigures: [
@@ -215,23 +215,23 @@ let project = Project.app(
         dependencies: [
             .project(
                 target: "Extensions",
-                path: .relativeToCurrentFile("../Supports/Extensions")
+                path: .relativeToRoot("Supports/Extensions")
             ),
             .project(
                 target: "Common3rdParty",
-                path: .relativeToCurrentFile("../Supports/Common3rdParty")
+                path: .relativeToRoot("Supports/Common3rdParty")
             ),
             .project(
                 target: "Domain",
-                path: .relativeToCurrentFile("../Domain")
+                path: .relativeToRoot("Domain")
             ),
             .project(
                 target: "Repository",
-                path: .relativeToCurrentFile("../Repository")
+                path: .relativeToRoot("Repository")
             ),
             .project(
                 target: "CommonPresentation",
-                path: .relativeToCurrentFile("../Presentations/CommonPresentation")
+                path: .relativeToRoot("Presentations/CommonPresentation")
             )
         ],
         signingConfigures: [
