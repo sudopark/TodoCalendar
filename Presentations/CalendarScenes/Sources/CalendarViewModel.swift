@@ -317,10 +317,10 @@ extension CalendarViewModelImple {
         self.bindUncompletedTodoRefresh()
 
         if FeatureFlag.isEnable(.aiAgent) {
-            self.aiAgentOrchestrationUsecase.prepare()
             self.bindShowAICommandResultIfNeed()
             self.bindVoiceInputLifecycle()
             self.bindScrollToVoiceInputOnFocusedMonth()
+            self.aiAgentOrchestrationUsecase.prepare()
         }
     }
     
@@ -501,7 +501,20 @@ extension CalendarViewModelImple {
 
 extension CalendarViewModelImple {
 
+    // 콜드런치 딥링크는 aiAgentState 미방출·달력 미부착 시점에 flush된다 — 그때 실행하면
+    // 상태를 idle로 오판독하고 스크롤도 유실된다. 웜 스타트면 구독 즉시 동기로 통과한다.
     func requestAIEntry() {
+        Publishers.CombineLatest(
+            self.subject.aiAgentState.compactMap { $0 }.first(),
+            self.subject.monthsInCurrentRange.compactMap { $0 }.first()
+        )
+        .sink(receiveValue: { [weak self] _, _ in
+            self?.performAIEntry()
+        })
+        .store(in: &self.cancellables)
+    }
+
+    private func performAIEntry() {
         self.router?.dismissPresented(animated: true) { [weak self] in
             guard let self = self else { return }
             let state = self.subject.aiAgentState.value ?? .idle
