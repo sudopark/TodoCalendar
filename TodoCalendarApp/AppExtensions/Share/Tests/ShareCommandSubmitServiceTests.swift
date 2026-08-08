@@ -273,6 +273,40 @@ extension ShareCommandSubmitServiceTests {
 }
 
 
+// MARK: - 입력 출처 전달
+
+extension ShareCommandSubmitServiceTests {
+
+    @Test("출처를 안 주면 텍스트로 보낸다")
+    func submit_whenNoInputSourceGiven_sendsText() async throws {
+        // given
+        let (service, repository) = self.makeService()
+
+        // when
+        try await service.submit(sharedText: "내일 회의", additionalInstruction: "")
+
+        // then
+        #expect(repository.didProcessInterpretWithInputSource == .text)
+    }
+
+    @Test("이미지 OCR 출처를 그대로 보낸다")
+    func submit_whenImageOcrGiven_sendsImageOcr() async throws {
+        // given
+        let (service, repository) = self.makeService()
+
+        // when
+        try await service.submit(
+            sharedText: "9월 10일 치과",
+            additionalInstruction: "",
+            inputSource: .imageOcr
+        )
+
+        // then
+        #expect(repository.didProcessInterpretWithInputSource == .imageOcr)
+    }
+}
+
+
 // MARK: - doubles
 
 // AICommandRepository 구현체는 앱 타겟 테스트(IntentCommandSubmitServiceTests)에도

@@ -20,12 +20,8 @@ final class ShareViewController: UIViewController {
 
         let viewModel = ShareCommandViewModel(
             submitService: self.factory.makeSubmitService(),
-            loadSharedText: { [weak self] in
-                switch await self?.loadSharedItem() {
-                case .text(let text): return text
-                case .image, .none: return ""
-                }
-            },
+            imageTextRecognizeService: self.factory.makeImageTextRecognizeService(),
+            loadSharedItem: { [weak self] in await self?.loadSharedItem() ?? .text("") },
             onClose: { [weak self] in self?.close() }
         )
         self.attach(viewModel)

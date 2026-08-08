@@ -10,6 +10,7 @@ import Foundation
 import Domain
 import Repository
 import CommonPresentation
+import FirstPartyServices
 
 
 struct ShareUsecaseFactory {
@@ -45,6 +46,10 @@ extension ShareUsecaseFactory {
             repository: self.makeAICommandRepository(),
             authStore: self.base.authStore
         )
+    }
+
+    func makeImageTextRecognizeService() -> any ImageTextRecognizeService {
+        return ImageTextRecognizeServiceImple()
     }
 
     // 공유 시트도 앱에서 고른 테마·폰트 스케일을 따른다 — 위젯과 같은 조립(UserDefaults 저장값)
