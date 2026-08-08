@@ -26,8 +26,10 @@ public final class SpeechRecognizeServiceImple: SpeechRecognizeService, @uncheck
             Result<SpeechRecognizeFragment, any Error>, Never
         >()
         let voiceLevel = CurrentValueSubject<Float, Never>(0)
+        let audioInputDisrupted = PassthroughSubject<Void, Never>()
     }
     private let subject = Subject()
+    private var audioSessionObserving = Set<AnyCancellable>()
 
     // 이 dBFS 이하를 0(무음)으로, 0dBFS를 1로 매핑하는 노이즈 플로어
     private let noiseFloor: Float = -50.0
@@ -46,6 +48,7 @@ extension SpeechRecognizeServiceImple {
                 throw RuntimeError(key: "recognizerUnavailable", "speech recognizer unavailable")
             }
             try self.configureAudioSession()
+            self.observeAudioDisruption()
             let request = self.makeRequest()
             self.installInputTap()
             self.task = self.makeRecognitionTask(recognizer: recognizer, request: request)
@@ -61,6 +64,40 @@ extension SpeechRecognizeServiceImple {
         let audioSession = AVAudioSession.sharedInstance()
         try audioSession.setCategory(.record, mode: .measurement)
         try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
+    }
+
+    // 이어폰 분리는 interruption이 아니라 routeChange(.oldDeviceUnavailable)로 온다 — 둘 다 봐야 한다.
+    private func observeAudioDisruption() {
+        self.audioSessionObserving = []
+
+        let interruptionBegan = NotificationCenter.default
+            .publisher(for: AVAudioSession.interruptionNotification)
+            .filter { Self.isInterruptionBegan($0) }
+            .map { _ in () }
+
+        let inputDeviceLost = NotificationCenter.default
+            .publisher(for: AVAudioSession.routeChangeNotification)
+            .filter { Self.isInputDeviceLost($0) }
+            .map { _ in () }
+
+        Publishers.Merge(interruptionBegan, inputDeviceLost)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.subject.audioInputDisrupted.send(())
+            }
+            .store(in: &self.audioSessionObserving)
+    }
+
+    private static func isInterruptionBegan(_ notification: Notification) -> Bool {
+        guard let raw = notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt
+        else { return false }
+        return AVAudioSession.InterruptionType(rawValue: raw) == .began
+    }
+
+    private static func isInputDeviceLost(_ notification: Notification) -> Bool {
+        guard let raw = notification.userInfo?[AVAudioSessionRouteChangeReasonKey] as? UInt
+        else { return false }
+        return AVAudioSession.RouteChangeReason(rawValue: raw) == .oldDeviceUnavailable
     }
 
     private func makeRequest() -> SFSpeechAudioBufferRecognitionRequest {
@@ -115,6 +152,7 @@ extension SpeechRecognizeServiceImple {
     // 무조건 호출해도 안전(idempotent): stop/cancel/removeTap 모두 미동작·미설치 상태에서 호출해도 무해.
     // start 실패 cleanup, 중복 stop, 에러 분기 self-teardown 모두 이 한 경로로 처리.
     private func teardownAudio() {
+        self.audioSessionObserving = []
         self.task?.cancel()
         self.audioEngine.stop()
         self.audioEngine.inputNode.removeTap(onBus: 0)
@@ -156,5 +194,8 @@ extension SpeechRecognizeServiceImple {
     }
     public var voiceLevel: AnyPublisher<Float, Never> {
         return self.subject.voiceLevel.eraseToAnyPublisher()
+    }
+    public var audioInputDisrupted: AnyPublisher<Void, Never> {
+        return self.subject.audioInputDisrupted.eraseToAnyPublisher()
     }
 }

@@ -34,4 +34,8 @@ public protocol SpeechRecognizeService: Sendable {
 
     // raw 오디오 입력 세기 (0...1 정규화 레벨)
     var voiceLevel: AnyPublisher<Float, Never> { get }
+
+    // 시스템이 오디오 입력을 회수한 순간 (인터럽션 · 입력 라우트 소실).
+    // 앱은 여전히 활성이라 앱 생명주기 이벤트로는 감지되지 않는다.
+    var audioInputDisrupted: AnyPublisher<Void, Never> { get }
 }

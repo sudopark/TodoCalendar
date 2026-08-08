@@ -204,6 +204,48 @@ extension SpeechRecognizeUsecaseImpleTests {
         }
         #expect(recognizeResult == .endedWithoutRecognizing)
     }
+
+    @Test func usecase_whenAudioInputDisrupted_emitsEndedWithoutRecognizing() async throws {
+        // given
+        let (usecase, service) = self.makeUsecase()
+
+        // when
+        let captured = try await self.captureResult(for: usecase) {
+            usecase.startListening()
+            try await Task.sleep(for: .milliseconds(50))
+            service.emitAudioDisruption()
+        }
+
+        // then
+        let result = try #require(captured)
+        guard case .success(let recognizeResult) = result else {
+            Issue.record("성공 결과가 아님")
+            return
+        }
+        #expect(recognizeResult == .endedWithoutRecognizing)
+    }
+
+    @Test func usecase_whenAudioInputDisruptedWhileSpeaking_discardsPartialText() async throws {
+        // given
+        let (usecase, service) = self.makeUsecase()
+
+        // when
+        let captured = try await self.captureResult(for: usecase) {
+            usecase.startListening()
+            try await Task.sleep(for: .milliseconds(50))
+            service.emit(.init(text: "오늘 회의", isFinal: false))
+            try await Task.sleep(for: .milliseconds(20))
+            service.emitAudioDisruption()
+        }
+
+        // then
+        let result = try #require(captured)
+        guard case .success(let recognizeResult) = result else {
+            Issue.record("성공 결과가 아님")
+            return
+        }
+        #expect(recognizeResult == .endedWithoutRecognizing)
+    }
 }
 
 
@@ -330,6 +372,26 @@ extension SpeechRecognizeUsecaseImpleTests {
         // then
         #expect(levels.last == .some(nil))
     }
+
+    @Test func usecase_whenAudioInputDisrupted_stopsListening() async throws {
+        // given
+        let expect = expectConfirm("오디오 입력이 끊기면 듣기 종료")
+        expect.count = 4
+        let (usecase, service) = self.makeUsecase()
+
+        // when
+        let levels = try await self.outputs(expect, for: usecase.isRecognizingWithLevel) {
+            usecase.startListening()
+            try await Task.sleep(for: .milliseconds(60))
+            service.sendLevel(0.5)
+            try await Task.sleep(for: .milliseconds(20))
+            service.emitAudioDisruption()
+            try await Task.sleep(for: .milliseconds(40))
+        }
+
+        // then
+        #expect(levels == [nil, 0.0, 0.5, nil])
+    }
 }
 
 
@@ -369,6 +431,7 @@ private final class StubSpeechRecognizeService: SpeechRecognizeService, @uncheck
 
     private let recognizedSubject = PassthroughSubject<SpeechRecognizeFragment, any Error>()
     private let voiceLevelSubject = CurrentValueSubject<Float, Never>(0)
+    private let audioInputDisruptedSubject = PassthroughSubject<Void, Never>()
 
     var startError: (any Error)?
 
@@ -377,6 +440,9 @@ private final class StubSpeechRecognizeService: SpeechRecognizeService, @uncheck
     }
     var voiceLevel: AnyPublisher<Float, Never> {
         return self.voiceLevelSubject.eraseToAnyPublisher()
+    }
+    var audioInputDisrupted: AnyPublisher<Void, Never> {
+        return self.audioInputDisruptedSubject.eraseToAnyPublisher()
     }
     func start() throws {
         if let startError { throw startError }
@@ -391,6 +457,9 @@ private final class StubSpeechRecognizeService: SpeechRecognizeService, @uncheck
     }
     func sendLevel(_ level: Float) {
         self.voiceLevelSubject.send(level)
+    }
+    func emitAudioDisruption() {
+        self.audioInputDisruptedSubject.send(())
     }
 }
 
