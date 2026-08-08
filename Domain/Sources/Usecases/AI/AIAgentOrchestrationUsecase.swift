@@ -173,14 +173,7 @@ extension AIAgentOrchestrationUsecaseImple {
 
         self.speechRecognizeUsecase.recognizeResult
             .sink { [weak self] result in
-                switch result {
-                case .success(let text):
-                    self?.resetVoiceBinding()
-                    self?.subject.state.send(.idle)
-                    try? self?.submit(text)
-                case .failure(let error):
-                    self?.handleRecognizeFailed(error)
-                }
+                self?.handleRecognizeEnd(result)
             }
             .store(in: &self.voiceInputBindings)
 
@@ -198,8 +191,13 @@ extension AIAgentOrchestrationUsecaseImple {
             .store(in: &self.voiceInputBindings)
     }
 
-    private func handleRecognizeFailed(_ error: any Error) {
+    // 인식 종료는 텍스트 확보·무인식·실패를 가리지 않고 stopInput과 동등하게 접는다.
+    // 바인딩을 남기면 다음 입력 세션에 이전 구독이 겹친다.
+    private func handleRecognizeEnd(_ result: Result<SpeechRecognizeResult, any Error>) {
+        self.resetVoiceBinding()
         self.subject.state.send(.idle)
+        guard case .success(.recognized(let text)) = result else { return }
+        try? self.submit(text)
     }
 
     private func resetVoiceBinding() {

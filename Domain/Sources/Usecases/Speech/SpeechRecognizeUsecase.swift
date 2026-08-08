@@ -10,6 +10,16 @@ import Foundation
 import Combine
 
 
+// MARK: - SpeechRecognizeResult
+
+// 텍스트 없이 끝나는 종료(침묵 타임아웃·오디오 입력 끊김)도 소비자가 인지해야 하므로
+// completion이 아니라 명시적 값으로 방출한다.
+public enum SpeechRecognizeResult: Sendable, Equatable {
+    case recognized(String)
+    case endedWithoutRecognizing
+}
+
+
 // MARK: - SpeechRecognizeUsecase
 
 public protocol SpeechRecognizeUsecase: Sendable {
@@ -18,7 +28,7 @@ public protocol SpeechRecognizeUsecase: Sendable {
     func stopListening()
     func finishListening()
 
-    var recognizeResult: AnyPublisher<Result<String, any Error>, Never> { get }
+    var recognizeResult: AnyPublisher<Result<SpeechRecognizeResult, any Error>, Never> { get }
     var recognizingText: AnyPublisher<String, Never> { get }
     var isRecognizingWithLevel: AnyPublisher<Float?, Never> { get }
 }
@@ -47,7 +57,7 @@ public final class SpeechRecognizeUsecaseImple: SpeechRecognizeUsecase, @uncheck
 
     private struct Subject {
         let isRecognizing = CurrentValueSubject<Bool, Never>(false)
-        let result = PassthroughSubject<Result<String, any Error>, Never>()
+        let result = PassthroughSubject<Result<SpeechRecognizeResult, any Error>, Never>()
         let recognizingText = CurrentValueSubject<String, Never>("")
     }
     private let subject = Subject()
@@ -83,16 +93,16 @@ extension SpeechRecognizeUsecaseImple {
     
     private func bindService() {
         
-        let selectText: (SpeechRecognizeFragment?, Void?) -> RecognizeResult? = { fragment, timeout in
-            
+        let selectResult: (SpeechRecognizeFragment?, Void?) -> SpeechRecognizeResult? = { fragment, timeout in
+
             switch (fragment, timeout) {
             case (.some(let frg), _) where frg.isFinal: return .recognized(frg.text)
             case (.some(let frg), .some): return .recognized(frg.text)
-            case (.none, .some): return .timeout
+            case (.none, .some): return .endedWithoutRecognizing
             default: return nil
             }
         }
-        
+
         self.subject.recognizingText.send("")
         self.serviceBinding = []
 
@@ -100,7 +110,7 @@ extension SpeechRecognizeUsecaseImple {
             self.service.recognized.mapAsOptional().prepend(nil),
             self.silenceTimeout.mapAsAnyError().mapAsOptional().prepend(nil)
         )
-        .compactMap(selectText)
+        .compactMap(selectResult)
         .first()
         .sink(
             receiveCompletion: self.handleCompletion(),
@@ -119,11 +129,6 @@ extension SpeechRecognizeUsecaseImple {
             .store(in: &self.serviceBinding)
     }
     
-    private enum RecognizeResult {
-        case recognized(String)
-        case timeout
-    }
-    
     private func handleCompletion() -> (Subscribers.Completion<any Error>) -> Void  {
         return  { [weak self] completion in
             guard let self, case .failure(let error) = completion
@@ -134,11 +139,10 @@ extension SpeechRecognizeUsecaseImple {
         }
     }
     
-    private func handleRecognized() -> (RecognizeResult) -> Void {
+    private func handleRecognized() -> (SpeechRecognizeResult) -> Void {
         return { [weak self] result in
             self?.stopListening()
-            guard case .recognized(let text) = result else { return }
-            self?.subject.result.send(.success(text))
+            self?.subject.result.send(.success(result))
         }
     }
     
@@ -165,7 +169,7 @@ extension SpeechRecognizeUsecaseImple {
 
 extension SpeechRecognizeUsecaseImple {
     
-    public var recognizeResult: AnyPublisher<Result<String, any Error>, Never> {
+    public var recognizeResult: AnyPublisher<Result<SpeechRecognizeResult, any Error>, Never> {
         return self.subject.result
             .eraseToAnyPublisher()
     }
@@ -180,7 +184,7 @@ extension SpeechRecognizeUsecaseImple {
         guard self.subject.isRecognizing.value else { return }
         let text = self.subject.recognizingText.value
         self.stopListening()
-        self.subject.result.send(.success(text))
+        self.subject.result.send(.success(.recognized(text)))
     }
 
     public var isRecognizingWithLevel: AnyPublisher<Float?, Never> {
