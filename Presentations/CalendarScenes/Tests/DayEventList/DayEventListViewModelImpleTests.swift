@@ -690,6 +690,21 @@ extension DayEventListViewModelImpleTests {
             "2023-09-30-holiday"
         ]
     }
+
+    private var dummyEventsWithScheduleTurnedRepeating: [any CalendarEvent] {
+        let turnedRepeating = ScheduleCalendarEvent(
+            eventIdWithoutTurn: "ev",
+            eventId: "not-repeating-schedule",
+            name: "not-repeating-schedule",
+            eventTime: .at(self.todayRange.lowerBound),
+            eventTimeOnCalendar: nil,
+            eventTagId: .custom("some"),
+            isRepeating: true
+        ) |> \.turn .~ 1
+        return self.dummyEvents.map { event in
+            event.eventId == "not-repeating-schedule" ? turnedRepeating : event
+        }
+    }
     
     func testViewModel_whenAppleCalendarEventExists_showInList() {
         // given
@@ -776,6 +791,32 @@ extension DayEventListViewModelImpleTests {
             .map { $0.filter { $0.name.starts(with: "current-todo") }}
             .map { !$0.isEmpty }
         XCTAssertEqual(hasCurrentTodo, [true, false])
+    }
+
+    func testViewModel_whenSameEventListNotifiedAgain_notRefreshCellViewModels() {
+        // given
+        let expect = expectation(description: "같은 이벤트 목록이 다시 통지되면 셀 목록을 재방출하지 않고, 실제로 바뀌었을때만 재방출한다")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModelWithInitialListLoaded()
+
+        // when
+        let cvmLists = self.waitOutputs(expect, for: viewModel.cellViewModels, timeout: 0.1) {
+            viewModel.selectedDayChanaged(self.dummyCurrentDay, and: self.dummyEvents)
+            viewModel.selectedDayChanaged(
+                self.dummyCurrentDay, and: self.dummyEventsWithScheduleTurnedRepeating
+            )
+        }
+
+        // then
+        XCTAssertEqual(cvmLists.count, 2)
+        let removeActionsPerEmit = cvmLists.map { cvms in
+            cvms.first(where: { $0.eventIdentifier == "not-repeating-schedule" })?.moreActions?.removeActions
+        }
+        XCTAssertEqual(removeActionsPerEmit.first, [.remove(onlyThisTime: false)])
+        XCTAssertEqual(
+            removeActionsPerEmit.last,
+            [.remove(onlyThisTime: true), .remove(onlyThisTime: false)]
+        )
     }
 }
 
