@@ -629,3 +629,8 @@
 "share.ai::sentButUntracked" = "Poslano, ali aplikacija ne može pratiti rezultat. Provjerite kalendar za trenutak.";
 "share.ai::textTooLong" = "Tekst je predug za slanje. Skratite ga i pokušajte ponovno.";
 "share.ai::instructionTooLong" = "Vaša uputa je predugačka. Skratite je.";
+"share.ai::image::title" = "Pošalji sliku AI-ju";
+"share.ai::image::recognizing" = "Čitanje teksta sa slike…";
+"share.ai::image::text::caption" = "Tekst pročitan sa slike – uredite ga ako nešto ne izgleda ispravno.";
+"share.ai::image::text::placeholder" = "Tekst pročitan sa slike";
+"share.ai::image::noTextFound" = "Nije pronađen nikakav tekst na ovoj slici. Upišite što želite dodati.";

@@ -629,3 +629,8 @@
 "share.ai::sentButUntracked" = "Enviat, però l'aplicació no pot fer el seguiment del resultat. Reviseu el calendari d'aquí a un moment.";
 "share.ai::textTooLong" = "El text és massa llarg per enviar-lo. Escurceu-lo i torneu-ho a provar.";
 "share.ai::instructionTooLong" = "La vostra instrucció és massa llarga. Escurceu-la.";
+"share.ai::image::title" = "Envia la imatge a la IA";
+"share.ai::image::recognizing" = "Llegint el text de la imatge…";
+"share.ai::image::text::caption" = "Text llegit de la imatge. Editeu-lo si alguna cosa no sembla correcta.";
+"share.ai::image::text::placeholder" = "Text llegit de la imatge";
+"share.ai::image::noTextFound" = "No s'ha trobat cap text en aquesta imatge. Escriviu el que vulgueu afegir.";

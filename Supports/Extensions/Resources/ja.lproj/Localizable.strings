@@ -629,3 +629,8 @@
 "share.ai::sentButUntracked" = "送信しましたが、アプリで結果を追跡できません。しばらくしてからカレンダーをご確認ください。";
 "share.ai::textTooLong" = "送信する内容が長すぎます。短くしてもう一度お試しください。";
 "share.ai::instructionTooLong" = "指示が長すぎます。短くしてください。";
+"share.ai::image::title" = "画像をAIに送信";
+"share.ai::image::recognizing" = "画像からテキストを読み取っています…";
+"share.ai::image::text::caption" = "画像から読み取ったテキストです。おかしい部分があれば編集してください。";
+"share.ai::image::text::placeholder" = "画像から読み取ったテキスト";
+"share.ai::image::noTextFound" = "この画像からテキストが見つかりませんでした。追加したい内容を入力してください。";

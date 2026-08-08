@@ -629,3 +629,8 @@
 "share.ai::sentButUntracked" = "Gönderildi, ancak uygulama sonucu izleyemiyor. Birazdan takviminizi kontrol edin.";
 "share.ai::textTooLong" = "Metin göndermek için çok uzun. Kısaltıp tekrar deneyin.";
 "share.ai::instructionTooLong" = "Yönergeniz çok uzun. Lütfen kısaltın.";
+"share.ai::image::title" = "Görseli AI'ya gönder";
+"share.ai::image::recognizing" = "Görseldeki metin okunuyor…";
+"share.ai::image::text::caption" = "Görselden okunan metin — bir şey yanlış görünüyorsa düzenleyin.";
+"share.ai::image::text::placeholder" = "Görselden okunan metin";
+"share.ai::image::noTextFound" = "Bu görselde herhangi bir metin bulunamadı. Eklemek istediğinizi yazın.";

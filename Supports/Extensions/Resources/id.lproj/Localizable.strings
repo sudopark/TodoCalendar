@@ -629,3 +629,8 @@
 "share.ai::sentButUntracked" = "Terkirim, tetapi aplikasi tidak dapat melacak hasilnya. Periksa kalender Anda sebentar lagi.";
 "share.ai::textTooLong" = "Teks terlalu panjang untuk dikirim. Persingkat dan coba lagi.";
 "share.ai::instructionTooLong" = "Instruksi Anda terlalu panjang. Silakan persingkat.";
+"share.ai::image::title" = "Kirim gambar ke AI";
+"share.ai::image::recognizing" = "Membaca teks dari gambar…";
+"share.ai::image::text::caption" = "Teks yang dibaca dari gambar — edit jika ada yang terlihat tidak sesuai.";
+"share.ai::image::text::placeholder" = "Teks dari gambar";
+"share.ai::image::noTextFound" = "Tidak dapat menemukan teks apa pun di gambar ini. Ketik apa yang ingin Anda tambahkan.";

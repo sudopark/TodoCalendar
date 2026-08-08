@@ -629,3 +629,8 @@
 "share.ai::sentButUntracked" = "Skickat, men appen kan inte följa resultatet. Kolla kalendern om en stund.";
 "share.ai::textTooLong" = "Texten är för lång för att skickas. Korta ner den och försök igen.";
 "share.ai::instructionTooLong" = "Din instruktion är för lång. Korta ner den.";
+"share.ai::image::title" = "Skicka bild till AI";
+"share.ai::image::recognizing" = "Läser text från bilden…";
+"share.ai::image::text::caption" = "Text som lästs från bilden – redigera om något ser fel ut.";
+"share.ai::image::text::placeholder" = "Text läst från bilden";
+"share.ai::image::noTextFound" = "Ingen text hittades i den här bilden. Skriv vad du vill lägga till.";
