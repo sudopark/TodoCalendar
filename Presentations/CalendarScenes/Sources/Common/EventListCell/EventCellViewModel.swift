@@ -165,6 +165,31 @@ public protocol EventCellViewModel: Sendable {
     var isRepeating: Bool { get }
     var moreActions: EventListMoreActionModel? { get }
     var isAlldayEvent: Bool { get }
+
+    /// 셀이 그리는 값 + 셀 액션이 소비하는 값 전부를 담는다. 이 키가 같으면 셀 목록 재방출이 생략된다.
+    /// 프로토콜 밖 프로퍼티는 각 타입이 `makeCustomCompareKey`의 추가 성분으로 직접 얹어야 한다 — 빠뜨리면 그 값의 변경이 화면·동작에 안 붙는다.
+    var customCompareKey: String { get }
+}
+
+extension EventCellViewModel {
+
+    fileprivate func makeCustomCompareKey(_ additionalComponents: [String?]) -> String {
+        let baseComponents: [String?] = [
+            "\(Self.self)",
+            self.eventIdentifier,
+            self.name,
+            "\(self.colorSource)",
+            self.periodText?.customCompareKey,
+            self.periodDescription,
+            "\(self.isForemost)",
+            "\(self.isRepeating)",
+            "\(self.isAlldayEvent)",
+            String(describing: self.moreActions)
+        ]
+        return (baseComponents + additionalComponents)
+            .map { $0 ?? "nil" }
+            .joined(separator: "-")
+    }
 }
 
 
@@ -233,6 +258,13 @@ public struct TodoEventCellViewModel: EventCellViewModel {
             removeActions: removeActions
         )
     }
+
+    public var customCompareKey: String {
+        return self.makeCustomCompareKey([
+            self.eventTimeRawValue.map { "\($0)" },
+            "\(self.isCurrentTodo)"
+        ])
+    }
 }
 
 struct PendingTodoEventCellViewModel: EventCellViewModel {
@@ -254,8 +286,9 @@ struct PendingTodoEventCellViewModel: EventCellViewModel {
         self.colorSource = defaultTagId.map { EventTagId.custom($0) } ?? EventTagId.default
     }
 
-    // TOOD: make custom compare key
     var moreActions: EventListMoreActionModel? { nil }
+
+    var customCompareKey: String { self.makeCustomCompareKey([]) }
 }
 
 // MARK: - Schedule
@@ -317,6 +350,13 @@ public struct ScheduleEventCellViewModel: EventCellViewModel {
             removeActions: removeActions
         )
     }
+
+    public var customCompareKey: String {
+        return self.makeCustomCompareKey([
+            self.turn.map { "\($0)" },
+            self.eventTimeRawValue.map { "\($0)" }
+        ])
+    }
 }
 
 
@@ -342,6 +382,8 @@ public struct HolidayEventCellViewModel: EventCellViewModel {
     }
 
     public var moreActions: EventListMoreActionModel? { nil }
+
+    public var customCompareKey: String { self.makeCustomCompareKey([]) }
 }
 
 
@@ -378,6 +420,10 @@ public struct AppleCalendarEventCellViewModel: EventCellViewModel {
     }
 
     public var moreActions: EventListMoreActionModel? { nil }
+
+    public var customCompareKey: String {
+        return self.makeCustomCompareKey([self.calendarId])
+    }
 }
 
 
@@ -421,6 +467,10 @@ public struct GoogleCalendarEventCellViewModel: EventCellViewModel {
         return .init(
             basicActions: [.editGoogleEvent(link: link)], removeActions: []
         )
+    }
+
+    public var customCompareKey: String {
+        return self.makeCustomCompareKey([self.calendarId, self.accountId])
     }
 }
 

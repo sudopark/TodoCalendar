@@ -336,6 +336,7 @@ extension DayEventListViewModelImple {
         .map(asCellViewModel)
 
         return foremostModel
+            .removeDuplicates(by: { $0?.customCompareKey == $1?.customCompareKey })
             .eraseToAnyPublisher()
     }
 
@@ -358,6 +359,7 @@ extension DayEventListViewModelImple {
             self.uiSettingUsecase.currentCalendarUISeting.map { $0.is24hourForm }.removeDuplicates()
         )
         .compactMap(asCellViewModels)
+        .removeDuplicates(by: { $0.map { $0.customCompareKey } == $1.map { $0.customCompareKey } })
         .eraseToAnyPublisher()
     }
 
@@ -389,6 +391,7 @@ extension DayEventListViewModelImple {
         .map(combineEvents)
 
         return cells
+            .removeDuplicates(by: { $0.map { $0.customCompareKey } == $1.map { $0.customCompareKey } })
             .eraseToAnyPublisher()
     }
 
