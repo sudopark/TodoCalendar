@@ -15,11 +15,24 @@ paths:
 - `Localizable.strings` — **AppIntents 라벨·다이얼로그**(`title`·`description`·`IntentDialog` 등). AppIntents 문구는 그 인텐트가 속한 타겟 자신의 번들에서 해석되므로, 공유 리소스인 `Supports/Extensions/Resources`에 넣으면 시스템이 못 찾는다 — 앱 타겟(`TodoCalendarApp`) 소속 인텐트는 반드시 여기. **#722에서 데인 함정**: AppIntents 메타데이터는 이 규칙을 몰라 다른 곳에 두면 조용히 원문(en)으로만 보이거나 라벨이 깨진다.
 - `AppShortcuts.strings` — Siri 발화 phrase(`AppShortcutsProvider`).
 
-## 1. 전 언어 동기화 짝 (CLAUDE.md §1)
+## 1. 개발 중엔 en/ko만 — 번역은 #810으로 미룬다 (CLAUDE.md §1)
 
-**en에 키를 추가·삭제·시그니처 변경하면 나머지 30개 언어 lproj를 같은 커밋 흐름에서 갱신한다.** en/ko만 갱신하고 끝내면 29개 언어가 즉시 stale이 된다.
+전 언어를 그 자리에서 번역하면 개별 작업이 번역에 발목잡힌다. 그래서 **개발 시점엔 `en`·`ko` lproj만 갱신하고, 나머지 29개 언어는 번역 대기 트래킹 이슈 #810에 미룬다.**
 
-검증: `python3 scripts/check-localization-parity.py` (인자 없으면 전 언어) — 키 세트·포맷 지정자 multiset·중복 키를 en과 대조. 커밋 전 0 위반 확인. 문법은 `plutil -lint <파일>`.
+작업 시 이 셋을 같이 한다:
+1. `en`·`ko` lproj에 키 추가·삭제·시그니처 변경 반영 (3개 리소스 위치 중 해당하는 곳).
+2. #810 본문 "대기 목록"에 **현재 작업의 이슈 또는 PR 링크**를 한 줄 추가.
+3. 커밋 전 `python3 scripts/check-localization-parity.py ko`로 en↔ko 파리티 0 위반 확인. 문법은 `plutil -lint <파일>`.
+
+**미번역 언어에선 그 문구가 원문 키 그대로 노출된다** — `NSLocalizedString`은 키가 해당 lproj에 없을 때 en으로 fallback하지 않고 키 문자열을 돌려준다(`String+Extensions.swift`). 배포 전 #810 소진이 전제다.
+
+### #810 처리 시점 (일괄 번역)
+
+유저 지시로 #810을 처리할 때만 29개 언어를 채운다:
+
+- 대기 키 목록의 정본은 `python3 scripts/check-localization-parity.py` (인자 없음 = 전 언어) 출력의 `missing keys`. #810 대기 목록의 링크는 번역 뉘앙스를 잡을 맥락 참조용.
+- 번역 원칙은 아래 §2·§3.
+- 전 언어 0 위반을 확인하고 #810 대기 목록을 비운 뒤 close.
 
 ## 2. 번역 원칙
 
