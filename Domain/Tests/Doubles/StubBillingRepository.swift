@@ -65,4 +65,17 @@ final class StubBillingRepository: BillingRepository, @unchecked Sendable {
             |> \.planId .~ .standard
             |> \.topupRemaining .~ 12300
     }
+
+    // 기록만 한다 — 검증은 테스트 케이스 책임
+    private(set) var didPostedTransactionUpdates: [String] = []
+
+    func postTransactionUpdate(signedTransaction: String) async throws -> BillingUserPlan {
+        self.didPostedTransactionUpdates.append(signedTransaction)
+        guard !self.shouldFailPurchase,
+              !self.failingJWSTokens.contains(signedTransaction)
+        else { throw RuntimeError("transaction update apply failed") }
+        return BillingUserPlan()
+            |> \.planId .~ .standard
+            |> \.topupRemaining .~ 12300
+    }
 }

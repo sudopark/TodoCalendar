@@ -63,6 +63,14 @@ extension BillingRepositoryImple {
             json: json, topupRemaining: json["topup_remaining"] as? Int
         ).userPlan
     }
+
+    public func postTransactionUpdate(signedTransaction: String) async throws -> BillingUserPlan {
+        let body: [String: Any] = ["signed_transaction": signedTransaction]
+        let json = try await self.requestJson(.post, BillingAPIEndpoints.transactions, parameters: body)
+        return BillingUserPlanMapper(
+            json: json, topupRemaining: json["topup_remaining"] as? Int
+        ).userPlan
+    }
 }
 
 

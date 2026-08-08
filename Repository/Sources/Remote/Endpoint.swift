@@ -294,6 +294,7 @@ enum BillingAPIEndpoints: Endpoint {
     case plans
     case topups
     case purchases
+    case transactions
     case userPlan
 
     var subPath: String {
@@ -301,6 +302,7 @@ enum BillingAPIEndpoints: Endpoint {
         case .plans: return "plans"
         case .topups: return "topups"
         case .purchases: return "purchases"
+        case .transactions: return "transactions"
         case .userPlan: return "user-plan"
         }
     }
