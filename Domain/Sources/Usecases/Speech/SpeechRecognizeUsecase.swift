@@ -106,17 +106,25 @@ extension SpeechRecognizeUsecaseImple {
         self.subject.recognizingText.send("")
         self.serviceBinding = []
 
-        Publishers.CombineLatest(
+        let recognizedOrTimeout = Publishers.CombineLatest(
             self.service.recognized.mapAsOptional().prepend(nil),
             self.silenceTimeout.mapAsAnyError().mapAsOptional().prepend(nil)
         )
         .compactMap(selectResult)
-        .first()
-        .sink(
-            receiveCompletion: self.handleCompletion(),
-            receiveValue: self.handleRecognized()
-        )
-        .store(in: &self.serviceBinding)
+        .eraseToAnyPublisher()
+
+        let disrupted = self.service.audioInputDisrupted
+            .map { SpeechRecognizeResult.endedWithoutRecognizing }
+            .mapNever()
+            .eraseToAnyPublisher()
+
+        Publishers.Merge(recognizedOrTimeout, disrupted)
+            .first()
+            .sink(
+                receiveCompletion: self.handleCompletion(),
+                receiveValue: self.handleRecognized()
+            )
+            .store(in: &self.serviceBinding)
 
         self.service.recognized
             .map { $0.text }
