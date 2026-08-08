@@ -629,3 +629,8 @@
 "share.ai::sentButUntracked" = "Trimis, dar aplicația nu poate urmări rezultatul. Verificați calendarul peste puțin timp.";
 "share.ai::textTooLong" = "Textul este prea lung pentru a fi trimis. Scurtați-l și încercați din nou.";
 "share.ai::instructionTooLong" = "Instrucțiunea dvs. este prea lungă. Scurtați-o.";
+"share.ai::image::title" = "Trimite imaginea către AI";
+"share.ai::image::recognizing" = "Se citește textul din imagine…";
+"share.ai::image::text::caption" = "Text citit din imagine — editați-l dacă ceva pare greșit.";
+"share.ai::image::text::placeholder" = "Text citit din imagine";
+"share.ai::image::noTextFound" = "Nu s-a găsit niciun text în această imagine. Introduceți ce doriți să adăugați.";

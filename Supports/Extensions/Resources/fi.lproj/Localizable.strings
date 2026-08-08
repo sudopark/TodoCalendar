@@ -629,3 +629,8 @@
 "share.ai::sentButUntracked" = "Lähetetty, mutta sovellus ei voi seurata tulosta. Tarkista kalenterisi hetken kuluttua.";
 "share.ai::textTooLong" = "Teksti on liian pitkä lähetettäväksi. Lyhennä sitä ja yritä uudelleen.";
 "share.ai::instructionTooLong" = "Ohjeesi on liian pitkä. Lyhennä sitä.";
+"share.ai::image::title" = "Lähetä kuva AI:lle";
+"share.ai::image::recognizing" = "Luetaan tekstiä kuvasta…";
+"share.ai::image::text::caption" = "Kuvasta luettu teksti – muokkaa, jos jokin näyttää virheelliseltä.";
+"share.ai::image::text::placeholder" = "Kuvasta luettu teksti";
+"share.ai::image::noTextFound" = "Tästä kuvasta ei löytynyt tekstiä. Kirjoita, mitä haluat lisätä.";

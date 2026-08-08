@@ -629,3 +629,8 @@
 "share.ai::sentButUntracked" = "Elküldve, de az alkalmazás nem tudja követni az eredményt. Nézze meg a naptárát kis idő múlva.";
 "share.ai::textTooLong" = "A szöveg túl hosszú a küldéshez. Rövidítse le, és próbálja újra.";
 "share.ai::instructionTooLong" = "Az Ön utasítása túl hosszú. Kérjük, rövidítse le.";
+"share.ai::image::title" = "Kép küldése az AI-nak";
+"share.ai::image::recognizing" = "Szöveg beolvasása a képről…";
+"share.ai::image::text::caption" = "A képről beolvasott szöveg – szerkessze, ha valami nem stimmel.";
+"share.ai::image::text::placeholder" = "A képről beolvasott szöveg";
+"share.ai::image::noTextFound" = "Ezen a képen nem található szöveg. Írja be, amit hozzá szeretne adni.";

@@ -629,3 +629,8 @@
 "share.ai::sentButUntracked" = "Odesláno, ale aplikace nemůže sledovat výsledek. Za chvíli zkontrolujte kalendář.";
 "share.ai::textTooLong" = "Text je příliš dlouhý na odeslání. Zkraťte ho a zkuste to znovu.";
 "share.ai::instructionTooLong" = "Váš pokyn je příliš dlouhý. Zkraťte ho.";
+"share.ai::image::title" = "Odeslat obrázek do AI";
+"share.ai::image::recognizing" = "Načítání textu z obrázku…";
+"share.ai::image::text::caption" = "Text načtený z obrázku – upravte ho, pokud něco nesedí.";
+"share.ai::image::text::placeholder" = "Text načtený z obrázku";
+"share.ai::image::noTextFound" = "V tomto obrázku nebyl nalezen žádný text. Napište, co chcete přidat.";

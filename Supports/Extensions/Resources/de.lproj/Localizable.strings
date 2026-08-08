@@ -629,3 +629,8 @@
 "share.ai::sentButUntracked" = "Gesendet, aber die App kann das Ergebnis nicht verfolgen. Prüfen Sie in Kürze Ihren Kalender.";
 "share.ai::textTooLong" = "Der Text ist zu lang zum Senden. Kürzen Sie ihn und versuchen Sie es erneut.";
 "share.ai::instructionTooLong" = "Ihre Anweisung ist zu lang. Bitte kürzen Sie sie.";
+"share.ai::image::title" = "Bild an die KI senden";
+"share.ai::image::recognizing" = "Text wird aus dem Bild gelesen…";
+"share.ai::image::text::caption" = "Aus dem Bild gelesener Text – bearbeiten Sie ihn, falls etwas nicht stimmt.";
+"share.ai::image::text::placeholder" = "Aus dem Bild gelesener Text";
+"share.ai::image::noTextFound" = "In diesem Bild wurde kein Text gefunden. Geben Sie ein, was Sie hinzufügen möchten.";

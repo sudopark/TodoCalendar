@@ -629,3 +629,8 @@
 "share.ai::sentButUntracked" = "Đã gửi, nhưng ứng dụng không theo dõi được kết quả. Hãy kiểm tra lịch sau giây lát.";
 "share.ai::textTooLong" = "Nội dung cần gửi quá dài. Vui lòng rút ngắn rồi thử lại.";
 "share.ai::instructionTooLong" = "Chỉ dẫn của bạn quá dài. Vui lòng rút ngắn.";
+"share.ai::image::title" = "Gửi ảnh tới AI";
+"share.ai::image::recognizing" = "Đang đọc văn bản trong ảnh…";
+"share.ai::image::text::caption" = "Văn bản được đọc từ ảnh — hãy chỉnh sửa nếu có gì đó không đúng.";
+"share.ai::image::text::placeholder" = "Văn bản đọc được từ ảnh";
+"share.ai::image::noTextFound" = "Không tìm thấy văn bản nào trong ảnh này. Hãy nhập nội dung bạn muốn thêm.";

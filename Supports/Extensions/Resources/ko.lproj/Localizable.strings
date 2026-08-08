@@ -631,3 +631,8 @@
 "share.ai::sentButUntracked" = "보냈지만 앱에서 결과를 추적할 수 없어요. 잠시 후 캘린더를 확인해 주세요.";
 "share.ai::textTooLong" = "보낼 내용이 너무 길어요. 줄여서 다시 시도해 주세요.";
 "share.ai::instructionTooLong" = "지시가 너무 길어요. 줄여 주세요.";
+"share.ai::image::title" = "이미지를 AI로 보내기";
+"share.ai::image::recognizing" = "이미지에서 텍스트를 읽는 중…";
+"share.ai::image::text::caption" = "이미지에서 읽은 텍스트예요 — 어색한 부분이 있으면 수정해 주세요.";
+"share.ai::image::text::placeholder" = "이미지에서 읽은 텍스트";
+"share.ai::image::noTextFound" = "이 이미지에서 텍스트를 찾지 못했어요. 추가하고 싶은 내용을 입력해 주세요.";

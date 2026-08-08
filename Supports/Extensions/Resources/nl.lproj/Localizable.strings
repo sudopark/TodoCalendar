@@ -629,3 +629,8 @@
 "share.ai::sentButUntracked" = "Verzonden, maar de app kan het resultaat niet volgen. Bekijk je agenda over een moment.";
 "share.ai::textTooLong" = "De tekst is te lang om te verzenden. Kort hem in en probeer het opnieuw.";
 "share.ai::instructionTooLong" = "Je instructie is te lang. Kort hem in.";
+"share.ai::image::title" = "Afbeelding naar AI sturen";
+"share.ai::image::recognizing" = "Tekst uit de afbeelding lezen…";
+"share.ai::image::text::caption" = "Tekst uit de afbeelding gelezen – pas het aan als er iets niet klopt.";
+"share.ai::image::text::placeholder" = "Tekst uit de afbeelding";
+"share.ai::image::noTextFound" = "Er is geen tekst gevonden in deze afbeelding. Typ wat je wilt toevoegen.";

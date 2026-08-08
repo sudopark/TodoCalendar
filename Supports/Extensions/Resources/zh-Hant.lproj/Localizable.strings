@@ -629,3 +629,8 @@
 "share.ai::sentButUntracked" = "已傳送，但應用程式無法追蹤結果。請稍後查看行事曆。";
 "share.ai::textTooLong" = "要傳送的內容太長，無法傳送。請縮短後再試一次。";
 "share.ai::instructionTooLong" = "指示太長，請縮短。";
+"share.ai::image::title" = "將圖片傳送給 AI";
+"share.ai::image::recognizing" = "正在從圖片中讀取文字…";
+"share.ai::image::text::caption" = "從圖片中讀取的文字——如有不準確之處，請編輯。";
+"share.ai::image::text::placeholder" = "從圖片中讀取的文字";
+"share.ai::image::noTextFound" = "未能在圖片中找到任何文字。請輸入想新增的內容。";

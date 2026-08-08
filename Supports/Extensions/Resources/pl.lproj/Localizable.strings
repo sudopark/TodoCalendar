@@ -629,3 +629,8 @@
 "share.ai::sentButUntracked" = "Wysłano, ale aplikacja nie może śledzić wyniku. Sprawdź kalendarz za chwilę.";
 "share.ai::textTooLong" = "Tekst jest za długi, aby go wysłać. Skróć go i spróbuj ponownie.";
 "share.ai::instructionTooLong" = "Twoje polecenie jest za długie. Skróć je.";
+"share.ai::image::title" = "Wyślij zdjęcie do AI";
+"share.ai::image::recognizing" = "Odczytywanie tekstu ze zdjęcia…";
+"share.ai::image::text::caption" = "Tekst odczytany ze zdjęcia — popraw go, jeśli coś wygląda nie tak.";
+"share.ai::image::text::placeholder" = "Tekst odczytany ze zdjęcia";
+"share.ai::image::noTextFound" = "Nie znaleziono żadnego tekstu na tym zdjęciu. Wpisz, co chcesz dodać.";

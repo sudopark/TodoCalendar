@@ -629,3 +629,8 @@
 "share.ai::sentButUntracked" = "Enviado, mas o app não consegue acompanhar o resultado. Verifique seu calendário em instantes.";
 "share.ai::textTooLong" = "O texto é longo demais para enviar. Reduza-o e tente novamente.";
 "share.ai::instructionTooLong" = "Sua instrução é longa demais. Reduza-a.";
+"share.ai::image::title" = "Enviar imagem para a IA";
+"share.ai::image::recognizing" = "Lendo o texto da imagem…";
+"share.ai::image::text::caption" = "Texto lido da imagem. Edite se algo parecer errado.";
+"share.ai::image::text::placeholder" = "Texto lido da imagem";
+"share.ai::image::noTextFound" = "Não foi possível encontrar texto nesta imagem. Digite o que você quer adicionar.";
