@@ -91,6 +91,24 @@ extension BillingRepositoryImpleTests {
 }
 
 
+// MARK: - 트랜잭션 위임
+
+extension BillingRepositoryImpleTests {
+
+    // 앱 밖에서 발견한 트랜잭션은 구매 확정과 다른 경로로 올린다 —
+    // 종류 판별은 서버가 하므로 앱은 JWS 만 싣는다
+    @Test func repository_postTransactionUpdate_returnsAppliedPlan() async throws {
+        // given
+        let repository = self.makeRepository()
+        // when
+        let plan = try await repository.postTransactionUpdate(signedTransaction: "jws_token")
+        // then
+        #expect(plan.planId == .lifetime)
+        #expect(plan.topupRemaining == 7700)
+    }
+}
+
+
 private struct DummyResponse {
 
     private var plansResponse: String {
@@ -124,6 +142,16 @@ private struct DummyResponse {
         """
     }
 
+    // 구매 확정 응답과 값을 일부러 다르게 둔다 — 잘못해서 purchases 로 나가면 TC 가 잡는다
+    private var transactionResponse: String {
+        return """
+        {
+            "id": "lifetime",
+            "topup_remaining": 7700
+        }
+        """
+    }
+
     // GET /v1/ai/usage 의 plan 필드·POST /v1/billing/purchases 응답과 동일 스키마
     private var userPlanResponse: String {
         return """
@@ -143,6 +171,8 @@ private struct DummyResponse {
                   resultJsonString: .success(self.topupsResponse)),
             .init(method: .post, endpoint: BillingAPIEndpoints.purchases,
                   resultJsonString: .success(self.purchaseResponse)),
+            .init(method: .post, endpoint: BillingAPIEndpoints.transactions,
+                  resultJsonString: .success(self.transactionResponse)),
             .init(method: .get, endpoint: BillingAPIEndpoints.userPlan,
                   resultJsonString: .success(self.userPlanResponse))
         ]
