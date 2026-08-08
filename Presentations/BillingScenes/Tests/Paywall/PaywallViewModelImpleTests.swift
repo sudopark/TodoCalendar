@@ -189,8 +189,8 @@ extension PaywallViewModelImpleTests {
     }
 
     // I1/I2 회귀 — 서버 카탈로그 요청 실패는 .loaded([]) 로 조용히 삼키지 않고 .failed 로
-    // 드러나며, purchase()/restore() 와 동일하게 showError 로 알린다
-    @Test func viewModel_whenCatalogLoadFails_setsFailedStateAndShowsError() async throws {
+    // 드러난다. 단 화면이 그 상태를 이미 그리므로 showError 로 중복 통지하지 않는다
+    @Test func viewModel_whenCatalogLoadFails_setsFailedStateWithoutErrorPopup() async throws {
         // given
         let (viewModel, _, router) = self.makeViewModel(catalogLoadError: TestError())
 
@@ -203,7 +203,7 @@ extension PaywallViewModelImpleTests {
 
         // then
         #expect(states.last == .failed)
-        #expect(router.didShowError is TestError)
+        #expect(router.didShowError == nil)
     }
 }
 
@@ -566,7 +566,7 @@ extension PaywallViewModelImpleTests {
     }
 
     // 유저 플랜 조회는 성공했는데 카탈로그만 실패하는 조합 — 화면은 그려지되(.ready) 카탈로그
-    // 축은 기존 .failed 처리를 그대로 물려받는다(이번 스코프에서 바뀌지 않는 계약)
+    // 축만 .failed 로 드러난다. 어느 축이 실패하든 팝업은 띄우지 않는다
     @Test func viewModel_whenUserPlanSucceedsButCatalogFails_screenStateIsReadyWithFailedCatalog() async throws {
         // given
         let (viewModel, _, router) = self.makeViewModel(catalogLoadError: TestError())
@@ -583,6 +583,6 @@ extension PaywallViewModelImpleTests {
 
         // then
         #expect(final == .ready(.failed))
-        #expect(router.didShowError is TestError)
+        #expect(router.didShowError == nil)
     }
 }
