@@ -174,13 +174,11 @@ extension PaywallViewModelImple {
     private func loadCatalog() async {
         do {
             // 여기서 catch 하는 건 서버 카탈로그 요청(loadPlans) 실패다 — StoreKit 상품 조회
-            // 실패는 loadPlanOfferings 내부(try?)가 이미 삼켜 product만 nil로 온다. 성격이
-            // 다른 실패라 같은 근거로 묻지 않는다 (#739)
+            // 실패는 loadPlanOfferings 내부(try?)가 이미 삼켜 product만 nil로 온다
             let offerings = try await self.billingUsecase.loadPlanOfferings()
             self.subject.catalogState.send(.loaded(offerings))
         } catch {
             self.subject.catalogState.send(.failed)
-            self.router?.showError(error)
         }
     }
 
