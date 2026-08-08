@@ -36,7 +36,7 @@ for r in records:
 EOF
 ```
 
-- `skills`가 빈 correction(미귀속)도 함께 나온다 — 발동 실패 후보로 검토.
+- `skills`가 빈 correction(미귀속)도 함께 나온다 — 발동 실패 후보로 검토하되, 응답 톤·글쓰기처럼 전역 규칙 소관이라 **의도적으로 비운 것**은 후보에서 뺀다 (CLAUDE.md §1 귀속 규칙). 미귀속에는 두 부류가 섞여 있고 레코드에 구분 필드가 없다.
 - 서브에이전트(code-analyzer 등)를 정비할 땐 `event: agent` 레코드(name 매칭)와 dispatch한 스킬(analyze·review)의 레코드를 함께 조회.
 - 필요하면 prompt 이벤트를 훑어 "스킬이 발동됐어야 했는데 안 된" 지시를 찾는다.
 
