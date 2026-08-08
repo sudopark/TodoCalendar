@@ -8,7 +8,7 @@ let project = Project.framework(
     dependencies: [
         .project(
             target: "Domain",
-            path: .relativeToCurrentFile("../../Domain")
+            path: .relativeToRoot("Domain")
         ),
         .external(name: "SwiftLinkPreview")
     ]

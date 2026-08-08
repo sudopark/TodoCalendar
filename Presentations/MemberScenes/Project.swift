@@ -8,15 +8,15 @@ let project = Project.frameworkWithTest(
     snapshotTests: true,
     dependencies: [
         .project(target: "Common3rdParty",
-                 path: .relativeToCurrentFile("../../Supports/Common3rdParty")),
+                 path: .relativeToRoot("Supports/Common3rdParty")),
         .project(target: "CommonPresentation",
-                 path: .relativeToCurrentFile("../../Presentations/CommonPresentation")),
+                 path: .relativeToRoot("Presentations/CommonPresentation")),
         .project(target: "Domain",
-                 path: .relativeToCurrentFile("../../Domain")),
+                 path: .relativeToRoot("Domain")),
         .project(target: "Extensions",
-                 path: .relativeToCurrentFile("../../Supports/Extensions")),
+                 path: .relativeToRoot("Supports/Extensions")),
         .project(target: "Scenes",
-                                         path: .relativeToCurrentFile("../../Presentations/Scenes"))
+                                         path: .relativeToRoot("Presentations/Scenes"))
     ]
 )
 

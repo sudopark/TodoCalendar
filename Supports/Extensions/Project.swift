@@ -9,7 +9,7 @@ let project = Project.frameworkWithTest(
     dependencies: [
         .project(
             target: "Common3rdParty",
-            path: .relativeToCurrentFile("../../Supports/Common3rdParty")
+            path: .relativeToRoot("Supports/Common3rdParty")
         )
     ]
 )

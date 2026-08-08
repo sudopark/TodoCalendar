@@ -124,8 +124,8 @@ extension Project {
                              resources: [],
                              dependencies: [
                                 .target(name: name),
-                                .project(target: "SnapshotTestHelpKit", path: .relativeToCurrentFile("../../Supports/SnapshotTestHelpKit")),
-                                .project(target: "TestDoubles", path: .relativeToCurrentFile("../../Supports/TestDoubles")),
+                                .project(target: "SnapshotTestHelpKit", path: .relativeToRoot("Supports/SnapshotTestHelpKit")),
+                                .project(target: "TestDoubles", path: .relativeToRoot("Supports/TestDoubles")),
                              ])
     }
 
@@ -164,9 +164,9 @@ extension Project {
                            resources: [],
                            dependencies: [
                             .target(name: name),
-                            .project(target: "UnitTestHelpKit", path: .relativeToCurrentFile("../../Supports/UnitTestHelpKit")),
-                            .project(target: "TestDoubles", path: .relativeToCurrentFile("../../Supports/TestDoubles")),
-                            .project(target: "Common3rdParty", path: .relativeToCurrentFile("../../Supports/Common3rdParty")),
+                            .project(target: "UnitTestHelpKit", path: .relativeToRoot("Supports/UnitTestHelpKit")),
+                            .project(target: "TestDoubles", path: .relativeToRoot("Supports/TestDoubles")),
+                            .project(target: "Common3rdParty", path: .relativeToRoot("Supports/Common3rdParty")),
                            ])
         return [sources, tests]
     }
@@ -293,9 +293,9 @@ extension Project {
             dependencies: [
                 .target(name: "\(name)"),
                 .project(target: "UnitTestHelpKit", path:
-                        .relativeToCurrentFile("../../Supports/UnitTestHelpKit")),
-                .project(target: "TestDoubles", path: .relativeToCurrentFile("../../Supports/TestDoubles")),
-                .project(target: "Common3rdParty", path: .relativeToCurrentFile("../../Supports/Common3rdParty")),
+                        .relativeToRoot("Supports/UnitTestHelpKit")),
+                .project(target: "TestDoubles", path: .relativeToRoot("Supports/TestDoubles")),
+                .project(target: "Common3rdParty", path: .relativeToRoot("Supports/Common3rdParty")),
             ])
         return [mainTarget, testTarget]
     }
@@ -361,15 +361,15 @@ extension Project {
                 .target(name: appName),
                 .project(
                     target: "UnitTestHelpKit",
-                    path: .relativeToCurrentFile("../../Supports/UnitTestHelpKit")
+                    path: .relativeToRoot("Supports/UnitTestHelpKit")
                 ),
                 .project(
                     target: "TestDoubles",
-                    path: .relativeToCurrentFile("../../Supports/TestDoubles")
+                    path: .relativeToRoot("Supports/TestDoubles")
                 ),
                 .project(
                     target: "Common3rdParty",
-                    path: .relativeToCurrentFile("../../Supports/Common3rdParty")
+                    path: .relativeToRoot("Supports/Common3rdParty")
                 )
             ]
         )
@@ -393,15 +393,15 @@ extension Project {
                         .target(name: appName),
                         .project(
                             target: "SnapshotTestHelpKit",
-                            path: .relativeToCurrentFile("../../Supports/SnapshotTestHelpKit")
+                            path: .relativeToRoot("Supports/SnapshotTestHelpKit")
                         ),
                         .project(
                             target: "TestDoubles",
-                            path: .relativeToCurrentFile("../../Supports/TestDoubles")
+                            path: .relativeToRoot("Supports/TestDoubles")
                         ),
                         .project(
                             target: "Common3rdParty",
-                            path: .relativeToCurrentFile("../../Supports/Common3rdParty")
+                            path: .relativeToRoot("Supports/Common3rdParty")
                         )
                     ]
                 )
