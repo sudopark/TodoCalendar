@@ -127,6 +127,9 @@ extension CalendarAPIAutenticatorTests {
         parameterizeTest(
             BillingAPIEndpoints.purchases, method: .post, expecthasToken: true
         )
+        parameterizeTest(
+            BillingAPIEndpoints.transactions, method: .post, expecthasToken: true
+        )
     }
 }
 

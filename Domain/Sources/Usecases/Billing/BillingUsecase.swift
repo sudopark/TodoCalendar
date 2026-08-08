@@ -28,15 +28,17 @@ public protocol BillingUsecase: AnyObject, Sendable {
 
     // 로그인 세션에 묶여 기동한다. 여기서 처리하는 건 StoreKit.Transaction.updates 뿐이다 —
     // 미완료 거래 복구는 트리거도 목적도 달라 아래 recoverUnfinishedTransactions 가 맡는다.
-    // 중복 호출 방어가 락 없는 플래그라 메인에서만 부른다
+    //
+    // startObservingTransactions·stopObservingTransactions·recoverUnfinishedTransactions
+    // 는 옵저빙 상태를 락 없는 플래그로 지킨다 — 셋 다 메인에서만 부른다
     func startObservingTransactions()
 
     // 로그아웃·팩토리 교체 시. 이전 세션 리스너가 살아 있으면 같은 JWS 가 중복 post 된다
     func stopObservingTransactions()
 
     // 서버 반영 전에 앱이 죽어 finish 되지 않은 트랜잭션을 재전송한다.
-    // 한 건이 영구 실패해도 나머지는 진행한다
-    func recoverUnfinishedTransactions() async
+    // 한 건이 영구 실패해도 나머지는 진행한다. 재호출·stop 시 이전 시도는 취소된다
+    func recoverUnfinishedTransactions()
 
     var currentUserPlan: AnyPublisher<BillingUserPlan, Never> { get }
 }
@@ -59,9 +61,11 @@ public final class BillingUsecaseImple: BillingUsecase, @unchecked Sendable {
     }
 
     private var observingTask: Task<Void, Never>?
+    private var recoveryTask: Task<Void, Never>?
 
     deinit {
         self.observingTask?.cancel()
+        self.recoveryTask?.cancel()
     }
 }
 
@@ -129,7 +133,9 @@ extension BillingUsecaseImple {
     }
 
     // 앱이 뒤늦게 발견한 트랜잭션 — 종류를 판별하지 않고 서버에 위임한다.
-    // 200 을 "서버가 확인했다" 로 읽고 그때만 finish 한다
+    // 200 을 "서버가 확인했다" 로 읽고 그때만 finish 한다.
+    // 서버가 transactionId 기준 멱등이라, 옵저빙 스트림과 recoverUnfinishedTransactions 가
+    // 같은 트랜잭션을 각각 집어 두 번 보내도 안전하다
     private func delegateAndFinish(
         _ transaction: BillingSignedTransaction
     ) async throws -> BillingUserPlan {
@@ -200,14 +206,22 @@ extension BillingUsecaseImple {
     public func stopObservingTransactions() {
         self.observingTask?.cancel()
         self.observingTask = nil
+        self.recoveryTask?.cancel()
+        self.recoveryTask = nil
     }
 
     // 한 건이 영구 실패해도 나머지는 반영돼야 한다 — fail-fast 면 앞의 실패가
-    // 매 시도마다 뒤 트랜잭션을 가려 영영 반영되지 않는다
-    public func recoverUnfinishedTransactions() async {
-        let transactions = await self.appStoreService.unfinishedTransactions()
-        for transaction in transactions {
-            _ = try? await self.delegateAndFinish(transaction)
+    // 매 시도마다 뒤 트랜잭션을 가려 영영 반영되지 않는다.
+    // unfinished 는 OS 전역이라 두 시도가 겹치면 같은 트랜잭션을 중복 전송한다
+    public func recoverUnfinishedTransactions() {
+        self.recoveryTask?.cancel()
+        self.recoveryTask = Task { [weak self] in
+            guard let transactions = await self?.appStoreService.unfinishedTransactions()
+            else { return }
+            for transaction in transactions {
+                guard !Task.isCancelled, let self else { return }
+                _ = try? await self.delegateAndFinish(transaction)
+            }
         }
     }
 

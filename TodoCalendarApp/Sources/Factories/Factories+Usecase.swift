@@ -27,6 +27,7 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
     let eventUploadService: any EventUploadService = NotNeedEventUploadService()
     let appUpdateCheckUsecase: any AppUpdateCheckUsecase
     let aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
+    let billingUsecase: any BillingUsecase
     private let applicationBase: ApplicationBase
 
     init(
@@ -44,6 +45,7 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
         self.appUpdateCheckUsecase = appUpdateCheckUsecase
         self.eventSyncUsecase = NotNeedEventSyncUsecase()
         self.applicationBase = applicationBase
+        self.billingUsecase = NotNeedBillingUsecase(sharedDataStore: applicationBase.sharedDataStore)
 
         // AI 기능은 로그인 유저 전용 — 실제 스택을 만들지 않는다 (#772).
         // 진입점 UI는 그대로 노출되고 탭 시 로그인 유도로 갈린다.
@@ -52,12 +54,6 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
 
     var eventNotifyService: SharedEventNotifyService {
         return self.applicationBase.eventNotifyService
-    }
-
-    // 미로그인 유저는 진입점이 숨겨지지만(Task 6) 프로토콜 충족을 위해 필요.
-    // 로그인 전 카탈로그 조회도 같은 앱 수명 인스턴스로 돈다 (#739)
-    var billingUsecase: any BillingUsecase {
-        return self.applicationBase.billingUsecase
     }
 }
 
@@ -373,6 +369,7 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
     let eventUploadService: any EventUploadService
     let appUpdateCheckUsecase: any AppUpdateCheckUsecase
     let aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
+    let billingUsecase: any BillingUsecase
     private let applicationBase: ApplicationBase
 
     init(
@@ -472,15 +469,20 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
             speechRecognizeUsecase: speech,
             eventSyncUsecase: self.eventSyncUsecase
         )
+
+        // 결제는 로그인 유저 전용이고, paywall 이 닫힌 동안엔 리스너도 돌 이유가 없다.
+        // 환경 분기는 composition root 소관이라 Domain 이 플래그를 모른다
+        self.billingUsecase = FeatureFlag.isEnable(.billingPaywall)
+            ? BillingUsecaseImple(
+                repository: BillingRepositoryImple(remote: applicationBase.remoteAPI),
+                appStoreService: AppStoreBillingServiceImple(),
+                sharedDataStore: applicationBase.sharedDataStore
+            )
+            : NotNeedBillingUsecase(sharedDataStore: applicationBase.sharedDataStore)
     }
 
     var eventNotifyService: SharedEventNotifyService {
         return self.applicationBase.eventNotifyService
-    }
-
-    // 트랜잭션 리스너는 앱 수명 단일 인스턴스 — ApplicationBase 소유를 그대로 노출 (#739)
-    var billingUsecase: any BillingUsecase {
-        return self.applicationBase.billingUsecase
     }
 }
 
