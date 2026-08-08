@@ -1099,10 +1099,22 @@ extension CalendarViewModelImpleTests {
 
 extension CalendarViewModelImpleTests {
 
-    func testViewModel_whenRequestAIEntryOnCommandPhase_routeToAICommand() {
+    // prepare() → prepareInitialMonths의 Task가 monthsInCurrentRange를 채울 때까지 대기.
+    // didInitialMonthsAttached는 send 직전에 불려 한 틱 양보가 필요하다.
+    private func prepareInitialMonths(_ viewModel: CalendarViewModelImple) async throws {
+        let expect = expectation(description: "초기 월 구성 완료 대기")
+        self.spyRouter.didInitialMonthsAttached = { expect.fulfill() }
+        viewModel.prepare()
+        await self.fulfillment(of: [expect], timeout: self.timeout)
+        self.spyRouter.didInitialMonthsAttached = nil
+        try await Task.sleep(for: .milliseconds(10))
+    }
+
+    func testViewModel_whenRequestAIEntryOnCommandPhase_routeToAICommand() async throws {
         // given
         let viewModel = self.makeViewModel()
         self.stubOrchestration.stateSubject.send(.processing(command: "회의"))
+        try await self.prepareInitialMonths(viewModel)
 
         // when
         viewModel.requestAIEntry()
@@ -1113,10 +1125,11 @@ extension CalendarViewModelImpleTests {
         XCTAssertNil(self.spyRouter.didShowConfirmWith)
     }
 
-    func testViewModel_whenRequestAIEntryOnIdleAndSignedIn_enterVoiceInput() {
+    func testViewModel_whenRequestAIEntryOnIdleAndSignedIn_enterVoiceInput() async throws {
         // given
         let viewModel = self.makeViewModel(isSignedIn: true)
         self.stubOrchestration.stateSubject.send(.idle)
+        try await self.prepareInitialMonths(viewModel)
 
         // when
         viewModel.requestAIEntry()
@@ -1127,10 +1140,11 @@ extension CalendarViewModelImpleTests {
         XCTAssertNil(self.spyRouter.didShowConfirmWith)
     }
 
-    func testViewModel_whenRequestAIEntryWithoutSignIn_askSignIn() {
+    func testViewModel_whenRequestAIEntryWithoutSignIn_askSignIn() async throws {
         // given
         let viewModel = self.makeViewModel(isSignedIn: false)
         self.stubOrchestration.stateSubject.send(.idle)
+        try await self.prepareInitialMonths(viewModel)
 
         // when
         viewModel.requestAIEntry()
@@ -1140,6 +1154,62 @@ extension CalendarViewModelImpleTests {
         XCTAssertNil(self.stubOrchestration.didEnterVoiceInput)
         // SpyRouter.showConfirm은 기본적으로 confirmed?()를 즉시 실행
         XCTAssertEqual(self.spyRouter.didRouteToSignIn, true)
+    }
+
+    func testViewModel_whenRequestAIEntryBeforeAIStateEmitted_notEnterVoiceInput() async throws {
+        // given
+        let viewModel = self.makeViewModel(isSignedIn: true)
+        try await self.prepareInitialMonths(viewModel)
+
+        // when
+        viewModel.requestAIEntry()
+        try await Task.sleep(for: .milliseconds(10))
+
+        // then
+        XCTAssertNil(self.stubOrchestration.didEnterVoiceInput)
+        XCTAssertEqual(self.spyRouter.didRouteToAICommandCount, 0)
+    }
+
+    func testViewModel_whenAIStateEmittedAfterRequestAIEntry_enterVoiceInput() async throws {
+        // given
+        let viewModel = self.makeViewModel(isSignedIn: true)
+        try await self.prepareInitialMonths(viewModel)
+        viewModel.requestAIEntry()
+
+        // when
+        self.stubOrchestration.stateSubject.send(.idle)
+        try await Task.sleep(for: .milliseconds(10))
+
+        // then
+        XCTAssertEqual(self.stubOrchestration.didEnterVoiceInput, true)
+    }
+
+    func testViewModel_whenProcessingStateEmittedAfterRequestAIEntry_routeToAICommand() async throws {
+        // given
+        let viewModel = self.makeViewModel(isSignedIn: true)
+        try await self.prepareInitialMonths(viewModel)
+        viewModel.requestAIEntry()
+
+        // when
+        self.stubOrchestration.stateSubject.send(.processing(command: "회의"))
+        try await Task.sleep(for: .milliseconds(10))
+
+        // then
+        XCTAssertEqual(self.spyRouter.didRouteToAICommandCount, 1)
+        XCTAssertNil(self.stubOrchestration.didEnterVoiceInput)
+    }
+
+    func testViewModel_whenRequestAIEntryBeforeCalendarAttached_notEnterVoiceInput() async throws {
+        // given
+        let viewModel = self.makeViewModel(isSignedIn: true)
+        self.stubOrchestration.stateSubject.send(.idle)
+
+        // when
+        viewModel.requestAIEntry()
+        try await Task.sleep(for: .milliseconds(10))
+
+        // then
+        XCTAssertNil(self.stubOrchestration.didEnterVoiceInput)
     }
 }
 
