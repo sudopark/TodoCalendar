@@ -6,6 +6,8 @@
 
 <!-- 레코드는 아래에 최신순으로 추가 -->
 
+- [2026-08-08 run-all-tests.sh가 컴파일 실패를 PASSED로 보고한다](2026-08-08-run-all-tests-reports-compile-failure-as-passed.md) — Infra / fixed / PASSED 오보, 컴파일 에러인데 통과, TEST FAILED 미감지, Executed 0 tests
+
 - [2026-08-07 비반복 이벤트를 롱탭했는데 컨텍스트 메뉴에 "이번만 삭제"가 뜬다](2026-08-07-day-event-list-context-menu-shows-wrong-remove-action.md) — Event / fixed / 이번만 삭제 오노출, 메뉴 깜빡임, 탭 무반응, 셀 목록 재방출
 
 - [2026-08-07 키보드 입력 시트에서 커맨드를 전송하면 present 충돌로 크래시](2026-08-07-ai-command-sheet-present-while-keyboard-sheet-up.md) — AIAgent / fixed / already presenting, 바텀시트 크래시, 키보드 입력 전송
