@@ -15,7 +15,7 @@ resolution: fixed
 
 - **해결**: `EventCellViewModel.customCompareKey`(셀이 그리는 값 전부 — 타입·id·이름·색 소스·기간 텍스트·isForemost·isRepeating·allday·moreActions)를 도입하고 위 세 publisher에 `removeDuplicates(by:)`를 건다. `CalendarEventListhUsecase`가 이미 쓰는 `compareKey` 기반 중복 제거와 같은 패턴. 값이 실제로 바뀌면 키가 달라져 그대로 방출된다.
 
-  키는 **프로토콜 요구사항**이어야 한다 — `EventCellViewModel`이 프로토콜이라 공통 프로퍼티만 보는 extension 단독 구현으로는 각 타입이 따로 들고 있는 값이 키에 못 들어간다. `makeCustomCompareKey(_:)`가 공통 성분을 조립하고 타입이 고유 값을 얹는다: Todo·Schedule은 `eventTimeRawValue`("이번만 삭제"가 지울 회차를 정하는 값 — 표시 텍스트가 같아도 달라질 수 있다), Google·Apple은 라우팅에 쓰는 `accountId`·`calendarId`. 이 구조는 #385에서 `ForEach(id:)` 오용을 고치며 같이 지워졌던 것(`a9e9583f`)이고, identity(안정적인 id)와 변경 감지(내용 키)는 별개 관심사라 `ForEach`는 `eventIdentifier`로 둔 채 키만 되살렸다.
+  키는 **프로토콜 요구사항**이어야 한다 — `EventCellViewModel`이 프로토콜이라 공통 프로퍼티만 보는 extension 단독 구현으로는 각 타입이 따로 들고 있는 값이 키에 못 들어간다. `makeCustomCompareKey(_:)`가 공통 성분을 조립하고 타입이 고유 값을 얹는다: Todo·Schedule은 `eventTimeRawValue`("이번만 삭제"가 지울 회차를 정하는 값 — 표시 텍스트가 같아도 달라질 수 있다), Google·Apple은 라우팅에 쓰는 `accountId`·`calendarId`. 상류 `GoogleCalendarEvent.compareKey`에도 `accountId`가 빠져 있어 함께 채웠다 — 상류에서 걸리면 셀 키가 정확해도 발화하지 못한다. 이 구조는 #385에서 `ForEach(id:)` 오용을 고치며 같이 지워졌던 것(`a9e9583f`)이고, identity(안정적인 id)와 변경 감지(내용 키)는 별개 관심사라 `ForEach`는 `eventIdentifier`로 둔 채 키만 되살렸다.
 
 - **기각 방향**:
   - Month → listener 통지 경로에 dedupe — 상류라 timezone·is24hourForm·pending todo 등 다른 축의 중복을 못 막는다

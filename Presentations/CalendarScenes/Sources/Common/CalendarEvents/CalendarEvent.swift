@@ -262,7 +262,7 @@ public struct GoogleCalendarEvent: CalendarEvent {
     }
 
     public var compareKey: String {
-        return "\(String(describing: Self.self))-\(eventId)-\(name)-\(eventTime?.hashValue ?? -1)-\(eventTimeOnCalendar?.hashValue ?? -1)-\(eventTagId.hashValue)-\(self.isForemost)-\(self.colorId ?? "nil")-\(self.htmlLink ?? "nil")-\(self.locationText ?? "nil")"
+        return "\(String(describing: Self.self))-\(eventId)-\(accountId)-\(name)-\(eventTime?.hashValue ?? -1)-\(eventTimeOnCalendar?.hashValue ?? -1)-\(eventTagId.hashValue)-\(self.isForemost)-\(self.colorId ?? "nil")-\(self.htmlLink ?? "nil")-\(self.locationText ?? "nil")"
     }
 }
 
