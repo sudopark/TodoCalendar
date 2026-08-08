@@ -17,7 +17,7 @@ import Domain
 public final class SpeechRecognizeServiceImple: SpeechRecognizeService, @unchecked Sendable {
 
     private let recognizer: SFSpeechRecognizer?
-    private let audioEngine = AVAudioEngine()
+    private var audioEngine = AVAudioEngine()
     private var request: SFSpeechAudioBufferRecognitionRequest?
     private var task: SFSpeechRecognitionTask?
 
@@ -66,21 +66,26 @@ extension SpeechRecognizeServiceImple {
         try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
     }
 
-    // 이어폰 분리는 interruption이 아니라 routeChange(.oldDeviceUnavailable)로 온다 — 둘 다 봐야 한다.
+    // 이어폰 분리는 interruption이 아니라 routeChange(.oldDeviceUnavailable)로 오고,
+    // 미디어 서비스 리셋은 둘 중 어느 쪽으로도 오지 않는다 — 셋 다 봐야 한다.
     private func observeAudioDisruption() {
         self.audioSessionObserving = []
 
         let interruptionBegan = NotificationCenter.default
             .publisher(for: AVAudioSession.interruptionNotification)
-            .filter { Self.isInterruptionBegan($0) }
+            .filter(self.isInterruptionBegan())
             .map { _ in () }
 
-        let inputDeviceLost = NotificationCenter.default
+        let oldDeviceUnavailable = NotificationCenter.default
             .publisher(for: AVAudioSession.routeChangeNotification)
-            .filter { Self.isInputDeviceLost($0) }
+            .filter(self.isOldDeviceUnavailable())
             .map { _ in () }
 
-        Publishers.Merge(interruptionBegan, inputDeviceLost)
+        let mediaServicesReset = NotificationCenter.default
+            .publisher(for: AVAudioSession.mediaServicesWereResetNotification)
+            .map { _ in () }
+
+        Publishers.Merge3(interruptionBegan, oldDeviceUnavailable, mediaServicesReset)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.subject.audioInputDisrupted.send(())
@@ -88,16 +93,20 @@ extension SpeechRecognizeServiceImple {
             .store(in: &self.audioSessionObserving)
     }
 
-    private static func isInterruptionBegan(_ notification: Notification) -> Bool {
-        guard let raw = notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt
-        else { return false }
-        return AVAudioSession.InterruptionType(rawValue: raw) == .began
+    private func isInterruptionBegan() -> (Notification) -> Bool {
+        return { notification in
+            guard let raw = notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt
+            else { return false }
+            return AVAudioSession.InterruptionType(rawValue: raw) == .began
+        }
     }
 
-    private static func isInputDeviceLost(_ notification: Notification) -> Bool {
-        guard let raw = notification.userInfo?[AVAudioSessionRouteChangeReasonKey] as? UInt
-        else { return false }
-        return AVAudioSession.RouteChangeReason(rawValue: raw) == .oldDeviceUnavailable
+    private func isOldDeviceUnavailable() -> (Notification) -> Bool {
+        return { notification in
+            guard let raw = notification.userInfo?[AVAudioSessionRouteChangeReasonKey] as? UInt
+            else { return false }
+            return AVAudioSession.RouteChangeReason(rawValue: raw) == .oldDeviceUnavailable
+        }
     }
 
     private func makeRequest() -> SFSpeechAudioBufferRecognitionRequest {
@@ -156,6 +165,8 @@ extension SpeechRecognizeServiceImple {
         self.task?.cancel()
         self.audioEngine.stop()
         self.audioEngine.inputNode.removeTap(onBus: 0)
+        // 미디어 서비스 리셋은 오디오 객체 그래프를 통째로 무효화한다 — 세션마다 새 엔진으로 시작한다
+        self.audioEngine = AVAudioEngine()
         self.request = nil
         self.task = nil
         self.subject.voiceLevel.send(0)
