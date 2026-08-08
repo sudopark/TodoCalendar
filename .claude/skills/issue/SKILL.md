@@ -21,6 +21,18 @@ description: Use when writing GitHub issues or issue comments in this project �
 - 킥오프 마커 코멘트(`<!-- kickoff -->` 류) 포맷은 kickoff 스킬 소관 — 여기서 재정의하지 않는다.
 - 클로즈 시 한 줄 코멘트를 남긴다: 뭘로 해소됐는지(커밋 sha·PR#) 또는 왜 안 하는지.
 
+## 보드
+
+이슈를 **새로 생성하면** 개발 대시보드(Project #2)의 `Todo`에 올린다:
+
+```bash
+.claude/scripts/project-board.sh <이슈번호> "Todo"
+```
+
+- 본문 갱신·코멘트 작성에는 적용하지 않는다 — 생성 시점만이다.
+- 이후 단계 이동(`In Progress`·`Review + QA`)은 kickoff·pr 스킬 소관 — 여기서 옮기지 않는다.
+- 배선이 실패해도 이슈 작업은 계속한다. 실패 사실만 유저에게 한 줄로 알린다.
+
 ## 다이어그램
 
 구조·플로우가 글보다 그림이 명확할 땐 mermaid 다이어그램을 본문·코멘트에 넣는다 (GitHub 렌더 지원).

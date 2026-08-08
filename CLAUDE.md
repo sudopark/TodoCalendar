@@ -71,6 +71,8 @@ tuist generate --no-open      # 파일 추가/삭제 후 재실행 필수
 
 > 테스트 작성 원칙: [`.claude/rules/testability.md`](.claude/rules/testability.md) (path 매칭 자동 로드)
 
+> 개발 대시보드(Project #2) 상태는 이슈 생성 `Todo` → 킥오프 `In Progress` → PR 생성 `Review + QA` 로 따라간다. 배선은 `.claude/scripts/project-board.sh <이슈번호> "<상태>"`, 조항은 issue·kickoff·pr 스킬 소관.
+
 ---
 
 ## 4. 도메인 컨텍스트
