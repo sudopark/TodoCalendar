@@ -62,21 +62,33 @@ public final class SpeechRecognizeUsecaseImple: SpeechRecognizeUsecase, @uncheck
     }
     private let subject = Subject()
     private var serviceBinding = Set<AnyCancellable>()
+    private var startTask: Task<Void, Never>?
 }
 
 extension SpeechRecognizeUsecaseImple {
-    
+
     public func startListening() {
-       
+
         guard !self.subject.isRecognizing.value else { return }
-        
-        Task {
+
+        // 권한 대기 중인 이전 start가 있으면 그것부터 접는다 — 살려두면 bind·start가 두 번 돈다
+        self.startTask?.cancel()
+        self.startTask = Task { [weak self] in
+            guard let self else { return }
             do {
                 try await self.permissionChecker.requestAccess()
+                // 대기 중에 stopListening이 왔으면 마이크를 켜지 않는다
+                guard !Task.isCancelled else { return }
                 self.bindService()
                 try self.service.start()
+                // start가 도는 동안 들어온 중지도 반영한다 — 안 그러면 마이크만 켜진 채 남는다
+                guard !Task.isCancelled else {
+                    self.service.stop()
+                    self.serviceBinding = []
+                    return
+                }
                 self.subject.isRecognizing.send(true)
-                
+
             } catch {
                 self.serviceBinding = []
                 self.subject.isRecognizing.send(false)
@@ -84,8 +96,10 @@ extension SpeechRecognizeUsecaseImple {
             }
         }
     }
-    
+
     public func stopListening() {
+        self.startTask?.cancel()
+        self.startTask = nil
         self.service.stop()
         self.serviceBinding = []
         self.subject.isRecognizing.send(false)
@@ -189,7 +203,11 @@ extension SpeechRecognizeUsecaseImple {
     }
 
     public func finishListening() {
-        guard self.subject.isRecognizing.value else { return }
+        guard self.subject.isRecognizing.value else {
+            // 아직 안 켜진 세션은 접기만 한다 — 살려두면 뒤늦은 인식이 커맨드로 전송된다
+            self.stopListening()
+            return
+        }
         let text = self.subject.recognizingText.value
         self.stopListening()
         self.subject.result.send(.success(.recognized(text)))

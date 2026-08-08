@@ -158,6 +158,7 @@ extension AIAgentOrchestrationUsecaseImple {
 
     public func enterKeyboardInput() {
         guard self.canEnterKeyboardInput else { return }
+        self.resetVoiceBinding()
         self.speechRecognizeUsecase.stopListening()
         self.subject.state.send(.listening(.keyboard))
     }

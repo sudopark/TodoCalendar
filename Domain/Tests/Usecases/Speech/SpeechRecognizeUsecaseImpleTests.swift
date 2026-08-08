@@ -49,6 +49,13 @@ class SpeechRecognizeUsecaseImpleTests: PublisherWaitable {
         try await Task.sleep(for: timeout)
         return box.value
     }
+
+    private func waitUntilListening(_ service: StubSpeechRecognizeService) async throws {
+        let deadline = ContinuousClock.now + .milliseconds(500)
+        while service.didStartCount == 0, ContinuousClock.now < deadline {
+            try await Task.sleep(for: .milliseconds(5))
+        }
+    }
 }
 
 
@@ -212,7 +219,7 @@ extension SpeechRecognizeUsecaseImpleTests {
         // when
         let captured = try await self.captureResult(for: usecase) {
             usecase.startListening()
-            try await Task.sleep(for: .milliseconds(50))
+            try await self.waitUntilListening(service)
             service.emitAudioDisruption()
         }
 
@@ -232,7 +239,7 @@ extension SpeechRecognizeUsecaseImpleTests {
         // when
         let captured = try await self.captureResult(for: usecase) {
             usecase.startListening()
-            try await Task.sleep(for: .milliseconds(50))
+            try await self.waitUntilListening(service)
             service.emit(.init(text: "오늘 회의", isFinal: false))
             try await Task.sleep(for: .milliseconds(20))
             service.emitAudioDisruption()
@@ -382,7 +389,7 @@ extension SpeechRecognizeUsecaseImpleTests {
         // when
         let levels = try await self.outputs(expect, for: usecase.isRecognizingWithLevel) {
             usecase.startListening()
-            try await Task.sleep(for: .milliseconds(60))
+            try await self.waitUntilListening(service)
             service.sendLevel(0.5)
             try await Task.sleep(for: .milliseconds(20))
             service.emitAudioDisruption()
@@ -391,6 +398,20 @@ extension SpeechRecognizeUsecaseImpleTests {
 
         // then
         #expect(levels == [nil, 0.0, 0.5, nil])
+    }
+
+    @Test func usecase_whenAudioInputDisrupted_releasesMicrophone() async throws {
+        // given
+        let (usecase, service) = self.makeUsecase()
+
+        // when
+        usecase.startListening()
+        try await self.waitUntilListening(service)
+        service.emitAudioDisruption()
+        try await Task.sleep(for: .milliseconds(40))
+
+        // then
+        #expect(service.didStop == true)
     }
 }
 
@@ -418,6 +439,32 @@ extension SpeechRecognizeUsecaseImpleTests {
         // then
         #expect(levels == [nil, 0.0, 0.5])
     }
+
+    @Test func usecase_whenStoppedBeforeAccessGranted_doesNotStartRecognizing() async throws {
+        // given
+        let (usecase, service) = self.makeUsecase()
+
+        // when
+        usecase.startListening()
+        usecase.stopListening()
+        try await Task.sleep(for: .milliseconds(100))
+
+        // then
+        #expect(service.didStartCount == 0)
+    }
+
+    @Test func usecase_whenStartCalledTwiceBeforeReady_startsOnlyOnce() async throws {
+        // given
+        let (usecase, service) = self.makeUsecase()
+
+        // when
+        usecase.startListening()
+        usecase.startListening()
+        try await Task.sleep(for: .milliseconds(100))
+
+        // then
+        #expect(service.didStartCount == 1)
+    }
 }
 
 
@@ -434,6 +481,8 @@ private final class StubSpeechRecognizeService: SpeechRecognizeService, @uncheck
     private let audioInputDisruptedSubject = PassthroughSubject<Void, Never>()
 
     var startError: (any Error)?
+    private(set) var didStartCount: Int = 0
+    private(set) var didStop: Bool = false
 
     var recognized: AnyPublisher<SpeechRecognizeFragment, any Error> {
         return self.recognizedSubject.eraseToAnyPublisher()
@@ -445,9 +494,12 @@ private final class StubSpeechRecognizeService: SpeechRecognizeService, @uncheck
         return self.audioInputDisruptedSubject.eraseToAnyPublisher()
     }
     func start() throws {
+        self.didStartCount += 1
         if let startError { throw startError }
     }
-    func stop() { }
+    func stop() {
+        self.didStop = true
+    }
 
     func emit(_ fragment: SpeechRecognizeFragment) {
         self.recognizedSubject.send(fragment)

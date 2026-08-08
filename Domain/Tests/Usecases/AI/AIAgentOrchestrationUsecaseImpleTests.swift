@@ -1103,6 +1103,40 @@ extension AIAgentOrchestrationUsecaseImpleTests {
             Issue.record("expected listening(.voice), got \(String(describing: state))")
         }
     }
+
+    // 키보드 전환 후 이전 음성 구독이 남지 않는다
+    @Test func usecase_afterEnterKeyboardInput_stopsForwardingRecognizingText() async throws {
+        // given
+        let usecase = self.makeUsecaseInIdle()
+        usecase.enterVoiceInput()
+        usecase.enterKeyboardInput()
+        let expect = expectConfirm("키보드 전환 후 인식 텍스트 미전달")
+        expect.count = 0
+        expect.timeout = .milliseconds(100)
+        // when
+        let texts = try await self.outputs(expect, for: usecase.recognizingText) {
+            self.stubSpeech.recognizingTextSubject.send("음성 잔여 텍스트")
+        }
+        // then
+        #expect(texts.isEmpty)
+    }
+
+    // 뒤늦게 도착한 음성 종료가 키보드 입력 상태를 덮지 않는다
+    @Test func usecase_lateRecognizeEndAfterEnterKeyboardInput_keepsKeyboardListening() async throws {
+        // given
+        let usecase = self.makeUsecaseInIdle()
+        usecase.enterVoiceInput()
+        usecase.enterKeyboardInput()
+        let expect = expectConfirm("키보드 입력 상태 유지")
+        expect.count = 0
+        expect.timeout = .milliseconds(100)
+        // when
+        let states = try await self.outputs(expect, for: usecase.state.dropFirst()) {
+            self.stubSpeech.recognizeResultSubject.send(.success(.endedWithoutRecognizing))
+        }
+        // then
+        #expect(states.isEmpty)
+    }
 }
 
 
