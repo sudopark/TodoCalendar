@@ -331,7 +331,7 @@ extension BillingUsecaseImpleTests {
 
         // when
         _ = try await self.firstOutput(expect, for: usecase.currentUserPlan) {
-            Task { await usecase.recoverUnfinishedTransactions() }
+            usecase.recoverUnfinishedTransactions()
         }
 
         // then
@@ -355,7 +355,7 @@ extension BillingUsecaseImpleTests {
 
         // when
         _ = try await self.firstOutput(expect, for: usecase.currentUserPlan) {
-            Task { await usecase.recoverUnfinishedTransactions() }
+            usecase.recoverUnfinishedTransactions()
         }
 
         // then

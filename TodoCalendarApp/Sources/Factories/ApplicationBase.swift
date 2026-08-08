@@ -16,31 +16,13 @@ import FirebaseAuth
 import Alamofire
 import SQLiteService
 import ExternalServices
-import StoreKitService
 
 
 final class ApplicationBase {
 
-    init() {
-        // remoteAPI·sharedDataStore 준비가 끝난 뒤 리스너를 앱 수명으로 1회 기동한다.
-        // billingUsecase 가 다른 lazy 프로퍼티(remoteAPI 등)를 참조하므로 이 시점엔 lazy var여야
-        // self 를 phase-1 초기화 제약 없이 쓸 수 있다 (let 로는 컴파일 불가)
-        self.billingUsecase.startObservingTransactions()
-    }
-
     let sharedDataStore: SharedDataStore = .init()
     let eventNotifyService: SharedEventNotifyService = .init()
 
-    // 트랜잭션 리스너는 앱 수명 단일 인스턴스여야 한다 — 로그인 세션에 묶으면 로그아웃 구간에
-    // 리스너가 사라지고, 팩토리 교체 순간 둘이 공존해 같은 JWS 를 중복 POST 한다 (#739)
-    lazy var billingUsecase: any BillingUsecase = {
-        return BillingUsecaseImple(
-            repository: BillingRepositoryImple(remote: self.remoteAPI),
-            appStoreService: AppStoreBillingServiceImple(),
-            sharedDataStore: self.sharedDataStore
-        )
-    }()
-    
     let userDefaultEnvironmentStorage = UserDefaultEnvironmentStorageImple(
         suiteName: AppEnvironment.groupID
     )
