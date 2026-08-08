@@ -790,7 +790,7 @@ private final class StubAIAgentUsageUsecase: AIAgentUsageUsecase, @unchecked Sen
 
 private final class StubSpeechRecognizeUsecase: SpeechRecognizeUsecase, @unchecked Sendable {
 
-    let recognizeResultSubject = PassthroughSubject<Result<String, any Error>, Never>()
+    let recognizeResultSubject = PassthroughSubject<Result<SpeechRecognizeResult, any Error>, Never>()
     let recognizingTextSubject = CurrentValueSubject<String, Never>("")
     let levelSubject = CurrentValueSubject<Float?, Never>(nil)
 
@@ -803,7 +803,7 @@ private final class StubSpeechRecognizeUsecase: SpeechRecognizeUsecase, @uncheck
     func stopListening() { self.didStopListening = true }
     func finishListening() { self.didFinishListening = true }
 
-    var recognizeResult: AnyPublisher<Result<String, any Error>, Never> {
+    var recognizeResult: AnyPublisher<Result<SpeechRecognizeResult, any Error>, Never> {
         self.recognizeResultSubject.eraseToAnyPublisher()
     }
     var recognizingText: AnyPublisher<String, Never> {
@@ -858,7 +858,7 @@ extension AIAgentOrchestrationUsecaseImpleTests {
         expect.count = 2
         // when
         let states = try await self.outputs(expect, for: usecase.state.dropFirst()) {
-            self.stubSpeech.recognizeResultSubject.send(.success("내일 회의"))
+            self.stubSpeech.recognizeResultSubject.send(.success(.recognized("내일 회의")))
         }
         // then — listening → idle → processing
         #expect(self.stubCommand.didProcessCommand == "내일 회의")
@@ -901,6 +901,57 @@ extension AIAgentOrchestrationUsecaseImpleTests {
         if case .idle = state {} else {
             Issue.record("expected idle, got \(String(describing: state))")
         }
+    }
+
+    // 침묵 타임아웃·오디오 끊김 등 무인식 종료 → idle 복귀 (커맨드 전송 없음)
+    @Test func usecase_recognizeEndedWithoutText_stateBecomesIdle() async throws {
+        // given
+        let usecase = self.makeUsecaseInIdle()
+        usecase.enterVoiceInput()
+        let expect = expectConfirm("idle on ended without recognizing")
+        // when
+        let state = try await self.firstOutput(expect, for: usecase.state.dropFirst()) {
+            self.stubSpeech.recognizeResultSubject.send(.success(.endedWithoutRecognizing))
+        }
+        // then
+        if case .idle = state {} else {
+            Issue.record("expected idle, got \(String(describing: state))")
+        }
+        #expect(self.stubCommand.didProcessCommand == nil)
+    }
+
+    // 무인식 종료 후 이전 음성 구독이 남지 않는다
+    @Test func usecase_afterRecognizeEndedWithoutText_stopsForwardingRecognizingText() async throws {
+        // given
+        let usecase = self.makeUsecaseInIdle()
+        usecase.enterVoiceInput()
+        self.stubSpeech.recognizeResultSubject.send(.success(.endedWithoutRecognizing))
+        let expect = expectConfirm("바인딩 해제 후 인식 텍스트 미전달")
+        expect.count = 0
+        expect.timeout = .milliseconds(100)
+        // when
+        let texts = try await self.outputs(expect, for: usecase.recognizingText) {
+            self.stubSpeech.recognizingTextSubject.send("남은 구독이 흘리면 안 되는 텍스트")
+        }
+        // then
+        #expect(texts.isEmpty)
+    }
+
+    // 인식 실패 후에도 이전 음성 구독이 남지 않는다
+    @Test func usecase_afterRecognizeFailed_stopsForwardingRecognizingText() async throws {
+        // given
+        let usecase = self.makeUsecaseInIdle()
+        usecase.enterVoiceInput()
+        self.stubSpeech.recognizeResultSubject.send(.failure(RuntimeError("speech fail")))
+        let expect = expectConfirm("실패 후 인식 텍스트 미전달")
+        expect.count = 0
+        expect.timeout = .milliseconds(100)
+        // when
+        let texts = try await self.outputs(expect, for: usecase.recognizingText) {
+            self.stubSpeech.recognizingTextSubject.send("남은 구독이 흘리면 안 되는 텍스트")
+        }
+        // then
+        #expect(texts.isEmpty)
     }
 
     // stopInput → idle, speech stop

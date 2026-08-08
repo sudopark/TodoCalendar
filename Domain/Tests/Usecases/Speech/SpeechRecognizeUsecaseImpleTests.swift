@@ -40,7 +40,7 @@ class SpeechRecognizeUsecaseImpleTests: PublisherWaitable {
         for usecase: SpeechRecognizeUsecaseImple,
         timeout: Duration = .milliseconds(150),
         _ action: () async throws -> Void
-    ) async throws -> Result<String, any Error>? {
+    ) async throws -> Result<SpeechRecognizeResult, any Error>? {
         let box = ResultBox()
         usecase.recognizeResult
             .sink { box.value = $0 }
@@ -69,7 +69,7 @@ extension SpeechRecognizeUsecaseImpleTests {
 
         // then
         let result = try #require(captured)
-        guard case .success(let text) = result else {
+        guard case .success(.recognized(let text)) = result else {
             Issue.record("성공 결과가 아님")
             return
         }
@@ -92,7 +92,7 @@ extension SpeechRecognizeUsecaseImpleTests {
 
         // then
         let result = try #require(captured)
-        guard case .success(let text) = result else {
+        guard case .success(.recognized(let text)) = result else {
             Issue.record("성공 결과가 아님")
             return
         }
@@ -113,7 +113,7 @@ extension SpeechRecognizeUsecaseImpleTests {
 
         // then
         let result = try #require(captured)
-        guard case .success(let text) = result else {
+        guard case .success(.recognized(let text)) = result else {
             Issue.record("성공 결과가 아님")
             return
         }
@@ -186,6 +186,24 @@ extension SpeechRecognizeUsecaseImpleTests {
             return
         }
     }
+
+    @Test func usecase_whenSilentWithoutSpeech_emitsEndedWithoutRecognizing() async throws {
+        // given
+        let (usecase, _) = self.makeUsecase(autoStopAfterSilence: 0.1)
+
+        // when
+        let captured = try await self.captureResult(for: usecase, timeout: .milliseconds(300)) {
+            usecase.startListening()
+        }
+
+        // then
+        let result = try #require(captured)
+        guard case .success(let recognizeResult) = result else {
+            Issue.record("성공 결과가 아님")
+            return
+        }
+        #expect(recognizeResult == .endedWithoutRecognizing)
+    }
 }
 
 
@@ -227,7 +245,7 @@ extension SpeechRecognizeUsecaseImpleTests {
 
         // then
         let result = try #require(captured)
-        guard case .success(let text) = result else {
+        guard case .success(.recognized(let text)) = result else {
             Issue.record("성공 결과가 아님")
             return
         }
@@ -247,7 +265,7 @@ extension SpeechRecognizeUsecaseImpleTests {
 
         // then
         let result = try #require(captured)
-        guard case .success(let text) = result else {
+        guard case .success(.recognized(let text)) = result else {
             Issue.record("성공 결과가 아님")
             return
         }
@@ -344,7 +362,7 @@ extension SpeechRecognizeUsecaseImpleTests {
 // MARK: - test doubles
 
 private final class ResultBox: @unchecked Sendable {
-    var value: Result<String, any Error>?
+    var value: Result<SpeechRecognizeResult, any Error>?
 }
 
 private final class StubSpeechRecognizeService: SpeechRecognizeService, @unchecked Sendable {

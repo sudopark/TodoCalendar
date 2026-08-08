@@ -13,7 +13,7 @@ import Domain
 
 final class StubSpeechRecognizeUsecase: SpeechRecognizeUsecase, @unchecked Sendable {
 
-    let recognizeResultSubject = PassthroughSubject<Result<String, any Error>, Never>()
+    let recognizeResultSubject = PassthroughSubject<Result<SpeechRecognizeResult, any Error>, Never>()
     let recognizingTextSubject = CurrentValueSubject<String, Never>("")
     let levelSubject = CurrentValueSubject<Float?, Never>(nil)
 
@@ -25,7 +25,7 @@ final class StubSpeechRecognizeUsecase: SpeechRecognizeUsecase, @unchecked Senda
     func stopListening() { self.didStopListening = true }
     func finishListening() { self.didFinishListening = true }
 
-    var recognizeResult: AnyPublisher<Result<String, any Error>, Never> {
+    var recognizeResult: AnyPublisher<Result<SpeechRecognizeResult, any Error>, Never> {
         self.recognizeResultSubject.eraseToAnyPublisher()
     }
     var recognizingText: AnyPublisher<String, Never> {
