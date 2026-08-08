@@ -66,7 +66,11 @@ extension ShareCommandSubmitService {
         }
     }
 
-    func submit(sharedText: String, additionalInstruction: String) async throws {
+    func submit(
+        sharedText: String,
+        additionalInstruction: String,
+        inputSource: AICommandInputSource = .text
+    ) async throws {
         let text = sharedText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty
         else { throw ShareSubmitFailure.emptyCommand }
@@ -82,7 +86,7 @@ extension ShareCommandSubmitService {
         let jobId = try await self.repository.processInterpretCommand(
             text: text,
             additionalInstruction: instruction,
-            inputSource: .text,
+            inputSource: inputSource,
             timeZone: TimeZone.current.identifier
         )
         // 확장은 시트를 닫으면 죽으므로 이 기록이 앱으로 넘기는 유일한 인계 채널이다.

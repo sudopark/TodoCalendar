@@ -12,21 +12,43 @@ import Domain
 import Extensions
 
 
+// MARK: - ShareCommandSource
+
+/// 공유 원문이 어디서 왔는지. 화면 구성과 서버 전송 값이 이 축으로 갈린다.
+enum ShareCommandSource: Sendable, Equatable {
+    case text
+    case image(preview: Data?)
+}
+
+extension ShareCommandSource {
+
+    var asCommandInputSource: AICommandInputSource {
+        switch self {
+        case .text: return .text
+        case .image: return .imageOcr
+        }
+    }
+}
+
+
 // MARK: - ShareCommandViewModel
 
 final class ShareCommandViewModel: @unchecked Sendable {
 
     private let submitService: ShareCommandSubmitService
-    private let loadSharedText: @Sendable () async -> String
+    private let imageTextRecognizeService: any ImageTextRecognizeService
+    private let loadSharedItem: @Sendable () async -> SharedCommandItem
     private let onClose: @Sendable () -> Void
 
     init(
         submitService: ShareCommandSubmitService,
-        loadSharedText: @escaping @Sendable () async -> String,
+        imageTextRecognizeService: any ImageTextRecognizeService,
+        loadSharedItem: @escaping @Sendable () async -> SharedCommandItem,
         onClose: @escaping @Sendable () -> Void
     ) {
         self.submitService = submitService
-        self.loadSharedText = loadSharedText
+        self.imageTextRecognizeService = imageTextRecognizeService
+        self.loadSharedItem = loadSharedItem
         self.onClose = onClose
     }
 
@@ -34,6 +56,8 @@ final class ShareCommandViewModel: @unchecked Sendable {
     // 다른 축을 지우지 않으므로 상태 조합이 늘어도 분기를 새로 만들 필요가 없다.
     private struct Subject {
         let sharedText = CurrentValueSubject<String?, Never>(nil)
+        /// 공유 원문의 출처 — 화면 분기와 전송 값에 쓰인다
+        let source = CurrentValueSubject<ShareCommandSource?, Never>(nil)
         /// 공유 원문·전송 가능 여부를 아직 확인하는 중
         let isPreparing = CurrentValueSubject<Bool, Never>(true)
         /// 미로그인·앞선 요청이라 제출 자체가 불가능하다 — 되돌아갈 곳이 없다
@@ -55,9 +79,34 @@ extension ShareCommandViewModel {
     func prepare() {
         Task { [weak self] in
             guard let self else { return }
-            self.subject.sharedText.send(await self.loadSharedText())
+            let item = await self.loadSharedItem()
+            await self.resolveSharedInput(item)
             self.subject.blockedMessage.send(await self.resolveBlockMessage())
             self.subject.isPreparing.send(false)
+        }
+    }
+
+    private func resolveSharedInput(_ item: SharedCommandItem) async {
+        switch item {
+        case .text(let text):
+            self.subject.source.send(.text)
+            self.subject.sharedText.send(text)
+
+        case .image(let imageData):
+            self.subject.source.send(.image(preview: SharedImagePreview.make(from: imageData)))
+            self.subject.sharedText.send(await self.recognizedText(in: imageData))
+        }
+    }
+
+    // 디코드 실패·Vision 실패도 빈 문자열로 수렴한다 — 유저의 다음 행동(직접 입력)이
+    // "글자 없는 이미지"와 같아서 구분해도 선택지가 달라지지 않는다. 원인은 로그로 남긴다.
+    private func recognizedText(in imageData: Data) async -> String {
+        do {
+            let lines = try await self.imageTextRecognizeService.recognizeTextLines(in: imageData)
+            return lines.joined(separator: "\n")
+        } catch {
+            logger.log(level: .error, "\(error)")
+            return ""
         }
     }
 
@@ -84,7 +133,8 @@ extension ShareCommandViewModel {
             do {
                 try await self.submitService.submit(
                     sharedText: sharedText,
-                    additionalInstruction: additionalInstruction
+                    additionalInstruction: additionalInstruction,
+                    inputSource: self.subject.source.value?.asCommandInputSource ?? .text
                 )
                 self.subject.sentMessage.send("share.ai::sent".localized())
             } catch ShareSubmitFailure.createdButNotTrackable {
@@ -123,6 +173,10 @@ extension ShareCommandViewModel {
 
     var sharedText: AnyPublisher<String, Never> {
         return self.subject.sharedText.compactMap { $0 }.eraseToAnyPublisher()
+    }
+
+    var source: AnyPublisher<ShareCommandSource?, Never> {
+        return self.subject.source.eraseToAnyPublisher()
     }
 
     var isPreparing: AnyPublisher<Bool, Never> {
