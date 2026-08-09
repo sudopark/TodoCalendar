@@ -24,8 +24,10 @@ public protocol AIAgentOrchestrationUsecase: AnyObject, Sendable {
     func enterVoiceInput()
     func finishVoiceInput()
     func enterKeyboardInput()
+    func enterImageInput()
     func stopInput()
     func submit(_ text: String) throws
+    func submitImageCommand(text: String, additionalInstruction: String?) throws
 
     func confirm()
     func decline()
@@ -169,6 +171,12 @@ extension AIAgentOrchestrationUsecaseImple {
         self.subject.state.send(.listening(.keyboard))
     }
 
+    public func enterImageInput() {
+        guard self.canEnterImageInput else { return }
+        self.speechRecognizeUsecase.stopListening()
+        self.subject.state.send(.listening(.image))
+    }
+
     public func stopInput() {
         self.resetVoiceBinding()
         self.speechRecognizeUsecase.stopListening()
@@ -218,6 +226,11 @@ extension AIAgentOrchestrationUsecaseImple {
 
 extension AIAgentOrchestrationUsecaseImple {
 
+    private enum Constant {
+        static let maxTextLength: Int = 10000
+        static let maxAdditionalInstructionLength: Int = 1000
+    }
+
     public func submit(_ text: String) throws {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
@@ -228,6 +241,34 @@ extension AIAgentOrchestrationUsecaseImple {
         }
         self.subject.state.send(.processing(command: trimmed))
         self.startProcessing(self.commandUsecase.processCommand(trimmed))
+    }
+
+    // 검증 순서: 빈 텍스트 → 원문 길이 → 부가지시 길이 → busy.
+    // 서버가 같은 조건으로 400을 내는데, 사전에 걸러 무엇을 줄여야 하는지 알린다.
+    public func submitImageCommand(text: String, additionalInstruction: String?) throws {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty
+        else { throw AIImageCommandSubmitFailReason.emptyText }
+        guard trimmed.count <= Constant.maxTextLength
+        else { throw AIImageCommandSubmitFailReason.textTooLong }
+
+        let trimmedInstruction = additionalInstruction?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let instruction: String? = (trimmedInstruction?.isEmpty ?? true) ? nil : trimmedInstruction
+        guard (instruction?.count ?? 0) <= Constant.maxAdditionalInstructionLength
+        else { throw AIImageCommandSubmitFailReason.instructionTooLong }
+
+        guard self.canSubmit
+        else { throw AIImageCommandSubmitFailReason.busy }
+
+        self.subject.state.send(.processing(command: trimmed))
+        self.startProcessing(
+            self.commandUsecase.processInterpretCommand(
+                text: trimmed,
+                additionalInstruction: instruction,
+                inputSource: .imageOcr
+            )
+        )
     }
 
     // 키보드 입력은 idle뿐 아니라 음성/키보드 입력 중(listening)에서도 진입 가능.
@@ -260,7 +301,14 @@ extension AIAgentOrchestrationUsecaseImple {
 
     private var canEnterVoiceInput: Bool {
         switch self.subject.state.value {
-        case .none, .idle, .listening(.keyboard): return true
+        case .none, .idle, .listening(.keyboard), .listening(.image): return true
+        default: return false
+        }
+    }
+
+    private var canEnterImageInput: Bool {
+        switch self.subject.state.value {
+        case .none, .idle, .listening: return true
         default: return false
         }
     }
@@ -445,10 +493,16 @@ public final class NotNeedAIAgentOrchestrationUsecase: AIAgentOrchestrationUseca
     public func enterVoiceInput() { }
     public func finishVoiceInput() { }
     public func enterKeyboardInput() { }
+    public func enterImageInput() { }
     public func stopInput() { }
 
     // 진입점이 로그인 가드로 막혀 있어 도달하지 않는다. 도달하면 가드가 뚫린 것이라 드러낸다.
     public func submit(_ text: String) throws {
+        throw RuntimeError(key: "AIAgent.needSignIn", "ai agent needs sign in")
+    }
+
+    // 진입점이 로그인 가드로 막혀 있어 도달하지 않는다. 도달하면 가드가 뚫린 것이라 드러낸다.
+    public func submitImageCommand(text: String, additionalInstruction: String?) throws {
         throw RuntimeError(key: "AIAgent.needSignIn", "ai agent needs sign in")
     }
 

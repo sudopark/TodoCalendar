@@ -772,6 +772,16 @@ private final class StubAICommandUsecase: AICommandUsecase, @unchecked Sendable 
         return self.processingPublisher(self.stubCommandJob)
     }
 
+    private(set) var didProcessInterpretWith: (text: String, instruction: String?, source: AICommandInputSource)?
+    func processInterpretCommand(
+        text: String,
+        additionalInstruction: String?,
+        inputSource: AICommandInputSource
+    ) -> AnyPublisher<AICommandProcessing, any Error> {
+        self.didProcessInterpretWith = (text, additionalInstruction, inputSource)
+        return self.processingPublisher(self.stubCommandJob)
+    }
+
     func processConfirmCommand(_ action: AIConfirmCommandAction) -> AnyPublisher<AICommandProcessing, any Error> {
         self.didProcessConfirmToken = action.confirmToken
         return self.processingPublisher(self.stubConfirmJob)
@@ -1434,5 +1444,147 @@ extension AIAgentOrchestrationUsecaseImpleTests {
 
         // then
         #expect(self.stubSpeech.didStopListening == true)
+    }
+}
+
+
+// MARK: - 이미지 커맨드 제출
+
+extension AIAgentOrchestrationUsecaseImpleTests {
+
+    // 이미지 입력 진입 시 음성 인식이 멈추고 상태가 .listening(.image)가 된다
+    @Test func usecase_enterImageInput_stopsListeningAndEmitsListeningImage() async throws {
+        // given
+        let usecase = self.makeUsecaseInIdle()
+        usecase.enterVoiceInput()
+        let expect = expectConfirm("listening(.image)")
+        // when
+        let state = try await self.firstOutput(expect, for: usecase.state.dropFirst()) {
+            usecase.enterImageInput()
+        }
+        // then
+        #expect(self.stubSpeech.didStopListening == true)
+        if case .listening(.image) = state {} else {
+            Issue.record("expected listening(.image), got \(String(describing: state))")
+        }
+    }
+
+    // submitImageCommand가 .processing(command:)로 전이하고 interpret 경로로 나간다
+    @Test func usecase_submitImageCommand_entersProcessingViaInterpretPath() async throws {
+        // given
+        let expect = expectConfirm("이미지 커맨드 전송 → processing → done")
+        expect.count = 2
+        var done = AIJobResult.DoneResult()
+        done.text = "영수증 등록 완료"
+        let usecase = self.makeUsecaseWithCommandJob(self.dummyJob(.done(done)))
+        usecase.reset()
+        usecase.enterImageInput()
+        // when
+        let states = try await self.outputs(expect, for: usecase.state.dropFirst()) {
+            try? usecase.submitImageCommand(text: "영수증 텍스트", additionalInstruction: "카드값만")
+        }
+        // then
+        #expect(states.map(self.stateName) == ["processing", "done"])
+        #expect(self.stubCommand.didProcessInterpretWith?.text == "영수증 텍스트")
+        #expect(self.stubCommand.didProcessInterpretWith?.instruction == "카드값만")
+        #expect(self.stubCommand.didProcessInterpretWith?.source == .imageOcr)
+    }
+
+    // 원문이 10,000자를 넘으면 textTooLong을 던지고 상태는 그대로다
+    @Test func usecase_submitImageCommand_whenTextTooLong_throwsAndKeepsState() throws {
+        // given
+        let usecase = self.makeUsecaseInIdle()
+        let tooLongText = String(repeating: "a", count: 10001)
+        // when
+        var caughtError: AIImageCommandSubmitFailReason?
+        do {
+            try usecase.submitImageCommand(text: tooLongText, additionalInstruction: nil)
+        } catch let error as AIImageCommandSubmitFailReason {
+            caughtError = error
+        }
+        // then
+        #expect(caughtError == .textTooLong)
+        #expect(self.stubCommand.didProcessInterpretWith == nil)
+    }
+
+    // 원문이 정확히 10,000자면 상한을 넘지 않아 처리로 진행한다
+    @Test func usecase_submitImageCommand_whenTextIsExactlyAtLimit_doesNotThrow() throws {
+        // given
+        let usecase = self.makeUsecaseInIdle()
+        let exactText = String(repeating: "a", count: 10000)
+        // when
+        var caughtError: AIImageCommandSubmitFailReason?
+        do {
+            try usecase.submitImageCommand(text: exactText, additionalInstruction: nil)
+        } catch let error as AIImageCommandSubmitFailReason {
+            caughtError = error
+        }
+        // then
+        #expect(caughtError == nil)
+        #expect(self.stubCommand.didProcessInterpretWith?.text.count == 10000)
+    }
+
+    // 부가지시가 1,000자를 넘으면 instructionTooLong을 던진다
+    @Test func usecase_submitImageCommand_whenInstructionTooLong_throws() throws {
+        // given
+        let usecase = self.makeUsecaseInIdle()
+        let tooLongInstruction = String(repeating: "b", count: 1001)
+        // when
+        var caughtError: AIImageCommandSubmitFailReason?
+        do {
+            try usecase.submitImageCommand(text: "영수증 텍스트", additionalInstruction: tooLongInstruction)
+        } catch let error as AIImageCommandSubmitFailReason {
+            caughtError = error
+        }
+        // then
+        #expect(caughtError == .instructionTooLong)
+        #expect(self.stubCommand.didProcessInterpretWith == nil)
+    }
+
+    // 부가지시가 정확히 1,000자면 상한을 넘지 않아 처리로 진행한다
+    @Test func usecase_submitImageCommand_whenInstructionIsExactlyAtLimit_doesNotThrow() throws {
+        // given
+        let usecase = self.makeUsecaseInIdle()
+        let exactInstruction = String(repeating: "b", count: 1000)
+        // when
+        var caughtError: AIImageCommandSubmitFailReason?
+        do {
+            try usecase.submitImageCommand(text: "영수증 텍스트", additionalInstruction: exactInstruction)
+        } catch let error as AIImageCommandSubmitFailReason {
+            caughtError = error
+        }
+        // then
+        #expect(caughtError == nil)
+        #expect(self.stubCommand.didProcessInterpretWith?.instruction?.count == 1000)
+    }
+
+    // 빈 텍스트는 emptyText를 던진다
+    @Test func usecase_submitImageCommand_whenEmptyText_throws() throws {
+        // given
+        let usecase = self.makeUsecaseInIdle()
+        // when
+        var caughtError: AIImageCommandSubmitFailReason?
+        do {
+            try usecase.submitImageCommand(text: "   ", additionalInstruction: nil)
+        } catch let error as AIImageCommandSubmitFailReason {
+            caughtError = error
+        }
+        // then
+        #expect(caughtError == .emptyText)
+    }
+
+    // 이미 처리 중이면 busy를 던진다
+    @Test func usecase_submitImageCommand_whileProcessing_throwsBusy() async throws {
+        // given — confirm 대기 중(진짜 busy 상태)
+        let usecase = self.makeUsecaseInConfirm()
+        // when
+        var caughtError: AIImageCommandSubmitFailReason?
+        do {
+            try usecase.submitImageCommand(text: "영수증 텍스트", additionalInstruction: nil)
+        } catch let error as AIImageCommandSubmitFailReason {
+            caughtError = error
+        }
+        // then
+        #expect(caughtError == .busy)
     }
 }

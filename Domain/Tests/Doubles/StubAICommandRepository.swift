@@ -27,15 +27,18 @@ class BaseStubAICommandRepository: AICommandRepository, @unchecked Sendable {
 
     var didProcessInterpretText: String?
     var didProcessInterpretAdditionalInstruction: String?
+    var didProcessInterpretWithInputSource: AICommandInputSource?
     func processInterpretCommand(
         text: String,
         additionalInstruction: String?,
+        inputSource: AICommandInputSource,
         timeZone: String
     ) async throws -> String {
         guard !self.shouldFailProcessCommand
         else {
             throw RuntimeError("not imple")
         }
+        self.didProcessInterpretWithInputSource = inputSource
         self.didProcessInterpretText = text
         self.didProcessInterpretAdditionalInstruction = additionalInstruction
         return "some_job"

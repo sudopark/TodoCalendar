@@ -343,6 +343,78 @@ extension AICommandUsecaseImpleTests {
 }
 
 
+// MARK: - 이미지 OCR 텍스트 해석 요청
+
+extension AICommandUsecaseImpleTests {
+
+    @Test func usecase_whenProcessInterpretCommand_passesInputSourceToRepository() async throws {
+        // given
+        let expect = expectConfirm("interpret job이 방출된다")
+        expect.timeout = .seconds(1)
+        let usecase = self.makeUsecase()
+
+        // when
+        let job = try await self.firstOutput(
+            expect,
+            for: usecase.processInterpretCommand(
+                text: "영수증 텍스트",
+                additionalInstruction: nil,
+                inputSource: .imageOcr
+            )
+            .jobsOnly()
+        )
+
+        // then
+        #expect(job != nil)
+        #expect(self.stubRepository.didProcessInterpretWithInputSource == .imageOcr)
+        #expect(self.stubRepository.didProcessInterpretText == "영수증 텍스트")
+        #expect(self.stubRepository.didProcessInterpretAdditionalInstruction == nil)
+    }
+
+    @Test func usecase_whenProcessInterpretCommand_checkIsFinishWithPolling() async throws {
+        // given
+        let expect = expectConfirm("interpret 처리시 폴링으로 작업 진행상태 모두 방출 후 완료")
+        expect.count = 4
+        expect.timeout = .seconds(1)
+        let usecase = self.makeUsecase()
+
+        // when
+        let processing = usecase.processInterpretCommand(
+            text: "영수증 텍스트", additionalInstruction: "부가 지시", inputSource: .imageOcr
+        )
+        .jobsOnly()
+        let jobs = try await self.outputs(expect, for: processing)
+
+        // then
+        let statuses = jobs.map { $0.status }
+        #expect(statuses == [.pending, .running, .running, .done])
+        #expect(jobs.last?.isFinish == true)
+
+        let processingCmd = try await self.stubRepository.loadProcessingAICommand()
+        #expect(processingCmd == nil)
+    }
+
+    @Test func usecase_processInterpretCommandFail() async throws {
+        // given
+        let expect = expectConfirm("interpret 요청부터 실패한경우 -> 에러")
+        expect.timeout = .seconds(1)
+        let usecase = self.makeUsecase(shouldFailMakeJob: true)
+
+        // when
+        let processing = usecase.processInterpretCommand(
+            text: "영수증 텍스트", additionalInstruction: nil, inputSource: .imageOcr
+        )
+        let fail = try await self.failure(expect, for: processing)
+
+        // then
+        #expect(fail != nil)
+
+        let processingCmd = try await self.stubRepository.loadProcessingAICommand()
+        #expect(processingCmd == nil)
+    }
+}
+
+
 // MARK: - process confirm command
 
 extension AICommandUsecaseImpleTests {

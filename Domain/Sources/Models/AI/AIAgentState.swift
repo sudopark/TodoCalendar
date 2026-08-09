@@ -14,6 +14,7 @@ import Foundation
 public enum AIAgentInputMethod: Sendable, Equatable {
     case voice
     case keyboard
+    case image
 }
 
 
@@ -22,7 +23,7 @@ public enum AIAgentInputMethod: Sendable, Equatable {
 public enum AIAgentState: Sendable {
 
     case idle                                                       // command 없음 (초기/리셋)
-    case listening(AIAgentInputMethod)                              // 입력 대기 (voice/keyboard)
+    case listening(AIAgentInputMethod)                              // 입력 대기 (voice/keyboard/image)
     case processing(command: String)                                // 서버 처리 중
     case confirm(command: String, message: String?, action: AIConfirmCommandAction, expireTime: Date?)  // 확인 필요 (nil = 만료 시각 불명 — 카운트다운 없음). 만료 여부는 expireTime을 과거와 비교해 소비자가 파생한다.
     case done(command: String, message: String?)                    // 완료

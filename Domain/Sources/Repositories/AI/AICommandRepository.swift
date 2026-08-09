@@ -19,6 +19,7 @@ public protocol AICommandRepository: AnyObject, Sendable {
     func processInterpretCommand(
         text: String,
         additionalInstruction: String?,
+        inputSource: AICommandInputSource,
         timeZone: String
     ) async throws -> String
 

@@ -17,6 +17,12 @@ public protocol AICommandUsecase: AnyObject, Sendable {
     
     func processCommand(_ commandText: String) -> AnyPublisher<AICommandProcessing, any Error>
 
+    func processInterpretCommand(
+        text: String,
+        additionalInstruction: String?,
+        inputSource: AICommandInputSource
+    ) -> AnyPublisher<AICommandProcessing, any Error>
+
     func processConfirmCommand(_ action: AIConfirmCommandAction) -> AnyPublisher<AICommandProcessing, any Error>
 
     func rejectConfirmCommand(_ action: AIConfirmCommandAction)
@@ -88,6 +94,30 @@ extension AICommandUsecaseImple {
 
         let makeJob: some Publisher<String, any Error> = Publishers.create(do: {
             let jobId = try await repository.processCommand(commandText, timeZone: timeZone)
+            try? await repository.updateProcessingAICommand(
+                .init(jobId: jobId, isConfirmJob: false)
+            )
+            return jobId
+        })
+
+        return self.waitJobUntilFinish(makeJob)
+    }
+
+    public func processInterpretCommand(
+        text: String,
+        additionalInstruction: String?,
+        inputSource: AICommandInputSource
+    ) -> AnyPublisher<AICommandProcessing, any Error> {
+
+        let timeZone = self.currentIANATimeZone(); let repository = self.repository
+
+        let makeJob: some Publisher<String, any Error> = Publishers.create(do: {
+            let jobId = try await repository.processInterpretCommand(
+                text: text,
+                additionalInstruction: additionalInstruction,
+                inputSource: inputSource,
+                timeZone: timeZone
+            )
             try? await repository.updateProcessingAICommand(
                 .init(jobId: jobId, isConfirmJob: false)
             )

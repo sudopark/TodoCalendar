@@ -387,6 +387,7 @@ extension AICommandRepositoryImpleTests {
         let jobId = try await repository.processInterpretCommand(
             text: "9월 10일 약속",
             additionalInstruction: "오후 3시로 잡아줘",
+            inputSource: .text,
             timeZone: "Asia/Seoul"
         )
 
@@ -409,11 +410,44 @@ extension AICommandRepositoryImpleTests {
         _ = try await repository.processInterpretCommand(
             text: "9월 10일 약속",
             additionalInstruction: nil,
+            inputSource: .text,
             timeZone: "Asia/Seoul"
         )
 
         // then
         XCTAssertNil(self.stubRemote.didRequestedParams?["additional_instruction"])
+    }
+
+    func test_processInterpretCommand_whenImageOcrSource_sendsImageOcrValue() async throws {
+        // given
+        let repository = self.makeRepository()
+
+        // when
+        _ = try await repository.processInterpretCommand(
+            text: "영수증에서 읽은 텍스트",
+            additionalInstruction: nil,
+            inputSource: .imageOcr,
+            timeZone: "Asia/Seoul"
+        )
+
+        // then
+        XCTAssertEqual(self.stubRemote.didRequestedParams?["input_source"] as? String, "image_ocr")
+    }
+
+    func test_processInterpretCommand_whenTextSource_sendsTextValue() async throws {
+        // given
+        let repository = self.makeRepository()
+
+        // when
+        _ = try await repository.processInterpretCommand(
+            text: "공유받은 웹페이지 본문",
+            additionalInstruction: nil,
+            inputSource: .text,
+            timeZone: "Asia/Seoul"
+        )
+
+        // then
+        XCTAssertEqual(self.stubRemote.didRequestedParams?["input_source"] as? String, "text")
     }
 }
 
