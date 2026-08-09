@@ -10,6 +10,7 @@ import Foundation
 import Combine
 import Prelude
 import Optics
+import Extensions
 
 
 public protocol BillingUsecase: AnyObject, Sendable {
@@ -33,7 +34,9 @@ public protocol BillingUsecase: AnyObject, Sendable {
     // 는 옵저빙 상태를 락 없는 플래그로 지킨다 — 셋 다 메인에서만 부른다
     func startObservingTransactions()
 
-    // 로그아웃·팩토리 교체 시. 이전 세션 리스너가 살아 있으면 같은 JWS 가 중복 post 된다
+    // 로그아웃·팩토리 교체 시. 이전 세션 리스너가 살아 있으면 같은 JWS 가 중복 post 된다.
+    // transactionUpdates 는 단일 소비 AsyncStream 이라, stop 후 같은 인스턴스에 startObservingTransactions
+    // 를 다시 불러도 재기동되지 않는다 — 새 세션은 항상 새 usecase 인스턴스로 만든다
     func stopObservingTransactions()
 
     // 서버 반영 전에 앱이 죽어 finish 되지 않은 트랜잭션을 재전송한다.
@@ -134,8 +137,8 @@ extension BillingUsecaseImple {
 
     // 앱이 뒤늦게 발견한 트랜잭션 — 종류를 판별하지 않고 서버에 위임한다.
     // 200 을 "서버가 확인했다" 로 읽고 그때만 finish 한다.
-    // 서버가 transactionId 기준 멱등이라, 옵저빙 스트림과 recoverUnfinishedTransactions 가
-    // 같은 트랜잭션을 각각 집어 두 번 보내도 안전하다
+    // 서버 원장 키가 관측(transactionId + 회수 여부) 기준 멱등이라, 옵저빙 스트림과
+    // recoverUnfinishedTransactions 가 같은 트랜잭션을 각각 집어 두 번 보내도 안전하다
     private func delegateAndFinish(
         _ transaction: BillingSignedTransaction
     ) async throws -> BillingUserPlan {
@@ -143,6 +146,9 @@ extension BillingUsecaseImple {
             signedTransaction: transaction.jws
         )
         await self.appStoreService.finishTransaction(id: transaction.id)
+        // 로그아웃은 shared store 를 비운 뒤 옵저빙을 끊는다. 그 사이 응답이 도착하면
+        // 이전 유저의 플랜이 비워진 store 에 다시 써져 다음 세션까지 남는다
+        guard !Task.isCancelled else { return userPlan }
         self.updateSharedUserPlan(userPlan)
         return userPlan
     }
@@ -155,7 +161,7 @@ extension BillingUsecaseImple {
         )
     }
 
-    // 서버가 transactionId ledger 로 멱등이라 전건 재제출이 안전하다.
+    // 서버 원장 키가 관측(transactionId + 회수 여부) 기준 멱등이라 전건 재제출이 안전하다.
     // 순차 await 이라 for 루프가 필요하다 — 마지막 반영 결과가 최신 상태.
     // recoverUnfinishedTransactions 와 달리 여기는 fail-fast 가 의도다 — restorePurchases 는
     // 유저가 직접 누른 액션이라 실패가 화면에 그대로 노출되고 재시도도 유저가 다시 누르면 되므로,
@@ -198,7 +204,14 @@ extension BillingUsecaseImple {
             // deinit 이 영영 오지 않아 deinit 의 cancel 이 죽은 코드가 된다
             for await transaction in updates {
                 guard let self else { return }
-                _ = try? await self.delegateAndFinish(transaction)
+                do {
+                    _ = try await self.delegateAndFinish(transaction)
+                } catch {
+                    logger.log(
+                        level: .error, "billing transaction delegate failed (stream): \(error)",
+                        with: ["transactionId": transaction.id]
+                    )
+                }
             }
         }
     }
@@ -220,7 +233,14 @@ extension BillingUsecaseImple {
             else { return }
             for transaction in transactions {
                 guard !Task.isCancelled, let self else { return }
-                _ = try? await self.delegateAndFinish(transaction)
+                do {
+                    _ = try await self.delegateAndFinish(transaction)
+                } catch {
+                    logger.log(
+                        level: .error, "billing transaction delegate failed (recovery): \(error)",
+                        with: ["transactionId": transaction.id]
+                    )
+                }
             }
         }
     }

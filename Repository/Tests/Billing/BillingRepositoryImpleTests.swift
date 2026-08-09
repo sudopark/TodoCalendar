@@ -18,6 +18,11 @@ final class BillingRepositoryImpleTests {
         let remote = StubRemoteAPI(responses: DummyResponse().responses)
         return BillingRepositoryImple(remote: remote)
     }
+
+    private func makeRepositoryWithUnwrappedTransactionResponse() -> BillingRepositoryImple {
+        let remote = StubRemoteAPI(responses: DummyResponse().unwrappedTransactionResponses)
+        return BillingRepositoryImple(remote: remote)
+    }
 }
 
 
@@ -106,6 +111,16 @@ extension BillingRepositoryImpleTests {
         #expect(plan.planId == .lifetime)
         #expect(plan.topupRemaining == 7700)
     }
+
+    // 서버가 계약을 어기고 user_plan 래핑 없이 평평한 응답을 주면 조용히 통과시키지 않는다
+    @Test func repository_postTransactionUpdate_whenResponseNotWrapped_throws() async throws {
+        // given
+        let repository = self.makeRepositoryWithUnwrappedTransactionResponse()
+        // when & then
+        await #expect(throws: (any Error).self) {
+            _ = try await repository.postTransactionUpdate(signedTransaction: "jws_token")
+        }
+    }
 }
 
 
@@ -142,8 +157,20 @@ private struct DummyResponse {
         """
     }
 
-    // 구매 확정 응답과 값을 일부러 다르게 둔다 — 잘못해서 purchases 로 나가면 TC 가 잡는다
+    // 구매 확정 응답과 값을 일부러 다르게 둔다 — 잘못해서 purchases 로 나가면 TC 가 잡는다.
+    // 이 엔드포인트만 user_plan 으로 감싼다
     private var transactionResponse: String {
+        return """
+        {
+            "user_plan": {
+                "id": "lifetime",
+                "topup_remaining": 7700
+            }
+        }
+        """
+    }
+
+    private var unwrappedTransactionResponse: String {
         return """
         {
             "id": "lifetime",
@@ -175,6 +202,13 @@ private struct DummyResponse {
                   resultJsonString: .success(self.transactionResponse)),
             .init(method: .get, endpoint: BillingAPIEndpoints.userPlan,
                   resultJsonString: .success(self.userPlanResponse))
+        ]
+    }
+
+    var unwrappedTransactionResponses: [StubRemoteAPI.Response] {
+        return [
+            .init(method: .post, endpoint: BillingAPIEndpoints.transactions,
+                  resultJsonString: .success(self.unwrappedTransactionResponse))
         ]
     }
 }
