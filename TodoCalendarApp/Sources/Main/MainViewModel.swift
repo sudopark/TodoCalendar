@@ -8,6 +8,7 @@
 //
 
 import Foundation
+import UIKit
 import Combine
 import Prelude
 import Optics
@@ -57,6 +58,7 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
     private let googleCalendarUsecase: any GoogleCalendarUsecase
     private let appleCalendarUsecase: any AppleCalendarUsecase
     private let eventSyncUsecase: any EventSyncUsecase
+    private let billingUsecase: any BillingUsecase
     var router: (any MainRouting)?
 
     init(
@@ -67,7 +69,8 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
         eventNotifyService: SharedEventNotifyService,
         googleCalendarUsecase: any GoogleCalendarUsecase,
         appleCalendarUsecase: any AppleCalendarUsecase,
-        eventSyncUsecase: any EventSyncUsecase
+        eventSyncUsecase: any EventSyncUsecase,
+        billingUsecase: any BillingUsecase
     ) {
         self.uiSettingUsecase = uiSettingUsecase
         self.temporaryUserDataMigrationUsecase = temporaryUserDataMigrationUsecase
@@ -77,7 +80,8 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
         self.googleCalendarUsecase = googleCalendarUsecase
         self.appleCalendarUsecase = appleCalendarUsecase
         self.eventSyncUsecase = eventSyncUsecase
-        
+        self.billingUsecase = billingUsecase
+
         self.internalBinding()
     }
     
@@ -117,8 +121,14 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
                 }
             })
             .store(in: &self.cancellables)
+
+        NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)
+            .sink(receiveValue: { [weak self] _ in
+                self?.billingUsecase.recoverUnfinishedTransactions()
+            })
+            .store(in: &self.cancellables)
     }
-    
+
 }
 
 
@@ -137,6 +147,8 @@ extension MainViewModelImple {
         self.bindEventTagColorMap()
         self.googleCalendarUsecase.prepare()
         self.appleCalendarUsecase.prepare()
+        self.billingUsecase.startObservingTransactions()
+        self.billingUsecase.recoverUnfinishedTransactions()
     }
     
     private func refreshViewAppearanceSettings() {

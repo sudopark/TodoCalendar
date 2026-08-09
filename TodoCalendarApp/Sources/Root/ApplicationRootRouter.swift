@@ -378,12 +378,6 @@ extension ApplicationRootRouter {
         }
         self.backgroundEventSyncUsecase.change(factory: self.usecaseFactory)
         self.aiJobRefreshUsecase.change(factory: self.usecaseFactory)
-
-        let billingUsecase = self.usecaseFactory.billingUsecase
-        billingUsecase.startObservingTransactions()
-        // 스트림이 콜드 스타트에 unfinished 를 안 흘려주는 경우가 있어 별도로 한 번 훑는다.
-        // 포그라운드 복귀 재시도는 #812
-        billingUsecase.recoverUnfinishedTransactions()
     }
     
     @MainActor
