@@ -6,6 +6,7 @@
 //  Copyright © 2026 com.sudo.park. All rights reserved.
 //
 
+import UIKit
 import SwiftUI
 import Combine
 import Extensions
@@ -23,11 +24,29 @@ import CommonPresentation
     var sharedText: String = ""
     var additionalInstruction: String = ""
 
+    var source: ShareCommandSource?
     var isPreparing: Bool = true
     var blockedMessage: String?
     var isSending: Bool = false
     var sentMessage: String?
     var failureMessage: String?
+
+    var isImageShared: Bool {
+        guard case .image = self.source else { return false }
+        return true
+    }
+
+    var imagePreview: Data? {
+        guard case .image(let preview) = self.source else { return nil }
+        return preview
+    }
+
+    // 이미지를 받았는데 뽑힌 텍스트가 없다 — 디코드 실패·Vision 실패·글자 없는 사진이 여기로 수렴한다.
+    // 유저가 직접 타이핑하기 시작하면 자연히 사라진다.
+    var imageTextNotFound: Bool {
+        guard self.isImageShared, !self.isPreparing else { return false }
+        return self.sharedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
 
     // 입력 화면을 대신해 안내 문구만 남는 종료 상태 — 제출 불가거나 제출 완료
     var terminalMessage: String? {
@@ -52,6 +71,11 @@ import CommonPresentation
         viewModel.sharedText
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] in self?.sharedText = $0 })
+            .store(in: &self.cancellables)
+
+        viewModel.source
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] in self?.source = $0 })
             .store(in: &self.cancellables)
 
         viewModel.isPreparing
@@ -141,8 +165,10 @@ struct ShareCommandView: View {
     // NavigationStack 대신 공용 시트 헤더를 써서 전부 토큰 색·폰트로 그린다.
     var body: some View {
         VStack(spacing: Metric.Spacing.regular) {
-            SheetHeaderView(title: "share.ai::title".localized())
-                .eventHandler(\.onClose, self.eventHandlers.close)
+            SheetHeaderView(
+                title: (self.state.isImageShared ? "share.ai::image::title" : "share.ai::title").localized()
+            )
+            .eventHandler(\.onClose, self.eventHandlers.close)
 
             self.contentBody
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -166,11 +192,20 @@ struct ShareCommandView: View {
     private var editingBody: some View {
         @Bindable var state = self.state
         return VStack(spacing: Metric.Spacing.regular) {
-            VStack(spacing: Metric.Spacing.regular) {
+            VStack(alignment: .leading, spacing: Metric.Spacing.regular) {
+
+                self.imagePreviewIfNeed
+
+                self.imageCaptionIfNeed
+
                 // 원문이 주 입력 — 앱 본체 AI 입력창과 같은 크기·여백으로 같은 기능임을 드러낸다
                 self.inputField(
                     text: $state.sharedText,
-                    placeholder: "share.ai::text::placeholder".localized(),
+                    placeholder: (
+                        self.state.isImageShared
+                            ? "share.ai::image::text::placeholder"
+                            : "share.ai::text::placeholder"
+                    ).localized(),
                     font: self.appearance.fontSet.size(16, weight: .regular).asFont,
                     lineLimit: 3...8
                 )
@@ -186,10 +221,20 @@ struct ShareCommandView: View {
             .opacity(self.state.isInputLocked ? 0.5 : 1.0)
             .overlay {
                 if self.state.isPreparing {
-                    LoadingCircleView(self.appearance.colorSet.accentAI.asColor)
-                        .frame(width: 32, height: 32)
+                    VStack(spacing: Metric.Spacing.small) {
+                        LoadingCircleView(self.appearance.colorSet.accentAI.asColor)
+                            .frame(width: 32, height: 32)
+
+                        if self.state.isImageShared {
+                            Text("share.ai::image::recognizing".localized())
+                                .font(self.appearance.fontSet.subNormal.asFont)
+                                .foregroundStyle(self.appearance.colorSet.text1.asColor)
+                        }
+                    }
                 }
             }
+
+            self.imageTextNotFoundIfNeed
 
             self.failureMessageIfNeed
 
@@ -228,6 +273,40 @@ struct ShareCommandView: View {
             RoundedRectangle(cornerRadius: Metric.Radius.chip)
                 .fill(self.appearance.colorSet.bg1.asColor)
         )
+    }
+
+    @ViewBuilder
+    private var imagePreviewIfNeed: some View {
+        if let previewData = self.state.imagePreview,
+           let image = UIImage(data: previewData) {
+            Image(uiImage: image)
+                .resizable()
+                .scaledToFit()
+                .frame(maxWidth: .infinity)
+                .frame(height: 140)
+                .clipShape(RoundedRectangle(cornerRadius: Metric.Radius.regular))
+        }
+    }
+
+    @ViewBuilder
+    private var imageCaptionIfNeed: some View {
+        if self.state.isImageShared {
+            Text("share.ai::image::text::caption".localized())
+                .font(self.appearance.fontSet.subNormal.asFont)
+                .foregroundStyle(self.appearance.colorSet.text1.asColor)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    @ViewBuilder
+    private var imageTextNotFoundIfNeed: some View {
+        if self.state.imageTextNotFound {
+            Text("share.ai::image::noTextFound".localized())
+                .font(self.appearance.fontSet.subNormal.asFont)
+                .foregroundStyle(self.appearance.colorSet.text1.asColor)
+                .multilineTextAlignment(.leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
     }
 
     @ViewBuilder

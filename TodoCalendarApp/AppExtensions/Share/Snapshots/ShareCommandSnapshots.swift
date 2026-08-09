@@ -7,6 +7,7 @@
 //
 
 import XCTest
+import UIKit
 import SwiftUI
 import Domain
 import Extensions
@@ -27,6 +28,16 @@ final class ShareCommandSnapshots: XCTestCase {
         let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")
         let setting = AppearanceSettings(calendar: calendar, defaultTagColor: tag)
         return ViewAppearance(setting: setting, isSystemDarkTheme: theme.isSystemDarkTheme)
+    }
+
+    @MainActor
+    private func makePreviewData() -> Data {
+        let renderer = UIGraphicsImageRenderer(size: .init(width: 1200, height: 800))
+        let image = renderer.image { context in
+            UIColor.systemTeal.setFill()
+            context.fill(CGRect(x: 0, y: 0, width: 1200, height: 800))
+        }
+        return SharedImagePreview.make(from: image.pngData()!)!
     }
 
     @MainActor
@@ -125,6 +136,50 @@ final class ShareCommandSnapshots: XCTestCase {
             .eventHandler(\.stateBinding) { state in
                 state.isPreparing = false
                 state.sentMessage = "share.ai::sent".localized()
+            }
+        }
+    }
+
+    @MainActor
+    func test_imageRecognizing() {
+        captureSnapshotPair(named: "imageRecognizing", layout: .fullScreen) { theme in
+            ShareCommandContainerView(
+                viewAppearance: self.makeAppearance(theme),
+                eventHandlers: ShareCommandViewEventHandler()
+            )
+            .eventHandler(\.stateBinding) { state in
+                state.source = .image(preview: self.makePreviewData())
+                state.isPreparing = true
+            }
+        }
+    }
+
+    @MainActor
+    func test_imageEditing() {
+        captureSnapshotPair(named: "imageEditing", layout: .fullScreen) { theme in
+            ShareCommandContainerView(
+                viewAppearance: self.makeAppearance(theme),
+                eventHandlers: ShareCommandViewEventHandler()
+            )
+            .eventHandler(\.stateBinding) { state in
+                state.source = .image(preview: self.makePreviewData())
+                state.isPreparing = false
+                state.sharedText = "9월 10일\n치과 예약 오후 3시"
+            }
+        }
+    }
+
+    @MainActor
+    func test_imageNoTextFound() {
+        captureSnapshotPair(named: "imageNoTextFound", layout: .fullScreen) { theme in
+            ShareCommandContainerView(
+                viewAppearance: self.makeAppearance(theme),
+                eventHandlers: ShareCommandViewEventHandler()
+            )
+            .eventHandler(\.stateBinding) { state in
+                state.source = .image(preview: self.makePreviewData())
+                state.isPreparing = false
+                state.sharedText = ""
             }
         }
     }
