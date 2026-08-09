@@ -553,7 +553,9 @@ extension AIAgentOrchestrationUsecaseImpleTests {
         expect.count = 2
         var done = AIJobResult.DoneResult()
         done.text = "완료"
-        let usecase = self.makeUsecaseWithCommandJob(self.dummyJob(.done(done)))
+        let usecase = self.makeUsecaseWithCommandJob(
+            self.dummyJob(.done(done), status: .running)
+        )
         usecase.reset()
         try? usecase.submit("회의")
         try await Task.sleep(for: .milliseconds(30))
@@ -564,6 +566,38 @@ extension AIAgentOrchestrationUsecaseImpleTests {
         // then
         #expect(states.last.map(self.stateName) == "idle")
         #expect(self.stubCommand.didCancelJobId == "job-1")
+    }
+
+    // job 조회가 한 번도 안 끝난 시점 — 생성 응답의 started 이벤트로 받아둔 jobId로 중지한다
+    @Test func usecase_reset_cancelsWithJobIdFromStartedEvent() async throws {
+        // given — started만 방출되고 job은 아직 없다
+        let usecase = self.makeUsecase()
+        usecase.reset()
+        try? usecase.submit("회의")
+        try await Task.sleep(for: .milliseconds(30))
+
+        // when
+        usecase.reset()
+
+        // then
+        #expect(self.stubCommand.didCancelJobId == "job-1")
+    }
+
+    // 결과 확인(acknowledge)도 reset을 타는데, 이미 끝난 job에 취소가 나가면 안 된다
+    @Test func usecase_whenJobFinished_resetDoesNotCancel() async throws {
+        // given
+        var done = AIJobResult.DoneResult()
+        done.text = "완료"
+        let usecase = self.makeUsecaseWithCommandJob(self.dummyJob(.done(done)))
+        usecase.reset()
+        try? usecase.submit("회의")
+        try await Task.sleep(for: .milliseconds(30))
+
+        // when
+        usecase.reset()
+
+        // then
+        #expect(self.stubCommand.didCancelJobId == nil)
     }
 
     @Test func usecase_decline_rejectsButDoesNotCancelOngoing() async throws {
@@ -733,14 +767,14 @@ private final class StubAICommandUsecase: AICommandUsecase, @unchecked Sendable 
     var didCancelJobId: String?
     var didProcessConfirmToken: String?
 
-    func processCommand(_ commandText: String) -> AnyPublisher<AIJob, any Error> {
+    func processCommand(_ commandText: String) -> AnyPublisher<AICommandProcessing, any Error> {
         self.didProcessCommand = commandText
-        return self.jobPublisher(self.stubCommandJob)
+        return self.processingPublisher(self.stubCommandJob)
     }
 
-    func processConfirmCommand(_ action: AIConfirmCommandAction) -> AnyPublisher<AIJob, any Error> {
+    func processConfirmCommand(_ action: AIConfirmCommandAction) -> AnyPublisher<AICommandProcessing, any Error> {
         self.didProcessConfirmToken = action.confirmToken
-        return self.jobPublisher(self.stubConfirmJob)
+        return self.processingPublisher(self.stubConfirmJob)
     }
     func rejectConfirmCommand(_ action: AIConfirmCommandAction) {
         self.didRejectParentJobId = action.parentJobId
@@ -748,12 +782,16 @@ private final class StubAICommandUsecase: AICommandUsecase, @unchecked Sendable 
     func cancelOngoingCommand(_ jobId: String) {
         self.didCancelJobId = jobId
     }
-    func restoreCommandifNeed() -> AnyPublisher<AIJob?, any Error> {
+    func restoreCommandifNeed() -> AnyPublisher<AICommandProcessing?, any Error> {
         self.didRestore = true
         if self.shouldFail {
             return Fail(error: RuntimeError("stub fail")).eraseToAnyPublisher()
         }
-        return Just(self.stubRestoreJob)
+        guard let job = self.stubRestoreJob else {
+            return Just(nil).setFailureType(to: (any Error).self).eraseToAnyPublisher()
+        }
+        return [.started(jobId: job.jobId), .job(job)].publisher
+            .map { Optional($0) }
             .setFailureType(to: (any Error).self)
             .eraseToAnyPublisher()
     }
@@ -767,12 +805,19 @@ private final class StubAICommandUsecase: AICommandUsecase, @unchecked Sendable 
         self.didClearProcessingCommandRecord = true
     }
 
-    private func jobPublisher(_ job: AIJob?) -> AnyPublisher<AIJob, any Error> {
+    // 실물과 같은 순서로 방출한다 — 생성 응답(jobId)이 먼저, 조회된 job이 뒤
+    var stubStartedJobId: String = "job-1"
+    private func processingPublisher(_ job: AIJob?) -> AnyPublisher<AICommandProcessing, any Error> {
         if self.shouldFail {
             return Fail(error: RuntimeError("stub fail")).eraseToAnyPublisher()
         }
-        guard let job else { return Empty().eraseToAnyPublisher() }
-        return Just(job).setFailureType(to: (any Error).self).eraseToAnyPublisher()
+        let started = AICommandProcessing.started(jobId: self.stubStartedJobId)
+        guard let job else {
+            return Just(started).setFailureType(to: (any Error).self).eraseToAnyPublisher()
+        }
+        return [started, .job(job)].publisher
+            .setFailureType(to: (any Error).self)
+            .eraseToAnyPublisher()
     }
 }
 
