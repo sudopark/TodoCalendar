@@ -94,10 +94,73 @@ extension AICommandUsecaseImpleTests {
 }
 
 
+// MARK: - 생성 응답 jobId 초기 방출
+
+extension AICommandUsecaseImpleTests {
+
+    // 폴링 주기를 길게 둬서 "생성은 됐지만 아직 한 번도 조회되지 않은" 구간을 만든다
+    private var pollingPolicyNotReachingFirstCheck: AICommandUsecaseImple.PollingPolicy {
+        return .init(checkInterval: 10, totalTimeout: 60)
+    }
+
+    @Test func usecase_processCommand_emitsStartedWithJobIdBeforeFirstCheck() async throws {
+        // given
+        let expect = expectConfirm("생성 응답 jobId가 첫 조회 전에 방출된다")
+        expect.timeout = .seconds(1)
+        let usecase = self.makeUsecase(
+            customPollingPolicy: self.pollingPolicyNotReachingFirstCheck
+        )
+
+        // when
+        let first = try await self.firstOutput(expect, for: usecase.processCommand("cmd"))
+
+        // then
+        guard case .started(let jobId) = try #require(first)
+        else { Issue.record("started 아님"); return }
+        #expect(jobId == "some_job")
+    }
+
+    @Test func usecase_processConfirmCommand_emitsStartedWithJobIdBeforeFirstCheck() async throws {
+        // given
+        let expect = expectConfirm("컨펌 생성 응답 jobId가 첫 조회 전에 방출된다")
+        expect.timeout = .seconds(1)
+        let usecase = self.makeUsecase(
+            customPollingPolicy: self.pollingPolicyNotReachingFirstCheck
+        )
+
+        // when
+        let first = try await self.firstOutput(expect, for: usecase.processConfirmCommand(.init()))
+
+        // then
+        guard case .started(let jobId) = try #require(first)
+        else { Issue.record("started 아님"); return }
+        #expect(jobId == "some_job")
+    }
+
+    @Test func usecase_processCommand_emitsStartedThenJobs() async throws {
+        // given
+        let expect = expectConfirm("started → job 순서")
+        expect.count = 3
+        expect.timeout = .seconds(1)
+        let usecase = self.makeUsecase(
+            customStubLoadJobs: [.dummyRunningJob, .dummyDoneJob]
+        )
+
+        // when
+        let outputs = try await self.outputs(expect, for: usecase.processCommand("cmd"))
+
+        // then
+        guard case .started = outputs.first else { Issue.record("첫 방출이 started 아님"); return }
+        #expect(outputs.map { $0.jobId } == ["some_job", "some_job", "some_job"])
+        #expect(outputs.dropFirst().allSatisfy { if case .job = $0 { true } else { false } })
+    }
+}
+
+
 // MARK: - process commmand
 
 extension AICommandUsecaseImpleTests {
-    
+
     @Test(arguments: [AIJob.dummyDoneJob, .dummyFailJob, .dummyConfirmJob])
     func usecase_processCommand(_ finalJob: AIJob) async throws {
         // given
@@ -111,7 +174,7 @@ extension AICommandUsecaseImpleTests {
         ])
         
         // when
-        let processing = usecase.processCommand("cmd")
+        let processing = usecase.processCommand("cmd").jobsOnly()
         let jobs = try await self.outputs(expect, for: processing)
         
         // then
@@ -128,7 +191,7 @@ extension AICommandUsecaseImpleTests {
         let usecase = self.makeUsecase()
         
         // when
-        let processing = usecase.processCommand("cmd")
+        let processing = usecase.processCommand("cmd").jobsOnly()
         let jobs = try await self.outputs(expect, for: processing)
         
         // then
@@ -151,7 +214,7 @@ extension AICommandUsecaseImpleTests {
         ])
 
         // when
-        let jobs = try await self.outputs(expect, for: usecase.processCommand("cmd"))
+        let jobs = try await self.outputs(expect, for: usecase.processCommand("cmd").jobsOnly())
 
         // then
         #expect(jobs.last?.status == .confirm)
@@ -173,7 +236,7 @@ extension AICommandUsecaseImpleTests {
         self.stubRepository.loadJobMocking = .success(.dummyRunningJob)
         
         // when
-        let processing = usecase.processCommand("cmd")
+        let processing = usecase.processCommand("cmd").jobsOnly()
         let jobs = try await self.outputs(expect, for: processing) {
             
             try await Task.sleep(for: .milliseconds(10))
@@ -204,7 +267,7 @@ extension AICommandUsecaseImpleTests {
         )
         
         // when
-        let processing = usecase.processCommand("cmd")
+        let processing = usecase.processCommand("cmd").jobsOnly()
         let jobs = try await self.outputs(expect, for: processing)
         
         // then
@@ -228,7 +291,7 @@ extension AICommandUsecaseImpleTests {
         )
         
         // when
-        let processing = usecase.processCommand("cmd")
+        let processing = usecase.processCommand("cmd").jobsOnly()
         let fail = try await self.failure(expect, for: processing)
         
         // then
@@ -249,7 +312,7 @@ extension AICommandUsecaseImpleTests {
         )
         
         // when
-        let processing = usecase.processCommand("cmd")
+        let processing = usecase.processCommand("cmd").jobsOnly()
         let fail = try await self.failure(expect, for: processing)
         
         // then
@@ -268,7 +331,7 @@ extension AICommandUsecaseImpleTests {
         let usecase = self.makeUsecase(shouldFailMakeJob: true)
         
         // when
-        let processing = usecase.processCommand("cmd")
+        let processing = usecase.processCommand("cmd").jobsOnly()
         let fail = try await self.failure(expect, for: processing)
         
         // then
@@ -297,7 +360,7 @@ extension AICommandUsecaseImpleTests {
         ])
 
         // when
-        let processing = usecase.processConfirmCommand(.init())
+        let processing = usecase.processConfirmCommand(.init()).jobsOnly()
         let jobs = try await self.outputs(expect, for: processing)
 
         // then
@@ -314,7 +377,7 @@ extension AICommandUsecaseImpleTests {
         let usecase = self.makeUsecase()
 
         // when
-        let processing = usecase.processConfirmCommand(.init())
+        let processing = usecase.processConfirmCommand(.init()).jobsOnly()
         let jobs = try await self.outputs(expect, for: processing)
 
         // then
@@ -339,7 +402,7 @@ extension AICommandUsecaseImpleTests {
         self.stubRepository.loadJobMocking = .success(.dummyRunningJob)
 
         // when
-        let processing = usecase.processConfirmCommand(.init())
+        let processing = usecase.processConfirmCommand(.init()).jobsOnly()
         let jobs = try await self.outputs(expect, for: processing) {
 
             try await Task.sleep(for: .milliseconds(10))
@@ -370,7 +433,7 @@ extension AICommandUsecaseImpleTests {
         )
 
         // when
-        let processing = usecase.processConfirmCommand(.init())
+        let processing = usecase.processConfirmCommand(.init()).jobsOnly()
         let jobs = try await self.outputs(expect, for: processing)
 
         // then
@@ -394,7 +457,7 @@ extension AICommandUsecaseImpleTests {
         )
 
         // when
-        let processing = usecase.processConfirmCommand(.init())
+        let processing = usecase.processConfirmCommand(.init()).jobsOnly()
         let fail = try await self.failure(expect, for: processing)
 
         // then
@@ -415,7 +478,7 @@ extension AICommandUsecaseImpleTests {
         )
 
         // when
-        let processing = usecase.processConfirmCommand(.init())
+        let processing = usecase.processConfirmCommand(.init()).jobsOnly()
         let fail = try await self.failure(expect, for: processing)
 
         // then
@@ -434,7 +497,7 @@ extension AICommandUsecaseImpleTests {
         let usecase = self.makeUsecase(shouldFailMakeConfirmJob: true)
 
         // when
-        let processing = usecase.processConfirmCommand(.init())
+        let processing = usecase.processConfirmCommand(.init()).jobsOnly()
         let fail = try await self.failure(expect, for: processing)
 
         // then
@@ -490,9 +553,9 @@ extension AICommandUsecaseImpleTests {
         )
         
         let firstJob = if isConfirm {
-            usecase.processCommand("cmd").first()
+            usecase.processCommand("cmd").jobsOnly().first()
         } else {
-            usecase.processConfirmCommand(.init()).first()
+            usecase.processConfirmCommand(.init()).jobsOnly().first()
         }
         
         let _ = try await firstJob.values.first(where: { _ in true })
@@ -508,7 +571,7 @@ extension AICommandUsecaseImpleTests {
         let usecase = try await self.makeUsecaseWithProcessingCmd(isConfirm: false)
         
         // when
-        let restore = usecase.restoreCommandifNeed()
+        let restore = usecase.restoreCommandifNeed().restoredJobsOnly()
         let jobs = try await self.outputs(expect, for: restore)
         
         // then
@@ -528,7 +591,7 @@ extension AICommandUsecaseImpleTests {
         let usecase = try await self.makeUsecaseWithProcessingCmd(isConfirm: true)
         
         // when
-        let restore = usecase.restoreCommandifNeed()
+        let restore = usecase.restoreCommandifNeed().restoredJobsOnly()
         let jobs = try await self.outputs(expect, for: restore)
         
         // then
@@ -550,7 +613,7 @@ extension AICommandUsecaseImpleTests {
             ServerErrorModel.dummy(.notFound)
         )
         // when
-        let restore = usecase.restoreCommandifNeed()
+        let restore = usecase.restoreCommandifNeed().restoredJobsOnly()
         let error = try await failure(expect, for: restore)
         
         // then
@@ -582,7 +645,9 @@ extension AICommandUsecaseImpleTests {
         let usecase = self.makeUsecaseWithRestoredJob(.dummyDoneJob)
 
         // when
-        let job = try await self.firstOutput(expect, for: usecase.restoreCommandifNeed())
+        let job = try await self.firstOutput(
+            expect, for: usecase.restoreCommandifNeed().restoredJobsOnly()
+        )
 
         // then
         #expect(job??.status == .done)
@@ -599,9 +664,9 @@ extension AICommandUsecaseImpleTests {
         )
         
         let firstJob = if isConfirm {
-            usecase.processCommand("cmd").first()
+            usecase.processCommand("cmd").jobsOnly().first()
         } else {
-            usecase.processConfirmCommand(.init()).first()
+            usecase.processConfirmCommand(.init()).jobsOnly().first()
         }
         
         let _ = try await firstJob.values.first(where: { _ in true })
@@ -659,5 +724,30 @@ private extension ServerErrorModel {
     static func dummy(_ code: ServerErrorModel.ErrorCode) -> ServerErrorModel {
         return .init()
             |> \.code .~ code
+    }
+}
+
+
+// MARK: - test helpers
+
+private extension Publisher where Output == AICommandProcessing {
+
+    func jobsOnly() -> AnyPublisher<AIJob, Failure> {
+        return self
+            .compactMap { if case .job(let job) = $0 { return job } else { return nil } }
+            .eraseToAnyPublisher()
+    }
+}
+
+private extension Publisher where Output == AICommandProcessing? {
+
+    // 복원 없음(nil)은 그대로 흘리고, started는 걸러 job만 남긴다
+    func restoredJobsOnly() -> AnyPublisher<AIJob?, Failure> {
+        let pick: (AICommandProcessing?) -> AIJob?? = { processing in
+            guard let processing else { return .some(nil) }
+            guard case .job(let job) = processing else { return nil }
+            return .some(job)
+        }
+        return self.compactMap(pick).eraseToAnyPublisher()
     }
 }

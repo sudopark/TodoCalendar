@@ -72,17 +72,19 @@ public final class AIAgentOrchestrationUsecaseImple: AIAgentOrchestrationUsecase
     private var voiceInputBindings = Set<AnyCancellable>()
     private var currentProcessingJobId: String?
 
-    private func startProcessing(_ jobPublisher: AnyPublisher<AIJob, any Error>) {
+    private func startProcessing(_ processing: AnyPublisher<AICommandProcessing, any Error>) {
         self.commandCancellable?.cancel()
-        self.commandCancellable = jobPublisher
+        self.commandCancellable = processing
             .sink(
                 receiveCompletion: { [weak self] completion in
                     if case .failure = completion {
+                        self?.currentProcessingJobId = nil
                         self?.subject.state.send(.failed(command: self?.currentCommand ?? "", reason: nil, errorCode: nil))
                     }
                 },
-                receiveValue: { [weak self] job in
-                    self?.currentProcessingJobId = job.jobId
+                receiveValue: { [weak self] processing in
+                    self?.currentProcessingJobId = processing.jobId
+                    guard case .job(let job) = processing else { return }
                     self?.handleJobResult(job)
                 }
             )
@@ -90,6 +92,10 @@ public final class AIAgentOrchestrationUsecaseImple: AIAgentOrchestrationUsecase
 
     private func handleJobResult(_ job: AIJob) {
         guard job.isFinish else { return }
+        // confirm은 유저 응답 대기라 아직 중지 대상이다 — 그 외 종료는 추적에서 뺀다
+        if job.status != .confirm {
+            self.currentProcessingJobId = nil
+        }
         self.triggerEventSyncIfNeeded(job.result)
         if job.status == .rejected || job.status == .canceled {
             self.subject.state.send(.idle)
@@ -314,13 +320,14 @@ extension AIAgentOrchestrationUsecaseImple {
                         self?.subject.state.send(.idle)
                     }
                 },
-                receiveValue: { [weak self] job in
+                receiveValue: { [weak self] processing in
                     guard let self else { return }
-                    guard let job else {
+                    guard let processing else {
                         self.subject.state.send(.idle)
                         return
                     }
-                    self.currentProcessingJobId = job.jobId
+                    self.currentProcessingJobId = processing.jobId
+                    guard case .job(let job) = processing else { return }
                     // 앱 밖에서 만들어진 job은 복원 시점에 아직 진행 중이다.
                     // handleJobResult는 종료 job만 다루므로 여기서 processing으로 올려야
                     // 진행 상태가 보이고 canSubmit 가드도 이 job을 인지한다.

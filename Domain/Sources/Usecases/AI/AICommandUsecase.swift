@@ -15,9 +15,9 @@ import Extensions
 
 public protocol AICommandUsecase: AnyObject, Sendable {
     
-    func processCommand(_ commandText: String) -> AnyPublisher<AIJob, any Error>
-    
-    func processConfirmCommand(_ action: AIConfirmCommandAction) -> AnyPublisher<AIJob, any Error>
+    func processCommand(_ commandText: String) -> AnyPublisher<AICommandProcessing, any Error>
+
+    func processConfirmCommand(_ action: AIConfirmCommandAction) -> AnyPublisher<AICommandProcessing, any Error>
 
     func rejectConfirmCommand(_ action: AIConfirmCommandAction)
 
@@ -25,7 +25,7 @@ public protocol AICommandUsecase: AnyObject, Sendable {
 
     func clearProcessingCommandRecord() async
 
-    func restoreCommandifNeed() -> AnyPublisher<AIJob?, any Error>
+    func restoreCommandifNeed() -> AnyPublisher<AICommandProcessing?, any Error>
 
     func refreshJobStatus(_ jobId: String)
 }
@@ -82,8 +82,8 @@ public final class AICommandUsecaseImple: AICommandUsecase, @unchecked Sendable 
 
 extension AICommandUsecaseImple {
     
-    public func processCommand(_ commandText: String) -> AnyPublisher<AIJob, any Error> {
-        
+    public func processCommand(_ commandText: String) -> AnyPublisher<AICommandProcessing, any Error> {
+
         let timeZone = self.currentIANATimeZone(); let repository = self.repository
 
         let makeJob: some Publisher<String, any Error> = Publishers.create(do: {
@@ -93,18 +93,11 @@ extension AICommandUsecaseImple {
             )
             return jobId
         })
-        
-        let waitJobUntilFinish = makeJob
-            .flatMap { [weak self] jobId in
-                return self?.checkJob(jobId) ?? Empty().eraseToAnyPublisher()
-            }
 
-        return waitJobUntilFinish
-            .handleClearProcessingCommand(repository)
-            .eraseToAnyPublisher()
+        return self.waitJobUntilFinish(makeJob)
     }
 
-    public func processConfirmCommand(_ action: AIConfirmCommandAction) -> AnyPublisher<AIJob, any Error> {
+    public func processConfirmCommand(_ action: AIConfirmCommandAction) -> AnyPublisher<AICommandProcessing, any Error> {
 
         let timeZone = self.currentIANATimeZone(); let repository = self.repository
 
@@ -116,13 +109,26 @@ extension AICommandUsecaseImple {
             return jobId
         })
 
-        let waitUntilFinish = makeConfirmJob
-            .flatMap { [weak self] jobId in
-                return self?.checkJob(jobId) ?? Empty().eraseToAnyPublisher()
-            }
+        return self.waitJobUntilFinish(makeConfirmJob)
+    }
 
-        return waitUntilFinish
-            .handleClearProcessingCommand(repository)
+    // 생성 응답의 jobId를 초기 이벤트로 먼저 내보낸다 — 조회로 job이 오기 전에도
+    // 소비자가 진행 중 job을 지목할 수 있어야 한다.
+    private func waitJobUntilFinish(
+        _ makeJobId: some Publisher<String, any Error>,
+        immediateCheck: Bool = false
+    ) -> AnyPublisher<AICommandProcessing, any Error> {
+
+        let repository = self.repository
+        return makeJobId
+            .flatMap { [weak self] jobId -> AnyPublisher<AICommandProcessing, any Error> in
+                guard let self else { return Empty().eraseToAnyPublisher() }
+                return self.checkJob(jobId, immediateCheck: immediateCheck)
+                    .handleClearProcessingCommand(repository)
+                    .map { AICommandProcessing.job($0) }
+                    .prepend(.started(jobId: jobId))
+                    .eraseToAnyPublisher()
+            }
             .eraseToAnyPublisher()
     }
     
@@ -210,21 +216,21 @@ extension AICommandUsecaseImple {
 
 extension AICommandUsecaseImple {
     
-    public func restoreCommandifNeed() -> AnyPublisher<AIJob?, any Error> {
+    public func restoreCommandifNeed() -> AnyPublisher<AICommandProcessing?, any Error> {
 
         let processingCmd = self.loadProcessingCommand()
 
         return processingCmd
-            .flatMap { [weak self] cmd -> AnyPublisher<AIJob?, any Error> in
+            .flatMap { [weak self] cmd -> AnyPublisher<AICommandProcessing?, any Error> in
                 guard let self, let cmd
                 else {
-                    return Just<AIJob?>(nil)
+                    return Just<AICommandProcessing?>(nil)
                         .setFailureType(to: (any Error).self)
                         .eraseToAnyPublisher()
                 }
 
-                return self.checkJob(cmd.jobId, immediateCheck: true)
-                    .handleClearProcessingCommand(self.repository)
+                let restoredJobId = Just(cmd.jobId).setFailureType(to: (any Error).self)
+                return self.waitJobUntilFinish(restoredJobId, immediateCheck: true)
                     .map { Optional($0) }
                     .eraseToAnyPublisher()
             }
