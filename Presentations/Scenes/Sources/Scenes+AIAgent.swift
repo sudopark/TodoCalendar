@@ -43,3 +43,22 @@ public protocol AIAgentKeyboardInputSceneBuilder: AnyObject {
     @MainActor
     func makeKeyboardInputScene() -> any AIAgentKeyboardInputScene
 }
+
+
+// MARK: - AIAgentImageCommandScene Interactable & Listenable
+
+public protocol AIAgentImageCommandSceneInteractor: AnyObject { }
+
+
+// MARK: - AIAgentImageCommandScene
+
+public protocol AIAgentImageCommandScene: Scene where Interactor == any AIAgentImageCommandSceneInteractor { }
+
+
+// MARK: - Builder
+
+public protocol AIAgentImageCommandSceneBuilder: AnyObject {
+
+    @MainActor
+    func makeImageCommandScene(imageData: Data) -> any AIAgentImageCommandScene
+}

@@ -28,6 +28,7 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
     let appUpdateCheckUsecase: any AppUpdateCheckUsecase
     let aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
     let billingUsecase: any BillingUsecase
+    let imageTextRecognizeService: any ImageTextRecognizeService = ImageTextRecognizeServiceImple()
     private let applicationBase: ApplicationBase
 
     init(
@@ -370,6 +371,7 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
     let appUpdateCheckUsecase: any AppUpdateCheckUsecase
     let aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
     let billingUsecase: any BillingUsecase
+    let imageTextRecognizeService: any ImageTextRecognizeService = ImageTextRecognizeServiceImple()
     private let applicationBase: ApplicationBase
 
     init(
