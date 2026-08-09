@@ -67,8 +67,12 @@ extension BillingRepositoryImple {
     public func postTransactionUpdate(signedTransaction: String) async throws -> BillingUserPlan {
         let body: [String: Any] = ["signed_transaction": signedTransaction]
         let json = try await self.requestJson(.post, BillingAPIEndpoints.transactions, parameters: body)
+        // 이 엔드포인트만 user_plan 으로 감싸 응답한다. 못 벗기면 빈 플랜으로 흘리지 않고 실패시킨다 —
+        // 매퍼가 throw 하지 않아 조용히 통과하면 보유 플랜이 지워지고 finish 까지 진행된다
+        guard let userPlan = json["user_plan"] as? [String: Any]
+        else { throw RuntimeError("invalid billing transaction response") }
         return BillingUserPlanMapper(
-            json: json, topupRemaining: json["topup_remaining"] as? Int
+            json: userPlan, topupRemaining: userPlan["topup_remaining"] as? Int
         ).userPlan
     }
 }

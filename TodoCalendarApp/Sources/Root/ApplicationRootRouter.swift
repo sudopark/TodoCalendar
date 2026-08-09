@@ -349,10 +349,14 @@ extension ApplicationRootRouter {
         }
     }
     
+    @MainActor
     private func changeUsecaseFactroy(
         by auth: Auth?
     ) {
-        // 새 팩토리를 세우기 전에 끊는다 — 둘이 잠깐이라도 공존하면 같은 JWS 가 중복 post 된다
+        // 새 팩토리를 세우기 전에 끊는다 — 둘이 잠깐이라도 공존하면 같은 JWS 가 중복 post 된다.
+        // 여기서 끊기는 건 usecase 의 소비자 Task 뿐이다 — service 의 생산자 listenerTask 는
+        // deinit 에서만 멈춘다. 소비자가 취소되면 단일 소비 AsyncStream 이 영구 종료돼
+        // 구 service 의 잔여 yield 는 받는 쪽 없이 버려진다
         self.usecaseFactory?.billingUsecase.stopObservingTransactions()
 
         if let auth = auth {
