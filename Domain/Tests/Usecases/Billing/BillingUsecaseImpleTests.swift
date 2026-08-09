@@ -387,3 +387,77 @@ extension BillingUsecaseImpleTests {
         #expect(weakUsecase == nil)
     }
 }
+
+
+// MARK: - 미완료 거래 조회·유저 요청 반영
+
+extension BillingUsecaseImpleTests {
+
+    @Test func usecase_hasUnfinishedTransactions_whenQueueEmpty_returnsFalse() async throws {
+        // given
+        let (usecase, _, _) = self.makeUsecase(unfinished: [])
+        // when
+        let hasUnfinished = await usecase.hasUnfinishedTransactions()
+        // then
+        #expect(hasUnfinished == false)
+    }
+
+    @Test func usecase_hasUnfinishedTransactions_whenQueueNotEmpty_returnsTrue() async throws {
+        // given
+        let pending = BillingSignedTransaction(
+            id: "tx:pending", productId: "plan.lifetime", jws: "jws:pending"
+        )
+        let (usecase, _, _) = self.makeUsecase(unfinished: [pending])
+        // when
+        let hasUnfinished = await usecase.hasUnfinishedTransactions()
+        // then
+        #expect(hasUnfinished == true)
+    }
+
+    @Test func usecase_applyUnfinishedTransactions_sendsAllToDelegationEndpoint() async throws {
+        // given
+        let first = BillingSignedTransaction(
+            id: "tx:first", productId: "plan.standard.monthly", jws: "jws:first"
+        )
+        let second = BillingSignedTransaction(
+            id: "tx:second", productId: "plan.lifetime", jws: "jws:second"
+        )
+        let (usecase, repository, service) = self.makeUsecase(unfinished: [first, second])
+        // when
+        let applied = try await usecase.applyUnfinishedTransactions()
+        // then
+        #expect(repository.didPostedTransactionUpdates == ["jws:first", "jws:second"])
+        #expect(service.didFinishedTransactionIds == ["tx:first", "tx:second"])
+        #expect(applied?.planId == .standard)
+    }
+
+    @Test func usecase_applyUnfinishedTransactions_whenQueueEmpty_returnsNilWithoutThrowing() async throws {
+        // given
+        let (usecase, repository, service) = self.makeUsecase(unfinished: [])
+        // when
+        let applied = try await usecase.applyUnfinishedTransactions()
+        // then
+        #expect(applied == nil)
+        #expect(repository.didPostedTransactionUpdates == [])
+        #expect(service.didFinishedTransactionIds == [])
+    }
+
+    @Test func usecase_applyUnfinishedTransactions_whenOneFails_throwsWithoutApplyingRest() async throws {
+        // given
+        let failing = BillingSignedTransaction(
+            id: "tx:bad", productId: "plan.lifetime", jws: "jws:bad"
+        )
+        let pending = BillingSignedTransaction(
+            id: "tx:pending", productId: "plan.lifetime", jws: "jws:pending"
+        )
+        let (usecase, repository, service) = self.makeUsecase(
+            unfinished: [failing, pending], failingJWSTokens: ["jws:bad"]
+        )
+        // when & then
+        await #expect(throws: (any Error).self) {
+            _ = try await usecase.applyUnfinishedTransactions()
+        }
+        #expect(repository.didPostedTransactionUpdates == ["jws:bad"])
+        #expect(service.didFinishedTransactionIds.isEmpty)
+    }
+}

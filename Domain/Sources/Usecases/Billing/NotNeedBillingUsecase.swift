@@ -39,6 +39,8 @@ public final class NotNeedBillingUsecase: BillingUsecase, Sendable {
     public func startObservingTransactions() { }
     public func stopObservingTransactions() { }
     public func recoverUnfinishedTransactions() { }
+    public func hasUnfinishedTransactions() async -> Bool { return false }
+    public func applyUnfinishedTransactions() async throws -> BillingUserPlan? { return nil }
 
     // 플랜 정보는 결제 기능이 아니다 — AI usage 응답도 같은 키를 채우므로
     // paywall 이 닫혀도 사용량 게이지는 플랜을 읽어야 한다
