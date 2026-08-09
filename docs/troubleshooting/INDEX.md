@@ -6,6 +6,8 @@
 
 <!-- 레코드는 아래에 최신순으로 추가 -->
 
+- [2026-08-09 중지를 눌러도 서버에 cancel이 안 나가고, 중지한 job의 결과가 뒤늦게 뜬다](2026-08-09-ai-job-stop-not-reaching-server.md) — AIAgent / fixed / 중지 안됨, 중지 후 완료 푸시, 복귀 시 진행중 안보임, 결과 시트 뒤늦게 노출, Combine throttle 지연
+
 - [2026-08-08 run-all-tests.sh가 컴파일 실패를 PASSED로 보고한다](2026-08-08-run-all-tests-reports-compile-failure-as-passed.md) — Infra / fixed / PASSED 오보, 컴파일 에러인데 통과, TEST FAILED 미감지, Executed 0 tests
 
 - [2026-08-07 비반복 이벤트를 롱탭했는데 컨텍스트 메뉴에 "이번만 삭제"가 뜬다](2026-08-07-day-event-list-context-menu-shows-wrong-remove-action.md) — Event / fixed / 이번만 삭제 오노출, 메뉴 깜빡임, 탭 무반응, 셀 목록 재방출
