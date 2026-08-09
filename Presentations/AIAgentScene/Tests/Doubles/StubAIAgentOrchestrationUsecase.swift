@@ -18,6 +18,7 @@ final class StubAIAgentOrchestrationUsecase: AIAgentOrchestrationUsecase, @unche
     let usageSubject = CurrentValueSubject<AIAgentUsage, Never>(.init(input: 0, output: 0, limit: 0))
     let recognizingTextSubject = PassthroughSubject<String, Never>()
     let voiceLevelSubject = PassthroughSubject<Float, Never>()
+    let speechPermissionDeniedSubject = PassthroughSubject<Void, Never>()
     private(set) var didPrepare = false
     private(set) var didEnterVoiceInput = false
     private(set) var didFinishVoiceInput = false
@@ -83,5 +84,8 @@ final class StubAIAgentOrchestrationUsecase: AIAgentOrchestrationUsecase, @unche
     }
     var voiceLevel: AnyPublisher<Float, Never> {
         self.voiceLevelSubject.eraseToAnyPublisher()
+    }
+    var speechPermissionDenied: AnyPublisher<Void, Never> {
+        self.speechPermissionDeniedSubject.eraseToAnyPublisher()
     }
 }

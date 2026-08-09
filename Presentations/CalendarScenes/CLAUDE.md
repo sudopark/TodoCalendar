@@ -137,6 +137,7 @@ graph LR
 |---|---|---|
 | `EventListCellView` (`Common/EventListCell/`) | 모든 이벤트(할일/일정/휴일/구글)를 렌더링하는 이벤트 셀 공용 뷰 — 완료 처리·상세 이동·more 액션 콜백 포함. 동반 UI 모델 `EventCellViewModel` 프로토콜도 공유 | DayEventListView, ForemostEventView, UncompletedTodoView |
 | `Common/AIAgentSignInConfirm` | AI 기능 미로그인 시 로그인 유도 confirm 다이얼로그 팩토리 (`ConfirmDialogInfo.aiAgentNeedSignIn`, DayEventList·Calendar VM 공유, #768) | DayEventListViewModelImple, CalendarViewModelImple |
+| `Common/AIAgentSpeechPermissionConfirm` | 마이크·음성인식 권한 거부 시 설정 이동 confirm 다이얼로그 팩토리 (`ConfirmDialogInfo.aiAgentSpeechPermissionDenied`, #809) | CalendarViewModelImple |
 
 주의: `ForemostEventView`·`UncompletedTodoView`는 `CalendarPaper/` 폴더에 있으나 실제 소비는 `DayEventList/` — 배치·사용처 불일치 알려짐 (#659 리스트업 16번 메모).
 

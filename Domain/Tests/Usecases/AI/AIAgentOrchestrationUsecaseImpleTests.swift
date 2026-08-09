@@ -942,6 +942,53 @@ extension AIAgentOrchestrationUsecaseImpleTests {
         }
     }
 
+    @Test func usecase_permissionDenied_notifiesSpeechPermissionDenied() async throws {
+        // given
+        let usecase = self.makeUsecaseInIdle()
+        usecase.enterVoiceInput()
+        let expect = expectConfirm("권한 거부 안내")
+        // when
+        let notified = try await self.outputs(expect, for: usecase.speechPermissionDenied) {
+            self.stubSpeech.recognizeResultSubject.send(
+                .failure(SpeechRecognizeAuthError(micNotAvail: .denied))
+            )
+        }
+        // then
+        #expect(notified.count == 1)
+    }
+
+    @Test func usecase_permissionRestricted_doesNotNotifySpeechPermissionDenied() async throws {
+        // given
+        let usecase = self.makeUsecaseInIdle()
+        usecase.enterVoiceInput()
+        let expect = expectConfirm("제한 상태는 안내 없음")
+        expect.count = 0
+        expect.timeout = .milliseconds(100)
+        // when
+        let notified = try await self.outputs(expect, for: usecase.speechPermissionDenied) {
+            self.stubSpeech.recognizeResultSubject.send(
+                .failure(SpeechRecognizeAuthError(speechNotAvail: .restricted))
+            )
+        }
+        // then
+        #expect(notified.isEmpty)
+    }
+
+    @Test func usecase_recognizeFailedWithoutPermissionIssue_doesNotNotifySpeechPermissionDenied() async throws {
+        // given
+        let usecase = self.makeUsecaseInIdle()
+        usecase.enterVoiceInput()
+        let expect = expectConfirm("일반 실패는 안내 없음")
+        expect.count = 0
+        expect.timeout = .milliseconds(100)
+        // when
+        let notified = try await self.outputs(expect, for: usecase.speechPermissionDenied) {
+            self.stubSpeech.recognizeResultSubject.send(.failure(RuntimeError("speech fail")))
+        }
+        // then
+        #expect(notified.isEmpty)
+    }
+
     // 일반 인식 실패 → state.idle
     @Test func usecase_recognizeFailed_stateBecomesIdle() async throws {
         // given

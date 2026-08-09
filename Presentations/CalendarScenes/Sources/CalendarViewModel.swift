@@ -277,6 +277,19 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
                 self?.aiAgentOrchestrationUsecase.stopInput()
             })
             .store(in: &self.cancellables)
+
+        self.aiAgentOrchestrationUsecase.speechPermissionDenied
+            .sink(receiveValue: { [weak self] _ in
+                self?.showSpeechPermissionSettingGuide()
+            })
+            .store(in: &self.cancellables)
+    }
+
+    private func showSpeechPermissionSettingGuide() {
+        let info = ConfirmDialogInfo.aiAgentSpeechPermissionDenied { [weak self] in
+            self?.router?.openSystemSetting()
+        }
+        self.router?.showConfirm(dialog: info)
     }
 
     private static func isVoiceListeningPhase(_ state: AIAgentState) -> Bool {

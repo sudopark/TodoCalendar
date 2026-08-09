@@ -551,6 +551,9 @@
 "aiAgent::retry" = "Retry";
 "aiAgent::needSignIn::title" = "Sign in required";
 "aiAgent::needSignIn::message" = "Sign in to use AI quick input.";
+"aiAgent::speechPermissionDenied::title" = "Permission required";
+"aiAgent::speechPermissionDenied::message" = "Allow microphone and speech recognition access in Settings to use voice input.";
+"aiAgent::speechPermissionDenied::confirm" = "Open Settings";
 "aiAgent::title" = "AI Quick Input";
 "aiAgent::keyboard::stop" = "Stop";
 "aiAgent::keyboard::send" = "Send";
