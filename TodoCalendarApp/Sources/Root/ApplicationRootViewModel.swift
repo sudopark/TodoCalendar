@@ -64,10 +64,6 @@ final class ApplicationRootViewModelImple: @unchecked Sendable {
     private var cancellables: Set<AnyCancellable> = []
 }
 
-private enum Constant {
-    static let processingJobRefreshInterval: TimeInterval = 30
-}
-
 
 // MARK: - handle root routing
 
@@ -191,13 +187,11 @@ extension ApplicationRootViewModelImple {
             })
             .store(in: &self.cancellables)
 
-        // didBecomeActive는 제어센터·알림센터 여닫기나 권한 다이얼로그 dismiss로도 매번 온다.
+        // 제어센터·알림센터 여닫기로도 매번 오지만 상한을 두지 않는다 — throttle은 창에 갇힌
+        // 이벤트를 버리지 않고 창 끝까지 미뤄서, 백그라운드 복귀의 job 갱신이 최대 창 길이만큼
+        // 늦어졌다 (#795). 진행 중 job이 없으면 refreshProcessingJobIfNeeded가 로컬 조회로
+        // 끝나 잦은 호출의 비용도 낮다.
         NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)
-            .throttle(
-                for: .seconds(Constant.processingJobRefreshInterval),
-                scheduler: DispatchQueue.main,
-                latest: false
-            )
             .sink(receiveValue: { [weak self] _ in
                 self?.handleDidBecomeActive()
             })
