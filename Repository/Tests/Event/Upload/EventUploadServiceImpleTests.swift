@@ -9,6 +9,8 @@
 import Testing
 import SQLiteService
 import Combine
+import Prelude
+import Optics
 import Domain
 import Extensions
 import UnitTestHelpKit
@@ -45,8 +47,19 @@ final class EventUploadServiceImpleTests: LocalTestable {
         ])
         
         let todoLocal = TodoLocalStorageImple(sqliteService: self.sqliteService)
+        let repeatingTodo = TodoEvent(uuid: "repeating-todo", name: "name")
+            |> \.time .~ .at(100)
+            |> \.repeating .~ pure(
+                EventRepeating(
+                    repeatingStartTime: 100,
+                    repeatOption: EventRepeatingOptions.EveryDay()
+                )
+                |> \.repeatingEndOption .~ .count(10)
+            )
+            |> \.repeatingTurn .~ 4
         try await todoLocal.updateTodoEvents([
-            .init(uuid: "todo", name: "name")
+            .init(uuid: "todo", name: "name"),
+            repeatingTodo
         ])
         let done = DoneTodoEvent(uuid: "done", name: "name", originEventId: "origin", doneTime: Date())
         try await todoLocal.saveDoneTodoEvent(done)
@@ -361,7 +374,25 @@ extension EventUploadServiceImpleTests {
             #expect(self.spyRemote.didEditTodoIds == ["todo"])
         }
     }
-    
+
+    // uploading task - update repeating todo: 반복 회차도 함께 업로드
+    @Test func service_updateRepeatingTodo_uploadRepeatingTurn() async throws {
+        try await self.runTestWithOpenClose("upload_tc13_todo_turn") {
+            // given
+            let service = try await self.makeService(with: [
+                .init(timestamp: 100, dataType: .todo, uuid: "repeating-todo", isRemovingTask: false)
+            ])
+
+            // when
+            try await service.resume()
+            try await service.waitUntilUploadingEnd()
+
+            // then
+            #expect(self.spyRemote.didEditTodoIds == ["repeating-todo"])
+            #expect(self.spyRemote.didEditTodoParams?.repeatingTurn == 4)
+        }
+    }
+
     // uploading task - delete schedule
     @Test func service_deleteSchedule() async throws {
         try await self.runTestWithOpenClose("upload_tc14_sc") {
@@ -487,6 +518,7 @@ private final class PrivateStubRemote: @unchecked Sendable {
     var didEditTagIds: [String] = []
     var didRemoveTodoIds: [String] = []
     var didEditTodoIds: [String] = []
+    var didEditTodoParams: TodoEditParams?
     var didRemoveScheduleIds: [String] = []
     var didEditScheduleIds: [String] = []
     var didEditEventDetailIds: [String] = []
@@ -531,6 +563,7 @@ extension PrivateStubRemote: TodoRemote {
     func updateTodoEvent(_ eventId: String, _ params: TodoEditParams) async throws -> TodoEvent {
         self.deleteOrUpdateIds.append(eventId)
         self.didEditTodoIds.append(eventId)
+        self.didEditTodoParams = params
         return .init(uuid: eventId, name: params.name ?? "")
     }
     

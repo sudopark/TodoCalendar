@@ -162,6 +162,7 @@ extension EventUploadServiceImple {
             |> \.eventTagId .~ todo.eventTagId
             |> \.time .~ todo.time
             |> \.repeating .~ todo.repeating
+            |> \.repeatingTurn .~ todo.repeatingTurn
             |> \.notificationOptions .~ todo.notificationOptions
         _ = try await self.todoRemote.updateTodoEvent(todoId, params)
     }
