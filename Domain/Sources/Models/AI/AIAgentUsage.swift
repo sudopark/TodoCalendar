@@ -15,7 +15,6 @@ public struct AIAgentUsage: Sendable {
     public let inputTokens: Int
     public let outputTokens: Int
     public let dailyLimit: Int
-    // 서버가 credit 단위로 집계한 사용량. 미배포 응답엔 없어 옵셔널
     public var creditsUsed: Int?
     // 일일 한도 리셋 시각 (UTC 자정)
     public var resetsAt: Date?
@@ -36,7 +35,6 @@ public struct AIAgentUsage: Sendable {
 
 public extension AIAgentUsage {
 
-    // 서버가 credit 집계를 안 내려주는 구간(미배포)에선 토큰 합으로 폴백
     var usedCredits: Int { self.creditsUsed ?? (self.inputTokens + self.outputTokens) }
 
     // 한도 소진 여부 — usedRatio 는 1.0 클램프라 초과를 구분 못 해 별도 파생 (#763)

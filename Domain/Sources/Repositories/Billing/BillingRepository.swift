@@ -20,7 +20,5 @@ public protocol BillingRepository: AnyObject, Sendable {
     // 구매 반영 후 발효 플랜을 돌려준다 — 별도 usage 재조회가 필요 없다
     func postPurchase(signedTransaction: String) async throws -> BillingUserPlan
 
-    // 앱 밖에서 발견한 트랜잭션(갱신·환불·가족공유·승인통과·미완료 잔여)을 서버에 위임한다.
-    // 종류 판별과 처리 필요 여부는 전부 서버가 하고, 앱은 200 을 "확인됨" 으로만 읽는다
     func postTransactionUpdate(signedTransaction: String) async throws -> BillingUserPlan
 }

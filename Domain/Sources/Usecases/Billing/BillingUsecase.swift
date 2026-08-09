@@ -27,20 +27,10 @@ public protocol BillingUsecase: AnyObject, Sendable {
     @discardableResult
     func refreshUserPlan() async throws -> BillingUserPlan
 
-    // 로그인 세션에 묶여 기동한다. 여기서 처리하는 건 StoreKit.Transaction.updates 뿐이다 —
-    // 미완료 거래 복구는 트리거도 목적도 달라 아래 recoverUnfinishedTransactions 가 맡는다.
-    //
-    // startObservingTransactions·stopObservingTransactions·recoverUnfinishedTransactions
-    // 는 옵저빙 상태를 락 없는 플래그로 지킨다 — 셋 다 메인에서만 부른다
     func startObservingTransactions()
 
-    // 로그아웃·팩토리 교체 시. 이전 세션 리스너가 살아 있으면 같은 JWS 가 중복 post 된다.
-    // transactionUpdates 는 단일 소비 AsyncStream 이라, stop 후 같은 인스턴스에 startObservingTransactions
-    // 를 다시 불러도 재기동되지 않는다 — 새 세션은 항상 새 usecase 인스턴스로 만든다
     func stopObservingTransactions()
 
-    // 서버 반영 전에 앱이 죽어 finish 되지 않은 트랜잭션을 재전송한다.
-    // 한 건이 영구 실패해도 나머지는 진행한다. 재호출·stop 시 이전 시도는 취소된다
     func recoverUnfinishedTransactions()
 
     var currentUserPlan: AnyPublisher<BillingUserPlan, Never> { get }
@@ -135,10 +125,6 @@ extension BillingUsecaseImple {
         return userPlan
     }
 
-    // 앱이 뒤늦게 발견한 트랜잭션 — 종류를 판별하지 않고 서버에 위임한다.
-    // 200 을 "서버가 확인했다" 로 읽고 그때만 finish 한다.
-    // 서버 원장 키가 관측(transactionId + 회수 여부) 기준 멱등이라, 옵저빙 스트림과
-    // recoverUnfinishedTransactions 가 같은 트랜잭션을 각각 집어 두 번 보내도 안전하다
     private func delegateAndFinish(
         _ transaction: BillingSignedTransaction
     ) async throws -> BillingUserPlan {
@@ -146,8 +132,6 @@ extension BillingUsecaseImple {
             signedTransaction: transaction.jws
         )
         await self.appStoreService.finishTransaction(id: transaction.id)
-        // 로그아웃은 shared store 를 비운 뒤 옵저빙을 끊는다. 그 사이 응답이 도착하면
-        // 이전 유저의 플랜이 비워진 store 에 다시 써져 다음 세션까지 남는다
         guard !Task.isCancelled else { return userPlan }
         self.updateSharedUserPlan(userPlan)
         return userPlan
@@ -161,11 +145,6 @@ extension BillingUsecaseImple {
         )
     }
 
-    // 서버 원장 키가 관측(transactionId + 회수 여부) 기준 멱등이라 전건 재제출이 안전하다.
-    // 순차 await 이라 for 루프가 필요하다 — 마지막 반영 결과가 최신 상태.
-    // recoverUnfinishedTransactions 와 달리 여기는 fail-fast 가 의도다 — restorePurchases 는
-    // 유저가 직접 누른 액션이라 실패가 화면에 그대로 노출되고 재시도도 유저가 다시 누르면 되므로,
-    // 앞 건 실패를 숨기고 뒤 건만 반영하는 게 오히려 혼란스럽다
     private func applyEach(
         _ transactions: [BillingSignedTransaction]
     ) async throws -> BillingUserPlan? {
@@ -200,8 +179,6 @@ extension BillingUsecaseImple {
         // 앱 밖 갱신·환불·가족공유·승인대기 통과가 들어오는 유일한 경로
         let updates = self.appStoreService.transactionUpdates
         self.observingTask = Task { [weak self] in
-            // 루프 본문에서만 self 를 잡는다 — 끝나지 않는 스트림을 strong self 로 돌면
-            // deinit 이 영영 오지 않아 deinit 의 cancel 이 죽은 코드가 된다
             for await transaction in updates {
                 guard let self else { return }
                 do {

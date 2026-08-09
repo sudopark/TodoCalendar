@@ -66,7 +66,6 @@ public struct AIJob: Sendable {
 
 // MARK: - AICommandProcessing
 
-// 커맨드 처리 진행 상태. 생성 응답으로 jobId를 먼저 받고, 그 뒤 조회로 job이 따라온다.
 public enum AICommandProcessing: Sendable {
     case started(jobId: String)
     case job(AIJob)
@@ -174,8 +173,6 @@ extension AIJobResult {
 
 extension AIJobDataMutation.DataType {
 
-    // 델타 event sync(eventTag/todo/schedule)로 커버되는 dataType.
-    // done은 동반 todo mutation으로 반영, event_detail은 상세화면 on-demand 로드라 제외.
     public var requiresEventSync: Bool {
         switch self {
         case .todo, .schedule, .tag: return true

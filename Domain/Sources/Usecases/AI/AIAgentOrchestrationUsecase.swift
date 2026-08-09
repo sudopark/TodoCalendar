@@ -96,7 +96,6 @@ public final class AIAgentOrchestrationUsecaseImple: AIAgentOrchestrationUsecase
 
     private func handleJobResult(_ job: AIJob) {
         guard job.isFinish else { return }
-        // confirm은 유저 응답 대기라 아직 중지 대상이다 — 그 외 종료는 추적에서 뺀다
         if job.status != .confirm {
             self.currentProcessingJobId = nil
         }
@@ -128,8 +127,6 @@ public final class AIAgentOrchestrationUsecaseImple: AIAgentOrchestrationUsecase
         }
     }
 
-    // job이 데이터를 바꿨으면(sync 대상 mutation) 델타 sync 1회.
-    // 실제 재조회는 sync→syncEnd→CalendarViewModel.refreshEvents 체인이 처리.
     private func triggerEventSyncIfNeeded(_ result: AIJobResult?) {
         guard let result,
               result.mutations.contains(where: { $0.dataType.requiresEventSync })
@@ -257,8 +254,6 @@ extension AIAgentOrchestrationUsecaseImple {
         self.startProcessing(self.commandUsecase.processCommand(trimmed))
     }
 
-    // 검증 순서: 빈 텍스트 → 원문 길이 → 부가지시 길이 → busy.
-    // 서버가 같은 조건으로 400을 내는데, 사전에 걸러 무엇을 줄여야 하는지 알린다.
     public func submitImageCommand(text: String, additionalInstruction: String?) throws {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty
@@ -285,9 +280,6 @@ extension AIAgentOrchestrationUsecaseImple {
         )
     }
 
-    // 키보드 입력은 idle뿐 아니라 음성/키보드 입력 중(listening)에서도 진입 가능.
-    // 음성 → 키보드 전환 시 stopListening + .listening(.keyboard) 정식 전환이 돼야
-    // 닫기 복귀(enterVoiceInput)가 canEnterVoiceInput 가드를 통과한다.
     private var canEnterKeyboardInput: Bool {
         switch self.subject.state.value {
         case .none, .idle, .listening: return true
@@ -295,8 +287,6 @@ extension AIAgentOrchestrationUsecaseImple {
         }
     }
 
-    // submit은 입력 대기(idle) + 음성/키보드 입력 중(listening)에서 허용.
-    // 키보드 입력은 .listening(.keyboard) 상태로 send하므로 idle-only면 씹힌다.
     private var canSubmit: Bool {
         switch self.subject.state.value {
         case .none, .idle, .listening: return true
@@ -362,8 +352,6 @@ extension AIAgentOrchestrationUsecaseImple {
         self.currentProcessingJobId = nil
     }
 
-    // 로그아웃 — 폴링·음성 인식을 끊고 로컬 복원 근거를 지운다. 서버 cancel은 부르지 않는다.
-    // async인 이유는 호출자(앱 루트)가 DB를 닫기 전에 삭제 완료를 기다려야 하기 때문.
     public func handleSignedOut() async {
         self.stopTrackingJob()
         self.resetVoiceBinding()
@@ -377,7 +365,6 @@ extension AIAgentOrchestrationUsecaseImple {
         self.commandCancellable = self.commandUsecase.restoreCommandifNeed()
             .sink(
                 receiveCompletion: { [weak self] completion in
-                    // 복원은 유저가 낸 커맨드가 아니다 — 실패를 결과 화면으로 띄우지 않는다
                     if case .failure = completion {
                         self?.subject.state.send(.idle)
                     }
@@ -406,13 +393,8 @@ extension AIAgentOrchestrationUsecaseImple {
         self.usageUsecase.refresh()
     }
 
-    // 푸시가 특정 job을 지목해 도착. 추적 중인 job일 때만 즉시 조회.
-    // 콜드 스타트(구독 없음)는 CalendarViewModel.prepare() → restoreIfNeeded()가 커버한다.
-    // 미추적 job(인텐트·확장이 앱 밖에서 만든 job)의 푸시는 저장소 복원으로 이어받는다 —
-    // 앱이 이미 포그라운드라 refreshProcessingJobIfNeeded(willEnterForeground 트리거)를 못 타는 경우를 메운다.
     public func handleJobStatusChanged(_ jobId: String) {
         guard self.currentProcessingJobId == jobId else {
-            // 추적 중이 아닌 job — 앱 밖(Siri 인텐트·공유 확장)에서 만들어졌다
             self.restoreIfNeededWhenIdle()
             return
         }
@@ -425,9 +407,6 @@ extension AIAgentOrchestrationUsecaseImple {
         self.commandUsecase.refreshJobStatus(jobId)
     }
 
-    // 복원 근거는 앱 메모리가 아니라 저장소의 ProcessingAICommand다 — 여기서 볼 것은
-    // "지금 화면을 덮어도 되는가" 하나뿐이다. 미방출(prepare의 복원 진행 중)·입력 중·
-    // 결과 표시 중이면 보고 있던 화면이 덮인다. refreshProcessingJobIfNeeded의 .idle 분기와 동일 가드.
     private func restoreIfNeededWhenIdle() {
         switch self.subject.state.value {
         case .idle:
@@ -437,7 +416,6 @@ extension AIAgentOrchestrationUsecaseImple {
         }
     }
 
-    // 포그라운드 복귀 — 백그라운드에서 폴링 Timer가 멈춘 공백을 메운다.
     public func refreshProcessingJobIfNeeded() {
         switch self.subject.state.value {
         case .processing:
@@ -485,8 +463,6 @@ extension AIAgentOrchestrationUsecaseImple {
 
 // MARK: - NotNeedAIAgentOrchestrationUsecase
 
-// AI 기능은 로그인 유저 전용 — 미로그인 세션엔 composition root가 이걸 주입한다.
-// 소비자는 로그인 여부를 모른 채 그대로 호출하고 여기서 전부 무동작으로 끝난다.
 public final class NotNeedAIAgentOrchestrationUsecase: AIAgentOrchestrationUsecase, Sendable {
 
     public init() { }
@@ -518,12 +494,10 @@ public final class NotNeedAIAgentOrchestrationUsecase: AIAgentOrchestrationUseca
     public func enterImageInput() { }
     public func stopInput() { }
 
-    // 진입점이 로그인 가드로 막혀 있어 도달하지 않는다. 도달하면 가드가 뚫린 것이라 드러낸다.
     public func submit(_ text: String) throws {
         throw RuntimeError(key: "AIAgent.needSignIn", "ai agent needs sign in")
     }
 
-    // 진입점이 로그인 가드로 막혀 있어 도달하지 않는다. 도달하면 가드가 뚫린 것이라 드러낸다.
     public func submitImageCommand(text: String, additionalInstruction: String?) throws {
         throw RuntimeError(key: "AIAgent.needSignIn", "ai agent needs sign in")
     }
