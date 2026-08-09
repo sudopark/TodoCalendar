@@ -11,7 +11,6 @@ import SwiftUI
 
 // MARK: - SheetHeaderView
 
-// 시트 공통 상단 헤더: 타이틀(좌) + 닫기(우). 시트들의 룩앤핏을 한 곳에서 통일.
 public struct SheetHeaderView: View {
 
     @Environment(ViewAppearance.self) private var appearance
@@ -36,7 +35,6 @@ public struct SheetHeaderView: View {
         .padding(.top, spacing: .regular)
     }
 
-    // 리퀴드 글래스는 iOS 26 전용이라 #available로 분기, 하위 버전은 CloseButton.
     @ViewBuilder
     private var closeButton: some View {
         if #available(iOS 26.0, *) {

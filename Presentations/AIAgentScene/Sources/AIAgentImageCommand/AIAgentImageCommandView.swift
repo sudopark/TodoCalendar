@@ -49,7 +49,6 @@ import CommonPresentation
             .store(in: &self.cancellables)
     }
 
-    // 인식 결과는 최초 1회만 채운다 — 이후 방출이 유저 편집을 덮어쓰면 안 된다
     private func seedTextIfNeeded(_ stage: AIAgentImageCommandStage) {
         guard case .editing(let recognized) = stage, self.didSeedText == false
         else { return }
@@ -144,7 +143,6 @@ private struct AIAgentImageCommandView: View {
         }
         .eventHandler(\.outsideTap, self.eventHandler.close)
         .onDisappear {
-            // 전송이 아니라 그냥 닫은(드래그·닫기 버튼) 경우 → 음성 입력으로 복귀
             if !self.state.actionTaken { self.eventHandler.dismissByGesture() }
         }
     }

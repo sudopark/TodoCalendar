@@ -10,7 +10,6 @@ import SwiftUI
 import CommonPresentation
 
 
-// 상세 화면 2곳(EventDetail·DoneTodo)이 공유하는 장소 라벨(이름+주소+xmark 아이콘).
 struct LandmarkLabelView: View {
 
     @Environment(ViewAppearance.self) private var appearance

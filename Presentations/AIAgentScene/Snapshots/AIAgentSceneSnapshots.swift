@@ -30,7 +30,6 @@ final class AIAgentSceneSnapshots: XCTestCase {
         return ViewAppearance(setting: setting, isSystemDarkTheme: theme.isSystemDarkTheme)
     }
 
-    // AIAgentKeyboardInputView는 private — public interface인 ContainerView로 캡처 (기본 empty 상태)
     @MainActor
     func test_keyboardInput() {
         captureSnapshotPair(named: "keyboardInput", layout: .fullScreen) { theme in
@@ -117,7 +116,6 @@ final class AIAgentSceneSnapshots: XCTestCase {
         }
     }
 
-    // 플랜 칩 + top-up 잔량 + 하향 예약이 전부 노출된 상태 (#720)
     @MainActor
     func test_commandDoneWithPlanInfo() {
         captureSnapshotPair(named: "commandDoneWithPlanInfo", layout: .fullScreen) { theme in
@@ -169,7 +167,6 @@ final class AIAgentSceneSnapshots: XCTestCase {
         }
     }
 
-    // 여러 줄 + 인라인 마크다운 응답 — 말풍선 내부 스크롤·서식·아이콘 상단 정렬 검증 (#766)
     @MainActor
     func test_commandDoneMultilineMessage() {
         captureSnapshotPair(named: "commandDoneMultilineMessage", layout: .fullScreen) { theme in

@@ -38,7 +38,6 @@ final class AIAgentKeyboardInputViewModelImple: AIAgentKeyboardInputViewModel, @
         self.billingUsecase = billingUsecase
     }
 
-    // 시트 진입 시 usage 최신화 — 갱신 트리거는 presentation 소유 (#713)
     func prepare() {
         self.aiAgentOrchestrationUsecase.loadUsage()
     }

@@ -18,7 +18,6 @@ import SnapshotTestHelpKit
 
 final class EventDetailSceneSnapshots: XCTestCase {
 
-    // 고정 epoch — Date() 사용 시 재기록마다 라벨이 달라져 git 비교가 무효화된다
     private let start: TimeInterval = 1_751_900_400
     private let end: TimeInterval = 1_751_904_000
 
@@ -43,7 +42,6 @@ final class EventDetailSceneSnapshots: XCTestCase {
                 .init(self.start, .current), .init(self.end, .current)
             )
             state.selectedRepeat = "some repeat"
-            // MKMapView(LandmarkMapView) 라이브 렌더링은 크래시·타일 비결정성 → customPlace로 고정
             state.selectedPlace = .customPlace("경복궁")
             return EventDetailView()
                 .environment(state)
@@ -141,7 +139,6 @@ final class EventDetailSceneSnapshots: XCTestCase {
                     .init(year: 2025, month: 7, day: 10, hour: 12, minute: 30, second: 1)
                 ))!
             ]
-            // DatePicker 결정성 고정 — Date() 대신 고정 epoch
             state.suggestCustomOptionTime = Date(timeIntervalSince1970: self.start)
             state.notificaitonPermissionDenied = true
             return SelectEventNotificationTimeView()
@@ -155,13 +152,11 @@ final class EventDetailSceneSnapshots: XCTestCase {
     func test_selectEventRepeatOption() {
         captureSnapshotPair(named: "selectEventRepeatOption", layout: .fullScreen) { theme in
             let state = SelectEventRepeatOptionViewState()
-            // 반복 시작시각 텍스트 결정성 고정 — 고정 epoch + Asia/Seoul
             let fixedDate = Date(timeIntervalSince1970: self.start)
             state.repeatStartTimeText = fixedDate.text(
                 "eventDetail.repeating.starttime:form".localized(),
                 timeZone: TimeZone(identifier: "Asia/Seoul")!
             )
-            // id는 UUID로 생성돼 리터럴로 지정 불가 — 인스턴스를 먼저 만들고 그 id를 선택 상태로 사용
             let selectedOption = SelectRepeatingOptionModel("option2", nil)
             state.optionList = [
                 [.init("some", nil)],
@@ -181,7 +176,6 @@ final class EventDetailSceneSnapshots: XCTestCase {
             let appearance = self.makeAppearance(theme)
             let state = SelectMapAppDialogViewState()
             state.supportMapApps = [.apple, .google]
-            // BottomSlideView 바깥 딤 영역이 투명해 다크에서 형태 확인 불가 → bg1 백드롭
             return ZStack {
                 appearance.colorSet.bg1.asColor.ignoresSafeArea()
                 SelectMapAppDialogView()
@@ -199,7 +193,6 @@ final class EventDetailSceneSnapshots: XCTestCase {
             state.name = "삼일절"
             state.dateText = "2025년 3월 1일 금요일"
             state.ddayText = "D-Day"
-            // countryModel은 RemoteImageView(원격 리소스) 렌더를 유발해 결정성 위반 → 미설정
             return HolidayEventDetailView()
                 .environment(state)
                 .environment(HolidayEventDetailViewEventHandler())
@@ -211,7 +204,6 @@ final class EventDetailSceneSnapshots: XCTestCase {
     func test_todoEventGuide() {
         captureSnapshotPair(named: "todoEventGuide", layout: .fullScreen) { theme in
             let appearance = self.makeAppearance(theme)
-            // BottomSlideView 바깥 딤 영역이 투명해 다크에서 형태 확인 불가 → bg1 백드롭
             return ZStack {
                 appearance.colorSet.bg1.asColor.ignoresSafeArea()
                 TodoEventGuideView(appearance: appearance)
@@ -223,7 +215,6 @@ final class EventDetailSceneSnapshots: XCTestCase {
     func test_foremostEventGuide() {
         captureSnapshotPair(named: "foremostEventGuide", layout: .fullScreen) { theme in
             let appearance = self.makeAppearance(theme)
-            // BottomSlideView 바깥 딤 영역이 투명해 다크에서 형태 확인 불가 → bg1 백드롭
             return ZStack {
                 appearance.colorSet.bg1.asColor.ignoresSafeArea()
                 ForemostEventGuideView(appearance: appearance)

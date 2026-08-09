@@ -10,8 +10,6 @@ import SwiftUI
 import CommonPresentation
 
 
-// 상세 화면 4곳(EventDetail·Google·Apple·DoneTodo)이 공유하는 시간 텍스트 라벨(연/일/시각).
-// dayLineLimit: Apple 상세는 기존에 lineLimit이 없었음 — 픽셀 불변 보존용 파라미터.
 struct EventTimeTextView: View {
 
     @Environment(ViewAppearance.self) private var appearance

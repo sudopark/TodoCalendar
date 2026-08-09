@@ -62,12 +62,6 @@ final class AIAgentCommandViewModelImple: AIAgentCommandViewModel, @unchecked Se
         self.orchestrationUsecase = orchestrationUsecase
         self.billingUsecase = billingUsecase
 
-        // paywall에서 구매가 성공하면 showFullScreen이 .overFullScreen이라 dismiss해도 이 화면의
-        // onAppear가 다시 안 뜬다 — 게이지·dailyLimit이 구 값 그대로 남는다. 신규 Listener 없이,
-        // 이미 구독 중인 currentUserPlan 릴레이에 얹어 플랜이 바뀔 때마다 usage를 재조회한다.
-        // dropFirst로 화면 진입 시점의 초기 seeding은 건너뛴다 — 안 그러면 진입마다 불필요한
-        // usage 호출이 나간다. 순수 query(currentUserPlan 프로퍼티)와 이 side effect를 분리해
-        // CQS를 지킨다(#739)
         self.billingUsecase.currentUserPlan
             .dropFirst()
             .sink { [weak self] _ in self?.orchestrationUsecase.loadUsage() }
@@ -80,7 +74,6 @@ final class AIAgentCommandViewModelImple: AIAgentCommandViewModel, @unchecked Se
 
 extension AIAgentCommandViewModelImple {
 
-    // 시트 진입 시 usage 최신화 — 갱신 트리거는 presentation 소유 (#713)
     func prepare() {
         self.orchestrationUsecase.loadUsage()
     }
@@ -119,8 +112,6 @@ extension AIAgentCommandViewModelImple {
         self.router?.closeScene()
     }
 
-    // 한도 초과 실패 화면의 "플랜 보기" — 노출 여부는 View가 errorCode·isPaywallAvailable로
-    // 이미 걸렀으므로 여기선 라우팅만 위임 (#739)
     func showPlans() {
         self.router?.routeToPaywall()
     }
@@ -175,7 +166,6 @@ extension AIAgentCommandViewModelImple {
             .eraseToAnyPublisher()
     }
 
-    // 세션 중 불변 플래그라 publisher가 아닌 스냅샷 Bool로 노출 (DayEventListViewModelImple.isAIAgentEnabled 선례, #739)
     var isPaywallAvailable: Bool {
         return FeatureFlag.isEnable(.billingPaywall)
     }

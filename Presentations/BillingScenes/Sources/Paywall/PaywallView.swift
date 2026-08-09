@@ -90,8 +90,6 @@ final class PaywallViewEventHandler: Observable {
 
     func bind(_ viewModel: any PaywallViewModel) {
         self.onAppear = viewModel.prepare
-        // 재시도 버튼도 prepare()와 같은 로드를 다시 태운다 — onAppear와 동일 메서드지만
-        // 유발 지점(생명주기 vs 유저 탭)이 달라 별도 클로저로 이름을 분리한다 (#739)
         self.retry = viewModel.prepare
         self.selectPlan = viewModel.selectPlan(_:)
         self.purchase = viewModel.purchase
@@ -142,9 +140,6 @@ private struct PaywallView: View {
     @Environment(PaywallViewState.self) private var state
     @Environment(PaywallViewEventHandler.self) private var eventHandlers
 
-    // 유저 플랜이 확인돼야 paywall을 그린다 — screenState가 .ready가 아니면 본문(플랜 카드·
-    // CTA·고지문)은 일절 그리지 않고 전면 로딩/에러로 대체한다. 헤더(닫기 버튼)는 게이트와
-    // 무관하게 항상 노출해 유저가 언제든 나갈 수 있게 한다 (#739)
     var body: some View {
         VStack(spacing: 0) {
             SheetHeaderView(title: "billing::paywall::title".localized())
@@ -248,8 +243,6 @@ private struct PaywallView: View {
 
     // MARK: - 선택 플랜 기능 섹션
 
-    // selectedPlanDetail == nil 은 "아직 안 불러옴"·"로드 실패"·"구매 가능 플랜 없음"을 겸하지
-    // 않는다 — catalogState 로 먼저 로딩/실패를 가르고, loaded 안에서만 상세/폴백을 가른다 (#739)
     @ViewBuilder
     private var featureSection: some View {
         switch self.state.catalogState {
@@ -298,7 +291,6 @@ private struct PaywallView: View {
                     .foregroundStyle(self.appearance.colorSet.text2.asColor)
             }
         } else if self.state.cellModels.contains(where: { $0.isCovered == false }) {
-            // 구매 가능해야 할 카드가 있는데도 선택된 게 없다 — 스토어 조회가 실패해 가격이 없는 상태
             Text("billing::paywall::disclosure::storeUnavailable".localized())
                 .font(self.appearance.fontSet.subNormal.asFont)
                 .foregroundStyle(self.appearance.colorSet.text2.asColor)

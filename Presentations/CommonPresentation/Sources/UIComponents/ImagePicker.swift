@@ -30,7 +30,6 @@ public enum ImagePickSource: Sendable, Equatable {
     /// 접근이 이미 막힌 상태. notDetermined는 시스템이 피커를 띄우며 직접 묻기 때문에 여기 해당하지 않는다.
     public var isAccessDenied: Bool {
         switch self {
-        // PHPicker는 별도 프로세스에서 돌아 앱이 라이브러리 권한을 갖지 않는다
         case .photoLibrary: return false
         case .camera:
             let status = AVCaptureDevice.authorizationStatus(for: .video)
@@ -112,7 +111,6 @@ extension ImagePicker: PHPickerViewControllerDelegate {
             return
         }
 
-        // loadDataRepresentation 콜백은 백그라운드 큐다 — 소비측 계약을 메인으로 고정한다.
         provider.loadDataRepresentation(
             forTypeIdentifier: UTType.image.identifier
         ) { data, _ in

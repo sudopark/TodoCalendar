@@ -138,8 +138,6 @@ extension DayEventListRouter {
         }
     }
 
-    // 권한이 거부된 채로 카메라 피커를 띄우면 시스템이 다시 묻지 않아 검은 화면만 올라온다.
-    // 어느 쪽으로 닫든 onCancel로 이미지 진입 전 상태를 되돌려야 .listening(.image)에 갇히지 않는다.
     private func showAccessDeniedGuide(onCancel: @escaping @Sendable () -> Void) {
         let info = ConfirmDialogInfo()
             |> \.title .~ "aiAgent::image::camera::denied::title".localized()

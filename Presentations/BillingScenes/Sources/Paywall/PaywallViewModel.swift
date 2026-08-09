@@ -21,15 +21,11 @@ struct PaywallPlanCellModel: Equatable {
 
     let planId: BillingPlanId
     let name: String
-    // 스토어 조회 실패 시 nil — 화면이 안내 문구로 대체하고 구매를 막는다
     let priceText: String?
     // "/월" 같은 주기 꼬리표. 1회 결제·주기 불명이면 nil
     let periodText: String?
     let metricText: String
-    // 정확히 지금 쓰고 있는 플랜 — "이용 중" 배지 표시 전용. 구매 가능 여부 판정에는 안 쓴다
     let isOwned: Bool
-    // 지금 보유한 플랜이 이 플랜과 같거나 상위 등급이라 구매가 불필요함(BillingPlanId.covers)
-    // — lifetime 보유자에게 standard 카드가 구매 가능으로 뜨는 걸 막는 판정이 여기 있다 (#739)
     let isCovered: Bool
     let isRecommended: Bool
 
@@ -47,8 +43,6 @@ struct PaywallPlanDetailModel: Equatable {
 
 // MARK: - 카탈로그 로딩 상태
 
-// selectedPlanDetail == nil 하나로 "아직 안 불러옴"·"로드 실패"·"구매 가능 플랜 없음"을 겸하지
-// 않기 위한 명시 상태. View 가 이 값으로 세 갈래(loading/failed/loaded)를 가른다 (#739)
 enum PaywallCatalogState: Equatable {
     case loading
     case failed
@@ -58,19 +52,12 @@ enum PaywallCatalogState: Equatable {
 
 // MARK: - 화면 렌더 게이트
 
-// 유저 플랜 조회 상태 — currentPlanId(SharedDataStore 미러링)만으로는 "이번 prepare()에서
-// refreshUserPlan()이 성공했는지"를 구분할 수 없다(과거 캐시된 값일 수 있어서). 화면 렌더
-// 게이트 전용으로 별도 축을 둔다 (#739)
 enum PaywallUserPlanLoadState: Equatable {
     case loading
     case failed
     case loaded
 }
 
-// 화면 전체 렌더 게이트 — userPlanState가 loaded여야만 본문(플랜 카드·CTA·고지문)을 그린다.
-// catalogState(카탈로그 축)는 유저 플랜이 확인된 뒤에만 의미가 있어 .ready 안에 실린다.
-// 두 축을 mutable var로 손으로 합치지 않고 CombineLatest로 선언적으로 합성한다
-// (여러 상태 합성은 선언적으로 — presentations-rules.md §5, #739)
 enum PaywallScreenState: Equatable {
     case loading
     case userPlanLoadFailed
@@ -112,21 +99,14 @@ final class PaywallViewModelImple: PaywallViewModel, @unchecked Sendable {
 
     private struct Subject {
         let catalogState = CurrentValueSubject<PaywallCatalogState, Never>(.loading)
-        // 화면 렌더 게이트 축 — prepare()의 refreshUserPlan() 결과만 반영. currentPlanId와
-        // 별개다(과거 캐시값과 이번 조회 성공을 구분해야 해서, #739)
         let userPlanState = CurrentValueSubject<PaywallUserPlanLoadState, Never>(.loading)
-        // billingUsecase.currentUserPlan(비동기 스트림)을 동기로 들여다볼 수 있게 로컬 미러링
-        // — selectPlan()/purchase() 같은 command가 "지금 보유 플랜이 뭔지"를 즉시 참조해야 한다
         let currentPlanId = CurrentValueSubject<BillingPlanId?, Never>(nil)
-        // 유저가 명시적으로 고른 플랜. nil이면 defaultSelection(첫 구매가능 셀)이 대신한다
         let userSelectedPlanId = CurrentValueSubject<BillingPlanId?, Never>(nil)
         let isPurchasing = CurrentValueSubject<Bool, Never>(false)
     }
     private let subject = Subject()
     private var cancellables: Set<AnyCancellable> = []
 
-    // catalogState 가 .loaded 가 아니면(로딩/실패) 구매 대상 오퍼링이 없다 — 두 곳(command 의
-    // 동기 조회, publisher 합성)이 같은 판정을 쓰도록 한 곳에 모은다
     private func currentOfferings(_ state: PaywallCatalogState) -> [BillingPlanOffering] {
         guard case .loaded(let offerings) = state else { return [] }
         return offerings
@@ -146,9 +126,6 @@ final class PaywallViewModelImple: PaywallViewModel, @unchecked Sendable {
 
 extension PaywallViewModelImple {
 
-    // 유저 플랜 재조회(refreshUserPlan)와 카탈로그 조회(loadPlanOfferings)를 동시에 태운다.
-    // 전자가 화면 전체 렌더 게이트(screenState)이고 후자는 게이트 통과 후에만 의미가 있는
-    // 하위 축이라 서로 값을 참조하지 않는 독립 실행 — async let으로 병렬화 (#739)
     func prepare() {
         self.subject.userPlanState.send(.loading)
         self.subject.catalogState.send(.loading)
@@ -160,8 +137,6 @@ extension PaywallViewModelImple {
         }
     }
 
-    // 실패해도 router.showError로 알리지 않는다 — 전면 에러 상태(screenState)가 이미 실패를
-    // 드러내므로 토스트·알림까지 겹치면 중복 통지다 (#739)
     private func loadUserPlan() async {
         do {
             try await self.billingUsecase.refreshUserPlan()
@@ -173,8 +148,6 @@ extension PaywallViewModelImple {
 
     private func loadCatalog() async {
         do {
-            // 여기서 catch 하는 건 서버 카탈로그 요청(loadPlans) 실패다 — StoreKit 상품 조회
-            // 실패는 loadPlanOfferings 내부(try?)가 이미 삼켜 product만 nil로 온다
             let offerings = try await self.billingUsecase.loadPlanOfferings()
             self.subject.catalogState.send(.loaded(offerings))
         } catch {
@@ -238,8 +211,6 @@ extension PaywallViewModelImple {
             guard let self else { return }
             defer { self.subject.isPurchasing.send(false) }
             do {
-                // 플랜 반영 자체는 currentUserPlan 릴레이가 자동 처리(#739) — 여기선 유저 피드백만.
-                // 버튼을 눌러도 화면에 아무 변화가 없으면 먹었는지 멈췄는지 유저가 알 수 없다
                 let restored = try await self.billingUsecase.restorePurchases()
                 self.router?.showToast(
                     restored != nil
@@ -288,16 +259,11 @@ extension PaywallViewModelImple {
         return self.catalogStatePublisher
     }
 
-    // userPlanState(화면 렌더 게이트)와 catalogState(하위 축)를 한 곳에서 순수 합성한다.
-    // 두 subject를 mutable var로 손으로 갱신·수동 통지하지 않고 CombineLatest로 — 어느 축이
-    // 바뀌든 자동 재계산돼 통지 누락이 없다 (presentations-rules.md §5, #739)
     var screenState: AnyPublisher<PaywallScreenState, Never> {
         return Publishers.CombineLatest(self.subject.userPlanState, self.catalogStatePublisher)
             .map { [weak self] userPlanState, catalogState -> PaywallScreenState in
                 self?.resolveScreenState(userPlanState: userPlanState, catalogState: catalogState) ?? .loading
             }
-            // catalogState가 바뀌어도 userPlanState가 loaded가 아니면 결과값(.loading/.userPlanLoadFailed)은
-            // 그대로다 — 같은 값 연속 방출로 다운스트림이 헛도는 걸 막는다 (catalogStatePublisher와 동일 근거)
             .removeDuplicates()
             .eraseToAnyPublisher()
     }
@@ -340,22 +306,14 @@ extension PaywallViewModelImple {
         return self.subject.isPurchasing.eraseToAnyPublisher()
     }
 
-    // prepare() 가 이미 .loading 인 상태에서 다시 .loading 을 보낼 수 있다(재시도 대비) —
-    // 같은 값 연속 방출로 다운스트림(cellModels 등)이 헛도는 걸 막는 단일 지점
     private var catalogStatePublisher: AnyPublisher<PaywallCatalogState, Never> {
         return self.subject.catalogState.removeDuplicates().eraseToAnyPublisher()
     }
 
-    // SharedDataStore.put은 값이 같아도 항상 재통지한다(dedupe 없음) — refreshUserPlan()이
-    // 매 prepare()마다 같은 플랜을 재확인만 해도 currentUserPlan이 다시 방출되고, 그 미러(subject.
-    // currentPlanId)도 같은 값을 재전송한다. 이 값을 그대로 CombineLatest에 흘리면 cellModels 등이
-    // 값 변화 없이도 재계산·재방출된다 — 여기서 한 번 걸러 다운스트림엔 실제 변화만 전달한다 (#739)
     private var currentPlanIdPublisher: AnyPublisher<BillingPlanId?, Never> {
         return self.subject.currentPlanId.removeDuplicates().eraseToAnyPublisher()
     }
 
-    // cellModels/selectedPlanId 등 여러 publisher 가 "로드된 오퍼링 배열"만 필요로 해서
-    // catalogState 에서 그 부분만 순수하게 뽑아 재사용한다 (loading/failed 는 빈 배열)
     private var offeringsPublisher: AnyPublisher<[BillingPlanOffering], Never> {
         return self.catalogStatePublisher
             .map { [weak self] in self?.currentOfferings($0) ?? [] }
@@ -368,7 +326,6 @@ extension PaywallViewModelImple {
 
 extension PaywallViewModelImple {
 
-    // userPlanState/catalogState 합성 순수 함수 — CombineLatest.map이 이 함수 하나만 부른다
     private func resolveScreenState(
         userPlanState: PaywallUserPlanLoadState, catalogState: PaywallCatalogState
     ) -> PaywallScreenState {
@@ -382,10 +339,8 @@ extension PaywallViewModelImple {
     private func makeCellModels(
         currentPlanId: BillingPlanId?, offerings: [BillingPlanOffering]
     ) -> [PaywallPlanCellModel] {
-        // 미배포·미로그인 상태는 free 로 취급 — free 는 아무 유료 플랜도 커버하지 않는다
         let effectiveCurrentId = currentPlanId ?? .free
         return offerings
-            // productId가 nil인 플랜(무료)은 구매 대상이 아니라 카드로 내지 않는다
             .filter { $0.plan.productId != nil }
             .map { offering in
                 PaywallPlanCellModel(
@@ -397,7 +352,6 @@ extension PaywallViewModelImple {
                         .localized(with: offering.plan.dailyLimit.formatted()),
                     isOwned: offering.plan.id == currentPlanId,
                     isCovered: effectiveCurrentId.covers(offering.plan.id),
-                    // 지금은 standard 고정 — 서버가 추천 플래그를 내려주게 되면 이 조건이 그 값으로 바뀐다
                     isRecommended: offering.plan.id == .standard
                 )
             }
@@ -417,21 +371,11 @@ extension PaywallViewModelImple {
     ) -> String {
         let effectiveId = planId ?? .free
         guard let plan = offerings.first(where: { $0.plan.id == effectiveId })?.plan else {
-            // 카탈로그를 아직 못 불러왔다 — 왼쪽 칩이 이미 플랜 이름을 그리므로
-            // 여기서 이름을 다시 반환하면 "[Standard] Standard" 로 중복 표시된다
             return ""
         }
         return "billing::paywall::current::description".localized(with: plan.dailyLimit.formatted())
     }
 
-    // 유저가 명시 선택한 게 있으면 그걸, 없으면 구매 가능한 첫 셀을 기본 선택으로 — 이 함수가
-    // 유일한 소스다. selectedPlanId publisher(리액티브)와 purchase()(동기 command) 양쪽이 재사용해
-    // "기본 선택 규칙"이 두 곳에 중복되지 않는다
-    //
-    // userSelected 는 선택 "시점"에만 검증된다(selectPlan(_:) 의 isPurchasable 가드) — 그 뒤 복원·
-    // 가족공유·다른 기기 구매 등으로 보유 플랜이 올라오면 선택은 그대로인데 더 이상 구매 대상이
-    // 아닐 수 있다. 매번 현재 cells 기준으로 재검증해야 CTA 활성·purchase() 가드가 최신 상태를
-    // 따른다 — 안 그러면 이미 커버된 플랜을 다시 청구하게 된다 (C1, #739)
     private func resolvedSelectedPlanId(
         userSelected: BillingPlanId?, currentPlanId: BillingPlanId?, offerings: [BillingPlanOffering]
     ) -> BillingPlanId? {
@@ -463,8 +407,6 @@ extension PaywallViewModelImple {
         )
     }
 
-    // kind 가 nil 인 건 "1회 결제"가 아니라 "스토어 조회 실패"다 — oneTime 으로 떨어뜨리면
-    // 구독 상품인데 사실과 다른 결제 조건이 표시된다. product 가 없을 때도 같은 이유로 여기로 온다
     private func disclosureText(for kind: BillingProductKind?) -> String {
         guard let kind else {
             return "billing::paywall::disclosure::storeUnavailable".localized()
@@ -496,8 +438,6 @@ extension PaywallViewModelImple {
         return "billing::paywall::cta::subscribe".localized(with: planName)
     }
 
-    // 이 배열이 앞으로 늘어나는 자리다. 혜택 항목이 추가되면 여기에만 붙는다 — 화면 구조는 안 바뀐다.
-    // 서버가 기능 키 배열을 주게 되면 이 함수가 그걸 받아 문자열로 변환하는 형태로 바뀐다.
     private func features(of plan: BillingPlan) -> [String] {
         return [
             "billing::paywall::feature::dailyCredits".localized(with: plan.dailyLimit.formatted()),

@@ -277,7 +277,6 @@ extension SettingItemListViewModelImple {
     var sectionModels: AnyPublisher<[any SettingSectionModelType], Never> {
 
         let transform: (AccountInfo?, DeviceInfo?, Bool) -> [any SettingSectionModelType] = { account, device, isUpdateAvailable in
-            // 미로그인·플래그 off 둘 다 진입점을 숨긴다 — 미로그인 숨김은 이 항목이 유일한 예외 선례 (#739)
             let showsBillingPlan = account != nil && FeatureFlag.isEnable(.billingPaywall)
             let baseSectionItems: [SettingItemModel] = [
                 .init(.appearance),

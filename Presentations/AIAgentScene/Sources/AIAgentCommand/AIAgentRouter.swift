@@ -42,7 +42,6 @@ extension AIAgentRouter {
         }
     }
 
-    // 한도 초과 실패 화면의 "플랜 보기" — 전체화면으로 열어 시트 위에도 뜨게 한다 (#739)
     func routeToPaywall() {
         Task { @MainActor in
             let next = self.paywallSceneBuilder.makePaywallScene()
