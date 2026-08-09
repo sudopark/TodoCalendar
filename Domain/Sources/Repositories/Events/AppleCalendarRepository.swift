@@ -14,7 +14,6 @@ import Combine
 
 public protocol AppleCalendarRepository: Sendable {
 
-    // 캐시 데이터를 먼저 방출 → 이어 EventKit에서 refresh한 데이터 방출 후 완료
     func loadCalendarTags() -> AnyPublisher<[AppleCalendar.Tag], any Error>
 
     func loadEvents(

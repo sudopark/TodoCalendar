@@ -10,7 +10,6 @@ import Foundation
 
 public enum AIUsageGuideLink {
 
-    // 전용 사용법 페이지 제작 전까지 기존 도움말 페이지로 연결 (#768 후속에서 교체)
     public static let koPath = HelpLink.koPath
     public static let enPath = HelpLink.enPath
 

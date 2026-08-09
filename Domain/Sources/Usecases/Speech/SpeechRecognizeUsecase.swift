@@ -71,7 +71,6 @@ extension SpeechRecognizeUsecaseImple {
 
         guard !self.subject.isRecognizing.value else { return }
 
-        // 권한 대기 중인 이전 start가 있으면 그것부터 접는다 — 살려두면 bind·start가 두 번 돈다
         self.startTask?.cancel()
         self.startTask = Task { [weak self] in
             guard let self else { return }
@@ -81,7 +80,6 @@ extension SpeechRecognizeUsecaseImple {
                 guard !Task.isCancelled else { return }
                 self.bindService()
                 try self.service.start()
-                // start가 도는 동안 들어온 중지도 반영한다 — 안 그러면 마이크만 켜진 채 남는다
                 guard !Task.isCancelled else {
                     self.service.stop()
                     self.serviceBinding = []
@@ -204,7 +202,6 @@ extension SpeechRecognizeUsecaseImple {
 
     public func finishListening() {
         guard self.subject.isRecognizing.value else {
-            // 아직 안 켜진 세션은 접기만 한다 — 살려두면 뒤늦은 인식이 커맨드로 전송된다
             self.stopListening()
             return
         }

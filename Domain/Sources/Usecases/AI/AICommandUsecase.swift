@@ -142,8 +142,6 @@ extension AICommandUsecaseImple {
         return self.waitJobUntilFinish(makeConfirmJob)
     }
 
-    // 생성 응답의 jobId를 초기 이벤트로 먼저 내보낸다 — 조회로 job이 오기 전에도
-    // 소비자가 진행 중 job을 지목할 수 있어야 한다.
     private func waitJobUntilFinish(
         _ makeJobId: some Publisher<String, any Error>,
         immediateCheck: Bool = false
@@ -163,9 +161,6 @@ extension AICommandUsecaseImple {
     }
     
     public func rejectConfirmCommand(_ action: AIConfirmCommandAction) {
-        // 서버 거부 API(Functions#243) 미구현 — 준비 전까지 fire-and-forget.
-        // 거부는 confirm 대기의 종착점이라 로컬 기록도 함께 정리한다 (cancelOngoingCommand와 대칭).
-        // 안 지우면 거부한 confirm이 다음 복원에 되살아나고, 앱 밖 진입점도 영구 차단된다.
         let repository = self.repository
         Task {
             try? await repository.rejectConfirmCommand(action)
@@ -174,9 +169,6 @@ extension AICommandUsecaseImple {
     }
 
     public func cancelOngoingCommand(_ jobId: String) {
-        // fire-and-forget — 호출 시점에 orchestration이 이미 구독을 끊고 idle로 보냈다.
-        // 서버의 CANCELED 통보를 클라가 소비하는 경로는 없다 (clear 전에 앱이 죽어
-        // 잔여 레코드가 restore되는 경우만 예외 — AIJob.Status.canceled가 이를 방어한다).
         let repository = self.repository
         Task {
             try? await repository.cancelCommand(jobId)
@@ -184,8 +176,6 @@ extension AICommandUsecaseImple {
         }
     }
 
-    // 로그아웃 정리 전용 — 서버 job은 그대로 두고 로컬 복원 근거만 지운다.
-    // 남겨두면 재로그인 시 restoreCommandifNeed가 죽은 job을 이어받아 다시 폴링한다.
     public func clearProcessingCommandRecord() async {
         try? await self.repository.clearProcessingAICommand()
     }

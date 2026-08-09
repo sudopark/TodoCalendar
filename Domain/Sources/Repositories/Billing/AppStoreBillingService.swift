@@ -9,8 +9,6 @@
 import Foundation
 
 
-// StoreKit 어댑터 계약. StoreKit 타입이 시그니처에 새어나오지 않게 해
-// 구현체(StoreKitService.AppStoreBillingServiceImple)가 별도 프레임워크에 있어도 이 계약은 그대로 유지된다
 public protocol AppStoreBillingService: AnyObject, Sendable {
 
     func loadProducts(ids: [String]) async throws -> [BillingProduct]
