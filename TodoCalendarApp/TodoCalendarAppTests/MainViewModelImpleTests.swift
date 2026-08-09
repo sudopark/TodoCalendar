@@ -26,6 +26,7 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var spyGoogleCalendarUsecase: StubGoogleCalendarUsecase!
     private var spyAppleCalendarUsecase: StubAppleCalendarUsecase!
     private var stubSyncUsecase: StubEventSyncUsecase!
+    private var spyBillingUsecase: SpyBillingUsecase!
     var cancelBag: Set<AnyCancellable>!
 
     override func setUpWithError() throws {
@@ -38,6 +39,7 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.spyGoogleCalendarUsecase = .init()
         self.spyAppleCalendarUsecase = .init()
         self.stubSyncUsecase = .init()
+        self.spyBillingUsecase = .init()
         self.cancelBag = .init()
         self.timeout = 0.01
     }
@@ -52,6 +54,7 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.spyGoogleCalendarUsecase = nil
         self.spyAppleCalendarUsecase = nil
         self.stubSyncUsecase = nil
+        self.spyBillingUsecase = nil
         self.cancelBag = nil
     }
 
@@ -68,7 +71,8 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
             eventNotifyService: self.stubEventNotifyService,
             googleCalendarUsecase: self.spyGoogleCalendarUsecase,
             appleCalendarUsecase: self.spyAppleCalendarUsecase,
-            eventSyncUsecase: self.stubSyncUsecase
+            eventSyncUsecase: self.stubSyncUsecase,
+            billingUsecase: self.spyBillingUsecase
         )
         viewModel.router = self.spyRouter
         self.spyRouter.didCalendarAttached = {
@@ -91,10 +95,51 @@ extension MainViewModelImpleTests {
             eventNotifyService: self.stubEventNotifyService,
             googleCalendarUsecase: self.spyGoogleCalendarUsecase,
             appleCalendarUsecase: self.spyAppleCalendarUsecase,
-            eventSyncUsecase: self.stubSyncUsecase
+            eventSyncUsecase: self.stubSyncUsecase,
+            billingUsecase: self.spyBillingUsecase
         )
         viewModel.router = self.spyRouter
         return viewModel
+    }
+
+    func testViewModel_whenPrepare_startObservingTransactionsAndRecoverUnfinished() {
+        // given
+        let viewModel = self.makeViewModelWithoutPrepare()
+
+        // when
+        viewModel.prepare()
+
+        // then
+        XCTAssertEqual(self.spyBillingUsecase.didStartObservingTimes, 1)
+        XCTAssertEqual(self.spyBillingUsecase.didRecoverUnfinishedTimes, 1)
+    }
+
+    func testViewModel_whenWillEnterForeground_notRestartObservingTransactions() {
+        // given
+        let viewModel = self.makeViewModelWithoutPrepare()
+        viewModel.prepare()
+
+        // when
+        NotificationCenter.default.post(
+            name: UIApplication.willEnterForegroundNotification, object: nil
+        )
+
+        // then
+        XCTAssertEqual(self.spyBillingUsecase.didStartObservingTimes, 1)
+    }
+
+    func testViewModel_whenWillEnterForeground_recoverUnfinishedBillingTransactions() {
+        // given
+        let viewModel = self.makeViewModelWithoutPrepare()
+        viewModel.prepare()
+
+        // when
+        NotificationCenter.default.post(
+            name: UIApplication.willEnterForegroundNotification, object: nil
+        )
+
+        // then
+        XCTAssertEqual(self.spyBillingUsecase.didRecoverUnfinishedTimes, 2)
     }
     
     func testViewModel_whenPrepare_refreshViewAppearance() {
@@ -374,10 +419,36 @@ extension MainViewModelImpleTests {
     }
 
     private final class SpyEventNotificationUsecase: EventNotificationUsecase, @unchecked Sendable {
-        
+
         var didRunSync: Bool = false
         func runSyncEventNotification() {
             self.didRunSync = true
+        }
+    }
+
+    private final class SpyBillingUsecase: BillingUsecase, @unchecked Sendable {
+
+        var didRecoverUnfinishedTimes: Int = 0
+        func recoverUnfinishedTransactions() {
+            self.didRecoverUnfinishedTimes += 1
+        }
+
+        var didStartObservingTimes: Int = 0
+        func startObservingTransactions() {
+            self.didStartObservingTimes += 1
+        }
+
+        func loadPlanOfferings() async throws -> [BillingPlanOffering] { return [] }
+        func loadTopupOfferings() async throws -> [BillingTopupOffering] { return [] }
+        func purchase(productId: String) async throws -> BillingPurchaseResult { return .cancelled }
+        func restorePurchases() async throws -> BillingUserPlan? { return nil }
+        func refreshUserPlan() async throws -> BillingUserPlan { return BillingUserPlan() }
+        func stopObservingTransactions() { }
+        func hasUnfinishedTransactions() async -> Bool { return false }
+        func applyUnfinishedTransactions() async throws -> BillingUserPlan? { return nil }
+
+        var currentUserPlan: AnyPublisher<BillingUserPlan, Never> {
+            return Empty().eraseToAnyPublisher()
         }
     }
 }
