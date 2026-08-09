@@ -56,4 +56,4 @@ review 스킬 §4와 동일 — 중복 병합·심각도 보수 재판정, Criti
 
 ## 5. 결과 게시
 
-review 스킬 §5와 동일 — `mcp__github-reviewer__create_pull_request_review`로 인라인 코멘트(full SHA), 게시 후 대화로 요약. 반영은 유저 지시 시 별도 커밋. 축 누수 태깅(§6)은 수행하지 않는다 — 그건 프로덕트 코드 관문 채점용.
+review 스킬 §5와 동일 — `mcp__github-reviewer__create_pull_request_review`로 인라인 코멘트(full SHA), 게시 후 대화로 요약. 반영은 유저 지시 시 원본 커밋에 흡수. 축 누수 태깅(§6)은 수행하지 않는다 — 그건 프로덕트 코드 관문 채점용.
