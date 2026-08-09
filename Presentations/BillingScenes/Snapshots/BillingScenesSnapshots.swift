@@ -283,6 +283,42 @@ extension BillingScenesSnapshots {
 }
 
 
+// MARK: - 미완료 결제 있음 — CTA 위 고정 복구 배너 (#812)
+
+extension BillingScenesSnapshots {
+
+    @MainActor
+    func test_paywallUnfinishedRecovery() {
+        captureSnapshotPair(named: "paywallUnfinishedRecovery", layout: .fullScreen) { theme in
+            self.makePaywallView(theme) { state in
+                state.currentPlan = .free
+                state.currentPlanDescription = "billing::paywall::current::description".localized(with: "20")
+                state.catalogState = .loaded([])
+                state.screenState = .ready(state.catalogState)
+                state.cellModels = [
+                    self.cell(
+                        .standard, price: "$4.99",
+                        period: "billing::paywall::period::monthly".localized(),
+                        dailyLimit: 200, isOwned: false, isCovered: false, isRecommended: true
+                    ),
+                    self.cell(
+                        .lifetime, price: "$49.99", period: nil,
+                        dailyLimit: 500, isOwned: false, isCovered: false
+                    )
+                ]
+                state.selectedPlanId = .standard
+                state.selectedPlanDetail = self.detail(
+                    planId: .standard, dailyLimit: 200, isTopupAllowed: true,
+                    disclosureKey: "billing::paywall::disclosure::subscription",
+                    ctaKey: "billing::paywall::cta::subscribe"
+                )
+                state.hasUnfinishedTransactions = true
+            }
+        }
+    }
+}
+
+
 // MARK: - 서버 카탈로그 요청 실패 — catalogState == .failed, accentWarn 안내 문구로 대체 (I5)
 
 extension BillingScenesSnapshots {

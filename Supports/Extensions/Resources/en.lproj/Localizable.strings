@@ -621,6 +621,10 @@
 "billing::paywall::pending::message" = "Ask a family organizer to approve this purchase. It'll apply automatically once approved.";
 "billing::paywall::userPlan::loadFailed" = "Couldn't load your plan. Please try again.";
 "billing::paywall::retry" = "Retry";
+"billing::paywall::unfinished::title" = "A purchase hasn't been applied";
+"billing::paywall::unfinished::message" = "Your payment went through, but your plan hasn't updated yet.";
+"billing::paywall::unfinished::action" = "Apply now";
+"billing::paywall::unfinished::applied" = "Your purchase has been applied";
 
 // MARK: - share extension
 
