@@ -203,6 +203,39 @@ let updateCached: ([TodoEvent]) -> Void = { [weak self] currents in
 .filter { !idSet.contains($0.uuid) }
 ```
 
+#### 순환참조 회피 — `self`가 아니라 쓸 객체를 캡처한다
+
+클로저 본문이 `self` 자체가 아니라 **`self`가 들고 있는 객체 하나만** 쓰는 경우가 많다. 이때 사전 `let`으로 꺼내 쓰지 말고 **캡처 리스트에 직접 적는다.** 두 형태는 완전히 동치이고(캡처 리스트 축약 `[foo]`는 `[foo = self.foo]`의 sugar, 캡처 리스트 초기화식은 클로저 밖에서 평가돼 `self.` 명시도 불필요), 캡처 의도가 선언부에 드러난다.
+
+```swift
+// ❌ 사전 let — 캡처 의도가 본문과 떨어져 있고, 이 let이 왜 있는지 읽는 사람이 추론해야 한다
+let repository = self.repository
+self.someFunction {
+    return repository.load()
+}
+
+// ✅ 캡처 리스트
+self.someFunction { [repository] in
+    return repository.load()
+}
+```
+
+**`[weak self]`를 대체하는 규칙이 아니다.** 셋은 세만틱이 다르다:
+
+| | `[foo]` | `[weak self]` + `self?.foo` |
+|---|---|---|
+| 캡처 후 `self.foo`가 재할당되면 | 생성 시점 값 | 호출 시점 값 |
+| `self` 해제 후 호출 | 그대로 실행 | no-op |
+
+그래서 **`self`의 생사가 실행 여부를 결정해야 하면 `[weak self]`가 맞다** — 화면이 사라진 뒤엔 돌면 안 되는 UI 갱신, 해제된 뒤 무의미해지는 후처리. `[foo]`는 `self`와 무관하게 그 객체에만 일을 시키는 경우에 쓴다 (repository·store·usecase 같은 협력 객체 호출).
+
+**주의 — `[foo]`는 `foo`를 강하게 잡는다.** `self` 사이클은 끊기지만, 그 클로저를 `foo` 자신이 보관하면 `foo → 클로저 → foo`라는 새 사이클이 생긴다. 이 자리엔 `[weak foo]`를 쓴다.
+
+```swift
+// ❌ node가 클로저를 들고, 클로저가 node를 강참조 — node·소유자 모두 deinit 안 됨
+self.node.onTick = { [node] in node.refresh() }
+```
+
 ### 2.6 타입 & 제네릭
 
 - 프로퍼티 선언 시 **명시적 타입 어노테이션**: `let storage: any TodoLocalStorage`
