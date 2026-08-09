@@ -30,8 +30,6 @@ extension ImageTextRecognizeServiceImple {
 
         return try await withTaskCancellationHandler {
             try await withCheckedThrowingContinuation { continuation in
-                // 디코드·다운샘플·OCR 모두 수십~수백 ms CPU 작업이라
-                // cooperative pool 스레드를 점유하지 않도록 GCD로 내린다.
                 DispatchQueue.global(qos: .userInitiated).async {
                     do {
                         let lines = try self.recognizedLines(
@@ -76,17 +74,13 @@ extension ImageTextRecognizeServiceImple {
         request.usesLanguageCorrection = true
         try cancelHandle.register(request)
 
-        // completionHandler를 쓰면 perform의 throw 경로와 겹쳐 이중 resume 위험이 생긴다.
-        // 동기 perform 후 results를 직접 읽어 결과 경로를 하나로 유지.
         let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
         do {
             try handler.perform([request])
         } catch {
-            // 취소로 인한 중단이면 Vision 내부 에러가 아니라 취소로 알린다.
             try cancelHandle.throwIfCancelled()
             throw error
         }
-        // cancel된 request는 throw 없이 빈 결과로 끝날 수 있어, 취소를 결과로 오인하지 않게 확인.
         try cancelHandle.throwIfCancelled()
 
         let observations = request.results ?? []

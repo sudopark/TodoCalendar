@@ -60,7 +60,6 @@ extension EKRecurrenceRule {
             }
         }
 
-        // WKST=MO is the RFC 5545 default — omit unless it differs
         if firstDayOfTheWeek > 0 && firstDayOfTheWeek != 2 {
             parts.append("WKST=\(Self.weekStartValue(firstDayOfTheWeek))")
         }

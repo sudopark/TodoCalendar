@@ -14,18 +14,10 @@ import Domain
 import Extensions
 
 
-// StoreKit 을 아는 유일한 프레임워크(StoreKitService)의 유일한 구현. Repository 에 의존하지 않는다 —
-// Domain 프로토콜 시그니처에 StoreKit 타입이 없어 이동이 파일 위치 변경으로 끝났다
 public final class AppStoreBillingServiceImple: AppStoreBillingService, Sendable {
 
-    // transactionUpdates 를 접근할 때마다 새로 만들면 소비자가 둘 이상일 때 같은 트랜잭션이
-    // 이중 post 된다 — init 에서 1회만 만들어 저장. 리스너 Task 도 init 시점에 뜨므로
-    // 트랜잭션이 드문 특성상 버퍼링 부담 없이 startObservingTransactions 이전 도착분도 받는다
     public let transactionUpdates: AsyncStream<BillingSignedTransaction>
 
-    // Task 를 continuation 의 onTermination 클로저에 맡기면 순환이 닫힌다 —
-    // Transaction.updates 는 끝나지 않아 소비자가 스트림을 취소하기 전엔 안 풀린다.
-    // 서비스가 직접 소유해 deinit 에서 끊는다
     private let listenerTask: Task<Void, Never>
 
     public init() {
@@ -79,7 +71,6 @@ extension AppStoreBillingServiceImple {
         case .userCancelled:
             return .cancelled
 
-        // 승인대기(Ask to Buy)는 나중에 Transaction.updates 로 도착한다
         case .pending:
             return .pending
 
@@ -112,8 +103,6 @@ private func verifiedTransaction(
     }
 }
 
-// 타입 멤버가 아닌 파일 스코프 함수 — 상태를 안 쓰는 순수 변환이다.
-// 자동갱신 구독만 구독으로 취급한다. 비갱신 구독·비소모품·소모품은 전부 1회 결제 고지 대상
 private func productKind(_ product: StoreKit.Product) -> BillingProductKind {
     guard product.type == .autoRenewable, let subscription = product.subscription
     else { return .oneTime }
@@ -125,7 +114,6 @@ private func subscriptionPeriod(_ period: StoreKit.Product.SubscriptionPeriod) -
     case (.week, 1):  return .weekly
     case (.month, 1): return .monthly
     case (.year, 1):  return .yearly
-    // 2주·3개월 같은 변칙 주기는 표기 문구가 없다 — 알 수 없음으로 두고 화면이 기간을 생략한다
     default:          return nil
     }
 }
@@ -135,8 +123,6 @@ private func subscriptionPeriod(_ period: StoreKit.Product.SubscriptionPeriod) -
 
 extension AppStoreBillingServiceImple {
 
-    // 소모품(top-up)은 currentEntitlements 에 잡히지 않는다 —
-    // 애플이 보유 상태를 들고 있지 않아서다. 잔량 원장의 진실은 서버뿐이다
     public func restorePurchases() async throws -> [BillingSignedTransaction] {
         try await AppStore.sync()
         return await self.collect(StoreKit.Transaction.currentEntitlements)

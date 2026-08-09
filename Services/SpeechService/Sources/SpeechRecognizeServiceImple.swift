@@ -66,8 +66,6 @@ extension SpeechRecognizeServiceImple {
         try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
     }
 
-    // 이어폰 분리는 interruption이 아니라 routeChange(.oldDeviceUnavailable)로 오고,
-    // 미디어 서비스 리셋은 둘 중 어느 쪽으로도 오지 않는다 — 셋 다 봐야 한다.
     private func observeAudioDisruption() {
         self.audioSessionObserving = []
 
@@ -165,7 +163,6 @@ extension SpeechRecognizeServiceImple {
         self.task?.cancel()
         self.audioEngine.stop()
         self.audioEngine.inputNode.removeTap(onBus: 0)
-        // 미디어 서비스 리셋은 오디오 객체 그래프를 통째로 무효화한다 — 세션마다 새 엔진으로 시작한다
         self.audioEngine = AVAudioEngine()
         self.request = nil
         self.task = nil
@@ -184,7 +181,6 @@ extension SpeechRecognizeServiceImple {
         }
         let rms = sqrt(sumSquares / Float(frameLength))
         let dbfs = 20 * log10(max(rms, .leastNonzeroMagnitude))
-        // raw normalized(0~1). 파형 시각 증폭은 presentation, 무음 판정(silence)은 이 값 기준.
         let level = max(0, min(1, (dbfs - self.noiseFloor) / -self.noiseFloor))
         self.subject.voiceLevel.send(level)
     }

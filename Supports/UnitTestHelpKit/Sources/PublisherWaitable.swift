@@ -97,8 +97,6 @@ public final class ConfirmationExpectation {
     }
 }
 
-// 방출값을 스레드 안전하게 모으는 박스. early-exit 폴링 시 sink 스레드의 append와
-// 폴링 루프의 read가 동시에 일어나므로 lock으로 보호한다.
 private final class WaitableOutputStore<T>: @unchecked Sendable {
     private let lock = NSLock()
     private var items: [T] = []
@@ -134,8 +132,6 @@ extension PublisherWaitable {
 
             try await action?()
 
-            // count 충족 시 즉시 종료, 아니면 timeout까지만 대기 (early-exit).
-            // count == 0("방출 없음" 단언)은 끝까지 기다려야 잘못된 방출을 잡아낸다.
             let deadline = ContinuousClock.now + confirmExpect.timeout
             while confirmExpect.count == 0 || store.count < confirmExpect.count,
                   ContinuousClock.now < deadline {
