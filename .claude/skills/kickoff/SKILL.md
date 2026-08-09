@@ -36,6 +36,7 @@ argument-hint: "[issue-number]"
 - 관련 PR이 있으면 `gh pr view <N> --json body`로 본문(문제→접근)을 읽는다. "남은 과제" 항목이 있으면 이번 이슈의 배경일 가능성이 높다 — 없는 PR도 정상이다.
 - `docs/spec/`에서 관련 도메인 스펙 문서를 찾아 읽는다.
 - 언급된 다른 이슈가 이번 작업의 선행/후속인지 판단한다.
+- `grep "#<이슈번호>" docs/troubleshooting/*.md` — 이 이슈를 참조하는 `resolution: deferred` 레코드가 있으면 **root cause가 이미 규명돼 있다.** 재규명하지 말고 레코드의 근본 원인·확정된 수정 방향을 스펙 브리프의 "현재 동작"에 싣고, 레코드 경로를 "참고"에 남긴다. 이 작업이 그 레코드를 해소한다는 사실도 함께 — implement 완료 판정이 이걸 받아 `resolution`을 갱신한다 (troubleshoot ③).
 
 **코드베이스** — code-analyzer 서브에이전트(`.claude/agents/code-analyzer.md`)로 fan-out (독립 영역은 병렬로, Agent tool `subagent_type: code-analyzer`). 각 프롬프트에 분석 대상·축·목적을 지정한다:
 

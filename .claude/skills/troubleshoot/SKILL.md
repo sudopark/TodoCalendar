@@ -54,13 +54,13 @@ systematic-debugging Phase 3(가설 검증)이 끝난 뒤, Phase 4(구현) 진�
 - **non-issue 판정** — 판정 확정 시점에
 - **규명 완료·수정 보류** (`deferred`) — 유저가 수정을 보류시켰거나 별도 이슈로 이관해 이번에 diff가 안 나갈 때. 보류 확정 시점에
 
-`deferred`를 이슈로만 남기고 넘어가지 않는다 — 이슈 본문은 INDEX의 증상 키워드 검색 대상 밖이라, 재발 시 ① 착수 조회에 안 걸려 같은 규명을 처음부터 다시 한다. 아카이브를 두는 목적이 그 건에 한해 무효가 된다. 나중에 수정이 들어가면 그 레코드의 `resolution`을 `fixed`로 갱신한다 (새 레코드를 만들지 않는다).
+`deferred`를 이슈로만 남기고 넘어가지 않는다 — 이슈 본문은 INDEX의 증상 키워드 검색 대상 밖이라, 재발 시 ① 착수 조회에 안 걸려 같은 규명을 처음부터 다시 한다. 아카이브를 두는 목적이 그 건에 한해 무효가 된다. **후속 이슈 번호를 레코드 frontmatter `issue:`에 반드시 남긴다** — 이게 갱신 훅의 앵커다. 나중에 그 이슈로 수정이 들어갈 때 kickoff §2 탐색이 이 레코드를 grep으로 끌어올리고, implement 완료 판정 3이 `resolution`을 `fixed`로 갱신한다 (새 레코드를 만들지 않는다). `issue:`가 비면 이 경로가 끊겨 레코드가 영구히 `deferred`로 남는다.
 
 1. `docs/troubleshooting/YYYY-MM-DD-<증상-slug>.md` 생성:
 
 ```markdown
 ---
-issue: "#N"            # 없으면 생략
+issue: "#N"            # 없으면 생략. 단 deferred는 필수 — 갱신 훅의 앵커
 subdomain: Event | Calendar | ExternalCalendar | Account | AIAgent | Notification | Billing | Settings | Support | Infra
 symptoms: [증상 키워드, 에러 메시지 조각, ...]
 resolution: fixed | workaround | deferred | non-issue

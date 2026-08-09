@@ -45,4 +45,4 @@ cd /Users/sudo.park/Documents/codebase/TodoCalendar && ./scripts/run-all-tests.s
 
 **다른 스킬 안에서 도구로 호출된 경우는 기록하지 않는다** — implement 완료 판정의 스킴 실행, 페어 wrap-up의 검증 등. 런을 마무리하는 전이는 호출한 스킬 쪽이고 종료 레코드도 거기서 남는다. 여기서 또 남기면 한 런에 종료가 두 겹으로 쌓여 호출 스킬의 준수 신호와 섞인다.
 
-이 종속 호출은 발동만 세지고 종료가 안 남아 누락률이 구조적으로 뜬다 — 그래서 이 스킬은 누락률 임계에서 면제돼 있다 (`.claude/scripts/usage-thresholds.json`의 `missing_rate_exempt_skills`). 준수 신호는 위 독립 런의 skill_end로만 잡는다.
+종속 호출로 뜨는 구조적 누락률은 `usage-thresholds.json`의 `missing_rate_exempt_skills`로 처리한다 — 누락률 숫자를 근거로 위 기록 범위를 넓히지 않는다.
