@@ -27,7 +27,7 @@ description: Use when composing a git commit in this project — 커밋 메시�
 
 ## 미푸시 커밋 수정 — 흡수
 
-푸시 전 커밋에 대한 셀프 리뷰·에이전트 리뷰 반영이나 방향 수정은 follow-up 커밋 금지 — 원본 커밋에 흡수한다 (최종 결과물에 수정 노이즈를 남기지 않는다):
+셀프 리뷰·에이전트 리뷰 반영이나 방향 수정은 follow-up 커밋 금지 — 원본 커밋에 흡수한다 (최종 결과물에 수정 노이즈를 남기지 않는다). **PR 공개 전후를 가리지 않는다** — 리뷰 반영도 "원래 커밋에 있어야 했던 것"이지 후속 개선이 아니다:
 
 - 직전 커밋이면 `git commit --amend`
 - 그 이전 커밋이면:
@@ -38,4 +38,6 @@ git commit --fixup <원본 커밋 sha>
 GIT_SEQUENCE_EDITOR=true git rebase -i --autosquash <base>   # 대화형 rebase 불가 환경의 우회 — 에디터 없이 autosquash 배치만 적용
 ```
 
-푸시·PR 공개 이후의 반영(review 스킬 리뷰 반영 포함)은 반대로 별도 커밋 — 리뷰어가 반영분을 추적할 수 있어야 한다.
+PR 공개 이후의 반영도 같다 — 흡수 후 `--force-with-lease`. 리뷰어의 추적성은 커밋 분리가 아니라 **리뷰 스레드 대댓글**(무엇을 어떻게 고쳤는지 + 흡수한 커밋 sha)로 담보한다 (CLAUDE.md GitHub 조항).
+
+**한 라운드의 반영은 전부 흡수한 뒤 push 를 한 번만 한다. 회신·resolve 는 그 push 뒤에.** rebase 는 대상 커밋뿐 아니라 그 앞뒤 모든 커밋을 재생성해 sha 를 바꾼다 — 코멘트마다 흡수→push→회신을 반복하면 먼저 회신에 적은 sha 가 다음 흡수로 곧바로 죽는다. 순서를 지키면 회신에 적는 sha 가 전부 최종본을 가리킨다.
