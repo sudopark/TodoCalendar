@@ -71,6 +71,9 @@ fi
 if printf '%s\n' "$FILES" | grep -qE "^Services/(FirstPartyServices|SpeechService|PlaceService|ExternalServices|StoreKitService)/"; then
   schemes+=("TodoCalendarApp")
 fi
+if printf '%s\n' "$FILES" | grep -q "^Services/FirstPartyServices/"; then
+  schemes+=("TodoCalendarAppShare")
+fi
 if printf '%s\n' "$FILES" | grep -q "^Presentations/CommonPresentation/"; then
   schemes+=($ALL_PRESENTATION "TodoCalendarApp" "TodoCalendarAppWidget" "TodoCalendarAppShare")
 fi
