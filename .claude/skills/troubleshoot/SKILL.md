@@ -48,7 +48,13 @@ systematic-debugging Phase 3(가설 검증)이 끝난 뒤, Phase 4(구현) 진�
 
 ## ③ 종료 — 아카이브 기록 (매 건)
 
-수정 완료 또는 non-issue 판정 시 남긴다. 시점은 commit/pr 스킬 전이 직전 (skill_end와 같은 타이밍). non-issue로 끝나 커밋이 없으면 판정 확정 시점에.
+**규명이 끝난 모든 건**에 남긴다 — 세 종착 상태 전부가 기록 시점이다:
+
+- **수정 완료** (`fixed`·`workaround`) — commit/pr 스킬 전이 직전 (skill_end와 같은 타이밍)
+- **non-issue 판정** — 판정 확정 시점에
+- **규명 완료·수정 보류** (`deferred`) — 유저가 수정을 보류시켰거나 별도 이슈로 이관해 이번에 diff가 안 나갈 때. 보류 확정 시점에
+
+`deferred`를 이슈로만 남기고 넘어가지 않는다 — 이슈 본문은 INDEX의 증상 키워드 검색 대상 밖이라, 재발 시 ① 착수 조회에 안 걸려 같은 규명을 처음부터 다시 한다. 아카이브를 두는 목적이 그 건에 한해 무효가 된다. 나중에 수정이 들어가면 그 레코드의 `resolution`을 `fixed`로 갱신한다 (새 레코드를 만들지 않는다).
 
 1. `docs/troubleshooting/YYYY-MM-DD-<증상-slug>.md` 생성:
 
@@ -57,7 +63,7 @@ systematic-debugging Phase 3(가설 검증)이 끝난 뒤, Phase 4(구현) 진�
 issue: "#N"            # 없으면 생략
 subdomain: Event | Calendar | ExternalCalendar | Account | AIAgent | Notification | Billing | Settings | Support | Infra
 symptoms: [증상 키워드, 에러 메시지 조각, ...]
-resolution: fixed | workaround | non-issue
+resolution: fixed | workaround | deferred | non-issue
 pattern: 패턴명         # patterns/ 승격분 있으면
 ---
 
@@ -65,7 +71,7 @@ pattern: 패턴명         # patterns/ 승격분 있으면
 
 - **증상**:
 - **근본 원인**:
-- **해결**: <결정된 수정. workaround면 한계·재발 조건과 (b) 후속 이슈 번호>
+- **해결**: <결정된 수정. workaround면 한계·재발 조건과 (b) 후속 이슈 번호. deferred면 확정된 수정 방향·보류 사유·후속 이슈 번호>
 - **기각 방향**: <방향> — <기각 이유>   ← 한 줄씩. 꼬리물기 재발 방지용으로 이 항목만 예외적으로 기록한다
 ```
 
@@ -81,6 +87,8 @@ pattern: 패턴명         # patterns/ 승격분 있으면
 | "같은 트리거를 관련 자리 전부에 심자" | 자리마다 심어야 유지되는 수정 = 증상 패치 신호 |
 | "방안 A/B/C가 있다" (판정 없이 종료) | 기준 적용해 하나 선택 + 이유 선언 |
 | "아카이브 기록은 나중에" | 기록 없는 종료는 종료가 아니다 — 매 건 |
+| "이번엔 안 고치니 기록할 게 없다" | 기록 대상은 수정이 아니라 규명 결과다 — `deferred`로 남긴다 |
+| "후속 이슈에 다 적었으니 됐다" | 이슈는 INDEX 증상 검색 밖 — 재발 시 규명을 처음부터 다시 한다 |
 
 ## 종료 기록 — skill_end
 
