@@ -52,8 +52,6 @@ final class ShareCommandViewModel: @unchecked Sendable {
         self.onClose = onClose
     }
 
-    // 입력 화면이 화면의 바닥이고, 아래 축들이 그 위에 쌓인다. 한 축의 변화가
-    // 다른 축을 지우지 않으므로 상태 조합이 늘어도 분기를 새로 만들 필요가 없다.
     private struct Subject {
         let sharedText = CurrentValueSubject<String?, Never>(nil)
         /// 공유 원문의 출처 — 화면 분기와 전송 값에 쓰인다
@@ -98,8 +96,6 @@ extension ShareCommandViewModel {
         }
     }
 
-    // 디코드 실패·Vision 실패도 빈 문자열로 수렴한다 — 유저의 다음 행동(직접 입력)이
-    // "글자 없는 이미지"와 같아서 구분해도 선택지가 달라지지 않는다. 원인은 로그로 남긴다.
     private func recognizedText(in imageData: Data) async -> String {
         do {
             let lines = try await self.imageTextRecognizeService.recognizeTextLines(in: imageData)

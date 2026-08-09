@@ -41,24 +41,19 @@ import CommonPresentation
         return preview
     }
 
-    // 이미지를 받았는데 뽑힌 텍스트가 없다 — 디코드 실패·Vision 실패·글자 없는 사진이 여기로 수렴한다.
-    // 유저가 직접 타이핑하기 시작하면 자연히 사라진다.
     var imageTextNotFound: Bool {
         guard self.isImageShared, !self.isPreparing else { return false }
         return self.sharedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
-    // 입력 화면을 대신해 안내 문구만 남는 종료 상태 — 제출 불가거나 제출 완료
     var terminalMessage: String? {
         return self.blockedMessage ?? self.sentMessage
     }
 
-    // 확인 전·전송 중엔 원문이 갱신되거나 in-flight 요청과 어긋날 수 있어 편집을 막는다
     var isInputLocked: Bool {
         return self.isPreparing || self.isSending
     }
 
-    // 전송 가능 = 막는 축이 하나도 없음 + 원문이 비어있지 않음. 축을 다 가진 여기서 합성한다
     var isSendable: Bool {
         guard !self.isInputLocked, self.terminalMessage == nil else { return false }
         return !self.sharedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -178,8 +173,6 @@ struct ShareCommandView: View {
         .background(self.appearance.colorSet.bg0.asColor)
     }
 
-    // 입력 화면이 바닥이고 준비·전송 중은 그 위에 덮인다. 되돌아갈 곳이 없는 종료
-    // 상태(제출 불가·제출 완료)만 입력 화면을 대신한다.
     @ViewBuilder
     private var contentBody: some View {
         if let message = self.state.terminalMessage {
@@ -198,7 +191,6 @@ struct ShareCommandView: View {
 
                 self.imageCaptionIfNeed
 
-                // 원문이 주 입력 — 앱 본체 AI 입력창과 같은 크기·여백으로 같은 기능임을 드러낸다
                 self.inputField(
                     text: $state.sharedText,
                     placeholder: (

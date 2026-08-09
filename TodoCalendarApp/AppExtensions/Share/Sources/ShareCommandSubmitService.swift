@@ -31,8 +31,6 @@ enum ShareSubmitFailure: Error, Equatable {
 
 final class ShareCommandSubmitService {
 
-    // 서버(POST /v1/ai/command/interpret)가 같은 값으로 400을 낸다.
-    // 여기서 먼저 막아 "실패했어요"가 아닌 무엇을 줄여야 하는지를 알린다.
     private enum Constant {
         static let maxSharedTextLength: Int = 10000
         static let maxAdditionalInstructionLength: Int = 1000

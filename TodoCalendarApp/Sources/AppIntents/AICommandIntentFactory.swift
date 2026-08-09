@@ -13,8 +13,6 @@ import SQLiteService
 import Alamofire
 
 
-// 앱 라이프사이클(prepareInitialScene → UsecaseFactory)에 의존하지 않는 인텐트 전용 조립.
-// openAppWhenRun = false 는 scene 없이 기동돼 그 경로가 돌지 않는다.
 struct AICommandIntentFactory {
 
     private let environmentStorage: UserDefaultEnvironmentStorageImple
@@ -30,7 +28,6 @@ struct AICommandIntentFactory {
         )
         keyChainStorage.setupSharedGroup(AppEnvironment.groupID)
 
-        // 앱에서 이 setup 은 prepareLaunch 경로가 부른다 — 백그라운드 기동엔 안 도니 직접 부른다
         let firebaseAuthService = FirebaseAuthServiceImple(
             appGroupId: AppEnvironment.groupID,
             useEmulator: AppEnvironment.useEmulator
@@ -58,12 +55,9 @@ extension AICommandIntentFactory {
         )
     }
 
-    // job 생성 + 처리중 기록 두 가지만 필요하므로 usecase가 아닌 repository를 직접 만든다.
     private func makeAICommandRepository() -> any AICommandRepository {
         let auth = self.authStore.loadCurrentAuth()
         let remoteAPI = self.makeRemoteAPI()
-        // AI 엔드포인트는 인증 필수(CalendarAPIAutenticator.shouldAdapt).
-        // auth를 seed하지 않으면 무인증으로 나간다 — ShareUsecaseFactory와 같은 처리.
         if let auth {
             remoteAPI.setup(credential: APICredential(auth: auth))
         }
