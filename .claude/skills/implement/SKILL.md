@@ -145,7 +145,7 @@ cd tools/complexity-analyzer
      - TC·파일 단위 실행은 `xcodebuild test -only-testing:<테스트타겟>/<클래스>[/<메서드>]`, 스킴 단위는 run-tests 스킬
    - **짝지어진 두 위치** — 각 경고를 해소(대응처 수정)하거나 오탐임을 확인하고 유저에게 보고. 경고를 무시한 채 커밋하지 않는다
 2. 마지막 리팩터 게이트 선언 완료 + 명세 항목마다 축1 TC 집합 훑기(§구현 중)를 1회 이상 수행
-3. Rules 갭·플랜 갭이 있었다면 후속 정리(rules 예약 / 후속 이슈·추가 할일)까지 완료
+3. Rules 갭·플랜 갭이 있었다면 후속 정리(rules 예약 / 후속 이슈·추가 할일)까지 완료. 이번 작업이 `resolution: deferred` 레코드를 해소했으면(kickoff §2 탐색이 끌어올린다) 그 레코드를 `fixed`로 갱신하고 해결 항목을 채운다 — 새 레코드를 만들지 않는다
 4. 컴파일·유닛 테스트로 검증되지 않는 계약을 만졌으면 실물을 직접 확인한다 — 테스트 전부 통과가 이 계약들의 동작을 보증하지 않는다:
    - **빌드 산출물** — AppIntents parameterSummary·메타데이터, Info.plist 키, 엔타이틀먼트, 위젯 타임라인. 예: `.appex/Metadata.appintents/extract.actionsdata`
    - **프로세스 경계** — 앱/확장/위젯은 별개 프로세스라 앱의 전역 설정(UIAppearance·DI 컨테이너·런타임 초기화)이 승계되지 않는다. 확장에서 도는 코드는 그 전제로 재확인

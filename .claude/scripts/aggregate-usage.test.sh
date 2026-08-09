@@ -78,6 +78,11 @@ cat > "$FIXTURE" << 'JSONL'
 {"ts":"2026-01-01T18:06:00+09:00","event":"correction","session_id":"v1","skills":["pair-programming"],"summary":"c1","gist":""}
 {"ts":"2026-01-01T18:07:00+09:00","event":"correction","session_id":"v2","skills":["pair-programming"],"summary":"c2","gist":""}
 {"ts":"2026-01-01T18:08:00+09:00","event":"correction","session_id":"v3","skills":["pair-programming"],"summary":"c3","gist":""}
+{"ts":"2026-01-01T19:00:00+09:00","event":"skill","session_id":"w1","name":"run-tests"}
+{"ts":"2026-01-01T19:01:00+09:00","event":"skill","session_id":"w2","name":"run-tests"}
+{"ts":"2026-01-01T19:02:00+09:00","event":"skill","session_id":"w3","name":"run-tests"}
+{"ts":"2026-01-01T19:03:00+09:00","event":"skill","session_id":"w4","name":"run-tests"}
+{"ts":"2026-01-01T19:04:00+09:00","event":"skill","session_id":"w5","name":"run-tests"}
 JSONL
 
 OUT=$(python3 aggregate-usage.py)
@@ -121,6 +126,10 @@ assert_eq "누락률 면제 스킬의 누락률 라인 미노출" "0" "$(printf 
 assert_contains "누락률 면제해도 correction 임계는 유지" "pair-programming — correction 3건" "$OUT"
 # 면제해도 --all 진단 표에는 남는다
 assert_contains "--all에 누락률 면제 버킷" "pair-programming" "$ALL"
+# run-tests — 발동 5·종료 0(누락률 100%)이어도 미노출. 면제는 스킬명 단위 config 데이터라
+# 항목마다 검증한다 (한쪽만 덮으면 다른 쪽 이름이 오타·삭제돼도 전 assert가 통과한다)
+assert_eq "누락률 면제는 등록된 스킬명마다 적용" "0" "$(printf '%s' "$OUT" | grep -c "run-tests — 종료 레코드 누락률")"
+assert_contains "--all에 누락률 면제 버킷(run-tests)" "run-tests" "$ALL"
 
 # --- 축별 누수 집계 ---
 # 축1: 3건 ≥ 임계 3 → 초과, 축2: 2건 < 임계 3 → 미검출, 축3: 0건
