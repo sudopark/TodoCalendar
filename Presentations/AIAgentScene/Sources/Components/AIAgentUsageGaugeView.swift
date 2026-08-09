@@ -12,8 +12,6 @@ import Extensions
 import CommonPresentation
 
 
-// 사용량/일일 한도 미니 게이지 — 키보드 입력·커맨드 시트 공유 (#713)
-// 플랜 칩·top-up 잔량·하향 예약 안내는 값이 있을 때만 붙는다 (#720)
 struct AIAgentUsageGaugeView: View {
 
     @Environment(ViewAppearance.self) private var appearance

@@ -51,9 +51,6 @@ enum DayEventListScrollAnchor {
     fileprivate var recognizingText: String = ""
     fileprivate var voiceLevel: Float = 0
 
-    // 음성 리스닝 UI(파형·네온 테두리·AI pill)는 음성 입력일 때만 켠다.
-    // 키보드 입력(.listening(.keyboard)) 중엔 뒤 배경을 평소 상태로 둬야
-    // 키보드 시트가 닫힐 때 파형 잔상이 노출되지 않는다.
     fileprivate var isVoiceListening: Bool {
         if case .listening(.voice) = aiAgentState { return true }
         return false
@@ -271,7 +268,6 @@ struct DayEventListView: View {
         .padding()
         .background(self.appearance.colorSet.bg0.asColor)
         .onChange(of: self.state.isVoiceListening) { _, listening in
-            // listening on/off 전환에 반대되는 세기의 햅틱 + 녹음 시작/종료 시스템 사운드.
             self.appearance.impactIfNeed(listening ? .medium : .soft)
             AudioServicesPlaySystemSound(listening ? 1113 : 1114)
         }
@@ -438,7 +434,6 @@ private struct QuickAddNewTodoView: View {
     fileprivate var addNewTodoQuickly: (String) -> Void = { _ in }
     fileprivate var makeNewTodoWithGivenNameAndDetails: (String) -> Void = { _ in }
 
-    // 입력 전 todo 필드만 흐리게. AI 진입 버튼은 딤 대상 아님.
     private var inputDimOpacity: Double {
         (self.state.isVoiceListening || self.isEntering) ? 1.0 : 0.5
     }
@@ -492,7 +487,6 @@ private struct QuickAddNewTodoView: View {
     @ViewBuilder
     private func leadingLabel() -> some View {
         if self.state.isVoiceListening {
-            // pill + 테두리로 "누르면 설명" affordance. 탭 시 안내 표시.
             Button {
                 self.eventHandler.showAIGuide()
             } label: {
@@ -552,8 +546,6 @@ private struct QuickAddNewTodoView: View {
     private func listeningContent() -> some View {
         HStack(spacing: 8) {
             VoiceWaveformView(
-                // raw voiceLevel은 실기기 마이크 dynamic range가 좁아 변동이 작다.
-                // sqrt로 파형을 시각 증폭한다 (표현 관심사라 도메인 아닌 여기서).
                 level: sqrt(self.state.voiceLevel),
                 tintColor: self.appearance.colorSet.text1.asColor
             )
@@ -637,7 +629,6 @@ private struct QuickAddNewTodoView: View {
 
 // MARK: - NeonListeningBorder
 
-// listening 중 입력창을 감싸는 네온 그라데이션 테두리. Siri 입력처럼 색이 흐른다.
 private struct NeonListeningBorder: View {
 
     let cornerRadius: CGFloat
@@ -738,9 +729,6 @@ private struct AIAgentEntryButton: View {
     @ViewBuilder
     private func entryButtonIcon() -> some View {
         if self.badge == .processing {
-            // 부모(인라인 바)가 키보드 avoidance로 위치를 바꿀 때, LoadingCircleView의
-            // repeatForever 애니가 그 위치 변화까지 보간해 인디케이터가 "떨어지듯" 움직인다.
-            // geometryGroup으로 부모 geometry 변화를 격리해 편승을 끊는다.
             LoadingCircleView(self.appearance.colorSet.primaryBtnText.asColor, lineWidth: 2)
                 .frame(width: 18, height: 18)
                 .geometryGroup()

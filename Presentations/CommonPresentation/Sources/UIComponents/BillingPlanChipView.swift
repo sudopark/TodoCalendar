@@ -26,7 +26,6 @@ public extension BillingPlanId {
 
 // MARK: - BillingPlanChipView
 
-// 플랜 표시 칩 — 사용량 게이지와 paywall 이 공유한다. 무료는 회색, 유료는 accentAI
 public struct BillingPlanChipView: View {
 
     @Environment(ViewAppearance.self) private var appearance

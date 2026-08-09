@@ -59,9 +59,6 @@ final class CalendarViewRouterImple: BaseRouterImple, CalendarViewRouting, @unch
         current.changeFocus(at: index)
     }
 
-    // 진입 시점에 떠 있는 시트는 이전 결과 시트일 수도, 키보드 입력 시트(다른 라우터가 띄운다)일 수도 있다.
-    // 무엇이 떠 있든 닫고 완료 콜백에서 present — 겹쳐 띄우면 UIKit이 예외를 던진다.
-    // 뜬 게 없으면 dismissPresented가 즉시 completion을 부르므로 음성 입력 경로도 그대로 통과한다.
     func routeToAICommand() {
         self.dismissPresented(animated: true) { [weak self] in
             Task { @MainActor in

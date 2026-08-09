@@ -144,8 +144,6 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
             }
             .store(in: &self.cancellables)
 
-        // command phase 자동 시트 표시는 단일 인스턴스인 CalendarViewModel이 담당.
-        // 여기선 진입 버튼 분기에 쓸 현재 상태만 미러링한다.
         self.aiAgentOrchestrationUsecase.state
             .sink { [weak self] state in
                 self?.subject.aiAgentState.send(state)
@@ -245,8 +243,6 @@ extension DayEventListViewModelImple {
         self.router?.routeToAIKeyboardInput()
     }
 
-    // 소스 선택·피커를 유저가 취소하면 이미지 진입 전 상태(음성 입력)로 되돌린다.
-    // 안 되돌리면 .listening(.image)에 갇혀 마이크는 꺼졌는데 입력 바만 남는다.
     func enterImageInput() {
         self.aiAgentOrchestrationUsecase.enterImageInput()
         self.router?.routeToImageSourceSelect { [weak self] in
@@ -408,7 +404,6 @@ extension DayEventListViewModelImple {
         return self.foremostEventUsecase.foremostEventMarkingStatus
     }
 
-    // 세션 중 불변 플래그라 publisher가 아닌 스냅샷 Bool로 노출
     var isAIAgentEnabled: Bool {
         return FeatureFlag.isEnable(.aiAgent)
     }

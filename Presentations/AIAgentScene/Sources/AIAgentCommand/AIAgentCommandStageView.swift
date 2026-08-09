@@ -23,7 +23,6 @@ import CommonPresentation
     var commandState: AIAgentCommandState?
     var usage: AIAgentUsage?
     var userPlan: BillingUserPlan?
-    // 세션 중 불변 플래그 — publisher 아닌 스냅샷 값으로 bind 시점에 1회 반영 (#739)
     var isPaywallAvailable: Bool = false
 
     func bind(_ viewModel: any AIAgentCommandViewModel) {
@@ -251,8 +250,6 @@ private extension AIAgentCommandStageView {
         }
     }
 
-    // AI 응답 본문 공통 — 서버가 실어 보내는 인라인 마크다운(**강조**)을 해석하고 줄바꿈은 원문대로 둔다.
-    // 목록·헤더 같은 블록 문법은 SwiftUI Text가 렌더하지 못해 파싱 대상에서 뺐다 — 마커가 원문 텍스트로 남는다
     func assistantMessageText(_ text: String) -> some View {
         Text(self.parsedMarkdown(text))
             .font(appearance.fontSet.size(16).asFont)
@@ -260,7 +257,6 @@ private extension AIAgentCommandStageView {
             .textSelection(.enabled)
     }
 
-    // 파싱 실패(깨진 마크다운)는 원문 그대로 폴백 — 응답을 못 읽는 상황을 만들지 않는다
     func parsedMarkdown(_ text: String) -> AttributedString {
         let parsed = try? AttributedString(
             markdown: text,
@@ -419,20 +415,16 @@ private extension AIAgentCommandStageView {
     func failedView(command: String, reason: String?, errorCode: ServerErrorModel.ErrorCode?) -> some View {
         VStack(alignment: .leading, spacing: Metric.Spacing.regular) {
 
-            // 채팅 형식 — 유저 지시(우측, 있을 때만) + AI 실패 메시지(좌측, 아이콘 말풍선 안)
             if command.isEmpty == false {
                 self.userMessageBubble(command)
             }
 
-            // 한도 초과는 모래시계로 구분 — "내일 리셋까지 대기" 의미. 문구는 서버 reason 그대로
             self.assistantIconMessageBubble(
                 systemName: errorCode == .dailyLimitExceeded ? "hourglass.circle.fill" : "exclamationmark.triangle.fill",
                 tint: appearance.colorSet.accentWarn.asColor,
                 text: reason.flatMap { $0.isEmpty ? nil : $0 } ?? "aiAgent::failed::default".localized()
             )
 
-            // 한도 초과 + paywall 플래그가 켜졌을 때만 "플랜 보기" 진입 — 플래그 판정은 ViewModel이 해서
-            // 여기선 스냅샷 값(state.isPaywallAvailable)만 읽는다 (#739)
             let showsPlansCTA = errorCode == .dailyLimitExceeded && self.state.isPaywallAvailable
             if showsPlansCTA {
                 ConfirmButton(
@@ -443,8 +435,6 @@ private extension AIAgentCommandStageView {
                 .padding(.top, spacing: .xsmall)
             }
 
-            // 실패를 확인 → reset(idle) 후 닫힘. 전환 CTA가 함께 있을 땐 그쪽이 1순위라
-            // 이 버튼은 보조 스타일로 낮춰 위계를 분리(#739), 단독 액션일 땐 기존대로 accentAI 유지
             ConfirmButton(
                 title: "common.confirm".localized(),
                 textColor: showsPlansCTA ? appearance.colorSet.secondaryBtnText.asColor : nil,
@@ -461,9 +451,6 @@ private extension AIAgentCommandStageView {
 
 // MARK: - AssistantBubble
 
-// ScrollView는 가로로도 greedy해 감싸는 순간 말풍선이 전체 폭이 된다 — 숨김 사본이 자연 폭과
-// 상한 안의 높이를 결정하고, 겹쳐놓은 스크롤이 넘치는 만큼을 흡수한다.
-// content는 숨김·스크롤 두 벌로 인스턴스화되므로 사이드이펙트 없는 표시 전용 뷰만 넘길 것
 private struct AssistantBubble<Content: View>: View {
 
     @Environment(ViewAppearance.self) private var appearance
@@ -512,7 +499,6 @@ private struct AssistantBubble<Content: View>: View {
         }
     }
 
-    // 상한에서 잘렸을 때만 — 문장이 배경으로 잦아들어 아래에 더 있음을 알린다
     private var bottomFade: some View {
         LinearGradient(
             colors: [
@@ -560,7 +546,6 @@ private struct TypingIndicator: View {
 
 struct AIAgentCommandStageViewPreviewProvider: PreviewProvider {
 
-    // 여러 줄 + 볼드가 섞인 응답 — 말풍선 스크롤·서식 검증용 (#766)
     static let sampleMultilineMessage: String = """
     이번 주 일정을 **3개** 추가하고 겹치는 건 정리했어요.
 

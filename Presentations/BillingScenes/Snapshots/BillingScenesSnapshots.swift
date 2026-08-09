@@ -97,8 +97,6 @@ extension BillingScenesSnapshots {
                 state.currentPlan = .free
                 state.currentPlanDescription = "billing::paywall::current::description".localized(with: "20")
                 state.catalogState = .loaded([])
-                // 유저 플랜 조회 게이트(#739) — 이 캡처가 노리는 본문(플랜 카드)이 그려지려면
-                // screenState 가 .ready 여야 한다. 게이트 자체의 로딩/실패 화면은 별도 스냅샷 소관
                 state.screenState = .ready(state.catalogState)
                 state.cellModels = [
                     self.cell(
@@ -204,8 +202,6 @@ extension BillingScenesSnapshots {
                 state.currentPlan = nil
                 state.currentPlanDescription = ""
                 state.catalogState = .loading
-                // 이 캡처는 "유저 플랜은 확인됐고 카탈로그만 로딩 중"인 본문 내부 스피너를 노린다
-                // (featureSection의 인라인 로딩). 화면 전체 게이트의 로딩/실패는 다른 시나리오다(#739)
                 state.screenState = .ready(state.catalogState)
                 state.cellModels = []
                 state.selectedPlanId = nil

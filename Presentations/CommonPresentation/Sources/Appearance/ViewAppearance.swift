@@ -82,7 +82,6 @@ import Domain
                 return googleCalendarColors[accountId]?.events[colorId]
                     .flatMap { UIColor.from(hex: $0.backgroudHex) } ?? .clear
             } else {
-                // accountId를 특정할 수 없는 경우 전체 계정 순회 (위젯 등 레거시 경로)
                 return googleCalendarColors.values.lazy
                     .compactMap { $0.events[colorId] }
                     .first

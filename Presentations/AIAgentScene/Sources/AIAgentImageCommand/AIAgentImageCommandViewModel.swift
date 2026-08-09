@@ -91,9 +91,6 @@ extension AIAgentImageCommandViewModelImple {
             } catch is CancellationError {
                 // 닫기로 인한 취소 — 화면이 이미 사라졌으므로 알리지 않는다
             } catch {
-                // 디코드·Vision 실패도 noTextFound로 수렴 — 유저 다음 행동(다른 이미지 선택)이 동일하고,
-                // 닫히는 중인 시트에서 알림을 띄우면 dismiss가 알림 자신을 닫아 시트가 갇는다.
-                // UI가 빈 결과와 실패를 의도적으로 구분하지 않으므로 원인 추적은 로그로 남긴다
                 logger.log(level: .error, "\(error)")
                 self.subject.stage.send(.noTextFound)
             }
@@ -127,7 +124,6 @@ extension AIAgentImageCommandViewModelImple {
         }
     }
 
-    // 시트만 닫음 — 음성 입력 복귀는 View의 onDisappear(dismissByGesture)가 처리 (키보드 입력 시트와 동일)
     func close() {
         self.recognizeTask?.cancel()
         self.recognizeTask = nil
@@ -154,7 +150,6 @@ extension AIAgentImageCommandViewModelImple {
         return self.aiAgentOrchestrationUsecase.usage
     }
 
-    // 키보드 입력 시트와 동일 — seeding 전 무방출이라 첫 값을 prepend 해 플랜 없는 상태부터 그린다 (#739)
     var currentUserPlan: AnyPublisher<BillingUserPlan?, Never> {
         return self.billingUsecase.currentUserPlan
             .map { $0 as BillingUserPlan? }
