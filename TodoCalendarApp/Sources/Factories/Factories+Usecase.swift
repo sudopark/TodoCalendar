@@ -48,8 +48,6 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
         self.applicationBase = applicationBase
         self.billingUsecase = NotNeedBillingUsecase(sharedDataStore: applicationBase.sharedDataStore)
 
-        // AI 기능은 로그인 유저 전용 — 실제 스택을 만들지 않는다 (#772).
-        // 진입점 UI는 그대로 노출되고 탭 시 로그인 유도로 갈린다.
         self.aiAgentOrchestrationUsecase = NotNeedAIAgentOrchestrationUsecase()
     }
 

@@ -28,8 +28,6 @@ extension AICommandSubmitFailReason {
             self = .limitExceeded
 
         case .unauthorized, .invalidAccessKey:
-            // 로컬 Auth 레코드는 남아있는데 서버 세션이 죽은 경우 — 무한 재시도로
-            // 유저를 몰아넣지 않도록 로그인 유도 문구로 떨어뜨린다.
             self = .notSignedIn
 
         default:

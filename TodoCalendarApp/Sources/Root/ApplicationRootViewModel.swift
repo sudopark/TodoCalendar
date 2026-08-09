@@ -128,7 +128,6 @@ extension ApplicationRootViewModelImple: AutenticatorTokenRefreshListener {
     private func handleUserSignedOut() {
         Task { [weak self] in
             self?.subject.isSignIn.send(false)
-            // DB가 닫히기 전에 로컬 AI 커맨드 기록을 지워야 재로그인 때 되살아나지 않는다
             await self?.aiJobRefreshUsecase.handleSignedOut()
             await self?.prepareUsecase.prepareSignedOut()
             
@@ -204,8 +203,6 @@ extension ApplicationRootViewModelImple {
         self.appUpdateCheckUsecase.checkUpdateIsNeed()
     }
 
-    // Siri 인텐트는 앱을 background로 내리지 않아 포그라운드 복귀 이벤트가 오지 않는다.
-    // active 전환은 그 경우까지 덮는다.
     private func handleDidBecomeActive() {
         self.aiJobRefreshUsecase.refreshProcessingJobIfNeeded()
     }
@@ -276,12 +273,10 @@ extension ApplicationRootViewModelImple {
 
     func handleReceivePushNotification(userInfo: [AnyHashable: Any]) {
 
-        // AI job 상태 변경 — data.jobId로 식별 (서버 aiFront 스펙)
         if let jobId = userInfo["jobId"] as? String {
             self.aiJobRefreshUsecase.handleJobStatusChanged(jobId)
             return
         }
 
-        // 그 외 푸시(이벤트 리마인더 등)는 현재 앱에서 별도 처리 없음 — 표시만 된다.
     }
 }

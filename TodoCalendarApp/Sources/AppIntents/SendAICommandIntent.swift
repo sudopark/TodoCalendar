@@ -18,7 +18,6 @@ struct SendAICommandIntent: AppIntent {
         "Send what you say to AI and let it create your events and to-dos."
     )
 
-    // 앱을 열지 않고 백그라운드에서 커맨드만 등록한다. 결과는 푸시로 전달된다.
     static let openAppWhenRun: Bool = false
 
     @Parameter(
@@ -57,7 +56,6 @@ extension AICommandSubmitFailReason {
         case .previousRequestPending:
             return IntentDialog("A previous request is still pending. Check the app to review it.")
         case .processingCommandRecordFailed:
-            // job은 이미 서버에 있다 — 재시도를 유도하면 중복 job에 크레딧이 두 번 나간다.
             return IntentDialog("Sent, but the app can't track the result. Check your calendar after a moment.")
         case .unknown:
             return IntentDialog("Something went wrong. Please try again.")

@@ -11,7 +11,6 @@ import Domain
 import Repository
 
 
-// 유저 없는 백그라운드에서 리프레시가 일시 실패했다고 세션을 지우면 조용히 로그아웃된다.
 struct NeverRemoveAuthStorage: AuthStore, APICredentialStore {
 
     private let storage: AuthStoreImple

@@ -64,8 +64,6 @@ final class ShareViewController: UIViewController {
 // SLComposeServiceViewController 같은 전용 베이스를 상속할 필요가 없다.
 extension ShareViewController {
 
-    // 이미지를 먼저 판정한다. 사진 provider가 public.file-url을 함께 광고하는 경우가 있어
-    // 텍스트를 먼저 프로브하면 file:///…HEIC 경로 문자열이 원문으로 채택된다.
     private func loadSharedItem() async -> SharedCommandItem {
         let items = (self.extensionContext?.inputItems as? [NSExtensionItem]) ?? []
         let providers = items.flatMap { $0.attachments ?? [] }
@@ -83,7 +81,6 @@ extension ShareViewController {
         return .text("")
     }
 
-    // loadItem은 UIImage(디코드된 비트맵)를 돌려줄 수 있어 확장 메모리 상한을 건드린다.
     private func loadImageData(from provider: NSItemProvider) async -> Data? {
         guard provider.hasItemConformingToTypeIdentifier(UTType.image.identifier)
         else { return nil }
