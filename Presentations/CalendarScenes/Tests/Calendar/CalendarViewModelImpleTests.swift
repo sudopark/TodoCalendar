@@ -1426,11 +1426,12 @@ private extension CalendarViewModelImpleTests {
     }
 }
 
-// MARK: - 앱 비활성과 음성 입력
+// MARK: - 앱 백그라운드 전환과 음성 입력
 
 extension CalendarViewModelImpleTests {
 
-    private func resignActiveAfterPrepared(
+    private func postAppLifecycleAfterPrepared(
+        _ notificationName: Notification.Name,
         aiAgentEnabled: Bool = true,
         state: AIAgentState?
     ) async throws {
@@ -1440,34 +1441,41 @@ extension CalendarViewModelImpleTests {
         try await Task.sleep(for: .milliseconds(50))
         state.map { self.stubOrchestration.stateSubject.send($0) }
 
-        NotificationCenter.default.post(
-            name: UIApplication.willResignActiveNotification, object: nil
-        )
+        NotificationCenter.default.post(name: notificationName, object: nil)
         try await Task.sleep(for: .milliseconds(50))
         // VM이 해제되면 구독도 끊겨 단언이 무의미해진다
         withExtendedLifetime(viewModel) { }
     }
 
-    func testViewModel_whenAppResignsActiveWhileVoiceListening_stopsInput() async throws {
+    private func enterBackgroundAfterPrepared(
+        aiAgentEnabled: Bool = true,
+        state: AIAgentState?
+    ) async throws {
+        try await self.postAppLifecycleAfterPrepared(
+            UIApplication.didEnterBackgroundNotification,
+            aiAgentEnabled: aiAgentEnabled, state: state
+        )
+    }
+
+    func testViewModel_whenAppEntersBackgroundWhileVoiceListening_stopsInput() async throws {
         // given, when
-        try await self.resignActiveAfterPrepared(state: .listening(.voice))
+        try await self.enterBackgroundAfterPrepared(state: .listening(.voice))
 
         // then
         XCTAssertEqual(self.stubOrchestration.didStopInput, true)
     }
 
-    // 키보드 입력은 오디오와 무관하므로 앱이 비활성이 돼도 유지된다
-    func testViewModel_whenAppResignsActiveWhileKeyboardListening_keepsInput() async throws {
+    func testViewModel_whenAppEntersBackgroundWhileKeyboardListening_keepsInput() async throws {
         // given, when
-        try await self.resignActiveAfterPrepared(state: .listening(.keyboard))
+        try await self.enterBackgroundAfterPrepared(state: .listening(.keyboard))
 
         // then
         XCTAssertNil(self.stubOrchestration.didStopInput)
     }
 
-    func testViewModel_whenAppResignsActiveWhileIdle_keepsInput() async throws {
+    func testViewModel_whenAppEntersBackgroundWhileIdle_keepsInput() async throws {
         // given, when
-        try await self.resignActiveAfterPrepared(state: .idle)
+        try await self.enterBackgroundAfterPrepared(state: .idle)
 
         // then
         XCTAssertNil(self.stubOrchestration.didStopInput)
@@ -1475,8 +1483,18 @@ extension CalendarViewModelImpleTests {
 
     func testViewModel_whenAIAgentFlagOff_doesNotStopInput() async throws {
         // given, when
-        try await self.resignActiveAfterPrepared(
+        try await self.enterBackgroundAfterPrepared(
             aiAgentEnabled: false, state: .listening(.voice)
+        )
+
+        // then
+        XCTAssertNil(self.stubOrchestration.didStopInput)
+    }
+
+    func testViewModel_whenAppResignsActiveWhileVoiceListening_keepsInput() async throws {
+        // given, when
+        try await self.postAppLifecycleAfterPrepared(
+            UIApplication.willResignActiveNotification, state: .listening(.voice)
         )
 
         // then
