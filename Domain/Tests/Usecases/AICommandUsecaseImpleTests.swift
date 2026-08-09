@@ -29,10 +29,12 @@ final class AICommandUsecaseImpleTests: PublisherWaitable {
         customStubLoadJobs: [AIJob]? = nil,
         customStubLoadJobAsResult: [Result<AIJob, any Error>]? = nil,
         shouldFailLoadJobWithError: ServerErrorModel? = nil,
-        customPollingPolicy: AICommandUsecaseImple.PollingPolicy? = nil
+        customPollingPolicy: AICommandUsecaseImple.PollingPolicy? = nil,
+        processCommandDelay: TimeInterval = 0
     ) -> AICommandUsecaseImple {
 
         stubRepository.shouldFailProcessCommand = shouldFailMakeJob
+        stubRepository.processCommandDelay = processCommandDelay
         stubRepository.shouldFailProcessConfirmCommand = shouldFailMakeConfirmJob
         let jobs = customStubLoadJobs ?? [
             .dummyPendingJob, .dummyRunningJob, .dummyRunningJob, .dummyDoneJob
@@ -449,15 +451,142 @@ extension AICommandUsecaseImpleTests {
 
 extension AICommandUsecaseImpleTests {
 
+    // 폴링 주기를 길게 둬서 "job은 만들어졌지만 아직 한 번도 조회되지 않은" 구간을 만든다
+    private var pollingPolicyNotReachingFirstCheck: AICommandUsecaseImple.PollingPolicy {
+        return .init(checkInterval: 10, totalTimeout: 60)
+    }
+
     @Test func usecase_cancelOngoingCommand_delegatesJobCancellationAndClear() async throws {
         // given
-        let usecase = self.makeUsecase()
+        let usecase = self.makeUsecase(
+            customPollingPolicy: self.pollingPolicyNotReachingFirstCheck
+        )
+        let processing = usecase.processCommand("cmd")
+            .sink(receiveCompletion: { _ in }, receiveValue: { _ in })
+        try await Task.sleep(for: .milliseconds(50))
+
         // when
-        usecase.cancelOngoingCommand("some_job")
-        try await Task.sleep(nanoseconds: 50_000_000)
-        // then — 전달받은 jobId로 repository cancel + clear 위임
+        usecase.cancelOngoingCommand()
+        try await Task.sleep(for: .milliseconds(50))
+
+        // then — 진행 중 job의 jobId로 repository cancel + clear 위임
         #expect(self.stubRepository.didCancelJobId == "some_job")
         #expect(self.stubRepository.didClearProcessing == true)
+        processing.cancel()
+    }
+
+    // job 조회 응답이 오기 전에 중지를 눌러도 서버 취소가 나가야 한다 —
+    // 첫 폴링까지 10초가 비어 있어 그 사이 중지가 통째로 유실되던 구멍 (#795)
+    @Test func usecase_whenCancelBeforeFirstJobCheck_requestsCancel() async throws {
+        // given
+        let usecase = self.makeUsecase(
+            customPollingPolicy: self.pollingPolicyNotReachingFirstCheck
+        )
+        var emitted: [AIJob] = []
+        let processing = usecase.processCommand("cmd")
+            .sink(receiveCompletion: { _ in }, receiveValue: { emitted.append($0) })
+        try await Task.sleep(for: .milliseconds(50))
+
+        // when — 시트가 닫혀 구독이 끊긴 뒤 중지
+        processing.cancel()
+        usecase.cancelOngoingCommand()
+        try await Task.sleep(for: .milliseconds(50))
+
+        // then
+        #expect(emitted.isEmpty == true)
+        #expect(self.stubRepository.didCancelJobId == "some_job")
+    }
+
+    // job 생성 응답조차 오기 전에 중지를 누른 경우 — 생성이 끝나는 즉시 취소가 집행돼야 한다
+    @Test func usecase_whenCancelBeforeJobCreated_requestsCancelRightAfterCreated() async throws {
+        // given
+        let usecase = self.makeUsecase(
+            customPollingPolicy: self.pollingPolicyNotReachingFirstCheck,
+            processCommandDelay: 0.2
+        )
+        let processing = usecase.processCommand("cmd")
+            .sink(receiveCompletion: { _ in }, receiveValue: { _ in })
+
+        // when — 생성 응답 전에 중지 + 시트 닫힘(구독 해제)
+        try await Task.sleep(for: .milliseconds(20))
+        usecase.cancelOngoingCommand()
+        processing.cancel()
+        try await Task.sleep(for: .milliseconds(400))
+
+        // then
+        #expect(self.stubRepository.didCancelJobId == "some_job")
+        #expect(self.stubRepository.didClearProcessing == true)
+    }
+
+    @Test func usecase_whenNoOngoingCommand_cancelRequestIsIgnored() async throws {
+        // given
+        let usecase = self.makeUsecase()
+
+        // when
+        usecase.cancelOngoingCommand()
+        try await Task.sleep(for: .milliseconds(50))
+
+        // then
+        #expect(self.stubRepository.didCancelJobId == nil)
+        #expect(self.stubRepository.didClearProcessing == false)
+    }
+
+    // 결과 확인(acknowledge)도 중지와 같은 경로를 타지만, 끝난 job에 취소가 나가면 안 된다
+    @Test func usecase_whenCommandAlreadyFinished_cancelRequestIsIgnored() async throws {
+        // given
+        let expect = expectConfirm("완료까지 진행")
+        expect.count = 4
+        expect.timeout = .seconds(1)
+        let usecase = self.makeUsecase()
+        let jobs = try await self.outputs(expect, for: usecase.processCommand("cmd"))
+        #expect(jobs.last?.isFinish == true)
+
+        // when
+        usecase.cancelOngoingCommand()
+        try await Task.sleep(for: .milliseconds(50))
+
+        // then
+        #expect(self.stubRepository.didCancelJobId == nil)
+    }
+
+    // 생성부터 실패하면 서버에 job이 없다 — 실패 화면을 확인(acknowledge)해도 취소가 나가면 안 된다
+    @Test func usecase_whenCommandCreationFailed_cancelRequestIsIgnored() async throws {
+        // given
+        let expect = expectConfirm("커맨드 생성 실패")
+        expect.timeout = .seconds(1)
+        let usecase = self.makeUsecase(shouldFailMakeJob: true)
+        let fail = try await self.failure(expect, for: usecase.processCommand("cmd"))
+        #expect(fail != nil)
+
+        // when
+        usecase.cancelOngoingCommand()
+        try await Task.sleep(for: .milliseconds(50))
+
+        // then
+        #expect(self.stubRepository.didCancelJobId == nil)
+    }
+
+    // 복원으로 이어받은 job도 중지 대상이다 — 콜드스타트 후 중지가 안 먹으면 안 된다
+    @Test func usecase_cancelRestoredCommand() async throws {
+        // given
+        let expect = expectConfirm("복원된 진행 중 job")
+        expect.timeout = .seconds(1)
+        let usecase = self.makeUsecase(
+            customStubLoadJobs: [.dummyRunningJob],
+            customPollingPolicy: self.pollingPolicyNotReachingFirstCheck
+        )
+        self.stubRepository.stubProcessingCommand = .init(
+            jobId: "restored_job", isConfirmJob: false
+        )
+        let restored = try await self.outputs(expect, for: usecase.restoreCommandifNeed())
+        #expect(restored.first??.isFinish == false)
+
+        // when
+        usecase.cancelOngoingCommand()
+        try await Task.sleep(for: .milliseconds(50))
+
+        // then
+        #expect(self.stubRepository.didCancelJobId == "restored_job")
     }
 }
 

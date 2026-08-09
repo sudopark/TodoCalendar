@@ -279,12 +279,11 @@ extension AIAgentOrchestrationUsecaseImple {
         self.subject.state.send(.idle)
     }
 
+    // 취소 대상 판정은 commandUsecase가 한다 — 여기서 jobId 보유로 판정하면 첫 job 조회
+    // 전(폴링 주기만큼)의 중지가 통째로 유실된다 (#795).
     public func reset() {
-        let jobId = self.currentProcessingJobId
         self.stopTrackingJob()
-        if let jobId {
-            self.commandUsecase.cancelOngoingCommand(jobId)
-        }
+        self.commandUsecase.cancelOngoingCommand()
         self.subject.state.send(.idle)
     }
 

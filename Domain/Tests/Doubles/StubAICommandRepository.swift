@@ -17,10 +17,14 @@ import Extensions
 class BaseStubAICommandRepository: AICommandRepository, @unchecked Sendable {
 
     var shouldFailProcessCommand: Bool = false
+    var processCommandDelay: TimeInterval = 0
     func processCommand(_ commandText: String, timeZone: String) async throws -> String {
         guard !self.shouldFailProcessCommand
         else {
             throw RuntimeError("not imple")
+        }
+        if self.processCommandDelay > 0 {
+            try await Task.sleep(for: .seconds(self.processCommandDelay))
         }
         return "some_job"
     }

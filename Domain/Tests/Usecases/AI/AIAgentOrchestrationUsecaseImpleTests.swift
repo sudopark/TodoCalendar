@@ -563,7 +563,21 @@ extension AIAgentOrchestrationUsecaseImpleTests {
         }
         // then
         #expect(states.last.map(self.stateName) == "idle")
-        #expect(self.stubCommand.didCancelJobId == "job-1")
+        #expect(self.stubCommand.didRequestCancelOngoing == true)
+    }
+
+    // job이 아직 방출되지 않아 orchestration이 jobId를 모르는 시점에도 중지는 나가야 한다 —
+    // 중지 여부를 jobId 보유로 판정하던 게 #795의 원인이었다
+    @Test func usecase_reset_requestsCancelEvenBeforeJobEmitted() async throws {
+        // given — command job이 방출되지 않는 상태(첫 조회 전)
+        let usecase = self.makeUsecase()
+        try? usecase.submit("회의")
+
+        // when
+        usecase.reset()
+
+        // then
+        #expect(self.stubCommand.didRequestCancelOngoing == true)
     }
 
     @Test func usecase_decline_rejectsButDoesNotCancelOngoing() async throws {
@@ -579,7 +593,7 @@ extension AIAgentOrchestrationUsecaseImpleTests {
         // then — reject은 가되 cancel(중지) API는 안 나간다
         #expect(states.last.map(self.stateName) == "idle")
         #expect(self.stubCommand.didRejectParentJobId == "parent-job")
-        #expect(self.stubCommand.didCancelJobId == nil)  // decline은 cancelOngoing 호출 안 함
+        #expect(self.stubCommand.didRequestCancelOngoing == false)  // decline은 cancelOngoing 호출 안 함
     }
 }
 
@@ -730,7 +744,7 @@ private final class StubAICommandUsecase: AICommandUsecase, @unchecked Sendable 
     var didRejectParentJobId: String?
     var didProcessCommand: String?
     var didRestore: Bool = false
-    var didCancelJobId: String?
+    var didRequestCancelOngoing: Bool = false
     var didProcessConfirmToken: String?
 
     func processCommand(_ commandText: String) -> AnyPublisher<AIJob, any Error> {
@@ -745,8 +759,8 @@ private final class StubAICommandUsecase: AICommandUsecase, @unchecked Sendable 
     func rejectConfirmCommand(_ action: AIConfirmCommandAction) {
         self.didRejectParentJobId = action.parentJobId
     }
-    func cancelOngoingCommand(_ jobId: String) {
-        self.didCancelJobId = jobId
+    func cancelOngoingCommand() {
+        self.didRequestCancelOngoing = true
     }
     func restoreCommandifNeed() -> AnyPublisher<AIJob?, any Error> {
         self.didRestore = true
@@ -1360,7 +1374,7 @@ extension AIAgentOrchestrationUsecaseImpleTests {
 
         // then
         #expect(self.stubCommand.didClearProcessingCommandRecord == true)
-        #expect(self.stubCommand.didCancelJobId == nil)
+        #expect(self.stubCommand.didRequestCancelOngoing == false)
     }
 
     @Test("로그아웃하면 진행 중이던 상태를 idle로 되돌린다")
