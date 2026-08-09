@@ -14,6 +14,7 @@
   - en `Localizable.strings` 키 추가/삭제 ↔ ko lproj 반영 ↔ 번역 대기 트래킹 이슈 #810에 작업 링크 기록 (나머지 29개 언어는 #810 처리 시점에 일괄 번역 — 상세는 `.claude/rules/localization.md`)
 - **스킬 종료·유저 교정은 레코드로 남긴다** (#690 flywheel 측정 신호):
   - 발동한 스킬의 절차가 끝나면: `python3 .claude/hooks/log-record.py skill_end --name <스킬> --compliance full|partial [--deviation "조항::사유"]` — 조항을 의도적으로 이행 안 했으면 partial + 이탈 조항·사유 필수.
+  - **partial은 조항이 허용하지 않은 이탈에만 쓴다.** 조항이 조건부 생략·갈음·대체 경로를 규정하고 그 조건을 충족해 그 경로를 탔으면 **full**이다 — 규정된 선택지를 고른 것은 이행이지 이탈이 아니다. 판정 기준은 규범 판단이 아니라 "그 조항이 이 생략을 문언으로 규정하고 있나"라는 사실 확인이다. 허용된 생략까지 partial로 세면 지표가 오염돼 진짜 이탈이 묻힌다.
   - 유저가 작업 결과·방식을 교정하면 그 자리에서: `python3 .claude/hooks/log-record.py correction --skills <귀속 스킬(쉼표 구분)> --summary "교정 요지" --gist "발화 요지"`. **귀속은 발동 중이던 스킬이 아니라 교정 대상의 소관으로 정한다** — 그 사안을 다루는 조항이 그 스킬에 **실제로 있을 때만** `--skills`에 넣고(규범 판단이 아니라 조항 존재라는 사실 확인), 응답 톤·글쓰기처럼 전역 규칙(CLAUDE.md) 소관인 교정은 `--skills` 생략. 발동 중이라는 이유로 붙이면 스킬 신호가 오염돼 엉뚱한 조항이 정비 대상으로 올라온다.
 - **`.claude/rules/*.md`는 path 매칭 시 자동 로드** — 로드된 조항을 구현 결정 시점에 적극 invoke.
 - **외운 지식 말고 이 문서를 보고 판단할 것.** (도메인 경계·용어는 [`docs/domain-context-map.md`](docs/domain-context-map.md) 정본 기준)
