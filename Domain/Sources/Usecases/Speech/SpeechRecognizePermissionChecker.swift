@@ -22,6 +22,14 @@ public struct SpeechRecognizeAuthError: Error {
         self.micNotAvail = micNotAvail
         self.speechNotAvail = speechNotAvail
     }
+
+    // restricted는 유저가 설정에서 풀 수 없다 — 조치 가능한 거부만 구분한다
+    public var isDenied: Bool {
+        switch (self.micNotAvail, self.speechNotAvail) {
+        case (.denied, _), (_, .denied): return true
+        default: return false
+        }
+    }
 }
 
 

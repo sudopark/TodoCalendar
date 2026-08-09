@@ -5,7 +5,7 @@
 //  Created by sudo.park on 2023/06/30.
 //
 
-import Foundation
+import UIKit
 import Domain
 import Scenes
 
@@ -20,6 +20,8 @@ protocol CalendarViewRouting: Routing, Sendable {
     func routeToAICommand()
 
     func routeToSignIn()
+
+    func openSystemSetting()
 }
 
 final class CalendarViewRouterImple: BaseRouterImple, CalendarViewRouting, @unchecked Sendable {
@@ -78,6 +80,15 @@ final class CalendarViewRouterImple: BaseRouterImple, CalendarViewRouting, @unch
         Task { @MainActor in
             let next = self.memberSceneBuilder.makeSignInScene()
             self.showBottomSlide(next)
+        }
+    }
+
+    func openSystemSetting() {
+        Task { @MainActor in
+            guard let url = URL(string: UIApplication.openSettingsURLString),
+                  UIApplication.shared.canOpenURL(url)
+            else { return }
+            UIApplication.shared.open(url)
         }
     }
 }

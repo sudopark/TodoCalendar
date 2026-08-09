@@ -1240,6 +1240,11 @@ private extension CalendarViewModelImpleTests {
         func routeToSignIn() {
             self.didRouteToSignIn = true
         }
+
+        var didOpenSystemSetting: Bool?
+        func openSystemSetting() {
+            self.didOpenSystemSetting = true
+        }
     }
     
     class SpyPaperInteractor: CalendarPaperSceneInteractor, @unchecked Sendable {
@@ -1499,6 +1504,28 @@ extension CalendarViewModelImpleTests {
 
         // then
         XCTAssertNil(self.stubOrchestration.didStopInput)
+    }
+
+    private func makePreparedViewModel() async throws -> CalendarViewModelImple {
+        FeatureFlag.enable(.aiAgent)
+        let viewModel = self.makeViewModel()
+        viewModel.prepare()
+        try await Task.sleep(for: .milliseconds(50))
+        return viewModel
+    }
+
+    func testViewModel_whenSpeechPermissionDenied_showsSettingGuide() async throws {
+        // given
+        let viewModel = try await self.makePreparedViewModel()
+
+        // when
+        self.stubOrchestration.speechPermissionDeniedSubject.send(())
+        try await Task.sleep(for: .milliseconds(50))
+
+        // then
+        XCTAssertNotNil(self.spyRouter.didShowConfirmWith)
+        XCTAssertEqual(self.spyRouter.didOpenSystemSetting, true)
+        withExtendedLifetime(viewModel) { }
     }
 }
 

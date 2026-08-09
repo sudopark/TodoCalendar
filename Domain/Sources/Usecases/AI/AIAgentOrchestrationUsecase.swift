@@ -19,6 +19,7 @@ public protocol AIAgentOrchestrationUsecase: AnyObject, Sendable {
     var usage: AnyPublisher<AIAgentUsage, Never> { get }
     var recognizingText: AnyPublisher<String, Never> { get }
     var voiceLevel: AnyPublisher<Float, Never> { get }
+    var speechPermissionDenied: AnyPublisher<Void, Never> { get }
 
     func prepare()
     func enterVoiceInput()
@@ -66,6 +67,7 @@ public final class AIAgentOrchestrationUsecaseImple: AIAgentOrchestrationUsecase
         let state = CurrentValueSubject<AIAgentState?, Never>(nil)
         let recognizingText = PassthroughSubject<String, Never>()
         let voiceLevel = PassthroughSubject<Float, Never>()
+        let speechPermissionDenied = PassthroughSubject<Void, Never>()
     }
     private let subject = Subject()
     private var commandCancellable: AnyCancellable?
@@ -203,8 +205,20 @@ extension AIAgentOrchestrationUsecaseImple {
     private func handleRecognizeEnd(_ result: Result<SpeechRecognizeResult, any Error>) {
         self.resetVoiceBinding()
         self.subject.state.send(.idle)
-        guard case .success(.recognized(let text)) = result else { return }
-        try? self.submit(text)
+        switch result {
+        case .success(.recognized(let text)):
+            try? self.submit(text)
+        case .failure(let error):
+            self.notifyIfPermissionDenied(error)
+        default:
+            break
+        }
+    }
+
+    private func notifyIfPermissionDenied(_ error: any Error) {
+        guard let authError = error as? SpeechRecognizeAuthError, authError.isDenied
+        else { return }
+        self.subject.speechPermissionDenied.send(())
     }
 
     private func resetVoiceBinding() {
@@ -414,6 +428,10 @@ extension AIAgentOrchestrationUsecaseImple {
     public var voiceLevel: AnyPublisher<Float, Never> {
         return self.subject.voiceLevel.eraseToAnyPublisher()
     }
+
+    public var speechPermissionDenied: AnyPublisher<Void, Never> {
+        return self.subject.speechPermissionDenied.eraseToAnyPublisher()
+    }
 }
 
 
@@ -438,6 +456,10 @@ public final class NotNeedAIAgentOrchestrationUsecase: AIAgentOrchestrationUseca
     }
 
     public var voiceLevel: AnyPublisher<Float, Never> {
+        return Empty(completeImmediately: false).eraseToAnyPublisher()
+    }
+
+    public var speechPermissionDenied: AnyPublisher<Void, Never> {
         return Empty(completeImmediately: false).eraseToAnyPublisher()
     }
 

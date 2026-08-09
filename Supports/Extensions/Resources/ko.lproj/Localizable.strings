@@ -551,6 +551,9 @@
 "aiAgent::retry" = "다시";
 "aiAgent::needSignIn::title" = "로그인이 필요해요";
 "aiAgent::needSignIn::message" = "AI 빠른 입력은 로그인 후 이용할 수 있어요.";
+"aiAgent::speechPermissionDenied::title" = "권한이 필요해요";
+"aiAgent::speechPermissionDenied::message" = "음성 입력을 쓰려면 설정에서 마이크와 음성 인식 권한을 허용해 주세요.";
+"aiAgent::speechPermissionDenied::confirm" = "설정 열기";
 "aiAgent::title" = "AI 빠른 입력";
 "aiAgent::keyboard::stop" = "중지";
 "aiAgent::keyboard::send" = "전송";
