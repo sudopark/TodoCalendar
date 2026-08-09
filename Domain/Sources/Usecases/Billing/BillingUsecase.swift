@@ -33,6 +33,10 @@ public protocol BillingUsecase: AnyObject, Sendable {
 
     func recoverUnfinishedTransactions()
 
+    func hasUnfinishedTransactions() async -> Bool
+
+    func applyUnfinishedTransactions() async throws -> BillingUserPlan?
+
     var currentUserPlan: AnyPublisher<BillingUserPlan, Never> { get }
 }
 
@@ -220,6 +224,19 @@ extension BillingUsecaseImple {
                 }
             }
         }
+    }
+
+    public func hasUnfinishedTransactions() async -> Bool {
+        return await self.appStoreService.unfinishedTransactions().isEmpty == false
+    }
+
+    public func applyUnfinishedTransactions() async throws -> BillingUserPlan? {
+        let transactions = await self.appStoreService.unfinishedTransactions()
+        var latest: BillingUserPlan?
+        for transaction in transactions {
+            latest = try await self.delegateAndFinish(transaction)
+        }
+        return latest
     }
 
     public var currentUserPlan: AnyPublisher<BillingUserPlan, Never> {

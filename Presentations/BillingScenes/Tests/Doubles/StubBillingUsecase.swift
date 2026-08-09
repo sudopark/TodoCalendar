@@ -22,11 +22,15 @@ final class StubBillingUsecase: BillingUsecase, @unchecked Sendable {
     // refreshUserPlan() 실패를 시뮬레이션 — nil이면 성공 (#739)
     private let userPlanLoadError: (any Error)?
     private let userPlanSubject: CurrentValueSubject<BillingUserPlan?, Never>
+    private let hasUnfinished: Bool
+    private let applyUnfinishedResult: Result<BillingUserPlan?, any Error>
 
     // 호출 기록 — 검증은 테스트 케이스가 한다
     var didPurchasedProductId: String?
     var didRestoreCalled: Bool = false
     var didRefreshUserPlanCalled: Bool = false
+    var didCheckUnfinishedCalled: Bool = false
+    var didApplyUnfinishedTimes: Int = 0
 
     init(
         offerings: [BillingPlanOffering] = [],
@@ -34,7 +38,9 @@ final class StubBillingUsecase: BillingUsecase, @unchecked Sendable {
         purchaseResult: Result<BillingPurchaseResult, any Error> = .success(.cancelled),
         userPlan: BillingUserPlan? = nil,
         restoreResult: BillingUserPlan? = nil,
-        userPlanLoadError: (any Error)? = nil
+        userPlanLoadError: (any Error)? = nil,
+        hasUnfinished: Bool = false,
+        applyUnfinishedResult: Result<BillingUserPlan?, any Error> = .success(nil)
     ) {
         self.stubOfferings = offerings
         self.catalogLoadError = catalogLoadError
@@ -42,6 +48,8 @@ final class StubBillingUsecase: BillingUsecase, @unchecked Sendable {
         self.restoreResult = restoreResult
         self.userPlanLoadError = userPlanLoadError
         self.userPlanSubject = .init(userPlan)
+        self.hasUnfinished = hasUnfinished
+        self.applyUnfinishedResult = applyUnfinishedResult
     }
 
     func loadPlanOfferings() async throws -> [BillingPlanOffering] {
@@ -80,6 +88,19 @@ final class StubBillingUsecase: BillingUsecase, @unchecked Sendable {
     func startObservingTransactions() { }
     func stopObservingTransactions() { }
     func recoverUnfinishedTransactions() { }
+    func hasUnfinishedTransactions() async -> Bool {
+        self.didCheckUnfinishedCalled = true
+        return self.hasUnfinished
+    }
+
+    func applyUnfinishedTransactions() async throws -> BillingUserPlan? {
+        self.didApplyUnfinishedTimes += 1
+        let applied = try self.applyUnfinishedResult.get()
+        if let applied {
+            self.userPlanSubject.send(applied)
+        }
+        return applied
+    }
 
     var currentUserPlan: AnyPublisher<BillingUserPlan, Never> {
         self.userPlanSubject.compactMap { $0 }.eraseToAnyPublisher()
