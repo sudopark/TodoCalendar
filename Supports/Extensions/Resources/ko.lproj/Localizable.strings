@@ -579,6 +579,8 @@
 "aiAgent::image::textTooLong" = "텍스트가 너무 길어요. 줄여서 다시 시도해 주세요.";
 "aiAgent::image::instructionTooLong" = "지시가 너무 길어요. 줄여서 다시 시도해 주세요.";
 "aiAgent::image::busy" = "다른 요청이 아직 진행 중이에요";
+"aiAgent::image::camera::denied::title" = "카메라 권한이 필요해요";
+"aiAgent::image::camera::denied::message" = "설정에서 카메라 접근을 허용하면 사진을 찍을 수 있어요.";
 
 // MARK: - billing
 

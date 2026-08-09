@@ -24,6 +24,7 @@ final class DayEventListSceneBuilerImple {
     private let accountUsecase: any AccountUsecase
     private let memberSceneBuilder: any MemberSceneBuilder
     private let aiKeyboardInputSceneBuilder: any AIAgentKeyboardInputSceneBuilder
+    private let aiImageCommandSceneBuilder: any AIAgentImageCommandSceneBuilder
 
     init(
         usecaseFactory: any UsecaseFactory,
@@ -32,7 +33,8 @@ final class DayEventListSceneBuilerImple {
         eventListSceneBuilder: any EventListSceneBuiler,
         accountUsecase: any AccountUsecase,
         memberSceneBuilder: any MemberSceneBuilder,
-        aiKeyboardInputSceneBuilder: any AIAgentKeyboardInputSceneBuilder
+        aiKeyboardInputSceneBuilder: any AIAgentKeyboardInputSceneBuilder,
+        aiImageCommandSceneBuilder: any AIAgentImageCommandSceneBuilder
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
@@ -41,6 +43,7 @@ final class DayEventListSceneBuilerImple {
         self.accountUsecase = accountUsecase
         self.memberSceneBuilder = memberSceneBuilder
         self.aiKeyboardInputSceneBuilder = aiKeyboardInputSceneBuilder
+        self.aiImageCommandSceneBuilder = aiImageCommandSceneBuilder
     }
 }
 
@@ -77,6 +80,7 @@ extension DayEventListSceneBuilerImple: DayEventListSceneBuiler {
             eventListSceneBuilder: self.eventListSceneBuilder,
             memberSceneBuilder: self.memberSceneBuilder,
             aiKeyboardInputSceneBuilder: self.aiKeyboardInputSceneBuilder,
+            aiImageCommandSceneBuilder: self.aiImageCommandSceneBuilder,
             viewAppearance: self.viewAppearance
         )
         viewModel.router = router

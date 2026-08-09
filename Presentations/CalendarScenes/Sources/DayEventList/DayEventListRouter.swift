@@ -8,8 +8,11 @@
 //
 
 import UIKit
+import Prelude
+import Optics
 import Domain
 import Scenes
+import Extensions
 import CommonPresentation
 
 
@@ -23,6 +26,7 @@ protocol DayEventListRouting: Routing, Sendable {
     func showDoneTodoList()
     func routeToSignIn()
     func routeToAIKeyboardInput()
+    func routeToImageSourceSelect(onCancel: @escaping @Sendable () -> Void)
     func routeToAIGuide()
 }
 
@@ -34,6 +38,8 @@ final class DayEventListRouter: BaseRouterImple, DayEventListRouting, @unchecked
     private let eventListSceneBuilder: any EventListSceneBuiler
     private let memberSceneBuilder: any MemberSceneBuilder
     private let aiKeyboardInputSceneBuilder: any AIAgentKeyboardInputSceneBuilder
+    private let aiImageCommandSceneBuilder: any AIAgentImageCommandSceneBuilder
+    private let imagePicker: ImagePicker = .init()
     private let viewAppearance: ViewAppearance
 
     init(
@@ -41,12 +47,14 @@ final class DayEventListRouter: BaseRouterImple, DayEventListRouting, @unchecked
         eventListSceneBuilder: any EventListSceneBuiler,
         memberSceneBuilder: any MemberSceneBuilder,
         aiKeyboardInputSceneBuilder: any AIAgentKeyboardInputSceneBuilder,
+        aiImageCommandSceneBuilder: any AIAgentImageCommandSceneBuilder,
         viewAppearance: ViewAppearance
     ) {
         self.eventDetailSceneBuilder = eventDetailSceneBuilder
         self.eventListSceneBuilder = eventListSceneBuilder
         self.memberSceneBuilder = memberSceneBuilder
         self.aiKeyboardInputSceneBuilder = aiKeyboardInputSceneBuilder
+        self.aiImageCommandSceneBuilder = aiImageCommandSceneBuilder
         self.viewAppearance = viewAppearance
     }
 }
@@ -85,6 +93,77 @@ extension DayEventListRouter {
     func routeToAIKeyboardInput() {
         Task { @MainActor in
             let next = self.aiKeyboardInputSceneBuilder.makeKeyboardInputScene()
+            self.showBottomSlide(next)
+        }
+    }
+
+    func routeToImageSourceSelect(onCancel: @escaping @Sendable () -> Void) {
+        Task { @MainActor in
+            var form = ActionSheetForm()
+            form.title = "aiAgent::image::sourceSelect::title".localized()
+            form.actions = [
+                .init("aiAgent::image::source::library".localized()) { [weak self] in
+                    self?.routeToImagePick(source: .photoLibrary, onCancel: onCancel)
+                }
+            ]
+            if ImagePickSource.camera.isAvailable {
+                form.actions.append(
+                    .init("aiAgent::image::source::camera".localized()) { [weak self] in
+                        self?.routeToImagePick(source: .camera, onCancel: onCancel)
+                    }
+                )
+            }
+            form.actions.append(.init("common.cancel".localized(), style: .cancel) { onCancel() })
+            self.showActionSheet(form)
+        }
+    }
+
+    private func routeToImagePick(
+        source: ImagePickSource,
+        onCancel: @escaping @Sendable () -> Void
+    ) {
+        Task { @MainActor in
+            guard !source.isAccessDenied else {
+                self.showAccessDeniedGuide(onCancel: onCancel)
+                return
+            }
+            let picker = self.imagePicker.makeViewController(source: source) { [weak self] data in
+                guard let data else {
+                    onCancel()
+                    return
+                }
+                self?.routeToImageCommand(imageData: data)
+            }
+            self.scene?.present(picker, animated: true)
+        }
+    }
+
+    // 권한이 거부된 채로 카메라 피커를 띄우면 시스템이 다시 묻지 않아 검은 화면만 올라온다.
+    // 어느 쪽으로 닫든 onCancel로 이미지 진입 전 상태를 되돌려야 .listening(.image)에 갇히지 않는다.
+    private func showAccessDeniedGuide(onCancel: @escaping @Sendable () -> Void) {
+        let info = ConfirmDialogInfo()
+            |> \.title .~ "aiAgent::image::camera::denied::title".localized()
+            |> \.message .~ "aiAgent::image::camera::denied::message".localized()
+            |> \.confirmText .~ "common.go_to_settings".localized()
+            |> \.confirmed .~ pure({ [weak self] in
+                self?.openSystemSetting()
+                onCancel()
+            })
+            |> \.canceled .~ pure({ onCancel() })
+        self.showConfirm(dialog: info)
+    }
+
+    private func openSystemSetting() {
+        Task { @MainActor in
+            guard let url = URL(string: UIApplication.openSettingsURLString)
+            else { return }
+            UIApplication.shared.open(url)
+        }
+    }
+
+    private func routeToImageCommand(imageData: Data) {
+        Task { @MainActor in
+            let next = self.aiImageCommandSceneBuilder.makeImageCommandScene(imageData: imageData)
             self.showBottomSlide(next)
         }
     }

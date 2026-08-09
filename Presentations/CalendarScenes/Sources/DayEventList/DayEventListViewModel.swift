@@ -61,6 +61,7 @@ protocol DayEventListViewModel: AnyObject, Sendable, DayEventListSceneInteractor
     func finishVoiceInput()
 
     func enterKeyboardInput()
+    func enterImageInput()
     func stopAIAgentInput()
     func submitAIAgent(_ text: String)
     func handleAIEntryButtonTap()
@@ -242,6 +243,15 @@ extension DayEventListViewModelImple {
     func enterKeyboardInput() {
         self.aiAgentOrchestrationUsecase.enterKeyboardInput()
         self.router?.routeToAIKeyboardInput()
+    }
+
+    // 소스 선택·피커를 유저가 취소하면 이미지 진입 전 상태(음성 입력)로 되돌린다.
+    // 안 되돌리면 .listening(.image)에 갇혀 마이크는 꺼졌는데 입력 바만 남는다.
+    func enterImageInput() {
+        self.aiAgentOrchestrationUsecase.enterImageInput()
+        self.router?.routeToImageSourceSelect { [weak self] in
+            self?.aiAgentOrchestrationUsecase.enterVoiceInput()
+        }
     }
 
     func stopAIAgentInput() {

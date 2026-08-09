@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import AVFoundation
 import PhotosUI
 import UniformTypeIdentifiers
 
@@ -23,6 +24,17 @@ public enum ImagePickSource: Sendable, Equatable {
         switch self {
         case .photoLibrary: return true
         case .camera: return UIImagePickerController.isSourceTypeAvailable(.camera)
+        }
+    }
+
+    /// 접근이 이미 막힌 상태. notDetermined는 시스템이 피커를 띄우며 직접 묻기 때문에 여기 해당하지 않는다.
+    public var isAccessDenied: Bool {
+        switch self {
+        // PHPicker는 별도 프로세스에서 돌아 앱이 라이브러리 권한을 갖지 않는다
+        case .photoLibrary: return false
+        case .camera:
+            let status = AVCaptureDevice.authorizationStatus(for: .video)
+            return status == .denied || status == .restricted
         }
     }
 }

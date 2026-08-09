@@ -253,6 +253,7 @@ private final class FakeDayEventListViewModel: DayEventListViewModel, @unchecked
     func enterVoiceInput() { }
     func finishVoiceInput() { }
     func enterKeyboardInput() { }
+    func enterImageInput() { }
     func stopAIAgentInput() { }
     func submitAIAgent(_ text: String) { }
     func handleAIEntryButtonTap() { }
