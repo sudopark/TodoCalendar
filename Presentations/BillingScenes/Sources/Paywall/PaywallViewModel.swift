@@ -74,6 +74,7 @@ protocol PaywallViewModel: AnyObject, Sendable, PaywallSceneInteractor {
     func selectPlan(_ planId: BillingPlanId)
     func purchase()
     func restore()
+    func recoverUnfinished()
     func openTerms()
     func openPrivacyPolicy()
     func close()
@@ -87,6 +88,7 @@ protocol PaywallViewModel: AnyObject, Sendable, PaywallSceneInteractor {
     var selectedPlanId: AnyPublisher<BillingPlanId?, Never> { get }
     var selectedPlanDetail: AnyPublisher<PaywallPlanDetailModel?, Never> { get }
     var isPurchasing: AnyPublisher<Bool, Never> { get }
+    var hasUnfinishedTransactions: AnyPublisher<Bool, Never> { get }
 }
 
 
@@ -103,6 +105,7 @@ final class PaywallViewModelImple: PaywallViewModel, @unchecked Sendable {
         let currentPlanId = CurrentValueSubject<BillingPlanId?, Never>(nil)
         let userSelectedPlanId = CurrentValueSubject<BillingPlanId?, Never>(nil)
         let isPurchasing = CurrentValueSubject<Bool, Never>(false)
+        let hasUnfinished = CurrentValueSubject<Bool, Never>(false)
     }
     private let subject = Subject()
     private var cancellables: Set<AnyCancellable> = []
@@ -133,7 +136,8 @@ extension PaywallViewModelImple {
             guard let self else { return }
             async let planLoad: Void = self.loadUserPlan()
             async let catalogLoad: Void = self.loadCatalog()
-            _ = await (planLoad, catalogLoad)
+            async let unfinishedLoad: Void = self.loadUnfinishedState()
+            _ = await (planLoad, catalogLoad, unfinishedLoad)
         }
     }
 
@@ -153,6 +157,11 @@ extension PaywallViewModelImple {
         } catch {
             self.subject.catalogState.send(.failed)
         }
+    }
+
+    private func loadUnfinishedState() async {
+        let hasUnfinished = await self.billingUsecase.hasUnfinishedTransactions()
+        self.subject.hasUnfinished.send(hasUnfinished)
     }
 
     func selectPlan(_ planId: BillingPlanId) {
@@ -217,6 +226,22 @@ extension PaywallViewModelImple {
                         ? "billing::paywall::restored".localized()
                         : "billing::paywall::restore::empty".localized()
                 )
+            } catch {
+                self.router?.showError(error)
+            }
+        }
+    }
+
+    func recoverUnfinished() {
+        guard self.subject.isPurchasing.value == false else { return }
+        self.subject.isPurchasing.send(true)
+        Task { [weak self] in
+            guard let self else { return }
+            defer { self.subject.isPurchasing.send(false) }
+            do {
+                _ = try await self.billingUsecase.applyUnfinishedTransactions()
+                self.subject.hasUnfinished.send(false)
+                self.router?.showToast("billing::paywall::unfinished::applied".localized())
             } catch {
                 self.router?.showError(error)
             }
@@ -304,6 +329,10 @@ extension PaywallViewModelImple {
 
     var isPurchasing: AnyPublisher<Bool, Never> {
         return self.subject.isPurchasing.eraseToAnyPublisher()
+    }
+
+    var hasUnfinishedTransactions: AnyPublisher<Bool, Never> {
+        return self.subject.hasUnfinished.removeDuplicates().eraseToAnyPublisher()
     }
 
     private var catalogStatePublisher: AnyPublisher<PaywallCatalogState, Never> {

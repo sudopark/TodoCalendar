@@ -27,6 +27,7 @@ import CommonPresentation
     var selectedPlanId: BillingPlanId?
     var selectedPlanDetail: PaywallPlanDetailModel?
     var isPurchasing: Bool = false
+    var hasUnfinishedTransactions: Bool = false
 
     func bind(_ viewModel: any PaywallViewModel) {
         guard self.didBind == false else { return }
@@ -71,6 +72,11 @@ import CommonPresentation
             .receive(on: RunLoop.main)
             .sink { [weak self] in self?.isPurchasing = $0 }
             .store(in: &self.cancellables)
+
+        viewModel.hasUnfinishedTransactions
+            .receive(on: RunLoop.main)
+            .sink { [weak self] in self?.hasUnfinishedTransactions = $0 }
+            .store(in: &self.cancellables)
     }
 }
 
@@ -84,6 +90,7 @@ final class PaywallViewEventHandler: Observable {
     var selectPlan: (BillingPlanId) -> Void = { _ in }
     var purchase: () -> Void = { }
     var restore: () -> Void = { }
+    var recoverUnfinished: () -> Void = { }
     var openTerms: () -> Void = { }
     var openPrivacyPolicy: () -> Void = { }
     var close: () -> Void = { }
@@ -94,6 +101,7 @@ final class PaywallViewEventHandler: Observable {
         self.selectPlan = viewModel.selectPlan(_:)
         self.purchase = viewModel.purchase
         self.restore = viewModel.restore
+        self.recoverUnfinished = viewModel.recoverUnfinished
         self.openTerms = viewModel.openTerms
         self.openPrivacyPolicy = viewModel.openPrivacyPolicy
         self.close = viewModel.close
@@ -174,6 +182,10 @@ private struct PaywallView: View {
                 .padding(.top, spacing: .regular)
             }
 
+            if self.state.hasUnfinishedTransactions {
+                self.unfinishedRecoveryBanner
+            }
+
             BottomConfirmButton(
                 title: self.state.selectedPlanDetail?.ctaTitle
                     ?? "billing::paywall::cta::unavailable".localized(),
@@ -182,6 +194,39 @@ private struct PaywallView: View {
             )
             .eventHandler(\.onTap) { self.eventHandlers.purchase() }
         }
+    }
+
+    // MARK: - 미완료 결제 복구 배너
+
+    private var unfinishedRecoveryBanner: some View {
+        HStack(alignment: .top, spacing: Metric.Spacing.small) {
+            Image(systemName: "exclamationmark.circle.fill")
+                .foregroundStyle(self.appearance.colorSet.accentWarn.asColor)
+
+            VStack(alignment: .leading, spacing: Metric.Spacing.xxsmall) {
+                Text("billing::paywall::unfinished::title".localized())
+                    .font(self.appearance.fontSet.subNormalWithBold.asFont)
+                    .foregroundStyle(self.appearance.colorSet.text0.asColor)
+                Text("billing::paywall::unfinished::message".localized())
+                    .font(self.appearance.fontSet.subSubNormal.asFont)
+                    .foregroundStyle(self.appearance.colorSet.text2.asColor)
+            }
+
+            Spacer(minLength: Metric.Spacing.small)
+
+            Text("billing::paywall::unfinished::action".localized())
+                .font(self.appearance.fontSet.subNormalWithBold.asFont)
+                .foregroundStyle(self.appearance.colorSet.accentAI.asColor)
+                .opacity(self.state.isPurchasing ? 0.5 : 1)
+                .allowsHitTesting(!self.state.isPurchasing)
+                .onTapGesture { self.eventHandlers.recoverUnfinished() }
+        }
+        .padding(spacing: .regular)
+        .background(
+            RoundedRectangle(cornerRadius: Metric.Radius.regular)
+                .fill(self.appearance.colorSet.bg1.asColor)
+        )
+        .padding(.horizontal, spacing: .xlarge)
     }
 
     // MARK: - 유저 플랜 조회 게이트 (로딩·전면 에러)

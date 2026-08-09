@@ -621,6 +621,10 @@
 "billing::paywall::pending::message" = "가족 구성원 관리자의 구매 승인을 기다리고 있어요. 승인되면 자동으로 반영됩니다.";
 "billing::paywall::userPlan::loadFailed" = "플랜을 불러오지 못했어요. 다시 시도해주세요.";
 "billing::paywall::retry" = "다시";
+"billing::paywall::unfinished::title" = "반영되지 않은 결제가 있어요";
+"billing::paywall::unfinished::message" = "결제는 완료됐지만 플랜에 아직 반영되지 않았어요.";
+"billing::paywall::unfinished::action" = "지금 반영";
+"billing::paywall::unfinished::applied" = "결제가 반영됐어요";
 
 // MARK: - share extension
 
