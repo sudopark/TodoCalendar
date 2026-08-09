@@ -94,10 +94,8 @@ extension ApplicationRootViewModelImpleTests {
         withExtendedLifetime(viewModel) { }
     }
 
-    // didBecomeActive는 제어센터·알림센터 여닫기, 권한 다이얼로그 dismiss 등에서도 매번 온다.
-    // 그때마다 재조회하면 job 진행 중 구간에 불필요한 서버 조회가 반복된다.
-    @Test("짧은 간격의 연속 활성 전환은 한 번만 이어받는다")
-    func viewModel_whenDidBecomeActiveRepeatedly_refreshOnlyOnce() async {
+    @Test("연속된 활성 전환도 매번 이어받는다")
+    func viewModel_whenDidBecomeActiveRepeatedly_refreshEveryTime() async {
         // given
         let viewModel = self.makeViewModel()
 
@@ -110,7 +108,7 @@ extension ApplicationRootViewModelImpleTests {
         try? await Task.sleep(for: .milliseconds(100))
 
         // then
-        #expect(self.spyAIJobRefreshUsecase.didRefreshProcessingJobTimes == 1)
+        #expect(self.spyAIJobRefreshUsecase.didRefreshProcessingJobTimes == 3)
         withExtendedLifetime(viewModel) { }
     }
 
