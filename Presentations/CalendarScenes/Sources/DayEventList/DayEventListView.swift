@@ -158,6 +158,7 @@ final class DayEventListViewEventHandler: Observable {
     var enterVoiceInput: () -> Void = { }
     var finishVoiceInput: () -> Void = { }
     var enterKeyboardInput: () -> Void = { }
+    var enterImageInput: () -> Void = { }
     var stopAIAgentInput: () -> Void = { }
     var submitAIAgent: (String) -> Void = { _ in }
     var handleAIEntryButtonTap: () -> Void = { }
@@ -182,6 +183,7 @@ final class DayEventListViewEventHandler: Observable {
         self.enterVoiceInput = viewModel.enterVoiceInput
         self.finishVoiceInput = viewModel.finishVoiceInput
         self.enterKeyboardInput = viewModel.enterKeyboardInput
+        self.enterImageInput = viewModel.enterImageInput
         self.stopAIAgentInput = viewModel.stopAIAgentInput
         self.submitAIAgent = viewModel.submitAIAgent(_:)
         self.handleAIEntryButtonTap = viewModel.handleAIEntryButtonTap
@@ -562,6 +564,9 @@ private struct QuickAddNewTodoView: View {
             }
             self.circleControlButton(icon: "stop.fill", isPrimary: false) {
                 self.eventHandler.stopAIAgentInput()
+            }
+            self.circleControlButton(icon: "photo", isPrimary: false) {
+                self.eventHandler.enterImageInput()
             }
             self.circleControlButton(icon: "arrow.up", isPrimary: true) {
                 self.eventHandler.finishVoiceInput()

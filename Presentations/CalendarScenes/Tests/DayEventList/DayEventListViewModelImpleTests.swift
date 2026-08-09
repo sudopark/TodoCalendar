@@ -1088,6 +1088,12 @@ extension DayEventListViewModelImpleTests {
         func routeToAIGuide() {
             self.didRouteToAIGuide = true
         }
+
+        var didRouteToImageSourceSelectOnCancel: (@Sendable () -> Void)?
+        func routeToImageSourceSelect(onCancel: @escaping @Sendable () -> Void) {
+            self.didRouteToImageSourceSelectOnCancel = onCancel
+            self.showActionSheet(ActionSheetForm())
+        }
     }
 
     private final class SpyListener: DayEventListSceneListener, @unchecked Sendable {
@@ -1227,6 +1233,30 @@ extension DayEventListViewModelImpleTests {
         // then — 키보드 입력으로 전환(usecase) + 바텀시트 present(router)
         XCTAssertEqual(self.stubOrchestrationUsecase.didEnterKeyboardInput, true)
         XCTAssertEqual(self.spyRouter.didRouteToAIKeyboardInput, true)
+    }
+
+    func testViewModel_enterImageInput_delegatesToUsecaseAndRoutesToSourceSelect() {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when
+        viewModel.enterImageInput()
+
+        // then
+        XCTAssertEqual(self.stubOrchestrationUsecase.didEnterImageInput, true)
+        XCTAssertEqual(self.spyRouter.didShowActionSheet, true)
+    }
+
+    func testViewModel_whenImageSourceSelectCancelled_returnsToVoiceInput() {
+        // given
+        let viewModel = self.makeViewModel()
+        viewModel.enterImageInput()
+
+        // when
+        self.spyRouter.didRouteToImageSourceSelectOnCancel?()
+
+        // then
+        XCTAssertEqual(self.stubOrchestrationUsecase.didEnterVoiceInput, true)
     }
 
     func testViewModel_finishVoiceInput_delegates_to_interactor() {

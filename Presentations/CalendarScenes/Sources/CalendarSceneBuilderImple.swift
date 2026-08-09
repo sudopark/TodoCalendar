@@ -20,6 +20,7 @@ public struct CalendarSceneBuilderImple {
     private let memberSceneBuilder: any MemberSceneBuilder
     private let aiAgentCommandSceneBuilder: any AIAgentCommandSceneBuilder
     private let aiAgentKeyboardInputSceneBuilder: any AIAgentKeyboardInputSceneBuilder
+    private let aiAgentImageCommandSceneBuilder: any AIAgentImageCommandSceneBuilder
     private let pendingCompleteTodoState: PendingCompleteTodoState = .init()
     public let calendarDeepLinkHandler = CalendarDeepLinkHandlerImple()
     private let eventDeepLinkHandler = EventDeepLinkHandlerImple()
@@ -32,7 +33,8 @@ public struct CalendarSceneBuilderImple {
         accountUsecase: any AccountUsecase,
         memberSceneBuilder: any MemberSceneBuilder,
         aiAgentCommandSceneBuilder: any AIAgentCommandSceneBuilder,
-        aiAgentKeyboardInputSceneBuilder: any AIAgentKeyboardInputSceneBuilder
+        aiAgentKeyboardInputSceneBuilder: any AIAgentKeyboardInputSceneBuilder,
+        aiAgentImageCommandSceneBuilder: any AIAgentImageCommandSceneBuilder
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
@@ -42,6 +44,7 @@ public struct CalendarSceneBuilderImple {
         self.memberSceneBuilder = memberSceneBuilder
         self.aiAgentCommandSceneBuilder = aiAgentCommandSceneBuilder
         self.aiAgentKeyboardInputSceneBuilder = aiAgentKeyboardInputSceneBuilder
+        self.aiAgentImageCommandSceneBuilder = aiAgentImageCommandSceneBuilder
     }
 
     private var eventListCellEventHanleViewModelBuilder: (any EventListCellEventHanleViewModelBuilder)?
@@ -88,7 +91,8 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
             eventListSceneBuilder: self.eventListSceneBuilder,
             accountUsecase: self.accountUsecase,
             memberSceneBuilder: self.memberSceneBuilder,
-            aiKeyboardInputSceneBuilder: self.aiAgentKeyboardInputSceneBuilder
+            aiKeyboardInputSceneBuilder: self.aiAgentKeyboardInputSceneBuilder,
+            aiImageCommandSceneBuilder: self.aiAgentImageCommandSceneBuilder
         )
 
         let handleViewModelBuilder = EventListCellEventHanleViewModelBuilderImple(
