@@ -82,6 +82,7 @@ extension ShareCommandSubmitService {
         let jobId = try await self.repository.processInterpretCommand(
             text: text,
             additionalInstruction: instruction,
+            inputSource: .text,
             timeZone: TimeZone.current.identifier
         )
         // 확장은 시트를 닫으면 죽으므로 이 기록이 앱으로 넘기는 유일한 인계 채널이다.

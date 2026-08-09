@@ -244,6 +244,7 @@ private final class StubAICommandRepository: AICommandRepository, @unchecked Sen
     func processInterpretCommand(
         text: String,
         additionalInstruction: String?,
+        inputSource: AICommandInputSource,
         timeZone: String
     ) async throws -> String {
         throw RuntimeError("intent path does not use interpret")

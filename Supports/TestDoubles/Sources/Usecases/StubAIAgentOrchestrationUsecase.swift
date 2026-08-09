@@ -18,8 +18,11 @@ public final class StubAIAgentOrchestrationUsecase: AIAgentOrchestrationUsecase,
     public private(set) var didEnterVoiceInput: Bool?
     public private(set) var didFinishVoiceInput: Bool?
     public private(set) var didEnterKeyboardInput: Bool?
+    public private(set) var didEnterImageInput: Bool?
     public private(set) var didStopInput: Bool?
     public private(set) var didSubmit: String?
+    public private(set) var didSubmitImageCommandWith: (text: String, instruction: String?)?
+    public var stubImageSubmitError: (any Error)?
 
     public init() {}
 
@@ -27,8 +30,14 @@ public final class StubAIAgentOrchestrationUsecase: AIAgentOrchestrationUsecase,
     public func enterVoiceInput() { self.didEnterVoiceInput = true }
     public func finishVoiceInput() { self.didFinishVoiceInput = true }
     public func enterKeyboardInput() { self.didEnterKeyboardInput = true }
+    public func enterImageInput() { self.didEnterImageInput = true }
     public func stopInput() { self.didStopInput = true }
     public func submit(_ text: String) throws { self.didSubmit = text }
+    public func submitImageCommand(text: String, additionalInstruction: String?) throws {
+        if let stubImageSubmitError { throw stubImageSubmitError }
+        self.didSubmitImageCommandWith = (text, additionalInstruction)
+        self.stateSubject.send(.processing(command: text))
+    }
     public func confirm() {}
     public func decline() {}
     public func reset() { self.stateSubject.send(.idle) }

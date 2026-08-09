@@ -22,8 +22,10 @@ final class StubAIAgentOrchestrationUsecase: AIAgentOrchestrationUsecase, @unche
     private(set) var didEnterVoiceInput = false
     private(set) var didFinishVoiceInput = false
     private(set) var didEnterKeyboardInput = false
+    private(set) var didEnterImageInput = false
     private(set) var didStopInput = false
     private(set) var didSubmit: String?
+    private(set) var didSubmitImageCommandWith: (text: String, instruction: String?)?
     private(set) var didConfirm = false
     private(set) var didDecline = false
     private(set) var didReset = false
@@ -31,15 +33,22 @@ final class StubAIAgentOrchestrationUsecase: AIAgentOrchestrationUsecase, @unche
     private(set) var didLoadUsage = false
 
     var stubSubmitError: (any Error)?
+    var stubImageSubmitError: (any Error)?
 
     func prepare() { self.didPrepare = true }
     func enterVoiceInput() { self.didEnterVoiceInput = true }
     func finishVoiceInput() { self.didFinishVoiceInput = true }
     func enterKeyboardInput() { self.didEnterKeyboardInput = true }
+    func enterImageInput() { self.didEnterImageInput = true }
     func stopInput() { self.didStopInput = true }
     func submit(_ text: String) throws {
         if let stubSubmitError { throw stubSubmitError }
         self.didSubmit = text
+        self.stateSubject.send(.processing(command: text))
+    }
+    func submitImageCommand(text: String, additionalInstruction: String?) throws {
+        if let stubImageSubmitError { throw stubImageSubmitError }
+        self.didSubmitImageCommandWith = (text, additionalInstruction)
         self.stateSubject.send(.processing(command: text))
     }
     func confirm() { self.didConfirm = true }

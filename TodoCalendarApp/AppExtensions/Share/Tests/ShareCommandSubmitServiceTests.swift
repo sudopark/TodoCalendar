@@ -111,6 +111,21 @@ extension ShareCommandSubmitServiceTests {
         #expect(repository.didUpdatePendingJobId == "some_job")
     }
 
+    @Test("입력 출처는 텍스트로 보낸다")
+    func submit_sendsInputSourceAsText() async throws {
+        // given
+        let (service, repository) = self.makeService()
+
+        // when
+        try await service.submit(
+            sharedText: "9월 10일 약속",
+            additionalInstruction: "오후 3시로 잡아줘"
+        )
+
+        // then
+        #expect(repository.didProcessInterpretWithInputSource == .text)
+    }
+
     @Test("앞뒤 공백은 제거하고 넘긴다")
     func submit_trimsInputs() async throws {
         // given
@@ -272,14 +287,17 @@ final class StubAICommandRepository: AICommandRepository, @unchecked Sendable {
 
     var didProcessInterpretText: String?
     var didProcessInterpretAdditionalInstruction: String?
+    var didProcessInterpretWithInputSource: AICommandInputSource?
     var didUpdatePendingJobId: String?
 
     func processInterpretCommand(
         text: String,
         additionalInstruction: String?,
+        inputSource: AICommandInputSource,
         timeZone: String
     ) async throws -> String {
         if let stubProcessError { throw stubProcessError }
+        self.didProcessInterpretWithInputSource = inputSource
         self.didProcessInterpretText = text
         self.didProcessInterpretAdditionalInstruction = additionalInstruction
         return "some_job"

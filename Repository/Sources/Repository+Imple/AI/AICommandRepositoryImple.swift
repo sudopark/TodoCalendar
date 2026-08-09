@@ -45,11 +45,13 @@ extension AICommandRepositoryImple {
     public func processInterpretCommand(
         text: String,
         additionalInstruction: String?,
+        inputSource: AICommandInputSource,
         timeZone: String
     ) async throws -> String {
         var body: [String: Any] = [
             "text": text,
-            "timezone": timeZone
+            "timezone": timeZone,
+            "input_source": inputSource.apiValue
         ]
         body["additional_instruction"] = additionalInstruction
         let json = try await self.requestJson(
@@ -134,5 +136,16 @@ private extension AICommandRepositoryImple {
             throw RuntimeError("invalid AI API response")
         }
         return json
+    }
+}
+
+
+private extension AICommandInputSource {
+
+    var apiValue: String {
+        switch self {
+        case .text: return "text"
+        case .imageOcr: return "image_ocr"
+        }
     }
 }
