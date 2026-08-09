@@ -202,7 +202,8 @@ let project = Project.app(
                 "NSExtensionAttributes": .dictionary([
                     "NSExtensionActivationRule": .dictionary([
                         "NSExtensionActivationSupportsText": .boolean(true),
-                        "NSExtensionActivationSupportsWebURLWithMaxCount": .integer(1)
+                        "NSExtensionActivationSupportsWebURLWithMaxCount": .integer(1),
+                        "NSExtensionActivationSupportsImageWithMaxCount": .integer(1)
                     ])
                 ]),
                 "NSExtensionPointIdentifier": .string("com.apple.share-services"),
@@ -232,6 +233,10 @@ let project = Project.app(
             .project(
                 target: "CommonPresentation",
                 path: .relativeToRoot("Presentations/CommonPresentation")
+            ),
+            .project(
+                target: "FirstPartyServices",
+                path: .relativeToRoot("Services/FirstPartyServices")
             )
         ],
         signingConfigures: [

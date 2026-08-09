@@ -99,6 +99,9 @@ jobs:
           if echo "$FILES" | grep -qE "^Services/(FirstPartyServices|SpeechService|PlaceService|ExternalServices|StoreKitService)/"; then
             schemes+=("TodoCalendarApp")
           fi
+          if echo "$FILES" | grep -q "^Services/FirstPartyServices/"; then
+            schemes+=("TodoCalendarAppShare")
+          fi
 
           # === Presentation 공통 ===
           # CommonPresentation: 모든 Presentation Scene + App + Widget이 의존
