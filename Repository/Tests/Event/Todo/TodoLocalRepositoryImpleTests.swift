@@ -993,6 +993,56 @@ extension TodoLocalRepositoryImpleTests {
         // then
         XCTAssertEqual(result2?.nextRepeatingTodoEvent?.repeatingTurn, 3)
     }
+
+    // 이번만 삭제는 회차를 소비하지 않는다
+    func testRepository_whenRemoveRepeatingTodoOnlyThisTime_notConsumeTurn() async throws {
+        // given
+        let origin = self.makeDummyTodoWithCountEnd(
+            id: "origin", time: 100, from: 100, endCount: 10, repeatingTurn: 4
+        )
+        self.stubSaveTodo([origin])
+        let repository = self.makeRepository()
+
+        // when
+        let result = try await repository.removeTodo("origin", onlyThisTime: true)
+
+        // then
+        XCTAssertEqual(result.nextRepeatingTodo?.repeatingTurn, 4)
+        XCTAssertEqual(result.nextRepeatingTodo?.time, .at(100 + 3600*24))
+    }
+
+    // 마지막 회차를 이번만 삭제해도 시리즈가 종료되지 않는다
+    func testRepository_whenRemoveLastTurnOnlyThisTime_seriesNotEnd() async throws {
+        // given
+        let origin = self.makeDummyTodoWithCountEnd(
+            id: "origin", time: 100, from: 100, endCount: 10, repeatingTurn: 10
+        )
+        self.stubSaveTodo([origin])
+        let repository = self.makeRepository()
+
+        // when
+        let result = try await repository.removeTodo("origin", onlyThisTime: true)
+
+        // then
+        XCTAssertEqual(result.nextRepeatingTodo?.repeatingTurn, 10)
+        XCTAssertEqual(result.nextRepeatingTodo?.time, .at(100 + 3600*24))
+    }
+
+    // 건너뛰기는 현행대로 회차를 소비한다
+    func testRepository_whenSkipRepeatingTodo_consumeTurn() async throws {
+        // given
+        let origin = self.makeDummyTodoWithCountEnd(
+            id: "origin", time: 100, from: 100, endCount: 10, repeatingTurn: 4
+        )
+        self.stubSaveTodo([origin])
+        let repository = self.makeRepository()
+
+        // when
+        let skipped = try await repository.skipRepeatingTodo("origin")
+
+        // then
+        XCTAssertEqual(skipped.repeatingTurn, 5)
+    }
 }
 
 

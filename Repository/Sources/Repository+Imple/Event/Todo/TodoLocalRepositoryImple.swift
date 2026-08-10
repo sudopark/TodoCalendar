@@ -95,7 +95,9 @@ extension TodoLocalRepositoryImple {
             |> \.nextRepeatingTodoEvent .~ nextTodo
     }
     
-    private func replaceTodoNextEventTimeIfIsRepeating(_ origin: TodoEvent) async throws -> TodoEvent {
+    private func replaceTodoNextEventTimeIfIsRepeating(
+        _ origin: TodoEvent, consumesTurn: Bool = true
+    ) async throws -> TodoEvent {
         guard let repeating = origin.repeating,
               let time = origin.time
         else {
@@ -103,10 +105,12 @@ extension TodoLocalRepositoryImple {
         }
         let enumerator = EventRepeatTimeEnumerator(
             repeating.repeatOption, endOption: repeating.repeatingEndOption)
-        guard let nextEventTime = enumerator?.nextEventTime(
-            from: .init(time: time, turn: origin.repeatingTurn ?? 1),
-            until: repeating.repeatingEndOption?.endTime
-        )
+        let current = RepeatingTimes(time: time, turn: origin.repeatingTurn ?? 1)
+        let endTime = repeating.repeatingEndOption?.endTime
+        let next = consumesTurn
+            ? enumerator?.nextEventTime(from: current, until: endTime)
+            : enumerator?.nextEventTimeWithoutTurnConsuming(from: current, until: endTime)
+        guard let nextEventTime = next
         else {
             throw RuntimeError(key: ClientErrorKeys.repeatingIsEnd.rawValue, "repeaitng end")
         }
@@ -130,7 +134,7 @@ extension TodoLocalRepositoryImple {
         try await self.localStorage.removeTodo(eventId)
         
         let next: TodoEvent? = onlyThisTime
-            ? try? await self.replaceTodoNextEventTimeIfIsRepeating(origin)
+            ? try? await self.replaceTodoNextEventTimeIfIsRepeating(origin, consumesTurn: false)
             : nil
         
         if next == nil {

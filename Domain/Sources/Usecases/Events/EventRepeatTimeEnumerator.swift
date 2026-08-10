@@ -84,14 +84,30 @@ public final class EventRepeatTimeEnumerator: Sendable {
         }
     }
     
-    public func nextEventTime(from time: RepeatingTimes, until endTime: TimeInterval?) -> RepeatingTimes? {
+    public func nextEventTime(
+        from time: RepeatingTimes, until endTime: TimeInterval?
+    ) -> RepeatingTimes? {
+        return self.nextEventTime(from: time, until: endTime, consumesTurn: true)
+    }
+
+    public func nextEventTimeWithoutTurnConsuming(
+        from time: RepeatingTimes, until endTime: TimeInterval?
+    ) -> RepeatingTimes? {
+        return self.nextEventTime(from: time, until: endTime, consumesTurn: false)
+    }
+
+    private func nextEventTime(
+        from time: RepeatingTimes,
+        until endTime: TimeInterval?,
+        consumesTurn: Bool
+    ) -> RepeatingTimes? {
         let currentEventStartDate = Date(timeIntervalSince1970: time.time.lowerBoundWithFixed)
         guard let current = Current(self.calendar, date: currentEventStartDate) else { return nil }
         let nextDate: Date?
         switch self.option {
         case let everyDay as EventRepeatingOptions.EveryDay:
             nextDate = self.calendar.addDays(everyDay.interval, from: currentEventStartDate)
-            
+
         case let everyWeek as EventRepeatingOptions.EveryWeek:
             nextDate = self.nextEventDate(everyWeek: everyWeek, current: current)
         case let everyMonth as EventRepeatingOptions.EveryMonth:
@@ -104,21 +120,25 @@ public final class EventRepeatTimeEnumerator: Sendable {
             nextDate = self.nextEventDate(lunarEveryYear, current)
         default: nextDate = nil
         }
-        
+
         guard let interval = nextDate.map ({ $0.timeIntervalSince(currentEventStartDate) })
         else { return nil }
-        
+
         let nextTime = time.time.shift(interval)
         if self.igonreTimeKeys.contains(nextTime.customKey) {
             return nextEventTime(
-                from: .init(time: nextTime, turn: time.turn), until: endTime
+                from: .init(time: nextTime, turn: time.turn),
+                until: endTime,
+                consumesTurn: consumesTurn
             )
         }
-        let next = RepeatingTimes(time: nextTime, turn: time.turn+1)
+        let next = RepeatingTimes(
+            time: nextTime, turn: consumesTurn ? time.turn+1 : time.turn
+        )
         if let endTime, nextTime.upperBoundWithFixed > endTime {
             return nil
         }
-        if let endCount = self.endOption?.endCount, next.turn > endCount {
+        if consumesTurn, let endCount = self.endOption?.endCount, next.turn > endCount {
             return nil
         }
         return next

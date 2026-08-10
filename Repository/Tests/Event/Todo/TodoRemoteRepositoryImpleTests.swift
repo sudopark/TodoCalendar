@@ -288,6 +288,30 @@ extension TodoRemoteRepositoryImpleTests {
         XCTAssertNil(result?.nextRepeatingTodo)
         XCTAssertEqual(self.spyTodoCache.didRemoveTodoId, "not-repeating-todo")
     }
+
+    // 반복 이벤트 이번만 삭제시 회차는 소비하지 않고 그대로 전송
+    func testRepository_whenRemoveRepeatingTodoOnlyThisTime_notConsumeTurn() async {
+        // given
+        let repository = self.makeRepository()
+
+        // when
+        let _ = try? await repository.removeTodo("repeating-todo", onlyThisTime: true)
+
+        // then
+        XCTAssertEqual(self.stubRemote.didRequestedParams?["repeating_turn"] as? Int, 1)
+    }
+
+    // 건너뛰기는 현행대로 회차를 소비해서 전송
+    func testRepository_whenSkipRepeatingTodo_consumeTurn() async {
+        // given
+        let repository = self.makeRepository()
+
+        // when
+        let _ = try? await repository.skipRepeatingTodo("repeating-todo")
+
+        // then
+        XCTAssertEqual(self.stubRemote.didRequestedParams?["repeating_turn"] as? Int, 2)
+    }
 }
 
 // MARK: - load
