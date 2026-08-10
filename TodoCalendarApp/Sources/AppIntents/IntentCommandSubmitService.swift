@@ -34,6 +34,9 @@ struct IntentCommandSubmitService: Sendable {
         guard await self.hasNoPendingRequest()
         else { throw AICommandSubmitFailReason.previousRequestPending }
 
+        guard await self.hasRemainingCredit()
+        else { throw AICommandSubmitFailReason.limitExceeded }
+
         let timeZone = self.settingRepository.loadUserSelectedTImeZone() ?? .current
         let jobId: String
         do {
@@ -53,6 +56,12 @@ struct IntentCommandSubmitService: Sendable {
         } catch {
             return false
         }
+    }
+
+    private func hasRemainingCredit() async -> Bool {
+        // 조회 실패는 통과 — 서버가 최종 판정한다.
+        guard let usage = try? await self.repository.loadUsage() else { return true }
+        return !usage.isCreditExhausted
     }
 
     private func updateProcessingCommand(jobId: String) async throws {
