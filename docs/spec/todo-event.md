@@ -68,7 +68,7 @@ stateDiagram-v2
     state "반복 할일 A\n(turn=3, 매주 월)" as OrigA
 
     state ".all (전체 수정)" as EditAll {
-        state "할일 A 직접 수정\n(turn 유지)" as AllResult
+        state "할일 A 직접 수정\n(반복 규칙 변경 시만 turn=1)" as AllResult
     }
 
     state ".onlyThisTime (이번만)" as EditThis {
@@ -286,24 +286,21 @@ flowchart TD
     Q1 -->|true| Q2{반복 설정 있음?}
     Q2 -->|없음| Del
 
-    Q2 -->|있음| Calc[다음 반복 시간 계산\nEventRepeatTimeEnumerator]
-    Calc --> Q3{다음 회차 유효?}
+    Q2 -->|있음| Calc[다음 시간 계산\nnextEventTimeWithoutTurnConsuming]
+    Calc --> Q3{.until 종료 도달?}
 
-    Q3 -->|유효| Advance[현재 → 다음 회차로 교체\ntime 전진, turn +1]
+    Q3 -->|아니오| Advance[현재 → 다음 시각으로 교체\ntime 전진, turn 유지]
     Advance --> UpdateStore[SharedDataStore.todos 교체\n미완료 판정 실행]
     UpdateStore --> Done
 
-    Q3 -->|종료 조건 도달| Del
+    Q3 -->|예| Del
 ```
 
 ---
 
 ## 7. 할일 건너뛰기 (반복 할일 전용)
 
-| 파라미터 | 동작 | 상세 |
-|---|---|---|
-| `.next` | 다음 1회 건너뛰기 | Repository가 반복 규칙으로 다음 시간 계산, repeatingTurn 증가 |
-| `.until(EventTime)` | 지정 시간까지 건너뛰기 | 할일의 time을 지정 시간으로 변경 (updateTodoEvent 경유) |
+반복 규칙으로 다음 시각을 계산해 할일을 전진시킨다. `repeatingTurn`을 소비한다.
 
 **에러 케이스**:
 | 조건 | 에러 |
@@ -319,7 +316,7 @@ flowchart TD
 ```
 count=3 반복 할일:
 turn 1 → 완료         (실행 O, 1회 소비)
-turn 2 → 건너뛰기(.next) (실행 X, 1회 소비)
+turn 2 → 건너뛰기 (실행 X, 1회 소비)
 turn 3 → 유효         (실행 O, 1회 소비)
 turn 4 → 종료         (count 3회 모두 소비)
 → 실제 실행 2회, 건너뛴 1회, 총 3회 소비
@@ -420,9 +417,8 @@ flowchart TD
     Start([skipRepeatingTodo 호출]) --> Q1{반복 설정 있음?}
 
     Q1 -->|없음| Err1[에러: notARepeatingEvent]
-    Q1 -->|있음| Q2{SkipTodoParams?}
+    Q1 -->|있음| Calc[EventRepeatTimeEnumerator\n다음 시간 계산]
 
-    Q2 -->|.next| Calc[EventRepeatTimeEnumerator\n다음 시간 계산]
     Calc --> Q3{다음 회차 유효?}
     Q3 -->|유효| Skip[time = next\nturn += 1]
     Q3 -->|종료 조건 도달| Err2[에러: repeatingIsEnd]
@@ -430,9 +426,6 @@ flowchart TD
     Skip --> Q4{새 time의 upperBound\nvs 현재 시각?}
     Q4 -->|"<= now (과거/현재)"| AddUncompleted[미완료 목록에 추가]
     Q4 -->|"> now (미래)"| RemoveUncompleted[미완료 목록에서 제거]
-
-    Q2 -->|".until(EventTime)"| Patch[updateTodoEvent 경유\ntime을 지정 시간으로 변경]
-    Patch --> Q4
 ```
 
 ### 수정 방식 결정 트리
@@ -467,7 +460,7 @@ flowchart TD
 
 ```
 상황: count=3 반복 할일, 현재 turn=3 (마지막 회차)
-동작: 건너뛰기(.next) 시도
+동작: 건너뛰기 시도
 
 결과:
   turn 3 → 건너뛰기 시도
@@ -504,7 +497,7 @@ flowchart TD
 
 의미: 밀린 반복 할일을 완료해도, 이미 지나간 다음 인스턴스가
       바로 미완료로 나타남. 사용자는 하나씩 완료하거나
-      건너뛰기(.until)로 원하는 미래 시점까지 점프 가능.
+      건너뛰기를 반복해 원하는 시점까지 진행해야 함.
 ```
 
 ### 13.4 이번만 수정(.onlyThisTime) + 반복 종료 직전

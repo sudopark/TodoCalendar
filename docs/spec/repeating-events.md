@@ -47,8 +47,10 @@ flowchart TD
 stateDiagram-v2
     state "할일 (TodoEvent)" as Todo {
         [*] --> T1: 생성 (repeatingTurn = nil → turn 1)
-        T1 --> T2: 완료/건너뛰기/이번만 수정/이번만 삭제
-        T2 --> T3: 완료/건너뛰기/이번만 수정/이번만 삭제
+        T1 --> T1: 이번만 삭제 (시각만 전진, turn 유지)
+        T1 --> T2: 완료/건너뛰기/이번만 수정
+        T2 --> T2: 이번만 삭제 (시각만 전진, turn 유지)
+        T2 --> T3: 완료/건너뛰기/이번만 수정
         T3 --> End: turn > count 또는 time > until
 
         note right of T1
@@ -329,6 +331,8 @@ EventRepeatTimeEnumerator(
 6. → RepeatingTimes(time: nextTime, turn: newTurn)
 ```
 
+`nextEventTimeWithoutTurnConsuming(from:until:)`은 4·5단계 중 turn 증가와 `.count` 판정을 건너뛴다. `.until` 판정은 시각 기준이라 그대로 적용된다. 할일의 이번만 삭제가 이 진입점을 쓴다.
+
 ### 제외 시간 재귀 처리
 
 `.onlyThisTime`으로 제외된 시간은 자동으로 건너뜀:
@@ -421,8 +425,8 @@ UTC 범위 = r.lower + offset ..< r.upper + offset
 | 이벤트 타입 | 액션 | Turn 변화 |
 |---|---|---|
 | 할일 | 완료 (completeTodo) | 다음 할일의 turn = 현재 + 1 |
-| 할일 | 건너뛰기 (.next) | turn + 1 |
-| 할일 | 이번만 삭제 | 다음 회차로 전진, turn + 1 |
+| 할일 | 건너뛰기 | turn + 1 |
+| 할일 | 이번만 삭제 | 다음 시각으로 전진, **turn 유지** (회차 미소비) |
 | 할일 | 이번만 수정 | 원본 다음으로 전진, turn + 1 |
 | 일정 | 시간 제외 (exclude) | turn 변화 없음 (제외 목록으로 관리) |
 
@@ -441,13 +445,26 @@ count=5 반복 할일:
   결과: 실제 실행 3회, 건너뜀 2회, 총 5회 소비
 ```
 
+이번만 삭제는 반대로 회차를 소비하지 않는다 — 일정의 `repeatingTimeToExcludes`와 같은 세만틱이다:
+
+```
+count=5 반복 할일:
+  turn 1 → 완료 (실행, 소비)
+  turn 2 → 이번만 삭제 (미실행, 미소비 → 다음 시각이 turn 2가 된다)
+  turn 2 → 완료 (실행, 소비)
+  ...
+  turn 5 → 이번만 삭제 (미소비 → 시리즈가 끝나지 않고 다음 시각이 turn 5가 된다)
+```
+
+건너뛰기와 이번만 삭제가 갈리는 이유: 둘 다 미소비면 `.count` 종료가 완료로만 도달 가능해져, 계속 건너뛰는 할일이 영원히 끝나지 않는다.
+
 ### 일정과 할일의 Turn 관리 차이
 
 | | 할일 (TodoEvent) | 일정 (ScheduleEvent) |
 |---|---|---|
 | Turn 저장 | `repeatingTurn` 프로퍼티 | `RepeatingTimes.turn` (계산 결과에 포함) |
 | Turn 추적 | 이벤트 자체에 현재 turn 저장 | 캐시(MemorizedEventsContainer)에서 계산 |
-| 이번만 제외 | turn 전진 | `repeatingTimeToExcludes`에 추가 |
+| 이번만 제외 | turn 유지 (시각만 전진) | `repeatingTimeToExcludes`에 추가 |
 | Count 종료 | turn > endCount | turn > endCount (계산 시 체크) |
 
 ---
@@ -660,7 +677,7 @@ SharedDataStore:
 
 === 4. 건너뛰기 (2회차) ===
 현재: 3/11 (3/10 경과, A가 미완료 진입)
-skipRepeatingTodo(A, .next)
+skipRepeatingTodo(A)
 
 Repository:
   nextEventTime(from: turn=2) → turn=3, time=3/17 07:00

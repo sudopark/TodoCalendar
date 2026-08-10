@@ -104,7 +104,7 @@ self.eventNotifyService.event<RefreshingEvent>()
 반복 이벤트 회차 추적. 없으면 count 기반 종료가 깨지는 핵심 불변식. 상세·엣지케이스는 [`docs/spec/repeating-events.md`](../docs/spec/repeating-events.md).
 
 - turn은 1부터. `EventRepeatTimeEnumerator.nextEventTime`은 항상 `from.turn + 1` 반환.
-- `TodoEvent.repeatingTurn`: 현재 회차 (`nil` = turn 1). 완료·수정·삭제·스킵마다 다음 turn으로 갱신. 없으면 `.count(n)` 종료가 동작 안 함.
+- `TodoEvent.repeatingTurn`: 현재 회차 (`nil` = turn 1). 완료·수정·스킵마다 다음 turn으로 갱신 (단, 이번만 삭제는 예외 — 시각만 전진하고 turn은 유지). 없으면 `.count(n)` 종료가 동작 안 함.
 - 다음 반복 계산 시 starting turn은 `origin.repeatingTurn ?? 1` (Local·Remote 동일).
 - `ScheduleEvent` 수정 범위: `.onlyThisTime`(현재 회차만 + 원본 제외) / `.fromNow`(현재부터 새 시리즈 분기) / 기본(전체 시리즈).
 
