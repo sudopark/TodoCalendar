@@ -230,7 +230,7 @@ extension EventListCellEventHanleViewModelImple {
     private func skipTodoToNext(_ cellViewModel: TodoEventCellViewModel) {
         Task { [weak self] in
             do {
-                _ = try await self?.todoEventUsecase.skipRepeatingTodo(cellViewModel.eventIdentifier, .next)
+                _ = try await self?.todoEventUsecase.skipRepeatingTodo(cellViewModel.eventIdentifier)
             } catch {
                 self?.router?.showError(error)
             }

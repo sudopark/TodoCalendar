@@ -1099,28 +1099,12 @@ extension TodoEventUsecaseImpleTests {
         let usecase = self.makeUsecaseWithStubRepeatingTodo()
         
         // when
-        let skipped = try await usecase.skipRepeatingTodo("repeating", .next)
-        
+        let skipped = try await usecase.skipRepeatingTodo("repeating")
+
         // then
         XCTAssertEqual(skipped.uuid, "repeating")
         XCTAssertEqual(skipped.time, .at(20))
     }
-    
-    // skip to some time
-    func testUsecase_skipToSomeTime() async throws {
-        // given
-        let usecase = self.makeUsecaseWithStubRepeatingTodo()
-        
-        // when
-        let skipped = try await usecase.skipRepeatingTodo(
-            "repeating", .until(.at(100))
-        )
-        
-        // then
-        XCTAssertEqual(skipped.uuid, "repeating")
-        XCTAssertEqual(skipped.time, .at(100))
-    }
-    
     // when skip todo update event list
     func testUsecase_whenSkipTodo_updateTodoList() {
         // given
@@ -1134,8 +1118,8 @@ extension TodoEventUsecaseImpleTests {
             
             Task {
                 usecase.refreshTodoEvents(in: 0..<200)
-                
-                _ = try await usecase.skipRepeatingTodo("repeating", .next)
+
+                _ = try await usecase.skipRepeatingTodo("repeating")
             }
         }
         
@@ -1157,18 +1141,18 @@ extension TodoEventUsecaseImpleTests {
         let todoLists = self.waitOutputs(expect, for: usecase.uncompletedTodos) {
             Task {
                 usecase.refreshUncompletedTodos()
-                
-                _ = try await usecase.skipRepeatingTodo("repeating", .next)
+
+                _ = try await usecase.skipRepeatingTodo("repeating")
             }
         }
-        
+
         // then
         let repeatingTodos = todoLists.map { ts in ts.first(where: { $0.uuid == "repeating" })}
         XCTAssertEqual(repeatingTodos.map { $0?.time }, [
             nil, .at(10), .at(20)
         ])
     }
-    
+
     func testUsecase_whenSkipTodoAndSkippedTodoEventTimeIsFuture_removeFromUncompletedTodo() {
         // given
         let expect = expectation(description: "todo skip시에 업데이트된 todo가 미래의 todo라면 완료 목록에서 제거")
@@ -1181,11 +1165,11 @@ extension TodoEventUsecaseImpleTests {
         let todoLists = self.waitOutputs(expect, for: usecase.uncompletedTodos, timeout: 0.01) {
             Task {
                 usecase.refreshUncompletedTodos()
-                
-                _ = try await usecase.skipRepeatingTodo("repeating", .next)
+
+                _ = try await usecase.skipRepeatingTodo("repeating")
             }
         }
-        
+
         // then
         let repeatingTodos = todoLists.map { ts in ts.first(where: { $0.uuid == "repeating" })}
         XCTAssertEqual(repeatingTodos.map { $0 != nil }, [

@@ -121,7 +121,7 @@ open class StubTodoEventUsecase: TodoEventUsecase {
         self.didHandleRemoveTodoIds = ids
     }
     
-    open func skipRepeatingTodo(_ todoId: String, _ params: SkipTodoParams) async throws -> TodoEvent {
+    open func skipRepeatingTodo(_ todoId: String) async throws -> TodoEvent {
         throw RuntimeError("not implemented")
     }
     

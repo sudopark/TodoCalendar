@@ -183,11 +183,3 @@ public enum TodoToggleResult {
         }
     }
 }
-
-
-// MARK: - skip todo
-
-public enum SkipTodoParams {
-    case next
-    case until(EventTime)
-}
