@@ -40,13 +40,17 @@ final class IntentCommandSubmitServiceTests {
         processFailWith error: (any Error)? = nil,
         pending: ProcessingAICommand? = nil,
         shouldFailLoadPending: Bool = false,
-        shouldFailUpdatePending: Bool = false
+        shouldFailUpdatePending: Bool = false,
+        usageLoadResult: AIAgentUsageLoadResult? = nil,
+        shouldFailLoadUsage: Bool = false
     ) -> StubAICommandRepository {
         let repository = StubAICommandRepository()
         repository.stubProcessError = error
         repository.stubPendingCommand = pending
         repository.shouldFailLoadPending = shouldFailLoadPending
         repository.shouldFailUpdatePending = shouldFailUpdatePending
+        repository.stubUsageLoadResult = usageLoadResult
+        repository.shouldFailLoadUsage = shouldFailLoadUsage
         return repository
     }
 
@@ -202,6 +206,47 @@ extension IntentCommandSubmitServiceTests {
     }
 }
 
+// MARK: - 크레딧 소진 사전 차단
+
+extension IntentCommandSubmitServiceTests {
+
+    private func exhaustedUsage() -> AIAgentUsageLoadResult {
+        return AIAgentUsageLoadResult(
+            usage: AIAgentUsage(input: 0, output: 0, limit: 3000)
+                |> \.creditsUsed .~ 3000,
+            userPlan: BillingUserPlan() |> \.topupRemaining .~ 0
+        )
+    }
+
+    @Test("크레딧이 소진됐으면 요청 없이 한도 초과로 실패한다")
+    func service_whenCreditExhausted_failsWithLimitExceeded() async {
+        // given
+        let repository = self.makeRepository(usageLoadResult: self.exhaustedUsage())
+        let (service, _) = self.makeService(stubRepository: repository)
+
+        // when
+        let reason = await self.failReason { try await service.submit("내일 3시 회의") }
+
+        // then
+        #expect(reason == .limitExceeded)
+        #expect(repository.didProcessCommandText == nil)
+    }
+
+    @Test("usage 조회에 실패하면 막지 않고 제출한다")
+    func service_whenUsageLoadFails_submitsCommand() async {
+        // given
+        let repository = self.makeRepository(shouldFailLoadUsage: true)
+        let (service, _) = self.makeService(stubRepository: repository)
+
+        // when
+        let reason = await self.failReason { try await service.submit("내일 3시 회의") }
+
+        // then
+        #expect(reason == nil)
+        #expect(repository.didProcessCommandText == "내일 3시 회의")
+    }
+}
+
 
 private final class StubAuthStore: AuthStore, @unchecked Sendable {
 
@@ -229,6 +274,8 @@ private final class StubAICommandRepository: AICommandRepository, @unchecked Sen
     var stubPendingCommand: ProcessingAICommand?
     var shouldFailLoadPending: Bool = false
     var shouldFailUpdatePending: Bool = false
+    var stubUsageLoadResult: AIAgentUsageLoadResult?
+    var shouldFailLoadUsage: Bool = false
 
     var didProcessCommandText: String?
     var didProcessTimeZone: String?
@@ -277,6 +324,11 @@ private final class StubAICommandRepository: AICommandRepository, @unchecked Sen
     }
 
     func loadUsage() async throws -> AIAgentUsageLoadResult {
-        throw RuntimeError("not imple")
+        guard !self.shouldFailLoadUsage
+        else { throw RuntimeError("failed to load usage") }
+        return self.stubUsageLoadResult ?? AIAgentUsageLoadResult(
+            usage: AIAgentUsage(input: 0, output: 0, limit: 3000),
+            userPlan: BillingUserPlan() |> \.topupRemaining .~ 0
+        )
     }
 }
