@@ -8,6 +8,7 @@
 
 import Testing
 import Combine
+import Extensions
 import UnitTestHelpKit
 
 @testable import Domain
@@ -20,6 +21,7 @@ final class BillingUsecaseImpleTests: PublisherWaitable {
     private func makeUsecase(
         shouldCancelPurchase: Bool = false,
         shouldPurchaseBePending: Bool = false,
+        shouldFailPurchase: Bool = false,
         shouldFailApply: Bool = false,
         shouldFailLoadProducts: Bool = false,
         shouldFailLoadUserPlan: Bool = false,
@@ -35,6 +37,7 @@ final class BillingUsecaseImpleTests: PublisherWaitable {
         let service = StubAppStoreBillingService(
             shouldCancelPurchase: shouldCancelPurchase,
             shouldPurchaseBePending: shouldPurchaseBePending,
+            shouldFailPurchase: shouldFailPurchase,
             shouldFailLoadProducts: shouldFailLoadProducts,
             unfinished: unfinished,
             restored: restored
@@ -166,6 +169,63 @@ extension BillingUsecaseImpleTests {
         // then
         #expect(plan?.planId == .standard)
     }
+
+    @Test func usecase_purchase_whenServerReflectFails_throwsReflectFailure() async throws {
+        // given
+        let (usecase, _, _) = self.makeUsecase(shouldFailApply: true)
+
+        // when
+        let failure: BillingReflectFailure? = await {
+            do {
+                _ = try await usecase.purchase(productId: "plan.lifetime")
+                return nil
+            } catch {
+                return error as? BillingReflectFailure
+            }
+        }()
+
+        // then
+        #expect(failure != nil)
+        #expect((failure?.underlying as? RuntimeError)?.message == "purchase apply failed")
+    }
+
+    // 결제 자체가 실패한 경우까지 감싸면 "결제는 완료됐다" 문구가 거짓말이 된다
+    @Test func usecase_purchase_whenStoreFails_throwsRawErrorNotReflectFailure() async throws {
+        // given
+        let (usecase, _, _) = self.makeUsecase(shouldFailPurchase: true)
+
+        // when
+        let error: (any Error)? = await {
+            do {
+                _ = try await usecase.purchase(productId: "plan.lifetime")
+                return nil
+            } catch {
+                return error
+            }
+        }()
+
+        // then
+        #expect(error is BillingReflectFailure == false)
+        #expect((error as? RuntimeError)?.message == "store purchase failed")
+    }
+
+    @Test func usecase_restorePurchases_whenServerReflectFails_throwsReflectFailure() async throws {
+        // given
+        let (usecase, _, _) = self.makeUsecase(shouldFailApply: true)
+
+        // when
+        let failure: BillingReflectFailure? = await {
+            do {
+                _ = try await usecase.restorePurchases()
+                return nil
+            } catch {
+                return error as? BillingReflectFailure
+            }
+        }()
+
+        // then
+        #expect(failure != nil)
+    }
 }
 
 
@@ -181,6 +241,25 @@ extension BillingUsecaseImpleTests {
         // then
         #expect(plan.planId == .standard)
         #expect(plan.topupRemaining == 45600)
+    }
+
+    // 조회 실패는 결제와 무관하다 — 감싸면 "결제는 완료됐다" 로 오분류된다
+    @Test func usecase_refreshUserPlan_whenFails_throwsRawErrorNotReflectFailure() async throws {
+        // given
+        let (usecase, _, _) = self.makeUsecase(shouldFailLoadUserPlan: true)
+
+        // when
+        let error: (any Error)? = await {
+            do {
+                _ = try await usecase.refreshUserPlan()
+                return nil
+            } catch {
+                return error
+            }
+        }()
+
+        // then
+        #expect(error is BillingReflectFailure == false)
     }
 
     @Test func usecase_refreshUserPlan_updatesSharedUserPlan() async throws {
@@ -459,5 +538,31 @@ extension BillingUsecaseImpleTests {
         }
         #expect(repository.didPostedTransactionUpdates == ["jws:bad"])
         #expect(service.didFinishedTransactionIds.isEmpty)
+    }
+
+    @Test func usecase_applyUnfinishedTransactions_whenServerReflectFails_throwsReflectFailure() async throws {
+        // given
+        let failing = BillingSignedTransaction(
+            id: "tx:bad", productId: "plan.lifetime", jws: "jws:bad"
+        )
+        let (usecase, _, _) = self.makeUsecase(
+            unfinished: [failing], failingJWSTokens: ["jws:bad"]
+        )
+
+        // when
+        let failure: BillingReflectFailure? = await {
+            do {
+                _ = try await usecase.applyUnfinishedTransactions()
+                return nil
+            } catch {
+                return error as? BillingReflectFailure
+            }
+        }()
+
+        // then
+        #expect(failure != nil)
+        #expect(
+            (failure?.underlying as? RuntimeError)?.message == "transaction update apply failed"
+        )
     }
 }

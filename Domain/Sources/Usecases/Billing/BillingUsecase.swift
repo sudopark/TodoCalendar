@@ -123,7 +123,9 @@ extension BillingUsecaseImple {
         _ transaction: BillingSignedTransaction
     ) async throws -> BillingUserPlan {
         // 서버가 믿는 건 서명 payload 안의 값 — 앱이 판단한 productId 는 올리지 않는다
-        let userPlan = try await self.repository.postPurchase(signedTransaction: transaction.jws)
+        let userPlan = try await self.wrappingReflectFailure {
+            try await self.repository.postPurchase(signedTransaction: transaction.jws)
+        }
         await self.appStoreService.finishTransaction(id: transaction.id)
         self.updateSharedUserPlan(userPlan)
         return userPlan
@@ -132,13 +134,23 @@ extension BillingUsecaseImple {
     private func delegateAndFinish(
         _ transaction: BillingSignedTransaction
     ) async throws -> BillingUserPlan {
-        let userPlan = try await self.repository.postTransactionUpdate(
-            signedTransaction: transaction.jws
-        )
+        let userPlan = try await self.wrappingReflectFailure {
+            try await self.repository.postTransactionUpdate(signedTransaction: transaction.jws)
+        }
         await self.appStoreService.finishTransaction(id: transaction.id)
         guard !Task.isCancelled else { return userPlan }
         self.updateSharedUserPlan(userPlan)
         return userPlan
+    }
+
+    private func wrappingReflectFailure(
+        _ post: () async throws -> BillingUserPlan
+    ) async throws -> BillingUserPlan {
+        do {
+            return try await post()
+        } catch {
+            throw BillingReflectFailure(error)
+        }
     }
 
     private func updateSharedUserPlan(_ userPlan: BillingUserPlan) {
