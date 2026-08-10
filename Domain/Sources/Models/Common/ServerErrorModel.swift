@@ -36,7 +36,6 @@ public struct ServerErrorModel: Error, @unchecked Sendable, Decodable {
         case agentError = "AgentError"
         case invalidTransaction = "InvalidTransaction"
         case unknownProduct = "UnknownProduct"
-        case topupRequiresPaidPlan = "TopupRequiresPaidPlan"
         case planChangeNotAllowed = "PlanChangeNotAllowed"
     }
     
