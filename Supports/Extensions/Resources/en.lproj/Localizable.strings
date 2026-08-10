@@ -548,6 +548,7 @@
 "aiAgent::state::failed" = "Task failed";
 "aiAgent::done::default" = "Done";
 "aiAgent::failed::default" = "Couldn't complete that";
+"aiAgent::failed::dailyLimitExceeded" = "You've used up today's AI credits.";
 "aiAgent::retry" = "Retry";
 "aiAgent::needSignIn::title" = "Sign in required";
 "aiAgent::needSignIn::message" = "Sign in to use AI quick input.";
@@ -644,6 +645,7 @@
 "share.ai::sentButUntracked" = "Sent, but the app can't track the result. Check your calendar after a moment.";
 "share.ai::textTooLong" = "That text is too long to send. Shorten it and try again.";
 "share.ai::instructionTooLong" = "Your instruction is too long. Please shorten it.";
+"share.ai::limitExceeded" = "You've used up today's AI credits. They reset at midnight UTC.";
 "share.ai::image::title" = "Send image to AI";
 "share.ai::image::recognizing" = "Reading text from the image…";
 "share.ai::image::text::caption" = "Text read from the image — edit it if anything looks off.";

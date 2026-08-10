@@ -12,10 +12,11 @@ import AsyncFlatMap
 
 
 public protocol AIAgentUsageUsecase: AnyObject {
-    
+
     func refresh()
     func loadUsage() async throws -> AIAgentUsage
-    
+    func isCreditExhausted() -> Bool
+
     var currentUsage: AnyPublisher<AIAgentUsage, Never> { get }
 }
 
@@ -90,5 +91,15 @@ extension AIAgentUsageUsecaseImple {
         )
         .compactMap { $0 }
         .eraseToAnyPublisher()
+    }
+
+    public func isCreditExhausted() -> Bool {
+        guard let usage = self.sharedDataStore.value(
+            AIAgentUsage.self, key: ShareDataKeys.aiAgentUsage.rawValue
+        ) else { return false }
+        let userPlan = self.sharedDataStore.value(
+            BillingUserPlan.self, key: ShareDataKeys.billingUserPlan.rawValue
+        )
+        return usage.isCreditExhausted(topupRemaining: userPlan?.topupRemaining)
     }
 }

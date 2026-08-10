@@ -250,6 +250,10 @@ extension AIAgentOrchestrationUsecaseImple {
         guard self.canSubmit else {
             throw RuntimeError(key: "AIAgent.busy", "already processing a command")
         }
+        guard !self.usageUsecase.isCreditExhausted() else {
+            self.notifyCreditExhausted(command: trimmed)
+            return
+        }
         self.subject.state.send(.processing(command: trimmed))
         self.startProcessing(self.commandUsecase.processCommand(trimmed))
     }
@@ -270,6 +274,11 @@ extension AIAgentOrchestrationUsecaseImple {
         guard self.canSubmit
         else { throw AIImageCommandSubmitFailReason.busy }
 
+        guard !self.usageUsecase.isCreditExhausted() else {
+            self.notifyCreditExhausted(command: trimmed)
+            return
+        }
+
         self.subject.state.send(.processing(command: trimmed))
         self.startProcessing(
             self.commandUsecase.processInterpretCommand(
@@ -285,6 +294,14 @@ extension AIAgentOrchestrationUsecaseImple {
         case .none, .idle, .listening: return true
         default: return false
         }
+    }
+
+    // throw 대신 상태 방출인 이유는 음성 경로가 submit 에러를 삼키기 때문 (try?).
+    private func notifyCreditExhausted(command: String) {
+        self.subject.state.send(
+            .failed(command: command, reason: nil, errorCode: .dailyLimitExceeded)
+        )
+        self.usageUsecase.refresh()
     }
 
     private var canSubmit: Bool {
