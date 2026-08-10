@@ -548,6 +548,7 @@
 "aiAgent::state::failed" = "작업 실패";
 "aiAgent::done::default" = "완료했어요";
 "aiAgent::failed::default" = "처리하지 못했어요";
+"aiAgent::failed::dailyLimitExceeded" = "오늘 AI 크레딧을 다 썼어요.";
 "aiAgent::retry" = "다시";
 "aiAgent::needSignIn::title" = "로그인이 필요해요";
 "aiAgent::needSignIn::message" = "AI 빠른 입력은 로그인 후 이용할 수 있어요.";
@@ -638,6 +639,7 @@
 "share.ai::sentButUntracked" = "보냈지만 앱에서 결과를 추적할 수 없어요. 잠시 후 캘린더를 확인해 주세요.";
 "share.ai::textTooLong" = "보낼 내용이 너무 길어요. 줄여서 다시 시도해 주세요.";
 "share.ai::instructionTooLong" = "지시가 너무 길어요. 줄여 주세요.";
+"share.ai::limitExceeded" = "오늘 AI 크레딧을 다 썼어요. 세계 표준시 자정에 초기화돼요.";
 "share.ai::image::title" = "이미지를 AI로 보내기";
 "share.ai::image::recognizing" = "이미지에서 텍스트를 읽는 중…";
 "share.ai::image::text::caption" = "이미지에서 읽은 텍스트예요 — 어색한 부분이 있으면 수정해 주세요.";

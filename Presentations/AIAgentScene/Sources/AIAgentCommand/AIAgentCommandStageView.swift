@@ -422,7 +422,7 @@ private extension AIAgentCommandStageView {
             self.assistantIconMessageBubble(
                 systemName: errorCode == .dailyLimitExceeded ? "hourglass.circle.fill" : "exclamationmark.triangle.fill",
                 tint: appearance.colorSet.accentWarn.asColor,
-                text: reason.flatMap { $0.isEmpty ? nil : $0 } ?? "aiAgent::failed::default".localized()
+                text: self.failedMessage(reason: reason, errorCode: errorCode)
             )
 
             let showsPlansCTA = errorCode == .dailyLimitExceeded && self.state.isPaywallAvailable
@@ -445,6 +445,13 @@ private extension AIAgentCommandStageView {
             .eventHandler(\.onTap, eventHandlers.acknowledge)
             .padding(.top, spacing: .xsmall)
         }
+    }
+
+    func failedMessage(reason: String?, errorCode: ServerErrorModel.ErrorCode?) -> String {
+        if let reason, !reason.isEmpty { return reason }
+        return errorCode == .dailyLimitExceeded
+            ? "aiAgent::failed::dailyLimitExceeded".localized()
+            : "aiAgent::failed::default".localized()
     }
 }
 

@@ -26,10 +26,14 @@ class AIAgentOrchestrationUsecaseImpleTests: PublisherWaitable {
     private var stubSpeech: StubSpeechRecognizeUsecase!
     private var stubSync: StubEventSyncUsecase!
 
-    private func makeUsecase(shouldFail: Bool = false) -> AIAgentOrchestrationUsecaseImple {
+    private func makeUsecase(
+        shouldFail: Bool = false,
+        isCreditExhausted: Bool = false
+    ) -> AIAgentOrchestrationUsecaseImple {
         self.stubCommand = .init()
         self.stubCommand.shouldFail = shouldFail
         self.stubUsage = .init()
+        self.stubUsage.stubIsCreditExhausted = isCreditExhausted
         self.stubSpeech = .init()
         self.stubSync = .init()
         return AIAgentOrchestrationUsecaseImple(
@@ -835,9 +839,11 @@ private final class StubAIAgentUsageUsecase: AIAgentUsageUsecase, @unchecked Sen
 
     let usageSubject = CurrentValueSubject<AIAgentUsage?, Never>(nil)
     var didRefresh: Bool = false
+    var stubIsCreditExhausted: Bool = false
 
     func refresh() { self.didRefresh = true }
     func loadUsage() async throws -> AIAgentUsage { throw RuntimeError("not imple") }
+    func isCreditExhausted() -> Bool { return self.stubIsCreditExhausted }
     var currentUsage: AnyPublisher<AIAgentUsage, Never> {
         return self.usageSubject.compactMap { $0 }.eraseToAnyPublisher()
     }
@@ -1633,5 +1639,77 @@ extension AIAgentOrchestrationUsecaseImpleTests {
         }
         // then
         #expect(caughtError == .busy)
+    }
+}
+
+
+// MARK: - 크레딧 소진 시 제출 차단
+
+extension AIAgentOrchestrationUsecaseImpleTests {
+
+    @Test("크레딧이 소진됐으면 요청 없이 소진 실패 상태를 방출한다")
+    func usecase_whenCreditExhausted_emitsFailedWithoutRequest() async throws {
+        // given
+        let expect = expectConfirm("소진 실패 상태 방출")
+        let usecase = self.makeUsecase(isCreditExhausted: true)
+
+        // when
+        let state = try await self.firstOutput(expect, for: usecase.state) {
+            try? usecase.submit("내일 회의 잡아줘")
+        }
+
+        // then
+        guard case .failed(let command, let reason, let errorCode) = state
+        else { Issue.record("failed 상태가 아니다"); return }
+        #expect(command == "내일 회의 잡아줘")
+        #expect(reason == nil)
+        #expect(errorCode == .dailyLimitExceeded)
+        #expect(self.stubCommand.didProcessCommand == nil)
+    }
+
+    @Test("크레딧이 소진됐으면 차단 후 usage 를 재조회한다")
+    func usecase_whenCreditExhausted_refreshesUsage() {
+        // given
+        let usecase = self.makeUsecase(isCreditExhausted: true)
+
+        // when
+        try? usecase.submit("내일 회의 잡아줘")
+
+        // then
+        #expect(self.stubUsage.didRefresh == true)
+    }
+
+    @Test("이미지 command 도 크레딧 소진이면 요청 없이 차단된다")
+    func usecase_whenCreditExhausted_blocksImageCommand() async throws {
+        // given
+        let expect = expectConfirm("소진 실패 상태 방출")
+        let usecase = self.makeUsecase(isCreditExhausted: true)
+
+        // when
+        let state = try await self.firstOutput(expect, for: usecase.state) {
+            try? usecase.submitImageCommand(text: "영수증 내용", additionalInstruction: nil)
+        }
+
+        // then
+        guard case .failed(_, _, let errorCode) = state
+        else { Issue.record("failed 상태가 아니다"); return }
+        #expect(errorCode == .dailyLimitExceeded)
+    }
+
+    @Test("크레딧이 남아 있으면 그대로 제출된다")
+    func usecase_whenCreditRemains_submitsCommand() async throws {
+        // given
+        let expect = expectConfirm("처리중 상태 방출")
+        let usecase = self.makeUsecase(isCreditExhausted: false)
+
+        // when
+        let state = try await self.firstOutput(expect, for: usecase.state) {
+            try? usecase.submit("내일 회의 잡아줘")
+        }
+
+        // then
+        guard case .processing(let command) = state
+        else { Issue.record("processing 상태가 아니다"); return }
+        #expect(command == "내일 회의 잡아줘")
     }
 }

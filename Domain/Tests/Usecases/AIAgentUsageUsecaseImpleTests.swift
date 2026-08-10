@@ -186,6 +186,90 @@ extension AIAgentUsageUsecaseImpleTests {
 }
 
 
+// MARK: - 캐시된 usage·plan 으로 소진 판정
+
+extension AIAgentUsageUsecaseImpleTests {
+
+    private func makeUsecaseWithCached(
+        usage: AIAgentUsage?,
+        userPlan: BillingUserPlan?
+    ) -> AIAgentUsageUsecaseImple {
+        let store = SharedDataStore()
+        if let usage {
+            store.put(AIAgentUsage.self, key: ShareDataKeys.aiAgentUsage.rawValue, usage)
+        }
+        if let userPlan {
+            store.put(BillingUserPlan.self, key: ShareDataKeys.billingUserPlan.rawValue, userPlan)
+        }
+        return AIAgentUsageUsecaseImple(
+            repository: PrivateStubRepository(),
+            sharedDataStore: store
+        )
+    }
+
+    private func exhaustedUsage() -> AIAgentUsage {
+        return AIAgentUsage(input: 0, output: 0, limit: 3000)
+            |> \.creditsUsed .~ 3000
+    }
+
+    @Test("캐시된 usage 가 소진이고 top-up 잔량이 없으면 소진")
+    func usecase_whenCachedUsageExhaustedWithoutTopup_isExhausted() {
+        // given
+        let usecase = self.makeUsecaseWithCached(
+            usage: self.exhaustedUsage(),
+            userPlan: BillingUserPlan() |> \.topupRemaining .~ 0
+        )
+
+        // when
+        let isExhausted = usecase.isCreditExhausted()
+
+        // then
+        #expect(isExhausted == true)
+    }
+
+    @Test("캐시된 usage 가 소진이어도 top-up 잔량이 있으면 소진 아님")
+    func usecase_whenCachedUsageExhaustedButTopupRemains_isNotExhausted() {
+        // given
+        let usecase = self.makeUsecaseWithCached(
+            usage: self.exhaustedUsage(),
+            userPlan: BillingUserPlan() |> \.topupRemaining .~ 500
+        )
+
+        // when
+        let isExhausted = usecase.isCreditExhausted()
+
+        // then
+        #expect(isExhausted == false)
+    }
+
+    @Test("캐시된 usage 가 없으면 소진 아님")
+    func usecase_whenUsageNotCached_isNotExhausted() {
+        // given
+        let usecase = self.makeUsecaseWithCached(usage: nil, userPlan: nil)
+
+        // when
+        let isExhausted = usecase.isCreditExhausted()
+
+        // then
+        #expect(isExhausted == false)
+    }
+
+    @Test("캐시된 plan 이 없으면 소진 아님")
+    func usecase_whenUserPlanNotCached_isNotExhausted() {
+        // given
+        let usecase = self.makeUsecaseWithCached(
+            usage: self.exhaustedUsage(), userPlan: nil
+        )
+
+        // when
+        let isExhausted = usecase.isCreditExhausted()
+
+        // then
+        #expect(isExhausted == false)
+    }
+}
+
+
 private final class PrivateStubRepository: BaseStubAICommandRepository, @unchecked Sendable {
 
     var stubResults: [Result<AIAgentUsage, any Error>] = []
