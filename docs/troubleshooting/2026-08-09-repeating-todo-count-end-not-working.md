@@ -13,4 +13,6 @@ resolution: fixed
 
 - **해결**: `uploadTodoEvent` 페이로드에 `repeatingTurn`을 실었다. 바로 옆 `uploadScheduleEvent`가 일정의 반복 장부(`showTurn`·`repeatingTimeToExcludes`)를 이미 그대로 올리고 있어 규약 복원에 가깝다. 회귀 테스트는 `EventUploadServiceImpleTests.service_updateRepeatingTodo_uploadRepeatingTurn`.
 
+  같은 누락이 서버로 나가는 페이로드 두 곳에 더 있어 함께 실었다 — `BatchTodoEventPayload.asJson`(비로그인 로컬 데이터의 로그인 시 이관)과 `RevertToggleTodoDoneParameter.asJson`(위젯 토글 되돌리기의 origin). 단 후자는 origin이 `PendingDoneTodoEventTable`에서 복원되는데 그 테이블에 `repeating_turn` 컬럼이 없어, 해당 컬럼이 생기기 전까지 실리는 값은 항상 nil이다 (#835 항목 2).
+
 - **기각 방향**: sync 반영 시 서버 turn이 nil이면 로컬 turn 유지 — 서버 값은 계속 비어 있어 기기 교체·재설치에서 재발하는 증상 패치.

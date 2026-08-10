@@ -49,6 +49,7 @@ struct BatchTodoEventPayload {
                 |> \.notificationOptions .~ pure(todo.notificationOptions)
             var payload = params.asJson()
             payload[TodoCodingKeys.createTime.rawValue] = todo.creatTimeStamp
+            payload[TodoCodingKeys.repeatingTurn.rawValue] = todo.repeatingTurn
             acc[todo.uuid] = payload
         }
     }

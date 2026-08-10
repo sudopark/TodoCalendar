@@ -722,6 +722,32 @@ extension TodoRemoteRepositoryImpleTests {
         )
     }
     
+    // toggle revert -> origin의 반복 회차도 함께 전송
+    func testRepository_whenRevertToggleRepeatingTodo_sendRepeatingTurn() async throws {
+        // given
+        let todoId = "origin"
+        let origin = TodoEvent(uuid: todoId, name: "origin")
+            |> \.time .~ .at(100)
+            |> \.repeating .~ pure(
+                EventRepeating(
+                    repeatingStartTime: 100,
+                    repeatOption: EventRepeatingOptions.EveryDay()
+                )
+                |> \.repeatingEndOption .~ .count(10)
+            )
+            |> \.repeatingTurn .~ 4
+        let repository = try await self.makeRepositoryWithUpdateToggleState(
+            todoId, .completing(origin: origin)
+        )
+
+        // when
+        let _ = try await repository.toggleTodo(todoId)
+
+        // then
+        let originPayload = self.stubRemote.didRequestedParams?["origin"] as? [String: Any]
+        XCTAssertEqual(originPayload?["repeating_turn"] as? Int, 4)
+    }
+
     // toggle -> reverting시에는 아무것도 안함
     func testRepository_whenToggleTodoIsRevertingAndToggleRequested_doNothing() async throws {
         // given
