@@ -625,6 +625,7 @@
 "billing::paywall::unfinished::message" = "Your payment went through, but your plan hasn't updated yet.";
 "billing::paywall::unfinished::action" = "Apply now";
 "billing::paywall::unfinished::applied" = "Your purchase has been applied";
+"billing::paywall::processing::message" = "Confirming your purchase…";
 
 // MARK: - share extension
 

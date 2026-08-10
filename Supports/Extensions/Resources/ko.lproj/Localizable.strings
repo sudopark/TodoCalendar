@@ -625,6 +625,7 @@
 "billing::paywall::unfinished::message" = "결제는 완료됐지만 플랜에 아직 반영되지 않았어요.";
 "billing::paywall::unfinished::action" = "지금 반영";
 "billing::paywall::unfinished::applied" = "결제가 반영됐어요";
+"billing::paywall::processing::message" = "결제를 확인하는 중이에요";
 
 // MARK: - share extension
 

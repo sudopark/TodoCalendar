@@ -21,7 +21,7 @@ public struct FullScreenLoadingView: View {
         message: String? = nil
     ) {
         self.isLoading = isLoading
-        self.message = R.String.commonWaitMessage
+        self.message = message ?? R.String.commonWaitMessage
     }
     
     public var body: some View {
