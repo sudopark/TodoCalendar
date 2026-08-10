@@ -58,7 +58,7 @@ final class ShareCommandViewModel: @unchecked Sendable {
         let source = CurrentValueSubject<ShareCommandSource?, Never>(nil)
         /// 공유 원문·전송 가능 여부를 아직 확인하는 중
         let isPreparing = CurrentValueSubject<Bool, Never>(true)
-        /// 미로그인·앞선 요청이라 제출 자체가 불가능하다 — 되돌아갈 곳이 없다
+        /// 제출 자체가 불가능하다 — 되돌아갈 곳이 없다
         let blockedMessage = CurrentValueSubject<String?, Never>(nil)
         let isSending = CurrentValueSubject<Bool, Never>(false)
         /// 제출이 끝나 더 할 일이 없다
@@ -114,6 +114,8 @@ extension ShareCommandViewModel {
             return "share.ai::needSignIn".localized()
         case .previousRequestPending:
             return "share.ai::pending".localized()
+        case .creditExhausted:
+            return "share.ai::limitExceeded".localized()
         }
     }
 
