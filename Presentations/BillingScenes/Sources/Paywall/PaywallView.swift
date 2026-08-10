@@ -149,21 +149,45 @@ private struct PaywallView: View {
     @Environment(PaywallViewEventHandler.self) private var eventHandlers
 
     var body: some View {
-        VStack(spacing: 0) {
-            SheetHeaderView(title: "billing::paywall::title".localized())
-                .eventHandler(\.onClose) { self.eventHandlers.close() }
-                .padding(.horizontal, spacing: .xlarge)
+        ZStack {
+            VStack(spacing: 0) {
+                SheetHeaderView(title: "billing::paywall::title".localized())
+                    .eventHandler(\.onClose) { self.eventHandlers.close() }
+                    .padding(.horizontal, spacing: .xlarge)
 
-            switch self.state.screenState {
-            case .loading:
-                self.userPlanLoadingView
-            case .userPlanLoadFailed:
-                self.userPlanLoadFailedView
-            case .ready:
-                self.planSelectionView
+                switch self.state.screenState {
+                case .loading:
+                    self.userPlanLoadingView
+                case .userPlanLoadFailed:
+                    self.userPlanLoadFailedView
+                case .ready:
+                    self.planSelectionView
+                }
+            }
+
+            if self.state.isPurchasing {
+                self.processingOverlay
             }
         }
         .background(self.appearance.colorSet.bg0.asColor.ignoresSafeArea())
+    }
+
+    // MARK: - 결제 처리 중 오버레이
+
+    // 스크림이 헤더의 닫기 버튼까지 덮어 이탈 경로를 막는다 — paywall 은 .overFullScreen 이라
+    // 스와이프 다운·딤 탭 dismiss 가 따로 없다
+    private var processingOverlay: some View {
+        ZStack {
+            Color.black.opacity(0.4)
+                .ignoresSafeArea()
+                .contentShape(Rectangle())
+                .onTapGesture { }
+
+            FullScreenLoadingView(
+                isLoading: true,
+                message: "billing::paywall::processing::message".localized()
+            )
+        }
     }
 
     // MARK: - 본문 (유저 플랜 확인 완료)
