@@ -9,6 +9,8 @@
 import Foundation
 import Combine
 import Testing
+import Prelude
+import Optics
 import Domain
 import Extensions
 import UnitTestHelpKit
@@ -281,6 +283,38 @@ extension ShareCommandViewModelTests {
 
         // then
         #expect(repository.didProcessInterpretWithInputSource == .imageOcr)
+    }
+}
+
+
+// MARK: - 크레딧 소진
+
+extension ShareCommandViewModelTests {
+
+    private func exhaustedRepository() -> StubAICommandRepository {
+        return makeStubAICommandRepository(
+            usageLoadResult: AIAgentUsageLoadResult(
+                usage: AIAgentUsage(input: 0, output: 0, limit: 3000)
+                    |> \.creditsUsed .~ 3000,
+                userPlan: BillingUserPlan() |> \.topupRemaining .~ 0
+            )
+        )
+    }
+
+    @Test("크레딧이 소진됐으면 준비 단계에서 차단 문구를 노출한다")
+    func prepare_whenCreditExhausted_showsBlockedMessage() async throws {
+        // given
+        let expect = expectConfirm("차단 문구 방출")
+        expect.count = 2
+        let viewModel = self.makeViewModel(repository: self.exhaustedRepository())
+
+        // when
+        let messages = try await self.outputs(expect, for: viewModel.blockedMessage) {
+            viewModel.prepare()
+        }
+
+        // then
+        #expect(messages.last ?? nil == "share.ai::limitExceeded".localized())
     }
 }
 

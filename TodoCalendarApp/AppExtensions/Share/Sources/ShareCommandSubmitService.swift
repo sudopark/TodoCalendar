@@ -17,6 +17,7 @@ enum ShareSubmitPrecondition {
     case needSignIn
     /// 앞선 요청이 아직 처리 중이거나, 결과를 유저가 확인하지 않았다.
     case previousRequestPending
+    case creditExhausted
 }
 
 
@@ -56,12 +57,16 @@ extension ShareCommandSubmitService {
 
         do {
             let pending = try await self.repository.loadProcessingAICommand()
-            return pending == nil ? .ready : .previousRequestPending
+            guard pending == nil else { return .previousRequestPending }
         } catch {
             // 앞선 요청 유무를 확인 못 했으면 통과시키지 않는다 —
             // 통과 후 제출하면 앱이 추적 중인 job을 덮어써 결과가 유실된다.
             return .previousRequestPending
         }
+
+        // 조회 실패는 통과 — 결과 유실 위험이 없고 서버가 최종 판정한다.
+        let usage = try? await self.repository.loadUsage()
+        return usage?.isCreditExhausted == true ? .creditExhausted : .ready
     }
 
     func submit(

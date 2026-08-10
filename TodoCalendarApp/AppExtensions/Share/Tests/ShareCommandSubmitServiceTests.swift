@@ -8,6 +8,8 @@
 
 import Foundation
 import Testing
+import Prelude
+import Optics
 import Domain
 import Repository
 import Extensions
@@ -307,6 +309,84 @@ extension ShareCommandSubmitServiceTests {
 }
 
 
+// MARK: - 크레딧 소진 전제
+
+extension ShareCommandSubmitServiceTests {
+
+    private func exhaustedUsage() -> AIAgentUsageLoadResult {
+        return AIAgentUsageLoadResult(
+            usage: AIAgentUsage(input: 0, output: 0, limit: 3000)
+                |> \.creditsUsed .~ 3000,
+            userPlan: BillingUserPlan() |> \.topupRemaining .~ 0
+        )
+    }
+
+    private func remainingUsage() -> AIAgentUsageLoadResult {
+        return AIAgentUsageLoadResult(
+            usage: AIAgentUsage(input: 0, output: 0, limit: 3000)
+                |> \.creditsUsed .~ 10,
+            userPlan: BillingUserPlan() |> \.topupRemaining .~ 0
+        )
+    }
+
+    @Test("크레딧이 소진됐으면 전제 판정이 소진으로 나온다")
+    func service_whenCreditExhausted_preconditionIsCreditExhausted() async {
+        // given
+        let repository = makeStubAICommandRepository(usageLoadResult: self.exhaustedUsage())
+        let (service, _) = self.makeService(repository: repository)
+
+        // when
+        let precondition = await service.checkPrecondition()
+
+        // then
+        #expect(precondition == .creditExhausted)
+    }
+
+    @Test("크레딧이 남았으면 전제 판정이 통과다")
+    func service_whenCreditRemains_preconditionIsReady() async {
+        // given
+        let repository = makeStubAICommandRepository(usageLoadResult: self.remainingUsage())
+        let (service, _) = self.makeService(repository: repository)
+
+        // when
+        let precondition = await service.checkPrecondition()
+
+        // then
+        #expect(precondition == .ready)
+    }
+
+    @Test("usage 조회에 실패하면 막지 않는다")
+    func service_whenUsageLoadFails_preconditionIsReady() async {
+        // given
+        let repository = makeStubAICommandRepository(shouldFailLoadUsage: true)
+        let (service, _) = self.makeService(repository: repository)
+
+        // when
+        let precondition = await service.checkPrecondition()
+
+        // then
+        #expect(precondition == .ready)
+    }
+
+    @Test("앞선 요청이 있으면 usage 조회 전에 그 판정이 우선한다")
+    func service_whenPreviousRequestPending_doesNotCheckCredit() async {
+        // given
+        let repository = makeStubAICommandRepository(
+            pending: .init(jobId: "job-1", isConfirmJob: false),
+            usageLoadResult: self.exhaustedUsage()
+        )
+        let (service, _) = self.makeService(repository: repository)
+
+        // when
+        let precondition = await service.checkPrecondition()
+
+        // then
+        #expect(precondition == .previousRequestPending)
+        #expect(repository.didLoadUsage == false)
+    }
+}
+
+
 // MARK: - doubles
 
 // AICommandRepository 구현체는 앱 타겟 테스트(IntentCommandSubmitServiceTests)에도
@@ -318,11 +398,14 @@ final class StubAICommandRepository: AICommandRepository, @unchecked Sendable {
     var shouldFailLoadPending: Bool = false
     var shouldFailUpdatePending: Bool = false
     var stubProcessError: (any Error)?
+    var stubUsageLoadResult: AIAgentUsageLoadResult?
+    var shouldFailLoadUsage: Bool = false
 
     var didProcessInterpretText: String?
     var didProcessInterpretAdditionalInstruction: String?
     var didProcessInterpretWithInputSource: AICommandInputSource?
     var didUpdatePendingJobId: String?
+    var didLoadUsage: Bool = false
 
     func processInterpretCommand(
         text: String,
@@ -361,7 +444,15 @@ final class StubAICommandRepository: AICommandRepository, @unchecked Sendable {
     func rejectConfirmCommand(_ action: AIConfirmCommandAction) async throws { }
     func cancelCommand(_ jobId: String) async throws { }
     func loadJob(_ jobId: String) async throws -> AIJob { throw RuntimeError("not used") }
-    func loadUsage() async throws -> AIAgentUsageLoadResult { throw RuntimeError("not used") }
+    func loadUsage() async throws -> AIAgentUsageLoadResult {
+        self.didLoadUsage = true
+        guard !self.shouldFailLoadUsage
+        else { throw RuntimeError("failed to load usage") }
+        return self.stubUsageLoadResult ?? AIAgentUsageLoadResult(
+            usage: AIAgentUsage(input: 0, output: 0, limit: 3000),
+            userPlan: BillingUserPlan() |> \.topupRemaining .~ 0
+        )
+    }
 }
 
 // ShareCommandSubmitServiceTests·ShareCommandViewModelTests가 공유하는 팩토리 —
@@ -370,13 +461,17 @@ func makeStubAICommandRepository(
     pending: ProcessingAICommand? = nil,
     processFailWith error: (any Error)? = nil,
     shouldFailLoadPending: Bool = false,
-    shouldFailUpdatePending: Bool = false
+    shouldFailUpdatePending: Bool = false,
+    usageLoadResult: AIAgentUsageLoadResult? = nil,
+    shouldFailLoadUsage: Bool = false
 ) -> StubAICommandRepository {
     let repository = StubAICommandRepository()
     repository.stubPendingCommand = pending
     repository.stubProcessError = error
     repository.shouldFailLoadPending = shouldFailLoadPending
     repository.shouldFailUpdatePending = shouldFailUpdatePending
+    repository.stubUsageLoadResult = usageLoadResult
+    repository.shouldFailLoadUsage = shouldFailLoadUsage
     return repository
 }
 
