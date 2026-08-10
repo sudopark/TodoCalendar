@@ -16,6 +16,7 @@ final class StubAppStoreBillingService: AppStoreBillingService, @unchecked Senda
 
     private let shouldCancelPurchase: Bool
     private let shouldPurchaseBePending: Bool
+    private let shouldFailPurchase: Bool
     private let shouldFailLoadProducts: Bool
     private let stubUnfinished: [BillingSignedTransaction]
     private let stubRestored: [BillingSignedTransaction]
@@ -25,12 +26,14 @@ final class StubAppStoreBillingService: AppStoreBillingService, @unchecked Senda
     init(
         shouldCancelPurchase: Bool = false,
         shouldPurchaseBePending: Bool = false,
+        shouldFailPurchase: Bool = false,
         shouldFailLoadProducts: Bool = false,
         unfinished: [BillingSignedTransaction] = [],
         restored: [BillingSignedTransaction]? = nil
     ) {
         self.shouldCancelPurchase = shouldCancelPurchase
         self.shouldPurchaseBePending = shouldPurchaseBePending
+        self.shouldFailPurchase = shouldFailPurchase
         self.shouldFailLoadProducts = shouldFailLoadProducts
         self.stubUnfinished = unfinished
         self.stubRestored = restored ?? [
@@ -59,6 +62,7 @@ final class StubAppStoreBillingService: AppStoreBillingService, @unchecked Senda
     }
 
     func purchase(productId: String) async throws -> BillingTransactionOutcome {
+        if self.shouldFailPurchase { throw RuntimeError("store purchase failed") }
         if self.shouldCancelPurchase { return .cancelled }
         if self.shouldPurchaseBePending { return .pending }
         return .verified(
