@@ -19,6 +19,7 @@ final class StubBillingUsecase: BillingUsecase, @unchecked Sendable {
     private let stubPurchaseResult: Result<BillingPurchaseResult, any Error>
     // restorePurchases() 가 반환할 값. nil 이면 "복원할 구매 없음"
     private let restoreResult: BillingUserPlan?
+    private let restoreError: (any Error)?
     // refreshUserPlan() 실패를 시뮬레이션 — nil이면 성공 (#739)
     private let userPlanLoadError: (any Error)?
     private let userPlanSubject: CurrentValueSubject<BillingUserPlan?, Never>
@@ -38,6 +39,7 @@ final class StubBillingUsecase: BillingUsecase, @unchecked Sendable {
         purchaseResult: Result<BillingPurchaseResult, any Error> = .success(.cancelled),
         userPlan: BillingUserPlan? = nil,
         restoreResult: BillingUserPlan? = nil,
+        restoreError: (any Error)? = nil,
         userPlanLoadError: (any Error)? = nil,
         hasUnfinished: Bool = false,
         applyUnfinishedResult: Result<BillingUserPlan?, any Error> = .success(nil)
@@ -46,6 +48,7 @@ final class StubBillingUsecase: BillingUsecase, @unchecked Sendable {
         self.catalogLoadError = catalogLoadError
         self.stubPurchaseResult = purchaseResult
         self.restoreResult = restoreResult
+        self.restoreError = restoreError
         self.userPlanLoadError = userPlanLoadError
         self.userPlanSubject = .init(userPlan)
         self.hasUnfinished = hasUnfinished
@@ -68,6 +71,7 @@ final class StubBillingUsecase: BillingUsecase, @unchecked Sendable {
     // "선택 후 복원으로 보유 플랜이 바뀌는" 시나리오(C1)가 재현된다
     func restorePurchases() async throws -> BillingUserPlan? {
         self.didRestoreCalled = true
+        if let restoreError { throw restoreError }
         if let restoreResult {
             self.userPlanSubject.send(restoreResult)
         }
