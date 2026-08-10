@@ -34,7 +34,7 @@ public protocol TodoEventUsecase {
     func refreshUncompletedTodos()
     var uncompletedTodos: AnyPublisher<[TodoEvent], Never> { get }
     
-    func skipRepeatingTodo(_ todoId: String, _ params: SkipTodoParams) async throws -> TodoEvent
+    func skipRepeatingTodo(_ todoId: String) async throws -> TodoEvent
 }
 
 
@@ -335,23 +335,11 @@ extension TodoEventUsecaseImple {
 // MARK: - skip todo
 
 extension TodoEventUsecaseImple {
-    
-    public func skipRepeatingTodo(
-        _ todoId: String, _ params: SkipTodoParams
-    ) async throws -> TodoEvent {
-        
-        switch params {
-        case .next:
-            let skipped = try await self.todoRepository.skipRepeatingTodo(todoId)
-            self.notifyUpdatedEvent(skipped)
-            self.updateUncompletedTodoList(by: skipped)
-            return skipped
-            
-        case .until(let next):
-            let params = TodoEditParams(.patch) |> \.time .~ next
-            let skipped = try await self.updateTodoEvent(todoId, params)
-            self.updateUncompletedTodoList(by: skipped)
-            return skipped
-        }
+
+    public func skipRepeatingTodo(_ todoId: String) async throws -> TodoEvent {
+        let skipped = try await self.todoRepository.skipRepeatingTodo(todoId)
+        self.notifyUpdatedEvent(skipped)
+        self.updateUncompletedTodoList(by: skipped)
+        return skipped
     }
 }

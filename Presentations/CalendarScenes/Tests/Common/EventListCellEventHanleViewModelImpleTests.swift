@@ -531,8 +531,8 @@ private final class PrivateStubTodoEventUsecase: StubTodoEventUsecase {
             .eraseToAnyPublisher()
     }
     
-    override func skipRepeatingTodo(_ todoId: String, _ params: SkipTodoParams) async throws -> TodoEvent {
-        
+    override func skipRepeatingTodo(_ todoId: String) async throws -> TodoEvent {
+
         let newTodo = TodoEvent(uuid: todoId, name: "skipped")
         self.fakeTodo.send(newTodo)
         return newTodo
