@@ -47,6 +47,13 @@ public extension AIAgentUsage {
         guard self.dailyLimit > 0 else { return 0 }
         return min(Double(self.usedCredits) / Double(self.dailyLimit), 1.0)
     }
+
+    // 일일 한도와 top-up 은 합산하지 않는다 — topupRemaining 은 이미 차감된 잔량이라
+    // usedCredits 와 더하면 초과분이 이중 반영된다.
+    func isCreditExhausted(topupRemaining: Int?) -> Bool {
+        guard let topupRemaining else { return false }
+        return self.isLimitExceeded && topupRemaining <= 0
+    }
 }
 
 
@@ -62,5 +69,13 @@ public struct AIAgentUsageLoadResult: Sendable {
     public init(usage: AIAgentUsage, userPlan: BillingUserPlan?) {
         self.usage = usage
         self.userPlan = userPlan
+    }
+}
+
+
+public extension AIAgentUsageLoadResult {
+
+    var isCreditExhausted: Bool {
+        return self.usage.isCreditExhausted(topupRemaining: self.userPlan?.topupRemaining)
     }
 }
