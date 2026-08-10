@@ -11,6 +11,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import Scenes
 import CommonPresentation
 
@@ -206,7 +207,7 @@ extension PaywallViewModelImple {
                     self.router?.showConfirm(dialog: info)
                 }
             } catch {
-                self.router?.showError(error)
+                self.showFailure(error)
             }
         }
     }
@@ -227,7 +228,7 @@ extension PaywallViewModelImple {
                         : "billing::paywall::restore::empty".localized()
                 )
             } catch {
-                self.router?.showError(error)
+                self.showFailure(error)
             }
         }
     }
@@ -243,7 +244,7 @@ extension PaywallViewModelImple {
                 self.subject.hasUnfinished.send(false)
                 self.router?.showToast("billing::paywall::unfinished::applied".localized())
             } catch {
-                self.router?.showError(error)
+                self.showFailure(error)
             }
         }
     }
@@ -260,6 +261,15 @@ extension PaywallViewModelImple {
 
     func close() {
         self.router?.closeScene()
+    }
+
+    private func showFailure(_ error: any Error) {
+        guard let reason = PaywallFailReason(error) else { return }
+        logger.log(level: .error, "paywall action failed: \(error)")
+        let info = ConfirmDialogInfo()
+            |> \.message .~ pure(reason.message)
+            |> \.withCancel .~ false
+        self.router?.showConfirm(dialog: info)
     }
 }
 

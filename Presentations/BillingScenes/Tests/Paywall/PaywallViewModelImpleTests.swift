@@ -27,6 +27,7 @@ final class PaywallViewModelImpleTests: PublisherWaitable {
         purchaseResult: Result<BillingPurchaseResult, any Error> = .success(.cancelled),
         userPlan: BillingUserPlan? = nil,
         restoreResult: BillingUserPlan? = nil,
+        restoreError: (any Error)? = nil,
         userPlanLoadError: (any Error)? = nil,
         hasUnfinished: Bool = false,
         applyUnfinishedResult: Result<BillingUserPlan?, any Error> = .success(nil)
@@ -37,6 +38,7 @@ final class PaywallViewModelImpleTests: PublisherWaitable {
             purchaseResult: purchaseResult,
             userPlan: userPlan,
             restoreResult: restoreResult,
+            restoreError: restoreError,
             userPlanLoadError: userPlanLoadError,
             hasUnfinished: hasUnfinished,
             applyUnfinishedResult: applyUnfinishedResult
@@ -390,7 +392,7 @@ extension PaywallViewModelImpleTests {
         #expect(router.didClosed == nil)
     }
 
-    @Test func viewModel_whenPurchaseFailed_showsError() async throws {
+    @Test func viewModel_whenPurchaseFailedAtStore_showsPurchaseFailedMessage() async throws {
         // given
         let standard = self.purchasableOffering(.standard, productId: "product.standard")
         let (viewModel, _, router) = self.makeViewModel(
@@ -403,7 +405,76 @@ extension PaywallViewModelImpleTests {
         try await self.waitProcessingCompleted(viewModel) { viewModel.purchase() }
 
         // then
-        #expect(router.didShowError is TestError)
+        #expect(
+            router.didShowConfirmWith?.message == "billing::paywall::fail::purchase".localized()
+        )
+    }
+
+    @Test func viewModel_whenServerReflectFailed_showsReflectDelayedMessage() async throws {
+        // given
+        let standard = self.purchasableOffering(.standard, productId: "product.standard")
+        let (viewModel, _, router) = self.makeViewModel(
+            offerings: [standard],
+            purchaseResult: .failure(BillingReflectFailure(RuntimeError("network down")))
+        )
+        _ = try await self.waitOfferingsLoaded(viewModel)
+        viewModel.selectPlan(.standard)
+
+        // when
+        try await self.waitProcessingCompleted(viewModel) { viewModel.purchase() }
+
+        // then
+        #expect(
+            router.didShowConfirmWith?.message
+                == "billing::paywall::fail::reflectDelayed".localized()
+        )
+    }
+
+    @Test(
+        "서버 에러 코드별로 다른 문구를 보여준다",
+        arguments: [
+            (ServerErrorModel.ErrorCode.invalidTransaction, "billing::paywall::fail::invalidTransaction"),
+            (.unknownProduct, "billing::paywall::fail::unknownProduct"),
+            (.planChangeNotAllowed, "billing::paywall::fail::planChangeNotAllowed")
+        ]
+    )
+    func viewModel_whenServerReflectFailedWithCode_showsCodeSpecificMessage(
+        _ code: ServerErrorModel.ErrorCode, _ expectedKey: String
+    ) async throws {
+        // given
+        let serverError = ServerErrorModel() |> \.code .~ code
+        let standard = self.purchasableOffering(.standard, productId: "product.standard")
+        let (viewModel, _, router) = self.makeViewModel(
+            offerings: [standard],
+            purchaseResult: .failure(BillingReflectFailure(serverError))
+        )
+        _ = try await self.waitOfferingsLoaded(viewModel)
+        viewModel.selectPlan(.standard)
+
+        // when
+        try await self.waitProcessingCompleted(viewModel) { viewModel.purchase() }
+
+        // then
+        #expect(router.didShowConfirmWith?.message == expectedKey.localized())
+    }
+
+    // 요청 취소는 유저가 만든 상태다 — 알림을 띄우면 취소했는데 에러를 본 꼴이 된다
+    @Test func viewModel_whenRequestCancelled_showsNothing() async throws {
+        // given
+        let cancelled = ServerErrorModel() |> \.code .~ ServerErrorModel.ErrorCode.cancelled
+        let standard = self.purchasableOffering(.standard, productId: "product.standard")
+        let (viewModel, _, router) = self.makeViewModel(
+            offerings: [standard],
+            purchaseResult: .failure(BillingReflectFailure(cancelled))
+        )
+        _ = try await self.waitOfferingsLoaded(viewModel)
+        viewModel.selectPlan(.standard)
+
+        // when
+        try await self.waitProcessingCompleted(viewModel) { viewModel.purchase() }
+
+        // then
+        #expect(router.didShowConfirmWith == nil)
     }
 
     // I5 — 성공(applied)은 가장 중요한 계약인데 테스트가 없었다: 토스트 후 씬을 닫는다
@@ -510,6 +581,22 @@ extension PaywallViewModelImpleTests {
         // then: 세 번째 값이 첫 호출 Task 완료의 false 다 — 두 번째 호출이 별도로
         // true 를 재전송하지 않았다
         #expect(states == [false, true, false])
+    }
+
+    @Test func viewModel_restore_whenServerReflectFails_showsDelayedMessage() async throws {
+        // given
+        let (viewModel, _, router) = self.makeViewModel(
+            restoreError: BillingReflectFailure(RuntimeError("network down"))
+        )
+
+        // when
+        try await self.waitProcessingCompleted(viewModel) { viewModel.restore() }
+
+        // then
+        #expect(
+            router.didShowConfirmWith?.message
+                == "billing::paywall::fail::reflectDelayed".localized()
+        )
     }
 }
 
@@ -690,11 +777,12 @@ extension PaywallViewModelImpleTests {
         #expect(router.didShowToastWithMessage == "billing::paywall::unfinished::applied".localized())
     }
 
-    @Test("복구에 실패하면 배너를 유지하고 에러를 알린다")
-    func viewModel_whenRecoverUnfinishedFails_keepsBannerAndShowError() async throws {
+    @Test("복구에 실패하면 배너를 유지하고 반영 지연을 알린다")
+    func viewModel_whenRecoverUnfinishedFails_keepsBannerAndShowsDelayedMessage() async throws {
         // given
         let (viewModel, _, router) = self.makeViewModel(
-            hasUnfinished: true, applyUnfinishedResult: .failure(RuntimeError("failed"))
+            hasUnfinished: true,
+            applyUnfinishedResult: .failure(BillingReflectFailure(RuntimeError("failed")))
         )
         try await self.waitUnfinishedBannerReady(viewModel)
 
@@ -707,7 +795,10 @@ extension PaywallViewModelImpleTests {
             expect, for: viewModel.hasUnfinishedTransactions
         )
         #expect(hasUnfinished == true)
-        #expect(router.didShowError != nil)
+        #expect(
+            router.didShowConfirmWith?.message
+                == "billing::paywall::fail::reflectDelayed".localized()
+        )
     }
 
     @Test("복구가 진행 중이면 연타해도 한 번만 반영한다")
