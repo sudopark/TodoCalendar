@@ -294,6 +294,7 @@ struct RevertToggleTodoDoneParameter {
             .map { $0.asJson() }
         originPayload[Key.repeating.rawValue] = self.origin.repeating.map { EventRepeatingMapper(repeating: $0) }
             .map { $0.asJson() }
+        originPayload[Key.repeatingTurn.rawValue] = self.origin.repeatingTurn
         originPayload[Key.notificationOptions.rawValue] = self.origin.notificationOptions
             .map { EventNotificationTimeOptionMapper(option: $0) }
             .map { try? $0.asJson() }
