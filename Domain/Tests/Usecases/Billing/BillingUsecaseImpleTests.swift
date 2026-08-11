@@ -20,6 +20,7 @@ final class BillingUsecaseImpleTests: PublisherWaitable {
 
     private func makeUsecase(
         shouldCancelPurchase: Bool = false,
+        shouldCancelRestore: Bool = false,
         shouldPurchaseBePending: Bool = false,
         shouldFailPurchase: Bool = false,
         shouldFailApply: Bool = false,
@@ -36,6 +37,7 @@ final class BillingUsecaseImpleTests: PublisherWaitable {
         )
         let service = StubAppStoreBillingService(
             shouldCancelPurchase: shouldCancelPurchase,
+            shouldCancelRestore: shouldCancelRestore,
             shouldPurchaseBePending: shouldPurchaseBePending,
             shouldFailPurchase: shouldFailPurchase,
             shouldFailLoadProducts: shouldFailLoadProducts,
@@ -301,12 +303,43 @@ extension BillingUsecaseImpleTests {
         // given
         let (usecase, repository, service) = self.makeUsecase()
         // when
-        let plan = try await usecase.restorePurchases()
+        let result = try await usecase.restorePurchases()
         // then
         #expect(repository.didPostedTransactionUpdates == ["jws:restored"])
         #expect(repository.didPostedSignedTransactions == [])
         #expect(service.didFinishedTransactionIds == ["tx:restored"])
-        #expect(plan?.planId == .standard)
+        guard case .applied(let plan) = result else {
+            Issue.record("반영 결과가 아니다: \(result)")
+            return
+        }
+        #expect(plan.planId == .standard)
+    }
+
+    // 시스템 로그인 시트를 닫은 것뿐이라 실패로 알리지 않는다 — 서버 왕복도 없다
+    @Test func usecase_restorePurchases_whenUserCancelled_returnsCancelledWithoutPosting() async throws {
+        // given
+        let (usecase, repository, service) = self.makeUsecase(shouldCancelRestore: true)
+        // when
+        let result = try await usecase.restorePurchases()
+        // then
+        guard case .cancelled = result else {
+            Issue.record("취소 결과가 아니다: \(result)")
+            return
+        }
+        #expect(repository.didPostedTransactionUpdates == [])
+        #expect(service.didFinishedTransactionIds == [])
+    }
+
+    @Test func usecase_restorePurchases_whenNothingRestored_returnsNothingToRestore() async throws {
+        // given
+        let (usecase, _, _) = self.makeUsecase(restored: [])
+        // when
+        let result = try await usecase.restorePurchases()
+        // then
+        guard case .nothingToRestore = result else {
+            Issue.record("복원 없음 결과가 아니다: \(result)")
+            return
+        }
     }
 
     // 앞 건이 실패해도 뒤 건은 반영돼야 한다. 실패 사실은 첫 사유로 던져 화면에 노출된다

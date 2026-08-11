@@ -28,7 +28,7 @@ final class StubBillingUsecase: BillingUsecase, @unchecked Sendable {
         throw RuntimeError("not imple")
     }
 
-    func restorePurchases() async throws -> BillingUserPlan? { nil }
+    func restorePurchases() async throws -> BillingRestoreResult { .nothingToRestore }
 
     func refreshUserPlan() async throws -> BillingUserPlan {
         self.currentUserPlanSubject.value ?? BillingUserPlan()

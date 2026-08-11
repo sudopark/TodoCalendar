@@ -19,7 +19,7 @@ public protocol AppStoreBillingService: AnyObject, Sendable {
     func purchase(productId: String) async throws -> BillingTransactionOutcome
 
     // 복원 — 현재 유효한 권한. 소모품(top-up)은 여기 잡히지 않는다
-    func restorePurchases() async throws -> [BillingSignedTransaction]
+    func restorePurchases() async throws -> BillingRestoreOutcome
 
     // 서버 반영 전 앱이 죽어 finish 되지 않은 트랜잭션
     func unfinishedTransactions() async -> [BillingSignedTransaction]

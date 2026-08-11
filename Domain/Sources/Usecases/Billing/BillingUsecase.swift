@@ -20,7 +20,7 @@ public protocol BillingUsecase: AnyObject, Sendable {
 
     // 유저 취소·승인대기(Ask to Buy) 는 에러가 아니다 — 결과를 구분해 반환
     func purchase(productId: String) async throws -> BillingPurchaseResult
-    func restorePurchases() async throws -> BillingUserPlan?
+    func restorePurchases() async throws -> BillingRestoreResult
 
     // paywall 진입 등에서 현재 플랜을 재확인한다. 성공하면 sharedDataStore 에 반영돼
     // currentUserPlan 구독자에게 흐른다. 실패는 호출측이 처리 (throws)
@@ -113,9 +113,16 @@ extension BillingUsecaseImple {
         }
     }
 
-    public func restorePurchases() async throws -> BillingUserPlan? {
-        let transactions = try await self.appStoreService.restorePurchases()
-        return try await self.applyEach(transactions)
+    public func restorePurchases() async throws -> BillingRestoreResult {
+        switch try await self.appStoreService.restorePurchases() {
+        case .synced(let transactions):
+            guard let userPlan = try await self.applyEach(transactions)
+            else { return .nothingToRestore }
+            return .applied(userPlan)
+
+        case .cancelled:
+            return .cancelled
+        }
     }
 
     // finish 는 서버 반영이 성공한 뒤에만. 먼저 부르면 실패 시 영수증이 사라져 복구 불가다
@@ -161,8 +168,8 @@ extension BillingUsecaseImple {
         )
     }
 
-    // 한 건이 영구 실패해도 나머지는 반영돼야 한다 — fail-fast 면 앞의 실패가 매 시도마다
-    // 뒤 트랜잭션을 가려 영영 반영되지 않는다. 실패 사실은 첫 사유로 호출측에 던진다
+    // 한 건이 영구 실패해도 나머지는 반영돼야 한다 — fail-fast 면 앞의 실패가
+    // 매 시도마다 뒤 트랜잭션을 가려 영영 반영되지 않는다
     private func applyEach(
         _ transactions: [BillingSignedTransaction]
     ) async throws -> BillingUserPlan? {

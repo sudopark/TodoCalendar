@@ -29,7 +29,7 @@ public final class NotNeedBillingUsecase: BillingUsecase, Sendable {
         throw RuntimeError(key: "Billing.needSignIn", "billing needs sign in")
     }
 
-    public func restorePurchases() async throws -> BillingUserPlan? { return nil }
+    public func restorePurchases() async throws -> BillingRestoreResult { return .nothingToRestore }
 
     @discardableResult
     public func refreshUserPlan() async throws -> BillingUserPlan {

@@ -26,7 +26,7 @@ final class PaywallViewModelImpleTests: PublisherWaitable {
         catalogLoadError: (any Error)? = nil,
         purchaseResult: Result<BillingPurchaseResult, any Error> = .success(.cancelled),
         userPlan: BillingUserPlan? = nil,
-        restoreResult: BillingUserPlan? = nil,
+        restoreResult: BillingRestoreResult = .nothingToRestore,
         restoreError: (any Error)? = nil,
         userPlanLoadError: (any Error)? = nil,
         hasUnfinished: Bool = false,
@@ -506,7 +506,7 @@ extension PaywallViewModelImpleTests {
         let lifetime = self.purchasableOffering(.lifetime, productId: "product.lifetime", kind: .oneTime)
         let (viewModel, stub, router) = self.makeViewModel(
             offerings: [standard, lifetime],
-            restoreResult: BillingUserPlan() |> \.planId .~ .lifetime
+            restoreResult: .applied(BillingUserPlan() |> \.planId .~ .lifetime)
         )
         _ = try await self.waitOfferingsLoaded(viewModel)
         viewModel.selectPlan(.standard)
@@ -538,7 +538,7 @@ extension PaywallViewModelImpleTests {
     @Test func viewModel_restore_whenPurchaseFound_showsRestoredToast() async throws {
         // given
         let (viewModel, stub, router) = self.makeViewModel(
-            restoreResult: BillingUserPlan() |> \.planId .~ .standard
+            restoreResult: .applied(BillingUserPlan() |> \.planId .~ .standard)
         )
 
         // when
@@ -550,8 +550,8 @@ extension PaywallViewModelImpleTests {
     }
 
     @Test func viewModel_restore_whenNothingToRestore_showsEmptyGuide() async throws {
-        // given: 복원할 구매가 없음(restoreResult nil)
-        let (viewModel, stub, router) = self.makeViewModel(restoreResult: nil)
+        // given: 복원할 구매가 없음
+        let (viewModel, stub, router) = self.makeViewModel(restoreResult: .nothingToRestore)
 
         // when
         try await self.waitProcessingCompleted(viewModel) { viewModel.restore() }
@@ -561,13 +561,27 @@ extension PaywallViewModelImpleTests {
         #expect(router.didShowToastWithMessage == "billing::paywall::restore::empty".localized())
     }
 
+    // App Store 로그인 시트를 닫은 것뿐 — 토스트도 다이얼로그도 남지 않는다
+    @Test func viewModel_restore_whenUserCancelled_showsNothing() async throws {
+        // given
+        let (viewModel, stub, router) = self.makeViewModel(restoreResult: .cancelled)
+
+        // when
+        try await self.waitProcessingCompleted(viewModel) { viewModel.restore() }
+
+        // then
+        #expect(stub.didRestoreCalled == true)
+        #expect(router.didShowToastWithMessage == nil)
+        #expect(router.didShowConfirmWith == nil)
+    }
+
     // I4 회귀 — 진행 중 재호출은 무시된다(AppStore.sync() 병렬 실행 방지).
     // 가드가 없다면 두 번째 호출도 곧바로 true 를 재전송해 (false, true, true) 로 3회가
     // 동기적으로 채워지고, 첫 호출의 완료(defer 의 false)를 기다리지 않게 된다
     @Test func viewModel_restore_whenAlreadyInProgress_ignoresDuplicateCall() async throws {
         // given
         let (viewModel, _, _) = self.makeViewModel(
-            restoreResult: BillingUserPlan() |> \.planId .~ .standard
+            restoreResult: .applied(BillingUserPlan() |> \.planId .~ .standard)
         )
 
         // when
