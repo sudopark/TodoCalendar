@@ -71,7 +71,7 @@ struct AppEnvironment {
         return [googleCalendarService, appleCalendarService]
     }
 
-    static let dbVersion: Int32 = 6
+    static let dbVersion: Int32 = 7
     static let googleCalendarDBVersion: Int32 = 0
     static let appleCalendarDBVersion: Int32 = 0
     
