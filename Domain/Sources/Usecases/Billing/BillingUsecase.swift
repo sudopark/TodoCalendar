@@ -161,13 +161,26 @@ extension BillingUsecaseImple {
         )
     }
 
+    // 한 건이 영구 실패해도 나머지는 반영돼야 한다 — fail-fast 면 앞의 실패가 매 시도마다
+    // 뒤 트랜잭션을 가려 영영 반영되지 않는다. 실패 사실은 첫 사유로 호출측에 던진다
     private func applyEach(
         _ transactions: [BillingSignedTransaction]
     ) async throws -> BillingUserPlan? {
         var latest: BillingUserPlan?
+        var firstFailure: (any Error)?
         for transaction in transactions {
-            latest = try await self.applyAndFinish(transaction)
+            guard !Task.isCancelled else { break }
+            do {
+                latest = try await self.delegateAndFinish(transaction)
+            } catch {
+                firstFailure = firstFailure ?? error
+                logger.log(
+                    level: .error, "billing transaction apply failed: \(error)",
+                    with: ["transactionId": transaction.id]
+                )
+            }
         }
+        if let firstFailure { throw firstFailure }
         return latest
     }
 }
@@ -216,25 +229,13 @@ extension BillingUsecaseImple {
         self.recoveryTask = nil
     }
 
-    // 한 건이 영구 실패해도 나머지는 반영돼야 한다 — fail-fast 면 앞의 실패가
-    // 매 시도마다 뒤 트랜잭션을 가려 영영 반영되지 않는다.
     // unfinished 는 OS 전역이라 두 시도가 겹치면 같은 트랜잭션을 중복 전송한다
     public func recoverUnfinishedTransactions() {
         self.recoveryTask?.cancel()
         self.recoveryTask = Task { [weak self] in
-            guard let transactions = await self?.appStoreService.unfinishedTransactions()
-            else { return }
-            for transaction in transactions {
-                guard !Task.isCancelled, let self else { return }
-                do {
-                    _ = try await self.delegateAndFinish(transaction)
-                } catch {
-                    logger.log(
-                        level: .error, "billing transaction delegate failed (recovery): \(error)",
-                        with: ["transactionId": transaction.id]
-                    )
-                }
-            }
+            guard let self else { return }
+            let transactions = await self.appStoreService.unfinishedTransactions()
+            _ = try? await self.applyEach(transactions)
         }
     }
 
@@ -244,11 +245,7 @@ extension BillingUsecaseImple {
 
     public func applyUnfinishedTransactions() async throws -> BillingUserPlan? {
         let transactions = await self.appStoreService.unfinishedTransactions()
-        var latest: BillingUserPlan?
-        for transaction in transactions {
-            latest = try await self.delegateAndFinish(transaction)
-        }
-        return latest
+        return try await self.applyEach(transactions)
     }
 
     public var currentUserPlan: AnyPublisher<BillingUserPlan, Never> {
