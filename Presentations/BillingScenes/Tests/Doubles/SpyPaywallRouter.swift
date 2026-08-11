@@ -13,4 +13,11 @@ import TestDoubles
 @testable import BillingScenes
 
 
-final class SpyPaywallRouter: BaseSpyRouter, PaywallRouting, @unchecked Sendable { }
+final class SpyPaywallRouter: BaseSpyRouter, PaywallRouting, @unchecked Sendable {
+
+    var didShowManageSubscriptions: Bool = false
+
+    func showManageSubscriptions() {
+        self.didShowManageSubscriptions = true
+    }
+}

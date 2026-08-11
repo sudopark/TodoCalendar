@@ -9,6 +9,7 @@ import UIKit
 import SwiftUI
 import Domain
 import Extensions
+import StoreKitService
 import Scenes
 import CommonPresentation
 import CalendarScenes
@@ -455,7 +456,8 @@ extension ApplicationRootRouter {
     private func paywallSceneBuilder() -> any PaywallSceneBuilder {
         return PaywallBuilderImple(
             usecaseFactory: self.usecaseFactory,
-            viewAppearance: self.viewAppearanceStore.appearance
+            viewAppearance: self.viewAppearanceStore.appearance,
+            showManageSubscriptions: { try await AppStoreSubscriptionSheet().show(in: $0) }
         )
     }
     

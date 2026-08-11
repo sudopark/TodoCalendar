@@ -12,9 +12,34 @@ import Scenes
 
 // MARK: - PaywallRouting
 
-protocol PaywallRouting: Routing, Sendable, AnyObject { }
+protocol PaywallRouting: Routing, Sendable, AnyObject {
+
+    func showManageSubscriptions()
+}
 
 
 // MARK: - PaywallRouter
 
-final class PaywallRouter: BaseRouterImple, PaywallRouting, @unchecked Sendable { }
+final class PaywallRouter: BaseRouterImple, PaywallRouting, @unchecked Sendable {
+
+    private let showManageSubscriptionsSheet: @MainActor @Sendable (UIWindowScene) async throws -> Void
+
+    init(
+        showManageSubscriptionsSheet: @escaping @MainActor @Sendable (UIWindowScene) async throws -> Void
+    ) {
+        self.showManageSubscriptionsSheet = showManageSubscriptionsSheet
+        super.init()
+    }
+
+    func showManageSubscriptions() {
+        Task { @MainActor in
+            // 시트는 씬에 붙어야 뜬다 — 화면이 내려간 뒤 도달하면 붙일 창이 없다
+            guard let windowScene = self.scene?.view.window?.windowScene else { return }
+            do {
+                try await self.showManageSubscriptionsSheet(windowScene)
+            } catch {
+                self.showError(error)
+            }
+        }
+    }
+}
