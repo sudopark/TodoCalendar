@@ -213,7 +213,7 @@ ApplicationDeepLinkHandlerImple:
 
 ### 5.1 메인 DB (`todo_calendar.db`)
 
-**현재 버전**: `AppEnvironment.dbVersion = 6`
+**현재 버전**: `AppEnvironment.dbVersion = 7`
 
 **마이그레이션 메커니즘** (`SQLiteService`):
 1. 앱 시작 시 `AppDataMigrationImple.runDBMigration()` 호출
@@ -234,6 +234,7 @@ ApplicationDeepLinkHandlerImple:
 | 3→4 | 구글 캘린더 이벤트 가시성 컬럼 | `google_calendar_event_origin` (레거시) | `ALTER TABLE ... ADD COLUMN visibility TEXT` |
 | 4→5 | 업로드 큐 테이블 재구성 | `event_upload_pending_queue` | 임시 테이블 생성 → 데이터 이동 → 원본 삭제 → 이름 변경 |
 | 5→6 | 할일 반복 회차 컬럼 추가 | `TodoEvents` | `ALTER TABLE ... ADD COLUMN repeating_turn INTEGER` |
+| 6→7 | 완료 처리 중 원본 보관 테이블의 컬럼 순서 교정 + 회차 컬럼 추가 | `PendingDoneTodoEvent` | 임시 테이블 생성 → 데이터 이동 → 원본 삭제 → 이름 변경 |
 
 **전체 테이블 목록** (`prepareTables()` 순서):
 
@@ -263,7 +264,7 @@ ApplicationDeepLinkHandlerImple:
 | 버전 | 에러 처리 | 이유 |
 |---|---|---|
 | 0→1, 1→2, 2→3, 3→4 | `try` (hard fail) | 핵심 스키마 변경 |
-| 4→5, 5→6 | `try?` (soft fail) | 큐 재구성/부가 컬럼, 실패해도 앱 동작에 큰 영향 없음 |
+| 4→5, 5→6, 6→7 | `try?` (soft fail) | 큐 재구성/부가 컬럼, 실패해도 앱 동작에 큰 영향 없음 |
 
 **전체 실패 시**: 최상위 try-catch에서 에러 로깅만 수행, 앱 크래시 방지.
 
@@ -286,10 +287,40 @@ ApplicationDeepLinkHandlerImple:
 
 ### 5.5 새 마이그레이션 추가 절차
 
+**세 위치를 반드시 함께 변경한다:**
+
 1. `AppEnvironment.dbVersion` (또는 `googleCalendarDBVersion`) 증가
 2. 해당 `Table` 타입의 `migrateStatement(for version:)`에 새 case 추가
-3. `AppDataMigrationImple.runDBMigration()`의 switch에 새 version case 추가
-4. 두 곳을 반드시 함께 변경해야 마이그레이션이 실행됨
+3. `AppDataMigrationImple` — `runDBMigration`의 switch에 case 추가 + `runMigrationVersionNtoM` 메서드 작성
+
+**3번이 빠지면 `migrateStatement`는 호출조차 되지 않는다.** 컴파일도 테스트도 통과하고 마이그레이션만 조용히 안 돈다.
+
+`migrateStatement(for:)`가 받는 숫자는 **떠나는 버전**이다 — `case 5`는 5 → 6 스텝에서 돈다.
+
+위 표에 새 행을 추가하고 §5.1의 "현재 버전"도 함께 올린다.
+
+### 5.6 컬럼 순서 변경·삭제 — temp 테이블 재생성
+
+SQLite의 `ALTER TABLE ADD COLUMN`은 **맨 뒤에 붙이는 것만** 된다. 순서 교정·컬럼 제거는 `modfiyColumns(tempTable:to:from:)`로 간다 — `INSERT INTO temp SELECT ... FROM 원본` → 원본 DROP → temp를 원본 이름으로 RENAME, 세 문장을 만들어준다.
+
+- **temp 테이블은 라이브러리가 안 만든다.** 마이그레이션 스텝에서 `createTableOrNot(<Temp>Table.self)`로 직접 생성한다. 새 컬럼 순서는 이 temp 테이블의 `Columns` 정의가 결정한다.
+- `to`/`from`은 컬럼 **이름** 매핑 표다. 각 이름은 해당 테이블에서 이름으로 해석되고, 두 리스트끼리는 위치로 짝지어진다. 이름이 안 바뀌면 같은 배열을 양쪽에 넘긴다.
+- **새로 추가하는 컬럼은 두 리스트에서 뺀다.** 원본에 없어 SELECT가 실패한다. 빠진 컬럼은 NULL로 남는다.
+- 선례: `EventUploadPendingQueueTableV4TempTable`(v4 → v5), `PendingDoneTodoEventTableV6TempTable`(v6 → v7)
+
+```swift
+private func runMigrationVersion6to7(_ database: any DataBase) throws {
+    do {
+        try database.createTableOrNot(PendingDoneTodoEventTable.self)
+        try database.createTableOrNot(PendingDoneTodoEventTableV6TempTable.self)
+        try database.migrate(PendingDoneTodoEventTable.self, version: 6)
+    } catch {
+        try? database.dropTable(PendingDoneTodoEventTable.self)   // 실패 시 드롭 — prepareTables가 새 스키마로 재생성
+    }
+}
+```
+
+> 컬럼 순서가 곧 cursor 읽기 순서라는 위치 결합은 [`Repository/CLAUDE.md`](../../Repository/CLAUDE.md) 참조.
 
 ---
 

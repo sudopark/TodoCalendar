@@ -6,7 +6,7 @@
 - **Query/Command 분리.** 읽기와 사이드이펙트를 한 흐름에 섞지 말 것.
 - **객체 변경 시** 참조하는 다른 객체 영향도 확인 (빌드 + 테스트) — 절차는 implement 스킬의 impact-check가 기계화.
 - **짝지어진 두 위치는 함께 갱신.** 한쪽만 바꾸면 무효가 되는 쌍은 추가/변경 시 대응처도 반드시 확인:
-  - `AppEnvironment.dbVersion` ↔ `Table.migrateStatement(for:)` case
+  - `AppEnvironment.dbVersion` ↔ `Table.migrateStatement(for:)` case ↔ `AppDataMigrationImple`의 `runDBMigration` case + `runMigrationVersionNtoM` (셋 다여야 한다 — 마지막이 빠지면 `migrateStatement`가 호출조차 안 되고 조용히 안 돈다)
   - CI `pr_test.yml` — `detect-changes`의 scheme 매핑(grep) ↔ `test` job의 `Test <scheme>` 실행 step (둘 중 하나만 추가하면 감지만 되고 실행 안 됨)
   - 신규 테스트 스킴 ↔ 스킴 목록 하드코딩 전부 (`pr_test.yml` 3곳·`scripts/run-all-tests.sh`·`impact-check.sh`+테스트·`run-tests` 스킬 — 상세는 add-framework 스킬. 단 `<Name>Snapshots` 스킴은 의도된 예외 — 로컬 전용, snapshot-check 스킬)
   - init 시그니처 ↔ 콜사이트
@@ -93,7 +93,7 @@ tuist generate --no-open      # 파일 추가/삭제 후 재실행 필수
 | ForemostEvent | [`docs/spec/tags-foremost-notifications.md`](docs/spec/tags-foremost-notifications.md) |
 | SharedDataStore 키·구독 | [`Domain/CLAUDE.md`](Domain/CLAUDE.md) |
 | 앱 버전 체크 | [`docs/spec/infrastructure.md §7`](docs/spec/infrastructure.md) |
-| DB 마이그레이션 | §1 짝규칙 (`dbVersion` ↔ `migrateStatement`) + [`Repository/CLAUDE.md`](Repository/CLAUDE.md) |
+| DB 마이그레이션 | §1 짝규칙 (`dbVersion` ↔ `migrateStatement` ↔ `AppDataMigrationImple` 스텝) + [`Repository/CLAUDE.md`](Repository/CLAUDE.md) |
 
 ---
 
