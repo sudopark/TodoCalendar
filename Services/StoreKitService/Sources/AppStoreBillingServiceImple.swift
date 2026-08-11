@@ -123,9 +123,14 @@ private func subscriptionPeriod(_ period: StoreKit.Product.SubscriptionPeriod) -
 
 extension AppStoreBillingServiceImple {
 
-    public func restorePurchases() async throws -> [BillingSignedTransaction] {
-        try await AppStore.sync()
-        return await self.collect(StoreKit.Transaction.currentEntitlements)
+    public func restorePurchases() async throws -> BillingRestoreOutcome {
+        do {
+            try await AppStore.sync()
+        // 시스템 로그인 시트를 닫으면 sync() 가 이걸 던진다 — 실패가 아니다
+        } catch StoreKitError.userCancelled {
+            return .cancelled
+        }
+        return .synced(await self.collect(StoreKit.Transaction.currentEntitlements))
     }
 
     public func unfinishedTransactions() async -> [BillingSignedTransaction] {

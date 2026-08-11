@@ -441,7 +441,7 @@ extension MainViewModelImpleTests {
         func loadPlanOfferings() async throws -> [BillingPlanOffering] { return [] }
         func loadTopupOfferings() async throws -> [BillingTopupOffering] { return [] }
         func purchase(productId: String) async throws -> BillingPurchaseResult { return .cancelled }
-        func restorePurchases() async throws -> BillingUserPlan? { return nil }
+        func restorePurchases() async throws -> BillingRestoreResult { return .nothingToRestore }
         func refreshUserPlan() async throws -> BillingUserPlan { return BillingUserPlan() }
         func stopObservingTransactions() { }
         func hasUnfinishedTransactions() async -> Bool { return false }

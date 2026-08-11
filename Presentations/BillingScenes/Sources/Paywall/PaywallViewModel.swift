@@ -221,12 +221,16 @@ extension PaywallViewModelImple {
             guard let self else { return }
             defer { self.subject.isPurchasing.send(false) }
             do {
-                let restored = try await self.billingUsecase.restorePurchases()
-                self.router?.showToast(
-                    restored != nil
-                        ? "billing::paywall::restored".localized()
-                        : "billing::paywall::restore::empty".localized()
-                )
+                switch try await self.billingUsecase.restorePurchases() {
+                case .applied:
+                    self.router?.showToast("billing::paywall::restored".localized())
+
+                case .nothingToRestore:
+                    self.router?.showToast("billing::paywall::restore::empty".localized())
+
+                case .cancelled:
+                    break
+                }
             } catch {
                 self.showFailure(error)
             }

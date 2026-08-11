@@ -15,6 +15,7 @@ import Extensions
 final class StubAppStoreBillingService: AppStoreBillingService, @unchecked Sendable {
 
     private let shouldCancelPurchase: Bool
+    private let shouldCancelRestore: Bool
     private let shouldPurchaseBePending: Bool
     private let shouldFailPurchase: Bool
     private let shouldFailLoadProducts: Bool
@@ -25,6 +26,7 @@ final class StubAppStoreBillingService: AppStoreBillingService, @unchecked Senda
 
     init(
         shouldCancelPurchase: Bool = false,
+        shouldCancelRestore: Bool = false,
         shouldPurchaseBePending: Bool = false,
         shouldFailPurchase: Bool = false,
         shouldFailLoadProducts: Bool = false,
@@ -32,6 +34,7 @@ final class StubAppStoreBillingService: AppStoreBillingService, @unchecked Senda
         restored: [BillingSignedTransaction]? = nil
     ) {
         self.shouldCancelPurchase = shouldCancelPurchase
+        self.shouldCancelRestore = shouldCancelRestore
         self.shouldPurchaseBePending = shouldPurchaseBePending
         self.shouldFailPurchase = shouldFailPurchase
         self.shouldFailLoadProducts = shouldFailLoadProducts
@@ -72,8 +75,9 @@ final class StubAppStoreBillingService: AppStoreBillingService, @unchecked Senda
         )
     }
 
-    func restorePurchases() async throws -> [BillingSignedTransaction] {
-        return self.stubRestored
+    func restorePurchases() async throws -> BillingRestoreOutcome {
+        guard !self.shouldCancelRestore else { return .cancelled }
+        return .synced(self.stubRestored)
     }
 
     func unfinishedTransactions() async -> [BillingSignedTransaction] {
