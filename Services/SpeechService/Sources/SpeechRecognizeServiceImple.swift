@@ -17,6 +17,7 @@ import Domain
 public final class SpeechRecognizeServiceImple: SpeechRecognizeService, @unchecked Sendable {
 
     private let recognizer: SFSpeechRecognizer?
+    private let serialQueue = DispatchQueue(label: "speech-recognize-service")
     private var audioEngine = AVAudioEngine()
     private var request: SFSpeechAudioBufferRecognitionRequest?
     private var task: SFSpeechRecognitionTask?
@@ -43,20 +44,22 @@ public final class SpeechRecognizeServiceImple: SpeechRecognizeService, @uncheck
 extension SpeechRecognizeServiceImple {
     
     public func start() throws {
-        do {
-            guard let recognizer, recognizer.isAvailable else {
-                throw RuntimeError(key: "recognizerUnavailable", "speech recognizer unavailable")
+        try self.serialQueue.sync {
+            do {
+                guard let recognizer, recognizer.isAvailable else {
+                    throw RuntimeError(key: "recognizerUnavailable", "speech recognizer unavailable")
+                }
+                try self.configureAudioSession()
+                self.observeAudioDisruption()
+                let request = self.makeRequest()
+                self.installInputTap()
+                self.task = self.makeRecognitionTask(recognizer: recognizer, request: request)
+                try self.startEngine()
+            } catch {
+                // start 도중 실패하면 설치된 tap/세션을 되돌려 완전 초기 상태로 리셋 후 전파
+                self.teardownAudio()
+                throw error
             }
-            try self.configureAudioSession()
-            self.observeAudioDisruption()
-            let request = self.makeRequest()
-            self.installInputTap()
-            self.task = self.makeRecognitionTask(recognizer: recognizer, request: request)
-            try self.startEngine()
-        } catch {
-            // start 도중 실패하면 설치된 tap/세션을 되돌려 완전 초기 상태로 리셋 후 전파
-            self.teardownAudio()
-            throw error
         }
     }
 
@@ -118,8 +121,10 @@ extension SpeechRecognizeServiceImple {
         let inputNode = self.audioEngine.inputNode
         let format = inputNode.outputFormat(forBus: 0)
         inputNode.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak self] buffer, _ in
-            self?.request?.append(buffer)
-            self?.updateVoiceLevel(buffer)
+            self?.serialQueue.async {
+                self?.request?.append(buffer)
+                self?.updateVoiceLevel(buffer)
+            }
         }
     }
 
@@ -128,7 +133,9 @@ extension SpeechRecognizeServiceImple {
         request: SFSpeechAudioBufferRecognitionRequest
     ) -> SFSpeechRecognitionTask {
         return recognizer.recognitionTask(with: request) { [weak self] result, error in
-            self?.handleRecognition(result: result, error: error)
+            self?.serialQueue.async {
+                self?.handleRecognition(result: result, error: error)
+            }
         }
     }
 
@@ -152,8 +159,10 @@ extension SpeechRecognizeServiceImple {
     }
 
     public func stop() {
-        self.request?.endAudio()
-        self.teardownAudio()
+        self.serialQueue.async {
+            self.request?.endAudio()
+            self.teardownAudio()
+        }
     }
 
     // 무조건 호출해도 안전(idempotent): stop/cancel/removeTap 모두 미동작·미설치 상태에서 호출해도 무해.
