@@ -14,7 +14,7 @@ import Scenes
 
 protocol PaywallRouting: Routing, Sendable, AnyObject {
 
-    func showManageSubscriptions()
+    func showManageSubscriptions(_ dismissed: @escaping @Sendable () -> Void)
 }
 
 
@@ -31,12 +31,13 @@ final class PaywallRouter: BaseRouterImple, PaywallRouting, @unchecked Sendable 
         super.init()
     }
 
-    func showManageSubscriptions() {
+    func showManageSubscriptions(_ dismissed: @escaping @Sendable () -> Void) {
         Task { @MainActor in
             // 시트는 씬에 붙어야 뜬다 — 화면이 내려간 뒤 도달하면 붙일 창이 없다
             guard let windowScene = self.scene?.view.window?.windowScene else { return }
             do {
                 try await self.showManageSubscriptionsSheet(windowScene)
+                dismissed()
             } catch {
                 self.showError(error)
             }

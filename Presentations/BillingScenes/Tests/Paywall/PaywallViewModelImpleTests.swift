@@ -920,4 +920,20 @@ extension PaywallViewModelImpleTests {
         // then
         #expect(router.didShowManageSubscriptions == true)
     }
+
+    @Test("관리 시트가 닫히면 유저 플랜을 재조회한다")
+    func viewModel_whenManageSubscriptionSheetDismissed_refreshesUserPlan() async throws {
+        // given
+        let (viewModel, stub, router) = self.makeViewModel()
+
+        // when
+        viewModel.manageSubscription()
+        router.didShowManageSubscriptionsWithDismissed?()
+
+        // then
+        _ = try await self.waitUntil(
+            stub.didRefreshUserPlanPublisher, matching: { $0 }
+        )
+        #expect(stub.didRefreshUserPlanCalled == true)
+    }
 }

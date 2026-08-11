@@ -15,9 +15,10 @@ import TestDoubles
 
 final class SpyPaywallRouter: BaseSpyRouter, PaywallRouting, @unchecked Sendable {
 
-    var didShowManageSubscriptions: Bool = false
+    var didShowManageSubscriptions: Bool { self.didShowManageSubscriptionsWithDismissed != nil }
+    var didShowManageSubscriptionsWithDismissed: (@Sendable () -> Void)?
 
-    func showManageSubscriptions() {
-        self.didShowManageSubscriptions = true
+    func showManageSubscriptions(_ dismissed: @escaping @Sendable () -> Void) {
+        self.didShowManageSubscriptionsWithDismissed = dismissed
     }
 }
