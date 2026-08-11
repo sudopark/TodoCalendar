@@ -256,7 +256,17 @@ extension PaywallViewModelImple {
     }
 
     func manageSubscription() {
-        self.router?.showManageSubscriptions()
+        self.router?.showManageSubscriptions { [weak self] in
+            self?.reloadUserPlanAfterManage()
+        }
+    }
+
+    // 시트에서 취소·플랜 변경을 했는지 앱은 알 수 없다 — 서버 원장이 정본이라 닫히면 다시 묻는다.
+    // 실패는 알리지 않는다. paywall 재진입이 같은 조회를 다시 돌린다
+    private func reloadUserPlanAfterManage() {
+        Task { [weak self] in
+            _ = try? await self?.billingUsecase.refreshUserPlan()
+        }
     }
 
     func openTerms() {

@@ -29,7 +29,11 @@ final class StubBillingUsecase: BillingUsecase, @unchecked Sendable {
     // 호출 기록 — 검증은 테스트 케이스가 한다
     var didPurchasedProductId: String?
     var didRestoreCalled: Bool = false
-    var didRefreshUserPlanCalled: Bool = false
+    private let didRefreshUserPlanSubject = CurrentValueSubject<Bool, Never>(false)
+    var didRefreshUserPlanCalled: Bool { self.didRefreshUserPlanSubject.value }
+    var didRefreshUserPlanPublisher: AnyPublisher<Bool, Never> {
+        self.didRefreshUserPlanSubject.eraseToAnyPublisher()
+    }
     var didCheckUnfinishedCalled: Bool = false
     var didApplyUnfinishedTimes: Int = 0
 
@@ -82,7 +86,7 @@ final class StubBillingUsecase: BillingUsecase, @unchecked Sendable {
     // 본문을 막는다. 성공 값은 restorePurchases()와 동일하게 subject 에 push해 currentUserPlan
     // 릴레이(currentPlanId 미러링)까지 재현한다 (#739)
     func refreshUserPlan() async throws -> BillingUserPlan {
-        self.didRefreshUserPlanCalled = true
+        self.didRefreshUserPlanSubject.send(true)
         if let userPlanLoadError { throw userPlanLoadError }
         let plan = self.userPlanSubject.value ?? BillingUserPlan()
         self.userPlanSubject.send(plan)
