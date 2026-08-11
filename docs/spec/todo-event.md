@@ -250,8 +250,8 @@ sequenceDiagram
 ## 5. 할일 완료 취소 (되돌리기)
 
 - DoneTodoEvent 삭제
-- 원본 TodoEvent 복원 → SharedDataStore `todos`에 추가
-- 이벤트 상세 데이터(장소, URL, 메모)도 함께 복원
+- 이름/태그/시각/알림만 승계한 **새 TodoEvent 생성**(새 ID, 반복 정보 없음) → SharedDataStore `todos`에 추가
+- 이벤트 상세 데이터(장소, URL, 메모)도 함께 복사
 
 ### RevertTodoResult (되돌리기 결과)
 
@@ -523,15 +523,16 @@ flowchart TD
 
 결과:
   1. DoneTodoEvent 삭제
-  2. 원본 TodoEvent 복원 (turn=3 시점의 상태)
-  3. 이벤트 상세 데이터(장소/URL/메모)도 복원
+  2. 새 TodoEvent 생성 — 새 ID, 반복 정보 없음
+     (이름/태그/시각/알림만 승계)
+  3. 이벤트 상세 데이터(장소/URL/메모)도 복사
   4. todos에 추가, 미완료 판정 실행
 
-주의: 완료 시 생성된 다음 인스턴스(turn=4)는
-      되돌리기로 자동 제거되지 않음.
-      → turn=3(복원)과 turn=4(이미 생성)가 공존 가능.
-      실제 코드에서는 Repository가 원본 ID로 교체하므로
-      같은 ID의 할일은 최신 상태로 덮어씀.
+주의: 되돌리기는 원본 시리즈를 되감지 않는다.
+      원본은 완료 시 이미 turn=4로 전진해 있고 그대로 남는다.
+      → 되돌린 단발 할일과 turn=4 시리즈가 공존한다.
+      DoneTodoEvent가 반복 정보·회차를 들고 있지 않으므로
+      시리즈 복원은 애초에 불가능하다.
 ```
 
 ### 13.6 위젯 TodoToggle과 반복 할일
@@ -546,7 +547,7 @@ flowchart TD
   - 위젯 캐시 리셋 + Timeline 갱신
 
 되돌리기 시:
-  - DoneTodoEvent 삭제 + 원본 복원
+  - DoneTodoEvent 삭제 + 새 TodoEvent 생성
   - 위젯 캐시 리셋
 
 isToggledCurrentTodo 판정:
