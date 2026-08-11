@@ -22,7 +22,7 @@ dispatch 프롬프트가 제공한다:
 diff의 변경 파일 경로를 기준으로 적용 규칙을 로드해 검사한다:
 
 1. `.claude/rules/*.md` 각 파일의 frontmatter `paths:`를 읽고 변경 경로와 매칭 — 매칭되는 rules 파일을 Read해 조항 위반을 검사한다. 파일 목록을 외우지 말고 매번 디렉토리를 나열한다 (rules는 추가된다).
-2. 루트 `CLAUDE.md` §1 **짝지어진 두 위치** — 한쪽만 바뀐 짝이 있는지 확인한다 (dbVersion↔migrateStatement, CI 스킴 매핑↔실행 step, 테스트 스킴↔스킴 목록 하드코딩, init 시그니처↔콜사이트).
+2. 루트 `CLAUDE.md` §1 **짝지어진 두 위치** — 한쪽만 바뀐 짝이 있는지 확인한다 (dbVersion↔migrateStatement↔AppDataMigrationImple 스텝, CI 스킴 매핑↔실행 step, 테스트 스킴↔스킴 목록 하드코딩, init 시그니처↔콜사이트).
 3. `Domain/`·`Repository/` 하위 변경이면 해당 child CLAUDE.md도 참조한다.
 4. 설계·스타일 원칙은 `docs/coding-style-and-philosophy.md` 기준.
 

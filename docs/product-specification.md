@@ -299,8 +299,8 @@
 - 타임존 인지 일수 계산, 1초 타이머 실시간 업데이트
 
 ### DB 마이그레이션
-- 메인 DB v6, 외부 캘린더 DB v0
-- 버전별 `migrateStatement` + `AppEnvironment.dbVersion` 동시 변경 필수
+- 메인 DB v7, 외부 캘린더 DB v0
+- `AppEnvironment.dbVersion` + `Table.migrateStatement` + `AppDataMigrationImple` 스텝, 세 위치 동시 변경 필수
 
 ### 외부 의존성
 - Alamofire, Kingfisher, SQLiteService, Firebase(Messaging), AppAuth, Combine 등
