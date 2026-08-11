@@ -151,6 +151,7 @@ extension BillingScenesSnapshots {
                     disclosureKey: "billing::paywall::disclosure::oneTime",
                     ctaKey: "billing::paywall::cta::buy"
                 )
+                state.showsManageSubscription = true
                 state.isPurchasing = false
             }
         }
