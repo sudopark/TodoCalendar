@@ -16,7 +16,9 @@ public protocol AppStoreBillingService: AnyObject, Sendable {
     // 결제 UI 를 띄우고 결과를 outcome 으로 구분해 반환.
     // 유저 취소(.cancelled)와 승인대기(Ask to Buy, .pending)는 둘 다 검증된 트랜잭션이 없지만
     // UI 대응이 다르다 — 취소는 닫기, 승인대기는 "보호자 승인 대기 중" 안내가 필요하다
-    func purchase(productId: String) async throws -> BillingTransactionOutcome
+    func purchase(
+        productId: String, appAccountToken: UUID
+    ) async throws -> BillingTransactionOutcome
 
     // 복원 — 현재 유효한 권한. 소모품(top-up)은 여기 잡히지 않는다
     func restorePurchases() async throws -> BillingRestoreOutcome

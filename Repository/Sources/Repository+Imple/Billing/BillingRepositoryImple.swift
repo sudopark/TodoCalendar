@@ -43,11 +43,9 @@ extension BillingRepositoryImple {
 
 extension BillingRepositoryImple {
 
-    public func loadUserPlan() async throws -> BillingUserPlan {
+    public func loadUserAccount() async throws -> BillingUserAccount {
         let json = try await self.requestJson(.get, BillingAPIEndpoints.userPlan)
-        return BillingUserPlanMapper(
-            json: json, topupRemaining: json["topup_remaining"] as? Int
-        ).userPlan
+        return BillingUserAccountMapper(json: json).account
     }
 }
 

@@ -103,7 +103,10 @@ extension BillingUsecaseImple {
 extension BillingUsecaseImple {
 
     public func purchase(productId: String) async throws -> BillingPurchaseResult {
-        switch try await self.appStoreService.purchase(productId: productId) {
+        let appAccountToken = try await self.currentAppAccountToken()
+        switch try await self.appStoreService.purchase(
+            productId: productId, appAccountToken: appAccountToken
+        ) {
         case .verified(let transaction):
             return .applied(try await self.applyAndFinish(transaction))
         case .cancelled:
@@ -199,9 +202,41 @@ extension BillingUsecaseImple {
 
     @discardableResult
     public func refreshUserPlan() async throws -> BillingUserPlan {
-        let userPlan = try await self.repository.loadUserPlan()
-        self.updateSharedUserPlan(userPlan)
-        return userPlan
+        return try await self.loadAndShareUserAccount().plan
+    }
+
+    private func loadAndShareUserAccount() async throws -> BillingUserAccount {
+        let account = try await self.repository.loadUserAccount()
+        self.updateSharedAppAccountToken(account.appAccountToken)
+        self.updateSharedUserPlan(account.plan)
+        return account
+    }
+
+    // 토큰 없이 산 트랜잭션은 주인을 표시할 값이 없어 서버가 거절한다 — 청구부터 하고
+    // 실패를 알리느니 결제창을 안 띄운다
+    private func currentAppAccountToken() async throws -> UUID {
+        if let cached = self.sharedAppAccountToken() { return cached }
+
+        guard let token = try await self.loadAndShareUserAccount().appAccountToken
+        else { throw RuntimeError(key: "Billing.noAccountToken", "billing account token not secured") }
+        return token
+    }
+
+    private func sharedAppAccountToken() -> UUID? {
+        return self.sharedDataStore.value(
+            UUID.self, key: ShareDataKeys.billingAppAccountToken.rawValue
+        )
+    }
+
+    // 계정 전환 시 이전 유저의 토큰이 남으면 남의 구매를 자기 것으로 주장하게 된다 —
+    // 값이 없는 응답에는 캐시를 지운다
+    private func updateSharedAppAccountToken(_ token: UUID?) {
+        let key = ShareDataKeys.billingAppAccountToken.rawValue
+        guard let token else {
+            self.sharedDataStore.delete(key)
+            return
+        }
+        self.sharedDataStore.put(UUID.self, key: key, token)
     }
 }
 

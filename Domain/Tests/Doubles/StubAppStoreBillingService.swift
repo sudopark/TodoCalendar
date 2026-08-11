@@ -50,6 +50,8 @@ final class StubAppStoreBillingService: AppStoreBillingService, @unchecked Senda
 
     // 기록만 한다 — 검증은 테스트 케이스 책임
     private(set) var didFinishedTransactionIds: [String] = []
+    private(set) var didPurchasedProductId: String?
+    private(set) var didPurchasedWithAppAccountToken: UUID?
 
     // 테스트가 앱 밖 트랜잭션 도착을 흉내낼 때 쓴다
     func sendTransactionUpdate(_ transaction: BillingSignedTransaction) {
@@ -64,7 +66,11 @@ final class StubAppStoreBillingService: AppStoreBillingService, @unchecked Senda
         }
     }
 
-    func purchase(productId: String) async throws -> BillingTransactionOutcome {
+    func purchase(
+        productId: String, appAccountToken: UUID
+    ) async throws -> BillingTransactionOutcome {
+        self.didPurchasedProductId = productId
+        self.didPurchasedWithAppAccountToken = appAccountToken
         if self.shouldFailPurchase { throw RuntimeError("store purchase failed") }
         if self.shouldCancelPurchase { return .cancelled }
         if self.shouldPurchaseBePending { return .pending }

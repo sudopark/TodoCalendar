@@ -28,12 +28,14 @@ final class BillingUsecaseImpleTests: PublisherWaitable {
         shouldFailLoadUserPlan: Bool = false,
         unfinished: [BillingSignedTransaction] = [],
         restored: [BillingSignedTransaction]? = nil,
-        failingJWSTokens: Set<String> = []
+        failingJWSTokens: Set<String> = [],
+        appAccountToken: UUID? = UUID(uuidString: "8f14e45f-ceea-467a-9c8f-1b3a2e5d7c04")
     ) -> (BillingUsecaseImple, StubBillingRepository, StubAppStoreBillingService) {
         let repository = StubBillingRepository(
             shouldFailPurchase: shouldFailApply,
             failingJWSTokens: failingJWSTokens,
-            shouldFailLoadUserPlan: shouldFailLoadUserPlan
+            shouldFailLoadUserPlan: shouldFailLoadUserPlan,
+            appAccountToken: appAccountToken
         )
         let service = StubAppStoreBillingService(
             shouldCancelPurchase: shouldCancelPurchase,
@@ -51,6 +53,7 @@ final class BillingUsecaseImpleTests: PublisherWaitable {
         )
         return (usecase, repository, service)
     }
+
 }
 
 
@@ -112,6 +115,58 @@ extension BillingUsecaseImpleTests {
         #expect(plan.topupRemaining == 12300)
     }
 
+    // 이 값이 애플 서명 payload 에 실려야 서버가 구매의 주인을 가릴 수 있다.
+    // 안 실으면 서버가 409 TransactionOwnedByAnotherAccount 로 거절한다 (Functions#323)
+    @Test func usecase_purchase_sendsAppAccountTokenToStore() async throws {
+        // given
+        let token = UUID(uuidString: "8f14e45f-ceea-467a-9c8f-1b3a2e5d7c04")
+        let (usecase, _, service) = self.makeUsecase(
+            appAccountToken: token
+        )
+        // when
+        _ = try await usecase.purchase(productId: "plan.standard.monthly")
+        // then
+        #expect(service.didPurchasedWithAppAccountToken == token)
+    }
+
+    // paywall 을 거치지 않은 진입점에서도 구매가 성립해야 한다 — 캐시가 비어 있으면
+    // 결제창을 띄우기 전에 서버에서 확보한다
+    @Test func usecase_purchase_whenTokenNotCached_securesFromServer() async throws {
+        // given
+        let (usecase, repository, service) = self.makeUsecase()
+        // when
+        _ = try await usecase.purchase(productId: "plan.standard.monthly")
+        // then
+        #expect(repository.didLoadUserAccountTimes == 1)
+        #expect(service.didPurchasedWithAppAccountToken != nil)
+    }
+
+    // 확보된 토큰이 있으면 서버를 다시 치지 않는다
+    @Test func usecase_purchase_whenTokenAlreadyCached_doesNotReloadAccount() async throws {
+        // given
+        let (usecase, repository, _) = self.makeUsecase()
+        try await usecase.refreshUserPlan()
+        // when
+        _ = try await usecase.purchase(productId: "plan.standard.monthly")
+        // then
+        #expect(repository.didLoadUserAccountTimes == 1)
+    }
+
+    // 토큰 없이 사면 그 트랜잭션엔 주인을 표시할 값이 안 박혀 영영 반영되지 않는다 —
+    // 청구부터 하고 실패를 알리느니 결제창을 아예 안 띄운다
+    @Test func usecase_purchase_whenAccountTokenMissing_throwsWithoutCharging() async throws {
+        // given
+        let (usecase, _, service) = self.makeUsecase(
+            appAccountToken: nil
+        )
+        // when
+        await #expect(throws: (any Error).self) {
+            _ = try await usecase.purchase(productId: "plan.standard.monthly")
+        }
+        // then
+        #expect(service.didPurchasedProductId == nil)
+    }
+
     // 유저 취소는 실패가 아니다 — 에러를 던지면 화면이 에러 팝업을 띄우게 된다
     @Test func usecase_purchase_whenUserCancels_returnsCancelledWithoutUpload() async throws {
         // given
@@ -163,13 +218,15 @@ extension BillingUsecaseImpleTests {
     @Test func usecase_purchase_updatesSharedUserPlan() async throws {
         // given
         let expect = expectConfirm("구매 결과가 공유 상태에 반영된다")
+        expect.count = 2
         let (usecase, _, _) = self.makeUsecase()
         // when
-        let plan = try await self.firstOutput(expect, for: usecase.currentUserPlan) {
+        let plans = try await self.outputs(expect, for: usecase.currentUserPlan) {
             _ = try await usecase.purchase(productId: "plan.standard.monthly")
         }
-        // then
-        #expect(plan?.planId == .standard)
+        // then: 토큰 확보를 위한 조회분(45600) 뒤에 구매 반영분이 온다
+        #expect(plans.last?.planId == .standard)
+        #expect(plans.last?.topupRemaining == 12300)
     }
 
     @Test func usecase_purchase_whenServerReflectFails_throwsReflectFailure() async throws {
@@ -280,8 +337,13 @@ extension BillingUsecaseImpleTests {
     // 실패는 호출측이 처리 — 이전에 반영돼 있던 공유 상태를 지우면 안 된다
     @Test func usecase_refreshUserPlan_whenFails_keepsExistingSharedPlan() async throws {
         // given
-        let (usecase, _, _) = self.makeUsecase(shouldFailLoadUserPlan: true)
-        _ = try await usecase.purchase(productId: "plan.standard.monthly")
+        let pending = BillingSignedTransaction(
+            id: "tx:pending", productId: "plan.standard.monthly", jws: "jws:pending"
+        )
+        let (usecase, _, _) = self.makeUsecase(
+            shouldFailLoadUserPlan: true, unfinished: [pending]
+        )
+        _ = try await usecase.applyUnfinishedTransactions()
         // when
         await #expect(throws: (any Error).self) {
             try await usecase.refreshUserPlan()

@@ -15,7 +15,7 @@ public protocol BillingRepository: AnyObject, Sendable {
     func loadTopups() async throws -> [BillingTopup]
 
     // 유저의 현재 발효 플랜 단독 조회. usage 응답에 얹혀 오는 경로와 독립 (#739)
-    func loadUserPlan() async throws -> BillingUserPlan
+    func loadUserAccount() async throws -> BillingUserAccount
 
     // 구매 반영 후 발효 플랜을 돌려준다 — 별도 usage 재조회가 필요 없다
     func postPurchase(signedTransaction: String) async throws -> BillingUserPlan
