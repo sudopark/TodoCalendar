@@ -70,6 +70,21 @@ struct BillingUserPlanMapper {
 }
 
 
+struct BillingUserAccountMapper {
+
+    let account: BillingUserAccount
+
+    init(json: [String: Any]) {
+        let plan = BillingUserPlanMapper(
+            json: json, topupRemaining: json["topup_remaining"] as? Int
+        ).userPlan
+
+        self.account = BillingUserAccount(plan: plan)
+            |> \.appAccountToken .~ (json["app_account_token"] as? String).flatMap { UUID(uuidString: $0) }
+    }
+}
+
+
 struct BillingScheduledChangeMapper {
 
     let change: BillingUserPlan.ScheduledChange?

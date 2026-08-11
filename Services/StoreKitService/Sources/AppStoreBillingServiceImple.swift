@@ -60,11 +60,14 @@ extension AppStoreBillingServiceImple {
 
 extension AppStoreBillingServiceImple {
 
-    public func purchase(productId: String) async throws -> BillingTransactionOutcome {
+    public func purchase(
+        productId: String, appAccountToken: UUID
+    ) async throws -> BillingTransactionOutcome {
         guard let product = try await Product.products(for: [productId]).first
         else { throw RuntimeError("unknown app store product: \(productId)") }
 
-        switch try await product.purchase() {
+        // 애플이 이 값을 트랜잭션에 기록하고 서명한다 — 서버가 구매의 주인을 가리는 근거
+        switch try await product.purchase(options: [.appAccountToken(appAccountToken)]) {
         case .success(let result):
             return .verified(try verifiedTransaction(result))
 

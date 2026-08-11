@@ -66,15 +66,25 @@ extension BillingRepositoryImpleTests {
 
 extension BillingRepositoryImpleTests {
 
-    @Test func repository_loadUserPlan_returnsCurrentPlan() async throws {
+    @Test func repository_loadUserAccount_returnsCurrentPlan() async throws {
         // given
         let repository = self.makeRepository()
         // when
-        let plan = try await repository.loadUserPlan()
+        let account = try await repository.loadUserAccount()
         // then
-        #expect(plan.planId == .standard)
-        #expect(plan.topupRemaining == 45600)
-        #expect(plan.scheduledChange?.planId == .free)
+        #expect(account.plan.planId == .standard)
+        #expect(account.plan.topupRemaining == 45600)
+        #expect(account.plan.scheduledChange?.planId == .free)
+    }
+
+    // 구매에 심을 결제 계정 식별자 — 이 값 없이 산 트랜잭션은 서버가 409 로 거절한다
+    @Test func repository_loadUserAccount_returnsAppAccountToken() async throws {
+        // given
+        let repository = self.makeRepository()
+        // when
+        let account = try await repository.loadUserAccount()
+        // then
+        #expect(account.appAccountToken == UUID(uuidString: "8f14e45f-ceea-467a-9c8f-1b3a2e5d7c04"))
     }
 }
 
@@ -179,13 +189,15 @@ private struct DummyResponse {
         """
     }
 
-    // GET /v1/ai/usage 의 plan 필드·POST /v1/billing/purchases 응답과 동일 스키마
+    // GET /v1/ai/usage 의 plan 필드·POST /v1/billing/purchases 응답과 동일 스키마 +
+    // 이 엔드포인트에만 오는 app_account_token (플랜 속성이 아니라 결제 계정 식별자)
     private var userPlanResponse: String {
         return """
         {
             "id": "standard",
             "scheduled_change": { "plan_id": "free", "effective_at": "2026-08-26T00:00:00.000Z" },
-            "topup_remaining": 45600
+            "topup_remaining": 45600,
+            "app_account_token": "8f14e45f-ceea-467a-9c8f-1b3a2e5d7c04"
         }
         """
     }
