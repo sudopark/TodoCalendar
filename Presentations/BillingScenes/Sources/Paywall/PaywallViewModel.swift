@@ -76,6 +76,7 @@ protocol PaywallViewModel: AnyObject, Sendable, PaywallSceneInteractor {
     func purchase()
     func restore()
     func recoverUnfinished()
+    func manageSubscription()
     func openTerms()
     func openPrivacyPolicy()
     func close()
@@ -90,6 +91,7 @@ protocol PaywallViewModel: AnyObject, Sendable, PaywallSceneInteractor {
     var selectedPlanDetail: AnyPublisher<PaywallPlanDetailModel?, Never> { get }
     var isPurchasing: AnyPublisher<Bool, Never> { get }
     var hasUnfinishedTransactions: AnyPublisher<Bool, Never> { get }
+    var showsManageSubscription: AnyPublisher<Bool, Never> { get }
 }
 
 
@@ -253,6 +255,10 @@ extension PaywallViewModelImple {
         }
     }
 
+    func manageSubscription() {
+        self.router?.showManageSubscriptions()
+    }
+
     func openTerms() {
         // TODO: 약관 URL 확정 후 반영 — 리젝 직결 항목이라 진입점 개방 전 필수(이번 스코프 밖, #739)
         self.router?.openSafari("")
@@ -349,6 +355,15 @@ extension PaywallViewModelImple {
         return self.subject.hasUnfinished.removeDuplicates().eraseToAnyPublisher()
     }
 
+    var showsManageSubscription: AnyPublisher<Bool, Never> {
+        return Publishers.CombineLatest(self.currentPlanIdPublisher, self.offeringsPublisher)
+            .map { [weak self] currentPlanId, offerings -> Bool in
+                self?.isSubscribedPlan(currentPlanId, offerings: offerings) ?? false
+            }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+
     private var catalogStatePublisher: AnyPublisher<PaywallCatalogState, Never> {
         return self.subject.catalogState.removeDuplicates().eraseToAnyPublisher()
     }
@@ -438,6 +453,15 @@ extension PaywallViewModelImple {
         return offering.plan.productId != nil
             && offering.product?.displayPrice != nil
             && effectiveCurrentId.covers(offering.plan.id) == false
+    }
+
+    // 평생(1회 결제)·무료는 애플 관리 시트에 표시될 항목이 없다 — 자동 갱신 구독만 진입시킨다
+    private func isSubscribedPlan(
+        _ planId: BillingPlanId?, offerings: [BillingPlanOffering]
+    ) -> Bool {
+        let kind = offerings.first(where: { $0.plan.id == planId })?.product?.kind
+        guard case .subscription = kind else { return false }
+        return true
     }
 
     private func detail(of offering: BillingPlanOffering) -> PaywallPlanDetailModel {

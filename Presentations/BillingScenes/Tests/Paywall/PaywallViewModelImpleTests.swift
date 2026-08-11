@@ -851,3 +851,73 @@ extension PaywallViewModelImpleTests {
         #expect(stub.didApplyUnfinishedTimes == 1)
     }
 }
+
+
+// MARK: - 구독 관리 진입점 노출 조건
+
+extension PaywallViewModelImpleTests {
+
+    private func makeViewModelWithPlan(
+        _ planId: BillingPlanId, kind: BillingProductKind?
+    ) -> (PaywallViewModelImple, StubBillingUsecase, SpyPaywallRouter) {
+        let offering = self.purchasableOffering(planId, productId: "product.\(planId)", kind: kind)
+        let userPlan = BillingUserPlan() |> \.planId .~ planId
+        return self.makeViewModel(offerings: [offering], userPlan: userPlan)
+    }
+
+    @Test("자동 갱신 구독을 보유하면 구독 관리 진입점이 노출된다")
+    func viewModel_whenPlanIsSubscription_showsManageSubscription() async throws {
+        // given
+        let (viewModel, _, _) = self.makeViewModelWithPlan(
+            .standard, kind: .subscription(period: .monthly)
+        )
+
+        // when
+        _ = try await self.waitOfferingsLoaded(viewModel)
+        let expect = expectConfirm("노출 여부 방출")
+        let shows = try await self.firstOutput(expect, for: viewModel.showsManageSubscription)
+
+        // then
+        #expect(shows == true)
+    }
+
+    @Test("평생(1회 결제) 플랜은 구독 관리 진입점이 노출되지 않는다")
+    func viewModel_whenPlanIsOneTime_hidesManageSubscription() async throws {
+        // given
+        let (viewModel, _, _) = self.makeViewModelWithPlan(.lifetime, kind: .oneTime)
+
+        // when
+        _ = try await self.waitOfferingsLoaded(viewModel)
+        let expect = expectConfirm("노출 여부 방출")
+        let shows = try await self.firstOutput(expect, for: viewModel.showsManageSubscription)
+
+        // then
+        #expect(shows == false)
+    }
+
+    @Test("스토어 상품을 못 받았으면 구독 관리 진입점이 노출되지 않는다")
+    func viewModel_whenStoreProductMissing_hidesManageSubscription() async throws {
+        // given
+        let (viewModel, _, _) = self.makeViewModelWithPlan(.standard, kind: nil)
+
+        // when
+        _ = try await self.waitOfferingsLoaded(viewModel)
+        let expect = expectConfirm("노출 여부 방출")
+        let shows = try await self.firstOutput(expect, for: viewModel.showsManageSubscription)
+
+        // then
+        #expect(shows == false)
+    }
+
+    @Test("구독 관리를 탭하면 라우터에 관리 시트를 요청한다")
+    func viewModel_manageSubscription_requestsSheetToRouter() async throws {
+        // given
+        let (viewModel, _, router) = self.makeViewModel()
+
+        // when
+        viewModel.manageSubscription()
+
+        // then
+        #expect(router.didShowManageSubscriptions == true)
+    }
+}
