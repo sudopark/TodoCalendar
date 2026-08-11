@@ -16,6 +16,7 @@ enum PaywallFailReason: Equatable {
     case invalidTransaction
     case unknownProduct
     case planChangeNotAllowed
+    case ownedByAnotherAccount
     case reflectDelayed
 }
 
@@ -35,6 +36,7 @@ extension PaywallFailReason {
         case .invalidTransaction: self = .invalidTransaction
         case .unknownProduct: self = .unknownProduct
         case .planChangeNotAllowed: self = .planChangeNotAllowed
+        case .transactionOwnedByAnotherAccount: self = .ownedByAnotherAccount
         default: self = .reflectDelayed
         }
     }
@@ -45,6 +47,7 @@ extension PaywallFailReason {
         case .invalidTransaction: return "billing::paywall::fail::invalidTransaction".localized()
         case .unknownProduct: return "billing::paywall::fail::unknownProduct".localized()
         case .planChangeNotAllowed: return "billing::paywall::fail::planChangeNotAllowed".localized()
+        case .ownedByAnotherAccount: return "billing::paywall::fail::ownedByAnotherAccount".localized()
         case .reflectDelayed: return "billing::paywall::fail::reflectDelayed".localized()
         }
     }

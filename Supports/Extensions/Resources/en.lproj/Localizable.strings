@@ -631,6 +631,7 @@
 "billing::paywall::fail::invalidTransaction" = "We couldn't verify your purchase. Please try again in a moment.";
 "billing::paywall::fail::unknownProduct" = "We couldn't recognize this purchase. Updating the app may fix it.";
 "billing::paywall::fail::planChangeNotAllowed" = "This plan change isn't supported.";
+"billing::paywall::fail::ownedByAnotherAccount" = "This purchase belongs to another account. Sign in with the account you bought it on.";
 "billing::paywall::fail::reflectDelayed" = "Your payment went through, but applying it is delayed. It'll be applied automatically.";
 
 // MARK: - share extension
