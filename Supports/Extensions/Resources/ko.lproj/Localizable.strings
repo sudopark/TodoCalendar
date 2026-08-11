@@ -630,6 +630,7 @@
 "billing::paywall::fail::invalidTransaction" = "결제 확인에 실패했어요. 잠시 후 다시 시도해 주세요.";
 "billing::paywall::fail::unknownProduct" = "인식할 수 없는 결제예요. 앱을 업데이트하면 해결될 수 있어요.";
 "billing::paywall::fail::planChangeNotAllowed" = "이 플랜 변경은 지원하지 않아요.";
+"billing::paywall::fail::ownedByAnotherAccount" = "다른 계정에 등록된 결제예요. 구매한 계정으로 로그인해 주세요.";
 "billing::paywall::fail::reflectDelayed" = "결제는 완료됐어요. 반영이 지연되고 있고, 곧 자동으로 반영됩니다.";
 
 // MARK: - share extension

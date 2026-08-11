@@ -37,6 +37,7 @@ public struct ServerErrorModel: Error, @unchecked Sendable, Decodable {
         case invalidTransaction = "InvalidTransaction"
         case unknownProduct = "UnknownProduct"
         case planChangeNotAllowed = "PlanChangeNotAllowed"
+        case transactionOwnedByAnotherAccount = "TransactionOwnedByAnotherAccount"
     }
     
     public var code: ErrorCode?

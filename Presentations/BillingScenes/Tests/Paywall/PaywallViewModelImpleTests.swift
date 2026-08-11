@@ -597,6 +597,24 @@ extension PaywallViewModelImpleTests {
         #expect(states == [false, true, false])
     }
 
+    // 애플 ID 는 같고 앱 계정이 다른 복원 — 기다리면 반영된다고 안내하면 거짓말이 된다
+    @Test func viewModel_restore_whenOwnedByAnotherAccount_showsOwnershipGuide() async throws {
+        // given
+        let serverError = ServerErrorModel() |> \.code .~ .transactionOwnedByAnotherAccount
+        let (viewModel, _, router) = self.makeViewModel(
+            restoreError: BillingReflectFailure(serverError)
+        )
+
+        // when
+        try await self.waitProcessingCompleted(viewModel) { viewModel.restore() }
+
+        // then
+        #expect(
+            router.didShowConfirmWith?.message
+                == "billing::paywall::fail::ownedByAnotherAccount".localized()
+        )
+    }
+
     @Test func viewModel_restore_whenServerReflectFails_showsDelayedMessage() async throws {
         // given
         let (viewModel, _, router) = self.makeViewModel(
