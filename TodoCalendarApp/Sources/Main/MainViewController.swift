@@ -146,15 +146,6 @@ extension MainViewController {
                 self?.viewModel.jumpDate()
             }
             .store(in: &self.cancellables)
-        
-        self.headerView.logButton.addTapGestureRecognizerPublisher()
-            .sink(receiveValue: { [weak self] in
-                self?.viewAppearance.impactIfNeed()
-                let consoleBuilder = LoggerConsoleBuilder()
-                let consoleVC = consoleBuilder.makeConsoleView()
-                self?.present(consoleVC, animated: true)
-            })
-            .store(in: &self.cancellables)
     }
 }
 
@@ -217,7 +208,6 @@ private final class HeaderView: UIView {
     let jumpButton = UIButton()
     let eventTypeFilterButton = UIButton()
     let settingButton = UIButton()
-    let logButton = UIButton()
     
     func updateMigrationStatus(_ status: TemporaryUserDataMigrationStatus?) {
          self.migrationStatus = status
@@ -303,13 +293,6 @@ private final class HeaderView: UIView {
             $0.leadingAnchor.constraint(greaterThanOrEqualTo: returnTodayView.trailingAnchor, constant: 4)
         }
         buttonsStackView.spacing = 8
-        
-        #if DEBUG
-        buttonsStackView.addArrangedSubview(logButton)
-        logButton.setTitle("Log", for: .normal)
-        logButton.setTitleColor(.red, for: .normal)
-        logButton.titleLabel?.font = .systemFont(ofSize: 12, weight: .bold)
-        #endif
         
         buttonsStackView.addArrangedSubview(migrationButton)
         migrationButton.autoLayout.active {
