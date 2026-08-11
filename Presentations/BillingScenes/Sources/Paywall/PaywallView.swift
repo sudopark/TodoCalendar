@@ -28,6 +28,7 @@ import CommonPresentation
     var selectedPlanDetail: PaywallPlanDetailModel?
     var isPurchasing: Bool = false
     var hasUnfinishedTransactions: Bool = false
+    var showsManageSubscription: Bool = false
 
     func bind(_ viewModel: any PaywallViewModel) {
         guard self.didBind == false else { return }
@@ -77,6 +78,11 @@ import CommonPresentation
             .receive(on: RunLoop.main)
             .sink { [weak self] in self?.hasUnfinishedTransactions = $0 }
             .store(in: &self.cancellables)
+
+        viewModel.showsManageSubscription
+            .receive(on: RunLoop.main)
+            .sink { [weak self] in self?.showsManageSubscription = $0 }
+            .store(in: &self.cancellables)
     }
 }
 
@@ -91,6 +97,7 @@ final class PaywallViewEventHandler: Observable {
     var purchase: () -> Void = { }
     var restore: () -> Void = { }
     var recoverUnfinished: () -> Void = { }
+    var manageSubscription: () -> Void = { }
     var openTerms: () -> Void = { }
     var openPrivacyPolicy: () -> Void = { }
     var close: () -> Void = { }
@@ -102,6 +109,7 @@ final class PaywallViewEventHandler: Observable {
         self.purchase = viewModel.purchase
         self.restore = viewModel.restore
         self.recoverUnfinished = viewModel.recoverUnfinished
+        self.manageSubscription = viewModel.manageSubscription
         self.openTerms = viewModel.openTerms
         self.openPrivacyPolicy = viewModel.openPrivacyPolicy
         self.close = viewModel.close
@@ -293,7 +301,24 @@ private struct PaywallView: View {
             Text(self.state.currentPlanDescription)
                 .font(self.appearance.fontSet.subNormal.asFont)
                 .foregroundStyle(self.appearance.colorSet.text2.asColor)
+
+            if self.state.showsManageSubscription {
+                Spacer(minLength: Metric.Spacing.small)
+                self.manageSubscriptionLink
+            }
         }
+    }
+
+    private var manageSubscriptionLink: some View {
+        HStack(spacing: Metric.Spacing.xxsmall) {
+            Text("billing::paywall::manageSubscription".localized())
+            Image(systemName: "chevron.right")
+        }
+        .font(self.appearance.fontSet.subSubNormal.asFont)
+        .foregroundStyle(self.appearance.colorSet.accentAI.asColor)
+        .opacity(self.state.isPurchasing ? 0.5 : 1)
+        .allowsHitTesting(!self.state.isPurchasing)
+        .onTapGesture { self.eventHandlers.manageSubscription() }
     }
 
     // MARK: - 플랜 카드

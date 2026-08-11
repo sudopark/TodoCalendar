@@ -617,6 +617,7 @@
 "billing::paywall::restore" = "Restore Purchases";
 "billing::paywall::restored" = "Purchases restored";
 "billing::paywall::restore::empty" = "No purchases to restore.";
+"billing::paywall::manageSubscription" = "Manage Subscription";
 "billing::paywall::purchase::applied" = "Plan updated";
 "billing::paywall::pending::title" = "Approval pending";
 "billing::paywall::pending::message" = "Ask a family organizer to approve this purchase. It'll apply automatically once approved.";
