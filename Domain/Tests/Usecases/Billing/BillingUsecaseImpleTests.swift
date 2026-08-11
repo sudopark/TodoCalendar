@@ -297,20 +297,20 @@ extension BillingUsecaseImpleTests {
 
 extension BillingUsecaseImpleTests {
 
-    @Test func usecase_restorePurchases_reappliesEntitlements() async throws {
+    @Test func usecase_restorePurchases_reappliesEntitlementsToDelegationEndpoint() async throws {
         // given
         let (usecase, repository, service) = self.makeUsecase()
         // when
         let plan = try await usecase.restorePurchases()
         // then
-        #expect(repository.didPostedSignedTransactions == ["jws:restored"])
+        #expect(repository.didPostedTransactionUpdates == ["jws:restored"])
+        #expect(repository.didPostedSignedTransactions == [])
         #expect(service.didFinishedTransactionIds == ["tx:restored"])
         #expect(plan?.planId == .standard)
     }
 
-    // 복원은 유저가 직접 누른 액션이라 fail-fast 가 의도다 — 앞 건이 실패하면 그대로 던져
-    // 화면에 노출하고 멈춘다. 미완료 복구 경로(best-effort)와 비대칭인 지점이라 잠가둔다
-    @Test func usecase_restorePurchases_whenOneFails_throwsWithoutApplyingRest() async throws {
+    // 앞 건이 실패해도 뒤 건은 반영돼야 한다. 실패 사실은 첫 사유로 던져 화면에 노출된다
+    @Test func usecase_restorePurchases_whenOneFails_stillAppliesTheRest() async throws {
         // given
         let (usecase, repository, service) = self.makeUsecase(
             restored: [
@@ -324,8 +324,9 @@ extension BillingUsecaseImpleTests {
             try await usecase.restorePurchases()
         }
         // then
-        #expect(repository.didPostedSignedTransactions == ["jws:bad"])
-        #expect(service.didFinishedTransactionIds.isEmpty)
+        #expect(repository.didPostedTransactionUpdates == ["jws:bad", "jws:good"])
+        // 서버 반영에 실패한 건은 finish 되지 않아 다음 시도에 다시 잡힌다
+        #expect(service.didFinishedTransactionIds == ["tx:good"])
     }
 }
 
@@ -521,7 +522,7 @@ extension BillingUsecaseImpleTests {
         #expect(service.didFinishedTransactionIds == [])
     }
 
-    @Test func usecase_applyUnfinishedTransactions_whenOneFails_throwsWithoutApplyingRest() async throws {
+    @Test func usecase_applyUnfinishedTransactions_whenOneFails_stillAppliesTheRest() async throws {
         // given
         let failing = BillingSignedTransaction(
             id: "tx:bad", productId: "plan.lifetime", jws: "jws:bad"
@@ -532,12 +533,13 @@ extension BillingUsecaseImpleTests {
         let (usecase, repository, service) = self.makeUsecase(
             unfinished: [failing, pending], failingJWSTokens: ["jws:bad"]
         )
-        // when & then
+        // when
         await #expect(throws: (any Error).self) {
             _ = try await usecase.applyUnfinishedTransactions()
         }
-        #expect(repository.didPostedTransactionUpdates == ["jws:bad"])
-        #expect(service.didFinishedTransactionIds.isEmpty)
+        // then
+        #expect(repository.didPostedTransactionUpdates == ["jws:bad", "jws:pending"])
+        #expect(service.didFinishedTransactionIds == ["tx:pending"])
     }
 
     @Test func usecase_applyUnfinishedTransactions_whenServerReflectFails_throwsReflectFailure() async throws {
