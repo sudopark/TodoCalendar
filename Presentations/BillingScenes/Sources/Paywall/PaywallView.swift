@@ -382,6 +382,8 @@ private struct PaywallView: View {
                 .onTapGesture { self.eventHandlers.openPrivacyPolicy() }
             Text("·")
             Text("billing::paywall::restore".localized())
+                .font(self.appearance.fontSet.subNormalWithBold.asFont)
+                .foregroundStyle(self.appearance.colorSet.text0.asColor)
                 .opacity(self.state.isPurchasing ? 0.5 : 1)
                 .allowsHitTesting(!self.state.isPurchasing)
                 .onTapGesture { self.eventHandlers.restore() }
