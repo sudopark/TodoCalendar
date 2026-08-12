@@ -114,6 +114,7 @@ final class PaywallViewEventHandler: Observable {
         self.retry = viewModel.prepare
         self.selectPlan = viewModel.selectPlan(_:)
         self.purchase = viewModel.purchase
+        self.purchaseTopup = viewModel.purchaseTopup(_:)
         self.restore = viewModel.restore
         self.recoverUnfinished = viewModel.recoverUnfinished
         self.manageSubscription = viewModel.manageSubscription

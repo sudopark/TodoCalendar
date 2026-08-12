@@ -1144,3 +1144,142 @@ extension PaywallViewModelImpleTests {
         #expect(emitted.isEmpty)
     }
 }
+
+
+// MARK: - top-up 구매
+
+extension PaywallViewModelImpleTests {
+
+    private func topupPurchaseViewModel(
+        purchaseResult: Result<BillingPurchaseResult, any Error>,
+        closesAfterPurchase: Bool = false,
+        topupOfferings: [BillingTopupOffering]? = nil
+    ) -> (PaywallViewModelImple, StubBillingUsecase, SpyPaywallRouter) {
+        return self.makeViewModel(
+            offerings: [
+                self.purchasableOffering(
+                    .standard, productId: "plan.standard.monthly", isTopupAllowed: true
+                )
+            ],
+            topupOfferings: topupOfferings ?? [self.topupOffering("topup.tier.1", credits: 30000)],
+            purchaseResult: purchaseResult,
+            userPlan: BillingUserPlan() |> \.planId .~ .standard,
+            closesAfterPurchase: closesAfterPurchase
+        )
+    }
+
+    private func appliedTopupPlan() -> BillingUserPlan {
+        return BillingUserPlan()
+            |> \.planId .~ .standard
+            |> \.topupRemaining .~ 30000
+    }
+
+    @Test func purchaseTopup_whenApplied_showsToastAndKeepsSceneOpen() async throws {
+        // given
+        let (viewModel, stub, router) = self.topupPurchaseViewModel(
+            purchaseResult: .success(.applied(self.appliedTopupPlan()))
+        )
+        _ = try await self.waitTopupCellsLoaded(viewModel)
+
+        // when
+        try await self.waitProcessingCompleted(viewModel) {
+            viewModel.purchaseTopup("topup.tier.1")
+        }
+
+        // then
+        #expect(stub.didPurchasedProductId == "topup.tier.1")
+        #expect(router.didShowToastWithMessage == "billing::paywall::topup::applied".localized())
+        #expect(router.didClosed == nil)
+    }
+
+    @Test func purchaseTopup_whenConfiguredToCloseAfterPurchase_closesScene() async throws {
+        // given
+        let (viewModel, _, router) = self.topupPurchaseViewModel(
+            purchaseResult: .success(.applied(self.appliedTopupPlan())), closesAfterPurchase: true
+        )
+        _ = try await self.waitTopupCellsLoaded(viewModel)
+
+        // when
+        try await self.waitProcessingCompleted(viewModel) {
+            viewModel.purchaseTopup("topup.tier.1")
+        }
+
+        // then
+        #expect(router.didClosed == true)
+    }
+
+    @Test func purchaseTopup_whenCancelled_showsNothing() async throws {
+        // given
+        let (viewModel, stub, router) = self.topupPurchaseViewModel(
+            purchaseResult: .success(.cancelled)
+        )
+        _ = try await self.waitTopupCellsLoaded(viewModel)
+
+        // when
+        try await self.waitProcessingCompleted(viewModel) {
+            viewModel.purchaseTopup("topup.tier.1")
+        }
+
+        // then
+        #expect(stub.didPurchasedProductId == "topup.tier.1")
+        #expect(router.didShowToastWithMessage == nil)
+        #expect(router.didShowConfirmWith == nil)
+    }
+
+    @Test func purchaseTopup_whenPending_showsWaitingApprovalGuide() async throws {
+        // given
+        let (viewModel, _, router) = self.topupPurchaseViewModel(
+            purchaseResult: .success(.pending)
+        )
+        _ = try await self.waitTopupCellsLoaded(viewModel)
+
+        // when
+        try await self.waitProcessingCompleted(viewModel) {
+            viewModel.purchaseTopup("topup.tier.1")
+        }
+
+        // then
+        #expect(router.didShowConfirmWith?.title == "billing::paywall::pending::title".localized())
+        #expect(router.didClosed == nil)
+    }
+
+    @Test func purchaseTopup_whenPurchaseFailed_showsFailureDialog() async throws {
+        // given
+        let (viewModel, _, router) = self.topupPurchaseViewModel(
+            purchaseResult: .failure(TestError())
+        )
+        _ = try await self.waitTopupCellsLoaded(viewModel)
+
+        // when
+        try await self.waitProcessingCompleted(viewModel) {
+            viewModel.purchaseTopup("topup.tier.1")
+        }
+
+        // then
+        #expect(
+            router.didShowConfirmWith?.message == "billing::paywall::fail::purchase".localized()
+        )
+        #expect(router.didClosed == nil)
+    }
+
+    @Test func purchaseTopup_whileAnotherPurchaseRuns_isIgnored() async throws {
+        // given
+        let (viewModel, stub, _) = self.topupPurchaseViewModel(
+            purchaseResult: .success(.cancelled),
+            topupOfferings: [
+                self.topupOffering("topup.tier.1", credits: 30000),
+                self.topupOffering("topup.tier.2", credits: 150000, price: "$4.99")
+            ]
+        )
+        _ = try await self.waitTopupCellsLoaded(viewModel)
+
+        // when
+        try await self.waitProcessingCompleted(viewModel) {
+            viewModel.purchaseTopup("topup.tier.1")
+            viewModel.purchaseTopup("topup.tier.2")
+        }
+
+        // then
+        #expect(stub.didPurchasedProductId == "topup.tier.1")
+    }
+}
