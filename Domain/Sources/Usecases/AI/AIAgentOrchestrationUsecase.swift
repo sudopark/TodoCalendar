@@ -40,7 +40,6 @@ public protocol AIAgentOrchestrationUsecase: AnyObject, Sendable {
     func handleJobStatusChanged(_ jobId: String)
     func refreshProcessingJobIfNeeded()
 
-    func handleSignedOut() async
 }
 
 
@@ -369,14 +368,6 @@ extension AIAgentOrchestrationUsecaseImple {
         self.currentProcessingJobId = nil
     }
 
-    public func handleSignedOut() async {
-        self.stopTrackingJob()
-        self.resetVoiceBinding()
-        self.speechRecognizeUsecase.stopListening()
-        await self.commandUsecase.clearProcessingCommandRecord()
-        self.subject.state.send(.idle)
-    }
-
     public func restoreIfNeeded() {
         self.commandCancellable?.cancel()
         self.commandCancellable = self.commandUsecase.restoreCommandifNeed()
@@ -526,5 +517,4 @@ public final class NotNeedAIAgentOrchestrationUsecase: AIAgentOrchestrationUseca
     public func loadUsage() { }
     public func handleJobStatusChanged(_ jobId: String) { }
     public func refreshProcessingJobIfNeeded() { }
-    public func handleSignedOut() async { }
 }
