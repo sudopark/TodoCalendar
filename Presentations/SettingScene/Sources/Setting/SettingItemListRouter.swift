@@ -134,7 +134,7 @@ extension SettingItemListRouter {
     // 전체화면으로 열어 시트 위에도 뜨게 한다 (#739)
     func routeToPaywall() {
         Task { @MainActor in
-            let next = self.paywallSceneBuilder.makePaywallScene()
+            let next = self.paywallSceneBuilder.makePaywallScene(closesAfterPurchase: false)
             self.showFullScreen(next)
         }
     }
