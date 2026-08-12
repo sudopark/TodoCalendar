@@ -30,7 +30,8 @@ final class PaywallViewModelImpleTests: PublisherWaitable {
         restoreError: (any Error)? = nil,
         userPlanLoadError: (any Error)? = nil,
         hasUnfinished: Bool = false,
-        applyUnfinishedResult: Result<BillingUserPlan?, any Error> = .success(nil)
+        applyUnfinishedResult: Result<BillingUserPlan?, any Error> = .success(nil),
+        closesAfterPurchase: Bool = false
     ) -> (PaywallViewModelImple, StubBillingUsecase, SpyPaywallRouter) {
         let stub = StubBillingUsecase(
             offerings: offerings,
@@ -43,7 +44,7 @@ final class PaywallViewModelImpleTests: PublisherWaitable {
             hasUnfinished: hasUnfinished,
             applyUnfinishedResult: applyUnfinishedResult
         )
-        let viewModel = PaywallViewModelImple(billingUsecase: stub)
+        let viewModel = PaywallViewModelImple(billingUsecase: stub, closesAfterPurchase: closesAfterPurchase)
         let router = SpyPaywallRouter()
         viewModel.router = router
         return (viewModel, stub, router)
@@ -475,25 +476,6 @@ extension PaywallViewModelImpleTests {
 
         // then
         #expect(router.didShowConfirmWith == nil)
-    }
-
-    // I5 — 성공(applied)은 가장 중요한 계약인데 테스트가 없었다: 토스트 후 씬을 닫는다
-    @Test func viewModel_whenPurchaseApplied_showsToastAndClosesScene() async throws {
-        // given
-        let standard = self.purchasableOffering(.standard, productId: "product.standard")
-        let appliedPlan = BillingUserPlan() |> \.planId .~ .standard
-        let (viewModel, _, router) = self.makeViewModel(
-            offerings: [standard], purchaseResult: .success(.applied(appliedPlan))
-        )
-        _ = try await self.waitOfferingsLoaded(viewModel)
-        viewModel.selectPlan(.standard)
-
-        // when
-        try await self.waitProcessingCompleted(viewModel) { viewModel.purchase() }
-
-        // then
-        #expect(router.didShowToastWithMessage == "billing::paywall::purchase::applied".localized())
-        #expect(router.didClosed == true)
     }
 
     // C1 회귀 — 선택 시점엔 구매 가능했더라도, 그 뒤 복원 등으로 보유 플랜이 선택 플랜을
@@ -935,5 +917,71 @@ extension PaywallViewModelImpleTests {
             stub.didRefreshUserPlanPublisher, matching: { $0 }
         )
         #expect(stub.didRefreshUserPlanCalled == true)
+    }
+}
+
+
+// MARK: - 구매 성공 후 닫힘 분기
+
+extension PaywallViewModelImpleTests {
+
+    private func standardPurchaseViewModel(
+        closesAfterPurchase: Bool
+    ) -> (PaywallViewModelImple, StubBillingUsecase, SpyPaywallRouter) {
+        let purchased = BillingUserPlan() |> \.planId .~ .standard
+        return self.makeViewModel(
+            offerings: [self.purchasableOffering(.standard, productId: "plan.standard.monthly")],
+            purchaseResult: .success(.applied(purchased)),
+            userPlan: BillingUserPlan() |> \.planId .~ .free,
+            closesAfterPurchase: closesAfterPurchase
+        )
+    }
+
+    @Test func purchase_whenConfiguredToCloseAfterPurchase_closesScene() async throws {
+        // given
+        let (viewModel, _, router) = self.standardPurchaseViewModel(closesAfterPurchase: true)
+        _ = try await self.waitOfferingsLoaded(viewModel)
+
+        // when
+        try await self.waitProcessingCompleted(viewModel) {
+            viewModel.purchase()
+        }
+
+        // then
+        #expect(router.didShowToastWithMessage == "billing::paywall::purchase::applied".localized())
+        #expect(router.didClosed == true)
+    }
+
+    @Test func purchase_whenNotConfiguredToClose_keepsSceneOpen() async throws {
+        // given
+        let (viewModel, _, router) = self.standardPurchaseViewModel(closesAfterPurchase: false)
+        _ = try await self.waitOfferingsLoaded(viewModel)
+
+        // when
+        try await self.waitProcessingCompleted(viewModel) {
+            viewModel.purchase()
+        }
+
+        // then
+        #expect(router.didShowToastWithMessage == "billing::paywall::purchase::applied".localized())
+        #expect(router.didClosed == nil)
+    }
+
+    @Test func purchase_whenSceneStaysOpen_refreshesCurrentPlan() async throws {
+        // given
+        let (viewModel, _, _) = self.standardPurchaseViewModel(closesAfterPurchase: false)
+        _ = try await self.waitOfferingsLoaded(viewModel)
+
+        // when
+        let expect = expectConfirm("구매 결과가 현재 플랜에 반영된다")
+        expect.timeout = .seconds(5)
+        let plan = try await self.firstOutput(
+            expect, for: viewModel.currentPlan.filter { $0 == .standard }
+        ) {
+            viewModel.purchase()
+        }
+
+        // then
+        #expect(plan == .standard)
     }
 }

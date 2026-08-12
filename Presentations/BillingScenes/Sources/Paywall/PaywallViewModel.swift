@@ -100,6 +100,7 @@ protocol PaywallViewModel: AnyObject, Sendable, PaywallSceneInteractor {
 final class PaywallViewModelImple: PaywallViewModel, @unchecked Sendable {
 
     private let billingUsecase: any BillingUsecase
+    private let closesAfterPurchase: Bool
     var router: (any PaywallRouting)?
 
     private struct Subject {
@@ -118,8 +119,9 @@ final class PaywallViewModelImple: PaywallViewModel, @unchecked Sendable {
         return offerings
     }
 
-    init(billingUsecase: any BillingUsecase) {
+    init(billingUsecase: any BillingUsecase, closesAfterPurchase: Bool) {
         self.billingUsecase = billingUsecase
+        self.closesAfterPurchase = closesAfterPurchase
         self.billingUsecase.currentUserPlan
             .map { $0.planId }
             .sink { [weak self] planId in self?.subject.currentPlanId.send(planId) }
@@ -196,7 +198,7 @@ extension PaywallViewModelImple {
                 switch try await self.billingUsecase.purchase(productId: productId) {
                 case .applied:
                     self.router?.showToast("billing::paywall::purchase::applied".localized())
-                    self.router?.closeScene()
+                    self.closeAfterPurchaseIfNeeded()
 
                 case .cancelled:
                     break   // 유저 취소 — 조용히 닫기(시트 유지)
@@ -280,6 +282,12 @@ extension PaywallViewModelImple {
     }
 
     func close() {
+        self.router?.closeScene()
+    }
+
+    // 반영 결과는 currentUserPlan 릴레이가 화면에 흘려보낸다 — 남는 판단은 닫을지 말지뿐이다
+    private func closeAfterPurchaseIfNeeded() {
+        guard self.closesAfterPurchase else { return }
         self.router?.closeScene()
     }
 

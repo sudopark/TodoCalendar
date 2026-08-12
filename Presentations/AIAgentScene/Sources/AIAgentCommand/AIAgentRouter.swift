@@ -44,7 +44,7 @@ extension AIAgentRouter {
 
     func routeToPaywall() {
         Task { @MainActor in
-            let next = self.paywallSceneBuilder.makePaywallScene()
+            let next = self.paywallSceneBuilder.makePaywallScene(closesAfterPurchase: true)
             self.showFullScreen(next)
         }
     }

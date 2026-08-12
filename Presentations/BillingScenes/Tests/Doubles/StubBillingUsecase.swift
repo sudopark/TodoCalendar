@@ -65,9 +65,15 @@ final class StubBillingUsecase: BillingUsecase, @unchecked Sendable {
     }
     func loadTopupOfferings() async throws -> [BillingTopupOffering] { [] }
 
+    // 실제 usecase(applyAndFinish)는 구매 결과를 sharedDataStore 에 반영해 currentUserPlan 이
+    // 재방출된다 — 스텁도 push 해야 "구매 후 화면이 갱신된다"가 테스트로 관찰된다
     func purchase(productId: String) async throws -> BillingPurchaseResult {
         self.didPurchasedProductId = productId
-        return try self.stubPurchaseResult.get()
+        let result = try self.stubPurchaseResult.get()
+        if case .applied(let plan) = result {
+            self.userPlanSubject.send(plan)
+        }
+        return result
     }
 
     // 실제 usecase(BillingUsecaseImple.applyEach)는 복원 결과를 sharedDataStore 에 반영해

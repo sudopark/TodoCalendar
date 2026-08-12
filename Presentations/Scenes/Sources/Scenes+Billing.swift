@@ -25,5 +25,5 @@ public protocol PaywallScene: Scene where Interactor == any PaywallSceneInteract
 public protocol PaywallSceneBuilder: AnyObject {
 
     @MainActor
-    func makePaywallScene() -> any PaywallScene
+    func makePaywallScene(closesAfterPurchase: Bool) -> any PaywallScene
 }

@@ -29,8 +29,11 @@ public final class PaywallBuilderImple: PaywallSceneBuilder {
     }
 
     @MainActor
-    public func makePaywallScene() -> any PaywallScene {
-        let viewModel = PaywallViewModelImple(billingUsecase: self.usecaseFactory.billingUsecase)
+    public func makePaywallScene(closesAfterPurchase: Bool) -> any PaywallScene {
+        let viewModel = PaywallViewModelImple(
+            billingUsecase: self.usecaseFactory.billingUsecase,
+            closesAfterPurchase: closesAfterPurchase
+        )
         let viewController = PaywallViewController(viewModel: viewModel, viewAppearance: self.viewAppearance)
         let router = PaywallRouter(showManageSubscriptionsSheet: self.showManageSubscriptions)
         router.scene = viewController
