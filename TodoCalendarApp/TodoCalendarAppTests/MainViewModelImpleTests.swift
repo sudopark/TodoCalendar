@@ -281,12 +281,34 @@ extension MainViewModelImpleTests {
     func testViewModel_routeToSettingScene() {
         // given
         let viewModel = self.makeViewModel()
-        
+
         // when
         viewModel.moveToSetting()
-        
+
         // then
         XCTAssertEqual(self.spyRouter.didRouteToSetting, true)
+    }
+
+    func testViewModel_whenMoveToPreviousMonth_requestToCalendar() {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when
+        viewModel.moveToPreviousMonth()
+
+        // then
+        XCTAssertEqual(self.spyRouter.interactor.didMoveToPreviousMonth, true)
+    }
+
+    func testViewModel_whenMoveToNextMonth_requestToCalendar() {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when
+        viewModel.moveToNextMonth()
+
+        // then
+        XCTAssertEqual(self.spyRouter.interactor.didMoveToNextMonth, true)
     }
 }
 
