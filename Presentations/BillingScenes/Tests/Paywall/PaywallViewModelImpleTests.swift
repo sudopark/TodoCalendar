@@ -1283,3 +1283,46 @@ extension PaywallViewModelImpleTests {
         #expect(stub.didPurchasedProductId == "topup.tier.1")
     }
 }
+
+
+// MARK: - 하향·만료 예정 표시
+
+extension PaywallViewModelImpleTests {
+
+    @Test func scheduledChange_whenUserPlanHasIt_isPublished() async throws {
+        // given
+        let effectiveAt = Date(timeIntervalSince1970: 1786000000)
+        let change = BillingUserPlan.ScheduledChange(planId: .free, effectiveAt: effectiveAt)
+        let (viewModel, _, _) = self.makeViewModel(
+            offerings: [self.purchasableOffering(.standard, productId: "plan.standard.monthly")],
+            userPlan: BillingUserPlan() |> \.planId .~ .standard |> \.scheduledChange .~ change
+        )
+
+        // when
+        let expect = expectConfirm("하향 예정 방출")
+        let published = try await self.firstOutput(expect, for: viewModel.scheduledChange) {
+            viewModel.prepare()
+        }
+
+        // then
+        #expect(published??.planId == .free)
+        #expect(published??.effectiveAt == effectiveAt)
+    }
+
+    @Test func scheduledChange_whenUserPlanHasNone_isNil() async throws {
+        // given
+        let (viewModel, _, _) = self.makeViewModel(
+            offerings: [self.purchasableOffering(.standard, productId: "plan.standard.monthly")],
+            userPlan: BillingUserPlan() |> \.planId .~ .standard
+        )
+
+        // when
+        let expect = expectConfirm("하향 예정 없음")
+        let published = try await self.firstOutput(expect, for: viewModel.scheduledChange) {
+            viewModel.prepare()
+        }
+
+        // then
+        #expect((published ?? nil) == nil)
+    }
+}

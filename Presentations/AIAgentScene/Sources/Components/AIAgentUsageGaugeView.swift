@@ -77,7 +77,7 @@ struct AIAgentUsageGaugeView: View {
             }
 
             if let change = self.userPlan?.scheduledChange {
-                self.scheduledChangeView(change)
+                BillingScheduledChangeView(change: change)
             }
         }
     }
@@ -123,22 +123,5 @@ private extension AIAgentUsageGaugeView {
                 .foregroundStyle(self.appearance.colorSet.accentWarn.asColor)
             }
         }
-    }
-}
-
-
-// MARK: - scheduled plan change
-
-private extension AIAgentUsageGaugeView {
-
-    func scheduledChangeView(_ change: BillingUserPlan.ScheduledChange) -> some View {
-        HStack(alignment: .top, spacing: Metric.Spacing.xxsmall) {
-            Image(systemName: "info.circle")
-            Text("aiAgent::usage::planChangeScheduled".localized(
-                with: change.effectiveAt.text("date_form::MMM_d".localized()), change.planId.name
-            ))
-        }
-        .font(self.appearance.fontSet.size(12).asFont)
-        .foregroundStyle(self.appearance.colorSet.accentInfo.asColor)
     }
 }

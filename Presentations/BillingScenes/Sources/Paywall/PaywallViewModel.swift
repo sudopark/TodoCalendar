@@ -94,6 +94,7 @@ protocol PaywallViewModel: AnyObject, Sendable, PaywallSceneInteractor {
     // presenter
     var currentPlan: AnyPublisher<BillingPlanId?, Never> { get }
     var currentPlanDescription: AnyPublisher<String, Never> { get }
+    var scheduledChange: AnyPublisher<BillingUserPlan.ScheduledChange?, Never> { get }
     var screenState: AnyPublisher<PaywallScreenState, Never> { get }
     var catalogState: AnyPublisher<PaywallCatalogState, Never> { get }
     var cellModels: AnyPublisher<[PaywallPlanCellModel], Never> { get }
@@ -118,6 +119,7 @@ final class PaywallViewModelImple: PaywallViewModel, @unchecked Sendable {
         let catalogState = CurrentValueSubject<PaywallCatalogState, Never>(.loading)
         let userPlanState = CurrentValueSubject<PaywallUserPlanLoadState, Never>(.loading)
         let currentPlanId = CurrentValueSubject<BillingPlanId?, Never>(nil)
+        let scheduledChange = CurrentValueSubject<BillingUserPlan.ScheduledChange?, Never>(nil)
         let userSelectedPlanId = CurrentValueSubject<BillingPlanId?, Never>(nil)
         let isPurchasing = CurrentValueSubject<Bool, Never>(false)
         let hasUnfinished = CurrentValueSubject<Bool, Never>(false)
@@ -135,8 +137,10 @@ final class PaywallViewModelImple: PaywallViewModel, @unchecked Sendable {
         self.billingUsecase = billingUsecase
         self.closesAfterPurchase = closesAfterPurchase
         self.billingUsecase.currentUserPlan
-            .map { $0.planId }
-            .sink { [weak self] planId in self?.subject.currentPlanId.send(planId) }
+            .sink { [weak self] userPlan in
+                self?.subject.currentPlanId.send(userPlan.planId)
+                self?.subject.scheduledChange.send(userPlan.scheduledChange)
+            }
             .store(in: &self.cancellables)
     }
 }
@@ -363,6 +367,10 @@ extension PaywallViewModelImple {
                 self?.currentPlanDescriptionText(planId: currentPlanId, offerings: offerings) ?? ""
             }
             .eraseToAnyPublisher()
+    }
+
+    var scheduledChange: AnyPublisher<BillingUserPlan.ScheduledChange?, Never> {
+        return self.subject.scheduledChange.removeDuplicates().eraseToAnyPublisher()
     }
 
     var catalogState: AnyPublisher<PaywallCatalogState, Never> {

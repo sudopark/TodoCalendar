@@ -21,6 +21,7 @@ import CommonPresentation
 
     var currentPlan: BillingPlanId?
     var currentPlanDescription: String = ""
+    var scheduledChange: BillingUserPlan.ScheduledChange?
     var screenState: PaywallScreenState = .loading
     var catalogState: PaywallCatalogState = .loading
     var cellModels: [PaywallPlanCellModel] = []
@@ -43,6 +44,11 @@ import CommonPresentation
         viewModel.currentPlanDescription
             .receive(on: RunLoop.main)
             .sink { [weak self] in self?.currentPlanDescription = $0 }
+            .store(in: &self.cancellables)
+
+        viewModel.scheduledChange
+            .receive(on: RunLoop.main)
+            .sink { [weak self] in self?.scheduledChange = $0 }
             .store(in: &self.cancellables)
 
         viewModel.screenState
@@ -308,15 +314,21 @@ private struct PaywallView: View {
     // MARK: - 현재 플랜 스트립
 
     private var currentPlanStrip: some View {
-        HStack(spacing: Metric.Spacing.small) {
-            BillingPlanChipView(plan: self.state.currentPlan ?? .free)
-            Text(self.state.currentPlanDescription)
-                .font(self.appearance.fontSet.subNormal.asFont)
-                .foregroundStyle(self.appearance.colorSet.text2.asColor)
+        VStack(alignment: .leading, spacing: Metric.Spacing.xsmall) {
+            HStack(spacing: Metric.Spacing.small) {
+                BillingPlanChipView(plan: self.state.currentPlan ?? .free)
+                Text(self.state.currentPlanDescription)
+                    .font(self.appearance.fontSet.subNormal.asFont)
+                    .foregroundStyle(self.appearance.colorSet.text2.asColor)
 
-            if self.state.showsManageSubscription {
-                Spacer(minLength: Metric.Spacing.small)
-                self.manageSubscriptionLink
+                if self.state.showsManageSubscription {
+                    Spacer(minLength: Metric.Spacing.small)
+                    self.manageSubscriptionLink
+                }
+            }
+
+            if let change = self.state.scheduledChange {
+                BillingScheduledChangeView(change: change)
             }
         }
     }
