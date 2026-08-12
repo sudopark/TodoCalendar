@@ -83,6 +83,7 @@ protocol PaywallViewModel: AnyObject, Sendable, PaywallSceneInteractor {
     func prepare()
     func selectPlan(_ planId: BillingPlanId)
     func purchase()
+    func purchaseTopup(_ productId: String)
     func restore()
     func recoverUnfinished()
     func manageSubscription()
@@ -222,11 +223,31 @@ extension PaywallViewModelImple {
                     break   // 유저 취소 — 조용히 닫기(시트 유지)
 
                 case .pending:
-                    let info = ConfirmDialogInfo()
-                        |> \.title .~ "billing::paywall::pending::title".localized()
-                        |> \.message .~ "billing::paywall::pending::message".localized()
-                        |> \.withCancel .~ false
-                    self.router?.showConfirm(dialog: info)
+                    self.showPendingDialog()
+                }
+            } catch {
+                self.showFailure(error)
+            }
+        }
+    }
+
+    func purchaseTopup(_ productId: String) {
+        guard self.subject.isPurchasing.value == false else { return }
+        self.subject.isPurchasing.send(true)
+        Task { [weak self] in
+            guard let self else { return }
+            defer { self.subject.isPurchasing.send(false) }
+            do {
+                switch try await self.billingUsecase.purchase(productId: productId) {
+                case .applied:
+                    self.router?.showToast("billing::paywall::topup::applied".localized())
+                    self.closeAfterPurchaseIfNeeded()
+
+                case .cancelled:
+                    break
+
+                case .pending:
+                    self.showPendingDialog()
                 }
             } catch {
                 self.showFailure(error)
@@ -307,6 +328,14 @@ extension PaywallViewModelImple {
     private func closeAfterPurchaseIfNeeded() {
         guard self.closesAfterPurchase else { return }
         self.router?.closeScene()
+    }
+
+    private func showPendingDialog() {
+        let info = ConfirmDialogInfo()
+            |> \.title .~ "billing::paywall::pending::title".localized()
+            |> \.message .~ "billing::paywall::pending::message".localized()
+            |> \.withCancel .~ false
+        self.router?.showConfirm(dialog: info)
     }
 
     private func showFailure(_ error: any Error) {

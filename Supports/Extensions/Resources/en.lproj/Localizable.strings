@@ -638,6 +638,7 @@
 "billing::paywall::topup::bonus" = "+%@%% bonus";
 "billing::paywall::topup::title" = "Add credits";
 "billing::paywall::topup::description" = "Extra credits are used after your daily limit runs out, and they don't expire.";
+"billing::paywall::topup::applied" = "Credits added";
 
 // MARK: - share extension
 
