@@ -14,8 +14,10 @@ import Domain
 final class StubBillingUsecase: BillingUsecase, @unchecked Sendable {
 
     private let stubOfferings: [BillingPlanOffering]
+    private let stubTopupOfferings: [BillingTopupOffering]
     // 서버 카탈로그 요청(loadPlans) 실패를 시뮬레이션 — nil이면 stubOfferings를 그대로 반환
     private let catalogLoadError: (any Error)?
+    private let topupLoadError: (any Error)?
     private let stubPurchaseResult: Result<BillingPurchaseResult, any Error>
     // restorePurchases() 가 반환할 결과 갈래
     private let restoreResult: BillingRestoreResult
@@ -39,7 +41,9 @@ final class StubBillingUsecase: BillingUsecase, @unchecked Sendable {
 
     init(
         offerings: [BillingPlanOffering] = [],
+        topupOfferings: [BillingTopupOffering] = [],
         catalogLoadError: (any Error)? = nil,
+        topupLoadError: (any Error)? = nil,
         purchaseResult: Result<BillingPurchaseResult, any Error> = .success(.cancelled),
         userPlan: BillingUserPlan? = nil,
         restoreResult: BillingRestoreResult = .nothingToRestore,
@@ -49,7 +53,9 @@ final class StubBillingUsecase: BillingUsecase, @unchecked Sendable {
         applyUnfinishedResult: Result<BillingUserPlan?, any Error> = .success(nil)
     ) {
         self.stubOfferings = offerings
+        self.stubTopupOfferings = topupOfferings
         self.catalogLoadError = catalogLoadError
+        self.topupLoadError = topupLoadError
         self.stubPurchaseResult = purchaseResult
         self.restoreResult = restoreResult
         self.restoreError = restoreError
@@ -63,7 +69,10 @@ final class StubBillingUsecase: BillingUsecase, @unchecked Sendable {
         if let catalogLoadError { throw catalogLoadError }
         return self.stubOfferings
     }
-    func loadTopupOfferings() async throws -> [BillingTopupOffering] { [] }
+    func loadTopupOfferings() async throws -> [BillingTopupOffering] {
+        if let topupLoadError { throw topupLoadError }
+        return self.stubTopupOfferings
+    }
 
     // 실제 usecase(applyAndFinish)는 구매 결과를 sharedDataStore 에 반영해 currentUserPlan 이
     // 재방출된다 — 스텁도 push 해야 "구매 후 화면이 갱신된다"가 테스트로 관찰된다
