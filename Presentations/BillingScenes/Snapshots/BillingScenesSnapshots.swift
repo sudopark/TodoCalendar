@@ -440,3 +440,48 @@ extension BillingScenesSnapshots {
         }
     }
 }
+
+
+// MARK: - 하향 예약 상태 — 현재 플랜 아래에 안내
+
+extension BillingScenesSnapshots {
+
+    @MainActor
+    func test_paywallScheduledChange() {
+        captureSnapshotPair(named: "paywallScheduledChange", layout: .fullScreen) { theme in
+            self.makePaywallView(theme) { state in
+                state.currentPlan = .standard
+                state.currentPlanDescription = "billing::paywall::current::description".localized(with: "200")
+                state.scheduledChange = BillingUserPlan.ScheduledChange(
+                    planId: .free, effectiveAt: Date(timeIntervalSince1970: 1786000000)
+                )
+                state.catalogState = .loaded([])
+                state.screenState = .ready(state.catalogState)
+                state.showsManageSubscription = true
+                state.cellModels = [
+                    self.cell(
+                        .standard, price: "$4.99",
+                        period: "billing::paywall::period::monthly".localized(),
+                        dailyLimit: 200, isOwned: true, isCovered: true, isRecommended: true
+                    ),
+                    self.cell(
+                        .lifetime, price: "$49.99", period: nil,
+                        dailyLimit: 500, isOwned: false, isCovered: false
+                    )
+                ]
+                state.selectedPlanId = .lifetime
+                state.selectedPlanDetail = self.detail(
+                    planId: .lifetime, dailyLimit: 500, isTopupAllowed: true,
+                    disclosureKey: "billing::paywall::disclosure::oneTime",
+                    ctaKey: "billing::paywall::cta::buy"
+                )
+                state.topupCellModels = [
+                    self.topupCell(credits: 30000, price: "$0.99"),
+                    self.topupCell(credits: 165000, price: "$4.99", bonusPercent: 10),
+                    self.topupCell(credits: 432000, price: "$9.99", bonusPercent: 20)
+                ]
+                state.isPurchasing = false
+            }
+        }
+    }
+}
