@@ -99,6 +99,8 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
     }
     private var cancellables: Set<AnyCancellable> = []
     private let subject = Subject()
+    // 슬라이드 도중 포커스가 통째로 바뀌면 뒤늦은 완료 콜백이 낡은 인덱스를 적용하지 않게 한다
+    private var focusGeneration: Int = 0
     
     private var monthsWithSort: AnyPublisher<[CalendarMonth], Never> {
         return self.subject.monthsInCurrentRange
@@ -413,8 +415,10 @@ extension CalendarViewModelImple {
                 ? (currentIndex + 1) % count
                 : (currentIndex - 1 + count) % count
 
+            let generationAtSlideStart = self.focusGeneration
             self.router?.slideFocus(to: targetIndex, isNext: isNext) { [weak self] in
-                self?.focusChanged(from: currentIndex, to: targetIndex)
+                guard let self = self, self.focusGeneration == generationAtSlideStart else { return }
+                self.focusChanged(from: currentIndex, to: targetIndex)
             }
         }
     }
@@ -424,6 +428,7 @@ extension CalendarViewModelImple {
         andSelectDay: @Sendable @escaping ((any CalendarPaperSceneInteractor)?) -> Void
     ) {
         Task { @MainActor in
+            self.focusGeneration += 1
             self.router?.changeFocus(at: totalMonths.focusedIndex)
             self.subject.monthsInCurrentRange.send(totalMonths)
             totalMonths.totalMonths.enumerated().forEach { offset, month in
