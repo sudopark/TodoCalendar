@@ -17,6 +17,9 @@ protocol CalendarViewRouting: Routing, Sendable {
     @MainActor
     func changeFocus(at index: Int)
 
+    @MainActor
+    func slideFocus(to index: Int, isNext: Bool, completed: @escaping @Sendable () -> Void)
+
     func routeToAICommand()
 
     func routeToSignIn()
@@ -57,6 +60,12 @@ final class CalendarViewRouterImple: BaseRouterImple, CalendarViewRouting, @unch
     func changeFocus(at index: Int) {
         guard let current = self.currentScene else { return }
         current.changeFocus(at: index)
+    }
+
+    @MainActor
+    func slideFocus(to index: Int, isNext: Bool, completed: @escaping @Sendable () -> Void) {
+        guard let current = self.currentScene else { return }
+        current.slideFocus(to: index, isNext: isNext, completed: completed)
     }
 
     func routeToAICommand() {

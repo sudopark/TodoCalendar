@@ -66,7 +66,27 @@ final class CalendarViewController: UIPageViewController, CalendarScene {
         guard let center = self.monthViewControllers?[safe: index] else { return }
         self.setViewControllers([center], direction: .forward, animated: false)
     }
-    
+
+    // 애니메이션 중 setViewControllers를 재호출하면 이후 스와이프가 엉뚱한 페이지를 보여준다
+    private var isSlidingFocus: Bool = false
+
+    func slideFocus(to index: Int, isNext: Bool, completed: @escaping @Sendable () -> Void) {
+        guard !self.isSlidingFocus,
+              let target = self.monthViewControllers?[safe: index]
+        else { return }
+
+        self.isSlidingFocus = true
+        self.setViewControllers(
+            [target],
+            direction: isNext ? .forward : .reverse,
+            animated: true
+        ) { [weak self] finished in
+            self?.isSlidingFocus = false
+            guard finished else { return }
+            completed()
+        }
+    }
+
     private func bind() {
      
         self.viewAppearance.didUpdated

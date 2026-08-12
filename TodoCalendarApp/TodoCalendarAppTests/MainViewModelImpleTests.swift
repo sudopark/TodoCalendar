@@ -415,7 +415,17 @@ extension MainViewModelImpleTests {
         func moveFocusToToday() {
             self.didFocusMovedToToday = true
         }
-        
+
+        var didMoveToPreviousMonth: Bool?
+        func moveToPreviousMonth() {
+            self.didMoveToPreviousMonth = true
+        }
+
+        var didMoveToNextMonth: Bool?
+        func moveToNextMonth() {
+            self.didMoveToNextMonth = true
+        }
+
         var didRequestMoveDay: CalendarDay?
         func moveDay(_ day: CalendarDay, withClearPresented: Bool) {
             self.didRequestMoveDay = day

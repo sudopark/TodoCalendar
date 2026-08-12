@@ -15,6 +15,8 @@ public protocol CalendarSceneInteractor: Sendable, AnyObject {
 
     func moveFocusToToday()
     func moveDay(_ day: CalendarDay, withClearPresented: Bool)
+    func moveToPreviousMonth()
+    func moveToNextMonth()
     func requestAIEntry()
 }
 
@@ -37,6 +39,9 @@ public protocol CalendarScene: Scene where Interactor == any CalendarSceneIntera
     
     @MainActor
     func changeFocus(at index: Int)
+
+    @MainActor
+    func slideFocus(to index: Int, isNext: Bool, completed: @escaping @Sendable () -> Void)
 }
 
 

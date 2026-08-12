@@ -181,6 +181,16 @@ private final class SpyCalendarInteractor: CalendarSceneInteractor, @unchecked S
 
     func moveFocusToToday() { }
 
+    var didMoveToPreviousMonth: Bool?
+    func moveToPreviousMonth() {
+        self.didMoveToPreviousMonth = true
+    }
+
+    var didMoveToNextMonth: Bool?
+    func moveToNextMonth() {
+        self.didMoveToNextMonth = true
+    }
+
     var didMoveToDay: CalendarDay?
     var didMoveToDayWithClearPresented: Bool?
     func moveDay(_ day: CalendarDay, withClearPresented: Bool) {
