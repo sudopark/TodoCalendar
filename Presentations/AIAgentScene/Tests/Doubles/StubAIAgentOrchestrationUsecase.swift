@@ -68,11 +68,6 @@ final class StubAIAgentOrchestrationUsecase: AIAgentOrchestrationUsecase, @unche
         self.didRefreshProcessingJob = true
     }
 
-    private(set) var didHandleSignedOut = false
-    func handleSignedOut() async {
-        self.didHandleSignedOut = true
-    }
-
     var state: AnyPublisher<AIAgentState, Never> {
         self.stateSubject.compactMap { $0 }.eraseToAnyPublisher()
     }
