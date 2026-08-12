@@ -33,11 +33,13 @@ protocol MainViewModel: AnyObject, Sendable, MainSceneInteractor {
     // interactor
     func prepare()
     func returnToToday()
+    func moveToPreviousMonth()
+    func moveToNextMonth()
     func handleMigration()
     func moveToEventTypeFilterSetting()
     func moveToSetting()
     func jumpDate()
-    
+
     // presenter
     var currentMonth: AnyPublisher<CurrentMonth, Never> { get }
     var isShowReturnToToday: AnyPublisher<Bool, Never> { get }
@@ -171,7 +173,15 @@ extension MainViewModelImple {
     func returnToToday() {
         self.calendarSceneInteractor?.moveFocusToToday()
     }
-    
+
+    func moveToPreviousMonth() {
+        self.calendarSceneInteractor?.moveToPreviousMonth()
+    }
+
+    func moveToNextMonth() {
+        self.calendarSceneInteractor?.moveToNextMonth()
+    }
+
     func handleMigration() {
         guard let status = self.subject.temporaryUserDataMigrationStatus.value,
               case .need(let count) = status

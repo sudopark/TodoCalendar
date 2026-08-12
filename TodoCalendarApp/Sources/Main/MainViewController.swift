@@ -88,6 +88,7 @@ extension MainViewController {
             .sink(receiveValue: { [weak self] month in
                 self?.headerView.monthLabel.text = month.monthText
                 self?.headerView.yearLabel.text = month.yearText
+                self?.headerView.yearLabel.isHidden = month.yearText == nil
             })
             .store(in: &self.cancellables)
         
@@ -146,6 +147,20 @@ extension MainViewController {
                 self?.viewModel.jumpDate()
             }
             .store(in: &self.cancellables)
+
+        self.headerView.previousMonthButton.addTapGestureRecognizerPublisher()
+            .sink { [weak self] in
+                self?.viewAppearance.impactIfNeed()
+                self?.viewModel.moveToPreviousMonth()
+            }
+            .store(in: &self.cancellables)
+
+        self.headerView.nextMonthButton.addTapGestureRecognizerPublisher()
+            .sink { [weak self] in
+                self?.viewAppearance.impactIfNeed()
+                self?.viewModel.moveToNextMonth()
+            }
+            .store(in: &self.cancellables)
     }
 }
 
@@ -200,6 +215,9 @@ private final class HeaderView: UIView {
     
     let monthLabel = UILabel()
     let yearLabel = UILabel()
+    private let titleStackView = UIStackView()
+    let previousMonthButton = UIButton()
+    let nextMonthButton = UIButton()
     let returnTodayView = UIView()
     private let returnTodayImage = UIImageView()
     private let returnTodayLabel = UILabel()
@@ -247,21 +265,38 @@ private final class HeaderView: UIView {
     
     func setupLayout() {
         
-        self.addSubview(monthLabel)
-        monthLabel.autoLayout.active(with: self) {
-            $0.centerYAnchor.constraint(equalTo: $1.centerYAnchor)
+        self.addSubview(previousMonthButton)
+        previousMonthButton.autoLayout.active(with: self) {
             $0.leadingAnchor.constraint(equalTo: $1.leadingAnchor, constant: 16)
+            $0.centerYAnchor.constraint(equalTo: $1.centerYAnchor)
+            $0.widthAnchor.constraint(equalToConstant: 24)
+            $0.heightAnchor.constraint(equalToConstant: 44)
         }
-        self.addSubview(yearLabel)
-        yearLabel.autoLayout.active(with: self.monthLabel) {
-            $0.bottomAnchor.constraint(equalTo: $1.lastBaselineAnchor)
-            $0.leadingAnchor.constraint(equalTo: $1.trailingAnchor, constant: 4)
+
+        self.addSubview(titleStackView)
+        titleStackView.autoLayout.active(with: self) {
+            $0.leadingAnchor.constraint(equalTo: self.previousMonthButton.trailingAnchor, constant: 8)
+            $0.centerYAnchor.constraint(equalTo: $1.centerYAnchor)
         }
-        
+        titleStackView.axis = .horizontal
+        titleStackView.alignment = .lastBaseline
+        titleStackView.spacing = 4
+        titleStackView.addArrangedSubview(monthLabel)
+        titleStackView.addArrangedSubview(yearLabel)
+
+        self.addSubview(nextMonthButton)
+        nextMonthButton.autoLayout.active(with: self) {
+            $0.leadingAnchor.constraint(equalTo: self.titleStackView.trailingAnchor, constant: 8)
+            $0.centerYAnchor.constraint(equalTo: $1.centerYAnchor)
+            $0.widthAnchor.constraint(equalToConstant: 24)
+            $0.heightAnchor.constraint(equalToConstant: 44)
+        }
+
         self.addSubview(returnTodayView)
         returnTodayView.autoLayout.active(with: self) {
             $0.centerXAnchor.constraint(equalTo: $1.centerXAnchor).setupPriority(.defaultLow)
             $0.centerYAnchor.constraint(equalTo: $1.centerYAnchor)
+            $0.leadingAnchor.constraint(greaterThanOrEqualTo: self.nextMonthButton.trailingAnchor, constant: 8)
         }
         
         self.returnTodayView.addSubview(returnTodayImage)
@@ -346,6 +381,15 @@ private final class HeaderView: UIView {
             self.migrationButton.tintColor = colorSet.accentInfo
         default: break
         }
+        let chevronConfiguration = UIImage.SymbolConfiguration(pointSize: 13, weight: .semibold)
+        self.previousMonthButton.tintColor = colorSet.text2
+        self.previousMonthButton.setImage(
+            UIImage(systemName: "chevron.left", withConfiguration: chevronConfiguration), for: .normal
+        )
+        self.nextMonthButton.tintColor = colorSet.text2
+        self.nextMonthButton.setImage(
+            UIImage(systemName: "chevron.right", withConfiguration: chevronConfiguration), for: .normal
+        )
         self.jumpButton.tintColor = colorSet.text0
         self.jumpButton.setImage(UIImage(systemName: "calendar"), for: .normal)
         self.eventTypeFilterButton.tintColor = colorSet.text0
