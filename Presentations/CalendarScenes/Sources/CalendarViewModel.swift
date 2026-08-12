@@ -406,15 +406,14 @@ extension CalendarViewModelImple {
     private func slideFocusedMonth(isNext: Bool) {
         Task { @MainActor in
             guard let range = self.subject.monthsInCurrentRange.value,
-                  !range.totalMonths.isEmpty
+                  let focusedMonth = range.focusedMonth
             else { return }
 
-            let count = range.totalMonths.count
-            let currentIndex = range.focusedIndex
-            let targetIndex = isNext
-                ? (currentIndex + 1) % count
-                : (currentIndex - 1 + count) % count
+            let targetMonth = isNext ? focusedMonth.nextMonth() : focusedMonth.previousMonth()
+            guard let targetIndex = range.totalMonths.firstIndex(of: targetMonth)
+            else { return }
 
+            let currentIndex = range.focusedIndex
             let generationAtSlideStart = self.focusGeneration
             self.router?.slideFocus(to: targetIndex, isNext: isNext) { [weak self] in
                 guard let self = self, self.focusGeneration == generationAtSlideStart else { return }
