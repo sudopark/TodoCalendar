@@ -283,6 +283,7 @@ private final class HeaderView: UIView {
         titleStackView.spacing = 4
         titleStackView.addArrangedSubview(monthLabel)
         titleStackView.addArrangedSubview(yearLabel)
+        monthLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
 
         self.addSubview(nextMonthButton)
         nextMonthButton.autoLayout.active(with: self) {
@@ -296,7 +297,7 @@ private final class HeaderView: UIView {
         returnTodayView.autoLayout.active(with: self) {
             $0.centerXAnchor.constraint(equalTo: $1.centerXAnchor).setupPriority(.defaultLow)
             $0.centerYAnchor.constraint(equalTo: $1.centerYAnchor)
-            $0.leadingAnchor.constraint(greaterThanOrEqualTo: self.nextMonthButton.trailingAnchor, constant: 8)
+            $0.leadingAnchor.constraint(greaterThanOrEqualTo: self.nextMonthButton.trailingAnchor, constant: 8).setupPriority(.defaultHigh)
         }
         
         self.returnTodayView.addSubview(returnTodayImage)

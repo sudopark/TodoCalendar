@@ -32,7 +32,7 @@ UIPageViewController로 월별 페이지를 좌우 스와이프로 전환한다.
 
 | 항목 | 설명 |
 |---|---|
-| Interactor | `moveFocusToToday()`, `moveDay(_:withClearPresented:)` |
+| Interactor | `moveFocusToToday()`, `moveDay(_:withClearPresented:)`, `moveToPreviousMonth()`, `moveToNextMonth()` |
 | Listener | `CalendarSceneListener` — 포커스 월 변경 알림 |
 | 주요 Usecase | Calendar, Holiday, TodoEvent, ScheduleEvent, GoogleCalendar, ForemostEvent, EventTag, EventSync |
 
