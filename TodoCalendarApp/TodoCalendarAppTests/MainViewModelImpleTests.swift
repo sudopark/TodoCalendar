@@ -6,6 +6,7 @@
 //
 
 import XCTest
+import UIKit
 import Combine
 import Domain
 import Scenes
@@ -27,6 +28,7 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var spyAppleCalendarUsecase: StubAppleCalendarUsecase!
     private var stubSyncUsecase: StubEventSyncUsecase!
     private var spyBillingUsecase: SpyBillingUsecase!
+    private var stubAIOrchestrationUsecase: StubAIAgentOrchestrationUsecase!
     var cancelBag: Set<AnyCancellable>!
 
     override func setUpWithError() throws {
@@ -40,6 +42,7 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.spyAppleCalendarUsecase = .init()
         self.stubSyncUsecase = .init()
         self.spyBillingUsecase = .init()
+        self.stubAIOrchestrationUsecase = .init()
         self.cancelBag = .init()
         self.timeout = 0.01
     }
@@ -55,6 +58,7 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.spyAppleCalendarUsecase = nil
         self.stubSyncUsecase = nil
         self.spyBillingUsecase = nil
+        self.stubAIOrchestrationUsecase = nil
         self.cancelBag = nil
     }
 
@@ -72,7 +76,8 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
             googleCalendarUsecase: self.spyGoogleCalendarUsecase,
             appleCalendarUsecase: self.spyAppleCalendarUsecase,
             eventSyncUsecase: self.stubSyncUsecase,
-            billingUsecase: self.spyBillingUsecase
+            billingUsecase: self.spyBillingUsecase,
+            aiAgentOrchestrationUsecase: self.stubAIOrchestrationUsecase
         )
         viewModel.router = self.spyRouter
         self.spyRouter.didCalendarAttached = {
@@ -96,7 +101,8 @@ extension MainViewModelImpleTests {
             googleCalendarUsecase: self.spyGoogleCalendarUsecase,
             appleCalendarUsecase: self.spyAppleCalendarUsecase,
             eventSyncUsecase: self.stubSyncUsecase,
-            billingUsecase: self.spyBillingUsecase
+            billingUsecase: self.spyBillingUsecase,
+            aiAgentOrchestrationUsecase: self.stubAIOrchestrationUsecase
         )
         viewModel.router = self.spyRouter
         return viewModel
@@ -450,5 +456,49 @@ extension MainViewModelImpleTests {
         var currentUserPlan: AnyPublisher<BillingUserPlan, Never> {
             return Empty().eraseToAnyPublisher()
         }
+    }
+}
+
+
+// MARK: - AI job 갱신
+
+extension MainViewModelImpleTests {
+
+    func testViewModel_whenEnterForeground_refreshProcessingAIJob() {
+        // given
+        let viewModel = self.makeViewModelWithoutPrepare()
+
+        // when
+        NotificationCenter.default.post(
+            name: UIApplication.willEnterForegroundNotification, object: nil
+        )
+
+        // then
+        XCTAssertEqual(self.stubAIOrchestrationUsecase.didRefreshProcessingJob, true)
+        withExtendedLifetime(viewModel) { }
+    }
+
+    func testViewModel_whenNotEnterForeground_notRefreshProcessingAIJob() {
+        // given
+        let viewModel = self.makeViewModelWithoutPrepare()
+
+        // when
+
+        // then
+        XCTAssertNil(self.stubAIOrchestrationUsecase.didRefreshProcessingJob)
+        withExtendedLifetime(viewModel) { }
+    }
+
+    func testViewModel_whenHandleAIJobStatusChanged_passToOrchestrationUsecase() {
+        // given
+        let viewModel = self.makeViewModelWithoutPrepare()
+
+        // when
+        viewModel.handleAIJobStatusChanged("some_job")
+
+        // then
+        XCTAssertEqual(
+            self.stubAIOrchestrationUsecase.didHandleJobStatusChangedWith, "some_job"
+        )
     }
 }

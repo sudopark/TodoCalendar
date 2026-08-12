@@ -25,9 +25,9 @@ final class ApplicationRootViewModelImple: @unchecked Sendable {
     private let externalCalendarServiceUsecase: any ExternalCalendarIntegrationUsecase
     private let userNotificationUsecase: any UserNotificationUsecase
     private let backgroundEventSyncUsecase: any BackgroundEventSyncUsecase
-    private let aiJobRefreshUsecase: any AIJobRefreshUsecase
     private let appUpdateCheckUsecase: any AppUpdateCheckUsecase
     var router: ApplicationRootRouter?
+    @MainActor private weak var mainSceneInteractor: (any MainSceneInteractor)?
 
     init(
         authUsecase: any AuthUsecase,
@@ -37,7 +37,6 @@ final class ApplicationRootViewModelImple: @unchecked Sendable {
         externalCalendarServiceUsecase: any ExternalCalendarIntegrationUsecase,
         userNotificationUsecase: any UserNotificationUsecase,
         backgroundEventSyncUsecase: any BackgroundEventSyncUsecase,
-        aiJobRefreshUsecase: any AIJobRefreshUsecase,
         appUpdateCheckUsecase: any AppUpdateCheckUsecase
     ) {
         self.authUsecase = authUsecase
@@ -47,7 +46,6 @@ final class ApplicationRootViewModelImple: @unchecked Sendable {
         self.externalCalendarServiceUsecase = externalCalendarServiceUsecase
         self.userNotificationUsecase = userNotificationUsecase
         self.backgroundEventSyncUsecase = backgroundEventSyncUsecase
-        self.aiJobRefreshUsecase = aiJobRefreshUsecase
         self.appUpdateCheckUsecase = appUpdateCheckUsecase
 
         self.bindAccountStatusChanged()
@@ -76,13 +74,19 @@ extension ApplicationRootViewModelImple: AutenticatorTokenRefreshListener {
     func prepareInitialScene() {
         Task {
             let result = try await self.prepareUsecase.prepareLaunch()
-            self.router?.setupInitialScene(result)
+            let interactor = await self.router?.setupInitialScene(result)
+            await self.attach(mainSceneInteractor: interactor)
             self.subject.isSignIn.send(result.latestLoginAcount != nil)
             self.registerTokenIfNeed()
             self.appUpdateCheckUsecase.checkUpdateIsNeed()
         }
     }
     
+    @MainActor
+    func attach(mainSceneInteractor: (any MainSceneInteractor)?) {
+        self.mainSceneInteractor = mainSceneInteractor
+    }
+
     private func bindAccountStatusChanged() {
         
         self.accountUsecase.accountStatusChanged
@@ -119,7 +123,8 @@ extension ApplicationRootViewModelImple: AutenticatorTokenRefreshListener {
             await self?.prepareUsecase.prepareSignedIn(account.auth)
             
             try? await Task.sleep(for: .milliseconds(100))
-            self?.router?.changeRootSceneAfter(signIn: account.auth)
+            let interactor = await self?.router?.changeRootSceneAfter(signIn: account.auth)
+            await self?.attach(mainSceneInteractor: interactor)
             self?.registerTokenIfNeed()
         }
         .store(in: &self.cancellables)
@@ -128,11 +133,11 @@ extension ApplicationRootViewModelImple: AutenticatorTokenRefreshListener {
     private func handleUserSignedOut() {
         Task { [weak self] in
             self?.subject.isSignIn.send(false)
-            await self?.aiJobRefreshUsecase.handleSignedOut()
             await self?.prepareUsecase.prepareSignedOut()
             
             try? await Task.sleep(for: .milliseconds(100))
-            self?.router?.changeRootSceneAfter(signIn: nil)
+            let interactor = await self?.router?.changeRootSceneAfter(signIn: nil)
+            await self?.attach(mainSceneInteractor: interactor)
         }
     }
     
@@ -185,12 +190,6 @@ extension ApplicationRootViewModelImple {
                 self?.handleWillEnterForeground()
             })
             .store(in: &self.cancellables)
-
-        NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)
-            .sink(receiveValue: { [weak self] _ in
-                self?.handleDidBecomeActive()
-            })
-            .store(in: &self.cancellables)
     }
 
     private func handleDidEnterBackground() {
@@ -201,10 +200,6 @@ extension ApplicationRootViewModelImple {
 
     private func handleWillEnterForeground() {
         self.appUpdateCheckUsecase.checkUpdateIsNeed()
-    }
-
-    private func handleDidBecomeActive() {
-        self.aiJobRefreshUsecase.refreshProcessingJobIfNeeded()
     }
 
     private func bindUpdateRequirement() {
@@ -274,7 +269,9 @@ extension ApplicationRootViewModelImple {
     func handleReceivePushNotification(userInfo: [AnyHashable: Any]) {
 
         if let jobId = userInfo["jobId"] as? String {
-            self.aiJobRefreshUsecase.handleJobStatusChanged(jobId)
+            Task { @MainActor in
+                self.mainSceneInteractor?.handleAIJobStatusChanged(jobId)
+            }
             return
         }
 

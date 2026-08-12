@@ -19,21 +19,18 @@ import UnitTestHelpKit
 
 final class ApplicationRootViewModelImpleTests {
 
-    private let callOrder = CallOrderRecorder()
     private let spyAppUpdateCheckUsecase = SpyAppUpdateCheckUsecase()
     private let fakeAccountUsecase = FakeAccountUsecase()
-    private lazy var spyAIJobRefreshUsecase = SpyAIJobRefreshUsecase(recorder: self.callOrder)
 
     private func makeViewModel() -> ApplicationRootViewModelImple {
         return ApplicationRootViewModelImple(
             authUsecase: StubAuthUsecase(),
             accountUsecase: self.fakeAccountUsecase,
-            prepareUsecase: StubApplicationPrepareUsecase(recorder: self.callOrder),
+            prepareUsecase: StubApplicationPrepareUsecase(),
             deepLinkHandler: ApplicationDeepLinkHandlerImple(),
             externalCalendarServiceUsecase: StubExternalCalendarIntegrationUsecase([]),
             userNotificationUsecase: StubUserNotificationUsecase(),
             backgroundEventSyncUsecase: StubBackgroundEventSyncUsecase(),
-            aiJobRefreshUsecase: self.spyAIJobRefreshUsecase,
             appUpdateCheckUsecase: self.spyAppUpdateCheckUsecase
         )
     }
@@ -44,32 +41,38 @@ final class ApplicationRootViewModelImpleTests {
 
 extension ApplicationRootViewModelImpleTests {
 
-    @Test("jobId가 담긴 푸시는 AI job 즉시 조회로 라우팅한다")
-    func viewModel_whenPushHasJobId_routeToAIJobRefresh() {
+    @Test("jobId가 담긴 푸시는 메인 화면으로 AI job 갱신을 내려보낸다")
+    func viewModel_whenPushHasJobId_routeToMainScene() async {
         // given
         let viewModel = self.makeViewModel()
+        let spyInteractor = SpyMainSceneInteractor()
+        await viewModel.attach(mainSceneInteractor: spyInteractor)
 
         // when
         viewModel.handleReceivePushNotification(
             userInfo: ["jobId": "some_job", "status": "DONE"]
         )
+        try? await Task.sleep(for: .milliseconds(100))
 
         // then
-        #expect(self.spyAIJobRefreshUsecase.didHandleJobStatusChangedWith == "some_job")
+        #expect(spyInteractor.didHandleAIJobStatusChangedWith == "some_job")
     }
 
-    @Test("jobId가 없는 푸시는 AI job 조회를 트리거하지 않는다")
-    func viewModel_whenPushHasNoJobId_doNotRouteToAIJobRefresh() {
+    @Test("jobId가 없는 푸시는 메인 화면에 아무것도 내려보내지 않는다")
+    func viewModel_whenPushHasNoJobId_doNotRouteToMainScene() async {
         // given
         let viewModel = self.makeViewModel()
+        let spyInteractor = SpyMainSceneInteractor()
+        await viewModel.attach(mainSceneInteractor: spyInteractor)
 
         // when
         viewModel.handleReceivePushNotification(
             userInfo: ["aps": ["alert": "이벤트 알림"]]
         )
+        try? await Task.sleep(for: .milliseconds(100))
 
         // then
-        #expect(self.spyAIJobRefreshUsecase.didHandleJobStatusChangedWith == nil)
+        #expect(spyInteractor.didHandleAIJobStatusChangedWith == nil)
     }
 }
 
@@ -78,42 +81,8 @@ extension ApplicationRootViewModelImpleTests {
 
 extension ApplicationRootViewModelImpleTests {
 
-    @Test("앱이 활성 상태가 되면 처리중인 AI job을 이어받는다")
-    func viewModel_whenDidBecomeActive_refreshProcessingJob() async {
-        // given
-        let viewModel = self.makeViewModel()
-
-        // when
-        NotificationCenter.default.post(
-            name: UIApplication.didBecomeActiveNotification, object: nil
-        )
-        try? await Task.sleep(for: .milliseconds(100))
-
-        // then
-        #expect(self.spyAIJobRefreshUsecase.didRefreshProcessingJobTimes == 1)
-        withExtendedLifetime(viewModel) { }
-    }
-
-    @Test("연속된 활성 전환도 매번 이어받는다")
-    func viewModel_whenDidBecomeActiveRepeatedly_refreshEveryTime() async {
-        // given
-        let viewModel = self.makeViewModel()
-
-        // when
-        (0..<3).forEach { _ in
-            NotificationCenter.default.post(
-                name: UIApplication.didBecomeActiveNotification, object: nil
-            )
-        }
-        try? await Task.sleep(for: .milliseconds(100))
-
-        // then
-        #expect(self.spyAIJobRefreshUsecase.didRefreshProcessingJobTimes == 3)
-        withExtendedLifetime(viewModel) { }
-    }
-
-    @Test("포그라운드 복귀는 업데이트 체크만 하고 AI job은 이어받지 않는다")
-    func viewModel_whenWillEnterForeground_onlyCheckUpdate() async {
+    @Test("포그라운드 복귀는 업데이트 체크를 수행한다")
+    func viewModel_whenWillEnterForeground_checkUpdate() async {
         // given
         let viewModel = self.makeViewModel()
 
@@ -125,44 +94,12 @@ extension ApplicationRootViewModelImpleTests {
 
         // then
         #expect(self.spyAppUpdateCheckUsecase.didCheckUpdateIsNeed == true)
-        #expect(self.spyAIJobRefreshUsecase.didRefreshProcessingJobTimes == 0)
-        withExtendedLifetime(viewModel) { }
-    }
-}
-
-
-// MARK: - 로그아웃
-
-extension ApplicationRootViewModelImpleTests {
-
-    // 로컬 AI 커맨드 기록은 로그인 유저의 DB에 있다 — prepareSignedOut이 DB를 닫고
-    // 익명 DB로 갈아끼우기 전에 지워야 재로그인 때 죽은 job이 되살아나지 않는다.
-    @Test("로그아웃하면 DB 정리보다 AI 커맨드 정리를 먼저 끝낸다")
-    func viewModel_whenSignedOut_clearAICommandBeforeDatabaseSwap() async {
-        // given
-        let viewModel = self.makeViewModel()
-
-        // when
-        self.fakeAccountUsecase.sendSignOut()
-        try? await Task.sleep(for: .milliseconds(300))
-
-        // then
-        #expect(self.callOrder.calls == ["aiHandleSignedOut", "prepareSignedOut"])
         withExtendedLifetime(viewModel) { }
     }
 }
 
 
 // MARK: - doubles
-
-private final class CallOrderRecorder: @unchecked Sendable {
-
-    private(set) var calls: [String] = []
-
-    func record(_ name: String) {
-        self.calls.append(name)
-    }
-}
 
 private final class FakeAccountUsecase: StubAccountUsecase, @unchecked Sendable {
 
@@ -177,41 +114,18 @@ private final class FakeAccountUsecase: StubAccountUsecase, @unchecked Sendable 
     }
 }
 
-private final class SpyAIJobRefreshUsecase: AIJobRefreshUsecase, @unchecked Sendable {
+private final class SpyMainSceneInteractor: MainSceneInteractor, @unchecked Sendable {
 
-    private let recorder: CallOrderRecorder
-
-    init(recorder: CallOrderRecorder) {
-        self.recorder = recorder
+    var didHandleAIJobStatusChangedWith: String?
+    func handleAIJobStatusChanged(_ jobId: String) {
+        self.didHandleAIJobStatusChangedWith = jobId
     }
 
-    var didHandleJobStatusChangedWith: String?
-    func handleJobStatusChanged(_ jobId: String) {
-        self.didHandleJobStatusChangedWith = jobId
-    }
-
-    var didRefreshProcessingJobTimes: Int = 0
-    func refreshProcessingJobIfNeeded() {
-        self.didRefreshProcessingJobTimes += 1
-    }
-
-    var didChangeFactory: Bool?
-    func change(factory: any UsecaseFactory) {
-        self.didChangeFactory = true
-    }
-
-    func handleSignedOut() async {
-        self.recorder.record("aiHandleSignedOut")
-    }
+    func calendarScene(focusChangedTo selected: SelectDayInfo) { }
+    func daySelectDialog(didSelect day: SelectDayInfo) { }
 }
 
 private final class StubApplicationPrepareUsecase: ApplicationPrepareUsecase {
-
-    private let recorder: CallOrderRecorder
-
-    init(recorder: CallOrderRecorder) {
-        self.recorder = recorder
-    }
 
     func prepareLaunch() async throws -> ApplicationPrepareResult {
         return ApplicationPrepareResult(
@@ -227,9 +141,7 @@ private final class StubApplicationPrepareUsecase: ApplicationPrepareUsecase {
 
     func prepareSignedIn(_ auth: Auth) async { }
 
-    func prepareSignedOut() async {
-        self.recorder.record("prepareSignedOut")
-    }
+    func prepareSignedOut() async { }
 
     func prepareExternalCalendarIntegrated(_ serviceId: String) { }
 
