@@ -410,7 +410,72 @@ extension CalendarViewModelImpleTests {
         let requesteds = self.spyRouter.spyInteractors.map { $0.didSelectTodayRequested }
         XCTAssertEqual(requesteds, [nil, true, nil])
     }
-    
+
+    func testViewModel_whenMoveToNextMonth_slideToNextPageAndUpdateMonths() {
+        // given
+        let expect = expectation(description: "다음달로 슬라이드 이동")
+        let viewModel = self.makeViewModelWithInitialSetup(
+            .init(year: 2023, month: 08, day: 02, weekDay: 3)
+        )
+        self.spyRouter.didSlideFocusCallback = { expect.fulfill() }
+
+        // when
+        viewModel.moveToNextMonth()
+        self.wait(for: [expect], timeout: self.timeout)
+
+        // then
+        XCTAssertEqual(self.spyRouter.didSlideFocusToIndex, 2)
+        XCTAssertEqual(self.spyRouter.didSlideFocusToNext, true)
+        let currentMonths = self.spyRouter.spyInteractors.map { $0.currentMonth }
+        XCTAssertEqual(currentMonths, [
+            .init(year: 2023, month: 10), .init(year: 2023, month: 08), .init(year: 2023, month: 09)
+        ])
+    }
+
+    func testViewModel_whenMoveToPreviousMonth_slideToPreviousPageAndUpdateMonths() {
+        // given
+        let expect = expectation(description: "이전달로 슬라이드 이동")
+        let viewModel = self.makeViewModelWithInitialSetup(
+            .init(year: 2023, month: 08, day: 02, weekDay: 3)
+        )
+        self.spyRouter.didSlideFocusCallback = { expect.fulfill() }
+
+        // when
+        viewModel.moveToPreviousMonth()
+        self.wait(for: [expect], timeout: self.timeout)
+
+        // then
+        XCTAssertEqual(self.spyRouter.didSlideFocusToIndex, 0)
+        XCTAssertEqual(self.spyRouter.didSlideFocusToNext, false)
+        let currentMonths = self.spyRouter.spyInteractors.map { $0.currentMonth }
+        XCTAssertEqual(currentMonths, [
+            .init(year: 2023, month: 07), .init(year: 2023, month: 08), .init(year: 2023, month: 06)
+        ])
+    }
+
+    func testViewModel_whenMoveToPreviousMonthTwice_slideAcrossPageBoundary() {
+        // given
+        let expect = expectation(description: "페이지 경계를 넘어 연속 이동")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModelWithInitialSetup(
+            .init(year: 2023, month: 08, day: 02, weekDay: 3)
+        )
+        self.spyRouter.didSlideFocusCallback = { expect.fulfill() }
+
+        // when
+        viewModel.moveToPreviousMonth()
+        viewModel.moveToPreviousMonth()
+        self.wait(for: [expect], timeout: self.timeout)
+
+        // then
+        XCTAssertEqual(self.spyRouter.didSlideFocusToIndex, 2)
+        XCTAssertEqual(self.spyRouter.didSlideFocusToNext, false)
+        let currentMonths = self.spyRouter.spyInteractors.map { $0.currentMonth }
+        XCTAssertEqual(currentMonths, [
+            .init(year: 2023, month: 07), .init(year: 2023, month: 05), .init(year: 2023, month: 06)
+        ])
+    }
+
     func testViewModel_moveDay() {
         // given
         let expect = expectation(description: "특정 일자로 이동")
@@ -1229,6 +1294,16 @@ private extension CalendarViewModelImpleTests {
         var didChangedFocusIndex: Int?
         func changeFocus(at index: Int) {
             self.didChangedFocusIndex = index
+        }
+
+        var didSlideFocusToIndex: Int?
+        var didSlideFocusToNext: Bool?
+        var didSlideFocusCallback: (() -> Void)?
+        func slideFocus(to index: Int, isNext: Bool, completed: @escaping @Sendable () -> Void) {
+            self.didSlideFocusToIndex = index
+            self.didSlideFocusToNext = isNext
+            completed()
+            self.didSlideFocusCallback?()
         }
 
         var didRouteToAICommandCount: Int = 0

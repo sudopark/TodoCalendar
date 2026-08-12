@@ -393,6 +393,32 @@ extension CalendarViewModelImple {
         }
     }
     
+    func moveToPreviousMonth() {
+        self.slideFocusedMonth(isNext: false)
+    }
+
+    func moveToNextMonth() {
+        self.slideFocusedMonth(isNext: true)
+    }
+
+    private func slideFocusedMonth(isNext: Bool) {
+        Task { @MainActor in
+            guard let range = self.subject.monthsInCurrentRange.value,
+                  !range.totalMonths.isEmpty
+            else { return }
+
+            let count = range.totalMonths.count
+            let currentIndex = range.focusedIndex
+            let targetIndex = isNext
+                ? (currentIndex + 1) % count
+                : (currentIndex - 1 + count) % count
+
+            self.router?.slideFocus(to: targetIndex, isNext: isNext) { [weak self] in
+                self?.focusChanged(from: currentIndex, to: targetIndex)
+            }
+        }
+    }
+
     private func changeChilds(
         _ totalMonths: TotalMonthsInRange,
         andSelectDay: @Sendable @escaping ((any CalendarPaperSceneInteractor)?) -> Void
