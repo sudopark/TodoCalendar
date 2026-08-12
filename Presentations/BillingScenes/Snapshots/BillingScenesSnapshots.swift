@@ -83,6 +83,19 @@ final class BillingScenesSnapshots: XCTestCase {
             ctaTitle: ctaKey.localized(with: planId.name)
         )
     }
+
+    private func topupCell(
+        credits: Int, price: String, bonusPercent: Int? = nil
+    ) -> PaywallTopupCellModel {
+        return PaywallTopupCellModel(
+            productId: "topup.tier.\(credits)",
+            creditsText: "billing::paywall::topup::credits".localized(with: credits.formatted()),
+            priceText: price,
+            bonusText: bonusPercent.map {
+                "billing::paywall::topup::bonus".localized(with: "\($0)")
+            }
+        )
+    }
 }
 
 
@@ -380,6 +393,48 @@ extension BillingScenesSnapshots {
                 state.cellModels = []
                 state.selectedPlanId = nil
                 state.selectedPlanDetail = nil
+                state.isPurchasing = false
+            }
+        }
+    }
+}
+
+
+// MARK: - 유료 플랜 보유 — top-up 섹션 노출
+
+extension BillingScenesSnapshots {
+
+    @MainActor
+    func test_paywallTopupAvailable() {
+        captureSnapshotPair(named: "paywallTopupAvailable", layout: .fullScreen) { theme in
+            self.makePaywallView(theme) { state in
+                state.currentPlan = .standard
+                state.currentPlanDescription = "billing::paywall::current::description".localized(with: "200")
+                state.catalogState = .loaded([])
+                state.screenState = .ready(state.catalogState)
+                state.showsManageSubscription = true
+                state.cellModels = [
+                    self.cell(
+                        .standard, price: "$4.99",
+                        period: "billing::paywall::period::monthly".localized(),
+                        dailyLimit: 200, isOwned: true, isCovered: true, isRecommended: true
+                    ),
+                    self.cell(
+                        .lifetime, price: "$49.99", period: nil,
+                        dailyLimit: 500, isOwned: false, isCovered: false
+                    )
+                ]
+                state.selectedPlanId = .lifetime
+                state.selectedPlanDetail = self.detail(
+                    planId: .lifetime, dailyLimit: 500, isTopupAllowed: true,
+                    disclosureKey: "billing::paywall::disclosure::oneTime",
+                    ctaKey: "billing::paywall::cta::buy"
+                )
+                state.topupCellModels = [
+                    self.topupCell(credits: 30000, price: "$0.99"),
+                    self.topupCell(credits: 165000, price: "$4.99", bonusPercent: 10),
+                    self.topupCell(credits: 432000, price: "$9.99", bonusPercent: 20)
+                ]
                 state.isPurchasing = false
             }
         }

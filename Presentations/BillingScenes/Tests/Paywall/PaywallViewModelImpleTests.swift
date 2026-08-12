@@ -23,7 +23,9 @@ final class PaywallViewModelImpleTests: PublisherWaitable {
 
     private func makeViewModel(
         offerings: [BillingPlanOffering] = [],
+        topupOfferings: [BillingTopupOffering] = [],
         catalogLoadError: (any Error)? = nil,
+        topupLoadError: (any Error)? = nil,
         purchaseResult: Result<BillingPurchaseResult, any Error> = .success(.cancelled),
         userPlan: BillingUserPlan? = nil,
         restoreResult: BillingRestoreResult = .nothingToRestore,
@@ -35,7 +37,9 @@ final class PaywallViewModelImpleTests: PublisherWaitable {
     ) -> (PaywallViewModelImple, StubBillingUsecase, SpyPaywallRouter) {
         let stub = StubBillingUsecase(
             offerings: offerings,
+            topupOfferings: topupOfferings,
             catalogLoadError: catalogLoadError,
+            topupLoadError: topupLoadError,
             purchaseResult: purchaseResult,
             userPlan: userPlan,
             restoreResult: restoreResult,
@@ -66,9 +70,12 @@ final class PaywallViewModelImpleTests: PublisherWaitable {
         productId: String,
         price: String = "$4.99",
         kind: BillingProductKind? = .subscription(period: .monthly),
-        dailyLimit: Int = 100
+        dailyLimit: Int = 100,
+        isTopupAllowed: Bool = false
     ) -> BillingPlanOffering {
-        let plan = BillingPlan(id: planId, dailyLimit: dailyLimit) |> \.productId .~ productId
+        let plan = BillingPlan(id: planId, dailyLimit: dailyLimit)
+            |> \.productId .~ productId
+            |> \.isTopupAllowed .~ isTopupAllowed
         var offering = BillingPlanOffering(plan: plan)
         offering.product = BillingProduct(productId: productId, displayName: "\(planId)", displayPrice: price)
             |> \.kind .~ kind
@@ -655,12 +662,14 @@ extension PaywallViewModelImpleTests {
         let (viewModel, _, _) = self.makeViewModel(userPlanLoadError: TestError())
         let firstExpect = expectConfirm("첫 로드 실패")
         firstExpect.count = 2
+        firstExpect.timeout = .seconds(5)
         _ = try await self.outputs(firstExpect, for: viewModel.screenState) { viewModel.prepare() }
 
         // when: 재시도 — 새 구독은 CombineLatest 특성상 직전 정착 상태(.userPlanLoadFailed)를
         // 먼저 리플레이하고, prepare()가 그 뒤로 .loading → .userPlanLoadFailed 순서로 이어진다
         let retryExpect = expectConfirm("재시도")
         retryExpect.count = 3
+        retryExpect.timeout = .seconds(5)
         let states = try await self.outputs(retryExpect, for: viewModel.screenState) {
             viewModel.prepare()
         }
@@ -983,5 +992,155 @@ extension PaywallViewModelImpleTests {
 
         // then
         #expect(plan == .standard)
+    }
+}
+
+
+// MARK: - top-up 카탈로그 노출
+
+extension PaywallViewModelImpleTests {
+
+    private func topupOffering(
+        _ productId: String,
+        credits: Int,
+        bonusRate: Double = 0,
+        price: String? = "$0.99"
+    ) -> BillingTopupOffering {
+        let topup = BillingTopup(productId: productId, credits: credits)
+            |> \.bonusRate .~ bonusRate
+        var offering = BillingTopupOffering(topup: topup)
+        offering.product = price.map {
+            BillingProduct(productId: productId, displayName: productId, displayPrice: $0)
+        }
+        return offering
+    }
+
+    private func standardOwnedViewModel(
+        topupOfferings: [BillingTopupOffering],
+        isTopupAllowed: Bool = true,
+        topupLoadError: (any Error)? = nil
+    ) -> (PaywallViewModelImple, StubBillingUsecase, SpyPaywallRouter) {
+        return self.makeViewModel(
+            offerings: [
+                self.freeOffering(),
+                self.purchasableOffering(
+                    .standard, productId: "plan.standard.monthly", isTopupAllowed: isTopupAllowed
+                )
+            ],
+            topupOfferings: topupOfferings,
+            topupLoadError: topupLoadError,
+            userPlan: BillingUserPlan() |> \.planId .~ .standard
+        )
+    }
+
+    private func waitTopupCellsLoaded(
+        _ viewModel: any PaywallViewModel
+    ) async throws -> [PaywallTopupCellModel] {
+        viewModel.prepare()
+        let deadline = ContinuousClock.now + .seconds(5)
+        var cells: [PaywallTopupCellModel] = []
+        while cells.isEmpty, ContinuousClock.now < deadline {
+            cells = try await self.firstOutput(
+                expectConfirm("top-up 셀 현재값"), for: viewModel.topupCellModels
+            ) ?? []
+            if cells.isEmpty {
+                try await Task.sleep(for: .milliseconds(20))
+            }
+        }
+        return cells
+    }
+
+    private func waitTopupCellsStayEmpty(
+        _ viewModel: any PaywallViewModel
+    ) async throws -> [[PaywallTopupCellModel]] {
+        let expect = expectConfirm("top-up 셀이 끝까지 안 생긴다")
+        expect.count = 0
+        expect.timeout = .milliseconds(500)
+        return try await self.outputs(
+            expect, for: viewModel.topupCellModels.filter { $0.isEmpty == false }
+        ) {
+            viewModel.prepare()
+        }
+    }
+
+    @Test func topupCellModels_whenCurrentPlanAllowsTopup_showsCells() async throws {
+        // given
+        let (viewModel, _, _) = self.standardOwnedViewModel(
+            topupOfferings: [
+                self.topupOffering("topup.tier.1", credits: 30000),
+                self.topupOffering("topup.tier.2", credits: 150000, bonusRate: 0.1, price: "$4.99")
+            ]
+        )
+
+        // when
+        let cells = try await self.waitTopupCellsLoaded(viewModel)
+
+        // then
+        #expect(cells.map { $0.productId } == ["topup.tier.1", "topup.tier.2"])
+        #expect(cells.first?.priceText == "$0.99")
+        #expect(cells.first?.bonusText == nil)
+    }
+
+    @Test func topupCellModels_whenBonusRateGiven_showsTotalCreditsWithBonusText() async throws {
+        // given
+        let (viewModel, _, _) = self.standardOwnedViewModel(
+            topupOfferings: [
+                self.topupOffering("topup.tier.2", credits: 150000, bonusRate: 0.1, price: "$4.99")
+            ]
+        )
+
+        // when
+        let cells = try await self.waitTopupCellsLoaded(viewModel)
+
+        // then
+        #expect(cells.count == 1)
+        #expect(cells.first?.creditsText.contains(165000.formatted()) == true)
+        #expect(cells.first?.bonusText?.contains("10") == true)
+    }
+
+    @Test func topupCellModels_whenCurrentPlanDisallowsTopup_isEmpty() async throws {
+        // given
+        let (viewModel, _, _) = self.standardOwnedViewModel(
+            topupOfferings: [self.topupOffering("topup.tier.1", credits: 30000)],
+            isTopupAllowed: false
+        )
+
+        // when
+        let emitted = try await self.waitTopupCellsStayEmpty(viewModel)
+
+        // then
+        #expect(emitted.isEmpty)
+    }
+
+    @Test func topupCellModels_whenStoreProductMissing_excludesThatCell() async throws {
+        // given
+        let (viewModel, _, _) = self.standardOwnedViewModel(
+            topupOfferings: [
+                self.topupOffering("topup.tier.1", credits: 30000, price: nil),
+                self.topupOffering("topup.tier.2", credits: 150000, price: "$4.99")
+            ]
+        )
+
+        // when
+        let cells = try await self.waitTopupCellsLoaded(viewModel)
+
+        // then
+        #expect(cells.map { $0.productId } == ["topup.tier.2"])
+    }
+
+    // top-up 조회 실패는 loadTopupCatalog 이 try? 로 삼켜 screenState 에 닿지 않는다 —
+    // 화면 게이트는 여기서 검증할 대상이 아니라 셀 부재만 본다
+    @Test func topupCellModels_whenTopupCatalogLoadFails_isEmpty() async throws {
+        // given
+        let (viewModel, _, _) = self.standardOwnedViewModel(
+            topupOfferings: [self.topupOffering("topup.tier.1", credits: 30000)],
+            topupLoadError: RuntimeError("topup catalog failed")
+        )
+
+        // when
+        let emitted = try await self.waitTopupCellsStayEmpty(viewModel)
+
+        // then
+        #expect(emitted.isEmpty)
     }
 }

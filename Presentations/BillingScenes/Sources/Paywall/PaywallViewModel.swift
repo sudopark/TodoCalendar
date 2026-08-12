@@ -41,6 +41,15 @@ struct PaywallPlanDetailModel: Equatable {
     let ctaTitle: String
 }
 
+struct PaywallTopupCellModel: Equatable {
+
+    let productId: String
+    let creditsText: String
+    let priceText: String
+    // 보너스가 없는 tier 는 nil
+    let bonusText: String?
+}
+
 
 // MARK: - 카탈로그 로딩 상태
 
@@ -87,6 +96,7 @@ protocol PaywallViewModel: AnyObject, Sendable, PaywallSceneInteractor {
     var screenState: AnyPublisher<PaywallScreenState, Never> { get }
     var catalogState: AnyPublisher<PaywallCatalogState, Never> { get }
     var cellModels: AnyPublisher<[PaywallPlanCellModel], Never> { get }
+    var topupCellModels: AnyPublisher<[PaywallTopupCellModel], Never> { get }
     var selectedPlanId: AnyPublisher<BillingPlanId?, Never> { get }
     var selectedPlanDetail: AnyPublisher<PaywallPlanDetailModel?, Never> { get }
     var isPurchasing: AnyPublisher<Bool, Never> { get }
@@ -110,6 +120,7 @@ final class PaywallViewModelImple: PaywallViewModel, @unchecked Sendable {
         let userSelectedPlanId = CurrentValueSubject<BillingPlanId?, Never>(nil)
         let isPurchasing = CurrentValueSubject<Bool, Never>(false)
         let hasUnfinished = CurrentValueSubject<Bool, Never>(false)
+        let topupOfferings = CurrentValueSubject<[BillingTopupOffering], Never>([])
     }
     private let subject = Subject()
     private var cancellables: Set<AnyCancellable> = []
@@ -142,7 +153,8 @@ extension PaywallViewModelImple {
             async let planLoad: Void = self.loadUserPlan()
             async let catalogLoad: Void = self.loadCatalog()
             async let unfinishedLoad: Void = self.loadUnfinishedState()
-            _ = await (planLoad, catalogLoad, unfinishedLoad)
+            async let topupLoad: Void = self.loadTopupCatalog()
+            _ = await (planLoad, catalogLoad, unfinishedLoad, topupLoad)
         }
     }
 
@@ -167,6 +179,12 @@ extension PaywallViewModelImple {
     private func loadUnfinishedState() async {
         let hasUnfinished = await self.billingUsecase.hasUnfinishedTransactions()
         self.subject.hasUnfinished.send(hasUnfinished)
+    }
+
+    // top-up 은 부가 기능이라 조회 실패가 화면을 막지 않는다 — 섹션만 빠진다
+    private func loadTopupCatalog() async {
+        let offerings = (try? await self.billingUsecase.loadTopupOfferings()) ?? []
+        self.subject.topupOfferings.send(offerings)
     }
 
     func selectPlan(_ planId: BillingPlanId) {
@@ -339,6 +357,21 @@ extension PaywallViewModelImple {
             .eraseToAnyPublisher()
     }
 
+    var topupCellModels: AnyPublisher<[PaywallTopupCellModel], Never> {
+        return Publishers.CombineLatest3(
+            self.currentPlanIdPublisher, self.offeringsPublisher, self.subject.topupOfferings
+        )
+        .map { [weak self] currentPlanId, planOfferings, topupOfferings -> [PaywallTopupCellModel] in
+            self?.makeTopupCellModels(
+                currentPlanId: currentPlanId,
+                planOfferings: planOfferings,
+                topupOfferings: topupOfferings
+            ) ?? []
+        }
+        .removeDuplicates()
+        .eraseToAnyPublisher()
+    }
+
     var selectedPlanId: AnyPublisher<BillingPlanId?, Never> {
         return Publishers.CombineLatest3(
             self.subject.userSelectedPlanId, self.currentPlanIdPublisher, self.offeringsPublisher
@@ -431,6 +464,37 @@ extension PaywallViewModelImple {
                     isRecommended: offering.plan.id == .standard
                 )
             }
+    }
+
+    // 살 수 있느냐는 서버 카탈로그가 답한다 — 플랜을 못 찾으면 노출하지 않는다(fail-closed)
+    private func makeTopupCellModels(
+        currentPlanId: BillingPlanId?,
+        planOfferings: [BillingPlanOffering],
+        topupOfferings: [BillingTopupOffering]
+    ) -> [PaywallTopupCellModel] {
+        let effectiveCurrentId = currentPlanId ?? .free
+        let isAllowed = planOfferings
+            .first(where: { $0.plan.id == effectiveCurrentId })?
+            .plan.isTopupAllowed ?? false
+        guard isAllowed else { return [] }
+        return topupOfferings.compactMap { self.topupCellModel(of: $0) }
+    }
+
+    private func topupCellModel(of offering: BillingTopupOffering) -> PaywallTopupCellModel? {
+        guard let price = offering.product?.displayPrice else { return nil }
+        return PaywallTopupCellModel(
+            productId: offering.topup.productId,
+            creditsText: "billing::paywall::topup::credits"
+                .localized(with: offering.topup.totalCredits.formatted()),
+            priceText: price,
+            bonusText: self.bonusText(of: offering.topup.bonusRate)
+        )
+    }
+
+    private func bonusText(of rate: Double) -> String? {
+        guard rate > 0 else { return nil }
+        let percent = Int((rate * 100).rounded())
+        return "billing::paywall::topup::bonus".localized(with: percent.formatted())
     }
 
     private func periodText(of kind: BillingProductKind?) -> String? {

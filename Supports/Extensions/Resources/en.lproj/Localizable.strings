@@ -634,6 +634,10 @@
 "billing::paywall::fail::planChangeNotAllowed" = "This plan change isn't supported.";
 "billing::paywall::fail::ownedByAnotherAccount" = "This purchase belongs to another account. Sign in with the account you bought it on.";
 "billing::paywall::fail::reflectDelayed" = "Your payment went through, but applying it is delayed. It'll be applied automatically.";
+"billing::paywall::topup::credits" = "%@ credits";
+"billing::paywall::topup::bonus" = "+%@%% bonus";
+"billing::paywall::topup::title" = "Add credits";
+"billing::paywall::topup::description" = "Extra credits are used after your daily limit runs out, and they don't expire.";
 
 // MARK: - share extension
 

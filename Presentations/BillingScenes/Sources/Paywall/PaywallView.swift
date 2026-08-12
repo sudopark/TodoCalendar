@@ -24,6 +24,7 @@ import CommonPresentation
     var screenState: PaywallScreenState = .loading
     var catalogState: PaywallCatalogState = .loading
     var cellModels: [PaywallPlanCellModel] = []
+    var topupCellModels: [PaywallTopupCellModel] = []
     var selectedPlanId: BillingPlanId?
     var selectedPlanDetail: PaywallPlanDetailModel?
     var isPurchasing: Bool = false
@@ -57,6 +58,11 @@ import CommonPresentation
         viewModel.cellModels
             .receive(on: RunLoop.main)
             .sink { [weak self] in self?.cellModels = $0 }
+            .store(in: &self.cancellables)
+
+        viewModel.topupCellModels
+            .receive(on: RunLoop.main)
+            .sink { [weak self] in self?.topupCellModels = $0 }
             .store(in: &self.cancellables)
 
         viewModel.selectedPlanId
@@ -95,6 +101,7 @@ final class PaywallViewEventHandler: Observable {
     var retry: () -> Void = { }
     var selectPlan: (BillingPlanId) -> Void = { _ in }
     var purchase: () -> Void = { }
+    var purchaseTopup: (String) -> Void = { _ in }
     var restore: () -> Void = { }
     var recoverUnfinished: () -> Void = { }
     var manageSubscription: () -> Void = { }
@@ -208,6 +215,10 @@ private struct PaywallView: View {
                     self.planCards
                     Divider()
                     self.featureSection
+                    if !self.state.topupCellModels.isEmpty {
+                        Divider()
+                        self.topupSection
+                    }
                     self.linksRow
                 }
                 .padding(.horizontal, spacing: .xlarge)
@@ -396,6 +407,25 @@ private struct PaywallView: View {
         }
     }
 
+    // MARK: - top-up 추가 구매
+
+    private var topupSection: some View {
+        VStack(alignment: .leading, spacing: Metric.Spacing.small) {
+            Text("billing::paywall::topup::title".localized())
+                .font(self.appearance.fontSet.subNormalWithBold.asFont)
+                .foregroundStyle(self.appearance.colorSet.text0.asColor)
+
+            ForEach(self.state.topupCellModels, id: \.productId) { cell in
+                PaywallTopupCellView(model: cell)
+                    .eventHandler(\.onTap) { self.eventHandlers.purchaseTopup(cell.productId) }
+            }
+
+            Text("billing::paywall::topup::description".localized())
+                .font(self.appearance.fontSet.subSubNormal.asFont)
+                .foregroundStyle(self.appearance.colorSet.text2.asColor)
+        }
+    }
+
     // MARK: - 약관·개인정보·복원 링크
 
     private var linksRow: some View {
@@ -531,5 +561,59 @@ private struct PaywallPlanCellView: View {
                 RoundedRectangle(cornerRadius: Metric.Radius.chip)
                     .fill(background)
             )
+    }
+}
+
+
+// MARK: - PaywallTopupCellView
+
+private struct PaywallTopupCellView: View {
+
+    @Environment(ViewAppearance.self) private var appearance
+    private let model: PaywallTopupCellModel
+
+    var onTap: () -> Void = { }
+
+    init(model: PaywallTopupCellModel) {
+        self.model = model
+    }
+
+    var body: some View {
+        HStack(spacing: Metric.Spacing.small) {
+            VStack(alignment: .leading, spacing: Metric.Spacing.xxsmall) {
+                Text(self.model.creditsText)
+                    .font(self.appearance.fontSet.subNormalWithBold.asFont)
+                    .foregroundStyle(self.appearance.colorSet.text0.asColor)
+
+                if let bonus = self.model.bonusText {
+                    Text(bonus)
+                        .font(self.appearance.fontSet.subSubNormal.asFont)
+                        .foregroundStyle(self.appearance.colorSet.accentAI.asColor)
+                }
+            }
+
+            Spacer(minLength: Metric.Spacing.small)
+
+            Text(self.model.priceText)
+                .font(self.appearance.fontSet.subNormalWithBold.asFont)
+                .foregroundStyle(self.appearance.colorSet.primaryBtnText.asColor)
+                .padding(.horizontal, spacing: .regular)
+                .padding(.vertical, spacing: .xsmall)
+                .background(
+                    RoundedRectangle(cornerRadius: Metric.Radius.regular)
+                        .fill(self.appearance.colorSet.accentAI.asColor)
+                )
+        }
+        .padding(spacing: .regular)
+        .background(
+            RoundedRectangle(cornerRadius: Metric.Radius.large)
+                .fill(self.appearance.colorSet.bg0.asColor)
+                .overlay(
+                    RoundedRectangle(cornerRadius: Metric.Radius.large)
+                        .stroke(self.appearance.colorSet.line.asColor, lineWidth: 1)
+                )
+        )
+        .contentShape(Rectangle())
+        .onTapGesture { self.onTap() }
     }
 }

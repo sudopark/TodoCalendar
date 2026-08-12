@@ -634,6 +634,10 @@
 "billing::paywall::fail::planChangeNotAllowed" = "이 플랜 변경은 지원하지 않아요.";
 "billing::paywall::fail::ownedByAnotherAccount" = "다른 계정에 등록된 결제예요. 구매한 계정으로 로그인해 주세요.";
 "billing::paywall::fail::reflectDelayed" = "결제는 완료됐어요. 반영이 지연되고 있고, 곧 자동으로 반영됩니다.";
+"billing::paywall::topup::credits" = "%@ 크레딧";
+"billing::paywall::topup::bonus" = "%@%% 추가 증정";
+"billing::paywall::topup::title" = "크레딧 추가 구매";
+"billing::paywall::topup::description" = "추가 크레딧은 일일 한도를 다 쓴 뒤에 사용되고, 만료되지 않아요.";
 
 // MARK: - share extension
 
