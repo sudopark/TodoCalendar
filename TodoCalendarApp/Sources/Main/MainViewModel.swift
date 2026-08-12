@@ -59,6 +59,7 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
     private let appleCalendarUsecase: any AppleCalendarUsecase
     private let eventSyncUsecase: any EventSyncUsecase
     private let billingUsecase: any BillingUsecase
+    private let aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
     var router: (any MainRouting)?
 
     init(
@@ -70,7 +71,8 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
         googleCalendarUsecase: any GoogleCalendarUsecase,
         appleCalendarUsecase: any AppleCalendarUsecase,
         eventSyncUsecase: any EventSyncUsecase,
-        billingUsecase: any BillingUsecase
+        billingUsecase: any BillingUsecase,
+        aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
     ) {
         self.uiSettingUsecase = uiSettingUsecase
         self.temporaryUserDataMigrationUsecase = temporaryUserDataMigrationUsecase
@@ -81,6 +83,7 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
         self.appleCalendarUsecase = appleCalendarUsecase
         self.eventSyncUsecase = eventSyncUsecase
         self.billingUsecase = billingUsecase
+        self.aiAgentOrchestrationUsecase = aiAgentOrchestrationUsecase
 
         self.internalBinding()
     }
@@ -125,6 +128,7 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
         NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)
             .sink(receiveValue: { [weak self] _ in
                 self?.billingUsecase.recoverUnfinishedTransactions()
+                self?.aiAgentOrchestrationUsecase.refreshProcessingJobIfNeeded()
             })
             .store(in: &self.cancellables)
     }
@@ -205,6 +209,10 @@ extension MainViewModelImple {
         self.router?.showJumpDaySelectDialog(current: current.dayInfo)
     }
     
+    func handleAIJobStatusChanged(_ jobId: String) {
+        self.aiAgentOrchestrationUsecase.handleJobStatusChanged(jobId)
+    }
+
     func daySelectDialog(didSelect day: SelectDayInfo) {
         guard let current = self.subject.focusedDayInfo.value,
               current.dayInfo != day.dayInfo

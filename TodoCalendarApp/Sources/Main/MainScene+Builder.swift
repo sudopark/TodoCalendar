@@ -13,7 +13,10 @@ import Scenes
 
 // MARK: - MainScene Interactable & Listenable
 
-public protocol MainSceneInteractor: Sendable, CalendarSceneListener, SelectDayDialogSceneListener { }
+public protocol MainSceneInteractor: Sendable, CalendarSceneListener, SelectDayDialogSceneListener {
+
+    func handleAIJobStatusChanged(_ jobId: String)
+}
 //
 //public protocol MainSceneListener: AnyObject { }
 

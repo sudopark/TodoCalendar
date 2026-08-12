@@ -204,8 +204,11 @@ extension ApplicationViewAppearanceStoreImple: AppleCalendarViewAppearanceStore 
 
 protocol ApplicationRouting: Routing {
 
-    func setupInitialScene(_ prepareResult: ApplicationPrepareResult)
-    func changeRootSceneAfter(signIn auth: Auth?)
+    @MainActor
+    func setupInitialScene(_ prepareResult: ApplicationPrepareResult) -> (any MainSceneInteractor)?
+
+    @MainActor
+    func changeRootSceneAfter(signIn auth: Auth?) -> (any MainSceneInteractor)?
     func showUpdatePopup(_ requirement: AppUpdateRequirement)
 }
 
@@ -219,7 +222,6 @@ final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
     private let accountUsecase: any AccountUsecase
     private let externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase
     private let backgroundEventSyncUsecase: any BackgroundEventSyncUsecase
-    private let aiJobRefreshUsecase: any AIJobRefreshUsecase
     private let applicationBase: ApplicationBase
     private let deepLinkHandler: ApplicationDeepLinkHandlerImple
     private let appUpdateCheckUsecase: any AppUpdateCheckUsecase
@@ -230,7 +232,6 @@ final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
         accountUsecase: any AccountUsecase,
         externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase,
         backgroundEventSyncUsecase: any BackgroundEventSyncUsecase,
-        aiJobRefreshUsecase: any AIJobRefreshUsecase,
         applicationBase: ApplicationBase,
         deepLinkHandler: ApplicationDeepLinkHandlerImple,
         appUpdateCheckUsecase: any AppUpdateCheckUsecase
@@ -239,7 +240,6 @@ final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
         self.accountUsecase = accountUsecase
         self.externalCalenarIntegrationUsecase = externalCalenarIntegrationUsecase
         self.backgroundEventSyncUsecase = backgroundEventSyncUsecase
-        self.aiJobRefreshUsecase = aiJobRefreshUsecase
         self.applicationBase = applicationBase
         self.deepLinkHandler = deepLinkHandler
         self.appUpdateCheckUsecase = appUpdateCheckUsecase
@@ -281,31 +281,30 @@ final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
 
 extension ApplicationRootRouter {
     
+    @MainActor
     func setupInitialScene(
         _ prepareResult: ApplicationPrepareResult
-    ) {
+    ) -> (any MainSceneInteractor)? {
         
-        guard !AppEnvironment.isTestBuild else { return }
+        guard !AppEnvironment.isTestBuild else { return nil }
         
-        Task { @MainActor in
-            self.viewAppearanceStore = .init(prepareResult.appearnceSetings, self.window)
-            self.changeUsecaseFactroy(
-                by: prepareResult.latestLoginAcount?.auth
-            )
-            self.refreshRoot()
-            self.setupBaseViewAppearanceSetting()
-        }
+        self.viewAppearanceStore = .init(prepareResult.appearnceSetings, self.window)
+        self.changeUsecaseFactroy(
+            by: prepareResult.latestLoginAcount?.auth
+        )
+        let interactor = self.refreshRoot()
+        self.setupBaseViewAppearanceSetting()
+        return interactor
     }
     
     @MainActor private func setupBaseViewAppearanceSetting() {
         UIDatePicker.appearance().minuteInterval = 5
     }
 
-    func changeRootSceneAfter(signIn auth: Auth?) {
-        Task { @MainActor in
-            self.changeUsecaseFactroy(by: auth)
-            self.refreshRoot()
-        }
+    @MainActor
+    func changeRootSceneAfter(signIn auth: Auth?) -> (any MainSceneInteractor)? {
+        self.changeUsecaseFactroy(by: auth)
+        return self.refreshRoot()
     }
     
     func showConfirm(dialog info: ConfirmDialogInfo) {
@@ -378,11 +377,10 @@ extension ApplicationRootRouter {
             )
         }
         self.backgroundEventSyncUsecase.change(factory: self.usecaseFactory)
-        self.aiJobRefreshUsecase.change(factory: self.usecaseFactory)
     }
     
     @MainActor
-    private func refreshRoot() {
+    private func refreshRoot() -> (any MainSceneInteractor)? {
         
         let builder = MainSceneBuilerImple(
             usecaseFactory: self.usecaseFactory,
@@ -393,6 +391,7 @@ extension ApplicationRootRouter {
         let mainScene = builder.makeMainScene()
         self.window.rootViewController = mainScene
         self.window.makeKeyAndVisible()
+        return mainScene.interactor
     }
     
     private func calendarSceneBulder() -> any CalendarSceneBuilder {
