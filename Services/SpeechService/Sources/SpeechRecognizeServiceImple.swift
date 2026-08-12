@@ -38,6 +38,11 @@ public final class SpeechRecognizeServiceImple: SpeechRecognizeService, @uncheck
     public init(locale: Locale = .current) {
         self.recognizer = SFSpeechRecognizer(locale: locale)
     }
+
+    // serialQueue를 타지 않는다 — stop()의 async 블록이 마지막 참조를 놓으면 deinit이 그 큐 위에서 돌아 sync 진입이 데드락된다
+    deinit {
+        self.teardownAudio()
+    }
 }
 
 
