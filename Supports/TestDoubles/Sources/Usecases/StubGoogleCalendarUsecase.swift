@@ -15,9 +15,11 @@ import Extensions
 
 
 open class StubGoogleCalendarUsecase: GoogleCalendarUsecase, @unchecked Sendable {
-    
+
     public init() { }
-    
+
+    public var googleService: GoogleCalendarService = .init(scopes: [.readWrite])
+
     public var didPrepared = false
     open func prepare() {
         self.didPrepared = true
