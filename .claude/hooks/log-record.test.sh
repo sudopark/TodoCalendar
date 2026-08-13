@@ -29,8 +29,8 @@ assert_eq "compliance full" "full" "$(field "$(last_line)" compliance)"
 assert_eq "full의 deviations 빈 배열" "[]" "$(field_json "$(last_line)" deviations)"
 assert_eq "session env 폴백" "env-session" "$(field "$(last_line)" session_id)"
 
-# --- skill_end partial + deviation 파싱 ---
-python3 log-record.py skill_end --name implement --compliance partial \
+# --- skill_end partial + deviation 파싱 (게이트 통과) ---
+python3 log-record.py skill_end --name implement --compliance partial --deviation-reviewed \
   --deviation "리팩터 게이트 생략::1파일 단순 수정" --deviation "스킴 계산 생략::테스트 無 경로"
 DEVS=$(field_json "$(last_line)" deviations)
 assert_eq "deviation 2건" "2" "$(printf '%s' "$DEVS" | python3 -c "import json,sys; print(len(json.load(sys.stdin)))")"
@@ -42,6 +42,25 @@ BEFORE=$(wc -l < "$LOG" | tr -d ' ')
 python3 log-record.py skill_end --name implement --compliance partial 2>/dev/null
 assert_eq "partial deviation 누락 exit 2" "2" "$?"
 assert_eq "partial deviation 누락 미기록" "$BEFORE" "$(wc -l < "$LOG" | tr -d ' ')"
+
+# --- partial인데 --deviation-reviewed 없음 → 게이트 exit 2 + 미기록 ---
+BEFORE_GATE=$(wc -l < "$LOG" | tr -d ' ')
+GATE_ERR=$(python3 log-record.py skill_end --name kickoff --compliance partial \
+  --deviation "A-3 플랜 생략::4조건 충족" 2>&1)
+assert_eq "게이트 미통과 exit 2" "2" "$?"
+assert_eq "게이트 미통과 미기록" "$BEFORE_GATE" "$(wc -l < "$LOG" | tr -d ' ')"
+case "$GATE_ERR" in
+  *"A-3 플랜 생략 :: 4조건 충족"*) PASS=$((PASS+1)) ;;
+  *) FAIL=$((FAIL+1)); echo "FAIL: 게이트 안내에 이탈 목록 노출"; echo "  actual: [$GATE_ERR]" ;;
+esac
+case "$GATE_ERR" in
+  *"--deviation-reviewed"*) PASS=$((PASS+1)) ;;
+  *) FAIL=$((FAIL+1)); echo "FAIL: 게이트 안내에 재호출 방법 노출"; echo "  actual: [$GATE_ERR]" ;;
+esac
+
+# --- full은 게이트 없이 그대로 기록 ---
+python3 log-record.py skill_end --name kickoff --compliance full
+assert_eq "full은 게이트 무관 기록" "full" "$(field "$(last_line)" compliance)"
 
 # --- correction 귀속 스킬 리스트 ---
 python3 log-record.py correction --skills "implement, pr" --summary "stub에 검증 넣지 말라" --gist "stub에서 assert 하지마"
