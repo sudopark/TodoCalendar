@@ -30,6 +30,18 @@ public protocol GoogleCalendarRepository: Sendable {
     func loadEventDetail(
         _ calendarId: String, _ timeZone: String, _ eventId: String
     ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error>
-    
+
+    func updateEvent(
+        _ calendarId: String,
+        _ timeZone: String,
+        _ eventId: String,
+        _ params: GoogleCalendar.EventEditParams
+    ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error>
+
+    func removeEvent(
+        _ calendarId: String,
+        _ eventId: String
+    ) -> AnyPublisher<Void, any Error>
+
     func resetCache() async throws
 }
