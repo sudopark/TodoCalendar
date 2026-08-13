@@ -66,6 +66,7 @@ extension GoogleOAuth2ServiceUsecaseImple {
         |> \.accessTokenExpirationDate .~ result.user.accessToken.expirationDate
         |> \.refreshTokenExpirationDate .~ result.user.refreshToken.expirationDate
         |> \.email .~ result.user.profile?.email
+        |> \.grantedScopes .~ result.user.grantedScopes
     }
     
     public func handle(open url: URL) -> Bool {
