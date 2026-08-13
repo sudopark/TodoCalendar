@@ -168,6 +168,7 @@ extension ExternalCalendarIntegrateRepositoryImple {
             let account = ExternalServiceAccountinfo(
                 service.identifier, email: google.email
             )
+            |> \.grantedScopes .~ google.grantedScopes
             let mapper = ExternalServiceAccountMapper(account: account)
             self.keyChainStore.update(accountKey(service.identifier, accountId), mapper)
             saveAccountId(accountId, for: service.identifier)

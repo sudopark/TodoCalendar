@@ -19,7 +19,7 @@ final class GoogleCalendarUsecaseImpleTests: PublisherWaitable {
 
     private let spyViewAppearanceStore = SpyGoogleCalendarViewAppearanceStore()
     private let stubStore = SharedDataStore()
-    private let service = GoogleCalendarService(scopes: [.readOnly])
+    private let service = GoogleCalendarService(scopes: [.readWrite])
     private let stubEventTagUsecase = StubEventTagUsecase()
     private let stubIntegrationUsecase = PrivateStubIntegrationUsecase()
     private let stubRepositoryPool = PrivateStubRepositoryPool()
@@ -52,7 +52,7 @@ final class GoogleCalendarUsecaseImpleTests: PublisherWaitable {
         stubRepositoryPool.setDefaultRepository(defaultRepo)
         accounts.forEach { updateAccount(email: $0, integrated: true) }
         return .init(
-            googleService: GoogleCalendarService(scopes: [.readOnly]),
+            googleService: GoogleCalendarService(scopes: [.readWrite]),
             integrationUsecase: stubIntegrationUsecase,
             repositoryPool: stubRepositoryPool,
             eventTagUsecase: stubEventTagUsecase,
