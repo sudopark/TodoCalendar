@@ -535,7 +535,7 @@ extension GoogleCalendarEventEditViewModelImpleTests {
 
 private final class SpyRouter: BaseSpyRouter, GoogleCalendarEventEditRouting, @unchecked Sendable { }
 
-private final class SpyListener: GoogleCalendarEventEditSceneListener {
+private final class SpyListener: GoogleCalendarEventEditSceneListener, @unchecked Sendable {
 
     var didUpdateEvent: GoogleCalendar.EventOrigin?
     func googleCalendarEvent(didUpdate event: GoogleCalendar.EventOrigin) {
