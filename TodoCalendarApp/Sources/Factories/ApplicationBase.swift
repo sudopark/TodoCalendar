@@ -56,6 +56,8 @@ final class ApplicationBase {
                     upto: googleDBVersion,
                     steps: { version, database in
                         switch version {
+                        case 0:
+                            try GoogleCalendarEventTagTableMigration.runMigration(for: version, database: database)
                         default: break
                         }
                     },
