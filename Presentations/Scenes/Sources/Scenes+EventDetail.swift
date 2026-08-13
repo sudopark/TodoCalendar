@@ -66,7 +66,7 @@ public protocol GoogleCalendarEventDetailScene: Scene where Interactor == any Go
 
 public protocol GoogleCalendarEventEditSceneInteractor: AnyObject { }
 
-public protocol GoogleCalendarEventEditSceneListener: AnyObject {
+public protocol GoogleCalendarEventEditSceneListener: AnyObject, Sendable {
 
     func googleCalendarEvent(didUpdate event: GoogleCalendar.EventOrigin)
     func googleCalendarEvent(didRemove eventId: String)

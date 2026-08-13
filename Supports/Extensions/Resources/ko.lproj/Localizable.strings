@@ -276,6 +276,13 @@
 "eventDetail::gogoleEvent::conference::password" = "비밀번호";
 "eventDetail::gogoleEvent::copy::message" = "클립보드에 복사되었습니다.";
 "eventDetail::gogoleEvent::canceled::message" = "취소된 일정입니다.";
+"eventDetail::gogoleEvent::readOnlyCalendar::message" = "읽기 전용 캘린더라 여기서는 일정을 수정할 수 없어요.";
+"eventDetail::gogoleEvent::reauthenticate::title" = "권한 추가가 필요해요";
+"eventDetail::gogoleEvent::reauthenticate::message" = "일정을 수정하려면 이 구글 계정에 다시 로그인해 주세요.";
+"eventDetail::gogoleEvent::repeating::title" = "반복되는 일정이에요";
+"eventDetail::gogoleEvent::repeating::onlyThisTime::button" = "이번 일정만";
+"eventDetail::gogoleEvent::repeating::all::button" = "전체 일정";
+"eventDetail::gogoleEvent::remove::confirm::message" = "구글 캘린더에서 이 일정을 삭제할까요?";
 
 // MARK: - Apple calendar event
 "eventDetail::appleCalendarEvent::viewOnCalendar" = "애플 캘린더에서 보기";
