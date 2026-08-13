@@ -532,7 +532,7 @@ extension CalendarViewModelImple {
             if Self.isAICommandPhase(state) {
                 self.router?.routeToAICommand()
             } else if self.subject.isSignedIn.value {
-                try? self.aiAgentOrchestrationUsecase.enterVoiceInput()
+                self.aiAgentOrchestrationUsecase.enterVoiceInput()
             } else {
                 let info = ConfirmDialogInfo.aiAgentNeedSignIn { [weak self] in
                     self?.router?.routeToSignIn()

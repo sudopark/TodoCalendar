@@ -24,22 +24,19 @@ public final class StubAIAgentOrchestrationUsecase: AIAgentOrchestrationUsecase,
     public private(set) var didSubmit: String?
     public private(set) var didSubmitImageCommandWith: (text: String, instruction: String?)?
     public var stubImageSubmitError: (any Error)?
-    public var stubEnterFailReason: AIAgentInputEnterFailReason?
+    public var stubIsCreditExhausted: Bool = false
 
     public init() {}
 
     public func prepare() { self.didPrepare = true }
-    public func enterVoiceInput() throws {
-        if let stubEnterFailReason { throw stubEnterFailReason }
+    public func enterVoiceInput() {
         self.didEnterVoiceInput = true
     }
     public func finishVoiceInput() { self.didFinishVoiceInput = true }
-    public func enterKeyboardInput() throws {
-        if let stubEnterFailReason { throw stubEnterFailReason }
+    public func enterKeyboardInput() {
         self.didEnterKeyboardInput = true
     }
-    public func enterImageInput() throws {
-        if let stubEnterFailReason { throw stubEnterFailReason }
+    public func enterImageInput() {
         self.didEnterImageInput = true
     }
     public func stopInput() { self.didStopInput = true }
@@ -81,5 +78,8 @@ public final class StubAIAgentOrchestrationUsecase: AIAgentOrchestrationUsecase,
     }
     public var speechPermissionDenied: AnyPublisher<Void, Never> {
         self.speechPermissionDeniedSubject.eraseToAnyPublisher()
+    }
+    public var isCreditExhausted: Bool {
+        self.stubIsCreditExhausted
     }
 }

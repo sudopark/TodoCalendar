@@ -62,7 +62,7 @@ final class AIAgentKeyboardInputViewModelImple: AIAgentKeyboardInputViewModel, @
     }
 
     func dismissByGesture() {
-        try? self.aiAgentOrchestrationUsecase.enterVoiceInput()
+        self.aiAgentOrchestrationUsecase.enterVoiceInput()
     }
 }
 

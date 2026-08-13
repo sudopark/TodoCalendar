@@ -133,7 +133,7 @@ extension AIAgentImageCommandViewModelImple {
     func dismissByGesture() {
         self.recognizeTask?.cancel()
         self.recognizeTask = nil
-        try? self.aiAgentOrchestrationUsecase.enterVoiceInput()
+        self.aiAgentOrchestrationUsecase.enterVoiceInput()
     }
 }
 

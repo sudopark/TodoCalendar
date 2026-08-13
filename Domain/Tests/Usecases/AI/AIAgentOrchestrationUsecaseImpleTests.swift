@@ -249,7 +249,7 @@ extension AIAgentOrchestrationUsecaseImpleTests {
         done.text = "완료"
         let usecase = self.makeUsecaseWithCommandJob(self.dummyJob(.done(done)))
         usecase.reset()
-        try usecase.enterKeyboardInput()
+        usecase.enterKeyboardInput()
         // when
         let states = try await self.outputs(expect, for: usecase.state.dropFirst()) {
             try? usecase.submit("회의 잡아줘")
@@ -887,7 +887,7 @@ extension AIAgentOrchestrationUsecaseImpleTests {
         let expect = expectConfirm("listening(.voice)")
         // when
         let state = try await self.firstOutput(expect, for: usecase.state.dropFirst()) {
-            try usecase.enterVoiceInput()
+            usecase.enterVoiceInput()
         }
         // then
         #expect(self.stubSpeech.didStartListening == true)
@@ -900,7 +900,7 @@ extension AIAgentOrchestrationUsecaseImpleTests {
     @Test func usecase_whileListening_forwardsRecognizingText() async throws {
         // given
         let usecase = self.makeUsecaseInIdle()
-        try usecase.enterVoiceInput()
+        usecase.enterVoiceInput()
         let expect = expectConfirm("recognizing text")
         // when
         let text = try await self.firstOutput(expect, for: usecase.recognizingText) {
@@ -914,7 +914,7 @@ extension AIAgentOrchestrationUsecaseImpleTests {
     @Test func usecase_recognizeSuccess_sendsCommandAndProcessingState() async throws {
         // given
         let usecase = self.makeUsecaseInIdle()
-        try usecase.enterVoiceInput()
+        usecase.enterVoiceInput()
         let expect = expectConfirm("processing")
         expect.count = 2
         // when
@@ -934,7 +934,7 @@ extension AIAgentOrchestrationUsecaseImpleTests {
     @Test func usecase_permissionDenied_stateBecomesIdle() async throws {
         // given
         let usecase = self.makeUsecaseInIdle()
-        try usecase.enterVoiceInput()
+        usecase.enterVoiceInput()
         let expect = expectConfirm("idle on permission denied")
         // when
         let state = try await self.firstOutput(expect, for: usecase.state.dropFirst()) {
@@ -951,7 +951,7 @@ extension AIAgentOrchestrationUsecaseImpleTests {
     @Test func usecase_permissionDenied_notifiesSpeechPermissionDenied() async throws {
         // given
         let usecase = self.makeUsecaseInIdle()
-        try usecase.enterVoiceInput()
+        usecase.enterVoiceInput()
         let expect = expectConfirm("권한 거부 안내")
         // when
         let notified = try await self.outputs(expect, for: usecase.speechPermissionDenied) {
@@ -966,7 +966,7 @@ extension AIAgentOrchestrationUsecaseImpleTests {
     @Test func usecase_permissionRestricted_doesNotNotifySpeechPermissionDenied() async throws {
         // given
         let usecase = self.makeUsecaseInIdle()
-        try usecase.enterVoiceInput()
+        usecase.enterVoiceInput()
         let expect = expectConfirm("제한 상태는 안내 없음")
         expect.count = 0
         expect.timeout = .milliseconds(100)
@@ -983,7 +983,7 @@ extension AIAgentOrchestrationUsecaseImpleTests {
     @Test func usecase_recognizeFailedWithoutPermissionIssue_doesNotNotifySpeechPermissionDenied() async throws {
         // given
         let usecase = self.makeUsecaseInIdle()
-        try usecase.enterVoiceInput()
+        usecase.enterVoiceInput()
         let expect = expectConfirm("일반 실패는 안내 없음")
         expect.count = 0
         expect.timeout = .milliseconds(100)
@@ -999,7 +999,7 @@ extension AIAgentOrchestrationUsecaseImpleTests {
     @Test func usecase_recognizeFailed_stateBecomesIdle() async throws {
         // given
         let usecase = self.makeUsecaseInIdle()
-        try usecase.enterVoiceInput()
+        usecase.enterVoiceInput()
         let expect = expectConfirm("idle on recognize fail")
         // when
         let state = try await self.firstOutput(expect, for: usecase.state.dropFirst()) {
@@ -1015,7 +1015,7 @@ extension AIAgentOrchestrationUsecaseImpleTests {
     @Test func usecase_recognizeEndedWithoutText_stateBecomesIdle() async throws {
         // given
         let usecase = self.makeUsecaseInIdle()
-        try usecase.enterVoiceInput()
+        usecase.enterVoiceInput()
         let expect = expectConfirm("idle on ended without recognizing")
         // when
         let state = try await self.firstOutput(expect, for: usecase.state.dropFirst()) {
@@ -1032,7 +1032,7 @@ extension AIAgentOrchestrationUsecaseImpleTests {
     @Test func usecase_afterRecognizeEndedWithoutText_stopsForwardingRecognizingText() async throws {
         // given
         let usecase = self.makeUsecaseInIdle()
-        try usecase.enterVoiceInput()
+        usecase.enterVoiceInput()
         self.stubSpeech.recognizeResultSubject.send(.success(.endedWithoutRecognizing))
         let expect = expectConfirm("바인딩 해제 후 인식 텍스트 미전달")
         expect.count = 0
@@ -1049,7 +1049,7 @@ extension AIAgentOrchestrationUsecaseImpleTests {
     @Test func usecase_afterRecognizeFailed_stopsForwardingRecognizingText() async throws {
         // given
         let usecase = self.makeUsecaseInIdle()
-        try usecase.enterVoiceInput()
+        usecase.enterVoiceInput()
         self.stubSpeech.recognizeResultSubject.send(.failure(RuntimeError("speech fail")))
         let expect = expectConfirm("실패 후 인식 텍스트 미전달")
         expect.count = 0
@@ -1066,7 +1066,7 @@ extension AIAgentOrchestrationUsecaseImpleTests {
     @Test func usecase_stopInput_stopsSpeechAndIdle() async throws {
         // given
         let usecase = self.makeUsecaseInIdle()
-        try usecase.enterVoiceInput()
+        usecase.enterVoiceInput()
         let expect = expectConfirm("idle after stop")
         // when
         let state = try await self.firstOutput(expect, for: usecase.state.dropFirst()) {
@@ -1086,7 +1086,7 @@ extension AIAgentOrchestrationUsecaseImpleTests {
         let expect = expectConfirm("listening(.keyboard)")
         // when
         let state = try await self.firstOutput(expect, for: usecase.state.dropFirst()) {
-            try usecase.enterKeyboardInput()
+            usecase.enterKeyboardInput()
         }
         // then
         if case .listening(.keyboard) = state {} else {
@@ -1098,7 +1098,7 @@ extension AIAgentOrchestrationUsecaseImpleTests {
     @Test func usecase_finishVoiceInput_sendsIdleThenFinishesSpeech() async throws {
         // given
         let usecase = self.makeUsecaseInIdle()
-        try usecase.enterVoiceInput()
+        usecase.enterVoiceInput()
         let expect = expectConfirm("idle after finishVoiceInput")
         // when
         let state = try await self.firstOutput(expect, for: usecase.state.dropFirst()) {
@@ -1144,11 +1144,11 @@ extension AIAgentOrchestrationUsecaseImpleTests {
         // given — reset() 후 enterKeyboardInput()으로 .listening(.keyboard) 진입
         let usecase = self.makeUsecase()
         usecase.reset()
-        try usecase.enterKeyboardInput()
+        usecase.enterKeyboardInput()
         let expect = expectConfirm("keyboard → voice")
         // when
         let state = try await self.firstOutput(expect, for: usecase.state.dropFirst()) {
-            try usecase.enterVoiceInput()
+            usecase.enterVoiceInput()
         }
         // then — .listening(.voice) 전환 + speech 시작
         #expect(self.stubSpeech.didStartListening == true)
@@ -1157,20 +1157,14 @@ extension AIAgentOrchestrationUsecaseImpleTests {
         }
     }
 
-    // 이미 .listening(.voice) 상태에서 enterVoiceInput → invalidState throw, speech 재시작 없음
-    @Test func usecase_enterVoiceInput_alreadyVoice_throwsInvalidStateAndDoesNotRestartSpeech() async throws {
+    // 이미 .listening(.voice) 상태에서 enterVoiceInput → 조용히 무시, speech 재시작 없음
+    @Test func usecase_enterVoiceInput_alreadyVoice_doesNotRestartSpeech() {
         // given — idle에서 enterVoiceInput으로 .listening(.voice)
         let usecase = self.makeUsecaseInIdle()
-        try usecase.enterVoiceInput()
+        usecase.enterVoiceInput()
         // when — 이미 voice-listening 상태에서 재호출
-        var failReason: AIAgentInputEnterFailReason?
-        do {
-            try usecase.enterVoiceInput()
-        } catch let reason as AIAgentInputEnterFailReason {
-            failReason = reason
-        } catch { }
-        // then — invalidState를 던지고 startListening은 첫 번째 한 번만
-        #expect(failReason == .invalidState)
+        usecase.enterVoiceInput()
+        // then — 재진입이 조용히 무시돼 startListening은 첫 번째 한 번만
         #expect(self.stubSpeech.startListeningCount == 1)
     }
 }
@@ -1185,11 +1179,11 @@ extension AIAgentOrchestrationUsecaseImpleTests {
     @Test func usecase_enterKeyboardInput_fromVoice_switchesToKeyboardAndStopsSpeech() async throws {
         // given — 음성 입력 중 (.listening(.voice))
         let usecase = self.makeUsecaseInIdle()
-        try usecase.enterVoiceInput()
+        usecase.enterVoiceInput()
         let expect = expectConfirm("voice → keyboard")
         // when
         let state = try await self.firstOutput(expect, for: usecase.state.dropFirst()) {
-            try usecase.enterKeyboardInput()
+            usecase.enterKeyboardInput()
         }
         // then — .listening(.keyboard) 전환 + speech 정식 종료
         #expect(self.stubSpeech.didStopListening == true)
@@ -1204,12 +1198,12 @@ extension AIAgentOrchestrationUsecaseImpleTests {
     @Test func usecase_voiceToKeyboardThenBackToVoice_restartsSpeech() async throws {
         // given — 음성 입력 → 키보드 전환
         let usecase = self.makeUsecaseInIdle()
-        try usecase.enterVoiceInput()          // .listening(.voice), startListening 1회
-        try usecase.enterKeyboardInput()       // .listening(.keyboard), stopListening
+        usecase.enterVoiceInput()          // .listening(.voice), startListening 1회
+        usecase.enterKeyboardInput()       // .listening(.keyboard), stopListening
         let expect = expectConfirm("keyboard 닫기 → voice 복귀")
         // when — 키보드 시트 닫힘(dismissByGesture) → enterVoiceInput
         let state = try await self.firstOutput(expect, for: usecase.state.dropFirst()) {
-            try usecase.enterVoiceInput()
+            usecase.enterVoiceInput()
         }
         // then — .listening(.voice) 복귀 + speech 재시작 (2번째 start)
         #expect(self.stubSpeech.startListeningCount == 2)
@@ -1222,8 +1216,8 @@ extension AIAgentOrchestrationUsecaseImpleTests {
     @Test func usecase_afterEnterKeyboardInput_stopsForwardingRecognizingText() async throws {
         // given
         let usecase = self.makeUsecaseInIdle()
-        try usecase.enterVoiceInput()
-        try usecase.enterKeyboardInput()
+        usecase.enterVoiceInput()
+        usecase.enterKeyboardInput()
         let expect = expectConfirm("키보드 전환 후 인식 텍스트 미전달")
         expect.count = 0
         expect.timeout = .milliseconds(100)
@@ -1239,8 +1233,8 @@ extension AIAgentOrchestrationUsecaseImpleTests {
     @Test func usecase_lateRecognizeEndAfterEnterKeyboardInput_keepsKeyboardListening() async throws {
         // given
         let usecase = self.makeUsecaseInIdle()
-        try usecase.enterVoiceInput()
-        try usecase.enterKeyboardInput()
+        usecase.enterVoiceInput()
+        usecase.enterKeyboardInput()
         let expect = expectConfirm("키보드 입력 상태 유지")
         expect.count = 0
         expect.timeout = .milliseconds(100)
@@ -1458,11 +1452,11 @@ extension AIAgentOrchestrationUsecaseImpleTests {
     @Test func usecase_enterImageInput_stopsListeningAndEmitsListeningImage() async throws {
         // given
         let usecase = self.makeUsecaseInIdle()
-        try usecase.enterVoiceInput()
+        usecase.enterVoiceInput()
         let expect = expectConfirm("listening(.image)")
         // when
         let state = try await self.firstOutput(expect, for: usecase.state.dropFirst()) {
-            try usecase.enterImageInput()
+            usecase.enterImageInput()
         }
         // then
         #expect(self.stubSpeech.didStopListening == true)
@@ -1480,7 +1474,7 @@ extension AIAgentOrchestrationUsecaseImpleTests {
         done.text = "영수증 등록 완료"
         let usecase = self.makeUsecaseWithCommandJob(self.dummyJob(.done(done)))
         usecase.reset()
-        try usecase.enterImageInput()
+        usecase.enterImageInput()
         // when
         let states = try await self.outputs(expect, for: usecase.state.dropFirst()) {
             try? usecase.submitImageCommand(text: "영수증 텍스트", additionalInstruction: "카드값만")
@@ -1669,20 +1663,20 @@ extension AIAgentOrchestrationUsecaseImpleTests {
 extension AIAgentOrchestrationUsecaseImpleTests {
 
     @Test("크레딧이 소진됐으면 음성 입력에 진입하지 않는다")
-    func usecase_whenCreditExhausted_blocksEnterVoiceInput() {
+    func usecase_whenCreditExhausted_blocksEnterVoiceInput() async throws {
         // given
+        let expect = expectConfirm("소진 시 상태 방출")
         let usecase = self.makeUsecase(isCreditExhausted: true)
 
         // when
-        var failReason: AIAgentInputEnterFailReason?
-        do {
-            try usecase.enterVoiceInput()
-        } catch let reason as AIAgentInputEnterFailReason {
-            failReason = reason
-        } catch { }
+        let state = try await self.firstOutput(expect, for: usecase.state) {
+            usecase.enterVoiceInput()
+        }
 
-        // then
-        #expect(failReason == .creditExhausted)
+        // then — listening으로 전이되지 않고 speech도 시작하지 않는다
+        if case .listening = state {
+            Issue.record("listening 상태로 전이되면 안 된다: \(String(describing: state))")
+        }
         #expect(self.stubSpeech.didStartListening == false)
     }
 
@@ -1694,7 +1688,7 @@ extension AIAgentOrchestrationUsecaseImpleTests {
 
         // when
         let state = try await self.firstOutput(expect, for: usecase.state) {
-            try? usecase.enterVoiceInput()
+            usecase.enterVoiceInput()
         }
 
         // then
@@ -1706,20 +1700,20 @@ extension AIAgentOrchestrationUsecaseImpleTests {
     }
 
     @Test("크레딧이 소진됐으면 키보드 입력에 진입하지 않는다")
-    func usecase_whenCreditExhausted_blocksEnterKeyboardInput() {
+    func usecase_whenCreditExhausted_blocksEnterKeyboardInput() async throws {
         // given
+        let expect = expectConfirm("소진 시 상태 방출")
         let usecase = self.makeUsecase(isCreditExhausted: true)
 
         // when
-        var failReason: AIAgentInputEnterFailReason?
-        do {
-            try usecase.enterKeyboardInput()
-        } catch let reason as AIAgentInputEnterFailReason {
-            failReason = reason
-        } catch { }
+        let state = try await self.firstOutput(expect, for: usecase.state) {
+            usecase.enterKeyboardInput()
+        }
 
-        // then
-        #expect(failReason == .creditExhausted)
+        // then — listening으로 전이되지 않는다
+        if case .listening = state {
+            Issue.record("listening 상태로 전이되면 안 된다: \(String(describing: state))")
+        }
     }
 
     @Test("키보드 입력 진입이 크레딧으로 막히면 소진 실패 상태를 방출한다")
@@ -1730,7 +1724,7 @@ extension AIAgentOrchestrationUsecaseImpleTests {
 
         // when
         let state = try await self.firstOutput(expect, for: usecase.state) {
-            try? usecase.enterKeyboardInput()
+            usecase.enterKeyboardInput()
         }
 
         // then
@@ -1742,20 +1736,20 @@ extension AIAgentOrchestrationUsecaseImpleTests {
     }
 
     @Test("크레딧이 소진됐으면 이미지 입력에 진입하지 않는다")
-    func usecase_whenCreditExhausted_blocksEnterImageInput() {
+    func usecase_whenCreditExhausted_blocksEnterImageInput() async throws {
         // given
+        let expect = expectConfirm("소진 시 상태 방출")
         let usecase = self.makeUsecase(isCreditExhausted: true)
 
         // when
-        var failReason: AIAgentInputEnterFailReason?
-        do {
-            try usecase.enterImageInput()
-        } catch let reason as AIAgentInputEnterFailReason {
-            failReason = reason
-        } catch { }
+        let state = try await self.firstOutput(expect, for: usecase.state) {
+            usecase.enterImageInput()
+        }
 
-        // then
-        #expect(failReason == .creditExhausted)
+        // then — listening으로 전이되지 않는다
+        if case .listening = state {
+            Issue.record("listening 상태로 전이되면 안 된다: \(String(describing: state))")
+        }
     }
 
     @Test("이미지 입력 진입이 크레딧으로 막히면 소진 실패 상태를 방출한다")
@@ -1766,7 +1760,7 @@ extension AIAgentOrchestrationUsecaseImpleTests {
 
         // when
         let state = try await self.firstOutput(expect, for: usecase.state) {
-            try? usecase.enterImageInput()
+            usecase.enterImageInput()
         }
 
         // then
@@ -1785,7 +1779,7 @@ extension AIAgentOrchestrationUsecaseImpleTests {
 
         // when
         let state = try await self.firstOutput(expect, for: usecase.state) {
-            try? usecase.enterVoiceInput()
+            usecase.enterVoiceInput()
         }
 
         // then
@@ -1810,21 +1804,15 @@ extension AIAgentOrchestrationUsecaseImpleTests {
         return usecase
     }
 
-    @Test("처리 중 상태에서는 크레딧이 소진돼도 invalidState를 던지고 소진 실패 상태로 덮지 않는다")
-    func usecase_whenProcessingAndCreditExhausted_enterKeyboardInput_throwsInvalidStateWithoutEmittingFailed() async throws {
+    @Test("처리 중 상태에서는 크레딧이 소진돼도 조용히 무시하고 소진 실패 상태로 덮지 않는다")
+    func usecase_whenProcessingAndCreditExhausted_enterKeyboardInput_keepsProcessingWithoutEmittingFailed() async throws {
         // given — .processing 진입 후 크레딧 소진 플래그를 켠다 (state 가드가 먼저 걸려야 한다)
         let usecase = self.makeUsecaseInProcessing(isCreditExhausted: true)
 
         // when
-        var failReason: AIAgentInputEnterFailReason?
-        do {
-            try usecase.enterKeyboardInput()
-        } catch let reason as AIAgentInputEnterFailReason {
-            failReason = reason
-        } catch { }
+        usecase.enterKeyboardInput()
 
-        // then — invalidState이고, 상태는 여전히 processing(소진 실패로 덮이지 않음)
-        #expect(failReason == .invalidState)
+        // then — 상태는 여전히 processing(소진 실패로 덮이지 않음)
         let expect = expectConfirm("상태는 processing 그대로")
         let state = try await self.firstOutput(expect, for: usecase.state)
         guard case .processing = state
