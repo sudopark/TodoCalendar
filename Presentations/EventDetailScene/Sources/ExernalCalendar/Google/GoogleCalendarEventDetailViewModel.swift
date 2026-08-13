@@ -120,12 +120,15 @@ protocol GoogleCalendarEventDetailViewModel: AnyObject, Sendable, GoogleCalendar
     // interactor
     func refresh()
     func editEvent()
+    func viewOnGoogleCalendar()
     func selectLink(_ link: URL)
     func selectAttachment(_ model: AttachmentModel)
     func copyText(_ text: String)
     func close()
-    
+
     // presenter
+    var isEditable: AnyPublisher<Bool, Never> { get }
+    var readOnlyCalendarMessage: AnyPublisher<String?, Never> { get }
     var hasDetailLink: AnyPublisher<Bool, Never> { get }
     var eventColorModel: AnyPublisher<GoogleCalendarEventColorModel, Never> { get }
     var eventName: AnyPublisher<String, Never> { get }
@@ -151,6 +154,7 @@ final class GoogleCalendarEventDetailViewModelImple: GoogleCalendarEventDetailVi
     private let eventId: String
     private let googleCalendarUsecase: any GoogleCalendarUsecase
     private let calendarSettingUsecase: any CalendarSettingUsecase
+    private let externalCalendarIntegrationUsecase: any ExternalCalendarIntegrationUsecase
     private let daysIntervalCountUsecase: any DaysIntervalCountUsecase
     var router: (any GoogleCalendarEventDetailRouting)?
 
@@ -160,6 +164,7 @@ final class GoogleCalendarEventDetailViewModelImple: GoogleCalendarEventDetailVi
         eventId: String,
         googleCalendarUsecase: any GoogleCalendarUsecase,
         calendarSettingUsecase: any CalendarSettingUsecase,
+        externalCalendarIntegrationUsecase: any ExternalCalendarIntegrationUsecase,
         daysIntervalCountUsecase: any DaysIntervalCountUsecase
     ) {
         self.calendarId = calenadrId
@@ -167,16 +172,18 @@ final class GoogleCalendarEventDetailViewModelImple: GoogleCalendarEventDetailVi
         self.eventId = eventId
         self.googleCalendarUsecase = googleCalendarUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
+        self.externalCalendarIntegrationUsecase = externalCalendarIntegrationUsecase
         self.daysIntervalCountUsecase = daysIntervalCountUsecase
 
         self.internalBind()
     }
-    
-    
+
+
     private struct Subject {
         let timeZone = CurrentValueSubject<TimeZone?, Never>(nil)
         let origin = CurrentValueSubject<GoogleCalendar.EventOrigin?, Never>(nil)
         let calendarTag = CurrentValueSubject<GoogleCalendar.Tag?, Never>(nil)
+        let writePermission = CurrentValueSubject<GoogleCalendar.EventWritePermission?, Never>(nil)
     }
     
     private var cancellables: Set<AnyCancellable> = []
@@ -197,6 +204,14 @@ final class GoogleCalendarEventDetailViewModelImple: GoogleCalendarEventDetailVi
                 self?.subject.calendarTag.send(tag)
             })
             .store(in: &self.cancellables)
+
+        self.googleCalendarUsecase.eventWritePermission(
+            accountId: self.accountId, calendarId: self.calendarId
+        )
+        .sink(receiveValue: { [weak self] permission in
+            self?.subject.writePermission.send(permission)
+        })
+        .store(in: &self.cancellables)
     }
 }
 
@@ -224,20 +239,62 @@ extension GoogleCalendarEventDetailViewModelImple {
             })
             .store(in: &self.cancellables)
     }
-    
+
     private func alertEventCanceled() {
         self.router?.showToast("eventDetail::gogoleEvent::canceled::message".localized())
         self.router?.closeScene()
     }
-    
+
     func editEvent() {
-        
-        guard let link = self.subject.origin.value?.htmlLink
-        else { return }
-        
-        self.router?.routeToEditEventWebView(link)
+
+        switch self.subject.writePermission.value {
+        case .writable:
+            self.routeToEditScene()
+        case .needReauthentication:
+            self.confirmReauthenticationForEdit()
+        case .readOnlyCalendar, .none:
+            return
+        }
+    }
+
+    private func routeToEditScene() {
+        self.router?.routeToEditEvent(
+            calendarId: self.calendarId, accountId: self.accountId, eventId: self.eventId,
+            listener: self
+        )
+    }
+
+    private func confirmReauthenticationForEdit() {
+        let info = ConfirmDialogInfo()
+            |> \.title .~ pure("eventDetail::gogoleEvent::reauthenticate::title".localized())
+            |> \.message .~ pure("eventDetail::gogoleEvent::reauthenticate::message".localized())
+            |> \.confirmed .~ pure(self.reauthenticateThenRouteToEditScene)
+            |> \.withCancel .~ true
+        self.router?.showConfirm(dialog: info)
+    }
+
+    private func reauthenticateThenRouteToEditScene() {
+        let service = self.googleCalendarUsecase.googleService
+        let accountId = self.accountId
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                _ = try await self.externalCalendarIntegrationUsecase.reauthenticate(
+                    external: service, accountId: accountId
+                )
+                self.routeToEditScene()
+            } catch {
+                self.router?.showError(error)
+            }
+        }
+        .store(in: &self.cancellables)
     }
     
+    func viewOnGoogleCalendar() {
+        guard let link = self.subject.origin.value?.htmlLink else { return }
+        self.router?.openSafari(link)
+    }
+
     func selectLink(_ link: URL) {
         self.router?.openSafari(link.absoluteString)
     }
@@ -263,6 +320,25 @@ extension GoogleCalendarEventDetailViewModelImple {
 
 extension GoogleCalendarEventDetailViewModelImple {
     
+    var isEditable: AnyPublisher<Bool, Never> {
+        return self.subject.writePermission
+            .compactMap { $0 }
+            .map { $0 != .readOnlyCalendar }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+
+    var readOnlyCalendarMessage: AnyPublisher<String?, Never> {
+        return self.subject.writePermission
+            .compactMap { $0 }
+            .map { permission -> String? in
+                guard permission == .readOnlyCalendar else { return nil }
+                return "eventDetail::gogoleEvent::readOnlyCalendar::message".localized()
+            }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+
     var hasDetailLink: AnyPublisher<Bool, Never> {
         return self.subject.origin
             .compactMap { $0 }
@@ -270,7 +346,7 @@ extension GoogleCalendarEventDetailViewModelImple {
             .removeDuplicates()
             .eraseToAnyPublisher()
     }
-    
+
     var eventColorModel: AnyPublisher<GoogleCalendarEventColorModel, Never> {
         let calendarId = self.calendarId
         return self.subject.origin
@@ -461,6 +537,24 @@ extension GoogleCalendarEventDetailViewModelImple {
             .map(transform)
             .removeDuplicates()
             .eraseToAnyPublisher()
+    }
+}
+
+
+// MARK: - GoogleCalendarEventDetailViewModelImple + GoogleCalendarEventEditSceneListener
+
+extension GoogleCalendarEventDetailViewModelImple: GoogleCalendarEventEditSceneListener {
+
+    func googleCalendarEvent(didUpdate event: GoogleCalendar.EventOrigin) {
+        guard !event.isRecurringSeriesMaster else {
+            self.refresh()
+            return
+        }
+        self.subject.origin.send(event)
+    }
+
+    func googleCalendarEvent(didRemove eventId: String) {
+        self.router?.closeScene()
     }
 }
 

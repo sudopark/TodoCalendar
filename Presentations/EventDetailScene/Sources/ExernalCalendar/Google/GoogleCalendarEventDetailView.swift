@@ -25,6 +25,8 @@ import CommonPresentation
     @ObservationIgnored private var didBind = false
     @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
     
+    var isEditable: Bool = false
+    var readOnlyCalendarMessage: String?
     var hasDetailLink: Bool = false
     var eventColor: GoogleCalendarEventColorModel?
     var eventName: String?
@@ -43,13 +45,27 @@ import CommonPresentation
         guard self.didBind == false else { return }
         self.didBind = true
         
+        viewModel.isEditable
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] isEditable in
+                self?.isEditable = isEditable
+            })
+            .store(in: &self.cancellables)
+
+        viewModel.readOnlyCalendarMessage
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] message in
+                self?.readOnlyCalendarMessage = message
+            })
+            .store(in: &self.cancellables)
+
         viewModel.hasDetailLink
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] has in
                 self?.hasDetailLink = has
             })
             .store(in: &self.cancellables)
-        
+
         viewModel.eventColorModel
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] model in
@@ -137,6 +153,7 @@ final class GoogleCalendarEventDetailViewEventHandler: Observable {
     var onAppear: () -> Void = { }
     var enterForeground: () -> Void = { }
     var editEvent: () -> Void = { }
+    var viewOnGoogleCalendar: () -> Void = { }
     var selectURL: (URL) -> Void = { _ in }
     var selectAttachment: (AttachmentModel) -> Void = { _ in }
     var copyText: (String) -> Void = { _ in }
@@ -147,6 +164,7 @@ final class GoogleCalendarEventDetailViewEventHandler: Observable {
         onAppear = viewModel.refresh
         enterForeground = viewModel.refresh
         editEvent = viewModel.editEvent
+        viewOnGoogleCalendar = viewModel.viewOnGoogleCalendar
         selectURL = viewModel.selectLink(_:)
         selectAttachment = viewModel.selectAttachment(_:)
         copyText = viewModel.copyText(_:)
@@ -242,14 +260,16 @@ struct GoogleCalendarEventDetailView: View {
             .padding(.horizontal, spacing: .regular)
             .padding(.bottom, 120)
             
-            VStack {
+            VStack(spacing: 0) {
                 Spacer()
-                
-                if self.state.hasDetailLink {
-                    BottomConfirmButton(
-                        title: "eventDetail::gogoleEvent::viewOnCalendar".localized(),
-                    )
-                    .eventHandler(\.onTap, self.eventHandlers.editEvent)
+
+                if let message = self.state.readOnlyCalendarMessage {
+                    DescriptionView(descriptions: [message])
+                        .padding(.horizontal, spacing: .regular)
+                        .padding(.bottom, spacing: .regular)
+                }
+                if self.state.isEditable || self.state.hasDetailLink {
+                    self.bottomButtons
                 }
             }
         }
@@ -257,6 +277,45 @@ struct GoogleCalendarEventDetailView: View {
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
             self.eventHandlers.onAppear()
         }
+    }
+
+    private var bottomButtons: some View {
+        HStack(spacing: Metric.Spacing.small) {
+            if self.state.isEditable {
+                ConfirmButton(title: "calednar::event::google::edit".localized())
+                    .eventHandler(\.onTap, self.eventHandlers.editEvent)
+            }
+
+            if self.state.hasDetailLink {
+                Menu {
+                    Button {
+                        self.eventHandlers.viewOnGoogleCalendar()
+                    } label: {
+                        Label(
+                            "eventDetail::gogoleEvent::viewOnCalendar".localized(),
+                            systemImage: "arrow.up.forward.square"
+                        )
+                    }
+                } label: {
+                    Image(systemName: "ellipsis")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .foregroundStyle(self.appearance.colorSet.text0.asColor)
+                        .frame(width: 20, height: 20)
+                        .padding()
+                        .background {
+                            RoundedRectangle(cornerRadius: Metric.Radius.regular)
+                                .fill(self.appearance.colorSet.secondaryBtnBackground.asColor)
+                        }
+                }
+            }
+        }
+        .padding()
+        .background(
+            Rectangle()
+                .fill(self.appearance.colorSet.dayBackground.asColor)
+                .ignoresSafeArea(edges: .bottom)
+        )
     }
     
     private var nameView: some View {
@@ -594,7 +653,7 @@ struct GoogleCalendarEventDetailViewPreviewProvider: PreviewProvider {
         viewAppearance.googleCalendarColors[colors.ownerId] = colors
         let state = GoogleCalendarEventDetailViewState()
         state.eventName = "google calendar event"
-        state.hasDetailLink = true
+        state.isEditable = true
         state.timeText = .period(.init(100, .current), .init(500, .current))
         state.ddayText = "D+3"
         state.repeatOptionText = "반복 옵션 텍스트"

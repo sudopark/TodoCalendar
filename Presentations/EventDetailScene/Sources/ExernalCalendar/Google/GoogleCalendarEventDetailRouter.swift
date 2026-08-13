@@ -16,22 +16,41 @@ import CommonPresentation
 // MARK: - Routing
 
 protocol GoogleCalendarEventDetailRouting: Routing, Sendable {
-    
-    func routeToEditEventWebView(_ link: String)
+
+    func routeToEditEvent(
+        calendarId: String, accountId: String, eventId: String,
+        listener: (any GoogleCalendarEventEditSceneListener)?
+    )
 }
 
 // MARK: - Router
 
-final class GoogleCalendarEventDetailRouter: BaseRouterImple, GoogleCalendarEventDetailRouting, @unchecked Sendable { }
+final class GoogleCalendarEventDetailRouter: BaseRouterImple, GoogleCalendarEventDetailRouting, @unchecked Sendable {
+
+    private let editSceneBuilder: any GoogleCalendarEventEditSceneBuiler
+
+    init(editSceneBuilder: any GoogleCalendarEventEditSceneBuiler) {
+        self.editSceneBuilder = editSceneBuilder
+    }
+}
 
 
 extension GoogleCalendarEventDetailRouter {
-    
+
     private var currentScene: (any GoogleCalendarEventDetailScene)? {
         self.scene as? (any GoogleCalendarEventDetailScene)
     }
-    
-    func routeToEditEventWebView(_ link: String) {
-        self.openSafari(link)
+
+    func routeToEditEvent(
+        calendarId: String, accountId: String, eventId: String,
+        listener: (any GoogleCalendarEventEditSceneListener)?
+    ) {
+        Task { @MainActor in
+            let next = self.editSceneBuilder.makeGoogleCalendarEventEditScene(
+                calendarId: calendarId, accountId: accountId, eventId: eventId,
+                listener: listener
+            )
+            self.currentScene?.present(next, animated: true)
+        }
     }
 }
