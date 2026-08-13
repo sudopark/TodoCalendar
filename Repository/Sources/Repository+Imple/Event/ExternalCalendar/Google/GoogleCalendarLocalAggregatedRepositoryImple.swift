@@ -92,6 +92,24 @@ extension GoogleCalendarLocalAggregatedRepositoryImple {
         }
     }
 
+    public func updateEvent(
+        _ calendarId: String,
+        _ timeZone: String,
+        _ eventId: String,
+        _ params: GoogleCalendar.EventEditParams
+    ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error> {
+        return Fail(error: RuntimeError("google calendar event write is not supported by the aggregated local repository"))
+            .eraseToAnyPublisher()
+    }
+
+    public func removeEvent(
+        _ calendarId: String,
+        _ eventId: String
+    ) -> AnyPublisher<Void, any Error> {
+        return Fail(error: RuntimeError("google calendar event write is not supported by the aggregated local repository"))
+            .eraseToAnyPublisher()
+    }
+
     private func load<T>(
         _ loading: @escaping @Sendable () async throws -> T
     ) -> AnyPublisher<T, any Error> {

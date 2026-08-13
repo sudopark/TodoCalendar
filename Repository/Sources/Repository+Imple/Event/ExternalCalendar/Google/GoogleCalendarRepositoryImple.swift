@@ -222,8 +222,77 @@ extension GoogleCalendarRepositoryImple {
     }
 }
 
+// MARK: - write event
+
 extension GoogleCalendarRepositoryImple {
-    
+
+    public func updateEvent(
+        _ calendarId: String,
+        _ timeZone: String,
+        _ eventId: String,
+        _ params: GoogleCalendar.EventEditParams
+    ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error> {
+
+        return AnyPublisher<GoogleCalendar.EventOrigin, any Error>.create { @Sendable [weak self] subscriber in
+            let task = Task { [weak self] in
+                guard let self else { return }
+                do {
+                    let updated = try await self.updateEventOnRemote(calendarId, eventId, params)
+                    if !updated.isRecurringSeriesMaster {
+                        try? await self.cacheStorage.updateEventDetail(calendarId, timeZone, updated, accountId: self.accountId)
+                    }
+                    subscriber.send(updated)
+                    subscriber.send(completion: .finished)
+                } catch {
+                    subscriber.send(completion: .failure(error))
+                }
+            }
+            return AnyCancellable { task.cancel() }
+        }
+        .eraseToAnyPublisher()
+    }
+
+    private func updateEventOnRemote(
+        _ calendarId: String,
+        _ eventId: String,
+        _ params: GoogleCalendar.EventEditParams
+    ) async throws -> GoogleCalendar.EventOrigin {
+        let id = calendarId.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? calendarId
+        let endpoint = GoogleCalendarEndpoint.event(calendarId: id, eventId: eventId)
+        let origin: GoogleCalendar.EventOrigin = try await self.remote.request(
+            .patch, endpoint, parameters: params.asJson()
+        )
+        return origin
+    }
+
+    public func removeEvent(
+        _ calendarId: String,
+        _ eventId: String
+    ) -> AnyPublisher<Void, any Error> {
+
+        return AnyPublisher<Void, any Error>.create { @Sendable [weak self] subscriber in
+            let task = Task { [weak self] in
+                guard let self else { return }
+                do {
+                    let id = calendarId.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? calendarId
+                    let endpoint = GoogleCalendarEndpoint.event(calendarId: id, eventId: eventId)
+                    let _ = try await self.remote.request(.delete, endpoint, with: nil, parameters: [:])
+                    try? await self.cacheStorage.removeEvents([eventId], accountId: self.accountId)
+                    subscriber.send(())
+                    subscriber.send(completion: .finished)
+                } catch {
+                    subscriber.send(completion: .failure(error))
+                }
+            }
+            return AnyCancellable { task.cancel() }
+        }
+        .eraseToAnyPublisher()
+    }
+}
+
+
+extension GoogleCalendarRepositoryImple {
+
     public func resetCache() async throws {
         try await self.cacheStorage.resetAll(accountId: self.accountId)
     }
