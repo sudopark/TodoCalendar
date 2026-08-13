@@ -65,8 +65,9 @@ struct GoogleCalendarEventTagMapper: Decodable {
         case foregroundColor
         case colorId
         case isSelected = "selected"
+        case accessRole
     }
-    
+
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.calendar = GoogleCalendar.Tag(
@@ -78,6 +79,7 @@ struct GoogleCalendarEventTagMapper: Decodable {
         |> \.foregroundColorHex .~ (try? container.decode(String.self, forKey: .foregroundColor))
         |> \.colorId .~ (try? container.decode(String.self, forKey: .colorId))
         |> \.isSelected .~ (try? container.decode(Bool.self, forKey: .isSelected))
+        |> \.accessRole .~ ((try? container.decode(String.self, forKey: .accessRole)).flatMap { GoogleCalendar.AccessRole(rawValue: $0) })
     }
 }
 
