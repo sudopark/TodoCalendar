@@ -53,7 +53,9 @@ public final class StubAIAgentOrchestrationUsecase: AIAgentOrchestrationUsecase,
     public func decline() {}
     public func reset() { self.stateSubject.send(.idle) }
     public func restoreIfNeeded() {}
-    public func loadUsage() {}
+
+    public private(set) var didLoadUsage: Bool?
+    public func loadUsage() { self.didLoadUsage = true }
 
     public var didHandleJobStatusChangedWith: String?
     public func handleJobStatusChanged(_ jobId: String) {

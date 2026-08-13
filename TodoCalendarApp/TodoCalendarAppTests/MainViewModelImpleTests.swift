@@ -501,4 +501,29 @@ extension MainViewModelImpleTests {
             self.stubAIOrchestrationUsecase.didHandleJobStatusChangedWith, "some_job"
         )
     }
+
+    func testViewModel_whenEnterForeground_refreshAIUsage() {
+        // given
+        let viewModel = self.makeViewModelWithoutPrepare()
+
+        // when
+        NotificationCenter.default.post(
+            name: UIApplication.willEnterForegroundNotification, object: nil
+        )
+
+        // then
+        XCTAssertEqual(self.stubAIOrchestrationUsecase.didLoadUsage, true)
+        withExtendedLifetime(viewModel) { }
+    }
+
+    func testViewModel_whenNotEnterForeground_notRefreshAIUsage() {
+        // given
+        let viewModel = self.makeViewModelWithoutPrepare()
+
+        // when
+
+        // then
+        XCTAssertNil(self.stubAIOrchestrationUsecase.didLoadUsage)
+        withExtendedLifetime(viewModel) { }
+    }
 }

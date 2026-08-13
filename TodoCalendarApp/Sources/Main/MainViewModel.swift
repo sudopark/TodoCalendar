@@ -129,6 +129,7 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
             .sink(receiveValue: { [weak self] _ in
                 self?.billingUsecase.recoverUnfinishedTransactions()
                 self?.aiAgentOrchestrationUsecase.refreshProcessingJobIfNeeded()
+                self?.aiAgentOrchestrationUsecase.loadUsage()
             })
             .store(in: &self.cancellables)
     }
