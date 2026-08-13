@@ -46,7 +46,7 @@ diff 성격·규모에 맞춰 1~4개를 고른다 (고정 목록 아님 — diff
 - 개정 근거 소스 — 이슈·usage-log 진단·스펙 (있으면)
 - **유저가 이 세션에서 지정한 제외·집중 조건**
 
-모델: 기본 sonnet(agent 고정값). 하네스 전면 개편처럼 파급 큰 diff면 세션 모델로 승격.
+모델: dispatch에 `model`을 지정하지 않는다 — agent frontmatter의 sonnet이 1차 기본이다. 승격은 review 스킬 §4 escalation을 따르되, "고위험 경로" 트리거는 하네스 대응으로 읽는다 — hook·스크립트 동작 변경, 스킬 간 조항 충돌 가능성이 있는 개편.
 
 agent 타입이 세션에 미등록이면(신설·개명 직후) `subagent_type: harness-reviewer`가 거부된다 — general-purpose에 `.claude/agents/harness-reviewer.md`를 먼저 Read시켜 역할 주입으로 우회한다.
 
