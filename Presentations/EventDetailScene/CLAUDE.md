@@ -22,7 +22,7 @@ graph TD
     ET -->|push| ETL[EventTagList<br/>태그 목록<br/>SettingScene]
 
     HD[HolidayEventDetail<br/>공휴일 상세]
-    GD[GoogleCalendarEventDetail<br/>구글 이벤트 상세] -->|Safari| GE[구글 캘린더 편집]
+    GD[GoogleCalendarEventDetail<br/>구글 이벤트 상세] -->|present| GE[GoogleCalendarEventEdit<br/>구글 이벤트 편집]
     DD[DoneTodoDetail<br/>완료 Todo 상세] -->|bottomSlide| MA2[SelectMapAppDialog]
 ```
 
@@ -101,8 +101,19 @@ graph TD
 | 항목 | 설명 |
 |---|---|
 | 표시 내용 | 제목, 시간, 참석자, 회의 링크, 첨부파일, 색상 |
-| Listener | 없음 |
-| 라우팅 | `routeToEditEventWebView()` → Safari로 구글 캘린더 편집 |
+| Listener | `GoogleCalendarEventEditSceneListener` 채택 — 편집·삭제 결과를 받아 갱신 |
+| 라우팅 | `routeToEditEvent()` → GoogleCalendarEventEdit (present) |
+| 편집 게이팅 | 쓰기 권한 3분기 — 읽기 전용 캘린더면 안내만, 계정 scope 부족이면 재인증 확인 후 진입 (`docs/spec/google-calendar.md §8.2`) |
+| 점점점 메뉴 | "구글 캘린더에서 보기" → `htmlLink` Safari |
+
+### GoogleCalendarEventEdit (구글 이벤트 편집)
+
+| 항목 | 설명 |
+|---|---|
+| 표시 방식 | present |
+| 편집 필드 | 제목, 시간(종일 토글), 장소, 메모, 색상 — 반복 규칙·참석자·회의·첨부는 편집 대상 아님 |
+| Listener | `GoogleCalendarEventEditSceneListener` — `googleCalendarEvent(didUpdate:)` / `(didRemove:)` |
+| 반복 이벤트 | 저장·삭제 시 "이번 일정만 / 전체 일정" ActionSheet |
 
 ### DoneTodoDetail (완료 Todo 상세)
 

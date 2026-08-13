@@ -41,19 +41,23 @@ extension GoogleCalendarEventDetailSceneBuilerImple: GoogleCalendarEventDetailSc
             calenadrId: calendarId, accountId: accountId, eventId: eventId,
             googleCalendarUsecase: self.usecaseFactory.makeGoogleCalendarUsecase(),
             calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
+            externalCalendarIntegrationUsecase: self.usecaseFactory.externalCalenarIntegrationUsecase,
             daysIntervalCountUsecase: self.usecaseFactory.makeDaysIntervalCountUsecase()
         )
-        
+
         let viewController = GoogleCalendarEventDetailViewController(
             viewModel: viewModel,
             viewAppearance: self.viewAppearance
         )
-    
-        let router = GoogleCalendarEventDetailRouter(
+
+        let editSceneBuilder = GoogleCalendarEventEditSceneBuilerImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearance
         )
+        let router = GoogleCalendarEventDetailRouter(editSceneBuilder: editSceneBuilder)
         router.scene = viewController
         viewModel.router = router
-        
+
         return viewController
     }
 }
