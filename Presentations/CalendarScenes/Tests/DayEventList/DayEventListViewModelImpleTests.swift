@@ -62,7 +62,8 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         foremostEventId: ForemostEventId? = nil,
         shouldFailDoneTodo: Bool = false,
         shouldFailMakeTodo: Bool = false,
-        isSignedIn: Bool = true
+        isSignedIn: Bool = true,
+        enterFailReason: AIAgentInputEnterFailReason? = nil
     ) -> DayEventListViewModelImple {
         let currentTodos: [TodoEvent] = [
             .init(uuid: "current-todo-1", name: "current-todo-1") |> \.creatTimeStamp .~ 100,
@@ -98,6 +99,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
             uiSettingUsecase: self.stubUISettingUsecase
         )
         
+        self.stubOrchestrationUsecase.stubEnterFailReason = enterFailReason
         let account: AccountInfo? = isSignedIn ? AccountInfo("uid") : nil
         let viewModel = DayEventListViewModelImple(
             calendarUsecase: StubCalendarUsecase(),
@@ -1287,6 +1289,28 @@ extension DayEventListViewModelImpleTests {
 
         // then
         XCTAssertEqual(self.stubOrchestrationUsecase.didSubmit, "hello world")
+    }
+
+    func testViewModel_whenCreditExhausted_enterKeyboardInput_notRouteToKeyboardSheet() {
+        // given
+        let viewModel = self.makeViewModel(enterFailReason: .creditExhausted)
+
+        // when
+        viewModel.enterKeyboardInput()
+
+        // then
+        XCTAssertNil(self.spyRouter.didRouteToAIKeyboardInput)
+    }
+
+    func testViewModel_whenCreditExhausted_enterImageInput_notRouteToImageSourceSelect() {
+        // given
+        let viewModel = self.makeViewModel(enterFailReason: .creditExhausted)
+
+        // when
+        viewModel.enterImageInput()
+
+        // then
+        XCTAssertNil(self.spyRouter.didRouteToImageSourceSelectOnCancel)
     }
 
 }

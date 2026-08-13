@@ -22,10 +22,10 @@ public protocol AIAgentOrchestrationUsecase: AnyObject, Sendable {
     var speechPermissionDenied: AnyPublisher<Void, Never> { get }
 
     func prepare()
-    func enterVoiceInput()
+    func enterVoiceInput() throws
     func finishVoiceInput()
-    func enterKeyboardInput()
-    func enterImageInput()
+    func enterKeyboardInput() throws
+    func enterImageInput() throws
     func stopInput()
     func submit(_ text: String) throws
     func submitImageCommand(text: String, additionalInstruction: String?) throws
@@ -150,8 +150,9 @@ extension AIAgentOrchestrationUsecaseImple {
 
 extension AIAgentOrchestrationUsecaseImple {
 
-    public func enterVoiceInput() {
-        guard self.canEnterVoiceInput else { return }
+    public func enterVoiceInput() throws {
+        guard self.canEnterVoiceInput else { throw AIAgentInputEnterFailReason.invalidState }
+        try self.throwIfCreditExhausted()
         self.bindSpeechRecognizing()
         self.speechRecognizeUsecase.startListening()
         self.subject.state.send(.listening(.voice))
@@ -162,15 +163,17 @@ extension AIAgentOrchestrationUsecaseImple {
         self.speechRecognizeUsecase.finishListening()
     }
 
-    public func enterKeyboardInput() {
-        guard self.canEnterKeyboardInput else { return }
+    public func enterKeyboardInput() throws {
+        guard self.canEnterKeyboardInput else { throw AIAgentInputEnterFailReason.invalidState }
+        try self.throwIfCreditExhausted()
         self.resetVoiceBinding()
         self.speechRecognizeUsecase.stopListening()
         self.subject.state.send(.listening(.keyboard))
     }
 
-    public func enterImageInput() {
-        guard self.canEnterImageInput else { return }
+    public func enterImageInput() throws {
+        guard self.canEnterImageInput else { throw AIAgentInputEnterFailReason.invalidState }
+        try self.throwIfCreditExhausted()
         self.speechRecognizeUsecase.stopListening()
         self.subject.state.send(.listening(.image))
     }
@@ -179,6 +182,12 @@ extension AIAgentOrchestrationUsecaseImple {
         self.resetVoiceBinding()
         self.speechRecognizeUsecase.stopListening()
         self.subject.state.send(.idle)
+    }
+
+    private func throwIfCreditExhausted() throws {
+        guard self.usageUsecase.isCreditExhausted() else { return }
+        self.notifyCreditExhausted(command: "")
+        throw AIAgentInputEnterFailReason.creditExhausted
     }
 
     private func bindSpeechRecognizing() {
@@ -496,10 +505,10 @@ public final class NotNeedAIAgentOrchestrationUsecase: AIAgentOrchestrationUseca
     }
 
     public func prepare() { }
-    public func enterVoiceInput() { }
+    public func enterVoiceInput() throws { }
     public func finishVoiceInput() { }
-    public func enterKeyboardInput() { }
-    public func enterImageInput() { }
+    public func enterKeyboardInput() throws { }
+    public func enterImageInput() throws { }
     public func stopInput() { }
 
     public func submit(_ text: String) throws {

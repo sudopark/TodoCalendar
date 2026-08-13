@@ -37,10 +37,16 @@ final class StubAIAgentOrchestrationUsecase: AIAgentOrchestrationUsecase, @unche
     var stubImageSubmitError: (any Error)?
 
     func prepare() { self.didPrepare = true }
-    func enterVoiceInput() { self.didEnterVoiceInput = true }
+    func enterVoiceInput() throws {
+        self.didEnterVoiceInput = true
+    }
     func finishVoiceInput() { self.didFinishVoiceInput = true }
-    func enterKeyboardInput() { self.didEnterKeyboardInput = true }
-    func enterImageInput() { self.didEnterImageInput = true }
+    func enterKeyboardInput() throws {
+        self.didEnterKeyboardInput = true
+    }
+    func enterImageInput() throws {
+        self.didEnterImageInput = true
+    }
     func stopInput() { self.didStopInput = true }
     func submit(_ text: String) throws {
         if let stubSubmitError { throw stubSubmitError }
