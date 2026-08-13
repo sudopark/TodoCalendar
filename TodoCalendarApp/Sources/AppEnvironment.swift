@@ -72,7 +72,7 @@ struct AppEnvironment {
     }
 
     static let dbVersion: Int32 = 7
-    static let googleCalendarDBVersion: Int32 = 0
+    static let googleCalendarDBVersion: Int32 = 1
     static let appleCalendarDBVersion: Int32 = 0
     
     static func deviceId(_ storage: any EnvironmentStorage) -> String {

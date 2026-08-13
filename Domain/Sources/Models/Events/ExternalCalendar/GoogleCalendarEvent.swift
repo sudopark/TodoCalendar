@@ -48,7 +48,21 @@ extension GoogleCalendar {
 // MARK: - Event Tag
 
 extension GoogleCalendar {
-    
+
+    public enum AccessRole: String, Sendable, Equatable {
+        case owner
+        case writer
+        case reader
+        case freeBusyReader
+
+        public var isWritable: Bool {
+            switch self {
+            case .owner, .writer: return true
+            case .reader, .freeBusyReader: return false
+            }
+        }
+    }
+
     public struct Tag: EventTag {
 
         public let tagId: EventTagId
@@ -61,11 +75,16 @@ extension GoogleCalendar {
         public var colorId: String?
         public var colorHex: String? { backgroundColorHex }
         public var isSelected: Bool?
+        public var accessRole: AccessRole?
 
         public init(id: String, name: String) {
             self.id = id
             self.tagId = .externalCalendar(serviceId: GoogleCalendarService.id, id: id)
             self.name = name
+        }
+
+        public var isWritable: Bool {
+            return self.accessRole?.isWritable ?? false
         }
     }
 }
