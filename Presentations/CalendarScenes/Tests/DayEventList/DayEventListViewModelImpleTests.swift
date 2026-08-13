@@ -586,24 +586,42 @@ extension DayEventListViewModelImpleTests {
             removeActions: [.remove(onlyThisTime: false)]
         ))
     }
-
-    func testGoogleCalendarEventCellViewModel_provideMoreActionWhenHtmlLinkExists() {
+    
+    func testHolidayCellViewModel_provideOnlyLiveActivityAction() {
+        // given
+        let kst = TimeZone(abbreviation: "KST")!
+        let holiday = Holiday(uuid: "id", dateString: "2020-03-01", name: "삼일절")
+        
+        // when
+        let cellViewModel = HolidayEventCellViewModel(
+            .init(holiday, in: kst)!
+        )
+        
+        // then
+        XCTAssertEqual(cellViewModel.moreActions, .init(
+            basicActions: [.toggleLiveActivity(isRegistered: false)],
+            removeActions: []
+        ))
+    }
+    
+    func testGoogleCalendarEventCellViewModel_provideEditMoreActionRegardlessOfHtmlLink() {
         // given
         func parameterizeTest(_ link: String?) {
             // given
             let cvm = GoogleCalendarEventCellViewModel.dummy(link)
-            
+
             // when
             let actions = cvm.moreActions
-            
+
             // then
-            if let link {
-                XCTAssertEqual(actions, .init(basicActions: [.editGoogleEvent(link: link)], removeActions: []))
-            } else {
-                XCTAssertEqual(actions, nil)
-            }
+            XCTAssertEqual(actions, .init(
+                basicActions: [
+                    .editGoogleEvent(calendarId: cvm.calendarId, accountId: cvm.accountId, eventId: cvm.eventIdentifier)
+                ],
+                removeActions: []
+            ))
         }
-        
+
         // when + then
         parameterizeTest("some")
         parameterizeTest(nil)
