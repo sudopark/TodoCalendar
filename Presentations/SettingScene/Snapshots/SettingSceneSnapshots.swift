@@ -148,7 +148,7 @@ final class SettingSceneSnapshots: XCTestCase {
             state.selectedAllDayEventNotificationTimeText = "so long text hahahahhahahha hahah"
             state.externalCalendarServiceModels = [
                 ExternalCalanserServiceModel(
-                    GoogleCalendarService(scopes: [.readOnly]),
+                    GoogleCalendarService(scopes: [.readWrite]),
                     accountId: nil
                 )!
             ]
