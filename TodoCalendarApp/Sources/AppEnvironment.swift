@@ -65,7 +65,7 @@ struct AppEnvironment {
     
     static let eventUploadMaxFailCount: Int = 10
     
-    static let googleCalendarService = GoogleCalendarService(scopes: [.readOnly])
+    static let googleCalendarService = GoogleCalendarService(scopes: [.readWrite])
     static let appleCalendarService = AppleCalendarService()
     static var supportExternalCalendarServices: [ExternalCalendarService] {
         return [googleCalendarService, appleCalendarService]
