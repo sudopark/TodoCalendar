@@ -20,7 +20,7 @@ import CommonPresentation
 final class EventDefaultMapAppViewController: UIHostingController<EventDefaultMapAppContainerView>, EventDefaultMapAppScene {
     
     private let viewModel: any EventDefaultMapAppViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
     
     @MainActor
     var interactor: (any EventDefaultMapAppSceneInteractor)? { self.viewModel }

@@ -19,7 +19,7 @@ import CommonPresentation
 final class SettingItemListViewController: UIHostingController<SettingItemListContainerView>, SettingItemListScene {
     
     private let viewModel: any SettingItemListViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
     
     @MainActor
     var interactor: (any SettingItemListSceneInteractor)? { self.viewModel }

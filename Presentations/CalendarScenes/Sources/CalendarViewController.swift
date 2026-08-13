@@ -14,7 +14,7 @@ import CommonPresentation
 final class CalendarViewController: UIPageViewController, CalendarScene {
     
     private let viewModel: any CalendarViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
     
     @MainActor
     var interactor: (any CalendarSceneInteractor)? { self.viewModel }

@@ -20,7 +20,7 @@ import CommonPresentation
 final class EventSettingViewController: UIHostingController<EventSettingContainerView>, EventSettingScene {
     
     private let viewModel: any EventSettingViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
     
     @MainActor
     var interactor: (any EventSettingSceneInteractor)? { self.viewModel }

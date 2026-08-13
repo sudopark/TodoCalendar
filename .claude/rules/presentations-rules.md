@@ -43,6 +43,7 @@ paths:
 | `BillingPlanChipView` | 플랜 이름 칩 — 무료 회색/유료 accentAI (사용량 게이지·paywall 공유, #739) | 없음 (표시 전용) |
 | `BillingScheduledChangeView` | 하향·만료 예정 안내 한 줄 — info 아이콘 + "N월 d일부터 X 플랜" (사용량 게이지·paywall 공유, #852) | 없음 (표시 전용) |
 | `ImagePicker` | 사진 라이브러리(PHPicker)·카메라 피커 뷰컨트롤러 팩토리 — 선택 결과를 `Data`로 전달 | `makeViewController(source:onPick:)` 클로저 |
+| `InAppWebViewController` | 인앱 웹뷰 화면 (UIKit) — 진행바·문서 타이틀·뒤로/앞으로·브라우저로 열기 + 로드 실패 폴백 (#806) | 모달은 `BaseRouterImple.showWebView(_:)` / `init` = push·child VC |
 
 - 이벤트 연결 주류는 `.eventHandler(\.키패스)` (기본값 있는 var 클로저) — 신규 컴포넌트도 이 패턴으로. 표의 예외(init 클로저·render-prop·체이닝)는 기존 API 존중.
 - 카탈로그가 낡았을 수 있다 — `ls Presentations/CommonPresentation/Sources/UIComponents/`로 실물 확인. 표에 없는 파일을 발견하면 이 표를 갱신한다.
@@ -157,7 +158,7 @@ case .command: builder.makeCommandView()
 ✅ self.router?.routeToSomewhere(param)
 ```
 
-Router는 `BaseRouterImple` 상속 + `XxxRouting` 채택. 공통 메서드(`showError`, `showToast`, `closeScene`, `showConfirm`, `showActionSheet`, `openSafari`, `showBottomSlide`, `dismissPresented`)는 먼저 재사용.
+Router는 `BaseRouterImple` 상속 + `XxxRouting` 채택. 공통 메서드(`showError`, `showToast`, `closeScene`, `showConfirm`, `showActionSheet`, `openSafari`, `showWebView`, `showBottomSlide`, `dismissPresented`)는 먼저 재사용.
 
 ### SwiftUI 타입 직접 참조 금지
 ViewModel에 `@Published` / `ObservableObject` / `@StateObject` ❌. 상태 노출은 **Combine `AnyPublisher`**, SwiftUI 변환은 `ViewState`가 담당.

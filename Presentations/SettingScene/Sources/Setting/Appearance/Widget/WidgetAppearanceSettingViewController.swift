@@ -16,7 +16,7 @@ import CommonPresentation
 final class WidgetAppearanceSettingViewController: UIHostingController<WidgetAppearanceSettingContainerView>, WidgetAppearanceSettingScene {
     
     private let viewModel: any WidgetAppearanceSettingViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
     
     @MainActor
     var interactor: (any WidgetAppearanceSettingSceneInteractor)? { self.viewModel }

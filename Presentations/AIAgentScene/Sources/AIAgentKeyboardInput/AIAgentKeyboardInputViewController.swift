@@ -15,7 +15,7 @@ final class AIAgentKeyboardInputViewController: UIHostingController<AIAgentKeybo
     var interactor: (any AIAgentKeyboardInputSceneInteractor)? { nil }
 
     private let viewModel: any AIAgentKeyboardInputViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
 
     init(
         viewModel: any AIAgentKeyboardInputViewModel,

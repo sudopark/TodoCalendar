@@ -19,7 +19,7 @@ import CommonPresentation
 final class HolidayListViewController: UIHostingController<HolidayListContainerView>, HolidayListScene {
     
     private let viewModel: any HolidayListViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
     
     @MainActor
     var interactor: (any HolidayListSceneInteractor)? { self.viewModel }

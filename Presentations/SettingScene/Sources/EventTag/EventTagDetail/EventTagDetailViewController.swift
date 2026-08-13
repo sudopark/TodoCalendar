@@ -19,7 +19,7 @@ import CommonPresentation
 final class EventTagDetailViewController: UIHostingController<EventTagDetailContainerView>, EventTagDetailScene {
     
     private let viewModel: any EventTagDetailViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
     
     @MainActor
     var interactor: (any EventTagDetailSceneInteractor)? { self.viewModel }

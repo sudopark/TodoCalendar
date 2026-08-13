@@ -64,6 +64,8 @@ protocol XXXSceneBuilder: AnyObject {
 }
 ```
 
+**Scene 요구사항**: `Scene`은 `interactor`와 `viewAppearance`를 요구한다. ViewController가 보관하는 `viewAppearance`는 `private`이면 안 된다 — Router가 `self.scene?.viewAppearance`로 읽어 `showWebView` 같은 공통 화면의 테마를 맞춘다.
+
 **공유 Scene 프로토콜**: 다른 Presentation 모듈에서 참조해야 하는 Scene은 `Scenes` 프레임워크의 `Scenes+*.swift`에 정의한다. 모듈 내부에서만 쓰이는 Scene은 해당 모듈 내에 정의한다.
 
 | 파일 | 포함 Scene |
@@ -135,7 +137,7 @@ final class XXXRouter: BaseRouterImple, XXXRouting {
 }
 ```
 
-**BaseRouterImple 제공 메서드**: `showError`, `showToast`, `closeScene`, `showConfirm`, `showActionSheet`, `openSafari`, `showBottomSlide`, `dismissPresented`
+**BaseRouterImple 제공 메서드**: `showError`, `showToast`, `closeScene`, `showConfirm`, `showActionSheet`, `openSafari`, `showWebView`, `showBottomSlide`, `dismissPresented`
 
 ### 2-4. SwiftUI 통합 (`XXXView.swift`)
 

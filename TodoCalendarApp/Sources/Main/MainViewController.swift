@@ -26,7 +26,7 @@ final class MainViewController: UIViewController, MainScene {
     private let compositeLoadingBarView = CompositeLoadingBarView()
     
     private let viewModel: any MainViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
     
     @MainActor
     var interactor: (any MainSceneInteractor)? { self.viewModel }

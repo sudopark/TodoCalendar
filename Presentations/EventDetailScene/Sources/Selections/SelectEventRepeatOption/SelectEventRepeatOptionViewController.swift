@@ -19,7 +19,7 @@ import CommonPresentation
 final class SelectEventRepeatOptionViewController: UIHostingController<SelectEventRepeatOptionContainerView>, SelectEventRepeatOptionScene {
     
     private let viewModel: any SelectEventRepeatOptionViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
     
     @MainActor
     var interactor: (any SelectEventRepeatOptionSceneInteractor)? { self.viewModel }

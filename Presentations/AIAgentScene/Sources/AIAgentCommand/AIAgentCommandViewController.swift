@@ -15,7 +15,7 @@ final class AIAgentCommandViewController: UIHostingController<AIAgentCommandStag
     var interactor: (any AIAgentCommandSceneInteractor)? { nil }
 
     private let viewModel: any AIAgentCommandViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
 
     init(
         viewModel: any AIAgentCommandViewModel,

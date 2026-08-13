@@ -20,7 +20,7 @@ import CommonPresentation
 final class HolidayEventDetailViewController: UIHostingController<HolidayEventDetailContainerView>, HolidayEventDetailScene {
     
     private let viewModel: any HolidayEventDetailViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
     
     @MainActor
     var interactor: (any HolidayEventDetailSceneInteractor)? { self.viewModel }
