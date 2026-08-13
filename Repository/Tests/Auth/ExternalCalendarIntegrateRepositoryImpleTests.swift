@@ -18,7 +18,7 @@ import UnitTestHelpKit
 struct ExternalCalendarIntegrateRepositoryImpleTests {
 
     private let services: [any ExternalCalendarService] = [
-        GoogleCalendarService(scopes: [.readOnly]),
+        GoogleCalendarService(scopes: [.readWrite]),
         AppleCalendarService()
     ]
     private let spyPool = SpyRemotePool()
@@ -60,7 +60,7 @@ struct ExternalCalendarIntegrateRepositoryImpleTests {
         )
     }
 
-    private let googleService: GoogleCalendarService = .init(scopes: [.readOnly])
+    private let googleService: GoogleCalendarService = .init(scopes: [.readWrite])
     private let appleService: AppleCalendarService = .init()
 
     private var dummyGoogleAccount: ExternalServiceAccountinfo {
@@ -345,6 +345,95 @@ extension ExternalCalendarIntegrateRepositoryImpleTests {
         #expect(spyPool.setupCredentials == [
             "\(googleService.identifier)-old-email": "old-google-access"
         ])
+    }
+}
+
+// MARK: - grantedScopes 저장/복원
+
+extension ExternalCalendarIntegrateRepositoryImpleTests {
+
+    // save credential — 허용받은 scope 가 반환된 계정 정보에 담김
+    @Test func repository_saveCredential_withGrantedScopes() async throws {
+        // given
+        let repository = self.makeReposiotry()
+
+        // when
+        let googleCredential = GoogleOAuth2Credential(
+            idToken: "id", accessToken: "access", refreshToken: "ref"
+        )
+        |> \.email .~ "google"
+        |> \.grantedScopes .~ ["https://www.googleapis.com/auth/calendar"]
+        let saved = try await repository.save(googleCredential, for: self.googleService)
+
+        // then
+        #expect(saved.grantedScopes == ["https://www.googleapis.com/auth/calendar"])
+    }
+
+    // save 이후 loadIntegratedAccounts 로 다시 불러와도 허용 scope 가 보존됨
+    @Test func repository_afterSaveCredential_loadIntegratedAccountsPreservesGrantedScopes() async throws {
+        // given
+        let repository = self.makeReposiotry()
+        let googleCredential = GoogleOAuth2Credential(
+            idToken: "id", accessToken: "access", refreshToken: "ref"
+        )
+        |> \.email .~ "google"
+        |> \.grantedScopes .~ ["https://www.googleapis.com/auth/calendar"]
+        _ = try await repository.save(googleCredential, for: self.googleService)
+
+        // when
+        let accounts = try await repository.loadIntegratedAccounts()
+
+        // then
+        #expect(accounts.first?.grantedScopes == ["https://www.googleapis.com/auth/calendar"])
+    }
+
+    // grantedScopes 를 세팅하지 않은 계정은 로드 후에도 grantedScopes 가 nil로 유지됨 (keychain spy는 값을 그대로 들고 있다가 캐스팅만 함 — JSON 인코딩/디코딩 경로는 안 탐)
+    @Test func repository_whenAccountGrantedScopesIsNil_loadIntegratedAccountsKeepsNil() async throws {
+        // given
+        let repository = self.makeReposiotry([(self.dummyGoogleAccount, self.googleCredential)])
+
+        // when
+        let accounts = try await repository.loadIntegratedAccounts()
+
+        // then
+        #expect(accounts.first?.grantedScopes == nil)
+    }
+}
+
+// MARK: - ExternalServiceAccountMapper JSON 디코딩 (실제 keychain은 JSONEncoder/JSONDecoder를 탄다 — SpyKeyChainStorage는 캐스팅만 하므로 이 경로는 mapper를 직접 검증)
+
+extension ExternalCalendarIntegrateRepositoryImpleTests {
+
+    // grantedScopes 키가 아예 없는 레거시 raw JSON을 디코드해도 나머지 필드는 살아있고 grantedScopes만 nil (fail-closed)
+    @Test func mapper_whenDecodingLegacyJSONWithoutGrantedScopesKey_grantedScopesIsNilButOtherFieldsSurvive() throws {
+        // given
+        let legacyJSON = """
+        {"serviceIdentifier":"google","email":"legacy@gmail.com"}
+        """
+        let data = try #require(legacyJSON.data(using: .utf8))
+
+        // when
+        let decoded = try JSONDecoder().decode(ExternalServiceAccountMapper.self, from: data)
+
+        // then
+        #expect(decoded.account.serviceIdentifier == "google")
+        #expect(decoded.account.email == "legacy@gmail.com")
+        #expect(decoded.account.grantedScopes == nil)
+    }
+
+    // grantedScopes가 있는 계정은 encode -> decode 라운드트립 후에도 값이 보존됨
+    @Test func mapper_whenGrantedScopesPresent_encodeDecodeRoundTripPreservesValue() throws {
+        // given
+        let account = ExternalServiceAccountinfo("google", email: "new@gmail.com")
+            |> \.grantedScopes .~ ["https://www.googleapis.com/auth/calendar"]
+        let mapper = ExternalServiceAccountMapper(account: account)
+
+        // when
+        let data = try JSONEncoder().encode(mapper)
+        let decoded = try JSONDecoder().decode(ExternalServiceAccountMapper.self, from: data)
+
+        // then
+        #expect(decoded.account.grantedScopes == ["https://www.googleapis.com/auth/calendar"])
     }
 }
 
