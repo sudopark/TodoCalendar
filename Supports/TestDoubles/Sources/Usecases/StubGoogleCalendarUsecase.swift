@@ -11,6 +11,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 
 
 open class StubGoogleCalendarUsecase: GoogleCalendarUsecase, @unchecked Sendable {
@@ -67,5 +68,38 @@ open class StubGoogleCalendarUsecase: GoogleCalendarUsecase, @unchecked Sendable
     open var integratedAccount: AnyPublisher<ExternalServiceAccountinfo?, Never> {
         return self.accountSubject
             .eraseToAnyPublisher()
+    }
+
+    public var stubWritePermission: GoogleCalendar.EventWritePermission = .writable
+    open func eventWritePermission(
+        accountId: String, calendarId: String
+    ) -> AnyPublisher<GoogleCalendar.EventWritePermission, Never> {
+        return Just(self.stubWritePermission).eraseToAnyPublisher()
+    }
+
+    public var didUpdateEventWith: (calendarId: String, eventId: String, accountId: String, params: GoogleCalendar.EventEditParams)?
+    public var stubUpdatedEventOrigin: GoogleCalendar.EventOrigin?
+    open func updateEvent(
+        _ calendarId: String,
+        _ eventId: String,
+        accountId: String,
+        at timeZone: TimeZone,
+        params: GoogleCalendar.EventEditParams
+    ) async throws -> GoogleCalendar.EventOrigin {
+        self.didUpdateEventWith = (calendarId, eventId, accountId, params)
+        guard let origin = self.stubUpdatedEventOrigin
+        else {
+            throw RuntimeError("stubUpdatedEventOrigin not set")
+        }
+        return origin
+    }
+
+    public var didRemoveEventWith: (calendarId: String, eventId: String, accountId: String)?
+    open func removeEvent(
+        _ calendarId: String,
+        _ eventId: String,
+        accountId: String
+    ) async throws {
+        self.didRemoveEventWith = (calendarId, eventId, accountId)
     }
 }
