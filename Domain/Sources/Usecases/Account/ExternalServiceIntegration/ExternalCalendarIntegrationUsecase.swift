@@ -34,7 +34,11 @@ public protocol ExternalCalendarIntegrationUsecase: Sendable {
     func prepareIntegratedAccounts() async throws
         
     func integrate(external service: any ExternalCalendarService) async throws -> ExternalServiceAccountinfo
-    
+
+    func reauthenticate(
+        external service: any ExternalCalendarService, accountId: String
+    ) async throws -> ExternalServiceAccountinfo
+
     func stopIntegrate(external service: any ExternalCalendarService, accountId: String) async throws
 
     func handleAuthenticationResultOrNot(open url: URL) -> Bool
@@ -118,12 +122,45 @@ extension ExternalCalendarIntegrationUsecaseImple {
     }
 
     public func integrate(external service: any ExternalCalendarService) async throws -> ExternalServiceAccountinfo {
+        let usecase = try self.resolveOAuthUsecase(for: service)
+        self.lastestUsedOAuthUsecase = usecase; defer { self.lastestUsedOAuthUsecase = nil }
+        let credential = try await usecase.requestAuthentication()
+        return try await self.applyIntegration(credential, for: service)
+    }
+
+    public func reauthenticate(
+        external service: any ExternalCalendarService, accountId: String
+    ) async throws -> ExternalServiceAccountinfo {
+        let usecase = try self.resolveOAuthUsecase(for: service)
+        self.lastestUsedOAuthUsecase = usecase; defer { self.lastestUsedOAuthUsecase = nil }
+        let credential = try await usecase.requestAuthentication(hint: accountId)
+        try self.verifyReauthenticatedAccountIdentity(credential, expected: accountId)
+        return try await self.applyIntegration(credential, for: service)
+    }
+
+    private func resolveOAuthUsecase(
+        for service: any ExternalCalendarService
+    ) throws -> any OAuth2ServiceUsecase {
         guard let usecase = self.oauth2ServiceProvider.usecase(for: service)
         else {
             throw RuntimeError("not support oauth service for: \(service)")
         }
-        self.lastestUsedOAuthUsecase = usecase; defer { self.lastestUsedOAuthUsecase = nil }
-        let credential = try await usecase.requestAuthentication()
+        return usecase
+    }
+
+    // 다른 구글 계정으로 로그인하면 엉뚱한 계정의 토큰이 덮이므로 재인증 결과 이메일을 검증한다.
+    private func verifyReauthenticatedAccountIdentity(
+        _ credential: any OAuth2Credential, expected accountId: String
+    ) throws {
+        guard let google = credential as? GoogleOAuth2Credential, google.email == accountId
+        else {
+            throw RuntimeError("reauthenticated account does not match: \(accountId)")
+        }
+    }
+
+    private func applyIntegration(
+        _ credential: any OAuth2Credential, for service: any ExternalCalendarService
+    ) async throws -> ExternalServiceAccountinfo {
         let account = try await self.externalServiceIntegrateRepository.save(credential, for: service)
             |> \.intergrationTime .~ Date()
         try? await self.dbConnectionController.open(serviceId: service.identifier)
