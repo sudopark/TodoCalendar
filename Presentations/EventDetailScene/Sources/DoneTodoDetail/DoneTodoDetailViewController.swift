@@ -20,7 +20,7 @@ import CommonPresentation
 final class DoneTodoDetailViewController: UIHostingController<DoneTodoDetailContainerView>, DoneTodoDetailScene {
     
     private let viewModel: any DoneTodoDetailViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
     
     @MainActor
     var interactor: (any DoneTodoDetailSceneInteractor)? { self.viewModel }

@@ -20,7 +20,7 @@ import CommonPresentation
 final class EventDefaultTagSelectViewController: UIHostingController<EventDefaultTagSelectContainerView>, EventDefaultTagSelectScene {
     
     private let viewModel: any EventDefaultTagSelectViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
     
     @MainActor
     var interactor: (any EventDefaultTagSelectSceneInteractor)? { self.viewModel }

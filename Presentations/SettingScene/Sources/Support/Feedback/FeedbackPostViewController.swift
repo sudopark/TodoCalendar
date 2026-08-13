@@ -20,7 +20,7 @@ import CommonPresentation
 final class FeedbackPostViewController: UIHostingController<FeedbackPostContainerView>, FeedbackPostScene {
     
     private let viewModel: any FeedbackPostViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
     
     @MainActor
     var interactor: (any FeedbackPostSceneInteractor)? { self.viewModel }

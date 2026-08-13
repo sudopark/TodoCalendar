@@ -20,7 +20,7 @@ import CommonPresentation
 final class TimeZoneSelectViewController: UIHostingController<TimeZoneSelectContainerView>, TimeZoneSelectScene {
     
     private let viewModel: any TimeZoneSelectViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
     
     @MainActor
     var interactor: (any TimeZoneSelectSceneInteractor)? { self.viewModel }

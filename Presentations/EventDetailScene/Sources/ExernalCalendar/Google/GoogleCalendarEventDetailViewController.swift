@@ -20,7 +20,7 @@ import CommonPresentation
 final class GoogleCalendarEventDetailViewController: UIHostingController<GoogleCalendarEventDetailContainerView>, GoogleCalendarEventDetailScene {
     
     private let viewModel: any GoogleCalendarEventDetailViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
     
     @MainActor
     var interactor: (any GoogleCalendarEventDetailSceneInteractor)? { self.viewModel }

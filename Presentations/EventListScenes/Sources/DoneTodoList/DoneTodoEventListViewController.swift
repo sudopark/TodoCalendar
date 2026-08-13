@@ -20,7 +20,7 @@ import CommonPresentation
 final class DoneTodoEventListViewController: UIHostingController<DoneTodoEventListContainerView>, DoneTodoEventListScene {
     
     private let viewModel: any DoneTodoEventListViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
     
     @MainActor
     var interactor: (any DoneTodoEventListSceneInteractor)? { self.viewModel }

@@ -19,7 +19,7 @@ import CommonPresentation
 final class CalendarPaperViewController: UIHostingController<CalenarPaperContainerView>, CalendarPaperScene {
     
     private let viewModel: any CalendarPaperViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
     
     private var cancellables: Set<AnyCancellable> = []
     

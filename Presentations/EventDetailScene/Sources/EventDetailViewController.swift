@@ -22,7 +22,7 @@ final class EventDetailViewController: UIHostingController<EventDetailContainerV
     
     private let viewModel: any EventDetailViewModel
     private let inputViewModel: any EventDetailInputViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
     weak var router: (any EventDetailRouting)?
     
     private var isSaving: Bool = false

@@ -17,7 +17,7 @@ final class SelectDayDialogViewController: UIHostingController<SelectDayDialogCo
     var interactor: EmptyInteractor? { nil }
     
     private let viewModel: any SelectDayDialogViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
     
     public init(
         viewModel: any SelectDayDialogViewModel,

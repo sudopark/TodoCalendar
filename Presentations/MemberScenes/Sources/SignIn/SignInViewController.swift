@@ -20,7 +20,7 @@ import CommonPresentation
 final class SignInViewController: UIHostingController<SignInContainerView>, SignInScene {
     
     private let viewModel: any SignInViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
     
     @MainActor
     var interactor: (any SignInSceneInteractor)? { self.viewModel }

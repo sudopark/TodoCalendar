@@ -20,7 +20,7 @@ import CommonPresentation
 final class ColorThemeSelectViewController: UIHostingController<ColorThemeSelectContainerView>, ColorThemeSelectScene {
     
     private let viewModel: any ColorThemeSelectViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
     
     @MainActor
     var interactor: (any ColorThemeSelectSceneInteractor)? { self.viewModel }

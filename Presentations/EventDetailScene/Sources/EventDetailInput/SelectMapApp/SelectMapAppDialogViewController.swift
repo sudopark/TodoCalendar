@@ -20,7 +20,7 @@ import CommonPresentation
 final class SelectMapAppDialogViewController: UIHostingController<SelectMapAppDialogContainerView>, SelectMapAppDialogScene {
     
     private let viewModel: any SelectMapAppDialogViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
     
     @MainActor
     var interactor: (any SelectMapAppDialogSceneInteractor)? { self.viewModel }

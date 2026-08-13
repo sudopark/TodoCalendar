@@ -19,7 +19,7 @@ import CommonPresentation
 final class SelectEventTagViewController: UIHostingController<SelectEventTagContainerView>, SelectEventTagScene {
     
     private let viewModel: any SelectEventTagViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
     
     @MainActor
     var interactor: (any SelectEventTagSceneInteractor)? { self.viewModel }

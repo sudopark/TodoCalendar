@@ -658,3 +658,9 @@
 "share.ai::image::text::caption" = "이미지에서 읽은 텍스트예요 — 어색한 부분이 있으면 수정해 주세요.";
 "share.ai::image::text::placeholder" = "이미지에서 읽은 텍스트";
 "share.ai::image::noTextFound" = "이 이미지에서 텍스트를 찾지 못했어요. 추가하고 싶은 내용을 입력해 주세요.";
+
+// MARK: - webview
+
+"webview::error::message" = "페이지를 불러오지 못했어요.";
+"webview::error::retry" = "다시 시도";
+"webview::openInBrowser" = "브라우저로 열기";

@@ -19,7 +19,7 @@ import CommonPresentation
 final class CountrySelectViewController: UIHostingController<CountrySelectContainerView>, CountrySelectScene {
     
     private let viewModel: any CountrySelectViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
     
     @MainActor
     var interactor: (any CountrySelectSceneInteractor)? { self.viewModel }

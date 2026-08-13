@@ -20,7 +20,7 @@ import CommonPresentation
 final class EventNotificationDefaultTimeOptionViewController: UIHostingController<EventNotificationDefaultTimeOptionContainerView>, EventNotificationDefaultTimeOptionScene {
     
     private let viewModel: any EventNotificationDefaultTimeOptionViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
     
     @MainActor
     var interactor: (any EventNotificationDefaultTimeOptionSceneInteractor)? { self.viewModel }

@@ -658,3 +658,9 @@
 "share.ai::image::text::caption" = "Text read from the image — edit it if anything looks off.";
 "share.ai::image::text::placeholder" = "Text read from the image";
 "share.ai::image::noTextFound" = "Couldn't find any text in this image. Type what you want to add.";
+
+// MARK: - webview
+
+"webview::error::message" = "Couldn't load this page.";
+"webview::error::retry" = "Try again";
+"webview::openInBrowser" = "Open in browser";

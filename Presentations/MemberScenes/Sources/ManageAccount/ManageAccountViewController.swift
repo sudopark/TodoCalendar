@@ -20,7 +20,7 @@ import CommonPresentation
 final class ManageAccountViewController: UIHostingController<ManageAccountContainerView>, ManageAccountScene {
     
     private let viewModel: any ManageAccountViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
     
     @MainActor
     var interactor: (any ManageAccountSceneInteractor)? { self.viewModel }

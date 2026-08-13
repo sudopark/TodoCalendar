@@ -23,7 +23,7 @@ final class AppearanceSettingViewController: UIHostingController<AppearanceSetti
     private let calendarSectionViewModel: any CalendarSectionAppearnaceSettingViewModel
     private let eventOnCalednarSectionViewModel: any EventOnCalendarViewModel
     private let eventListAppearanceSettingViewModel: any EventListAppearnaceSettingViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
     
     @MainActor
     var interactor: (any AppearanceSettingSceneInteractor)? { self.viewModel }

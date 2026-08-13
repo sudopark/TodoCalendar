@@ -94,6 +94,7 @@ public struct EmptyInteractor: Sendable { }
 public protocol Scene: UIViewController {
     associatedtype Interactor
     @MainActor var interactor: Interactor? { get }
+    @MainActor var viewAppearance: ViewAppearance { get }
 }
 
 
@@ -192,6 +193,28 @@ open class BaseRouterImple: Routing, @unchecked Sendable {
         }
     }
     
+    public func showWebView(_ url: URL) {
+        Task { @MainActor in
+
+            guard let appearance = self.scene?.viewAppearance else { return }
+            let controller = InAppWebViewController(url: url, appearance: appearance)
+            let navigationController = UINavigationController(rootViewController: controller)
+            controller.navigationItem.leftBarButtonItem = UIBarButtonItem(
+                title: "common.close".localized(),
+                primaryAction: UIAction { [weak navigationController] _ in
+                    navigationController?.dismiss(animated: true)
+                }
+            )
+            navigationController.navigationBar.tintColor = appearance.colorSet.text0
+            navigationController.navigationBar.titleTextAttributes = [
+                .foregroundColor: appearance.colorSet.text0,
+                .font: appearance.fontSet.subNormalWithBold
+            ]
+
+            self.scene?.present(navigationController, animated: true)
+        }
+    }
+
     @MainActor
     public func showBottomSlide(_ slide: UIViewController) {
         slide.modalPresentationStyle = .custom

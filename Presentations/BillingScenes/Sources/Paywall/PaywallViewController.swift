@@ -17,7 +17,7 @@ final class PaywallViewController: UIHostingController<PaywallContainerView>, Pa
     var interactor: (any PaywallSceneInteractor)? { nil }
 
     private let viewModel: any PaywallViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
 
     init(
         viewModel: any PaywallViewModel,

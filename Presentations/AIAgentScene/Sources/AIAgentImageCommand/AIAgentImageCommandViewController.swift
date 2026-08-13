@@ -18,7 +18,7 @@ final class AIAgentImageCommandViewController: UIHostingController<AIAgentImageC
     var interactor: (any AIAgentImageCommandSceneInteractor)? { nil }
 
     private let viewModel: any AIAgentImageCommandViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
 
     init(
         viewModel: any AIAgentImageCommandViewModel,
