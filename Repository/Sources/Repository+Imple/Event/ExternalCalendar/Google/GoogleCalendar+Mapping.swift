@@ -85,16 +85,44 @@ struct GoogleCalendarEventTagMapper: Decodable {
 
 
 struct GoogleCalendarEventTagListMapper: Decodable {
-    
+
     let calendars: [GoogleCalendar.Tag]
-    
+
     private enum CodingKeys: String, CodingKey {
         case items
     }
-    
+
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let mappers = try container.decode([GoogleCalendarEventTagMapper].self, forKey: .items)
         self.calendars = mappers.map { $0.calendar }
+    }
+}
+
+
+// MARK: - GoogleCalendar.EventEditParams
+
+extension GoogleCalendar.EventEditParams {
+
+    func asJson() -> [String: Any] {
+        var json: [String: Any] = [:]
+        json["summary"] = self.summary
+        json["location"] = self.location
+        json["description"] = self.description
+        json["colorId"] = self.colorId
+        json["start"] = self.start?.asJson()
+        json["end"] = self.end?.asJson()
+        return json
+    }
+}
+
+extension GoogleCalendar.EventOrigin.GoogleEventTime {
+
+    func asJson() -> [String: Any] {
+        var json: [String: Any] = [:]
+        json["date"] = self.date
+        json["dateTime"] = self.dateTime
+        json["timeZone"] = self.timeZone
+        return json
     }
 }
