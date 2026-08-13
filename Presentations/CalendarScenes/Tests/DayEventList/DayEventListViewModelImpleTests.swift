@@ -63,7 +63,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         shouldFailDoneTodo: Bool = false,
         shouldFailMakeTodo: Bool = false,
         isSignedIn: Bool = true,
-        enterFailReason: AIAgentInputEnterFailReason? = nil
+        isCreditExhausted: Bool = false
     ) -> DayEventListViewModelImple {
         let currentTodos: [TodoEvent] = [
             .init(uuid: "current-todo-1", name: "current-todo-1") |> \.creatTimeStamp .~ 100,
@@ -99,7 +99,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
             uiSettingUsecase: self.stubUISettingUsecase
         )
         
-        self.stubOrchestrationUsecase.stubEnterFailReason = enterFailReason
+        self.stubOrchestrationUsecase.stubIsCreditExhausted = isCreditExhausted
         let account: AccountInfo? = isSignedIn ? AccountInfo("uid") : nil
         let viewModel = DayEventListViewModelImple(
             calendarUsecase: StubCalendarUsecase(),
@@ -1293,7 +1293,7 @@ extension DayEventListViewModelImpleTests {
 
     func testViewModel_whenCreditExhausted_enterKeyboardInput_notRouteToKeyboardSheet() {
         // given
-        let viewModel = self.makeViewModel(enterFailReason: .creditExhausted)
+        let viewModel = self.makeViewModel(isCreditExhausted: true)
 
         // when
         viewModel.enterKeyboardInput()
@@ -1304,7 +1304,7 @@ extension DayEventListViewModelImpleTests {
 
     func testViewModel_whenCreditExhausted_enterImageInput_notRouteToImageSourceSelect() {
         // given
-        let viewModel = self.makeViewModel(enterFailReason: .creditExhausted)
+        let viewModel = self.makeViewModel(isCreditExhausted: true)
 
         // when
         viewModel.enterImageInput()

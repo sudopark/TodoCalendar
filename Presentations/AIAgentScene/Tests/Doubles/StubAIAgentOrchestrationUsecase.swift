@@ -35,16 +35,17 @@ final class StubAIAgentOrchestrationUsecase: AIAgentOrchestrationUsecase, @unche
 
     var stubSubmitError: (any Error)?
     var stubImageSubmitError: (any Error)?
+    var isCreditExhausted: Bool = false
 
     func prepare() { self.didPrepare = true }
-    func enterVoiceInput() throws {
+    func enterVoiceInput() {
         self.didEnterVoiceInput = true
     }
     func finishVoiceInput() { self.didFinishVoiceInput = true }
-    func enterKeyboardInput() throws {
+    func enterKeyboardInput() {
         self.didEnterKeyboardInput = true
     }
-    func enterImageInput() throws {
+    func enterImageInput() {
         self.didEnterImageInput = true
     }
     func stopInput() { self.didStopInput = true }
