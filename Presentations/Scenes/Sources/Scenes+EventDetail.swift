@@ -145,6 +145,12 @@ public protocol EventDetailSceneBuilder {
     ) -> any GoogleCalendarEventDetailScene
 
     @MainActor
+    func makeGoogleCalendarEventEditScene(
+        calendarId: String, accountId: String, eventId: String,
+        listener: (any GoogleCalendarEventEditSceneListener)?
+    ) -> any GoogleCalendarEventEditScene
+
+    @MainActor
     func makeAppleCalendarEventDetailScene(
         calendarId: String, eventId: String
     ) -> any AppleCalendarEventDetailScene

@@ -596,23 +596,24 @@ extension DayEventListViewModelImpleTests {
         XCTAssertEqual(cellViewModel.moreActions, nil)
     }
     
-    func testGoogleCalendarEventCellViewModel_provideMoreActionWhenHtmlLinkExists() {
+    func testGoogleCalendarEventCellViewModel_provideEditMoreActionRegardlessOfHtmlLink() {
         // given
         func parameterizeTest(_ link: String?) {
             // given
             let cvm = GoogleCalendarEventCellViewModel.dummy(link)
-            
+
             // when
             let actions = cvm.moreActions
-            
+
             // then
-            if let link {
-                XCTAssertEqual(actions, .init(basicActions: [.editGoogleEvent(link: link)], removeActions: []))
-            } else {
-                XCTAssertEqual(actions, nil)
-            }
+            XCTAssertEqual(actions, .init(
+                basicActions: [
+                    .editGoogleEvent(calendarId: cvm.calendarId, accountId: cvm.accountId, eventId: cvm.eventIdentifier)
+                ],
+                removeActions: []
+            ))
         }
-        
+
         // when + then
         parameterizeTest("some")
         parameterizeTest(nil)
