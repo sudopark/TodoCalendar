@@ -77,7 +77,8 @@ public struct GoogleOAuth2Credential: OAuth2Credential {
     public var accessTokenExpirationDate: Date?
     public var refreshTokenExpirationDate: Date?
     public var email: String?
-    
+    public var grantedScopes: [String]?
+
     public init(
         idToken: String,
         accessToken: String,

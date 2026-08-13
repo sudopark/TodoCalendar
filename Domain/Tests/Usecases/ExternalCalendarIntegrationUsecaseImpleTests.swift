@@ -85,7 +85,7 @@ extension ExternalCalendarIntegrationUsecaseImpleTests {
         let usecase = self.makeUsecase()
         
         // when
-        let service = GoogleCalendarService(scopes: [.readOnly])
+        let service = GoogleCalendarService(scopes: [.readWrite])
         let account = try await usecase.integrate(external: service)
         
         // then
@@ -114,7 +114,7 @@ extension ExternalCalendarIntegrationUsecaseImpleTests {
     // after integrate -> update integrated accounts map
     @Test func usecase_whenAfterIntegrate_updateSharedAccountMap() async throws {
         // given
-        let service = GoogleCalendarService(scopes: [.readOnly])
+        let service = GoogleCalendarService(scopes: [.readWrite])
         let confirmation = self.expectConfirm("연동 이후 연동된 계정리스트 업데이트")
         confirmation.count = 2
         let usecase = self.makeUsecase()
@@ -134,7 +134,7 @@ extension ExternalCalendarIntegrationUsecaseImpleTests {
     // stop integrate
     @Test func usecase_stopIntegrate() async throws {
         // given
-        let service = GoogleCalendarService(scopes: [.readOnly])
+        let service = GoogleCalendarService(scopes: [.readWrite])
         let account = ExternalServiceAccountinfo(service.identifier, email: "some")
         let usecase = self.makeUsecase(startWithIntegrated: [account])
         try await usecase.prepareIntegratedAccounts()
@@ -149,7 +149,7 @@ extension ExternalCalendarIntegrationUsecaseImpleTests {
     // stop integrate -> update integrated accounts map
     @Test func usecase_whenAfterStopIntegrate_updateSharedAccountMap() async throws {
         // given
-        let service = GoogleCalendarService(scopes: [.readOnly])
+        let service = GoogleCalendarService(scopes: [.readWrite])
         let account = ExternalServiceAccountinfo(service.identifier, email: "some")
         let usecase = self.makeUsecase(startWithIntegrated: [account])
         try await usecase.prepareIntegratedAccounts()
@@ -170,7 +170,7 @@ extension ExternalCalendarIntegrationUsecaseImpleTests {
     
     @Test func usecase_handleAuthenticationResult() async throws {
         // given
-        let service = GoogleCalendarService(scopes: [.readOnly])
+        let service = GoogleCalendarService(scopes: [.readWrite])
         let wait = PassthroughSubject<Void, Never>()
         let usecase = self.makeUsecase(withWait: wait)
         var handled: Bool?
@@ -188,7 +188,7 @@ extension ExternalCalendarIntegrationUsecaseImpleTests {
     
     @Test func usecase_whenNotIntegrating_notHandleAuthenticationResult() {
         // given
-        let service = GoogleCalendarService(scopes: [.readOnly])
+        let service = GoogleCalendarService(scopes: [.readWrite])
         let usecase = self.makeUsecase()
         
         // when
@@ -215,7 +215,7 @@ extension ExternalCalendarIntegrationUsecaseImpleTests {
     // integrate 시에 DB open
     @Test func usecase_whenIntegrate_openDB() async throws {
         // given
-        let service = GoogleCalendarService(scopes: [.readOnly])
+        let service = GoogleCalendarService(scopes: [.readWrite])
         let usecase = self.makeUsecase()
 
         // when
@@ -228,7 +228,7 @@ extension ExternalCalendarIntegrationUsecaseImpleTests {
     // stopIntegrate 시에 DB close
     @Test func usecase_whenStopIntegrate_closeDB() async throws {
         // given
-        let service = GoogleCalendarService(scopes: [.readOnly])
+        let service = GoogleCalendarService(scopes: [.readWrite])
         let account = ExternalServiceAccountinfo(service.identifier, email: "some")
         let usecase = self.makeUsecase(startWithIntegrated: [account])
         try await usecase.prepareIntegratedAccounts()
@@ -242,7 +242,7 @@ extension ExternalCalendarIntegrationUsecaseImpleTests {
 
     @Test func usecase_whenServiceIntegrationStatusChanged_notify() async throws {
         // given
-        let service = GoogleCalendarService(scopes: [.readOnly])
+        let service = GoogleCalendarService(scopes: [.readWrite])
         let expect = self.expectConfirm("연동여부 변경시에 외부에 전파")
         expect.count = 2
         let usecase = self.makeUsecase()
@@ -314,7 +314,7 @@ extension ExternalCalendarIntegrationUsecaseImpleTests {
 
     @Test func currentOrNewIntegratedAccount_whenAlreadyIntegrated_emitsCurrentThenStops() async throws {
         // given
-        let service = GoogleCalendarService(scopes: [.readOnly])
+        let service = GoogleCalendarService(scopes: [.readWrite])
         let account = ExternalServiceAccountinfo(service.identifier, email: "google@email.com")
         let usecase = self.makeUsecase(startWithIntegrated: [account])
         try await usecase.prepareIntegratedAccounts()
@@ -333,7 +333,7 @@ extension ExternalCalendarIntegrationUsecaseImpleTests {
 
     @Test func currentOrNewIntegratedAccount_whenNewIntegration_emitsOnceWithoutDuplicate() async throws {
         // given
-        let service = GoogleCalendarService(scopes: [.readOnly])
+        let service = GoogleCalendarService(scopes: [.readWrite])
         let usecase = self.makeUsecase()
         let expect = self.expectConfirm("신규 연동 시 계정 1회만 방출")
 
