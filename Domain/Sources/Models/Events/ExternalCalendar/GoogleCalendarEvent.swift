@@ -125,7 +125,12 @@ extension GoogleCalendar {
         
         public var status: EventStatus?
         public var visibility: Visibility?
-        
+
+        // 구글 API는 시리즈 마스터를 가리키는 별도 플래그를 주지 않아 이 필드 조합으로만 구분 가능하다.
+        public var isRecurringSeriesMaster: Bool {
+            return self.recurringEventId == nil && self.recurrence != nil
+        }
+
         public init(
             id: String, summary: String?
         ) {
@@ -164,7 +169,7 @@ extension GoogleCalendar {
             public init() { }
         }
 
-        public struct GoogleEventTime: Codable, Sendable {
+        public struct GoogleEventTime: Codable, Sendable, Equatable {
             public var date: String?
             public var dateTime: String?
             public var timeZone: String?
