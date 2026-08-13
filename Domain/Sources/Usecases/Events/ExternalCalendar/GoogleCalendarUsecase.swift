@@ -28,6 +28,8 @@ public protocol GoogleCalendarViewAppearanceStore: Sendable {
 
 public protocol GoogleCalendarUsecase: Sendable {
 
+    var googleService: GoogleCalendarService { get }
+
     func prepare()
 
     // calendar
@@ -48,12 +50,54 @@ public protocol GoogleCalendarUsecase: Sendable {
         accountId: String,
         at timeZone: TimeZone
     ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error>
+
+    func eventWritePermission(
+        accountId: String, calendarId: String
+    ) -> AnyPublisher<GoogleCalendar.EventWritePermission, Never>
+
+    func updateEvent(
+        _ calendarId: String,
+        _ eventId: String,
+        accountId: String,
+        at timeZone: TimeZone,
+        params: GoogleCalendar.EventEditParams
+    ) async throws -> GoogleCalendar.EventOrigin
+
+    func removeEvent(
+        _ calendarId: String,
+        _ eventId: String,
+        accountId: String
+    ) async throws
+}
+
+
+// MARK: - GoogleCalendar.EventWritePermission
+
+extension GoogleCalendar {
+
+    public enum EventWritePermission: Sendable, Equatable {
+        case writable
+        case needReauthentication
+        case readOnlyCalendar
+
+        init(account: ExternalServiceAccountinfo?, calendar: GoogleCalendar.Tag?) {
+            guard calendar?.isWritable == true else {
+                self = .readOnlyCalendar
+                return
+            }
+            guard account?.canWriteGoogleCalendar == true else {
+                self = .needReauthentication
+                return
+            }
+            self = .writable
+        }
+    }
 }
 
 
 public final class GoogleCalendarUsecaseImple: GoogleCalendarUsecase, @unchecked Sendable {
 
-    private let googleService: GoogleCalendarService
+    public let googleService: GoogleCalendarService
     private let integrationUsecase: any ExternalCalendarIntegrationUsecase
     private let repositoryPool: any GoogleCalendarRepositoryPool
     private let eventTagUsecase: any EventTagUsecase
@@ -310,6 +354,84 @@ extension GoogleCalendarUsecaseImple {
     ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error> {
         return self.repositoryPool.repository(for: accountId)
             .loadEventDetail(calendarId, timeZone.identifier, eventId)
+    }
+}
+
+
+// MARK: - write permission and write commands
+
+extension GoogleCalendarUsecaseImple {
+
+    public func eventWritePermission(
+        accountId: String, calendarId: String
+    ) -> AnyPublisher<GoogleCalendar.EventWritePermission, Never> {
+        let serviceId = self.googleService.identifier
+        let accountPublisher = self.integrationUsecase.integratedServiceAccounts
+            .map { $0[serviceId]?.first(where: { $0.email == accountId }) }
+            .removeDuplicates()
+        let calendarPublisher = self.sharedDataStore
+            .observe(
+                [String: [GoogleCalendar.Tag]].self,
+                key: ShareDataKeys.googleCalendarTags.rawValue
+            )
+            .map { $0?[accountId]?.first(where: { $0.id == calendarId }) }
+            .removeDuplicates()
+
+        return Publishers.CombineLatest(accountPublisher, calendarPublisher)
+            .map(GoogleCalendar.EventWritePermission.init(account:calendar:))
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+
+    public func updateEvent(
+        _ calendarId: String,
+        _ eventId: String,
+        accountId: String,
+        at timeZone: TimeZone,
+        params: GoogleCalendar.EventEditParams
+    ) async throws -> GoogleCalendar.EventOrigin {
+        let repository = self.repositoryPool.repository(for: accountId)
+        let publisher = repository.updateEvent(calendarId, timeZone.identifier, eventId, params)
+        guard let origin = try await publisher.values.first(where: { _ in true })
+        else {
+            throw RuntimeError("failed to update google calendar event")
+        }
+        guard !origin.isRecurringSeriesMaster else {
+            return origin
+        }
+        self.cacheUpdatedEvent(origin, calendarId, accountId: accountId, timeZone: timeZone)
+        return origin
+    }
+
+    private func cacheUpdatedEvent(
+        _ origin: GoogleCalendar.EventOrigin,
+        _ calendarId: String,
+        accountId: String,
+        timeZone: TimeZone
+    ) {
+        guard let event = GoogleCalendar.Event(origin, calendarId, accountId: accountId, timeZone.identifier)
+        else { return }
+        self.sharedDataStore.update(
+            [String: GoogleCalendar.Event].self,
+            key: ShareDataKeys.googleCalendarEvents.rawValue
+        ) { existing in
+            (existing ?? [:]) |> key(event.eventId) .~ event
+        }
+    }
+
+    public func removeEvent(
+        _ calendarId: String,
+        _ eventId: String,
+        accountId: String
+    ) async throws {
+        let repository = self.repositoryPool.repository(for: accountId)
+        _ = try await repository.removeEvent(calendarId, eventId).values.first(where: { _ in true })
+        self.sharedDataStore.update(
+            [String: GoogleCalendar.Event].self,
+            key: ShareDataKeys.googleCalendarEvents.rawValue
+        ) { existing in
+            (existing ?? [:]) |> key(eventId) .~ nil
+        }
     }
 }
 

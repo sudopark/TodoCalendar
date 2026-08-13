@@ -34,6 +34,17 @@ open class StubExternalCalendarIntegrationUsecase: ExternalCalendarIntegrationUs
         return account
     }
 
+    open func reauthenticate(
+        external service: any ExternalCalendarService, accountId: String
+    ) async throws -> ExternalServiceAccountinfo {
+        let account = ExternalServiceAccountinfo(service.identifier, email: accountId)
+        var map = self.fakeAccountMapSubject.value
+        map[service.identifier, default: []].removeAll { $0.email == account.email }
+        map[service.identifier, default: []].append(account)
+        self.fakeAccountMapSubject.send(map)
+        return account
+    }
+
     open func stopIntegrate(external service: any ExternalCalendarService, accountId: String) async throws {
         var map = self.fakeAccountMapSubject.value
         map[service.identifier]?.removeAll { $0.email == accountId }
