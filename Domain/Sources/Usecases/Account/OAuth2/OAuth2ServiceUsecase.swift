@@ -16,7 +16,18 @@ public protocol OAuth2ServiceUsecase: Sendable {
     @MainActor
     func requestAuthentication() async throws -> CredentialType
 
+    @MainActor
+    func requestAuthentication(hint: String?) async throws -> CredentialType
+
     func handle(open url: URL) -> Bool
+}
+
+extension OAuth2ServiceUsecase {
+
+    @MainActor
+    public func requestAuthentication(hint: String?) async throws -> CredentialType {
+        return try await self.requestAuthentication()
+    }
 }
 
 
