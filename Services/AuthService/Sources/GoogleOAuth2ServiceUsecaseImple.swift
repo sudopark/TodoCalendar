@@ -35,21 +35,26 @@ extension GoogleOAuth2ServiceUsecaseImple {
     
     @MainActor
     public func requestAuthentication() async throws -> GoogleOAuth2Credential {
+        return try await self.requestAuthentication(hint: nil)
+    }
+
+    @MainActor
+    public func requestAuthentication(hint: String?) async throws -> GoogleOAuth2Credential {
         guard let topViewController = self.topViewControllerFinding()
         else {
             throw RuntimeError(key: "GoogleSignIn_oauth_fail", "top viewController not found")
         }
-        
+
         guard let clientId = FirebaseApp.app()?.options.clientID else {
             throw RuntimeError(key: "GoogleSignIn_oauth_fail", "firebase clientId not exists")
         }
-        
+
         let config = GIDConfiguration(clientID: clientId)
         GIDSignIn.sharedInstance.configuration = config
-        
+
         let result = try await GIDSignIn.sharedInstance.signIn(
             withPresenting: topViewController,
-            hint: nil,
+            hint: hint,
             additionalScopes: self.additionalScope
         )
         
