@@ -9,6 +9,7 @@
 import Foundation
 import Domain
 import SQLiteService
+import Extensions
 
 extension GoogleCalendar.Tag: @retroactive RowValueType {
     
@@ -22,6 +23,7 @@ extension GoogleCalendar.Tag: @retroactive RowValueType {
         self.foregroundColorHex = cursor.next()
         self.colorId = cursor.next()
         self.isSelected = cursor.next()
+        self.accessRole = (cursor.next() as String?).flatMap { GoogleCalendar.AccessRole(rawValue: $0) }
     }
 }
 
@@ -37,6 +39,7 @@ struct OldGoogleCalendarEventTagTable: Table {
         case foreground
         case colorId = "color_id"
         case isSelected = "is_selected"
+        case accessRole = "access_role"
 
         var dataType: ColumnDataType {
             switch self {
@@ -47,6 +50,7 @@ struct OldGoogleCalendarEventTagTable: Table {
             case .foreground: return .text([])
             case .colorId: return .text([])
             case .isSelected: return .integer([])
+            case .accessRole: return .text([])
             }
         }
     }
@@ -64,6 +68,7 @@ struct OldGoogleCalendarEventTagTable: Table {
         case .foreground: return entity.foregroundColorHex
         case .colorId: return entity.colorId
         case .isSelected: return entity.isSelected ?? false
+        case .accessRole: return entity.accessRole?.rawValue
         }
     }
 
@@ -90,6 +95,7 @@ struct GoogleCalendarEventTagTable: Table {
         case foreground
         case colorId = "color_id"
         case isSelected = "is_selected"
+        case accessRole = "access_role"
 
         var dataType: ColumnDataType {
             switch self {
@@ -101,6 +107,7 @@ struct GoogleCalendarEventTagTable: Table {
             case .foreground: return .text([])
             case .colorId: return .text([])
             case .isSelected: return .integer([])
+            case .accessRole: return .text([])
             }
         }
     }
@@ -134,6 +141,31 @@ struct GoogleCalendarEventTagTable: Table {
         case .foreground: return entity.tag.foregroundColorHex
         case .colorId: return entity.tag.colorId
         case .isSelected: return entity.tag.isSelected ?? false
+        case .accessRole: return entity.tag.accessRole?.rawValue
+        }
+    }
+
+    static func migrateStatement(for version: Int32) -> String? {
+        switch version {
+        case 0:
+            return Self.addColumnStatement(.accessRole)
+        default: return nil
+        }
+    }
+}
+
+
+// MARK: - migration entrypoint for external calendar DB (app 층은 이 타입을 통해서만 접근)
+
+public enum GoogleCalendarEventTagTableMigration {
+
+    public static func runMigration(for version: Int32, database: any DataBase) throws {
+        do {
+            try database.migrate(GoogleCalendarEventTagTable.self, version: version)
+            logger.log(.sql, level: .info, "google calendar db migration version \(version) -> \(version + 1), GoogleCalendarEventTagTable finished")
+        } catch {
+            logger.log(.sql, level: .error, "google calendar db migration version \(version) -> \(version + 1) failed, reason: \(error).. will drop GoogleCalendarEventTagTable")
+            try? database.dropTable(GoogleCalendarEventTagTable.self)
         }
     }
 }
