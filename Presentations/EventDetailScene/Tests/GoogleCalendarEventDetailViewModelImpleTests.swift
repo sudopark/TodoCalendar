@@ -11,6 +11,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Scenes
 import Extensions
 import UnitTestHelpKit
 import TestDoubles
@@ -19,19 +20,24 @@ import TestDoubles
 
 
 final class GoogleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
-    
+
     var cancelBag: Set<AnyCancellable>! = []
     private let spyRouter = SpyRouter()
-    
+    private let integrationUsecase = StubExternalCalendarIntegrationUsecase([])
+    private var lastCalendarUsecase: PrivateStubGoogleCalendarUsecase!
+
     private func makeViewModel(
         recurrence: String? = nil,
         isCanceled: Bool = false,
-        customAttendees: [GoogleCalendar.EventOrigin.Attendee]? = nil
+        customAttendees: [GoogleCalendar.EventOrigin.Attendee]? = nil,
+        writePermission: GoogleCalendar.EventWritePermission = .writable,
+        shouldFailReauthenticate: Bool = false
     ) -> GoogleCalendarEventDetailViewModelImple {
         let settingUsecase = StubCalendarSettingUsecase()
         settingUsecase.prepare()
-        
+
         let calendarUsecase = PrivateStubGoogleCalendarUsecase()
+        calendarUsecase.stubWritePermission = writePermission
         calendarUsecase.additionalStubbing = { stub in
             stub
                 |> \.attendees .~ (customAttendees ?? stub.attendees)
@@ -39,11 +45,14 @@ final class GoogleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
                 |> \.status .~ (isCanceled ? .cancelled : .confirmed)
         }
         calendarUsecase.refreshGoogleCalendarEventTags()
-        
+        self.lastCalendarUsecase = calendarUsecase
+        self.integrationUsecase.shouldFailReauthenticate = shouldFailReauthenticate
+
         let viewModel = GoogleCalendarEventDetailViewModelImple(
             calenadrId: "g:7", accountId: "stub@gmail.com", eventId: "id",
             googleCalendarUsecase: calendarUsecase,
             calendarSettingUsecase: settingUsecase,
+            externalCalendarIntegrationUsecase: self.integrationUsecase,
             daysIntervalCountUsecase: StubDaysIntervalCountUsecase()
         )
         viewModel.router = self.spyRouter
@@ -304,20 +313,251 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
     }
 }
 
+// MARK: - refresh() 반복 호출과 구독 누적 방지 (포그라운드 재진입 등)
+
 extension GoogleCalendarEventDetailViewModelImpleTests {
-    
-    @Test func viewModel_editEvent() {
+
+    @Test func refresh_calledMultipleTimes_doesNotAccumulateEventWritePermissionSubscriptions() async throws {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when — 포그라운드 재진입처럼 refresh() 가 반복 호출됨
+        viewModel.refresh()
+        viewModel.refresh()
+        viewModel.refresh()
+        try await Task.sleep(for: .milliseconds(10))
+
+        // then — internalBind() 시점에 1회만 구독한다. refresh() 는 새 구독을 만들지 않는다
+        #expect(self.lastCalendarUsecase.didRequestEventWritePermissionWith.count == 1)
+    }
+}
+
+
+// MARK: - editEvent(): 쓰기 권한별 분기
+
+extension GoogleCalendarEventDetailViewModelImpleTests {
+
+    @Test func editEvent_whenWritable_routesToEditScene() {
+        // given
+        let viewModel = self.makeViewModel(writePermission: .writable)
+        viewModel.refresh()
+
+        // when
+        viewModel.editEvent()
+
+        // then
+        #expect(self.spyRouter.didRouteToEditSceneWith?.calendarId == "g:7")
+        #expect(self.spyRouter.didRouteToEditSceneWith?.accountId == "stub@gmail.com")
+        #expect(self.spyRouter.didRouteToEditSceneWith?.eventId == "id")
+        #expect(self.spyRouter.didShowConfirmWith == nil)
+    }
+
+    @Test func editEvent_whenNeedReauthentication_confirmed_reauthenticatesThenRoutesToEditScene() async throws {
+        // given
+        let viewModel = self.makeViewModel(writePermission: .needReauthentication)
+        self.spyRouter.shouldConfirmNotCancel = true
+        viewModel.refresh()
+
+        // when
+        viewModel.editEvent()
+        try await Task.sleep(for: .milliseconds(10))
+
+        // then
+        #expect(self.spyRouter.didShowConfirmWith?.title == "eventDetail::gogoleEvent::reauthenticate::title".localized())
+        #expect(self.integrationUsecase.didReauthenticateWith?.accountId == "stub@gmail.com")
+        #expect(self.spyRouter.didRouteToEditSceneWith?.eventId == "id")
+    }
+
+    @Test func editEvent_whenNeedReauthentication_declined_doesNotRoute() {
+        // given
+        let viewModel = self.makeViewModel(writePermission: .needReauthentication)
+        self.spyRouter.shouldConfirmNotCancel = false
+        viewModel.refresh()
+
+        // when
+        viewModel.editEvent()
+
+        // then
+        #expect(self.integrationUsecase.didReauthenticateWith == nil)
+        #expect(self.spyRouter.didRouteToEditSceneWith == nil)
+    }
+
+    @Test func editEvent_whenNeedReauthentication_andReauthenticateFails_showsErrorAndDoesNotRoute() async throws {
+        // given
+        let viewModel = self.makeViewModel(
+            writePermission: .needReauthentication, shouldFailReauthenticate: true
+        )
+        self.spyRouter.shouldConfirmNotCancel = true
+        viewModel.refresh()
+
+        // when
+        viewModel.editEvent()
+        try await Task.sleep(for: .milliseconds(10))
+
+        // then
+        #expect(self.spyRouter.didShowError != nil)
+        #expect(self.spyRouter.didRouteToEditSceneWith == nil)
+    }
+
+    @Test func editEvent_whenNeedReauthentication_usesGoogleServiceFromUsecaseNotAHardcodedLiteral() async throws {
+        // given — composition root 가 주입한 서비스 값(scopes 비움)을 usecase 가 들고 있다고 가정
+        let viewModel = self.makeViewModel(writePermission: .needReauthentication)
+        self.lastCalendarUsecase.googleService = GoogleCalendarService(scopes: [])
+        self.spyRouter.shouldConfirmNotCancel = true
+        viewModel.refresh()
+
+        // when
+        viewModel.editEvent()
+        try await Task.sleep(for: .milliseconds(10))
+
+        // then — ViewModel 이 GoogleCalendarService(scopes: [.readWrite]) 를 직접 새로 만들지 않고
+        // usecase 가 들고 있던 값(빈 scopes)을 그대로 재인증에 전달한다
+        let usedService = self.integrationUsecase.didReauthenticateWithService as? GoogleCalendarService
+        #expect(usedService?.scopes == [])
+    }
+
+    @Test func editEvent_whenReadOnlyCalendar_doesNothing() {
+        // given
+        let viewModel = self.makeViewModel(writePermission: .readOnlyCalendar)
+        viewModel.refresh()
+
+        // when
+        viewModel.editEvent()
+
+        // then
+        #expect(self.spyRouter.didRouteToEditSceneWith == nil)
+        #expect(self.spyRouter.didShowConfirmWith == nil)
+    }
+}
+
+
+// MARK: - isEditable / readOnlyCalendarMessage 노출 — 권한 3상태 전수 표
+
+extension GoogleCalendarEventDetailViewModelImpleTests {
+
+    @Test(
+        "권한별 isEditable/readOnlyCalendarMessage 노출",
+        arguments: [
+            (GoogleCalendar.EventWritePermission.writable, true, false),
+            (GoogleCalendar.EventWritePermission.needReauthentication, true, false),
+            (GoogleCalendar.EventWritePermission.readOnlyCalendar, false, true)
+        ]
+    )
+    func provideIsEditableAndReadOnlyMessage(
+        _ permission: GoogleCalendar.EventWritePermission,
+        _ expectedIsEditable: Bool,
+        _ expectedHasReadOnlyMessage: Bool
+    ) async throws {
+        // given
+        let comment = Comment(stringLiteral: "\(permission)")
+        let viewModel = self.makeViewModel(writePermission: permission)
+
+        // when
+        let isEditable = try await self.firstOutput(
+            expectConfirm("isEditable: \(permission)"), for: viewModel.isEditable
+        ) {
+            viewModel.refresh()
+        }
+        let message = try await self.firstOutput(
+            expectConfirm("readOnlyCalendarMessage: \(permission)"), for: viewModel.readOnlyCalendarMessage
+        ) ?? nil
+
+        // then
+        #expect(isEditable == expectedIsEditable, comment)
+        let expectedMessage = expectedHasReadOnlyMessage
+            ? "eventDetail::gogoleEvent::readOnlyCalendar::message".localized()
+            : nil
+        #expect(message == expectedMessage, comment)
+    }
+}
+
+
+// MARK: - 편집 결과 반영 (GoogleCalendarEventEditSceneListener)
+
+extension GoogleCalendarEventDetailViewModelImpleTests {
+
+    @Test func googleCalendarEvent_didUpdate_refreshesEventName() async throws {
+        // given
+        let expect = expectConfirm("수정된 이벤트 이름 반영")
+        expect.count = 2
+        let viewModel = self.makeViewModel()
+        let updated = GoogleCalendar.EventOrigin(id: "id", summary: "updated name")
+
+        // when
+        let names = try await self.outputs(expect, for: viewModel.eventName) {
+            viewModel.refresh()
+            viewModel.googleCalendarEvent(didUpdate: updated)
+        }
+
+        // then
+        #expect(names == ["name", "updated name"])
+    }
+
+    @Test func googleCalendarEvent_didUpdate_withSeriesMasterResponse_refetchesInsteadOfApplyingItDirectly() async throws {
+        // given — "전체 일정" 저장 응답(시리즈 마스터: recurringEventId 없음 + recurrence 있음)이 온다
+        let viewModel = self.makeViewModel()
+        viewModel.refresh()
+        try await Task.sleep(for: .milliseconds(10))
+        var seriesMaster = GoogleCalendar.EventOrigin(id: "series1", summary: "series master title")
+        seriesMaster.recurrence = ["RRULE:FREQ=DAILY;COUNT=3"]
+
+        // when
+        viewModel.googleCalendarEvent(didUpdate: seriesMaster)
+        try await Task.sleep(for: .milliseconds(10))
+
+        // then — 마스터를 그대로 반영했다면 location 이 nil(마스터엔 없음)로 덮였을 것이다.
+        // 대신 인스턴스를 재조회해 stub 의 원래 location("location")이 유지돼야 한다.
+        let expect = expectConfirm("재조회 후 인스턴스 데이터 유지")
+        let location = try await self.firstOutput(expect, for: viewModel.location)
+        #expect(location == "location")
+    }
+
+    @Test func googleCalendarEvent_didRemove_closesDetailScene() {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when
+        viewModel.googleCalendarEvent(didRemove: "id")
+
+        // then
+        #expect(self.spyRouter.didClosed == true)
+    }
+}
+
+// MARK: - 구글 캘린더에서 보기 (점점점 메뉴)
+
+extension GoogleCalendarEventDetailViewModelImpleTests {
+
+    @Test func hasDetailLink_reflectsHtmlLinkPresence() async throws {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when
+        let has = try await self.firstOutput(
+            expectConfirm("hasDetailLink"), for: viewModel.hasDetailLink
+        ) { viewModel.refresh() }
+
+        // then — stub eventDetail 은 항상 htmlLink 를 가진다
+        #expect(has == true)
+    }
+
+    @Test func viewOnGoogleCalendar_opensHtmlLinkInSafari() async throws {
         // given
         let viewModel = self.makeViewModel()
         viewModel.refresh()
-        
+        try await Task.sleep(for: .milliseconds(10))
+
         // when
-        viewModel.editEvent()
-        
-        // then
-        #expect(self.spyRouter.didRouteToEditEventWebViewWithLink == "link")
+        viewModel.viewOnGoogleCalendar()
+
+        // then — routeToEditEvent(편집) 가 아니라 openSafari 로 연다
+        #expect(self.spyRouter.didOpenSafariPath == "link")
+        #expect(self.spyRouter.didRouteToEditSceneWith == nil)
     }
-    
+}
+
+extension GoogleCalendarEventDetailViewModelImpleTests {
+
     @Test func viewModel_selectURL() {
         // given
         let viewModel = self.makeViewModel()
@@ -364,9 +604,17 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
 }
 
 private final class PrivateStubGoogleCalendarUsecase: StubGoogleCalendarUsecase, @unchecked Sendable {
-    
+
     var additionalStubbing: ((GoogleCalendar.EventOrigin) -> GoogleCalendar.EventOrigin)?
-    
+
+    var didRequestEventWritePermissionWith: [(accountId: String, calendarId: String)] = []
+    override func eventWritePermission(
+        accountId: String, calendarId: String
+    ) -> AnyPublisher<GoogleCalendar.EventWritePermission, Never> {
+        self.didRequestEventWritePermissionWith.append((accountId, calendarId))
+        return super.eventWritePermission(accountId: accountId, calendarId: calendarId)
+    }
+
     override func eventDetail(
         _ calendarId: String, _ eventId: String, accountId: String, at timeZone: TimeZone
     ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error> {
@@ -419,9 +667,12 @@ private final class PrivateStubGoogleCalendarUsecase: StubGoogleCalendarUsecase,
 }
 
 private final class SpyRouter: BaseSpyRouter, GoogleCalendarEventDetailRouting, @unchecked Sendable {
-    
-    var didRouteToEditEventWebViewWithLink: String?
-    func routeToEditEventWebView(_ link: String) {
-        self.didRouteToEditEventWebViewWithLink = link
+
+    var didRouteToEditSceneWith: (calendarId: String, accountId: String, eventId: String, listener: (any GoogleCalendarEventEditSceneListener)?)?
+    func routeToEditEvent(
+        calendarId: String, accountId: String, eventId: String,
+        listener: (any GoogleCalendarEventEditSceneListener)?
+    ) {
+        self.didRouteToEditSceneWith = (calendarId, accountId, eventId, listener)
     }
 }
