@@ -6,7 +6,7 @@
 
 ## 1. 개요
 
-- **읽기 전용** 연동 (조회만 가능, 이벤트 편집 불가)
+- 조회 + **기존 이벤트 편집·삭제** (이벤트 생성·반복 규칙 편집은 미지원 — #863)
 - **다중 계정** 동시 지원 (구글 계정 여러 개를 동시에 연동)
 - Google OAuth2 인증, Firebase GoogleSignIn SDK 사용
 - 연동 후 캘린더 목록/이벤트/색상 자동 동기화
@@ -20,9 +20,11 @@
 ```
 GoogleOAuth2ServiceProvider
 ├── identifier: "google"
-├── scopes: ["https://www.googleapis.com/auth/calendar.readonly"]
+├── scopes: ["https://www.googleapis.com/auth/calendar"]
 └── 인증 SDK: GIDSignIn (Firebase GoogleSignIn)
 ```
+
+읽기·쓰기를 모두 포함하는 sensitive scope다. 이 scope 로 바꾸면 구글 OAuth 재심사가 필요하고, 승인 전에 요청하면 유저에게 미인증 앱 화면이 뜨고 100명 캡이 걸린다 (#402).
 
 ### 2.2 자격증명 구조 (GoogleOAuth2Credential)
 
@@ -34,6 +36,7 @@ GoogleOAuth2ServiceProvider
 | `accessTokenExpirationDate` | Date? | 액세스 토큰 만료 시점 |
 | `refreshTokenExpirationDate` | Date? | 리프레시 토큰 만료 시점 |
 | `email` | String? | 구글 계정 이메일 (accountId로 사용) |
+| `grantedScopes` | [String]? | 유저가 실제 허용한 scope. nil(=이 필드 도입 전 계정)이면 쓰기 불가로 본다 (fail-closed) |
 
 ### 2.3 인증 플로우
 
@@ -141,6 +144,7 @@ GoogleCalendar.Colors
 | `foregroundColorHex` | String? | 전경 색상 |
 | `colorId` | String? | 구글 색상 ID |
 | `isSelected` | Bool? | 구글 계정에서의 선택 상태 |
+| `accessRole` | `AccessRole?` | owner / writer / reader / freeBusyReader. owner·writer 만 `isWritable`. nil(미확인)은 쓰기 불가 |
 
 ### 4.3 GoogleCalendar.Event (정규화된 이벤트)
 
@@ -329,7 +333,7 @@ activeCalendars() = 전체 캘린더 - offTagIds에 포함된 캘린더
 
 ---
 
-## 8. 이벤트 상세 (읽기 전용)
+## 8. 이벤트 상세·편집
 
 ### 8.1 표시 항목
 
@@ -346,9 +350,29 @@ activeCalendars() = 전체 캘린더 - offTagIds에 포함된 캘린더
 | 상태 | confirmed / tentative / cancelled |
 | 공개 범위 | default / public / private / confidential |
 
-### 8.2 편집 버튼
+### 8.2 편집 진입 — 쓰기 권한 판정
 
-"구글 캘린더에서 편집" → `htmlLink` URL을 Safari로 열기.
+상세 화면 하단 편집 버튼은 두 층을 순서대로 본다. **캘린더 층이 먼저다** — 읽기 전용 캘린더는 재인증해도 못 고치므로 계정 층을 먼저 물으면 유저가 재인증까지 하고 막다른 길을 만난다.
+
+| 판정 | 조건 | 동작 |
+|---|---|---|
+| `readOnlyCalendar` | `Tag.isWritable == false` | 편집 불가 안내 표시 |
+| `needReauthentication` | 캘린더는 쓰기 가능 + 계정 `grantedScopes` 에 쓰기 scope 없음 | 재인증 확인 → 성공 시 편집 진입 |
+| `writable` | 둘 다 만족 | 바로 편집 진입 |
+
+점점점 메뉴의 "구글 캘린더에서 보기"는 `htmlLink` 를 Safari 로 연다 (편집 아님).
+
+### 8.3 편집 대상 필드
+
+`summary` · `start`/`end`(종일 토글 포함) · `location` · `description` · `colorId` 만 편집한다. `recurrence`·`attendees`·`conferenceData`·`attachments` 는 `EventEditParams` 에 필드를 두지 않아 PATCH 바디에 실릴 경로 자체가 없다 — 구글 PATCH 는 부분 업데이트라 안 보낸 필드는 서버 원본이 유지되고, `RRuleParser` 가 못 읽는 `BYMONTHDAY`·EXDATE·RDATE 가 소실되지 않는다.
+
+all-day 의 `end.date` 는 구글에서 배타적(exclusive)이다. 읽기가 가공 없이 담고 편집도 가공 없이 보내 왕복 항등을 유지한다 — 한쪽만 보정하면 저장할 때마다 하루씩 늘어난다.
+
+### 8.4 반복 이벤트 수정·삭제 범위
+
+`recurringEventId` 가 있으면 "이번 일정만 / 전체 일정" 을 묻고, 각각 인스턴스 id / `recurringEventId` 로 PATCH·DELETE 한다. 시리즈 마스터 응답(`recurringEventId` 없음 + `recurrence` 있음)은 인스턴스 캐시로 반영하지 않는다.
+
+오프라인·서버 실패는 즉시 실패시킨다. 큐에 쌓지 않고 로컬 선반영도 하지 않는다.
 
 ---
 
@@ -430,6 +454,7 @@ GoogleCalendarViewAppearanceStore protocol
 | `foregroundColor` | TEXT | 전경색 |
 | `colorId` | TEXT | 구글 색상 ID |
 | `isSelected` | INTEGER | 선택 상태 |
+| `access_role` | TEXT | owner / writer / reader / freeBusyReader (v1에서 추가) |
 
 #### google_calendar_event_origin
 
@@ -465,6 +490,12 @@ GoogleCalendarViewAppearanceStore protocol
 - `AppEnvironment.googleCalendarDBVersion`으로 스키마 버전 관리
 - `onFirstOpen` 콜백에서 테이블 생성 + 마이그레이션 실행
 - 단일 계정 → 다중 계정 마이그레이션: `AppDataMigrationImple` (1회성, 플래그 기반 멱등성)
+
+| 버전 | 스텝 | 대상 |
+|---|---|---|
+| 0 → 1 | `access_role` 컬럼 추가 | `google_calendar_list` |
+
+**테이블은 `onFirstOpen` 이 아니라 캘린더 목록 최초 로드 시 lazy 생성된다.** 신규 설치에서는 마이그레이션이 테이블보다 먼저 돌아 `ALTER TABLE` 이 실패하므로, 각 스텝은 메인 DB(`AppDataMigrationImple`)와 같이 실패를 로그로 남기고 대상 테이블을 drop 한 뒤 통과시킨다 (`GoogleCalendarEventTagTableMigration`). 이렇게 해야 `user_version` 이 전진하고, 테이블은 다음 로드 때 최신 스키마로 다시 만들어진다. 스텝이 throw 하면 `user_version` 이 0에 고정돼 이후 모든 스텝이 조용히 안 돈다.
 
 ---
 

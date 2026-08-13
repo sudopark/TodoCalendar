@@ -34,9 +34,18 @@ open class StubExternalCalendarIntegrationUsecase: ExternalCalendarIntegrationUs
         return account
     }
 
+    public var didReauthenticateWith: (serviceId: String, accountId: String)?
+    public var didReauthenticateWithService: (any ExternalCalendarService)?
+    public var shouldFailReauthenticate: Bool = false
     open func reauthenticate(
         external service: any ExternalCalendarService, accountId: String
     ) async throws -> ExternalServiceAccountinfo {
+        self.didReauthenticateWith = (service.identifier, accountId)
+        self.didReauthenticateWithService = service
+        guard !self.shouldFailReauthenticate
+        else {
+            throw RuntimeError("failed to reauthenticate")
+        }
         let account = ExternalServiceAccountinfo(service.identifier, email: accountId)
         var map = self.fakeAccountMapSubject.value
         map[service.identifier, default: []].removeAll { $0.email == account.email }
