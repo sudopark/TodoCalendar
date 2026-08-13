@@ -403,6 +403,9 @@ private final class PrivateStubIntegrationUsecase: ExternalCalendarIntegrationUs
 
     func prepareIntegratedAccounts() async throws {}
     func integrate(external service: any ExternalCalendarService) async throws -> ExternalServiceAccountinfo { fatalError() }
+    func reauthenticate(
+        external service: any ExternalCalendarService, accountId: String
+    ) async throws -> ExternalServiceAccountinfo { fatalError() }
     func stopIntegrate(external service: any ExternalCalendarService, accountId: String) async throws {}
     func handleAuthenticationResultOrNot(open url: URL) -> Bool { false }
 
