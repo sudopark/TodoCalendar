@@ -146,7 +146,7 @@ public enum EventListMoreAction: Sendable, Equatable {
     case skipTodo
     case edit
     case copy
-    case editGoogleEvent(link: String)
+    case editGoogleEvent(calendarId: String, accountId: String, eventId: String)
 }
 
 public struct EventListMoreActionModel: Sendable, Equatable {
@@ -439,7 +439,6 @@ public struct GoogleCalendarEventCellViewModel: EventCellViewModel {
     public var isForemost: Bool = false
     public let calendarId: String
     public let accountId: String
-    public let htmlLink: String?
     public var isAlldayEvent: Bool = false
 
     public init?(
@@ -458,14 +457,15 @@ public struct GoogleCalendarEventCellViewModel: EventCellViewModel {
         self.isForemost = event.isForemost
         self.calendarId = event.calendarId
         self.accountId = event.accountId
-        self.htmlLink = event.htmlLink
         self.isAlldayEvent = event.eventTime?.isAllDay ?? false
     }
 
     public var moreActions: EventListMoreActionModel? {
-        guard let link = self.htmlLink else { return nil }
         return .init(
-            basicActions: [.editGoogleEvent(link: link)], removeActions: []
+            basicActions: [
+                .editGoogleEvent(calendarId: self.calendarId, accountId: self.accountId, eventId: self.eventIdentifier)
+            ],
+            removeActions: []
         )
     }
 
