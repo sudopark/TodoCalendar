@@ -306,6 +306,7 @@ SQLite의 `ALTER TABLE ADD COLUMN`은 **맨 뒤에 붙이는 것만** 된다. �
 - **temp 테이블은 라이브러리가 안 만든다.** 마이그레이션 스텝에서 `createTableOrNot(<Temp>Table.self)`로 직접 생성한다. 새 컬럼 순서는 이 temp 테이블의 `Columns` 정의가 결정한다.
 - `to`/`from`은 컬럼 **이름** 매핑 표다. 각 이름은 해당 테이블에서 이름으로 해석되고, 두 리스트끼리는 위치로 짝지어진다. 이름이 안 바뀌면 같은 배열을 양쪽에 넘긴다.
 - **새로 추가하는 컬럼은 두 리스트에서 뺀다.** 원본에 없어 SELECT가 실패한다. 빠진 컬럼은 NULL로 남는다.
+- **temp 테이블의 `Columns`는 그 버전 스키마로 동결한다.** 살아있는 원본 `Columns`를 typealias·참조로 끌어쓰면, 이후 컬럼을 추가하는 순간 과거 마이그레이션의 복사 목록에 그 버전 원본엔 없는 이름이 실려 SELECT가 깨진다. 그러면 위 예시의 실패 경로를 타 원본 테이블이 드롭되고 사용자 데이터가 사라진다. 컬럼 나열이 중복돼 보여도 각 temp 테이블은 자기 case를 통째로 적는다.
 - 선례: `EventUploadPendingQueueTableV4TempTable`(v4 → v5), `PendingDoneTodoEventTableV6TempTable`(v6 → v7)
 
 ```swift

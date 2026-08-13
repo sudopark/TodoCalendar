@@ -11,6 +11,7 @@
   - 신규 테스트 스킴 ↔ 스킴 목록 하드코딩 전부 (`pr_test.yml` 3곳·`scripts/run-all-tests.sh`·`impact-check.sh`+테스트·`run-tests` 스킬 — 상세는 add-framework 스킬. 단 `<Name>Snapshots` 스킴은 의도된 예외 — 로컬 전용, snapshot-check 스킬)
   - init 시그니처 ↔ 콜사이트
   - 인증 필요 신규 Endpoint enum ↔ `CalendarAPIAutenticator.shouldAdapt` case ↔ 회귀 테스트 (누락 시 무인증 요청 → 401, 리트라이도 안 됨)
+  - CommonPresentation 신규 컴포넌트 ↔ `.claude/rules/presentations-rules.md` §2 카탈로그 표 등재 (누락 시 다음 사람이 못 찾아 같은 컴포넌트를 또 만든다)
   - en `Localizable.strings` 키 추가/삭제 ↔ ko lproj 반영 ↔ 번역 대기 트래킹 이슈 #810에 작업 링크 기록 (나머지 29개 언어는 #810 처리 시점에 일괄 번역 — 상세는 `.claude/rules/localization.md`)
 - **스킬 종료·유저 교정은 레코드로 남긴다** (#690 flywheel 측정 신호):
   - 발동한 스킬의 절차가 끝나면: `python3 .claude/hooks/log-record.py skill_end --name <스킬> --compliance full|partial [--deviation "조항::사유" --deviation-reviewed]` — 조항을 의도적으로 이행 안 했으면 partial + 이탈 조항·사유 필수.
