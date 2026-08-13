@@ -185,6 +185,188 @@ extension GoogleCalendarRepositoryImple_Tests {
         #expect(tag?.foregroundColorHex == "#000000")
         #expect(tag?.colorId == "12")
         #expect(tag?.isSelected == true)
+        #expect(tag?.accessRole == .owner)
+    }
+}
+
+// MARK: - accessRole 저장/복원
+
+extension GoogleCalendarRepositoryImple_Tests {
+
+    @Test func cacheStorage_saveAndLoad_preservesOwnerAccessRole() async throws {
+        try await self.runTestWithOpenClose("test_google_access_role_1") {
+            // given
+            let tag = GoogleCalendar.Tag(id: "owner_calendar", name: "owner calendar")
+                |> \.accessRole .~ .owner
+
+            // when
+            try await self.cacheStorage.updateCalendarList([tag], accountId: self.testAccountId)
+            let loaded = try await self.cacheStorage.loadCalendarList(accountId: self.testAccountId)
+
+            // then
+            #expect(loaded.first?.accessRole == .owner)
+            #expect(loaded.first?.isWritable == true)
+        }
+    }
+
+    @Test func cacheStorage_saveAndLoad_preservesReaderAccessRole() async throws {
+        try await self.runTestWithOpenClose("test_google_access_role_2") {
+            // given
+            let tag = GoogleCalendar.Tag(id: "reader_calendar", name: "reader calendar")
+                |> \.accessRole .~ .reader
+
+            // when
+            try await self.cacheStorage.updateCalendarList([tag], accountId: self.testAccountId)
+            let loaded = try await self.cacheStorage.loadCalendarList(accountId: self.testAccountId)
+
+            // then
+            #expect(loaded.first?.accessRole == .reader)
+            #expect(loaded.first?.isWritable == false)
+        }
+    }
+
+    @Test func cacheStorage_saveAndLoad_withNilAccessRole_doesNotShiftOtherColumns() async throws {
+        try await self.runTestWithOpenClose("test_google_access_role_3") {
+            // given
+            let tag = GoogleCalendar.Tag(id: "no_role_calendar", name: "no role calendar")
+                |> \.colorId .~ "12"
+                |> \.isSelected .~ true
+
+            // when
+            try await self.cacheStorage.updateCalendarList([tag], accountId: self.testAccountId)
+            let loaded = try await self.cacheStorage.loadCalendarList(accountId: self.testAccountId)
+
+            // then
+            #expect(loaded.first?.accessRole == nil)
+            #expect(loaded.first?.isWritable == false)
+            #expect(loaded.first?.name == "no role calendar")
+            #expect(loaded.first?.colorId == "12")
+            #expect(loaded.first?.isSelected == true)
+        }
+    }
+
+    @Test func mapper_whenAccessRoleIsUnrecognizedValue_decodesAsNilButOtherFieldsSurvive() throws {
+        // given
+        let json = """
+        {
+            "id": "future_role_calendar",
+            "summary": "future role calendar",
+            "colorId": "5",
+            "selected": true,
+            "accessRole": "futureRoleNotYetSupported"
+        }
+        """.data(using: .utf8)!
+
+        // when
+        let mapper = try JSONDecoder().decode(GoogleCalendarEventTagMapper.self, from: json)
+
+        // then
+        #expect(mapper.calendar.id == "future_role_calendar")
+        #expect(mapper.calendar.colorId == "5")
+        #expect(mapper.calendar.isSelected == true)
+        #expect(mapper.calendar.accessRole == nil)
+        #expect(mapper.calendar.isWritable == false)
+    }
+
+    @Test func migration_addsAccessRoleColumn_toExistingTable_withoutLosingData() async throws {
+        try await self.runTestWithOpenClose("test_google_access_role_migration") {
+            // given
+            let legacyTag = GoogleCalendar.Tag(id: "legacy_calendar", name: "legacy calendar")
+                |> \.colorId .~ "9"
+                |> \.isSelected .~ true
+            try await self.sqliteService.async.run { db in
+                try db.createTableOrNot(GoogleCalendarEventTagTableV0LegacyTable.self)
+                let entity = GoogleCalendarEventTagTable.Entity(accountId: self.testAccountId, legacyTag)
+                try db.insert(GoogleCalendarEventTagTableV0LegacyTable.self, entities: [entity], shouldReplace: true)
+            }
+
+            // when
+            try await self.sqliteService.async.run { db in
+                try GoogleCalendarEventTagTableMigration.runMigration(for: 0, database: db)
+            }
+            let migratedInTag = GoogleCalendar.Tag(id: "migrated_in_calendar", name: "migrated in calendar")
+                |> \.accessRole .~ .owner
+            try await self.sqliteService.async.run { db in
+                let entity = GoogleCalendarEventTagTable.Entity(accountId: self.testAccountId, migratedInTag)
+                try db.insert(GoogleCalendarEventTagTable.self, entities: [entity], shouldReplace: false)
+            }
+            let loaded = try await self.cacheStorage.loadCalendarList(accountId: self.testAccountId)
+
+            // then
+            let legacy = loaded.first { $0.id == "legacy_calendar" }
+            #expect(legacy?.colorId == "9")
+            #expect(legacy?.isSelected == true)
+            #expect(legacy?.accessRole == nil)
+
+            let migratedIn = loaded.first { $0.id == "migrated_in_calendar" }
+            #expect(migratedIn?.accessRole == .owner)
+        }
+    }
+
+    @Test func migration_whenTableNotCreatedYet_succeedsAndTableAcceptsAccessRole() async throws {
+        try await self.runTestWithOpenClose("test_google_access_role_migration_fresh") {
+            // given - 신규 설치: 캘린더 목록을 아직 한 번도 로드하지 않아 테이블이 없다
+
+            // when
+            try await self.sqliteService.async.run { db in
+                try GoogleCalendarEventTagTableMigration.runMigration(for: 0, database: db)
+            }
+
+            // then
+            let tag = GoogleCalendar.Tag(id: "fresh_calendar", name: "fresh calendar")
+                |> \.accessRole .~ .writer
+            try await self.sqliteService.async.run { db in
+                let entity = GoogleCalendarEventTagTable.Entity(accountId: self.testAccountId, tag)
+                try db.insert(GoogleCalendarEventTagTable.self, entities: [entity], shouldReplace: false)
+            }
+            let loaded = try await self.cacheStorage.loadCalendarList(accountId: self.testAccountId)
+            #expect(loaded.first?.id == "fresh_calendar")
+            #expect(loaded.first?.accessRole == .writer)
+        }
+    }
+}
+
+private struct GoogleCalendarEventTagTableV0LegacyTable: Table {
+
+    enum Columns: String, TableColumn {
+        case accountId = "account_id"
+        case tagId = "tag_id"
+        case name
+        case description
+        case background
+        case foreground
+        case colorId = "color_id"
+        case isSelected = "is_selected"
+
+        var dataType: ColumnDataType {
+            switch self {
+            case .accountId: return .text([.notNull])
+            case .tagId: return .text([.primaryKey(autoIncrement: false), .unique, .notNull])
+            case .name: return .text([.notNull])
+            case .description: return .text([])
+            case .background: return .text([])
+            case .foreground: return .text([])
+            case .colorId: return .text([])
+            case .isSelected: return .integer([])
+            }
+        }
+    }
+
+    typealias ColumnType = Columns
+    typealias EntityType = GoogleCalendarEventTagTable.Entity
+    static var tableName: String { GoogleCalendarEventTagTable.tableName }
+
+    static func scalar(_ entity: EntityType, for column: Columns) -> (any ScalarType)? {
+        switch column {
+        case .accountId: return entity.accountId
+        case .tagId: return entity.tag.id
+        case .name: return entity.tag.name
+        case .description: return entity.tag.description
+        case .background: return entity.tag.backgroundColorHex
+        case .foreground: return entity.tag.foregroundColorHex
+        case .colorId: return entity.tag.colorId
+        case .isSelected: return entity.tag.isSelected ?? false
+        }
     }
 }
 
