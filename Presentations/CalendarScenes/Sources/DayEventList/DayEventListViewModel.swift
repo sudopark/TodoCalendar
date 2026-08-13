@@ -231,7 +231,7 @@ extension DayEventListViewModelImple {
             self.confirmSignInForAIAgent()
             return
         }
-        self.aiAgentOrchestrationUsecase.enterVoiceInput()
+        try? self.aiAgentOrchestrationUsecase.enterVoiceInput()
     }
 
     func finishVoiceInput() {
@@ -239,14 +239,22 @@ extension DayEventListViewModelImple {
     }
 
     func enterKeyboardInput() {
-        self.aiAgentOrchestrationUsecase.enterKeyboardInput()
+        do {
+            try self.aiAgentOrchestrationUsecase.enterKeyboardInput()
+        } catch {
+            return
+        }
         self.router?.routeToAIKeyboardInput()
     }
 
     func enterImageInput() {
-        self.aiAgentOrchestrationUsecase.enterImageInput()
+        do {
+            try self.aiAgentOrchestrationUsecase.enterImageInput()
+        } catch {
+            return
+        }
         self.router?.routeToImageSourceSelect { [weak self] in
-            self?.aiAgentOrchestrationUsecase.enterVoiceInput()
+            try? self?.aiAgentOrchestrationUsecase.enterVoiceInput()
         }
     }
 
