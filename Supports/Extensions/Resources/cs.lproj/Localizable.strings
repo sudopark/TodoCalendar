@@ -145,7 +145,6 @@
 "calednar::event::skip_todo_until" = "Vyberte čas, do kdy tento úkol přeskočit";
 "calednar::event::copy" = "Kopírovat událost";
 "calendar::move_date" = "Přesunout datum";
-"calednar::event::google::edit" = "Upravit událost Google Kalendáře";
 
 
 // MARK: - event detail

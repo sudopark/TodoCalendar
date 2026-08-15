@@ -167,7 +167,6 @@
 "calendar::share::this_day" = "이 날 일정 공유";
 "calendar::share::this_week" = "이 주 일정 공유";
 "calendar::share::this_month" = "이 달 일정 공유";
-"calednar::event::google::edit" = "구글캘린더 이벤트 수정";
 
 
 // MARK: - event detail

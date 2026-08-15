@@ -167,7 +167,6 @@
 "calendar::share::this_day" = "Share this day";
 "calendar::share::this_week" = "Share this week";
 "calendar::share::this_month" = "Share this month";
-"calednar::event::google::edit" = "Edit Google Calendar Event";
 
 
 // MARK: - event detail

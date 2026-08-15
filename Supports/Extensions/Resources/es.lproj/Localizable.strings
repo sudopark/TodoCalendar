@@ -145,7 +145,6 @@
 "calednar::event::skip_todo_until" = "Selecciona una fecha para omitir esta tarea";
 "calednar::event::copy" = "Copiar evento";
 "calendar::move_date" = "Mover fecha";
-"calednar::event::google::edit" = "Editar evento de Google Calendar";
 
 
 // MARK: - event detail

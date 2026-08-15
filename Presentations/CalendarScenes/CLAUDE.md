@@ -100,7 +100,6 @@ graph TD
     ECH -->|ScheduleEvent| SD[ScheduleEventDetail]
     ECH -->|Holiday| HD[HolidayEventDetail]
     ECH -->|GoogleEvent| GD[GoogleCalendarEventDetail]
-    ECH -->|Google 편집| GE[GoogleCalendarEventEdit<br/>네이티브 편집, EventDetailScene]
 ```
 
 ### Listener/Interactor 통신 흐름

@@ -397,104 +397,6 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
 }
 
 
-// MARK: - editEvent(): 쓰기 권한별 분기
-
-extension GoogleCalendarEventDetailViewModelImpleTests {
-
-    @Test func editEvent_whenWritable_routesToEditScene() {
-        // given
-        let viewModel = self.makeViewModel(writePermission: .writable)
-        viewModel.refresh()
-
-        // when
-        viewModel.editEvent()
-
-        // then
-        #expect(self.spyRouter.didRouteToEditSceneWith?.calendarId == "g:7")
-        #expect(self.spyRouter.didRouteToEditSceneWith?.accountId == "stub@gmail.com")
-        #expect(self.spyRouter.didRouteToEditSceneWith?.eventId == "id")
-        #expect(self.spyRouter.didShowConfirmWith == nil)
-    }
-
-    @Test func editEvent_whenNeedReauthentication_confirmed_reauthenticatesThenRoutesToEditScene() async throws {
-        // given
-        let viewModel = self.makeViewModel(writePermission: .needReauthentication)
-        self.spyRouter.shouldConfirmNotCancel = true
-        viewModel.refresh()
-
-        // when
-        viewModel.editEvent()
-        try await Task.sleep(for: .milliseconds(10))
-
-        // then
-        #expect(self.spyRouter.didShowConfirmWith?.title == "eventDetail::gogoleEvent::reauthenticate::title".localized())
-        #expect(self.integrationUsecase.didReauthenticateWith?.accountId == "stub@gmail.com")
-        #expect(self.spyRouter.didRouteToEditSceneWith?.eventId == "id")
-    }
-
-    @Test func editEvent_whenNeedReauthentication_declined_doesNotRoute() {
-        // given
-        let viewModel = self.makeViewModel(writePermission: .needReauthentication)
-        self.spyRouter.shouldConfirmNotCancel = false
-        viewModel.refresh()
-
-        // when
-        viewModel.editEvent()
-
-        // then
-        #expect(self.integrationUsecase.didReauthenticateWith == nil)
-        #expect(self.spyRouter.didRouteToEditSceneWith == nil)
-    }
-
-    @Test func editEvent_whenNeedReauthentication_andReauthenticateFails_showsErrorAndDoesNotRoute() async throws {
-        // given
-        let viewModel = self.makeViewModel(
-            writePermission: .needReauthentication, shouldFailReauthenticate: true
-        )
-        self.spyRouter.shouldConfirmNotCancel = true
-        viewModel.refresh()
-
-        // when
-        viewModel.editEvent()
-        try await Task.sleep(for: .milliseconds(10))
-
-        // then
-        #expect(self.spyRouter.didShowError != nil)
-        #expect(self.spyRouter.didRouteToEditSceneWith == nil)
-    }
-
-    @Test func editEvent_whenNeedReauthentication_usesGoogleServiceFromUsecaseNotAHardcodedLiteral() async throws {
-        // given — composition root 가 주입한 서비스 값(scopes 비움)을 usecase 가 들고 있다고 가정
-        let viewModel = self.makeViewModel(writePermission: .needReauthentication)
-        self.lastCalendarUsecase.googleService = GoogleCalendarService(scopes: [])
-        self.spyRouter.shouldConfirmNotCancel = true
-        viewModel.refresh()
-
-        // when
-        viewModel.editEvent()
-        try await Task.sleep(for: .milliseconds(10))
-
-        // then — ViewModel 이 GoogleCalendarService(scopes: [.readWrite]) 를 직접 새로 만들지 않고
-        // usecase 가 들고 있던 값(빈 scopes)을 그대로 재인증에 전달한다
-        let usedService = self.integrationUsecase.didReauthenticateWithService as? GoogleCalendarService
-        #expect(usedService?.scopes == [])
-    }
-
-    @Test func editEvent_whenReadOnlyCalendar_doesNothing() {
-        // given
-        let viewModel = self.makeViewModel(writePermission: .readOnlyCalendar)
-        viewModel.refresh()
-
-        // when
-        viewModel.editEvent()
-
-        // then
-        #expect(self.spyRouter.didRouteToEditSceneWith == nil)
-        #expect(self.spyRouter.didShowConfirmWith == nil)
-    }
-}
-
-
 // MARK: - isEditable / readOnlyCalendarMessage 노출 — 권한 3상태 전수 표
 
 extension GoogleCalendarEventDetailViewModelImpleTests {
@@ -536,58 +438,6 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
 }
 
 
-// MARK: - 편집 결과 반영 (GoogleCalendarEventEditSceneListener)
-
-extension GoogleCalendarEventDetailViewModelImpleTests {
-
-    @Test func googleCalendarEvent_didUpdate_refreshesEventName() async throws {
-        // given
-        let expect = expectConfirm("수정된 이벤트 이름 반영")
-        expect.count = 2
-        let viewModel = self.makeViewModel()
-        let updated = GoogleCalendar.EventOrigin(id: "id", summary: "updated name")
-
-        // when
-        let names = try await self.outputs(expect, for: viewModel.eventName) {
-            viewModel.refresh()
-            viewModel.googleCalendarEvent(didUpdate: updated)
-        }
-
-        // then
-        #expect(names == ["name", "updated name"])
-    }
-
-    @Test func googleCalendarEvent_didUpdate_withSeriesMasterResponse_refetchesInsteadOfApplyingItDirectly() async throws {
-        // given — "전체 일정" 저장 응답(시리즈 마스터: recurringEventId 없음 + recurrence 있음)이 온다
-        let viewModel = self.makeViewModel()
-        viewModel.refresh()
-        try await Task.sleep(for: .milliseconds(10))
-        var seriesMaster = GoogleCalendar.EventOrigin(id: "series1", summary: "series master title")
-        seriesMaster.recurrence = ["RRULE:FREQ=DAILY;COUNT=3"]
-
-        // when
-        viewModel.googleCalendarEvent(didUpdate: seriesMaster)
-        try await Task.sleep(for: .milliseconds(10))
-
-        // then — 마스터를 그대로 반영했다면 location 이 nil(마스터엔 없음)로 덮였을 것이다.
-        // 대신 인스턴스를 재조회해 stub 의 원래 location("location")이 유지돼야 한다.
-        let expect = expectConfirm("재조회 후 인스턴스 데이터 유지")
-        let location = try await self.firstOutput(expect, for: viewModel.location)
-        #expect(location == "location")
-    }
-
-    @Test func googleCalendarEvent_didRemove_closesDetailScene() {
-        // given
-        let viewModel = self.makeViewModel()
-
-        // when
-        viewModel.googleCalendarEvent(didRemove: "id")
-
-        // then
-        #expect(self.spyRouter.didClosed == true)
-    }
-}
-
 // MARK: - 구글 캘린더에서 보기 (점점점 메뉴)
 
 extension GoogleCalendarEventDetailViewModelImpleTests {
@@ -627,9 +477,8 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
         // when
         viewModel.viewOnGoogleCalendar()
 
-        // then — routeToEditEvent(편집) 가 아니라 openSafari 로 연다
+        // then
         #expect(self.spyRouter.didOpenSafariPath == "link")
-        #expect(self.spyRouter.didRouteToEditSceneWith == nil)
     }
 }
 
@@ -1644,13 +1493,4 @@ private final class PrivateStubGoogleCalendarUsecase: StubGoogleCalendarUsecase,
     }
 }
 
-private final class SpyRouter: BaseSpyRouter, GoogleCalendarEventDetailRouting, @unchecked Sendable {
-
-    var didRouteToEditSceneWith: (calendarId: String, accountId: String, eventId: String, listener: (any GoogleCalendarEventEditSceneListener)?)?
-    func routeToEditEvent(
-        calendarId: String, accountId: String, eventId: String,
-        listener: (any GoogleCalendarEventEditSceneListener)?
-    ) {
-        self.didRouteToEditSceneWith = (calendarId, accountId, eventId, listener)
-    }
-}
+private final class SpyRouter: BaseSpyRouter, GoogleCalendarEventDetailRouting, @unchecked Sendable { }

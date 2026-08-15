@@ -145,7 +145,6 @@
 "calednar::event::skip_todo_until" = "Välj en tid för att hoppa över denna uppgift";
 "calednar::event::copy" = "Kopiera händelse";
 "calendar::move_date" = "Flytta datum";
-"calednar::event::google::edit" = "Redigera Google Kalender-händelse";
 
 
 // MARK: - event detail

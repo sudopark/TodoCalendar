@@ -25,7 +25,6 @@ protocol EventListCellEventHanleRouting: Routing, Sendable {
         calendarId: String, accountId: String, eventId: String
     )
     func routeToAppleCalendarEventDetail(calendarId: String, eventId: String)
-    func routeToEditGoogleEvent(calendarId: String, accountId: String, eventId: String)
     func routeToMakeNewEvent(_ withParams: MakeEventParams)
 }
 
@@ -97,16 +96,6 @@ extension EventListCellEventHanleRouter {
         }
     }
 
-    func routeToEditGoogleEvent(calendarId: String, accountId: String, eventId: String) {
-        Task { @MainActor in
-            let next = self.eventDetailSceneBuilder.makeGoogleCalendarEventEditScene(
-                calendarId: calendarId, accountId: accountId, eventId: eventId,
-                listener: nil
-            )
-            self.scene?.present(next, animated: true)
-        }
-    }
-    
     func routeToMakeNewEvent(_ withParams: MakeEventParams) {
         Task { @MainActor in
             
