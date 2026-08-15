@@ -413,6 +413,9 @@ extension GoogleCalendarEventDetailViewModelImple {
     }
 
     private func updateCurrentFields(_ mutate: @escaping (EditableFields) -> EditableFields) {
+        // 권한 조회 전(nil)은 허용 — isEditable publisher 의 compactMap 판정과 동일 기준
+        guard self.subject.writePermission.value != .readOnlyCalendar else { return }
+        guard !self.subject.isSaving.value else { return }
         guard let fields = self.subject.fields.value else { return }
         self.subject.fields.send(
             fields |> \.current %~ mutate
@@ -638,6 +641,7 @@ extension GoogleCalendarEventDetailViewModelImple {
 extension GoogleCalendarEventDetailViewModelImple {
 
     func startEditDescription() {
+        guard self.subject.writePermission.value != .readOnlyCalendar else { return }
         let memo = self.subject.fields.value?.current.memo ?? ""
         guard !self.subject.isDescriptionPlainEditing.value, memo.hasHTMLTag else { return }
         let info = ConfirmDialogInfo()

@@ -30,20 +30,25 @@ final class GoogleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
         recurrence: String? = nil,
         isCanceled: Bool = false,
         customAttendees: [GoogleCalendar.EventOrigin.Attendee]? = nil,
-        writePermission: GoogleCalendar.EventWritePermission = .writable,
+        writePermission: GoogleCalendar.EventWritePermission? = .writable,
         shouldFailReauthenticate: Bool = false,
         summaryPerCall: [String]? = nil,
         recurringEventId: String? = nil,
         htmlLink: String? = "link",
         description: String? = "그냥 텍스트<br><b>볼드</b><br>첨부파일도 있을거다잉<br>마크다운임?",
         updatedOrigin: GoogleCalendar.EventOrigin? = GoogleCalendarEventDetailViewModelImpleTests.defaultUpdatedOrigin(),
+        updateEventDelayMilliseconds: UInt64 = 0,
         eventDetailFailsFromCallIndex: Int? = nil
     ) -> GoogleCalendarEventDetailViewModelImple {
         let settingUsecase = StubCalendarSettingUsecase()
         settingUsecase.prepare()
 
         let calendarUsecase = PrivateStubGoogleCalendarUsecase()
-        calendarUsecase.stubWritePermission = writePermission
+        if let writePermission {
+            calendarUsecase.stubWritePermission = writePermission
+        } else {
+            calendarUsecase.shouldEmitWritePermission = false
+        }
         calendarUsecase.summaryPerCall = summaryPerCall
         calendarUsecase.additionalStubbing = { stub in
             stub
@@ -55,6 +60,7 @@ final class GoogleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
                 |> \.description .~ description
         }
         calendarUsecase.stubUpdatedEventOrigin = updatedOrigin
+        calendarUsecase.updateEventDelayMilliseconds = updateEventDelayMilliseconds
         calendarUsecase.eventDetailFailsFromCallIndex = eventDetailFailsFromCallIndex
         calendarUsecase.refreshGoogleCalendarEventTags()
         self.lastCalendarUsecase = calendarUsecase
@@ -841,6 +847,59 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
     }
 }
 
+// MARK: - 읽기 전용 캘린더에서는 편집 입력이 무시된다
+
+extension GoogleCalendarEventDetailViewModelImpleTests {
+
+    @Test func enterName_whenReadOnlyCalendar_doesNotMarkAsChanged() async throws {
+        // given
+        let viewModel = self.makeViewModel(writePermission: .readOnlyCalendar)
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+
+        // when
+        viewModel.enter(name: "changed")
+
+        // then
+        let hasChanges = try await self.firstOutput(expectConfirm("hasChanges"), for: viewModel.hasChanges)
+        let name = try await self.firstOutput(expectConfirm("eventName"), for: viewModel.eventName)
+        #expect(hasChanges == false)
+        #expect(name == "name")
+    }
+
+    @Test func selectColorId_whenReadOnlyCalendar_doesNotMarkAsChanged() async throws {
+        // given
+        let viewModel = self.makeViewModel(writePermission: .readOnlyCalendar)
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventColorModel) {
+            viewModel.refresh()
+        }
+
+        // when
+        viewModel.select(colorId: "new_color")
+
+        // then
+        let hasChanges = try await self.firstOutput(expectConfirm("hasChanges"), for: viewModel.hasChanges)
+        #expect(hasChanges == false)
+    }
+
+    @Test func enterName_whenWritePermissionNotLoadedYet_appliesChange() async throws {
+        // given — eventWritePermission 이 아직 방출하지 않은 상태(권한 조회 전)
+        let viewModel = self.makeViewModel(writePermission: nil)
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+
+        // when
+        viewModel.enter(name: "changed")
+
+        // then
+        let updated = try await self.firstOutput(expectConfirm("변경된 이름"), for: viewModel.eventName)
+        #expect(updated == "changed")
+    }
+}
+
+
 // MARK: - 저장 — 쓰기 권한 게이팅
 
 extension GoogleCalendarEventDetailViewModelImpleTests {
@@ -1141,6 +1200,31 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
 }
 
 
+// MARK: - 저장 중 입력 무시
+
+extension GoogleCalendarEventDetailViewModelImpleTests {
+
+    @Test func enterName_whileSaving_isIgnored() async throws {
+        // given
+        let viewModel = self.makeViewModel(updateEventDelayMilliseconds: 100)
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+        viewModel.enter(name: "before save")
+        _ = try await self.firstOutput(expectConfirm("저장 전 입력 반영"), for: viewModel.eventName)
+
+        // when — 저장 시작 직후(응답 오기 전)에 입력
+        viewModel.save()
+        try await Task.sleep(for: .milliseconds(10))
+        viewModel.enter(name: "typed while saving")
+
+        // then
+        let name = try await self.firstOutput(expectConfirm("저장 중 입력 무시"), for: viewModel.eventName)
+        #expect(name == "before save")
+    }
+}
+
+
 // MARK: - 삭제
 
 extension GoogleCalendarEventDetailViewModelImpleTests {
@@ -1416,6 +1500,24 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
         #expect(self.spyRouter.didShowConfirmWith == nil)
     }
 
+    @Test func startEditDescription_whenReadOnlyCalendar_doesNotShowConfirm() async throws {
+        // given
+        let viewModel = self.makeViewModel(
+            writePermission: .readOnlyCalendar, description: "그냥 텍스트<br><b>볼드</b>"
+        )
+        _ = try await self.firstOutput(expectConfirm("설명 로드"), for: viewModel.descriptionModel) {
+            viewModel.refresh()
+        }
+
+        // when
+        viewModel.startEditDescription()
+
+        // then
+        #expect(self.spyRouter.didShowConfirmWith == nil)
+        let model = try await self.firstOutput(expectConfirm("서식 유지"), for: viewModel.descriptionModel)
+        #expect(model == .richText("그냥 텍스트<br><b>볼드</b>"))
+    }
+
     @Test func descriptionModel_whenPlainDescriptionEditedIntoTagText_staysPlainText() async throws {
         // given — 평문으로 로드된 설명은 편집 중 태그 패턴이 섞여도 판정이 뒤바뀌지 않는다
         let viewModel = self.makeViewModel(description: "그냥 텍스트")
@@ -1458,12 +1560,15 @@ private final class PrivateStubGoogleCalendarUsecase: StubGoogleCalendarUsecase,
     var summaryPerCall: [String]?
     private var eventDetailCallCount = 0
     var eventDetailFailsFromCallIndex: Int?
+    var updateEventDelayMilliseconds: UInt64 = 0
 
     var didRequestEventWritePermissionWith: [(accountId: String, calendarId: String)] = []
+    var shouldEmitWritePermission: Bool = true
     override func eventWritePermission(
         accountId: String, calendarId: String
     ) -> AnyPublisher<GoogleCalendar.EventWritePermission, Never> {
         self.didRequestEventWritePermissionWith.append((accountId, calendarId))
+        guard self.shouldEmitWritePermission else { return Empty().eraseToAnyPublisher() }
         return super.eventWritePermission(accountId: accountId, calendarId: calendarId)
     }
 
@@ -1521,6 +1626,21 @@ private final class PrivateStubGoogleCalendarUsecase: StubGoogleCalendarUsecase,
         let stub = additionalStubbing?(origin) ?? origin
 
         return Just(stub).mapAsAnyError().eraseToAnyPublisher()
+    }
+
+    override func updateEvent(
+        _ calendarId: String,
+        _ eventId: String,
+        accountId: String,
+        at timeZone: TimeZone,
+        params: GoogleCalendar.EventEditParams
+    ) async throws -> GoogleCalendar.EventOrigin {
+        if self.updateEventDelayMilliseconds > 0 {
+            try await Task.sleep(for: .milliseconds(self.updateEventDelayMilliseconds))
+        }
+        return try await super.updateEvent(
+            calendarId, eventId, accountId: accountId, at: timeZone, params: params
+        )
     }
 }
 

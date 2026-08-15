@@ -115,6 +115,8 @@
 "calendar::eventSync::loadingAllEvents::message" = "모든 이벤트를 불러오는 중…";
 "calendar::event_time::todo" = "할일";
 "calendar::event_time::allday" = "하루종일";
+"calendar::event_time::start" = "시작";
+"calendar::event_time::end" = "종료";
 "calendar::event_time::allday::with" = "%@ 하루종일";
 "calendar::event_time::period:some_days" = "%d일";
 "calendar::event_time::period:some_minutes" = "%d분";
