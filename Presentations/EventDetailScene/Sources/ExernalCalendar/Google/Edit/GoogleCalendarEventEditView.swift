@@ -27,6 +27,7 @@ import CommonPresentation
     var selectedColorModel: GoogleCalendarEventColorModel?
     var isSavable: Bool = false
     var isSaving: Bool = false
+    var hasDetailLink: Bool = false
 
     func bind(_ viewModel: any GoogleCalendarEventEditViewModel) {
 
@@ -81,6 +82,13 @@ import CommonPresentation
                 self?.isSaving = isSaving
             })
             .store(in: &self.cancellables)
+
+        viewModel.hasDetailLink
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] hasLink in
+                self?.hasDetailLink = hasLink
+            })
+            .store(in: &self.cancellables)
     }
 }
 
@@ -99,6 +107,7 @@ final class GoogleCalendarEventEditViewEventHandler: Observable {
     var selectColor: (String?) -> Void = { _ in }
     var save: () -> Void = { }
     var remove: () -> Void = { }
+    var editOnGoogleCalendar: () -> Void = { }
     var close: () -> Void = { }
 
     func bind(_ viewModel: any GoogleCalendarEventEditViewModel) {
@@ -112,6 +121,7 @@ final class GoogleCalendarEventEditViewEventHandler: Observable {
         self.selectColor = viewModel.select(colorId:)
         self.save = viewModel.save
         self.remove = viewModel.remove
+        self.editOnGoogleCalendar = viewModel.editOnGoogleCalendar
         self.close = viewModel.close
     }
 }
@@ -156,10 +166,11 @@ struct GoogleCalendarEventEditView: View {
     @Environment(GoogleCalendarEventEditViewEventHandler.self) private var eventHandlers
     @Environment(ViewAppearance.self) private var appearance
 
-    private enum InputFields: Hashable {
+    private enum InputFields: String {
         case name
         case location
         case memo
+        var id: String { "GoogleCalendarEventEditView::InputFields::\(self.rawValue)" }
     }
     @FocusState private var isFocusInput: InputFields?
 
@@ -168,22 +179,38 @@ struct GoogleCalendarEventEditView: View {
         case end
     }
     @State private var isTimeSelecting: TimeSelecting?
+    @State private var isColorSelecting: Bool = false
 
     /// Google Calendar 이벤트 색상은 계정과 무관하게 고정된 "1".."11" 팔레트다.
     private static let colorIdCandidates: [String] = (1...11).map(String.init)
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: Metric.Spacing.xlarge) {
-                self.nameInputView
-                self.timeSelectView
-                self.colorSelectView
-                self.locationInputView
-                self.memoInputView
+        ScrollViewReader { proxy in
+            ScrollView {
+                VStack(spacing: Metric.Spacing.xlarge) {
+                    self.nameInputView
+                        .id(InputFields.name.id)
+                    self.timeSelectView
+                    self.colorSelectView
+
+                    VStack(spacing: Metric.Spacing.xlarge) {
+                        self.locationInputView
+                            .id(InputFields.location.id)
+                        self.memoInputView
+                            .id(InputFields.memo.id)
+                    }
+                    .padding(.top, spacing: .regular)
+                }
+                .padding(.top, spacing: .xlarge)
+                .padding(.horizontal, spacing: .regular)
+                .padding(.bottom, 120)
             }
-            .padding(.top, spacing: .xlarge)
-            .padding(.horizontal, spacing: .regular)
-            .padding(.bottom, spacing: .xlarge)
+            .onChange(of: isFocusInput) { _, new in
+                guard let id = new?.id else { return }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                    withAnimation { proxy.scrollTo(id, anchor: .center) }
+                }
+            }
         }
         .safeAreaInset(edge: .bottom) {
             self.bottomButtons
@@ -194,21 +221,35 @@ struct GoogleCalendarEventEditView: View {
 
     private var nameInputView: some View {
         @Bindable var state = self.state
-        return TextField(
-            "",
-            text: $state.eventName,
-            prompt: Text("eventDetail.edit::add_new_name::placeholder".localized())
-                .foregroundStyle(appearance.colorSet.placeHolder.asColor)
-        )
-        .focused($isFocusInput, equals: .name)
-        .autocorrectionDisabled()
-        .textInputAutocapitalization(.never)
-        .font(appearance.fontSet.size(22, weight: .semibold).asFont)
-        .foregroundStyle(appearance.colorSet.text0.asColor)
-        .onChange(of: state.eventName) { _, new in
-            eventHandlers.enterName(new)
+        return HStack(spacing: Metric.Spacing.regular) {
+            EventTagColorView(
+                GoogleCalendarEventColorSource(
+                    calendarId: state.selectedColorModel?.calendarId ?? "",
+                    colorId: state.selectedColorModel?.colorId
+                )
+            ) { color in
+                RoundedRectangle(cornerRadius: 3)
+                    .fill(color)
+                    .frame(width: 6)
+            }
+
+            TextField(
+                "",
+                text: $state.eventName,
+                prompt: Text("eventDetail.edit::add_new_name::placeholder".localized())
+                    .foregroundStyle(appearance.colorSet.placeHolder.asColor)
+            )
+            .focused($isFocusInput, equals: .name)
+            .autocorrectionDisabled()
+            .textInputAutocapitalization(.never)
+            .font(appearance.fontSet.size(22, weight: .semibold).asFont)
+            .foregroundStyle(appearance.colorSet.text0.asColor)
+            .onChange(of: state.eventName) { _, new in
+                eventHandlers.enterName(new)
+            }
+            .onSubmit { self.isFocusInput = nil }
         }
-        .onSubmit { self.isFocusInput = nil }
+        .fixedSize(horizontal: false, vertical: true)
     }
 
     private var timeSelectView: some View {
@@ -327,19 +368,73 @@ struct GoogleCalendarEventEditView: View {
     }
 
     private var colorSelectView: some View {
-        HStack(spacing: Metric.Spacing.small) {
+        HStack(alignment: .top, spacing: Metric.Spacing.large) {
             Image(systemName: "paintpalette")
                 .font(.system(size: 16, weight: .light))
                 .foregroundStyle(appearance.colorSet.text1.asColor)
 
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: Metric.Spacing.small) {
-                    ForEach(Self.colorIdCandidates, id: \.self) { colorId in
-                        self.colorSwatch(colorId)
-                    }
+            VStack(alignment: .leading, spacing: Metric.Spacing.small) {
+                self.selectedColorChip
+
+                if self.isColorSelecting {
+                    self.colorPaletteView
                 }
             }
+
+            Spacer()
         }
+    }
+
+    private var selectedColorChip: some View {
+        HStack(spacing: Metric.Spacing.small) {
+            EventTagColorView(
+                GoogleCalendarEventColorSource(
+                    calendarId: state.selectedColorModel?.calendarId ?? "",
+                    colorId: state.selectedColorModel?.colorId
+                )
+            ) { color in
+                Circle()
+                    .fill(color)
+                    .frame(width: 16, height: 16)
+            }
+
+            Image(systemName: self.isColorSelecting ? "chevron.up" : "chevron.down")
+                .font(appearance.fontSet.subNormal.asFont)
+                .foregroundStyle(appearance.colorSet.text2.asColor)
+        }
+        .padding(spacing: .small)
+        .background(
+            RoundedRectangle(cornerRadius: Metric.Radius.sheet)
+                .fill(appearance.colorSet.bg1.asColor)
+        )
+        .onTapGesture {
+            self.appearance.impactIfNeed()
+            self.updateColorSelectingShowing()
+        }
+    }
+
+    private func updateColorSelectingShowing() {
+        appearance.withAnimationIfNeed {
+            self.isColorSelecting.toggle()
+        }
+        self.isFocusInput = nil
+    }
+
+    private var colorPaletteView: some View {
+        LazyVGrid(
+            columns: [GridItem(.adaptive(minimum: 24), spacing: Metric.Spacing.regular)],
+            alignment: .leading,
+            spacing: Metric.Spacing.regular
+        ) {
+            ForEach(Self.colorIdCandidates, id: \.self) { colorId in
+                self.colorSwatch(colorId)
+            }
+        }
+        .padding(spacing: .regular)
+        .background(
+            RoundedRectangle(cornerRadius: Metric.Radius.large)
+                .fill(appearance.colorSet.bg1.asColor)
+        )
     }
 
     private func colorSwatch(_ colorId: String) -> some View {
@@ -353,7 +448,15 @@ struct GoogleCalendarEventEditView: View {
                 .frame(width: 24, height: 24)
                 .overlay(
                     Circle()
-                        .stroke(appearance.colorSet.text0.asColor, lineWidth: isSelected ? 2 : 0)
+                        .stroke(appearance.colorSet.line.asColor, lineWidth: 1)
+                )
+                .padding(spacing: .xxsmall)
+                .overlay(
+                    Circle()
+                        .stroke(
+                            appearance.colorSet.text0.asColor,
+                            lineWidth: isSelected ? 2 : 0
+                        )
                 )
         }
         .onTapGesture {
@@ -421,21 +524,48 @@ struct GoogleCalendarEventEditView: View {
     }
 
     private var bottomButtons: some View {
-        VStack(spacing: Metric.Spacing.small) {
-            Button(role: .destructive) {
-                eventHandlers.remove()
-            } label: {
-                Text("common.remove".localized())
-                    .font(appearance.fontSet.subNormal.asFont)
-                    .foregroundStyle(appearance.colorSet.accentWarn.asColor)
-            }
-
-            BottomConfirmButton(
+        HStack(spacing: Metric.Spacing.small) {
+            ConfirmButton(
                 title: "common.save".localized(),
                 isEnable: state.isSavable,
                 isProcessing: state.isSaving
             )
             .eventHandler(\.onTap, eventHandlers.save)
+
+            self.moreActionMenu
+        }
+        .padding()
+        .background(
+            Rectangle()
+                .fill(appearance.colorSet.dayBackground.asColor)
+                .ignoresSafeArea(edges: .bottom)
+        )
+    }
+
+    private var moreActionMenu: some View {
+        Menu {
+            if state.hasDetailLink {
+                Section {
+                    Button {
+                        eventHandlers.editOnGoogleCalendar()
+                    } label: {
+                        Label(
+                            "eventDetail::gogoleEvent::editOnCalendar".localized(),
+                            systemImage: "arrow.up.forward.square"
+                        )
+                    }
+                }
+            }
+
+            Section {
+                Button(role: .destructive) {
+                    eventHandlers.remove()
+                } label: {
+                    Label("common.remove".localized(), systemImage: "trash")
+                }
+            }
+        } label: {
+            MoreActionMenuLabel()
         }
     }
 }

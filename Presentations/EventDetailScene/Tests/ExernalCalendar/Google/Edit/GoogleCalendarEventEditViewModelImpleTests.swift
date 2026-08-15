@@ -26,7 +26,8 @@ final class GoogleCalendarEventEditViewModelImpleTests: PublisherWaitable {
     private let spyListener = SpyListener()
 
     private func makeViewModel(
-        recurringEventId: String? = nil
+        recurringEventId: String? = nil,
+        htmlLink: String? = "https://calendar.google.com/event?eid=instance_id"
     ) -> (GoogleCalendarEventEditViewModelImple, StubGoogleCalendarUsecase) {
         let settingUsecase = StubCalendarSettingUsecase()
         settingUsecase.prepare()
@@ -42,6 +43,7 @@ final class GoogleCalendarEventEditViewModelImpleTests: PublisherWaitable {
             |> \.description .~ "origin memo"
             |> \.colorId .~ "3"
             |> \.recurringEventId .~ recurringEventId
+            |> \.htmlLink .~ htmlLink
 
         let calendarUsecase = StubGoogleCalendarUsecase()
         calendarUsecase.stubDetail = origin
@@ -527,6 +529,86 @@ extension GoogleCalendarEventEditViewModelImpleTests {
         // then
         #expect(usecase.didRemoveEventWith?.eventId == "series_id")
         #expect(self.spyListener.didRemoveEventId == "series_id")
+    }
+}
+
+
+// MARK: - 구글 캘린더에서 수정 — 더보기 메뉴 액션
+
+extension GoogleCalendarEventEditViewModelImpleTests {
+
+    @Test func editOnGoogleCalendar_opensOriginHtmlLink() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModel()
+        let _ = try await self.firstOutput(expectConfirm("원본 로드"), for: viewModel.eventName) {
+            viewModel.prepare()
+        }
+
+        // when
+        viewModel.editOnGoogleCalendar()
+
+        // then
+        #expect(
+            self.spyRouter.didOpenSafariPath == "https://calendar.google.com/event?eid=instance_id"
+        )
+    }
+
+    @Test func editOnGoogleCalendar_whenOriginHasNoHtmlLink_notOpensSafari() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModel(htmlLink: nil)
+        let _ = try await self.firstOutput(expectConfirm("원본 로드"), for: viewModel.eventName) {
+            viewModel.prepare()
+        }
+
+        // when
+        viewModel.editOnGoogleCalendar()
+
+        // then
+        #expect(self.spyRouter.didOpenSafariPath == nil)
+    }
+
+    @Test func hasDetailLink_beforeOriginLoaded_isFalse() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModel()
+
+        // when
+        let hasLink = try await self.firstOutput(
+            expectConfirm("로드 전 링크 여부"), for: viewModel.hasDetailLink
+        )
+
+        // then
+        #expect(hasLink == false)
+    }
+
+    @Test func hasDetailLink_whenOriginLoaded_isTrue() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModel()
+        let expect = expectConfirm("로드 후 링크 여부")
+        expect.count = 2
+
+        // when
+        let hasLinks = try await self.outputs(expect, for: viewModel.hasDetailLink) {
+            viewModel.prepare()
+        }
+
+        // then
+        #expect(hasLinks == [false, true])
+    }
+
+    @Test func hasDetailLink_whenOriginLoadedWithoutHtmlLink_isFalse() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModel(htmlLink: nil)
+        let _ = try await self.firstOutput(expectConfirm("원본 로드"), for: viewModel.eventName) {
+            viewModel.prepare()
+        }
+
+        // when
+        let hasLink = try await self.firstOutput(
+            expectConfirm("링크 없는 원본"), for: viewModel.hasDetailLink
+        )
+
+        // then
+        #expect(hasLink == false)
     }
 }
 
