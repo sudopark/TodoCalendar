@@ -31,7 +31,8 @@ final class StubAIAgentOrchestrationUsecase: AIAgentOrchestrationUsecase, @unche
     private(set) var didDecline = false
     private(set) var didReset = false
     private(set) var didRestore = false
-    private(set) var didLoadUsage = false
+    private(set) var didLoadUsageCount = 0
+    var didLoadUsage: Bool { self.didLoadUsageCount > 0 }
 
     var stubSubmitError: (any Error)?
     var stubImageSubmitError: (any Error)?
@@ -63,7 +64,7 @@ final class StubAIAgentOrchestrationUsecase: AIAgentOrchestrationUsecase, @unche
     func decline() { self.didDecline = true }
     func reset() { self.didReset = true; self.stateSubject.send(.idle) }
     func restoreIfNeeded() { self.didRestore = true }
-    func loadUsage() { self.didLoadUsage = true }
+    func loadUsage() { self.didLoadUsageCount += 1 }
 
     private(set) var didHandleJobStatusChangedWith: String?
     func handleJobStatusChanged(_ jobId: String) {
