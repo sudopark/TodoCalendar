@@ -20,7 +20,9 @@ protocol CalendarViewRouting: Routing, Sendable {
     @MainActor
     func slideFocus(to index: Int, isNext: Bool, completed: @escaping @Sendable () -> Void)
 
-    func routeToAICommand()
+    func routeToAICommand(listener: (any AIAgentCommandSceneListener)?)
+
+    func routeToPaywall()
 
     func routeToSignIn()
 
@@ -32,14 +34,17 @@ final class CalendarViewRouterImple: BaseRouterImple, CalendarViewRouting, @unch
     private let paperSceneBuilder: any CalendarPaperSceneBuiler
     private let aiAgentCommandSceneBuilder: any AIAgentCommandSceneBuilder
     private let memberSceneBuilder: any MemberSceneBuilder
+    private let paywallSceneBuilder: any PaywallSceneBuilder
     init(
         _ paperSceneBuilder: any CalendarPaperSceneBuiler,
         aiAgentCommandSceneBuilder: any AIAgentCommandSceneBuilder,
-        memberSceneBuilder: any MemberSceneBuilder
+        memberSceneBuilder: any MemberSceneBuilder,
+        paywallSceneBuilder: any PaywallSceneBuilder
     ) {
         self.paperSceneBuilder = paperSceneBuilder
         self.aiAgentCommandSceneBuilder = aiAgentCommandSceneBuilder
         self.memberSceneBuilder = memberSceneBuilder
+        self.paywallSceneBuilder = paywallSceneBuilder
     }
     private var currentScene: (any CalendarScene)? { self.scene as? (any CalendarScene) }
 
@@ -68,18 +73,33 @@ final class CalendarViewRouterImple: BaseRouterImple, CalendarViewRouting, @unch
         current.slideFocus(to: index, isNext: isNext, completed: completed)
     }
 
-    func routeToAICommand() {
+    func routeToAICommand(listener: (any AIAgentCommandSceneListener)?) {
         self.dismissPresented(animated: true) { [weak self] in
             Task { @MainActor in
-                self?.presentAICommandScene()
+                self?.presentAICommandScene(listener: listener)
             }
         }
     }
 
     @MainActor
-    private func presentAICommandScene() {
-        let next = self.aiAgentCommandSceneBuilder.makeCommandScene()
+    private func presentAICommandScene(listener: (any AIAgentCommandSceneListener)?) {
+        let next = self.aiAgentCommandSceneBuilder.makeCommandScene(listener: listener)
         self.showBottomSlide(next)
+    }
+
+    // 시트를 얹은 채로 paywall을 올리면 top-up 후 복귀해도 시트가 다시 드러난다
+    func routeToPaywall() {
+        self.dismissPresented(animated: true) { [weak self] in
+            Task { @MainActor in
+                self?.presentPaywallScene()
+            }
+        }
+    }
+
+    @MainActor
+    private func presentPaywallScene() {
+        let next = self.paywallSceneBuilder.makePaywallScene(closesAfterPurchase: true)
+        self.showFullScreen(next)
     }
 
     func routeToSignIn() {
