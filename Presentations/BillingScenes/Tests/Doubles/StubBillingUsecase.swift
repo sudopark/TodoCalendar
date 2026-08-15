@@ -36,7 +36,8 @@ final class StubBillingUsecase: BillingUsecase, @unchecked Sendable {
     var didRefreshUserPlanPublisher: AnyPublisher<Bool, Never> {
         self.didRefreshUserPlanSubject.eraseToAnyPublisher()
     }
-    var didCheckUnfinishedCalled: Bool = false
+    var didCheckUnfinishedTimes: Int = 0
+    var didCheckUnfinishedCalled: Bool { self.didCheckUnfinishedTimes > 0 }
     var didApplyUnfinishedTimes: Int = 0
 
     init(
@@ -112,7 +113,7 @@ final class StubBillingUsecase: BillingUsecase, @unchecked Sendable {
     func stopObservingTransactions() { }
     func recoverUnfinishedTransactions() { }
     func hasUnfinishedTransactions() async -> Bool {
-        self.didCheckUnfinishedCalled = true
+        self.didCheckUnfinishedTimes += 1
         return self.hasUnfinished
     }
 

@@ -845,6 +845,117 @@ extension PaywallViewModelImpleTests {
 }
 
 
+// MARK: - 실패 후 미완료 거래 재조회 (#885)
+
+extension PaywallViewModelImpleTests {
+
+    @Test("구매 실패 후 미완료 거래를 다시 조회해 배너를 띄운다")
+    func viewModel_whenPurchaseFails_reChecksUnfinishedTransactions() async throws {
+        // given
+        let standard = self.purchasableOffering(.standard, productId: "product.standard")
+        let (viewModel, stub, _) = self.makeViewModel(
+            offerings: [standard], purchaseResult: .failure(TestError()), hasUnfinished: true
+        )
+        _ = try await self.waitOfferingsLoaded(viewModel)
+        viewModel.selectPlan(.standard)
+
+        // when
+        try await self.waitProcessingCompleted(viewModel) { viewModel.purchase() }
+
+        // then: prepare() 에서 1회 + 실패 후 재조회 1회
+        #expect(stub.didCheckUnfinishedTimes == 2)
+        let expect = expectConfirm("배너 노출 상태")
+        let hasUnfinished = try await self.firstOutput(expect, for: viewModel.hasUnfinishedTransactions)
+        #expect(hasUnfinished == true)
+    }
+
+    @Test("top-up 구매 실패 후 미완료 거래를 다시 조회해 배너를 띄운다")
+    func viewModel_whenPurchaseTopupFails_reChecksUnfinishedTransactions() async throws {
+        // given: prepare() 를 부르지 않아 재조회 여부가 고정 stub 만으로 판별된다
+        let (viewModel, stub, _) = self.makeViewModel(
+            purchaseResult: .failure(TestError()), hasUnfinished: true
+        )
+
+        // when
+        try await self.waitProcessingCompleted(viewModel) { viewModel.purchaseTopup("topup.tier.1") }
+
+        // then
+        #expect(stub.didCheckUnfinishedTimes == 1)
+        let expect = expectConfirm("배너 노출 상태")
+        let hasUnfinished = try await self.firstOutput(expect, for: viewModel.hasUnfinishedTransactions)
+        #expect(hasUnfinished == true)
+    }
+
+    @Test("복원 실패 후 미완료 거래를 다시 조회해 배너를 띄운다")
+    func viewModel_whenRestoreFails_reChecksUnfinishedTransactions() async throws {
+        // given
+        let (viewModel, stub, _) = self.makeViewModel(
+            restoreError: TestError(), hasUnfinished: true
+        )
+
+        // when
+        try await self.waitProcessingCompleted(viewModel) { viewModel.restore() }
+
+        // then
+        #expect(stub.didCheckUnfinishedTimes == 1)
+        let expect = expectConfirm("배너 노출 상태")
+        let hasUnfinished = try await self.firstOutput(expect, for: viewModel.hasUnfinishedTransactions)
+        #expect(hasUnfinished == true)
+    }
+
+    // 판별력 — 재조회가 무조건 배너를 켜는 게 아니라 실제 미완료 거래 유무를 그대로 반영한다
+    @Test("미완료 거래가 없으면 복원이 실패해도 배너를 띄우지 않는다")
+    func viewModel_whenRestoreFailsWithoutUnfinishedTransaction_keepsBannerHidden() async throws {
+        // given
+        let (viewModel, stub, _) = self.makeViewModel(
+            restoreError: TestError(), hasUnfinished: false
+        )
+
+        // when
+        try await self.waitProcessingCompleted(viewModel) { viewModel.restore() }
+
+        // then
+        #expect(stub.didCheckUnfinishedTimes == 1)
+        let expect = expectConfirm("배너 미노출 상태")
+        let hasUnfinished = try await self.firstOutput(expect, for: viewModel.hasUnfinishedTransactions)
+        #expect(hasUnfinished == false)
+    }
+
+    @Test("구매 실패로 뜬 배너를 재시도로 반영하면 배너가 내려간다")
+    func viewModel_whenRetryAfterPurchaseFailureSucceeds_hidesBannerAndShowsAppliedToast() async throws {
+        // given
+        let applied = BillingUserPlan() |> \.planId .~ .standard
+        let (viewModel, stub, router) = self.makeViewModel(
+            purchaseResult: .failure(TestError()),
+            hasUnfinished: true,
+            applyUnfinishedResult: .success(applied)
+        )
+
+        // when: 구매 실패
+        try await self.waitProcessingCompleted(viewModel) { viewModel.purchaseTopup("topup.tier.1") }
+
+        // then: 배너가 뜬다
+        let shownExpect = expectConfirm("배너 노출 상태")
+        let bannerShown = try await self.firstOutput(
+            shownExpect, for: viewModel.hasUnfinishedTransactions
+        )
+        #expect(bannerShown == true)
+
+        // when: 그 배너의 "지금 적용" 으로 재시도
+        try await self.waitProcessingCompleted(viewModel) { viewModel.recoverUnfinished() }
+
+        // then: 배너가 내려가고 반영을 알린다
+        let hiddenExpect = expectConfirm("배너 내려간 상태")
+        let bannerHidden = try await self.firstOutput(
+            hiddenExpect, for: viewModel.hasUnfinishedTransactions
+        )
+        #expect(bannerHidden == false)
+        #expect(stub.didApplyUnfinishedTimes == 1)
+        #expect(router.didShowToastWithMessage == "billing::paywall::unfinished::applied".localized())
+    }
+}
+
+
 // MARK: - 구독 관리 진입점 노출 조건
 
 extension PaywallViewModelImpleTests {
