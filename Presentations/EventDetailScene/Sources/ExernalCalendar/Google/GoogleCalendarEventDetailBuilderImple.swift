@@ -57,6 +57,7 @@ extension GoogleCalendarEventDetailSceneBuilerImple: GoogleCalendarEventDetailSc
         let router = GoogleCalendarEventDetailRouter(editSceneBuilder: editSceneBuilder)
         router.scene = viewController
         viewModel.router = router
+        viewController.router = router
 
         return viewController
     }
