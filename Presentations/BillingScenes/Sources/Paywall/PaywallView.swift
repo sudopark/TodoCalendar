@@ -26,6 +26,7 @@ import CommonPresentation
     var catalogState: PaywallCatalogState = .loading
     var cellModels: [PaywallPlanCellModel] = []
     var topupCellModels: [PaywallTopupCellModel] = []
+    var topupTitle: String = ""
     var selectedPlanId: BillingPlanId?
     var selectedPlanDetail: PaywallPlanDetailModel?
     var isPurchasing: Bool = false
@@ -69,6 +70,11 @@ import CommonPresentation
         viewModel.topupCellModels
             .receive(on: RunLoop.main)
             .sink { [weak self] in self?.topupCellModels = $0 }
+            .store(in: &self.cancellables)
+
+        viewModel.topupTitle
+            .receive(on: RunLoop.main)
+            .sink { [weak self] in self?.topupTitle = $0 }
             .store(in: &self.cancellables)
 
         viewModel.selectedPlanId
@@ -424,7 +430,7 @@ private struct PaywallView: View {
 
     private var topupSection: some View {
         VStack(alignment: .leading, spacing: Metric.Spacing.small) {
-            Text("billing::paywall::topup::title".localized())
+            Text(self.state.topupTitle)
                 .font(self.appearance.fontSet.subNormalWithBold.asFont)
                 .foregroundStyle(self.appearance.colorSet.text0.asColor)
 

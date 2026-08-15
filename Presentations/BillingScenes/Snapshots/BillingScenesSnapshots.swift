@@ -435,6 +435,7 @@ extension BillingScenesSnapshots {
                     self.topupCell(credits: 165000, price: "$4.99", bonusPercent: 10),
                     self.topupCell(credits: 432000, price: "$9.99", bonusPercent: 20)
                 ]
+                state.topupTitle = "billing::paywall::topup::title".localized()
                 state.isPurchasing = false
             }
         }
@@ -480,6 +481,7 @@ extension BillingScenesSnapshots {
                     self.topupCell(credits: 165000, price: "$4.99", bonusPercent: 10),
                     self.topupCell(credits: 432000, price: "$9.99", bonusPercent: 20)
                 ]
+                state.topupTitle = "billing::paywall::topup::title".localized()
                 state.isPurchasing = false
             }
         }

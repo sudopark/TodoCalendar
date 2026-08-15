@@ -1171,6 +1171,68 @@ extension PaywallViewModelImpleTests {
 }
 
 
+// MARK: - top-up 섹션 헤더 (#884)
+
+extension PaywallViewModelImpleTests {
+
+    // topupRemaining 이 없으면(nil) 헤더는 보유량 없이 기본 타이틀만 보여준다
+    @Test func topupTitle_whenRemainingIsNil_showsPlainTitle() async throws {
+        // given
+        let (viewModel, _, _) = self.makeViewModel(
+            userPlan: BillingUserPlan() |> \.planId .~ .standard
+        )
+
+        // when
+        let expect = expectConfirm("보유량 없는 타이틀")
+        let title = try await self.firstOutput(expect, for: viewModel.topupTitle) {
+            viewModel.prepare()
+        }
+
+        // then
+        #expect(title == "billing::paywall::topup::title".localized())
+    }
+
+    // 분기 경계 — topupRemaining 이 0 이면(비교 연산자를 뒤집으면 실패하는 지점) 여전히
+    // 기본 타이틀이다. 0 은 "보유 없음"과 같은 상태라 보유량을 붙이지 않는다
+    @Test func topupTitle_whenRemainingIsZero_showsPlainTitle() async throws {
+        // given
+        let (viewModel, _, _) = self.makeViewModel(
+            userPlan: BillingUserPlan() |> \.planId .~ .standard |> \.topupRemaining .~ 0
+        )
+
+        // when
+        let expect = expectConfirm("0 은 보유량 미표기")
+        let title = try await self.firstOutput(expect, for: viewModel.topupTitle) {
+            viewModel.prepare()
+        }
+
+        // then
+        #expect(title == "billing::paywall::topup::title".localized())
+    }
+
+    // topupRemaining 이 양수면 헤더에 보유량이 붙는다
+    @Test func topupTitle_whenRemainingIsPositive_showsTitleWithRemaining() async throws {
+        // given
+        let (viewModel, _, _) = self.makeViewModel(
+            userPlan: BillingUserPlan() |> \.planId .~ .standard |> \.topupRemaining .~ 12000
+        )
+
+        // when
+        let expect = expectConfirm("보유량 표기")
+        let title = try await self.firstOutput(expect, for: viewModel.topupTitle) {
+            viewModel.prepare()
+        }
+
+        // then
+        #expect(
+            title
+                == "billing::paywall::topup::title::withRemaining"
+                    .localized(with: 12000.formatted())
+        )
+    }
+}
+
+
 // MARK: - top-up 구매
 
 extension PaywallViewModelImpleTests {
@@ -1199,7 +1261,8 @@ extension PaywallViewModelImpleTests {
             |> \.topupRemaining .~ 30000
     }
 
-    @Test func purchaseTopup_whenApplied_showsToastAndKeepsSceneOpen() async throws {
+    // #884 — 구매한 tier 의 총 크레딧이 토스트 문구에 실린다(topup.tier.1 은 30000, 보너스 없음)
+    @Test func purchaseTopup_whenApplied_showsToastWithPurchasedCreditsAndKeepsSceneOpen() async throws {
         // given
         let (viewModel, stub, router) = self.topupPurchaseViewModel(
             purchaseResult: .success(.applied(self.appliedTopupPlan()))
@@ -1213,6 +1276,31 @@ extension PaywallViewModelImpleTests {
 
         // then
         #expect(stub.didPurchasedProductId == "topup.tier.1")
+        #expect(
+            router.didShowToastWithMessage
+                == "billing::paywall::topup::applied::withCredits".localized(with: 30000.formatted())
+        )
+        #expect(router.didClosed == nil)
+    }
+
+    // #884 — 순서 축: 구매한 productId 를 카탈로그(topupOfferings)에서 찾지 못하면(비정상 진입)
+    // 수치 없는 기존 문구로 안전하게 물러난다. 정상 플로우에선 셀이 카탈로그에서 만들어지므로
+    // purchaseTopup 에 전달되는 productId 는 항상 topupOfferings 에 존재한다 — 이 분기는
+    // 방어용이라 실사용 경로에선 도달하지 않는다
+    @Test func purchaseTopup_whenProductIdNotInCatalog_showsToastWithoutCredits() async throws {
+        // given
+        let (viewModel, stub, router) = self.topupPurchaseViewModel(
+            purchaseResult: .success(.applied(self.appliedTopupPlan()))
+        )
+        _ = try await self.waitTopupCellsLoaded(viewModel)
+
+        // when
+        try await self.waitProcessingCompleted(viewModel) {
+            viewModel.purchaseTopup("topup.unknown")
+        }
+
+        // then
+        #expect(stub.didPurchasedProductId == "topup.unknown")
         #expect(router.didShowToastWithMessage == "billing::paywall::topup::applied".localized())
         #expect(router.didClosed == nil)
     }
