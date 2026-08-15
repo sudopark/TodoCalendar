@@ -145,7 +145,6 @@
 "calednar::event::skip_todo_until" = "Seleziona un orario per saltare questo da fare";
 "calednar::event::copy" = "Copia evento";
 "calendar::move_date" = "Sposta data";
-"calednar::event::google::edit" = "Modifica evento di Google Calendar";
 
 
 // MARK: - event detail

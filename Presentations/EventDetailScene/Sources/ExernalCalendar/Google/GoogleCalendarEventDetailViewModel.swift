@@ -124,7 +124,6 @@ protocol GoogleCalendarEventDetailViewModel: AnyObject, Sendable, GoogleCalendar
 
     // interactor
     func refresh()
-    func editEvent()
     func viewOnGoogleCalendar()
     func selectLink(_ link: URL)
     func selectAttachment(_ model: AttachmentModel)
@@ -296,51 +295,6 @@ extension GoogleCalendarEventDetailViewModelImple {
         self.subject.fields.send(.init(origin: fields))
     }
 
-    func editEvent() {
-
-        switch self.subject.writePermission.value {
-        case .writable:
-            self.routeToEditScene()
-        case .needReauthentication:
-            self.confirmReauthenticationForEdit()
-        case .readOnlyCalendar, .none:
-            return
-        }
-    }
-
-    private func routeToEditScene() {
-        self.router?.routeToEditEvent(
-            calendarId: self.calendarId, accountId: self.accountId, eventId: self.eventId,
-            listener: self
-        )
-    }
-
-    private func confirmReauthenticationForEdit() {
-        let info = ConfirmDialogInfo()
-            |> \.title .~ pure("eventDetail::gogoleEvent::reauthenticate::title".localized())
-            |> \.message .~ pure("eventDetail::gogoleEvent::reauthenticate::message".localized())
-            |> \.confirmed .~ pure(self.reauthenticateThenRouteToEditScene)
-            |> \.withCancel .~ true
-        self.router?.showConfirm(dialog: info)
-    }
-
-    private func reauthenticateThenRouteToEditScene() {
-        let service = self.googleCalendarUsecase.googleService
-        let accountId = self.accountId
-        Task { [weak self] in
-            guard let self else { return }
-            do {
-                _ = try await self.externalCalendarIntegrationUsecase.reauthenticate(
-                    external: service, accountId: accountId
-                )
-                self.routeToEditScene()
-            } catch {
-                self.router?.showError(error)
-            }
-        }
-        .store(in: &self.cancellables)
-    }
-    
     func viewOnGoogleCalendar() {
         guard let link = self.subject.origin.value?.htmlLink else { return }
         self.router?.openSafari(link)
@@ -861,24 +815,6 @@ extension GoogleCalendarEventDetailViewModelImple {
             .map(transform)
             .removeDuplicates()
             .eraseToAnyPublisher()
-    }
-}
-
-
-// MARK: - GoogleCalendarEventDetailViewModelImple + GoogleCalendarEventEditSceneListener
-
-extension GoogleCalendarEventDetailViewModelImple: GoogleCalendarEventEditSceneListener {
-
-    func googleCalendarEvent(didUpdate event: GoogleCalendar.EventOrigin) {
-        guard !event.isRecurringSeriesMaster else {
-            self.refresh()
-            return
-        }
-        self.applyLoaded(event)
-    }
-
-    func googleCalendarEvent(didRemove eventId: String) {
-        self.router?.closeScene()
     }
 }
 

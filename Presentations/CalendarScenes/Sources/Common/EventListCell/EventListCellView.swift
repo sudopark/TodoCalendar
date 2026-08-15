@@ -118,8 +118,6 @@ struct EventListCellView: View {
             return skipTodoButton().asAnyView()
         case .copy:
             return copyButton().asAnyView()
-        case .editGoogleEvent(let calendarId, let accountId, let eventId):
-            return editGoogleEventButton(calendarId, accountId, eventId).asAnyView()
         }
     }
     
@@ -185,22 +183,6 @@ struct EventListCellView: View {
                 Text("calednar::event::copy".localized())
                 Image(systemName: "doc.on.doc")
             }
-        }
-    }
-    
-    private func editGoogleEventButton(
-        _ calendarId: String, _ accountId: String, _ eventId: String
-    ) -> some View {
-        return Button {
-            self.handleMoreAction(
-                self.cellViewModel,
-                .editGoogleEvent(calendarId: calendarId, accountId: accountId, eventId: eventId)
-            )
-        } label: {
-            Text("calednar::event::google::edit".localized())
-            Image("google_calendar_icon")
-                .resizable()
-                .scaledToFill()
         }
     }
     

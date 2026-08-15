@@ -145,7 +145,6 @@
 "calednar::event::skip_todo_until" = "Επιλέξτε ώρα μέχρι την οποία θα παραλειφθεί αυτή η εργασία";
 "calednar::event::copy" = "Αντιγραφή συμβάντος";
 "calendar::move_date" = "Μετακίνηση ημερομηνίας";
-"calednar::event::google::edit" = "Επεξεργασία συμβάντος Google Ημερολογίου";
 
 
 // MARK: - event detail

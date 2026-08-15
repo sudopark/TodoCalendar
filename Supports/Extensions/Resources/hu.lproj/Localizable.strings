@@ -145,7 +145,6 @@
 "calednar::event::skip_todo_until" = "Válassza ki, meddig hagyja ki ezt a feladatot";
 "calednar::event::copy" = "Esemény másolása";
 "calendar::move_date" = "Dátum áthelyezése";
-"calednar::event::google::edit" = "Google Naptár esemény szerkesztése";
 
 
 // MARK: - event detail

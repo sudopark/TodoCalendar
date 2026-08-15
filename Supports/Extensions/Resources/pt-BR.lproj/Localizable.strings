@@ -145,7 +145,6 @@
 "calednar::event::skip_todo_until" = "Selecione um horário para pular esta tarefa";
 "calednar::event::copy" = "Copiar evento";
 "calendar::move_date" = "Mover data";
-"calednar::event::google::edit" = "Editar evento do Google Agenda";
 
 
 // MARK: - event detail

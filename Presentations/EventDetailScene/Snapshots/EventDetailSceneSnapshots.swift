@@ -82,35 +82,6 @@ final class EventDetailSceneSnapshots: XCTestCase {
     }
 
     @MainActor
-    func test_googleEventEdit() {
-        captureSnapshotPair(named: "googleEventEdit", layout: .fullScreen) { theme in
-            let appearance = self.makeAppearance(theme)
-            let colors = GoogleCalendar.Colors(
-                ownerId: "snapshot@google.com",
-                calendars: ["calendar_id": .init(foregroundHex: "#ffffff", backgroudHex: "#039be5")],
-                events: (1...11).reduce(into: [String: GoogleCalendar.Colors.ColorSet]()) {
-                    $0["\($1)"] = .init(foregroundHex: "#ffffff", backgroudHex: "#f4511e")
-                }
-            )
-            appearance.googleCalendarColors[colors.ownerId] = colors
-            let state = GoogleCalendarEventEditViewState()
-            state.eventName = "google calendar event"
-            state.selectedTime = .period(
-                .init(self.start, .current), .init(self.end, .current)
-            )
-            state.location = "location text"
-            state.memo = "memo text"
-            state.selectedColorModel = .init(colorId: "6", calendarId: "calendar_id")
-            state.isSavable = true
-            state.hasDetailLink = true
-            return GoogleCalendarEventEditView()
-                .environment(state)
-                .environment(GoogleCalendarEventEditViewEventHandler())
-                .environment(appearance)
-        }
-    }
-
-    @MainActor
     func test_appleEventDetail() {
         captureSnapshotPair(named: "appleEventDetail", layout: .fullScreen) { theme in
             let state = AppleCalendarEventDetailViewState()

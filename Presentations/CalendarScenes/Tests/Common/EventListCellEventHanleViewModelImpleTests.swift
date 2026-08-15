@@ -24,8 +24,6 @@ class EventListCellEventHanleViewModelImpleTests: BaseTestCase, PublisherWaitabl
     private var spyTodoUsecase: PrivateStubTodoEventUsecase!
     private var spySchedleUsecase: PrivateScheduleEventUsecase!
     private var spyForemostUsecase: PrivateForemostEventUsecase!
-    private var stubGoogleCalendarUsecase: StubGoogleCalendarUsecase!
-    private var stubExternalCalendarIntegrationUsecase: StubExternalCalendarIntegrationUsecase!
     private var spyRouter: SpyEventListCellEventHanleRouter!
 
     override func setUpWithError() throws {
@@ -33,8 +31,6 @@ class EventListCellEventHanleViewModelImpleTests: BaseTestCase, PublisherWaitabl
         self.spyTodoUsecase = .init()
         self.spySchedleUsecase = .init()
         self.spyForemostUsecase = .init()
-        self.stubGoogleCalendarUsecase = .init()
-        self.stubExternalCalendarIntegrationUsecase = .init([])
         self.spyRouter = .init()
     }
 
@@ -43,27 +39,19 @@ class EventListCellEventHanleViewModelImpleTests: BaseTestCase, PublisherWaitabl
         self.spyTodoUsecase = nil
         self.spySchedleUsecase = nil
         self.spyForemostUsecase = nil
-        self.stubGoogleCalendarUsecase = nil
-        self.stubExternalCalendarIntegrationUsecase = nil
         self.spyRouter = nil
     }
 
     private func makeViewModel(
-        shouldFailDoneTodo: Bool = false,
-        googleEventWritePermission: GoogleCalendar.EventWritePermission = .writable,
-        shouldFailReauthenticate: Bool = false
+        shouldFailDoneTodo: Bool = false
     ) -> EventListCellEventHanleViewModelImple {
 
         self.spyTodoUsecase.shouldFailCompleteTodo = shouldFailDoneTodo
-        self.stubGoogleCalendarUsecase.stubWritePermission = googleEventWritePermission
-        self.stubExternalCalendarIntegrationUsecase.shouldFailReauthenticate = shouldFailReauthenticate
 
         let viewModel = EventListCellEventHanleViewModelImple(
             todoEventUsecase: self.spyTodoUsecase,
             scheduleEventUsecase: self.spySchedleUsecase,
-            foremostEventUsecase: self.spyForemostUsecase,
-            googleCalendarUsecase: self.stubGoogleCalendarUsecase,
-            externalCalendarIntegrationUsecase: self.stubExternalCalendarIntegrationUsecase
+            foremostEventUsecase: self.spyForemostUsecase
         )
         viewModel.router = self.spyRouter
         return viewModel
@@ -392,107 +380,6 @@ extension EventListCellEventHanleViewModelImpleTests {
         XCTAssertEqual(names, ["origin", "skipped"])
     }
     
-    func testViewModel_editGoogleEvent_whenWritable_routesToEditScene() {
-        // given
-        let viewModel = self.makeViewModel(googleEventWritePermission: .writable)
-        let model = GoogleCalendarEventCellViewModel.dummy()
-
-        // when
-        viewModel.handleMoreAction(
-            model, .editGoogleEvent(calendarId: "calendar", accountId: "stub@gmail.com", eventId: "google")
-        )
-
-        // then
-        XCTAssertEqual(self.spyRouter.didRouteToEditGoogleEventWith?.calendarId, "calendar")
-        XCTAssertEqual(self.spyRouter.didRouteToEditGoogleEventWith?.accountId, "stub@gmail.com")
-        XCTAssertEqual(self.spyRouter.didRouteToEditGoogleEventWith?.eventId, "google")
-        XCTAssertNil(self.spyRouter.didOpenSafariPath)
-    }
-
-    func testViewModel_editGoogleEvent_whenNeedReauthentication_confirmed_reauthenticatesThenRoutesToEditScene() async throws {
-        // given
-        let viewModel = self.makeViewModel(googleEventWritePermission: .needReauthentication)
-        self.spyRouter.shouldConfirmNotCancel = true
-        let model = GoogleCalendarEventCellViewModel.dummy()
-
-        // when
-        viewModel.handleMoreAction(
-            model, .editGoogleEvent(calendarId: "calendar", accountId: "stub@gmail.com", eventId: "google")
-        )
-        try await Task.sleep(for: .milliseconds(10))
-
-        // then
-        XCTAssertEqual(
-            self.spyRouter.didShowConfirmWith?.title,
-            "eventDetail::gogoleEvent::reauthenticate::title".localized()
-        )
-        XCTAssertEqual(self.stubExternalCalendarIntegrationUsecase.didReauthenticateWith?.accountId, "stub@gmail.com")
-        XCTAssertEqual(self.spyRouter.didRouteToEditGoogleEventWith?.eventId, "google")
-    }
-
-    func testViewModel_editGoogleEvent_whenNeedReauthentication_declined_doesNotRoute() {
-        // given
-        let viewModel = self.makeViewModel(googleEventWritePermission: .needReauthentication)
-        self.spyRouter.shouldConfirmNotCancel = false
-        let model = GoogleCalendarEventCellViewModel.dummy()
-
-        // when
-        viewModel.handleMoreAction(
-            model, .editGoogleEvent(calendarId: "calendar", accountId: "stub@gmail.com", eventId: "google")
-        )
-
-        // then
-        XCTAssertNil(self.stubExternalCalendarIntegrationUsecase.didReauthenticateWith)
-        XCTAssertNil(self.spyRouter.didRouteToEditGoogleEventWith)
-    }
-
-    func testViewModel_editGoogleEvent_whenNeedReauthentication_andReauthenticateFails_showsErrorAndDoesNotRoute() async throws {
-        // given
-        let viewModel = self.makeViewModel(
-            googleEventWritePermission: .needReauthentication, shouldFailReauthenticate: true
-        )
-        self.spyRouter.shouldConfirmNotCancel = true
-        let model = GoogleCalendarEventCellViewModel.dummy()
-
-        // when
-        viewModel.handleMoreAction(
-            model, .editGoogleEvent(calendarId: "calendar", accountId: "stub@gmail.com", eventId: "google")
-        )
-        try await Task.sleep(for: .milliseconds(10))
-
-        // then
-        XCTAssertNotNil(self.spyRouter.didShowError)
-        XCTAssertNil(self.spyRouter.didRouteToEditGoogleEventWith)
-    }
-
-    func testViewModel_editGoogleEvent_whenReadOnlyCalendar_showsToastAndDoesNotRoute() {
-        // given
-        let viewModel = self.makeViewModel(googleEventWritePermission: .readOnlyCalendar)
-        let model = GoogleCalendarEventCellViewModel.dummy()
-
-        // when
-        viewModel.handleMoreAction(
-            model, .editGoogleEvent(calendarId: "calendar", accountId: "stub@gmail.com", eventId: "google")
-        )
-
-        // then
-        XCTAssertEqual(
-            self.spyRouter.didShowToastWithMessage,
-            "eventDetail::gogoleEvent::readOnlyCalendar::message".localized()
-        )
-        XCTAssertNil(self.spyRouter.didRouteToEditGoogleEventWith)
-    }
-
-    func testViewModel_googleEventCellMoreActions_exposesEditMenuEvenWithoutHtmlLink() {
-        // given
-        let model = GoogleCalendarEventCellViewModel.dummy(nil)
-
-        // when
-        let moreActions = model.moreActions
-
-        // then
-        XCTAssertNotNil(moreActions)
-    }
 }
 
 extension EventListCellEventHanleViewModelImpleTests {
@@ -593,11 +480,6 @@ final class SpyEventListCellEventHanleRouter: BaseSpyRouter, EventListCellEventH
         self.didRouteToGoogleEventDetailWithId = eventId
     }
     
-    var didRouteToEditGoogleEventWith: (calendarId: String, accountId: String, eventId: String)?
-    func routeToEditGoogleEvent(calendarId: String, accountId: String, eventId: String) {
-        self.didRouteToEditGoogleEventWith = (calendarId, accountId, eventId)
-    }
-
     var didRouteToAppleCalendarEventDetailWithId: String?
     func routeToAppleCalendarEventDetail(calendarId: String, eventId: String) {
         self.didRouteToAppleCalendarEventDetailWithId = eventId

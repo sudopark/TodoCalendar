@@ -145,7 +145,6 @@
 "calednar::event::skip_todo_until" = "Odaberite vrijeme do kojeg preskočiti ovaj zadatak";
 "calednar::event::copy" = "Kopiraj događaj";
 "calendar::move_date" = "Pomakni datum";
-"calednar::event::google::edit" = "Uredi događaj Google kalendara";
 
 
 // MARK: - event detail

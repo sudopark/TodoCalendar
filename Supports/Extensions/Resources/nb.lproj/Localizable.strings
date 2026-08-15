@@ -145,7 +145,6 @@
 "calednar::event::skip_todo_until" = "Velg et tidspunkt for å hoppe over denne oppgaven";
 "calednar::event::copy" = "Kopier hendelse";
 "calendar::move_date" = "Flytt dato";
-"calednar::event::google::edit" = "Rediger Google Kalender-hendelse";
 
 
 // MARK: - event detail
