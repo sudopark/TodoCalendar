@@ -115,10 +115,13 @@ import CommonPresentation
             })
             .store(in: &self.cancellables)
         
-        viewModel.descriptionHTMLText
+        viewModel.descriptionModel
             .receive(on: RunLoop.main)
-            .sink(receiveValue: { [weak self] text in
-                self?.descriptionHTMLText = text?.asHTMLAttributeText
+            .sink(receiveValue: { [weak self] model in
+                switch model {
+                case .richText(let raw): self?.descriptionHTMLText = raw.asHTMLAttributeText
+                case .plainText: self?.descriptionHTMLText = nil
+                }
             })
             .store(in: &self.cancellables)
         

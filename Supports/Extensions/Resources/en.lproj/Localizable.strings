@@ -276,6 +276,7 @@
 "eventDetail::gogoleEvent::conference::password" = "Password";
 "eventDetail::gogoleEvent::copy::message" = "Copied to clipboard.";
 "eventDetail::gogoleEvent::canceled::message" = "This event has been cancelled.";
+"eventDetail::gogoleEvent::saved::message" = "The event has been saved.";
 "eventDetail::gogoleEvent::readOnlyCalendar::message" = "This calendar is read-only, so the event can't be edited here.";
 "eventDetail::gogoleEvent::reauthenticate::title" = "Additional permission needed";
 "eventDetail::gogoleEvent::reauthenticate::message" = "Sign in to this Google account again to edit events.";
@@ -284,6 +285,8 @@
 "eventDetail::gogoleEvent::repeating::all::button" = "All events";
 "eventDetail::gogoleEvent::remove::confirm::message" = "Delete this event from Google Calendar?";
 "eventDetail::gogoleEvent::editOnCalendar" = "Edit in Google Calendar";
+"eventDetail::gogoleEvent::notEditableField::message" = "This can't be edited here. Please edit it in Google Calendar.";
+"eventDetail::gogoleEvent::description::formatLoss::message" = "This description has formatting. Editing it here will remove the formatting.";
 
 // MARK: - Apple calendar event
 "eventDetail::appleCalendarEvent::viewOnCalendar" = "View in Apple Calendar";
