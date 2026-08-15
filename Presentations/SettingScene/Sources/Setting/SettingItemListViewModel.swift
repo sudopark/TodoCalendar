@@ -29,6 +29,8 @@ struct SettingItemModel: SettingItemModelType {
         case addReview
         case sourceCode
         case billingPlan
+        case terms
+        case privacyPolicy
     }
     
     let itemId: ItemId
@@ -68,6 +70,12 @@ struct SettingItemModel: SettingItemModelType {
         case .billingPlan:
             self.iconNamge = "creditcard"
             self.text = "setting.billing.plan::name".localized()
+        case .terms:
+            self.iconNamge = "doc.text"
+            self.text = "setting.terms::name".localized()
+        case .privacyPolicy:
+            self.iconNamge = "hand.raised"
+            self.text = "setting.privacyPolicy::name".localized()
         }
     }
     
@@ -251,6 +259,12 @@ extension SettingItemListViewModelImple {
 
         case .billingPlan:
             self.router?.routeToPaywall()
+
+        case .terms:
+            self.router?.showWebView(LegalLink.termsPath)
+
+        case .privacyPolicy:
+            self.router?.showWebView(LegalLink.privacyPolicyPath)
         }
     }
     
@@ -299,7 +313,9 @@ extension SettingItemListViewModelImple {
             let appInfoSectionItems: [SettingItemModel] = [
                 .init(.shareApp),
                 .init(.addReview),
-                .init(.sourceCode)
+                .init(.sourceCode),
+                .init(.terms),
+                .init(.privacyPolicy)
             ]
             let appInfoSection = AppInfoSectionModel(
                 headerText: "setting.section.app::name".localized(),
