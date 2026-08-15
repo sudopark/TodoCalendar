@@ -17,10 +17,18 @@ protocol CalendarEventListhUsecase: Sendable {
     func calendarEvents(
         in range: Range<TimeInterval>
     ) -> AnyPublisher<[any CalendarEvent], Never>
-    
+
+    // todo, schedule, timeZone, foremost, 태그 필터 미적용
+    func allCalendarEvents(
+        in range: Range<TimeInterval>
+    ) -> AnyPublisher<[any CalendarEvent], Never>
+
     // current todo, foremost
     func currentTodoEvents() -> AnyPublisher<[TodoCalendarEvent], Never>
-    
+
+    // current todo, foremost, 태그 필터 미적용
+    func allCurrentTodoEvents() -> AnyPublisher<[TodoCalendarEvent], Never>
+
     // showUncompletedTodos, uncompleted todo, foremost, timeZone
     func uncompletedTodos() -> AnyPublisher<[TodoCalendarEvent], Never>
 }
@@ -90,8 +98,20 @@ final class CalendarEventListhUsecaseImple: CalendarEventListhUsecase, @unchecke
 }
 
 extension CalendarEventListhUsecaseImple {
-    
+
     func calendarEvents(in range: Range<TimeInterval>) -> AnyPublisher<[any CalendarEvent], Never> {
+        return self.calendarEventsPublisher(from: self.activeCalendarEventTuple(in: range))
+    }
+
+    func allCalendarEvents(in range: Range<TimeInterval>) -> AnyPublisher<[any CalendarEvent], Never> {
+        return self.calendarEventsPublisher(from: self.rawCalendarEventTuple(in: range))
+    }
+
+    private typealias CalendarEventTuple = ([TodoEvent], [ScheduleEvent], [GoogleCalendar.Event], [AppleCalendar.Event])
+
+    private func calendarEventsPublisher(
+        from tuplePublisher: AnyPublisher<CalendarEventTuple, Never>
+    ) -> AnyPublisher<[any CalendarEvent], Never> {
         let foremost = self.subject.foremostEvent.map { event in
             return event.map { ForemostEventId(event: $0) }
         }
@@ -111,7 +131,7 @@ extension CalendarEventListhUsecaseImple {
         }
 
         return Publishers.CombineLatest3(
-            self.activeCalendarEventTuple(in: range),
+            tuplePublisher,
             foremost,
             self.subject.timeZone.compactMap { $0 }
         )
@@ -120,7 +140,19 @@ extension CalendarEventListhUsecaseImple {
         .eraseToAnyPublisher()
     }
 
-    private typealias CalendarEventTuple = ([TodoEvent], [ScheduleEvent], [GoogleCalendar.Event], [AppleCalendar.Event])
+    private func rawCalendarEventTuple(
+        in range: Range<TimeInterval>
+    ) -> AnyPublisher<CalendarEventTuple, Never> {
+        return Publishers.CombineLatest4(
+            self.todoUsecase.todoEvents(in: range),
+            self.scheduleUsecase.scheduleEvents(in: range),
+            self.googleCalendarUsecase.eventsWithoutCanceled(in: range),
+            self.appleCalendarUsecase.events(in: range)
+        )
+        .map { ($0, $1, $2, $3) }
+        .eraseToAnyPublisher()
+    }
+
     private func activeCalendarEventTuple(
         in range: Range<TimeInterval>
     ) -> AnyPublisher<CalendarEventTuple, Never> {
@@ -133,41 +165,53 @@ extension CalendarEventListhUsecaseImple {
             return (todos, schedules, googles, apples)
         }
 
-        let rawTuplePublisher = Publishers.CombineLatest4(
-            self.todoUsecase.todoEvents(in: range),
-            self.scheduleUsecase.scheduleEvents(in: range),
-            self.googleCalendarUsecase.eventsWithoutCanceled(in: range),
-            self.appleCalendarUsecase.events(in: range)
-        )
-        .map { ($0, $1, $2, $3) }
-
         return Publishers.CombineLatest(
-            rawTuplePublisher,
+            self.rawCalendarEventTuple(in: range),
             self.subject.offTagIds
         )
         .map(transform)
         .eraseToAnyPublisher()
     }
-    
+
     func currentTodoEvents() -> AnyPublisher<[TodoCalendarEvent], Never> {
-        
-        let transform: ([TodoEvent], (any ForemostMarkableEvent)?, Set<EventTagId>) -> [TodoCalendarEvent]
-        transform = { todos, foremost, offIds in
-            return todos
-                .filter { offIds.notContains($0.eventTagId) }
-                .map { TodoCalendarEvent(current: $0, isForemost: $0.uuid == foremost?.eventId) }
+        return self.currentTodoEventsPublisher(from: self.activeCurrentTodos())
+    }
+
+    func allCurrentTodoEvents() -> AnyPublisher<[TodoCalendarEvent], Never> {
+        return self.currentTodoEventsPublisher(from: self.todoUsecase.currentTodoEvents)
+    }
+
+    private func currentTodoEventsPublisher(
+        from todosPublisher: AnyPublisher<[TodoEvent], Never>
+    ) -> AnyPublisher<[TodoCalendarEvent], Never> {
+        let transform: ([TodoEvent], (any ForemostMarkableEvent)?) -> [TodoCalendarEvent]
+        transform = { todos, foremost in
+            return todos.map { TodoCalendarEvent(current: $0, isForemost: $0.uuid == foremost?.eventId) }
         }
-        
-        return Publishers.CombineLatest3(
-            self.todoUsecase.currentTodoEvents,
-            self.subject.foremostEvent,
-            self.subject.offTagIds
+
+        return Publishers.CombineLatest(
+            todosPublisher,
+            self.subject.foremostEvent
         )
         .map(transform)
         .removeDuplicates(by: { $0.map { $0.compareKey } == $1.map { $0.compareKey }})
         .eraseToAnyPublisher()
     }
-    
+
+    private func activeCurrentTodos() -> AnyPublisher<[TodoEvent], Never> {
+        let transform: ([TodoEvent], Set<EventTagId>) -> [TodoEvent]
+        transform = { todos, offIds in
+            return todos.filter { offIds.notContains($0.eventTagId) }
+        }
+
+        return Publishers.CombineLatest(
+            self.todoUsecase.currentTodoEvents,
+            self.subject.offTagIds
+        )
+        .map(transform)
+        .eraseToAnyPublisher()
+    }
+
     func uncompletedTodos() -> AnyPublisher<[TodoCalendarEvent], Never> {
         let transform: ([TodoEvent], (any ForemostMarkableEvent)?, TimeZone) -> [TodoCalendarEvent]
         transform = { todos, foremost, timeZone in
