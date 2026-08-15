@@ -357,4 +357,44 @@ extension AIAgentCommandViewModelImpleTests {
         XCTAssertTrue(self.stubAgent.didLoadUsage)
         _ = viewModel
     }
+
+    // 서버 응답이 같은 플랜을 재기록하는 경우를 재현
+    func test_currentUserPlanSameValueAsSeed_doesNotRefreshUsage() {
+        // given
+        let (viewModel, billingStub) = self.makeViewModelWithBillingStub(
+            userPlan: BillingUserPlan() |> \.planId .~ .free
+        )
+        // when
+        billingStub.currentUserPlanSubject.send(BillingUserPlan() |> \.planId .~ .free)
+        // then
+        XCTAssertEqual(self.stubAgent.didLoadUsageCount, 0)
+        _ = viewModel
+    }
+
+    func test_currentUserPlanSameValuePutTwice_refreshesUsageOnlyOnce() {
+        // given
+        let (viewModel, billingStub) = self.makeViewModelWithBillingStub(
+            userPlan: BillingUserPlan() |> \.planId .~ .free
+        )
+        // when
+        billingStub.currentUserPlanSubject.send(BillingUserPlan() |> \.planId .~ .standard)
+        billingStub.currentUserPlanSubject.send(BillingUserPlan() |> \.planId .~ .standard)
+        // then
+        XCTAssertEqual(self.stubAgent.didLoadUsageCount, 1)
+        _ = viewModel
+    }
+
+    // dedup이 정상적인 플랜 변경까지 막지는 않는다
+    func test_currentUserPlanDifferentValues_refreshesUsageForEachChange() {
+        // given
+        let (viewModel, billingStub) = self.makeViewModelWithBillingStub(
+            userPlan: BillingUserPlan() |> \.planId .~ .free
+        )
+        // when
+        billingStub.currentUserPlanSubject.send(BillingUserPlan() |> \.planId .~ .standard)
+        billingStub.currentUserPlanSubject.send(BillingUserPlan() |> \.planId .~ .lifetime)
+        // then
+        XCTAssertEqual(self.stubAgent.didLoadUsageCount, 2)
+        _ = viewModel
+    }
 }

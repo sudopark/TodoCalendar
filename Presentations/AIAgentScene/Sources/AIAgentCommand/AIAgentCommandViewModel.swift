@@ -63,6 +63,7 @@ final class AIAgentCommandViewModelImple: AIAgentCommandViewModel, @unchecked Se
         self.billingUsecase = billingUsecase
 
         self.billingUsecase.currentUserPlan
+            .removeDuplicates()
             .dropFirst()
             .sink { [weak self] _ in self?.orchestrationUsecase.loadUsage() }
             .store(in: &self.cancellables)
