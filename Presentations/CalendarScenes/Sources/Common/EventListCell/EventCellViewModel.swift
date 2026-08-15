@@ -567,8 +567,8 @@ private extension Range where Bound == TimeInterval {
 }
 
 
-private extension Range where Bound == TimeInterval {
-    
+extension Range where Bound == TimeInterval {
+
     func checkTodayRangeBound(_ time: EventTime, timeZone: TimeZone) -> (
         isAllTodayTimeContains: Bool,
         starttimeInToday: Bool,
