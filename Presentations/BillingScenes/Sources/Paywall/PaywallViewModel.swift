@@ -315,13 +315,11 @@ extension PaywallViewModelImple {
     }
 
     func openTerms() {
-        // TODO: 약관 URL 확정 후 반영 — 리젝 직결 항목이라 진입점 개방 전 필수(이번 스코프 밖, #739)
-        self.router?.openSafari("")
+        self.router?.showWebView(LegalLink.termsPath)
     }
 
     func openPrivacyPolicy() {
-        // TODO: 개인정보처리방침 URL 확정 후 반영 — 리젝 직결 항목이라 진입점 개방 전 필수(이번 스코프 밖, #739)
-        self.router?.openSafari("")
+        self.router?.showWebView(LegalLink.privacyPolicyPath)
     }
 
     func close() {
