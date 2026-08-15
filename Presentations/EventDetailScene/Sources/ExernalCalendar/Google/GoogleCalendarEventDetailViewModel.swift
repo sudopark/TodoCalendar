@@ -53,6 +53,11 @@ struct GoogleCalendarEventColorModel: Equatable {
     let calendarId: String
 }
 
+enum GoogleCalendarEventDescriptionModel: Equatable {
+    case richText(String)
+    case plainText(String)
+}
+
 struct AttachmentModel: Equatable {
     let id: String
     let fileURL: String
@@ -132,6 +137,10 @@ protocol GoogleCalendarEventDetailViewModel: AnyObject, Sendable, GoogleCalendar
     func enter(location: String?)
     func enter(memo: String?)
     func select(colorId: String?)
+    func save()
+    func remove()
+    func selectNotEditableField()
+    func startEditDescription()
 
     // presenter
     var isEditable: AnyPublisher<Bool, Never> { get }
@@ -147,7 +156,7 @@ protocol GoogleCalendarEventDetailViewModel: AnyObject, Sendable, GoogleCalendar
     var conferenceModel: AnyPublisher<ConferenceModel?, Never> { get }
     var attendees: AnyPublisher<AttendeeListViewModel?, Never> { get }
     // 회의 모델
-    var descriptionHTMLText: AnyPublisher<String?, Never> { get }
+    var descriptionModel: AnyPublisher<GoogleCalendarEventDescriptionModel, Never> { get }
     var attachments: AnyPublisher<[AttachmentModel]?, Never> { get }
     var isSavable: AnyPublisher<Bool, Never> { get }
     var isSaving: AnyPublisher<Bool, Never> { get }
@@ -207,6 +216,7 @@ final class GoogleCalendarEventDetailViewModelImple: GoogleCalendarEventDetailVi
         let writePermission = CurrentValueSubject<GoogleCalendar.EventWritePermission?, Never>(nil)
         let fields = CurrentValueSubject<OriginalAndCurrent<EditableFields>?, Never>(nil)
         let isSaving = CurrentValueSubject<Bool, Never>(false)
+        let isDescriptionPlainEditing = CurrentValueSubject<Bool, Never>(false)
     }
     
     private var cancellables: Set<AnyCancellable> = []
@@ -244,7 +254,10 @@ final class GoogleCalendarEventDetailViewModelImple: GoogleCalendarEventDetailVi
 extension GoogleCalendarEventDetailViewModelImple {
     
     func refresh() {
-        
+        self.refresh(force: false)
+    }
+
+    private func refresh(force: Bool) {
         let currentTimeZone = self.subject.timeZone.compactMap { $0 }.first()
         let eventOrigin = currentTimeZone.flatMap { [weak self] timeZone -> AnyPublisher<GoogleCalendar.EventOrigin, any Error> in
             guard let self = self else { return Empty().eraseToAnyPublisher() }
@@ -256,7 +269,7 @@ extension GoogleCalendarEventDetailViewModelImple {
                     self?.alertEventCanceled()
                     return
                 }
-                self?.applyLoaded(event)
+                self?.applyLoaded(event, force: force)
             }, receiveError: { [weak self] error in
                 self?.router?.showError(error)
             })
@@ -268,10 +281,11 @@ extension GoogleCalendarEventDetailViewModelImple {
         self.router?.closeScene()
     }
 
-    private func applyLoaded(_ event: GoogleCalendar.EventOrigin) {
-        guard self.subject.fields.value?.isChanged != true else { return }
+    private func applyLoaded(_ event: GoogleCalendar.EventOrigin, force: Bool = false) {
+        guard force || self.subject.fields.value?.isChanged != true else { return }
         guard let timeZone = self.subject.timeZone.value else { return }
         self.subject.origin.send(event)
+        self.subject.isDescriptionPlainEditing.send(!(event.description ?? "").hasHTMLTag)
         let fields = EditableFields(
             name: event.summaryText,
             time: event.selectedTime(timeZone),
@@ -346,9 +360,13 @@ extension GoogleCalendarEventDetailViewModelImple {
             "eventDetail::gogoleEvent::copy::message".localized()
         )
     }
-    
+
     func close() {
         self.router?.closeScene()
+    }
+
+    func selectNotEditableField() {
+        self.router?.showToast("eventDetail::gogoleEvent::notEditableField::message".localized())
     }
 }
 
@@ -399,6 +417,235 @@ extension GoogleCalendarEventDetailViewModelImple {
         self.subject.fields.send(
             fields |> \.current %~ mutate
         )
+    }
+}
+
+
+// MARK: - GoogleCalendarEventDetailViewModelImple Save
+
+extension GoogleCalendarEventDetailViewModelImple {
+
+    func save() {
+        self.runWithWritePermission { [weak self] in
+            self?.saveChanges()
+        }
+    }
+
+    private func runWithWritePermission(_ action: @escaping @Sendable () -> Void) {
+        switch self.subject.writePermission.value {
+        case .writable: action()
+        case .needReauthentication: self.confirmReauthentication(thenRun: action)
+        case .readOnlyCalendar, .none: return
+        }
+    }
+
+    private func confirmReauthentication(thenRun action: @escaping @Sendable () -> Void) {
+        let info = ConfirmDialogInfo()
+            |> \.title .~ pure("eventDetail::gogoleEvent::reauthenticate::title".localized())
+            |> \.message .~ pure("eventDetail::gogoleEvent::reauthenticate::message".localized())
+            |> \.confirmed .~ pure({ [weak self] in self?.reauthenticateThenRun(action) })
+            |> \.withCancel .~ true
+        self.router?.showConfirm(dialog: info)
+    }
+
+    private func reauthenticateThenRun(_ action: @escaping @Sendable () -> Void) {
+        let service = self.googleCalendarUsecase.googleService
+        let accountId = self.accountId
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                _ = try await self.externalCalendarIntegrationUsecase.reauthenticate(
+                    external: service, accountId: accountId
+                )
+                action()
+            } catch {
+                self.router?.showError(error)
+            }
+        }
+        .store(in: &self.cancellables)
+    }
+
+    private func saveChanges() {
+        guard let origin = self.subject.origin.value,
+              let timeZone = self.subject.timeZone.value,
+              let params = self.editParams(timeZone), !params.isEmpty
+        else {
+            return
+        }
+
+        guard let recurringEventId = origin.recurringEventId else {
+            self.updateEvent(origin.id, params, timeZone)
+            return
+        }
+        self.showUpdateScopeActionSheet(origin.id, recurringEventId, params, timeZone)
+    }
+
+    private func editParams(_ timeZone: TimeZone) -> GoogleCalendar.EventEditParams? {
+        guard let fields = self.subject.fields.value, fields.isChanged else { return nil }
+
+        var params = GoogleCalendar.EventEditParams()
+        if fields.origin.name != fields.current.name {
+            params.summary = fields.current.name
+        }
+        if fields.origin.location != fields.current.location {
+            params.location = fields.current.location
+        }
+        if fields.origin.memo != fields.current.memo {
+            params.description = fields.current.memo
+        }
+        if fields.origin.colorId != fields.current.colorId {
+            params.colorId = fields.current.colorId
+        }
+        if fields.origin.time != fields.current.time,
+           let pair = fields.current.time?.asGoogleEventTimePair(timeZone) {
+            params.start = pair.start
+            params.end = pair.end
+        }
+        return params
+    }
+
+    private func showUpdateScopeActionSheet(
+        _ instanceEventId: String,
+        _ recurringEventId: String,
+        _ params: GoogleCalendar.EventEditParams,
+        _ timeZone: TimeZone
+    ) {
+        var form = ActionSheetForm()
+            |> \.title .~ pure("eventDetail::gogoleEvent::repeating::title".localized())
+
+        form.actions.append(
+            .init("eventDetail::gogoleEvent::repeating::onlyThisTime::button".localized()) { [weak self] in
+                self?.updateEvent(instanceEventId, params, timeZone)
+            }
+        )
+        form.actions.append(
+            .init("eventDetail::gogoleEvent::repeating::all::button".localized()) { [weak self] in
+                self?.updateEvent(recurringEventId, params, timeZone)
+            }
+        )
+        form.actions.append(.init("common.cancel".localized(), style: .cancel))
+
+        self.router?.showActionSheet(form)
+    }
+
+    private func updateEvent(
+        _ eventId: String, _ params: GoogleCalendar.EventEditParams, _ timeZone: TimeZone
+    ) {
+        let calendarId = self.calendarId
+        let accountId = self.accountId
+        self.subject.isSaving.send(true)
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                let _ = try await self.googleCalendarUsecase.updateEvent(
+                    calendarId, eventId, accountId: accountId, at: timeZone, params: params
+                )
+                self.subject.isSaving.send(false)
+                self.router?.showToast("eventDetail::gogoleEvent::saved::message".localized())
+                self.router?.closeScene()
+            } catch {
+                self.subject.isSaving.send(false)
+                self.router?.showError(error)
+            }
+        }
+        .store(in: &self.cancellables)
+    }
+
+}
+
+
+// MARK: - GoogleCalendarEventDetailViewModelImple Remove
+
+extension GoogleCalendarEventDetailViewModelImple {
+
+    func remove() {
+        self.runWithWritePermission { [weak self] in
+            self?.removeWithScope()
+        }
+    }
+
+    private func removeWithScope() {
+        guard let origin = self.subject.origin.value else { return }
+
+        guard let recurringEventId = origin.recurringEventId else {
+            self.confirmRemoveEvent(origin.id)
+            return
+        }
+        self.showRemoveScopeActionSheet(origin.id, recurringEventId)
+    }
+
+    private func confirmRemoveEvent(_ eventId: String) {
+        let confirmed: () -> Void = { [weak self] in self?.removeEvent(eventId) }
+        let info = ConfirmDialogInfo()
+            |> \.message .~ pure("eventDetail::gogoleEvent::remove::confirm::message".localized())
+            |> \.confirmText .~ "common.remove".localized()
+            |> \.confirmed .~ pure(confirmed)
+            |> \.withCancel .~ true
+            |> \.cancelText .~ "common.cancel".localized()
+        self.router?.showConfirm(dialog: info)
+    }
+
+    private func showRemoveScopeActionSheet(
+        _ instanceEventId: String, _ recurringEventId: String
+    ) {
+        var form = ActionSheetForm()
+            |> \.title .~ pure("eventDetail::gogoleEvent::repeating::title".localized())
+            |> \.message .~ pure("eventDetail::gogoleEvent::remove::confirm::message".localized())
+
+        form.actions.append(
+            .init(
+                "eventDetail::gogoleEvent::repeating::onlyThisTime::button".localized(),
+                style: .destructive
+            ) { [weak self] in
+                self?.removeEvent(instanceEventId)
+            }
+        )
+        form.actions.append(
+            .init(
+                "eventDetail::gogoleEvent::repeating::all::button".localized(),
+                style: .destructive
+            ) { [weak self] in
+                self?.removeEvent(recurringEventId)
+            }
+        )
+        form.actions.append(.init("common.cancel".localized(), style: .cancel))
+
+        self.router?.showActionSheet(form)
+    }
+
+    private func removeEvent(_ eventId: String) {
+        let calendarId = self.calendarId
+        let accountId = self.accountId
+        self.subject.isSaving.send(true)
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                try await self.googleCalendarUsecase.removeEvent(calendarId, eventId, accountId: accountId)
+                self.subject.isSaving.send(false)
+                self.router?.closeScene()
+            } catch {
+                self.subject.isSaving.send(false)
+                self.router?.showError(error)
+            }
+        }
+        .store(in: &self.cancellables)
+    }
+}
+
+
+// MARK: - GoogleCalendarEventDetailViewModelImple Description
+
+extension GoogleCalendarEventDetailViewModelImple {
+
+    func startEditDescription() {
+        let memo = self.subject.fields.value?.current.memo ?? ""
+        guard !self.subject.isDescriptionPlainEditing.value, memo.hasHTMLTag else { return }
+        let info = ConfirmDialogInfo()
+            |> \.title .~ pure("common.info".localized())
+            |> \.message .~ pure("eventDetail::gogoleEvent::description::formatLoss::message".localized())
+            |> \.confirmed .~ pure({ [weak self] in self?.subject.isDescriptionPlainEditing.send(true) })
+            |> \.withCancel .~ true
+        self.router?.showConfirm(dialog: info)
     }
 }
 
@@ -578,14 +825,19 @@ extension GoogleCalendarEventDetailViewModelImple {
             .eraseToAnyPublisher()
     }
 
-    var descriptionHTMLText: AnyPublisher<String?, Never> {
-        return self.subject.origin
-            .compactMap { $0 }
-            .map { $0.description }
-            .removeDuplicates()
-            .eraseToAnyPublisher()
+    var descriptionModel: AnyPublisher<GoogleCalendarEventDescriptionModel, Never> {
+        Publishers.CombineLatest(
+            self.subject.fields.compactMap { $0 }.map { $0.current.memo ?? "" },
+            self.subject.isDescriptionPlainEditing
+        )
+        .map { memo, isPlainEditing in
+            guard !isPlainEditing, memo.hasHTMLTag else { return .plainText(memo) }
+            return .richText(memo)
+        }
+        .removeDuplicates()
+        .eraseToAnyPublisher()
     }
-    
+
     var attachments: AnyPublisher<[AttachmentModel]?, Never> {
         let transform: ([GoogleCalendar.EventOrigin.Attachment]?) -> [AttachmentModel]? = { attachments in
             
@@ -623,6 +875,23 @@ extension GoogleCalendarEventDetailViewModelImple: GoogleCalendarEventEditSceneL
 
     func googleCalendarEvent(didRemove eventId: String) {
         self.router?.closeScene()
+    }
+}
+
+
+private extension String {
+
+    private enum Constant {
+        // 구글 캘린더 설명에 실제로 쓰이는 태그만 화이트리스트. 각괄호 이메일(<user@x.com>)·URL(<https://...>) 오탐 방지 — 태그명 뒤 경계(공백/슬래시/닫힘)를 요구해 <abbr> 같은 미등재 태그 접두 매치도 차단한다.
+        static let htmlTagPattern =
+            "</?(?:br|b|i|u|p|div|span|a|ul|ol|li|strong|em|h[1-6]|table|tr|td|img|font)(?=[\\s/>])"
+    }
+
+    var hasHTMLTag: Bool {
+        self.range(
+            of: Constant.htmlTagPattern,
+            options: [.regularExpression, .caseInsensitive]
+        ) != nil
     }
 }
 
@@ -693,5 +962,58 @@ private extension SelectedTime {
         case .period(let start, _): return start.date
         case .alldayPeriod(let start, _): return start.date
         }
+    }
+
+    // 읽기(EventOrigin.selectedTime)가 구글의 배타적 end.date를 가공 없이 담으므로, 왕복 항등을 위해 여기도 가공하지 않는다.
+    func asGoogleEventTimePair(
+        _ timeZone: TimeZone
+    ) -> (start: GoogleCalendar.EventOrigin.GoogleEventTime, end: GoogleCalendar.EventOrigin.GoogleEventTime)? {
+        switch self {
+        case .at:
+            return nil
+
+        case .period(let start, let end):
+            guard start.date < end.date else { return nil }
+            return (
+                .init(dateTime: start.date.timeIntervalSince1970, timeZone),
+                .init(dateTime: end.date.timeIntervalSince1970, timeZone)
+            )
+
+        case .singleAllDay(let day):
+            let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
+            guard let nextDay = calendar.date(byAdding: .day, value: 1, to: day.date)
+            else { return nil }
+            return (
+                .init(date: day.date.timeIntervalSince1970, timeZone),
+                .init(date: nextDay.timeIntervalSince1970, timeZone)
+            )
+
+        case .alldayPeriod(let start, let end):
+            guard start.date < end.date else { return nil }
+            return (
+                .init(date: start.date.timeIntervalSince1970, timeZone),
+                .init(date: end.date.timeIntervalSince1970, timeZone)
+            )
+        }
+    }
+}
+
+private extension GoogleCalendar.EventOrigin.GoogleEventTime {
+
+    init(dateTime timeStamp: TimeInterval, _ timeZone: TimeZone) {
+        self.init()
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime]
+        formatter.timeZone = timeZone
+        self.dateTime = formatter.string(from: Date(timeIntervalSince1970: timeStamp))
+        self.timeZone = timeZone.identifier
+    }
+
+    init(date timeStamp: TimeInterval, _ timeZone: TimeZone) {
+        self.init()
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.timeZone = timeZone
+        self.date = formatter.string(from: Date(timeIntervalSince1970: timeStamp))
     }
 }
