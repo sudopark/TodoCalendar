@@ -114,6 +114,8 @@
 "calendar::uncompletedTodos:title" = "Uncompleted To-do";
 "calendar::event_time::todo" = "Todo";
 "calendar::event_time::allday" = "All day";
+"calendar::event_time::start" = "Start";
+"calendar::event_time::end" = "End";
 "calendar::event_time::allday::with" = "%@ all day";
 "calendar::event_time::period:some_days" = "%d days";
 "calendar::event_time::period:some_minutes" = "%d minutes";
