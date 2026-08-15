@@ -241,6 +241,7 @@ private final class FakeDayEventListViewModel: DayEventListViewModel, @unchecked
     func makeEvent() { }
     func makeEventByTemplate() { }
     func showDoneTodoList() { }
+    func showSharePreview() { }
     func refreshUncompletedTodoEvents() { }
     func enterVoiceInput() { }
     func finishVoiceInput() { }
