@@ -311,6 +311,17 @@
 "eventList::remove::confirm::button::olderThan1y" = "Older than 1 year";
 
 
+// MARK: - share preview
+
+"share_preview::title" = "Share Preview";
+"share_preview::tag_filter::title" = "Tags";
+"share_preview::tag_filter::select_all" = "Select all";
+"share_preview::tag_filter::deselect_all" = "Deselect all";
+"share_preview::option::include_tag_name" = "Include tag name";
+"share_preview::share_button" = "Share";
+"share_preview::empty" = "No events to share";
+
+
 // MARK: - account
 
 "manage_account::title" = "Account Management";

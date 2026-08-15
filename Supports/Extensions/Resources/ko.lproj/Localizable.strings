@@ -311,6 +311,17 @@
 "eventList::remove::confirm::button::olderThan1y" = "일년 이상 오래된";
 
 
+// MARK: - share preview
+
+"share_preview::title" = "공유 미리보기";
+"share_preview::tag_filter::title" = "태그";
+"share_preview::tag_filter::select_all" = "전체 선택";
+"share_preview::tag_filter::deselect_all" = "전체 해제";
+"share_preview::option::include_tag_name" = "태그명 함께 표시";
+"share_preview::share_button" = "공유하기";
+"share_preview::empty" = "공유할 일정이 없어요";
+
+
 // MARK: - account
 
 "manage_account::title" = "계정 관리";

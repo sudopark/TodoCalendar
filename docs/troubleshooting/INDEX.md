@@ -16,3 +16,6 @@
 
 - [2026-08-07 키보드 입력 시트에서 커맨드를 전송하면 present 충돌로 크래시](2026-08-07-ai-command-sheet-present-while-keyboard-sheet-up.md) — AIAgent / fixed / already presenting, 바텀시트 크래시, 키보드 입력 전송
 - [2026-08-06 Share Extension으로 만든 AI job의 결과 푸시가 안 온다](2026-08-06-share-extension-ai-job-no-push.md) — AIAgent / non-issue / 푸시 안옴, device_id, DailyLimitExceeded, share extension
+- [2026-08-15 공유 미리보기에 조회 범위와 안 겹치는 이벤트가 섞여 나온다](2026-08-15-share-preview-shows-events-outside-range.md) — Event / fixed / 범위 밖 이벤트 노출·반복 일정 turn·clamped 재판정 누락
+
+- [2026-08-16 공유 미리보기에서 일부 기본 이벤트의 태그명이 안 나온다](2026-08-16-share-preview-deleted-tag-name-missing.md) — Event / fixed / 태그명 안나옴, 삭제된 태그, 드롭다운 빈 항목, tagName nil, stub이 미스를 못 만듦
