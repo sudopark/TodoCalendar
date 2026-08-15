@@ -108,6 +108,7 @@ public protocol Routing: AnyObject {
     func showConfirm(dialog info: ConfirmDialogInfo)
     func showActionSheet(_ form: ActionSheetForm)
     func openSafari(_ path: String)
+    func showWebView(_ path: String)
     func dismissPresented(animated: Bool, _ completed: (@Sendable () -> Void)?)
 }
 
@@ -193,10 +194,11 @@ open class BaseRouterImple: Routing, @unchecked Sendable {
         }
     }
     
-    public func showWebView(_ url: URL) {
+    public func showWebView(_ path: String) {
         Task { @MainActor in
 
-            guard let appearance = self.scene?.viewAppearance else { return }
+            guard let url = path.asURL(), let appearance = self.scene?.viewAppearance
+            else { return }
             let controller = InAppWebViewController(url: url, appearance: appearance)
             let navigationController = UINavigationController(rootViewController: controller)
             controller.navigationItem.leftBarButtonItem = UIBarButtonItem(
