@@ -217,6 +217,16 @@ open class BaseRouterImple: Routing, @unchecked Sendable {
         }
     }
 
+    public func showShareSheet(text: String) {
+        Task { @MainActor in
+            let activityViewController = UIActivityViewController(
+                activityItems: [text], applicationActivities: nil
+            )
+            activityViewController.popoverPresentationController?.sourceView = self.scene?.view
+            self.scene?.present(activityViewController, animated: true)
+        }
+    }
+
     @MainActor
     public func showBottomSlide(_ slide: UIViewController) {
         slide.modalPresentationStyle = .custom

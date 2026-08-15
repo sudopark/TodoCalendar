@@ -50,10 +50,21 @@ open class StubEventTagUsecase: EventTagUsecase, @unchecked Sendable {
     
     open func refreshCustomTags(_ ids: [String]) { }
     open func eventTags(_ ids: [EventTagId]) -> AnyPublisher<[EventTagId : any EventTag], Never> {
-        let tags = ids
-            .map { CustomEventTag(uuid: $0.customTagId ?? "", name: "some", colorHex: "0x000000") }
+        let tags: [EventTagId: any EventTag] = ids
+            .compactMap { self.sharedTag(of: $0) }
             .asDictionary { $0.tagId }
         return Just(tags).eraseToAnyPublisher()
+    }
+
+    // 공유 태그 맵에는 커스텀·기본·공휴일만 올라간다 — 외부 캘린더 태그는 각 서비스 usecase 소관
+    private func sharedTag(of id: EventTagId) -> (any EventTag)? {
+        switch id {
+        case .default: return DefaultEventTag.default("default")
+        case .holiday: return DefaultEventTag.holiday("holiday")
+        case .custom(let customId) where customId == "not_exists": return nil
+        case .custom(let customId): return CustomEventTag(uuid: customId, name: "some", colorHex: "0x000000")
+        case .externalCalendar: return nil
+        }
     }
     
     public func eventTag(id: EventTagId) -> AnyPublisher<(any EventTag)?, Never> {
