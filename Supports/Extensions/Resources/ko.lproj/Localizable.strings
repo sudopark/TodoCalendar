@@ -145,6 +145,9 @@
 "calednar::event::skip_todo_until" = "할일 건너뛰기할 날짜 선택";
 "calednar::event::copy" = "이벤트 복사";
 "calendar::move_date" = "날짜 이동";
+"calendar::share::this_day" = "이 날 일정 공유";
+"calendar::share::this_week" = "이 주 일정 공유";
+"calendar::share::this_month" = "이 달 일정 공유";
 "calednar::event::google::edit" = "구글캘린더 이벤트 수정";
 
 
