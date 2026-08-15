@@ -32,7 +32,12 @@ final class GoogleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
         customAttendees: [GoogleCalendar.EventOrigin.Attendee]? = nil,
         writePermission: GoogleCalendar.EventWritePermission = .writable,
         shouldFailReauthenticate: Bool = false,
-        summaryPerCall: [String]? = nil
+        summaryPerCall: [String]? = nil,
+        recurringEventId: String? = nil,
+        htmlLink: String? = "link",
+        description: String? = "그냥 텍스트<br><b>볼드</b><br>첨부파일도 있을거다잉<br>마크다운임?",
+        updatedOrigin: GoogleCalendar.EventOrigin? = GoogleCalendarEventDetailViewModelImpleTests.defaultUpdatedOrigin(),
+        eventDetailFailsFromCallIndex: Int? = nil
     ) -> GoogleCalendarEventDetailViewModelImple {
         let settingUsecase = StubCalendarSettingUsecase()
         settingUsecase.prepare()
@@ -45,7 +50,12 @@ final class GoogleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
                 |> \.attendees .~ (customAttendees ?? stub.attendees)
                 |> \.recurrence .~ (recurrence.map { [$0] })
                 |> \.status .~ (isCanceled ? .cancelled : .confirmed)
+                |> \.recurringEventId .~ recurringEventId
+                |> \.htmlLink .~ htmlLink
+                |> \.description .~ description
         }
+        calendarUsecase.stubUpdatedEventOrigin = updatedOrigin
+        calendarUsecase.eventDetailFailsFromCallIndex = eventDetailFailsFromCallIndex
         calendarUsecase.refreshGoogleCalendarEventTags()
         self.lastCalendarUsecase = calendarUsecase
         self.integrationUsecase.shouldFailReauthenticate = shouldFailReauthenticate
@@ -59,6 +69,52 @@ final class GoogleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
         )
         viewModel.router = self.spyRouter
         return viewModel
+    }
+
+    private static func defaultUpdatedOrigin() -> GoogleCalendar.EventOrigin {
+        let start = GoogleCalendar.EventOrigin.GoogleEventTime()
+            |> \.dateTime .~ "2026-08-13T10:00:00+09:00"
+        let end = GoogleCalendar.EventOrigin.GoogleEventTime()
+            |> \.dateTime .~ "2026-08-13T11:00:00+09:00"
+        return GoogleCalendar.EventOrigin(id: "id", summary: "updated name")
+            |> \.start .~ start
+            |> \.end .~ end
+            |> \.location .~ "updated location"
+    }
+
+    private func makeAllDayViewModel(
+        startDate: String, endDate: String
+    ) -> GoogleCalendarEventDetailViewModelImple {
+        let settingUsecase = StubCalendarSettingUsecase()
+        settingUsecase.prepare()
+
+        let start = GoogleCalendar.EventOrigin.GoogleEventTime() |> \.date .~ startDate
+        let end = GoogleCalendar.EventOrigin.GoogleEventTime() |> \.date .~ endDate
+
+        let calendarUsecase = PrivateStubGoogleCalendarUsecase()
+        calendarUsecase.additionalStubbing = { stub in
+            stub |> \.start .~ start |> \.end .~ end
+        }
+        calendarUsecase.stubUpdatedEventOrigin = GoogleCalendar.EventOrigin(id: "id", summary: "name")
+            |> \.start .~ start
+            |> \.end .~ end
+        calendarUsecase.refreshGoogleCalendarEventTags()
+        self.lastCalendarUsecase = calendarUsecase
+
+        let viewModel = GoogleCalendarEventDetailViewModelImple(
+            calenadrId: "g:7", accountId: "stub@gmail.com", eventId: "id",
+            googleCalendarUsecase: calendarUsecase,
+            calendarSettingUsecase: settingUsecase,
+            externalCalendarIntegrationUsecase: self.integrationUsecase,
+            daysIntervalCountUsecase: StubDaysIntervalCountUsecase()
+        )
+        viewModel.router = self.spyRouter
+        return viewModel
+    }
+
+    private func waitSaveCompleted(_ action: () -> Void) async throws {
+        action()
+        try await Task.sleep(for: .milliseconds(50))
     }
 }
 
@@ -209,18 +265,18 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
         #expect(text == expectText, comment)
     }
     
-    @Test func viewModel_provideDescriptionHTMLText() async throws {
+    @Test func viewModel_provideDescriptionModel() async throws {
         // given
-        let expect = expectConfirm("이벤트 설명 html text 정보 제공")
+        let expect = expectConfirm("이벤트 설명 모델 제공")
         let viewModel = self.makeViewModel()
-        
+
         // when
-        let text = try await self.firstOutput(expect, for: viewModel.descriptionHTMLText) {
+        let model = try await self.firstOutput(expect, for: viewModel.descriptionModel) {
             viewModel.refresh()
         }
-        
+
         // then
-        #expect(text == "그냥 텍스트<br><b>볼드</b><br>첨부파일도 있을거다잉<br>마크다운임?")
+        #expect(model == .richText("그냥 텍스트<br><b>볼드</b><br>첨부파일도 있을거다잉<br>마크다운임?"))
     }
     
     @Test func viewModel_provideAttachmentModels() async throws {
@@ -543,6 +599,19 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
         #expect(has == true)
     }
 
+    @Test func hasDetailLink_whenOriginHasNoHtmlLink_isFalse() async throws {
+        // given
+        let viewModel = self.makeViewModel(htmlLink: nil)
+
+        // when
+        let has = try await self.firstOutput(
+            expectConfirm("hasDetailLink"), for: viewModel.hasDetailLink
+        ) { viewModel.refresh() }
+
+        // then
+        #expect(has == false)
+    }
+
     @Test func viewOnGoogleCalendar_opensHtmlLinkInSafari() async throws {
         // given
         let viewModel = self.makeViewModel()
@@ -772,11 +841,623 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
     }
 }
 
+// MARK: - 저장 — 쓰기 권한 게이팅
+
+extension GoogleCalendarEventDetailViewModelImpleTests {
+
+    @Test func save_whenWritable_sendsOnlyChangedFieldsInParams() async throws {
+        // given
+        let viewModel = self.makeViewModel(writePermission: .writable)
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+
+        // when
+        viewModel.enter(name: "new name")
+        try await self.waitSaveCompleted { viewModel.save() }
+
+        // then
+        let params = self.lastCalendarUsecase.didUpdateEventWith?.params
+        #expect(params?.summary == "new name")
+        #expect(params?.start == nil)
+        #expect(params?.end == nil)
+        #expect(params?.location == nil)
+        #expect(params?.description == nil)
+        #expect(params?.colorId == nil)
+    }
+
+    @Test func save_whenNeedReauthentication_confirmed_reauthenticatesThenSaves() async throws {
+        // given
+        let viewModel = self.makeViewModel(writePermission: .needReauthentication)
+        self.spyRouter.shouldConfirmNotCancel = true
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+        viewModel.enter(name: "new name")
+
+        // when
+        try await self.waitSaveCompleted { viewModel.save() }
+
+        // then
+        #expect(self.integrationUsecase.didReauthenticateWith?.accountId == "stub@gmail.com")
+        #expect(self.lastCalendarUsecase.didUpdateEventWith?.params.summary == "new name")
+    }
+
+    @Test func save_whenNeedReauthentication_declined_doesNotSave() async throws {
+        // given
+        let viewModel = self.makeViewModel(writePermission: .needReauthentication)
+        self.spyRouter.shouldConfirmNotCancel = false
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+        viewModel.enter(name: "new name")
+
+        // when
+        viewModel.save()
+        try await Task.sleep(for: .milliseconds(10))
+
+        // then
+        #expect(self.integrationUsecase.didReauthenticateWith == nil)
+        #expect(self.lastCalendarUsecase.didUpdateEventWith == nil)
+        let name = try await self.firstOutput(expectConfirm("입력값 유지"), for: viewModel.eventName)
+        #expect(name == "new name")
+    }
+
+    @Test func save_whenNeedReauthentication_andReauthenticateFails_showsErrorAndDoesNotSave() async throws {
+        // given
+        let viewModel = self.makeViewModel(
+            writePermission: .needReauthentication, shouldFailReauthenticate: true
+        )
+        self.spyRouter.shouldConfirmNotCancel = true
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+        viewModel.enter(name: "new name")
+
+        // when
+        try await self.waitSaveCompleted { viewModel.save() }
+
+        // then
+        #expect(self.spyRouter.didShowError != nil)
+        #expect(self.lastCalendarUsecase.didUpdateEventWith == nil)
+    }
+
+    @Test func save_whenReadOnlyCalendar_inputIsIgnoredSoNoUpdateRequested() async throws {
+        // given — enter(name:) 가 updateCurrentFields 의 읽기 전용 가드에서 이미 무시된다.
+        // runWithWritePermission 의 readOnlyCalendar 게이트 자체는 remove_whenReadOnlyCalendar_doesNothing 이 덮는다.
+        let viewModel = self.makeViewModel(writePermission: .readOnlyCalendar)
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+        viewModel.enter(name: "new name")
+
+        // when
+        viewModel.save()
+        try await Task.sleep(for: .milliseconds(10))
+
+        // then
+        #expect(self.lastCalendarUsecase.didUpdateEventWith == nil)
+        #expect(self.spyRouter.didShowConfirmWith == nil)
+        #expect(self.spyRouter.didClosed == nil)
+    }
+}
+
+
+// MARK: - 저장 파라미터 구성
+
+extension GoogleCalendarEventDetailViewModelImpleTests {
+
+    @Test func save_whenLocationCleared_sendsEmptyStringInParams() async throws {
+        // given
+        let viewModel = self.makeViewModel()
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+
+        // when — nil(안 건드림)이 아니라 빈 문자열로 실어야 구글이 필드를 지운다
+        viewModel.enter(location: "")
+        try await self.waitSaveCompleted { viewModel.save() }
+
+        // then
+        let params = self.lastCalendarUsecase.didUpdateEventWith?.params
+        #expect(params?.location == "")
+        #expect(params?.summary == nil)
+        #expect(params?.description == nil)
+    }
+
+    @Test func save_whenMemoCleared_sendsEmptyStringInParams() async throws {
+        // given
+        let viewModel = self.makeViewModel()
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+
+        // when
+        viewModel.enter(memo: "")
+        try await self.waitSaveCompleted { viewModel.save() }
+
+        // then
+        let params = self.lastCalendarUsecase.didUpdateEventWith?.params
+        #expect(params?.description == "")
+        #expect(params?.summary == nil)
+    }
+
+    @Test func save_singleDayAllDayEvent_touchingStartOnly_keepsOriginalEndDate() async throws {
+        // given — 8/13 하루짜리(구글 raw: start=8/13, end=8/14 배타적)
+        let viewModel = self.makeAllDayViewModel(startDate: "2026-08-13", endDate: "2026-08-14")
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+
+        // when — 시작일 피커만 하루 당김. 종료일은 안 건드림
+        let newStart = "2026-08-12".date(form: "yyyy-MM-dd", timeZoneAbbre: "KST")
+        viewModel.selectStartTime(newStart)
+        try await self.waitSaveCompleted { viewModel.save() }
+
+        // then — end.date 는 원본 그대로(8/14), 저장마다 하루씩 늘어나지 않는다
+        let params = self.lastCalendarUsecase.didUpdateEventWith?.params
+        #expect(params?.end?.date == "2026-08-14")
+    }
+
+    @Test func save_multiDayAllDayEvent_touchingStartOnly_keepsOriginalEndDate() async throws {
+        // given — 8/13~8/15 사흘짜리(구글 raw: start=8/13, end=8/16 배타적)
+        let viewModel = self.makeAllDayViewModel(startDate: "2026-08-13", endDate: "2026-08-16")
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+
+        // when
+        let newStart = "2026-08-12".date(form: "yyyy-MM-dd", timeZoneAbbre: "KST")
+        viewModel.selectStartTime(newStart)
+        try await self.waitSaveCompleted { viewModel.save() }
+
+        // then
+        let params = self.lastCalendarUsecase.didUpdateEventWith?.params
+        #expect(params?.end?.date == "2026-08-16")
+    }
+
+    @Test func save_whenOnlyTimeRangeBecameInvalid_doesNotRequestUpdate() async throws {
+        // given
+        let viewModel = self.makeViewModel()
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+
+        // when — 새 시작시각이 기존 종료시각보다 늦어 무효한 시간 범위가 된다.
+        // asGoogleEventTimePair 가 nil 을 반환해 params 가 완전히 비고, save() 는 조기 반환한다
+        let invalidStart = Date(timeIntervalSince1970: 1_900_000_000)
+        viewModel.selectStartTime(invalidStart)
+        try await self.waitSaveCompleted { viewModel.save() }
+
+        // then — 업데이트 요청 자체가 안 나가고, 편집 화면과 달리 상세 화면도 닫히지 않는다
+        #expect(self.lastCalendarUsecase.didUpdateEventWith == nil)
+        #expect(self.spyRouter.didClosed == nil)
+    }
+}
+
+
+// MARK: - 반복 이벤트 저장 범위
+
+extension GoogleCalendarEventDetailViewModelImpleTests {
+
+    @Test func save_repeatingEvent_showsScopeActionSheet() async throws {
+        // given
+        let viewModel = self.makeViewModel(recurringEventId: "series_id")
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+        viewModel.enter(name: "new name")
+
+        // when
+        viewModel.save()
+        try await Task.sleep(for: .milliseconds(10))
+
+        // then
+        #expect(self.spyRouter.didShowActionSheetWith != nil)
+    }
+
+    @Test func save_repeatingEvent_onlyThisTime_usesInstanceEventId() async throws {
+        // given
+        let viewModel = self.makeViewModel(recurringEventId: "series_id")
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+        viewModel.enter(name: "new name")
+        self.spyRouter.actionSheetSelectionMocking = { form in
+            form.actions.first(where: {
+                $0.text == "eventDetail::gogoleEvent::repeating::onlyThisTime::button".localized()
+            })
+        }
+
+        // when
+        try await self.waitSaveCompleted { viewModel.save() }
+
+        // then
+        #expect(self.lastCalendarUsecase.didUpdateEventWith?.eventId == "id")
+    }
+
+    @Test func save_repeatingEvent_all_usesRecurringEventId() async throws {
+        // given
+        let viewModel = self.makeViewModel(recurringEventId: "series_id")
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+        viewModel.enter(name: "new name")
+        self.spyRouter.actionSheetSelectionMocking = { form in
+            form.actions.first(where: {
+                $0.text == "eventDetail::gogoleEvent::repeating::all::button".localized()
+            })
+        }
+
+        // when
+        try await self.waitSaveCompleted { viewModel.save() }
+
+        // then
+        #expect(self.lastCalendarUsecase.didUpdateEventWith?.eventId == "series_id")
+    }
+}
+
+
+// MARK: - 저장 성공/실패
+
+extension GoogleCalendarEventDetailViewModelImpleTests {
+
+    @Test func save_success_showsToastAndClosesScene() async throws {
+        // given
+        let updated = GoogleCalendar.EventOrigin(id: "id", summary: "saved name")
+        let viewModel = self.makeViewModel(updatedOrigin: updated)
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+        viewModel.enter(name: "new name")
+
+        // when
+        try await self.waitSaveCompleted { viewModel.save() }
+
+        // then
+        #expect(self.spyRouter.didShowToastWithMessage == "eventDetail::gogoleEvent::saved::message".localized())
+        #expect(self.spyRouter.didClosed == true)
+    }
+
+    @Test func save_failure_keepsSceneOpenAndInputRetained() async throws {
+        // given
+        let viewModel = self.makeViewModel(updatedOrigin: nil)
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+        viewModel.enter(name: "updated name")
+
+        // when
+        try await self.waitSaveCompleted { viewModel.save() }
+
+        // then
+        #expect(self.spyRouter.didClosed == nil)
+        #expect(self.spyRouter.didShowError != nil)
+        let isSavingNow = try await self.firstOutput(expectConfirm("isSaving false"), for: viewModel.isSaving)
+        #expect(isSavingNow == false)
+        let nameStillEdited = try await self.firstOutput(expectConfirm("입력값 유지"), for: viewModel.eventName)
+        #expect(nameStillEdited == "updated name")
+    }
+}
+
+
+// MARK: - 삭제
+
+extension GoogleCalendarEventDetailViewModelImpleTests {
+
+    @Test func remove_whenWritable_confirmed_closesScene() async throws {
+        // given
+        let viewModel = self.makeViewModel(writePermission: .writable)
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+
+        // when
+        viewModel.remove()
+        try await Task.sleep(for: .milliseconds(10))
+
+        // then
+        #expect(self.lastCalendarUsecase.didRemoveEventWith?.eventId == "id")
+        #expect(self.spyRouter.didClosed == true)
+    }
+
+    @Test func remove_whenNeedReauthentication_confirmed_reauthenticatesThenRemoves() async throws {
+        // given
+        let viewModel = self.makeViewModel(writePermission: .needReauthentication)
+        self.spyRouter.shouldConfirmNotCancel = true
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+
+        // when
+        viewModel.remove()
+        try await Task.sleep(for: .milliseconds(10))
+
+        // then
+        #expect(self.integrationUsecase.didReauthenticateWith?.accountId == "stub@gmail.com")
+        #expect(self.lastCalendarUsecase.didRemoveEventWith?.eventId == "id")
+        #expect(self.spyRouter.didClosed == true)
+    }
+
+    @Test func remove_whenReadOnlyCalendar_doesNothing() async throws {
+        // given
+        let viewModel = self.makeViewModel(writePermission: .readOnlyCalendar)
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+
+        // when
+        viewModel.remove()
+        try await Task.sleep(for: .milliseconds(10))
+
+        // then
+        #expect(self.lastCalendarUsecase.didRemoveEventWith == nil)
+        #expect(self.spyRouter.didShowConfirmWith == nil)
+        #expect(self.spyRouter.didClosed == nil)
+    }
+
+    @Test func remove_repeatingEvent_showsScopeActionSheet() async throws {
+        // given
+        let viewModel = self.makeViewModel(recurringEventId: "series_id")
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+
+        // when
+        viewModel.remove()
+        try await Task.sleep(for: .milliseconds(10))
+
+        // then
+        #expect(self.spyRouter.didShowConfirmWith == nil)
+        #expect(self.spyRouter.didShowActionSheetWith != nil)
+    }
+
+    @Test func remove_repeatingEvent_onlyThisTime_usesInstanceEventId() async throws {
+        // given
+        let viewModel = self.makeViewModel(recurringEventId: "series_id")
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+        self.spyRouter.actionSheetSelectionMocking = { form in
+            form.actions.first(where: {
+                $0.text == "eventDetail::gogoleEvent::repeating::onlyThisTime::button".localized()
+            })
+        }
+
+        // when
+        viewModel.remove()
+        try await Task.sleep(for: .milliseconds(10))
+
+        // then
+        #expect(self.lastCalendarUsecase.didRemoveEventWith?.eventId == "id")
+    }
+
+    @Test func remove_repeatingEvent_all_usesRecurringEventId() async throws {
+        // given
+        let viewModel = self.makeViewModel(recurringEventId: "series_id")
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+        self.spyRouter.actionSheetSelectionMocking = { form in
+            form.actions.first(where: {
+                $0.text == "eventDetail::gogoleEvent::repeating::all::button".localized()
+            })
+        }
+
+        // when
+        viewModel.remove()
+        try await Task.sleep(for: .milliseconds(10))
+
+        // then
+        #expect(self.lastCalendarUsecase.didRemoveEventWith?.eventId == "series_id")
+    }
+}
+
+
+// MARK: - 수정 불가 항목 안내
+
+extension GoogleCalendarEventDetailViewModelImpleTests {
+
+    @Test func selectNotEditableField_showsGuideToast() {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when
+        viewModel.selectNotEditableField()
+
+        // then
+        #expect(self.spyRouter.didShowToastWithMessage == "eventDetail::gogoleEvent::notEditableField::message".localized())
+    }
+}
+
+
+// MARK: - 설명 서식 처리
+
+extension GoogleCalendarEventDetailViewModelImpleTests {
+
+    @Test func descriptionModel_whenOriginHasHTMLTag_isRichText() async throws {
+        // given
+        let viewModel = self.makeViewModel(description: "그냥 텍스트<br><b>볼드</b>")
+
+        // when
+        let model = try await self.firstOutput(expectConfirm("설명 모델"), for: viewModel.descriptionModel) {
+            viewModel.refresh()
+        }
+
+        // then
+        #expect(model == .richText("그냥 텍스트<br><b>볼드</b>"))
+    }
+
+    @Test func descriptionModel_whenOriginIsPlainText_isPlainText() async throws {
+        // given
+        let viewModel = self.makeViewModel(description: "그냥 텍스트")
+
+        // when
+        let model = try await self.firstOutput(expectConfirm("설명 모델"), for: viewModel.descriptionModel) {
+            viewModel.refresh()
+        }
+
+        // then
+        #expect(model == .plainText("그냥 텍스트"))
+    }
+
+    @Test func descriptionModel_whenPlainTextContainsAngleBracketedEmail_isPlainText() async throws {
+        // given
+        let viewModel = self.makeViewModel(description: "연락처: <user@example.com> 입니다")
+
+        // when
+        let model = try await self.firstOutput(expectConfirm("설명 모델"), for: viewModel.descriptionModel) {
+            viewModel.refresh()
+        }
+
+        // then
+        #expect(model == .plainText("연락처: <user@example.com> 입니다"))
+    }
+
+    @Test func descriptionModel_whenPlainTextContainsAngleBracketedURL_isPlainText() async throws {
+        // given
+        let viewModel = self.makeViewModel(description: "<https://example.com>")
+
+        // when
+        let model = try await self.firstOutput(expectConfirm("설명 모델"), for: viewModel.descriptionModel) {
+            viewModel.refresh()
+        }
+
+        // then
+        #expect(model == .plainText("<https://example.com>"))
+    }
+
+    @Test func descriptionModel_whenUppercaseHTMLTag_isRichText() async throws {
+        // given
+        let viewModel = self.makeViewModel(description: "줄바꿈<BR>다음줄")
+
+        // when
+        let model = try await self.firstOutput(expectConfirm("설명 모델"), for: viewModel.descriptionModel) {
+            viewModel.refresh()
+        }
+
+        // then
+        #expect(model == .richText("줄바꿈<BR>다음줄"))
+    }
+
+    @Test func descriptionModel_whenUnknownTagOnly_isPlainText() async throws {
+        // given
+        let viewModel = self.makeViewModel(description: "<blockquote>인용</blockquote>")
+
+        // when
+        let model = try await self.firstOutput(expectConfirm("설명 모델"), for: viewModel.descriptionModel) {
+            viewModel.refresh()
+        }
+
+        // then
+        #expect(model == .plainText("<blockquote>인용</blockquote>"))
+    }
+
+    @Test func startEditDescription_whenRichText_showsFormatLossConfirm() async throws {
+        // given
+        let viewModel = self.makeViewModel(description: "그냥 텍스트<br><b>볼드</b>")
+        self.spyRouter.shouldConfirmNotCancel = false
+        _ = try await self.firstOutput(expectConfirm("설명 로드"), for: viewModel.descriptionModel) {
+            viewModel.refresh()
+        }
+
+        // when
+        viewModel.startEditDescription()
+
+        // then
+        #expect(self.spyRouter.didShowConfirmWith?.title == "common.info".localized())
+        #expect(self.spyRouter.didShowConfirmWith?.message == "eventDetail::gogoleEvent::description::formatLoss::message".localized())
+    }
+
+    @Test func startEditDescription_confirmed_switchesToPlainText() async throws {
+        // given
+        let viewModel = self.makeViewModel(description: "그냥 텍스트<br><b>볼드</b>")
+        self.spyRouter.shouldConfirmNotCancel = true
+        _ = try await self.firstOutput(expectConfirm("설명 로드"), for: viewModel.descriptionModel) {
+            viewModel.refresh()
+        }
+
+        // when
+        viewModel.startEditDescription()
+        let model = try await self.firstOutput(expectConfirm("전환된 설명 모델"), for: viewModel.descriptionModel)
+
+        // then
+        #expect(model == .plainText("그냥 텍스트<br><b>볼드</b>"))
+    }
+
+    @Test func startEditDescription_declined_staysRichText() async throws {
+        // given
+        let viewModel = self.makeViewModel(description: "그냥 텍스트<br><b>볼드</b>")
+        self.spyRouter.shouldConfirmNotCancel = false
+        _ = try await self.firstOutput(expectConfirm("설명 로드"), for: viewModel.descriptionModel) {
+            viewModel.refresh()
+        }
+
+        // when
+        viewModel.startEditDescription()
+        try await Task.sleep(for: .milliseconds(10))
+        let model = try await self.firstOutput(expectConfirm("변화 없는 설명 모델"), for: viewModel.descriptionModel)
+
+        // then
+        #expect(model == .richText("그냥 텍스트<br><b>볼드</b>"))
+    }
+
+    @Test func startEditDescription_whenAlreadyPlainText_doesNotShowConfirm() async throws {
+        // given
+        let viewModel = self.makeViewModel(description: "그냥 텍스트")
+        _ = try await self.firstOutput(expectConfirm("설명 로드"), for: viewModel.descriptionModel) {
+            viewModel.refresh()
+        }
+
+        // when
+        viewModel.startEditDescription()
+
+        // then
+        #expect(self.spyRouter.didShowConfirmWith == nil)
+    }
+
+    @Test func descriptionModel_whenPlainDescriptionEditedIntoTagText_staysPlainText() async throws {
+        // given — 평문으로 로드된 설명은 편집 중 태그 패턴이 섞여도 판정이 뒤바뀌지 않는다
+        let viewModel = self.makeViewModel(description: "그냥 텍스트")
+        _ = try await self.firstOutput(expectConfirm("설명 로드"), for: viewModel.descriptionModel) {
+            viewModel.refresh()
+        }
+
+        // when
+        viewModel.enter(memo: "<b>볼드</b>")
+        let model = try await self.firstOutput(expectConfirm("태그 입력 후 평문 유지"), for: viewModel.descriptionModel)
+
+        // then
+        #expect(model == .plainText("<b>볼드</b>"))
+    }
+
+    @Test func descriptionModel_afterConfirmedPlainEditing_staysPlainTextWhileTagsRemain() async throws {
+        // given
+        let viewModel = self.makeViewModel(description: "그냥 텍스트<br><b>볼드</b>")
+        self.spyRouter.shouldConfirmNotCancel = true
+        _ = try await self.firstOutput(expectConfirm("설명 로드"), for: viewModel.descriptionModel) {
+            viewModel.refresh()
+        }
+        viewModel.startEditDescription()
+        _ = try await self.firstOutput(expectConfirm("평문 전환 확인"), for: viewModel.descriptionModel)
+
+        // when — 태그가 그대로 남은 채로 다른 값을 입력해도 다시 richText 로 안 바뀐다
+        viewModel.enter(memo: "그냥 텍스트<br><b>볼드</b> 추가")
+        let model = try await self.firstOutput(expectConfirm("평문 유지"), for: viewModel.descriptionModel)
+
+        // then
+        #expect(model == .plainText("그냥 텍스트<br><b>볼드</b> 추가"))
+    }
+
+}
+
+
 private final class PrivateStubGoogleCalendarUsecase: StubGoogleCalendarUsecase, @unchecked Sendable {
 
     var additionalStubbing: ((GoogleCalendar.EventOrigin) -> GoogleCalendar.EventOrigin)?
     var summaryPerCall: [String]?
     private var eventDetailCallCount = 0
+    var eventDetailFailsFromCallIndex: Int?
 
     var didRequestEventWritePermissionWith: [(accountId: String, calendarId: String)] = []
     override func eventWritePermission(
@@ -789,8 +1470,12 @@ private final class PrivateStubGoogleCalendarUsecase: StubGoogleCalendarUsecase,
     override func eventDetail(
         _ calendarId: String, _ eventId: String, accountId: String, at timeZone: TimeZone
     ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error> {
-        let summary = self.summaryPerCall?[safe: self.eventDetailCallCount] ?? self.summaryPerCall?.last ?? "name"
+        let callIndex = self.eventDetailCallCount
         self.eventDetailCallCount += 1
+        if let failsFrom = self.eventDetailFailsFromCallIndex, callIndex >= failsFrom {
+            return Fail(error: RuntimeError("stub eventDetail failure")).eraseToAnyPublisher()
+        }
+        let summary = self.summaryPerCall?[safe: callIndex] ?? self.summaryPerCall?.last ?? "name"
 
         let start = GoogleCalendar.EventOrigin.GoogleEventTime()
             |> \.dateTime .~ "2025-05-24T12:00:00+09:00"
@@ -834,7 +1519,7 @@ private final class PrivateStubGoogleCalendarUsecase: StubGoogleCalendarUsecase,
             |> \.colorId .~ "color_id"
         
         let stub = additionalStubbing?(origin) ?? origin
-        
+
         return Just(stub).mapAsAnyError().eraseToAnyPublisher()
     }
 }
