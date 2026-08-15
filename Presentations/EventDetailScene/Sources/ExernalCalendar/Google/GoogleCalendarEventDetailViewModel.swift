@@ -125,6 +125,13 @@ protocol GoogleCalendarEventDetailViewModel: AnyObject, Sendable, GoogleCalendar
     func selectAttachment(_ model: AttachmentModel)
     func copyText(_ text: String)
     func close()
+    func enter(name: String)
+    func selectStartTime(_ date: Date)
+    func selectEndTime(_ date: Date)
+    func toggleAllDay()
+    func enter(location: String?)
+    func enter(memo: String?)
+    func select(colorId: String?)
 
     // presenter
     var isEditable: AnyPublisher<Bool, Never> { get }
@@ -142,6 +149,20 @@ protocol GoogleCalendarEventDetailViewModel: AnyObject, Sendable, GoogleCalendar
     // 회의 모델
     var descriptionHTMLText: AnyPublisher<String?, Never> { get }
     var attachments: AnyPublisher<[AttachmentModel]?, Never> { get }
+    var isSavable: AnyPublisher<Bool, Never> { get }
+    var isSaving: AnyPublisher<Bool, Never> { get }
+    var hasChanges: AnyPublisher<Bool, Never> { get }
+}
+
+
+// MARK: - EditableFields
+
+private struct EditableFields: Equatable {
+    var name: String
+    var time: SelectedTime?
+    var location: String?
+    var memo: String?
+    var colorId: String?
 }
 
 
@@ -184,6 +205,8 @@ final class GoogleCalendarEventDetailViewModelImple: GoogleCalendarEventDetailVi
         let origin = CurrentValueSubject<GoogleCalendar.EventOrigin?, Never>(nil)
         let calendarTag = CurrentValueSubject<GoogleCalendar.Tag?, Never>(nil)
         let writePermission = CurrentValueSubject<GoogleCalendar.EventWritePermission?, Never>(nil)
+        let fields = CurrentValueSubject<OriginalAndCurrent<EditableFields>?, Never>(nil)
+        let isSaving = CurrentValueSubject<Bool, Never>(false)
     }
     
     private var cancellables: Set<AnyCancellable> = []
@@ -233,7 +256,7 @@ extension GoogleCalendarEventDetailViewModelImple {
                     self?.alertEventCanceled()
                     return
                 }
-                self?.subject.origin.send(event)
+                self?.applyLoaded(event)
             }, receiveError: { [weak self] error in
                 self?.router?.showError(error)
             })
@@ -243,6 +266,20 @@ extension GoogleCalendarEventDetailViewModelImple {
     private func alertEventCanceled() {
         self.router?.showToast("eventDetail::gogoleEvent::canceled::message".localized())
         self.router?.closeScene()
+    }
+
+    private func applyLoaded(_ event: GoogleCalendar.EventOrigin) {
+        guard self.subject.fields.value?.isChanged != true else { return }
+        guard let timeZone = self.subject.timeZone.value else { return }
+        self.subject.origin.send(event)
+        let fields = EditableFields(
+            name: event.summaryText,
+            time: event.selectedTime(timeZone),
+            location: event.location,
+            memo: event.description,
+            colorId: event.colorId
+        )
+        self.subject.fields.send(.init(origin: fields))
     }
 
     func editEvent() {
@@ -316,6 +353,56 @@ extension GoogleCalendarEventDetailViewModelImple {
 }
 
 
+// MARK: - GoogleCalendarEventDetailViewModelImple Editable Fields Interactor
+
+extension GoogleCalendarEventDetailViewModelImple {
+
+    func enter(name: String) {
+        self.updateCurrentFields { $0 |> \.name .~ name }
+    }
+
+    func selectStartTime(_ date: Date) {
+        guard let timeZone = self.subject.timeZone.value else { return }
+        self.updateCurrentFields { fields in
+            fields |> \.time .~ fields.time.periodStartChanged(date, timeZone)
+        }
+    }
+
+    func selectEndTime(_ date: Date) {
+        guard let timeZone = self.subject.timeZone.value else { return }
+        self.updateCurrentFields { fields in
+            fields |> \.time .~ fields.time.periodEndTimeChanged(date, timeZone)
+        }
+    }
+
+    func toggleAllDay() {
+        guard let timeZone = self.subject.timeZone.value else { return }
+        self.updateCurrentFields { fields in
+            fields |> \.time .~ fields.time?.toggleIsAllDay(timeZone)
+        }
+    }
+
+    func enter(location: String?) {
+        self.updateCurrentFields { $0 |> \.location .~ location }
+    }
+
+    func enter(memo: String?) {
+        self.updateCurrentFields { $0 |> \.memo .~ memo }
+    }
+
+    func select(colorId: String?) {
+        self.updateCurrentFields { $0 |> \.colorId .~ colorId }
+    }
+
+    private func updateCurrentFields(_ mutate: @escaping (EditableFields) -> EditableFields) {
+        guard let fields = self.subject.fields.value else { return }
+        self.subject.fields.send(
+            fields |> \.current %~ mutate
+        )
+    }
+}
+
+
 // MARK: - GoogleCalendarEventDetailViewModelImple Presenter
 
 extension GoogleCalendarEventDetailViewModelImple {
@@ -349,83 +436,39 @@ extension GoogleCalendarEventDetailViewModelImple {
 
     var eventColorModel: AnyPublisher<GoogleCalendarEventColorModel, Never> {
         let calendarId = self.calendarId
-        return self.subject.origin
+        return self.subject.fields
             .compactMap { $0 }
-            .map {
-                GoogleCalendarEventColorModel(colorId: $0.colorId, calendarId: calendarId)
-            }
+            .map { GoogleCalendarEventColorModel(colorId: $0.current.colorId, calendarId: calendarId) }
             .removeDuplicates()
             .eraseToAnyPublisher()
     }
-    
+
     var eventName: AnyPublisher<String, Never> {
-        
-        return self.subject.origin
-            .compactMap { $0 }
-            .map { $0.summaryText }
+        return self.subject.fields
+            .compactMap { $0?.current.name }
             .removeDuplicates()
             .eraseToAnyPublisher()
     }
-    
+
     var timeText: AnyPublisher<SelectedTime?, Never> {
-        let transform: (GoogleCalendar.EventOrigin, TimeZone) -> SelectedTime? = { origin, timeZone in
-            
-            let start = origin.start?.supportEventTimeElemnt(timeZone.identifier)
-            let end = origin.end?.supportEventTimeElemnt(timeZone.identifier)
-            
-            switch (start, end) {
-            case (.period(let st), .period(let et)):
-                let time = EventTime.period(
-                    st.timeIntervalSince1970..<et.timeIntervalSince1970
-                )
-                return .init(time, timeZone)
-                
-            case(.allDay(let st, let sz), .allDay(let et, _)):
-                let time = EventTime.allDay(
-                    st.timeIntervalSince1970..<et.timeIntervalSince1970,
-                    secondsFromGMT: TimeInterval(sz.secondsFromGMT())
-                )
-                return .init(time, timeZone)
-                
-            default: return nil
-            }
-        }
-        
-        return Publishers.CombineLatest(
-            self.subject.origin.compactMap { $0 },
-            self.subject.timeZone.compactMap { $0 }
-        )
-        .map(transform)
-        .removeDuplicates()
-        .eraseToAnyPublisher()
+        return self.subject.fields
+            .compactMap { $0 }
+            .map { $0.current.time }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
     }
-    
+
     var ddayText: AnyPublisher<String, Never> {
-        typealias SupportTime = GoogleCalendar.EventOrigin.GoogleEventTime.SupportEventTimeElemnt
-        let asEventTime: (GoogleCalendar.EventOrigin, TimeZone) -> SupportTime?
-        asEventTime = { origin, timeZone in
-            return origin.start?.supportEventTimeElemnt(timeZone.identifier)
-        }
-        
-        let countDays: (SupportTime?) -> AnyPublisher<Int, Never> = { [weak self] time in
-            guard let self = self, let time else { return Empty().eraseToAnyPublisher() }
-            let start  = switch time {
-                case .period(let date): date
-                case .allDay(let date, _): date
+        return self.subject.fields
+            .compactMap { $0?.current.time }
+            .map { [weak self] time -> AnyPublisher<Int, Never> in
+                guard let self else { return Empty().eraseToAnyPublisher() }
+                return self.daysIntervalCountUsecase.countDays(to: time.startDate)
             }
-            return self.daysIntervalCountUsecase.countDays(to: start)
-        }
-        
-        return Publishers.CombineLatest(
-            self.subject.origin.compactMap { $0 },
-            self.subject.timeZone.compactMap { $0 }
-        )
-        .map(asEventTime)
-        .map(countDays)
-        .switchToLatest()
-        .removeDuplicates()
-        .map { DDayText($0).text }
-        .eraseToAnyPublisher()
+            .switchToLatest()
+            .removeDuplicates()
+            .map { DDayText($0).text }
+            .eraseToAnyPublisher()
     }
     
     var repeatOption: AnyPublisher<String?, Never> {
@@ -503,13 +546,38 @@ extension GoogleCalendarEventDetailViewModelImple {
     }
     
     var location: AnyPublisher<String?, Never> {
-        return self.subject.origin
+        return self.subject.fields
             .compactMap { $0 }
-            .map { $0.location }
+            .map { $0.current.location }
             .removeDuplicates()
             .eraseToAnyPublisher()
     }
-    
+
+    var isSavable: AnyPublisher<Bool, Never> {
+        return self.subject.fields
+            .map { fields -> Bool in
+                guard let fields, fields.isChanged else { return false }
+                let nameIsNotEmpty = !fields.current.name.isEmpty
+                let timeIsValid = fields.current.time?.isValid ?? false
+                return nameIsNotEmpty && timeIsValid
+            }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+
+    var isSaving: AnyPublisher<Bool, Never> {
+        return self.subject.isSaving
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+
+    var hasChanges: AnyPublisher<Bool, Never> {
+        return self.subject.fields
+            .map { $0?.isChanged ?? false }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+
     var descriptionHTMLText: AnyPublisher<String?, Never> {
         return self.subject.origin
             .compactMap { $0 }
@@ -550,7 +618,7 @@ extension GoogleCalendarEventDetailViewModelImple: GoogleCalendarEventEditSceneL
             self.refresh()
             return
         }
-        self.subject.origin.send(event)
+        self.applyLoaded(event)
     }
 
     func googleCalendarEvent(didRemove eventId: String) {
@@ -579,12 +647,51 @@ private extension Array where Element == GoogleCalendar.EventOrigin.Attendee {
 }
 
 private extension GoogleCalendar.EventOrigin.Attendee {
-    
+
     var identifier: String? {
         return self.id ?? self.email
     }
-    
+
     var displayNameOrEmail: String? {
         return self.displayName ?? self.email
+    }
+}
+
+
+// MARK: - GoogleCalendar time <-> SelectedTime mapping
+
+private extension GoogleCalendar.EventOrigin {
+
+    func selectedTime(_ timeZone: TimeZone) -> SelectedTime? {
+        let start = self.start?.supportEventTimeElemnt(timeZone.identifier)
+        let end = self.end?.supportEventTimeElemnt(timeZone.identifier)
+        switch (start, end) {
+        case (.period(let st), .period(let et)):
+            return SelectedTime(
+                .period(st.timeIntervalSince1970..<et.timeIntervalSince1970), timeZone
+            )
+        case (.allDay(let st, let sz), .allDay(let et, _)):
+            return SelectedTime(
+                .allDay(
+                    st.timeIntervalSince1970..<et.timeIntervalSince1970,
+                    secondsFromGMT: TimeInterval(sz.secondsFromGMT())
+                ),
+                timeZone
+            )
+        default:
+            return nil
+        }
+    }
+}
+
+private extension SelectedTime {
+
+    var startDate: Date {
+        switch self {
+        case .at(let time): return time.date
+        case .singleAllDay(let time): return time.date
+        case .period(let start, _): return start.date
+        case .alldayPeriod(let start, _): return start.date
+        }
     }
 }
