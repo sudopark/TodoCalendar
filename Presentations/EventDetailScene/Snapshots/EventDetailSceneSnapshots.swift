@@ -56,16 +56,23 @@ final class EventDetailSceneSnapshots: XCTestCase {
             let appearance = self.makeAppearance(theme)
             let colors = GoogleCalendar.Colors(
                 ownerId: "snapshot@google.com",
-                calendars: ["colorId": .init(foregroundHex: "#ff0000", backgroudHex: "#ff00ff")],
-                events: ["colorId": .init(foregroundHex: "#ff0000", backgroudHex: "#ff00ff")]
+                calendars: ["calendar_id": .init(foregroundHex: "#ffffff", backgroudHex: "#039be5")],
+                events: (1...11).reduce(into: [String: GoogleCalendar.Colors.ColorSet]()) {
+                    $0["\($1)"] = .init(foregroundHex: "#ffffff", backgroudHex: "#f4511e")
+                }
             )
             appearance.googleCalendarColors[colors.ownerId] = colors
             let state = GoogleCalendarEventDetailViewState()
             state.eventName = "google calendar event"
+            state.isEditable = true
+            state.hasDetailLink = true
+            state.isSavable = true
             state.timeText = .period(.init(self.start, .current), .init(self.end, .current))
             state.ddayText = "D+3"
             state.repeatOptionText = "repeat option"
             state.location = "location text"
+            state.memo = "memo text"
+            state.eventColor = .init(colorId: "6", calendarId: "calendar_id")
             state.calendarModel = .init(calenarId: "some", name: "some@calendar.com")
             return GoogleCalendarEventDetailView()
                 .environment(state)
