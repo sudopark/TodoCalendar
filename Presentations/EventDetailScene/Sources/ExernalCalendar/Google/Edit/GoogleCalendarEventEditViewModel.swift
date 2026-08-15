@@ -30,10 +30,12 @@ protocol GoogleCalendarEventEditViewModel: AnyObject, Sendable, GoogleCalendarEv
     func select(colorId: String?)
     func save()
     func remove()
+    func editOnGoogleCalendar()
     func close()
 
     // presenter
     var eventName: AnyPublisher<String, Never> { get }
+    var hasDetailLink: AnyPublisher<Bool, Never> { get }
     var selectedTime: AnyPublisher<SelectedTime?, Never> { get }
     var location: AnyPublisher<String?, Never> { get }
     var memo: AnyPublisher<String?, Never> { get }
@@ -340,6 +342,11 @@ extension GoogleCalendarEventEditViewModelImple {
         .store(in: &self.cancellables)
     }
 
+    func editOnGoogleCalendar() {
+        guard let link = self.subject.origin.value?.htmlLink else { return }
+        self.router?.openSafari(link)
+    }
+
     func close() {
         self.router?.closeScene()
     }
@@ -408,6 +415,13 @@ extension GoogleCalendarEventEditViewModelImple {
     var hasChanges: AnyPublisher<Bool, Never> {
         self.subject.fields
             .map { $0?.isChanged ?? false }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+
+    var hasDetailLink: AnyPublisher<Bool, Never> {
+        self.subject.origin
+            .map { $0?.htmlLink != nil }
             .removeDuplicates()
             .eraseToAnyPublisher()
     }
