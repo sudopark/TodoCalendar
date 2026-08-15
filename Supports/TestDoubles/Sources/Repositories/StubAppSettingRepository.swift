@@ -64,7 +64,20 @@ open class StubAppSettingRepository: AppSettingRepository, @unchecked Sendable {
         |> \.defaultNewEventPeriod .~ (params.defaultNewEventPeriod ?? old.defaultNewEventPeriod)
         return newSetting
     }
-    
+
+    public var stubEventShareSettings: EventShareSettings = .init()
+    public var didChangeEventShareParams: EditEventShareSettingsParams?
+    open func loadEventShareSetting() -> EventShareSettings {
+        return self.stubEventShareSettings
+    }
+
+    open func changeEventShareSetting(_ params: EditEventShareSettingsParams) -> EventShareSettings {
+        self.didChangeEventShareParams = params
+        let newSetting = self.stubEventShareSettings.update(params)
+        self.stubEventShareSettings = newSetting
+        return newSetting
+    }
+
     open func loadWidgetAppearanceSetting() -> WidgetAppearanceSettings {
         return self.loadSavedViewAppearance().widget
     }

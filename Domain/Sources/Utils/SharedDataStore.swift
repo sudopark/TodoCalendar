@@ -25,6 +25,7 @@ public enum ShareDataKeys: String {
     case calendarAppearance
     case defaultEventTagColor
     case eventSetting
+    case eventShareSetting
     case foremostEventId
     case uncompletedTodos
     case externalCalendarAccounts

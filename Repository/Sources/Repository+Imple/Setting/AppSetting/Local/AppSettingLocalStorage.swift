@@ -291,6 +291,28 @@ extension AppSettingLocalStorage {
 }
 
 
+// MARK: - event share setting
+
+extension AppSettingLocalStorage {
+
+    private var shareIncludeTagName: String { "share_include_tag_name" }
+
+    func loadEventShareSetting(for userId: String?) -> EventShareSettings {
+        let includeTagName: Bool? = self.environmentStorage.load(shareIncludeTagName)
+
+        return EventShareSettings()
+            |> \.includeTagName .~ (includeTagName ?? false)
+    }
+
+    func saveEventShareSetting(_ newValue: EventShareSettings, for userId: String?) {
+        self.environmentStorage.update(
+            shareIncludeTagName,
+            newValue.includeTagName
+        )
+    }
+}
+
+
 private extension EventTagId {
     
     var rawValue: String {

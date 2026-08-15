@@ -125,4 +125,29 @@ extension AppSettingLocalRepositoryImpleTests {
                 |> \.defaultMapApp .~ .google
         )
     }
+
+    func testRepository_loadEventShareSetting_whenNothingSaved_returnsDefault() {
+        // given
+        let repository = self.makeRepository()
+
+        // when
+        let setting = repository.loadEventShareSetting()
+
+        // then
+        XCTAssertEqual(setting.includeTagName, false)
+    }
+
+    func testRepository_changeEventShareSetting_thenLoadReturnsChangedValue() {
+        // given
+        let repository = self.makeRepository()
+        let params = EditEventShareSettingsParams() |> \.includeTagName .~ true
+
+        // when
+        let changed = repository.changeEventShareSetting(params)
+        let loaded = repository.loadEventShareSetting()
+
+        // then
+        XCTAssertEqual(changed.includeTagName, true)
+        XCTAssertEqual(loaded.includeTagName, true)
+    }
 }
