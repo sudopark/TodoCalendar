@@ -519,11 +519,19 @@ extension PaywallViewModelImple {
         guard let price = offering.product?.displayPrice else { return nil }
         return PaywallTopupCellModel(
             productId: offering.topup.productId,
-            creditsText: "billing::paywall::topup::credits"
-                .localized(with: offering.topup.totalCredits.formatted()),
+            creditsText: self.creditsText(of: offering.topup),
             priceText: price,
             bonusText: self.bonusText(of: offering.topup.bonusRate)
         )
+    }
+
+    private func creditsText(of topup: BillingTopup) -> String {
+        guard topup.bonusRate > 0 else {
+            return "billing::paywall::topup::credits".localized(with: topup.totalCredits.formatted())
+        }
+        let bonusCredits = topup.totalCredits - topup.credits
+        return "billing::paywall::topup::credits::split"
+            .localized(with: topup.credits.formatted(), bonusCredits.formatted())
     }
 
     private func bonusText(of rate: Double) -> String? {

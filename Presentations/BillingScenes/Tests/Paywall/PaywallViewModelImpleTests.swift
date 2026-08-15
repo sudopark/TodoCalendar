@@ -1082,7 +1082,25 @@ extension PaywallViewModelImpleTests {
         #expect(cells.first?.bonusText == nil)
     }
 
-    @Test func topupCellModels_whenBonusRateGiven_showsTotalCreditsWithBonusText() async throws {
+    // #883 — 보너스가 없는 tier 는 기본·추가로 나누지 않고 단일 총량만 보여준다
+    @Test func topupCellModels_whenBonusRateIsZero_showsSingleCreditsAmount() async throws {
+        // given
+        let (viewModel, _, _) = self.standardOwnedViewModel(
+            topupOfferings: [self.topupOffering("topup.tier.1", credits: 30000)]
+        )
+
+        // when
+        let cells = try await self.waitTopupCellsLoaded(viewModel)
+
+        // then
+        #expect(
+            cells.first?.creditsText
+                == "billing::paywall::topup::credits".localized(with: 30000.formatted())
+        )
+    }
+
+    // #883 — 보너스가 있는 tier 는 기본 크레딧과 추가(보너스) 크레딧을 나눠 보여준다
+    @Test func topupCellModels_whenBonusRateGiven_showsBaseAndBonusSplitCreditsText() async throws {
         // given
         let (viewModel, _, _) = self.standardOwnedViewModel(
             topupOfferings: [
@@ -1093,9 +1111,15 @@ extension PaywallViewModelImpleTests {
         // when
         let cells = try await self.waitTopupCellsLoaded(viewModel)
 
-        // then
+        // then — 단위(크레딧)는 split 문구 자체에 한 번만 붙는다("기본 150,000 + 추가 15,000 크레딧").
+        // 인자로는 숫자만 넘긴다 — 이미 단위가 붙은 로컬라이즈 문자열을 다시 인자로 중첩하면
+        // 언어별 어순·조사가 깨지는 i18n 안티패턴이 된다
         #expect(cells.count == 1)
-        #expect(cells.first?.creditsText.contains(165000.formatted()) == true)
+        #expect(
+            cells.first?.creditsText
+                == "billing::paywall::topup::credits::split"
+                    .localized(with: 150000.formatted(), 15000.formatted())
+        )
         #expect(cells.first?.bonusText?.contains("10") == true)
     }
 
