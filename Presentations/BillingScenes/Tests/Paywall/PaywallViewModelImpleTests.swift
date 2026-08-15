@@ -13,6 +13,7 @@ import Optics
 import Domain
 import Extensions
 import UnitTestHelpKit
+import TestDoubles
 
 @testable import BillingScenes
 
@@ -1324,5 +1325,35 @@ extension PaywallViewModelImpleTests {
 
         // then
         #expect((published ?? nil) == nil)
+    }
+}
+
+
+// MARK: - 약관·개인정보처리방침 (#857)
+
+extension PaywallViewModelImpleTests {
+
+    @Test func openTerms_showsTermsPageOnInAppWebView() {
+        // given
+        let (viewModel, _, spyRouter) = self.makeViewModel()
+
+        // when
+        viewModel.openTerms()
+
+        // then
+        #expect(spyRouter.didShowWebViewPath == LegalLink.termsPath)
+        #expect(spyRouter.didOpenSafariPath == nil)
+    }
+
+    @Test func openPrivacyPolicy_showsPrivacyPageOnInAppWebView() {
+        // given
+        let (viewModel, _, spyRouter) = self.makeViewModel()
+
+        // when
+        viewModel.openPrivacyPolicy()
+
+        // then
+        #expect(spyRouter.didShowWebViewPath == LegalLink.privacyPolicyPath)
+        #expect(spyRouter.didOpenSafariPath == nil)
     }
 }
