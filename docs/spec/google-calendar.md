@@ -337,36 +337,44 @@ activeCalendars() = 전체 캘린더 - offTagIds에 포함된 캘린더
 
 ### 8.1 표시 항목
 
-| 항목 | 소스 |
-|---|---|
-| 이벤트명 | `summary` |
-| 시간 | `start`/`end` (period 또는 allDay) |
-| 위치 | `location` |
-| 참석자 목록 | `attendees[]` (이름, 이메일, 응답 상태) |
-| 회의 링크 | `conferenceData.entryPoints[].uri` |
-| 첨부파일 | `attachments[]` (title, fileUrl, mimeType) |
-| 설명 | `description` |
-| 색상 | calendarId → 캘린더 색상 + eventColorId 오버라이드 |
-| 상태 | confirmed / tentative / cancelled |
-| 공개 범위 | default / public / private / confidential |
+상세 화면은 별도 편집 모드 없이 상시 편집 폼이다. 편집 가능 필드는 처음부터 입력 컴포넌트로 그리고, 불가 필드는 값을 보여주되 탭하면 안내 토스트가 뜬다.
 
-### 8.2 편집 진입 — 쓰기 권한 판정
+| 항목 | 소스 | 인라인 편집 |
+|---|---|---|
+| 이벤트명 | `summary` | 가능 |
+| 시간 | `start`/`end` (period 또는 allDay) | 가능 |
+| 위치 | `location` | 가능 |
+| 설명 | `description` | 가능 |
+| 색상 | calendarId → 캘린더 색상 + eventColorId 오버라이드 | 가능 |
+| 반복 규칙 | `recurrence` | 불가 (탭 시 토스트) |
+| 참석자 목록 | `attendees[]` (이름, 이메일, 응답 상태) | 불가 (탭 시 토스트) |
+| 회의 정보 | `conferenceData.entryPoints[].uri` | 불가 (헤더 탭 시 토스트, 링크/코드는 열기·복사 그대로) |
+| 첨부파일 | `attachments[]` (title, fileUrl, mimeType) | 불가 (탭하면 Safari로 열기 — 토스트 아님) |
+| 캘린더 | calendarId → 캘린더명 | 불가 (탭 시 토스트) |
+| 상태 | confirmed / tentative / cancelled | 표시만 |
+| 공개 범위 | default / public / private / confidential | 표시만 |
 
-상세 화면 하단 편집 버튼은 두 층을 순서대로 본다. **캘린더 층이 먼저다** — 읽기 전용 캘린더는 재인증해도 못 고치므로 계정 층을 먼저 물으면 유저가 재인증까지 하고 막다른 길을 만난다.
+### 8.2 쓰기 권한 판정 — 저장·삭제 실행 시점
+
+편집 가능 필드는 처음부터 입력 가능하다. 쓰기 권한은 **저장·삭제를 실행하는 시점**에 판정한다. 판정은 두 층을 순서대로 본다 — **캘린더 층이 먼저다**: 읽기 전용 캘린더는 재인증해도 못 고치므로 계정 층을 먼저 물으면 유저가 재인증까지 하고 막다른 길을 만난다.
 
 | 판정 | 조건 | 동작 |
 |---|---|---|
-| `readOnlyCalendar` | `Tag.isWritable == false` | 편집 불가 안내 표시 |
-| `needReauthentication` | 캘린더는 쓰기 가능 + 계정 `grantedScopes` 에 쓰기 scope 없음 | 재인증 확인 → 성공 시 편집 진입 |
-| `writable` | 둘 다 만족 | 바로 편집 진입 |
+| `readOnlyCalendar` | `Tag.isWritable == false` | 입력 필드 비활성 + 하단 안내문. 저장 버튼·삭제 메뉴 노출 안 함 |
+| `needReauthentication` | 캘린더는 쓰기 가능 + 계정 `grantedScopes` 에 쓰기 scope 없음 | 편집은 자유롭게 가능. 저장·삭제 실행 시 재인증 확인 다이얼로그 → 성공하면 이어서 저장·삭제 실행 |
+| `writable` | 둘 다 만족 | 저장·삭제 바로 실행 |
 
-점점점 메뉴의 "구글 캘린더에서 보기"는 `htmlLink` 를 Safari 로 연다 (편집 아님).
+`readOnlyCalendar` 상태에서는 `updateCurrentFields` 가드가 입력 자체를 무시해 저장 불가능한 변경이 쌓이지 않는다.
+
+점점점 메뉴의 링크 항목은 `isEditable` 에 따라 문구가 갈린다 — 편집 가능이면 "구글 캘린더에서 수정", 읽기 전용이면 "구글 캘린더에서 보기". 둘 다 `htmlLink` 를 Safari 로 연다 (메뉴 자체가 편집 액션은 아님). 삭제 항목은 `isEditable` 일 때만 노출된다.
 
 ### 8.3 편집 대상 필드
 
 `summary` · `start`/`end`(종일 토글 포함) · `location` · `description` · `colorId` 만 편집한다. `recurrence`·`attendees`·`conferenceData`·`attachments` 는 `EventEditParams` 에 필드를 두지 않아 PATCH 바디에 실릴 경로 자체가 없다 — 구글 PATCH 는 부분 업데이트라 안 보낸 필드는 서버 원본이 유지되고, `RRuleParser` 가 못 읽는 `BYMONTHDAY`·EXDATE·RDATE 가 소실되지 않는다.
 
 all-day 의 `end.date` 는 구글에서 배타적(exclusive)이다. 읽기가 가공 없이 담고 편집도 가공 없이 보내 왕복 항등을 유지한다 — 한쪽만 보정하면 저장할 때마다 하루씩 늘어난다.
+
+설명은 HTML을 담을 수 있어, 서식이 있으면 읽기 렌더로 두고 탭 시 소실 경고 후 평문 편집으로 전환한다.
 
 ### 8.4 반복 이벤트 수정·삭제 범위
 
