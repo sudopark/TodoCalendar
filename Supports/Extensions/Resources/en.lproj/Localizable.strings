@@ -283,6 +283,7 @@
 "eventDetail::gogoleEvent::repeating::onlyThisTime::button" = "This event only";
 "eventDetail::gogoleEvent::repeating::all::button" = "All events";
 "eventDetail::gogoleEvent::remove::confirm::message" = "Delete this event from Google Calendar?";
+"eventDetail::gogoleEvent::editOnCalendar" = "Edit in Google Calendar";
 
 // MARK: - Apple calendar event
 "eventDetail::appleCalendarEvent::viewOnCalendar" = "View in Apple Calendar";
