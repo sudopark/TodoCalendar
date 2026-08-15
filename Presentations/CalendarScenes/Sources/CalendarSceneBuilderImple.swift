@@ -21,6 +21,7 @@ public struct CalendarSceneBuilderImple {
     private let aiAgentCommandSceneBuilder: any AIAgentCommandSceneBuilder
     private let aiAgentKeyboardInputSceneBuilder: any AIAgentKeyboardInputSceneBuilder
     private let aiAgentImageCommandSceneBuilder: any AIAgentImageCommandSceneBuilder
+    private let paywallSceneBuilder: any PaywallSceneBuilder
     private let pendingCompleteTodoState: PendingCompleteTodoState = .init()
     public let calendarDeepLinkHandler = CalendarDeepLinkHandlerImple()
     private let eventDeepLinkHandler = EventDeepLinkHandlerImple()
@@ -34,7 +35,8 @@ public struct CalendarSceneBuilderImple {
         memberSceneBuilder: any MemberSceneBuilder,
         aiAgentCommandSceneBuilder: any AIAgentCommandSceneBuilder,
         aiAgentKeyboardInputSceneBuilder: any AIAgentKeyboardInputSceneBuilder,
-        aiAgentImageCommandSceneBuilder: any AIAgentImageCommandSceneBuilder
+        aiAgentImageCommandSceneBuilder: any AIAgentImageCommandSceneBuilder,
+        paywallSceneBuilder: any PaywallSceneBuilder
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
@@ -45,6 +47,7 @@ public struct CalendarSceneBuilderImple {
         self.aiAgentCommandSceneBuilder = aiAgentCommandSceneBuilder
         self.aiAgentKeyboardInputSceneBuilder = aiAgentKeyboardInputSceneBuilder
         self.aiAgentImageCommandSceneBuilder = aiAgentImageCommandSceneBuilder
+        self.paywallSceneBuilder = paywallSceneBuilder
     }
 
     private var eventListCellEventHanleViewModelBuilder: (any EventListCellEventHanleViewModelBuilder)?
@@ -116,7 +119,8 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
         let router = CalendarViewRouterImple(
             paperSceneBuilder,
             aiAgentCommandSceneBuilder: self.aiAgentCommandSceneBuilder,
-            memberSceneBuilder: self.memberSceneBuilder
+            memberSceneBuilder: self.memberSceneBuilder,
+            paywallSceneBuilder: self.paywallSceneBuilder
         )
         router.scene = viewController
         viewModel.router = router

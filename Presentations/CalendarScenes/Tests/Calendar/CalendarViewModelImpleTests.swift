@@ -1123,6 +1123,34 @@ extension CalendarViewModelImpleTests {
         // then
         XCTAssertEqual(self.spyRouter.didRouteToAICommandCount, 1)
     }
+
+    // AI 커맨드 시트가 paywall 요청을 되돌려 보낼 대상은 자기 자신(AIAgentCommandSceneListener)이어야 한다
+    func testViewModel_whenRoutingToAICommand_passesSelfAsListener() {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when
+        viewModel.calendarPaperDidRequestShowAICommand()
+
+        // then
+        XCTAssertTrue(self.spyRouter.didRouteToAICommandListener === viewModel)
+    }
+}
+
+// MARK: - 한도 초과 시트 → paywall 진입 위임 (#887)
+
+extension CalendarViewModelImpleTests {
+
+    func testViewModel_whenAIAgentCommandRequestsPaywall_routesToPaywall() {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when
+        viewModel.aiAgentCommandDidRequestPaywall()
+
+        // then
+        XCTAssertEqual(self.spyRouter.didRouteToPaywallCount, 1)
+    }
 }
 
 // MARK: - 음성 입력 진입 시 포커스된 달만 스크롤
@@ -1343,8 +1371,15 @@ private extension CalendarViewModelImpleTests {
         }
 
         var didRouteToAICommandCount: Int = 0
-        func routeToAICommand() {
+        var didRouteToAICommandListener: (any AIAgentCommandSceneListener)?
+        func routeToAICommand(listener: (any AIAgentCommandSceneListener)?) {
             self.didRouteToAICommandCount += 1
+            self.didRouteToAICommandListener = listener
+        }
+
+        var didRouteToPaywallCount: Int = 0
+        func routeToPaywall() {
+            self.didRouteToPaywallCount += 1
         }
 
         var didRouteToSignIn: Bool?

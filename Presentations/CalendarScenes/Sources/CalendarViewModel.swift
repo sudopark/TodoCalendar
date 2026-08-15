@@ -494,7 +494,15 @@ extension CalendarViewModelImple: CalendarPaperSceneListener {
     }
 
     func calendarPaperDidRequestShowAICommand() {
-        self.router?.routeToAICommand()
+        self.router?.routeToAICommand(listener: self)
+    }
+}
+
+
+extension CalendarViewModelImple: AIAgentCommandSceneListener {
+
+    func aiAgentCommandDidRequestPaywall() {
+        self.router?.routeToPaywall()
     }
 }
 
@@ -509,7 +517,8 @@ extension CalendarViewModelImple {
             .removeDuplicates()
             .filter { $0 }
             .sink { [weak self] _ in
-                self?.router?.routeToAICommand()
+                guard let self else { return }
+                self.router?.routeToAICommand(listener: self)
             }
             .store(in: &self.cancellables)
     }
@@ -560,7 +569,7 @@ extension CalendarViewModelImple {
             guard let self = self else { return }
             let state = self.subject.aiAgentState.value ?? .idle
             if Self.isAICommandPhase(state) {
-                self.router?.routeToAICommand()
+                self.router?.routeToAICommand(listener: self)
             } else if self.subject.isSignedIn.value {
                 self.aiAgentOrchestrationUsecase.enterVoiceInput()
             } else {
