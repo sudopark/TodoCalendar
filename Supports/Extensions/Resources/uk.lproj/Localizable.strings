@@ -145,7 +145,6 @@
 "calednar::event::skip_todo_until" = "Виберіть час, до якого пропустити це завдання";
 "calednar::event::copy" = "Копіювати подію";
 "calendar::move_date" = "Перенести дату";
-"calednar::event::google::edit" = "Редагувати подію Google Календаря";
 
 
 // MARK: - event detail
