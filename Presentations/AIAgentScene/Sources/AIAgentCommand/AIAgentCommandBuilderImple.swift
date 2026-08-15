@@ -13,29 +13,29 @@ public final class AIAgentCommandBuilderImple: AIAgentCommandSceneBuilder {
 
     private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
-    private let paywallSceneBuilder: any PaywallSceneBuilder
 
     public init(
         usecaseFactory: any UsecaseFactory,
-        viewAppearance: ViewAppearance,
-        paywallSceneBuilder: any PaywallSceneBuilder
+        viewAppearance: ViewAppearance
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
-        self.paywallSceneBuilder = paywallSceneBuilder
     }
 
     @MainActor
-    public func makeCommandScene() -> any AIAgentCommandScene {
+    public func makeCommandScene(
+        listener: (any AIAgentCommandSceneListener)?
+    ) -> any AIAgentCommandScene {
         let viewModel = AIAgentCommandViewModelImple(
             orchestrationUsecase: self.usecaseFactory.aiAgentOrchestrationUsecase,
             billingUsecase: self.usecaseFactory.billingUsecase
         )
+        viewModel.listener = listener
         let viewController = AIAgentCommandViewController(
             viewModel: viewModel,
             viewAppearance: self.viewAppearance
         )
-        let router = AIAgentRouter(paywallSceneBuilder: self.paywallSceneBuilder)
+        let router = AIAgentRouter()
         router.scene = viewController
         viewModel.router = router
         return viewController

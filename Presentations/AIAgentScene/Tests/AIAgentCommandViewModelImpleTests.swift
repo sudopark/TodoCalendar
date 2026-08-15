@@ -21,17 +21,20 @@ class AIAgentCommandViewModelImpleTests: BaseTestCase, PublisherWaitable {
     var cancelBag: Set<AnyCancellable>!
     private var stubAgent: StubAIAgentOrchestrationUsecase!
     private var spyRouter: SpyAIAgentRouter!
+    private var spyListener: SpyAIAgentCommandSceneListener!
 
     override func setUpWithError() throws {
         self.cancelBag = .init()
         self.stubAgent = .init()
         self.spyRouter = .init()
+        self.spyListener = .init()
     }
 
     override func tearDownWithError() throws {
         self.cancelBag = nil
         self.stubAgent = nil
         self.spyRouter = nil
+        self.spyListener = nil
         FeatureFlag.disable(.billingPaywall)
     }
 
@@ -41,6 +44,7 @@ class AIAgentCommandViewModelImpleTests: BaseTestCase, PublisherWaitable {
             billingUsecase: StubBillingUsecase(stubUserPlan: userPlan)
         )
         viewModel.router = self.spyRouter
+        viewModel.listener = self.spyListener
         return viewModel
     }
 
@@ -302,13 +306,24 @@ extension AIAgentCommandViewModelImpleTests {
         XCTAssertEqual(isAvailable, true)
     }
 
-    func test_showPlans_routesToPaywall() {
+    func test_showPlans_requestsPaywallViaListener() {
+        // given
+        let viewModel = self.makeViewModel()
+        // when
+        viewModel.showPlans()
+        // then — 자기 router로 직접 열지 않고 부모(Listener)에게 위임한다
+        XCTAssertEqual(self.spyListener.didRequestPaywall, true)
+    }
+
+    // reset 누락 시 다음 한도 초과에서 bindShowAICommandResultIfNeed의 false→true 전이가
+    // 다시 발생하지 않아 시트가 영영 안 뜨는 회귀가 생긴다
+    func test_showPlans_resetsOrchestrationState() {
         // given
         let viewModel = self.makeViewModel()
         // when
         viewModel.showPlans()
         // then
-        XCTAssertEqual(self.spyRouter.didRouteToPaywall, true)
+        XCTAssertEqual(self.stubAgent.didReset, true)
     }
 }
 
