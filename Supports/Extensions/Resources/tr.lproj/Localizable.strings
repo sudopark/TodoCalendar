@@ -145,7 +145,6 @@
 "calednar::event::skip_todo_until" = "Bu görevi atlamak için bir zaman seçin";
 "calednar::event::copy" = "Etkinliği kopyala";
 "calendar::move_date" = "Tarihi taşı";
-"calednar::event::google::edit" = "Google Takvim Etkinliğini Düzenle";
 
 
 // MARK: - event detail

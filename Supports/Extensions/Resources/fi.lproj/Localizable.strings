@@ -145,7 +145,6 @@
 "calednar::event::skip_todo_until" = "Valitse ajankohta, johon asti tämä tehtävä ohitetaan";
 "calednar::event::copy" = "Kopioi tapahtuma";
 "calendar::move_date" = "Siirrä päivämäärää";
-"calednar::event::google::edit" = "Muokkaa Google-kalenterin tapahtumaa";
 
 
 // MARK: - event detail

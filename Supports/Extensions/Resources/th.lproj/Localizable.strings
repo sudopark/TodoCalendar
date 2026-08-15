@@ -145,7 +145,6 @@
 "calednar::event::skip_todo_until" = "เลือกเวลาที่จะข้ามสิ่งที่ต้องทำนี้";
 "calednar::event::copy" = "คัดลอกกิจกรรม";
 "calendar::move_date" = "ย้ายวันที่";
-"calednar::event::google::edit" = "แก้ไขกิจกรรมใน Google ปฏิทิน";
 
 
 // MARK: - event detail

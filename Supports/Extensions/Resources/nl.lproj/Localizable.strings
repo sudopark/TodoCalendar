@@ -145,7 +145,6 @@
 "calednar::event::skip_todo_until" = "Kies een tijdstip om deze taak over te slaan";
 "calednar::event::copy" = "Gebeurtenis kopiëren";
 "calendar::move_date" = "Datum verplaatsen";
-"calednar::event::google::edit" = "Google Calendar-gebeurtenis bewerken";
 
 
 // MARK: - event detail
