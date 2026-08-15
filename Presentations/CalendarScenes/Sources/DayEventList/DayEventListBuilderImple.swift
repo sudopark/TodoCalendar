@@ -25,6 +25,7 @@ final class DayEventListSceneBuilerImple {
     private let memberSceneBuilder: any MemberSceneBuilder
     private let aiKeyboardInputSceneBuilder: any AIAgentKeyboardInputSceneBuilder
     private let aiImageCommandSceneBuilder: any AIAgentImageCommandSceneBuilder
+    private let sharePreviewSceneBuilder: any SharePreviewSceneBuilder
 
     init(
         usecaseFactory: any UsecaseFactory,
@@ -34,7 +35,8 @@ final class DayEventListSceneBuilerImple {
         accountUsecase: any AccountUsecase,
         memberSceneBuilder: any MemberSceneBuilder,
         aiKeyboardInputSceneBuilder: any AIAgentKeyboardInputSceneBuilder,
-        aiImageCommandSceneBuilder: any AIAgentImageCommandSceneBuilder
+        aiImageCommandSceneBuilder: any AIAgentImageCommandSceneBuilder,
+        sharePreviewSceneBuilder: any SharePreviewSceneBuilder
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
@@ -44,6 +46,7 @@ final class DayEventListSceneBuilerImple {
         self.memberSceneBuilder = memberSceneBuilder
         self.aiKeyboardInputSceneBuilder = aiKeyboardInputSceneBuilder
         self.aiImageCommandSceneBuilder = aiImageCommandSceneBuilder
+        self.sharePreviewSceneBuilder = sharePreviewSceneBuilder
     }
 }
 
@@ -75,17 +78,13 @@ extension DayEventListSceneBuilerImple: DayEventListSceneBuiler {
             accountUsecase: self.accountUsecase,
             aiAgentOrchestrationUsecase: self.usecaseFactory.aiAgentOrchestrationUsecase
         )
-        let sharePreviewSceneBuilder = SharePreviewSceneBuilerImple(
-            usecaseFactory: self.usecaseFactory,
-            viewAppearance: self.viewAppearance
-        )
         let router = DayEventListRouter(
             eventDetailSceneBuilder: self.eventDetailSceneBuilder,
             eventListSceneBuilder: self.eventListSceneBuilder,
             memberSceneBuilder: self.memberSceneBuilder,
             aiKeyboardInputSceneBuilder: self.aiKeyboardInputSceneBuilder,
             aiImageCommandSceneBuilder: self.aiImageCommandSceneBuilder,
-            sharePreviewSceneBuilder: sharePreviewSceneBuilder,
+            sharePreviewSceneBuilder: self.sharePreviewSceneBuilder,
             viewAppearance: self.viewAppearance
         )
         viewModel.router = router

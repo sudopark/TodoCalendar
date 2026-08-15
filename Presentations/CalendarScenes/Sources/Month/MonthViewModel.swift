@@ -162,7 +162,8 @@ protocol MonthViewModel: AnyObject, Sendable, MonthSceneInteractor {
     
     func attachListener(_ listener: any MonthSceneListener)
     func select(_ day: DayCellViewModel)
-    
+    func shareEvents(_ kind: CalendarShareRangeKind, for day: DayCellViewModel)
+
     var weekDays: AnyPublisher<[WeekDayModel], Never> { get }
     var weekModels: AnyPublisher<[WeekRowModel], Never> { get }
     var currentSelectDayIdentifier: AnyPublisher<String, Never> { get }
@@ -204,6 +205,25 @@ final class MonthViewModelImple: MonthViewModel, @unchecked Sendable {
         let timeZone: TimeZone
         let component: CalendarComponent
         let range: Range<TimeInterval>
+
+        func shareRange(
+            _ kind: CalendarShareRangeKind, for day: DayCellViewModel
+        ) -> Range<TimeInterval>? {
+            switch kind {
+            case .day:
+                return CalendarComponent.Day(
+                    year: day.year, month: day.month, day: day.day, weekDay: 1
+                ).dayRange(self.timeZone)
+
+            case .week:
+                return self.component.weeks
+                    .first(where: { week in week.days.contains(where: { $0.identifier == day.identifier }) })?
+                    .range(self.timeZone)
+
+            case .month:
+                return self.component.monthRange(self.timeZone)
+            }
+        }
     }
     
     private struct Subject: @unchecked Sendable {
@@ -319,7 +339,14 @@ extension MonthViewModelImple {
             .init(day.year, day.month, day.day)
         )
     }
-    
+
+    func shareEvents(_ kind: CalendarShareRangeKind, for day: DayCellViewModel) {
+        guard let info = self.subject.currentMonthInfo.value,
+              let range = info.shareRange(kind, for: day)
+        else { return }
+        self.listener?.monthScene(didRequestShare: range)
+    }
+
     func clearDaySelection() {
         self.subject.userSelectedDay.send(nil)
     }
