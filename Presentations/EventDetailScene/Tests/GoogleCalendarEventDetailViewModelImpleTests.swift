@@ -31,13 +31,15 @@ final class GoogleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
         isCanceled: Bool = false,
         customAttendees: [GoogleCalendar.EventOrigin.Attendee]? = nil,
         writePermission: GoogleCalendar.EventWritePermission = .writable,
-        shouldFailReauthenticate: Bool = false
+        shouldFailReauthenticate: Bool = false,
+        summaryPerCall: [String]? = nil
     ) -> GoogleCalendarEventDetailViewModelImple {
         let settingUsecase = StubCalendarSettingUsecase()
         settingUsecase.prepare()
 
         let calendarUsecase = PrivateStubGoogleCalendarUsecase()
         calendarUsecase.stubWritePermission = writePermission
+        calendarUsecase.summaryPerCall = summaryPerCall
         calendarUsecase.additionalStubbing = { stub in
             stub
                 |> \.attendees .~ (customAttendees ?? stub.attendees)
@@ -603,9 +605,178 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
     }
 }
 
+// MARK: - 편집 입력 상태
+
+extension GoogleCalendarEventDetailViewModelImpleTests {
+
+    @Test func enterName_updatesEventNamePublisher() async throws {
+        // given
+        let viewModel = self.makeViewModel()
+        _ = try await self.firstOutput(expectConfirm("origin 이름 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+
+        // when
+        viewModel.enter(name: "new name")
+        let updated = try await self.firstOutput(expectConfirm("변경된 이름"), for: viewModel.eventName)
+
+        // then
+        #expect(updated == "new name")
+    }
+
+    @Test func selectStartTime_updatesTimeTextPublisher() async throws {
+        // given
+        let viewModel = self.makeViewModel()
+        _ = try await self.firstOutput(expectConfirm("origin 시간 로드"), for: viewModel.timeText) {
+            viewModel.refresh()
+        }
+        let timeZone = TimeZone(abbreviation: "KST")!
+        let newStart = Date(timeIntervalSince1970: 1_748_400_000)
+
+        // when
+        viewModel.selectStartTime(newStart)
+        let updated = try await self.firstOutput(expectConfirm("변경된 시간"), for: viewModel.timeText)
+
+        // then
+        let expectedDay = SelectTimeText(newStart.timeIntervalSince1970, timeZone).day
+        switch updated {
+        case .period(let start, _):
+            #expect(start.day == expectedDay)
+        default:
+            Issue.record("기간 타입 시간이어야 함")
+        }
+    }
+
+    @Test func toggleAllDay_switchesTimeToAllDay() async throws {
+        // given
+        let viewModel = self.makeViewModel()
+        _ = try await self.firstOutput(expectConfirm("origin 시간 로드"), for: viewModel.timeText) {
+            viewModel.refresh()
+        }
+
+        // when
+        viewModel.toggleAllDay()
+        let updated = try await self.firstOutput(expectConfirm("종일 전환 시간"), for: viewModel.timeText) ?? nil
+
+        // then
+        #expect(updated?.isAllDay == true)
+    }
+
+    @Test func enterLocation_updatesLocationPublisher() async throws {
+        // given
+        let viewModel = self.makeViewModel()
+        _ = try await self.firstOutput(expectConfirm("origin 장소 로드"), for: viewModel.location) {
+            viewModel.refresh()
+        }
+
+        // when
+        viewModel.enter(location: "new location")
+        let updated = try await self.firstOutput(expectConfirm("변경된 장소"), for: viewModel.location)
+
+        // then
+        #expect(updated == "new location")
+    }
+
+    @Test func selectColorId_updatesEventColorModelPublisher() async throws {
+        // given
+        let viewModel = self.makeViewModel()
+        _ = try await self.firstOutput(expectConfirm("origin 색상 로드"), for: viewModel.eventColorModel) {
+            viewModel.refresh()
+        }
+
+        // when
+        viewModel.select(colorId: "new_color")
+        let updated = try await self.firstOutput(expectConfirm("변경된 색상"), for: viewModel.eventColorModel)
+
+        // then
+        #expect(updated?.colorId == "new_color")
+        #expect(updated?.calendarId == "g:7")
+    }
+
+    @Test func ddayText_followsEditedTimeNotOrigin() async throws {
+        // given — countDays 스텁은 입력값과 무관하게 항상 [-4, 0, 4]를 방출하므로,
+        // 시간 편집 후 재구독(스트림 재발행) 여부로 소스 전환을 판별한다.
+        let expect = expectConfirm("edited time 기준으로 d-day 재계산")
+        expect.count = 6
+        let viewModel = self.makeViewModel()
+
+        // when
+        let days = try await self.outputs(expect, for: viewModel.ddayText) {
+            viewModel.refresh()
+            viewModel.selectStartTime(Date(timeIntervalSince1970: 1_748_400_000))
+        }
+
+        // then
+        #expect(days == ["D+4", "D-Day", "D-4", "D+4", "D-Day", "D-4"])
+    }
+
+    @Test func whenNothingChanged_isSavableIsFalse() async throws {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when
+        let isSavable = try await self.firstOutput(expectConfirm("isSavable 확인"), for: viewModel.isSavable) {
+            viewModel.refresh()
+        }
+
+        // then
+        #expect(isSavable == false)
+    }
+
+    @Test func whenNameClearedToEmpty_hasChangesIsTrueButIsSavableIsFalse() async throws {
+        // given
+        let viewModel = self.makeViewModel()
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+
+        // when
+        viewModel.enter(name: "")
+        let hasChanges = try await self.firstOutput(expectConfirm("hasChanges"), for: viewModel.hasChanges)
+        let isSavable = try await self.firstOutput(expectConfirm("isSavable"), for: viewModel.isSavable)
+
+        // then
+        #expect(hasChanges == true)
+        #expect(isSavable == false)
+    }
+
+    @Test func refresh_whenHasUnsavedChanges_doesNotDiscardThem() async throws {
+        // given
+        let viewModel = self.makeViewModel()
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+        viewModel.enter(name: "edited name")
+
+        // when
+        viewModel.refresh()
+        let name = try await self.firstOutput(expectConfirm("refresh 후에도 편집값 유지"), for: viewModel.eventName)
+
+        // then
+        #expect(name == "edited name")
+    }
+
+    @Test func refresh_whenNoChanges_appliesLatestOrigin() async throws {
+        // given
+        let viewModel = self.makeViewModel(summaryPerCall: ["name", "updated name"])
+        _ = try await self.firstOutput(expectConfirm("최초 origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+
+        // when — 편집 없이 다시 refresh
+        viewModel.refresh()
+        let name = try await self.firstOutput(expectConfirm("최신 origin 반영"), for: viewModel.eventName)
+
+        // then
+        #expect(name == "updated name")
+    }
+}
+
 private final class PrivateStubGoogleCalendarUsecase: StubGoogleCalendarUsecase, @unchecked Sendable {
 
     var additionalStubbing: ((GoogleCalendar.EventOrigin) -> GoogleCalendar.EventOrigin)?
+    var summaryPerCall: [String]?
+    private var eventDetailCallCount = 0
 
     var didRequestEventWritePermissionWith: [(accountId: String, calendarId: String)] = []
     override func eventWritePermission(
@@ -618,7 +789,9 @@ private final class PrivateStubGoogleCalendarUsecase: StubGoogleCalendarUsecase,
     override func eventDetail(
         _ calendarId: String, _ eventId: String, accountId: String, at timeZone: TimeZone
     ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error> {
-     
+        let summary = self.summaryPerCall?[safe: self.eventDetailCallCount] ?? self.summaryPerCall?.last ?? "name"
+        self.eventDetailCallCount += 1
+
         let start = GoogleCalendar.EventOrigin.GoogleEventTime()
             |> \.dateTime .~ "2025-05-24T12:00:00+09:00"
         let end = GoogleCalendar.EventOrigin.GoogleEventTime()
@@ -649,7 +822,7 @@ private final class PrivateStubGoogleCalendarUsecase: StubGoogleCalendarUsecase,
             |> \.conferenceId .~ "id"
             |> \.conferenceSolution .~ solution
             |> \.entryPoints .~ entries
-        let origin = GoogleCalendar.EventOrigin(id: eventId, summary: "name")
+        let origin = GoogleCalendar.EventOrigin(id: eventId, summary: summary)
             |> \.start .~ start
             |> \.end .~ end
             |> \.location .~ "location"
