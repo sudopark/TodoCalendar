@@ -233,7 +233,7 @@ extension PaywallViewModelImple {
                     self.showPendingDialog()
                 }
             } catch {
-                self.showFailure(error)
+                await self.showFailureAndRecheckUnfinished(error)
             }
         }
     }
@@ -257,7 +257,7 @@ extension PaywallViewModelImple {
                     self.showPendingDialog()
                 }
             } catch {
-                self.showFailure(error)
+                await self.showFailureAndRecheckUnfinished(error)
             }
         }
     }
@@ -282,7 +282,7 @@ extension PaywallViewModelImple {
                     break
                 }
             } catch {
-                self.showFailure(error)
+                await self.showFailureAndRecheckUnfinished(error)
             }
         }
     }
@@ -350,6 +350,12 @@ extension PaywallViewModelImple {
             |> \.message .~ pure(reason.message)
             |> \.withCancel .~ false
         self.router?.showConfirm(dialog: info)
+    }
+
+    // 서버 반영만 실패해도 미완료 거래가 남을 수 있어 실패 직후 다시 조회한다
+    private func showFailureAndRecheckUnfinished(_ error: any Error) async {
+        self.showFailure(error)
+        await self.loadUnfinishedState()
     }
 }
 
