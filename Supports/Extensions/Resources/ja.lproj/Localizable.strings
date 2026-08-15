@@ -145,7 +145,6 @@
 "calednar::event::skip_todo_until" = "スキップする日時を選択";
 "calednar::event::copy" = "イベントを複製";
 "calendar::move_date" = "日付を移動";
-"calednar::event::google::edit" = "Googleカレンダーのイベントを編集";
 
 
 // MARK: - event detail

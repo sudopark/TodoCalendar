@@ -147,7 +147,6 @@ public enum EventListMoreAction: Sendable, Equatable {
     case skipTodo
     case edit
     case copy
-    case editGoogleEvent(calendarId: String, accountId: String, eventId: String)
 }
 
 public struct EventListMoreActionModel: Sendable, Equatable {
@@ -499,14 +498,7 @@ public struct GoogleCalendarEventCellViewModel: EventCellViewModel {
         self.isAlldayEvent = event.eventTime?.isAllDay ?? false
     }
 
-    public var moreActions: EventListMoreActionModel? {
-        return .init(
-            basicActions: [
-                .editGoogleEvent(calendarId: self.calendarId, accountId: self.accountId, eventId: self.eventIdentifier)
-            ],
-            removeActions: []
-        )
-    }
+    public var moreActions: EventListMoreActionModel? { nil }
 
     public var customCompareKey: String {
         return self.makeCustomCompareKey([self.calendarId, self.accountId])

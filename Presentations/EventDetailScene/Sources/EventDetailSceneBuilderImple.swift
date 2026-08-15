@@ -181,21 +181,6 @@ extension EventDetailSceneBuilderImple: EventDetailSceneBuilder {
     }
 
     @MainActor
-    public func makeGoogleCalendarEventEditScene(
-        calendarId: String, accountId: String, eventId: String,
-        listener: (any GoogleCalendarEventEditSceneListener)?
-    ) -> any GoogleCalendarEventEditScene {
-        let editSceneBuilder = GoogleCalendarEventEditSceneBuilerImple(
-            usecaseFactory: self.usecaseFactory,
-            viewAppearance: self.viewAppearance
-        )
-        return editSceneBuilder.makeGoogleCalendarEventEditScene(
-            calendarId: calendarId, accountId: accountId, eventId: eventId,
-            listener: listener
-        )
-    }
-
-    @MainActor
     public func makeAppleCalendarEventDetailScene(
         calendarId: String, eventId: String
     ) -> any AppleCalendarEventDetailScene {

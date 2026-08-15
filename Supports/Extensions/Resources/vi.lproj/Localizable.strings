@@ -145,7 +145,6 @@
 "calednar::event::skip_todo_until" = "Chọn thời gian để bỏ qua việc cần làm này";
 "calednar::event::copy" = "Sao chép sự kiện";
 "calendar::move_date" = "Di chuyển ngày";
-"calednar::event::google::edit" = "Chỉnh sửa sự kiện Google Calendar";
 
 
 // MARK: - event detail
