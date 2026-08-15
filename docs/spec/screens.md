@@ -209,30 +209,30 @@ maxDrawableEventRowCount = (셀높이 - eventTopMargin) / eventRowHeightWithSpac
 | 할일 수정 (EditTodo) | `EditTodoEventDetailViewModelImple` | 기존 할일 편집 |
 | 일정 수정 (EditSchedule) | `EditScheduleEventDetailViewModelImple` | 기존 일정 편집 |
 | 공휴일 상세 (Holiday) | `HolidayEventDetailViewModelImple` | 읽기 전용, D-Day 카운트다운 |
-| 구글 캘린더 상세 (GoogleCalendar) | `GoogleCalendarEventDetailViewModelImple` | 읽기 전용, 구글에서 편집 링크 제공 |
+| 구글 캘린더 상세 (GoogleCalendar) | `GoogleCalendarEventDetailViewModelImple` | 상시 편집 폼 — 편집 가능 필드는 인라인 편집, 나머지는 탭 시 안내 토스트 |
 | 완료 할일 상세 (DoneTodo) | `DoneTodoDetailViewModelImple` | 읽기 전용, 완료 취소(되돌리기) 가능 |
 
 ### 2.2 모드별 필드 매트릭스
 
 | 필드 | Add | EditTodo | EditSchedule | Holiday | GoogleCal | DoneTodo |
 |---|---|---|---|---|---|---|
-| 이름 | 편집 | 편집 | 편집 | 표시 | 표시 | 표시 |
+| 이름 | 편집 | 편집 | 편집 | 표시 | 편집 | 표시 |
 | 타입 토글 (할일/일정) | **활성** | 비활성 | 비활성 | — | — | — |
-| 날짜/시간 | 편집 | 편집 | 편집 | 표시 | 표시 | 표시 (원본+완료시간) |
-| 하루종일 토글 | 편집 | 편집 | 편집 | — | — | — |
-| 기간 (종료시간) | 편집 | 편집 | 편집 | — | 표시 | — |
+| 날짜/시간 | 편집 | 편집 | 편집 | 표시 | 편집 | 표시 (원본+완료시간) |
+| 하루종일 토글 | 편집 | 편집 | 편집 | — | 편집 | — |
+| 기간 (종료시간) | 편집 | 편집 | 편집 | — | 편집 | — |
 | 반복 | 편집 | 편집 | 편집 | — | 표시 (RRULE 파싱) | — |
 | 알림 (복수) | 편집 | 편집 | 편집 | — | — | 표시 |
-| 태그/색상 | 편집 | 편집 | 편집 | — | 표시 (캘린더명) | 표시 |
-| 위치 | 편집 | 편집 | 편집 | — | 표시 | 표시 |
+| 태그/색상 | 편집 | 편집 | 편집 | — | 편집 (색상) / 표시 (캘린더명) | 표시 |
+| 위치 | 편집 | 편집 | 편집 | — | 편집 | 표시 |
 | URL | 편집 | 편집 | 편집 | — | — | 표시 |
-| 메모 | 편집 | 편집 | 편집 | — | 표시 (description) | 표시 |
+| 메모 | 편집 | 편집 | 편집 | — | 편집 | 표시 |
 | D-Day | — | — | — | 표시 | 표시 | — |
 | 컨퍼런스 링크 | — | — | — | — | 표시 | — |
 | 참석자 | — | — | — | — | 표시 | — |
 | 첨부파일 | — | — | — | — | 표시 | — |
 | 강조 이벤트 (Foremost) | 비활성 | 표시+토글 | 표시+토글 | — | — | — |
-| 추가 액션 (더보기) | — | 활성 | 활성 | — | 편집 링크 | 되돌리기 |
+| 추가 액션 (더보기) | — | 활성 | 활성 | — | 구글에서 수정 / 삭제 | 되돌리기 |
 
 ### 2.3 저장 버튼 활성화 조건
 
