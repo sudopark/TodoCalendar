@@ -75,12 +75,17 @@ extension DayEventListSceneBuilerImple: DayEventListSceneBuiler {
             accountUsecase: self.accountUsecase,
             aiAgentOrchestrationUsecase: self.usecaseFactory.aiAgentOrchestrationUsecase
         )
+        let sharePreviewSceneBuilder = SharePreviewSceneBuilerImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearance
+        )
         let router = DayEventListRouter(
             eventDetailSceneBuilder: self.eventDetailSceneBuilder,
             eventListSceneBuilder: self.eventListSceneBuilder,
             memberSceneBuilder: self.memberSceneBuilder,
             aiKeyboardInputSceneBuilder: self.aiKeyboardInputSceneBuilder,
             aiImageCommandSceneBuilder: self.aiImageCommandSceneBuilder,
+            sharePreviewSceneBuilder: sharePreviewSceneBuilder,
             viewAppearance: self.viewAppearance
         )
         viewModel.router = router

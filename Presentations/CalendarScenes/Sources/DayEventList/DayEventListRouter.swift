@@ -24,6 +24,7 @@ protocol DayEventListRouting: Routing, Sendable {
     // TODO: tempplate 관련해서 초기 파라미터 필요할 수 있음
     func routeToSelectTemplateForMakeEvent()
     func showDoneTodoList()
+    func showSharePreview(range: Range<TimeInterval>)
     func routeToSignIn()
     func routeToAIKeyboardInput()
     func routeToImageSourceSelect(onCancel: @escaping @Sendable () -> Void)
@@ -39,6 +40,7 @@ final class DayEventListRouter: BaseRouterImple, DayEventListRouting, @unchecked
     private let memberSceneBuilder: any MemberSceneBuilder
     private let aiKeyboardInputSceneBuilder: any AIAgentKeyboardInputSceneBuilder
     private let aiImageCommandSceneBuilder: any AIAgentImageCommandSceneBuilder
+    private let sharePreviewSceneBuilder: any SharePreviewSceneBuilder
     private let imagePicker: ImagePicker = .init()
     private let viewAppearance: ViewAppearance
 
@@ -48,6 +50,7 @@ final class DayEventListRouter: BaseRouterImple, DayEventListRouting, @unchecked
         memberSceneBuilder: any MemberSceneBuilder,
         aiKeyboardInputSceneBuilder: any AIAgentKeyboardInputSceneBuilder,
         aiImageCommandSceneBuilder: any AIAgentImageCommandSceneBuilder,
+        sharePreviewSceneBuilder: any SharePreviewSceneBuilder,
         viewAppearance: ViewAppearance
     ) {
         self.eventDetailSceneBuilder = eventDetailSceneBuilder
@@ -55,6 +58,7 @@ final class DayEventListRouter: BaseRouterImple, DayEventListRouting, @unchecked
         self.memberSceneBuilder = memberSceneBuilder
         self.aiKeyboardInputSceneBuilder = aiKeyboardInputSceneBuilder
         self.aiImageCommandSceneBuilder = aiImageCommandSceneBuilder
+        self.sharePreviewSceneBuilder = sharePreviewSceneBuilder
         self.viewAppearance = viewAppearance
     }
 }
@@ -79,6 +83,13 @@ extension DayEventListRouter {
     func showDoneTodoList() {
         Task { @MainActor in
             let next = self.eventListSceneBuilder.makeDoneTodoEventListScene()
+            self.scene?.present(next, animated: true)
+        }
+    }
+
+    func showSharePreview(range: Range<TimeInterval>) {
+        Task { @MainActor in
+            let next = self.sharePreviewSceneBuilder.makeSharePreviewScene(range: range)
             self.scene?.present(next, animated: true)
         }
     }

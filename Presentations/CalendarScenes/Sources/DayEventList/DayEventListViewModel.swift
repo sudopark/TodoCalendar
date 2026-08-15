@@ -56,6 +56,7 @@ protocol DayEventListViewModel: AnyObject, Sendable, DayEventListSceneInteractor
     func makeEvent()
     func makeEventByTemplate()
     func showDoneTodoList()
+    func showSharePreview()
     func refreshUncompletedTodoEvents()
     func enterVoiceInput()
     func finishVoiceInput()
@@ -220,6 +221,12 @@ extension DayEventListViewModelImple {
 
     func showDoneTodoList() {
         self.router?.showDoneTodoList()
+    }
+
+    func showSharePreview() {
+        guard let range = self.subject.currentDayAndEventLists.value?.currentDay.range
+        else { return }
+        self.router?.showSharePreview(range: range)
     }
 
     func refreshUncompletedTodoEvents() {

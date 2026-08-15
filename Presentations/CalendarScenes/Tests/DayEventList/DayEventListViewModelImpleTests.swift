@@ -1041,16 +1041,28 @@ extension DayEventListViewModelImpleTests {
 }
 
 extension DayEventListViewModelImpleTests {
-    
+
     func testViewModel_showDoneTodoList() {
         // given
         let viewModel = self.makeViewModel()
-        
+
         // when
         viewModel.showDoneTodoList()
-        
+
         // then
         XCTAssertEqual(self.spyRouter.didShowDoneTodoList, true)
+    }
+
+    func testViewModel_whenShowSharePreview_routesWithSelectedDayRange() {
+        // given
+        let viewModel = self.makeViewModel()
+        viewModel.selectedDayChanaged(self.dummyCurrentDay, and: [])
+
+        // when
+        viewModel.showSharePreview()
+
+        // then
+        XCTAssertEqual(self.spyRouter.didShowSharePreviewWithRange, self.dummyCurrentDay.range)
     }
 }
 
@@ -1074,6 +1086,11 @@ extension DayEventListViewModelImpleTests {
         var didShowDoneTodoList: Bool?
         func showDoneTodoList() {
             self.didShowDoneTodoList = true
+        }
+
+        var didShowSharePreviewWithRange: Range<TimeInterval>?
+        func showSharePreview(range: Range<TimeInterval>) {
+            self.didShowSharePreviewWithRange = range
         }
 
         var didRouteToSignIn: Bool?

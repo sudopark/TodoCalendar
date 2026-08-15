@@ -150,6 +150,7 @@ final class DayEventListViewEventHandler: Observable {
     var makeNewTodoWithGivenNameAndDetails: (String) -> Void = { _ in }
     var requestShowDetail: (any EventCellViewModel) -> Void = { _ in }
     var showDoneTodoList: () -> Void = { }
+    var showSharePreview: () -> Void = { }
     var handleMoreAction: (any EventCellViewModel, EventListMoreAction) -> Void = { _, _ in }
     var refreshUncompletedTodos: () -> Void = { }
     var enterVoiceInput: () -> Void = { }
@@ -175,6 +176,7 @@ final class DayEventListViewEventHandler: Observable {
         self.makeNewTodoWithGivenNameAndDetails = viewModel.makeTodoEvent(with:)
         self.requestShowDetail = eventListCellEventHandleViewModel.selectEvent(_:)
         self.showDoneTodoList = viewModel.showDoneTodoList
+        self.showSharePreview = viewModel.showSharePreview
         self.handleMoreAction = eventListCellEventHandleViewModel.handleMoreAction(_:_:)
         self.refreshUncompletedTodos = viewModel.refreshUncompletedTodoEvents
         self.enterVoiceInput = viewModel.enterVoiceInput
@@ -377,6 +379,13 @@ struct DayEventListView: View {
                 }
 
                 Spacer()
+
+                Button {
+                    self.isFocusInput = false
+                    self.eventHandler.showSharePreview()
+                } label: {
+                    Image(systemName: "square.and.arrow.up")
+                }
 
                 Button {
                     self.isFocusInput = false
