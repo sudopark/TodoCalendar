@@ -269,6 +269,10 @@ final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
         }
     }
     
+    func showWebView(_ path: String) {
+        // ignore
+    }
+
     func pop(animate: Bool) {
         // ignore
     }
