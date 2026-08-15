@@ -99,6 +99,7 @@ protocol PaywallViewModel: AnyObject, Sendable, PaywallSceneInteractor {
     var catalogState: AnyPublisher<PaywallCatalogState, Never> { get }
     var cellModels: AnyPublisher<[PaywallPlanCellModel], Never> { get }
     var topupCellModels: AnyPublisher<[PaywallTopupCellModel], Never> { get }
+    var topupTitle: AnyPublisher<String, Never> { get }
     var selectedPlanId: AnyPublisher<BillingPlanId?, Never> { get }
     var selectedPlanDetail: AnyPublisher<PaywallPlanDetailModel?, Never> { get }
     var isPurchasing: AnyPublisher<Bool, Never> { get }
@@ -124,6 +125,7 @@ final class PaywallViewModelImple: PaywallViewModel, @unchecked Sendable {
         let isPurchasing = CurrentValueSubject<Bool, Never>(false)
         let hasUnfinished = CurrentValueSubject<Bool, Never>(false)
         let topupOfferings = CurrentValueSubject<[BillingTopupOffering], Never>([])
+        let topupRemaining = CurrentValueSubject<Int?, Never>(nil)
     }
     private let subject = Subject()
     private var cancellables: Set<AnyCancellable> = []
@@ -140,6 +142,7 @@ final class PaywallViewModelImple: PaywallViewModel, @unchecked Sendable {
             .sink { [weak self] userPlan in
                 self?.subject.currentPlanId.send(userPlan.planId)
                 self?.subject.scheduledChange.send(userPlan.scheduledChange)
+                self?.subject.topupRemaining.send(userPlan.topupRemaining)
             }
             .store(in: &self.cancellables)
     }
@@ -244,7 +247,7 @@ extension PaywallViewModelImple {
             do {
                 switch try await self.billingUsecase.purchase(productId: productId) {
                 case .applied:
-                    self.router?.showToast("billing::paywall::topup::applied".localized())
+                    self.router?.showToast(self.topupAppliedMessage(productId: productId))
                     self.closeAfterPurchaseIfNeeded()
 
                 case .cancelled:
@@ -407,6 +410,15 @@ extension PaywallViewModelImple {
         .eraseToAnyPublisher()
     }
 
+    var topupTitle: AnyPublisher<String, Never> {
+        return self.subject.topupRemaining
+            .removeDuplicates()
+            .map { [weak self] remaining -> String in
+                self?.topupTitleText(remaining: remaining) ?? ""
+            }
+            .eraseToAnyPublisher()
+    }
+
     var selectedPlanId: AnyPublisher<BillingPlanId?, Never> {
         return Publishers.CombineLatest3(
             self.subject.userSelectedPlanId, self.currentPlanIdPublisher, self.offeringsPublisher
@@ -538,6 +550,24 @@ extension PaywallViewModelImple {
         guard rate > 0 else { return nil }
         let percent = Int((rate * 100).rounded())
         return "billing::paywall::topup::bonus".localized(with: percent.formatted())
+    }
+
+    private func topupTitleText(remaining: Int?) -> String {
+        guard let remaining, remaining > 0 else {
+            return "billing::paywall::topup::title".localized()
+        }
+        return "billing::paywall::topup::title::withRemaining".localized(with: remaining.formatted())
+    }
+
+    // 정상 플로우에선 productId 가 카탈로그에서 온다 — 못 찾으면 수치 없는 문구로 fail-safe
+    private func topupAppliedMessage(productId: String) -> String {
+        guard let offering = self.subject.topupOfferings.value
+            .first(where: { $0.topup.productId == productId })
+        else {
+            return "billing::paywall::topup::applied".localized()
+        }
+        return "billing::paywall::topup::applied::withCredits"
+            .localized(with: offering.topup.totalCredits.formatted())
     }
 
     private func periodText(of kind: BillingProductKind?) -> String? {
