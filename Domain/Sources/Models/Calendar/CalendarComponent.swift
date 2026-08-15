@@ -92,12 +92,41 @@ public struct CalendarComponent: Equatable {
 
 
 extension Calendar {
-    
+
     public func date(from day: CalendarComponent.Day) -> Date? {
         let components = DateComponents(
             year: day.year, month: day.month, day: day.day,
             hour: 0, minute: 0, second: 0
         )
         return self.date(from: components)
+    }
+}
+
+
+extension CalendarComponent.Week {
+
+    public func range(_ timeZone: TimeZone) -> Range<TimeInterval>? {
+        let calendar = Calendar(identifier: .gregorian)
+        |> \.timeZone .~ timeZone
+        guard let firstDay = self.days.first, let lastDay = self.days.last,
+              let lowerBoundDate = calendar.date(from: firstDay).map(calendar.startOfDay(for:)),
+              let upperBoundDate = calendar.date(from: lastDay).flatMap(calendar.endOfDay(for:))
+        else { return nil }
+        return lowerBoundDate.timeIntervalSince1970..<upperBoundDate.timeIntervalSince1970
+    }
+}
+
+extension CalendarComponent {
+
+    public func monthRange(_ timeZone: TimeZone) -> Range<TimeInterval>? {
+        let calendar = Calendar(identifier: .gregorian)
+        |> \.timeZone .~ timeZone
+        let firstDay = CalendarComponent.Day(year: self.year, month: self.month, day: 1, weekDay: 1)
+        guard let referenceDate = calendar.date(from: firstDay),
+              let monthStart = calendar.firstDayOfMonth(from: referenceDate),
+              let lastDayOfMonth = calendar.lastDayOfMonth(from: referenceDate),
+              let monthEnd = calendar.endOfDay(for: lastDayOfMonth)
+        else { return nil }
+        return monthStart.timeIntervalSince1970..<monthEnd.timeIntervalSince1970
     }
 }
