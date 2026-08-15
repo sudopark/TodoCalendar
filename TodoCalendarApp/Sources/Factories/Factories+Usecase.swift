@@ -264,7 +264,11 @@ extension NonLoginUsecaseFactoryImple {
     func makeEventSettingUsecase() -> EventSettingUsecase {
         return self.makeAppSettingUsecase()
     }
-    
+
+    func makeEventShareSettingUsecase() -> any EventShareSettingUsecase {
+        return self.makeAppSettingUsecase()
+    }
+
     func makeNotificationPermissionUsecase() -> NotificationPermissionUsecase {
         return NotificationPermissionUsecaseImple(
             notificationService: UNLocalNotificationServiceImple()
@@ -747,7 +751,11 @@ extension LoginUsecaseFactoryImple {
     func makeEventSettingUsecase() -> any EventSettingUsecase {
         return self.makeAppSettingUsecase()
     }
-    
+
+    func makeEventShareSettingUsecase() -> any EventShareSettingUsecase {
+        return self.makeAppSettingUsecase()
+    }
+
     func makeNotificationPermissionUsecase() -> any NotificationPermissionUsecase {
         return NotificationPermissionUsecaseImple(
             notificationService: UNLocalNotificationServiceImple()

@@ -94,6 +94,17 @@ extension AppSettingRemoteRepositoryImple {
         self.storage.saveEventSetting(new, for: self.userId)
         return new
     }
+
+    public func loadEventShareSetting() -> EventShareSettings {
+        return self.storage.loadEventShareSetting(for: self.userId)
+    }
+
+    public func changeEventShareSetting(_ params: EditEventShareSettingsParams) -> EventShareSettings {
+        let old = self.loadEventShareSetting()
+        let new = old.update(params)
+        self.storage.saveEventShareSetting(new, for: self.userId)
+        return new
+    }
 }
 
 

@@ -151,3 +151,43 @@ extension AppSettingUsecaseImple: EventSettingUsecase {
             .eraseToAnyPublisher()
     }
 }
+
+
+// MARK: - EventShareSettingUsecase
+
+public protocol EventShareSettingUsecase: Sendable {
+
+    func loadEventShareSetting() -> EventShareSettings
+    func changeEventShareSetting(_ params: EditEventShareSettingsParams) throws -> EventShareSettings
+
+    var currentEventShareSetting: AnyPublisher<EventShareSettings, Never> { get }
+}
+
+extension AppSettingUsecaseImple: EventShareSettingUsecase {
+
+    private var eventShareSettingKey: String { ShareDataKeys.eventShareSetting.rawValue }
+
+    public func loadEventShareSetting() -> EventShareSettings {
+        let setting = self.appSettingRepository.loadEventShareSetting()
+        self.sharedDataStore.put(EventShareSettings.self, key: eventShareSettingKey, setting)
+        return setting
+    }
+
+    public func changeEventShareSetting(_ params: EditEventShareSettingsParams) throws -> EventShareSettings {
+        guard params.isValid
+        else {
+            throw RuntimeError("invalid edit parameters")
+        }
+        let newSetting = self.appSettingRepository.changeEventShareSetting(params)
+        self.sharedDataStore.put(EventShareSettings.self, key: eventShareSettingKey, newSetting)
+        return newSetting
+    }
+
+    public var currentEventShareSetting: AnyPublisher<EventShareSettings, Never> {
+        return self.sharedDataStore
+            .observe(EventShareSettings.self, key: self.eventShareSettingKey)
+            .compactMap { $0 }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+}
