@@ -14,7 +14,6 @@ public enum HelpLink {
     public static let enPath = "https://readmind.notion.site/To-do-Calendar-Help-a2183ee1a41946faa8e0658640fb4c6a?pvs=4"
 
     public static var currentPath: String {
-        let isKorean = Locale.current.language.languageCode == .korean
-        return isKorean ? self.koPath : self.enPath
+        return Locale.isCurrentKorean ? self.koPath : self.enPath
     }
 }
