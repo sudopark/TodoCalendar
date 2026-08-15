@@ -1068,16 +1068,7 @@ struct EventDetailView: View {
                     }
                 }
                 label: {
-                    Image(systemName: "ellipsis")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .foregroundStyle(self.appearance.colorSet.text0.asColor)
-                        .frame(width: 20, height: 20)
-                        .padding()
-                        .background {
-                            RoundedRectangle(cornerRadius: Metric.Radius.regular)
-                                .fill(self.appearance.colorSet.secondaryBtnBackground.asColor)
-                        }
+                    MoreActionMenuLabel()
                 }
             }
             
