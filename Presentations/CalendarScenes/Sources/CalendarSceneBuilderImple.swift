@@ -87,6 +87,10 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearance
         )
+        let sharePreviewSceneBuilder = SharePreviewSceneBuilerImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearance
+        )
         let eventListSceneBuilder = DayEventListSceneBuilerImple(
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearance,
@@ -95,7 +99,8 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
             accountUsecase: self.accountUsecase,
             memberSceneBuilder: self.memberSceneBuilder,
             aiKeyboardInputSceneBuilder: self.aiAgentKeyboardInputSceneBuilder,
-            aiImageCommandSceneBuilder: self.aiAgentImageCommandSceneBuilder
+            aiImageCommandSceneBuilder: self.aiAgentImageCommandSceneBuilder,
+            sharePreviewSceneBuilder: sharePreviewSceneBuilder
         )
 
         let handleViewModelBuilder = EventListCellEventHanleViewModelBuilderImple(
@@ -114,6 +119,7 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
             monthSceneBuilder: monthSceneBuilder,
             eventListSceneBuilder: eventListSceneBuilder,
             eventListCellEventHanleViewModelBuilder: handleViewModelBuilder,
+            sharePreviewSceneBuilder: sharePreviewSceneBuilder,
             pendingCompleteTodoState: pendingCompleteTodoState
         )
         let router = CalendarViewRouterImple(

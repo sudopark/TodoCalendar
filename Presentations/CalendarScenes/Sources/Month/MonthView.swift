@@ -439,7 +439,10 @@ final class DummyMonthViewModel: MonthViewModel, @unchecked Sendable {
     func select(_ day: DayCellViewModel) {
         self.selectedDay.send(day.identifier)
     }
-    
+
+    func shareEvents(_ kind: CalendarShareRangeKind, for day: DayCellViewModel) {
+    }
+
     func selectDay(_ day: CalendarDay) {
         self.selectedDay.send("\(day.year)-\(day.month)-\(day.day)")
     }

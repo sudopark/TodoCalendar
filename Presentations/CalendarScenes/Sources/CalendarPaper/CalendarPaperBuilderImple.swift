@@ -22,6 +22,7 @@ final class CalendarPaperSceneBuilerImple {
     private let monthSceneBuilder: any MonthSceneBuilder
     private let eventListSceneBuilder: any DayEventListSceneBuiler
     private let eventListCellEventHanleViewModelBuilder: any EventListCellEventHanleViewModelBuilder
+    private let sharePreviewSceneBuilder: any SharePreviewSceneBuilder
     private let pendingCompleteTodoState: PendingCompleteTodoState
     
     init(
@@ -30,6 +31,7 @@ final class CalendarPaperSceneBuilerImple {
         monthSceneBuilder: any MonthSceneBuilder,
         eventListSceneBuilder: any DayEventListSceneBuiler,
         eventListCellEventHanleViewModelBuilder: any EventListCellEventHanleViewModelBuilder,
+        sharePreviewSceneBuilder: any SharePreviewSceneBuilder,
         pendingCompleteTodoState: PendingCompleteTodoState
     ) {
         self.usecaseFactory = usecaseFactory
@@ -37,6 +39,7 @@ final class CalendarPaperSceneBuilerImple {
         self.monthSceneBuilder = monthSceneBuilder
         self.eventListSceneBuilder = eventListSceneBuilder
         self.eventListCellEventHanleViewModelBuilder = eventListCellEventHanleViewModelBuilder
+        self.sharePreviewSceneBuilder = sharePreviewSceneBuilder
         self.pendingCompleteTodoState = pendingCompleteTodoState
     }
 }
@@ -70,8 +73,8 @@ extension CalendarPaperSceneBuilerImple: CalendarPaperSceneBuiler {
             viewAppearance: self.viewAppearance
         )
         (eventListComponents.router as? BaseRouterImple)?.scene = viewController
-        
-        let router = CalendarPaperRouter()
+
+        let router = CalendarPaperRouter(sharePreviewSceneBuilder: self.sharePreviewSceneBuilder)
         router.scene = viewController
         viewModel.router = router
         
