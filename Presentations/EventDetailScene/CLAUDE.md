@@ -114,6 +114,7 @@ graph TD
 | 편집 필드 | 제목, 시간(종일 토글), 장소, 메모, 색상 — 반복 규칙·참석자·회의·첨부는 편집 대상 아님 |
 | Listener | `GoogleCalendarEventEditSceneListener` — `googleCalendarEvent(didUpdate:)` / `(didRemove:)` |
 | 반복 이벤트 | 저장·삭제 시 "이번 일정만 / 전체 일정" ActionSheet |
+| 점점점 메뉴 | "구글 캘린더에서 수정" → `htmlLink` Safari (`hasDetailLink`일 때만) / "삭제" |
 
 ### DoneTodoDetail (완료 Todo 상세)
 
@@ -175,6 +176,7 @@ graph TD
 |---|---|---|
 | `EventTimeTextView` | `SelectTimeText`(연/일/시각) 라벨. `textColor`(selecting 하이라이트)·`isStrikethrough`(invalid)·`dayLineLimit` 파라미터로 화면별 변형 흡수 | EventDetailView, GoogleCalendarEventDetailView, AppleCalendarEventDetailView, DoneTodoDetailView |
 | `LandmarkLabelView` | 장소 라벨 (이름+주소+xmark 아이콘). EventDetailView는 Menu(삭제 액션)로 감싸 사용 | EventDetailView, DoneTodoDetailView |
+| `MoreActionMenuLabel` | 하단 더보기(ellipsis) 버튼 라벨 — 20×20 아이콘 + `Radius.regular` `secondaryBtnBackground` 배경. `Menu`의 label로만 사용하고 액션 목록은 호출부가 구성 | EventDetailView, HolidayEventDetailView, GoogleCalendarEventDetailView, GoogleCalendarEventEditView |
 
 `GuideView/`의 가이드 오버레이 2종(ForemostEventGuideView·TodoEventGuideView)은 컴포넌트 패밀리로 별도 그룹.
 

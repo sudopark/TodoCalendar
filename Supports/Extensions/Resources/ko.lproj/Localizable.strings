@@ -294,6 +294,7 @@
 "eventDetail::gogoleEvent::repeating::onlyThisTime::button" = "이번 일정만";
 "eventDetail::gogoleEvent::repeating::all::button" = "전체 일정";
 "eventDetail::gogoleEvent::remove::confirm::message" = "구글 캘린더에서 이 일정을 삭제할까요?";
+"eventDetail::gogoleEvent::editOnCalendar" = "구글 캘린더에서 수정";
 
 // MARK: - Apple calendar event
 "eventDetail::appleCalendarEvent::viewOnCalendar" = "애플 캘린더에서 보기";
