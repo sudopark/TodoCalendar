@@ -14,7 +14,6 @@ public enum AIUsageGuideLink {
     public static let enPath = HelpLink.enPath
 
     public static var currentPath: String {
-        let isKorean = Locale.current.language.languageCode == .korean
-        return isKorean ? self.koPath : self.enPath
+        return Locale.isCurrentKorean ? self.koPath : self.enPath
     }
 }
