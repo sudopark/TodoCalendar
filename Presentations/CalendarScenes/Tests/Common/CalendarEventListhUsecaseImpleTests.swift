@@ -26,7 +26,8 @@ final class CalendarEventListhUsecaseImpleTests: PublisherWaitable {
     private let uiSettingUsecase = StubUISettingUsecase()
     
     private func makeUsecase(
-        appleEvents: [AppleCalendar.Event] = []
+        appleEvents: [AppleCalendar.Event] = [],
+        offTagIds: [EventTagId] = []
     ) async throws -> CalendarEventListhUsecaseImple {
         let todos = (0..<3).map { int in
             return TodoEvent(uuid: "todo:\(int)", name: "todo")
@@ -72,6 +73,8 @@ final class CalendarEventListhUsecaseImpleTests: PublisherWaitable {
         calendarSettingUsecase.prepare()
 
         _ = try await self.uiSettingUsecase.refreshAppearanceSetting()
+
+        self.eventTagUsecase.addEventTagOffIds(offTagIds)
 
         return .init(
             todoUsecase: todoUsecase,
@@ -202,6 +205,40 @@ extension CalendarEventListhUsecaseImpleTests {
             [],
             withoutGoogles
         ])
+    }
+}
+
+
+// MARK: - all calendar events (태그 필터 미적용)
+
+extension CalendarEventListhUsecaseImpleTests {
+
+    @Test func usecase_allCalendarEvents_includesEventsOfOffTags() async throws {
+        // given
+        let expect = expectConfirm("태그 필터와 무관하게 전체 이벤트 제공")
+        let usecase = try await self.makeUsecase(offTagIds: [.default])
+
+        // when
+        let eventSource = usecase.allCalendarEvents(in: 0..<10)
+        let events = try await self.firstOutput(expect, for: eventSource)
+
+        // then
+        let ids = events?.map { $0.eventId }
+        #expect(ids == (0..<3).map { "todo:\($0)"} + (0..<3).map { "sc:\($0)-1" } + (0..<3).map { "g:\($0)" })
+    }
+
+    @Test func usecase_calendarEvents_stillExcludesOffTags() async throws {
+        // given
+        let expect = expectConfirm("기존 조회는 여전히 off 태그 이벤트를 제외")
+        let usecase = try await self.makeUsecase(offTagIds: [.default])
+
+        // when
+        let eventSource = usecase.calendarEvents(in: 0..<10)
+        let events = try await self.firstOutput(expect, for: eventSource)
+
+        // then
+        let ids = events?.map { $0.eventId }
+        #expect(ids == (0..<3).map { "g:\($0)" })
     }
 }
 
