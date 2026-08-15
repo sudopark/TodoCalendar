@@ -45,23 +45,17 @@ final class EventListCellEventHanleViewModelImple: EventListCellEventHanleViewMo
     private let todoEventUsecase: any TodoEventUsecase
     private let scheduleEventUsecase: any ScheduleEventUsecase
     private let foremostEventUsecase: any ForemostEventUsecase
-    private let googleCalendarUsecase: any GoogleCalendarUsecase
-    private let externalCalendarIntegrationUsecase: any ExternalCalendarIntegrationUsecase
 
     var router: (any EventListCellEventHanleRouting)?
 
     init(
         todoEventUsecase: any TodoEventUsecase,
         scheduleEventUsecase: any ScheduleEventUsecase,
-        foremostEventUsecase: any ForemostEventUsecase,
-        googleCalendarUsecase: any GoogleCalendarUsecase,
-        externalCalendarIntegrationUsecase: any ExternalCalendarIntegrationUsecase
+        foremostEventUsecase: any ForemostEventUsecase
     ) {
         self.todoEventUsecase = todoEventUsecase
         self.scheduleEventUsecase = scheduleEventUsecase
         self.foremostEventUsecase = foremostEventUsecase
-        self.googleCalendarUsecase = googleCalendarUsecase
-        self.externalCalendarIntegrationUsecase = externalCalendarIntegrationUsecase
     }
     
     private struct Subject {
@@ -146,61 +140,7 @@ extension EventListCellEventHanleViewModelImple {
             
         case .copy:
             self.copyEvent(cellViewModel)
-            
-        case .editGoogleEvent(let calendarId, let accountId, let eventId):
-            self.editGoogleEvent(calendarId: calendarId, accountId: accountId, eventId: eventId)
         }
-    }
-
-    private func editGoogleEvent(calendarId: String, accountId: String, eventId: String) {
-        self.googleCalendarUsecase.eventWritePermission(accountId: accountId, calendarId: calendarId)
-            .first()
-            .sink(receiveValue: { [weak self] permission in
-                self?.handleGoogleEventWritePermission(
-                    permission, calendarId: calendarId, accountId: accountId, eventId: eventId
-                )
-            })
-            .store(in: &self.cancellables)
-    }
-
-    private func handleGoogleEventWritePermission(
-        _ permission: GoogleCalendar.EventWritePermission,
-        calendarId: String, accountId: String, eventId: String
-    ) {
-        switch permission {
-        case .writable:
-            self.router?.routeToEditGoogleEvent(calendarId: calendarId, accountId: accountId, eventId: eventId)
-
-        case .needReauthentication:
-            let title = "eventDetail::gogoleEvent::reauthenticate::title".localized()
-            let message = "eventDetail::gogoleEvent::reauthenticate::message".localized()
-            self.runMoreActionAfterConfirm(title, message) { [weak self] in
-                self?.reauthenticateThenRouteToEditGoogleEvent(
-                    calendarId: calendarId, accountId: accountId, eventId: eventId
-                )
-            }
-
-        case .readOnlyCalendar:
-            self.router?.showToast("eventDetail::gogoleEvent::readOnlyCalendar::message".localized())
-        }
-    }
-
-    private func reauthenticateThenRouteToEditGoogleEvent(
-        calendarId: String, accountId: String, eventId: String
-    ) {
-        let service = self.googleCalendarUsecase.googleService
-        Task { [weak self] in
-            guard let self else { return }
-            do {
-                _ = try await self.externalCalendarIntegrationUsecase.reauthenticate(
-                    external: service, accountId: accountId
-                )
-                self.router?.routeToEditGoogleEvent(calendarId: calendarId, accountId: accountId, eventId: eventId)
-            } catch {
-                self.router?.showError(error)
-            }
-        }
-        .store(in: &self.cancellables)
     }
 
     private func removeEvent(

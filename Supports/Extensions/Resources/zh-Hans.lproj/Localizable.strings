@@ -145,7 +145,6 @@
 "calednar::event::skip_todo_until" = "选择跳过此待办的时间";
 "calednar::event::copy" = "复制事件";
 "calendar::move_date" = "移动日期";
-"calednar::event::google::edit" = "编辑Google日历事件";
 
 
 // MARK: - event detail

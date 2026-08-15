@@ -145,7 +145,6 @@
 "calednar::event::skip_todo_until" = "Pilih waktu untuk melangkau tugasan ini";
 "calednar::event::copy" = "Salin acara";
 "calendar::move_date" = "Alihkan tarikh";
-"calednar::event::google::edit" = "Edit Acara Kalendar Google";
 
 
 // MARK: - event detail

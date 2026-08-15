@@ -145,7 +145,6 @@
 "calednar::event::skip_todo_until" = "इस कार्य को छोड़ने के लिए एक समय चुनें";
 "calednar::event::copy" = "इवेंट कॉपी करें";
 "calendar::move_date" = "तारीख बदलें";
-"calednar::event::google::edit" = "Google कैलेंडर इवेंट संपादित करें";
 
 
 // MARK: - event detail

@@ -145,7 +145,6 @@
 "calednar::event::skip_todo_until" = "Vælg et tidspunkt for at springe denne opgave over";
 "calednar::event::copy" = "Kopiér begivenhed";
 "calendar::move_date" = "Flyt dato";
-"calednar::event::google::edit" = "Rediger Google Kalender-begivenhed";
 
 
 // MARK: - event detail

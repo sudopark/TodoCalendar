@@ -145,7 +145,6 @@
 "calednar::event::skip_todo_until" = "選擇要略過此待辦事項的時間";
 "calednar::event::copy" = "複製活動";
 "calendar::move_date" = "移動日期";
-"calednar::event::google::edit" = "編輯 Google 日曆活動";
 
 
 // MARK: - event detail

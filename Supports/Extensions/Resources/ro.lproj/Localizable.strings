@@ -145,7 +145,6 @@
 "calednar::event::skip_todo_until" = "Selectați ora până la care omiteți această sarcină";
 "calednar::event::copy" = "Copiază evenimentul";
 "calendar::move_date" = "Mută data";
-"calednar::event::google::edit" = "Editează evenimentul din Google Calendar";
 
 
 // MARK: - event detail

@@ -62,21 +62,6 @@ public protocol GoogleCalendarEventDetailSceneInteractor: AnyObject { }
 public protocol GoogleCalendarEventDetailScene: Scene where Interactor == any GoogleCalendarEventDetailSceneInteractor
 { }
 
-// MARK: - GoogleCalendarEventEditScene Interactable & Listenable
-
-public protocol GoogleCalendarEventEditSceneInteractor: AnyObject { }
-
-public protocol GoogleCalendarEventEditSceneListener: AnyObject, Sendable {
-
-    func googleCalendarEvent(didUpdate event: GoogleCalendar.EventOrigin)
-    func googleCalendarEvent(didRemove eventId: String)
-}
-
-// MARK: - GoogleCalendarEventEditScene
-
-public protocol GoogleCalendarEventEditScene: Scene where Interactor == any GoogleCalendarEventEditSceneInteractor
-{ }
-
 
 // MARK: - HolidayEventDetailScene Interactable & Listenable
 
@@ -143,12 +128,6 @@ public protocol EventDetailSceneBuilder {
     func makeGoogleCalendarDetailScene(
         calendarId: String, accountId: String, eventId: String
     ) -> any GoogleCalendarEventDetailScene
-
-    @MainActor
-    func makeGoogleCalendarEventEditScene(
-        calendarId: String, accountId: String, eventId: String,
-        listener: (any GoogleCalendarEventEditSceneListener)?
-    ) -> any GoogleCalendarEventEditScene
 
     @MainActor
     func makeAppleCalendarEventDetailScene(
