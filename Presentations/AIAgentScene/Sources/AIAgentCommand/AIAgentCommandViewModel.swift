@@ -52,6 +52,7 @@ final class AIAgentCommandViewModelImple: AIAgentCommandViewModel, @unchecked Se
     private let orchestrationUsecase: any AIAgentOrchestrationUsecase
     private let billingUsecase: any BillingUsecase
     var router: (any AIAgentRouting)?
+    weak var listener: (any AIAgentCommandSceneListener)?
 
     private var cancellables: Set<AnyCancellable> = []
 
@@ -114,7 +115,9 @@ extension AIAgentCommandViewModelImple {
     }
 
     func showPlans() {
-        self.router?.routeToPaywall()
+        // reset 없이 idle로 안 돌아가면 다음 한도 초과 때 상위의 false→true 재전이 감지가 막혀 시트가 안 뜬다
+        self.orchestrationUsecase.reset()
+        self.listener?.aiAgentCommandDidRequestPaywall()
     }
 }
 
