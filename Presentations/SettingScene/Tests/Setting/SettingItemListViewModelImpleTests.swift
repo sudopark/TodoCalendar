@@ -105,7 +105,7 @@ extension SettingItemListViewModelImpleTests {
         let appInfoSection = sections?[safe: 2]
         let infoItemIds = appInfoSection?.items.compactMap { $0 as? SettingItemModel }.map { $0.itemId }
         XCTAssertEqual(infoItemIds, [
-            .shareApp, .addReview, .sourceCode
+            .shareApp, .addReview, .sourceCode, .terms, .privacyPolicy
         ])
 
         let suggestSection = sections?[safe: 3]
@@ -148,7 +148,7 @@ extension SettingItemListViewModelImpleTests {
         XCTAssertEqual(appInfoSection is AppInfoSectionModel, true)
         let infoItemIds = appInfoSection?.items.compactMap { $0 as? SettingItemModel }.map { $0.itemId }
         XCTAssertEqual(infoItemIds, [
-            .shareApp, .addReview, .sourceCode
+            .shareApp, .addReview, .sourceCode, .terms, .privacyPolicy
         ])
         
         let suggestSection = sections?[safe: 3]
@@ -574,5 +574,65 @@ extension SettingItemListViewModelImpleTests {
 
         // then — Setting 화면은 구독만, checkUpdateIsNeed 호출 안 함
         XCTAssertFalse(self.stubAppUpdateCheckUsecase.didCheckUpdateIsNeed)
+    }
+}
+
+
+// MARK: - 약관·개인정보처리방침 진입점 (#857)
+
+extension SettingItemListViewModelImpleTests {
+
+    private func settingItem(
+        _ itemId: SettingItemModel.ItemId, from viewModel: SettingItemListViewModelImple
+    ) -> SettingItemModel? {
+        let items = self.WaitItemLoaded(viewModel)
+        return items.compactMap { $0 as? SettingItemModel }.first(where: { $0.itemId == itemId })
+    }
+
+    func testViewModel_provideTermsAndPrivacyPolicyItems() {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when
+        let terms = self.settingItem(.terms, from: viewModel)
+        let privacyPolicy = self.settingItem(.privacyPolicy, from: viewModel)
+
+        // then
+        XCTAssertNotNil(terms)
+        XCTAssertNotNil(privacyPolicy)
+    }
+
+    func testViewModel_whenSelectTerms_showTermsPageOnInAppWebView() {
+        // given
+        let viewModel = self.makeViewModel()
+        guard let terms = self.settingItem(.terms, from: viewModel)
+        else {
+            XCTAssert(false)
+            return
+        }
+
+        // when
+        viewModel.selectItem(terms)
+
+        // then
+        XCTAssertEqual(self.spyRouter.didShowWebViewPath, LegalLink.termsPath)
+        XCTAssertNil(self.spyRouter.didOpenSafariPath)
+    }
+
+    func testViewModel_whenSelectPrivacyPolicy_showPrivacyPageOnInAppWebView() {
+        // given
+        let viewModel = self.makeViewModel()
+        guard let privacyPolicy = self.settingItem(.privacyPolicy, from: viewModel)
+        else {
+            XCTAssert(false)
+            return
+        }
+
+        // when
+        viewModel.selectItem(privacyPolicy)
+
+        // then
+        XCTAssertEqual(self.spyRouter.didShowWebViewPath, LegalLink.privacyPolicyPath)
+        XCTAssertNil(self.spyRouter.didOpenSafariPath)
     }
 }

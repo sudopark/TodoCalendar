@@ -416,6 +416,8 @@
 "setting.share::name" = "Share App";
 "setting.write_review::name" = "Write an app review";
 "setting.billing.plan::name" = "Plan";
+"setting.terms::name" = "Terms of Use";
+"setting.privacyPolicy::name" = "Privacy Policy";
 "setting.account.signedIn::manageAccount" = "Account";
 "setting.account.needSignIn" = "Login";
 "setting.suggest::readmind::appName" = "Readminds";
