@@ -64,6 +64,15 @@ extension GoogleCalendarLocalAggregatedRepositoryImple {
         }
     }
 
+    public func loadRepeatingEventInstances(
+        _ calendarId: String,
+        _ eventId: String,
+        in period: Range<TimeInterval>
+    ) -> AnyPublisher<[GoogleCalendar.Event], any Error> {
+        return Fail(error: RuntimeError("google calendar repeating event instances are not supported by the aggregated local repository"))
+            .eraseToAnyPublisher()
+    }
+
     public func loadEvents(
         _ calendarId: String,
         in period: Range<TimeInterval>

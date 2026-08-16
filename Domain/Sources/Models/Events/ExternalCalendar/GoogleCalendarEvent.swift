@@ -280,7 +280,12 @@ extension GoogleCalendar {
         
         public var nextRepeatingTimes: [RepeatingTimes] = []
         public var repeatingTimeToExcludes: Set<String> = []
-        
+
+        // 구글 반복 인스턴스의 id 는 "{마스터id}_{원래시작시각}" 이다 — 시각이 바뀌면 id 도 바뀌므로 낡은 항목 판별에 쓴다
+        public func isInstance(of recurringEventId: String) -> Bool {
+            return self.eventId.hasPrefix("\(recurringEventId)_")
+        }
+
         public init(
             _ eventId: String, _ calendarId: String,
             accountId: String,

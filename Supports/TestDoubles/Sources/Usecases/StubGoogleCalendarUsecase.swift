@@ -44,7 +44,17 @@ open class StubGoogleCalendarUsecase: GoogleCalendarUsecase, @unchecked Sendable
     }
     
     open func refreshEvents(in period: Range<TimeInterval>) {
-        
+
+    }
+
+    public var didRefreshRepeatingEventWith: (calendarId: String, eventId: String, accountId: String, period: Range<TimeInterval>)?
+    open func refreshRepeatingEvent(
+        _ calendarId: String,
+        _ eventId: String,
+        accountId: String,
+        in period: Range<TimeInterval>
+    ) {
+        self.didRefreshRepeatingEventWith = (calendarId, eventId, accountId, period)
     }
     
     public var stubEvents: [GoogleCalendar.Event] = []
