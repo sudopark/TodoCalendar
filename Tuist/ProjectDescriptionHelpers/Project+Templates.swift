@@ -238,6 +238,13 @@ extension Project {
                     ]
                 ],
                 "GIDClientID": "\(googleClientId)",
+                "GADApplicationIdentifier": "\(admobAppId)",
+                "NSUserTrackingUsageDescription": "Tracking permission is used to show you more relevant ads.",
+                "SKAdNetworkItems": .array(
+                    Project.skAdNetworkIdentifiers.map {
+                        .dictionary(["SKAdNetworkIdentifier": .string($0)])
+                    }
+                ),
                 "CFBundleURLTypes": [
                     [
                         "CFBundleTypeRole": "Editor",
