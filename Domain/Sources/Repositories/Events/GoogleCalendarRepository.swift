@@ -27,6 +27,12 @@ public protocol GoogleCalendarRepository: Sendable {
         in period: Range<TimeInterval>
     ) -> AnyPublisher<[GoogleCalendar.Event], any Error>
     
+    func loadRepeatingEventInstances(
+        _ calendarId: String,
+        _ eventId: String,
+        in period: Range<TimeInterval>
+    ) -> AnyPublisher<[GoogleCalendar.Event], any Error>
+
     func loadEventDetail(
         _ calendarId: String, _ timeZone: String, _ eventId: String
     ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error>
