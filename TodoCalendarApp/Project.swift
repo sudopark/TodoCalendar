@@ -90,6 +90,10 @@ let project = Project.app(
         .project(
             target: "StoreKitService",
             path: .relativeToRoot("Services/StoreKitService")
+        ),
+        .project(
+            target: "AdService",
+            path: .relativeToRoot("Services/AdService")
         )
       ],
     extensionTargets:
