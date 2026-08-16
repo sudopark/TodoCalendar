@@ -118,10 +118,11 @@ extension GoogleCalendar.EventEditParams {
 
 extension GoogleCalendar.EventOrigin.GoogleEventTime {
 
+    // patch 는 start/end 를 필드 단위로 병합해 이전 표현이 살아남는다 — 상호배타인 date/dateTime 은 명시적 null 로 지워야 한다
     func asJson() -> [String: Any] {
         var json: [String: Any] = [:]
-        json["date"] = self.date
-        json["dateTime"] = self.dateTime
+        json["date"] = self.date ?? NSNull()
+        json["dateTime"] = self.dateTime ?? NSNull()
         json["timeZone"] = self.timeZone
         return json
     }
