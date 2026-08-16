@@ -67,6 +67,12 @@ final class StubGoogleCalendarRepository: GoogleCalendarRepository, @unchecked S
         return Just(tags).mapAsAnyError().eraseToAnyPublisher()
     }
 
+    func loadRepeatingEventInstances(
+        _ calendarId: String, _ eventId: String, in period: Range<TimeInterval>
+    ) -> AnyPublisher<[GoogleCalendar.Event], any Error> {
+        return Empty().eraseToAnyPublisher()
+    }
+
     var eventMocking: [GoogleCalendar.Event]?
     func loadEvents(_ calendarId: String, in period: Range<TimeInterval>) -> AnyPublisher<[GoogleCalendar.Event], any Error> {
         guard !shouldFail else {

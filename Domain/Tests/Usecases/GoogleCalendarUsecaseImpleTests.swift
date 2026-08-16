@@ -613,6 +613,47 @@ extension GoogleCalendarUsecaseImpleTests {
         #expect(cached?["series1"] == nil)
     }
 
+    @Test func updateEvent_whenResponseIsSeriesMaster_refreshesInstancesOverCachedPeriod() async throws {
+        // given — 이미 조회된 이벤트가 캐시에 있고, 그 span 이 인스턴스 재조회 구간이 된다
+        var seriesMaster = GoogleCalendar.EventOrigin(id: "series1", summary: "series updated")
+        seriesMaster.recurrence = ["RRULE:FREQ=DAILY;COUNT=3"]
+        let repo = PrivateStubRepository(customUpdateEventOriginStubbing: seriesMaster)
+        let usecase = makeUsecase(accounts: ["account@google.com"], defaultRepo: repo)
+        let alreadyLoaded = GoogleCalendar.Event(
+            "loaded", "cal1", accountId: "account@google.com",
+            name: "loaded", colorId: nil, time: .period(100..<200)
+        )
+        // 시각을 바꾸면 인스턴스 id 가 달라져 응답에 없는 낡은 항목이 된다
+        let staleInstance = GoogleCalendar.Event(
+            "series1_old", "cal1", accountId: "account@google.com",
+            name: "stale instance", colorId: nil, time: .period(100..<200)
+        )
+        stubStore.put(
+            [String: GoogleCalendar.Event].self,
+            key: ShareDataKeys.googleCalendarEvents.rawValue,
+            ["loaded": alreadyLoaded, "series1_old": staleInstance]
+        )
+
+        // when
+        _ = try await usecase.updateEvent(
+            "cal1", "series1", accountId: "account@google.com",
+            at: TimeZone(identifier: "Asia/Seoul")!, params: .init()
+        )
+        try await Task.sleep(for: .milliseconds(100))
+
+        // then — 캐시 span(100..<200)으로 그 시리즈의 인스턴스만 재조회하고 결과를 캐시에 병합한다
+        #expect(repo.didLoadRepeatingInstancesWith?.eventId == "series1")
+        #expect(repo.didLoadRepeatingInstancesWith?.calendarId == "cal1")
+        #expect(repo.didLoadRepeatingInstancesWith?.period == 100..<200)
+        let cached = stubStore.value(
+            [String: GoogleCalendar.Event].self, key: ShareDataKeys.googleCalendarEvents.rawValue
+        )
+        #expect(cached?["series1_0"]?.name == "refreshed instance")
+        #expect(cached?["series1_1"]?.name == "refreshed instance")
+        #expect(cached?["series1_old"] == nil)
+        #expect(cached?["loaded"] != nil)
+    }
+
     @Test func removeEvent_removesFromSharedDataStore() async throws {
         // given
         let usecase = makeUsecase(
@@ -815,6 +856,22 @@ private final class PrivateStubRepository: GoogleCalendarRepository, @unchecked 
     ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error> {
         let origin = GoogleCalendar.EventOrigin(id: eventId, summary: "some")
         return Just(origin).mapAsAnyError().eraseToAnyPublisher()
+    }
+
+    var didLoadRepeatingInstancesWith: (calendarId: String, eventId: String, period: Range<TimeInterval>)?
+    func loadRepeatingEventInstances(
+        _ calendarId: String, _ eventId: String, in period: Range<TimeInterval>
+    ) -> AnyPublisher<[GoogleCalendar.Event], any Error> {
+        self.didLoadRepeatingInstancesWith = (calendarId, eventId, period)
+        let instances = (0..<2).map { i -> GoogleCalendar.Event in
+            .init(
+                "\(eventId)_\(i)", calendarId,
+                accountId: "stub@gmail.com",
+                name: "refreshed instance", colorId: "color",
+                time: .period(period.lowerBound..<period.lowerBound + TimeInterval(i + 1))
+            )
+        }
+        return Just(instances).mapAsAnyError().eraseToAnyPublisher()
     }
 
     func updateEvent(
