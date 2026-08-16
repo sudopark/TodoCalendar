@@ -68,7 +68,7 @@ fi
 if printf '%s\n' "$FILES" | grep -q "^Services/AuthService/Tests/"; then
   schemes+=("AuthService")
 fi
-if printf '%s\n' "$FILES" | grep -qE "^Services/(FirstPartyServices|SpeechService|PlaceService|ExternalServices|StoreKitService)/"; then
+if printf '%s\n' "$FILES" | grep -qE "^Services/(FirstPartyServices|SpeechService|PlaceService|ExternalServices|StoreKitService|AdService)/"; then
   schemes+=("TodoCalendarApp")
 fi
 if printf '%s\n' "$FILES" | grep -q "^Services/FirstPartyServices/"; then

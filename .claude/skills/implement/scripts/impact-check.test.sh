@@ -34,6 +34,7 @@ assert_eq "Services/SpeechService → App(테스트 스킴 없음)" "TodoCalenda
 assert_eq "Services/PlaceService → App(테스트 스킴 없음)" "TodoCalendarApp" "$(schemes_for 'M\tServices/PlaceService/Sources/Foo.swift')"
 assert_eq "Services/ExternalServices → App(테스트 스킴 없음)" "TodoCalendarApp" "$(schemes_for 'M\tServices/ExternalServices/Sources/Foo.swift')"
 assert_eq "Services/StoreKitService → App(테스트 스킴 없음)" "TodoCalendarApp" "$(schemes_for 'M\tServices/StoreKitService/Sources/Foo.swift')"
+assert_eq "Services/AdService → App(테스트 스킴 없음)" "TodoCalendarApp" "$(schemes_for 'M\tServices/AdService/Sources/Foo.swift')"
 assert_eq "AIAgentScene → 단독" "AIAgentScene" "$(schemes_for 'M\tPresentations/AIAgentScene/Sources/Foo.swift')"
 assert_eq "BillingScenes → 단독" "BillingScenes" "$(schemes_for 'M\tPresentations/BillingScenes/Sources/Foo.swift')"
 assert_eq "CalendarScenes → +App+Widget" "CalendarScenes TodoCalendarApp TodoCalendarAppWidget" "$(schemes_for 'M\tPresentations/CalendarScenes/Sources/Foo.swift')"
