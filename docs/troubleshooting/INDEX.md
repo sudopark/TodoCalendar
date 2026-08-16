@@ -6,6 +6,8 @@
 
 <!-- 레코드는 아래에 최신순으로 추가 -->
 
+- [2026-08-16 구글 이벤트의 시간 표현을 바꾸면 `Invalid start time` 400 이 뜬다](2026-08-16-google-event-time-type-switch-invalid-start-time.md) — ExternalCalendar / fixed / Invalid start time, 구글 이벤트 종일 전환 400, date dateTime 공존, patch 병합
+
 - [2026-08-09 종료조건이 n회인 반복 할일이 n회를 훌쩍 넘겨서까지 반복된다](2026-08-09-repeating-todo-count-end-not-working.md) — Event / fixed / 반복 todo count 종료 안됨, 종료조건 n회 초과 반복, repeatingTurn 유실, 업로드 후 turn 리셋
 
 - [2026-08-09 중지를 눌러도 서버에 cancel이 안 나가고, 중지한 job의 결과가 뒤늦게 뜬다](2026-08-09-ai-job-stop-not-reaching-server.md) — AIAgent / fixed / 중지 안됨, 중지 후 완료 푸시, 복귀 시 진행중 안보임, 결과 시트 뒤늦게 노출, Combine throttle 지연
