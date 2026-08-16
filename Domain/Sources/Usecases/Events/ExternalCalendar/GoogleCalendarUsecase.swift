@@ -40,6 +40,13 @@ public protocol GoogleCalendarUsecase: Sendable {
     // events
     func refreshEvents(in period: Range<TimeInterval>)
 
+    func refreshRepeatingEvent(
+        _ calendarId: String,
+        _ eventId: String,
+        accountId: String,
+        in period: Range<TimeInterval>
+    )
+
     func events(
         in period: Range<TimeInterval>
     ) -> AnyPublisher<[GoogleCalendar.Event], Never>
@@ -303,6 +310,26 @@ extension GoogleCalendarUsecaseImple {
             .store(in: &self.refreshEventBag)
     }
 
+    public func refreshRepeatingEvent(
+        _ calendarId: String,
+        _ eventId: String,
+        accountId: String,
+        in period: Range<TimeInterval>
+    ) {
+        let repository = self.repositoryPool.repository(for: accountId)
+        repository.loadRepeatingEventInstances(calendarId, eventId, in: period)
+            .sink(receiveCompletion: { _ in }, receiveValue: { [weak self] instances in
+                self?.sharedDataStore.update(
+                    [String: GoogleCalendar.Event].self,
+                    key: ShareDataKeys.googleCalendarEvents.rawValue
+                ) { old in
+                    let withoutStale = (old ?? [:]).filter { !$0.value.isInstance(of: eventId) }
+                    return instances.reduce(into: withoutStale) { $0[$1.eventId] = $1 }
+                }
+            })
+            .store(in: &self.cancelBag)
+    }
+
     private func refreshEvents(
         _ calendarId: String, accountId: String, in period: Range<TimeInterval>
     ) {
@@ -396,11 +423,26 @@ extension GoogleCalendarUsecaseImple {
         else {
             throw RuntimeError("failed to update google calendar event")
         }
-        guard !origin.isRecurringSeriesMaster else {
+        // 시리즈 마스터 수정은 N개 인스턴스를 바꾸는데 응답엔 인스턴스가 없다 — 캐시에 꽂을 값이 없어 재조회로만 반영된다
+        if origin.isRecurringSeriesMaster {
+            if let period = self.cachedEventsPeriod() {
+                self.refreshRepeatingEvent(calendarId, eventId, accountId: accountId, in: period)
+            }
             return origin
         }
         self.cacheUpdatedEvent(origin, calendarId, accountId: accountId, timeZone: timeZone)
         return origin
+    }
+
+    private func cachedEventsPeriod() -> Range<TimeInterval>? {
+        let cached = self.sharedDataStore.value(
+            [String: GoogleCalendar.Event].self, key: ShareDataKeys.googleCalendarEvents.rawValue
+        ) ?? [:]
+        guard let lower = cached.values.map({ $0.eventTime.lowerBoundWithFixed }).min(),
+              let upper = cached.values.map({ $0.eventTime.upperBoundWithFixed }).max(),
+              lower < upper
+        else { return nil }
+        return lower..<upper
     }
 
     private func cacheUpdatedEvent(
