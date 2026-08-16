@@ -699,6 +699,64 @@ extension GoogleCalendarRepositoryImple_Tests {
         }
     }
 
+    @Test func repository_updateEventToAllDay_sendsNullDateTime() async throws {
+        try await self.runTestWithOpenClose("test_google_event_update_to_allday") {
+            // given
+            let expect = self.expectConfirm("시간 있는 이벤트를 종일로 바꾸면 dateTime 을 null 로 지운다")
+            let repository = self.makeRepository()
+            let start = GoogleCalendar.EventOrigin.GoogleEventTime() |> \.date .~ "2026-08-15"
+            let end = GoogleCalendar.EventOrigin.GoogleEventTime() |> \.date .~ "2026-08-16"
+            let params = GoogleCalendar.EventEditParams()
+                |> \.start .~ start
+                |> \.end .~ end
+
+            // when
+            let _ = try await self.firstOutput(
+                expect, for: repository.updateEvent("c_id", "Asia/Seoul", "time_is_date", params)
+            )
+
+            // then
+            let requestedParams = try #require(self.stubRemote.didRequestedParams)
+            let startJson = try #require(requestedParams["start"] as? [String: Any])
+            #expect(startJson["date"] as? String == "2026-08-15")
+            #expect(startJson["dateTime"] is NSNull)
+            let endJson = try #require(requestedParams["end"] as? [String: Any])
+            #expect(endJson["date"] as? String == "2026-08-16")
+            #expect(endJson["dateTime"] is NSNull)
+        }
+    }
+
+    @Test func repository_updateEventToTimed_sendsNullDate() async throws {
+        try await self.runTestWithOpenClose("test_google_event_update_to_timed") {
+            // given
+            let expect = self.expectConfirm("종일 이벤트를 시간 있는 이벤트로 바꾸면 date 를 null 로 지운다")
+            let repository = self.makeRepository()
+            let start = GoogleCalendar.EventOrigin.GoogleEventTime()
+                |> \.dateTime .~ "2026-08-15T10:00:00+09:00"
+                |> \.timeZone .~ "Asia/Seoul"
+            let end = GoogleCalendar.EventOrigin.GoogleEventTime()
+                |> \.dateTime .~ "2026-08-15T11:00:00+09:00"
+                |> \.timeZone .~ "Asia/Seoul"
+            let params = GoogleCalendar.EventEditParams()
+                |> \.start .~ start
+                |> \.end .~ end
+
+            // when
+            let _ = try await self.firstOutput(
+                expect, for: repository.updateEvent("c_id", "Asia/Seoul", "time_is_date", params)
+            )
+
+            // then
+            let requestedParams = try #require(self.stubRemote.didRequestedParams)
+            let startJson = try #require(requestedParams["start"] as? [String: Any])
+            #expect(startJson["dateTime"] as? String == "2026-08-15T10:00:00+09:00")
+            #expect(startJson["date"] is NSNull)
+            let endJson = try #require(requestedParams["end"] as? [String: Any])
+            #expect(endJson["dateTime"] as? String == "2026-08-15T11:00:00+09:00")
+            #expect(endJson["date"] is NSNull)
+        }
+    }
+
     @Test func repository_updateEvent_whenResponseIsSeriesMaster_doesNotCacheAsInstanceDetail() async throws {
         try await self.runTestWithOpenClose("test_google_event_update_4") {
             // given — "전체 일정" 저장은 시리즈 마스터(recurringEventId 없음 + recurrence 있음)를 돌려준다
