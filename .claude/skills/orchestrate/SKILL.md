@@ -7,7 +7,7 @@ description: Use when executing decomposed large work as multiple PRs from one s
 
 컨트롤러(이 세션)가 분해된 sub-work들을 서브에이전트 dispatch로 실행하고, sub-work 단위로 개별 PR을 내보낸다. **컨트롤러는 분할·브리프·검수·PR 흐름 관리만 한다** — 코드는 서브에이전트가 만지고, diff·보고 전문은 파일로 주고받아 컨트롤러 컨텍스트를 오염시키지 않는다.
 
-**SDD와의 관계**: 단일 PR 규모 플랜은 superpowers subagent-driven-development가 담당한다. 이 스킬은 그 위 스케일 — PR 여러 개짜리 작업의 실행 모드다. SDD의 태스크별 리뷰어 dispatch는 이 모드에 **없다** — 검증은 (a) 서브에이전트 자체 테스트, (b) 컨트롤러 검수(implement 스킬의 rules 항목별 스캔), (c) PR 단위 확인(유저, 지시 시 review 스킬)으로 수렴한다.
+**SDD와의 관계**: 단일 PR 규모 플랜은 superpowers subagent-driven-development가 담당한다. 이 스킬은 그 위 스케일 — PR 여러 개짜리 작업의 실행 모드다. 검증 모델은 두 모드가 같다 — (a) 서브에이전트 자체 테스트, (b) 컨트롤러 검수(implement 스킬의 rules 항목별 스캔), (c) PR 단위 확인(유저, 지시 시 review 스킬)으로 수렴하고, 태스크별 리뷰어 dispatch는 어느 쪽에도 없다 (implement 스킬 §착수).
 
 ## 단위 정의 — 두 층을 혼동하지 않는다
 
