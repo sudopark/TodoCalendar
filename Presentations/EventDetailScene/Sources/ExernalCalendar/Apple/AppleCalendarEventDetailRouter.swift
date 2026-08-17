@@ -15,7 +15,6 @@ import CommonPresentation
 
 protocol AppleCalendarEventDetailRouting: Routing, Sendable {
     func routeToAppleCalendarApp(at interval: TimeInterval)
-    func openURL(_ urlString: String)
 }
 
 // MARK: - Router
@@ -33,11 +32,6 @@ extension AppleCalendarEventDetailRouter {
         // calshow: scheme uses seconds since 2001-01-01 (Core Data reference date)
         let referenceInterval = interval - 978307200
         guard let url = URL(string: "calshow:\(referenceInterval)") else { return }
-        UIApplication.shared.open(url)
-    }
-
-    func openURL(_ urlString: String) {
-        guard let url = URL(string: urlString) else { return }
         UIApplication.shared.open(url)
     }
 }

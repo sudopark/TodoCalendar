@@ -19,20 +19,38 @@ import CommonPresentation
     @ObservationIgnored private var didBind = false
     @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
 
+    var isEditable: Bool = false
+    var readOnlyCalendarMessage: String?
     var eventName: String = ""
     var timeText: SelectedTime?
     var ddayText: String = ""
     var repeatText: String?
-    var location: String?
-    var url: String?
-    var notes: String?
+    var location: String = ""
+    var url: String = ""
+    var notes: String = ""
     var attendees: [AppleCalendar.Attendee] = []
     var tagModel: AppleCalendarTagModel?
+    var isSavable: Bool = false
+    var isSaving: Bool = false
 
     func bind(_ viewModel: any AppleCalendarEventDetailViewModel) {
 
         guard self.didBind == false else { return }
         self.didBind = true
+
+        viewModel.isEditable
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] isEditable in
+                self?.isEditable = isEditable
+            })
+            .store(in: &self.cancellables)
+
+        viewModel.readOnlyCalendarMessage
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] message in
+                self?.readOnlyCalendarMessage = message
+            })
+            .store(in: &self.cancellables)
 
         viewModel.eventName
             .receive(on: RunLoop.main)
@@ -65,21 +83,21 @@ import CommonPresentation
         viewModel.location
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] text in
-                self?.location = text
+                self?.location = text ?? ""
             })
             .store(in: &self.cancellables)
 
         viewModel.url
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] text in
-                self?.url = text
+                self?.url = text ?? ""
             })
             .store(in: &self.cancellables)
 
         viewModel.notes
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] text in
-                self?.notes = text
+                self?.notes = text ?? ""
             })
             .store(in: &self.cancellables)
 
@@ -96,6 +114,20 @@ import CommonPresentation
                 self?.tagModel = model
             })
             .store(in: &self.cancellables)
+
+        viewModel.isSavable
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] isSavable in
+                self?.isSavable = isSavable
+            })
+            .store(in: &self.cancellables)
+
+        viewModel.isSaving
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] isSaving in
+                self?.isSaving = isSaving
+            })
+            .store(in: &self.cancellables)
     }
 }
 
@@ -106,14 +138,32 @@ final class AppleCalendarEventDetailViewEventHandler: Observable {
 
     var onAppear: () -> Void = { }
     var openInAppleCalendar: () -> Void = { }
-    var openURL: (String) -> Void = { _ in }
     var close: () -> Void = { }
+    var enterName: (String) -> Void = { _ in }
+    var selectStartTime: (Date) -> Void = { _ in }
+    var selectEndTime: (Date) -> Void = { _ in }
+    var toggleAllDay: () -> Void = { }
+    var enterLocation: (String?) -> Void = { _ in }
+    var enterURL: (String?) -> Void = { _ in }
+    var enterNotes: (String?) -> Void = { _ in }
+    var save: () -> Void = { }
+    var remove: () -> Void = { }
+    var selectNotEditableField: () -> Void = { }
 
     func bind(_ viewModel: any AppleCalendarEventDetailViewModel) {
         self.onAppear = viewModel.refresh
         self.openInAppleCalendar = viewModel.openInAppleCalendar
-        self.openURL = viewModel.openURL(_:)
         self.close = viewModel.close
+        self.enterName = viewModel.enter(name:)
+        self.selectStartTime = viewModel.selectStartTime(_:)
+        self.selectEndTime = viewModel.selectEndTime(_:)
+        self.toggleAllDay = viewModel.toggleAllDay
+        self.enterLocation = viewModel.enter(location:)
+        self.enterURL = viewModel.enter(url:)
+        self.enterNotes = viewModel.enter(notes:)
+        self.save = viewModel.save
+        self.remove = viewModel.remove
+        self.selectNotEditableField = viewModel.selectNotEditableField
     }
 }
 
@@ -157,57 +207,142 @@ struct AppleCalendarEventDetailView: View {
     @Environment(AppleCalendarEventDetailViewState.self) private var state
     @Environment(AppleCalendarEventDetailViewEventHandler.self) private var eventHandlers
 
+    private enum InputFields: String {
+        case name
+        case location
+        case url
+        case notes
+        var id: String { "AppleCalendarEventDetailView::InputFields::\(self.rawValue)" }
+    }
+    @FocusState private var isFocusInput: InputFields?
+
     var body: some View {
-        ZStack {
+        ScrollViewReader { proxy in
             ScrollView {
-                VStack(spacing: 25) {
-                    Spacer(minLength: 5)
-                    self.nameView
+                VStack(spacing: Metric.Spacing.xlarge) {
+                    self.nameInputView
+                        .id(InputFields.name.id)
+                        .disabled(!state.isEditable)
 
                     self.eventTypeView
 
-                    VStack(spacing: Metric.Spacing.large) {
-                        if let timeText = self.state.timeText {
-                            self.timeView(timeText)
-                        }
+                    VStack(spacing: Metric.Spacing.regular) {
+                        self.timeSelectView
+                            .disabled(!state.isEditable)
+
                         self.ddayView
 
                         if let repeatText = self.state.repeatText {
                             self.repeatView(repeatText)
                         }
-
-                        if let location = self.state.location {
-                            self.locationView(location)
-                        }
-
-                        if !self.state.attendees.isEmpty {
-                            self.attendeesView(self.state.attendees)
-                        }
-
-                        if let url = self.state.url {
-                            self.urlView(url)
-                        }
-
-                        if let notes = self.state.notes {
-                            self.notesView(notes)
-                        }
-
-                        if let tagModel = self.state.tagModel {
-                            self.calendarNameView(tagModel)
-                        }
                     }
-                    .padding(.top, spacing: .xlarge)
+
+                    self.locationInputView
+                        .id(InputFields.location.id)
+                        .disabled(!state.isEditable)
+
+                    if !self.state.attendees.isEmpty {
+                        self.attendeesView(self.state.attendees)
+                    }
+
+                    self.urlInputView
+                        .id(InputFields.url.id)
+                        .disabled(!state.isEditable)
+
+                    self.memoInputView
+                        .id(InputFields.notes.id)
+                        .disabled(!state.isEditable)
+
+                    if let tagModel = self.state.tagModel {
+                        self.calendarNameView(tagModel)
+                    }
+                }
+                .padding(.top, spacing: .xlarge)
+                .padding(.horizontal, spacing: .regular)
+                .padding(.bottom, 120)
+            }
+            .onChange(of: isFocusInput) { _, new in
+                guard let id = new?.id else { return }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                    withAnimation { proxy.scrollTo(id, anchor: .center) }
                 }
             }
-            .padding(.horizontal, spacing: .regular)
+        }
+        .safeAreaInset(edge: .bottom) {
+            self.bottomButtons
+        }
+        .allowsHitTesting(!state.isSaving)
+        .background(appearance.colorSet.bg0.asColor)
+    }
 
-            VStack {
-                Spacer()
-                BottomConfirmButton(title: "eventDetail::appleCalendarEvent::viewOnCalendar".localized())
-                    .eventHandler(\.onTap, self.eventHandlers.openInAppleCalendar)
+    private var bottomButtons: some View {
+        VStack(spacing: Metric.Spacing.regular) {
+            if let message = self.state.readOnlyCalendarMessage {
+                DescriptionView(descriptions: [message])
+            }
+            HStack(spacing: Metric.Spacing.small) {
+                if self.state.isEditable {
+                    ConfirmButton(
+                        title: "common.save".localized(),
+                        isEnable: state.isSavable,
+                        isProcessing: state.isSaving
+                    )
+                    .eventHandler(\.onTap, eventHandlers.save)
+                }
+                self.moreActionMenu
             }
         }
-        .background(appearance.colorSet.bg0.asColor)
+        .padding()
+        .background(
+            Rectangle()
+                .fill(self.appearance.colorSet.dayBackground.asColor)
+                .ignoresSafeArea(edges: .bottom)
+        )
+    }
+
+    private var moreActionMenu: some View {
+        Menu {
+            Section {
+                Button {
+                    eventHandlers.openInAppleCalendar()
+                } label: {
+                    Label(
+                        state.isEditable
+                            ? "eventDetail::appleCalendarEvent::editOnCalendar".localized()
+                            : "eventDetail::appleCalendarEvent::viewOnCalendar".localized(),
+                        systemImage: "arrow.up.forward.square"
+                    )
+                }
+            }
+            if state.isEditable {
+                Section {
+                    Button(role: .destructive) {
+                        eventHandlers.remove()
+                    } label: {
+                        Label("common.remove".localized(), systemImage: "trash")
+                    }
+                }
+            }
+        } label: {
+            MoreActionMenuLabel()
+        }
+    }
+
+    private var nameInputView: some View {
+        @Bindable var state = self.state
+        let calendarColor: Color = self.state.tagModel
+            .map { appearance.appleCalendarColor($0.calendarId).asColor }
+            ?? appearance.colorSet.accent.asColor
+        return EventNameInputView(
+            name: $state.eventName,
+            focusValue: InputFields.name,
+            focusState: $isFocusInput
+        ) {
+            RoundedRectangle(cornerRadius: 3)
+                .fill(calendarColor)
+                .frame(width: 6)
+        }
+        .eventHandler(\.onChangeName, eventHandlers.enterName)
     }
 
     private var eventTypeView: some View {
@@ -225,60 +360,12 @@ struct AppleCalendarEventDetailView: View {
         }
     }
 
-    private var nameView: some View {
-        HStack {
-            let calendarColor: Color = self.state.tagModel
-                .map { appearance.appleCalendarColor($0.calendarId).asColor }
-                ?? appearance.colorSet.accent.asColor
-            RoundedRectangle(cornerRadius: 3)
-                .fill(calendarColor)
-                .frame(width: 6)
-
-            Text(self.state.eventName)
-                .font(appearance.fontSet.size(22, weight: .semibold).asFont)
-                .foregroundStyle(appearance.colorSet.text0.asColor)
-
-            Spacer()
-        }
-    }
-
-    private func timeView(_ timeText: SelectedTime) -> some View {
-        HStack(spacing: Metric.Spacing.large) {
-            Image(systemName: "calendar")
-                .font(.system(size: 16, weight: .light))
-                .foregroundStyle(self.appearance.colorSet.text1.asColor)
-
-            switch timeText {
-            case .at(let text):
-                timeTextView(text)
-                    .asAnyView()
-            case .period(let start, let end):
-                HStack(spacing: Metric.Spacing.small) {
-                    timeTextView(start)
-                    Image(systemName: "chevron.right")
-                        .foregroundStyle(appearance.colorSet.text1.asColor)
-                    timeTextView(end)
-                }
-                .asAnyView()
-            case .singleAllDay(let day):
-                timeTextView(day)
-                    .asAnyView()
-            case .alldayPeriod(let start, let end):
-                HStack(spacing: Metric.Spacing.small) {
-                    timeTextView(start)
-                    Image(systemName: "chevron.right")
-                        .foregroundStyle(appearance.colorSet.text1.asColor)
-                    timeTextView(end)
-                }
-                .asAnyView()
-            }
-
-            Spacer()
-        }
-    }
-
-    private func timeTextView(_ text: SelectTimeText) -> some View {
-        EventTimeTextView(text, dayLineLimit: nil)
+    private var timeSelectView: some View {
+        EventTimeSelectView(time: state.timeText)
+            .eventHandler(\.onSelectStartTime, eventHandlers.selectStartTime)
+            .eventHandler(\.onSelectEndTime, eventHandlers.selectEndTime)
+            .eventHandler(\.onToggleAllDay, eventHandlers.toggleAllDay)
+            .eventHandler(\.onBeginSelecting) { self.isFocusInput = nil }
     }
 
     private var ddayView: some View {
@@ -307,6 +394,21 @@ struct AppleCalendarEventDetailView: View {
 
             Spacer()
         }
+        .onTapGesture {
+            eventHandlers.selectNotEditableField()
+        }
+    }
+
+    private var locationInputView: some View {
+        @Bindable var state = self.state
+        return EventTextInputRow(
+            systemImageName: "location.fill",
+            text: $state.location,
+            placeholder: "eventDetail.place::placeholder".localized(),
+            focusValue: InputFields.location,
+            focusState: $isFocusInput
+        )
+        .eventHandler(\.onChangeText) { eventHandlers.enterLocation($0) }
     }
 
     private func attendeesView(_ attendees: [AppleCalendar.Attendee]) -> some View {
@@ -326,6 +428,9 @@ struct AppleCalendarEventDetailView: View {
             ForEach(Array(attendees.enumerated()), id: \.offset) { _, attendee in
                 self.attendeeView(attendee)
             }
+        }
+        .onTapGesture {
+            eventHandlers.selectNotEditableField()
         }
     }
 
@@ -364,62 +469,44 @@ struct AppleCalendarEventDetailView: View {
         .padding(.leading, spacing: .indent)
     }
 
-    private func locationView(_ location: String) -> some View {
-        HStack(spacing: Metric.Spacing.large) {
-            Image(systemName: "location.fill")
-                .font(.system(size: 16, weight: .light))
-                .foregroundStyle(self.appearance.colorSet.text1.asColor)
-
-            Text(location)
-                .font(appearance.fontSet.normal.asFont)
-                .foregroundStyle(appearance.colorSet.text0.asColor)
-
-            Spacer()
-        }
+    private var urlInputView: some View {
+        @Bindable var state = self.state
+        return EventTextInputRow(
+            systemImageName: "link",
+            text: $state.url,
+            placeholder: "eventDetail::appleCalendarEvent::url::placeholder".localized(),
+            focusValue: InputFields.url,
+            focusState: $isFocusInput
+        )
+        .eventHandler(\.onChangeText) { eventHandlers.enterURL($0) }
     }
 
-    private func urlView(_ urlString: String) -> some View {
-        HStack(spacing: Metric.Spacing.large) {
-            Image(systemName: "link")
-                .font(.system(size: 16, weight: .light))
-                .foregroundStyle(self.appearance.colorSet.text1.asColor)
-
-            Text(urlString)
-                .font(appearance.fontSet.normal.asFont)
-                .foregroundStyle(appearance.colorSet.accent.asColor)
-                .onTapGesture {
-                    self.eventHandlers.openURL(urlString)
-                }
-
-            Spacer()
-        }
-    }
-
-    private func notesView(_ notes: String) -> some View {
-        HStack(alignment: .top, spacing: Metric.Spacing.large) {
-            Image(systemName: "doc.text")
-                .font(.system(size: 16, weight: .light))
-                .foregroundStyle(self.appearance.colorSet.text1.asColor)
-
-            Text(notes)
-                .font(appearance.fontSet.normal.asFont)
-                .foregroundStyle(appearance.colorSet.text0.asColor)
-
-            Spacer()
-        }
+    private var memoInputView: some View {
+        @Bindable var state = self.state
+        return EventMemoInputView(
+            memo: $state.notes,
+            placeholder: "eventDetail.edit::memo".localized(),
+            focusValue: InputFields.notes,
+            focusState: $isFocusInput
+        )
+        .eventHandler(\.onChangeMemo) { eventHandlers.enterNotes($0) }
     }
 
     private func calendarNameView(_ tagModel: AppleCalendarTagModel) -> some View {
         HStack(spacing: Metric.Spacing.large) {
-            Image(systemName: "calendar.badge.checkmark")
-                .font(.system(size: 16, weight: .light))
-                .foregroundStyle(self.appearance.colorSet.text1.asColor)
+            Image("apple_calendar_icon")
+                .resizable()
+                .scaledToFill()
+                .frame(width: 16, height: 16)
 
             Text(tagModel.name)
                 .font(appearance.fontSet.normal.asFont)
                 .foregroundStyle(appearance.colorSet.text0.asColor)
 
             Spacer()
+        }
+        .onTapGesture {
+            eventHandlers.selectNotEditableField()
         }
     }
 }
