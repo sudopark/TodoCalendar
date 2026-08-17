@@ -258,6 +258,11 @@ private final class FakeSharePreviewViewModel: SharePreviewViewModel, @unchecked
     var lineModels: AnyPublisher<[SharePreviewLineModel], Never> {
         Just(self.stubLineModels).eraseToAnyPublisher()
     }
+    var sectionModels: AnyPublisher<[SharePreviewSectionModel], Never> {
+        let sections = SharePreviewSectionComposer(timeZone: TimeZone(abbreviation: "KST")!)
+            .sections(of: self.stubLineModels)
+        return Just(sections).eraseToAnyPublisher()
+    }
     var dateHeaderText: AnyPublisher<String, Never> {
         Just(self.stubDateHeaderText).eraseToAnyPublisher()
     }

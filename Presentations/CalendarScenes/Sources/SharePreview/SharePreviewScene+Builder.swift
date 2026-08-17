@@ -20,10 +20,21 @@ protocol SharePreviewSceneInteractor: AnyObject { }
 protocol SharePreviewScene: Scene where Interactor == any SharePreviewSceneInteractor { }
 
 
+// MARK: - CalendarShareRangeKind
+
+enum CalendarShareRangeKind {
+    case day
+    case week
+    case month
+}
+
+
 // MARK: - Builder
 
 protocol SharePreviewSceneBuilder: Sendable {
 
     @MainActor
-    func makeSharePreviewScene(range: Range<TimeInterval>) -> any SharePreviewScene
+    func makeSharePreviewScene(
+        range: Range<TimeInterval>, kind: CalendarShareRangeKind
+    ) -> any SharePreviewScene
 }

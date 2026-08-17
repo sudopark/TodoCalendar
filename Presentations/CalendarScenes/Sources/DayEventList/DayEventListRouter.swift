@@ -89,7 +89,7 @@ extension DayEventListRouter {
 
     func showSharePreview(range: Range<TimeInterval>) {
         Task { @MainActor in
-            let next = self.sharePreviewSceneBuilder.makeSharePreviewScene(range: range)
+            let next = self.sharePreviewSceneBuilder.makeSharePreviewScene(range: range, kind: .day)
             self.scene?.present(next, animated: true)
         }
     }

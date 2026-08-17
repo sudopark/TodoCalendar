@@ -13,7 +13,8 @@ import Extensions
 
 struct SharePreviewLineModel: Equatable, Sendable, Identifiable {
     let eventId: String
-    let dayStart: TimeInterval
+    /// nil = 날짜에 매이지 않는 할일 (시간 없는 current todo)
+    let dayStart: TimeInterval?
     let name: String
     var timeText: String?
     var tagId: EventTagId?
@@ -26,7 +27,7 @@ struct SharePreviewLineModel: Equatable, Sendable, Identifiable {
 
     init(
         eventId: String,
-        dayStart: TimeInterval,
+        dayStart: TimeInterval?,
         name: String,
         timeText: String? = nil,
         tagId: EventTagId? = nil,
@@ -53,7 +54,9 @@ struct SharePreviewLineModel: Equatable, Sendable, Identifiable {
         isShort: Bool
     ) {
         let dayStart = SharePreviewLineModelFactory.dayStart(for: calendarEvent, in: range, timeZone: timeZone)
-        let dayRange = SharePreviewLineModelFactory.dayRange(startingAt: dayStart, timeZone: timeZone)
+        let dayRange = SharePreviewLineModelFactory.dayRange(
+            startingAt: dayStart ?? range.lowerBound, timeZone: timeZone
+        )
         let timeText = SharePreviewLineModelFactory.timeText(
             eventTime: calendarEvent.eventTime, dayRange: dayRange, timeZone: timeZone, isShort: isShort
         )
@@ -75,8 +78,9 @@ private enum SharePreviewLineModelFactory {
 
     static func dayStart(
         for calendarEvent: any CalendarEvent, in range: Range<TimeInterval>, timeZone: TimeZone
-    ) -> TimeInterval {
-        let anchor = calendarEvent.eventTimeOnCalendar?.clamped(to: range)?.lowerBound ?? range.lowerBound
+    ) -> TimeInterval? {
+        guard let anchor = calendarEvent.eventTimeOnCalendar?.clamped(to: range)?.lowerBound
+        else { return nil }
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = timeZone
         return calendar.startOfDay(for: Date(timeIntervalSince1970: anchor)).timeIntervalSince1970

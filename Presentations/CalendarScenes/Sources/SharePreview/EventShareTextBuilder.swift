@@ -19,48 +19,33 @@ struct EventShareTextBuilder {
     func build(
         _ lines: [SharePreviewLineModel],
         in range: Range<TimeInterval>,
+        kind: CalendarShareRangeKind,
         includeTagName: Bool
     ) -> String {
         let visibleLines = lines.filter { !$0.isExcluded }
         guard !visibleLines.isEmpty else { return "" }
 
-        let groups = Dictionary(grouping: visibleLines, by: \.dayStart)
-        let sortedDayStarts = groups.keys.sorted()
-
-        let headerDateText = sortedDayStarts.count == 1
-            ? self.dateHeaderText(for: sortedDayStarts[0])
-            : self.rangeHeaderText(for: range.lowerBound)
-        let header = "\(Constant.calendarEmoji)\(headerDateText)"
-
-        let body = sortedDayStarts.count == 1
-            ? self.renderSingleDayBody(groups[sortedDayStarts[0]] ?? [], includeTagName: includeTagName)
-            : self.renderMultiDayBody(sortedDayStarts, groups: groups, includeTagName: includeTagName)
+        let composer = SharePreviewSectionComposer(timeZone: self.timeZone)
+        let sections = composer.sections(of: visibleLines)
+        let header = "\(Constant.calendarEmoji)\(composer.rangeHeaderText(of: sections, in: range, kind: kind))"
+        // 날짜 헤더가 없으면 섹션 경계가 드러나지 않아 빈 줄 없이 한 덩어리로 잇는다
+        let sectionSeparator = sections.contains { $0.dayHeaderText != nil } ? "\n\n" : "\n"
+        let body = sections
+            .map { self.renderSection($0, includeTagName: includeTagName) }
+            .joined(separator: sectionSeparator)
 
         return "\(header)\n\n\(body)"
     }
 
-    private func renderSingleDayBody(
-        _ lines: [SharePreviewLineModel],
+    private func renderSection(
+        _ section: SharePreviewSectionModel,
         includeTagName: Bool
     ) -> String {
-        return lines
+        let bullets = section.lines
             .map { self.bulletLine($0, includeTagName: includeTagName) }
             .joined(separator: "\n")
-    }
-
-    private func renderMultiDayBody(
-        _ sortedDayStarts: [TimeInterval],
-        groups: [TimeInterval: [SharePreviewLineModel]],
-        includeTagName: Bool
-    ) -> String {
-        return sortedDayStarts
-            .map { dayStart -> String in
-                let groupLines = groups[dayStart] ?? []
-                let groupHeader = "\(Constant.groupMarker)\(self.groupHeaderText(for: dayStart))"
-                let bullets = self.renderSingleDayBody(groupLines, includeTagName: includeTagName)
-                return "\(groupHeader)\n\(bullets)"
-            }
-            .joined(separator: "\n\n")
+        guard let dayHeaderText = section.dayHeaderText else { return bullets }
+        return "\(dayHeaderText)\n\(bullets)"
     }
 
     private func bulletLine(_ line: SharePreviewLineModel, includeTagName: Bool) -> String {
@@ -70,28 +55,10 @@ struct EventShareTextBuilder {
         return "\(Constant.bullet)\(todoPrefix)\(timePrefix)\(line.name)\(tagSuffix)"
     }
 
-    private func dateHeaderText(for dayStart: TimeInterval) -> String {
-        return self.formattedDate(dayStart, format: "date_form::yyyy_MM_dd_E_".localized())
-    }
-
-    private func groupHeaderText(for dayStart: TimeInterval) -> String {
-        return self.formattedDate(dayStart, format: "date_form.MMM_dd_E".localized())
-    }
-
-    private func rangeHeaderText(for time: TimeInterval) -> String {
-        return self.formattedDate(time, format: "date_form.MMM_yyyy".localized())
-    }
-
-    private func formattedDate(_ time: TimeInterval, format: String) -> String {
-        let formatter = DateFormatter() |> \.timeZone .~ self.timeZone
-        formatter.dateFormat = format
-        return formatter.string(from: Date(timeIntervalSince1970: time))
-    }
 }
 
 private enum Constant {
     static let calendarEmoji: String = "📅 "
-    static let groupMarker: String = "▸ "
     static let bullet: String = "• "
     static let tagSeparator: String = " · "
 }

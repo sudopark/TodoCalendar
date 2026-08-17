@@ -44,19 +44,13 @@ protocol MonthSceneInteractor: AnyObject {
     func selectDay(_ day: CalendarDay)
 }
 
-enum CalendarShareRangeKind {
-    case day
-    case week
-    case month
-}
-
 protocol MonthSceneListener: AnyObject {
 
     func monthScene(
         didChange currentSelectedDay: CurrentSelectDayModel,
         and eventsThatDay: [any CalendarEvent]
     )
-    func monthScene(didRequestShare range: Range<TimeInterval>)
+    func monthScene(didRequestShare range: Range<TimeInterval>, kind: CalendarShareRangeKind)
 }
 
 protocol MonthScene: Scene where Interactor == any MonthSceneInteractor {

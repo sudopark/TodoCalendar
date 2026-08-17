@@ -42,7 +42,14 @@ final class SharePreviewViewModelImpleTests: PublisherWaitable {
             |> \.eventTagId .~ .custom("not_exists")
     }
 
+    private func septemberWeekRange() -> Range<TimeInterval> {
+        let start = self.september10thRange().lowerBound
+        return start..<(start + 3600 * 24 * 7)
+    }
+
     private func makeViewModel(
+        range customRange: Range<TimeInterval>? = nil,
+        kind: CalendarShareRangeKind = .day,
         offTagIds: [EventTagId] = [],
         foremostEventId: ForemostEventId? = nil,
         includeTagName: Bool = false,
@@ -54,7 +61,7 @@ final class SharePreviewViewModelImpleTests: PublisherWaitable {
         appleEvents: [AppleCalendar.Event]? = nil,
         appleTags: [AppleCalendar.Tag]? = nil
     ) throws -> SharePreviewViewModelImple {
-        let range = self.september10thRange()
+        let range = customRange ?? self.september10thRange()
 
         let todoUsecase = StubTodoEventUsecase()
         todoUsecase.stubTodoEventsInRange = todos ?? [
@@ -116,6 +123,7 @@ final class SharePreviewViewModelImpleTests: PublisherWaitable {
 
         let viewModel = SharePreviewViewModelImple(
             range: range,
+            kind: kind,
             eventListUsecase: eventListUsecase,
             calendarSettingUsecase: calendarSettingUsecase,
             uiSettingUsecase: self.uiSettingUsecase,
@@ -222,6 +230,105 @@ extension SharePreviewViewModelImpleTests {
         let deletedTagLine = lines?.first(where: { $0.eventId == "todo:deleted-tag" })
         #expect(deletedTagLine?.tagId == .default)
         #expect(deletedTagLine?.tagName == DefaultEventTag.default("").name)
+    }
+}
+
+
+// MARK: - 날짜 섹션 분리
+
+extension SharePreviewViewModelImpleTests {
+
+    private func threeDaySchedules() -> [ScheduleEvent] {
+        let range = self.septemberWeekRange()
+        return (0..<3).map { dayOffset in
+            ScheduleEvent(
+                uuid: "sc:day\(dayOffset)", name: "day\(dayOffset)-schedule",
+                time: .at(range.lowerBound + 3600 * (24 * TimeInterval(dayOffset) + 9))
+            )
+            |> \.eventTagId .~ .default
+        }
+    }
+
+    @Test func viewModel_whenRangeIsSingleDay_hasNoDayHeader() async throws {
+        // given
+        let expect = expectConfirm("하루 범위는 날짜 헤더가 붙지 않는다")
+        let viewModel = try self.makeViewModel(currentTodos: [])
+
+        // when
+        let sections = try await self.firstOutput(expect, for: viewModel.sectionModels) {
+            viewModel.prepare()
+        }
+
+        // then
+        #expect(sections?.count == 1)
+        #expect(sections?.first?.dayHeaderText == nil)
+    }
+
+    @Test func viewModel_currentTodos_areSeparateLeadingSectionWithoutDay() async throws {
+        // given
+        let expect = expectConfirm("시간 없는 할일은 날짜에 안 묶이고 맨 앞 섹션으로 빠진다")
+        let viewModel = try self.makeViewModel(
+            range: self.septemberWeekRange(),
+            schedules: self.threeDaySchedules()
+        )
+
+        // when
+        let sections = try await self.firstOutput(expect, for: viewModel.sectionModels) {
+            viewModel.prepare()
+        }
+
+        // then
+        #expect(sections?.first?.dayStart == nil)
+        #expect(sections?.first?.dayHeaderText == nil)
+        #expect(sections?.first?.lines.map { $0.eventId } == ["c-t:0"])
+        #expect(sections?.dropFirst().allSatisfy { $0.dayStart != nil } == true)
+    }
+
+    @Test func viewModel_whenRangeSpansMultipleDays_splitsSectionsPerDayWithHeader() async throws {
+        // given
+        let expect = expectConfirm("여러 날 범위는 날짜별 섹션으로 갈리고 각 섹션에 헤더가 붙는다")
+        let viewModel = try self.makeViewModel(
+            range: self.septemberWeekRange(),
+            currentTodos: [],
+            schedules: self.threeDaySchedules()
+        )
+
+        // when
+        let sections = try await self.firstOutput(expect, for: viewModel.sectionModels) {
+            viewModel.prepare()
+        }
+
+        // then
+        let dayStarts = sections?.compactMap { $0.dayStart }
+        #expect(dayStarts == dayStarts?.sorted())
+        #expect(sections?.count == 3)
+        #expect(sections?.allSatisfy { $0.dayHeaderText?.hasPrefix("▸ ") == true } == true)
+        #expect(sections?.flatMap { $0.lines.map { $0.eventId } }.contains("sc:day2-1") == true)
+    }
+
+    @Test func viewModel_whenRangeSpansMultipleDays_headerSwitchesFromDayToMonthText() async throws {
+        // given
+        let expect = expectConfirm("여러 날 범위의 상단 헤더는 하루 표기가 아니다")
+        let singleDayViewModel = try self.makeViewModel()
+        let multiDayViewModel = try self.makeViewModel(
+            range: self.septemberWeekRange(),
+            currentTodos: [],
+            schedules: self.threeDaySchedules()
+        )
+
+        // when
+        let singleDayHeader = try await self.firstOutput(expect, for: singleDayViewModel.dateHeaderText) {
+            singleDayViewModel.prepare()
+        }
+        let multiDayHeader = try await self.firstOutput(
+            expectConfirm("여러 날 헤더"), for: multiDayViewModel.dateHeaderText
+        ) {
+            multiDayViewModel.prepare()
+        }
+
+        // then
+        #expect(multiDayHeader?.isEmpty == false)
+        #expect(multiDayHeader != singleDayHeader)
     }
 }
 

@@ -978,8 +978,10 @@ extension MonthViewModelImpleTests {
         }
 
         var didRequestShareRange: Range<TimeInterval>?
-        func monthScene(didRequestShare range: Range<TimeInterval>) {
+        var didRequestShareKind: CalendarShareRangeKind?
+        func monthScene(didRequestShare range: Range<TimeInterval>, kind: CalendarShareRangeKind) {
             self.didRequestShareRange = range
+            self.didRequestShareKind = kind
         }
     }
 }

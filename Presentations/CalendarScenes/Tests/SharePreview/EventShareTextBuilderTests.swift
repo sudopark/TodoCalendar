@@ -45,7 +45,7 @@ extension EventShareTextBuilderTests {
         let builder = self.makeBuilder()
 
         // when
-        let text = builder.build(lines, in: day..<(day + 86_400), includeTagName: false)
+        let text = builder.build(lines, in: day..<(day + 86_400), kind: .day, includeTagName: false)
 
         // then
         let resultLines = text.components(separatedBy: "\n")
@@ -66,7 +66,7 @@ extension EventShareTextBuilderTests {
         let builder = self.makeBuilder()
 
         // when
-        let text = builder.build(lines, in: day..<(day + 86_400), includeTagName: false)
+        let text = builder.build(lines, in: day..<(day + 86_400), kind: .day, includeTagName: false)
 
         // then
         let resultLines = text.components(separatedBy: "\n")
@@ -84,7 +84,7 @@ extension EventShareTextBuilderTests {
         let builder = self.makeBuilder()
 
         // when
-        let text = builder.build(lines, in: day..<(day + 86_400), includeTagName: false)
+        let text = builder.build(lines, in: day..<(day + 86_400), kind: .day, includeTagName: false)
 
         // then
         let resultLines = text.components(separatedBy: "\n")
@@ -109,7 +109,7 @@ extension EventShareTextBuilderTests {
         let builder = self.makeBuilder()
 
         // when
-        let text = builder.build(lines, in: day..<(day + 86_400), includeTagName: true)
+        let text = builder.build(lines, in: day..<(day + 86_400), kind: .day, includeTagName: true)
 
         // then
         let resultLines = text.components(separatedBy: "\n")
@@ -125,7 +125,7 @@ extension EventShareTextBuilderTests {
         let builder = self.makeBuilder()
 
         // when
-        let text = builder.build(lines, in: day..<(day + 86_400), includeTagName: true)
+        let text = builder.build(lines, in: day..<(day + 86_400), kind: .day, includeTagName: true)
 
         // then
         let resultLines = text.components(separatedBy: "\n")
@@ -150,7 +150,7 @@ extension EventShareTextBuilderTests {
         let builder = self.makeBuilder()
 
         // when
-        let text = builder.build(lines, in: day1..<(day2 + 86_400), includeTagName: false)
+        let text = builder.build(lines, in: day1..<(day2 + 86_400), kind: .month, includeTagName: false)
 
         // then
         let resultLines = text.components(separatedBy: "\n")
@@ -162,6 +162,27 @@ extension EventShareTextBuilderTests {
         #expect(resultLines[4] == "")
         #expect(resultLines[5].hasPrefix("▸ "))
         #expect(resultLines[6] == "• 종일 워크숍")
+    }
+
+    @Test func builder_undatedTodos_renderBeforeAnyDayGroup() {
+        // given
+        let day1 = self.dayStart(year: 2026, month: 8, day: 15)
+        let day2 = self.dayStart(year: 2026, month: 8, day: 16)
+        let lines = [
+            SharePreviewLineModel(eventId: "e1", dayStart: day1, name: "팀 스탠드업", timeText: "09:00"),
+            SharePreviewLineModel(eventId: "t1", dayStart: nil, name: "장보기", isTodo: true),
+            SharePreviewLineModel(eventId: "e2", dayStart: day2, name: "워크숍", timeText: "종일")
+        ]
+        let builder = self.makeBuilder()
+
+        // when
+        let text = builder.build(lines, in: day1..<(day2 + 86_400), kind: .month, includeTagName: false)
+
+        // then
+        let resultLines = text.components(separatedBy: "\n")
+        #expect(resultLines[2] == "• \(R.String.calendarEventTimeTodo) 장보기")
+        #expect(resultLines[3] == "")
+        #expect(resultLines[4].hasPrefix("▸ "))
     }
 }
 
@@ -179,7 +200,7 @@ extension EventShareTextBuilderTests {
         let builder = self.makeBuilder()
 
         // when
-        let text = builder.build(lines, in: day..<(day + 86_400), includeTagName: false)
+        let text = builder.build(lines, in: day..<(day + 86_400), kind: .day, includeTagName: false)
 
         // then
         let resultLines = text.components(separatedBy: "\n")
@@ -195,7 +216,7 @@ extension EventShareTextBuilderTests {
         let builder = self.makeBuilder()
 
         // when
-        let text = builder.build(lines, in: day..<(day + 86_400), includeTagName: false)
+        let text = builder.build(lines, in: day..<(day + 86_400), kind: .day, includeTagName: false)
 
         // then
         let resultLines = text.components(separatedBy: "\n")
@@ -211,7 +232,7 @@ extension EventShareTextBuilderTests {
         let builder = self.makeBuilder()
 
         // when
-        let text = builder.build(lines, in: day..<(day + 86_400), includeTagName: false)
+        let text = builder.build(lines, in: day..<(day + 86_400), kind: .day, includeTagName: false)
 
         // then
         let resultLines = text.components(separatedBy: "\n")
@@ -234,7 +255,7 @@ extension EventShareTextBuilderTests {
         let builder = self.makeBuilder()
 
         // when
-        let text = builder.build(lines, in: day..<(day + 86_400), includeTagName: false)
+        let text = builder.build(lines, in: day..<(day + 86_400), kind: .day, includeTagName: false)
 
         // then
         #expect(text == "")
@@ -247,7 +268,7 @@ extension EventShareTextBuilderTests {
         let builder = self.makeBuilder()
 
         // when
-        let text = builder.build(lines, in: day..<(day + 86_400), includeTagName: false)
+        let text = builder.build(lines, in: day..<(day + 86_400), kind: .day, includeTagName: false)
 
         // then
         #expect(text == "")

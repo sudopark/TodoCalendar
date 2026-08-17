@@ -17,7 +17,7 @@ import CommonPresentation
 
 protocol CalendarPaperRouting: Routing, Sendable {
 
-    func showSharePreview(range: Range<TimeInterval>)
+    func showSharePreview(range: Range<TimeInterval>, kind: CalendarShareRangeKind)
 }
 
 // MARK: - Router
@@ -38,9 +38,9 @@ extension CalendarPaperRouter {
         self.scene as? (any CalendarPaperScene)
     }
 
-    func showSharePreview(range: Range<TimeInterval>) {
+    func showSharePreview(range: Range<TimeInterval>, kind: CalendarShareRangeKind) {
         Task { @MainActor in
-            let next = self.sharePreviewSceneBuilder.makeSharePreviewScene(range: range)
+            let next = self.sharePreviewSceneBuilder.makeSharePreviewScene(range: range, kind: kind)
             self.scene?.present(next, animated: true)
         }
     }
