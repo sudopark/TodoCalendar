@@ -654,6 +654,76 @@ extension GoogleCalendarUsecaseImpleTests {
         #expect(cached?["loaded"] != nil)
     }
 
+    @Test func updateEvent_whenRecurrenceRemoved_refreshesCachedPeriod() async throws {
+        // given — 반복 해제 응답은 마스터가 아니다(recurrence == nil) — 결과만 보면 재조회가 필요 없어 보인다
+        let notMasterAnymore = GoogleCalendar.EventOrigin(id: "series1", summary: "no longer repeating")
+        let repo = PrivateStubRepository(customUpdateEventOriginStubbing: notMasterAnymore)
+        let usecase = makeUsecase(accounts: ["account@google.com"], defaultRepo: repo)
+        stubStore.put(
+            [String: GoogleCalendar.Event].self,
+            key: ShareDataKeys.googleCalendarEvents.rawValue,
+            ["loaded": dummyEvent("loaded")]
+        )
+        var params = GoogleCalendar.EventEditParams()
+        params.recurrence = []
+
+        // when
+        _ = try await usecase.updateEvent(
+            "cal1", "series1", accountId: "account@google.com",
+            at: TimeZone(identifier: "Asia/Seoul")!, params: params
+        )
+        try await Task.sleep(for: .milliseconds(100))
+
+        // then — 대상이 반복 해제 대상이었으므로 펼쳐진 인스턴스를 걷어내는 재조회가 돈다
+        #expect(repo.didLoadRepeatingInstancesWith?.eventId == "series1")
+    }
+
+    @Test func updateEvent_whenRecurrenceAdded_refreshesCachedPeriod() async throws {
+        // given — 이번 응답 자체는 마스터가 아니지만(recurringEventId nil, recurrence nil), 대상에 반복을 새로 실었다
+        let notMasterYet = GoogleCalendar.EventOrigin(id: "event1", summary: "now repeating")
+        let repo = PrivateStubRepository(customUpdateEventOriginStubbing: notMasterYet)
+        let usecase = makeUsecase(accounts: ["account@google.com"], defaultRepo: repo)
+        stubStore.put(
+            [String: GoogleCalendar.Event].self,
+            key: ShareDataKeys.googleCalendarEvents.rawValue,
+            ["loaded": dummyEvent("loaded")]
+        )
+        var params = GoogleCalendar.EventEditParams()
+        params.recurrence = ["RRULE:FREQ=DAILY;COUNT=3"]
+
+        // when
+        _ = try await usecase.updateEvent(
+            "cal1", "event1", accountId: "account@google.com",
+            at: TimeZone(identifier: "Asia/Seoul")!, params: params
+        )
+        try await Task.sleep(for: .milliseconds(100))
+
+        // then
+        #expect(repo.didLoadRepeatingInstancesWith?.eventId == "event1")
+    }
+
+    @Test func updateEvent_whenOnlyOtherFieldsChanged_cachesResponseOnly() async throws {
+        // given — 반복과 무관한 필드만 바뀌었고 응답도 인스턴스다
+        let usecase = makeUsecase(
+            accounts: ["account@google.com"],
+            defaultRepo: .init(customUpdateEventOriginStubbing: dummyUpdatedEventOrigin)
+        )
+        var params = GoogleCalendar.EventEditParams()
+        params.summary = "updated"
+
+        // when
+        _ = try await usecase.updateEvent(
+            "cal1", "event1", accountId: "account@google.com",
+            at: TimeZone(identifier: "Asia/Seoul")!, params: params
+        )
+
+        // then — 재조회 없이 응답만 캐시에 반영
+        let cached = stubStore.value(
+            [String: GoogleCalendar.Event].self, key: ShareDataKeys.googleCalendarEvents.rawValue
+        )
+        #expect(cached?["event1"]?.name == "updated")
+    }
+
     @Test func removeEvent_removesFromSharedDataStore() async throws {
         // given
         let usecase = makeUsecase(
@@ -706,6 +776,89 @@ extension GoogleCalendarUsecaseImpleTests {
         #expect(cached?["event1_100"] == nil)
         #expect(cached?["event1_200"] == nil)
         #expect(cached?["other"] != nil)
+    }
+
+    @Test func updateEvent_whenRecurrenceAdded_removesStaleSingleEventFromCache() async throws {
+        // given — 반복 없던 단일 이벤트가 eventId 키로 캐시돼 있다
+        var seriesMaster = GoogleCalendar.EventOrigin(id: "event1", summary: "now repeating")
+        seriesMaster.recurrence = ["RRULE:FREQ=DAILY;COUNT=3"]
+        let repo = PrivateStubRepository(customUpdateEventOriginStubbing: seriesMaster)
+        let usecase = makeUsecase(accounts: ["account@google.com"], defaultRepo: repo)
+        stubStore.put(
+            [String: GoogleCalendar.Event].self,
+            key: ShareDataKeys.googleCalendarEvents.rawValue,
+            ["event1": self.dummyEvent("event1")]
+        )
+        var params = GoogleCalendar.EventEditParams()
+        params.recurrence = ["RRULE:FREQ=DAILY;COUNT=3"]
+
+        // when
+        _ = try await usecase.updateEvent(
+            "cal1", "event1", accountId: "account@google.com",
+            at: TimeZone(identifier: "Asia/Seoul")!, params: params
+        )
+        try await Task.sleep(for: .milliseconds(100))
+
+        // then — 옛 단일 이벤트 캐시가 eventId 키에 남지 않는다
+        let cached = stubStore.value(
+            [String: GoogleCalendar.Event].self, key: ShareDataKeys.googleCalendarEvents.rawValue
+        )
+        #expect(cached?["event1"] == nil)
+    }
+
+    @Test func updateEvent_whenRecurrenceRemoved_cachesEventItself() async throws {
+        // given — 반복 해제 응답은 마스터가 아니다(recurrence == nil) — 반복이 풀린 단일 이벤트다
+        var notMasterAnymore = GoogleCalendar.EventOrigin(id: "series1", summary: "no longer repeating")
+        notMasterAnymore.start = .init() |> \.dateTime .~ "2023-03-05T00:00:00+09:00"
+        notMasterAnymore.end = .init() |> \.dateTime .~ "2023-03-06T00:00:00+09:00"
+        let repo = PrivateStubRepository(customUpdateEventOriginStubbing: notMasterAnymore)
+        let usecase = makeUsecase(accounts: ["account@google.com"], defaultRepo: repo)
+        var params = GoogleCalendar.EventEditParams()
+        params.recurrence = []
+
+        // when
+        _ = try await usecase.updateEvent(
+            "cal1", "series1", accountId: "account@google.com",
+            at: TimeZone(identifier: "Asia/Seoul")!, params: params
+        )
+        try await Task.sleep(for: .milliseconds(100))
+
+        // then — 본체가 eventId 키에 갱신되어 반영된다
+        let cached = stubStore.value(
+            [String: GoogleCalendar.Event].self, key: ShareDataKeys.googleCalendarEvents.rawValue
+        )
+        #expect(cached?["series1"]?.name == "no longer repeating")
+    }
+
+    @Test func updateEvent_whenRecurrenceRemoved_removesStaleInstancesFromCache() async throws {
+        // given — 기존에 펼쳐진 반복 인스턴스들이 series1_* 로 캐시돼 있다
+        var notMasterAnymore = GoogleCalendar.EventOrigin(id: "series1", summary: "no longer repeating")
+        notMasterAnymore.start = .init() |> \.dateTime .~ "2023-03-05T00:00:00+09:00"
+        notMasterAnymore.end = .init() |> \.dateTime .~ "2023-03-06T00:00:00+09:00"
+        let repo = PrivateStubRepository(customUpdateEventOriginStubbing: notMasterAnymore)
+        let usecase = makeUsecase(accounts: ["account@google.com"], defaultRepo: repo)
+        stubStore.put(
+            [String: GoogleCalendar.Event].self,
+            key: ShareDataKeys.googleCalendarEvents.rawValue,
+            ["series1_0": self.dummyEvent("series1_0"), "series1_1": self.dummyEvent("series1_1")]
+        )
+        var params = GoogleCalendar.EventEditParams()
+        params.recurrence = []
+
+        // when
+        _ = try await usecase.updateEvent(
+            "cal1", "series1", accountId: "account@google.com",
+            at: TimeZone(identifier: "Asia/Seoul")!, params: params
+        )
+        try await Task.sleep(for: .milliseconds(100))
+
+        // then — 걷힌 series1_* 옛 인스턴스는 사라지고 본체만 남는다
+        let cached = stubStore.value(
+            [String: GoogleCalendar.Event].self, key: ShareDataKeys.googleCalendarEvents.rawValue
+        )
+        #expect(cached?["series1_0"] == nil)
+        #expect(cached?["series1_1"] == nil)
+        #expect(cached?["series1"]?.name == "no longer repeating")
     }
 
     private func dummyEvent(_ eventId: String) -> GoogleCalendar.Event {
