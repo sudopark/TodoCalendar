@@ -137,5 +137,20 @@ final class PrivateStubAppleCalendarRepository: AppleCalendarRepository, @unchec
         return Just(nil).eraseToAnyPublisher()
     }
 
+    func updateEvent(
+        _ eventId: String,
+        _ params: AppleCalendar.EventEditParams,
+        scope: AppleCalendar.EventEditScope
+    ) async throws -> AppleCalendar.EventOrigin {
+        throw RuntimeError("read db cannot write")
+    }
+
+    func removeEvent(
+        _ eventId: String,
+        scope: AppleCalendar.EventEditScope
+    ) async throws {
+        throw RuntimeError("read db cannot write")
+    }
+
     func resetCache() async throws { }
 }

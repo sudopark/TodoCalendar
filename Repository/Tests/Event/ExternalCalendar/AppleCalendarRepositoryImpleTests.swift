@@ -8,6 +8,8 @@
 
 import Testing
 import Combine
+import Prelude
+import Optics
 import Domain
 import Extensions
 import SQLiteService
@@ -170,6 +172,139 @@ extension AppleCalendarRepositoryImpleTests {
 }
 
 
+// MARK: - updateEvent / removeEvent
+
+extension AppleCalendarRepositoryImpleTests {
+
+    @Test func repository_updateEvent_passesScopeToStore() async throws {
+        try await runTestWithOpenClose("apple_repo_update_scope") { [self] in
+            // given
+            let repo = self.makeRepository()
+            // when
+            _ = try await repo.updateEvent(
+                "store-event-0", .init(), scope: .thisAndFuture
+            )
+
+            // then
+            #expect(self.stubAccessor.didUpdateEventWith?.2 == .thisAndFuture)
+        }
+    }
+
+    @Test func repository_updateNonRepeatingEvent_updatesCache() async throws {
+        try await runTestWithOpenClose("apple_repo_update_nonrepeating") { [self] in
+            // given
+            let period: Range<TimeInterval> = 0..<1000
+            let pool = StubConnectionPool(self.sqliteService)
+            let storage = AppleCalendarLocalStorageImple(connectionPool: pool)
+            let original = AppleCalendar.EventOrigin(
+                eventId: "e-1", originalEventId: "e-1",
+                calendarId: "cal-1", name: "Original", eventTime: .period(100..<500)
+            )
+            try await storage.saveEventOrigins([original], in: period)
+            let repo = AppleCalendarRepositoryImple(storeAccessor: self.stubAccessor, cacheStorage: storage)
+
+            self.stubAccessor.stubUpdatedOrigin = original |> \.name .~ "Updated Name"
+
+            // when
+            _ = try await repo.updateEvent("e-1", .init(), scope: .thisEventOnly)
+            let cached = try await storage.loadEventOrigin(id: "e-1")
+
+            // then
+            #expect(cached?.name == "Updated Name")
+        }
+    }
+
+    @Test func repository_updateRepeatingEvent_doesNotUpdateSingleCacheEntry() async throws {
+        try await runTestWithOpenClose("apple_repo_update_repeating") { [self] in
+            // given
+            let period: Range<TimeInterval> = 0..<1000
+            let pool = StubConnectionPool(self.sqliteService)
+            let storage = AppleCalendarLocalStorageImple(connectionPool: pool)
+            let original = AppleCalendar.EventOrigin(
+                eventId: "e-2", originalEventId: "e-2",
+                calendarId: "cal-1", name: "Original", eventTime: .period(100..<500)
+            ) |> \.isRepeating .~ true
+            try await storage.saveEventOrigins([original], in: period)
+            let repo = AppleCalendarRepositoryImple(storeAccessor: self.stubAccessor, cacheStorage: storage)
+
+            self.stubAccessor.stubUpdatedOrigin = original |> \.name .~ "Updated Name"
+
+            // when
+            _ = try await repo.updateEvent("e-2", .init(), scope: .thisAndFuture)
+            let cached = try await storage.loadEventOrigin(id: "e-2")
+
+            // then
+            #expect(cached?.name == "Original")
+        }
+    }
+
+    @Test func repository_removeEvent_passesScopeToStore() async throws {
+        try await runTestWithOpenClose("apple_repo_remove_scope") { [self] in
+            // given
+            let repo = self.makeRepository()
+            // when
+            _ = try await repo.removeEvent(
+                "store-event-0", scope: .thisAndFuture
+            )
+
+            // then
+            #expect(self.stubAccessor.didRemoveEventWith?.1 == .thisAndFuture)
+        }
+    }
+
+    @Test func repository_removeEvent_removesFromCache() async throws {
+        try await runTestWithOpenClose("apple_repo_remove") { [self] in
+            // given
+            let period: Range<TimeInterval> = 0..<1000
+            let pool = StubConnectionPool(self.sqliteService)
+            let storage = AppleCalendarLocalStorageImple(connectionPool: pool)
+            let event = AppleCalendar.EventOrigin(
+                eventId: "e-3", originalEventId: "e-3",
+                calendarId: "cal-1", name: "Event", eventTime: .period(100..<500)
+            )
+            try await storage.saveEventOrigins([event], in: period)
+            let repo = AppleCalendarRepositoryImple(storeAccessor: self.stubAccessor, cacheStorage: storage)
+
+            // when
+            try await repo.removeEvent("e-3", scope: .thisEventOnly)
+            let cached = try await storage.loadEventOrigin(id: "e-3")
+
+            // then
+            #expect(cached == nil)
+        }
+    }
+
+    @Test func repository_whenStoreWriteFails_propagatesErrorAndKeepsCache() async throws {
+        try await runTestWithOpenClose("apple_repo_update_fails") { [self] in
+            // given
+            let period: Range<TimeInterval> = 0..<1000
+            let pool = StubConnectionPool(self.sqliteService)
+            let storage = AppleCalendarLocalStorageImple(connectionPool: pool)
+            let original = AppleCalendar.EventOrigin(
+                eventId: "e-4", originalEventId: "e-4",
+                calendarId: "cal-1", name: "Original", eventTime: .period(100..<500)
+            )
+            try await storage.saveEventOrigins([original], in: period)
+            let repo = AppleCalendarRepositoryImple(storeAccessor: self.stubAccessor, cacheStorage: storage)
+            self.stubAccessor.shouldFailWrite = true
+
+            // when
+            var writeError: (any Error)?
+            do {
+                _ = try await repo.updateEvent("e-4", .init(), scope: .thisEventOnly)
+            } catch {
+                writeError = error
+            }
+            let cached = try await storage.loadEventOrigin(id: "e-4")
+
+            // then
+            #expect(writeError != nil)
+            #expect(cached?.name == "Original")
+        }
+    }
+}
+
+
 // MARK: - resetCache
 
 extension AppleCalendarRepositoryImpleTests {
@@ -222,6 +357,11 @@ private final class StubAppleCalendarStoreAccessor: AppleCalendarStoreAccessor, 
         )
     }
 
+    var stubUpdatedOrigin: AppleCalendar.EventOrigin?
+    var shouldFailWrite: Bool = false
+    var didUpdateEventWith: (String, AppleCalendar.EventEditParams, AppleCalendar.EventEditScope)?
+    var didRemoveEventWith: (String, AppleCalendar.EventEditScope)?
+
     func requestFullAccessToEvents() async throws -> Bool { requestGranted }
     func checkAuthorizationStatus() -> AppleCalendarAuthorizationStatus { isAuthorized ? .fullAccess : .denied }
     func loadCalendarTags() -> [AppleCalendar.Tag] { stubTags }
@@ -230,6 +370,27 @@ private final class StubAppleCalendarStoreAccessor: AppleCalendarStoreAccessor, 
     }
     func loadEventOrigin(id: String) -> AppleCalendar.EventOrigin? {
         stubOrigins.first { $0.eventId == id }
+    }
+
+    func updateEvent(
+        _ eventId: String,
+        _ params: AppleCalendar.EventEditParams,
+        scope: AppleCalendar.EventEditScope
+    ) throws -> AppleCalendar.EventOrigin {
+        didUpdateEventWith = (eventId, params, scope)
+        if shouldFailWrite { throw RuntimeError("stub write failure") }
+        return stubUpdatedOrigin ?? AppleCalendar.EventOrigin(
+            eventId: eventId, originalEventId: eventId,
+            calendarId: "store-cal-0", name: "Updated", eventTime: .period(100..<500)
+        )
+    }
+
+    func removeEvent(
+        _ eventId: String,
+        scope: AppleCalendar.EventEditScope
+    ) throws {
+        didRemoveEventWith = (eventId, scope)
+        if shouldFailWrite { throw RuntimeError("stub write failure") }
     }
 }
 
