@@ -59,14 +59,14 @@ open class StubAppleCalendarUsecase: AppleCalendarUsecase, @unchecked Sendable {
         return Just(origin).eraseToAnyPublisher()
     }
 
-    public var stubIsCalendarWritable: Bool = true
+    public var stubIsCalendarWritable: Bool? = true
     open func isCalendarWritable(_ calendarId: String) -> AnyPublisher<Bool?, Never> {
         return Just<Bool?>(stubIsCalendarWritable).eraseToAnyPublisher()
     }
 
     public var stubUpdatedOrigin: AppleCalendar.EventOrigin?
     public var shouldFailWrite: Bool = false
-    public var didUpdateEventWith: (String, AppleCalendar.EventEditParams, AppleCalendar.EventEditScope)?
+    public var didUpdateEventWith: (eventId: String, params: AppleCalendar.EventEditParams, scope: AppleCalendar.EventEditScope)?
     open func updateEvent(
         _ eventId: String,
         params: AppleCalendar.EventEditParams,
@@ -82,7 +82,7 @@ open class StubAppleCalendarUsecase: AppleCalendarUsecase, @unchecked Sendable {
         )
     }
 
-    public var didRemoveEventWith: (String, AppleCalendar.EventEditScope)?
+    public var didRemoveEventWith: (eventId: String, scope: AppleCalendar.EventEditScope)?
     open func removeEvent(
         _ eventId: String,
         scope: AppleCalendar.EventEditScope
