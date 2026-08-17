@@ -106,12 +106,13 @@ open class StubGoogleCalendarUsecase: GoogleCalendarUsecase, @unchecked Sendable
         return origin
     }
 
-    public var didRemoveEventWith: (calendarId: String, eventId: String, accountId: String)?
+    public var didRemoveEventWith: (calendarId: String, eventId: String, accountId: String, scope: GoogleCalendar.EventRemoveScope)?
     open func removeEvent(
         _ calendarId: String,
         _ eventId: String,
-        accountId: String
+        accountId: String,
+        scope: GoogleCalendar.EventRemoveScope
     ) async throws {
-        self.didRemoveEventWith = (calendarId, eventId, accountId)
+        self.didRemoveEventWith = (calendarId, eventId, accountId, scope)
     }
 }
