@@ -333,6 +333,8 @@
 "share_preview::header::last_week" = "저번주";
 "share_preview::header::next_week" = "다음주";
 "share_preview::header::week_of_month" = "%1$@ %2$d주";
+"share_preview::format::text" = "텍스트";
+"share_preview::format::image" = "이미지";
 
 
 // MARK: - account

@@ -207,6 +207,190 @@ final class SharePreviewSnapshots: XCTestCase {
                 .environment(self.makeAppearance(theme))
         }
     }
+
+    // MARK: - shareImageCard: day list, 단일 날짜 4행 중 1행 isExcluded
+
+    @MainActor
+    func test_shareImageCard_dayList() {
+        let content = ShareImageContentModel.list([
+            ShareImageListSection(
+                dayStart: nil, dayHeaderText: nil,
+                lines: [self.todoLine("todo-1", name: "장보기", tagId: .custom("personal"))]
+            ),
+            ShareImageListSection(
+                dayStart: 0, dayHeaderText: nil,
+                lines: [
+                    self.scheduleLine(
+                        "sc-1", name: "팀 스탠드업", tagId: .custom("work"),
+                        periodText: .singleText(.init(text: "09:00"))
+                    ),
+                    self.scheduleLine(
+                        "sc-2", name: "디자인 리뷰", tagId: .custom("work"),
+                        periodText: .doubleText(.init(text: "13:00"), .init(text: "14:30")),
+                        periodDescription: "1시간 30분",
+                        isExcluded: true
+                    ),
+                    self.scheduleLine(
+                        "sc-3", name: "가족 여행", tagId: .custom("personal"),
+                        periodText: .singleText(.init(text: R.String.calendarEventTimeAllday))
+                    )
+                ]
+            )
+        ])
+
+        captureSnapshotPair(named: "shareImageCard_dayList", layout: .component) { theme in
+            ShareImageCardView(headerText: "08/15/2026 (Sat)", content: content, cardWidth: 360)
+                .environment(self.makeAppearance(theme))
+        }
+    }
+
+    // MARK: - shareImageCard: week list, 날짜 없는 할일 섹션 + 날짜 그룹 2개
+
+    @MainActor
+    func test_shareImageCard_weekList() {
+        let content = ShareImageContentModel.list([
+            ShareImageListSection(
+                dayStart: nil, dayHeaderText: nil,
+                lines: [self.todoLine("todo-1", name: "이력서 업데이트", tagId: .custom("work"))]
+            ),
+            ShareImageListSection(
+                dayStart: 0, dayHeaderText: "08/15 (Sat)",
+                lines: [
+                    self.scheduleLine(
+                        "sc-1", name: "치과 예약", tagId: .custom("personal"),
+                        periodText: .singleText(.init(text: "10:30"))
+                    ),
+                    self.scheduleLine(
+                        "sc-2", name: "프로젝트 회의", tagId: .custom("work"),
+                        periodText: .doubleText(.init(text: "14:00"), .init(text: "15:00")),
+                        periodDescription: "1시간"
+                    )
+                ]
+            ),
+            ShareImageListSection(
+                dayStart: 86400, dayHeaderText: "08/16 (Sun)",
+                lines: [
+                    self.scheduleLine(
+                        "sc-3", name: "마라톤 대회", tagId: .custom("exercise"),
+                        periodText: .singleText(.init(text: R.String.calendarEventTimeAllday))
+                    )
+                ]
+            )
+        ])
+
+        captureSnapshotPair(named: "shareImageCard_weekList", layout: .component) { theme in
+            ShareImageCardView(headerText: "08/15 ~ 08/16", content: content, cardWidth: 360)
+                .environment(self.makeAppearance(theme))
+        }
+    }
+
+    // MARK: - shareImageCard: month grid, 6주 그리드 기간·단일 시점 이벤트 혼재 1건 제외
+
+    @MainActor
+    func test_shareImageCard_monthGrid() {
+        let weeks = self.monthGridWeeks()
+        let periodEvent = self.eventOnWeek(
+            "period-1", name: "워크샵", tagId: .custom("work"), daysSequence: 2...4, hasPeriod: true
+        )
+        let pointEvent1 = self.eventOnWeek(
+            "point-1", name: "치과", tagId: .custom("personal"), daysSequence: 3...3, hasPeriod: false
+        )
+        let pointEvent2 = self.eventOnWeek(
+            "point-2", name: "요가", tagId: .custom("exercise"), daysSequence: 5...5, hasPeriod: false
+        )
+        let excludedEvent = self.eventOnWeek(
+            "excluded-1", name: "취소된 일정", tagId: .custom("personal"), daysSequence: 6...6, hasPeriod: false
+        )
+
+        let gridWeeks = weeks.enumerated().map { index, row -> ShareImageMonthWeek in
+            switch index {
+            case 2:
+                return ShareImageMonthWeek(row: row, eventStacks: [[periodEvent], [pointEvent1]])
+            case 3:
+                return ShareImageMonthWeek(row: row, eventStacks: [[pointEvent2, excludedEvent]])
+            default:
+                return ShareImageMonthWeek(row: row, eventStacks: [])
+            }
+        }
+        let grid = ShareImageMonthGrid(
+            weekDays: WeekDayModel.allModels(of: .sunday),
+            weeks: gridWeeks,
+            excludedEventIds: [excludedEvent.eventId]
+        )
+
+        captureSnapshotPair(named: "shareImageCard_monthGrid", layout: .component) { theme in
+            ShareImageCardView(headerText: "2026년 8월", content: .monthGrid(grid), cardWidth: 360)
+                .environment(self.makeAppearance(theme))
+        }
+    }
+}
+
+
+// MARK: - ShareImageCardView fixtures
+
+private extension SharePreviewSnapshots {
+
+    var shareImageTimeZone: TimeZone { TimeZone(abbreviation: "KST")! }
+
+    func todoLine(
+        _ id: String, name: String, tagId: EventTagId, isExcluded: Bool = false
+    ) -> ShareImageListLine {
+        var cellViewModel = TodoEventCellViewModel(id, name: name)
+        cellViewModel.periodText = .currentTodoText
+        cellViewModel.colorSource = tagId
+        return ShareImageListLine(eventId: id, cellViewModel: cellViewModel, isExcluded: isExcluded)
+    }
+
+    func scheduleLine(
+        _ id: String, name: String, tagId: EventTagId,
+        periodText: EventPeriodText, periodDescription: String? = nil,
+        isExcluded: Bool = false
+    ) -> ShareImageListLine {
+        var cellViewModel = ScheduleEventCellViewModel(id, name: name)
+        cellViewModel.periodText = periodText
+        cellViewModel.periodDescription = periodDescription
+        cellViewModel.colorSource = tagId
+        return ShareImageListLine(eventId: id, cellViewModel: cellViewModel, isExcluded: isExcluded)
+    }
+
+    func monthGridWeeks() -> [WeekRowModel] {
+        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ self.shareImageTimeZone
+        let firstOfMonth = calendar.date(from: DateComponents(year: 2026, month: 8, day: 1))!
+        let firstWeekday = calendar.component(.weekday, from: firstOfMonth)
+        let gridStart = calendar.date(byAdding: .day, value: -(firstWeekday - 1), to: firstOfMonth)!
+        return (0..<6).map { weekIndex in
+            let days = (0..<7).map { dayIndex -> DayCellViewModel in
+                let date = calendar.date(byAdding: .day, value: weekIndex * 7 + dayIndex, to: gridStart)!
+                let comps = calendar.dateComponents([.year, .month, .day, .weekday], from: date)
+                let accent: AccentDays? = comps.weekday == 1 ? .sunday : comps.weekday == 7 ? .saturday : nil
+                return DayCellViewModel(
+                    year: comps.year!, month: comps.month!, day: comps.day!,
+                    isNotCurrentMonth: comps.month != 8, accentDay: accent
+                )
+            }
+            return WeekRowModel("week-\(weekIndex)", days)
+        }
+    }
+
+    func gridDate(_ day: Int, hour: Int = 9) -> Date {
+        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ self.shareImageTimeZone
+        return calendar.date(from: DateComponents(year: 2026, month: 8, day: day, hour: hour))!
+    }
+
+    func gridEvent(_ id: String, name: String, tagId: EventTagId, hasPeriod: Bool) -> any CalendarEvent {
+        let time: EventTime = hasPeriod
+            ? .period(self.gridDate(1).timeIntervalSince1970..<self.gridDate(3).timeIntervalSince1970)
+            : .at(self.gridDate(1).timeIntervalSince1970)
+        let schedule = ScheduleEvent(uuid: id, name: name, time: time) |> \.eventTagId .~ tagId
+        return ScheduleCalendarEvent.events(from: schedule, in: self.shareImageTimeZone).first!
+    }
+
+    func eventOnWeek(
+        _ id: String, name: String, tagId: EventTagId, daysSequence: ClosedRange<Int>, hasPeriod: Bool
+    ) -> EventOnWeek {
+        let event = self.gridEvent(id, name: name, tagId: tagId, hasPeriod: hasPeriod)
+        return EventOnWeek(0..<1, Array(daysSequence), daysSequence, [], event)
+    }
 }
 
 
