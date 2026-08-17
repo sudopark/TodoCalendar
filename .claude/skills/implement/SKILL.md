@@ -9,7 +9,7 @@ description: Use when writing or modifying code in this project — 구현 착�
 
 ## 채점 4축 좌표계 (#690)
 
-작업 결과물(코드) 채점은 4축 순차 관문이다 — 이 스킬이 축1~3 관문을 집행하고, 축4는 review 스킬 소관. 축4에서 잡힌 finding은 "축1~3 중 어디서 잡혔어야 했나" 누수 태깅(axis_leak 레코드, review 스킬)의 좌표로 이 축 번호를 쓴다.
+작업 결과물(코드) 채점은 4축 순차 관문이다 — 이 스킬이 축1~3 관문을 집행하고, 축4는 PR 직전 최종 whole-branch 리뷰(상시)와 review 스킬(유저 지시 시)이 나눠 갖는다. 축4에서 잡힌 finding은 어느 쪽에서 나왔든 "축1~3 중 어디서 잡혔어야 했나" 누수 태깅(axis_leak 레코드)의 좌표로 이 축 번호를 쓴다.
 
 | 축 | 질문 | 관문 |
 |---|---|---|
@@ -27,8 +27,9 @@ description: Use when writing or modifying code in this project — 구현 착�
 - **플랜 있음** → superpowers executing-plans/subagent-driven-development가 태스크 순서를 이끈다. 각 태스크에 아래 절차를 적용한다.
 - **플랜 없음** (즉흥 수정) → superpowers TDD + 이 스킬만으로 진행한다. 플랜 단계만 빠질 뿐, rules 확인 → 패턴 파악 → 구현 → 완료 판정은 동일하게 탄다.
 - **페어 프로그래밍 모드** (유저가 명시 선언한 세션) → 턴 규칙·TDD 수준·커밋 시점은 pair-programming 스킬이 이끈다. 이 스킬은 프로젝트 종속 규칙(rules·tuist generate·짝지어진 두 위치·콜사이트 grep) 공급자로만 동작한다.
-- **서브에이전트 dispatch 구현** (subagent-driven-development·병렬 dispatch 등) → 서브에이전트는 이 스킬을 스스로 invoke하지 못한다. dispatch하는 메인 세션이 첫 브리프 작성 전에 이 스킬을 invoke하고, 아래 절차를 브리프로 승계시킨다. "내가 직접 코드를 안 만지니 해당 없음"은 성립하지 않는다 — 코드 diff가 시작되는 주체가 누구든 발동한다. 갭 보고 루프(rules·플랜)의 유저 반문은 메인 세션이 중계한다 — 브리프에 "갭 발견 시 추측으로 채우지 말고 보고 후 중단"을 명시한다. 축1 선언·리팩터 게이트 선언은 브리프 승계와 태스크별 리뷰로 갈음한다 — 컨트롤러가 매 GREEN마다 선언을 재생산하지 않는다 (직접 구현 시에만 선언 관문).
-- SDD 실행 시 태스크별 리뷰는 **플랜의 리뷰 게이트 판정을 따른다** (plan 스킬 §3) — 생략 표기 태스크는 task review 없이 ledger 완료로 넘어간다. 단 실행 중 신호(DONE_WITH_CONCERNS·테스트 불안정·갭 보고)가 뜨면 생략 판정을 뒤집고 리뷰를 돌린다. 최종 whole-branch 리뷰는 생략 대상이 아니다.
+- **서브에이전트 dispatch 구현** (subagent-driven-development·병렬 dispatch 등) → 서브에이전트는 이 스킬을 스스로 invoke하지 못한다. dispatch하는 메인 세션이 첫 브리프 작성 전에 이 스킬을 invoke하고, 아래 절차를 브리프로 승계시킨다. "내가 직접 코드를 안 만지니 해당 없음"은 성립하지 않는다 — 코드 diff가 시작되는 주체가 누구든 발동한다. 갭 보고 루프(rules·플랜)의 유저 반문은 메인 세션이 중계한다 — 브리프에 "갭 발견 시 추측으로 채우지 말고 보고 후 중단"을 명시한다. 축1 선언·리팩터 게이트 선언은 브리프 승계와 컨트롤러 검수로 갈음한다 — 컨트롤러가 매 GREEN마다 선언을 재생산하지 않는다 (직접 구현 시에만 선언 관문).
+- **태스크별 리뷰어 dispatch는 돌리지 않는다.** superpowers SDD가 매 태스크마다 강제하는 task review·scoped re-review는 이 프로젝트에서 무효다 (그 스킬의 `Never skip the task review`를 여기서 오버라이드한다). 태스크 완료 판정은 **서브에이전트 자체 테스트 + 컨트롤러 검수**(§착수)로 하고 ledger를 `Task <N>: complete (commits <base7>..<head7>, self-test + controller review)`로 닫는다 — SDD 원문의 `review clean`·`parked` 표기는 리뷰가 돈 것을 전제한 값이라 쓰지 않는다. orchestrate 스킬과 같은 검증 모델이다. 실행 중 신호(DONE_WITH_CONCERNS·테스트 불안정·갭 보고)도 리뷰 dispatch로 넘기지 않고 컨트롤러가 그 자리에서 처리한다 — correctness·scope 관련이면 재dispatch로 고치고, observation이면 확인만 하고 진행, 갭이면 유저 반문.
+- **에이전트 리뷰는 PR 직전 최종 whole-branch 1회로 모은다.** 이 리뷰는 생략 대상이 아니다 — 태스크 단위 그물이 없어진 만큼 축4의 상시 관문이 이것 하나다. 그래서 finding 정리 직후 축1~3 귀속을 판정해 `axis_leak`을 기록한다 (명령·판정 기준은 review 스킬 §6) — 기록이 빠지면 관문이 줄어든 만큼 누수 집계도 같이 죽는다.
 
 시작할 때:
 
@@ -37,7 +38,7 @@ description: Use when writing or modifying code in this project — 구현 착�
 - child CLAUDE.md가 있는 프레임워크(Domain·Repository·각 Presentation 등)를 수정할 땐 해당 child CLAUDE.md를 확인하고, 수정 후 그 규칙과 어긋남이 없는지 재점검한다.
 - 동종 컴포넌트를 grep해 구조 패턴(상태관리·합성·추상화 수준)을 파악하고 그 패턴을 따른다. 요구사항만 보고 즉흥 구현하지 않는다.
 - 서브에이전트에 구현을 dispatch할 땐 브리프에 적용 rules 조항의 **요지를 발췌해 싣는다** — 파일 경로·조항명만 던지지 않는다 (path 매칭 자동 로드는 서브에이전트에겐 없다). 검증 범위(완료 판정의 사다리로 산정한 최소 실행 범위)·따라야 할 구조 패턴도 함께 명시한다 — "전체 스킴 통과"를 기본값으로 승계하지 않는다. 증분 빌드 원칙(§구현 중 — clean·DerivedData 삭제 금지, `-derivedDataPath` 신설 금지, 불필요 tuist generate 금지) 요지도 브리프에 발췌한다.
-- 서브에이전트 산출물 검수 때 브리프에 실은 rules 조항의 위반 여부를 항목별로 스캔한다 — 컴파일·테스트 통과는 rules 준수를 보증하지 않는다.
+- 서브에이전트 산출물 검수 때 브리프에 실은 rules 조항의 위반 여부를 항목별로 스캔하고, **브리프가 요구한 명세 항목과 산출물을 대조한다** — 컴파일·테스트 통과는 rules 준수도 명세 충족도 보증하지 않는다. 태스크 리뷰어가 없으므로 이 대조가 spec 판정의 유일한 자리다.
 - (선택) 기존 타입을 수정하는 작업이면 복잡도 baseline을 측정해둔다 — 아래 "복잡도 측정" 참조. 생략 조건에 걸리면 그냥 건너뛴다.
 
 ## 구현 중
