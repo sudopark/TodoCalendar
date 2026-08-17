@@ -18,6 +18,7 @@ extension GoogleCalendar {
         public var location: String?
         public var description: String?
         public var colorId: String?
+        public var recurrence: [String]?
 
         public init() { }
 
@@ -28,6 +29,7 @@ extension GoogleCalendar {
                 && self.location == nil
                 && self.description == nil
                 && self.colorId == nil
+                && self.recurrence == nil
         }
     }
 
