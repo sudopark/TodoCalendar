@@ -163,3 +163,141 @@ struct AppleCalendarRecurrenceRuleTests {
         #expect(rrule == "RRULE:FREQ=MONTHLY;INTERVAL=1;BYDAY=MO,TU,WE,TH,FR;BYSETPOS=-1")
     }
 }
+
+
+// MARK: - RRULE string → EKRecurrenceRule
+
+extension AppleCalendarRecurrenceRuleTests {
+
+    private func utcDate(_ text: String) -> Date {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyyMMdd'T'HHmmss'Z'"
+        formatter.timeZone = TimeZone(abbreviation: "UTC")
+        return formatter.date(from: text)!
+    }
+
+    @Test func initFromRRuleText_weekly() throws {
+        // given
+        let text = "RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,FR"
+        // when
+        let rule = try #require(EKRecurrenceRule(rruleText: text))
+        // then
+        #expect(rule.frequency == .weekly)
+        #expect(rule.interval == 2)
+        #expect(rule.daysOfTheWeek?.map { $0.dayOfTheWeek } == [.monday, .friday])
+        #expect(rule.daysOfTheWeek?.map { $0.weekNumber } == [0, 0])
+        #expect(rule.daysOfTheMonth == nil)
+        #expect(rule.monthsOfTheYear == nil)
+        #expect(rule.recurrenceEnd == nil)
+    }
+
+    @Test func initFromRRuleText_monthlyByMonthDay() throws {
+        // given
+        let text = "RRULE:FREQ=MONTHLY;BYMONTHDAY=15"
+        // when
+        let rule = try #require(EKRecurrenceRule(rruleText: text))
+        // then
+        #expect(rule.frequency == .monthly)
+        #expect(rule.interval == 1)
+        #expect(rule.daysOfTheMonth?.map { $0.intValue } == [15])
+        #expect(rule.daysOfTheWeek == nil)
+    }
+
+    @Test func initFromRRuleText_yearlyByMonthAndMonthDay() throws {
+        // given
+        let text = "RRULE:FREQ=YEARLY;BYMONTH=3;BYMONTHDAY=15"
+        // when
+        let rule = try #require(EKRecurrenceRule(rruleText: text))
+        // then
+        #expect(rule.frequency == .yearly)
+        #expect(rule.monthsOfTheYear?.map { $0.intValue } == [3])
+        #expect(rule.daysOfTheMonth?.map { $0.intValue } == [15])
+    }
+
+    @Test func initFromRRuleText_ordinalByDay() throws {
+        // given
+        let text = "RRULE:FREQ=MONTHLY;BYDAY=2TU"
+        // when
+        let rule = try #require(EKRecurrenceRule(rruleText: text))
+        // then
+        #expect(rule.daysOfTheWeek?.map { $0.dayOfTheWeek } == [.tuesday])
+        #expect(rule.daysOfTheWeek?.map { $0.weekNumber } == [2])
+    }
+
+    @Test func initFromRRuleText_lastOrdinalByDay() throws {
+        // given - 매월 마지막 수요일
+        let text = "RRULE:FREQ=MONTHLY;BYDAY=-1WE"
+        // when
+        let rule = try #require(EKRecurrenceRule(rruleText: text))
+        // then
+        #expect(rule.daysOfTheWeek?.map { $0.dayOfTheWeek } == [.wednesday])
+        #expect(rule.daysOfTheWeek?.map { $0.weekNumber } == [-1])
+    }
+
+    @Test func initFromRRuleText_until() throws {
+        // given
+        let text = "RRULE:FREQ=DAILY;INTERVAL=1;UNTIL=20261231T000000Z"
+        // when
+        let rule = try #require(EKRecurrenceRule(rruleText: text))
+        // then
+        #expect(rule.recurrenceEnd?.endDate == utcDate("20261231T000000Z"))
+        #expect(rule.recurrenceEnd?.occurrenceCount == 0)
+    }
+
+    @Test func initFromRRuleText_count() throws {
+        // given
+        let text = "RRULE:FREQ=DAILY;INTERVAL=1;COUNT=10"
+        // when
+        let rule = try #require(EKRecurrenceRule(rruleText: text))
+        // then
+        #expect(rule.recurrenceEnd?.occurrenceCount == 10)
+        #expect(rule.recurrenceEnd?.endDate == nil)
+    }
+
+    @Test func initFromRRuleText_whenUnsupportedKeyExists_isNil() {
+        // given
+        let text = "RRULE:FREQ=MONTHLY;BYSETPOS=-1;BYDAY=MO"
+        // when
+        let rule = EKRecurrenceRule(rruleText: text)
+        // then
+        #expect(rule == nil)
+    }
+
+    @Test func initFromRRuleText_whenIntervalIsZero_isNil() {
+        // given
+        let text = "RRULE:FREQ=DAILY;INTERVAL=0"
+        // when
+        let rule = EKRecurrenceRule(rruleText: text)
+        // then
+        #expect(rule == nil)
+    }
+
+    @Test func initFromRRuleText_whenTextIsNotRRule_isNil() {
+        // given
+        let text = "FREQ=DAILY;INTERVAL=1"
+        // when
+        let rule = EKRecurrenceRule(rruleText: text)
+        // then
+        #expect(rule == nil)
+    }
+
+    @Test func roundTrip_ekRuleToTextToEkRule() throws {
+        // given
+        let origin = EKRecurrenceRule(
+            recurrenceWith: .monthly, interval: 3,
+            daysOfTheWeek: [EKRecurrenceDayOfWeek(.tuesday, weekNumber: 2)],
+            daysOfTheMonth: nil, monthsOfTheYear: nil,
+            weeksOfTheYear: nil, daysOfTheYear: nil,
+            setPositions: nil, end: EKRecurrenceEnd(occurrenceCount: 5)
+        )
+        // when
+        let restored = try #require(EKRecurrenceRule(rruleText: origin.toRRuleString()))
+        // then
+        #expect(restored.frequency == origin.frequency)
+        #expect(restored.interval == origin.interval)
+        #expect(restored.daysOfTheWeek?.map { $0.dayOfTheWeek } == [.tuesday])
+        #expect(restored.daysOfTheWeek?.map { $0.weekNumber } == [2])
+        #expect(restored.recurrenceEnd?.occurrenceCount == 5)
+        #expect(restored.toRRuleString() == origin.toRRuleString())
+    }
+}

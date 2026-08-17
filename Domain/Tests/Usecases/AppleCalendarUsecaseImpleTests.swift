@@ -549,6 +549,54 @@ extension AppleCalendarUsecaseImpleTests {
         #expect(stubRepository.didLoadEventsIn == 0..<3)
     }
 
+    @Test func updateEvent_whenRecurrenceRulesChangedOnMaster_refreshesCachedPeriod() async throws {
+        // given - 반복 규칙 편집은 회차 날짜 없는 마스터 id 를 대상으로 삼는다.
+        // 규칙이 바뀌면 인스턴스 집합이 통째로 달라져 캐시를 다시 채워야 한다
+        let usecase = makeUsecase(isIntegrated: true, stubEvents: makeStubEvents(count: 3))
+        try await seedSharedCache(usecase, in: 0..<3)
+
+        var updatedOrigin = AppleCalendar.EventOrigin(
+            eventId: "event:0", originalEventId: "event:0",
+            calendarId: "cal:0", name: "Repeat Changed", eventTime: .period(0..<1)
+        )
+        updatedOrigin.isRepeating = true
+        stubRepository.stubUpdatedOrigin = updatedOrigin
+        stubRepository.didLoadEventsIn = nil
+        let params = AppleCalendar.EventEditParams()
+            |> \.recurrenceRules .~ ["RRULE:FREQ=DAILY;INTERVAL=1"]
+
+        // when
+        _ = try await usecase.updateEvent("event:0", params: params, scope: .thisAndFuture)
+        try await Task.sleep(for: .milliseconds(50))
+
+        // then
+        #expect(stubRepository.didLoadEventsIn == 0..<3)
+    }
+
+    @Test func updateEvent_whenOnlyOtherFieldsChangedOnMaster_cachesResponseOnly() async throws {
+        // given
+        let usecase = makeUsecase(isIntegrated: true, stubEvents: makeStubEvents(count: 3))
+        try await seedSharedCache(usecase, in: 0..<3)
+
+        var updatedOrigin = AppleCalendar.EventOrigin(
+            eventId: "event:0", originalEventId: "event:0",
+            calendarId: "cal:0", name: "Name Only Changed", eventTime: .period(0..<1)
+        )
+        updatedOrigin.isRepeating = true
+        stubRepository.stubUpdatedOrigin = updatedOrigin
+        stubRepository.didLoadEventsIn = nil
+        let params = AppleCalendar.EventEditParams()
+            |> \.name .~ "Name Only Changed"
+
+        // when
+        _ = try await usecase.updateEvent("event:0", params: params, scope: .thisEventOnly)
+        try await Task.sleep(for: .milliseconds(50))
+
+        // then
+        #expect(stubRepository.didLoadEventsIn == nil)
+        #expect(cachedEvents()["event:0"]?.name == "Name Only Changed")
+    }
+
     @Test func usecase_removeEvent_removesFromSharedCache() async throws {
         // given
         let usecase = makeUsecase(isIntegrated: true, stubEvents: makeStubEvents(count: 3))
