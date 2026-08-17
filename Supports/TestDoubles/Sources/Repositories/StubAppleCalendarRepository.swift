@@ -49,6 +49,25 @@ open class StubAppleCalendarRepository: AppleCalendarRepository, @unchecked Send
         return Just(origin).eraseToAnyPublisher()
     }
 
+    public var stubUpdatedOrigin: AppleCalendar.EventOrigin?
+    public var didUpdateEventWith: (String, AppleCalendar.EventEditParams, AppleCalendar.EventEditScope)?
+    open func updateEvent(
+        _ eventId: String,
+        _ params: AppleCalendar.EventEditParams,
+        scope: AppleCalendar.EventEditScope
+    ) async throws -> AppleCalendar.EventOrigin {
+        didUpdateEventWith = (eventId, params, scope)
+        return stubUpdatedOrigin ?? AppleCalendar.EventOrigin(
+            eventId: eventId, originalEventId: eventId,
+            calendarId: "cal-1", name: "Updated", eventTime: .period(0..<500)
+        )
+    }
+
+    open func removeEvent(
+        _ eventId: String,
+        scope: AppleCalendar.EventEditScope
+    ) async throws { }
+
     public var didResetCache = false
     open func resetCache() async throws {
         didResetCache = true

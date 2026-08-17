@@ -24,12 +24,39 @@ extension AppleCalendar {
         public let id: String
         public let name: String
         public let colorHex: String?
+        /// nil = 캐시에서 올라온 태그라 EventKit 쓰기 가능 여부를 아직 확인 못함
+        public var isWritable: Bool? = nil
 
         public init(id: String, name: String, colorHex: String?) {
             self.id = id
             self.tagId = .externalCalendar(serviceId: AppleCalendarService.id, id: id)
             self.name = name
             self.colorHex = colorHex
+        }
+    }
+}
+
+
+// MARK: - EventOccurrenceId
+
+extension AppleCalendar {
+
+    /// 반복 인스턴스 id `{originalEventId}#occ:{timestamp}` 의 해석 결과
+    public struct EventOccurrenceId: Sendable, Equatable {
+
+        public let originalEventId: String
+        public let occurrenceDate: Date?
+
+        public init(_ compositeId: String) {
+            guard let markerRange = compositeId.range(of: "#occ:", options: .backwards),
+                  let timestamp = Int(compositeId[markerRange.upperBound...])
+            else {
+                self.originalEventId = compositeId
+                self.occurrenceDate = nil
+                return
+            }
+            self.originalEventId = String(compositeId[..<markerRange.lowerBound])
+            self.occurrenceDate = Date(timeIntervalSince1970: TimeInterval(timestamp))
         }
     }
 }
