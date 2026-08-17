@@ -9,6 +9,7 @@
 import Foundation
 import Combine
 import Domain
+import UnitTestHelpKit
 
 
 open class StubAppleCalendarRepository: AppleCalendarRepository, @unchecked Sendable {
@@ -26,10 +27,12 @@ open class StubAppleCalendarRepository: AppleCalendarRepository, @unchecked Send
 
     public var stubEvents: [AppleCalendar.Event] = []
     public var didLoadEvents = false
+    public var didLoadEventsIn: Range<TimeInterval>?
     open func loadEvents(
         in period: Range<TimeInterval>
     ) -> AnyPublisher<[AppleCalendar.Event], any Error> {
         didLoadEvents = true
+        didLoadEventsIn = period
         return Just(stubEvents)
             .setFailureType(to: (any Error).self)
             .eraseToAnyPublisher()
@@ -50,6 +53,7 @@ open class StubAppleCalendarRepository: AppleCalendarRepository, @unchecked Send
     }
 
     public var stubUpdatedOrigin: AppleCalendar.EventOrigin?
+    public var shouldFailUpdate: Bool = false
     public var didUpdateEventWith: (String, AppleCalendar.EventEditParams, AppleCalendar.EventEditScope)?
     open func updateEvent(
         _ eventId: String,
@@ -57,16 +61,24 @@ open class StubAppleCalendarRepository: AppleCalendarRepository, @unchecked Send
         scope: AppleCalendar.EventEditScope
     ) async throws -> AppleCalendar.EventOrigin {
         didUpdateEventWith = (eventId, params, scope)
+        if shouldFailUpdate {
+            throw TestError()
+        }
         return stubUpdatedOrigin ?? AppleCalendar.EventOrigin(
             eventId: eventId, originalEventId: eventId,
             calendarId: "cal-1", name: "Updated", eventTime: .period(0..<500)
         )
     }
 
+    public var shouldFailRemove: Bool = false
     open func removeEvent(
         _ eventId: String,
         scope: AppleCalendar.EventEditScope
-    ) async throws { }
+    ) async throws {
+        if shouldFailRemove {
+            throw TestError()
+        }
+    }
 
     public var didResetCache = false
     open func resetCache() async throws {

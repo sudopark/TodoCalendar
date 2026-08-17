@@ -32,6 +32,20 @@ public protocol AppleCalendarUsecase: Sendable {
     var calendarTags: AnyPublisher<[AppleCalendar.Tag], Never> { get }
     func events(in period: Range<TimeInterval>) -> AnyPublisher<[AppleCalendar.Event], Never>
     func eventOrigin(id: String) -> AnyPublisher<AppleCalendar.EventOrigin?, Never>
+
+    /// nil = 아직 판정 불가 (소비측이 판단을 미룬다)
+    func isCalendarWritable(_ calendarId: String) -> AnyPublisher<Bool?, Never>
+
+    func updateEvent(
+        _ eventId: String,
+        params: AppleCalendar.EventEditParams,
+        scope: AppleCalendar.EventEditScope
+    ) async throws -> AppleCalendar.EventOrigin
+
+    func removeEvent(
+        _ eventId: String,
+        scope: AppleCalendar.EventEditScope
+    ) async throws
 }
 
 
@@ -190,5 +204,76 @@ extension AppleCalendarUsecaseImple {
 
     public func eventOrigin(id: String) -> AnyPublisher<AppleCalendar.EventOrigin?, Never> {
         return self.repository.loadEventOrigin(id: id)
+    }
+}
+
+
+// MARK: - write commands
+
+extension AppleCalendarUsecaseImple {
+
+    public func isCalendarWritable(_ calendarId: String) -> AnyPublisher<Bool?, Never> {
+        return self.calendarTags
+            .map { $0.first(where: { $0.id == calendarId })?.isWritable }
+            .eraseToAnyPublisher()
+    }
+
+    public func updateEvent(
+        _ eventId: String,
+        params: AppleCalendar.EventEditParams,
+        scope: AppleCalendar.EventEditScope
+    ) async throws -> AppleCalendar.EventOrigin {
+        let origin = try await self.repository.updateEvent(eventId, params, scope: scope)
+        // 판단 기준은 결과가 아니라 대상이다 — "이번만" 수정은 그 회차를 시리즈에서 떼어내
+        // 결과가 비반복이 되는데, 정작 재조회가 필요한 건 회차가 빠진 원본 시리즈 쪽이다
+        if self.isRepeatingOccurrence(eventId) {
+            if let period = self.cachedEventsPeriod() {
+                self.refreshEvents(in: period)
+            }
+        } else {
+            self.cacheUpdatedEvent(origin)
+        }
+        return origin
+    }
+
+    private func isRepeatingOccurrence(_ eventId: String) -> Bool {
+        return AppleCalendar.EventOccurrenceId(eventId).occurrenceDate != nil
+    }
+
+    private func cachedEventsPeriod() -> Range<TimeInterval>? {
+        let cached = self.sharedDataStore.value(
+            [String: AppleCalendar.Event].self, key: ShareDataKeys.appleCalendarEvents.rawValue
+        ) ?? [:]
+        guard let lower = cached.values.map({ $0.eventTime.lowerBoundWithFixed }).min(),
+              let upper = cached.values.map({ $0.eventTime.upperBoundWithFixed }).max(),
+              lower < upper
+        else { return nil }
+        return lower..<upper
+    }
+
+    private func cacheUpdatedEvent(_ origin: AppleCalendar.EventOrigin) {
+        let event = origin.asEvent()
+        self.sharedDataStore.update(
+            [String: AppleCalendar.Event].self,
+            key: ShareDataKeys.appleCalendarEvents.rawValue
+        ) { existing in
+            (existing ?? [:]) |> key(event.eventId) .~ event
+        }
+    }
+
+    public func removeEvent(
+        _ eventId: String,
+        scope: AppleCalendar.EventEditScope
+    ) async throws {
+        try await self.repository.removeEvent(eventId, scope: scope)
+        self.sharedDataStore.update(
+            [String: AppleCalendar.Event].self,
+            key: ShareDataKeys.appleCalendarEvents.rawValue
+        ) { existing in
+            (existing ?? [:]) |> key(eventId) .~ nil
+        }
+        if scope == .thisAndFuture, let period = self.cachedEventsPeriod() {
+            self.refreshEvents(in: period)
+        }
     }
 }
