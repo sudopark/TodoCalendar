@@ -29,6 +29,7 @@ struct BaseWidgetBundle: WidgetBundle {
         NextEventWidget()
         NextRemainEventWidget()
         AICommandShortcutWidget()
+        EventCountdownLiveActivity()
         // #741 D-day 위젯 배포 보류 — 갤러리 노출을 끈다.
         // 여기만 FeatureFlag가 아닌 주석인 이유: @WidgetBundleBuilder는 런타임 조건(`if`)을
         // 받지 못한다(컴파일 실패). 앱 쪽 후보 등록 메뉴는 FeatureFlag.ddayWidget이 가린다.
