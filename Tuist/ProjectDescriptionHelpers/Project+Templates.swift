@@ -271,7 +271,8 @@ extension Project {
                 "NSCalendarsFullAccessUsageDescription": "Calendar access is required to display events and sync with Apple Calendar.",
                 "NSMicrophoneUsageDescription": "Microphone access is required to enter events and to-dos by voice.",
                 "NSSpeechRecognitionUsageDescription": "Speech recognition is required to convert your voice into events and to-dos.",
-                "NSCameraUsageDescription": "Camera access is required to read text from a photo you take."
+                "NSCameraUsageDescription": "Camera access is required to read text from a photo you take.",
+                "NSSupportsLiveActivities": true
             ]),
             sources: [
                 "Sources/**",
@@ -331,7 +332,8 @@ extension Project {
             "Sources/NeverRemoveAuthStorage.swift",
             // 컨트롤이 참조하는 AppIntent — 앱을 열려면 앱·확장 양쪽 타겟에 속해야 한다 (Apple 문서 요구)
             "Sources/AppIntents/OpenAICommandInputIntent.swift",
-            .glob("Intents/TodoCalendarWidgetIntents.intentdefinition", codeGen: .public)
+            .glob("Intents/TodoCalendarWidgetIntents.intentdefinition", codeGen: .public),
+            .glob("Sources/LiveActivity/**")
         ]
 
         let target = Target.target(

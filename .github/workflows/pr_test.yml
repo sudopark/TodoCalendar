@@ -151,6 +151,10 @@ jobs:
           if echo "$FILES" | grep -q "^TodoCalendarApp/AppExtensions/Share/"; then
             schemes+=("TodoCalendarApp" "TodoCalendarAppShare")
           fi
+          # LiveActivity 소스는 App+Widget+Share 세 타겟이 각자 직접 컴파일한다(Project+Templates의 sources 글롭).
+          if echo "$FILES" | grep -q "^TodoCalendarApp/Sources/LiveActivity/"; then
+            schemes+=("TodoCalendarApp" "TodoCalendarAppWidget" "TodoCalendarAppShare")
+          fi
 
           # .github/, scripts/, docs/ 등 → 코드 빌드에 영향 없으므로 테스트 불필요
 
