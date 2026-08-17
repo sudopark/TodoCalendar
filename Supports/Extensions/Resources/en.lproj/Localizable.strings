@@ -333,6 +333,8 @@
 "share_preview::header::last_week" = "Last week";
 "share_preview::header::next_week" = "Next week";
 "share_preview::header::week_of_month" = "%1$@ week %2$d";
+"share_preview::format::text" = "Text";
+"share_preview::format::image" = "Image";
 
 
 // MARK: - account
