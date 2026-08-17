@@ -42,14 +42,16 @@ class SelectEventRepeatOptionViewModelTests: BaseTestCase, PublisherWaitable {
     
     private func makeViewModel(
         previous: EventRepeating? = nil,
-        customSelectTime: Date? = nil
+        customSelectTime: Date? = nil,
+        rruleRepresentableOnly: Bool = false
     ) -> SelectEventRepeatOptionViewModelImple {
-        
+
         let settingUsecase = StubCalendarSettingUsecase()
         settingUsecase.selectTimeZone(self.timeZone)
         let viewModel = SelectEventRepeatOptionViewModelImple(
             selectTime: customSelectTime ?? self.someSundayStartTime,
             previousSelected: previous,
+            rruleRepresentableOnly: rruleRepresentableOnly,
             calendarSettingUsecase: settingUsecase
         )
         viewModel.router = self.spyRouter
@@ -239,6 +241,56 @@ extension SelectEventRepeatOptionViewModelTests {
         XCTAssertEqual(allItemCount, self.defaultOptionListTexts.flatMap { $0 }.count + 1)
     }
     
+    // rruleRepresentableOnly 인 경우 음력 옵션은 목록에서 빠진다
+    func testViewModel_whenRruleRepresentableOnly_excludesLunarOption() {
+        // given
+        let viewModel = self.makeViewModel(previous: nil, rruleRepresentableOnly: true)
+
+        // when
+        let options = self.waitFirstNotEmptyOptionList(viewModel)
+
+        // then
+        let lunarOptionText = "eventDetail.repeating.lunarCalendar_everyYear:title".localized()
+        XCTAssertFalse(options?.flatMap { $0 }.map { $0.text }.contains(lunarOptionText) ?? true)
+    }
+
+    // rruleRepresentableOnly 아닌 경우 음력 옵션은 목록에 그대로 노출
+    func testViewModel_whenNotRestricted_includesLunarOption() {
+        // given
+        let viewModel = self.makeViewModel(previous: nil, rruleRepresentableOnly: false)
+
+        // when
+        let options = self.waitFirstNotEmptyOptionList(viewModel)
+
+        // then
+        let lunarOptionText = "eventDetail.repeating.lunarCalendar_everyYear:title".localized()
+        XCTAssertTrue(options?.flatMap { $0 }.map { $0.text }.contains(lunarOptionText) ?? false)
+    }
+
+    // rruleRepresentableOnly 로 음력 옵션이 빠지더라도, 이전 선택값이 음력 옵션이면 목록 앞에 붙여 선택 상태로 유지
+    func testViewModel_whenPreviousOptionIsNotInSupports_showsItAsSelected() {
+        // given
+        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ self.timeZone
+        let month = calendar.component(.month, from: self.defaultStartTime)
+        let day = calendar.component(.day, from: self.defaultStartTime)
+        let previous = EventRepeating(
+            repeatingStartTime: self.defaultStartTime.timeIntervalSince1970,
+            repeatOption: EventRepeatingOptions.LunarCalendarEveryYear(self.timeZone, month, day)
+        )
+        let viewModel = self.makeViewModel(previous: previous, rruleRepresentableOnly: true)
+        let options = self.waitFirstNotEmptyOptionList(viewModel)
+
+        // when
+        let expect = expectation(description: "이전 선택값이 목록에 없으면 선택 상태로 노출")
+        let id = self.waitFirstOutput(expect, for: viewModel.selectedOptionId)
+
+        // then
+        let lunarOptionText = "eventDetail.repeating.lunarCalendar_everyYear:title".localized()
+        let previousOptionInList = options?.flatMap { $0 }.first(where: { $0.text == lunarOptionText })
+        XCTAssertNotNil(previousOptionInList)
+        XCTAssertEqual(id, previousOptionInList?.id)
+    }
+
     // 반복 옵션 선택시에 선택된 이벤트 아이디 변경
     func testViewModel_whenSelectionIdChanged_updateSelectedId() {
         // given

@@ -72,6 +72,7 @@ protocol SelectEventRepeatOptionSceneBuiler: AnyObject {
     func makeSelectEventRepeatOptionScene(
         selectTime: Date,
         previousSelected repeating: EventRepeating?,
+        rruleRepresentableOnly: Bool,
         listener: (any SelectEventRepeatOptionSceneListener)?
     ) -> any SelectEventRepeatOptionScene
 }
