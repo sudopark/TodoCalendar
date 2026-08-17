@@ -1,0 +1,139 @@
+//
+//  EventCountdownActivityViewModelTests.swift
+//  TodoCalendarAppWidgetTests
+//
+//  Created by sudo.park on 8/17/26.
+//  Copyright © 2026 com.sudo.park. All rights reserved.
+//
+
+import Testing
+import Foundation
+import UIKit
+
+@testable import TodoCalendarAppWidget
+
+
+struct EventCountdownActivityViewModelTests {
+
+    private func makeViewModel(
+        target: LiveActivityEventTarget,
+        colorHex: String,
+        placeName: String? = nil,
+        memo: String? = nil
+    ) -> EventCountdownActivityViewModel {
+        let attributes = EventCountdownActivityAttributes(target: target)
+        let state = EventCountdownActivityAttributes.State(
+            eventName: "Test Event",
+            eventTimeText: "10:00 AM",
+            tagColorHex: colorHex,
+            eventDate: Date(),
+            startDate: Date(),
+            placeName: placeName,
+            memo: memo
+        )
+        return EventCountdownActivityViewModel(attributes, state)
+    }
+
+    @Test("light", arguments: ["#EEEEEE", "#F2D64B", "#7FE07F"])
+    func viewModel_whenTagColorIsLight_usesDarkGlyph(colorHex: String) {
+        // given
+        let viewModel = makeViewModel(target: .todo(id: "1"), colorHex: colorHex)
+
+        // when + then
+        #expect(viewModel.usesDarkGlyph == true)
+    }
+
+    @Test("dark", arguments: ["#333333", "#003D82", "#2FB457", "#6FCB6F"])
+    func viewModel_whenTagColorIsDark_usesLightGlyph(colorHex: String) {
+        // given
+        let viewModel = makeViewModel(target: .todo(id: "1"), colorHex: colorHex)
+
+        // when + then
+        #expect(viewModel.usesDarkGlyph == false)
+    }
+
+    @Test("invalid", arguments: ["not-a-color", "2FB457"])
+    func viewModel_whenTagColorHexIsInvalid_fallsBackToGrayWithLightGlyph(invalidHex: String) {
+        // given
+        let viewModel = makeViewModel(target: .todo(id: "1"), colorHex: invalidHex)
+
+        // when + then
+        #expect(viewModel.tagColor == UIColor.gray.asColor)
+        #expect(viewModel.usesDarkGlyph == false)
+    }
+
+    @Test(
+        "complete button",
+        arguments: [
+            (LiveActivityEventTarget.todo(id: "t1"), true),
+            (LiveActivityEventTarget.schedule(id: "s1", turnKey: "1755400800..<1755404400"), false),
+            (LiveActivityEventTarget.holiday(uuid: "h1", dateString: "2026-08-17"), false),
+            (LiveActivityEventTarget.googleCalendar(accountId: "a1", calendarId: "c1", eventId: "e1"), false),
+            (LiveActivityEventTarget.appleCalendar(calendarId: "c1", eventId: "e1"), false)
+        ]
+    )
+    func viewModel_showsCompleteButton_onlyForTodoTarget(
+        _ target: LiveActivityEventTarget, _ expected: Bool
+    ) {
+        // given
+        let viewModel = makeViewModel(target: target, colorHex: "#EEEEEE")
+
+        // when + then
+        #expect(viewModel.showsCompleteButton == expected)
+    }
+
+    @Test
+    func viewModel_passesEventFieldsFromState() {
+        // given
+        let eventDate = Date(timeIntervalSince1970: 1755400800)
+        let attributes = EventCountdownActivityAttributes(target: .todo(id: "t1"))
+        let state = EventCountdownActivityAttributes.State(
+            eventName: "팀 회의 준비",
+            eventTimeText: "오후 3:00",
+            tagColorHex: "#2FB457",
+            eventDate: eventDate,
+            startDate: eventDate.addingTimeInterval(-3600)
+        )
+
+        // when
+        let viewModel = EventCountdownActivityViewModel(attributes, state)
+
+        // then
+        #expect(viewModel.eventName == "팀 회의 준비")
+        #expect(viewModel.eventTimeText == "오후 3:00")
+        #expect(viewModel.eventDate == eventDate)
+    }
+
+    @Test
+    func viewModel_whenPlaceNameExists_prefersItOverMemo() {
+        // given + when
+        let viewModel = makeViewModel(
+            target: .todo(id: "t1"), colorHex: "#EEEEEE",
+            placeName: "강남 사옥 3층", memo: "노트북 챙기기"
+        )
+
+        // then
+        #expect(viewModel.subtitle == "강남 사옥 3층")
+    }
+
+    @Test("subtitle falls back to memo", arguments: [nil, "", "   "])
+    func viewModel_whenPlaceNameIsAbsent_fallsBackToMemo(placeName: String?) {
+        // given + when
+        let viewModel = makeViewModel(
+            target: .todo(id: "t1"), colorHex: "#EEEEEE",
+            placeName: placeName, memo: "노트북 챙기기"
+        )
+
+        // then
+        #expect(viewModel.subtitle == "노트북 챙기기")
+    }
+
+    @Test
+    func viewModel_whenNeitherPlaceNorMemoExists_hasNoSubtitle() {
+        // given + when
+        let viewModel = makeViewModel(target: .holiday(uuid: "h1", dateString: "2026-08-17"), colorHex: "#EEEEEE")
+
+        // then
+        #expect(viewModel.subtitle == nil)
+    }
+}
