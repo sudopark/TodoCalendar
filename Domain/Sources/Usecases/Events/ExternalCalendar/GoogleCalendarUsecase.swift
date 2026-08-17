@@ -424,14 +424,19 @@ extension GoogleCalendarUsecaseImple {
         else {
             throw RuntimeError("failed to update google calendar event")
         }
-        // 시리즈 마스터 수정은 N개 인스턴스를 바꾸는데 응답엔 인스턴스가 없다 — 캐시에 꽂을 값이 없어 재조회로만 반영된다
-        if origin.isRecurringSeriesMaster {
+        // 판단 기준은 결과가 아니라 대상이다 — 반복 해제는 응답의 recurrence 가 nil 이 돼
+        // isRecurringSeriesMaster 가 false 로 떨어지지만, 펼쳐진 인스턴스는 여전히 걷어야 한다
+        if origin.isRecurringSeriesMaster || params.recurrence != nil {
             if let period = self.cachedEventsPeriod() {
                 self.refreshRepeatingEvent(calendarId, eventId, accountId: accountId, in: period)
             }
-            return origin
         }
-        self.cacheUpdatedEvent(origin, calendarId, accountId: accountId, timeZone: timeZone)
+        // 인스턴스 집합 재조회와 본체 키 정리는 별개 축이다 — 마스터는 표시 인스턴스가 아니다
+        if origin.isRecurringSeriesMaster {
+            self.removeCachedEventItself(eventId)
+        } else {
+            self.cacheUpdatedEvent(origin, calendarId, accountId: accountId, timeZone: timeZone)
+        }
         return origin
     }
 
@@ -458,7 +463,18 @@ extension GoogleCalendarUsecaseImple {
             [String: GoogleCalendar.Event].self,
             key: ShareDataKeys.googleCalendarEvents.rawValue
         ) { existing in
-            (existing ?? [:]) |> key(event.eventId) .~ event
+            let withoutStaleInstances = (existing ?? [:])
+                .filter { !$0.value.isInstance(of: event.eventId) }
+            return withoutStaleInstances |> key(event.eventId) .~ event
+        }
+    }
+
+    private func removeCachedEventItself(_ eventId: String) {
+        self.sharedDataStore.update(
+            [String: GoogleCalendar.Event].self,
+            key: ShareDataKeys.googleCalendarEvents.rawValue
+        ) { existing in
+            (existing ?? [:]) |> key(eventId) .~ nil
         }
     }
 

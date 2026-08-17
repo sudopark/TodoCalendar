@@ -757,6 +757,45 @@ extension GoogleCalendarRepositoryImple_Tests {
         }
     }
 
+    @Test func repository_updateEvent_sendsRecurrenceArray() async throws {
+        try await self.runTestWithOpenClose("test_google_event_update_recurrence_1") {
+            // given
+            let expect = self.expectConfirm("반복 규칙을 실은 patch 요청")
+            let repository = self.makeRepository()
+            let params = GoogleCalendar.EventEditParams()
+                |> \.recurrence .~ ["RRULE:FREQ=DAILY;COUNT=3", "EXDATE;TZID=Asia/Seoul:20260101T090000"]
+
+            // when
+            let _ = try await self.firstOutput(
+                expect, for: repository.updateEvent("c_id", "Asia/Seoul", "time_is_date", params)
+            )
+
+            // then
+            let requestedParams = try #require(self.stubRemote.didRequestedParams)
+            let recurrence = requestedParams["recurrence"] as? [String]
+            #expect(recurrence == ["RRULE:FREQ=DAILY;COUNT=3", "EXDATE;TZID=Asia/Seoul:20260101T090000"])
+        }
+    }
+
+    @Test func repository_updateEvent_whenRecurrenceIsNil_omitsKey() async throws {
+        try await self.runTestWithOpenClose("test_google_event_update_recurrence_2") {
+            // given
+            let expect = self.expectConfirm("반복을 안 건드리면 patch body 에 recurrence 키가 없다")
+            let repository = self.makeRepository()
+            let params = GoogleCalendar.EventEditParams()
+                |> \.summary .~ "updated summary"
+
+            // when
+            let _ = try await self.firstOutput(
+                expect, for: repository.updateEvent("c_id", "Asia/Seoul", "time_is_date", params)
+            )
+
+            // then
+            let requestedParams = try #require(self.stubRemote.didRequestedParams)
+            #expect(requestedParams["recurrence"] == nil)
+        }
+    }
+
     @Test func repository_updateEvent_whenResponseIsSeriesMaster_doesNotCacheAsInstanceDetail() async throws {
         try await self.runTestWithOpenClose("test_google_event_update_4") {
             // given — "전체 일정" 저장은 시리즈 마스터(recurringEventId 없음 + recurrence 있음)를 돌려준다
