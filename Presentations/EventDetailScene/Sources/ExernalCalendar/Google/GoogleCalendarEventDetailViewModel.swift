@@ -532,7 +532,7 @@ extension GoogleCalendarEventDetailViewModelImple {
     }
 
     private func confirmRemoveEvent(_ eventId: String) {
-        let confirmed: () -> Void = { [weak self] in self?.removeEvent(eventId) }
+        let confirmed: () -> Void = { [weak self] in self?.removeEvent(eventId, scope: .thisEventOnly) }
         let info = ConfirmDialogInfo()
             |> \.message .~ pure("eventDetail::gogoleEvent::remove::confirm::message".localized())
             |> \.confirmText .~ "common.remove".localized()
@@ -554,7 +554,7 @@ extension GoogleCalendarEventDetailViewModelImple {
                 "eventDetail::gogoleEvent::repeating::onlyThisTime::button".localized(),
                 style: .destructive
             ) { [weak self] in
-                self?.removeEvent(instanceEventId)
+                self?.removeEvent(instanceEventId, scope: .thisEventOnly)
             }
         )
         form.actions.append(
@@ -562,7 +562,7 @@ extension GoogleCalendarEventDetailViewModelImple {
                 "eventDetail::gogoleEvent::repeating::all::button".localized(),
                 style: .destructive
             ) { [weak self] in
-                self?.removeEvent(recurringEventId)
+                self?.removeEvent(recurringEventId, scope: .allEvents)
             }
         )
         form.actions.append(.init("common.cancel".localized(), style: .cancel))
@@ -570,14 +570,16 @@ extension GoogleCalendarEventDetailViewModelImple {
         self.router?.showActionSheet(form)
     }
 
-    private func removeEvent(_ eventId: String) {
+    private func removeEvent(_ eventId: String, scope: GoogleCalendar.EventRemoveScope) {
         let calendarId = self.calendarId
         let accountId = self.accountId
         self.subject.isSaving.send(true)
         Task { [weak self] in
             guard let self else { return }
             do {
-                try await self.googleCalendarUsecase.removeEvent(calendarId, eventId, accountId: accountId)
+                try await self.googleCalendarUsecase.removeEvent(
+                    calendarId, eventId, accountId: accountId, scope: scope
+                )
                 self.subject.isSaving.send(false)
                 self.router?.closeScene()
             } catch {

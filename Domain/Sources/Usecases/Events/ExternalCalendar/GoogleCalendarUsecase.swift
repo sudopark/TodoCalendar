@@ -73,7 +73,8 @@ public protocol GoogleCalendarUsecase: Sendable {
     func removeEvent(
         _ calendarId: String,
         _ eventId: String,
-        accountId: String
+        accountId: String,
+        scope: GoogleCalendar.EventRemoveScope
     ) async throws
 }
 
@@ -464,7 +465,8 @@ extension GoogleCalendarUsecaseImple {
     public func removeEvent(
         _ calendarId: String,
         _ eventId: String,
-        accountId: String
+        accountId: String,
+        scope: GoogleCalendar.EventRemoveScope
     ) async throws {
         let repository = self.repositoryPool.repository(for: accountId)
         _ = try await repository.removeEvent(calendarId, eventId).values.first(where: { _ in true })
@@ -472,7 +474,15 @@ extension GoogleCalendarUsecaseImple {
             [String: GoogleCalendar.Event].self,
             key: ShareDataKeys.googleCalendarEvents.rawValue
         ) { existing in
-            (existing ?? [:]) |> key(eventId) .~ nil
+            switch scope {
+            // 시리즈를 지우면 캐시에 남은 건 마스터 id 가 아니라 펼쳐진 인스턴스들이다
+            case .allEvents:
+                return (existing ?? [:]).filter {
+                    $0.key != eventId && !$0.value.isInstance(of: eventId)
+                }
+            case .thisEventOnly:
+                return (existing ?? [:]) |> key(eventId) .~ nil
+            }
         }
     }
 }

@@ -30,4 +30,9 @@ extension GoogleCalendar {
                 && self.colorId == nil
         }
     }
+
+    public enum EventRemoveScope: Sendable, Equatable {
+        case thisEventOnly
+        case allEvents
+    }
 }
