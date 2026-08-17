@@ -32,7 +32,7 @@ import CommonPresentation
     var eventName: String = ""
     var timeText: SelectedTime?
     var ddayText: String?
-    var repeatOptionText: String?
+    var repeatOptionText: String = ""
     var calendarModel: GoogleCalendarModel?
     var location: String = ""
     var memo: String = ""
@@ -190,6 +190,7 @@ final class GoogleCalendarEventDetailViewEventHandler: Observable {
     var save: () -> Void = { }
     var remove: () -> Void = { }
     var selectNotEditableField: () -> Void = { }
+    var selectRepeatOption: () -> Void = { }
     var startEditDescription: () -> Void = { }
 
     func bind(_ viewModel: any GoogleCalendarEventDetailViewModel) {
@@ -210,6 +211,7 @@ final class GoogleCalendarEventDetailViewEventHandler: Observable {
         save = viewModel.save
         remove = viewModel.remove
         selectNotEditableField = viewModel.selectNotEditableField
+        selectRepeatOption = viewModel.selectRepeatOption
         startEditDescription = viewModel.startEditDescription
     }
 }
@@ -282,9 +284,7 @@ struct GoogleCalendarEventDetailView: View {
                         if let dday = self.state.ddayText {
                             self.ddayView(dday)
                         }
-                        if let repeatOption = self.state.repeatOptionText {
-                            self.repeatOptionText(repeatOption)
-                        }
+                        self.repeatOptionText(state.repeatOptionText)
                     }
 
                     self.colorSelectView
@@ -459,7 +459,7 @@ struct GoogleCalendarEventDetailView: View {
         }
         .padding(.leading, spacing: .indent)
         .onTapGesture {
-            eventHandlers.selectNotEditableField()
+            eventHandlers.selectRepeatOption()
         }
     }
 

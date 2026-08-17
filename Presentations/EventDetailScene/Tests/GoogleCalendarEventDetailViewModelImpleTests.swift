@@ -28,6 +28,7 @@ final class GoogleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
 
     private func makeViewModel(
         recurrence: String? = nil,
+        recurrenceLines: [String]? = nil,
         isCanceled: Bool = false,
         customAttendees: [GoogleCalendar.EventOrigin.Attendee]? = nil,
         writePermission: GoogleCalendar.EventWritePermission? = .writable,
@@ -53,7 +54,7 @@ final class GoogleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
         calendarUsecase.additionalStubbing = { stub in
             stub
                 |> \.attendees .~ (customAttendees ?? stub.attendees)
-                |> \.recurrence .~ (recurrence.map { [$0] })
+                |> \.recurrence .~ (recurrenceLines ?? recurrence.map { [$0] })
                 |> \.status .~ (isCanceled ? .cancelled : .confirmed)
                 |> \.recurringEventId .~ recurringEventId
                 |> \.htmlLink .~ htmlLink
@@ -221,19 +222,19 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
         #expect(location == "location")
     }
     
-    private func expectRecurrenceText(_ recurrence: String?) -> String? {
+    private func expectRecurrenceText(_ recurrence: String?) -> String {
         switch recurrence {
-        case .none: return nil
+        case .none: return "No repeats"
         case "RRULE:FREQ=DAILY": return "Every day"
         case "RRULE:FREQ=DAILY;INTERVAL=5": return "Every 5 Days"
-        case "RRULE:FREQ=WEEKLY;BYDAY=TU": return "Every Week TUE"
-        case "RRULE:FREQ=WEEKLY;INTERVAL=3;BYDAY=TU": return "Every 3 Weeks TUE"
-        case "RRULE:FREQ=MONTHLY;BYDAY=-1WE": return "Every Month Last WED"
+        case "RRULE:FREQ=WEEKLY;BYDAY=TU": return "Every Tuesday"
+        case "RRULE:FREQ=WEEKLY;INTERVAL=3;BYDAY=TU": return "Every 3 Weeks Tuesday"
+        case "RRULE:FREQ=MONTHLY;BYDAY=-1WE": return "The last Wednesday of every month"
         case "RRULE:FREQ=MONTHLY;INTERVAL=3;BYDAY=2WE": return "Every 3 Months 2nd WED"
         case "RRULE:FREQ=MONTHLY;INTERVAL=2": return "Every 2 Months"
         case "RRULE:FREQ=YEARLY": return "Every Year"
         case "RRULE:FREQ=YEARLY;INTERVAL=3": return "Every 3 Years"
-        case "RRULE:FREQ=WEEKLY;BYDAY=FR,MO,TH,TU,WE": return "Every Week MON,TUE,WED,THU,FRI"
+        case "RRULE:FREQ=WEEKLY;BYDAY=FR,MO,TH,TU,WE": return "Every Weekday"
         case "RRULE:FREQ=WEEKLY;WKST=MO;UNTIL=20250816T145959Z;BYDAY=SA": return "Every Week SAT\nuntil Aug 16, 2025"
         case "RRULE:FREQ=DAILY;COUNT=3": return "Every day\n3 time(s)"
         default: return ""
@@ -1403,6 +1404,222 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
 }
 
 
+// MARK: - 반복 행 표시
+
+extension GoogleCalendarEventDetailViewModelImpleTests {
+
+    @Test func viewModel_whenNoRecurrence_providesNoRepeatText() async throws {
+        // given
+        let viewModel = self.makeViewModel(recurrence: nil)
+
+        // when
+        let text = try await self.firstOutput(expectConfirm("반복 없음 텍스트"), for: viewModel.repeatOption) {
+            viewModel.refresh()
+        }
+
+        // then
+        #expect(text == R.String.EventDetail.Repeating.notRepeatingTitle)
+    }
+
+    @Test func viewModel_whenRuleIsNotMappable_stillProvidesRuleText() async throws {
+        // given — BYSETPOS 는 unsupportedKeys 로 잡혀 매핑이 실패하지만, 원본 규칙 텍스트는 그대로 보여야 한다
+        let rruleText = "RRULE:FREQ=MONTHLY;BYSETPOS=-1;BYDAY=MO"
+        let viewModel = self.makeViewModel(recurrence: rruleText)
+
+        // when
+        let text = try await self.firstOutput(expectConfirm("잠긴 규칙 텍스트"), for: viewModel.repeatOption) {
+            viewModel.refresh()
+        }
+
+        // then
+        let expected = RRuleParser.parse(rruleText)!.frequencyText()
+        #expect(text == expected)
+    }
+
+    @Test func viewModel_whenRuleIsUnparsable_doesNotSayNoRepeat() async throws {
+        // given — HOURLY 는 RRuleParser.Frequency 자체에 없어 parse 가 nil 을 낸다
+        let rruleText = "RRULE:FREQ=HOURLY;INTERVAL=2"
+        let viewModel = self.makeViewModel(recurrence: rruleText)
+
+        // when
+        let text = try await self.firstOutput(expectConfirm("파싱 불가 규칙 텍스트"), for: viewModel.repeatOption) {
+            viewModel.refresh()
+        }
+
+        // then — "반복 없음"이 아니라 원본 규칙 텍스트를 그대로 보여준다
+        #expect(text != R.String.EventDetail.Repeating.notRepeatingTitle)
+        #expect(text == "FREQ=HOURLY;INTERVAL=2")
+    }
+}
+
+
+// MARK: - 반복 편집 진입
+
+extension GoogleCalendarEventDetailViewModelImpleTests {
+
+    @Test func viewModel_whenRuleIsNotMappable_selectRepeatOptionShowsToast() async throws {
+        // given
+        let viewModel = self.makeViewModel(recurrence: "RRULE:FREQ=MONTHLY;BYSETPOS=-1;BYDAY=MO")
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+
+        // when
+        viewModel.selectRepeatOption()
+
+        // then
+        #expect(self.spyRouter.didShowToastWithMessage == "eventDetail::gogoleEvent::notEditableField::message".localized())
+        #expect(self.spyRouter.didRouteToRepeatOptionSelectWith == nil)
+    }
+
+    @Test func viewModel_whenRuleIsMappable_selectRepeatOptionRoutes() async throws {
+        // given
+        let viewModel = self.makeViewModel(recurrence: "RRULE:FREQ=DAILY;INTERVAL=5")
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+
+        // when
+        viewModel.selectRepeatOption()
+
+        // then
+        #expect(self.spyRouter.didRouteToRepeatOptionSelectWith != nil)
+        #expect(self.spyRouter.didShowToastWithMessage == nil)
+    }
+
+    @Test func viewModel_whenNoRecurrence_selectRepeatOptionRoutes() async throws {
+        // given
+        let viewModel = self.makeViewModel(recurrence: nil)
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+
+        // when
+        viewModel.selectRepeatOption()
+
+        // then
+        #expect(self.spyRouter.didRouteToRepeatOptionSelectWith != nil)
+        #expect(self.spyRouter.didRouteToRepeatOptionSelectWith?.previousSelected == nil)
+    }
+
+    @Test func viewModel_whenMultipleRules_selectRepeatOptionShowsToast() async throws {
+        // given - 저장이 RRULE 줄을 통째 치환하므로 복수 규칙은 편집을 열면 안 된다
+        let viewModel = self.makeViewModel(
+            recurrenceLines: ["RRULE:FREQ=DAILY;INTERVAL=5", "RRULE:FREQ=WEEKLY;BYDAY=SA"]
+        )
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+
+        // when
+        viewModel.selectRepeatOption()
+
+        // then
+        #expect(self.spyRouter.didShowToastWithMessage == "eventDetail::gogoleEvent::notEditableField::message".localized())
+        #expect(self.spyRouter.didRouteToRepeatOptionSelectWith == nil)
+    }
+
+    @Test func selectRepeatOption_whenReadOnlyCalendar_doesNothing() async throws {
+        // given
+        let viewModel = self.makeViewModel(
+            recurrence: "RRULE:FREQ=DAILY;INTERVAL=5", writePermission: .readOnlyCalendar
+        )
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+
+        // when
+        viewModel.selectRepeatOption()
+
+        // then
+        #expect(self.spyRouter.didRouteToRepeatOptionSelectWith == nil)
+        #expect(self.spyRouter.didShowToastWithMessage == nil)
+    }
+}
+
+
+// MARK: - 반복 규칙 저장
+
+extension GoogleCalendarEventDetailViewModelImpleTests {
+
+    @Test func viewModel_whenRepeatChanged_sendsRecurrenceWithOtherLinesKept() async throws {
+        // given — 원본 recurrence 가 RRULE + EXDATE 두 줄
+        let viewModel = self.makeViewModel(recurrenceLines: [
+            "RRULE:FREQ=DAILY;INTERVAL=5",
+            "EXDATE;TZID=Asia/Seoul:20260101T090000"
+        ])
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+
+        // when
+        let newRepeating = EventRepeating(
+            repeatingStartTime: 1_748_400_000,
+            repeatOption: EventRepeatingOptions.EveryDay() |> \.interval .~ 3
+        )
+        viewModel.selectEventRepeatOption(didSelect: .init(text: "매 3일", repeating: newRepeating))
+        try await self.waitSaveCompleted { viewModel.save() }
+
+        // then
+        let recurrence = self.lastCalendarUsecase.didUpdateEventWith?.params.recurrence
+        #expect(recurrence?.count == 2)
+        #expect(recurrence?.last == "EXDATE;TZID=Asia/Seoul:20260101T090000")
+        #expect(recurrence?.first?.hasPrefix("RRULE:FREQ=DAILY;INTERVAL=3") == true)
+    }
+
+    @Test func viewModel_whenRepeatRemoved_sendsRecurrenceWithoutRRule() async throws {
+        // given
+        let viewModel = self.makeViewModel(recurrence: "RRULE:FREQ=DAILY;INTERVAL=5")
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+
+        // when
+        viewModel.selectEventRepeatOptionNotRepeat()
+        try await self.waitSaveCompleted { viewModel.save() }
+
+        // then
+        let recurrence = self.lastCalendarUsecase.didUpdateEventWith?.params.recurrence
+        #expect(recurrence == [])
+    }
+
+    @Test func viewModel_whenRepeatChanged_savesToMasterWithoutScopeSheet() async throws {
+        // given — 반복 인스턴스 상세(recurringEventId 존재)에서 규칙을 바꾸는 상황
+        let viewModel = self.makeViewModel(
+            recurrence: "RRULE:FREQ=DAILY;INTERVAL=5", recurringEventId: "series_id"
+        )
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+
+        // when
+        viewModel.selectEventRepeatOptionNotRepeat()
+        try await self.waitSaveCompleted { viewModel.save() }
+
+        // then
+        #expect(self.spyRouter.didShowActionSheetWith == nil)
+        #expect(self.lastCalendarUsecase.didUpdateEventWith?.eventId == "series_id")
+    }
+
+    @Test func viewModel_whenOnlyNameChanged_showsScopeSheet() async throws {
+        // given
+        let viewModel = self.makeViewModel(recurringEventId: "series_id")
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+
+        // when
+        viewModel.enter(name: "new name")
+        try await Task.sleep(for: .milliseconds(10))
+        viewModel.save()
+        try await Task.sleep(for: .milliseconds(10))
+
+        // then
+        #expect(self.spyRouter.didShowActionSheetWith != nil)
+    }
+}
+
+
 private final class PrivateStubGoogleCalendarUsecase: StubGoogleCalendarUsecase, @unchecked Sendable {
 
     var additionalStubbing: ((GoogleCalendar.EventOrigin) -> GoogleCalendar.EventOrigin)?
@@ -1493,4 +1710,14 @@ private final class PrivateStubGoogleCalendarUsecase: StubGoogleCalendarUsecase,
     }
 }
 
-private final class SpyRouter: BaseSpyRouter, GoogleCalendarEventDetailRouting, @unchecked Sendable { }
+private final class SpyRouter: BaseSpyRouter, GoogleCalendarEventDetailRouting, @unchecked Sendable {
+
+    var didRouteToRepeatOptionSelectWith: (selectTime: Date, previousSelected: EventRepeating?)?
+    func routeToEventRepeatOptionSelect(
+        selectTime: Date,
+        previousSelected repeating: EventRepeating?,
+        listener: (any SelectEventRepeatOptionSceneListener)?
+    ) {
+        self.didRouteToRepeatOptionSelectWith = (selectTime, repeating)
+    }
+}
