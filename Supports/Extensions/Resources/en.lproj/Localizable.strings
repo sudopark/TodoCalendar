@@ -302,9 +302,18 @@
 
 // MARK: - Apple calendar event
 "eventDetail::appleCalendarEvent::viewOnCalendar" = "View in Apple Calendar";
+"eventDetail::appleCalendarEvent::editOnCalendar" = "Edit in Apple Calendar";
 "eventDetail::appleCalendarEvent::calendar::event" = "Apple Calendar Event";
 "eventDetail::appleCalendarEvent::attendees" = "Attendees (%d people)";
 "eventDetail::appleCalendarEvent::attendees::organizer" = "Organizer";
+"eventDetail::appleCalendarEvent::saved::message" = "Saved.";
+"eventDetail::appleCalendarEvent::remove::confirm::message" = "Delete this event?";
+"eventDetail::appleCalendarEvent::repeating::title" = "Repeating event";
+"eventDetail::appleCalendarEvent::repeating::onlyThisTime::button" = "This event only";
+"eventDetail::appleCalendarEvent::repeating::thisAndFuture::button" = "This and all future events";
+"eventDetail::appleCalendarEvent::readOnlyCalendar::message" = "This calendar is read-only, so the event can't be edited.";
+"eventDetail::appleCalendarEvent::notEditableField::message" = "This field can't be edited in the app.";
+"eventDetail::appleCalendarEvent::url::placeholder" = "URL";
 
 // MARK: - event tag
 

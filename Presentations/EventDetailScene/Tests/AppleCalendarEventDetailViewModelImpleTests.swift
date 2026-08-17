@@ -827,7 +827,6 @@ extension AppleCalendarEventDetailViewModelImpleTests {
 
 private final class SpyRouter: BaseSpyRouter, AppleCalendarEventDetailRouting, @unchecked Sendable {
     func routeToAppleCalendarApp(at interval: TimeInterval) { }
-    func openURL(_ urlString: String) { }
 }
 
 
