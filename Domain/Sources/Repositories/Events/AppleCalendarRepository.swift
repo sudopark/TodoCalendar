@@ -22,5 +22,16 @@ public protocol AppleCalendarRepository: Sendable {
 
     func loadEventOrigin(id: String) -> AnyPublisher<AppleCalendar.EventOrigin?, Never>
 
+    func updateEvent(
+        _ eventId: String,
+        _ params: AppleCalendar.EventEditParams,
+        scope: AppleCalendar.EventEditScope
+    ) async throws -> AppleCalendar.EventOrigin
+
+    func removeEvent(
+        _ eventId: String,
+        scope: AppleCalendar.EventEditScope
+    ) async throws
+
     func resetCache() async throws
 }
