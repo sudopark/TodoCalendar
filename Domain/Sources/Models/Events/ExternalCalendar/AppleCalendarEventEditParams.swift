@@ -17,6 +17,7 @@ extension AppleCalendar {
         public var location: String?
         public var url: String?
         public var notes: String?
+        public var recurrenceRules: [String]?
 
         public init() { }
 
@@ -26,6 +27,7 @@ extension AppleCalendar {
                 && self.location == nil
                 && self.url == nil
                 && self.notes == nil
+                && self.recurrenceRules == nil
         }
     }
 

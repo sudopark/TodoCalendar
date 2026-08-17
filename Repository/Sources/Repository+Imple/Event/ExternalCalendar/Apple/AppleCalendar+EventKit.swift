@@ -275,6 +275,14 @@ private extension EKEvent {
         if let notes = params.notes {
             self.notes = notes
         }
+        if let rules = params.recurrenceRules {
+            let converted = rules.compactMap { EKRecurrenceRule(rruleText: $0) }
+            // 부분 성공은 변환에 실패한 규칙을 조용히 지운다
+            guard converted.count == rules.count else {
+                throw RuntimeError("failed to convert apple calendar recurrence rules: \(rules)")
+            }
+            recurrenceRules = converted.isEmpty ? nil : converted
+        }
     }
 
     private func applyEventTime(_ time: EventTime) {
