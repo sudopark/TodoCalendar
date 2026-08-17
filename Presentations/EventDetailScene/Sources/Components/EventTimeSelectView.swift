@@ -164,15 +164,6 @@ struct EventTimeSelectView: View {
 
 private extension SelectedTime {
 
-    var startDate: Date {
-        switch self {
-        case .at(let time): return time.date
-        case .singleAllDay(let time): return time.date
-        case .period(let start, _): return start.date
-        case .alldayPeriod(let start, _): return start.date
-        }
-    }
-
     var endDate: Date? {
         switch self {
         case .period(_, let end): return end.date

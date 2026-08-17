@@ -41,6 +41,7 @@ protocol AppleCalendarEventDetailViewModel: AnyObject, Sendable, AppleCalendarEv
     func save()
     func remove()
     func selectNotEditableField()
+    func selectRepeatOption()
 
     // presenter
     var isEditable: AnyPublisher<Bool, Never> { get }
@@ -48,7 +49,7 @@ protocol AppleCalendarEventDetailViewModel: AnyObject, Sendable, AppleCalendarEv
     var eventName: AnyPublisher<String, Never> { get }
     var timeText: AnyPublisher<SelectedTime?, Never> { get }
     var ddayText: AnyPublisher<String, Never> { get }
-    var repeatText: AnyPublisher<String?, Never> { get }
+    var repeatText: AnyPublisher<String, Never> { get }
     var location: AnyPublisher<String?, Never> { get }
     var url: AnyPublisher<String?, Never> { get }
     var notes: AnyPublisher<String?, Never> { get }
@@ -67,6 +68,7 @@ private struct EditableFields: Equatable {
     var location: String?
     var url: String?
     var notes: String?
+    var repeating: EventRepeating?
 }
 
 
@@ -156,7 +158,8 @@ extension AppleCalendarEventDetailViewModelImple {
             time: SelectedTime(origin.eventTime, timeZone),
             location: origin.location,
             url: origin.url.flatMap { $0.isEmpty ? nil : $0 },
-            notes: origin.notes
+            notes: origin.notes,
+            repeating: origin.editableRepeating(timeZone)
         )
         self.subject.fields.send(.init(origin: fields))
     }
@@ -173,6 +176,41 @@ extension AppleCalendarEventDetailViewModelImple {
 
     func selectNotEditableField() {
         self.router?.showToast("eventDetail::appleCalendarEvent::notEditableField::message".localized())
+    }
+
+    func selectRepeatOption() {
+        guard self.subject.isWritable.value == true else { return }
+        guard !self.subject.isSaving.value else { return }
+        guard let origin = self.subject.event.value,
+              let timeZone = self.subject.timeZone.value,
+              let fields = self.subject.fields.value
+        else { return }
+
+        guard origin.isRepeatLocked(timeZone) == false else {
+            self.selectNotEditableField()
+            return
+        }
+
+        let selectTime = fields.current.time?.startDate ?? Date()
+        self.router?.routeToEventRepeatOptionSelect(
+            selectTime: selectTime,
+            previousSelected: fields.current.repeating,
+            listener: self
+        )
+    }
+}
+
+
+// MARK: - AppleCalendarEventDetailViewModelImple SelectEventRepeatOptionSceneListener
+
+extension AppleCalendarEventDetailViewModelImple: SelectEventRepeatOptionSceneListener {
+
+    func selectEventRepeatOption(didSelect repeating: EventRepeatingTimeSelectResult) {
+        self.updateCurrentFields { $0 |> \.repeating .~ repeating.repeating }
+    }
+
+    func selectEventRepeatOptionNotRepeat() {
+        self.updateCurrentFields { $0 |> \.repeating .~ nil }
     }
 }
 
@@ -247,6 +285,12 @@ extension AppleCalendarEventDetailViewModelImple {
             return
         }
 
+        // EKSpan 에 전체 시리즈가 없다 — 마스터(첫 회차)에 futureEvents 를 걸어야 시리즈 전체에 규칙이 적용된다
+        guard params.recurrenceRules == nil else {
+            self.updateEvent(origin.originalEventId, params, scope: .thisAndFuture)
+            return
+        }
+
         guard origin.isRepeating else {
             self.updateEvent(origin.eventId, params, scope: .thisEventOnly)
             return
@@ -272,6 +316,9 @@ extension AppleCalendarEventDetailViewModelImple {
         }
         if fields.origin.time != fields.current.time {
             params.time = fields.current.time?.eventTime(timeZone)
+        }
+        if fields.origin.repeating != fields.current.repeating {
+            params.recurrenceRules = fields.current.repeating?.asRRuleText(timeZone).map { [$0] } ?? []
         }
         return params
     }
@@ -454,20 +501,32 @@ extension AppleCalendarEventDetailViewModelImple {
             .eraseToAnyPublisher()
     }
 
-    var repeatText: AnyPublisher<String?, Never> {
-        return Publishers.CombineLatest(
-            self.subject.event.compactMap { $0 },
-            self.subject.timeZone.compactMap { $0 }
-        )
-        .map { event, timeZone -> String? in
-            guard let rruleString = event.recurrenceRules.first,
-                  let rrule = RRuleParser.parse(rruleString) else { return nil }
-            let frequencyText = rrule.frequencyText()
-            if let endText = rrule.endOptionText(timeZone) {
-                return "\(frequencyText) \(endText)"
+    var repeatText: AnyPublisher<String, Never> {
+
+        let transform: (AppleCalendar.EventOrigin, TimeZone, EventRepeating?) -> String = { origin, timeZone, currentRepeating in
+            guard origin.isRepeatLocked(timeZone) == false else {
+                // 잠긴 규칙도 "반복 없음"이 아니라 원본 규칙 문구를 보여준다 — 파싱까지 실패하면 규칙 텍스트 그대로
+                guard let rruleLine = origin.rruleLines.first else {
+                    return R.String.EventDetail.Repeating.notRepeatingTitle
+                }
+                guard let rrule = RRuleParser.parse(rruleLine) else {
+                    return rruleLine.strippingRRulePrefix
+                }
+                return rrule.appendingEndOptionText(to: rrule.frequencyText(), timeZone)
             }
-            return frequencyText
+
+            guard let repeating = currentRepeating else {
+                return R.String.EventDetail.Repeating.notRepeatingTitle
+            }
+            return repeating.repeatOptionDisplayText(timeZone)
         }
+
+        return Publishers.CombineLatest3(
+            self.subject.event.compactMap { $0 },
+            self.subject.timeZone.compactMap { $0 },
+            self.subject.fields.compactMap { $0 }.map { $0.current.repeating }
+        )
+        .map(transform)
         .removeDuplicates()
         .eraseToAnyPublisher()
     }
@@ -521,5 +580,34 @@ extension AppleCalendarEventDetailViewModelImple {
         return self.subject.isSaving
             .removeDuplicates()
             .eraseToAnyPublisher()
+    }
+}
+
+
+// MARK: - AppleCalendar.EventOrigin repeat rule mapping
+
+private extension AppleCalendar.EventOrigin {
+
+    var rruleLines: [String] {
+        self.recurrenceRules.filter { $0.hasPrefix("RRULE:") }
+    }
+
+    // 저장이 규칙 배열을 한 줄로 통째 치환한다 — 복수 규칙은 편집을 열면 나머지가 조용히 지워지므로 왕복 대상에서 뺀다
+    var soleRRuleLine: String? {
+        self.rruleLines.count == 1 ? self.rruleLines.first : nil
+    }
+
+    func editableRepeating(_ timeZone: TimeZone) -> EventRepeating? {
+        guard let rruleLine = self.soleRRuleLine,
+              let rrule = RRuleParser.parse(rruleLine)
+        else { return nil }
+        return rrule.asEventRepeating(
+            startTime: self.eventTime.lowerBoundWithFixed, timeZone: timeZone
+        )
+    }
+
+    // 규칙 텍스트는 있는데 앱 옵션으로 왕복 못 시키면(RRule+EventRepeating.swift 의 nil) 편집을 잠근다
+    func isRepeatLocked(_ timeZone: TimeZone) -> Bool {
+        !self.rruleLines.isEmpty && self.editableRepeating(timeZone) == nil
     }
 }
