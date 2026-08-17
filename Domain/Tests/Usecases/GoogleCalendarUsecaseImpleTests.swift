@@ -670,13 +670,49 @@ extension GoogleCalendarUsecaseImpleTests {
         #expect(seeded?["event1"] != nil)
 
         // when
-        try await usecase.removeEvent("cal1", "event1", accountId: "account@google.com")
+        try await usecase.removeEvent(
+            "cal1", "event1", accountId: "account@google.com", scope: .thisEventOnly
+        )
 
         // then
         let cached = stubStore.value(
             [String: GoogleCalendar.Event].self, key: ShareDataKeys.googleCalendarEvents.rawValue
         )
         #expect(cached?["event1"] == nil)
+    }
+
+    @Test func removeEvent_allEvents_removesExpandedInstancesOfSeries() async throws {
+        // given — 캐시엔 마스터가 아니라 펼쳐진 인스턴스들이 들어 있다
+        let usecase = makeUsecase(accounts: ["account@google.com"])
+        let instances: [String: GoogleCalendar.Event] = [
+            "event1_100": self.dummyEvent("event1_100"),
+            "event1_200": self.dummyEvent("event1_200"),
+            "other": self.dummyEvent("other")
+        ]
+        stubStore.put(
+            [String: GoogleCalendar.Event].self,
+            key: ShareDataKeys.googleCalendarEvents.rawValue, instances
+        )
+
+        // when
+        try await usecase.removeEvent(
+            "cal1", "event1", accountId: "account@google.com", scope: .allEvents
+        )
+
+        // then
+        let cached = stubStore.value(
+            [String: GoogleCalendar.Event].self, key: ShareDataKeys.googleCalendarEvents.rawValue
+        )
+        #expect(cached?["event1_100"] == nil)
+        #expect(cached?["event1_200"] == nil)
+        #expect(cached?["other"] != nil)
+    }
+
+    private func dummyEvent(_ eventId: String) -> GoogleCalendar.Event {
+        return GoogleCalendar.Event(
+            eventId, "cal1", accountId: "account@google.com",
+            name: eventId, colorId: nil, time: .period(0..<100)
+        )
     }
 }
 
