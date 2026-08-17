@@ -40,6 +40,7 @@ extension SharePreviewSceneBuilerImple: SharePreviewSceneBuilder {
         let eventTagUsecase = self.usecaseFactory.makeEventTagUsecase()
         let googleCalendarUsecase = self.usecaseFactory.makeGoogleCalendarUsecase()
         let appleCalendarUsecase = self.usecaseFactory.makeAppleCalendarUsecase()
+        let calendarUsecase = self.usecaseFactory.makeCalendarUsecase()
         let eventListUsecase = CalendarEventListhUsecaseImple(
             todoUsecase: self.usecaseFactory.makeTodoEventUsecase(),
             scheduleUsecase: self.usecaseFactory.makeScheduleEventUsecase(),
@@ -59,7 +60,8 @@ extension SharePreviewSceneBuilerImple: SharePreviewSceneBuilder {
             eventTagUsecase: eventTagUsecase,
             eventShareSettingUsecase: self.usecaseFactory.makeEventShareSettingUsecase(),
             googleCalendarUsecase: googleCalendarUsecase,
-            appleCalendarUsecase: appleCalendarUsecase
+            appleCalendarUsecase: appleCalendarUsecase,
+            calendarUsecase: calendarUsecase
         )
         let router = SharePreviewRouter()
         viewModel.router = router

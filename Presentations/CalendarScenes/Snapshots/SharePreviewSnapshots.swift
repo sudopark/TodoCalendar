@@ -430,6 +430,7 @@ private final class FakeSharePreviewViewModel: SharePreviewViewModel, @unchecked
     func deselectAllTags() { }
     func toggleLine(_ eventId: String) { }
     func toggleIncludeTagName(_ newValue: Bool) { }
+    func selectFormat(_ format: SharePreviewFormat) { }
     func share() { }
     func close() { }
 
@@ -455,5 +456,14 @@ private final class FakeSharePreviewViewModel: SharePreviewViewModel, @unchecked
     }
     var isShareEnabled: AnyPublisher<Bool, Never> {
         Just(self.stubIsShareEnabled).eraseToAnyPublisher()
+    }
+    var format: AnyPublisher<SharePreviewFormat, Never> {
+        Just(.text).eraseToAnyPublisher()
+    }
+    var imageContentModel: AnyPublisher<ShareImageContentModel?, Never> {
+        Just(nil).eraseToAnyPublisher()
+    }
+    var isIncludeTagNameOptionVisible: AnyPublisher<Bool, Never> {
+        Just(true).eraseToAnyPublisher()
     }
 }

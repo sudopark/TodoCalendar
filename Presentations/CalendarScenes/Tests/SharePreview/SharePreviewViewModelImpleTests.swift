@@ -25,6 +25,7 @@ final class SharePreviewViewModelImpleTests: PublisherWaitable {
     private let eventTagUsecase = StubEventTagUsecase()
     private let uiSettingUsecase = StubUISettingUsecase()
     private let eventShareSettingUsecase = StubEventShareSettingUsecase()
+    private let calendarUsecase = StubCalendarUsecase()
     private let router = SpySharePreviewRouter()
     private let taggedId = EventTagId.custom("tag-a")
 
@@ -45,6 +46,12 @@ final class SharePreviewViewModelImpleTests: PublisherWaitable {
     private func septemberWeekRange() -> Range<TimeInterval> {
         let start = self.september10thRange().lowerBound
         return start..<(start + 3600 * 24 * 7)
+    }
+
+    private func formattedText(_ format: String, at time: TimeInterval) -> String {
+        let formatter = DateFormatter() |> \.timeZone .~ TimeZone(abbreviation: "KST")!
+        formatter.dateFormat = format.localized()
+        return formatter.string(from: Date(timeIntervalSince1970: time))
     }
 
     private func makeViewModel(
@@ -130,7 +137,8 @@ final class SharePreviewViewModelImpleTests: PublisherWaitable {
             eventTagUsecase: self.eventTagUsecase,
             eventShareSettingUsecase: self.eventShareSettingUsecase,
             googleCalendarUsecase: googleCalendarUsecase,
-            appleCalendarUsecase: appleCalendarUsecase
+            appleCalendarUsecase: appleCalendarUsecase,
+            calendarUsecase: self.calendarUsecase
         )
         viewModel.router = self.router
         return viewModel
@@ -441,6 +449,30 @@ extension SharePreviewViewModelImpleTests {
 
         // then
         #expect(headerText?.isEmpty == false)
+    }
+}
+
+
+// MARK: - imageHeaderText: 월 범위는 날짜 그룹 수와 무관하게 월 표기
+
+extension SharePreviewViewModelImpleTests {
+
+    @Test func viewModel_imageHeaderText_whenMonthRangeHasSingleDatedDay_isMonthFormat() async throws {
+        // given
+        let viewModel = try self.makeViewModel(kind: .month)
+        viewModel.prepare()
+        _ = try await self.firstOutput(expectConfirm("초기 로드"), for: viewModel.lineModels) { }
+
+        // when
+        let imageHeader = try await self.firstOutput(expectConfirm("이미지 헤더"), for: viewModel.imageHeaderText) { }
+        let textHeader = try await self.firstOutput(expectConfirm("텍스트 헤더"), for: viewModel.dateHeaderText) { }
+
+        // then
+        let range = self.september10thRange()
+        let expectedImageHeader = self.formattedText("date_form.MMM_yyyy", at: range.lowerBound)
+        let expectedTextHeader = self.formattedText("date_form::yyyy_MM_dd_E_", at: range.lowerBound)
+        #expect(imageHeader == expectedImageHeader)
+        #expect(textHeader == expectedTextHeader)
     }
 }
 
@@ -860,6 +892,23 @@ extension SharePreviewViewModelImpleTests {
         // then
         #expect(isEnabled == false)
     }
+
+    @Test func viewModel_isShareEnabled_falseWhenImageFormatAndMonthRangeHasNoDatedEventsAndOnlyCurrentTodos() async throws {
+        // given
+        let viewModel = try self.makeViewModel(kind: .month, todos: [], schedules: [])
+        viewModel.prepare()
+        _ = try await self.firstOutput(expectConfirm("초기 로드"), for: viewModel.lineModels) { }
+        viewModel.selectFormat(.image)
+        _ = try await self.firstOutput(
+            expectConfirm("월 이미지 콘텐츠 로드"), for: viewModel.imageContentModel.compactMap { $0 }
+        ) { }
+
+        // when
+        let isEnabled = try await self.firstOutput(expectConfirm("공유 가능 여부"), for: viewModel.isShareEnabled) { }
+
+        // then
+        #expect(isEnabled == false)
+    }
 }
 
 
@@ -936,6 +985,199 @@ extension SharePreviewViewModelImpleTests {
 }
 
 
+// MARK: - 형식 전환
+
+extension SharePreviewViewModelImpleTests {
+
+    @Test func viewModel_whenPrepared_formatIsText() async throws {
+        // given
+        let expect = expectConfirm("초기 형식은 텍스트")
+        let viewModel = try self.makeViewModel()
+
+        // when
+        let format = try await self.firstOutput(expect, for: viewModel.format) {
+            viewModel.prepare()
+        }
+
+        // then
+        #expect(format == .text)
+    }
+
+    @Test func viewModel_whenSelectImageFormat_emitsImageFormat() async throws {
+        // given
+        let viewModel = try self.makeViewModel()
+        viewModel.prepare()
+        _ = try await self.firstOutput(expectConfirm("초기 형식"), for: viewModel.format) { }
+
+        // when
+        let format = try await self.firstOutput(expectConfirm("이미지 형식 전환"), for: viewModel.format.dropFirst()) {
+            viewModel.selectFormat(.image)
+        }
+
+        // then
+        #expect(format == .image)
+    }
+
+    @Test func viewModel_whenImageFormatAndDayRange_emitsListContent() async throws {
+        // given
+        let viewModel = try self.makeViewModel(kind: .day)
+        viewModel.prepare()
+        _ = try await self.firstOutput(expectConfirm("초기 라인 로드"), for: viewModel.lineModels) { }
+
+        // when
+        let content = try await self.firstOutput(
+            expectConfirm("이미지 콘텐츠"), for: viewModel.imageContentModel.compactMap { $0 }
+        ) {
+            viewModel.selectFormat(.image)
+        }
+
+        // then
+        guard case .list(let sections) = content else {
+            Issue.record("list content expected")
+            return
+        }
+        let ids = Set(sections.flatMap { $0.lines.map { $0.eventId } })
+        #expect(ids == ["c-t:0", "sc:0-1", "todo:0"])
+    }
+
+    @Test func viewModel_whenImageFormatAndMonthRange_emitsMonthGridContent() async throws {
+        // given
+        let viewModel = try self.makeViewModel(kind: .month)
+        viewModel.prepare()
+        _ = try await self.firstOutput(expectConfirm("초기 라인 로드"), for: viewModel.lineModels) { }
+
+        // when
+        let content = try await self.firstOutput(
+            expectConfirm("월 그리드 콘텐츠"), for: viewModel.imageContentModel.compactMap { $0 }
+        ) {
+            viewModel.selectFormat(.image)
+        }
+
+        // then
+        guard case .monthGrid(let grid) = content else {
+            Issue.record("month grid content expected")
+            return
+        }
+        let allEventIds = Set(grid.weeks.flatMap { $0.eventStacks.flatMap { $0.map { $0.eventId } } })
+        #expect(allEventIds.contains("sc:0-1"))
+    }
+
+    @Test func viewModel_whenTextFormat_imageContentIsNil() async throws {
+        // given
+        let viewModel = try self.makeViewModel()
+        viewModel.prepare()
+        _ = try await self.firstOutput(expectConfirm("초기 라인 로드"), for: viewModel.lineModels) { }
+
+        // when
+        let content = try await self.firstOutput(expectConfirm("텍스트 형식 이미지 콘텐츠"), for: viewModel.imageContentModel) { }
+
+        // then
+        #expect((content ?? nil) == nil)
+    }
+}
+
+
+// MARK: - 이미지 형식의 옵션·공유
+
+extension SharePreviewViewModelImpleTests {
+
+    @Test("이미지 형식이면 범위 종류와 무관하게 태그명 옵션을 숨긴다", arguments: [CalendarShareRangeKind.day, .week, .month])
+    func viewModel_whenImageFormat_hidesIncludeTagNameOption(_ kind: CalendarShareRangeKind) async throws {
+        // given
+        let viewModel = try self.makeViewModel(kind: kind)
+        viewModel.prepare()
+
+        // when
+        let isVisible = try await self.firstOutput(
+            expectConfirm("\(kind)+이미지 옵션 숨김"), for: viewModel.isIncludeTagNameOptionVisible.dropFirst()
+        ) {
+            viewModel.selectFormat(.image)
+        }
+
+        // then
+        #expect(isVisible == false)
+    }
+
+    @Test("텍스트 형식이면 범위 종류와 무관하게 태그명 옵션을 노출한다", arguments: [CalendarShareRangeKind.day, .week, .month])
+    func viewModel_whenTextFormat_showsIncludeTagNameOption(_ kind: CalendarShareRangeKind) async throws {
+        // given
+        let expect = expectConfirm("\(kind)+텍스트 옵션 표시")
+        let viewModel = try self.makeViewModel(kind: kind)
+
+        // when
+        let isVisible = try await self.firstOutput(expect, for: viewModel.isIncludeTagNameOptionVisible) {
+            viewModel.prepare()
+        }
+
+        // then
+        #expect(isVisible == true)
+    }
+
+    @Test func viewModel_whenShareWithImageFormat_routesImageContentWithoutExcludedLines() async throws {
+        // given
+        let viewModel = try self.makeViewModel(kind: .day)
+        viewModel.prepare()
+        _ = try await self.firstOutput(expectConfirm("초기 로드"), for: viewModel.lineModels) { }
+        viewModel.selectFormat(.image)
+        _ = try await self.firstOutput(
+            expectConfirm("이미지 콘텐츠 로드"), for: viewModel.imageContentModel.compactMap { $0 }
+        ) { }
+
+        // when
+        viewModel.share()
+
+        // then
+        guard case .list(let sections) = self.router.didShareImageContent else {
+            Issue.record("list content expected")
+            return
+        }
+        let ids = Set(sections.flatMap { $0.lines.map { $0.eventId } })
+        #expect(ids == ["c-t:0", "sc:0-1", "todo:0"])
+        #expect(self.router.didShareImageHeaderText?.isEmpty == false)
+    }
+
+    @Test func viewModel_whenShareWithTextFormat_stillRoutesText() async throws {
+        // given
+        let viewModel = try self.makeViewModel()
+        viewModel.prepare()
+        _ = try await self.firstOutput(expectConfirm("초기 로드"), for: viewModel.lineModels) { }
+
+        // when
+        viewModel.share()
+
+        // then
+        #expect(self.router.didShareWithText?.isEmpty == false)
+        #expect(self.router.didShareImageContent == nil)
+    }
+
+    @Test func viewModel_whenToggleLineThenShareImage_excludedLineIsNotInSharedContent() async throws {
+        // given
+        let viewModel = try self.makeViewModel(kind: .day)
+        viewModel.prepare()
+        _ = try await self.firstOutput(expectConfirm("초기 로드"), for: viewModel.lineModels) { }
+        _ = try await self.firstOutput(expectConfirm("개별 제외 반영"), for: viewModel.lineModels.dropFirst()) {
+            viewModel.toggleLine("todo:0")
+        }
+        viewModel.selectFormat(.image)
+        _ = try await self.firstOutput(
+            expectConfirm("이미지 콘텐츠 로드"), for: viewModel.imageContentModel.compactMap { $0 }
+        ) { }
+
+        // when
+        viewModel.share()
+
+        // then
+        guard case .list(let sections) = self.router.didShareImageContent else {
+            Issue.record("list content expected")
+            return
+        }
+        let ids = Set(sections.flatMap { $0.lines.map { $0.eventId } })
+        #expect(ids.contains("todo:0") == false)
+        #expect(ids.contains("sc:0-1") == true)
+    }
+}
+
+
 // MARK: - doubles
 
 private final class SpySharePreviewRouter: BaseSpyRouter, SharePreviewRouting, @unchecked Sendable {
@@ -943,5 +1185,12 @@ private final class SpySharePreviewRouter: BaseSpyRouter, SharePreviewRouting, @
     var didShareWithText: String?
     func showShareSheet(text: String) {
         self.didShareWithText = text
+    }
+
+    var didShareImageContent: ShareImageContentModel?
+    var didShareImageHeaderText: String?
+    func showShareSheet(imageContent: ShareImageContentModel, headerText: String) {
+        self.didShareImageContent = imageContent
+        self.didShareImageHeaderText = headerText
     }
 }
