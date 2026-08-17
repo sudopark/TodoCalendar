@@ -112,6 +112,7 @@ extension GoogleCalendar.EventEditParams {
         json["colorId"] = self.colorId
         json["start"] = self.start?.asJson()
         json["end"] = self.end?.asJson()
+        json["recurrence"] = self.recurrence
         return json
     }
 }
