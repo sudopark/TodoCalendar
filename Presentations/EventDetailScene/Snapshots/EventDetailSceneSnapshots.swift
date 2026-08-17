@@ -85,9 +85,16 @@ final class EventDetailSceneSnapshots: XCTestCase {
     func test_appleEventDetail() {
         captureSnapshotPair(named: "appleEventDetail", layout: .fullScreen) { theme in
             let state = AppleCalendarEventDetailViewState()
+            state.isEditable = true
+            state.isSavable = true
             state.eventName = "apple calendar event"
             state.timeText = .period(.init(self.start, .current), .init(self.end, .current))
             state.ddayText = "D-1"
+            state.repeatText = "repeat option"
+            state.location = "location text"
+            state.url = "https://example.com"
+            state.notes = "memo text"
+            state.tagModel = .init(calendarId: "calendar_id", name: "calendar name")
             return AppleCalendarEventDetailView()
                 .environment(state)
                 .environment(AppleCalendarEventDetailViewEventHandler())

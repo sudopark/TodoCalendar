@@ -30,7 +30,6 @@ protocol AppleCalendarEventDetailViewModel: AnyObject, Sendable, AppleCalendarEv
     // interactor
     func refresh()
     func openInAppleCalendar()
-    func openURL(_ urlString: String)
     func close()
     func enter(name: String)
     func selectStartTime(_ date: Date)
@@ -166,10 +165,6 @@ extension AppleCalendarEventDetailViewModelImple {
         guard let origin = self.subject.event.value else { return }
         let startInterval = origin.eventTime.lowerBoundWithFixed
         self.router?.routeToAppleCalendarApp(at: startInterval)
-    }
-
-    func openURL(_ urlString: String) {
-        self.router?.openURL(urlString)
     }
 
     func close() {
