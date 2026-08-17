@@ -226,7 +226,8 @@ extension AppleCalendarUsecaseImple {
         let origin = try await self.repository.updateEvent(eventId, params, scope: scope)
         // 판단 기준은 결과가 아니라 대상이다 — "이번만" 수정은 그 회차를 시리즈에서 떼어내
         // 결과가 비반복이 되는데, 정작 재조회가 필요한 건 회차가 빠진 원본 시리즈 쪽이다
-        if self.isRepeatingOccurrence(eventId) {
+        // 반복 규칙 편집도 마스터 id 가 대상이라 회차 판정에 안 걸린다
+        if self.isRepeatingOccurrence(eventId) || params.recurrenceRules != nil {
             if let period = self.cachedEventsPeriod() {
                 self.refreshEvents(in: period)
             }
