@@ -544,6 +544,11 @@
 "widget.aiCommand::title" = "Add with AI";
 "widget.aiCommand::explain" = "Open AI input with one tap.";
 
+// MARK: - liveActivity
+
+"liveActivity::stale" = "Starting now";
+"liveActivity::action::end" = "End";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "This link format is not supported.\nPlease update the app to the latest version.";
