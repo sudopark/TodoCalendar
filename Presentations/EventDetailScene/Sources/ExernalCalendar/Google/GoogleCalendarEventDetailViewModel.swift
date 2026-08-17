@@ -139,6 +139,7 @@ protocol GoogleCalendarEventDetailViewModel: AnyObject, Sendable, GoogleCalendar
     func save()
     func remove()
     func selectNotEditableField()
+    func selectRepeatOption()
     func startEditDescription()
 
     // presenter
@@ -149,7 +150,7 @@ protocol GoogleCalendarEventDetailViewModel: AnyObject, Sendable, GoogleCalendar
     var eventName: AnyPublisher<String, Never> { get }
     var timeText: AnyPublisher<SelectedTime?, Never> { get }
     var ddayText: AnyPublisher<String, Never> { get }
-    var repeatOption: AnyPublisher<String?, Never> { get }
+    var repeatOption: AnyPublisher<String, Never> { get }
     var calendarModel: AnyPublisher<GoogleCalendarModel?, Never> { get }
     var location: AnyPublisher<String?, Never> { get }
     var conferenceModel: AnyPublisher<ConferenceModel?, Never> { get }
@@ -171,6 +172,7 @@ private struct EditableFields: Equatable {
     var location: String?
     var memo: String?
     var colorId: String?
+    var repeating: EventRepeating?
 }
 
 
@@ -290,7 +292,8 @@ extension GoogleCalendarEventDetailViewModelImple {
             time: event.selectedTime(timeZone),
             location: event.location,
             memo: event.description,
-            colorId: event.colorId
+            colorId: event.colorId,
+            repeating: event.editableRepeating(timeZone)
         )
         self.subject.fields.send(.init(origin: fields))
     }
@@ -321,6 +324,41 @@ extension GoogleCalendarEventDetailViewModelImple {
 
     func selectNotEditableField() {
         self.router?.showToast("eventDetail::gogoleEvent::notEditableField::message".localized())
+    }
+
+    func selectRepeatOption() {
+        guard self.subject.writePermission.value != .readOnlyCalendar else { return }
+        guard !self.subject.isSaving.value else { return }
+        guard let origin = self.subject.origin.value,
+              let timeZone = self.subject.timeZone.value,
+              let fields = self.subject.fields.value
+        else { return }
+
+        guard origin.isRepeatLocked(timeZone) == false else {
+            self.selectNotEditableField()
+            return
+        }
+
+        let selectTime = fields.current.time?.startDate ?? Date()
+        self.router?.routeToEventRepeatOptionSelect(
+            selectTime: selectTime,
+            previousSelected: fields.current.repeating,
+            listener: self
+        )
+    }
+}
+
+
+// MARK: - GoogleCalendarEventDetailViewModelImple SelectEventRepeatOptionSceneListener
+
+extension GoogleCalendarEventDetailViewModelImple: SelectEventRepeatOptionSceneListener {
+
+    func selectEventRepeatOption(didSelect repeating: EventRepeatingTimeSelectResult) {
+        self.updateCurrentFields { $0 |> \.repeating .~ repeating.repeating }
+    }
+
+    func selectEventRepeatOptionNotRepeat() {
+        self.updateCurrentFields { $0 |> \.repeating .~ nil }
     }
 }
 
@@ -425,8 +463,14 @@ extension GoogleCalendarEventDetailViewModelImple {
     private func saveChanges() {
         guard let origin = self.subject.origin.value,
               let timeZone = self.subject.timeZone.value,
-              let params = self.editParams(timeZone), !params.isEmpty
+              let params = self.editParams(origin, timeZone), !params.isEmpty
         else {
+            return
+        }
+
+        // 반복 규칙은 시리즈 마스터의 속성이라 구글이 인스턴스 patch 의 recurrence 를 거부한다 — 범위 선택 없이 마스터를 대상으로 저장
+        guard params.recurrence == nil else {
+            self.updateEvent(origin.recurringEventId ?? origin.id, params, timeZone)
             return
         }
 
@@ -437,7 +481,9 @@ extension GoogleCalendarEventDetailViewModelImple {
         self.showUpdateScopeActionSheet(origin.id, recurringEventId, params, timeZone)
     }
 
-    private func editParams(_ timeZone: TimeZone) -> GoogleCalendar.EventEditParams? {
+    private func editParams(
+        _ origin: GoogleCalendar.EventOrigin, _ timeZone: TimeZone
+    ) -> GoogleCalendar.EventEditParams? {
         guard let fields = self.subject.fields.value, fields.isChanged else { return nil }
 
         var params = GoogleCalendar.EventEditParams()
@@ -457,6 +503,10 @@ extension GoogleCalendarEventDetailViewModelImple {
            let pair = fields.current.time?.asGoogleEventTimePair(timeZone) {
             params.start = pair.start
             params.end = pair.end
+        }
+        if fields.origin.repeating != fields.current.repeating {
+            let newRRuleText = fields.current.repeating?.asRRuleText(timeZone)
+            params.recurrence = (origin.recurrence ?? []).replacingRRuleLine(newRRuleText)
         }
         return params
     }
@@ -678,29 +728,36 @@ extension GoogleCalendarEventDetailViewModelImple {
             .eraseToAnyPublisher()
     }
     
-    var repeatOption: AnyPublisher<String?, Never> {
-        
-        let transform: (GoogleCalendar.EventOrigin, TimeZone) -> String? = { origin, timeZone in
-            guard let recurrence = origin.recurrence?.first,
-                  let rrule = RRuleParser.parse(recurrence)
-            else { return nil }
-            
-            let frequencyText = rrule.frequencyText()
-            if let endOptionText = rrule.endOptionText(timeZone) {
-                return "\(frequencyText)\n\(endOptionText)"
+    var repeatOption: AnyPublisher<String, Never> {
+
+        let transform: (GoogleCalendar.EventOrigin, TimeZone, EventRepeating?) -> String = { origin, timeZone, currentRepeating in
+            guard origin.isRepeatLocked(timeZone) == false else {
+                // rruleLine 이 있는데 파싱까지 실패하면(RRuleParser 미지원 FREQ 등) "반복 없음"이 아니라 원본 규칙을 보여준다
+                guard let rruleLine = origin.rruleLines.first else {
+                    return R.String.EventDetail.Repeating.notRepeatingTitle
+                }
+                guard let rrule = RRuleParser.parse(rruleLine) else {
+                    return rruleLine.strippingRRulePrefix
+                }
+                return rrule.appendingEndOptionText(to: rrule.frequencyText(), timeZone)
             }
-            return frequencyText
+
+            guard let repeating = currentRepeating else {
+                return R.String.EventDetail.Repeating.notRepeatingTitle
+            }
+            return repeating.repeatOptionDisplayText(timeZone)
         }
-        
-        return Publishers.CombineLatest(
+
+        return Publishers.CombineLatest3(
             self.subject.origin.compactMap { $0 },
-            self.subject.timeZone.compactMap { $0 }
+            self.subject.timeZone.compactMap { $0 },
+            self.subject.fields.compactMap { $0 }.map { $0.current.repeating }
         )
         .map(transform)
         .removeDuplicates()
         .eraseToAnyPublisher()
     }
-    
+
     var conferenceModel: AnyPublisher<ConferenceModel?, Never> {
         let transform: (GoogleCalendar.EventOrigin.ConferenceData?) -> ConferenceModel?
         transform = { conference in
@@ -835,6 +892,10 @@ private extension String {
             options: [.regularExpression, .caseInsensitive]
         ) != nil
     }
+
+    var strippingRRulePrefix: String {
+        self.hasPrefix("RRULE:") ? String(self.dropFirst("RRULE:".count)) : self
+    }
 }
 
 
@@ -893,6 +954,28 @@ private extension GoogleCalendar.EventOrigin {
             return nil
         }
     }
+
+    var rruleLines: [String] {
+        self.recurrence?.filter { $0.hasPrefix("RRULE:") } ?? []
+    }
+
+    // 저장이 규칙 배열의 모든 RRULE 줄을 한 줄로 통째 치환한다 — 복수 규칙은 편집을 열면 나머지가 조용히 지워지므로 왕복 대상에서 뺀다
+    var soleRRuleLine: String? {
+        self.rruleLines.count == 1 ? self.rruleLines.first : nil
+    }
+
+    func editableRepeating(_ timeZone: TimeZone) -> EventRepeating? {
+        guard let startTime = self.selectedTime(timeZone)?.startDate.timeIntervalSince1970,
+              let rruleLine = self.soleRRuleLine,
+              let rrule = RRuleParser.parse(rruleLine)
+        else { return nil }
+        return rrule.asEventRepeating(startTime: startTime, timeZone: timeZone)
+    }
+
+    // 규칙 텍스트는 있는데 앱 옵션으로 왕복 못 시키면(RRule+EventRepeating.swift 의 nil) 편집을 잠근다
+    func isRepeatLocked(_ timeZone: TimeZone) -> Bool {
+        self.rruleLines.isEmpty == false && self.editableRepeating(timeZone) == nil
+    }
 }
 
 private extension SelectedTime {
@@ -939,6 +1022,28 @@ private extension SelectedTime {
         }
     }
 }
+
+// MARK: - repeatOption text composition
+
+private extension EventRepeating {
+
+    func repeatOptionDisplayText(_ timeZone: TimeZone) -> String {
+        guard let rruleLine = self.asRRuleText(timeZone), let rrule = RRuleParser.parse(rruleLine)
+        else { return R.String.EventDetail.Repeating.notRepeatingTitle }
+        let frequencyText = EventRepeatingTimeSelectResult(self, timeZone: timeZone)?.text
+            ?? rrule.frequencyText()
+        return rrule.appendingEndOptionText(to: frequencyText, timeZone)
+    }
+}
+
+private extension RRule {
+
+    func appendingEndOptionText(to frequencyText: String, _ timeZone: TimeZone) -> String {
+        guard let endOptionText = self.endOptionText(timeZone) else { return frequencyText }
+        return "\(frequencyText)\n\(endOptionText)"
+    }
+}
+
 
 private extension GoogleCalendar.EventOrigin.GoogleEventTime {
 
