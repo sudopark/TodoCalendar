@@ -10,6 +10,7 @@ import Foundation
 import Combine
 import CombineExt
 import Domain
+import Extensions
 
 
 /// 위젯용 read-only Apple Calendar Repository.
@@ -46,6 +47,21 @@ extension AppleCalendarLocalAggregatedRepositoryImple {
 
     public func loadEventOrigin(id: String) -> AnyPublisher<AppleCalendar.EventOrigin?, Never> {
         return Just(nil).eraseToAnyPublisher()
+    }
+
+    public func updateEvent(
+        _ eventId: String,
+        _ params: AppleCalendar.EventEditParams,
+        scope: AppleCalendar.EventEditScope
+    ) async throws -> AppleCalendar.EventOrigin {
+        throw RuntimeError("apple calendar event write is not supported by the aggregated local repository")
+    }
+
+    public func removeEvent(
+        _ eventId: String,
+        scope: AppleCalendar.EventEditScope
+    ) async throws {
+        throw RuntimeError("apple calendar event write is not supported by the aggregated local repository")
     }
 
     public func resetCache() async throws { }

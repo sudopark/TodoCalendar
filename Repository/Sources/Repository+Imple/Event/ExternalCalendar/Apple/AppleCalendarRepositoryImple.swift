@@ -114,6 +114,28 @@ extension AppleCalendarRepositoryImple {
         return merged
     }
 
+    public func updateEvent(
+        _ eventId: String,
+        _ params: AppleCalendar.EventEditParams,
+        scope: AppleCalendar.EventEditScope
+    ) async throws -> AppleCalendar.EventOrigin {
+        let updated = try self.storeAccessor.updateEvent(eventId, params, scope: scope)
+        if !updated.isRepeating {
+            try? await self.cacheStorage.updateEventOrigin(updated)
+        }
+        logger.log(.appleCalendar, level: .info, "event updated", with: ["id": eventId])
+        return updated
+    }
+
+    public func removeEvent(
+        _ eventId: String,
+        scope: AppleCalendar.EventEditScope
+    ) async throws {
+        try self.storeAccessor.removeEvent(eventId, scope: scope)
+        try? await self.cacheStorage.removeEvents([eventId])
+        logger.log(.appleCalendar, level: .info, "event removed", with: ["id": eventId])
+    }
+
     public func resetCache() async throws {
         logger.log(.appleCalendar, level: .info, "cache reset")
         try await cacheStorage.resetAll()
