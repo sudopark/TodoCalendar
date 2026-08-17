@@ -892,10 +892,6 @@ private extension String {
             options: [.regularExpression, .caseInsensitive]
         ) != nil
     }
-
-    var strippingRRulePrefix: String {
-        self.hasPrefix("RRULE:") ? String(self.dropFirst("RRULE:".count)) : self
-    }
 }
 
 
@@ -980,15 +976,6 @@ private extension GoogleCalendar.EventOrigin {
 
 private extension SelectedTime {
 
-    var startDate: Date {
-        switch self {
-        case .at(let time): return time.date
-        case .singleAllDay(let time): return time.date
-        case .period(let start, _): return start.date
-        case .alldayPeriod(let start, _): return start.date
-        }
-    }
-
     // 읽기(EventOrigin.selectedTime)가 구글의 배타적 end.date를 가공 없이 담으므로, 왕복 항등을 위해 여기도 가공하지 않는다.
     func asGoogleEventTimePair(
         _ timeZone: TimeZone
@@ -1022,28 +1009,6 @@ private extension SelectedTime {
         }
     }
 }
-
-// MARK: - repeatOption text composition
-
-private extension EventRepeating {
-
-    func repeatOptionDisplayText(_ timeZone: TimeZone) -> String {
-        guard let rruleLine = self.asRRuleText(timeZone), let rrule = RRuleParser.parse(rruleLine)
-        else { return R.String.EventDetail.Repeating.notRepeatingTitle }
-        let frequencyText = EventRepeatingTimeSelectResult(self, timeZone: timeZone)?.text
-            ?? rrule.frequencyText()
-        return rrule.appendingEndOptionText(to: frequencyText, timeZone)
-    }
-}
-
-private extension RRule {
-
-    func appendingEndOptionText(to frequencyText: String, _ timeZone: TimeZone) -> String {
-        guard let endOptionText = self.endOptionText(timeZone) else { return frequencyText }
-        return "\(frequencyText)\n\(endOptionText)"
-    }
-}
-
 
 private extension GoogleCalendar.EventOrigin.GoogleEventTime {
 

@@ -24,7 +24,7 @@ import CommonPresentation
     var eventName: String = ""
     var timeText: SelectedTime?
     var ddayText: String = ""
-    var repeatText: String?
+    var repeatText: String = ""
     var location: String = ""
     var url: String = ""
     var notes: String = ""
@@ -149,6 +149,7 @@ final class AppleCalendarEventDetailViewEventHandler: Observable {
     var save: () -> Void = { }
     var remove: () -> Void = { }
     var selectNotEditableField: () -> Void = { }
+    var selectRepeatOption: () -> Void = { }
 
     func bind(_ viewModel: any AppleCalendarEventDetailViewModel) {
         self.onAppear = viewModel.refresh
@@ -164,6 +165,7 @@ final class AppleCalendarEventDetailViewEventHandler: Observable {
         self.save = viewModel.save
         self.remove = viewModel.remove
         self.selectNotEditableField = viewModel.selectNotEditableField
+        self.selectRepeatOption = viewModel.selectRepeatOption
     }
 }
 
@@ -232,9 +234,7 @@ struct AppleCalendarEventDetailView: View {
 
                         self.ddayView
 
-                        if let repeatText = self.state.repeatText {
-                            self.repeatView(repeatText)
-                        }
+                        self.repeatView(state.repeatText)
                     }
 
                     self.locationInputView
@@ -395,7 +395,7 @@ struct AppleCalendarEventDetailView: View {
             Spacer()
         }
         .onTapGesture {
-            eventHandlers.selectNotEditableField()
+            eventHandlers.selectRepeatOption()
         }
     }
 
