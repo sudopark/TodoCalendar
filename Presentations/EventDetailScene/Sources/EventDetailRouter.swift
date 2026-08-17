@@ -114,6 +114,7 @@ extension EventDetailRouter {
             let next = self.selectRepeatOptionSceneBuilder.makeSelectEventRepeatOptionScene(
                 selectTime: selectTime,
                 previousSelected: initalOption,
+                rruleRepresentableOnly: false,
                 listener: listener
             )
             self.currentScene?.present(next, animated: true)
