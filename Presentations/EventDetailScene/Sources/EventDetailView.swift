@@ -1159,7 +1159,7 @@ extension EventDetailMoreAction: Identifiable {
                 : "calendar::event::more_action:dday_candidate:register:item_name".localized()
         case .copy: return "calendar::event::more_action:copy:item_name".localized()
         case .addToTemplate: return "add to template".localized()
-        case .share: return "share".localized()
+        case .share: return "calendar::event::more_action:share:item_name".localized()
         case .transformToSchedule: return "calendar::event::more_action:transform_to::schedule".localized()
         case .transformToTodo: return "calendar::event::more_action:transform_to::todo".localized()
         }

@@ -18,15 +18,17 @@ import CommonPresentation
 // MARK: - Routing
 
 protocol EventDetailRouting: Routing, Sendable, AnyObject {
-    
+
     func attachInput(
         // TODO: listener 삭제해도됨
         _ listener: (any EventDetailInputListener)?
     ) -> (any EventDetailInputInteractor)?
-    
+
     func showTodoEventGuide()
-    
+
     func showForemostEventGuide()
+
+    func showShareSheet(text: String)
 }
 
 

@@ -162,11 +162,39 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
             // TODO:
             break
         case .share:
-            // TODO:
-            break
-            
+            self.shareEvent()
+
         default: break
         }
+    }
+
+    private func shareEvent() {
+        guard let basic = self.subject.basicData.value?.current,
+              let name = basic.name
+        else { return }
+
+        let addition = self.subject.additionalData.value?.current
+        let builder = EventDetailShareTextBuilder()
+        let timeText = basic.selectedTime.map(builder.timeText(from:))
+
+        self.eventTagUsecase.eventTag(id: basic.eventTagId)
+            .first()
+            .sink { [weak self] tag in
+                let model = EventDetailShareModel(
+                    name: name,
+                    isTodo: false,
+                    timeText: timeText,
+                    repeatText: basic.eventRepeating?.text.emptyAsNil(),
+                    tagName: tag?.name.emptyAsNil(),
+                    placeName: addition?.place?.placeName.emptyAsNil(),
+                    url: addition?.url?.emptyAsNil(),
+                    memo: addition?.memo?.emptyAsNil()
+                )
+                let text = builder.build(model)
+                guard !text.isEmpty else { return }
+                self?.router?.showShareSheet(text: text)
+            }
+            .store(in: &self.cancellables)
     }
     
     private func removeEventAfterConfirm(onlyThisTime: Bool) {
@@ -570,12 +598,9 @@ extension EditScheduleEventDetailViewModelImple {
                     )
                 ]
                 : []
-            // TODO: share 기능 일단 비활성화
             let otherActions: [EventDetailMoreAction] = isRepeating
-//                ? [.share]
-//                : [.toggleTo(isForemost: !isForemost), .share]
-                ? ddayActions + [.copy, .transformToTodo]
-                : [.toggleTo(isForemost: !isForemost)] + ddayActions + [.copy, .transformToTodo]
+                ? ddayActions + [.copy, .transformToTodo, .share]
+                : [.toggleTo(isForemost: !isForemost)] + ddayActions + [.copy, .transformToTodo, .share]
             return [removeActions, otherActions]
         }
         return Publishers.CombineLatest3(

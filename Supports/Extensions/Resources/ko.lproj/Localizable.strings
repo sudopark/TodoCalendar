@@ -136,6 +136,7 @@
 "calendar::event::more_action:dday_candidate:register:message" = "이 일정을 D-day 위젯 후보로 추가할까요? 위젯을 편집할 때 목록 맨 위에 표시됩니다.";
 "calendar::event::more_action:dday_candidate:unregister:message" = "이 일정을 D-day 위젯 후보에서 제거할까요?";
 "calendar::event::more_action:copy:item_name" = "이벤트 복사";
+"calendar::event::more_action:share:item_name" = "공유";
 "event_detail::share::field::time" = "시간";
 "event_detail::share::field::repeating" = "반복옵션";
 "event_detail::share::field::place" = "장소";
