@@ -7,6 +7,7 @@
 //
 
 import Domain
+import Extensions
 
 
 // MARK: - RRule display text helpers (shared across Google/Apple calendar detail)
@@ -55,9 +56,29 @@ extension RRule {
             return nil
         }
     }
+
+    func appendingEndOptionText(to frequencyText: String, _ timeZone: TimeZone) -> String {
+        guard let endOptionText = self.endOptionText(timeZone) else { return frequencyText }
+        return "\(frequencyText)\n\(endOptionText)"
+    }
+}
+
+extension EventRepeating {
+
+    func repeatOptionDisplayText(_ timeZone: TimeZone) -> String {
+        guard let rruleLine = self.asRRuleText(timeZone), let rrule = RRuleParser.parse(rruleLine)
+        else { return R.String.EventDetail.Repeating.notRepeatingTitle }
+        let frequencyText = EventRepeatingTimeSelectResult(self, timeZone: timeZone)?.text
+            ?? rrule.frequencyText()
+        return rrule.appendingEndOptionText(to: frequencyText, timeZone)
+    }
 }
 
 extension String {
+
+    var strippingRRulePrefix: String {
+        self.hasPrefix("RRULE:") ? String(self.dropFirst("RRULE:".count)) : self
+    }
 
     func appendDaysText(_ byDays: [RRule.ByDay]) -> String {
         guard !byDays.isEmpty else { return self }
