@@ -50,7 +50,13 @@ extension GoogleCalendarEventDetailSceneBuilerImple: GoogleCalendarEventDetailSc
             viewAppearance: self.viewAppearance
         )
 
-        let router = GoogleCalendarEventDetailRouter()
+        let selectRepeatOptionSceneBuilder = SelectEventRepeatOptionSceneBuilerImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearance
+        )
+        let router = GoogleCalendarEventDetailRouter(
+            selectRepeatOptionSceneBuilder: selectRepeatOptionSceneBuilder
+        )
         router.scene = viewController
         viewModel.router = router
         viewController.router = router

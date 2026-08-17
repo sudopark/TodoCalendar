@@ -6,7 +6,7 @@
 
 ## 1. 개요
 
-- 조회 + **기존 이벤트 편집·삭제** (이벤트 생성·반복 규칙 편집은 미지원 — #863)
+- 조회 + **기존 이벤트 편집·삭제** (이벤트 생성은 미지원 — #863)
 - **다중 계정** 동시 지원 (구글 계정 여러 개를 동시에 연동)
 - Google OAuth2 인증, Firebase GoogleSignIn SDK 사용
 - 연동 후 캘린더 목록/이벤트/색상 자동 동기화
@@ -346,7 +346,7 @@ activeCalendars() = 전체 캘린더 - offTagIds에 포함된 캘린더
 | 위치 | `location` | 가능 |
 | 설명 | `description` | 가능 |
 | 색상 | calendarId → 캘린더 색상 + eventColorId 오버라이드 | 가능 |
-| 반복 규칙 | `recurrence` | 불가 (탭 시 토스트) |
+| 반복 규칙 | `recurrence` | 가능 (앱 반복 옵션으로 왕복 못 시키는 규칙·복수 RRULE 줄은 잠금 → 탭 시 토스트) |
 | 참석자 목록 | `attendees[]` (이름, 이메일, 응답 상태) | 불가 (탭 시 토스트) |
 | 회의 정보 | `conferenceData.entryPoints[].uri` | 불가 (헤더 탭 시 토스트, 링크/코드는 열기·복사 그대로) |
 | 첨부파일 | `attachments[]` (title, fileUrl, mimeType) | 불가 (탭하면 Safari로 열기 — 토스트 아님) |
@@ -370,7 +370,9 @@ activeCalendars() = 전체 캘린더 - offTagIds에 포함된 캘린더
 
 ### 8.3 편집 대상 필드
 
-`summary` · `start`/`end`(종일 토글 포함) · `location` · `description` · `colorId` 만 편집한다. `recurrence`·`attendees`·`conferenceData`·`attachments` 는 `EventEditParams` 에 필드를 두지 않아 PATCH 바디에 실릴 경로 자체가 없다 — 구글 PATCH 는 부분 업데이트라 안 보낸 필드는 서버 원본이 유지되고, `RRuleParser` 가 못 읽는 `BYMONTHDAY`·EXDATE·RDATE 가 소실되지 않는다.
+`summary` · `start`/`end`(종일 토글 포함) · `location` · `description` · `colorId` · `recurrence` 를 편집한다. `attendees`·`conferenceData`·`attachments` 는 `EventEditParams` 에 필드를 두지 않아 PATCH 바디에 실릴 경로 자체가 없다 — 구글 PATCH 는 부분 업데이트라 안 보낸 필드는 서버 원본이 유지된다.
+
+`recurrence` 는 배열 전체를 보내되 RRULE 줄만 갈아끼운다(`replacingRRuleLine`) — EXDATE·RDATE 는 원본 그대로 보존된다. 규칙을 바꾼 저장은 회차가 아니라 시리즈 마스터(`recurringEventId ?? id`)를 대상으로 하고 수정 범위 선택 시트를 띄우지 않는다. 반복 옵션 선택 화면은 RRULE 로 표현 가능한 옵션만 제공한다(음력 제외).
 
 all-day 의 `end.date` 는 구글에서 배타적(exclusive)이다. 읽기가 가공 없이 담고 편집도 가공 없이 보내 왕복 항등을 유지한다 — 한쪽만 보정하면 저장할 때마다 하루씩 늘어난다.
 
@@ -653,7 +655,7 @@ flowchart TD
   2. 이벤트 상세 화면에서 RRULE을 텍스트로 파싱하여 표시
      → "매주 월, 수, 금 반복 (2026.12.31까지)"
   3. 앱의 EventRepeatingOption(EveryWeek 등)으로 변환하지 않음
-  4. → 구글 이벤트는 앱 내에서 반복 수정 불가 (읽기 전용)
+  4. → 앱 반복 옵션으로 왕복 가능한 규칙만 편집을 연다. 왕복 불가(미지원 키 등)하거나 RRULE 줄이 2개 이상이면 잠그고 원본 규칙 텍스트만 보여준다 — 저장이 RRULE 줄을 통째 치환하므로 여는 순간이 곧 파괴다
 
 RRuleParser 지원 범위:
   ✓ FREQ (DAILY/WEEKLY/MONTHLY/YEARLY)
