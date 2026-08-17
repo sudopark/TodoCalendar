@@ -344,7 +344,7 @@ extension MonthViewModelImple {
         guard let info = self.subject.currentMonthInfo.value,
               let range = info.shareRange(kind, for: day)
         else { return }
-        self.listener?.monthScene(didRequestShare: range)
+        self.listener?.monthScene(didRequestShare: range, kind: kind)
     }
 
     func clearDaySelection() {

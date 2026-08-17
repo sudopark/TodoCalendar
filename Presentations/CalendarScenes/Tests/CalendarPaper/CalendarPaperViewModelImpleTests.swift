@@ -146,10 +146,11 @@ extension CalendarPaperViewModelImpleTests {
         let range: Range<TimeInterval> = 0..<100
 
         // when
-        viewModel.monthScene(didRequestShare: range)
+        viewModel.monthScene(didRequestShare: range, kind: .week)
 
         // then
         XCTAssertEqual(self.spyRouter.didShowSharePreviewWithRange, range)
+        XCTAssertEqual(self.spyRouter.didShowSharePreviewWithKind, .week)
     }
 }
 
@@ -159,8 +160,10 @@ extension CalendarPaperViewModelImpleTests {
     private class SpyRouter: BaseSpyRouter, CalendarPaperRouting, @unchecked Sendable {
 
         var didShowSharePreviewWithRange: Range<TimeInterval>?
-        func showSharePreview(range: Range<TimeInterval>) {
+        var didShowSharePreviewWithKind: CalendarShareRangeKind?
+        func showSharePreview(range: Range<TimeInterval>, kind: CalendarShareRangeKind) {
             self.didShowSharePreviewWithRange = range
+            self.didShowSharePreviewWithKind = kind
         }
     }
     

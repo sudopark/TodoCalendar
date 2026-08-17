@@ -32,7 +32,9 @@ final class SharePreviewSceneBuilerImple: @unchecked Sendable {
 extension SharePreviewSceneBuilerImple: SharePreviewSceneBuilder {
 
     @MainActor
-    func makeSharePreviewScene(range: Range<TimeInterval>) -> any SharePreviewScene {
+    func makeSharePreviewScene(
+        range: Range<TimeInterval>, kind: CalendarShareRangeKind
+    ) -> any SharePreviewScene {
         let calendarSettingUsecase = self.usecaseFactory.makeCalendarSettingUsecase()
         let uiSettingUsecase = self.usecaseFactory.makeUISettingUsecase()
         let eventTagUsecase = self.usecaseFactory.makeEventTagUsecase()
@@ -50,6 +52,7 @@ extension SharePreviewSceneBuilerImple: SharePreviewSceneBuilder {
         )
         let viewModel = SharePreviewViewModelImple(
             range: range,
+            kind: kind,
             eventListUsecase: eventListUsecase,
             calendarSettingUsecase: calendarSettingUsecase,
             uiSettingUsecase: uiSettingUsecase,

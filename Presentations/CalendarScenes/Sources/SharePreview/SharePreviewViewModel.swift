@@ -44,6 +44,7 @@ protocol SharePreviewViewModel: AnyObject, Sendable, SharePreviewSceneInteractor
     var isTagFilterExpanded: AnyPublisher<Bool, Never> { get }
     var tagCellViewModels: AnyPublisher<[SharePreviewTagCellViewModel], Never> { get }
     var lineModels: AnyPublisher<[SharePreviewLineModel], Never> { get }
+    var sectionModels: AnyPublisher<[SharePreviewSectionModel], Never> { get }
     var dateHeaderText: AnyPublisher<String, Never> { get }
     var includeTagName: AnyPublisher<Bool, Never> { get }
     var isShareEnabled: AnyPublisher<Bool, Never> { get }
@@ -55,6 +56,7 @@ protocol SharePreviewViewModel: AnyObject, Sendable, SharePreviewSceneInteractor
 final class SharePreviewViewModelImple: SharePreviewViewModel, @unchecked Sendable {
 
     private let range: Range<TimeInterval>
+    private let kind: CalendarShareRangeKind
     private let eventListUsecase: any CalendarEventListhUsecase
     private let calendarSettingUsecase: any CalendarSettingUsecase
     private let uiSettingUsecase: any UISettingUsecase
@@ -66,6 +68,7 @@ final class SharePreviewViewModelImple: SharePreviewViewModel, @unchecked Sendab
 
     init(
         range: Range<TimeInterval>,
+        kind: CalendarShareRangeKind,
         eventListUsecase: any CalendarEventListhUsecase,
         calendarSettingUsecase: any CalendarSettingUsecase,
         uiSettingUsecase: any UISettingUsecase,
@@ -75,6 +78,7 @@ final class SharePreviewViewModelImple: SharePreviewViewModel, @unchecked Sendab
         appleCalendarUsecase: any AppleCalendarUsecase
     ) {
         self.range = range
+        self.kind = kind
         self.eventListUsecase = eventListUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
         self.uiSettingUsecase = uiSettingUsecase
@@ -166,7 +170,8 @@ extension SharePreviewViewModelImple {
             .sink { [weak self] lines, timeZone in
                 guard let self else { return }
                 let text = EventShareTextBuilder(timeZone: timeZone).build(
-                    lines, in: self.range, includeTagName: self.subject.includeTagName.value
+                    lines, in: self.range, kind: self.kind,
+                    includeTagName: self.subject.includeTagName.value
                 )
                 guard !text.isEmpty else { return }
                 self.router?.showShareSheet(text: text)
@@ -215,14 +220,25 @@ extension SharePreviewViewModelImple {
         .eraseToAnyPublisher()
     }
 
+    var sectionModels: AnyPublisher<[SharePreviewSectionModel], Never> {
+        return Publishers.CombineLatest(
+            self.lineModels, self.calendarSettingUsecase.currentTimeZone
+        )
+        .map { lines, timeZone in
+            SharePreviewSectionComposer(timeZone: timeZone).sections(of: lines)
+        }
+        .eraseToAnyPublisher()
+    }
+
     var dateHeaderText: AnyPublisher<String, Never> {
-        return self.calendarSettingUsecase.currentTimeZone
-            .map { [range] timeZone -> String in
-                let formatter = DateFormatter() |> \.timeZone .~ timeZone
-                formatter.dateFormat = "date_form::yyyy_MM_dd_E_".localized()
-                return formatter.string(from: Date(timeIntervalSince1970: range.lowerBound))
-            }
-            .eraseToAnyPublisher()
+        return Publishers.CombineLatest(
+            self.sectionModels, self.calendarSettingUsecase.currentTimeZone
+        )
+        .map { [range, kind] sections, timeZone in
+            SharePreviewSectionComposer(timeZone: timeZone)
+                .rangeHeaderText(of: sections, in: range, kind: kind)
+        }
+        .eraseToAnyPublisher()
     }
 
     var includeTagName: AnyPublisher<Bool, Never> {

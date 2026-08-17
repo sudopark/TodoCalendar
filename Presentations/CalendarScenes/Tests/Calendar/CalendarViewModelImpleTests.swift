@@ -1424,7 +1424,7 @@ private extension CalendarViewModelImpleTests {
         }
 
         func monthScene(didChange currentSelectedDay: CurrentSelectDayModel, and eventsThatDay: [any CalendarEvent]) { }
-        func monthScene(didRequestShare range: Range<TimeInterval>) { }
+        func monthScene(didRequestShare range: Range<TimeInterval>, kind: CalendarShareRangeKind) { }
         func dayEventListDidRequestShowAICommand() { }
     }
     

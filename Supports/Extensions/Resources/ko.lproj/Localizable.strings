@@ -323,6 +323,10 @@
 "share_preview::option::include_tag_name" = "태그명 함께 표시";
 "share_preview::share_button" = "공유하기";
 "share_preview::empty" = "공유할 일정이 없어요";
+"share_preview::header::this_week" = "이번주";
+"share_preview::header::last_week" = "저번주";
+"share_preview::header::next_week" = "다음주";
+"share_preview::header::week_of_month" = "%1$@ %2$d주";
 
 
 // MARK: - account

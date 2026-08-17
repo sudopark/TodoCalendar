@@ -23,7 +23,7 @@ import Extensions
 
     fileprivate var isTagFilterExpanded: Bool = false
     fileprivate var tagCellViewModels: [SharePreviewTagCellViewModel] = []
-    fileprivate var lineModels: [SharePreviewLineModel] = []
+    fileprivate var sectionModels: [SharePreviewSectionModel] = []
     fileprivate var dateHeaderText: String = ""
     fileprivate var includeTagName: Bool = false
     fileprivate var isShareEnabled: Bool = false
@@ -43,9 +43,9 @@ import Extensions
             .sink { [weak self] models in self?.tagCellViewModels = models }
             .store(in: &self.cancellables)
 
-        viewModel.lineModels
+        viewModel.sectionModels
             .receive(on: RunLoop.main)
-            .sink { [weak self] lines in self?.lineModels = lines }
+            .sink { [weak self] sections in self?.sectionModels = sections }
             .store(in: &self.cancellables)
 
         viewModel.dateHeaderText
@@ -255,12 +255,26 @@ struct SharePreviewView: View {
                 .font(self.appearance.fontSet.size(16, weight: .semibold).asFont)
                 .foregroundStyle(self.appearance.colorSet.text0.asColor)
 
-            if self.state.lineModels.isEmpty {
+            if self.state.sectionModels.isEmpty {
                 self.emptyView()
             } else {
-                ForEach(self.state.lineModels) { line in
-                    self.lineRowView(line)
+                ForEach(self.state.sectionModels) { section in
+                    self.sectionView(section)
                 }
+            }
+        }
+    }
+
+    private func sectionView(_ section: SharePreviewSectionModel) -> some View {
+        VStack(alignment: .leading, spacing: Metric.Spacing.small) {
+            if let dayHeaderText = section.dayHeaderText {
+                Text(dayHeaderText)
+                    .font(self.appearance.fontSet.normal.asFont)
+                    .foregroundStyle(self.appearance.colorSet.text1.asColor)
+                    .padding(.top, spacing: .small)
+            }
+            ForEach(section.lines) { line in
+                self.lineRowView(line)
             }
         }
     }

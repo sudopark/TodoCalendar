@@ -323,6 +323,10 @@
 "share_preview::option::include_tag_name" = "Include tag name";
 "share_preview::share_button" = "Share";
 "share_preview::empty" = "No events to share";
+"share_preview::header::this_week" = "This week";
+"share_preview::header::last_week" = "Last week";
+"share_preview::header::next_week" = "Next week";
+"share_preview::header::week_of_month" = "%1$@ week %2$d";
 
 
 // MARK: - account

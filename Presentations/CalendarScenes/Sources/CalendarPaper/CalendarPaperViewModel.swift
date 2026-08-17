@@ -91,8 +91,8 @@ extension CalendarPaperViewModelImple {
         self.listener?.calendarPaperDidRequestShowAICommand()
     }
 
-    func monthScene(didRequestShare range: Range<TimeInterval>) {
-        self.router?.showSharePreview(range: range)
+    func monthScene(didRequestShare range: Range<TimeInterval>, kind: CalendarShareRangeKind) {
+        self.router?.showSharePreview(range: range, kind: kind)
     }
 
     func scrollToVoiceInput() {
