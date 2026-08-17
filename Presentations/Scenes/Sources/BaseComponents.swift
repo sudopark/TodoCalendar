@@ -227,6 +227,31 @@ open class BaseRouterImple: Routing, @unchecked Sendable {
         }
     }
 
+    public func showShareSheet(image: UIImage) {
+        Task { @MainActor in
+            // UIImage를 그대로 넘기면 사진 앱 저장 액션이 안 뜨고 이름도 매번 같아 덮어쓴다
+            let item: Any = self.temporaryPNGFileURL(image) ?? image
+            let activityViewController = UIActivityViewController(
+                activityItems: [item], applicationActivities: nil
+            )
+            activityViewController.popoverPresentationController?.sourceView = self.scene?.view
+            self.scene?.present(activityViewController, animated: true)
+        }
+    }
+
+    private func temporaryPNGFileURL(_ image: UIImage) -> URL? {
+        guard let data = image.pngData() else { return nil }
+        let formatter = DateFormatter() |> \.dateFormat .~ "yyyyMMdd_HHmmss"
+        let fileName = "TodoCalendar_\(formatter.string(from: Date())).png"
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
+        do {
+            try data.write(to: url, options: .atomic)
+            return url
+        } catch {
+            return nil
+        }
+    }
+
     @MainActor
     public func showBottomSlide(_ slide: UIViewController) {
         slide.modalPresentationStyle = .custom

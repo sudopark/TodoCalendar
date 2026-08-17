@@ -272,6 +272,7 @@ extension Project {
                 "NSMicrophoneUsageDescription": "Microphone access is required to enter events and to-dos by voice.",
                 "NSSpeechRecognitionUsageDescription": "Speech recognition is required to convert your voice into events and to-dos.",
                 "NSCameraUsageDescription": "Camera access is required to read text from a photo you take.",
+                "NSPhotoLibraryAddUsageDescription": "Photo library access is required to save a shared event image to your photos.",
                 "NSSupportsLiveActivities": true
             ]),
             sources: [

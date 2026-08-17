@@ -2,3 +2,4 @@
 "NSMicrophoneUsageDescription" = "음성으로 일정·할일을 입력하기 위해 마이크 접근 권한이 필요합니다.";
 "NSSpeechRecognitionUsageDescription" = "음성을 텍스트로 변환해 일정·할일을 만들기 위해 음성 인식 권한이 필요합니다.";
 "NSCameraUsageDescription" = "촬영한 사진에서 텍스트를 읽기 위해 카메라 접근 권한이 필요합니다.";
+"NSPhotoLibraryAddUsageDescription" = "공유할 일정 이미지를 사진 앱에 저장하기 위해 사진 접근 권한이 필요합니다.";
