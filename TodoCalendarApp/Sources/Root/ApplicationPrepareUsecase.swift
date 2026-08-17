@@ -7,6 +7,7 @@
 
 import Foundation
 import Combine
+@preconcurrency import ActivityKit
 import Domain
 import CommonPresentation
 import Extensions
@@ -106,6 +107,7 @@ extension ApplicationPrepareUsecaseImple {
     }
     
     func prepareSignedIn(_ auth: Auth) async {
+        await self.endLiveActivities()
         self.sharedDataStore.clearAll {
             $0 != ShareDataKeys.accountInfo.rawValue
             && $0 != ShareDataKeys.externalCalendarAccounts.rawValue
@@ -121,6 +123,7 @@ extension ApplicationPrepareUsecaseImple {
     }
     
     func prepareSignedOut() async {
+        await self.endLiveActivities()
         self.sharedDataStore.clearAll {
             $0 != ShareDataKeys.externalCalendarAccounts.rawValue
         }
@@ -131,6 +134,13 @@ extension ApplicationPrepareUsecaseImple {
             try? await self.prepareDatabase(for: nil)
         } catch let error {
             logger.log(level: .critical, "signOut -> close db failed..: \(error)")
+        }
+    }
+    
+    /// 라이브액티비티는 계정 스코프다 — 안 끄면 전환된 계정 잠금화면에 이전 계정 이벤트가 남는다.
+    private func endLiveActivities() async {
+        for activity in Activity<EventCountdownActivityAttributes>.activities {
+            await activity.end(nil, dismissalPolicy: .immediate)
         }
     }
     

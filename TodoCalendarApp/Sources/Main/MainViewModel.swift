@@ -62,6 +62,7 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
     private let eventSyncUsecase: any EventSyncUsecase
     private let billingUsecase: any BillingUsecase
     private let aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
+    private let eventLiveActivityUsecase: any EventLiveActivityUsecase
     var router: (any MainRouting)?
 
     init(
@@ -74,7 +75,8 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
         appleCalendarUsecase: any AppleCalendarUsecase,
         eventSyncUsecase: any EventSyncUsecase,
         billingUsecase: any BillingUsecase,
-        aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
+        aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase,
+        eventLiveActivityUsecase: any EventLiveActivityUsecase
     ) {
         self.uiSettingUsecase = uiSettingUsecase
         self.temporaryUserDataMigrationUsecase = temporaryUserDataMigrationUsecase
@@ -86,6 +88,7 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
         self.eventSyncUsecase = eventSyncUsecase
         self.billingUsecase = billingUsecase
         self.aiAgentOrchestrationUsecase = aiAgentOrchestrationUsecase
+        self.eventLiveActivityUsecase = eventLiveActivityUsecase
 
         self.internalBinding()
     }
@@ -132,6 +135,7 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
                 self?.billingUsecase.recoverUnfinishedTransactions()
                 self?.aiAgentOrchestrationUsecase.refreshProcessingJobIfNeeded()
                 self?.aiAgentOrchestrationUsecase.loadUsage()
+                self?.handleWillEnterForeground()
             })
             .store(in: &self.cancellables)
     }
@@ -156,6 +160,15 @@ extension MainViewModelImple {
         self.appleCalendarUsecase.prepare()
         self.billingUsecase.startObservingTransactions()
         self.billingUsecase.recoverUnfinishedTransactions()
+        Task { [weak self] in
+            await self?.eventLiveActivityUsecase.prepare()
+        }
+    }
+
+    private func handleWillEnterForeground() {
+        Task { [weak self] in
+            await self?.eventLiveActivityUsecase.handleWillEnterForeground()
+        }
     }
     
     private func refreshViewAppearanceSettings() {

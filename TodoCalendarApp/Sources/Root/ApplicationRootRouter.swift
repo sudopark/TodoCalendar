@@ -388,6 +388,7 @@ extension ApplicationRootRouter {
         
         let builder = MainSceneBuilerImple(
             usecaseFactory: self.usecaseFactory,
+            sharedDataStore: self.applicationBase.sharedDataStore,
             viewAppearance: self.viewAppearanceStore.appearance,
             calendarSceneBulder: self.calendarSceneBulder(),
             settingSceneBuilder: self.settingSceneBuilder()

@@ -29,6 +29,7 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var stubSyncUsecase: StubEventSyncUsecase!
     private var spyBillingUsecase: SpyBillingUsecase!
     private var stubAIOrchestrationUsecase: StubAIAgentOrchestrationUsecase!
+    private var spyEventLiveActivityUsecase: SpyEventLiveActivityUsecase!
     var cancelBag: Set<AnyCancellable>!
 
     override func setUpWithError() throws {
@@ -43,6 +44,7 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubSyncUsecase = .init()
         self.spyBillingUsecase = .init()
         self.stubAIOrchestrationUsecase = .init()
+        self.spyEventLiveActivityUsecase = .init()
         self.cancelBag = .init()
         self.timeout = 0.01
     }
@@ -59,6 +61,7 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubSyncUsecase = nil
         self.spyBillingUsecase = nil
         self.stubAIOrchestrationUsecase = nil
+        self.spyEventLiveActivityUsecase = nil
         self.cancelBag = nil
     }
 
@@ -77,7 +80,8 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
             appleCalendarUsecase: self.spyAppleCalendarUsecase,
             eventSyncUsecase: self.stubSyncUsecase,
             billingUsecase: self.spyBillingUsecase,
-            aiAgentOrchestrationUsecase: self.stubAIOrchestrationUsecase
+            aiAgentOrchestrationUsecase: self.stubAIOrchestrationUsecase,
+            eventLiveActivityUsecase: self.spyEventLiveActivityUsecase
         )
         viewModel.router = self.spyRouter
         self.spyRouter.didCalendarAttached = {
@@ -102,7 +106,8 @@ extension MainViewModelImpleTests {
             appleCalendarUsecase: self.spyAppleCalendarUsecase,
             eventSyncUsecase: self.stubSyncUsecase,
             billingUsecase: self.spyBillingUsecase,
-            aiAgentOrchestrationUsecase: self.stubAIOrchestrationUsecase
+            aiAgentOrchestrationUsecase: self.stubAIOrchestrationUsecase,
+            eventLiveActivityUsecase: self.spyEventLiveActivityUsecase
         )
         viewModel.router = self.spyRouter
         return viewModel
@@ -464,6 +469,35 @@ extension MainViewModelImpleTests {
         }
     }
 
+    final class SpyEventLiveActivityUsecase: EventLiveActivityUsecase, @unchecked Sendable {
+
+        var didPrepare: Bool = false
+        var didHandleWillEnterForeground: Bool = false
+        var didStop: Bool = false
+        var whenDidPrepare: (() -> Void)?
+        var whenDidHandleWillEnterForeground: (() -> Void)?
+
+        func startActivity(_ target: LiveActivityTarget) async throws { }
+
+        func stopActivity() async {
+            self.didStop = true
+        }
+
+        func prepare() async {
+            self.didPrepare = true
+            self.whenDidPrepare?()
+        }
+
+        func handleWillEnterForeground() async {
+            self.didHandleWillEnterForeground = true
+            self.whenDidHandleWillEnterForeground?()
+        }
+
+        var registeredTarget: AnyPublisher<LiveActivityTarget?, Never> {
+            return Empty().eraseToAnyPublisher()
+        }
+    }
+
     private final class SpyBillingUsecase: BillingUsecase, @unchecked Sendable {
 
         var didRecoverUnfinishedTimes: Int = 0
@@ -557,5 +591,42 @@ extension MainViewModelImpleTests {
         // then
         XCTAssertNil(self.stubAIOrchestrationUsecase.didLoadUsage)
         withExtendedLifetime(viewModel) { }
+    }
+}
+
+
+// MARK: - 라이브액티비티
+
+extension MainViewModelImpleTests {
+
+    func testViewModel_whenPrepare_prepareLiveActivity() {
+        // given
+        let expect = expectation(description: "prepare 시 라이브액티비티 복원이 걸린다")
+        let viewModel = self.makeViewModelWithoutPrepare()
+        self.spyEventLiveActivityUsecase.whenDidPrepare = { expect.fulfill() }
+
+        // when
+        viewModel.prepare()
+
+        // then
+        self.wait(for: [expect], timeout: 0.1)
+        XCTAssertEqual(self.spyEventLiveActivityUsecase.didPrepare, true)
+    }
+
+    func testViewModel_whenWillEnterForeground_reconcileLiveActivity() {
+        // given
+        let expect = expectation(description: "포그라운드 복귀 시 등록 상태를 재조정한다")
+        let viewModel = self.makeViewModelWithoutPrepare()
+        viewModel.prepare()
+        self.spyEventLiveActivityUsecase.whenDidHandleWillEnterForeground = { expect.fulfill() }
+
+        // when
+        NotificationCenter.default.post(
+            name: UIApplication.willEnterForegroundNotification, object: nil
+        )
+
+        // then
+        self.wait(for: [expect], timeout: 0.1)
+        XCTAssertEqual(self.spyEventLiveActivityUsecase.didHandleWillEnterForeground, true)
     }
 }

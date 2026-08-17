@@ -31,7 +31,7 @@ final class ApplicationRootViewModelImpleTests {
             externalCalendarServiceUsecase: StubExternalCalendarIntegrationUsecase([]),
             userNotificationUsecase: StubUserNotificationUsecase(),
             backgroundEventSyncUsecase: StubBackgroundEventSyncUsecase(),
-            appUpdateCheckUsecase: self.spyAppUpdateCheckUsecase
+            appUpdateCheckUsecase: self.spyAppUpdateCheckUsecase,
         )
     }
 }
@@ -99,7 +99,6 @@ extension ApplicationRootViewModelImpleTests {
 }
 
 
-// MARK: - doubles
 
 private final class FakeAccountUsecase: StubAccountUsecase, @unchecked Sendable {
 
@@ -177,3 +176,4 @@ private final class SpyAppUpdateCheckUsecase: AppUpdateCheckUsecase, @unchecked 
         return Empty().eraseToAnyPublisher()
     }
 }
+
