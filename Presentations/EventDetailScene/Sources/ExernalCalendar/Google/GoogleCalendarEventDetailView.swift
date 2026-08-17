@@ -261,18 +261,6 @@ struct GoogleCalendarEventDetailView: View {
     }
     @FocusState private var isFocusInput: InputFields?
 
-    private enum TimeSelecting {
-        case start
-        case end
-
-        var title: String {
-            switch self {
-            case .start: return "calendar::event_time::start".localized()
-            case .end: return "calendar::event_time::end".localized()
-            }
-        }
-    }
-    @State private var isTimeSelecting: TimeSelecting?
     @State private var isColorSelecting: Bool = false
 
     /// Google Calendar 이벤트 색상은 계정과 무관하게 고정된 "1".."11" 팔레트다.
@@ -404,7 +392,11 @@ struct GoogleCalendarEventDetailView: View {
 
     private var nameInputView: some View {
         @Bindable var state = self.state
-        return HStack(spacing: Metric.Spacing.regular) {
+        return EventNameInputView(
+            name: $state.eventName,
+            focusValue: InputFields.name,
+            focusState: $isFocusInput
+        ) {
             EventTagColorView(
                 GoogleCalendarEventColorSource(
                     calendarId: state.eventColor?.calendarId ?? "",
@@ -415,24 +407,8 @@ struct GoogleCalendarEventDetailView: View {
                     .fill(color)
                     .frame(width: 6)
             }
-
-            TextField(
-                "",
-                text: $state.eventName,
-                prompt: Text("eventDetail.edit::add_new_name::placeholder".localized())
-                    .foregroundStyle(appearance.colorSet.placeHolder.asColor)
-            )
-            .focused($isFocusInput, equals: .name)
-            .autocorrectionDisabled()
-            .textInputAutocapitalization(.never)
-            .font(appearance.fontSet.size(22, weight: .semibold).asFont)
-            .foregroundStyle(appearance.colorSet.text0.asColor)
-            .onChange(of: state.eventName) { _, new in
-                eventHandlers.enterName(new)
-            }
-            .onSubmit { self.isFocusInput = nil }
         }
-        .fixedSize(horizontal: false, vertical: true)
+        .eventHandler(\.onChangeName, eventHandlers.enterName)
     }
 
     private var eventTypeView: some View {
@@ -451,128 +427,11 @@ struct GoogleCalendarEventDetailView: View {
     }
 
     private var timeSelectView: some View {
-        VStack(spacing: Metric.Spacing.small) {
-            HStack(spacing: Metric.Spacing.large) {
-                Image(systemName: "clock")
-                    .font(.system(size: 16, weight: .light))
-                    .foregroundStyle(appearance.colorSet.text1.asColor)
-
-                self.selectedTimeView()
-
-                Spacer()
-
-                self.toggleAllDayView
-            }
-
-            if let selecting = self.isTimeSelecting {
-                self.timePickerView(selecting)
-            }
-        }
-    }
-
-    private func selectedTimeView() -> some View {
-        guard let time = state.timeText else {
-            return EmptyView().asAnyView()
-        }
-        let isInvalid = time.isValid == false
-        switch time {
-        case .period(let start, let end), .alldayPeriod(let start, let end):
-            return HStack(spacing: Metric.Spacing.large) {
-                self.timeView(start, .start, isInvalid: isInvalid)
-                Image(systemName: "chevron.right")
-                    .foregroundStyle(appearance.colorSet.text1.asColor)
-                self.timeView(end, .end, isInvalid: isInvalid)
-            }
-            .asAnyView()
-
-        case .singleAllDay(let day):
-            return HStack(spacing: Metric.Spacing.large) {
-                self.timeView(day, .start, isInvalid: isInvalid)
-                Spacer()
-            }
-            .asAnyView()
-
-        case .at(let day):
-            return self.timeView(day, .start, isInvalid: isInvalid).asAnyView()
-        }
-    }
-
-    private func timeView(
-        _ text: SelectTimeText, _ position: TimeSelecting, isInvalid: Bool
-    ) -> some View {
-        let isSelecting = self.isTimeSelecting == position
-        let textColor = isSelecting ? appearance.colorSet.text1.asColor : appearance.colorSet.text0.asColor
-        return EventTimeTextView(text, textColor: textColor, isStrikethrough: isInvalid)
-            .onTapGesture {
-                self.appearance.impactIfNeed()
-                self.updateTimePickerShowing(position)
-            }
-    }
-
-    private func updateTimePickerShowing(_ selecting: TimeSelecting) {
-        appearance.withAnimationIfNeed {
-            self.isTimeSelecting = self.isTimeSelecting == selecting ? nil : selecting
-        }
-        self.isFocusInput = nil
-    }
-
-    private var toggleAllDayView: some View {
-        let isAllDay = state.timeText?.isAllDay ?? false
-        return Button {
-            eventHandlers.toggleAllDay()
-        } label: {
-            Text("calendar::event_time::allday".localized())
-                .foregroundStyle(
-                    isAllDay ? appearance.colorSet.selectedDayText.asColor : appearance.colorSet.text2.asColor
-                )
-                .padding(.vertical, spacing: .small)
-                .padding(.horizontal, spacing: .large)
-        }
-        .background(self.toggleAllDayBackgroundView(isAllDay))
-    }
-
-    private func toggleAllDayBackgroundView(_ isAllDay: Bool) -> some View {
-        Group {
-            if isAllDay {
-                RoundedRectangle(cornerRadius: Metric.Radius.sheet)
-                    .fill(appearance.colorSet.selectedDayBackground.asColor)
-            } else {
-                RoundedRectangle(cornerRadius: Metric.Radius.sheet)
-                    .stroke(appearance.colorSet.text2.asColor, lineWidth: 1)
-            }
-        }
-    }
-
-    private func timePickerView(_ selecting: TimeSelecting) -> some View {
-        let isAllDay = state.timeText?.isAllDay ?? false
-        let binding = Binding<Date>(
-            get: {
-                switch selecting {
-                case .start: return state.timeText?.startDate ?? Date()
-                case .end: return state.timeText?.endDate ?? Date()
-                }
-            },
-            set: { newDate in
-                switch selecting {
-                case .start: eventHandlers.selectStartTime(newDate)
-                case .end: eventHandlers.selectEndTime(newDate)
-                }
-            }
-        )
-        return VStack(alignment: .leading, spacing: Metric.Spacing.xsmall) {
-            Text(selecting.title)
-                .font(appearance.fontSet.subNormal.asFont)
-                .foregroundStyle(appearance.colorSet.text1.asColor)
-
-            DatePicker(
-                "", selection: binding,
-                displayedComponents: isAllDay ? [.date] : [.date, .hourAndMinute]
-            )
-            .datePickerStyle(.compact)
-            .labelsHidden()
-            .invertColorIfNeed(appearance)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        EventTimeSelectView(time: state.timeText)
+            .eventHandler(\.onSelectStartTime, eventHandlers.selectStartTime)
+            .eventHandler(\.onSelectEndTime, eventHandlers.selectEndTime)
+            .eventHandler(\.onToggleAllDay, eventHandlers.toggleAllDay)
+            .eventHandler(\.onBeginSelecting) { self.isFocusInput = nil }
     }
 
     private func ddayView(_ text: String) -> some View {
@@ -702,28 +561,15 @@ struct GoogleCalendarEventDetailView: View {
     }
 
     private var locationInputView: some View {
-        HStack(spacing: Metric.Spacing.large) {
-            Image(systemName: "map")
-                .font(.system(size: 16, weight: .light))
-                .foregroundStyle(appearance.colorSet.text1.asColor)
-
-            @Bindable var state = self.state
-            TextField(
-                "",
-                text: $state.location,
-                prompt: Text("eventDetail.place::placeholder".localized())
-                    .foregroundStyle(appearance.colorSet.placeHolder.asColor)
-            )
-            .focused($isFocusInput, equals: .location)
-            .autocorrectionDisabled()
-            .textInputAutocapitalization(.never)
-            .foregroundStyle(appearance.colorSet.text0.asColor)
-            .font(appearance.fontSet.size(14).asFont)
-            .onChange(of: state.location) { _, new in
-                eventHandlers.enterLocation(new)
-            }
-            .onSubmit { self.isFocusInput = nil }
-        }
+        @Bindable var state = self.state
+        return EventTextInputRow(
+            systemImageName: "map",
+            text: $state.location,
+            placeholder: "eventDetail.place::placeholder".localized(),
+            focusValue: InputFields.location,
+            focusState: $isFocusInput
+        )
+        .eventHandler(\.onChangeText) { eventHandlers.enterLocation($0) }
     }
 
     private func conferenceView(_ model: ConferenceModel) -> some View {
@@ -895,37 +741,14 @@ struct GoogleCalendarEventDetailView: View {
     }
 
     private var memoInputView: some View {
-        HStack(alignment: .top, spacing: Metric.Spacing.large) {
-            Image(systemName: "doc.text")
-                .font(.system(size: 16, weight: .light))
-                .foregroundStyle(appearance.colorSet.text1.asColor)
-                .padding(.top, spacing: .small)
-
-            ZStack(alignment: .topLeading) {
-
-                if state.memo.isEmpty {
-                    Text("eventDetail.edit::memo".localized())
-                        .foregroundStyle(appearance.colorSet.placeHolder.asColor)
-                        .font(appearance.fontSet.size(14).asFont)
-                        .padding(.leading, spacing: .xsmall)
-                        .padding(.top, spacing: .regular)
-                }
-
-                @Bindable var state = self.state
-                TextEditor(text: $state.memo)
-                    .focused($isFocusInput, equals: .memo)
-                    .autocorrectionDisabled()
-                    .multilineTextAlignment(.leading)
-                    .foregroundStyle(appearance.colorSet.text0.asColor)
-                    .font(appearance.fontSet.size(14).asFont)
-                    .textInputAutocapitalization(.never)
-                    .scrollContentBackground(.hidden)
-                    .frame(minHeight: 80)
-                    .onChange(of: state.memo) { _, new in
-                        eventHandlers.enterMemo(new)
-                    }
-            }
-        }
+        @Bindable var state = self.state
+        return EventMemoInputView(
+            memo: $state.memo,
+            placeholder: "eventDetail.edit::memo".localized(),
+            focusValue: InputFields.memo,
+            focusState: $isFocusInput
+        )
+        .eventHandler(\.onChangeMemo) { eventHandlers.enterMemo($0) }
     }
 
     private func attachmentsView(_ attachments: [AttachmentModel]) -> some View {
@@ -959,27 +782,6 @@ struct GoogleCalendarEventDetailView: View {
                 Spacer()
             }
             .padding(.leading, spacing: .indent)
-        }
-    }
-}
-
-
-private extension SelectedTime {
-
-    var startDate: Date {
-        switch self {
-        case .at(let time): return time.date
-        case .singleAllDay(let time): return time.date
-        case .period(let start, _): return start.date
-        case .alldayPeriod(let start, _): return start.date
-        }
-    }
-
-    var endDate: Date? {
-        switch self {
-        case .period(_, let end): return end.date
-        case .alldayPeriod(_, let end): return end.date
-        default: return nil
         }
     }
 }
