@@ -442,27 +442,10 @@ extension DayEventListViewModelImple {
                 .sortedByCreateTime()
                 .compactMap { TodoEventCellViewModel($0, in: range, timeZone, is24HourForm) }
 
-            let eventCellsWithTime = dayAndEvents.events
-                .sortedByEventTime()
-                .compactMap { event -> (any EventCellViewModel)? in
-                    switch event {
-                    case let todo as TodoCalendarEvent:
-                        return TodoEventCellViewModel(todo, in: range, timeZone, is24HourForm)
-
-                    case let schedule as ScheduleCalendarEvent:
-                        return ScheduleEventCellViewModel(schedule, in: range, timeZone: timeZone, is24HourForm)
-                    case let holiday as HolidayCalendarEvent:
-                        return HolidayEventCellViewModel(holiday)
-
-                    case let google as GoogleCalendarEvent:
-                        return GoogleCalendarEventCellViewModel(google, in: range, timeZone, is24HourForm)
-
-                    case let apple as AppleCalendarEvent:
-                        return AppleCalendarEventCellViewModel(apple, in: range, timeZone, is24HourForm)
-
-                    default: return nil
-                }
-            }
+            let mapper = EventCellViewModelMapper(range: range, timeZone: timeZone, is24hourForm: is24HourForm)
+            let eventCellsWithTime = mapper.cellViewModels(
+                from: dayAndEvents.events.sortedByEventTime()
+            )
 
             return (currentTodoCells, eventCellsWithTime)
         }
