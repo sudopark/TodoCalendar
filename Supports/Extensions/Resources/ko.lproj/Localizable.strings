@@ -544,6 +544,11 @@
 "widget.aiCommand::title" = "AI로 추가";
 "widget.aiCommand::explain" = "탭 한 번으로 AI 입력을 여세요.";
 
+// MARK: - liveActivity
+
+"liveActivity::stale" = "지금 시작";
+"liveActivity::action::end" = "종료";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "지원하지 않는 형식의 링크입니다.\n앱을 최신 버전으로 업데이트 해주세요.";
