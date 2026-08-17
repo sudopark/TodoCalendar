@@ -48,7 +48,13 @@ extension AppleCalendarEventDetailSceneBuilderImple: AppleCalendarEventDetailSce
             viewAppearance: self.viewAppearance
         )
 
-        let router = AppleCalendarEventDetailRouter()
+        let selectRepeatOptionSceneBuilder = SelectEventRepeatOptionSceneBuilerImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearance
+        )
+        let router = AppleCalendarEventDetailRouter(
+            selectRepeatOptionSceneBuilder: selectRepeatOptionSceneBuilder
+        )
         router.scene = viewController
         viewModel.router = router
 
