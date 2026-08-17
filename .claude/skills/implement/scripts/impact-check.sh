@@ -115,6 +115,10 @@ fi
 if printf '%s\n' "$FILES" | grep -q "^TodoCalendarApp/AppExtensions/Share/"; then
   schemes+=("TodoCalendarApp" "TodoCalendarAppShare")
 fi
+# LiveActivity 소스는 App+Widget+Share 세 타겟이 각자 직접 컴파일한다(Project+Templates의 sources 글롭).
+if printf '%s\n' "$FILES" | grep -q "^TodoCalendarApp/Sources/LiveActivity/"; then
+  schemes+=("TodoCalendarApp" "TodoCalendarAppWidget" "TodoCalendarAppShare")
+fi
 
 # ---- tuist generate (테스트보다 선행 액션 — 첫 섹션으로 출력) ----
 # tuist 재생성 필요: (1) .swift 소스 멤버십 추가/삭제/이동(ADRC), (2) 매니페스트(Project/Workspace/Package/Tuist) 변경(수정 포함).
