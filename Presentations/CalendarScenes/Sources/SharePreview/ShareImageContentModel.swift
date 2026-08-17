@@ -53,7 +53,7 @@ struct ShareImageListSection: Equatable, Sendable, Identifiable {
 
 // MARK: - Month 컴포넌트 Sendable 보강
 
-// Month 파일 소속이라 여기서 retroactive 선언 — 셋 다 불변 값 타입이고 저장 프로퍼티가 전부 Sendable이라 안전하다.
+// 타입 홈 파일 밖 소급 conformance라 @unchecked가 강제된다. 저장 프로퍼티는 전부 Sendable임을 확인함.
 extension WeekRowModel: @unchecked Sendable {}
 extension DayCellViewModel: @unchecked Sendable {}
 extension EventOnWeek: @unchecked Sendable {}

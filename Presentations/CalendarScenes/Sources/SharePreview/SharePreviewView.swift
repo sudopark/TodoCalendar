@@ -27,6 +27,10 @@ import Extensions
     fileprivate var dateHeaderText: String = ""
     fileprivate var includeTagName: Bool = false
     fileprivate var isShareEnabled: Bool = false
+    fileprivate var format: SharePreviewFormat = .text
+    fileprivate var imageContentModel: ShareImageContentModel? = nil
+    fileprivate var imageHeaderText: String = ""
+    fileprivate var isIncludeTagNameOptionVisible: Bool = true
 
     func bind(_ viewModel: any SharePreviewViewModel) {
 
@@ -62,6 +66,26 @@ import Extensions
             .receive(on: RunLoop.main)
             .sink { [weak self] isEnable in self?.isShareEnabled = isEnable }
             .store(in: &self.cancellables)
+
+        viewModel.format
+            .receive(on: RunLoop.main)
+            .sink { [weak self] format in self?.format = format }
+            .store(in: &self.cancellables)
+
+        viewModel.imageContentModel
+            .receive(on: RunLoop.main)
+            .sink { [weak self] content in self?.imageContentModel = content }
+            .store(in: &self.cancellables)
+
+        viewModel.imageHeaderText
+            .receive(on: RunLoop.main)
+            .sink { [weak self] text in self?.imageHeaderText = text }
+            .store(in: &self.cancellables)
+
+        viewModel.isIncludeTagNameOptionVisible
+            .receive(on: RunLoop.main)
+            .sink { [weak self] isVisible in self?.isIncludeTagNameOptionVisible = isVisible }
+            .store(in: &self.cancellables)
     }
 }
 
@@ -77,6 +101,7 @@ final class SharePreviewViewEventHandler: Observable {
     var deselectAllTags: () -> Void = { }
     var toggleLine: (String) -> Void = { _ in }
     var toggleIncludeTagName: (Bool) -> Void = { _ in }
+    var selectFormat: (SharePreviewFormat) -> Void = { _ in }
     var share: () -> Void = { }
 
     func bind(_ viewModel: any SharePreviewViewModel) {
@@ -88,6 +113,7 @@ final class SharePreviewViewEventHandler: Observable {
         self.deselectAllTags = viewModel.deselectAllTags
         self.toggleLine = viewModel.toggleLine(_:)
         self.toggleIncludeTagName = viewModel.toggleIncludeTagName(_:)
+        self.selectFormat = viewModel.selectFormat(_:)
         self.share = viewModel.share
     }
 }
@@ -138,16 +164,22 @@ struct SharePreviewView: View {
                 .eventHandler(\.onClose, self.eventHandlers.close)
                 .padding(.horizontal, spacing: .regular)
 
+            self.formatPickerView()
+                .padding(.horizontal, spacing: .regular)
+                .padding(.top, spacing: .small)
+
             self.tagFilterView()
                 .padding(.horizontal, spacing: .regular)
                 .padding(.top, spacing: .regular)
 
             ScrollView {
-                self.bodyView()
+                self.formatBodyView()
                     .padding(spacing: .regular)
             }
 
-            self.optionView()
+            if self.state.isIncludeTagNameOptionVisible {
+                self.optionView()
+            }
 
             BottomConfirmButton(
                 title: "share_preview::share_button".localized(),
@@ -156,6 +188,27 @@ struct SharePreviewView: View {
             .eventHandler(\.onTap, self.eventHandlers.share)
         }
         .background(self.appearance.colorSet.bg0.asColor)
+    }
+
+    // MARK: - format picker
+
+    private func formatPickerView() -> some View {
+        Picker("", selection: Binding(
+            get: { self.state.format },
+            set: { self.eventHandlers.selectFormat($0) }
+        )) {
+            Text("share_preview::format::text".localized())
+                .font(self.appearance.fontSet.normal.asFont)
+                .foregroundStyle(self.appearance.colorSet.text0.asColor)
+                .tag(SharePreviewFormat.text)
+            Text("share_preview::format::image".localized())
+                .font(self.appearance.fontSet.normal.asFont)
+                .foregroundStyle(self.appearance.colorSet.text0.asColor)
+                .tag(SharePreviewFormat.image)
+        }
+        .pickerStyle(.segmented)
+        // 세그먼트 색은 시스템 트레이트를 따라가므로 앱 테마에 국소 고정한다.
+        .colorScheme(self.appearance.colorSet is DefaultDarkColorSet ? .dark : .light)
     }
 
     // MARK: - tag filter dropdown
@@ -248,6 +301,28 @@ struct SharePreviewView: View {
     }
 
     // MARK: - event line list
+
+    @ViewBuilder
+    private func formatBodyView() -> some View {
+        switch self.state.format {
+        case .text:
+            self.bodyView()
+        case .image:
+            if let content = self.state.imageContentModel {
+                ShareImageCardView(
+                    headerText: self.state.imageHeaderText, content: content, cardWidth: self.cardWidth
+                )
+                .eventHandler(\.lineTapped, self.eventHandlers.toggleLine)
+            } else {
+                self.emptyView()
+            }
+        }
+    }
+
+    // SharePreviewRouter의 cardWidth와 같은 값이어야 미리보기와 공유 이미지가 어긋나지 않는다.
+    private var cardWidth: CGFloat {
+        UIScreen.main.bounds.width - Metric.Spacing.regular * 2
+    }
 
     private func bodyView() -> some View {
         VStack(alignment: .leading, spacing: Metric.Spacing.small) {

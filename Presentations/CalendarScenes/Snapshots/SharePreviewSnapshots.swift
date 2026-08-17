@@ -49,7 +49,11 @@ final class SharePreviewSnapshots: XCTestCase {
         lineModels: [SharePreviewLineModel],
         dateHeaderText: String,
         includeTagName: Bool,
-        isShareEnabled: Bool
+        isShareEnabled: Bool,
+        format: SharePreviewFormat = .text,
+        imageContentModel: ShareImageContentModel? = nil,
+        imageHeaderText: String? = nil,
+        isIncludeTagNameOptionVisible: Bool = true
     ) -> any SharePreviewViewModel {
         return FakeSharePreviewViewModel(
             isTagFilterExpanded: isTagFilterExpanded,
@@ -57,7 +61,11 @@ final class SharePreviewSnapshots: XCTestCase {
             lineModels: lineModels,
             dateHeaderText: dateHeaderText,
             includeTagName: includeTagName,
-            isShareEnabled: isShareEnabled
+            isShareEnabled: isShareEnabled,
+            format: format,
+            imageContentModel: imageContentModel,
+            imageHeaderText: imageHeaderText ?? dateHeaderText,
+            isIncludeTagNameOptionVisible: isIncludeTagNameOptionVisible
         )
     }
 
@@ -196,6 +204,109 @@ final class SharePreviewSnapshots: XCTestCase {
                 dateHeaderText: "08/20/2026 (Thu)",
                 includeTagName: false,
                 isShareEnabled: false
+            )
+            let state = SharePreviewViewState()
+            state.bind(viewModel)
+            RunLoop.main.run(until: Date().addingTimeInterval(0.05))
+
+            return SharePreviewView()
+                .environment(state)
+                .environment(SharePreviewViewEventHandler())
+                .environment(self.makeAppearance(theme))
+        }
+    }
+
+    // MARK: - imageFormat: day list, 세그먼트 이미지 선택 · 태그명 옵션 줄 없음
+
+    @MainActor
+    func test_imageFormat_dayList() {
+        let content = ShareImageContentModel.list([
+            ShareImageListSection(
+                dayStart: nil, dayHeaderText: nil,
+                lines: [self.todoLine("todo-1", name: "장보기", tagId: .custom("personal"))]
+            ),
+            ShareImageListSection(
+                dayStart: 0, dayHeaderText: nil,
+                lines: [
+                    self.scheduleLine(
+                        "sc-1", name: "팀 스탠드업", tagId: .custom("work"),
+                        periodText: .singleText(.init(text: "09:00"))
+                    ),
+                    self.scheduleLine(
+                        "sc-2", name: "디자인 리뷰", tagId: .custom("work"),
+                        periodText: .doubleText(.init(text: "13:00"), .init(text: "14:30")),
+                        periodDescription: "1시간 30분",
+                        isExcluded: true
+                    )
+                ]
+            )
+        ])
+
+        captureSnapshotPair(named: "imageFormat_dayList", layout: .fullScreen) { theme in
+            let viewModel = self.makeViewModel(
+                isTagFilterExpanded: false,
+                tagCellViewModels: [
+                    .init(tagId: .custom("work"), name: "업무", isOn: true),
+                    .init(tagId: .custom("personal"), name: "개인", isOn: true)
+                ],
+                lineModels: [],
+                dateHeaderText: "08/15/2026 (Sat)",
+                includeTagName: false,
+                isShareEnabled: true,
+                format: .image,
+                imageContentModel: content,
+                isIncludeTagNameOptionVisible: false
+            )
+            let state = SharePreviewViewState()
+            state.bind(viewModel)
+            RunLoop.main.run(until: Date().addingTimeInterval(0.05))
+
+            return SharePreviewView()
+                .environment(state)
+                .environment(SharePreviewViewEventHandler())
+                .environment(self.makeAppearance(theme))
+        }
+    }
+
+    // MARK: - imageFormat: month grid, 세그먼트 이미지 선택 · 태그명 옵션 줄 없음
+
+    @MainActor
+    func test_imageFormat_monthGrid() {
+        let weeks = self.monthGridWeeks()
+        let periodEvent = self.eventOnWeek(
+            "period-1", name: "워크샵", tagId: .custom("work"), daysSequence: 2...4, hasPeriod: true
+        )
+        let pointEvent = self.eventOnWeek(
+            "point-1", name: "치과", tagId: .custom("personal"), daysSequence: 3...3, hasPeriod: false
+        )
+        let gridWeeks = weeks.enumerated().map { index, row -> ShareImageMonthWeek in
+            switch index {
+            case 2:
+                return ShareImageMonthWeek(row: row, eventStacks: [[periodEvent], [pointEvent]])
+            default:
+                return ShareImageMonthWeek(row: row, eventStacks: [])
+            }
+        }
+        let grid = ShareImageMonthGrid(
+            weekDays: WeekDayModel.allModels(of: .sunday),
+            weeks: gridWeeks,
+            excludedEventIds: []
+        )
+
+        captureSnapshotPair(named: "imageFormat_monthGrid", layout: .fullScreen) { theme in
+            let viewModel = self.makeViewModel(
+                isTagFilterExpanded: false,
+                tagCellViewModels: [
+                    .init(tagId: .custom("work"), name: "업무", isOn: true),
+                    .init(tagId: .custom("personal"), name: "개인", isOn: true)
+                ],
+                lineModels: [],
+                dateHeaderText: "2026년 8월",
+                includeTagName: false,
+                isShareEnabled: true,
+                format: .image,
+                imageContentModel: .monthGrid(grid),
+                isIncludeTagNameOptionVisible: false
             )
             let state = SharePreviewViewState()
             state.bind(viewModel)
@@ -407,13 +518,22 @@ private final class FakeSharePreviewViewModel: SharePreviewViewModel, @unchecked
     private let stubIncludeTagName: Bool
     private let stubIsShareEnabled: Bool
 
+    private let stubFormat: SharePreviewFormat
+    private let stubImageContentModel: ShareImageContentModel?
+    private let stubImageHeaderText: String
+    private let stubIsIncludeTagNameOptionVisible: Bool
+
     init(
         isTagFilterExpanded: Bool,
         tagCellViewModels: [SharePreviewTagCellViewModel],
         lineModels: [SharePreviewLineModel],
         dateHeaderText: String,
         includeTagName: Bool,
-        isShareEnabled: Bool
+        isShareEnabled: Bool,
+        format: SharePreviewFormat = .text,
+        imageContentModel: ShareImageContentModel? = nil,
+        imageHeaderText: String? = nil,
+        isIncludeTagNameOptionVisible: Bool = true
     ) {
         self.stubIsTagFilterExpanded = isTagFilterExpanded
         self.stubTagCellViewModels = tagCellViewModels
@@ -421,6 +541,10 @@ private final class FakeSharePreviewViewModel: SharePreviewViewModel, @unchecked
         self.stubDateHeaderText = dateHeaderText
         self.stubIncludeTagName = includeTagName
         self.stubIsShareEnabled = isShareEnabled
+        self.stubFormat = format
+        self.stubImageContentModel = imageContentModel
+        self.stubImageHeaderText = imageHeaderText ?? dateHeaderText
+        self.stubIsIncludeTagNameOptionVisible = isIncludeTagNameOptionVisible
     }
 
     func prepare() { }
@@ -458,12 +582,15 @@ private final class FakeSharePreviewViewModel: SharePreviewViewModel, @unchecked
         Just(self.stubIsShareEnabled).eraseToAnyPublisher()
     }
     var format: AnyPublisher<SharePreviewFormat, Never> {
-        Just(.text).eraseToAnyPublisher()
+        Just(self.stubFormat).eraseToAnyPublisher()
     }
     var imageContentModel: AnyPublisher<ShareImageContentModel?, Never> {
-        Just(nil).eraseToAnyPublisher()
+        Just(self.stubImageContentModel).eraseToAnyPublisher()
+    }
+    var imageHeaderText: AnyPublisher<String, Never> {
+        Just(self.stubImageHeaderText).eraseToAnyPublisher()
     }
     var isIncludeTagNameOptionVisible: AnyPublisher<Bool, Never> {
-        Just(true).eraseToAnyPublisher()
+        Just(self.stubIsIncludeTagNameOptionVisible).eraseToAnyPublisher()
     }
 }

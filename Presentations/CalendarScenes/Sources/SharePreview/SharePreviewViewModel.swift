@@ -286,8 +286,7 @@ extension SharePreviewViewModelImple {
         return self.subject.includeTagName.eraseToAnyPublisher()
     }
 
-    // lineModels·imageHasSharableContent를 늘 같이 CombineLatest로 묶으면 같은 subject를 다시 구독하는
-    // 두 체인이 트리거 하나에 따로 갱신되며 과도기 값을 내보내 오탐을 만든다 — format이 바뀔 때만 갈아탄다.
+    // CombineLatest로 묶으면 같은 subject를 다시 구독하는 두 체인이 따로 갱신돼 과도기 값이 샌다.
     var isShareEnabled: AnyPublisher<Bool, Never> {
         return self.subject.format
             .map { [weak self] format -> AnyPublisher<Bool, Never> in
@@ -336,7 +335,7 @@ extension SharePreviewViewModelImple {
             .eraseToAnyPublisher()
     }
 
-    // 월 그리드는 그 달 전체를 보여주므로 헤더도 월 표기여야 한다 — 날짜 있는 이벤트 그룹 수 기준인 dateHeaderText를 그대로 못 쓴다.
+    // dateHeaderText는 날짜 그룹이 1개면 단일 날짜로 접혀 월 그리드 헤더로 못 쓴다.
     var imageHeaderText: AnyPublisher<String, Never> {
         guard case .month = self.kind else { return self.dateHeaderText }
         return self.calendarSettingUsecase.currentTimeZone
