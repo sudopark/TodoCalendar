@@ -88,6 +88,18 @@ graph TD
 | 역할 | 설치된 지도 앱 목록 표시 → 선택 시 바로 열기 |
 | 지원 앱 | Google Maps, Apple Maps, Naver, Kakao |
 
+### AppleCalendarEventDetail (애플 캘린더 상세 — 상시 편집 폼)
+
+별도 편집 Scene 없이 상세 화면 자체가 편집 필드(제목·시간·장소·메모·URL)를 상시 보유한다 (#902) — 반복 규칙·참석자·캘린더는 편집 대상 아님. 색상은 편집 대상이 아니다(EventKit 캘린더 색은 캘린더 소속, 이벤트 단위 아님).
+
+| 항목 | 설명 |
+|---|---|
+| 편집 가능 | 제목·시간(종일 토글 포함)·장소·URL·메모 — 상시 입력 컴포넌트 |
+| 편집 불가 (탭 시 토스트) | 반복 규칙·참석자·캘린더명 |
+| 편집 게이팅 | 저장·삭제 실행 시점에 판정 — 읽기 전용 캘린더면 안내만(입력도 비활성), 필드 편집 자체도 `isWritable == true`가 아니면 무시(fail-closed) |
+| 반복 이벤트 | 저장·삭제 시 "이번 일정만 / 이후 모든 일정" ActionSheet |
+| 점점점 메뉴 | 링크 항목은 `isEditable`이면 "애플 캘린더에서 수정", 읽기 전용이면 "애플 캘린더에서 보기" — 둘 다 Apple Calendar 앱으로 이동(항상 노출, 상세 링크 유무 게이팅 없음). "삭제"는 `isEditable`일 때만 노출 |
+
 ### HolidayEventDetail (공휴일 상세)
 
 | 항목 | 설명 |
@@ -168,11 +180,11 @@ graph TD
 |---|---|---|
 | `EventTimeTextView` | `SelectTimeText`(연/일/시각) 라벨. `textColor`(selecting 하이라이트)·`isStrikethrough`(invalid)·`dayLineLimit` 파라미터로 화면별 변형 흡수 | EventDetailView, GoogleCalendarEventDetailView, AppleCalendarEventDetailView, DoneTodoDetailView |
 | `LandmarkLabelView` | 장소 라벨 (이름+주소+xmark 아이콘). EventDetailView는 Menu(삭제 액션)로 감싸 사용 | EventDetailView, DoneTodoDetailView |
-| `MoreActionMenuLabel` | 하단 더보기(ellipsis) 버튼 라벨 — 20×20 아이콘 + `Radius.regular` `secondaryBtnBackground` 배경. `Menu`의 label로만 사용하고 액션 목록은 호출부가 구성 | EventDetailView, HolidayEventDetailView, GoogleCalendarEventDetailView |
-| `EventNameInputView` | 선행 색 바(`colorBar` render-prop) + 큰 제목 TextField. 포커스는 부모 `@FocusState` 바인딩(`@FocusState.Binding`)을 받아 스크롤 연동 유지 | GoogleCalendarEventDetailView |
-| `EventTimeSelectView` | clock 아이콘 + 선택 시각(`EventTimeTextView` 재사용, 탭하면 인라인 DatePicker 토글) + 종일 토글. 피커 토글 상태는 내부 `@State` 소유, `onBeginSelecting` 훅으로 부모가 텍스트 포커스 해제 | GoogleCalendarEventDetailView |
-| `EventTextInputRow` | 아이콘 + 한 줄 TextField (장소·URL 등 공용). 포커스는 부모 `@FocusState` 바인딩 | GoogleCalendarEventDetailView |
-| `EventMemoInputView` | doc.text 아이콘 + placeholder 겹친 TextEditor. 포커스는 부모 `@FocusState` 바인딩 | GoogleCalendarEventDetailView |
+| `MoreActionMenuLabel` | 하단 더보기(ellipsis) 버튼 라벨 — 20×20 아이콘 + `Radius.regular` `secondaryBtnBackground` 배경. `Menu`의 label로만 사용하고 액션 목록은 호출부가 구성 | EventDetailView, HolidayEventDetailView, GoogleCalendarEventDetailView, AppleCalendarEventDetailView |
+| `EventNameInputView` | 선행 색 바(`colorBar` render-prop) + 큰 제목 TextField. 포커스는 부모 `@FocusState` 바인딩(`@FocusState.Binding`)을 받아 스크롤 연동 유지 | GoogleCalendarEventDetailView, AppleCalendarEventDetailView |
+| `EventTimeSelectView` | clock 아이콘 + 선택 시각(`EventTimeTextView` 재사용, 탭하면 인라인 DatePicker 토글) + 종일 토글. 피커 토글 상태는 내부 `@State` 소유, `onBeginSelecting` 훅으로 부모가 텍스트 포커스 해제 | GoogleCalendarEventDetailView, AppleCalendarEventDetailView |
+| `EventTextInputRow` | 아이콘 + 한 줄 TextField (장소·URL 등 공용). 포커스는 부모 `@FocusState` 바인딩 | GoogleCalendarEventDetailView, AppleCalendarEventDetailView |
+| `EventMemoInputView` | doc.text 아이콘 + placeholder 겹친 TextEditor. 포커스는 부모 `@FocusState` 바인딩 | GoogleCalendarEventDetailView, AppleCalendarEventDetailView |
 
 `GuideView/`의 가이드 오버레이 2종(ForemostEventGuideView·TodoEventGuideView)은 컴포넌트 패밀리로 별도 그룹.
 

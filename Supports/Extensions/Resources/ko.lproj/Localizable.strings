@@ -291,9 +291,18 @@
 
 // MARK: - Apple calendar event
 "eventDetail::appleCalendarEvent::viewOnCalendar" = "애플 캘린더에서 보기";
+"eventDetail::appleCalendarEvent::editOnCalendar" = "애플 캘린더에서 수정";
 "eventDetail::appleCalendarEvent::calendar::event" = "애플 캘린더 이벤트";
 "eventDetail::appleCalendarEvent::attendees" = "참석자 (%d명)";
 "eventDetail::appleCalendarEvent::attendees::organizer" = "주최자";
+"eventDetail::appleCalendarEvent::saved::message" = "일정을 저장했어요.";
+"eventDetail::appleCalendarEvent::remove::confirm::message" = "이 일정을 삭제할까요?";
+"eventDetail::appleCalendarEvent::repeating::title" = "반복되는 일정이에요";
+"eventDetail::appleCalendarEvent::repeating::onlyThisTime::button" = "이번 일정만";
+"eventDetail::appleCalendarEvent::repeating::thisAndFuture::button" = "이후 모든 일정";
+"eventDetail::appleCalendarEvent::readOnlyCalendar::message" = "읽기 전용 캘린더라 일정을 수정할 수 없어요.";
+"eventDetail::appleCalendarEvent::notEditableField::message" = "이 항목은 앱에서 수정할 수 없어요.";
+"eventDetail::appleCalendarEvent::url::placeholder" = "URL";
 
 // MARK: - event tag
 
