@@ -11,6 +11,7 @@ import Prelude
 import Optics
 import Domain
 import Scenes
+import Extensions
 import UnitTestHelpKit
 import TestDoubles
 
@@ -239,15 +240,15 @@ extension EditTodoEventDetailViewModelImpleTests {
         parameterizeTest(
             self.makeViewModel(customTodo: todo),
             expect: [
-                [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)], 
-                [.toggleTo(isForemost: true), .copy, .transformToSchedule]
+                [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)],
+                [.toggleTo(isForemost: true), .copy, .transformToSchedule, .share]
             ]
         )
         parameterizeTest(
             self.makeViewModel(customTodo: todo, isForemost: true),
             expect: [
                 [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)],
-                [.toggleTo(isForemost: false), .copy, .transformToSchedule]
+                [.toggleTo(isForemost: false), .copy, .transformToSchedule, .share]
             ]
         )
         let todoNotRepeating = todo |> \.repeating .~ nil
@@ -255,9 +256,76 @@ extension EditTodoEventDetailViewModelImpleTests {
             self.makeViewModel(customTodo: todoNotRepeating),
             expect: [
                 [.remove(onlyThisEvent: false)],
-                [.toggleTo(isForemost: true), .copy, .transformToSchedule]
+                [.toggleTo(isForemost: true), .copy, .transformToSchedule, .share]
             ]
         )
+    }
+
+    func testViewModel_moreActions_containShare() {
+        // given
+        let expect = expectation(description: "more action에 공유 포함")
+        let viewModel = self.makeViewModel()
+
+        // when
+        let actions = self.waitFirstOutput(expect, for: viewModel.moreActions) {
+            viewModel.prepare()
+        }
+
+        // then
+        XCTAssertEqual(actions?.flatMap { $0 }.contains(.share), true)
+    }
+
+    func testViewModel_whenHandleShareAction_routesWithAssembledText() {
+        // given
+        let viewModel = self.makeViewModelWithPrepare()
+
+        // when
+        viewModel.handleMoreAction(.share)
+
+        // then
+        XCTAssertEqual(self.spyRouter.didShareText?.contains(self.dummyRepeatingTodo.name), true)
+    }
+
+    func testViewModel_whenHandleShareAction_includesTagName() {
+        // given
+        let viewModel = self.makeViewModelWithPrepare()
+
+        // when
+        viewModel.handleMoreAction(.share)
+
+        // then
+        XCTAssertEqual(self.spyRouter.didShareText?.contains("some"), true)
+    }
+
+    func testViewModel_whenHandleShareAction_includesUrlAndMemoFields() {
+        // given
+        let viewModel = self.makeViewModelWithPrepare()
+
+        // when
+        viewModel.handleMoreAction(.share)
+
+        // then
+        let text = self.spyRouter.didShareText
+        XCTAssertEqual(text?.contains("\(self.shareFieldLabel("url")): url"), true)
+        XCTAssertEqual(text?.contains("\(self.shareFieldLabel("memo")): memo"), true)
+    }
+
+    func testViewModel_whenHandleShareAction_prefixesTodoMarkerToNameAndIncludesRepeatOption() {
+        // given
+        let viewModel = self.makeViewModelWithPrepare()
+
+        // when
+        viewModel.handleMoreAction(.share)
+
+        // then
+        let text = self.spyRouter.didShareText
+        let todoText = "calendar::event_time::todo".localized()
+        XCTAssertEqual(text?.hasPrefix("(\(todoText)) \(self.dummyRepeatingTodo.name)"), true)
+        XCTAssertEqual(text?.contains("\(self.shareFieldLabel("repeating")): "), true)
+    }
+
+    private func shareFieldLabel(_ key: String) -> String {
+        return "event_detail::share::field::\(key)".localized()
     }
     
     func testViewModel_whenAfterRemoveTodo_closeScene() {

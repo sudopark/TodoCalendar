@@ -150,11 +150,39 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
             // TODO:
             break
         case .share:
-            // TODO:
-            break
-            
+            self.shareEvent()
+
         default: break
         }
+    }
+
+    private func shareEvent() {
+        guard let basic = self.subject.basicData.value?.current,
+              let name = basic.name
+        else { return }
+
+        let addition = self.subject.additionalData.value?.current
+        let builder = EventDetailShareTextBuilder()
+        let timeText = basic.selectedTime.map(builder.timeText(from:))
+
+        self.eventTagUsecase.eventTag(id: basic.eventTagId)
+            .first()
+            .sink { [weak self] tag in
+                let model = EventDetailShareModel(
+                    name: name,
+                    isTodo: true,
+                    timeText: timeText,
+                    repeatText: basic.eventRepeating?.text.emptyAsNil(),
+                    tagName: tag?.name.emptyAsNil(),
+                    placeName: addition?.place?.placeName.emptyAsNil(),
+                    url: addition?.url?.emptyAsNil(),
+                    memo: addition?.memo?.emptyAsNil()
+                )
+                let text = builder.build(model)
+                guard !text.isEmpty else { return }
+                self?.router?.showShareSheet(text: text)
+            }
+            .store(in: &self.cancellables)
     }
     
     private func removeEventAfterConfirm(onlyThisTime: Bool) {
@@ -482,9 +510,7 @@ extension EditTodoEventDetailViewModelImple {
             let removeActions: [EventDetailMoreAction] = isRepeating
                 ? [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)]
                 : [.remove(onlyThisEvent: false)]
-            // TODO: share 기능 일단 비활성화
-//            return [removeActions, [.toggleTo(isForemost: !isForemost), .share]]
-            return [removeActions, [.toggleTo(isForemost: !isForemost), .copy, .transformToSchedule]]
+            return [removeActions, [.toggleTo(isForemost: !isForemost), .copy, .transformToSchedule, .share]]
         }
         return Publishers.CombineLatest(
             self.subject.basicData.compactMap{ $0?.origin },
