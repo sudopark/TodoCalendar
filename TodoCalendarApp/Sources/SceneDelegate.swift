@@ -11,7 +11,7 @@ import CommonPresentation
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
-    #if DEBUG
+    #if DEBUG || TEST_DEPLOY
     private var debugFloatingLoggerWindow: DebugFloatingLoggerWindow?
     #endif
 
@@ -28,7 +28,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         app?.applicationViewModel.prepareInitialScene()
 
-        #if DEBUG
+        #if DEBUG || TEST_DEPLOY
         self.debugFloatingLoggerWindow = DebugFloatingLoggerWindow(windowScene: windowScene)
         #endif
 

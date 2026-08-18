@@ -6,7 +6,7 @@
 //  Copyright © 2026 com.sudo.park. All rights reserved.
 //
 
-#if DEBUG
+#if DEBUG || TEST_DEPLOY
 
 import UIKit
 import Extensions
