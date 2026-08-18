@@ -17,25 +17,26 @@ open class StubEventSyncUsecase: EventSyncUsecase, @unchecked Sendable {
     
     public var didSyncRequested: Bool = false
     public var didSyncRequestedCount: Int = 0
-    private let isSyncSubject = CurrentValueSubject<Bool, Never>(false)
-    
+    private let isSyncSubject = CurrentValueSubject<EventSyncStatus, Never>(.idle)
+    public var stubStatusWhileSyncing: EventSyncStatus = .incrementalSyncing
+
     open func sync(_ completed: (@Sendable () -> Void)?) {
-        self.isSyncSubject.send(true)
+        self.isSyncSubject.send(self.stubStatusWhileSyncing)
         self.didSyncRequested = true
         self.didSyncRequestedCount += 1
-        self.isSyncSubject.send(false)
+        self.isSyncSubject.send(.idle)
         completed?()
     }
-    
+
     open func forceSync() {
         self.sync(nil)
     }
-    
+
     open func cancelSync() {
-        self.isSyncSubject.send(false)
+        self.isSyncSubject.send(.idle)
     }
-    
-    open var isSyncInProgress: AnyPublisher<Bool, Never> {
+
+    open var syncStatus: AnyPublisher<EventSyncStatus, Never> {
         return self.isSyncSubject
             .removeDuplicates()
             .eraseToAnyPublisher()
