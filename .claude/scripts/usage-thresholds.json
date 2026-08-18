@@ -8,7 +8,6 @@
     "superpowers:"
   ],
   "excluded_skills": [
-    "handoff-prepare",
     "open-external"
   ],
   "missing_rate_exempt_skills": [

@@ -8,8 +8,10 @@
 - (미귀속) 버킷은 --all 진단 표에만 노출 — 스킬이 아니라 정비(improvement 마킹) 소비 경로가 없어 임계 판정에서 제외.
 - plugin_prefixes 매칭 스킬(superpowers: 등)은 조항이 이 레포 밖이라 개정 불가 → partial·correction 임계만 제외.
   누락률은 유지한다 — 종료 레코드 배선은 프로젝트 스킬 소관이라 여전히 고칠 수 있는 신호다.
-- excluded_skills 는 임계 판정에서 통째로 뺀다. 글로벌 스킬(~/.claude/skills)처럼 이 레포가 정본을
-  갖지 않아 정비 경로 자체가 없는 대상용. --all 진단 표에는 그대로 남는다.
+- excluded_skills 는 임계 판정에서 통째로 뺀다. 절차가 얕아(한두 스텝 recipe) 준수·누락을 재봐야
+  신호가 안 나오는 대상용 — open-external 류. 글로벌 스킬(~/.claude/skills)이라는 사실 자체는 제외
+  사유가 아니다: improve-skill §4 가 글로벌 스킬의 정비 경로(커밋 없이 수정)를 규정한다.
+  --all 진단 표에는 그대로 남는다.
 - missing_rate_exempt_skills 는 누락률만 뺀다 (plugin_prefixes의 대칭). 정상 종료 경로에 기록 주체가
   없어 종료 레코드가 구조적으로 안 남는 대상용 — 모드형 스킬의 세션 단절 자연 종료(pair-programming),
   도구형 스킬의 타 스킬 종속 호출(run-tests). partial·correction 은 유효한 신호라 유지한다.
