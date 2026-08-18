@@ -509,7 +509,7 @@ extension AppleCalendarEventDetailViewModelImple {
                 guard let rruleLine = origin.rruleLines.first else {
                     return R.String.EventDetail.Repeating.notRepeatingTitle
                 }
-                guard let rrule = RRuleParser.parse(rruleLine) else {
+                guard let rrule = RRuleParser.parse(rruleLine)?.reanchoringUTCDayEndUntil(to: timeZone) else {
                     return rruleLine.strippingRRulePrefix
                 }
                 return rrule.appendingEndOptionText(to: rrule.frequencyText(), timeZone)
@@ -599,7 +599,7 @@ private extension AppleCalendar.EventOrigin {
 
     func editableRepeating(_ timeZone: TimeZone) -> EventRepeating? {
         guard let rruleLine = self.soleRRuleLine,
-              let rrule = RRuleParser.parse(rruleLine)
+              let rrule = RRuleParser.parse(rruleLine)?.reanchoringUTCDayEndUntil(to: timeZone)
         else { return nil }
         return rrule.asEventRepeating(
             startTime: self.eventTime.lowerBoundWithFixed, timeZone: timeZone
