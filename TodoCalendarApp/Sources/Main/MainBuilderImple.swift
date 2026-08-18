@@ -18,20 +18,17 @@ import CommonPresentation
 public final class MainSceneBuilerImple {
     
     private let usecaseFactory: any UsecaseFactory
-    private let sharedDataStore: SharedDataStore
     private let viewAppearance: ViewAppearance
     private let calendarSceneBulder: any CalendarSceneBuilder
     private let settingSceneBuilder: any SettingSceneBuiler
     
     public init(
         usecaseFactory: any UsecaseFactory,
-        sharedDataStore: SharedDataStore,
         viewAppearance: ViewAppearance,
         calendarSceneBulder: any CalendarSceneBuilder,
         settingSceneBuilder: any SettingSceneBuiler
     ) {
         self.usecaseFactory = usecaseFactory
-        self.sharedDataStore = sharedDataStore
         self.viewAppearance = viewAppearance
         self.calendarSceneBulder = calendarSceneBulder
         self.settingSceneBuilder = settingSceneBuilder
@@ -55,10 +52,7 @@ extension MainSceneBuilerImple: MainSceneBuiler {
             eventSyncUsecase: self.usecaseFactory.eventSyncUsecase,
             billingUsecase: self.usecaseFactory.billingUsecase,
             aiAgentOrchestrationUsecase: self.usecaseFactory.aiAgentOrchestrationUsecase,
-            eventLiveActivityUsecase: EventLiveActivityUsecaseImple(
-                controller: EventCountdownLiveActivityController(),
-                sharedDataStore: self.sharedDataStore
-            )
+            eventLiveActivityUsecase: self.usecaseFactory.eventLiveActivityUsecase
         )
         
         let viewController = MainViewController(

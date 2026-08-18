@@ -37,6 +37,7 @@ public protocol EventUsecaseFactory {
     func makeDaysIntervalCountUsecase() -> any DaysIntervalCountUsecase
     var eventSyncUsecase: any EventSyncUsecase { get }
     var eventUploadService: any EventUploadService { get }
+    var eventLiveActivityUsecase: any EventLiveActivityUsecase { get }
 }
 
 public protocol SettingUsecaseFactory {
