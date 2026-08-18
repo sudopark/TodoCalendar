@@ -6,6 +6,8 @@
 
 <!-- 레코드는 아래에 최신순으로 추가 -->
 
+- [2026-08-19 애플 캘린더 반복 일정의 종료일이 앱 상세에서 하루 뒤로 보인다](2026-08-19-apple-repeat-until-off-by-one-day.md) — ExternalCalendar / fixed / 애플 반복 종료일 하루 뒤, UNTIL 하루 밀림, EKRecurrenceEnd endDate, 반복 종료 타임존
+
 - [2026-08-16 구글 이벤트의 시간 표현을 바꾸면 `Invalid start time` 400 이 뜬다](2026-08-16-google-event-time-type-switch-invalid-start-time.md) — ExternalCalendar / fixed / Invalid start time, 구글 이벤트 종일 전환 400, date dateTime 공존, patch 병합
 
 - [2026-08-09 종료조건이 n회인 반복 할일이 n회를 훌쩍 넘겨서까지 반복된다](2026-08-09-repeating-todo-count-end-not-working.md) — Event / fixed / 반복 todo count 종료 안됨, 종료조건 n회 초과 반복, repeatingTurn 유실, 업로드 후 turn 리셋

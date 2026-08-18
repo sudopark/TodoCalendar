@@ -287,3 +287,74 @@ extension RRuleParserTests {
         ])
     }
 }
+
+// MARK: - 애플이 UTC 하루 끝으로 저장한 UNTIL 재앵커링
+
+extension RRuleParserTests {
+
+    private var seoul: TimeZone { TimeZone(identifier: "Asia/Seoul")! }
+
+    private func utcDate(_ text: String) -> Date {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyyMMdd'T'HHmmss'Z'"
+        formatter.timeZone = TimeZone(secondsFromGMT: 0)
+        return formatter.date(from: text)!
+    }
+
+    @Test func reanchorUntil_whenUTCDayEnd_movesToLocalDayEnd() {
+        // given
+        let rrule = RRuleParser.parse("RRULE:FREQ=DAILY;UNTIL=20260930T235959Z")!
+
+        // when
+        let reanchored = rrule.reanchoringUTCDayEndUntil(to: self.seoul)
+
+        // then
+        #expect(reanchored.until == self.utcDate("20260930T145959Z"))
+    }
+
+    @Test func reanchorUntil_whenNextDayMidnight_movesToPreviousLocalDayEnd() {
+        // given
+        let rrule = RRuleParser.parse("RRULE:FREQ=DAILY;UNTIL=20261001T000000Z")!
+
+        // when
+        let reanchored = rrule.reanchoringUTCDayEndUntil(to: self.seoul)
+
+        // then
+        #expect(reanchored.until == self.utcDate("20260930T145959Z"))
+    }
+
+    @Test func reanchorUntil_whenNotDayBoundary_keepsUntil() {
+        // given
+        let rrule = RRuleParser.parse("RRULE:FREQ=DAILY;UNTIL=20260929T230000Z")!
+
+        // when
+        let reanchored = rrule.reanchoringUTCDayEndUntil(to: self.seoul)
+
+        // then
+        #expect(reanchored.until == self.utcDate("20260929T230000Z"))
+    }
+
+    @Test func reanchorUntil_whenCountEnd_keepsCount() {
+        // given
+        let rrule = RRuleParser.parse("RRULE:FREQ=DAILY;COUNT=10")!
+
+        // when
+        let reanchored = rrule.reanchoringUTCDayEndUntil(to: self.seoul)
+
+        // then
+        #expect(reanchored.until == nil)
+        #expect(reanchored.count == 10)
+    }
+
+    @Test func reanchorUntil_isIdempotent() {
+        // given
+        let rrule = RRuleParser.parse("RRULE:FREQ=DAILY;UNTIL=20260930T235959Z")!
+
+        // when
+        let once = rrule.reanchoringUTCDayEndUntil(to: self.seoul)
+        let twice = once.reanchoringUTCDayEndUntil(to: self.seoul)
+
+        // then
+        #expect(twice.until == once.until)
+    }
+}
