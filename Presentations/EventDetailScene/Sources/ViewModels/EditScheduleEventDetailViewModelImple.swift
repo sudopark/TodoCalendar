@@ -25,6 +25,7 @@ final class EditScheduleEventDetailViewModelImple: EventDetailViewModel, @unchec
     private let calendarSettingUsecase: any CalendarSettingUsecase
     private let foremostEventUsecase: any ForemostEventUsecase
     private let ddayCandidateUsecase: any DDayCandidateUsecase
+    private let eventLiveActivityUsecase: any EventLiveActivityUsecase
     var router: (any EventDetailRouting)?
     weak var listener: EventDetailSceneListener?
     
@@ -37,7 +38,8 @@ final class EditScheduleEventDetailViewModelImple: EventDetailViewModel, @unchec
         todoEventUsecase: any TodoEventUsecase,
         calendarSettingUsecase: any CalendarSettingUsecase,
         foremostEventUsecase: any ForemostEventUsecase,
-        ddayCandidateUsecase: any DDayCandidateUsecase
+        ddayCandidateUsecase: any DDayCandidateUsecase,
+        eventLiveActivityUsecase: any EventLiveActivityUsecase
     ) {
         self.scheduleId = scheduleId
         self.repeatingEventTargetTime = repeatingEventTargetTime
@@ -48,6 +50,7 @@ final class EditScheduleEventDetailViewModelImple: EventDetailViewModel, @unchec
         self.calendarSettingUsecase = calendarSettingUsecase
         self.foremostEventUsecase = foremostEventUsecase
         self.ddayCandidateUsecase = ddayCandidateUsecase
+        self.eventLiveActivityUsecase = eventLiveActivityUsecase
 
         self.internalBinding()
     }
@@ -151,6 +154,9 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
 
         case .toggleDDayCandidate(let isRegistered):
             self.toggleDDayCandidateAfterConfirm(isRegistered: isRegistered)
+
+        case .toggleLiveActivity(let isRegistered):
+            self.toggleLiveActivity(isRegistered)
 
         case .copy:
             self.copyEvent()
@@ -293,6 +299,30 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
     /// 상세가 열린 회차가 곧 등록 대상이다 — 반복이면 그 회차, 아니면 원본.
     private var currentCandidate: DDayCandidate {
         return DDayCandidate(
+            scheduleId: self.scheduleId,
+            targetTime: self.repeatingEventTargetTime,
+            isRepeating: self.subject.basicData.value?.origin.isRepeatingEvent ?? false
+        )
+    }
+
+    private func toggleLiveActivity(_ isRegistered: Bool) {
+        let target = self.currentLiveActivityTarget
+        Task { [weak self] in
+            guard let self else { return }
+            guard isRegistered == false
+            else { return await self.eventLiveActivityUsecase.stopActivity() }
+
+            do {
+                try await self.eventLiveActivityUsecase.startActivity(target)
+            } catch {
+                self.router?.showLiveActivityUnavailable(error)
+            }
+        }
+    }
+
+    /// 상세가 열린 회차가 곧 등록 대상이다 — 반복이면 그 회차, 아니면 원본.
+    private var currentLiveActivityTarget: LiveActivityTarget {
+        return LiveActivityTarget(
             scheduleId: self.scheduleId,
             targetTime: self.repeatingEventTargetTime,
             isRepeating: self.subject.basicData.value?.origin.isRepeatingEvent ?? false
@@ -578,8 +608,8 @@ extension EditScheduleEventDetailViewModelImple {
         // 위젯 없이 후보만 등록하게 두면 갈 곳 없는 기능이 된다. 처리 로직은 살아 있다
         let isDDayWidgetEnabled = FeatureFlag.isEnable(.ddayWidget)
         let transform: (
-            EventDetailBasicData, (any ForemostMarkableEvent)?, [DDayCandidate]
-        ) -> [[EventDetailMoreAction]] = { basic, foremostEvent, candidates in
+            EventDetailBasicData, (any ForemostMarkableEvent)?, [DDayCandidate], LiveActivityTarget?
+        ) -> [[EventDetailMoreAction]] = { basic, foremostEvent, candidates, registeredTarget in
             let isRepeating = basic.isRepeatingEvent
             let isForemost = foremostEvent?.eventId == scheduleId
             let removeActions: [EventDetailMoreAction] = isRepeating
@@ -598,18 +628,31 @@ extension EditScheduleEventDetailViewModelImple {
                     )
                 ]
                 : []
+            let liveActivityActions: [EventDetailMoreAction] = basic.selectedTime != nil
+                ? [
+                    .toggleLiveActivity(
+                        isRegistered: registeredTarget == LiveActivityTarget(
+                            scheduleId: scheduleId,
+                            targetTime: targetTime,
+                            isRepeating: isRepeating
+                        )
+                    )
+                ]
+                : []
             let otherActions: [EventDetailMoreAction] = isRepeating
-                ? ddayActions + [.copy, .transformToTodo, .share]
-                : [.toggleTo(isForemost: !isForemost)] + ddayActions + [.copy, .transformToTodo, .share]
+                ? ddayActions + liveActivityActions + [.copy, .transformToTodo, .share]
+                : [.toggleTo(isForemost: !isForemost)] + ddayActions + liveActivityActions
+                    + [.copy, .transformToTodo, .share]
             return [removeActions, otherActions]
         }
-        return Publishers.CombineLatest3(
+        return Publishers.CombineLatest4(
             self.subject.basicData.compactMap { $0?.origin },
             self.foremostEventUsecase.foremostEvent,
             // 플래그가 꺼져 있으면 후보 목록을 조회·구독하지 않는다
             isDDayWidgetEnabled
                 ? self.ddayCandidateUsecase.candidates
-                : Just<[DDayCandidate]>([]).eraseToAnyPublisher()
+                : Just<[DDayCandidate]>([]).eraseToAnyPublisher(),
+            self.eventLiveActivityUsecase.registeredTarget
         )
         .map(transform)
         .removeDuplicates()
@@ -657,6 +700,19 @@ private extension ScheduleMakeParams {
         self.eventTagId = basic.eventTagId
         self.repeating = basic.eventRepeating?.repeating
         self.notificationOptions = basic.eventNotifications
+    }
+}
+
+
+private extension LiveActivityTarget {
+
+    /// 회차 키 규칙은 `DDayCandidate.init(scheduleId:targetTime:isRepeating:)`과 같다 —
+    /// 비반복에도 채워져 있는 `repeatingEventTargetTime`을 그대로 실으면 등록 대상이 어긋난다.
+    init(scheduleId: String, targetTime: EventTime?, isRepeating: Bool) {
+        self = .schedule(
+            id: scheduleId,
+            turnKey: isRepeating ? targetTime?.customKey : nil
+        )
     }
 }
 

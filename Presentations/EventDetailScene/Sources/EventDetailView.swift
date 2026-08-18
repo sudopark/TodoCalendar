@@ -1134,6 +1134,8 @@ extension EventDetailMoreAction: Identifiable {
             return "toggleTo:\(isForemost)"
         case .toggleDDayCandidate(let isRegistered):
             return "toggleDDayCandidate:\(isRegistered)"
+        case .toggleLiveActivity(let isRegistered):
+            return "toggleLiveActivity:\(isRegistered)"
         case .copy: return "copy"
         case .addToTemplate: return "addToTemplate"
         case .share: return "share"
@@ -1157,6 +1159,10 @@ extension EventDetailMoreAction: Identifiable {
             return isRegistered
                 ? "calendar::event::more_action:dday_candidate:unregister:item_name".localized()
                 : "calendar::event::more_action:dday_candidate:register:item_name".localized()
+        case .toggleLiveActivity(let isRegistered):
+            return isRegistered
+                ? "calendar::event::more_action:live_activity:unregister:item_name".localized()
+                : "calendar::event::more_action:live_activity:register:item_name".localized()
         case .copy: return "calendar::event::more_action:copy:item_name".localized()
         case .addToTemplate: return "add to template".localized()
         case .share: return "calendar::event::more_action:share:item_name".localized()
@@ -1170,6 +1176,7 @@ extension EventDetailMoreAction: Identifiable {
         case .remove: return "trash"
         case .toggleTo: return "exclamationmark.circle"
         case .toggleDDayCandidate: return "calendar.badge.clock"
+        case .toggleLiveActivity: return "timer"
         case .copy: return "doc.on.doc"
         case .addToTemplate: return "doc.plaintext"
         case .share: return "square.and.arrow.up"

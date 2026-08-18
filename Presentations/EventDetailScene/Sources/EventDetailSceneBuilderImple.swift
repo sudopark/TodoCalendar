@@ -68,7 +68,8 @@ extension EventDetailSceneBuilderImple: EventDetailSceneBuilder {
             eventDetailDataUsecase: self.usecaseFactory.makeEventDetailDataUsecase(),
             scheduleEventUsecase: self.usecaseFactory.makeScheduleEventUsecase(),
             calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
-            foremostEventUsecase: self.usecaseFactory.makeForemostEventUsecase()
+            foremostEventUsecase: self.usecaseFactory.makeForemostEventUsecase(),
+            eventLiveActivityUsecase: self.usecaseFactory.eventLiveActivityUsecase
         )
         viewModel.listener = listener
         return self.makeEventDetailScene(viewModel)
@@ -89,7 +90,8 @@ extension EventDetailSceneBuilderImple: EventDetailSceneBuilder {
             todoEventUsecase: self.usecaseFactory.makeTodoEventUsecase(),
             calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
             foremostEventUsecase: self.usecaseFactory.makeForemostEventUsecase(),
-            ddayCandidateUsecase: self.usecaseFactory.makeDDayCandidateUsecase()
+            ddayCandidateUsecase: self.usecaseFactory.makeDDayCandidateUsecase(),
+            eventLiveActivityUsecase: self.usecaseFactory.eventLiveActivityUsecase
         )
         viewModel.listener = listener
         return self.makeEventDetailScene(viewModel)
