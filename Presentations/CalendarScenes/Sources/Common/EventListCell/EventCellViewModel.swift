@@ -143,6 +143,7 @@ public enum EventListMoreAction: Sendable, Equatable {
     
     case remove(onlyThisTime: Bool)
     case toggleTo(isForemost: Bool)
+    case toggleLiveActivity(isRegistered: Bool)
     case skipTodo
     case edit
     case copy
@@ -165,6 +166,7 @@ public protocol EventCellViewModel: Sendable {
     var isRepeating: Bool { get }
     var moreActions: EventListMoreActionModel? { get }
     var isAlldayEvent: Bool { get }
+    var liveActivityTarget: LiveActivityTarget? { get }
 
     /// 셀이 그리는 값 + 셀 액션이 소비하는 값 전부를 담는다. 이 키가 같으면 셀 목록 재방출이 생략된다.
     /// 프로토콜 밖 프로퍼티는 각 타입이 `makeCustomCompareKey`의 추가 성분으로 직접 얹어야 한다 — 빠뜨리면 그 값의 변경이 화면·동작에 안 붙는다.
@@ -172,6 +174,8 @@ public protocol EventCellViewModel: Sendable {
 }
 
 extension EventCellViewModel {
+
+    public var liveActivityTarget: LiveActivityTarget? { nil }
 
     fileprivate func makeCustomCompareKey(_ additionalComponents: [String?]) -> String {
         let baseComponents: [String?] = [
@@ -257,6 +261,11 @@ public struct TodoEventCellViewModel: EventCellViewModel {
             basicActions: basicActions,
             removeActions: removeActions
         )
+    }
+
+    public var liveActivityTarget: LiveActivityTarget? {
+        guard self.eventTimeRawValue != nil else { return nil }
+        return .todo(id: self.eventIdentifier)
     }
 
     public var customCompareKey: String {
@@ -351,6 +360,14 @@ public struct ScheduleEventCellViewModel: EventCellViewModel {
         )
     }
 
+    public var liveActivityTarget: LiveActivityTarget? {
+        guard self.eventTimeRawValue != nil else { return nil }
+        return .schedule(
+            id: self.eventIdWithoutTurn,
+            turnKey: self.isRepeating ? self.eventTimeRawValue?.customKey : nil
+        )
+    }
+
     public var customCompareKey: String {
         return self.makeCustomCompareKey([
             self.turn.map { "\($0)" },
@@ -371,10 +388,12 @@ public struct HolidayEventCellViewModel: EventCellViewModel {
     public let isRepeating: Bool = false
     public let isForemost: Bool = false
     public let isAlldayEvent: Bool = true
+    public let dateString: String
 
     public init(_ holiday: HolidayCalendarEvent) {
         self.eventIdentifier = holiday.eventId
         self.name = holiday.name
+        self.dateString = holiday.dateString
         self.periodText = .singleText(
             .init(text: R.String.calendarEventTimeAllday)
         )
@@ -382,6 +401,10 @@ public struct HolidayEventCellViewModel: EventCellViewModel {
     }
 
     public var moreActions: EventListMoreActionModel? { nil }
+
+    public var liveActivityTarget: LiveActivityTarget? {
+        .holiday(uuid: self.eventIdentifier, dateString: self.dateString)
+    }
 
     public var customCompareKey: String { self.makeCustomCompareKey([]) }
 }
