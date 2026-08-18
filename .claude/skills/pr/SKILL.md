@@ -29,6 +29,18 @@ python3 .claude/scripts/check-comments.py
 
 배경: #820에서 AI 작업으로 유입된 서술형 주석 354줄을 걷어냈다. 사후 일괄 정리는 비용이 크니 유입 시점에 막는다.
 
+### static 검토 (필수)
+
+같은 시점에 이번 브랜치가 추가한 `static`을 훑는다:
+
+```bash
+git diff origin/develop...HEAD -- '*.swift' | grep -n '^+.*static '
+```
+
+- `static func`는 금지다 (CLAUDE.md §1). 각 건이 `.claude/rules/swift-style.md` §3 예외(프로토콜·프레임워크 요구사항, 전역 설정값 정본)에 해당하는지 확인하고, 아니면 인스턴스 소속으로 옮긴 뒤 PR을 올린다. case 없는 enum으로 감싼 형태도 같은 금지 대상이다.
+- `static let`은 swift-style §1(`private enum Constant` 응집) 기준으로 본다. 그 밖의 `static`(`static var` 등)은 §1·§2가 규정하는 대상이 아니라 §3 예외(프로토콜·프레임워크 요구사항 — AppIntents `static let title` 류, 전역 설정값 정본) 해당 여부만 확인하고 넘어간다.
+- 남긴 건과 그 근거 조항을 유저에게 한 줄로 보고한다. 주석 검토와 같이 **본 뒤 판단해야 통과다.**
+
 ## 본문
 
 **기준: 보는 사람이 코드를 까보기 전에 본문만으로 내용을 파악할 수 있어야 한다.**
