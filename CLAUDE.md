@@ -66,6 +66,7 @@ tuist generate --no-open      # 파일 추가/삭제 후 재실행 필수
 | 버그·논리 모순 수정 | troubleshoot 스킬 (superpowers systematic-debugging 컴패니언 — 아카이브 `docs/troubleshooting/`) |
 | 파일·프레임워크 추가 | add-file / add-framework 스킬 |
 | 테스트 실행 | run-tests 스킬 (스킴 목록 정본) |
+| 테스트 빌드 배포 | test-deploy 스킬 (Firebase App Distribution) |
 | UI 디자인 | design 스킬 |
 | 스냅샷 검증·화면 카탈로그 | snapshot-check / app-catalog 스킬 |
 | 코드 분석 (로직·추적·관계·영향도) | analyze 스킬 → code-analyzer subagent |
