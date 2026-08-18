@@ -1,0 +1,33 @@
+default_platform(:ios)
+
+platform :ios do
+  desc "Development 서명 IPA를 빌드해 Firebase App Distribution testers 그룹에 배포"
+  lane :test_deploy do
+    build_app(
+      workspace: "TodoCalendar.xcworkspace",
+      scheme: "TodoCalendarApp",
+      configuration: "Release",
+      export_method: "development",
+      export_options: {
+        signingStyle: "manual",
+        signingCertificate: "Apple Development",
+        provisioningProfiles: {
+          "com.sudo.park.TodoCalendarApp" => "match Development com.sudo.park.TodoCalendarApp",
+          "com.sudo.park.TodoCalendarApp.Widget" => "match Development com.sudo.park.TodoCalendarApp.Widget",
+          "com.sudo.park.TodoCalendarApp.IntentExtensions" => "match Development com.sudo.park.TodoCalendarApp.IntentExtensions",
+          "com.sudo.park.TodoCalendarApp.Share" => "match Development com.sudo.park.TodoCalendarApp.Share"
+        }
+      },
+      output_directory: "build",
+      output_name: "TodoCalendarApp.ipa",
+      clean: false
+    )
+
+    firebase_app_distribution(
+      googleservice_info_plist_path: "GoogleService-Info.plist",
+      groups: "testers",
+      release_notes: ENV["TEST_DEPLOY_RELEASE_NOTES"] || "local build",
+      ipa_path: lane_context[SharedValues::IPA_OUTPUT_PATH]
+    )
+  end
+end
