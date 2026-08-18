@@ -5,6 +5,7 @@
 - **수정 전 파일 먼저 read.** 추측 수정 금지.
 - **미확정 산출물의 수정은 비용이 아니다.** 머지 전 코드·플랜·문서는 전부 초안이다. 유저 지시로 이미 쓴 구현을 바꿀 때 재작업 분량을 반문("이미 X로 짰는데 괜찮아?")·범위 축소·트레이드오프 어느 형태로도 반영하지 않는다 — 고려 대상 자체가 아니다. 충언은 전역 규칙의 충언 조건이 설 때만 하고, 재작업 분량은 그 조건이 아니다. 비용으로 세는 건 이미 머지돼 다른 작업이 의존하는 것뿐이다.
 - **Query/Command 분리.** 읽기와 사이드이펙트를 한 흐름에 섞지 말 것.
+- **`static func` 금지.** 로직은 인스턴스 소속으로 배치한다 — 네임스페이스 enum(`enum XxxFormatter { static func ... }`)으로 감싸는 우회도 같은 금지 대상이다. 배치 원칙·예외는 `.claude/rules/swift-style.md` §2·§3.
 - **객체 변경 시** 참조하는 다른 객체 영향도 확인 (빌드 + 테스트) — 절차는 implement 스킬의 impact-check가 기계화.
 - **짝지어진 두 위치는 함께 갱신.** 한쪽만 바꾸면 무효가 되는 쌍은 추가/변경 시 대응처도 반드시 확인:
   - `AppEnvironment.dbVersion` ↔ `Table.migrateStatement(for:)` case ↔ `AppDataMigrationImple`의 `runDBMigration` case + `runMigrationVersionNtoM` (셋 다여야 한다 — 마지막이 빠지면 `migrateStatement`가 호출조차 안 되고 조용히 안 돈다)

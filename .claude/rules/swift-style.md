@@ -24,11 +24,13 @@ private enum Constant {
 
 - 한 곳에서만 쓰는 값은 함수 내 로컬 상수(`let`)로 충분하면 그걸 우선.
 
-## 2. static 메서드 — 인스턴스 소속 우선
+## 2. static 메서드 — 만들지 않는다
 
-로직은 인스턴스 소속으로 배치한다: 대상 타입 extension의 계산 프로퍼티·메서드, 또는 전용 struct(Mapper 등)의 인스턴스 메서드. 클래스·struct 본문의 `static func`는 지양.
+로직은 인스턴스 소속으로만 배치한다: 대상 타입 extension의 계산 프로퍼티·메서드, 또는 전용 struct(Mapper 등)의 인스턴스 메서드. `static func`는 §3 예외에서만 쓴다 — 클래스·struct 본문이든 enum 본문이든 같다.
 
-- **허용 — 네임스페이스 enum 패턴**: case 없는 enum에 관련 유틸을 모으는 형태(`enum DDayTargetDateFormatter { static func ... }`)는 인스턴스화 자체가 불가능한 순수 네임스페이스라 허용.
+- **네임스페이스 enum도 우회로가 아니다.** `enum DDayTargetDateFormatter { static func ... }`처럼 case 없는 enum에 유틸을 모으는 형태를 포함한다. enum에 붙는 static은 §1의 상수 정의(`private enum Constant { static let ... }`)뿐이다.
+- **"인스턴스를 안 만들어도 돼서"는 배치 사유가 아니다.** 그 편의가 소속 판단을 건너뛰게 만들고, 결과적으로 로직이 주인 없는 자리에 쌓인다.
+- 붙일 인스턴스가 안 보이면 static을 쓸 근거가 아니라 **대상 타입이 아직 안 만들어졌다는 신호**다. 대상 타입 extension으로 붙이거나 전용 struct를 만든다.
 
 ## 3. static 규칙의 예외
 
