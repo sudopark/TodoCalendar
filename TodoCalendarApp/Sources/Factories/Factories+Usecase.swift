@@ -51,9 +51,15 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
 
         self.aiAgentOrchestrationUsecase = NotNeedAIAgentOrchestrationUsecase()
 
+        let eventDetailStorage = EventDetailDataLocalStorageImple<EventDetailDataTable>(
+            sqliteService: applicationBase.commonSqliteService
+        )
         self.eventLiveActivityUsecase = EventLiveActivityUsecaseImple(
             controller: EventCountdownLiveActivityController(),
-            sharedDataStore: applicationBase.sharedDataStore
+            sharedDataStore: applicationBase.sharedDataStore,
+            eventDetailDataUsecase: EventDetailDataLocalRepostioryImple(
+                localStorage: eventDetailStorage
+            )
         )
     }
 
@@ -493,7 +499,14 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
 
         self.eventLiveActivityUsecase = EventLiveActivityUsecaseImple(
             controller: EventCountdownLiveActivityController(),
-            sharedDataStore: applicationBase.sharedDataStore
+            sharedDataStore: applicationBase.sharedDataStore,
+            eventDetailDataUsecase: EventDetailUploadDecorateRepositoryImple(
+                remote: EventDetailRemoteImple(remoteAPI: applicationBase.remoteAPI),
+                cacheStorage: EventDetailDataLocalStorageImple<EventDetailDataTable>(
+                    sqliteService: applicationBase.commonSqliteService
+                ),
+                uploadService: uploadService
+            )
         )
     }
 

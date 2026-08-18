@@ -12,6 +12,7 @@ import Foundation
 import Prelude
 import Optics
 import UnitTestHelpKit
+import TestDoubles
 import Extensions
 
 import Domain
@@ -27,7 +28,8 @@ final class EventLiveActivityUsecaseImpleTests: PublisherWaitable {
         stubRestoredRegistration: LiveActivityRegistration? = nil,
         stubStartError: (any Error)? = nil,
         stubEmitsNilOnEnd: Bool = false,
-        stubStartDelayNanoseconds: UInt64 = 0
+        stubStartDelayNanoseconds: UInt64 = 0,
+        eventDetailUsecase: SpyEventDetailDataUsecase = .init()
     ) -> (EventLiveActivityUsecaseImple, StubLiveActivityController, SharedDataStore) {
         let stub = StubLiveActivityController(
             stubRestoredRegistration: stubRestoredRegistration,
@@ -36,7 +38,11 @@ final class EventLiveActivityUsecaseImpleTests: PublisherWaitable {
             stubStartDelayNanoseconds: stubStartDelayNanoseconds
         )
         let store = SharedDataStore()
-        let usecase = EventLiveActivityUsecaseImple(controller: stub, sharedDataStore: store)
+        let usecase = EventLiveActivityUsecaseImple(
+            controller: stub,
+            sharedDataStore: store,
+            eventDetailDataUsecase: eventDetailUsecase
+        )
         return (usecase, stub, store)
     }
 
@@ -1232,5 +1238,146 @@ extension EventLiveActivityUsecaseImpleTests {
 
         // then
         #expect(stub.didStartWith?.1.tagColorHex == "#222222")
+    }
+}
+
+
+// MARK: - 잠금화면 부제
+
+extension EventLiveActivityUsecaseImpleTests {
+
+    private func makeDetail(
+        _ eventId: String, place: String? = nil, memo: String? = nil
+    ) -> EventDetailData {
+        return EventDetailData(eventId)
+            |> \.place .~ place.map { Place($0) }
+            |> \.memo .~ memo
+    }
+
+    @Test func usecase_startTodoActivity_fillsPlaceNameFromEventDetail() async throws {
+        // given
+        let detailUsecase = SpyEventDetailDataUsecase()
+        detailUsecase.stubDetail = self.makeDetail("t1", place: "회의실 A", memo: "준비물")
+        let (usecase, stub, store) = self.makeUsecase(eventDetailUsecase: detailUsecase)
+        let future = Date().addingTimeInterval(60)
+        self.putTodos(store, [self.makeTodo(id: "t1", eventDate: future)])
+
+        // when
+        try await usecase.startActivity(.todo(id: "t1"))
+
+        // then
+        let content = try #require(stub.didStartWith?.1)
+        #expect(detailUsecase.didLoadDetailIds == ["t1"])
+        #expect(content.placeName == "회의실 A")
+        #expect(content.memo == "준비물")
+    }
+
+    @Test func usecase_startTodoActivity_whenPlaceIsNil_fillsMemoOnly() async throws {
+        // given
+        let detailUsecase = SpyEventDetailDataUsecase()
+        detailUsecase.stubDetail = self.makeDetail("t1", memo: "준비물")
+        let (usecase, stub, store) = self.makeUsecase(eventDetailUsecase: detailUsecase)
+        let future = Date().addingTimeInterval(60)
+        self.putTodos(store, [self.makeTodo(id: "t1", eventDate: future)])
+
+        // when
+        try await usecase.startActivity(.todo(id: "t1"))
+
+        // then
+        let content = try #require(stub.didStartWith?.1)
+        #expect(content.placeName == nil)
+        #expect(content.memo == "준비물")
+    }
+
+    @Test func usecase_startScheduleActivity_fillsPlaceNameFromEventDetail() async throws {
+        // given
+        let detailUsecase = SpyEventDetailDataUsecase()
+        detailUsecase.stubDetail = self.makeDetail("s1", place: "3층 라운지")
+        let (usecase, stub, store) = self.makeUsecase(eventDetailUsecase: detailUsecase)
+        let future = Date().addingTimeInterval(60)
+        store.put(
+            MemorizedEventsContainer<ScheduleEvent>.self, key: ShareDataKeys.schedules.rawValue,
+            MemorizedEventsContainer<ScheduleEvent>().append(self.makeSchedule(id: "s1", eventDate: future))
+        )
+
+        // when
+        try await usecase.startActivity(
+            .schedule(id: "s1", turnKey: EventTime.at(future.timeIntervalSince1970).customKey)
+        )
+
+        // then
+        let content = try #require(stub.didStartWith?.1)
+        #expect(detailUsecase.didLoadDetailIds == ["s1"])
+        #expect(content.placeName == "3층 라운지")
+    }
+
+    @Test func usecase_startHolidayActivity_notLoadEventDetail() async throws {
+        // given
+        let detailUsecase = SpyEventDetailDataUsecase()
+        let (usecase, stub, store) = self.makeUsecase(eventDetailUsecase: detailUsecase)
+        let scenario = self.holidayTimeZoneScenario()
+        store.put(TimeZone.self, key: ShareDataKeys.timeZone.rawValue, scenario.timeZone)
+        store.put(
+            [String: [Int: [Holiday]]].self, key: ShareDataKeys.holidays.rawValue,
+            ["KR": [2026: [Holiday(uuid: "hz", dateString: scenario.dateString, name: "holiday")]]]
+        )
+
+        // when
+        try await usecase.startActivity(.holiday(uuid: "hz", dateString: scenario.dateString))
+
+        // then
+        #expect(detailUsecase.didLoadDetailIds.isEmpty)
+        #expect(stub.didStartWith?.1.placeName == nil)
+    }
+
+    @Test func usecase_startActivity_whenEventDetailNeverResponds_startsWithoutSubtitle() async throws {
+        // given
+        let detailUsecase = SpyEventDetailDataUsecase()
+        detailUsecase.stubNeverResponds = true
+        let (usecase, stub, store) = self.makeUsecase(eventDetailUsecase: detailUsecase)
+        let future = Date().addingTimeInterval(60)
+        self.putTodos(store, [self.makeTodo(id: "t1", eventDate: future)])
+
+        // when
+        try await usecase.startActivity(.todo(id: "t1"))
+
+        // then
+        let content = try #require(stub.didStartWith?.1)
+        #expect(content.placeName == nil)
+        #expect(content.memo == nil)
+    }
+
+    @Test func usecase_whenUpdatedAfterRegistration_keepsSubtitle() async throws {
+        // given
+        let detailUsecase = SpyEventDetailDataUsecase()
+        detailUsecase.stubDetail = self.makeDetail("t1", place: "회의실 A", memo: "준비물")
+        let (usecase, stub, store) = self.makeUsecase(eventDetailUsecase: detailUsecase)
+        let future = Date().addingTimeInterval(60)
+        self.putTodos(store, [self.makeTodo(id: "t1", name: "old", eventDate: future)])
+        try await usecase.startActivity(.todo(id: "t1"))
+
+        // when
+        self.putTodos(store, [self.makeTodo(id: "t1", name: "new", eventDate: future)])
+        try await self.waitForEffects()
+
+        // then
+        let content = try #require(stub.didUpdateWith)
+        #expect(content.eventName == "new")
+        #expect(content.placeName == "회의실 A")
+        #expect(content.memo == "준비물")
+    }
+}
+
+
+private final class SpyEventDetailDataUsecase: StubEventDetailDataUsecase, @unchecked Sendable {
+
+    var didLoadDetailIds: [String] = []
+    var stubNeverResponds: Bool = false
+
+    override func loadDetail(_ id: String) -> AnyPublisher<EventDetailData, any Error> {
+        self.didLoadDetailIds.append(id)
+        guard self.stubNeverResponds == false
+        else { return Empty(completeImmediately: false).eraseToAnyPublisher() }
+        return super.loadDetail(id)
     }
 }
