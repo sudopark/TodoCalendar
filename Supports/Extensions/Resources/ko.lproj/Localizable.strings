@@ -142,6 +142,8 @@
 "calendar::event::more_action:live_activity:unavail::not_found" = "이벤트 정보를 찾을 수 없어요.";
 "calendar::event::more_action:live_activity:unavail::already_passed" = "이미 시작한 이벤트예요.";
 "calendar::event::more_action:live_activity:unavail::too_far_future" = "8시간 이내에 시작하는 이벤트만 표시할 수 있어요.";
+"calendar::event::more_action:live_activity:register:confirm" = "이 이벤트를 잠금화면에 표시할까요?";
+"calendar::event::more_action:live_activity:unregister:confirm" = "이 이벤트를 잠금화면에서 제거할까요?";
 "calendar::event::more_action:copy:item_name" = "이벤트 복사";
 "calendar::event::more_action:share:item_name" = "공유";
 "event_detail::share::field::time" = "시간";

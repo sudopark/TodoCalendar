@@ -142,6 +142,8 @@
 "calendar::event::more_action:live_activity:unavail::not_found" = "This event is no longer available.";
 "calendar::event::more_action:live_activity:unavail::already_passed" = "This event has already started.";
 "calendar::event::more_action:live_activity:unavail::too_far_future" = "Only events starting within 8 hours can be shown.";
+"calendar::event::more_action:live_activity:register:confirm" = "Do you want to show this event on the Lock Screen?";
+"calendar::event::more_action:live_activity:unregister:confirm" = "Do you want to remove this event from the Lock Screen?";
 "calendar::event::more_action:copy:item_name" = "Copy event";
 "calendar::event::more_action:share:item_name" = "Share";
 "event_detail::share::field::time" = "Time";
