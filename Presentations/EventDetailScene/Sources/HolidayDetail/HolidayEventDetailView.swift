@@ -27,6 +27,7 @@ import CommonPresentation
     var dateText: String = ""
     var ddayText: String = ""
     var countryModel: CountryModel?
+    var liveActivityActionModel: LiveActivityActionModel?
     
     func bind(_ viewModel: any HolidayEventDetailViewModel) {
         
@@ -60,6 +61,13 @@ import CommonPresentation
                 self?.countryModel = model
             })
             .store(in: &self.cancellables)
+        
+        viewModel.liveActivityActionModel
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] model in
+                self?.liveActivityActionModel = model
+            })
+            .store(in: &self.cancellables)
     }
 }
 
@@ -70,12 +78,14 @@ final class HolidayEventDetailViewEventHandler: Observable {
     var onAppear: () -> Void = { }
     var close: () -> Void = { }
     var hideHoliday: () -> Void = { }
+    var toggleLiveActivity: (Bool) -> Void = { _ in }
 
     func bind(_ viewModel: any HolidayEventDetailViewModel) {
 
         self.onAppear = viewModel.refresh
         self.close = viewModel.close
         self.hideHoliday = viewModel.hideHoliday
+        self.toggleLiveActivity = viewModel.toggleLiveActivity(isRegistered:)
     }
 }
 
@@ -150,6 +160,14 @@ struct HolidayEventDetailView: View {
                 .eventHandler(\.onTap, self.eventHandlers.close)
 
             Menu {
+                if let model = self.state.liveActivityActionModel {
+                    Button {
+                        self.eventHandlers.toggleLiveActivity(model.isRegistered)
+                    } label: {
+                        Label(model.itemText, systemImage: "timer")
+                    }
+                }
+
                 Button(role: .destructive) {
                     self.eventHandlers.hideHoliday()
                 } label: {

@@ -14,7 +14,9 @@ import Extensions
 import Scenes
 
 
-final class EditScheduleEventDetailViewModelImple: EventDetailViewModel, @unchecked Sendable {
+final class EditScheduleEventDetailViewModelImple: EventDetailViewModel, LiveActivityToggleHandling, @unchecked Sendable {
+
+    var liveActivityRouting: (any Routing)? { self.router }
     
     private let scheduleId: String
     private let repeatingEventTargetTime: EventTime?
@@ -25,7 +27,7 @@ final class EditScheduleEventDetailViewModelImple: EventDetailViewModel, @unchec
     private let calendarSettingUsecase: any CalendarSettingUsecase
     private let foremostEventUsecase: any ForemostEventUsecase
     private let ddayCandidateUsecase: any DDayCandidateUsecase
-    private let eventLiveActivityUsecase: any EventLiveActivityUsecase
+    let eventLiveActivityUsecase: any EventLiveActivityUsecase
     var router: (any EventDetailRouting)?
     weak var listener: EventDetailSceneListener?
     
@@ -156,7 +158,9 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
             self.toggleDDayCandidateAfterConfirm(isRegistered: isRegistered)
 
         case .toggleLiveActivity(let isRegistered):
-            self.toggleLiveActivity(isRegistered)
+            self.startOrStopLiveActivity(
+                self.currentLiveActivityTarget, isRegistered: isRegistered
+            )
 
         case .copy:
             self.copyEvent()
@@ -303,21 +307,6 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
             targetTime: self.repeatingEventTargetTime,
             isRepeating: self.subject.basicData.value?.origin.isRepeatingEvent ?? false
         )
-    }
-
-    private func toggleLiveActivity(_ isRegistered: Bool) {
-        let target = self.currentLiveActivityTarget
-        Task { [weak self] in
-            guard let self else { return }
-            guard isRegistered == false
-            else { return await self.eventLiveActivityUsecase.stopActivity() }
-
-            do {
-                try await self.eventLiveActivityUsecase.startActivity(target)
-            } catch {
-                self.router?.showLiveActivityUnavailable(error)
-            }
-        }
     }
 
     /// 상세가 열린 회차가 곧 등록 대상이다 — 반복이면 그 회차, 아니면 원본.
