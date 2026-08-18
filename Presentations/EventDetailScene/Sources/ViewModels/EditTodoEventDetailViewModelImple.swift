@@ -14,7 +14,9 @@ import Extensions
 import Scenes
 
 
-final class EditTodoEventDetailViewModelImple: EventDetailViewModel, @unchecked Sendable {
+final class EditTodoEventDetailViewModelImple: EventDetailViewModel, LiveActivityToggleHandling, @unchecked Sendable {
+
+    var liveActivityRouting: (any Routing)? { self.router }
     
     private let todoId: String
     private let todoUsecase: any TodoEventUsecase
@@ -23,7 +25,7 @@ final class EditTodoEventDetailViewModelImple: EventDetailViewModel, @unchecked 
     private let scheduleEventUsecase: any ScheduleEventUsecase
     private let calendarSettingUsecase: any CalendarSettingUsecase
     private let foremostEventUsecase: any ForemostEventUsecase
-    private let eventLiveActivityUsecase: any EventLiveActivityUsecase
+    let eventLiveActivityUsecase: any EventLiveActivityUsecase
     var router: (any EventDetailRouting)?
     weak var listener: EventDetailSceneListener?
     
@@ -150,7 +152,7 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
             self.transformToScheduleAfterConfirm()
 
         case .toggleLiveActivity(let isRegistered):
-            self.toggleLiveActivity(isRegistered)
+            self.startOrStopLiveActivity(.todo(id: self.todoId), isRegistered: isRegistered)
             
         case .addToTemplate:
             // TODO:
@@ -159,21 +161,6 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
             self.shareEvent()
 
         default: break
-        }
-    }
-
-    private func toggleLiveActivity(_ isRegistered: Bool) {
-        let target = LiveActivityTarget.todo(id: self.todoId)
-        Task { [weak self] in
-            guard let self else { return }
-            guard isRegistered == false
-            else { return await self.eventLiveActivityUsecase.stopActivity() }
-
-            do {
-                try await self.eventLiveActivityUsecase.startActivity(target)
-            } catch {
-                self.router?.showLiveActivityUnavailable(error)
-            }
         }
     }
 

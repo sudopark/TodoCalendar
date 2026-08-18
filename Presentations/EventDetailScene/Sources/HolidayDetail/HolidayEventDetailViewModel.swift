@@ -30,32 +30,38 @@ protocol HolidayEventDetailViewModel: AnyObject, Sendable, HolidayEventDetailSce
     func refresh()
     func close()
     func hideHoliday()
+    func toggleLiveActivity(isRegistered: Bool)
 
     // presenter
     var holidayName: AnyPublisher<String, Never> { get }
     var dateText: AnyPublisher<String, Never> { get }
     var ddayText: AnyPublisher<String, Never> { get }
     var countryModel: AnyPublisher<CountryModel, Never> { get }
+    var liveActivityActionModel: AnyPublisher<LiveActivityActionModel?, Never> { get }
 }
 
 
 // MARK: - HolidayEventDetailViewModelImple
 
-final class HolidayEventDetailViewModelImple: HolidayEventDetailViewModel, @unchecked Sendable {
+final class HolidayEventDetailViewModelImple: HolidayEventDetailViewModel, LiveActivityToggleHandling, @unchecked Sendable {
     
     private let uuid: String
     private let holidayUsecase: any HolidayUsecase
     private let daysIntervalCountUsecase: any DaysIntervalCountUsecase
+    let eventLiveActivityUsecase: any EventLiveActivityUsecase
     var router: (any HolidayEventDetailRouting)?
+    var liveActivityRouting: (any Routing)? { self.router }
     
     init(
         uuid: String,
         holidayUsecase: any HolidayUsecase,
-        daysIntervalCountUsecase: any DaysIntervalCountUsecase
+        daysIntervalCountUsecase: any DaysIntervalCountUsecase,
+        eventLiveActivityUsecase: any EventLiveActivityUsecase
     ) {
         self.uuid = uuid
         self.holidayUsecase = holidayUsecase
         self.daysIntervalCountUsecase = daysIntervalCountUsecase
+        self.eventLiveActivityUsecase = eventLiveActivityUsecase
     }
     
     
@@ -105,6 +111,11 @@ extension HolidayEventDetailViewModelImple {
             |> \.confirmed .~ pure(confirmed)
             |> \.withCancel .~ true
         self.router?.showConfirm(dialog: info)
+    }
+
+    func toggleLiveActivity(isRegistered: Bool) {
+        guard let holiday = self.subject.holiday.value else { return }
+        self.startOrStopLiveActivity(holiday.liveActivityTarget, isRegistered: isRegistered)
     }
 
     private func hideHolidayConfirmed(_ name: String) {
@@ -160,6 +171,21 @@ extension HolidayEventDetailViewModelImple {
             .eraseToAnyPublisher()
     }
     
+    var liveActivityActionModel: AnyPublisher<LiveActivityActionModel?, Never> {
+        let transform: (Holiday?, LiveActivityTarget?) -> LiveActivityActionModel? = { holiday, registeredTarget in
+            guard let holiday else { return nil }
+            return LiveActivityActionModel(
+                isRegistered: registeredTarget == holiday.liveActivityTarget
+            )
+        }
+        return Publishers.CombineLatest(
+            self.subject.holiday, self.eventLiveActivityUsecase.registeredTarget
+        )
+        .map(transform)
+        .removeDuplicates()
+        .eraseToAnyPublisher()
+    }
+    
     var countryModel: AnyPublisher<CountryModel, Never> {
         let transform: (HolidaySupportCountry) -> CountryModel = { country in
             return .init(
@@ -171,5 +197,13 @@ extension HolidayEventDetailViewModelImple {
             .map(transform)
             .removeDuplicates()
             .eraseToAnyPublisher()
+    }
+}
+
+
+private extension Holiday {
+
+    var liveActivityTarget: LiveActivityTarget {
+        return .holiday(uuid: self.uuid, dateString: self.dateString)
     }
 }

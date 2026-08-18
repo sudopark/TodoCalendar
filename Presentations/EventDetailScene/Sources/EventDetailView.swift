@@ -1160,9 +1160,7 @@ extension EventDetailMoreAction: Identifiable {
                 ? "calendar::event::more_action:dday_candidate:unregister:item_name".localized()
                 : "calendar::event::more_action:dday_candidate:register:item_name".localized()
         case .toggleLiveActivity(let isRegistered):
-            return isRegistered
-                ? "calendar::event::more_action:live_activity:unregister:item_name".localized()
-                : "calendar::event::more_action:live_activity:register:item_name".localized()
+            return LiveActivityActionModel(isRegistered: isRegistered).itemText
         case .copy: return "calendar::event::more_action:copy:item_name".localized()
         case .addToTemplate: return "add to template".localized()
         case .share: return "calendar::event::more_action:share:item_name".localized()

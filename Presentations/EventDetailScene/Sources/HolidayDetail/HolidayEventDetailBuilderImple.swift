@@ -9,6 +9,7 @@
 //
 
 import UIKit
+import Domain
 import Scenes
 import CommonPresentation
 
@@ -38,7 +39,8 @@ extension HolidayEventDetailSceneBuilerImple: HolidayEventDetailSceneBuiler {
         let viewModel = HolidayEventDetailViewModelImple(
             uuid: uuid,
             holidayUsecase: self.usecaseFactory.makeHolidayUsecase(),
-            daysIntervalCountUsecase: self.usecaseFactory.makeDaysIntervalCountUsecase()
+            daysIntervalCountUsecase: self.usecaseFactory.makeDaysIntervalCountUsecase(),
+            eventLiveActivityUsecase: self.usecaseFactory.eventLiveActivityUsecase
         )
         
         let viewController = HolidayEventDetailViewController(
