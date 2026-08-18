@@ -1565,13 +1565,13 @@ private extension CalendarViewModelImpleTests {
     }
     
     private class PrivateStubEventSyncUsecase: StubEventSyncUsecase, @unchecked Sendable {
-        
-        private let isSyncing = CurrentValueSubject<Bool, Never>(false)
+
+        private let isSyncing = CurrentValueSubject<EventSyncStatus, Never>(.idle)
         func updateIsSync(_ isSync: Bool) {
-            self.isSyncing.send(isSync)
+            self.isSyncing.send(isSync ? .incrementalSyncing : .idle)
         }
-        
-        override var isSyncInProgress: AnyPublisher<Bool, Never> {
+
+        override var syncStatus: AnyPublisher<EventSyncStatus, Never> {
             return isSyncing.removeDuplicates()
                 .eraseToAnyPublisher()
         }

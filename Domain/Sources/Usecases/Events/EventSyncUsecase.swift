@@ -19,13 +19,20 @@ public protocol EventSyncUsecase: Sendable, AnyObject {
     func cancelSync()
     func forceSync()
     
-    var isSyncInProgress: AnyPublisher<Bool, Never> { get }
+    var syncStatus: AnyPublisher<EventSyncStatus, Never> { get }
     func loadLatestSyncDataTimestamp() async throws -> TimeInterval?
 }
 
 extension EventSyncUsecase {
-    
+
     public func sync() { self.sync(nil) }
+
+    public var isSyncInProgress: AnyPublisher<Bool, Never> {
+        return self.syncStatus
+            .map { $0 != .idle }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
 }
 
 
@@ -49,7 +56,7 @@ public final class EventSyncUsecaseImple: EventSyncUsecase, @unchecked Sendable 
         static let pageSize: Int = 30
     }
     private struct Subject {
-        let isSyncing = CurrentValueSubject<Bool, Never>(false)
+        let syncStatus = CurrentValueSubject<EventSyncStatus, Never>(.idle)
     }
     private let subject = Subject()
     private var syncTask: Task<Void, any Error>?
@@ -72,7 +79,7 @@ extension EventSyncUsecaseImple {
     public func cancelSync() {
         self.syncTask?.cancel()
         self.syncTask = nil
-        self.subject.isSyncing.send(false)
+        self.subject.syncStatus.send(.idle)
     }
     
     public func forceSync() {
@@ -87,7 +94,7 @@ extension EventSyncUsecaseImple {
     }
     
     private func runSyncTask() async throws {
-        self.subject.isSyncing.send(true)
+        self.subject.syncStatus.send(.incrementalSyncing)
 
         try await self.eventSyncMediator.waitUntilEventSyncAvailable()
 
@@ -103,11 +110,14 @@ extension EventSyncUsecaseImple {
         }
 
         logger.log(level: .debug, "event sync process end")
-        self.subject.isSyncing.send(false)
+        self.subject.syncStatus.send(.idle)
     }
-    
+
     private func runSync(_ dataType: SyncDataType) async throws {
         let checkIsNeed = try await self.syncRepository.checkIsNeedSync(for: dataType)
+        if checkIsNeed.result == .migrationNeeds {
+            self.subject.syncStatus.send(.fullSyncing)
+        }
         switch (checkIsNeed.result, dataType) {
         case (.noNeedToSync, _): break
         case (.migrationNeeds, .eventTag):
@@ -158,12 +168,12 @@ extension EventSyncUsecaseImple {
 
 extension EventSyncUsecaseImple {
     
-    public var isSyncInProgress: AnyPublisher<Bool, Never> {
-        return self.subject.isSyncing
+    public var syncStatus: AnyPublisher<EventSyncStatus, Never> {
+        return self.subject.syncStatus
             .removeDuplicates()
             .eraseToAnyPublisher()
     }
-    
+
     public func loadLatestSyncDataTimestamp() async throws -> TimeInterval? {
         return try await self.syncRepository.loadLatestSyncDataTimestamp()
     }
@@ -184,8 +194,8 @@ public final class NotNeedEventSyncUsecase: EventSyncUsecase, Sendable {
     
     public func forceSync() { }
     
-    public var isSyncInProgress: AnyPublisher<Bool, Never> {
-        return Just(false).eraseToAnyPublisher()
+    public var syncStatus: AnyPublisher<EventSyncStatus, Never> {
+        return Just(.idle).eraseToAnyPublisher()
     }
     
     public func loadLatestSyncDataTimestamp() async throws -> TimeInterval? {
