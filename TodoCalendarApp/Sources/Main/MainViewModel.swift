@@ -45,6 +45,7 @@ protocol MainViewModel: AnyObject, Sendable, MainSceneInteractor {
     var isShowReturnToToday: AnyPublisher<Bool, Never> { get }
     var temporaryUserDataMigrationStatus: AnyPublisher<TemporaryUserDataMigrationStatus?, Never> { get }
     var isLoadingCalendarEvents: AnyPublisher<Bool, Never> { get }
+    var isLoadingAllEvents: AnyPublisher<Bool, Never> { get }
 }
 
 
@@ -288,6 +289,13 @@ extension MainViewModelImple {
     
     var isLoadingCalendarEvents: AnyPublisher<Bool, Never> {
         return self.eventSyncUsecase.isSyncInProgress
+            .eraseToAnyPublisher()
+    }
+
+    var isLoadingAllEvents: AnyPublisher<Bool, Never> {
+        return self.eventSyncUsecase.syncStatus
+            .map { $0 == .fullSyncing }
+            .removeDuplicates()
             .eraseToAnyPublisher()
     }
 }

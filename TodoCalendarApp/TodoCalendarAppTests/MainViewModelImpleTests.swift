@@ -66,9 +66,11 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
     }
 
     private func makeViewModel(
-        shouldFailMigration: Bool = false
+        shouldFailMigration: Bool = false,
+        fullSyncing: Bool = false
     ) -> MainViewModelImple {
         self.stubMigrationUsecase.shouldFail = shouldFailMigration
+        self.stubSyncUsecase.stubStatusWhileSyncing = fullSyncing ? .fullSyncing : .incrementalSyncing
         let expect = expectation(description: "wait until attached")
         let viewModel = MainViewModelImple(
             uiSettingUsecase: self.spyUISettingUsecase,
@@ -384,10 +386,40 @@ extension MainViewModelImpleTests {
         // then
         XCTAssertEqual(isLoadings, [false, true, false])
     }
+
+    func testViewModel_whenFullSyncing_notifyLoadingAllEvents() {
+        // given
+        let expect = expectation(description: "전체 sync 중임을 알림")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModel(fullSyncing: true)
+
+        // when
+        let isLoadings = self.waitOutputs(expect, for: viewModel.isLoadingAllEvents) {
+            self.stubSyncUsecase.sync()
+        }
+
+        // then
+        XCTAssertEqual(isLoadings, [false, true, false])
+    }
+
+    func testViewModel_whenIncrementalSyncing_notNotifyLoadingAllEvents() {
+        // given
+        let expect = expectation(description: "증분 sync 중에는 전체 sync 안내를 하지 않음")
+        expect.expectedFulfillmentCount = 1
+        let viewModel = self.makeViewModel()
+
+        // when
+        let isLoadings = self.waitOutputs(expect, for: viewModel.isLoadingAllEvents) {
+            self.stubSyncUsecase.sync()
+        }
+
+        // then
+        XCTAssertEqual(isLoadings, [false])
+    }
 }
 
 extension MainViewModelImpleTests {
-    
+
     func testViewModel_jumpDay() {
         // given
         let viewModel = self.makeViewModel()
