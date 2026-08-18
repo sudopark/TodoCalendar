@@ -7,6 +7,9 @@
 //
 
 import Foundation
+import Extensions
+import Prelude
+import Optics
 
 
 // MARK: - RRule
@@ -172,5 +175,36 @@ extension Array where Element == String {
             guard line.hasPrefix("RRULE:") else { return line }
             return newRRuleText
         }
+    }
+}
+
+
+// MARK: - 애플이 UTC 하루 끝으로 저장한 UNTIL 재앵커링
+
+extension RRule {
+
+    // EventKit 은 반복 종료 날짜를 UTC 하루 끝(23:59:59Z 또는 다음날 00:00:00Z) instant 로 돌려준다
+    public func reanchoringUTCDayEndUntil(to timeZone: TimeZone) -> RRule {
+        guard let until = self.until, until.isUTCDayBoundary,
+              let localDayEnd = until.addingTimeInterval(-1).utcDayEnd(in: timeZone)
+        else { return self }
+        return self |> \.until .~ localDayEnd
+    }
+}
+
+private extension Date {
+
+    var isUTCDayBoundary: Bool {
+        let secondsInDay = Int(self.timeIntervalSince1970.rounded()) % 86400
+        let normalized = (secondsInDay + 86400) % 86400
+        return normalized == 0 || normalized == 86399
+    }
+
+    func utcDayEnd(in timeZone: TimeZone) -> Date? {
+        let utcCalendar = Calendar(identifier: .gregorian) |> \.timeZone .~ TimeZone.gmt
+        let localCalendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
+        let dayComponents = utcCalendar.dateComponents([.year, .month, .day], from: self)
+        return localCalendar.date(from: dayComponents)
+            .flatMap { localCalendar.endOfDay(for: $0) }
     }
 }

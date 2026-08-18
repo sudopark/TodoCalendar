@@ -1088,6 +1088,45 @@ extension AppleCalendarEventDetailViewModelImpleTests {
 }
 
 
+// MARK: - 애플이 UTC 하루 끝으로 저장한 반복 종료일 표시
+
+extension AppleCalendarEventDetailViewModelImpleTests {
+
+    private func repeatText(forRule rule: String) async throws -> String? {
+        let viewModel = self.makeViewModelWithOrigin { $0.recurrenceRules = [rule] }
+        return try await self.firstOutput(expectConfirm("반복 텍스트"), for: viewModel.repeatText) {
+            viewModel.refresh()
+        }
+    }
+
+    @Test func viewModel_whenUntilIsUTCDayEnd_showsSameEndDateAsLocalInstant() async throws {
+        // given - 같은 9/30 종료를 애플식(UTC 하루 끝)과 로컬 instant 로 각각 표현
+        let appleEncodedRule = "RRULE:FREQ=DAILY;INTERVAL=1;UNTIL=20260930T235959Z"
+        let localInstantRule = "RRULE:FREQ=DAILY;INTERVAL=1;UNTIL=20260930T145959Z"
+
+        // when
+        let appleEncodedText = try await self.repeatText(forRule: appleEncodedRule)
+        let localInstantText = try await self.repeatText(forRule: localInstantRule)
+
+        // then
+        #expect(appleEncodedText == localInstantText)
+    }
+
+    @Test func viewModel_whenLockedRuleUntilIsUTCDayEnd_showsSameEndDateAsLocalInstant() async throws {
+        // given - BYSETPOS 로 매핑이 잠긴 규칙도 같은 종료일로 보여야 한다
+        let appleEncodedRule = "RRULE:FREQ=MONTHLY;BYSETPOS=-1;BYDAY=MO;UNTIL=20260930T235959Z"
+        let localInstantRule = "RRULE:FREQ=MONTHLY;BYSETPOS=-1;BYDAY=MO;UNTIL=20260930T145959Z"
+
+        // when
+        let appleEncodedText = try await self.repeatText(forRule: appleEncodedRule)
+        let localInstantText = try await self.repeatText(forRule: localInstantRule)
+
+        // then
+        #expect(appleEncodedText == localInstantText)
+    }
+}
+
+
 private final class SpyRouter: BaseSpyRouter, AppleCalendarEventDetailRouting, @unchecked Sendable {
     func routeToAppleCalendarApp(at interval: TimeInterval) { }
 
