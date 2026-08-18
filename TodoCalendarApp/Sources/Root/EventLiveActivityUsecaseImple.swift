@@ -21,13 +21,16 @@ final class EventLiveActivityUsecaseImple: EventLiveActivityUsecase, @unchecked 
 
     private let controller: any LiveActivityController
     private let sharedDataStore: SharedDataStore
+    private let eventDetailDataUsecase: any EventDetailDataUsecase
 
     init(
         controller: any LiveActivityController,
-        sharedDataStore: SharedDataStore
+        sharedDataStore: SharedDataStore,
+        eventDetailDataUsecase: any EventDetailDataUsecase
     ) {
         self.controller = controller
         self.sharedDataStore = sharedDataStore
+        self.eventDetailDataUsecase = eventDetailDataUsecase
     }
 
     private struct Subject {
@@ -54,7 +57,8 @@ extension EventLiveActivityUsecaseImple {
         else { throw EventLiveActivityStartFailReason.eventNotFound }
         try self.validateRegistration(eventDate: observed.eventDate, now: now)
 
-        let content = self.initialContent(from: observed, startDate: now)
+        let detail = await self.eventDetail(for: target)
+        let content = self.initialContent(from: observed, startDate: now, detail: detail)
         let baseline = LiveActivityBaseline(observed)
 
         let previous = self.pendingStart
@@ -66,8 +70,20 @@ extension EventLiveActivityUsecaseImple {
         try await task.value
     }
 
+    /// 원격 상세 조회는 캐시가 없고 서버가 빈 응답을 주면 값도 완료도 보내지 않고 끝난다
+    /// (`EventDetailUploadDecorateRepositoryImple`) — 타임아웃이 없으면 등록이 영영 매달린다.
+    private func eventDetail(for target: LiveActivityTarget) async -> EventDetailData? {
+        guard let id = target.eventDetailDataId else { return nil }
+        return try? await self.eventDetailDataUsecase.loadDetail(id)
+            .timeout(.seconds(Constant.detailLoadTimeout), scheduler: DispatchQueue.global())
+            .values
+            .first(where: { _ in true })
+    }
+
     private func initialContent(
-        from observed: LiveActivityObservedEvent, startDate: Date
+        from observed: LiveActivityObservedEvent,
+        startDate: Date,
+        detail: EventDetailData?
     ) -> EventCountdownActivityAttributes.State {
         return EventCountdownActivityAttributes.State(
             eventName: observed.name,
@@ -75,7 +91,8 @@ extension EventLiveActivityUsecaseImple {
             tagColorHex: observed.tagColorHex,
             eventDate: observed.eventDate,
             startDate: startDate,
-            placeName: observed.placeName
+            placeName: detail?.place?.placeName ?? observed.placeName,
+            memo: detail?.memo
         )
     }
 
@@ -546,6 +563,7 @@ extension EventLiveActivityUsecaseImple {
 
 private enum Constant {
     static let activeLimit: TimeInterval = 8 * 3600
+    static let detailLoadTimeout: TimeInterval = 1
 }
 
 private typealias Holidays = [String: [Int: [Holiday]]]
@@ -594,6 +612,14 @@ private extension LiveActivityTarget {
         switch self {
         case .googleCalendar, .appleCalendar: return true
         case .todo, .schedule, .holiday: return false
+        }
+    }
+
+    var eventDetailDataId: String? {
+        switch self {
+        case .todo(let id): return id
+        case .schedule(let id, _): return id
+        case .holiday, .googleCalendar, .appleCalendar: return nil
         }
     }
 }
