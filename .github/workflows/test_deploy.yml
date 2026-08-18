@@ -1,0 +1,69 @@
+name: Test Deploy
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: test-deploy-lane
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: Maggie-m1
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash -eo pipefail {0}
+    env:
+      # 레포에 없는 실 config 3종의 러너 로컬 보관소. 배치 절차는 .claude/skills/test-deploy/SKILL.md
+      SECRETS_DIR: /Users/sudo.park/Desktop/actions/secrets/TodoCalendar
+      FASTLANE_SKIP_UPDATE_CHECK: '1'
+      FASTLANE_HIDE_CHANGELOG: '1'
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Use homebrew ruby
+        run: echo "/opt/homebrew/opt/ruby/bin" >> "$GITHUB_PATH"
+
+      - name: Install ruby gems
+        run: bundle install
+
+      # firebase_app_distribution 은 이 파일의 refresh token 을 직접 읽는다. 없으면 아카이브 전에 죽인다.
+      - name: Verify Firebase credentials
+        run: test -f "$HOME/.config/configstore/firebase-tools.json"
+
+      - name: Install real config
+        run: |
+          test -d "$SECRETS_DIR"
+          cp "$SECRETS_DIR/InfoPlist_Secrets.swift" Tuist/ProjectDescriptionHelpers/InfoPlist_Secrets.swift
+          cp "$SECRETS_DIR/GoogleService-Info.plist" TodoCalendarApp/Resources/GoogleService-Info.plist
+          cp "$SECRETS_DIR/secrets.json" TodoCalendarApp/Resources/secrets.json
+
+      - name: Install toolchain (tuist via mise)
+        run: |
+          mise install
+          echo "$(mise where tuist)" >> "$GITHUB_PATH"
+
+      - name: Install dependencies
+        run: tuist install
+
+      - name: Generate project
+        run: tuist generate --no-open
+
+      - name: Stamp build number
+        run: |
+          for target in TodoCalendarApp TodoCalendarAppWidget TodoCalendarAppIntentExtensions TodoCalendarAppShare; do
+            plutil -replace CFBundleVersion -string "${{ github.run_number }}" \
+              "TodoCalendarApp/Derived/InfoPlists/${target}-Info.plist"
+          done
+
+      - name: Build and distribute
+        env:
+          REF_NAME: ${{ github.ref_name }}
+          RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          TEST_DEPLOY_RELEASE_NOTES="branch: $REF_NAME
+          commit: $(git rev-parse --short HEAD) $(git log -1 --pretty=%s)
+          build: $RUN_NUMBER"
+          export TEST_DEPLOY_RELEASE_NOTES
+          bundle exec fastlane ios test_deploy
