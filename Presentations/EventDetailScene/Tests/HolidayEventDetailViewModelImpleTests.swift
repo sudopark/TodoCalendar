@@ -14,6 +14,7 @@ import Domain
 import Extensions
 import UnitTestHelpKit
 import TestDoubles
+import Scenes
 
 @testable import EventDetailScene
 
@@ -32,13 +33,17 @@ final class HolidayEventDetailViewModelImpleTests: PublisherWaitable {
         try await usecase.prepare()
         self.stubLiveActivityUsecase.registeredTargetSubject.send(registeredLiveActivityTarget)
         self.stubLiveActivityUsecase.stubStartError = liveActivityStartError
+        let liveActivityToggleViewModel = LiveActivityToggleViewModelImple(
+            eventLiveActivityUsecase: self.stubLiveActivityUsecase
+        )
         let viewModel = HolidayEventDetailViewModelImple(
             uuid: "some",
             holidayUsecase: usecase,
             daysIntervalCountUsecase: StubDaysIntervalCountUsecase(),
-            eventLiveActivityUsecase: self.stubLiveActivityUsecase
+            liveActivityToggleViewModel: liveActivityToggleViewModel
         )
         viewModel.router = self.spyRouter
+        liveActivityToggleViewModel.router = self.spyRouter
         return viewModel
     }
 }
@@ -114,13 +119,17 @@ extension HolidayEventDetailViewModelImpleTests {
     private func makeViewModelWithUsecase() async throws -> (HolidayEventDetailViewModelImple, PrivateStubHolidayUsecase) {
         let usecase = PrivateStubHolidayUsecase()
         try await usecase.prepare()
+        let liveActivityToggleViewModel = LiveActivityToggleViewModelImple(
+            eventLiveActivityUsecase: self.stubLiveActivityUsecase
+        )
         let viewModel = HolidayEventDetailViewModelImple(
             uuid: "some",
             holidayUsecase: usecase,
             daysIntervalCountUsecase: StubDaysIntervalCountUsecase(),
-            eventLiveActivityUsecase: self.stubLiveActivityUsecase
+            liveActivityToggleViewModel: liveActivityToggleViewModel
         )
         viewModel.router = self.spyRouter
+        liveActivityToggleViewModel.router = self.spyRouter
         return (viewModel, usecase)
     }
 

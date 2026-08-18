@@ -1,51 +1,66 @@
 //
-//  LiveActivityToggleHandling.swift
-//  EventDetailScene
+//  LiveActivityToggleViewModel.swift
+//  Scenes
 //
 //  Created by sudo.park on 8/19/26.
 //  Copyright © 2026 com.sudo.park. All rights reserved.
 //
 
 import Foundation
+import Combine
 import Prelude
 import Optics
 import Domain
-import Scenes
 import Extensions
 
 
-struct LiveActivityActionModel: Equatable {
+public struct LiveActivityActionModel: Equatable, Sendable {
 
-    let isRegistered: Bool
+    public let isRegistered: Bool
 
-    var itemText: String {
+    public var itemText: String {
         return self.isRegistered
             ? "calendar::event::more_action:live_activity:unregister:item_name".localized()
             : "calendar::event::more_action:live_activity:register:item_name".localized()
     }
+
+    public init(isRegistered: Bool) {
+        self.isRegistered = isRegistered
+    }
 }
 
 
-protocol LiveActivityToggleHandling: AnyObject, Sendable {
+public protocol LiveActivityToggleViewModel: AnyObject, Sendable {
 
-    var eventLiveActivityUsecase: any EventLiveActivityUsecase { get }
-    var liveActivityRouting: (any Routing)? { get }
+    func startOrStopLiveActivity(_ target: LiveActivityTarget, isCurrentlyRegistered: Bool)
+    var registeredTarget: AnyPublisher<LiveActivityTarget?, Never> { get }
 }
 
-extension LiveActivityToggleHandling {
+public final class LiveActivityToggleViewModelImple: LiveActivityToggleViewModel, @unchecked Sendable {
 
-    func startOrStopLiveActivity(_ target: LiveActivityTarget, isRegistered: Bool) {
+    private let eventLiveActivityUsecase: any EventLiveActivityUsecase
+    public weak var router: (any Routing)?
+
+    public init(eventLiveActivityUsecase: any EventLiveActivityUsecase) {
+        self.eventLiveActivityUsecase = eventLiveActivityUsecase
+    }
+
+    public func startOrStopLiveActivity(_ target: LiveActivityTarget, isCurrentlyRegistered: Bool) {
         Task { [weak self] in
             guard let self else { return }
-            guard isRegistered == false
+            guard isCurrentlyRegistered == false
             else { return await self.eventLiveActivityUsecase.stopActivity() }
 
             do {
                 try await self.eventLiveActivityUsecase.startActivity(target)
             } catch {
-                self.liveActivityRouting?.showLiveActivityUnavailable(error)
+                self.router?.showLiveActivityUnavailable(error)
             }
         }
+    }
+
+    public var registeredTarget: AnyPublisher<LiveActivityTarget?, Never> {
+        return self.eventLiveActivityUsecase.registeredTarget
     }
 }
 
@@ -54,7 +69,7 @@ extension Routing {
 
     /// 등록 불가는 오류가 아니라 안내다 — `showError`는 "문제가 발생했습니다" 뒤에 사유를
     /// 괄호로 덧붙여 안내문을 오류처럼 읽히게 한다.
-    func showLiveActivityUnavailable(_ error: any Error) {
+    public func showLiveActivityUnavailable(_ error: any Error) {
         guard let reason = error as? EventLiveActivityStartFailReason
         else { return self.showError(error) }
 

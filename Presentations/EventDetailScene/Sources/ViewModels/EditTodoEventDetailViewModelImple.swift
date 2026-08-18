@@ -14,10 +14,8 @@ import Extensions
 import Scenes
 
 
-final class EditTodoEventDetailViewModelImple: EventDetailViewModel, LiveActivityToggleHandling, @unchecked Sendable {
+final class EditTodoEventDetailViewModelImple: EventDetailViewModel, @unchecked Sendable {
 
-    var liveActivityRouting: (any Routing)? { self.router }
-    
     private let todoId: String
     private let todoUsecase: any TodoEventUsecase
     private let eventTagUsecase: any EventTagUsecase
@@ -25,7 +23,7 @@ final class EditTodoEventDetailViewModelImple: EventDetailViewModel, LiveActivit
     private let scheduleEventUsecase: any ScheduleEventUsecase
     private let calendarSettingUsecase: any CalendarSettingUsecase
     private let foremostEventUsecase: any ForemostEventUsecase
-    let eventLiveActivityUsecase: any EventLiveActivityUsecase
+    private let liveActivityToggleViewModel: any LiveActivityToggleViewModel
     var router: (any EventDetailRouting)?
     weak var listener: EventDetailSceneListener?
     
@@ -37,7 +35,7 @@ final class EditTodoEventDetailViewModelImple: EventDetailViewModel, LiveActivit
         scheduleEventUsecase: any ScheduleEventUsecase,
         calendarSettingUsecase: any CalendarSettingUsecase,
         foremostEventUsecase: any ForemostEventUsecase,
-        eventLiveActivityUsecase: any EventLiveActivityUsecase
+        liveActivityToggleViewModel: any LiveActivityToggleViewModel
     ) {
         self.todoId = todoId
         self.todoUsecase = todoUsecase
@@ -46,7 +44,7 @@ final class EditTodoEventDetailViewModelImple: EventDetailViewModel, LiveActivit
         self.scheduleEventUsecase = scheduleEventUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
         self.foremostEventUsecase = foremostEventUsecase
-        self.eventLiveActivityUsecase = eventLiveActivityUsecase
+        self.liveActivityToggleViewModel = liveActivityToggleViewModel
         
         self.internalBinding()
     }
@@ -152,7 +150,7 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
             self.transformToScheduleAfterConfirm()
 
         case .toggleLiveActivity(let isRegistered):
-            self.startOrStopLiveActivity(.todo(id: self.todoId), isRegistered: isRegistered)
+            self.liveActivityToggleViewModel.startOrStopLiveActivity(.todo(id: self.todoId), isCurrentlyRegistered: isRegistered)
             
         case .addToTemplate:
             // TODO:
@@ -532,7 +530,7 @@ extension EditTodoEventDetailViewModelImple {
         return Publishers.CombineLatest3(
             self.subject.basicData.compactMap{ $0?.origin },
             self.foremostEventUsecase.foremostEvent,
-            self.eventLiveActivityUsecase.registeredTarget
+            self.liveActivityToggleViewModel.registeredTarget
         )
         .map(transform)
         .removeDuplicates()

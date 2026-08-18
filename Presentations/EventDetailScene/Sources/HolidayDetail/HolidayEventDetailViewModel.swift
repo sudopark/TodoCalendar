@@ -43,25 +43,24 @@ protocol HolidayEventDetailViewModel: AnyObject, Sendable, HolidayEventDetailSce
 
 // MARK: - HolidayEventDetailViewModelImple
 
-final class HolidayEventDetailViewModelImple: HolidayEventDetailViewModel, LiveActivityToggleHandling, @unchecked Sendable {
+final class HolidayEventDetailViewModelImple: HolidayEventDetailViewModel, @unchecked Sendable {
     
     private let uuid: String
     private let holidayUsecase: any HolidayUsecase
     private let daysIntervalCountUsecase: any DaysIntervalCountUsecase
-    let eventLiveActivityUsecase: any EventLiveActivityUsecase
+    private let liveActivityToggleViewModel: any LiveActivityToggleViewModel
     var router: (any HolidayEventDetailRouting)?
-    var liveActivityRouting: (any Routing)? { self.router }
     
     init(
         uuid: String,
         holidayUsecase: any HolidayUsecase,
         daysIntervalCountUsecase: any DaysIntervalCountUsecase,
-        eventLiveActivityUsecase: any EventLiveActivityUsecase
+        liveActivityToggleViewModel: any LiveActivityToggleViewModel
     ) {
         self.uuid = uuid
         self.holidayUsecase = holidayUsecase
         self.daysIntervalCountUsecase = daysIntervalCountUsecase
-        self.eventLiveActivityUsecase = eventLiveActivityUsecase
+        self.liveActivityToggleViewModel = liveActivityToggleViewModel
     }
     
     
@@ -115,7 +114,7 @@ extension HolidayEventDetailViewModelImple {
 
     func toggleLiveActivity(isRegistered: Bool) {
         guard let holiday = self.subject.holiday.value else { return }
-        self.startOrStopLiveActivity(holiday.liveActivityTarget, isRegistered: isRegistered)
+        self.liveActivityToggleViewModel.startOrStopLiveActivity(holiday.liveActivityTarget, isCurrentlyRegistered: isRegistered)
     }
 
     private func hideHolidayConfirmed(_ name: String) {
@@ -179,7 +178,7 @@ extension HolidayEventDetailViewModelImple {
             )
         }
         return Publishers.CombineLatest(
-            self.subject.holiday, self.eventLiveActivityUsecase.registeredTarget
+            self.subject.holiday, self.liveActivityToggleViewModel.registeredTarget
         )
         .map(transform)
         .removeDuplicates()

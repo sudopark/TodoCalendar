@@ -14,10 +14,8 @@ import Extensions
 import Scenes
 
 
-final class EditScheduleEventDetailViewModelImple: EventDetailViewModel, LiveActivityToggleHandling, @unchecked Sendable {
+final class EditScheduleEventDetailViewModelImple: EventDetailViewModel, @unchecked Sendable {
 
-    var liveActivityRouting: (any Routing)? { self.router }
-    
     private let scheduleId: String
     private let repeatingEventTargetTime: EventTime?
     private let scheduleUsecase: any ScheduleEventUsecase
@@ -27,7 +25,7 @@ final class EditScheduleEventDetailViewModelImple: EventDetailViewModel, LiveAct
     private let calendarSettingUsecase: any CalendarSettingUsecase
     private let foremostEventUsecase: any ForemostEventUsecase
     private let ddayCandidateUsecase: any DDayCandidateUsecase
-    let eventLiveActivityUsecase: any EventLiveActivityUsecase
+    private let liveActivityToggleViewModel: any LiveActivityToggleViewModel
     var router: (any EventDetailRouting)?
     weak var listener: EventDetailSceneListener?
     
@@ -41,7 +39,7 @@ final class EditScheduleEventDetailViewModelImple: EventDetailViewModel, LiveAct
         calendarSettingUsecase: any CalendarSettingUsecase,
         foremostEventUsecase: any ForemostEventUsecase,
         ddayCandidateUsecase: any DDayCandidateUsecase,
-        eventLiveActivityUsecase: any EventLiveActivityUsecase
+        liveActivityToggleViewModel: any LiveActivityToggleViewModel
     ) {
         self.scheduleId = scheduleId
         self.repeatingEventTargetTime = repeatingEventTargetTime
@@ -52,7 +50,7 @@ final class EditScheduleEventDetailViewModelImple: EventDetailViewModel, LiveAct
         self.calendarSettingUsecase = calendarSettingUsecase
         self.foremostEventUsecase = foremostEventUsecase
         self.ddayCandidateUsecase = ddayCandidateUsecase
-        self.eventLiveActivityUsecase = eventLiveActivityUsecase
+        self.liveActivityToggleViewModel = liveActivityToggleViewModel
 
         self.internalBinding()
     }
@@ -158,8 +156,8 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
             self.toggleDDayCandidateAfterConfirm(isRegistered: isRegistered)
 
         case .toggleLiveActivity(let isRegistered):
-            self.startOrStopLiveActivity(
-                self.currentLiveActivityTarget, isRegistered: isRegistered
+            self.liveActivityToggleViewModel.startOrStopLiveActivity(
+                self.currentLiveActivityTarget, isCurrentlyRegistered: isRegistered
             )
 
         case .copy:
@@ -641,7 +639,7 @@ extension EditScheduleEventDetailViewModelImple {
             isDDayWidgetEnabled
                 ? self.ddayCandidateUsecase.candidates
                 : Just<[DDayCandidate]>([]).eraseToAnyPublisher(),
-            self.eventLiveActivityUsecase.registeredTarget
+            self.liveActivityToggleViewModel.registeredTarget
         )
         .map(transform)
         .removeDuplicates()
