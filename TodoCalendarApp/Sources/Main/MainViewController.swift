@@ -23,6 +23,7 @@ final class MainViewController: UIViewController, MainScene {
     private let headerAreaStackView = UIStackView()
     private let headerView = HeaderView()
     private let calendarContainerView = UIView()
+    private let loadingAllEventsLabel = UILabel()
     private let compositeLoadingBarView = CompositeLoadingBarView()
     
     private let viewModel: any MainViewModel
@@ -112,7 +113,14 @@ extension MainViewController {
                 self?.compositeLoadingBarView.updateIsLoading(isLoading)
             })
             .store(in: &self.cancellables)
-        
+
+        self.viewModel.isLoadingAllEvents
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] isLoading in
+                self?.loadingAllEventsLabel.isHidden = !isLoading
+            })
+            .store(in: &self.cancellables)
+
         self.headerView.returnTodayView.addTapGestureRecognizerPublisher()
             .sink(receiveValue: { [weak self] in
                 self?.viewModel.returnToToday()
@@ -184,7 +192,12 @@ extension MainViewController {
             $0.heightAnchor.constraint(equalToConstant: 44)
         }
         headerView.setupLayout()
-        
+
+        headerAreaStackView.addArrangedSubview(loadingAllEventsLabel)
+        loadingAllEventsLabel.text = "calendar::eventSync::loadingAllEvents::message".localized()
+        loadingAllEventsLabel.textAlignment = .center
+        loadingAllEventsLabel.isHidden = true
+
         headerAreaStackView.addArrangedSubview(compositeLoadingBarView)
         compositeLoadingBarView.autoLayout.active {
             $0.heightAnchor.constraint(equalToConstant: 3.2)
@@ -204,6 +217,8 @@ extension MainViewController {
     ) {
         self.view.backgroundColor = colorSet.dayBackground
         self.headerView.setupStyling(fontSet, colorSet)
+        self.loadingAllEventsLabel.font = fontSet.subNormal
+        self.loadingAllEventsLabel.textColor = colorSet.text2
         self.compositeLoadingBarView.setupStyling(fontSet, colorSet)
     }
 }

@@ -112,6 +112,7 @@
 
 "calendar::foremostevent:title" = "Foremost Event";
 "calendar::uncompletedTodos:title" = "Uncompleted To-do";
+"calendar::eventSync::loadingAllEvents::message" = "Fetching all your events…";
 "calendar::event_time::todo" = "Todo";
 "calendar::event_time::allday" = "All day";
 "calendar::event_time::allday::with" = "%@ all day";
