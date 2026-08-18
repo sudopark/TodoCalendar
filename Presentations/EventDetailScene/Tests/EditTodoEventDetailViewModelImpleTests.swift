@@ -90,6 +90,9 @@ class EditTodoEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubLiveActivityUsecase.registeredTargetSubject.send(registeredLiveActivityTarget)
         self.stubLiveActivityUsecase.stubStartError = liveActivityStartError
         
+        let liveActivityToggleViewModel = LiveActivityToggleViewModelImple(
+            eventLiveActivityUsecase: self.stubLiveActivityUsecase
+        )
         let viewModel = EditTodoEventDetailViewModelImple(
             todoId: todo.uuid,
             todoUsecase: self.spyTodoUsecase,
@@ -98,9 +101,10 @@ class EditTodoEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitable {
             scheduleEventUsecase: scheduleUsecase,
             calendarSettingUsecase: calendarSettingUsecase,
             foremostEventUsecase: self.stubForemostEventUsecase,
-            eventLiveActivityUsecase: self.stubLiveActivityUsecase
+            liveActivityToggleViewModel: liveActivityToggleViewModel
         )
         viewModel.router = self.spyRouter
+        liveActivityToggleViewModel.router = self.spyRouter
         viewModel.listener = self.spyListener
         viewModel.attachInput()
         return viewModel

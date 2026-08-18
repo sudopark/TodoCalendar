@@ -97,6 +97,9 @@ class EditScheduleEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitabl
         self.stubLiveActivityUsecase.registeredTargetSubject.send(registeredLiveActivityTarget)
         self.stubLiveActivityUsecase.stubStartError = liveActivityStartError
 
+        let liveActivityToggleViewModel = LiveActivityToggleViewModelImple(
+            eventLiveActivityUsecase: self.stubLiveActivityUsecase
+        )
         let viewModel = EditScheduleEventDetailViewModelImple(
             scheduleId: schedule.uuid,
             repeatingEventTargetTime: repeatingEventTargetTime,
@@ -107,9 +110,10 @@ class EditScheduleEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitabl
             calendarSettingUsecase: calendarSettingUsecase,
             foremostEventUsecase: self.stubForemostEventUsecase,
             ddayCandidateUsecase: self.stubDDayCandidateUsecase,
-            eventLiveActivityUsecase: self.stubLiveActivityUsecase
+            liveActivityToggleViewModel: liveActivityToggleViewModel
         )
         viewModel.router = self.spyRouter
+        liveActivityToggleViewModel.router = self.spyRouter
         viewModel.listener = self.spyListener
         viewModel.attachInput()
         return viewModel

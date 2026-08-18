@@ -61,6 +61,9 @@ extension EventDetailSceneBuilderImple: EventDetailSceneBuilder {
         _ todoId: String,
         listener: EventDetailSceneListener?
     ) -> any EventDetailScene {
+        let liveActivityToggleViewModel = LiveActivityToggleViewModelImple(
+            eventLiveActivityUsecase: self.usecaseFactory.eventLiveActivityUsecase
+        )
         let viewModel = EditTodoEventDetailViewModelImple(
             todoId: todoId,
             todoUsecase: self.usecaseFactory.makeTodoEventUsecase(),
@@ -69,10 +72,10 @@ extension EventDetailSceneBuilderImple: EventDetailSceneBuilder {
             scheduleEventUsecase: self.usecaseFactory.makeScheduleEventUsecase(),
             calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
             foremostEventUsecase: self.usecaseFactory.makeForemostEventUsecase(),
-            eventLiveActivityUsecase: self.usecaseFactory.eventLiveActivityUsecase
+            liveActivityToggleViewModel: liveActivityToggleViewModel
         )
         viewModel.listener = listener
-        return self.makeEventDetailScene(viewModel)
+        return self.makeEventDetailScene(viewModel, liveActivityToggleViewModel: liveActivityToggleViewModel)
     }
     
     @MainActor
@@ -81,6 +84,9 @@ extension EventDetailSceneBuilderImple: EventDetailSceneBuilder {
         _ repeatingEventTargetTime: EventTime?,
         listener: EventDetailSceneListener?
     ) -> any EventDetailScene {
+        let liveActivityToggleViewModel = LiveActivityToggleViewModelImple(
+            eventLiveActivityUsecase: self.usecaseFactory.eventLiveActivityUsecase
+        )
         let viewModel = EditScheduleEventDetailViewModelImple(
             scheduleId: scheduleId,
             repeatingEventTargetTime: repeatingEventTargetTime,
@@ -91,15 +97,16 @@ extension EventDetailSceneBuilderImple: EventDetailSceneBuilder {
             calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
             foremostEventUsecase: self.usecaseFactory.makeForemostEventUsecase(),
             ddayCandidateUsecase: self.usecaseFactory.makeDDayCandidateUsecase(),
-            eventLiveActivityUsecase: self.usecaseFactory.eventLiveActivityUsecase
+            liveActivityToggleViewModel: liveActivityToggleViewModel
         )
         viewModel.listener = listener
-        return self.makeEventDetailScene(viewModel)
+        return self.makeEventDetailScene(viewModel, liveActivityToggleViewModel: liveActivityToggleViewModel)
     }
 
     @MainActor
     private func makeEventDetailScene(
-        _ viewModel: any EventDetailViewModel
+        _ viewModel: any EventDetailViewModel,
+        liveActivityToggleViewModel: LiveActivityToggleViewModelImple? = nil
     ) -> any EventDetailScene {
         
         let inputViewModel = EventDetailInputViewModelImple(
@@ -151,6 +158,7 @@ extension EventDetailSceneBuilderImple: EventDetailSceneBuilder {
         router.inputViewModel = inputViewModel
         router.scene = viewController
         viewModel.router = router
+        liveActivityToggleViewModel?.router = router
         inputViewModel.routing = router
         viewModel.attachInput()
         viewController.router = router
