@@ -7,6 +7,7 @@ platform :ios do
       workspace: "TodoCalendar.xcworkspace",
       scheme: "TodoCalendarApp",
       configuration: "Release",
+      xcargs: "SWIFT_ACTIVE_COMPILATION_CONDITIONS='$(inherited) TEST_DEPLOY'",
       export_method: "development",
       export_options: {
         signingStyle: "manual",
