@@ -41,29 +41,43 @@ protocol EventListCellEventHanleViewModel: EventDetailSceneListener {
 
 
 final class EventListCellEventHanleViewModelImple: EventListCellEventHanleViewModel, @unchecked Sendable {
-    
+
     private let todoEventUsecase: any TodoEventUsecase
     private let scheduleEventUsecase: any ScheduleEventUsecase
     private let foremostEventUsecase: any ForemostEventUsecase
-    
+    private let liveActivityToggleViewModel: any LiveActivityToggleViewModel
+
     var router: (any EventListCellEventHanleRouting)?
-    
+
     init(
         todoEventUsecase: any TodoEventUsecase,
         scheduleEventUsecase: any ScheduleEventUsecase,
-        foremostEventUsecase: any ForemostEventUsecase
+        foremostEventUsecase: any ForemostEventUsecase,
+        liveActivityToggleViewModel: any LiveActivityToggleViewModel
     ) {
         self.todoEventUsecase = todoEventUsecase
         self.scheduleEventUsecase = scheduleEventUsecase
         self.foremostEventUsecase = foremostEventUsecase
+        self.liveActivityToggleViewModel = liveActivityToggleViewModel
+
+        self.internalBind()
     }
-    
+
     private struct Subject {
         let doneTodoResult = PassthroughSubject<DoneTodoResult, Never>()
+        let registeredLiveActivityTarget = CurrentValueSubject<LiveActivityTarget?, Never>(nil)
     }
     private var cancellables: Set<AnyCancellable> = []
     private var todoCompleteTaskMap: [String: Task<Void, any Error>] = [:]
     private let subject = Subject()
+
+    private func internalBind() {
+        self.liveActivityToggleViewModel.registeredTarget
+            .sink { [weak self] target in
+                self?.subject.registeredLiveActivityTarget.send(target)
+            }
+            .store(in: &self.cancellables)
+    }
 }
 
 extension EventListCellEventHanleViewModelImple {
@@ -130,7 +144,10 @@ extension EventListCellEventHanleViewModelImple {
             
         case .toggleTo(let isForemost):
             self.toggleForemostEvent(cellViewModel, isForemost)
-            
+
+        case .toggleLiveActivity(let isRegistered):
+            self.toggleLiveActivity(cellViewModel, isRegistered)
+
         case .edit:
             self.selectEvent(cellViewModel)
             
@@ -218,6 +235,32 @@ extension EventListCellEventHanleViewModelImple {
         }
     }
     
+    private func toggleLiveActivity(
+        _ cellViewModel: any EventCellViewModel,
+        _ isRegistered: Bool
+    ) {
+        guard let target = cellViewModel.liveActivityTarget else { return }
+
+        let title = "calendar::event::more_action:live_activity:title".localized()
+        let message = self.toggleLiveActivityConfirmMessage(isRegistered, target: target)
+        self.runMoreActionAfterConfirm(title, message) { [weak self] in
+            self?.liveActivityToggleViewModel.startOrStopLiveActivity(target, isCurrentlyRegistered: isRegistered)
+        }
+    }
+
+    private func toggleLiveActivityConfirmMessage(
+        _ isRegistered: Bool, target: LiveActivityTarget
+    ) -> String {
+        guard !isRegistered else {
+            return "calendar::event::more_action:live_activity:unregister:confirm".localized()
+        }
+        let currentlyRegisteredTarget = self.subject.registeredLiveActivityTarget.value
+        let isReplacingOtherTarget = currentlyRegisteredTarget != nil && currentlyRegisteredTarget != target
+        return isReplacingOtherTarget
+            ? "calendar::event::more_action:live_activity:replace:confirm".localized()
+            : "calendar::event::more_action:live_activity:register:confirm".localized()
+    }
+
     private func showUnavailToMarkRepeatingScheduleAsForemostEvent() {
         let info = ConfirmDialogInfo()
             |> \.title .~ "calendar::event::more_action::foremost_event:title".localized()

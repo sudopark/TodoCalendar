@@ -24,8 +24,9 @@ class EventListCellEventHanleViewModelImpleTests: BaseTestCase, PublisherWaitabl
     private var spyTodoUsecase: PrivateStubTodoEventUsecase!
     private var spySchedleUsecase: PrivateScheduleEventUsecase!
     private var spyForemostUsecase: PrivateForemostEventUsecase!
+    private var stubLiveActivityUsecase: StubEventLiveActivityUsecase!
     private var spyRouter: SpyEventListCellEventHanleRouter!
-    
+
     override func setUpWithError() throws {
         self.cancelBag = .init()
         self.spyTodoUsecase = .init()
@@ -33,27 +34,37 @@ class EventListCellEventHanleViewModelImpleTests: BaseTestCase, PublisherWaitabl
         self.spyForemostUsecase = .init()
         self.spyRouter = .init()
     }
-    
+
     override func tearDownWithError() throws {
         self.cancelBag = nil
         self.spyTodoUsecase = nil
         self.spySchedleUsecase = nil
         self.spyForemostUsecase = nil
+        self.stubLiveActivityUsecase = nil
         self.spyRouter = nil
     }
-    
+
     private func makeViewModel(
-        shouldFailDoneTodo: Bool = false
+        shouldFailDoneTodo: Bool = false,
+        registeredLiveActivityTarget: LiveActivityTarget? = nil,
+        liveActivityStartError: (any Error)? = nil
     ) -> EventListCellEventHanleViewModelImple {
-        
+
         self.spyTodoUsecase.shouldFailCompleteTodo = shouldFailDoneTodo
-        
+        self.stubLiveActivityUsecase = .init(registeredTarget: registeredLiveActivityTarget)
+        self.stubLiveActivityUsecase.stubStartError = liveActivityStartError
+
+        let liveActivityToggleViewModel = LiveActivityToggleViewModelImple(
+            eventLiveActivityUsecase: self.stubLiveActivityUsecase
+        )
         let viewModel = EventListCellEventHanleViewModelImple(
             todoEventUsecase: self.spyTodoUsecase,
             scheduleEventUsecase: self.spySchedleUsecase,
-            foremostEventUsecase: self.spyForemostUsecase
+            foremostEventUsecase: self.spyForemostUsecase,
+            liveActivityToggleViewModel: liveActivityToggleViewModel
         )
         viewModel.router = self.spyRouter
+        liveActivityToggleViewModel.router = self.spyRouter
         return viewModel
     }
 }
@@ -380,6 +391,114 @@ extension EventListCellEventHanleViewModelImpleTests {
         XCTAssertEqual(names, ["origin", "skipped"])
     }
     
+    func testViewModel_whenToggleLiveActivityToRegister_afterConfirm_startActivity() {
+        // given
+        let expect = expectation(description: "미등록 상태에서 토글하면 확인 후 등록")
+        let viewModel = self.makeViewModel()
+        self.stubLiveActivityUsecase.didStartTargetCallback = { _ in expect.fulfill() }
+        let cellViewModel = TodoEventCellViewModel("todo", name: "name")
+            |> \.eventTimeRawValue .~ .at(100)
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .toggleLiveActivity(isRegistered: false))
+        self.wait(for: [expect], timeout: self.timeout)
+
+        // then
+        XCTAssertEqual(self.stubLiveActivityUsecase.didStartTarget, cellViewModel.liveActivityTarget)
+        XCTAssertEqual(
+            self.spyRouter.didShowConfirmWith?.message,
+            "calendar::event::more_action:live_activity:register:confirm".localized()
+        )
+    }
+
+    func testViewModel_whenToggleLiveActivityToRegister_whileOtherTargetRegistered_showReplaceConfirm() {
+        // given
+        let expect = expectation(description: "다른 이벤트가 등록된 상태에서 등록을 누르면 교체 확인 문구가 뜬다")
+        let viewModel = self.makeViewModel(registeredLiveActivityTarget: .todo(id: "other-todo"))
+        self.stubLiveActivityUsecase.didStartTargetCallback = { _ in expect.fulfill() }
+        let cellViewModel = TodoEventCellViewModel("todo", name: "name")
+            |> \.eventTimeRawValue .~ .at(100)
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .toggleLiveActivity(isRegistered: false))
+        self.wait(for: [expect], timeout: self.timeout)
+
+        // then
+        XCTAssertEqual(
+            self.spyRouter.didShowConfirmWith?.message,
+            "calendar::event::more_action:live_activity:replace:confirm".localized()
+        )
+    }
+
+    func testViewModel_whenToggleLiveActivityToUnregister_afterConfirm_stopActivity() {
+        // given
+        let expect = expectation(description: "등록 상태에서 토글하면 확인 후 해제")
+        let viewModel = self.makeViewModel()
+        self.stubLiveActivityUsecase.didStopActivityCallback = { expect.fulfill() }
+        let cellViewModel = TodoEventCellViewModel("todo", name: "name")
+            |> \.eventTimeRawValue .~ .at(100)
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .toggleLiveActivity(isRegistered: true))
+        self.wait(for: [expect], timeout: self.timeout)
+
+        // then
+        XCTAssertEqual(self.stubLiveActivityUsecase.didStopActivity, true)
+        XCTAssertNil(self.stubLiveActivityUsecase.didStartTarget)
+        XCTAssertEqual(
+            self.spyRouter.didShowConfirmWith?.message,
+            "calendar::event::more_action:live_activity:unregister:confirm".localized()
+        )
+    }
+
+    func testViewModel_whenStartLiveActivityFails_showUnavailableConfirm() {
+        // given
+        let expect = expectation(description: "등록 실패시 안내 다이얼로그 표시")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModel(
+            liveActivityStartError: EventLiveActivityStartFailReason.tooFarFuture
+        )
+        self.spyRouter.didShowConfirmWithCallback = { _ in expect.fulfill() }
+        let cellViewModel = TodoEventCellViewModel("todo", name: "name")
+            |> \.eventTimeRawValue .~ .at(100)
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .toggleLiveActivity(isRegistered: false))
+        self.wait(for: [expect], timeout: self.timeout)
+
+        // then
+        XCTAssertEqual(self.spyRouter.didShowConfirmWith?.withCancel, false)
+    }
+
+    func testViewModel_whenCancelToggleLiveActivityConfirm_doesNothing() {
+        // given
+        let viewModel = self.makeViewModel()
+        self.spyRouter.shouldConfirmNotCancel = false
+        let cellViewModel = TodoEventCellViewModel("todo", name: "name")
+            |> \.eventTimeRawValue .~ .at(100)
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .toggleLiveActivity(isRegistered: false))
+
+        // then
+        XCTAssertNotNil(self.spyRouter.didShowConfirmWith)
+        XCTAssertNil(self.stubLiveActivityUsecase.didStartTarget)
+        XCTAssertEqual(self.stubLiveActivityUsecase.didStopActivity, false)
+    }
+
+    func testViewModel_whenCellHasNoLiveActivityTarget_toggleLiveActivityDoesNothing() {
+        // given
+        let viewModel = self.makeViewModel()
+        let cellViewModel = TodoEventCellViewModel("todo", name: "name")
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .toggleLiveActivity(isRegistered: false))
+
+        // then
+        XCTAssertNil(self.spyRouter.didShowConfirmWith)
+        XCTAssertNil(self.stubLiveActivityUsecase.didStartTarget)
+    }
+
     func testViewModel_handleEditGoogleCalendarEventDetail() {
         // given
         let viewModel = self.makeViewModel()

@@ -88,3 +88,44 @@ extension EventCellViewModelTests {
         #expect(cell?.customCompareKey != accountChangedCell?.customCompareKey)
     }
 }
+
+extension EventCellViewModelTests {
+
+    @Test("시간 있는 todo 셀의 라이브액티비티 타겟은 .todo다 — 시간 없으면 nil")
+    func todoCell_liveActivityTarget_dependsOnEventTime() {
+        // given
+        let cellWithTime = self.makeTodoCell(rawTime: .at(100))
+        let cellWithoutTime = self.makeTodoCell(rawTime: nil)
+
+        // when + then
+        #expect(cellWithTime.liveActivityTarget == .todo(id: "todo"))
+        #expect(cellWithoutTime.liveActivityTarget == nil)
+    }
+
+    @Test("schedule 셀의 라이브액티비티 타겟은 반복일 때만 회차 키를 싣는다 — 시간 없으면 nil")
+    func scheduleCell_liveActivityTargetTurnKey_dependsOnRepeating() {
+        // given
+        let repeatingCell = ScheduleEventCellViewModel("schedule", turn: 1, name: "name", isRepeating: true)
+            |> \.eventTimeRawValue .~ .at(100)
+        let nonRepeatingCell = ScheduleEventCellViewModel("schedule", turn: 1, name: "name", isRepeating: false)
+            |> \.eventTimeRawValue .~ .at(100)
+        let noTimeCell = self.makeScheduleCell(rawTime: nil)
+
+        // when + then
+        #expect(repeatingCell.liveActivityTarget == .schedule(id: "schedule", turnKey: EventTime.at(100).customKey))
+        #expect(nonRepeatingCell.liveActivityTarget == .schedule(id: "schedule", turnKey: nil))
+        #expect(noTimeCell.liveActivityTarget == nil)
+    }
+
+    @Test("holiday 셀의 라이브액티비티 타겟은 uuid와 dateString을 싣는다")
+    func holidayCell_liveActivityTarget() {
+        // given
+        let holiday = HolidayCalendarEvent(
+            .init(uuid: "holiday", dateString: "2023-02-03", name: "dummy"), in: self.timeZone
+        )!
+        let cell = HolidayEventCellViewModel(holiday)
+
+        // when + then
+        #expect(cell.liveActivityTarget == .holiday(uuid: "holiday", dateString: "2023-02-03"))
+    }
+}

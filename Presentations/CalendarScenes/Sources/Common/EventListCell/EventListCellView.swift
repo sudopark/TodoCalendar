@@ -11,6 +11,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Scenes
 import Extensions
 import CommonPresentation
 
@@ -114,6 +115,8 @@ struct EventListCellView: View {
             return removeButton(onlyThisTime).asAnyView()
         case .toggleTo(let isForemost):
             return toggleForemostButton(isForemost).asAnyView()
+        case .toggleLiveActivity(let isRegistered):
+            return toggleLiveActivityButton(isRegistered).asAnyView()
         case .skipTodo:
             return skipTodoButton().asAnyView()
         case .copy:
@@ -155,6 +158,19 @@ struct EventListCellView: View {
         }
     }
     
+    private func toggleLiveActivityButton(_ isRegistered: Bool) -> some View {
+        return Button {
+            self.handleMoreAction(
+                self.cellViewModel, .toggleLiveActivity(isRegistered: isRegistered)
+            )
+        } label: {
+            HStack {
+                Text(LiveActivityActionModel(isRegistered: isRegistered).itemText)
+                Image(systemName: "timer")
+            }
+        }
+    }
+
     private func editEventButton() -> some View {
         return Button {
             self.requestShowDetail(self.cellViewModel)
