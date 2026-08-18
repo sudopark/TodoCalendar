@@ -28,6 +28,7 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
     let appUpdateCheckUsecase: any AppUpdateCheckUsecase
     let aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
     let billingUsecase: any BillingUsecase
+    let eventLiveActivityUsecase: any EventLiveActivityUsecase
     let imageTextRecognizeService: any ImageTextRecognizeService = ImageTextRecognizeServiceImple()
     private let applicationBase: ApplicationBase
 
@@ -49,6 +50,11 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
         self.billingUsecase = NotNeedBillingUsecase(sharedDataStore: applicationBase.sharedDataStore)
 
         self.aiAgentOrchestrationUsecase = NotNeedAIAgentOrchestrationUsecase()
+
+        self.eventLiveActivityUsecase = EventLiveActivityUsecaseImple(
+            controller: EventCountdownLiveActivityController(),
+            sharedDataStore: applicationBase.sharedDataStore
+        )
     }
 
     var eventNotifyService: SharedEventNotifyService {
@@ -373,6 +379,7 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
     let appUpdateCheckUsecase: any AppUpdateCheckUsecase
     let aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
     let billingUsecase: any BillingUsecase
+    let eventLiveActivityUsecase: any EventLiveActivityUsecase
     let imageTextRecognizeService: any ImageTextRecognizeService = ImageTextRecognizeServiceImple()
     private let applicationBase: ApplicationBase
 
@@ -483,6 +490,11 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
                 sharedDataStore: applicationBase.sharedDataStore
             )
             : NotNeedBillingUsecase(sharedDataStore: applicationBase.sharedDataStore)
+
+        self.eventLiveActivityUsecase = EventLiveActivityUsecaseImple(
+            controller: EventCountdownLiveActivityController(),
+            sharedDataStore: applicationBase.sharedDataStore
+        )
     }
 
     var eventNotifyService: SharedEventNotifyService {
