@@ -23,6 +23,7 @@ final class EditTodoEventDetailViewModelImple: EventDetailViewModel, @unchecked 
     private let scheduleEventUsecase: any ScheduleEventUsecase
     private let calendarSettingUsecase: any CalendarSettingUsecase
     private let foremostEventUsecase: any ForemostEventUsecase
+    private let eventLiveActivityUsecase: any EventLiveActivityUsecase
     var router: (any EventDetailRouting)?
     weak var listener: EventDetailSceneListener?
     
@@ -33,7 +34,8 @@ final class EditTodoEventDetailViewModelImple: EventDetailViewModel, @unchecked 
         eventDetailDataUsecase: any EventDetailDataUsecase,
         scheduleEventUsecase: any ScheduleEventUsecase,
         calendarSettingUsecase: any CalendarSettingUsecase,
-        foremostEventUsecase: any ForemostEventUsecase
+        foremostEventUsecase: any ForemostEventUsecase,
+        eventLiveActivityUsecase: any EventLiveActivityUsecase
     ) {
         self.todoId = todoId
         self.todoUsecase = todoUsecase
@@ -42,6 +44,7 @@ final class EditTodoEventDetailViewModelImple: EventDetailViewModel, @unchecked 
         self.scheduleEventUsecase = scheduleEventUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
         self.foremostEventUsecase = foremostEventUsecase
+        self.eventLiveActivityUsecase = eventLiveActivityUsecase
         
         self.internalBinding()
     }
@@ -145,6 +148,9 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
             
         case .transformToSchedule:
             self.transformToScheduleAfterConfirm()
+
+        case .toggleLiveActivity(let isRegistered):
+            self.toggleLiveActivity(isRegistered)
             
         case .addToTemplate:
             // TODO:
@@ -153,6 +159,21 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
             self.shareEvent()
 
         default: break
+        }
+    }
+
+    private func toggleLiveActivity(_ isRegistered: Bool) {
+        let target = LiveActivityTarget.todo(id: self.todoId)
+        Task { [weak self] in
+            guard let self else { return }
+            guard isRegistered == false
+            else { return await self.eventLiveActivityUsecase.stopActivity() }
+
+            do {
+                try await self.eventLiveActivityUsecase.startActivity(target)
+            } catch {
+                self.router?.showLiveActivityUnavailable(error)
+            }
         }
     }
 
@@ -504,17 +525,27 @@ extension EditTodoEventDetailViewModelImple {
     
     var moreActions: AnyPublisher<[[EventDetailMoreAction]], Never> {
         let todoId = self.todoId
-        let transform: (EventDetailBasicData, (any ForemostMarkableEvent)?) -> [[EventDetailMoreAction]] = { basic, foremostEvent in
+        let transform: (
+            EventDetailBasicData, (any ForemostMarkableEvent)?, LiveActivityTarget?
+        ) -> [[EventDetailMoreAction]] = { basic, foremostEvent, registeredTarget in
             let isRepeating = basic.selectedTime != nil && basic.eventRepeating != nil
             let isForemost = foremostEvent?.eventId == todoId
             let removeActions: [EventDetailMoreAction] = isRepeating
                 ? [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)]
                 : [.remove(onlyThisEvent: false)]
-            return [removeActions, [.toggleTo(isForemost: !isForemost), .copy, .transformToSchedule, .share]]
+            let liveActivityActions: [EventDetailMoreAction] = basic.selectedTime != nil
+                ? [.toggleLiveActivity(isRegistered: registeredTarget == .todo(id: todoId))]
+                : []
+            return [
+                removeActions,
+                [.toggleTo(isForemost: !isForemost)] + liveActivityActions
+                    + [.copy, .transformToSchedule, .share]
+            ]
         }
-        return Publishers.CombineLatest(
+        return Publishers.CombineLatest3(
             self.subject.basicData.compactMap{ $0?.origin },
-            self.foremostEventUsecase.foremostEvent
+            self.foremostEventUsecase.foremostEvent,
+            self.eventLiveActivityUsecase.registeredTarget
         )
         .map(transform)
         .removeDuplicates()

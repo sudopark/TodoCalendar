@@ -135,6 +135,12 @@
 "calendar::event::more_action:dday_candidate:title" = "D-day widget candidate";
 "calendar::event::more_action:dday_candidate:register:message" = "Add this event as a D-day widget candidate? It will appear at the top of the list when you edit the widget.";
 "calendar::event::more_action:dday_candidate:unregister:message" = "Remove this event from D-day widget candidates?";
+"calendar::event::more_action:live_activity:title" = "Live Activity";
+"calendar::event::more_action:live_activity:register:item_name" = "Show on Lock Screen";
+"calendar::event::more_action:live_activity:unregister:item_name" = "Remove from Lock Screen";
+"calendar::event::more_action:live_activity:unavail::not_found" = "This event is no longer available.";
+"calendar::event::more_action:live_activity:unavail::already_passed" = "This event has already started.";
+"calendar::event::more_action:live_activity:unavail::too_far_future" = "Only events starting within 8 hours can be shown.";
 "calendar::event::more_action:copy:item_name" = "Copy event";
 "calendar::event::more_action:share:item_name" = "Share";
 "event_detail::share::field::time" = "Time";
