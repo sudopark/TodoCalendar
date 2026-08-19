@@ -796,43 +796,6 @@ extension GoogleCalendarRepositoryImple_Tests {
         }
     }
 
-    @Test func repository_updateEvent_sendsAttendeesArray() async throws {
-        try await self.runTestWithOpenClose("test_google_event_update_attendees_1") {
-            // given
-            let expect = self.expectConfirm("참석자 목록을 실은 patch 요청")
-            let repository = self.makeRepository()
-            let attendee = GoogleCalendar.EventOrigin.Attendee()
-                |> \.id .~ "attendee-id"
-                |> \.email .~ "a@b.com"
-                |> \.displayName .~ "A B"
-                |> \.organizer .~ true
-                |> \.selfValue .~ true
-                |> \.resource .~ true
-                |> \.optional .~ true
-                |> \.responseStatus .~ "accepted"
-            let params = GoogleCalendar.EventEditParams()
-                |> \.attendees .~ [attendee]
-
-            // when
-            let _ = try await self.firstOutput(
-                expect, for: repository.updateEvent("c_id", "Asia/Seoul", "time_is_date", params)
-            )
-
-            // then
-            let requestedParams = try #require(self.stubRemote.didRequestedParams)
-            let attendeesJson = try #require(requestedParams["attendees"] as? [[String: Any]])
-            let attendeeJson = try #require(attendeesJson.first)
-            #expect(attendeeJson["email"] as? String == "a@b.com")
-            #expect(attendeeJson["displayName"] as? String == "A B")
-            #expect(attendeeJson["responseStatus"] as? String == "accepted")
-            #expect(attendeeJson["optional"] as? Bool == true)
-            #expect(attendeeJson["resource"] as? Bool == true)
-            #expect(attendeeJson["id"] == nil)
-            #expect(attendeeJson["self"] == nil)
-            #expect(attendeeJson["organizer"] == nil)
-        }
-    }
-
     @Test func repository_updateEvent_whenAttendeesIsNil_omitsKey() async throws {
         try await self.runTestWithOpenClose("test_google_event_update_attendees_2") {
             // given
@@ -957,6 +920,139 @@ extension GoogleCalendarRepositoryImple_Tests {
     }
 }
 
+// MARK: - respond to event
+
+extension GoogleCalendarRepositoryImple_Tests {
+
+    private func attendee(
+        email: String, isSelf: Bool, responseStatus: String
+    ) -> GoogleCalendar.EventOrigin.Attendee {
+        return .init()
+            |> \.email .~ email
+            |> \.selfValue .~ isSelf
+            |> \.responseStatus .~ responseStatus
+    }
+
+    /// 캐시에는 other 가 accepted 로 남아 있고 원격에서는 declined 로 바뀐 상태를 만든다.
+    private func saveStaleRsvpCache() async throws {
+        let stale = GoogleCalendar.EventOrigin(id: "rsvp_event", summary: "stale")
+            |> \.attendees .~ [
+                self.attendee(email: "me@email.com", isSelf: true, responseStatus: "needsAction"),
+                self.attendee(email: "other@email.com", isSelf: false, responseStatus: "accepted")
+            ]
+        try await self.cacheStorage.updateEventDetail(
+            "c_id", "Asia/Seoul", stale, accountId: self.testAccountId
+        )
+    }
+
+    @Test func repository_respondToEvent_patchesAttendeesFromRemoteNotCache() async throws {
+        try await self.runTestWithOpenClose("test_google_event_rsvp_1") {
+            // given — 캐시의 other 는 accepted, 원격의 other 는 declined
+            try await self.saveStaleRsvpCache()
+            let repository = self.makeRepository()
+
+            // when
+            let _ = try await repository.respondToEvent("c_id", "Asia/Seoul", "rsvp_event", .accepted)
+
+            // then — 캐시를 읽었다면 other 가 accepted 로 실린다
+            let requestedParams = try #require(self.stubRemote.didRequestedParams)
+            let attendeesJson = try #require(requestedParams["attendees"] as? [[String: Any]])
+            let other = attendeesJson.first { $0["email"] as? String == "other@email.com" }
+            #expect(other?["responseStatus"] as? String == "declined")
+        }
+    }
+
+    @Test func repository_respondToEvent_replacesOnlySelfResponse() async throws {
+        try await self.runTestWithOpenClose("test_google_event_rsvp_2") {
+            // given
+            let repository = self.makeRepository()
+
+            // when
+            let _ = try await repository.respondToEvent("c_id", "Asia/Seoul", "rsvp_event", .tentative)
+
+            // then — 내 항목만 갈리고 배열 전체가 실린다
+            let requestedParams = try #require(self.stubRemote.didRequestedParams)
+            let attendeesJson = try #require(requestedParams["attendees"] as? [[String: Any]])
+            #expect(attendeesJson.count == 2)
+            let me = attendeesJson.first { $0["email"] as? String == "me@email.com" }
+            #expect(me?["responseStatus"] as? String == "tentative")
+            let other = attendeesJson.first { $0["email"] as? String == "other@email.com" }
+            #expect(other?["responseStatus"] as? String == "declined")
+        }
+    }
+
+    @Test func repository_respondToEvent_omitsReadOnlyAttendeeFields() async throws {
+        try await self.runTestWithOpenClose("test_google_event_rsvp_6") {
+            // given
+            let repository = self.makeRepository()
+
+            // when
+            let _ = try await repository.respondToEvent("c_id", "Asia/Seoul", "rsvp_event", .accepted)
+
+            // then — id·self·organizer 는 read-only 라 patch body 에서 빠지고 나머지는 실린다
+            let requestedParams = try #require(self.stubRemote.didRequestedParams)
+            let attendeesJson = try #require(requestedParams["attendees"] as? [[String: Any]])
+            let me = try #require(attendeesJson.first { $0["email"] as? String == "me@email.com" })
+            #expect(me["displayName"] as? String == "Me")
+            #expect(me["responseStatus"] as? String == "accepted")
+            #expect(me["id"] == nil)
+            #expect(me["self"] == nil)
+            #expect(me["organizer"] == nil)
+            let other = try #require(attendeesJson.first { $0["email"] as? String == "other@email.com" })
+            #expect(other["optional"] as? Bool == true)
+            #expect(other["id"] == nil)
+        }
+    }
+
+    @Test func repository_respondToEvent_updatesLocalCache() async throws {
+        try await self.runTestWithOpenClose("test_google_event_rsvp_5") {
+            // given — 캐시는 me=needsAction, other=accepted 인 낡은 상태
+            try await self.saveStaleRsvpCache()
+            let repository = self.makeRepository()
+
+            // when
+            let _ = try await repository.respondToEvent("c_id", "Asia/Seoul", "rsvp_event", .accepted)
+            let cached = try await self.cacheStorage.loadEventDetail(
+                "rsvp_event", accountId: self.testAccountId
+            )
+
+            // then — 응답 결과가 상세 캐시에 반영돼 재진입 시 낡은 값이 안 뜬다
+            let cachedAttendees = try #require(cached.attendees)
+            let me = cachedAttendees.first { $0.email == "me@email.com" }
+            #expect(me?.responseStatus == "accepted")
+            let other = cachedAttendees.first { $0.email == "other@email.com" }
+            #expect(other?.responseStatus == "declined")
+        }
+    }
+
+    @Test func repository_respondToEvent_whenNoSelfAttendee_throwsWithoutPatch() async throws {
+        try await self.runTestWithOpenClose("test_google_event_rsvp_3") {
+            // given — 내가 참석자가 아닌 이벤트
+            let repository = self.makeRepository()
+
+            // when + then
+            await #expect(throws: (any Error).self) {
+                _ = try await repository.respondToEvent("c_id", "Asia/Seoul", "rsvp_no_self", .accepted)
+            }
+            #expect(self.stubRemote.didRequestedMethod == .get)
+        }
+    }
+
+    @Test func repository_respondToEvent_whenRemoteLoadFails_doesNotPatch() async throws {
+        try await self.runTestWithOpenClose("test_google_event_rsvp_4") {
+            // given
+            let repository = self.makeRepository()
+
+            // when + then
+            await #expect(throws: (any Error).self) {
+                _ = try await repository.respondToEvent("c_id", "Asia/Seoul", "rsvp_load_fail", .accepted)
+            }
+            #expect(self.stubRemote.didRequestedMethod == .get)
+        }
+    }
+}
+
+
 extension GoogleCalendarRepositoryImple_Tests {
 
     @Test func storage_whenConnectionNotAvailable_throwsError() async throws {
@@ -1060,8 +1156,97 @@ private struct DummyResponse {
                 method: .delete,
                 endpoint: GoogleCalendarEndpoint.event(calendarId: "c_id", eventId: "fail_event"),
                 resultJsonString: .failure(RuntimeError("failed"))
+            ),
+            .init(
+                method: .get,
+                endpoint: GoogleCalendarEndpoint.event(calendarId: "c_id", eventId: "rsvp_event"),
+                resultJsonString: .success(self.dummyRsvpEvent("rsvp_event", attendees: self.rsvpAttendees))
+            ),
+            .init(
+                method: .patch,
+                endpoint: GoogleCalendarEndpoint.event(calendarId: "c_id", eventId: "rsvp_event"),
+                resultJsonString: .success(
+                    self.dummyRsvpEvent("rsvp_event", attendees: self.rsvpPatchedAttendees)
+                )
+            ),
+            .init(
+                method: .get,
+                endpoint: GoogleCalendarEndpoint.event(calendarId: "c_id", eventId: "rsvp_no_self"),
+                resultJsonString: .success(
+                    self.dummyRsvpEvent("rsvp_no_self", attendees: self.rsvpAttendeesWithoutSelf)
+                )
+            ),
+            .init(
+                method: .get,
+                endpoint: GoogleCalendarEndpoint.event(calendarId: "c_id", eventId: "rsvp_load_fail"),
+                resultJsonString: .failure(RuntimeError("failed"))
             )
         ]
+    }
+
+    /// 원격 기준값 — other 는 declined 다 (캐시에 심는 값과 갈린다)
+    private var rsvpAttendees: String {
+        return """
+        {
+          "id": "me-id",
+          "email": "me@email.com",
+          "displayName": "Me",
+          "self": true,
+          "organizer": true,
+          "responseStatus": "needsAction"
+        },
+        {
+          "id": "other-id",
+          "email": "other@email.com",
+          "displayName": "Other",
+          "optional": true,
+          "responseStatus": "declined"
+        }
+        """
+    }
+
+    /// patch 응답 — 내 응답이 accepted 로 적용된 상태
+    private var rsvpPatchedAttendees: String {
+        return """
+        {
+          "email": "me@email.com",
+          "self": true,
+          "responseStatus": "accepted"
+        },
+        {
+          "email": "other@email.com",
+          "responseStatus": "declined"
+        }
+        """
+    }
+
+    private var rsvpAttendeesWithoutSelf: String {
+        return """
+        {
+          "email": "other@email.com",
+          "responseStatus": "declined"
+        }
+        """
+    }
+
+    private func dummyRsvpEvent(_ id: String, attendees: String) -> String {
+        return """
+        {
+         "attendees": [
+        \(attendees)
+         ],
+         "kind": "calendar#event",
+         "id": "\(id)",
+         "status": "confirmed",
+         "summary": "rsvp",
+         "start": {
+          "date": "2025-04-11"
+         },
+         "end": {
+          "date": "2025-04-12"
+         }
+        }
+        """
     }
     
     private var dummyColors: String {
