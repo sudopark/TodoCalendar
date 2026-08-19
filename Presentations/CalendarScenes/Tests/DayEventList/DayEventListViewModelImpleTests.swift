@@ -27,6 +27,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var stubForemostEventUsecase: StubForemostEventUsecase!
     private var stubTagUsecase: StubEventTagUsecase!
     private var stubUISettingUsecase: StubUISettingUsecase!
+    private var stubLiveActivityUsecase: StubEventLiveActivityUsecase!
     private var spyRouter: SpyRouter!
     private var spyListener: SpyListener!
 
@@ -48,6 +49,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubForemostEventUsecase = nil
         self.stubTagUsecase = nil
         self.stubUISettingUsecase = nil
+        self.stubLiveActivityUsecase = nil
         self.spyRouter = nil
         self.spyListener = nil
         self.stubOrchestrationUsecase = nil
@@ -63,7 +65,8 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         shouldFailDoneTodo: Bool = false,
         shouldFailMakeTodo: Bool = false,
         isSignedIn: Bool = true,
-        isCreditExhausted: Bool = false
+        isCreditExhausted: Bool = false,
+        registeredLiveActivityTarget: LiveActivityTarget? = nil
     ) -> DayEventListViewModelImple {
         let currentTodos: [TodoEvent] = [
             .init(uuid: "current-todo-1", name: "current-todo-1") |> \.creatTimeStamp .~ 100,
@@ -100,6 +103,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         )
         
         self.stubOrchestrationUsecase.stubIsCreditExhausted = isCreditExhausted
+        self.stubLiveActivityUsecase = StubEventLiveActivityUsecase(registeredTarget: registeredLiveActivityTarget)
         let account: AccountInfo? = isSignedIn ? AccountInfo("uid") : nil
         let viewModel = DayEventListViewModelImple(
             calendarUsecase: StubCalendarUsecase(),
@@ -109,7 +113,8 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
             foremostEventUsecase: self.stubForemostEventUsecase,
             uiSettingUsecase: self.stubUISettingUsecase,
             accountUsecase: StubAccountUsecase(account),
-            aiAgentOrchestrationUsecase: self.stubOrchestrationUsecase
+            aiAgentOrchestrationUsecase: self.stubOrchestrationUsecase,
+            eventLiveActivityUsecase: self.stubLiveActivityUsecase
         )
         viewModel.router = self.spyRouter
         viewModel.attachListener(self.spyListener)
@@ -569,33 +574,19 @@ extension DayEventListViewModelImpleTests {
         
         // then
         XCTAssertEqual(repeating?.moreActions, .init(
-            basicActions: [.toggleTo(isForemost: false), .edit, .copy],
+            basicActions: [.toggleTo(isForemost: false), .toggleLiveActivity(isRegistered: false), .edit, .copy],
             removeActions: [.remove(onlyThisTime: true), .remove(onlyThisTime: false)]
         ))
         XCTAssertEqual(notRepeating?.moreActions, .init(
-            basicActions: [.toggleTo(isForemost: false), .edit, .copy],
+            basicActions: [.toggleTo(isForemost: false), .toggleLiveActivity(isRegistered: false), .edit, .copy],
             removeActions: [.remove(onlyThisTime: false)]
         ))
         XCTAssertEqual(foremostEvent?.moreActions, .init(
-            basicActions: [.toggleTo(isForemost: true), .edit, .copy],
+            basicActions: [.toggleTo(isForemost: true), .toggleLiveActivity(isRegistered: false), .edit, .copy],
             removeActions: [.remove(onlyThisTime: false)]
         ))
     }
-    
-    func testHolidayCellViewModel_notProvideMoreAction() {
-        // given
-        let kst = TimeZone(abbreviation: "KST")!
-        let holiday = Holiday(uuid: "id", dateString: "2020-03-01", name: "삼일절")
-        
-        // when
-        let cellViewModel = HolidayEventCellViewModel(
-            .init(holiday, in: kst)!
-        )
-        
-        // then
-        XCTAssertEqual(cellViewModel.moreActions, nil)
-    }
-    
+
     func testGoogleCalendarEventCellViewModel_provideMoreActionWhenHtmlLinkExists() {
         // given
         func parameterizeTest(_ link: String?) {
@@ -757,14 +748,16 @@ extension DayEventListViewModelImpleTests {
     
     private func makeViewModelWithInitialListLoaded(
         shouldFailDoneTodo: Bool = false,
-        shouldFailMakeTodo: Bool = false
+        shouldFailMakeTodo: Bool = false,
+        registeredLiveActivityTarget: LiveActivityTarget? = nil
     ) -> DayEventListViewModelImple {
         // given
         let expect = expectation(description: "wait first cells loaded")
         expect.assertForOverFulfill = false
         let viewModel = self.makeViewModel(
             shouldFailDoneTodo: shouldFailDoneTodo,
-            shouldFailMakeTodo: shouldFailMakeTodo
+            shouldFailMakeTodo: shouldFailMakeTodo,
+            registeredLiveActivityTarget: registeredLiveActivityTarget
         )
         
         // when
@@ -819,6 +812,172 @@ extension DayEventListViewModelImpleTests {
             removeActionsPerEmit.last,
             [.remove(onlyThisTime: true), .remove(onlyThisTime: false)]
         )
+    }
+}
+
+// MARK: - live activity registration mark
+
+extension DayEventListViewModelImpleTests {
+
+    private func isLiveActivityRegisteredCell(_ cvm: any EventCellViewModel) -> Bool {
+        switch cvm {
+        case let todo as TodoEventCellViewModel: return todo.isLiveActivityRegistered
+        case let schedule as ScheduleEventCellViewModel: return schedule.isLiveActivityRegistered
+        case let holiday as HolidayEventCellViewModel: return holiday.isLiveActivityRegistered
+        default: return false
+        }
+    }
+
+    func testViewModel_whenLiveActivityRegistered_cellViewModelsMarkMatchingCell() {
+        // given
+        let expect = expectation(description: "라이브액티비티 등록된 타겟과 일치하는 셀만 표시가 켜진다")
+        let viewModel = self.makeViewModelWithInitialListLoaded(
+            registeredLiveActivityTarget: .todo(id: "todo-with-time")
+        )
+
+        // when
+        let cvms = self.waitFirstOutput(expect, for: viewModel.cellViewModels, timeout: 0.1)
+
+        // then
+        let registeredIds = cvms?
+            .filter { self.isLiveActivityRegisteredCell($0) }
+            .map { $0.eventIdentifier }
+        XCTAssertEqual(registeredIds, ["todo-with-time"])
+    }
+
+    func testViewModel_whenLiveActivityUnregistered_cellViewModelsClearMark() {
+        // given
+        let expect = expectation(description: "라이브액티비티 등록 해제되면 모든 셀의 표시가 사라진다")
+        let viewModel = self.makeViewModelWithInitialListLoaded(
+            registeredLiveActivityTarget: .todo(id: "todo-with-time")
+        )
+        let clearedState = viewModel.cellViewModels.first(where: { cvms in
+            cvms.contains(where: { $0.eventIdentifier == "todo-with-time" })
+                && !cvms.contains(where: { self.isLiveActivityRegisteredCell($0) })
+        })
+
+        // when
+        let cleared = self.waitFirstOutput(expect, for: clearedState, timeout: 2.0) {
+            self.stubLiveActivityUsecase.registeredTargetSubject.send(nil)
+        }
+
+        // then
+        XCTAssertNotNil(cleared)
+    }
+
+    func testViewModel_uncompletedTodoModels_excludeLiveActivityToggleFromMoreActions() {
+        // given
+        let expect = expectation(description: "미완료 todo 셀은 전부 isUncompletedTodo이고 라이브액티비티 토글이 없다")
+        let timedTodo1 = TodoEvent.dummy(1) |> \.time .~ .at(100)
+        let timedTodo2 = TodoEvent.dummy(2) |> \.time .~ .at(200)
+        self.stubTodoUsecase.stubUncompletedTodoLists = [[timedTodo1, timedTodo2]]
+        let viewModel = self.makeViewModel()
+
+        // when
+        let uncompleteds = self.waitFirstOutput(expect, for: viewModel.uncompletedTodoEventModels, timeout: 0.1) {
+            viewModel.refreshUncompletedTodoEvents()
+        }
+
+        // then
+        XCTAssertEqual(uncompleteds?.allSatisfy { $0.isUncompletedTodo }, true)
+        let hasLiveActivityToggle = uncompleteds?.contains { cvm in
+            cvm.moreActions?.basicActions.contains { if case .toggleLiveActivity = $0 { return true } else { return false } } == true
+        }
+        XCTAssertEqual(hasLiveActivityToggle, false)
+    }
+
+    func testViewModel_whenLiveActivityRegistered_uncompletedTodoModelsMarkMatchingCell() {
+        // given
+        let expect = expectation(description: "미완료 todo 셀 목록에도 라이브액티비티 등록 표시가 실린다")
+        let timedTodo1 = TodoEvent.dummy(1) |> \.time .~ .at(100)
+        let timedTodo2 = TodoEvent.dummy(2) |> \.time .~ .at(200)
+        self.stubTodoUsecase.stubUncompletedTodoLists = [[timedTodo1, timedTodo2]]
+        let viewModel = self.makeViewModel(registeredLiveActivityTarget: .todo(id: "id:1"))
+
+        // when
+        let uncompleteds = self.waitFirstOutput(expect, for: viewModel.uncompletedTodoEventModels, timeout: 0.1) {
+            viewModel.refreshUncompletedTodoEvents()
+        }
+
+        // then
+        let flags = uncompleteds?.reduce(into: [String: Bool]()) { acc, cvm in
+            acc[cvm.eventIdentifier] = cvm.isLiveActivityRegistered
+        }
+        XCTAssertEqual(flags?["id:1"], true)
+        XCTAssertEqual(flags?["id:2"], false)
+    }
+
+    func testViewModel_whenLiveActivityRegistered_foremostEventModelMarksCell() {
+        // given
+        let expect = expectation(description: "가장 중요 이벤트 셀에도 라이브액티비티 등록 표시가 실린다")
+        let viewModel = self.makeViewModelWithInitialListLoaded(
+            registeredLiveActivityTarget: .schedule(id: "schedule", turnKey: nil)
+        )
+
+        // when
+        let foremost = self.waitFirstOutput(
+            expect, for: viewModel.foremostEventModel.compactMap { $0 }, timeout: 0.1
+        ) {
+            Task {
+                try await self.stubForemostEventUsecase.update(foremost: .init("schedule", false))
+            }
+        }
+
+        // then
+        let scheduleCell = foremost as? ScheduleEventCellViewModel
+        XCTAssertEqual(scheduleCell?.isLiveActivityRegistered, true)
+    }
+
+    func testViewModel_whenLiveActivityRegisteredForHoliday_holidayCellMarked() {
+        // given
+        let expect = expectation(description: "등록된 타겟과 일치하는 공휴일 셀만 표시가 켜진다")
+        let viewModel = self.makeViewModelWithInitialListLoaded(
+            registeredLiveActivityTarget: .holiday(uuid: "2023-09-30-holiday", dateString: "2023-09-30")
+        )
+
+        // when
+        let cvms = self.waitFirstOutput(expect, for: viewModel.cellViewModels, timeout: 0.1)
+
+        // then
+        let registeredIds = cvms?
+            .filter { self.isLiveActivityRegisteredCell($0) }
+            .map { $0.eventIdentifier }
+        XCTAssertEqual(registeredIds, ["2023-09-30-holiday"])
+    }
+
+    func testViewModel_whenLiveActivityRegisteredForSpecificRepeatingTurn_onlyThatTurnCellMarked() {
+        // given
+        let expect = expectation(description: "반복 일정의 특정 회차 키가 일치하는 셀만 표시가 켜지고 같은 날 뜬 다른 회차는 켜지지 않는다")
+        let timeZone = TimeZone(abbreviation: "KST")!
+        let dummyRepeating = EventRepeating(repeatingStartTime: 0, repeatOption: EventRepeatingOptions.EveryDay())
+        let turn1Time: EventTime = .period(
+            self.todayRange.lowerBound - (3600 * 24) ..< self.todayRange.lowerBound + (3600 * 30)
+        )
+        let turn2Time: EventTime = .period(
+            self.todayRange.lowerBound + (3600 * 6) ..< self.todayRange.upperBound + (3600 * 24)
+        )
+        let periodSchedule = ScheduleEvent(
+            uuid: "repeating-period-schedule", name: "repeating-period-schedule", time: turn1Time
+        )
+        |> \.repeating .~ dummyRepeating
+        |> \.eventTagId .~ .custom("some")
+        |> \.nextRepeatingTimes .~ [.init(time: turn2Time, turn: 2)]
+        let twoTurnEvents = ScheduleCalendarEvent.events(from: periodSchedule, in: timeZone)
+        let viewModel = self.makeViewModel(
+            registeredLiveActivityTarget: .schedule(id: "repeating-period-schedule", turnKey: turn2Time.customKey)
+        )
+
+        // when
+        let source = viewModel.cellViewModels.drop(while: { $0.count != twoTurnEvents.count + 2 })
+        let cvms = self.waitFirstOutput(expect, for: source, timeout: 0.1) {
+            viewModel.selectedDayChanaged(self.dummyCurrentDay, and: twoTurnEvents)
+        }
+
+        // then
+        let registeredIds = cvms?
+            .filter { self.isLiveActivityRegisteredCell($0) }
+            .map { $0.eventIdentifier }
+        XCTAssertEqual(registeredIds, ["repeating-period-schedule-2"])
     }
 }
 

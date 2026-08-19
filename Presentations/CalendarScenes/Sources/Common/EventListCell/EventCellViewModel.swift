@@ -211,6 +211,8 @@ public struct TodoEventCellViewModel: EventCellViewModel {
     public var isForemost: Bool = false
     public var isAlldayEvent: Bool = false
     public var isCurrentTodo: Bool = false
+    public var isLiveActivityRegistered: Bool = false
+    public var isUncompletedTodo: Bool = false
 
     public init(_ id: String, name: String) {
         self.eventIdentifier = id
@@ -256,7 +258,11 @@ public struct TodoEventCellViewModel: EventCellViewModel {
             : [.remove(onlyThisTime: false)]
         let skipActions: [EventListMoreAction] = self.isRepeating
             ? [.skipTodo] : []
-        let basicActions: [EventListMoreAction] = [.toggleTo(isForemost: self.isForemost)] + skipActions + [.edit, .copy]
+        let liveActivityActions: [EventListMoreAction] = (self.liveActivityTarget != nil && !self.isUncompletedTodo)
+            ? [.toggleLiveActivity(isRegistered: self.isLiveActivityRegistered)]
+            : []
+        let basicActions: [EventListMoreAction] = [.toggleTo(isForemost: self.isForemost)]
+            + liveActivityActions + skipActions + [.edit, .copy]
         return .init(
             basicActions: basicActions,
             removeActions: removeActions
@@ -315,6 +321,7 @@ public struct ScheduleEventCellViewModel: EventCellViewModel {
     public let isForemost: Bool
     public var isAlldayEvent: Bool { self.eventTimeRawValue?.isAllDay ?? false }
     public var eventTimeRawValue: EventTime?
+    public var isLiveActivityRegistered: Bool = false
 
     public init(_ id: String, turn: Int? = nil, name: String, isRepeating: Bool = false) {
         self.eventIdWithoutTurn = id
@@ -354,8 +361,11 @@ public struct ScheduleEventCellViewModel: EventCellViewModel {
         let removeActions: [EventListMoreAction] = self.isRepeating
             ? [.remove(onlyThisTime: true), .remove(onlyThisTime: false)]
             : [.remove(onlyThisTime: false)]
+        let liveActivityActions: [EventListMoreAction] = self.liveActivityTarget != nil
+            ? [.toggleLiveActivity(isRegistered: self.isLiveActivityRegistered)]
+            : []
         return .init(
-            basicActions: [.toggleTo(isForemost: self.isForemost), .edit, .copy],
+            basicActions: [.toggleTo(isForemost: self.isForemost)] + liveActivityActions + [.edit, .copy],
             removeActions: removeActions
         )
     }
@@ -389,6 +399,7 @@ public struct HolidayEventCellViewModel: EventCellViewModel {
     public let isForemost: Bool = false
     public let isAlldayEvent: Bool = true
     public let dateString: String
+    public var isLiveActivityRegistered: Bool = false
 
     public init(_ holiday: HolidayCalendarEvent) {
         self.eventIdentifier = holiday.eventId
@@ -400,7 +411,12 @@ public struct HolidayEventCellViewModel: EventCellViewModel {
         self.colorSource = EventTagId.holiday
     }
 
-    public var moreActions: EventListMoreActionModel? { nil }
+    public var moreActions: EventListMoreActionModel? {
+        return .init(
+            basicActions: [.toggleLiveActivity(isRegistered: self.isLiveActivityRegistered)],
+            removeActions: []
+        )
+    }
 
     public var liveActivityTarget: LiveActivityTarget? {
         .holiday(uuid: self.eventIdentifier, dateString: self.dateString)
