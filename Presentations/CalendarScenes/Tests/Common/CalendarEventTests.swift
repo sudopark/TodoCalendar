@@ -19,17 +19,23 @@ class CalendarEventTests {
 
     private func makeGoogleEvent(
         calendarId: String = "calendar",
-        accountId: String = "account"
+        accountId: String = "account",
+        isWritable: Bool = false,
+        recurringEventId: String? = nil
     ) -> GoogleCalendarEvent {
-        let raw = GoogleCalendar.Event(
+        var raw = GoogleCalendar.Event(
             "google", calendarId,
             accountId: accountId, name: "name", colorId: "color",
             time: .at(100)
         )
-        return GoogleCalendarEvent(raw, in: self.timeZone)
+        raw.recurringEventId = recurringEventId
+        return GoogleCalendarEvent(raw, in: self.timeZone, isWritable: isWritable)
     }
 
-    private func makeAppleEvent(calendarId: String = "calendar") -> AppleCalendarEvent {
+    private func makeAppleEvent(
+        calendarId: String = "calendar",
+        isWritable: Bool = false
+    ) -> AppleCalendarEvent {
         let raw = AppleCalendar.Event(
             eventId: "apple",
             originalEventId: "apple",
@@ -37,7 +43,7 @@ class CalendarEventTests {
             name: "name",
             eventTime: .at(100)
         )
-        return AppleCalendarEvent(raw, in: self.timeZone)
+        return AppleCalendarEvent(raw, in: self.timeZone, isWritable: isWritable)
     }
 }
 
@@ -82,5 +88,41 @@ extension CalendarEventTests {
 
         // when + then
         #expect(event.compareKey != calendarChangedEvent.compareKey)
+    }
+
+    @Test("google 이벤트는 원본에 recurringEventId가 있으면 반복 이벤트다")
+    func googleEvent_isRepeating_whenHasRecurringEventId() {
+        // given
+        let repeatingEvent = self.makeGoogleEvent(recurringEventId: "master-1")
+        let notRepeatingEvent = self.makeGoogleEvent(recurringEventId: nil)
+
+        // when + then
+        #expect(repeatingEvent.isRepeating == true)
+        #expect(notRepeatingEvent.isRepeating == false)
+    }
+
+    @Test("외부 캘린더 이벤트는 쓰기 가능 여부가 달라지면 compare key도 달라진다")
+    func externalEvent_compareKeyIsDifferent_whenIsWritableChanged() {
+        // given
+        let (google, writableGoogle) = (
+            self.makeGoogleEvent(isWritable: false), self.makeGoogleEvent(isWritable: true)
+        )
+        let (apple, writableApple) = (
+            self.makeAppleEvent(isWritable: false), self.makeAppleEvent(isWritable: true)
+        )
+
+        // when + then
+        #expect(google.compareKey != writableGoogle.compareKey)
+        #expect(apple.compareKey != writableApple.compareKey)
+    }
+
+    @Test("google 이벤트는 recurringEventId가 달라지면 compare key도 달라진다")
+    func googleEvent_compareKeyIsDifferent_whenRecurringEventIdChanged() {
+        // given
+        let event = self.makeGoogleEvent(recurringEventId: nil)
+        let recurringEvent = self.makeGoogleEvent(recurringEventId: "master-1")
+
+        // when + then
+        #expect(event.compareKey != recurringEvent.compareKey)
     }
 }
