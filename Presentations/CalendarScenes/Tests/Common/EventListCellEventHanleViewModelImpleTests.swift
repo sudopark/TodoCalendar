@@ -24,6 +24,9 @@ class EventListCellEventHanleViewModelImpleTests: BaseTestCase, PublisherWaitabl
     private var spyTodoUsecase: PrivateStubTodoEventUsecase!
     private var spySchedleUsecase: PrivateScheduleEventUsecase!
     private var spyForemostUsecase: PrivateForemostEventUsecase!
+    private var spyGoogleUsecase: PrivateGoogleCalendarUsecase!
+    private var spyAppleUsecase: PrivateAppleCalendarUsecase!
+    private var stubIntegrationUsecase: StubExternalCalendarIntegrationUsecase!
     private var stubLiveActivityUsecase: StubEventLiveActivityUsecase!
     private var spyRouter: SpyEventListCellEventHanleRouter!
 
@@ -32,6 +35,9 @@ class EventListCellEventHanleViewModelImpleTests: BaseTestCase, PublisherWaitabl
         self.spyTodoUsecase = .init()
         self.spySchedleUsecase = .init()
         self.spyForemostUsecase = .init()
+        self.spyGoogleUsecase = .init()
+        self.spyAppleUsecase = .init()
+        self.stubIntegrationUsecase = .init([])
         self.spyRouter = .init()
     }
 
@@ -40,17 +46,28 @@ class EventListCellEventHanleViewModelImpleTests: BaseTestCase, PublisherWaitabl
         self.spyTodoUsecase = nil
         self.spySchedleUsecase = nil
         self.spyForemostUsecase = nil
+        self.spyGoogleUsecase = nil
+        self.spyAppleUsecase = nil
+        self.stubIntegrationUsecase = nil
         self.stubLiveActivityUsecase = nil
         self.spyRouter = nil
     }
 
     private func makeViewModel(
         shouldFailDoneTodo: Bool = false,
+        googleWritePermission: GoogleCalendar.EventWritePermission = .writable,
+        appleShouldFailWrite: Bool = false,
+        googleShouldFailWrite: Bool = false,
+        shouldFailReauthenticate: Bool = false,
         registeredLiveActivityTarget: LiveActivityTarget? = nil,
         liveActivityStartError: (any Error)? = nil
     ) -> EventListCellEventHanleViewModelImple {
 
         self.spyTodoUsecase.shouldFailCompleteTodo = shouldFailDoneTodo
+        self.spyGoogleUsecase.stubWritePermission = googleWritePermission
+        self.spyAppleUsecase.shouldFailWrite = appleShouldFailWrite
+        self.spyGoogleUsecase.shouldFailWrite = googleShouldFailWrite
+        self.stubIntegrationUsecase.shouldFailReauthenticate = shouldFailReauthenticate
         self.stubLiveActivityUsecase = .init(registeredTarget: registeredLiveActivityTarget)
         self.stubLiveActivityUsecase.stubStartError = liveActivityStartError
 
@@ -62,6 +79,9 @@ class EventListCellEventHanleViewModelImpleTests: BaseTestCase, PublisherWaitabl
             todoEventUsecase: self.spyTodoUsecase,
             scheduleEventUsecase: self.spySchedleUsecase,
             foremostEventUsecase: self.spyForemostUsecase,
+            googleCalendarUsecase: self.spyGoogleUsecase,
+            appleCalendarUsecase: self.spyAppleUsecase,
+            externalCalendarIntegrationUsecase: self.stubIntegrationUsecase,
             liveActivityToggleViewModel: liveActivityToggleViewModel
         )
         viewModel.router = self.spyRouter
@@ -152,10 +172,93 @@ extension EventListCellEventHanleViewModelImpleTests {
 }
 
 
+// MARK: - 외부 캘린더 셀 more actions
+
+extension EventListCellEventHanleViewModelImpleTests {
+
+    func testGoogleCell_moreActionsIsNil_whenCalendarIsNotWritable() {
+        // given
+        let model = GoogleCalendarEventCellViewModel.dummy(isWritable: false)
+
+        // when
+        let actions = model.moreActions
+
+        // then
+        XCTAssertNil(actions)
+    }
+
+    func testGoogleCell_removeActions_whenNotRepeating() {
+        // given
+        let model = GoogleCalendarEventCellViewModel.dummy(isWritable: true, recurringEventId: nil)
+
+        // when
+        let actions = model.moreActions
+
+        // then
+        XCTAssertEqual(actions?.removeActions, [.remove(scope: .all)])
+    }
+
+    func testGoogleCell_removeActions_whenRepeating() {
+        // given
+        let model = GoogleCalendarEventCellViewModel.dummy(isWritable: true, recurringEventId: "master-1")
+
+        // when
+        let actions = model.moreActions
+
+        // then
+        XCTAssertEqual(actions?.removeActions, [.remove(scope: .onlyThisTime), .remove(scope: .all)])
+    }
+
+    func testGoogleCell_basicActionsIsEmpty() {
+        // given
+        let model = GoogleCalendarEventCellViewModel.dummy(isWritable: true)
+
+        // when
+        let actions = model.moreActions
+
+        // then
+        XCTAssertEqual(actions?.basicActions, [])
+    }
+
+    func testAppleCell_moreActionsIsNil_whenCalendarIsNotWritable() {
+        // given
+        let model = AppleCalendarEventCellViewModel.dummy(isWritable: false)
+
+        // when
+        let actions = model.moreActions
+
+        // then
+        XCTAssertNil(actions)
+    }
+
+    func testAppleCell_removeActions_whenRepeating() {
+        // given
+        let model = AppleCalendarEventCellViewModel.dummy(isWritable: true, isRepeating: true)
+
+        // when
+        let actions = model.moreActions
+
+        // then
+        XCTAssertEqual(actions?.removeActions, [.remove(scope: .onlyThisTime), .remove(scope: .thisAndFuture)])
+    }
+
+    func testAppleCell_removeActions_whenNotRepeating() {
+        // given
+        let model = AppleCalendarEventCellViewModel.dummy(isWritable: true, isRepeating: false)
+
+        // when
+        let actions = model.moreActions
+
+        // then
+        XCTAssertEqual(actions?.removeActions, [.remove(scope: .all)])
+    }
+}
+
+
 // MARK: - test handle done todo
 
 extension EventListCellEventHanleViewModelImpleTests {
-    
+
     func testViewModel_doneTodo() {
         // given
         func parameterizeTest(shouldFail: Bool) {
@@ -506,10 +609,216 @@ extension EventListCellEventHanleViewModelImpleTests {
         XCTAssertNil(self.stubLiveActivityUsecase.didStartTarget)
     }
 
+
+}
+
+
+// MARK: - 외부 캘린더 이벤트 삭제
+
+extension EventListCellEventHanleViewModelImpleTests {
+
+    func testViewModel_whenRemoveGoogleEventOnlyThisTime_removeInstanceWithThisEventOnlyScope() {
+        // given
+        let expect = expectation(description: "구글 이벤트 이번 회차만 삭제")
+        self.spyGoogleUsecase.didRemoveEventWithCallback = { expect.fulfill() }
+        let viewModel = self.makeViewModel(googleWritePermission: .writable)
+        let cellViewModel = GoogleCalendarEventCellViewModel.dummy(isWritable: true, recurringEventId: "master-1")
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .remove(scope: .onlyThisTime))
+        self.wait(for: [expect], timeout: self.timeout)
+
+        // then
+        XCTAssertEqual(self.spyGoogleUsecase.didRemoveEventWith?.eventId, "google")
+        XCTAssertEqual(self.spyGoogleUsecase.didRemoveEventWith?.scope, .thisEventOnly)
+    }
+
+    func testViewModel_whenRemoveRepeatingGoogleEventWithAllScope_removeMasterWithAllEventsScope() {
+        // given
+        let expect = expectation(description: "구글 반복 이벤트 전체 삭제 — 시리즈 마스터 id 사용")
+        self.spyGoogleUsecase.didRemoveEventWithCallback = { expect.fulfill() }
+        let viewModel = self.makeViewModel(googleWritePermission: .writable)
+        let cellViewModel = GoogleCalendarEventCellViewModel.dummy(isWritable: true, recurringEventId: "master-1")
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .remove(scope: .all))
+        self.wait(for: [expect], timeout: self.timeout)
+
+        // then
+        XCTAssertEqual(self.spyGoogleUsecase.didRemoveEventWith?.eventId, "master-1")
+        XCTAssertEqual(self.spyGoogleUsecase.didRemoveEventWith?.scope, .allEvents)
+    }
+
+    func testViewModel_whenRemoveNotRepeatingGoogleEvent_removeItselfWithThisEventOnlyScope() {
+        // given
+        let expect = expectation(description: "구글 비반복 이벤트 전체 삭제 — 인스턴스 id 사용")
+        self.spyGoogleUsecase.didRemoveEventWithCallback = { expect.fulfill() }
+        let viewModel = self.makeViewModel(googleWritePermission: .writable)
+        let cellViewModel = GoogleCalendarEventCellViewModel.dummy(isWritable: true, recurringEventId: nil)
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .remove(scope: .all))
+        self.wait(for: [expect], timeout: self.timeout)
+
+        // then
+        XCTAssertEqual(self.spyGoogleUsecase.didRemoveEventWith?.eventId, "google")
+        XCTAssertEqual(self.spyGoogleUsecase.didRemoveEventWith?.scope, .thisEventOnly)
+    }
+
+    func testViewModel_whenRemoveGoogleEventAndNeedReauthentication_reauthenticateThenRemove() {
+        // given
+        let expect = expectation(description: "재인증 이후 삭제 실행")
+        self.spyGoogleUsecase.didRemoveEventWithCallback = { expect.fulfill() }
+        let viewModel = self.makeViewModel(googleWritePermission: .needReauthentication)
+        let cellViewModel = GoogleCalendarEventCellViewModel.dummy(isWritable: true, recurringEventId: nil)
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .remove(scope: .all))
+        self.wait(for: [expect], timeout: self.timeout)
+
+        // then
+        XCTAssertEqual(self.stubIntegrationUsecase.didReauthenticateWith?.accountId, "stub@gmail.com")
+        XCTAssertEqual(self.spyGoogleUsecase.didRemoveEventWith?.eventId, "google")
+    }
+
+    func testViewModel_whenRemoveGoogleEventAndReauthenticateFailed_showError() {
+        // given
+        let expect = expectation(description: "재인증 자체가 실패하면 에러 노출, 삭제는 시도 안 함")
+        self.spyRouter.didShowErrorCallback = { _ in expect.fulfill() }
+        let viewModel = self.makeViewModel(
+            googleWritePermission: .needReauthentication, shouldFailReauthenticate: true
+        )
+        let cellViewModel = GoogleCalendarEventCellViewModel.dummy(isWritable: true, recurringEventId: nil)
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .remove(scope: .all))
+        self.wait(for: [expect], timeout: self.timeout)
+
+        // then
+        XCTAssertNotNil(self.spyRouter.didShowError)
+        XCTAssertNil(self.spyGoogleUsecase.didRemoveEventWith)
+    }
+
+    func testViewModel_whenCancelReauthenticateConfirm_neitherReauthenticateNorRemove() {
+        // given
+        let notCalled = expectation(description: "재인증 확인 다이얼로그를 거절하면 재인증도 삭제도 시도 안 함")
+        notCalled.isInverted = true
+        self.spyGoogleUsecase.didRemoveEventWithCallback = { notCalled.fulfill() }
+        let viewModel = self.makeViewModel(googleWritePermission: .needReauthentication)
+        self.spyRouter.shouldConfirmNotCancel = false
+        let cellViewModel = GoogleCalendarEventCellViewModel.dummy(isWritable: true, recurringEventId: nil)
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .remove(scope: .all))
+        self.wait(for: [notCalled], timeout: 0.3)
+
+        // then
+        XCTAssertNil(self.stubIntegrationUsecase.didReauthenticateWith)
+        XCTAssertNil(self.spyGoogleUsecase.didRemoveEventWith)
+    }
+
+    func testViewModel_whenRemoveGoogleEventFailed_showError() {
+        // given
+        let expect = expectation(description: "구글 삭제 자체가 실패하면 에러 노출")
+        self.spyRouter.didShowErrorCallback = { _ in expect.fulfill() }
+        let viewModel = self.makeViewModel(googleWritePermission: .writable, googleShouldFailWrite: true)
+        let cellViewModel = GoogleCalendarEventCellViewModel.dummy(isWritable: true, recurringEventId: nil)
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .remove(scope: .all))
+        self.wait(for: [expect], timeout: self.timeout)
+
+        // then
+        XCTAssertNotNil(self.spyRouter.didShowError)
+    }
+
+    func testViewModel_whenRemoveGoogleEventOnReadOnlyCalendar_notRemove() {
+        // given
+        let notCalled = expectation(description: "읽기 전용 캘린더에서는 삭제도 확인 다이얼로그도 시도하지 않음")
+        notCalled.isInverted = true
+        self.spyGoogleUsecase.didRemoveEventWithCallback = { notCalled.fulfill() }
+        let viewModel = self.makeViewModel(googleWritePermission: .readOnlyCalendar)
+        let cellViewModel = GoogleCalendarEventCellViewModel.dummy(isWritable: true, recurringEventId: nil)
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .remove(scope: .all))
+        self.wait(for: [notCalled], timeout: 0.3)
+
+        // then
+        XCTAssertNil(self.spyGoogleUsecase.didRemoveEventWith)
+        XCTAssertNil(self.spyRouter.didShowConfirmWith)
+    }
+
+    func testViewModel_whenRemoveAppleEventOnlyThisTime_removeWithThisEventOnlyScope() {
+        // given
+        let expect = expectation(description: "애플 이벤트 이번만 삭제")
+        self.spyAppleUsecase.didRemoveEventWithCallback = { expect.fulfill() }
+        let viewModel = self.makeViewModel()
+        let cellViewModel = AppleCalendarEventCellViewModel.dummy(isWritable: true, isRepeating: true)
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .remove(scope: .onlyThisTime))
+        self.wait(for: [expect], timeout: self.timeout)
+
+        // then
+        XCTAssertEqual(self.spyAppleUsecase.didRemoveEventWith?.eventId, "apple-event")
+        XCTAssertEqual(self.spyAppleUsecase.didRemoveEventWith?.scope, .thisEventOnly)
+    }
+
+    func testViewModel_whenRemoveAppleEventThisAndFuture_removeWithThisAndFutureScope() {
+        // given
+        let expect = expectation(description: "애플 이벤트 이후 모든 이벤트 삭제")
+        self.spyAppleUsecase.didRemoveEventWithCallback = { expect.fulfill() }
+        let viewModel = self.makeViewModel()
+        let cellViewModel = AppleCalendarEventCellViewModel.dummy(isWritable: true, isRepeating: true)
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .remove(scope: .thisAndFuture))
+        self.wait(for: [expect], timeout: self.timeout)
+
+        // then
+        XCTAssertEqual(self.spyAppleUsecase.didRemoveEventWith?.eventId, "apple-event")
+        XCTAssertEqual(self.spyAppleUsecase.didRemoveEventWith?.scope, .thisAndFuture)
+        XCTAssertEqual(
+            self.spyRouter.didShowConfirmWith?.message,
+            "calendar::event::more_action::remove_this_and_future:message".localized()
+        )
+    }
+
+    func testViewModel_whenRemoveNotRepeatingAppleEventWithAllScope_removeWithThisEventOnlyScope() {
+        // given
+        let expect = expectation(description: "애플 비반복 이벤트를 all scope로 삭제해도 thisEventOnly로 변환")
+        self.spyAppleUsecase.didRemoveEventWithCallback = { expect.fulfill() }
+        let viewModel = self.makeViewModel()
+        let cellViewModel = AppleCalendarEventCellViewModel.dummy(isWritable: true, isRepeating: false)
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .remove(scope: .all))
+        self.wait(for: [expect], timeout: self.timeout)
+
+        // then
+        XCTAssertEqual(self.spyAppleUsecase.didRemoveEventWith?.eventId, "apple-event")
+        XCTAssertEqual(self.spyAppleUsecase.didRemoveEventWith?.scope, .thisEventOnly)
+    }
+
+    func testViewModel_whenRemoveExternalEventFailed_showError() {
+        // given
+        let expect = expectation(description: "삭제 실패시 에러 노출")
+        self.spyRouter.didShowErrorCallback = { _ in expect.fulfill() }
+        let viewModel = self.makeViewModel(appleShouldFailWrite: true)
+        let cellViewModel = AppleCalendarEventCellViewModel.dummy(isWritable: true, isRepeating: false)
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .remove(scope: .all))
+        self.wait(for: [expect], timeout: self.timeout)
+
+        // then
+        XCTAssertNotNil(self.spyRouter.didShowError)
+    }
 }
 
 extension EventListCellEventHanleViewModelImpleTests {
-    
+
     func testViewModel_makeTodoWithParams() {
         // given
         let viewModel = self.makeViewModel()
@@ -672,6 +981,32 @@ private final class PrivateForemostEventUsecase: StubForemostEventUsecase {
     }
 }
 
+private final class PrivateGoogleCalendarUsecase: StubGoogleCalendarUsecase {
+
+    var didRemoveEventWithCallback: (() -> Void)?
+    override func removeEvent(
+        _ calendarId: String,
+        _ eventId: String,
+        accountId: String,
+        scope: GoogleCalendar.EventRemoveScope
+    ) async throws {
+        try await super.removeEvent(calendarId, eventId, accountId: accountId, scope: scope)
+        self.didRemoveEventWithCallback?()
+    }
+}
+
+private final class PrivateAppleCalendarUsecase: StubAppleCalendarUsecase {
+
+    var didRemoveEventWithCallback: (() -> Void)?
+    override func removeEvent(
+        _ eventId: String,
+        scope: AppleCalendar.EventEditScope
+    ) async throws {
+        try await super.removeEvent(eventId, scope: scope)
+        self.didRemoveEventWithCallback?()
+    }
+}
+
 private extension DoneTodoResult {
     
     var isSuccess: Bool {
@@ -687,14 +1022,19 @@ private extension DoneTodoResult {
 
 extension GoogleCalendarEventCellViewModel {
 
-    static func dummy(_ link: String? = "link") -> GoogleCalendarEventCellViewModel {
+    static func dummy(
+        _ link: String? = "link",
+        isWritable: Bool = false,
+        recurringEventId: String? = nil
+    ) -> GoogleCalendarEventCellViewModel {
         let google = GoogleCalendar.Event(
             "google", "calendar", accountId: "stub@gmail.com",
             name: "name",
             colorId: "id", htmlLink: link,
             time: .at(1)
         )
-        let googleEvent = GoogleCalendarEvent(google, in: TimeZone.current)
+        |> \.recurringEventId .~ recurringEventId
+        let googleEvent = GoogleCalendarEvent(google, in: TimeZone.current, isWritable: isWritable)
         return GoogleCalendarEventCellViewModel(
             googleEvent, in: 0..<10, TimeZone.current, true
         )!
@@ -703,7 +1043,10 @@ extension GoogleCalendarEventCellViewModel {
 
 extension AppleCalendarEventCellViewModel {
 
-    static func dummy() -> AppleCalendarEventCellViewModel {
+    static func dummy(
+        isWritable: Bool = false,
+        isRepeating: Bool = false
+    ) -> AppleCalendarEventCellViewModel {
         let appleEvent = AppleCalendar.Event(
             eventId: "apple-event",
             originalEventId: "apple-event",
@@ -711,7 +1054,8 @@ extension AppleCalendarEventCellViewModel {
             name: "Apple Event",
             eventTime: .at(1)
         )
-        let calendarEvent = AppleCalendarEvent(appleEvent, in: TimeZone.current)
+        |> \.isRepeating .~ isRepeating
+        let calendarEvent = AppleCalendarEvent(appleEvent, in: TimeZone.current, isWritable: isWritable)
         return AppleCalendarEventCellViewModel(
             calendarEvent, in: 0..<10, TimeZone.current, true
         )!
