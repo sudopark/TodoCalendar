@@ -98,23 +98,23 @@ struct EventListCellView: View {
                     moreActionsView(moreActions.basicActions[$0])
                 }
 
-                if !moreActions.removeActions.isEmpty {
+                if !moreActions.basicActions.isEmpty {
                     Divider()
+                }
 
-                    ForEach(0..<moreActions.removeActions.count, id: \.self) {
-                        moreActionsView(moreActions.removeActions[$0])
-                    }
+                ForEach(0..<moreActions.removeActions.count, id: \.self) {
+                    moreActionsView(moreActions.removeActions[$0])
                 }
             }
         }
     }
-    
+
     private func moreActionsView(_ action: EventListMoreAction) -> some View {
         switch action {
         case .edit:
             return editEventButton().asAnyView()
-        case .remove(let onlyThisTime):
-            return removeButton(onlyThisTime).asAnyView()
+        case .remove(let scope):
+            return removeButton(scope).asAnyView()
         case .toggleTo(let isForemost):
             return toggleForemostButton(isForemost).asAnyView()
         case .toggleLiveActivity(let isRegistered):
@@ -125,20 +125,28 @@ struct EventListCellView: View {
             return copyButton().asAnyView()
         }
     }
-    
-    private func removeButton(_ onlyThisTime: Bool) -> some View {
+
+    private func removeButton(_ scope: EventListRemoveScope) -> some View {
         return Button(role: .destructive) {
             self.handleMoreAction(
-                self.cellViewModel, .remove(onlyThisTime: onlyThisTime)
+                self.cellViewModel, .remove(scope: scope)
             )
         } label: {
             HStack {
-                Text(onlyThisTime
-                     ? R.String.calendarEventMoreActionRemoveOnlyThistimeItemName
-                     : R.String.calendarEventMoreActionRemoveItemName
-                )
+                Text(self.removeItemName(scope))
                 Image(systemName: "trash")
             }
+        }
+    }
+
+    private func removeItemName(_ scope: EventListRemoveScope) -> String {
+        switch scope {
+        case .onlyThisTime:
+            return R.String.calendarEventMoreActionRemoveOnlyThistimeItemName
+        case .thisAndFuture:
+            return "calendar::event::more_action:remove_this_and_future:item_name".localized()
+        case .all:
+            return R.String.calendarEventMoreActionRemoveItemName
         }
     }
     
