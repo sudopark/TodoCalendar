@@ -97,6 +97,13 @@ final class StubGoogleCalendarRepository: GoogleCalendarRepository, @unchecked S
         return Empty().eraseToAnyPublisher()
     }
 
+    func respondToEvent(
+        _ calendarId: String, _ timeZone: String, _ eventId: String,
+        _ responseStatus: GoogleCalendar.AttendeeResponseStatus
+    ) async throws -> GoogleCalendar.EventOrigin {
+        throw RuntimeError("read db cannot write")
+    }
+
     func removeEvent(_ calendarId: String, _ eventId: String) -> AnyPublisher<Void, any Error> {
         return Empty().eraseToAnyPublisher()
     }

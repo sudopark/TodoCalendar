@@ -930,6 +930,63 @@ extension GoogleCalendarUsecaseImpleTests {
 }
 
 
+// MARK: - 역할 9: respondToEvent()
+
+extension GoogleCalendarUsecaseImpleTests {
+
+    @Test func respondToEvent_delegatesToAccountRepository() async throws {
+        // given
+        let repo = PrivateStubRepository(
+            customRespondOriginStubbing: GoogleCalendar.EventOrigin(id: "event1", summary: "responded")
+        )
+        let usecase = makeUsecase(accounts: ["account@google.com"], defaultRepo: repo)
+
+        // when
+        let origin = try await usecase.respondToEvent(
+            "cal1", "event1", accountId: "account@google.com",
+            at: TimeZone(identifier: "Asia/Seoul")!, responseStatus: .declined
+        )
+
+        // then
+        #expect(repo.didRespondToEventWith?.calendarId == "cal1")
+        #expect(repo.didRespondToEventWith?.timeZone == "Asia/Seoul")
+        #expect(repo.didRespondToEventWith?.eventId == "event1")
+        #expect(repo.didRespondToEventWith?.responseStatus == .declined)
+        #expect(origin.summary == "responded")
+    }
+
+    @Test func respondToEvent_whenRepositoryFails_throws() async throws {
+        // given
+        let repo = PrivateStubRepository(respondToEventShouldFail: true)
+        let usecase = makeUsecase(accounts: ["account@google.com"], defaultRepo: repo)
+
+        // when & then
+        await #expect(throws: (any Error).self) {
+            _ = try await usecase.respondToEvent(
+                "cal1", "event1", accountId: "account@google.com",
+                at: TimeZone(identifier: "Asia/Seoul")!, responseStatus: .accepted
+            )
+        }
+    }
+
+    @Test func respondToEvent_doesNotRunUpdateEventFlow() async throws {
+        // given
+        let repo = PrivateStubRepository()
+        let usecase = makeUsecase(accounts: ["account@google.com"], defaultRepo: repo)
+
+        // when
+        _ = try await usecase.respondToEvent(
+            "cal1", "event1", accountId: "account@google.com",
+            at: TimeZone(identifier: "Asia/Seoul")!, responseStatus: .accepted
+        )
+
+        // then — RSVP 는 updateEvent 와 그 인스턴스 재조회 로직을 타지 않는다
+        #expect(repo.didUpdateEventWith == nil)
+        #expect(repo.didLoadRepeatingInstancesWith == nil)
+    }
+}
+
+
 // MARK: - Event 변환 단위 테스트
 
 extension GoogleCalendarUsecaseImpleTests {
@@ -1040,13 +1097,24 @@ private final class PrivateStubRepository: GoogleCalendarRepository, @unchecked 
     private var stubCalendarTags: [[GoogleCalendar.Tag]]
     var eventsMocking: PassthroughSubject<[GoogleCalendar.Event], any Error>?
     private let customUpdateEventOriginStubbing: GoogleCalendar.EventOrigin?
+    private let customRespondOriginStubbing: GoogleCalendar.EventOrigin?
+    private let respondToEventShouldFail: Bool
+    var didUpdateEventWith: (eventId: String, params: GoogleCalendar.EventEditParams)?
+    var didRespondToEventWith: (
+        calendarId: String, timeZone: String, eventId: String,
+        responseStatus: GoogleCalendar.AttendeeResponseStatus
+    )?
 
     init(
         customCalendarsStubbing: [GoogleCalendar.Tag]? = nil,
         eventsMocking: PassthroughSubject<[GoogleCalendar.Event], any Error>? = nil,
-        customUpdateEventOriginStubbing: GoogleCalendar.EventOrigin? = nil
+        customUpdateEventOriginStubbing: GoogleCalendar.EventOrigin? = nil,
+        customRespondOriginStubbing: GoogleCalendar.EventOrigin? = nil,
+        respondToEventShouldFail: Bool = false
     ) {
         self.customUpdateEventOriginStubbing = customUpdateEventOriginStubbing
+        self.customRespondOriginStubbing = customRespondOriginStubbing
+        self.respondToEventShouldFail = respondToEventShouldFail
         self.stubColors = [
             .init(
                 ownerId: "account@google.com",
@@ -1126,8 +1194,21 @@ private final class PrivateStubRepository: GoogleCalendarRepository, @unchecked 
     func updateEvent(
         _ calendarId: String, _ timeZone: String, _ eventId: String, _ params: GoogleCalendar.EventEditParams
     ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error> {
+        self.didUpdateEventWith = (eventId, params)
         let origin = self.customUpdateEventOriginStubbing ?? GoogleCalendar.EventOrigin(id: eventId, summary: params.summary)
         return Just(origin).mapAsAnyError().eraseToAnyPublisher()
+    }
+
+    func respondToEvent(
+        _ calendarId: String,
+        _ timeZone: String,
+        _ eventId: String,
+        _ responseStatus: GoogleCalendar.AttendeeResponseStatus
+    ) async throws -> GoogleCalendar.EventOrigin {
+        self.didRespondToEventWith = (calendarId, timeZone, eventId, responseStatus)
+        guard !self.respondToEventShouldFail else { throw TestError() }
+        return self.customRespondOriginStubbing
+            ?? GoogleCalendar.EventOrigin(id: eventId, summary: "some")
     }
 
     func removeEvent(_ calendarId: String, _ eventId: String) -> AnyPublisher<Void, any Error> {

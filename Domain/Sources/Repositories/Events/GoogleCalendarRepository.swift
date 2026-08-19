@@ -44,6 +44,13 @@ public protocol GoogleCalendarRepository: Sendable {
         _ params: GoogleCalendar.EventEditParams
     ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error>
 
+    func respondToEvent(
+        _ calendarId: String,
+        _ timeZone: String,
+        _ eventId: String,
+        _ responseStatus: GoogleCalendar.AttendeeResponseStatus
+    ) async throws -> GoogleCalendar.EventOrigin
+
     func removeEvent(
         _ calendarId: String,
         _ eventId: String
