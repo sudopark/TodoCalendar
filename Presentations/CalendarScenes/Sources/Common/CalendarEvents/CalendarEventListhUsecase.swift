@@ -34,6 +34,11 @@ protocol CalendarEventListhUsecase: Sendable {
 }
 
 
+private struct WritableCalendarIds: Equatable {
+    var google: [String: Set<String>] = [:]
+    var apple: Set<String> = []
+}
+
 final class CalendarEventListhUsecaseImple: CalendarEventListhUsecase, @unchecked Sendable {
 
     private let todoUsecase: any TodoEventUsecase
@@ -71,6 +76,7 @@ final class CalendarEventListhUsecaseImple: CalendarEventListhUsecase, @unchecke
         let foremostEvent = CurrentValueSubject<(any ForemostMarkableEvent)?, Never>(nil)
         let timeZone = CurrentValueSubject<TimeZone?, Never>(nil)
         let offTagIds = CurrentValueSubject<Set<EventTagId>, Never>([])
+        let writableCalendarIds = CurrentValueSubject<WritableCalendarIds, Never>(.init())
     }
     private let subject = Subject()
     private var cancellables: Set<AnyCancellable> = []
@@ -94,6 +100,24 @@ final class CalendarEventListhUsecaseImple: CalendarEventListhUsecase, @unchecke
                 self?.subject.offTagIds.send(ids)
             })
             .store(in: &self.cancellables)
+
+        Publishers.CombineLatest(
+            self.googleCalendarUsecase.calendarTags,
+            self.appleCalendarUsecase.calendarTags
+        )
+        .map { googleTags, appleTags -> WritableCalendarIds in
+            let google = googleTags
+                .filter { $0.isWritable }
+                .reduce(into: [String: Set<String>]()) { acc, tag in
+                    acc[tag.ownerId, default: []].insert(tag.id)
+                }
+            let apple = Set(appleTags.filter { $0.isWritable == true }.map { $0.id })
+            return WritableCalendarIds(google: google, apple: apple)
+        }
+        .sink(receiveValue: { [weak self] ids in
+            self?.subject.writableCalendarIds.send(ids)
+        })
+        .store(in: &self.cancellables)
     }
 }
 
@@ -116,8 +140,8 @@ extension CalendarEventListhUsecaseImple {
             return event.map { ForemostEventId(event: $0) }
         }
         let transform: (
-            CalendarEventTuple, ForemostEventId?, TimeZone
-        ) -> [any CalendarEvent] = { events, foremostId, timeZone in
+            CalendarEventTuple, ForemostEventId?, TimeZone, WritableCalendarIds
+        ) -> [any CalendarEvent] = { events, foremostId, timeZone, writableIds in
             let (todos, schedules, googles, apples) = events
             let todoEvents = todos.compactMap {
                 TodoCalendarEvent($0, in: timeZone, isForemost: foremostId?.eventId == $0.uuid)
@@ -125,15 +149,20 @@ extension CalendarEventListhUsecaseImple {
             let scheduleEvents = schedules.flatMap {
                 ScheduleCalendarEvent.events(from: $0, in: timeZone, foremostId: foremostId?.eventId)
             }
-            let googleEvents = googles.map { GoogleCalendarEvent($0, in: timeZone) }
-            let appleEvents = apples.map { AppleCalendarEvent($0, in: timeZone) }
+            let googleEvents = googles.map {
+                GoogleCalendarEvent($0, in: timeZone, isWritable: writableIds.google[$0.accountId]?.contains($0.calendarId) == true)
+            }
+            let appleEvents = apples.map {
+                AppleCalendarEvent($0, in: timeZone, isWritable: writableIds.apple.contains($0.calendarId))
+            }
             return todoEvents + scheduleEvents + googleEvents + appleEvents
         }
 
-        return Publishers.CombineLatest3(
+        return Publishers.CombineLatest4(
             tuplePublisher,
             foremost,
-            self.subject.timeZone.compactMap { $0 }
+            self.subject.timeZone.compactMap { $0 },
+            self.subject.writableCalendarIds
         )
         .map(transform)
         .removeDuplicates(by: { $0.map { $0.compareKey } == $1.map { $0.compareKey } })
