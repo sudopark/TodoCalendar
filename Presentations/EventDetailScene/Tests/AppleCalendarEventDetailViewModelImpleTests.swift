@@ -1138,6 +1138,11 @@ private final class SpyRouter: BaseSpyRouter, AppleCalendarEventDetailRouting, @
     ) {
         self.didRouteToRepeatOptionSelectWith = (selectTime, repeating)
     }
+
+    var didShareText: String?
+    func showShareSheet(text: String) {
+        self.didShareText = text
+    }
 }
 
 
@@ -1145,5 +1150,78 @@ private final class MockAppleCalendarUsecase: StubAppleCalendarUsecase, @uncheck
     let isWritableSubject = CurrentValueSubject<Bool?, Never>(true)
     override func isCalendarWritable(_ calendarId: String) -> AnyPublisher<Bool?, Never> {
         return self.isWritableSubject.eraseToAnyPublisher()
+    }
+}
+
+
+// MARK: - 공유
+
+extension AppleCalendarEventDetailViewModelImpleTests {
+
+    private func shareFieldLabel(_ key: String) -> String {
+        return "event_detail::share::field::\(key)".localized()
+    }
+
+    private var shareTagLabel: String { "eventTag.title".localized() }
+
+    @Test func viewModel_whenShare_composeTextWithVisibleFields() async throws {
+        // given
+        let viewModel = self.makeViewModelWithOrigin {
+            $0.location = "Conference Room A"
+            $0.url = "https://example.com"
+            $0.notes = "메모"
+        }
+        viewModel.refresh()
+        try await Task.sleep(for: .milliseconds(10))
+        let time = try await self.firstOutput(expectConfirm("현재 시간값"), for: viewModel.timeText)
+        let expectedTimeText = time.flatMap { $0 }.map { EventDetailShareTextBuilder().timeText(from: $0) }
+
+        // when
+        viewModel.share()
+        try await Task.sleep(for: .milliseconds(10))
+
+        // then
+        let text = try #require(self.spyRouter.didShareText)
+        let lines = text.components(separatedBy: "\n")
+        #expect(lines.first == "Meeting")
+        #expect(lines.contains("\(self.shareFieldLabel("time")): \(expectedTimeText ?? "")"))
+        #expect(lines.contains("\(self.shareTagLabel): Work"))
+        #expect(lines.contains("\(self.shareFieldLabel("place")): Conference Room A"))
+        #expect(lines.contains("\(self.shareFieldLabel("url")): https://example.com"))
+        #expect(lines.contains("\(self.shareFieldLabel("memo")): 메모"))
+    }
+
+    @Test func viewModel_whenShareAfterEnterName_shareEditedName() async throws {
+        // given
+        let viewModel = self.makeViewModelWithOrigin { _ in }
+        viewModel.refresh()
+        try await Task.sleep(for: .milliseconds(10))
+        viewModel.enter(name: "수정된 이름")
+
+        // when
+        viewModel.share()
+        try await Task.sleep(for: .milliseconds(10))
+
+        // then
+        let text = try #require(self.spyRouter.didShareText)
+        let lines = text.components(separatedBy: "\n")
+        #expect(lines.first == "수정된 이름")
+        #expect(!lines.contains("Meeting"))
+    }
+
+    @Test func viewModel_whenShareNotRepeatingEvent_withoutRepeatLine() async throws {
+        // given
+        let viewModel = self.makeViewModelWithOrigin { _ in }
+        viewModel.refresh()
+        try await Task.sleep(for: .milliseconds(10))
+
+        // when
+        viewModel.share()
+        try await Task.sleep(for: .milliseconds(10))
+
+        // then
+        let text = try #require(self.spyRouter.didShareText)
+        let lines = text.components(separatedBy: "\n")
+        #expect(!lines.contains(where: { $0.hasPrefix("\(self.shareFieldLabel("repeating")):") }))
     }
 }
