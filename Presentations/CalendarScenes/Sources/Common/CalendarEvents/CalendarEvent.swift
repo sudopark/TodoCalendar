@@ -228,9 +228,11 @@ public struct GoogleCalendarEvent: CalendarEvent {
     public let htmlLink: String?
     public let isForemost: Bool
     public let isRepeating: Bool
+    public let recurringEventId: String?
+    public let isWritable: Bool
     public var locationText: String?
-    
-    public init(_ event: GoogleCalendar.Event, in timeZone: TimeZone) {
+
+    public init(_ event: GoogleCalendar.Event, in timeZone: TimeZone, isWritable: Bool = false) {
         self.eventId = event.eventId
         self.calendarId = event.calendarId
         self.accountId = event.accountId
@@ -245,7 +247,7 @@ public struct GoogleCalendarEvent: CalendarEvent {
             self.eventTimeOnCalendar = .period(
                 range.shiftting(secondsFromGMT, to: timeZone)
             )
-            
+
         default:
             self.eventTimeOnCalendar = EventTimeOnCalendar(event.eventTime, timeZone: timeZone)
         }
@@ -253,16 +255,18 @@ public struct GoogleCalendarEvent: CalendarEvent {
         self.colorId = event.colorId
         self.htmlLink = event.htmlLink
         self.isForemost = false
-        self.isRepeating = false
+        self.recurringEventId = event.recurringEventId
+        self.isRepeating = event.recurringEventId != nil
+        self.isWritable = isWritable
         self.locationText = event.location
     }
-    
+
     public var colorSource: any EventTagColorSource {
         GoogleCalendarEventColorSource(calendarId: calendarId, colorId: colorId)
     }
 
     public var compareKey: String {
-        return "\(String(describing: Self.self))-\(eventId)-\(accountId)-\(name)-\(eventTime?.hashValue ?? -1)-\(eventTimeOnCalendar?.hashValue ?? -1)-\(eventTagId.hashValue)-\(self.isForemost)-\(self.colorId ?? "nil")-\(self.htmlLink ?? "nil")-\(self.locationText ?? "nil")"
+        return "\(String(describing: Self.self))-\(eventId)-\(accountId)-\(name)-\(eventTime?.hashValue ?? -1)-\(eventTimeOnCalendar?.hashValue ?? -1)-\(eventTagId.hashValue)-\(self.isForemost)-\(self.colorId ?? "nil")-\(self.htmlLink ?? "nil")-\(self.locationText ?? "nil")-\(self.isRepeating)-\(self.recurringEventId ?? "nil")-\(self.isWritable)"
     }
 }
 
@@ -276,9 +280,10 @@ public struct AppleCalendarEvent: CalendarEvent {
     public let eventTagId: EventTagId
     public let isForemost: Bool = false
     public let isRepeating: Bool
+    public let isWritable: Bool
     public var locationText: String?
 
-    public init(_ event: AppleCalendar.Event, in timeZone: TimeZone) {
+    public init(_ event: AppleCalendar.Event, in timeZone: TimeZone, isWritable: Bool = false) {
         self.eventId = event.eventId
         self.calendarId = event.calendarId
         self.name = event.name
@@ -286,11 +291,16 @@ public struct AppleCalendarEvent: CalendarEvent {
         self.eventTimeOnCalendar = EventTimeOnCalendar(event.eventTime, timeZone: timeZone)
         self.eventTagId = event.eventTagId
         self.isRepeating = event.isRepeating
+        self.isWritable = isWritable
         self.locationText = event.location
     }
 
     public var colorSource: any EventTagColorSource {
         AppleCalendarEventColorSource(calendarId: calendarId)
+    }
+
+    public var compareKey: String {
+        return "\(String(describing: Self.self))-\(eventId)-\(name)-\(eventTime?.hashValue ?? -1)-\(eventTimeOnCalendar?.hashValue ?? -1)-\(eventTagId.hashValue)-\(self.isForemost)-\(self.locationText ?? "nil")-\(self.isRepeating)-\(self.isWritable)"
     }
 }
 
