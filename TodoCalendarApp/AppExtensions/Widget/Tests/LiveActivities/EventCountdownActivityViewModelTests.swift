@@ -62,24 +62,30 @@ struct EventCountdownActivityViewModelTests {
         #expect(viewModel.usesDarkGlyph == false)
     }
 
+    @Test("todoId when todo target", arguments: ["t1", "t123"])
+    func viewModel_whenTodoTarget_exposesTodoId(_ todoId: String) {
+        // given
+        let viewModel = makeViewModel(target: .todo(id: todoId), colorHex: "#EEEEEE")
+
+        // when + then
+        #expect(viewModel.todoId == todoId)
+    }
+
     @Test(
-        "complete button",
+        "todoId when non-todo target",
         arguments: [
-            (LiveActivityEventTarget.todo(id: "t1"), true),
-            (LiveActivityEventTarget.schedule(id: "s1", turnKey: "1755400800..<1755404400"), false),
-            (LiveActivityEventTarget.holiday(uuid: "h1", dateString: "2026-08-17"), false),
-            (LiveActivityEventTarget.googleCalendar(accountId: "a1", calendarId: "c1", eventId: "e1"), false),
-            (LiveActivityEventTarget.appleCalendar(calendarId: "c1", eventId: "e1"), false)
+            LiveActivityEventTarget.schedule(id: "s1", turnKey: "1755400800..<1755404400"),
+            LiveActivityEventTarget.holiday(uuid: "h1", dateString: "2026-08-17"),
+            LiveActivityEventTarget.googleCalendar(accountId: "a1", calendarId: "c1", eventId: "e1"),
+            LiveActivityEventTarget.appleCalendar(calendarId: "c1", eventId: "e1")
         ]
     )
-    func viewModel_showsCompleteButton_onlyForTodoTarget(
-        _ target: LiveActivityEventTarget, _ expected: Bool
-    ) {
+    func viewModel_whenNotTodoTarget_hasNoTodoId(_ target: LiveActivityEventTarget) {
         // given
         let viewModel = makeViewModel(target: target, colorHex: "#EEEEEE")
 
         // when + then
-        #expect(viewModel.showsCompleteButton == expected)
+        #expect(viewModel.todoId == nil)
     }
 
     @Test

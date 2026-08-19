@@ -36,22 +36,4 @@ struct LiveActivityEventTargetTests {
         // then
         #expect(restored == target)
     }
-
-    @Test(
-        "isTodo",
-        arguments: [
-            (LiveActivityEventTarget.todo(id: "t1"), true),
-            (LiveActivityEventTarget.schedule(id: "s1", turnKey: "1755400800..<1755404400"), false),
-            (LiveActivityEventTarget.holiday(uuid: "h1", dateString: "2026-08-17"), false),
-            (LiveActivityEventTarget.googleCalendar(accountId: "a1", calendarId: "c1", eventId: "e1"), false),
-            (LiveActivityEventTarget.appleCalendar(calendarId: "c1", eventId: "e1"), false)
-        ]
-    )
-    func target_isTodo_onlyForTodoCase(_ target: LiveActivityEventTarget, _ expected: Bool) {
-        // given + when
-        let isTodo = target.isTodo
-
-        // then
-        #expect(isTodo == expected)
-    }
 }
