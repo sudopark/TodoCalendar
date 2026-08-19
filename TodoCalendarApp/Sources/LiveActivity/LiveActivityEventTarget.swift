@@ -17,9 +17,4 @@ enum LiveActivityEventTarget: Codable, Hashable, Sendable {
     case holiday(uuid: String, dateString: String)
     case googleCalendar(accountId: String, calendarId: String, eventId: String)
     case appleCalendar(calendarId: String, eventId: String)
-
-    var isTodo: Bool {
-        if case .todo = self { return true }
-        return false
-    }
 }

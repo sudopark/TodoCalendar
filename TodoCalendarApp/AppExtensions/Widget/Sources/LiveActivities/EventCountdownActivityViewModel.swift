@@ -20,7 +20,7 @@ struct EventCountdownActivityViewModel {
     let subtitle: String?
     let tagColor: Color
     let usesDarkGlyph: Bool
-    let showsCompleteButton: Bool
+    let todoId: String?
 
     init(_ attributes: EventCountdownActivityAttributes, _ state: EventCountdownActivityAttributes.State) {
         self.eventName = state.eventName
@@ -28,7 +28,13 @@ struct EventCountdownActivityViewModel {
         self.eventDate = state.eventDate
         self.startDate = state.startDate
         self.subtitle = state.placeName?.nonEmptyTrimmed ?? state.memo?.nonEmptyTrimmed
-        self.showsCompleteButton = attributes.target.isTodo
+
+        switch attributes.target {
+        case .todo(let id):
+            self.todoId = id
+        case .schedule, .holiday, .googleCalendar, .appleCalendar:
+            self.todoId = nil
+        }
 
         let uiColor = UIColor.from(hex: state.tagColorHex) ?? .gray
         self.tagColor = uiColor.asColor

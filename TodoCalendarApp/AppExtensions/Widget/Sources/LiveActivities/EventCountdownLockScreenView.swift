@@ -99,19 +99,17 @@ struct EventCountdownActionButtonRow: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            if model.showsCompleteButton {
-                Button(action: { }) {
+            if let todoId = model.todoId {
+                Button(intent: CompleteTodoAndEndLiveActivityIntent(todoId: todoId)) {
                     Text("common.done".localized())
                         .frame(maxWidth: .infinity)
                 }
-                .disabled(true)
             }
 
-            Button(action: { }) {
+            Button(intent: EndLiveActivityIntent()) {
                 Text("liveActivity::action::end".localized())
                     .frame(maxWidth: .infinity)
             }
-            .disabled(true)
         }
         .buttonStyle(.bordered)
     }
