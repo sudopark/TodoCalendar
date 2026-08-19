@@ -177,7 +177,7 @@ extension GoogleCalendar {
             public init() { }
         }
 
-        public struct Attendee: Codable, Sendable {
+        public struct Attendee: Codable, Sendable, Equatable {
             public var id: String?
             public var email: String?
             public var displayName: String?
@@ -201,7 +201,15 @@ extension GoogleCalendar {
             public var isAccepted: Bool {
                 return self.responseStatus == "accepted"
             }
-            
+
+            public var isSelf: Bool {
+                return self.selfValue == true
+            }
+
+            public var response: GoogleCalendar.AttendeeResponseStatus? {
+                return self.responseStatus.flatMap(GoogleCalendar.AttendeeResponseStatus.init(rawValue:))
+            }
+
             public init() { }
         }
 
@@ -252,6 +260,14 @@ extension GoogleCalendar {
             case confidential
         }
     }
+
+    public enum AttendeeResponseStatus: String, Sendable, Equatable {
+        case needsAction
+        case declined
+        case tentative
+        case accepted
+    }
+
     public struct EventOriginValueList: Decodable, Sendable {
         public var timeZone: String?
         public var items: [EventOrigin] = []

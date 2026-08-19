@@ -796,6 +796,62 @@ extension GoogleCalendarRepositoryImple_Tests {
         }
     }
 
+    @Test func repository_updateEvent_sendsAttendeesArray() async throws {
+        try await self.runTestWithOpenClose("test_google_event_update_attendees_1") {
+            // given
+            let expect = self.expectConfirm("참석자 목록을 실은 patch 요청")
+            let repository = self.makeRepository()
+            let attendee = GoogleCalendar.EventOrigin.Attendee()
+                |> \.id .~ "attendee-id"
+                |> \.email .~ "a@b.com"
+                |> \.displayName .~ "A B"
+                |> \.organizer .~ true
+                |> \.selfValue .~ true
+                |> \.resource .~ true
+                |> \.optional .~ true
+                |> \.responseStatus .~ "accepted"
+            let params = GoogleCalendar.EventEditParams()
+                |> \.attendees .~ [attendee]
+
+            // when
+            let _ = try await self.firstOutput(
+                expect, for: repository.updateEvent("c_id", "Asia/Seoul", "time_is_date", params)
+            )
+
+            // then
+            let requestedParams = try #require(self.stubRemote.didRequestedParams)
+            let attendeesJson = try #require(requestedParams["attendees"] as? [[String: Any]])
+            let attendeeJson = try #require(attendeesJson.first)
+            #expect(attendeeJson["email"] as? String == "a@b.com")
+            #expect(attendeeJson["displayName"] as? String == "A B")
+            #expect(attendeeJson["responseStatus"] as? String == "accepted")
+            #expect(attendeeJson["optional"] as? Bool == true)
+            #expect(attendeeJson["resource"] as? Bool == true)
+            #expect(attendeeJson["id"] == nil)
+            #expect(attendeeJson["self"] == nil)
+            #expect(attendeeJson["organizer"] == nil)
+        }
+    }
+
+    @Test func repository_updateEvent_whenAttendeesIsNil_omitsKey() async throws {
+        try await self.runTestWithOpenClose("test_google_event_update_attendees_2") {
+            // given
+            let expect = self.expectConfirm("참석자를 안 건드리면 patch body 에 attendees 키가 없다")
+            let repository = self.makeRepository()
+            let params = GoogleCalendar.EventEditParams()
+                |> \.summary .~ "updated summary"
+
+            // when
+            let _ = try await self.firstOutput(
+                expect, for: repository.updateEvent("c_id", "Asia/Seoul", "time_is_date", params)
+            )
+
+            // then
+            let requestedParams = try #require(self.stubRemote.didRequestedParams)
+            #expect(requestedParams["attendees"] == nil)
+        }
+    }
+
     @Test func repository_updateEvent_whenResponseIsSeriesMaster_doesNotCacheAsInstanceDetail() async throws {
         try await self.runTestWithOpenClose("test_google_event_update_4") {
             // given — "전체 일정" 저장은 시리즈 마스터(recurringEventId 없음 + recurrence 있음)를 돌려준다
