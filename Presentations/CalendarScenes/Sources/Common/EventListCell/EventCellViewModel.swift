@@ -443,6 +443,7 @@ public struct AppleCalendarEventCellViewModel: EventCellViewModel {
     public let isRepeating: Bool
     public var isForemost: Bool = false
     public let calendarId: String
+    public let isWritable: Bool
     public var isAlldayEvent: Bool = false
 
     public init?(
@@ -460,13 +461,20 @@ public struct AppleCalendarEventCellViewModel: EventCellViewModel {
         self.periodText = EventPeriodText(schedule: time, in: todayRange, timeZone: timeZone, is24hourForm: is24hourForm)
         self.periodDescription = event.eventTime?.durationText(timeZone, forceShowEventDateDurationText: forceShowEventDateDurationText)
         self.calendarId = event.calendarId
+        self.isWritable = event.isWritable
         self.isAlldayEvent = event.eventTime?.isAllDay ?? false
     }
 
-    public var moreActions: EventListMoreActionModel? { nil }
+    public var moreActions: EventListMoreActionModel? {
+        guard self.isWritable else { return nil }
+        let removeActions: [EventListMoreAction] = self.isRepeating
+            ? [.remove(scope: .onlyThisTime), .remove(scope: .thisAndFuture)]
+            : [.remove(scope: .all)]
+        return .init(basicActions: [], removeActions: removeActions)
+    }
 
     public var customCompareKey: String {
-        return self.makeCustomCompareKey([self.calendarId])
+        return self.makeCustomCompareKey([self.calendarId, "\(self.isWritable)"])
     }
 }
 
@@ -479,10 +487,12 @@ public struct GoogleCalendarEventCellViewModel: EventCellViewModel {
     public let name: String
     public var periodText: EventPeriodText?
     public var periodDescription: String?
-    public let isRepeating: Bool = false
+    public let isRepeating: Bool
     public var isForemost: Bool = false
     public let calendarId: String
     public let accountId: String
+    public let recurringEventId: String?
+    public let isWritable: Bool
     public var isAlldayEvent: Bool = false
 
     public init?(
@@ -498,16 +508,27 @@ public struct GoogleCalendarEventCellViewModel: EventCellViewModel {
         self.name = event.name
         self.periodText = EventPeriodText(schedule: time, in: todayRange, timeZone: timeZone, is24hourForm: is24hourForm)
         self.periodDescription = event.eventTime?.durationText(timeZone, forceShowEventDateDurationText: forceShowEventDateDurationText)
+        self.isRepeating = event.isRepeating
         self.isForemost = event.isForemost
         self.calendarId = event.calendarId
         self.accountId = event.accountId
+        self.recurringEventId = event.recurringEventId
+        self.isWritable = event.isWritable
         self.isAlldayEvent = event.eventTime?.isAllDay ?? false
     }
 
-    public var moreActions: EventListMoreActionModel? { nil }
+    public var moreActions: EventListMoreActionModel? {
+        guard self.isWritable else { return nil }
+        let removeActions: [EventListMoreAction] = self.isRepeating
+            ? [.remove(scope: .onlyThisTime), .remove(scope: .all)]
+            : [.remove(scope: .all)]
+        return .init(basicActions: [], removeActions: removeActions)
+    }
 
     public var customCompareKey: String {
-        return self.makeCustomCompareKey([self.calendarId, self.accountId])
+        return self.makeCustomCompareKey([
+            self.calendarId, self.accountId, self.recurringEventId, "\(self.isWritable)"
+        ])
     }
 }
 

@@ -30,14 +30,30 @@ class EventCellViewModelTests {
             |> \.eventTimeRawValue .~ rawTime
     }
 
-    private func makeGoogleCell(accountId: String) -> GoogleCalendarEventCellViewModel? {
+    private func makeGoogleCell(
+        accountId: String = "account",
+        recurringEventId: String? = nil,
+        isWritable: Bool = false
+    ) -> GoogleCalendarEventCellViewModel? {
         let raw = GoogleCalendar.Event(
             "google", "calendar",
             accountId: accountId, name: "name", colorId: "color",
             time: .at(100)
         )
-        let event = GoogleCalendarEvent(raw, in: self.timeZone)
+        |> \.recurringEventId .~ recurringEventId
+        let event = GoogleCalendarEvent(raw, in: self.timeZone, isWritable: isWritable)
         return GoogleCalendarEventCellViewModel(
+            event, in: self.todayRange, self.timeZone, true
+        )
+    }
+
+    private func makeAppleCell(isWritable: Bool) -> AppleCalendarEventCellViewModel? {
+        let raw = AppleCalendar.Event(
+            eventId: "apple", originalEventId: "apple", calendarId: "calendar",
+            name: "name", eventTime: .at(100)
+        )
+        let event = AppleCalendarEvent(raw, in: self.timeZone, isWritable: isWritable)
+        return AppleCalendarEventCellViewModel(
             event, in: self.todayRange, self.timeZone, true
         )
     }
@@ -86,6 +102,36 @@ extension EventCellViewModelTests {
 
         // when + then
         #expect(cell?.customCompareKey != accountChangedCell?.customCompareKey)
+    }
+
+    @Test("google 셀은 둘 다 반복 이벤트라도 시리즈 마스터 id가 다르면 compare key가 달라진다")
+    func googleCell_compareKeyIsDifferent_whenRecurringEventIdChanged() {
+        // given
+        let cell = self.makeGoogleCell(recurringEventId: "master-1")
+        let recurringEventIdChangedCell = self.makeGoogleCell(recurringEventId: "master-2")
+
+        // when + then
+        #expect(cell?.customCompareKey != recurringEventIdChangedCell?.customCompareKey)
+    }
+
+    @Test("google 셀은 표시에 안 쓰이는 isWritable이 달라져도 compare key가 달라진다")
+    func googleCell_compareKeyIsDifferent_whenIsWritableChanged() {
+        // given
+        let cell = self.makeGoogleCell(isWritable: false)
+        let writableChangedCell = self.makeGoogleCell(isWritable: true)
+
+        // when + then
+        #expect(cell?.customCompareKey != writableChangedCell?.customCompareKey)
+    }
+
+    @Test("apple 셀은 표시에 안 쓰이는 isWritable이 달라져도 compare key가 달라진다")
+    func appleCell_compareKeyIsDifferent_whenIsWritableChanged() {
+        // given
+        let cell = self.makeAppleCell(isWritable: false)
+        let writableChangedCell = self.makeAppleCell(isWritable: true)
+
+        // when + then
+        #expect(cell?.customCompareKey != writableChangedCell?.customCompareKey)
     }
 }
 
