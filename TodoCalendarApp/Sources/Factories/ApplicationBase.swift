@@ -273,7 +273,7 @@ struct DeviceInfoFetchServiceImple: DeviceInfoFetchService {
 
 // MARK: - dummy
 
-class DummyFirebaseAuthService: FirebaseAuthService {
+private class DummyFirebaseAuthService: FirebaseAuthService {
     
     func setup() throws { }
     

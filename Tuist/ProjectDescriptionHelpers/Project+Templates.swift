@@ -277,6 +277,7 @@ extension Project {
             ]),
             sources: [
                 "Sources/**",
+                "AppExtensions/Base/**",
                 .glob("Intents/TodoCalendarWidgetIntents.intentdefinition", codeGen: .public)
             ],
             resources: ["Resources/**"],

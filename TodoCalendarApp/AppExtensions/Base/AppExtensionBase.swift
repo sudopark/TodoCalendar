@@ -68,7 +68,10 @@ final class AppExtensionBase {
         if AppEnvironment.isTestBuild {
             return DummyFirebaseAuthService()
         } else {
-            FirebaseApp.configure()
+            // 앱 프로세스에서는 AppDelegate가 먼저 configure 한다 — 두 번 부르면 예외가 난다.
+            if FirebaseApp.app() == nil {
+                FirebaseApp.configure()
+            }
             let service = FirebaseAuthServiceImple(
                 appGroupId: AppEnvironment.groupID,
                 useEmulator: AppEnvironment.useEmulator
@@ -129,7 +132,7 @@ final class AppExtensionBase {
 
 // MARK: - dummy
 
-class DummyFirebaseAuthService: FirebaseAuthService {
+private class DummyFirebaseAuthService: FirebaseAuthService {
     
     func setup() throws {
         
