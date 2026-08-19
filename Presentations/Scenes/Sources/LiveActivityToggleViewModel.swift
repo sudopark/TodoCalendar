@@ -53,6 +53,9 @@ public final class LiveActivityToggleViewModelImple: LiveActivityToggleViewModel
 
             do {
                 try await self.eventLiveActivityUsecase.startActivity(target)
+                self.router?.showToast(
+                    "calendar::event::more_action:live_activity:register:success".localized()
+                )
             } catch {
                 self.router?.showLiveActivityUnavailable(error)
             }
