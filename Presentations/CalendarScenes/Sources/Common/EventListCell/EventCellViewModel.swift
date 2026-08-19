@@ -139,9 +139,15 @@ public enum EventPeriodText: Equatable, Sendable {
 
 // MARK: - EventEditAction
 
+public enum EventListRemoveScope: Sendable, Equatable {
+    case onlyThisTime
+    case thisAndFuture
+    case all
+}
+
 public enum EventListMoreAction: Sendable, Equatable {
-    
-    case remove(onlyThisTime: Bool)
+
+    case remove(scope: EventListRemoveScope)
     case toggleTo(isForemost: Bool)
     case skipTodo
     case edit
@@ -247,8 +253,8 @@ public struct TodoEventCellViewModel: EventCellViewModel {
     
     public var moreActions: EventListMoreActionModel? {
         let removeActions: [EventListMoreAction] = self.isRepeating
-            ? [.remove(onlyThisTime: true), .remove(onlyThisTime: false)]
-            : [.remove(onlyThisTime: false)]
+            ? [.remove(scope: .onlyThisTime), .remove(scope: .all)]
+            : [.remove(scope: .all)]
         let skipActions: [EventListMoreAction] = self.isRepeating
             ? [.skipTodo] : []
         let basicActions: [EventListMoreAction] = [.toggleTo(isForemost: self.isForemost)] + skipActions + [.edit, .copy]
@@ -342,8 +348,8 @@ public struct ScheduleEventCellViewModel: EventCellViewModel {
     
     public var moreActions: EventListMoreActionModel? {
         let removeActions: [EventListMoreAction] = self.isRepeating
-            ? [.remove(onlyThisTime: true), .remove(onlyThisTime: false)]
-            : [.remove(onlyThisTime: false)]
+            ? [.remove(scope: .onlyThisTime), .remove(scope: .all)]
+            : [.remove(scope: .all)]
         return .init(
             basicActions: [.toggleTo(isForemost: self.isForemost), .edit, .copy],
             removeActions: removeActions

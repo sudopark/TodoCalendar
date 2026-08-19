@@ -535,25 +535,25 @@ extension DayEventListViewModelImpleTests {
             todoNotRepeating.moreActions,
             .init(
                 basicActions: [.toggleTo(isForemost: false), .edit, .copy],
-                removeActions: [.remove(onlyThisTime: false)]
+                removeActions: [.remove(scope: .all)]
             )
         )
         XCTAssertEqual(
             todoWithRepeating.moreActions,
             .init(
                 basicActions: [.toggleTo(isForemost: false), .skipTodo, .edit, .copy],
-                removeActions: [.remove(onlyThisTime: true), .remove(onlyThisTime: false)]
+                removeActions: [.remove(scope: .onlyThisTime), .remove(scope: .all)]
             )
         )
         XCTAssertEqual(
             todoAsForemost.moreActions,
             .init(
                 basicActions: [.toggleTo(isForemost: true), .edit, .copy],
-                removeActions: [.remove(onlyThisTime: false)]
+                removeActions: [.remove(scope: .all)]
             )
         )
     }
-    
+
     func testScheduleEventCellViewModel_provideMoreAction() {
         // given
         let kst = TimeZone(abbreviation: "KST")!
@@ -570,15 +570,15 @@ extension DayEventListViewModelImpleTests {
         // then
         XCTAssertEqual(repeating?.moreActions, .init(
             basicActions: [.toggleTo(isForemost: false), .edit, .copy],
-            removeActions: [.remove(onlyThisTime: true), .remove(onlyThisTime: false)]
+            removeActions: [.remove(scope: .onlyThisTime), .remove(scope: .all)]
         ))
         XCTAssertEqual(notRepeating?.moreActions, .init(
             basicActions: [.toggleTo(isForemost: false), .edit, .copy],
-            removeActions: [.remove(onlyThisTime: false)]
+            removeActions: [.remove(scope: .all)]
         ))
         XCTAssertEqual(foremostEvent?.moreActions, .init(
             basicActions: [.toggleTo(isForemost: true), .edit, .copy],
-            removeActions: [.remove(onlyThisTime: false)]
+            removeActions: [.remove(scope: .all)]
         ))
     }
     
@@ -810,10 +810,10 @@ extension DayEventListViewModelImpleTests {
         let removeActionsPerEmit = cvmLists.map { cvms in
             cvms.first(where: { $0.eventIdentifier == "not-repeating-schedule" })?.moreActions?.removeActions
         }
-        XCTAssertEqual(removeActionsPerEmit.first, [.remove(onlyThisTime: false)])
+        XCTAssertEqual(removeActionsPerEmit.first, [.remove(scope: .all)])
         XCTAssertEqual(
             removeActionsPerEmit.last,
-            [.remove(onlyThisTime: true), .remove(onlyThisTime: false)]
+            [.remove(scope: .onlyThisTime), .remove(scope: .all)]
         )
     }
 }

@@ -125,8 +125,8 @@ extension EventListCellEventHanleViewModelImple {
     ) {
         
         switch action {
-        case .remove(let onlyThisTime):
-            self.removeEvent(cellViewModel, onlyThisTime)
+        case .remove(let scope):
+            self.removeEvent(cellViewModel, scope)
             
         case .toggleTo(let isForemost):
             self.toggleForemostEvent(cellViewModel, isForemost)
@@ -145,27 +145,42 @@ extension EventListCellEventHanleViewModelImple {
 
     private func removeEvent(
         _ cellViewModel: any EventCellViewModel,
-        _ onlyThisTime: Bool
+        _ scope: EventListRemoveScope
     ) {
 
         let title = R.String.calendarEventMoreActionRemoveTitle
-        let message = onlyThisTime
-            ? R.String.calendarEventMoreActionRemoveOnlyThistimeMessage
-            : R.String.calendarEventMoreActionRemoveMessage
+        let message = self.removeConfirmMessage(scope)
         self.runMoreActionAfterConfirm(title, message) { [weak self] in
             guard let self = self else { return }
             Task { [weak self] in
                 do {
                     switch cellViewModel {
                     case let todo as TodoEventCellViewModel:
-                        try await self?.todoEventUsecase.removeTodo(
-                            todo.eventIdentifier, onlyThisTime: onlyThisTime
-                        )
+                        switch scope {
+                        case .onlyThisTime:
+                            try await self?.todoEventUsecase.removeTodo(
+                                todo.eventIdentifier, onlyThisTime: true
+                            )
+                        case .all:
+                            try await self?.todoEventUsecase.removeTodo(
+                                todo.eventIdentifier, onlyThisTime: false
+                            )
+                        case .thisAndFuture:
+                            break
+                        }
                     case let schedule as ScheduleEventCellViewModel:
-                        let time = onlyThisTime ? schedule.eventTimeRawValue : nil
-                        try await self?.scheduleEventUsecase.removeScheduleEvent(
-                            schedule.eventIdWithoutTurn, onlyThisTime: time
-                        )
+                        switch scope {
+                        case .onlyThisTime:
+                            try await self?.scheduleEventUsecase.removeScheduleEvent(
+                                schedule.eventIdWithoutTurn, onlyThisTime: schedule.eventTimeRawValue
+                            )
+                        case .all:
+                            try await self?.scheduleEventUsecase.removeScheduleEvent(
+                                schedule.eventIdWithoutTurn, onlyThisTime: nil
+                            )
+                        case .thisAndFuture:
+                            break
+                        }
                     default: break
                     }
                 } catch {
@@ -173,6 +188,17 @@ extension EventListCellEventHanleViewModelImple {
                 }
             }
             .store(in: &self.cancellables)
+        }
+    }
+
+    private func removeConfirmMessage(_ scope: EventListRemoveScope) -> String {
+        switch scope {
+        case .onlyThisTime:
+            return R.String.calendarEventMoreActionRemoveOnlyThistimeMessage
+        case .thisAndFuture:
+            return "calendar::event::more_action::remove_this_and_future:message".localized()
+        case .all:
+            return R.String.calendarEventMoreActionRemoveMessage
         }
     }
     
