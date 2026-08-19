@@ -126,11 +126,13 @@
 "calendar::event::more_action::foremost_event:title" = "Foremost event";
 "calendar::event::more_action::remove_only_thistime:message" = "Do you want to delete only this event from all repeating events?";
 "calendar::event::more_action::remove:message" = "Do you want to remove this event?";
+"calendar::event::more_action::remove_this_and_future:message" = "Do you want to delete this and all future events in the repeating series?";
 "calendar::event::more_action::mark_as_foremost" = "Do you want to mark this event as your most important event?";
 "calendar::event::more_action::unmark_as_foremost" = "Do you want to unmark this event as your most important event?";
 "calendar::event::more_action::mark_as_foremost::unavail" = "A repeating schedule event cannot be marked as the most important event.";
 "calendar::event::more_action:remove_only_thistime:item_name" = "Remove only this event";
 "calendar::event::more_action:remove:item_name" = "Remove event";
+"calendar::event::more_action:remove_this_and_future:item_name" = "Remove this and all future events";
 "calendar::event::more_action:foremost:mark:item_name" = "Mark as foremost";
 "calendar::event::more_action:foremost:unmark:item_name" = "Unmark as foremost";
 "calendar::event::more_action:dday_candidate:register:item_name" = "Add to D-day widget";

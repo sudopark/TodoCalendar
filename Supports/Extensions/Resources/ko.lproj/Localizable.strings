@@ -126,11 +126,13 @@
 "calendar::event::more_action::foremost_event:title" = "제일 중요한 이벤트";
 "calendar::event::more_action::remove_only_thistime:message" = "전체 반복 이벤트 중 이번 이벤트만을 삭제하기 원합니까?";
 "calendar::event::more_action::remove:message" = "이벤트를 삭제하시겠습니까?";
+"calendar::event::more_action::remove_this_and_future:message" = "이번 및 향후 반복 이벤트를 모두 삭제하시겠습니까?";
 "calendar::event::more_action::mark_as_foremost" = "제일 중요한 이벤트로 등록할까요?";
 "calendar::event::more_action::unmark_as_foremost" = "제일 중요한 이벤트를 해제할까요?";
 "calendar::event::more_action::mark_as_foremost::unavail" = "반복되는 일정 이벤트는 가장 중요한 이벤트로 등록할 수 없습니다.";
 "calendar::event::more_action:remove_only_thistime:item_name" = "이번만 삭제";
 "calendar::event::more_action:remove:item_name" = "이벤트 삭제";
+"calendar::event::more_action:remove_this_and_future:item_name" = "이번 및 향후 이벤트 삭제";
 "calendar::event::more_action:foremost:mark:item_name" = "제일 중요 이벤트 등록";
 "calendar::event::more_action:foremost:unmark:item_name" = "제일 중요 이벤트 해제";
 "calendar::event::more_action:dday_candidate:register:item_name" = "D-day 위젯 후보로 추가";
