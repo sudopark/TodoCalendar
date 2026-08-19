@@ -45,17 +45,26 @@ final class EventListCellEventHanleViewModelImple: EventListCellEventHanleViewMo
     private let todoEventUsecase: any TodoEventUsecase
     private let scheduleEventUsecase: any ScheduleEventUsecase
     private let foremostEventUsecase: any ForemostEventUsecase
+    private let googleCalendarUsecase: any GoogleCalendarUsecase
+    private let appleCalendarUsecase: any AppleCalendarUsecase
+    private let externalCalendarIntegrationUsecase: any ExternalCalendarIntegrationUsecase
 
     var router: (any EventListCellEventHanleRouting)?
 
     init(
         todoEventUsecase: any TodoEventUsecase,
         scheduleEventUsecase: any ScheduleEventUsecase,
-        foremostEventUsecase: any ForemostEventUsecase
+        foremostEventUsecase: any ForemostEventUsecase,
+        googleCalendarUsecase: any GoogleCalendarUsecase,
+        appleCalendarUsecase: any AppleCalendarUsecase,
+        externalCalendarIntegrationUsecase: any ExternalCalendarIntegrationUsecase
     ) {
         self.todoEventUsecase = todoEventUsecase
         self.scheduleEventUsecase = scheduleEventUsecase
         self.foremostEventUsecase = foremostEventUsecase
+        self.googleCalendarUsecase = googleCalendarUsecase
+        self.appleCalendarUsecase = appleCalendarUsecase
+        self.externalCalendarIntegrationUsecase = externalCalendarIntegrationUsecase
     }
     
     private struct Subject {
@@ -147,47 +156,152 @@ extension EventListCellEventHanleViewModelImple {
         _ cellViewModel: any EventCellViewModel,
         _ scope: EventListRemoveScope
     ) {
+        guard let google = cellViewModel as? GoogleCalendarEventCellViewModel else {
+            self.confirmAndRemoveEvent(cellViewModel, scope)
+            return
+        }
+        self.googleCalendarUsecase
+            .eventWritePermission(accountId: google.accountId, calendarId: google.calendarId)
+            .first()
+            .sink { [weak self] permission in
+                switch permission {
+                case .writable:
+                    self?.confirmAndRemoveEvent(google, scope)
+                case .needReauthentication:
+                    self?.confirmReauthenticateThenRemove(google, scope)
+                case .readOnlyCalendar:
+                    break
+                }
+            }
+            .store(in: &self.cancellables)
+    }
 
+    private func confirmReauthenticateThenRemove(
+        _ google: GoogleCalendarEventCellViewModel,
+        _ scope: EventListRemoveScope
+    ) {
+        let info = ConfirmDialogInfo()
+            |> \.title .~ pure("eventDetail::gogoleEvent::reauthenticate::title".localized())
+            |> \.message .~ pure("eventDetail::gogoleEvent::reauthenticate::message".localized())
+            |> \.confirmed .~ pure({ [weak self] in self?.reauthenticateThenRemove(google, scope) })
+            |> \.withCancel .~ true
+        self.router?.showConfirm(dialog: info)
+    }
+
+    private func reauthenticateThenRemove(
+        _ google: GoogleCalendarEventCellViewModel,
+        _ scope: EventListRemoveScope
+    ) {
+        let service = self.googleCalendarUsecase.googleService
+        let accountId = google.accountId
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                _ = try await self.externalCalendarIntegrationUsecase.reauthenticate(
+                    external: service, accountId: accountId
+                )
+                self.confirmAndRemoveEvent(google, scope)
+            } catch {
+                self.router?.showError(error)
+            }
+        }
+        .store(in: &self.cancellables)
+    }
+
+    private func confirmAndRemoveEvent(
+        _ cellViewModel: any EventCellViewModel,
+        _ scope: EventListRemoveScope
+    ) {
         let title = R.String.calendarEventMoreActionRemoveTitle
         let message = self.removeConfirmMessage(scope)
         self.runMoreActionAfterConfirm(title, message) { [weak self] in
             guard let self = self else { return }
             Task { [weak self] in
                 do {
-                    switch cellViewModel {
-                    case let todo as TodoEventCellViewModel:
-                        switch scope {
-                        case .onlyThisTime:
-                            try await self?.todoEventUsecase.removeTodo(
-                                todo.eventIdentifier, onlyThisTime: true
-                            )
-                        case .all:
-                            try await self?.todoEventUsecase.removeTodo(
-                                todo.eventIdentifier, onlyThisTime: false
-                            )
-                        case .thisAndFuture:
-                            break
-                        }
-                    case let schedule as ScheduleEventCellViewModel:
-                        switch scope {
-                        case .onlyThisTime:
-                            try await self?.scheduleEventUsecase.removeScheduleEvent(
-                                schedule.eventIdWithoutTurn, onlyThisTime: schedule.eventTimeRawValue
-                            )
-                        case .all:
-                            try await self?.scheduleEventUsecase.removeScheduleEvent(
-                                schedule.eventIdWithoutTurn, onlyThisTime: nil
-                            )
-                        case .thisAndFuture:
-                            break
-                        }
-                    default: break
-                    }
+                    try await self?.executeRemove(cellViewModel, scope)
                 } catch {
                     self?.router?.showError(error)
                 }
             }
             .store(in: &self.cancellables)
+        }
+    }
+
+    private func executeRemove(
+        _ cellViewModel: any EventCellViewModel,
+        _ scope: EventListRemoveScope
+    ) async throws {
+        switch cellViewModel {
+        case let todo as TodoEventCellViewModel:
+            switch scope {
+            case .onlyThisTime:
+                try await self.todoEventUsecase.removeTodo(
+                    todo.eventIdentifier, onlyThisTime: true
+                )
+            case .all:
+                try await self.todoEventUsecase.removeTodo(
+                    todo.eventIdentifier, onlyThisTime: false
+                )
+            case .thisAndFuture:
+                break
+            }
+        case let schedule as ScheduleEventCellViewModel:
+            switch scope {
+            case .onlyThisTime:
+                try await self.scheduleEventUsecase.removeScheduleEvent(
+                    schedule.eventIdWithoutTurn, onlyThisTime: schedule.eventTimeRawValue
+                )
+            case .all:
+                try await self.scheduleEventUsecase.removeScheduleEvent(
+                    schedule.eventIdWithoutTurn, onlyThisTime: nil
+                )
+            case .thisAndFuture:
+                break
+            }
+        case let google as GoogleCalendarEventCellViewModel:
+            try await self.removeGoogleEvent(google, scope)
+        case let apple as AppleCalendarEventCellViewModel:
+            try await self.removeAppleEvent(apple, scope)
+        default: break
+        }
+    }
+
+    private func removeGoogleEvent(
+        _ google: GoogleCalendarEventCellViewModel,
+        _ scope: EventListRemoveScope
+    ) async throws {
+        switch scope {
+        case .onlyThisTime:
+            try await self.googleCalendarUsecase.removeEvent(
+                google.calendarId, google.eventIdentifier, accountId: google.accountId, scope: .thisEventOnly
+            )
+        case .all:
+            // 셀의 eventIdentifier 는 펼쳐진 인스턴스 id — 시리즈를 지우려면 마스터 id 가 필요하다
+            if let masterId = google.recurringEventId {
+                try await self.googleCalendarUsecase.removeEvent(
+                    google.calendarId, masterId, accountId: google.accountId, scope: .allEvents
+                )
+            } else {
+                try await self.googleCalendarUsecase.removeEvent(
+                    google.calendarId, google.eventIdentifier, accountId: google.accountId, scope: .thisEventOnly
+                )
+            }
+        case .thisAndFuture:
+            break
+        }
+    }
+
+    private func removeAppleEvent(
+        _ apple: AppleCalendarEventCellViewModel,
+        _ scope: EventListRemoveScope
+    ) async throws {
+        switch scope {
+        case .onlyThisTime:
+            try await self.appleCalendarUsecase.removeEvent(apple.eventIdentifier, scope: .thisEventOnly)
+        case .thisAndFuture:
+            try await self.appleCalendarUsecase.removeEvent(apple.eventIdentifier, scope: .thisAndFuture)
+        case .all:
+            try await self.appleCalendarUsecase.removeEvent(apple.eventIdentifier, scope: .thisEventOnly)
         }
     }
 

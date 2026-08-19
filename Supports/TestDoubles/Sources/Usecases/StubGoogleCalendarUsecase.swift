@@ -89,6 +89,8 @@ open class StubGoogleCalendarUsecase: GoogleCalendarUsecase, @unchecked Sendable
         return Just(self.stubWritePermission).eraseToAnyPublisher()
     }
 
+    public var shouldFailWrite: Bool = false
+
     public var didUpdateEventWith: (calendarId: String, eventId: String, accountId: String, params: GoogleCalendar.EventEditParams)?
     public var stubUpdatedEventOrigin: GoogleCalendar.EventOrigin?
     open func updateEvent(
@@ -99,6 +101,9 @@ open class StubGoogleCalendarUsecase: GoogleCalendarUsecase, @unchecked Sendable
         params: GoogleCalendar.EventEditParams
     ) async throws -> GoogleCalendar.EventOrigin {
         self.didUpdateEventWith = (calendarId, eventId, accountId, params)
+        if shouldFailWrite {
+            throw RuntimeError("failed to update google calendar event")
+        }
         guard let origin = self.stubUpdatedEventOrigin
         else {
             throw RuntimeError("stubUpdatedEventOrigin not set")
@@ -114,5 +119,8 @@ open class StubGoogleCalendarUsecase: GoogleCalendarUsecase, @unchecked Sendable
         scope: GoogleCalendar.EventRemoveScope
     ) async throws {
         self.didRemoveEventWith = (calendarId, eventId, accountId, scope)
+        if shouldFailWrite {
+            throw RuntimeError("failed to remove google calendar event")
+        }
     }
 }
