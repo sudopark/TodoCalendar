@@ -150,6 +150,7 @@ final class AppleCalendarEventDetailViewEventHandler: Observable {
     var remove: () -> Void = { }
     var selectNotEditableField: () -> Void = { }
     var selectRepeatOption: () -> Void = { }
+    var share: () -> Void = { }
 
     func bind(_ viewModel: any AppleCalendarEventDetailViewModel) {
         self.onAppear = viewModel.refresh
@@ -166,6 +167,7 @@ final class AppleCalendarEventDetailViewEventHandler: Observable {
         self.remove = viewModel.remove
         self.selectNotEditableField = viewModel.selectNotEditableField
         self.selectRepeatOption = viewModel.selectRepeatOption
+        self.share = viewModel.share
     }
 }
 
@@ -311,6 +313,16 @@ struct AppleCalendarEventDetailView: View {
                             ? "eventDetail::appleCalendarEvent::editOnCalendar".localized()
                             : "eventDetail::appleCalendarEvent::viewOnCalendar".localized(),
                         systemImage: "arrow.up.forward.square"
+                    )
+                }
+            }
+            Section {
+                Button {
+                    eventHandlers.share()
+                } label: {
+                    Label(
+                        "calendar::event::more_action:share:item_name".localized(),
+                        systemImage: "square.and.arrow.up"
                     )
                 }
             }

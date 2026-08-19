@@ -42,6 +42,7 @@ protocol AppleCalendarEventDetailViewModel: AnyObject, Sendable, AppleCalendarEv
     func remove()
     func selectNotEditableField()
     func selectRepeatOption()
+    func share()
 
     // presenter
     var isEditable: AnyPublisher<Bool, Never> { get }
@@ -435,6 +436,39 @@ extension AppleCalendarEventDetailViewModelImple {
             }
         }
         .store(in: &self.cancellables)
+    }
+}
+
+
+// MARK: - AppleCalendarEventDetailViewModelImple Share
+
+extension AppleCalendarEventDetailViewModelImple {
+
+    func share() {
+        guard let fields = self.subject.fields.value?.current else { return }
+
+        let builder = EventDetailShareTextBuilder()
+        let timeText = fields.time.map(builder.timeText(from:))
+        let tagName = self.subject.calendarTag.value?.name.emptyAsNil()
+
+        self.repeatText
+            .first()
+            .sink { [weak self] repeatText in
+                let model = EventDetailShareModel(
+                    name: fields.name,
+                    isTodo: false,
+                    timeText: timeText,
+                    repeatText: repeatText == R.String.EventDetail.Repeating.notRepeatingTitle ? nil : repeatText,
+                    tagName: tagName,
+                    placeName: fields.location?.emptyAsNil(),
+                    url: fields.url?.emptyAsNil(),
+                    memo: fields.notes?.emptyAsNil()
+                )
+                let text = builder.build(model)
+                guard !text.isEmpty else { return }
+                self?.router?.showShareSheet(text: text)
+            }
+            .store(in: &self.cancellables)
     }
 }
 
