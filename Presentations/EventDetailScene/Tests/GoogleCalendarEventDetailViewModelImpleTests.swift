@@ -44,7 +44,9 @@ final class GoogleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
         updateEventDelayMilliseconds: UInt64 = 0,
         eventDetailFailsFromCallIndex: Int? = nil,
         registeredLiveActivityTarget: LiveActivityTarget? = nil,
-        liveActivityStartError: (any Error)? = nil
+        liveActivityStartError: (any Error)? = nil,
+        respondedOrigin: GoogleCalendar.EventOrigin? = GoogleCalendarEventDetailViewModelImpleTests.defaultRespondedOrigin(),
+        respondEventDelayMilliseconds: UInt64 = 0
     ) -> GoogleCalendarEventDetailViewModelImple {
         let settingUsecase = StubCalendarSettingUsecase()
         settingUsecase.prepare()
@@ -68,6 +70,8 @@ final class GoogleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
         calendarUsecase.stubUpdatedEventOrigin = updatedOrigin
         calendarUsecase.updateEventDelayMilliseconds = updateEventDelayMilliseconds
         calendarUsecase.eventDetailFailsFromCallIndex = eventDetailFailsFromCallIndex
+        calendarUsecase.stubRespondedEventOrigin = respondedOrigin
+        calendarUsecase.respondEventDelayMilliseconds = respondEventDelayMilliseconds
         calendarUsecase.refreshGoogleCalendarEventTags()
         self.lastCalendarUsecase = calendarUsecase
         self.integrationUsecase.shouldFailReauthenticate = shouldFailReauthenticate
@@ -100,6 +104,18 @@ final class GoogleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
             |> \.start .~ start
             |> \.end .~ end
             |> \.location .~ "updated location"
+    }
+
+    private static func defaultRespondedOrigin() -> GoogleCalendar.EventOrigin {
+        let selfAttendee = GoogleCalendar.EventOrigin.Attendee()
+            |> \.id .~ "id:31"
+            |> \.selfValue .~ true
+            |> \.responseStatus .~ "accepted"
+        let otherAttendee = GoogleCalendar.EventOrigin.Attendee()
+            |> \.id .~ "id:2"
+            |> \.responseStatus .~ "declined"
+        return GoogleCalendar.EventOrigin(id: "id", summary: "name")
+            |> \.attendees .~ [selfAttendee, otherAttendee]
     }
 
     private func makeAllDayViewModel(
@@ -1679,6 +1695,282 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
 }
 
 
+// MARK: - 참석 응답 — 내 attendee 마킹
+
+extension GoogleCalendarEventDetailViewModelImpleTests {
+
+    @Test func attendees_marksSelfAttendee() async throws {
+        // given
+        let expect = expectConfirm("attendee 정보 제공 - self 여부·응답상태")
+        let viewModel = self.makeViewModel()
+
+        // when
+        let list = try await self.firstOutput(expect, for: viewModel.attendees) {
+            viewModel.refresh()
+        } ?? nil
+
+        // then
+        let selfAttendee = list?.attendees.first(where: { $0.id == "id:31" })
+        #expect(selfAttendee?.isSelf == true)
+        #expect(selfAttendee?.response == .needsAction)
+        let others = list?.attendees.filter { $0.id != "id:31" }
+        #expect(others?.allSatisfy { $0.isSelf == false } == true)
+    }
+}
+
+
+// MARK: - 참석 응답 — 쓰기 권한 게이팅
+
+extension GoogleCalendarEventDetailViewModelImpleTests {
+
+    @Test func selectAttendanceResponse_whenReadOnlyCalendar_showsNotEditableToast() async throws {
+        // given — 참석자 행은 저장 버튼과 달리 readOnlyCalendar 에서도 항상 렌더되므로 조용히 무시하면 안 되고 토스트가 떠야 한다
+        let viewModel = self.makeViewModel(writePermission: .readOnlyCalendar)
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+
+        // when
+        viewModel.selectAttendanceResponse()
+        try await Task.sleep(for: .milliseconds(10))
+
+        // then
+        #expect(self.spyRouter.didShowActionSheetWith == nil)
+        #expect(self.spyRouter.didShowConfirmWith == nil)
+        #expect(self.lastCalendarUsecase.didRespondToEventWith == nil)
+        #expect(self.spyRouter.didShowToastWithMessage == "eventDetail::gogoleEvent::notEditableField::message".localized())
+    }
+
+    @Test func selectAttendanceResponse_whenNeedReauthentication_confirmsFirst() async throws {
+        // given
+        let viewModel = self.makeViewModel(writePermission: .needReauthentication)
+        self.spyRouter.shouldConfirmNotCancel = true
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+
+        // when
+        viewModel.selectAttendanceResponse()
+        try await Task.sleep(for: .milliseconds(10))
+
+        // then
+        #expect(self.integrationUsecase.didReauthenticateForWriteScopeWith?.accountId == "stub@gmail.com")
+        #expect(self.spyRouter.didShowActionSheetWith != nil)
+    }
+
+    @Test func selectAttendanceResponse_showsActionSheetWithThreeResponses() async throws {
+        // given
+        let viewModel = self.makeViewModel(writePermission: .writable)
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+
+        // when
+        viewModel.selectAttendanceResponse()
+        try await Task.sleep(for: .milliseconds(10))
+
+        // then
+        let actions = self.spyRouter.didShowActionSheetWith?.actions.map { $0.text }
+        #expect(actions == [
+            "eventDetail::gogoleEvent::attendees::response::accepted".localized(),
+            "eventDetail::gogoleEvent::attendees::response::tentative".localized(),
+            "eventDetail::gogoleEvent::attendees::response::declined".localized(),
+            "common.cancel".localized()
+        ])
+    }
+
+    @Test func selectAttendanceResponse_whileResponding_doesNotShowActionSheet() async throws {
+        // given — 응답 요청이 진행 중인 상태를 실제로 만든다(응답 지연 60ms)
+        let viewModel = self.makeViewModel(writePermission: .writable, respondEventDelayMilliseconds: 60)
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+        viewModel.selectAttendanceResponse()
+        try await Task.sleep(for: .milliseconds(10))
+        let acceptedAction = self.spyRouter.didShowActionSheetWith?.actions.first(where: {
+            $0.text == "eventDetail::gogoleEvent::attendees::response::accepted".localized()
+        })
+        acceptedAction?.selected?()
+        try await Task.sleep(for: .milliseconds(10))
+        self.spyRouter.didShowActionSheetWith = nil
+
+        // when — 응답이 아직 진행 중인 시점에 내 행을 다시 탭
+        viewModel.selectAttendanceResponse()
+        try await Task.sleep(for: .milliseconds(10))
+
+        // then — 두 번째 액션시트는 뜨지 않는다
+        #expect(self.spyRouter.didShowActionSheetWith == nil)
+        try await Task.sleep(for: .milliseconds(60))
+    }
+}
+
+
+// MARK: - 참석 응답 — 대상 id·저장 상태와의 독립성
+
+extension GoogleCalendarEventDetailViewModelImpleTests {
+
+    private func selectAcceptedResponse() {
+        self.spyRouter.actionSheetSelectionMocking = { form in
+            form.actions.first(where: {
+                $0.text == "eventDetail::gogoleEvent::attendees::response::accepted".localized()
+            })
+        }
+    }
+
+    @Test func respondAttendance_callsUsecaseWithSeriesMasterId_whenRecurringInstance() async throws {
+        // given
+        let viewModel = self.makeViewModel(recurringEventId: "series_id")
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+        self.selectAcceptedResponse()
+
+        // when
+        viewModel.selectAttendanceResponse()
+        try await Task.sleep(for: .milliseconds(10))
+
+        // then
+        #expect(self.lastCalendarUsecase.didRespondToEventWith?.eventId == "series_id")
+        #expect(self.lastCalendarUsecase.didRespondToEventWith?.responseStatus == .accepted)
+    }
+
+    @Test func respondAttendance_doesNotCloseScene() async throws {
+        // given
+        let viewModel = self.makeViewModel()
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+        self.selectAcceptedResponse()
+
+        // when
+        viewModel.selectAttendanceResponse()
+        try await Task.sleep(for: .milliseconds(10))
+
+        // then
+        #expect(self.spyRouter.didClosed == nil)
+    }
+
+    @Test func respondAttendance_keepsEditingFields() async throws {
+        // given — 응답 성공이 applyLoaded 를 부르면 편집 중이던 입력이 origin 값으로 되돌아간다
+        let viewModel = self.makeViewModel()
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+        viewModel.enter(name: "editing in progress")
+        self.selectAcceptedResponse()
+
+        // when
+        viewModel.selectAttendanceResponse()
+        try await Task.sleep(for: .milliseconds(10))
+
+        // then
+        let hasChanges = try await self.firstOutput(expectConfirm("hasChanges"), for: viewModel.hasChanges)
+        let name = try await self.firstOutput(expectConfirm("eventName"), for: viewModel.eventName)
+        #expect(hasChanges == true)
+        #expect(name == "editing in progress")
+    }
+
+    @Test func respondAttendance_doesNotToggleIsSaving() async throws {
+        // given — 응답 대기 상태가 isSaving 을 재사용하면 저장 버튼 로딩·화면 잠금이 같이 걸린다
+        let viewModel = self.makeViewModel(respondEventDelayMilliseconds: 100)
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+        self.selectAcceptedResponse()
+
+        // when
+        viewModel.selectAttendanceResponse()
+        try await Task.sleep(for: .milliseconds(10))
+
+        // then — 응답 요청이 진행 중인 시점에도 isSaving 은 그대로 false
+        let isSavingWhileResponding = try await self.firstOutput(expectConfirm("isSaving"), for: viewModel.isSaving)
+        #expect(isSavingWhileResponding == false)
+        try await Task.sleep(for: .milliseconds(120))
+    }
+
+    @Test func respondAttendance_togglesRespondingState() async throws {
+        // given
+        let viewModel = self.makeViewModel(respondEventDelayMilliseconds: 60)
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+        self.selectAcceptedResponse()
+
+        // when
+        viewModel.selectAttendanceResponse()
+        try await Task.sleep(for: .milliseconds(10))
+        let respondingDuring = try await self.firstOutput(
+            expectConfirm("responding 중"), for: viewModel.isRespondingAttendance
+        )
+
+        // then
+        #expect(respondingDuring == true)
+        try await Task.sleep(for: .milliseconds(80))
+        let respondingAfter = try await self.firstOutput(
+            expectConfirm("responding 완료"), for: viewModel.isRespondingAttendance
+        )
+        #expect(respondingAfter == false)
+    }
+
+    @Test func respondAttendance_whenFails_showsError() async throws {
+        // given
+        let viewModel = self.makeViewModel(respondedOrigin: nil)
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+        self.selectAcceptedResponse()
+
+        // when
+        viewModel.selectAttendanceResponse()
+        try await Task.sleep(for: .milliseconds(10))
+
+        // then
+        #expect(self.spyRouter.didShowError != nil)
+        let isResponding = try await self.firstOutput(
+            expectConfirm("isRespondingAttendance false"), for: viewModel.isRespondingAttendance
+        )
+        #expect(isResponding == false)
+    }
+
+    @Test func respondAttendance_updatesSelfAttendeeResponse() async throws {
+        // given — fixture 상 초기 self(id:31) 응답은 needsAction(31 % 2 == 1)
+        let viewModel = self.makeViewModel()
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+        self.selectAcceptedResponse()
+
+        // when
+        viewModel.selectAttendanceResponse()
+        try await Task.sleep(for: .milliseconds(10))
+
+        // then — 응답 성공 후 목록의 내 항목 response 가 요청한 값으로 갱신된다
+        let list = try await self.firstOutput(expectConfirm("attendees 갱신"), for: viewModel.attendees) ?? nil
+        let selfAttendee = list?.attendees.first(where: { $0.isSelf })
+        #expect(selfAttendee?.response == .accepted)
+    }
+
+    @Test func respondAttendance_keepsOtherAttendeesInList() async throws {
+        // given
+        let viewModel = self.makeViewModel()
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+        self.selectAcceptedResponse()
+
+        // when
+        viewModel.selectAttendanceResponse()
+        try await Task.sleep(for: .milliseconds(10))
+
+        // then — 내 항목만 갈리고 다른 참석자는 목록에 남는다
+        let list = try await self.firstOutput(expectConfirm("attendees 갱신"), for: viewModel.attendees) ?? nil
+        #expect(list?.attendees.count == 2)
+        let other = list?.attendees.first(where: { !$0.isSelf })
+        #expect(other?.response == .declined)
+    }
+}
+
+
 private final class PrivateStubGoogleCalendarUsecase: StubGoogleCalendarUsecase, @unchecked Sendable {
 
     var additionalStubbing: ((GoogleCalendar.EventOrigin) -> GoogleCalendar.EventOrigin)?
@@ -1765,6 +2057,22 @@ private final class PrivateStubGoogleCalendarUsecase: StubGoogleCalendarUsecase,
         }
         return try await super.updateEvent(
             calendarId, eventId, accountId: accountId, at: timeZone, params: params
+        )
+    }
+
+    var respondEventDelayMilliseconds: UInt64 = 0
+    override func respondToEvent(
+        _ calendarId: String,
+        _ eventId: String,
+        accountId: String,
+        at timeZone: TimeZone,
+        responseStatus: GoogleCalendar.AttendeeResponseStatus
+    ) async throws -> GoogleCalendar.EventOrigin {
+        if self.respondEventDelayMilliseconds > 0 {
+            try await Task.sleep(for: .milliseconds(self.respondEventDelayMilliseconds))
+        }
+        return try await super.respondToEvent(
+            calendarId, eventId, accountId: accountId, at: timeZone, responseStatus: responseStatus
         )
     }
 }

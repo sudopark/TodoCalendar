@@ -313,6 +313,12 @@
 "eventDetail::gogoleEvent::attendee::unknown" = "알수없음";
 "eventDetail::gogoleEvent::attendees" = "참석자 (%d명)";
 "eventDetail::gogoleEvent::attendees::organizer" = "주최자";
+"eventDetail::gogoleEvent::attendees::me" = "나";
+"eventDetail::gogoleEvent::attendees::response::title" = "참석하시나요?";
+"eventDetail::gogoleEvent::attendees::response::accepted" = "예";
+"eventDetail::gogoleEvent::attendees::response::tentative" = "미정";
+"eventDetail::gogoleEvent::attendees::response::declined" = "아니오";
+"eventDetail::gogoleEvent::attendees::response::needsAction" = "응답 없음";
 "eventDetail::gogoleEvent::conference::accessCode" = "액세스 코드";
 "eventDetail::gogoleEvent::conference::meetingCode" = "미팅코드";
 "eventDetail::gogoleEvent::conference::passCode" = "패스코드";
