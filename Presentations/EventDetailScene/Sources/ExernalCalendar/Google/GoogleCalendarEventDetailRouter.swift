@@ -23,6 +23,8 @@ protocol GoogleCalendarEventDetailRouting: Routing, Sendable {
         previousSelected repeating: EventRepeating?,
         listener: (any SelectEventRepeatOptionSceneListener)?
     )
+
+    func showShareSheet(text: String)
 }
 
 // MARK: - Router
