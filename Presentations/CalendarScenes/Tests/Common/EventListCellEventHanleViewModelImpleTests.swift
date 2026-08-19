@@ -195,7 +195,8 @@ extension EventListCellEventHanleViewModelImpleTests {
             _ cellViewModel: TodoEventCellViewModel,
             _ action: EventListMoreAction,
             expectRemovedId: String,
-            and expectOnlyThisTime: Bool
+            and expectOnlyThisTime: Bool,
+            expectConfirmMessage: String
         ) {
             // given
             let expect = expectation(description: description)
@@ -213,22 +214,24 @@ extension EventListCellEventHanleViewModelImpleTests {
             // then
             XCTAssertEqual(recordParams?.0, expectRemovedId)
             XCTAssertEqual(recordParams?.1, expectOnlyThisTime)
-            XCTAssertEqual(self.spyRouter.didShowConfirmWith != nil, true)
+            XCTAssertEqual(self.spyRouter.didShowConfirmWith?.message, expectConfirmMessage)
         }
         // when + then
         let dummy = TodoEventCellViewModel("todo", name: "some")
         parameterizeTest(
             "todo event 삭제",
-            dummy, .remove(onlyThisTime: false),
-            expectRemovedId: "todo", and: false
+            dummy, .remove(scope: .all),
+            expectRemovedId: "todo", and: false,
+            expectConfirmMessage: R.String.calendarEventMoreActionRemoveMessage
         )
         parameterizeTest(
             "반복중인 todo event 이번 회차만 삭제",
-            dummy, .remove(onlyThisTime: true),
-            expectRemovedId: "todo", and: true
+            dummy, .remove(scope: .onlyThisTime),
+            expectRemovedId: "todo", and: true,
+            expectConfirmMessage: R.String.calendarEventMoreActionRemoveOnlyThistimeMessage
         )
     }
-    
+
     func testViewModel_removeScheduleEvent() {
         // given
         func parameterizeTest(
@@ -236,7 +239,8 @@ extension EventListCellEventHanleViewModelImpleTests {
             _ cellViewModel: ScheduleEventCellViewModel,
             _ action: EventListMoreAction,
             expectRemovedId: String,
-            and expectOnlyThisTime: EventTime?
+            and expectOnlyThisTime: EventTime?,
+            expectConfirmMessage: String
         ) {
             // given
             let expect = expectation(description: description)
@@ -254,20 +258,22 @@ extension EventListCellEventHanleViewModelImpleTests {
             // then
             XCTAssertEqual(recordParams?.0, expectRemovedId)
             XCTAssertEqual(recordParams?.1, expectOnlyThisTime)
-            XCTAssertEqual(self.spyRouter.didShowConfirmWith != nil, true)
+            XCTAssertEqual(self.spyRouter.didShowConfirmWith?.message, expectConfirmMessage)
         }
         // when + then
         let dummy = ScheduleEventCellViewModel("schedule", name: "name")
             |> \.eventTimeRawValue .~ .at(100)
         parameterizeTest(
             "schedule event 삭제",
-            dummy, .remove(onlyThisTime: false),
-            expectRemovedId: "schedule", and: nil
+            dummy, .remove(scope: .all),
+            expectRemovedId: "schedule", and: nil,
+            expectConfirmMessage: R.String.calendarEventMoreActionRemoveMessage
         )
         parameterizeTest(
             "반복중인 schedule event 이번 회차만 삭제",
-            dummy, .remove(onlyThisTime: true),
-            expectRemovedId: "schedule", and: .at(100)
+            dummy, .remove(scope: .onlyThisTime),
+            expectRemovedId: "schedule", and: .at(100),
+            expectConfirmMessage: R.String.calendarEventMoreActionRemoveOnlyThistimeMessage
         )
     }
     
