@@ -192,6 +192,7 @@ final class GoogleCalendarEventDetailViewEventHandler: Observable {
     var selectNotEditableField: () -> Void = { }
     var selectRepeatOption: () -> Void = { }
     var startEditDescription: () -> Void = { }
+    var share: () -> Void = { }
 
     func bind(_ viewModel: any GoogleCalendarEventDetailViewModel) {
         onAppear = viewModel.refresh
@@ -213,6 +214,7 @@ final class GoogleCalendarEventDetailViewEventHandler: Observable {
         selectNotEditableField = viewModel.selectNotEditableField
         selectRepeatOption = viewModel.selectRepeatOption
         startEditDescription = viewModel.startEditDescription
+        share = viewModel.share
     }
 }
 
@@ -347,9 +349,7 @@ struct GoogleCalendarEventDetailView: View {
                     )
                     .eventHandler(\.onTap, eventHandlers.save)
                 }
-                if self.state.isEditable || self.state.hasDetailLink {
-                    self.moreActionMenu
-                }
+                self.moreActionMenu
             }
         }
         .padding()
@@ -374,6 +374,16 @@ struct GoogleCalendarEventDetailView: View {
                             systemImage: "arrow.up.forward.square"
                         )
                     }
+                }
+            }
+            Section {
+                Button {
+                    eventHandlers.share()
+                } label: {
+                    Label(
+                        "calendar::event::more_action:share:item_name".localized(),
+                        systemImage: "square.and.arrow.up"
+                    )
                 }
             }
             if state.isEditable {

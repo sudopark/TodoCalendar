@@ -141,6 +141,7 @@ protocol GoogleCalendarEventDetailViewModel: AnyObject, Sendable, GoogleCalendar
     func selectNotEditableField()
     func selectRepeatOption()
     func startEditDescription()
+    func share()
 
     // presenter
     var isEditable: AnyPublisher<Bool, Never> { get }
@@ -660,6 +661,40 @@ extension GoogleCalendarEventDetailViewModelImple {
 }
 
 
+// MARK: - GoogleCalendarEventDetailViewModelImple Share
+
+extension GoogleCalendarEventDetailViewModelImple {
+
+    func share() {
+        guard let fields = self.subject.fields.value?.current else { return }
+
+        let builder = EventDetailShareTextBuilder()
+        let timeText = fields.time.map(builder.timeText(from:))
+        let memoText = fields.memo.asPlainShareText
+        let tagName = self.subject.calendarTag.value?.name.emptyAsNil()
+
+        self.repeatOption
+            .first()
+            .sink { [weak self] repeatText in
+                let model = EventDetailShareModel(
+                    name: fields.name,
+                    isTodo: false,
+                    timeText: timeText,
+                    repeatText: repeatText == R.String.EventDetail.Repeating.notRepeatingTitle ? nil : repeatText,
+                    tagName: tagName,
+                    placeName: fields.location?.emptyAsNil(),
+                    url: nil,
+                    memo: memoText
+                )
+                let text = builder.build(model)
+                guard !text.isEmpty else { return }
+                self?.router?.showShareSheet(text: text)
+            }
+            .store(in: &self.cancellables)
+    }
+}
+
+
 // MARK: - GoogleCalendarEventDetailViewModelImple Presenter
 
 extension GoogleCalendarEventDetailViewModelImple {
@@ -891,6 +926,17 @@ private extension String {
             of: Constant.htmlTagPattern,
             options: [.regularExpression, .caseInsensitive]
         ) != nil
+    }
+}
+
+
+private extension Optional where Wrapped == String {
+
+    var asPlainShareText: String? {
+        guard let memo = self else { return nil }
+        guard memo.hasHTMLTag else { return memo.emptyAsNil() }
+        guard let attributed = memo.asHTMLAttributeText else { return memo.emptyAsNil() }
+        return String(attributed.characters).emptyAsNil()
     }
 }
 
