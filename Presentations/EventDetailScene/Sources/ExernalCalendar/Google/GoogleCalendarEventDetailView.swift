@@ -45,6 +45,7 @@ import CommonPresentation
     var isSavable: Bool = false
     var isSaving: Bool = false
     var liveActivityActionModel: LiveActivityActionModel?
+    var isRespondingAttendance: Bool = false
 
     func bind(_ viewModel: any GoogleCalendarEventDetailViewModel) {
 
@@ -176,6 +177,13 @@ import CommonPresentation
                 self?.liveActivityActionModel = model
             })
             .store(in: self.cancellables)
+
+        viewModel.isRespondingAttendance
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] isResponding in
+                self?.isRespondingAttendance = isResponding
+            })
+            .store(in: self.cancellables)
     }
 }
 
@@ -204,6 +212,7 @@ final class GoogleCalendarEventDetailViewEventHandler: Observable {
     var startEditDescription: () -> Void = { }
     var share: () -> Void = { }
     var toggleLiveActivity: (Bool) -> Void = { _ in }
+    var selectAttendanceResponse: () -> Void = { }
 
     func bind(_ viewModel: any GoogleCalendarEventDetailViewModel) {
         onAppear = viewModel.refresh
@@ -227,6 +236,7 @@ final class GoogleCalendarEventDetailViewEventHandler: Observable {
         startEditDescription = viewModel.startEditDescription
         share = viewModel.share
         toggleLiveActivity = viewModel.toggleLiveActivity(isRegistered:)
+        selectAttendanceResponse = viewModel.selectAttendanceResponse
     }
 }
 
@@ -687,11 +697,29 @@ struct GoogleCalendarEventDetailView: View {
     }
 
     private func attendeeView(_ attendee: AttendeeViewModelModel) -> some View {
+        Group {
+            if attendee.isSelf {
+                self.attendeeRow(attendee)
+                    .onTapGesture {
+                        eventHandlers.selectAttendanceResponse()
+                    }
+            } else {
+                self.attendeeRow(attendee)
+            }
+        }
+    }
+
+    private func attendeeRow(_ attendee: AttendeeViewModelModel) -> some View {
         HStack {
 
-            Image(systemName: attendee.isAccepted ? "checkmark.circle.fill" : "circle")
-                .font(.system(size: 12, weight: .light))
-                .foregroundStyle(self.appearance.colorSet.text1.asColor)
+            if attendee.isSelf, state.isRespondingAttendance {
+                LoadingCircleView(appearance.colorSet.text1.asColor)
+                    .frame(width: 12, height: 12)
+            } else {
+                Image(systemName: attendee.isAccepted ? "checkmark.circle.fill" : "circle")
+                    .font(.system(size: 12, weight: .light))
+                    .foregroundStyle(self.appearance.colorSet.text1.asColor)
+            }
 
             VStack(alignment: .leading) {
                 Text(attendee.name)
@@ -700,6 +728,12 @@ struct GoogleCalendarEventDetailView: View {
 
                 if attendee.isOrganizer {
                     Text("eventDetail::gogoleEvent::attendees::organizer".localized())
+                        .font(appearance.fontSet.subSubNormal.asFont)
+                        .foregroundStyle(appearance.colorSet.text2.asColor)
+                }
+
+                if attendee.isSelf {
+                    Text("\("eventDetail::gogoleEvent::attendees::me".localized()) · \(attendee.responseStatusText)")
                         .font(appearance.fontSet.subSubNormal.asFont)
                         .foregroundStyle(appearance.colorSet.text2.asColor)
                 }
