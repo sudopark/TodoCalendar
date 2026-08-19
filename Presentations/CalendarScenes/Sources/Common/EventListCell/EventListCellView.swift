@@ -97,11 +97,13 @@ struct EventListCellView: View {
                 ForEach(0..<moreActions.basicActions.count, id: \.self) {
                     moreActionsView(moreActions.basicActions[$0])
                 }
-                
-                Divider()
-                
-                ForEach(0..<moreActions.removeActions.count, id: \.self) {
-                    moreActionsView(moreActions.removeActions[$0])
+
+                if !moreActions.removeActions.isEmpty {
+                    Divider()
+
+                    ForEach(0..<moreActions.removeActions.count, id: \.self) {
+                        moreActionsView(moreActions.removeActions[$0])
+                    }
                 }
             }
         }

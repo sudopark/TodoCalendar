@@ -94,6 +94,7 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
     private let uiSettingUsecase: any UISettingUsecase
     private let accountUsecase: any AccountUsecase
     private let aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
+    private let eventLiveActivityUsecase: any EventLiveActivityUsecase
     var router: (any DayEventListRouting)?
     private weak var listener: (any DayEventListSceneListener)?
 
@@ -105,7 +106,8 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
         foremostEventUsecase: any ForemostEventUsecase,
         uiSettingUsecase: any UISettingUsecase,
         accountUsecase: any AccountUsecase,
-        aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
+        aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase,
+        eventLiveActivityUsecase: any EventLiveActivityUsecase
     ) {
         self.calendarUsecase = calendarUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
@@ -115,6 +117,7 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
         self.uiSettingUsecase = uiSettingUsecase
         self.accountUsecase = accountUsecase
         self.aiAgentOrchestrationUsecase = aiAgentOrchestrationUsecase
+        self.eventLiveActivityUsecase = eventLiveActivityUsecase
 
         self.internalBind()
     }
@@ -341,6 +344,11 @@ extension DayEventListViewModelImple {
             default: return nil
             }
         }
+        let applyRegistration: ((any EventCellViewModel)?, LiveActivityTarget?) -> (any EventCellViewModel)?
+        applyRegistration = { cvm, target in
+            cvm?.liveActivityRegistrationApplied(target)
+        }
+
         let foremostModel = Publishers.CombineLatest4(
             self.foremostEventUsecase.foremostEvent,
             self.calendarUsecase.currentDay.removeDuplicates(),
@@ -349,7 +357,8 @@ extension DayEventListViewModelImple {
         )
         .map(asCellViewModel)
 
-        return foremostModel
+        return Publishers.CombineLatest(foremostModel, self.eventLiveActivityUsecase.registeredTarget)
+            .map(applyRegistration)
             .removeDuplicates(by: { $0?.customCompareKey == $1?.customCompareKey })
             .eraseToAnyPublisher()
     }
@@ -364,17 +373,26 @@ extension DayEventListViewModelImple {
                 .filter { !$0.isForemost }
                 .compactMap {
                     TodoEventCellViewModel($0, in: todayRange, timeZone, is24Form, forceShowEventDateDurationText: true)
+                        .map { $0 |> \.isUncompletedTodo .~ true }
                 }
         }
-        return Publishers.CombineLatest4(
+        let applyRegistration: ([TodoEventCellViewModel], LiveActivityTarget?) -> [TodoEventCellViewModel]
+        applyRegistration = { todos, target in
+            todos.compactMap { $0.liveActivityRegistrationApplied(target) as? TodoEventCellViewModel }
+        }
+
+        let todos = Publishers.CombineLatest4(
             self.eventListUsecase.uncompletedTodos(),
             self.calendarUsecase.currentDay,
             self.calendarSettingUsecase.currentTimeZone,
             self.uiSettingUsecase.currentCalendarUISeting.map { $0.is24hourForm }.removeDuplicates()
         )
         .compactMap(asCellViewModels)
-        .removeDuplicates(by: { $0.map { $0.customCompareKey } == $1.map { $0.customCompareKey } })
-        .eraseToAnyPublisher()
+
+        return Publishers.CombineLatest(todos, self.eventLiveActivityUsecase.registeredTarget)
+            .map(applyRegistration)
+            .removeDuplicates(by: { $0.map { $0.customCompareKey } == $1.map { $0.customCompareKey } })
+            .eraseToAnyPublisher()
     }
 
     var selectedDay: AnyPublisher<SelectedDayModel, Never> {
@@ -397,6 +415,10 @@ extension DayEventListViewModelImple {
         combineEvents = { pair, pending in
             return pair.0 + pending + pair.1
         }
+        let applyRegistration: ([any EventCellViewModel], LiveActivityTarget?) -> [any EventCellViewModel]
+        applyRegistration = { cvms, target in
+            cvms.map { $0.liveActivityRegistrationApplied(target) }
+        }
 
         let cells = Publishers.CombineLatest(
             self.currentAndEventCellViewModels.receive(on: self.cvmCombineScheduler),
@@ -404,7 +426,8 @@ extension DayEventListViewModelImple {
         )
         .map(combineEvents)
 
-        return cells
+        return Publishers.CombineLatest(cells, self.eventLiveActivityUsecase.registeredTarget)
+            .map(applyRegistration)
             .removeDuplicates(by: { $0.map { $0.customCompareKey } == $1.map { $0.customCompareKey } })
             .eraseToAnyPublisher()
     }
@@ -471,6 +494,22 @@ extension DayEventListViewModelImple {
 
 
 // MARK: - private helpers
+
+private extension EventCellViewModel {
+
+    func liveActivityRegistrationApplied(_ registered: LiveActivityTarget?) -> any EventCellViewModel {
+        switch self {
+        case let todo as TodoEventCellViewModel:
+            return todo |> \.isLiveActivityRegistered .~ (registered != nil && todo.liveActivityTarget == registered)
+        case let schedule as ScheduleEventCellViewModel:
+            return schedule |> \.isLiveActivityRegistered .~ (registered != nil && schedule.liveActivityTarget == registered)
+        case let holiday as HolidayEventCellViewModel:
+            return holiday |> \.isLiveActivityRegistered .~ (registered != nil && holiday.liveActivityTarget == registered)
+        default:
+            return self
+        }
+    }
+}
 
 private extension EventTime {
 

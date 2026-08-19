@@ -128,4 +128,40 @@ extension EventCellViewModelTests {
         // when + then
         #expect(cell.liveActivityTarget == .holiday(uuid: "holiday", dateString: "2023-02-03"))
     }
+
+    @Test("시간 있는 todo의 moreActions는 라이브액티비티 토글을 담고 등록 여부를 반영한다 — 시간 없으면 안 담는다")
+    func todoCell_moreActionsContainsLiveActivityToggle_whenTimeExists() {
+        // given
+        let cellWithTime = self.makeTodoCell(rawTime: .at(100))
+        let registeredCellWithTime = cellWithTime |> \.isLiveActivityRegistered .~ true
+        let cellWithoutTime = self.makeTodoCell(rawTime: nil)
+
+        // when + then
+        #expect(cellWithTime.moreActions?.basicActions.contains(.toggleLiveActivity(isRegistered: false)) == true)
+        #expect(registeredCellWithTime.moreActions?.basicActions.contains(.toggleLiveActivity(isRegistered: true)) == true)
+        #expect(cellWithoutTime.moreActions?.basicActions.contains(where: { if case .toggleLiveActivity = $0 { return true } else { return false } }) == false)
+    }
+
+    @Test("holiday의 moreActions는 라이브액티비티 토글 하나만 담는다")
+    func holidayCell_moreActionsHasOnlyLiveActivityToggle() {
+        // given
+        let holiday = HolidayCalendarEvent(
+            .init(uuid: "holiday", dateString: "2023-02-03", name: "dummy"), in: self.timeZone
+        )!
+        let cell = HolidayEventCellViewModel(holiday)
+
+        // when + then
+        #expect(cell.moreActions?.basicActions == [.toggleLiveActivity(isRegistered: false)])
+        #expect(cell.moreActions?.removeActions == [])
+    }
+
+    @Test("시간 있는 todo 셀이라도 isUncompletedTodo면 moreActions는 라이브액티비티 토글을 안 담는다")
+    func todoCell_moreActionsExcludesLiveActivityToggle_whenUncompletedTodo() {
+        // given
+        let uncompletedCell = self.makeTodoCell(rawTime: .at(100))
+            |> \.isUncompletedTodo .~ true
+
+        // when + then
+        #expect(uncompletedCell.moreActions?.basicActions.contains(where: { if case .toggleLiveActivity = $0 { return true } else { return false } }) == false)
+    }
 }
