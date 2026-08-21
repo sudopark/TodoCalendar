@@ -136,19 +136,26 @@ extension EventLiveActivityUsecaseImple {
         }
         guard await self.endIfExpired(registration) == false else { return }
 
-        self.subject.registeredTarget.send(registration.target)
-        self.startWatching(registration.target, seedContent: registration.content, seedBaseline: nil)
+        self.restore(registration)
     }
 
+    /// 콜드런치 직후엔 ActivityKit이 `Activity.activities`를 아직 안 채워뒀을 수 있어 복귀마다
+    /// 재조회한다. 이미 등록됐으면 재복원하지 않는다 — 감시 기준선이 리셋된다.
     func handleWillEnterForeground() async {
-        guard self.subject.registeredTarget.value != nil else { return }
-
         guard let registration = await self.controller.currentActivity()
         else {
             self.clearRegistration()
             return
         }
-        _ = await self.endIfExpired(registration)
+        guard await self.endIfExpired(registration) == false else { return }
+        guard self.subject.registeredTarget.value == nil else { return }
+
+        self.restore(registration)
+    }
+
+    private func restore(_ registration: LiveActivityRegistration) {
+        self.subject.registeredTarget.send(registration.target)
+        self.startWatching(registration.target, seedContent: registration.content, seedBaseline: nil)
     }
 
     private func endIfExpired(_ registration: LiveActivityRegistration) async -> Bool {

@@ -16,7 +16,7 @@ import Domain
 
 final class StubLiveActivityController: LiveActivityController, @unchecked Sendable {
 
-    private let stubRestoredRegistration: LiveActivityRegistration?
+    var stubRestoredRegistration: LiveActivityRegistration?
     private let stubStartError: (any Error)?
     /// 실제 ActivityKit이 `end()` 직후 `activityStateUpdates`로 종료를 알리는 것을 흉내낸다 —
     /// 교체 흐름 중 도착하는 stale nil 레이스(F3) 재현용.
