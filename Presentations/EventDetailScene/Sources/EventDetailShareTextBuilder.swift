@@ -12,19 +12,37 @@ import Extensions
 
 enum EventDetailShareTagLine: Equatable {
     case eventTag(String)
-    case externalCalendar(String)
+    case googleCalendar(String)
+    case appleCalendar(String)
+
+    private enum Constant {
+        static let serviceNameSeparator: String = " - "
+    }
 
     var labelKey: String {
         switch self {
         case .eventTag: return "eventTag.title"
-        case .externalCalendar: return "event_detail::share::field::calendar"
+        case .googleCalendar, .appleCalendar: return "event_detail::share::field::calendar"
         }
     }
 
     var name: String {
+        guard let serviceNameKey else { return self.calendarName }
+        return [serviceNameKey.localized(), self.calendarName].joined(separator: Constant.serviceNameSeparator)
+    }
+
+    private var serviceNameKey: String? {
         switch self {
-        case .eventTag(let name): return name
-        case .externalCalendar(let name): return name
+        case .eventTag: return nil
+        case .googleCalendar: return "event_setting::external_calendar::google::serviceName"
+        case .appleCalendar: return "event_setting::external_calendar::apple::serviceName"
+        }
+    }
+
+    private var calendarName: String {
+        switch self {
+        case .eventTag(let name), .googleCalendar(let name), .appleCalendar(let name):
+            return name
         }
     }
 }

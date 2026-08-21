@@ -449,7 +449,7 @@ extension AppleCalendarEventDetailViewModelImple {
 
         let builder = EventDetailShareTextBuilder()
         let timeText = fields.time.map(builder.timeText(from:))
-        let tagLine = self.subject.calendarTag.value?.name.emptyAsNil().map { EventDetailShareTagLine.externalCalendar($0) }
+        let tagLine = self.subject.calendarTag.value?.name.emptyAsNil().map { EventDetailShareTagLine.appleCalendar($0) }
 
         self.repeatText
             .first()
