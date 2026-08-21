@@ -63,9 +63,14 @@ open class StubGoogleCalendarUsecase: GoogleCalendarUsecase, @unchecked Sendable
     }
     
     public var stubDetail: GoogleCalendar.EventOrigin?
+    public var shouldFailEventDetail: Bool = false
     open func eventDetail(
         _ calendarId: String, _ eventId: String, accountId: String, at timeZone: TimeZone
     ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error> {
+        guard self.shouldFailEventDetail == false
+        else {
+            return Fail(error: RuntimeError("failed to load google calendar event")).eraseToAnyPublisher()
+        }
         guard let detail = self.stubDetail
         else {
             return Empty().eraseToAnyPublisher()

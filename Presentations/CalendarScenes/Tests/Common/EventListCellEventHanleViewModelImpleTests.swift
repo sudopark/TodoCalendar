@@ -75,6 +75,11 @@ class EventListCellEventHanleViewModelImpleTests: BaseTestCase, PublisherWaitabl
         stubDetailData: EventDetailData? = nil,
         shouldFailLoadDetail: Bool = false,
         shouldFailTodoEventFetch: Bool = false,
+        stubGoogleEventOrigin: GoogleCalendar.EventOrigin? = nil,
+        shouldFailGoogleEventDetail: Bool = false,
+        stubGoogleCalendarTags: [GoogleCalendar.Tag]? = nil,
+        stubAppleEventOrigin: AppleCalendar.EventOrigin? = nil,
+        stubAppleCalendarTags: [AppleCalendar.Tag]? = nil,
         registeredLiveActivityTarget: LiveActivityTarget? = nil,
         liveActivityStartError: (any Error)? = nil
     ) -> EventListCellEventHanleViewModelImple {
@@ -91,6 +96,13 @@ class EventListCellEventHanleViewModelImpleTests: BaseTestCase, PublisherWaitabl
         self.spyEventDetailDataUsecase.stubDetail = stubDetailData
         self.spyEventDetailDataUsecase.shouldFailLoadDetail = shouldFailLoadDetail
         self.spyTodoUsecase.shouldFailTodoEvent = shouldFailTodoEventFetch
+        self.spyGoogleUsecase.stubDetail = stubGoogleEventOrigin
+        self.spyGoogleUsecase.shouldFailEventDetail = shouldFailGoogleEventDetail
+        self.spyGoogleUsecase.stubCalendarTags = stubGoogleCalendarTags
+        self.spyGoogleUsecase.refreshGoogleCalendarEventTags()
+        self.spyAppleUsecase.stubEventOrigin = stubAppleEventOrigin
+        self.spyAppleUsecase.stubCalendarTags = stubAppleCalendarTags
+        self.spyAppleUsecase.refreshCalendarTags()
         self.stubLiveActivityUsecase = .init(registeredTarget: registeredLiveActivityTarget)
         self.stubLiveActivityUsecase.stubStartError = liveActivityStartError
 
@@ -202,17 +214,6 @@ extension EventListCellEventHanleViewModelImpleTests {
 
 extension EventListCellEventHanleViewModelImpleTests {
 
-    func testGoogleCell_moreActionsIsNil_whenCalendarIsNotWritable() {
-        // given
-        let model = GoogleCalendarEventCellViewModel.dummy(isWritable: false)
-
-        // when
-        let actions = model.moreActions
-
-        // then
-        XCTAssertNil(actions)
-    }
-
     func testGoogleCell_removeActions_whenNotRepeating() {
         // given
         let model = GoogleCalendarEventCellViewModel.dummy(isWritable: true, recurringEventId: nil)
@@ -235,7 +236,7 @@ extension EventListCellEventHanleViewModelImpleTests {
         XCTAssertEqual(actions?.removeActions, [.remove(scope: .onlyThisTime), .remove(scope: .all)])
     }
 
-    func testGoogleCell_basicActionsIsEmpty() {
+    func testGoogleCell_basicActionsIsShareOnly() {
         // given
         let model = GoogleCalendarEventCellViewModel.dummy(isWritable: true)
 
@@ -243,18 +244,7 @@ extension EventListCellEventHanleViewModelImpleTests {
         let actions = model.moreActions
 
         // then
-        XCTAssertEqual(actions?.basicActions, [])
-    }
-
-    func testAppleCell_moreActionsIsNil_whenCalendarIsNotWritable() {
-        // given
-        let model = AppleCalendarEventCellViewModel.dummy(isWritable: false)
-
-        // when
-        let actions = model.moreActions
-
-        // then
-        XCTAssertNil(actions)
+        XCTAssertEqual(actions?.basicActions, [.share])
     }
 
     func testAppleCell_removeActions_whenRepeating() {
@@ -277,6 +267,19 @@ extension EventListCellEventHanleViewModelImpleTests {
 
         // then
         XCTAssertEqual(actions?.removeActions, [.remove(scope: .all)])
+    }
+
+    func testViewModel_readOnlyExternalCalendarCell_moreActionsHasShareOnly() {
+        // given
+        func parameterizeTest(_ actions: EventListMoreActionModel?) {
+            // then
+            XCTAssertNotNil(actions)
+            XCTAssertEqual(actions?.basicActions, [.share])
+            XCTAssertEqual(actions?.removeActions, [])
+        }
+        // when + then
+        parameterizeTest(GoogleCalendarEventCellViewModel.dummy(isWritable: false).moreActions)
+        parameterizeTest(AppleCalendarEventCellViewModel.dummy(isWritable: false).moreActions)
     }
 }
 
@@ -1104,6 +1107,175 @@ extension EventListCellEventHanleViewModelImpleTests {
 
     private func shareFieldLabel(_ key: String) -> String {
         return "event_detail::share::field::\(key)".localized()
+    }
+}
+
+
+// MARK: - 목록 셀 롱탭 공유 — 구글·애플
+
+extension EventListCellEventHanleViewModelImpleTests {
+
+    private func googleEventTime(_ isoText: String) -> GoogleCalendar.EventOrigin.GoogleEventTime {
+        return GoogleCalendar.EventOrigin.GoogleEventTime() |> \.dateTime .~ isoText
+    }
+
+    func testViewModel_whenShareGoogleEvent_showShareSheetWithoutUrlLine() {
+        // given
+        let origin = GoogleCalendar.EventOrigin(id: "google", summary: "구글 회의")
+            |> \.start .~ self.googleEventTime("2026-08-21T10:00:00+09:00")
+            |> \.end .~ self.googleEventTime("2026-08-21T11:00:00+09:00")
+            |> \.htmlLink .~ "https://calendar.google.com/event?eid=xxx"
+            |> \.location .~ "회의실 A"
+        let viewModel = self.makeViewModel(stubGoogleEventOrigin: origin)
+        let cellViewModel = GoogleCalendarEventCellViewModel.dummy(isWritable: true)
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .share)
+
+        // then
+        let text = self.spyRouter.didShareText
+        XCTAssertEqual(text?.contains("구글 회의"), true)
+        XCTAssertEqual(text?.contains(self.shareFieldLabel("url")), false)
+        XCTAssertEqual(text?.contains("https://calendar.google.com"), false)
+    }
+
+    func testViewModel_whenShareGoogleEvent_showShareSheetWithCalendarNameLine() {
+        // given
+        let origin = GoogleCalendar.EventOrigin(id: "google", summary: "구글 회의")
+            |> \.start .~ self.googleEventTime("2026-08-21T10:00:00+09:00")
+            |> \.end .~ self.googleEventTime("2026-08-21T11:00:00+09:00")
+        let tags = [GoogleCalendar.Tag(id: "calendar", name: "업무")]
+        let viewModel = self.makeViewModel(stubGoogleEventOrigin: origin, stubGoogleCalendarTags: tags)
+        let cellViewModel = GoogleCalendarEventCellViewModel.dummy(isWritable: true)
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .share)
+
+        // then
+        let text = self.spyRouter.didShareText
+        let googleServiceName = "event_setting::external_calendar::google::serviceName".localized()
+        XCTAssertEqual(
+            text?.contains("\(self.shareFieldLabel("calendar")): \(googleServiceName) - 업무"), true
+        )
+    }
+
+    func testViewModel_whenShareGoogleEventWithHtmlDescription_shareAsPlainText() {
+        // given
+        let origin = GoogleCalendar.EventOrigin(id: "google", summary: "구글 회의")
+            |> \.start .~ self.googleEventTime("2026-08-21T10:00:00+09:00")
+            |> \.end .~ self.googleEventTime("2026-08-21T11:00:00+09:00")
+            |> \.description .~ "<p>준비물</p><br>노트북"
+        let viewModel = self.makeViewModel(stubGoogleEventOrigin: origin)
+        let cellViewModel = GoogleCalendarEventCellViewModel.dummy(isWritable: true)
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .share)
+
+        // then
+        let text = self.spyRouter.didShareText
+        XCTAssertEqual(text?.contains("<p>"), false)
+        XCTAssertEqual(text?.contains("준비물"), true)
+        XCTAssertEqual(text?.contains("노트북"), true)
+    }
+
+    func testViewModel_whenShareGoogleEventWithRepeatRule_repeatTextIncludesEndOption() {
+        // given
+        let origin = GoogleCalendar.EventOrigin(id: "google", summary: "구글 반복 회의")
+            |> \.start .~ self.googleEventTime("2026-08-21T10:00:00+09:00")
+            |> \.end .~ self.googleEventTime("2026-08-21T11:00:00+09:00")
+            |> \.recurrence .~ ["RRULE:FREQ=DAILY;COUNT=5"]
+        let viewModel = self.makeViewModel(stubGoogleEventOrigin: origin)
+        let cellViewModel = GoogleCalendarEventCellViewModel.dummy(isWritable: true)
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .share)
+
+        // then
+        let text = self.spyRouter.didShareText
+        let everyDayTitle = "eventDetail.repeating.everyDay:title".localized()
+        let endOptionText = "eventDetail.repeating::endoption_times".localized(with: 5)
+        XCTAssertEqual(text?.contains("\(self.shareFieldLabel("repeating")): \(everyDayTitle)"), true)
+        XCTAssertEqual(text?.contains(endOptionText), true)
+    }
+
+    func testViewModel_whenShareGoogleEventFetchFails_showErrorWithoutSharing() {
+        // given
+        let viewModel = self.makeViewModel(shouldFailGoogleEventDetail: true)
+        let cellViewModel = GoogleCalendarEventCellViewModel.dummy(isWritable: true)
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .share)
+
+        // then
+        XCTAssertNotNil(self.spyRouter.didShowError)
+        XCTAssertNil(self.spyRouter.didShareText)
+    }
+
+    func testViewModel_whenShareAppleEvent_showShareSheetWithUrlAndNotes() {
+        // given
+        let origin = AppleCalendar.EventOrigin(
+            eventId: "apple-event", originalEventId: "apple-event",
+            calendarId: "apple-calendar", name: "애플 회의", eventTime: .at(1_700_000_000)
+        )
+        |> \.location .~ "회의실 B"
+        |> \.url .~ "https://example.com/apple"
+        |> \.notes .~ "메모입니다"
+        let tags = [AppleCalendar.Tag(id: "apple-calendar", name: "개인", colorHex: "hex")]
+        let viewModel = self.makeViewModel(stubAppleEventOrigin: origin, stubAppleCalendarTags: tags)
+        let cellViewModel = AppleCalendarEventCellViewModel.dummy(isWritable: true)
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .share)
+
+        // then
+        let text = self.spyRouter.didShareText
+        XCTAssertEqual(text?.contains("애플 회의"), true)
+        XCTAssertEqual(text?.contains("\(self.shareFieldLabel("url")): https://example.com/apple"), true)
+        XCTAssertEqual(text?.contains("\(self.shareFieldLabel("memo")): 메모입니다"), true)
+        XCTAssertEqual(text?.contains("개인"), true)
+    }
+
+    func testViewModel_whenShareAppleEventWithLockedRepeatUntil_reanchorsUTCDayEndToLocalDate() {
+        // given — BYSETPOS 는 앱 옵션으로 왕복 못 시켜 잠금 분기(원본 규칙 폴백)를 탄다
+        let timeZone = TimeZone(abbreviation: "KST")!
+        let rruleText = "RRULE:FREQ=DAILY;UNTIL=20261231T235959Z;BYSETPOS=1"
+        let origin = AppleCalendar.EventOrigin(
+            eventId: "apple-event", originalEventId: "apple-event",
+            calendarId: "apple-calendar", name: "애플 반복 회의", eventTime: .at(1_700_000_000)
+        )
+        |> \.recurrenceRules .~ [rruleText]
+        let viewModel = self.makeViewModel(stubAppleEventOrigin: origin)
+        let cellViewModel = AppleCalendarEventCellViewModel.dummy(isWritable: true)
+
+        let rawRRule = RRuleParser.parse(rruleText)!
+        let reanchoredRRule = rawRRule.reanchoringUTCDayEndUntil(to: timeZone)
+        let dateForm = "date_form.yyyy_MMM_dd".localized()
+        let expectedEndOptionText = "eventDetail.repeating::endoption_until"
+            .localized(with: reanchoredRRule.until!.text(dateForm, timeZone: timeZone))
+        let unreanchoredEndOptionText = "eventDetail.repeating::endoption_until"
+            .localized(with: rawRRule.until!.text(dateForm, timeZone: timeZone))
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .share)
+
+        // then
+        let text = self.spyRouter.didShareText
+        XCTAssertNotEqual(expectedEndOptionText, unreanchoredEndOptionText)
+        XCTAssertEqual(text?.contains(expectedEndOptionText), true)
+        XCTAssertEqual(text?.contains(unreanchoredEndOptionText), false)
+    }
+
+    func testViewModel_whenShareAppleEventOriginIsNil_doesNotShare() {
+        // given
+        let viewModel = self.makeViewModel()
+        let cellViewModel = AppleCalendarEventCellViewModel.dummy(isWritable: true)
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .share)
+
+        // then
+        XCTAssertNil(self.spyRouter.didShareText)
+        XCTAssertNil(self.spyRouter.didShowError)
     }
 }
 

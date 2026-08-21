@@ -98,7 +98,7 @@ struct EventListCellView: View {
                     moreActionsView(moreActions.basicActions[$0])
                 }
 
-                if !moreActions.basicActions.isEmpty {
+                if !moreActions.basicActions.isEmpty && !moreActions.removeActions.isEmpty {
                     Divider()
                 }
 

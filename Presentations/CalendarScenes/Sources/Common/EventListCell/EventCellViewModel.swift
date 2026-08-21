@@ -467,11 +467,12 @@ public struct AppleCalendarEventCellViewModel: EventCellViewModel {
     }
 
     public var moreActions: EventListMoreActionModel? {
-        guard self.isWritable else { return nil }
-        let removeActions: [EventListMoreAction] = self.isRepeating
-            ? [.remove(scope: .onlyThisTime), .remove(scope: .thisAndFuture)]
-            : [.remove(scope: .all)]
-        return .init(basicActions: [], removeActions: removeActions)
+        let removeActions: [EventListMoreAction] = self.isWritable
+            ? (self.isRepeating
+                ? [.remove(scope: .onlyThisTime), .remove(scope: .thisAndFuture)]
+                : [.remove(scope: .all)])
+            : []
+        return .init(basicActions: [.share], removeActions: removeActions)
     }
 
     public var customCompareKey: String {
@@ -519,11 +520,12 @@ public struct GoogleCalendarEventCellViewModel: EventCellViewModel {
     }
 
     public var moreActions: EventListMoreActionModel? {
-        guard self.isWritable else { return nil }
-        let removeActions: [EventListMoreAction] = self.isRepeating
-            ? [.remove(scope: .onlyThisTime), .remove(scope: .all)]
-            : [.remove(scope: .all)]
-        return .init(basicActions: [], removeActions: removeActions)
+        let removeActions: [EventListMoreAction] = self.isWritable
+            ? (self.isRepeating
+                ? [.remove(scope: .onlyThisTime), .remove(scope: .all)]
+                : [.remove(scope: .all)])
+            : []
+        return .init(basicActions: [.share], removeActions: removeActions)
     }
 
     public var customCompareKey: String {
