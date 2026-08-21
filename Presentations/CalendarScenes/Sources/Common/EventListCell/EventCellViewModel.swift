@@ -153,6 +153,7 @@ public enum EventListMoreAction: Sendable, Equatable {
     case skipTodo
     case edit
     case copy
+    case share
 }
 
 public struct EventListMoreActionModel: Sendable, Equatable {
@@ -267,7 +268,7 @@ public struct TodoEventCellViewModel: EventCellViewModel {
             ? [.toggleLiveActivity(isRegistered: self.isLiveActivityRegistered)]
             : []
         let basicActions: [EventListMoreAction] = [.toggleTo(isForemost: self.isForemost)]
-            + liveActivityActions + skipActions + [.edit, .copy]
+            + liveActivityActions + skipActions + [.edit, .copy, .share]
         return .init(
             basicActions: basicActions,
             removeActions: removeActions
@@ -370,7 +371,7 @@ public struct ScheduleEventCellViewModel: EventCellViewModel {
             ? [.toggleLiveActivity(isRegistered: self.isLiveActivityRegistered)]
             : []
         return .init(
-            basicActions: [.toggleTo(isForemost: self.isForemost)] + liveActivityActions + [.edit, .copy],
+            basicActions: [.toggleTo(isForemost: self.isForemost)] + liveActivityActions + [.edit, .copy, .share],
             removeActions: removeActions
         )
     }
