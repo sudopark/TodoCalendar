@@ -35,6 +35,7 @@ description: Use when writing or modifying code in this project — 구현 착�
 시작할 때:
 
 - **베이스 브랜치** — 브랜치 지정 지시가 없으면 최신 develop을 pull(`git pull origin develop`)한 뒤 거기서 `features/` 브랜치를 딴다. 이미 지정된 작업 브랜치에 있으면 유지.
+- **워크트리는 새로 만들지 않는다** — 작업 브랜치는 **베이스 브랜치가 이미 체크아웃된 워크트리**에서 딴다. 워크트리는 유저가 미리 만들어 둔 것만 쓰고, 새로 생성하거나 지금 작업 중인 자리를 다른 워크트리로 옮기지 않는다. 유저가 베이스 브랜치를 지정했다면 그게 체크아웃된 워크트리가 곧 작업 자리다. **superpowers SDD의 Setup(`using-git-worktrees`로 격리 워크스페이스 생성·확인)은 이 조항이 오버라이드한다** — 그 지시를 따르면 유저가 열어둔 작업 자리를 벗어나고, 워크트리마다 빌드 캐시가 갈려 증분 빌드도 깨진다. orchestrate 병렬 모드가 sub-work마다 워크트리를 배정하는 것은 이 금지 대상이 아니다 — 그 배정도 **기존 워크트리 중에서** 고른다.
 - 변경 대상 경로에 걸리는 `.claude/rules/*.md` 조항을 확인하고, 구현 결정 시점에 해당 조항을 적극 invoke한다.
 - child CLAUDE.md가 있는 프레임워크(Domain·Repository·각 Presentation 등)를 수정할 땐 해당 child CLAUDE.md를 확인하고, 수정 후 그 규칙과 어긋남이 없는지 재점검한다.
 - 동종 컴포넌트를 grep해 구조 패턴(상태관리·합성·추상화 수준)을 파악하고 그 패턴을 따른다. 요구사항만 보고 즉흥 구현하지 않는다.
