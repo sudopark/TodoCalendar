@@ -10,12 +10,31 @@ import Foundation
 import Extensions
 
 
+enum EventDetailShareTagLine: Equatable {
+    case eventTag(String)
+    case externalCalendar(String)
+
+    var labelKey: String {
+        switch self {
+        case .eventTag: return "eventTag.title"
+        case .externalCalendar: return "event_detail::share::field::calendar"
+        }
+    }
+
+    var name: String {
+        switch self {
+        case .eventTag(let name): return name
+        case .externalCalendar(let name): return name
+        }
+    }
+}
+
 struct EventDetailShareModel: Equatable {
     let name: String
     var isTodo: Bool = false
     var timeText: String?
     var repeatText: String?
-    var tagName: String?
+    var tagLine: EventDetailShareTagLine?
     var placeName: String?
     var url: String?
     var memo: String?
@@ -25,7 +44,6 @@ struct EventDetailShareTextBuilder {
 
     private enum Constant {
         static let labelSeparator: String = ": "
-        static let tagLabelKey: String = "eventTag.title"
         static let todoTextKey: String = "calendar::event_time::todo"
         static let periodSeparator: String = " ~ "
         static let lineSeparator: String = "\n"
@@ -35,8 +53,10 @@ struct EventDetailShareTextBuilder {
     func build(_ model: EventDetailShareModel) -> String {
         let fields: [(labelKey: String, value: String?)] = [
             ("event_detail::share::field::time", model.timeText),
-            ("event_detail::share::field::repeating", model.repeatText),
-            (Constant.tagLabelKey, model.tagName),
+            ("event_detail::share::field::repeating", model.repeatText)
+        ]
+        + self.tagFields(model.tagLine)
+        + [
             ("event_detail::share::field::place", model.placeName),
             ("event_detail::share::field::url", model.url),
             ("event_detail::share::field::memo", model.memo)
@@ -45,6 +65,11 @@ struct EventDetailShareTextBuilder {
             field.value.map { "\(field.labelKey.localized())\(Constant.labelSeparator)\($0)" }
         }
         return ([self.nameLine(model)] + fieldLines).joined(separator: Constant.lineSeparator)
+    }
+
+    private func tagFields(_ line: EventDetailShareTagLine?) -> [(labelKey: String, value: String?)] {
+        guard let line else { return [] }
+        return [(line.labelKey, line.name)]
     }
 
     private func nameLine(_ model: EventDetailShareModel) -> String {

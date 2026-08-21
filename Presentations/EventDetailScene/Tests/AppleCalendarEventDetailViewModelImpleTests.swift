@@ -1162,7 +1162,7 @@ extension AppleCalendarEventDetailViewModelImpleTests {
         return "event_detail::share::field::\(key)".localized()
     }
 
-    private var shareTagLabel: String { "eventTag.title".localized() }
+    private var shareTagLabel: String { self.shareFieldLabel("calendar") }
 
     @Test func viewModel_whenShare_composeTextWithVisibleFields() async throws {
         // given
