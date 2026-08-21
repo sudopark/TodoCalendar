@@ -16,6 +16,7 @@ import FirebaseAuth
 import Alamofire
 import SQLiteService
 import ExternalServices
+import CommonPresentation
 import AdService
 
 
@@ -178,6 +179,10 @@ final class ApplicationBase {
             testDeviceIdentifiers: AppEnvironment.admobTestDeviceIdentifiers
         )
     }()
+    
+    lazy var fullScreenAdRouter: any FullScreenAdRouter = ApplicationFullScreenAdRouter(
+        adUnitId: AppEnvironment.admobUnitIds.fullScreen
+    )
 }
 
 
