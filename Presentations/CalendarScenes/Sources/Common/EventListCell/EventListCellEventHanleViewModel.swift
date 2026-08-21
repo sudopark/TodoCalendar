@@ -451,6 +451,10 @@ extension EventListCellEventHanleViewModelImple {
             self.shareTodoEvent(todo)
         case let schedule as ScheduleEventCellViewModel:
             self.shareScheduleEvent(schedule)
+        case let google as GoogleCalendarEventCellViewModel:
+            self.shareGoogleEvent(google)
+        case let apple as AppleCalendarEventCellViewModel:
+            self.shareAppleEvent(apple)
         default: return
         }
     }
@@ -520,11 +524,106 @@ extension EventListCellEventHanleViewModelImple {
                 url: detail?.url?.emptyAsNil(),
                 memo: detail?.memo?.emptyAsNil()
             )
-            let text = builder.build(model)
-            guard !text.isEmpty else { return }
-            self?.router?.showShareSheet(text: text)
+            self?.showShareSheetIfNeeded(model, builder)
         }
         .store(in: &self.cancellables)
+    }
+
+    private func shareGoogleEvent(_ cellViewModel: GoogleCalendarEventCellViewModel) {
+        let calendarId = cellViewModel.calendarId
+        let accountId = cellViewModel.accountId
+        let eventId = cellViewModel.eventIdentifier
+        self.calendarSettingUsecase.currentTimeZone
+            .first()
+            .setFailureType(to: (any Error).self)
+            .flatMap { [weak self] timeZone -> AnyPublisher<(GoogleCalendar.EventOrigin, [GoogleCalendar.Tag], TimeZone), any Error> in
+                guard let self else { return Empty().eraseToAnyPublisher() }
+                return Publishers.CombineLatest(
+                    self.googleCalendarUsecase.eventDetail(calendarId, eventId, accountId: accountId, at: timeZone),
+                    self.googleCalendarUsecase.calendarTags.setFailureType(to: (any Error).self)
+                )
+                .map { origin, tags in (origin, tags, timeZone) }
+                .eraseToAnyPublisher()
+            }
+            .first()
+            .sink(receiveCompletion: { [weak self] completion in
+                guard case .failure(let error) = completion else { return }
+                self?.router?.showError(error)
+            }, receiveValue: { [weak self] origin, tags, timeZone in
+                self?.shareGoogleEventText(origin, calendarId: calendarId, tags: tags, timeZone: timeZone)
+            })
+            .store(in: &self.cancellables)
+    }
+
+    private func shareGoogleEventText(
+        _ origin: GoogleCalendar.EventOrigin,
+        calendarId: String,
+        tags: [GoogleCalendar.Tag],
+        timeZone: TimeZone
+    ) {
+        let builder = EventDetailShareTextBuilder()
+        let selectedTime = origin.selectedTime(timeZone)
+        let repeatText = origin.shareRepeatText(timeZone)
+        let tagLine = tags.first(where: { $0.id == calendarId })?.name.emptyAsNil()
+            .map { EventDetailShareTagLine.googleCalendar($0) }
+        let model = EventDetailShareModel(
+            name: origin.summaryText,
+            isTodo: false,
+            timeText: selectedTime.map(builder.timeText(from:)),
+            repeatText: repeatText,
+            tagLine: tagLine,
+            placeName: origin.location?.emptyAsNil(),
+            url: nil,
+            memo: origin.description.asPlainShareText
+        )
+        self.showShareSheetIfNeeded(model, builder)
+    }
+
+    private func shareAppleEvent(_ cellViewModel: AppleCalendarEventCellViewModel) {
+        let calendarId = cellViewModel.calendarId
+        Publishers.CombineLatest3(
+            self.appleCalendarUsecase.eventOrigin(id: cellViewModel.eventIdentifier),
+            self.appleCalendarUsecase.calendarTags,
+            self.calendarSettingUsecase.currentTimeZone
+        )
+        .first()
+        .sink { [weak self] origin, tags, timeZone in
+            guard let origin else { return }
+            self?.shareAppleEventText(origin, calendarId: calendarId, tags: tags, timeZone: timeZone)
+        }
+        .store(in: &self.cancellables)
+    }
+
+    private func shareAppleEventText(
+        _ origin: AppleCalendar.EventOrigin,
+        calendarId: String,
+        tags: [AppleCalendar.Tag],
+        timeZone: TimeZone
+    ) {
+        let builder = EventDetailShareTextBuilder()
+        let selectedTime = SelectedTime(origin.eventTime, timeZone)
+        let repeatText = origin.shareRepeatText(timeZone)
+        let tagLine = tags.first(where: { $0.id == calendarId })?.name.emptyAsNil()
+            .map { EventDetailShareTagLine.appleCalendar($0) }
+        let model = EventDetailShareModel(
+            name: origin.name,
+            isTodo: false,
+            timeText: builder.timeText(from: selectedTime),
+            repeatText: repeatText,
+            tagLine: tagLine,
+            placeName: origin.location?.emptyAsNil(),
+            url: origin.url?.emptyAsNil(),
+            memo: origin.notes?.emptyAsNil()
+        )
+        self.showShareSheetIfNeeded(model, builder)
+    }
+
+    private func showShareSheetIfNeeded(
+        _ model: EventDetailShareModel, _ builder: EventDetailShareTextBuilder
+    ) {
+        let text = builder.build(model)
+        guard !text.isEmpty else { return }
+        self.router?.showShareSheet(text: text)
     }
 
     private func runMoreActionAfterConfirm(
