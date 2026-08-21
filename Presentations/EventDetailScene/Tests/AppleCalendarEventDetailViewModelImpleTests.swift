@@ -1163,6 +1163,9 @@ extension AppleCalendarEventDetailViewModelImpleTests {
     }
 
     private var shareTagLabel: String { self.shareFieldLabel("calendar") }
+    private var appleServiceName: String {
+        "event_setting::external_calendar::apple::serviceName".localized()
+    }
 
     @Test func viewModel_whenShare_composeTextWithVisibleFields() async throws {
         // given
@@ -1185,7 +1188,7 @@ extension AppleCalendarEventDetailViewModelImpleTests {
         let lines = text.components(separatedBy: "\n")
         #expect(lines.first == "Meeting")
         #expect(lines.contains("\(self.shareFieldLabel("time")): \(expectedTimeText ?? "")"))
-        #expect(lines.contains("\(self.shareTagLabel): Work"))
+        #expect(lines.contains("\(self.shareTagLabel): \(self.appleServiceName) - Work"))
         #expect(lines.contains("\(self.shareFieldLabel("place")): Conference Room A"))
         #expect(lines.contains("\(self.shareFieldLabel("url")): https://example.com"))
         #expect(lines.contains("\(self.shareFieldLabel("memo")): 메모"))
