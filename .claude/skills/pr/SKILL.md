@@ -67,6 +67,15 @@ PR을 올리면 대응 이슈를 개발 대시보드(Project #2)의 `Review + QA
 - 머지는 `gh pr merge --rebase`, squash 금지 — 단계별 커밋이 develop에 보존돼야 회귀 분석 시 변경 의도를 추적할 수 있다.
 - 머지 후 브랜치(로컬·리모트) 정리 여부를 유저에게 확인한다. 확인을 요청한 시점이 이 조항의 이행이다 — 답변 대기로 끝나도 이탈이 아니다.
 - 브랜치가 워크트리에 체크아웃돼 있으면 삭제가 거부된다 — 그 워크트리에서 임시 브랜치를 만들어 이동(`git switch -c <임시-브랜치>`)한 뒤 대상 브랜치를 삭제한다.
-- 머지 후 `python3 .claude/scripts/aggregate-usage.py` 실행 (#690 flywheel). 무출력이면 조용히 넘어간다.
-  - **보고 전 중복 확인**: `gh issue list --label harness --state open --json number,title,body` — ⚠️ 줄의 **스킬명 + 신호 유형**(partial·correction·누락률·축N)이 이미 열린 이슈에 잡혀 있으면 보고하지 않는다. 이슈로 따둔 건 인지하고 나중에 고치기로 한 것이라, 다시 올리면 노이즈다. 조항 단위까지는 대조하지 않는다 — 집계 출력에 조항명이 없다(`deviations[].clause`는 raw usage-log에만 있다).
-  - 남은 신호만 유저에게 보고한다. 유저가 정비를 지시하면 improve-skill, 이슈로 남기라고 하면 issue 스킬로 생성하고 `harness` 라벨을 붙인다.
+- 머지 후 신호 판정 (#690 flywheel):
+
+  ```bash
+  gh issue list --label harness --state open --json body --jq '.[].body' > /tmp/harness-open.md
+  python3 .claude/scripts/triage-usage.py --recorded-file /tmp/harness-open.md
+  ```
+
+  - **판정은 스크립트가 한다 — 추론으로 다시 하지 않는다.** duplicate(이미 누적 이슈에 적힘)·stale(대상 조항이 그 신호보다 나중에 개정됨 = 정비는 됐고 소비 마킹만 안 됨)·actionable 셋으로 갈린다. 판정을 세션마다 추론으로 하면 같은 신호가 런마다 다르게 읽힌다.
+  - **무출력이면 아무 말도 하지 않는다.** "신호 없음"도 보고하지 않는다 — 보고할 게 없다는 뜻이지 언급할 자리가 아니다.
+  - **stale 블록이 나오면 출력된 마킹 명령을 그대로 실행한다.** 유저 보고 대상이 아니다. 이 정리를 건너뛰면 이미 정비된 신호를 다음 런이 또 판단한다.
+  - **actionable 만 유저에게 보고한다.** 기여 레코드(ts·요지)가 함께 출력되니 그 데이터로 보고한다 — 기억으로 재구성하지 않는다.
+  - 유저가 **"기록해"** 라고 지시하면 improve-skill §5(누적 이슈 기록)로 간다. 정비를 지시하면 improve-skill §1~4로 간다. 신호마다 이슈를 새로 따지 않는다.
