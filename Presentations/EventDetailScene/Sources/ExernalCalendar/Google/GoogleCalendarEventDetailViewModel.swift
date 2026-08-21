@@ -671,7 +671,7 @@ extension GoogleCalendarEventDetailViewModelImple {
         let builder = EventDetailShareTextBuilder()
         let timeText = fields.time.map(builder.timeText(from:))
         let memoText = fields.memo.asPlainShareText
-        let tagLine = self.subject.calendarTag.value?.name.emptyAsNil().map { EventDetailShareTagLine.externalCalendar($0) }
+        let tagLine = self.subject.calendarTag.value?.name.emptyAsNil().map { EventDetailShareTagLine.googleCalendar($0) }
 
         self.repeatOption
             .first()

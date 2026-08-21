@@ -65,16 +65,43 @@ extension EventDetailShareTextBuilderTests {
         #expect(result == expected)
     }
 
-    @Test func builder_whenTagLineIsExternalCalendar_rendersCalendarLabel() {
+    @Test func builder_whenTagLineIsGoogleCalendar_rendersServiceNamePrefixedCalendarLabel() {
         // given
-        let model = EventDetailShareModel(name: "이름", tagLine: .externalCalendar("업무"))
+        let model = EventDetailShareModel(name: "이름", tagLine: .googleCalendar("업무"))
 
         // when
         let result = self.builder.build(model)
 
         // then
+        let serviceName = "event_setting::external_calendar::google::serviceName".localized()
         #expect(self.calendarLabel != self.tagLabel)
-        #expect(result == "이름\n\(self.calendarLabel): 업무")
+        #expect(result == "이름\n\(self.calendarLabel): \(serviceName) - 업무")
+    }
+
+    @Test func builder_whenTagLineIsAppleCalendar_rendersServiceNamePrefixedCalendarLabel() {
+        // given
+        let model = EventDetailShareModel(name: "이름", tagLine: .appleCalendar("업무"))
+
+        // when
+        let result = self.builder.build(model)
+
+        // then
+        let serviceName = "event_setting::external_calendar::apple::serviceName".localized()
+        #expect(self.calendarLabel != self.tagLabel)
+        #expect(result == "이름\n\(self.calendarLabel): \(serviceName) - 업무")
+    }
+
+    @Test func builder_googleAndAppleCalendarTagLines_produceDifferentServiceNamePrefixes() {
+        // given
+        let googleModel = EventDetailShareModel(name: "이름", tagLine: .googleCalendar("업무"))
+        let appleModel = EventDetailShareModel(name: "이름", tagLine: .appleCalendar("업무"))
+
+        // when
+        let googleResult = self.builder.build(googleModel)
+        let appleResult = self.builder.build(appleModel)
+
+        // then
+        #expect(googleResult != appleResult)
     }
 
     @Test func builder_whenFieldIsNil_omitsThatLine() {

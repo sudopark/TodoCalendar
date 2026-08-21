@@ -1737,6 +1737,9 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
     }
 
     private var shareTagLabel: String { self.shareFieldLabel("calendar") }
+    private var googleServiceName: String {
+        "event_setting::external_calendar::google::serviceName".localized()
+    }
 
     @Test func viewModel_whenShare_composeTextWithVisibleFields() async throws {
         // given
@@ -1757,7 +1760,7 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
         #expect(lines.first == "name")
         #expect(lines.contains("\(self.shareFieldLabel("time")): \(expectedTimeText ?? "")"))
         #expect(lines.contains("\(self.shareFieldLabel("repeating")): \(repeatText ?? "")"))
-        #expect(lines.contains("\(self.shareTagLabel): g:7"))
+        #expect(lines.contains("\(self.shareTagLabel): \(self.googleServiceName) - g:7"))
         #expect(lines.contains("\(self.shareFieldLabel("place")): location"))
         #expect(!lines.contains(where: { $0.hasPrefix("\(self.shareFieldLabel("url")):") }))
         #expect(lines.contains(where: { $0.hasPrefix("\(self.shareFieldLabel("memo")):") }))
