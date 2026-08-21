@@ -11,6 +11,7 @@ import UIKit
 import Domain
 import Scenes
 import CommonPresentation
+import AdService
 
 
 // MARK: - MainSceneBuilerImple
@@ -21,17 +22,20 @@ public final class MainSceneBuilerImple {
     private let viewAppearance: ViewAppearance
     private let calendarSceneBulder: any CalendarSceneBuilder
     private let settingSceneBuilder: any SettingSceneBuiler
+    private let mobileAdService: GoogleMobileAdsServiceImple?
     
     public init(
         usecaseFactory: any UsecaseFactory,
         viewAppearance: ViewAppearance,
         calendarSceneBulder: any CalendarSceneBuilder,
-        settingSceneBuilder: any SettingSceneBuiler
+        settingSceneBuilder: any SettingSceneBuiler,
+        mobileAdService: GoogleMobileAdsServiceImple?
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
         self.calendarSceneBulder = calendarSceneBulder
         self.settingSceneBuilder = settingSceneBuilder
+        self.mobileAdService = mobileAdService
     }
 }
 
@@ -57,7 +61,8 @@ extension MainSceneBuilerImple: MainSceneBuiler {
         
         let viewController = MainViewController(
             viewModel: viewModel,
-            viewAppearance: self.viewAppearance
+            viewAppearance: self.viewAppearance,
+            mobileAdService: self.mobileAdService
         )
         
         let router = MainRouter(

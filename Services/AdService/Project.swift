@@ -7,13 +7,10 @@ let project = Project.framework(
     iOSTargetVersion: "17.0",
     dependencies: [
         .project(
-            target: "Domain",
-            path: .relativeToRoot("Domain")
-        ),
-        .project(
             target: "Extensions",
             path: .relativeToRoot("Supports/Extensions")
         ),
-        .external(name: "GoogleMobileAds")
+        .external(name: "GoogleMobileAds"),
+        .external(name: "GoogleUserMessagingPlatform")
     ]
 )

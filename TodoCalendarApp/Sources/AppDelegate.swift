@@ -7,7 +7,6 @@
 
 import UIKit
 import Domain
-import AdService
 import Extensions
 import FirebaseCore
 import FirebaseMessaging
@@ -33,8 +32,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             Messaging.messaging().delegate = self
             UNUserNotificationCenter.current().delegate = self
             application.registerForRemoteNotifications()
-
-            self.startMobileAdService()
         }
 
         let builder = ApplicationRootBuilder()
@@ -44,29 +41,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         return true
     }
-
-    private func startMobileAdService() {
-        let service = GoogleMobileAdsServiceImple()
-        Task {
-            await service.prepare()
-            #if DEBUG
-            await self.checkTestRewardedAdLoadable(service)
-            #endif
-        }
-    }
-
-    #if DEBUG
-    private func checkTestRewardedAdLoadable(_ service: any MobileAdService) async {
-        // 실제 광고 단위 발급 전이라 Google 공개 데모 단위를 쓴다
-        let testUnitId = "ca-app-pub-3940256099942544/1712485313"
-        do {
-            try await service.loadRewardedAd(unitId: testUnitId)
-            logger.log(level: .info, "AdMob test rewarded ad loaded")
-        } catch {
-            logger.log(level: .error, "AdMob test rewarded ad load failed: \(error)")
-        }
-    }
-    #endif
 
     // MARK: UISceneSession Lifecycle
 
