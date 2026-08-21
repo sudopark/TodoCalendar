@@ -13,6 +13,7 @@ import Optics
 import Domain
 import Scenes
 import Extensions
+import CommonPresentation
 
 enum DoneTodoResult {
     case success(_ id: String)
@@ -48,6 +49,9 @@ final class EventListCellEventHanleViewModelImple: EventListCellEventHanleViewMo
     private let googleCalendarUsecase: any GoogleCalendarUsecase
     private let appleCalendarUsecase: any AppleCalendarUsecase
     private let externalCalendarIntegrationUsecase: any ExternalCalendarIntegrationUsecase
+    private let eventTagUsecase: any EventTagUsecase
+    private let eventDetailDataUsecase: any EventDetailDataUsecase
+    private let calendarSettingUsecase: any CalendarSettingUsecase
     private let liveActivityToggleViewModel: any LiveActivityToggleViewModel
 
     var router: (any EventListCellEventHanleRouting)?
@@ -59,6 +63,9 @@ final class EventListCellEventHanleViewModelImple: EventListCellEventHanleViewMo
         googleCalendarUsecase: any GoogleCalendarUsecase,
         appleCalendarUsecase: any AppleCalendarUsecase,
         externalCalendarIntegrationUsecase: any ExternalCalendarIntegrationUsecase,
+        eventTagUsecase: any EventTagUsecase,
+        eventDetailDataUsecase: any EventDetailDataUsecase,
+        calendarSettingUsecase: any CalendarSettingUsecase,
         liveActivityToggleViewModel: any LiveActivityToggleViewModel
     ) {
         self.todoEventUsecase = todoEventUsecase
@@ -67,6 +74,9 @@ final class EventListCellEventHanleViewModelImple: EventListCellEventHanleViewMo
         self.googleCalendarUsecase = googleCalendarUsecase
         self.appleCalendarUsecase = appleCalendarUsecase
         self.externalCalendarIntegrationUsecase = externalCalendarIntegrationUsecase
+        self.eventTagUsecase = eventTagUsecase
+        self.eventDetailDataUsecase = eventDetailDataUsecase
+        self.calendarSettingUsecase = calendarSettingUsecase
         self.liveActivityToggleViewModel = liveActivityToggleViewModel
 
         self.internalBind()
@@ -166,6 +176,9 @@ extension EventListCellEventHanleViewModelImple {
             
         case .copy:
             self.copyEvent(cellViewModel)
+
+        case .share:
+            self.shareEvent(cellViewModel)
         }
     }
 
@@ -431,7 +444,89 @@ extension EventListCellEventHanleViewModelImple {
         default: return
         }
     }
-    
+
+    private func shareEvent(_ cellViewModel: any EventCellViewModel) {
+        switch cellViewModel {
+        case let todo as TodoEventCellViewModel:
+            self.shareTodoEvent(todo)
+        case let schedule as ScheduleEventCellViewModel:
+            self.shareScheduleEvent(schedule)
+        default: return
+        }
+    }
+
+    private func shareTodoEvent(_ cellViewModel: TodoEventCellViewModel) {
+        self.todoEventUsecase.todoEvent(cellViewModel.eventIdentifier)
+            .first()
+            .sink(receiveCompletion: { [weak self] completion in
+                guard case .failure(let error) = completion else { return }
+                self?.router?.showError(error)
+            }, receiveValue: { [weak self] todo in
+                self?.assembleAndShareText(
+                    name: todo.name, isTodo: true,
+                    time: todo.time, repeating: todo.repeating,
+                    eventTagId: todo.eventTagId ?? .default, detailId: todo.uuid
+                )
+            })
+            .store(in: &self.cancellables)
+    }
+
+    private func shareScheduleEvent(_ cellViewModel: ScheduleEventCellViewModel) {
+        self.scheduleEventUsecase.scheduleEvent(cellViewModel.eventIdWithoutTurn)
+            .first()
+            .sink(receiveCompletion: { [weak self] completion in
+                guard case .failure(let error) = completion else { return }
+                self?.router?.showError(error)
+            }, receiveValue: { [weak self] schedule in
+                let eventTime = cellViewModel.eventTimeRawValue ?? schedule.time
+                self?.assembleAndShareText(
+                    name: schedule.name, isTodo: false,
+                    time: eventTime, repeating: schedule.repeating,
+                    eventTagId: schedule.eventTagId ?? .default, detailId: schedule.uuid
+                )
+            })
+            .store(in: &self.cancellables)
+    }
+
+    private func assembleAndShareText(
+        name: String, isTodo: Bool,
+        time: EventTime?, repeating: EventRepeating?,
+        eventTagId: EventTagId, detailId: String
+    ) {
+        let builder = EventDetailShareTextBuilder()
+        Publishers.CombineLatest3(
+            self.eventTagUsecase.eventTag(id: eventTagId),
+            self.eventDetailDataUsecase.loadDetail(detailId)
+                .map { $0 as EventDetailData? }
+                .catch { _ in Just(nil) }
+                .replaceEmpty(with: nil),
+            self.calendarSettingUsecase.currentTimeZone.first()
+        )
+        .first()
+        .sink { [weak self] tag, detail, timeZone in
+            let timeText = time.map { SelectedTime($0, timeZone) }.map(builder.timeText(from:))
+            let repeatSummaryText = repeating.flatMap { repeating -> String? in
+                guard let repeatStart = time.map({ Date(timeIntervalSince1970: $0.lowerBoundWithFixed) })
+                else { return nil }
+                return repeating.repeatOption.summaryText(startTime: repeatStart, timeZone: timeZone)
+            }
+            let model = EventDetailShareModel(
+                name: name,
+                isTodo: isTodo,
+                timeText: timeText,
+                repeatText: repeatSummaryText?.emptyAsNil(),
+                tagLine: tag?.name.emptyAsNil().map { .eventTag($0) },
+                placeName: detail?.place?.placeName.emptyAsNil(),
+                url: detail?.url?.emptyAsNil(),
+                memo: detail?.memo?.emptyAsNil()
+            )
+            let text = builder.build(model)
+            guard !text.isEmpty else { return }
+            self?.router?.showShareSheet(text: text)
+        }
+        .store(in: &self.cancellables)
+    }
+
     private func runMoreActionAfterConfirm(
         _ title: String, _ message: String,
         _ action: @escaping () -> Void
