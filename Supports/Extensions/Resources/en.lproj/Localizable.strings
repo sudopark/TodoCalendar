@@ -154,6 +154,7 @@
 "calendar::event::more_action:share:item_name" = "Share";
 "event_detail::share::field::time" = "Time";
 "event_detail::share::field::repeating" = "Repeat";
+"event_detail::share::field::calendar" = "Calendar";
 "event_detail::share::field::place" = "Location";
 "event_detail::share::field::url" = "Link";
 "event_detail::share::field::memo" = "Memo";

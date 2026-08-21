@@ -154,6 +154,7 @@
 "calendar::event::more_action:share:item_name" = "공유";
 "event_detail::share::field::time" = "시간";
 "event_detail::share::field::repeating" = "반복옵션";
+"event_detail::share::field::calendar" = "캘린더";
 "event_detail::share::field::place" = "장소";
 "event_detail::share::field::url" = "링크";
 "event_detail::share::field::memo" = "메모";

@@ -193,7 +193,7 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
                     isTodo: false,
                     timeText: timeText,
                     repeatText: basic.eventRepeating?.text.emptyAsNil(),
-                    tagName: tag?.name.emptyAsNil(),
+                    tagLine: tag?.name.emptyAsNil().map { .eventTag($0) },
                     placeName: addition?.place?.placeName.emptyAsNil(),
                     url: addition?.url?.emptyAsNil(),
                     memo: addition?.memo?.emptyAsNil()

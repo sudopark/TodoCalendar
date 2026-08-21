@@ -29,6 +29,7 @@ extension EventDetailShareTextBuilderTests {
     }
 
     private var tagLabel: String { "eventTag.title".localized() }
+    private var calendarLabel: String { "event_detail::share::field::calendar".localized() }
     private var todoText: String { "calendar::event_time::todo".localized() }
 
     private func fullModel() -> EventDetailShareModel {
@@ -37,7 +38,7 @@ extension EventDetailShareTextBuilderTests {
             isTodo: true,
             timeText: "2026.08.15 (금) 09:00 ~ 10:00",
             repeatText: "매일",
-            tagName: "건강",
+            tagLine: .eventTag("건강"),
             placeName: "강남약국",
             url: "https://example.com",
             memo: "식후 30분"
@@ -64,11 +65,23 @@ extension EventDetailShareTextBuilderTests {
         #expect(result == expected)
     }
 
+    @Test func builder_whenTagLineIsExternalCalendar_rendersCalendarLabel() {
+        // given
+        let model = EventDetailShareModel(name: "이름", tagLine: .externalCalendar("업무"))
+
+        // when
+        let result = self.builder.build(model)
+
+        // then
+        #expect(self.calendarLabel != self.tagLabel)
+        #expect(result == "이름\n\(self.calendarLabel): 업무")
+    }
+
     @Test func builder_whenFieldIsNil_omitsThatLine() {
         // given
         let model = EventDetailShareModel(
             name: "이름", timeText: "시간", repeatText: nil,
-            tagName: nil, placeName: nil, url: nil, memo: nil
+            tagLine: nil, placeName: nil, url: nil, memo: nil
         )
 
         // when
