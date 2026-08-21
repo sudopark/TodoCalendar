@@ -899,6 +899,93 @@ extension EventLiveActivityUsecaseImpleTests {
 }
 
 
+// MARK: - 앱 재시작 복원 재시도
+
+extension EventLiveActivityUsecaseImpleTests {
+
+    /// 콜드런치 직후엔 `Activity.activities`가 아직 비어 있을 수 있다.
+    @Test func usecase_whenActivityNotVisibleAtColdLaunch_handleWillEnterForegroundRestoresTarget() async throws {
+        // given
+        let future = Date().addingTimeInterval(60)
+        let (usecase, stub, _) = self.makeUsecase(stubRestoredRegistration: nil)
+        await usecase.prepare()
+        try await self.waitForEffects()
+
+        // when
+        stub.stubRestoredRegistration = LiveActivityRegistration(
+            target: .todo(id: "t1"), content: self.content(eventDate: future)
+        )
+        await usecase.handleWillEnterForeground()
+
+        // then
+        let expect = self.expectConfirm("뒤늦게 보인 액티비티 복원")
+        let target = try await self.firstOutput(expect, for: usecase.registeredTarget)
+        #expect(target == .todo(id: "t1"))
+    }
+
+    @Test func usecase_whenRestoredOnForeground_watchesSharedStateChanges() async throws {
+        // given
+        let future = Date().addingTimeInterval(60)
+        let (usecase, stub, store) = self.makeUsecase(stubRestoredRegistration: nil)
+        await usecase.prepare()
+        try await self.waitForEffects()
+        stub.stubRestoredRegistration = LiveActivityRegistration(
+            target: .todo(id: "t1"), content: self.content(eventDate: future)
+        )
+        await usecase.handleWillEnterForeground()
+        self.putTodos(store, [self.makeTodo(id: "t1", name: "event", eventDate: future)])
+        try await self.waitForEffects()
+
+        // when
+        self.putTodos(store, [self.makeTodo(id: "t1", name: "changed", eventDate: future)])
+        try await self.waitForEffects()
+
+        // then
+        #expect(stub.didUpdateWith?.eventName == "changed")
+    }
+
+    @Test func usecase_whenActivityRestoredOnForegroundAlreadyExpired_endsImmediately() async throws {
+        // given
+        let past = Date().addingTimeInterval(-60)
+        let (usecase, stub, _) = self.makeUsecase(stubRestoredRegistration: nil)
+        await usecase.prepare()
+        try await self.waitForEffects()
+
+        // when
+        stub.stubRestoredRegistration = LiveActivityRegistration(
+            target: .todo(id: "t1"), content: self.content(eventDate: past)
+        )
+        await usecase.handleWillEnterForeground()
+
+        // then
+        #expect(stub.didEnd == true)
+        let expect = self.expectConfirm("만료된 액티비티는 복원 대신 종료")
+        let target = try await self.firstOutput(expect, for: usecase.registeredTarget)
+        #expect(target == .some(nil))
+    }
+
+    /// 재복원은 기준선을 리셋해 그 사이 바뀐 회차를 흡수해버린다.
+    @Test func usecase_handleWillEnterForeground_whenAlreadyRegistered_keepsExistingBaseline() async throws {
+        // given
+        let future = Date().addingTimeInterval(60)
+        let (usecase, stub, store) = self.makeUsecase()
+        self.putTodos(store, [self.makeTodo(id: "t1", eventDate: future)])
+        try await usecase.startActivity(.todo(id: "t1"))
+        stub.stubRestoredRegistration = LiveActivityRegistration(
+            target: .todo(id: "t1"), content: self.content(eventDate: future)
+        )
+
+        // when
+        await usecase.handleWillEnterForeground()
+        self.putTodos(store, [self.makeTodo(id: "t1", eventDate: future, turn: 3)])
+        try await self.waitForEffects()
+
+        // then
+        #expect(stub.didEnd == true)
+    }
+}
+
+
 // MARK: - 5종 대상 구독 배선
 
 extension EventLiveActivityUsecaseImpleTests {
