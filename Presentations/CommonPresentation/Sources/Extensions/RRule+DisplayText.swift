@@ -1,18 +1,19 @@
 //
 //  RRule+DisplayText.swift
-//  EventDetailScene
+//  CommonPresentation
 //
 //  Created by sudo.park on 4/7/26.
 //  Copyright © 2026 com.sudo.park. All rights reserved.
 //
 
+import Foundation
 import Domain
 import Extensions
 
 
 // MARK: - RRule display text helpers (shared across Google/Apple calendar detail)
 
-extension RRule {
+public extension RRule {
 
     func frequencyText() -> String {
         switch self.freq {
@@ -46,6 +47,22 @@ extension RRule {
         }
     }
 
+    func appendingEndOptionText(to frequencyText: String, _ timeZone: TimeZone) -> String {
+        guard let endOptionText = self.endOptionText(timeZone) else { return frequencyText }
+        return "\(frequencyText)\n\(endOptionText)"
+    }
+
+    func displayText(startTime: Date, _ timeZone: TimeZone) -> String {
+        let frequencyText = self.asEventRepeating(
+            startTime: startTime.timeIntervalSince1970, timeZone: timeZone
+        )?.repeatOption.summaryText(startTime: startTime, timeZone: timeZone)
+            ?? self.frequencyText()
+        return self.appendingEndOptionText(to: frequencyText, timeZone)
+    }
+}
+
+extension RRule {
+
     func endOptionText(_ timeZone: TimeZone) -> String? {
         if let until = self.until {
             let dateText = until.text("date_form.yyyy_MMM_dd".localized(), timeZone: timeZone)
@@ -56,29 +73,28 @@ extension RRule {
             return nil
         }
     }
-
-    func appendingEndOptionText(to frequencyText: String, _ timeZone: TimeZone) -> String {
-        guard let endOptionText = self.endOptionText(timeZone) else { return frequencyText }
-        return "\(frequencyText)\n\(endOptionText)"
-    }
 }
 
-extension EventRepeating {
+public extension EventRepeating {
 
     func repeatOptionDisplayText(_ timeZone: TimeZone) -> String {
         guard let rruleLine = self.asRRuleText(timeZone), let rrule = RRuleParser.parse(rruleLine)
         else { return R.String.EventDetail.Repeating.notRepeatingTitle }
-        let frequencyText = EventRepeatingTimeSelectResult(self, timeZone: timeZone)?.text
-            ?? rrule.frequencyText()
+        let frequencyText = self.repeatOption.summaryText(
+            startTime: Date(timeIntervalSince1970: self.repeatingStartTime), timeZone: timeZone
+        ) ?? rrule.frequencyText()
         return rrule.appendingEndOptionText(to: frequencyText, timeZone)
     }
 }
 
-extension String {
+public extension String {
 
     var strippingRRulePrefix: String {
         self.hasPrefix("RRULE:") ? String(self.dropFirst("RRULE:".count)) : self
     }
+}
+
+extension String {
 
     func appendDaysText(_ byDays: [RRule.ByDay]) -> String {
         guard !byDays.isEmpty else { return self }
