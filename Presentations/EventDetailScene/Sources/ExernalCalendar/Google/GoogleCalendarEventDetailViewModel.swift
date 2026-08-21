@@ -914,34 +914,6 @@ extension GoogleCalendarEventDetailViewModelImple {
 }
 
 
-private extension String {
-
-    private enum Constant {
-        // 구글 캘린더 설명에 실제로 쓰이는 태그만 화이트리스트. 각괄호 이메일(<user@x.com>)·URL(<https://...>) 오탐 방지 — 태그명 뒤 경계(공백/슬래시/닫힘)를 요구해 <abbr> 같은 미등재 태그 접두 매치도 차단한다.
-        static let htmlTagPattern =
-            "</?(?:br|b|i|u|p|div|span|a|ul|ol|li|strong|em|h[1-6]|table|tr|td|img|font)(?=[\\s/>])"
-    }
-
-    var hasHTMLTag: Bool {
-        self.range(
-            of: Constant.htmlTagPattern,
-            options: [.regularExpression, .caseInsensitive]
-        ) != nil
-    }
-}
-
-
-private extension Optional where Wrapped == String {
-
-    var asPlainShareText: String? {
-        guard let memo = self else { return nil }
-        guard memo.hasHTMLTag else { return memo.emptyAsNil() }
-        guard let attributed = memo.asHTMLAttributeText else { return memo.emptyAsNil() }
-        return String(attributed.characters).emptyAsNil()
-    }
-}
-
-
 private extension Array where Element == GoogleCalendar.EventOrigin.Attendee {
     
     func sortAttendees() -> Array {
@@ -976,27 +948,6 @@ private extension GoogleCalendar.EventOrigin.Attendee {
 // MARK: - GoogleCalendar time <-> SelectedTime mapping
 
 private extension GoogleCalendar.EventOrigin {
-
-    func selectedTime(_ timeZone: TimeZone) -> SelectedTime? {
-        let start = self.start?.supportEventTimeElemnt(timeZone.identifier)
-        let end = self.end?.supportEventTimeElemnt(timeZone.identifier)
-        switch (start, end) {
-        case (.period(let st), .period(let et)):
-            return SelectedTime(
-                .period(st.timeIntervalSince1970..<et.timeIntervalSince1970), timeZone
-            )
-        case (.allDay(let st, let sz), .allDay(let et, _)):
-            return SelectedTime(
-                .allDay(
-                    st.timeIntervalSince1970..<et.timeIntervalSince1970,
-                    secondsFromGMT: TimeInterval(sz.secondsFromGMT())
-                ),
-                timeZone
-            )
-        default:
-            return nil
-        }
-    }
 
     var rruleLines: [String] {
         self.recurrence?.filter { $0.hasPrefix("RRULE:") } ?? []

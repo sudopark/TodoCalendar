@@ -604,7 +604,7 @@ extension DayEventListViewModelImpleTests {
         ))
     }
     
-    func testGoogleCalendarEventCellViewModel_hasNoMoreActions() {
+    func testGoogleCalendarEventCellViewModel_hasShareOnlyMoreActionsRegardlessOfDetailLink() {
         // given
         func parameterizeTest(_ link: String?) {
             // given
@@ -614,7 +614,7 @@ extension DayEventListViewModelImpleTests {
             let actions = cvm.moreActions
 
             // then
-            XCTAssertNil(actions)
+            XCTAssertEqual(actions, .init(basicActions: [.share], removeActions: []))
         }
 
         // when + then
