@@ -179,7 +179,7 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
                     isTodo: true,
                     timeText: timeText,
                     repeatText: basic.eventRepeating?.text.emptyAsNil(),
-                    tagName: tag?.name.emptyAsNil(),
+                    tagLine: tag?.name.emptyAsNil().map { .eventTag($0) },
                     placeName: addition?.place?.placeName.emptyAsNil(),
                     url: addition?.url?.emptyAsNil(),
                     memo: addition?.memo?.emptyAsNil()

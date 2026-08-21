@@ -671,7 +671,7 @@ extension GoogleCalendarEventDetailViewModelImple {
         let builder = EventDetailShareTextBuilder()
         let timeText = fields.time.map(builder.timeText(from:))
         let memoText = fields.memo.asPlainShareText
-        let tagName = self.subject.calendarTag.value?.name.emptyAsNil()
+        let tagLine = self.subject.calendarTag.value?.name.emptyAsNil().map { EventDetailShareTagLine.externalCalendar($0) }
 
         self.repeatOption
             .first()
@@ -681,7 +681,7 @@ extension GoogleCalendarEventDetailViewModelImple {
                     isTodo: false,
                     timeText: timeText,
                     repeatText: repeatText == R.String.EventDetail.Repeating.notRepeatingTitle ? nil : repeatText,
-                    tagName: tagName,
+                    tagLine: tagLine,
                     placeName: fields.location?.emptyAsNil(),
                     url: nil,
                     memo: memoText

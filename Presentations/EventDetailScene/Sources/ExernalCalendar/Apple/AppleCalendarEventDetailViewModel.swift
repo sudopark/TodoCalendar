@@ -449,7 +449,7 @@ extension AppleCalendarEventDetailViewModelImple {
 
         let builder = EventDetailShareTextBuilder()
         let timeText = fields.time.map(builder.timeText(from:))
-        let tagName = self.subject.calendarTag.value?.name.emptyAsNil()
+        let tagLine = self.subject.calendarTag.value?.name.emptyAsNil().map { EventDetailShareTagLine.externalCalendar($0) }
 
         self.repeatText
             .first()
@@ -459,7 +459,7 @@ extension AppleCalendarEventDetailViewModelImple {
                     isTodo: false,
                     timeText: timeText,
                     repeatText: repeatText == R.String.EventDetail.Repeating.notRepeatingTitle ? nil : repeatText,
-                    tagName: tagName,
+                    tagLine: tagLine,
                     placeName: fields.location?.emptyAsNil(),
                     url: fields.url?.emptyAsNil(),
                     memo: fields.notes?.emptyAsNil()
