@@ -9,6 +9,7 @@
 import Testing
 import Foundation
 import Extensions
+import CommonPresentation
 
 @testable import EventDetailScene
 

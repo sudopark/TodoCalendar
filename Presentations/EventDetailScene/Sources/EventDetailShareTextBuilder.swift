@@ -8,6 +8,7 @@
 
 import Foundation
 import Extensions
+import CommonPresentation
 
 
 enum EventDetailShareTagLine: Equatable {

@@ -12,6 +12,7 @@ import Optics
 import Domain
 import Extensions
 import Scenes
+import CommonPresentation
 
 
 final class EditTodoEventDetailViewModelImple: EventDetailViewModel, @unchecked Sendable {
