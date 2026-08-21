@@ -14,6 +14,7 @@ description: Use when composing a git commit in this project — 커밋 메시�
 - 첫 줄 `[#이슈번호] 동작 변화 요약` — 파일/클래스 목록 ❌, 동작이 어떻게 달라졌나 ✅ (예시는 CLAUDE.md §5)
 - 본문은 앵커 단위 불릿: 변경된 코드 심볼(`ClassName.methodName`)을 앵커로, 한 불릿 = 한 앵커 + 그 변화
 - 배경이 상위 PR/이슈에 있으면 커밋에 반복하지 않는다. 단독 커밋(cherry-pick·핫픽스)일 때만 배경 서술
+- 폐기한 안·시행착오는 싣지 않는다 — 메시지는 최종 diff가 왜 이 모양인지만 말한다
 
 ## 분할이 미정일 때만 — 단위 판단
 
