@@ -16,6 +16,7 @@ import Optics
 import Domain
 import Extensions
 import Scenes
+import CommonPresentation
 
 
 struct AttendeeViewModelModel: Equatable {
