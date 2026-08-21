@@ -202,7 +202,7 @@ extension EventLiveActivityUsecaseImple {
 extension EventLiveActivityUsecaseImple {
 
     /// 등록 경로는 조회 시점 관찰값을 기준선으로 넘긴다 — 첫 배달을 기다리면 그 사이 변화가
-    /// 기준선에 흡수돼 파기 판정이 사라진다. 복원 경로는 넘길 값이 없어 nil(첫 관찰값 채택)이다.
+    /// 기준선에 흡수돼 파기 판정이 사라진다. 복원 경로는 넘길 값이 없어 nil(첫 non-nil 관찰값 채택)이다.
     private func startWatching(
         _ target: LiveActivityTarget,
         seedContent: EventCountdownActivityAttributes.State,
@@ -495,9 +495,11 @@ extension EventLiveActivityUsecaseImple {
         return (self.advancedState(state, observed: observed, judgement: judgement), judgement)
     }
 
+    /// 구독 즉시 흐르는 nil을 기준선으로 굳히면 뒤늦은 로드가 변경으로 오판된다.
     private func seededState(
         _ state: LiveActivityWatchState, observed: LiveActivityObservedEvent?
     ) -> LiveActivityWatchState {
+        guard let observed else { return state }
         return state
             |> \.hasBaseline .~ true
             |> \.baseline .~ LiveActivityBaseline(observed)
