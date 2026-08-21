@@ -1,6 +1,6 @@
 //
 //  EventDetailShareTextBuilder.swift
-//  EventDetailScene
+//  CommonPresentation
 //
 //  Created by sudo.park on 8/15/26.
 //  Copyright © 2026 com.sudo.park. All rights reserved.
@@ -8,10 +8,9 @@
 
 import Foundation
 import Extensions
-import CommonPresentation
 
 
-enum EventDetailShareTagLine: Equatable {
+public enum EventDetailShareTagLine: Equatable {
     case eventTag(String)
     case googleCalendar(String)
     case appleCalendar(String)
@@ -20,14 +19,14 @@ enum EventDetailShareTagLine: Equatable {
         static let serviceNameSeparator: String = " - "
     }
 
-    var labelKey: String {
+    public var labelKey: String {
         switch self {
         case .eventTag: return "eventTag.title"
         case .googleCalendar, .appleCalendar: return "event_detail::share::field::calendar"
         }
     }
 
-    var name: String {
+    public var name: String {
         guard let serviceNameKey else { return self.calendarName }
         return [serviceNameKey.localized(), self.calendarName].joined(separator: Constant.serviceNameSeparator)
     }
@@ -48,18 +47,40 @@ enum EventDetailShareTagLine: Equatable {
     }
 }
 
-struct EventDetailShareModel: Equatable {
-    let name: String
-    var isTodo: Bool = false
-    var timeText: String?
-    var repeatText: String?
-    var tagLine: EventDetailShareTagLine?
-    var placeName: String?
-    var url: String?
-    var memo: String?
+public struct EventDetailShareModel: Equatable {
+    public let name: String
+    public var isTodo: Bool = false
+    public var timeText: String?
+    public var repeatText: String?
+    public var tagLine: EventDetailShareTagLine?
+    public var placeName: String?
+    public var url: String?
+    public var memo: String?
+
+    public init(
+        name: String,
+        isTodo: Bool = false,
+        timeText: String? = nil,
+        repeatText: String? = nil,
+        tagLine: EventDetailShareTagLine? = nil,
+        placeName: String? = nil,
+        url: String? = nil,
+        memo: String? = nil
+    ) {
+        self.name = name
+        self.isTodo = isTodo
+        self.timeText = timeText
+        self.repeatText = repeatText
+        self.tagLine = tagLine
+        self.placeName = placeName
+        self.url = url
+        self.memo = memo
+    }
 }
 
-struct EventDetailShareTextBuilder {
+public struct EventDetailShareTextBuilder {
+
+    public init() {}
 
     private enum Constant {
         static let labelSeparator: String = ": "
@@ -69,7 +90,7 @@ struct EventDetailShareTextBuilder {
         static let allDayTextKey: String = "calendar::event_time::allday"
     }
 
-    func build(_ model: EventDetailShareModel) -> String {
+    public func build(_ model: EventDetailShareModel) -> String {
         let fields: [(labelKey: String, value: String?)] = [
             ("event_detail::share::field::time", model.timeText),
             ("event_detail::share::field::repeating", model.repeatText)
@@ -96,7 +117,7 @@ struct EventDetailShareTextBuilder {
         return "(\(Constant.todoTextKey.localized())) \(model.name)"
     }
 
-    func timeText(from selectedTime: SelectedTime) -> String {
+    public func timeText(from selectedTime: SelectedTime) -> String {
         switch selectedTime {
         case .at(let time):
             return self.joinedParts(time)
