@@ -720,6 +720,8 @@ extension EventLiveActivityUsecaseImpleTests {
         let (usecase, stub, store) = self.makeUsecase(stubRestoredRegistration: registration)
         await usecase.prepare()
         try await self.waitForEffects()
+        self.putTodos(store, [self.makeTodo(id: "t1", name: "restored", eventDate: future)])
+        try await self.waitForEffects()
 
         // when
         store.put(
@@ -978,6 +980,71 @@ extension EventLiveActivityUsecaseImpleTests {
         // when
         await usecase.handleWillEnterForeground()
         self.putTodos(store, [self.makeTodo(id: "t1", eventDate: future, turn: 3)])
+        try await self.waitForEffects()
+
+        // then
+        #expect(stub.didEnd == true)
+    }
+}
+
+
+// MARK: - 복원 기준선 시딩
+
+extension EventLiveActivityUsecaseImpleTests {
+
+    @Test func usecase_afterRestore_whenScheduleLoadsLater_keepsActivity() async throws {
+        // given
+        let future = Date().addingTimeInterval(60)
+        let registration = LiveActivityRegistration(
+            target: .schedule(id: "s1", turnKey: nil), content: self.content(eventDate: future)
+        )
+        let (usecase, stub, store) = self.makeUsecase(stubRestoredRegistration: registration)
+        await usecase.prepare()
+        try await self.waitForEffects()
+
+        // when
+        store.put(
+            MemorizedEventsContainer<ScheduleEvent>.self, key: ShareDataKeys.schedules.rawValue,
+            MemorizedEventsContainer<ScheduleEvent>().append(self.makeSchedule(id: "s1", eventDate: future))
+        )
+        try await self.waitForEffects()
+
+        // then
+        #expect(stub.didEnd == false)
+    }
+
+    @Test func usecase_afterRestore_whenRepeatingTodoLoadsLater_keepsActivity() async throws {
+        // given
+        let future = Date().addingTimeInterval(60)
+        let registration = LiveActivityRegistration(
+            target: .todo(id: "t1"), content: self.content(eventDate: future)
+        )
+        let (usecase, stub, store) = self.makeUsecase(stubRestoredRegistration: registration)
+        await usecase.prepare()
+        try await self.waitForEffects()
+
+        // when
+        self.putTodos(store, [self.makeTodo(id: "t1", eventDate: future, turn: 3)])
+        try await self.waitForEffects()
+
+        // then
+        #expect(stub.didEnd == false)
+    }
+
+    @Test func usecase_afterRestore_whenTurnChangesAfterBaselineSeeded_endsActivity() async throws {
+        // given
+        let future = Date().addingTimeInterval(60)
+        let registration = LiveActivityRegistration(
+            target: .todo(id: "t1"), content: self.content(eventDate: future)
+        )
+        let (usecase, stub, store) = self.makeUsecase(stubRestoredRegistration: registration)
+        await usecase.prepare()
+        try await self.waitForEffects()
+        self.putTodos(store, [self.makeTodo(id: "t1", eventDate: future, turn: 3)])
+        try await self.waitForEffects()
+
+        // when
+        self.putTodos(store, [self.makeTodo(id: "t1", eventDate: future, turn: 4)])
         try await self.waitForEffects()
 
         // then
