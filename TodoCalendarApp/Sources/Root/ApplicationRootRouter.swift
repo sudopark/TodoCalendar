@@ -390,7 +390,8 @@ extension ApplicationRootRouter {
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearanceStore.appearance,
             calendarSceneBulder: self.calendarSceneBulder(),
-            settingSceneBuilder: self.settingSceneBuilder()
+            settingSceneBuilder: self.settingSceneBuilder(),
+            mobileAdService: self.applicationBase.mobileAdService
         )
         let mainScene = builder.makeMainScene()
         self.window.rootViewController = mainScene

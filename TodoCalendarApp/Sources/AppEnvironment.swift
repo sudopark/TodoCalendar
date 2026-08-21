@@ -71,6 +71,23 @@ struct AppEnvironment {
         return [googleCalendarService, appleCalendarService]
     }
 
+    struct AdUnitIds {
+        let calendarBottomBanner: String
+        let aiCommandMediumRectangle: String
+        let fullScreen: String
+    }
+    
+    // Google 공개 테스트 단위 — 실단위 발급은 #904
+    static var admobUnitIds: AdUnitIds {
+        return AdUnitIds(
+            calendarBottomBanner: "ca-app-pub-3940256099942544/2934735716",
+            aiCommandMediumRectangle: "ca-app-pub-3940256099942544/2934735716",
+            fullScreen: "ca-app-pub-3940256099942544/4411468910"
+        )
+    }
+    
+    static var admobTestDeviceIdentifiers: [String] { [] }
+
     static let dbVersion: Int32 = 7
     static let googleCalendarDBVersion: Int32 = 0
     static let appleCalendarDBVersion: Int32 = 0

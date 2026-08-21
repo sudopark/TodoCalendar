@@ -16,6 +16,7 @@ import FirebaseAuth
 import Alamofire
 import SQLiteService
 import ExternalServices
+import AdService
 
 
 final class ApplicationBase {
@@ -168,6 +169,13 @@ final class ApplicationBase {
         return AppleCalendarRepositoryImple(
             storeAccessor: self.ekEventStoreWrapper,
             cacheStorage: cacheStorage
+        )
+    }()
+    
+    lazy var mobileAdService: GoogleMobileAdsServiceImple? = {
+        guard AppEnvironment.isTestBuild == false else { return nil }
+        return GoogleMobileAdsServiceImple(
+            testDeviceIdentifiers: AppEnvironment.admobTestDeviceIdentifiers
         )
     }()
 }

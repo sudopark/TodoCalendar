@@ -14,6 +14,7 @@ import CombineCocoa
 import Scenes
 import CommonPresentation
 import Extensions
+import AdService
 
 
 // MARK: - MainViewController
@@ -28,6 +29,8 @@ final class MainViewController: UIViewController, MainScene {
     
     private let viewModel: any MainViewModel
     let viewAppearance: ViewAppearance
+    private let mobileAdService: GoogleMobileAdsServiceImple?
+    private var adPreparingTask: Task<Void, Never>?
     
     @MainActor
     var interactor: (any MainSceneInteractor)? { self.viewModel }
@@ -36,10 +39,12 @@ final class MainViewController: UIViewController, MainScene {
     
     init(
         viewModel: any MainViewModel,
-        viewAppearance: ViewAppearance
+        viewAppearance: ViewAppearance,
+        mobileAdService: GoogleMobileAdsServiceImple?
     ) {
         self.viewModel = viewModel
         self.viewAppearance = viewAppearance
+        self.mobileAdService = mobileAdService
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -56,6 +61,16 @@ final class MainViewController: UIViewController, MainScene {
         super.viewDidLoad()
         self.bind()
         self.viewModel.prepare()
+    }
+    
+    // UMP 동의 폼·ATT 프롬프트는 화면이 실제로 올라온 뒤라야 뜬다
+    public override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        guard let service = self.mobileAdService, self.adPreparingTask == nil else { return }
+        self.adPreparingTask = Task { [weak self] in
+            guard let self else { return }
+            await service.prepare(from: self)
+        }
     }
     
     func addCalendar(_ calendarScene: any CalendarScene) {
