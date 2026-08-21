@@ -13,6 +13,7 @@ import Optics
 import Domain
 import Extensions
 import Scenes
+import CommonPresentation
 import UnitTestHelpKit
 import TestDoubles
 
@@ -27,6 +28,9 @@ class EventListCellEventHanleViewModelImpleTests: BaseTestCase, PublisherWaitabl
     private var spyGoogleUsecase: PrivateGoogleCalendarUsecase!
     private var spyAppleUsecase: PrivateAppleCalendarUsecase!
     private var stubIntegrationUsecase: StubExternalCalendarIntegrationUsecase!
+    private var stubEventTagUsecase: StubEventTagUsecase!
+    private var spyEventDetailDataUsecase: PrivateEventDetailDataUsecase!
+    private var stubCalendarSettingUsecase: StubCalendarSettingUsecase!
     private var stubLiveActivityUsecase: StubEventLiveActivityUsecase!
     private var spyRouter: SpyEventListCellEventHanleRouter!
 
@@ -38,6 +42,10 @@ class EventListCellEventHanleViewModelImpleTests: BaseTestCase, PublisherWaitabl
         self.spyGoogleUsecase = .init()
         self.spyAppleUsecase = .init()
         self.stubIntegrationUsecase = .init([])
+        self.stubEventTagUsecase = .init()
+        self.spyEventDetailDataUsecase = .init()
+        self.stubCalendarSettingUsecase = .init()
+        self.stubCalendarSettingUsecase.selectTimeZone(TimeZone(abbreviation: "KST")!)
         self.spyRouter = .init()
     }
 
@@ -49,6 +57,9 @@ class EventListCellEventHanleViewModelImpleTests: BaseTestCase, PublisherWaitabl
         self.spyGoogleUsecase = nil
         self.spyAppleUsecase = nil
         self.stubIntegrationUsecase = nil
+        self.stubEventTagUsecase = nil
+        self.spyEventDetailDataUsecase = nil
+        self.stubCalendarSettingUsecase = nil
         self.stubLiveActivityUsecase = nil
         self.spyRouter = nil
     }
@@ -59,6 +70,11 @@ class EventListCellEventHanleViewModelImpleTests: BaseTestCase, PublisherWaitabl
         appleShouldFailWrite: Bool = false,
         googleShouldFailWrite: Bool = false,
         shouldFailReauthenticate: Bool = false,
+        stubTodoEvent: TodoEvent? = nil,
+        stubScheduleEvent: ScheduleEvent? = nil,
+        stubDetailData: EventDetailData? = nil,
+        shouldFailLoadDetail: Bool = false,
+        shouldFailTodoEventFetch: Bool = false,
         registeredLiveActivityTarget: LiveActivityTarget? = nil,
         liveActivityStartError: (any Error)? = nil
     ) -> EventListCellEventHanleViewModelImple {
@@ -68,6 +84,13 @@ class EventListCellEventHanleViewModelImpleTests: BaseTestCase, PublisherWaitabl
         self.spyAppleUsecase.shouldFailWrite = appleShouldFailWrite
         self.spyGoogleUsecase.shouldFailWrite = googleShouldFailWrite
         self.stubIntegrationUsecase.shouldFailReauthenticate = shouldFailReauthenticate
+        if let stubTodoEvent {
+            self.spyTodoUsecase.setStub(todo: stubTodoEvent)
+        }
+        self.spySchedleUsecase.stubEvent = stubScheduleEvent
+        self.spyEventDetailDataUsecase.stubDetail = stubDetailData
+        self.spyEventDetailDataUsecase.shouldFailLoadDetail = shouldFailLoadDetail
+        self.spyTodoUsecase.shouldFailTodoEvent = shouldFailTodoEventFetch
         self.stubLiveActivityUsecase = .init(registeredTarget: registeredLiveActivityTarget)
         self.stubLiveActivityUsecase.stubStartError = liveActivityStartError
 
@@ -82,6 +105,9 @@ class EventListCellEventHanleViewModelImpleTests: BaseTestCase, PublisherWaitabl
             googleCalendarUsecase: self.spyGoogleUsecase,
             appleCalendarUsecase: self.spyAppleUsecase,
             externalCalendarIntegrationUsecase: self.stubIntegrationUsecase,
+            eventTagUsecase: self.stubEventTagUsecase,
+            eventDetailDataUsecase: self.spyEventDetailDataUsecase,
+            calendarSettingUsecase: self.stubCalendarSettingUsecase,
             liveActivityToggleViewModel: liveActivityToggleViewModel
         )
         viewModel.router = self.spyRouter
@@ -884,9 +910,212 @@ extension EventListCellEventHanleViewModelImpleTests {
     }
 }
 
+// MARK: - 목록 셀 롱탭 공유
+
+extension EventListCellEventHanleViewModelImpleTests {
+
+    func testViewModel_whenShareTodoEvent_showShareSheetWithDetailFields() {
+        // given
+        let todo = TodoEvent(uuid: "todo-1", name: "회의 준비")
+            |> \.time .~ .at(1_700_000_000)
+            |> \.repeating .~ EventRepeating(repeatingStartTime: 1_700_000_000, repeatOption: EventRepeatingOptions.EveryDay())
+            |> \.eventTagId .~ .custom("tag-1")
+        let detail = EventDetailData("todo-1")
+            |> \.place .~ Place("회의실")
+            |> \.url .~ "https://example.com"
+            |> \.memo .~ "준비물 챙기기"
+        let viewModel = self.makeViewModel(stubTodoEvent: todo, stubDetailData: detail)
+        let cellViewModel = TodoEventCellViewModel("todo-1", name: "회의 준비")
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .share)
+
+        // then
+        let text = self.spyRouter.didShareText
+        let todoMarker = "calendar::event_time::todo".localized()
+        let everyDayTitle = "eventDetail.repeating.everyDay:title".localized()
+        XCTAssertEqual(text?.hasPrefix("(\(todoMarker)) 회의 준비"), true)
+        XCTAssertEqual(text?.contains("\(self.shareFieldLabel("repeating")): \(everyDayTitle)"), true)
+        XCTAssertEqual(text?.contains("\("eventTag.title".localized()): some"), true)
+        XCTAssertEqual(text?.contains("\(self.shareFieldLabel("place")): 회의실"), true)
+        XCTAssertEqual(text?.contains("\(self.shareFieldLabel("url")): https://example.com"), true)
+        XCTAssertEqual(text?.contains("\(self.shareFieldLabel("memo")): 준비물 챙기기"), true)
+    }
+
+    func testViewModel_whenShareScheduleEvent_showShareSheetWithDetailFields() {
+        // given
+        let schedule = ScheduleEvent(uuid: "schedule-1", name: "팀 회의", time: .at(1_700_000_000))
+            |> \.repeating .~ EventRepeating(repeatingStartTime: 1_700_000_000, repeatOption: EventRepeatingOptions.EveryDay())
+            |> \.eventTagId .~ .custom("tag-1")
+        let detail = EventDetailData("schedule-1")
+            |> \.place .~ Place("회의실 B")
+            |> \.url .~ "https://example.com/schedule"
+            |> \.memo .~ "자료 준비"
+        let viewModel = self.makeViewModel(stubScheduleEvent: schedule, stubDetailData: detail)
+        let cellViewModel = ScheduleEventCellViewModel("schedule-1", name: "팀 회의")
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .share)
+
+        // then
+        let text = self.spyRouter.didShareText
+        let everyDayTitle = "eventDetail.repeating.everyDay:title".localized()
+        XCTAssertEqual(text?.hasPrefix("팀 회의"), true)
+        XCTAssertEqual(text?.contains("\(self.shareFieldLabel("repeating")): \(everyDayTitle)"), true)
+        XCTAssertEqual(text?.contains("\("eventTag.title".localized()): some"), true)
+        XCTAssertEqual(text?.contains("\(self.shareFieldLabel("place")): 회의실 B"), true)
+        XCTAssertEqual(text?.contains("\(self.shareFieldLabel("url")): https://example.com/schedule"), true)
+        XCTAssertEqual(text?.contains("\(self.shareFieldLabel("memo")): 자료 준비"), true)
+    }
+
+    func testViewModel_whenShareEventWithoutDetailData_shareWithoutPlaceUrlMemo() {
+        // given
+        let todo = TodoEvent(uuid: "todo-2", name: "빠른 확인")
+            |> \.time .~ .at(1_700_000_000)
+        let viewModel = self.makeViewModel(stubTodoEvent: todo, shouldFailLoadDetail: true)
+        let cellViewModel = TodoEventCellViewModel("todo-2", name: "빠른 확인")
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .share)
+
+        // then
+        let text = self.spyRouter.didShareText
+        XCTAssertEqual(text?.contains("빠른 확인"), true)
+        XCTAssertEqual(text?.contains(self.shareFieldLabel("place")), false)
+        XCTAssertEqual(text?.contains(self.shareFieldLabel("url")), false)
+        XCTAssertEqual(text?.contains(self.shareFieldLabel("memo")), false)
+    }
+
+    func testViewModel_whenShareEventWithNoDetailRow_stillShowsShareSheet() {
+        // given — 상세 로우 자체가 없는 이벤트(빠른 추가 todo 등)는 loadDetail 이 값 없이 finished 한다
+        let todo = TodoEvent(uuid: "todo-5", name: "빠른 추가")
+            |> \.time .~ .at(1_700_000_000)
+        let viewModel = self.makeViewModel(stubTodoEvent: todo)
+        let cellViewModel = TodoEventCellViewModel("todo-5", name: "빠른 추가")
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .share)
+
+        // then
+        let text = self.spyRouter.didShareText
+        XCTAssertEqual(text?.contains("빠른 추가"), true)
+    }
+
+    func testViewModel_whenShareRepeatingSchedule_useEventIdWithoutTurn() {
+        // given
+        let schedule = ScheduleEvent(uuid: "repeating-schedule", name: "반복 회의", time: .at(1_700_000_000))
+        let viewModel = self.makeViewModel(stubScheduleEvent: schedule, shouldFailLoadDetail: true)
+        let cellViewModel = ScheduleEventCellViewModel(
+            "repeating-schedule", turn: 3, name: "반복 회의", isRepeating: true
+        )
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .share)
+
+        // then
+        XCTAssertEqual(self.spySchedleUsecase.didFetchScheduleEventWithId, "repeating-schedule")
+        XCTAssertNotEqual(self.spySchedleUsecase.didFetchScheduleEventWithId, cellViewModel.eventIdentifier)
+    }
+
+    func testViewModel_whenShareRepeatingScheduleTurn_useCellTurnTimeNotOriginTime() {
+        // given
+        let timeZone = TimeZone(abbreviation: "KST")!
+        let originTime: TimeInterval = 1_700_000_000
+        let turnTime: TimeInterval = 1_705_000_000
+        let schedule = ScheduleEvent(uuid: "repeating-schedule", name: "반복 회의", time: .at(originTime))
+        let viewModel = self.makeViewModel(stubScheduleEvent: schedule, shouldFailLoadDetail: true)
+        let cellViewModel = ScheduleEventCellViewModel(
+            "repeating-schedule", turn: 3, name: "반복 회의", isRepeating: true
+        )
+        |> \.eventTimeRawValue .~ .at(turnTime)
+        let expectedTimeText = EventDetailShareTextBuilder().timeText(from: SelectedTime(.at(turnTime), timeZone))
+        let originTimeText = EventDetailShareTextBuilder().timeText(from: SelectedTime(.at(originTime), timeZone))
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .share)
+
+        // then
+        let text = self.spyRouter.didShareText
+        XCTAssertEqual(text?.contains("\(self.shareFieldLabel("time")): \(expectedTimeText)"), true)
+        XCTAssertEqual(text?.contains(originTimeText), false)
+    }
+
+    func testViewModel_whenShareEventWithRepeatEndOption_repeatTextOmitsEndOption() {
+        // given
+        let repeating = EventRepeating(repeatingStartTime: 1_700_000_000, repeatOption: EventRepeatingOptions.EveryDay())
+            |> \.repeatingEndOption .~ .count(5)
+        let todo = TodoEvent(uuid: "todo-3", name: "반복 회의")
+            |> \.time .~ .at(1_700_000_000)
+            |> \.repeating .~ repeating
+        let viewModel = self.makeViewModel(stubTodoEvent: todo, shouldFailLoadDetail: true)
+        let cellViewModel = TodoEventCellViewModel("todo-3", name: "반복 회의")
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .share)
+
+        // then
+        let text = self.spyRouter.didShareText
+        let everyDayTitle = "eventDetail.repeating.everyDay:title".localized()
+        let endOptionText = "eventDetail.repeating::endoption_times".localized(with: 5)
+        XCTAssertEqual(text?.contains("\(self.shareFieldLabel("repeating")): \(everyDayTitle)"), true)
+        XCTAssertEqual(text?.contains(endOptionText), false)
+    }
+
+    func testViewModel_whenShareEventFetchFails_showErrorWithoutSharing() {
+        // given
+        let viewModel = self.makeViewModel(shouldFailTodoEventFetch: true)
+        let cellViewModel = TodoEventCellViewModel("todo-4", name: "원본 조회 실패")
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .share)
+
+        // then
+        XCTAssertNotNil(self.spyRouter.didShowError)
+        XCTAssertNil(self.spyRouter.didShareText)
+    }
+
+    func testViewModel_whenShareRepeatingTodoAdvancedByComplete_repeatTextFollowsEventTime() {
+        // given: "매월 31일" 반복 할일이 완료로 전진해 이벤트 시각(3/3)과 반복 시작(1/31)이 갈린 상태
+        let timeZone = TimeZone(abbreviation: "KST")!
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = timeZone
+        let repeatStart = calendar.date(from: DateComponents(year: 2026, month: 1, day: 31, hour: 9))!
+        let advanced = calendar.date(from: DateComponents(year: 2026, month: 3, day: 3, hour: 9))!
+        let everyMonth = EventRepeatingOptions.EveryMonth(timeZone: timeZone)
+            |> \.selection .~ .days([31])
+        let repeating = EventRepeating(
+            repeatingStartTime: repeatStart.timeIntervalSince1970, repeatOption: everyMonth
+        )
+        let todo = TodoEvent(uuid: "todo-5", name: "월세 내기")
+            |> \.time .~ .at(advanced.timeIntervalSince1970)
+            |> \.repeating .~ repeating
+        let viewModel = self.makeViewModel(stubTodoEvent: todo, shouldFailLoadDetail: true)
+        let cellViewModel = TodoEventCellViewModel("todo-5", name: "월세 내기")
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .share)
+
+        // then: 반복 시작(1/31) 기준이면 "매월", 이벤트 시각(3/3) 기준이라야 "매월 31일"이 된다
+        let text = self.spyRouter.didShareText
+        let someDayTitle = "eventDetail.repeating.everyMonth_someDay:title"
+            .localized(with: 31.ordinal ?? "31")
+        XCTAssertEqual(text?.contains("\(self.shareFieldLabel("repeating")): \(someDayTitle)"), true)
+    }
+
+    private func shareFieldLabel(_ key: String) -> String {
+        return "event_detail::share::field::\(key)".localized()
+    }
+}
+
+
 final class SpyEventListCellEventHanleRouter: BaseSpyRouter, EventListCellEventHanleRouting, @unchecked Sendable {
-    
+
     func attach(_ scene: any Scene) { }
+
+    var didShareText: String?
+    func showShareSheet(text: String) {
+        self.didShareText = text
+    }
     
     var didRouteToTodoDetail: Bool?
     func routeToTodoEventDetail(_ eventId: String) {
@@ -943,13 +1172,22 @@ private final class PrivateStubTodoEventUsecase: StubTodoEventUsecase {
         self.didRemoveTodoWithParamsCallback?(id, onlyThisTime)
     }
     
+    var shouldFailTodoEvent: Bool = false
     private let fakeTodo = CurrentValueSubject<TodoEvent, Never>(TodoEvent(uuid: "some", name: "origin"))
     override func todoEvent(_ id: String) -> AnyPublisher<TodoEvent, any Error> {
+        guard self.shouldFailTodoEvent == false
+        else {
+            return Fail(error: RuntimeError("failed")).eraseToAnyPublisher()
+        }
         return fakeTodo
             .mapNever()
             .eraseToAnyPublisher()
     }
-    
+
+    func setStub(todo: TodoEvent) {
+        self.fakeTodo.send(todo)
+    }
+
     override func skipRepeatingTodo(_ todoId: String) async throws -> TodoEvent {
 
         let newTodo = TodoEvent(uuid: todoId, name: "skipped")
@@ -959,10 +1197,28 @@ private final class PrivateStubTodoEventUsecase: StubTodoEventUsecase {
 }
 
 private final class PrivateScheduleEventUsecase: StubScheduleEventUsecase {
-    
+
     var didRemoveEventWithParamsCallback: ((String, EventTime?) -> Void)?
     override func removeScheduleEvent(_ eventId: String, onlyThisTime: EventTime?) async throws {
         self.didRemoveEventWithParamsCallback?(eventId, onlyThisTime)
+    }
+
+    var didFetchScheduleEventWithId: String?
+    override func scheduleEvent(_ eventId: String) -> AnyPublisher<ScheduleEvent, any Error> {
+        self.didFetchScheduleEventWithId = eventId
+        return super.scheduleEvent(eventId)
+    }
+}
+
+private final class PrivateEventDetailDataUsecase: StubEventDetailDataUsecase {
+
+    var shouldFailLoadDetail: Bool = false
+    override func loadDetail(_ id: String) -> AnyPublisher<EventDetailData, any Error> {
+        guard self.shouldFailLoadDetail == false
+        else {
+            return Fail(error: RuntimeError("failed")).eraseToAnyPublisher()
+        }
+        return super.loadDetail(id)
     }
 }
 

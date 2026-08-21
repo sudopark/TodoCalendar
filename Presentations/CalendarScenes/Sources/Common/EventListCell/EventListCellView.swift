@@ -123,6 +123,8 @@ struct EventListCellView: View {
             return skipTodoButton().asAnyView()
         case .copy:
             return copyButton().asAnyView()
+        case .share:
+            return shareButton().asAnyView()
         }
     }
 
@@ -208,6 +210,17 @@ struct EventListCellView: View {
             HStack {
                 Text("calednar::event::copy".localized())
                 Image(systemName: "doc.on.doc")
+            }
+        }
+    }
+
+    private func shareButton() -> some View {
+        return Button {
+            self.handleMoreAction(self.cellViewModel, .share)
+        } label: {
+            HStack {
+                Text("calendar::event::more_action:share:item_name".localized())
+                Image(systemName: "square.and.arrow.up")
             }
         }
     }

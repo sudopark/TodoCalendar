@@ -539,21 +539,21 @@ extension DayEventListViewModelImpleTests {
         XCTAssertEqual(
             todoNotRepeating.moreActions,
             .init(
-                basicActions: [.toggleTo(isForemost: false), .edit, .copy],
+                basicActions: [.toggleTo(isForemost: false), .edit, .copy, .share],
                 removeActions: [.remove(scope: .all)]
             )
         )
         XCTAssertEqual(
             todoWithRepeating.moreActions,
             .init(
-                basicActions: [.toggleTo(isForemost: false), .skipTodo, .edit, .copy],
+                basicActions: [.toggleTo(isForemost: false), .skipTodo, .edit, .copy, .share],
                 removeActions: [.remove(scope: .onlyThisTime), .remove(scope: .all)]
             )
         )
         XCTAssertEqual(
             todoAsForemost.moreActions,
             .init(
-                basicActions: [.toggleTo(isForemost: true), .edit, .copy],
+                basicActions: [.toggleTo(isForemost: true), .edit, .copy, .share],
                 removeActions: [.remove(scope: .all)]
             )
         )
@@ -566,23 +566,23 @@ extension DayEventListViewModelImpleTests {
         let repeatingSchedule = ScheduleEvent(uuid: "id", name: "some", time: .at(10))
             |> \.repeating .~ dummyRepeating
         let notRepeatingSchedule = repeatingSchedule |> \.repeating .~  nil
-        
+
         // when
         let repeating = ScheduleEventCellViewModel(ScheduleCalendarEvent.events(from: repeatingSchedule, in: kst).first!, in: 0..<20, timeZone: kst, true)
         let notRepeating = ScheduleEventCellViewModel(ScheduleCalendarEvent.events(from: notRepeatingSchedule, in: kst).first!, in: 0..<20, timeZone: kst, true)
         let foremostEvent = ScheduleEventCellViewModel(ScheduleCalendarEvent.events(from: notRepeatingSchedule, in: kst, foremostId: "id").first!, in: 0..<20, timeZone: kst, true)
-        
+
         // then
         XCTAssertEqual(repeating?.moreActions, .init(
-            basicActions: [.toggleTo(isForemost: false), .toggleLiveActivity(isRegistered: false), .edit, .copy],
+            basicActions: [.toggleTo(isForemost: false), .toggleLiveActivity(isRegistered: false), .edit, .copy, .share],
             removeActions: [.remove(scope: .onlyThisTime), .remove(scope: .all)]
         ))
         XCTAssertEqual(notRepeating?.moreActions, .init(
-            basicActions: [.toggleTo(isForemost: false), .toggleLiveActivity(isRegistered: false), .edit, .copy],
+            basicActions: [.toggleTo(isForemost: false), .toggleLiveActivity(isRegistered: false), .edit, .copy, .share],
             removeActions: [.remove(scope: .all)]
         ))
         XCTAssertEqual(foremostEvent?.moreActions, .init(
-            basicActions: [.toggleTo(isForemost: true), .toggleLiveActivity(isRegistered: false), .edit, .copy],
+            basicActions: [.toggleTo(isForemost: true), .toggleLiveActivity(isRegistered: false), .edit, .copy, .share],
             removeActions: [.remove(scope: .all)]
         ))
     }

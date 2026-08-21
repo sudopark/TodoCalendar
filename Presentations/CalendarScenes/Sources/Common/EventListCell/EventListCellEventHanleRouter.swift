@@ -26,6 +26,7 @@ protocol EventListCellEventHanleRouting: Routing, Sendable {
     )
     func routeToAppleCalendarEventDetail(calendarId: String, eventId: String)
     func routeToMakeNewEvent(_ withParams: MakeEventParams)
+    func showShareSheet(text: String)
 }
 
 

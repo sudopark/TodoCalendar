@@ -43,6 +43,9 @@ final class EventListCellEventHanleViewModelBuilderImple: EventListCellEventHanl
             googleCalendarUsecase: self.usecaseFactory.makeGoogleCalendarUsecase(),
             appleCalendarUsecase: self.usecaseFactory.makeAppleCalendarUsecase(),
             externalCalendarIntegrationUsecase: self.usecaseFactory.externalCalenarIntegrationUsecase,
+            eventTagUsecase: self.usecaseFactory.makeEventTagUsecase(),
+            eventDetailDataUsecase: self.usecaseFactory.makeEventDetailDataUsecase(),
+            calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
             liveActivityToggleViewModel: liveActivityToggleViewModel
         )
         let router = EventListCellEventHanleRouter(
