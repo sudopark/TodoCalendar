@@ -12,6 +12,7 @@
   ],
   "missing_rate_exempt_skills": [
     "pair-programming",
-    "run-tests"
+    "run-tests",
+    "snapshot-check"
   ]
 }
