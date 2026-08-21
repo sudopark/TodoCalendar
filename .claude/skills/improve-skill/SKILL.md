@@ -1,6 +1,6 @@
 ---
 name: improve-skill
-description: Use when running a maintenance cycle on a project skill or subagent — usage-log 레코드를 4분류로 진단해 스킬 md 개정안(diff)을 만들고 유저 승인 후 반영·소비 마킹한다. Triggers on "스킬 정비하자", "improve-skill 돌리자", pr 스킬 머지 단계의 임계 초과 제안을 유저가 수락했을 때. Does NOT trigger on 스킬 신규 작성(superpowers:writing-skills), 코드 리뷰 피드백 반영(feedback-reinforcement-learning), 유저가 지시한 일회성 스킬 문구 수정(직접 수정).
+description: Use when running a maintenance cycle on a project skill or subagent — usage-log 레코드를 4분류로 진단해 스킬 md 개정안(diff)을 만들고 유저 승인 후 반영·소비 마킹한다. Triggers on "스킬 정비하자", "improve-skill 돌리자", "하네스 신호 기록해"(§5 누적 이슈 기록), pr 스킬 머지 단계의 임계 초과 제안을 유저가 수락했을 때. Does NOT trigger on 스킬 신규 작성(superpowers:writing-skills), 코드 리뷰 피드백 반영(feedback-reinforcement-learning), 유저가 지시한 일회성 스킬 문구 수정(직접 수정).
 ---
 
 # Improve Skill — 스킬 정비 사이클
@@ -8,6 +8,8 @@ description: Use when running a maintenance cycle on a project skill or subagent
 usage-log에 쌓인 신호(발동·skill_end·correction)를 근거로 대상 스킬을 진단하고 개정한다. **반영은 유저 승인 후에만** — 하네스는 모든 후속 작업에 곱해지는 레버리지라 무감독 self-modify 금지.
 
 ## 1. 레코드 수집
+
+**누적 이슈에서 진입한 정비면 그 이슈 본문이 1차 입력이다** — §5가 쌓아둔 항목별 기여 레코드를 그대로 쓰고, 아래 스캔은 그 뒤에 새로 쌓인 레코드를 보태는 용도로만 돌린다. 이슈를 안 읽고 raw 스캔부터 하면 §5가 근거를 정리해둔 이유가 사라진다.
 
 대상 스킬의 미소비 레코드(마지막 improvement 마킹 이후)를 모은다:
 
@@ -64,3 +66,15 @@ EOF
 ```bash
 python3 .claude/hooks/log-record.py improvement --name <대상 스킬>
 ```
+
+## 5. 누적 이슈 기록 — 유저가 "기록해" 라고 할 때
+
+정비가 필요한 항목은 **열려 있는 누적 이슈 하나에 모은다.** 신호마다 이슈를 따로 따면 이슈가 불어나고 정비 단위가 잘게 쪼개진다.
+
+1. 열린 누적 이슈를 찾는다 — `gh issue list --label harness --state open`. 없으면 새로 만든다 (`harness` 라벨, 제목에 누적 이슈임이 드러나게).
+2. `triage-usage.py` 의 **actionable 항목만** 그 이슈에 더한다. 항목마다 셋을 넣는다:
+   - `<!-- signal: <bucket>/<kind> -->` 마커 — 다음 런의 중복 판정 입력이다. 값은 추론하지 말고 `triage-usage.py` 출력의 `signal:` 줄을 그대로 옮긴다. **빠뜨리거나 틀리면 같은 신호가 계속 재보고된다.**
+   - 기여 레코드(ts·요지) 목록 — 정비 시점에 근거를 다시 캐지 않게
+   - 확정된 사실만. 처방이 이미 서면 적고, 안 섰으면 적지 않는다
+3. 기존 이슈에 더할 땐 **본문을 편집한다** (`gh issue edit --body-file`). 코멘트로 쌓지 않는다 — 정비 시점에 한 번에 읽을 목록이라 본문에 있어야 한다.
+4. **기록까지가 이 절차다.** 정비는 하지 않는다. 항목이 모이면 유저가 정비를 지시하고(§1~4), 완료 후 그 이슈를 닫는다.
