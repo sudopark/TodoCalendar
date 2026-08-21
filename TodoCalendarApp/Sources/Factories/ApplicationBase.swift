@@ -183,6 +183,10 @@ final class ApplicationBase {
     lazy var fullScreenAdRouter: any FullScreenAdRouter = ApplicationFullScreenAdRouter(
         adUnitId: AppEnvironment.admobUnitIds.fullScreen
     )
+    
+    lazy var adViewBuilder: (any AdViewBuilder)? = {
+        return self.mobileAdService.map { ApplicationAdViewBuilder(adService: $0) }
+    }()
 }
 
 
