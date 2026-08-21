@@ -32,9 +32,7 @@ struct EventCountdownLockScreenView: View {
                         .truncationMode(.tail)
                         .foregroundStyle(.primary)
 
-                    Text(model.eventTimeText)
-                        .font(.system(size: 13))
-                        .foregroundStyle(.secondary)
+                    EventCountdownTimeAndSubtitleText(model: model, font: .system(size: 13))
                 }
                 .layoutPriority(1)
 
@@ -87,6 +85,33 @@ struct EventCountdownTimerText: View {
                 .multilineTextAlignment(.trailing)
                 .foregroundStyle(.primary)
         }
+    }
+}
+
+struct EventCountdownTimeAndSubtitleText: View {
+
+    private let model: EventCountdownActivityViewModel
+    private let font: Font
+
+    init(model: EventCountdownActivityViewModel, font: Font) {
+        self.model = model
+        self.font = font
+    }
+
+    var body: some View {
+        HStack(spacing: 5) {
+            Text(model.eventTimeText)
+
+            if let subtitle = model.subtitle {
+                Text(verbatim: "|")
+
+                Text(subtitle)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+            }
+        }
+        .font(font)
+        .foregroundStyle(.secondary)
     }
 }
 

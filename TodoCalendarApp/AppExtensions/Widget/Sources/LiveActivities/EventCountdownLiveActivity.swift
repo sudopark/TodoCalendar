@@ -83,19 +83,7 @@ private struct EventCountdownExpandedTextBlock: View {
                 .truncationMode(.tail)
                 .foregroundStyle(.primary)
 
-            HStack(spacing: 5) {
-                Text(model.eventTimeText)
-
-                if let subtitle = model.subtitle {
-                    Text(verbatim: "|")
-
-                    Text(subtitle)
-                        .lineLimit(1)
-                        .truncationMode(.tail)
-                }
-            }
-            .font(.system(size: 12))
-            .foregroundStyle(.secondary)
+            EventCountdownTimeAndSubtitleText(model: model, font: .system(size: 12))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
