@@ -57,6 +57,10 @@ def aggregate(records):
     marks = improvement_marks(records)
     stats = {}
     axis_stats = {1: 0, 2: 0, 3: 0}
+    contributors = {}
+
+    def contribute(bucket, kind, record):
+        contributors.setdefault((bucket, kind), []).append(record)
 
     invocation_sessions = {}
     end_sessions = {}
@@ -86,16 +90,21 @@ def aggregate(records):
             if name and is_fresh(name, record) and is_first_in_session(end_sessions, name, record, index):
                 entry = stat(name)
                 entry["ends"] += 1
-                entry["partial" if record.get("compliance") == "partial" else "full"] += 1
+                is_partial = record.get("compliance") == "partial"
+                entry["partial" if is_partial else "full"] += 1
+                if is_partial:
+                    contribute(name, "partial", record)
         elif event == "correction":
             for name in record.get("skills") or [UNATTRIBUTED]:
                 if is_fresh(name, record):
                     stat(name)["corrections"] += 1
+                    contribute(name, "correction", record)
         elif event == "axis_leak":
             axis = record.get("missed_axis")
             if axis in (1, 2, 3) and is_fresh(f"axis:{axis}", record):
                 axis_stats[axis] += 1
-    return stats, axis_stats
+                contribute(f"axis:{axis}", "leak", record)
+    return stats, axis_stats, contributors
 
 
 def missing_rate(entry):
@@ -104,8 +113,9 @@ def missing_rate(entry):
     return max(0.0, 1.0 - entry["ends"] / entry["invocations"])
 
 
-def violations(stats, axis_stats, thresholds):
-    lines = []
+def violation_records(stats, axis_stats, thresholds):
+    """임계 초과 신호를 구조로 반환한다 — triage-usage.py가 판정 입력으로 쓴다."""
+    found = []
     plugin_prefixes = tuple(thresholds.get("plugin_prefixes", []))
     excluded = set(thresholds.get("excluded_skills", []))
     missing_rate_exempt = set(thresholds.get("missing_rate_exempt_skills", []))
@@ -114,24 +124,40 @@ def violations(stats, axis_stats, thresholds):
             continue
         is_plugin = bool(plugin_prefixes) and name.startswith(plugin_prefixes)
         if not is_plugin and entry["corrections"] >= thresholds["correction_count"]:
-            lines.append(f"⚠️ {name} — correction {entry['corrections']}건 (임계 {thresholds['correction_count']})")
+            found.append({
+                "bucket": name, "kind": "correction", "count": entry["corrections"],
+                "message": f"⚠️ {name} — correction {entry['corrections']}건 (임계 {thresholds['correction_count']})",
+            })
         if not is_plugin and entry["partial"] >= thresholds["partial_count"]:
-            lines.append(f"⚠️ {name} — 준수 partial {entry['partial']}건 (임계 {thresholds['partial_count']})")
+            found.append({
+                "bucket": name, "kind": "partial", "count": entry["partial"],
+                "message": f"⚠️ {name} — 준수 partial {entry['partial']}건 (임계 {thresholds['partial_count']})",
+            })
         if name not in missing_rate_exempt and entry["invocations"] >= thresholds["min_invocations_for_missing"]:
             rate = missing_rate(entry)
             if rate >= thresholds["missing_rate"]:
-                lines.append(
-                    f"⚠️ {name} — 종료 레코드 누락률 {rate:.0%} "
-                    f"(발동 {entry['invocations']}·종료 {entry['ends']}, 임계 {thresholds['missing_rate']:.0%})"
-                )
+                found.append({
+                    "bucket": name, "kind": "missing_rate", "count": entry["invocations"] - entry["ends"],
+                    "message": (
+                        f"⚠️ {name} — 종료 레코드 누락률 {rate:.0%} "
+                        f"(발동 {entry['invocations']}·종료 {entry['ends']}, 임계 {thresholds['missing_rate']:.0%})"
+                    ),
+                })
     for axis in (1, 2, 3):
         count = axis_stats[axis]
         if count >= thresholds["axis_leak_count"]:
-            lines.append(
-                f"⚠️ 축{axis} 누수 {count}건 (임계 {thresholds['axis_leak_count']}) — "
-                f"implement 스킬 축{axis} 관문 정비 검토 (소비 마킹 버킷 axis:{axis})"
-            )
-    return lines
+            found.append({
+                "bucket": f"axis:{axis}", "kind": "leak", "count": count,
+                "message": (
+                    f"⚠️ 축{axis} 누수 {count}건 (임계 {thresholds['axis_leak_count']}) — "
+                    f"implement 스킬 축{axis} 관문 정비 검토 (소비 마킹 버킷 axis:{axis})"
+                ),
+            })
+    return found
+
+
+def violations(stats, axis_stats, thresholds):
+    return [item["message"] for item in violation_records(stats, axis_stats, thresholds)]
 
 
 def full_table(stats, axis_stats):
@@ -155,7 +181,7 @@ def main():
     with open(CONFIG_PATH, encoding="utf-8") as f:
         thresholds = json.load(f)
 
-    stats, axis_stats = aggregate(load_records())
+    stats, axis_stats, _ = aggregate(load_records())
     lines = full_table(stats, axis_stats) if args.all else violations(stats, axis_stats, thresholds)
     if lines:
         print("\n".join(lines))
