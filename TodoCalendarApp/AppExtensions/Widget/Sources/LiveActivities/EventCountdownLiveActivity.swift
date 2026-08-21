@@ -26,7 +26,7 @@ struct EventCountdownLiveActivity: Widget {
 
             return DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
-                    EventTagGlyphBadge(model: model, diameter: 26)
+                    EventCountdownRingBadge(model: model, diameter: 26)
                         // 아일랜드 좌측 라운딩에 배지가 물려 잘린다 — 안쪽으로 들여 피한다.
                         .padding(.leading, 6)
                 }
@@ -51,7 +51,7 @@ struct EventCountdownLiveActivity: Widget {
                     .frame(maxHeight: .infinity, alignment: .bottom)
                 }
             } compactLeading: {
-                EventTagGlyphBadge(model: model, diameter: 26)
+                EventCountdownRingBadge(model: model, diameter: 26)
             } compactTrailing: {
                 Text(model.eventName)
                     .font(.system(size: 13, weight: .medium))
@@ -59,7 +59,7 @@ struct EventCountdownLiveActivity: Widget {
                     .truncationMode(.tail)
             } minimal: {
                 // 최소 표시 영역이 배지보다 작아 링이 잘린다 — 지름을 줄여 영역 안쪽에 들인다.
-                EventTagGlyphBadge(model: model, diameter: 27)
+                EventCountdownRingBadge(model: model, diameter: 27)
             }
         }
     }
@@ -76,14 +76,18 @@ private struct EventCountdownExpandedTextBlock: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(model.eventName)
-                .font(.system(size: 15, weight: .semibold))
-                .lineLimit(1)
-                .truncationMode(.tail)
-                .foregroundStyle(.primary)
+        HStack(alignment: .center, spacing: 8) {
+            EventCountdownTagColorBar(color: model.tagColor, width: 3)
 
-            EventCountdownTimeAndSubtitleText(model: model, font: .system(size: 12))
+            VStack(alignment: .leading, spacing: 2) {
+                Text(model.eventName)
+                    .font(.system(size: 15, weight: .semibold))
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .foregroundStyle(.primary)
+
+                EventCountdownTimeAndSubtitleText(model: model, font: .system(size: 12))
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }

@@ -23,16 +23,20 @@ struct EventCountdownLockScreenView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .center, spacing: 12) {
-                EventTagGlyphBadge(model: model, diameter: 34)
+                EventCountdownRingBadge(model: model, diameter: 34)
 
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(model.eventName)
-                        .font(.system(size: 17, weight: .semibold))
-                        .lineLimit(1)
-                        .truncationMode(.tail)
-                        .foregroundStyle(.primary)
+                HStack(alignment: .center, spacing: 10) {
+                    EventCountdownTagColorBar(color: model.tagColor, width: 4)
 
-                    EventCountdownTimeAndSubtitleText(model: model, font: .system(size: 13))
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(model.eventName)
+                            .font(.system(size: 17, weight: .semibold))
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                            .foregroundStyle(.primary)
+
+                        EventCountdownTimeAndSubtitleText(model: model, font: .system(size: 13))
+                    }
                 }
                 .layoutPriority(1)
 
@@ -85,6 +89,23 @@ struct EventCountdownTimerText: View {
                 .multilineTextAlignment(.trailing)
                 .foregroundStyle(.primary)
         }
+    }
+}
+
+struct EventCountdownTagColorBar: View {
+
+    private let color: Color
+    private let width: CGFloat
+
+    init(color: Color, width: CGFloat) {
+        self.color = color
+        self.width = width
+    }
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: width / 2)
+            .fill(color)
+            .frame(width: width)
     }
 }
 

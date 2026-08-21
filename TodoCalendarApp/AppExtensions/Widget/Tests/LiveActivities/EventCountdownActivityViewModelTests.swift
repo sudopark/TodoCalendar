@@ -34,32 +34,13 @@ struct EventCountdownActivityViewModelTests {
         return EventCountdownActivityViewModel(attributes, state)
     }
 
-    @Test("light", arguments: ["#EEEEEE", "#F2D64B", "#7FE07F"])
-    func viewModel_whenTagColorIsLight_usesDarkGlyph(colorHex: String) {
-        // given
-        let viewModel = makeViewModel(target: .todo(id: "1"), colorHex: colorHex)
-
-        // when + then
-        #expect(viewModel.usesDarkGlyph == true)
-    }
-
-    @Test("dark", arguments: ["#333333", "#003D82", "#2FB457", "#6FCB6F"])
-    func viewModel_whenTagColorIsDark_usesLightGlyph(colorHex: String) {
-        // given
-        let viewModel = makeViewModel(target: .todo(id: "1"), colorHex: colorHex)
-
-        // when + then
-        #expect(viewModel.usesDarkGlyph == false)
-    }
-
     @Test("invalid", arguments: ["not-a-color", "2FB457"])
-    func viewModel_whenTagColorHexIsInvalid_fallsBackToGrayWithLightGlyph(invalidHex: String) {
+    func viewModel_whenTagColorHexIsInvalid_fallsBackToGray(invalidHex: String) {
         // given
         let viewModel = makeViewModel(target: .todo(id: "1"), colorHex: invalidHex)
 
         // when + then
         #expect(viewModel.tagColor == UIColor.gray.asColor)
-        #expect(viewModel.usesDarkGlyph == false)
     }
 
     @Test("todoId when todo target", arguments: ["t1", "t123"])
