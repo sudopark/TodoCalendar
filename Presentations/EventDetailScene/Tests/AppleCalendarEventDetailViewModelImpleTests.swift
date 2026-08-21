@@ -14,6 +14,7 @@ import Domain
 import Extensions
 import UnitTestHelpKit
 import TestDoubles
+import CommonPresentation
 
 @testable import EventDetailScene
 
