@@ -39,6 +39,7 @@ public enum ShareDataKeys: String {
     case billingUserPlan
     case billingAppAccountToken
     case ddayCandidates
+    case isGuideTodoCompleted
 }
 
 

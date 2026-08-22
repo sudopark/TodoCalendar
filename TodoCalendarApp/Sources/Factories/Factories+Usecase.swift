@@ -325,13 +325,22 @@ extension NonLoginUsecaseFactoryImple {
 }
 
 extension NonLoginUsecaseFactoryImple {
-    
+
     func makeFeedbackUsecase() -> any FeedbackUsecase {
         let feedbackRepository = FeedbackRepositoryImple(remote: self.applicationBase.remoteAPI)
         return FeedbackUsecaseImple(
             accountUsecase: self.accountUescase,
             feedbackRepository: feedbackRepository,
             deviceInfoFetchService: DeviceInfoFetchServiceImple()
+        )
+    }
+
+    func makeGuideTodoUsecase() -> any GuideTodoUsecase {
+        return GuideTodoUsecaseImple(
+            repository: GuideTodoLocalRepositoryImple(
+                environmentStorage: self.applicationBase.userDefaultEnvironmentStorage
+            ),
+            sharedDataStore: self.applicationBase.sharedDataStore
         )
     }
 }
@@ -820,13 +829,22 @@ extension LoginUsecaseFactoryImple {
 }
 
 extension LoginUsecaseFactoryImple {
-    
+
     func makeFeedbackUsecase() -> any FeedbackUsecase {
         let feedbackRepository = FeedbackRepositoryImple(remote: self.applicationBase.remoteAPI)
         return FeedbackUsecaseImple(
             accountUsecase: self.accountUescase,
             feedbackRepository: feedbackRepository,
             deviceInfoFetchService: DeviceInfoFetchServiceImple()
+        )
+    }
+
+    func makeGuideTodoUsecase() -> any GuideTodoUsecase {
+        return GuideTodoUsecaseImple(
+            repository: GuideTodoLocalRepositoryImple(
+                environmentStorage: self.applicationBase.userDefaultEnvironmentStorage
+            ),
+            sharedDataStore: self.applicationBase.sharedDataStore
         )
     }
 }

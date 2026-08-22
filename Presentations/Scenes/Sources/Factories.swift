@@ -65,6 +65,7 @@ public protocol CommonUsecaseFactory {
 public protocol SupportUsecaseFactory {
 
     func makeFeedbackUsecase() -> any FeedbackUsecase
+    func makeGuideTodoUsecase() -> any GuideTodoUsecase
     var appUpdateCheckUsecase: any AppUpdateCheckUsecase { get }
 }
 
