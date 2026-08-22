@@ -18,13 +18,15 @@
 ### 2.1 인증 프로바이더
 
 ```
-GoogleOAuth2ServiceProvider
+AppEnvironment.googleCalendarService (GoogleCalendarService)
 ├── identifier: "google"
-├── scopes: ["https://www.googleapis.com/auth/calendar"]
+├── scopes: ["https://www.googleapis.com/auth/calendar.readonly"]
 └── 인증 SDK: GIDSignIn (Firebase GoogleSignIn)
 ```
 
-읽기·쓰기를 모두 포함하는 sensitive scope다. 이 scope 로 바꾸면 구글 OAuth 재심사가 필요하고, 승인 전에 요청하면 유저에게 미인증 앱 화면이 뜨고 100명 캡이 걸린다 (#402).
+최초 연동은 읽기 전용 scope 로만 요청한다. 일부 회사 워크스페이스가 구글 캘린더 연동을 읽기 전용일 때만 허용하기 때문이다. 쓰기(`https://www.googleapis.com/auth/calendar`)는 유저가 이벤트를 저장·삭제하는 시점에 승격으로 요청한다(§8.2).
+
+쓰기 scope 는 읽기·쓰기를 모두 포함하는 sensitive scope 다. 이 scope 를 요청하면 구글 OAuth 재심사가 필요하고, 승인 전에 요청하면 유저에게 미인증 앱 화면이 뜨고 100명 캡이 걸린다 (#402).
 
 ### 2.2 자격증명 구조 (GoogleOAuth2Credential)
 
@@ -361,10 +363,12 @@ activeCalendars() = 전체 캘린더 - offTagIds에 포함된 캘린더
 | 판정 | 조건 | 동작 |
 |---|---|---|
 | `readOnlyCalendar` | `Tag.isWritable == false` | 입력 필드 비활성 + 하단 안내문. 저장 버튼·삭제 메뉴 노출 안 함 |
-| `needReauthentication` | 캘린더는 쓰기 가능 + 계정 `grantedScopes` 에 쓰기 scope 없음 | 편집은 자유롭게 가능. 저장·삭제 실행 시 재인증 확인 다이얼로그 → 성공하면 이어서 저장·삭제 실행 |
+| `needReauthentication` | 캘린더는 쓰기 가능 + 계정 `grantedScopes` 에 쓰기 scope 없음 | 편집은 자유롭게 가능. 저장·삭제 실행 시 재인증 확인 다이얼로그 → 성공하면 이어서 저장·삭제 실행. 재인증 결과에 쓰기 scope 가 없으면 저장·삭제를 실행하지 않고 조직 정책 가능성을 안내한다(fail-closed) |
 | `writable` | 둘 다 만족 | 저장·삭제 바로 실행 |
 
 `readOnlyCalendar` 상태에서는 `updateCurrentFields` 가드가 입력 자체를 무시해 저장 불가능한 변경이 쌓이지 않는다.
+
+`needReauthentication` 의 재인증·승격 실패 판정은 `ExternalCalendarIntegrationUsecase.reauthenticateForWriteScope` 소관이다. 승격은 기존에 연동된 계정의 자격증명 교체일 뿐 신규 연동이 아니므로, 성공해도 `integrationStatusChanged(.integrated)` 브로드캐스트와 DB 재오픈은 하지 않는다 — 둘 다 신규 연동 시점에만 필요한 부수효과라 승격에서 재실행하면 유저가 직접 켠 캘린더 on/off 상태가 초기화된다.
 
 점점점 메뉴의 링크 항목은 `isEditable` 에 따라 문구가 갈린다 — 편집 가능이면 "구글 캘린더에서 수정", 읽기 전용이면 "구글 캘린더에서 보기". 둘 다 `htmlLink` 를 Safari 로 연다 (메뉴 자체가 편집 액션은 아님). 삭제 항목은 `isEditable` 일 때만 노출된다.
 
