@@ -236,7 +236,7 @@ extension EventListCellEventHanleViewModelImpleTests {
         XCTAssertEqual(actions?.removeActions, [.remove(scope: .onlyThisTime), .remove(scope: .all)])
     }
 
-    func testGoogleCell_basicActionsIsShareOnly() {
+    func testGoogleCell_basicActionsIsLiveActivityToggleAndShare() {
         // given
         let model = GoogleCalendarEventCellViewModel.dummy(isWritable: true)
 
@@ -244,7 +244,7 @@ extension EventListCellEventHanleViewModelImpleTests {
         let actions = model.moreActions
 
         // then
-        XCTAssertEqual(actions?.basicActions, [.share])
+        XCTAssertEqual(actions?.basicActions, [.toggleLiveActivity(isRegistered: false), .share])
     }
 
     func testAppleCell_removeActions_whenRepeating() {
@@ -269,12 +269,12 @@ extension EventListCellEventHanleViewModelImpleTests {
         XCTAssertEqual(actions?.removeActions, [.remove(scope: .all)])
     }
 
-    func testViewModel_readOnlyExternalCalendarCell_moreActionsHasShareOnly() {
+    func testViewModel_readOnlyExternalCalendarCell_moreActionsHasLiveActivityToggleAndShareOnly() {
         // given
         func parameterizeTest(_ actions: EventListMoreActionModel?) {
             // then
             XCTAssertNotNil(actions)
-            XCTAssertEqual(actions?.basicActions, [.share])
+            XCTAssertEqual(actions?.basicActions, [.toggleLiveActivity(isRegistered: false), .share])
             XCTAssertEqual(actions?.removeActions, [])
         }
         // when + then

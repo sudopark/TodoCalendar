@@ -210,4 +210,54 @@ extension EventCellViewModelTests {
         // when + then
         #expect(uncompletedCell.moreActions?.basicActions.contains(where: { if case .toggleLiveActivity = $0 { return true } else { return false } }) == false)
     }
+
+    @Test("apple 셀의 라이브액티비티 타겟은 인스턴스 eventId를 쓴다 — 마스터(originalEventId)가 아니다")
+    func appleCell_liveActivityTarget_usesInstanceEventIdNotMaster() {
+        // given
+        let raw = AppleCalendar.Event(
+            eventId: "master-1#occ:100", originalEventId: "master-1", calendarId: "calendar",
+            name: "name", eventTime: .at(100)
+        )
+        let event = AppleCalendarEvent(raw, in: self.timeZone, isWritable: true)
+        let cell = AppleCalendarEventCellViewModel(event, in: self.todayRange, self.timeZone, true)
+
+        // when + then
+        #expect(cell?.liveActivityTarget == .appleCalendar(calendarId: "calendar", eventId: "master-1#occ:100"))
+    }
+
+    @Test("apple 셀의 moreActions는 라이브액티비티 토글을 공유 앞에 담고 등록 여부를 반영한다")
+    func appleCell_moreActionsContainsLiveActivityToggleBeforeShare() {
+        // given
+        let cell = self.makeAppleCell(isWritable: true)
+        let registeredCell = cell.map { $0 |> \.isLiveActivityRegistered .~ true }
+
+        // when + then
+        #expect(cell?.moreActions?.basicActions == [.toggleLiveActivity(isRegistered: false), .share])
+        #expect(registeredCell?.moreActions?.basicActions == [.toggleLiveActivity(isRegistered: true), .share])
+    }
+
+    @Test("google 셀의 라이브액티비티 타겟은 인스턴스 eventId를 쓴다 — 시리즈 마스터(recurringEventId)가 아니다")
+    func googleCell_liveActivityTarget_usesInstanceEventIdNotMaster() {
+        // given
+        let raw = GoogleCalendar.Event(
+            "instance-1", "calendar", accountId: "account", name: "name", colorId: "color", time: .at(100)
+        )
+        |> \.recurringEventId .~ "master-1"
+        let event = GoogleCalendarEvent(raw, in: self.timeZone, isWritable: true)
+        let cell = GoogleCalendarEventCellViewModel(event, in: self.todayRange, self.timeZone, true)
+
+        // when + then
+        #expect(cell?.liveActivityTarget == .googleCalendar(accountId: "account", calendarId: "calendar", eventId: "instance-1"))
+    }
+
+    @Test("google 셀의 moreActions는 라이브액티비티 토글을 공유 앞에 담고 등록 여부를 반영한다")
+    func googleCell_moreActionsContainsLiveActivityToggleBeforeShare() {
+        // given
+        let cell = self.makeGoogleCell()
+        let registeredCell = cell.map { $0 |> \.isLiveActivityRegistered .~ true }
+
+        // when + then
+        #expect(cell?.moreActions?.basicActions == [.toggleLiveActivity(isRegistered: false), .share])
+        #expect(registeredCell?.moreActions?.basicActions == [.toggleLiveActivity(isRegistered: true), .share])
+    }
 }
