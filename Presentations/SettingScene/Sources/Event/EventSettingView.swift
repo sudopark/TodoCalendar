@@ -509,7 +509,7 @@ struct EventSettingViewPreviewProvider: PreviewProvider {
         state.selectedAllDayEventNotificationTimeText = "so long text hahahahhahahha hahah"
         state.externalCalendarServiceModels = [
             ExternalCalanserServiceModel(
-                GoogleCalendarService(scopes: [.readWrite]),
+                GoogleCalendarService(scopes: [.readonly]),
                 accountId: nil
             )!
         ]
