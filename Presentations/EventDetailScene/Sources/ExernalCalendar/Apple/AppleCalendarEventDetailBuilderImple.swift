@@ -35,12 +35,16 @@ extension AppleCalendarEventDetailSceneBuilderImple: AppleCalendarEventDetailSce
         calendarId: String, eventId: String
     ) -> any AppleCalendarEventDetailScene {
 
+        let liveActivityToggleViewModel = LiveActivityToggleViewModelImple(
+            eventLiveActivityUsecase: self.usecaseFactory.eventLiveActivityUsecase
+        )
         let viewModel = AppleCalendarEventDetailViewModelImple(
             calendarId: calendarId,
             eventId: eventId,
             appleCalendarUsecase: self.usecaseFactory.makeAppleCalendarUsecase(),
             calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
-            daysIntervalCountUsecase: self.usecaseFactory.makeDaysIntervalCountUsecase()
+            daysIntervalCountUsecase: self.usecaseFactory.makeDaysIntervalCountUsecase(),
+            liveActivityToggleViewModel: liveActivityToggleViewModel
         )
 
         let viewController = AppleCalendarEventDetailViewController(
@@ -57,6 +61,7 @@ extension AppleCalendarEventDetailSceneBuilderImple: AppleCalendarEventDetailSce
         )
         router.scene = viewController
         viewModel.router = router
+        liveActivityToggleViewModel.router = router
 
         return viewController
     }
