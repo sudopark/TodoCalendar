@@ -56,9 +56,9 @@ public final class AdBannerUIView: UIView {
         _ billingUsecase: any BillingUsecase
     ) {
         Publishers.CombineLatest(adService.isStarted, billingUsecase.currentUserPlan)
+            .receive(on: RunLoop.main)
             .map { isStarted, userPlan in isStarted && userPlan.planId == .free }
             .removeDuplicates()
-            .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] isAllowed in
                 self?.apply(isAllowed: isAllowed)
             })

@@ -24,6 +24,7 @@ final class MainViewController: UIViewController, MainScene {
     private let headerAreaStackView = UIStackView()
     private let headerView = HeaderView()
     private let calendarContainerView = UIView()
+    private let bottomBannerView: UIView?
     private let loadingAllEventsLabel = UILabel()
     private let compositeLoadingBarView = CompositeLoadingBarView()
     
@@ -40,11 +41,13 @@ final class MainViewController: UIViewController, MainScene {
     init(
         viewModel: any MainViewModel,
         viewAppearance: ViewAppearance,
-        mobileAdService: GoogleMobileAdsServiceImple?
+        mobileAdService: GoogleMobileAdsServiceImple?,
+        adViewBuilder: (any AdViewBuilder)?
     ) {
         self.viewModel = viewModel
         self.viewAppearance = viewAppearance
         self.mobileAdService = mobileAdService
+        self.bottomBannerView = adViewBuilder?.makeBannerUIView(size: .banner)
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -218,12 +221,25 @@ extension MainViewController {
             $0.heightAnchor.constraint(equalToConstant: 3.2)
         }
         
+        self.bottomBannerView.map { self.setupBottomBannerLayout($0) }
+        
         self.view.addSubview(calendarContainerView)
         calendarContainerView.autoLayout.active(with: self.view) {
             $0.leadingAnchor.constraint(equalTo: $1.safeAreaLayoutGuide.leadingAnchor)
             $0.trailingAnchor.constraint(equalTo: $1.safeAreaLayoutGuide.trailingAnchor)
             $0.topAnchor.constraint(equalTo: headerAreaStackView.bottomAnchor, constant: 14)
-            $0.bottomAnchor.constraint(equalTo: $1.bottomAnchor)
+            $0.bottomAnchor.constraint(
+                equalTo: self.bottomBannerView?.topAnchor ?? $1.bottomAnchor
+            )
+        }
+    }
+    
+    // 로드 전·실패·유료 플랜이면 배너가 intrinsic size 0 이라 캘린더가 하단까지 채운다
+    private func setupBottomBannerLayout(_ bannerView: UIView) {
+        self.view.addSubview(bannerView)
+        bannerView.autoLayout.active(with: self.view) {
+            $0.centerXAnchor.constraint(equalTo: $1.centerXAnchor)
+            $0.bottomAnchor.constraint(equalTo: $1.safeAreaLayoutGuide.bottomAnchor)
         }
     }
     

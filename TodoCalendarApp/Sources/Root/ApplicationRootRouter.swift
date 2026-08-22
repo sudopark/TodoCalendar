@@ -391,12 +391,22 @@ extension ApplicationRootRouter {
             viewAppearance: self.viewAppearanceStore.appearance,
             calendarSceneBulder: self.calendarSceneBulder(),
             settingSceneBuilder: self.settingSceneBuilder(),
-            mobileAdService: self.applicationBase.mobileAdService
+            mobileAdService: self.applicationBase.mobileAdService,
+            adViewBuilder: self.adViewBuilder()
         )
         let mainScene = builder.makeMainScene()
         self.window.rootViewController = mainScene
         self.window.makeKeyAndVisible()
         return mainScene.interactor
+    }
+    
+    private func adViewBuilder() -> (any AdViewBuilder)? {
+        return self.applicationBase.mobileAdService.map {
+            ApplicationAdViewBuilder(
+                adService: $0,
+                billingUsecase: self.usecaseFactory.billingUsecase
+            )
+        }
     }
     
     private func calendarSceneBulder() -> any CalendarSceneBuilder {
