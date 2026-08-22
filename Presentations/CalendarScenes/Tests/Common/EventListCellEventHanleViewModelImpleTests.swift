@@ -32,6 +32,7 @@ class EventListCellEventHanleViewModelImpleTests: BaseTestCase, PublisherWaitabl
     private var spyEventDetailDataUsecase: PrivateEventDetailDataUsecase!
     private var stubCalendarSettingUsecase: StubCalendarSettingUsecase!
     private var stubLiveActivityUsecase: StubEventLiveActivityUsecase!
+    private var stubGuideTodoUsecase: StubGuideTodoUsecase!
     private var spyRouter: SpyEventListCellEventHanleRouter!
 
     override func setUpWithError() throws {
@@ -46,6 +47,7 @@ class EventListCellEventHanleViewModelImpleTests: BaseTestCase, PublisherWaitabl
         self.spyEventDetailDataUsecase = .init()
         self.stubCalendarSettingUsecase = .init()
         self.stubCalendarSettingUsecase.selectTimeZone(TimeZone(abbreviation: "KST")!)
+        self.stubGuideTodoUsecase = .init()
         self.spyRouter = .init()
     }
 
@@ -61,6 +63,7 @@ class EventListCellEventHanleViewModelImpleTests: BaseTestCase, PublisherWaitabl
         self.spyEventDetailDataUsecase = nil
         self.stubCalendarSettingUsecase = nil
         self.stubLiveActivityUsecase = nil
+        self.stubGuideTodoUsecase = nil
         self.spyRouter = nil
     }
 
@@ -122,6 +125,7 @@ class EventListCellEventHanleViewModelImpleTests: BaseTestCase, PublisherWaitabl
             eventTagUsecase: self.stubEventTagUsecase,
             eventDetailDataUsecase: self.spyEventDetailDataUsecase,
             calendarSettingUsecase: self.stubCalendarSettingUsecase,
+            guideTodoUsecase: self.stubGuideTodoUsecase,
             liveActivityToggleViewModel: liveActivityToggleViewModel
         )
         viewModel.router = self.spyRouter
@@ -208,6 +212,43 @@ extension EventListCellEventHanleViewModelImpleTests {
         
         // then
         XCTAssertEqual(self.spyRouter.didRouteToHolidayEventDetailWithId, "holiday")
+    }
+}
+
+
+// MARK: - 안내할일
+
+extension EventListCellEventHanleViewModelImpleTests {
+
+    func testViewModel_whenSelectGuideTodo_showGuidePageOnWebView() {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when
+        viewModel.selectEvent(GuideTodoEventCellViewModel())
+
+        // then
+        XCTAssertEqual(self.spyRouter.didShowWebViewPath, GuideLink.indexPath)
+    }
+
+    func testViewModel_whenDoneGuideTodo_completeGuideTodoWithoutTodoUsecase() {
+        // given
+        let expect = expectation(description: "안내할일 완료 결과 방출")
+        let viewModel = self.makeViewModel()
+
+        // when
+        let result = self.waitFirstOutput(expect, for: viewModel.doneTodoResult) {
+            viewModel.doneTodo(GuideTodoEventCellViewModel().eventIdentifier)
+        }
+
+        // then
+        XCTAssertEqual(self.stubGuideTodoUsecase.didCompleteGuideTodo, true)
+        XCTAssertEqual(self.spyTodoUsecase.didCompleteTodoWithId, nil)
+        if case .success(let id) = result {
+            XCTAssertEqual(id, GuideTodoEventCellViewModel().eventIdentifier)
+        } else {
+            XCTAssert(false)
+        }
     }
 }
 
@@ -1355,8 +1396,10 @@ final class SpyEventListCellEventHanleRouter: BaseSpyRouter, EventListCellEventH
 private final class PrivateStubTodoEventUsecase: StubTodoEventUsecase {
     
     var completeTodoHasLatency: Bool = false
-    
+    var didCompleteTodoWithId: String?
+
     override func completeTodo(_ eventId: String) async throws -> DoneTodoEvent {
+        self.didCompleteTodoWithId = eventId
         if completeTodoHasLatency {
             try await Task.sleep(for: .milliseconds(10))
         }

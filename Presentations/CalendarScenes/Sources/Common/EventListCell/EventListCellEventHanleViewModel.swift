@@ -52,6 +52,7 @@ final class EventListCellEventHanleViewModelImple: EventListCellEventHanleViewMo
     private let eventTagUsecase: any EventTagUsecase
     private let eventDetailDataUsecase: any EventDetailDataUsecase
     private let calendarSettingUsecase: any CalendarSettingUsecase
+    private let guideTodoUsecase: any GuideTodoUsecase
     private let liveActivityToggleViewModel: any LiveActivityToggleViewModel
 
     var router: (any EventListCellEventHanleRouting)?
@@ -66,6 +67,7 @@ final class EventListCellEventHanleViewModelImple: EventListCellEventHanleViewMo
         eventTagUsecase: any EventTagUsecase,
         eventDetailDataUsecase: any EventDetailDataUsecase,
         calendarSettingUsecase: any CalendarSettingUsecase,
+        guideTodoUsecase: any GuideTodoUsecase,
         liveActivityToggleViewModel: any LiveActivityToggleViewModel
     ) {
         self.todoEventUsecase = todoEventUsecase
@@ -77,6 +79,7 @@ final class EventListCellEventHanleViewModelImple: EventListCellEventHanleViewMo
         self.eventTagUsecase = eventTagUsecase
         self.eventDetailDataUsecase = eventDetailDataUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
+        self.guideTodoUsecase = guideTodoUsecase
         self.liveActivityToggleViewModel = liveActivityToggleViewModel
 
         self.internalBind()
@@ -124,12 +127,21 @@ extension EventListCellEventHanleViewModelImple {
 
         case let holiday as HolidayEventCellViewModel:
             self.router?.routeToHolidayEventDetail(holiday.eventIdentifier)
-            
+
+        case is GuideTodoEventCellViewModel:
+            self.router?.showWebView(GuideLink.indexPath)
+
         default: break
         }
     }
-    
+
     func doneTodo(_ eventId: String) {
+        guard eventId != GuideTodoEventCellViewModel.Constant.identifier
+        else {
+            self.guideTodoUsecase.completeGuideTodo()
+            self.subject.doneTodoResult.send(.success(eventId))
+            return
+        }
         self.cancelDoneTodo(eventId)
         self.todoCompleteTaskMap[eventId] = Task { [weak self] in
             do {
