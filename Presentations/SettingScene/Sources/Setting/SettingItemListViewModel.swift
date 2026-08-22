@@ -262,13 +262,13 @@ extension SettingItemListViewModelImple {
             self.router?.routeToHolidaySetting()
 
         case .aiUsageGuide:
-            self.router?.openSafari(AIUsageGuideLink.currentPath)
+            self.router?.showWebView(GuideLink.aiInputPath)
 
         case .feedback:
             self.router?.routeToFeedbackPost()
             
         case .help:
-            self.router?.openSafari(HelpLink.currentPath)
+            self.router?.showWebView(GuideLink.indexPath)
             
         case .shareApp:
             self.router?.openShare(link: self.appstoreLinkPath)
