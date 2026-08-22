@@ -8,6 +8,7 @@
 
 import UIKit
 import SwiftUI
+import Domain
 
 
 public struct AdBannerView: View {
@@ -15,16 +16,19 @@ public struct AdBannerView: View {
     private let adUnitId: String
     private let size: AdBannerSize
     private let adService: GoogleMobileAdsServiceImple
-    @State private var isLoaded: Bool = false
+    private let billingUsecase: any BillingUsecase
+    @State private var isVisible: Bool = false
 
     public init(
         adUnitId: String,
         size: AdBannerSize,
-        adService: GoogleMobileAdsServiceImple
+        adService: GoogleMobileAdsServiceImple,
+        billingUsecase: any BillingUsecase
     ) {
         self.adUnitId = adUnitId
         self.size = size
         self.adService = adService
+        self.billingUsecase = billingUsecase
     }
 
     public var body: some View {
@@ -33,9 +37,10 @@ public struct AdBannerView: View {
             adUnitId: self.adUnitId,
             size: self.size,
             adService: self.adService,
-            isLoaded: self.$isLoaded
+            billingUsecase: self.billingUsecase,
+            isVisible: self.$isVisible
         )
-        .frame(height: self.isLoaded ? self.size.asCGSize.height : 0)
+        .frame(height: self.isVisible ? self.size.asCGSize.height : 0)
     }
 }
 
@@ -44,14 +49,16 @@ private struct BannerRepresentable: UIViewRepresentable {
     let adUnitId: String
     let size: AdBannerSize
     let adService: GoogleMobileAdsServiceImple
-    @Binding var isLoaded: Bool
+    let billingUsecase: any BillingUsecase
+    @Binding var isVisible: Bool
 
     func makeUIView(context: Context) -> AdBannerUIView {
         return AdBannerUIView(
             adUnitId: self.adUnitId,
             size: self.size,
             adService: self.adService,
-            onLoad: { self.isLoaded = true }
+            billingUsecase: self.billingUsecase,
+            onVisibilityChange: { self.isVisible = $0 }
         )
     }
 

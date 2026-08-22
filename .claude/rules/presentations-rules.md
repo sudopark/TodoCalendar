@@ -54,9 +54,9 @@ paths:
 
 | 타입 | 역할 | 진입 |
 |---|---|---|
-| `AdViewBuilder` | 배너 광고 뷰 팩토리 — placement로 요청 (#898) | `makeBannerView(for:)` / `makeBannerUIView(for:)` |
-| `FullScreenAdRouter` | 전면 광고 노출 커맨드 — 씬 Router가 재위임 (#898) | `showFullScreenAd(from:)` |
-| `PrivacyOptionsFormRouter` | UMP 개인정보 옵션 폼 — 요구 여부 조회 + 폼 표시 (#958) | `isPrivacyOptionsRequired()` / `showPrivacyOptionsForm(from:)` |
+| `AdViewBuilder` | 배너 광고 뷰 팩토리 — 사이즈로 요청 (#898·#956) | `makeBannerView(size:)` / `makeBannerUIView(size:)` |
+| `FullScreenAdRouter` | 전면 광고 노출 커맨드 — 씬 Router가 재위임. AdService의 `FullScreenAd`가 앱 타겟 extension으로 채택 (#898·#956) | `showFullScreenAd(from:)` |
+| `PrivacyOptionsFormRouter` | UMP 개인정보 옵션 폼 — 요구 여부 조회 + 폼 표시. AdService의 `GoogleMobileAdsServiceImple`이 앱 타겟 extension으로 채택 (#958·#956) | `isPrivacyOptionsRequired()` / `showPrivacyOptionsForm(from:)` |
 | `SignInButtonProvider` | OAuth 로그인 버튼 팩토리 (§4 custom provider 선례) | init property 주입 |
 | `LiveActivityActionModel` | 라이브액티비티 등록/해제 메뉴 항목 문구 — 상세·리스트 두 진입점이 공유 (#910·#911) | `init(isRegistered:)` → `itemText` |
 

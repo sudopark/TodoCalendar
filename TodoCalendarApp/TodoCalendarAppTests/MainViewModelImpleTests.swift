@@ -550,6 +550,7 @@ extension MainViewModelImpleTests {
         func stopObservingTransactions() { }
         func hasUnfinishedTransactions() async -> Bool { return false }
         func applyUnfinishedTransactions() async throws -> BillingUserPlan? { return nil }
+        func latestUserPlan() -> BillingUserPlan? { return nil }
 
         var currentUserPlan: AnyPublisher<BillingUserPlan, Never> {
             return Empty().eraseToAnyPublisher()
