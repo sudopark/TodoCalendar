@@ -77,7 +77,8 @@ final class BillingScenesSnapshots: XCTestCase {
             sectionTitle: "billing::paywall::features::title".localized(with: planId.name),
             features: [
                 "billing::paywall::feature::dailyCredits".localized(with: "\(dailyLimit)"),
-                isTopupAllowed ? "billing::paywall::feature::topup".localized() : nil
+                isTopupAllowed ? "billing::paywall::feature::topup".localized() : nil,
+                "billing::paywall::feature::noAds".localized()
             ].compactMap { $0 },
             disclosure: disclosureKey.localized(),
             ctaTitle: ctaKey.localized(with: planId.name)

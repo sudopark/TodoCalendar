@@ -673,6 +673,7 @@
 "billing::paywall::features::title" = "%@ includes";
 "billing::paywall::feature::dailyCredits" = "%@ credits a day";
 "billing::paywall::feature::topup" = "Top-up available when credits run out";
+"billing::paywall::feature::noAds" = "No ads";
 "billing::paywall::disclosure::subscription" = "Your subscription renews automatically each month unless you cancel at least 24 hours before the current period ends. You can cancel anytime in App Store settings.";
 "billing::paywall::disclosure::subscription::generic" = "Your subscription renews automatically at the end of each billing period unless you cancel at least 24 hours before it ends. You can cancel anytime in App Store settings.";
 "billing::paywall::disclosure::oneTime" = "Pay once and keep it. This does not renew.";
