@@ -77,12 +77,13 @@ struct AppEnvironment {
         let fullScreen: String
     }
     
-    // Google 공개 테스트 단위 — 실단위 발급은 #904
     static var admobUnitIds: AdUnitIds {
+        // MREC 전용 단위를 따로 발급하지 않아 캘린더 하단 배너와 한 단위를 공유한다
+        let banner: String = "ca-app-pub-4980913859277199/4855632588"
         return AdUnitIds(
-            calendarBottomBanner: "ca-app-pub-3940256099942544/2934735716",
-            aiCommandMediumRectangle: "ca-app-pub-3940256099942544/2934735716",
-            fullScreen: "ca-app-pub-3940256099942544/4411468910"
+            calendarBottomBanner: banner,
+            aiCommandMediumRectangle: banner,
+            fullScreen: "ca-app-pub-4980913859277199/7394166018"
         )
     }
     
