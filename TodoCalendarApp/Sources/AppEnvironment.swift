@@ -72,17 +72,17 @@ struct AppEnvironment {
     }
 
     struct AdUnitIds {
-        let calendarBottomBanner: String
-        let aiCommandMediumRectangle: String
+        let banner: String
+        let mediumRectangle: String
         let fullScreen: String
     }
-    
+
     static var admobUnitIds: AdUnitIds {
-        // MREC 전용 단위를 따로 발급하지 않아 캘린더 하단 배너와 한 단위를 공유한다
+        // MREC 전용 단위를 따로 발급하지 않아 배너와 한 단위를 공유한다
         let banner: String = "ca-app-pub-4980913859277199/4855632588"
         return AdUnitIds(
-            calendarBottomBanner: banner,
-            aiCommandMediumRectangle: banner,
+            banner: banner,
+            mediumRectangle: banner,
             fullScreen: "ca-app-pub-4980913859277199/7394166018"
         )
     }

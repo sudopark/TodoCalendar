@@ -10,16 +10,16 @@ import UIKit
 import SwiftUI
 
 
-public enum AdBannerPlacement: Sendable {
-    case calendarBottom
-    case aiCommandProcessing
+public enum AdBannerSize: Sendable {
+    case banner
+    case mediumRectangle
 }
 
 public protocol AdViewBuilder {
-    
+
     @MainActor
-    func makeBannerView(for placement: AdBannerPlacement) -> any View
-    
+    func makeBannerView(size: AdBannerSize) -> any View
+
     @MainActor
-    func makeBannerUIView(for placement: AdBannerPlacement) -> UIView
+    func makeBannerUIView(size: AdBannerSize) -> UIView
 }

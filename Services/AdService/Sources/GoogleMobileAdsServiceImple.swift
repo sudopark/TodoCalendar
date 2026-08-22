@@ -162,4 +162,6 @@ extension GoogleMobileAdsServiceImple {
             .removeDuplicates()
             .eraseToAnyPublisher()
     }
+
+    var isStartedNow: Bool { self.subject.isStart.value }
 }
