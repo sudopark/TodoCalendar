@@ -15,6 +15,7 @@ import Extensions
 import UnitTestHelpKit
 import TestDoubles
 import Scenes
+import CommonPresentation
 
 @testable import EventDetailScene
 

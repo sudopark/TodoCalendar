@@ -12,22 +12,7 @@ import Prelude
 import Optics
 import Domain
 import Extensions
-
-
-public struct LiveActivityActionModel: Equatable, Sendable {
-
-    public let isRegistered: Bool
-
-    public var itemText: String {
-        return self.isRegistered
-            ? "calendar::event::more_action:live_activity:unregister:item_name".localized()
-            : "calendar::event::more_action:live_activity:register:item_name".localized()
-    }
-
-    public init(isRegistered: Bool) {
-        self.isRegistered = isRegistered
-    }
-}
+import CommonPresentation
 
 
 public protocol LiveActivityToggleViewModel: AnyObject, Sendable {
