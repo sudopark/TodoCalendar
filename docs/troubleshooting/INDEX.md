@@ -25,3 +25,4 @@
 - [2026-08-16 공유 미리보기에서 일부 기본 이벤트의 태그명이 안 나온다](2026-08-16-share-preview-deleted-tag-name-missing.md) — Event / fixed / 태그명 안나옴, 삭제된 태그, 드롭다운 빈 항목, tagName nil, stub이 미스를 못 만듦
 - [2026-08-22 DayEventList 라이브액티비티 해제 표시 테스트 간헐 타임아웃](2026-08-22-dayeventlist-live-activity-clear-mark-flaky.md) — Event / deferred / whenLiveActivityUnregistered_cellViewModelsClearMark·Exceeded timeout of 2 seconds·간헐 실패
 - [2026-08-22 구글 이벤트 개별 색상이 라이브액티비티에서 무시됨](2026-08-22-google-event-custom-color-ignored-in-live-activity.md) — ExternalCalendar / fixed / 구글 이벤트 색상·커스텀 색상 무시·라이브액티비티 색·colorId
+- [2026-08-22 캘린더 하단 배너를 붙이자 플랜 구독 합성에서 격리 어서션 크래시](2026-08-22-ad-banner-plan-binding-main-actor-crash.md) — Billing / fixed / 배너 광고 크래시·_swift_task_checkIsolatedSwift·dispatch_assert_queue_fail·MainActor 격리 위반

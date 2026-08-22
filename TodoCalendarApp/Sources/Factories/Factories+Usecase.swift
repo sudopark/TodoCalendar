@@ -31,7 +31,6 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
     let billingUsecase: any BillingUsecase
     let eventLiveActivityUsecase: any EventLiveActivityUsecase
     let imageTextRecognizeService: any ImageTextRecognizeService = ImageTextRecognizeServiceImple()
-    let adViewBuilder: (any AdViewBuilder)?
     let fullScreenAdRouter: (any FullScreenAdRouter)?
     private let applicationBase: ApplicationBase
 
@@ -51,7 +50,6 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
         self.eventSyncUsecase = NotNeedEventSyncUsecase()
         self.applicationBase = applicationBase
         self.billingUsecase = NotNeedBillingUsecase(sharedDataStore: applicationBase.sharedDataStore)
-        self.adViewBuilder = applicationBase.makeAdViewBuilder(billingUsecase: self.billingUsecase)
         self.fullScreenAdRouter = applicationBase.makeFullScreenAdRouter(billingUsecase: self.billingUsecase)
 
         self.aiAgentOrchestrationUsecase = NotNeedAIAgentOrchestrationUsecase()
@@ -392,7 +390,6 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
     let billingUsecase: any BillingUsecase
     let eventLiveActivityUsecase: any EventLiveActivityUsecase
     let imageTextRecognizeService: any ImageTextRecognizeService = ImageTextRecognizeServiceImple()
-    let adViewBuilder: (any AdViewBuilder)?
     let fullScreenAdRouter: (any FullScreenAdRouter)?
     private let applicationBase: ApplicationBase
 
@@ -499,7 +496,6 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
             appStoreService: AppStoreBillingServiceImple(),
             sharedDataStore: applicationBase.sharedDataStore
         )
-        self.adViewBuilder = applicationBase.makeAdViewBuilder(billingUsecase: self.billingUsecase)
         self.fullScreenAdRouter = applicationBase.makeFullScreenAdRouter(billingUsecase: self.billingUsecase)
 
         self.eventLiveActivityUsecase = EventLiveActivityUsecaseImple(

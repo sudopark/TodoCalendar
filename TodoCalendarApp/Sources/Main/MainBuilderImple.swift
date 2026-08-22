@@ -23,19 +23,22 @@ public final class MainSceneBuilerImple {
     private let calendarSceneBulder: any CalendarSceneBuilder
     private let settingSceneBuilder: any SettingSceneBuiler
     private let mobileAdService: GoogleMobileAdsServiceImple?
+    private let adViewBuilder: (any AdViewBuilder)?
     
     public init(
         usecaseFactory: any UsecaseFactory,
         viewAppearance: ViewAppearance,
         calendarSceneBulder: any CalendarSceneBuilder,
         settingSceneBuilder: any SettingSceneBuiler,
-        mobileAdService: GoogleMobileAdsServiceImple?
+        mobileAdService: GoogleMobileAdsServiceImple?,
+        adViewBuilder: (any AdViewBuilder)?
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
         self.calendarSceneBulder = calendarSceneBulder
         self.settingSceneBuilder = settingSceneBuilder
         self.mobileAdService = mobileAdService
+        self.adViewBuilder = adViewBuilder
     }
 }
 
@@ -62,7 +65,8 @@ extension MainSceneBuilerImple: MainSceneBuiler {
         let viewController = MainViewController(
             viewModel: viewModel,
             viewAppearance: self.viewAppearance,
-            mobileAdService: self.mobileAdService
+            mobileAdService: self.mobileAdService,
+            adViewBuilder: self.adViewBuilder
         )
         
         let router = MainRouter(

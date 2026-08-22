@@ -186,12 +186,6 @@ final class ApplicationBase {
         return self.mobileAdService
     }()
 
-    func makeAdViewBuilder(billingUsecase: any BillingUsecase) -> (any AdViewBuilder)? {
-        return self.mobileAdService.map {
-            ApplicationAdViewBuilder(adService: $0, billingUsecase: billingUsecase)
-        }
-    }
-
     func makeFullScreenAdRouter(billingUsecase: any BillingUsecase) -> (any FullScreenAdRouter)? {
         return self.mobileAdService.map {
             FullScreenAd(
