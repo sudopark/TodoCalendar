@@ -8,6 +8,8 @@
 
 import Foundation
 import Combine
+import Prelude
+import Optics
 import Extensions
 
 
@@ -17,8 +19,11 @@ public final class NotNeedBillingUsecase: BillingUsecase, Sendable {
 
     private let sharedDataStore: SharedDataStore
 
+    // 로그아웃은 clearAll 로 키를 지운 뒤 팩토리를 재생성하므로, init 에서 seed 하면 항상 그 clear 다음에 들어간다
     public init(sharedDataStore: SharedDataStore) {
         self.sharedDataStore = sharedDataStore
+        let freePlan = BillingUserPlan() |> \.planId .~ .free
+        sharedDataStore.put(BillingUserPlan.self, key: ShareDataKeys.billingUserPlan.rawValue, freePlan)
     }
 
     public func loadPlanOfferings() async throws -> [BillingPlanOffering] { return [] }
