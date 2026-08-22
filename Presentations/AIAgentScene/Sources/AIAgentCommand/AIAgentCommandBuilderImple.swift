@@ -13,13 +13,16 @@ public final class AIAgentCommandBuilderImple: AIAgentCommandSceneBuilder {
 
     private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
+    private let adViewBuilder: (any AdViewBuilder)?
 
     public init(
         usecaseFactory: any UsecaseFactory,
-        viewAppearance: ViewAppearance
+        viewAppearance: ViewAppearance,
+        adViewBuilder: (any AdViewBuilder)?
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
+        self.adViewBuilder = adViewBuilder
     }
 
     @MainActor
@@ -33,7 +36,8 @@ public final class AIAgentCommandBuilderImple: AIAgentCommandSceneBuilder {
         viewModel.listener = listener
         let viewController = AIAgentCommandViewController(
             viewModel: viewModel,
-            viewAppearance: self.viewAppearance
+            viewAppearance: self.viewAppearance,
+            adViewBuilder: self.adViewBuilder
         )
         let router = AIAgentRouter()
         router.scene = viewController

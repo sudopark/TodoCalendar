@@ -487,7 +487,8 @@ extension ApplicationRootRouter {
     private func aiAgentCommandSceneBuilder() -> any AIAgentCommandSceneBuilder {
         return AIAgentCommandBuilderImple(
             usecaseFactory: self.usecaseFactory,
-            viewAppearance: self.viewAppearanceStore.appearance
+            viewAppearance: self.viewAppearanceStore.appearance,
+            adViewBuilder: self.adViewBuilder()
         )
     }
 
