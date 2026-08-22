@@ -46,6 +46,7 @@ paths:
 | `InAppWebViewController` | 인앱 웹뷰 화면 (UIKit) — 진행바·문서 타이틀·뒤로/앞으로·브라우저로 열기 + 로드 실패 폴백 (#806) | 모달은 `BaseRouterImple.showWebView(_:)` / `init` = push·child VC |
 | `AdViewBuilder` | 배너 광고 뷰 팩토리 (프로토콜 — placement로 요청, 구현체는 앱 타겟. 씬은 SDK를 모른다, #898) | `makeBannerView(for:)` / `makeBannerUIView(for:)` |
 | `FullScreenAdRouter` | 전면 광고 노출 커맨드 (프로토콜 — 씬 Router가 재위임, 구현체는 앱 타겟, #898) | `showFullScreenAd(from:)` |
+| `PrivacyOptionsFormRouter` | UMP 개인정보 옵션 폼 진입점 (프로토콜 — 요구 여부 조회 + 폼 표시, 구현체는 앱 타겟, #958) | `isPrivacyOptionsRequired()` / `showPrivacyOptionsForm(from:)` |
 
 - 이벤트 연결 주류는 `.eventHandler(\.키패스)` (기본값 있는 var 클로저) — 신규 컴포넌트도 이 패턴으로. 표의 예외(init 클로저·render-prop·체이닝)는 기존 API 존중.
 - **컴포넌트를 새로 만들었으면 같은 커밋에서 이 표에 한 줄 추가한다** (CLAUDE.md §1 짝 규칙). 등재 안 된 컴포넌트는 다음 사람이 못 찾아 같은 걸 또 만든다.
