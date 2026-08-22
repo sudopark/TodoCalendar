@@ -96,6 +96,22 @@ extension GoogleCalendarUsecaseImpleTests {
         }
     }
 
+    /// #934 — 라이브액티비티가 팔레트(colorId→hex)를 읽을 수 있어야 이벤트 개별 색을 반영한다.
+    @Test func prepare_whenAccountExists_storesColorsInSharedDataStore() async throws {
+        // given
+        let usecase = makeUsecase(accounts: ["account@google.com"])
+
+        // when
+        usecase.prepare()
+        try await Task.sleep(for: .milliseconds(100))
+
+        // then
+        let colors = stubStore.value(
+            [String: GoogleCalendar.Colors].self, key: ShareDataKeys.googleCalendarColors.rawValue
+        )
+        #expect(colors?["account@google.com"] != nil)
+    }
+
     @Test func prepare_whenCalledMultipleTimes_onlyLatestSubscriptionIsActive() async throws {
         let usecase = makeUsecase()
 
@@ -181,6 +197,50 @@ extension GoogleCalendarUsecaseImpleTests {
             ids.contains(where: { $0.externalServiceId == GoogleCalendarService.id })
         }
         #expect(hasGoogleOffId == [true, false])
+    }
+
+    /// #934 — 로그아웃한 계정의 팔레트가 SharedDataStore 에 남으면 라이브액티비티가 옛 색을 계속 쓴다.
+    @Test func integration_whenAccountDisconnected_removesColorsFromSharedDataStore() async throws {
+        // given
+        let usecase = makeUsecase(accounts: ["account@google.com"])
+        usecase.prepare()
+        try await Task.sleep(for: .milliseconds(100))
+        let seeded = stubStore.value(
+            [String: GoogleCalendar.Colors].self, key: ShareDataKeys.googleCalendarColors.rawValue
+        )
+        #expect(seeded?["account@google.com"] != nil)
+
+        // when
+        self.updateAccount(email: "account@google.com", integrated: false)
+        try await Task.sleep(for: .milliseconds(300))
+
+        // then
+        let cleared = stubStore.value(
+            [String: GoogleCalendar.Colors].self, key: ShareDataKeys.googleCalendarColors.rawValue
+        )
+        #expect(cleared?["account@google.com"] == nil)
+    }
+
+    @Test func integration_whenOneAccountDisconnected_otherAccountColorsRemainIntact() async throws {
+        // given
+        let repo1 = PrivateStubRepository(customCalendarsStubbing: [.init(id: "cal-a", name: "A")])
+        let repo2 = PrivateStubRepository(customCalendarsStubbing: [.init(id: "cal-b", name: "B")])
+        stubRepositoryPool.setRepository(repo1, for: "account1@google.com")
+        stubRepositoryPool.setRepository(repo2, for: "account2@google.com")
+        let usecase = makeUsecase(accounts: ["account1@google.com", "account2@google.com"])
+        usecase.prepare()
+        try await Task.sleep(for: .milliseconds(100))
+
+        // when
+        self.updateAccount(email: "account1@google.com", integrated: false)
+        try await Task.sleep(for: .milliseconds(100))
+
+        // then
+        let colors = stubStore.value(
+            [String: GoogleCalendar.Colors].self, key: ShareDataKeys.googleCalendarColors.rawValue
+        )
+        #expect(colors?["account1@google.com"] == nil)
+        #expect(colors?["account2@google.com"] != nil)
     }
 
     @Test func integration_whenOneAccountDisconnected_otherAccountRemainsIntact() async throws {
