@@ -159,7 +159,6 @@ final class AIAgentSceneSnapshots: XCTestCase {
             state.usage = AIAgentUsage(input: 5000, output: 0, limit: 5000)
                 |> \.resetsAt .~ Date().addingTimeInterval(3 * 3600 + 12 * 60 + 30)
             state.userPlan = BillingUserPlan() |> \.planId .~ .free
-            state.isPaywallAvailable = true
             return AIAgentCommandStageView()
                 .environment(state)
                 .environment(AIAgentCommandViewEventHandler())

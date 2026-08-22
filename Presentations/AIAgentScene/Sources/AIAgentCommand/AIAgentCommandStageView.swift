@@ -23,13 +23,10 @@ import CommonPresentation
     var commandState: AIAgentCommandState?
     var usage: AIAgentUsage?
     var userPlan: BillingUserPlan?
-    var isPaywallAvailable: Bool = false
 
     func bind(_ viewModel: any AIAgentCommandViewModel) {
         guard self.didBind == false else { return }
         self.didBind = true
-
-        self.isPaywallAvailable = viewModel.isPaywallAvailable
 
         viewModel.commandState
             .receive(on: RunLoop.main)
@@ -425,7 +422,7 @@ private extension AIAgentCommandStageView {
                 text: self.failedMessage(reason: reason, errorCode: errorCode)
             )
 
-            let showsPlansCTA = errorCode == .dailyLimitExceeded && self.state.isPaywallAvailable
+            let showsPlansCTA = errorCode == .dailyLimitExceeded
             if showsPlansCTA {
                 ConfirmButton(
                     title: "aiAgent::failed::showPlans".localized(),
