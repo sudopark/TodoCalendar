@@ -4,6 +4,7 @@ import ProjectDescription
 let project = Project.frameworkWithTest(name: "SettingScene",
                                         destinations: [.iPhone],
                                         iOSTargetVersion: "17.0",
+                                        resources: ["Resources/**"],
                                         snapshotTests: true,
                                         dependencies: [
                                             .project(target: "Common3rdParty", 
