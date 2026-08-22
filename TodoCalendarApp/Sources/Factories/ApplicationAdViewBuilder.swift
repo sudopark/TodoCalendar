@@ -13,11 +13,13 @@ import AdService
 
 
 final class ApplicationAdViewBuilder: AdViewBuilder {
-    
+
     private let adService: GoogleMobileAdsServiceImple
-    
-    init(adService: GoogleMobileAdsServiceImple) {
+    private let gate: AdDisplayGate
+
+    init(adService: GoogleMobileAdsServiceImple, gate: AdDisplayGate) {
         self.adService = adService
+        self.gate = gate
     }
     
     private struct BannerRequest {
@@ -43,20 +45,24 @@ final class ApplicationAdViewBuilder: AdViewBuilder {
     @MainActor
     func makeBannerView(for placement: AdBannerPlacement) -> any View {
         let request = self.bannerRequest(for: placement)
-        return AdBannerView(
-            adUnitId: request.adUnitId,
-            size: request.size,
-            adService: self.adService
-        )
+        return GatedAdBannerView(canShowAd: self.gate.canShowAd) {
+            AdBannerView(
+                adUnitId: request.adUnitId,
+                size: request.size,
+                adService: self.adService
+            )
+        }
     }
-    
+
     @MainActor
     func makeBannerUIView(for placement: AdBannerPlacement) -> UIView {
         let request = self.bannerRequest(for: placement)
-        return AdBannerUIView(
-            adUnitId: request.adUnitId,
-            size: request.size,
-            adService: self.adService
-        )
+        return GatedAdBannerUIView(canShowAd: self.gate.canShowAd) {
+            AdBannerUIView(
+                adUnitId: request.adUnitId,
+                size: request.size,
+                adService: self.adService
+            )
+        }
     }
 }

@@ -175,19 +175,28 @@ final class ApplicationBase {
         )
     }()
     
+    lazy var billingUserPlanConfirmationUsecase: any BillingUserPlanConfirmationUsecase = {
+        return BillingUserPlanConfirmationUsecaseImple(sharedDataStore: self.sharedDataStore)
+    }()
+
+    lazy var adDisplayGate: AdDisplayGate = {
+        return AdDisplayGate(userPlanConfirmationUsecase: self.billingUserPlanConfirmationUsecase)
+    }()
+
     lazy var mobileAdService: GoogleMobileAdsServiceImple? = {
         guard AppEnvironment.isTestBuild == false else { return nil }
         return GoogleMobileAdsServiceImple(
             testDeviceIdentifiers: AppEnvironment.admobTestDeviceIdentifiers
         )
     }()
-    
+
     lazy var fullScreenAdRouter: any FullScreenAdRouter = ApplicationFullScreenAdRouter(
-        adUnitId: AppEnvironment.admobUnitIds.fullScreen
+        adUnitId: AppEnvironment.admobUnitIds.fullScreen,
+        gate: self.adDisplayGate
     )
-    
+
     lazy var adViewBuilder: (any AdViewBuilder)? = {
-        return self.mobileAdService.map { ApplicationAdViewBuilder(adService: $0) }
+        return self.mobileAdService.map { ApplicationAdViewBuilder(adService: $0, gate: self.adDisplayGate) }
     }()
     
     lazy var privacyOptionsFormRouter: (any PrivacyOptionsFormRouter)? = {
