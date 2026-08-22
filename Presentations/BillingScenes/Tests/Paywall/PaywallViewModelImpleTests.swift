@@ -348,6 +348,48 @@ extension PaywallViewModelImpleTests {
 }
 
 
+// MARK: - 혜택 목록 (광고 제거, #956)
+
+extension PaywallViewModelImpleTests {
+
+    @Test func paywall_planDetail_containsNoAdsFeature() async throws {
+        // given
+        let standard = self.purchasableOffering(
+            .standard, productId: "product.standard", isTopupAllowed: true
+        )
+        let (viewModel, _, _) = self.makeViewModel(offerings: [standard])
+
+        // when
+        _ = try await self.waitOfferingsLoaded(viewModel)
+        viewModel.selectPlan(.standard)
+        let detailExpect = expectConfirm("플랜 상세 features")
+        let detail = try await self.firstOutput(detailExpect, for: viewModel.selectedPlanDetail) ?? nil
+
+        // then
+        #expect(detail?.features.contains("billing::paywall::feature::noAds".localized()) == true)
+    }
+
+    // 범위 축 — isTopupAllowed == false 인 플랜에서도 topup 줄만 빠지고 noAds 줄은 남는다
+    @Test func paywall_planDetail_whenTopupNotAllowed_stillContainsNoAdsFeature() async throws {
+        // given
+        let standard = self.purchasableOffering(
+            .standard, productId: "product.standard", isTopupAllowed: false
+        )
+        let (viewModel, _, _) = self.makeViewModel(offerings: [standard])
+
+        // when
+        _ = try await self.waitOfferingsLoaded(viewModel)
+        viewModel.selectPlan(.standard)
+        let detailExpect = expectConfirm("top-up 미허용 플랜 features")
+        let detail = try await self.firstOutput(detailExpect, for: viewModel.selectedPlanDetail) ?? nil
+
+        // then
+        #expect(detail?.features.contains("billing::paywall::feature::topup".localized()) == false)
+        #expect(detail?.features.contains("billing::paywall::feature::noAds".localized()) == true)
+    }
+}
+
+
 // MARK: - 구매
 
 extension PaywallViewModelImpleTests {
