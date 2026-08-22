@@ -329,12 +329,10 @@ extension CalendarViewModelImple {
         
         self.bindUncompletedTodoRefresh()
 
-        if FeatureFlag.isEnable(.aiAgent) {
-            self.bindShowAICommandResultIfNeed()
-            self.bindVoiceInputLifecycle()
-            self.bindScrollToVoiceInputOnFocusedMonth()
-            self.aiAgentOrchestrationUsecase.prepare()
-        }
+        self.bindShowAICommandResultIfNeed()
+        self.bindVoiceInputLifecycle()
+        self.bindScrollToVoiceInputOnFocusedMonth()
+        self.aiAgentOrchestrationUsecase.prepare()
     }
     
     private func prepareInitialMonths(around today: CalendarComponent.Day) {

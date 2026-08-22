@@ -16,9 +16,6 @@ public final class FeatureFlag: @unchecked Sendable {
         /// D-day 위젯(#741) — 배포 보류 중. 켜면 일정 상세에 후보 등록 메뉴가 다시 노출된다.
         /// 위젯 갤러리 노출은 `TodoCalendarWidgetBundle`에서 별도로 막혀 있다.
         case ddayWidget
-        /// AI Agent(#746) — 배포 보류 중. 켜면 캘린더 일별 리스트에 AI 진입 버튼이 노출되고
-        /// 앱 시작 시 orchestration prepare(usage 로드·job 복원)가 재개된다.
-        case aiAgent
         /// Billing paywall(#739) — 배포 보류 중. ASC 상품 메타데이터·서버 productId 정합이
         /// 끝나기 전엔 진입점(한도 초과 화면 · 설정)을 닫아둔다.
         case billingPaywall

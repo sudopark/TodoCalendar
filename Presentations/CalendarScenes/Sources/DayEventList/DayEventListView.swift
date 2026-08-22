@@ -46,7 +46,6 @@ enum DayEventListScrollAnchor {
     fileprivate var dayModel: SelectedDayModel?
     fileprivate var cellViewModels: [any EventCellViewModel] = []
     fileprivate var foremostEventMarkingStatus: ForemostMarkingStatus = .idle
-    fileprivate var isAIAgentEnabled: Bool = false
     fileprivate var aiAgentState: AIAgentState = .idle
     fileprivate var recognizingText: String = ""
     fileprivate var voiceLevel: Float = 0
@@ -76,8 +75,6 @@ enum DayEventListScrollAnchor {
 
         guard self.didBind == false else { return }
         self.didBind = true
-
-        self.isAIAgentEnabled = viewModel.isAIAgentEnabled
 
         viewModel.foremostEventModel
             .receive(on: RunLoop.main)
@@ -542,11 +539,9 @@ private struct QuickAddNewTodoView: View {
             }
             .opacity(self.inputDimOpacity)
 
-            if self.state.isAIAgentEnabled {
-                AIAgentEntryButton(badge: self.state.aiCommandBadge) {
-                    self.isFocusInput = false
-                    self.eventHandler.handleAIEntryButtonTap()
-                }
+            AIAgentEntryButton(badge: self.state.aiCommandBadge) {
+                self.isFocusInput = false
+                self.eventHandler.handleAIEntryButtonTap()
             }
         }
     }
