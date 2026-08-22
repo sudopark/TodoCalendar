@@ -760,6 +760,39 @@ extension EventLiveActivityUsecaseImpleTests {
         #expect(stub.didUpdateWith == nil)
     }
 
+    /// 복원 기준선은 첫 관찰값으로 잡혀 규칙 5가 안 끊는다 — 규칙 7 갱신에서 회차 쿼리도
+    /// 복원 시점 값이 아니라 관찰된 새 시각을 따라가야 한다.
+    @Test func usecase_afterRestore_whenRuleSevenFires_updatesScheduleTimeQuery() async throws {
+        // given
+        let staleTime = Date().addingTimeInterval(60)
+        let newTime = Date().addingTimeInterval(120)
+        let staleContent = self.content(name: "schedule", eventDate: staleTime)
+            |> \.scheduleTimeQuery .~ EventTime.at(staleTime.timeIntervalSince1970).queryParams
+        let registration = LiveActivityRegistration(
+            target: .schedule(id: "s1", turnKey: nil), content: staleContent
+        )
+        let (usecase, stub, store) = self.makeUsecase(stubRestoredRegistration: registration)
+        store.put(
+            MemorizedEventsContainer<ScheduleEvent>.self, key: ShareDataKeys.schedules.rawValue,
+            MemorizedEventsContainer<ScheduleEvent>()
+                .append(self.makeSchedule(id: "s1", name: "schedule", eventDate: newTime))
+        )
+        await usecase.prepare()
+        try await self.waitForEffects()
+
+        // when
+        store.put(
+            MemorizedEventsContainer<ScheduleEvent>.self, key: ShareDataKeys.schedules.rawValue,
+            MemorizedEventsContainer<ScheduleEvent>()
+                .append(self.makeSchedule(id: "s1", name: "changed", eventDate: newTime))
+        )
+        try await self.waitForEffects()
+
+        // then
+        let expectedQuery = EventTime.at(newTime.timeIntervalSince1970).queryParams
+        #expect(stub.didUpdateWith?.scheduleTimeQuery == expectedQuery)
+    }
+
     @Test func usecase_handleWillEnterForeground_whenEventDatePassed_endsActivity() async throws {
         // given
         let past = Date().addingTimeInterval(-60)
@@ -1282,6 +1315,75 @@ extension EventLiveActivityUsecaseImpleTests {
         let startDate = try #require(stub.didStartWith?.1.startDate)
         #expect(startDate >= before)
         #expect(startDate <= Date())
+    }
+
+    @Test func usecase_startScheduleActivity_fillsScheduleTimeQueryFromOriginTime() async throws {
+        // given
+        let (usecase, stub, store) = self.makeUsecase()
+        let future = Date().addingTimeInterval(60)
+        let schedule = self.makeSchedule(id: "s1", eventDate: future)
+        store.put(
+            MemorizedEventsContainer<ScheduleEvent>.self, key: ShareDataKeys.schedules.rawValue,
+            MemorizedEventsContainer<ScheduleEvent>().append(schedule)
+        )
+
+        // when
+        try await usecase.startActivity(.schedule(id: "s1", turnKey: nil))
+
+        // then
+        #expect(stub.didStartWith?.1.scheduleTimeQuery == schedule.time.queryParams)
+    }
+
+    /// 원본 회차는 `schedule.time`을 그대로 실어야 초 미만 정밀도가 보존된다.
+    @Test func usecase_startScheduleActivity_originOccurrence_fillsScheduleTimeQueryLosslessly() async throws {
+        // given
+        let (usecase, stub, store) = self.makeUsecase()
+        let future = Date().addingTimeInterval(60.4)
+        let schedule = self.makeSchedule(id: "s1", eventDate: future)
+        store.put(
+            MemorizedEventsContainer<ScheduleEvent>.self, key: ShareDataKeys.schedules.rawValue,
+            MemorizedEventsContainer<ScheduleEvent>().append(schedule)
+        )
+
+        // when
+        try await usecase.startActivity(.schedule(id: "s1", turnKey: nil))
+
+        // then
+        let query = try #require(stub.didStartWith?.1.scheduleTimeQuery)
+        #expect(EventTime(deepLink: query) == schedule.time)
+    }
+
+    @Test func usecase_startRepeatingScheduleActivity_fillsScheduleTimeQueryFromTurnKey() async throws {
+        // given
+        let (usecase, stub, store) = self.makeUsecase()
+        let originTime = Date().addingTimeInterval(60)
+        let turnTime = Date().addingTimeInterval(3600)
+        let turnKey = EventTime.at(turnTime.timeIntervalSince1970).customKey
+        store.put(
+            MemorizedEventsContainer<ScheduleEvent>.self, key: ShareDataKeys.schedules.rawValue,
+            MemorizedEventsContainer<ScheduleEvent>()
+                .append(self.makeSchedule(id: "s1", eventDate: originTime))
+        )
+
+        // when
+        try await usecase.startActivity(.schedule(id: "s1", turnKey: turnKey))
+
+        // then
+        let expectedQuery = try #require(EventTime(customKey: turnKey)).queryParams
+        #expect(stub.didStartWith?.1.scheduleTimeQuery == expectedQuery)
+    }
+
+    @Test func usecase_startTodoActivity_leavesScheduleTimeQueryNil() async throws {
+        // given
+        let (usecase, stub, store) = self.makeUsecase()
+        let future = Date().addingTimeInterval(60)
+        self.putTodos(store, [self.makeTodo(id: "t1", eventDate: future)])
+
+        // when
+        try await usecase.startActivity(.todo(id: "t1"))
+
+        // then
+        #expect(stub.didStartWith?.1.scheduleTimeQuery == nil)
     }
 }
 

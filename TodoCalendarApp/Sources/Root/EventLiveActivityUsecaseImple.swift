@@ -92,7 +92,8 @@ extension EventLiveActivityUsecaseImple {
             eventDate: observed.eventDate,
             startDate: startDate,
             placeName: detail?.place?.placeName ?? observed.placeName,
-            memo: detail?.memo
+            memo: detail?.memo,
+            scheduleTimeQuery: observed.scheduleTimeQuery
         )
     }
 
@@ -363,8 +364,16 @@ extension EventLiveActivityUsecaseImple {
             placeName: nil,
             repeatingTurn: todo.repeatingTurn,
             scheduleOriginTimeKey: nil,
-            isTurnExcluded: false
+            isTurnExcluded: false,
+            scheduleTimeQuery: nil
         )
+    }
+
+    /// 원본 회차·비반복은 `schedule.time`을 그대로 쓴다 — turnKey(customKey)는 초 미만을 잘라내서,
+    /// 되돌린 값이 시리즈 시작 시각과 정확히 같지 않으면 상세의 "전체 일정" 판정이 어긋난다.
+    private func occurrenceTime(of schedule: ScheduleEvent, turnKey: String?) -> EventTime {
+        guard let turnKey, turnKey != schedule.time.customKey else { return schedule.time }
+        return EventTime(customKey: turnKey) ?? schedule.time
     }
 
     private func observedEvent(
@@ -382,7 +391,8 @@ extension EventLiveActivityUsecaseImple {
             placeName: nil,
             repeatingTurn: nil,
             scheduleOriginTimeKey: schedule.time.customKey,
-            isTurnExcluded: turnKey.map { schedule.repeatingTimeToExcludes.contains($0) } ?? false
+            isTurnExcluded: turnKey.map { schedule.repeatingTimeToExcludes.contains($0) } ?? false,
+            scheduleTimeQuery: self.occurrenceTime(of: schedule, turnKey: turnKey).queryParams
         )
     }
 
@@ -398,7 +408,8 @@ extension EventLiveActivityUsecaseImple {
             placeName: nil,
             repeatingTurn: nil,
             scheduleOriginTimeKey: nil,
-            isTurnExcluded: false
+            isTurnExcluded: false,
+            scheduleTimeQuery: nil
         )
     }
 
@@ -419,7 +430,8 @@ extension EventLiveActivityUsecaseImple {
             placeName: event.location,
             repeatingTurn: nil,
             scheduleOriginTimeKey: nil,
-            isTurnExcluded: false
+            isTurnExcluded: false,
+            scheduleTimeQuery: nil
         )
     }
 
@@ -437,7 +449,8 @@ extension EventLiveActivityUsecaseImple {
             placeName: event.location,
             repeatingTurn: nil,
             scheduleOriginTimeKey: nil,
-            isTurnExcluded: false
+            isTurnExcluded: false,
+            scheduleTimeQuery: nil
         )
     }
 
@@ -555,6 +568,7 @@ extension EventLiveActivityUsecaseImple {
             |> \.eventTimeText .~ observed.eventTimeText
             |> \.eventDate .~ observed.eventDate
             |> \.placeName .~ observed.placeName
+            |> \.scheduleTimeQuery .~ observed.scheduleTimeQuery
     }
 
     /// Todo·Schedule·공휴일은 공유 상태에 장소 정보가 없다 — 규칙 7의 장소 비교 대상에서
@@ -587,6 +601,7 @@ private struct LiveActivityObservedEvent {
     var repeatingTurn: Int?
     var scheduleOriginTimeKey: String?
     var isTurnExcluded: Bool
+    var scheduleTimeQuery: [String: String]?
 }
 
 private struct LiveActivityBaseline {
