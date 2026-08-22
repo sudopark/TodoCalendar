@@ -674,6 +674,7 @@
 "billing::paywall::features::title" = "%@에 포함된 기능";
 "billing::paywall::feature::dailyCredits" = "하루 %@ 크레딧";
 "billing::paywall::feature::topup" = "크레딧 소진 시 추가 구매 가능";
+"billing::paywall::feature::noAds" = "광고 없이 사용";
 "billing::paywall::disclosure::subscription" = "구독은 매월 자동 갱신되며, 현재 기간이 끝나기 24시간 전까지 해지하지 않으면 같은 금액으로 갱신됩니다. 해지는 App Store 설정에서 언제든 할 수 있어요.";
 "billing::paywall::disclosure::subscription::generic" = "구독은 각 결제 주기가 끝날 때 자동 갱신되며, 끝나기 24시간 전까지 해지하지 않으면 같은 금액으로 갱신됩니다. 해지는 App Store 설정에서 언제든 할 수 있어요.";
 "billing::paywall::disclosure::oneTime" = "한 번 결제하면 계속 사용할 수 있어요. 자동 갱신되지 않습니다.";

@@ -669,7 +669,8 @@ extension PaywallViewModelImple {
     private func features(of plan: BillingPlan) -> [String] {
         return [
             "billing::paywall::feature::dailyCredits".localized(with: plan.dailyLimit.formatted()),
-            plan.isTopupAllowed ? "billing::paywall::feature::topup".localized() : nil
+            plan.isTopupAllowed ? "billing::paywall::feature::topup".localized() : nil,
+            "billing::paywall::feature::noAds".localized()
         ].compactMap { $0 }
     }
 }
