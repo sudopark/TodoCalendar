@@ -9,14 +9,15 @@ description: Use when producing full-screen snapshot images of app scenes for ex
 
 ## 1. 스위트 위치
 
-- 각 Scene 프레임워크의 `Snapshots/<Name>CatalogSnapshots.swift`. 시범 구축분: SettingScene(설정 목록·국가 선택), MemberScenes(로그인).
+- 각 Scene 프레임워크의 `Snapshots/<Name>CatalogSnapshots.swift`.
 - 새 화면 추가: 대상 프레임워크에 Snapshots 타겟이 없으면 snapshot-check §2와 동일하게 활성화 후 카탈로그 테스트 파일에 케이스 추가.
+- 확장 타겟(위젯 등)은 `TodoCalendarApp/AppExtensions/<Ext>/Snapshots/`에 배치. `Project.makeAppExtensionTargets(..., snapshotTests: true)`로 활성화.
 
 ## 2. 화면 구성 — 더미 데이터
 
 - 화면당 대표 상태 1개(정보가 풍부한 상태)로 구성. 상태 조합 나열 금지 — 그건 snapshot-check의 검증 영역.
 - 구성 소스 우선순위: ① 대상 뷰 파일의 #Preview/PreviewProvider (더미 구성 그대로 재사용) ② TestDoubles의 Dummies·Stub ③ 직접 구성.
-- 라이트·다크 pair 자동(captureSnapshotPair), 언어 en 고정, layout은 `.fullScreen`.
+- 라이트·다크 pair 자동(captureSnapshotPair), 언어 en 고정. layout은 풀스크린 화면이면 `.fullScreen`, 위젯·부분 컴포넌트면 `.fixed`.
 - **캡처 호출에 `snapshotDirectory: catalogSnapshotDirectory()` 필수** — 검증용 기본 경로(`__Snapshots__/`)와 격리해 `snapshot-catalog/<Framework>/<스위트>/`에 기록한다.
 
 ## 3. 촬영·수집
