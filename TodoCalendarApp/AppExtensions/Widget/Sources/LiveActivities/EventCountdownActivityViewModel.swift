@@ -20,6 +20,7 @@ struct EventCountdownActivityViewModel {
     let subtitle: String?
     let tagColor: Color
     let todoId: String?
+    let deepLink: URL?
 
     init(_ attributes: EventCountdownActivityAttributes, _ state: EventCountdownActivityAttributes.State) {
         self.eventName = state.eventName
@@ -34,6 +35,8 @@ struct EventCountdownActivityViewModel {
         case .schedule, .holiday, .googleCalendar, .appleCalendar:
             self.todoId = nil
         }
+
+        self.deepLink = attributes.target.eventDetailURL(scheduleTimeQuery: state.scheduleTimeQuery)
 
         let uiColor = UIColor.from(hex: state.tagColorHex) ?? .gray
         self.tagColor = uiColor.asColor

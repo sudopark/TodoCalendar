@@ -61,6 +61,7 @@ struct EventCountdownLiveActivity: Widget {
                 // 최소 표시 영역이 배지보다 작아 링이 잘린다 — 지름을 줄여 영역 안쪽에 들인다.
                 EventCountdownRingBadge(model: model, diameter: 27)
             }
+            .widgetURL(model.deepLink)
         }
     }
 }
