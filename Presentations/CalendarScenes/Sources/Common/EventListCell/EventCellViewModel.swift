@@ -446,6 +446,7 @@ public struct AppleCalendarEventCellViewModel: EventCellViewModel {
     public let calendarId: String
     public let isWritable: Bool
     public var isAlldayEvent: Bool = false
+    public var isLiveActivityRegistered: Bool = false
 
     public init?(
         _ event: AppleCalendarEvent,
@@ -472,7 +473,14 @@ public struct AppleCalendarEventCellViewModel: EventCellViewModel {
                 ? [.remove(scope: .onlyThisTime), .remove(scope: .thisAndFuture)]
                 : [.remove(scope: .all)])
             : []
-        return .init(basicActions: [.share], removeActions: removeActions)
+        return .init(
+            basicActions: [.toggleLiveActivity(isRegistered: self.isLiveActivityRegistered), .share],
+            removeActions: removeActions
+        )
+    }
+
+    public var liveActivityTarget: LiveActivityTarget? {
+        .appleCalendar(calendarId: self.calendarId, eventId: self.eventIdentifier)
     }
 
     public var customCompareKey: String {
@@ -496,6 +504,7 @@ public struct GoogleCalendarEventCellViewModel: EventCellViewModel {
     public let recurringEventId: String?
     public let isWritable: Bool
     public var isAlldayEvent: Bool = false
+    public var isLiveActivityRegistered: Bool = false
 
     public init?(
         _ event: GoogleCalendarEvent,
@@ -525,7 +534,14 @@ public struct GoogleCalendarEventCellViewModel: EventCellViewModel {
                 ? [.remove(scope: .onlyThisTime), .remove(scope: .all)]
                 : [.remove(scope: .all)])
             : []
-        return .init(basicActions: [.share], removeActions: removeActions)
+        return .init(
+            basicActions: [.toggleLiveActivity(isRegistered: self.isLiveActivityRegistered), .share],
+            removeActions: removeActions
+        )
+    }
+
+    public var liveActivityTarget: LiveActivityTarget? {
+        .googleCalendar(accountId: self.accountId, calendarId: self.calendarId, eventId: self.eventIdentifier)
     }
 
     public var customCompareKey: String {

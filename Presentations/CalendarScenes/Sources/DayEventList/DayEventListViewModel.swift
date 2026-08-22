@@ -500,6 +500,10 @@ private extension EventCellViewModel {
             return schedule |> \.isLiveActivityRegistered .~ (registered != nil && schedule.liveActivityTarget == registered)
         case let holiday as HolidayEventCellViewModel:
             return holiday |> \.isLiveActivityRegistered .~ (registered != nil && holiday.liveActivityTarget == registered)
+        case let apple as AppleCalendarEventCellViewModel:
+            return apple |> \.isLiveActivityRegistered .~ (registered != nil && apple.liveActivityTarget == registered)
+        case let google as GoogleCalendarEventCellViewModel:
+            return google |> \.isLiveActivityRegistered .~ (registered != nil && google.liveActivityTarget == registered)
         default:
             return self
         }

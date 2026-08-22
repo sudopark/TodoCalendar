@@ -603,7 +603,7 @@ extension DayEventListViewModelImpleTests {
         ))
     }
     
-    func testGoogleCalendarEventCellViewModel_hasShareOnlyMoreActionsRegardlessOfDetailLink() {
+    func testGoogleCalendarEventCellViewModel_hasLiveActivityToggleAndShareMoreActionsRegardlessOfDetailLink() {
         // given
         func parameterizeTest(_ link: String?) {
             // given
@@ -613,7 +613,9 @@ extension DayEventListViewModelImpleTests {
             let actions = cvm.moreActions
 
             // then
-            XCTAssertEqual(actions, .init(basicActions: [.share], removeActions: []))
+            XCTAssertEqual(actions, .init(
+                basicActions: [.toggleLiveActivity(isRegistered: false), .share], removeActions: []
+            ))
         }
 
         // when + then
@@ -836,6 +838,8 @@ extension DayEventListViewModelImpleTests {
         case let todo as TodoEventCellViewModel: return todo.isLiveActivityRegistered
         case let schedule as ScheduleEventCellViewModel: return schedule.isLiveActivityRegistered
         case let holiday as HolidayEventCellViewModel: return holiday.isLiveActivityRegistered
+        case let apple as AppleCalendarEventCellViewModel: return apple.isLiveActivityRegistered
+        case let google as GoogleCalendarEventCellViewModel: return google.isLiveActivityRegistered
         default: return false
         }
     }
@@ -990,6 +994,64 @@ extension DayEventListViewModelImpleTests {
             .filter { self.isLiveActivityRegisteredCell($0) }
             .map { $0.eventIdentifier }
         XCTAssertEqual(registeredIds, ["repeating-period-schedule-2"])
+    }
+
+    func testViewModel_whenLiveActivityRegisteredForAppleCalendarEvent_appleCellMarkedByInstanceId() {
+        // given
+        let expect = expectation(description: "등록된 타겟의 인스턴스 id와 일치하는 애플 캘린더 셀만 표시가 켜진다 — 마스터(originalEventId)로는 안 켜진다")
+        let timeZone = TimeZone(abbreviation: "KST")!
+        let appleEvent = AppleCalendarEvent(
+            AppleCalendar.Event(
+                eventId: "apple-master#occ:100",
+                originalEventId: "apple-master",
+                calendarId: "cal-1",
+                name: "Apple Event",
+                eventTime: .at(self.todayRange.lowerBound + 50)
+            ),
+            in: timeZone
+        )
+        let viewModel = self.makeViewModel(
+            registeredLiveActivityTarget: .appleCalendar(calendarId: "cal-1", eventId: "apple-master#occ:100")
+        )
+
+        // when
+        let source = viewModel.cellViewModels.filter { $0.contains(where: { $0 is AppleCalendarEventCellViewModel }) }
+        let cvms = self.waitFirstOutput(expect, for: source, timeout: 0.1) {
+            viewModel.selectedDayChanaged(self.dummyCurrentDay, and: [appleEvent])
+        }
+
+        // then
+        let registeredIds = cvms?
+            .filter { self.isLiveActivityRegisteredCell($0) }
+            .map { $0.eventIdentifier }
+        XCTAssertEqual(registeredIds, ["apple-master#occ:100"])
+    }
+
+    func testViewModel_whenLiveActivityRegisteredForGoogleCalendarEvent_googleCellMarkedByInstanceId() {
+        // given
+        let expect = expectation(description: "등록된 타겟의 인스턴스 id와 일치하는 구글 캘린더 셀만 표시가 켜진다 — 시리즈 마스터(recurringEventId)로는 안 켜진다")
+        let timeZone = TimeZone(abbreviation: "KST")!
+        let raw = GoogleCalendar.Event(
+            "google-instance", "calendarId", accountId: "stub@gmail.com", name: "google", colorId: "color",
+            time: .at(self.todayRange.lowerBound + 200)
+        )
+        |> \.recurringEventId .~ "google-master"
+        let googleEvent = GoogleCalendarEvent(raw, in: timeZone)
+        let viewModel = self.makeViewModel(
+            registeredLiveActivityTarget: .googleCalendar(accountId: "stub@gmail.com", calendarId: "calendarId", eventId: "google-instance")
+        )
+
+        // when
+        let source = viewModel.cellViewModels.filter { $0.contains(where: { $0 is GoogleCalendarEventCellViewModel }) }
+        let cvms = self.waitFirstOutput(expect, for: source, timeout: 0.1) {
+            viewModel.selectedDayChanaged(self.dummyCurrentDay, and: [googleEvent])
+        }
+
+        // then
+        let registeredIds = cvms?
+            .filter { self.isLiveActivityRegisteredCell($0) }
+            .map { $0.eventIdentifier }
+        XCTAssertEqual(registeredIds, ["google-instance"])
     }
 }
 

@@ -23,3 +23,4 @@
 - [2026-08-15 공유 미리보기에 조회 범위와 안 겹치는 이벤트가 섞여 나온다](2026-08-15-share-preview-shows-events-outside-range.md) — Event / fixed / 범위 밖 이벤트 노출·반복 일정 turn·clamped 재판정 누락
 
 - [2026-08-16 공유 미리보기에서 일부 기본 이벤트의 태그명이 안 나온다](2026-08-16-share-preview-deleted-tag-name-missing.md) — Event / fixed / 태그명 안나옴, 삭제된 태그, 드롭다운 빈 항목, tagName nil, stub이 미스를 못 만듦
+- [2026-08-22 DayEventList 라이브액티비티 해제 표시 테스트 간헐 타임아웃](2026-08-22-dayeventlist-live-activity-clear-mark-flaky.md) — Event / deferred / whenLiveActivityUnregistered_cellViewModelsClearMark·Exceeded timeout of 2 seconds·간헐 실패
