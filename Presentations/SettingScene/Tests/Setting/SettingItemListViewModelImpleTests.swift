@@ -107,7 +107,7 @@ extension SettingItemListViewModelImpleTests {
         let appInfoSection = sections?[safe: 2]
         let infoItemIds = appInfoSection?.items.compactMap { $0 as? SettingItemModel }.map { $0.itemId }
         XCTAssertEqual(infoItemIds, [
-            .shareApp, .addReview, .sourceCode, .terms, .privacyPolicy
+            .shareApp, .addReview, .openSourceLicense, .terms, .privacyPolicy
         ])
 
         let suggestSection = sections?[safe: 3]
@@ -150,7 +150,7 @@ extension SettingItemListViewModelImpleTests {
         XCTAssertEqual(appInfoSection is AppInfoSectionModel, true)
         let infoItemIds = appInfoSection?.items.compactMap { $0 as? SettingItemModel }.map { $0.itemId }
         XCTAssertEqual(infoItemIds, [
-            .shareApp, .addReview, .sourceCode, .terms, .privacyPolicy
+            .shareApp, .addReview, .openSourceLicense, .terms, .privacyPolicy
         ])
         
         let suggestSection = sections?[safe: 3]
@@ -312,21 +312,22 @@ extension SettingItemListViewModelImpleTests {
         XCTAssertEqual(self.spyRouter.didOpenSafariPath, HelpLink.currentPath)
     }
     
-    func testViewModel_routeToSourceCode() {
+    func testViewModel_routeToOpenSourceLicense() {
         // given
         let viewModel = self.makeViewModel()
         let items = self.WaitItemLoaded(viewModel)
         
         // when
-        guard let source = items.compactMap({ $0 as? SettingItemModel }).first(where: { $0.itemId == .sourceCode })
+        guard let license = items.compactMap({ $0 as? SettingItemModel }).first(where: { $0.itemId == .openSourceLicense })
         else {
             XCTAssert(false)
             return
         }
-        viewModel.selectItem(source)
+        viewModel.selectItem(license)
         
         // then
-        XCTAssertEqual(self.spyRouter.didOpenSafariPath, "https://github.com/sudopark/TodoCalendar")
+        XCTAssertEqual(self.spyRouter.didRouteToOpenSourceLicense, true)
+        XCTAssertNil(self.spyRouter.didOpenSafariPath)
     }
 }
 
@@ -377,6 +378,11 @@ private class SpyRouter: BaseSpyRouter, SettingItemListRouting, @unchecked Senda
     var didRouteToAdPrivacyOptions: Bool?
     func routeToAdPrivacyOptions() {
         self.didRouteToAdPrivacyOptions = true
+    }
+    
+    var didRouteToOpenSourceLicense: Bool?
+    func routeToOpenSourceLicense() {
+        self.didRouteToOpenSourceLicense = true
     }
 }
 
@@ -698,7 +704,7 @@ extension SettingItemListViewModelImpleTests {
         
         // then
         XCTAssertEqual(itemIds, [
-            .shareApp, .addReview, .sourceCode, .terms, .privacyPolicy, .adPrivacyOptions
+            .shareApp, .addReview, .openSourceLicense, .terms, .privacyPolicy, .adPrivacyOptions
         ])
     }
     
@@ -734,7 +740,7 @@ extension SettingItemListViewModelImpleTests {
         let appInfoSection = sections?.compactMap { $0 as? AppInfoSectionModel }.first
         let itemIds = appInfoSection?.items.compactMap { $0 as? SettingItemModel }.map { $0.itemId }
         XCTAssertEqual(itemIds, [
-            .shareApp, .addReview, .sourceCode, .terms, .privacyPolicy
+            .shareApp, .addReview, .openSourceLicense, .terms, .privacyPolicy
         ])
     }
     

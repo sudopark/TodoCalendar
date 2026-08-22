@@ -320,7 +320,7 @@ struct SettingItemListViewPreviewProvider: PreviewProvider {
             items: [
                 SettingItemModel(.shareApp),
                 SettingItemModel(.addReview),
-                SettingItemModel(.sourceCode)
+                SettingItemModel(.openSourceLicense)
             ]
         )
         let suggestSection = SettingSectionModel(

@@ -476,6 +476,7 @@
 "setting.help::name" = "Help";
 "setting.share::name" = "Share App";
 "setting.write_review::name" = "Write an app review";
+"setting.openSourceLicense::name" = "Open Source License";
 "setting.billing.plan::name" = "Plan";
 "setting.terms::name" = "Terms of Use";
 "setting.privacyPolicy::name" = "Privacy Policy";
