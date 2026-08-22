@@ -54,6 +54,7 @@ struct EventCountdownLockScreenView: View {
             EventCountdownActionButtonRow(model: model)
         }
         .padding(16)
+        .widgetURL(model.deepLink)
     }
 }
 
