@@ -77,19 +77,22 @@ struct AIAgentCommandStageContainerView: View {
     @State private var state: AIAgentCommandViewState = .init()
     private let viewAppearance: ViewAppearance
     private let eventHandlers: AIAgentCommandViewEventHandler
+    private let adViewBuilder: (any AdViewBuilder)?
 
     var stateBinding: (AIAgentCommandViewState) -> Void = { _ in }
 
     init(
         viewAppearance: ViewAppearance,
-        eventHandlers: AIAgentCommandViewEventHandler
+        eventHandlers: AIAgentCommandViewEventHandler,
+        adViewBuilder: (any AdViewBuilder)?
     ) {
         self.viewAppearance = viewAppearance
         self.eventHandlers = eventHandlers
+        self.adViewBuilder = adViewBuilder
     }
 
     var body: some View {
-        return AIAgentCommandStageView()
+        return AIAgentCommandStageView(adViewBuilder: self.adViewBuilder)
             .onAppear {
                 self.stateBinding(self.state)
                 self.eventHandlers.prepare()
@@ -108,6 +111,12 @@ struct AIAgentCommandStageView: View {
     @Environment(ViewAppearance.self) private var appearance
     @Environment(AIAgentCommandViewState.self) private var state
     @Environment(AIAgentCommandViewEventHandler.self) private var eventHandlers
+
+    private let adViewBuilder: (any AdViewBuilder)?
+
+    init(adViewBuilder: (any AdViewBuilder)? = nil) {
+        self.adViewBuilder = adViewBuilder
+    }
 
     // confirm의 expireTime — 만료 시각에 헤더·stage가 함께 재렌더되도록 TimelineView 스케줄 근거로 공유.
     // nil(만료 시각 불명) 또는 confirm이 아니면 빈 스케줄 — 최초 1회 렌더만.
@@ -189,6 +198,8 @@ private extension AIAgentCommandStageView {
             self.userMessageBubble(command)
             self.assistantTypingBubble
 
+            self.mediumRectangleBanner
+
             // 숨김(close)은 헤더 X로 일원화 — 여기선 진행 중지만
             ConfirmButton(
                 title: "aiAgent::stop".localized(),
@@ -200,6 +211,15 @@ private extension AIAgentCommandStageView {
         }
     }
 
+    // 로드 전·실패·유료 플랜이면 높이 0 이라 시트가 안 늘어난다
+    @ViewBuilder
+    var mediumRectangleBanner: some View {
+        if let adViewBuilder = self.adViewBuilder {
+            adViewBuilder.makeBannerView(size: .mediumRectangle)
+                .asAnyView()
+                .frame(maxWidth: .infinity, alignment: .center)
+        }
+    }
 }
 
 
