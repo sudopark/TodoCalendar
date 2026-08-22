@@ -126,6 +126,10 @@ final class StubBillingUsecase: BillingUsecase, @unchecked Sendable {
         return applied
     }
 
+    func latestUserPlan() -> BillingUserPlan? {
+        self.userPlanSubject.value
+    }
+
     var currentUserPlan: AnyPublisher<BillingUserPlan, Never> {
         self.userPlanSubject.compactMap { $0 }.eraseToAnyPublisher()
     }
