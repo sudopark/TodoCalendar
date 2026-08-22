@@ -706,7 +706,7 @@ extension EventListCellEventHanleViewModelImpleTests {
         self.wait(for: [expect], timeout: self.timeout)
 
         // then
-        XCTAssertEqual(self.stubIntegrationUsecase.didReauthenticateWith?.accountId, "stub@gmail.com")
+        XCTAssertEqual(self.stubIntegrationUsecase.didReauthenticateForWriteScopeWith?.accountId, "stub@gmail.com")
         XCTAssertEqual(self.spyGoogleUsecase.didRemoveEventWith?.eventId, "google")
     }
 
@@ -742,7 +742,7 @@ extension EventListCellEventHanleViewModelImpleTests {
         self.wait(for: [notCalled], timeout: 0.3)
 
         // then
-        XCTAssertNil(self.stubIntegrationUsecase.didReauthenticateWith)
+        XCTAssertNil(self.stubIntegrationUsecase.didReauthenticateForWriteScopeWith)
         XCTAssertNil(self.spyGoogleUsecase.didRemoveEventWith)
     }
 
