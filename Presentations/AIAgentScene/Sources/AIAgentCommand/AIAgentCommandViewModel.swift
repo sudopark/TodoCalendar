@@ -41,7 +41,6 @@ public protocol AIAgentCommandViewModel: AnyObject, Sendable {
     var commandState: AnyPublisher<AIAgentCommandState?, Never> { get }
     var usage: AnyPublisher<AIAgentUsage, Never> { get }
     var currentUserPlan: AnyPublisher<BillingUserPlan?, Never> { get }
-    var isPaywallAvailable: Bool { get }
 }
 
 
@@ -168,9 +167,5 @@ extension AIAgentCommandViewModelImple {
             .map { $0 as BillingUserPlan? }
             .prepend(nil)
             .eraseToAnyPublisher()
-    }
-
-    var isPaywallAvailable: Bool {
-        return FeatureFlag.isEnable(.billingPaywall)
     }
 }

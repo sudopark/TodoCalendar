@@ -291,7 +291,7 @@ extension SettingItemListViewModelImple {
     var sectionModels: AnyPublisher<[any SettingSectionModelType], Never> {
 
         let transform: (AccountInfo?, DeviceInfo?, Bool) -> [any SettingSectionModelType] = { account, device, isUpdateAvailable in
-            let showsBillingPlan = account != nil && FeatureFlag.isEnable(.billingPaywall)
+            let showsBillingPlan = account != nil
             let baseSectionItems: [SettingItemModel] = [
                 .init(.appearance),
                 .init(.editEvent),

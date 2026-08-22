@@ -487,15 +487,11 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
             eventSyncUsecase: self.eventSyncUsecase
         )
 
-        // 결제는 로그인 유저 전용이고, paywall 이 닫힌 동안엔 리스너도 돌 이유가 없다.
-        // 환경 분기는 composition root 소관이라 Domain 이 플래그를 모른다
-        self.billingUsecase = FeatureFlag.isEnable(.billingPaywall)
-            ? BillingUsecaseImple(
-                repository: BillingRepositoryImple(remote: applicationBase.remoteAPI),
-                appStoreService: AppStoreBillingServiceImple(),
-                sharedDataStore: applicationBase.sharedDataStore
-            )
-            : NotNeedBillingUsecase(sharedDataStore: applicationBase.sharedDataStore)
+        self.billingUsecase = BillingUsecaseImple(
+            repository: BillingRepositoryImple(remote: applicationBase.remoteAPI),
+            appStoreService: AppStoreBillingServiceImple(),
+            sharedDataStore: applicationBase.sharedDataStore
+        )
 
         self.eventLiveActivityUsecase = EventLiveActivityUsecaseImple(
             controller: EventCountdownLiveActivityController(),

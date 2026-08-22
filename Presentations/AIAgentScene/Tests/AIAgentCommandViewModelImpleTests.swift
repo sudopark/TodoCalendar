@@ -35,7 +35,6 @@ class AIAgentCommandViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubAgent = nil
         self.spyRouter = nil
         self.spyListener = nil
-        FeatureFlag.disable(.billingPaywall)
     }
 
     private func makeViewModel(userPlan: BillingUserPlan? = nil) -> AIAgentCommandViewModelImple {
@@ -286,25 +285,6 @@ extension AIAgentCommandViewModelImpleTests {
 // MARK: - paywall 진입점 (#739)
 
 extension AIAgentCommandViewModelImpleTests {
-
-    func test_isPaywallAvailable_whenFlagOff_isFalse() {
-        // given
-        let viewModel = self.makeViewModel()
-        // when
-        let isAvailable = viewModel.isPaywallAvailable
-        // then
-        XCTAssertEqual(isAvailable, false)
-    }
-
-    func test_isPaywallAvailable_whenFlagOn_isTrue() {
-        // given
-        FeatureFlag.enable(.billingPaywall)
-        let viewModel = self.makeViewModel()
-        // when
-        let isAvailable = viewModel.isPaywallAvailable
-        // then
-        XCTAssertEqual(isAvailable, true)
-    }
 
     func test_showPlans_requestsPaywallViaListener() {
         // given

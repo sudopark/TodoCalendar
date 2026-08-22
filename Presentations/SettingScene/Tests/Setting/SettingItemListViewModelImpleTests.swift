@@ -33,7 +33,6 @@ class SettingItemListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.cancelBag = nil
         self.spyRouter = nil
         self.stubAppUpdateCheckUsecase = nil
-        FeatureFlag.disable(.billingPaywall)
     }
 
     private func makeViewModel(
@@ -133,7 +132,7 @@ extension SettingItemListViewModelImpleTests {
         let baseSection = sections?[safe: 0]
         let baseItemIds = baseSection?.items.compactMap { $0 as? SettingItemModel }.map { $0.itemId }
         XCTAssertEqual(baseItemIds, [
-            .appearance, .editEvent, .holidaySetting
+            .appearance, .editEvent, .holidaySetting, .billingPlan
         ])
         let accountItem = baseSection?.items.last as? AccountSettingItemModel
         XCTAssertEqual(accountItem?.isSignIn, true)
@@ -465,9 +464,8 @@ extension SettingItemListViewModelImpleTests {
 
 extension SettingItemListViewModelImpleTests {
 
-    func test_whenSignedInAndFlagOn_showsBillingPlanItem() {
+    func test_whenSignedIn_showsBillingPlanItem() {
         // given
-        FeatureFlag.enable(.billingPaywall)
         let viewModel = self.makeViewModel(AccountInfo("some"))
         let items = self.WaitItemLoaded(viewModel)
 
@@ -478,21 +476,8 @@ extension SettingItemListViewModelImpleTests {
         XCTAssertNotNil(billingItem)
     }
 
-    func test_whenSignedInButFlagOff_hidesBillingPlanItem() {
+    func test_whenNotSignedIn_hidesBillingPlanItem() {
         // given
-        let viewModel = self.makeViewModel(AccountInfo("some"))
-        let items = self.WaitItemLoaded(viewModel)
-
-        // when
-        let billingItem = items.compactMap { $0 as? SettingItemModel }.first(where: { $0.itemId == .billingPlan })
-
-        // then
-        XCTAssertNil(billingItem)
-    }
-
-    func test_whenFlagOnButNotSignedIn_hidesBillingPlanItem() {
-        // given
-        FeatureFlag.enable(.billingPaywall)
         let viewModel = self.makeViewModel(nil)
         let items = self.WaitItemLoaded(viewModel)
 
@@ -505,7 +490,6 @@ extension SettingItemListViewModelImpleTests {
 
     func test_selectBillingPlan_routesToPaywall() {
         // given
-        FeatureFlag.enable(.billingPaywall)
         let viewModel = self.makeViewModel(AccountInfo("some"))
         let items = self.WaitItemLoaded(viewModel)
         guard let billingItem = items.compactMap({ $0 as? SettingItemModel }).first(where: { $0.itemId == .billingPlan })
