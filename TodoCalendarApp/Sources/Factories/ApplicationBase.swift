@@ -189,6 +189,10 @@ final class ApplicationBase {
     lazy var adViewBuilder: (any AdViewBuilder)? = {
         return self.mobileAdService.map { ApplicationAdViewBuilder(adService: $0) }
     }()
+    
+    lazy var privacyOptionsFormRouter: (any PrivacyOptionsFormRouter)? = {
+        return self.mobileAdService.map { ApplicationPrivacyOptionsFormRouter(adService: $0) }
+    }()
 }
 
 

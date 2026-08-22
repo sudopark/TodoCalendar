@@ -107,6 +107,24 @@ extension GoogleMobileAdsServiceImple {
         #endif
         return parameters
     }
+    
+    @MainActor
+    public func isPrivacyOptionsRequired() -> Bool {
+        return ConsentInformation.shared.privacyOptionsRequirementStatus == .required
+    }
+    
+    @MainActor
+    public func showPrivacyOptionsForm(from viewController: UIViewController) async throws {
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, any Error>) in
+            ConsentForm.presentPrivacyOptionsForm(from: viewController) { error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume()
+                }
+            }
+        }
+    }
 }
 
 
