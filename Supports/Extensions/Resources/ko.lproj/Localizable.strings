@@ -294,7 +294,8 @@
 "eventDetail::gogoleEvent::saved::message" = "일정을 저장했습니다.";
 "eventDetail::gogoleEvent::readOnlyCalendar::message" = "읽기 전용 캘린더라 여기서는 일정을 수정할 수 없어요.";
 "eventDetail::gogoleEvent::reauthenticate::title" = "권한 추가가 필요해요";
-"eventDetail::gogoleEvent::reauthenticate::message" = "일정을 수정하려면 이 구글 계정에 다시 로그인해 주세요.";
+"eventDetail::gogoleEvent::reauthenticate::message" = "이 구글 계정은 읽기 전용으로 연동돼 있어요. 일정을 수정하려면 편집 권한을 따로 허용해야 해요.";
+"eventDetail::gogoleEvent::writeScopeNotGranted::message" = "편집 권한을 받지 못했어요. 회사·학교 계정이라면 관리자 정책으로 막혀 있을 수 있어요.";
 "eventDetail::gogoleEvent::repeating::title" = "반복되는 일정이에요";
 "eventDetail::gogoleEvent::repeating::onlyThisTime::button" = "이번 일정만";
 "eventDetail::gogoleEvent::repeating::all::button" = "전체 일정";

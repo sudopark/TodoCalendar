@@ -231,11 +231,23 @@ extension EventListCellEventHanleViewModelImple {
                     external: service, accountId: accountId
                 )
                 self.confirmAndRemoveEvent(google, scope)
+            } catch let reason as GoogleCalendarWriteScopeFailReason {
+                self.showWriteScopeNotGrantedGuide(reason)
             } catch {
                 self.router?.showError(error)
             }
         }
         .store(in: &self.cancellables)
+    }
+
+    private func showWriteScopeNotGrantedGuide(_ reason: GoogleCalendarWriteScopeFailReason) {
+        switch reason {
+        case .notGranted:
+            let info = ConfirmDialogInfo()
+                |> \.message .~ pure("eventDetail::gogoleEvent::writeScopeNotGranted::message".localized())
+                |> \.withCancel .~ false
+            self.router?.showConfirm(dialog: info)
+        }
     }
 
     private func confirmAndRemoveEvent(

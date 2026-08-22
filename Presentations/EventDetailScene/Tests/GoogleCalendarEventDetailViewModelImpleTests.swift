@@ -35,6 +35,7 @@ final class GoogleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
         customAttendees: [GoogleCalendar.EventOrigin.Attendee]? = nil,
         writePermission: GoogleCalendar.EventWritePermission? = .writable,
         shouldFailReauthenticate: Bool = false,
+        shouldFailReauthenticateWithNotGranted: Bool = false,
         summaryPerCall: [String]? = nil,
         recurringEventId: String? = nil,
         htmlLink: String? = "link",
@@ -70,6 +71,7 @@ final class GoogleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
         calendarUsecase.refreshGoogleCalendarEventTags()
         self.lastCalendarUsecase = calendarUsecase
         self.integrationUsecase.shouldFailReauthenticate = shouldFailReauthenticate
+        self.integrationUsecase.shouldFailReauthenticateWithNotGranted = shouldFailReauthenticateWithNotGranted
         self.stubLiveActivityUsecase.registeredTargetSubject.send(registeredLiveActivityTarget)
         self.stubLiveActivityUsecase.stubStartError = liveActivityStartError
         let liveActivityToggleViewModel = LiveActivityToggleViewModelImple(
@@ -847,6 +849,26 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
         #expect(self.lastCalendarUsecase.didUpdateEventWith == nil)
     }
 
+    @Test func save_whenReauthenticateFailsWithWriteScopeNotGranted_showsGuideAndDoesNotSave() async throws {
+        // given
+        let viewModel = self.makeViewModel(
+            writePermission: .needReauthentication, shouldFailReauthenticateWithNotGranted: true
+        )
+        self.spyRouter.shouldConfirmNotCancel = true
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+        viewModel.enter(name: "new name")
+
+        // when
+        try await self.waitSaveCompleted { viewModel.save() }
+
+        // then
+        #expect(self.spyRouter.didShowConfirmWith?.message == "eventDetail::gogoleEvent::writeScopeNotGranted::message".localized())
+        #expect(self.spyRouter.didShowConfirmWith?.withCancel == false)
+        #expect(self.lastCalendarUsecase.didUpdateEventWith == nil)
+    }
+
     @Test func save_whenReadOnlyCalendar_inputIsIgnoredSoNoUpdateRequested() async throws {
         // given — enter(name:) 가 updateCurrentFields 의 읽기 전용 가드에서 이미 무시된다.
         // runWithWritePermission 의 readOnlyCalendar 게이트 자체는 remove_whenReadOnlyCalendar_doesNothing 이 덮는다.
@@ -1127,6 +1149,27 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
         #expect(self.integrationUsecase.didReauthenticateForWriteScopeWith?.accountId == "stub@gmail.com")
         #expect(self.lastCalendarUsecase.didRemoveEventWith?.eventId == "id")
         #expect(self.spyRouter.didClosed == true)
+    }
+
+    @Test func remove_whenReauthenticateFailsWithWriteScopeNotGranted_showsGuideAndDoesNotRemove() async throws {
+        // given
+        let viewModel = self.makeViewModel(
+            writePermission: .needReauthentication, shouldFailReauthenticateWithNotGranted: true
+        )
+        self.spyRouter.shouldConfirmNotCancel = true
+        _ = try await self.firstOutput(expectConfirm("origin 로드"), for: viewModel.eventName) {
+            viewModel.refresh()
+        }
+
+        // when
+        viewModel.remove()
+        try await Task.sleep(for: .milliseconds(10))
+
+        // then
+        #expect(self.spyRouter.didShowConfirmWith?.message == "eventDetail::gogoleEvent::writeScopeNotGranted::message".localized())
+        #expect(self.spyRouter.didShowConfirmWith?.withCancel == false)
+        #expect(self.lastCalendarUsecase.didRemoveEventWith == nil)
+        #expect(self.spyRouter.didClosed == nil)
     }
 
     @Test func remove_whenReadOnlyCalendar_doesNothing() async throws {

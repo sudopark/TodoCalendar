@@ -70,6 +70,7 @@ class EventListCellEventHanleViewModelImpleTests: BaseTestCase, PublisherWaitabl
         appleShouldFailWrite: Bool = false,
         googleShouldFailWrite: Bool = false,
         shouldFailReauthenticate: Bool = false,
+        shouldFailReauthenticateWithNotGranted: Bool = false,
         stubTodoEvent: TodoEvent? = nil,
         stubScheduleEvent: ScheduleEvent? = nil,
         stubDetailData: EventDetailData? = nil,
@@ -89,6 +90,7 @@ class EventListCellEventHanleViewModelImpleTests: BaseTestCase, PublisherWaitabl
         self.spyAppleUsecase.shouldFailWrite = appleShouldFailWrite
         self.spyGoogleUsecase.shouldFailWrite = googleShouldFailWrite
         self.stubIntegrationUsecase.shouldFailReauthenticate = shouldFailReauthenticate
+        self.stubIntegrationUsecase.shouldFailReauthenticateWithNotGranted = shouldFailReauthenticateWithNotGranted
         if let stubTodoEvent {
             self.spyTodoUsecase.setStub(todo: stubTodoEvent)
         }
@@ -708,6 +710,29 @@ extension EventListCellEventHanleViewModelImpleTests {
         // then
         XCTAssertEqual(self.stubIntegrationUsecase.didReauthenticateForWriteScopeWith?.accountId, "stub@gmail.com")
         XCTAssertEqual(self.spyGoogleUsecase.didRemoveEventWith?.eventId, "google")
+    }
+
+    func testViewModel_whenRemoveGoogleEventAndWriteScopeNotGranted_showGuideAndNotRemove() {
+        // given
+        let notCalled = expectation(description: "승격 실패 시 삭제 실행 안 함")
+        notCalled.isInverted = true
+        self.spyGoogleUsecase.didRemoveEventWithCallback = { notCalled.fulfill() }
+        let viewModel = self.makeViewModel(
+            googleWritePermission: .needReauthentication, shouldFailReauthenticateWithNotGranted: true
+        )
+        let cellViewModel = GoogleCalendarEventCellViewModel.dummy(isWritable: true, recurringEventId: nil)
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .remove(scope: .all))
+        self.wait(for: [notCalled], timeout: 0.3)
+
+        // then
+        XCTAssertEqual(
+            self.spyRouter.didShowConfirmWith?.message,
+            "eventDetail::gogoleEvent::writeScopeNotGranted::message".localized()
+        )
+        XCTAssertEqual(self.spyRouter.didShowConfirmWith?.withCancel, false)
+        XCTAssertNil(self.spyGoogleUsecase.didRemoveEventWith)
     }
 
     func testViewModel_whenRemoveGoogleEventAndReauthenticateFailed_showError() {
