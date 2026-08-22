@@ -82,10 +82,10 @@ final class EventLiveActivityUsecaseImpleTests: PublisherWaitable {
 
     private func makeGoogleEvent(
         id: String, calendarId: String = "cal", accountId: String = "acc",
-        name: String = "google", eventDate: Date, location: String? = nil
+        name: String = "google", colorId: String? = nil, eventDate: Date, location: String? = nil
     ) -> GoogleCalendar.Event {
         return GoogleCalendar.Event(
-            id, calendarId, accountId: accountId, name: name, colorId: nil,
+            id, calendarId, accountId: accountId, name: name, colorId: colorId,
             location: location, time: .at(eventDate.timeIntervalSince1970)
         )
     }
@@ -1422,7 +1422,32 @@ extension EventLiveActivityUsecaseImpleTests {
         #expect(stub.didStartWith?.1.tagColorHex == "#AAA111")
     }
 
-    /// 계정이 다르면 같은 calendarId여도 매칭되면 안 된다 — 다계정에서 색이 섞인다.
+    @Test func usecase_startActivity_googleTarget_whenCalendarTagMissing_usesDefaultColor() async throws {
+        // given
+        let (usecase, stub, store) = self.makeUsecase()
+        let future = Date().addingTimeInterval(60)
+        store.put(
+            DefaultEventTagColorSetting.self, key: ShareDataKeys.defaultEventTagColor.rawValue,
+            DefaultEventTagColorSetting(holiday: "#111111", default: "#222222")
+        )
+        store.put(
+            [String: GoogleCalendar.Event].self, key: ShareDataKeys.googleCalendarEvents.rawValue,
+            ["g1": self.makeGoogleEvent(id: "g1", eventDate: future)]
+        )
+        store.put(
+            [String: [GoogleCalendar.Tag]].self, key: ShareDataKeys.googleCalendarTags.rawValue,
+            ["other-account": [self.makeGoogleTag(id: "other-cal", colorHex: "#AAA111")]]
+        )
+
+        // when
+        try await usecase.startActivity(
+            .googleCalendar(accountId: "acc", calendarId: "cal", eventId: "g1")
+        )
+
+        // then
+        #expect(stub.didStartWith?.1.tagColorHex == "#222222")
+    }
+
     @Test func usecase_startActivity_googleTarget_whenAccountNotMatched_usesDefaultColor() async throws {
         // given
         let (usecase, stub, store) = self.makeUsecase()
@@ -1447,6 +1472,97 @@ extension EventLiveActivityUsecaseImpleTests {
 
         // then
         #expect(stub.didStartWith?.1.tagColorHex == "#222222")
+    }
+
+    @Test func usecase_startActivity_googleTarget_whenEventColorIdOnlyInOtherAccountPalette_doesNotLeak() async throws {
+        // given
+        let (usecase, stub, store) = self.makeUsecase()
+        let future = Date().addingTimeInterval(60)
+        store.put(
+            DefaultEventTagColorSetting.self, key: ShareDataKeys.defaultEventTagColor.rawValue,
+            DefaultEventTagColorSetting(holiday: "#111111", default: "#222222")
+        )
+        store.put(
+            [String: GoogleCalendar.Event].self, key: ShareDataKeys.googleCalendarEvents.rawValue,
+            ["g1": self.makeGoogleEvent(id: "g1", calendarId: "cal", accountId: "acc", colorId: "5", eventDate: future)]
+        )
+        store.put(
+            [String: GoogleCalendar.Colors].self, key: ShareDataKeys.googleCalendarColors.rawValue,
+            ["other-account": self.makeGooglePalette(ownerId: "other-account", events: ["5": "#leaked"])]
+        )
+
+        // when
+        try await usecase.startActivity(
+            .googleCalendar(accountId: "acc", calendarId: "cal", eventId: "g1")
+        )
+
+        // then
+        #expect(stub.didStartWith?.1.tagColorHex == "#222222")
+    }
+
+    @Test func usecase_startActivity_googleTarget_whenEventHasColorId_usesEventPaletteColorOverCalendarColor() async throws {
+        // given
+        let (usecase, stub, store) = self.makeUsecase()
+        let future = Date().addingTimeInterval(60)
+        store.put(
+            [String: GoogleCalendar.Event].self, key: ShareDataKeys.googleCalendarEvents.rawValue,
+            ["g1": self.makeGoogleEvent(id: "g1", colorId: "5", eventDate: future)]
+        )
+        store.put(
+            [String: [GoogleCalendar.Tag]].self, key: ShareDataKeys.googleCalendarTags.rawValue,
+            ["acc": [self.makeGoogleTag(id: "cal", colorHex: "#calendarColor") |> \.ownerId .~ "acc"]]
+        )
+        store.put(
+            [String: GoogleCalendar.Colors].self, key: ShareDataKeys.googleCalendarColors.rawValue,
+            ["acc": self.makeGooglePalette(ownerId: "acc", events: ["5": "#eventColor"])]
+        )
+
+        // when
+        try await usecase.startActivity(
+            .googleCalendar(accountId: "acc", calendarId: "cal", eventId: "g1")
+        )
+
+        // then
+        #expect(stub.didStartWith?.1.tagColorHex == "#eventColor")
+    }
+
+    @Test func usecase_startActivity_googleTarget_whenCalendarHasOnlyPaletteColorId_resolvesFromPalette() async throws {
+        // given
+        let (usecase, stub, store) = self.makeUsecase()
+        let future = Date().addingTimeInterval(60)
+        store.put(
+            [String: GoogleCalendar.Event].self, key: ShareDataKeys.googleCalendarEvents.rawValue,
+            ["g1": self.makeGoogleEvent(id: "g1", eventDate: future)]
+        )
+        let tagWithPaletteOnly = GoogleCalendar.Tag(id: "cal", name: "cal")
+            |> \.ownerId .~ "acc"
+            |> \.colorId .~ "3"
+        store.put(
+            [String: [GoogleCalendar.Tag]].self, key: ShareDataKeys.googleCalendarTags.rawValue,
+            ["acc": [tagWithPaletteOnly]]
+        )
+        store.put(
+            [String: GoogleCalendar.Colors].self, key: ShareDataKeys.googleCalendarColors.rawValue,
+            ["acc": self.makeGooglePalette(ownerId: "acc", calendars: ["3": "#paletteCalendarColor"])]
+        )
+
+        // when
+        try await usecase.startActivity(
+            .googleCalendar(accountId: "acc", calendarId: "cal", eventId: "g1")
+        )
+
+        // then
+        #expect(stub.didStartWith?.1.tagColorHex == "#paletteCalendarColor")
+    }
+
+    private func makeGooglePalette(
+        ownerId: String, calendars: [String: String] = [:], events: [String: String] = [:]
+    ) -> GoogleCalendar.Colors {
+        return GoogleCalendar.Colors(
+            ownerId: ownerId,
+            calendars: calendars.mapValues { .init(foregroundHex: "fg", backgroudHex: $0) },
+            events: events.mapValues { .init(foregroundHex: "fg", backgroudHex: $0) }
+        )
     }
 
     @Test func usecase_startActivity_appleTarget_usesMatchingCalendarTagColor() async throws {

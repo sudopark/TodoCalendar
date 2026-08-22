@@ -184,7 +184,14 @@ extension GoogleCalendarUsecaseImple {
         repository.loadColors()
             .catch { _ in Empty() }
             .sink { [weak self] colors in
-                self?.appearanceStore.applyColors(colors, for: accountId)
+                guard let self else { return }
+                self.sharedDataStore.update(
+                    [String: GoogleCalendar.Colors].self,
+                    key: ShareDataKeys.googleCalendarColors.rawValue
+                ) { existing in
+                    (existing ?? [:]) |> key(accountId) .~ colors
+                }
+                self.appearanceStore.applyColors(colors, for: accountId)
             }
             .store(in: &cancelBag)
     }
@@ -223,6 +230,13 @@ extension GoogleCalendarUsecaseImple {
         sharedDataStore.update(
             [String: [GoogleCalendar.Tag]].self,
             key: ShareDataKeys.googleCalendarTags.rawValue
+        ) { existing in
+            (existing ?? [:]) |> key(accountId) .~ nil
+        }
+
+        sharedDataStore.update(
+            [String: GoogleCalendar.Colors].self,
+            key: ShareDataKeys.googleCalendarColors.rawValue
         ) { existing in
             (existing ?? [:]) |> key(accountId) .~ nil
         }

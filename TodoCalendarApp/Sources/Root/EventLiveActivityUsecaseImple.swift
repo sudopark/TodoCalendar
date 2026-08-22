@@ -420,8 +420,9 @@ extension EventLiveActivityUsecaseImple {
         settings: DisplayFormatSettings
     ) -> LiveActivityObservedEvent {
         let eventDate = Date(timeIntervalSince1970: event.eventTime.lowerBoundWithFixed)
-        let calendarTags = self.value([String: [GoogleCalendar.Tag]].self, .googleCalendarTags)
-        let colorHex = calendarTags?[accountId]?.first { $0.id == calendarId }?.colorHex
+        let colorHex = self.googleEventColorResolver(accountId: accountId).colorHex(
+            eventColorId: event.colorId, calendarId: calendarId
+        )
         return LiveActivityObservedEvent(
             name: event.name,
             eventDate: eventDate,
@@ -433,6 +434,15 @@ extension EventLiveActivityUsecaseImple {
             isTurnExcluded: false,
             scheduleTimeQuery: nil
         )
+    }
+
+    /// 같은 calendarId를 여러 계정이 구독할 수 있다 — 공유 캘린더·공휴일 캘린더가 그렇다.
+    private func googleEventColorResolver(accountId: String) -> GoogleCalendar.EventColorResolver {
+        let calendarTags = self.value([String: [GoogleCalendar.Tag]].self, .googleCalendarTags)?[accountId]?
+            .reduce(into: [String: GoogleCalendar.Tag]()) { $0[$1.id] = $1 } ?? [:]
+        let palette = self.value([String: GoogleCalendar.Colors].self, .googleCalendarColors)?[accountId]
+        let palettes = palette.map { [accountId: $0] } ?? [:]
+        return GoogleCalendar.EventColorResolver(calendarTags: calendarTags, palettes: palettes)
     }
 
     private func observedEvent(

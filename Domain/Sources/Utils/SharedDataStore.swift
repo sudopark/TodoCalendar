@@ -30,6 +30,7 @@ public enum ShareDataKeys: String {
     case uncompletedTodos
     case externalCalendarAccounts
     case googleCalendarTags
+    case googleCalendarColors
     case googleCalendarEvents
     case foremostMarkingStatus
     case appleCalendarTags
