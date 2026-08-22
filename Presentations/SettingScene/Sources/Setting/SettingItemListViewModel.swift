@@ -28,7 +28,7 @@ struct SettingItemModel: SettingItemModelType {
         case help
         case shareApp
         case addReview
-        case sourceCode
+        case openSourceLicense
         case billingPlan
         case terms
         case privacyPolicy
@@ -66,9 +66,9 @@ struct SettingItemModel: SettingItemModelType {
         case .addReview:
             self.iconNamge = "star"
             self.text = "setting.write_review::name".localized()
-        case .sourceCode:
-            self.iconNamge = "pc"
-            self.text = "Source Code"
+        case .openSourceLicense:
+            self.iconNamge = "doc.on.doc"
+            self.text = "setting.openSourceLicense::name".localized()
         case .billingPlan:
             self.iconNamge = "creditcard"
             self.text = "setting.billing.plan::name".localized()
@@ -276,8 +276,8 @@ extension SettingItemListViewModelImple {
         case .addReview:
             self.router?.openSafari(self.appstoreLinkPath)
             
-        case .sourceCode:
-            self.router?.openSafari("https://github.com/sudopark/TodoCalendar")
+        case .openSourceLicense:
+            self.router?.routeToOpenSourceLicense()
 
         case .billingPlan:
             self.router?.routeToPaywall()
@@ -338,7 +338,7 @@ extension SettingItemListViewModelImple {
             let appInfoSectionItems: [SettingItemModel] = [
                 .init(.shareApp),
                 .init(.addReview),
-                .init(.sourceCode),
+                .init(.openSourceLicense),
                 .init(.terms),
                 .init(.privacyPolicy)
             ] + (isAdPrivacyOptionsRequired ? [.init(.adPrivacyOptions)] : [])

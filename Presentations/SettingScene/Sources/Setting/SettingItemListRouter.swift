@@ -28,6 +28,7 @@ protocol SettingItemListRouting: Routing, Sendable {
     func openShare(link path: String)
     func routeToPaywall()
     func routeToAdPrivacyOptions()
+    func routeToOpenSourceLicense()
 }
 
 // MARK: - Router
@@ -40,6 +41,7 @@ final class SettingItemListRouter: BaseRouterImple, SettingItemListRouting, @unc
     private let memberSceneBuilder: any MemberSceneBuilder
     private let feedbackPostSceneBuiler: any FeedbackPostSceneBuiler
     private let paywallSceneBuilder: any PaywallSceneBuilder
+    private let openSourceLicenseSceneBuiler: any OpenSourceLicenseSceneBuiler
     private let privacyOptionsFormRouter: (any PrivacyOptionsFormRouter)?
 
     init(
@@ -49,6 +51,7 @@ final class SettingItemListRouter: BaseRouterImple, SettingItemListRouting, @unc
         memberSceneBuilder: any MemberSceneBuilder,
         feedbackPostSceneBuiler: any FeedbackPostSceneBuiler,
         paywallSceneBuilder: any PaywallSceneBuilder,
+        openSourceLicenseSceneBuiler: any OpenSourceLicenseSceneBuiler,
         privacyOptionsFormRouter: (any PrivacyOptionsFormRouter)?
     ) {
         self.appearanceSceneBuilder = appearanceSceneBuilder
@@ -57,6 +60,7 @@ final class SettingItemListRouter: BaseRouterImple, SettingItemListRouting, @unc
         self.memberSceneBuilder = memberSceneBuilder
         self.feedbackPostSceneBuiler = feedbackPostSceneBuiler
         self.paywallSceneBuilder = paywallSceneBuilder
+        self.openSourceLicenseSceneBuiler = openSourceLicenseSceneBuiler
         self.privacyOptionsFormRouter = privacyOptionsFormRouter
     }
 }
@@ -140,6 +144,13 @@ extension SettingItemListRouter {
         Task { @MainActor in
             let next = self.paywallSceneBuilder.makePaywallScene(closesAfterPurchase: false)
             self.showFullScreen(next)
+        }
+    }
+    
+    func routeToOpenSourceLicense() {
+        Task { @MainActor in
+            let next = self.openSourceLicenseSceneBuiler.makeOpenSourceLicenseScene()
+            self.currentScene?.navigationController?.pushViewController(next, animated: true)
         }
     }
     

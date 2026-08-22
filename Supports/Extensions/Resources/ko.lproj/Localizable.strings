@@ -476,6 +476,7 @@
 "setting.help::name" = "도움말";
 "setting.share::name" = "앱 공유";
 "setting.write_review::name" = "앱 리뷰쓰기";
+"setting.openSourceLicense::name" = "오픈소스 라이선스";
 "setting.billing.plan::name" = "플랜";
 "setting.terms::name" = "이용약관";
 "setting.privacyPolicy::name" = "개인정보처리방침";

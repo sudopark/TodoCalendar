@@ -125,6 +125,10 @@ extension SettingSceneBuilderImple {
             viewAppearance: self.viewAppearance
         )
         
+        let openSourceLicenseSceneBuilder = OpenSourceLicenseSceneBuilerImple(
+            viewAppearance: self.viewAppearance
+        )
+        
         let builder = SettingItemListSceneBuilerImple(
             appstoreLinkPath: self.appstoreLinkPath,
             usecaseFactory: self.usecaseFactory,
@@ -135,6 +139,7 @@ extension SettingSceneBuilderImple {
             memberSceneBuilder: self.memberSceneBuilder,
             feedbackPostSceneBuiler: feedbackSceneBuilder,
             paywallSceneBuilder: self.paywallSceneBuilder,
+            openSourceLicenseSceneBuiler: openSourceLicenseSceneBuilder,
             privacyOptionsFormRouter: self.privacyOptionsFormRouter
         )
         return builder.makeSettingItemListScene()

@@ -15,6 +15,7 @@ graph TD
     SIL[SettingItemList<br/>설정 메인 메뉴] -->|push| AS[AppearanceSetting<br/>외형 설정]
     SIL -->|push| ES[EventSetting<br/>이벤트 설정]
     SIL -->|push| HL[HolidayList<br/>공휴일 설정]
+    SIL -->|push| OSL[OpenSourceLicense<br/>오픈소스 라이선스]
     SIL -->|present| FP[FeedbackPost<br/>피드백]
     SIL -->|push| MA[ManageAccount<br/>MemberScenes]
     SIL -->|bottomSlide| SI[SignIn<br/>MemberScenes]
@@ -93,6 +94,15 @@ sequenceDiagram
 | Listener | `EventTagDetailSceneListener` — created/updated/deleted 콜백 |
 | `isRootNavigation` | true면 모달 dismiss, false면 nav pop |
 
+### OpenSourceLicense (오픈소스 라이선스)
+
+| 항목 | 설명 |
+|---|---|
+| 표시 방식 | push (leaf) |
+| 데이터 | `Resources/open-source-licenses.json` — `Bundle.module`로 로드. 라이브러리 30개 메타 + 라이선스 종류별 전문 6부 |
+| 화면 구성 | 라이브러리 목록(이름·저작권·라이선스명, 탭하면 소스 저장소를 사파리로) + 하단에 종류별 전문 |
+| 갱신 | SPM 의존성이 바뀌면 JSON을 손으로 갱신 |
+
 ### FeedbackPost (피드백)
 
 | 항목 | 설명 |
@@ -128,6 +138,7 @@ graph TD
     SSB -->|생성| ETDB[EventTagDetailBuilder]
     SSB -->|생성| HLB[HolidayListBuilder]
     SSB -->|생성| FPB[FeedbackPostBuilder]
+    SSB -->|생성| OSLB[OpenSourceLicenseBuilder]
 
     ASB -->|하위| CTB[ColorThemeSelectBuilder]
     ASB -->|하위| WAB[WidgetAppearanceBuilder]

@@ -25,6 +25,7 @@ final class SettingItemListSceneBuilerImple {
     private let memberSceneBuilder: any MemberSceneBuilder
     private let feedbackPostSceneBuiler: any FeedbackPostSceneBuiler
     private let paywallSceneBuilder: any PaywallSceneBuilder
+    private let openSourceLicenseSceneBuiler: any OpenSourceLicenseSceneBuiler
     private let privacyOptionsFormRouter: (any PrivacyOptionsFormRouter)?
 
     init(
@@ -37,6 +38,7 @@ final class SettingItemListSceneBuilerImple {
         memberSceneBuilder: any MemberSceneBuilder,
         feedbackPostSceneBuiler: any FeedbackPostSceneBuiler,
         paywallSceneBuilder: any PaywallSceneBuilder,
+        openSourceLicenseSceneBuiler: any OpenSourceLicenseSceneBuiler,
         privacyOptionsFormRouter: (any PrivacyOptionsFormRouter)?
     ) {
         self.appstoreLinkPath = appstoreLinkPath
@@ -48,6 +50,7 @@ final class SettingItemListSceneBuilerImple {
         self.memberSceneBuilder = memberSceneBuilder
         self.feedbackPostSceneBuiler = feedbackPostSceneBuiler
         self.paywallSceneBuilder = paywallSceneBuilder
+        self.openSourceLicenseSceneBuiler = openSourceLicenseSceneBuiler
         self.privacyOptionsFormRouter = privacyOptionsFormRouter
     }
 }
@@ -79,6 +82,7 @@ extension SettingItemListSceneBuilerImple: SettingItemListSceneBuiler {
             memberSceneBuilder: self.memberSceneBuilder,
             feedbackPostSceneBuiler: self.feedbackPostSceneBuiler,
             paywallSceneBuilder: self.paywallSceneBuilder,
+            openSourceLicenseSceneBuiler: self.openSourceLicenseSceneBuiler,
             privacyOptionsFormRouter: self.privacyOptionsFormRouter
         )
         router.scene = viewController

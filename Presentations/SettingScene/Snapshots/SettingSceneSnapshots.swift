@@ -72,7 +72,7 @@ final class SettingSceneSnapshots: XCTestCase {
                 items: [
                     SettingItemModel(.shareApp),
                     SettingItemModel(.addReview),
-                    SettingItemModel(.sourceCode)
+                    SettingItemModel(.openSourceLicense)
                 ]
             )
             state.sections = [baseSection, supportSection, appInfoSection]
