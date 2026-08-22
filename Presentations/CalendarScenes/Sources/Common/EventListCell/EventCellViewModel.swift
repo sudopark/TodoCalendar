@@ -312,6 +312,29 @@ struct PendingTodoEventCellViewModel: EventCellViewModel {
     var customCompareKey: String { self.makeCustomCompareKey([]) }
 }
 
+public struct GuideTodoEventCellViewModel: EventCellViewModel {
+
+    /// private이 아닌 이유 — 이 식별자가 셀 타입과 완료 처리기 사이의 계약이다.
+    enum Constant {
+        static let identifier: String = "guide-todo"
+    }
+
+    public let eventIdentifier: String = Constant.identifier
+    public var colorSource: any EventTagColorSource = EventTagId.default
+    public let name: String = "calendar::guideTodo::name".localized()
+    public var periodText: EventPeriodText? = .currentTodoText
+    public var periodDescription: String?
+    public let isRepeating: Bool = false
+    public let isForemost: Bool = false
+    public let isAlldayEvent: Bool = false
+
+    public init() { }
+
+    public var moreActions: EventListMoreActionModel? { nil }
+
+    public var customCompareKey: String { self.makeCustomCompareKey([]) }
+}
+
 // MARK: - Schedule
 
 public struct ScheduleEventCellViewModel: EventCellViewModel {

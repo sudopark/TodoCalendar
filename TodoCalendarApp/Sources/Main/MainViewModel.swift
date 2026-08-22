@@ -64,6 +64,7 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
     private let billingUsecase: any BillingUsecase
     private let aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
     private let eventLiveActivityUsecase: any EventLiveActivityUsecase
+    private let guideTodoUsecase: any GuideTodoUsecase
     var router: (any MainRouting)?
 
     init(
@@ -77,7 +78,8 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
         eventSyncUsecase: any EventSyncUsecase,
         billingUsecase: any BillingUsecase,
         aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase,
-        eventLiveActivityUsecase: any EventLiveActivityUsecase
+        eventLiveActivityUsecase: any EventLiveActivityUsecase,
+        guideTodoUsecase: any GuideTodoUsecase
     ) {
         self.uiSettingUsecase = uiSettingUsecase
         self.temporaryUserDataMigrationUsecase = temporaryUserDataMigrationUsecase
@@ -90,6 +92,7 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
         self.billingUsecase = billingUsecase
         self.aiAgentOrchestrationUsecase = aiAgentOrchestrationUsecase
         self.eventLiveActivityUsecase = eventLiveActivityUsecase
+        self.guideTodoUsecase = guideTodoUsecase
 
         self.internalBinding()
     }
@@ -161,6 +164,7 @@ extension MainViewModelImple {
         self.appleCalendarUsecase.prepare()
         self.billingUsecase.startObservingTransactions()
         self.billingUsecase.recoverUnfinishedTransactions()
+        self.guideTodoUsecase.prepare()
         Task { [weak self] in
             await self?.eventLiveActivityUsecase.prepare()
         }

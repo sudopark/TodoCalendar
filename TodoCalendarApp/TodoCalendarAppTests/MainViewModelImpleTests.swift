@@ -30,6 +30,7 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var spyBillingUsecase: SpyBillingUsecase!
     private var stubAIOrchestrationUsecase: StubAIAgentOrchestrationUsecase!
     private var spyEventLiveActivityUsecase: SpyEventLiveActivityUsecase!
+    private var stubGuideTodoUsecase: StubGuideTodoUsecase!
     var cancelBag: Set<AnyCancellable>!
 
     override func setUpWithError() throws {
@@ -45,6 +46,7 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.spyBillingUsecase = .init()
         self.stubAIOrchestrationUsecase = .init()
         self.spyEventLiveActivityUsecase = .init()
+        self.stubGuideTodoUsecase = .init()
         self.cancelBag = .init()
         self.timeout = 0.01
     }
@@ -62,6 +64,7 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.spyBillingUsecase = nil
         self.stubAIOrchestrationUsecase = nil
         self.spyEventLiveActivityUsecase = nil
+        self.stubGuideTodoUsecase = nil
         self.cancelBag = nil
     }
 
@@ -83,7 +86,8 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
             eventSyncUsecase: self.stubSyncUsecase,
             billingUsecase: self.spyBillingUsecase,
             aiAgentOrchestrationUsecase: self.stubAIOrchestrationUsecase,
-            eventLiveActivityUsecase: self.spyEventLiveActivityUsecase
+            eventLiveActivityUsecase: self.spyEventLiveActivityUsecase,
+            guideTodoUsecase: self.stubGuideTodoUsecase
         )
         viewModel.router = self.spyRouter
         self.spyRouter.didCalendarAttached = {
@@ -109,7 +113,8 @@ extension MainViewModelImpleTests {
             eventSyncUsecase: self.stubSyncUsecase,
             billingUsecase: self.spyBillingUsecase,
             aiAgentOrchestrationUsecase: self.stubAIOrchestrationUsecase,
-            eventLiveActivityUsecase: self.spyEventLiveActivityUsecase
+            eventLiveActivityUsecase: self.spyEventLiveActivityUsecase,
+            guideTodoUsecase: self.stubGuideTodoUsecase
         )
         viewModel.router = self.spyRouter
         return viewModel
@@ -661,5 +666,22 @@ extension MainViewModelImpleTests {
         // then
         self.wait(for: [expect], timeout: 0.1)
         XCTAssertEqual(self.spyEventLiveActivityUsecase.didHandleWillEnterForeground, true)
+    }
+}
+
+
+// MARK: - 안내할일
+
+extension MainViewModelImpleTests {
+
+    func testViewModel_whenPrepare_prepareGuideTodo() {
+        // given
+        let viewModel = self.makeViewModelWithoutPrepare()
+
+        // when
+        viewModel.prepare()
+
+        // then
+        XCTAssertEqual(self.stubGuideTodoUsecase.didPrepare, true)
     }
 }
