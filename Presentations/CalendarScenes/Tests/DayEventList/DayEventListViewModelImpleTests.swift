@@ -28,6 +28,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var stubTagUsecase: StubEventTagUsecase!
     private var stubUISettingUsecase: StubUISettingUsecase!
     private var stubLiveActivityUsecase: StubEventLiveActivityUsecase!
+    private var stubGuideTodoUsecase: StubGuideTodoUsecase!
     private var spyRouter: SpyRouter!
     private var spyListener: SpyListener!
 
@@ -37,6 +38,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubScheduleUsecase = .init()
         self.stubTagUsecase = .init()
         self.stubUISettingUsecase = .init()
+        self.stubGuideTodoUsecase = .init()
         self.spyRouter = .init()
         self.spyListener = .init()
         self.stubOrchestrationUsecase = .init()
@@ -50,6 +52,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubTagUsecase = nil
         self.stubUISettingUsecase = nil
         self.stubLiveActivityUsecase = nil
+        self.stubGuideTodoUsecase = nil
         self.spyRouter = nil
         self.spyListener = nil
         self.stubOrchestrationUsecase = nil
@@ -65,7 +68,8 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         shouldFailMakeTodo: Bool = false,
         isSignedIn: Bool = true,
         isCreditExhausted: Bool = false,
-        registeredLiveActivityTarget: LiveActivityTarget? = nil
+        registeredLiveActivityTarget: LiveActivityTarget? = nil,
+        isGuideTodoVisible: Bool = true
     ) -> DayEventListViewModelImple {
         let currentTodos: [TodoEvent] = [
             .init(uuid: "current-todo-1", name: "current-todo-1") |> \.creatTimeStamp .~ 100,
@@ -103,6 +107,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         
         self.stubOrchestrationUsecase.stubIsCreditExhausted = isCreditExhausted
         self.stubLiveActivityUsecase = StubEventLiveActivityUsecase(registeredTarget: registeredLiveActivityTarget)
+        self.stubGuideTodoUsecase = .init(isVisible: isGuideTodoVisible)
         let account: AccountInfo? = isSignedIn ? AccountInfo("uid") : nil
         let viewModel = DayEventListViewModelImple(
             calendarUsecase: StubCalendarUsecase(),
@@ -113,7 +118,8 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
             uiSettingUsecase: self.stubUISettingUsecase,
             accountUsecase: StubAccountUsecase(account),
             aiAgentOrchestrationUsecase: self.stubOrchestrationUsecase,
-            eventLiveActivityUsecase: self.stubLiveActivityUsecase
+            eventLiveActivityUsecase: self.stubLiveActivityUsecase,
+            guideTodoUsecase: self.stubGuideTodoUsecase
         )
         viewModel.router = self.spyRouter
         viewModel.attachListener(self.spyListener)
@@ -748,18 +754,19 @@ extension DayEventListViewModelImpleTests {
         )
         
         // when
-        let source = viewModel.cellViewModels.drop(while: { $0.count != self.dummyEvents.count + 1 })
+        let source = viewModel.cellViewModels.drop(while: { $0.count != self.dummyEvents.count + 2 })
         let cvms = self.waitFirstOutput(expect, for: source, timeout: 0.1) {
             viewModel.selectedDayChanaged(self.dummyCurrentDay, and: self.dummyEvents)
         }
-        
+
         // then
         let eventIdLists = cvms?.map { $0.eventIdentifier }
         XCTAssertEqual(eventIdLists, [
+            GuideTodoEventCellViewModel.Constant.identifier,
             "current-todo-1"
         ] + self.dummyEventIdStrings)
     }
-    
+
     private func makeViewModelWithInitialListLoaded(
         shouldFailDoneTodo: Bool = false,
         shouldFailMakeTodo: Bool = false,
@@ -773,9 +780,9 @@ extension DayEventListViewModelImpleTests {
             shouldFailMakeTodo: shouldFailMakeTodo,
             registeredLiveActivityTarget: registeredLiveActivityTarget
         )
-        
+
         // when
-        let source = viewModel.cellViewModels.drop(while: { $0.count != self.dummyEvents.count + 2 })
+        let source = viewModel.cellViewModels.drop(while: { $0.count != self.dummyEvents.count + 3 })
         let _ = self.waitFirstOutput(expect, for: source) {
             viewModel.selectedDayChanaged(self.dummyCurrentDay, and: self.dummyEvents)
         }
@@ -984,7 +991,7 @@ extension DayEventListViewModelImpleTests {
         )
 
         // when
-        let source = viewModel.cellViewModels.drop(while: { $0.count != twoTurnEvents.count + 2 })
+        let source = viewModel.cellViewModels.drop(while: { $0.count != twoTurnEvents.count + 3 })
         let cvms = self.waitFirstOutput(expect, for: source, timeout: 0.1) {
             viewModel.selectedDayChanaged(self.dummyCurrentDay, and: twoTurnEvents)
         }
@@ -1061,6 +1068,7 @@ extension DayEventListViewModelImpleTests {
     
     private var totalEventNameListWithoutPending: [String] {
         return [
+            GuideTodoEventCellViewModel().name,
             "current-todo-2", "current-todo-1",
             "not-repeating-schedule",
             "repeating-schedule",
@@ -1069,9 +1077,10 @@ extension DayEventListViewModelImpleTests {
             "holiday",
         ]
     }
-    
+
     private var totalEventNameListsWithPending: [String] {
         return [
+            GuideTodoEventCellViewModel().name,
             "current-todo-2", "current-todo-1",
             "pending-quick-todo",
             "not-repeating-schedule",
@@ -1565,6 +1574,41 @@ extension DayEventListViewModelImpleTests {
         viewModel.handleAIEntryButtonTap()
         // then
         XCTAssertEqual(self.stubOrchestrationUsecase.didEnterVoiceInput, true)
+    }
+}
+
+// MARK: - 안내할일
+
+extension DayEventListViewModelImpleTests {
+
+    func testViewModel_whenGuideTodoVisible_showGuideTodoCellAtFirst() {
+        // given
+        let expect = expectation(description: "안내할일 셀이 맨 앞에 온다")
+        let viewModel = self.makeViewModel(isGuideTodoVisible: true)
+
+        // when
+        let source = viewModel.cellViewModels.drop(while: { $0.count != self.dummyEvents.count + 3 })
+        let cvms = self.waitFirstOutput(expect, for: source, timeout: 0.1) {
+            viewModel.selectedDayChanaged(self.dummyCurrentDay, and: self.dummyEvents)
+        }
+
+        // then
+        XCTAssertEqual(cvms?.first is GuideTodoEventCellViewModel, true)
+    }
+
+    func testViewModel_whenGuideTodoNotVisible_notShowGuideTodoCell() {
+        // given
+        let expect = expectation(description: "안내할일 셀이 없다")
+        let viewModel = self.makeViewModel(isGuideTodoVisible: false)
+
+        // when
+        let source = viewModel.cellViewModels.drop(while: { $0.count != self.dummyEvents.count + 2 })
+        let cvms = self.waitFirstOutput(expect, for: source, timeout: 0.1) {
+            viewModel.selectedDayChanaged(self.dummyCurrentDay, and: self.dummyEvents)
+        }
+
+        // then
+        XCTAssertEqual(cvms?.contains(where: { $0 is GuideTodoEventCellViewModel }), false)
     }
 }
 

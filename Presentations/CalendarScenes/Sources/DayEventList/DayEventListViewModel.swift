@@ -94,6 +94,7 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
     private let accountUsecase: any AccountUsecase
     private let aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
     private let eventLiveActivityUsecase: any EventLiveActivityUsecase
+    private let guideTodoUsecase: any GuideTodoUsecase
     var router: (any DayEventListRouting)?
     private weak var listener: (any DayEventListSceneListener)?
 
@@ -106,7 +107,8 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
         uiSettingUsecase: any UISettingUsecase,
         accountUsecase: any AccountUsecase,
         aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase,
-        eventLiveActivityUsecase: any EventLiveActivityUsecase
+        eventLiveActivityUsecase: any EventLiveActivityUsecase,
+        guideTodoUsecase: any GuideTodoUsecase
     ) {
         self.calendarUsecase = calendarUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
@@ -117,6 +119,7 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
         self.accountUsecase = accountUsecase
         self.aiAgentOrchestrationUsecase = aiAgentOrchestrationUsecase
         self.eventLiveActivityUsecase = eventLiveActivityUsecase
+        self.guideTodoUsecase = guideTodoUsecase
 
         self.internalBind()
     }
@@ -410,18 +413,21 @@ extension DayEventListViewModelImple {
 
     var cellViewModels: AnyPublisher<[any EventCellViewModel], Never> {
 
-        let combineEvents: (CurrentAndEvents, [PendingTodoEventCellViewModel]) -> [any EventCellViewModel]
-        combineEvents = { pair, pending in
-            return pair.0 + pending + pair.1
+        let combineEvents: (CurrentAndEvents, [PendingTodoEventCellViewModel], Bool) -> [any EventCellViewModel]
+        combineEvents = { pair, pending, isGuideTodoVisible in
+            let guides: [any EventCellViewModel] = isGuideTodoVisible
+                ? [GuideTodoEventCellViewModel()] : []
+            return guides + pair.0 + pending + pair.1
         }
         let applyRegistration: ([any EventCellViewModel], LiveActivityTarget?) -> [any EventCellViewModel]
         applyRegistration = { cvms, target in
             cvms.map { $0.liveActivityRegistrationApplied(target) }
         }
 
-        let cells = Publishers.CombineLatest(
+        let cells = Publishers.CombineLatest3(
             self.currentAndEventCellViewModels.receive(on: self.cvmCombineScheduler),
-            self.subject.pendingTodoEvents.receive(on: self.cvmCombineScheduler)
+            self.subject.pendingTodoEvents.receive(on: self.cvmCombineScheduler),
+            self.guideTodoUsecase.isGuideTodoVisible.receive(on: self.cvmCombineScheduler)
         )
         .map(combineEvents)
 

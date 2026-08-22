@@ -112,6 +112,7 @@
 
 "calendar::foremostevent:title" = "제일 중요한 이벤트";
 "calendar::uncompletedTodos:title" = "완료되지 않은 할일";
+"calendar::guideTodo::name" = "투두캘린더 사용법 보기";
 "calendar::eventSync::loadingAllEvents::message" = "모든 이벤트를 불러오는 중…";
 "calendar::event_time::todo" = "할일";
 "calendar::event_time::allday" = "하루종일";
