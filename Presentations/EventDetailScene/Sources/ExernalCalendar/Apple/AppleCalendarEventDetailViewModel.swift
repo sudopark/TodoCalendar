@@ -44,6 +44,7 @@ protocol AppleCalendarEventDetailViewModel: AnyObject, Sendable, AppleCalendarEv
     func selectNotEditableField()
     func selectRepeatOption()
     func share()
+    func toggleLiveActivity(isRegistered: Bool)
 
     // presenter
     var isEditable: AnyPublisher<Bool, Never> { get }
@@ -59,6 +60,7 @@ protocol AppleCalendarEventDetailViewModel: AnyObject, Sendable, AppleCalendarEv
     var tagModel: AnyPublisher<AppleCalendarTagModel?, Never> { get }
     var isSavable: AnyPublisher<Bool, Never> { get }
     var isSaving: AnyPublisher<Bool, Never> { get }
+    var liveActivityActionModel: AnyPublisher<LiveActivityActionModel?, Never> { get }
 }
 
 
@@ -83,6 +85,7 @@ final class AppleCalendarEventDetailViewModelImple: AppleCalendarEventDetailView
     private let appleCalendarUsecase: any AppleCalendarUsecase
     private let calendarSettingUsecase: any CalendarSettingUsecase
     private let daysIntervalCountUsecase: any DaysIntervalCountUsecase
+    private let liveActivityToggleViewModel: any LiveActivityToggleViewModel
     var router: (any AppleCalendarEventDetailRouting)?
 
     init(
@@ -90,13 +93,15 @@ final class AppleCalendarEventDetailViewModelImple: AppleCalendarEventDetailView
         eventId: String,
         appleCalendarUsecase: any AppleCalendarUsecase,
         calendarSettingUsecase: any CalendarSettingUsecase,
-        daysIntervalCountUsecase: any DaysIntervalCountUsecase
+        daysIntervalCountUsecase: any DaysIntervalCountUsecase,
+        liveActivityToggleViewModel: any LiveActivityToggleViewModel
     ) {
         self.calendarId = calendarId
         self.eventId = eventId
         self.appleCalendarUsecase = appleCalendarUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
         self.daysIntervalCountUsecase = daysIntervalCountUsecase
+        self.liveActivityToggleViewModel = liveActivityToggleViewModel
 
         self.internalBind()
     }
@@ -474,6 +479,22 @@ extension AppleCalendarEventDetailViewModelImple {
 }
 
 
+// MARK: - AppleCalendarEventDetailViewModelImple LiveActivity
+
+extension AppleCalendarEventDetailViewModelImple {
+
+    func toggleLiveActivity(isRegistered: Bool) {
+        self.liveActivityToggleViewModel.startOrStopLiveActivity(
+            self.liveActivityTarget, isCurrentlyRegistered: isRegistered
+        )
+    }
+
+    private var liveActivityTarget: LiveActivityTarget {
+        return .appleCalendar(calendarId: self.calendarId, eventId: self.eventId)
+    }
+}
+
+
 // MARK: - AppleCalendarEventDetailViewModelImple Presenter
 
 extension AppleCalendarEventDetailViewModelImple {
@@ -615,6 +636,20 @@ extension AppleCalendarEventDetailViewModelImple {
         return self.subject.isSaving
             .removeDuplicates()
             .eraseToAnyPublisher()
+    }
+
+    var liveActivityActionModel: AnyPublisher<LiveActivityActionModel?, Never> {
+        let target = self.liveActivityTarget
+        let transform: (AppleCalendar.EventOrigin?, LiveActivityTarget?) -> LiveActivityActionModel? = { event, registeredTarget in
+            guard event != nil else { return nil }
+            return LiveActivityActionModel(isRegistered: registeredTarget == target)
+        }
+        return Publishers.CombineLatest(
+            self.subject.event, self.liveActivityToggleViewModel.registeredTarget
+        )
+        .map(transform)
+        .removeDuplicates()
+        .eraseToAnyPublisher()
     }
 }
 

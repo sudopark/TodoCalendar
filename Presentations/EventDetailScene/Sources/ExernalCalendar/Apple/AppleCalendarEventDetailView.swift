@@ -9,6 +9,7 @@
 import SwiftUI
 import Combine
 import Domain
+import Scenes
 import CommonPresentation
 
 
@@ -32,6 +33,7 @@ import CommonPresentation
     var tagModel: AppleCalendarTagModel?
     var isSavable: Bool = false
     var isSaving: Bool = false
+    var liveActivityActionModel: LiveActivityActionModel?
 
     func bind(_ viewModel: any AppleCalendarEventDetailViewModel) {
 
@@ -128,6 +130,13 @@ import CommonPresentation
                 self?.isSaving = isSaving
             })
             .store(in: &self.cancellables)
+
+        viewModel.liveActivityActionModel
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] model in
+                self?.liveActivityActionModel = model
+            })
+            .store(in: &self.cancellables)
     }
 }
 
@@ -151,6 +160,7 @@ final class AppleCalendarEventDetailViewEventHandler: Observable {
     var selectNotEditableField: () -> Void = { }
     var selectRepeatOption: () -> Void = { }
     var share: () -> Void = { }
+    var toggleLiveActivity: (Bool) -> Void = { _ in }
 
     func bind(_ viewModel: any AppleCalendarEventDetailViewModel) {
         self.onAppear = viewModel.refresh
@@ -168,6 +178,7 @@ final class AppleCalendarEventDetailViewEventHandler: Observable {
         self.selectNotEditableField = viewModel.selectNotEditableField
         self.selectRepeatOption = viewModel.selectRepeatOption
         self.share = viewModel.share
+        self.toggleLiveActivity = viewModel.toggleLiveActivity(isRegistered:)
     }
 }
 
@@ -317,6 +328,14 @@ struct AppleCalendarEventDetailView: View {
                 }
             }
             Section {
+                if let model = self.state.liveActivityActionModel {
+                    Button {
+                        eventHandlers.toggleLiveActivity(model.isRegistered)
+                    } label: {
+                        Label(model.itemText, systemImage: "timer")
+                    }
+                }
+
                 Button {
                     eventHandlers.share()
                 } label: {

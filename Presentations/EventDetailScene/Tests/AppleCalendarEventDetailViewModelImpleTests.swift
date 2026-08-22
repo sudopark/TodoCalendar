@@ -11,6 +11,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Scenes
 import Extensions
 import UnitTestHelpKit
 import TestDoubles
@@ -24,11 +25,16 @@ final class AppleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
     var cancelBag: Set<AnyCancellable>! = []
     private let spyRouter = SpyRouter()
     private var lastAppleUsecase: StubAppleCalendarUsecase!
+    private let stubLiveActivityUsecase = StubEventLiveActivityUsecase()
 
     private let stubCalendarId = "cal:1"
     private let stubEventId = "event:1"
 
-    private func makeViewModel() -> AppleCalendarEventDetailViewModelImple {
+    private func makeViewModel(
+        eventId: String? = nil,
+        registeredLiveActivityTarget: LiveActivityTarget? = nil,
+        liveActivityStartError: (any Error)? = nil
+    ) -> AppleCalendarEventDetailViewModelImple {
         let settingUsecase = StubCalendarSettingUsecase()
         settingUsecase.prepare()
 
@@ -50,15 +56,22 @@ final class AppleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
         origin.location = "Conference Room A"
         appleUsecase.stubEventOrigin = origin
         self.lastAppleUsecase = appleUsecase
+        self.stubLiveActivityUsecase.registeredTargetSubject.send(registeredLiveActivityTarget)
+        self.stubLiveActivityUsecase.stubStartError = liveActivityStartError
+        let liveActivityToggleViewModel = LiveActivityToggleViewModelImple(
+            eventLiveActivityUsecase: self.stubLiveActivityUsecase
+        )
 
         let viewModel = AppleCalendarEventDetailViewModelImple(
             calendarId: stubCalendarId,
-            eventId: stubEventId,
+            eventId: eventId ?? stubEventId,
             appleCalendarUsecase: appleUsecase,
             calendarSettingUsecase: settingUsecase,
-            daysIntervalCountUsecase: StubDaysIntervalCountUsecase()
+            daysIntervalCountUsecase: StubDaysIntervalCountUsecase(),
+            liveActivityToggleViewModel: liveActivityToggleViewModel
         )
         viewModel.router = self.spyRouter
+        liveActivityToggleViewModel.router = self.spyRouter
         return viewModel
     }
 
@@ -86,14 +99,19 @@ final class AppleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
         configure(&origin)
         appleUsecase.stubEventOrigin = origin
         self.lastAppleUsecase = appleUsecase
+        let liveActivityToggleViewModel = LiveActivityToggleViewModelImple(
+            eventLiveActivityUsecase: self.stubLiveActivityUsecase
+        )
         let viewModel = AppleCalendarEventDetailViewModelImple(
             calendarId: stubCalendarId,
             eventId: stubEventId,
             appleCalendarUsecase: appleUsecase,
             calendarSettingUsecase: settingUsecase,
-            daysIntervalCountUsecase: StubDaysIntervalCountUsecase()
+            daysIntervalCountUsecase: StubDaysIntervalCountUsecase(),
+            liveActivityToggleViewModel: liveActivityToggleViewModel
         )
         viewModel.router = self.spyRouter
+        liveActivityToggleViewModel.router = self.spyRouter
         return viewModel
     }
 
@@ -112,14 +130,19 @@ final class AppleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
         )
         appleUsecase.stubEventOrigin = origin
         self.lastAppleUsecase = appleUsecase
+        let liveActivityToggleViewModel = LiveActivityToggleViewModelImple(
+            eventLiveActivityUsecase: self.stubLiveActivityUsecase
+        )
         let viewModel = AppleCalendarEventDetailViewModelImple(
             calendarId: stubCalendarId,
             eventId: stubEventId,
             appleCalendarUsecase: appleUsecase,
             calendarSettingUsecase: settingUsecase,
-            daysIntervalCountUsecase: StubDaysIntervalCountUsecase()
+            daysIntervalCountUsecase: StubDaysIntervalCountUsecase(),
+            liveActivityToggleViewModel: liveActivityToggleViewModel
         )
         viewModel.router = self.spyRouter
+        liveActivityToggleViewModel.router = self.spyRouter
         return (viewModel, appleUsecase)
     }
 
@@ -1227,5 +1250,151 @@ extension AppleCalendarEventDetailViewModelImpleTests {
         let text = try #require(self.spyRouter.didShareText)
         let lines = text.components(separatedBy: "\n")
         #expect(!lines.contains(where: { $0.hasPrefix("\(self.shareFieldLabel("repeating")):") }))
+    }
+}
+
+
+// MARK: - 라이브액티비티
+
+extension AppleCalendarEventDetailViewModelImpleTests {
+
+    private var appleLiveActivityTarget: LiveActivityTarget {
+        return .appleCalendar(calendarId: stubCalendarId, eventId: stubEventId)
+    }
+
+    @Test func viewModel_whenEventLoaded_provideLiveActivityAction() async throws {
+        // given
+        let expect = expectConfirm("이벤트 로드 후 라이브액티비티 항목 노출")
+        expect.count = 2
+        let viewModel = self.makeViewModel()
+
+        // when
+        let models = try await self.outputs(expect, for: viewModel.liveActivityActionModel) {
+            viewModel.refresh()
+        }
+
+        // then
+        #expect(models == [nil, LiveActivityActionModel(isRegistered: false)])
+    }
+
+    @Test func viewModel_whenLiveActivityRegisteredForEvent_provideUnregisterAction() async throws {
+        // given
+        let expect = expectConfirm("등록된 대상이면 해제 항목 노출")
+        expect.count = 2
+        let viewModel = self.makeViewModel(
+            registeredLiveActivityTarget: self.appleLiveActivityTarget
+        )
+
+        // when
+        let models = try await self.outputs(expect, for: viewModel.liveActivityActionModel) {
+            viewModel.refresh()
+        }
+
+        // then
+        #expect(models == [nil, LiveActivityActionModel(isRegistered: true)])
+    }
+
+    @Test func viewModel_whenLiveActivityRegisteredForOtherEvent_provideRegisterAction() async throws {
+        // given
+        let expect = expectConfirm("다른 이벤트가 등록돼 있으면 등록 항목 노출")
+        expect.count = 2
+        let viewModel = self.makeViewModel(
+            registeredLiveActivityTarget: .todo(id: "other")
+        )
+
+        // when
+        let models = try await self.outputs(expect, for: viewModel.liveActivityActionModel) {
+            viewModel.refresh()
+        }
+
+        // then
+        #expect(models == [nil, LiveActivityActionModel(isRegistered: false)])
+    }
+
+    @Test func viewModel_whenToggleLiveActivity_startActivityWithAppleTarget() async throws {
+        // given
+        let viewModel = self.makeViewModel()
+        viewModel.refresh()
+        try await Task.sleep(for: .milliseconds(100))
+
+        // when
+        viewModel.toggleLiveActivity(isRegistered: false)
+        try await Task.sleep(for: .milliseconds(100))
+
+        // then
+        #expect(self.stubLiveActivityUsecase.didStartTarget == self.appleLiveActivityTarget)
+        #expect(self.stubLiveActivityUsecase.didStopActivity == false)
+    }
+
+    @Test func viewModel_whenToggleLiveActivityOnOccurrence_startActivityWithOccurrenceEventId() async throws {
+        // given — 반복 회차 상세(합성 eventId)로 진입한 상황. 마스터 id(stubEventId)와는 다른 값이어야 한다
+        let occurrenceEventId = "\(stubEventId)#occ:100"
+        let viewModel = self.makeViewModel(eventId: occurrenceEventId)
+        viewModel.refresh()
+        try await Task.sleep(for: .milliseconds(100))
+
+        // when
+        viewModel.toggleLiveActivity(isRegistered: false)
+        try await Task.sleep(for: .milliseconds(100))
+
+        // then
+        #expect(
+            self.stubLiveActivityUsecase.didStartTarget
+                == .appleCalendar(calendarId: stubCalendarId, eventId: occurrenceEventId)
+        )
+    }
+
+    @Test func viewModel_whenToggleRegisteredLiveActivity_stopActivity() async throws {
+        // given
+        let viewModel = self.makeViewModel(
+            registeredLiveActivityTarget: self.appleLiveActivityTarget
+        )
+        viewModel.refresh()
+        try await Task.sleep(for: .milliseconds(100))
+
+        // when
+        viewModel.toggleLiveActivity(isRegistered: true)
+        try await Task.sleep(for: .milliseconds(100))
+
+        // then
+        #expect(self.stubLiveActivityUsecase.didStopActivity == true)
+        #expect(self.stubLiveActivityUsecase.didStartTarget == nil)
+    }
+
+    @Test func viewModel_whenStartLiveActivityFail_showUnavailableMessage() async throws {
+        // given
+        let viewModel = self.makeViewModel(
+            liveActivityStartError: EventLiveActivityStartFailReason.tooFarFuture
+        )
+        viewModel.refresh()
+        try await Task.sleep(for: .milliseconds(100))
+
+        // when
+        viewModel.toggleLiveActivity(isRegistered: false)
+        try await Task.sleep(for: .milliseconds(100))
+
+        // then
+        #expect(
+            self.spyRouter.didShowConfirmWith?.message
+            == "calendar::event::more_action:live_activity:unavail::too_far_future".localized()
+        )
+        #expect(self.spyRouter.didShowConfirmWith?.withCancel == false)
+        #expect(self.spyRouter.didShowError == nil)
+    }
+
+    // 읽기 전용 캘린더여도 라이브액티비티는 로컬 동작이라 쓰기 권한과 무관하게 노출된다
+    @Test func viewModel_whenReadOnlyCalendar_stillProvideLiveActivityAction() async throws {
+        // given
+        let expect = expectConfirm("읽기 전용 캘린더에서도 라이브액티비티 항목 노출")
+        expect.count = 2
+        let viewModel = self.makeViewModelWithOrigin(isWritable: false) { _ in }
+
+        // when
+        let models = try await self.outputs(expect, for: viewModel.liveActivityActionModel) {
+            viewModel.refresh()
+        }
+
+        // then
+        #expect(models == [nil, LiveActivityActionModel(isRegistered: false)])
     }
 }
