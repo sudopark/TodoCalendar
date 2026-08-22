@@ -93,26 +93,30 @@ public func captureSnapshotPair<V: View>(
 }
 
 
-/// 카탈로그(기록 용도) 이미지 저장 전용 경로 — 레포 루트의 snapshot-catalog/<Framework>/<스위트>/ (gitignored).
+/// 카탈로그(기록 용도) 이미지 저장 전용 경로 — 레포 루트의 snapshot-catalog/<모듈>/<스위트>/ (gitignored).
 /// 검증 용도(snapshot-check)는 이 함수를 쓰지 않는다 — 기본 __Snapshots__/에 기록.
-/// Presentations 밖 경로에서 호출되면 XCTFail — nil 폴백으로 커밋 대상 경로(__Snapshots__/)에 흘러드는 것을 막는다.
+/// 아래 마커 밖 경로면 XCTFail — nil 폴백으로 커밋 대상 경로(__Snapshots__/)에 흘러드는 것을 막는다.
 public func catalogSnapshotDirectory(
     file: StaticString = #filePath,
     line: UInt = #line
 ) -> String? {
+    let markers = ["/Presentations/", "/TodoCalendarApp/AppExtensions/"]
     let filePath = "\(file)"
-    guard let range = filePath.range(of: "/Presentations/"),
-          let frameworkName = filePath[range.upperBound...].split(separator: "/").first
-    else {
+    let resolved = markers.lazy.compactMap { marker -> (String, Substring)? in
+        guard let range = filePath.range(of: marker),
+              let moduleName = filePath[range.upperBound...].split(separator: "/").first
+        else { return nil }
+        return (String(filePath[..<range.lowerBound]), moduleName)
+    }.first
+    guard let (repoRootPath, moduleName) = resolved else {
         XCTFail(
-            "catalogSnapshotDirectory: /Presentations/ 밖 경로라 카탈로그 경로를 도출할 수 없다 — \(filePath)",
+            "catalogSnapshotDirectory: \(markers.joined(separator: "·")) 밖 경로라 카탈로그 경로를 도출할 수 없다 — \(filePath)",
             file: file, line: line
         )
         return nil
     }
-    let repoRoot = String(filePath[..<range.lowerBound])
     let suiteName = URL(fileURLWithPath: filePath).deletingPathExtension().lastPathComponent
-    return "\(repoRoot)/snapshot-catalog/\(frameworkName)/\(suiteName)"
+    return "\(repoRootPath)/snapshot-catalog/\(moduleName)/\(suiteName)"
 }
 
 

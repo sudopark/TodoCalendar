@@ -145,7 +145,8 @@ let project = Project.app(
                     name: "Release",
                     settings: Project.releaseWidgetSigningSetting
                 )
-            ]
+            ],
+            snapshotTests: true
         )
     + Project.makeAppExtensionTargets(
         appName: "TodoCalendarApp",
