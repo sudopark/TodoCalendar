@@ -34,14 +34,19 @@ open class StubExternalCalendarIntegrationUsecase: ExternalCalendarIntegrationUs
         return account
     }
 
-    public var didReauthenticateWith: (serviceId: String, accountId: String)?
-    public var didReauthenticateWithService: (any ExternalCalendarService)?
+    public var didReauthenticateForWriteScopeWith: (serviceId: String, accountId: String)?
+    public var didReauthenticateForWriteScopeWithService: (any ExternalCalendarService)?
     public var shouldFailReauthenticate: Bool = false
-    open func reauthenticate(
+    public var shouldFailReauthenticateWithNotGranted: Bool = false
+    open func reauthenticateForWriteScope(
         external service: any ExternalCalendarService, accountId: String
     ) async throws -> ExternalServiceAccountinfo {
-        self.didReauthenticateWith = (service.identifier, accountId)
-        self.didReauthenticateWithService = service
+        self.didReauthenticateForWriteScopeWith = (service.identifier, accountId)
+        self.didReauthenticateForWriteScopeWithService = service
+        guard !self.shouldFailReauthenticateWithNotGranted
+        else {
+            throw GoogleCalendarWriteScopeFailReason.notGranted
+        }
         guard !self.shouldFailReauthenticate
         else {
             throw RuntimeError("failed to reauthenticate")

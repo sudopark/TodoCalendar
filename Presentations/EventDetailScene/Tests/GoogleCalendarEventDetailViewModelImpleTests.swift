@@ -804,7 +804,7 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
         try await self.waitSaveCompleted { viewModel.save() }
 
         // then
-        #expect(self.integrationUsecase.didReauthenticateWith?.accountId == "stub@gmail.com")
+        #expect(self.integrationUsecase.didReauthenticateForWriteScopeWith?.accountId == "stub@gmail.com")
         #expect(self.lastCalendarUsecase.didUpdateEventWith?.params.summary == "new name")
     }
 
@@ -822,7 +822,7 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
         try await Task.sleep(for: .milliseconds(10))
 
         // then
-        #expect(self.integrationUsecase.didReauthenticateWith == nil)
+        #expect(self.integrationUsecase.didReauthenticateForWriteScopeWith == nil)
         #expect(self.lastCalendarUsecase.didUpdateEventWith == nil)
         let name = try await self.firstOutput(expectConfirm("입력값 유지"), for: viewModel.eventName)
         #expect(name == "new name")
@@ -1124,7 +1124,7 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
         try await Task.sleep(for: .milliseconds(10))
 
         // then
-        #expect(self.integrationUsecase.didReauthenticateWith?.accountId == "stub@gmail.com")
+        #expect(self.integrationUsecase.didReauthenticateForWriteScopeWith?.accountId == "stub@gmail.com")
         #expect(self.lastCalendarUsecase.didRemoveEventWith?.eventId == "id")
         #expect(self.spyRouter.didClosed == true)
     }

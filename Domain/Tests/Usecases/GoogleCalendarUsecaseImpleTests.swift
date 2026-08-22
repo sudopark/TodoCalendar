@@ -1014,7 +1014,7 @@ private final class PrivateStubIntegrationUsecase: ExternalCalendarIntegrationUs
 
     func prepareIntegratedAccounts() async throws {}
     func integrate(external service: any ExternalCalendarService) async throws -> ExternalServiceAccountinfo { fatalError() }
-    func reauthenticate(
+    func reauthenticateForWriteScope(
         external service: any ExternalCalendarService, accountId: String
     ) async throws -> ExternalServiceAccountinfo { fatalError() }
     func stopIntegrate(external service: any ExternalCalendarService, accountId: String) async throws {}

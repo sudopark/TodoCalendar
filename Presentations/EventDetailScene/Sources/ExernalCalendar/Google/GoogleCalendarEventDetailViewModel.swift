@@ -456,7 +456,7 @@ extension GoogleCalendarEventDetailViewModelImple {
         Task { [weak self] in
             guard let self else { return }
             do {
-                _ = try await self.externalCalendarIntegrationUsecase.reauthenticate(
+                _ = try await self.externalCalendarIntegrationUsecase.reauthenticateForWriteScope(
                     external: service, accountId: accountId
                 )
                 action()

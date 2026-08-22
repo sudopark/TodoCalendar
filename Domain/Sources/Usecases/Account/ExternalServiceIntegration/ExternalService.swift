@@ -45,6 +45,7 @@ public struct AppleCalendarService: ExternalCalendarService {
 public struct GoogleCalendarService: ExternalCalendarService {
     
     public enum Scope: String, Sendable {
+        case readonly = "https://www.googleapis.com/auth/calendar.readonly"
         case readWrite = "https://www.googleapis.com/auth/calendar"
     }
     
