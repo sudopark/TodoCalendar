@@ -11,6 +11,7 @@ import Foundation
 import Combine
 import Domain
 import Scenes
+import CommonPresentation
 
 
 protocol SettingItemModelType {
@@ -31,6 +32,7 @@ struct SettingItemModel: SettingItemModelType {
         case billingPlan
         case terms
         case privacyPolicy
+        case adPrivacyOptions
     }
     
     let itemId: ItemId
@@ -76,6 +78,9 @@ struct SettingItemModel: SettingItemModelType {
         case .privacyPolicy:
             self.iconNamge = "hand.raised"
             self.text = "setting.privacyPolicy::name".localized()
+        case .adPrivacyOptions:
+            self.iconNamge = "checkmark.shield"
+            self.text = "setting.adPrivacyOptions::name".localized()
         }
     }
     
@@ -170,6 +175,7 @@ final class SettingItemListViewModelImple: SettingItemListViewModel, @unchecked 
     private let uiSettingUsecase: any UISettingUsecase
     private let deviceInfoFetchService: any DeviceInfoFetchService
     private let appUpdateCheckUsecase: any AppUpdateCheckUsecase
+    private let privacyOptionsFormRouter: (any PrivacyOptionsFormRouter)?
     var router: (any SettingItemListRouting)?
 
     init(
@@ -177,18 +183,21 @@ final class SettingItemListViewModelImple: SettingItemListViewModel, @unchecked 
         accountUsecase: any AccountUsecase,
         uiSettingUsecase: any UISettingUsecase,
         deviceInfoFetchService: any DeviceInfoFetchService,
-        appUpdateCheckUsecase: any AppUpdateCheckUsecase
+        appUpdateCheckUsecase: any AppUpdateCheckUsecase,
+        privacyOptionsFormRouter: (any PrivacyOptionsFormRouter)?
     ) {
         self.appstoreLinkPath = appstoreLinkPath
         self.accountUsecase = accountUsecase
         self.uiSettingUsecase = uiSettingUsecase
         self.deviceInfoFetchService = deviceInfoFetchService
         self.appUpdateCheckUsecase = appUpdateCheckUsecase
+        self.privacyOptionsFormRouter = privacyOptionsFormRouter
     }
     
     
     private struct Subject {
         let deviceInfo = CurrentValueSubject<DeviceInfo?, Never>(nil)
+        let isAdPrivacyOptionsRequired = CurrentValueSubject<Bool, Never>(false)
     }
     
     private var cancellables: Set<AnyCancellable> = []
@@ -201,9 +210,22 @@ final class SettingItemListViewModelImple: SettingItemListViewModel, @unchecked 
 extension SettingItemListViewModelImple {
     
     func prepare() {
+        self.prepareDeviceInfo()
+        self.prepareAdPrivacyOptionsRequirement()
+    }
+    
+    private func prepareDeviceInfo() {
         Task { [weak self] in
             let info = await self?.deviceInfoFetchService.fetchDeviceInfo()
             self?.subject.deviceInfo.send(info)
+        }
+        .store(in: &self.cancellables)
+    }
+    
+    private func prepareAdPrivacyOptionsRequirement() {
+        Task { @MainActor [weak self] in
+            let isRequired = self?.privacyOptionsFormRouter?.isPrivacyOptionsRequired()
+            self?.subject.isAdPrivacyOptionsRequired.send(isRequired ?? false)
         }
         .store(in: &self.cancellables)
     }
@@ -265,6 +287,9 @@ extension SettingItemListViewModelImple {
 
         case .privacyPolicy:
             self.router?.showWebView(LegalLink.privacyPolicyPath)
+
+        case .adPrivacyOptions:
+            self.router?.routeToAdPrivacyOptions()
         }
     }
     
@@ -290,7 +315,7 @@ extension SettingItemListViewModelImple {
     
     var sectionModels: AnyPublisher<[any SettingSectionModelType], Never> {
 
-        let transform: (AccountInfo?, DeviceInfo?, Bool) -> [any SettingSectionModelType] = { account, device, isUpdateAvailable in
+        let transform: (AccountInfo?, DeviceInfo?, Bool, Bool) -> [any SettingSectionModelType] = { account, device, isUpdateAvailable, isAdPrivacyOptionsRequired in
             let showsBillingPlan = account != nil
             let baseSectionItems: [SettingItemModel] = [
                 .init(.appearance),
@@ -316,7 +341,7 @@ extension SettingItemListViewModelImple {
                 .init(.sourceCode),
                 .init(.terms),
                 .init(.privacyPolicy)
-            ]
+            ] + (isAdPrivacyOptionsRequired ? [.init(.adPrivacyOptions)] : [])
             let appInfoSection = AppInfoSectionModel(
                 headerText: "setting.section.app::name".localized(),
                 version: device?.appVersion.map { "v\($0)"},
@@ -334,10 +359,11 @@ extension SettingItemListViewModelImple {
         }
 
         return Publishers
-            .CombineLatest3(
+            .CombineLatest4(
                 self.accountUsecase.currentAccountInfo,
                 self.subject.deviceInfo,
-                self.appUpdateCheckUsecase.isUpdateAvailable
+                self.appUpdateCheckUsecase.isUpdateAvailable,
+                self.subject.isAdPrivacyOptionsRequired
             )
             .map(transform)
             .eraseToAnyPublisher()

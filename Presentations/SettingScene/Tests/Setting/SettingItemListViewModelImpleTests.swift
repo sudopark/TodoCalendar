@@ -11,6 +11,7 @@ import Prelude
 import Optics
 import Domain
 import Scenes
+import CommonPresentation
 import UnitTestHelpKit
 import TestDoubles
 
@@ -37,7 +38,8 @@ class SettingItemListViewModelImpleTests: BaseTestCase, PublisherWaitable {
 
     private func makeViewModel(
         _ account: AccountInfo? = nil,
-        isUpdateAvailable: Bool = false
+        isUpdateAvailable: Bool = false,
+        privacyOptionsFormRouter: (any PrivacyOptionsFormRouter)? = nil
     ) -> SettingItemListViewModelImple {
         self.stubAppUpdateCheckUsecase.isUpdateAvailableSubject.send(isUpdateAvailable)
         let accountUsecase = StubAccountUsecase(account)
@@ -46,7 +48,8 @@ class SettingItemListViewModelImpleTests: BaseTestCase, PublisherWaitable {
             accountUsecase: accountUsecase,
             uiSettingUsecase: StubUISettingUsecase(),
             deviceInfoFetchService: StubDeviceInfoFetchService(),
-            appUpdateCheckUsecase: self.stubAppUpdateCheckUsecase
+            appUpdateCheckUsecase: self.stubAppUpdateCheckUsecase,
+            privacyOptionsFormRouter: privacyOptionsFormRouter
         )
         viewModel.router = self.spyRouter
         return viewModel
@@ -370,6 +373,11 @@ private class SpyRouter: BaseSpyRouter, SettingItemListRouting, @unchecked Senda
     func routeToPaywall() {
         self.didRouteToPaywall = true
     }
+    
+    var didRouteToAdPrivacyOptions: Bool?
+    func routeToAdPrivacyOptions() {
+        self.didRouteToAdPrivacyOptions = true
+    }
 }
 
 
@@ -619,4 +627,151 @@ extension SettingItemListViewModelImpleTests {
         XCTAssertEqual(self.spyRouter.didShowWebViewPath, LegalLink.privacyPolicyPath)
         XCTAssertNil(self.spyRouter.didOpenSafariPath)
     }
+}
+
+
+// MARK: - 광고 개인정보 옵션 진입점 (#958)
+
+extension SettingItemListViewModelImpleTests {
+    
+    private func appInfoItems(
+        _ viewModel: SettingItemListViewModelImple
+    ) -> AnyPublisher<[SettingItemModel], Never> {
+        return viewModel.sectionModels
+            .compactMap { $0.compactMap { $0 as? AppInfoSectionModel }.first }
+            .map { $0.items.compactMap { $0 as? SettingItemModel } }
+            .eraseToAnyPublisher()
+    }
+    
+    private func waitAppInfoItemsWhenAdPrivacyOptionsShown(
+        _ viewModel: SettingItemListViewModelImple
+    ) -> [SettingItemModel] {
+        // given
+        let expect = expectation(description: "광고 개인정보 옵션 항목이 실린 방출")
+        let source = self.appInfoItems(viewModel)
+            .first(where: { $0.contains(where: { $0.itemId == .adPrivacyOptions }) })
+        
+        // when
+        let items = self.waitFirstOutput(expect, for: source) {
+            viewModel.prepare()
+        }
+        
+        // then
+        return items ?? []
+    }
+    
+    private func waitAdPrivacyOptionsNeverShown(_ viewModel: SettingItemListViewModelImple) {
+        // given
+        let expect = expectation(description: "광고 개인정보 옵션 항목이 끝내 안 실린다")
+        expect.isInverted = true
+        let source = self.appInfoItems(viewModel)
+            .first(where: { $0.contains(where: { $0.itemId == .adPrivacyOptions }) })
+        
+        // when
+        _ = self.waitOutputs(expect, for: source) {
+            viewModel.prepare()
+        }
+    }
+    
+    func test_whenPrivacyOptionsRequired_showsAdPrivacyOptionsItem() {
+        // given
+        let viewModel = self.makeViewModel(
+            privacyOptionsFormRouter: StubPrivacyOptionsFormRouter(isRequired: true)
+        )
+        
+        // when
+        let items = self.waitAppInfoItemsWhenAdPrivacyOptionsShown(viewModel)
+        
+        // then
+        let adPrivacyOptions = items.first(where: { $0.itemId == .adPrivacyOptions })
+        XCTAssertEqual(adPrivacyOptions?.iconNamge, "checkmark.shield")
+    }
+    
+    func test_whenPrivacyOptionsRequired_placesAdPrivacyOptionsItemAfterPrivacyPolicy() {
+        // given
+        let viewModel = self.makeViewModel(
+            privacyOptionsFormRouter: StubPrivacyOptionsFormRouter(isRequired: true)
+        )
+        
+        // when
+        let itemIds = self.waitAppInfoItemsWhenAdPrivacyOptionsShown(viewModel).map { $0.itemId }
+        
+        // then
+        XCTAssertEqual(itemIds, [
+            .shareApp, .addReview, .sourceCode, .terms, .privacyPolicy, .adPrivacyOptions
+        ])
+    }
+    
+    func test_whenPrivacyOptionsNotRequired_hidesAdPrivacyOptionsItem() {
+        // given
+        let viewModel = self.makeViewModel(
+            privacyOptionsFormRouter: StubPrivacyOptionsFormRouter(isRequired: false)
+        )
+        
+        // when & then
+        self.waitAdPrivacyOptionsNeverShown(viewModel)
+    }
+    
+    func test_whenPrivacyOptionsFormRouterIsNil_hidesAdPrivacyOptionsItem() {
+        // given
+        let viewModel = self.makeViewModel(privacyOptionsFormRouter: nil)
+        
+        // when & then
+        self.waitAdPrivacyOptionsNeverShown(viewModel)
+    }
+    
+    func test_beforePrepare_hidesAdPrivacyOptionsItem() {
+        // given
+        let expect = expectation(description: "prepare 이전 앱 정보 섹션 항목")
+        let viewModel = self.makeViewModel(
+            privacyOptionsFormRouter: StubPrivacyOptionsFormRouter(isRequired: true)
+        )
+        
+        // when
+        let sections = self.waitFirstOutput(expect, for: viewModel.sectionModels)
+        
+        // then
+        let appInfoSection = sections?.compactMap { $0 as? AppInfoSectionModel }.first
+        let itemIds = appInfoSection?.items.compactMap { $0 as? SettingItemModel }.map { $0.itemId }
+        XCTAssertEqual(itemIds, [
+            .shareApp, .addReview, .sourceCode, .terms, .privacyPolicy
+        ])
+    }
+    
+    func test_selectAdPrivacyOptions_routesToAdPrivacyOptionsForm() {
+        // given
+        let viewModel = self.makeViewModel(
+            privacyOptionsFormRouter: StubPrivacyOptionsFormRouter(isRequired: true)
+        )
+        let items = self.waitAppInfoItemsWhenAdPrivacyOptionsShown(viewModel)
+        guard let adPrivacyOptions = items.first(where: { $0.itemId == .adPrivacyOptions })
+        else {
+            XCTAssert(false)
+            return
+        }
+        
+        // when
+        viewModel.selectItem(adPrivacyOptions)
+        
+        // then
+        XCTAssertEqual(self.spyRouter.didRouteToAdPrivacyOptions, true)
+    }
+}
+
+
+private final class StubPrivacyOptionsFormRouter: PrivacyOptionsFormRouter {
+    
+    private let isRequired: Bool
+    
+    init(isRequired: Bool) {
+        self.isRequired = isRequired
+    }
+    
+    @MainActor
+    func isPrivacyOptionsRequired() -> Bool {
+        return self.isRequired
+    }
+    
+    @MainActor
+    func showPrivacyOptionsForm(from viewController: UIViewController) async throws { }
 }

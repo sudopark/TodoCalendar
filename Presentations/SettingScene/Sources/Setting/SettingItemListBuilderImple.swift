@@ -25,6 +25,7 @@ final class SettingItemListSceneBuilerImple {
     private let memberSceneBuilder: any MemberSceneBuilder
     private let feedbackPostSceneBuiler: any FeedbackPostSceneBuiler
     private let paywallSceneBuilder: any PaywallSceneBuilder
+    private let privacyOptionsFormRouter: (any PrivacyOptionsFormRouter)?
 
     init(
         appstoreLinkPath: String,
@@ -35,7 +36,8 @@ final class SettingItemListSceneBuilerImple {
         holidayListSceneBuilder: any HolidayListSceneBuiler,
         memberSceneBuilder: any MemberSceneBuilder,
         feedbackPostSceneBuiler: any FeedbackPostSceneBuiler,
-        paywallSceneBuilder: any PaywallSceneBuilder
+        paywallSceneBuilder: any PaywallSceneBuilder,
+        privacyOptionsFormRouter: (any PrivacyOptionsFormRouter)?
     ) {
         self.appstoreLinkPath = appstoreLinkPath
         self.usecaseFactory = usecaseFactory
@@ -46,6 +48,7 @@ final class SettingItemListSceneBuilerImple {
         self.memberSceneBuilder = memberSceneBuilder
         self.feedbackPostSceneBuiler = feedbackPostSceneBuiler
         self.paywallSceneBuilder = paywallSceneBuilder
+        self.privacyOptionsFormRouter = privacyOptionsFormRouter
     }
 }
 
@@ -60,7 +63,8 @@ extension SettingItemListSceneBuilerImple: SettingItemListSceneBuiler {
             accountUsecase: self.usecaseFactory.accountUescase,
             uiSettingUsecase: self.usecaseFactory.makeUISettingUsecase(),
             deviceInfoFetchService: self.usecaseFactory.deviceInfoFetchService(),
-            appUpdateCheckUsecase: self.usecaseFactory.appUpdateCheckUsecase
+            appUpdateCheckUsecase: self.usecaseFactory.appUpdateCheckUsecase,
+            privacyOptionsFormRouter: self.privacyOptionsFormRouter
         )
         
         let viewController = SettingItemListViewController(
@@ -74,7 +78,8 @@ extension SettingItemListSceneBuilerImple: SettingItemListSceneBuiler {
             holidayListSceneBuilder: self.holidayListSceneBuilder,
             memberSceneBuilder: self.memberSceneBuilder,
             feedbackPostSceneBuiler: self.feedbackPostSceneBuiler,
-            paywallSceneBuilder: self.paywallSceneBuilder
+            paywallSceneBuilder: self.paywallSceneBuilder,
+            privacyOptionsFormRouter: self.privacyOptionsFormRouter
         )
         router.scene = viewController
         viewModel.router = router

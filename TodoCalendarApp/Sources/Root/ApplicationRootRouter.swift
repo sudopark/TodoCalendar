@@ -454,7 +454,8 @@ extension ApplicationRootRouter {
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearanceStore.appearance,
             memberSceneBuilder: self.memberSceneBuilder(),
-            paywallSceneBuilder: self.paywallSceneBuilder()
+            paywallSceneBuilder: self.paywallSceneBuilder(),
+            privacyOptionsFormRouter: self.applicationBase.privacyOptionsFormRouter
         )
     }
 
