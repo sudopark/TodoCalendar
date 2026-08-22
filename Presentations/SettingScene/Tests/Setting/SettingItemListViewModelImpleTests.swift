@@ -299,7 +299,7 @@ extension SettingItemListViewModelImpleTests {
         // given
         let viewModel = self.makeViewModel()
         let items = self.WaitItemLoaded(viewModel)
-        
+
         // when
         guard let help = items.compactMap ({ $0 as? SettingItemModel }).first(where: { $0.itemId == .help })
         else {
@@ -307,9 +307,9 @@ extension SettingItemListViewModelImpleTests {
             return
         }
         viewModel.selectItem(help)
-        
+
         // then
-        XCTAssertEqual(self.spyRouter.didOpenSafariPath, HelpLink.currentPath)
+        XCTAssertEqual(self.spyRouter.didShowWebViewPath, GuideLink.indexPath)
     }
     
     func testViewModel_routeToOpenSourceLicense() {
@@ -551,10 +551,7 @@ extension SettingItemListViewModelImpleTests {
         viewModel.selectItem(guideItem)
 
         // then
-        let expectPath = Locale.current.language.languageCode == .korean
-        ? AIUsageGuideLink.koPath
-        : AIUsageGuideLink.enPath
-        XCTAssertEqual(self.spyRouter.didOpenSafariPath, expectPath)
+        XCTAssertEqual(self.spyRouter.didShowWebViewPath, GuideLink.aiInputPath)
     }
 }
 

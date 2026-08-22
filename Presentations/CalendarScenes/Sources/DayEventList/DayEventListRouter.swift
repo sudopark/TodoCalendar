@@ -178,6 +178,6 @@ extension DayEventListRouter {
     }
 
     func routeToAIGuide() {
-        self.openSafari(AIUsageGuideLink.currentPath)
+        self.showWebView(GuideLink.aiInputPath)
     }
 }
