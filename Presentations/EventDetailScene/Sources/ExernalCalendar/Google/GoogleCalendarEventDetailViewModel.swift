@@ -143,6 +143,7 @@ protocol GoogleCalendarEventDetailViewModel: AnyObject, Sendable, GoogleCalendar
     func selectRepeatOption()
     func startEditDescription()
     func share()
+    func toggleLiveActivity(isRegistered: Bool)
 
     // presenter
     var isEditable: AnyPublisher<Bool, Never> { get }
@@ -163,6 +164,7 @@ protocol GoogleCalendarEventDetailViewModel: AnyObject, Sendable, GoogleCalendar
     var isSavable: AnyPublisher<Bool, Never> { get }
     var isSaving: AnyPublisher<Bool, Never> { get }
     var hasChanges: AnyPublisher<Bool, Never> { get }
+    var liveActivityActionModel: AnyPublisher<LiveActivityActionModel?, Never> { get }
 }
 
 
@@ -189,6 +191,7 @@ final class GoogleCalendarEventDetailViewModelImple: GoogleCalendarEventDetailVi
     private let calendarSettingUsecase: any CalendarSettingUsecase
     private let externalCalendarIntegrationUsecase: any ExternalCalendarIntegrationUsecase
     private let daysIntervalCountUsecase: any DaysIntervalCountUsecase
+    private let liveActivityToggleViewModel: any LiveActivityToggleViewModel
     var router: (any GoogleCalendarEventDetailRouting)?
 
     init(
@@ -198,7 +201,8 @@ final class GoogleCalendarEventDetailViewModelImple: GoogleCalendarEventDetailVi
         googleCalendarUsecase: any GoogleCalendarUsecase,
         calendarSettingUsecase: any CalendarSettingUsecase,
         externalCalendarIntegrationUsecase: any ExternalCalendarIntegrationUsecase,
-        daysIntervalCountUsecase: any DaysIntervalCountUsecase
+        daysIntervalCountUsecase: any DaysIntervalCountUsecase,
+        liveActivityToggleViewModel: any LiveActivityToggleViewModel
     ) {
         self.calendarId = calenadrId
         self.accountId = accountId
@@ -207,6 +211,7 @@ final class GoogleCalendarEventDetailViewModelImple: GoogleCalendarEventDetailVi
         self.calendarSettingUsecase = calendarSettingUsecase
         self.externalCalendarIntegrationUsecase = externalCalendarIntegrationUsecase
         self.daysIntervalCountUsecase = daysIntervalCountUsecase
+        self.liveActivityToggleViewModel = liveActivityToggleViewModel
 
         self.internalBind()
     }
@@ -696,6 +701,24 @@ extension GoogleCalendarEventDetailViewModelImple {
 }
 
 
+// MARK: - GoogleCalendarEventDetailViewModelImple LiveActivity
+
+extension GoogleCalendarEventDetailViewModelImple {
+
+    func toggleLiveActivity(isRegistered: Bool) {
+        self.liveActivityToggleViewModel.startOrStopLiveActivity(
+            self.liveActivityTarget, isCurrentlyRegistered: isRegistered
+        )
+    }
+
+    private var liveActivityTarget: LiveActivityTarget {
+        return .googleCalendar(
+            accountId: self.accountId, calendarId: self.calendarId, eventId: self.eventId
+        )
+    }
+}
+
+
 // MARK: - GoogleCalendarEventDetailViewModelImple Presenter
 
 extension GoogleCalendarEventDetailViewModelImple {
@@ -876,6 +899,20 @@ extension GoogleCalendarEventDetailViewModelImple {
             .map { $0?.isChanged ?? false }
             .removeDuplicates()
             .eraseToAnyPublisher()
+    }
+
+    var liveActivityActionModel: AnyPublisher<LiveActivityActionModel?, Never> {
+        let target = self.liveActivityTarget
+        let transform: (GoogleCalendar.EventOrigin?, LiveActivityTarget?) -> LiveActivityActionModel? = { origin, registeredTarget in
+            guard origin != nil else { return nil }
+            return LiveActivityActionModel(isRegistered: registeredTarget == target)
+        }
+        return Publishers.CombineLatest(
+            self.subject.origin, self.liveActivityToggleViewModel.registeredTarget
+        )
+        .map(transform)
+        .removeDuplicates()
+        .eraseToAnyPublisher()
     }
 
     var descriptionModel: AnyPublisher<GoogleCalendarEventDescriptionModel, Never> {

@@ -15,6 +15,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Scenes
 import CommonPresentation
 
 
@@ -42,6 +43,7 @@ import CommonPresentation
     var conferenceData: ConferenceModel?
     var isSavable: Bool = false
     var isSaving: Bool = false
+    var liveActivityActionModel: LiveActivityActionModel?
 
     func bind(_ viewModel: any GoogleCalendarEventDetailViewModel) {
 
@@ -166,6 +168,13 @@ import CommonPresentation
                 self?.isSaving = isSaving
             })
             .store(in: &self.cancellables)
+
+        viewModel.liveActivityActionModel
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] model in
+                self?.liveActivityActionModel = model
+            })
+            .store(in: &self.cancellables)
     }
 }
 
@@ -193,6 +202,7 @@ final class GoogleCalendarEventDetailViewEventHandler: Observable {
     var selectRepeatOption: () -> Void = { }
     var startEditDescription: () -> Void = { }
     var share: () -> Void = { }
+    var toggleLiveActivity: (Bool) -> Void = { _ in }
 
     func bind(_ viewModel: any GoogleCalendarEventDetailViewModel) {
         onAppear = viewModel.refresh
@@ -215,6 +225,7 @@ final class GoogleCalendarEventDetailViewEventHandler: Observable {
         selectRepeatOption = viewModel.selectRepeatOption
         startEditDescription = viewModel.startEditDescription
         share = viewModel.share
+        toggleLiveActivity = viewModel.toggleLiveActivity(isRegistered:)
     }
 }
 
@@ -377,6 +388,14 @@ struct GoogleCalendarEventDetailView: View {
                 }
             }
             Section {
+                if let model = self.state.liveActivityActionModel {
+                    Button {
+                        eventHandlers.toggleLiveActivity(model.isRegistered)
+                    } label: {
+                        Label(model.itemText, systemImage: "timer")
+                    }
+                }
+
                 Button {
                     eventHandlers.share()
                 } label: {

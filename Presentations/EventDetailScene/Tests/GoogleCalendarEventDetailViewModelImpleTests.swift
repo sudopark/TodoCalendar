@@ -26,6 +26,7 @@ final class GoogleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
     private let spyRouter = SpyRouter()
     private let integrationUsecase = StubExternalCalendarIntegrationUsecase([])
     private var lastCalendarUsecase: PrivateStubGoogleCalendarUsecase!
+    private let stubLiveActivityUsecase = StubEventLiveActivityUsecase()
 
     private func makeViewModel(
         recurrence: String? = nil,
@@ -40,7 +41,9 @@ final class GoogleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
         description: String? = "그냥 텍스트<br><b>볼드</b><br>첨부파일도 있을거다잉<br>마크다운임?",
         updatedOrigin: GoogleCalendar.EventOrigin? = GoogleCalendarEventDetailViewModelImpleTests.defaultUpdatedOrigin(),
         updateEventDelayMilliseconds: UInt64 = 0,
-        eventDetailFailsFromCallIndex: Int? = nil
+        eventDetailFailsFromCallIndex: Int? = nil,
+        registeredLiveActivityTarget: LiveActivityTarget? = nil,
+        liveActivityStartError: (any Error)? = nil
     ) -> GoogleCalendarEventDetailViewModelImple {
         let settingUsecase = StubCalendarSettingUsecase()
         settingUsecase.prepare()
@@ -67,15 +70,22 @@ final class GoogleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
         calendarUsecase.refreshGoogleCalendarEventTags()
         self.lastCalendarUsecase = calendarUsecase
         self.integrationUsecase.shouldFailReauthenticate = shouldFailReauthenticate
+        self.stubLiveActivityUsecase.registeredTargetSubject.send(registeredLiveActivityTarget)
+        self.stubLiveActivityUsecase.stubStartError = liveActivityStartError
+        let liveActivityToggleViewModel = LiveActivityToggleViewModelImple(
+            eventLiveActivityUsecase: self.stubLiveActivityUsecase
+        )
 
         let viewModel = GoogleCalendarEventDetailViewModelImple(
             calenadrId: "g:7", accountId: "stub@gmail.com", eventId: "id",
             googleCalendarUsecase: calendarUsecase,
             calendarSettingUsecase: settingUsecase,
             externalCalendarIntegrationUsecase: self.integrationUsecase,
-            daysIntervalCountUsecase: StubDaysIntervalCountUsecase()
+            daysIntervalCountUsecase: StubDaysIntervalCountUsecase(),
+            liveActivityToggleViewModel: liveActivityToggleViewModel
         )
         viewModel.router = self.spyRouter
+        liveActivityToggleViewModel.router = self.spyRouter
         return viewModel
     }
 
@@ -108,15 +118,20 @@ final class GoogleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
             |> \.end .~ end
         calendarUsecase.refreshGoogleCalendarEventTags()
         self.lastCalendarUsecase = calendarUsecase
+        let liveActivityToggleViewModel = LiveActivityToggleViewModelImple(
+            eventLiveActivityUsecase: self.stubLiveActivityUsecase
+        )
 
         let viewModel = GoogleCalendarEventDetailViewModelImple(
             calenadrId: "g:7", accountId: "stub@gmail.com", eventId: "id",
             googleCalendarUsecase: calendarUsecase,
             calendarSettingUsecase: settingUsecase,
             externalCalendarIntegrationUsecase: self.integrationUsecase,
-            daysIntervalCountUsecase: StubDaysIntervalCountUsecase()
+            daysIntervalCountUsecase: StubDaysIntervalCountUsecase(),
+            liveActivityToggleViewModel: liveActivityToggleViewModel
         )
         viewModel.router = self.spyRouter
+        liveActivityToggleViewModel.router = self.spyRouter
         return viewModel
     }
 
@@ -1816,5 +1831,150 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
         let text = try #require(self.spyRouter.didShareText)
         let lines = text.components(separatedBy: "\n")
         #expect(!lines.contains(where: { $0.hasPrefix("\(self.shareFieldLabel("repeating")):") }))
+    }
+}
+
+
+// MARK: - 라이브액티비티
+
+extension GoogleCalendarEventDetailViewModelImpleTests {
+
+    private var googleLiveActivityTarget: LiveActivityTarget {
+        return .googleCalendar(accountId: "stub@gmail.com", calendarId: "g:7", eventId: "id")
+    }
+
+    @Test func viewModel_whenEventLoaded_provideLiveActivityAction() async throws {
+        // given
+        let expect = expectConfirm("이벤트 로드 후 라이브액티비티 항목 노출")
+        expect.count = 2
+        let viewModel = self.makeViewModel()
+
+        // when
+        let models = try await self.outputs(expect, for: viewModel.liveActivityActionModel) {
+            viewModel.refresh()
+        }
+
+        // then
+        #expect(models == [nil, LiveActivityActionModel(isRegistered: false)])
+    }
+
+    @Test func viewModel_whenLiveActivityRegisteredForEvent_provideUnregisterAction() async throws {
+        // given
+        let expect = expectConfirm("등록된 대상이면 해제 항목 노출")
+        expect.count = 2
+        let viewModel = self.makeViewModel(
+            registeredLiveActivityTarget: self.googleLiveActivityTarget
+        )
+
+        // when
+        let models = try await self.outputs(expect, for: viewModel.liveActivityActionModel) {
+            viewModel.refresh()
+        }
+
+        // then
+        #expect(models == [nil, LiveActivityActionModel(isRegistered: true)])
+    }
+
+    @Test func viewModel_whenLiveActivityRegisteredForOtherEvent_provideRegisterAction() async throws {
+        // given
+        let expect = expectConfirm("다른 이벤트가 등록돼 있으면 등록 항목 노출")
+        expect.count = 2
+        let viewModel = self.makeViewModel(
+            registeredLiveActivityTarget: .todo(id: "other")
+        )
+
+        // when
+        let models = try await self.outputs(expect, for: viewModel.liveActivityActionModel) {
+            viewModel.refresh()
+        }
+
+        // then
+        #expect(models == [nil, LiveActivityActionModel(isRegistered: false)])
+    }
+
+    @Test func viewModel_whenToggleLiveActivity_startActivityWithGoogleTarget() async throws {
+        // given
+        let viewModel = self.makeViewModel()
+        viewModel.refresh()
+        try await Task.sleep(for: .milliseconds(100))
+
+        // when
+        viewModel.toggleLiveActivity(isRegistered: false)
+        try await Task.sleep(for: .milliseconds(100))
+
+        // then
+        #expect(self.stubLiveActivityUsecase.didStartTarget == self.googleLiveActivityTarget)
+        #expect(self.stubLiveActivityUsecase.didStopActivity == false)
+    }
+
+    @Test func viewModel_whenToggleLiveActivityOnRecurringInstance_startActivityWithInstanceEventId() async throws {
+        // given — origin 이 마스터 id("master")를 갖는 반복 인스턴스 상세. 씬 진입 id("id")와는 다른 값이어야 한다
+        let viewModel = self.makeViewModel(recurringEventId: "master")
+        viewModel.refresh()
+        try await Task.sleep(for: .milliseconds(100))
+
+        // when
+        viewModel.toggleLiveActivity(isRegistered: false)
+        try await Task.sleep(for: .milliseconds(100))
+
+        // then
+        #expect(
+            self.stubLiveActivityUsecase.didStartTarget
+                == .googleCalendar(accountId: "stub@gmail.com", calendarId: "g:7", eventId: "id")
+        )
+    }
+
+    @Test func viewModel_whenToggleRegisteredLiveActivity_stopActivity() async throws {
+        // given
+        let viewModel = self.makeViewModel(
+            registeredLiveActivityTarget: self.googleLiveActivityTarget
+        )
+        viewModel.refresh()
+        try await Task.sleep(for: .milliseconds(100))
+
+        // when
+        viewModel.toggleLiveActivity(isRegistered: true)
+        try await Task.sleep(for: .milliseconds(100))
+
+        // then
+        #expect(self.stubLiveActivityUsecase.didStopActivity == true)
+        #expect(self.stubLiveActivityUsecase.didStartTarget == nil)
+    }
+
+    @Test func viewModel_whenStartLiveActivityFail_showUnavailableMessage() async throws {
+        // given
+        let viewModel = self.makeViewModel(
+            liveActivityStartError: EventLiveActivityStartFailReason.tooFarFuture
+        )
+        viewModel.refresh()
+        try await Task.sleep(for: .milliseconds(100))
+
+        // when
+        viewModel.toggleLiveActivity(isRegistered: false)
+        try await Task.sleep(for: .milliseconds(100))
+
+        // then
+        #expect(
+            self.spyRouter.didShowConfirmWith?.message
+            == "calendar::event::more_action:live_activity:unavail::too_far_future".localized()
+        )
+        #expect(self.spyRouter.didShowConfirmWith?.withCancel == false)
+        #expect(self.spyRouter.didShowError == nil)
+    }
+
+    // 읽기 전용 캘린더여도 라이브액티비티는 로컬 동작이라 쓰기 권한과 무관하게 노출된다
+    @Test func viewModel_whenReadOnlyCalendar_stillProvideLiveActivityAction() async throws {
+        // given
+        let expect = expectConfirm("읽기 전용 캘린더에서도 라이브액티비티 항목 노출")
+        expect.count = 2
+        let viewModel = self.makeViewModel(writePermission: .readOnlyCalendar)
+
+        // when
+        let models = try await self.outputs(expect, for: viewModel.liveActivityActionModel) {
+            viewModel.refresh()
+        }
+
+        // then
+        #expect(models == [nil, LiveActivityActionModel(isRegistered: false)])
     }
 }
