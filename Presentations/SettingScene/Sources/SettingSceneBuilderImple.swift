@@ -19,6 +19,7 @@ public final class SettingSceneBuilderImple: SettingSceneBuiler {
     private let viewAppearance: ViewAppearance
     private let memberSceneBuilder: any MemberSceneBuilder
     private let paywallSceneBuilder: any PaywallSceneBuilder
+    private let privacyOptionsFormRouter: (any PrivacyOptionsFormRouter)?
 
     public init(
         appstoreLinkPath: String,
@@ -26,7 +27,8 @@ public final class SettingSceneBuilderImple: SettingSceneBuiler {
         usecaseFactory: any UsecaseFactory,
         viewAppearance: ViewAppearance,
         memberSceneBuilder: any MemberSceneBuilder,
-        paywallSceneBuilder: any PaywallSceneBuilder
+        paywallSceneBuilder: any PaywallSceneBuilder,
+        privacyOptionsFormRouter: (any PrivacyOptionsFormRouter)?
     ) {
         self.appstoreLinkPath = appstoreLinkPath
         self.supportExternalCalendarServices = supportExternalCalendarServices
@@ -34,6 +36,7 @@ public final class SettingSceneBuilderImple: SettingSceneBuiler {
         self.viewAppearance = viewAppearance
         self.memberSceneBuilder = memberSceneBuilder
         self.paywallSceneBuilder = paywallSceneBuilder
+        self.privacyOptionsFormRouter = privacyOptionsFormRouter
     }
 }
 
@@ -131,7 +134,8 @@ extension SettingSceneBuilderImple {
             holidayListSceneBuilder: holidayListSceneBuilder,
             memberSceneBuilder: self.memberSceneBuilder,
             feedbackPostSceneBuiler: feedbackSceneBuilder,
-            paywallSceneBuilder: self.paywallSceneBuilder
+            paywallSceneBuilder: self.paywallSceneBuilder,
+            privacyOptionsFormRouter: self.privacyOptionsFormRouter
         )
         return builder.makeSettingItemListScene()
     }

@@ -479,6 +479,7 @@
 "setting.billing.plan::name" = "플랜";
 "setting.terms::name" = "이용약관";
 "setting.privacyPolicy::name" = "개인정보처리방침";
+"setting.adPrivacyOptions::name" = "광고 개인정보 옵션";
 "setting.account.signedIn::manageAccount" = "계정";
 "setting.account.needSignIn" = "로그인";
 "setting.suggest::readmind::appName" = "Readmind";

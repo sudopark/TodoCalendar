@@ -27,6 +27,7 @@ protocol SettingItemListRouting: Routing, Sendable {
     func routeToSignIn()
     func openShare(link path: String)
     func routeToPaywall()
+    func routeToAdPrivacyOptions()
 }
 
 // MARK: - Router
@@ -39,6 +40,7 @@ final class SettingItemListRouter: BaseRouterImple, SettingItemListRouting, @unc
     private let memberSceneBuilder: any MemberSceneBuilder
     private let feedbackPostSceneBuiler: any FeedbackPostSceneBuiler
     private let paywallSceneBuilder: any PaywallSceneBuilder
+    private let privacyOptionsFormRouter: (any PrivacyOptionsFormRouter)?
 
     init(
         appearanceSceneBuilder: any AppearanceSettingSceneBuiler,
@@ -46,7 +48,8 @@ final class SettingItemListRouter: BaseRouterImple, SettingItemListRouting, @unc
         holidayListSceneBuilder: any HolidayListSceneBuiler,
         memberSceneBuilder: any MemberSceneBuilder,
         feedbackPostSceneBuiler: any FeedbackPostSceneBuiler,
-        paywallSceneBuilder: any PaywallSceneBuilder
+        paywallSceneBuilder: any PaywallSceneBuilder,
+        privacyOptionsFormRouter: (any PrivacyOptionsFormRouter)?
     ) {
         self.appearanceSceneBuilder = appearanceSceneBuilder
         self.eventSettingSceneBuilder = eventSettingSceneBuilder
@@ -54,6 +57,7 @@ final class SettingItemListRouter: BaseRouterImple, SettingItemListRouting, @unc
         self.memberSceneBuilder = memberSceneBuilder
         self.feedbackPostSceneBuiler = feedbackPostSceneBuiler
         self.paywallSceneBuilder = paywallSceneBuilder
+        self.privacyOptionsFormRouter = privacyOptionsFormRouter
     }
 }
 
@@ -136,6 +140,17 @@ extension SettingItemListRouter {
         Task { @MainActor in
             let next = self.paywallSceneBuilder.makePaywallScene(closesAfterPurchase: false)
             self.showFullScreen(next)
+        }
+    }
+    
+    func routeToAdPrivacyOptions() {
+        Task { @MainActor in
+            guard let scene = self.currentScene else { return }
+            do {
+                try await self.privacyOptionsFormRouter?.showPrivacyOptionsForm(from: scene)
+            } catch {
+                self.showError(error)
+            }
         }
     }
 }

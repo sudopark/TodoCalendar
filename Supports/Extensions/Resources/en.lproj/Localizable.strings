@@ -479,6 +479,7 @@
 "setting.billing.plan::name" = "Plan";
 "setting.terms::name" = "Terms of Use";
 "setting.privacyPolicy::name" = "Privacy Policy";
+"setting.adPrivacyOptions::name" = "Ad Privacy Options";
 "setting.account.signedIn::manageAccount" = "Account";
 "setting.account.needSignIn" = "Login";
 "setting.suggest::readmind::appName" = "Readminds";
