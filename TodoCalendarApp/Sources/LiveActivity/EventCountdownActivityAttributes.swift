@@ -25,5 +25,6 @@ struct EventCountdownActivityAttributes: ActivityAttributes {
         var startDate: Date
         var placeName: String? = nil
         var memo: String? = nil
+        var scheduleTimeQuery: [String: String]? = nil
     }
 }
