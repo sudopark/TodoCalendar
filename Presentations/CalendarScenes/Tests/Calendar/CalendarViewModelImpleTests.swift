@@ -75,7 +75,6 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.spyEventSyncUsecase = nil
         self.spyEventUploadService = nil
         self.stubOrchestration = nil
-        FeatureFlag.disable(.aiAgent)
     }
     
     private func makeViewModel(
@@ -200,9 +199,8 @@ extension CalendarViewModelImpleTests {
         XCTAssertEqual(isForemostEventPrepared, [false, true])
     }
 
-    func testViewModel_whenAIAgentFlagOn_prepareCallsOrchestrationPrepare() async throws {
+    func testViewModel_whenPrepare_callsOrchestrationPrepare() async throws {
         // given
-        FeatureFlag.enable(.aiAgent)
         let viewModel = self.makeViewModel()
 
         // when
@@ -211,18 +209,6 @@ extension CalendarViewModelImpleTests {
         // then
         try await Task.sleep(for: .milliseconds(10))
         XCTAssertEqual(self.stubOrchestration.didPrepare, true)
-    }
-
-    func testViewModel_whenAIAgentFlagOff_prepareNotCallsOrchestrationPrepare() async throws {
-        // given
-        let viewModel = self.makeViewModel()
-
-        // when
-        viewModel.prepare()
-
-        // then
-        try await Task.sleep(for: .milliseconds(10))
-        XCTAssertNil(self.stubOrchestration.didPrepare)
     }
 
     private func makeViewModelWithInitialSetup(_ today: CalendarComponent.Day) -> CalendarViewModelImple {
@@ -1087,7 +1073,6 @@ extension CalendarViewModelImpleTests {
 
     func testViewModel_whenAIEntersCommandPhase_routesToAICommand() {
         // given
-        FeatureFlag.enable(.aiAgent)
         let viewModel = self.makeViewModel()
         viewModel.prepare()
 
@@ -1101,7 +1086,6 @@ extension CalendarViewModelImpleTests {
 
     func testViewModel_whenStayInCommandPhase_routesOnlyOncePerEntry() {
         // given
-        FeatureFlag.enable(.aiAgent)
         let viewModel = self.makeViewModel()
         viewModel.prepare()
 
@@ -1159,7 +1143,6 @@ extension CalendarViewModelImpleTests {
 
     func testViewModel_whenVoiceInputStarts_scrollsOnlyFocusedMonthPaper() async throws {
         // given
-        FeatureFlag.enable(.aiAgent)
         let viewModel = self.makeViewModel()
         viewModel.prepare()
         try await Task.sleep(for: .milliseconds(50))
@@ -1175,7 +1158,6 @@ extension CalendarViewModelImpleTests {
 
     func testViewModel_whenFocusMovedToOtherMonth_scrollsThatMonthPaper() async throws {
         // given
-        FeatureFlag.enable(.aiAgent)
         let viewModel = self.makeViewModel()
         viewModel.prepare()
         try await Task.sleep(for: .milliseconds(50))
@@ -1192,7 +1174,6 @@ extension CalendarViewModelImpleTests {
 
     func testViewModel_whenStayInVoiceListening_scrollsOnlyOncePerEntry() async throws {
         // given
-        FeatureFlag.enable(.aiAgent)
         let viewModel = self.makeViewModel()
         viewModel.prepare()
         try await Task.sleep(for: .milliseconds(50))
@@ -1207,20 +1188,6 @@ extension CalendarViewModelImpleTests {
         XCTAssertEqual(counts, [0, 1, 0])
     }
 
-    func testViewModel_whenAIAgentFlagOff_doesNotScrollOnVoiceInput() async throws {
-        // given
-        let viewModel = self.makeViewModel()
-        viewModel.prepare()
-        try await Task.sleep(for: .milliseconds(50))
-
-        // when
-        self.stubOrchestration.stateSubject.send(.listening(.voice))
-        try await Task.sleep(for: .milliseconds(50))
-
-        // then
-        let counts = self.spyRouter.spyInteractors.map { $0.didScrollToVoiceInputCount }
-        XCTAssertEqual(counts, [0, 0, 0])
-    }
 }
 
 // MARK: - 외부 진입점의 AI 입력 요청 (requestAIEntry)
@@ -1247,8 +1214,8 @@ extension CalendarViewModelImpleTests {
         // when
         viewModel.requestAIEntry()
 
-        // then
-        XCTAssertEqual(self.spyRouter.didRouteToAICommandCount, 1)
+        // then — command phase 진입으로 자동 표시가 1회, 진입 요청이 1회
+        XCTAssertEqual(self.spyRouter.didRouteToAICommandCount, 2)
         XCTAssertNil(self.stubOrchestration.didEnterVoiceInput)
         XCTAssertNil(self.spyRouter.didShowConfirmWith)
     }
@@ -1322,8 +1289,8 @@ extension CalendarViewModelImpleTests {
         self.stubOrchestration.stateSubject.send(.processing(command: "회의"))
         try await Task.sleep(for: .milliseconds(10))
 
-        // then
-        XCTAssertEqual(self.spyRouter.didRouteToAICommandCount, 1)
+        // then — command phase 진입으로 자동 표시가 1회, 대기하던 진입 요청이 1회
+        XCTAssertEqual(self.spyRouter.didRouteToAICommandCount, 2)
         XCTAssertNil(self.stubOrchestration.didEnterVoiceInput)
     }
 
@@ -1584,10 +1551,8 @@ extension CalendarViewModelImpleTests {
 
     private func postAppLifecycleAfterPrepared(
         _ notificationName: Notification.Name,
-        aiAgentEnabled: Bool = true,
         state: AIAgentState?
     ) async throws {
-        if aiAgentEnabled { FeatureFlag.enable(.aiAgent) }
         let viewModel = self.makeViewModel()
         viewModel.prepare()
         try await Task.sleep(for: .milliseconds(50))
@@ -1599,13 +1564,9 @@ extension CalendarViewModelImpleTests {
         withExtendedLifetime(viewModel) { }
     }
 
-    private func enterBackgroundAfterPrepared(
-        aiAgentEnabled: Bool = true,
-        state: AIAgentState?
-    ) async throws {
+    private func enterBackgroundAfterPrepared(state: AIAgentState?) async throws {
         try await self.postAppLifecycleAfterPrepared(
-            UIApplication.didEnterBackgroundNotification,
-            aiAgentEnabled: aiAgentEnabled, state: state
+            UIApplication.didEnterBackgroundNotification, state: state
         )
     }
 
@@ -1633,16 +1594,6 @@ extension CalendarViewModelImpleTests {
         XCTAssertNil(self.stubOrchestration.didStopInput)
     }
 
-    func testViewModel_whenAIAgentFlagOff_doesNotStopInput() async throws {
-        // given, when
-        try await self.enterBackgroundAfterPrepared(
-            aiAgentEnabled: false, state: .listening(.voice)
-        )
-
-        // then
-        XCTAssertNil(self.stubOrchestration.didStopInput)
-    }
-
     func testViewModel_whenAppResignsActiveWhileVoiceListening_keepsInput() async throws {
         // given, when
         try await self.postAppLifecycleAfterPrepared(
@@ -1654,7 +1605,6 @@ extension CalendarViewModelImpleTests {
     }
 
     private func makePreparedViewModel() async throws -> CalendarViewModelImple {
-        FeatureFlag.enable(.aiAgent)
         let viewModel = self.makeViewModel()
         viewModel.prepare()
         try await Task.sleep(for: .milliseconds(50))
