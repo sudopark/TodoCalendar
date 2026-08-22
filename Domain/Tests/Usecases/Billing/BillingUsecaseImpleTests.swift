@@ -8,6 +8,8 @@
 
 import Testing
 import Combine
+import Prelude
+import Optics
 import Extensions
 import UnitTestHelpKit
 
@@ -422,6 +424,40 @@ extension BillingUsecaseImpleTests {
         #expect(repository.didPostedTransactionUpdates == ["jws:bad", "jws:good"])
         // 서버 반영에 실패한 건은 finish 되지 않아 다음 시도에 다시 잡힌다
         #expect(service.didFinishedTransactionIds == ["tx:good"])
+    }
+}
+
+
+// MARK: - 동기 조회
+
+extension BillingUsecaseImpleTests {
+
+    @Test func usecase_whenPlanNotStored_latestUserPlanIsNil() {
+        // given
+        let (usecase, _, _) = self.makeUsecase()
+        // when
+        let plan = usecase.latestUserPlan()
+        // then
+        #expect(plan == nil)
+    }
+
+    @Test func usecase_whenPlanStored_latestUserPlanReturnsIt() {
+        // given
+        let store = SharedDataStore()
+        store.put(
+            BillingUserPlan.self,
+            key: ShareDataKeys.billingUserPlan.rawValue,
+            BillingUserPlan() |> \.planId .~ .standard
+        )
+        let usecase = BillingUsecaseImple(
+            repository: StubBillingRepository(),
+            appStoreService: StubAppStoreBillingService(),
+            sharedDataStore: store
+        )
+        // when
+        let plan = usecase.latestUserPlan()
+        // then
+        #expect(plan?.planId == .standard)
     }
 }
 

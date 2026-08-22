@@ -37,6 +37,9 @@ public protocol BillingUsecase: AnyObject, Sendable {
 
     func applyUnfinishedTransactions() async throws -> BillingUserPlan?
 
+    // 구독을 걸 수 없는 순간에 즉시 판정해야 하는 호출부용 — currentUserPlan 과 같은 값을 본다
+    func latestUserPlan() -> BillingUserPlan?
+
     var currentUserPlan: AnyPublisher<BillingUserPlan, Never> { get }
 }
 
@@ -237,6 +240,12 @@ extension BillingUsecaseImple {
             return
         }
         self.sharedDataStore.put(UUID.self, key: key, token)
+    }
+
+    public func latestUserPlan() -> BillingUserPlan? {
+        return self.sharedDataStore.value(
+            BillingUserPlan.self, key: ShareDataKeys.billingUserPlan.rawValue
+        )
     }
 }
 

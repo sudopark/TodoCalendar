@@ -40,6 +40,10 @@ final class StubBillingUsecase: BillingUsecase, @unchecked Sendable {
     func hasUnfinishedTransactions() async -> Bool { false }
     func applyUnfinishedTransactions() async throws -> BillingUserPlan? { nil }
 
+    func latestUserPlan() -> BillingUserPlan? {
+        self.currentUserPlanSubject.value
+    }
+
     var currentUserPlan: AnyPublisher<BillingUserPlan, Never> {
         self.currentUserPlanSubject.compactMap { $0 }.eraseToAnyPublisher()
     }
