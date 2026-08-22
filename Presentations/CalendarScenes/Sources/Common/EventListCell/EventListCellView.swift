@@ -357,9 +357,13 @@ struct EventListCellView: View {
 // MARK: - extensions
 
 extension EventCellViewModel {
-    
+
     var todoEventId: String? {
-        return (self as? TodoEventCellViewModel)?.eventIdentifier
+        switch self {
+        case let todo as TodoEventCellViewModel: return todo.eventIdentifier
+        case let guide as GuideTodoEventCellViewModel: return guide.eventIdentifier
+        default: return nil
+        }
     }
 }
 
