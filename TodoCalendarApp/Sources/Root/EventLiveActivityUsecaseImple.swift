@@ -75,7 +75,9 @@ extension EventLiveActivityUsecaseImple {
     private func eventDetail(for target: LiveActivityTarget) async -> EventDetailData? {
         guard let id = target.eventDetailDataId else { return nil }
         return try? await self.eventDetailDataUsecase.loadDetail(id)
-            .timeout(.seconds(Constant.detailLoadTimeout), scheduler: DispatchQueue.global())
+            // Publishers.Timeout 은 concurrent 큐를 스케줄러로 받으면 구독 즉시 온 값을 흘린다 —
+            // Just 기준 global() 은 5000회 중 777회 유실, 메인 큐는 0회다
+            .timeout(.seconds(Constant.detailLoadTimeout), scheduler: DispatchQueue.main)
             .values
             .first(where: { _ in true })
     }
