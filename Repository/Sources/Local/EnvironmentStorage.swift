@@ -10,6 +10,8 @@ import Foundation
 public enum EnvironmentKeys: String {
     case needCheckResetWidgetCache
     case needCheckResetCurrentTodo
+    case fullScreenAdExposureRecords
+    case appColdLaunchHistory
 }
 
 public protocol EnvironmentStorage: AnyObject, Sendable {
