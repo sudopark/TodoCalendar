@@ -26,6 +26,7 @@ final class MainViewController: UIViewController, MainScene {
     private let calendarContainerView = UIView()
     private let bottomBannerView: UIView?
     private let loadingAllEventsLabel = UILabel()
+    private let legalNoticeBannerView = LegalNoticeBannerView()
     private let compositeLoadingBarView = CompositeLoadingBarView()
     
     private let viewModel: any MainViewModel
@@ -139,6 +140,29 @@ extension MainViewController {
             })
             .store(in: &self.cancellables)
 
+        self.viewModel.legalNoticeBanners
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] models in
+                self?.legalNoticeBannerView.update(models)
+            })
+            .store(in: &self.cancellables)
+
+        self.legalNoticeBannerView.documentTapped
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] documentType in
+                self?.viewAppearance.impactIfNeed()
+                self?.viewModel.openLegalNoticeDocument(documentType)
+            })
+            .store(in: &self.cancellables)
+
+        self.legalNoticeBannerView.closeTapped
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] documentType in
+                self?.viewAppearance.impactIfNeed()
+                self?.viewModel.closeLegalNoticeBanner(documentType)
+            })
+            .store(in: &self.cancellables)
+
         self.headerView.returnTodayView.addTapGestureRecognizerPublisher()
             .sink(receiveValue: { [weak self] in
                 self?.viewModel.returnToToday()
@@ -216,6 +240,9 @@ extension MainViewController {
         loadingAllEventsLabel.textAlignment = .center
         loadingAllEventsLabel.isHidden = true
 
+        headerAreaStackView.addArrangedSubview(legalNoticeBannerView)
+        legalNoticeBannerView.isHidden = true
+
         headerAreaStackView.addArrangedSubview(compositeLoadingBarView)
         compositeLoadingBarView.autoLayout.active {
             $0.heightAnchor.constraint(equalToConstant: 3.2)
@@ -250,6 +277,7 @@ extension MainViewController {
         self.headerView.setupStyling(fontSet, colorSet)
         self.loadingAllEventsLabel.font = fontSet.subNormal
         self.loadingAllEventsLabel.textColor = colorSet.text2
+        self.legalNoticeBannerView.setupStyling(fontSet, colorSet)
         self.compositeLoadingBarView.setupStyling(fontSet, colorSet)
     }
 }
