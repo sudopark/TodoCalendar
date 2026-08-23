@@ -29,3 +29,4 @@
 - [2026-08-24 로컬 DB 테스트가 런마다 다른 지점에서 크래시](2026-08-24-local-db-tests-random-crash.md) — Infra / fixed / illegal multi-threaded access·vnode unlinked while in use·Repository 스킴 랜덤 실패
 - [2026-08-24 `.timeout` 이 concurrent 큐에서 동기 방출값을 흘린다](2026-08-24-combine-timeout-drops-value-on-concurrent-queue.md) — Event / fixed / 라이브액티비티 placeName·memo nil·Publishers.Timeout·DispatchQueue.global
 - [2026-08-24 백그라운드 Task 에서 구독을 담다 Set 저장소가 깨진다](2026-08-24-cancelbag-data-race-crash.md) — Infra / fixed / unrecognized selector 0x8000000000000000·member:·CalendarScenes 랜덤 크래시
+- [2026-08-24 Paywall screenState 테스트가 방출 개수로 흔들린다](2026-08-24-paywall-screenstate-emission-count-flaky.md) — Billing / deferred / Confirmation was confirmed·PaywallViewModelImpleTests·BillingScenes 간헐 실패
