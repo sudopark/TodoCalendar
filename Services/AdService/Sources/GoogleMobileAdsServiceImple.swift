@@ -11,23 +11,33 @@ import Combine
 import AppTrackingTransparency
 import GoogleMobileAds
 import UserMessagingPlatform
+import Domain
 import Extensions
 
 
-public final class GoogleMobileAdsServiceImple: @unchecked Sendable {
-    
-    private let testDeviceIdentifiers: [String]
-    
-    public init(testDeviceIdentifiers: [String]) {
-        self.testDeviceIdentifiers = testDeviceIdentifiers
+public final class GoogleMobileAdsServiceImple: MobileAdService, @unchecked Sendable {
+
+    private enum Constant {
+        static let fullScreenAdExpirationInterval: TimeInterval = 60 * 60
     }
-    
+
+    private let testDeviceIdentifiers: [String]
+    private let fullScreenAdUnitId: String
+
+    public init(testDeviceIdentifiers: [String], fullScreenAdUnitId: String) {
+        self.testDeviceIdentifiers = testDeviceIdentifiers
+        self.fullScreenAdUnitId = fullScreenAdUnitId
+    }
+
     private struct Subject {
         let isStart = CurrentValueSubject<Bool, Never>(false)
     }
     private let subject = Subject()
-    
-    @MainActor private var startingTask: Task<Void, Never>?
+
+    private let lock = NSLock()
+    private var loadedFullScreenAd: InterstitialAd?
+    private var loadedFullScreenAdAt: Date?
+    private var isLoadingFullScreenAd: Bool = false
     @MainActor private var applicationActiveObserving: AnyCancellable?
 }
 
@@ -36,31 +46,25 @@ public final class GoogleMobileAdsServiceImple: @unchecked Sendable {
 
 extension GoogleMobileAdsServiceImple {
     
-    @MainActor
-    public func prepare(from viewController: UIViewController) async {
-        await self.updateConsentInfo()
-        await self.presentConsentFormIfRequired(from: viewController)
-        await self.requestTrackingAuthorization()
-        await self.startIfNeeded()?.value
-    }
-    
-    @MainActor
-    private func startIfNeeded() -> Task<Void, Never>? {
-        if let task = self.startingTask {
-            return task
-        }
-        guard ConsentInformation.shared.canRequestAds else { return nil }
+    public func start() {
         
-        let task = Task { @MainActor [weak self] in
-            guard let self else { return }
+        Task { [weak self] in
             #if DEBUG
-            MobileAds.shared.requestConfiguration.testDeviceIdentifiers = self.testDeviceIdentifiers
+            MobileAds.shared.requestConfiguration.testDeviceIdentifiers = self?.testDeviceIdentifiers
             #endif
             _ = await MobileAds.shared.start()
-            self.subject.isStart.send(true)
+            self?.subject.isStart.send(true)
         }
-        self.startingTask = task
-        return task
+    }
+
+    public func presentConsentFormAndTrackingPromptIfNeeded(from viewController: UIViewController) async {
+        
+        await self.updateConsentInfo()
+        
+        _ = await Task { @MainActor [weak self] in
+            await self?.presentConsentFormIfRequired(from: viewController)
+            await self?.requestTrackingAuthorization()
+        }.value
     }
 }
 
@@ -68,8 +72,7 @@ extension GoogleMobileAdsServiceImple {
 // MARK: - UMP consent
 
 extension GoogleMobileAdsServiceImple {
-    
-    @MainActor
+
     private func updateConsentInfo() async {
         await withCheckedContinuation { continuation in
             ConsentInformation.shared.requestConsentInfoUpdate(
@@ -80,11 +83,9 @@ extension GoogleMobileAdsServiceImple {
                 }
                 continuation.resume()
             }
-            // canRequestAds 는 update 호출 직후부터 이전 세션 동의를 반영한다 (UMPConsentInformation.h:76-79)
-            _ = self.startIfNeeded()
         }
     }
-    
+
     @MainActor
     private func presentConsentFormIfRequired(from viewController: UIViewController) async {
         await withCheckedContinuation { continuation in
@@ -153,15 +154,70 @@ extension GoogleMobileAdsServiceImple {
 }
 
 
-// MARK: - isStarted
+// MARK: - full screen ad preload
 
 extension GoogleMobileAdsServiceImple {
-    
-    var isStarted: AnyPublisher<Bool, Never> {
+
+    public func preloadFullScreenAd() async {
+        guard self.isStartedNow else { return }
+        let shouldLoad = self.lock.withLock {
+            guard self.isLoadingFullScreenAd == false,
+                  self.hasValidLoadedFullScreenAd == false
+            else { return false }
+            self.isLoadingFullScreenAd = true
+            return true
+        }
+        guard shouldLoad else { return }
+
+        do {
+            let ad = try await InterstitialAd.load(
+                with: self.fullScreenAdUnitId, request: Request()
+            )
+            self.lock.withLock {
+                self.loadedFullScreenAd = ad
+                self.loadedFullScreenAdAt = Date()
+                self.isLoadingFullScreenAd = false
+            }
+        } catch {
+            logger.log(level: .error, "interstitial ad preload failed: \(error)")
+            self.lock.withLock { self.isLoadingFullScreenAd = false }
+        }
+    }
+
+    public func takePreloadedFullScreenAd() -> InterstitialAd? {
+        let result: InterstitialAd? = self.lock.withLock {
+            guard let loadedAd = self.loadedFullScreenAd else { return nil }
+            defer {
+                self.loadedFullScreenAd = nil
+                self.loadedFullScreenAdAt = nil
+            }
+            return self.hasValidLoadedFullScreenAd ? loadedAd : nil
+        }
+        guard let result else {
+            Task { [weak self] in
+                await self?.preloadFullScreenAd()
+            }
+            return nil
+        }
+        return result
+    }
+
+    private var hasValidLoadedFullScreenAd: Bool {
+        guard let loadedAt = self.loadedFullScreenAdAt else { return false }
+        return Date().timeIntervalSince(loadedAt) < Constant.fullScreenAdExpirationInterval
+    }
+}
+
+
+// MARK: - MobileAdAvailability
+
+extension GoogleMobileAdsServiceImple: MobileAdAvailability {
+
+    public var isStarted: AnyPublisher<Bool, Never> {
         return self.subject.isStart
             .removeDuplicates()
             .eraseToAnyPublisher()
     }
 
-    var isStartedNow: Bool { self.subject.isStart.value }
+    public var isStartedNow: Bool { self.subject.isStart.value }
 }

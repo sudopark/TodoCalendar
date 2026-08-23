@@ -7,10 +7,11 @@
 //
 
 import UIKit
+import SwiftUI
 import Combine
 import GoogleMobileAds
-import Extensions
 import Domain
+import Extensions
 
 
 public final class AdBannerUIView: UIView {
@@ -25,8 +26,7 @@ public final class AdBannerUIView: UIView {
     public init(
         adUnitId: String,
         size: AdBannerSize,
-        adService: GoogleMobileAdsServiceImple,
-        billingUsecase: any BillingUsecase,
+        adExposureUsecase: any AdExposureUsecase,
         onVisibilityChange: (@MainActor (Bool) -> Void)? = nil
     ) {
         self.bannerView = BannerView(adSize: size.asAdSize)
@@ -35,7 +35,7 @@ public final class AdBannerUIView: UIView {
 
         self.bannerView.adUnitID = adUnitId
         self.bannerView.delegate = self
-        self.bindLoadWhenFreePlanConfirmed(adService, billingUsecase)
+        self.bindLoadWhenBannerAdAllowed(adExposureUsecase)
     }
 
     required init?(coder: NSCoder) {
@@ -49,16 +49,9 @@ public final class AdBannerUIView: UIView {
         return cgSize(for: self.bannerView.adSize)
     }
 
-    // currentUserPlan 이 무방출이면 CombineLatest 도 무방출이라 자연히 fail-closed 다.
-    // .first() 를 안 쓰는 이유는 세션 중 유료 전환 시 배너를 내려야 해서다.
-    private func bindLoadWhenFreePlanConfirmed(
-        _ adService: GoogleMobileAdsServiceImple,
-        _ billingUsecase: any BillingUsecase
-    ) {
-        Publishers.CombineLatest(adService.isStarted, billingUsecase.currentUserPlan)
+    private func bindLoadWhenBannerAdAllowed(_ adExposureUsecase: any AdExposureUsecase) {
+        adExposureUsecase.isBannerAdAllowed
             .receive(on: RunLoop.main)
-            .map { isStarted, userPlan in isStarted && userPlan.planId == .free }
-            .removeDuplicates()
             .sink(receiveValue: { [weak self] isAllowed in
                 self?.apply(isAllowed: isAllowed)
             })
@@ -106,4 +99,54 @@ extension AdBannerUIView: BannerViewDelegate {
     ) {
         logger.log(level: .error, "banner ad load failed: \(error)")
     }
+}
+
+
+// MARK: - AdBannerView
+
+public struct AdBannerView: View {
+
+    private let adUnitId: String
+    private let size: AdBannerSize
+    private let adExposureUsecase: any AdExposureUsecase
+    @State private var isVisible: Bool = false
+
+    public init(
+        adUnitId: String,
+        size: AdBannerSize,
+        adExposureUsecase: any AdExposureUsecase
+    ) {
+        self.adUnitId = adUnitId
+        self.size = size
+        self.adExposureUsecase = adExposureUsecase
+    }
+
+    public var body: some View {
+        BannerRepresentable(
+            adUnitId: self.adUnitId,
+            size: self.size,
+            adExposureUsecase: self.adExposureUsecase,
+            isVisible: self.$isVisible
+        )
+        .frame(height: self.isVisible ? self.size.asCGSize.height : 0)
+    }
+}
+
+private struct BannerRepresentable: UIViewRepresentable {
+
+    let adUnitId: String
+    let size: AdBannerSize
+    let adExposureUsecase: any AdExposureUsecase
+    @Binding var isVisible: Bool
+
+    func makeUIView(context: Context) -> AdBannerUIView {
+        return AdBannerUIView(
+            adUnitId: self.adUnitId,
+            size: self.size,
+            adExposureUsecase: self.adExposureUsecase,
+            onVisibilityChange: { self.isVisible = $0 }
+        )
+    }
+
+    func updateUIView(_ uiView: AdBannerUIView, context: Context) { }
 }

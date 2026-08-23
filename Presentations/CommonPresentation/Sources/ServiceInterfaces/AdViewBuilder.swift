@@ -8,12 +8,8 @@
 
 import UIKit
 import SwiftUI
+import Domain
 
-
-public enum AdBannerSize: Sendable {
-    case banner
-    case mediumRectangle
-}
 
 public protocol AdViewBuilder {
 
