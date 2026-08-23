@@ -13,8 +13,8 @@ import PlaceService
 import ExternalServices
 import Repository
 import StoreKitService
+import AdService
 import Scenes
-import CommonPresentation
 
 // MARK: - NonLoginUsecaseFactoryImple
 
@@ -30,8 +30,8 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
     let aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
     let billingUsecase: any BillingUsecase
     let eventLiveActivityUsecase: any EventLiveActivityUsecase
+    let adExposureUsecase: any AdExposureUsecase
     let imageTextRecognizeService: any ImageTextRecognizeService = ImageTextRecognizeServiceImple()
-    let fullScreenAdRouter: (any FullScreenAdRouter)?
     private let applicationBase: ApplicationBase
 
     init(
@@ -50,7 +50,6 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
         self.eventSyncUsecase = NotNeedEventSyncUsecase()
         self.applicationBase = applicationBase
         self.billingUsecase = NotNeedBillingUsecase(sharedDataStore: applicationBase.sharedDataStore)
-        self.fullScreenAdRouter = applicationBase.makeFullScreenAdRouter(billingUsecase: self.billingUsecase)
 
         self.aiAgentOrchestrationUsecase = NotNeedAIAgentOrchestrationUsecase()
 
@@ -62,6 +61,16 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
             sharedDataStore: applicationBase.sharedDataStore,
             eventDetailDataUsecase: EventDetailDataLocalRepostioryImple(
                 localStorage: eventDetailStorage
+            )
+        )
+        self.adExposureUsecase = AdExposureUsecaseImple(
+            adAvailability: applicationBase.mobileAdService,
+            billingUsecase: self.billingUsecase,
+            adRepository: AdLocalRepositoryImple(
+                environmentStorage: applicationBase.userDefaultEnvironmentStorage
+            ),
+            coldLaunchHistoryRepository: AppColdLaunchHistoryLocalRepositoryImple(
+                environmentStorage: applicationBase.userDefaultEnvironmentStorage
             )
         )
     }
@@ -407,8 +416,8 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
     let aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
     let billingUsecase: any BillingUsecase
     let eventLiveActivityUsecase: any EventLiveActivityUsecase
+    let adExposureUsecase: any AdExposureUsecase
     let imageTextRecognizeService: any ImageTextRecognizeService = ImageTextRecognizeServiceImple()
-    let fullScreenAdRouter: (any FullScreenAdRouter)?
     private let applicationBase: ApplicationBase
 
     init(
@@ -514,7 +523,6 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
             appStoreService: AppStoreBillingServiceImple(),
             sharedDataStore: applicationBase.sharedDataStore
         )
-        self.fullScreenAdRouter = applicationBase.makeFullScreenAdRouter(billingUsecase: self.billingUsecase)
 
         self.eventLiveActivityUsecase = EventLiveActivityUsecaseImple(
             controller: EventCountdownLiveActivityController(),
@@ -525,6 +533,17 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
                     sqliteService: applicationBase.commonSqliteService
                 ),
                 uploadService: uploadService
+            )
+        )
+
+        self.adExposureUsecase = AdExposureUsecaseImple(
+            adAvailability: applicationBase.mobileAdService,
+            billingUsecase: self.billingUsecase,
+            adRepository: AdLocalRepositoryImple(
+                environmentStorage: applicationBase.userDefaultEnvironmentStorage
+            ),
+            coldLaunchHistoryRepository: AppColdLaunchHistoryLocalRepositoryImple(
+                environmentStorage: applicationBase.userDefaultEnvironmentStorage
             )
         )
     }

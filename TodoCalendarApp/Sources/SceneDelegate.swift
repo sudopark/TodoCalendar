@@ -32,6 +32,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         self.debugFloatingLoggerWindow = DebugFloatingLoggerWindow(windowScene: windowScene)
         #endif
 
+        session.isLaunchedFromAppIcon = connectionOptions.urlContexts.isEmpty
+            && connectionOptions.notificationResponse == nil
+            && connectionOptions.shortcutItem == nil
+
         guard let url = connectionOptions.urlContexts.first?.url else { return }
         _ = app?.applicationViewModel.handle(open: url)
     }

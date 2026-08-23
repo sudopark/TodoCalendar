@@ -54,6 +54,10 @@ final class ApplicationRootBuilder {
             ),
             sharedDataStore: applicationBase.sharedDataStore,
             environmentStorage: applicationBase.userDefaultEnvironmentStorage,
+            coldLaunchHistoryRepository: AppColdLaunchHistoryLocalRepositoryImple(
+                environmentStorage: applicationBase.userDefaultEnvironmentStorage
+            ),
+            mobileAdService: applicationBase.mobileAdService,
             database: applicationBase.commonSqliteService,
             appDataMigration: appDataMigration
         )

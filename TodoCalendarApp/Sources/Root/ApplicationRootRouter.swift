@@ -20,6 +20,7 @@ import MemberScenes
 import AIAgentScene
 import BillingScenes
 import SQLiteService
+import AdService
 
 
 // MARK: - ApplicationViewAppearanceStore
@@ -392,6 +393,7 @@ extension ApplicationRootRouter {
             calendarSceneBulder: self.calendarSceneBulder(),
             settingSceneBuilder: self.settingSceneBuilder(),
             mobileAdService: self.applicationBase.mobileAdService,
+            fullScreenAdRouter: self.fullScreenAdRouter(),
             adViewBuilder: self.adViewBuilder()
         )
         let mainScene = builder.makeMainScene()
@@ -400,13 +402,17 @@ extension ApplicationRootRouter {
         return mainScene.interactor
     }
     
-    private func adViewBuilder() -> (any AdViewBuilder)? {
-        return self.applicationBase.mobileAdService.map {
-            ApplicationAdViewBuilder(
-                adService: $0,
-                billingUsecase: self.usecaseFactory.billingUsecase
-            )
-        }
+    private func adViewBuilder() -> any AdViewBuilder {
+        return ApplicationAdViewBuilder(
+            adExposureUsecase: self.usecaseFactory.adExposureUsecase
+        )
+    }
+
+    private func fullScreenAdRouter() -> any FullScreenAdRouter {
+        return FullScreenAdRouterImple(
+            adService: self.applicationBase.mobileAdService,
+            adExposureUsecase: self.usecaseFactory.adExposureUsecase
+        )
     }
     
     private func calendarSceneBulder() -> any CalendarSceneBuilder {
@@ -420,7 +426,8 @@ extension ApplicationRootRouter {
             aiAgentCommandSceneBuilder: self.aiAgentCommandSceneBuilder(),
             aiAgentKeyboardInputSceneBuilder: self.aiAgentKeyboardInputSceneBuilder(),
             aiAgentImageCommandSceneBuilder: self.aiAgentImageCommandSceneBuilder(),
-            paywallSceneBuilder: self.paywallSceneBuilder()
+            paywallSceneBuilder: self.paywallSceneBuilder(),
+            fullScreenAdRouter: self.fullScreenAdRouter()
         )
         self.deepLinkHandler.attach(calendarHandler: builder.calendarDeepLinkHandler)
         return builder
@@ -465,7 +472,7 @@ extension ApplicationRootRouter {
             viewAppearance: self.viewAppearanceStore.appearance,
             memberSceneBuilder: self.memberSceneBuilder(),
             paywallSceneBuilder: self.paywallSceneBuilder(),
-            privacyOptionsFormRouter: self.applicationBase.privacyOptionsFormRouter
+            privacyOptionsFormRouter: self.applicationBase.mobileAdService
         )
     }
 
