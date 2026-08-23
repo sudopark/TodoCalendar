@@ -19,8 +19,8 @@ class AICommandRepositoryImpleTests: BaseLocalTests {
     private var stubRemote: StubRemoteAPI!
 
     override func setUpWithError() throws {
-        try super.setUpWithError()
         self.fileName = "ai_command_test"
+        try super.setUpWithError()
         self.stubRemote = .init(responses: DummyResponse().responses)
     }
 

@@ -159,21 +159,12 @@ sequenceDiagram
 
 ### 테스트 인프라 (`Tests/Common/`)
 
-- **`BaseLocalTests: BaseTestCase`** — 테스트용 SQLite DB를 캐시 디렉터리에 별도 파일로 생성하고, 테스트 종료 시 삭제. 실제 앱의 DB에는 영향을 주지 않음.
+- **`BaseLocalTests: BaseTestCase`** — 테스트용 SQLite DB를 캐시 디렉터리에 별도 파일로 생성하고, 테스트 종료 시 닫은 뒤 삭제. 실제 앱의 DB에는 영향을 주지 않음.
 - **`LocalTestable` 프로토콜** — `runTestWithOpenClose(_:_:)` 헬퍼로 DB 생성→테스트→삭제를 자동화. Swift Testing (`@Suite`) 사용 시 채택.
 
-```swift
-// BaseLocalTests: 캐시 디렉터리에 테스트 전용 DB 파일 생성
-func testDBPath() -> String {
-    return FileManager.default
-        .url(for: .cachesDirectory, ...)
-        .appendingPathComponent("\(self.fileName).db").path
-}
-// tearDown 시 DB 파일 삭제 → 앱 데이터와 완전 격리
-override func tearDownWithError() throws {
-    try? FileManager.default.removeItem(atPath: self.testDBPath())
-}
-```
+**DB 파일명은 `fileName`에 테스트마다 다른 UUID를 붙이고, tearDown은 커넥션을 닫은 뒤 파일을 지운다.** 고정 파일명 + 미close 조합이면 앞 테스트의 커넥션이 살아 있는 채로 뒤 테스트가 같은 vnode를 열어 프로세스가 죽는다 (원인·측정치는 `docs/troubleshooting/2026-08-24-local-db-tests-random-crash.md`).
+
+`fileName` 지정은 `super.setUpWithError()` **앞**에 둔다 — 뒤에 두면 파일명이 기본값으로 남아 로그에서 어느 테스트의 DB인지 추적이 안 된다 (UUID 덕에 충돌 자체는 안 난다).
 
 ### Local Repository 테스트
 
@@ -186,9 +177,9 @@ override func tearDownWithError() throws {
 ```swift
 // 예: TodoLocalRepositoryImpleTests
 class TodoLocalRepositoryImpleTests: BaseLocalTests {
-    // setUp: 캐시 디렉터리에 test.db 생성
+    // setUp: 캐시 디렉터리에 todos_<UUID>.db 생성
     // 실제 SQLite에 TodoEvent 저장 → 조회하여 검증
-    // tearDown: test.db 파일 삭제
+    // tearDown: 커넥션 close 후 그 파일 삭제
 }
 ```
 
