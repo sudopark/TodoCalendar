@@ -63,7 +63,7 @@ final class AddEventViewModelImple: EventDetailViewModel, @unchecked Sendable {
         let isSaving = CurrentValueSubject<Bool, Never>(false)
     }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private var inputInteractor: (any EventDetailInputInteractor)?
     private let subject = Subject()
     
@@ -72,7 +72,7 @@ final class AddEventViewModelImple: EventDetailViewModel, @unchecked Sendable {
             .sink(receiveValue: { [weak self] timeZone in
                 self?.subject.timeZone.send(timeZone)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 
@@ -106,7 +106,7 @@ extension AddEventViewModelImple: EventDetailInputListener {
                 self?.inputInteractor?.prepared(basic: pair.0, additional: pair.1)
                 self?.subject.isTodo.send(params.isTodoCase)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
     
     private func prepareBasicData(
@@ -250,7 +250,7 @@ extension AddEventViewModelImple: EventDetailInputListener {
             }
             self?.subject.isSaving.send(false)
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     private func saveNewScheduleEvent() {
@@ -279,7 +279,7 @@ extension AddEventViewModelImple: EventDetailInputListener {
             }
             self?.subject.isSaving.send(false)
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     private func saveEventDetailWithoutError(_ eventId: String?) async {

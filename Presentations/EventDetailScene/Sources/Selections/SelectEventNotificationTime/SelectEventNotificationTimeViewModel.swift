@@ -13,6 +13,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import Scenes
 import CommonPresentation
 
@@ -97,7 +98,7 @@ final class SelectEventNotificationTimeViewModelImple: SelectEventNotificationTi
         let notificationPermissionDenied = PassthroughSubject<Void, Never>()
     }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private let subject = Subject()
     
     private func bindChangedOptionChanged() {
@@ -108,7 +109,7 @@ final class SelectEventNotificationTimeViewModelImple: SelectEventNotificationTi
             .sink(receiveValue: { [weak self] options in
                 self?.listener?.selectEventNotificationTime(didUpdate: options)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 
@@ -142,7 +143,7 @@ extension SelectEventNotificationTimeViewModelImple {
             default: break
             }
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     func toggleSelectDefaultOption(_ option: EventNotificationTimeOption?) {

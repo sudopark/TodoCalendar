@@ -13,6 +13,7 @@ import Prelude
 import Optics
 import Combine
 import Domain
+import Extensions
 import Scenes
 
 
@@ -50,7 +51,7 @@ final class FeedbackPostViewModelImple: FeedbackPostViewModel, @unchecked Sendab
         let isPosting = CurrentValueSubject<Bool, Never>(false)
     }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private let subject = Subject()
 }
 
@@ -84,7 +85,7 @@ extension FeedbackPostViewModelImple {
                 self?.router?.showError(error)
             }
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     private func showPostedAndClose() {

@@ -58,7 +58,7 @@ public final class EventTagUsecaseImple: EventTagUsecase, @unchecked Sendable {
         self.refreshBindingQueue = refreshBindingQueue ?? DispatchQueue(label: "event-tag-binding")
     }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     
     private var shareKey: String { ShareDataKeys.tags.rawValue }
 }
@@ -143,7 +143,7 @@ extension EventTagUsecaseImple {
             .sink(receiveValue: { [weak self] ids in
                 self?.refreshCustomTags(ids)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         let offIds = self.tagRepository.loadOffTags()
         self.sharedDataStore.put(Set<EventTagId>.self, key: ShareDataKeys.offEventTagSet.rawValue, offIds)
@@ -161,7 +161,7 @@ extension EventTagUsecaseImple {
             .removeDuplicates()
             .map { $0.asDictionary { $0.tagId }}
             .sink(receiveValue: updateStore)
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
     
     public func refreshCustomTags(_ ids: [String]) {
@@ -178,7 +178,7 @@ extension EventTagUsecaseImple {
         
         self.tagRepository.loadCustomTags(ids)
             .sink(receiveCompletion: { _ in }, receiveValue: updateCached)
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
     
     public func eventTag(id: EventTagId) -> AnyPublisher<(any EventTag)?, Never> {

@@ -10,6 +10,7 @@
 import UIKit
 import SwiftUI
 import Combine
+import Extensions
 import Scenes
 import CommonPresentation
 
@@ -24,7 +25,7 @@ final class SelectEventTagViewController: UIHostingController<SelectEventTagCont
     @MainActor
     var interactor: (any SelectEventTagSceneInteractor)? { self.viewModel }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     
     init(
         viewModel: any SelectEventTagViewModel,

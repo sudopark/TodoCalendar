@@ -97,7 +97,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         let aiAgentState = CurrentValueSubject<AIAgentState?, Never>(nil)
         let isSignedIn = CurrentValueSubject<Bool, Never>(false)
     }
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private let subject = Subject()
     // 슬라이드 도중 포커스가 통째로 바뀌면 뒤늦은 완료 콜백이 낡은 인덱스를 적용하지 않게 한다
     private var focusGeneration: Int = 0
@@ -118,7 +118,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
                     self?.calendarPaperInteractors?[safe: offset]?.updateMonthIfNeed(month)
                 }
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         self.bindEventUploadService()
         self.bindRefreshEvents()
@@ -129,13 +129,13 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
             .sink(receiveValue: { [weak self] isSignedIn in
                 self?.subject.isSignedIn.send(isSignedIn)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         self.aiAgentOrchestrationUsecase.state
             .sink(receiveValue: { [weak self] state in
                 self?.subject.aiAgentState.send(state)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
     
     private func bindRefreshEvents() {
@@ -155,7 +155,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
             .sink(receiveValue: { [weak self] ranges in
                 self?.refreshEvents(ranges)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         let refreshAfterEnterForeground = NotificationCenter.default.publisher(
             for: UIApplication.willEnterForegroundNotification
@@ -172,13 +172,13 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
             self?.refreshEvents([total])
             self?.todoEventUsecase.refreshCurentTodoEvents()
         })
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
         
         refreshAfterEnterForeground
             .sink(receiveValue: { [weak self] in
                 self?.eventSyncUsecase.sync()
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
     
     private func bindFocusedMonthChanged() {
@@ -217,7 +217,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
             logger.log(level: .debug, "select day changed: \(selected)")
             self?.listener?.calendarScene(focusChangedTo: selected)
         })
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     private func bindRefreshHoliday() {
@@ -230,7 +230,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
             .sink(receiveValue: { [weak self] newYears in
                 self?.refreshHolidays(for: newYears)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
     
     private func refreshHolidays(for newYears: [Int]) {
@@ -239,7 +239,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
                 try? await self?.holidayUsecase.refreshHolidays(year)
             }
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     private func refreshEvents(_ ranges: [Range<TimeInterval>]) {
@@ -266,7 +266,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
                 }
             }
         })
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
 
     private func bindVoiceInputLifecycle() {
@@ -278,13 +278,13 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
             .sink(receiveValue: { [weak self] _ in
                 self?.aiAgentOrchestrationUsecase.stopInput()
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         self.aiAgentOrchestrationUsecase.speechPermissionDenied
             .sink(receiveValue: { [weak self] _ in
                 self?.showSpeechPermissionSettingGuide()
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 
     private func showSpeechPermissionSettingGuide() {
@@ -310,7 +310,7 @@ extension CalendarViewModelImple {
             .sink(receiveValue: { [weak self] today in
                 self?.prepareInitialMonths(around: today)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         self.calendarSettingUsecase.prepare()
         Task { [weak self] in
@@ -378,7 +378,7 @@ extension CalendarViewModelImple {
                     thisMonthInteractor?.selectToday()
                 }
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
     
     func moveDay(_ day: CalendarDay, withClearPresented: Bool) {
@@ -479,7 +479,7 @@ extension CalendarViewModelImple {
         .sink(receiveValue: { [weak self] _, _ in
             self?.todoEventUsecase.refreshUncompletedTodos()
         })
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
 }
 
@@ -518,7 +518,7 @@ extension CalendarViewModelImple {
                 guard let self else { return }
                 self.router?.routeToAICommand(listener: self)
             }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 
     // 음성 입력 '진입 순간'에만 스크롤한다 — 같은 상태의 반복 방출로는 재스크롤하지 않는다.
@@ -533,7 +533,7 @@ extension CalendarViewModelImple {
                 else { return }
                 self?.calendarPaperInteractors?[safe: focusedIndex]?.scrollToVoiceInput()
             }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 
     private static func isAICommandPhase(_ state: AIAgentState) -> Bool {
@@ -559,7 +559,7 @@ extension CalendarViewModelImple {
         .sink(receiveValue: { [weak self] _, _ in
             self?.performAIEntry()
         })
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
 
     private func performAIEntry() {

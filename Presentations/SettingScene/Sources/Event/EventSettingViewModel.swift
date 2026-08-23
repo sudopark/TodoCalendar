@@ -13,6 +13,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import Scenes
 
 
@@ -155,7 +156,7 @@ final class EventSettingViewModelImple: EventSettingViewModel, @unchecked Sendab
         let isConnectOrDisconnectExternalCalednar = CurrentValueSubject<Bool, Never>(false)
     }
 
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private let subject = Subject()
 
     private func internalBinding() {
@@ -164,7 +165,7 @@ final class EventSettingViewModelImple: EventSettingViewModel, @unchecked Sendab
             .sink(receiveValue: { [weak self] setting in
                 self?.subject.setting.send(setting)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 
@@ -237,7 +238,7 @@ extension EventSettingViewModelImple {
                 self?.router?.showError(error)
             }
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     private func handleAppleCalendarPermissionFail(_ reason: AppleCalendarPermissionFailReason) {
@@ -277,7 +278,7 @@ extension EventSettingViewModelImple {
                 self?.router?.showError(error)
             }
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     func close() {

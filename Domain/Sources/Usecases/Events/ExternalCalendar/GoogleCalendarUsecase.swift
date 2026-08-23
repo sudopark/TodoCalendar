@@ -128,12 +128,11 @@ public final class GoogleCalendarUsecaseImple: GoogleCalendarUsecase, @unchecked
         self.sharedDataStore = sharedDataStore
     }
 
-    private var cancelBag: Set<AnyCancellable> = []
-    private var refreshEventBag: Set<AnyCancellable> = []
+    private let cancelBag = CancelBag()
+    private let refreshEventBag = CancelBag()
 
     private func clearCancelBag() {
-        self.cancelBag.forEach { $0.cancel() }
-        self.cancelBag = []
+        self.cancelBag.cancelAll()
     }
 }
 
@@ -160,7 +159,7 @@ extension GoogleCalendarUsecaseImple {
                     self.clearAccountCache(email)
                 }
             }
-            .store(in: &cancelBag)
+            .store(in: cancelBag)
     }
 
     public func refreshGoogleCalendarEventTags() {
@@ -193,7 +192,7 @@ extension GoogleCalendarUsecaseImple {
                 }
                 self.appearanceStore.applyColors(colors, for: accountId)
             }
-            .store(in: &cancelBag)
+            .store(in: cancelBag)
     }
 
     private func refreshCalendarTags(_ accountId: String, isNew: Bool = false) {
@@ -214,7 +213,7 @@ extension GoogleCalendarUsecaseImple {
                 }
                 self.appearanceStore.applyCalendarTags(incoming, for: accountId)
             }
-            .store(in: &cancelBag)
+            .store(in: cancelBag)
     }
 
     private func clearAccountCache(_ accountId: String) {
@@ -303,8 +302,7 @@ extension GoogleCalendarUsecaseImple {
 extension GoogleCalendarUsecaseImple {
 
     private func cancelRefresh() {
-        refreshEventBag.forEach { $0.cancel() }
-        refreshEventBag = []
+        refreshEventBag.cancelAll()
     }
 
     public func refreshEvents(in period: Range<TimeInterval>) {
@@ -322,7 +320,7 @@ extension GoogleCalendarUsecaseImple {
                     self.refreshEvents(calendar.id, accountId: calendar.ownerId, in: period)
                 }
             })
-            .store(in: &self.refreshEventBag)
+            .store(in: self.refreshEventBag)
     }
 
     public func refreshRepeatingEvent(
@@ -342,7 +340,7 @@ extension GoogleCalendarUsecaseImple {
                     return instances.reduce(into: withoutStale) { $0[$1.eventId] = $1 }
                 }
             })
-            .store(in: &self.cancelBag)
+            .store(in: self.cancelBag)
     }
 
     private func refreshEvents(
@@ -368,7 +366,7 @@ extension GoogleCalendarUsecaseImple {
 
         repository.loadEvents(calendarId, in: period)
             .sink(receiveValue: updateEvents)
-            .store(in: &self.refreshEventBag)
+            .store(in: self.refreshEventBag)
     }
 
     public func events(

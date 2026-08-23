@@ -21,7 +21,7 @@ import CommonPresentation
 @Observable final class PendingCompleteTodoState {
     
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
     var ids: Set<String> = []
     
     func bind(_ viewModel: EventListCellEventHanleViewModel, _ appearance: ViewAppearance) {
@@ -37,7 +37,7 @@ import CommonPresentation
                     self.ids.remove(result.id)
                 }
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

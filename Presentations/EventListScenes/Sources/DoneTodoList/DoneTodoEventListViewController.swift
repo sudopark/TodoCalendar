@@ -11,6 +11,7 @@
 import UIKit
 import SwiftUI
 import Combine
+import Extensions
 import Scenes
 import CommonPresentation
 
@@ -25,7 +26,7 @@ final class DoneTodoEventListViewController: UIHostingController<DoneTodoEventLi
     @MainActor
     var interactor: (any DoneTodoEventListSceneInteractor)? { self.viewModel }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     
     init(
         viewModel: any DoneTodoEventListViewModel,

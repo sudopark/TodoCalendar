@@ -9,6 +9,7 @@
 import SwiftUI
 import Combine
 import Domain
+import Extensions
 import Scenes
 import CommonPresentation
 
@@ -18,7 +19,7 @@ import CommonPresentation
 @Observable final class AppleCalendarEventDetailViewState {
 
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
 
     var isEditable: Bool = false
     var readOnlyCalendarMessage: String?
@@ -45,98 +46,98 @@ import CommonPresentation
             .sink(receiveValue: { [weak self] isEditable in
                 self?.isEditable = isEditable
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.readOnlyCalendarMessage
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] message in
                 self?.readOnlyCalendarMessage = message
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.eventName
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] name in
                 self?.eventName = name
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.timeText
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] text in
                 self?.timeText = text
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.ddayText
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] text in
                 self?.ddayText = text
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.repeatText
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] text in
                 self?.repeatText = text
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.location
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] text in
                 self?.location = text ?? ""
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.url
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] text in
                 self?.url = text ?? ""
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.notes
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] text in
                 self?.notes = text ?? ""
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.attendees
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] list in
                 self?.attendees = list
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.tagModel
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] model in
                 self?.tagModel = model
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.isSavable
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] isSavable in
                 self?.isSavable = isSavable
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.isSaving
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] isSaving in
                 self?.isSaving = isSaving
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.liveActivityActionModel
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] model in
                 self?.liveActivityActionModel = model
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

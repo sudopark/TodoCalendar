@@ -20,7 +20,7 @@ import CommonPresentation
 @Observable final class SelectEventTagViewState {
     
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
     
     var tags: [TagCellViewModel] = []
     var selectedTagId: EventTagId?
@@ -36,14 +36,14 @@ import CommonPresentation
             .sink(receiveValue: { [weak self] tags in
                 self?.tags = tags
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.selectedTagId
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] id in
                 self?.selectedTagId = id
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

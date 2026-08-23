@@ -8,6 +8,7 @@
 
 import Foundation
 import Combine
+import Extensions
 
 
 // MARK: - SpeechRecognizeResult
@@ -61,7 +62,7 @@ public final class SpeechRecognizeUsecaseImple: SpeechRecognizeUsecase, @uncheck
         let recognizingText = CurrentValueSubject<String, Never>("")
     }
     private let subject = Subject()
-    private var serviceBinding = Set<AnyCancellable>()
+    private let serviceBinding = CancelBag()
     private var startTask: Task<Void, Never>?
 }
 
@@ -82,13 +83,13 @@ extension SpeechRecognizeUsecaseImple {
                 try self.service.start()
                 guard !Task.isCancelled else {
                     self.service.stop()
-                    self.serviceBinding = []
+                    self.serviceBinding.cancelAll()
                     return
                 }
                 self.subject.isRecognizing.send(true)
 
             } catch {
-                self.serviceBinding = []
+                self.serviceBinding.cancelAll()
                 self.subject.isRecognizing.send(false)
                 self.subject.result.send(.failure(error))
             }
@@ -99,7 +100,7 @@ extension SpeechRecognizeUsecaseImple {
         self.startTask?.cancel()
         self.startTask = nil
         self.service.stop()
-        self.serviceBinding = []
+        self.serviceBinding.cancelAll()
         self.subject.isRecognizing.send(false)
     }
     
@@ -116,7 +117,7 @@ extension SpeechRecognizeUsecaseImple {
         }
 
         self.subject.recognizingText.send("")
-        self.serviceBinding = []
+        self.serviceBinding.cancelAll()
 
         let recognizedOrTimeout = Publishers.CombineLatest(
             self.service.recognized.mapAsOptional().prepend(nil),
@@ -136,7 +137,7 @@ extension SpeechRecognizeUsecaseImple {
                 receiveCompletion: self.handleCompletion(),
                 receiveValue: self.handleRecognized()
             )
-            .store(in: &self.serviceBinding)
+            .store(in: self.serviceBinding)
 
         self.service.recognized
             .map { $0.text }
@@ -146,7 +147,7 @@ extension SpeechRecognizeUsecaseImple {
                     self?.subject.recognizingText.send(text)
                 }
             )
-            .store(in: &self.serviceBinding)
+            .store(in: self.serviceBinding)
     }
     
     private func handleCompletion() -> (Subscribers.Completion<any Error>) -> Void  {

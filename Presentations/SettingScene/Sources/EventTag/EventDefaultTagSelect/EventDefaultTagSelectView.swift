@@ -14,6 +14,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import CommonPresentation
 
 
@@ -22,7 +23,7 @@ import CommonPresentation
 @Observable final class EventDefaultTagSelectViewState {
     
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
     var cellViewModels: [BaseCalendarEventTagCellViewModel] = []
     var selectedId: EventTagId?
     
@@ -37,14 +38,14 @@ import CommonPresentation
             .sink(receiveValue: { [weak self] cvms in
                 self?.cellViewModels = cvms
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.selectedId
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] id in
                 self?.selectedId = id
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

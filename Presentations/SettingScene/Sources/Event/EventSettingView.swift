@@ -12,6 +12,7 @@
 import SwiftUI
 import Combine
 import Domain
+import Extensions
 import CommonPresentation
 
 
@@ -20,7 +21,7 @@ import CommonPresentation
 @Observable final class EventSettingViewState {
     
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
     
     var tagModel: BaseCalendarEventTagCellViewModel?
     var selectedEventNotificationTimeText: String?
@@ -41,56 +42,56 @@ import CommonPresentation
             .sink(receiveValue: { [weak self] model in
                 self?.tagModel = model
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.selectedEventNotificationTimeText
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] text in
                 self?.selectedEventNotificationTimeText = text
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.selectedAllDayEventNotificationTimeText
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] text in
                 self?.selectedAllDayEventNotificationTimeText = text
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.selectedPeriod
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] model in
                 self?.periodModel = model
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.defaultMapApp
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] app in
                 self?.defaultMapApp = app
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.eventSyncModel
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] model in
                 self?.eventSyncModel = model
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.integratedExternalCalendars
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] models in
                 self?.externalCalendarServiceModels = models
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.isConnectOrDisconnectExternalCalednar
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] flag in
                 self?.isConnectOrDisconnectingExternalService = flag
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

@@ -9,13 +9,14 @@
 import SwiftUI
 import Combine
 import Domain
+import Extensions
 import CommonPresentation
 
 
 @Observable final class WidgetAppearanceSettingViewState {
     
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
     
     var background: WidgetAppearanceSettings.Background = .system
     var isSystemTheme = true
@@ -37,7 +38,7 @@ import CommonPresentation
                     self?.customBackground = UIColor.from(hex: hex)?.asColor
                 }
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

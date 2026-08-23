@@ -6,6 +6,7 @@
 import SwiftUI
 import Combine
 import Domain
+import Extensions
 import CommonPresentation
 
 
@@ -17,7 +18,7 @@ import CommonPresentation
     var usage: AIAgentUsage?
     var userPlan: BillingUserPlan?
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
 
     func bind(_ viewModel: any AIAgentKeyboardInputViewModel) {
         guard self.didBind == false else { return }
@@ -26,12 +27,12 @@ import CommonPresentation
         viewModel.usage
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] in self?.usage = $0 })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.currentUserPlan
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] in self?.userPlan = $0 })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

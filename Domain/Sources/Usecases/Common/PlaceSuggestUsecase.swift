@@ -54,7 +54,7 @@ public final class PlaceSuggestUsecaseImple: PlaceSuggestUsecase, @unchecked Sen
         let places = CurrentValueSubject<[Place], Never>([])
     }
     private let subject = Subject()
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
 }
 
 extension PlaceSuggestUsecaseImple {
@@ -89,7 +89,7 @@ extension PlaceSuggestUsecaseImple {
             .sink(receiveValue: { [weak self] places in
                 self?.subject.places.send(places)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

@@ -11,6 +11,7 @@
 import Foundation
 import Combine
 import Domain
+import Extensions
 import Scenes
 
 
@@ -46,7 +47,7 @@ final class SignInViewModelImple: SignInViewModel, @unchecked Sendable {
         let isSigningIn = CurrentValueSubject<Bool, Never>(false)
     }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private let subject = Subject()
 }
 
@@ -68,7 +69,7 @@ extension SignInViewModelImple {
                 self?.router?.showError(error)
             }
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     func close() {

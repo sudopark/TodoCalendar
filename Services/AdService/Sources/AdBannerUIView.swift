@@ -21,7 +21,7 @@ public final class AdBannerUIView: UIView {
     private var isLoaded: Bool = false
     private var isAllowed: Bool = false
     private var didRequestLoad: Bool = false
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
 
     public init(
         adUnitId: String,
@@ -55,7 +55,7 @@ public final class AdBannerUIView: UIView {
             .sink(receiveValue: { [weak self] isAllowed in
                 self?.apply(isAllowed: isAllowed)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 
     private func apply(isAllowed: Bool) {

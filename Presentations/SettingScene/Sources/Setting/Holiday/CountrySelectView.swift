@@ -11,6 +11,7 @@
 import SwiftUI
 import Combine
 import Domain
+import Extensions
 import CommonPresentation
 
 
@@ -19,7 +20,7 @@ import CommonPresentation
 @Observable final class CountrySelectViewState {
     
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
     var countries: [HolidaySupportCountry] = []
     var selectedCountryCode: String? = nil
     var isSavable: Bool = false
@@ -36,28 +37,28 @@ import CommonPresentation
             .sink(receiveValue: { [weak self] countries in
                 self?.countries = countries
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.selectedCountryCode
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] code in
                 self?.selectedCountryCode = code
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.isSaving
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] flag in
                 self?.isSaving = flag
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.isConfirmable
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] flag in
                 self?.isSavable = flag
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

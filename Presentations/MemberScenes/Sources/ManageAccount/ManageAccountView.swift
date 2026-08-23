@@ -12,6 +12,7 @@
 import SwiftUI
 import Combine
 import Domain
+import Extensions
 import CommonPresentation
 
 
@@ -20,7 +21,7 @@ import CommonPresentation
 @Observable final class ManageAccountViewState {
     
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
     
     var isMigrating = false
     var accountInfo: AccountInfoModel?
@@ -39,35 +40,35 @@ import CommonPresentation
             .sink(receiveValue: { [weak self] flag in
                 self?.isMigrating = flag
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.currentAccountInfo
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] info in
                 self?.accountInfo = info
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.isNeedMigrationEventCount
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] count in
                 self?.migrationNeedEventCount = count
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.isSigningOut
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] flag in
                 self?.isSignOuts = flag
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.isDeletingAccount
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] flag in
                 self?.isDeletingAccount = flag
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

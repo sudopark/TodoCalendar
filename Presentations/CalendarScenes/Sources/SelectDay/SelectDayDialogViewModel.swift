@@ -9,6 +9,7 @@
 import Foundation
 import Combine
 import Domain
+import Extensions
 import Scenes
 
 
@@ -43,7 +44,7 @@ final class SelectDayDialogViewModelImple: SelectDayDialogViewModel, @unchecked 
         let today = CurrentValueSubject<CalendarComponent.Day?, Never>(nil)
     }
     private let subject = Subject()
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     
     private func internalBinding() {
         
@@ -51,7 +52,7 @@ final class SelectDayDialogViewModelImple: SelectDayDialogViewModel, @unchecked 
             .sink(receiveValue: { [weak self] today in
                 self?.subject.today.send(today)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

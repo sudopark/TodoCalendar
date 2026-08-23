@@ -13,6 +13,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import Scenes
 
 
@@ -49,7 +50,7 @@ final class EventDefaultMapAppViewModelImple: EventDefaultMapAppViewModel, @unch
     
     private struct Subject {}
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private let subject = Subject()
 }
 

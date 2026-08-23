@@ -20,7 +20,7 @@ import CommonPresentation
 @Observable final class SelectEventNotificationTimeViewState {
     
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
     
     var defaultTimeOptions: [NotificationTimeOptionModel] = []
     var customTimeOptions: [CustomTimeOptionModel] = []
@@ -49,28 +49,28 @@ import CommonPresentation
             .sink(receiveValue: { [weak self] models in
                 self?.defaultTimeOptions = models
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.customTimeOptions
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] models in
                 self?.customTimeOptions = models
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.selectedDefaultTimeOptions
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] options in
                 self?.selectedDefaultTimeOptions = options
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.isNeedNotificaitonPermission
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] in
                 self?.notificaitonPermissionDenied = true
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

@@ -107,7 +107,7 @@ final class SharePreviewViewModelImple: SharePreviewViewModel, @unchecked Sendab
         let format = CurrentValueSubject<SharePreviewFormat, Never>(.text)
     }
     private let subject = Subject()
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
 }
 
 
@@ -122,7 +122,7 @@ extension SharePreviewViewModelImple {
                 self?.subject.rawLines.send(lines)
                 self?.subject.knownTagIds.send(Set(lines.compactMap { $0.tagId }))
             }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         self.subject.includeTagName.send(
             self.eventShareSettingUsecase.loadEventShareSetting().includeTagName
@@ -144,7 +144,7 @@ extension SharePreviewViewModelImple {
                 overrides[tagId] = !isCurrentlyOn
                 self.subject.userTagOverrides.send(overrides)
             }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 
     func selectAllTags() {
@@ -200,7 +200,7 @@ extension SharePreviewViewModelImple {
                 guard !text.isEmpty else { return }
                 self.router?.shareText(text)
             }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 
     private func shareImage() {
@@ -217,7 +217,7 @@ extension SharePreviewViewModelImple {
             guard !self.isEmptyContent(filtered) else { return }
             self.router?.shareImage(filtered, headerText: headerText)
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
 
     func close() {

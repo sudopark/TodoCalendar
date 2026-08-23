@@ -11,6 +11,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 
 
 // MARK: - base calednar event tag
@@ -90,7 +91,7 @@ final class EventTagListViewUsecase {
     
     private let allTags = CurrentValueSubject<[any EventTag]?, Never>(nil)
     private let occuredError = PassthroughSubject<any Error, Never>()
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
 }
 
 extension EventTagListViewUsecase {
@@ -107,7 +108,7 @@ extension EventTagListViewUsecase {
         
         self.tagUsecase.loadAllEventTags()
             .sink(receiveValue: loaded, receiveError: handleError)
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
     
     func reloadExternalCalendarIfNeed() {

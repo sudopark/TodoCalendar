@@ -18,7 +18,7 @@ import CommonPresentation
 @Observable final class ShareCommandViewState {
 
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
 
     // 공유 원문은 viewModel이 1회 실어주고, 이후엔 유저가 직접 편집한다
     var sharedText: String = ""
@@ -66,37 +66,37 @@ import CommonPresentation
         viewModel.sharedText
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] in self?.sharedText = $0 })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.source
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] in self?.source = $0 })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.isPreparing
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] in self?.isPreparing = $0 })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.blockedMessage
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] in self?.blockedMessage = $0 })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.isSending
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] in self?.isSending = $0 })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.sentMessage
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] in self?.sentMessage = $0 })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.failureMessage
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] in self?.failureMessage = $0 })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

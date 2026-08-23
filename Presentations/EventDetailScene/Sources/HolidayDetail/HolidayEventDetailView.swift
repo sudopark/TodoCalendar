@@ -22,7 +22,7 @@ import Scenes
 @Observable final class HolidayEventDetailViewState {
     
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
     
     var name: String = ""
     var dateText: String = ""
@@ -40,35 +40,35 @@ import Scenes
             .sink(receiveValue: { [weak self] name in
                 self?.name = name
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.dateText
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] text in
                 self?.dateText = text
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.ddayText
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] text in
                 self?.ddayText = text
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.countryModel
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] model in
                 self?.countryModel = model
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.liveActivityActionModel
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] model in
                 self?.liveActivityActionModel = model
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

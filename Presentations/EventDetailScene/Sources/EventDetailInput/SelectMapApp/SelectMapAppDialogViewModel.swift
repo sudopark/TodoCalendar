@@ -13,6 +13,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import Scenes
 
 
@@ -55,7 +56,7 @@ final class SelectMapAppDialogViewModelImple: SelectMapAppDialogViewModel, @unch
         let alwaysSelectThisMapOption = CurrentValueSubject<Bool, Never>(false)
     }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private let subject = Subject()
 }
 

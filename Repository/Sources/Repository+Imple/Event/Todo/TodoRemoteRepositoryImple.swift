@@ -19,7 +19,7 @@ public final class TodoRemoteRepositoryImple: TodoEventRepository, @unchecked Se
     
     private let remote: any TodoRemote
     private let cacheStorage: any TodoLocalStorage
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     
     public init(
         remote: any TodoRemote,

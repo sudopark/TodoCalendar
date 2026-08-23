@@ -12,6 +12,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import Scenes
 
 
@@ -76,7 +77,7 @@ final class SelectEventTagViewModelImple: SelectEventTagViewModel, @unchecked Se
         let tags = CurrentValueSubject<[any EventTag]?, Never>(nil)
     }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private let subject = Subject()
     
     private func bindSelectedTagNotify() {
@@ -86,7 +87,7 @@ final class SelectEventTagViewModelImple: SelectEventTagViewModel, @unchecked Se
             .sink(receiveValue: { [weak self] tag in
                 self?.listener?.selectEventTag(didSelected: tag)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 
@@ -111,7 +112,7 @@ extension SelectEventTagViewModelImple {
         
         self.tagUsecase.loadAllEventTags()
             .sink(receiveValue: loaded, receiveError: handleError)
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
     
     func selectTag(_ id: EventTagId) {

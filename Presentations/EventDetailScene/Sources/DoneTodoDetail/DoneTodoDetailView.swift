@@ -12,6 +12,7 @@
 import SwiftUI
 import Combine
 import Domain
+import Extensions
 import CommonPresentation
 
 
@@ -20,7 +21,7 @@ import CommonPresentation
 @Observable final class DoneTodoDetailViewState {
     
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
     
     var name: String?
     var tag: SelectedTag?
@@ -43,56 +44,56 @@ import CommonPresentation
             .sink(receiveValue: { [weak self] name in
                 self?.name = name
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.eventTag
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] tag in
                 self?.tag = tag
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.timeModel
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] model in
                 self?.timeModel = model
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.notificationTimeText
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] text in
                 self?.notificationOptions = text
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.url
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] url in
                 self?.url = url
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.memo
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] memo in
                 self?.memo = memo
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.placeModel
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] place in
                 self?.placeModel = place
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.isReverting
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] flag in
                 self?.isReverting = flag
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

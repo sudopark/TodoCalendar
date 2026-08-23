@@ -138,7 +138,7 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
         let aiAgentState = CurrentValueSubject<AIAgentState?, Never>(nil)
     }
 
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private let subject = Subject()
     private let cvmCombineScheduler = DispatchQueue(label: "serial-combine")
 
@@ -148,13 +148,13 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
             .sink { [weak self] signedIn in
                 self?.subject.isSignedIn.send(signedIn)
             }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         self.aiAgentOrchestrationUsecase.state
             .sink { [weak self] state in
                 self?.subject.aiAgentState.send(state)
             }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 
@@ -189,7 +189,7 @@ extension DayEventListViewModelImple {
                 $0.filter { $0.eventIdentifier != newPendingTodo.eventIdentifier }
             }
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
 
     private func updatePendingTodos(

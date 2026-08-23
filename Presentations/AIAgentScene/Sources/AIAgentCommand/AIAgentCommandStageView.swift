@@ -18,7 +18,7 @@ import CommonPresentation
 @Observable final class AIAgentCommandViewState {
 
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
 
     var commandState: AIAgentCommandState?
     var usage: AIAgentUsage?
@@ -31,17 +31,17 @@ import CommonPresentation
         viewModel.commandState
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] in self?.commandState = $0 })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.usage
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] in self?.usage = $0 })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.currentUserPlan
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] in self?.userPlan = $0 })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

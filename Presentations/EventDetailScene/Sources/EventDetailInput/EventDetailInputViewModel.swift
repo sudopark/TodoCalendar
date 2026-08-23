@@ -196,7 +196,7 @@ final class EventDetailInputViewModelImple: EventDetailInputViewModel, @unchecke
         }
     }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private let subject = Subject()
 }
 
@@ -213,7 +213,7 @@ extension EventDetailInputViewModelImple {
         .sink(receiveValue: { [weak self] (basic, additional) in
             self?.listener?.eventDetail(didInput: basic, additional: additional)
         })
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
         
         let setting = self.eventSettingUsecase.loadEventSetting()
         self.subject.eventSetting.send(setting)
@@ -240,7 +240,7 @@ extension EventDetailInputViewModelImple {
             .sink(receiveValue: { [weak self] preview in
                 self?.subject.linkPreview.send(preview)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
     
     func prepared(basic: EventDetailBasicData, additional: EventDetailData) {
@@ -254,7 +254,7 @@ extension EventDetailInputViewModelImple {
             .compactMap { $0 }
             .first()
             .sink(receiveValue: update)
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
     
     func enter(name: String) {

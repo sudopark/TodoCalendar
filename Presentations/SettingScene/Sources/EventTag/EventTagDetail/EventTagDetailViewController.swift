@@ -10,6 +10,7 @@
 import UIKit
 import SwiftUI
 import Combine
+import Extensions
 import Scenes
 import CommonPresentation
 
@@ -24,7 +25,7 @@ final class EventTagDetailViewController: UIHostingController<EventTagDetailCont
     @MainActor
     var interactor: (any EventTagDetailSceneInteractor)? { self.viewModel }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     
     init(
         viewModel: any EventTagDetailViewModel,
@@ -61,6 +62,6 @@ final class EventTagDetailViewController: UIHostingController<EventTagDetailCont
             .sink(receiveValue: { [weak self] isProcessing in
                 self?.isModalInPresentation = isProcessing
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }

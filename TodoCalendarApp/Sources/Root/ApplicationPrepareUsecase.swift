@@ -49,7 +49,7 @@ final class ApplicationPrepareUsecaseImple: ApplicationPrepareUsecase {
     private let appDataMigration: AppDataMigrationImple
     private let databasePathFinding: (String?) -> String
 
-    private var cancelBag: Set<AnyCancellable> = []
+    private let cancelBag = CancelBag()
 
     init(
         accountUsecase: any AccountUsecase,

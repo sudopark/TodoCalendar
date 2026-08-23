@@ -66,7 +66,7 @@ final class EditScheduleEventDetailViewModelImple: EventDetailViewModel, @unchec
         let timeZone = CurrentValueSubject<TimeZone?, Never>(nil)
     }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private let subject = Subject()
     private weak var inputInteractor: (any EventDetailInputInteractor)?
     
@@ -76,7 +76,7 @@ final class EditScheduleEventDetailViewModelImple: EventDetailViewModel, @unchec
             .sink(receiveValue: { [weak self] timeZone in
                 self?.subject.timeZone.send(timeZone)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 
@@ -121,7 +121,7 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
             self.additionDataWithoutError().mapNever()
         )
         .sink(receiveCompletion: handleCompleted, receiveValue: handlePrepared)
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     private func prepareBasicData() -> AnyPublisher<EventDetailBasicData, any Error> {
@@ -203,7 +203,7 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
                 guard !text.isEmpty else { return }
                 self?.router?.showShareSheet(text: text)
             }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
     
     private func removeEventAfterConfirm(onlyThisTime: Bool) {
@@ -238,7 +238,7 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
                     self?.router?.showError(error)
                 }
             }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         }
     }
     
@@ -272,7 +272,7 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
                     self?.router?.showError(error)
                 }
             }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         }
     }
 
@@ -371,7 +371,7 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
                 self.router?.showError(error)
             }
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     private func replaceEventDetailToTodo(_ scheduleId: String, _ newTodoId: String) async {
@@ -517,7 +517,7 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
             }
             self?.subject.isSaving.send(false)
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     private func scheduleEditParams(from basic: EventDetailBasicData, _ timeZone: TimeZone) -> SchedulePutParams {

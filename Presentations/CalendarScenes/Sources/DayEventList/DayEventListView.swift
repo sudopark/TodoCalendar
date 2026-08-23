@@ -39,7 +39,7 @@ enum DayEventListScrollAnchor {
 @Observable final class DayEventListViewState {
 
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
 
     fileprivate var foremostModel: (any EventCellViewModel)?
     fileprivate var uncompletedTodos: [TodoEventCellViewModel] = []
@@ -83,7 +83,7 @@ enum DayEventListScrollAnchor {
                     self?.foremostModel = model
                 }
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.uncompletedTodoEventModels
             .receive(on: RunLoop.main)
@@ -92,14 +92,14 @@ enum DayEventListScrollAnchor {
                     self?.uncompletedTodos = models
                 }
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.selectedDay
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] model in
                 self?.dayModel = model
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.cellViewModels
             .receive(on: RunLoop.main)
@@ -108,7 +108,7 @@ enum DayEventListScrollAnchor {
                     self?.cellViewModels = cellViewModels
                 }
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.foremostEventMarkingStatus
             .receive(on: RunLoop.main)
@@ -117,24 +117,24 @@ enum DayEventListScrollAnchor {
                     self?.foremostEventMarkingStatus = status
                 }
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.aiAgentState
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] state in
                 self?.aiAgentState = state
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.recognizingText
             .receive(on: RunLoop.main)
             .sink { [weak self] text in self?.recognizingText = text }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.voiceLevel
             .receive(on: RunLoop.main)
             .sink { [weak self] level in self?.voiceLevel = level }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

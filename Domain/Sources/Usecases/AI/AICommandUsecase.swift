@@ -72,14 +72,14 @@ public final class AICommandUsecaseImple: AICommandUsecase, @unchecked Sendable 
         let jobFinishEvent = PassthroughSubject<String, Never>()
     }
     private let subject = Subject()
-    private var cancelBag = Set<AnyCancellable>()
+    private let cancelBag = CancelBag()
 
     private func internalBind() {
         self.calendarSettingUsecase.currentTimeZone
             .sink(receiveValue: { [weak self] timeZone in
                 self?.subject.timeZone.send(timeZone)
             })
-            .store(in: &self.cancelBag)
+            .store(in: self.cancelBag)
     }
 }
 

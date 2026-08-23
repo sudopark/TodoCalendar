@@ -53,7 +53,7 @@ final class AIAgentCommandViewModelImple: AIAgentCommandViewModel, @unchecked Se
     var router: (any AIAgentRouting)?
     weak var listener: (any AIAgentCommandSceneListener)?
 
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
 
     init(
         orchestrationUsecase: any AIAgentOrchestrationUsecase,
@@ -66,7 +66,7 @@ final class AIAgentCommandViewModelImple: AIAgentCommandViewModel, @unchecked Se
             .removeDuplicates()
             .dropFirst()
             .sink { [weak self] _ in self?.orchestrationUsecase.loadUsage() }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

@@ -164,7 +164,7 @@ final class SelectEventRepeatOptionViewModelImple: SelectEventRepeatOptionViewMo
         let endOption = CurrentValueSubject<RepeatEndOptionModel?, Never>(nil)
     }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private let subject = Subject()
 }
 
@@ -184,7 +184,7 @@ extension SelectEventRepeatOptionViewModelImple {
         self.calendarSettingUsecase.currentTimeZone
             .first()
             .sink(receiveValue: setupValue)
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
     
     private func setupOptionModels(

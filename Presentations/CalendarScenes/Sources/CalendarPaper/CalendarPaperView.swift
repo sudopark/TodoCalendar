@@ -8,12 +8,13 @@
 
 import SwiftUI
 import Combine
+import Extensions
 import CommonPresentation
 
 @Observable final class CalendarPaperViewState {
 
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
 
     // 값 자체엔 의미가 없다 — 증가가 곧 스크롤 트리거다.
     fileprivate var scrollToVoiceInputTrigger: Int = 0
@@ -28,7 +29,7 @@ import CommonPresentation
             .sink { [weak self] _ in
                 self?.scrollToVoiceInputTrigger += 1
             }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

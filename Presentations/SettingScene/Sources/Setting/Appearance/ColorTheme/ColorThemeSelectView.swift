@@ -14,6 +14,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import CommonPresentation
 
 
@@ -22,7 +23,7 @@ import CommonPresentation
 @Observable final class ColorThemeSelectViewState {
     
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
     
     fileprivate var sampleModel: CalendarAppearanceModel = .init(.sunday)
     fileprivate var themeModels: [ColorThemeModel] = []
@@ -38,14 +39,14 @@ import CommonPresentation
             .sink(receiveValue: { [weak self] model in
                 self?.sampleModel = model
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.colorThemeModels
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] models in
                 self?.themeModels = models
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 
