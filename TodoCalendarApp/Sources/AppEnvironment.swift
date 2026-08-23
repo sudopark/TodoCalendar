@@ -87,7 +87,7 @@ struct AppEnvironment {
         )
     }
     
-    static var admobTestDeviceIdentifiers: [String] { [] }
+    static var admobTestDeviceIdentifiers: [String] { ["ae5e8b3d51ff482948d92b1ee888e81f"] }
 
     static let dbVersion: Int32 = 7
     static let googleCalendarDBVersion: Int32 = 1

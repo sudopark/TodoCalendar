@@ -76,7 +76,7 @@ extension GoogleMobileAdsServiceImple {
     private func updateConsentInfo() async {
         await withCheckedContinuation { continuation in
             ConsentInformation.shared.requestConsentInfoUpdate(
-                with: self.requestParameters()
+                with: RequestParameters()
             ) { error in
                 if let error {
                     logger.log(level: .error, "UMP consent info update failed: \(error)")
@@ -96,17 +96,6 @@ extension GoogleMobileAdsServiceImple {
                 continuation.resume()
             }
         }
-    }
-    
-    private func requestParameters() -> RequestParameters {
-        let parameters = RequestParameters()
-        #if DEBUG
-        let debugSettings = DebugSettings()
-        debugSettings.testDeviceIdentifiers = self.testDeviceIdentifiers
-        debugSettings.geography = .EEA
-        parameters.debugSettings = debugSettings
-        #endif
-        return parameters
     }
     
     @MainActor
