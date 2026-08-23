@@ -15,11 +15,12 @@ import UnitTestHelpKit
 class BaseLocalTests: BaseTestCase {
     
     var fileName: String = "test"
+    private var dbFileName: String = "test"
     
     func testDBPath() -> String {
         return try! FileManager.default
             .url(for: .cachesDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
-            .appendingPathComponent("\(self.fileName).db")
+            .appendingPathComponent("\(self.dbFileName).db")
             .path
     }
     
@@ -27,15 +28,19 @@ class BaseLocalTests: BaseTestCase {
     
     override func setUpWithError() throws {
         self.timeout = 1.0
+        // 앞 테스트의 커넥션이 아직 살아 있어도 같은 vnode 를 물지 않도록 테스트마다 다른 파일을 연다
+        self.dbFileName = "\(self.fileName)_\(UUID().uuidString)"
         let path = self.testDBPath()
         print("will open => \(path)")
         self.sqliteService = SQLiteService()
         _ = self.sqliteService.open(path: path)
     }
     
-    override func tearDownWithError() throws {
+    override func tearDown() async throws {
+        let path = self.testDBPath()
+        try? await self.sqliteService?.async.close()
         self.sqliteService = nil
-        try? FileManager.default.removeItem(atPath: self.testDBPath())
+        try? FileManager.default.removeItem(atPath: path)
     }
 }
 
