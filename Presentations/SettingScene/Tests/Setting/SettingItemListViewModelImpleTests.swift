@@ -101,7 +101,7 @@ extension SettingItemListViewModelImpleTests {
         let supportSection = sections?[safe: 1]
         let supportItemIds = supportSection?.items.compactMap { $0 as? SettingItemModel }.map { $0.itemId }
         XCTAssertEqual(supportItemIds, [
-            .aiUsageGuide, .feedback, .help
+            .openWeb, .aiUsageGuide, .feedback, .help
         ])
 
         let appInfoSection = sections?[safe: 2]
@@ -143,9 +143,9 @@ extension SettingItemListViewModelImpleTests {
         let supportSection = sections?[safe: 1]
         let supportItemIds = supportSection?.items.compactMap { $0 as? SettingItemModel }.map { $0.itemId }
         XCTAssertEqual(supportItemIds, [
-            .aiUsageGuide, .feedback, .help
+            .openWeb, .aiUsageGuide, .feedback, .help
         ])
-        
+
         let appInfoSection = sections?[safe: 2]
         XCTAssertEqual(appInfoSection is AppInfoSectionModel, true)
         let infoItemIds = appInfoSection?.items.compactMap { $0 as? SettingItemModel }.map { $0.itemId }
@@ -552,6 +552,47 @@ extension SettingItemListViewModelImpleTests {
 
         // then
         XCTAssertEqual(self.spyRouter.didShowWebViewPath, GuideLink.aiInputPath)
+    }
+}
+
+
+// MARK: - 웹 앱 진입점 (#982)
+
+extension SettingItemListViewModelImpleTests {
+
+    func testViewModel_provideOpenWebItem_atTopOfSupportSection() {
+        // given
+        let expect = expectation(description: "세팅 항목 section 제공")
+        let viewModel = self.makeViewModel()
+
+        // when
+        let sections = self.waitFirstOutput(expect, for: viewModel.sectionModels)
+
+        // then
+        let allItemIds = sections?.flatMap { $0.items }.compactMap { $0 as? SettingItemModel }.map { $0.itemId }
+        XCTAssertEqual(allItemIds?.contains(.openWeb), true)
+
+        let supportSection = sections?[safe: 1]
+        let firstSupportItemId = supportSection?.items.first.flatMap { $0 as? SettingItemModel }?.itemId
+        XCTAssertEqual(firstSupportItemId, .openWeb)
+    }
+
+    func testViewModel_whenSelectOpenWeb_openWebAppInSafari() {
+        // given
+        let viewModel = self.makeViewModel()
+        let items = self.WaitItemLoaded(viewModel)
+        guard let openWebItem = items.compactMap({ $0 as? SettingItemModel }).first(where: { $0.itemId == .openWeb })
+        else {
+            XCTAssert(false)
+            return
+        }
+
+        // when
+        viewModel.selectItem(openWebItem)
+
+        // then
+        XCTAssertEqual(self.spyRouter.didOpenSafariPath, WebAppLink.homePath)
+        XCTAssertNil(self.spyRouter.didShowWebViewPath)
     }
 }
 

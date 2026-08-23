@@ -23,6 +23,7 @@ struct SettingItemModel: SettingItemModelType {
         case appearance
         case editEvent
         case holidaySetting
+        case openWeb
         case aiUsageGuide
         case feedback
         case help
@@ -51,6 +52,9 @@ struct SettingItemModel: SettingItemModelType {
         case .holidaySetting:
             self.iconNamge = "globe"
             self.text = "setting.holiday.item::name".localized()
+        case .openWeb:
+            self.iconNamge = "safari"
+            self.text = "setting.openWeb::name".localized()
         case .aiUsageGuide:
             self.iconNamge = "sparkles"
             self.text = "setting.aiGuide::name".localized()
@@ -261,6 +265,9 @@ extension SettingItemListViewModelImple {
         case .holidaySetting:
             self.router?.routeToHolidaySetting()
 
+        case .openWeb:
+            self.router?.openSafari(WebAppLink.homePath)
+
         case .aiUsageGuide:
             self.router?.showWebView(GuideLink.aiInputPath)
 
@@ -329,6 +336,7 @@ extension SettingItemListViewModelImple {
             )
 
             let supportSectionItems: [SettingItemModel] = [
+                .init(.openWeb),
                 .init(.aiUsageGuide),
                 .init(.feedback),
                 .init(.help)

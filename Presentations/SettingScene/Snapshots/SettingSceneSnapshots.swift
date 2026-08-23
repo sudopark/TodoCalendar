@@ -61,6 +61,7 @@ final class SettingSceneSnapshots: XCTestCase {
             let supportSection = SettingSectionModel(
                 headerText: "setting.section.support::name".localized(),
                 items: [
+                    SettingItemModel(.openWeb),
                     SettingItemModel(.feedback),
                     SettingItemModel(.help)
                 ]

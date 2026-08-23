@@ -478,6 +478,7 @@
 "setting.aiGuide::name" = "AI로 추가 — Siri·위젯";
 "setting.feedback::name" = "피드백";
 "setting.help::name" = "도움말";
+"setting.openWeb::name" = "웹에서 열기";
 "setting.share::name" = "앱 공유";
 "setting.write_review::name" = "앱 리뷰쓰기";
 "setting.openSourceLicense::name" = "오픈소스 라이선스";
