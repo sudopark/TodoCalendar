@@ -421,7 +421,7 @@ public struct RemoteEnvironment: Sendable {
             return appendSubpathIfNotEmpty(prefix, googleCalendar.subPath)
 
         case let app as AppEndpoints:
-            let prefix = "https://raw.githubusercontent.com/sudopark/TodoCalendar/develop/app-config"
+            let prefix = "https://raw.githubusercontent.com/sudopark/TodoCalendar-Terms/main/app-config"
             return appendSubpathIfNotEmpty(prefix, app.subPath)
 
         case let ai as AIAPIEndpoints:
