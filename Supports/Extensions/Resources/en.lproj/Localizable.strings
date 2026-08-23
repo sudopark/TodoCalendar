@@ -478,6 +478,7 @@
 "setting.aiGuide::name" = "Add with AI — Siri & widgets";
 "setting.feedback::name" = "Feedback";
 "setting.help::name" = "Help";
+"setting.openWeb::name" = "Open on the web";
 "setting.share::name" = "Share App";
 "setting.write_review::name" = "Write an app review";
 "setting.openSourceLicense::name" = "Open Source License";
