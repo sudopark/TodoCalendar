@@ -46,6 +46,10 @@ description: Use when writing an implementation plan in this project — 킥오�
 
 타입·파일을 다른 모듈로 옮기는 플랜은 이동 대상마다 계층(usecase / service / engine)을 판별해 목록에 명시한다. "SDK import가 있다" 같은 표면 신호로 일괄 분류 금지 — usecase는 Domain 잔류(service 프로토콜 소비), service 구현체만 내려간다. 동형 선례(예: PlaceSuggest 분리 구조)를 찾아 대조하고 그 결과를 플랜에 적는다.
 
+### 신설 요소 최소 판정
+
+플랜이 신설하는 타입·프로토콜·래퍼·중간층마다 **"기존 객체에 의존을 직접 주입해 풀 수 없나"를 먼저 묻는다.** 신설은 직접 연결이 불가한 구체 근거가 있거나 현재 소비자가 둘 이상일 때만 — 근거를 태스크 본문에 적고, 못 적으면 신설하지 않는다. implement 리팩터 게이트의 Speculative Generality는 코드가 된 뒤에만 걸린다 — 간접층은 플랜에서 막는 게 싸다.
+
 ## 필수 섹션
 
 writing-plans 기본 구조(Goal/Architecture/Global Constraints/태스크)에 다음 3개 섹션을 추가한다:
@@ -79,6 +83,7 @@ writing-plans 기본 구조(Goal/Architecture/Global Constraints/태스크)에 �
 - **어떤 과정으로 수행하고 어디서 커밋하는지** — 태스크 스텝 + 커밋 시퀀스로 답해지는가
 - **탐색으로 알아낸 전제**(현재 동작 file:line, 함정, 오탐 알려진 것)가 Global Constraints나 태스크 본문에 적혀 있는가
 - **실행자가 따라야 할 rules 조항**(테스트 작성이 있으면 testability.md의 더블·wait API 규칙 등)이 태스크 본문에 발췌돼 있는가 — 실행 서브에이전트는 path 매칭 자동 로드를 받지 못한다
+- **신설 타입·간접층마다 필요 근거(직접 주입 불가 사유 또는 소비자 둘 이상)가 적혀 있는가** — 없으면 §신설 요소 최소 판정으로 되돌아간다
 - **§해상도의 "정확히 박을 것" 다섯이 태스크마다 채워졌는가** — 시그니처·경로와 동형 구현 `file:line`·엣지 케이스·테스트 이름·커밋 시퀀스. 하나라도 비면 실행자가 추측하거나 갭 보고로 되돌아온다
 
 ## 실행 중 갭
