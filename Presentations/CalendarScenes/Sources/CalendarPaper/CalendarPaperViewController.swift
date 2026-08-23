@@ -10,6 +10,7 @@
 import SwiftUI
 import UIKit
 import Combine
+import Extensions
 import Scenes
 import CommonPresentation
 
@@ -21,7 +22,7 @@ final class CalendarPaperViewController: UIHostingController<CalenarPaperContain
     private let viewModel: any CalendarPaperViewModel
     let viewAppearance: ViewAppearance
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     
     @MainActor
     var interactor: (any CalendarPaperSceneInteractor)? { self.viewModel }

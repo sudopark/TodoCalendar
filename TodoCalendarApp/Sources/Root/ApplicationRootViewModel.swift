@@ -59,7 +59,7 @@ final class ApplicationRootViewModelImple: @unchecked Sendable {
         let isSignIn = CurrentValueSubject<Bool, Never>(false)
     }
     private let subject = Subject()
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
 }
 
 
@@ -100,7 +100,7 @@ extension ApplicationRootViewModelImple: AutenticatorTokenRefreshListener {
                     self?.handleUserSignedOut()
                 }
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
     
     private func bindExternalCalenarIntegratedStatus() {
@@ -114,7 +114,7 @@ extension ApplicationRootViewModelImple: AutenticatorTokenRefreshListener {
                     self?.prepareUsecase.prepareExternalCalendarStopIntegrated(status.serviceId)
                 }
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
     
     private func handleUserSignedIn(_ account: Account) {
@@ -127,7 +127,7 @@ extension ApplicationRootViewModelImple: AutenticatorTokenRefreshListener {
             await self?.attach(mainSceneInteractor: interactor)
             self?.registerTokenIfNeed()
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     private func handleUserSignedOut() {
@@ -183,13 +183,13 @@ extension ApplicationRootViewModelImple {
             .sink(receiveValue: { [weak self] _ in
                 self?.handleDidEnterBackground()
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)
             .sink(receiveValue: { [weak self] _ in
                 self?.handleWillEnterForeground()
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 
     private func handleDidEnterBackground() {
@@ -208,7 +208,7 @@ extension ApplicationRootViewModelImple {
             .sink(receiveValue: { [weak self] requirement in
                 self?.router?.showUpdatePopup(requirement)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 
@@ -257,7 +257,7 @@ extension ApplicationRootViewModelImple {
                 logger.log(level: .error, "register fcm token fail: \(error.localizedDescription)")
             }
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
 }
 

@@ -89,7 +89,7 @@ final class EventListCellEventHanleViewModelImple: EventListCellEventHanleViewMo
         let doneTodoResult = PassthroughSubject<DoneTodoResult, Never>()
         let registeredLiveActivityTarget = CurrentValueSubject<LiveActivityTarget?, Never>(nil)
     }
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private var todoCompleteTaskMap: [String: Task<Void, any Error>] = [:]
     private let subject = Subject()
 
@@ -98,7 +98,7 @@ final class EventListCellEventHanleViewModelImple: EventListCellEventHanleViewMo
             .sink { [weak self] target in
                 self?.subject.registeredLiveActivityTarget.send(target)
             }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 
@@ -215,7 +215,7 @@ extension EventListCellEventHanleViewModelImple {
                     break
                 }
             }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 
     private func confirmReauthenticateThenRemove(
@@ -249,7 +249,7 @@ extension EventListCellEventHanleViewModelImple {
                 self.router?.showError(error)
             }
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
 
     private func showWriteScopeNotGrantedGuide(_ reason: GoogleCalendarWriteScopeFailReason) {
@@ -277,7 +277,7 @@ extension EventListCellEventHanleViewModelImple {
                     self?.router?.showError(error)
                 }
             }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         }
     }
 
@@ -405,7 +405,7 @@ extension EventListCellEventHanleViewModelImple {
                     self?.router?.showError(error)
                 }
             }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         }
     }
     
@@ -452,7 +452,7 @@ extension EventListCellEventHanleViewModelImple {
                 self?.router?.showError(error)
             }
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     private func copyEvent(_ cellViewModel: any EventCellViewModel) {
@@ -496,7 +496,7 @@ extension EventListCellEventHanleViewModelImple {
                     eventTagId: todo.eventTagId ?? .default, detailId: todo.uuid
                 )
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 
     private func shareScheduleEvent(_ cellViewModel: ScheduleEventCellViewModel) {
@@ -513,7 +513,7 @@ extension EventListCellEventHanleViewModelImple {
                     eventTagId: schedule.eventTagId ?? .default, detailId: schedule.uuid
                 )
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 
     private func assembleAndShareText(
@@ -550,7 +550,7 @@ extension EventListCellEventHanleViewModelImple {
             )
             self?.showShareSheetIfNeeded(model, builder)
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
 
     private func shareGoogleEvent(_ cellViewModel: GoogleCalendarEventCellViewModel) {
@@ -576,7 +576,7 @@ extension EventListCellEventHanleViewModelImple {
             }, receiveValue: { [weak self] origin, tags, timeZone in
                 self?.shareGoogleEventText(origin, calendarId: calendarId, tags: tags, timeZone: timeZone)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 
     private func shareGoogleEventText(
@@ -615,7 +615,7 @@ extension EventListCellEventHanleViewModelImple {
             guard let origin else { return }
             self?.shareAppleEventText(origin, calendarId: calendarId, tags: tags, timeZone: timeZone)
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
 
     private func shareAppleEventText(

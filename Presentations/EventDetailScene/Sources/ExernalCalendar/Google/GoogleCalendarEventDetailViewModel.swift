@@ -227,7 +227,7 @@ final class GoogleCalendarEventDetailViewModelImple: GoogleCalendarEventDetailVi
         let isDescriptionPlainEditing = CurrentValueSubject<Bool, Never>(false)
     }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private let subject = Subject()
     
     private func internalBind() {
@@ -236,7 +236,7 @@ final class GoogleCalendarEventDetailViewModelImple: GoogleCalendarEventDetailVi
             .sink(receiveValue: { [weak self] timeZone in
                 self?.subject.timeZone.send(timeZone)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         let calendarId = self.calendarId
         self.googleCalendarUsecase.calendarTags
@@ -244,7 +244,7 @@ final class GoogleCalendarEventDetailViewModelImple: GoogleCalendarEventDetailVi
             .sink(receiveValue: { [weak self] tag in
                 self?.subject.calendarTag.send(tag)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         self.googleCalendarUsecase.eventWritePermission(
             accountId: self.accountId, calendarId: self.calendarId
@@ -252,7 +252,7 @@ final class GoogleCalendarEventDetailViewModelImple: GoogleCalendarEventDetailVi
         .sink(receiveValue: { [weak self] permission in
             self?.subject.writePermission.send(permission)
         })
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
 }
 
@@ -281,7 +281,7 @@ extension GoogleCalendarEventDetailViewModelImple {
             }, receiveError: { [weak self] error in
                 self?.router?.showError(error)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 
     private func alertEventCanceled() {
@@ -466,7 +466,7 @@ extension GoogleCalendarEventDetailViewModelImple {
                 self.router?.showError(error)
             }
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
 
     private func showWriteScopeNotGrantedGuide(_ reason: GoogleCalendarWriteScopeFailReason) {
@@ -574,7 +574,7 @@ extension GoogleCalendarEventDetailViewModelImple {
                 self.router?.showError(error)
             }
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
 
 }
@@ -656,7 +656,7 @@ extension GoogleCalendarEventDetailViewModelImple {
                 self.router?.showError(error)
             }
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
 }
 
@@ -708,7 +708,7 @@ extension GoogleCalendarEventDetailViewModelImple {
                 guard !text.isEmpty else { return }
                 self?.router?.showShareSheet(text: text)
             }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

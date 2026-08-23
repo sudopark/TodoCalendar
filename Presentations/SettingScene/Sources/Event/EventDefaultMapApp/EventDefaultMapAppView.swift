@@ -12,6 +12,7 @@
 import SwiftUI
 import Combine
 import Domain
+import Extensions
 import CommonPresentation
 
 
@@ -20,7 +21,7 @@ import CommonPresentation
 @Observable final class EventDefaultMapAppViewState {
     
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
     
     var models: [SupportMapAppModel] = []
     
@@ -34,7 +35,7 @@ import CommonPresentation
             .sink(receiveValue: { [weak self] models in
                 self?.models = models
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

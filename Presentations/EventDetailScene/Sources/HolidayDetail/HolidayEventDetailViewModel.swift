@@ -70,7 +70,7 @@ final class HolidayEventDetailViewModelImple: HolidayEventDetailViewModel, @unch
         let holiday = CurrentValueSubject<Holiday?, Never>(nil)
     }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private let subject = Subject()
 }
 
@@ -85,13 +85,13 @@ extension HolidayEventDetailViewModelImple {
             .sink(receiveValue: { [weak self] holiday in
                 self?.subject.holiday.send(holiday)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         self.holidayUsecase.currentSelectedCountry
             .sink(receiveValue: { [weak self] country in
                 self?.subject.country.send(country)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
     
     func close() {

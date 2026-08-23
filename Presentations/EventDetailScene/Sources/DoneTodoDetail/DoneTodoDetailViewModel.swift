@@ -13,6 +13,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import Scenes
 import CommonPresentation
 
@@ -83,7 +84,7 @@ final class DoneTodoDetailViewModelImple: DoneTodoDetailViewModel, @unchecked Se
         let isReverting = CurrentValueSubject<Bool, Never>(false)
     }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private let subject = Subject()
 }
 
@@ -98,7 +99,7 @@ extension DoneTodoDetailViewModelImple {
             .sink(receiveValue: { [weak self] done in
                 self?.subject.doneToddo.send(done)
             }, receiveError: self.handleError())
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         self.doneDetailUsecase.loadDetail(self.uuid)
             .mapAsOptional()
@@ -106,7 +107,7 @@ extension DoneTodoDetailViewModelImple {
             .sink(receiveValue: { [weak self] detail in
                 self?.subject.doneTodoDetail.send(detail)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
     
     func openMap() {
@@ -145,7 +146,7 @@ extension DoneTodoDetailViewModelImple {
                 self?.handleError()(error)
             }
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     private func handleReverted(_ todo: TodoEvent) {

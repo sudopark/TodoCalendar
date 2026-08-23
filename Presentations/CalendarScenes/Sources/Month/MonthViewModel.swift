@@ -233,7 +233,7 @@ final class MonthViewModelImple: MonthViewModel, @unchecked Sendable {
         let eventStackMap = CurrentValueSubject<[String: WeekEventStack], Never>([:])
     }
     private let subject = Subject()
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private var currentMonthComponentsBinding: AnyCancellable?
     private let eventStackBuildingQueue = DispatchQueue(label: "event-stack-builder")
     
@@ -254,7 +254,7 @@ final class MonthViewModelImple: MonthViewModel, @unchecked Sendable {
             let totalComponent = CurrentMonthInfo(timeZone: timeZone, component: component, range: range)
             self?.subject.currentMonthInfo.send(totalComponent)
         })
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     private func bindEventsInCurrentMonth() {
@@ -286,7 +286,7 @@ final class MonthViewModelImple: MonthViewModel, @unchecked Sendable {
             .sink(receiveValue: { [weak self] stackMap in
                 self?.subject.eventStackMap.send(stackMap)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
     
     private func bindCurerntSelectedDayNotifying() {
@@ -307,7 +307,7 @@ final class MonthViewModelImple: MonthViewModel, @unchecked Sendable {
             .sink(receiveValue: { [weak self] pair in
                 self?.listener?.monthScene(didChange: pair.0, and: pair.1)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

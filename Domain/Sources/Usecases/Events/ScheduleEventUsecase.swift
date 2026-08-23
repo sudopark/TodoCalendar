@@ -48,7 +48,7 @@ public final class ScheduleEventUsecaseImple: ScheduleEventUsecase, @unchecked S
     }
     
     private let eventMemorizationQueue = DispatchQueue(label: "schedule-event-memorize")
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
 }
 
 
@@ -184,7 +184,7 @@ extension ScheduleEventUsecaseImple {
             }
             .receive(on: self.eventMemorizationQueue)
             .sink(receiveCompletion: { _ in }, receiveValue: updateCache)
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
     
     public func scheduleEvents(in period: Range<TimeInterval>)  -> AnyPublisher<[ScheduleEvent], Never> {

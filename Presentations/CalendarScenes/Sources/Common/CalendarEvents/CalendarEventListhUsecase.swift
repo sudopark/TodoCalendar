@@ -79,7 +79,7 @@ final class CalendarEventListhUsecaseImple: CalendarEventListhUsecase, @unchecke
         let writableCalendarIds = CurrentValueSubject<WritableCalendarIds, Never>(.init())
     }
     private let subject = Subject()
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     
     private func internalBind() {
         
@@ -87,19 +87,19 @@ final class CalendarEventListhUsecaseImple: CalendarEventListhUsecase, @unchecke
             .sink(receiveValue: { [weak self] event in
                 self?.subject.foremostEvent.send(event)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         self.calendarSettingUsecase.currentTimeZone
             .sink(receiveValue: { [weak self] timeZone in
                 self?.subject.timeZone.send(timeZone)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         self.eventTagUsecase.offEventTagIdsOnCalendar()
             .sink(receiveValue: { [weak self] ids in
                 self?.subject.offTagIds.send(ids)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         Publishers.CombineLatest(
             self.googleCalendarUsecase.calendarTags,
@@ -117,7 +117,7 @@ final class CalendarEventListhUsecaseImple: CalendarEventListhUsecase, @unchecke
         .sink(receiveValue: { [weak self] ids in
             self?.subject.writableCalendarIds.send(ids)
         })
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
 }
 

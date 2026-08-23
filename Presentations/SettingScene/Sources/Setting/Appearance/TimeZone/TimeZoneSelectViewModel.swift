@@ -11,6 +11,7 @@
 import Foundation
 import Combine
 import Domain
+import Extensions
 import Scenes
 
 
@@ -106,7 +107,7 @@ final class TimeZoneSelectViewModelImple: TimeZoneSelectViewModel, @unchecked Se
         let searchKeyword = CurrentValueSubject<String?, Never>(nil)
     }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private let subject = Subject()
 }
 

@@ -73,7 +73,7 @@ public final class AIAgentOrchestrationUsecaseImple: AIAgentOrchestrationUsecase
     }
     private let subject = Subject()
     private var commandCancellable: AnyCancellable?
-    private var voiceInputBindings = Set<AnyCancellable>()
+    private let voiceInputBindings = CancelBag()
     private var currentProcessingJobId: String?
 
     private func startProcessing(_ processing: AnyPublisher<AICommandProcessing, any Error>) {
@@ -198,20 +198,20 @@ extension AIAgentOrchestrationUsecaseImple {
             .sink { [weak self] result in
                 self?.handleRecognizeEnd(result)
             }
-            .store(in: &self.voiceInputBindings)
+            .store(in: self.voiceInputBindings)
 
         self.speechRecognizeUsecase.recognizingText
             .sink { [weak self] text in
                 self?.subject.recognizingText.send(text)
             }
-            .store(in: &self.voiceInputBindings)
+            .store(in: self.voiceInputBindings)
 
         self.speechRecognizeUsecase.isRecognizingWithLevel
             .compactMap { $0 }
             .sink { [weak self] level in
                 self?.subject.voiceLevel.send(level)
             }
-            .store(in: &self.voiceInputBindings)
+            .store(in: self.voiceInputBindings)
     }
 
     // 인식 종료는 텍스트 확보·무인식·실패를 가리지 않고 stopInput과 동등하게 접는다.
@@ -236,8 +236,7 @@ extension AIAgentOrchestrationUsecaseImple {
     }
 
     private func resetVoiceBinding() {
-        self.voiceInputBindings.forEach { $0.cancel() }
-        self.voiceInputBindings.removeAll()
+        self.voiceInputBindings.cancelAll()
     }
 }
 

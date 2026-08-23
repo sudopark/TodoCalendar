@@ -76,12 +76,11 @@ public final class AppleCalendarUsecaseImple: AppleCalendarUsecase, @unchecked S
         self.sharedDataStore = sharedDataStore
     }
 
-    private var cancelBag: Set<AnyCancellable> = []
-    private var refreshEventBag: Set<AnyCancellable> = []
+    private let cancelBag = CancelBag()
+    private let refreshEventBag = CancelBag()
 
     private func clearCancelBag() {
-        cancelBag.forEach { $0.cancel() }
-        cancelBag = []
+        cancelBag.cancelAll()
     }
 }
 
@@ -106,7 +105,7 @@ extension AppleCalendarUsecaseImple {
                     self.clearCache()
                 }
             }
-            .store(in: &cancelBag)
+            .store(in: cancelBag)
     }
 
     private func refreshIfAlreadyIntegrated() {
@@ -149,7 +148,7 @@ extension AppleCalendarUsecaseImple {
                     self.appearanceStore.applyCalendarTags(tags)
                 }
             )
-            .store(in: &cancelBag)
+            .store(in: cancelBag)
     }
 
     public var calendarTags: AnyPublisher<[AppleCalendar.Tag], Never> {
@@ -168,8 +167,7 @@ extension AppleCalendarUsecaseImple {
 extension AppleCalendarUsecaseImple {
 
     public func refreshEvents(in period: Range<TimeInterval>) {
-        refreshEventBag.forEach { $0.cancel() }
-        refreshEventBag = []
+        refreshEventBag.cancelAll()
 
         integrationUsecase.currentOrNewIntegratedAccount(for: appleService.identifier)
             .flatMap { [weak self] _ -> AnyPublisher<[AppleCalendar.Event], Never> in
@@ -179,7 +177,7 @@ extension AppleCalendarUsecaseImple {
                     .eraseToAnyPublisher()
             }
             .sink { [weak self] events in self?.updateStoredEvents(events, in: period) }
-            .store(in: &refreshEventBag)
+            .store(in: refreshEventBag)
     }
 
     private func updateStoredEvents(_ refreshed: [AppleCalendar.Event], in period: Range<TimeInterval>) {

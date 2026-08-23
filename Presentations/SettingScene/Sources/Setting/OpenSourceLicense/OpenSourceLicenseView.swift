@@ -10,6 +10,7 @@
 import SwiftUI
 import Combine
 import Domain
+import Extensions
 import CommonPresentation
 
 
@@ -18,7 +19,7 @@ import CommonPresentation
 @Observable final class OpenSourceLicenseViewState {
     
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
     var libraries: [OpenSourceLibrary] = []
     var licenses: [OpenSourceLicenseText] = []
     
@@ -32,14 +33,14 @@ import CommonPresentation
             .sink(receiveValue: { [weak self] libraries in
                 self?.libraries = libraries
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.licenses
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] licenses in
                 self?.licenses = licenses
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

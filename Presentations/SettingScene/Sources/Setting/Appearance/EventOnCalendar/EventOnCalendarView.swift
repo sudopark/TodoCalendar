@@ -8,13 +8,14 @@
 import SwiftUI
 import Combine
 import Domain
+import Extensions
 import CommonPresentation
 
 
 @Observable final class EventOnCalendarViewState {
     
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
     @ObservationIgnored let allRowHeights: [RowHeightOnCalendarViewModel] = [
         .init(.small), .init(.medium), .init(.large)
     ]
@@ -39,28 +40,28 @@ import CommonPresentation
             .sink(receiveValue: { [weak self] height in
                 self?.selectedRowHeight = height
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.textIncreasedSizeText
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] model in
                 self?.additionalFontSizeModel = model
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.isBoldTextOnCalendar
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] isBold in
                 self?.isBold = isBold
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.showEvnetTagColor
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] isShow in
                 self?.isShowEventTagColor = isShow
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

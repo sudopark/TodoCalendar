@@ -21,7 +21,7 @@ import Scenes
 @Observable final class EventDetailViewState {
     
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
     
     var selectedTag: SelectedTag?
     var enterName: String = ""
@@ -69,42 +69,42 @@ import Scenes
             .sink(receiveValue: { [weak self] model in
                 self?.eventDetailTypeModel = model
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         inputViewModel.initialName
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] name in
                 self?.enterName = name ?? ""
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         inputViewModel.initailURL
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] value in
                 self?.url = value ?? ""
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         inputViewModel.isValidURLEntered
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] isValid in
                 self?.isValidURLEntered = isValid
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         inputViewModel.linkPreview
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] model in
                 self?.linkPreviewModel = model
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         inputViewModel.initialMemo
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] value in
                 self?.memo = value ?? ""
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         inputViewModel.selectedTime
             .receive(on: RunLoop.main)
@@ -112,84 +112,84 @@ import Scenes
                 self?.selectedTime = time
                 self?.isAllDay = time?.isAllDay ?? false
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         inputViewModel.selectedTimeDDay
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] text in
                 self?.ddayText = text
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         inputViewModel.repeatOption
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] option in
                 self?.selectedRepeat = option
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         inputViewModel.repeatOptionPeriod
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] period in
                 self?.selectedRepeatPeriod = period
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         inputViewModel.selectedTag
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] tag in
                 self?.selectedTag = tag
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         inputViewModel.selectedNotificationTimeText
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] text in
                 self?.selectedNotificationTimeText = text
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         inputViewModel.suggestPlaces
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] places in
                 self?.suggestPlaces = places
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         inputViewModel.selectedPlace
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] place in
                 self?.selectedPlace = place
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.isForemost
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] isForemost in
                 self?.isForemost = isForemost
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.isSaving
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] isSaving in
                 self?.isSaving = isSaving
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.isSavable
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] isSavable in
                 self?.isSavable = isSavable
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.moreActions
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] actions in
                 self?.availableMoreActions = actions
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

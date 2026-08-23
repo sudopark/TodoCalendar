@@ -10,6 +10,7 @@
 import Foundation
 import Combine
 import Domain
+import Extensions
 import Scenes
 import CommonPresentation
 
@@ -204,7 +205,7 @@ final class SettingItemListViewModelImple: SettingItemListViewModel, @unchecked 
         let isAdPrivacyOptionsRequired = CurrentValueSubject<Bool, Never>(false)
     }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private let subject = Subject()
 }
 
@@ -223,7 +224,7 @@ extension SettingItemListViewModelImple {
             let info = await self?.deviceInfoFetchService.fetchDeviceInfo()
             self?.subject.deviceInfo.send(info)
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     private func prepareAdPrivacyOptionsRequirement() {
@@ -231,7 +232,7 @@ extension SettingItemListViewModelImple {
             let isRequired = self?.privacyOptionsFormRouter?.isPrivacyOptionsRequired()
             self?.subject.isAdPrivacyOptionsRequired.send(isRequired ?? false)
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     func selectItem(_ model: any SettingItemModelType) {

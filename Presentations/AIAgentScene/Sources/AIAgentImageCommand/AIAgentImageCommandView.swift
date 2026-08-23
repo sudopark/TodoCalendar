@@ -9,6 +9,7 @@
 import SwiftUI
 import Combine
 import Domain
+import Extensions
 import CommonPresentation
 
 
@@ -24,7 +25,7 @@ import CommonPresentation
     var userPlan: BillingUserPlan?
     @ObservationIgnored private var didBind = false
     @ObservationIgnored private var didSeedText = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
 
     func bind(_ viewModel: any AIAgentImageCommandViewModel) {
         guard self.didBind == false else { return }
@@ -36,17 +37,17 @@ import CommonPresentation
                 self?.stage = stage
                 self?.seedTextIfNeeded(stage)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.usage
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] in self?.usage = $0 })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.currentUserPlan
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] in self?.userPlan = $0 })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 
     private func seedTextIfNeeded(_ stage: AIAgentImageCommandStage) {

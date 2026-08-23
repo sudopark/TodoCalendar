@@ -12,6 +12,7 @@
 import SwiftUI
 import Combine
 import Domain
+import Extensions
 import CommonPresentation
 
 
@@ -20,7 +21,7 @@ import CommonPresentation
 @Observable final class FeedbackPostViewState {
     
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
     
     var isPosting: Bool = false
     var isPostable: Bool = false
@@ -37,14 +38,14 @@ import CommonPresentation
             .sink(receiveValue: { [weak self] flag in
                 self?.isPostable = flag
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.isPosting
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] flag in
                 self?.isPosting = flag
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

@@ -25,7 +25,7 @@ public final class EventNotificationUsecaseImple: EventNotificationUsecase, @unc
     private let notificationRepository: any EventNotificationRepository
     private let notificationService: any LocalNotificationService
 
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private var todoSyncBinding: AnyCancellable?
     private var scheduleSyncBinding: AnyCancellable?
 
@@ -99,7 +99,7 @@ extension EventNotificationUsecaseImple {
                 self.cancelNotifications(notificationIds)
             }
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
 
     private func runSyncScheduleEvents() {
@@ -149,7 +149,7 @@ extension EventNotificationUsecaseImple {
                 self.cancelNotifications(notificationIds)
             }
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
 
     private func scheduleNotificationIfFuture(_ params: SingleEventNotificationMakeParams) async throws -> String? {

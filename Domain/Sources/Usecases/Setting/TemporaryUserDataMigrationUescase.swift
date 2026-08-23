@@ -43,7 +43,7 @@ public final class TemporaryUserDataMigrationUescaseImple: TemporaryUserDataMigr
         let migrationResult = PassthroughSubject<Result<Void, any Error>, Never>()
     }
     private let subject = Subject()
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
 }
 
 
@@ -58,7 +58,7 @@ extension TemporaryUserDataMigrationUescaseImple {
                 logger.log(level: .error, "migration check fail: \(error)")
             }
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     public func startMigration() {
@@ -80,7 +80,7 @@ extension TemporaryUserDataMigrationUescaseImple {
                 try await self?.updateMigrationNeedCount()
             }
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     private func updateMigrationNeedCount() async throws {

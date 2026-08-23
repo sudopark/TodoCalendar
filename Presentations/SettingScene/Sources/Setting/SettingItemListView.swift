@@ -11,6 +11,7 @@
 import SwiftUI
 import Combine
 import Domain
+import Extensions
 import CommonPresentation
 
 
@@ -19,7 +20,7 @@ import CommonPresentation
 @Observable final class SettingItemListViewState {
     
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
     var sections: [any SettingSectionModelType] = []
     
     func bind(_ viewModel: any SettingItemListViewModel) {
@@ -33,7 +34,7 @@ import CommonPresentation
             .sink(receiveValue: { [weak self] sections in
                 self?.sections = sections
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

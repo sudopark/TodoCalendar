@@ -13,6 +13,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import Scenes
 
 
@@ -114,7 +115,7 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
         let temporaryUserDataMigrationStatus = CurrentValueSubject<TemporaryUserDataMigrationStatus?, Never>(nil)
     }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private let subject = Subject()
     private var calendarSceneInteractor: (any CalendarSceneInteractor)?
     
@@ -125,14 +126,14 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
             .sink(receiveValue: { [weak self] _ in
                 self?.subject.temporaryUserDataMigrationStatus.send(.migrating)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         self.temporaryUserDataMigrationUsecase.migrationNeedEventCount
             .filter { $0 > 0 }
             .sink(receiveValue: { [weak self] count in
                 self?.subject.temporaryUserDataMigrationStatus.send(.need(count))
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         self.temporaryUserDataMigrationUsecase.migrationResult
             .sink(receiveValue: { [weak self] result in
@@ -144,7 +145,7 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
                     self?.router?.showError(error)
                 }
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)
             .sink(receiveValue: { [weak self] _ in
@@ -154,7 +155,7 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
                 self?.handleWillEnterForeground()
                 self?.legalNoticeUsecase.checkNoticeIsNeed()
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 
 }
@@ -194,7 +195,7 @@ extension MainViewModelImple {
         Task { [weak self] in
             _ = try await self?.uiSettingUsecase.refreshAppearanceSetting()
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     private func bindEventTagColorMap() {
@@ -204,7 +205,7 @@ extension MainViewModelImple {
             .sink(receiveValue: { [weak self] tags in
                 self?.uiSettingUsecase.applyEventTagColors(Array(tags.values))
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
     
     func returnToToday() {

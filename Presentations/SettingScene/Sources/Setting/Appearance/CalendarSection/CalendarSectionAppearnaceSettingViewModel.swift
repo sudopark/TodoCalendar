@@ -10,6 +10,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import Scenes
 
 struct CalendarSectionAppearanceSetting {
@@ -145,7 +146,7 @@ final class CalendarSectionViewModelImple: CalendarSectionAppearnaceSettingViewM
         let setting = CurrentValueSubject<CalendarSectionAppearanceSetting?, Never>(nil)
     }
     private let subject = Subject()
-    private var cancelables: Set<AnyCancellable> = []
+    private let cancelables = CancelBag()
     
     private func internalBind() {
         
@@ -153,7 +154,7 @@ final class CalendarSectionViewModelImple: CalendarSectionAppearnaceSettingViewM
             .sink(receiveValue: { [weak self] day in
                 self?.subject.startWeekDay.send(day)
             })
-            .store(in: &self.cancelables)
+            .store(in: self.cancelables)
     }
 }
 

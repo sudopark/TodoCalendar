@@ -10,6 +10,7 @@
 import UIKit
 import SwiftUI
 import Combine
+import Extensions
 import Scenes
 import CommonPresentation
 
@@ -24,7 +25,7 @@ final class EventTagListViewController: UIHostingController<EventTagListContaine
     @MainActor
     var interactor: (any EventTagListSceneInteractor)? { self.viewModel }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     
     init(
         isRootNavigation: Bool,

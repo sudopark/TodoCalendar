@@ -12,6 +12,7 @@
 import SwiftUI
 import Combine
 import Domain
+import Extensions
 import CommonPresentation
 
 
@@ -20,7 +21,7 @@ import CommonPresentation
 @Observable final class SignInViewState {
     
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
     
     var isSigning = false
     var supportOAuthServices: [any OAuth2ServiceProvider] = []
@@ -35,7 +36,7 @@ import CommonPresentation
             .sink(receiveValue: { [weak self] flag in
                 self?.isSigning = flag
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         self.supportOAuthServices = viewModel.supportSignInOAuthService
     }

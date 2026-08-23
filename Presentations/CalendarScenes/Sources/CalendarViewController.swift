@@ -8,6 +8,7 @@
 import UIKit
 import Combine
 import Domain
+import Extensions
 import Scenes
 import CommonPresentation
 
@@ -19,7 +20,7 @@ final class CalendarViewController: UIPageViewController, CalendarScene {
     @MainActor
     var interactor: (any CalendarSceneInteractor)? { self.viewModel }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     
     init(
         viewModel: any CalendarViewModel,
@@ -94,7 +95,7 @@ final class CalendarViewController: UIPageViewController, CalendarScene {
             .sink(receiveValue: { [weak self] tuple in
                 self?.setupStyling(tuple.1, tuple.2)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

@@ -22,7 +22,7 @@ import Extensions
 @Observable final class EventTagListViewState {
     
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
     
     var cellviewModels: [BaseCalendarEventTagCellViewModel] = []
     var externalCalendarTagSections: [ExternalCalendarEventTagListSectionModel] = []
@@ -40,7 +40,7 @@ import Extensions
                     self?.cellviewModels = cellViewModels
                 }
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.externalCalendarSections
             .receive(on: RunLoop.main)
@@ -49,7 +49,7 @@ import Extensions
                     self?.externalCalendarTagSections = sections
                 }
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

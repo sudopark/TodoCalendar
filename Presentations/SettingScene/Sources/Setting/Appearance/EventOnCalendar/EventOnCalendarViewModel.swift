@@ -10,6 +10,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import Scenes
 
 struct EventOnCalendarAppearanceSetting {
@@ -108,7 +109,7 @@ final class EventOnCalendarViewModelImple: EventOnCalendarViewModel, @unchecked 
         let setting = CurrentValueSubject<EventOnCalendarAppearanceSetting?, Never>(nil)
     }
     private let subject = Subject()
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
 }
 
 extension EventOnCalendarViewModelImple {

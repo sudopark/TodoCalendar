@@ -13,6 +13,7 @@ import SwiftUI
 import Combine
 import Prelude
 import Optics
+import Extensions
 import Scenes
 import CommonPresentation
 
@@ -30,7 +31,7 @@ final class GoogleCalendarEventDetailViewController: UIHostingController<GoogleC
 
     private var hasChanges: Bool = false
     private var isSaving: Bool = false
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
 
     init(
         viewModel: any GoogleCalendarEventDetailViewModel,
@@ -79,7 +80,7 @@ extension GoogleCalendarEventDetailViewController: UIAdaptivePresentationControl
             self?.isSaving = isSaving
             self?.isModalInPresentation = hasChanges || isSaving
         })
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
 
     func presentationControllerDidAttemptToDismiss(

@@ -10,6 +10,7 @@
 import UIKit
 import Prelude
 import Optics
+import Extensions
 import SwiftUI
 import Combine
 import Scenes
@@ -31,7 +32,7 @@ final class EventDetailViewController: UIHostingController<EventDetailContainerV
     @MainActor
     var interactor: EmptyInteractor?
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     
     init(
         viewModel: any EventDetailViewModel,
@@ -80,7 +81,7 @@ extension EventDetailViewController: UIAdaptivePresentationControllerDelegate {
             self?.isSaving = isSaving
             self?.isModalInPresentation = hasChanges || isSaving
         })
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     func presentationControllerDidAttemptToDismiss(

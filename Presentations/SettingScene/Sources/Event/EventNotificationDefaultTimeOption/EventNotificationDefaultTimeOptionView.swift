@@ -12,6 +12,7 @@
 import SwiftUI
 import Combine
 import Domain
+import Extensions
 import CommonPresentation
 
 
@@ -20,7 +21,7 @@ import CommonPresentation
 @Observable final class EventNotificationDefaultTimeOptionViewState {
     
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
     
     var isNeedNotificationPermission: Bool = false
     var options: [DefaultTimeOptionModel] = []
@@ -37,21 +38,21 @@ import CommonPresentation
             .sink(receiveValue: { [weak self] flag in
                 self?.isNeedNotificationPermission = flag
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.options
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] options in
                 self?.options = options
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.selectedOption
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] option in
                 self?.selectedOption = option
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

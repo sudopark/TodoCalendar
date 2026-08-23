@@ -128,7 +128,7 @@ final class PaywallViewModelImple: PaywallViewModel, @unchecked Sendable {
         let topupRemaining = CurrentValueSubject<Int?, Never>(nil)
     }
     private let subject = Subject()
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
 
     private func currentOfferings(_ state: PaywallCatalogState) -> [BillingPlanOffering] {
         guard case .loaded(let offerings) = state else { return [] }
@@ -144,7 +144,7 @@ final class PaywallViewModelImple: PaywallViewModel, @unchecked Sendable {
                 self?.subject.scheduledChange.send(userPlan.scheduledChange)
                 self?.subject.topupRemaining.send(userPlan.topupRemaining)
             }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

@@ -56,7 +56,7 @@ public final class TodoEventUsecaseImple: TodoEventUsecase {
         self.eventNotifyService = eventNotifyService
     }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
 }
 
 
@@ -206,7 +206,7 @@ extension TodoEventUsecaseImple {
                 $0 ? RefreshingEvent.refreshingCurrentTodo(true) : .refreshingCurrentTodo(false)
             }
             .sink(receiveCompletion: { _ in }, receiveValue: updateCached)
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
     
     public var currentTodoEvents: AnyPublisher<[TodoEvent], Never> {
@@ -235,7 +235,7 @@ extension TodoEventUsecaseImple {
                 $0 ? RefreshingEvent.refreshingTodo(true) : .refreshingTodo(false)
             }
             .sink(receiveCompletion: { _ in }, receiveValue: updateCache)
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
     
     public func todoEvents(in period: Range<TimeInterval>) -> AnyPublisher<[TodoEvent], Never> {
@@ -287,7 +287,7 @@ extension TodoEventUsecaseImple {
                 $0 ? RefreshingEvent.refreshingUncompletedTodo(true) : .refreshingUncompletedTodo(false)
             }
             .sink(receiveValue: refreshCached)
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
     
     public var uncompletedTodos: AnyPublisher<[TodoEvent], Never> {

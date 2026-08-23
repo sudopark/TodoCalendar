@@ -38,7 +38,7 @@ final class MainViewController: UIViewController, MainScene {
     @MainActor
     var interactor: (any MainSceneInteractor)? { self.viewModel }
 
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
 
     init(
         viewModel: any MainViewModel,
@@ -115,7 +115,7 @@ extension MainViewController {
             .sink(receiveValue: { [weak self] tuple in
                 self?.setupStyling(tuple.1, tuple.2)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         self.viewModel.currentMonth
             .receive(on: RunLoop.main)
@@ -124,42 +124,42 @@ extension MainViewController {
                 self?.headerView.yearLabel.text = month.yearText
                 self?.headerView.yearLabel.isHidden = month.yearText == nil
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         self.viewModel.isShowReturnToToday
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] show in
                 self?.headerView.returnTodayView.isHidden = !show
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         self.viewModel.temporaryUserDataMigrationStatus
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] status in
                 self?.headerView.updateMigrationStatus(status)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         self.viewModel.isLoadingCalendarEvents
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] isLoading in
                 self?.compositeLoadingBarView.updateIsLoading(isLoading)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         self.viewModel.isLoadingAllEvents
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] isLoading in
                 self?.loadingAllEventsLabel.isHidden = !isLoading
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         self.viewModel.legalNoticeBanners
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] models in
                 self?.legalNoticeBannerView.update(models)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         self.legalNoticeBannerView.documentTapped
             .receive(on: RunLoop.main)
@@ -167,7 +167,7 @@ extension MainViewController {
                 self?.viewAppearance.impactIfNeed()
                 self?.viewModel.openLegalNoticeDocument(documentType)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         self.legalNoticeBannerView.closeTapped
             .receive(on: RunLoop.main)
@@ -175,20 +175,20 @@ extension MainViewController {
                 self?.viewAppearance.impactIfNeed()
                 self?.viewModel.closeLegalNoticeBanner(documentType)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         self.headerView.returnTodayView.addTapGestureRecognizerPublisher()
             .sink(receiveValue: { [weak self] in
                 self?.viewModel.returnToToday()
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         self.headerView.migrationButton.addTapGestureRecognizerPublisher()
             .sink(receiveValue: { [weak self] in
                 self?.viewAppearance.impactIfNeed()
                 self?.viewModel.handleMigration()
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         self.headerView.eventTypeFilterButton
             .addTapGestureRecognizerPublisher()
@@ -196,35 +196,35 @@ extension MainViewController {
                 self?.viewAppearance.impactIfNeed()
                 self?.viewModel.moveToEventTypeFilterSetting()
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         self.headerView.settingButton.addTapGestureRecognizerPublisher()
             .sink { [weak self] in
                 self?.viewAppearance.impactIfNeed()
                 self?.viewModel.moveToSetting()
             }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         self.headerView.jumpButton.addTapGestureRecognizerPublisher()
             .sink { [weak self] in
                 self?.viewAppearance.impactIfNeed()
                 self?.viewModel.jumpDate()
             }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         self.headerView.previousMonthButton.addTapGestureRecognizerPublisher()
             .sink { [weak self] in
                 self?.viewAppearance.impactIfNeed()
                 self?.viewModel.moveToPreviousMonth()
             }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         self.headerView.nextMonthButton.addTapGestureRecognizerPublisher()
             .sink { [weak self] in
                 self?.viewAppearance.impactIfNeed()
                 self?.viewModel.moveToNextMonth()
             }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

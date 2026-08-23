@@ -30,7 +30,7 @@ public final class SpeechRecognizeServiceImple: SpeechRecognizeService, @uncheck
         let audioInputDisrupted = PassthroughSubject<Void, Never>()
     }
     private let subject = Subject()
-    private var audioSessionObserving = Set<AnyCancellable>()
+    private let audioSessionObserving = CancelBag()
 
     // 이 dBFS 이하를 0(무음)으로, 0dBFS를 1로 매핑하는 노이즈 플로어
     private let noiseFloor: Float = -50.0
@@ -75,7 +75,7 @@ extension SpeechRecognizeServiceImple {
     }
 
     private func observeAudioDisruption() {
-        self.audioSessionObserving = []
+        self.audioSessionObserving.cancelAll()
 
         let interruptionBegan = NotificationCenter.default
             .publisher(for: AVAudioSession.interruptionNotification)
@@ -96,7 +96,7 @@ extension SpeechRecognizeServiceImple {
             .sink { [weak self] _ in
                 self?.subject.audioInputDisrupted.send(())
             }
-            .store(in: &self.audioSessionObserving)
+            .store(in: self.audioSessionObserving)
     }
 
     private func isInterruptionBegan() -> (Notification) -> Bool {
@@ -173,7 +173,7 @@ extension SpeechRecognizeServiceImple {
     // 무조건 호출해도 안전(idempotent): stop/cancel/removeTap 모두 미동작·미설치 상태에서 호출해도 무해.
     // start 실패 cleanup, 중복 stop, 에러 분기 self-teardown 모두 이 한 경로로 처리.
     private func teardownAudio() {
-        self.audioSessionObserving = []
+        self.audioSessionObserving.cancelAll()
         self.task?.cancel()
         self.audioEngine.stop()
         self.audioEngine.inputNode.removeTap(onBus: 0)

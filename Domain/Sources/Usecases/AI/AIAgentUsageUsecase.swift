@@ -8,6 +8,7 @@
 
 import Foundation
 import Combine
+import Extensions
 import AsyncFlatMap
 
 
@@ -40,7 +41,7 @@ public final class AIAgentUsageUsecaseImple: AIAgentUsageUsecase, @unchecked Sen
         let refresh = PassthroughSubject<Void, Never>()
     }
     private let subject = Subject()
-    private var cancellables = Set<AnyCancellable>()
+    private let cancellables = CancelBag()
 }
 
 
@@ -63,7 +64,7 @@ extension AIAgentUsageUsecaseImple {
             .map(loadUsageWithoutError)
             .switchToLatest()
             .sink(receiveValue: { _ in })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
     
     public func loadUsage() async throws -> AIAgentUsage {

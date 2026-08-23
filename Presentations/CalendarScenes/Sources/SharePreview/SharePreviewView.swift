@@ -19,7 +19,7 @@ import Extensions
 @Observable final class SharePreviewViewState {
 
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
 
     fileprivate var isTagFilterExpanded: Bool = false
     fileprivate var tagCellViewModels: [SharePreviewTagCellViewModel] = []
@@ -40,52 +40,52 @@ import Extensions
         viewModel.isTagFilterExpanded
             .receive(on: RunLoop.main)
             .sink { [weak self] isExpanded in self?.isTagFilterExpanded = isExpanded }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.tagCellViewModels
             .receive(on: RunLoop.main)
             .sink { [weak self] models in self?.tagCellViewModels = models }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.sectionModels
             .receive(on: RunLoop.main)
             .sink { [weak self] sections in self?.sectionModels = sections }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.dateHeaderText
             .receive(on: RunLoop.main)
             .sink { [weak self] text in self?.dateHeaderText = text }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.includeTagName
             .receive(on: RunLoop.main)
             .sink { [weak self] isOn in self?.includeTagName = isOn }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.isShareEnabled
             .receive(on: RunLoop.main)
             .sink { [weak self] isEnable in self?.isShareEnabled = isEnable }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.format
             .receive(on: RunLoop.main)
             .sink { [weak self] format in self?.format = format }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.imageContentModel
             .receive(on: RunLoop.main)
             .sink { [weak self] content in self?.imageContentModel = content }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.imageHeaderText
             .receive(on: RunLoop.main)
             .sink { [weak self] text in self?.imageHeaderText = text }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.isIncludeTagNameOptionVisible
             .receive(on: RunLoop.main)
             .sink { [weak self] isVisible in self?.isIncludeTagNameOptionVisible = isVisible }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

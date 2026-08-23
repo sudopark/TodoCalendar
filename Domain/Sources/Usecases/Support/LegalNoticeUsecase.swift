@@ -38,7 +38,7 @@ public final class LegalNoticeUsecaseImple: LegalNoticeUsecase, @unchecked Senda
         let pendingUpdates = CurrentValueSubject<[LegalNoticeUpdateInfo], Never>([])
     }
     private let subject = Subject()
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
 }
 
 
@@ -62,7 +62,7 @@ extension LegalNoticeUsecaseImple {
             .sink(receiveValue: { [weak self] updates in
                 self?.subject.pendingUpdates.send(updates)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 
     private func loadUpdatesWithoutError() -> AnyPublisher<LegalNoticeUpdates, any Error> {

@@ -9,6 +9,7 @@
 import UIKit
 import Combine
 import Domain
+import Extensions
 import CommonPresentation
 
 
@@ -32,7 +33,7 @@ final class LegalNoticeBannerRowView: UIView {
 
     private let tapSubject = PassthroughSubject<Void, Never>()
     private let closeSubject = PassthroughSubject<Void, Never>()
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -64,11 +65,11 @@ extension LegalNoticeBannerRowView {
 
         rowTapPublisher
             .sink(receiveValue: { [weak self] in self?.tapSubject.send(()) })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         self.closeButton.addTapGestureRecognizerPublisher()
             .sink(receiveValue: { [weak self] in self?.closeSubject.send(()) })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 
@@ -155,7 +156,7 @@ final class LegalNoticeBannerView: UIView {
     private let stackView = UIStackView()
     private var rows: [LegalNoticeBannerRowView] = []
     private var separators: [UIView] = []
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private var currentFontSet: (any FontSet)?
     private var currentColorSet: (any ColorSet)?
 
@@ -190,7 +191,7 @@ extension LegalNoticeBannerView {
             self.stackView.removeArrangedSubview($0)
             $0.removeFromSuperview()
         }
-        self.cancellables = []
+        self.cancellables.cancelAll()
         self.separators = []
 
         self.rows = models.map { model -> LegalNoticeBannerRowView in
@@ -216,10 +217,10 @@ extension LegalNoticeBannerView {
     private func bind(_ row: LegalNoticeBannerRowView, documentType: LegalDocumentType) {
         row.tapped
             .sink(receiveValue: { [weak self] in self?.documentTappedSubject.send(documentType) })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         row.closeTapped
             .sink(receiveValue: { [weak self] in self?.closeTappedSubject.send(documentType) })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 
     private func applyStyleIfNeeded(to row: LegalNoticeBannerRowView) {

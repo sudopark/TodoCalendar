@@ -9,6 +9,7 @@
 import SwiftUI
 import Combine
 import Domain
+import Extensions
 import CommonPresentation
 
 
@@ -17,7 +18,7 @@ import CommonPresentation
 @Observable final class PaywallViewState {
 
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
 
     var currentPlan: BillingPlanId?
     var currentPlanDescription: String = ""
@@ -40,67 +41,67 @@ import CommonPresentation
         viewModel.currentPlan
             .receive(on: RunLoop.main)
             .sink { [weak self] in self?.currentPlan = $0 }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.currentPlanDescription
             .receive(on: RunLoop.main)
             .sink { [weak self] in self?.currentPlanDescription = $0 }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.scheduledChange
             .receive(on: RunLoop.main)
             .sink { [weak self] in self?.scheduledChange = $0 }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.screenState
             .receive(on: RunLoop.main)
             .sink { [weak self] in self?.screenState = $0 }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.catalogState
             .receive(on: RunLoop.main)
             .sink { [weak self] in self?.catalogState = $0 }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.cellModels
             .receive(on: RunLoop.main)
             .sink { [weak self] in self?.cellModels = $0 }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.topupCellModels
             .receive(on: RunLoop.main)
             .sink { [weak self] in self?.topupCellModels = $0 }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.topupTitle
             .receive(on: RunLoop.main)
             .sink { [weak self] in self?.topupTitle = $0 }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.selectedPlanId
             .receive(on: RunLoop.main)
             .sink { [weak self] in self?.selectedPlanId = $0 }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.selectedPlanDetail
             .receive(on: RunLoop.main)
             .sink { [weak self] in self?.selectedPlanDetail = $0 }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.isPurchasing
             .receive(on: RunLoop.main)
             .sink { [weak self] in self?.isPurchasing = $0 }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.hasUnfinishedTransactions
             .receive(on: RunLoop.main)
             .sink { [weak self] in self?.hasUnfinishedTransactions = $0 }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.showsManageSubscription
             .receive(on: RunLoop.main)
             .sink { [weak self] in self?.showsManageSubscription = $0 }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

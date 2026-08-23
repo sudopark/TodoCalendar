@@ -115,7 +115,7 @@ final class AppleCalendarEventDetailViewModelImple: AppleCalendarEventDetailView
         let isWritable = CurrentValueSubject<Bool?, Never>(nil)
     }
 
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private let subject = Subject()
 
     private func internalBind() {
@@ -124,7 +124,7 @@ final class AppleCalendarEventDetailViewModelImple: AppleCalendarEventDetailView
             .sink { [weak self] timeZone in
                 self?.subject.timeZone.send(timeZone)
             }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         let calendarId = self.calendarId
         self.appleCalendarUsecase.calendarTags
@@ -132,13 +132,13 @@ final class AppleCalendarEventDetailViewModelImple: AppleCalendarEventDetailView
             .sink { [weak self] tag in
                 self?.subject.calendarTag.send(tag)
             }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         self.appleCalendarUsecase.isCalendarWritable(calendarId)
             .sink { [weak self] isWritable in
                 self?.subject.isWritable.send(isWritable)
             }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 
@@ -153,7 +153,7 @@ extension AppleCalendarEventDetailViewModelImple {
             .sink { [weak self] origin in
                 self?.applyLoaded(origin)
             }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 
     private func applyLoaded(_ origin: AppleCalendar.EventOrigin) {
@@ -367,7 +367,7 @@ extension AppleCalendarEventDetailViewModelImple {
                 self.router?.showError(error)
             }
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
 }
 
@@ -441,7 +441,7 @@ extension AppleCalendarEventDetailViewModelImple {
                 self.router?.showError(error)
             }
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
 }
 
@@ -474,7 +474,7 @@ extension AppleCalendarEventDetailViewModelImple {
                 guard !text.isEmpty else { return }
                 self?.router?.showShareSheet(text: text)
             }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

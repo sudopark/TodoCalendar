@@ -10,6 +10,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import CommonPresentation
 
 @Observable final class MonthViewState {
@@ -26,7 +27,7 @@ import CommonPresentation
     }
     
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
     
     func bind(_ viewModel: any MonthViewModel) {
         guard self.didBind == false else { return }
@@ -40,28 +41,28 @@ import CommonPresentation
             .sink(receiveValue: { [weak self] days in
                 self?.weekDays = days
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.weekModels
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] models in
                 self?.weeks = models
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.currentSelectDayIdentifier
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] identifier in
                 self?.selectedDay = identifier
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.todayIdentifier
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] identifier in
                 self?.today = identifier
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 
