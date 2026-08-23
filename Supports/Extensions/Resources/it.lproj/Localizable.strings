@@ -326,7 +326,6 @@
 "manage_account::delete_account_button::confirm:message" = "Sei sicuro di voler eliminare il tuo account?";
 "manage_account::delete_account_button::description" = "Dopo aver richiesto l'eliminazione dell'account, il tuo account verrà eliminato.\nUna volta eliminato, le informazioni dell'account non potranno essere recuperate.";
 "signIn::title" = "Accedi";
-"signIn:description" = "Esegui il backup del tuo elenco di eventi e sincronizzalo con altri dispositivi iOS\n(Le piattaforme supportate saranno ampliate.)";
 
 
 // MARK: - setting

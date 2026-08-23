@@ -326,7 +326,6 @@
 "manage_account::delete_account_button::confirm:message" = "Sind Sie sicher, dass Sie Ihr Konto löschen möchten?";
 "manage_account::delete_account_button::description" = "Nach der Anfrage zur Kontolöschung wird Ihr Konto gelöscht.\nEinmal gelöschte Kontoinformationen können nicht wiederhergestellt werden.";
 "signIn::title" = "Anmelden";
-"signIn:description" = "Sichern Sie Ihre Ereignisliste und synchronisieren Sie sie auf anderen iOS-Geräten\n(Unterstützte Plattformen werden erweitert.)";
 
 
 // MARK: - setting

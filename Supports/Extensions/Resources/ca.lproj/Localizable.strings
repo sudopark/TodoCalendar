@@ -326,7 +326,6 @@
 "manage_account::delete_account_button::confirm:message" = "Segur que voleu suprimir el compte?";
 "manage_account::delete_account_button::description" = "Després de sol·licitar la supressió del compte, aquest s'eliminarà.\nUn cop suprimit, la informació del compte no es pot recuperar.";
 "signIn::title" = "Inicia sessió";
-"signIn:description" = "Feu una còpia de seguretat de la vostra llista d'esdeveniments i sincronitzeu-la amb altres dispositius iOS\n(Les plataformes compatibles s'ampliaran properament.)";
 
 
 // MARK: - setting

@@ -326,7 +326,6 @@
 "manage_account::delete_account_button::confirm:message" = "Czy na pewno chcesz usunąć swoje konto?";
 "manage_account::delete_account_button::description" = "Po złożeniu wniosku o usunięcie konta zostanie ono usunięte.\nPo usunięciu danych konta nie można ich odzyskać.";
 "signIn::title" = "Zaloguj się";
-"signIn:description" = "Utwórz kopię zapasową listy wydarzeń i synchronizuj ją między innymi urządzeniami z iOS\n(Obsługiwane platformy będą rozszerzane.)";
 
 
 // MARK: - setting

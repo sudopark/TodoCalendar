@@ -326,7 +326,6 @@
 "manage_account::delete_account_button::confirm:message" = "確定要刪除您的帳號嗎？";
 "manage_account::delete_account_button::description" = "提出刪除帳號要求後，您的帳號將會被刪除。\n刪除後，帳號資訊將無法復原。";
 "signIn::title" = "登入";
-"signIn:description" = "備份您的活動清單，並與其他 iOS 裝置同步\n（支援的平台將持續擴充）";
 
 
 // MARK: - setting

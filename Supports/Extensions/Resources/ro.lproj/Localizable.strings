@@ -326,7 +326,6 @@
 "manage_account::delete_account_button::confirm:message" = "Sigur doriți să vă ștergeți contul?";
 "manage_account::delete_account_button::description" = "După solicitarea ștergerii, contul va fi șters.\nDupă ștergere, datele contului nu pot fi recuperate.";
 "signIn::title" = "Autentificare";
-"signIn:description" = "Faceți o copie de rezervă a listei de evenimente și sincronizați-o cu alte dispozitive iOS\n(Platformele acceptate vor fi extinse.)";
 
 
 // MARK: - setting

@@ -326,7 +326,6 @@
 "manage_account::delete_account_button::confirm:message" = "Biztosan törölni szeretné a fiókját?";
 "manage_account::delete_account_button::description" = "A fiók törlésének kérelmezése után a fiók törlésre kerül.\nA törlés után a fiók adatai nem állíthatók helyre.";
 "signIn::title" = "Bejelentkezés";
-"signIn:description" = "Készítsen biztonsági másolatot eseménylistájáról, és szinkronizálja azt más iOS-eszközök között\n(A támogatott platformok köre bővülni fog.)";
 
 
 // MARK: - setting

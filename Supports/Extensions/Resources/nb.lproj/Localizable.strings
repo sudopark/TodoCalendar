@@ -326,7 +326,6 @@
 "manage_account::delete_account_button::confirm:message" = "Er du sikker på at du vil slette kontoen din?";
 "manage_account::delete_account_button::description" = "Etter at du har bedt om sletting av kontoen, blir kontoen slettet.\nNår den er slettet, kan kontoinformasjonen ikke gjenopprettes.";
 "signIn::title" = "Logg inn";
-"signIn:description" = "Sikkerhetskopier hendelseslisten din og synkroniser den på tvers av andre iOS-enheter\n(Støttede plattformer vil bli utvidet.)";
 
 
 // MARK: - setting

@@ -326,7 +326,6 @@
 "manage_account::delete_account_button::confirm:message" = "Hesabınızı silmek istediğinizden emin misiniz?";
 "manage_account::delete_account_button::description" = "Hesap silme talebinde bulunduktan sonra hesabınız silinecektir.\nSilindikten sonra hesap bilgileri kurtarılamaz.";
 "signIn::title" = "Giriş Yap";
-"signIn:description" = "Etkinlik listenizi yedekleyin ve diğer iOS cihazlarıyla senkronize edin\n(Desteklenen platformlar genişletilecektir.)";
 
 
 // MARK: - setting

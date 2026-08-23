@@ -326,7 +326,6 @@
 "manage_account::delete_account_button::confirm:message" = "Haluatko varmasti poistaa tilisi?";
 "manage_account::delete_account_button::description" = "Kun olet pyytänyt tilin poistamista, tili poistetaan.\nPoistettuja tilitietoja ei voi palauttaa.";
 "signIn::title" = "Kirjaudu sisään";
-"signIn:description" = "Varmuuskopioi tapahtumaluettelosi ja synkronoi se muiden iOS-laitteiden kanssa\n(Tuettuja alustoja laajennetaan.)";
 
 
 // MARK: - setting

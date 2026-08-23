@@ -326,7 +326,6 @@
 "manage_account::delete_account_button::confirm:message" = "क्या आप वाकई अपना खाता हटाना चाहते हैं?";
 "manage_account::delete_account_button::description" = "खाता हटाने का अनुरोध करने के बाद, आपका खाता हटा दिया जाएगा।\nहटाने के बाद, खाते की जानकारी पुनर्प्राप्त नहीं की जा सकती।";
 "signIn::title" = "लॉगिन";
-"signIn:description" = "अपनी इवेंट सूची का बैकअप लें और इसे अन्य iOS डिवाइस पर सिंक करें\n(समर्थित प्लेटफ़ॉर्म का विस्तार किया जाएगा।)";
 
 
 // MARK: - setting

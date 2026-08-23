@@ -326,7 +326,6 @@
 "manage_account::delete_account_button::confirm:message" = "Opravdu chcete smazat svůj účet?";
 "manage_account::delete_account_button::description" = "Po požádání o smazání účtu bude účet smazán.\nJakmile je smazán, údaje o účtu nelze obnovit.";
 "signIn::title" = "Přihlásit se";
-"signIn:description" = "Zálohujte si seznam událostí a synchronizujte jej mezi dalšími zařízeními s iOS\n(Podporované platformy budou rozšiřovány.)";
 
 
 // MARK: - setting

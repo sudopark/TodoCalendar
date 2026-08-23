@@ -326,7 +326,6 @@
 "manage_account::delete_account_button::confirm:message" = "ยืนยันการลบบัญชีหรือไม่?";
 "manage_account::delete_account_button::description" = "หลังจากส่งคำขอลบบัญชี บัญชีของคุณจะถูกลบ\nเมื่อลบแล้วจะไม่สามารถกู้คืนข้อมูลบัญชีได้";
 "signIn::title" = "เข้าสู่ระบบ";
-"signIn:description" = "สำรองรายการกิจกรรมและซิงค์กับอุปกรณ์ iOS เครื่องอื่น\n(แพลตฟอร์มที่รองรับจะขยายเพิ่มในอนาคต)";
 
 
 // MARK: - setting

@@ -326,7 +326,6 @@
 "manage_account::delete_account_button::confirm:message" = "Jeste li sigurni da želite izbrisati svoj račun?";
 "manage_account::delete_account_button::description" = "Nakon zahtjeva za brisanje, račun će biti izbrisan.\nNakon brisanja, podatke računa nije moguće vratiti.";
 "signIn::title" = "Prijava";
-"signIn:description" = "Napravite sigurnosnu kopiju popisa događaja i sinkronizirajte ga s drugim iOS uređajima\n(Popis podržanih platformi bit će proširen.)";
 
 
 // MARK: - setting
