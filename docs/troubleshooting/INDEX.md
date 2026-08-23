@@ -27,3 +27,5 @@
 - [2026-08-22 구글 이벤트 개별 색상이 라이브액티비티에서 무시됨](2026-08-22-google-event-custom-color-ignored-in-live-activity.md) — ExternalCalendar / fixed / 구글 이벤트 색상·커스텀 색상 무시·라이브액티비티 색·colorId
 - [2026-08-22 캘린더 하단 배너를 붙이자 플랜 구독 합성에서 격리 어서션 크래시](2026-08-22-ad-banner-plan-binding-main-actor-crash.md) — Billing / fixed / 배너 광고 크래시·_swift_task_checkIsolatedSwift·dispatch_assert_queue_fail·MainActor 격리 위반
 - [2026-08-24 로컬 DB 테스트가 런마다 다른 지점에서 크래시](2026-08-24-local-db-tests-random-crash.md) — Infra / fixed / illegal multi-threaded access·vnode unlinked while in use·Repository 스킴 랜덤 실패
+- [2026-08-24 `.timeout` 이 concurrent 큐에서 동기 방출값을 흘린다](2026-08-24-combine-timeout-drops-value-on-concurrent-queue.md) — Event / fixed / 라이브액티비티 placeName·memo nil·Publishers.Timeout·DispatchQueue.global
+- [2026-08-24 백그라운드 Task 에서 구독을 담다 Set 저장소가 깨진다](2026-08-24-cancelbag-data-race-crash.md) — Infra / fixed / unrecognized selector 0x8000000000000000·member:·CalendarScenes 랜덤 크래시
