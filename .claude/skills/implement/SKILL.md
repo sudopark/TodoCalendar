@@ -9,7 +9,7 @@ description: Use when writing or modifying code in this project — 구현 착�
 
 ## 채점 4축 좌표계 (#690)
 
-작업 결과물(코드) 채점은 4축 순차 관문이다 — 이 스킬이 축1~3 관문을 집행하고, 축4는 PR 직전 최종 whole-branch 리뷰(상시)와 review 스킬(유저 지시 시)이 나눠 갖는다. 축4에서 잡힌 finding은 어느 쪽에서 나왔든 "축1~3 중 어디서 잡혔어야 했나" 누수 태깅(axis_leak 레코드)의 좌표로 이 축 번호를 쓴다.
+작업 결과물(코드) 채점은 4축 순차 관문이다 — 이 스킬이 축1~3 관문을 집행하고, 축4는 review 스킬이 갖는다 — pre-PR whole-branch 레인(상시)과 공개 PR 레인(유저 지시 시). 축4에서 잡힌 finding은 어느 쪽에서 나왔든 "축1~3 중 어디서 잡혔어야 했나" 누수 태깅(axis_leak 레코드)의 좌표로 이 축 번호를 쓴다.
 
 | 축 | 질문 | 관문 |
 |---|---|---|
@@ -30,7 +30,7 @@ description: Use when writing or modifying code in this project — 구현 착�
 - **서브에이전트 dispatch 구현** (subagent-driven-development·병렬 dispatch 등) → 서브에이전트는 이 스킬을 스스로 invoke하지 못한다. dispatch하는 메인 세션이 첫 브리프 작성 전에 이 스킬을 invoke하고, 아래 절차를 브리프로 승계시킨다. "내가 직접 코드를 안 만지니 해당 없음"은 성립하지 않는다 — 코드 diff가 시작되는 주체가 누구든 발동한다. 갭 보고 루프(rules·플랜)의 유저 반문은 메인 세션이 중계한다 — 브리프에 "갭 발견 시 추측으로 채우지 말고 보고 후 중단"을 명시한다. 축1 선언·리팩터 게이트 선언은 브리프 승계와 컨트롤러 검수로 갈음한다 — 컨트롤러가 매 GREEN마다 선언을 재생산하지 않는다 (직접 구현 시에만 선언 관문).
   - **갈음 대상엔 산출물 3종이 든다** — 축1 3칸 선언·TC 실효 줄·리팩터 게이트 신설물 줄. 브리프에 그 형식을 그대로 싣고 서브에이전트 보고로 받는다.
 - **태스크별 리뷰어 dispatch는 돌리지 않는다.** superpowers SDD가 매 태스크마다 강제하는 task review·scoped re-review는 이 프로젝트에서 무효다 (그 스킬의 `Never skip the task review`를 여기서 오버라이드한다). 태스크 완료 판정은 **서브에이전트 자체 테스트 + 컨트롤러 검수**(§착수)로 하고 ledger를 `Task <N>: complete (commits <base7>..<head7>, self-test + controller review)`로 닫는다 — SDD 원문의 `review clean`·`parked` 표기는 리뷰가 돈 것을 전제한 값이라 쓰지 않는다. orchestrate 스킬과 같은 검증 모델이다. 실행 중 신호(DONE_WITH_CONCERNS·테스트 불안정·갭 보고)도 리뷰 dispatch로 넘기지 않고 컨트롤러가 그 자리에서 처리한다 — correctness·scope 관련이면 재dispatch로 고치고, observation이면 확인만 하고 진행, 갭이면 유저 반문.
-- **에이전트 리뷰는 PR 직전 최종 whole-branch 1회로 모은다.** 이 리뷰는 생략 대상이 아니다 — 태스크 단위 그물이 없어진 만큼 축4의 상시 관문이 이것 하나다. 그래서 finding 정리 직후 축1~3 귀속을 판정해 `axis_leak`을 기록한다 (명령·판정 기준은 review 스킬 §6) — 기록이 빠지면 관문이 줄어든 만큼 누수 집계도 같이 죽는다.
+- **에이전트 리뷰는 PR 직전 최종 whole-branch 1회로 모은다.** 이 리뷰는 생략 대상이 아니다 — 태스크 단위 그물이 없어진 만큼 축4의 상시 관문이 이것 하나다. 그래서 축1~3 귀속을 판정해 `axis_leak`을 기록한다 (시점·명령·판정 기준은 review 스킬 §6 — pre-PR 레인은 PR 생성 직후) — 기록이 빠지면 관문이 줄어든 만큼 누수 집계도 같이 죽는다.
 
 시작할 때:
 

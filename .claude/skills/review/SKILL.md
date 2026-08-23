@@ -1,15 +1,18 @@
 ---
 name: review
-description: Use when the user requests an agent code review of an open pull request in this project — 공개된 PR에 대해 code-reviewer subagent를 다관점 병렬 dispatch하고 결과를 합산·검증해 인라인 코멘트로 게시한다. Triggers on "리뷰 돌려보자", "리뷰해줘" (PR이 올라간 상태에서). Does NOT trigger on PR 올리기 전 셀프리뷰(수행하지 않음), PR 공개 시점의 자동 실행(유저 지시가 유일한 트리거), PR 직전 최종 whole-branch 리뷰(superpowers subagent-driven-development 소관), 하네스 변경분 리뷰(harness-review 스킬), 리뷰 반영 커밋 구성(commit 스킬), PR 본문 작성(pr 스킬).
+description: Use when running an agent code review in this project — code-reviewer subagent를 다관점 병렬 dispatch하고 결과를 합산·검증해 게시한다. 레인이 둘이다: 공개된 PR에 대한 유저 지시 리뷰(인라인 코멘트 게시), 그리고 implement §착수가 강제하는 PR 직전 최종 whole-branch 리뷰(pre-PR 레인 — 유저 지시 불요, 대화 보고로 게시 갈음). Triggers on "리뷰 돌려보자", "리뷰해줘" (PR이 올라간 상태에서), PR 직전 최종 whole-branch 리뷰 시점. Does NOT trigger on PR 공개 시점의 자동 실행(공개 PR 레인은 유저 지시가 유일한 트리거), 하네스 변경분 리뷰(harness-review 스킬), 리뷰 반영 커밋 구성(commit 스킬), PR 본문 작성(pr 스킬).
 ---
 
 # Review — 에이전트 리뷰 수행
 
 `code-reviewer` subagent(`.claude/agents/code-reviewer.md`)를 관점별 병렬 dispatch해 변경분을 리뷰한다. 컨트롤러(이 세션)의 책임: 범위 확정 → 관점 선정 → dispatch → 합산·오탐 검증 → 결과 게시.
 
-## 0. 실행 시점
+## 0. 실행 시점 — 두 레인
 
-**공개된 PR에 대해 유저가 지시했을 때만** 돈다. PR 올리기 전 셀프리뷰 없음, PR이 공개됐다고 자동 실행도 없음 — "리뷰 돌려보자" 같은 명시 지시가 유일한 트리거다.
+- **공개 PR 레인** — 공개된 PR에 대해 **유저가 지시했을 때만** 돈다. PR이 공개됐다고 자동 실행하지 않는다 — "리뷰 돌려보자" 같은 명시 지시가 유일한 트리거다.
+- **pre-PR whole-branch 레인** — implement §착수가 강제하는 PR 직전 최종 whole-branch 리뷰다. **그 조항이 트리거라 유저 지시가 필요 없다.** 대상 PR이 없으므로 §5의 인라인 게시 대신 **대화 보고**로 게시를 갈음하고, 반영은 원본 커밋 흡수(commit 스킬)다. §1~4·§6은 동일하게 돈다 — 이 경로는 이행이다.
+
+두 레인 밖의 실행은 없다 — 위 둘에 해당하지 않는 셀프리뷰는 수행하지 않는다.
 
 ## 1. 범위 확정 — diff 패키지
 
@@ -78,6 +81,7 @@ escalation 결과도 위 확정 기준을 그대로 통과해야 게시된다 �
 
 - `mcp__github-reviewer__create_pull_request_review`(bot 계정)로 **해당 코드 라인에 인라인 코멘트** — 한 코멘트에 몰아쓰지 않는다. `commit_id`는 full SHA (short SHA는 422).
 - 게시 후 대화로 요약 보고. 반영은 유저 지시 시 **원본 커밋에 흡수** 후 `--force-with-lease` (commit 스킬의 흡수 절차) — PR 공개 후라고 별도 커밋으로 남기지 않는다. 추적성은 리뷰 스레드 대댓글(무엇을 어떻게 고쳤는지 + 흡수한 커밋 sha)로 담보한다.
+- **pre-PR 레인**은 인라인 코멘트 대상 PR이 없다 — 확정 finding을 §4 보고 기준(코드 인용 + 위치 + reasoning)대로 대화에 실어 게시를 갈음하고, 반영분은 원본 커밋에 흡수한다.
 
 ## 6. 누수 태깅 (#690 채점 4축)
 
@@ -87,6 +91,7 @@ escalation 결과도 위 확정 기준을 그대로 통과해야 게시된다 �
 python3 .claude/hooks/log-record.py axis_leak --missed-axis <1|2|3> --finding "<한 줄 요약>" --pr <PR번호>
 ```
 
-- 판정 기준: 결함이 **TC가 명세를 못 담음**(누락 케이스·false positive test)이면 축1 / **TC가 있는데도 동작 오류가 통과**면 축2 / **구현 구조·효율·역할 분배**면 축3.
+- 판정 기준: 결함이 **TC가 명세를 못 담음**(누락 케이스·false positive test)이면 축1 / **TC가 있는데도 동작 오류가 통과**면 축2 / **구현 구조·효율·역할 분배**면 축3. **비결정 단언**(플레이키·타이밍 결합·타임아웃 상향으로 덮은 것)도 축2다 — 명세 누락이 아니라 검증 동작의 오류라서다.
+- **pre-PR 레인은 PR 생성 직후 태깅한다** — `--pr`에 그때 생긴 번호를 쓴다. finding 정리와 태깅 사이에 PR 생성(pr 스킬)이 끼는 것뿐, 기록 의무는 같다.
 - 축1~3 어디서도 잡을 수 없는 종류(기획 홀·요구사항 자체의 결함)는 태깅하지 않는다 — 관문 누수가 아니다.
 - 집계·임계 판정은 aggregate-usage.py가 축별로 수행하고, 오탐·중복 판정은 triage-usage.py가 이어받아 pr 스킬 머지 단계에서 출력된다 — actionable로 남은 축은 누적 이슈에 항목으로 쌓이고(improve-skill §5), 정비 반영 후 소비 마킹은 `improvement --name axis:<n>`.
