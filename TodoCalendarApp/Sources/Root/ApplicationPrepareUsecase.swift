@@ -13,6 +13,7 @@ import CommonPresentation
 import Extensions
 import Repository
 import SQLiteService
+import AdService
 
 struct ApplicationPrepareResult {
     
@@ -42,6 +43,8 @@ final class ApplicationPrepareUsecaseImple: ApplicationPrepareUsecase {
     private let latestAppSettingRepository: any AppSettingRepository
     private let sharedDataStore: SharedDataStore
     private let environmentStorage: any EnvironmentStorage
+    private let coldLaunchHistoryRepository: any AppColdLaunchHistoryRepository
+    private let mobileAdService: any MobileAdService
     private let database: SQLiteService
     private let appDataMigration: AppDataMigrationImple
     private let databasePathFinding: (String?) -> String
@@ -55,6 +58,8 @@ final class ApplicationPrepareUsecaseImple: ApplicationPrepareUsecase {
         latestAppSettingRepository: any AppSettingRepository,
         sharedDataStore: SharedDataStore,
         environmentStorage: any EnvironmentStorage,
+        coldLaunchHistoryRepository: any AppColdLaunchHistoryRepository,
+        mobileAdService: any MobileAdService,
         database: SQLiteService,
         appDataMigration: AppDataMigrationImple,
         databasePathFinding: @escaping (String?) -> String = { AppEnvironment.dbFilePath(for: $0) }
@@ -65,6 +70,8 @@ final class ApplicationPrepareUsecaseImple: ApplicationPrepareUsecase {
         self.latestAppSettingRepository = latestAppSettingRepository
         self.sharedDataStore = sharedDataStore
         self.environmentStorage = environmentStorage
+        self.coldLaunchHistoryRepository = coldLaunchHistoryRepository
+        self.mobileAdService = mobileAdService
         self.database = database
         self.appDataMigration = appDataMigration
         self.databasePathFinding = databasePathFinding
@@ -75,6 +82,8 @@ final class ApplicationPrepareUsecaseImple: ApplicationPrepareUsecase {
 extension ApplicationPrepareUsecaseImple {
     
     func prepareLaunch() async throws -> ApplicationPrepareResult {
+        self.recordColdLaunch()
+        self.mobileAdService.start()
         let latestLoginAccount = try await self.accountUsecase.prepareLastSignInAccount()
         let appearance = try await self.prepareLatestAppearanceSeting()
 
@@ -92,6 +101,12 @@ extension ApplicationPrepareUsecaseImple {
         )
     }
     
+    private func recordColdLaunch() {
+        var history = self.coldLaunchHistoryRepository.loadColdLaunchHistory()
+        history.recordLaunch(at: Date())
+        self.coldLaunchHistoryRepository.updateColdLaunchHistory(history)
+    }
+
     func prepareEnterBackground() {
         
         let syncResult = self.database.run { db in

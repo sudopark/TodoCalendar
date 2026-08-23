@@ -31,23 +31,26 @@ final class MainViewController: UIViewController, MainScene {
     
     private let viewModel: any MainViewModel
     let viewAppearance: ViewAppearance
-    private let mobileAdService: GoogleMobileAdsServiceImple?
-    private var adPreparingTask: Task<Void, Never>?
-    
+    private let mobileAdService: any MobileAdService
+    private let fullScreenAdRouter: (any FullScreenAdRouter)?
+    private var didPrepareAd: Bool = false
+
     @MainActor
     var interactor: (any MainSceneInteractor)? { self.viewModel }
-    
+
     private var cancellables: Set<AnyCancellable> = []
-    
+
     init(
         viewModel: any MainViewModel,
         viewAppearance: ViewAppearance,
-        mobileAdService: GoogleMobileAdsServiceImple?,
+        mobileAdService: any MobileAdService,
+        fullScreenAdRouter: (any FullScreenAdRouter)?,
         adViewBuilder: (any AdViewBuilder)?
     ) {
         self.viewModel = viewModel
         self.viewAppearance = viewAppearance
         self.mobileAdService = mobileAdService
+        self.fullScreenAdRouter = fullScreenAdRouter
         self.bottomBannerView = adViewBuilder?.makeBannerUIView(size: .banner)
         super.init(nibName: nil, bundle: nil)
     }
@@ -70,13 +73,24 @@ final class MainViewController: UIViewController, MainScene {
     // UMP 동의 폼·ATT 프롬프트는 화면이 실제로 올라온 뒤라야 뜬다
     public override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        guard let service = self.mobileAdService, self.adPreparingTask == nil else { return }
-        self.adPreparingTask = Task { [weak self] in
+        guard self.didPrepareAd == false else { return }
+        self.didPrepareAd = true
+        Task { @MainActor [weak self] in
             guard let self else { return }
-            await service.prepare(from: self)
+            await self.mobileAdService.presentConsentFormAndTrackingPromptIfNeeded(from: self)
+            await self.mobileAdService.preloadFullScreenAd()
+            
+            guard self.isLaunchedFromAppIcon else { return }
+            self.fullScreenAdRouter?.showFullScreenAd(
+                from: self, scope: .application, isFromAppLaunch: true
+            )
         }
     }
     
+    private var isLaunchedFromAppIcon: Bool {
+        return self.view.window?.windowScene?.session.isLaunchedFromAppIcon ?? false
+    }
+
     func addCalendar(_ calendarScene: any CalendarScene) {
         self.addChild(calendarScene)
         self.calendarContainerView.addSubview(calendarScene.view)

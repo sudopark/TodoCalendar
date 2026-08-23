@@ -88,7 +88,12 @@ public protocol BillingUsecaseFactory {
     var billingUsecase: any BillingUsecase { get }
 }
 
-public protocol UsecaseFactory: AccountUsecaseFactory, CalendarUsecaseFactory, EventUsecaseFactory, NotificationUsecaseFactory, SettingUsecaseFactory, CommonUsecaseFactory, SupportUsecaseFactory, ExternalCalendarUsecaseFactory, AIAgentUsecaseFactory, BillingUsecaseFactory {
+public protocol AdUsecaseFactory {
+
+    var adExposureUsecase: any AdExposureUsecase { get }
+}
+
+public protocol UsecaseFactory: AccountUsecaseFactory, CalendarUsecaseFactory, EventUsecaseFactory, NotificationUsecaseFactory, SettingUsecaseFactory, CommonUsecaseFactory, SupportUsecaseFactory, ExternalCalendarUsecaseFactory, AIAgentUsecaseFactory, BillingUsecaseFactory, AdUsecaseFactory {
 
     var eventNotifyService: SharedEventNotifyService { get }
 }
