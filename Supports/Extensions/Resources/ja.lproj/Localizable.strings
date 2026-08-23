@@ -326,7 +326,6 @@
 "manage_account::delete_account_button::confirm:message" = "本当にアカウントを削除しますか？";
 "manage_account::delete_account_button::description" = "アカウント削除をリクエストすると、アカウントが削除されます。\n削除されたアカウント情報は復元できません。";
 "signIn::title" = "ログイン";
-"signIn:description" = "イベントリストをバックアップして、他のiOSデバイスと同期しましょう\n（対応プラットフォームは今後拡大予定です。）";
 
 
 // MARK: - setting

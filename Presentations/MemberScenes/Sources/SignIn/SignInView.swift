@@ -126,11 +126,8 @@ struct SignInView: View {
                         .foregroundStyle(appearance.colorSet.text0.asColor)
                         .multilineTextAlignment(.center)
                     
-                    Text("signIn:description".localized())
-                        .font(appearance.fontSet.subNormal.asFont)
-                        .foregroundStyle(appearance.colorSet.text1.asColor)
-                        .multilineTextAlignment(.center)
-                    
+                    self.featureListView
+
                     VStack(spacing: Metric.Spacing.regular) {
                         ForEach(state.supportOAuthServices, id: \.identifier) { provider in
                             self.makeButtonView(provider)
@@ -151,6 +148,26 @@ struct SignInView: View {
             self.eventHandlers.requestSignIn(provider)
         }
         .asAnyView()
+    }
+
+    private var featureListView: some View {
+        VStack(alignment: .leading, spacing: Metric.Spacing.small) {
+            self.featureRow("arrow.triangle.2.circlepath", "signIn::feature::sync".localized())
+            self.featureRow("sparkles", "signIn::feature::aiAgent".localized())
+            self.featureRow("globe", "signIn::feature::web".localized())
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func featureRow(_ symbolName: String, _ text: String) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: Metric.Spacing.xsmall) {
+            Image(systemName: symbolName)
+                .foregroundStyle(appearance.colorSet.accent.asColor)
+            Text(text)
+                .font(appearance.fontSet.subNormal.asFont)
+                .foregroundStyle(appearance.colorSet.text1.asColor)
+                .fixedSize(horizontal: false, vertical: true)
+        }
     }
 }
 

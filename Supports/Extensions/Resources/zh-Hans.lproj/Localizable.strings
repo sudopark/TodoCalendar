@@ -326,7 +326,6 @@
 "manage_account::delete_account_button::confirm:message" = "确定要注销您的账户吗？";
 "manage_account::delete_account_button::description" = "提交注销申请后，您的账户将被删除。\n账户信息一经删除将无法恢复。";
 "signIn::title" = "登录";
-"signIn:description" = "备份您的事件列表，并在其他iOS设备间同步\n（支持的平台将持续扩展。）";
 
 
 // MARK: - setting

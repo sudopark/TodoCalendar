@@ -326,7 +326,6 @@
 "manage_account::delete_account_button::confirm:message" = "Bạn có chắc chắn muốn xóa tài khoản không?";
 "manage_account::delete_account_button::description" = "Sau khi yêu cầu xóa tài khoản, tài khoản của bạn sẽ bị xóa.\nMột khi đã xóa, thông tin tài khoản không thể khôi phục.";
 "signIn::title" = "Đăng nhập";
-"signIn:description" = "Sao lưu danh sách sự kiện của bạn và đồng bộ trên các thiết bị iOS khác\n(Các nền tảng hỗ trợ sẽ được mở rộng.)";
 
 
 // MARK: - setting

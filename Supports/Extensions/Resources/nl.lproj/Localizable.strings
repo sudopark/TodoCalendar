@@ -326,7 +326,6 @@
 "manage_account::delete_account_button::confirm:message" = "Weet je zeker dat je je account wilt verwijderen?";
 "manage_account::delete_account_button::description" = "Nadat je het verwijderen van je account hebt aangevraagd, wordt je account verwijderd.\nEenmaal verwijderd, kunnen accountgegevens niet worden hersteld.";
 "signIn::title" = "Inloggen";
-"signIn:description" = "Back-up je gebeurtenislijst en synchroniseer deze op andere iOS-apparaten\n(Ondersteunde platforms worden uitgebreid.)";
 
 
 // MARK: - setting

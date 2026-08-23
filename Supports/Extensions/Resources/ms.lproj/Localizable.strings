@@ -326,7 +326,6 @@
 "manage_account::delete_account_button::confirm:message" = "Adakah anda pasti mahu memadam akaun anda?";
 "manage_account::delete_account_button::description" = "Selepas permintaan pemadaman akaun, akaun anda akan dipadam.\nSetelah dipadam, maklumat akaun tidak dapat dipulihkan.";
 "signIn::title" = "Log Masuk";
-"signIn:description" = "Sandarkan senarai acara anda dan segerakkannya merentas peranti iOS lain\n(Platform yang disokong akan diperluas.)";
 
 
 // MARK: - setting

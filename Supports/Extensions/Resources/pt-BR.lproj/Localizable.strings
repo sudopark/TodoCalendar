@@ -326,7 +326,6 @@
 "manage_account::delete_account_button::confirm:message" = "Tem certeza de que deseja excluir sua conta?";
 "manage_account::delete_account_button::description" = "Após solicitar a exclusão, sua conta será excluída.\nApós a exclusão, as informações da conta não podem ser recuperadas.";
 "signIn::title" = "Login";
-"signIn:description" = "Faça backup da sua lista de eventos e sincronize entre outros dispositivos iOS\n(Mais plataformas serão suportadas em breve.)";
 
 
 // MARK: - setting

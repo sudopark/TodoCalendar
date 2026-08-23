@@ -326,7 +326,6 @@
 "manage_account::delete_account_button::confirm:message" = "Är du säker på att du vill ta bort ditt konto?";
 "manage_account::delete_account_button::description" = "Efter att du begärt borttagning av kontot kommer det att raderas.\nNär det har raderats kan kontoinformationen inte återställas.";
 "signIn::title" = "Logga in";
-"signIn:description" = "Säkerhetskopiera din händelselista och synkronisera den mellan andra iOS-enheter\n(Fler plattformar kommer att stödjas.)";
 
 
 // MARK: - setting

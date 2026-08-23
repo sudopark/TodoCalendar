@@ -326,7 +326,6 @@
 "manage_account::delete_account_button::confirm:message" = "Apakah Anda yakin ingin menghapus akun Anda?";
 "manage_account::delete_account_button::description" = "Setelah meminta penghapusan akun, akun Anda akan dihapus.\nSetelah dihapus, informasi akun tidak dapat dipulihkan.";
 "signIn::title" = "Masuk";
-"signIn:description" = "Cadangkan daftar acara Anda dan sinkronkan dengan perangkat iOS lain\n(Platform yang didukung akan diperluas.)";
 
 
 // MARK: - setting

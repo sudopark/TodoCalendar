@@ -390,7 +390,9 @@
 "manage_account::delete_account_button::confirm:message" = "Are you sure you want to delete your account?";
 "manage_account::delete_account_button::description" = "After requesting account deletion, your account will be deleted.\nOnce deleted, account information cannot be recovered.";
 "signIn::title" = "Login";
-"signIn:description" = "Back up your event list and sync it across other iOS devices\n(Supported platforms will be expanded.)";
+"signIn::feature::sync" = "Back up events, sync across devices";
+"signIn::feature::aiAgent" = "Manage your schedule with the AI agent";
+"signIn::feature::web" = "Use on the web · todo-calendar.com";
 
 
 // MARK: - setting
