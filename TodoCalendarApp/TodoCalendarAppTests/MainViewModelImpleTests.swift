@@ -99,6 +99,9 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
         }
         viewModel.prepare()
         self.wait(for: [expect], timeout: self.timeout)
+        // 앞 테스트의 VM 이 아직 살아 있으면 전역 NotificationCenter 방출에 반응해 이미 채워진
+        // expectation 을 다시 때린다. XCTest 는 그걸 API violation 어서션으로 처리해 프로세스를 죽인다
+        self.spyRouter.didCalendarAttached = nil
         return viewModel
     }
 }
@@ -216,6 +219,7 @@ extension MainViewModelImpleTests {
         
         // then
         self.wait(for: [expect], timeout: self.timeout)
+        self.spyUISettingUsecase.didAppluEventTagColorCallback = nil
     }
     
     func testViewModel_whenPrepare_prepareGoogleCalendar() {
@@ -694,6 +698,7 @@ extension MainViewModelImpleTests {
 
         // then
         self.wait(for: [expect], timeout: 0.1)
+        self.spyEventLiveActivityUsecase.whenDidPrepare = nil
         XCTAssertEqual(self.spyEventLiveActivityUsecase.didPrepare, true)
     }
 
@@ -711,6 +716,7 @@ extension MainViewModelImpleTests {
 
         // then
         self.wait(for: [expect], timeout: 0.1)
+        self.spyEventLiveActivityUsecase.whenDidHandleWillEnterForeground = nil
         XCTAssertEqual(self.spyEventLiveActivityUsecase.didHandleWillEnterForeground, true)
     }
 }

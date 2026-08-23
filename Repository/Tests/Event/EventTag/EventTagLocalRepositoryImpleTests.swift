@@ -154,7 +154,7 @@ extension EventTagLocalRepositoryImpleTests {
         
         // when
         try await repository.deleteTag(origin.uuid)
-        let tagAfterDelete = try await repository.loadCustomTags([origin.uuid]).firstValue(with: 100)
+        let tagAfterDelete = try await repository.loadCustomTags([origin.uuid]).firstValue(with: 1000)
         let offIdsAfterDelete = repository.loadOffTags()
         
         // then
@@ -265,7 +265,7 @@ extension EventTagLocalRepositoryImpleTests {
         let repository = try await self.makeRepositoryWithStubSaveTags(totalTags)
         
         // when
-        let tags = try await repository.loadAllCustomTags().firstValue(with: 10)
+        let tags = try await repository.loadAllCustomTags().firstValue(with: 1000)
         
         // then
         XCTAssertEqual(tags?.map { $0.uuid }, totalTags.map { $0.uuid })

@@ -18,7 +18,7 @@ import UnitTestHelpKit
 @testable import CalendarScenes
 
 
-class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
+class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable, AsyncEffectWaitable {
     
     var cancelBag: Set<AnyCancellable>!
     private var spyRouter: SpyRouter!
@@ -1144,50 +1144,54 @@ extension CalendarViewModelImpleTests {
     func testViewModel_whenVoiceInputStarts_scrollsOnlyFocusedMonthPaper() async throws {
         // given
         let viewModel = self.makeViewModel()
-        viewModel.prepare()
-        try await Task.sleep(for: .milliseconds(50))
+        try await self.prepareInitialMonths(viewModel)
 
         // when
         self.stubOrchestration.stateSubject.send(.listening(.voice))
-        try await Task.sleep(for: .milliseconds(50))
 
         // then — 초기 포커스는 가운데(index 1) 달
-        let counts = self.spyRouter.spyInteractors.map { $0.didScrollToVoiceInputCount }
-        XCTAssertEqual(counts, [0, 1, 0])
+        try await self.assertScrollToVoiceInputCounts([0, 1, 0])
+        withExtendedLifetime(viewModel) { }
     }
 
     func testViewModel_whenFocusMovedToOtherMonth_scrollsThatMonthPaper() async throws {
         // given
         let viewModel = self.makeViewModel()
-        viewModel.prepare()
-        try await Task.sleep(for: .milliseconds(50))
+        try await self.prepareInitialMonths(viewModel)
 
         // when
         viewModel.focusChanged(from: 1, to: 2)
         self.stubOrchestration.stateSubject.send(.listening(.voice))
-        try await Task.sleep(for: .milliseconds(50))
 
         // then
-        let counts = self.spyRouter.spyInteractors.map { $0.didScrollToVoiceInputCount }
-        XCTAssertEqual(counts, [0, 0, 1])
+        try await self.assertScrollToVoiceInputCounts([0, 0, 1])
+        withExtendedLifetime(viewModel) { }
     }
 
     func testViewModel_whenStayInVoiceListening_scrollsOnlyOncePerEntry() async throws {
         // given
         let viewModel = self.makeViewModel()
-        viewModel.prepare()
-        try await Task.sleep(for: .milliseconds(50))
+        try await self.prepareInitialMonths(viewModel)
 
         // when — 같은 상태가 반복 방출돼도 진입 edge는 1회
         self.stubOrchestration.stateSubject.send(.listening(.voice))
         self.stubOrchestration.stateSubject.send(.listening(.voice))
-        try await Task.sleep(for: .milliseconds(50))
 
         // then
-        let counts = self.spyRouter.spyInteractors.map { $0.didScrollToVoiceInputCount }
-        XCTAssertEqual(counts, [0, 1, 0])
+        try await self.assertScrollToVoiceInputCounts([0, 1, 0])
+        withExtendedLifetime(viewModel) { }
     }
 
+    private var scrollToVoiceInputCounts: [Int] {
+        return self.spyRouter.spyInteractors.map { $0.didScrollToVoiceInputCount }
+    }
+
+    // 스크롤이 도착할 때까지 기다린 뒤, 뒤늦은 추가 방출이 없는지 정착 시간을 두고 다시 본다
+    private func assertScrollToVoiceInputCounts(_ expected: [Int]) async throws {
+        try await self.waitEffect("스크롤 횟수 \(expected) 도달") { self.scrollToVoiceInputCounts == expected }
+        try await Task.sleep(for: .milliseconds(50))
+        XCTAssertEqual(self.scrollToVoiceInputCounts, expected)
+    }
 }
 
 // MARK: - 외부 진입점의 AI 입력 요청 (requestAIEntry)
@@ -1549,65 +1553,73 @@ private extension CalendarViewModelImpleTests {
 
 extension CalendarViewModelImpleTests {
 
+    // VM이 해제되면 구독도 끊겨 단언이 무의미해지므로 호출측이 받아 살려둔다
     private func postAppLifecycleAfterPrepared(
         _ notificationName: Notification.Name,
         state: AIAgentState?
-    ) async throws {
+    ) async throws -> CalendarViewModelImple {
         let viewModel = self.makeViewModel()
-        viewModel.prepare()
-        try await Task.sleep(for: .milliseconds(50))
+        try await self.prepareInitialMonths(viewModel)
         state.map { self.stubOrchestration.stateSubject.send($0) }
 
         NotificationCenter.default.post(name: notificationName, object: nil)
-        try await Task.sleep(for: .milliseconds(50))
-        // VM이 해제되면 구독도 끊겨 단언이 무의미해진다
-        withExtendedLifetime(viewModel) { }
+        return viewModel
     }
 
-    private func enterBackgroundAfterPrepared(state: AIAgentState?) async throws {
-        try await self.postAppLifecycleAfterPrepared(
+    private func enterBackgroundAfterPrepared(state: AIAgentState?) async throws -> CalendarViewModelImple {
+        return try await self.postAppLifecycleAfterPrepared(
             UIApplication.didEnterBackgroundNotification, state: state
         )
     }
 
+    // 중지가 일어나지 '않음'을 보는 케이스는 기다릴 조건이 없어 정착 시간만 둔다
+    private func assertKeepsInputAfterSettling() async throws {
+        try await Task.sleep(for: .milliseconds(50))
+        XCTAssertNil(self.stubOrchestration.didStopInput)
+    }
+
     func testViewModel_whenAppEntersBackgroundWhileVoiceListening_stopsInput() async throws {
         // given, when
-        try await self.enterBackgroundAfterPrepared(state: .listening(.voice))
+        let viewModel = try await self.enterBackgroundAfterPrepared(state: .listening(.voice))
 
         // then
+        try await self.waitEffect("백그라운드 전환으로 입력 중지") { self.stubOrchestration.didStopInput == true }
         XCTAssertEqual(self.stubOrchestration.didStopInput, true)
+        withExtendedLifetime(viewModel) { }
     }
 
     func testViewModel_whenAppEntersBackgroundWhileKeyboardListening_keepsInput() async throws {
         // given, when
-        try await self.enterBackgroundAfterPrepared(state: .listening(.keyboard))
+        let viewModel = try await self.enterBackgroundAfterPrepared(state: .listening(.keyboard))
 
         // then
-        XCTAssertNil(self.stubOrchestration.didStopInput)
+        try await self.assertKeepsInputAfterSettling()
+        withExtendedLifetime(viewModel) { }
     }
 
     func testViewModel_whenAppEntersBackgroundWhileIdle_keepsInput() async throws {
         // given, when
-        try await self.enterBackgroundAfterPrepared(state: .idle)
+        let viewModel = try await self.enterBackgroundAfterPrepared(state: .idle)
 
         // then
-        XCTAssertNil(self.stubOrchestration.didStopInput)
+        try await self.assertKeepsInputAfterSettling()
+        withExtendedLifetime(viewModel) { }
     }
 
     func testViewModel_whenAppResignsActiveWhileVoiceListening_keepsInput() async throws {
         // given, when
-        try await self.postAppLifecycleAfterPrepared(
+        let viewModel = try await self.postAppLifecycleAfterPrepared(
             UIApplication.willResignActiveNotification, state: .listening(.voice)
         )
 
         // then
-        XCTAssertNil(self.stubOrchestration.didStopInput)
+        try await self.assertKeepsInputAfterSettling()
+        withExtendedLifetime(viewModel) { }
     }
 
     private func makePreparedViewModel() async throws -> CalendarViewModelImple {
         let viewModel = self.makeViewModel()
-        viewModel.prepare()
-        try await Task.sleep(for: .milliseconds(50))
+        try await self.prepareInitialMonths(viewModel)
         return viewModel
     }
 
