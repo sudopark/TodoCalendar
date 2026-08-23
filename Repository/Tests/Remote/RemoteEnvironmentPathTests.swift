@@ -82,3 +82,16 @@ extension RemoteEnvironmentPathTests {
         #expect(path == "https://api.example.com/v1/billing/user-plan")
     }
 }
+
+
+// MARK: - calendarAPIHost 밖 고정 호스트 엔드포인트 검증
+
+extension RemoteEnvironmentPathTests {
+
+    @Test func path_appUpdateInfoEndpoint_returnsTermsRepositoryRawURL() {
+        // when
+        let path = self.env.path(AppEndpoints.updateInfo)
+        // then
+        #expect(path == "https://raw.githubusercontent.com/sudopark/TodoCalendar-Terms/main/app-config/update-info.json")
+    }
+}

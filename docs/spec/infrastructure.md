@@ -351,8 +351,8 @@ private func runMigrationVersion6to7(_ database: any DataBase) throws {
 
 ### 7.1 원격 설정
 
-**위치**: `app-config/update-info.json` (저장소 루트의 `app-config/` 디렉토리)
-**서빙**: `https://raw.githubusercontent.com/sudopark/TodoCalendar/develop/app-config/update-info.json` (GitHub raw URL)
+**위치**: `sudopark/TodoCalendar-Terms` 레포 `main` 브랜치의 `app-config/update-info.json`
+**서빙**: `https://raw.githubusercontent.com/sudopark/TodoCalendar-Terms/main/app-config/update-info.json` (GitHub raw URL)
 **포맷**:
 ```json
 {
@@ -366,6 +366,7 @@ private func runMigrationVersion6to7(_ database: any DataBase) throws {
 - `force_update_version` / `recommend_update_version` — 업데이트 **강제·권장 하한선**. 팝업 트리거용.
 - `latest_version` — **스토어에 올라간 최신 배포 버전**. 설정 화면의 "업데이트 가능" 안내(비강제) 판정용.
 - 디코딩은 Repository 레이어의 `AppUpdateInfoMapper`가 담당. Domain 모델 `AppUpdateInfo`는 Decodable 채택하지 않음.
+- 이 저장소 루트의 `app-config/update-info.json`은 2.9.6 이하 구버전 앱이 여전히 바라보는 옛 경로다 (#983). 구버전을 2.9.7 이상으로 밀어낼 때까지 함께 갱신해야 하며, 그 전에 이 저장소를 비공개로 돌리면 구버전은 §7.6대로 업데이트 안내를 전혀 못 받는다.
 
 ### 7.2 판정 알고리즘
 
@@ -448,7 +449,7 @@ private func runMigrationVersion6to7(_ database: any DataBase) throws {
 | Root VM | `TodoCalendarApp/Sources/Root/ApplicationRootViewModel.swift`의 `bindUpdateRequirement` + `handleWillEnterForeground` |
 | Setting VM | `Presentations/SettingScene/Sources/Setting/SettingItemListViewModel.swift`의 `isUpdateAvailable` 구독 + `openAppUpdate()` |
 | Factory | `Presentations/Scenes/Sources/Factories.swift` `SupportUsecaseFactory.appUpdateCheckUsecase` (단일 인스턴스 공유 계약) |
-| 원격 설정 | `app-config/update-info.json` |
+| 원격 설정 | `sudopark/TodoCalendar-Terms` 레포의 `app-config/update-info.json` |
 
 ### 7.6 한계 / 후속 과제
 
