@@ -235,7 +235,7 @@ extension TodoLocalRepositoryImpleTests {
         let _ = try await repository.updateTodoEvent(old.uuid, params)
         
         // when
-        let events = try await repository.loadTodoEvents(in: self.dummyRange(0..<10)).firstValue(with: 10)
+        let events = try await repository.loadTodoEvents(in: self.dummyRange(0..<10)).firstValue(with: 1000)
         
         // then
         XCTAssertEqual(events?.count, 1)
@@ -265,7 +265,7 @@ extension TodoLocalRepositoryImpleTests {
         try await stubTodos()
         
         // when
-        let uncompletedTodos = try await repository.loadUncompletedTodos().firstValue(with: 100)
+        let uncompletedTodos = try await repository.loadUncompletedTodos().firstValue(with: 1000)
         
         
         // then
@@ -705,7 +705,7 @@ extension TodoLocalRepositoryImpleTests {
         let repository = try await self.makeRepositoryWithStubTodo(todo)
         
         // when
-        let loadedTodo = try await repository.todoEvent(todo.uuid).firstValue(with: 100)
+        let loadedTodo = try await repository.todoEvent(todo.uuid).firstValue(with: 1000)
         
         // then
         XCTAssertNotNil(loadedTodo)

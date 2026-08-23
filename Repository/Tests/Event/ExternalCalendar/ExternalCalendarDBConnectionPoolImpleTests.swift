@@ -19,11 +19,13 @@ final class ExternalCalendarSQLiteConnectionPoolImpleTests {
 
     private let serviceId1 = "google"
     private let serviceId2 = "apple"
+    // 앞 테스트의 커넥션이 아직 살아 있어도 같은 vnode 를 물지 않도록 테스트마다 다른 파일을 연다
+    private let dbFileSuffix = UUID().uuidString
 
     private func testDBPath(name: String) -> String {
         (try! FileManager.default
             .url(for: .cachesDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
-            .appendingPathComponent("\(name).db"))
+            .appendingPathComponent("\(name)_\(dbFileSuffix).db"))
             .path
     }
 

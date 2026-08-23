@@ -20,7 +20,7 @@ import Domain
 @testable import TodoCalendarApp
 
 
-final class EventLiveActivityUsecaseImpleTests: PublisherWaitable {
+final class EventLiveActivityUsecaseImpleTests: PublisherWaitable, AsyncEffectWaitable {
 
     var cancelBag: Set<AnyCancellable>! = .init()
 
@@ -115,8 +115,15 @@ final class EventLiveActivityUsecaseImpleTests: PublisherWaitable {
         return formatter.string(from: date)
     }
 
+    // 효과가 '안 일어남'을 보는 케이스는 기다릴 조건이 없어 정착 시간만 둔다
     private func waitForEffects() async throws {
         try await Task.sleep(for: .milliseconds(100))
+    }
+
+    private func waitForEffects(
+        _ description: String, until condition: () -> Bool
+    ) async throws {
+        try await self.waitEffect(description, until: condition)
     }
 
     /// 실행 시각과 무관하게 항상 `(now, now+8h)` 안에 들어오는 공휴일 시나리오를 만든다 —
@@ -521,7 +528,7 @@ extension EventLiveActivityUsecaseImpleTests {
             [String: TodoEvent].self, key: ShareDataKeys.todos.rawValue,
             ["t1": self.makeTodo(id: "t1", name: "new", eventDate: future)]
         )
-        try await self.waitForEffects()
+        try await self.waitForEffects("stub.didUpdateWith?.eventName == 'new'") { stub.didUpdateWith?.eventName == "new" }
 
         // then
         #expect(stub.didUpdateWith?.eventName == "new")
@@ -543,7 +550,7 @@ extension EventLiveActivityUsecaseImpleTests {
             [String: TodoEvent].self, key: ShareDataKeys.todos.rawValue,
             ["t1": self.makeTodo(id: "t1", eventDate: nextTime)]
         )
-        try await self.waitForEffects()
+        try await self.waitForEffects("stub.didUpdateWith?.eventDate == Date(timeIntervalSince1970: nextTime.timeIntervalSince1970)") { stub.didUpdateWith?.eventDate == Date(timeIntervalSince1970: nextTime.timeIntervalSince1970) }
 
         // then
         #expect(stub.didUpdateWith?.eventDate == Date(timeIntervalSince1970: nextTime.timeIntervalSince1970))
@@ -567,12 +574,12 @@ extension EventLiveActivityUsecaseImpleTests {
             [String: TodoEvent].self, key: ShareDataKeys.todos.rawValue,
             ["t1": self.makeTodo(id: "t1", eventDate: nextTime)]
         )
-        try await self.waitForEffects()
-
-        // then
         let expectedText = self.expectedTimeText(
             for: Date(timeIntervalSince1970: nextTime.timeIntervalSince1970)
         )
+        try await self.waitForEffects("stub.didUpdateWith?.eventTimeText == expectedText") { stub.didUpdateWith?.eventTimeText == expectedText }
+
+        // then
         #expect(stub.didUpdateWith?.eventTimeText == expectedText)
     }
 
@@ -591,7 +598,7 @@ extension EventLiveActivityUsecaseImpleTests {
             [String: GoogleCalendar.Event].self, key: ShareDataKeys.googleCalendarEvents.rawValue,
             ["g1": self.makeGoogleEvent(id: "g1", eventDate: future, location: "new place")]
         )
-        try await self.waitForEffects()
+        try await self.waitForEffects("stub.didUpdateWith?.placeName == 'new place'") { stub.didUpdateWith?.placeName == "new place" }
 
         // then
         #expect(stub.didUpdateWith?.placeName == "new place")
@@ -630,7 +637,7 @@ extension EventLiveActivityUsecaseImpleTests {
             [String: TodoEvent].self, key: ShareDataKeys.todos.rawValue,
             ["t1": self.makeTodo(id: "t1", name: "changed", eventDate: future)]
         )
-        try await self.waitForEffects()
+        try await self.waitForEffects("stub.didUpdateWith?.startDate == startDate") { stub.didUpdateWith?.startDate == startDate }
 
         // then
         #expect(stub.didUpdateWith?.startDate == startDate)
@@ -728,12 +735,12 @@ extension EventLiveActivityUsecaseImpleTests {
             [String: TodoEvent].self, key: ShareDataKeys.todos.rawValue,
             ["t1": self.makeTodo(id: "t1", name: "changed", eventDate: future)]
         )
-        try await self.waitForEffects()
-
-        // then
         let expectedTimeText = self.expectedTimeText(
             for: Date(timeIntervalSince1970: future.timeIntervalSince1970)
         )
+        try await self.waitForEffects("stub.didUpdateWith?.eventTimeText == expectedTimeText") { stub.didUpdateWith?.eventTimeText == expectedTimeText }
+
+        // then
         #expect(stub.didUpdateWith?.eventTimeText == expectedTimeText)
         #expect(stub.didUpdateWith?.tagColorHex == "#ABCDEF")
         #expect(stub.didUpdateWith?.startDate == restoredContent.startDate)
@@ -786,10 +793,10 @@ extension EventLiveActivityUsecaseImpleTests {
             MemorizedEventsContainer<ScheduleEvent>()
                 .append(self.makeSchedule(id: "s1", name: "changed", eventDate: newTime))
         )
-        try await self.waitForEffects()
+        let expectedQuery = EventTime.at(newTime.timeIntervalSince1970).queryParams
+        try await self.waitForEffects("stub.didUpdateWith?.scheduleTimeQuery == expectedQuery") { stub.didUpdateWith?.scheduleTimeQuery == expectedQuery }
 
         // then
-        let expectedQuery = EventTime.at(newTime.timeIntervalSince1970).queryParams
         #expect(stub.didUpdateWith?.scheduleTimeQuery == expectedQuery)
     }
 
@@ -801,7 +808,7 @@ extension EventLiveActivityUsecaseImpleTests {
         )
         let (usecase, stub, _) = self.makeUsecase(stubRestoredRegistration: registration)
         await usecase.prepare()
-        try await self.waitForEffects()
+        try await self.waitForEffects("stub.didEnd == true") { stub.didEnd == true }
 
         // when
         await usecase.handleWillEnterForeground()
@@ -973,7 +980,7 @@ extension EventLiveActivityUsecaseImpleTests {
 
         // when
         self.putTodos(store, [self.makeTodo(id: "t1", name: "changed", eventDate: future)])
-        try await self.waitForEffects()
+        try await self.waitForEffects("stub.didUpdateWith?.eventName == 'changed'") { stub.didUpdateWith?.eventName == "changed" }
 
         // then
         #expect(stub.didUpdateWith?.eventName == "changed")
@@ -1013,7 +1020,7 @@ extension EventLiveActivityUsecaseImpleTests {
         // when
         await usecase.handleWillEnterForeground()
         self.putTodos(store, [self.makeTodo(id: "t1", eventDate: future, turn: 3)])
-        try await self.waitForEffects()
+        try await self.waitForEffects("stub.didEnd == true") { stub.didEnd == true }
 
         // then
         #expect(stub.didEnd == true)
@@ -1078,7 +1085,7 @@ extension EventLiveActivityUsecaseImpleTests {
 
         // when
         self.putTodos(store, [self.makeTodo(id: "t1", eventDate: future, turn: 4)])
-        try await self.waitForEffects()
+        try await self.waitForEffects("stub.didEnd == true") { stub.didEnd == true }
 
         // then
         #expect(stub.didEnd == true)
@@ -1207,7 +1214,7 @@ extension EventLiveActivityUsecaseImpleTests {
             [String: [Int: [Holiday]]].self, key: ShareDataKeys.holidays.rawValue,
             ["KR": [2026: [Holiday(uuid: "hz", dateString: scenario.dateString, name: "new")]]]
         )
-        try await self.waitForEffects()
+        try await self.waitForEffects("stub.didUpdateWith?.eventName == 'new'") { stub.didUpdateWith?.eventName == "new" }
 
         // then
         #expect(stub.didEnd == false)
@@ -1730,7 +1737,7 @@ extension EventLiveActivityUsecaseImpleTests {
 
         // when
         self.putTodos(store, [self.makeTodo(id: "t1", name: "new", eventDate: future)])
-        try await self.waitForEffects()
+        try await self.waitForEffects("stub.didUpdateWith?.eventName == 'new'") { stub.didUpdateWith?.eventName == "new" }
 
         // then
         let content = try #require(stub.didUpdateWith)
