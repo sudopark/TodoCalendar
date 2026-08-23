@@ -1183,14 +1183,14 @@ extension SharePreviewViewModelImpleTests {
 private final class SpySharePreviewRouter: BaseSpyRouter, SharePreviewRouting, @unchecked Sendable {
 
     var didShareWithText: String?
-    func showShareSheet(text: String) {
+    func shareText(_ text: String) {
         self.didShareWithText = text
     }
 
     var didShareImageContent: ShareImageContentModel?
     var didShareImageHeaderText: String?
-    func showShareSheet(imageContent: ShareImageContentModel, headerText: String) {
-        self.didShareImageContent = imageContent
+    func shareImage(_ content: ShareImageContentModel, headerText: String) {
+        self.didShareImageContent = content
         self.didShareImageHeaderText = headerText
     }
 }

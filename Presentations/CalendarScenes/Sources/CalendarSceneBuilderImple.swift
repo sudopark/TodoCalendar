@@ -22,6 +22,7 @@ public struct CalendarSceneBuilderImple {
     private let aiAgentKeyboardInputSceneBuilder: any AIAgentKeyboardInputSceneBuilder
     private let aiAgentImageCommandSceneBuilder: any AIAgentImageCommandSceneBuilder
     private let paywallSceneBuilder: any PaywallSceneBuilder
+    private let fullScreenAdRouter: (any FullScreenAdRouter)?
     private let pendingCompleteTodoState: PendingCompleteTodoState = .init()
     public let calendarDeepLinkHandler = CalendarDeepLinkHandlerImple()
     private let eventDeepLinkHandler = EventDeepLinkHandlerImple()
@@ -36,7 +37,8 @@ public struct CalendarSceneBuilderImple {
         aiAgentCommandSceneBuilder: any AIAgentCommandSceneBuilder,
         aiAgentKeyboardInputSceneBuilder: any AIAgentKeyboardInputSceneBuilder,
         aiAgentImageCommandSceneBuilder: any AIAgentImageCommandSceneBuilder,
-        paywallSceneBuilder: any PaywallSceneBuilder
+        paywallSceneBuilder: any PaywallSceneBuilder,
+        fullScreenAdRouter: (any FullScreenAdRouter)?
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
@@ -48,6 +50,7 @@ public struct CalendarSceneBuilderImple {
         self.aiAgentKeyboardInputSceneBuilder = aiAgentKeyboardInputSceneBuilder
         self.aiAgentImageCommandSceneBuilder = aiAgentImageCommandSceneBuilder
         self.paywallSceneBuilder = paywallSceneBuilder
+        self.fullScreenAdRouter = fullScreenAdRouter
     }
 
     private var eventListCellEventHanleViewModelBuilder: (any EventListCellEventHanleViewModelBuilder)?
@@ -89,7 +92,8 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
         )
         let sharePreviewSceneBuilder = SharePreviewSceneBuilerImple(
             usecaseFactory: self.usecaseFactory,
-            viewAppearance: self.viewAppearance
+            viewAppearance: self.viewAppearance,
+            fullScreenAdRouter: self.fullScreenAdRouter
         )
         let eventListSceneBuilder = DayEventListSceneBuilerImple(
             usecaseFactory: self.usecaseFactory,

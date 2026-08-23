@@ -18,13 +18,16 @@ final class SharePreviewSceneBuilerImple: @unchecked Sendable {
 
     private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
+    private let fullScreenAdRouter: (any FullScreenAdRouter)?
 
     init(
         usecaseFactory: any UsecaseFactory,
-        viewAppearance: ViewAppearance
+        viewAppearance: ViewAppearance,
+        fullScreenAdRouter: (any FullScreenAdRouter)?
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
+        self.fullScreenAdRouter = fullScreenAdRouter
     }
 }
 
@@ -63,7 +66,7 @@ extension SharePreviewSceneBuilerImple: SharePreviewSceneBuilder {
             appleCalendarUsecase: appleCalendarUsecase,
             calendarUsecase: calendarUsecase
         )
-        let router = SharePreviewRouter()
+        let router = SharePreviewRouter(fullScreenAdRouter: self.fullScreenAdRouter)
         viewModel.router = router
         let viewController = SharePreviewViewController(
             viewModel: viewModel,

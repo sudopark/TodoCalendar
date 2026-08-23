@@ -218,16 +218,28 @@ open class BaseRouterImple: Routing, @unchecked Sendable {
     }
 
     public func showShareSheet(text: String) {
+        self.showShareSheet(text: text, onShared: nil)
+    }
+
+    public func showShareSheet(text: String, onShared: (@Sendable @MainActor () -> Void)?) {
         Task { @MainActor in
             let activityViewController = UIActivityViewController(
                 activityItems: [text], applicationActivities: nil
             )
             activityViewController.popoverPresentationController?.sourceView = self.scene?.view
+            activityViewController.completionWithItemsHandler = { _, completed, _, _ in
+                guard completed else { return }
+                Task { @MainActor in onShared?() }
+            }
             self.scene?.present(activityViewController, animated: true)
         }
     }
 
     public func showShareSheet(image: UIImage) {
+        self.showShareSheet(image: image, onShared: nil)
+    }
+
+    public func showShareSheet(image: UIImage, onShared: (@Sendable @MainActor () -> Void)?) {
         Task { @MainActor in
             // UIImage를 그대로 넘기면 사진 앱 저장 액션이 안 뜨고 이름도 매번 같아 덮어쓴다
             let item: Any = self.temporaryPNGFileURL(image) ?? image
@@ -235,6 +247,10 @@ open class BaseRouterImple: Routing, @unchecked Sendable {
                 activityItems: [item], applicationActivities: nil
             )
             activityViewController.popoverPresentationController?.sourceView = self.scene?.view
+            activityViewController.completionWithItemsHandler = { _, completed, _, _ in
+                guard completed else { return }
+                Task { @MainActor in onShared?() }
+            }
             self.scene?.present(activityViewController, animated: true)
         }
     }

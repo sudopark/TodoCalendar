@@ -198,7 +198,7 @@ extension SharePreviewViewModelImple {
                     includeTagName: self.subject.includeTagName.value
                 )
                 guard !text.isEmpty else { return }
-                self.router?.showShareSheet(text: text)
+                self.router?.shareText(text)
             }
             .store(in: &self.cancellables)
     }
@@ -215,7 +215,7 @@ extension SharePreviewViewModelImple {
             let composer = ShareImageContentComposer(timeZone: timeZone, is24hourForm: is24hourForm)
             let filtered = composer.removingExcluded(content)
             guard !self.isEmptyContent(filtered) else { return }
-            self.router?.showShareSheet(imageContent: filtered, headerText: headerText)
+            self.router?.shareImage(filtered, headerText: headerText)
         }
         .store(in: &self.cancellables)
     }
