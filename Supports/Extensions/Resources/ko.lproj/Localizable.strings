@@ -740,3 +740,9 @@
 "webview::error::message" = "페이지를 불러오지 못했어요.";
 "webview::error::retry" = "다시 시도";
 "webview::openInBrowser" = "브라우저로 열기";
+
+// MARK: - legal notice
+
+"legal_notice.message::terms" = "이용약관이 개정됐어요.";
+"legal_notice.message::privacy" = "개인정보처리방침이 개정됐어요.";
+"legal_notice.effectiveDate" = "시행일 %@";

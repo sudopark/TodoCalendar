@@ -343,6 +343,15 @@ extension NonLoginUsecaseFactoryImple {
             sharedDataStore: self.applicationBase.sharedDataStore
         )
     }
+
+    func makeLegalNoticeUsecase() -> any LegalNoticeUsecase {
+        return LegalNoticeUsecaseImple(
+            legalNoticeRepository: LegalNoticeRepositoryImple(
+                remoteAPI: self.applicationBase.remoteAPI,
+                environmentStorage: self.applicationBase.userDefaultEnvironmentStorage
+            )
+        )
+    }
 }
 
 extension NonLoginUsecaseFactoryImple {
@@ -845,6 +854,15 @@ extension LoginUsecaseFactoryImple {
                 environmentStorage: self.applicationBase.userDefaultEnvironmentStorage
             ),
             sharedDataStore: self.applicationBase.sharedDataStore
+        )
+    }
+
+    func makeLegalNoticeUsecase() -> any LegalNoticeUsecase {
+        return LegalNoticeUsecaseImple(
+            legalNoticeRepository: LegalNoticeRepositoryImple(
+                remoteAPI: self.applicationBase.remoteAPI,
+                environmentStorage: self.applicationBase.userDefaultEnvironmentStorage
+            )
         )
     }
 }

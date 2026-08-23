@@ -740,3 +740,9 @@
 "webview::error::message" = "Couldn't load this page.";
 "webview::error::retry" = "Try again";
 "webview::openInBrowser" = "Open in browser";
+
+// MARK: - legal notice
+
+"legal_notice.message::terms" = "Our Terms of Service have been updated.";
+"legal_notice.message::privacy" = "Our Privacy Policy has been updated.";
+"legal_notice.effectiveDate" = "Effective %@";

@@ -28,6 +28,12 @@ public struct CurrentMonth: Equatable {
     var yearText: String?
 }
 
+struct LegalNoticeBannerModel: Equatable {
+    let documentType: LegalDocumentType
+    let message: String
+    let effectiveDateText: String
+}
+
 protocol MainViewModel: AnyObject, Sendable, MainSceneInteractor {
 
     // interactor
@@ -39,6 +45,8 @@ protocol MainViewModel: AnyObject, Sendable, MainSceneInteractor {
     func moveToEventTypeFilterSetting()
     func moveToSetting()
     func jumpDate()
+    func openLegalNoticeDocument(_ documentType: LegalDocumentType)
+    func closeLegalNoticeBanner(_ documentType: LegalDocumentType)
 
     // presenter
     var currentMonth: AnyPublisher<CurrentMonth, Never> { get }
@@ -46,6 +54,7 @@ protocol MainViewModel: AnyObject, Sendable, MainSceneInteractor {
     var temporaryUserDataMigrationStatus: AnyPublisher<TemporaryUserDataMigrationStatus?, Never> { get }
     var isLoadingCalendarEvents: AnyPublisher<Bool, Never> { get }
     var isLoadingAllEvents: AnyPublisher<Bool, Never> { get }
+    var legalNoticeBanners: AnyPublisher<[LegalNoticeBannerModel], Never> { get }
 }
 
 
@@ -65,6 +74,7 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
     private let aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
     private let eventLiveActivityUsecase: any EventLiveActivityUsecase
     private let guideTodoUsecase: any GuideTodoUsecase
+    private let legalNoticeUsecase: any LegalNoticeUsecase
     var router: (any MainRouting)?
 
     init(
@@ -79,7 +89,8 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
         billingUsecase: any BillingUsecase,
         aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase,
         eventLiveActivityUsecase: any EventLiveActivityUsecase,
-        guideTodoUsecase: any GuideTodoUsecase
+        guideTodoUsecase: any GuideTodoUsecase,
+        legalNoticeUsecase: any LegalNoticeUsecase
     ) {
         self.uiSettingUsecase = uiSettingUsecase
         self.temporaryUserDataMigrationUsecase = temporaryUserDataMigrationUsecase
@@ -93,10 +104,11 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
         self.aiAgentOrchestrationUsecase = aiAgentOrchestrationUsecase
         self.eventLiveActivityUsecase = eventLiveActivityUsecase
         self.guideTodoUsecase = guideTodoUsecase
+        self.legalNoticeUsecase = legalNoticeUsecase
 
         self.internalBinding()
     }
-    
+
     private struct Subject {
         let focusedDayInfo = CurrentValueSubject<SelectDayInfo?, Never>(nil)
         let temporaryUserDataMigrationStatus = CurrentValueSubject<TemporaryUserDataMigrationStatus?, Never>(nil)
@@ -140,6 +152,7 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
                 self?.aiAgentOrchestrationUsecase.refreshProcessingJobIfNeeded()
                 self?.aiAgentOrchestrationUsecase.loadUsage()
                 self?.handleWillEnterForeground()
+                self?.legalNoticeUsecase.checkNoticeIsNeed()
             })
             .store(in: &self.cancellables)
     }
@@ -165,6 +178,7 @@ extension MainViewModelImple {
         self.billingUsecase.startObservingTransactions()
         self.billingUsecase.recoverUnfinishedTransactions()
         self.guideTodoUsecase.prepare()
+        self.legalNoticeUsecase.checkNoticeIsNeed()
         Task { [weak self] in
             await self?.eventLiveActivityUsecase.prepare()
         }
@@ -248,6 +262,14 @@ extension MainViewModelImple {
         else { return }
         self.calendarSceneInteractor?.moveDay(day.dayInfo)
     }
+
+    func openLegalNoticeDocument(_ documentType: LegalDocumentType) {
+        self.router?.showWebView(documentType.linkPath)
+    }
+
+    func closeLegalNoticeBanner(_ documentType: LegalDocumentType) {
+        self.legalNoticeUsecase.confirmNotice(documentType)
+    }
 }
 
 
@@ -300,6 +322,34 @@ extension MainViewModelImple {
         return self.eventSyncUsecase.syncStatus
             .map { $0 == .fullSyncing }
             .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+
+    var legalNoticeBanners: AnyPublisher<[LegalNoticeBannerModel], Never> {
+
+        let message: (LegalDocumentType) -> String = { documentType in
+            switch documentType {
+            case .terms: return "legal_notice.message::terms".localized()
+            case .privacy: return "legal_notice.message::privacy".localized()
+            }
+        }
+        let dateFormatter = DateFormatter()
+            |> \.dateFormat .~ "date_form.yyyy_MM_dd".localized()
+            |> \.timeZone .~ TimeZone(secondsFromGMT: 0)
+
+        return self.legalNoticeUsecase.pendingNoticeUpdates
+            .map { updates -> [LegalNoticeBannerModel] in
+                return updates.map { info in
+                    let effectiveDateText = "legal_notice.effectiveDate".localized(
+                        with: dateFormatter.string(from: info.effectiveDate)
+                    )
+                    return LegalNoticeBannerModel(
+                        documentType: info.documentType,
+                        message: message(info.documentType),
+                        effectiveDateText: effectiveDateText
+                    )
+                }
+            }
             .eraseToAnyPublisher()
     }
 }

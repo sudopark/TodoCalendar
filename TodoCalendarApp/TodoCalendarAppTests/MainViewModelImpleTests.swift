@@ -31,6 +31,7 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var stubAIOrchestrationUsecase: StubAIAgentOrchestrationUsecase!
     private var spyEventLiveActivityUsecase: SpyEventLiveActivityUsecase!
     private var stubGuideTodoUsecase: StubGuideTodoUsecase!
+    private var stubLegalNoticeUsecase: StubLegalNoticeUsecase!
     var cancelBag: Set<AnyCancellable>!
 
     override func setUpWithError() throws {
@@ -47,6 +48,7 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubAIOrchestrationUsecase = .init()
         self.spyEventLiveActivityUsecase = .init()
         self.stubGuideTodoUsecase = .init()
+        self.stubLegalNoticeUsecase = .init()
         self.cancelBag = .init()
         self.timeout = 0.01
     }
@@ -65,6 +67,7 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubAIOrchestrationUsecase = nil
         self.spyEventLiveActivityUsecase = nil
         self.stubGuideTodoUsecase = nil
+        self.stubLegalNoticeUsecase = nil
         self.cancelBag = nil
     }
 
@@ -87,7 +90,8 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
             billingUsecase: self.spyBillingUsecase,
             aiAgentOrchestrationUsecase: self.stubAIOrchestrationUsecase,
             eventLiveActivityUsecase: self.spyEventLiveActivityUsecase,
-            guideTodoUsecase: self.stubGuideTodoUsecase
+            guideTodoUsecase: self.stubGuideTodoUsecase,
+            legalNoticeUsecase: self.stubLegalNoticeUsecase
         )
         viewModel.router = self.spyRouter
         self.spyRouter.didCalendarAttached = {
@@ -114,10 +118,26 @@ extension MainViewModelImpleTests {
             billingUsecase: self.spyBillingUsecase,
             aiAgentOrchestrationUsecase: self.stubAIOrchestrationUsecase,
             eventLiveActivityUsecase: self.spyEventLiveActivityUsecase,
-            guideTodoUsecase: self.stubGuideTodoUsecase
+            guideTodoUsecase: self.stubGuideTodoUsecase,
+            legalNoticeUsecase: self.stubLegalNoticeUsecase
         )
         viewModel.router = self.spyRouter
         return viewModel
+    }
+
+    private func makeUpdateInfo(
+        id: String = "notice_1",
+        documentType: LegalDocumentType,
+        effectiveDate: Date = Date(timeIntervalSince1970: 1_700_000_000)
+    ) -> LegalNoticeUpdateInfo {
+        return LegalNoticeUpdateInfo(id: id, documentType: documentType, effectiveDate: effectiveDate)
+    }
+
+    private func formattedEffectiveDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "date_form.yyyy_MM_dd".localized()
+        formatter.timeZone = TimeZone(secondsFromGMT: 0)
+        return formatter.string(from: date)
     }
 
     func testViewModel_whenPrepare_startObservingTransactionsAndRecoverUnfinished() {
@@ -561,6 +581,32 @@ extension MainViewModelImpleTests {
             return Empty().eraseToAnyPublisher()
         }
     }
+
+    private final class StubLegalNoticeUsecase: LegalNoticeUsecase, @unchecked Sendable {
+
+        private let updatesSubject = CurrentValueSubject<[LegalNoticeUpdateInfo], Never>([])
+        var didCheckNoticeIsNeed: Bool = false
+        var didConfirmNoticeWithDocumentType: LegalDocumentType?
+
+        func checkNoticeIsNeed() {
+            self.didCheckNoticeIsNeed = true
+        }
+
+        var pendingNoticeUpdates: AnyPublisher<[LegalNoticeUpdateInfo], Never> {
+            return self.updatesSubject.eraseToAnyPublisher()
+        }
+
+        func confirmNotice(_ documentType: LegalDocumentType) {
+            self.didConfirmNoticeWithDocumentType = documentType
+            self.updatesSubject.send(
+                self.updatesSubject.value.filter { $0.documentType != documentType }
+            )
+        }
+
+        func sendUpdates(_ updates: [LegalNoticeUpdateInfo]) {
+            self.updatesSubject.send(updates)
+        }
+    }
 }
 
 
@@ -683,5 +729,121 @@ extension MainViewModelImpleTests {
 
         // then
         XCTAssertEqual(self.stubGuideTodoUsecase.didPrepare, true)
+    }
+}
+
+
+// MARK: - 고지 배너
+
+extension MainViewModelImpleTests {
+
+    func testViewModel_whenTwoPendingUpdates_emitsTwoBannerModelsInOrder() {
+        // given
+        let expect = expectation(description: "미확인 문서 2건 -> 배너 모델 2건")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModelWithoutPrepare()
+
+        // when
+        let modelLists = self.waitOutputs(expect, for: viewModel.legalNoticeBanners) {
+            self.stubLegalNoticeUsecase.sendUpdates([
+                self.makeUpdateInfo(id: "terms_1", documentType: .terms),
+                self.makeUpdateInfo(id: "privacy_1", documentType: .privacy)
+            ])
+        }
+
+        // then
+        let models = modelLists.last
+        let expectedEffectiveDateText = "legal_notice.effectiveDate".localized(
+            with: self.formattedEffectiveDate(Date(timeIntervalSince1970: 1_700_000_000))
+        )
+        XCTAssertEqual(models?.map { $0.documentType }, [.terms, .privacy])
+        XCTAssertEqual(models?.map { $0.message }, [
+            "legal_notice.message::terms".localized(),
+            "legal_notice.message::privacy".localized()
+        ])
+        XCTAssertEqual(models?.map { $0.effectiveDateText }, [
+            expectedEffectiveDateText, expectedEffectiveDateText
+        ])
+    }
+
+    func testViewModel_whenOnePendingUpdate_emitsOneBannerModel() {
+        // given
+        let expect = expectation(description: "미확인 문서 1건 -> 배너 모델 1건")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModelWithoutPrepare()
+
+        // when
+        let modelLists = self.waitOutputs(expect, for: viewModel.legalNoticeBanners) {
+            self.stubLegalNoticeUsecase.sendUpdates([
+                self.makeUpdateInfo(documentType: .privacy)
+            ])
+        }
+
+        // then
+        let models = modelLists.last
+        XCTAssertEqual(models?.map { $0.documentType }, [.privacy])
+        XCTAssertEqual(models?.map { $0.message }, [
+            "legal_notice.message::privacy".localized()
+        ])
+    }
+
+    func testViewModel_whenNoPendingUpdates_emitsEmptyArray() {
+        // given
+        let expect = expectation(description: "미확인 문서가 없으면 빈 배열 방출")
+        let viewModel = self.makeViewModelWithoutPrepare()
+
+        // when
+        let models = self.waitFirstOutput(expect, for: viewModel.legalNoticeBanners)
+
+        // then
+        XCTAssertEqual(models, [])
+    }
+
+    func testViewModel_whenOpenDocument_showsWebViewForThatDocumentOnly() {
+        // given
+        let viewModel = self.makeViewModelWithoutPrepare()
+
+        // when
+        viewModel.openLegalNoticeDocument(.privacy)
+
+        // then
+        XCTAssertEqual(self.spyRouter.didShowWebViewPath, LegalDocumentType.privacy.linkPath)
+        XCTAssertNil(self.spyRouter.didShowActionSheetWith)
+    }
+
+    func testViewModel_whenCloseBanner_confirmsThatDocumentOnly() {
+        // given
+        let viewModel = self.makeViewModelWithoutPrepare()
+
+        // when
+        viewModel.closeLegalNoticeBanner(.terms)
+
+        // then
+        XCTAssertEqual(self.stubLegalNoticeUsecase.didConfirmNoticeWithDocumentType, .terms)
+    }
+
+    func testViewModel_whenPrepare_checkLegalNotice() {
+        // given
+        let viewModel = self.makeViewModelWithoutPrepare()
+
+        // when
+        viewModel.prepare()
+
+        // then
+        XCTAssertEqual(self.stubLegalNoticeUsecase.didCheckNoticeIsNeed, true)
+    }
+
+    func testViewModel_whenWillEnterForeground_checkLegalNotice() {
+        // given
+        let viewModel = self.makeViewModelWithoutPrepare()
+
+        // when
+        NotificationCenter.default.post(
+            name: UIApplication.willEnterForegroundNotification, object: nil
+        )
+
+        // then
+        XCTAssertEqual(self.stubLegalNoticeUsecase.didCheckNoticeIsNeed, true)
+        withExtendedLifetime(viewModel) { }
     }
 }
