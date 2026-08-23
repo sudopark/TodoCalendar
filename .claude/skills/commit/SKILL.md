@@ -42,3 +42,7 @@ GIT_SEQUENCE_EDITOR=true git rebase -i --autosquash <base>   # 대화형 rebase 
 PR 공개 이후의 반영도 같다 — 흡수 후 `--force-with-lease`. 리뷰어의 추적성은 커밋 분리가 아니라 **리뷰 스레드 대댓글**(무엇을 어떻게 고쳤는지 + 흡수한 커밋 sha)로 담보한다 (CLAUDE.md GitHub 조항).
 
 **한 라운드의 반영은 전부 흡수한 뒤 push 를 한 번만 한다. 회신·resolve 는 그 push 뒤에.** rebase 는 대상 커밋뿐 아니라 그 앞뒤 모든 커밋을 재생성해 sha 를 바꾼다 — 코멘트마다 흡수→push→회신을 반복하면 먼저 회신에 적은 sha 가 다음 흡수로 곧바로 죽는다. 순서를 지키면 회신에 적는 sha 가 전부 최종본을 가리킨다.
+
+## 종료 기록 — skill_end
+
+**유저가 커밋 자체를 목적으로 직접 지시한 독립 런에서만** 남긴다 — 커밋(흡수 포함)을 마친 직후 `log-record.py skill_end --name commit` (명령·compliance 규칙은 CLAUDE.md §1). implement 완료 판정·pr 리뷰 반영·SDD 태스크 흐름 안에서 도구로 호출된 커밋은 기록하지 않는다 — 종료는 상위 스킬이 남긴다.

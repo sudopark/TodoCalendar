@@ -11,6 +11,7 @@
     "open-external"
   ],
   "missing_rate_exempt_skills": [
+    "commit",
     "pair-programming",
     "run-tests",
     "snapshot-check"
