@@ -5,6 +5,8 @@ paths:
   - "Repository/**"
   - "Presentations/**"
   - "Services/**"
+  - "TodoCalendarApp/**"
+  - "Supports/**"
 ---
 
 # 테스트 작성 규칙
@@ -191,7 +193,7 @@ extension AppDataMigrationImpleTests {
 
 | Module | Contents |
 |---|---|
-| `UnitTestHelpKit` | `BaseTestCase`, `PublisherWaitable`, `BaseStub`, `TestError` |
+| `UnitTestHelpKit` | `BaseTestCase`, `PublisherWaitable`, `AsyncEffectWaitable`, `BaseStub`, `TestError` |
 | `TestDoubles` | 공유 Stub repositories / stub usecases |
 | `SnapshotTestHelpKit` | `captureSnapshotPair`·`SnapshotTheme`·`catalogSnapshotDirectory` — 스냅샷 캡처 (snapshot-check 스킬) |
 
@@ -203,3 +205,19 @@ extension AppDataMigrationImpleTests {
 - `Tests/`는 `Sources/`의 폴더 구조를 미러링한다 (예: `Sources/Usecases/…` → `Tests/Usecases/…`).
 - 구현체 테스트 파일명은 대상 타입명 + `Tests`: `XxxImpleTests.swift` (예: `EventTagDetailViewModelImpleTests.swift`).
 - 테스트 더블은 해당 프레임워크 `Tests/Doubles/`에. 여러 프레임워크가 공유하면 `TestDoubles` 모듈에 (§7).
+
+---
+
+## 9. 비동기 효과 대기 — 고정 sleep 금지
+
+`Task.sleep` 으로 효과 도착을 기다리지 않는다. `UnitTestHelpKit.AsyncEffectWaitable` 을 채택하고 조건이 참이 될 때까지 폴링한다 — 병렬 실행 부하로 효과가 늦어도 대기 시간만 늘고 판정은 안 흔들린다.
+
+```swift
+try await self.waitEffect("갱신된 이름이 반영됨") { stub.didUpdateWith?.eventName == "new" }
+#expect(stub.didUpdateWith?.eventName == "new")
+```
+
+- 조건이 끝내 참이 안 되면 `AsyncEffectWaitTimeout` 을 던진다. 설명 문자열은 필수 — 무엇을 기다리다 실패했는지가 메시지에 남는다.
+- **"안 일어남" 단언**(`#expect(stub.didEnd == false)`)은 기다릴 조건이 없어 정착 sleep 이 맞다. 짧아도 오탐이 아니라 오통과 방향이라 플레이키를 안 만든다.
+- **"정확히 N회" 단언**은 도달까지 폴링한 뒤 정착 시간을 두고 다시 본다 — 도달 즉시 단언하면 뒤늦은 중복 방출을 놓친다.
+- 정착 시간은 **50ms** 를 기본으로 쓴다. 사람마다 다른 매직넘버가 흩어지지 않게 이 값을 기준으로 두고, 벗어나면 이유를 한 줄 남긴다.
