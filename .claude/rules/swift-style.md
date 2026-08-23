@@ -80,3 +80,33 @@ self.someFunction { [repository] in repository.load() }
 PR 올리기 전 `python3 .claude/scripts/check-comments.py`로 이번 브랜치가 추가한 주석을 훑는다 (pr 스킬 소관). 지적된 건은 기본이 삭제다.
 
 배경: #820 — AI 작업으로 유입된 서술형 주석 354줄을 사후 일괄 정리했다.
+
+## 6. 구독 보관함 — `Set<AnyCancellable>` 대신 `CancelBag`
+
+프로덕션 코드는 구독을 `Extensions` 의 `CancelBag` 에 담는다. `Set<AnyCancellable>` 프로퍼티를 직접 두지 않는다.
+
+```swift
+// ❌
+private var cancellables: Set<AnyCancellable> = []
+... .store(in: &self.cancellables)
+
+// ✅
+private let cancellables = CancelBag()
+... .store(in: self.cancellables)
+```
+
+**Why:** 뷰모델·유스케이스는 대개 `@unchecked Sendable` 이고, `Task` 본문 안에서 구독을 담는 순간 메인 스레드의 `store` 와 겹쳐 Set 저장소가 깨진다. 손상된 Set 은 `member:` unrecognized selector 로 프로세스를 죽이는데, 수신 클래스가 런마다 바뀌어 원인 추적이 어렵다 (`docs/troubleshooting/2026-08-24-cancelbag-data-race-crash.md`). `CancelBag` 은 잠금으로 그 경로를 막는다.
+
+- 비우기는 `cancelAll()`.
+- 예외는 `UnitTestHelpKit.PublisherWaitable` 뿐이다. 테스트마다 인스턴스가 새로 생겨 레이스가 없다.
+
+### 검증
+
+기계 강제 수단은 아직 없다. PR 전에 직접 확인한다 (pr 스킬 소관):
+
+```bash
+grep -rn "Set<AnyCancellable>" --include='*.swift' Domain Repository Presentations Services TodoCalendarApp Supports Template \
+  | grep -vE "Tests/|Snapshots/|CancelBag\.swift|Task\+Extensions\.swift|PublisherWaitable\.swift"
+```
+
+출력이 비어야 한다. Xcode Scene 템플릿(`Template/`)도 대상이다 — 거기 남으면 새 Scene 마다 위반이 복제된다.

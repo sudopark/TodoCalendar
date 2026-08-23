@@ -97,7 +97,7 @@ final class XXXViewModelImple: XXXViewModel, @unchecked Sendable {
         let someState = CurrentValueSubject<SomeType?, Never>(nil)
     }
     private let subject = Subject()
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
 
     init(someUsecase: any SomeUsecase) { ... }
 }
@@ -159,7 +159,7 @@ graph LR
 // ViewState — ViewModel Publisher를 구독하여 View용 상태로 변환
 @Observable final class XXXViewState {
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
 
     var someValue: String = ""
 
@@ -169,7 +169,7 @@ graph LR
         viewModel.someState
             .receive(on: RunLoop.main)
             .sink { [weak self] in self?.someValue = $0 }
-            .store(in: &cancellables)
+            .store(in: cancellables)
     }
 }
 

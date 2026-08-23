@@ -5,6 +5,7 @@
 import Foundation
 import Combine
 import Domain
+import Extensions
 import Scenes
 
 
@@ -33,7 +34,7 @@ final class ___VARIABLE_sceneName___ViewModelImple: ___VARIABLE_sceneName___View
         
     }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private let subject = Subject()
 }
 
