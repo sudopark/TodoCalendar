@@ -4,6 +4,7 @@
 
 import UIKit
 import Combine
+import Extensions
 import Scenes
 import CommonPresentation
 
@@ -18,7 +19,7 @@ final class ___VARIABLE_sceneName___ViewController: UIViewController, ___VARIABL
     @MainActor
     var interactor: (any ___VARIABLE_sceneName___SceneInteractor)? { self.viewModel }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     
     init(
         viewModel: any ___VARIABLE_sceneName___ViewModel,
@@ -55,7 +56,7 @@ extension ___VARIABLE_sceneName___ViewController {
             .sink(receiveValue: { [weak self] tuple in
                 self?.setupStyling(tuple.1, tuple.2)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

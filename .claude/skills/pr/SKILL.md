@@ -15,6 +15,10 @@ description: Use when creating or merging a pull request in this project — PR 
 - 페이즈가 나뉘는 작업은 페이즈별 PR — 머지 후 다음 페이즈 착수.
 - WIP 정리는 PR 올리기 전에 (commit 스킬의 흡수 절차) — 리뷰어에게 보이는 커밋은 논리 단위 최종본이어야 한다.
 
+### 구독 보관함 검토 (필수)
+
+프로덕션에 `Set<AnyCancellable>` 이 남지 않았는지 본다 — 검증 명령과 배경은 `.claude/rules/swift-style.md` §6 `검증`. 출력이 비어야 통과다.
+
 ### 주석 검토 (필수)
 
 PR 생성 **전에** 이번 브랜치가 추가한 주석을 훑는다:

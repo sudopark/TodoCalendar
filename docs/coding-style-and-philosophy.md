@@ -191,7 +191,7 @@ let userDefaults = suiteName.flatMap { UserDefaults(suiteName: $0) } ?? .standar
 // Trailing closure
 self.todoRepository.loadCurrentTodoEvents()
     .sink(receiveCompletion: { _ in }, receiveValue: updateCached)
-    .store(in: &self.cancellables)
+    .store(in: self.cancellables)
 
 // [weak self] capture
 let updateCached: ([TodoEvent]) -> Void = { [weak self] currents in

@@ -6,6 +6,7 @@
 import SwiftUI
 import Combine
 import Domain
+import Extensions
 import CommonPresentation
 
 
@@ -14,7 +15,7 @@ import CommonPresentation
 @Observable final class ___VARIABLE_sceneName___ViewState {
     
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
     
     func bind(_ viewModel: any ___VARIABLE_sceneName___ViewModel) {
         
