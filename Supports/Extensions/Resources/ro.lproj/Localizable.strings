@@ -112,8 +112,12 @@
 
 "calendar::foremostevent:title" = "Eveniment principal";
 "calendar::uncompletedTodos:title" = "Sarcini neterminate";
+"calendar::guideTodo::name" = "Vezi cum funcționează To-do Calendar";
+"calendar::eventSync::loadingAllEvents::message" = "Se încarcă toate evenimentele…";
 "calendar::event_time::todo" = "Sarcină";
 "calendar::event_time::allday" = "Toată ziua";
+"calendar::event_time::start" = "Început";
+"calendar::event_time::end" = "Sfârșit";
 "calendar::event_time::allday::with" = "%@ toată ziua";
 "calendar::event_time::period:some_days" = "%d zile";
 "calendar::event_time::period:some_minutes" = "%d minute";
@@ -123,11 +127,13 @@
 "calendar::event::more_action::foremost_event:title" = "Eveniment principal";
 "calendar::event::more_action::remove_only_thistime:message" = "Doriți să eliminați doar acest eveniment din toate evenimentele repetitive?";
 "calendar::event::more_action::remove:message" = "Doriți să eliminați acest eveniment?";
+"calendar::event::more_action::remove_this_and_future:message" = "Doriți să eliminați acest eveniment și pe toate cele viitoare din seria de evenimente repetitive?";
 "calendar::event::more_action::mark_as_foremost" = "Doriți să marcați acest eveniment ca fiind cel mai important?";
 "calendar::event::more_action::unmark_as_foremost" = "Doriți să anulați marcarea acestui eveniment ca fiind cel mai important?";
 "calendar::event::more_action::mark_as_foremost::unavail" = "O programare repetitivă nu poate fi marcată drept cel mai important eveniment.";
 "calendar::event::more_action:remove_only_thistime:item_name" = "Elimină doar acest eveniment";
 "calendar::event::more_action:remove:item_name" = "Elimină evenimentul";
+"calendar::event::more_action:remove_this_and_future:item_name" = "Elimină acest eveniment și pe toate cele viitoare";
 "calendar::event::more_action:foremost:mark:item_name" = "Marchează ca principal";
 "calendar::event::more_action:foremost:unmark:item_name" = "Anulează marcarea principală";
 "calendar::event::more_action:dday_candidate:register:item_name" = "Adaugă la widgetul Numărătoare inversă";
@@ -135,7 +141,24 @@
 "calendar::event::more_action:dday_candidate:title" = "Candidat pentru widgetul Numărătoare inversă";
 "calendar::event::more_action:dday_candidate:register:message" = "Adaugi acest eveniment ca fiind candidat pentru widgetul Numărătoare inversă? Va apărea în partea de sus a listei când editezi widgetul.";
 "calendar::event::more_action:dday_candidate:unregister:message" = "Elimini acest eveniment dintre candidații pentru widgetul Numărătoare inversă?";
+"calendar::event::more_action:live_activity:title" = "Activitate live";
+"calendar::event::more_action:live_activity:register:item_name" = "Afișează pe ecranul de blocare";
+"calendar::event::more_action:live_activity:unregister:item_name" = "Elimină de pe ecranul de blocare";
+"calendar::event::more_action:live_activity:unavail::not_found" = "Acest eveniment nu mai este disponibil.";
+"calendar::event::more_action:live_activity:unavail::already_passed" = "Acest eveniment a început deja.";
+"calendar::event::more_action:live_activity:unavail::too_far_future" = "Pot fi afișate doar evenimentele care încep în următoarele 8 ore.";
+"calendar::event::more_action:live_activity:register:confirm" = "Doriți să afișați acest eveniment pe ecranul de blocare?";
+"calendar::event::more_action:live_activity:unregister:confirm" = "Doriți să eliminați acest eveniment de pe ecranul de blocare?";
+"calendar::event::more_action:live_activity:replace:confirm" = "Alt eveniment este afișat pe ecranul de blocare. Doriți să îl înlocuiți cu acesta?";
+"calendar::event::more_action:live_activity:register:success" = "Acum se afișează pe ecranul de blocare. Blocați dispozitivul pentru a-l vedea.";
 "calendar::event::more_action:copy:item_name" = "Copiază evenimentul";
+"calendar::event::more_action:share:item_name" = "Distribuie";
+"event_detail::share::field::time" = "Ora";
+"event_detail::share::field::repeating" = "Repetare";
+"event_detail::share::field::calendar" = "Calendar";
+"event_detail::share::field::place" = "Locație";
+"event_detail::share::field::url" = "Link";
+"event_detail::share::field::memo" = "Notă";
 "calendar::event::more_action:transform_to::schedule" = "Convertește în programare";
 "calendar::event::more_action:transform_to::todo" = "Convertește în sarcină";
 "calendar::event::more_action:edit:item_name" = "Editează";
@@ -145,6 +168,9 @@
 "calednar::event::skip_todo_until" = "Selectați ora până la care omiteți această sarcină";
 "calednar::event::copy" = "Copiază evenimentul";
 "calendar::move_date" = "Mută data";
+"calendar::share::this_day" = "Distribuie această zi";
+"calendar::share::this_week" = "Distribuie această săptămână";
+"calendar::share::this_month" = "Distribuie această lună";
 
 
 // MARK: - event detail
@@ -266,12 +292,33 @@
 "eventDetail::gogoleEvent::conference::password" = "Parolă";
 "eventDetail::gogoleEvent::copy::message" = "Copiat în clipboard.";
 "eventDetail::gogoleEvent::canceled::message" = "Acest eveniment a fost anulat.";
+"eventDetail::gogoleEvent::saved::message" = "Evenimentul a fost salvat.";
+"eventDetail::gogoleEvent::readOnlyCalendar::message" = "Acest calendar este doar pentru citire, așa că evenimentul nu poate fi editat aici.";
+"eventDetail::gogoleEvent::reauthenticate::title" = "Este necesară o permisiune suplimentară";
+"eventDetail::gogoleEvent::reauthenticate::message" = "Acest cont Google este conectat cu acces doar pentru citire. Pentru a edita evenimente, trebuie să acordați separat permisiunea de editare.";
+"eventDetail::gogoleEvent::writeScopeNotGranted::message" = "Permisiunea de editare nu a fost acordată. Dacă acesta este un cont de serviciu sau școlar, este posibil ca administratorul să nu o permită.";
+"eventDetail::gogoleEvent::repeating::title" = "Acesta este un eveniment repetitiv";
+"eventDetail::gogoleEvent::repeating::onlyThisTime::button" = "Doar acest eveniment";
+"eventDetail::gogoleEvent::repeating::all::button" = "Toate evenimentele";
+"eventDetail::gogoleEvent::remove::confirm::message" = "Ștergeți acest eveniment din Google Calendar?";
+"eventDetail::gogoleEvent::editOnCalendar" = "Editează în Google Calendar";
+"eventDetail::gogoleEvent::notEditableField::message" = "Acest element nu poate fi editat aici. Editați-l în Google Calendar.";
+"eventDetail::gogoleEvent::description::formatLoss::message" = "Această descriere are formatare. Dacă o editați aici, formatarea se va pierde.";
 
 // MARK: - Apple calendar event
 "eventDetail::appleCalendarEvent::viewOnCalendar" = "Vizualizează în Apple Calendar";
+"eventDetail::appleCalendarEvent::editOnCalendar" = "Editează în Apple Calendar";
 "eventDetail::appleCalendarEvent::calendar::event" = "Eveniment Apple Calendar";
 "eventDetail::appleCalendarEvent::attendees" = "Participanți (%d persoane)";
 "eventDetail::appleCalendarEvent::attendees::organizer" = "Organizator";
+"eventDetail::appleCalendarEvent::saved::message" = "Salvat.";
+"eventDetail::appleCalendarEvent::remove::confirm::message" = "Ștergeți acest eveniment?";
+"eventDetail::appleCalendarEvent::repeating::title" = "Eveniment repetitiv";
+"eventDetail::appleCalendarEvent::repeating::onlyThisTime::button" = "Doar acest eveniment";
+"eventDetail::appleCalendarEvent::repeating::thisAndFuture::button" = "Acest eveniment și toate cele viitoare";
+"eventDetail::appleCalendarEvent::readOnlyCalendar::message" = "Acest calendar este doar pentru citire, așa că evenimentul nu poate fi editat.";
+"eventDetail::appleCalendarEvent::notEditableField::message" = "Acest câmp nu poate fi editat în aplicație.";
+"eventDetail::appleCalendarEvent::url::placeholder" = "URL";
 
 // MARK: - event tag
 
@@ -310,6 +357,23 @@
 "eventList::remove::confirm::button::olderThan1y" = "Mai vechi de 1 an";
 
 
+// MARK: - share preview
+
+"share_preview::title" = "Previzualizare distribuire";
+"share_preview::tag_filter::title" = "Tipuri de eveniment";
+"share_preview::tag_filter::select_all" = "Selectează tot";
+"share_preview::tag_filter::deselect_all" = "Deselectează tot";
+"share_preview::option::include_tag_name" = "Include tipul de eveniment";
+"share_preview::share_button" = "Distribuie";
+"share_preview::empty" = "Niciun eveniment de distribuit";
+"share_preview::header::this_week" = "Săptămâna aceasta";
+"share_preview::header::last_week" = "Săptămâna trecută";
+"share_preview::header::next_week" = "Săptămâna viitoare";
+"share_preview::header::week_of_month" = "Săptămâna %2$d din %1$@";
+"share_preview::format::text" = "Text";
+"share_preview::format::image" = "Imagine";
+
+
 // MARK: - account
 
 "manage_account::title" = "Gestionarea contului";
@@ -326,6 +390,9 @@
 "manage_account::delete_account_button::confirm:message" = "Sigur doriți să vă ștergeți contul?";
 "manage_account::delete_account_button::description" = "După solicitarea ștergerii, contul va fi șters.\nDupă ștergere, datele contului nu pot fi recuperate.";
 "signIn::title" = "Autentificare";
+"signIn::feature::sync" = "Fă backup evenimentelor și sincronizează-le între dispozitive";
+"signIn::feature::aiAgent" = "Gestionează-ți programul cu agentul AI";
+"signIn::feature::web" = "Folosește-l pe web · todo-calendar.com";
 
 
 // MARK: - setting
@@ -411,9 +478,14 @@
 "setting.aiGuide::name" = "Adaugă cu AI – Siri și widget-uri";
 "setting.feedback::name" = "Feedback";
 "setting.help::name" = "Ajutor";
+"setting.openWeb::name" = "Deschide pe web";
 "setting.share::name" = "Distribuie aplicația";
 "setting.write_review::name" = "Scrie o recenzie despre aplicație";
+"setting.openSourceLicense::name" = "Licențe open source";
 "setting.billing.plan::name" = "Plan";
+"setting.terms::name" = "Termeni de utilizare";
+"setting.privacyPolicy::name" = "Politica de confidențialitate";
+"setting.adPrivacyOptions::name" = "Opțiuni de confidențialitate pentru reclame";
 "setting.account.signedIn::manageAccount" = "Cont";
 "setting.account.needSignIn" = "Autentificare";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -516,6 +588,11 @@
 "widget.aiCommand::title" = "Adăugați cu AI";
 "widget.aiCommand::explain" = "Atingeți o dată pentru a deschide introducerea AI.";
 
+// MARK: - liveActivity
+
+"liveActivity::stale" = "Începe acum";
+"liveActivity::action::end" = "Încheie";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "Acest format de link nu este acceptat.\nVă rugăm actualizați aplicația la cea mai recentă versiune.";
@@ -546,9 +623,13 @@
 "aiAgent::state::failed" = "Comandă eșuată";
 "aiAgent::done::default" = "Gata";
 "aiAgent::failed::default" = "Nu s-a putut finaliza";
+"aiAgent::failed::dailyLimitExceeded" = "Ai epuizat creditele AI de astăzi.";
 "aiAgent::retry" = "Reîncearcă";
 "aiAgent::needSignIn::title" = "Este necesară autentificarea";
 "aiAgent::needSignIn::message" = "Autentificați-vă pentru a folosi introducerea rapidă AI.";
+"aiAgent::speechPermissionDenied::title" = "Este necesară permisiunea";
+"aiAgent::speechPermissionDenied::message" = "Permiteți accesul la microfon și la recunoașterea vocală din Setări pentru a folosi introducerea vocală.";
+"aiAgent::speechPermissionDenied::confirm" = "Deschide Setările";
 "aiAgent::title" = "Introducere rapidă AI";
 "aiAgent::keyboard::stop" = "Stop";
 "aiAgent::keyboard::send" = "Trimite";
@@ -577,6 +658,8 @@
 "aiAgent::image::textTooLong" = "Textul este prea lung. Scurtați-l și încercați din nou.";
 "aiAgent::image::instructionTooLong" = "Instrucțiunile dvs. sunt prea lungi. Scurtați-le și încercați din nou.";
 "aiAgent::image::busy" = "O altă solicitare încă rulează";
+"aiAgent::image::camera::denied::title" = "Este necesar accesul la cameră";
+"aiAgent::image::camera::denied::message" = "Permiteți accesul la cameră din Setări pentru a face o fotografie.";
 
 // MARK: - billing
 
@@ -596,6 +679,7 @@
 "billing::paywall::features::title" = "Ce include %@";
 "billing::paywall::feature::dailyCredits" = "%@ credite pe zi";
 "billing::paywall::feature::topup" = "Poți cumpăra mai multe credite când se epuizează";
+"billing::paywall::feature::noAds" = "Fără reclame";
 "billing::paywall::disclosure::subscription" = "Abonamentul se reînnoiește automat în fiecare lună, dacă nu îl anulezi cu cel puțin 24 de ore înainte de sfârșitul perioadei curente. Îl poți anula oricând din setările App Store.";
 "billing::paywall::disclosure::subscription::generic" = "Abonamentul se reînnoiește automat la sfârșitul fiecărei perioade de facturare, dacă nu îl anulezi cu cel puțin 24 de ore înainte de încheierea acesteia. Îl poți anula oricând din setările App Store.";
 "billing::paywall::disclosure::oneTime" = "Plătește o singură dată și păstrează-l pentru totdeauna. Acesta nu se reînnoiește automat.";
@@ -609,11 +693,31 @@
 "billing::paywall::restore" = "Restaurează achizițiile";
 "billing::paywall::restored" = "Achiziții restaurate";
 "billing::paywall::restore::empty" = "Nu există achiziții de restaurat.";
+"billing::paywall::manageSubscription" = "Gestionează abonamentul";
 "billing::paywall::purchase::applied" = "Plan actualizat";
 "billing::paywall::pending::title" = "Aprobare în așteptare";
 "billing::paywall::pending::message" = "Cere unui organizator al familiei să aprobe această achiziție. Se va aplica automat după aprobare.";
 "billing::paywall::userPlan::loadFailed" = "Nu s-a putut încărca planul tău. Încearcă din nou.";
 "billing::paywall::retry" = "Reîncearcă";
+"billing::paywall::unfinished::title" = "Există o achiziție neaplicată";
+"billing::paywall::unfinished::message" = "Plata a fost efectuată, dar planul tău nu s-a actualizat încă.";
+"billing::paywall::unfinished::action" = "Aplică acum";
+"billing::paywall::unfinished::applied" = "Achiziția a fost aplicată";
+"billing::paywall::processing::message" = "Se confirmă achiziția…";
+"billing::paywall::fail::purchase" = "Nu am putut finaliza achiziția. Încearcă din nou.";
+"billing::paywall::fail::invalidTransaction" = "Nu am putut verifica achiziția. Încearcă din nou peste puțin timp.";
+"billing::paywall::fail::unknownProduct" = "Nu am putut recunoaște această achiziție. Actualizarea aplicației ar putea rezolva problema.";
+"billing::paywall::fail::planChangeNotAllowed" = "Această schimbare de plan nu este acceptată.";
+"billing::paywall::fail::ownedByAnotherAccount" = "Această achiziție aparține altui cont. Autentifică-te cu contul cu care ai făcut-o.";
+"billing::paywall::fail::reflectDelayed" = "Plata a fost efectuată, dar aplicarea întârzie. Se va aplica automat.";
+"billing::paywall::topup::credits" = "%@ credite";
+"billing::paywall::topup::credits::split" = "Credite: %@ de bază + %@ bonus";
+"billing::paywall::topup::bonus" = "+%@%% bonus";
+"billing::paywall::topup::title" = "Adaugă credite";
+"billing::paywall::topup::title::withRemaining" = "Adaugă credite · %@ disponibile";
+"billing::paywall::topup::description" = "Creditele suplimentare sunt folosite după epuizarea limitei zilnice și nu expiră.";
+"billing::paywall::topup::applied" = "Credite adăugate";
+"billing::paywall::topup::applied::withCredits" = "%@ credite adăugate";
 
 // MARK: - share extension
 
@@ -627,8 +731,21 @@
 "share.ai::sentButUntracked" = "Trimis, dar aplicația nu poate urmări rezultatul. Verificați calendarul peste puțin timp.";
 "share.ai::textTooLong" = "Textul este prea lung pentru a fi trimis. Scurtați-l și încercați din nou.";
 "share.ai::instructionTooLong" = "Instrucțiunea dvs. este prea lungă. Scurtați-o.";
+"share.ai::limitExceeded" = "Ai epuizat creditele AI de astăzi. Se resetează la miezul nopții UTC.";
 "share.ai::image::title" = "Trimite imaginea către AI";
 "share.ai::image::recognizing" = "Se citește textul din imagine…";
 "share.ai::image::text::caption" = "Text citit din imagine — editați-l dacă ceva pare greșit.";
 "share.ai::image::text::placeholder" = "Text citit din imagine";
 "share.ai::image::noTextFound" = "Nu s-a găsit niciun text în această imagine. Introduceți ce doriți să adăugați.";
+
+// MARK: - webview
+
+"webview::error::message" = "Nu s-a putut încărca această pagină.";
+"webview::error::retry" = "Încearcă din nou";
+"webview::openInBrowser" = "Deschide în browser";
+
+// MARK: - legal notice
+
+"legal_notice.message::terms" = "Termenii și condițiile noastre au fost actualizate.";
+"legal_notice.message::privacy" = "Politica noastră de confidențialitate a fost actualizată.";
+"legal_notice.effectiveDate" = "În vigoare de la %@";
