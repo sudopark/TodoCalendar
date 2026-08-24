@@ -36,7 +36,8 @@ def entries(path):
     return dict(found), dup
 
 def specs(value):
-    return sorted(re.sub(r'\d+\$', '', m) for m in SPEC.findall(value))
+    # %% 는 리터럴 퍼센트라 지정자가 아니다 — 먼저 걷어내지 않으면 "+%@%% extra" 의 "% e" 를 지정자로 잡는다
+    return sorted(re.sub(r'\d+\$', '', m) for m in SPEC.findall(value.replace('%%', '')))
 
 def check_en():
     ok = True
