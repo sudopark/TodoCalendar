@@ -112,8 +112,12 @@
 
 "calendar::foremostevent:title" = "सबसे महत्वपूर्ण इवेंट";
 "calendar::uncompletedTodos:title" = "अधूरे कार्य";
+"calendar::guideTodo::name" = "देखें To-do Calendar कैसे काम करता है";
+"calendar::eventSync::loadingAllEvents::message" = "आपके सभी इवेंट लाए जा रहे हैं…";
 "calendar::event_time::todo" = "कार्य";
 "calendar::event_time::allday" = "पूरे दिन";
+"calendar::event_time::start" = "शुरू";
+"calendar::event_time::end" = "समाप्त";
 "calendar::event_time::allday::with" = "%@ पूरे दिन";
 "calendar::event_time::period:some_days" = "%d दिन";
 "calendar::event_time::period:some_minutes" = "%d मिनट";
@@ -123,11 +127,13 @@
 "calendar::event::more_action::foremost_event:title" = "सबसे महत्वपूर्ण इवेंट";
 "calendar::event::more_action::remove_only_thistime:message" = "क्या आप सभी दोहराए जाने वाले इवेंट में से केवल इस इवेंट को हटाना चाहते हैं?";
 "calendar::event::more_action::remove:message" = "क्या आप इस इवेंट को हटाना चाहते हैं?";
+"calendar::event::more_action::remove_this_and_future:message" = "क्या आप इस और आगे के सभी दोहराए जाने वाले इवेंट हटाना चाहते हैं?";
 "calendar::event::more_action::mark_as_foremost" = "क्या आप इस इवेंट को अपने सबसे महत्वपूर्ण इवेंट के रूप में चिह्नित करना चाहते हैं?";
 "calendar::event::more_action::unmark_as_foremost" = "क्या आप इस इवेंट से सबसे महत्वपूर्ण का चिह्न हटाना चाहते हैं?";
 "calendar::event::more_action::mark_as_foremost::unavail" = "दोहराई जाने वाली अनुसूची इवेंट को सबसे महत्वपूर्ण इवेंट के रूप में चिह्नित नहीं किया जा सकता।";
 "calendar::event::more_action:remove_only_thistime:item_name" = "केवल यह इवेंट हटाएं";
 "calendar::event::more_action:remove:item_name" = "इवेंट हटाएं";
+"calendar::event::more_action:remove_this_and_future:item_name" = "यह और आगे के सभी इवेंट हटाएं";
 "calendar::event::more_action:foremost:mark:item_name" = "सबसे महत्वपूर्ण के रूप में चिह्नित करें";
 "calendar::event::more_action:foremost:unmark:item_name" = "सबसे महत्वपूर्ण का चिह्न हटाएं";
 "calendar::event::more_action:dday_candidate:register:item_name" = "डी-डे विजेट में जोड़ें";
@@ -135,7 +141,24 @@
 "calendar::event::more_action:dday_candidate:title" = "डी-डे विजेट उम्मीदवार";
 "calendar::event::more_action:dday_candidate:register:message" = "इस इवेंट को डी-डे विजेट के उम्मीदवार के रूप में जोड़ें? विजेट संपादित करते समय यह सूची में सबसे ऊपर दिखेगा।";
 "calendar::event::more_action:dday_candidate:unregister:message" = "इस इवेंट को डी-डे विजेट के उम्मीदवारों से हटाएं?";
+"calendar::event::more_action:live_activity:title" = "लाइव गतिविधि";
+"calendar::event::more_action:live_activity:register:item_name" = "लॉक स्क्रीन पर दिखाएं";
+"calendar::event::more_action:live_activity:unregister:item_name" = "लॉक स्क्रीन से हटाएं";
+"calendar::event::more_action:live_activity:unavail::not_found" = "यह इवेंट अब उपलब्ध नहीं है।";
+"calendar::event::more_action:live_activity:unavail::already_passed" = "यह इवेंट पहले ही शुरू हो चुका है।";
+"calendar::event::more_action:live_activity:unavail::too_far_future" = "केवल 8 घंटे के भीतर शुरू होने वाले इवेंट ही दिखाए जा सकते हैं।";
+"calendar::event::more_action:live_activity:register:confirm" = "क्या आप इस इवेंट को लॉक स्क्रीन पर दिखाना चाहते हैं?";
+"calendar::event::more_action:live_activity:unregister:confirm" = "क्या आप इस इवेंट को लॉक स्क्रीन से हटाना चाहते हैं?";
+"calendar::event::more_action:live_activity:replace:confirm" = "लॉक स्क्रीन पर कोई दूसरा इवेंट दिख रहा है। उसे इससे बदलें?";
+"calendar::event::more_action:live_activity:register:success" = "अब लॉक स्क्रीन पर दिख रहा है। देखने के लिए अपना डिवाइस लॉक करें।";
 "calendar::event::more_action:copy:item_name" = "इवेंट कॉपी करें";
+"calendar::event::more_action:share:item_name" = "साझा करें";
+"event_detail::share::field::time" = "समय";
+"event_detail::share::field::repeating" = "दोहराव";
+"event_detail::share::field::calendar" = "कैलेंडर";
+"event_detail::share::field::place" = "स्थान";
+"event_detail::share::field::url" = "लिंक";
+"event_detail::share::field::memo" = "मेमो";
 "calendar::event::more_action:transform_to::schedule" = "अनुसूची में बदलें";
 "calendar::event::more_action:transform_to::todo" = "कार्य में बदलें";
 "calendar::event::more_action:edit:item_name" = "संपादित करें";
@@ -145,6 +168,9 @@
 "calednar::event::skip_todo_until" = "इस कार्य को छोड़ने के लिए एक समय चुनें";
 "calednar::event::copy" = "इवेंट कॉपी करें";
 "calendar::move_date" = "तारीख बदलें";
+"calendar::share::this_day" = "यह दिन साझा करें";
+"calendar::share::this_week" = "यह सप्ताह साझा करें";
+"calendar::share::this_month" = "यह महीना साझा करें";
 
 
 // MARK: - event detail
@@ -266,12 +292,33 @@
 "eventDetail::gogoleEvent::conference::password" = "पासवर्ड";
 "eventDetail::gogoleEvent::copy::message" = "क्लिपबोर्ड पर कॉपी हो गया।";
 "eventDetail::gogoleEvent::canceled::message" = "यह इवेंट रद्द कर दिया गया है।";
+"eventDetail::gogoleEvent::saved::message" = "इवेंट सहेज लिया गया है।";
+"eventDetail::gogoleEvent::readOnlyCalendar::message" = "यह कैलेंडर केवल-पढ़ने के लिए है, इसलिए इवेंट यहां संपादित नहीं किया जा सकता।";
+"eventDetail::gogoleEvent::reauthenticate::title" = "अतिरिक्त अनुमति आवश्यक है";
+"eventDetail::gogoleEvent::reauthenticate::message" = "यह Google खाता केवल-पढ़ने की पहुंच के साथ जुड़ा है। इवेंट संपादित करने के लिए आपको संपादन की अनुमति अलग से देनी होगी।";
+"eventDetail::gogoleEvent::writeScopeNotGranted::message" = "संपादन की अनुमति नहीं मिली। यदि यह कार्य या स्कूल खाता है, तो आपका व्यवस्थापक इसकी अनुमति नहीं दे रहा हो सकता है।";
+"eventDetail::gogoleEvent::repeating::title" = "यह एक दोहराया जाने वाला इवेंट है";
+"eventDetail::gogoleEvent::repeating::onlyThisTime::button" = "केवल यह इवेंट";
+"eventDetail::gogoleEvent::repeating::all::button" = "सभी इवेंट";
+"eventDetail::gogoleEvent::remove::confirm::message" = "Google कैलेंडर से यह इवेंट हटाएं?";
+"eventDetail::gogoleEvent::editOnCalendar" = "Google कैलेंडर में संपादित करें";
+"eventDetail::gogoleEvent::notEditableField::message" = "इसे यहां संपादित नहीं किया जा सकता। कृपया इसे Google कैलेंडर में संपादित करें।";
+"eventDetail::gogoleEvent::description::formatLoss::message" = "इस विवरण में फ़ॉर्मेटिंग है। इसे यहां संपादित करने पर फ़ॉर्मेटिंग हट जाएगी।";
 
 // MARK: - Apple calendar event
 "eventDetail::appleCalendarEvent::viewOnCalendar" = "Apple कैलेंडर में देखें";
+"eventDetail::appleCalendarEvent::editOnCalendar" = "Apple कैलेंडर में संपादित करें";
 "eventDetail::appleCalendarEvent::calendar::event" = "Apple कैलेंडर इवेंट";
 "eventDetail::appleCalendarEvent::attendees" = "उपस्थित लोग (%d लोग)";
 "eventDetail::appleCalendarEvent::attendees::organizer" = "आयोजक";
+"eventDetail::appleCalendarEvent::saved::message" = "सहेजा गया।";
+"eventDetail::appleCalendarEvent::remove::confirm::message" = "यह इवेंट हटाएं?";
+"eventDetail::appleCalendarEvent::repeating::title" = "दोहराया जाने वाला इवेंट";
+"eventDetail::appleCalendarEvent::repeating::onlyThisTime::button" = "केवल यह इवेंट";
+"eventDetail::appleCalendarEvent::repeating::thisAndFuture::button" = "यह और आगे के सभी इवेंट";
+"eventDetail::appleCalendarEvent::readOnlyCalendar::message" = "यह कैलेंडर केवल-पढ़ने के लिए है, इसलिए इवेंट संपादित नहीं किया जा सकता।";
+"eventDetail::appleCalendarEvent::notEditableField::message" = "यह फ़ील्ड ऐप में संपादित नहीं की जा सकती।";
+"eventDetail::appleCalendarEvent::url::placeholder" = "URL";
 
 // MARK: - event tag
 
@@ -310,6 +357,23 @@
 "eventList::remove::confirm::button::olderThan1y" = "1 साल से पुराने";
 
 
+// MARK: - share preview
+
+"share_preview::title" = "साझा करने का पूर्वावलोकन";
+"share_preview::tag_filter::title" = "टैग";
+"share_preview::tag_filter::select_all" = "सभी चुनें";
+"share_preview::tag_filter::deselect_all" = "सभी अचयनित करें";
+"share_preview::option::include_tag_name" = "टैग का नाम शामिल करें";
+"share_preview::share_button" = "साझा करें";
+"share_preview::empty" = "साझा करने के लिए कोई इवेंट नहीं है";
+"share_preview::header::this_week" = "इस सप्ताह";
+"share_preview::header::last_week" = "पिछला सप्ताह";
+"share_preview::header::next_week" = "अगला सप्ताह";
+"share_preview::header::week_of_month" = "%1$@ का सप्ताह %2$d";
+"share_preview::format::text" = "टेक्स्ट";
+"share_preview::format::image" = "छवि";
+
+
 // MARK: - account
 
 "manage_account::title" = "खाता प्रबंधन";
@@ -326,6 +390,9 @@
 "manage_account::delete_account_button::confirm:message" = "क्या आप वाकई अपना खाता हटाना चाहते हैं?";
 "manage_account::delete_account_button::description" = "खाता हटाने का अनुरोध करने के बाद, आपका खाता हटा दिया जाएगा।\nहटाने के बाद, खाते की जानकारी पुनर्प्राप्त नहीं की जा सकती।";
 "signIn::title" = "लॉगिन";
+"signIn::feature::sync" = "इवेंट का बैकअप · डिवाइसों के बीच सिंक";
+"signIn::feature::aiAgent" = "AI एजेंट से अपना शेड्यूल प्रबंधित करें";
+"signIn::feature::web" = "वेब पर भी इस्तेमाल करें · todo-calendar.com";
 
 
 // MARK: - setting
@@ -411,9 +478,14 @@
 "setting.aiGuide::name" = "AI से जोड़ें — Siri और विजेट";
 "setting.feedback::name" = "फ़ीडबैक";
 "setting.help::name" = "सहायता";
+"setting.openWeb::name" = "वेब पर खोलें";
 "setting.share::name" = "ऐप साझा करें";
 "setting.write_review::name" = "ऐप समीक्षा लिखें";
+"setting.openSourceLicense::name" = "ओपन सोर्स लाइसेंस";
 "setting.billing.plan::name" = "प्लान";
+"setting.terms::name" = "उपयोग की शर्तें";
+"setting.privacyPolicy::name" = "गोपनीयता नीति";
+"setting.adPrivacyOptions::name" = "विज्ञापन गोपनीयता विकल्प";
 "setting.account.signedIn::manageAccount" = "खाता";
 "setting.account.needSignIn" = "लॉगिन";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -516,6 +588,11 @@
 "widget.aiCommand::title" = "AI से जोड़ें";
 "widget.aiCommand::explain" = "AI इनपुट खोलने के लिए एक बार टैप करें।";
 
+// MARK: - liveActivity
+
+"liveActivity::stale" = "अभी शुरू हो रहा है";
+"liveActivity::action::end" = "समाप्त करें";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "यह लिंक प्रारूप समर्थित नहीं है।\nकृपया ऐप को नवीनतम संस्करण में अपडेट करें।";
@@ -546,9 +623,13 @@
 "aiAgent::state::failed" = "निर्देश विफल हुआ";
 "aiAgent::done::default" = "पूर्ण";
 "aiAgent::failed::default" = "इसे पूरा नहीं किया जा सका";
+"aiAgent::failed::dailyLimitExceeded" = "आज के AI क्रेडिट खत्म हो गए हैं।";
 "aiAgent::retry" = "फिर से प्रयास करें";
 "aiAgent::needSignIn::title" = "लॉगिन आवश्यक है";
 "aiAgent::needSignIn::message" = "AI क्विक इनपुट का उपयोग करने के लिए लॉगिन करें।";
+"aiAgent::speechPermissionDenied::title" = "अनुमति आवश्यक है";
+"aiAgent::speechPermissionDenied::message" = "वॉइस इनपुट का उपयोग करने के लिए सेटिंग्स में माइक्रोफ़ोन और वाणी पहचान की अनुमति दें।";
+"aiAgent::speechPermissionDenied::confirm" = "सेटिंग्स खोलें";
 "aiAgent::title" = "AI क्विक इनपुट";
 "aiAgent::keyboard::stop" = "रोकें";
 "aiAgent::keyboard::send" = "भेजें";
@@ -577,6 +658,8 @@
 "aiAgent::image::textTooLong" = "टेक्स्ट बहुत लंबा है। इसे छोटा करके फिर से प्रयास करें।";
 "aiAgent::image::instructionTooLong" = "आपके निर्देश बहुत लंबे हैं। इन्हें छोटा करके फिर से प्रयास करें।";
 "aiAgent::image::busy" = "एक और अनुरोध अभी भी चल रहा है";
+"aiAgent::image::camera::denied::title" = "कैमरा एक्सेस आवश्यक है";
+"aiAgent::image::camera::denied::message" = "फ़ोटो लेने के लिए सेटिंग्स में कैमरा एक्सेस की अनुमति दें।";
 
 // MARK: - billing
 
@@ -596,6 +679,7 @@
 "billing::paywall::features::title" = "%@ में क्या शामिल है";
 "billing::paywall::feature::dailyCredits" = "रोज़ %@ क्रेडिट";
 "billing::paywall::feature::topup" = "क्रेडिट खत्म होने पर और खरीदे जा सकते हैं";
+"billing::paywall::feature::noAds" = "कोई विज्ञापन नहीं";
 "billing::paywall::disclosure::subscription" = "आपकी सदस्यता हर महीने अपने आप नवीनीकृत होती है, जब तक कि आप मौजूदा अवधि समाप्त होने से कम से कम 24 घंटे पहले इसे रद्द न करें। आप App Store सेटिंग्स में कभी भी इसे रद्द कर सकते हैं।";
 "billing::paywall::disclosure::subscription::generic" = "आपकी सदस्यता हर बिलिंग अवधि के अंत में अपने आप नवीनीकृत होती है, जब तक कि आप उसके समाप्त होने से कम से कम 24 घंटे पहले उसे रद्द न करें। आप App Store सेटिंग्स में कभी भी इसे रद्द कर सकते हैं।";
 "billing::paywall::disclosure::oneTime" = "एक बार भुगतान करें और हमेशा के लिए इस्तेमाल करें। यह अपने आप नवीनीकृत नहीं होता।";
@@ -609,11 +693,31 @@
 "billing::paywall::restore" = "खरीदारी पुनर्स्थापित करें";
 "billing::paywall::restored" = "खरीदारी पुनर्स्थापित की गई";
 "billing::paywall::restore::empty" = "पुनर्स्थापित करने के लिए कोई खरीदारी नहीं है।";
+"billing::paywall::manageSubscription" = "सदस्यता प्रबंधित करें";
 "billing::paywall::purchase::applied" = "प्लान अपडेट हो गया";
 "billing::paywall::pending::title" = "स्वीकृति लंबित";
 "billing::paywall::pending::message" = "इस खरीदारी को स्वीकृत करने के लिए किसी पारिवारिक व्यवस्थापक से कहें। स्वीकृत होते ही यह अपने आप लागू हो जाएगी।";
 "billing::paywall::userPlan::loadFailed" = "आपका प्लान लोड नहीं हो सका। कृपया फिर से कोशिश करें।";
 "billing::paywall::retry" = "फिर से प्रयास करें";
+"billing::paywall::unfinished::title" = "एक खरीदारी लागू नहीं हुई है";
+"billing::paywall::unfinished::message" = "आपका भुगतान हो गया है, लेकिन आपका प्लान अभी अपडेट नहीं हुआ है।";
+"billing::paywall::unfinished::action" = "अभी लागू करें";
+"billing::paywall::unfinished::applied" = "आपकी खरीदारी लागू हो गई है";
+"billing::paywall::processing::message" = "आपकी खरीदारी की पुष्टि की जा रही है…";
+"billing::paywall::fail::purchase" = "हम खरीदारी पूरी नहीं कर सके। कृपया फिर से कोशिश करें।";
+"billing::paywall::fail::invalidTransaction" = "हम आपकी खरीदारी सत्यापित नहीं कर सके। कृपया थोड़ी देर बाद फिर से कोशिश करें।";
+"billing::paywall::fail::unknownProduct" = "हम इस खरीदारी को पहचान नहीं सके। ऐप अपडेट करने से यह ठीक हो सकता है।";
+"billing::paywall::fail::planChangeNotAllowed" = "यह प्लान बदलाव समर्थित नहीं है।";
+"billing::paywall::fail::ownedByAnotherAccount" = "यह खरीदारी किसी अन्य खाते की है। जिस खाते से खरीदी थी उसी से लॉगिन करें।";
+"billing::paywall::fail::reflectDelayed" = "आपका भुगतान हो गया है, लेकिन उसे लागू होने में देरी हो रही है। यह अपने आप लागू हो जाएगा।";
+"billing::paywall::topup::credits" = "%@ क्रेडिट";
+"billing::paywall::topup::credits::split" = "बेस %@ + बोनस %@ क्रेडिट";
+"billing::paywall::topup::bonus" = "+%@%% बोनस";
+"billing::paywall::topup::title" = "क्रेडिट जोड़ें";
+"billing::paywall::topup::title::withRemaining" = "क्रेडिट जोड़ें · %@ उपलब्ध";
+"billing::paywall::topup::description" = "अतिरिक्त क्रेडिट दैनिक सीमा खत्म होने के बाद इस्तेमाल होते हैं, और ये कभी समाप्त नहीं होते।";
+"billing::paywall::topup::applied" = "क्रेडिट जोड़ दिए गए";
+"billing::paywall::topup::applied::withCredits" = "%@ क्रेडिट जोड़ दिए गए";
 
 // MARK: - share extension
 
@@ -627,8 +731,21 @@
 "share.ai::sentButUntracked" = "भेज दिया गया, लेकिन ऐप परिणाम ट्रैक नहीं कर सकता। कुछ देर बाद अपना कैलेंडर देखें।";
 "share.ai::textTooLong" = "टेक्स्ट भेजने के लिए बहुत लंबा है। इसे छोटा करके फिर से प्रयास करें।";
 "share.ai::instructionTooLong" = "आपका निर्देश बहुत लंबा है। कृपया इसे छोटा करें।";
+"share.ai::limitExceeded" = "आज के AI क्रेडिट खत्म हो गए हैं। ये UTC मध्यरात्रि को रीसेट होते हैं।";
 "share.ai::image::title" = "छवि AI को भेजें";
 "share.ai::image::recognizing" = "छवि से टेक्स्ट पढ़ा जा रहा है…";
 "share.ai::image::text::caption" = "छवि से पढ़ा गया टेक्स्ट — अगर कुछ गलत लगे तो उसे संपादित करें।";
 "share.ai::image::text::placeholder" = "छवि से पढ़ा गया टेक्स्ट";
 "share.ai::image::noTextFound" = "इस छवि में कोई टेक्स्ट नहीं मिला। आप जो जोड़ना चाहते हैं वह टाइप करें।";
+
+// MARK: - webview
+
+"webview::error::message" = "यह पेज लोड नहीं हो सका।";
+"webview::error::retry" = "फिर से प्रयास करें";
+"webview::openInBrowser" = "ब्राउज़र में खोलें";
+
+// MARK: - legal notice
+
+"legal_notice.message::terms" = "हमारी सेवा की शर्तें अपडेट की गई हैं।";
+"legal_notice.message::privacy" = "हमारी गोपनीयता नीति अपडेट की गई है।";
+"legal_notice.effectiveDate" = "%@ से प्रभावी";
