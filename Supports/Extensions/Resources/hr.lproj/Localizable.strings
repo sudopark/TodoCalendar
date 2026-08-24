@@ -112,8 +112,12 @@
 
 "calendar::foremostevent:title" = "Najvažniji događaj";
 "calendar::uncompletedTodos:title" = "Nedovršeni zadaci";
+"calendar::guideTodo::name" = "Pogledajte kako radi To-do Calendar";
+"calendar::eventSync::loadingAllEvents::message" = "Dohvaćanje svih događaja…";
 "calendar::event_time::todo" = "Zadatak";
 "calendar::event_time::allday" = "Cijeli dan";
+"calendar::event_time::start" = "Početak";
+"calendar::event_time::end" = "Kraj";
 "calendar::event_time::allday::with" = "%@ cijeli dan";
 "calendar::event_time::period:some_days" = "%d dana";
 "calendar::event_time::period:some_minutes" = "%d min";
@@ -123,11 +127,13 @@
 "calendar::event::more_action::foremost_event:title" = "Najvažniji događaj";
 "calendar::event::more_action::remove_only_thistime:message" = "Želite li ukloniti samo ovaj događaj iz svih ponavljajućih događaja?";
 "calendar::event::more_action::remove:message" = "Želite li ukloniti ovaj događaj?";
+"calendar::event::more_action::remove_this_and_future:message" = "Želite li ukloniti ovaj i sve buduće događaje iz ponavljajuće serije?";
 "calendar::event::more_action::mark_as_foremost" = "Želite li označiti ovaj događaj kao najvažniji?";
 "calendar::event::more_action::unmark_as_foremost" = "Želite li ukloniti oznaku najvažnijeg za ovaj događaj?";
 "calendar::event::more_action::mark_as_foremost::unavail" = "Ponavljajući termin ne može se označiti kao najvažniji događaj.";
 "calendar::event::more_action:remove_only_thistime:item_name" = "Ukloni samo ovaj događaj";
 "calendar::event::more_action:remove:item_name" = "Ukloni događaj";
+"calendar::event::more_action:remove_this_and_future:item_name" = "Ukloni ovaj i sve buduće događaje";
 "calendar::event::more_action:foremost:mark:item_name" = "Označi kao najvažnije";
 "calendar::event::more_action:foremost:unmark:item_name" = "Ukloni oznaku najvažnijeg";
 "calendar::event::more_action:dday_candidate:register:item_name" = "Dodaj u widget Odbrojavanje";
@@ -135,7 +141,24 @@
 "calendar::event::more_action:dday_candidate:title" = "Kandidat za widget Odbrojavanje";
 "calendar::event::more_action:dday_candidate:register:message" = "Dodati ovaj događaj kao kandidata za widget Odbrojavanje? Prikazat će se na vrhu popisa kada uređujete widget.";
 "calendar::event::more_action:dday_candidate:unregister:message" = "Ukloniti ovaj događaj iz kandidata za widget Odbrojavanje?";
+"calendar::event::more_action:live_activity:title" = "Aktivnost uživo";
+"calendar::event::more_action:live_activity:register:item_name" = "Prikaži na zaključanom zaslonu";
+"calendar::event::more_action:live_activity:unregister:item_name" = "Ukloni sa zaključanog zaslona";
+"calendar::event::more_action:live_activity:unavail::not_found" = "Ovaj događaj više nije dostupan.";
+"calendar::event::more_action:live_activity:unavail::already_passed" = "Ovaj događaj je već započeo.";
+"calendar::event::more_action:live_activity:unavail::too_far_future" = "Mogu se prikazati samo događaji koji počinju unutar 8 sati.";
+"calendar::event::more_action:live_activity:register:confirm" = "Želite li prikazati ovaj događaj na zaključanom zaslonu?";
+"calendar::event::more_action:live_activity:unregister:confirm" = "Želite li ukloniti ovaj događaj sa zaključanog zaslona?";
+"calendar::event::more_action:live_activity:replace:confirm" = "Na zaključanom zaslonu prikazuje se drugi događaj. Zamijeniti ga ovim?";
+"calendar::event::more_action:live_activity:register:success" = "Sada se prikazuje na zaključanom zaslonu. Zaključajte uređaj da biste to vidjeli.";
 "calendar::event::more_action:copy:item_name" = "Kopiraj događaj";
+"calendar::event::more_action:share:item_name" = "Podijeli";
+"event_detail::share::field::time" = "Vrijeme";
+"event_detail::share::field::repeating" = "Ponavljanje";
+"event_detail::share::field::calendar" = "Kalendar";
+"event_detail::share::field::place" = "Lokacija";
+"event_detail::share::field::url" = "Poveznica";
+"event_detail::share::field::memo" = "Bilješka";
 "calendar::event::more_action:transform_to::schedule" = "Pretvori u termin";
 "calendar::event::more_action:transform_to::todo" = "Pretvori u zadatak";
 "calendar::event::more_action:edit:item_name" = "Uredi";
@@ -145,6 +168,9 @@
 "calednar::event::skip_todo_until" = "Odaberite vrijeme do kojeg preskočiti ovaj zadatak";
 "calednar::event::copy" = "Kopiraj događaj";
 "calendar::move_date" = "Pomakni datum";
+"calendar::share::this_day" = "Podijeli ovaj dan";
+"calendar::share::this_week" = "Podijeli ovaj tjedan";
+"calendar::share::this_month" = "Podijeli ovaj mjesec";
 
 
 // MARK: - event detail
@@ -266,12 +292,33 @@
 "eventDetail::gogoleEvent::conference::password" = "Lozinka";
 "eventDetail::gogoleEvent::copy::message" = "Kopirano u međuspremnik.";
 "eventDetail::gogoleEvent::canceled::message" = "Ovaj događaj je otkazan.";
+"eventDetail::gogoleEvent::saved::message" = "Događaj je spremljen.";
+"eventDetail::gogoleEvent::readOnlyCalendar::message" = "Ovaj kalendar je samo za čitanje, pa se događaj ovdje ne može urediti.";
+"eventDetail::gogoleEvent::reauthenticate::title" = "Potrebno je dodatno dopuštenje";
+"eventDetail::gogoleEvent::reauthenticate::message" = "Ovaj Google račun povezan je s pristupom samo za čitanje. Za uređivanje događaja morate zasebno odobriti dopuštenje za uređivanje.";
+"eventDetail::gogoleEvent::writeScopeNotGranted::message" = "Dopuštenje za uređivanje nije odobreno. Ako je riječ o poslovnom ili školskom računu, administrator to možda ne dopušta.";
+"eventDetail::gogoleEvent::repeating::title" = "Ovo je ponavljajući događaj";
+"eventDetail::gogoleEvent::repeating::onlyThisTime::button" = "Samo ovaj događaj";
+"eventDetail::gogoleEvent::repeating::all::button" = "Svi događaji";
+"eventDetail::gogoleEvent::remove::confirm::message" = "Izbrisati ovaj događaj iz Google kalendara?";
+"eventDetail::gogoleEvent::editOnCalendar" = "Uredi u Google kalendaru";
+"eventDetail::gogoleEvent::notEditableField::message" = "Ovo se ovdje ne može urediti. Uredite to u Google kalendaru.";
+"eventDetail::gogoleEvent::description::formatLoss::message" = "Ovaj opis sadrži oblikovanje. Uređivanjem ovdje oblikovanje će se ukloniti.";
 
 // MARK: - Apple calendar event
 "eventDetail::appleCalendarEvent::viewOnCalendar" = "Prikaži u Apple kalendaru";
+"eventDetail::appleCalendarEvent::editOnCalendar" = "Uredi u Apple kalendaru";
 "eventDetail::appleCalendarEvent::calendar::event" = "Događaj Apple kalendara";
 "eventDetail::appleCalendarEvent::attendees" = "Sudionici (%d osoba)";
 "eventDetail::appleCalendarEvent::attendees::organizer" = "Organizator";
+"eventDetail::appleCalendarEvent::saved::message" = "Spremljeno.";
+"eventDetail::appleCalendarEvent::remove::confirm::message" = "Izbrisati ovaj događaj?";
+"eventDetail::appleCalendarEvent::repeating::title" = "Ponavljajući događaj";
+"eventDetail::appleCalendarEvent::repeating::onlyThisTime::button" = "Samo ovaj događaj";
+"eventDetail::appleCalendarEvent::repeating::thisAndFuture::button" = "Ovaj i sve buduće događaje";
+"eventDetail::appleCalendarEvent::readOnlyCalendar::message" = "Ovaj kalendar je samo za čitanje, pa se događaj ne može urediti.";
+"eventDetail::appleCalendarEvent::notEditableField::message" = "Ovo polje nije moguće urediti u aplikaciji.";
+"eventDetail::appleCalendarEvent::url::placeholder" = "URL";
 
 // MARK: - event tag
 
@@ -309,6 +356,22 @@
 "eventList::remove::confirm::button::olderThan6m" = "Stariji od 6 mjeseci";
 "eventList::remove::confirm::button::olderThan1y" = "Stariji od 1 godine";
 
+// MARK: - share preview
+
+"share_preview::title" = "Pregled dijeljenja";
+"share_preview::tag_filter::title" = "Oznake";
+"share_preview::tag_filter::select_all" = "Odaberi sve";
+"share_preview::tag_filter::deselect_all" = "Poništi odabir";
+"share_preview::option::include_tag_name" = "Prikaži naziv oznake";
+"share_preview::share_button" = "Podijeli";
+"share_preview::empty" = "Nema događaja za dijeljenje";
+"share_preview::header::this_week" = "Ovaj tjedan";
+"share_preview::header::last_week" = "Prošli tjedan";
+"share_preview::header::next_week" = "Sljedeći tjedan";
+"share_preview::header::week_of_month" = "%1$@, %2$d. tjedan";
+"share_preview::format::text" = "Tekst";
+"share_preview::format::image" = "Slika";
+
 
 // MARK: - account
 
@@ -326,6 +389,9 @@
 "manage_account::delete_account_button::confirm:message" = "Jeste li sigurni da želite izbrisati svoj račun?";
 "manage_account::delete_account_button::description" = "Nakon zahtjeva za brisanje, račun će biti izbrisan.\nNakon brisanja, podatke računa nije moguće vratiti.";
 "signIn::title" = "Prijava";
+"signIn::feature::sync" = "Sigurnosna kopija događaja, sinkronizacija među uređajima";
+"signIn::feature::aiAgent" = "Upravljajte rasporedom uz AI agenta";
+"signIn::feature::web" = "Koristite na webu · todo-calendar.com";
 
 
 // MARK: - setting
@@ -411,9 +477,14 @@
 "setting.aiGuide::name" = "Dodaj uz AI — Siri i widgeti";
 "setting.feedback::name" = "Povratne informacije";
 "setting.help::name" = "Pomoć";
+"setting.openWeb::name" = "Otvori na webu";
 "setting.share::name" = "Podijeli aplikaciju";
 "setting.write_review::name" = "Napišite recenziju aplikacije";
+"setting.openSourceLicense::name" = "Licencije otvorenog koda";
 "setting.billing.plan::name" = "Plan";
+"setting.terms::name" = "Uvjeti korištenja";
+"setting.privacyPolicy::name" = "Pravila o privatnosti";
+"setting.adPrivacyOptions::name" = "Postavke privatnosti oglasa";
 "setting.account.signedIn::manageAccount" = "Račun";
 "setting.account.needSignIn" = "Prijava";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -516,6 +587,11 @@
 "widget.aiCommand::title" = "Dodaj pomoću AI";
 "widget.aiCommand::explain" = "Dodirnite jednom da otvorite AI unos.";
 
+// MARK: - liveActivity
+
+"liveActivity::stale" = "Počinje sada";
+"liveActivity::action::end" = "Završi";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "Ovaj format poveznice nije podržan.\nAžurirajte aplikaciju na najnoviju verziju.";
@@ -546,9 +622,13 @@
 "aiAgent::state::failed" = "Naredba nije uspjela";
 "aiAgent::done::default" = "Gotovo";
 "aiAgent::failed::default" = "Nije uspjelo dovršiti";
+"aiAgent::failed::dailyLimitExceeded" = "Današnji AI krediti su potrošeni.";
 "aiAgent::retry" = "Pokušaj ponovno";
 "aiAgent::needSignIn::title" = "Potrebna je prijava";
 "aiAgent::needSignIn::message" = "Prijavite se kako biste koristili brzi AI unos.";
+"aiAgent::speechPermissionDenied::title" = "Potrebno je dopuštenje";
+"aiAgent::speechPermissionDenied::message" = "Omogućite pristup mikrofonu i prepoznavanju govora u Postavkama kako biste koristili glasovni unos.";
+"aiAgent::speechPermissionDenied::confirm" = "Otvori Postavke";
 "aiAgent::title" = "Brzi AI unos";
 "aiAgent::keyboard::stop" = "Zaustavi";
 "aiAgent::keyboard::send" = "Pošalji";
@@ -577,6 +657,8 @@
 "aiAgent::image::textTooLong" = "Tekst je predug. Skratite ga i pokušajte ponovno.";
 "aiAgent::image::instructionTooLong" = "Vaše upute su predugačke. Skratite ih i pokušajte ponovno.";
 "aiAgent::image::busy" = "Drugi zahtjev još uvijek traje";
+"aiAgent::image::camera::denied::title" = "Potreban je pristup kameri";
+"aiAgent::image::camera::denied::message" = "Omogućite pristup kameri u Postavkama kako biste fotografirali.";
 
 // MARK: - billing
 
@@ -596,6 +678,7 @@
 "billing::paywall::features::title" = "%@ uključuje";
 "billing::paywall::feature::dailyCredits" = "%@ bodova dnevno";
 "billing::paywall::feature::topup" = "Kad bodovi ponestanu, možete kupiti dodatne";
+"billing::paywall::feature::noAds" = "Bez oglasa";
 "billing::paywall::disclosure::subscription" = "Pretplata se automatski obnavlja svaki mjesec, osim ako je otkažete najmanje 24 sata prije isteka trenutačnog razdoblja. Otkazati je možete bilo kada u postavkama App Storea.";
 "billing::paywall::disclosure::subscription::generic" = "Pretplata se automatski obnavlja na kraju svakog obračunskog razdoblja, osim ako je otkažete najmanje 24 sata prije nego što istekne. Otkazati je možete bilo kada u postavkama App Storea.";
 "billing::paywall::disclosure::oneTime" = "Platite jednom i zadržite zauvijek. Ovo se ne obnavlja automatski.";
@@ -609,11 +692,31 @@
 "billing::paywall::restore" = "Vrati kupnje";
 "billing::paywall::restored" = "Kupnje vraćene";
 "billing::paywall::restore::empty" = "Nema kupnji za vraćanje.";
+"billing::paywall::manageSubscription" = "Upravljaj pretplatom";
 "billing::paywall::purchase::applied" = "Plan ažuriran";
 "billing::paywall::pending::title" = "Čeka odobrenje";
 "billing::paywall::pending::message" = "Zamolite organizatora obitelji da odobri ovu kupnju. Automatski će se primijeniti nakon odobrenja.";
 "billing::paywall::userPlan::loadFailed" = "Učitavanje vašeg plana nije uspjelo. Pokušajte ponovno.";
 "billing::paywall::retry" = "Pokušaj ponovno";
+"billing::paywall::unfinished::title" = "Kupnja nije primijenjena";
+"billing::paywall::unfinished::message" = "Plaćanje je uspjelo, ali vaš plan još nije ažuriran.";
+"billing::paywall::unfinished::action" = "Primijeni sada";
+"billing::paywall::unfinished::applied" = "Vaša kupnja je primijenjena";
+"billing::paywall::processing::message" = "Potvrđivanje kupnje…";
+"billing::paywall::fail::purchase" = "Kupnja nije dovršena. Pokušajte ponovno.";
+"billing::paywall::fail::invalidTransaction" = "Provjera kupnje nije uspjela. Pokušajte ponovno za trenutak.";
+"billing::paywall::fail::unknownProduct" = "Ovu kupnju nije bilo moguće prepoznati. Ažuriranje aplikacije to može riješiti.";
+"billing::paywall::fail::planChangeNotAllowed" = "Ova promjena plana nije podržana.";
+"billing::paywall::fail::ownedByAnotherAccount" = "Ova kupnja pripada drugom računu. Prijavite se računom na kojem je obavljena.";
+"billing::paywall::fail::reflectDelayed" = "Plaćanje je uspjelo, ali primjena kasni. Primijenit će se automatski.";
+"billing::paywall::topup::credits" = "%@ bodova";
+"billing::paywall::topup::credits::split" = "Osnovno %@ + bonus %@ bodova";
+"billing::paywall::topup::bonus" = "+%@%% bonusa";
+"billing::paywall::topup::title" = "Dokupi bodove";
+"billing::paywall::topup::title::withRemaining" = "Dokupi bodove · imate %@";
+"billing::paywall::topup::description" = "Dodatni bodovi troše se nakon što potrošite dnevni limit i ne istječu.";
+"billing::paywall::topup::applied" = "Bodovi dodani";
+"billing::paywall::topup::applied::withCredits" = "Dodano %@ bodova";
 
 // MARK: - share extension
 
@@ -627,8 +730,21 @@
 "share.ai::sentButUntracked" = "Poslano, ali aplikacija ne može pratiti rezultat. Provjerite kalendar za trenutak.";
 "share.ai::textTooLong" = "Tekst je predug za slanje. Skratite ga i pokušajte ponovno.";
 "share.ai::instructionTooLong" = "Vaša uputa je predugačka. Skratite je.";
+"share.ai::limitExceeded" = "Današnji AI krediti su potrošeni. Obnavljaju se u ponoć po UTC-u.";
 "share.ai::image::title" = "Pošalji sliku AI-ju";
 "share.ai::image::recognizing" = "Čitanje teksta sa slike…";
 "share.ai::image::text::caption" = "Tekst pročitan sa slike – uredite ga ako nešto ne izgleda ispravno.";
 "share.ai::image::text::placeholder" = "Tekst pročitan sa slike";
 "share.ai::image::noTextFound" = "Nije pronađen nikakav tekst na ovoj slici. Upišite što želite dodati.";
+
+// MARK: - webview
+
+"webview::error::message" = "Učitavanje ove stranice nije uspjelo.";
+"webview::error::retry" = "Pokušaj ponovno";
+"webview::openInBrowser" = "Otvori u pregledniku";
+
+// MARK: - legal notice
+
+"legal_notice.message::terms" = "Naši Uvjeti korištenja su ažurirani.";
+"legal_notice.message::privacy" = "Naša Pravila o privatnosti su ažurirana.";
+"legal_notice.effectiveDate" = "Na snazi od %@";

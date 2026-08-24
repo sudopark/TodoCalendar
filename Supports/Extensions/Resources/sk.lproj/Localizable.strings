@@ -112,8 +112,12 @@
 
 "calendar::foremostevent:title" = "Najdôležitejšia udalosť";
 "calendar::uncompletedTodos:title" = "Nesplnené úlohy";
+"calendar::guideTodo::name" = "Pozrite sa, ako funguje To-do Calendar";
+"calendar::eventSync::loadingAllEvents::message" = "Načítavanie všetkých udalostí…";
 "calendar::event_time::todo" = "Úloha";
 "calendar::event_time::allday" = "Celý deň";
+"calendar::event_time::start" = "Začiatok";
+"calendar::event_time::end" = "Koniec";
 "calendar::event_time::allday::with" = "%@ celý deň";
 "calendar::event_time::period:some_days" = "%d dní";
 "calendar::event_time::period:some_minutes" = "%d minút";
@@ -123,11 +127,13 @@
 "calendar::event::more_action::foremost_event:title" = "Najdôležitejšia udalosť";
 "calendar::event::more_action::remove_only_thistime:message" = "Chcete odstrániť iba túto udalosť zo všetkých opakujúcich sa udalostí?";
 "calendar::event::more_action::remove:message" = "Chcete odstrániť túto udalosť?";
+"calendar::event::more_action::remove_this_and_future:message" = "Chcete odstrániť túto a všetky budúce udalosti z opakujúcej sa série?";
 "calendar::event::more_action::mark_as_foremost" = "Chcete označiť túto udalosť ako svoju najdôležitejšiu?";
 "calendar::event::more_action::unmark_as_foremost" = "Chcete zrušiť označenie tejto udalosti ako najdôležitejšej?";
 "calendar::event::more_action::mark_as_foremost::unavail" = "Opakujúci sa termín nemožno označiť ako najdôležitejšiu udalosť.";
 "calendar::event::more_action:remove_only_thistime:item_name" = "Odstrániť iba túto udalosť";
 "calendar::event::more_action:remove:item_name" = "Odstrániť udalosť";
+"calendar::event::more_action:remove_this_and_future:item_name" = "Odstrániť túto a všetky budúce udalosti";
 "calendar::event::more_action:foremost:mark:item_name" = "Označiť ako najdôležitejšiu";
 "calendar::event::more_action:foremost:unmark:item_name" = "Zrušiť označenie ako najdôležitejšiu";
 "calendar::event::more_action:dday_candidate:register:item_name" = "Pridať do widgetu Odpočet";
@@ -135,7 +141,24 @@
 "calendar::event::more_action:dday_candidate:title" = "Kandidát pre widget Odpočet";
 "calendar::event::more_action:dday_candidate:register:message" = "Pridať túto udalosť ako kandidáta pre widget Odpočet? Po úprave widgetu sa zobrazí na začiatku zoznamu.";
 "calendar::event::more_action:dday_candidate:unregister:message" = "Odstrániť túto udalosť z kandidátov pre widget Odpočet?";
+"calendar::event::more_action:live_activity:title" = "Živá aktivita";
+"calendar::event::more_action:live_activity:register:item_name" = "Zobraziť na uzamknutej obrazovke";
+"calendar::event::more_action:live_activity:unregister:item_name" = "Odstrániť z uzamknutej obrazovky";
+"calendar::event::more_action:live_activity:unavail::not_found" = "Táto udalosť už nie je dostupná.";
+"calendar::event::more_action:live_activity:unavail::already_passed" = "Táto udalosť už začala.";
+"calendar::event::more_action:live_activity:unavail::too_far_future" = "Zobraziť možno iba udalosti začínajúce do 8 hodín.";
+"calendar::event::more_action:live_activity:register:confirm" = "Chcete túto udalosť zobraziť na uzamknutej obrazovke?";
+"calendar::event::more_action:live_activity:unregister:confirm" = "Chcete túto udalosť odstrániť z uzamknutej obrazovky?";
+"calendar::event::more_action:live_activity:replace:confirm" = "Na uzamknutej obrazovke sa zobrazuje iná udalosť. Nahradiť ju touto?";
+"calendar::event::more_action:live_activity:register:success" = "Teraz sa zobrazuje na uzamknutej obrazovke. Zamknite zariadenie a pozrite sa.";
 "calendar::event::more_action:copy:item_name" = "Kopírovať udalosť";
+"calendar::event::more_action:share:item_name" = "Zdieľať";
+"event_detail::share::field::time" = "Čas";
+"event_detail::share::field::repeating" = "Opakovanie";
+"event_detail::share::field::calendar" = "Kalendár";
+"event_detail::share::field::place" = "Miesto";
+"event_detail::share::field::url" = "Odkaz";
+"event_detail::share::field::memo" = "Poznámka";
 "calendar::event::more_action:transform_to::schedule" = "Zmeniť na termín";
 "calendar::event::more_action:transform_to::todo" = "Zmeniť na úlohu";
 "calendar::event::more_action:edit:item_name" = "Upraviť";
@@ -145,6 +168,9 @@
 "calednar::event::skip_todo_until" = "Vyberte čas, do ktorého túto úlohu preskočiť";
 "calednar::event::copy" = "Kopírovať udalosť";
 "calendar::move_date" = "Presunúť dátum";
+"calendar::share::this_day" = "Zdieľať tento deň";
+"calendar::share::this_week" = "Zdieľať tento týždeň";
+"calendar::share::this_month" = "Zdieľať tento mesiac";
 
 
 // MARK: - event detail
@@ -266,12 +292,33 @@
 "eventDetail::gogoleEvent::conference::password" = "Heslo";
 "eventDetail::gogoleEvent::copy::message" = "Skopírované do schránky.";
 "eventDetail::gogoleEvent::canceled::message" = "Táto udalosť bola zrušená.";
+"eventDetail::gogoleEvent::saved::message" = "Udalosť bola uložená.";
+"eventDetail::gogoleEvent::readOnlyCalendar::message" = "Tento kalendár je iba na čítanie, udalosť tu preto nemožno upraviť.";
+"eventDetail::gogoleEvent::reauthenticate::title" = "Je potrebné ďalšie oprávnenie";
+"eventDetail::gogoleEvent::reauthenticate::message" = "Tento účet Google je pripojený iba na čítanie. Ak chcete upravovať udalosti, je potrebné samostatne udeliť oprávnenie na úpravy.";
+"eventDetail::gogoleEvent::writeScopeNotGranted::message" = "Oprávnenie na úpravy nebolo udelené. Ak ide o pracovný alebo školský účet, správca to nemusí povoliť.";
+"eventDetail::gogoleEvent::repeating::title" = "Toto je opakujúca sa udalosť";
+"eventDetail::gogoleEvent::repeating::onlyThisTime::button" = "Iba túto udalosť";
+"eventDetail::gogoleEvent::repeating::all::button" = "Všetky udalosti";
+"eventDetail::gogoleEvent::remove::confirm::message" = "Odstrániť túto udalosť z Google Kalendára?";
+"eventDetail::gogoleEvent::editOnCalendar" = "Upraviť v Google Kalendári";
+"eventDetail::gogoleEvent::notEditableField::message" = "Toto tu nemožno upraviť. Upravte to prosím v Google Kalendári.";
+"eventDetail::gogoleEvent::description::formatLoss::message" = "Tento popis obsahuje formátovanie. Úpravou tu o formátovanie prídete.";
 
 // MARK: - Apple calendar event
 "eventDetail::appleCalendarEvent::viewOnCalendar" = "Zobraziť v Apple Kalendári";
+"eventDetail::appleCalendarEvent::editOnCalendar" = "Upraviť v Apple Kalendári";
 "eventDetail::appleCalendarEvent::calendar::event" = "Udalosť Apple Kalendára";
 "eventDetail::appleCalendarEvent::attendees" = "Účastníci (%d osôb)";
 "eventDetail::appleCalendarEvent::attendees::organizer" = "Organizátor";
+"eventDetail::appleCalendarEvent::saved::message" = "Uložené.";
+"eventDetail::appleCalendarEvent::remove::confirm::message" = "Odstrániť túto udalosť?";
+"eventDetail::appleCalendarEvent::repeating::title" = "Opakujúca sa udalosť";
+"eventDetail::appleCalendarEvent::repeating::onlyThisTime::button" = "Iba túto udalosť";
+"eventDetail::appleCalendarEvent::repeating::thisAndFuture::button" = "Túto a všetky budúce udalosti";
+"eventDetail::appleCalendarEvent::readOnlyCalendar::message" = "Tento kalendár je iba na čítanie, udalosť preto nemožno upraviť.";
+"eventDetail::appleCalendarEvent::notEditableField::message" = "Toto pole nemožno v aplikácii upraviť.";
+"eventDetail::appleCalendarEvent::url::placeholder" = "URL";
 
 // MARK: - event tag
 
@@ -309,6 +356,22 @@
 "eventList::remove::confirm::button::olderThan6m" = "Staršie ako 6 mesiacov";
 "eventList::remove::confirm::button::olderThan1y" = "Staršie ako 1 rok";
 
+// MARK: - share preview
+
+"share_preview::title" = "Náhľad zdieľania";
+"share_preview::tag_filter::title" = "Štítky";
+"share_preview::tag_filter::select_all" = "Vybrať všetko";
+"share_preview::tag_filter::deselect_all" = "Zrušiť výber";
+"share_preview::option::include_tag_name" = "Zobraziť názov štítka";
+"share_preview::share_button" = "Zdieľať";
+"share_preview::empty" = "Žiadne udalosti na zdieľanie";
+"share_preview::header::this_week" = "Tento týždeň";
+"share_preview::header::last_week" = "Minulý týždeň";
+"share_preview::header::next_week" = "Budúci týždeň";
+"share_preview::header::week_of_month" = "%1$@, %2$d. týždeň";
+"share_preview::format::text" = "Text";
+"share_preview::format::image" = "Obrázok";
+
 
 // MARK: - account
 
@@ -326,6 +389,9 @@
 "manage_account::delete_account_button::confirm:message" = "Naozaj chcete vymazať svoj účet?";
 "manage_account::delete_account_button::description" = "Po požiadaní o vymazanie účtu bude účet vymazaný.\nPo vymazaní nemožno údaje o účte obnoviť.";
 "signIn::title" = "Prihlásiť sa";
+"signIn::feature::sync" = "Záloha udalostí, synchronizácia medzi zariadeniami";
+"signIn::feature::aiAgent" = "Spravujte svoj program s AI agentom";
+"signIn::feature::web" = "Používajte na webe · todo-calendar.com";
 
 
 // MARK: - setting
@@ -411,9 +477,14 @@
 "setting.aiGuide::name" = "Pridať pomocou AI – Siri a widgety";
 "setting.feedback::name" = "Spätná väzba";
 "setting.help::name" = "Pomocník";
+"setting.openWeb::name" = "Otvoriť na webe";
 "setting.share::name" = "Zdieľať aplikáciu";
 "setting.write_review::name" = "Napísať recenziu aplikácie";
+"setting.openSourceLicense::name" = "Licencie open source";
 "setting.billing.plan::name" = "Plán";
+"setting.terms::name" = "Podmienky používania služby";
+"setting.privacyPolicy::name" = "Zásady ochrany osobných údajov";
+"setting.adPrivacyOptions::name" = "Možnosti súkromia reklám";
 "setting.account.signedIn::manageAccount" = "Účet";
 "setting.account.needSignIn" = "Prihlásiť sa";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -516,6 +587,11 @@
 "widget.aiCommand::title" = "Pridať pomocou AI";
 "widget.aiCommand::explain" = "Jedným klepnutím otvoríte zadávanie AI.";
 
+// MARK: - liveActivity
+
+"liveActivity::stale" = "Začína teraz";
+"liveActivity::action::end" = "Ukončiť";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "Tento formát odkazu nie je podporovaný.\nAktualizujte, prosím, aplikáciu na najnovšiu verziu.";
@@ -546,9 +622,13 @@
 "aiAgent::state::failed" = "Príkaz zlyhal";
 "aiAgent::done::default" = "Hotovo";
 "aiAgent::failed::default" = "Nepodarilo sa to dokončiť";
+"aiAgent::failed::dailyLimitExceeded" = "Dnešné kredity AI sú vyčerpané.";
 "aiAgent::retry" = "Skúsiť znova";
 "aiAgent::needSignIn::title" = "Vyžaduje sa prihlásenie";
 "aiAgent::needSignIn::message" = "Prihláste sa a použite rýchle zadávanie AI.";
+"aiAgent::speechPermissionDenied::title" = "Vyžaduje sa povolenie";
+"aiAgent::speechPermissionDenied::message" = "Povoľte v Nastaveniach prístup k mikrofónu a rozpoznávaniu reči, aby ste mohli používať hlasové zadávanie.";
+"aiAgent::speechPermissionDenied::confirm" = "Otvoriť Nastavenia";
 "aiAgent::title" = "Rýchle zadávanie AI";
 "aiAgent::keyboard::stop" = "Zastaviť";
 "aiAgent::keyboard::send" = "Odoslať";
@@ -577,6 +657,8 @@
 "aiAgent::image::textTooLong" = "Text je príliš dlhý. Skráťte ho a skúste to znova.";
 "aiAgent::image::instructionTooLong" = "Vaše pokyny sú príliš dlhé. Skráťte ich a skúste to znova.";
 "aiAgent::image::busy" = "Iná požiadavka stále prebieha";
+"aiAgent::image::camera::denied::title" = "Vyžaduje sa prístup k fotoaparátu";
+"aiAgent::image::camera::denied::message" = "Povoľte prístup k fotoaparátu v Nastaveniach, aby ste mohli odfotiť.";
 
 // MARK: - billing
 
@@ -596,6 +678,7 @@
 "billing::paywall::features::title" = "%@ obsahuje";
 "billing::paywall::feature::dailyCredits" = "%@ kreditov denne";
 "billing::paywall::feature::topup" = "Po vyčerpaní kreditov si môžete dokúpiť ďalšie";
+"billing::paywall::feature::noAds" = "Bez reklám";
 "billing::paywall::disclosure::subscription" = "Predplatné sa automaticky obnovuje každý mesiac, pokiaľ ho nezrušíte aspoň 24 hodín pred koncom aktuálneho obdobia. Zrušiť ho môžete kedykoľvek v nastaveniach App Store.";
 "billing::paywall::disclosure::subscription::generic" = "Predplatné sa automaticky obnovuje na konci každého zúčtovacieho obdobia, pokiaľ ho nezrušíte aspoň 24 hodín pred jeho koncom. Zrušiť ho môžete kedykoľvek v nastaveniach App Store.";
 "billing::paywall::disclosure::oneTime" = "Zaplaťte raz a používajte navždy. Toto sa automaticky neobnovuje.";
@@ -609,11 +692,31 @@
 "billing::paywall::restore" = "Obnoviť nákupy";
 "billing::paywall::restored" = "Nákupy obnovené";
 "billing::paywall::restore::empty" = "Žiadne nákupy na obnovenie.";
+"billing::paywall::manageSubscription" = "Spravovať predplatné";
 "billing::paywall::purchase::applied" = "Plán aktualizovaný";
 "billing::paywall::pending::title" = "Čaká na schválenie";
 "billing::paywall::pending::message" = "Požiadajte rodinného organizátora o schválenie tohto nákupu. Po schválení sa automaticky uplatní.";
 "billing::paywall::userPlan::loadFailed" = "Nepodarilo sa načítať váš plán. Skúste to prosím znova.";
 "billing::paywall::retry" = "Skúsiť znova";
+"billing::paywall::unfinished::title" = "Nákup nebol uplatnený";
+"billing::paywall::unfinished::message" = "Platba prebehla, ale váš plán zatiaľ nebol aktualizovaný.";
+"billing::paywall::unfinished::action" = "Uplatniť teraz";
+"billing::paywall::unfinished::applied" = "Váš nákup bol uplatnený";
+"billing::paywall::processing::message" = "Overovanie nákupu…";
+"billing::paywall::fail::purchase" = "Nákup sa nepodarilo dokončiť. Skúste to prosím znova.";
+"billing::paywall::fail::invalidTransaction" = "Nákup sa nepodarilo overiť. Skúste to prosím o chvíľu znova.";
+"billing::paywall::fail::unknownProduct" = "Tento nákup sa nepodarilo rozpoznať. Problém môže vyriešiť aktualizácia aplikácie.";
+"billing::paywall::fail::planChangeNotAllowed" = "Táto zmena plánu nie je podporovaná.";
+"billing::paywall::fail::ownedByAnotherAccount" = "Tento nákup patrí inému účtu. Prihláste sa účtom, na ktorom bol zakúpený.";
+"billing::paywall::fail::reflectDelayed" = "Platba prebehla, ale jej uplatnenie sa zdržalo. Uplatní sa automaticky.";
+"billing::paywall::topup::credits" = "%@ kreditov";
+"billing::paywall::topup::credits::split" = "Základ %@ + bonus %@ kreditov";
+"billing::paywall::topup::bonus" = "+%@%% bonus";
+"billing::paywall::topup::title" = "Dokúpiť kredity";
+"billing::paywall::topup::title::withRemaining" = "Dokúpiť kredity · vlastníte %@";
+"billing::paywall::topup::description" = "Ďalšie kredity sa použijú po vyčerpaní denného limitu a ich platnosť nevyprší.";
+"billing::paywall::topup::applied" = "Kredity pridané";
+"billing::paywall::topup::applied::withCredits" = "Pridaných %@ kreditov";
 
 // MARK: - share extension
 
@@ -627,8 +730,21 @@
 "share.ai::sentButUntracked" = "Odoslané, ale aplikácia nemôže sledovať výsledok. O chvíľu skontrolujte kalendár.";
 "share.ai::textTooLong" = "Text je príliš dlhý na odoslanie. Skráťte ho a skúste to znova.";
 "share.ai::instructionTooLong" = "Váš pokyn je príliš dlhý. Skráťte ho.";
+"share.ai::limitExceeded" = "Dnešné kredity AI sú vyčerpané. Obnovujú sa o polnoci UTC.";
 "share.ai::image::title" = "Odoslať obrázok do AI";
 "share.ai::image::recognizing" = "Načítava sa text z obrázka…";
 "share.ai::image::text::caption" = "Text načítaný z obrázka – upravte ho, ak niečo nesedí.";
 "share.ai::image::text::placeholder" = "Text načítaný z obrázka";
 "share.ai::image::noTextFound" = "V tomto obrázku sa nenašiel žiadny text. Napíšte, čo chcete pridať.";
+
+// MARK: - webview
+
+"webview::error::message" = "Túto stránku sa nepodarilo načítať.";
+"webview::error::retry" = "Skúsiť znova";
+"webview::openInBrowser" = "Otvoriť v prehliadači";
+
+// MARK: - legal notice
+
+"legal_notice.message::terms" = "Naše Podmienky používania služby boli aktualizované.";
+"legal_notice.message::privacy" = "Naše Zásady ochrany osobných údajov boli aktualizované.";
+"legal_notice.effectiveDate" = "Účinné od %@";

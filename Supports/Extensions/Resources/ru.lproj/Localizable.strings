@@ -112,8 +112,12 @@
 
 "calendar::foremostevent:title" = "Главное событие";
 "calendar::uncompletedTodos:title" = "Невыполненные задачи";
+"calendar::guideTodo::name" = "Узнайте, как работает To-do Calendar";
+"calendar::eventSync::loadingAllEvents::message" = "Загрузка всех событий…";
 "calendar::event_time::todo" = "Задача";
 "calendar::event_time::allday" = "Весь день";
+"calendar::event_time::start" = "Начало";
+"calendar::event_time::end" = "Конец";
 "calendar::event_time::allday::with" = "%@ весь день";
 "calendar::event_time::period:some_days" = "%d дн.";
 "calendar::event_time::period:some_minutes" = "%d мин.";
@@ -123,11 +127,13 @@
 "calendar::event::more_action::foremost_event:title" = "Главное событие";
 "calendar::event::more_action::remove_only_thistime:message" = "Удалить только это событие из всех повторяющихся событий?";
 "calendar::event::more_action::remove:message" = "Удалить это событие?";
+"calendar::event::more_action::remove_this_and_future:message" = "Удалить это и все будущие события из повторяющейся серии?";
 "calendar::event::more_action::mark_as_foremost" = "Отметить это событие как самое важное?";
 "calendar::event::more_action::unmark_as_foremost" = "Снять отметку этого события как самого важного?";
 "calendar::event::more_action::mark_as_foremost::unavail" = "Повторяющееся событие расписания нельзя отметить как самое важное.";
 "calendar::event::more_action:remove_only_thistime:item_name" = "Удалить только это событие";
 "calendar::event::more_action:remove:item_name" = "Удалить событие";
+"calendar::event::more_action:remove_this_and_future:item_name" = "Удалить это и все будущие события";
 "calendar::event::more_action:foremost:mark:item_name" = "Отметить как главное";
 "calendar::event::more_action:foremost:unmark:item_name" = "Снять отметку главного";
 "calendar::event::more_action:dday_candidate:register:item_name" = "Добавить в виджет обратного отсчёта";
@@ -135,7 +141,24 @@
 "calendar::event::more_action:dday_candidate:title" = "Кандидат для виджета обратного отсчёта";
 "calendar::event::more_action:dday_candidate:register:message" = "Добавить это событие как кандидата для виджета обратного отсчёта? Оно появится вверху списка при редактировании виджета.";
 "calendar::event::more_action:dday_candidate:unregister:message" = "Удалить это событие из кандидатов для виджета обратного отсчёта?";
+"calendar::event::more_action:live_activity:title" = "Live-активность";
+"calendar::event::more_action:live_activity:register:item_name" = "Показать на экране блокировки";
+"calendar::event::more_action:live_activity:unregister:item_name" = "Удалить с экрана блокировки";
+"calendar::event::more_action:live_activity:unavail::not_found" = "Это событие больше недоступно.";
+"calendar::event::more_action:live_activity:unavail::already_passed" = "Это событие уже началось.";
+"calendar::event::more_action:live_activity:unavail::too_far_future" = "Показать можно только события, начинающиеся в течение 8 часов.";
+"calendar::event::more_action:live_activity:register:confirm" = "Показать это событие на экране блокировки?";
+"calendar::event::more_action:live_activity:unregister:confirm" = "Удалить это событие с экрана блокировки?";
+"calendar::event::more_action:live_activity:replace:confirm" = "На экране блокировки показывается другое событие. Заменить его этим?";
+"calendar::event::more_action:live_activity:register:success" = "Показывается на экране блокировки. Заблокируйте устройство, чтобы увидеть.";
 "calendar::event::more_action:copy:item_name" = "Копировать событие";
+"calendar::event::more_action:share:item_name" = "Поделиться";
+"event_detail::share::field::time" = "Время";
+"event_detail::share::field::repeating" = "Повтор";
+"event_detail::share::field::calendar" = "Календарь";
+"event_detail::share::field::place" = "Место";
+"event_detail::share::field::url" = "Ссылка";
+"event_detail::share::field::memo" = "Заметка";
 "calendar::event::more_action:transform_to::schedule" = "Преобразовать во встречу";
 "calendar::event::more_action:transform_to::todo" = "Преобразовать в задачу";
 "calendar::event::more_action:edit:item_name" = "Изменить";
@@ -145,6 +168,9 @@
 "calednar::event::skip_todo_until" = "Выберите время, до которого пропустить эту задачу";
 "calednar::event::copy" = "Копировать событие";
 "calendar::move_date" = "Перенести дату";
+"calendar::share::this_day" = "Поделиться этим днём";
+"calendar::share::this_week" = "Поделиться этой неделей";
+"calendar::share::this_month" = "Поделиться этим месяцем";
 
 
 // MARK: - event detail
@@ -266,12 +292,33 @@
 "eventDetail::gogoleEvent::conference::password" = "Пароль";
 "eventDetail::gogoleEvent::copy::message" = "Скопировано в буфер обмена.";
 "eventDetail::gogoleEvent::canceled::message" = "Это событие отменено.";
+"eventDetail::gogoleEvent::saved::message" = "Событие сохранено.";
+"eventDetail::gogoleEvent::readOnlyCalendar::message" = "Этот календарь доступен только для чтения, поэтому событие нельзя изменить здесь.";
+"eventDetail::gogoleEvent::reauthenticate::title" = "Требуется дополнительное разрешение";
+"eventDetail::gogoleEvent::reauthenticate::message" = "Этот аккаунт Google подключён с доступом только для чтения. Чтобы изменять события, нужно отдельно разрешить редактирование.";
+"eventDetail::gogoleEvent::writeScopeNotGranted::message" = "Разрешение на редактирование не получено. Если это рабочий или учебный аккаунт, администратор может это запрещать.";
+"eventDetail::gogoleEvent::repeating::title" = "Это повторяющееся событие";
+"eventDetail::gogoleEvent::repeating::onlyThisTime::button" = "Только это событие";
+"eventDetail::gogoleEvent::repeating::all::button" = "Все события";
+"eventDetail::gogoleEvent::remove::confirm::message" = "Удалить это событие из Google Календаря?";
+"eventDetail::gogoleEvent::editOnCalendar" = "Изменить в Google Календаре";
+"eventDetail::gogoleEvent::notEditableField::message" = "Это нельзя изменить здесь. Измените в Google Календаре.";
+"eventDetail::gogoleEvent::description::formatLoss::message" = "В этом описании есть форматирование. При изменении здесь оно будет удалено.";
 
 // MARK: - Apple calendar event
 "eventDetail::appleCalendarEvent::viewOnCalendar" = "Открыть в Apple Календаре";
+"eventDetail::appleCalendarEvent::editOnCalendar" = "Изменить в Apple Календаре";
 "eventDetail::appleCalendarEvent::calendar::event" = "Событие Apple Календаря";
 "eventDetail::appleCalendarEvent::attendees" = "Участники (%d чел.)";
 "eventDetail::appleCalendarEvent::attendees::organizer" = "Организатор";
+"eventDetail::appleCalendarEvent::saved::message" = "Сохранено.";
+"eventDetail::appleCalendarEvent::remove::confirm::message" = "Удалить это событие?";
+"eventDetail::appleCalendarEvent::repeating::title" = "Повторяющееся событие";
+"eventDetail::appleCalendarEvent::repeating::onlyThisTime::button" = "Только это событие";
+"eventDetail::appleCalendarEvent::repeating::thisAndFuture::button" = "Это и все будущие события";
+"eventDetail::appleCalendarEvent::readOnlyCalendar::message" = "Этот календарь доступен только для чтения, поэтому событие нельзя изменить.";
+"eventDetail::appleCalendarEvent::notEditableField::message" = "Это поле нельзя изменить в приложении.";
+"eventDetail::appleCalendarEvent::url::placeholder" = "URL";
 
 // MARK: - event tag
 
@@ -309,6 +356,22 @@
 "eventList::remove::confirm::button::olderThan6m" = "Старше 6 месяцев";
 "eventList::remove::confirm::button::olderThan1y" = "Старше 1 года";
 
+// MARK: - share preview
+
+"share_preview::title" = "Предпросмотр";
+"share_preview::tag_filter::title" = "Теги";
+"share_preview::tag_filter::select_all" = "Выбрать все";
+"share_preview::tag_filter::deselect_all" = "Снять выделение";
+"share_preview::option::include_tag_name" = "Показывать название тега";
+"share_preview::share_button" = "Поделиться";
+"share_preview::empty" = "Нет событий, которыми можно поделиться";
+"share_preview::header::this_week" = "Эта неделя";
+"share_preview::header::last_week" = "Прошлая неделя";
+"share_preview::header::next_week" = "Следующая неделя";
+"share_preview::header::week_of_month" = "%1$@, %2$d-я неделя";
+"share_preview::format::text" = "Текст";
+"share_preview::format::image" = "Изображение";
+
 
 // MARK: - account
 
@@ -326,6 +389,9 @@
 "manage_account::delete_account_button::confirm:message" = "Вы уверены, что хотите удалить свой аккаунт?";
 "manage_account::delete_account_button::description" = "После запроса на удаление аккаунт будет удалён.\nПосле удаления данные аккаунта нельзя восстановить.";
 "signIn::title" = "Вход";
+"signIn::feature::sync" = "Резервное копирование событий, синхронизация между устройствами";
+"signIn::feature::aiAgent" = "Управляйте расписанием с ИИ-агентом";
+"signIn::feature::web" = "Пользуйтесь в вебе · todo-calendar.com";
 
 
 // MARK: - setting
@@ -411,9 +477,14 @@
 "setting.aiGuide::name" = "Добавить с ИИ — Siri и виджеты";
 "setting.feedback::name" = "Обратная связь";
 "setting.help::name" = "Помощь";
+"setting.openWeb::name" = "Открыть в веб-версии";
 "setting.share::name" = "Поделиться приложением";
 "setting.write_review::name" = "Написать отзыв о приложении";
+"setting.openSourceLicense::name" = "Лицензии открытого ПО";
 "setting.billing.plan::name" = "Тариф";
+"setting.terms::name" = "Условия использования";
+"setting.privacyPolicy::name" = "Политика конфиденциальности";
+"setting.adPrivacyOptions::name" = "Настройки конфиденциальности рекламы";
 "setting.account.signedIn::manageAccount" = "Аккаунт";
 "setting.account.needSignIn" = "Вход";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -516,6 +587,11 @@
 "widget.aiCommand::title" = "Добавить с помощью ИИ";
 "widget.aiCommand::explain" = "Нажмите один раз, чтобы открыть ввод ИИ.";
 
+// MARK: - liveActivity
+
+"liveActivity::stale" = "Начинается сейчас";
+"liveActivity::action::end" = "Завершить";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "Этот формат ссылки не поддерживается.\nПожалуйста, обновите приложение до последней версии.";
@@ -546,9 +622,13 @@
 "aiAgent::state::failed" = "Команда не выполнена";
 "aiAgent::done::default" = "Готово";
 "aiAgent::failed::default" = "Не удалось выполнить";
+"aiAgent::failed::dailyLimitExceeded" = "Сегодняшние кредиты ИИ израсходованы.";
 "aiAgent::retry" = "Повторить";
 "aiAgent::needSignIn::title" = "Требуется вход";
 "aiAgent::needSignIn::message" = "Войдите, чтобы использовать быстрый ввод ИИ.";
+"aiAgent::speechPermissionDenied::title" = "Требуется разрешение";
+"aiAgent::speechPermissionDenied::message" = "Разрешите доступ к микрофону и распознаванию речи в настройках, чтобы использовать голосовой ввод.";
+"aiAgent::speechPermissionDenied::confirm" = "Открыть настройки";
 "aiAgent::title" = "Быстрый ввод ИИ";
 "aiAgent::keyboard::stop" = "Стоп";
 "aiAgent::keyboard::send" = "Отправить";
@@ -577,6 +657,8 @@
 "aiAgent::image::textTooLong" = "Текст слишком длинный. Сократите его и попробуйте ещё раз.";
 "aiAgent::image::instructionTooLong" = "Ваши указания слишком длинные. Сократите их и попробуйте ещё раз.";
 "aiAgent::image::busy" = "Ещё выполняется другой запрос";
+"aiAgent::image::camera::denied::title" = "Требуется доступ к камере";
+"aiAgent::image::camera::denied::message" = "Разрешите доступ к камере в настройках, чтобы сделать фото.";
 
 // MARK: - billing
 
@@ -596,6 +678,7 @@
 "billing::paywall::features::title" = "Что включено в %@";
 "billing::paywall::feature::dailyCredits" = "%@ кредитов в день";
 "billing::paywall::feature::topup" = "Можно докупить кредиты после их исчерпания";
+"billing::paywall::feature::noAds" = "Без рекламы";
 "billing::paywall::disclosure::subscription" = "Подписка продлевается автоматически каждый месяц, если вы не отмените её как минимум за 24 часа до окончания текущего периода. Отменить подписку можно в любое время в настройках App Store.";
 "billing::paywall::disclosure::subscription::generic" = "Подписка продлевается автоматически в конце каждого расчётного периода, если вы не отмените её как минимум за 24 часа до его окончания. Отменить подписку можно в любое время в настройках App Store.";
 "billing::paywall::disclosure::oneTime" = "Оплатите один раз и пользуйтесь без ограничений. Автоматическое продление отсутствует.";
@@ -609,11 +692,31 @@
 "billing::paywall::restore" = "Восстановить покупки";
 "billing::paywall::restored" = "Покупки восстановлены";
 "billing::paywall::restore::empty" = "Нет покупок для восстановления.";
+"billing::paywall::manageSubscription" = "Управление подпиской";
 "billing::paywall::purchase::applied" = "Тариф обновлён";
 "billing::paywall::pending::title" = "Ожидает одобрения";
 "billing::paywall::pending::message" = "Попросите организатора семейного доступа одобрить эту покупку. После одобрения она будет применена автоматически.";
 "billing::paywall::userPlan::loadFailed" = "Не удалось загрузить ваш тариф. Повторите попытку.";
 "billing::paywall::retry" = "Повторить";
+"billing::paywall::unfinished::title" = "Есть неприменённая покупка";
+"billing::paywall::unfinished::message" = "Оплата прошла, но ваш тариф ещё не обновлён.";
+"billing::paywall::unfinished::action" = "Применить сейчас";
+"billing::paywall::unfinished::applied" = "Покупка применена";
+"billing::paywall::processing::message" = "Подтверждение покупки…";
+"billing::paywall::fail::purchase" = "Не удалось завершить покупку. Повторите попытку.";
+"billing::paywall::fail::invalidTransaction" = "Не удалось подтвердить покупку. Повторите попытку чуть позже.";
+"billing::paywall::fail::unknownProduct" = "Не удалось распознать эту покупку. Возможно, поможет обновление приложения.";
+"billing::paywall::fail::planChangeNotAllowed" = "Такое изменение тарифа не поддерживается.";
+"billing::paywall::fail::ownedByAnotherAccount" = "Эта покупка принадлежит другому аккаунту. Войдите в аккаунт, на котором она была совершена.";
+"billing::paywall::fail::reflectDelayed" = "Оплата прошла, но её применение задерживается. Она будет применена автоматически.";
+"billing::paywall::topup::credits" = "%@ кредитов";
+"billing::paywall::topup::credits::split" = "База %@ + бонус %@ кредитов";
+"billing::paywall::topup::bonus" = "+%@%% бонус";
+"billing::paywall::topup::title" = "Докупить кредиты";
+"billing::paywall::topup::title::withRemaining" = "Докупить кредиты · есть %@";
+"billing::paywall::topup::description" = "Дополнительные кредиты используются после исчерпания дневного лимита и не сгорают.";
+"billing::paywall::topup::applied" = "Кредиты добавлены";
+"billing::paywall::topup::applied::withCredits" = "Добавлено %@ кредитов";
 
 // MARK: - share extension
 
@@ -627,8 +730,21 @@
 "share.ai::sentButUntracked" = "Отправлено, но приложение не может отследить результат. Проверьте календарь чуть позже.";
 "share.ai::textTooLong" = "Текст слишком длинный для отправки. Сократите его и попробуйте ещё раз.";
 "share.ai::instructionTooLong" = "Ваше указание слишком длинное. Сократите его.";
+"share.ai::limitExceeded" = "Сегодняшние кредиты ИИ израсходованы. Они обновляются в полночь по UTC.";
 "share.ai::image::title" = "Отправить изображение ИИ";
 "share.ai::image::recognizing" = "Считывание текста с изображения…";
 "share.ai::image::text::caption" = "Текст, считанный с изображения — отредактируйте, если что-то выглядит не так.";
 "share.ai::image::text::placeholder" = "Текст, считанный с изображения";
 "share.ai::image::noTextFound" = "На этом изображении не найден текст. Введите то, что хотите добавить.";
+
+// MARK: - webview
+
+"webview::error::message" = "Не удалось загрузить эту страницу.";
+"webview::error::retry" = "Повторить";
+"webview::openInBrowser" = "Открыть в браузере";
+
+// MARK: - legal notice
+
+"legal_notice.message::terms" = "Наши Условия использования обновлены.";
+"legal_notice.message::privacy" = "Наша Политика конфиденциальности обновлена.";
+"legal_notice.effectiveDate" = "Вступает в силу %@";

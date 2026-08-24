@@ -2,3 +2,4 @@
 "NSMicrophoneUsageDescription" = "Prístup k mikrofónu je vyžadovaný na hlasové zadávanie udalostí a úloh.";
 "NSSpeechRecognitionUsageDescription" = "Rozpoznávanie reči je vyžadované na prevod vášho hlasu na udalosti a úlohy.";
 "NSCameraUsageDescription" = "Prístup k fotoaparátu je vyžadovaný na čítanie textu z odfotenej fotografie.";
+"NSPhotoLibraryAddUsageDescription" = "Prístup k fotkám je vyžadovaný na uloženie zdieľaného obrázka udalosti do vašich fotiek.";
