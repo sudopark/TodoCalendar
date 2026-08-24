@@ -2,3 +2,4 @@
 "NSMicrophoneUsageDescription" = "需要访问麦克风以通过语音输入事件和待办事项。";
 "NSSpeechRecognitionUsageDescription" = "需要语音识别功能以将您的语音转换为事件和待办事项。";
 "NSCameraUsageDescription" = "需要访问相机才能读取您拍摄照片中的文本。";
+"NSPhotoLibraryAddUsageDescription" = "需要访问照片以将分享的事件图片保存到您的照片中。";
