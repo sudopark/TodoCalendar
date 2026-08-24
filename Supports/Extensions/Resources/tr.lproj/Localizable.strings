@@ -112,8 +112,12 @@
 
 "calendar::foremostevent:title" = "En Önemli Etkinlik";
 "calendar::uncompletedTodos:title" = "Tamamlanmamış Görevler";
+"calendar::guideTodo::name" = "To-do Calendar'ın nasıl çalıştığını görün";
+"calendar::eventSync::loadingAllEvents::message" = "Tüm etkinlikleriniz getiriliyor…";
 "calendar::event_time::todo" = "Görev";
 "calendar::event_time::allday" = "Tüm gün";
+"calendar::event_time::start" = "Başlangıç";
+"calendar::event_time::end" = "Bitiş";
 "calendar::event_time::allday::with" = "%@ tüm gün";
 "calendar::event_time::period:some_days" = "%d gün";
 "calendar::event_time::period:some_minutes" = "%d dakika";
@@ -123,11 +127,13 @@
 "calendar::event::more_action::foremost_event:title" = "En önemli etkinlik";
 "calendar::event::more_action::remove_only_thistime:message" = "Bu etkinliği yalnızca tüm tekrarlayan etkinliklerden mi kaldırmak istiyorsunuz?";
 "calendar::event::more_action::remove:message" = "Bu etkinliği kaldırmak istiyor musunuz?";
+"calendar::event::more_action::remove_this_and_future:message" = "Tekrarlayan serideki bu ve sonraki tüm etkinlikleri silmek istiyor musunuz?";
 "calendar::event::more_action::mark_as_foremost" = "Bu etkinliği en önemli etkinliğiniz olarak işaretlemek istiyor musunuz?";
 "calendar::event::more_action::unmark_as_foremost" = "Bu etkinliğin en önemli etkinlik işaretini kaldırmak istiyor musunuz?";
 "calendar::event::more_action::mark_as_foremost::unavail" = "Tekrarlayan bir randevu etkinliği en önemli etkinlik olarak işaretlenemez.";
 "calendar::event::more_action:remove_only_thistime:item_name" = "Yalnızca bu etkinliği kaldır";
 "calendar::event::more_action:remove:item_name" = "Etkinliği kaldır";
+"calendar::event::more_action:remove_this_and_future:item_name" = "Bu ve sonraki tüm etkinlikleri kaldır";
 "calendar::event::more_action:foremost:mark:item_name" = "En önemli olarak işaretle";
 "calendar::event::more_action:foremost:unmark:item_name" = "En önemli işaretini kaldır";
 "calendar::event::more_action:dday_candidate:register:item_name" = "Geri Sayım widget'ına ekle";
@@ -135,7 +141,24 @@
 "calendar::event::more_action:dday_candidate:title" = "Geri Sayım widget adayı";
 "calendar::event::more_action:dday_candidate:register:message" = "Bu etkinlik Geri Sayım widget'ına aday olarak eklensin mi? Widget'ı düzenlerken listenin en üstünde görünür.";
 "calendar::event::more_action:dday_candidate:unregister:message" = "Bu etkinlik Geri Sayım widget'ı adaylarından kaldırılsın mı?";
+"calendar::event::more_action:live_activity:title" = "Canlı Etkinlik";
+"calendar::event::more_action:live_activity:register:item_name" = "Kilit Ekranı'nda göster";
+"calendar::event::more_action:live_activity:unregister:item_name" = "Kilit Ekranı'ndan kaldır";
+"calendar::event::more_action:live_activity:unavail::not_found" = "Bu etkinlik artık kullanılamıyor.";
+"calendar::event::more_action:live_activity:unavail::already_passed" = "Bu etkinlik zaten başladı.";
+"calendar::event::more_action:live_activity:unavail::too_far_future" = "Yalnızca 8 saat içinde başlayan etkinlikler gösterilebilir.";
+"calendar::event::more_action:live_activity:register:confirm" = "Bu etkinliği Kilit Ekranı'nda göstermek istiyor musunuz?";
+"calendar::event::more_action:live_activity:unregister:confirm" = "Bu etkinliği Kilit Ekranı'ndan kaldırmak istiyor musunuz?";
+"calendar::event::more_action:live_activity:replace:confirm" = "Kilit Ekranı'nda başka bir etkinlik gösteriliyor. Bununla değiştirilsin mi?";
+"calendar::event::more_action:live_activity:register:success" = "Artık Kilit Ekranı'nda gösteriliyor. Görmek için cihazınızı kilitleyin.";
 "calendar::event::more_action:copy:item_name" = "Etkinliği kopyala";
+"calendar::event::more_action:share:item_name" = "Paylaş";
+"event_detail::share::field::time" = "Saat";
+"event_detail::share::field::repeating" = "Tekrarlama";
+"event_detail::share::field::calendar" = "Takvim";
+"event_detail::share::field::place" = "Konum";
+"event_detail::share::field::url" = "Bağlantı";
+"event_detail::share::field::memo" = "Not";
 "calendar::event::more_action:transform_to::schedule" = "Randevuya dönüştür";
 "calendar::event::more_action:transform_to::todo" = "Göreve dönüştür";
 "calendar::event::more_action:edit:item_name" = "Düzenle";
@@ -145,6 +168,9 @@
 "calednar::event::skip_todo_until" = "Bu görevi atlamak için bir zaman seçin";
 "calednar::event::copy" = "Etkinliği kopyala";
 "calendar::move_date" = "Tarihi taşı";
+"calendar::share::this_day" = "Bu günü paylaş";
+"calendar::share::this_week" = "Bu haftayı paylaş";
+"calendar::share::this_month" = "Bu ayı paylaş";
 
 
 // MARK: - event detail
@@ -266,12 +292,33 @@
 "eventDetail::gogoleEvent::conference::password" = "Şifre";
 "eventDetail::gogoleEvent::copy::message" = "Panoya kopyalandı.";
 "eventDetail::gogoleEvent::canceled::message" = "Bu etkinlik iptal edildi.";
+"eventDetail::gogoleEvent::saved::message" = "Etkinlik kaydedildi.";
+"eventDetail::gogoleEvent::readOnlyCalendar::message" = "Bu takvim salt okunur, bu nedenle etkinlik burada düzenlenemez.";
+"eventDetail::gogoleEvent::reauthenticate::title" = "Ek izin gerekli";
+"eventDetail::gogoleEvent::reauthenticate::message" = "Bu Google hesabı salt okunur erişimle bağlı. Etkinlikleri düzenlemek için düzenleme iznini ayrıca vermeniz gerekir.";
+"eventDetail::gogoleEvent::writeScopeNotGranted::message" = "Düzenleme izni verilmedi. Bu bir iş veya okul hesabıysa yöneticiniz buna izin vermiyor olabilir.";
+"eventDetail::gogoleEvent::repeating::title" = "Bu, tekrarlayan bir etkinlik";
+"eventDetail::gogoleEvent::repeating::onlyThisTime::button" = "Yalnızca bu etkinlik";
+"eventDetail::gogoleEvent::repeating::all::button" = "Tüm etkinlikler";
+"eventDetail::gogoleEvent::remove::confirm::message" = "Bu etkinlik Google Takvim'den silinsin mi?";
+"eventDetail::gogoleEvent::editOnCalendar" = "Google Takvim'de düzenle";
+"eventDetail::gogoleEvent::notEditableField::message" = "Bu burada düzenlenemez. Lütfen Google Takvim'de düzenleyin.";
+"eventDetail::gogoleEvent::description::formatLoss::message" = "Bu açıklama biçimlendirme içeriyor. Burada düzenlerseniz biçimlendirme kaldırılır.";
 
 // MARK: - Apple calendar event
 "eventDetail::appleCalendarEvent::viewOnCalendar" = "Apple Takvim'de görüntüle";
+"eventDetail::appleCalendarEvent::editOnCalendar" = "Apple Takvim'de düzenle";
 "eventDetail::appleCalendarEvent::calendar::event" = "Apple Takvim Etkinliği";
 "eventDetail::appleCalendarEvent::attendees" = "Katılımcılar (%d kişi)";
 "eventDetail::appleCalendarEvent::attendees::organizer" = "Organizatör";
+"eventDetail::appleCalendarEvent::saved::message" = "Kaydedildi.";
+"eventDetail::appleCalendarEvent::remove::confirm::message" = "Bu etkinlik silinsin mi?";
+"eventDetail::appleCalendarEvent::repeating::title" = "Tekrarlayan etkinlik";
+"eventDetail::appleCalendarEvent::repeating::onlyThisTime::button" = "Yalnızca bu etkinlik";
+"eventDetail::appleCalendarEvent::repeating::thisAndFuture::button" = "Bu ve sonraki tüm etkinlikler";
+"eventDetail::appleCalendarEvent::readOnlyCalendar::message" = "Bu takvim salt okunur, bu nedenle etkinlik düzenlenemez.";
+"eventDetail::appleCalendarEvent::notEditableField::message" = "Bu alan uygulamada düzenlenemez.";
+"eventDetail::appleCalendarEvent::url::placeholder" = "URL";
 
 // MARK: - event tag
 
@@ -310,6 +357,23 @@
 "eventList::remove::confirm::button::olderThan1y" = "1 yıldan eski";
 
 
+// MARK: - share preview
+
+"share_preview::title" = "Paylaşım Önizlemesi";
+"share_preview::tag_filter::title" = "Etiketler";
+"share_preview::tag_filter::select_all" = "Tümünü seç";
+"share_preview::tag_filter::deselect_all" = "Seçimi kaldır";
+"share_preview::option::include_tag_name" = "Etiket adını göster";
+"share_preview::share_button" = "Paylaş";
+"share_preview::empty" = "Paylaşılacak etkinlik yok";
+"share_preview::header::this_week" = "Bu hafta";
+"share_preview::header::last_week" = "Geçen hafta";
+"share_preview::header::next_week" = "Gelecek hafta";
+"share_preview::header::week_of_month" = "%1$@ %2$d. hafta";
+"share_preview::format::text" = "Metin";
+"share_preview::format::image" = "Görsel";
+
+
 // MARK: - account
 
 "manage_account::title" = "Hesap Yönetimi";
@@ -326,6 +390,9 @@
 "manage_account::delete_account_button::confirm:message" = "Hesabınızı silmek istediğinizden emin misiniz?";
 "manage_account::delete_account_button::description" = "Hesap silme talebinde bulunduktan sonra hesabınız silinecektir.\nSilindikten sonra hesap bilgileri kurtarılamaz.";
 "signIn::title" = "Giriş Yap";
+"signIn::feature::sync" = "Etkinlikleri yedekleyin, cihazlar arasında senkronize edin";
+"signIn::feature::aiAgent" = "Etkinliklerinizi AI ajanıyla yönetin";
+"signIn::feature::web" = "Web'de de kullanın · todo-calendar.com";
 
 
 // MARK: - setting
@@ -411,9 +478,14 @@
 "setting.aiGuide::name" = "Yapay zekâ ile ekle — Siri ve widget'lar";
 "setting.feedback::name" = "Geri Bildirim";
 "setting.help::name" = "Yardım";
+"setting.openWeb::name" = "Web'de aç";
 "setting.share::name" = "Uygulamayı Paylaş";
 "setting.write_review::name" = "Uygulama değerlendirmesi yaz";
+"setting.openSourceLicense::name" = "Açık Kaynak Lisansları";
 "setting.billing.plan::name" = "Plan";
+"setting.terms::name" = "Kullanım Koşulları";
+"setting.privacyPolicy::name" = "Gizlilik Politikası";
+"setting.adPrivacyOptions::name" = "Reklam Gizlilik Seçenekleri";
 "setting.account.signedIn::manageAccount" = "Hesap";
 "setting.account.needSignIn" = "Giriş Yap";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -516,6 +588,11 @@
 "widget.aiCommand::title" = "AI ile Ekle";
 "widget.aiCommand::explain" = "AI girişini açmak için bir kez dokunun.";
 
+// MARK: - liveActivity
+
+"liveActivity::stale" = "Şimdi başlıyor";
+"liveActivity::action::end" = "Bitir";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "Bu bağlantı biçimi desteklenmiyor.\nLütfen uygulamayı en son sürüme güncelleyin.";
@@ -546,9 +623,13 @@
 "aiAgent::state::failed" = "İşlem başarısız";
 "aiAgent::done::default" = "Tamamlandı";
 "aiAgent::failed::default" = "Bu tamamlanamadı";
+"aiAgent::failed::dailyLimitExceeded" = "Bugünkü AI kredilerinizi kullandınız.";
 "aiAgent::retry" = "Tekrar dene";
 "aiAgent::needSignIn::title" = "Giriş gerekli";
 "aiAgent::needSignIn::message" = "Hızlı AI girişini kullanmak için giriş yapın.";
+"aiAgent::speechPermissionDenied::title" = "İzin gerekli";
+"aiAgent::speechPermissionDenied::message" = "Sesli girişi kullanmak için Ayarlar'dan mikrofon ve konuşma tanıma erişimine izin verin.";
+"aiAgent::speechPermissionDenied::confirm" = "Ayarları Aç";
 "aiAgent::title" = "Hızlı AI Girişi";
 "aiAgent::keyboard::stop" = "Durdur";
 "aiAgent::keyboard::send" = "Gönder";
@@ -577,6 +658,8 @@
 "aiAgent::image::textTooLong" = "Metin çok uzun. Kısaltıp tekrar deneyin.";
 "aiAgent::image::instructionTooLong" = "Yönergeleriniz çok uzun. Kısaltıp tekrar deneyin.";
 "aiAgent::image::busy" = "Başka bir istek hâlâ devam ediyor";
+"aiAgent::image::camera::denied::title" = "Kamera erişimi gerekli";
+"aiAgent::image::camera::denied::message" = "Fotoğraf çekmek için Ayarlar'dan kamera erişimine izin verin.";
 
 // MARK: - billing
 
@@ -596,6 +679,7 @@
 "billing::paywall::features::title" = "%@ neler içerir";
 "billing::paywall::feature::dailyCredits" = "günde %@ kredi";
 "billing::paywall::feature::topup" = "Krediler tükendiğinde ek satın alma yapılabilir";
+"billing::paywall::feature::noAds" = "Reklamsız kullanım";
 "billing::paywall::disclosure::subscription" = "Aboneliğiniz, mevcut dönem sona ermeden en az 24 saat önce iptal etmediğiniz sürece her ay otomatik olarak yenilenir. Aboneliğinizi App Store ayarlarından istediğiniz zaman iptal edebilirsiniz.";
 "billing::paywall::disclosure::subscription::generic" = "Aboneliğiniz, her fatura döneminin sonunda, döneminiz sona ermeden en az 24 saat önce iptal etmediğiniz sürece otomatik olarak yenilenir. Aboneliğinizi App Store ayarlarından istediğiniz zaman iptal edebilirsiniz.";
 "billing::paywall::disclosure::oneTime" = "Bir kez ödeyin ve süresiz kullanın. Bu, otomatik olarak yenilenmez.";
@@ -609,11 +693,31 @@
 "billing::paywall::restore" = "Satın Alımları Geri Yükle";
 "billing::paywall::restored" = "Satın alımlar geri yüklendi";
 "billing::paywall::restore::empty" = "Geri yüklenecek satın alma yok.";
+"billing::paywall::manageSubscription" = "Aboneliği Yönet";
 "billing::paywall::purchase::applied" = "Plan güncellendi";
 "billing::paywall::pending::title" = "Onay bekleniyor";
 "billing::paywall::pending::message" = "Bu satın alımı onaylaması için bir aile organizatöründen isteyin. Onaylandığında otomatik olarak uygulanır.";
 "billing::paywall::userPlan::loadFailed" = "Planınız yüklenemedi. Lütfen tekrar deneyin.";
 "billing::paywall::retry" = "Tekrar dene";
+"billing::paywall::unfinished::title" = "Uygulanmamış bir satın alım var";
+"billing::paywall::unfinished::message" = "Ödemeniz alındı ancak planınız henüz güncellenmedi.";
+"billing::paywall::unfinished::action" = "Şimdi uygula";
+"billing::paywall::unfinished::applied" = "Satın alımınız uygulandı";
+"billing::paywall::processing::message" = "Satın alımınız doğrulanıyor…";
+"billing::paywall::fail::purchase" = "Satın alma tamamlanamadı. Lütfen tekrar deneyin.";
+"billing::paywall::fail::invalidTransaction" = "Satın alımınız doğrulanamadı. Lütfen birazdan tekrar deneyin.";
+"billing::paywall::fail::unknownProduct" = "Bu satın alım tanınamadı. Uygulamayı güncellemek sorunu çözebilir.";
+"billing::paywall::fail::planChangeNotAllowed" = "Bu plan değişikliği desteklenmiyor.";
+"billing::paywall::fail::ownedByAnotherAccount" = "Bu satın alım başka bir hesaba ait. Satın aldığınız hesapla giriş yapın.";
+"billing::paywall::fail::reflectDelayed" = "Ödemeniz alındı ancak uygulanması gecikiyor. Otomatik olarak uygulanacak.";
+"billing::paywall::topup::credits" = "%@ kredi";
+"billing::paywall::topup::credits::split" = "Temel %@ + Bonus %@ kredi";
+"billing::paywall::topup::bonus" = "+%@%% bonus";
+"billing::paywall::topup::title" = "Kredi ekle";
+"billing::paywall::topup::title::withRemaining" = "Kredi ekle · %@ mevcut";
+"billing::paywall::topup::description" = "Ek krediler, günlük limitiniz bittikten sonra kullanılır ve süresi dolmaz.";
+"billing::paywall::topup::applied" = "Krediler eklendi";
+"billing::paywall::topup::applied::withCredits" = "%@ kredi eklendi";
 
 // MARK: - share extension
 
@@ -627,8 +731,21 @@
 "share.ai::sentButUntracked" = "Gönderildi, ancak uygulama sonucu izleyemiyor. Birazdan takviminizi kontrol edin.";
 "share.ai::textTooLong" = "Metin göndermek için çok uzun. Kısaltıp tekrar deneyin.";
 "share.ai::instructionTooLong" = "Yönergeniz çok uzun. Lütfen kısaltın.";
+"share.ai::limitExceeded" = "Bugünkü AI kredilerinizi kullandınız. UTC gece yarısında sıfırlanır.";
 "share.ai::image::title" = "Görseli AI'ya gönder";
 "share.ai::image::recognizing" = "Görseldeki metin okunuyor…";
 "share.ai::image::text::caption" = "Görselden okunan metin — bir şey yanlış görünüyorsa düzenleyin.";
 "share.ai::image::text::placeholder" = "Görselden okunan metin";
 "share.ai::image::noTextFound" = "Bu görselde herhangi bir metin bulunamadı. Eklemek istediğinizi yazın.";
+
+// MARK: - webview
+
+"webview::error::message" = "Bu sayfa yüklenemedi.";
+"webview::error::retry" = "Tekrar dene";
+"webview::openInBrowser" = "Tarayıcıda aç";
+
+// MARK: - legal notice
+
+"legal_notice.message::terms" = "Hizmet Şartlarımız güncellendi.";
+"legal_notice.message::privacy" = "Gizlilik Politikamız güncellendi.";
+"legal_notice.effectiveDate" = "Yürürlük tarihi: %@";
