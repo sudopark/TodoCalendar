@@ -2,3 +2,4 @@
 "NSMicrophoneUsageDescription" = "音声でイベントやタスクを入力するためにマイクへのアクセスが必要です。";
 "NSSpeechRecognitionUsageDescription" = "音声をイベントやタスクに変換するために音声認識が必要です。";
 "NSCameraUsageDescription" = "撮影した写真からテキストを読み取るためにカメラへのアクセスが必要です。";
+"NSPhotoLibraryAddUsageDescription" = "共有するイベント画像を写真に保存するために写真へのアクセスが必要です。";

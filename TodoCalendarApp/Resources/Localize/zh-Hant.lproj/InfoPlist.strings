@@ -2,3 +2,4 @@
 "NSMicrophoneUsageDescription" = "需要麥克風存取權限，才能以語音輸入活動與待辦事項。";
 "NSSpeechRecognitionUsageDescription" = "需要語音辨識權限，才能將您的語音轉換為活動與待辦事項。";
 "NSCameraUsageDescription" = "需要相機存取權限，才能讀取您拍攝照片中的文字。";
+"NSPhotoLibraryAddUsageDescription" = "需要照片存取權限，才能將分享的活動圖片儲存到您的照片中。";
