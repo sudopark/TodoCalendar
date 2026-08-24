@@ -2,3 +2,4 @@
 "NSMicrophoneUsageDescription" = "Akses mikrofon diperlukan untuk memasukkan acara dan tugasan melalui suara.";
 "NSSpeechRecognitionUsageDescription" = "Pengecaman pertuturan diperlukan untuk menukar suara anda kepada acara dan tugasan.";
 "NSCameraUsageDescription" = "Akses kamera diperlukan untuk membaca teks daripada gambar yang anda ambil.";
+"NSPhotoLibraryAddUsageDescription" = "Akses pustaka foto diperlukan untuk menyimpan imej acara yang dikongsi ke dalam foto anda.";

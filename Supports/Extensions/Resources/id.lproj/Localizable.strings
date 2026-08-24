@@ -112,8 +112,12 @@
 
 "calendar::foremostevent:title" = "Acara Terpenting";
 "calendar::uncompletedTodos:title" = "Tugas Belum Selesai";
+"calendar::guideTodo::name" = "Lihat cara kerja To-do Calendar";
+"calendar::eventSync::loadingAllEvents::message" = "Mengambil semua acara Anda…";
 "calendar::event_time::todo" = "Tugas";
 "calendar::event_time::allday" = "Sepanjang hari";
+"calendar::event_time::start" = "Mulai";
+"calendar::event_time::end" = "Selesai";
 "calendar::event_time::allday::with" = "%@ sepanjang hari";
 "calendar::event_time::period:some_days" = "%d hari";
 "calendar::event_time::period:some_minutes" = "%d menit";
@@ -123,11 +127,13 @@
 "calendar::event::more_action::foremost_event:title" = "Acara terpenting";
 "calendar::event::more_action::remove_only_thistime:message" = "Apakah Anda ingin menghapus acara ini saja dari semua acara berulang?";
 "calendar::event::more_action::remove:message" = "Apakah Anda ingin menghapus acara ini?";
+"calendar::event::more_action::remove_this_and_future:message" = "Apakah Anda ingin menghapus acara ini dan semua acara berikutnya dalam rangkaian berulang?";
 "calendar::event::more_action::mark_as_foremost" = "Apakah Anda ingin menandai acara ini sebagai acara terpenting Anda?";
 "calendar::event::more_action::unmark_as_foremost" = "Apakah Anda ingin menghapus tanda acara terpenting dari acara ini?";
 "calendar::event::more_action::mark_as_foremost::unavail" = "Acara jadwal yang berulang tidak dapat ditandai sebagai acara terpenting.";
 "calendar::event::more_action:remove_only_thistime:item_name" = "Hapus acara ini saja";
 "calendar::event::more_action:remove:item_name" = "Hapus acara";
+"calendar::event::more_action:remove_this_and_future:item_name" = "Hapus acara ini dan semua berikutnya";
 "calendar::event::more_action:foremost:mark:item_name" = "Tandai sebagai terpenting";
 "calendar::event::more_action:foremost:unmark:item_name" = "Hapus tanda terpenting";
 "calendar::event::more_action:dday_candidate:register:item_name" = "Tambahkan ke widget H-Day";
@@ -135,7 +141,24 @@
 "calendar::event::more_action:dday_candidate:title" = "Kandidat widget H-Day";
 "calendar::event::more_action:dday_candidate:register:message" = "Tambahkan acara ini sebagai kandidat widget H-Day? Acara ini akan muncul di bagian atas daftar saat Anda mengedit widget.";
 "calendar::event::more_action:dday_candidate:unregister:message" = "Hapus acara ini dari kandidat widget H-Day?";
+"calendar::event::more_action:live_activity:title" = "Aktivitas Langsung";
+"calendar::event::more_action:live_activity:register:item_name" = "Tampilkan di Layar Terkunci";
+"calendar::event::more_action:live_activity:unregister:item_name" = "Hapus dari Layar Terkunci";
+"calendar::event::more_action:live_activity:unavail::not_found" = "Acara ini tidak tersedia lagi.";
+"calendar::event::more_action:live_activity:unavail::already_passed" = "Acara ini sudah dimulai.";
+"calendar::event::more_action:live_activity:unavail::too_far_future" = "Hanya acara yang dimulai dalam 8 jam yang dapat ditampilkan.";
+"calendar::event::more_action:live_activity:register:confirm" = "Apakah Anda ingin menampilkan acara ini di Layar Terkunci?";
+"calendar::event::more_action:live_activity:unregister:confirm" = "Apakah Anda ingin menghapus acara ini dari Layar Terkunci?";
+"calendar::event::more_action:live_activity:replace:confirm" = "Acara lain sedang ditampilkan di Layar Terkunci. Ganti dengan acara ini?";
+"calendar::event::more_action:live_activity:register:success" = "Sekarang ditampilkan di Layar Terkunci. Kunci perangkat Anda untuk melihatnya.";
 "calendar::event::more_action:copy:item_name" = "Salin acara";
+"calendar::event::more_action:share:item_name" = "Bagikan";
+"event_detail::share::field::time" = "Waktu";
+"event_detail::share::field::repeating" = "Pengulangan";
+"event_detail::share::field::calendar" = "Kalender";
+"event_detail::share::field::place" = "Lokasi";
+"event_detail::share::field::url" = "Tautan";
+"event_detail::share::field::memo" = "Catatan";
 "calendar::event::more_action:transform_to::schedule" = "Ubah menjadi jadwal";
 "calendar::event::more_action:transform_to::todo" = "Ubah menjadi tugas";
 "calendar::event::more_action:edit:item_name" = "Edit";
@@ -145,6 +168,9 @@
 "calednar::event::skip_todo_until" = "Pilih waktu untuk melewati tugas ini";
 "calednar::event::copy" = "Salin acara";
 "calendar::move_date" = "Pindahkan tanggal";
+"calendar::share::this_day" = "Bagikan hari ini";
+"calendar::share::this_week" = "Bagikan minggu ini";
+"calendar::share::this_month" = "Bagikan bulan ini";
 
 
 // MARK: - event detail
@@ -266,12 +292,33 @@
 "eventDetail::gogoleEvent::conference::password" = "Kata Sandi";
 "eventDetail::gogoleEvent::copy::message" = "Disalin ke papan klip.";
 "eventDetail::gogoleEvent::canceled::message" = "Acara ini telah dibatalkan.";
+"eventDetail::gogoleEvent::saved::message" = "Acara telah disimpan.";
+"eventDetail::gogoleEvent::readOnlyCalendar::message" = "Kalender ini hanya-baca, jadi acara tidak dapat diedit di sini.";
+"eventDetail::gogoleEvent::reauthenticate::title" = "Izin tambahan diperlukan";
+"eventDetail::gogoleEvent::reauthenticate::message" = "Akun Google ini terhubung dengan akses hanya-baca. Untuk mengedit acara, Anda perlu memberikan izin edit secara terpisah.";
+"eventDetail::gogoleEvent::writeScopeNotGranted::message" = "Izin edit tidak diberikan. Jika ini akun kantor atau sekolah, administrator Anda mungkin tidak mengizinkannya.";
+"eventDetail::gogoleEvent::repeating::title" = "Ini adalah acara berulang";
+"eventDetail::gogoleEvent::repeating::onlyThisTime::button" = "Acara ini saja";
+"eventDetail::gogoleEvent::repeating::all::button" = "Semua acara";
+"eventDetail::gogoleEvent::remove::confirm::message" = "Hapus acara ini dari Google Kalender?";
+"eventDetail::gogoleEvent::editOnCalendar" = "Edit di Google Kalender";
+"eventDetail::gogoleEvent::notEditableField::message" = "Ini tidak dapat diedit di sini. Silakan edit di Google Kalender.";
+"eventDetail::gogoleEvent::description::formatLoss::message" = "Deskripsi ini memiliki format. Mengeditnya di sini akan menghapus formatnya.";
 
 // MARK: - Apple calendar event
 "eventDetail::appleCalendarEvent::viewOnCalendar" = "Lihat di Apple Kalender";
+"eventDetail::appleCalendarEvent::editOnCalendar" = "Edit di Apple Kalender";
 "eventDetail::appleCalendarEvent::calendar::event" = "Acara Apple Kalender";
 "eventDetail::appleCalendarEvent::attendees" = "Peserta (%d orang)";
 "eventDetail::appleCalendarEvent::attendees::organizer" = "Penyelenggara";
+"eventDetail::appleCalendarEvent::saved::message" = "Tersimpan.";
+"eventDetail::appleCalendarEvent::remove::confirm::message" = "Hapus acara ini?";
+"eventDetail::appleCalendarEvent::repeating::title" = "Acara berulang";
+"eventDetail::appleCalendarEvent::repeating::onlyThisTime::button" = "Acara ini saja";
+"eventDetail::appleCalendarEvent::repeating::thisAndFuture::button" = "Acara ini dan semua berikutnya";
+"eventDetail::appleCalendarEvent::readOnlyCalendar::message" = "Kalender ini hanya-baca, jadi acara tidak dapat diedit.";
+"eventDetail::appleCalendarEvent::notEditableField::message" = "Kolom ini tidak dapat diedit di aplikasi.";
+"eventDetail::appleCalendarEvent::url::placeholder" = "URL";
 
 // MARK: - event tag
 
@@ -310,6 +357,23 @@
 "eventList::remove::confirm::button::olderThan1y" = "Lebih lama dari 1 tahun";
 
 
+// MARK: - share preview
+
+"share_preview::title" = "Pratinjau Berbagi";
+"share_preview::tag_filter::title" = "Tag";
+"share_preview::tag_filter::select_all" = "Pilih semua";
+"share_preview::tag_filter::deselect_all" = "Batalkan semua pilihan";
+"share_preview::option::include_tag_name" = "Sertakan nama tag";
+"share_preview::share_button" = "Bagikan";
+"share_preview::empty" = "Tidak ada acara untuk dibagikan";
+"share_preview::header::this_week" = "Minggu ini";
+"share_preview::header::last_week" = "Minggu lalu";
+"share_preview::header::next_week" = "Minggu depan";
+"share_preview::header::week_of_month" = "%1$@ minggu %2$d";
+"share_preview::format::text" = "Teks";
+"share_preview::format::image" = "Gambar";
+
+
 // MARK: - account
 
 "manage_account::title" = "Kelola Akun";
@@ -326,6 +390,9 @@
 "manage_account::delete_account_button::confirm:message" = "Apakah Anda yakin ingin menghapus akun Anda?";
 "manage_account::delete_account_button::description" = "Setelah meminta penghapusan akun, akun Anda akan dihapus.\nSetelah dihapus, informasi akun tidak dapat dipulihkan.";
 "signIn::title" = "Masuk";
+"signIn::feature::sync" = "Cadangkan acara, sinkronkan antar perangkat";
+"signIn::feature::aiAgent" = "Kelola jadwal Anda dengan agen AI";
+"signIn::feature::web" = "Gunakan di web · todo-calendar.com";
 
 
 // MARK: - setting
@@ -411,9 +478,14 @@
 "setting.aiGuide::name" = "Tambah dengan AI — Siri & widget";
 "setting.feedback::name" = "Masukan";
 "setting.help::name" = "Bantuan";
+"setting.openWeb::name" = "Buka di web";
 "setting.share::name" = "Bagikan Aplikasi";
 "setting.write_review::name" = "Tulis ulasan aplikasi";
+"setting.openSourceLicense::name" = "Lisensi Sumber Terbuka";
 "setting.billing.plan::name" = "Paket";
+"setting.terms::name" = "Ketentuan Penggunaan";
+"setting.privacyPolicy::name" = "Kebijakan Privasi";
+"setting.adPrivacyOptions::name" = "Opsi Privasi Iklan";
 "setting.account.signedIn::manageAccount" = "Akun";
 "setting.account.needSignIn" = "Masuk";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -516,6 +588,11 @@
 "widget.aiCommand::title" = "Tambah dengan AI";
 "widget.aiCommand::explain" = "Ketuk sekali untuk membuka input AI.";
 
+// MARK: - liveActivity
+
+"liveActivity::stale" = "Dimulai sekarang";
+"liveActivity::action::end" = "Akhiri";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "Format tautan ini tidak didukung.\nMohon perbarui aplikasi ke versi terbaru.";
@@ -546,9 +623,13 @@
 "aiAgent::state::failed" = "Perintah gagal";
 "aiAgent::done::default" = "Selesai";
 "aiAgent::failed::default" = "Tidak bisa menyelesaikan itu";
+"aiAgent::failed::dailyLimitExceeded" = "Kredit AI hari ini sudah habis.";
 "aiAgent::retry" = "Coba lagi";
 "aiAgent::needSignIn::title" = "Perlu masuk";
 "aiAgent::needSignIn::message" = "Masuk untuk menggunakan input cepat AI.";
+"aiAgent::speechPermissionDenied::title" = "Izin diperlukan";
+"aiAgent::speechPermissionDenied::message" = "Izinkan akses mikrofon dan pengenalan suara di Pengaturan untuk menggunakan input suara.";
+"aiAgent::speechPermissionDenied::confirm" = "Buka Pengaturan";
 "aiAgent::title" = "Input Cepat AI";
 "aiAgent::keyboard::stop" = "Hentikan";
 "aiAgent::keyboard::send" = "Kirim";
@@ -577,6 +658,8 @@
 "aiAgent::image::textTooLong" = "Teks terlalu panjang. Persingkat dan coba lagi.";
 "aiAgent::image::instructionTooLong" = "Instruksi Anda terlalu panjang. Persingkat dan coba lagi.";
 "aiAgent::image::busy" = "Permintaan lain masih berjalan";
+"aiAgent::image::camera::denied::title" = "Akses kamera diperlukan";
+"aiAgent::image::camera::denied::message" = "Izinkan akses kamera di Pengaturan untuk mengambil foto.";
 
 // MARK: - billing
 
@@ -596,6 +679,7 @@
 "billing::paywall::features::title" = "%@ mencakup";
 "billing::paywall::feature::dailyCredits" = "%@ kredit per hari";
 "billing::paywall::feature::topup" = "Bisa membeli tambahan saat kredit habis";
+"billing::paywall::feature::noAds" = "Tanpa iklan";
 "billing::paywall::disclosure::subscription" = "Langganan Anda diperpanjang secara otomatis setiap bulan kecuali Anda membatalkannya setidaknya 24 jam sebelum periode saat ini berakhir. Anda dapat membatalkannya kapan saja di pengaturan App Store.";
 "billing::paywall::disclosure::subscription::generic" = "Langganan Anda diperpanjang secara otomatis di akhir setiap periode penagihan, kecuali Anda membatalkannya setidaknya 24 jam sebelum periode tersebut berakhir. Anda dapat membatalkannya kapan saja di pengaturan App Store.";
 "billing::paywall::disclosure::oneTime" = "Bayar sekali dan gunakan selamanya. Ini tidak diperpanjang secara otomatis.";
@@ -609,11 +693,31 @@
 "billing::paywall::restore" = "Pulihkan Pembelian";
 "billing::paywall::restored" = "Pembelian dipulihkan";
 "billing::paywall::restore::empty" = "Tidak ada pembelian untuk dipulihkan.";
+"billing::paywall::manageSubscription" = "Kelola Langganan";
 "billing::paywall::purchase::applied" = "Paket diperbarui";
 "billing::paywall::pending::title" = "Menunggu persetujuan";
 "billing::paywall::pending::message" = "Minta pengelola keluarga untuk menyetujui pembelian ini. Pembelian akan diterapkan secara otomatis setelah disetujui.";
 "billing::paywall::userPlan::loadFailed" = "Tidak dapat memuat paket Anda. Coba lagi.";
 "billing::paywall::retry" = "Coba lagi";
+"billing::paywall::unfinished::title" = "Ada pembelian yang belum diterapkan";
+"billing::paywall::unfinished::message" = "Pembayaran Anda berhasil, tetapi paket Anda belum diperbarui.";
+"billing::paywall::unfinished::action" = "Terapkan sekarang";
+"billing::paywall::unfinished::applied" = "Pembelian Anda telah diterapkan";
+"billing::paywall::processing::message" = "Mengonfirmasi pembelian Anda…";
+"billing::paywall::fail::purchase" = "Kami tidak dapat menyelesaikan pembelian. Silakan coba lagi.";
+"billing::paywall::fail::invalidTransaction" = "Kami tidak dapat memverifikasi pembelian Anda. Coba lagi sebentar lagi.";
+"billing::paywall::fail::unknownProduct" = "Kami tidak dapat mengenali pembelian ini. Memperbarui aplikasi mungkin dapat memperbaikinya.";
+"billing::paywall::fail::planChangeNotAllowed" = "Perubahan paket ini tidak didukung.";
+"billing::paywall::fail::ownedByAnotherAccount" = "Pembelian ini milik akun lain. Masuk dengan akun yang Anda gunakan untuk membelinya.";
+"billing::paywall::fail::reflectDelayed" = "Pembayaran Anda berhasil, tetapi penerapannya tertunda. Ini akan diterapkan secara otomatis.";
+"billing::paywall::topup::credits" = "%@ kredit";
+"billing::paywall::topup::credits::split" = "Dasar %@ + Bonus %@ kredit";
+"billing::paywall::topup::bonus" = "+%@%% bonus";
+"billing::paywall::topup::title" = "Tambah kredit";
+"billing::paywall::topup::title::withRemaining" = "Tambah kredit · %@ dimiliki";
+"billing::paywall::topup::description" = "Kredit tambahan digunakan setelah batas harian Anda habis, dan tidak akan kedaluwarsa.";
+"billing::paywall::topup::applied" = "Kredit ditambahkan";
+"billing::paywall::topup::applied::withCredits" = "%@ kredit ditambahkan";
 
 // MARK: - share extension
 
@@ -627,8 +731,21 @@
 "share.ai::sentButUntracked" = "Terkirim, tetapi aplikasi tidak dapat melacak hasilnya. Periksa kalender Anda sebentar lagi.";
 "share.ai::textTooLong" = "Teks terlalu panjang untuk dikirim. Persingkat dan coba lagi.";
 "share.ai::instructionTooLong" = "Instruksi Anda terlalu panjang. Silakan persingkat.";
+"share.ai::limitExceeded" = "Kredit AI hari ini sudah habis. Kredit direset pada tengah malam UTC.";
 "share.ai::image::title" = "Kirim gambar ke AI";
 "share.ai::image::recognizing" = "Membaca teks dari gambar…";
 "share.ai::image::text::caption" = "Teks yang dibaca dari gambar — edit jika ada yang terlihat tidak sesuai.";
 "share.ai::image::text::placeholder" = "Teks dari gambar";
 "share.ai::image::noTextFound" = "Tidak dapat menemukan teks apa pun di gambar ini. Ketik apa yang ingin Anda tambahkan.";
+
+// MARK: - webview
+
+"webview::error::message" = "Tidak dapat memuat halaman ini.";
+"webview::error::retry" = "Coba lagi";
+"webview::openInBrowser" = "Buka di browser";
+
+// MARK: - legal notice
+
+"legal_notice.message::terms" = "Ketentuan Layanan kami telah diperbarui.";
+"legal_notice.message::privacy" = "Kebijakan Privasi kami telah diperbarui.";
+"legal_notice.effectiveDate" = "Berlaku %@";
