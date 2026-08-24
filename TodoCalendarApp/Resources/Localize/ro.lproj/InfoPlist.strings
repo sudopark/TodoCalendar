@@ -2,3 +2,4 @@
 "NSMicrophoneUsageDescription" = "Accesul la microfon este necesar pentru a introduce evenimente și sarcini prin voce.";
 "NSSpeechRecognitionUsageDescription" = "Recunoașterea vocală este necesară pentru a converti vocea dvs. în evenimente și sarcini.";
 "NSCameraUsageDescription" = "Accesul la cameră este necesar pentru a citi textul dintr-o fotografie pe care o faceți.";
+"NSPhotoLibraryAddUsageDescription" = "Accesul la biblioteca foto este necesar pentru a salva în fotografiile dvs. imaginea unui eveniment distribuit.";
