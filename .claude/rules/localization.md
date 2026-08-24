@@ -34,6 +34,24 @@ paths:
 - 번역 원칙은 아래 §2·§3.
 - 전 언어 0 위반을 확인하고 #810 대기 목록을 비운 뒤 close.
 
+### 서비스 이용 가이드 — lproj 의 후행 작업
+
+앱이 인웹뷰로 여는 안내 페이지 원고는 이 레포가 아니라 `sudopark/TodoCalendar-Terms` 의
+`guide/<언어코드>/` 에 있다 (언어 코드는 lproj 와 같고, 파일 7개는 전 언어 공통 이름).
+
+- **lproj 가 먼저다.** 본문의 화면 라벨은 자유번역하지 않고 그 언어 lproj 값을 그대로 인용한다 —
+  가이드가 앱 버튼을 다른 말로 부르면 독자가 그 버튼을 못 찾는다. 인용 소스는 lproj 3곳 전부다
+  (Siri 발화문은 `AppShortcuts.strings`. 시스템이 `AppShortcutsProvider` 의 Swift 리터럴을
+  키로 삼아 로컬라이즈하므로 영어로 남기지 않는다).
+- **어떤 표현이 화면 라벨인지는 en↔ko 대조로 가른다.** 원고의 볼드는 UI 라벨(`**Convert to schedule**`)과
+  서술 개념어(`**location**`)에 구분 없이 쓰여 표기만으로는 못 가른다. en 과 ko 가이드를 나란히 놓으면
+  ko 는 ko lproj 값을 쓴 상태라 어느 볼드가 인용인지 드러나고, 그 ko 값을 lproj 에서 grep 하면 키가
+  역추적된다 — 같은 키를 대상 언어 lproj 에서 찾으면 그게 정답 문구다.
+- 링크 대상 파일·이미지 URL·헤딩 구조는 en 과 같게 두고, **헤딩 앵커만 번역된 헤딩을 따라간다**
+  (`#foremost-event` → ko `#제일-중요한-이벤트`).
+- 스크린샷은 `guide/images/` 영문 1벌을 절대 URL 로 전 언어가 공유한다 — 언어별로 다시 찍지 않는다.
+- 검증: `python3 scripts/check-guide-parity.py <terms-repo-경로>` (언어 생략 = 전 언어) 0 위반.
+
 ## 2. 번역 원칙
 
 - **도메인 3계층 용어 분리**: Event ⊃ {Todo, Schedule}는 언어마다 서로 다른 단어여야 한다 (`total::event::count`/`todo::count`/`schedule::count`가 리트머스). 예: de Ereignis/Aufgabe/Termin, fr événement/tâche/rendez-vous.

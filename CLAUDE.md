@@ -76,6 +76,8 @@ tuist generate --no-open      # 파일 추가/삭제 후 재실행 필수
 
 > 테스트 작성 원칙: [`.claude/rules/testability.md`](.claude/rules/testability.md) (path 매칭 자동 로드)
 
+> 서비스 이용 가이드(`sudopark/TodoCalendar-Terms` `guide/`) 번역·수정은 [`.claude/rules/localization.md`](.claude/rules/localization.md) §1 소관. 원고가 다른 레포라 path 매칭에 안 걸리니 그 작업을 시작할 땐 여기서 찾아 연다.
+
 > 개발 대시보드(Project #2) 상태는 이슈 생성 `Todo` → 킥오프 `In Progress` → PR 생성 `Review + QA` 로 따라간다. 배선은 `.claude/scripts/project-board.sh <이슈번호> "<상태>"`, 조항은 issue·kickoff·pr 스킬 소관.
 
 ---
