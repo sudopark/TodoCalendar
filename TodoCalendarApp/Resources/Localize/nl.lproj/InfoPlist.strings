@@ -2,3 +2,4 @@
 "NSMicrophoneUsageDescription" = "Toegang tot de microfoon is vereist om gebeurtenissen en taken via spraak in te voeren.";
 "NSSpeechRecognitionUsageDescription" = "Spraakherkenning is vereist om je stem om te zetten in gebeurtenissen en taken.";
 "NSCameraUsageDescription" = "Toegang tot de camera is vereist om tekst te lezen uit een foto die je maakt.";
+"NSPhotoLibraryAddUsageDescription" = "Toegang tot de fotobibliotheek is vereist om een gedeelde afbeelding van een gebeurtenis in je foto's te bewaren.";

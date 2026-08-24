@@ -2,3 +2,4 @@
 "NSMicrophoneUsageDescription" = "Mikrofonin käyttöoikeus tarvitaan tapahtumien ja tehtävien syöttämiseen äänellä.";
 "NSSpeechRecognitionUsageDescription" = "Puheentunnistus tarvitaan äänesi muuntamiseen tapahtumiksi ja tehtäviksi.";
 "NSCameraUsageDescription" = "Kameran käyttöoikeus tarvitaan tekstin lukemiseen ottamastasi kuvasta.";
+"NSPhotoLibraryAddUsageDescription" = "Kuvakirjaston käyttöoikeus tarvitaan jaetun tapahtumakuvan tallentamiseen kuviisi.";

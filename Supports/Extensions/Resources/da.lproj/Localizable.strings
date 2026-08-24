@@ -112,8 +112,12 @@
 
 "calendar::foremostevent:title" = "Vigtigste begivenhed";
 "calendar::uncompletedTodos:title" = "Uafsluttede opgaver";
+"calendar::guideTodo::name" = "Sådan fungerer To-do Calendar";
+"calendar::eventSync::loadingAllEvents::message" = "Henter alle dine begivenheder…";
 "calendar::event_time::todo" = "Opgave";
 "calendar::event_time::allday" = "Hele dagen";
+"calendar::event_time::start" = "Start";
+"calendar::event_time::end" = "Slut";
 "calendar::event_time::allday::with" = "%@ hele dagen";
 "calendar::event_time::period:some_days" = "%d dage";
 "calendar::event_time::period:some_minutes" = "%d minutter";
@@ -123,11 +127,13 @@
 "calendar::event::more_action::foremost_event:title" = "Vigtigste begivenhed";
 "calendar::event::more_action::remove_only_thistime:message" = "Vil du kun slette denne begivenhed blandt alle de gentagne begivenheder?";
 "calendar::event::more_action::remove:message" = "Vil du fjerne denne begivenhed?";
+"calendar::event::more_action::remove_this_and_future:message" = "Vil du slette denne og alle fremtidige begivenheder i den gentagne serie?";
 "calendar::event::more_action::mark_as_foremost" = "Vil du markere denne begivenhed som din vigtigste begivenhed?";
 "calendar::event::more_action::unmark_as_foremost" = "Vil du fjerne markeringen af denne begivenhed som din vigtigste begivenhed?";
 "calendar::event::more_action::mark_as_foremost::unavail" = "En gentagende aftale kan ikke markeres som den vigtigste begivenhed.";
 "calendar::event::more_action:remove_only_thistime:item_name" = "Fjern kun denne begivenhed";
 "calendar::event::more_action:remove:item_name" = "Fjern begivenhed";
+"calendar::event::more_action:remove_this_and_future:item_name" = "Fjern denne og alle fremtidige begivenheder";
 "calendar::event::more_action:foremost:mark:item_name" = "Markér som vigtigst";
 "calendar::event::more_action:foremost:unmark:item_name" = "Fjern markering som vigtigst";
 "calendar::event::more_action:dday_candidate:register:item_name" = "Føj til D-dag-widgeten";
@@ -135,7 +141,24 @@
 "calendar::event::more_action:dday_candidate:title" = "Kandidat til D-dag-widgeten";
 "calendar::event::more_action:dday_candidate:register:message" = "Vil du tilføje denne begivenhed som kandidat til D-dag-widgeten? Den vises øverst på listen, når du redigerer widgeten.";
 "calendar::event::more_action:dday_candidate:unregister:message" = "Vil du fjerne denne begivenhed fra kandidaterne til D-dag-widgeten?";
+"calendar::event::more_action:live_activity:title" = "Live-aktivitet";
+"calendar::event::more_action:live_activity:register:item_name" = "Vis på låseskærmen";
+"calendar::event::more_action:live_activity:unregister:item_name" = "Fjern fra låseskærmen";
+"calendar::event::more_action:live_activity:unavail::not_found" = "Denne begivenhed er ikke længere tilgængelig.";
+"calendar::event::more_action:live_activity:unavail::already_passed" = "Denne begivenhed er allerede begyndt.";
+"calendar::event::more_action:live_activity:unavail::too_far_future" = "Kun begivenheder, der begynder inden for 8 timer, kan vises.";
+"calendar::event::more_action:live_activity:register:confirm" = "Vil du vise denne begivenhed på låseskærmen?";
+"calendar::event::more_action:live_activity:unregister:confirm" = "Vil du fjerne denne begivenhed fra låseskærmen?";
+"calendar::event::more_action:live_activity:replace:confirm" = "En anden begivenhed vises på låseskærmen. Vil du erstatte den med denne?";
+"calendar::event::more_action:live_activity:register:success" = "Vises nu på låseskærmen. Lås din enhed for at se den.";
 "calendar::event::more_action:copy:item_name" = "Kopiér begivenhed";
+"calendar::event::more_action:share:item_name" = "Del";
+"event_detail::share::field::time" = "Tidspunkt";
+"event_detail::share::field::repeating" = "Gentagelse";
+"event_detail::share::field::calendar" = "Kalender";
+"event_detail::share::field::place" = "Sted";
+"event_detail::share::field::url" = "Link";
+"event_detail::share::field::memo" = "Notat";
 "calendar::event::more_action:transform_to::schedule" = "Konverter til aftale";
 "calendar::event::more_action:transform_to::todo" = "Konverter til opgave";
 "calendar::event::more_action:edit:item_name" = "Rediger";
@@ -145,6 +168,9 @@
 "calednar::event::skip_todo_until" = "Vælg et tidspunkt for at springe denne opgave over";
 "calednar::event::copy" = "Kopiér begivenhed";
 "calendar::move_date" = "Flyt dato";
+"calendar::share::this_day" = "Del denne dag";
+"calendar::share::this_week" = "Del denne uge";
+"calendar::share::this_month" = "Del denne måned";
 
 
 // MARK: - event detail
@@ -266,12 +292,33 @@
 "eventDetail::gogoleEvent::conference::password" = "Kodeord";
 "eventDetail::gogoleEvent::copy::message" = "Kopieret til udklipsholderen.";
 "eventDetail::gogoleEvent::canceled::message" = "Denne begivenhed er blevet aflyst.";
+"eventDetail::gogoleEvent::saved::message" = "Begivenheden er gemt.";
+"eventDetail::gogoleEvent::readOnlyCalendar::message" = "Denne kalender er skrivebeskyttet, så begivenheden kan ikke redigeres her.";
+"eventDetail::gogoleEvent::reauthenticate::title" = "Yderligere tilladelse påkrævet";
+"eventDetail::gogoleEvent::reauthenticate::message" = "Denne Google-konto er forbundet med skrivebeskyttet adgang. For at redigere begivenheder skal du give redigeringstilladelse separat.";
+"eventDetail::gogoleEvent::writeScopeNotGranted::message" = "Redigeringstilladelse blev ikke givet. Hvis det er en arbejds- eller skolekonto, tillader din administrator det måske ikke.";
+"eventDetail::gogoleEvent::repeating::title" = "Dette er en gentagen begivenhed";
+"eventDetail::gogoleEvent::repeating::onlyThisTime::button" = "Kun denne begivenhed";
+"eventDetail::gogoleEvent::repeating::all::button" = "Alle begivenheder";
+"eventDetail::gogoleEvent::remove::confirm::message" = "Vil du slette denne begivenhed fra Google Kalender?";
+"eventDetail::gogoleEvent::editOnCalendar" = "Rediger i Google Kalender";
+"eventDetail::gogoleEvent::notEditableField::message" = "Dette kan ikke redigeres her. Rediger det i Google Kalender.";
+"eventDetail::gogoleEvent::description::formatLoss::message" = "Denne beskrivelse indeholder formatering. Hvis du redigerer den her, forsvinder formateringen.";
 
 // MARK: - Apple calendar event
 "eventDetail::appleCalendarEvent::viewOnCalendar" = "Vis i Apple Kalender";
+"eventDetail::appleCalendarEvent::editOnCalendar" = "Rediger i Apple Kalender";
 "eventDetail::appleCalendarEvent::calendar::event" = "Apple Kalender-begivenhed";
 "eventDetail::appleCalendarEvent::attendees" = "Deltagere (%d personer)";
 "eventDetail::appleCalendarEvent::attendees::organizer" = "Arrangør";
+"eventDetail::appleCalendarEvent::saved::message" = "Gemt.";
+"eventDetail::appleCalendarEvent::remove::confirm::message" = "Vil du slette denne begivenhed?";
+"eventDetail::appleCalendarEvent::repeating::title" = "Gentagen begivenhed";
+"eventDetail::appleCalendarEvent::repeating::onlyThisTime::button" = "Kun denne begivenhed";
+"eventDetail::appleCalendarEvent::repeating::thisAndFuture::button" = "Denne og alle fremtidige begivenheder";
+"eventDetail::appleCalendarEvent::readOnlyCalendar::message" = "Denne kalender er skrivebeskyttet, så begivenheden kan ikke redigeres.";
+"eventDetail::appleCalendarEvent::notEditableField::message" = "Dette felt kan ikke redigeres i appen.";
+"eventDetail::appleCalendarEvent::url::placeholder" = "URL";
 
 // MARK: - event tag
 
@@ -310,6 +357,23 @@
 "eventList::remove::confirm::button::olderThan1y" = "Ældre end 1 år";
 
 
+// MARK: - share preview
+
+"share_preview::title" = "Forhåndsvisning af deling";
+"share_preview::tag_filter::title" = "Begivenhedstyper";
+"share_preview::tag_filter::select_all" = "Vælg alle";
+"share_preview::tag_filter::deselect_all" = "Fravælg alle";
+"share_preview::option::include_tag_name" = "Vis navn på begivenhedstype";
+"share_preview::share_button" = "Del";
+"share_preview::empty" = "Ingen begivenheder at dele";
+"share_preview::header::this_week" = "Denne uge";
+"share_preview::header::last_week" = "Sidste uge";
+"share_preview::header::next_week" = "Næste uge";
+"share_preview::header::week_of_month" = "%1$@, uge %2$d";
+"share_preview::format::text" = "Tekst";
+"share_preview::format::image" = "Billede";
+
+
 // MARK: - account
 
 "manage_account::title" = "Kontostyring";
@@ -326,6 +390,9 @@
 "manage_account::delete_account_button::confirm:message" = "Er du sikker på, at du vil slette din konto?";
 "manage_account::delete_account_button::description" = "Efter anmodning om sletning bliver din konto slettet.\nNår kontoen er slettet, kan oplysningerne ikke gendannes.";
 "signIn::title" = "Login";
+"signIn::feature::sync" = "Sikkerhedskopiér begivenheder, synkroniser på tværs af enheder";
+"signIn::feature::aiAgent" = "Håndter din kalender med AI-agenten";
+"signIn::feature::web" = "Brug også på nettet · todo-calendar.com";
 
 
 // MARK: - setting
@@ -411,9 +478,14 @@
 "setting.aiGuide::name" = "Tilføj med AI – Siri & widgets";
 "setting.feedback::name" = "Feedback";
 "setting.help::name" = "Hjælp";
+"setting.openWeb::name" = "Åbn på nettet";
 "setting.share::name" = "Del appen";
 "setting.write_review::name" = "Skriv en anmeldelse af appen";
+"setting.openSourceLicense::name" = "Open source-licenser";
 "setting.billing.plan::name" = "Abonnement";
+"setting.terms::name" = "Servicevilkår";
+"setting.privacyPolicy::name" = "Privatlivspolitik";
+"setting.adPrivacyOptions::name" = "Privatlivsindstillinger for annoncer";
 "setting.account.signedIn::manageAccount" = "Konto";
 "setting.account.needSignIn" = "Login";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -516,6 +588,11 @@
 "widget.aiCommand::title" = "Tilføj med AI";
 "widget.aiCommand::explain" = "Tryk én gang for at åbne AI-indtastning.";
 
+// MARK: - liveActivity
+
+"liveActivity::stale" = "Begynder nu";
+"liveActivity::action::end" = "Afslut";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "Dette linkformat understøttes ikke.\nOpdater appen til den nyeste version.";
@@ -546,9 +623,13 @@
 "aiAgent::state::failed" = "Kommando mislykkedes";
 "aiAgent::done::default" = "Færdig";
 "aiAgent::failed::default" = "Kunne ikke fuldføre det";
+"aiAgent::failed::dailyLimitExceeded" = "Du har brugt dagens AI-kreditter.";
 "aiAgent::retry" = "Prøv igen";
 "aiAgent::needSignIn::title" = "Login påkrævet";
 "aiAgent::needSignIn::message" = "Log ind for at bruge AI-hurtigindtastning.";
+"aiAgent::speechPermissionDenied::title" = "Tilladelse påkrævet";
+"aiAgent::speechPermissionDenied::message" = "Giv adgang til mikrofon og talegenkendelse i Indstillinger for at bruge stemmeindtastning.";
+"aiAgent::speechPermissionDenied::confirm" = "Åbn Indstillinger";
 "aiAgent::title" = "AI-hurtigindtastning";
 "aiAgent::keyboard::stop" = "Stop";
 "aiAgent::keyboard::send" = "Send";
@@ -577,6 +658,8 @@
 "aiAgent::image::textTooLong" = "Teksten er for lang. Gør den kortere, og prøv igen.";
 "aiAgent::image::instructionTooLong" = "Dine instruktioner er for lange. Gør dem kortere, og prøv igen.";
 "aiAgent::image::busy" = "En anden anmodning kører stadig";
+"aiAgent::image::camera::denied::title" = "Adgang til kamera påkrævet";
+"aiAgent::image::camera::denied::message" = "Giv adgang til kameraet i Indstillinger for at tage et billede.";
 
 // MARK: - billing
 
@@ -596,6 +679,7 @@
 "billing::paywall::features::title" = "%@ inkluderer";
 "billing::paywall::feature::dailyCredits" = "%@ credits om dagen";
 "billing::paywall::feature::topup" = "Du kan købe flere, når credits er brugt op";
+"billing::paywall::feature::noAds" = "Ingen annoncer";
 "billing::paywall::disclosure::subscription" = "Dit abonnement fornyes automatisk hver måned, medmindre du opsiger det mindst 24 timer før den aktuelle periode slutter. Du kan opsige det når som helst i App Store-indstillinger.";
 "billing::paywall::disclosure::subscription::generic" = "Dit abonnement fornyes automatisk ved slutningen af hver faktureringsperiode, medmindre du opsiger det mindst 24 timer før den slutter. Du kan opsige det når som helst i App Store-indstillinger.";
 "billing::paywall::disclosure::oneTime" = "Betal én gang, og behold det for altid. Dette fornyes ikke automatisk.";
@@ -609,11 +693,31 @@
 "billing::paywall::restore" = "Gendan køb";
 "billing::paywall::restored" = "Køb gendannet";
 "billing::paywall::restore::empty" = "Ingen køb at gendanne.";
+"billing::paywall::manageSubscription" = "Administrer abonnement";
 "billing::paywall::purchase::applied" = "Abonnement opdateret";
 "billing::paywall::pending::title" = "Afventer godkendelse";
 "billing::paywall::pending::message" = "Bed en familieorganisator om at godkende dette køb. Det anvendes automatisk, når det er godkendt.";
 "billing::paywall::userPlan::loadFailed" = "Kunne ikke indlæse dit abonnement. Prøv igen.";
 "billing::paywall::retry" = "Prøv igen";
+"billing::paywall::unfinished::title" = "Et køb er ikke blevet anvendt";
+"billing::paywall::unfinished::message" = "Din betaling gik igennem, men dit abonnement er ikke opdateret endnu.";
+"billing::paywall::unfinished::action" = "Anvend nu";
+"billing::paywall::unfinished::applied" = "Dit køb er blevet anvendt";
+"billing::paywall::processing::message" = "Bekræfter dit køb…";
+"billing::paywall::fail::purchase" = "Købet kunne ikke gennemføres. Prøv igen.";
+"billing::paywall::fail::invalidTransaction" = "Vi kunne ikke bekræfte dit køb. Prøv igen om et øjeblik.";
+"billing::paywall::fail::unknownProduct" = "Vi kunne ikke genkende dette køb. Det kan måske løses ved at opdatere appen.";
+"billing::paywall::fail::planChangeNotAllowed" = "Dette abonnementsskift understøttes ikke.";
+"billing::paywall::fail::ownedByAnotherAccount" = "Dette køb tilhører en anden konto. Log ind med den konto, du købte det med.";
+"billing::paywall::fail::reflectDelayed" = "Din betaling gik igennem, men anvendelsen er forsinket. Den anvendes automatisk.";
+"billing::paywall::topup::credits" = "%@ credits";
+"billing::paywall::topup::credits::split" = "Basis %@ + bonus %@ credits";
+"billing::paywall::topup::bonus" = "+%@%% bonus";
+"billing::paywall::topup::title" = "Køb credits";
+"billing::paywall::topup::title::withRemaining" = "Køb credits · %@ tilgængelige";
+"billing::paywall::topup::description" = "Ekstra credits bruges, når din daglige grænse er opbrugt, og de udløber ikke.";
+"billing::paywall::topup::applied" = "Credits tilføjet";
+"billing::paywall::topup::applied::withCredits" = "%@ credits tilføjet";
 
 // MARK: - share extension
 
@@ -627,8 +731,21 @@
 "share.ai::sentButUntracked" = "Sendt, men appen kan ikke følge resultatet. Tjek din kalender om lidt.";
 "share.ai::textTooLong" = "Teksten er for lang til at blive sendt. Gør den kortere, og prøv igen.";
 "share.ai::instructionTooLong" = "Din instruktion er for lang. Gør den kortere.";
+"share.ai::limitExceeded" = "Du har brugt dagens AI-kreditter. De nulstilles ved midnat UTC.";
 "share.ai::image::title" = "Send billede til AI";
 "share.ai::image::recognizing" = "Læser tekst fra billedet…";
 "share.ai::image::text::caption" = "Tekst læst fra billedet – rediger, hvis noget ser forkert ud.";
 "share.ai::image::text::placeholder" = "Tekst læst fra billedet";
 "share.ai::image::noTextFound" = "Der blev ikke fundet nogen tekst i dette billede. Skriv, hvad du vil tilføje.";
+
+// MARK: - webview
+
+"webview::error::message" = "Siden kunne ikke indlæses.";
+"webview::error::retry" = "Prøv igen";
+"webview::openInBrowser" = "Åbn i browser";
+
+// MARK: - legal notice
+
+"legal_notice.message::terms" = "Vores servicevilkår er blevet opdateret.";
+"legal_notice.message::privacy" = "Vores privatlivspolitik er blevet opdateret.";
+"legal_notice.effectiveDate" = "Gælder fra %@";
