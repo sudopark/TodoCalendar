@@ -112,8 +112,12 @@
 
 "calendar::foremostevent:title" = "Κύριο συμβάν";
 "calendar::uncompletedTodos:title" = "Ημιτελείς εργασίες";
+"calendar::guideTodo::name" = "Δείτε πώς λειτουργεί το To-do Calendar";
+"calendar::eventSync::loadingAllEvents::message" = "Φόρτωση όλων των συμβάντων σας…";
 "calendar::event_time::todo" = "Εργασία";
 "calendar::event_time::allday" = "Όλη μέρα";
+"calendar::event_time::start" = "Έναρξη";
+"calendar::event_time::end" = "Λήξη";
 "calendar::event_time::allday::with" = "%@ όλη μέρα";
 "calendar::event_time::period:some_days" = "%d ημέρες";
 "calendar::event_time::period:some_minutes" = "%d λεπτά";
@@ -123,11 +127,13 @@
 "calendar::event::more_action::foremost_event:title" = "Κύριο συμβάν";
 "calendar::event::more_action::remove_only_thistime:message" = "Θέλετε να αφαιρέσετε μόνο αυτό το συμβάν από όλα τα επαναλαμβανόμενα συμβάντα;";
 "calendar::event::more_action::remove:message" = "Θέλετε να αφαιρέσετε αυτό το συμβάν;";
+"calendar::event::more_action::remove_this_and_future:message" = "Θέλετε να διαγράψετε αυτό και όλα τα επόμενα συμβάντα της επαναλαμβανόμενης σειράς;";
 "calendar::event::more_action::mark_as_foremost" = "Θέλετε να επισημάνετε αυτό το συμβάν ως το πιο σημαντικό σας;";
 "calendar::event::more_action::unmark_as_foremost" = "Θέλετε να καταργήσετε την επισήμανση αυτού του συμβάντος ως το πιο σημαντικό;";
 "calendar::event::more_action::mark_as_foremost::unavail" = "Ένα επαναλαμβανόμενο ραντεβού δεν μπορεί να επισημανθεί ως το πιο σημαντικό συμβάν.";
 "calendar::event::more_action:remove_only_thistime:item_name" = "Αφαίρεση μόνο αυτού του συμβάντος";
 "calendar::event::more_action:remove:item_name" = "Αφαίρεση συμβάντος";
+"calendar::event::more_action:remove_this_and_future:item_name" = "Αφαίρεση αυτού και όλων των επόμενων συμβάντων";
 "calendar::event::more_action:foremost:mark:item_name" = "Επισήμανση ως κύριο";
 "calendar::event::more_action:foremost:unmark:item_name" = "Κατάργηση επισήμανσης κύριου";
 "calendar::event::more_action:dday_candidate:register:item_name" = "Προσθήκη στο widget Αντίστροφη μέτρηση";
@@ -135,7 +141,24 @@
 "calendar::event::more_action:dday_candidate:title" = "Υποψήφιο για το widget Αντίστροφη μέτρηση";
 "calendar::event::more_action:dday_candidate:register:message" = "Να προστεθεί αυτό το συμβάν ως υποψήφιο για το widget Αντίστροφη μέτρηση; Θα εμφανίζεται στην κορυφή της λίστας όταν επεξεργάζεστε το widget.";
 "calendar::event::more_action:dday_candidate:unregister:message" = "Να αφαιρεθεί αυτό το συμβάν από τα υποψήφια για το widget Αντίστροφη μέτρηση;";
+"calendar::event::more_action:live_activity:title" = "Ζωντανή δραστηριότητα";
+"calendar::event::more_action:live_activity:register:item_name" = "Εμφάνιση στην οθόνη κλειδώματος";
+"calendar::event::more_action:live_activity:unregister:item_name" = "Αφαίρεση από την οθόνη κλειδώματος";
+"calendar::event::more_action:live_activity:unavail::not_found" = "Αυτό το συμβάν δεν είναι πλέον διαθέσιμο.";
+"calendar::event::more_action:live_activity:unavail::already_passed" = "Αυτό το συμβάν έχει ήδη ξεκινήσει.";
+"calendar::event::more_action:live_activity:unavail::too_far_future" = "Μπορούν να εμφανιστούν μόνο συμβάντα που ξεκινούν εντός 8 ωρών.";
+"calendar::event::more_action:live_activity:register:confirm" = "Θέλετε να εμφανίζεται αυτό το συμβάν στην οθόνη κλειδώματος;";
+"calendar::event::more_action:live_activity:unregister:confirm" = "Θέλετε να αφαιρέσετε αυτό το συμβάν από την οθόνη κλειδώματος;";
+"calendar::event::more_action:live_activity:replace:confirm" = "Ένα άλλο συμβάν εμφανίζεται στην οθόνη κλειδώματος. Να αντικατασταθεί με αυτό;";
+"calendar::event::more_action:live_activity:register:success" = "Εμφανίζεται τώρα στην οθόνη κλειδώματος. Κλειδώστε τη συσκευή σας για να το δείτε.";
 "calendar::event::more_action:copy:item_name" = "Αντιγραφή συμβάντος";
+"calendar::event::more_action:share:item_name" = "Κοινοποίηση";
+"event_detail::share::field::time" = "Ώρα";
+"event_detail::share::field::repeating" = "Επανάληψη";
+"event_detail::share::field::calendar" = "Ημερολόγιο";
+"event_detail::share::field::place" = "Τοποθεσία";
+"event_detail::share::field::url" = "Σύνδεσμος";
+"event_detail::share::field::memo" = "Σημείωση";
 "calendar::event::more_action:transform_to::schedule" = "Μετατροπή σε ραντεβού";
 "calendar::event::more_action:transform_to::todo" = "Μετατροπή σε εργασία";
 "calendar::event::more_action:edit:item_name" = "Επεξεργασία";
@@ -145,6 +168,9 @@
 "calednar::event::skip_todo_until" = "Επιλέξτε ώρα μέχρι την οποία θα παραλειφθεί αυτή η εργασία";
 "calednar::event::copy" = "Αντιγραφή συμβάντος";
 "calendar::move_date" = "Μετακίνηση ημερομηνίας";
+"calendar::share::this_day" = "Κοινοποίηση αυτής της ημέρας";
+"calendar::share::this_week" = "Κοινοποίηση αυτής της εβδομάδας";
+"calendar::share::this_month" = "Κοινοποίηση αυτού του μήνα";
 
 
 // MARK: - event detail
@@ -266,12 +292,33 @@
 "eventDetail::gogoleEvent::conference::password" = "Κωδικός";
 "eventDetail::gogoleEvent::copy::message" = "Αντιγράφηκε στο πρόχειρο.";
 "eventDetail::gogoleEvent::canceled::message" = "Αυτό το συμβάν έχει ακυρωθεί.";
+"eventDetail::gogoleEvent::saved::message" = "Το συμβάν αποθηκεύτηκε.";
+"eventDetail::gogoleEvent::readOnlyCalendar::message" = "Αυτό το ημερολόγιο είναι μόνο για ανάγνωση, οπότε το συμβάν δεν μπορεί να επεξεργαστεί εδώ.";
+"eventDetail::gogoleEvent::reauthenticate::title" = "Απαιτείται πρόσθετη άδεια";
+"eventDetail::gogoleEvent::reauthenticate::message" = "Αυτός ο λογαριασμός Google είναι συνδεδεμένος με πρόσβαση μόνο για ανάγνωση. Για να επεξεργάζεστε συμβάντα, πρέπει να παραχωρήσετε ξεχωριστά άδεια επεξεργασίας.";
+"eventDetail::gogoleEvent::writeScopeNotGranted::message" = "Δεν παραχωρήθηκε άδεια επεξεργασίας. Αν πρόκειται για εταιρικό ή σχολικό λογαριασμό, ο διαχειριστής σας ενδέχεται να μην το επιτρέπει.";
+"eventDetail::gogoleEvent::repeating::title" = "Αυτό είναι ένα επαναλαμβανόμενο συμβάν";
+"eventDetail::gogoleEvent::repeating::onlyThisTime::button" = "Μόνο αυτό το συμβάν";
+"eventDetail::gogoleEvent::repeating::all::button" = "Όλα τα συμβάντα";
+"eventDetail::gogoleEvent::remove::confirm::message" = "Διαγραφή αυτού του συμβάντος από το Google Ημερολόγιο;";
+"eventDetail::gogoleEvent::editOnCalendar" = "Επεξεργασία στο Google Ημερολόγιο";
+"eventDetail::gogoleEvent::notEditableField::message" = "Αυτό δεν μπορεί να επεξεργαστεί εδώ. Επεξεργαστείτε το στο Google Ημερολόγιο.";
+"eventDetail::gogoleEvent::description::formatLoss::message" = "Αυτή η περιγραφή έχει μορφοποίηση. Αν την επεξεργαστείτε εδώ, η μορφοποίηση θα αφαιρεθεί.";
 
 // MARK: - Apple calendar event
 "eventDetail::appleCalendarEvent::viewOnCalendar" = "Προβολή στο Apple Ημερολόγιο";
+"eventDetail::appleCalendarEvent::editOnCalendar" = "Επεξεργασία στο Apple Ημερολόγιο";
 "eventDetail::appleCalendarEvent::calendar::event" = "Συμβάν Apple Ημερολογίου";
 "eventDetail::appleCalendarEvent::attendees" = "Συμμετέχοντες (%d άτομα)";
 "eventDetail::appleCalendarEvent::attendees::organizer" = "Διοργανωτής";
+"eventDetail::appleCalendarEvent::saved::message" = "Αποθηκεύτηκε.";
+"eventDetail::appleCalendarEvent::remove::confirm::message" = "Διαγραφή αυτού του συμβάντος;";
+"eventDetail::appleCalendarEvent::repeating::title" = "Επαναλαμβανόμενο συμβάν";
+"eventDetail::appleCalendarEvent::repeating::onlyThisTime::button" = "Μόνο αυτό το συμβάν";
+"eventDetail::appleCalendarEvent::repeating::thisAndFuture::button" = "Αυτό και όλα τα επόμενα συμβάντα";
+"eventDetail::appleCalendarEvent::readOnlyCalendar::message" = "Αυτό το ημερολόγιο είναι μόνο για ανάγνωση, οπότε το συμβάν δεν μπορεί να επεξεργαστεί.";
+"eventDetail::appleCalendarEvent::notEditableField::message" = "Αυτό το πεδίο δεν μπορεί να επεξεργαστεί στην εφαρμογή.";
+"eventDetail::appleCalendarEvent::url::placeholder" = "URL";
 
 // MARK: - event tag
 
@@ -310,6 +357,23 @@
 "eventList::remove::confirm::button::olderThan1y" = "Παλαιότερες από 1 χρόνο";
 
 
+// MARK: - share preview
+
+"share_preview::title" = "Προεπισκόπηση κοινοποίησης";
+"share_preview::tag_filter::title" = "Ετικέτες";
+"share_preview::tag_filter::select_all" = "Επιλογή όλων";
+"share_preview::tag_filter::deselect_all" = "Αποεπιλογή όλων";
+"share_preview::option::include_tag_name" = "Συμπερίληψη ονόματος ετικέτας";
+"share_preview::share_button" = "Κοινοποίηση";
+"share_preview::empty" = "Δεν υπάρχουν συμβάντα για κοινοποίηση";
+"share_preview::header::this_week" = "Αυτή η εβδομάδα";
+"share_preview::header::last_week" = "Προηγούμενη εβδομάδα";
+"share_preview::header::next_week" = "Επόμενη εβδομάδα";
+"share_preview::header::week_of_month" = "%1$@, εβδομάδα %2$d";
+"share_preview::format::text" = "Κείμενο";
+"share_preview::format::image" = "Εικόνα";
+
+
 // MARK: - account
 
 "manage_account::title" = "Διαχείριση λογαριασμού";
@@ -326,6 +390,9 @@
 "manage_account::delete_account_button::confirm:message" = "Είστε βέβαιοι ότι θέλετε να διαγράψετε τον λογαριασμό σας;";
 "manage_account::delete_account_button::description" = "Μετά την αίτηση διαγραφής, ο λογαριασμός θα διαγραφεί.\nΜετά τη διαγραφή, τα δεδομένα του λογαριασμού δεν μπορούν να ανακτηθούν.";
 "signIn::title" = "Σύνδεση";
+"signIn::feature::sync" = "Αντίγραφα ασφαλείας συμβάντων, συγχρονισμός σε όλες τις συσκευές";
+"signIn::feature::aiAgent" = "Διαχειριστείτε τα συμβάντα σας με τον βοηθό AI";
+"signIn::feature::web" = "Χρήση και στο web · todo-calendar.com";
 
 
 // MARK: - setting
@@ -411,9 +478,14 @@
 "setting.aiGuide::name" = "Προσθήκη με AI — Siri & widget";
 "setting.feedback::name" = "Σχόλια";
 "setting.help::name" = "Βοήθεια";
+"setting.openWeb::name" = "Άνοιγμα στο web";
 "setting.share::name" = "Κοινοποίηση εφαρμογής";
 "setting.write_review::name" = "Γράψτε μια κριτική για την εφαρμογή";
+"setting.openSourceLicense::name" = "Άδειες ανοιχτού κώδικα";
 "setting.billing.plan::name" = "Πρόγραμμα";
+"setting.terms::name" = "Όροι χρήσης";
+"setting.privacyPolicy::name" = "Πολιτική απορρήτου";
+"setting.adPrivacyOptions::name" = "Επιλογές απορρήτου διαφημίσεων";
 "setting.account.signedIn::manageAccount" = "Λογαριασμός";
 "setting.account.needSignIn" = "Σύνδεση";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -516,6 +588,11 @@
 "widget.aiCommand::title" = "Προσθήκη με AI";
 "widget.aiCommand::explain" = "Πατήστε μία φορά για να ανοίξετε την εισαγωγή AI.";
 
+// MARK: - liveActivity
+
+"liveActivity::stale" = "Ξεκινά τώρα";
+"liveActivity::action::end" = "Λήξη";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "Αυτή η μορφή συνδέσμου δεν υποστηρίζεται.\nΠαρακαλούμε ενημερώστε την εφαρμογή στην τελευταία έκδοση.";
@@ -546,9 +623,13 @@
 "aiAgent::state::failed" = "Η εντολή απέτυχε";
 "aiAgent::done::default" = "Έγινε";
 "aiAgent::failed::default" = "Δεν ήταν δυνατή η ολοκλήρωση";
+"aiAgent::failed::dailyLimitExceeded" = "Εξαντλήσατε τις σημερινές μονάδες AI.";
 "aiAgent::retry" = "Επανάληψη";
 "aiAgent::needSignIn::title" = "Απαιτείται σύνδεση";
 "aiAgent::needSignIn::message" = "Συνδεθείτε για να χρησιμοποιήσετε τη γρήγορη εισαγωγή AI.";
+"aiAgent::speechPermissionDenied::title" = "Απαιτείται άδεια";
+"aiAgent::speechPermissionDenied::message" = "Επιτρέψτε την πρόσβαση στο μικρόφωνο και στην αναγνώριση ομιλίας από τις Ρυθμίσεις για να χρησιμοποιήσετε τη φωνητική εισαγωγή.";
+"aiAgent::speechPermissionDenied::confirm" = "Άνοιγμα Ρυθμίσεων";
 "aiAgent::title" = "Γρήγορη εισαγωγή AI";
 "aiAgent::keyboard::stop" = "Διακοπή";
 "aiAgent::keyboard::send" = "Αποστολή";
@@ -577,6 +658,8 @@
 "aiAgent::image::textTooLong" = "Το κείμενο είναι πολύ μεγάλο. Συντομεύστε το και δοκιμάστε ξανά.";
 "aiAgent::image::instructionTooLong" = "Οι οδηγίες σας είναι πολύ μεγάλες. Συντομεύστε τις και δοκιμάστε ξανά.";
 "aiAgent::image::busy" = "Ένα άλλο αίτημα εξακολουθεί να εκτελείται";
+"aiAgent::image::camera::denied::title" = "Απαιτείται πρόσβαση στην κάμερα";
+"aiAgent::image::camera::denied::message" = "Επιτρέψτε την πρόσβαση στην κάμερα από τις Ρυθμίσεις για να τραβήξετε φωτογραφία.";
 
 // MARK: - billing
 
@@ -596,6 +679,7 @@
 "billing::paywall::features::title" = "Τι περιλαμβάνει το %@";
 "billing::paywall::feature::dailyCredits" = "%@ μονάδες την ημέρα";
 "billing::paywall::feature::topup" = "Μπορείτε να αγοράσετε επιπλέον όταν εξαντληθούν οι μονάδες";
+"billing::paywall::feature::noAds" = "Χωρίς διαφημίσεις";
 "billing::paywall::disclosure::subscription" = "Η συνδρομή σας ανανεώνεται αυτόματα κάθε μήνα, εκτός εάν την ακυρώσετε τουλάχιστον 24 ώρες πριν από τη λήξη της τρέχουσας περιόδου. Μπορείτε να την ακυρώσετε ανά πάσα στιγμή από τις ρυθμίσεις του App Store.";
 "billing::paywall::disclosure::subscription::generic" = "Η συνδρομή σας ανανεώνεται αυτόματα στο τέλος κάθε περιόδου χρέωσης, εκτός εάν την ακυρώσετε τουλάχιστον 24 ώρες πριν από τη λήξη της. Μπορείτε να την ακυρώσετε ανά πάσα στιγμή από τις ρυθμίσεις του App Store.";
 "billing::paywall::disclosure::oneTime" = "Πληρώστε μία φορά και κρατήστε το για πάντα. Δεν ανανεώνεται αυτόματα.";
@@ -609,11 +693,31 @@
 "billing::paywall::restore" = "Επαναφορά αγορών";
 "billing::paywall::restored" = "Οι αγορές επαναφέρθηκαν";
 "billing::paywall::restore::empty" = "Δεν υπάρχουν αγορές προς επαναφορά.";
+"billing::paywall::manageSubscription" = "Διαχείριση συνδρομής";
 "billing::paywall::purchase::applied" = "Το πρόγραμμα ενημερώθηκε";
 "billing::paywall::pending::title" = "Εκκρεμεί έγκριση";
 "billing::paywall::pending::message" = "Ζητήστε από τον οργανωτή οικογένειας να εγκρίνει αυτήν την αγορά. Θα εφαρμοστεί αυτόματα μόλις εγκριθεί.";
 "billing::paywall::userPlan::loadFailed" = "Δεν ήταν δυνατή η φόρτωση του προγράμματός σας. Δοκιμάστε ξανά.";
 "billing::paywall::retry" = "Επανάληψη";
+"billing::paywall::unfinished::title" = "Υπάρχει αγορά που δεν έχει εφαρμοστεί";
+"billing::paywall::unfinished::message" = "Η πληρωμή ολοκληρώθηκε, αλλά το πρόγραμμά σας δεν έχει ενημερωθεί ακόμη.";
+"billing::paywall::unfinished::action" = "Εφαρμογή τώρα";
+"billing::paywall::unfinished::applied" = "Η αγορά σας εφαρμόστηκε";
+"billing::paywall::processing::message" = "Επιβεβαίωση της αγοράς σας…";
+"billing::paywall::fail::purchase" = "Δεν ήταν δυνατή η ολοκλήρωση της αγοράς. Δοκιμάστε ξανά.";
+"billing::paywall::fail::invalidTransaction" = "Δεν ήταν δυνατή η επαλήθευση της αγοράς σας. Δοκιμάστε ξανά σε λίγο.";
+"billing::paywall::fail::unknownProduct" = "Δεν ήταν δυνατή η αναγνώριση αυτής της αγοράς. Η ενημέρωση της εφαρμογής μπορεί να το διορθώσει.";
+"billing::paywall::fail::planChangeNotAllowed" = "Αυτή η αλλαγή προγράμματος δεν υποστηρίζεται.";
+"billing::paywall::fail::ownedByAnotherAccount" = "Αυτή η αγορά ανήκει σε άλλον λογαριασμό. Συνδεθείτε με τον λογαριασμό με τον οποίο την κάνατε.";
+"billing::paywall::fail::reflectDelayed" = "Η πληρωμή ολοκληρώθηκε, αλλά η εφαρμογή της καθυστερεί. Θα εφαρμοστεί αυτόματα.";
+"billing::paywall::topup::credits" = "%@ μονάδες";
+"billing::paywall::topup::credits::split" = "Βασικές %@ + μπόνους %@ μονάδες";
+"billing::paywall::topup::bonus" = "+%@%% μπόνους";
+"billing::paywall::topup::title" = "Προσθήκη μονάδων";
+"billing::paywall::topup::title::withRemaining" = "Προσθήκη μονάδων · %@ διαθέσιμες";
+"billing::paywall::topup::description" = "Οι επιπλέον μονάδες χρησιμοποιούνται αφού εξαντληθεί το ημερήσιο όριό σας και δεν λήγουν.";
+"billing::paywall::topup::applied" = "Οι μονάδες προστέθηκαν";
+"billing::paywall::topup::applied::withCredits" = "Προστέθηκαν %@ μονάδες";
 
 // MARK: - share extension
 
@@ -627,8 +731,21 @@
 "share.ai::sentButUntracked" = "Στάλθηκε, αλλά η εφαρμογή δεν μπορεί να παρακολουθήσει το αποτέλεσμα. Ελέγξτε το ημερολόγιό σας σε λίγο.";
 "share.ai::textTooLong" = "Το κείμενο είναι πολύ μεγάλο για αποστολή. Συντομεύστε το και δοκιμάστε ξανά.";
 "share.ai::instructionTooLong" = "Η οδηγία σας είναι πολύ μεγάλη. Συντομεύστε την.";
+"share.ai::limitExceeded" = "Εξαντλήσατε τις σημερινές μονάδες AI. Επαναφέρονται τα μεσάνυχτα UTC.";
 "share.ai::image::title" = "Αποστολή εικόνας στο AI";
 "share.ai::image::recognizing" = "Ανάγνωση κειμένου από την εικόνα…";
 "share.ai::image::text::caption" = "Κείμενο που διαβάστηκε από την εικόνα — επεξεργαστείτε το αν κάτι δεν φαίνεται σωστό.";
 "share.ai::image::text::placeholder" = "Κείμενο από την εικόνα";
 "share.ai::image::noTextFound" = "Δεν βρέθηκε κείμενο σε αυτήν την εικόνα. Πληκτρολογήστε ό,τι θέλετε να προσθέσετε.";
+
+// MARK: - webview
+
+"webview::error::message" = "Δεν ήταν δυνατή η φόρτωση αυτής της σελίδας.";
+"webview::error::retry" = "Δοκιμάστε ξανά";
+"webview::openInBrowser" = "Άνοιγμα στο πρόγραμμα περιήγησης";
+
+// MARK: - legal notice
+
+"legal_notice.message::terms" = "Οι Όροι υπηρεσίας μας ενημερώθηκαν.";
+"legal_notice.message::privacy" = "Η Πολιτική απορρήτου μας ενημερώθηκε.";
+"legal_notice.effectiveDate" = "Ισχύει από %@";

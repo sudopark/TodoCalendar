@@ -112,8 +112,12 @@
 
 "calendar::foremostevent:title" = "Legfontosabb esemény";
 "calendar::uncompletedTodos:title" = "Befejezetlen feladatok";
+"calendar::guideTodo::name" = "Nézze meg, hogyan működik a To-do Calendar";
+"calendar::eventSync::loadingAllEvents::message" = "Az összes esemény betöltése…";
 "calendar::event_time::todo" = "Feladat";
 "calendar::event_time::allday" = "Egész nap";
+"calendar::event_time::start" = "Kezdés";
+"calendar::event_time::end" = "Vége";
 "calendar::event_time::allday::with" = "%@ egész nap";
 "calendar::event_time::period:some_days" = "%d nap";
 "calendar::event_time::period:some_minutes" = "%d perc";
@@ -123,11 +127,13 @@
 "calendar::event::more_action::foremost_event:title" = "Legfontosabb esemény";
 "calendar::event::more_action::remove_only_thistime:message" = "Csak ezt az eseményt szeretné törölni az összes ismétlődő esemény közül?";
 "calendar::event::more_action::remove:message" = "Szeretné eltávolítani ezt az eseményt?";
+"calendar::event::more_action::remove_this_and_future:message" = "Szeretné törölni ezt és az összes további eseményt az ismétlődő sorozatban?";
 "calendar::event::more_action::mark_as_foremost" = "Szeretné a legfontosabb eseményeként megjelölni ezt az eseményt?";
 "calendar::event::more_action::unmark_as_foremost" = "Szeretné megszüntetni ennek az eseménynek a legfontosabbként való megjelölését?";
 "calendar::event::more_action::mark_as_foremost::unavail" = "Ismétlődő program nem jelölhető meg legfontosabb eseményként.";
 "calendar::event::more_action:remove_only_thistime:item_name" = "Csak ezt az eseményt távolítsa el";
 "calendar::event::more_action:remove:item_name" = "Esemény eltávolítása";
+"calendar::event::more_action:remove_this_and_future:item_name" = "Ez és az összes további esemény eltávolítása";
 "calendar::event::more_action:foremost:mark:item_name" = "Megjelölés legfontosabbként";
 "calendar::event::more_action:foremost:unmark:item_name" = "Legfontosabb jelölés megszüntetése";
 "calendar::event::more_action:dday_candidate:register:item_name" = "Hozzáadás a Visszaszámlálás widgethez";
@@ -135,7 +141,24 @@
 "calendar::event::more_action:dday_candidate:title" = "Visszaszámlálás widget jelölt";
 "calendar::event::more_action:dday_candidate:register:message" = "Hozzáadja ezt az eseményt a Visszaszámlálás widget jelöltjeként? A widget szerkesztésekor a lista tetején jelenik meg.";
 "calendar::event::more_action:dday_candidate:unregister:message" = "Eltávolítja ezt az eseményt a Visszaszámlálás widget jelöltjei közül?";
+"calendar::event::more_action:live_activity:title" = "Élő tevékenység";
+"calendar::event::more_action:live_activity:register:item_name" = "Megjelenítés a zárolási képernyőn";
+"calendar::event::more_action:live_activity:unregister:item_name" = "Eltávolítás a zárolási képernyőről";
+"calendar::event::more_action:live_activity:unavail::not_found" = "Ez az esemény már nem érhető el.";
+"calendar::event::more_action:live_activity:unavail::already_passed" = "Ez az esemény már elkezdődött.";
+"calendar::event::more_action:live_activity:unavail::too_far_future" = "Csak a 8 órán belül kezdődő események jeleníthetők meg.";
+"calendar::event::more_action:live_activity:register:confirm" = "Szeretné megjeleníteni ezt az eseményt a zárolási képernyőn?";
+"calendar::event::more_action:live_activity:unregister:confirm" = "Szeretné eltávolítani ezt az eseményt a zárolási képernyőről?";
+"calendar::event::more_action:live_activity:replace:confirm" = "Egy másik esemény látható a zárolási képernyőn. Lecseréli erre?";
+"calendar::event::more_action:live_activity:register:success" = "Most már látható a zárolási képernyőn. Zárolja az eszközt a megtekintéshez.";
 "calendar::event::more_action:copy:item_name" = "Esemény másolása";
+"calendar::event::more_action:share:item_name" = "Megosztás";
+"event_detail::share::field::time" = "Időpont";
+"event_detail::share::field::repeating" = "Ismétlés";
+"event_detail::share::field::calendar" = "Naptár";
+"event_detail::share::field::place" = "Helyszín";
+"event_detail::share::field::url" = "Hivatkozás";
+"event_detail::share::field::memo" = "Jegyzet";
 "calendar::event::more_action:transform_to::schedule" = "Átalakítás programmá";
 "calendar::event::more_action:transform_to::todo" = "Átalakítás feladattá";
 "calendar::event::more_action:edit:item_name" = "Szerkesztés";
@@ -145,6 +168,9 @@
 "calednar::event::skip_todo_until" = "Válassza ki, meddig hagyja ki ezt a feladatot";
 "calednar::event::copy" = "Esemény másolása";
 "calendar::move_date" = "Dátum áthelyezése";
+"calendar::share::this_day" = "Nap megosztása";
+"calendar::share::this_week" = "Hét megosztása";
+"calendar::share::this_month" = "Hónap megosztása";
 
 
 // MARK: - event detail
@@ -266,12 +292,33 @@
 "eventDetail::gogoleEvent::conference::password" = "Jelszó";
 "eventDetail::gogoleEvent::copy::message" = "Vágólapra másolva.";
 "eventDetail::gogoleEvent::canceled::message" = "Ez az esemény törölve lett.";
+"eventDetail::gogoleEvent::saved::message" = "Az esemény mentésre került.";
+"eventDetail::gogoleEvent::readOnlyCalendar::message" = "Ez a naptár csak olvasható, ezért az esemény itt nem szerkeszthető.";
+"eventDetail::gogoleEvent::reauthenticate::title" = "További engedély szükséges";
+"eventDetail::gogoleEvent::reauthenticate::message" = "Ez a Google-fiók csak olvasási hozzáféréssel van összekapcsolva. Az események szerkesztéséhez külön szerkesztési engedélyt kell adnia.";
+"eventDetail::gogoleEvent::writeScopeNotGranted::message" = "A szerkesztési engedély nem lett megadva. Munkahelyi vagy iskolai fiók esetén előfordulhat, hogy a rendszergazda nem engedélyezi.";
+"eventDetail::gogoleEvent::repeating::title" = "Ez egy ismétlődő esemény";
+"eventDetail::gogoleEvent::repeating::onlyThisTime::button" = "Csak ez az esemény";
+"eventDetail::gogoleEvent::repeating::all::button" = "Minden esemény";
+"eventDetail::gogoleEvent::remove::confirm::message" = "Törli ezt az eseményt a Google Naptárból?";
+"eventDetail::gogoleEvent::editOnCalendar" = "Szerkesztés a Google Naptárban";
+"eventDetail::gogoleEvent::notEditableField::message" = "Ez itt nem szerkeszthető. Kérjük, szerkessze a Google Naptárban.";
+"eventDetail::gogoleEvent::description::formatLoss::message" = "Ez a leírás formázást tartalmaz. Ha itt szerkeszti, a formázás elveszik.";
 
 // MARK: - Apple calendar event
 "eventDetail::appleCalendarEvent::viewOnCalendar" = "Megtekintés az Apple Naptárban";
+"eventDetail::appleCalendarEvent::editOnCalendar" = "Szerkesztés az Apple Naptárban";
 "eventDetail::appleCalendarEvent::calendar::event" = "Apple Naptár esemény";
 "eventDetail::appleCalendarEvent::attendees" = "Résztvevők (%d fő)";
 "eventDetail::appleCalendarEvent::attendees::organizer" = "Szervező";
+"eventDetail::appleCalendarEvent::saved::message" = "Mentve.";
+"eventDetail::appleCalendarEvent::remove::confirm::message" = "Törli ezt az eseményt?";
+"eventDetail::appleCalendarEvent::repeating::title" = "Ismétlődő esemény";
+"eventDetail::appleCalendarEvent::repeating::onlyThisTime::button" = "Csak ez az esemény";
+"eventDetail::appleCalendarEvent::repeating::thisAndFuture::button" = "Ez és az összes további esemény";
+"eventDetail::appleCalendarEvent::readOnlyCalendar::message" = "Ez a naptár csak olvasható, ezért az esemény nem szerkeszthető.";
+"eventDetail::appleCalendarEvent::notEditableField::message" = "Ez a mező nem szerkeszthető az alkalmazásban.";
+"eventDetail::appleCalendarEvent::url::placeholder" = "URL";
 
 // MARK: - event tag
 
@@ -310,6 +357,23 @@
 "eventList::remove::confirm::button::olderThan1y" = "1 évnél régebbi";
 
 
+// MARK: - share preview
+
+"share_preview::title" = "Megosztás előnézete";
+"share_preview::tag_filter::title" = "Címkék";
+"share_preview::tag_filter::select_all" = "Összes kijelölése";
+"share_preview::tag_filter::deselect_all" = "Kijelölés törlése";
+"share_preview::option::include_tag_name" = "Címke nevének megjelenítése";
+"share_preview::share_button" = "Megosztás";
+"share_preview::empty" = "Nincs megosztható esemény";
+"share_preview::header::this_week" = "Ez a hét";
+"share_preview::header::last_week" = "Előző hét";
+"share_preview::header::next_week" = "Következő hét";
+"share_preview::header::week_of_month" = "%1$@ %2$d. hete";
+"share_preview::format::text" = "Szöveg";
+"share_preview::format::image" = "Kép";
+
+
 // MARK: - account
 
 "manage_account::title" = "Fiókkezelés";
@@ -326,6 +390,9 @@
 "manage_account::delete_account_button::confirm:message" = "Biztosan törölni szeretné a fiókját?";
 "manage_account::delete_account_button::description" = "A fiók törlésének kérelmezése után a fiók törlésre kerül.\nA törlés után a fiók adatai nem állíthatók helyre.";
 "signIn::title" = "Bejelentkezés";
+"signIn::feature::sync" = "Események mentése, szinkronizálás az eszközök között";
+"signIn::feature::aiAgent" = "Eseménykezelés AI-ügynökkel";
+"signIn::feature::web" = "Használat a weben · todo-calendar.com";
 
 
 // MARK: - setting
@@ -411,9 +478,14 @@
 "setting.aiGuide::name" = "Hozzáadás AI-val – Siri és widgetek";
 "setting.feedback::name" = "Visszajelzés";
 "setting.help::name" = "Súgó";
+"setting.openWeb::name" = "Megnyitás a weben";
 "setting.share::name" = "Alkalmazás megosztása";
 "setting.write_review::name" = "Alkalmazás értékelése";
+"setting.openSourceLicense::name" = "Nyílt forráskódú licencek";
 "setting.billing.plan::name" = "Csomag";
+"setting.terms::name" = "Felhasználási feltételek";
+"setting.privacyPolicy::name" = "Adatvédelmi irányelvek";
+"setting.adPrivacyOptions::name" = "Hirdetési adatvédelmi beállítások";
 "setting.account.signedIn::manageAccount" = "Fiók";
 "setting.account.needSignIn" = "Bejelentkezés";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -516,6 +588,11 @@
 "widget.aiCommand::title" = "Hozzáadás AI-val";
 "widget.aiCommand::explain" = "Koppintson egyet az AI-bevitel megnyitásához.";
 
+// MARK: - liveActivity
+
+"liveActivity::stale" = "Most kezdődik";
+"liveActivity::action::end" = "Befejezés";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "Ez a hivatkozásformátum nem támogatott.\nKérjük, frissítse az alkalmazást a legújabb verzióra.";
@@ -546,9 +623,13 @@
 "aiAgent::state::failed" = "Parancs sikertelen";
 "aiAgent::done::default" = "Kész";
 "aiAgent::failed::default" = "Nem sikerült elvégezni";
+"aiAgent::failed::dailyLimitExceeded" = "Elhasználta a mai AI-krediteket.";
 "aiAgent::retry" = "Újrapróbálás";
 "aiAgent::needSignIn::title" = "Bejelentkezés szükséges";
 "aiAgent::needSignIn::message" = "Jelentkezzen be az AI gyorsbevitel használatához.";
+"aiAgent::speechPermissionDenied::title" = "Engedély szükséges";
+"aiAgent::speechPermissionDenied::message" = "A hangbevitel használatához engedélyezze a mikrofon- és beszédfelismerési hozzáférést a Beállításokban.";
+"aiAgent::speechPermissionDenied::confirm" = "Beállítások megnyitása";
 "aiAgent::title" = "AI gyorsbevitel";
 "aiAgent::keyboard::stop" = "Leállítás";
 "aiAgent::keyboard::send" = "Küldés";
@@ -577,6 +658,8 @@
 "aiAgent::image::textTooLong" = "A szöveg túl hosszú. Rövidítse le, és próbálja újra.";
 "aiAgent::image::instructionTooLong" = "Az utasításai túl hosszúak. Rövidítse le őket, és próbálja újra.";
 "aiAgent::image::busy" = "Egy másik kérés még mindig folyamatban van";
+"aiAgent::image::camera::denied::title" = "Kamera-hozzáférés szükséges";
+"aiAgent::image::camera::denied::message" = "Fénykép készítéséhez engedélyezze a kamera-hozzáférést a Beállításokban.";
 
 // MARK: - billing
 
@@ -596,6 +679,7 @@
 "billing::paywall::features::title" = "A(z) %@ tartalma";
 "billing::paywall::feature::dailyCredits" = "napi %@ kredit";
 "billing::paywall::feature::topup" = "Kredit elfogyása esetén további vásárolható";
+"billing::paywall::feature::noAds" = "Hirdetések nélkül";
 "billing::paywall::disclosure::subscription" = "Az előfizetés minden hónapban automatikusan megújul, hacsak nem mondod le legalább 24 órával a jelenlegi időszak vége előtt. Bármikor lemondhatod az App Store beállításaiban.";
 "billing::paywall::disclosure::subscription::generic" = "Az előfizetés minden számlázási időszak végén automatikusan megújul, hacsak nem mondod le legalább 24 órával a lejárta előtt. Bármikor lemondhatod az App Store beállításaiban.";
 "billing::paywall::disclosure::oneTime" = "Fizess egyszer, és használd örökre. Ez nem újul meg automatikusan.";
@@ -609,11 +693,31 @@
 "billing::paywall::restore" = "Vásárlások visszaállítása";
 "billing::paywall::restored" = "Vásárlások visszaállítva";
 "billing::paywall::restore::empty" = "Nincs visszaállítható vásárlás.";
+"billing::paywall::manageSubscription" = "Előfizetés kezelése";
 "billing::paywall::purchase::applied" = "Csomag frissítve";
 "billing::paywall::pending::title" = "Jóváhagyásra vár";
 "billing::paywall::pending::message" = "Kérd meg a családszervezőt, hogy hagyja jóvá ezt a vásárlást. Jóváhagyás után automatikusan érvénybe lép.";
 "billing::paywall::userPlan::loadFailed" = "Nem sikerült betölteni a csomagodat. Kérjük, próbáld újra.";
 "billing::paywall::retry" = "Újrapróbálás";
+"billing::paywall::unfinished::title" = "Van egy nem érvényesített vásárlásod";
+"billing::paywall::unfinished::message" = "A fizetés sikerült, de a csomagod még nem frissült.";
+"billing::paywall::unfinished::action" = "Érvényesítés most";
+"billing::paywall::unfinished::applied" = "A vásárlásod érvénybe lépett";
+"billing::paywall::processing::message" = "A vásárlás megerősítése folyamatban…";
+"billing::paywall::fail::purchase" = "Nem sikerült befejezni a vásárlást. Kérjük, próbáld újra.";
+"billing::paywall::fail::invalidTransaction" = "Nem sikerült ellenőrizni a vásárlásodat. Kérjük, próbáld újra kicsit később.";
+"billing::paywall::fail::unknownProduct" = "Nem sikerült felismerni ezt a vásárlást. Az alkalmazás frissítése megoldhatja.";
+"billing::paywall::fail::planChangeNotAllowed" = "Ez a csomagváltás nem támogatott.";
+"billing::paywall::fail::ownedByAnotherAccount" = "Ez a vásárlás egy másik fiókhoz tartozik. Jelentkezz be azzal a fiókkal, amelyikkel megvásároltad.";
+"billing::paywall::fail::reflectDelayed" = "A fizetés sikerült, de az érvényesítése késik. Automatikusan érvénybe lép.";
+"billing::paywall::topup::credits" = "%@ kredit";
+"billing::paywall::topup::credits::split" = "Alap %@ + bónusz %@ kredit";
+"billing::paywall::topup::bonus" = "+%@%% bónusz";
+"billing::paywall::topup::title" = "Kreditek vásárlása";
+"billing::paywall::topup::title::withRemaining" = "Kreditek vásárlása · %@ elérhető";
+"billing::paywall::topup::description" = "Az extra krediteket a napi limit elfogyása után használjuk fel, és nem járnak le.";
+"billing::paywall::topup::applied" = "Kreditek hozzáadva";
+"billing::paywall::topup::applied::withCredits" = "%@ kredit hozzáadva";
 
 // MARK: - share extension
 
@@ -627,8 +731,21 @@
 "share.ai::sentButUntracked" = "Elküldve, de az alkalmazás nem tudja követni az eredményt. Nézze meg a naptárát kis idő múlva.";
 "share.ai::textTooLong" = "A szöveg túl hosszú a küldéshez. Rövidítse le, és próbálja újra.";
 "share.ai::instructionTooLong" = "Az Ön utasítása túl hosszú. Kérjük, rövidítse le.";
+"share.ai::limitExceeded" = "Elhasználta a mai AI-krediteket. UTC szerint éjfélkor állnak vissza.";
 "share.ai::image::title" = "Kép küldése az AI-nak";
 "share.ai::image::recognizing" = "Szöveg beolvasása a képről…";
 "share.ai::image::text::caption" = "A képről beolvasott szöveg – szerkessze, ha valami nem stimmel.";
 "share.ai::image::text::placeholder" = "A képről beolvasott szöveg";
 "share.ai::image::noTextFound" = "Ezen a képen nem található szöveg. Írja be, amit hozzá szeretne adni.";
+
+// MARK: - webview
+
+"webview::error::message" = "Az oldalt nem sikerült betölteni.";
+"webview::error::retry" = "Újrapróbálás";
+"webview::openInBrowser" = "Megnyitás böngészőben";
+
+// MARK: - legal notice
+
+"legal_notice.message::terms" = "Frissítettük a felhasználási feltételeinket.";
+"legal_notice.message::privacy" = "Frissítettük az adatvédelmi irányelveinket.";
+"legal_notice.effectiveDate" = "Hatályos: %@";
