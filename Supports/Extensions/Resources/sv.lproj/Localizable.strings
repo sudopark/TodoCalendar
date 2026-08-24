@@ -112,8 +112,12 @@
 
 "calendar::foremostevent:title" = "Viktigaste händelsen";
 "calendar::uncompletedTodos:title" = "Ej slutförda uppgifter";
+"calendar::guideTodo::name" = "Så fungerar To-do Calendar";
+"calendar::eventSync::loadingAllEvents::message" = "Hämtar alla dina händelser…";
 "calendar::event_time::todo" = "Uppgift";
 "calendar::event_time::allday" = "Hela dagen";
+"calendar::event_time::start" = "Start";
+"calendar::event_time::end" = "Slut";
 "calendar::event_time::allday::with" = "%@ hela dagen";
 "calendar::event_time::period:some_days" = "%d dagar";
 "calendar::event_time::period:some_minutes" = "%d minuter";
@@ -123,11 +127,13 @@
 "calendar::event::more_action::foremost_event:title" = "Viktigaste händelsen";
 "calendar::event::more_action::remove_only_thistime:message" = "Vill du bara ta bort den här händelsen från alla återkommande händelser?";
 "calendar::event::more_action::remove:message" = "Vill du ta bort den här händelsen?";
+"calendar::event::more_action::remove_this_and_future:message" = "Vill du ta bort den här och alla framtida händelser i den återkommande serien?";
 "calendar::event::more_action::mark_as_foremost" = "Vill du markera den här händelsen som din viktigaste händelse?";
 "calendar::event::more_action::unmark_as_foremost" = "Vill du avmarkera den här händelsen som din viktigaste händelse?";
 "calendar::event::more_action::mark_as_foremost::unavail" = "Ett återkommande möte kan inte markeras som den viktigaste händelsen.";
 "calendar::event::more_action:remove_only_thistime:item_name" = "Ta bort endast den här händelsen";
 "calendar::event::more_action:remove:item_name" = "Ta bort händelse";
+"calendar::event::more_action:remove_this_and_future:item_name" = "Ta bort den här och alla framtida händelser";
 "calendar::event::more_action:foremost:mark:item_name" = "Markera som viktigast";
 "calendar::event::more_action:foremost:unmark:item_name" = "Avmarkera som viktigast";
 "calendar::event::more_action:dday_candidate:register:item_name" = "Lägg till i D-dag-widgeten";
@@ -135,7 +141,24 @@
 "calendar::event::more_action:dday_candidate:title" = "Kandidat för D-dag-widgeten";
 "calendar::event::more_action:dday_candidate:register:message" = "Lägg till den här händelsen som kandidat för D-dag-widgeten? Den visas högst upp i listan när du redigerar widgeten.";
 "calendar::event::more_action:dday_candidate:unregister:message" = "Ta bort den här händelsen från kandidaterna för D-dag-widgeten?";
+"calendar::event::more_action:live_activity:title" = "Liveaktivitet";
+"calendar::event::more_action:live_activity:register:item_name" = "Visa på låsskärmen";
+"calendar::event::more_action:live_activity:unregister:item_name" = "Ta bort från låsskärmen";
+"calendar::event::more_action:live_activity:unavail::not_found" = "Den här händelsen är inte längre tillgänglig.";
+"calendar::event::more_action:live_activity:unavail::already_passed" = "Den här händelsen har redan börjat.";
+"calendar::event::more_action:live_activity:unavail::too_far_future" = "Endast händelser som börjar inom 8 timmar kan visas.";
+"calendar::event::more_action:live_activity:register:confirm" = "Vill du visa den här händelsen på låsskärmen?";
+"calendar::event::more_action:live_activity:unregister:confirm" = "Vill du ta bort den här händelsen från låsskärmen?";
+"calendar::event::more_action:live_activity:replace:confirm" = "En annan händelse visas på låsskärmen. Vill du ersätta den med den här?";
+"calendar::event::more_action:live_activity:register:success" = "Visas nu på låsskärmen. Lås enheten för att se den.";
 "calendar::event::more_action:copy:item_name" = "Kopiera händelse";
+"calendar::event::more_action:share:item_name" = "Dela";
+"event_detail::share::field::time" = "Tid";
+"event_detail::share::field::repeating" = "Upprepning";
+"event_detail::share::field::calendar" = "Kalender";
+"event_detail::share::field::place" = "Plats";
+"event_detail::share::field::url" = "Länk";
+"event_detail::share::field::memo" = "Anteckning";
 "calendar::event::more_action:transform_to::schedule" = "Konvertera till möte";
 "calendar::event::more_action:transform_to::todo" = "Konvertera till uppgift";
 "calendar::event::more_action:edit:item_name" = "Redigera";
@@ -145,6 +168,9 @@
 "calednar::event::skip_todo_until" = "Välj en tid för att hoppa över denna uppgift";
 "calednar::event::copy" = "Kopiera händelse";
 "calendar::move_date" = "Flytta datum";
+"calendar::share::this_day" = "Dela den här dagen";
+"calendar::share::this_week" = "Dela den här veckan";
+"calendar::share::this_month" = "Dela den här månaden";
 
 
 // MARK: - event detail
@@ -266,12 +292,33 @@
 "eventDetail::gogoleEvent::conference::password" = "Lösenord";
 "eventDetail::gogoleEvent::copy::message" = "Kopierat till urklipp.";
 "eventDetail::gogoleEvent::canceled::message" = "Den här händelsen har avbokats.";
+"eventDetail::gogoleEvent::saved::message" = "Händelsen har sparats.";
+"eventDetail::gogoleEvent::readOnlyCalendar::message" = "Den här kalendern är skrivskyddad, så händelsen kan inte redigeras här.";
+"eventDetail::gogoleEvent::reauthenticate::title" = "Ytterligare behörighet krävs";
+"eventDetail::gogoleEvent::reauthenticate::message" = "Det här Google-kontot är anslutet med skrivskyddad åtkomst. För att redigera händelser måste du ge redigeringsbehörighet separat.";
+"eventDetail::gogoleEvent::writeScopeNotGranted::message" = "Redigeringsbehörighet beviljades inte. Om det är ett arbets- eller skolkonto kanske din administratör inte tillåter det.";
+"eventDetail::gogoleEvent::repeating::title" = "Det här är en återkommande händelse";
+"eventDetail::gogoleEvent::repeating::onlyThisTime::button" = "Endast den här händelsen";
+"eventDetail::gogoleEvent::repeating::all::button" = "Alla händelser";
+"eventDetail::gogoleEvent::remove::confirm::message" = "Vill du ta bort den här händelsen från Google Kalender?";
+"eventDetail::gogoleEvent::editOnCalendar" = "Redigera i Google Kalender";
+"eventDetail::gogoleEvent::notEditableField::message" = "Det här kan inte redigeras här. Redigera det i Google Kalender.";
+"eventDetail::gogoleEvent::description::formatLoss::message" = "Den här beskrivningen har formatering. Om du redigerar den här försvinner formateringen.";
 
 // MARK: - Apple calendar event
 "eventDetail::appleCalendarEvent::viewOnCalendar" = "Visa i Apple Kalender";
+"eventDetail::appleCalendarEvent::editOnCalendar" = "Redigera i Apple Kalender";
 "eventDetail::appleCalendarEvent::calendar::event" = "Apple Kalender-händelse";
 "eventDetail::appleCalendarEvent::attendees" = "Deltagare (%d personer)";
 "eventDetail::appleCalendarEvent::attendees::organizer" = "Organisatör";
+"eventDetail::appleCalendarEvent::saved::message" = "Sparad.";
+"eventDetail::appleCalendarEvent::remove::confirm::message" = "Vill du ta bort den här händelsen?";
+"eventDetail::appleCalendarEvent::repeating::title" = "Återkommande händelse";
+"eventDetail::appleCalendarEvent::repeating::onlyThisTime::button" = "Endast den här händelsen";
+"eventDetail::appleCalendarEvent::repeating::thisAndFuture::button" = "Den här och alla framtida händelser";
+"eventDetail::appleCalendarEvent::readOnlyCalendar::message" = "Den här kalendern är skrivskyddad, så händelsen kan inte redigeras.";
+"eventDetail::appleCalendarEvent::notEditableField::message" = "Det här fältet kan inte redigeras i appen.";
+"eventDetail::appleCalendarEvent::url::placeholder" = "URL";
 
 // MARK: - event tag
 
@@ -310,6 +357,23 @@
 "eventList::remove::confirm::button::olderThan1y" = "Äldre än 1 år";
 
 
+// MARK: - share preview
+
+"share_preview::title" = "Förhandsvisning av delning";
+"share_preview::tag_filter::title" = "Händelsetyper";
+"share_preview::tag_filter::select_all" = "Markera alla";
+"share_preview::tag_filter::deselect_all" = "Avmarkera alla";
+"share_preview::option::include_tag_name" = "Visa namn på händelsetyp";
+"share_preview::share_button" = "Dela";
+"share_preview::empty" = "Inga händelser att dela";
+"share_preview::header::this_week" = "Denna vecka";
+"share_preview::header::last_week" = "Förra veckan";
+"share_preview::header::next_week" = "Nästa vecka";
+"share_preview::header::week_of_month" = "%1$@, vecka %2$d";
+"share_preview::format::text" = "Text";
+"share_preview::format::image" = "Bild";
+
+
 // MARK: - account
 
 "manage_account::title" = "Kontohantering";
@@ -326,6 +390,9 @@
 "manage_account::delete_account_button::confirm:message" = "Är du säker på att du vill ta bort ditt konto?";
 "manage_account::delete_account_button::description" = "Efter att du begärt borttagning av kontot kommer det att raderas.\nNär det har raderats kan kontoinformationen inte återställas.";
 "signIn::title" = "Logga in";
+"signIn::feature::sync" = "Säkerhetskopiera händelser, synka mellan enheter";
+"signIn::feature::aiAgent" = "Hantera din kalender med AI-agenten";
+"signIn::feature::web" = "Använd även på webben · todo-calendar.com";
 
 
 // MARK: - setting
@@ -411,9 +478,14 @@
 "setting.aiGuide::name" = "Lägg till med AI – Siri & widgetar";
 "setting.feedback::name" = "Feedback";
 "setting.help::name" = "Hjälp";
+"setting.openWeb::name" = "Öppna på webben";
 "setting.share::name" = "Dela appen";
 "setting.write_review::name" = "Skriv en recension av appen";
+"setting.openSourceLicense::name" = "Licenser för öppen källkod";
 "setting.billing.plan::name" = "Plan";
+"setting.terms::name" = "Användarvillkor";
+"setting.privacyPolicy::name" = "Integritetspolicy";
+"setting.adPrivacyOptions::name" = "Integritetsalternativ för annonser";
 "setting.account.signedIn::manageAccount" = "Konto";
 "setting.account.needSignIn" = "Logga in";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -516,6 +588,11 @@
 "widget.aiCommand::title" = "Lägg till med AI";
 "widget.aiCommand::explain" = "Tryck en gång för att öppna AI-inmatning.";
 
+// MARK: - liveActivity
+
+"liveActivity::stale" = "Börjar nu";
+"liveActivity::action::end" = "Avsluta";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "Det här länkformatet stöds inte.\nUppdatera appen till den senaste versionen.";
@@ -546,9 +623,13 @@
 "aiAgent::state::failed" = "Kommandot misslyckades";
 "aiAgent::done::default" = "Klart";
 "aiAgent::failed::default" = "Kunde inte slutföra det";
+"aiAgent::failed::dailyLimitExceeded" = "Du har använt upp dagens AI-krediter.";
 "aiAgent::retry" = "Försök igen";
 "aiAgent::needSignIn::title" = "Inloggning krävs";
 "aiAgent::needSignIn::message" = "Logga in för att använda AI-snabbinmatning.";
+"aiAgent::speechPermissionDenied::title" = "Behörighet krävs";
+"aiAgent::speechPermissionDenied::message" = "Tillåt åtkomst till mikrofon och taligenkänning i Inställningar för att använda röstinmatning.";
+"aiAgent::speechPermissionDenied::confirm" = "Öppna inställningar";
 "aiAgent::title" = "AI-snabbinmatning";
 "aiAgent::keyboard::stop" = "Stopp";
 "aiAgent::keyboard::send" = "Skicka";
@@ -577,6 +658,8 @@
 "aiAgent::image::textTooLong" = "Texten är för lång. Korta ner den och försök igen.";
 "aiAgent::image::instructionTooLong" = "Dina instruktioner är för långa. Korta ner dem och försök igen.";
 "aiAgent::image::busy" = "En annan begäran pågår fortfarande";
+"aiAgent::image::camera::denied::title" = "Kameraåtkomst krävs";
+"aiAgent::image::camera::denied::message" = "Tillåt kameraåtkomst i Inställningar för att ta en bild.";
 
 // MARK: - billing
 
@@ -596,6 +679,7 @@
 "billing::paywall::features::title" = "%@ innehåller";
 "billing::paywall::feature::dailyCredits" = "%@ krediter per dag";
 "billing::paywall::feature::topup" = "Du kan köpa fler krediter när de tar slut";
+"billing::paywall::feature::noAds" = "Inga annonser";
 "billing::paywall::disclosure::subscription" = "Din prenumeration förnyas automatiskt varje månad om du inte säger upp den minst 24 timmar innan den aktuella perioden slutar. Du kan säga upp den när som helst i App Store-inställningarna.";
 "billing::paywall::disclosure::subscription::generic" = "Din prenumeration förnyas automatiskt i slutet av varje faktureringsperiod om du inte säger upp den minst 24 timmar innan den slutar. Du kan säga upp den när som helst i App Store-inställningarna.";
 "billing::paywall::disclosure::oneTime" = "Betala en gång och behåll den för alltid. Den förnyas inte automatiskt.";
@@ -609,11 +693,31 @@
 "billing::paywall::restore" = "Återställ köp";
 "billing::paywall::restored" = "Köp återställda";
 "billing::paywall::restore::empty" = "Inga köp att återställa.";
+"billing::paywall::manageSubscription" = "Hantera prenumeration";
 "billing::paywall::purchase::applied" = "Planen har uppdaterats";
 "billing::paywall::pending::title" = "Väntar på godkännande";
 "billing::paywall::pending::message" = "Be en familjeorganisatör att godkänna det här köpet. Det tillämpas automatiskt när det har godkänts.";
 "billing::paywall::userPlan::loadFailed" = "Det gick inte att läsa in din plan. Försök igen.";
 "billing::paywall::retry" = "Försök igen";
+"billing::paywall::unfinished::title" = "Ett köp har inte tillämpats";
+"billing::paywall::unfinished::message" = "Din betalning gick igenom, men din plan har inte uppdaterats än.";
+"billing::paywall::unfinished::action" = "Tillämpa nu";
+"billing::paywall::unfinished::applied" = "Ditt köp har tillämpats";
+"billing::paywall::processing::message" = "Bekräftar ditt köp…";
+"billing::paywall::fail::purchase" = "Det gick inte att slutföra köpet. Försök igen.";
+"billing::paywall::fail::invalidTransaction" = "Vi kunde inte verifiera ditt köp. Försök igen om en stund.";
+"billing::paywall::fail::unknownProduct" = "Vi kunde inte känna igen det här köpet. Att uppdatera appen kan lösa det.";
+"billing::paywall::fail::planChangeNotAllowed" = "Det här planbytet stöds inte.";
+"billing::paywall::fail::ownedByAnotherAccount" = "Det här köpet tillhör ett annat konto. Logga in med kontot du köpte det med.";
+"billing::paywall::fail::reflectDelayed" = "Din betalning gick igenom, men tillämpningen är fördröjd. Den tillämpas automatiskt.";
+"billing::paywall::topup::credits" = "%@ krediter";
+"billing::paywall::topup::credits::split" = "Bas %@ + bonus %@ krediter";
+"billing::paywall::topup::bonus" = "+%@%% bonus";
+"billing::paywall::topup::title" = "Köp krediter";
+"billing::paywall::topup::title::withRemaining" = "Köp krediter · %@ tillgängliga";
+"billing::paywall::topup::description" = "Extra krediter används när din dagliga gräns tar slut, och de går inte ut.";
+"billing::paywall::topup::applied" = "Krediter tillagda";
+"billing::paywall::topup::applied::withCredits" = "%@ krediter tillagda";
 
 // MARK: - share extension
 
@@ -627,8 +731,21 @@
 "share.ai::sentButUntracked" = "Skickat, men appen kan inte följa resultatet. Kolla kalendern om en stund.";
 "share.ai::textTooLong" = "Texten är för lång för att skickas. Korta ner den och försök igen.";
 "share.ai::instructionTooLong" = "Din instruktion är för lång. Korta ner den.";
+"share.ai::limitExceeded" = "Du har använt upp dagens AI-krediter. De återställs vid midnatt UTC.";
 "share.ai::image::title" = "Skicka bild till AI";
 "share.ai::image::recognizing" = "Läser text från bilden…";
 "share.ai::image::text::caption" = "Text som lästs från bilden – redigera om något ser fel ut.";
 "share.ai::image::text::placeholder" = "Text läst från bilden";
 "share.ai::image::noTextFound" = "Ingen text hittades i den här bilden. Skriv vad du vill lägga till.";
+
+// MARK: - webview
+
+"webview::error::message" = "Det gick inte att läsa in sidan.";
+"webview::error::retry" = "Försök igen";
+"webview::openInBrowser" = "Öppna i webbläsare";
+
+// MARK: - legal notice
+
+"legal_notice.message::terms" = "Våra användarvillkor har uppdaterats.";
+"legal_notice.message::privacy" = "Vår integritetspolicy har uppdaterats.";
+"legal_notice.effectiveDate" = "Gäller från %@";

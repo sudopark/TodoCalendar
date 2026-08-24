@@ -2,3 +2,4 @@
 "NSMicrophoneUsageDescription" = "Adgang til mikrofonen er nødvendig for at indtaste begivenheder og opgaver med stemmen.";
 "NSSpeechRecognitionUsageDescription" = "Talegenkendelse er nødvendig for at konvertere din stemme til begivenheder og opgaver.";
 "NSCameraUsageDescription" = "Adgang til kameraet er nødvendig for at læse tekst fra et billede, du tager.";
+"NSPhotoLibraryAddUsageDescription" = "Adgang til fotobiblioteket er nødvendig for at gemme et delt billede af en begivenhed blandt dine billeder.";

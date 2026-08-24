@@ -112,8 +112,12 @@
 
 "calendar::foremostevent:title" = "Wichtigstes Ereignis";
 "calendar::uncompletedTodos:title" = "Unerledigte Aufgaben";
+"calendar::guideTodo::name" = "So funktioniert To-do Calendar";
+"calendar::eventSync::loadingAllEvents::message" = "Alle Ereignisse werden geladen…";
 "calendar::event_time::todo" = "Aufgabe";
 "calendar::event_time::allday" = "Ganztägig";
+"calendar::event_time::start" = "Beginn";
+"calendar::event_time::end" = "Ende";
 "calendar::event_time::allday::with" = "%@ ganztägig";
 "calendar::event_time::period:some_days" = "%d Tage";
 "calendar::event_time::period:some_minutes" = "%d Minuten";
@@ -123,11 +127,13 @@
 "calendar::event::more_action::foremost_event:title" = "Wichtigstes Ereignis";
 "calendar::event::more_action::remove_only_thistime:message" = "Möchten Sie nur dieses Ereignis aus allen wiederkehrenden Ereignissen löschen?";
 "calendar::event::more_action::remove:message" = "Möchten Sie dieses Ereignis entfernen?";
+"calendar::event::more_action::remove_this_and_future:message" = "Möchten Sie dieses und alle zukünftigen Ereignisse der Wiederholungsreihe löschen?";
 "calendar::event::more_action::mark_as_foremost" = "Möchten Sie dieses Ereignis als Ihr wichtigstes Ereignis markieren?";
 "calendar::event::more_action::unmark_as_foremost" = "Möchten Sie die Markierung dieses Ereignisses als wichtigstes Ereignis aufheben?";
 "calendar::event::more_action::mark_as_foremost::unavail" = "Ein wiederkehrender Termin kann nicht als wichtigstes Ereignis markiert werden.";
 "calendar::event::more_action:remove_only_thistime:item_name" = "Nur dieses Ereignis entfernen";
 "calendar::event::more_action:remove:item_name" = "Ereignis entfernen";
+"calendar::event::more_action:remove_this_and_future:item_name" = "Dieses und alle zukünftigen Ereignisse entfernen";
 "calendar::event::more_action:foremost:mark:item_name" = "Als wichtigstes markieren";
 "calendar::event::more_action:foremost:unmark:item_name" = "Markierung als wichtigstes aufheben";
 "calendar::event::more_action:dday_candidate:register:item_name" = "Zum Countdown-Widget hinzufügen";
@@ -135,7 +141,24 @@
 "calendar::event::more_action:dday_candidate:title" = "Countdown-Widget-Kandidat";
 "calendar::event::more_action:dday_candidate:register:message" = "Dieses Ereignis als Kandidaten für das Countdown-Widget hinzufügen? Es wird oben in der Liste angezeigt, wenn Sie das Widget bearbeiten.";
 "calendar::event::more_action:dday_candidate:unregister:message" = "Dieses Ereignis aus den Countdown-Widget-Kandidaten entfernen?";
+"calendar::event::more_action:live_activity:title" = "Live-Aktivität";
+"calendar::event::more_action:live_activity:register:item_name" = "Auf dem Sperrbildschirm anzeigen";
+"calendar::event::more_action:live_activity:unregister:item_name" = "Vom Sperrbildschirm entfernen";
+"calendar::event::more_action:live_activity:unavail::not_found" = "Dieses Ereignis ist nicht mehr verfügbar.";
+"calendar::event::more_action:live_activity:unavail::already_passed" = "Dieses Ereignis hat bereits begonnen.";
+"calendar::event::more_action:live_activity:unavail::too_far_future" = "Es können nur Ereignisse angezeigt werden, die innerhalb von 8 Stunden beginnen.";
+"calendar::event::more_action:live_activity:register:confirm" = "Möchten Sie dieses Ereignis auf dem Sperrbildschirm anzeigen?";
+"calendar::event::more_action:live_activity:unregister:confirm" = "Möchten Sie dieses Ereignis vom Sperrbildschirm entfernen?";
+"calendar::event::more_action:live_activity:replace:confirm" = "Ein anderes Ereignis wird auf dem Sperrbildschirm angezeigt. Durch dieses ersetzen?";
+"calendar::event::more_action:live_activity:register:success" = "Wird jetzt auf dem Sperrbildschirm angezeigt. Sperren Sie Ihr Gerät, um es zu sehen.";
 "calendar::event::more_action:copy:item_name" = "Ereignis kopieren";
+"calendar::event::more_action:share:item_name" = "Teilen";
+"event_detail::share::field::time" = "Zeit";
+"event_detail::share::field::repeating" = "Wiederholung";
+"event_detail::share::field::calendar" = "Kalender";
+"event_detail::share::field::place" = "Ort";
+"event_detail::share::field::url" = "Link";
+"event_detail::share::field::memo" = "Notiz";
 "calendar::event::more_action:transform_to::schedule" = "In Termin umwandeln";
 "calendar::event::more_action:transform_to::todo" = "In Aufgabe umwandeln";
 "calendar::event::more_action:edit:item_name" = "Bearbeiten";
@@ -145,6 +168,9 @@
 "calednar::event::skip_todo_until" = "Wählen Sie eine Zeit, um diese Aufgabe zu überspringen";
 "calednar::event::copy" = "Ereignis kopieren";
 "calendar::move_date" = "Datum verschieben";
+"calendar::share::this_day" = "Diesen Tag teilen";
+"calendar::share::this_week" = "Diese Woche teilen";
+"calendar::share::this_month" = "Diesen Monat teilen";
 
 
 // MARK: - event detail
@@ -266,12 +292,33 @@
 "eventDetail::gogoleEvent::conference::password" = "Passwort";
 "eventDetail::gogoleEvent::copy::message" = "In die Zwischenablage kopiert.";
 "eventDetail::gogoleEvent::canceled::message" = "Dieses Ereignis wurde abgesagt.";
+"eventDetail::gogoleEvent::saved::message" = "Das Ereignis wurde gespeichert.";
+"eventDetail::gogoleEvent::readOnlyCalendar::message" = "Dieser Kalender ist schreibgeschützt, daher kann das Ereignis hier nicht bearbeitet werden.";
+"eventDetail::gogoleEvent::reauthenticate::title" = "Zusätzliche Berechtigung erforderlich";
+"eventDetail::gogoleEvent::reauthenticate::message" = "Dieses Google-Konto ist mit schreibgeschütztem Zugriff verbunden. Um Ereignisse zu bearbeiten, müssen Sie die Bearbeitungsberechtigung separat erteilen.";
+"eventDetail::gogoleEvent::writeScopeNotGranted::message" = "Die Bearbeitungsberechtigung wurde nicht erteilt. Bei einem Arbeits- oder Schulkonto kann Ihr Administrator dies untersagen.";
+"eventDetail::gogoleEvent::repeating::title" = "Dies ist ein wiederkehrendes Ereignis";
+"eventDetail::gogoleEvent::repeating::onlyThisTime::button" = "Nur dieses Ereignis";
+"eventDetail::gogoleEvent::repeating::all::button" = "Alle Ereignisse";
+"eventDetail::gogoleEvent::remove::confirm::message" = "Dieses Ereignis aus Google Kalender löschen?";
+"eventDetail::gogoleEvent::editOnCalendar" = "In Google Kalender bearbeiten";
+"eventDetail::gogoleEvent::notEditableField::message" = "Dies kann hier nicht bearbeitet werden. Bitte bearbeiten Sie es in Google Kalender.";
+"eventDetail::gogoleEvent::description::formatLoss::message" = "Diese Beschreibung enthält Formatierungen. Wenn Sie sie hier bearbeiten, geht die Formatierung verloren.";
 
 // MARK: - Apple calendar event
 "eventDetail::appleCalendarEvent::viewOnCalendar" = "In Apple Kalender anzeigen";
+"eventDetail::appleCalendarEvent::editOnCalendar" = "In Apple Kalender bearbeiten";
 "eventDetail::appleCalendarEvent::calendar::event" = "Apple Kalender-Ereignis";
 "eventDetail::appleCalendarEvent::attendees" = "Teilnehmer (%d Personen)";
 "eventDetail::appleCalendarEvent::attendees::organizer" = "Organisator";
+"eventDetail::appleCalendarEvent::saved::message" = "Gespeichert.";
+"eventDetail::appleCalendarEvent::remove::confirm::message" = "Dieses Ereignis löschen?";
+"eventDetail::appleCalendarEvent::repeating::title" = "Wiederkehrendes Ereignis";
+"eventDetail::appleCalendarEvent::repeating::onlyThisTime::button" = "Nur dieses Ereignis";
+"eventDetail::appleCalendarEvent::repeating::thisAndFuture::button" = "Dieses und alle zukünftigen Ereignisse";
+"eventDetail::appleCalendarEvent::readOnlyCalendar::message" = "Dieser Kalender ist schreibgeschützt, daher kann das Ereignis nicht bearbeitet werden.";
+"eventDetail::appleCalendarEvent::notEditableField::message" = "Dieses Feld kann in der App nicht bearbeitet werden.";
+"eventDetail::appleCalendarEvent::url::placeholder" = "URL";
 
 // MARK: - event tag
 
@@ -310,6 +357,23 @@
 "eventList::remove::confirm::button::olderThan1y" = "Älter als 1 Jahr";
 
 
+// MARK: - share preview
+
+"share_preview::title" = "Vorschau zum Teilen";
+"share_preview::tag_filter::title" = "Ereignistypen";
+"share_preview::tag_filter::select_all" = "Alle auswählen";
+"share_preview::tag_filter::deselect_all" = "Alle abwählen";
+"share_preview::option::include_tag_name" = "Ereignistyp-Namen anzeigen";
+"share_preview::share_button" = "Teilen";
+"share_preview::empty" = "Keine Ereignisse zum Teilen";
+"share_preview::header::this_week" = "Diese Woche";
+"share_preview::header::last_week" = "Letzte Woche";
+"share_preview::header::next_week" = "Nächste Woche";
+"share_preview::header::week_of_month" = "%1$@, Woche %2$d";
+"share_preview::format::text" = "Text";
+"share_preview::format::image" = "Bild";
+
+
 // MARK: - account
 
 "manage_account::title" = "Kontoverwaltung";
@@ -326,6 +390,9 @@
 "manage_account::delete_account_button::confirm:message" = "Sind Sie sicher, dass Sie Ihr Konto löschen möchten?";
 "manage_account::delete_account_button::description" = "Nach der Anfrage zur Kontolöschung wird Ihr Konto gelöscht.\nEinmal gelöschte Kontoinformationen können nicht wiederhergestellt werden.";
 "signIn::title" = "Anmelden";
+"signIn::feature::sync" = "Ereignisse sichern, geräteübergreifend synchronisieren";
+"signIn::feature::aiAgent" = "Ihren Kalender mit dem KI-Agenten verwalten";
+"signIn::feature::web" = "Auch im Web nutzen · todo-calendar.com";
 
 
 // MARK: - setting
@@ -411,9 +478,14 @@
 "setting.aiGuide::name" = "Mit KI hinzufügen – Siri & Widgets";
 "setting.feedback::name" = "Feedback";
 "setting.help::name" = "Hilfe";
+"setting.openWeb::name" = "Im Web öffnen";
 "setting.share::name" = "App teilen";
 "setting.write_review::name" = "App bewerten";
+"setting.openSourceLicense::name" = "Open-Source-Lizenzen";
 "setting.billing.plan::name" = "Tarif";
+"setting.terms::name" = "Nutzungsbedingungen";
+"setting.privacyPolicy::name" = "Datenschutzrichtlinie";
+"setting.adPrivacyOptions::name" = "Datenschutzoptionen für Werbung";
 "setting.account.signedIn::manageAccount" = "Konto";
 "setting.account.needSignIn" = "Anmelden";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -516,6 +588,11 @@
 "widget.aiCommand::title" = "Mit KI hinzufügen";
 "widget.aiCommand::explain" = "Tippen Sie einmal, um die KI-Eingabe zu öffnen.";
 
+// MARK: - liveActivity
+
+"liveActivity::stale" = "Beginnt jetzt";
+"liveActivity::action::end" = "Beenden";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "Dieses Linkformat wird nicht unterstützt.\nBitte aktualisieren Sie die App auf die neueste Version.";
@@ -546,9 +623,13 @@
 "aiAgent::state::failed" = "Befehl fehlgeschlagen";
 "aiAgent::done::default" = "Fertig";
 "aiAgent::failed::default" = "Konnte nicht abgeschlossen werden";
+"aiAgent::failed::dailyLimitExceeded" = "Sie haben Ihr heutiges KI-Guthaben aufgebraucht.";
 "aiAgent::retry" = "Erneut versuchen";
 "aiAgent::needSignIn::title" = "Anmeldung erforderlich";
 "aiAgent::needSignIn::message" = "Melden Sie sich an, um die KI-Schnelleingabe zu nutzen.";
+"aiAgent::speechPermissionDenied::title" = "Berechtigung erforderlich";
+"aiAgent::speechPermissionDenied::message" = "Erlauben Sie in den Einstellungen den Zugriff auf Mikrofon und Spracherkennung, um die Spracheingabe zu nutzen.";
+"aiAgent::speechPermissionDenied::confirm" = "Einstellungen öffnen";
 "aiAgent::title" = "KI-Schnelleingabe";
 "aiAgent::keyboard::stop" = "Stopp";
 "aiAgent::keyboard::send" = "Senden";
@@ -577,6 +658,8 @@
 "aiAgent::image::textTooLong" = "Der Text ist zu lang. Kürzen Sie ihn und versuchen Sie es erneut.";
 "aiAgent::image::instructionTooLong" = "Ihre Anweisungen sind zu lang. Kürzen Sie sie und versuchen Sie es erneut.";
 "aiAgent::image::busy" = "Eine andere Anfrage läuft noch";
+"aiAgent::image::camera::denied::title" = "Kamerazugriff erforderlich";
+"aiAgent::image::camera::denied::message" = "Erlauben Sie in den Einstellungen den Kamerazugriff, um ein Foto aufzunehmen.";
 
 // MARK: - billing
 
@@ -596,6 +679,7 @@
 "billing::paywall::features::title" = "%@ enthält";
 "billing::paywall::feature::dailyCredits" = "%@ Credits pro Tag";
 "billing::paywall::feature::topup" = "Bei aufgebrauchten Credits kannst du weitere kaufen";
+"billing::paywall::feature::noAds" = "Keine Werbung";
 "billing::paywall::disclosure::subscription" = "Dein Abo verlängert sich automatisch jeden Monat, sofern du nicht mindestens 24 Stunden vor Ablauf des aktuellen Zeitraums kündigst. Du kannst jederzeit in den App Store-Einstellungen kündigen.";
 "billing::paywall::disclosure::subscription::generic" = "Dein Abo verlängert sich automatisch am Ende jedes Abrechnungszeitraums, sofern du nicht mindestens 24 Stunden vorher kündigst. Du kannst jederzeit in den App Store-Einstellungen kündigen.";
 "billing::paywall::disclosure::oneTime" = "Einmal zahlen und dauerhaft behalten. Dies verlängert sich nicht automatisch.";
@@ -609,11 +693,31 @@
 "billing::paywall::restore" = "Käufe wiederherstellen";
 "billing::paywall::restored" = "Käufe wiederhergestellt";
 "billing::paywall::restore::empty" = "Keine Käufe zum Wiederherstellen vorhanden.";
+"billing::paywall::manageSubscription" = "Abo verwalten";
 "billing::paywall::purchase::applied" = "Tarif aktualisiert";
 "billing::paywall::pending::title" = "Genehmigung ausstehend";
 "billing::paywall::pending::message" = "Bitte einen Familienorganisator, diesen Kauf zu genehmigen. Er wird nach der Genehmigung automatisch angewendet.";
 "billing::paywall::userPlan::loadFailed" = "Dein Tarif konnte nicht geladen werden. Bitte versuche es erneut.";
 "billing::paywall::retry" = "Erneut versuchen";
+"billing::paywall::unfinished::title" = "Ein Kauf wurde noch nicht angewendet";
+"billing::paywall::unfinished::message" = "Deine Zahlung war erfolgreich, aber dein Tarif wurde noch nicht aktualisiert.";
+"billing::paywall::unfinished::action" = "Jetzt anwenden";
+"billing::paywall::unfinished::applied" = "Dein Kauf wurde angewendet";
+"billing::paywall::processing::message" = "Dein Kauf wird bestätigt…";
+"billing::paywall::fail::purchase" = "Der Kauf konnte nicht abgeschlossen werden. Bitte versuche es erneut.";
+"billing::paywall::fail::invalidTransaction" = "Dein Kauf konnte nicht verifiziert werden. Bitte versuche es gleich noch einmal.";
+"billing::paywall::fail::unknownProduct" = "Dieser Kauf konnte nicht erkannt werden. Ein Update der App kann das Problem beheben.";
+"billing::paywall::fail::planChangeNotAllowed" = "Dieser Tarifwechsel wird nicht unterstützt.";
+"billing::paywall::fail::ownedByAnotherAccount" = "Dieser Kauf gehört zu einem anderen Konto. Melde dich mit dem Konto an, mit dem du ihn getätigt hast.";
+"billing::paywall::fail::reflectDelayed" = "Deine Zahlung war erfolgreich, aber die Anwendung verzögert sich. Sie wird automatisch angewendet.";
+"billing::paywall::topup::credits" = "%@ Credits";
+"billing::paywall::topup::credits::split" = "Basis %@ + Bonus %@ Credits";
+"billing::paywall::topup::bonus" = "+%@%% Bonus";
+"billing::paywall::topup::title" = "Credits kaufen";
+"billing::paywall::topup::title::withRemaining" = "Credits kaufen · %@ vorhanden";
+"billing::paywall::topup::description" = "Zusätzliche Credits werden verwendet, wenn dein Tageslimit aufgebraucht ist, und sie verfallen nicht.";
+"billing::paywall::topup::applied" = "Credits hinzugefügt";
+"billing::paywall::topup::applied::withCredits" = "%@ Credits hinzugefügt";
 
 // MARK: - share extension
 
@@ -627,8 +731,21 @@
 "share.ai::sentButUntracked" = "Gesendet, aber die App kann das Ergebnis nicht verfolgen. Prüfen Sie in Kürze Ihren Kalender.";
 "share.ai::textTooLong" = "Der Text ist zu lang zum Senden. Kürzen Sie ihn und versuchen Sie es erneut.";
 "share.ai::instructionTooLong" = "Ihre Anweisung ist zu lang. Bitte kürzen Sie sie.";
+"share.ai::limitExceeded" = "Sie haben Ihr heutiges KI-Guthaben aufgebraucht. Es wird um Mitternacht UTC zurückgesetzt.";
 "share.ai::image::title" = "Bild an die KI senden";
 "share.ai::image::recognizing" = "Text wird aus dem Bild gelesen…";
 "share.ai::image::text::caption" = "Aus dem Bild gelesener Text – bearbeiten Sie ihn, falls etwas nicht stimmt.";
 "share.ai::image::text::placeholder" = "Aus dem Bild gelesener Text";
 "share.ai::image::noTextFound" = "In diesem Bild wurde kein Text gefunden. Geben Sie ein, was Sie hinzufügen möchten.";
+
+// MARK: - webview
+
+"webview::error::message" = "Die Seite konnte nicht geladen werden.";
+"webview::error::retry" = "Erneut versuchen";
+"webview::openInBrowser" = "Im Browser öffnen";
+
+// MARK: - legal notice
+
+"legal_notice.message::terms" = "Unsere Nutzungsbedingungen wurden aktualisiert.";
+"legal_notice.message::privacy" = "Unsere Datenschutzrichtlinie wurde aktualisiert.";
+"legal_notice.effectiveDate" = "Gültig ab %@";
