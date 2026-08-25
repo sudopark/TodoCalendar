@@ -638,6 +638,7 @@
 "aiAgent::usage::topupRemaining" = "%@ crédits supplémentaires restants";
 "aiAgent::usage::planChangeScheduled" = "Passage au forfait %2$@ le %1$@";
 "aiAgent::usage::resetsIn" = "De nouveau disponible dans %@";
+"aiAgent::notificationPermissionDenied::message" = "Activez les notifications dans Réglages pour recevoir les résultats de l’IA.";
 "aiAgent::stop::confirm::title" = "Arrêter le traitement ?";
 "aiAgent::stop::confirm::message" = "L'arrêt annule la commande en cours et elle ne pourra pas être reprise.";
 "aiAgent::confirm::countdown" = "restant pour approuver";

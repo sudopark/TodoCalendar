@@ -637,6 +637,7 @@
 "aiAgent::usage::topupRemaining" = "Pozostało %@ dodatkowych kredytów";
 "aiAgent::usage::planChangeScheduled" = "Zmiana na plan %2$@ dnia %1$@";
 "aiAgent::usage::resetsIn" = "Znów dostępne za %@";
+"aiAgent::notificationPermissionDenied::message" = "Włącz powiadomienia w Ustawieniach, aby otrzymywać wyniki AI.";
 "aiAgent::stop::confirm::title" = "Zatrzymać przetwarzanie?";
 "aiAgent::stop::confirm::message" = "Zatrzymanie odrzuci bieżące polecenie i nie będzie można go wznowić.";
 "aiAgent::confirm::countdown" = "pozostało na zatwierdzenie";

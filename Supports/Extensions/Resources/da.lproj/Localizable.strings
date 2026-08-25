@@ -638,6 +638,7 @@
 "aiAgent::usage::topupRemaining" = "%@ ekstra kreditter tilbage";
 "aiAgent::usage::planChangeScheduled" = "Skift til planen %2$@ den %1$@";
 "aiAgent::usage::resetsIn" = "Tilgængelig igen om %@";
+"aiAgent::notificationPermissionDenied::message" = "Slå notifikationer til i Indstillinger for at modtage AI-resultater.";
 "aiAgent::stop::confirm::title" = "Stop behandling?";
 "aiAgent::stop::confirm::message" = "Hvis du stopper, kasseres den igangværende kommando, og den kan ikke genoptages.";
 "aiAgent::confirm::countdown" = "tilbage til at godkende";

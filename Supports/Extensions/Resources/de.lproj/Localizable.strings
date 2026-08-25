@@ -638,6 +638,7 @@
 "aiAgent::usage::topupRemaining" = "Noch %@ zusätzliches Guthaben";
 "aiAgent::usage::planChangeScheduled" = "Wechsel zum Tarif %2$@ am %1$@";
 "aiAgent::usage::resetsIn" = "In %@ wieder verfügbar";
+"aiAgent::notificationPermissionDenied::message" = "Aktivieren Sie in den Einstellungen Benachrichtigungen, um KI-Ergebnisse zu erhalten.";
 "aiAgent::stop::confirm::title" = "Verarbeitung stoppen?";
 "aiAgent::stop::confirm::message" = "Durch das Stoppen wird der laufende Befehl verworfen und kann nicht fortgesetzt werden.";
 "aiAgent::confirm::countdown" = "verbleibend zur Bestätigung";

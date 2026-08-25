@@ -637,6 +637,7 @@
 "aiAgent::usage::topupRemaining" = "Preostalo %@ dodatnih kredita";
 "aiAgent::usage::planChangeScheduled" = "Prelazak na plan %2$@ %1$@";
 "aiAgent::usage::resetsIn" = "Ponovno dostupno za %@";
+"aiAgent::notificationPermissionDenied::message" = "Uključite obavijesti u Postavkama kako biste primali AI rezultate.";
 "aiAgent::stop::confirm::title" = "Zaustaviti obradu?";
 "aiAgent::stop::confirm::message" = "Zaustavljanje odbacuje naredbu u tijeku i ona se neće moći nastaviti.";
 "aiAgent::confirm::countdown" = "preostalo za odobrenje";

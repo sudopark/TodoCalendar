@@ -638,6 +638,7 @@
 "aiAgent::usage::topupRemaining" = "เครดิตเสริมเหลือ %@";
 "aiAgent::usage::planChangeScheduled" = "จะเปลี่ยนเป็นแพ็กเกจ %2$@ ในวันที่ %1$@";
 "aiAgent::usage::resetsIn" = "ใช้ได้อีกครั้งใน %@";
+"aiAgent::notificationPermissionDenied::message" = "เปิดการแจ้งเตือนในการตั้งค่าเพื่อรับผลลัพธ์จาก AI";
 "aiAgent::stop::confirm::title" = "ต้องการหยุดประมวลผลหรือไม่?";
 "aiAgent::stop::confirm::message" = "การหยุดจะทำให้งานที่กำลังทำอยู่หายไปและไม่สามารถกู้คืนได้";
 "aiAgent::confirm::countdown" = "เหลือเวลาอนุมัติ";

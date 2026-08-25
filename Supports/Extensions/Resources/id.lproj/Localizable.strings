@@ -638,6 +638,7 @@
 "aiAgent::usage::topupRemaining" = "Sisa %@ kredit tambahan";
 "aiAgent::usage::planChangeScheduled" = "Beralih ke paket %2$@ pada %1$@";
 "aiAgent::usage::resetsIn" = "Tersedia lagi dalam %@";
+"aiAgent::notificationPermissionDenied::message" = "Aktifkan notifikasi di Pengaturan untuk menerima hasil AI.";
 "aiAgent::stop::confirm::title" = "Hentikan proses?";
 "aiAgent::stop::confirm::message" = "Menghentikan akan membatalkan perintah yang sedang berjalan, dan tidak dapat dilanjutkan.";
 "aiAgent::confirm::countdown" = "tersisa untuk menyetujui";

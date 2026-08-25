@@ -637,6 +637,7 @@
 "aiAgent::usage::topupRemaining" = "Zbývá %@ dalších kreditů";
 "aiAgent::usage::planChangeScheduled" = "Přechod na plán %2$@ dne %1$@";
 "aiAgent::usage::resetsIn" = "Znovu k dispozici za %@";
+"aiAgent::notificationPermissionDenied::message" = "Zapněte oznámení v Nastavení, abyste dostávali výsledky AI.";
 "aiAgent::stop::confirm::title" = "Zastavit zpracování?";
 "aiAgent::stop::confirm::message" = "Zastavení zruší probíhající příkaz a nebude možné jej obnovit.";
 "aiAgent::confirm::countdown" = "zbývá na potvrzení";

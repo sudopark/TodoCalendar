@@ -638,6 +638,7 @@
 "aiAgent::usage::topupRemaining" = "%@ créditos extras restantes";
 "aiAgent::usage::planChangeScheduled" = "Mudança para o plano %2$@ em %1$@";
 "aiAgent::usage::resetsIn" = "Disponível novamente em %@";
+"aiAgent::notificationPermissionDenied::message" = "Ative as notificações em Ajustes para receber os resultados da IA.";
 "aiAgent::stop::confirm::title" = "Interromper o processamento?";
 "aiAgent::stop::confirm::message" = "Interromper descarta o comando em andamento, e ele não pode ser retomado.";
 "aiAgent::confirm::countdown" = "restante para aprovar";

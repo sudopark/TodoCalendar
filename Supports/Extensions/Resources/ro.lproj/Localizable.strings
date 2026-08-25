@@ -638,6 +638,7 @@
 "aiAgent::usage::topupRemaining" = "Mai ai %@ credite suplimentare";
 "aiAgent::usage::planChangeScheduled" = "Treci la planul %2$@ pe %1$@";
 "aiAgent::usage::resetsIn" = "Disponibil din nou în %@";
+"aiAgent::notificationPermissionDenied::message" = "Activați notificările din Setări pentru a primi rezultatele AI.";
 "aiAgent::stop::confirm::title" = "Oprești procesarea?";
 "aiAgent::stop::confirm::message" = "Oprirea anulează comanda în desfășurare, iar aceasta nu va putea fi reluată.";
 "aiAgent::confirm::countdown" = "rămas pentru aprobare";

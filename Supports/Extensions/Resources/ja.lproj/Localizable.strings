@@ -637,6 +637,7 @@
 "aiAgent::usage::topupRemaining" = "追加クレジット残り%@";
 "aiAgent::usage::planChangeScheduled" = "%1$@に%2$@プランへ切り替わります";
 "aiAgent::usage::resetsIn" = "%@後にまた使えます";
+"aiAgent::notificationPermissionDenied::message" = "AIの結果を受け取るには、設定で通知をオンにしてください。";
 "aiAgent::stop::confirm::title" = "処理を中止しますか？";
 "aiAgent::stop::confirm::message" = "中止すると進行中のコマンドは破棄され、再開できません。";
 "aiAgent::confirm::countdown" = "以内に承認してください";
