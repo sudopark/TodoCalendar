@@ -12,6 +12,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import CommonPresentation
 import SnapshotTestHelpKit
 
@@ -84,16 +85,7 @@ private final class CatalogMonthViewModel: MonthViewModel, @unchecked Sendable {
     private let selectedDay = CurrentValueSubject<String?, Never>("2026-3-12")
 
     var weekDays: AnyPublisher<[WeekDayModel], Never> {
-        return Just([
-            .init(symbol: "SUN", "SUN", isSunday: true),
-            .init(symbol: "MON", "MON"),
-            .init(symbol: "TUE", "TUE"),
-            .init(symbol: "WED", "WED"),
-            .init(symbol: "THU", "THU"),
-            .init(symbol: "FRI", "FRI"),
-            .init(symbol: "SAT", "SAT", isSaturday: true)
-        ])
-        .eraseToAnyPublisher()
+        return Just(WeekDayModel.allModels()).eraseToAnyPublisher()
     }
 
     var weekModels: AnyPublisher<[WeekRowModel], Never> {
@@ -141,24 +133,24 @@ private final class CatalogMonthViewModel: MonthViewModel, @unchecked Sendable {
         switch weekId {
         case "week:0":
             lines = [
-                [self.event("holiday", "Independence Movement Day", days: [1], seq: 1...1, ids: ["2026-3-1"])],
-                [self.event("kickoff", "Project kickoff", days: [3, 4], seq: 3...4, ids: ["2026-3-3", "2026-3-4"])],
-                [self.event("dentist", "Dentist", days: [5], seq: 5...5, ids: ["2026-3-5"], hasPeriod: false)]
+                [self.event("holiday", "catalog.event::holiday".catalogLocalized(), days: [1], seq: 1...1, ids: ["2026-3-1"])],
+                [self.event("kickoff", "catalog.event::project_kickoff".catalogLocalized(), days: [3, 4], seq: 3...4, ids: ["2026-3-3", "2026-3-4"])],
+                [self.event("dentist", "catalog.event::dentist".catalogLocalized(), days: [5], seq: 5...5, ids: ["2026-3-5"], hasPeriod: false)]
             ]
         case "week:1":
             lines = [
-                [self.event("trip", "Jeju trip", days: [2, 3, 4], seq: 2...4, ids: ["2026-3-9", "2026-3-10", "2026-3-11"])],
-                [self.event("review", "Design review", days: [5], seq: 5...5, ids: ["2026-3-12"], hasPeriod: false)],
-                [self.event("dinner", "Dinner with Sara", days: [6], seq: 6...6, ids: ["2026-3-13"], hasPeriod: false)]
+                [self.event("trip", "catalog.event::trip".catalogLocalized(), days: [2, 3, 4], seq: 2...4, ids: ["2026-3-9", "2026-3-10", "2026-3-11"])],
+                [self.event("review", "catalog.event::design_review".catalogLocalized(), days: [5], seq: 5...5, ids: ["2026-3-12"], hasPeriod: false)],
+                [self.event("dinner", "catalog.event::dinner".catalogLocalized(), days: [6], seq: 6...6, ids: ["2026-3-13"], hasPeriod: false)]
             ]
         case "week:2":
             lines = [
-                [self.event("sprint", "Sprint planning", days: [2], seq: 2...2, ids: ["2026-3-16"], hasPeriod: false)],
-                [self.event("workshop", "Team workshop", days: [5, 6], seq: 5...6, ids: ["2026-3-19", "2026-3-20"])]
+                [self.event("sprint", "catalog.event::sprint_planning".catalogLocalized(), days: [2], seq: 2...2, ids: ["2026-3-16"], hasPeriod: false)],
+                [self.event("workshop", "catalog.event::team_workshop".catalogLocalized(), days: [5, 6], seq: 5...6, ids: ["2026-3-19", "2026-3-20"])]
             ]
         case "week:3":
             lines = [
-                [self.event("release", "Release day", days: [3], seq: 3...3, ids: ["2026-3-24"], hasPeriod: false)]
+                [self.event("release", "catalog.event::release_day".catalogLocalized(), days: [3], seq: 3...3, ids: ["2026-3-24"], hasPeriod: false)]
             ]
         default:
             lines = []
@@ -217,39 +209,59 @@ private struct CatalogCalendarEvent: CalendarEvent {
 /// DayEventListViewState 의 필드가 fileprivate 라 bind(viewModel:appearance:) 경로로만 채울 수 있다.
 private final class CatalogDayEventListViewModel: DayEventListViewModel, @unchecked Sendable {
 
-    private let foremost = TodoEventCellViewModel("foremost", name: "Submit the tax return")
-        |> \.periodText .~ .singleText(.init(text: "Todo"))
+    private enum Constant {
+        /// 2026-03-12(목) 00:00 ~ 03-13 00:00 KST
+        static let todayRange: Range<TimeInterval> = 1_773_241_200..<1_773_327_600
+        static let uncompletedTodoTime: TimeInterval = 1_773_279_000     // 10:30
+        static let designReviewTime: TimeInterval = 1_773_275_400        // 09:30
+        static let lunchPeriod: Range<TimeInterval> = 1_773_284_400..<1_773_288_000  // 12:00~13:00
+        /// 03-09 ~ 03-11 종일 — upperBound 가 03-11 00:00 이라 3일로 표시된다
+        static let tripPeriod: Range<TimeInterval> = 1_772_982_000..<1_773_154_800
+    }
 
-    private let uncompleteds: [TodoEventCellViewModel] = [
-        TodoEventCellViewModel("uncompleted", name: "Reply to the landlord")
-            |> \.periodText .~ .doubleText(.init(text: "Todo"), .init(text: "10:30", pmOram: "AM"))
-    ]
+    private let timeZone = TimeZone(identifier: "Asia/Seoul")!
 
-    private let cells: [any EventCellViewModel] = {
+    private lazy var foremost: TodoEventCellViewModel = self.currentTodoCell(
+        "foremost", "catalog.todo::tax_return".catalogLocalized(), isForemost: true
+    )
+
+    private lazy var uncompleteds: [TodoEventCellViewModel] = {
+        let todo = TodoEvent(uuid: "uncompleted", name: "catalog.todo::reply_landlord".catalogLocalized())
+            |> \.time .~ .at(Constant.uncompletedTodoTime)
+        let event = TodoCalendarEvent(todo, in: self.timeZone)
+        return TodoEventCellViewModel(event, in: Constant.todayRange, self.timeZone, false)
+            .map { [$0] } ?? []
+    }()
+
+    private lazy var cells: [any EventCellViewModel] = {
         let todos: [TodoEventCellViewModel] = [
-            TodoEventCellViewModel("todo1", name: "Water the plants")
-                |> \.periodText .~ .singleText(.init(text: "Todo")),
-            TodoEventCellViewModel("todo2", name: "Book the flight")
-                |> \.periodText .~ .singleText(.init(text: "Todo"))
+            self.currentTodoCell("todo1", "catalog.todo::water_plants".catalogLocalized()),
+            self.currentTodoCell("todo2", "catalog.todo::book_flight".catalogLocalized())
         ]
         let schedules: [ScheduleEventCellViewModel] = [
-            ScheduleEventCellViewModel("sc1", name: "Design review")
-                |> \.periodText .~ .singleText(.init(text: "9:30", pmOram: "AM")),
-            ScheduleEventCellViewModel("sc2", name: "Lunch with Sara")
-                |> \.periodText .~ .doubleText(
-                    .init(text: "12:00", pmOram: "PM"),
-                    .init(text: "1:00", pmOram: "PM")
-                )
-                |> \.periodDescription .~ "Mar 12 12:00 ~ Mar 12 13:00 (1 hour)",
-            ScheduleEventCellViewModel("sc3", name: "Jeju trip")
-                |> \.periodText .~ .doubleText(
-                    .init(text: "Mar 9"),
-                    .init(text: "Mar 11")
-                )
-                |> \.periodDescription .~ "Mar 9 ~ Mar 11 (3 days)"
+            ScheduleEvent(uuid: "sc1", name: "catalog.event::design_review".catalogLocalized(), time: .at(Constant.designReviewTime)),
+            ScheduleEvent(uuid: "sc2", name: "catalog.event::lunch".catalogLocalized(), time: .period(Constant.lunchPeriod)),
+            ScheduleEvent(
+                uuid: "sc3", name: "catalog.event::trip".catalogLocalized(),
+                time: .allDay(Constant.tripPeriod, secondsFromGMT: TimeInterval(self.timeZone.secondsFromGMT()))
+            )
         ]
+        .flatMap { ScheduleCalendarEvent.events(from: $0, in: self.timeZone) }
+        .compactMap {
+            ScheduleEventCellViewModel($0, in: Constant.todayRange, timeZone: self.timeZone, false)
+        }
         return todos + schedules
     }()
+
+    private func currentTodoCell(
+        _ id: String, _ name: String, isForemost: Bool = false
+    ) -> TodoEventCellViewModel {
+        return TodoEventCellViewModel(
+            currentTodo: TodoCalendarEvent(
+                current: TodoEvent(uuid: id, name: name), isForemost: isForemost
+            )
+        )
+    }
 
     var foremostEventModel: AnyPublisher<(any EventCellViewModel)?, Never> {
         Just(self.foremost).eraseToAnyPublisher()
@@ -258,7 +270,11 @@ private final class CatalogDayEventListViewModel: DayEventListViewModel, @unchec
         Just(self.uncompleteds).eraseToAnyPublisher()
     }
     var selectedDay: AnyPublisher<SelectedDayModel, Never> {
-        Just(SelectedDayModel(dateText: "Thursday, March 12, 2026", lunarDateText: "")).eraseToAnyPublisher()
+        let currentDay = CurrentSelectDayModel(
+            2026, 3, 12, weekId: "week:1", range: Constant.todayRange
+        )
+        return Just(SelectedDayModel(self.timeZone, currentModel: currentDay))
+            .eraseToAnyPublisher()
     }
     var cellViewModels: AnyPublisher<[any EventCellViewModel], Never> {
         Just(self.cells).eraseToAnyPublisher()

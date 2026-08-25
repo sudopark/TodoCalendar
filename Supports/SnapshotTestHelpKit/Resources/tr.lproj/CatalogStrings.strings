@@ -1,0 +1,42 @@
+/* 화면 카탈로그(app-catalog) 더미 텍스트 — 앱 번들에 실리지 않는다 */
+
+// MARK: - 캘린더 이벤트
+
+"catalog.event::holiday" = "Bağımsızlık Hareketi Günü";
+"catalog.event::project_kickoff" = "Proje başlangıcı";
+"catalog.event::dentist" = "Diş hekimi";
+"catalog.event::trip" = "Jeju gezisi";
+"catalog.event::design_review" = "Tasarım incelemesi";
+"catalog.event::dinner" = "Sara ile akşam yemeği";
+"catalog.event::sprint_planning" = "Sprint planlama";
+"catalog.event::team_workshop" = "Ekip atölyesi";
+"catalog.event::release_day" = "Yayın günü";
+"catalog.event::lunch" = "Sara ile öğle yemeği";
+
+// MARK: - 할일
+
+"catalog.todo::tax_return" = "Vergi beyannamesini ver";
+"catalog.todo::reply_landlord" = "Ev sahibine yanıt yaz";
+"catalog.todo::water_plants" = "Bitkileri sula";
+"catalog.todo::book_flight" = "Uçuşu ayırt";
+"catalog.todo::renew_passport" = "Pasaportu yenile";
+"catalog.todo::send_invoice" = "Faturayı gönder";
+"catalog.todo::cancel_subscription" = "Kullanmadığım aboneliği iptal et";
+"catalog.todo::return_books" = "Kütüphane kitaplarını iade et";
+
+// MARK: - 이벤트 상세
+
+"catalog.place::startup_hub" = "Seoul Startup Hub";
+"catalog.memo::wireframes" = "Basılı wireframe'leri yanına al.";
+
+// MARK: - 이벤트 타입
+
+"catalog.tag::work" = "İş";
+"catalog.tag::family" = "Aile";
+"catalog.tag::health" = "Sağlık";
+"catalog.tag::study" = "Çalışma";
+
+// MARK: - AI 빠른 입력
+
+"catalog.ai::command" = "cuma öğlen Sara ile öğle yemeği";
+"catalog.ai::result" = "“Sara ile öğle yemeği” 13 Mart Cuma 12:00'ye eklendi.";

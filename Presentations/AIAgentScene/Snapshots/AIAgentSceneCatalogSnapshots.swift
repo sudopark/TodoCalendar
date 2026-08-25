@@ -54,8 +54,8 @@ final class AIAgentSceneCatalogSnapshots: XCTestCase {
         ) { theme in
             let state = AIAgentCommandViewState()
             state.commandState = .done(
-                command: "Lunch with Sara on Friday at noon",
-                message: "Added “Lunch with Sara” to Friday, March 13 at 12:00 PM."
+                command: "catalog.ai::command".catalogLocalized(),
+                message: "catalog.ai::result".catalogLocalized()
             )
             state.usage = AIAgentUsage(input: 3200, output: 0, limit: 20000)
                 |> \.creditsUsed .~ 3200

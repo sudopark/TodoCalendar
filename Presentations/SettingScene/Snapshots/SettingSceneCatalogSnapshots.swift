@@ -110,10 +110,10 @@ extension SettingSceneCatalogSnapshots {
         ) { theme in
             let state = EventTagListViewState()
             let tags: [(String, String)] = [
-                ("Work", "#088CDA"),
-                ("Family", "#F9316D"),
-                ("Health", "#3CB371"),
-                ("Study", "#FFA02E")
+                ("catalog.tag::work".catalogLocalized(), "#088CDA"),
+                ("catalog.tag::family".catalogLocalized(), "#F9316D"),
+                ("catalog.tag::health".catalogLocalized(), "#3CB371"),
+                ("catalog.tag::study".catalogLocalized(), "#FFA02E")
             ]
             let customTags = tags.enumerated().map { idx, pair in
                 CustomEventTag(uuid: "tag:\(idx)", name: pair.0, colorHex: pair.1)

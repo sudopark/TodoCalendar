@@ -1,0 +1,42 @@
+/* 화면 카탈로그(app-catalog) 더미 텍스트 — 앱 번들에 실리지 않는다 */
+
+// MARK: - 캘린더 이벤트
+
+"catalog.event::holiday" = "स्वतंत्रता आंदोलन दिवस";
+"catalog.event::project_kickoff" = "प्रोजेक्ट किकऑफ़";
+"catalog.event::dentist" = "डेंटिस्ट";
+"catalog.event::trip" = "जेजू की यात्रा";
+"catalog.event::design_review" = "डिज़ाइन रिव्यू";
+"catalog.event::dinner" = "सारा के साथ डिनर";
+"catalog.event::sprint_planning" = "स्प्रिंट प्लानिंग";
+"catalog.event::team_workshop" = "टीम वर्कशॉप";
+"catalog.event::release_day" = "रिलीज़ का दिन";
+"catalog.event::lunch" = "सारा के साथ लंच";
+
+// MARK: - 할일
+
+"catalog.todo::tax_return" = "टैक्स रिटर्न भरना";
+"catalog.todo::reply_landlord" = "मकान मालिक को जवाब देना";
+"catalog.todo::water_plants" = "पौधों में पानी देना";
+"catalog.todo::book_flight" = "फ़्लाइट बुक करना";
+"catalog.todo::renew_passport" = "पासपोर्ट रिन्यू कराना";
+"catalog.todo::send_invoice" = "इनवॉइस भेजना";
+"catalog.todo::cancel_subscription" = "बेकार पड़ा सब्सक्रिप्शन बंद करना";
+"catalog.todo::return_books" = "लाइब्रेरी की किताबें लौटाना";
+
+// MARK: - 이벤트 상세
+
+"catalog.place::startup_hub" = "Seoul Startup Hub";
+"catalog.memo::wireframes" = "प्रिंट किए हुए वायरफ़्रेम साथ ले जाना।";
+
+// MARK: - 이벤트 타입
+
+"catalog.tag::work" = "काम";
+"catalog.tag::family" = "परिवार";
+"catalog.tag::health" = "सेहत";
+"catalog.tag::study" = "पढ़ाई";
+
+// MARK: - AI 빠른 입력
+
+"catalog.ai::command" = "शुक्रवार दोपहर सारा के साथ लंच";
+"catalog.ai::result" = "“सारा के साथ लंच” शुक्रवार, 13 मार्च दोपहर 12:00 बजे जोड़ दिया गया।";
