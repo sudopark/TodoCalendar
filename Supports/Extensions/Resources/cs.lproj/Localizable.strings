@@ -55,13 +55,13 @@
 
 // MARK: - event
 
-"dayname::sunday" = "Neděle";
-"dayname::monday" = "Pondělí";
-"dayname::tuesday" = "Úterý";
-"dayname::wednesday" = "Středa";
-"dayname::thursday" = "Čtvrtek";
-"dayname::friday" = "Pátek";
-"dayname::saturday" = "Sobota";
+"dayname::sunday" = "neděle";
+"dayname::monday" = "pondělí";
+"dayname::tuesday" = "úterý";
+"dayname::wednesday" = "středa";
+"dayname::thursday" = "čtvrtek";
+"dayname::friday" = "pátek";
+"dayname::saturday" = "sobota";
 
 "dayname::sunday:short" = "NE";
 "dayname::monday:short" = "PO";

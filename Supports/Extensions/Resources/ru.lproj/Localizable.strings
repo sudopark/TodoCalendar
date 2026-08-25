@@ -55,13 +55,13 @@
 
 // MARK: - event
 
-"dayname::sunday" = "Воскресенье";
-"dayname::monday" = "Понедельник";
-"dayname::tuesday" = "Вторник";
-"dayname::wednesday" = "Среда";
-"dayname::thursday" = "Четверг";
-"dayname::friday" = "Пятница";
-"dayname::saturday" = "Суббота";
+"dayname::sunday" = "воскресенье";
+"dayname::monday" = "понедельник";
+"dayname::tuesday" = "вторник";
+"dayname::wednesday" = "среда";
+"dayname::thursday" = "четверг";
+"dayname::friday" = "пятница";
+"dayname::saturday" = "суббота";
 
 "dayname::sunday:short" = "ВС";
 "dayname::monday:short" = "ПН";
