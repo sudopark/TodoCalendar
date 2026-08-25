@@ -149,7 +149,7 @@ final class MyTests: PublisherWaitable {
 
 | Method | 용도 |
 |---|---|
-| `expectConfirm(_:)` | `ConfirmationExpectation` 생성 (default count: 1, timeout: 100ms) |
+| `expectConfirm(_:)` | `ConfirmationExpectation` 생성 (default count: 1, timeout: 3s) |
 | `outputs(_:for:_:)` | async — 방출값 수집 |
 | `firstOutput(_:for:_:)` | async — 첫 방출만 |
 | `failure(_:for:_:)` | async — 실패 completion |
@@ -157,7 +157,7 @@ final class MyTests: PublisherWaitable {
 다중 방출/긴 대기 필요 시 `expect.count`, `expect.timeout` 조정.
 
 ### XCTest
-`BaseTestCase, PublisherWaitable` 채택, `setUpWithError`에서 `cancelBag = .init()`. 메서드는 `waitOutputs(_:for:timeout:_:)` / `waitFirstOutput(_:for:timeout:_:)` / `waitError(_:for:timeout:_:)` (XCTestExpectation 기반).
+`BaseTestCase, PublisherWaitable` 채택, `setUpWithError`에서 `cancelBag = .init()`. 메서드는 `waitOutputs(_:for:timeout:_:)` / `waitFirstOutput(_:for:timeout:_:)` / `waitError(_:for:timeout:_:)` (XCTestExpectation 기반, default timeout: 2s).
 
 ---
 
