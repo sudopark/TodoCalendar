@@ -663,6 +663,7 @@
 "aiAgent::usage::topupRemaining" = "还剩%@附加额度";
 "aiAgent::usage::planChangeScheduled" = "将于%1$@切换至%2$@套餐";
 "aiAgent::usage::resetsIn" = "%@后可再次使用";
+"aiAgent::notificationPermissionDenied::message" = "请在设置中开启通知，以接收 AI 结果。";
 "aiAgent::stop::confirm::title" = "是否停止处理？";
 "aiAgent::stop::confirm::message" = "停止后将放弃正在进行的任务，且无法恢复。";
 "aiAgent::confirm::countdown" = "内确认";

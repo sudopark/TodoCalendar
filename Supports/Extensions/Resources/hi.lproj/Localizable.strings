@@ -664,6 +664,7 @@
 "aiAgent::usage::topupRemaining" = "%@ अतिरिक्त क्रेडिट बचे हैं";
 "aiAgent::usage::planChangeScheduled" = "%1$@ को %2$@ प्लान में बदलाव होगा";
 "aiAgent::usage::resetsIn" = "%@ में फिर से उपलब्ध";
+"aiAgent::notificationPermissionDenied::message" = "AI के परिणाम पाने के लिए सेटिंग्स में सूचनाएँ चालू करें।";
 "aiAgent::stop::confirm::title" = "प्रोसेसिंग रोकें?";
 "aiAgent::stop::confirm::message" = "रोकने से जारी निर्देश छोड़ दिया जाएगा, और इसे फिर से शुरू नहीं किया जा सकेगा।";
 "aiAgent::confirm::countdown" = "स्वीकृति के लिए शेष";

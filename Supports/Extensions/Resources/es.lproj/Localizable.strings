@@ -664,6 +664,7 @@
 "aiAgent::usage::topupRemaining" = "%@ créditos adicionales restantes";
 "aiAgent::usage::planChangeScheduled" = "Cambiarás al plan %2$@ el %1$@";
 "aiAgent::usage::resetsIn" = "Disponible de nuevo en %@";
+"aiAgent::notificationPermissionDenied::message" = "Activa las notificaciones en Ajustes para recibir los resultados de la IA.";
 "aiAgent::stop::confirm::title" = "¿Detener el procesamiento?";
 "aiAgent::stop::confirm::message" = "Al detener se descarta el comando en curso y no se puede reanudar.";
 "aiAgent::confirm::countdown" = "restante para aprobar";

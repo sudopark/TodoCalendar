@@ -664,6 +664,7 @@
 "aiAgent::usage::topupRemaining" = "Queden %@ crèdits addicionals";
 "aiAgent::usage::planChangeScheduled" = "Canvi al pla %2$@ el %1$@";
 "aiAgent::usage::resetsIn" = "Disponible de nou d'aquí a %@";
+"aiAgent::notificationPermissionDenied::message" = "Activeu les notificacions a Configuració per rebre els resultats de la IA.";
 "aiAgent::stop::confirm::title" = "Voleu aturar el processament?";
 "aiAgent::stop::confirm::message" = "En aturar-lo es descartarà l'ordre en curs i no es podrà reprendre.";
 "aiAgent::confirm::countdown" = "restant per aprovar";

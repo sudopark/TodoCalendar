@@ -664,6 +664,7 @@
 "aiAgent::usage::topupRemaining" = "Baki %@ kredit tambahan";
 "aiAgent::usage::planChangeScheduled" = "Bertukar ke pelan %2$@ pada %1$@";
 "aiAgent::usage::resetsIn" = "Tersedia semula dalam %@";
+"aiAgent::notificationPermissionDenied::message" = "Hidupkan pemberitahuan dalam Tetapan untuk menerima hasil AI.";
 "aiAgent::stop::confirm::title" = "Hentikan pemprosesan?";
 "aiAgent::stop::confirm::message" = "Menghentikan akan membuang arahan yang sedang berjalan, dan ia tidak boleh disambung semula.";
 "aiAgent::confirm::countdown" = "berbaki untuk meluluskan";

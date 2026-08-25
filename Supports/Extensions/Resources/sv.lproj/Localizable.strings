@@ -664,6 +664,7 @@
 "aiAgent::usage::topupRemaining" = "%@ extra krediter kvar";
 "aiAgent::usage::planChangeScheduled" = "Byte till planen %2$@ den %1$@";
 "aiAgent::usage::resetsIn" = "Tillgängligt igen om %@";
+"aiAgent::notificationPermissionDenied::message" = "Slå på notiser i Inställningar för att få AI-resultat.";
 "aiAgent::stop::confirm::title" = "Avbryta bearbetningen?";
 "aiAgent::stop::confirm::message" = "Om du avbryter kasseras den pågående åtgärden, och den kan inte återupptas.";
 "aiAgent::confirm::countdown" = "kvar för att godkänna";

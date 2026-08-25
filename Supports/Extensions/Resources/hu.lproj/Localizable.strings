@@ -664,6 +664,7 @@
 "aiAgent::usage::topupRemaining" = "%@ extra kredit maradt";
 "aiAgent::usage::planChangeScheduled" = "%1$@-tól a(z) %2$@ csomagra vált";
 "aiAgent::usage::resetsIn" = "%@ múlva újra használható";
+"aiAgent::notificationPermissionDenied::message" = "Az AI-eredmények fogadásához kapcsolja be az értesítéseket a Beállításokban.";
 "aiAgent::stop::confirm::title" = "Leállítja a feldolgozást?";
 "aiAgent::stop::confirm::message" = "A leállítás elveti a folyamatban lévő parancsot, és az nem folytatható.";
 "aiAgent::confirm::countdown" = "van hátra a jóváhagyáshoz";

@@ -663,6 +663,7 @@
 "aiAgent::usage::topupRemaining" = "Осталось %@ доп. кредитов";
 "aiAgent::usage::planChangeScheduled" = "Переход на план «%2$@» %1$@";
 "aiAgent::usage::resetsIn" = "Снова доступно через %@";
+"aiAgent::notificationPermissionDenied::message" = "Включите уведомления в настройках, чтобы получать результаты ИИ.";
 "aiAgent::stop::confirm::title" = "Остановить обработку?";
 "aiAgent::stop::confirm::message" = "Остановка отменяет выполняемую команду, и её нельзя будет возобновить.";
 "aiAgent::confirm::countdown" = "осталось на подтверждение";
