@@ -14,7 +14,7 @@
   - init 시그니처 ↔ 콜사이트
   - 인증 필요 신규 Endpoint enum ↔ `CalendarAPIAutenticator.shouldAdapt` case ↔ 회귀 테스트 (누락 시 무인증 요청 → 401, 리트라이도 안 됨)
   - CommonPresentation 신규 컴포넌트 ↔ `.claude/rules/presentations-rules.md` §2 카탈로그 표 등재 (누락 시 다음 사람이 못 찾아 같은 컴포넌트를 또 만든다)
-  - en `Localizable.strings` 키 추가/삭제 ↔ ko lproj 반영 ↔ 번역 대기 트래킹 이슈 #810에 작업 링크 기록 (나머지 29개 언어는 #810 처리 시점에 일괄 번역 — 상세는 `.claude/rules/localization.md`)
+  - en `Localizable.strings` 키 추가/삭제 ↔ ko lproj 반영 ↔ 번역 대기 트래킹 이슈 #1001에 작업 링크 기록 (나머지 29개 언어는 #1001 처리 시점에 일괄 번역 — 상세는 `.claude/rules/localization.md`)
 - **스킬 종료·유저 교정은 레코드로 남긴다** (#690 flywheel 측정 신호):
   - 발동한 스킬의 절차가 끝나면: `python3 .claude/hooks/log-record.py skill_end --name <스킬> --compliance full|partial [--deviation "조항::사유" --deviation-reviewed]` — 조항을 의도적으로 이행 안 했으면 partial + 이탈 조항·사유 필수.
   - **partial은 조항이 허용하지 않은 이탈에만 쓴다.** 조항이 조건부 생략·갈음·대체 경로를 규정하고 그 조건을 충족해 그 경로를 탔으면 **full**이다 — 규정된 선택지를 고른 것은 이행이지 이탈이 아니다. 판정 기준은 규범 판단이 아니라 "그 조항이 이 생략을 문언으로 규정하고 있나"라는 사실 확인이다. 허용된 생략까지 partial로 세면 지표가 오염돼 진짜 이탈이 묻힌다. 그래서 `--deviation-reviewed` 없는 partial은 스크립트가 이 기준을 stderr로 되돌려주며 거부한다 — 재판정해 full이면 `--compliance full`로, 진짜 이탈이면 플래그를 붙여 다시 호출한다.
