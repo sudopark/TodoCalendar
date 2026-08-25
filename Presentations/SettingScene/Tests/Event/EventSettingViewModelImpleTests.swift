@@ -567,9 +567,4 @@ private class SpyRouter: BaseSpyRouter, EventSettingRouting, @unchecked Sendable
     func routeToSelectDefaultMapApp() {
         self.didRouteToSelectDefaultMapApp = true
     }
-
-    var didOpenSystemSetting: Bool?
-    func openSystemSetting() {
-        self.didOpenSystemSetting = true
-    }
 }

@@ -25,8 +25,6 @@ protocol CalendarViewRouting: Routing, Sendable {
     func routeToPaywall()
 
     func routeToSignIn()
-
-    func openSystemSetting()
 }
 
 final class CalendarViewRouterImple: BaseRouterImple, CalendarViewRouting, @unchecked Sendable {
@@ -106,15 +104,6 @@ final class CalendarViewRouterImple: BaseRouterImple, CalendarViewRouting, @unch
         Task { @MainActor in
             let next = self.memberSceneBuilder.makeSignInScene()
             self.showBottomSlide(next)
-        }
-    }
-
-    func openSystemSetting() {
-        Task { @MainActor in
-            guard let url = URL(string: UIApplication.openSettingsURLString),
-                  UIApplication.shared.canOpenURL(url)
-            else { return }
-            UIApplication.shared.open(url)
         }
     }
 }

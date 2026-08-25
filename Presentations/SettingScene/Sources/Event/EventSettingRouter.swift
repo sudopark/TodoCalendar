@@ -20,7 +20,6 @@ protocol EventSettingRouting: Routing, Sendable {
     func routeToSelectTag()
     func routeToEventNotificationTime(forAllDay: Bool)
     func routeToSelectDefaultMapApp()
-    func openSystemSetting()
 }
 
 // MARK: - Router
@@ -74,13 +73,6 @@ extension EventSettingRouter {
         Task { @MainActor in
             let next = self.eventDefaultMapAppSceneBuilder.makeEventDefaultMapAppScene()
             self.currentScene?.navigationController?.pushViewController(next, animated: true)
-        }
-    }
-
-    func openSystemSetting() {
-        Task { @MainActor in
-            guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
-            UIApplication.shared.open(url)
         }
     }
 }

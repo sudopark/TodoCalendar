@@ -162,14 +162,6 @@ extension DayEventListRouter {
         self.showConfirm(dialog: info)
     }
 
-    private func openSystemSetting() {
-        Task { @MainActor in
-            guard let url = URL(string: UIApplication.openSettingsURLString)
-            else { return }
-            UIApplication.shared.open(url)
-        }
-    }
-
     private func routeToImageCommand(imageData: Data) {
         Task { @MainActor in
             let next = self.aiImageCommandSceneBuilder.makeImageCommandScene(imageData: imageData)

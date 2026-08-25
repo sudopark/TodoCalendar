@@ -188,7 +188,7 @@ extension SelectEventNotificationTimeViewModelImple {
     }
     
     func moveSystemNotificationSetting() {
-        self.router?.openSystemNotificationSetting()
+        self.router?.openSystemSetting()
     }
     
     func close() {
