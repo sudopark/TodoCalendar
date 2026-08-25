@@ -17,7 +17,10 @@ description: Use when producing full-screen snapshot images of app scenes for ex
 
 - 화면당 대표 상태 1개(정보가 풍부한 상태)로 구성. 상태 조합 나열 금지 — 그건 snapshot-check의 검증 영역.
 - 구성 소스 우선순위: ① 대상 뷰 파일의 #Preview/PreviewProvider (더미 구성 그대로 재사용) ② TestDoubles의 Dummies·Stub ③ 직접 구성.
-- 라이트·다크 pair 자동(captureSnapshotPair), 언어 en 고정. layout은 풀스크린 화면이면 `.fullScreen`, 위젯·부분 컴포넌트면 `.fixed`.
+- 라이트·다크 pair 자동(captureSnapshotPair). layout은 풀스크린 화면이면 `.fullScreen`, 위젯·부분 컴포넌트면 `.fixed`.
+- **더미 텍스트는 하드코딩하지 않는다.** 화면에 뜨는 문구는 두 갈래다:
+  - 실제 화면에서 로컬라이즈된 값이 들어가는 자리(반복 주기·알림 시각·태그명·`Todo` 배지)는 **프로덕션 경로로 만든다** — 키를 `.localized()` 로 부르거나, 도메인 모델을 세워 프로덕션 이니셜라이저(`TodoEventCellViewModel(_:in:_:_:)` 등)에 넘긴다. 손으로 적은 문자열은 프로덕션이 실제로 그리는 값과 어긋나기 쉽다.
+  - 유저가 입력했을 법한 콘텐츠(이벤트 이름·메모·AI 명령문)는 `SnapshotTestHelpKit` 의 `Resources/<lang>.lproj/CatalogStrings.strings` 에 넣고 `"키".catalogLocalized()` 로 부른다. **앱 lproj 에 넣지 않는다** — 프로덕션에 안 뜨는 문구가 앱 번들과 파리티 검사에 섞인다.
 - **캡처 호출에 `snapshotDirectory: catalogSnapshotDirectory()` 필수** — 검증용 기본 경로(`__Snapshots__/`)와 격리해 `snapshot-catalog/<Framework>/<스위트>/`에 기록한다.
 
 ## 3. 촬영·수집
@@ -26,9 +29,14 @@ description: Use when producing full-screen snapshot images of app scenes for ex
 
 ```bash
 xcodebuild test -workspace TodoCalendar.xcworkspace -scheme <Name>Snapshots \
+  -only-testing:<Name>Snapshots/<Name>CatalogSnapshots \
   -destination 'platform=iOS Simulator,name=iPhone 17 - snapshot_ref,OS=26.2' \
-  -testLanguage en -testRegion en_US | xcpretty
+  -testLanguage <언어> -testRegion <언어>_<지역> | xcpretty
 ```
+
+- **`-only-testing` 은 필수다.** 같은 스킴에 검증 스위트(`__Snapshots__/`, 커밋 대상)가 함께 살아서, 한정하지 않으면 그쪽이 이 언어·이 시점으로 재기록돼 워킹트리가 오염된다. 실행 후 `git status --short -- '*__Snapshots__*'` 가 비어 있어야 한다.
+- **언어는 요청받은 것으로 바꾼다.** 지정이 없으면 en/en_US.
+- 서비스 이용 가이드용 전 언어 촬영은 `scripts/capture-guide-screenshots.sh` 가 위 절차와 파일명 매핑을 감싼다 (`.claude/rules/localization.md` §1 가이드 절).
 
 - **기기 변경 가능**: 유저가 다른 기기·OS로 요청하면 `-destination`의 name/OS 교체 (`xcrun simctl list devices available`로 가용 확인). 여러 기기 세트 요청이면 destination만 바꿔 반복 실행.
 - 기본 시뮬레이터가 없으면 생성: `xcrun simctl create 'iPhone 17 - snapshot_ref' 'iPhone 17' iOS26.2`.

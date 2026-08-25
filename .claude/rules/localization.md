@@ -49,7 +49,15 @@ paths:
   역추적된다 — 같은 키를 대상 언어 lproj 에서 찾으면 그게 정답 문구다.
 - 링크 대상 파일·이미지 URL·헤딩 구조는 en 과 같게 두고, **헤딩 앵커만 번역된 헤딩을 따라간다**
   (`#foremost-event` → ko `#제일-중요한-이벤트`).
-- 스크린샷은 `guide/images/` 영문 1벌을 절대 URL 로 전 언어가 공유한다 — 언어별로 다시 찍지 않는다.
+- **스크린샷은 언어별로 찍는다.** `scripts/capture-guide-screenshots.sh <언어>...` 로 촬영해
+  (언어당 약 1분 40초, 백그라운드로 돌리면 시간 제한에 걸리니 **4개씩 포그라운드**로 끊는다)
+  `guide/images/<언어>/` 에 넣고, `scripts/rewrite-guide-image-lang.py <terms-repo> --write` 로
+  본문 URL 을 그 언어 경로로 돌린다. **en 만은 `en/` 을 만들지 말고 루트 `guide/images/` 를 덮어쓴다** —
+  거기가 en 겸 폴백 자리다. md 는 정적이라 폴백이 없어서, 촬영이 밀린 언어는 루트를 계속 가리켜야
+  이미지가 안 깨진다.
+  화면 속 더미 텍스트의 번역은 `SnapshotTestHelpKit` 의 `CatalogStrings.strings` 소관 (app-catalog 스킬 §2).
+- **AI 명령·응답문의 정본은 그 언어 가이드 본문이다.** `02-ai-input.md` 가 같은 예시 문장을 인용하고
+  있어서, 스샷과 본문이 어긋나면 독자가 같은 예시로 못 읽는다.
 - 검증: `python3 scripts/check-guide-parity.py <terms-repo-경로>` (언어 생략 = 전 언어) 0 위반.
 
 ## 2. 번역 원칙
