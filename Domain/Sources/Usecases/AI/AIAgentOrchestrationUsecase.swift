@@ -20,6 +20,7 @@ public protocol AIAgentOrchestrationUsecase: AnyObject, Sendable {
     var recognizingText: AnyPublisher<String, Never> { get }
     var voiceLevel: AnyPublisher<Float, Never> { get }
     var speechPermissionDenied: AnyPublisher<Void, Never> { get }
+    var isNotificationPermissionDenied: AnyPublisher<Bool, Never> { get }
     var isCreditExhausted: Bool { get }
 
     func prepare()
@@ -41,6 +42,7 @@ public protocol AIAgentOrchestrationUsecase: AnyObject, Sendable {
     func handleJobStatusChanged(_ jobId: String)
     func refreshProcessingJobIfNeeded()
 
+    func refreshNotificationPermissionStatus()
 }
 
 
@@ -52,17 +54,20 @@ public final class AIAgentOrchestrationUsecaseImple: AIAgentOrchestrationUsecase
     private let usageUsecase: any AIAgentUsageUsecase
     private let speechRecognizeUsecase: any SpeechRecognizeUsecase
     private let eventSyncUsecase: any EventSyncUsecase
+    private let notificationPermissionUsecase: any NotificationPermissionUsecase
 
     public init(
         commandUsecase: any AICommandUsecase,
         usageUsecase: any AIAgentUsageUsecase,
         speechRecognizeUsecase: any SpeechRecognizeUsecase,
-        eventSyncUsecase: any EventSyncUsecase
+        eventSyncUsecase: any EventSyncUsecase,
+        notificationPermissionUsecase: any NotificationPermissionUsecase
     ) {
         self.commandUsecase = commandUsecase
         self.usageUsecase = usageUsecase
         self.speechRecognizeUsecase = speechRecognizeUsecase
         self.eventSyncUsecase = eventSyncUsecase
+        self.notificationPermissionUsecase = notificationPermissionUsecase
     }
 
     private struct Subject {
@@ -70,6 +75,7 @@ public final class AIAgentOrchestrationUsecaseImple: AIAgentOrchestrationUsecase
         let recognizingText = PassthroughSubject<String, Never>()
         let voiceLevel = PassthroughSubject<Float, Never>()
         let speechPermissionDenied = PassthroughSubject<Void, Never>()
+        let isNotificationPermissionDenied = CurrentValueSubject<Bool, Never>(false)
     }
     private let subject = Subject()
     private var commandCancellable: AnyCancellable?
@@ -155,8 +161,13 @@ extension AIAgentOrchestrationUsecaseImple {
         guard self.canEnterVoiceInput else { return }
         guard !self.blockEntryIfCreditExhausted() else { return }
         self.bindSpeechRecognizing()
-        self.speechRecognizeUsecase.startListening()
         self.subject.state.send(.listening(.voice))
+        Task { [weak self] in
+            // 마이크 알럿은 조회 왕복 없이 첫 await 에서 바로 뜬다 — 여기서 기다려야 알림이 먼저 뜬다.
+            await self?.checkAndRequestNotificationPermissionIfNeeded()
+            guard self?.isVoiceListening == true else { return }
+            self?.speechRecognizeUsecase.startListening()
+        }
     }
 
     public func finishVoiceInput() {
@@ -328,6 +339,11 @@ extension AIAgentOrchestrationUsecaseImple {
         }
     }
 
+    private var isVoiceListening: Bool {
+        guard case .listening(.voice) = self.subject.state.value else { return false }
+        return true
+    }
+
     private var canEnterVoiceInput: Bool {
         switch self.subject.state.value {
         case .none, .idle, .listening(.keyboard), .listening(.image): return true
@@ -452,6 +468,44 @@ extension AIAgentOrchestrationUsecaseImple {
 }
 
 
+// MARK: - 알림 권한
+
+extension AIAgentOrchestrationUsecaseImple {
+
+    public func refreshNotificationPermissionStatus() {
+        Task { [weak self] in
+            await self?.updateNotificationPermissionDenied(shouldRequest: false)
+        }
+    }
+
+    private func checkAndRequestNotificationPermissionIfNeeded() async {
+        await self.updateNotificationPermissionDenied(shouldRequest: true)
+    }
+
+    private func updateNotificationPermissionDenied(shouldRequest: Bool) async {
+        let isDenied = await self.resolveNotificationPermissionDenied(shouldRequest: shouldRequest)
+        self.subject.isNotificationPermissionDenied.send(isDenied)
+    }
+
+    // throw는 fail-open(false) — 조회 실패로 안내를 띄우면 권한이 있는 사용자에게 오탐이 뜬다.
+    private func resolveNotificationPermissionDenied(shouldRequest: Bool) async -> Bool {
+        guard let status = try? await self.notificationPermissionUsecase.checkAuthorizationStatus()
+        else { return false }
+        switch status {
+        case .authorized:
+            return false
+        case .denied:
+            return true
+        case .notDetermined:
+            guard shouldRequest,
+                  let granted = try? await self.notificationPermissionUsecase.requestPermission()
+            else { return false }
+            return !granted
+        }
+    }
+}
+
+
 // MARK: - outputs
 
 extension AIAgentOrchestrationUsecaseImple {
@@ -474,6 +528,10 @@ extension AIAgentOrchestrationUsecaseImple {
 
     public var speechPermissionDenied: AnyPublisher<Void, Never> {
         return self.subject.speechPermissionDenied.eraseToAnyPublisher()
+    }
+
+    public var isNotificationPermissionDenied: AnyPublisher<Bool, Never> {
+        return self.subject.isNotificationPermissionDenied.removeDuplicates().eraseToAnyPublisher()
     }
 
     public var isCreditExhausted: Bool {
@@ -508,6 +566,10 @@ public final class NotNeedAIAgentOrchestrationUsecase: AIAgentOrchestrationUseca
         return Empty(completeImmediately: false).eraseToAnyPublisher()
     }
 
+    public var isNotificationPermissionDenied: AnyPublisher<Bool, Never> {
+        return Just(false).eraseToAnyPublisher()
+    }
+
     public var isCreditExhausted: Bool { false }
 
     public func prepare() { }
@@ -532,4 +594,5 @@ public final class NotNeedAIAgentOrchestrationUsecase: AIAgentOrchestrationUseca
     public func loadUsage() { }
     public func handleJobStatusChanged(_ jobId: String) { }
     public func refreshProcessingJobIfNeeded() { }
+    public func refreshNotificationPermissionStatus() { }
 }
