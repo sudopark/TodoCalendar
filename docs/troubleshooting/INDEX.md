@@ -30,3 +30,4 @@
 - [2026-08-24 `.timeout` 이 concurrent 큐에서 동기 방출값을 흘린다](2026-08-24-combine-timeout-drops-value-on-concurrent-queue.md) — Event / fixed / 라이브액티비티 placeName·memo nil·Publishers.Timeout·DispatchQueue.global
 - [2026-08-24 백그라운드 Task 에서 구독을 담다 Set 저장소가 깨진다](2026-08-24-cancelbag-data-race-crash.md) — Infra / fixed / unrecognized selector 0x8000000000000000·member:·CalendarScenes 랜덤 크래시
 - [2026-08-24 Paywall screenState 테스트가 방출 개수로 흔들린다](2026-08-24-paywall-screenstate-emission-count-flaky.md) — Billing / deferred / Confirmation was confirmed·PaywallViewModelImpleTests·BillingScenes 간헐 실패
+- [2026-08-25 CI 가 브랜치와 무관하게 매번 다른 테스트에서 타임아웃으로 깨진다](2026-08-25-ci-wallclock-timeout-flaky.md) — Infra / workaround / CI 반복 실패·Exceeded timeout of·매번 다른 테스트·로컬은 통과

@@ -156,7 +156,7 @@ extension TodoLocalRepositoryImpleTests {
                 try db.insert(Detail.self, entities: details)
             }
         }
-        let _ = self.waitFirstOutput(expect, for: saving, timeout: 1)
+        let _ = self.waitFirstOutput(expect, for: saving)
     }
     
     // make and load/

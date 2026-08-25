@@ -21,7 +21,7 @@ extension PublisherWaitable where Self: XCTestCase {
     public func waitOutputs<P: Publisher>(
         _ expect: XCTestExpectation,
         for source: P,
-        timeout: TimeInterval = 0.5,
+        timeout: TimeInterval = 2.0,
         _ action: (() -> Void)? = nil
     ) -> [P.Output] {
         // given
@@ -44,7 +44,7 @@ extension PublisherWaitable where Self: XCTestCase {
     public func waitError<P: Publisher>(
         _ expect: XCTestExpectation,
         for source: P,
-        timeout: TimeInterval = 0.5,
+        timeout: TimeInterval = 2.0,
         _ action: (() -> Void)? = nil
     ) -> P.Failure? {
         // given
@@ -68,7 +68,7 @@ extension PublisherWaitable where Self: XCTestCase {
     public func waitFirstOutput<P: Publisher>(
         _ expect: XCTestExpectation,
         for source: P,
-        timeout: TimeInterval = 0.5,
+        timeout: TimeInterval = 2.0,
         _ action: (() -> Void)? = nil
     ) -> P.Output? {
         return self.waitOutputs(expect, for: source, timeout: timeout, action).first
@@ -111,7 +111,7 @@ extension PublisherWaitable {
     public func expectConfirm(
         _ description: String
     ) -> ConfirmationExpectation {
-        return .init(comment: .init(stringLiteral: description), count: 1, timeout: .seconds(1))
+        return .init(comment: .init(stringLiteral: description), count: 1, timeout: .seconds(3))
     }
 
     @available(iOS 16.0, *)
