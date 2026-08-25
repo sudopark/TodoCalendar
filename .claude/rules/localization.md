@@ -65,7 +65,7 @@ paths:
 - **도메인 3계층 용어 분리**: Event ⊃ {Todo, Schedule}는 언어마다 서로 다른 단어여야 한다 (`total::event::count`/`todo::count`/`schedule::count`가 리트머스). 예: de Ereignis/Aufgabe/Termin, fr événement/tâche/rendez-vous.
 - **aiAgent 구획의 "Task"는 그 언어의 Todo 예약어 금지** — "명령(command)" 계열로 (예: sv Kommandot, de Befehl, fr commande). AI 명령 완료가 "할 일 완료"로 오독되는 충돌 방지.
 - **위젯 명칭 일관**: D-day 위젯 관련 신규 문구는 그 언어의 기존 `widget.dday::name` 용어를 재사용 (언어별로 D-Day 차용/번역 클러스터가 다름 — zh-Hans 倒计时, de Countdown, tr Geri Sayım).
-- **복수형**: stringsdict 미도입 — `%d minute(s)` 류는 각 언어의 단·복수 겸용 자연 표기. 슬라브어권 격변화 한계는 감수(#626 확정).
+- **복수형**: stringsdict 미도입 — `%d minute(s)` 류는 각 언어의 단·복수 겸용 자연 표기. 슬라브어권 수사 격변화는 격변화를 타지 않는 표현(전치격 복수·서수 표기·축약)으로 재작성해 피한다 (#999).
 - **포맷 지정자**: multiset은 en과 일치. 어순상 재배치가 필요하면 positional(`%1$@`)로.
 
 ## 3. 날짜 포맷 키 — 번역 금지

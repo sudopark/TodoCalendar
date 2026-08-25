@@ -188,7 +188,7 @@
 "eventDetail.repeating.everyWeekSomeDay:title" = "Ogni %@";
 "eventDetail.repeating.everySomeWeek:title" = "Ogni %d settimane";
 "eventDetail.repeating.everyWeekDays:title" = "Ogni giorno feriale";
-"eventDetail.repeating.everySomeWeekSomeDay:title" = "Ogni %d settimane il %@";
+"eventDetail.repeating.everySomeWeekSomeDay:title" = "Ogni %d settimane: %@";
 "eventDetail.repeating.everyMonth:title" = "Ogni mese";
 "eventDetail.repeating.everyMonth_someDay:title" = "Il %@ di ogni mese.";
 "eventDetail.repeating.everyYear:title" = "Ogni anno";

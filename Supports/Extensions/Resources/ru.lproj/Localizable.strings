@@ -185,10 +185,10 @@
 "eventDetail.repeating.starttime:title" = "Время начала повтора";
 "eventDetail.repeating.everyDay:title" = "Каждый день";
 "eventDetail.repeating.everyWeek:title" = "Каждую неделю";
-"eventDetail.repeating.everyWeekSomeDay:title" = "Каждое %@";
+"eventDetail.repeating.everyWeekSomeDay:title" = "Каждую неделю: %@";
 "eventDetail.repeating.everySomeWeek:title" = "Каждые %d нед.";
 "eventDetail.repeating.everyWeekDays:title" = "Каждый будний день";
-"eventDetail.repeating.everySomeWeekSomeDay:title" = "Каждые %d нед. по %@";
+"eventDetail.repeating.everySomeWeekSomeDay:title" = "Каждые %d нед.: %@";
 "eventDetail.repeating.everyMonth:title" = "Каждый месяц";
 "eventDetail.repeating.everyMonth_someDay:title" = "%@ каждого месяца.";
 "eventDetail.repeating.everyYear:title" = "Каждый год";
@@ -215,9 +215,9 @@
 "eventDetail.repeating.everyNDays:title" = "Каждые %d дн.";
 "eventDetail.repeating.last" = "Последний";
 "eventDetail.repeating.everyNMonths:title" = "Каждые %d мес.";
-"eventDetail.repeating.everyNYears:title" = "Каждые %d лет";
+"eventDetail.repeating.everyNYears:title" = "Каждые %d г.";
 "eventDetail.repeating::endoption_until" = "до %@";
-"eventDetail.repeating::endoption_times" = "%d раз";
+"eventDetail.repeating::endoption_times" = "Повторов: %d";
 
 "eventDetail.place::placeholder" = "Место";
 "eventDetail.place::remove_button" = "Удалить место";

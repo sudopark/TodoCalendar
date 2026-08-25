@@ -185,10 +185,10 @@
 "eventDetail.repeating.starttime:title" = "Час початку повторення";
 "eventDetail.repeating.everyDay:title" = "Щодня";
 "eventDetail.repeating.everyWeek:title" = "Щотижня";
-"eventDetail.repeating.everyWeekSomeDay:title" = "Щотижня в %@";
+"eventDetail.repeating.everyWeekSomeDay:title" = "Щотижня: %@";
 "eventDetail.repeating.everySomeWeek:title" = "Кожні %d тиж.";
 "eventDetail.repeating.everyWeekDays:title" = "Щобудня";
-"eventDetail.repeating.everySomeWeekSomeDay:title" = "Кожні %d тиж. у %@";
+"eventDetail.repeating.everySomeWeekSomeDay:title" = "Кожні %d тиж.: %@";
 "eventDetail.repeating.everyMonth:title" = "Щомісяця";
 "eventDetail.repeating.everyMonth_someDay:title" = "%@ щомісяця.";
 "eventDetail.repeating.everyYear:title" = "Щороку";
@@ -215,9 +215,9 @@
 "eventDetail.repeating.everyNDays:title" = "Кожні %d дн.";
 "eventDetail.repeating.last" = "Останній";
 "eventDetail.repeating.everyNMonths:title" = "Кожні %d міс.";
-"eventDetail.repeating.everyNYears:title" = "Кожні %d років";
+"eventDetail.repeating.everyNYears:title" = "Кожні %d р.";
 "eventDetail.repeating::endoption_until" = "до %@";
-"eventDetail.repeating::endoption_times" = "%d разів";
+"eventDetail.repeating::endoption_times" = "Повторів: %d";
 
 "eventDetail.place::placeholder" = "Місце";
 "eventDetail.place::remove_button" = "Видалити місце";
