@@ -37,10 +37,12 @@ public protocol AIAgentCommandViewModel: AnyObject, Sendable {
     func acknowledge()
     func close()
     func showPlans()
+    func openNotificationSetting()
 
     var commandState: AnyPublisher<AIAgentCommandState?, Never> { get }
     var usage: AnyPublisher<AIAgentUsage, Never> { get }
     var currentUserPlan: AnyPublisher<BillingUserPlan?, Never> { get }
+    var isNotificationPermissionDenied: AnyPublisher<Bool, Never> { get }
 }
 
 
@@ -77,6 +79,7 @@ extension AIAgentCommandViewModelImple {
 
     func prepare() {
         self.orchestrationUsecase.loadUsage()
+        self.orchestrationUsecase.refreshNotificationPermissionStatus()
     }
 
     func sendCommand(_ text: String) {
@@ -117,6 +120,10 @@ extension AIAgentCommandViewModelImple {
         // reset 없이 idle로 안 돌아가면 다음 한도 초과 때 상위의 false→true 재전이 감지가 막혀 시트가 안 뜬다
         self.orchestrationUsecase.reset()
         self.listener?.aiAgentCommandDidRequestPaywall()
+    }
+
+    func openNotificationSetting() {
+        self.router?.openSystemSetting()
     }
 }
 
@@ -167,5 +174,9 @@ extension AIAgentCommandViewModelImple {
             .map { $0 as BillingUserPlan? }
             .prepend(nil)
             .eraseToAnyPublisher()
+    }
+
+    var isNotificationPermissionDenied: AnyPublisher<Bool, Never> {
+        return self.orchestrationUsecase.isNotificationPermissionDenied
     }
 }

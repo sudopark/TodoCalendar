@@ -28,10 +28,12 @@ protocol AIAgentImageCommandViewModel: AnyObject, Sendable {
     func send(text: String, additionalInstruction: String)
     func close()
     func dismissByGesture()
+    func openNotificationSetting()
 
     var stage: AnyPublisher<AIAgentImageCommandStage, Never> { get }
     var usage: AnyPublisher<AIAgentUsage, Never> { get }
     var currentUserPlan: AnyPublisher<BillingUserPlan?, Never> { get }
+    var isNotificationPermissionDenied: AnyPublisher<Bool, Never> { get }
 }
 
 
@@ -75,6 +77,7 @@ extension AIAgentImageCommandViewModelImple {
 
     func prepare() {
         self.aiAgentOrchestrationUsecase.loadUsage()
+        self.aiAgentOrchestrationUsecase.refreshNotificationPermissionStatus()
         self.startRecognize()
     }
 
@@ -135,6 +138,10 @@ extension AIAgentImageCommandViewModelImple {
         self.recognizeTask = nil
         self.aiAgentOrchestrationUsecase.enterVoiceInput()
     }
+
+    func openNotificationSetting() {
+        self.router?.openSystemSetting()
+    }
 }
 
 
@@ -155,6 +162,10 @@ extension AIAgentImageCommandViewModelImple {
             .map { $0 as BillingUserPlan? }
             .prepend(nil)
             .eraseToAnyPublisher()
+    }
+
+    var isNotificationPermissionDenied: AnyPublisher<Bool, Never> {
+        return self.aiAgentOrchestrationUsecase.isNotificationPermissionDenied
     }
 }
 

@@ -308,6 +308,42 @@ extension AIAgentCommandViewModelImpleTests {
 }
 
 
+// MARK: - 알림 권한 거부 안내 (#998)
+
+extension AIAgentCommandViewModelImpleTests {
+
+    func testViewModel_whenPrepare_refreshNotificationPermissionStatus() {
+        // given
+        let viewModel = self.makeViewModel()
+        // when
+        viewModel.prepare()
+        // then
+        XCTAssertEqual(self.stubAgent.didRefreshNotificationPermissionStatus, true)
+    }
+
+    func testViewModel_relayNotificationPermissionDenied() {
+        // given
+        let viewModel = self.makeViewModel()
+        let expect = expectation(description: "알림 권한 거부 상태를 릴레이한다")
+        // when
+        let denied = self.waitFirstOutput(expect, for: viewModel.isNotificationPermissionDenied.dropFirst()) {
+            self.stubAgent.isNotificationPermissionDeniedSubject.send(true)
+        }
+        // then
+        XCTAssertEqual(denied, true)
+    }
+
+    func testViewModel_whenOpenNotificationSetting_routeToSystemSetting() {
+        // given
+        let viewModel = self.makeViewModel()
+        // when
+        viewModel.openNotificationSetting()
+        // then
+        XCTAssertEqual(self.spyRouter.didOpenSystemSetting, true)
+    }
+}
+
+
 // MARK: - 구매 후 usage 재조회 릴레이 (#739)
 
 extension AIAgentCommandViewModelImpleTests {

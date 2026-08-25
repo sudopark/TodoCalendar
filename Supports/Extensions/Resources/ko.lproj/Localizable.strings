@@ -638,6 +638,7 @@
 "aiAgent::usage::topupRemaining" = "추가 크레딧 %@ 남음";
 "aiAgent::usage::planChangeScheduled" = "%1$@부터 %2$@ 플랜으로 바뀌어요";
 "aiAgent::usage::resetsIn" = "%@ 뒤에 다시 쓸 수 있어요";
+"aiAgent::notificationPermissionDenied::message" = "AI 결과를 받으려면 설정에서 알림을 켜 주세요.";
 "aiAgent::stop::confirm::title" = "처리를 중지할까요?";
 "aiAgent::stop::confirm::message" = "중지하면 진행 중인 작업이 사라지고 다시 시작할 수 없어요.";
 "aiAgent::confirm::countdown" = "안에 승인해 주세요";

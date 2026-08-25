@@ -23,6 +23,7 @@ import CommonPresentation
     var commandState: AIAgentCommandState?
     var usage: AIAgentUsage?
     var userPlan: BillingUserPlan?
+    var isNotificationPermissionDenied: Bool = false
 
     func bind(_ viewModel: any AIAgentCommandViewModel) {
         guard self.didBind == false else { return }
@@ -42,6 +43,11 @@ import CommonPresentation
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] in self?.userPlan = $0 })
             .store(in: self.cancellables)
+
+        viewModel.isNotificationPermissionDenied
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] in self?.isNotificationPermissionDenied = $0 })
+            .store(in: self.cancellables)
     }
 }
 
@@ -57,6 +63,7 @@ final class AIAgentCommandViewEventHandler: Observable {
     var acknowledge: () -> Void = { }
     var close: () -> Void = { }
     var showPlans: () -> Void = { }
+    var openNotificationSetting: () -> Void = { }
 
     func bind(_ viewModel: any AIAgentCommandViewModel) {
         self.prepare = viewModel.prepare
@@ -66,6 +73,7 @@ final class AIAgentCommandViewEventHandler: Observable {
         self.acknowledge = viewModel.acknowledge
         self.close = viewModel.close
         self.showPlans = viewModel.showPlans
+        self.openNotificationSetting = viewModel.openNotificationSetting
     }
 }
 
@@ -153,6 +161,13 @@ struct AIAgentCommandStageView: View {
                         .eventHandler(\.onClose) {
                             self.eventHandlers.close()
                         }
+
+                    if self.state.isNotificationPermissionDenied {
+                        AIAgentNotificationPermissionNoticeView()
+                            .eventHandler(\.onTap) {
+                                self.eventHandlers.openNotificationSetting()
+                            }
+                    }
 
                     if let usage = state.usage, usage.dailyLimit > 0 {
                         AIAgentUsageGaugeView(usage: usage, userPlan: state.userPlan)

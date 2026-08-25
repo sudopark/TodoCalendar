@@ -17,6 +17,7 @@ import CommonPresentation
     fileprivate var actionTaken: Bool = false
     var usage: AIAgentUsage?
     var userPlan: BillingUserPlan?
+    var isNotificationPermissionDenied: Bool = false
     @ObservationIgnored private var didBind = false
     @ObservationIgnored private let cancellables = CancelBag()
 
@@ -33,6 +34,11 @@ import CommonPresentation
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] in self?.userPlan = $0 })
             .store(in: self.cancellables)
+
+        viewModel.isNotificationPermissionDenied
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] in self?.isNotificationPermissionDenied = $0 })
+            .store(in: self.cancellables)
     }
 }
 
@@ -46,6 +52,7 @@ final class AIAgentKeyboardInputEventHandler: Observable {
     var stop: () -> Void = { }
     var close: () -> Void = { }
     var dismissByGesture: () -> Void = { }
+    var openNotificationSetting: () -> Void = { }
 
     func bind(_ viewModel: any AIAgentKeyboardInputViewModel) {
         self.prepare = viewModel.prepare
@@ -53,6 +60,7 @@ final class AIAgentKeyboardInputEventHandler: Observable {
         self.stop = viewModel.stop
         self.close = viewModel.close
         self.dismissByGesture = viewModel.dismissByGesture
+        self.openNotificationSetting = viewModel.openNotificationSetting
     }
 }
 
@@ -112,6 +120,13 @@ private struct AIAgentKeyboardInputView: View {
                     .eventHandler(\.onClose) {
                         self.eventHandler.close()
                     }
+
+                if self.state.isNotificationPermissionDenied {
+                    AIAgentNotificationPermissionNoticeView()
+                        .eventHandler(\.onTap) {
+                            self.eventHandler.openNotificationSetting()
+                        }
+                }
 
                 if let usage = state.usage, usage.dailyLimit > 0 {
                     AIAgentUsageGaugeView(usage: usage, userPlan: state.userPlan)
