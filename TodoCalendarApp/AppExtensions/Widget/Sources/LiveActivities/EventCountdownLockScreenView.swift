@@ -21,33 +21,26 @@ struct EventCountdownLockScreenView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(alignment: .center, spacing: 12) {
-                EventCountdownRingBadge(model: model, diameter: 34)
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(alignment: .center, spacing: 8) {
+                EventCountdownSymbolBadge(diameter: 20)
 
-                HStack(alignment: .center, spacing: 10) {
-                    EventCountdownTagColorBar(color: model.tagColor, width: 4)
-
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(model.eventName)
-                            .font(.system(size: 17, weight: .semibold))
-                            .lineLimit(1)
-                            .truncationMode(.tail)
-                            .foregroundStyle(.primary)
-
-                        EventCountdownTimeAndSubtitleText(model: model, font: .system(size: 13))
-                    }
-                }
-                .layoutPriority(1)
-
-                Spacer(minLength: 0)
+                // 이름 쪽만 무한 확장을 허용한다 — HStack이 덜 유연한 카운트다운에 고유 폭을 먼저 준다.
+                EventCountdownEventNameText(model: model)
+                    .frame(maxWidth: .infinity, alignment: .leading)
 
                 EventCountdownTimerText(
                     model: model, isStale: isStale,
-                    liveFont: .system(size: 30, weight: .semibold),
-                    staleFont: .system(size: 17)
+                    liveFont: .system(size: 24, weight: .semibold),
+                    staleFont: .system(size: 15)
                 )
+                // 폭이 모자라면 Text(timerInterval:)은 말줄임이 아니라 자릿수를 --로 대체한다 — 최대 표기 "23:59:59" 폭을 바닥으로 깐다.
+                .frame(minWidth: 104, alignment: .trailing)
             }
+
+            EventCountdownTimeAndSubtitleText(model: model, font: .system(size: 12))
+
+            EventCountdownProgressBar(model: model)
 
             Divider()
 
@@ -93,20 +86,57 @@ struct EventCountdownTimerText: View {
     }
 }
 
-struct EventCountdownTagColorBar: View {
+struct EventCountdownProgressBar: View {
 
-    private let color: Color
-    private let width: CGFloat
-
-    init(color: Color, width: CGFloat) {
-        self.color = color
-        self.width = width
+    private let model: EventCountdownActivityViewModel
+    init(model: EventCountdownActivityViewModel) {
+        self.model = model
     }
 
     var body: some View {
-        RoundedRectangle(cornerRadius: width / 2)
-            .fill(color)
-            .frame(width: width)
+        // 만료 후에는 timerInterval range가 역전돼 트랩하므로 바 자체를 그리지 않는다.
+        if model.eventDate > .now, model.startDate < model.eventDate {
+            ProgressView(timerInterval: model.startDate...model.eventDate, countsDown: true) {
+                EmptyView()
+            } currentValueLabel: {
+                EmptyView()
+            }
+            .progressViewStyle(.linear)
+            .tint(model.tagColor)
+        }
+    }
+}
+
+struct EventCountdownEventNameText: View {
+
+    private let model: EventCountdownActivityViewModel
+    init(model: EventCountdownActivityViewModel) {
+        self.model = model
+    }
+
+    var body: some View {
+        Text(model.eventName)
+            .font(.system(size: 14, weight: .medium))
+            .lineLimit(1)
+            .truncationMode(.tail)
+            .foregroundStyle(.primary)
+    }
+}
+
+struct EventCountdownTitleBlock: View {
+
+    private let model: EventCountdownActivityViewModel
+    init(model: EventCountdownActivityViewModel) {
+        self.model = model
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            EventCountdownEventNameText(model: model)
+
+            EventCountdownTimeAndSubtitleText(model: model, font: .system(size: 12))
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
@@ -121,11 +151,15 @@ struct EventCountdownTimeAndSubtitleText: View {
     }
 
     var body: some View {
-        HStack(spacing: 5) {
+        HStack(spacing: 6) {
+            Circle()
+                .fill(model.tagColor)
+                .frame(width: 7, height: 7)
+
             Text(model.eventTimeText)
 
             if let subtitle = model.subtitle {
-                Text(verbatim: "|")
+                Text(verbatim: "·")
 
                 Text(subtitle)
                     .lineLimit(1)
@@ -163,5 +197,6 @@ struct EventCountdownActionButtonRow: View {
             }
         }
         .buttonStyle(.bordered)
+        .controlSize(.small)
     }
 }

@@ -26,7 +26,7 @@ struct EventCountdownLiveActivity: Widget {
 
             return DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
-                    EventCountdownRingBadge(model: model, diameter: 26)
+                    EventCountdownSymbolBadge(diameter: 26)
                         // 아일랜드 좌측 라운딩에 배지가 물려 잘린다 — 안쪽으로 들여 피한다.
                         .padding(.leading, 6)
                 }
@@ -43,8 +43,10 @@ struct EventCountdownLiveActivity: Widget {
 
                 // leading·trailing은 카메라 하우징 양옆이라 폭이 좁다 — 말줄임이 나는 텍스트는 전체 폭인 bottom에 둔다.
                 DynamicIslandExpandedRegion(.bottom) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        EventCountdownExpandedTextBlock(model: model)
+                    VStack(alignment: .leading, spacing: 4) {
+                        EventCountdownTitleBlock(model: model)
+
+                        EventCountdownProgressBar(model: model)
 
                         EventCountdownActionButtonRow(model: model)
                     }
@@ -63,34 +65,6 @@ struct EventCountdownLiveActivity: Widget {
             }
             .widgetURL(model.deepLink)
         }
-    }
-}
-
-
-// MARK: - 다이나믹아일랜드 조각
-
-private struct EventCountdownExpandedTextBlock: View {
-
-    private let model: EventCountdownActivityViewModel
-    init(model: EventCountdownActivityViewModel) {
-        self.model = model
-    }
-
-    var body: some View {
-        HStack(alignment: .center, spacing: 8) {
-            EventCountdownTagColorBar(color: model.tagColor, width: 3)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(model.eventName)
-                    .font(.system(size: 15, weight: .semibold))
-                    .lineLimit(1)
-                    .truncationMode(.tail)
-                    .foregroundStyle(.primary)
-
-                EventCountdownTimeAndSubtitleText(model: model, font: .system(size: 12))
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
@@ -119,11 +93,11 @@ private let previewPastEventState = EventCountdownActivityAttributes.State(
     tagColorHex: "#2FB457", eventDate: .now.addingTimeInterval(-600), startDate: .now.addingTimeInterval(-4000)
 )
 
-/// 링이 실제로 줄어드는 게 몇 초 안에 보이는 짧은 케이스.
+/// 진행 바가 실제로 차오르는 게 몇 초 안에 보이는 짧은 케이스.
 private let previewShortRemainState = EventCountdownActivityAttributes.State(
     eventName: "타이머 확인", eventTimeText: "곧",
     tagColorHex: "#2FB457", eventDate: .now.addingTimeInterval(30), startDate: .now.addingTimeInterval(-30),
-    placeName: "링 테스트"
+    placeName: "진행 바 테스트"
 )
 
 #Preview("잠금화면", as: .content, using: EventCountdownActivityAttributes(target: .todo(id: "preview"))) {

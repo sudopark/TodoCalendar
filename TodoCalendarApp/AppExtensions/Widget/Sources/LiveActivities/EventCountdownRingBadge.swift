@@ -9,6 +9,44 @@
 import SwiftUI
 
 
+/// 색은 배치하는 쪽이 정한다 — 배경 위 대비가 영역마다 달라서다.
+struct EventCountdownAppSymbol: View {
+
+    private let diameter: CGFloat
+    init(diameter: CGFloat) {
+        self.diameter = diameter
+    }
+
+    var body: some View {
+        Image("app_symbol")
+            .resizable()
+            .renderingMode(.template)
+            .scaledToFit()
+            .frame(width: diameter, height: diameter)
+    }
+}
+
+/// 잠금화면·아일랜드 확장형 전용 — 잔량은 진행 바가 맡으므로 로고만 노출한다.
+struct EventCountdownSymbolBadge: View {
+
+    private let diameter: CGFloat
+    init(diameter: CGFloat) {
+        self.diameter = diameter
+    }
+
+    var body: some View {
+        Circle()
+            // 아일랜드(검정)·잠금화면(밝은 머티리얼) 양쪽에서 보이려면 적응색이어야 한다.
+            .fill(.primary.opacity(0.12))
+            .frame(width: diameter, height: diameter)
+            .overlay {
+                EventCountdownAppSymbol(diameter: diameter * 0.56)
+                    .foregroundStyle(.primary)
+            }
+    }
+}
+
+/// compact·minimal 전용 — 진행 바를 놓을 자리가 없어 링이 유일한 잔량 표현이다.
 struct EventCountdownRingBadge: View {
 
     private let model: EventCountdownActivityViewModel
@@ -23,11 +61,7 @@ struct EventCountdownRingBadge: View {
 
     var body: some View {
         ZStack {
-            Image("app_symbol")
-                .resizable()
-                .renderingMode(.template)
-                .scaledToFit()
-                .frame(width: symbolDiameter, height: symbolDiameter)
+            EventCountdownAppSymbol(diameter: symbolDiameter)
                 .foregroundStyle(.secondary)
 
             remainRing
