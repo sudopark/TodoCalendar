@@ -18,17 +18,20 @@ import Extensions
 @testable import Domain
 
 
-class AIAgentOrchestrationUsecaseImpleTests: PublisherWaitable {
+class AIAgentOrchestrationUsecaseImpleTests: PublisherWaitable, AsyncEffectWaitable {
 
     var cancelBag: Set<AnyCancellable>! = []
     private var stubCommand: StubAICommandUsecase!
     private var stubUsage: StubAIAgentUsageUsecase!
     private var stubSpeech: StubSpeechRecognizeUsecase!
     private var stubSync: StubEventSyncUsecase!
+    private var stubNotificationPermission: StubNotificationPermissionUsecase!
 
     private func makeUsecase(
         shouldFail: Bool = false,
-        isCreditExhausted: Bool = false
+        isCreditExhausted: Bool = false,
+        notificationStatus: NotificationAuthorizationStatus = .authorized,
+        shouldGrantNotification: Bool = true
     ) -> AIAgentOrchestrationUsecaseImple {
         self.stubCommand = .init()
         self.stubCommand.shouldFail = shouldFail
@@ -36,12 +39,22 @@ class AIAgentOrchestrationUsecaseImpleTests: PublisherWaitable {
         self.stubUsage.stubIsCreditExhausted = isCreditExhausted
         self.stubSpeech = .init()
         self.stubSync = .init()
+        self.stubNotificationPermission = .init()
+        self.stubNotificationPermission.stubAuthorizationStatusCheckResult = .success(notificationStatus)
+        self.stubNotificationPermission.stubRequestPermissionResult = .success(shouldGrantNotification)
         return AIAgentOrchestrationUsecaseImple(
             commandUsecase: self.stubCommand,
             usageUsecase: self.stubUsage,
             speechRecognizeUsecase: self.stubSpeech,
-            eventSyncUsecase: self.stubSync
+            eventSyncUsecase: self.stubSync,
+            notificationPermissionUsecase: self.stubNotificationPermission
         )
+    }
+
+    private func makeUsecaseWithNotificationCheckFailure() -> AIAgentOrchestrationUsecaseImple {
+        let usecase = self.makeUsecase()
+        self.stubNotificationPermission.stubAuthorizationStatusCheckResult = .failure(RuntimeError("check fail"))
+        return usecase
     }
 
     private func makeUsecaseWithCommandJob(_ job: AIJob) -> AIAgentOrchestrationUsecaseImple {
@@ -849,6 +862,36 @@ private final class StubAIAgentUsageUsecase: AIAgentUsageUsecase, @unchecked Sen
     }
 }
 
+// 권한 응답 도착 시점을 테스트가 정하는 게이트 — 응답 전/후 동작을 결정적으로 가른다
+private final class PermissionGate: @unchecked Sendable {
+
+    private let lock = NSLock()
+    private var continuation: CheckedContinuation<Void, Never>?
+    private var isOpened = false
+
+    func wait() async {
+        await withCheckedContinuation { continuation in
+            self.lock.lock()
+            if self.isOpened {
+                self.lock.unlock()
+                continuation.resume()
+            } else {
+                self.continuation = continuation
+                self.lock.unlock()
+            }
+        }
+    }
+
+    func open() {
+        self.lock.lock()
+        let continuation = self.continuation
+        self.continuation = nil
+        self.isOpened = true
+        self.lock.unlock()
+        continuation?.resume()
+    }
+}
+
 private final class StubSpeechRecognizeUsecase: SpeechRecognizeUsecase, @unchecked Sendable {
 
     let recognizeResultSubject = PassthroughSubject<Result<SpeechRecognizeResult, any Error>, Never>()
@@ -890,7 +933,7 @@ extension AIAgentOrchestrationUsecaseImpleTests {
             usecase.enterVoiceInput()
         }
         // then
-        #expect(self.stubSpeech.didStartListening == true)
+        try await self.waitEffect("음성 인식이 시작됨") { self.stubSpeech.didStartListening }
         if case .listening(.voice) = state {} else {
             Issue.record("expected listening(.voice), got \(String(describing: state))")
         }
@@ -1151,20 +1194,23 @@ extension AIAgentOrchestrationUsecaseImpleTests {
             usecase.enterVoiceInput()
         }
         // then — .listening(.voice) 전환 + speech 시작
-        #expect(self.stubSpeech.didStartListening == true)
+        try await self.waitEffect("음성 인식이 시작됨") { self.stubSpeech.didStartListening }
         if case .listening(.voice) = state {} else {
             Issue.record("expected listening(.voice), got \(String(describing: state))")
         }
     }
 
     // 이미 .listening(.voice) 상태에서 enterVoiceInput → 조용히 무시, speech 재시작 없음
-    @Test func usecase_enterVoiceInput_alreadyVoice_doesNotRestartSpeech() {
+    @Test func usecase_enterVoiceInput_alreadyVoice_doesNotRestartSpeech() async throws {
         // given — idle에서 enterVoiceInput으로 .listening(.voice)
         let usecase = self.makeUsecaseInIdle()
         usecase.enterVoiceInput()
+        try await self.waitEffect("첫 인식 시작이 도달") { self.stubSpeech.startListeningCount == 1 }
         // when — 이미 voice-listening 상태에서 재호출
         usecase.enterVoiceInput()
-        // then — 재진입이 조용히 무시돼 startListening은 첫 번째 한 번만
+        // then — 재진입이 조용히 무시돼 startListening은 첫 번째 한 번만.
+        // 뒤늦은 두 번째 호출을 놓치지 않게 정착 시간을 두고 다시 본다
+        try await Task.sleep(for: .milliseconds(50))
         #expect(self.stubSpeech.startListeningCount == 1)
     }
 }
@@ -1199,6 +1245,7 @@ extension AIAgentOrchestrationUsecaseImpleTests {
         // given — 음성 입력 → 키보드 전환
         let usecase = self.makeUsecaseInIdle()
         usecase.enterVoiceInput()          // .listening(.voice), startListening 1회
+        try await self.waitEffect("첫 인식 시작이 도달") { self.stubSpeech.startListeningCount == 1 }
         usecase.enterKeyboardInput()       // .listening(.keyboard), stopListening
         let expect = expectConfirm("keyboard 닫기 → voice 복귀")
         // when — 키보드 시트 닫힘(dismissByGesture) → enterVoiceInput
@@ -1206,7 +1253,7 @@ extension AIAgentOrchestrationUsecaseImpleTests {
             usecase.enterVoiceInput()
         }
         // then — .listening(.voice) 복귀 + speech 재시작 (2번째 start)
-        #expect(self.stubSpeech.startListeningCount == 2)
+        try await self.waitEffect("음성 인식이 재시작됨") { self.stubSpeech.startListeningCount == 2 }
         if case .listening(.voice) = state {} else {
             Issue.record("expected listening(.voice), got \(String(describing: state))")
         }
@@ -1786,7 +1833,7 @@ extension AIAgentOrchestrationUsecaseImpleTests {
         guard case .listening(let inputMode) = state
         else { Issue.record("listening 상태가 아니다"); return }
         #expect(inputMode == .voice)
-        #expect(self.stubSpeech.didStartListening == true)
+        try await self.waitEffect("음성 인식이 시작됨") { self.stubSpeech.didStartListening }
     }
 }
 
@@ -1817,5 +1864,191 @@ extension AIAgentOrchestrationUsecaseImpleTests {
         let state = try await self.firstOutput(expect, for: usecase.state)
         guard case .processing = state
         else { Issue.record("processing 상태가 아니다: \(String(describing: state))"); return }
+    }
+}
+
+
+// MARK: - 알림 권한
+
+extension AIAgentOrchestrationUsecaseImpleTests {
+
+    // 마이크·음성인식 알럿보다 알림 알럿이 먼저 뜨려면, 권한 응답이 오기 전엔 인식이 시작되면 안 된다
+    @Test func usecase_whenEnterVoiceInput_notStartRecognizingUntilNotificationPermissionResolved() async throws {
+        // given — 권한 응답을 게이트로 잡아둔다
+        let gate = PermissionGate()
+        let usecase = self.makeUsecase(notificationStatus: .notDetermined)
+        self.stubNotificationPermission.requestPermissionGate = { await gate.wait() }
+        // when
+        usecase.enterVoiceInput()
+        try await self.waitEffect("알림 권한 요청이 도달") {
+            self.stubNotificationPermission.didRequestPermission == true
+        }
+        // then — 응답 전이라 인식은 아직 시작되지 않았다
+        #expect(self.stubSpeech.didStartListening == false)
+        // when — 권한 응답 도착
+        gate.open()
+        // then
+        try await self.waitEffect("응답 뒤에야 인식이 시작됨") { self.stubSpeech.didStartListening }
+    }
+
+    // 권한 응답을 기다리는 사이 취소하면 뒤늦은 응답이 인식을 시작시키지 않는다
+    @Test func usecase_whenStopInputBeforeNotificationPermissionResolved_notStartRecognizing() async throws {
+        // given
+        let gate = PermissionGate()
+        let usecase = self.makeUsecase(notificationStatus: .notDetermined)
+        self.stubNotificationPermission.requestPermissionGate = { await gate.wait() }
+        usecase.enterVoiceInput()
+        try await self.waitEffect("알림 권한 요청이 도달") {
+            self.stubNotificationPermission.didRequestPermission == true
+        }
+        // when — 응답 도착 전에 취소
+        usecase.stopInput()
+        gate.open()
+        // then — 뒤늦은 응답이 인식을 시작시키지 않는다
+        try await Task.sleep(for: .milliseconds(50))
+        #expect(self.stubSpeech.didStartListening == false)
+    }
+
+    @Test func usecase_whenEnterKeyboardInput_notCheckNotificationPermission() async throws {
+        // given — 키보드 전환은 listening 진입 이후라 알림 권한을 다시 건드리지 않는다
+        let expect = expectConfirm("키보드 전환에는 값 변화 없음")
+        expect.count = 0
+        expect.timeout = .milliseconds(100)
+        let usecase = self.makeUsecase(notificationStatus: .notDetermined, shouldGrantNotification: false)
+        // when
+        let values = try await self.outputs(expect, for: usecase.isNotificationPermissionDenied.dropFirst()) {
+            usecase.enterKeyboardInput()
+        }
+        // then
+        #expect(values.isEmpty)
+        #expect(self.stubNotificationPermission.didCheckAuthorizationStatus == nil)
+    }
+
+    @Test func usecase_whenEnterImageInput_notCheckNotificationPermission() async throws {
+        // given — 이미지 전환도 listening 진입 이후라 알림 권한을 다시 건드리지 않는다
+        let expect = expectConfirm("이미지 전환에는 값 변화 없음")
+        expect.count = 0
+        expect.timeout = .milliseconds(100)
+        let usecase = self.makeUsecase(notificationStatus: .notDetermined, shouldGrantNotification: false)
+        // when
+        let values = try await self.outputs(expect, for: usecase.isNotificationPermissionDenied.dropFirst()) {
+            usecase.enterImageInput()
+        }
+        // then
+        #expect(values.isEmpty)
+        #expect(self.stubNotificationPermission.didCheckAuthorizationStatus == nil)
+    }
+
+    @Test func usecase_whenNotificationPermissionRequestDenied_emitDenied() async throws {
+        // given
+        let expect = expectConfirm("notDetermined + 거부 → isNotificationPermissionDenied true 방출")
+        expect.count = 2
+        let usecase = self.makeUsecase(notificationStatus: .notDetermined, shouldGrantNotification: false)
+        // when
+        let values = try await self.outputs(expect, for: usecase.isNotificationPermissionDenied) {
+            usecase.enterVoiceInput()
+        }
+        // then
+        #expect(values == [false, true])
+    }
+
+    @Test func usecase_whenNotificationPermissionAlreadyDenied_emitDeniedWithoutRequest() async throws {
+        // given
+        let expect = expectConfirm("이미 denied → 요청 없이 true 방출")
+        expect.count = 2
+        let usecase = self.makeUsecase(notificationStatus: .denied)
+        // when
+        let values = try await self.outputs(expect, for: usecase.isNotificationPermissionDenied) {
+            usecase.enterVoiceInput()
+        }
+        // then — true 방출이 도달한 시점 = 상태 판정이 끝난 시점이라 여기서 요청 여부를 단언해도 안전하다
+        #expect(values == [false, true])
+        #expect(self.stubNotificationPermission.didRequestPermission == nil)
+    }
+
+    @Test func usecase_whenNotificationPermissionAuthorized_notEmitDenied() async throws {
+        // given
+        let usecase = self.makeUsecase(notificationStatus: .authorized)
+        // when — authorized는 값이 바뀌지 않아 기다릴 조건이 없다. 조회 도달을 기다린 뒤 현재값을 본다
+        usecase.enterVoiceInput()
+        // then
+        try await self.waitEffect("알림 권한 조회가 도달") {
+            self.stubNotificationPermission.didCheckAuthorizationStatus == true
+        }
+        #expect(self.stubNotificationPermission.didRequestPermission == nil)
+        let expect = expectConfirm("false 유지")
+        let value = try await self.firstOutput(expect, for: usecase.isNotificationPermissionDenied)
+        #expect(value == false)
+    }
+
+    @Test func usecase_whenNotificationPermissionCheckFails_notEmitDenied() async throws {
+        // given
+        let usecase = self.makeUsecaseWithNotificationCheckFailure()
+        // when — throw 시 fail-open(false)이라 값이 바뀌지 않아 기다릴 조건이 없다. 조회 도달을 기다린 뒤 현재값을 본다
+        usecase.enterVoiceInput()
+        // then
+        try await self.waitEffect("알림 권한 조회가 도달") {
+            self.stubNotificationPermission.didCheckAuthorizationStatus == true
+        }
+        let expect = expectConfirm("체크 실패 → fail-open, false 유지")
+        let value = try await self.firstOutput(expect, for: usecase.isNotificationPermissionDenied)
+        #expect(value == false)
+    }
+
+    @Test func usecase_whenEnterVoiceInputBlockedByCreditExhausted_notCheckNotificationPermission() async throws {
+        // given — credit 가드가 알림 권한 호출보다 먼저 걸린다
+        let expect = expectConfirm("크레딧 소진 → failed 상태")
+        let usecase = self.makeUsecase(isCreditExhausted: true, notificationStatus: .notDetermined)
+        // when
+        let state = try await self.firstOutput(expect, for: usecase.state) {
+            usecase.enterVoiceInput()
+        }
+        // then — failed 도달 시점 = 가드가 이미 막은 뒤라 여기서 요청 여부를 단언해도 안전하다
+        guard case .failed(_, _, let errorCode) = state
+        else { Issue.record("failed 상태가 아니다: \(String(describing: state))"); return }
+        #expect(errorCode == .dailyLimitExceeded)
+        #expect(self.stubNotificationPermission.didRequestPermission == nil)
+    }
+
+    @Test func usecase_whenRefreshNotificationPermissionStatusWithDenied_emitDenied() async throws {
+        // given
+        let expect = expectConfirm("refresh + denied → true 방출")
+        expect.count = 2
+        let usecase = self.makeUsecase(notificationStatus: .denied)
+        // when
+        let values = try await self.outputs(expect, for: usecase.isNotificationPermissionDenied) {
+            usecase.refreshNotificationPermissionStatus()
+        }
+        // then
+        #expect(values == [false, true])
+    }
+
+    @Test func usecase_whenRefreshNotificationPermissionStatusWithNotDetermined_notRequestPermission() async throws {
+        // given
+        let usecase = self.makeUsecase(notificationStatus: .notDetermined)
+        // when — notDetermined는 refresh에서 요청하지 않아 값이 바뀌지 않는다. 조회 도달을 기다린 뒤 단언한다
+        usecase.refreshNotificationPermissionStatus()
+        // then
+        try await self.waitEffect("알림 권한 조회가 도달") {
+            self.stubNotificationPermission.didCheckAuthorizationStatus == true
+        }
+        #expect(self.stubNotificationPermission.didRequestPermission == nil)
+        let expect = expectConfirm("false 유지")
+        let value = try await self.firstOutput(expect, for: usecase.isNotificationPermissionDenied)
+        #expect(value == false)
+    }
+
+    @Test func usecase_whenEnterVoiceInputWithDeniedNotification_stillEnterListening() async throws {
+        // given
+        let usecase = self.makeUsecase(notificationStatus: .denied)
+        usecase.reset()
+        let expect = expectConfirm("권한 거부와 무관하게 listening 전이")
+        // when
+        let state = try await self.firstOutput(expect, for: usecase.state.dropFirst()) {
+            usecase.enterVoiceInput()
+        }
+        // then
+        guard case .listening(.voice) = state
+        else { Issue.record("listening(.voice) 상태가 아니다: \(String(describing: state))"); return }
     }
 }

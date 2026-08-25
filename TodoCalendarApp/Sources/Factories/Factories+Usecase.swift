@@ -515,7 +515,10 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
             commandUsecase: aiCommandUsecase,
             usageUsecase: aiUsageUsecase,
             speechRecognizeUsecase: speech,
-            eventSyncUsecase: self.eventSyncUsecase
+            eventSyncUsecase: self.eventSyncUsecase,
+            notificationPermissionUsecase: NotificationPermissionUsecaseImple(
+                notificationService: UNLocalNotificationServiceImple()
+            )
         )
 
         self.billingUsecase = BillingUsecaseImple(

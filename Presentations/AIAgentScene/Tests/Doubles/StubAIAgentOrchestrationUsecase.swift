@@ -19,6 +19,7 @@ final class StubAIAgentOrchestrationUsecase: AIAgentOrchestrationUsecase, @unche
     let recognizingTextSubject = PassthroughSubject<String, Never>()
     let voiceLevelSubject = PassthroughSubject<Float, Never>()
     let speechPermissionDeniedSubject = PassthroughSubject<Void, Never>()
+    let isNotificationPermissionDeniedSubject = CurrentValueSubject<Bool, Never>(false)
     private(set) var didPrepare = false
     private(set) var didEnterVoiceInput = false
     private(set) var didFinishVoiceInput = false
@@ -76,6 +77,11 @@ final class StubAIAgentOrchestrationUsecase: AIAgentOrchestrationUsecase, @unche
         self.didRefreshProcessingJob = true
     }
 
+    private(set) var didRefreshNotificationPermissionStatus: Bool?
+    func refreshNotificationPermissionStatus() {
+        self.didRefreshNotificationPermissionStatus = true
+    }
+
     var state: AnyPublisher<AIAgentState, Never> {
         self.stateSubject.compactMap { $0 }.eraseToAnyPublisher()
     }
@@ -90,5 +96,8 @@ final class StubAIAgentOrchestrationUsecase: AIAgentOrchestrationUsecase, @unche
     }
     var speechPermissionDenied: AnyPublisher<Void, Never> {
         self.speechPermissionDeniedSubject.eraseToAnyPublisher()
+    }
+    var isNotificationPermissionDenied: AnyPublisher<Bool, Never> {
+        self.isNotificationPermissionDeniedSubject.eraseToAnyPublisher()
     }
 }
