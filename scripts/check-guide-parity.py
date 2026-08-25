@@ -47,10 +47,16 @@ def parse(path):
     headings = [(len(hashes), title) for hashes, title in HEADING.findall(text)]
     return {
         "links": LINK.findall(text),
-        "images": sorted(IMG.findall(text)),
+        "images": sorted(image_name(url) for url in IMG.findall(text)),
         "levels": [level for level, _ in headings],
         "anchors": anchors_of(headings),
     }
+
+def image_name(url):
+    """스크린샷은 언어별로 `images/<lang>/` 아래 갈리므로 언어 세그먼트를 걷어내고 파일명만 본다 —
+    아직 촬영 안 된 언어는 en 이 있는 루트를 계속 가리켜서 URL 자체는 일치하지 않는다."""
+    return url.rsplit('/', 1)[-1]
+
 
 def guide_files(guide_dir):
     """검사 대상 파일 세트는 en 디렉토리가 정본 — 원고에 문서가 늘어도 이 스크립트를 고칠 필요가 없다."""
@@ -76,7 +82,7 @@ def check(guide_dir, files, lang):
             print(f"[{lang}] {name} link target mismatch: en={en_targets} {lang}={xx_targets}")
             file_ok = False
         if en["images"] != xx["images"]:
-            print(f"[{lang}] {name} image url mismatch: only-en={sorted(set(en['images'])-set(xx['images']))} only-{lang}={sorted(set(xx['images'])-set(en['images']))}")
+            print(f"[{lang}] {name} image set mismatch: only-en={sorted(set(en['images'])-set(xx['images']))} only-{lang}={sorted(set(xx['images'])-set(en['images']))}")
             file_ok = False
         if en["levels"] != xx["levels"]:
             print(f"[{lang}] {name} heading level sequence: en={en['levels']} {lang}={xx['levels']}")
