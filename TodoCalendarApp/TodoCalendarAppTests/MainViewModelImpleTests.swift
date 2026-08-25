@@ -680,6 +680,31 @@ extension MainViewModelImpleTests {
         XCTAssertNil(self.stubAIOrchestrationUsecase.didLoadUsage)
         withExtendedLifetime(viewModel) { }
     }
+
+    func testViewModel_whenEnterForeground_refreshNotificationPermissionStatus() {
+        // given
+        let viewModel = self.makeViewModelWithoutPrepare()
+
+        // when
+        NotificationCenter.default.post(
+            name: UIApplication.willEnterForegroundNotification, object: nil
+        )
+
+        // then
+        XCTAssertEqual(self.stubAIOrchestrationUsecase.didRefreshNotificationPermissionStatus, true)
+        withExtendedLifetime(viewModel) { }
+    }
+
+    func testViewModel_whenNotEnterForeground_notRefreshNotificationPermissionStatus() {
+        // given
+        let viewModel = self.makeViewModelWithoutPrepare()
+
+        // when
+
+        // then
+        XCTAssertNil(self.stubAIOrchestrationUsecase.didRefreshNotificationPermissionStatus)
+        withExtendedLifetime(viewModel) { }
+    }
 }
 
 

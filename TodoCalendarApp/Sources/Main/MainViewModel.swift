@@ -152,6 +152,7 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
                 self?.billingUsecase.recoverUnfinishedTransactions()
                 self?.aiAgentOrchestrationUsecase.refreshProcessingJobIfNeeded()
                 self?.aiAgentOrchestrationUsecase.loadUsage()
+                self?.aiAgentOrchestrationUsecase.refreshNotificationPermissionStatus()
                 self?.handleWillEnterForeground()
                 self?.legalNoticeUsecase.checkNoticeIsNeed()
             })
