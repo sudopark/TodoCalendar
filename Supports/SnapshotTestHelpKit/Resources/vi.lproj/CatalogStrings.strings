@@ -1,0 +1,42 @@
+/* 화면 카탈로그(app-catalog) 더미 텍스트 — 앱 번들에 실리지 않는다 */
+
+// MARK: - 캘린더 이벤트
+
+"catalog.event::holiday" = "Ngày Phong trào Độc lập";
+"catalog.event::project_kickoff" = "Khởi động dự án";
+"catalog.event::dentist" = "Nha sĩ";
+"catalog.event::trip" = "Chuyến đi Jeju";
+"catalog.event::design_review" = "Duyệt thiết kế";
+"catalog.event::dinner" = "Ăn tối với Sara";
+"catalog.event::sprint_planning" = "Lập kế hoạch sprint";
+"catalog.event::team_workshop" = "Workshop nhóm";
+"catalog.event::release_day" = "Ngày phát hành";
+"catalog.event::lunch" = "Ăn trưa với Sara";
+
+// MARK: - 할일
+
+"catalog.todo::tax_return" = "Nộp tờ khai thuế";
+"catalog.todo::reply_landlord" = "Trả lời chủ nhà";
+"catalog.todo::water_plants" = "Tưới cây";
+"catalog.todo::book_flight" = "Đặt vé máy bay";
+"catalog.todo::renew_passport" = "Gia hạn hộ chiếu";
+"catalog.todo::send_invoice" = "Gửi hóa đơn";
+"catalog.todo::cancel_subscription" = "Hủy gói đăng ký không dùng";
+"catalog.todo::return_books" = "Trả sách thư viện";
+
+// MARK: - 이벤트 상세
+
+"catalog.place::startup_hub" = "Seoul Startup Hub";
+"catalog.memo::wireframes" = "Mang theo bản wireframe đã in.";
+
+// MARK: - 이벤트 타입
+
+"catalog.tag::work" = "Công việc";
+"catalog.tag::family" = "Gia đình";
+"catalog.tag::health" = "Sức khỏe";
+"catalog.tag::study" = "Học tập";
+
+// MARK: - AI 빠른 입력
+
+"catalog.ai::command" = "ăn trưa với Sara thứ Sáu lúc 12 giờ";
+"catalog.ai::result" = "Đã thêm “Ăn trưa với Sara” vào thứ Sáu, 13 tháng 3 lúc 12:00.";

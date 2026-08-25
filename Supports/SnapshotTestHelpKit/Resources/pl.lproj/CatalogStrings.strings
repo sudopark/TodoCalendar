@@ -1,0 +1,42 @@
+/* 화면 카탈로그(app-catalog) 더미 텍스트 — 앱 번들에 실리지 않는다 */
+
+// MARK: - 캘린더 이벤트
+
+"catalog.event::holiday" = "Dzień Ruchu Niepodległościowego";
+"catalog.event::project_kickoff" = "Kick-off projektu";
+"catalog.event::dentist" = "Dentysta";
+"catalog.event::trip" = "Wyjazd na Jeju";
+"catalog.event::design_review" = "Przegląd projektu graficznego";
+"catalog.event::dinner" = "Kolacja z Sarą";
+"catalog.event::sprint_planning" = "Planowanie sprintu";
+"catalog.event::team_workshop" = "Warsztaty zespołowe";
+"catalog.event::release_day" = "Dzień wydania";
+"catalog.event::lunch" = "Obiad z Sarą";
+
+// MARK: - 할일
+
+"catalog.todo::tax_return" = "Złożyć zeznanie podatkowe";
+"catalog.todo::reply_landlord" = "Odpisać właścicielowi mieszkania";
+"catalog.todo::water_plants" = "Podlać kwiaty";
+"catalog.todo::book_flight" = "Zarezerwować lot";
+"catalog.todo::renew_passport" = "Wyrobić nowy paszport";
+"catalog.todo::send_invoice" = "Wysłać fakturę";
+"catalog.todo::cancel_subscription" = "Anulować nieużywaną subskrypcję";
+"catalog.todo::return_books" = "Oddać książki do biblioteki";
+
+// MARK: - 이벤트 상세
+
+"catalog.place::startup_hub" = "Seoul Startup Hub";
+"catalog.memo::wireframes" = "Zabrać wydrukowane makiety.";
+
+// MARK: - 이벤트 타입
+
+"catalog.tag::work" = "Praca";
+"catalog.tag::family" = "Rodzina";
+"catalog.tag::health" = "Zdrowie";
+"catalog.tag::study" = "Nauka";
+
+// MARK: - AI 빠른 입력
+
+"catalog.ai::command" = "obiad z Sarą w piątek w południe";
+"catalog.ai::result" = "„Obiad z Sarą” dodano na piątek 13 marca o 12:00.";

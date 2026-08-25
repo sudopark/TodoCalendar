@@ -1,0 +1,42 @@
+/* 화면 카탈로그(app-catalog) 더미 텍스트 — 앱 번들에 실리지 않는다 */
+
+// MARK: - 캘린더 이벤트
+
+"catalog.event::holiday" = "Ημέρα του Κινήματος Ανεξαρτησίας";
+"catalog.event::project_kickoff" = "Εκκίνηση έργου";
+"catalog.event::dentist" = "Οδοντίατρος";
+"catalog.event::trip" = "Ταξίδι στο Τζέτζου";
+"catalog.event::design_review" = "Επισκόπηση σχεδιασμού";
+"catalog.event::dinner" = "Δείπνο με τη Σάρα";
+"catalog.event::sprint_planning" = "Σχεδιασμός sprint";
+"catalog.event::team_workshop" = "Εργαστήριο ομάδας";
+"catalog.event::release_day" = "Ημέρα κυκλοφορίας";
+"catalog.event::lunch" = "Μεσημεριανό με τη Σάρα";
+
+// MARK: - 할일
+
+"catalog.todo::tax_return" = "Υποβολή φορολογικής δήλωσης";
+"catalog.todo::reply_landlord" = "Απάντηση στον ιδιοκτήτη";
+"catalog.todo::water_plants" = "Πότισμα των φυτών";
+"catalog.todo::book_flight" = "Κράτηση πτήσης";
+"catalog.todo::renew_passport" = "Ανανέωση διαβατηρίου";
+"catalog.todo::send_invoice" = "Αποστολή τιμολογίου";
+"catalog.todo::cancel_subscription" = "Ακύρωση αχρησιμοποίητης συνδρομής";
+"catalog.todo::return_books" = "Επιστροφή βιβλίων στη βιβλιοθήκη";
+
+// MARK: - 이벤트 상세
+
+"catalog.place::startup_hub" = "Seoul Startup Hub";
+"catalog.memo::wireframes" = "Να πάρω τα εκτυπωμένα wireframes.";
+
+// MARK: - 이벤트 타입
+
+"catalog.tag::work" = "Δουλειά";
+"catalog.tag::family" = "Οικογένεια";
+"catalog.tag::health" = "Υγεία";
+"catalog.tag::study" = "Μελέτη";
+
+// MARK: - AI 빠른 입력
+
+"catalog.ai::command" = "μεσημεριανό με τη Σάρα την Παρασκευή στις 12";
+"catalog.ai::result" = "Το «Μεσημεριανό με τη Σάρα» προστέθηκε την Παρασκευή 13 Μαρτίου στις 12:00.";

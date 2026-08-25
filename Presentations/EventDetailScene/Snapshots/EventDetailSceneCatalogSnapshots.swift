@@ -40,16 +40,16 @@ final class EventDetailSceneCatalogSnapshots: XCTestCase {
         ) { theme in
             let state = EventDetailViewState()
             state.eventDetailTypeModel = .todoCase()
-            state.enterName = "Design review"
-            state.selectedTag = .init(.default, "Default", "#088CDA")
+            state.enterName = "catalog.event::design_review".catalogLocalized()
+            state.selectedTag = .init(.default, "eventTag.defaults.default::name".localized(), "#088CDA")
             state.selectedTime = .period(
                 .init(self.start, .current), .init(self.end, .current)
             )
-            state.selectedRepeat = "Every 2 Weeks Thursday"
-            state.selectedNotificationTimeText = "10 minute(s) before the event"
-            state.enterPlaceName = "Seoul Startup Hub"
-            state.selectedPlace = .customPlace("Seoul Startup Hub")
-            state.memo = "Bring the printed wireframes."
+            state.selectedRepeat = "eventDetail.repeating.everySomeWeek:title".localized(with: 2)
+            state.selectedNotificationTimeText = "event_notification_setting::option_title::before_minutes".localized(with: 10)
+            state.enterPlaceName = "catalog.place::startup_hub".catalogLocalized()
+            state.selectedPlace = .customPlace("catalog.place::startup_hub".catalogLocalized())
+            state.memo = "catalog.memo::wireframes".catalogLocalized()
             state.isSavable = true
             return EventDetailView()
                 .environment(state)

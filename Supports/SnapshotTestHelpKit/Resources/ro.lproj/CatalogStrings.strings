@@ -1,0 +1,42 @@
+/* 화면 카탈로그(app-catalog) 더미 텍스트 — 앱 번들에 실리지 않는다 */
+
+// MARK: - 캘린더 이벤트
+
+"catalog.event::holiday" = "Ziua Mișcării de Independență";
+"catalog.event::project_kickoff" = "Startul proiectului";
+"catalog.event::dentist" = "Dentist";
+"catalog.event::trip" = "Călătorie în Jeju";
+"catalog.event::design_review" = "Revizuire de design";
+"catalog.event::dinner" = "Cină cu Sara";
+"catalog.event::sprint_planning" = "Planificarea sprintului";
+"catalog.event::team_workshop" = "Atelier de echipă";
+"catalog.event::release_day" = "Ziua lansării";
+"catalog.event::lunch" = "Prânz cu Sara";
+
+// MARK: - 할일
+
+"catalog.todo::tax_return" = "Depune declarația fiscală";
+"catalog.todo::reply_landlord" = "Răspunde proprietarului";
+"catalog.todo::water_plants" = "Udă plantele";
+"catalog.todo::book_flight" = "Rezervă biletul de avion";
+"catalog.todo::renew_passport" = "Reînnoiește pașaportul";
+"catalog.todo::send_invoice" = "Trimite factura";
+"catalog.todo::cancel_subscription" = "Anulează abonamentul nefolosit";
+"catalog.todo::return_books" = "Returnează cărțile la bibliotecă";
+
+// MARK: - 이벤트 상세
+
+"catalog.place::startup_hub" = "Seoul Startup Hub";
+"catalog.memo::wireframes" = "Ia wireframe-urile printate.";
+
+// MARK: - 이벤트 타입
+
+"catalog.tag::work" = "Muncă";
+"catalog.tag::family" = "Familie";
+"catalog.tag::health" = "Sănătate";
+"catalog.tag::study" = "Studiu";
+
+// MARK: - AI 빠른 입력
+
+"catalog.ai::command" = "prânz cu Sara vineri la ora 12";
+"catalog.ai::result" = "„Prânz cu Sara” a fost adăugat vineri, 13 martie, la 12:00.";

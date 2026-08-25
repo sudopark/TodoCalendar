@@ -1,0 +1,42 @@
+/* 화면 카탈로그(app-catalog) 더미 텍스트 — 앱 번들에 실리지 않는다 */
+
+// MARK: - 캘린더 이벤트
+
+"catalog.event::holiday" = "Dia del Moviment d'Independència";
+"catalog.event::project_kickoff" = "Inici del projecte";
+"catalog.event::dentist" = "Dentista";
+"catalog.event::trip" = "Viatge a Jeju";
+"catalog.event::design_review" = "Revisió de disseny";
+"catalog.event::dinner" = "Sopar amb la Sara";
+"catalog.event::sprint_planning" = "Planificació de l'sprint";
+"catalog.event::team_workshop" = "Taller d'equip";
+"catalog.event::release_day" = "Dia del llançament";
+"catalog.event::lunch" = "Dinar amb la Sara";
+
+// MARK: - 할일
+
+"catalog.todo::tax_return" = "Presentar la declaració";
+"catalog.todo::reply_landlord" = "Respondre al propietari";
+"catalog.todo::water_plants" = "Regar les plantes";
+"catalog.todo::book_flight" = "Reservar el vol";
+"catalog.todo::renew_passport" = "Renovar el passaport";
+"catalog.todo::send_invoice" = "Enviar la factura";
+"catalog.todo::cancel_subscription" = "Cancel·lar la subscripció que no faig servir";
+"catalog.todo::return_books" = "Tornar els llibres de la biblioteca";
+
+// MARK: - 이벤트 상세
+
+"catalog.place::startup_hub" = "Seoul Startup Hub";
+"catalog.memo::wireframes" = "Portar els wireframes impresos.";
+
+// MARK: - 이벤트 타입
+
+"catalog.tag::work" = "Feina";
+"catalog.tag::family" = "Família";
+"catalog.tag::health" = "Salut";
+"catalog.tag::study" = "Estudis";
+
+// MARK: - AI 빠른 입력
+
+"catalog.ai::command" = "dinar amb la Sara divendres al migdia";
+"catalog.ai::result" = "«Dinar amb la Sara» afegit al divendres 13 de març a les 12:00.";

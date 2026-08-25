@@ -1,0 +1,42 @@
+/* 화면 카탈로그(app-catalog) 더미 텍스트 — 앱 번들에 실리지 않는다 */
+
+// MARK: - 캘린더 이벤트
+
+"catalog.event::holiday" = "Giorno del Movimento d'indipendenza";
+"catalog.event::project_kickoff" = "Avvio del progetto";
+"catalog.event::dentist" = "Dentista";
+"catalog.event::trip" = "Viaggio a Jeju";
+"catalog.event::design_review" = "Revisione del design";
+"catalog.event::dinner" = "Cena con Sara";
+"catalog.event::sprint_planning" = "Pianificazione dello sprint";
+"catalog.event::team_workshop" = "Workshop di team";
+"catalog.event::release_day" = "Giorno del rilascio";
+"catalog.event::lunch" = "Pranzo con Sara";
+
+// MARK: - 할일
+
+"catalog.todo::tax_return" = "Presentare la dichiarazione dei redditi";
+"catalog.todo::reply_landlord" = "Rispondere al padrone di casa";
+"catalog.todo::water_plants" = "Annaffiare le piante";
+"catalog.todo::book_flight" = "Prenotare il volo";
+"catalog.todo::renew_passport" = "Rinnovare il passaporto";
+"catalog.todo::send_invoice" = "Inviare la fattura";
+"catalog.todo::cancel_subscription" = "Disdire l'abbonamento inutilizzato";
+"catalog.todo::return_books" = "Restituire i libri della biblioteca";
+
+// MARK: - 이벤트 상세
+
+"catalog.place::startup_hub" = "Seoul Startup Hub";
+"catalog.memo::wireframes" = "Portare i wireframe stampati.";
+
+// MARK: - 이벤트 타입
+
+"catalog.tag::work" = "Lavoro";
+"catalog.tag::family" = "Famiglia";
+"catalog.tag::health" = "Salute";
+"catalog.tag::study" = "Studio";
+
+// MARK: - AI 빠른 입력
+
+"catalog.ai::command" = "pranzo con Sara venerdì a mezzogiorno";
+"catalog.ai::result" = "«Pranzo con Sara» aggiunto a venerdì 13 marzo alle 12:00.";

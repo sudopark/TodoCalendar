@@ -1,0 +1,42 @@
+/* 화면 카탈로그(app-catalog) 더미 텍스트 — 앱 번들에 실리지 않는다 */
+
+// MARK: - 캘린더 이벤트
+
+"catalog.event::holiday" = "Deň hnutia za nezávislosť";
+"catalog.event::project_kickoff" = "Štart projektu";
+"catalog.event::dentist" = "Zubár";
+"catalog.event::trip" = "Cesta na Čedžu";
+"catalog.event::design_review" = "Design review";
+"catalog.event::dinner" = "Večera so Sárou";
+"catalog.event::sprint_planning" = "Plánovanie šprintu";
+"catalog.event::team_workshop" = "Tímový workshop";
+"catalog.event::release_day" = "Deň vydania";
+"catalog.event::lunch" = "Obed so Sárou";
+
+// MARK: - 할일
+
+"catalog.todo::tax_return" = "Podať daňové priznanie";
+"catalog.todo::reply_landlord" = "Odpovedať majiteľovi bytu";
+"catalog.todo::water_plants" = "Poliať kvety";
+"catalog.todo::book_flight" = "Rezervovať let";
+"catalog.todo::renew_passport" = "Obnoviť pas";
+"catalog.todo::send_invoice" = "Poslať faktúru";
+"catalog.todo::cancel_subscription" = "Zrušiť nepoužívané predplatné";
+"catalog.todo::return_books" = "Vrátiť knihy do knižnice";
+
+// MARK: - 이벤트 상세
+
+"catalog.place::startup_hub" = "Seoul Startup Hub";
+"catalog.memo::wireframes" = "Vziať vytlačené drôtené modely.";
+
+// MARK: - 이벤트 타입
+
+"catalog.tag::work" = "Práca";
+"catalog.tag::family" = "Rodina";
+"catalog.tag::health" = "Zdravie";
+"catalog.tag::study" = "Štúdium";
+
+// MARK: - AI 빠른 입력
+
+"catalog.ai::command" = "obed so Sárou v piatok napoludnie";
+"catalog.ai::result" = "„Obed so Sárou“ bol pridaný na piatok 13. marca o 12:00.";

@@ -1,0 +1,42 @@
+/* 화면 카탈로그(app-catalog) 더미 텍스트 — 앱 번들에 실리지 않는다 */
+
+// MARK: - 캘린더 이벤트
+
+"catalog.event::holiday" = "삼일절";
+"catalog.event::project_kickoff" = "프로젝트 킥오프";
+"catalog.event::dentist" = "치과";
+"catalog.event::trip" = "제주 여행";
+"catalog.event::design_review" = "디자인 리뷰";
+"catalog.event::dinner" = "사라랑 저녁";
+"catalog.event::sprint_planning" = "스프린트 계획";
+"catalog.event::team_workshop" = "팀 워크숍";
+"catalog.event::release_day" = "릴리즈 날";
+"catalog.event::lunch" = "사라랑 점심";
+
+// MARK: - 할일
+
+"catalog.todo::tax_return" = "세금 신고하기";
+"catalog.todo::reply_landlord" = "집주인에게 답장하기";
+"catalog.todo::water_plants" = "화분에 물 주기";
+"catalog.todo::book_flight" = "항공권 예약하기";
+"catalog.todo::renew_passport" = "여권 갱신하기";
+"catalog.todo::send_invoice" = "청구서 보내기";
+"catalog.todo::cancel_subscription" = "안 쓰는 구독 해지하기";
+"catalog.todo::return_books" = "도서관 책 반납하기";
+
+// MARK: - 이벤트 상세
+
+"catalog.place::startup_hub" = "서울 창업허브";
+"catalog.memo::wireframes" = "출력한 와이어프레임 챙기기.";
+
+// MARK: - 이벤트 타입
+
+"catalog.tag::work" = "업무";
+"catalog.tag::family" = "가족";
+"catalog.tag::health" = "건강";
+"catalog.tag::study" = "공부";
+
+// MARK: - AI 빠른 입력
+
+"catalog.ai::command" = "금요일 12시에 사라랑 점심";
+"catalog.ai::result" = "“사라랑 점심”을 3월 13일 금요일 오후 12시에 추가했어요.";

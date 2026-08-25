@@ -1,0 +1,42 @@
+/* 화면 카탈로그(app-catalog) 더미 텍스트 — 앱 번들에 실리지 않는다 */
+
+// MARK: - 캘린더 이벤트
+
+"catalog.event::holiday" = "Dan pokreta za nezavisnost";
+"catalog.event::project_kickoff" = "Početak projekta";
+"catalog.event::dentist" = "Zubar";
+"catalog.event::trip" = "Putovanje na Jeju";
+"catalog.event::design_review" = "Pregled dizajna";
+"catalog.event::dinner" = "Večera sa Sarom";
+"catalog.event::sprint_planning" = "Planiranje sprinta";
+"catalog.event::team_workshop" = "Timska radionica";
+"catalog.event::release_day" = "Dan izdanja";
+"catalog.event::lunch" = "Ručak sa Sarom";
+
+// MARK: - 할일
+
+"catalog.todo::tax_return" = "Predati poreznu prijavu";
+"catalog.todo::reply_landlord" = "Odgovoriti stanodavcu";
+"catalog.todo::water_plants" = "Zaliti biljke";
+"catalog.todo::book_flight" = "Rezervirati let";
+"catalog.todo::renew_passport" = "Obnoviti putovnicu";
+"catalog.todo::send_invoice" = "Poslati račun";
+"catalog.todo::cancel_subscription" = "Otkazati pretplatu koju ne koristim";
+"catalog.todo::return_books" = "Vratiti knjige u knjižnicu";
+
+// MARK: - 이벤트 상세
+
+"catalog.place::startup_hub" = "Seoul Startup Hub";
+"catalog.memo::wireframes" = "Ponijeti isprintane žičane modele.";
+
+// MARK: - 이벤트 타입
+
+"catalog.tag::work" = "Posao";
+"catalog.tag::family" = "Obitelj";
+"catalog.tag::health" = "Zdravlje";
+"catalog.tag::study" = "Učenje";
+
+// MARK: - AI 빠른 입력
+
+"catalog.ai::command" = "ručak sa Sarom u petak u podne";
+"catalog.ai::result" = "„Ručak sa Sarom” dodan je u petak 13. ožujka u 12:00.";

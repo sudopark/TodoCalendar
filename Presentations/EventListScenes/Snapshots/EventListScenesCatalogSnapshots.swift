@@ -41,9 +41,9 @@ final class EventListScenesCatalogSnapshots: XCTestCase {
             let lastMonth: TimeInterval = 1_770_690_600 // 2026-02-10 09:30 KST
             let lastYear: TimeInterval = 1_752_452_000  // 2025-07-14 KST
 
-            let recentNames = ["Water the plants", "Reply to the landlord", "Book the flight"]
-            let lastMonthNames = ["Renew the passport", "Send the invoice"]
-            let lastYearNames = ["Cancel the old subscription", "Return the library books"]
+            let recentNames = ["catalog.todo::water_plants".catalogLocalized(), "catalog.todo::reply_landlord".catalogLocalized(), "catalog.todo::book_flight".catalogLocalized()]
+            let lastMonthNames = ["catalog.todo::renew_passport".catalogLocalized(), "catalog.todo::send_invoice".catalogLocalized()]
+            let lastYearNames = ["catalog.todo::cancel_subscription".catalogLocalized(), "catalog.todo::return_books".catalogLocalized()]
 
             let recentEvents = recentNames.enumerated().map { idx, name in
                 DoneTodoEvent(

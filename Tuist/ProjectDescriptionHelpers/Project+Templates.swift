@@ -81,6 +81,7 @@ extension Project {
         destinations: Destinations,
         iOSTargetVersion: String,
         withSourceFile: Bool = true,
+        resources: ResourceFileElements? = nil,
         snapshotTests: Bool = false,
         dependencies: [TargetDependency] = [],
         customSetting: [String: SettingValue] = [:]
@@ -90,6 +91,7 @@ extension Project {
             destinations: destinations,
             iOSTargetVersion: iOSTargetVersion,
             withSourceFile: withSourceFile,
+            resources: resources,
             dependencies: dependencies,
             customSetting: customSetting
         )
@@ -176,6 +178,7 @@ extension Project {
         destinations: Destinations,
         iOSTargetVersion: String,
         withSourceFile: Bool,
+        resources: ResourceFileElements? = nil,
         dependencies: [TargetDependency] = [],
         customSetting: [String: SettingValue] = [:]
     )
@@ -189,7 +192,7 @@ extension Project {
                              deploymentTargets: .iOS(iOSTargetVersion),
                              infoPlist: .default,
                              sources: withSourceFile ? ["Sources/**"] : [],
-                             resources: [],
+                             resources: resources,
                              headers: Headers.headers(public: "\(name).h"),
                              dependencies: dependencies,
                              settings: .settings(
