@@ -664,6 +664,7 @@
 "aiAgent::usage::topupRemaining" = "%@ extra credits left";
 "aiAgent::usage::planChangeScheduled" = "Switching to the %2$@ plan on %1$@";
 "aiAgent::usage::resetsIn" = "Available again in %@";
+"aiAgent::notificationPermissionDenied::message" = "Turn on notifications in Settings to receive AI results.";
 "aiAgent::stop::confirm::title" = "Stop processing?";
 "aiAgent::stop::confirm::message" = "Stopping discards the task in progress, and it can't be resumed.";
 "aiAgent::confirm::countdown" = "left to approve";

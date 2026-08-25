@@ -145,3 +145,39 @@ extension AIAgentImageCommandViewModelImpleTests {
         #expect(self.spyRouter.didClosed != true)
     }
 }
+
+
+// MARK: - 알림 권한 거부 안내 (#998)
+
+extension AIAgentImageCommandViewModelImpleTests {
+
+    @Test func viewModel_whenPrepare_refreshNotificationPermissionStatus() {
+        // given
+        let viewModel = self.makeViewModel()
+        // when
+        viewModel.prepare()
+        // then
+        #expect(self.stubOrchestration.didRefreshNotificationPermissionStatus == true)
+    }
+
+    @Test func viewModel_relayNotificationPermissionDenied() async throws {
+        // given
+        let expect = expectConfirm("알림 권한 거부 상태를 릴레이한다")
+        let viewModel = self.makeViewModel()
+        // when
+        let denied = try await self.firstOutput(expect, for: viewModel.isNotificationPermissionDenied.dropFirst()) {
+            self.stubOrchestration.isNotificationPermissionDeniedSubject.send(true)
+        }
+        // then
+        #expect(denied == true)
+    }
+
+    @Test func viewModel_whenOpenNotificationSetting_routeToSystemSetting() {
+        // given
+        let viewModel = self.makeViewModel()
+        // when
+        viewModel.openNotificationSetting()
+        // then
+        #expect(self.spyRouter.didOpenSystemSetting == true)
+    }
+}

@@ -16,9 +16,11 @@ protocol AIAgentKeyboardInputViewModel: AnyObject, Sendable {
     func stop()
     func close()
     func dismissByGesture()
+    func openNotificationSetting()
 
     var usage: AnyPublisher<AIAgentUsage, Never> { get }
     var currentUserPlan: AnyPublisher<BillingUserPlan?, Never> { get }
+    var isNotificationPermissionDenied: AnyPublisher<Bool, Never> { get }
 }
 
 
@@ -40,6 +42,7 @@ final class AIAgentKeyboardInputViewModelImple: AIAgentKeyboardInputViewModel, @
 
     func prepare() {
         self.aiAgentOrchestrationUsecase.loadUsage()
+        self.aiAgentOrchestrationUsecase.refreshNotificationPermissionStatus()
     }
 
     func send(_ text: String) {
@@ -64,6 +67,10 @@ final class AIAgentKeyboardInputViewModelImple: AIAgentKeyboardInputViewModel, @
     func dismissByGesture() {
         self.aiAgentOrchestrationUsecase.enterVoiceInput()
     }
+
+    func openNotificationSetting() {
+        self.router?.openSystemSetting()
+    }
 }
 
 
@@ -82,5 +89,9 @@ extension AIAgentKeyboardInputViewModelImple {
             .map { $0 as BillingUserPlan? }
             .prepend(nil)
             .eraseToAnyPublisher()
+    }
+
+    var isNotificationPermissionDenied: AnyPublisher<Bool, Never> {
+        return self.aiAgentOrchestrationUsecase.isNotificationPermissionDenied
     }
 }

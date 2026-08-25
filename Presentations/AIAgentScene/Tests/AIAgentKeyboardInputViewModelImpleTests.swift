@@ -20,12 +20,15 @@ final class AIAgentKeyboardInputViewModelImpleTests: PublisherWaitable {
 
     var cancelBag: Set<AnyCancellable>! = .init()
     private let stubAgent: StubAIAgentOrchestrationUsecase = .init()
+    private let spyRouter = SpyAIAgentKeyboardInputRouter()
 
     private func makeViewModel(userPlan: BillingUserPlan? = nil) -> AIAgentKeyboardInputViewModelImple {
-        return AIAgentKeyboardInputViewModelImple(
+        let viewModel = AIAgentKeyboardInputViewModelImple(
             aiAgentOrchestrationUsecase: self.stubAgent,
             billingUsecase: StubBillingUsecase(stubUserPlan: userPlan)
         )
+        viewModel.router = self.spyRouter
+        return viewModel
     }
 }
 
@@ -72,5 +75,41 @@ extension AIAgentKeyboardInputViewModelImpleTests {
         let plans = try await self.outputs(expect, for: viewModel.currentUserPlan)
         // then
         #expect(plans.map { $0?.planId } == [nil, .standard])
+    }
+}
+
+
+// MARK: - 알림 권한 거부 안내 (#998)
+
+extension AIAgentKeyboardInputViewModelImpleTests {
+
+    @Test func viewModel_whenPrepare_refreshNotificationPermissionStatus() {
+        // given
+        let viewModel = self.makeViewModel()
+        // when
+        viewModel.prepare()
+        // then
+        #expect(self.stubAgent.didRefreshNotificationPermissionStatus == true)
+    }
+
+    @Test func viewModel_relayNotificationPermissionDenied() async throws {
+        // given
+        let expect = expectConfirm("알림 권한 거부 상태를 릴레이한다")
+        let viewModel = self.makeViewModel()
+        // when
+        let denied = try await self.firstOutput(expect, for: viewModel.isNotificationPermissionDenied.dropFirst()) {
+            self.stubAgent.isNotificationPermissionDeniedSubject.send(true)
+        }
+        // then
+        #expect(denied == true)
+    }
+
+    @Test func viewModel_whenOpenNotificationSetting_routeToSystemSetting() {
+        // given
+        let viewModel = self.makeViewModel()
+        // when
+        viewModel.openNotificationSetting()
+        // then
+        #expect(self.spyRouter.didOpenSystemSetting == true)
     }
 }
