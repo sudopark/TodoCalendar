@@ -79,6 +79,14 @@
 "dayname::friday:very_short" = "C";
 "dayname::saturday:very_short" = "C";
 
+"dayname::sunday:gender" = "m";
+"dayname::monday:gender" = "m";
+"dayname::tuesday:gender" = "m";
+"dayname::wednesday:gender" = "m";
+"dayname::thursday:gender" = "m";
+"dayname::friday:gender" = "m";
+"dayname::saturday:gender" = "m";
+
 
 // MARK: - event notification
 
@@ -196,14 +204,33 @@
 "eventDetail.repeating.everyYearSomeDay:title" = "Her yıl %@";
 "eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "Her yıl %@ (ay takvimi)";
 "eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "Her ayın son haftasının tüm günleri";
-"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "Her ayın ilk %@ günü";
-"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "Her ayın ikinci %@ günü";
-"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "Her ayın üçüncü %@ günü";
-"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "Her ayın dördüncü %@ günü";
-"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "Her ayın beşinci %@ günü";
-"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "Her ayın altıncı %@ günü";
-"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "Her ayın yedinci %@ günü";
-"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "Her ayın son %@ günü";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::m" = "Her ayın ilk %@ günü";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::f" = "Her ayın ilk %@ günü";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::n" = "Her ayın ilk %@ günü";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::m" = "Her ayın ikinci %@ günü";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::f" = "Her ayın ikinci %@ günü";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::n" = "Her ayın ikinci %@ günü";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::m" = "Her ayın üçüncü %@ günü";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::f" = "Her ayın üçüncü %@ günü";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::n" = "Her ayın üçüncü %@ günü";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::m" = "Her ayın dördüncü %@ günü";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::f" = "Her ayın dördüncü %@ günü";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::n" = "Her ayın dördüncü %@ günü";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::m" = "Her ayın beşinci %@ günü";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::f" = "Her ayın beşinci %@ günü";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::n" = "Her ayın beşinci %@ günü";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::m" = "Her ayın altıncı %@ günü";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::f" = "Her ayın altıncı %@ günü";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::n" = "Her ayın altıncı %@ günü";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::m" = "Her ayın yedinci %@ günü";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::f" = "Her ayın yedinci %@ günü";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::n" = "Her ayın yedinci %@ günü";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::m" = "Her ayın son %@ günü";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::f" = "Her ayın son %@ günü";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::n" = "Her ayın son %@ günü";
+"eventDetail.repeating.last::m" = "Son";
+"eventDetail.repeating.last::f" = "Son";
+"eventDetail.repeating.last::n" = "Son";
 "eventDetail.repeating.endtime::title" = "Tekrarlama Bitişi";
 "eventDetail.repeating.endtime::option::never" = "Asla";
 "eventDetail.repeating.endtime::option::on" = "Tarihte";
@@ -213,7 +240,6 @@
 "eventDetail.repeating::period_endcount" = "%@ tarihinden itibaren %d kez";
 
 "eventDetail.repeating.everyNDays:title" = "Her %d günde bir";
-"eventDetail.repeating.last" = "Son";
 "eventDetail.repeating.everyNMonths:title" = "Her %d ayda bir";
 "eventDetail.repeating.everyNYears:title" = "Her %d yılda bir";
 "eventDetail.repeating::endoption_until" = "%@ tarihine kadar";

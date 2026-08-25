@@ -79,6 +79,14 @@
 "dayname::friday:very_short" = "शु";
 "dayname::saturday:very_short" = "श";
 
+"dayname::sunday:gender" = "m";
+"dayname::monday:gender" = "m";
+"dayname::tuesday:gender" = "m";
+"dayname::wednesday:gender" = "m";
+"dayname::thursday:gender" = "m";
+"dayname::friday:gender" = "m";
+"dayname::saturday:gender" = "m";
+
 
 // MARK: - event notification
 
@@ -196,14 +204,33 @@
 "eventDetail.repeating.everyYearSomeDay:title" = "हर साल %@";
 "eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "हर साल %@ (चंद्र कैलेंडर)";
 "eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "हर महीने के अंतिम सप्ताह के सभी दिन";
-"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "हर महीने का पहला %@";
-"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "हर महीने का दूसरा %@";
-"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "हर महीने का तीसरा %@";
-"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "हर महीने का चौथा %@";
-"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "हर महीने का पांचवां %@";
-"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "हर महीने का छठा %@";
-"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "हर महीने का सातवां %@";
-"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "हर महीने का अंतिम %@";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::m" = "हर महीने का पहला %@";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::f" = "हर महीने का पहला %@";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::n" = "हर महीने का पहला %@";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::m" = "हर महीने का दूसरा %@";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::f" = "हर महीने का दूसरा %@";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::n" = "हर महीने का दूसरा %@";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::m" = "हर महीने का तीसरा %@";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::f" = "हर महीने का तीसरा %@";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::n" = "हर महीने का तीसरा %@";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::m" = "हर महीने का चौथा %@";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::f" = "हर महीने का चौथा %@";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::n" = "हर महीने का चौथा %@";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::m" = "हर महीने का पांचवां %@";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::f" = "हर महीने का पांचवां %@";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::n" = "हर महीने का पांचवां %@";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::m" = "हर महीने का छठा %@";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::f" = "हर महीने का छठा %@";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::n" = "हर महीने का छठा %@";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::m" = "हर महीने का सातवां %@";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::f" = "हर महीने का सातवां %@";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::n" = "हर महीने का सातवां %@";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::m" = "हर महीने का अंतिम %@";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::f" = "हर महीने का अंतिम %@";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::n" = "हर महीने का अंतिम %@";
+"eventDetail.repeating.last::m" = "अंतिम";
+"eventDetail.repeating.last::f" = "अंतिम";
+"eventDetail.repeating.last::n" = "अंतिम";
 "eventDetail.repeating.endtime::title" = "दोहराव समाप्ति";
 "eventDetail.repeating.endtime::option::never" = "कभी नहीं";
 "eventDetail.repeating.endtime::option::on" = "तारीख को";
@@ -213,7 +240,6 @@
 "eventDetail.repeating::period_endcount" = "%@ से शुरू, %d बार";
 
 "eventDetail.repeating.everyNDays:title" = "हर %d दिन में";
-"eventDetail.repeating.last" = "अंतिम";
 "eventDetail.repeating.everyNMonths:title" = "हर %d महीने में";
 "eventDetail.repeating.everyNYears:title" = "हर %d साल में";
 "eventDetail.repeating::endoption_until" = "%@ तक";

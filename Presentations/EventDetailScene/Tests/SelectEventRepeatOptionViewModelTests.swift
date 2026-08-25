@@ -94,11 +94,11 @@ extension SelectEventRepeatOptionViewModelTests {
             ],
             [
                 "eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title".localized(),
-                "eventDetail.repeating.every1WeekOfEveryMonth::someday".localized(with: "Sunday"),
-                "eventDetail.repeating.every2WeekOfEveryMonth::someday".localized(with: "Sunday"),
-                "eventDetail.repeating.every3WeekOfEveryMonth::someday".localized(with: "Sunday"),
-                "eventDetail.repeating.every4WeekOfEveryMonth::someday".localized(with: "Sunday"),
-                "eventDetail.repeating.everyLastWeekOfEveryMonth::someday".localized(with: "Sunday")
+                "eventDetail.repeating.every1WeekOfEveryMonth::someday::m".localized(with: "Sunday"),
+                "eventDetail.repeating.every2WeekOfEveryMonth::someday::m".localized(with: "Sunday"),
+                "eventDetail.repeating.every3WeekOfEveryMonth::someday::m".localized(with: "Sunday"),
+                "eventDetail.repeating.every4WeekOfEveryMonth::someday::m".localized(with: "Sunday"),
+                "eventDetail.repeating.everyLastWeekOfEveryMonth::someday::m".localized(with: "Sunday")
             ]
         ]
     }
@@ -234,7 +234,7 @@ extension SelectEventRepeatOptionViewModelTests {
         
         // then
         XCTAssertNotNil(id)
-        let findingText = "eventDetail.repeating.every3WeekOfEveryMonth::someday".localized(with: "Wednesday")
+        let findingText = "eventDetail.repeating.every3WeekOfEveryMonth::someday::m".localized(with: "Wednesday")
         let week3thWedId = options?.flatMap { $0 }.first(where: { $0.text == findingText })?.id
         XCTAssertEqual(id, week3thWedId)
         let allItemCount = options?.flatMap { $0 }.count

@@ -79,6 +79,14 @@
 "dayname::friday:very_short" = "金";
 "dayname::saturday:very_short" = "土";
 
+"dayname::sunday:gender" = "m";
+"dayname::monday:gender" = "m";
+"dayname::tuesday:gender" = "m";
+"dayname::wednesday:gender" = "m";
+"dayname::thursday:gender" = "m";
+"dayname::friday:gender" = "m";
+"dayname::saturday:gender" = "m";
+
 
 // MARK: - event notification
 
@@ -196,14 +204,33 @@
 "eventDetail.repeating.everyYearSomeDay:title" = "毎年%@";
 "eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "毎年%@（旧暦）";
 "eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "毎月最終週のすべての曜日";
-"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "毎月第1%@";
-"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "毎月第2%@";
-"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "毎月第3%@";
-"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "毎月第4%@";
-"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "毎月第5%@";
-"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "毎月第6%@";
-"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "毎月第7%@";
-"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "毎月最終%@";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::m" = "毎月第1%@";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::f" = "毎月第1%@";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::n" = "毎月第1%@";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::m" = "毎月第2%@";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::f" = "毎月第2%@";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::n" = "毎月第2%@";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::m" = "毎月第3%@";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::f" = "毎月第3%@";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::n" = "毎月第3%@";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::m" = "毎月第4%@";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::f" = "毎月第4%@";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::n" = "毎月第4%@";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::m" = "毎月第5%@";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::f" = "毎月第5%@";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::n" = "毎月第5%@";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::m" = "毎月第6%@";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::f" = "毎月第6%@";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::n" = "毎月第6%@";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::m" = "毎月第7%@";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::f" = "毎月第7%@";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::n" = "毎月第7%@";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::m" = "毎月最終%@";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::f" = "毎月最終%@";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::n" = "毎月最終%@";
+"eventDetail.repeating.last::m" = "最終";
+"eventDetail.repeating.last::f" = "最終";
+"eventDetail.repeating.last::n" = "最終";
 "eventDetail.repeating.endtime::title" = "繰り返しの終了";
 "eventDetail.repeating.endtime::option::never" = "しない";
 "eventDetail.repeating.endtime::option::on" = "日付指定";
@@ -213,7 +240,6 @@
 "eventDetail.repeating::period_endcount" = "%@から%d回";
 
 "eventDetail.repeating.everyNDays:title" = "%d日ごと";
-"eventDetail.repeating.last" = "最終";
 "eventDetail.repeating.everyNMonths:title" = "%dヶ月ごと";
 "eventDetail.repeating.everyNYears:title" = "%d年ごと";
 "eventDetail.repeating::endoption_until" = "%@まで";

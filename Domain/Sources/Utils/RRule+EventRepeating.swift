@@ -302,7 +302,7 @@ extension WeekOrdinal {
 
 extension RRule.ByDay.WeekDay {
 
-    fileprivate var asDayOfWeeks: DayOfWeeks {
+    public var asDayOfWeeks: DayOfWeeks {
         switch self {
         case .SU: return .sunday
         case .MO: return .monday

@@ -79,6 +79,14 @@
 "dayname::friday:very_short" = "J";
 "dayname::saturday:very_short" = "S";
 
+"dayname::sunday:gender" = "m";
+"dayname::monday:gender" = "m";
+"dayname::tuesday:gender" = "m";
+"dayname::wednesday:gender" = "m";
+"dayname::thursday:gender" = "m";
+"dayname::friday:gender" = "m";
+"dayname::saturday:gender" = "m";
+
 
 // MARK: - event notification
 
@@ -196,14 +204,33 @@
 "eventDetail.repeating.everyYearSomeDay:title" = "Setiap tahun %@";
 "eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "Setiap tahun %@ (kalendar lunar)";
 "eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "Semua hari pada minggu terakhir setiap bulan";
-"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "%@ pertama setiap bulan";
-"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "%@ kedua setiap bulan";
-"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "%@ ketiga setiap bulan";
-"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "%@ keempat setiap bulan";
-"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "%@ kelima setiap bulan";
-"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "%@ keenam setiap bulan";
-"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "%@ ketujuh setiap bulan";
-"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "%@ terakhir setiap bulan";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::m" = "%@ pertama setiap bulan";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::f" = "%@ pertama setiap bulan";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::n" = "%@ pertama setiap bulan";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::m" = "%@ kedua setiap bulan";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::f" = "%@ kedua setiap bulan";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::n" = "%@ kedua setiap bulan";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::m" = "%@ ketiga setiap bulan";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::f" = "%@ ketiga setiap bulan";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::n" = "%@ ketiga setiap bulan";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::m" = "%@ keempat setiap bulan";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::f" = "%@ keempat setiap bulan";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::n" = "%@ keempat setiap bulan";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::m" = "%@ kelima setiap bulan";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::f" = "%@ kelima setiap bulan";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::n" = "%@ kelima setiap bulan";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::m" = "%@ keenam setiap bulan";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::f" = "%@ keenam setiap bulan";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::n" = "%@ keenam setiap bulan";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::m" = "%@ ketujuh setiap bulan";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::f" = "%@ ketujuh setiap bulan";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::n" = "%@ ketujuh setiap bulan";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::m" = "%@ terakhir setiap bulan";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::f" = "%@ terakhir setiap bulan";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::n" = "%@ terakhir setiap bulan";
+"eventDetail.repeating.last::m" = "Terakhir";
+"eventDetail.repeating.last::f" = "Terakhir";
+"eventDetail.repeating.last::n" = "Terakhir";
 "eventDetail.repeating.endtime::title" = "Tamat Pengulangan";
 "eventDetail.repeating.endtime::option::never" = "Tidak sekali-kali";
 "eventDetail.repeating.endtime::option::on" = "Pada";
@@ -213,7 +240,6 @@
 "eventDetail.repeating::period_endcount" = "Bermula %@, %d kali";
 
 "eventDetail.repeating.everyNDays:title" = "Setiap %d hari";
-"eventDetail.repeating.last" = "Terakhir";
 "eventDetail.repeating.everyNMonths:title" = "Setiap %d bulan";
 "eventDetail.repeating.everyNYears:title" = "Setiap %d tahun";
 "eventDetail.repeating::endoption_until" = "sehingga %@";
