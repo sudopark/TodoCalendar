@@ -391,7 +391,7 @@
 "manage_account::delete_account_button::description" = "Dopo aver richiesto l'eliminazione dell'account, il tuo account verrà eliminato.\nUna volta eliminato, le informazioni dell'account non potranno essere recuperate.";
 "signIn::title" = "Accedi";
 "signIn::feature::sync" = "Backup degli eventi e sincronizzazione tra dispositivi";
-"signIn::feature::aiAgent" = "Gestisci la tua agenda con l'agente AI";
+"signIn::feature::aiAgent" = "Gestisci la tua agenda con l'agente IA";
 "signIn::feature::web" = "Usalo sul web · todo-calendar.com";
 
 
@@ -585,8 +585,8 @@
 "widget.dday.target::registered" = "Fissato";
 "widget.dday.turn::name" = "Turno %d";
 
-"widget.aiCommand::title" = "Aggiungi con l'AI";
-"widget.aiCommand::explain" = "Tocca una volta per aprire l'inserimento AI.";
+"widget.aiCommand::title" = "Aggiungi con l'IA";
+"widget.aiCommand::explain" = "Tocca una volta per aprire l'inserimento IA.";
 
 // MARK: - liveActivity
 
@@ -623,14 +623,14 @@
 "aiAgent::state::failed" = "Attività non riuscita";
 "aiAgent::done::default" = "Fatto";
 "aiAgent::failed::default" = "Impossibile completare l'operazione";
-"aiAgent::failed::dailyLimitExceeded" = "Hai esaurito i crediti AI di oggi.";
+"aiAgent::failed::dailyLimitExceeded" = "Hai esaurito i crediti IA di oggi.";
 "aiAgent::retry" = "Riprova";
 "aiAgent::needSignIn::title" = "Accesso richiesto";
-"aiAgent::needSignIn::message" = "Accedi per usare l'inserimento rapido con AI.";
+"aiAgent::needSignIn::message" = "Accedi per usare l'inserimento rapido con IA.";
 "aiAgent::speechPermissionDenied::title" = "Autorizzazione richiesta";
 "aiAgent::speechPermissionDenied::message" = "Consenti l'accesso al microfono e al riconoscimento vocale nelle Impostazioni per usare l'inserimento vocale.";
 "aiAgent::speechPermissionDenied::confirm" = "Apri Impostazioni";
-"aiAgent::title" = "Inserimento rapido AI";
+"aiAgent::title" = "Inserimento rapido IA";
 "aiAgent::keyboard::stop" = "Interrompi";
 "aiAgent::keyboard::send" = "Invia";
 "aiAgent::stop" = "Interrompi";
@@ -721,18 +721,18 @@
 
 // MARK: - share extension
 
-"share.ai::title" = "Invia all'AI";
+"share.ai::title" = "Invia all'IA";
 "share.ai::text::placeholder" = "Testo da inviare";
 "share.ai::instruction::placeholder" = "Aggiungi un'istruzione (facoltativo)";
-"share.ai::needSignIn" = "Esegui l'accesso nell'app per usare l'inserimento rapido con AI.";
+"share.ai::needSignIn" = "Esegui l'accesso nell'app per usare l'inserimento rapido con IA.";
 "share.ai::pending" = "Una richiesta precedente è ancora in attesa. Apri l'app per vederne l'avanzamento o il risultato.";
 "share.ai::sent" = "Inviato. Puoi vedere il risultato nell'app.";
 "share.ai::failed" = "Impossibile inviare. Riprova.";
 "share.ai::sentButUntracked" = "Inviato, ma l'app non può tracciare il risultato. Controlla il calendario tra poco.";
 "share.ai::textTooLong" = "Il testo è troppo lungo da inviare. Accorcialo e riprova.";
 "share.ai::instructionTooLong" = "La tua istruzione è troppo lunga. Accorciala.";
-"share.ai::limitExceeded" = "Hai esaurito i crediti AI di oggi. Si azzerano a mezzanotte UTC.";
-"share.ai::image::title" = "Invia l'immagine all'AI";
+"share.ai::limitExceeded" = "Hai esaurito i crediti IA di oggi. Si azzerano a mezzanotte UTC.";
+"share.ai::image::title" = "Invia l'immagine all'IA";
 "share.ai::image::recognizing" = "Lettura del testo dall'immagine…";
 "share.ai::image::text::caption" = "Testo letto dall'immagine. Modificalo se qualcosa non ti convince.";
 "share.ai::image::text::placeholder" = "Testo letto dall'immagine";
