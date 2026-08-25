@@ -79,6 +79,14 @@
 "dayname::friday:very_short" = "F";
 "dayname::saturday:very_short" = "L";
 
+"dayname::sunday:gender" = "m";
+"dayname::monday:gender" = "m";
+"dayname::tuesday:gender" = "m";
+"dayname::wednesday:gender" = "m";
+"dayname::thursday:gender" = "m";
+"dayname::friday:gender" = "m";
+"dayname::saturday:gender" = "m";
+
 
 // MARK: - event notification
 
@@ -196,14 +204,33 @@
 "eventDetail.repeating.everyYearSomeDay:title" = "Varje år %@";
 "eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "Varje år %@ (månkalender)";
 "eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "Alla dagar i den sista veckan varje månad";
-"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "Den första %@ i varje månad";
-"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "Den andra %@ i varje månad";
-"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "Den tredje %@ i varje månad";
-"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "Den fjärde %@ i varje månad";
-"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "Den femte %@ i varje månad";
-"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "Den sjätte %@ i varje månad";
-"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "Den sjunde %@ i varje månad";
-"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "Den sista %@ i varje månad";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::m" = "Den första %@ i varje månad";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::f" = "Den första %@ i varje månad";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::n" = "Den första %@ i varje månad";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::m" = "Den andra %@ i varje månad";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::f" = "Den andra %@ i varje månad";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::n" = "Den andra %@ i varje månad";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::m" = "Den tredje %@ i varje månad";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::f" = "Den tredje %@ i varje månad";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::n" = "Den tredje %@ i varje månad";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::m" = "Den fjärde %@ i varje månad";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::f" = "Den fjärde %@ i varje månad";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::n" = "Den fjärde %@ i varje månad";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::m" = "Den femte %@ i varje månad";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::f" = "Den femte %@ i varje månad";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::n" = "Den femte %@ i varje månad";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::m" = "Den sjätte %@ i varje månad";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::f" = "Den sjätte %@ i varje månad";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::n" = "Den sjätte %@ i varje månad";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::m" = "Den sjunde %@ i varje månad";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::f" = "Den sjunde %@ i varje månad";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::n" = "Den sjunde %@ i varje månad";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::m" = "Den sista %@ i varje månad";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::f" = "Den sista %@ i varje månad";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::n" = "Den sista %@ i varje månad";
+"eventDetail.repeating.last::m" = "Sista";
+"eventDetail.repeating.last::f" = "Sista";
+"eventDetail.repeating.last::n" = "Sista";
 "eventDetail.repeating.endtime::title" = "Upprepning slutar";
 "eventDetail.repeating.endtime::option::never" = "Aldrig";
 "eventDetail.repeating.endtime::option::on" = "Den";
@@ -213,7 +240,6 @@
 "eventDetail.repeating::period_endcount" = "Från %@, %d gånger";
 
 "eventDetail.repeating.everyNDays:title" = "Var %d:e dag";
-"eventDetail.repeating.last" = "Sista";
 "eventDetail.repeating.everyNMonths:title" = "Var %d:e månad";
 "eventDetail.repeating.everyNYears:title" = "Vart %d:e år";
 "eventDetail.repeating::endoption_until" = "till %@";

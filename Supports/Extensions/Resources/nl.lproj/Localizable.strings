@@ -79,6 +79,14 @@
 "dayname::friday:very_short" = "V";
 "dayname::saturday:very_short" = "Z";
 
+"dayname::sunday:gender" = "m";
+"dayname::monday:gender" = "m";
+"dayname::tuesday:gender" = "m";
+"dayname::wednesday:gender" = "m";
+"dayname::thursday:gender" = "m";
+"dayname::friday:gender" = "m";
+"dayname::saturday:gender" = "m";
+
 
 // MARK: - event notification
 
@@ -196,14 +204,33 @@
 "eventDetail.repeating.everyYearSomeDay:title" = "Elk jaar %@";
 "eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "Elk jaar %@ (maankalender)";
 "eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "Alle dagen van de laatste week van elke maand";
-"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "De eerste %@ van elke maand";
-"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "De tweede %@ van elke maand";
-"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "De derde %@ van elke maand";
-"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "De vierde %@ van elke maand";
-"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "De vijfde %@ van elke maand";
-"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "De zesde %@ van elke maand";
-"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "De zevende %@ van elke maand";
-"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "De laatste %@ van elke maand";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::m" = "De eerste %@ van elke maand";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::f" = "De eerste %@ van elke maand";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::n" = "De eerste %@ van elke maand";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::m" = "De tweede %@ van elke maand";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::f" = "De tweede %@ van elke maand";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::n" = "De tweede %@ van elke maand";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::m" = "De derde %@ van elke maand";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::f" = "De derde %@ van elke maand";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::n" = "De derde %@ van elke maand";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::m" = "De vierde %@ van elke maand";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::f" = "De vierde %@ van elke maand";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::n" = "De vierde %@ van elke maand";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::m" = "De vijfde %@ van elke maand";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::f" = "De vijfde %@ van elke maand";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::n" = "De vijfde %@ van elke maand";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::m" = "De zesde %@ van elke maand";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::f" = "De zesde %@ van elke maand";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::n" = "De zesde %@ van elke maand";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::m" = "De zevende %@ van elke maand";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::f" = "De zevende %@ van elke maand";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::n" = "De zevende %@ van elke maand";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::m" = "De laatste %@ van elke maand";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::f" = "De laatste %@ van elke maand";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::n" = "De laatste %@ van elke maand";
+"eventDetail.repeating.last::m" = "Laatste";
+"eventDetail.repeating.last::f" = "Laatste";
+"eventDetail.repeating.last::n" = "Laatste";
 "eventDetail.repeating.endtime::title" = "Einde van de herhaling";
 "eventDetail.repeating.endtime::option::never" = "Nooit";
 "eventDetail.repeating.endtime::option::on" = "Op";
@@ -213,7 +240,6 @@
 "eventDetail.repeating::period_endcount" = "Vanaf %@, %d keer";
 
 "eventDetail.repeating.everyNDays:title" = "Elke %d dagen";
-"eventDetail.repeating.last" = "Laatste";
 "eventDetail.repeating.everyNMonths:title" = "Elke %d maanden";
 "eventDetail.repeating.everyNYears:title" = "Elke %d jaar";
 "eventDetail.repeating::endoption_until" = "tot %@";

@@ -79,6 +79,14 @@
 "dayname::friday:very_short" = "ศ";
 "dayname::saturday:very_short" = "ส";
 
+"dayname::sunday:gender" = "m";
+"dayname::monday:gender" = "m";
+"dayname::tuesday:gender" = "m";
+"dayname::wednesday:gender" = "m";
+"dayname::thursday:gender" = "m";
+"dayname::friday:gender" = "m";
+"dayname::saturday:gender" = "m";
+
 
 // MARK: - event notification
 
@@ -196,14 +204,33 @@
 "eventDetail.repeating.everyYearSomeDay:title" = "ทุกปี%@";
 "eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "ทุกปี%@ (ปฏิทินจันทรคติ)";
 "eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "ทุกวันในสัปดาห์สุดท้ายของทุกเดือน";
-"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "%@แรกของทุกเดือน";
-"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "%@ที่สองของทุกเดือน";
-"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "%@ที่สามของทุกเดือน";
-"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "%@ที่สี่ของทุกเดือน";
-"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "%@ที่ห้าของทุกเดือน";
-"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "%@ที่หกของทุกเดือน";
-"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "%@ที่เจ็ดของทุกเดือน";
-"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "%@สุดท้ายของทุกเดือน";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::m" = "%@แรกของทุกเดือน";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::f" = "%@แรกของทุกเดือน";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::n" = "%@แรกของทุกเดือน";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::m" = "%@ที่สองของทุกเดือน";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::f" = "%@ที่สองของทุกเดือน";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::n" = "%@ที่สองของทุกเดือน";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::m" = "%@ที่สามของทุกเดือน";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::f" = "%@ที่สามของทุกเดือน";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::n" = "%@ที่สามของทุกเดือน";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::m" = "%@ที่สี่ของทุกเดือน";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::f" = "%@ที่สี่ของทุกเดือน";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::n" = "%@ที่สี่ของทุกเดือน";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::m" = "%@ที่ห้าของทุกเดือน";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::f" = "%@ที่ห้าของทุกเดือน";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::n" = "%@ที่ห้าของทุกเดือน";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::m" = "%@ที่หกของทุกเดือน";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::f" = "%@ที่หกของทุกเดือน";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::n" = "%@ที่หกของทุกเดือน";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::m" = "%@ที่เจ็ดของทุกเดือน";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::f" = "%@ที่เจ็ดของทุกเดือน";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::n" = "%@ที่เจ็ดของทุกเดือน";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::m" = "%@สุดท้ายของทุกเดือน";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::f" = "%@สุดท้ายของทุกเดือน";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::n" = "%@สุดท้ายของทุกเดือน";
+"eventDetail.repeating.last::m" = "สุดท้าย";
+"eventDetail.repeating.last::f" = "สุดท้าย";
+"eventDetail.repeating.last::n" = "สุดท้าย";
 "eventDetail.repeating.endtime::title" = "สิ้นสุดการทำซ้ำ";
 "eventDetail.repeating.endtime::option::never" = "ไม่สิ้นสุด";
 "eventDetail.repeating.endtime::option::on" = "ในวันที่";
@@ -213,7 +240,6 @@
 "eventDetail.repeating::period_endcount" = "เริ่ม%@ %dครั้ง";
 
 "eventDetail.repeating.everyNDays:title" = "ทุก%dวัน";
-"eventDetail.repeating.last" = "สุดท้าย";
 "eventDetail.repeating.everyNMonths:title" = "ทุก%dเดือน";
 "eventDetail.repeating.everyNYears:title" = "ทุก%dปี";
 "eventDetail.repeating::endoption_until" = "จนถึง%@";

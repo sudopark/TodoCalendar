@@ -79,6 +79,14 @@
 "dayname::friday:very_short" = "금";
 "dayname::saturday:very_short" = "토";
 
+"dayname::sunday:gender" = "m";
+"dayname::monday:gender" = "m";
+"dayname::tuesday:gender" = "m";
+"dayname::wednesday:gender" = "m";
+"dayname::thursday:gender" = "m";
+"dayname::friday:gender" = "m";
+"dayname::saturday:gender" = "m";
+
 
 // MARK: - event notification
 
@@ -196,14 +204,33 @@
 "eventDetail.repeating.everyYearSomeDay:title" = "매년 %@";
 "eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "매년 음력 %@";
 "eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "매달의 마지막주의 모든일";
-"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "매달 첫번째 %@";
-"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "매달 두번째 %@";
-"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "매달 세번째 %@";
-"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "매달 네번째 %@";
-"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "매달 다섯번째 %@";
-"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "매달 여섯번째 %@";
-"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "매달 일곱번째 %@";
-"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "매달 마지막 %@";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::m" = "매달 첫번째 %@";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::f" = "매달 첫번째 %@";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::n" = "매달 첫번째 %@";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::m" = "매달 두번째 %@";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::f" = "매달 두번째 %@";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::n" = "매달 두번째 %@";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::m" = "매달 세번째 %@";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::f" = "매달 세번째 %@";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::n" = "매달 세번째 %@";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::m" = "매달 네번째 %@";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::f" = "매달 네번째 %@";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::n" = "매달 네번째 %@";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::m" = "매달 다섯번째 %@";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::f" = "매달 다섯번째 %@";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::n" = "매달 다섯번째 %@";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::m" = "매달 여섯번째 %@";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::f" = "매달 여섯번째 %@";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::n" = "매달 여섯번째 %@";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::m" = "매달 일곱번째 %@";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::f" = "매달 일곱번째 %@";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::n" = "매달 일곱번째 %@";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::m" = "매달 마지막 %@";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::f" = "매달 마지막 %@";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::n" = "매달 마지막 %@";
+"eventDetail.repeating.last::m" = "마지막";
+"eventDetail.repeating.last::f" = "마지막";
+"eventDetail.repeating.last::n" = "마지막";
 "eventDetail.repeating.endtime::title" = "반복 종료";
 "eventDetail.repeating.endtime::option::never" = "안함";
 "eventDetail.repeating.endtime::option::on" = "시간";
@@ -213,7 +240,6 @@
 "eventDetail.repeating::period_endcount" = "%@ 부터 %d회";
 
 "eventDetail.repeating.everyNDays:title" = "매%d일";
-"eventDetail.repeating.last" = "마지막";
 "eventDetail.repeating.everyNMonths:title" = "매%d달";
 "eventDetail.repeating.everyNYears:title" = "매%d년";
 "eventDetail.repeating::endoption_until" = "%@ 까지";

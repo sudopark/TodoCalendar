@@ -79,6 +79,14 @@
 "dayname::friday:very_short" = "Π";
 "dayname::saturday:very_short" = "Σ";
 
+"dayname::sunday:gender" = "f";
+"dayname::monday:gender" = "f";
+"dayname::tuesday:gender" = "f";
+"dayname::wednesday:gender" = "f";
+"dayname::thursday:gender" = "f";
+"dayname::friday:gender" = "f";
+"dayname::saturday:gender" = "n";
+
 
 // MARK: - event notification
 
@@ -196,14 +204,33 @@
 "eventDetail.repeating.everyYearSomeDay:title" = "Κάθε χρόνο %@";
 "eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "Κάθε χρόνο %@ (σεληνιακό ημερολόγιο)";
 "eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "Όλες οι ημέρες της τελευταίας εβδομάδας κάθε μήνα";
-"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "Η πρώτη %@ κάθε μήνα";
-"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "Η δεύτερη %@ κάθε μήνα";
-"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "Η τρίτη %@ κάθε μήνα";
-"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "Η τέταρτη %@ κάθε μήνα";
-"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "Η πέμπτη %@ κάθε μήνα";
-"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "Η έκτη %@ κάθε μήνα";
-"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "Η έβδομη %@ κάθε μήνα";
-"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "Η τελευταία %@ κάθε μήνα";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::m" = "Ο πρώτος %@ κάθε μήνα";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::f" = "Η πρώτη %@ κάθε μήνα";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::n" = "Το πρώτο %@ κάθε μήνα";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::m" = "Ο δεύτερος %@ κάθε μήνα";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::f" = "Η δεύτερη %@ κάθε μήνα";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::n" = "Το δεύτερο %@ κάθε μήνα";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::m" = "Ο τρίτος %@ κάθε μήνα";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::f" = "Η τρίτη %@ κάθε μήνα";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::n" = "Το τρίτο %@ κάθε μήνα";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::m" = "Ο τέταρτος %@ κάθε μήνα";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::f" = "Η τέταρτη %@ κάθε μήνα";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::n" = "Το τέταρτο %@ κάθε μήνα";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::m" = "Ο πέμπτος %@ κάθε μήνα";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::f" = "Η πέμπτη %@ κάθε μήνα";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::n" = "Το πέμπτο %@ κάθε μήνα";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::m" = "Ο έκτος %@ κάθε μήνα";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::f" = "Η έκτη %@ κάθε μήνα";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::n" = "Το έκτο %@ κάθε μήνα";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::m" = "Ο έβδομος %@ κάθε μήνα";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::f" = "Η έβδομη %@ κάθε μήνα";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::n" = "Το έβδομο %@ κάθε μήνα";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::m" = "Ο τελευταίος %@ κάθε μήνα";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::f" = "Η τελευταία %@ κάθε μήνα";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::n" = "Το τελευταίο %@ κάθε μήνα";
+"eventDetail.repeating.last::m" = "Τελευταίος";
+"eventDetail.repeating.last::f" = "Τελευταία";
+"eventDetail.repeating.last::n" = "Τελευταίο";
 "eventDetail.repeating.endtime::title" = "Λήξη επανάληψης";
 "eventDetail.repeating.endtime::option::never" = "Ποτέ";
 "eventDetail.repeating.endtime::option::on" = "Στις";
@@ -213,7 +240,6 @@
 "eventDetail.repeating::period_endcount" = "Από %@, %d φορές";
 
 "eventDetail.repeating.everyNDays:title" = "Κάθε %d ημέρες";
-"eventDetail.repeating.last" = "Τελευταίο";
 "eventDetail.repeating.everyNMonths:title" = "Κάθε %d μήνες";
 "eventDetail.repeating.everyNYears:title" = "Κάθε %d χρόνια";
 "eventDetail.repeating::endoption_until" = "έως %@";

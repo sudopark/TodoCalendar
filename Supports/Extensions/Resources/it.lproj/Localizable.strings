@@ -79,6 +79,14 @@
 "dayname::friday:very_short" = "V";
 "dayname::saturday:very_short" = "S";
 
+"dayname::sunday:gender" = "f";
+"dayname::monday:gender" = "m";
+"dayname::tuesday:gender" = "m";
+"dayname::wednesday:gender" = "m";
+"dayname::thursday:gender" = "m";
+"dayname::friday:gender" = "m";
+"dayname::saturday:gender" = "m";
+
 
 // MARK: - event notification
 
@@ -196,14 +204,33 @@
 "eventDetail.repeating.everyYearSomeDay:title" = "Ogni anno il %@";
 "eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "Ogni anno il %@ (calendario lunare)";
 "eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "Tutti i giorni dell'ultima settimana di ogni mese";
-"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "Il primo %@ di ogni mese";
-"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "Il secondo %@ di ogni mese";
-"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "Il terzo %@ di ogni mese";
-"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "Il quarto %@ di ogni mese";
-"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "Il quinto %@ di ogni mese";
-"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "Il sesto %@ di ogni mese";
-"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "Il settimo %@ di ogni mese";
-"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "L'ultimo %@ di ogni mese";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::m" = "Il primo %@ di ogni mese";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::f" = "La prima %@ di ogni mese";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::n" = "Il primo %@ di ogni mese";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::m" = "Il secondo %@ di ogni mese";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::f" = "La seconda %@ di ogni mese";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::n" = "Il secondo %@ di ogni mese";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::m" = "Il terzo %@ di ogni mese";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::f" = "La terza %@ di ogni mese";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::n" = "Il terzo %@ di ogni mese";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::m" = "Il quarto %@ di ogni mese";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::f" = "La quarta %@ di ogni mese";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::n" = "Il quarto %@ di ogni mese";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::m" = "Il quinto %@ di ogni mese";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::f" = "La quinta %@ di ogni mese";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::n" = "Il quinto %@ di ogni mese";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::m" = "Il sesto %@ di ogni mese";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::f" = "La sesta %@ di ogni mese";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::n" = "Il sesto %@ di ogni mese";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::m" = "Il settimo %@ di ogni mese";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::f" = "La settima %@ di ogni mese";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::n" = "Il settimo %@ di ogni mese";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::m" = "L'ultimo %@ di ogni mese";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::f" = "L'ultima %@ di ogni mese";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::n" = "L'ultimo %@ di ogni mese";
+"eventDetail.repeating.last::m" = "Ultimo";
+"eventDetail.repeating.last::f" = "Ultima";
+"eventDetail.repeating.last::n" = "Ultimo";
 "eventDetail.repeating.endtime::title" = "Fine ricorrenza";
 "eventDetail.repeating.endtime::option::never" = "Mai";
 "eventDetail.repeating.endtime::option::on" = "Il giorno";
@@ -213,7 +240,6 @@
 "eventDetail.repeating::period_endcount" = "A partire dal %@ per %d volte";
 
 "eventDetail.repeating.everyNDays:title" = "Ogni %d giorni";
-"eventDetail.repeating.last" = "Ultimo";
 "eventDetail.repeating.everyNMonths:title" = "Ogni %d mesi";
 "eventDetail.repeating.everyNYears:title" = "Ogni %d anni";
 "eventDetail.repeating::endoption_until" = "fino al %@";

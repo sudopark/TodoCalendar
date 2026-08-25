@@ -79,6 +79,14 @@
 "dayname::friday:very_short" = "П";
 "dayname::saturday:very_short" = "С";
 
+"dayname::sunday:gender" = "n";
+"dayname::monday:gender" = "m";
+"dayname::tuesday:gender" = "m";
+"dayname::wednesday:gender" = "f";
+"dayname::thursday:gender" = "m";
+"dayname::friday:gender" = "f";
+"dayname::saturday:gender" = "f";
+
 
 // MARK: - event notification
 
@@ -196,14 +204,33 @@
 "eventDetail.repeating.everyYearSomeDay:title" = "Каждый год %@";
 "eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "Каждый год %@ (лунный календарь)";
 "eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "Все дни последней недели каждого месяца";
-"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "Первое %@ каждого месяца";
-"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "Второе %@ каждого месяца";
-"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "Третье %@ каждого месяца";
-"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "Четвёртое %@ каждого месяца";
-"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "Пятое %@ каждого месяца";
-"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "Шестое %@ каждого месяца";
-"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "Седьмое %@ каждого месяца";
-"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "Последнее %@ каждого месяца";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::m" = "Первый %@ каждого месяца";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::f" = "Первая %@ каждого месяца";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::n" = "Первое %@ каждого месяца";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::m" = "Второй %@ каждого месяца";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::f" = "Вторая %@ каждого месяца";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::n" = "Второе %@ каждого месяца";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::m" = "Третий %@ каждого месяца";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::f" = "Третья %@ каждого месяца";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::n" = "Третье %@ каждого месяца";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::m" = "Четвёртый %@ каждого месяца";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::f" = "Четвёртая %@ каждого месяца";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::n" = "Четвёртое %@ каждого месяца";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::m" = "Пятый %@ каждого месяца";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::f" = "Пятая %@ каждого месяца";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::n" = "Пятое %@ каждого месяца";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::m" = "Шестой %@ каждого месяца";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::f" = "Шестая %@ каждого месяца";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::n" = "Шестое %@ каждого месяца";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::m" = "Седьмой %@ каждого месяца";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::f" = "Седьмая %@ каждого месяца";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::n" = "Седьмое %@ каждого месяца";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::m" = "Последний %@ каждого месяца";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::f" = "Последняя %@ каждого месяца";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::n" = "Последнее %@ каждого месяца";
+"eventDetail.repeating.last::m" = "Последний";
+"eventDetail.repeating.last::f" = "Последняя";
+"eventDetail.repeating.last::n" = "Последнее";
 "eventDetail.repeating.endtime::title" = "Окончание повтора";
 "eventDetail.repeating.endtime::option::never" = "Никогда";
 "eventDetail.repeating.endtime::option::on" = "В дату";
@@ -213,7 +240,6 @@
 "eventDetail.repeating::period_endcount" = "С %@, %d раз";
 
 "eventDetail.repeating.everyNDays:title" = "Каждые %d дн.";
-"eventDetail.repeating.last" = "Последний";
 "eventDetail.repeating.everyNMonths:title" = "Каждые %d мес.";
 "eventDetail.repeating.everyNYears:title" = "Каждые %d г.";
 "eventDetail.repeating::endoption_until" = "до %@";

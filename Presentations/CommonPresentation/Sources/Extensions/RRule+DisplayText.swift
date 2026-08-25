@@ -135,7 +135,8 @@ extension RRule.ByDay {
         case .none:
             return self.weekDay.text()
         case .some(let n) where n == -1:
-            return "\("eventDetail.repeating.last".localized()) \(self.weekDay.text())"
+            let gender = self.weekDay.asDayOfWeeks.localizedGrammaticalGender
+            return "\("eventDetail.repeating.last::\(gender)".localized()) \(self.weekDay.text())"
         case .some(let n):
             return n.ordinal.map { "\($0) \(self.weekDay.text())" } ?? self.weekDay.text()
         }

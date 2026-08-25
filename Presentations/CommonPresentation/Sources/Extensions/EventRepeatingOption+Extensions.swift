@@ -67,11 +67,12 @@ public extension EventRepeatingOption {
             return R.String.EventDetail.Repeating.everyLastWeekDaysOfEveryMonthTitle
 
         case .everyMonthSomeWeekDay(let seq, let weekDay):
-            return "eventDetail.repeating.every\(seq)WeekOfEveryMonth::someday"
+            return "eventDetail.repeating.every\(seq)WeekOfEveryMonth::someday::\(weekDay.localizedGrammaticalGender)"
                 .localized(with: weekDay.text)
 
         case .everyMonthLastWeekDay(let weekDay):
-            return R.String.EventDetail.Repeating.everyLastWeekOfEveryMonthSomeday(weekDay.text)
+            return "eventDetail.repeating.everyLastWeekOfEveryMonth::someday::\(weekDay.localizedGrammaticalGender)"
+                .localized(with: weekDay.text)
         }
     }
 }

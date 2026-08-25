@@ -71,4 +71,55 @@ struct RRuleDisplayTextTests {
         // then
         #expect(text == "Every Week\n5 time(s)")
     }
+
+    @Test func rrule_displayText_unsupportedMonthlyWithLastWeekDay_appendsGenderedLastText() throws {
+        // given
+        let rruleLine = "RRULE:FREQ=MONTHLY;BYMONTHDAY=15;BYDAY=-1FR"
+        let rrule = try #require(RRuleParser.parse(rruleLine))
+        let timeZone = try #require(TimeZone(identifier: "UTC"))
+        let startTime = Date(timeIntervalSince1970: 1_700_000_000)
+
+        // when
+        let text = rrule.displayText(startTime: startTime, timeZone)
+
+        // then
+        let asEventRepeating = rrule.asEventRepeating(
+            startTime: startTime.timeIntervalSince1970, timeZone: timeZone
+        )
+        #expect(asEventRepeating == nil)
+        let expectedLastText = "eventDetail.repeating.last::m".localized()
+        #expect(text.contains("\(expectedLastText) \(DayOfWeeks.friday.shortText)"))
+    }
+
+    @Test func summaryText_everyMonthSomeWeekDay_usesGenderedTemplateKey() throws {
+        // given
+        let timeZone = try #require(TimeZone(identifier: "UTC"))
+        var option = EventRepeatingOptions.EveryMonth(timeZone: timeZone)
+        option.selection = .week([.seq(3)], [.wednesday])
+        let startTime = Date(timeIntervalSince1970: 1_700_000_000)
+
+        // when
+        let text = option.summaryText(startTime: startTime, timeZone: timeZone)
+
+        // then
+        let expected = "eventDetail.repeating.every3WeekOfEveryMonth::someday::m"
+            .localized(with: DayOfWeeks.wednesday.text)
+        #expect(text == expected)
+    }
+
+    @Test func summaryText_everyMonthLastWeekDay_usesGenderedTemplateKey() throws {
+        // given
+        let timeZone = try #require(TimeZone(identifier: "UTC"))
+        var option = EventRepeatingOptions.EveryMonth(timeZone: timeZone)
+        option.selection = .week([.last], [.wednesday])
+        let startTime = Date(timeIntervalSince1970: 1_700_000_000)
+
+        // when
+        let text = option.summaryText(startTime: startTime, timeZone: timeZone)
+
+        // then
+        let expected = "eventDetail.repeating.everyLastWeekOfEveryMonth::someday::m"
+            .localized(with: DayOfWeeks.wednesday.text)
+        #expect(text == expected)
+    }
 }

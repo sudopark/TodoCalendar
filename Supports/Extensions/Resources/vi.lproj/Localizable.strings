@@ -79,6 +79,14 @@
 "dayname::friday:very_short" = "6";
 "dayname::saturday:very_short" = "7";
 
+"dayname::sunday:gender" = "m";
+"dayname::monday:gender" = "m";
+"dayname::tuesday:gender" = "m";
+"dayname::wednesday:gender" = "m";
+"dayname::thursday:gender" = "m";
+"dayname::friday:gender" = "m";
+"dayname::saturday:gender" = "m";
+
 
 // MARK: - event notification
 
@@ -196,14 +204,33 @@
 "eventDetail.repeating.everyYearSomeDay:title" = "Mỗi năm %@";
 "eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "Mỗi năm %@ (âm lịch)";
 "eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "Tất cả các ngày của tuần cuối mỗi tháng";
-"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "%@ đầu tiên của mỗi tháng";
-"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "%@ thứ hai của mỗi tháng";
-"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "%@ thứ ba của mỗi tháng";
-"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "%@ thứ tư của mỗi tháng";
-"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "%@ thứ năm của mỗi tháng";
-"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "%@ thứ sáu của mỗi tháng";
-"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "%@ thứ bảy của mỗi tháng";
-"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "%@ cuối cùng của mỗi tháng";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::m" = "%@ đầu tiên của mỗi tháng";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::f" = "%@ đầu tiên của mỗi tháng";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::n" = "%@ đầu tiên của mỗi tháng";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::m" = "%@ thứ hai của mỗi tháng";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::f" = "%@ thứ hai của mỗi tháng";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::n" = "%@ thứ hai của mỗi tháng";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::m" = "%@ thứ ba của mỗi tháng";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::f" = "%@ thứ ba của mỗi tháng";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::n" = "%@ thứ ba của mỗi tháng";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::m" = "%@ thứ tư của mỗi tháng";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::f" = "%@ thứ tư của mỗi tháng";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::n" = "%@ thứ tư của mỗi tháng";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::m" = "%@ thứ năm của mỗi tháng";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::f" = "%@ thứ năm của mỗi tháng";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::n" = "%@ thứ năm của mỗi tháng";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::m" = "%@ thứ sáu của mỗi tháng";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::f" = "%@ thứ sáu của mỗi tháng";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::n" = "%@ thứ sáu của mỗi tháng";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::m" = "%@ thứ bảy của mỗi tháng";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::f" = "%@ thứ bảy của mỗi tháng";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::n" = "%@ thứ bảy của mỗi tháng";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::m" = "%@ cuối cùng của mỗi tháng";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::f" = "%@ cuối cùng của mỗi tháng";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::n" = "%@ cuối cùng của mỗi tháng";
+"eventDetail.repeating.last::m" = "Cuối cùng";
+"eventDetail.repeating.last::f" = "Cuối cùng";
+"eventDetail.repeating.last::n" = "Cuối cùng";
 "eventDetail.repeating.endtime::title" = "Kết thúc lặp lại";
 "eventDetail.repeating.endtime::option::never" = "Không bao giờ";
 "eventDetail.repeating.endtime::option::on" = "Vào ngày";
@@ -213,7 +240,6 @@
 "eventDetail.repeating::period_endcount" = "Bắt đầu từ %@, %d lần";
 
 "eventDetail.repeating.everyNDays:title" = "Mỗi %d ngày";
-"eventDetail.repeating.last" = "Cuối cùng";
 "eventDetail.repeating.everyNMonths:title" = "Mỗi %d tháng";
 "eventDetail.repeating.everyNYears:title" = "Mỗi %d năm";
 "eventDetail.repeating::endoption_until" = "đến %@";

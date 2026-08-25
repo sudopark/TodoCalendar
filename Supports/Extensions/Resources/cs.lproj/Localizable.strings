@@ -79,6 +79,14 @@
 "dayname::friday:very_short" = "P";
 "dayname::saturday:very_short" = "S";
 
+"dayname::sunday:gender" = "f";
+"dayname::monday:gender" = "n";
+"dayname::tuesday:gender" = "n";
+"dayname::wednesday:gender" = "f";
+"dayname::thursday:gender" = "m";
+"dayname::friday:gender" = "m";
+"dayname::saturday:gender" = "f";
+
 
 // MARK: - event notification
 
@@ -196,14 +204,33 @@
 "eventDetail.repeating.everyYearSomeDay:title" = "Každý rok %@";
 "eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "Každý rok %@ (lunární kalendář)";
 "eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "Všechny dny posledního týdne každého měsíce";
-"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "První %@ každého měsíce";
-"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "Druhý %@ každého měsíce";
-"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "Třetí %@ každého měsíce";
-"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "Čtvrtý %@ každého měsíce";
-"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "Pátý %@ každého měsíce";
-"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "Šestý %@ každého měsíce";
-"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "Sedmý %@ každého měsíce";
-"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "Poslední %@ každého měsíce";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::m" = "První %@ každého měsíce";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::f" = "První %@ každého měsíce";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::n" = "První %@ každého měsíce";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::m" = "Druhý %@ každého měsíce";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::f" = "Druhá %@ každého měsíce";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::n" = "Druhé %@ každého měsíce";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::m" = "Třetí %@ každého měsíce";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::f" = "Třetí %@ každého měsíce";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::n" = "Třetí %@ každého měsíce";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::m" = "Čtvrtý %@ každého měsíce";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::f" = "Čtvrtá %@ každého měsíce";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::n" = "Čtvrté %@ každého měsíce";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::m" = "Pátý %@ každého měsíce";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::f" = "Pátá %@ každého měsíce";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::n" = "Páté %@ každého měsíce";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::m" = "Šestý %@ každého měsíce";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::f" = "Šestá %@ každého měsíce";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::n" = "Šesté %@ každého měsíce";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::m" = "Sedmý %@ každého měsíce";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::f" = "Sedmá %@ každého měsíce";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::n" = "Sedmé %@ každého měsíce";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::m" = "Poslední %@ každého měsíce";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::f" = "Poslední %@ každého měsíce";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::n" = "Poslední %@ každého měsíce";
+"eventDetail.repeating.last::m" = "Poslední";
+"eventDetail.repeating.last::f" = "Poslední";
+"eventDetail.repeating.last::n" = "Poslední";
 "eventDetail.repeating.endtime::title" = "Konec opakování";
 "eventDetail.repeating.endtime::option::never" = "Nikdy";
 "eventDetail.repeating.endtime::option::on" = "Dne";
@@ -213,7 +240,6 @@
 "eventDetail.repeating::period_endcount" = "Od %@, %d krát";
 
 "eventDetail.repeating.everyNDays:title" = "Po %d dnech";
-"eventDetail.repeating.last" = "Poslední";
 "eventDetail.repeating.everyNMonths:title" = "Po %d měsících";
 "eventDetail.repeating.everyNYears:title" = "Po %d letech";
 "eventDetail.repeating::endoption_until" = "do %@";
