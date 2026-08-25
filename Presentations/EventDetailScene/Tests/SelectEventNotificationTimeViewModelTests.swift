@@ -303,18 +303,12 @@ extension SelectEventNotificationTimeViewModelTests {
         viewModel.moveSystemNotificationSetting()
         
         // then
-        XCTAssertEqual(self.spyRouter.didOpenSystemNotificationSetting, true)
+        XCTAssertEqual(self.spyRouter.didOpenSystemSetting, true)
     }
 }
 
 
-private class SpyRouter: BaseSpyRouter, SelectEventNotificationTimeRouting, @unchecked Sendable {
-    
-    var didOpenSystemNotificationSetting: Bool?
-    func openSystemNotificationSetting() {
-        self.didOpenSystemNotificationSetting = true
-    }
-}
+private class SpyRouter: BaseSpyRouter, SelectEventNotificationTimeRouting, @unchecked Sendable { }
 
 private class SpyListener: SelectEventNotificationTimeSceneListener {
     

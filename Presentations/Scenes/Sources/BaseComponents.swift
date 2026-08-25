@@ -109,13 +109,23 @@ public protocol Routing: AnyObject {
     func showActionSheet(_ form: ActionSheetForm)
     func openSafari(_ path: String)
     func showWebView(_ path: String)
+    func openSystemSetting()
     func dismissPresented(animated: Bool, _ completed: (@Sendable () -> Void)?)
 }
 
 extension Routing {
-    
+
     public func closeScene(_ dismissed: (@Sendable () -> Void)? = nil) {
         self.closeScene(animate: true, dismissed)
+    }
+
+    public func openSystemSetting() {
+        Task { @MainActor in
+            guard let url = URL(string: UIApplication.openSettingsURLString),
+                  UIApplication.shared.canOpenURL(url)
+            else { return }
+            UIApplication.shared.open(url)
+        }
     }
 }
 

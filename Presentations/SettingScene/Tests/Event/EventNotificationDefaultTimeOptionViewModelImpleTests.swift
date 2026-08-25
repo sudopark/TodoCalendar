@@ -92,7 +92,7 @@ extension EventNotificationDefaultTimeOptionViewModelImpleTests {
         viewModel.requestPermission()
         
         // then
-        XCTAssertEqual(self.spyRouter.didOpenSystemNotificationSetting, true)
+        XCTAssertEqual(self.spyRouter.didOpenSystemSetting, true)
     }
 }
 
@@ -161,10 +161,4 @@ extension EventNotificationDefaultTimeOptionViewModelImpleTests {
 }
 
 
-private final class SpyRouter: BaseSpyRouter, EventNotificationDefaultTimeOptionRouting, @unchecked Sendable {
-    
-    var didOpenSystemNotificationSetting: Bool?
-    func openSystemNotificationSetting() {
-        self.didOpenSystemNotificationSetting = true
-    }
-}
+private final class SpyRouter: BaseSpyRouter, EventNotificationDefaultTimeOptionRouting, @unchecked Sendable { }

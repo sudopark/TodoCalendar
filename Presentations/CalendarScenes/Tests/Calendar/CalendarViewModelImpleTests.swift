@@ -1357,11 +1357,6 @@ private extension CalendarViewModelImpleTests {
         func routeToSignIn() {
             self.didRouteToSignIn = true
         }
-
-        var didOpenSystemSetting: Bool?
-        func openSystemSetting() {
-            self.didOpenSystemSetting = true
-        }
     }
     
     class SpyPaperInteractor: CalendarPaperSceneInteractor, @unchecked Sendable {

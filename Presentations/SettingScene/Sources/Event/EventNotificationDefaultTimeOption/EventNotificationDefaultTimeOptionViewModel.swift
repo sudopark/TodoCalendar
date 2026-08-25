@@ -111,7 +111,7 @@ extension EventNotificationDefaultTimeOptionViewModelImple {
     }
     
     func requestPermission() {
-        self.router?.openSystemNotificationSetting()
+        self.router?.openSystemSetting()
     }
     
     private func requestNotificationPermission() {
