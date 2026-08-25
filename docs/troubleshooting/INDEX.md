@@ -31,3 +31,4 @@
 - [2026-08-24 백그라운드 Task 에서 구독을 담다 Set 저장소가 깨진다](2026-08-24-cancelbag-data-race-crash.md) — Infra / fixed / unrecognized selector 0x8000000000000000·member:·CalendarScenes 랜덤 크래시
 - [2026-08-24 Paywall screenState 테스트가 방출 개수로 흔들린다](2026-08-24-paywall-screenstate-emission-count-flaky.md) — Billing / deferred / Confirmation was confirmed·PaywallViewModelImpleTests·BillingScenes 간헐 실패
 - [2026-08-25 CI 가 브랜치와 무관하게 매번 다른 테스트에서 타임아웃으로 깨진다](2026-08-25-ci-wallclock-timeout-flaky.md) — Infra / workaround / CI 반복 실패·Exceeded timeout of·매번 다른 테스트·로컬은 통과
+- [2026-08-26 `Text(timerInterval:)` 을 좁은 행에 넣으면 크래시하거나 자릿수가 `--` 로 빠진다](2026-08-26-live-activity-timer-text-layout-traps.md) — Event / fixed / 라이브액티비티 잠금화면 크래시·LayoutSubview.place·GeometryReaderLayout·카운트다운 1:15:--·fixedSize
