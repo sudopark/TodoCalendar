@@ -185,10 +185,10 @@
 "eventDetail.repeating.starttime:title" = "Čas začátku opakování";
 "eventDetail.repeating.everyDay:title" = "Každý den";
 "eventDetail.repeating.everyWeek:title" = "Každý týden";
-"eventDetail.repeating.everyWeekSomeDay:title" = "Každé %@";
-"eventDetail.repeating.everySomeWeek:title" = "Každých %d týdnů";
+"eventDetail.repeating.everyWeekSomeDay:title" = "Každý týden: %@";
+"eventDetail.repeating.everySomeWeek:title" = "Po %d týdnech";
 "eventDetail.repeating.everyWeekDays:title" = "Každý pracovní den";
-"eventDetail.repeating.everySomeWeekSomeDay:title" = "Každých %d týdnů v %@";
+"eventDetail.repeating.everySomeWeekSomeDay:title" = "Po %d týdnech: %@";
 "eventDetail.repeating.everyMonth:title" = "Každý měsíc";
 "eventDetail.repeating.everyMonth_someDay:title" = "%@ každý měsíc.";
 "eventDetail.repeating.everyYear:title" = "Každý rok";
@@ -212,10 +212,10 @@
 "eventDetail.repeating.endtime::shouldFutureThanStartTime" = "Čas konce opakování musí být pozdější než čas začátku.\n(Datum začátku opakování: %@)";
 "eventDetail.repeating::period_endcount" = "Od %@, %d krát";
 
-"eventDetail.repeating.everyNDays:title" = "Každých %d dní";
+"eventDetail.repeating.everyNDays:title" = "Po %d dnech";
 "eventDetail.repeating.last" = "Poslední";
-"eventDetail.repeating.everyNMonths:title" = "Každých %d měsíců";
-"eventDetail.repeating.everyNYears:title" = "Každých %d let";
+"eventDetail.repeating.everyNMonths:title" = "Po %d měsících";
+"eventDetail.repeating.everyNYears:title" = "Po %d letech";
 "eventDetail.repeating::endoption_until" = "do %@";
 "eventDetail.repeating::endoption_times" = "%d krát";
 

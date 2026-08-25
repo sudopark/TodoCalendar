@@ -185,10 +185,10 @@
 "eventDetail.repeating.starttime:title" = "Czas rozpoczęcia powtarzania";
 "eventDetail.repeating.everyDay:title" = "Codziennie";
 "eventDetail.repeating.everyWeek:title" = "Co tydzień";
-"eventDetail.repeating.everyWeekSomeDay:title" = "Co %@";
-"eventDetail.repeating.everySomeWeek:title" = "Co %d tygodni";
+"eventDetail.repeating.everyWeekSomeDay:title" = "Co tydzień: %@";
+"eventDetail.repeating.everySomeWeek:title" = "Co %d. tydzień";
 "eventDetail.repeating.everyWeekDays:title" = "Każdego dnia roboczego";
-"eventDetail.repeating.everySomeWeekSomeDay:title" = "Co %d tygodni w %@";
+"eventDetail.repeating.everySomeWeekSomeDay:title" = "Co %d. tydzień: %@";
 "eventDetail.repeating.everyMonth:title" = "Co miesiąc";
 "eventDetail.repeating.everyMonth_someDay:title" = "%@ każdego miesiąca.";
 "eventDetail.repeating.everyYear:title" = "Co rok";
@@ -212,10 +212,10 @@
 "eventDetail.repeating.endtime::shouldFutureThanStartTime" = "Czas zakończenia powtarzania musi być późniejszy niż czas rozpoczęcia.\n(Data rozpoczęcia powtarzania: %@)";
 "eventDetail.repeating::period_endcount" = "Od %@, %d razy";
 
-"eventDetail.repeating.everyNDays:title" = "Co %d dni";
+"eventDetail.repeating.everyNDays:title" = "Co %d. dzień";
 "eventDetail.repeating.last" = "Ostatni";
-"eventDetail.repeating.everyNMonths:title" = "Co %d miesięcy";
-"eventDetail.repeating.everyNYears:title" = "Co %d lat";
+"eventDetail.repeating.everyNMonths:title" = "Co %d. miesiąc";
+"eventDetail.repeating.everyNYears:title" = "Co %d. rok";
 "eventDetail.repeating::endoption_until" = "do %@";
 "eventDetail.repeating::endoption_times" = "%d razy";
 

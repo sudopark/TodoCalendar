@@ -185,10 +185,10 @@
 "eventDetail.repeating.starttime:title" = "Início da recorrência";
 "eventDetail.repeating.everyDay:title" = "Todos os dias";
 "eventDetail.repeating.everyWeek:title" = "Toda semana";
-"eventDetail.repeating.everyWeekSomeDay:title" = "Toda %@";
+"eventDetail.repeating.everyWeekSomeDay:title" = "Toda semana: %@";
 "eventDetail.repeating.everySomeWeek:title" = "A cada %d semanas";
 "eventDetail.repeating.everyWeekDays:title" = "Todo dia útil";
-"eventDetail.repeating.everySomeWeekSomeDay:title" = "A cada %d semanas %@";
+"eventDetail.repeating.everySomeWeekSomeDay:title" = "A cada %d semanas: %@";
 "eventDetail.repeating.everyMonth:title" = "Todo mês";
 "eventDetail.repeating.everyMonth_someDay:title" = "%@ de cada mês.";
 "eventDetail.repeating.everyYear:title" = "Todo ano";

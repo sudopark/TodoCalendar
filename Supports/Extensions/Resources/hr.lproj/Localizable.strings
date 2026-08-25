@@ -185,10 +185,10 @@
 "eventDetail.repeating.starttime:title" = "Vrijeme početka ponavljanja";
 "eventDetail.repeating.everyDay:title" = "Svaki dan";
 "eventDetail.repeating.everyWeek:title" = "Svaki tjedan";
-"eventDetail.repeating.everyWeekSomeDay:title" = "Svaki %@";
-"eventDetail.repeating.everySomeWeek:title" = "Svaka %d tjedna";
+"eventDetail.repeating.everyWeekSomeDay:title" = "Svaki tjedan: %@";
+"eventDetail.repeating.everySomeWeek:title" = "Svaki %d. tjedan";
 "eventDetail.repeating.everyWeekDays:title" = "Svaki radni dan";
-"eventDetail.repeating.everySomeWeekSomeDay:title" = "Svaka %d tjedna, %@";
+"eventDetail.repeating.everySomeWeekSomeDay:title" = "Svaki %d. tjedan: %@";
 "eventDetail.repeating.everyMonth:title" = "Svaki mjesec";
 "eventDetail.repeating.everyMonth_someDay:title" = "%@ svakog mjeseca.";
 "eventDetail.repeating.everyYear:title" = "Svake godine";
@@ -212,10 +212,10 @@
 "eventDetail.repeating.endtime::shouldFutureThanStartTime" = "Vrijeme kraja ponavljanja mora biti kasnije od vremena početka.\n(Datum početka ponavljanja: %@)";
 "eventDetail.repeating::period_endcount" = "Od %@, %d puta";
 
-"eventDetail.repeating.everyNDays:title" = "Svaka %d dana";
+"eventDetail.repeating.everyNDays:title" = "Svaki %d. dan";
 "eventDetail.repeating.last" = "Zadnji";
-"eventDetail.repeating.everyNMonths:title" = "Svaka %d mjeseca";
-"eventDetail.repeating.everyNYears:title" = "Svaka %d godine";
+"eventDetail.repeating.everyNMonths:title" = "Svaki %d. mjesec";
+"eventDetail.repeating.everyNYears:title" = "Svake %d. godine";
 "eventDetail.repeating::endoption_until" = "do %@";
 "eventDetail.repeating::endoption_times" = "%d puta";
 
