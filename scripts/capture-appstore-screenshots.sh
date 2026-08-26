@@ -49,7 +49,7 @@ SUITES=(
 
 # <업로드 파일명>|<모듈 디렉토리>/<스위트>/<캡처 파일명>
 MAPPING=(
-    "01-calendar|CalendarScenes/CalendarScenesCatalogSnapshots/test_calendar.calendar-light.png"
+    "01-calendar|CalendarScenes/CalendarScenesCatalogSnapshots/test_storeCalendar.storeCalendar-light.png"
     "05-repeat-options|EventDetailScene/EventDetailSceneCatalogSnapshots/test_storeRepeatOptions.storeRepeatOptions-light.png"
     "06-event-detail|EventDetailScene/EventDetailSceneCatalogSnapshots/test_eventDetail.eventDetail-light.png"
     "07-event-types|SettingScene/SettingSceneCatalogSnapshots/test_eventTypeList.eventTypeList-light.png"
