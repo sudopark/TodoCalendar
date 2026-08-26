@@ -88,6 +88,12 @@ struct EventListCellView: View {
         .padding(.vertical, spacing: .xsmall).padding(.horizontal, spacing: .small)
         .frame(idealHeight: 50)
         .backgroundAsRoundedRectForEventList(self.appearance)
+        .overlay(alignment: .topTrailing) {
+            if self.cellViewModel.isLiveActivityRegistered {
+                self.liveActivityBadgeView
+                    .offset(x: 6, y: -6)
+            }
+        }
         .onTapGesture {
             self.appearance.impactIfNeed()
             self.requestShowDetail(self.cellViewModel)
@@ -328,6 +334,16 @@ struct EventListCellView: View {
     private var foremostMarkingView: some View {
         return LoadingCircleView(appearance.colorSet.accent.asColor, lineWidth: 1.5)
             .frame(width: 24, height: 24)
+    }
+
+    private var liveActivityBadgeView: some View {
+        return Image(systemName: "timer")
+            .font(.system(size: 10, weight: .bold))
+            .foregroundColor(appearance.colorSet.primaryBtnText.asColor)
+            .frame(width: 18, height: 18)
+            .background(
+                Circle().fill(appearance.colorSet.accent.asColor)
+            )
     }
     
     private func todoDoneButton(_ todoId: String) -> some View {
