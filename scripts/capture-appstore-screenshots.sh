@@ -6,6 +6,7 @@
 #   scripts/capture-appstore-screenshots.sh --all
 #
 # 결과: snapshot-appstore/<lang>/<NN-슬러그>.png (gitignore 대상, 언어별 격리)
+#       snapshot-appstore/<lang>/captions/<NN-슬러그>.png — 합성 캔버스 상단에 얹을 캡션
 #       snapshot-appstore/<lang>/widgets/<슬러그>.png — 홈화면 합성 전 위젯 원본
 # 홈화면 위젯 스샷은 위젯 원본을 홈화면에 합성해 만드는 별도 단계다 — 여기서는 원본까지만 뽑는다.
 #
@@ -44,6 +45,7 @@ SUITES=(
     "CalendarScenesSnapshots|CalendarScenesCatalogSnapshots|CalendarScenes"
     "EventDetailSceneSnapshots|EventDetailSceneCatalogSnapshots|EventDetailScene"
     "SettingSceneSnapshots|SettingSceneCatalogSnapshots|SettingScene"
+    "CommonPresentationSnapshots|AppStoreCaptionSnapshots|CommonPresentation"
     "TodoCalendarAppWidgetSnapshots|WidgetCatalogSnapshots|Widget"
 )
 
@@ -56,7 +58,15 @@ MAPPING=(
     "05-appearance|SettingScene/SettingSceneCatalogSnapshots/test_appearanceSetting.appearanceSetting-light.png"
 )
 
-# 홈화면 합성 전 위젯 원본 — 화면 규격이 아니라 위젯 캔버스 규격이라 규격 검사·알파 제거 대상이 아니다
+# 캡션·위젯 원본 — 화면 규격이 아니라 각자의 캔버스 규격이라 규격 검사·알파 제거 대상이 아니다
+CAPTION_MAPPING=(
+    "01-calendar|CommonPresentation/AppStoreCaptionSnapshots/test_storeCaptions.01-calendar-light.png"
+    "02-repeat-options|CommonPresentation/AppStoreCaptionSnapshots/test_storeCaptions.02-repeat-options-light.png"
+    "03-event-detail|CommonPresentation/AppStoreCaptionSnapshots/test_storeCaptions.03-event-detail-light.png"
+    "04-event-types|CommonPresentation/AppStoreCaptionSnapshots/test_storeCaptions.04-event-types-light.png"
+    "05-appearance|CommonPresentation/AppStoreCaptionSnapshots/test_storeCaptions.05-appearance-light.png"
+)
+
 WIDGET_MAPPING=(
     "today-and-next|Widget/WidgetCatalogSnapshots/test_widgetTodayAndNext.widget-today-and-next-light.png"
     "event-list|Widget/WidgetCatalogSnapshots/test_widgetEventList.widget-event-list-light.png"
@@ -158,12 +168,18 @@ capture_lang() {
 
     local out="$ROOT/snapshot-appstore/$lang"
     rm -rf "$out"
-    mkdir -p "$out/widgets"
+    mkdir -p "$out/captions" "$out/widgets"
     for entry in "${MAPPING[@]}" ; do
         IFS='|' read -r name source <<< "$entry"
         local src="$ROOT/snapshot-catalog/$source"
         [ -f "$src" ] || { echo "  ✗ 누락: $source"; return 1; }
         cp "$src" "$out/$name.png"
+    done
+    for entry in "${CAPTION_MAPPING[@]}" ; do
+        IFS='|' read -r name source <<< "$entry"
+        local src="$ROOT/snapshot-catalog/$source"
+        [ -f "$src" ] || { echo "  ✗ 누락: $source"; return 1; }
+        cp "$src" "$out/captions/$name.png"
     done
     for entry in "${WIDGET_MAPPING[@]}" ; do
         IFS='|' read -r name source <<< "$entry"
@@ -171,7 +187,7 @@ capture_lang() {
         [ -f "$src" ] || { echo "  ✗ 누락: $source"; return 1; }
         cp "$src" "$out/widgets/$name.png"
     done
-    echo "  ✓ [$lang] ${#MAPPING[@]}장 + 위젯 원본 ${#WIDGET_MAPPING[@]}종 → snapshot-appstore/$lang/"
+    echo "  ✓ [$lang] ${#MAPPING[@]}장 + 캡션 ${#CAPTION_MAPPING[@]}장 + 위젯 원본 ${#WIDGET_MAPPING[@]}종 → snapshot-appstore/$lang/"
 
     verify_and_strip_alpha "$python_bin" "$out" || return 1
 
