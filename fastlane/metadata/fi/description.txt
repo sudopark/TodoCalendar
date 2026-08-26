@@ -1,0 +1,43 @@
+Tehtäväsi ja aikataulusi samassa kalenterissa.
+
+Aikataulusi on kalenterissa. Tehtäväsi ovat jossain muualla. Kun haluat nähdä, mitä kuukausi tuo tullessaan ja mitä on vielä tekemättä, päädyt katsomaan kahdesta paikasta.
+
+To-do Calendar pitää molemmat samassa kalenterissa. Aikataulutapahtuma asettuu sille päivälle, jona se tapahtuu, ja tehtävä pysyy näkyvissä, kunnes merkitset sen valmiiksi. Myöskään ajattomat tehtävät eivät katoa.
+
+Sovellus toimii ilman tiliä ja ilman verkkoyhteyttä. Kirjaudu sisään vain silloin, kun haluat varmuuskopioida tietosi ja jakaa ne laitteidesi välillä.
+
+■ Yksi kalenteri, molemmat työn lajit
+· Aikataulutapahtumat ja tehtävät ovat vierekkäin, väreinä itse luomasi tapahtumatyypit
+· Keskeneräiset tehtävät eivät jää menneelle päivälle — ne pysyvät kiinnitettyinä kalenterin ylälaitaan
+· Valitse päivä, niin sovellus rakentaa siihen sopivan toiston — joka torstai, kuukauden kolmas torstai, jopa vuosittainen kuukalenterin päivä
+· Jokaiseen tapahtumaan voi liittää paikan, linkin, muistiinpanon ja muistutukset
+· Kiinnitä tärkeimmäksi tapahtumaksi se, jota et voi missata, niin se pysyy ylimpänä katsoitpa mitä päivää tahansa
+· Jaa päivä, viikko tai kuukausi tekstinä tai kuvakorttina
+
+■ AI-pikasyöttö
+”lounas Saran kanssa perjantaina keskipäivällä”, ”siirrä hammaslääkäri ensi tiistaille”, ”merkitse pyykit tehdyiksi”.
+Kuvaile se niin kuin sanoisit sen ääneen. Ei lomakkeita täytettäväksi, ei päivämääriä valittavaksi kenttä kerrallaan.
+· Puhe, näppäimistö ja lukeminen kuvasta — valokuvaa lukujärjestys tai tapahtumajuliste, ja teksti muuttuu tapahtumiksi
+· Sirin, toimintopainikkeen, widgetin, Ohjauskeskuksen tai jakovalikon kautta, avaamatta sovellusta
+· Ei pelkkää lisäämistä: aikojen siirtoa, uudelleennimeämistä, valmiiksi merkitsemistä, poistamista, useita kerralla
+· Kaikki, mikä poistaa tai muuttaa jotain, näyttää tarkalleen, mitä on tapahtumassa, ja odottaa hyväksyntääsi
+· AI-pikasyöttö edellyttää sisäänkirjautumista
+
+■ Näe päiväsi avaamatta sovellusta
+· Home-valikon widgetit — tänään ja mitä seuraavaksi, tapahtumalista, TÄNÄÄN, tärkein tapahtumasi, kuukausi ja viikot sekä yhdistelmät, joissa on kaksi näistä vierekkäin
+· Merkitse tehtävä valmiiksi suoraan widgetistä
+· Lukitusnäytön widgetit seuraavaa tapahtumaa ja päivän loppuosaa varten
+· Pian alkava tapahtuma laskee aikaa lukitusnäytöllä ja Dynamic Islandissa
+· Laita Lisää AI:lla Ohjauskeskukseen, niin yksi pyyhkäisy vie sinut syöttönäkymään mistä tahansa
+
+■ Ota muut kalenterisi mukaan
+· Google-kalenteri — yhdistä useita tilejä kerralla. Jokainen kalenteri säilyttää värin, jonka annoit sille Googlessa, ja osallistujat, kokouslinkit ja liitteet ovat kaikki mukana ja muokattavissa saman tien
+· Apple-kalenteri — iPhonessasi jo olevat kalenterit, yhdellä käyttöoikeudella
+· Valitse tapahtumatyyppien listasta, mitä näytetään, yksi kalenteri kerrallaan
+· Katkaise yhteys, eikä Google-tililtäsi tai laitteeltasi poisteta mitään
+
+■ Tee siitä omasi
+· Kuinka paljon tietoja kukin tapahtuma näyttää, tapahtuman tekstin koko ja värit — jokainen muutos näkyy heti esikatselussa
+· Väriteema ja widgetin teema, viikon ensimmäinen päivä, korostetut päivät
+· Maakohtaiset vapaapäivät, kuukalenteri, 24 tunnin muoto ja aikavyöhyke
+· Aseta tapahtumatyyppi ja muistutusaika, joilla uudet tapahtumat alkavat
