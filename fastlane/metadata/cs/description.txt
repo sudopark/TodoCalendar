@@ -1,0 +1,43 @@
+Vaše úkoly i termíny v jednom kalendáři.
+
+Vaše termíny žijí v kalendáři. Vaše úkoly někde jinde. Abyste zjistili, co vás tenhle měsíc čeká a co jste ještě nestihli, nakonec koukáte na dvě místa.
+
+To-do Calendar drží obojí ve stejném kalendáři. Termín leží na dni, kdy se odehrává, a úkol zůstává, dokud ho neodškrtnete. Nezmizí ani úkoly, u kterých žádný čas není.
+
+Funguje bez účtu a bez připojení. Přihlaste se jen tehdy, když chcete mít data zálohovaná a sdílená mezi svými zařízeními.
+
+■ Jeden kalendář, dva druhy práce
+· Termíny a úkoly jsou pohromadě, barevně odlišené podle typů událostí, které si vytvoříte sami
+· Nedokončené úkoly nezůstanou ležet na minulém datu — zůstávají připnuté nahoře v kalendáři
+· Vyberte datum a aplikace za vás sestaví odpovídající opakování — každý čtvrtek, třetí čtvrtek každého měsíce, i roční datum podle lunárního kalendáře
+· Ke každé události patří místo, odkaz, poznámka i připomenutí
+· Připněte to, co si nesmíte nechat ujít, jako nejdůležitější událost — zůstane nahoře, ať se díváte na kterýkoli den
+· Sdílejte den, týden nebo měsíc jako text nebo jako obrázkovou kartu
+
+■ Rychlé zadávání AI
+„oběd se Sárou v pátek v poledne“, „přesuň zubaře na příští úterý“, „označ prádlo jako hotové“.
+Popište to tak, jak byste to řekli. Žádné formuláře k vyplnění, žádná data k vybírání pole po poli.
+· Hlas, klávesnice a čtení z obrázku — vyfoťte rozvrh nebo plakát na akci a text se změní v události
+· Přes Siri, tlačítko Akce, widget, Ovládací centrum nebo nabídku sdílení, aniž byste otevřeli aplikaci
+· Nejen přidávání: posouvání časů, přejmenování, dokončování, mazání, i více věcí najednou
+· Cokoli, co něco maže nebo mění, vám přesně ukáže, co se chystá udělat, a počká na vaše schválení
+· Rychlé zadávání AI vyžaduje přihlášení
+
+■ Uvidíte svůj den, aniž byste aplikaci otevřeli
+· Widgety na plochu — dnes a co bude dál, seznam událostí, DNES, vaše nejdůležitější událost, měsíc a týdny a kombinace, které dvě z nich spojí vedle sebe
+· Odškrtněte úkol přímo z widgetu
+· Widgety na uzamčenou obrazovku pro další událost a zbytek dneška
+· Událost, která má začít, odpočítává na uzamčené obrazovce i v Dynamic Islandu
+· Dejte si Přidat pomocí AI do Ovládacího centra a jedno přejetí vás odkudkoli přenese na obrazovku zadávání
+
+■ Vezměte si s sebou ostatní kalendáře
+· Google Kalendář — připojte několik účtů najednou. Každý kalendář si nechá barvu, kterou jste mu dali v Googlu, a účastníci, odkazy na schůzky i přílohy jsou na místě a hned upravitelné
+· Apple Kalendář — kalendáře, které už máte v iPhonu, po jediném udělení oprávnění
+· V seznamu typů událostí vyberte, co se má zobrazovat, kalendář po kalendáři
+· Odpojte se a z vašeho účtu Google ani ze zařízení nic nezmizí
+
+■ Nastavte si to po svém
+· Kolik detailů každá událost ukáže, velikost písma a barvy textu událostí — každá změna se hned ukáže v náhledu
+· Barevné téma a motiv widgetu, první den v týdnu, zvýrazněné dny
+· Svátky podle země, lunární kalendář, 24hodinový formát a časové pásmo
+· Určete typ události a čas připomenutí, se kterými nové události startují
