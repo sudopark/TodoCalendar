@@ -1,0 +1,43 @@
+Vos tâches et votre agenda, sur un seul calendrier.
+
+Votre agenda vit dans un calendrier. Vos tâches vivent ailleurs. Pour savoir ce que le mois vous réserve et ce qu'il vous reste à faire, vous finissez toujours par regarder à deux endroits.
+
+To-do Calendar garde les deux sur le même calendrier. Un rendez-vous se pose sur le jour où il a lieu, et une tâche reste là jusqu'à ce que vous la cochiez. Les tâches sans heure définie ne disparaissent pas non plus.
+
+Tout fonctionne sans compte et sans connexion. Connectez-vous seulement quand vous voulez sauvegarder vos données et les partager entre vos appareils.
+
+■ Un calendrier, deux façons de s'organiser
+· Rendez-vous et tâches côte à côte, avec les couleurs des types d'événement que vous créez vous-même
+· Les tâches non terminées ne restent pas enterrées à une date déjà passée — elles restent épinglées en haut du calendrier
+· Choisissez une date et l'application construit la récurrence qui va avec — chaque jeudi, le troisième jeudi de chaque mois, et même une date annuelle du calendrier lunaire
+· Chaque événement peut porter un lieu, un lien, une note et des rappels
+· Épinglez ce que vous ne pouvez pas manquer comme événement principal : il reste en haut, quel que soit le jour affiché
+· Partagez une journée, une semaine ou un mois en texte ou en carte image
+
+■ Saisie rapide par IA
+« déjeuner avec Sara vendredi à midi », « décale le dentiste à mardi prochain », « marque la lessive comme faite ».
+Décrivez-le comme vous le diriez. Aucun formulaire à remplir, aucune date à choisir champ par champ.
+· À la voix, au clavier et en lisant depuis une image — photographiez un emploi du temps ou l'affiche d'un événement et le texte devient des événements
+· Depuis Siri, le bouton Action, un widget, le centre de contrôle ou la feuille de partage, sans ouvrir l'application
+· Pas seulement ajouter : décaler des horaires, renommer, terminer, supprimer, et plusieurs choses à la fois
+· Tout ce qui supprime ou modifie quelque chose vous montre exactement ce qui va se passer et attend votre accord
+· La saisie rapide par IA nécessite d'être connecté
+
+■ Voir votre journée sans ouvrir l'application
+· Widgets de l'écran d'accueil — aujourd'hui et à venir, votre liste d'événements, AUJOURD'HUI, votre événement principal, le mois et les semaines, et des combinaisons qui en réunissent deux
+· Terminez une tâche directement depuis un widget
+· Widgets de l'écran verrouillé pour votre prochain événement et ce qu'il reste de la journée
+· Un événement sur le point de commencer décompte sur l'écran verrouillé et dans la Dynamic Island
+· Placez Ajouter avec l'IA dans le centre de contrôle : un geste vous amène à l'écran de saisie où que vous soyez
+
+■ Vos autres calendriers avec vous
+· Google Calendar — connectez plusieurs comptes à la fois. Chaque calendrier garde la couleur que vous lui avez donnée dans Google, et les participants, les liens de réunion et les pièces jointes sont là, modifiables sur place
+· Apple Calendar — les calendriers déjà présents sur votre iPhone, avec une seule autorisation
+· Choisissez ce qui s'affiche, calendrier par calendrier, depuis la liste des types d'événement
+· Déconnectez et rien n'est supprimé de votre compte Google ni de votre appareil
+
+■ À votre main
+· Le niveau de détail affiché par événement, la taille du texte et les couleurs des événements : chaque changement s'aperçoit en direct
+· Thème de couleur et thème du widget, le premier jour de la semaine, les jours en évidence
+· Jours fériés par pays, calendrier lunaire, format 24 heures et fuseau horaire
+· Fixez le type d'événement et l'heure de rappel avec lesquels démarrent les nouveaux événements
