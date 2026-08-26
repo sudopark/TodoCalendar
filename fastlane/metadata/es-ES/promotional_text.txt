@@ -1,0 +1,1 @@
+3.0.0 — Llega la entrada rápida con IA. Describe un evento por voz, por teclado o con una foto, desde Siri, el botón de Acción o el Centro de Control, sin abrir la app.
