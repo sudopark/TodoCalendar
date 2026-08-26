@@ -25,6 +25,55 @@ def ensure_asc_baseline_downloaded!(metadata_path)
   MESSAGE
 end
 
+# ASC 가 로케일마다 요구하는 필수 필드 — 하나라도 비면 심사 제출이 막힌다
+REQUIRED_LOCALE_FIELDS = %w[name description keywords support_url privacy_url].freeze
+
+# deliver 가 로케일이 아닌 용도로 쓰는 하위 디렉토리
+NON_LOCALE_METADATA_DIRS = %w[
+  review_information
+  trade_representative_contact_information
+  app_clip_review_information
+].freeze
+
+def metadata_locale_dirs(metadata_path)
+  Dir.children(metadata_path).sort
+     .map { |name| [name, File.join(metadata_path, name)] }
+     .select { |name, path| File.directory?(path) && !NON_LOCALE_METADATA_DIRS.include?(name) }
+end
+
+def blank_metadata_field?(dir, field)
+  path = File.join(dir, "#{field}.txt")
+  !File.exist?(path) || File.read(path).strip.empty?
+end
+
+def ensure_required_locale_fields!(metadata_path)
+  missing = metadata_locale_dirs(metadata_path).each_with_object({}) do |(locale, dir), acc|
+    absent = REQUIRED_LOCALE_FIELDS.select { |field| blank_metadata_field?(dir, field) }
+    acc[locale] = absent unless absent.empty?
+  end
+  return if missing.empty?
+
+  UI.user_error!(<<~MESSAGE)
+    로케일 #{missing.size}개가 ASC 심사 필수 필드를 못 갖췄다. 이대로 올리면 제출이 막힌다.
+
+    #{missing.map { |locale, fields| "  #{locale} — #{fields.join(', ')}" }.join("\n")}
+
+    `deliver init` 뒤에 en-US 의 비번역 필드를 나머지 로케일로 퍼뜨려라:
+      python3 scripts/propagate-appstore-metadata.py --apply
+  MESSAGE
+end
+
+# release_notes 는 업데이트 버전에서만 필수다. deliver 는 첫 버전이면 아예 올리지 않는데
+# 그 판정은 ASC 쪽 정보라 로컬에서 못 하므로 중단이 아니라 경고로 알린다
+def warn_missing_release_notes(metadata_path)
+  locales = metadata_locale_dirs(metadata_path)
+             .select { |_, dir| blank_metadata_field?(dir, "release_notes") }
+             .map(&:first)
+  return if locales.empty?
+
+  UI.important("release_notes 없는 로케일 #{locales.size}개: #{locales.join(', ')} — 업데이트 버전이면 ASC 가 로케일마다 요구한다")
+end
+
 platform :ios do
   desc "Development 서명 IPA를 빌드해 Firebase App Distribution testers 그룹에 배포"
   lane :test_deploy do
@@ -61,6 +110,8 @@ platform :ios do
   lane :upload_app_store_metadata do
     metadata_path = app_store_metadata_path
     ensure_asc_baseline_downloaded!(metadata_path)
+    ensure_required_locale_fields!(metadata_path)
+    warn_missing_release_notes(metadata_path)
 
     api_key = app_store_connect_api_key(
       key_id: required_env("ASC_KEY_ID", "App Store Connect > 사용자 및 액세스 > 통합에서 발급한 키 ID"),
