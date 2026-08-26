@@ -1,0 +1,43 @@
+Görevleriniz ve randevularınız tek bir takvimde.
+
+Randevularınız takvimde durur. Görevleriniz başka bir yerde. Bu ayın ne getirdiğini ve neleri hâlâ yapmadığınızı görmek için sonunda iki yere birden bakarsınız.
+
+To-do Calendar ikisini de aynı takvimde tutar. Bir randevu gerçekleştiği günün üzerinde durur, bir görev ise siz işaretleyene kadar kalır. Saatsiz görevler de kaybolmaz.
+
+Uygulama hesapsız ve bağlantısız çalışır. Yalnızca verilerinizin yedeklenmesini ve aynı takvimin bütün cihazlarınızda olmasını istediğinizde giriş yapın.
+
+■ Tek takvim, iki tür iş bir arada
+· Randevular ve görevler yan yana durur, kendi oluşturduğunuz etkinlik türlerinin renkleriyle
+· Tamamlanmamış görevler geçmiş bir tarihte gömülü kalmaz — takvimin en üstünde sabitli durur
+· Bir tarih seçin, uygulama ona uyan tekrarlamayı kursun: her Perşembe, her ayın üçüncü Perşembe günü, hatta ay takvimine göre yıllık bir tarih
+· Her etkinlik bir konum, bir bağlantı, bir not ve hatırlatmalar taşıyabilir
+· Kaçırmayı göze alamadığınızı en önemli etkinlik olarak sabitleyin, hangi güne bakarsanız bakın en üstte kalsın
+· Bir günü, bir haftayı ya da bir ayı metin olarak veya görsel kart olarak paylaşın
+
+■ Hızlı AI girişi
+"cuma öğlen Sara ile öğle yemeği", "diş hekimini gelecek salıya al", "çamaşırı tamamlandı olarak işaretle".
+Nasıl söylüyorsanız öyle anlatın. Doldurulacak form yok, alan alan seçilecek tarih yok.
+· Ses, klavye ve görselden okuma — bir ders programını ya da etkinlik afişini fotoğraflayın, metin etkinliğe dönüşsün
+· Siri'den, Aksiyon Düğmesi'nden, bir widget'tan, Kontrol Merkezi'nden ya da paylaşım sayfasından, uygulamayı açmadan
+· Yalnızca ekleme değil: saat taşıma, ad değiştirme, tamamlama, silme, hatta birkaçını birden
+· Bir şeyi silen ya da değiştiren her işlem, tam olarak ne yapacağını önce gösterir ve onayınızı bekler
+· Hızlı AI girişi için giriş yapmış bir hesap gerekir
+
+■ Gününüzü uygulamayı açmadan görün
+· Ana Ekran widget'ları — bugün ve sıradakiler, etkinlik listeniz, BUGÜN, en önemli etkinliğiniz, takvim ve haftalar, ayrıca ikisini bir araya getiren kombinasyonlar
+· Bir görevi doğrudan widget'tan işaretleyin
+· Sonraki etkinliğiniz ve günden kalanlar için Kilit Ekranı widget'ları
+· Başlamak üzere olan bir etkinlik Kilit Ekranı'nda ve Dynamic Island'da geri sayar
+· AI ile Ekle'yi Kontrol Merkezi'ne koyun, tek kaydırmayla her yerden giriş ekranına ulaşın
+
+■ Diğer takvimlerinizi de getirin
+· Google Takvim — aynı anda birden çok hesap bağlayın. Her takvim Google'da ona verdiğiniz rengi korur; katılımcılar, toplantı bağlantıları ve ekler de oradadır, yerinde düzenlenebilir
+· Apple Takvim — iPhone'unuzda hâlihazırda duran takvimler, tek bir izinle
+· Etkinlik türleri listesinden neyin görüneceğini takvim takvim seçin
+· Bağlantıyı kesin, Google hesabınızdan da cihazınızdan da hiçbir şey silinmez
+
+■ Kendinize göre ayarlayın
+· Her etkinliğin ne kadar ayrıntı göstereceği, etkinlik metni boyutu ve etkinlik renkleri — her değişiklik anında önizlenir
+· Renk teması ve widget teması, haftanın başlangıç günü, vurgulanan günler
+· Ülkeye göre tatiller, ay takvimi, 24 saat biçimi ve saat dilimi
+· Yeni etkinliklerin hangi etkinlik türü ve hangi bildirim zamanıyla başlayacağını belirleyin
