@@ -93,7 +93,7 @@ extension SettingItemListViewModelImpleTests {
         let baseSection = sections?[safe: 0]
         let baseItemIds = baseSection?.items.compactMap { $0 as? SettingItemModel }.map { $0.itemId }
         XCTAssertEqual(baseItemIds, [
-            .appearance, .editEvent, .holidaySetting
+            .appearance, .editEvent, .holidaySetting, .billingPlan
         ])
         let accountItem = baseSection?.items.last as? AccountSettingItemModel
         XCTAssertEqual(accountItem?.isSignIn, false)
@@ -474,7 +474,7 @@ extension SettingItemListViewModelImpleTests {
 }
 
 
-// MARK: - billing plan 진입점 (#739)
+// MARK: - billing plan 진입점 (#739, #1007)
 
 extension SettingItemListViewModelImpleTests {
 
@@ -490,7 +490,7 @@ extension SettingItemListViewModelImpleTests {
         XCTAssertNotNil(billingItem)
     }
 
-    func test_whenNotSignedIn_hidesBillingPlanItem() {
+    func test_whenNotSignedIn_showsBillingPlanItem() {
         // given
         let viewModel = self.makeViewModel(nil)
         let items = self.WaitItemLoaded(viewModel)
@@ -499,7 +499,46 @@ extension SettingItemListViewModelImpleTests {
         let billingItem = items.compactMap { $0 as? SettingItemModel }.first(where: { $0.itemId == .billingPlan })
 
         // then
-        XCTAssertNil(billingItem)
+        XCTAssertNotNil(billingItem)
+    }
+
+    func test_whenNotSignedIn_selectBillingPlan_showsSignInConfirm() {
+        // given
+        self.spyRouter.shouldConfirmNotCancel = false
+        let viewModel = self.makeViewModel(nil)
+        let items = self.WaitItemLoaded(viewModel)
+        guard let billingItem = items.compactMap({ $0 as? SettingItemModel }).first(where: { $0.itemId == .billingPlan })
+        else {
+            XCTAssert(false)
+            return
+        }
+
+        // when
+        viewModel.selectItem(billingItem)
+
+        // then
+        XCTAssertEqual(self.spyRouter.didShowConfirmWith?.title, "billing::needSignIn::title".localized())
+        XCTAssertEqual(self.spyRouter.didShowConfirmWith?.message, "billing::needSignIn::message".localized())
+        XCTAssertNil(self.spyRouter.didRouteToSignIn)
+        XCTAssertNil(self.spyRouter.didRouteToPaywall)
+    }
+
+    func test_whenNotSignedIn_confirmSignIn_routesToSignInWithoutPaywall() {
+        // given
+        let viewModel = self.makeViewModel(nil)
+        let items = self.WaitItemLoaded(viewModel)
+        guard let billingItem = items.compactMap({ $0 as? SettingItemModel }).first(where: { $0.itemId == .billingPlan })
+        else {
+            XCTAssert(false)
+            return
+        }
+
+        // when
+        viewModel.selectItem(billingItem)
+
+        // then
+        XCTAssertEqual(self.spyRouter.didRouteToSignIn, true)
+        XCTAssertNil(self.spyRouter.didRouteToPaywall)
     }
 
     func test_selectBillingPlan_routesToPaywall() {

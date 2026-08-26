@@ -746,6 +746,9 @@
 "billing::paywall::topup::applied" = "Credits added";
 "billing::paywall::topup::applied::withCredits" = "%@ credits added";
 
+"billing::needSignIn::title" = "Sign in required";
+"billing::needSignIn::message" = "Sign in to view and manage your plan.";
+
 // MARK: - share extension
 
 "share.ai::title" = "Send to AI";
