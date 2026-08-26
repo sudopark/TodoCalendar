@@ -1,0 +1,1 @@
+3.0.0 — Đã có nhập nhanh AI. Mô tả sự kiện bằng giọng nói, bàn phím hoặc một tấm ảnh, từ Siri, nút Hành động hay Trung tâm điều khiển. Không cần mở ứng dụng.

@@ -1,0 +1,43 @@
+Việc cần làm và lịch trình của bạn, trên cùng một cuốn lịch.
+
+Lịch trình nằm trong cuốn lịch, việc cần làm nằm ở một ứng dụng khác. Muốn biết tháng này có gì và còn việc gì chưa xong, bạn lại phải mở hai chỗ.
+
+To-do Calendar đặt cả hai lên cùng một cuốn lịch. Lịch trình nằm đúng ngày nó diễn ra, còn việc cần làm ở lại cho đến khi bạn đánh dấu hoàn thành. Việc không gắn với thời gian nào cũng không biến mất.
+
+Ứng dụng chạy được khi không có tài khoản và không có mạng. Bạn chỉ đăng nhập khi muốn sao lưu dữ liệu và dùng chung giữa các thiết bị.
+
+■ Một cuốn lịch, hai loại công việc
+· Lịch trình và việc cần làm nằm cạnh nhau, phân biệt bằng màu của loại sự kiện do bạn tự đặt
+· Việc chưa hoàn thành không bị bỏ lại ở một ngày đã qua — chúng được ghim trên cùng của lịch
+· Chọn một ngày là ứng dụng dựng sẵn kiểu lặp lại tương ứng — mỗi thứ Năm, thứ Năm thứ ba của mỗi tháng, cả ngày âm lịch hằng năm
+· Mỗi sự kiện đều có thể mang theo vị trí, liên kết, ghi chú và nhắc nhở
+· Ghim việc không được phép quên làm sự kiện quan trọng nhất và nó luôn ở trên cùng, dù bạn đang xem ngày nào
+· Chia sẻ một ngày, một tuần hay một tháng dưới dạng văn bản hoặc thẻ hình ảnh
+
+■ Nhập nhanh AI
+"ăn trưa với Sara thứ Sáu lúc 12 giờ", "dời lịch nha sĩ sang thứ Ba tuần sau", "đánh dấu đã giặt đồ xong".
+Cứ mô tả theo cách bạn vẫn nói. Không biểu mẫu phải điền, không phải chọn ngày từng ô một.
+· Giọng nói, bàn phím và đọc từ hình ảnh — chụp thời khóa biểu hay áp phích sự kiện là chữ trong ảnh thành sự kiện
+· Từ Siri, nút Hành động, tiện ích, Trung tâm điều khiển hay bảng chia sẻ, không cần mở ứng dụng
+· Không chỉ thêm mới — dời giờ, đổi tên, đánh dấu hoàn thành, xóa, và nhiều việc trong một yêu cầu
+· Mọi yêu cầu xóa hay thay đổi đều cho bạn xem chính xác nó sắp làm gì rồi chờ bạn duyệt
+· Nhập nhanh AI cần đăng nhập mới dùng được
+
+■ Xem cả ngày mà không cần mở ứng dụng
+· Tiện ích Màn hình chính — hôm nay và sắp tới, danh sách sự kiện, HÔM NAY, sự kiện quan trọng nhất, lịch tháng và lịch tuần, cùng các tiện ích kết hợp ghép hai loại lại
+· Đánh dấu hoàn thành một việc ngay trên tiện ích
+· Tiện ích Màn hình khóa cho sự kiện kế tiếp và phần còn lại của hôm nay
+· Sự kiện sắp bắt đầu sẽ đếm ngược trên Màn hình khóa và trong Dynamic Island
+· Đặt Thêm bằng AI vào Trung tâm điều khiển, một cú vuốt là tới màn hình nhập từ bất cứ đâu
+
+■ Mang theo các lịch khác của bạn
+· Google Calendar — kết nối nhiều tài khoản cùng lúc. Mỗi lịch giữ nguyên màu bạn đã đặt trên Google, người tham dự, liên kết họp và tệp đính kèm đều có, sửa được ngay tại chỗ
+· Apple Calendar — các lịch vốn đã có trên iPhone, chỉ cần cấp quyền một lần
+· Chọn thứ được hiển thị, từng lịch một, ngay trong danh sách loại sự kiện
+· Ngắt kết nối cũng không xóa gì khỏi tài khoản Google hay thiết bị của bạn
+
+■ Điều chỉnh theo ý bạn
+· Mỗi sự kiện hiện bao nhiêu thông tin, cỡ chữ và màu sự kiện — mọi thay đổi đều xem trước ngay
+· Chủ đề màu và chủ đề tiện ích, ngày bắt đầu tuần, ngày nhấn mạnh
+· Ngày lễ theo quốc gia, âm lịch, định dạng 24 giờ và múi giờ
+· Đặt sẵn loại sự kiện và thời gian nhắc nhở mà sự kiện mới sẽ dùng
