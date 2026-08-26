@@ -133,6 +133,18 @@ extension EventCellViewModelTests {
         // when + then
         #expect(cell?.customCompareKey != writableChangedCell?.customCompareKey)
     }
+
+    @Test("미완료 투두 셀은 more action에 라이브액티비티 항목이 없어도 등록 여부가 달라지면 compare key가 달라진다")
+    func uncompletedTodoCell_compareKeyIsDifferent_whenLiveActivityRegistrationChanged() {
+        // given
+        let cell = self.makeTodoCell(rawTime: .at(100)) |> \.isUncompletedTodo .~ true
+        let registeredCell = self.makeTodoCell(rawTime: .at(100))
+            |> \.isUncompletedTodo .~ true
+            |> \.isLiveActivityRegistered .~ true
+
+        // when + then
+        #expect(cell.customCompareKey != registeredCell.customCompareKey)
+    }
 }
 
 extension EventCellViewModelTests {
