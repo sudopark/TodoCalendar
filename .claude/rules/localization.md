@@ -15,24 +15,47 @@ paths:
 - `Localizable.strings` — **AppIntents 라벨·다이얼로그**(`title`·`description`·`IntentDialog` 등). AppIntents 문구는 그 인텐트가 속한 타겟 자신의 번들에서 해석되므로, 공유 리소스인 `Supports/Extensions/Resources`에 넣으면 시스템이 못 찾는다 — 앱 타겟(`TodoCalendarApp`) 소속 인텐트는 반드시 여기. **#722에서 데인 함정**: AppIntents 메타데이터는 이 규칙을 몰라 다른 곳에 두면 조용히 원문(en)으로만 보이거나 라벨이 깨진다.
 - `AppShortcuts.strings` — Siri 발화 phrase(`AppShortcutsProvider`).
 
-## 1. 개발 중엔 en/ko만 — 번역은 #1001으로 미룬다 (CLAUDE.md §1)
+## 1. 개발 중엔 en/ko만 — 번역은 `localization` 트래킹 이슈로 미룬다 (CLAUDE.md §1)
 
-전 언어를 그 자리에서 번역하면 개별 작업이 번역에 발목잡힌다. 그래서 **개발 시점엔 `en`·`ko` lproj만 갱신하고, 나머지 29개 언어는 번역 대기 트래킹 이슈 #1001에 미룬다.**
+전 언어를 그 자리에서 번역하면 개별 작업이 번역에 발목잡힌다. 그래서 **개발 시점엔 `en`·`ko` lproj만 갱신하고, 나머지 29개 언어는 번역 대기 트래킹 이슈에 미룬다.**
 
 작업 시 이 셋을 같이 한다:
 1. `en`·`ko` lproj에 키 추가·삭제·시그니처 변경 반영 (3개 리소스 위치 중 해당하는 곳).
-2. #1001 본문 "대기 목록"에 **현재 작업의 이슈 또는 PR 링크**를 한 줄 추가.
+2. 트래킹 이슈 본문 "대기 목록"에 **현재 작업의 이슈 또는 PR 링크**를 한 줄 추가 (등록처는 아래).
 3. 커밋 전 `python3 scripts/check-localization-parity.py ko`로 en↔ko 파리티 0 위반 확인. 문법은 `plutil -lint <파일>`.
 
-**미번역 언어에선 그 문구가 원문 키 그대로 노출된다** — `NSLocalizedString`은 키가 해당 lproj에 없을 때 en으로 fallback하지 않고 키 문자열을 돌려준다(`String+Extensions.swift`). 배포 전 #1001 소진이 전제다.
+**미번역 언어에선 그 문구가 원문 키 그대로 노출된다** — `NSLocalizedString`은 키가 해당 lproj에 없을 때 en으로 fallback하지 않고 키 문자열을 돌려준다(`String+Extensions.swift`). 배포 전 소진이 전제다.
 
-### #1001 처리 시점 (일괄 번역)
+### 등록처 — `localization` 라벨로 찾는다
 
-유저 지시로 #1001을 처리할 때만 29개 언어를 채운다:
+트래킹 이슈는 번호로 지목하지 않는다. 소진할 때마다 승계돼 번호가 바뀌고, 그때마다 이 문서와 CLAUDE.md를 고쳐야 하기 때문이다. **`localization` 라벨이 붙은 열린 이슈 중 가장 나중에 만들어진 것**이 등록처다:
 
-- 대기 키 목록의 정본은 `python3 scripts/check-localization-parity.py` (인자 없음 = 전 언어) 출력의 `missing keys`. #1001 대기 목록의 링크는 번역 뉘앙스를 잡을 맥락 참조용.
+```bash
+gh issue list --label localization --state open --json number,title,createdAt \
+  --jq 'sort_by(.createdAt) | last | "#\(.number) \(.title)"'
+```
+
+- 하나라도 나오면 그 이슈 본문의 "대기 목록"에 추가한다.
+- **빈 결과면 새로 만든다.** 본문은 직전 사이클 이슈를 복사해 대기 목록 두 절만 `(비어 있음)`으로 비운 것을 쓴다 — 닫을 때도 라벨을 떼지 않으므로 같은 조회의 `--state closed` 로 나온다. 라벨을 빠뜨리면 다음 작업이 못 찾는다.
+
+```bash
+PREV=$(gh issue list --label localization --state closed --json number,createdAt \
+  --jq 'sort_by(.createdAt) | last | .number')
+gh issue view $PREV --json body -q .body > <스크래치패드>/next-cycle.md   # 대기 목록을 비운 뒤
+gh issue create --label localization -t "다국어 번역 대기 — en/ko 선반영 작업 트래킹" \
+  -F <스크래치패드>/next-cycle.md
+```
+
+정렬을 `--jq` 로 명시하고 `-t`·`-F` 를 붙이는 건 취향이 아니다 — `gh issue list` 의 기본 정렬은 `--help` 에 명문화돼 있지 않고, `gh issue create` 는 `-t`·`-b`/`-F` 가 없으면 대화형 prompt 로 빠져 비대화형 세션이 거기서 멈춘다.
+
+### 처리 시점 (일괄 번역)
+
+유저 지시로 트래킹 이슈를 처리할 때만 29개 언어를 채운다:
+
+- 대기 키 목록의 정본은 `python3 scripts/check-localization-parity.py` (인자 없음 = 전 언어) 출력의 `missing keys`. 대기 목록의 링크는 번역 뉘앙스를 잡을 맥락 참조용.
 - 번역 원칙은 아래 §2·§3.
-- 전 언어 0 위반을 확인하고 #1001 대기 목록을 비운 뒤 close. **닫을 땐 같은 역할의 후속 트래킹 이슈를 새로 만들고, 이 문서와 CLAUDE.md §1 의 이슈 번호를 그 번호로 갱신한다** — 상시 프로세스라 등록할 자리가 없으면 다음 작업이 미룰 데를 잃는다. (직전 사이클: #810, 2026-08-25 소진)
+- **아직 번역할 수 없는 항목**(머지 보류 중이라 en 키 자체가 없는 작업 등)이 대기 목록에 남으면, 닫기 전에 승계 이슈를 만들어 그 항목만 옮긴다 — 그것 때문에 나머지 소진을 미루지 않는다.
+- 전 언어 0 위반을 확인하고 그 이슈를 close. **남길 항목이 없으면 후속 트래킹 이슈를 미리 만들지 않는다** — 다음에 번역을 미루는 작업이 위 라벨 조회에서 빈 결과를 받고 스스로 만든다. (직전 사이클: #1001, 2026-08-26 소진)
 
 ### 서비스 이용 가이드 — lproj 의 후행 작업
 
