@@ -1,0 +1,43 @@
+Tugasan dan jadual anda, dalam satu kalendar.
+
+Jadual anda berada dalam kalendar. Tugasan anda berada di tempat lain. Untuk melihat apa yang ada bulan ini dan apa yang belum anda buat, akhirnya anda menyemak dua tempat.
+
+To-do Calendar menyimpan kedua-duanya dalam kalendar yang sama. Jadual duduk pada hari ia berlangsung, dan tugasan kekal sehingga anda menandakannya selesai. Tugasan tanpa waktu pun tidak hilang.
+
+Aplikasi ini berfungsi tanpa akaun dan tanpa sambungan. Log masuk hanya apabila anda mahu data anda disandarkan dan kalendar yang sama ada pada semua peranti anda.
+
+■ Satu kalendar, dua jenis kerja
+· Jadual dan tugasan duduk bersama, dalam warna jenis acara yang anda cipta sendiri
+· Tugasan belum selesai tidak tertimbus pada tarikh yang sudah berlalu — ia kekal disemat di bahagian atas kalendar
+· Pilih satu tarikh dan aplikasi membina pengulangan yang sepadan: setiap Khamis, Khamis ketiga setiap bulan, malah tarikh tahunan mengikut kalendar lunar
+· Setiap acara boleh membawa lokasi, pautan, nota dan peringatan
+· Sematkan perkara yang anda tidak boleh terlepas sebagai acara paling penting, dan ia kekal di atas tidak kira tarikh mana yang anda lihat
+· Kongsi satu hari, satu minggu atau satu bulan sebagai teks atau sebagai kad imej
+
+■ Input pantas AI
+"makan tengah hari dengan Sara Jumaat tengah hari", "alihkan temu janji doktor gigi ke Selasa depan", "tandakan cucian selesai".
+Huraikannya seperti cara anda bercakap. Tiada borang untuk diisi, tiada tarikh untuk dipilih medan demi medan.
+· Suara, papan kekunci dan baca daripada imej — ambil gambar jadual waktu kelas atau poster acara, dan teksnya menjadi acara
+· Daripada Siri, Butang Tindakan, widget, Pusat Kawalan atau helaian Kongsi, tanpa membuka aplikasi
+· Bukan sekadar menambah: mengalih waktu, menukar nama, menyelesaikan, membuang, malah beberapa sekali gus
+· Apa-apa yang membuang atau mengubah sesuatu akan menunjukkan dengan tepat apa yang bakal dilakukannya dan menunggu kelulusan anda
+· Input pantas AI memerlukan akaun yang telah log masuk
+
+■ Lihat hari anda tanpa membuka aplikasi
+· Widget Skrin Utama — hari ini dan seterusnya, senarai acara, HARI INI, acara paling penting anda, kalendar dan minggu, serta gabungan yang mencantumkan dua daripadanya
+· Tandakan tugasan selesai terus daripada widget
+· Widget Skrin Kunci untuk acara seterusnya dan apa yang tinggal untuk hari ini
+· Acara yang bakal bermula mengira detik pada Skrin Kunci dan dalam Dynamic Island
+· Letakkan Tambah dengan AI dalam Pusat Kawalan, satu leret membawa anda ke skrin input dari mana-mana sahaja
+
+■ Bawa kalendar anda yang lain
+· Kalendar Google — sambungkan beberapa akaun serentak. Setiap kalendar mengekalkan warna yang anda beri padanya dalam Google, dan peserta, pautan mesyuarat serta lampiran semuanya ada di situ, boleh diedit terus
+· Kalendar Apple — kalendar yang sudah ada pada iPhone anda, dengan sekali beri akses
+· Pilih apa yang dipaparkan, satu kalendar demi satu kalendar, daripada senarai jenis acara
+· Putuskan sambungan dan tiada apa-apa dibuang daripada akaun Google atau peranti anda
+
+■ Jadikan ia milik anda
+· Berapa banyak perincian dipaparkan oleh setiap acara, saiz teks acara dan warna acara — setiap perubahan dipratonton secara langsung
+· Tema warna dan tema widget, hari permulaan minggu, hari ditonjolkan
+· Cuti umum mengikut negara, kalendar lunar, format 24 jam dan zon waktu
+· Tetapkan jenis acara dan waktu pemberitahuan yang digunakan oleh acara baharu
