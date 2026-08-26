@@ -1,0 +1,43 @@
+Twoje zadania i Twój plan dnia — w jednym kalendarzu.
+
+Twój plan dnia jest w kalendarzu. Twoje zadania są gdzie indziej. Żeby zobaczyć, co przynosi ten miesiąc i co jeszcze zostało do zrobienia, kończysz na sprawdzaniu dwóch miejsc.
+
+To-do Calendar trzyma jedno i drugie w tym samym kalendarzu. Termin leży w dniu, w którym się odbywa, a zadanie zostaje, dopóki go nie odhaczysz. Zadania bez godziny też nie znikają.
+
+Aplikacja działa bez konta i bez połączenia. Zaloguj się tylko wtedy, gdy chcesz mieć kopię zapasową danych i ten sam kalendarz na wszystkich urządzeniach.
+
+■ Jeden kalendarz, dwa rodzaje spraw
+· Terminy i zadania leżą razem, w kolorach typów wydarzeń, które tworzysz samodzielnie
+· Niezakończone zadania nie zostają na minionej dacie — zostają przypięte na górze kalendarza
+· Wybierz datę, a aplikacja zbuduje pasujące powtarzanie — w każdy czwartek, trzeci czwartek każdego miesiąca, a nawet coroczną datę z kalendarza księżycowego
+· Każde wydarzenie może mieć miejsce, link, notatkę i przypomnienia
+· Przypnij to, czego nie możesz przegapić, jako najważniejsze wydarzenie — zostanie na górze, niezależnie od tego, który dzień oglądasz
+· Udostępnij dzień, tydzień albo miesiąc jako tekst lub jako kartę z obrazem
+
+■ Szybkie wprowadzanie AI
+„obiad z Sarą w piątek w południe”, „przenieś dentystę na przyszły wtorek”, „odhacz pranie”.
+Opisz to zwykłymi słowami, tak jak w rozmowie. Bez formularzy do wypełnienia, bez wybierania daty pole po polu.
+· Głos, klawiatura i odczytywanie z obrazu — sfotografuj plan lekcji albo plakat wydarzenia, a tekst zamieni się w wydarzenia
+· Przez Siri, przycisk Akcji, widżet, Centrum sterowania albo arkusz udostępniania, bez otwierania aplikacji
+· Nie tylko dodawanie: przenoszenie godzin, zmiana nazwy, kończenie, usuwanie, także kilku rzeczy naraz
+· Wszystko, co coś usuwa albo zmienia, pokazuje dokładnie, co ma się wydarzyć, i czeka na Twoją zgodę
+· Szybkie wprowadzanie AI wymaga zalogowania
+
+■ Podgląd dnia bez otwierania aplikacji
+· Widżety na ekran początkowy — dziś i co dalej, lista wydarzeń, DZIŚ, Twoje najważniejsze wydarzenie, kalendarz i tygodnie oraz kombinacje łączące dwa z nich
+· Odhacz zadanie prosto z widżetu
+· Widżety na ekran blokady z następnym wydarzeniem i resztą dzisiejszego dnia
+· Wydarzenie, które zaraz się zacznie, odlicza czas na ekranie blokady i w Dynamic Island
+· Umieść Dodaj za pomocą AI w Centrum sterowania, a jedno przesunięcie zabierze Cię do ekranu wprowadzania z dowolnego miejsca
+
+■ Twoje pozostałe kalendarze
+· Kalendarz Google — połącz kilka kont naraz. Każdy kalendarz zachowuje kolor nadany mu w Google, a uczestnicy, linki do spotkań i załączniki są na miejscu i od razu do edycji
+· Kalendarz Apple — kalendarze, które już masz na iPhonie, po jednorazowym udzieleniu dostępu
+· Wybierz z listy typów wydarzeń, co ma być widoczne, kalendarz po kalendarzu
+· Rozłącz, a z Twojego konta Google ani z urządzenia nic nie zniknie
+
+■ Ustaw to po swojemu
+· Ile szczegółów pokazuje każde wydarzenie, rozmiar czcionki i kolory tekstu wydarzenia — każda zmiana widoczna od razu w podglądzie
+· Motyw kolorystyczny i motyw widżetu, pierwszy dzień tygodnia, wyróżnione dni
+· Święta według kraju, kalendarz księżycowy, format 24-godzinny i strefa czasowa
+· Ustal typ wydarzenia i czas przypomnienia, z jakimi startują nowe wydarzenia
