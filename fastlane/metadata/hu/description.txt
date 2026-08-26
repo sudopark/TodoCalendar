@@ -1,0 +1,43 @@
+A feladatai és a programjai egyetlen naptárban.
+
+A programjai a naptárban vannak. A feladatai valahol máshol. Ahhoz, hogy lássa, mit hoz a hónap és mi maradt még elintézetlenül, a végén két helyre néz.
+
+A To-do Calendar mindkettőt ugyanabba a naptárba teszi. A program azon a napon ül, amikor megtörténik, a feladat pedig marad, amíg ki nem pipálja. Az időpont nélküli feladatok sem tűnnek el.
+
+Fiók és internetkapcsolat nélkül is működik. Csak akkor jelentkezzen be, ha menteni szeretné az adatait, és megosztaná őket az eszközei között.
+
+■ Egy naptár, kétféle teendő
+· A programok és a feladatok együtt vannak, a saját maga készítette eseménytípusok színeivel
+· A befejezetlen feladatok nem ragadnak egy elmúlt dátumon — kitűzve maradnak a naptár tetején
+· Válasszon dátumot, és az alkalmazás felépíti a hozzá illő ismétlődést — minden csütörtökön, minden hónap harmadik csütörtökén, akár holdnaptár szerinti évfordulón is
+· Minden eseményhez tartozhat helyszín, hivatkozás, jegyzet és értesítés
+· Tűzze ki legfontosabb eseményként azt, amit nem hagyhat ki — felül marad, bármelyik napot nézi
+· Osszon meg egy napot, egy hetet vagy egy hónapot szövegként vagy képkártyaként
+
+■ AI gyorsbevitel
+„ebéd Sárával pénteken délben”, „tedd át a fogorvost jövő keddre”, „a mosás kész”.
+Írja le úgy, ahogy mondaná. Nincs kitöltendő űrlap, nincs mezőnként kiválasztandó dátum.
+· Hang, billentyűzet és olvasás képből — fényképezze le az órarendet vagy egy esemény plakátját, és a szövegből események lesznek
+· Siriből, az Action gombból, egy widgetből, a Vezérlőközpontból vagy a megosztási lapról, az alkalmazás megnyitása nélkül
+· Nemcsak hozzáadás: időpontok áthelyezése, átnevezés, befejezés, törlés, több dolog egyszerre is
+· Ami töröl vagy megváltoztat valamit, pontosan megmutatja, mire készül, és megvárja a jóváhagyását
+· Az AI gyorsbevitelhez be kell jelentkeznie
+
+■ Lássa a napját az alkalmazás megnyitása nélkül
+· Kezdőképernyős widgetek — ma és ami ezután következik, az eseménylista, MA, a legfontosabb eseménye, a hónap és a hetek, valamint kombinációk, amelyek kettőt tesznek egymás mellé
+· Pipáljon ki egy feladatot egyenesen egy widgetből
+· Zárolási képernyős widgetek a következő eseményhez és a nap hátralévő részéhez
+· A hamarosan kezdődő esemény a zárolási képernyőn és a Dynamic Islanden számol vissza
+· Tegye a Hozzáadás AI-val elemet a Vezérlőközpontba, és egyetlen húzás bárhonnan a beviteli képernyőre viszi
+
+■ Hozza magával a többi naptárát
+· Google Naptár — több fiókot is összekapcsolhat egyszerre. Minden naptár megtartja a Google-ban adott színét, a résztvevők, a találkozólinkek és a mellékletek pedig mind ott vannak, helyben szerkeszthetően
+· Apple Naptár — az iPhone-ján már meglévő naptárak, egyetlen engedélyezéssel
+· Az eseménytípusok listájából naptáranként választhatja ki, mi jelenjen meg
+· Bontsa a kapcsolatot, és semmi nem törlődik a Google-fiókjából vagy a készülékéről
+
+■ Alakítsa a magáévá
+· Mennyi részletet mutasson egy esemény, az esemény szövegének mérete és színei — minden változás azonnal látszik az előnézetben
+· Színtéma és widget témája, a hét első napja, kiemelt napok
+· Országonkénti ünnepnapok, holdnaptár, 24 órás formátum és időzóna
+· Állítsa be, milyen eseménytípussal és értesítési idővel induljanak az új események
