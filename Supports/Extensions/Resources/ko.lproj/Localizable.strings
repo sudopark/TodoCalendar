@@ -159,6 +159,7 @@
 "calendar::event::more_action:live_activity:unregister:confirm" = "이 이벤트를 잠금화면에서 제거할까요?";
 "calendar::event::more_action:live_activity:replace:confirm" = "다른 이벤트가 잠금화면에 표시 중이에요. 이 이벤트로 바꿀까요?";
 "calendar::event::more_action:live_activity:register:success" = "잠금화면에 표시했어요. 기기를 잠그고 확인해보세요.";
+"calendar::event::more_action:live_activity:showing" = "잠금화면에 표시 중";
 "calendar::event::more_action:copy:item_name" = "이벤트 복사";
 "calendar::event::more_action:share:item_name" = "공유";
 "event_detail::share::field::time" = "시간";

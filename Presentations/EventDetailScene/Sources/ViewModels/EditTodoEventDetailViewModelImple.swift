@@ -537,6 +537,14 @@ extension EditTodoEventDetailViewModelImple {
         .removeDuplicates()
         .eraseToAnyPublisher()
     }
+
+    var isLiveActivityRegistered: AnyPublisher<Bool, Never> {
+        let todoId = self.todoId
+        return self.liveActivityToggleViewModel.registeredTarget
+            .map { $0 == .todo(id: todoId) }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
 }
 
 

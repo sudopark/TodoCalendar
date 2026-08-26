@@ -185,6 +185,7 @@ graph TD
 | `EventTimeSelectView` | clock 아이콘 + 선택 시각(`EventTimeTextView` 재사용, 탭하면 인라인 DatePicker 토글) + 종일 토글. 피커 토글 상태는 내부 `@State` 소유, `onBeginSelecting` 훅으로 부모가 텍스트 포커스 해제 | GoogleCalendarEventDetailView, AppleCalendarEventDetailView |
 | `EventTextInputRow` | 아이콘 + 한 줄 TextField (장소·URL 등 공용). 포커스는 부모 `@FocusState` 바인딩 | GoogleCalendarEventDetailView, AppleCalendarEventDetailView |
 | `EventMemoInputView` | doc.text 아이콘 + placeholder 겹친 TextEditor. 포커스는 부모 `@FocusState` 바인딩 | GoogleCalendarEventDetailView, AppleCalendarEventDetailView |
+| `LiveActivityBadgeView` | 라이브액티비티 등록 상태 표시 행 — timer 아이콘 + "잠금화면에 표시 중" 문구. 표시 전용이라 파라미터·이벤트 연결 없음 (#1009) | EventDetailView, HolidayEventDetailView, AppleCalendarEventDetailView, GoogleCalendarEventDetailView |
 
 `GuideView/`의 가이드 오버레이 2종(ForemostEventGuideView·TodoEventGuideView)은 컴포넌트 패밀리로 별도 그룹.
 
