@@ -173,6 +173,7 @@ public protocol EventCellViewModel: Sendable {
     var moreActions: EventListMoreActionModel? { get }
     var isAlldayEvent: Bool { get }
     var liveActivityTarget: LiveActivityTarget? { get }
+    var isLiveActivityRegistered: Bool { get }
 
     /// 셀이 그리는 값 + 셀 액션이 소비하는 값 전부를 담는다. 이 키가 같으면 셀 목록 재방출이 생략된다.
     /// 프로토콜 밖 프로퍼티는 각 타입이 `makeCustomCompareKey`의 추가 성분으로 직접 얹어야 한다 — 빠뜨리면 그 값의 변경이 화면·동작에 안 붙는다.
@@ -182,6 +183,7 @@ public protocol EventCellViewModel: Sendable {
 extension EventCellViewModel {
 
     public var liveActivityTarget: LiveActivityTarget? { nil }
+    public var isLiveActivityRegistered: Bool { false }
 
     fileprivate func makeCustomCompareKey(_ additionalComponents: [String?]) -> String {
         let baseComponents: [String?] = [
@@ -194,6 +196,7 @@ extension EventCellViewModel {
             "\(self.isForemost)",
             "\(self.isRepeating)",
             "\(self.isAlldayEvent)",
+            "\(self.isLiveActivityRegistered)",
             String(describing: self.moreActions)
         ]
         return (baseComponents + additionalComponents)
