@@ -1,0 +1,43 @@
+Tugas dan jadwal Anda, dalam satu kalender.
+
+Jadwal Anda ada di kalender. Tugas Anda ada di tempat lain. Untuk tahu isi bulan ini dan apa saja yang belum Anda kerjakan, ujung-ujungnya Anda memeriksa dua tempat.
+
+To-do Calendar menaruh keduanya di kalender yang sama. Jadwal duduk pada tanggal saat ia berlangsung, dan tugas tetap ada sampai Anda mencentangnya. Tugas tanpa waktu pun tidak menghilang.
+
+Aplikasi ini berjalan tanpa akun dan tanpa koneksi. Masuk hanya kalau Anda ingin data Anda dicadangkan dan kalender yang sama ada di semua perangkat Anda.
+
+■ Satu kalender, dua jenis pekerjaan
+· Jadwal dan tugas duduk berdampingan, dengan warna jenis acara yang Anda buat sendiri
+· Tugas yang belum selesai tidak terkubur di tanggal yang sudah lewat — semuanya tersemat di bagian atas kalender
+· Pilih sebuah tanggal, dan aplikasi menyusun pengulangan yang cocok: setiap Kamis, Kamis ketiga setiap bulan, bahkan tanggal tahunan menurut kalender lunar
+· Setiap acara bisa membawa lokasi, tautan, catatan, dan notifikasi
+· Sematkan hal yang tidak boleh Anda lewatkan sebagai acara terpenting, dan ia tetap di atas apa pun tanggal yang sedang Anda lihat
+· Bagikan satu hari, satu minggu, atau satu bulan sebagai teks atau sebagai kartu gambar
+
+■ Input cepat AI
+"makan siang dengan Sara Jumat pukul 12", "pindahkan dokter gigi ke Selasa depan", "tandai cucian sudah selesai".
+Jelaskan seperti saat Anda mengucapkannya. Tanpa formulir yang harus diisi, tanpa tanggal yang dipilih kolom demi kolom.
+· Suara, papan ketik, dan baca dari gambar — foto jadwal pelajaran atau poster acara, dan teksnya berubah menjadi acara
+· Dari Siri, Tombol Aksi, widget, Pusat Kontrol, atau lembar berbagi, tanpa membuka aplikasi
+· Bukan sekadar menambah: menggeser waktu, mengganti nama, menyelesaikan, menghapus, bahkan beberapa sekaligus
+· Apa pun yang menghapus atau mengubah sesuatu akan menunjukkan persis apa yang hendak dilakukannya, lalu menunggu persetujuan Anda
+· Input cepat AI memerlukan akun yang sudah masuk
+
+■ Lihat hari Anda tanpa membuka aplikasi
+· Widget Layar Utama — hari ini dan selanjutnya, daftar acara, HARI INI, acara terpenting Anda, kalender dan mingguan, plus kombinasi yang menyatukan dua di antaranya
+· Centang sebuah tugas langsung dari widget
+· Widget Layar Terkunci untuk acara berikutnya dan sisa agenda hari ini
+· Acara yang sebentar lagi dimulai akan menghitung mundur di Layar Terkunci dan di Dynamic Island
+· Taruh Tambah dengan AI di Pusat Kontrol, sekali usap membawa Anda ke layar input dari mana saja
+
+■ Bawa kalender Anda yang lain
+· Google Kalender — hubungkan beberapa akun sekaligus. Tiap kalender mempertahankan warna yang Anda beri di Google, dan peserta, tautan rapat, serta lampiran semuanya ada di sana, bisa diedit di tempat
+· Apple Kalender — kalender yang sudah ada di iPhone Anda, cukup sekali memberi izin
+· Pilih apa yang tampil, satu kalender demi satu kalender, dari daftar jenis acara
+· Putuskan hubungannya dan tidak ada yang terhapus dari akun Google atau perangkat Anda
+
+■ Buat jadi milik Anda
+· Seberapa rinci tiap acara ditampilkan, ukuran teks acara, dan warna acara — tiap perubahan langsung terlihat di pratinjau
+· Tema warna dan tema widget, hari awal minggu, hari yang ditonjolkan
+· Hari libur menurut negara, kalender lunar, format 24 jam, dan zona waktu
+· Tetapkan jenis acara dan waktu notifikasi yang dipakai acara baru sejak awal
