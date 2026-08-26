@@ -1,0 +1,43 @@
+Suas tarefas e seus compromissos, em um só calendário.
+
+Seus compromissos ficam num calendário. Suas tarefas ficam em outro lugar. Para saber o que o mês reserva e o que você ainda não fez, acaba sempre olhando em dois lugares.
+
+O To-do Calendar mantém os dois no mesmo calendário. Um compromisso fica no dia em que acontece, e uma tarefa continua ali até você marcá-la como concluída. As tarefas sem horário nenhum também não somem.
+
+Funciona sem conta e sem conexão. Faça login só quando quiser backup dos seus dados e compartilhamento entre os seus dispositivos.
+
+■ Um só calendário para as duas coisas
+· Compromissos e tarefas ficam lado a lado, com a cor dos tipos de evento que você mesmo cria
+· Tarefas não concluídas não ficam para trás numa data já passada — elas ficam fixadas no topo do calendário
+· Escolha uma data e o app monta a recorrência correspondente — toda quinta-feira, a terceira quinta-feira de cada mês, até uma data anual do calendário lunar
+· Cada evento pode levar localização, link, anotação e lembretes
+· Fixe o que você não pode perder como evento principal e ele fica no topo, seja qual for o dia que você está vendo
+· Compartilhe um dia, uma semana ou um mês como texto ou como cartão de imagem
+
+■ Entrada rápida por IA
+"almoço com a Sara sexta ao meio-dia", "passa o dentista para terça que vem", "marca a lavanderia como concluída".
+Descreva do jeito que você falaria. Sem formulário para preencher, sem data para escolher campo a campo.
+· Voz, teclado e ler a partir de uma imagem — fotografe uma grade de horários ou o cartaz de um evento e o texto vira evento
+· Pela Siri, pelo botão de Ação, por um widget, pela Central de Controle ou pelo menu de compartilhamento, sem abrir o app
+· Não é só adicionar: dá para mudar horário, renomear, concluir, excluir, e várias coisas de uma vez
+· Tudo o que remove ou altera alguma coisa mostra exatamente o que vai fazer e espera sua aprovação
+· A entrada rápida por IA exige login
+
+■ Veja o seu dia sem abrir o app
+· Widgets da Tela de Início — hoje e o que vem a seguir, sua lista de eventos, HOJE, seu evento principal, o mês e as semanas, e combinações que juntam dois deles
+· Conclua uma tarefa direto de um widget
+· Widgets da Tela Bloqueada para o próximo evento e o que resta do dia
+· Um evento prestes a começar faz a contagem regressiva na Tela Bloqueada e na Ilha Dinâmica
+· Coloque Adicionar com IA na Central de Controle e um gesto leva você à tela de entrada de onde estiver
+
+■ Traga seus outros calendários
+· Google Agenda — conecte várias contas ao mesmo tempo. Cada agenda mantém a cor que você deu a ela no Google, e participantes, links de reunião e anexos estão todos lá, editáveis na hora
+· Calendário da Apple — os calendários que já estão no seu iPhone, com uma única permissão
+· Escolha o que aparece, um calendário de cada vez, na lista de tipos de evento
+· Desconecte e nada é removido da sua conta do Google nem do seu aparelho
+
+■ Do seu jeito
+· Quanto detalhe cada evento mostra, o tamanho do texto e as cores dos eventos: toda mudança aparece na hora na pré-visualização
+· Tema de cores e tema do widget, o primeiro dia da semana e os dias em destaque
+· Feriados por país, calendário lunar, formato de 24 horas e fuso horário
+· Defina o tipo de evento e o horário de lembrete com que os eventos novos já começam
