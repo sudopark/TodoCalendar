@@ -96,3 +96,6 @@ snapshot-guide/
 
 ### App Store 스크린샷 원본 ###
 snapshot-appstore/
+
+### App Store 업로드용 합성 스샷 ###
+fastlane/screenshots/
