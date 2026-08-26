@@ -1,0 +1,43 @@
+Ihre Aufgaben und Ihre Termine — in einem Kalender.
+
+Ihre Termine liegen in einem Kalender. Ihre Aufgaben liegen irgendwo anders. Um zu sehen, was der Monat bringt und was noch offen ist, schauen Sie am Ende an zwei Stellen nach.
+
+To-do Calendar hält beides im selben Kalender. Ein Termin liegt an dem Tag, an dem er stattfindet, und eine Aufgabe bleibt stehen, bis Sie sie abhaken. Auch Aufgaben ohne Uhrzeit verschwinden nicht.
+
+Die App funktioniert ohne Konto und ohne Verbindung. Melden Sie sich nur an, wenn Sie Ihre Daten sichern und auf allen Geräten teilen möchten.
+
+■ Ein Kalender, zwei Arten von Arbeit
+· Termine und Aufgaben stehen nebeneinander, farblich getrennt nach Ereignistypen, die Sie selbst anlegen
+· Unerledigte Aufgaben bleiben nicht an einem vergangenen Datum liegen — sie bleiben oben im Kalender angeheftet
+· Wählen Sie ein Datum, und die App baut die passende Wiederholung — jeden Donnerstag, den dritten Donnerstag jeden Monats, sogar ein jährliches Datum im Mondkalender
+· Jedes Ereignis kann einen Ort, einen Link, eine Notiz und Benachrichtigungen tragen
+· Heften Sie das, was Sie nicht verpassen dürfen, als wichtigstes Ereignis an — es bleibt oben, welchen Tag Sie auch ansehen
+· Teilen Sie einen Tag, eine Woche oder einen Monat als Text oder als Bildkarte
+
+■ KI-Schnelleingabe
+„Mittagessen mit Sara am Freitag um 12 Uhr“, „verschiebe den Zahnarzt auf nächsten Dienstag“, „hake die Wäsche ab“.
+Beschreiben Sie es so, wie Sie es sagen würden. Keine Formulare zum Ausfüllen, keine Datumsauswahl Feld für Feld.
+· Sprache, Tastatur und Lesen aus einem Bild — fotografieren Sie einen Stundenplan oder ein Veranstaltungsplakat, und der Text wird zu Ereignissen
+· Über Siri, die Action-Taste, ein Widget, das Kontrollzentrum oder das Teilen-Menü, ohne die App zu öffnen
+· Nicht nur hinzufügen: Zeiten verschieben, umbenennen, abhaken, löschen, auch mehreres auf einmal
+· Alles, was etwas löscht oder ändert, zeigt Ihnen genau, was gleich passiert, und wartet auf Ihre Bestätigung
+· Die KI-Schnelleingabe setzt eine Anmeldung voraus
+
+■ Ihren Tag sehen, ohne die App zu öffnen
+· Widgets für den Home-Bildschirm — heute und was als Nächstes kommt, die Ereignisliste, HEUTE, Ihr wichtigstes Ereignis, Monat und Wochen, dazu Kombinationen aus zweien davon
+· Aufgaben direkt aus einem Widget abhaken
+· Widgets für den Sperrbildschirm mit dem nächsten Ereignis und dem, was von heute übrig ist
+· Ein Ereignis, das gleich beginnt, zählt auf dem Sperrbildschirm und in der Dynamic Island herunter
+· Legen Sie „Mit KI hinzufügen“ ins Kontrollzentrum, und eine Wischgeste bringt Sie von überall zur Eingabe
+
+■ Ihre anderen Kalender mitbringen
+· Google Kalender — mehrere Konten gleichzeitig verbinden. Jeder Kalender behält die Farbe, die Sie ihm bei Google gegeben haben, und Teilnehmer, Meeting-Links und Anhänge sind alle da und direkt bearbeitbar
+· Apple Kalender — die Kalender, die schon auf Ihrem iPhone liegen, mit einer einzigen Freigabe
+· Wählen Sie Kalender für Kalender aus, was angezeigt wird — in der Liste der Ereignistypen
+· Trennen Sie die Verbindung, und aus Ihrem Google-Konto oder von Ihrem Gerät wird nichts entfernt
+
+■ Machen Sie es zu Ihrem
+· Wie viel Detail jedes Ereignis zeigt, Schriftgröße und Farben für Ereignistext — jede Änderung sehen Sie sofort in der Vorschau
+· Farbschema und Widget-Design, erster Wochentag, hervorgehobene Tage
+· Feiertage nach Land, Mondkalender, 24-Stunden-Format und Zeitzone
+· Legen Sie fest, mit welchem Ereignistyp und welcher Benachrichtigungszeit neue Ereignisse starten
