@@ -913,4 +913,32 @@ extension EditTodoEventDetailViewModelImpleTests {
             expectMessage: "calendar::event::more_action:live_activity:unavail::too_far_future".localized()
         )
     }
+
+    func testViewModel_whenLiveActivityRegistered_isLiveActivityRegisteredIsTrue() {
+        // given
+        let expect = expectation(description: "등록된 todo 는 isLiveActivityRegistered 가 true")
+        let viewModel = self.makeViewModel(
+            registeredLiveActivityTarget: .todo(id: "dummy_todo")
+        )
+
+        // when
+        let isRegistered = self.waitFirstOutput(expect, for: viewModel.isLiveActivityRegistered)
+
+        // then
+        XCTAssertEqual(isRegistered, true)
+    }
+
+    func testViewModel_whenOtherEventRegistered_isLiveActivityRegisteredIsFalse() {
+        // given
+        let expect = expectation(description: "다른 이벤트가 등록됐으면 isLiveActivityRegistered 가 false")
+        let viewModel = self.makeViewModel(
+            registeredLiveActivityTarget: .todo(id: "other_todo")
+        )
+
+        // when
+        let isRegistered = self.waitFirstOutput(expect, for: viewModel.isLiveActivityRegistered)
+
+        // then
+        XCTAssertEqual(isRegistered, false)
+    }
 }

@@ -1358,5 +1358,42 @@ extension EditScheduleEventDetailViewModelImpleTests {
         )
         XCTAssertNil(self.spyRouter.didShowError)
     }
+
+    func testViewModel_whenRegisteredTurnMatches_isLiveActivityRegisteredIsTrue() {
+        // given
+        let expect = expectation(description: "열린 회차와 같은 타겟이 등록되면 isLiveActivityRegistered 가 true")
+        let targetTime = EventTime.at(300)
+        let viewModel = self.makeViewModel(
+            repeatingEventTargetTime: targetTime,
+            registeredLiveActivityTarget: .schedule(id: "dummy_schedule", turnKey: targetTime.customKey)
+        )
+
+        // when
+        let isRegistered = self.waitFirstOutput(expect, for: viewModel.isLiveActivityRegistered) {
+            viewModel.prepare()
+        }
+
+        // then
+        XCTAssertEqual(isRegistered, true)
+    }
+
+    func testViewModel_whenRegisteredTurnIsOther_isLiveActivityRegisteredIsFalse() {
+        // given
+        let expect = expectation(description: "다른 회차가 등록되면 isLiveActivityRegistered 가 false")
+        let targetTime = EventTime.at(300)
+        let otherTurnTime = EventTime.at(900)
+        let viewModel = self.makeViewModel(
+            repeatingEventTargetTime: targetTime,
+            registeredLiveActivityTarget: .schedule(id: "dummy_schedule", turnKey: otherTurnTime.customKey)
+        )
+
+        // when
+        let isRegistered = self.waitFirstOutput(expect, for: viewModel.isLiveActivityRegistered) {
+            viewModel.prepare()
+        }
+
+        // then
+        XCTAssertEqual(isRegistered, false)
+    }
 }
 

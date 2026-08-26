@@ -646,6 +646,24 @@ extension EditScheduleEventDetailViewModelImple {
         .removeDuplicates()
         .eraseToAnyPublisher()
     }
+
+    var isLiveActivityRegistered: AnyPublisher<Bool, Never> {
+        let (scheduleId, targetTime) = (self.scheduleId, self.repeatingEventTargetTime)
+        let transform: (EventDetailBasicData, LiveActivityTarget?) -> Bool = { basic, registeredTarget in
+            return registeredTarget == LiveActivityTarget(
+                scheduleId: scheduleId,
+                targetTime: targetTime,
+                isRepeating: basic.isRepeatingEvent
+            )
+        }
+        return Publishers.CombineLatest(
+            self.subject.basicData.compactMap { $0?.origin },
+            self.liveActivityToggleViewModel.registeredTarget
+        )
+        .map(transform)
+        .removeDuplicates()
+        .eraseToAnyPublisher()
+    }
 }
 
 private extension EventDetailBasicData {

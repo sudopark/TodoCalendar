@@ -92,6 +92,7 @@ protocol EventDetailViewModel: Sendable, AnyObject {
     
     // presenter
     var isForemost: AnyPublisher<Bool, Never> { get }
+    var isLiveActivityRegistered: AnyPublisher<Bool, Never> { get }
     var isLoading: AnyPublisher<Bool, Never> { get }
     var eventDetailTypeModel: AnyPublisher<EventDetailTypeModel, Never> { get }
     var hasChanges: AnyPublisher<Bool, Never> { get }

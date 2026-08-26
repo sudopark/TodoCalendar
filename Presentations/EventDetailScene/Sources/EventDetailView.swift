@@ -36,7 +36,8 @@ import Scenes
     var isAllDay: Bool = false
     var availableMoreActions: [[EventDetailMoreAction]] = []
     var isForemost: Bool = false
-    
+    var isLiveActivityRegistered: Bool = false
+
     @ObservationIgnored var suggestEventEndTime: () -> Date? = { nil }
     var selectedStartDate: Date = Date()
     var selectedEndDate: Date = Date().addingTimeInterval(60)
@@ -169,7 +170,14 @@ import Scenes
                 self?.isForemost = isForemost
             })
             .store(in: self.cancellables)
-        
+
+        viewModel.isLiveActivityRegistered
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] isRegistered in
+                self?.isLiveActivityRegistered = isRegistered
+            })
+            .store(in: self.cancellables)
+
         viewModel.isSaving
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] isSaving in
@@ -314,6 +322,9 @@ struct EventDetailView: View {
                     self.nameInputView
                     if state.isForemost {
                         self.foremostEventView
+                    }
+                    if state.isLiveActivityRegistered {
+                        LiveActivityBadgeView()
                     }
                     self.eventDetailTypeView
                     self.timeSelectView
