@@ -1,5 +1,30 @@
 default_platform(:ios)
 
+def required_env(name, hint)
+  value = ENV[name].to_s
+  UI.user_error!("환경변수 #{name} 가 비어 있다 — #{hint}") if value.empty?
+  value
+end
+
+def app_store_metadata_path
+  File.join(FastlaneCore::FastlaneFolder.path.to_s, "metadata")
+end
+
+# deliver init 이 항상 만드는 copyright.txt 로 "현재 ASC 메타데이터를 내려받았는가" 를 판정한다
+def ensure_asc_baseline_downloaded!(metadata_path)
+  baseline = File.join(metadata_path, "copyright.txt")
+  return if File.exist?(baseline)
+
+  UI.user_error!(<<~MESSAGE)
+    `deliver init` 을 아직 돌리지 않았다 (#{baseline} 없음).
+
+    지금 metadata/ 에는 이번에 새로 쓴 4필드(subtitle·description·keywords·promotional_text)뿐이라,
+    이대로 올리면 로케일들이 name·support_url·release_notes 가 빈 채로 ASC 에 활성화돼 심사 제출이 막힌다.
+
+    fastlane/metadata/README.md 의 "업로드 전에 반드시 이 순서로" 를 먼저 따라라.
+  MESSAGE
+end
+
 platform :ios do
   desc "Development 서명 IPA를 빌드해 Firebase App Distribution testers 그룹에 배포"
   lane :test_deploy do
@@ -29,6 +54,37 @@ platform :ios do
       groups: "testers",
       release_notes: ENV["TEST_DEPLOY_RELEASE_NOTES"] || "local build",
       ipa_path: lane_context[SharedValues::IPA_OUTPUT_PATH]
+    )
+  end
+
+  desc "fastlane/metadata 의 텍스트 메타데이터만 App Store Connect 에 올리고 precheck 로 검사 (바이너리·스크린샷 제외, 심사 제출은 콘솔에서 직접)"
+  lane :upload_app_store_metadata do
+    metadata_path = app_store_metadata_path
+    ensure_asc_baseline_downloaded!(metadata_path)
+
+    api_key = app_store_connect_api_key(
+      key_id: required_env("ASC_KEY_ID", "App Store Connect > 사용자 및 액세스 > 통합에서 발급한 키 ID"),
+      issuer_id: required_env("ASC_ISSUER_ID", "같은 화면의 Issuer ID"),
+      key_content: required_env("ASC_KEY_CONTENT", "AuthKey_<키ID>.p8 를 base64 로 인코딩한 값 — base64 -i AuthKey_<키ID>.p8"),
+      is_key_content_base64: true
+    )
+
+    deliver(
+      api_key: api_key,
+      metadata_path: metadata_path,
+      skip_binary_upload: true,
+      skip_screenshots: true,
+      submit_for_review: false,
+      # HTML 프리뷰 확인 프롬프트를 남겨 업로드 직전에 사람이 최종 확인한다
+      force: false,
+      # precheck 는 아래에서 직접 돌린다 — deliver 내부 실행은 위반을 찾아도 lane 을 세우지 않는다
+      run_precheck_before_submit: false
+    )
+
+    # precheck 는 ASC 에 올라간 값을 읽는다 — 업로드 뒤에 돌려야 이번 원고가 검사 대상이 된다
+    precheck(
+      api_key: api_key,
+      include_in_app_purchases: false
     )
   end
 end
