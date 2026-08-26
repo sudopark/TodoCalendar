@@ -1,0 +1,43 @@
+Vaši zadaci i vaši termini, u jednom kalendaru.
+
+Termini žive u kalendaru. Zadaci žive negdje drugdje. Da biste vidjeli što donosi ovaj mjesec i što je još ostalo neobavljeno, na kraju gledate na dva mjesta.
+
+To-do Calendar drži oboje u istom kalendaru. Termin stoji na danu kad se događa, a zadatak ostaje dok ga ne označite kvačicom. Ni zadaci bez vremena ne nestaju.
+
+Aplikacija radi bez računa i bez veze. Prijavite se samo kad želite sigurnosnu kopiju podataka i isti kalendar na svim svojim uređajima.
+
+■ Jedan kalendar, obje vrste posla
+· Termini i zadaci stoje zajedno, u bojama tipova događaja koje stvarate vi
+· Nedovršeni zadaci ne ostaju zakopani na prošlom datumu — stoje prikvačeni na vrhu kalendara
+· Odaberite datum i aplikacija složi ponavljanje koje odgovara: svaki tjedan: četvrtak, treći četvrtak svakog mjeseca, pa čak i godišnji datum po lunarnom kalendaru
+· Svaki događaj može nositi lokaciju, poveznicu, bilješku i podsjetnike
+· Prikvačite ono što ne smijete propustiti kao najvažniji događaj i ostaje na vrhu, koji god dan gledate
+· Podijelite dan, tjedan ili mjesec kao tekst ili kao sliku
+
+■ Brzi AI unos
+„ručak sa Sarom u petak u podne”, „pomakni zubara na idući utorak”, „označi rublje kao gotovo”.
+Opišite to onako kako biste rekli naglas. Bez obrazaca za ispunjavanje, bez biranja datuma polje po polje.
+· Glas, tipkovnica i čitanje iz slike — fotografirajte raspored nastave ili plakat i tekst postaje događaji
+· Sa Sirija, gumba Radnja, widgeta, iz Kontrolnog centra ili izbornika dijeljenja, bez otvaranja aplikacije
+· Ne samo dodavanje: pomicanje vremena, preimenovanje, dovršavanje, brisanje, i više njih odjednom
+· Sve što nešto briše ili mijenja najprije pokaže točno što namjerava učiniti i čeka vaše odobrenje
+· Brzi AI unos zahtijeva prijavljeni račun
+
+■ Pogled na dan bez otvaranja aplikacije
+· Widgeti za početni zaslon — danas i što slijedi, popis događaja, DANAS, vaš najvažniji događaj, mjesec i tjedni te kombinacije koje spajaju dva prikaza
+· Označite zadatak kvačicom izravno iz widgeta
+· Widgeti za zaključani zaslon sa sljedećim događajem i onim što je ostalo od danas
+· Događaj koji samo što nije počeo odbrojava na zaključanom zaslonu i u Dinamičkom otoku
+· Stavite Dodaj pomoću AI u Kontrolni centar i jedno povlačenje vodi vas na zaslon unosa s bilo kojeg mjesta
+
+■ Dovedite i ostale kalendare
+· Google kalendar — povežite više računa odjednom. Svaki kalendar zadržava boju koju ste mu dali u Googleu, a sudionici, poveznice sastanaka i privici su svi tu, odmah dostupni za uređivanje
+· Apple kalendar — kalendari koje već imate na iPhoneu, uz jedno odobrenje pristupa
+· Iz popisa tipova događaja birajte što se prikazuje, kalendar po kalendar
+· Prekinite vezu i ništa se ne briše s vašeg Google računa ni s uređaja
+
+■ Neka bude vaš
+· Koliko detalja prikazuje svaki događaj, veličina teksta događaja i boje događaja — svaka promjena odmah se vidi u pregledu
+· Tema boja i tema widgeta, prvi dan u tjednu, istaknuti dani
+· Blagdani po državi, lunarni kalendar, 24-satni format i vremenska zona
+· Postavite tip događaja i vrijeme obavijesti s kojima kreću novi događaji
