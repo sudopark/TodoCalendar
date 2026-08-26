@@ -1,0 +1,43 @@
+Oppgavene og avtalene dine – i én og samme kalender.
+
+Avtalene dine ligger i en kalender. Oppgavene dine ligger et annet sted. For å se hva måneden bringer og hva du fortsatt ikke har gjort, ender du opp med å sjekke to steder.
+
+To-do Calendar holder begge deler i den samme kalenderen. En avtale ligger på dagen den skjer, og en oppgave blir stående til du krysser den av. Oppgaver uten tidspunkt forsvinner heller ikke.
+
+Appen fungerer uten konto og uten nett. Logg inn bare når du vil ha dataene dine sikkerhetskopiert og delt på tvers av enhetene dine.
+
+■ Én kalender, to slags gjøremål
+· Avtaler og oppgaver ligger sammen, fargelagt etter hendelsestyper du lager selv
+· Uferdige oppgaver blir ikke liggende igjen på en dato som er passert – de blir liggende øverst i kalenderen
+· Velg en dato, så bygger appen gjentakelsen som passer – hver torsdag, den tredje torsdagen i hver måned, til og med en årlig dato i månekalenderen
+· Hver hendelse kan ha med seg et sted, en lenke, et notat og varsler
+· Fest det du ikke kan gå glipp av som viktigste hendelse, så blir den liggende øverst uansett hvilken dag du ser på
+· Del en dag, en uke eller en måned som tekst eller som bildekort
+
+■ AI-hurtiginntasting
+«lunsj med Sara fredag kl. 12», «flytt tannlegen til neste tirsdag», «merk klesvasken som fullført».
+Beskriv det slik du ville sagt det. Ingen skjemaer å fylle ut, ingen datoer å velge felt for felt.
+· Stemme, tastatur og lesing fra bilde – ta et bilde av en timeplan eller en plakat, og teksten blir til hendelser
+· Fra Siri, Handlingsknappen, en widget, Kontrollsenteret eller delingsmenyen, uten å åpne appen
+· Ikke bare legge til: flytte tidspunkt, gi nytt navn, fullføre, slette, flere ting om gangen
+· Alt som sletter eller endrer noe, viser deg nøyaktig hva som er i ferd med å skje, og venter på godkjenningen din
+· AI-hurtiginntasting krever at du er logget inn
+
+■ Se dagen din uten å åpne appen
+· Widgets for Hjem-skjermen – i dag og hva som kommer, hendelseslisten din, I DAG, den viktigste hendelsen din, måned og uker, og kombinasjoner som setter to av dem sammen
+· Kryss av en oppgave rett fra en widget
+· Widgets for låseskjermen med neste hendelse og det som er igjen av dagen
+· En hendelse som snart begynner, teller ned på låseskjermen og i Dynamic Island
+· Plasser Legg til med AI i Kontrollsenteret, så tar ett sveip deg til inntastingsskjermen uansett hvor du er
+
+■ Ta med de andre kalenderne dine
+· Google Kalender – koble til flere kontoer samtidig. Hver kalender beholder fargen du ga den i Google, og deltakere, møtelenker og vedlegg er alle med, redigerbare på stedet
+· Apple Kalender – kalenderne du allerede har på iPhonen, med én enkelt tillatelse
+· Velg hva som vises, én kalender om gangen, fra listen over hendelsestyper
+· Koble fra, og ingenting blir fjernet fra Google-kontoen din eller enheten din
+
+■ Gjør den til din
+· Hvor mye detaljer hver hendelse viser, skriftstørrelse og farger for hendelsestekst – hver endring vises med én gang
+· Fargetema og widget-tema, ukens første dag, fremhevede dager
+· Helligdager etter land, månekalenderen, 24-timers format og tidssone
+· Bestem hvilken hendelsestype og hvilket varslingstidspunkt nye hendelser starter med
