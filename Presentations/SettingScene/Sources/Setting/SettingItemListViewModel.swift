@@ -9,6 +9,8 @@
 
 import Foundation
 import Combine
+import Prelude
+import Optics
 import Domain
 import Extensions
 import Scenes
@@ -197,12 +199,24 @@ final class SettingItemListViewModelImple: SettingItemListViewModel, @unchecked 
         self.deviceInfoFetchService = deviceInfoFetchService
         self.appUpdateCheckUsecase = appUpdateCheckUsecase
         self.privacyOptionsFormRouter = privacyOptionsFormRouter
+
+        self.bindIsSignedIn()
+    }
+
+    private func bindIsSignedIn() {
+        self.accountUsecase.currentAccountInfo
+            .map { $0 != nil }
+            .sink(receiveValue: { [weak self] isSignedIn in
+                self?.subject.isSignedIn.send(isSignedIn)
+            })
+            .store(in: self.cancellables)
     }
     
     
     private struct Subject {
         let deviceInfo = CurrentValueSubject<DeviceInfo?, Never>(nil)
         let isAdPrivacyOptionsRequired = CurrentValueSubject<Bool, Never>(false)
+        let isSignedIn = CurrentValueSubject<Bool, Never>(false)
     }
     
     private let cancellables = CancelBag()
@@ -288,7 +302,7 @@ extension SettingItemListViewModelImple {
             self.router?.routeToOpenSourceLicense()
 
         case .billingPlan:
-            self.router?.routeToPaywall()
+            self.handleBillingPlanSelected()
 
         case .terms:
             self.router?.showWebView(LegalLink.termsPath)
@@ -301,6 +315,18 @@ extension SettingItemListViewModelImple {
         }
     }
     
+    private func handleBillingPlanSelected() {
+        if self.subject.isSignedIn.value {
+            self.router?.routeToPaywall()
+        } else {
+            let info = ConfirmDialogInfo()
+                |> \.title .~ "billing::needSignIn::title".localized()
+                |> \.message .~ "billing::needSignIn::message".localized()
+                |> \.confirmed .~ { [weak self] in self?.router?.routeToSignIn() }
+            self.router?.showConfirm(dialog: info)
+        }
+    }
+
     private func handleSignIn(_ item: AccountSettingItemModel) {
         if item.isSignIn {
             self.router?.routeToAccountManage()
@@ -324,12 +350,12 @@ extension SettingItemListViewModelImple {
     var sectionModels: AnyPublisher<[any SettingSectionModelType], Never> {
 
         let transform: (AccountInfo?, DeviceInfo?, Bool, Bool) -> [any SettingSectionModelType] = { account, device, isUpdateAvailable, isAdPrivacyOptionsRequired in
-            let showsBillingPlan = account != nil
             let baseSectionItems: [SettingItemModel] = [
                 .init(.appearance),
                 .init(.editEvent),
-                .init(.holidaySetting)
-            ] + (showsBillingPlan ? [.init(.billingPlan)] : [])
+                .init(.holidaySetting),
+                .init(.billingPlan)
+            ]
             let accountItem = AccountSettingItemModel(account)
             let baseSection = SettingSectionModel(
                 headerText: nil,
