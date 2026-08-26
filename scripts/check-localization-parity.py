@@ -5,11 +5,11 @@ usage:
   scripts/check-localization-parity.py <lang> [<lang> ...]   # 지정 언어만
   scripts/check-localization-parity.py                       # 전 언어 (en 제외 자동 탐색)
 
-개발 중엔 en/ko만 갱신하고 나머지 29개 언어 번역은 트래킹 이슈 #810으로 미룬다
+개발 중엔 en/ko만 갱신하고 나머지 29개 언어 번역은 `localization` 라벨 트래킹 이슈로 미룬다
 (CLAUDE.md §1). 그래서 용도가 둘이다:
   - 작업 커밋 전: `... ko` 로 en↔ko 파리티만 검증.
-  - #810 일괄 번역 시: 인자 없이 실행해 나온 missing keys 가 곧 번역 대기 키 목록이고,
-    전 언어 0 위반이 close 조건.
+  - 일괄 번역 시: 인자 없이 실행해 나온 missing keys 가 곧 번역 대기 키 목록이고,
+    전 언어 0 위반이 그 이슈의 close 조건.
 세부 번역 원칙은 .claude/rules/localization.md 참조.
 """
 import re, sys, collections
