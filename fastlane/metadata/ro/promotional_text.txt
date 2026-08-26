@@ -1,0 +1,1 @@
+3.0.0 — Noua introducere rapidă AI: descrieți evenimentul prin voce, tastatură sau poză, din Siri, butonul de Acțiune sau Centrul de control, fără a deschide aplicația.
