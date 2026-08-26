@@ -1,0 +1,1 @@
+3.0.0 — Nowe: szybkie wprowadzanie AI. Opisz wydarzenie głosem, klawiaturą albo zdjęciem — przez Siri, przycisk Akcji lub Centrum sterowania. Bez otwierania aplikacji.
