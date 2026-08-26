@@ -1,0 +1,1 @@
+tarefas,lista de tarefas,afazeres,agenda,planner,organizador,lembretes,widget,recorrente,voz,ia
