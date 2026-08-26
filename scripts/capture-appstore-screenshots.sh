@@ -7,7 +7,7 @@
 #
 # 결과: snapshot-appstore/<lang>/<NN-슬러그>.png (gitignore 대상, 언어별 격리)
 #       snapshot-appstore/<lang>/widgets/<슬러그>.png — 홈화면 합성 전 위젯 원본
-# 03-widgets 는 위젯 원본을 홈화면에 합성해 만드는 별도 단계다 — 여기서는 원본까지만 뽑는다.
+# 홈화면 위젯 스샷은 위젯 원본을 홈화면에 합성해 만드는 별도 단계다 — 여기서는 원본까지만 뽑는다.
 #
 # capture-guide-screenshots.sh 와 촬영 절차는 같고 세 가지가 다르다:
 #   - 6.9" 업로드 규격(1320×2868)이 나오는 iPhone 16 Pro Max 전용 시뮬레이터를 쓴다.
@@ -50,10 +50,10 @@ SUITES=(
 # <업로드 파일명>|<모듈 디렉토리>/<스위트>/<캡처 파일명>
 MAPPING=(
     "01-calendar|CalendarScenes/CalendarScenesCatalogSnapshots/test_storeCalendar.storeCalendar-light.png"
-    "05-repeat-options|EventDetailScene/EventDetailSceneCatalogSnapshots/test_storeRepeatOptions.storeRepeatOptions-light.png"
-    "06-event-detail|EventDetailScene/EventDetailSceneCatalogSnapshots/test_eventDetail.eventDetail-light.png"
-    "07-event-types|SettingScene/SettingSceneCatalogSnapshots/test_eventTypeList.eventTypeList-light.png"
-    "08-appearance|SettingScene/SettingSceneCatalogSnapshots/test_appearanceSetting.appearanceSetting-light.png"
+    "02-repeat-options|EventDetailScene/EventDetailSceneCatalogSnapshots/test_storeRepeatOptions.storeRepeatOptions-light.png"
+    "03-event-detail|EventDetailScene/EventDetailSceneCatalogSnapshots/test_eventDetail.eventDetail-light.png"
+    "04-event-types|SettingScene/SettingSceneCatalogSnapshots/test_storeEventTypeList.storeEventTypeList-light.png"
+    "05-appearance|SettingScene/SettingSceneCatalogSnapshots/test_appearanceSetting.appearanceSetting-light.png"
 )
 
 # 홈화면 합성 전 위젯 원본 — 화면 규격이 아니라 위젯 캔버스 규격이라 규격 검사·알파 제거 대상이 아니다
