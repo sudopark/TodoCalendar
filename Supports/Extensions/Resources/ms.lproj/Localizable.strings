@@ -159,6 +159,7 @@
 "calendar::event::more_action:live_activity:unregister:confirm" = "Adakah anda mahu mengeluarkan acara ini daripada Skrin Kunci?";
 "calendar::event::more_action:live_activity:replace:confirm" = "Acara lain sedang dipaparkan pada Skrin Kunci. Gantikan dengan acara ini?";
 "calendar::event::more_action:live_activity:register:success" = "Kini dipaparkan pada Skrin Kunci. Kunci peranti anda untuk melihatnya.";
+"calendar::event::more_action:live_activity:showing" = "Dipaparkan pada Skrin Kunci";
 "calendar::event::more_action:copy:item_name" = "Salin acara";
 "calendar::event::more_action:share:item_name" = "Kongsi";
 "event_detail::share::field::time" = "Waktu";
@@ -745,6 +746,9 @@
 "billing::paywall::topup::description" = "Kredit tambahan digunakan selepas had harian anda habis, dan ia tidak luput.";
 "billing::paywall::topup::applied" = "Kredit ditambah";
 "billing::paywall::topup::applied::withCredits" = "%@ kredit ditambah";
+
+"billing::needSignIn::title" = "Log masuk diperlukan";
+"billing::needSignIn::message" = "Log masuk untuk melihat dan mengurus pelan anda.";
 
 // MARK: - share extension
 

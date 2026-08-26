@@ -159,6 +159,7 @@
 "calendar::event::more_action:live_activity:unregister:confirm" = "¿Quieres quitar este evento de la pantalla bloqueada?";
 "calendar::event::more_action:live_activity:replace:confirm" = "Otro evento se está mostrando en la pantalla bloqueada. ¿Quieres sustituirlo por este?";
 "calendar::event::more_action:live_activity:register:success" = "Ya se muestra en la pantalla bloqueada. Bloquea el dispositivo para verlo.";
+"calendar::event::more_action:live_activity:showing" = "Se muestra en la pantalla bloqueada";
 "calendar::event::more_action:copy:item_name" = "Copiar evento";
 "calendar::event::more_action:share:item_name" = "Compartir";
 "event_detail::share::field::time" = "Hora";
@@ -745,6 +746,9 @@
 "billing::paywall::topup::description" = "Los créditos adicionales se usan cuando se agota tu límite diario y no caducan.";
 "billing::paywall::topup::applied" = "Créditos añadidos";
 "billing::paywall::topup::applied::withCredits" = "%@ créditos añadidos";
+
+"billing::needSignIn::title" = "Se requiere iniciar sesión";
+"billing::needSignIn::message" = "Inicia sesión para ver y gestionar tu plan.";
 
 // MARK: - share extension
 

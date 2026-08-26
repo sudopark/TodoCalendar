@@ -159,6 +159,7 @@
 "calendar::event::more_action:live_activity:unregister:confirm" = "Bạn có muốn xóa sự kiện này khỏi màn hình khóa không?";
 "calendar::event::more_action:live_activity:replace:confirm" = "Một sự kiện khác đang hiển thị trên màn hình khóa. Thay bằng sự kiện này?";
 "calendar::event::more_action:live_activity:register:success" = "Đã hiển thị trên màn hình khóa. Hãy khóa thiết bị để xem.";
+"calendar::event::more_action:live_activity:showing" = "Đang hiển thị trên màn hình khóa";
 "calendar::event::more_action:copy:item_name" = "Sao chép sự kiện";
 "calendar::event::more_action:share:item_name" = "Chia sẻ";
 "event_detail::share::field::time" = "Thời gian";
@@ -745,6 +746,9 @@
 "billing::paywall::topup::description" = "Tín dụng bổ sung được dùng sau khi hết hạn mức hằng ngày và không hết hạn.";
 "billing::paywall::topup::applied" = "Đã thêm tín dụng";
 "billing::paywall::topup::applied::withCredits" = "Đã thêm %@ tín dụng";
+
+"billing::needSignIn::title" = "Cần đăng nhập";
+"billing::needSignIn::message" = "Đăng nhập để xem và quản lý gói của bạn.";
 
 // MARK: - share extension
 

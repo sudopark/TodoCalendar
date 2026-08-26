@@ -159,6 +159,7 @@
 "calendar::event::more_action:live_activity:unregister:confirm" = "Vil du fjerne denne begivenhed fra låseskærmen?";
 "calendar::event::more_action:live_activity:replace:confirm" = "En anden begivenhed vises på låseskærmen. Vil du erstatte den med denne?";
 "calendar::event::more_action:live_activity:register:success" = "Vises nu på låseskærmen. Lås din enhed for at se den.";
+"calendar::event::more_action:live_activity:showing" = "Vises på låseskærmen";
 "calendar::event::more_action:copy:item_name" = "Kopiér begivenhed";
 "calendar::event::more_action:share:item_name" = "Del";
 "event_detail::share::field::time" = "Tidspunkt";
@@ -745,6 +746,9 @@
 "billing::paywall::topup::description" = "Ekstra credits bruges, når din daglige grænse er opbrugt, og de udløber ikke.";
 "billing::paywall::topup::applied" = "Credits tilføjet";
 "billing::paywall::topup::applied::withCredits" = "%@ credits tilføjet";
+
+"billing::needSignIn::title" = "Login påkrævet";
+"billing::needSignIn::message" = "Log ind for at se og administrere dit abonnement.";
 
 // MARK: - share extension
 

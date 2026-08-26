@@ -159,6 +159,7 @@
 "calendar::event::more_action:live_activity:unregister:confirm" = "Voleu eliminar aquest esdeveniment de la pantalla bloquejada?";
 "calendar::event::more_action:live_activity:replace:confirm" = "Hi ha un altre esdeveniment a la pantalla bloquejada. Voleu substituir-lo per aquest?";
 "calendar::event::more_action:live_activity:register:success" = "Ja es mostra a la pantalla bloquejada. Bloquegeu el dispositiu per veure-ho.";
+"calendar::event::more_action:live_activity:showing" = "Es mostra a la pantalla bloquejada";
 "calendar::event::more_action:copy:item_name" = "Copia l'esdeveniment";
 "calendar::event::more_action:share:item_name" = "Comparteix";
 "event_detail::share::field::time" = "Hora";
@@ -745,6 +746,9 @@
 "billing::paywall::topup::description" = "Els crèdits addicionals s'utilitzen quan s'esgota el límit diari i no caduquen.";
 "billing::paywall::topup::applied" = "Crèdits afegits";
 "billing::paywall::topup::applied::withCredits" = "%@ crèdits afegits";
+
+"billing::needSignIn::title" = "Cal iniciar sessió";
+"billing::needSignIn::message" = "Inicieu sessió per veure i gestionar el vostre pla.";
 
 // MARK: - share extension
 

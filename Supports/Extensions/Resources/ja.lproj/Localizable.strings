@@ -159,6 +159,7 @@
 "calendar::event::more_action:live_activity:unregister:confirm" = "このイベントをロック画面から削除しますか？";
 "calendar::event::more_action:live_activity:replace:confirm" = "別のイベントがロック画面に表示されています。このイベントに置き換えますか？";
 "calendar::event::more_action:live_activity:register:success" = "ロック画面に表示しました。デバイスをロックして確認してください。";
+"calendar::event::more_action:live_activity:showing" = "ロック画面に表示中";
 "calendar::event::more_action:copy:item_name" = "イベントを複製";
 "calendar::event::more_action:share:item_name" = "共有";
 "event_detail::share::field::time" = "時間";
@@ -744,6 +745,9 @@
 "billing::paywall::topup::description" = "追加クレジットは1日の上限を使い切った後に使用され、有効期限はありません。";
 "billing::paywall::topup::applied" = "クレジットを追加しました";
 "billing::paywall::topup::applied::withCredits" = "%@クレジットを追加しました";
+
+"billing::needSignIn::title" = "ログインが必要です";
+"billing::needSignIn::message" = "プランの確認と変更を行うにはログインしてください。";
 
 // MARK: - share extension
 

@@ -159,6 +159,7 @@
 "calendar::event::more_action:live_activity:unregister:confirm" = "Θέλετε να αφαιρέσετε αυτό το συμβάν από την οθόνη κλειδώματος;";
 "calendar::event::more_action:live_activity:replace:confirm" = "Ένα άλλο συμβάν εμφανίζεται στην οθόνη κλειδώματος. Να αντικατασταθεί με αυτό;";
 "calendar::event::more_action:live_activity:register:success" = "Εμφανίζεται τώρα στην οθόνη κλειδώματος. Κλειδώστε τη συσκευή σας για να το δείτε.";
+"calendar::event::more_action:live_activity:showing" = "Εμφανίζεται στην οθόνη κλειδώματος";
 "calendar::event::more_action:copy:item_name" = "Αντιγραφή συμβάντος";
 "calendar::event::more_action:share:item_name" = "Κοινοποίηση";
 "event_detail::share::field::time" = "Ώρα";
@@ -745,6 +746,9 @@
 "billing::paywall::topup::description" = "Οι επιπλέον μονάδες χρησιμοποιούνται αφού εξαντληθεί το ημερήσιο όριό σας και δεν λήγουν.";
 "billing::paywall::topup::applied" = "Οι μονάδες προστέθηκαν";
 "billing::paywall::topup::applied::withCredits" = "Προστέθηκαν %@ μονάδες";
+
+"billing::needSignIn::title" = "Απαιτείται σύνδεση";
+"billing::needSignIn::message" = "Συνδεθείτε για να δείτε και να διαχειριστείτε το πρόγραμμά σας.";
 
 // MARK: - share extension
 

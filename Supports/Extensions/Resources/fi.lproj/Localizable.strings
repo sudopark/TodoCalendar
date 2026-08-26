@@ -159,6 +159,7 @@
 "calendar::event::more_action:live_activity:unregister:confirm" = "Haluatko poistaa tämän tapahtuman lukitusnäytöltä?";
 "calendar::event::more_action:live_activity:replace:confirm" = "Lukitusnäytöllä näkyy jo toinen tapahtuma. Korvataanko se tällä?";
 "calendar::event::more_action:live_activity:register:success" = "Näkyy nyt lukitusnäytöllä. Lukitse laitteesi nähdäksesi sen.";
+"calendar::event::more_action:live_activity:showing" = "Näkyy lukitusnäytöllä";
 "calendar::event::more_action:copy:item_name" = "Kopioi tapahtuma";
 "calendar::event::more_action:share:item_name" = "Jaa";
 "event_detail::share::field::time" = "Aika";
@@ -745,6 +746,9 @@
 "billing::paywall::topup::description" = "Lisäkrediittejä käytetään, kun päivittäinen rajasi on täynnä, eivätkä ne vanhene.";
 "billing::paywall::topup::applied" = "Krediitit lisätty";
 "billing::paywall::topup::applied::withCredits" = "%@ krediittiä lisätty";
+
+"billing::needSignIn::title" = "Kirjautuminen vaaditaan";
+"billing::needSignIn::message" = "Kirjaudu sisään nähdäksesi ja hallitaksesi tilaustasi.";
 
 // MARK: - share extension
 

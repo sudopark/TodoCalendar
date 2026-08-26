@@ -159,6 +159,7 @@
 "calendar::event::more_action:live_activity:unregister:confirm" = "Möchten Sie dieses Ereignis vom Sperrbildschirm entfernen?";
 "calendar::event::more_action:live_activity:replace:confirm" = "Ein anderes Ereignis wird auf dem Sperrbildschirm angezeigt. Durch dieses ersetzen?";
 "calendar::event::more_action:live_activity:register:success" = "Wird jetzt auf dem Sperrbildschirm angezeigt. Sperren Sie Ihr Gerät, um es zu sehen.";
+"calendar::event::more_action:live_activity:showing" = "Wird auf dem Sperrbildschirm angezeigt";
 "calendar::event::more_action:copy:item_name" = "Ereignis kopieren";
 "calendar::event::more_action:share:item_name" = "Teilen";
 "event_detail::share::field::time" = "Zeit";
@@ -745,6 +746,9 @@
 "billing::paywall::topup::description" = "Zusätzliche Credits werden verwendet, wenn dein Tageslimit aufgebraucht ist, und sie verfallen nicht.";
 "billing::paywall::topup::applied" = "Credits hinzugefügt";
 "billing::paywall::topup::applied::withCredits" = "%@ Credits hinzugefügt";
+
+"billing::needSignIn::title" = "Anmeldung erforderlich";
+"billing::needSignIn::message" = "Melden Sie sich an, um Ihren Tarif anzusehen und zu verwalten.";
 
 // MARK: - share extension
 

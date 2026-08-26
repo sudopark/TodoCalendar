@@ -159,6 +159,7 @@
 "calendar::event::more_action:live_activity:unregister:confirm" = "Apakah Anda ingin menghapus acara ini dari Layar Terkunci?";
 "calendar::event::more_action:live_activity:replace:confirm" = "Acara lain sedang ditampilkan di Layar Terkunci. Ganti dengan acara ini?";
 "calendar::event::more_action:live_activity:register:success" = "Sekarang ditampilkan di Layar Terkunci. Kunci perangkat Anda untuk melihatnya.";
+"calendar::event::more_action:live_activity:showing" = "Ditampilkan di Layar Terkunci";
 "calendar::event::more_action:copy:item_name" = "Salin acara";
 "calendar::event::more_action:share:item_name" = "Bagikan";
 "event_detail::share::field::time" = "Waktu";
@@ -745,6 +746,9 @@
 "billing::paywall::topup::description" = "Kredit tambahan digunakan setelah batas harian Anda habis, dan tidak akan kedaluwarsa.";
 "billing::paywall::topup::applied" = "Kredit ditambahkan";
 "billing::paywall::topup::applied::withCredits" = "%@ kredit ditambahkan";
+
+"billing::needSignIn::title" = "Perlu masuk";
+"billing::needSignIn::message" = "Masuk untuk melihat dan mengelola paket Anda.";
 
 // MARK: - share extension
 

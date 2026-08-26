@@ -159,6 +159,7 @@
 "calendar::event::more_action:live_activity:unregister:confirm" = "Vill du ta bort den här händelsen från låsskärmen?";
 "calendar::event::more_action:live_activity:replace:confirm" = "En annan händelse visas på låsskärmen. Vill du ersätta den med den här?";
 "calendar::event::more_action:live_activity:register:success" = "Visas nu på låsskärmen. Lås enheten för att se den.";
+"calendar::event::more_action:live_activity:showing" = "Visas på låsskärmen";
 "calendar::event::more_action:copy:item_name" = "Kopiera händelse";
 "calendar::event::more_action:share:item_name" = "Dela";
 "event_detail::share::field::time" = "Tid";
@@ -745,6 +746,9 @@
 "billing::paywall::topup::description" = "Extra krediter används när din dagliga gräns tar slut, och de går inte ut.";
 "billing::paywall::topup::applied" = "Krediter tillagda";
 "billing::paywall::topup::applied::withCredits" = "%@ krediter tillagda";
+
+"billing::needSignIn::title" = "Inloggning krävs";
+"billing::needSignIn::message" = "Logga in för att se och hantera din plan.";
 
 // MARK: - share extension
 

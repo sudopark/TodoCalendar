@@ -159,6 +159,7 @@
 "calendar::event::more_action:live_activity:unregister:confirm" = "是否将此事件从锁定屏幕移除？";
 "calendar::event::more_action:live_activity:replace:confirm" = "锁定屏幕上正在显示其他事件。是否替换为此事件？";
 "calendar::event::more_action:live_activity:register:success" = "已在锁定屏幕上显示。锁屏后即可查看。";
+"calendar::event::more_action:live_activity:showing" = "正在锁定屏幕上显示";
 "calendar::event::more_action:copy:item_name" = "复制事件";
 "calendar::event::more_action:share:item_name" = "分享";
 "event_detail::share::field::time" = "时间";
@@ -744,6 +745,9 @@
 "billing::paywall::topup::description" = "附加积分会在每日额度用完后使用，且永不过期。";
 "billing::paywall::topup::applied" = "积分已添加";
 "billing::paywall::topup::applied::withCredits" = "已添加 %@ 积分";
+
+"billing::needSignIn::title" = "需要登录";
+"billing::needSignIn::message" = "登录后即可查看和管理您的套餐。";
 
 // MARK: - share extension
 

@@ -159,6 +159,7 @@
 "calendar::event::more_action:live_activity:unregister:confirm" = "Želite li ukloniti ovaj događaj sa zaključanog zaslona?";
 "calendar::event::more_action:live_activity:replace:confirm" = "Na zaključanom zaslonu prikazuje se drugi događaj. Zamijeniti ga ovim?";
 "calendar::event::more_action:live_activity:register:success" = "Sada se prikazuje na zaključanom zaslonu. Zaključajte uređaj da biste to vidjeli.";
+"calendar::event::more_action:live_activity:showing" = "Prikazuje se na zaključanom zaslonu";
 "calendar::event::more_action:copy:item_name" = "Kopiraj događaj";
 "calendar::event::more_action:share:item_name" = "Podijeli";
 "event_detail::share::field::time" = "Vrijeme";
@@ -744,6 +745,9 @@
 "billing::paywall::topup::description" = "Dodatni bodovi troše se nakon što potrošite dnevni limit i ne istječu.";
 "billing::paywall::topup::applied" = "Bodovi dodani";
 "billing::paywall::topup::applied::withCredits" = "Dodano %@ bodova";
+
+"billing::needSignIn::title" = "Potrebna je prijava";
+"billing::needSignIn::message" = "Prijavite se kako biste pregledali svoj plan i upravljali njime.";
 
 // MARK: - share extension
 
