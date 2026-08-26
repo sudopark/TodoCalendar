@@ -44,15 +44,12 @@ SUITES=(
     "CalendarScenesSnapshots|CalendarScenesCatalogSnapshots|CalendarScenes"
     "EventDetailSceneSnapshots|EventDetailSceneCatalogSnapshots|EventDetailScene"
     "SettingSceneSnapshots|SettingSceneCatalogSnapshots|SettingScene"
-    "AIAgentSceneSnapshots|AIAgentSceneCatalogSnapshots|AIAgentScene"
     "TodoCalendarAppWidgetSnapshots|WidgetCatalogSnapshots|Widget"
 )
 
 # <업로드 파일명>|<모듈 디렉토리>/<스위트>/<캡처 파일명>
 MAPPING=(
     "01-calendar|CalendarScenes/CalendarScenesCatalogSnapshots/test_calendar.calendar-light.png"
-    "02-ai-input|AIAgentScene/AIAgentSceneCatalogSnapshots/test_storeAIInput.storeAIInput-light.png"
-    "04-google-event|EventDetailScene/EventDetailSceneCatalogSnapshots/test_storeGoogleEventDetail.storeGoogleEventDetail-light.png"
     "05-repeat-options|EventDetailScene/EventDetailSceneCatalogSnapshots/test_storeRepeatOptions.storeRepeatOptions-light.png"
     "06-event-detail|EventDetailScene/EventDetailSceneCatalogSnapshots/test_eventDetail.eventDetail-light.png"
     "07-event-types|SettingScene/SettingSceneCatalogSnapshots/test_eventTypeList.eventTypeList-light.png"
