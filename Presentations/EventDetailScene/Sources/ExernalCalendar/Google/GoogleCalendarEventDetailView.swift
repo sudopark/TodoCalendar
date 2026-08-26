@@ -290,6 +290,10 @@ struct GoogleCalendarEventDetailView: View {
                         .id(InputFields.name.id)
                         .disabled(!state.isEditable)
 
+                    if self.state.liveActivityActionModel?.isRegistered == true {
+                        LiveActivityBadgeView()
+                    }
+
                     self.eventTypeView
 
                     VStack(spacing: Metric.Spacing.regular) {

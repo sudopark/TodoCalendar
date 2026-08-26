@@ -136,6 +136,10 @@ struct HolidayEventDetailView: View {
                 Spacer(minLength: 5)
                 self.nameView
 
+                if self.state.liveActivityActionModel?.isRegistered == true {
+                    LiveActivityBadgeView()
+                }
+
                 VStack(spacing: Metric.Spacing.large) {
                     if let model = self.state.countryModel {
                         self.countryInfoView(model)
