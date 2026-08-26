@@ -13,8 +13,10 @@ ASC 심사 제출에 필수인 필드라 제출이 막히고, 31개 로케일을
 **아직 `deliver init`을 돌리지 않았다.** 작업 당시 세션에 App Store Connect API 키가 없어서
 현재 ASC 상태를 내려받지 못했고, 여기 있는 건 새로 쓴 원고 4종뿐이다.
 
-`upload_app_store_metadata` lane은 `deliver init`이 항상 만드는 `copyright.txt`가 이 디렉토리에
-있는지로 기준선 확보 여부를 판정하고, 없으면 업로드 전에 중단한다.
+`upload_app_store_metadata` lane은 업로드 전에 두 가지를 본다. `deliver init`이 항상 만드는
+`copyright.txt`가 이 디렉토리에 있는지(= 기준선 확보 여부), 그리고 모든 로케일이 ASC 심사 필수 필드
+(`name`·`description`·`keywords`·`support_url`·`privacy_url`)를 갖췄는지. 하나라도 어긋나면
+빠진 로케일 목록과 함께 중단한다.
 
 ## 업로드 전에 반드시 이 순서로
 
@@ -33,7 +35,10 @@ DELIVER_SKIP_SCREENSHOTS=true bundle exec fastlane deliver init --api_key_path /
 #    수정된 tracked 파일 = 우리 4필드)
 git checkout -- $(git diff --name-only -- fastlane/metadata)
 
-# 4. init이 못 만든 신규 로케일의 name·support_url·privacy_url을 채운다 (ASC에 없던 로케일이라 빈 채로 남는다)
+# 4. init이 못 만든 신규 로케일의 비번역 필드를 en-US 값으로 채운다
+#    init은 ASC에 이미 있던 로케일(en-US·ko)만 내려받으므로 나머지는 빈 채로 남는다
+#    이미 있는 파일은 덮지 않으므로 ko 값과 번역 원고는 그대로다. --apply 없이 돌리면 계획만 나온다
+python3 scripts/propagate-appstore-metadata.py --apply
 
 # 5. 업로드 (업로드 뒤 precheck가 자동으로 돈다)
 bundle exec fastlane ios upload_app_store_metadata
