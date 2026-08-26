@@ -77,10 +77,119 @@ final class CalendarScenesCatalogSnapshots: XCTestCase {
 }
 
 
+// MARK: - App Store 스샷용 화면 (#996)
+
+extension CalendarScenesCatalogSnapshots {
+
+    private var storeCalendarMonth: (year: Int, month: Int) { (2026, 3) }
+
+    private var storeCalendarMonthDate: Date {
+        let calendar = Calendar(identifier: .gregorian)
+        let components = DateComponents(
+            year: self.storeCalendarMonth.year, month: self.storeCalendarMonth.month, day: 1
+        )
+        return calendar.date(from: components) ?? Date()
+    }
+
+    @MainActor
+    private func makeStoreAppearance(_ theme: SnapshotTheme) -> ViewAppearance {
+        let appearance = self.makeAppearance(theme)
+        let tags: [any EventTag] = [
+            DefaultEventTag.default("#088CDA"),
+            DefaultEventTag.holiday("#D6236A"),
+            StoreCatalogEventTag.work.customTag,
+            StoreCatalogEventTag.family.customTag,
+            StoreCatalogEventTag.health.customTag,
+            StoreCatalogEventTag.study.customTag
+        ]
+        appearance.updateEventColorMap(by: tags)
+        return appearance
+    }
+
+    /// 프로덕션 월 헤더는 앱 타겟 MainViewController 의 private HeaderView 라 여기서 참조할 수 없다 — 같은 메트릭으로 재현한다.
+    @MainActor
+    private func storeCalendarHeaderView(_ appearance: ViewAppearance) -> some View {
+        let formatter = DateFormatter() |> \.dateFormat .~ "date_form.MMM".localized()
+        let chevronFont: Font = .system(size: 13, weight: .semibold)
+        return HStack(spacing: Metric.Spacing.small) {
+            Image(systemName: "chevron.left")
+                .font(chevronFont)
+                .foregroundStyle(appearance.colorSet.text2.asColor)
+                .frame(width: 24)
+
+            HStack(alignment: .lastTextBaseline, spacing: Metric.Spacing.xsmall) {
+                Text(formatter.string(from: self.storeCalendarMonthDate).uppercased())
+                    .font(appearance.fontSet.bigMonth.asFont)
+                Text(verbatim: "\(self.storeCalendarMonth.year)")
+                    .font(appearance.fontSet.normal.asFont)
+            }
+            .foregroundStyle(appearance.colorSet.text0.asColor)
+
+            Image(systemName: "chevron.right")
+                .font(chevronFont)
+                .foregroundStyle(appearance.colorSet.text2.asColor)
+                .frame(width: 24)
+
+            Spacer()
+
+            HStack(spacing: Metric.Spacing.small) {
+                ForEach(["calendar", "line.3.horizontal.decrease.circle", "gearshape"], id: \.self) { name in
+                    Image(systemName: name)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 25, height: 25)
+                        .foregroundStyle(appearance.colorSet.text0.asColor)
+                }
+            }
+        }
+        .frame(height: 44)
+        .padding(.horizontal, spacing: .large)
+        .background(appearance.colorSet.dayBackground.asColor)
+    }
+
+    @MainActor
+    func test_storeCalendar() {
+        captureSnapshotPair(
+            named: "storeCalendar", layout: .fullScreen, snapshotDirectory: catalogSnapshotDirectory()
+        ) { theme in
+            let appearance = self.makeStoreAppearance(theme)
+
+            let monthState = MonthViewState()
+            monthState.bind(StoreCatalogMonthViewModel())
+            RunLoop.main.run(until: Date().addingTimeInterval(0.05))
+
+            let dayListState = DayEventListViewState()
+            dayListState.bind(CatalogDayEventListViewModel(), appearance)
+            RunLoop.main.run(until: Date().addingTimeInterval(0.05))
+
+            return VStack(spacing: 0) {
+                self.storeCalendarHeaderView(appearance)
+                ScrollView {
+                    VStack(spacing: 0) {
+                        MonthView()
+                            .environment(monthState)
+                            .environment(MonthViewEventHandler())
+                            .onAppear {
+                                RunLoop.main.run(until: Date().addingTimeInterval(0.1))
+                            }
+                        DayEventListView()
+                            .environment(dayListState)
+                            .environment(PendingCompleteTodoState())
+                            .environment(DayEventListViewEventHandler())
+                    }
+                }
+            }
+            .background(appearance.colorSet.bg0.asColor)
+            .environment(appearance)
+        }
+    }
+}
+
+
 // MARK: - Test Doubles
 
 /// 2026년 3월 — 1일이 일요일이라 앞 빈칸 없이 5주로 떨어진다.
-private final class CatalogMonthViewModel: MonthViewModel, @unchecked Sendable {
+private class CatalogMonthViewModel: MonthViewModel, @unchecked Sendable {
 
     private let selectedDay = CurrentValueSubject<String?, Never>("2026-3-12")
 
@@ -129,11 +238,17 @@ private final class CatalogMonthViewModel: MonthViewModel, @unchecked Sendable {
     }
 
     func eventStack(at weekId: String) -> AnyPublisher<WeekEventStackViewModel, Never> {
+        let lines = self.eventLines(at: weekId)
+        return Just(.init(linesStack: lines, shouldMarkEventDays: !lines.isEmpty))
+            .eraseToAnyPublisher()
+    }
+
+    fileprivate func eventLines(at weekId: String) -> [[EventOnWeek]] {
         let lines: [[EventOnWeek]]
         switch weekId {
         case "week:0":
             lines = [
-                [self.event("holiday", "catalog.event::holiday".catalogLocalized(), days: [1], seq: 1...1, ids: ["2026-3-1"])],
+                [self.event("holiday", "catalog.event::holiday".catalogLocalized(), days: [1], seq: 1...1, ids: ["2026-3-1"], tagId: .holiday)],
                 [self.event("kickoff", "catalog.event::project_kickoff".catalogLocalized(), days: [3, 4], seq: 3...4, ids: ["2026-3-3", "2026-3-4"])],
                 [self.event("dentist", "catalog.event::dentist".catalogLocalized(), days: [5], seq: 5...5, ids: ["2026-3-5"], hasPeriod: false)]
             ]
@@ -155,18 +270,18 @@ private final class CatalogMonthViewModel: MonthViewModel, @unchecked Sendable {
         default:
             lines = []
         }
-        return Just(.init(linesStack: lines, shouldMarkEventDays: !lines.isEmpty))
-            .eraseToAnyPublisher()
+        return lines
     }
 
-    private func event(
+    fileprivate func event(
         _ id: String, _ name: String,
         days: [Int], seq: ClosedRange<Int>, ids: [String],
+        tagId: EventTagId = .default,
         hasPeriod: Bool = true
     ) -> EventOnWeek {
         return EventOnWeek(
             0..<1, days, seq, ids,
-            CatalogCalendarEvent(id, name, hasPeriod: hasPeriod, isHolidayTag: id == "holiday")
+            CatalogCalendarEvent(id, name, hasPeriod: hasPeriod, tagId: tagId)
         )
     }
 
@@ -196,10 +311,10 @@ private struct CatalogCalendarEvent: CalendarEvent {
     var isForemost: Bool = false
     var locationText: String?
 
-    init(_ id: String, _ name: String, hasPeriod: Bool = true, isHolidayTag: Bool = false) {
+    init(_ id: String, _ name: String, hasPeriod: Bool = true, tagId: EventTagId = .default) {
         self.eventId = id
         self.name = name
-        self.eventTagId = isHolidayTag ? .holiday : .default
+        self.eventTagId = tagId
         if hasPeriod {
             self.eventTimeOnCalendar = .init(.period(0..<1), timeZone: TimeZone.autoupdatingCurrent)
         }
@@ -309,4 +424,136 @@ private final class CatalogDayEventListViewModel: DayEventListViewModel, @unchec
     func handleAIEntryButtonTap() { }
     func showAIGuide() { }
     func attachListener(_ listener: any DayEventListSceneListener) { }
+}
+
+
+/// 이벤트 종류 목록 스샷(SettingSceneCatalogSnapshots.test_storeEventTypeList)과 색이 어긋나면
+/// 같은 라인업의 두 장이 앞뒤가 안 맞는다 — 색 값은 그쪽 픽스처와 같이 간다.
+private enum StoreCatalogEventTag: String {
+    case work
+    case family
+    case health
+    case study
+
+    var key: String { "catalog.tag::\(self.rawValue)" }
+
+    var tagId: EventTagId { .custom(self.key) }
+
+    var colorHex: String {
+        switch self {
+        case .work: return "#088CDA"
+        case .family: return "#F9316D"
+        case .health: return "#3CB371"
+        case .study: return "#FFA02E"
+        }
+    }
+
+    var customTag: CustomEventTag {
+        return CustomEventTag(uuid: self.key, name: self.key.catalogLocalized(), colorHex: self.colorHex)
+    }
+}
+
+/// 주간 반복 일정(월요일 스프린트·목요일 리뷰)을 다섯 주에 깔아 빈 주가 없게 하고,
+/// 3월 19일에 다섯 줄을 겹쳐 `+N` 오버플로우가 나오게 한다.
+private final class StoreCatalogMonthViewModel: CatalogMonthViewModel, @unchecked Sendable {
+
+    override fileprivate func eventLines(at weekId: String) -> [[EventOnWeek]] {
+        switch weekId {
+        case "week:0":
+            return [
+                [self.march("holiday", "holiday", days: [1], seq: 1...1, tagId: .holiday)],
+                [
+                    self.march("sprint-1", "sprint_planning", days: [2], seq: 2...2, tagId: StoreCatalogEventTag.work.tagId, hasPeriod: false),
+                    self.march("review-1", "design_review", days: [5], seq: 5...5, tagId: StoreCatalogEventTag.work.tagId, hasPeriod: false)
+                ],
+                [
+                    self.march("dentist-1", "dentist", days: [4], seq: 4...4, tagId: StoreCatalogEventTag.health.tagId, hasPeriod: false),
+                    self.march("dinner-1", "dinner", days: [7], seq: 7...7, tagId: StoreCatalogEventTag.family.tagId, hasPeriod: false)
+                ]
+            ]
+        case "week:1":
+            return [
+                [self.march("trip-1", "trip", days: [9, 10, 11], seq: 2...4, tagId: StoreCatalogEventTag.family.tagId)],
+                [
+                    self.march("sprint-2", "sprint_planning", days: [9], seq: 2...2, tagId: StoreCatalogEventTag.work.tagId, hasPeriod: false),
+                    self.march("review-2", "design_review", days: [12], seq: 5...5, tagId: StoreCatalogEventTag.work.tagId, hasPeriod: false)
+                ],
+                [
+                    self.march("release-1", "release_day", days: [10], seq: 3...3, hasPeriod: false),
+                    self.march("lunch-1", "lunch", days: [13], seq: 6...6, tagId: StoreCatalogEventTag.family.tagId, hasPeriod: false)
+                ]
+            ]
+        case "week:2":
+            return [
+                [self.march("workshop-1", "team_workshop", days: [19, 20], seq: 5...6, tagId: StoreCatalogEventTag.study.tagId)],
+                [
+                    self.march("sprint-3", "sprint_planning", days: [16], seq: 2...2, tagId: StoreCatalogEventTag.work.tagId, hasPeriod: false),
+                    self.march("review-3", "design_review", days: [19], seq: 5...5, tagId: StoreCatalogEventTag.work.tagId, hasPeriod: false)
+                ],
+                [
+                    self.march("lunch-2", "lunch", days: [17], seq: 3...3, tagId: StoreCatalogEventTag.family.tagId, hasPeriod: false),
+                    self.march("dentist-2", "dentist", days: [19], seq: 5...5, tagId: StoreCatalogEventTag.health.tagId, hasPeriod: false)
+                ],
+                [
+                    self.march("kickoff-1", "project_kickoff", days: [17], seq: 3...3, tagId: StoreCatalogEventTag.work.tagId, hasPeriod: false),
+                    self.march("release-2", "release_day", days: [19], seq: 5...5, hasPeriod: false)
+                ],
+                [self.march("dinner-2", "dinner", days: [19], seq: 5...5, tagId: StoreCatalogEventTag.family.tagId, hasPeriod: false)]
+            ]
+        case "week:3":
+            return [
+                [
+                    self.march("sprint-4", "sprint_planning", days: [23], seq: 2...2, tagId: StoreCatalogEventTag.work.tagId, hasPeriod: false),
+                    self.march("review-4", "design_review", days: [26], seq: 5...5, tagId: StoreCatalogEventTag.work.tagId, hasPeriod: false)
+                ],
+                [
+                    self.march("dentist-3", "dentist", days: [24], seq: 3...3, tagId: StoreCatalogEventTag.health.tagId, hasPeriod: false),
+                    self.march("dinner-3", "dinner", days: [28], seq: 7...7, tagId: StoreCatalogEventTag.family.tagId, hasPeriod: false)
+                ],
+                [self.march("workshop-2", "team_workshop", days: [27, 28], seq: 6...7, tagId: StoreCatalogEventTag.study.tagId)]
+            ]
+        case "week:4":
+            return [
+                [
+                    self.march("sprint-5", "sprint_planning", days: [30], seq: 2...2, tagId: StoreCatalogEventTag.work.tagId, hasPeriod: false),
+                    self.april("review-5", "design_review", days: [2], seq: 5...5, tagId: StoreCatalogEventTag.work.tagId, hasPeriod: false)
+                ],
+                [self.april("trip-2", "trip", days: [3, 4], seq: 6...7, tagId: StoreCatalogEventTag.family.tagId)],
+                [
+                    self.march("release-3", "release_day", days: [31], seq: 3...3, hasPeriod: false),
+                    self.april("lunch-3", "lunch", days: [1], seq: 4...4, tagId: StoreCatalogEventTag.family.tagId, hasPeriod: false)
+                ]
+            ]
+        default:
+            return []
+        }
+    }
+
+    private func march(
+        _ id: String, _ nameKey: String,
+        days: [Int], seq: ClosedRange<Int>,
+        tagId: EventTagId = .default, hasPeriod: Bool = true
+    ) -> EventOnWeek {
+        return self.dayOfMonth(id, nameKey, month: 3, days: days, seq: seq, tagId: tagId, hasPeriod: hasPeriod)
+    }
+
+    private func april(
+        _ id: String, _ nameKey: String,
+        days: [Int], seq: ClosedRange<Int>,
+        tagId: EventTagId = .default, hasPeriod: Bool = true
+    ) -> EventOnWeek {
+        return self.dayOfMonth(id, nameKey, month: 4, days: days, seq: seq, tagId: tagId, hasPeriod: hasPeriod)
+    }
+
+    private func dayOfMonth(
+        _ id: String, _ nameKey: String, month: Int,
+        days: [Int], seq: ClosedRange<Int>,
+        tagId: EventTagId, hasPeriod: Bool
+    ) -> EventOnWeek {
+        return self.event(
+            id, "catalog.event::\(nameKey)".catalogLocalized(),
+            days: days, seq: seq, ids: days.map { "2026-\(month)-\($0)" },
+            tagId: tagId, hasPeriod: hasPeriod
+        )
+    }
 }
