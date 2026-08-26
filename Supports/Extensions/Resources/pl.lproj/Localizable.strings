@@ -159,6 +159,7 @@
 "calendar::event::more_action:live_activity:unregister:confirm" = "Czy chcesz usunąć to wydarzenie z ekranu blokady?";
 "calendar::event::more_action:live_activity:replace:confirm" = "Inne wydarzenie jest wyświetlane na ekranie blokady. Zastąpić je tym?";
 "calendar::event::more_action:live_activity:register:success" = "Wyświetlono na ekranie blokady. Zablokuj urządzenie, aby to zobaczyć.";
+"calendar::event::more_action:live_activity:showing" = "Wyświetlane na ekranie blokady";
 "calendar::event::more_action:copy:item_name" = "Kopiuj wydarzenie";
 "calendar::event::more_action:share:item_name" = "Udostępnij";
 "event_detail::share::field::time" = "Czas";
@@ -744,6 +745,9 @@
 "billing::paywall::topup::description" = "Dodatkowe kredyty są używane po wyczerpaniu dziennego limitu i nie wygasają.";
 "billing::paywall::topup::applied" = "Kredyty dodane";
 "billing::paywall::topup::applied::withCredits" = "Dodano %@ kredytów";
+
+"billing::needSignIn::title" = "Wymagane zalogowanie";
+"billing::needSignIn::message" = "Zaloguj się, aby wyświetlić plan i nim zarządzać.";
 
 // MARK: - share extension
 

@@ -159,6 +159,7 @@
 "calendar::event::more_action:live_activity:unregister:confirm" = "ต้องการลบกิจกรรมนี้ออกจากหน้าจอล็อกหรือไม่?";
 "calendar::event::more_action:live_activity:replace:confirm" = "มีกิจกรรมอื่นแสดงอยู่บนหน้าจอล็อก ต้องการเปลี่ยนเป็นกิจกรรมนี้หรือไม่?";
 "calendar::event::more_action:live_activity:register:success" = "แสดงบนหน้าจอล็อกแล้ว ล็อกเครื่องเพื่อดูได้เลย";
+"calendar::event::more_action:live_activity:showing" = "กำลังแสดงบนหน้าจอล็อก";
 "calendar::event::more_action:copy:item_name" = "คัดลอกกิจกรรม";
 "calendar::event::more_action:share:item_name" = "แชร์";
 "event_detail::share::field::time" = "เวลา";
@@ -745,6 +746,9 @@
 "billing::paywall::topup::description" = "เครดิตเสริมจะถูกใช้หลังจากใช้โควตารายวันหมดแล้ว และไม่มีวันหมดอายุ";
 "billing::paywall::topup::applied" = "เพิ่มเครดิตแล้ว";
 "billing::paywall::topup::applied::withCredits" = "เพิ่ม %@ เครดิตแล้ว";
+
+"billing::needSignIn::title" = "ต้องเข้าสู่ระบบ";
+"billing::needSignIn::message" = "เข้าสู่ระบบเพื่อดูและจัดการแพ็กเกจของคุณ";
 
 // MARK: - share extension
 

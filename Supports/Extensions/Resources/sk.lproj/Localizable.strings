@@ -159,6 +159,7 @@
 "calendar::event::more_action:live_activity:unregister:confirm" = "Chcete túto udalosť odstrániť z uzamknutej obrazovky?";
 "calendar::event::more_action:live_activity:replace:confirm" = "Na uzamknutej obrazovke sa zobrazuje iná udalosť. Nahradiť ju touto?";
 "calendar::event::more_action:live_activity:register:success" = "Teraz sa zobrazuje na uzamknutej obrazovke. Zamknite zariadenie a pozrite sa.";
+"calendar::event::more_action:live_activity:showing" = "Zobrazuje sa na uzamknutej obrazovke";
 "calendar::event::more_action:copy:item_name" = "Kopírovať udalosť";
 "calendar::event::more_action:share:item_name" = "Zdieľať";
 "event_detail::share::field::time" = "Čas";
@@ -744,6 +745,9 @@
 "billing::paywall::topup::description" = "Ďalšie kredity sa použijú po vyčerpaní denného limitu a ich platnosť nevyprší.";
 "billing::paywall::topup::applied" = "Kredity pridané";
 "billing::paywall::topup::applied::withCredits" = "Pridaných %@ kreditov";
+
+"billing::needSignIn::title" = "Vyžaduje sa prihlásenie";
+"billing::needSignIn::message" = "Prihláste sa na zobrazenie a správu svojho plánu.";
 
 // MARK: - share extension
 

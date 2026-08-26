@@ -159,6 +159,7 @@
 "calendar::event::more_action:live_activity:unregister:confirm" = "Deseja remover este evento da Tela Bloqueada?";
 "calendar::event::more_action:live_activity:replace:confirm" = "Outro evento está aparecendo na Tela Bloqueada. Deseja substituí-lo por este?";
 "calendar::event::more_action:live_activity:register:success" = "Agora aparece na Tela Bloqueada. Bloqueie o dispositivo para ver.";
+"calendar::event::more_action:live_activity:showing" = "Aparecendo na Tela Bloqueada";
 "calendar::event::more_action:copy:item_name" = "Copiar evento";
 "calendar::event::more_action:share:item_name" = "Compartilhar";
 "event_detail::share::field::time" = "Horário";
@@ -745,6 +746,9 @@
 "billing::paywall::topup::description" = "Os créditos extras são usados depois que seu limite diário acaba e não expiram.";
 "billing::paywall::topup::applied" = "Créditos adicionados";
 "billing::paywall::topup::applied::withCredits" = "%@ créditos adicionados";
+
+"billing::needSignIn::title" = "Login necessário";
+"billing::needSignIn::message" = "Faça login para ver e gerenciar seu plano.";
 
 // MARK: - share extension
 

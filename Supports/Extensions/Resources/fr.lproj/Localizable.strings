@@ -159,6 +159,7 @@
 "calendar::event::more_action:live_activity:unregister:confirm" = "Voulez-vous retirer cet événement de l'écran verrouillé ?";
 "calendar::event::more_action:live_activity:replace:confirm" = "Un autre événement s'affiche sur l'écran verrouillé. Voulez-vous le remplacer par celui-ci ?";
 "calendar::event::more_action:live_activity:register:success" = "Il s'affiche désormais sur l'écran verrouillé. Verrouillez votre appareil pour le voir.";
+"calendar::event::more_action:live_activity:showing" = "Affiché sur l'écran verrouillé";
 "calendar::event::more_action:copy:item_name" = "Copier l'événement";
 "calendar::event::more_action:share:item_name" = "Partager";
 "event_detail::share::field::time" = "Heure";
@@ -745,6 +746,9 @@
 "billing::paywall::topup::description" = "Les crédits supplémentaires sont utilisés une fois votre limite quotidienne atteinte et n'expirent pas.";
 "billing::paywall::topup::applied" = "Crédits ajoutés";
 "billing::paywall::topup::applied::withCredits" = "%@ crédits ajoutés";
+
+"billing::needSignIn::title" = "Connexion requise";
+"billing::needSignIn::message" = "Connectez-vous pour consulter et gérer votre forfait.";
 
 // MARK: - share extension
 

@@ -159,6 +159,7 @@
 "calendar::event::more_action:live_activity:unregister:confirm" = "是否要將此活動從鎖定畫面移除？";
 "calendar::event::more_action:live_activity:replace:confirm" = "鎖定畫面上正在顯示其他活動。是否要改為此活動？";
 "calendar::event::more_action:live_activity:register:success" = "已在鎖定畫面顯示。鎖定裝置即可查看。";
+"calendar::event::more_action:live_activity:showing" = "正在鎖定畫面顯示";
 "calendar::event::more_action:copy:item_name" = "複製活動";
 "calendar::event::more_action:share:item_name" = "分享";
 "event_detail::share::field::time" = "時間";
@@ -744,6 +745,9 @@
 "billing::paywall::topup::description" = "額外點數會在每日額度用完後使用，且不會過期。";
 "billing::paywall::topup::applied" = "已加入點數";
 "billing::paywall::topup::applied::withCredits" = "已加入 %@ 點數";
+
+"billing::needSignIn::title" = "需要登入";
+"billing::needSignIn::message" = "登入後即可查看與管理您的方案。";
 
 // MARK: - share extension
 

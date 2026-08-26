@@ -159,6 +159,7 @@
 "calendar::event::more_action:live_activity:unregister:confirm" = "Удалить это событие с экрана блокировки?";
 "calendar::event::more_action:live_activity:replace:confirm" = "На экране блокировки показывается другое событие. Заменить его этим?";
 "calendar::event::more_action:live_activity:register:success" = "Показывается на экране блокировки. Заблокируйте устройство, чтобы увидеть.";
+"calendar::event::more_action:live_activity:showing" = "Показывается на экране блокировки";
 "calendar::event::more_action:copy:item_name" = "Копировать событие";
 "calendar::event::more_action:share:item_name" = "Поделиться";
 "event_detail::share::field::time" = "Время";
@@ -744,6 +745,9 @@
 "billing::paywall::topup::description" = "Дополнительные кредиты используются после исчерпания дневного лимита и не сгорают.";
 "billing::paywall::topup::applied" = "Кредиты добавлены";
 "billing::paywall::topup::applied::withCredits" = "Добавлено %@ кредитов";
+
+"billing::needSignIn::title" = "Требуется вход";
+"billing::needSignIn::message" = "Войдите, чтобы просматривать и изменять свой тариф.";
 
 // MARK: - share extension
 

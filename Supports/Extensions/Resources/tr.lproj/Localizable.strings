@@ -159,6 +159,7 @@
 "calendar::event::more_action:live_activity:unregister:confirm" = "Bu etkinliği Kilit Ekranı'ndan kaldırmak istiyor musunuz?";
 "calendar::event::more_action:live_activity:replace:confirm" = "Kilit Ekranı'nda başka bir etkinlik gösteriliyor. Bununla değiştirilsin mi?";
 "calendar::event::more_action:live_activity:register:success" = "Artık Kilit Ekranı'nda gösteriliyor. Görmek için cihazınızı kilitleyin.";
+"calendar::event::more_action:live_activity:showing" = "Kilit Ekranı'nda gösteriliyor";
 "calendar::event::more_action:copy:item_name" = "Etkinliği kopyala";
 "calendar::event::more_action:share:item_name" = "Paylaş";
 "event_detail::share::field::time" = "Saat";
@@ -745,6 +746,9 @@
 "billing::paywall::topup::description" = "Ek krediler, günlük limitiniz bittikten sonra kullanılır ve süresi dolmaz.";
 "billing::paywall::topup::applied" = "Krediler eklendi";
 "billing::paywall::topup::applied::withCredits" = "%@ kredi eklendi";
+
+"billing::needSignIn::title" = "Giriş gerekli";
+"billing::needSignIn::message" = "Planınızı görüntülemek ve yönetmek için giriş yapın.";
 
 // MARK: - share extension
 

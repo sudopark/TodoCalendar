@@ -159,6 +159,7 @@
 "calendar::event::more_action:live_activity:unregister:confirm" = "Видалити цю подію з екрана блокування?";
 "calendar::event::more_action:live_activity:replace:confirm" = "На екрані блокування показується інша подія. Замінити її цією?";
 "calendar::event::more_action:live_activity:register:success" = "Показується на екрані блокування. Заблокуйте пристрій, щоб побачити.";
+"calendar::event::more_action:live_activity:showing" = "Показується на екрані блокування";
 "calendar::event::more_action:copy:item_name" = "Копіювати подію";
 "calendar::event::more_action:share:item_name" = "Поділитися";
 "event_detail::share::field::time" = "Час";
@@ -744,6 +745,9 @@
 "billing::paywall::topup::description" = "Додаткові кредити використовуються після вичерпання денного ліміту й не згорають.";
 "billing::paywall::topup::applied" = "Кредити додано";
 "billing::paywall::topup::applied::withCredits" = "Додано %@ кредитів";
+
+"billing::needSignIn::title" = "Потрібен вхід";
+"billing::needSignIn::message" = "Увійдіть, щоб переглядати та змінювати свій тариф.";
 
 // MARK: - share extension
 

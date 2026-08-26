@@ -159,6 +159,7 @@
 "calendar::event::more_action:live_activity:unregister:confirm" = "Wil je deze gebeurtenis van het toegangsscherm verwijderen?";
 "calendar::event::more_action:live_activity:replace:confirm" = "Er wordt al een andere gebeurtenis op het toegangsscherm getoond. Wil je die vervangen door deze?";
 "calendar::event::more_action:live_activity:register:success" = "Wordt nu getoond op het toegangsscherm. Vergrendel je apparaat om het te zien.";
+"calendar::event::more_action:live_activity:showing" = "Wordt getoond op het toegangsscherm";
 "calendar::event::more_action:copy:item_name" = "Gebeurtenis kopiëren";
 "calendar::event::more_action:share:item_name" = "Delen";
 "event_detail::share::field::time" = "Tijd";
@@ -745,6 +746,9 @@
 "billing::paywall::topup::description" = "Extra credits worden gebruikt zodra je daglimiet op is, en ze verlopen niet.";
 "billing::paywall::topup::applied" = "Credits toegevoegd";
 "billing::paywall::topup::applied::withCredits" = "%@ credits toegevoegd";
+
+"billing::needSignIn::title" = "Inloggen vereist";
+"billing::needSignIn::message" = "Log in om je abonnement te bekijken en te beheren.";
 
 // MARK: - share extension
 

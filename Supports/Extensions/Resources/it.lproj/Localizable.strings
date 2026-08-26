@@ -159,6 +159,7 @@
 "calendar::event::more_action:live_activity:unregister:confirm" = "Vuoi rimuovere questo evento dalla schermata di blocco?";
 "calendar::event::more_action:live_activity:replace:confirm" = "Un altro evento è visibile nella schermata di blocco. Vuoi sostituirlo con questo?";
 "calendar::event::more_action:live_activity:register:success" = "Ora è visibile nella schermata di blocco. Blocca il dispositivo per vederlo.";
+"calendar::event::more_action:live_activity:showing" = "Visibile nella schermata di blocco";
 "calendar::event::more_action:copy:item_name" = "Copia evento";
 "calendar::event::more_action:share:item_name" = "Condividi";
 "event_detail::share::field::time" = "Orario";
@@ -745,6 +746,9 @@
 "billing::paywall::topup::description" = "I crediti extra vengono usati dopo aver esaurito il limite giornaliero e non scadono.";
 "billing::paywall::topup::applied" = "Crediti aggiunti";
 "billing::paywall::topup::applied::withCredits" = "%@ crediti aggiunti";
+
+"billing::needSignIn::title" = "Accesso richiesto";
+"billing::needSignIn::message" = "Accedi per visualizzare e gestire il tuo piano.";
 
 // MARK: - share extension
 

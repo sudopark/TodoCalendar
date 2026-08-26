@@ -159,6 +159,7 @@
 "calendar::event::more_action:live_activity:unregister:confirm" = "क्या आप इस इवेंट को लॉक स्क्रीन से हटाना चाहते हैं?";
 "calendar::event::more_action:live_activity:replace:confirm" = "लॉक स्क्रीन पर कोई दूसरा इवेंट दिख रहा है। उसे इससे बदलें?";
 "calendar::event::more_action:live_activity:register:success" = "अब लॉक स्क्रीन पर दिख रहा है। देखने के लिए अपना डिवाइस लॉक करें।";
+"calendar::event::more_action:live_activity:showing" = "लॉक स्क्रीन पर दिख रहा है";
 "calendar::event::more_action:copy:item_name" = "इवेंट कॉपी करें";
 "calendar::event::more_action:share:item_name" = "साझा करें";
 "event_detail::share::field::time" = "समय";
@@ -745,6 +746,9 @@
 "billing::paywall::topup::description" = "अतिरिक्त क्रेडिट दैनिक सीमा खत्म होने के बाद इस्तेमाल होते हैं, और ये कभी समाप्त नहीं होते।";
 "billing::paywall::topup::applied" = "क्रेडिट जोड़ दिए गए";
 "billing::paywall::topup::applied::withCredits" = "%@ क्रेडिट जोड़ दिए गए";
+
+"billing::needSignIn::title" = "लॉगिन आवश्यक है";
+"billing::needSignIn::message" = "अपना प्लान देखने और प्रबंधित करने के लिए लॉगिन करें।";
 
 // MARK: - share extension
 

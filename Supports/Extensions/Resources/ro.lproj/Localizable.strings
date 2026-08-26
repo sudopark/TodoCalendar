@@ -159,6 +159,7 @@
 "calendar::event::more_action:live_activity:unregister:confirm" = "Doriți să eliminați acest eveniment de pe ecranul de blocare?";
 "calendar::event::more_action:live_activity:replace:confirm" = "Alt eveniment este afișat pe ecranul de blocare. Doriți să îl înlocuiți cu acesta?";
 "calendar::event::more_action:live_activity:register:success" = "Acum se afișează pe ecranul de blocare. Blocați dispozitivul pentru a-l vedea.";
+"calendar::event::more_action:live_activity:showing" = "Se afișează pe ecranul de blocare";
 "calendar::event::more_action:copy:item_name" = "Copiază evenimentul";
 "calendar::event::more_action:share:item_name" = "Distribuie";
 "event_detail::share::field::time" = "Ora";
@@ -745,6 +746,9 @@
 "billing::paywall::topup::description" = "Creditele suplimentare sunt folosite după epuizarea limitei zilnice și nu expiră.";
 "billing::paywall::topup::applied" = "Credite adăugate";
 "billing::paywall::topup::applied::withCredits" = "%@ credite adăugate";
+
+"billing::needSignIn::title" = "Este necesară autentificarea";
+"billing::needSignIn::message" = "Autentificați-vă pentru a vizualiza și gestiona planul.";
 
 // MARK: - share extension
 
