@@ -51,7 +51,13 @@ bundle exec fastlane ios upload_app_store_metadata
 31개 ASC 로케일 각각에 `subtitle.txt`·`description.txt`·`keywords.txt`·`promotional_text.txt`.
 
 유저 승인이 끝난 최종 원고다. 문구를 임의로 다듬지 말 것.
+다만 `promotional_text.txt` 는 31개 로케일 전부 버전 번호로 시작한다 — 그 표기만은 버전을 올릴 때
+함께 갱신하고, 그건 `release-notes` 스킬 §0 소관이다.
 길이 제한(문자 수 기준): subtitle 30, keywords 100, promotional_text 170, description 4000.
+
+`release_notes.txt`(이번 버전의 새로운 기능, 상한 4000자)는 버전마다 갈리는 필드라 여기 없다 —
+원고 작성·31개 로케일 현지화·업로드 절차는 `release-notes` 스킬 소관이고, 검사는
+`python3 scripts/check-release-notes.py` 다.
 
 ## lproj ↔ ASC 로케일 매핑
 
