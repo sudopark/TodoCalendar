@@ -44,6 +44,8 @@ python3 scripts/propagate-appstore-metadata.py --apply
 bundle exec fastlane ios upload_app_store_metadata
 ```
 
+스크린샷은 이 lane이 건드리지 않는다. 촬영·합성·업로드 절차는 [`../screenshots.md`](../screenshots.md).
+
 ## 지금 들어 있는 것
 
 31개 ASC 로케일 각각에 `subtitle.txt`·`description.txt`·`keywords.txt`·`promotional_text.txt`.
