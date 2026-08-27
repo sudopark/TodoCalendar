@@ -427,8 +427,6 @@ private final class CatalogDayEventListViewModel: DayEventListViewModel, @unchec
 }
 
 
-/// 이벤트 종류 목록 스샷(SettingSceneCatalogSnapshots.test_storeEventTypeList)과 색이 어긋나면
-/// 같은 라인업의 두 장이 앞뒤가 안 맞는다 — 색 값은 그쪽 픽스처와 같이 간다.
 private enum StoreCatalogEventTag: String {
     case work
     case family
