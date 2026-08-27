@@ -124,7 +124,8 @@ private enum StoreCaptionSlot: CaseIterable {
     case calendar
     case repeatOptions
     case eventDetail
-    case eventTypes
+    case googleEvent
+    case widgets
     case appearance
 
     var slug: String {
@@ -132,16 +133,19 @@ private enum StoreCaptionSlot: CaseIterable {
         case .calendar: return "01-calendar"
         case .repeatOptions: return "02-repeat-options"
         case .eventDetail: return "03-event-detail"
-        case .eventTypes: return "04-event-types"
-        case .appearance: return "05-appearance"
+        case .googleEvent: return "04-google-event"
+        case .widgets: return "05-widgets"
+        case .appearance: return "06-appearance"
         }
     }
 
     private var headingIndex: Int? {
         switch self {
         case .calendar: return 0
+        case .widgets: return 2
+        case .googleEvent: return 3
         case .appearance: return 4
-        case .repeatOptions, .eventDetail, .eventTypes: return nil
+        case .repeatOptions, .eventDetail: return nil
         }
     }
 
@@ -149,8 +153,7 @@ private enum StoreCaptionSlot: CaseIterable {
         switch self {
         case .repeatOptions: return ["en": "The app builds the repeat for you"]
         case .eventDetail: return ["en": "Location, link, memo, reminders"]
-        case .eventTypes: return ["en": "Color-coded by your own event types"]
-        case .calendar, .appearance: return [:]
+        case .calendar, .googleEvent, .widgets, .appearance: return [:]
         }
     }
 
