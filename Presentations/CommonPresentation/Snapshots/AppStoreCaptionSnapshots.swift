@@ -151,8 +151,44 @@ private enum StoreCaptionSlot: CaseIterable {
 
     private var writtenCaptions: [String: String] {
         switch self {
-        case .repeatOptions: return ["en": "The app builds the repeat for you"]
-        case .eventDetail: return ["en": "Location, link, memo, reminders"]
+        case .repeatOptions:
+            return [
+                "ca": "L'aplicació us munta la repetició",
+                "da": "Appen bygger gentagelsen",
+                "de": "Die App baut die Wiederholung",
+                "en": "The app builds the repeat for you",
+                "es": "La app te arma la repetición",
+                "fr": "L'application construit la récurrence",
+                "it": "L'app costruisce la ricorrenza",
+                "ja": "繰り返しはアプリが組み立てます",
+                "ko": "반복은 앱이 만들어 줍니다",
+                "nl": "De app bouwt de herhaling",
+                "pt-BR": "O app monta a recorrência",
+                "sv": "Appen bygger upprepningen åt dig",
+                "th": "แอปประกอบรูปแบบการทำซ้ำให้",
+                "vi": "Ứng dụng dựng sẵn kiểu lặp lại",
+                "zh-Hans": "应用替你配好重复规则",
+                "zh-Hant": "應用程式替您配好重複規則"
+            ]
+        case .eventDetail:
+            return [
+                "ca": "Ubicació, enllaç, nota, recordatoris",
+                "da": "Sted, link, note, påmindelser",
+                "de": "Ort, Link, Notiz, Benachrichtigungen",
+                "en": "Location, link, memo, reminders",
+                "es": "Ubicación, enlace, nota, recordatorios",
+                "fr": "Lieu, lien, note, rappels",
+                "it": "Luogo, link, nota, promemoria",
+                "ja": "場所・リンク・メモ・リマインダー",
+                "ko": "위치, 링크, 메모, 미리알림",
+                "nl": "Locatie, link, notitie, meldingen",
+                "pt-BR": "Localização, link, anotação, lembretes",
+                "sv": "Plats, länk, anteckning, påminnelser",
+                "th": "สถานที่ ลิงก์ บันทึกช่วยจำ การแจ้งเตือน",
+                "vi": "Vị trí, liên kết, ghi chú, nhắc nhở",
+                "zh-Hans": "地点、链接、备注、事件提醒",
+                "zh-Hant": "地點、連結、備註、活動提醒"
+            ]
         case .calendar, .googleEvent, .widgets, .appearance: return [:]
         }
     }
