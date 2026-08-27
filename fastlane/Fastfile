@@ -74,6 +74,126 @@ def warn_missing_release_notes(metadata_path)
   UI.important("release_notes 없는 로케일 #{locales.size}개: #{locales.join(', ')} — 업데이트 버전이면 ASC 가 로케일마다 요구한다")
 end
 
+def app_store_screenshots_path
+  File.join(FastlaneCore::FastlaneFolder.path.to_s, "screenshots")
+end
+
+# 6.9" 디스플레이 업로드 규격. 다른 크기·알파 채널은 ASC 가 업로드 단계에서 거부한다
+APP_STORE_SCREENSHOT_SIZE = [1320, 2868].freeze
+APP_STORE_SCREENSHOT_SLOTS = %w[01 02 03 04 05 06].freeze
+
+def screenshot_locale_dirs(screenshots_path)
+  return [] unless File.directory?(screenshots_path)
+
+  Dir.children(screenshots_path).sort
+     .map { |name| [name, File.join(screenshots_path, name)] }
+     .select { |_, path| File.directory?(path) }
+end
+
+# 촬영은 언어별로 따로 돌아 중간에 끊길 수 있다. metadata 로케일 집합을 기준선으로 삼아
+# 빠진 언어를 이름으로 짚어준다 — 조용히 덜 올라가면 그 언어는 스샷 없이 심사에 들어간다
+def ensure_screenshot_locales_match_metadata!(screenshots_path, metadata_path)
+  captured = screenshot_locale_dirs(screenshots_path).map(&:first)
+  expected = metadata_locale_dirs(metadata_path).map(&:first)
+  missing = expected - captured
+  unexpected = captured - expected
+  return if missing.empty? && unexpected.empty?
+
+  report = []
+  report << "  촬영 안 된 로케일 — #{missing.join(', ')}" unless missing.empty?
+  report << "  metadata 에 없는 로케일 — #{unexpected.join(', ')}" unless unexpected.empty?
+
+  UI.user_error!(<<~MESSAGE)
+    스크린샷 로케일 집합이 metadata 로케일 집합과 다르다 (스크린샷 #{captured.size}개 / metadata #{expected.size}개).
+
+    #{report.join("\n")}
+
+    촬영이 중간에 끊겼다면 남은 언어만 넘겨 이어붙여라 (lproj 코드로 넘긴다):
+      bash scripts/capture-appstore-screenshots.sh <lang> ...
+      python3 scripts/compose-appstore-screenshots.py <lang> ...
+  MESSAGE
+end
+
+def screenshot_slots(dir)
+  Dir.glob(File.join(dir, "*.png")).map { |path| File.basename(path)[0, 2] }.sort
+end
+
+def ensure_screenshot_slots_complete!(screenshots_path)
+  broken = screenshot_locale_dirs(screenshots_path).each_with_object({}) do |(locale, dir), acc|
+    slots = screenshot_slots(dir)
+    acc[locale] = slots unless slots == APP_STORE_SCREENSHOT_SLOTS
+  end
+  return if broken.empty?
+
+  UI.user_error!(<<~MESSAGE)
+    로케일 #{broken.size}개의 스크린샷 슬롯이 #{APP_STORE_SCREENSHOT_SLOTS.first}~#{APP_STORE_SCREENSHOT_SLOTS.last} 6장과 다르다.
+    빠진 슬롯은 ASC 에 그냥 안 올라가고, 남는 슬롯은 다른 언어와 순서가 어긋난다.
+
+    #{broken.map { |locale, slots| "  #{locale} — #{slots.empty? ? '없음' : slots.join(', ')}" }.join("\n")}
+
+    해당 언어를 다시 합성해라: python3 scripts/compose-appstore-screenshots.py <lang> ...
+  MESSAGE
+end
+
+# PNG IHDR 을 직접 읽는다 — 186장 검사에 이미지 gem 을 새로 끌어오지 않으려는 선택
+def png_header(path)
+  header = File.binread(path, 26).to_s
+  return nil unless header.bytesize == 26 && header.byteslice(12, 4) == "IHDR"
+
+  width, height, _bit_depth, color_type = header.byteslice(16, 10).unpack("NNCC")
+  { width: width, height: height, color_type: color_type }
+end
+
+# 팔레트·RGB 이미지의 투명도는 색 타입이 아니라 tRNS 청크로 들어온다. IDAT 앞에만 올 수 있어
+# 픽셀 데이터까지 읽을 필요 없이 청크 헤더만 건너뛰며 본다
+def png_transparency_chunk?(path)
+  File.open(path, "rb") do |io|
+    io.seek(8)
+    while (chunk = io.read(8)) && chunk.bytesize == 8
+      length, type = chunk.unpack("Na4")
+      return true if type == "tRNS"
+      return false if type == "IDAT"
+
+      io.seek(length + 4, IO::SEEK_CUR)
+    end
+  end
+  false
+end
+
+def screenshot_spec_violation(path)
+  header = png_header(path)
+  return "PNG 헤더를 못 읽는다" if header.nil?
+
+  size = [header[:width], header[:height]]
+  return "#{size.join('x')} — 규격 #{APP_STORE_SCREENSHOT_SIZE.join('x')} 이 아니다" unless size == APP_STORE_SCREENSHOT_SIZE
+  return "알파 채널 있음 (color type #{header[:color_type]})" unless (header[:color_type] & 4).zero?
+  return "tRNS 투명도 있음" if png_transparency_chunk?(path)
+
+  nil
+end
+
+def ensure_screenshots_meet_upload_spec!(screenshots_path)
+  violations = screenshot_locale_dirs(screenshots_path).flat_map do |locale, dir|
+    Dir.glob(File.join(dir, "*.png")).sort.map do |path|
+      reason = screenshot_spec_violation(path)
+      "  #{locale}/#{File.basename(path)} — #{reason}" if reason
+    end.compact
+  end
+  return if violations.empty?
+
+  listed = violations.first(10)
+  listed << "  … 외 #{violations.size - listed.size}장" if violations.size > listed.size
+
+  UI.user_error!(<<~MESSAGE)
+    업로드 규격에 안 맞는 스크린샷 #{violations.size}장이 있다. ASC 가 업로드 단계에서 거부한다.
+
+    #{listed.join("\n")}
+
+    합성 단계에서 규격이 어긋난 것이니 해당 언어를 다시 합성해라:
+      python3 scripts/compose-appstore-screenshots.py <lang> ...
+  MESSAGE
+end
+
 platform :ios do
   desc "Development 서명 IPA를 빌드해 Firebase App Distribution testers 그룹에 배포"
   lane :test_deploy do
@@ -136,6 +256,36 @@ platform :ios do
     precheck(
       api_key: api_key,
       include_in_app_purchases: false
+    )
+  end
+
+  desc "fastlane/screenshots 의 6.9\" 스크린샷만 App Store Connect 에 올린다 (바이너리·텍스트 메타데이터 제외, 심사 제출은 콘솔에서 직접)"
+  lane :upload_app_store_screenshots do
+    screenshots_path = app_store_screenshots_path
+    ensure_screenshot_locales_match_metadata!(screenshots_path, app_store_metadata_path)
+    ensure_screenshot_slots_complete!(screenshots_path)
+    ensure_screenshots_meet_upload_spec!(screenshots_path)
+
+    api_key = app_store_connect_api_key(
+      key_id: required_env("ASC_KEY_ID", "App Store Connect > 사용자 및 액세스 > 통합에서 발급한 키 ID"),
+      issuer_id: required_env("ASC_ISSUER_ID", "같은 화면의 Issuer ID"),
+      key_content: required_env("ASC_KEY_CONTENT", "AuthKey_<키ID>.p8 를 base64 로 인코딩한 값 — base64 -i AuthKey_<키ID>.p8"),
+      is_key_content_base64: true
+    )
+
+    deliver(
+      api_key: api_key,
+      screenshots_path: screenshots_path,
+      skip_binary_upload: true,
+      skip_metadata: true,
+      skip_screenshots: false,
+      # 재업로드가 기존 스샷 뒤에 덧붙는 걸 막는다 — ASC 는 디스플레이당 10장이 상한이라 두 번만 돌려도 넘친다
+      overwrite_screenshots: true,
+      submit_for_review: false,
+      # 186장 업로드는 한 시간대 단위라 프롬프트를 지키고 있을 수 없다. 위 가드 3종이 사전 확인을 대신한다
+      force: true,
+      # precheck 는 텍스트 메타데이터 검사라 스샷 업로드와 무관하다
+      run_precheck_before_submit: false
     )
   end
 end
