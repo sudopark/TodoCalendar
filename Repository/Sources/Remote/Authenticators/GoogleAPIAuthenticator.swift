@@ -128,6 +128,11 @@ extension GoogleAPIAuthenticator {
                 self?.listener?.oauthAutenticator(self, didRefresh: newCredential)
                 completion(.success(newCredential))
             } catch {
+                guard error.isServerResponseNotReceived == false else {
+                    logger.log(level: .error, "google api token refresh fail without server response, keep credential..:\(error)")
+                    completion(.failure(error))
+                    return
+                }
                 logger.log(level: .error, "google api token refresh fail..:\(error)")
                 self?.credentialStore.removeCredential()
                 self?.listener?.oauthAutenticator(self, didRefreshFailed: error)
