@@ -166,7 +166,7 @@ private enum StoreCaptionSlot: CaseIterable {
                 "id": "Aplikasi menyusun pengulangan",
                 "it": "L'app costruisce la ricorrenza",
                 "ja": "繰り返しはアプリが組み立てます",
-                "ko": "반복은 앱이 만들어 줍니다",
+                "ko": "날짜만 고르면 반복은 앱이 만듭니다",
                 "ms": "Aplikasi membina pengulangan",
                 "nb": "Appen bygger gjentakelsen",
                 "nl": "De app bouwt de herhaling",
