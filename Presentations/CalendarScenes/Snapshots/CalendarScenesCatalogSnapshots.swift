@@ -451,7 +451,6 @@ private enum StoreCatalogEventTag: String {
     }
 }
 
-/// 주간 반복 일정(월요일 스프린트·목요일 리뷰)을 다섯 주에 깔아 빈 주가 없게 하고,
 /// 3월 19일에 다섯 줄을 겹쳐 `+N` 오버플로우가 나오게 한다.
 private final class StoreCatalogMonthViewModel: CatalogMonthViewModel, @unchecked Sendable {
 
