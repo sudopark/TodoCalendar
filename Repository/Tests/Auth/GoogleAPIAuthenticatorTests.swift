@@ -137,6 +137,30 @@ extension GoogleAPIAuthenticatorTests {
         #expect(credentailAfterRefreshFail == nil)
         #expect(self.spyListener.didTokenRefreshFailed == true)
     }
+
+    @Test func authenticator_whenRefreshFailWithoutServerResponse_keepCredentialAndNotNotifyFailed() async throws {
+        // given
+        let authenticator = self.makeAuthenticator()
+
+        // when
+        let credential = APICredential(accessToken: "access")
+            |> \.refreshToken .~ "refresh_timeout"
+
+        let result = await withCheckedContinuation { continuation in
+            authenticator.refresh(credential, for: Session()) { res in
+                continuation.resume(returning: res)
+            }
+        }
+
+        // then
+        guard case .failure = result
+        else {
+            Issue.record("토큰갱신이 실패하지 않음")
+            return
+        }
+        #expect(self.spyCredentialStore.loadCredential()?.accessToken == "old_credential")
+        #expect(self.spyListener.didTokenRefreshFailed == nil)
+    }
 }
 
 private final class FakeKeyChainStore: KeyChainStorage, @unchecked Sendable {
@@ -188,6 +212,14 @@ extension GoogleAPIAuthenticatorTests {
                     return params["refresh_token"] as? String == "refresh_fail"
                 },
                 resultJsonString: .failure(RuntimeError("failed"))
+            ),
+            .init(
+                method: .post,
+                endpoint: GoogleAuthEndpoint.token,
+                parameterCompare: { _, params in
+                    return params["refresh_token"] as? String == "refresh_timeout"
+                },
+                resultJsonString: .failure(URLError(.timedOut))
             ),
             .init(
                 method: .get,
