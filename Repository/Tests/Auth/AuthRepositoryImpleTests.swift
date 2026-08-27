@@ -162,10 +162,10 @@ class StubFirebaseAuthService: FirebaseAuthService {
         return DummyResult()
     }
     
-    var shouldFailRefresh: Bool = false
+    var refreshFailError: (any Error)?
     func refreshToken(_ resultHandler: @escaping (Result<AuthRefreshResult, Error>) -> Void) {
-        if self.shouldFailRefresh {
-            resultHandler(.failure(RuntimeError("failed")))
+        if let refreshFailError = self.refreshFailError {
+            resultHandler(.failure(refreshFailError))
         } else {
             let result = AuthRefreshResult(uid: "uid", idToken: "access-new", refreshToken: "refresh-new")
             resultHandler(.success(result))

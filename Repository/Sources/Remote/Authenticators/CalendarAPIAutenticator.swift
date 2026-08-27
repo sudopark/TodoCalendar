@@ -94,6 +94,11 @@ extension CalendarAPIAutenticator {
                 completion(.success(credential))
                 
             case .failure(let error):
+                guard error.isServerResponseNotReceived == false else {
+                    logger.log(level: .error, "token refresh fail without server response, keep credential..:\(error)")
+                    completion(.failure(error))
+                    return
+                }
                 logger.log(level: .error, "token refresh failed..\(error)")
                 try? self?.firebaseAuthService.signOut()
                 self?.credentialStore.removeCredential()
