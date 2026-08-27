@@ -9,7 +9,6 @@
 import XCTest
 import SwiftUI
 import Domain
-import Extensions
 import CommonPresentation
 import SnapshotTestHelpKit
 
@@ -169,61 +168,6 @@ extension SettingSceneCatalogSnapshots {
                 $0.additionalFontSizeModel = .init(3)
                 $0.isShowEventTagColor = true
             }
-        }
-    }
-}
-
-
-// MARK: - App Store 스샷용 화면 (#996)
-
-extension SettingSceneCatalogSnapshots {
-
-    /// 캘린더 스샷(CalendarScenesCatalogSnapshots.test_storeCalendar)과 색이 어긋나면
-    /// 같은 라인업의 두 장이 앞뒤가 안 맞는다 — 색 값은 test_eventTypeList 픽스처와 같이 간다.
-    private var storeEventTags: [CustomEventTag] {
-        let tags: [(String, String)] = [
-            ("catalog.tag::work", "#088CDA"),
-            ("catalog.tag::family", "#F9316D"),
-            ("catalog.tag::health", "#3CB371"),
-            ("catalog.tag::study", "#FFA02E")
-        ]
-        return tags.map { key, colorHex in
-            CustomEventTag(uuid: key, name: key.catalogLocalized(), colorHex: colorHex)
-        }
-    }
-
-    private var storeExternalCalendarSections: [ExternalCalendarEventTagListSectionModel] {
-        let services: [(String, String)] = [
-            (GoogleCalendarService.id, "event_setting::external_calendar::google::serviceName"),
-            (AppleCalendarService.id, "event_setting::external_calendar::apple::serviceName")
-        ]
-        return services.map { serviceId, titleKey in
-            ExternalCalendarEventTagListSectionModel(
-                serviceId: serviceId,
-                serviceTitle: titleKey.localized(),
-                cellViewModels: [],
-                offIds: []
-            )
-        }
-    }
-
-    @MainActor
-    func test_storeEventTypeList() {
-        captureSnapshotPair(
-            named: "storeEventTypeList", layout: .fullScreen, snapshotDirectory: catalogSnapshotDirectory()
-        ) { theme in
-            let state = EventTagListViewState()
-            let customTags = self.storeEventTags
-            state.cellviewModels = customTags.map { BaseCalendarEventTagCellViewModel($0) }
-            state.externalCalendarTagSections = self.storeExternalCalendarSections
-
-            let appearance = self.makeAppearance(theme)
-            appearance.updateEventColorMap(by: customTags)
-
-            return EventTagListView(isRootNavigation: true)
-                .environment(appearance)
-                .environment(state)
-                .environment(EventTagListEventHandlers())
         }
     }
 }

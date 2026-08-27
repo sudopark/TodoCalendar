@@ -54,8 +54,8 @@ MAPPING=(
     "01-calendar|CalendarScenes/CalendarScenesCatalogSnapshots/test_storeCalendar.storeCalendar-light.png"
     "02-repeat-options|EventDetailScene/EventDetailSceneCatalogSnapshots/test_storeRepeatOptions.storeRepeatOptions-light.png"
     "03-event-detail|EventDetailScene/EventDetailSceneCatalogSnapshots/test_eventDetail.eventDetail-light.png"
-    "04-event-types|SettingScene/SettingSceneCatalogSnapshots/test_storeEventTypeList.storeEventTypeList-light.png"
-    "05-appearance|SettingScene/SettingSceneCatalogSnapshots/test_appearanceSetting.appearanceSetting-light.png"
+    "04-google-event|EventDetailScene/EventDetailSceneCatalogSnapshots/test_storeGoogleEventDetail.storeGoogleEventDetail-light.png"
+    "06-appearance|SettingScene/SettingSceneCatalogSnapshots/test_appearanceSetting.appearanceSetting-light.png"
 )
 
 # 캡션·위젯 원본 — 화면 규격이 아니라 각자의 캔버스 규격이라 규격 검사·알파 제거 대상이 아니다
@@ -63,8 +63,9 @@ CAPTION_MAPPING=(
     "01-calendar|CommonPresentation/AppStoreCaptionSnapshots/test_storeCaptions.01-calendar-light.png"
     "02-repeat-options|CommonPresentation/AppStoreCaptionSnapshots/test_storeCaptions.02-repeat-options-light.png"
     "03-event-detail|CommonPresentation/AppStoreCaptionSnapshots/test_storeCaptions.03-event-detail-light.png"
-    "04-event-types|CommonPresentation/AppStoreCaptionSnapshots/test_storeCaptions.04-event-types-light.png"
-    "05-appearance|CommonPresentation/AppStoreCaptionSnapshots/test_storeCaptions.05-appearance-light.png"
+    "04-google-event|CommonPresentation/AppStoreCaptionSnapshots/test_storeCaptions.04-google-event-light.png"
+    "05-widgets|CommonPresentation/AppStoreCaptionSnapshots/test_storeCaptions.05-widgets-light.png"
+    "06-appearance|CommonPresentation/AppStoreCaptionSnapshots/test_storeCaptions.06-appearance-light.png"
 )
 
 WIDGET_MAPPING=(

@@ -8,6 +8,8 @@
 
 import XCTest
 import SwiftUI
+import Prelude
+import Optics
 import Domain
 import Extensions
 import CommonPresentation
@@ -102,6 +104,92 @@ final class EventDetailSceneCatalogSnapshots: XCTestCase {
             named: "storeRepeatOptions", layout: .fullScreen, snapshotDirectory: catalogSnapshotDirectory()
         ) { theme in
             self.makeRepeatOptionView(theme)
+        }
+    }
+}
+
+
+// MARK: - Google Calendar event detail
+
+extension EventDetailSceneCatalogSnapshots {
+
+    private var googleCalendarId: String { "team@example.com" }
+    private var googleEventColorId: String { "7" }
+
+    @MainActor
+    private func makeGoogleAppearance(_ theme: SnapshotTheme) -> ViewAppearance {
+        let appearance = self.makeAppearance(theme)
+        appearance.googleCalendarColors["catalog"] = GoogleCalendar.Colors(
+            ownerId: "catalog",
+            calendars: [:],
+            events: [
+                self.googleEventColorId: .init(foregroundHex: "#FFFFFF", backgroudHex: "#039BE5")
+            ]
+        )
+        return appearance
+    }
+
+    private var googleAttendees: AttendeeListViewModel {
+        let names = ["sara@example.com", "leo@example.com", "mina@example.com"]
+        let attendees = names.enumerated().map { index, name in
+            AttendeeViewModelModel("attendee:\(index)", name)
+                |> \.isOrganizer .~ (index == 0)
+                |> \.isAccepted .~ (index != 2)
+        }
+        return AttendeeListViewModel(attendees: attendees, totalCounts: attendees.count)
+    }
+
+    private var googleConference: ConferenceModel {
+        let entry = ConferenceEntryModel(uri: "https://meet.google.com/xkq-mbrd-hvz")
+            |> \.entryCodeKey .~ "eventDetail::gogoleEvent::conference::meetingCode".localized()
+            |> \.entryCodeValue .~ "xkq-mbrd-hvz"
+        return ConferenceModel(
+            iconURL: "", name: "Google Meet", entries: [entry]
+        )
+    }
+
+    private var googleAttachments: [AttachmentModel] {
+        return [
+            AttachmentModel(
+                id: "attachment:agenda",
+                fileURL: "https://drive.google.com/file/d/catalog-agenda",
+                title: "\("catalog.event::sprint_planning".catalogLocalized()).pdf",
+                iconLink: nil
+            ),
+            AttachmentModel(
+                id: "attachment:review",
+                fileURL: "https://drive.google.com/file/d/catalog-review",
+                title: "\("catalog.event::design_review".catalogLocalized()).png",
+                iconLink: nil
+            )
+        ]
+    }
+
+    @MainActor
+    func test_storeGoogleEventDetail() {
+        captureSnapshotPair(
+            named: "storeGoogleEventDetail", layout: .fullScreen, snapshotDirectory: catalogSnapshotDirectory()
+        ) { theme in
+            let state = GoogleCalendarEventDetailViewState()
+            state.isEditable = true
+            state.isSavable = true
+            state.hasDetailLink = true
+            state.eventName = "catalog.event::sprint_planning".catalogLocalized()
+            state.eventColor = .init(colorId: self.googleEventColorId, calendarId: self.googleCalendarId)
+            state.timeText = .period(
+                .init(self.start, .current), .init(self.end, .current)
+            )
+            state.repeatOptionText = "eventDetail.repeating.everyWeek:title".localized()
+            state.location = "catalog.place::startup_hub".catalogLocalized()
+            state.conferenceData = self.googleConference
+            state.attendees = self.googleAttendees
+            state.memo = "catalog.memo::wireframes".catalogLocalized()
+            state.attachments = self.googleAttachments
+            state.calendarModel = .init(calenarId: self.googleCalendarId, name: self.googleCalendarId)
+            return GoogleCalendarEventDetailView()
+                .environment(state)
+                .environment(GoogleCalendarEventDetailViewEventHandler())
+                .environment(self.makeGoogleAppearance(theme))
         }
     }
 }
