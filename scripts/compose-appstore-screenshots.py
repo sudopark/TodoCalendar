@@ -6,6 +6,7 @@ usage:
     python3 scripts/compose-appstore-screenshots.py --all
 
 입력: snapshot-appstore/<lang>/<NN-슬러그>.png + snapshot-appstore/<lang>/captions/<NN-슬러그>.png
+      05-widgets 만 화면 원본이 없다 — snapshot-appstore/<lang>/widgets/ 의 위젯 원본을 홈화면으로 합성해 만든다
 출력: fastlane/screenshots/<ASC 로케일>/<NN>_<슬러그>.png (1320×2868 / 알파 없음)
 
 기기 프레임은 애플 공식 베젤만 쓴다 (마케팅·아이덴티티 가이드라인). 동봉 라이선스가
@@ -19,7 +20,7 @@ import tempfile
 from collections import Counter
 from pathlib import Path
 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageChops, ImageDraw, ImageFilter
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -51,9 +52,22 @@ SLUGS = [
     "01-calendar",
     "02-repeat-options",
     "03-event-detail",
-    "04-event-types",
-    "05-appearance",
+    "04-google-event",
+    "05-widgets",
+    "06-appearance",
 ]
+
+HOME_SCREEN_SLUG = "05-widgets"
+HOME_SCREEN_WIDGETS = ["today-and-next", "month"]
+# 라이트 테마 위젯이 떠 보이는 배경 — 홈화면 벽지 자리라 앱 컬러셋과 무관하다
+WALLPAPER_TOP_COLOR = (58, 74, 128)
+WALLPAPER_BOTTOM_COLOR = (146, 122, 168)
+WIDGET_RADIUS = 78                  # 위젯 코너 26pt @3x — 캡처에 구워진 곡률과 같은 값
+WIDGET_TOP = 430
+WIDGET_GAP = 90
+WIDGET_SHADOW_BLUR = 34
+WIDGET_SHADOW_OFFSET = 14
+WIDGET_SHADOW_ALPHA = 90
 
 
 def asc_locale(lang):
@@ -111,6 +125,68 @@ def screen_hole(bezel):
     return mask, box
 
 
+# MARK: - 홈화면 위젯
+
+def wallpaper(size):
+    width, height = size
+    column = Image.new("RGB", (1, height))
+    painter = ImageDraw.Draw(column)
+    for y in range(height):
+        ratio = y / (height - 1)
+        painter.point((0, y), tuple(
+            round(top + (bottom - top) * ratio)
+            for top, bottom in zip(WALLPAPER_TOP_COLOR, WALLPAPER_BOTTOM_COLOR)
+        ))
+    return column.resize((width, height), Image.BILINEAR).convert("RGBA")
+
+
+def trim_widget_margin(capture):
+    """위젯 캡처엔 위젯 바깥 여백이 함께 들어 있다 — 그대로 얹으면 카드 테두리가 이중으로 보인다."""
+    opaque = capture.convert("RGB")
+    background = Image.new("RGB", opaque.size, opaque.getpixel((0, 0)))
+    difference = ImageChops.difference(opaque, background).convert("L")
+    box = difference.point(lambda value: 255 if value > 6 else 0).getbbox()
+    if box is None:
+        raise SystemExit("✗ 위젯 캡처가 배경색 한 장이다 — 잘라낼 내용이 없다")
+    return capture.crop(box)
+
+
+def rounded(widget, radius):
+    mask = Image.new("L", widget.size, 0)
+    ImageDraw.Draw(mask).rounded_rectangle(
+        [0, 0, widget.width - 1, widget.height - 1], radius=radius, fill=255
+    )
+    shaped = widget.convert("RGBA")
+    shaped.putalpha(mask)
+    return shaped
+
+
+def paste_with_shadow(screen, widget, position):
+    shadow = Image.new("RGBA", screen.size, (0, 0, 0, 0))
+    cast = Image.new("RGBA", widget.size, (0, 0, 0, WIDGET_SHADOW_ALPHA))
+    cast.putalpha(widget.getchannel("A").point(lambda alpha: alpha * WIDGET_SHADOW_ALPHA // 255))
+    shadow.paste(cast, (position[0], position[1] + WIDGET_SHADOW_OFFSET), cast)
+    screen.alpha_composite(shadow.filter(ImageFilter.GaussianBlur(WIDGET_SHADOW_BLUR)))
+    screen.alpha_composite(widget, position)
+
+
+def home_screen(source_dir, size):
+    widgets = []
+    for name in HOME_SCREEN_WIDGETS:
+        path = source_dir / "widgets" / f"{name}.png"
+        if not path.exists():
+            raise SystemExit(f"  ✗ 누락: {path.relative_to(ROOT)} — 먼저 촬영 스크립트를 돌려라")
+        with Image.open(path) as capture:
+            widgets.append(rounded(trim_widget_margin(capture), WIDGET_RADIUS))
+
+    screen = wallpaper(size)
+    top = WIDGET_TOP
+    for widget in widgets:
+        paste_with_shadow(screen, widget, ((size[0] - widget.width) // 2, top))
+        top += widget.height + WIDGET_GAP
+    return screen
+
+
 # MARK: - 합성
 
 def inset_screenshot(screenshot, size):
@@ -122,14 +198,19 @@ def inset_screenshot(screenshot, size):
     return inset
 
 
-def compose(screenshot, caption, bezel, hole_mask, hole_box):
-    hole_size = (hole_box[2] - hole_box[0], hole_box[3] - hole_box[1])
+def screen_image(slug, source_dir, size):
+    if slug == HOME_SCREEN_SLUG:
+        return home_screen(source_dir, size)
+    path = source_dir / f"{slug}.png"
+    if not path.exists():
+        raise SystemExit(f"  ✗ 누락: {path.relative_to(ROOT)} — 먼저 촬영 스크립트를 돌려라")
+    with Image.open(path) as screenshot:
+        return inset_screenshot(screenshot.convert("RGBA"), size)
+
+
+def compose(screen, caption, bezel, hole_mask, hole_box):
     device = Image.new("RGBA", bezel.size, (0, 0, 0, 0))
-    device.paste(
-        inset_screenshot(screenshot, hole_size),
-        (hole_box[0], hole_box[1]),
-        hole_mask.crop(hole_box),
-    )
+    device.paste(screen, (hole_box[0], hole_box[1]), hole_mask.crop(hole_box))
     device.paste(bezel, (0, 0), bezel)
 
     device_height = round(DEVICE_WIDTH * bezel.height / bezel.width)
@@ -145,19 +226,20 @@ def compose_lang(lang, bezel, hole_mask, hole_box):
     source_dir = ROOT / "snapshot-appstore" / lang
     output_dir = ROOT / "fastlane/screenshots" / asc_locale(lang)
     output_dir.mkdir(parents=True, exist_ok=True)
+    # 라인업 번호가 바뀌면 지난 회차 산출물이 남고, deliver 는 디렉토리째 올린다
+    for stale in output_dir.glob("*.png"):
+        stale.unlink()
     print(f"▶︎ [{lang}] 합성 → fastlane/screenshots/{asc_locale(lang)}/")
 
+    hole_size = (hole_box[2] - hole_box[0], hole_box[3] - hole_box[1])
     for slug in SLUGS:
-        screenshot_path = source_dir / f"{slug}.png"
         caption_path = source_dir / "captions" / f"{slug}.png"
-        for path in (screenshot_path, caption_path):
-            if not path.exists():
-                raise SystemExit(f"  ✗ 누락: {path.relative_to(ROOT)} — 먼저 촬영 스크립트를 돌려라")
+        if not caption_path.exists():
+            raise SystemExit(f"  ✗ 누락: {caption_path.relative_to(ROOT)} — 먼저 촬영 스크립트를 돌려라")
 
-        with Image.open(screenshot_path) as screenshot, Image.open(caption_path) as caption:
-            composed = compose(
-                screenshot.convert("RGBA"), caption.convert("RGBA"), bezel, hole_mask, hole_box
-            )
+        screen = screen_image(slug, source_dir, hole_size)
+        with Image.open(caption_path) as caption:
+            composed = compose(screen, caption.convert("RGBA"), bezel, hole_mask, hole_box)
         composed.save(output_dir / upload_name(slug))
     print(f"  ✓ [{lang}] {len(SLUGS)}장")
     return output_dir
