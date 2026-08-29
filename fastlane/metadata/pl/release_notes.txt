@@ -1,0 +1,27 @@
+Ta aktualizacja dodaje nowe funkcje.
+
+■ Szybkie wprowadzanie AI
+· Powiedz albo napisz, a wydarzenie zostanie utworzone. „Obiad z Sarą w piątek o 12”, „przenieś dentystę na przyszły wtorek” – dokładnie tak, jak byś to powiedział
+· Odczytaj z obrazu: zrób zdjęcie planu zajęć albo plakatu wydarzenia lub wybierz obraz z biblioteki, a tekst zamieni się w wydarzenia
+· Nie tylko dodawanie: zmiana godziny, zmiana nazwy, oznaczenie jako wykonane, usunięcie. Prośby, które coś zmieniają lub usuwają, najpierw pokazują, co się stanie, i proszą o potwierdzenie
+· Wyślij przez Siri, widżet albo Centrum sterowania bez otwierania aplikacji
+· Udostępnij tekst lub zdjęcie z innej aplikacji, a przejdzie to do Wyślij do AI
+· Szybkie wprowadzanie AI jest dostępne po zalogowaniu
+
+■ Pokaż na ekranie blokady
+· Wydarzenie, które zaraz się zacznie, odlicza czas na ekranie blokady i w Dynamic Island
+· Dodaj je ze szczegółów wydarzenia albo z listy dnia – także wydarzenia z Kalendarza Google i Kalendarza Apple
+· Oznacz zadanie jako wykonane lub zakończ wyświetlanie prosto z ekranu blokady, a stuknięcie otwiera szczegóły
+
+■ Udostępnianie planu dnia
+· Przytrzymaj datę w kalendarzu, aby wybrać Udostępnij ten dzień, Udostępnij ten tydzień lub Udostępnij ten miesiąc
+· W Podgląd udostępniania wybierz, które Typy wydarzeń mają się znaleźć, oraz czy udostępnić jako Tekst czy Obraz
+· Możesz też udostępnić pojedyncze wydarzenie
+
+■ Edycja wydarzeń Kalendarza Google i Kalendarza Apple
+· Zmieniaj i usuwaj wydarzenia z połączonych kalendarzy bezpośrednio w aplikacji, razem z regułami powtarzania
+· Przytrzymaj na liście, aby usunąć
+
+■ Plany
+· Ulepsz plan pozwala wybrać między Standardowy a Dożywotni – każdy z większą liczbą kredytów dziennie
+· Gdy się skończą, Dokup kredyty je uzupełni, a dokupione kredyty nie tracą ważności

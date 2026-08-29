@@ -1,0 +1,27 @@
+Tämä päivitys tuo uusia ominaisuuksia.
+
+■ AI-pikasyöttö
+· Sano tai kirjoita, ja tapahtuma on valmis. "Lounas Saran kanssa perjantaina kello 12", "siirrä hammaslääkäri ensi tiistaille" – juuri niin kuin sen sanoisit
+· Lue kuvasta: kuvaa lukujärjestys tai tapahtumajuliste tai valitse kuva kirjastosta, niin teksti muuttuu tapahtumiksi
+· Ei pelkkää lisäämistä: ajan siirtäminen, uudelleennimeäminen, valmiiksi merkitseminen, poistaminen. Pyynnöt, jotka muuttavat tai poistavat jotain, näyttävät ensin mitä tapahtuu ja pyytävät vahvistusta
+· Lähetä Sirin, widgetin tai ohjauskeskuksen kautta avaamatta sovellusta
+· Jaa tekstiä tai kuva toisesta sovelluksesta, niin se jatkuu kohtaan Lähetä AI:lle
+· AI-pikasyöttö on käytettävissä kirjautumisen jälkeen
+
+■ Näytä lukitusnäytöllä
+· Pian alkava tapahtuma laskee aikaa lukitusnäytöllä ja Dynamic Islandissa
+· Lisää se tapahtuman tiedoista tai päivän listasta – myös Google-kalenterin ja Apple-kalenterin tapahtumat
+· Merkitse tehtävä valmiiksi tai lopeta näyttäminen suoraan lukitusnäytöltä, ja avaa tiedot napauttamalla
+
+■ Kalenterin jakaminen
+· Paina kalenterissa päivämäärää pitkään: Jaa tämä päivä, Jaa tämä viikko tai Jaa tämä kuukausi
+· Valitse kohdassa Jaon esikatselu, mitkä Tapahtumatyypit otetaan mukaan ja jaetaanko muodossa Teksti vai Kuva
+· Voit jakaa myös yksittäisen tapahtuman
+
+■ Google-kalenterin ja Apple-kalenterin tapahtumien muokkaus
+· Muokkaa ja poista yhdistettyjen kalenterien tapahtumia suoraan sovelluksessa, toistosäännöt mukaan lukien
+· Poista painamalla listassa pitkään
+
+■ Tilaukset
+· Kohdassa Päivitä tilaus valitset vaihtoehdoista Vakio ja Elinikäinen – kummassakin enemmän krediittejä päivässä
+· Jos ne loppuvat, Osta krediittejä täydentää, eivätkä lisätyt krediitit vanhene

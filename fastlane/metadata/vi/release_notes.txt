@@ -1,0 +1,27 @@
+Bản cập nhật này bổ sung các tính năng mới.
+
+■ Nhập nhanh AI
+· Nói hoặc gõ là sự kiện được tạo. "Ăn trưa với Sarah lúc 12 giờ thứ Sáu", "dời lịch nha sĩ sang thứ Ba tuần sau" — cứ nói như bình thường
+· Đọc từ hình ảnh — chụp thời khóa biểu hay áp phích sự kiện, hoặc chọn ảnh từ thư viện, chữ trong ảnh sẽ thành sự kiện
+· Không chỉ thêm mà còn dời giờ, đổi tên, đánh dấu hoàn thành, xóa. Với yêu cầu sửa hoặc xóa, ứng dụng cho bạn xem trước điều sắp xảy ra và hỏi lại
+· Gửi từ Siri, tiện ích hoặc Trung tâm điều khiển mà không cần mở ứng dụng
+· Chia sẻ văn bản hay ảnh từ ứng dụng khác là nối thẳng sang Gửi tới AI
+· Nhập nhanh AI khả dụng sau khi bạn đăng nhập
+
+■ Hiển thị trên màn hình khóa
+· Sự kiện sắp bắt đầu sẽ đếm ngược trên màn hình khóa và Dynamic Island
+· Thêm từ chi tiết sự kiện hoặc danh sách sự kiện trong ngày — sự kiện Lịch Google và Lịch Apple cũng được
+· Đánh dấu hoàn thành việc cần làm hoặc dừng hiển thị ngay trên màn hình khóa, chạm để mở chi tiết sự kiện
+
+■ Chia sẻ lịch trình
+· Nhấn giữ một ngày trong lịch để chọn Chia sẻ ngày này, Chia sẻ tuần này hoặc Chia sẻ tháng này
+· Trong Xem trước chia sẻ, chọn Loại sự kiện muốn đưa vào và chia sẻ dưới dạng Văn bản hay Hình ảnh
+· Cũng có thể chia sẻ riêng một sự kiện
+
+■ Chỉnh sửa sự kiện Lịch Google và Lịch Apple
+· Sửa và xóa sự kiện của lịch đã kết nối ngay trong ứng dụng, kể cả quy tắc lặp lại
+· Nhấn giữ trong danh sách để xóa
+
+■ Gói
+· Nâng cấp gói cho bạn chọn giữa Tiêu chuẩn và Trọn đời, gói cao hơn có nhiều tín dụng mỗi ngày hơn
+· Hết tín dụng thì Mua thêm tín dụng để bù thêm, và tín dụng mua thêm không hết hạn

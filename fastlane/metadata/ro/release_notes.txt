@@ -1,0 +1,27 @@
+Această actualizare aduce funcții noi.
+
+■ Introducere rapidă AI
+· Spune sau scrie, iar evenimentul e creat. „Prânz cu Sara vineri la 12”, „mută dentistul marțea viitoare” – exact cum ai spune-o
+· Citește dintr-o imagine: fotografiază un orar sau afișul unui eveniment ori alege o imagine din bibliotecă, iar textul devine evenimente
+· Nu doar adăugare: mutarea orei, redenumirea, marcarea ca finalizat, ștergerea. Cererile care modifică sau șterg ceva îți arată întâi ce urmează să se întâmple și cer confirmare
+· Trimite din Siri, dintr-un widget sau din Centrul de control, fără să deschizi aplicația
+· Partajează text sau o fotografie din altă aplicație și continuă în Trimite către AI
+· Introducere rapidă AI este disponibil după autentificare
+
+■ Afișează pe ecranul de blocare
+· Un eveniment care stă să înceapă numără invers pe ecranul blocat și în Dynamic Island
+· Adaugă-l din detaliile evenimentului sau din lista zilei – inclusiv evenimente din Google Calendar și Calendar Apple
+· Bifează o sarcină ca finalizată sau oprește afișarea direct de pe ecranul blocat, iar o atingere deschide detaliile
+
+■ Partajarea programului
+· Ține apăsat pe o dată din calendar pentru Distribuie această zi, Distribuie această săptămână sau Distribuie această lună
+· În Previzualizare distribuire alege ce Tipuri de eveniment să fie incluse și dacă partajezi ca Text sau Imagine
+· Poți partaja și un singur eveniment
+
+■ Editarea evenimentelor din Google Calendar și Calendar Apple
+· Modifică și șterge evenimentele calendarelor conectate direct în aplicație, inclusiv regulile de repetare
+· Ține apăsat în listă pentru a șterge
+
+■ Planuri
+· Actualizează planul îți permite să alegi între Standard și Pe viață – fiecare cu mai multe credite pe zi
+· Dacă se termină, Adaugă credite le completează, iar creditele adăugate nu expiră

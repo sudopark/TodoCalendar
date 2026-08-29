@@ -1,0 +1,27 @@
+Denne oppdateringen legger til nye funksjoner.
+
+■ AI-hurtiginntasting
+· Si det eller skriv det, så er hendelsen opprettet. "Lunsj med Sara fredag klokken 12", "flytt tannlegen til neste tirsdag" – slik du faktisk ville sagt det
+· Les fra bilde: ta bilde av en timeplan eller en plakat, eller velg et bilde fra biblioteket, så blir teksten til hendelser
+· Ikke bare opprette: flytte tidspunktet, gi nytt navn, merke som ferdig, slette. Forespørsler som endrer eller fjerner noe, viser først hva som skjer, og ber om bekreftelse
+· Send fra Siri, en widget eller Kontrollsenter uten å åpne appen
+· Del tekst eller et bilde fra en annen app, så fortsetter det til Send til AI
+· AI-hurtiginntasting er tilgjengelig etter at du har logget inn
+
+■ Vis på låseskjermen
+· En hendelse som snart begynner, teller ned på låseskjermen og i Dynamic Island
+· Legg den til fra hendelsesdetaljene eller dagens liste – også hendelser fra Google Kalender og Apple Kalender
+· Kryss av en gjøremål eller avslutt visningen rett fra låseskjermen, og trykk for å åpne detaljene
+
+■ Del kalenderen
+· Hold inne en dato i kalenderen for Del denne dagen, Del denne uken eller Del denne måneden
+· Velg i Forhåndsvisning av deling hvilke Hendelsestyper som skal bli med, og om du deler som Tekst eller Bilde
+· Du kan også dele én enkelt hendelse
+
+■ Redigere hendelser i Google Kalender og Apple Kalender
+· Endre og slett hendelser i de tilkoblede kalenderne dine rett i appen, gjentakelsesregler inkludert
+· Hold inne i listen for å slette
+
+■ Abonnementer
+· I Oppgrader abonnement velger du mellom Standard og Livstid – med flere kreditter per dag
+· Går de tomme, fyller Kjøp credits på, og kjøpte kreditter utløper ikke

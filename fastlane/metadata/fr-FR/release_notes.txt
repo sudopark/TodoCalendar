@@ -1,0 +1,27 @@
+Cette mise à jour ajoute de nouvelles fonctionnalités.
+
+■ Saisie rapide par IA
+· Parlez ou écrivez, et l'événement est créé. « Déjeuner avec Sarah vendredi à midi », « décale le dentiste à mardi prochain » : comme vous le diriez vraiment
+· Lire depuis une image : photographiez un emploi du temps ou l'affiche d'un événement, ou choisissez une image dans votre photothèque, et le texte devient des événements
+· Pas seulement ajouter : décaler l'heure, renommer, marquer comme fait, supprimer. Les demandes qui modifient ou suppriment quelque chose vous montrent d'abord ce qui va changer et demandent confirmation
+· Envoyez depuis Siri, un widget ou le centre de contrôle sans ouvrir l'app
+· Partagez du texte ou une photo depuis une autre app et cela enchaîne sur Envoyer à l'IA
+· Saisie rapide par IA est disponible après connexion
+
+■ Afficher sur l'écran verrouillé
+· Un événement sur le point de commencer affiche son compte à rebours sur l'écran verrouillé et dans la Dynamic Island
+· Ajoutez-le depuis le détail de l'événement ou la liste du jour, y compris les événements Google Agenda et Calendrier Apple
+· Marquez une tâche comme faite ou arrêtez l'affichage directement depuis l'écran verrouillé, et touchez pour ouvrir le détail
+
+■ Partage de l'agenda
+· Appuyez longuement sur une date du calendrier pour Partager cette journée, Partager cette semaine ou Partager ce mois
+· Dans Aperçu du partage, choisissez les Types d'événement à inclure et si le partage se fait en Texte ou en Image
+· Vous pouvez aussi partager un seul événement
+
+■ Modification des événements Google Agenda et Calendrier Apple
+· Modifiez et supprimez les événements de vos agendas connectés directement dans l'app, règles de répétition comprises
+· Appuyez longuement dans la liste pour supprimer
+
+■ Forfaits
+· Améliorer le forfait vous laisse choisir entre Standard et À vie, chacun avec plus de crédits par jour
+· S'il n'en reste plus, Ajouter des crédits les recharge, et les crédits ajoutés n'expirent pas
