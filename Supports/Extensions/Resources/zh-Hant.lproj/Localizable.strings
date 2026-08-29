@@ -386,10 +386,10 @@
 // MARK: - share preview
 
 "share_preview::title" = "分享預覽";
-"share_preview::tag_filter::title" = "標籤";
+"share_preview::tag_filter::title" = "活動類型";
 "share_preview::tag_filter::select_all" = "全選";
 "share_preview::tag_filter::deselect_all" = "全部取消";
-"share_preview::option::include_tag_name" = "顯示標籤名稱";
+"share_preview::option::include_tag_name" = "顯示活動類型名稱";
 "share_preview::share_button" = "分享";
 "share_preview::empty" = "沒有可分享的活動";
 "share_preview::header::this_week" = "本週";

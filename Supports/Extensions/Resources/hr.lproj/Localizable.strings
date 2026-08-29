@@ -386,10 +386,10 @@
 // MARK: - share preview
 
 "share_preview::title" = "Pregled dijeljenja";
-"share_preview::tag_filter::title" = "Oznake";
+"share_preview::tag_filter::title" = "Tipovi događaja";
 "share_preview::tag_filter::select_all" = "Odaberi sve";
 "share_preview::tag_filter::deselect_all" = "Poništi odabir";
-"share_preview::option::include_tag_name" = "Prikaži naziv oznake";
+"share_preview::option::include_tag_name" = "Prikaži naziv tipa događaja";
 "share_preview::share_button" = "Podijeli";
 "share_preview::empty" = "Nema događaja za dijeljenje";
 "share_preview::header::this_week" = "Ovaj tjedan";

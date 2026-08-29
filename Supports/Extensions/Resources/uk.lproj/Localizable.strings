@@ -386,10 +386,10 @@
 // MARK: - share preview
 
 "share_preview::title" = "Попередній перегляд";
-"share_preview::tag_filter::title" = "Теги";
+"share_preview::tag_filter::title" = "Типи подій";
 "share_preview::tag_filter::select_all" = "Вибрати всі";
 "share_preview::tag_filter::deselect_all" = "Зняти позначки";
-"share_preview::option::include_tag_name" = "Показувати назву тегу";
+"share_preview::option::include_tag_name" = "Показувати назву типу події";
 "share_preview::share_button" = "Поділитися";
 "share_preview::empty" = "Немає подій, якими можна поділитися";
 "share_preview::header::this_week" = "Цей тиждень";

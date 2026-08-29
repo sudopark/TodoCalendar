@@ -387,10 +387,10 @@
 // MARK: - share preview
 
 "share_preview::title" = "Paylaşım Önizlemesi";
-"share_preview::tag_filter::title" = "Etiketler";
+"share_preview::tag_filter::title" = "Etkinlik Türleri";
 "share_preview::tag_filter::select_all" = "Tümünü seç";
 "share_preview::tag_filter::deselect_all" = "Seçimi kaldır";
-"share_preview::option::include_tag_name" = "Etiket adını göster";
+"share_preview::option::include_tag_name" = "Etkinlik türü adını göster";
 "share_preview::share_button" = "Paylaş";
 "share_preview::empty" = "Paylaşılacak etkinlik yok";
 "share_preview::header::this_week" = "Bu hafta";

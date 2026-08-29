@@ -387,10 +387,10 @@
 // MARK: - share preview
 
 "share_preview::title" = "Pratinjau Berbagi";
-"share_preview::tag_filter::title" = "Tag";
+"share_preview::tag_filter::title" = "Jenis Acara";
 "share_preview::tag_filter::select_all" = "Pilih semua";
 "share_preview::tag_filter::deselect_all" = "Batalkan semua pilihan";
-"share_preview::option::include_tag_name" = "Sertakan nama tag";
+"share_preview::option::include_tag_name" = "Sertakan nama jenis acara";
 "share_preview::share_button" = "Bagikan";
 "share_preview::empty" = "Tidak ada acara untuk dibagikan";
 "share_preview::header::this_week" = "Minggu ini";

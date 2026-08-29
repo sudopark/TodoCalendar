@@ -387,10 +387,10 @@
 // MARK: - share preview
 
 "share_preview::title" = "ตัวอย่างการแชร์";
-"share_preview::tag_filter::title" = "แท็ก";
+"share_preview::tag_filter::title" = "ประเภทกิจกรรม";
 "share_preview::tag_filter::select_all" = "เลือกทั้งหมด";
 "share_preview::tag_filter::deselect_all" = "ยกเลิกเลือกทั้งหมด";
-"share_preview::option::include_tag_name" = "แสดงชื่อแท็ก";
+"share_preview::option::include_tag_name" = "แสดงชื่อประเภทกิจกรรม";
 "share_preview::share_button" = "แชร์";
 "share_preview::empty" = "ไม่มีกิจกรรมให้แชร์";
 "share_preview::header::this_week" = "สัปดาห์นี้";

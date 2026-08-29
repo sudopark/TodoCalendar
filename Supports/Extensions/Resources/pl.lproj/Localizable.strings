@@ -386,10 +386,10 @@
 // MARK: - share preview
 
 "share_preview::title" = "Podgląd udostępniania";
-"share_preview::tag_filter::title" = "Tagi";
+"share_preview::tag_filter::title" = "Typy wydarzeń";
 "share_preview::tag_filter::select_all" = "Zaznacz wszystko";
 "share_preview::tag_filter::deselect_all" = "Odznacz wszystko";
-"share_preview::option::include_tag_name" = "Pokaż nazwę tagu";
+"share_preview::option::include_tag_name" = "Pokaż nazwę typu wydarzenia";
 "share_preview::share_button" = "Udostępnij";
 "share_preview::empty" = "Brak wydarzeń do udostępnienia";
 "share_preview::header::this_week" = "Ten tydzień";
