@@ -1,0 +1,27 @@
+Kemas kini ini menambah ciri baharu.
+
+■ Input Pantas AI
+· Sebut atau taip, acara pun tercipta. "Makan tengah hari dengan Sarah Jumaat pukul 12", "pindahkan doktor gigi ke Selasa depan" — persis cara anda bercakap
+· Baca daripada imej: ambil gambar jadual kelas atau poster acara, atau pilih imej daripada pustaka, dan teksnya menjadi acara
+· Bukan sekadar menambah: alih masa, tukar nama, tanda selesai, padam. Permintaan yang mengubah atau membuang sesuatu akan menunjukkan dahulu apa yang bakal berlaku dan meminta pengesahan
+· Hantar melalui Siri, widget atau Pusat Kawalan tanpa membuka apl
+· Kongsi teks atau foto daripada apl lain dan ia bersambung ke Hantar ke AI
+· Input Pantas AI tersedia selepas anda log masuk
+
+■ Papar pada Skrin Kunci
+· Acara yang bakal bermula membuat kiraan detik pada skrin kunci dan Dynamic Island
+· Tambah daripada butiran acara atau senarai harian — acara Kalendar Google dan Kalendar Apple juga boleh
+· Tanda tugasan sebagai selesai atau hentikan paparan terus daripada skrin kunci, dan ketik untuk membuka butiran
+
+■ Berkongsi jadual
+· Tekan lama satu tarikh dalam kalendar untuk Kongsi hari ini, Kongsi minggu ini atau Kongsi bulan ini
+· Dalam Pratonton Kongsi, pilih Jenis Acara yang hendak disertakan dan sama ada berkongsi sebagai Teks atau Imej
+· Satu acara sahaja pun boleh dikongsi
+
+■ Menyunting acara Kalendar Google dan Kalendar Apple
+· Ubah dan padam acara kalendar yang disambungkan terus dalam apl, termasuk peraturan ulangan
+· Tekan lama dalam senarai untuk memadam
+
+■ Pelan
+· Naik taraf pelan membolehkan anda memilih antara Standard dan Seumur Hidup — masing-masing dengan lebih banyak kredit sehari
+· Jika habis, Tambah kredit mengisinya semula, dan kredit tambahan tidak luput

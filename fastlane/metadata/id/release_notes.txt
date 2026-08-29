@@ -1,0 +1,27 @@
+Pembaruan ini menambahkan fitur baru.
+
+■ Input Cepat AI
+· Ucapkan atau ketik, acaranya langsung dibuat. "Makan siang dengan Sarah Jumat jam 12", "pindahkan dokter gigi ke Selasa depan" — persis seperti cara kamu bicara
+· Baca dari gambar: foto jadwal pelajaran atau poster acara, atau pilih gambar dari galeri, lalu teksnya menjadi acara
+· Bukan cuma menambah: menggeser waktu, mengganti nama, menandai selesai, menghapus. Permintaan yang mengubah atau menghapus sesuatu lebih dulu menunjukkan apa yang akan terjadi dan meminta konfirmasi
+· Kirim lewat Siri, widget, atau Pusat Kontrol tanpa membuka aplikasi
+· Bagikan teks atau foto dari aplikasi lain dan lanjut ke Kirim ke AI
+· Input Cepat AI tersedia setelah kamu masuk
+
+■ Tampilkan di Layar Terkunci
+· Acara yang sebentar lagi mulai menghitung mundur di layar terkunci dan Dynamic Island
+· Tambahkan dari detail acara atau daftar harian — acara Google Kalender dan Kalender Apple juga bisa
+· Tandai tugas selesai atau hentikan tampilannya langsung dari layar terkunci, dan ketuk untuk membuka detailnya
+
+■ Berbagi jadwal
+· Tekan lama sebuah tanggal di kalender untuk Bagikan hari ini, Bagikan minggu ini, atau Bagikan bulan ini
+· Di Pratinjau Berbagi, pilih Jenis Acara yang ikut disertakan dan mau dibagikan sebagai Teks atau Gambar
+· Satu acara saja juga bisa dibagikan
+
+■ Mengedit acara Google Kalender dan Kalender Apple
+· Ubah dan hapus acara dari kalender yang terhubung langsung di aplikasi, termasuk aturan pengulangan
+· Tekan lama di daftar untuk menghapus
+
+■ Paket
+· Tingkatkan paket memungkinkanmu memilih antara Standar dan Seumur Hidup — masing-masing dengan kredit harian lebih banyak
+· Kalau habis, Tambah kredit mengisinya kembali, dan kredit tambahan tidak kedaluwarsa

@@ -1,0 +1,27 @@
+Ez a frissítés új funkciókat hoz.
+
+■ AI gyorsbevitel
+· Mondd vagy írd le, és az esemény elkészül. „Ebéd Sarah-val pénteken 12-kor”, „tedd át a fogorvost jövő keddre” – pontosan úgy, ahogy mondanád
+· Olvasás képből: fényképezd le az órarendet vagy egy esemény plakátját, vagy válassz képet a könyvtárból, és a szövegből esemény lesz
+· Nemcsak hozzáadás: időpont áthelyezése, átnevezés, késznek jelölés, törlés. A módosító vagy törlő kérések előbb megmutatják, mi fog történni, és megerősítést kérnek
+· Küldd el Sirivel, widgettel vagy a Vezérlőközpontból, az app megnyitása nélkül
+· Oszd meg egy másik appból a szöveget vagy a fotót, és folytatódik itt: Küldés az AI-nak
+· A(z) AI gyorsbevitel bejelentkezés után érhető el
+
+■ Megjelenítés a zárolási képernyőn
+· A hamarosan kezdődő esemény visszaszámlál a zárolási képernyőn és a Dynamic Islanden
+· Add hozzá az esemény adatlapjáról vagy a napi listából – a Google Naptár és az Apple Naptár eseményeit is
+· Pipáld ki a teendőt vagy állítsd le a megjelenítést egyenesen a zárolási képernyőről, koppintással pedig megnyílik az adatlap
+
+■ Program megosztása
+· Tartsd nyomva a naptárban a dátumot: Nap megosztása, Hét megosztása vagy Hónap megosztása
+· A(z) Megosztás előnézete nézetben válaszd ki, mely Eseménytípusok kerüljön bele, és hogy Szöveg vagy Kép formában osztod meg
+· Egyetlen eseményt is megoszthatsz
+
+■ Google Naptár- és Apple Naptár-események szerkesztése
+· A csatlakoztatott naptárak eseményeit közvetlenül az appban módosíthatod és törölheted, az ismétlődési szabályokkal együtt
+· Törléshez tartsd nyomva a listában
+
+■ Csomagok
+· A(z) Csomag frissítése képernyőn a(z) Standard és a(z) Örökös közül választhatsz – naponta több kredittel
+· Ha elfogynak, a(z) Kreditek vásárlása feltölti, a megvásárolt kreditek pedig nem járnak le

@@ -1,0 +1,27 @@
+Den här uppdateringen lägger till nya funktioner.
+
+■ AI-snabbinmatning
+· Säg eller skriv, så skapas händelsen. "Lunch med Sara på fredag klockan 12", "flytta tandläkaren till nästa tisdag" – precis som du skulle säga det
+· Läs från bild: fotografera ett schema eller en evenemangsaffisch, eller välj en bild ur biblioteket, så blir texten händelser
+· Inte bara lägga till: flytta tiden, byta namn, markera som klar, radera. Förfrågningar som ändrar eller tar bort något visar först vad som kommer att hända och ber om bekräftelse
+· Skicka från Siri, en widget eller Kontrollcenter utan att öppna appen
+· Dela text eller ett foto från en annan app så fortsätter det till Skicka till AI
+· AI-snabbinmatning är tillgängligt när du har loggat in
+
+■ Visa på låsskärmen
+· En händelse som snart börjar räknar ner på låsskärmen och i Dynamic Island
+· Lägg till den från händelsens detaljvy eller dagens lista – även händelser från Google Kalender och Apple Kalender
+· Bocka av en uppgift eller sluta visa den direkt från låsskärmen, och tryck för att öppna detaljvyn
+
+■ Dela schemat
+· Håll ned ett datum i kalendern för Dela den här dagen, Dela den här veckan eller Dela den här månaden
+· Välj i Förhandsvisning av delning vilka Händelsetyper som ska med och om du delar som Text eller Bild
+· Du kan också dela en enskild händelse
+
+■ Redigera händelser i Google Kalender och Apple Kalender
+· Ändra och radera händelser i dina anslutna kalendrar direkt i appen, upprepningsregler inkluderade
+· Håll ned i listan för att radera
+
+■ Planer
+· I Uppgradera plan väljer du mellan Standard och Livstid – med fler krediter per dag
+· Tar de slut fyller Köp krediter på, och köpta krediter förfaller inte

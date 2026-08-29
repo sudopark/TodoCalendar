@@ -1,0 +1,27 @@
+Dieses Update bringt neue Funktionen.
+
+■ KI-Schnelleingabe
+· Sprich oder tippe, und das Ereignis steht. „Freitag um 12 Mittagessen mit Sarah“, „verschieb den Zahnarzt auf nächsten Dienstag“ – so, wie man es wirklich sagt
+· Aus Bild lesen: Fotografiere einen Stundenplan oder ein Veranstaltungsplakat oder wähle ein Bild aus der Mediathek, und aus dem Text werden Ereignisse
+· Nicht nur anlegen: Zeit verschieben, umbenennen, als erledigt markieren, löschen. Anfragen, die etwas ändern oder entfernen, zeigen dir vorher, was passiert, und fragen nach
+· Schicke es über Siri, ein Widget oder das Kontrollzentrum, ohne die App zu öffnen
+· Teile Text oder ein Foto aus einer anderen App, und es geht weiter zu An die KI senden
+· KI-Schnelleingabe steht nach der Anmeldung zur Verfügung
+
+■ Auf dem Sperrbildschirm anzeigen
+· Ein Ereignis, das gleich beginnt, zählt auf dem Sperrbildschirm und in der Dynamic Island herunter
+· Füge es aus der Ereignisansicht oder der Tagesliste hinzu – auch Ereignisse aus Google Kalender und Apple Kalender
+· Hake eine Aufgabe direkt auf dem Sperrbildschirm ab oder beende die Anzeige, und tippe, um zur Ereignisansicht zu gelangen
+
+■ Termine teilen
+· Halte ein Datum im Kalender gedrückt für Diesen Tag teilen, Diese Woche teilen oder Diesen Monat teilen
+· Wähle in Vorschau zum Teilen, welche Ereignistypen dabei sein sollen und ob du als Text oder Bild teilst
+· Auch ein einzelnes Ereignis lässt sich teilen
+
+■ Ereignisse in Google Kalender und Apple Kalender bearbeiten
+· Ändere und lösche Ereignisse deiner verbundenen Kalender direkt in der App, Wiederholungsregeln eingeschlossen
+· Halte in der Liste gedrückt, um zu löschen
+
+■ Tarife
+· In Tarif upgraden wählst du zwischen Standard und Lebenslang – mit jeweils mehr Guthaben pro Tag
+· Geht das Guthaben aus, füllt Credits kaufen es wieder auf, und zugekauftes Guthaben verfällt nicht

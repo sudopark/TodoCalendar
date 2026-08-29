@@ -1,0 +1,27 @@
+Denne opdatering tilføjer nye funktioner.
+
+■ AI-hurtigindtastning
+· Sig det eller skriv det, så er begivenheden oprettet. "Frokost med Sara fredag klokken 12", "flyt tandlægen til næste tirsdag" – præcis som du ville sige det
+· Læs fra billede: fotografér et skema eller en plakat, eller vælg et billede fra biblioteket, så bliver teksten til begivenheder
+· Ikke kun oprette: flytte tidspunktet, omdøbe, markere som færdig, slette. Anmodninger, der ændrer eller fjerner noget, viser først hvad der sker, og beder om bekræftelse
+· Send fra Siri, en widget eller Kontrolcenter uden at åbne appen
+· Del tekst eller et billede fra en anden app, så fortsætter det til Send til AI
+· AI-hurtigindtastning er tilgængelig, når du er logget ind
+
+■ Vis på låseskærmen
+· En begivenhed, der snart begynder, tæller ned på låseskærmen og i Dynamic Island
+· Tilføj den fra begivenhedens detaljer eller dagens liste – også begivenheder fra Google Kalender og Apple Kalender
+· Marker en opgave som færdig eller stop visningen direkte fra låseskærmen, og tryk for at åbne detaljerne
+
+■ Del din kalender
+· Hold en dato nede i kalenderen for Del denne dag, Del denne uge eller Del denne måned
+· Vælg i Forhåndsvisning af deling, hvilke Begivenhedstyper der skal med, og om du deler som Tekst eller Billede
+· Du kan også dele en enkelt begivenhed
+
+■ Rediger begivenheder i Google Kalender og Apple Kalender
+· Ret og slet begivenheder i dine forbundne kalendere direkte i appen, gentagelsesregler inklusive
+· Hold nede på listen for at slette
+
+■ Abonnementer
+· I Opgrader abonnement vælger du mellem Standard og Livstid – med flere kreditter om dagen
+· Løber de tør, fylder Køb credits op, og tilkøbte kreditter udløber ikke
