@@ -3,6 +3,8 @@
 App Store Connect(ASC)에 올릴 텍스트 메타데이터를 fastlane `deliver` 규약대로 담아둔 곳이다.
 `metadata/<ASC 로케일>/<필드>.txt` 구조이고, **파일명이 곧 ASC 필드**다.
 
+자격증명·실행환경·업로드 검증·제출 순서는 [`docs/appstore-connect-operations.md`](../../docs/appstore-connect-operations.md).
+
 ## 업로드
 
 ```sh

@@ -3,6 +3,8 @@
 ASC에 올릴 6.9" 스크린샷을 담는 곳은 `fastlane/screenshots/<ASC 로케일>/<NN>_<슬러그>.png`이고,
 파일명 앞 두 자리가 곧 ASC 진열 순서다. 31개 로케일 × 6장 = 186장, 전부 1320×2868 / 알파 없음.
 
+자격증명·실행환경·업로드 검증·제출 순서는 [`docs/appstore-connect-operations.md`](../docs/appstore-connect-operations.md).
+
 `screenshots/` 자체는 `.gitignore` 대상이다. 원고가 아니라 촬영·합성으로 다시 만드는 산출물이라
 레포에 두지 않는다. 아래 절차로 언제든 재생성한다.
 

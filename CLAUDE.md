@@ -100,6 +100,7 @@ tuist generate --no-open      # 파일 추가/삭제 후 재실행 필수
 | ForemostEvent | [`docs/spec/tags-foremost-notifications.md`](docs/spec/tags-foremost-notifications.md) |
 | SharedDataStore 키·구독 | [`Domain/CLAUDE.md`](Domain/CLAUDE.md) |
 | 앱 버전 체크 | [`docs/spec/infrastructure.md §7`](docs/spec/infrastructure.md) |
+| App Store Connect 업로드 운영 | [`docs/appstore-connect-operations.md`](docs/appstore-connect-operations.md) |
 | DB 마이그레이션 | §1 짝규칙 (`dbVersion` ↔ `migrateStatement` ↔ `AppDataMigrationImple` 스텝) + [`Repository/CLAUDE.md`](Repository/CLAUDE.md) |
 
 ---
