@@ -64,6 +64,7 @@ DerivedData/
 
 ### fastlane ###
 fastlane/report.xml
+fastlane/Preview.html
 fastlane/README.md
 fastlane/test_output/
 
@@ -99,3 +100,6 @@ snapshot-appstore/
 
 ### App Store 업로드용 합성 스샷 ###
 fastlane/screenshots/
+
+# ASC 심사 정보(데모 계정·담당자 연락처) — deliver init 이 내려받는다. public 레포라 커밋 금지
+fastlane/metadata/review_information/

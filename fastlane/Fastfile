@@ -6,8 +6,10 @@ def required_env(name, hint)
   value
 end
 
+# fastlane 은 액션을 프로젝트 루트로 chdir 해서 실행하는데 FastlaneFolder.path 는 상대경로("./")를
+# 돌려준다 — 레인 본문에서 절대경로로 굳히지 않으면 가드와 액션이 서로 다른 디렉토리를 본다
 def app_store_metadata_path
-  File.join(FastlaneCore::FastlaneFolder.path.to_s, "metadata")
+  File.expand_path(File.join(FastlaneCore::FastlaneFolder.path.to_s, "metadata"))
 end
 
 # deliver init 이 항상 만드는 copyright.txt 로 "현재 ASC 메타데이터를 내려받았는가" 를 판정한다
@@ -75,7 +77,7 @@ def warn_missing_release_notes(metadata_path)
 end
 
 def app_store_screenshots_path
-  File.join(FastlaneCore::FastlaneFolder.path.to_s, "screenshots")
+  File.expand_path(File.join(FastlaneCore::FastlaneFolder.path.to_s, "screenshots"))
 end
 
 # 6.9" 디스플레이 업로드 규격. 다른 크기·알파 채널은 ASC 가 업로드 단계에서 거부한다
@@ -255,7 +257,10 @@ platform :ios do
     # precheck 는 ASC 에 올라간 값을 읽는다 — 업로드 뒤에 돌려야 이번 원고가 검사 대상이 된다
     precheck(
       api_key: api_key,
-      include_in_app_purchases: false
+      include_in_app_purchases: false,
+      # 구글 캘린더 연동은 앱의 실제 기능이라 competitor 언급이 아니다. 룰이 "google" 을 무조건 잡아
+      # 30개 로케일이 매번 걸리므로 경고로 낮춘다 — 다른 룰은 error 로 둔다
+      other_platforms: { level: :warn }
     )
   end
 
