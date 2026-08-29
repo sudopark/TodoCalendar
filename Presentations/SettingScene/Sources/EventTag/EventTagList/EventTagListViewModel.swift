@@ -12,6 +12,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import Scenes
 
 
@@ -63,7 +64,7 @@ final class EventTagListViewModelImple: EventTagListViewModel, @unchecked Sendab
         let cvms = CurrentValueSubject<[BaseCalendarEventTagCellViewModel]?, Never>(nil)
     }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private let subject = Subject()
     
     private func internalBinding() {
@@ -72,13 +73,13 @@ final class EventTagListViewModelImple: EventTagListViewModel, @unchecked Sendab
             .sink(receiveValue: { [weak self] cvms in
                 self?.subject.cvms.send(cvms)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         self.eventTagListUsecase.reloadFailed
             .sink(receiveValue: { [weak self] error in
                 self?.router?.showError(error)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

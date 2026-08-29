@@ -11,12 +11,15 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 
 
 open class StubGoogleCalendarUsecase: GoogleCalendarUsecase, @unchecked Sendable {
-    
+
     public init() { }
-    
+
+    public var googleService: GoogleCalendarService = .init(scopes: [.readWrite])
+
     public var didPrepared = false
     open func prepare() {
         self.didPrepared = true
@@ -41,7 +44,17 @@ open class StubGoogleCalendarUsecase: GoogleCalendarUsecase, @unchecked Sendable
     }
     
     open func refreshEvents(in period: Range<TimeInterval>) {
-        
+
+    }
+
+    public var didRefreshRepeatingEventWith: (calendarId: String, eventId: String, accountId: String, period: Range<TimeInterval>)?
+    open func refreshRepeatingEvent(
+        _ calendarId: String,
+        _ eventId: String,
+        accountId: String,
+        in period: Range<TimeInterval>
+    ) {
+        self.didRefreshRepeatingEventWith = (calendarId, eventId, accountId, period)
     }
     
     public var stubEvents: [GoogleCalendar.Event] = []
@@ -50,9 +63,14 @@ open class StubGoogleCalendarUsecase: GoogleCalendarUsecase, @unchecked Sendable
     }
     
     public var stubDetail: GoogleCalendar.EventOrigin?
+    public var shouldFailEventDetail: Bool = false
     open func eventDetail(
         _ calendarId: String, _ eventId: String, accountId: String, at timeZone: TimeZone
     ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error> {
+        guard self.shouldFailEventDetail == false
+        else {
+            return Fail(error: RuntimeError("failed to load google calendar event")).eraseToAnyPublisher()
+        }
         guard let detail = self.stubDetail
         else {
             return Empty().eraseToAnyPublisher()
@@ -67,5 +85,47 @@ open class StubGoogleCalendarUsecase: GoogleCalendarUsecase, @unchecked Sendable
     open var integratedAccount: AnyPublisher<ExternalServiceAccountinfo?, Never> {
         return self.accountSubject
             .eraseToAnyPublisher()
+    }
+
+    public var stubWritePermission: GoogleCalendar.EventWritePermission = .writable
+    open func eventWritePermission(
+        accountId: String, calendarId: String
+    ) -> AnyPublisher<GoogleCalendar.EventWritePermission, Never> {
+        return Just(self.stubWritePermission).eraseToAnyPublisher()
+    }
+
+    public var shouldFailWrite: Bool = false
+
+    public var didUpdateEventWith: (calendarId: String, eventId: String, accountId: String, params: GoogleCalendar.EventEditParams)?
+    public var stubUpdatedEventOrigin: GoogleCalendar.EventOrigin?
+    open func updateEvent(
+        _ calendarId: String,
+        _ eventId: String,
+        accountId: String,
+        at timeZone: TimeZone,
+        params: GoogleCalendar.EventEditParams
+    ) async throws -> GoogleCalendar.EventOrigin {
+        self.didUpdateEventWith = (calendarId, eventId, accountId, params)
+        if shouldFailWrite {
+            throw RuntimeError("failed to update google calendar event")
+        }
+        guard let origin = self.stubUpdatedEventOrigin
+        else {
+            throw RuntimeError("stubUpdatedEventOrigin not set")
+        }
+        return origin
+    }
+
+    public var didRemoveEventWith: (calendarId: String, eventId: String, accountId: String, scope: GoogleCalendar.EventRemoveScope)?
+    open func removeEvent(
+        _ calendarId: String,
+        _ eventId: String,
+        accountId: String,
+        scope: GoogleCalendar.EventRemoveScope
+    ) async throws {
+        self.didRemoveEventWith = (calendarId, eventId, accountId, scope)
+        if shouldFailWrite {
+            throw RuntimeError("failed to remove google calendar event")
+        }
     }
 }

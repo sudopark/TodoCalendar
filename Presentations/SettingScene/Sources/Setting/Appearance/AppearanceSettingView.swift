@@ -10,6 +10,7 @@
 
 import SwiftUI
 import Domain
+import Extensions
 import Combine
 import CommonPresentation
 
@@ -58,7 +59,7 @@ struct AppearanceRow< Content: View>: View {
 @Observable final class AppearanceSettingViewState {
     
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
     
     var timeZoneName: String?
     var hapticOn: Bool = false
@@ -79,21 +80,21 @@ struct AppearanceRow< Content: View>: View {
             .sink(receiveValue: { [weak self] name in
                 self?.timeZoneName = name
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.hapticIsOn
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] flag in
                 self?.hapticOn = flag
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.animationIsOn
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] flag in
                 self?.animationOn = flag
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

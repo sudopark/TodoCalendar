@@ -53,7 +53,7 @@ extension EventDetailDataLocalRepostioryImpleTests {
         
         // when
         let _ = try await repository.saveDetail(detail)
-        let loadedDetail = try await repository.loadDetail("some").firstValue(with: 100)
+        let loadedDetail = try await repository.loadDetail("some").firstValue(with: 1000)
         
         // then
         XCTAssertEqual(loadedDetail?.eventId, detail.eventId)

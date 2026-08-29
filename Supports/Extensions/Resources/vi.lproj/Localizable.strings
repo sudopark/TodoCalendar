@@ -79,6 +79,14 @@
 "dayname::friday:very_short" = "6";
 "dayname::saturday:very_short" = "7";
 
+"dayname::sunday:gender" = "m";
+"dayname::monday:gender" = "m";
+"dayname::tuesday:gender" = "m";
+"dayname::wednesday:gender" = "m";
+"dayname::thursday:gender" = "m";
+"dayname::friday:gender" = "m";
+"dayname::saturday:gender" = "m";
+
 
 // MARK: - event notification
 
@@ -112,8 +120,12 @@
 
 "calendar::foremostevent:title" = "Sự kiện quan trọng nhất";
 "calendar::uncompletedTodos:title" = "Việc chưa hoàn thành";
+"calendar::guideTodo::name" = "Xem cách dùng To-do Calendar";
+"calendar::eventSync::loadingAllEvents::message" = "Đang tải toàn bộ sự kiện…";
 "calendar::event_time::todo" = "Việc cần làm";
 "calendar::event_time::allday" = "Cả ngày";
+"calendar::event_time::start" = "Bắt đầu";
+"calendar::event_time::end" = "Kết thúc";
 "calendar::event_time::allday::with" = "%@ cả ngày";
 "calendar::event_time::period:some_days" = "%d ngày";
 "calendar::event_time::period:some_minutes" = "%d phút";
@@ -123,11 +135,13 @@
 "calendar::event::more_action::foremost_event:title" = "Sự kiện quan trọng nhất";
 "calendar::event::more_action::remove_only_thistime:message" = "Bạn có muốn chỉ xóa sự kiện này trong toàn bộ chuỗi sự kiện lặp lại không?";
 "calendar::event::more_action::remove:message" = "Bạn có muốn xóa sự kiện này không?";
+"calendar::event::more_action::remove_this_and_future:message" = "Bạn có muốn xóa sự kiện này và tất cả sự kiện lặp lại sau đó không?";
 "calendar::event::more_action::mark_as_foremost" = "Bạn có muốn đánh dấu sự kiện này là sự kiện quan trọng nhất không?";
 "calendar::event::more_action::unmark_as_foremost" = "Bạn có muốn bỏ đánh dấu sự kiện này khỏi sự kiện quan trọng nhất không?";
 "calendar::event::more_action::mark_as_foremost::unavail" = "Sự kiện lịch trình lặp lại không thể được đánh dấu là sự kiện quan trọng nhất.";
 "calendar::event::more_action:remove_only_thistime:item_name" = "Chỉ xóa lần này";
 "calendar::event::more_action:remove:item_name" = "Xóa sự kiện";
+"calendar::event::more_action:remove_this_and_future:item_name" = "Xóa sự kiện này và các sự kiện sau";
 "calendar::event::more_action:foremost:mark:item_name" = "Đánh dấu quan trọng nhất";
 "calendar::event::more_action:foremost:unmark:item_name" = "Bỏ đánh dấu quan trọng nhất";
 "calendar::event::more_action:dday_candidate:register:item_name" = "Thêm vào tiện ích D-Day";
@@ -135,7 +149,25 @@
 "calendar::event::more_action:dday_candidate:title" = "Ứng viên tiện ích D-Day";
 "calendar::event::more_action:dday_candidate:register:message" = "Thêm sự kiện này làm ứng viên cho tiện ích D-Day? Sự kiện sẽ hiển thị đầu danh sách khi bạn chỉnh sửa tiện ích.";
 "calendar::event::more_action:dday_candidate:unregister:message" = "Xóa sự kiện này khỏi danh sách ứng viên tiện ích D-Day?";
+"calendar::event::more_action:live_activity:title" = "Hoạt động trực tiếp";
+"calendar::event::more_action:live_activity:register:item_name" = "Hiển thị trên màn hình khóa";
+"calendar::event::more_action:live_activity:unregister:item_name" = "Xóa khỏi màn hình khóa";
+"calendar::event::more_action:live_activity:unavail::not_found" = "Không còn tìm thấy sự kiện này.";
+"calendar::event::more_action:live_activity:unavail::already_passed" = "Sự kiện này đã bắt đầu.";
+"calendar::event::more_action:live_activity:unavail::too_far_future" = "Chỉ có thể hiển thị sự kiện bắt đầu trong vòng 8 giờ.";
+"calendar::event::more_action:live_activity:register:confirm" = "Bạn có muốn hiển thị sự kiện này trên màn hình khóa không?";
+"calendar::event::more_action:live_activity:unregister:confirm" = "Bạn có muốn xóa sự kiện này khỏi màn hình khóa không?";
+"calendar::event::more_action:live_activity:replace:confirm" = "Một sự kiện khác đang hiển thị trên màn hình khóa. Thay bằng sự kiện này?";
+"calendar::event::more_action:live_activity:register:success" = "Đã hiển thị trên màn hình khóa. Hãy khóa thiết bị để xem.";
+"calendar::event::more_action:live_activity:showing" = "Đang hiển thị trên màn hình khóa";
 "calendar::event::more_action:copy:item_name" = "Sao chép sự kiện";
+"calendar::event::more_action:share:item_name" = "Chia sẻ";
+"event_detail::share::field::time" = "Thời gian";
+"event_detail::share::field::repeating" = "Lặp lại";
+"event_detail::share::field::calendar" = "Lịch";
+"event_detail::share::field::place" = "Vị trí";
+"event_detail::share::field::url" = "Liên kết";
+"event_detail::share::field::memo" = "Ghi chú";
 "calendar::event::more_action:transform_to::schedule" = "Chuyển thành lịch trình";
 "calendar::event::more_action:transform_to::todo" = "Chuyển thành việc cần làm";
 "calendar::event::more_action:edit:item_name" = "Chỉnh sửa";
@@ -145,7 +177,9 @@
 "calednar::event::skip_todo_until" = "Chọn thời gian để bỏ qua việc cần làm này";
 "calednar::event::copy" = "Sao chép sự kiện";
 "calendar::move_date" = "Di chuyển ngày";
-"calednar::event::google::edit" = "Chỉnh sửa sự kiện Google Calendar";
+"calendar::share::this_day" = "Chia sẻ ngày này";
+"calendar::share::this_week" = "Chia sẻ tuần này";
+"calendar::share::this_month" = "Chia sẻ tháng này";
 
 
 // MARK: - event detail
@@ -171,14 +205,33 @@
 "eventDetail.repeating.everyYearSomeDay:title" = "Mỗi năm %@";
 "eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "Mỗi năm %@ (âm lịch)";
 "eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "Tất cả các ngày của tuần cuối mỗi tháng";
-"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "%@ đầu tiên của mỗi tháng";
-"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "%@ thứ hai của mỗi tháng";
-"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "%@ thứ ba của mỗi tháng";
-"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "%@ thứ tư của mỗi tháng";
-"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "%@ thứ năm của mỗi tháng";
-"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "%@ thứ sáu của mỗi tháng";
-"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "%@ thứ bảy của mỗi tháng";
-"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "%@ cuối cùng của mỗi tháng";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::m" = "%@ đầu tiên của mỗi tháng";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::f" = "%@ đầu tiên của mỗi tháng";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::n" = "%@ đầu tiên của mỗi tháng";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::m" = "%@ thứ hai của mỗi tháng";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::f" = "%@ thứ hai của mỗi tháng";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::n" = "%@ thứ hai của mỗi tháng";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::m" = "%@ thứ ba của mỗi tháng";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::f" = "%@ thứ ba của mỗi tháng";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::n" = "%@ thứ ba của mỗi tháng";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::m" = "%@ thứ tư của mỗi tháng";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::f" = "%@ thứ tư của mỗi tháng";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::n" = "%@ thứ tư của mỗi tháng";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::m" = "%@ thứ năm của mỗi tháng";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::f" = "%@ thứ năm của mỗi tháng";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::n" = "%@ thứ năm của mỗi tháng";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::m" = "%@ thứ sáu của mỗi tháng";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::f" = "%@ thứ sáu của mỗi tháng";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::n" = "%@ thứ sáu của mỗi tháng";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::m" = "%@ thứ bảy của mỗi tháng";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::f" = "%@ thứ bảy của mỗi tháng";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::n" = "%@ thứ bảy của mỗi tháng";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::m" = "%@ cuối cùng của mỗi tháng";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::f" = "%@ cuối cùng của mỗi tháng";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::n" = "%@ cuối cùng của mỗi tháng";
+"eventDetail.repeating.last::m" = "Cuối cùng";
+"eventDetail.repeating.last::f" = "Cuối cùng";
+"eventDetail.repeating.last::n" = "Cuối cùng";
 "eventDetail.repeating.endtime::title" = "Kết thúc lặp lại";
 "eventDetail.repeating.endtime::option::never" = "Không bao giờ";
 "eventDetail.repeating.endtime::option::on" = "Vào ngày";
@@ -188,7 +241,6 @@
 "eventDetail.repeating::period_endcount" = "Bắt đầu từ %@, %d lần";
 
 "eventDetail.repeating.everyNDays:title" = "Mỗi %d ngày";
-"eventDetail.repeating.last" = "Cuối cùng";
 "eventDetail.repeating.everyNMonths:title" = "Mỗi %d tháng";
 "eventDetail.repeating.everyNYears:title" = "Mỗi %d năm";
 "eventDetail.repeating::endoption_until" = "đến %@";
@@ -267,12 +319,33 @@
 "eventDetail::gogoleEvent::conference::password" = "Mật khẩu";
 "eventDetail::gogoleEvent::copy::message" = "Đã sao chép vào bộ nhớ tạm.";
 "eventDetail::gogoleEvent::canceled::message" = "Sự kiện này đã bị hủy.";
+"eventDetail::gogoleEvent::saved::message" = "Đã lưu sự kiện.";
+"eventDetail::gogoleEvent::readOnlyCalendar::message" = "Lịch này chỉ đọc nên không thể chỉnh sửa sự kiện tại đây.";
+"eventDetail::gogoleEvent::reauthenticate::title" = "Cần thêm quyền";
+"eventDetail::gogoleEvent::reauthenticate::message" = "Tài khoản Google này được kết nối với quyền chỉ đọc. Để chỉnh sửa sự kiện, bạn cần cấp riêng quyền chỉnh sửa.";
+"eventDetail::gogoleEvent::writeScopeNotGranted::message" = "Chưa được cấp quyền chỉnh sửa. Nếu đây là tài khoản công ty hoặc trường học, quản trị viên có thể không cho phép.";
+"eventDetail::gogoleEvent::repeating::title" = "Đây là sự kiện lặp lại";
+"eventDetail::gogoleEvent::repeating::onlyThisTime::button" = "Chỉ sự kiện này";
+"eventDetail::gogoleEvent::repeating::all::button" = "Tất cả sự kiện";
+"eventDetail::gogoleEvent::remove::confirm::message" = "Xóa sự kiện này khỏi Google Calendar?";
+"eventDetail::gogoleEvent::editOnCalendar" = "Chỉnh sửa trong Google Calendar";
+"eventDetail::gogoleEvent::notEditableField::message" = "Không thể chỉnh sửa tại đây. Vui lòng chỉnh sửa trong Google Calendar.";
+"eventDetail::gogoleEvent::description::formatLoss::message" = "Mô tả này có định dạng. Chỉnh sửa tại đây sẽ làm mất định dạng.";
 
 // MARK: - Apple calendar event
 "eventDetail::appleCalendarEvent::viewOnCalendar" = "Xem trong Apple Calendar";
+"eventDetail::appleCalendarEvent::editOnCalendar" = "Chỉnh sửa trong Apple Calendar";
 "eventDetail::appleCalendarEvent::calendar::event" = "Sự kiện Apple Calendar";
 "eventDetail::appleCalendarEvent::attendees" = "Người tham dự (%d người)";
 "eventDetail::appleCalendarEvent::attendees::organizer" = "Người tổ chức";
+"eventDetail::appleCalendarEvent::saved::message" = "Đã lưu.";
+"eventDetail::appleCalendarEvent::remove::confirm::message" = "Xóa sự kiện này?";
+"eventDetail::appleCalendarEvent::repeating::title" = "Sự kiện lặp lại";
+"eventDetail::appleCalendarEvent::repeating::onlyThisTime::button" = "Chỉ sự kiện này";
+"eventDetail::appleCalendarEvent::repeating::thisAndFuture::button" = "Sự kiện này và các sự kiện sau";
+"eventDetail::appleCalendarEvent::readOnlyCalendar::message" = "Lịch này chỉ đọc nên không thể chỉnh sửa sự kiện.";
+"eventDetail::appleCalendarEvent::notEditableField::message" = "Không thể chỉnh sửa mục này trong ứng dụng.";
+"eventDetail::appleCalendarEvent::url::placeholder" = "URL";
 
 // MARK: - event tag
 
@@ -311,6 +384,23 @@
 "eventList::remove::confirm::button::olderThan1y" = "Cũ hơn 1 năm";
 
 
+// MARK: - share preview
+
+"share_preview::title" = "Xem trước chia sẻ";
+"share_preview::tag_filter::title" = "Loại sự kiện";
+"share_preview::tag_filter::select_all" = "Chọn tất cả";
+"share_preview::tag_filter::deselect_all" = "Bỏ chọn tất cả";
+"share_preview::option::include_tag_name" = "Hiển thị tên loại sự kiện";
+"share_preview::share_button" = "Chia sẻ";
+"share_preview::empty" = "Không có sự kiện nào để chia sẻ";
+"share_preview::header::this_week" = "Tuần này";
+"share_preview::header::last_week" = "Tuần trước";
+"share_preview::header::next_week" = "Tuần sau";
+"share_preview::header::week_of_month" = "Tuần %2$d %1$@";
+"share_preview::format::text" = "Văn bản";
+"share_preview::format::image" = "Hình ảnh";
+
+
 // MARK: - account
 
 "manage_account::title" = "Quản lý tài khoản";
@@ -327,7 +417,9 @@
 "manage_account::delete_account_button::confirm:message" = "Bạn có chắc chắn muốn xóa tài khoản không?";
 "manage_account::delete_account_button::description" = "Sau khi yêu cầu xóa tài khoản, tài khoản của bạn sẽ bị xóa.\nMột khi đã xóa, thông tin tài khoản không thể khôi phục.";
 "signIn::title" = "Đăng nhập";
-"signIn:description" = "Sao lưu danh sách sự kiện của bạn và đồng bộ trên các thiết bị iOS khác\n(Các nền tảng hỗ trợ sẽ được mở rộng.)";
+"signIn::feature::sync" = "Sao lưu sự kiện · Đồng bộ giữa các thiết bị";
+"signIn::feature::aiAgent" = "Quản lý lịch trình với AI agent";
+"signIn::feature::web" = "Dùng trên web · todo-calendar.com";
 
 
 // MARK: - setting
@@ -410,10 +502,17 @@
 "setting.holiday.hide::confirm::message" = "Ẩn ngày lễ này mỗi năm?\nBạn có thể hiện lại trong Cài đặt > Ngày lễ.";
 "setting.holiday.hidden::sectionTitle" = "Ngày lễ đã ẩn";
 "setting.holiday.show::button" = "Hiện";
+"setting.aiGuide::name" = "Thêm bằng AI — Siri & widget";
 "setting.feedback::name" = "Phản hồi";
 "setting.help::name" = "Trợ giúp";
+"setting.openWeb::name" = "Mở trên web";
 "setting.share::name" = "Chia sẻ ứng dụng";
 "setting.write_review::name" = "Viết đánh giá ứng dụng";
+"setting.openSourceLicense::name" = "Giấy phép mã nguồn mở";
+"setting.billing.plan::name" = "Gói";
+"setting.terms::name" = "Điều khoản sử dụng";
+"setting.privacyPolicy::name" = "Chính sách quyền riêng tư";
+"setting.adPrivacyOptions::name" = "Tùy chọn quyền riêng tư quảng cáo";
 "setting.account.signedIn::manageAccount" = "Tài khoản";
 "setting.account.needSignIn" = "Đăng nhập";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -513,6 +612,14 @@
 "widget.dday.target::registered" = "Đã ghim";
 "widget.dday.turn::name" = "Lần %d";
 
+"widget.aiCommand::title" = "Thêm bằng AI";
+"widget.aiCommand::explain" = "Chạm một lần để mở ô nhập AI.";
+
+// MARK: - liveActivity
+
+"liveActivity::stale" = "Bắt đầu ngay";
+"liveActivity::action::end" = "Kết thúc";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "Định dạng liên kết này không được hỗ trợ.\nVui lòng cập nhật ứng dụng lên phiên bản mới nhất.";
@@ -543,20 +650,133 @@
 "aiAgent::state::failed" = "Thất bại";
 "aiAgent::done::default" = "Xong";
 "aiAgent::failed::default" = "Không thể hoàn thành";
+"aiAgent::failed::dailyLimitExceeded" = "Bạn đã dùng hết tín dụng AI hôm nay.";
 "aiAgent::retry" = "Thử lại";
 "aiAgent::needSignIn::title" = "Cần đăng nhập";
 "aiAgent::needSignIn::message" = "Đăng nhập để sử dụng nhập nhanh bằng AI.";
+"aiAgent::speechPermissionDenied::title" = "Cần cấp quyền";
+"aiAgent::speechPermissionDenied::message" = "Cho phép truy cập micro và nhận dạng giọng nói trong Cài đặt để dùng nhập bằng giọng nói.";
+"aiAgent::speechPermissionDenied::confirm" = "Mở Cài đặt";
 "aiAgent::title" = "Nhập nhanh AI";
 "aiAgent::keyboard::stop" = "Dừng";
 "aiAgent::keyboard::send" = "Gửi";
 "aiAgent::stop" = "Dừng";
 "aiAgent::usage" = "%@ / %@ credit";
-"aiAgent::plan::free" = "Miễn phí";
-"aiAgent::plan::standard" = "Tiêu chuẩn";
-"aiAgent::plan::lifetime" = "Trọn đời";
 "aiAgent::usage::topupRemaining" = "Còn lại %@ credit bổ sung";
 "aiAgent::usage::planChangeScheduled" = "Sẽ chuyển sang gói %2$@ vào %1$@";
+"aiAgent::usage::resetsIn" = "Có thể dùng lại sau %@";
+"aiAgent::notificationPermissionDenied::message" = "Bật thông báo trong Cài đặt để nhận kết quả AI.";
 "aiAgent::stop::confirm::title" = "Dừng xử lý?";
 "aiAgent::stop::confirm::message" = "Dừng lại sẽ hủy bỏ tác vụ đang thực hiện và không thể tiếp tục.";
 "aiAgent::confirm::countdown" = "để xác nhận";
 "aiAgent::confirm::expired::message" = "Đã hết thời gian. Vui lòng yêu cầu lại.";
+"aiAgent::tip::externalEntry" = "Mẹo: Bạn cũng có thể thêm bằng Siri, nút Hành động hoặc widget.";
+"aiAgent::failed::showPlans" = "Xem các gói";
+
+"aiAgent::image::title" = "Đọc từ hình ảnh";
+"aiAgent::image::sourceSelect::title" = "Thêm hình ảnh";
+"aiAgent::image::source::library" = "Chọn từ thư viện";
+"aiAgent::image::source::camera" = "Chụp ảnh";
+"aiAgent::image::recognizing" = "Đang đọc hình ảnh…";
+"aiAgent::image::noText" = "Không tìm thấy văn bản nào trong hình ảnh này";
+"aiAgent::image::readText" = "Văn bản từ hình ảnh";
+"aiAgent::image::instruction" = "Chỉ dẫn thêm (tùy chọn)";
+"aiAgent::image::instruction::placeholder" = "VD: Thêm những mục này dưới dạng việc cần làm";
+"aiAgent::image::empty" = "Không có văn bản để gửi";
+"aiAgent::image::textTooLong" = "Văn bản quá dài. Vui lòng rút ngắn rồi thử lại.";
+"aiAgent::image::instructionTooLong" = "Chỉ dẫn của bạn quá dài. Vui lòng rút ngắn rồi thử lại.";
+"aiAgent::image::busy" = "Một yêu cầu khác vẫn đang xử lý";
+"aiAgent::image::camera::denied::title" = "Cần quyền truy cập camera";
+"aiAgent::image::camera::denied::message" = "Cho phép truy cập camera trong Cài đặt để chụp ảnh.";
+
+// MARK: - billing
+
+"billing::plan::free" = "Miễn phí";
+"billing::plan::standard" = "Tiêu chuẩn";
+"billing::plan::lifetime" = "Trọn đời";
+
+"billing::paywall::title" = "Nâng cấp gói";
+"billing::paywall::current::description" = "%@ tín dụng mỗi ngày";
+"billing::paywall::metric::dailyCredits" = "%@ tín dụng/ngày";
+"billing::paywall::period::weekly" = "/tuần";
+"billing::paywall::period::monthly" = "/tháng";
+"billing::paywall::period::yearly" = "/năm";
+"billing::paywall::price::unavailable" = "Không thể tải giá";
+"billing::paywall::badge::recommended" = "Đề xuất";
+"billing::paywall::badge::owned" = "Gói hiện tại";
+"billing::paywall::features::title" = "%@ bao gồm";
+"billing::paywall::feature::dailyCredits" = "%@ tín dụng mỗi ngày";
+"billing::paywall::feature::topup" = "Có thể mua thêm khi hết tín dụng";
+"billing::paywall::feature::noAds" = "Không quảng cáo";
+"billing::paywall::disclosure::subscription" = "Gói đăng ký sẽ tự động gia hạn hàng tháng trừ khi bạn hủy trước khi kỳ hiện tại kết thúc ít nhất 24 giờ. Bạn có thể hủy bất cứ lúc nào trong phần cài đặt App Store.";
+"billing::paywall::disclosure::subscription::generic" = "Gói đăng ký sẽ tự động gia hạn vào cuối mỗi chu kỳ thanh toán, trừ khi bạn hủy trước khi chu kỳ đó kết thúc ít nhất 24 giờ. Bạn có thể hủy bất cứ lúc nào trong phần cài đặt App Store.";
+"billing::paywall::disclosure::oneTime" = "Thanh toán một lần và sử dụng mãi mãi. Gói này không tự động gia hạn.";
+"billing::paywall::disclosure::storeUnavailable" = "Không thể kết nối với App Store. Vui lòng thử lại sau.";
+"billing::paywall::cta::subscribe" = "Đăng ký %@";
+"billing::paywall::cta::buy" = "Mua %@";
+"billing::paywall::cta::unavailable" = "Không thể mua";
+"billing::paywall::allPlansOwned" = "Bạn đã sử dụng gói cao cấp nhất.";
+"billing::paywall::terms" = "Điều khoản dịch vụ";
+"billing::paywall::privacyPolicy" = "Chính sách quyền riêng tư";
+"billing::paywall::restore" = "Khôi phục giao dịch mua";
+"billing::paywall::restored" = "Đã khôi phục giao dịch mua";
+"billing::paywall::restore::empty" = "Không có giao dịch mua nào để khôi phục.";
+"billing::paywall::manageSubscription" = "Quản lý đăng ký";
+"billing::paywall::purchase::applied" = "Đã áp dụng gói";
+"billing::paywall::pending::title" = "Đang chờ phê duyệt";
+"billing::paywall::pending::message" = "Hãy nhờ người tổ chức gia đình phê duyệt giao dịch mua này. Giao dịch sẽ tự động được áp dụng sau khi được phê duyệt.";
+"billing::paywall::userPlan::loadFailed" = "Không thể tải gói của bạn. Vui lòng thử lại.";
+"billing::paywall::retry" = "Thử lại";
+"billing::paywall::unfinished::title" = "Có giao dịch mua chưa được áp dụng";
+"billing::paywall::unfinished::message" = "Thanh toán đã thành công, nhưng gói của bạn chưa được cập nhật.";
+"billing::paywall::unfinished::action" = "Áp dụng ngay";
+"billing::paywall::unfinished::applied" = "Giao dịch mua của bạn đã được áp dụng";
+"billing::paywall::processing::message" = "Đang xác nhận giao dịch mua…";
+"billing::paywall::fail::purchase" = "Không thể hoàn tất giao dịch mua. Vui lòng thử lại.";
+"billing::paywall::fail::invalidTransaction" = "Không thể xác minh giao dịch mua của bạn. Vui lòng thử lại sau giây lát.";
+"billing::paywall::fail::unknownProduct" = "Không thể nhận diện giao dịch mua này. Cập nhật ứng dụng có thể khắc phục được.";
+"billing::paywall::fail::planChangeNotAllowed" = "Không hỗ trợ thay đổi gói này.";
+"billing::paywall::fail::ownedByAnotherAccount" = "Giao dịch mua này thuộc về tài khoản khác. Hãy đăng nhập bằng tài khoản đã mua.";
+"billing::paywall::fail::reflectDelayed" = "Thanh toán đã thành công, nhưng việc áp dụng đang bị chậm. Hệ thống sẽ tự động áp dụng.";
+"billing::paywall::topup::credits" = "%@ tín dụng";
+"billing::paywall::topup::credits::split" = "Cơ bản %@ + Thưởng %@ tín dụng";
+"billing::paywall::topup::bonus" = "+%@%% thưởng";
+"billing::paywall::topup::title" = "Mua thêm tín dụng";
+"billing::paywall::topup::title::withRemaining" = "Mua thêm tín dụng · Đang có %@";
+"billing::paywall::topup::description" = "Tín dụng bổ sung được dùng sau khi hết hạn mức hằng ngày và không hết hạn.";
+"billing::paywall::topup::applied" = "Đã thêm tín dụng";
+"billing::paywall::topup::applied::withCredits" = "Đã thêm %@ tín dụng";
+
+"billing::needSignIn::title" = "Cần đăng nhập";
+"billing::needSignIn::message" = "Đăng nhập để xem và quản lý gói của bạn.";
+
+// MARK: - share extension
+
+"share.ai::title" = "Gửi tới AI";
+"share.ai::text::placeholder" = "Nội dung cần gửi";
+"share.ai::instruction::placeholder" = "Thêm chỉ dẫn (tùy chọn)";
+"share.ai::needSignIn" = "Đăng nhập trong ứng dụng để sử dụng nhập nhanh bằng AI.";
+"share.ai::pending" = "Một yêu cầu trước đó vẫn đang chờ. Hãy mở ứng dụng để xem tiến trình hoặc kết quả.";
+"share.ai::sent" = "Đã gửi. Bạn có thể xem kết quả trong ứng dụng.";
+"share.ai::failed" = "Không thể gửi. Vui lòng thử lại.";
+"share.ai::sentButUntracked" = "Đã gửi, nhưng ứng dụng không theo dõi được kết quả. Hãy kiểm tra lịch sau giây lát.";
+"share.ai::textTooLong" = "Nội dung cần gửi quá dài. Vui lòng rút ngắn rồi thử lại.";
+"share.ai::instructionTooLong" = "Chỉ dẫn của bạn quá dài. Vui lòng rút ngắn.";
+"share.ai::limitExceeded" = "Bạn đã dùng hết tín dụng AI hôm nay. Hạn mức sẽ đặt lại vào nửa đêm giờ UTC.";
+"share.ai::image::title" = "Gửi ảnh tới AI";
+"share.ai::image::recognizing" = "Đang đọc văn bản trong ảnh…";
+"share.ai::image::text::caption" = "Văn bản được đọc từ ảnh — hãy chỉnh sửa nếu có gì đó không đúng.";
+"share.ai::image::text::placeholder" = "Văn bản đọc được từ ảnh";
+"share.ai::image::noTextFound" = "Không tìm thấy văn bản nào trong ảnh này. Hãy nhập nội dung bạn muốn thêm.";
+
+// MARK: - webview
+
+"webview::error::message" = "Không thể tải trang này.";
+"webview::error::retry" = "Thử lại";
+"webview::openInBrowser" = "Mở trong trình duyệt";
+
+// MARK: - legal notice
+
+"legal_notice.message::terms" = "Điều khoản dịch vụ đã được cập nhật.";
+"legal_notice.message::privacy" = "Chính sách quyền riêng tư đã được cập nhật.";
+"legal_notice.effectiveDate" = "Có hiệu lực từ %@";

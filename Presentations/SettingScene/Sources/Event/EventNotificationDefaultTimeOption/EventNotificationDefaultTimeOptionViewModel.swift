@@ -13,6 +13,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import Scenes
 import CommonPresentation
 
@@ -71,7 +72,7 @@ final class EventNotificationDefaultTimeOptionViewModelImple: EventNotificationD
         let selecedOption = CurrentValueSubject<EventNotificationTimeOption??, Never>(nil)
     }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private let subject = Subject()
 }
 
@@ -106,11 +107,11 @@ extension EventNotificationDefaultTimeOptionViewModelImple {
                 self.subject.notificationPermissionStatus.send(.denied)
             }
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     func requestPermission() {
-        self.router?.openSystemNotificationSetting()
+        self.router?.openSystemSetting()
     }
     
     private func requestNotificationPermission() {
@@ -127,7 +128,7 @@ extension EventNotificationDefaultTimeOptionViewModelImple {
                 self.router?.showError(error)
             }
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     private func showNotificationPermissionDenied() {

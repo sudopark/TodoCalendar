@@ -1,0 +1,27 @@
+Esta actualización añade funciones nuevas.
+
+■ Entrada rápida con IA
+· Habla o escribe y el evento queda creado. "Comida con Sara el viernes a las 12", "pasa el dentista al martes que viene": tal y como lo dirías
+· Leer desde una imagen: fotografía un horario de clase o el cartel de un evento, o elige uno de tu fototeca, y el texto se convierte en eventos
+· No solo añadir: cambiar la hora, renombrar, marcar como hecho, eliminar. Las peticiones que modifican o borran algo te muestran antes qué va a pasar y piden confirmación
+· Envía desde Siri, un widget o el Centro de control sin abrir la app
+· Comparte texto o una foto desde otra app y sigue en Enviar a la IA
+· Entrada rápida con IA está disponible tras iniciar sesión
+
+■ Mostrar en la pantalla bloqueada
+· Un evento a punto de empezar cuenta atrás en la pantalla bloqueada y en la Dynamic Island
+· Añádelo desde el detalle del evento o la lista del día, también los eventos de Google Calendar y Calendario de Apple
+· Marca una tarea como hecha o deja de mostrarla desde la propia pantalla bloqueada, y toca para ir al detalle del evento
+
+■ Compartir la agenda
+· Mantén pulsada una fecha del calendario para Compartir este día, Compartir esta semana o Compartir este mes
+· En Vista previa para compartir, elige qué Tipos de evento incluir y si compartir como Texto o Imagen
+· También puedes compartir un solo evento
+
+■ Editar eventos de Google Calendar y Calendario de Apple
+· Modifica y elimina los eventos de tus calendarios conectados desde la propia app, reglas de repetición incluidas
+· Mantén pulsado en la lista para eliminar
+
+■ Planes
+· Mejorar plan te deja elegir entre Estándar y Vitalicio, cada uno con más créditos al día
+· Si te quedas sin créditos, Añadir créditos los repone, y los créditos añadidos no caducan

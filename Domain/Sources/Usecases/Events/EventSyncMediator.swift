@@ -8,6 +8,7 @@
 
 import Foundation
 import Combine
+import Extensions
 
 public protocol EventSyncMediator: Sendable {
     
@@ -37,7 +38,7 @@ public final class EventSyncMediatorImple: EventSyncMediator, @unchecked Sendabl
         let isTemporaryUserDataMigration = CurrentValueSubject<Bool, Never>(false)
     }
     private let subject = Subject()
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     
     private func internalBinding() {
         
@@ -45,7 +46,7 @@ public final class EventSyncMediatorImple: EventSyncMediator, @unchecked Sendabl
             .sink(receiveValue: { [weak self] isMigrating in
                 self?.subject.isTemporaryUserDataMigration.send(isMigrating)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

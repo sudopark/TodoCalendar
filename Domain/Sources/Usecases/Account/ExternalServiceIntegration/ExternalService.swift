@@ -45,7 +45,8 @@ public struct AppleCalendarService: ExternalCalendarService {
 public struct GoogleCalendarService: ExternalCalendarService {
     
     public enum Scope: String, Sendable {
-        case readOnly = "https://www.googleapis.com/auth/calendar.readonly"
+        case readonly = "https://www.googleapis.com/auth/calendar.readonly"
+        case readWrite = "https://www.googleapis.com/auth/calendar"
     }
     
     public let identifier: String = GoogleCalendarService.id

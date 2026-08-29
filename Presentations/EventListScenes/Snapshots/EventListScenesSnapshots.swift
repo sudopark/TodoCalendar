@@ -32,8 +32,6 @@ final class EventListScenesSnapshots: XCTestCase {
 
     // MARK: - DoneTodoList/DoneTodoEventListView
 
-    // 결정성: doneTime은 서로 다른 연도의 고정 epoch(Asia/Seoul) — 실제 실행 시점(Date())과
-    // 무관하게 항상 "yyyy_MM_dd" 포맷 분기로 떨어져 today/yesterday 상대 라벨을 타지 않는다.
     @MainActor
     func test_doneTodoEventList() {
         captureSnapshotPair(named: "doneTodoEventList", layout: .fullScreen) { theme in

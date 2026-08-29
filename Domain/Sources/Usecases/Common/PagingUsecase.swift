@@ -7,6 +7,7 @@
 
 import Foundation
 import Combine
+import Extensions
 import AsyncFlatMap
 
 
@@ -57,7 +58,7 @@ public final class PagingUsecase<Repository: PagingRepository> {
         let occurredError = PassthroughSubject<any Error, Never>()
     }
     private let subject = Subject()
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     
     private func internalBinding() {
         
@@ -87,7 +88,7 @@ public final class PagingUsecase<Repository: PagingRepository> {
             .map(loadWithoutError)
             .switchToLatest()
             .sink(receiveValue: updatePagingResult)
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

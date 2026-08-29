@@ -162,7 +162,8 @@ protocol MonthViewModel: AnyObject, Sendable, MonthSceneInteractor {
     
     func attachListener(_ listener: any MonthSceneListener)
     func select(_ day: DayCellViewModel)
-    
+    func shareEvents(_ kind: CalendarShareRangeKind, for day: DayCellViewModel)
+
     var weekDays: AnyPublisher<[WeekDayModel], Never> { get }
     var weekModels: AnyPublisher<[WeekRowModel], Never> { get }
     var currentSelectDayIdentifier: AnyPublisher<String, Never> { get }
@@ -204,6 +205,25 @@ final class MonthViewModelImple: MonthViewModel, @unchecked Sendable {
         let timeZone: TimeZone
         let component: CalendarComponent
         let range: Range<TimeInterval>
+
+        func shareRange(
+            _ kind: CalendarShareRangeKind, for day: DayCellViewModel
+        ) -> Range<TimeInterval>? {
+            switch kind {
+            case .day:
+                return CalendarComponent.Day(
+                    year: day.year, month: day.month, day: day.day, weekDay: 1
+                ).dayRange(self.timeZone)
+
+            case .week:
+                return self.component.weeks
+                    .first(where: { week in week.days.contains(where: { $0.identifier == day.identifier }) })?
+                    .range(self.timeZone)
+
+            case .month:
+                return self.component.monthRange(self.timeZone)
+            }
+        }
     }
     
     private struct Subject: @unchecked Sendable {
@@ -213,7 +233,7 @@ final class MonthViewModelImple: MonthViewModel, @unchecked Sendable {
         let eventStackMap = CurrentValueSubject<[String: WeekEventStack], Never>([:])
     }
     private let subject = Subject()
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private var currentMonthComponentsBinding: AnyCancellable?
     private let eventStackBuildingQueue = DispatchQueue(label: "event-stack-builder")
     
@@ -234,7 +254,7 @@ final class MonthViewModelImple: MonthViewModel, @unchecked Sendable {
             let totalComponent = CurrentMonthInfo(timeZone: timeZone, component: component, range: range)
             self?.subject.currentMonthInfo.send(totalComponent)
         })
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     private func bindEventsInCurrentMonth() {
@@ -266,7 +286,7 @@ final class MonthViewModelImple: MonthViewModel, @unchecked Sendable {
             .sink(receiveValue: { [weak self] stackMap in
                 self?.subject.eventStackMap.send(stackMap)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
     
     private func bindCurerntSelectedDayNotifying() {
@@ -287,7 +307,7 @@ final class MonthViewModelImple: MonthViewModel, @unchecked Sendable {
             .sink(receiveValue: { [weak self] pair in
                 self?.listener?.monthScene(didChange: pair.0, and: pair.1)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 
@@ -319,7 +339,14 @@ extension MonthViewModelImple {
             .init(day.year, day.month, day.day)
         )
     }
-    
+
+    func shareEvents(_ kind: CalendarShareRangeKind, for day: DayCellViewModel) {
+        guard let info = self.subject.currentMonthInfo.value,
+              let range = info.shareRange(kind, for: day)
+        else { return }
+        self.listener?.monthScene(didRequestShare: range, kind: kind)
+    }
+
     func clearDaySelection() {
         self.subject.userSelectedDay.send(nil)
     }

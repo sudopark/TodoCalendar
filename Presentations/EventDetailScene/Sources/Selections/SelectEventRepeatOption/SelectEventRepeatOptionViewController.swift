@@ -10,6 +10,7 @@
 import UIKit
 import SwiftUI
 import Combine
+import Extensions
 import Scenes
 import CommonPresentation
 
@@ -19,12 +20,12 @@ import CommonPresentation
 final class SelectEventRepeatOptionViewController: UIHostingController<SelectEventRepeatOptionContainerView>, SelectEventRepeatOptionScene {
     
     private let viewModel: any SelectEventRepeatOptionViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
     
     @MainActor
     var interactor: (any SelectEventRepeatOptionSceneInteractor)? { self.viewModel }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     
     init(
         viewModel: any SelectEventRepeatOptionViewModel,

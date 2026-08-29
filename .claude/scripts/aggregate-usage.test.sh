@@ -47,6 +47,42 @@ cat > "$FIXTURE" << 'JSONL'
 {"ts":"2026-01-02T09:02:00+09:00","event":"axis_leak","session_id":"s5","missed_axis":1,"finding":"f3","pr":"705"}
 {"ts":"2026-01-02T09:03:00+09:00","event":"axis_leak","session_id":"s5","missed_axis":2,"finding":"g1","pr":""}
 {"ts":"2026-01-02T09:04:00+09:00","event":"axis_leak","session_id":"s5","missed_axis":2,"finding":"g2","pr":""}
+{"ts":"2026-01-01T15:00:00+09:00","event":"skill","session_id":"s10","name":"superpowers:writing-skills"}
+{"ts":"2026-01-01T15:01:00+09:00","event":"skill_end","session_id":"s10","name":"superpowers:writing-skills","compliance":"partial","deviations":[{"clause":"a","reason":"b"}]}
+{"ts":"2026-01-01T15:02:00+09:00","event":"skill_end","session_id":"s11","name":"superpowers:writing-skills","compliance":"partial","deviations":[{"clause":"a","reason":"b"}]}
+{"ts":"2026-01-01T15:03:00+09:00","event":"skill_end","session_id":"s12","name":"superpowers:writing-skills","compliance":"partial","deviations":[{"clause":"a","reason":"b"}]}
+{"ts":"2026-01-01T15:04:00+09:00","event":"correction","session_id":"s10","skills":["superpowers:writing-skills"],"summary":"c1","gist":""}
+{"ts":"2026-01-01T15:05:00+09:00","event":"correction","session_id":"s11","skills":["superpowers:writing-skills"],"summary":"c2","gist":""}
+{"ts":"2026-01-01T15:06:00+09:00","event":"correction","session_id":"s12","skills":["superpowers:writing-skills"],"summary":"c3","gist":""}
+{"ts":"2026-01-01T16:00:00+09:00","event":"skill","session_id":"t1","name":"superpowers:brainstorming"}
+{"ts":"2026-01-01T16:01:00+09:00","event":"skill","session_id":"t2","name":"superpowers:brainstorming"}
+{"ts":"2026-01-01T16:02:00+09:00","event":"skill","session_id":"t3","name":"superpowers:brainstorming"}
+{"ts":"2026-01-01T16:03:00+09:00","event":"skill","session_id":"t4","name":"superpowers:brainstorming"}
+{"ts":"2026-01-01T16:04:00+09:00","event":"skill","session_id":"t5","name":"superpowers:brainstorming"}
+{"ts":"2026-01-01T16:05:00+09:00","event":"skill_end","session_id":"t1","name":"superpowers:brainstorming","compliance":"full","deviations":[]}
+{"ts":"2026-01-01T16:06:00+09:00","event":"skill_end","session_id":"t2","name":"superpowers:brainstorming","compliance":"full","deviations":[]}
+{"ts":"2026-01-01T17:00:00+09:00","event":"skill","session_id":"u1","name":"open-external"}
+{"ts":"2026-01-01T17:01:00+09:00","event":"skill","session_id":"u2","name":"open-external"}
+{"ts":"2026-01-01T17:02:00+09:00","event":"skill","session_id":"u3","name":"open-external"}
+{"ts":"2026-01-01T17:03:00+09:00","event":"skill","session_id":"u4","name":"open-external"}
+{"ts":"2026-01-01T17:04:00+09:00","event":"skill","session_id":"u5","name":"open-external"}
+{"ts":"2026-01-01T17:05:00+09:00","event":"correction","session_id":"u1","skills":["open-external"],"summary":"c1","gist":""}
+{"ts":"2026-01-01T17:06:00+09:00","event":"correction","session_id":"u2","skills":["open-external"],"summary":"c2","gist":""}
+{"ts":"2026-01-01T17:07:00+09:00","event":"correction","session_id":"u3","skills":["open-external"],"summary":"c3","gist":""}
+{"ts":"2026-01-01T18:00:00+09:00","event":"skill","session_id":"v1","name":"pair-programming"}
+{"ts":"2026-01-01T18:01:00+09:00","event":"skill","session_id":"v2","name":"pair-programming"}
+{"ts":"2026-01-01T18:02:00+09:00","event":"skill","session_id":"v3","name":"pair-programming"}
+{"ts":"2026-01-01T18:03:00+09:00","event":"skill","session_id":"v4","name":"pair-programming"}
+{"ts":"2026-01-01T18:04:00+09:00","event":"skill","session_id":"v5","name":"pair-programming"}
+{"ts":"2026-01-01T18:05:00+09:00","event":"skill_end","session_id":"v1","name":"pair-programming","compliance":"full","deviations":[]}
+{"ts":"2026-01-01T18:06:00+09:00","event":"correction","session_id":"v1","skills":["pair-programming"],"summary":"c1","gist":""}
+{"ts":"2026-01-01T18:07:00+09:00","event":"correction","session_id":"v2","skills":["pair-programming"],"summary":"c2","gist":""}
+{"ts":"2026-01-01T18:08:00+09:00","event":"correction","session_id":"v3","skills":["pair-programming"],"summary":"c3","gist":""}
+{"ts":"2026-01-01T19:00:00+09:00","event":"skill","session_id":"w1","name":"run-tests"}
+{"ts":"2026-01-01T19:01:00+09:00","event":"skill","session_id":"w2","name":"run-tests"}
+{"ts":"2026-01-01T19:02:00+09:00","event":"skill","session_id":"w3","name":"run-tests"}
+{"ts":"2026-01-01T19:03:00+09:00","event":"skill","session_id":"w4","name":"run-tests"}
+{"ts":"2026-01-01T19:04:00+09:00","event":"skill","session_id":"w5","name":"run-tests"}
 JSONL
 
 OUT=$(python3 aggregate-usage.py)
@@ -68,6 +104,32 @@ assert_eq "미귀속 violations 제외" "0" "$(printf '%s' "$OUT" | grep -c "미
 ALL=$(python3 aggregate-usage.py --all)
 assert_contains "--all에 미귀속 버킷" "(미귀속)" "$ALL"
 assert_contains "--all에 스킬별 카운트" "implement" "$ALL"
+
+# --- 플러그인 스킬(plugin_prefixes 매칭): 조항 개정 경로가 없어 준수 축만 제외 ---
+# superpowers:writing-skills — partial 3·correction 3이어도 violations 미노출
+assert_eq "플러그인 partial·correction 임계 제외" "0" "$(printf '%s' "$OUT" | grep -c "superpowers:writing-skills")"
+# superpowers:brainstorming — 누락률은 기록 배선(프로젝트 스킬 소관) 신호라 유지
+assert_contains "플러그인 누락률은 유지" "superpowers:brainstorming — 종료 레코드 누락률 60%" "$OUT"
+# 제외된 버킷도 --all 진단 표에는 남는다
+assert_contains "--all에 플러그인 버킷" "superpowers:writing-skills" "$ALL"
+
+# --- excluded_skills: 절차가 얕아 신호가 안 나오는 대상은 임계 판정 통째 제외 ---
+# open-external — 발동 5·종료 0(누락률 100%)·correction 3이어도 violations 미노출
+assert_eq "excluded_skills 임계 판정 전체 제외" "0" "$(printf '%s' "$OUT" | grep -c "open-external")"
+# 제외해도 --all 진단 표에는 남는다
+assert_contains "--all에 excluded_skills 버킷" "open-external" "$ALL"
+
+# --- missing_rate_exempt_skills: 종료 레코드가 구조적으로 안 남는 대상은 누락률만 제외 ---
+# pair-programming — 발동 5·종료 1(누락률 80%)이어도 누락률 라인 미노출
+assert_eq "누락률 면제 스킬의 누락률 라인 미노출" "0" "$(printf '%s' "$OUT" | grep -c "pair-programming — 종료 레코드 누락률")"
+# 같은 스킬의 correction 3건은 유효 신호라 그대로 검출 (excluded_skills와의 차이)
+assert_contains "누락률 면제해도 correction 임계는 유지" "pair-programming — correction 3건" "$OUT"
+# 면제해도 --all 진단 표에는 남는다
+assert_contains "--all에 누락률 면제 버킷" "pair-programming" "$ALL"
+# run-tests — 발동 5·종료 0(누락률 100%)이어도 미노출. 면제는 스킬명 단위 config 데이터라
+# 항목마다 검증한다 (한쪽만 덮으면 다른 쪽 이름이 오타·삭제돼도 전 assert가 통과한다)
+assert_eq "누락률 면제는 등록된 스킬명마다 적용" "0" "$(printf '%s' "$OUT" | grep -c "run-tests — 종료 레코드 누락률")"
+assert_contains "--all에 누락률 면제 버킷(run-tests)" "run-tests" "$ALL"
 
 # --- 축별 누수 집계 ---
 # 축1: 3건 ≥ 임계 3 → 초과, 축2: 2건 < 임계 3 → 미검출, 축3: 0건

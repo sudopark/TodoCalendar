@@ -8,18 +8,19 @@
 import UIKit
 import Combine
 import Domain
+import Extensions
 import Scenes
 import CommonPresentation
 
 final class CalendarViewController: UIPageViewController, CalendarScene {
     
     private let viewModel: any CalendarViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
     
     @MainActor
     var interactor: (any CalendarSceneInteractor)? { self.viewModel }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     
     init(
         viewModel: any CalendarViewModel,
@@ -66,7 +67,27 @@ final class CalendarViewController: UIPageViewController, CalendarScene {
         guard let center = self.monthViewControllers?[safe: index] else { return }
         self.setViewControllers([center], direction: .forward, animated: false)
     }
-    
+
+    // 애니메이션 중 setViewControllers를 재호출하면 이후 스와이프가 엉뚱한 페이지를 보여준다
+    private var isSlidingFocus: Bool = false
+
+    func slideFocus(to index: Int, isNext: Bool, completed: @escaping @Sendable () -> Void) {
+        guard !self.isSlidingFocus,
+              let target = self.monthViewControllers?[safe: index]
+        else { return }
+
+        self.isSlidingFocus = true
+        self.setViewControllers(
+            [target],
+            direction: isNext ? .forward : .reverse,
+            animated: true
+        ) { [weak self] finished in
+            self?.isSlidingFocus = false
+            guard finished else { return }
+            completed()
+        }
+    }
+
     private func bind() {
      
         self.viewAppearance.didUpdated
@@ -74,7 +95,7 @@ final class CalendarViewController: UIPageViewController, CalendarScene {
             .sink(receiveValue: { [weak self] tuple in
                 self?.setupStyling(tuple.1, tuple.2)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

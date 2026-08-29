@@ -19,57 +19,6 @@ import CommonPresentation
 
 private typealias Options = EventRepeatingOptions
 
-private enum SupportedRepeatOptions {
-
-    static func supports(from startTime: Date, timeZone: TimeZone) -> [[any EventRepeatingOption]] {
-        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
-        let month = calendar.component(.month, from: startTime)
-        let startDay = calendar.component(.day, from: startTime)
-        guard let weekday = DayOfWeeks(rawValue: calendar.component(.weekday, from: startTime))
-        else { return [] }
-        
-        let section1: [any EventRepeatingOption] = [
-            EventRepeatingOptions.EveryDay(),
-            EventRepeatingOptions.EveryWeek(timeZone)
-                |> \.dayOfWeeks .~ [weekday],
-            EventRepeatingOptions.EveryWeek(timeZone)
-                |> \.interval .~ 2
-                |> \.dayOfWeeks .~ [weekday],
-            EventRepeatingOptions.EveryWeek(timeZone)
-                |> \.interval .~ 3
-                |> \.dayOfWeeks .~ [weekday],
-            EventRepeatingOptions.EveryWeek(timeZone)
-                |> \.interval .~ 4
-                |> \.dayOfWeeks .~ [weekday],
-            EventRepeatingOptions.EveryMonth(timeZone: timeZone)
-                |> \.selection .~ .days([startDay]),
-            EventRepeatingOptions.EveryYearSomeDay(timeZone, month, startDay),
-            EventRepeatingOptions.LunarCalendarEveryYear(timeZone, month, startDay)
-        ]
-        
-        let everyWeekDays: [any EventRepeatingOption] = if !calendar.isDateInWeekend(startTime) {
-            [Options.EveryWeek(timeZone) |> \.dayOfWeeks .~ [.monday, .tuesday, .wednesday, .thursday, .friday]]
-        } else { [] }
-        
-        let section2: [any EventRepeatingOption] = everyWeekDays + [
-            EventRepeatingOptions.EveryMonth(timeZone: timeZone)
-            |> \.selection .~ .week([.last], [.sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday]),
-            EventRepeatingOptions.EveryMonth(timeZone: timeZone)
-            |> \.selection .~ .week([.seq(1)], [weekday]),
-            EventRepeatingOptions.EveryMonth(timeZone: timeZone)
-            |> \.selection .~ .week([.seq(2)], [weekday]),
-            EventRepeatingOptions.EveryMonth(timeZone: timeZone)
-            |> \.selection .~ .week([.seq(3)], [weekday]),
-            EventRepeatingOptions.EveryMonth(timeZone: timeZone)
-            |> \.selection .~ .week([.seq(4)], [weekday]),
-            EventRepeatingOptions.EveryMonth(timeZone: timeZone)
-            |> \.selection .~ .week([.last], [weekday])
-        ]
-        
-        return [section1, section2]
-    }
-}
-
 struct SelectRepeatingOptionModel: Equatable, Identifiable {
     
     let id: String
@@ -166,18 +115,21 @@ final class SelectEventRepeatOptionViewModelImple: SelectEventRepeatOptionViewMo
     
     private let selectTime: Date
     private let previousSelectOption: EventRepeating?
+    private let rruleRepresentableOnly: Bool
     private let calendarSettingUsecase: any CalendarSettingUsecase
-    
+
     var listener: (any SelectEventRepeatOptionSceneListener)?
     var router: (any SelectEventRepeatOptionRouting)?
-    
+
     init(
         selectTime: Date,
         previousSelected repeating: EventRepeating?,
+        rruleRepresentableOnly: Bool,
         calendarSettingUsecase: any CalendarSettingUsecase
     ) {
         self.selectTime = selectTime
         self.previousSelectOption = repeating
+        self.rruleRepresentableOnly = rruleRepresentableOnly
         self.calendarSettingUsecase = calendarSettingUsecase
     }
     
@@ -212,7 +164,7 @@ final class SelectEventRepeatOptionViewModelImple: SelectEventRepeatOptionViewMo
         let endOption = CurrentValueSubject<RepeatEndOptionModel?, Never>(nil)
     }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private let subject = Subject()
 }
 
@@ -232,7 +184,7 @@ extension SelectEventRepeatOptionViewModelImple {
         self.calendarSettingUsecase.currentTimeZone
             .first()
             .sink(receiveValue: setupValue)
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
     
     private func setupOptionModels(
@@ -244,7 +196,7 @@ extension SelectEventRepeatOptionViewModelImple {
         let previousOptionModel = previousSelectOption.flatMap {
             SelectRepeatingOptionModel($0.repeatOption, self.selectTime, timeZone)
         }
-        let supportOptionModels = SupportedRepeatOptions.supports(from: self.selectTime, timeZone: timeZone)
+        let supportOptionModels = self.supportedRepeatOptions(timeZone)
             .map { options in
                 options.compactMap { SelectRepeatingOptionModel($0, self.selectTime, timeZone) }
             }
@@ -420,5 +372,62 @@ extension SelectEventRepeatOptionViewModelImple {
         .map(transform)
         .removeDuplicates()
         .eraseToAnyPublisher()
+    }
+}
+
+
+// MARK: - 지원 반복 옵션 목록
+
+private extension SelectEventRepeatOptionViewModelImple {
+
+    func supportedRepeatOptions(_ timeZone: TimeZone) -> [[any EventRepeatingOption]] {
+        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
+        let month = calendar.component(.month, from: self.selectTime)
+        let startDay = calendar.component(.day, from: self.selectTime)
+        guard let weekday = DayOfWeeks(rawValue: calendar.component(.weekday, from: self.selectTime))
+        else { return [] }
+
+        let lunarOption: [any EventRepeatingOption] = self.rruleRepresentableOnly
+            ? []
+            : [EventRepeatingOptions.LunarCalendarEveryYear(timeZone, month, startDay)]
+
+        let section1: [any EventRepeatingOption] = [
+            EventRepeatingOptions.EveryDay(),
+            EventRepeatingOptions.EveryWeek(timeZone)
+                |> \.dayOfWeeks .~ [weekday],
+            EventRepeatingOptions.EveryWeek(timeZone)
+                |> \.interval .~ 2
+                |> \.dayOfWeeks .~ [weekday],
+            EventRepeatingOptions.EveryWeek(timeZone)
+                |> \.interval .~ 3
+                |> \.dayOfWeeks .~ [weekday],
+            EventRepeatingOptions.EveryWeek(timeZone)
+                |> \.interval .~ 4
+                |> \.dayOfWeeks .~ [weekday],
+            EventRepeatingOptions.EveryMonth(timeZone: timeZone)
+                |> \.selection .~ .days([startDay]),
+            EventRepeatingOptions.EveryYearSomeDay(timeZone, month, startDay)
+        ] + lunarOption
+
+        let everyWeekDays: [any EventRepeatingOption] = if !calendar.isDateInWeekend(self.selectTime) {
+            [Options.EveryWeek(timeZone) |> \.dayOfWeeks .~ [.monday, .tuesday, .wednesday, .thursday, .friday]]
+        } else { [] }
+        
+        let section2: [any EventRepeatingOption] = everyWeekDays + [
+            EventRepeatingOptions.EveryMonth(timeZone: timeZone)
+            |> \.selection .~ .week([.last], [.sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday]),
+            EventRepeatingOptions.EveryMonth(timeZone: timeZone)
+            |> \.selection .~ .week([.seq(1)], [weekday]),
+            EventRepeatingOptions.EveryMonth(timeZone: timeZone)
+            |> \.selection .~ .week([.seq(2)], [weekday]),
+            EventRepeatingOptions.EveryMonth(timeZone: timeZone)
+            |> \.selection .~ .week([.seq(3)], [weekday]),
+            EventRepeatingOptions.EveryMonth(timeZone: timeZone)
+            |> \.selection .~ .week([.seq(4)], [weekday]),
+            EventRepeatingOptions.EveryMonth(timeZone: timeZone)
+            |> \.selection .~ .week([.last], [weekday])
+        ]
+        
+        return [section1, section2]
     }
 }

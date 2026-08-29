@@ -113,7 +113,37 @@ extension EventSyncUsecaseImpleTests {
         // then
         #expect(syncs == [false, true, false])
     }
-    
+
+    @Test func usecase_whenMigrationNeeds_syncStatusIsFullSyncing() async throws {
+        // given
+        let expect = expectConfirm("migration 이 필요하면 전체 sync 상태로 알림")
+        expect.count = 4
+        let usecase = self.makeUsecase(checkResult: .migrationNeeds)
+
+        // when
+        let statuses = try await self.outputs(expect, for: usecase.syncStatus) {
+            usecase.sync()
+        }
+
+        // then
+        #expect(statuses == [.idle, .incrementalSyncing, .fullSyncing, .idle])
+    }
+
+    @Test func usecase_whenNeedToSync_syncStatusIsIncrementalSyncing() async throws {
+        // given
+        let expect = expectConfirm("증분 sync 는 전체 sync 상태로 올라가지 않음")
+        expect.count = 3
+        let usecase = self.makeUsecase(checkResult: .needToSync)
+
+        // when
+        let statuses = try await self.outputs(expect, for: usecase.syncStatus) {
+            usecase.sync()
+        }
+
+        // then
+        #expect(statuses == [.idle, .incrementalSyncing, .idle])
+    }
+
     @Test func usecase_whenEventUploading_waitSync() async throws {
         // given
         let expect = expectConfirm("event uploading 중에는 sync 동작 대기")

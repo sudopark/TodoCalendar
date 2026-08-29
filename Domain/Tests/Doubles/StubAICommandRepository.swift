@@ -15,13 +15,32 @@ import Extensions
 
 
 class BaseStubAICommandRepository: AICommandRepository, @unchecked Sendable {
-    
+
     var shouldFailProcessCommand: Bool = false
     func processCommand(_ commandText: String, timeZone: String) async throws -> String {
         guard !self.shouldFailProcessCommand
         else {
             throw RuntimeError("not imple")
         }
+        return "some_job"
+    }
+
+    var didProcessInterpretText: String?
+    var didProcessInterpretAdditionalInstruction: String?
+    var didProcessInterpretWithInputSource: AICommandInputSource?
+    func processInterpretCommand(
+        text: String,
+        additionalInstruction: String?,
+        inputSource: AICommandInputSource,
+        timeZone: String
+    ) async throws -> String {
+        guard !self.shouldFailProcessCommand
+        else {
+            throw RuntimeError("not imple")
+        }
+        self.didProcessInterpretWithInputSource = inputSource
+        self.didProcessInterpretText = text
+        self.didProcessInterpretAdditionalInstruction = additionalInstruction
         return "some_job"
     }
 
@@ -84,7 +103,7 @@ class BaseStubAICommandRepository: AICommandRepository, @unchecked Sendable {
         self.stubProcessingCommand = nil
     }
     
-    func loadUsage() async throws -> AIAgentUsage {
+    func loadUsage() async throws -> AIAgentUsageLoadResult {
         throw RuntimeError("not imple")
     }
 }

@@ -73,6 +73,7 @@ enum EventDetailMoreAction: Equatable {
     case addToTemplate  // 이후 구현 예정
     case toggleTo(isForemost: Bool)
     case toggleDDayCandidate(isRegistered: Bool)
+    case toggleLiveActivity(isRegistered: Bool)
     case share
 }
 
@@ -91,6 +92,7 @@ protocol EventDetailViewModel: Sendable, AnyObject {
     
     // presenter
     var isForemost: AnyPublisher<Bool, Never> { get }
+    var isLiveActivityRegistered: AnyPublisher<Bool, Never> { get }
     var isLoading: AnyPublisher<Bool, Never> { get }
     var eventDetailTypeModel: AnyPublisher<EventDetailTypeModel, Never> { get }
     var hasChanges: AnyPublisher<Bool, Never> { get }

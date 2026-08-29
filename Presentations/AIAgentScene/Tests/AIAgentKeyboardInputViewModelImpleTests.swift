@@ -8,6 +8,8 @@
 
 import Testing
 import Combine
+import Prelude
+import Optics
 import Domain
 import UnitTestHelpKit
 
@@ -18,11 +20,15 @@ final class AIAgentKeyboardInputViewModelImpleTests: PublisherWaitable {
 
     var cancelBag: Set<AnyCancellable>! = .init()
     private let stubAgent: StubAIAgentOrchestrationUsecase = .init()
+    private let spyRouter = SpyAIAgentKeyboardInputRouter()
 
-    private func makeViewModel() -> AIAgentKeyboardInputViewModelImple {
-        return AIAgentKeyboardInputViewModelImple(
-            aiAgentOrchestrationUsecase: self.stubAgent
+    private func makeViewModel(userPlan: BillingUserPlan? = nil) -> AIAgentKeyboardInputViewModelImple {
+        let viewModel = AIAgentKeyboardInputViewModelImple(
+            aiAgentOrchestrationUsecase: self.stubAgent,
+            billingUsecase: StubBillingUsecase(stubUserPlan: userPlan)
         )
+        viewModel.router = self.spyRouter
+        return viewModel
     }
 }
 
@@ -51,5 +57,59 @@ extension AIAgentKeyboardInputViewModelImpleTests {
         #expect(usage?.inputTokens == 100)
         #expect(usage?.outputTokens == 200)
         #expect(usage?.dailyLimit == 5000)
+    }
+}
+
+
+// MARK: - currentUserPlan 릴레이 (#739)
+
+extension AIAgentKeyboardInputViewModelImpleTests {
+
+    // seeding 전(prepend nil) + billingUsecase 값 순서로 방출
+    @Test func viewModel_relaysCurrentUserPlan() async throws {
+        // given
+        let expect = expectConfirm("currentUserPlan 을 릴레이한다")
+        expect.count = 2
+        let viewModel = self.makeViewModel(userPlan: BillingUserPlan() |> \.planId .~ .standard)
+        // when
+        let plans = try await self.outputs(expect, for: viewModel.currentUserPlan)
+        // then
+        #expect(plans.map { $0?.planId } == [nil, .standard])
+    }
+}
+
+
+// MARK: - 알림 권한 거부 안내 (#998)
+
+extension AIAgentKeyboardInputViewModelImpleTests {
+
+    @Test func viewModel_whenPrepare_refreshNotificationPermissionStatus() {
+        // given
+        let viewModel = self.makeViewModel()
+        // when
+        viewModel.prepare()
+        // then
+        #expect(self.stubAgent.didRefreshNotificationPermissionStatus == true)
+    }
+
+    @Test func viewModel_relayNotificationPermissionDenied() async throws {
+        // given
+        let expect = expectConfirm("알림 권한 거부 상태를 릴레이한다")
+        let viewModel = self.makeViewModel()
+        // when
+        let denied = try await self.firstOutput(expect, for: viewModel.isNotificationPermissionDenied.dropFirst()) {
+            self.stubAgent.isNotificationPermissionDeniedSubject.send(true)
+        }
+        // then
+        #expect(denied == true)
+    }
+
+    @Test func viewModel_whenOpenNotificationSetting_routeToSystemSetting() {
+        // given
+        let viewModel = self.makeViewModel()
+        // when
+        viewModel.openNotificationSetting()
+        // then
+        #expect(self.spyRouter.didOpenSystemSetting == true)
     }
 }

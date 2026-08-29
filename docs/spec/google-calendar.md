@@ -6,7 +6,7 @@
 
 ## 1. 개요
 
-- **읽기 전용** 연동 (조회만 가능, 이벤트 편집 불가)
+- 조회 + **기존 이벤트 편집·삭제** (이벤트 생성은 미지원 — #863)
 - **다중 계정** 동시 지원 (구글 계정 여러 개를 동시에 연동)
 - Google OAuth2 인증, Firebase GoogleSignIn SDK 사용
 - 연동 후 캘린더 목록/이벤트/색상 자동 동기화
@@ -18,11 +18,15 @@
 ### 2.1 인증 프로바이더
 
 ```
-GoogleOAuth2ServiceProvider
+AppEnvironment.googleCalendarService (GoogleCalendarService)
 ├── identifier: "google"
 ├── scopes: ["https://www.googleapis.com/auth/calendar.readonly"]
 └── 인증 SDK: GIDSignIn (Firebase GoogleSignIn)
 ```
+
+최초 연동은 읽기 전용 scope 로만 요청한다. 일부 회사 워크스페이스가 구글 캘린더 연동을 읽기 전용일 때만 허용하기 때문이다. 쓰기(`https://www.googleapis.com/auth/calendar`)는 유저가 이벤트를 저장·삭제하는 시점에 승격으로 요청한다(§8.2).
+
+쓰기 scope 는 읽기·쓰기를 모두 포함하는 sensitive scope 다. 이 scope 를 요청하면 구글 OAuth 재심사가 필요하고, 승인 전에 요청하면 유저에게 미인증 앱 화면이 뜨고 100명 캡이 걸린다 (#402).
 
 ### 2.2 자격증명 구조 (GoogleOAuth2Credential)
 
@@ -34,6 +38,7 @@ GoogleOAuth2ServiceProvider
 | `accessTokenExpirationDate` | Date? | 액세스 토큰 만료 시점 |
 | `refreshTokenExpirationDate` | Date? | 리프레시 토큰 만료 시점 |
 | `email` | String? | 구글 계정 이메일 (accountId로 사용) |
+| `grantedScopes` | [String]? | 유저가 실제 허용한 scope. nil(=이 필드 도입 전 계정)이면 쓰기 불가로 본다 (fail-closed) |
 
 ### 2.3 인증 플로우
 
@@ -141,6 +146,7 @@ GoogleCalendar.Colors
 | `foregroundColorHex` | String? | 전경 색상 |
 | `colorId` | String? | 구글 색상 ID |
 | `isSelected` | Bool? | 구글 계정에서의 선택 상태 |
+| `accessRole` | `AccessRole?` | owner / writer / reader / freeBusyReader. owner·writer 만 `isWritable`. nil(미확인)은 쓰기 불가 |
 
 ### 4.3 GoogleCalendar.Event (정규화된 이벤트)
 
@@ -329,26 +335,58 @@ activeCalendars() = 전체 캘린더 - offTagIds에 포함된 캘린더
 
 ---
 
-## 8. 이벤트 상세 (읽기 전용)
+## 8. 이벤트 상세·편집
 
 ### 8.1 표시 항목
 
-| 항목 | 소스 |
-|---|---|
-| 이벤트명 | `summary` |
-| 시간 | `start`/`end` (period 또는 allDay) |
-| 위치 | `location` |
-| 참석자 목록 | `attendees[]` (이름, 이메일, 응답 상태) |
-| 회의 링크 | `conferenceData.entryPoints[].uri` |
-| 첨부파일 | `attachments[]` (title, fileUrl, mimeType) |
-| 설명 | `description` |
-| 색상 | calendarId → 캘린더 색상 + eventColorId 오버라이드 |
-| 상태 | confirmed / tentative / cancelled |
-| 공개 범위 | default / public / private / confidential |
+상세 화면은 별도 편집 모드 없이 상시 편집 폼이다. 편집 가능 필드는 처음부터 입력 컴포넌트로 그리고, 불가 필드는 값을 보여주되 탭하면 안내 토스트가 뜬다.
 
-### 8.2 편집 버튼
+| 항목 | 소스 | 인라인 편집 |
+|---|---|---|
+| 이벤트명 | `summary` | 가능 |
+| 시간 | `start`/`end` (period 또는 allDay) | 가능 |
+| 위치 | `location` | 가능 |
+| 설명 | `description` | 가능 |
+| 색상 | calendarId → 캘린더 색상 + eventColorId 오버라이드 | 가능 |
+| 반복 규칙 | `recurrence` | 가능 (앱 반복 옵션으로 왕복 못 시키는 규칙·복수 RRULE 줄은 잠금 → 탭 시 토스트) |
+| 참석자 목록 | `attendees[]` (이름, 이메일, 응답 상태) | 불가 (탭 시 토스트) |
+| 회의 정보 | `conferenceData.entryPoints[].uri` | 불가 (헤더 탭 시 토스트, 링크/코드는 열기·복사 그대로) |
+| 첨부파일 | `attachments[]` (title, fileUrl, mimeType) | 불가 (탭하면 Safari로 열기 — 토스트 아님) |
+| 캘린더 | calendarId → 캘린더명 | 불가 (탭 시 토스트) |
+| 상태 | confirmed / tentative / cancelled | 표시만 |
+| 공개 범위 | default / public / private / confidential | 표시만 |
 
-"구글 캘린더에서 편집" → `htmlLink` URL을 Safari로 열기.
+### 8.2 쓰기 권한 판정 — 저장·삭제 실행 시점
+
+편집 가능 필드는 처음부터 입력 가능하다. 쓰기 권한은 **저장·삭제를 실행하는 시점**에 판정한다. 판정은 두 층을 순서대로 본다 — **캘린더 층이 먼저다**: 읽기 전용 캘린더는 재인증해도 못 고치므로 계정 층을 먼저 물으면 유저가 재인증까지 하고 막다른 길을 만난다.
+
+| 판정 | 조건 | 동작 |
+|---|---|---|
+| `readOnlyCalendar` | `Tag.isWritable == false` | 입력 필드 비활성 + 하단 안내문. 저장 버튼·삭제 메뉴 노출 안 함 |
+| `needReauthentication` | 캘린더는 쓰기 가능 + 계정 `grantedScopes` 에 쓰기 scope 없음 | 편집은 자유롭게 가능. 저장·삭제 실행 시 재인증 확인 다이얼로그 → 성공하면 이어서 저장·삭제 실행. 재인증 결과에 쓰기 scope 가 없으면 저장·삭제를 실행하지 않고 조직 정책 가능성을 안내한다(fail-closed) |
+| `writable` | 둘 다 만족 | 저장·삭제 바로 실행 |
+
+`readOnlyCalendar` 상태에서는 `updateCurrentFields` 가드가 입력 자체를 무시해 저장 불가능한 변경이 쌓이지 않는다.
+
+`needReauthentication` 의 재인증·승격 실패 판정은 `ExternalCalendarIntegrationUsecase.reauthenticateForWriteScope` 소관이다. 승격은 기존에 연동된 계정의 자격증명 교체일 뿐 신규 연동이 아니므로, 성공해도 `integrationStatusChanged(.integrated)` 브로드캐스트와 DB 재오픈은 하지 않는다 — 둘 다 신규 연동 시점에만 필요한 부수효과라 승격에서 재실행하면 유저가 직접 켠 캘린더 on/off 상태가 초기화된다.
+
+점점점 메뉴의 링크 항목은 `isEditable` 에 따라 문구가 갈린다 — 편집 가능이면 "구글 캘린더에서 수정", 읽기 전용이면 "구글 캘린더에서 보기". 둘 다 `htmlLink` 를 Safari 로 연다 (메뉴 자체가 편집 액션은 아님). 삭제 항목은 `isEditable` 일 때만 노출된다.
+
+### 8.3 편집 대상 필드
+
+`summary` · `start`/`end`(종일 토글 포함) · `location` · `description` · `colorId` · `recurrence` 를 편집한다. `attendees`·`conferenceData`·`attachments` 는 `EventEditParams` 에 필드를 두지 않아 PATCH 바디에 실릴 경로 자체가 없다 — 구글 PATCH 는 부분 업데이트라 안 보낸 필드는 서버 원본이 유지된다.
+
+`recurrence` 는 배열 전체를 보내되 RRULE 줄만 갈아끼운다(`replacingRRuleLine`) — EXDATE·RDATE 는 원본 그대로 보존된다. 규칙을 바꾼 저장은 회차가 아니라 시리즈 마스터(`recurringEventId ?? id`)를 대상으로 하고 수정 범위 선택 시트를 띄우지 않는다. 반복 옵션 선택 화면은 RRULE 로 표현 가능한 옵션만 제공한다(음력 제외).
+
+all-day 의 `end.date` 는 구글에서 배타적(exclusive)이다. 읽기가 가공 없이 담고 편집도 가공 없이 보내 왕복 항등을 유지한다 — 한쪽만 보정하면 저장할 때마다 하루씩 늘어난다.
+
+설명은 HTML을 담을 수 있어, 서식이 있으면 읽기 렌더로 두고 탭 시 소실 경고 후 평문 편집으로 전환한다.
+
+### 8.4 반복 이벤트 수정·삭제 범위
+
+`recurringEventId` 가 있으면 "이번 일정만 / 전체 일정" 을 묻고, 각각 인스턴스 id / `recurringEventId` 로 PATCH·DELETE 한다. 시리즈 마스터 응답(`recurringEventId` 없음 + `recurrence` 있음)은 인스턴스 캐시로 반영하지 않는다.
+
+오프라인·서버 실패는 즉시 실패시킨다. 큐에 쌓지 않고 로컬 선반영도 하지 않는다.
 
 ---
 
@@ -430,6 +468,7 @@ GoogleCalendarViewAppearanceStore protocol
 | `foregroundColor` | TEXT | 전경색 |
 | `colorId` | TEXT | 구글 색상 ID |
 | `isSelected` | INTEGER | 선택 상태 |
+| `access_role` | TEXT | owner / writer / reader / freeBusyReader (v1에서 추가) |
 
 #### google_calendar_event_origin
 
@@ -465,6 +504,12 @@ GoogleCalendarViewAppearanceStore protocol
 - `AppEnvironment.googleCalendarDBVersion`으로 스키마 버전 관리
 - `onFirstOpen` 콜백에서 테이블 생성 + 마이그레이션 실행
 - 단일 계정 → 다중 계정 마이그레이션: `AppDataMigrationImple` (1회성, 플래그 기반 멱등성)
+
+| 버전 | 스텝 | 대상 |
+|---|---|---|
+| 0 → 1 | `access_role` 컬럼 추가 | `google_calendar_list` |
+
+**테이블은 `onFirstOpen` 이 아니라 캘린더 목록 최초 로드 시 lazy 생성된다.** 신규 설치에서는 마이그레이션이 테이블보다 먼저 돌아 `ALTER TABLE` 이 실패하므로, 각 스텝은 메인 DB(`AppDataMigrationImple`)와 같이 실패를 로그로 남기고 대상 테이블을 drop 한 뒤 통과시킨다 (`GoogleCalendarEventTagTableMigration`). 이렇게 해야 `user_version` 이 전진하고, 테이블은 다음 로드 때 최신 스키마로 다시 만들어진다. 스텝이 throw 하면 `user_version` 이 0에 고정돼 이후 모든 스텝이 조용히 안 돈다.
 
 ---
 
@@ -614,7 +659,7 @@ flowchart TD
   2. 이벤트 상세 화면에서 RRULE을 텍스트로 파싱하여 표시
      → "매주 월, 수, 금 반복 (2026.12.31까지)"
   3. 앱의 EventRepeatingOption(EveryWeek 등)으로 변환하지 않음
-  4. → 구글 이벤트는 앱 내에서 반복 수정 불가 (읽기 전용)
+  4. → 앱 반복 옵션으로 왕복 가능한 규칙만 편집을 연다. 왕복 불가(미지원 키 등)하거나 RRULE 줄이 2개 이상이면 잠그고 원본 규칙 텍스트만 보여준다 — 저장이 RRULE 줄을 통째 치환하므로 여는 순간이 곧 파괴다
 
 RRuleParser 지원 범위:
   ✓ FREQ (DAILY/WEEKLY/MONTHLY/YEARLY)

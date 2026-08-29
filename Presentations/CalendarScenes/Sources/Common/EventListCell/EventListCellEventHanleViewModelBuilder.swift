@@ -33,16 +33,28 @@ final class EventListCellEventHanleViewModelBuilderImple: EventListCellEventHanl
         self.usecaseFactory = usecaseFactory
         self.eventDetailSceneBuilder = eventDetailSceneBuilder
         
+        let liveActivityToggleViewModel = LiveActivityToggleViewModelImple(
+            eventLiveActivityUsecase: self.usecaseFactory.eventLiveActivityUsecase
+        )
         let viewModel = EventListCellEventHanleViewModelImple(
             todoEventUsecase: self.usecaseFactory.makeTodoEventUsecase(),
             scheduleEventUsecase: self.usecaseFactory.makeScheduleEventUsecase(),
-            foremostEventUsecase: self.usecaseFactory.makeForemostEventUsecase()
+            foremostEventUsecase: self.usecaseFactory.makeForemostEventUsecase(),
+            googleCalendarUsecase: self.usecaseFactory.makeGoogleCalendarUsecase(),
+            appleCalendarUsecase: self.usecaseFactory.makeAppleCalendarUsecase(),
+            externalCalendarIntegrationUsecase: self.usecaseFactory.externalCalenarIntegrationUsecase,
+            eventTagUsecase: self.usecaseFactory.makeEventTagUsecase(),
+            eventDetailDataUsecase: self.usecaseFactory.makeEventDetailDataUsecase(),
+            calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
+            guideTodoUsecase: self.usecaseFactory.makeGuideTodoUsecase(),
+            liveActivityToggleViewModel: liveActivityToggleViewModel
         )
         let router = EventListCellEventHanleRouter(
             eventDetailSceneBuilder: eventDetailSceneBuilder
         )
         self.viewModel = viewModel
         viewModel.router = router
+        liveActivityToggleViewModel.router = router
         router.eventDetailListener = viewModel
         self.router = router
     }

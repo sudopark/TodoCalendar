@@ -22,7 +22,7 @@ graph TD
     ET -->|push| ETL[EventTagList<br/>태그 목록<br/>SettingScene]
 
     HD[HolidayEventDetail<br/>공휴일 상세]
-    GD[GoogleCalendarEventDetail<br/>구글 이벤트 상세] -->|Safari| GE[구글 캘린더 편집]
+    GD[GoogleCalendarEventDetail<br/>구글 이벤트 상세]
     DD[DoneTodoDetail<br/>완료 Todo 상세] -->|bottomSlide| MA2[SelectMapAppDialog]
 ```
 
@@ -88,6 +88,18 @@ graph TD
 | 역할 | 설치된 지도 앱 목록 표시 → 선택 시 바로 열기 |
 | 지원 앱 | Google Maps, Apple Maps, Naver, Kakao |
 
+### AppleCalendarEventDetail (애플 캘린더 상세 — 상시 편집 폼)
+
+별도 편집 Scene 없이 상세 화면 자체가 편집 필드(제목·시간·장소·메모·URL·반복 규칙)를 상시 보유한다 (#902, #917) — 참석자·캘린더는 편집 대상 아님. 색상은 편집 대상이 아니다(EventKit 캘린더 색은 캘린더 소속, 이벤트 단위 아님).
+
+| 항목 | 설명 |
+|---|---|
+| 편집 가능 | 제목·시간(종일 토글 포함)·장소·URL·메모 — 상시 입력 컴포넌트. 반복 규칙은 탭 → 옵션 선택 Scene(`rruleRepresentableOnly: true`), 앱 옵션으로 왕복되는 단일 RRULE 에 한함 |
+| 편집 불가 (탭 시 토스트) | 참석자·캘린더명. 반복 규칙도 왕복 불가할 때(미지원 키·복수 RRULE)는 잠기고 토스트만 — 행 자체는 항상 노출("반복 없음" 플레이스홀더) |
+| 편집 게이팅 | 저장·삭제 실행 시점에 판정 — 읽기 전용 캘린더면 안내만(입력도 비활성), 필드 편집·반복 선택 진입 자체도 `isWritable == true`가 아니면 무시(fail-closed) |
+| 반복 이벤트 | 저장·삭제 시 "이번 일정만 / 이후 모든 일정" ActionSheet. 단 반복 규칙을 바꾼 저장은 범위 선택 없이 마스터(`originalEventId`)에 `.thisAndFuture` 고정 — EKSpan 에 시리즈 전체가 없다 |
+| 점점점 메뉴 | 링크 항목은 `isEditable`이면 "애플 캘린더에서 수정", 읽기 전용이면 "애플 캘린더에서 보기" — 둘 다 Apple Calendar 앱으로 이동(항상 노출, 상세 링크 유무 게이팅 없음). "삭제"는 `isEditable`일 때만 노출 |
+
 ### HolidayEventDetail (공휴일 상세)
 
 | 항목 | 설명 |
@@ -96,13 +108,17 @@ graph TD
 | Listener | 없음 |
 | 라우팅 | 없음 (leaf) |
 
-### GoogleCalendarEventDetail (구글 캘린더 상세)
+### GoogleCalendarEventDetail (구글 캘린더 상세 — 상시 편집 폼)
+
+별도 편집 Scene 없이 상세 화면 자체가 편집 필드(제목·시간·장소·메모·색상·반복 규칙)를 상시 보유한다 (#877, #917) — 참석자·회의·첨부·캘린더는 편집 대상 아님.
 
 | 항목 | 설명 |
 |---|---|
-| 표시 내용 | 제목, 시간, 참석자, 회의 링크, 첨부파일, 색상 |
-| Listener | 없음 |
-| 라우팅 | `routeToEditEventWebView()` → Safari로 구글 캘린더 편집 |
+| 편집 가능 | 제목·시간(종일 토글 포함)·장소·설명·색상 — 상시 입력 컴포넌트. 반복 규칙은 탭 → 옵션 선택 Scene(`rruleRepresentableOnly: true`), 앱 옵션으로 왕복되는 RRULE 에 한함 (저장 시 EXDATE·RDATE 는 보존) |
+| 편집 불가 (탭 시 토스트) | 참석자·캘린더. 반복 규칙도 왕복 불가할 때(미지원 키·미지원 FREQ)는 잠기고 토스트만 — 행 자체는 항상 노출("반복 없음" 플레이스홀더). 회의는 헤더(아이콘+이름)만 토스트 — 링크 열기·코드 복사는 그대로 동작. 첨부파일은 토스트 아니고 탭하면 Safari로 열기 |
+| 편집 게이팅 | 저장·삭제 실행 시점에 판정 — 읽기 전용 캘린더면 안내만(입력도 비활성), 계정 scope 부족이면 저장·삭제 실행 시 재인증 확인 (`docs/spec/google-calendar.md §8.2`) |
+| 반복 이벤트 | 저장·삭제 시 "이번 일정만 / 전체 일정" ActionSheet. 단 반복 규칙을 바꾼 저장은 범위 선택 없이 시리즈 마스터(`recurringEventId`) 대상 — 구글이 인스턴스 patch 의 recurrence 를 거부한다 |
+| 점점점 메뉴 | 링크 항목은 `isEditable`이면 "구글 캘린더에서 수정", 읽기 전용이면 "구글 캘린더에서 보기" — 둘 다 `htmlLink` Safari (`hasDetailLink`일 때만). "삭제"는 `isEditable`일 때만 노출 |
 
 ### DoneTodoDetail (완료 Todo 상세)
 
@@ -164,6 +180,12 @@ graph TD
 |---|---|---|
 | `EventTimeTextView` | `SelectTimeText`(연/일/시각) 라벨. `textColor`(selecting 하이라이트)·`isStrikethrough`(invalid)·`dayLineLimit` 파라미터로 화면별 변형 흡수 | EventDetailView, GoogleCalendarEventDetailView, AppleCalendarEventDetailView, DoneTodoDetailView |
 | `LandmarkLabelView` | 장소 라벨 (이름+주소+xmark 아이콘). EventDetailView는 Menu(삭제 액션)로 감싸 사용 | EventDetailView, DoneTodoDetailView |
+| `MoreActionMenuLabel` | 하단 더보기(ellipsis) 버튼 라벨 — 20×20 아이콘 + `Radius.regular` `secondaryBtnBackground` 배경. `Menu`의 label로만 사용하고 액션 목록은 호출부가 구성 | EventDetailView, HolidayEventDetailView, GoogleCalendarEventDetailView, AppleCalendarEventDetailView |
+| `EventNameInputView` | 선행 색 바(`colorBar` render-prop) + 큰 제목 TextField. 포커스는 부모 `@FocusState` 바인딩(`@FocusState.Binding`)을 받아 스크롤 연동 유지 | GoogleCalendarEventDetailView, AppleCalendarEventDetailView |
+| `EventTimeSelectView` | clock 아이콘 + 선택 시각(`EventTimeTextView` 재사용, 탭하면 인라인 DatePicker 토글) + 종일 토글. 피커 토글 상태는 내부 `@State` 소유, `onBeginSelecting` 훅으로 부모가 텍스트 포커스 해제 | GoogleCalendarEventDetailView, AppleCalendarEventDetailView |
+| `EventTextInputRow` | 아이콘 + 한 줄 TextField (장소·URL 등 공용). 포커스는 부모 `@FocusState` 바인딩 | GoogleCalendarEventDetailView, AppleCalendarEventDetailView |
+| `EventMemoInputView` | doc.text 아이콘 + placeholder 겹친 TextEditor. 포커스는 부모 `@FocusState` 바인딩 | GoogleCalendarEventDetailView, AppleCalendarEventDetailView |
+| `LiveActivityBadgeView` | 라이브액티비티 등록 상태 표시 행 — timer 아이콘 + "잠금화면에 표시 중" 문구. 표시 전용이라 파라미터·이벤트 연결 없음 (#1009) | EventDetailView, HolidayEventDetailView, AppleCalendarEventDetailView, GoogleCalendarEventDetailView |
 
 `GuideView/`의 가이드 오버레이 2종(ForemostEventGuideView·TodoEventGuideView)은 컴포넌트 패밀리로 별도 그룹.
 

@@ -18,35 +18,54 @@ final class StubAIAgentOrchestrationUsecase: AIAgentOrchestrationUsecase, @unche
     let usageSubject = CurrentValueSubject<AIAgentUsage, Never>(.init(input: 0, output: 0, limit: 0))
     let recognizingTextSubject = PassthroughSubject<String, Never>()
     let voiceLevelSubject = PassthroughSubject<Float, Never>()
+    let speechPermissionDeniedSubject = PassthroughSubject<Void, Never>()
+    let isNotificationPermissionDeniedSubject = CurrentValueSubject<Bool, Never>(false)
     private(set) var didPrepare = false
     private(set) var didEnterVoiceInput = false
     private(set) var didFinishVoiceInput = false
     private(set) var didEnterKeyboardInput = false
+    private(set) var didEnterImageInput = false
     private(set) var didStopInput = false
     private(set) var didSubmit: String?
+    private(set) var didSubmitImageCommandWith: (text: String, instruction: String?)?
     private(set) var didConfirm = false
     private(set) var didDecline = false
     private(set) var didReset = false
     private(set) var didRestore = false
-    private(set) var didLoadUsage = false
+    private(set) var didLoadUsageCount = 0
+    var didLoadUsage: Bool { self.didLoadUsageCount > 0 }
 
     var stubSubmitError: (any Error)?
+    var stubImageSubmitError: (any Error)?
+    var isCreditExhausted: Bool = false
 
     func prepare() { self.didPrepare = true }
-    func enterVoiceInput() { self.didEnterVoiceInput = true }
+    func enterVoiceInput() {
+        self.didEnterVoiceInput = true
+    }
     func finishVoiceInput() { self.didFinishVoiceInput = true }
-    func enterKeyboardInput() { self.didEnterKeyboardInput = true }
+    func enterKeyboardInput() {
+        self.didEnterKeyboardInput = true
+    }
+    func enterImageInput() {
+        self.didEnterImageInput = true
+    }
     func stopInput() { self.didStopInput = true }
     func submit(_ text: String) throws {
         if let stubSubmitError { throw stubSubmitError }
         self.didSubmit = text
         self.stateSubject.send(.processing(command: text))
     }
+    func submitImageCommand(text: String, additionalInstruction: String?) throws {
+        if let stubImageSubmitError { throw stubImageSubmitError }
+        self.didSubmitImageCommandWith = (text, additionalInstruction)
+        self.stateSubject.send(.processing(command: text))
+    }
     func confirm() { self.didConfirm = true }
     func decline() { self.didDecline = true }
     func reset() { self.didReset = true; self.stateSubject.send(.idle) }
     func restoreIfNeeded() { self.didRestore = true }
-    func loadUsage() { self.didLoadUsage = true }
+    func loadUsage() { self.didLoadUsageCount += 1 }
 
     private(set) var didHandleJobStatusChangedWith: String?
     func handleJobStatusChanged(_ jobId: String) {
@@ -56,6 +75,11 @@ final class StubAIAgentOrchestrationUsecase: AIAgentOrchestrationUsecase, @unche
     private(set) var didRefreshProcessingJob = false
     func refreshProcessingJobIfNeeded() {
         self.didRefreshProcessingJob = true
+    }
+
+    private(set) var didRefreshNotificationPermissionStatus: Bool?
+    func refreshNotificationPermissionStatus() {
+        self.didRefreshNotificationPermissionStatus = true
     }
 
     var state: AnyPublisher<AIAgentState, Never> {
@@ -69,5 +93,11 @@ final class StubAIAgentOrchestrationUsecase: AIAgentOrchestrationUsecase, @unche
     }
     var voiceLevel: AnyPublisher<Float, Never> {
         self.voiceLevelSubject.eraseToAnyPublisher()
+    }
+    var speechPermissionDenied: AnyPublisher<Void, Never> {
+        self.speechPermissionDeniedSubject.eraseToAnyPublisher()
+    }
+    var isNotificationPermissionDenied: AnyPublisher<Bool, Never> {
+        self.isNotificationPermissionDeniedSubject.eraseToAnyPublisher()
     }
 }

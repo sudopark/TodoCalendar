@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Domain
 import Scenes
 import CommonPresentation
 
@@ -14,13 +15,28 @@ import CommonPresentation
 // MARK: - Routing
 
 protocol AppleCalendarEventDetailRouting: Routing, Sendable {
+
     func routeToAppleCalendarApp(at interval: TimeInterval)
-    func openURL(_ urlString: String)
+
+    func routeToEventRepeatOptionSelect(
+        selectTime: Date,
+        previousSelected repeating: EventRepeating?,
+        listener: (any SelectEventRepeatOptionSceneListener)?
+    )
+
+    func showShareSheet(text: String)
 }
 
 // MARK: - Router
 
-final class AppleCalendarEventDetailRouter: BaseRouterImple, AppleCalendarEventDetailRouting, @unchecked Sendable { }
+final class AppleCalendarEventDetailRouter: BaseRouterImple, AppleCalendarEventDetailRouting, @unchecked Sendable {
+
+    private let selectRepeatOptionSceneBuilder: any SelectEventRepeatOptionSceneBuiler
+
+    init(selectRepeatOptionSceneBuilder: any SelectEventRepeatOptionSceneBuiler) {
+        self.selectRepeatOptionSceneBuilder = selectRepeatOptionSceneBuilder
+    }
+}
 
 
 extension AppleCalendarEventDetailRouter {
@@ -36,8 +52,19 @@ extension AppleCalendarEventDetailRouter {
         UIApplication.shared.open(url)
     }
 
-    func openURL(_ urlString: String) {
-        guard let url = URL(string: urlString) else { return }
-        UIApplication.shared.open(url)
+    func routeToEventRepeatOptionSelect(
+        selectTime: Date,
+        previousSelected repeating: EventRepeating?,
+        listener: (any SelectEventRepeatOptionSceneListener)?
+    ) {
+        Task { @MainActor in
+            let next = self.selectRepeatOptionSceneBuilder.makeSelectEventRepeatOptionScene(
+                selectTime: selectTime,
+                previousSelected: repeating,
+                rruleRepresentableOnly: true,
+                listener: listener
+            )
+            self.scene?.present(next, animated: true)
+        }
     }
 }

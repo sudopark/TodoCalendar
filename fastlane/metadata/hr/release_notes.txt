@@ -1,0 +1,27 @@
+Ovo ažuriranje donosi nove značajke.
+
+■ Brzi AI unos
+· Reci ili napiši i događaj je gotov. „Ručak sa Sarom u petak u 12”, „prebaci zubara na sljedeći utorak” – točno onako kako bi to rekao
+· Čitaj iz slike: fotografiraj raspored sati ili plakat događaja ili odaberi sliku iz knjižnice, a tekst postaje događaj
+· Ne samo dodavanje: pomicanje vremena, preimenovanje, označavanje kao gotovo, brisanje. Zahtjevi koji nešto mijenjaju ili uklanjaju najprije pokažu što će se dogoditi i traže potvrdu
+· Pošalji putem Sirija, widgeta ili Kontrolnog centra bez otvaranja aplikacije
+· Podijeli tekst ili fotografiju iz druge aplikacije i nastavlja se u Pošalji AI-ju
+· Brzi AI unos je dostupan nakon prijave
+
+■ Prikaži na zaključanom zaslonu
+· Događaj koji uskoro počinje odbrojava na zaključanom zaslonu i u Dynamic Islandu
+· Dodaj ga iz pojedinosti događaja ili s popisa dana – i događaje iz Google kalendara i Apple kalendara
+· Označi zadatak gotovim ili prekini prikaz izravno sa zaključanog zaslona, a dodirom se otvaraju pojedinosti
+
+■ Dijeljenje rasporeda
+· Zadrži datum u kalendaru za Podijeli ovaj dan, Podijeli ovaj tjedan ili Podijeli ovaj mjesec
+· U Pregled dijeljenja odaberi koje Tipovi događaja uključiti i dijeliš li kao Tekst ili Slika
+· Možeš podijeliti i samo jedan događaj
+
+■ Uređivanje događaja Google kalendara i Apple kalendara
+· Mijenjaj i briši događaje povezanih kalendara izravno u aplikaciji, uključujući pravila ponavljanja
+· Za brisanje zadrži prst na popisu
+
+■ Planovi
+· Nadogradi plan omogućuje odabir između Standardni i Doživotni – svaki s više kredita dnevno
+· Ako ponestanu, Dokupi bodove ih nadopunjuje, a dokupljeni krediti ne istječu

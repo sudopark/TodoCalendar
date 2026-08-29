@@ -12,6 +12,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import Scenes
 
 
@@ -55,7 +56,7 @@ final class AppearanceSettingViewModelImple: AppearanceSettingViewModel, @unchec
         let uiSetting = CurrentValueSubject<CalendarAppearanceSettings?, Never>(nil)
     }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private let subject = Subject()
 }
 

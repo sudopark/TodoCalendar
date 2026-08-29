@@ -79,6 +79,14 @@
 "dayname::friday:very_short" = "ศ";
 "dayname::saturday:very_short" = "ส";
 
+"dayname::sunday:gender" = "m";
+"dayname::monday:gender" = "m";
+"dayname::tuesday:gender" = "m";
+"dayname::wednesday:gender" = "m";
+"dayname::thursday:gender" = "m";
+"dayname::friday:gender" = "m";
+"dayname::saturday:gender" = "m";
+
 
 // MARK: - event notification
 
@@ -112,8 +120,12 @@
 
 "calendar::foremostevent:title" = "กิจกรรมสำคัญที่สุด";
 "calendar::uncompletedTodos:title" = "สิ่งที่ยังไม่เสร็จ";
+"calendar::guideTodo::name" = "ดูวิธีใช้ To-do Calendar";
+"calendar::eventSync::loadingAllEvents::message" = "กำลังโหลดกิจกรรมทั้งหมด…";
 "calendar::event_time::todo" = "สิ่งที่ต้องทำ";
 "calendar::event_time::allday" = "ทั้งวัน";
+"calendar::event_time::start" = "เริ่ม";
+"calendar::event_time::end" = "สิ้นสุด";
 "calendar::event_time::allday::with" = "%@ทั้งวัน";
 "calendar::event_time::period:some_days" = "%dวัน";
 "calendar::event_time::period:some_minutes" = "%dนาที";
@@ -123,11 +135,13 @@
 "calendar::event::more_action::foremost_event:title" = "กิจกรรมสำคัญที่สุด";
 "calendar::event::more_action::remove_only_thistime:message" = "ต้องการลบเฉพาะกิจกรรมนี้ออกจากกิจกรรมที่ทำซ้ำทั้งหมดหรือไม่?";
 "calendar::event::more_action::remove:message" = "ต้องการลบกิจกรรมนี้หรือไม่?";
+"calendar::event::more_action::remove_this_and_future:message" = "ต้องการลบกิจกรรมนี้และกิจกรรมที่ทำซ้ำถัดไปทั้งหมดหรือไม่?";
 "calendar::event::more_action::mark_as_foremost" = "ต้องการตั้งกิจกรรมนี้เป็นกิจกรรมสำคัญที่สุดหรือไม่?";
 "calendar::event::more_action::unmark_as_foremost" = "ต้องการยกเลิกการตั้งกิจกรรมนี้เป็นกิจกรรมสำคัญที่สุดหรือไม่?";
 "calendar::event::more_action::mark_as_foremost::unavail" = "กิจกรรมนัดหมายที่ทำซ้ำไม่สามารถตั้งเป็นกิจกรรมสำคัญที่สุดได้";
 "calendar::event::more_action:remove_only_thistime:item_name" = "ลบเฉพาะกิจกรรมนี้";
 "calendar::event::more_action:remove:item_name" = "ลบกิจกรรม";
+"calendar::event::more_action:remove_this_and_future:item_name" = "ลบกิจกรรมนี้และถัดไปทั้งหมด";
 "calendar::event::more_action:foremost:mark:item_name" = "ตั้งเป็นกิจกรรมสำคัญที่สุด";
 "calendar::event::more_action:foremost:unmark:item_name" = "ยกเลิกกิจกรรมสำคัญที่สุด";
 "calendar::event::more_action:dday_candidate:register:item_name" = "เพิ่มลงในวิดเจ็ตดีเดย์";
@@ -135,7 +149,25 @@
 "calendar::event::more_action:dday_candidate:title" = "รายการที่จะใช้ในวิดเจ็ตดีเดย์";
 "calendar::event::more_action:dday_candidate:register:message" = "เพิ่มกิจกรรมนี้เป็นรายการที่จะใช้ในวิดเจ็ตดีเดย์หรือไม่? กิจกรรมนี้จะแสดงอยู่บนสุดของรายการเมื่อคุณแก้ไขวิดเจ็ต";
 "calendar::event::more_action:dday_candidate:unregister:message" = "ลบกิจกรรมนี้ออกจากรายการที่จะใช้ในวิดเจ็ตดีเดย์หรือไม่?";
+"calendar::event::more_action:live_activity:title" = "กิจกรรมสด";
+"calendar::event::more_action:live_activity:register:item_name" = "แสดงบนหน้าจอล็อก";
+"calendar::event::more_action:live_activity:unregister:item_name" = "ลบออกจากหน้าจอล็อก";
+"calendar::event::more_action:live_activity:unavail::not_found" = "ไม่พบกิจกรรมนี้แล้ว";
+"calendar::event::more_action:live_activity:unavail::already_passed" = "กิจกรรมนี้เริ่มไปแล้ว";
+"calendar::event::more_action:live_activity:unavail::too_far_future" = "แสดงได้เฉพาะกิจกรรมที่จะเริ่มภายใน 8 ชั่วโมงเท่านั้น";
+"calendar::event::more_action:live_activity:register:confirm" = "ต้องการแสดงกิจกรรมนี้บนหน้าจอล็อกหรือไม่?";
+"calendar::event::more_action:live_activity:unregister:confirm" = "ต้องการลบกิจกรรมนี้ออกจากหน้าจอล็อกหรือไม่?";
+"calendar::event::more_action:live_activity:replace:confirm" = "มีกิจกรรมอื่นแสดงอยู่บนหน้าจอล็อก ต้องการเปลี่ยนเป็นกิจกรรมนี้หรือไม่?";
+"calendar::event::more_action:live_activity:register:success" = "แสดงบนหน้าจอล็อกแล้ว ล็อกเครื่องเพื่อดูได้เลย";
+"calendar::event::more_action:live_activity:showing" = "กำลังแสดงบนหน้าจอล็อก";
 "calendar::event::more_action:copy:item_name" = "คัดลอกกิจกรรม";
+"calendar::event::more_action:share:item_name" = "แชร์";
+"event_detail::share::field::time" = "เวลา";
+"event_detail::share::field::repeating" = "ทำซ้ำ";
+"event_detail::share::field::calendar" = "ปฏิทิน";
+"event_detail::share::field::place" = "สถานที่";
+"event_detail::share::field::url" = "ลิงก์";
+"event_detail::share::field::memo" = "บันทึกช่วยจำ";
 "calendar::event::more_action:transform_to::schedule" = "เปลี่ยนเป็นนัดหมาย";
 "calendar::event::more_action:transform_to::todo" = "เปลี่ยนเป็นสิ่งที่ต้องทำ";
 "calendar::event::more_action:edit:item_name" = "แก้ไข";
@@ -145,7 +177,9 @@
 "calednar::event::skip_todo_until" = "เลือกเวลาที่จะข้ามสิ่งที่ต้องทำนี้";
 "calednar::event::copy" = "คัดลอกกิจกรรม";
 "calendar::move_date" = "ย้ายวันที่";
-"calednar::event::google::edit" = "แก้ไขกิจกรรมใน Google ปฏิทิน";
+"calendar::share::this_day" = "แชร์กิจกรรมวันนี้";
+"calendar::share::this_week" = "แชร์กิจกรรมสัปดาห์นี้";
+"calendar::share::this_month" = "แชร์กิจกรรมเดือนนี้";
 
 
 // MARK: - event detail
@@ -171,14 +205,33 @@
 "eventDetail.repeating.everyYearSomeDay:title" = "ทุกปี%@";
 "eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "ทุกปี%@ (ปฏิทินจันทรคติ)";
 "eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "ทุกวันในสัปดาห์สุดท้ายของทุกเดือน";
-"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "%@แรกของทุกเดือน";
-"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "%@ที่สองของทุกเดือน";
-"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "%@ที่สามของทุกเดือน";
-"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "%@ที่สี่ของทุกเดือน";
-"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "%@ที่ห้าของทุกเดือน";
-"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "%@ที่หกของทุกเดือน";
-"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "%@ที่เจ็ดของทุกเดือน";
-"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "%@สุดท้ายของทุกเดือน";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::m" = "%@แรกของทุกเดือน";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::f" = "%@แรกของทุกเดือน";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::n" = "%@แรกของทุกเดือน";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::m" = "%@ที่สองของทุกเดือน";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::f" = "%@ที่สองของทุกเดือน";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::n" = "%@ที่สองของทุกเดือน";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::m" = "%@ที่สามของทุกเดือน";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::f" = "%@ที่สามของทุกเดือน";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::n" = "%@ที่สามของทุกเดือน";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::m" = "%@ที่สี่ของทุกเดือน";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::f" = "%@ที่สี่ของทุกเดือน";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::n" = "%@ที่สี่ของทุกเดือน";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::m" = "%@ที่ห้าของทุกเดือน";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::f" = "%@ที่ห้าของทุกเดือน";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::n" = "%@ที่ห้าของทุกเดือน";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::m" = "%@ที่หกของทุกเดือน";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::f" = "%@ที่หกของทุกเดือน";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::n" = "%@ที่หกของทุกเดือน";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::m" = "%@ที่เจ็ดของทุกเดือน";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::f" = "%@ที่เจ็ดของทุกเดือน";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::n" = "%@ที่เจ็ดของทุกเดือน";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::m" = "%@สุดท้ายของทุกเดือน";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::f" = "%@สุดท้ายของทุกเดือน";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::n" = "%@สุดท้ายของทุกเดือน";
+"eventDetail.repeating.last::m" = "สุดท้าย";
+"eventDetail.repeating.last::f" = "สุดท้าย";
+"eventDetail.repeating.last::n" = "สุดท้าย";
 "eventDetail.repeating.endtime::title" = "สิ้นสุดการทำซ้ำ";
 "eventDetail.repeating.endtime::option::never" = "ไม่สิ้นสุด";
 "eventDetail.repeating.endtime::option::on" = "ในวันที่";
@@ -188,7 +241,6 @@
 "eventDetail.repeating::period_endcount" = "เริ่ม%@ %dครั้ง";
 
 "eventDetail.repeating.everyNDays:title" = "ทุก%dวัน";
-"eventDetail.repeating.last" = "สุดท้าย";
 "eventDetail.repeating.everyNMonths:title" = "ทุก%dเดือน";
 "eventDetail.repeating.everyNYears:title" = "ทุก%dปี";
 "eventDetail.repeating::endoption_until" = "จนถึง%@";
@@ -267,12 +319,33 @@
 "eventDetail::gogoleEvent::conference::password" = "รหัสผ่าน";
 "eventDetail::gogoleEvent::copy::message" = "คัดลอกไปยังคลิปบอร์ดแล้ว";
 "eventDetail::gogoleEvent::canceled::message" = "กิจกรรมนี้ถูกยกเลิกแล้ว";
+"eventDetail::gogoleEvent::saved::message" = "บันทึกกิจกรรมแล้ว";
+"eventDetail::gogoleEvent::readOnlyCalendar::message" = "ปฏิทินนี้เป็นแบบอ่านอย่างเดียว จึงไม่สามารถแก้ไขกิจกรรมที่นี่ได้";
+"eventDetail::gogoleEvent::reauthenticate::title" = "ต้องการสิทธิ์เพิ่มเติม";
+"eventDetail::gogoleEvent::reauthenticate::message" = "บัญชี Google นี้เชื่อมต่อด้วยสิทธิ์อ่านอย่างเดียว หากต้องการแก้ไขกิจกรรม คุณต้องให้สิทธิ์แก้ไขเพิ่มเติมแยกต่างหาก";
+"eventDetail::gogoleEvent::writeScopeNotGranted::message" = "ไม่ได้รับสิทธิ์แก้ไข หากเป็นบัญชีที่ทำงานหรือโรงเรียน ผู้ดูแลระบบอาจไม่อนุญาต";
+"eventDetail::gogoleEvent::repeating::title" = "นี่คือกิจกรรมที่ทำซ้ำ";
+"eventDetail::gogoleEvent::repeating::onlyThisTime::button" = "เฉพาะกิจกรรมนี้";
+"eventDetail::gogoleEvent::repeating::all::button" = "กิจกรรมทั้งหมด";
+"eventDetail::gogoleEvent::remove::confirm::message" = "ลบกิจกรรมนี้ออกจาก Google ปฏิทินหรือไม่?";
+"eventDetail::gogoleEvent::editOnCalendar" = "แก้ไขใน Google ปฏิทิน";
+"eventDetail::gogoleEvent::notEditableField::message" = "ไม่สามารถแก้ไขที่นี่ได้ กรุณาแก้ไขใน Google ปฏิทิน";
+"eventDetail::gogoleEvent::description::formatLoss::message" = "คำอธิบายนี้มีการจัดรูปแบบอยู่ หากแก้ไขที่นี่ การจัดรูปแบบจะหายไป";
 
 // MARK: - Apple calendar event
 "eventDetail::appleCalendarEvent::viewOnCalendar" = "ดูใน Apple ปฏิทิน";
+"eventDetail::appleCalendarEvent::editOnCalendar" = "แก้ไขใน Apple ปฏิทิน";
 "eventDetail::appleCalendarEvent::calendar::event" = "กิจกรรมใน Apple ปฏิทิน";
 "eventDetail::appleCalendarEvent::attendees" = "ผู้เข้าร่วม (%dคน)";
 "eventDetail::appleCalendarEvent::attendees::organizer" = "ผู้จัด";
+"eventDetail::appleCalendarEvent::saved::message" = "บันทึกแล้ว";
+"eventDetail::appleCalendarEvent::remove::confirm::message" = "ลบกิจกรรมนี้หรือไม่?";
+"eventDetail::appleCalendarEvent::repeating::title" = "กิจกรรมที่ทำซ้ำ";
+"eventDetail::appleCalendarEvent::repeating::onlyThisTime::button" = "เฉพาะกิจกรรมนี้";
+"eventDetail::appleCalendarEvent::repeating::thisAndFuture::button" = "กิจกรรมนี้และถัดไปทั้งหมด";
+"eventDetail::appleCalendarEvent::readOnlyCalendar::message" = "ปฏิทินนี้เป็นแบบอ่านอย่างเดียว จึงไม่สามารถแก้ไขกิจกรรมได้";
+"eventDetail::appleCalendarEvent::notEditableField::message" = "ไม่สามารถแก้ไขรายการนี้ในแอปได้";
+"eventDetail::appleCalendarEvent::url::placeholder" = "URL";
 
 // MARK: - event tag
 
@@ -311,6 +384,23 @@
 "eventList::remove::confirm::button::olderThan1y" = "เก่ากว่า 1 ปี";
 
 
+// MARK: - share preview
+
+"share_preview::title" = "ตัวอย่างการแชร์";
+"share_preview::tag_filter::title" = "ประเภทกิจกรรม";
+"share_preview::tag_filter::select_all" = "เลือกทั้งหมด";
+"share_preview::tag_filter::deselect_all" = "ยกเลิกเลือกทั้งหมด";
+"share_preview::option::include_tag_name" = "แสดงชื่อประเภทกิจกรรม";
+"share_preview::share_button" = "แชร์";
+"share_preview::empty" = "ไม่มีกิจกรรมให้แชร์";
+"share_preview::header::this_week" = "สัปดาห์นี้";
+"share_preview::header::last_week" = "สัปดาห์ที่แล้ว";
+"share_preview::header::next_week" = "สัปดาห์หน้า";
+"share_preview::header::week_of_month" = "%1$@ สัปดาห์ที่ %2$d";
+"share_preview::format::text" = "ข้อความ";
+"share_preview::format::image" = "รูปภาพ";
+
+
 // MARK: - account
 
 "manage_account::title" = "จัดการบัญชี";
@@ -327,7 +417,9 @@
 "manage_account::delete_account_button::confirm:message" = "ยืนยันการลบบัญชีหรือไม่?";
 "manage_account::delete_account_button::description" = "หลังจากส่งคำขอลบบัญชี บัญชีของคุณจะถูกลบ\nเมื่อลบแล้วจะไม่สามารถกู้คืนข้อมูลบัญชีได้";
 "signIn::title" = "เข้าสู่ระบบ";
-"signIn:description" = "สำรองรายการกิจกรรมและซิงค์กับอุปกรณ์ iOS เครื่องอื่น\n(แพลตฟอร์มที่รองรับจะขยายเพิ่มในอนาคต)";
+"signIn::feature::sync" = "สำรองข้อมูลกิจกรรม · ซิงค์ข้ามอุปกรณ์";
+"signIn::feature::aiAgent" = "จัดการตารางเวลาด้วย AI เอเจนต์";
+"signIn::feature::web" = "ใช้งานบนเว็บ · todo-calendar.com";
 
 
 // MARK: - setting
@@ -410,10 +502,17 @@
 "setting.holiday.hide::confirm::message" = "ซ่อนวันหยุดนี้ทุกปีหรือไม่?\nสามารถแสดงอีกครั้งได้ที่การตั้งค่า > วันหยุด";
 "setting.holiday.hidden::sectionTitle" = "วันหยุดที่ซ่อนไว้";
 "setting.holiday.show::button" = "แสดง";
+"setting.aiGuide::name" = "เพิ่มด้วย AI — Siri และวิดเจ็ต";
 "setting.feedback::name" = "ข้อเสนอแนะ";
 "setting.help::name" = "ช่วยเหลือ";
+"setting.openWeb::name" = "เปิดบนเว็บ";
 "setting.share::name" = "แชร์แอป";
 "setting.write_review::name" = "เขียนรีวิวแอป";
+"setting.openSourceLicense::name" = "สัญญาอนุญาตโอเพนซอร์ส";
+"setting.billing.plan::name" = "แพ็กเกจ";
+"setting.terms::name" = "ข้อกำหนดการใช้งาน";
+"setting.privacyPolicy::name" = "นโยบายความเป็นส่วนตัว";
+"setting.adPrivacyOptions::name" = "ตัวเลือกความเป็นส่วนตัวของโฆษณา";
 "setting.account.signedIn::manageAccount" = "บัญชี";
 "setting.account.needSignIn" = "เข้าสู่ระบบ";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -513,6 +612,14 @@
 "widget.dday.target::registered" = "ปักหมุดแล้ว";
 "widget.dday.turn::name" = "ครั้งที่%d";
 
+"widget.aiCommand::title" = "เพิ่มด้วย AI";
+"widget.aiCommand::explain" = "แตะครั้งเดียวเพื่อเปิดการป้อนข้อมูล AI";
+
+// MARK: - liveActivity
+
+"liveActivity::stale" = "กำลังจะเริ่ม";
+"liveActivity::action::end" = "สิ้นสุด";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "รูปแบบลิงก์นี้ไม่รองรับ\nกรุณาอัปเดตแอปเป็นเวอร์ชันล่าสุด";
@@ -543,20 +650,133 @@
 "aiAgent::state::failed" = "ทำไม่สำเร็จ";
 "aiAgent::done::default" = "เสร็จสิ้น";
 "aiAgent::failed::default" = "ทำรายการนี้ไม่สำเร็จ";
+"aiAgent::failed::dailyLimitExceeded" = "คุณใช้เครดิต AI ของวันนี้หมดแล้ว";
 "aiAgent::retry" = "ลองใหม่";
 "aiAgent::needSignIn::title" = "ต้องเข้าสู่ระบบ";
 "aiAgent::needSignIn::message" = "เข้าสู่ระบบเพื่อใช้การป้อนข้อมูลด่วนด้วย AI";
+"aiAgent::speechPermissionDenied::title" = "ต้องการสิทธิ์";
+"aiAgent::speechPermissionDenied::message" = "อนุญาตการเข้าถึงไมโครโฟนและการรู้จำเสียงพูดในการตั้งค่าเพื่อใช้การป้อนข้อมูลด้วยเสียง";
+"aiAgent::speechPermissionDenied::confirm" = "เปิดการตั้งค่า";
 "aiAgent::title" = "ป้อนข้อมูลด่วนด้วย AI";
 "aiAgent::keyboard::stop" = "หยุด";
 "aiAgent::keyboard::send" = "ส่ง";
 "aiAgent::stop" = "หยุด";
 "aiAgent::usage" = "%@/%@ เครดิต";
-"aiAgent::plan::free" = "ฟรี";
-"aiAgent::plan::standard" = "มาตรฐาน";
-"aiAgent::plan::lifetime" = "ตลอดชีพ";
 "aiAgent::usage::topupRemaining" = "เครดิตเสริมเหลือ %@";
 "aiAgent::usage::planChangeScheduled" = "จะเปลี่ยนเป็นแพ็กเกจ %2$@ ในวันที่ %1$@";
+"aiAgent::usage::resetsIn" = "ใช้ได้อีกครั้งใน %@";
+"aiAgent::notificationPermissionDenied::message" = "เปิดการแจ้งเตือนในการตั้งค่าเพื่อรับผลลัพธ์จาก AI";
 "aiAgent::stop::confirm::title" = "ต้องการหยุดประมวลผลหรือไม่?";
 "aiAgent::stop::confirm::message" = "การหยุดจะทำให้งานที่กำลังทำอยู่หายไปและไม่สามารถกู้คืนได้";
 "aiAgent::confirm::countdown" = "เหลือเวลาอนุมัติ";
 "aiAgent::confirm::expired::message" = "หมดเวลาแล้ว กรุณาส่งคำขอใหม่อีกครั้ง";
+"aiAgent::tip::externalEntry" = "เคล็ดลับ: คุณยังเพิ่มได้ด้วย Siri ปุ่มการทำงาน หรือวิดเจ็ต";
+"aiAgent::failed::showPlans" = "ดูแพ็กเกจ";
+
+"aiAgent::image::title" = "อ่านจากรูปภาพ";
+"aiAgent::image::sourceSelect::title" = "เพิ่มรูปภาพ";
+"aiAgent::image::source::library" = "เลือกจากคลังภาพ";
+"aiAgent::image::source::camera" = "ถ่ายภาพ";
+"aiAgent::image::recognizing" = "กำลังอ่านรูปภาพ…";
+"aiAgent::image::noText" = "ไม่พบข้อความในรูปภาพนี้";
+"aiAgent::image::readText" = "ข้อความจากรูปภาพ";
+"aiAgent::image::instruction" = "คำสั่งเพิ่มเติม (ไม่บังคับ)";
+"aiAgent::image::instruction::placeholder" = "เช่น เพิ่มสิ่งเหล่านี้เป็นสิ่งที่ต้องทำ";
+"aiAgent::image::empty" = "ไม่มีข้อความที่จะส่ง";
+"aiAgent::image::textTooLong" = "ข้อความยาวเกินไป กรุณาย่อให้สั้นลงแล้วลองอีกครั้ง";
+"aiAgent::image::instructionTooLong" = "คำสั่งของคุณยาวเกินไป กรุณาย่อให้สั้นลงแล้วลองอีกครั้ง";
+"aiAgent::image::busy" = "มีคำขออื่นที่กำลังทำงานอยู่";
+"aiAgent::image::camera::denied::title" = "ต้องการสิทธิ์เข้าถึงกล้อง";
+"aiAgent::image::camera::denied::message" = "อนุญาตการเข้าถึงกล้องในการตั้งค่าเพื่อถ่ายภาพ";
+
+// MARK: - billing
+
+"billing::plan::free" = "ฟรี";
+"billing::plan::standard" = "มาตรฐาน";
+"billing::plan::lifetime" = "ตลอดชีพ";
+
+"billing::paywall::title" = "อัปเกรดแพ็กเกจ";
+"billing::paywall::current::description" = "%@ เครดิตต่อวัน";
+"billing::paywall::metric::dailyCredits" = "%@ เครดิต/วัน";
+"billing::paywall::period::weekly" = "/สัปดาห์";
+"billing::paywall::period::monthly" = "/เดือน";
+"billing::paywall::period::yearly" = "/ปี";
+"billing::paywall::price::unavailable" = "ไม่สามารถโหลดราคาได้";
+"billing::paywall::badge::recommended" = "แนะนำ";
+"billing::paywall::badge::owned" = "แพ็กเกจปัจจุบัน";
+"billing::paywall::features::title" = "สิ่งที่รวมอยู่ใน %@";
+"billing::paywall::feature::dailyCredits" = "%@ เครดิตต่อวัน";
+"billing::paywall::feature::topup" = "ซื้อเพิ่มได้เมื่อเครดิตหมด";
+"billing::paywall::feature::noAds" = "ไม่มีโฆษณา";
+"billing::paywall::disclosure::subscription" = "การสมัครสมาชิกจะต่ออายุอัตโนมัติทุกเดือน เว้นแต่คุณจะยกเลิกอย่างน้อย 24 ชั่วโมงก่อนสิ้นสุดรอบปัจจุบัน คุณสามารถยกเลิกได้ทุกเมื่อในการตั้งค่า App Store";
+"billing::paywall::disclosure::subscription::generic" = "การสมัครสมาชิกจะต่ออายุอัตโนมัติเมื่อสิ้นสุดรอบการเรียกเก็บเงินแต่ละรอบ เว้นแต่คุณจะยกเลิกอย่างน้อย 24 ชั่วโมงก่อนสิ้นสุดรอบนั้น คุณสามารถยกเลิกได้ทุกเมื่อในการตั้งค่า App Store";
+"billing::paywall::disclosure::oneTime" = "จ่ายครั้งเดียวแล้วใช้งานได้ตลอดไป ไม่มีการต่ออายุอัตโนมัติ";
+"billing::paywall::disclosure::storeUnavailable" = "ไม่สามารถเชื่อมต่อกับ App Store ได้ โปรดลองอีกครั้งภายหลัง";
+"billing::paywall::cta::subscribe" = "สมัครสมาชิก %@";
+"billing::paywall::cta::buy" = "ซื้อ %@";
+"billing::paywall::cta::unavailable" = "ไม่สามารถซื้อได้";
+"billing::paywall::allPlansOwned" = "คุณใช้แพ็กเกจสูงสุดอยู่แล้ว";
+"billing::paywall::terms" = "ข้อกำหนดในการให้บริการ";
+"billing::paywall::privacyPolicy" = "นโยบายความเป็นส่วนตัว";
+"billing::paywall::restore" = "กู้คืนการซื้อ";
+"billing::paywall::restored" = "กู้คืนการซื้อแล้ว";
+"billing::paywall::restore::empty" = "ไม่มีรายการซื้อให้กู้คืน";
+"billing::paywall::manageSubscription" = "จัดการการสมัครสมาชิก";
+"billing::paywall::purchase::applied" = "อัปเดตแพ็กเกจแล้ว";
+"billing::paywall::pending::title" = "รอการอนุมัติ";
+"billing::paywall::pending::message" = "ขอให้ผู้จัดการครอบครัวอนุมัติการซื้อนี้ เมื่อได้รับอนุมัติแล้วจะมีผลโดยอัตโนมัติ";
+"billing::paywall::userPlan::loadFailed" = "ไม่สามารถโหลดแพ็กเกจของคุณได้ โปรดลองอีกครั้ง";
+"billing::paywall::retry" = "ลองใหม่";
+"billing::paywall::unfinished::title" = "มีการซื้อที่ยังไม่ถูกนำไปใช้";
+"billing::paywall::unfinished::message" = "ชำระเงินสำเร็จแล้ว แต่แพ็กเกจของคุณยังไม่อัปเดต";
+"billing::paywall::unfinished::action" = "นำไปใช้เลย";
+"billing::paywall::unfinished::applied" = "นำการซื้อของคุณไปใช้แล้ว";
+"billing::paywall::processing::message" = "กำลังยืนยันการซื้อ…";
+"billing::paywall::fail::purchase" = "ไม่สามารถทำการซื้อให้เสร็จสมบูรณ์ได้ โปรดลองอีกครั้ง";
+"billing::paywall::fail::invalidTransaction" = "ไม่สามารถยืนยันการซื้อของคุณได้ โปรดลองอีกครั้งในอีกสักครู่";
+"billing::paywall::fail::unknownProduct" = "ไม่รู้จักการซื้อนี้ การอัปเดตแอปอาจช่วยแก้ปัญหาได้";
+"billing::paywall::fail::planChangeNotAllowed" = "ไม่รองรับการเปลี่ยนแพ็กเกจแบบนี้";
+"billing::paywall::fail::ownedByAnotherAccount" = "การซื้อนี้เป็นของบัญชีอื่น กรุณาเข้าสู่ระบบด้วยบัญชีที่ใช้ซื้อ";
+"billing::paywall::fail::reflectDelayed" = "ชำระเงินสำเร็จแล้ว แต่การนำไปใช้ล่าช้า ระบบจะนำไปใช้ให้โดยอัตโนมัติ";
+"billing::paywall::topup::credits" = "%@ เครดิต";
+"billing::paywall::topup::credits::split" = "พื้นฐาน %@ + โบนัส %@ เครดิต";
+"billing::paywall::topup::bonus" = "+%@%% โบนัส";
+"billing::paywall::topup::title" = "ซื้อเครดิตเพิ่ม";
+"billing::paywall::topup::title::withRemaining" = "ซื้อเครดิตเพิ่ม · มีอยู่ %@";
+"billing::paywall::topup::description" = "เครดิตเสริมจะถูกใช้หลังจากใช้โควตารายวันหมดแล้ว และไม่มีวันหมดอายุ";
+"billing::paywall::topup::applied" = "เพิ่มเครดิตแล้ว";
+"billing::paywall::topup::applied::withCredits" = "เพิ่ม %@ เครดิตแล้ว";
+
+"billing::needSignIn::title" = "ต้องเข้าสู่ระบบ";
+"billing::needSignIn::message" = "เข้าสู่ระบบเพื่อดูและจัดการแพ็กเกจของคุณ";
+
+// MARK: - share extension
+
+"share.ai::title" = "ส่งไปยัง AI";
+"share.ai::text::placeholder" = "ข้อความที่จะส่ง";
+"share.ai::instruction::placeholder" = "เพิ่มคำสั่ง (ไม่บังคับ)";
+"share.ai::needSignIn" = "เข้าสู่ระบบในแอปก่อนเพื่อใช้การป้อนข้อมูลด่วนด้วย AI";
+"share.ai::pending" = "คำขอก่อนหน้ายังค้างอยู่ เปิดแอปเพื่อดูความคืบหน้าหรือผลลัพธ์";
+"share.ai::sent" = "ส่งแล้ว ดูผลลัพธ์ได้ในแอป";
+"share.ai::failed" = "ส่งไม่สำเร็จ กรุณาลองอีกครั้ง";
+"share.ai::sentButUntracked" = "ส่งแล้ว แต่แอปติดตามผลลัพธ์ไม่ได้ กรุณาตรวจสอบปฏิทินในอีกสักครู่";
+"share.ai::textTooLong" = "ข้อความที่จะส่งยาวเกินไป กรุณาย่อให้สั้นลงแล้วลองอีกครั้ง";
+"share.ai::instructionTooLong" = "คำสั่งของคุณยาวเกินไป กรุณาย่อให้สั้นลง";
+"share.ai::limitExceeded" = "คุณใช้เครดิต AI ของวันนี้หมดแล้ว โดยจะรีเซ็ตตอนเที่ยงคืนตามเวลา UTC";
+"share.ai::image::title" = "ส่งรูปภาพไปยัง AI";
+"share.ai::image::recognizing" = "กำลังอ่านข้อความจากรูปภาพ…";
+"share.ai::image::text::caption" = "ข้อความที่อ่านได้จากรูปภาพ — แก้ไขได้หากมีจุดใดดูไม่ถูกต้อง";
+"share.ai::image::text::placeholder" = "ข้อความที่อ่านจากรูปภาพ";
+"share.ai::image::noTextFound" = "ไม่พบข้อความในรูปภาพนี้ โปรดพิมพ์สิ่งที่คุณต้องการเพิ่ม";
+
+// MARK: - webview
+
+"webview::error::message" = "ไม่สามารถโหลดหน้านี้ได้";
+"webview::error::retry" = "ลองอีกครั้ง";
+"webview::openInBrowser" = "เปิดในเบราว์เซอร์";
+
+// MARK: - legal notice
+
+"legal_notice.message::terms" = "ข้อกำหนดในการให้บริการมีการอัปเดต";
+"legal_notice.message::privacy" = "นโยบายความเป็นส่วนตัวมีการอัปเดต";
+"legal_notice.effectiveDate" = "มีผลวันที่ %@";

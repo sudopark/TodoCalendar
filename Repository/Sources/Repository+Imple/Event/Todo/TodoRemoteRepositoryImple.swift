@@ -19,7 +19,7 @@ public final class TodoRemoteRepositoryImple: TodoEventRepository, @unchecked Se
     
     private let remote: any TodoRemote
     private let cacheStorage: any TodoLocalStorage
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     
     public init(
         remote: any TodoRemote,
@@ -103,7 +103,9 @@ extension TodoRemoteRepositoryImple {
         return result
     }
     
-    private func findNextRepeatingEvent(_ origin: TodoEvent) throws -> RepeatingTimes {
+    private func findNextRepeatingEvent(
+        _ origin: TodoEvent, consumesTurn: Bool = true
+    ) throws -> RepeatingTimes {
         guard let repeating = origin.repeating,
               let time = origin.time
         else {
@@ -113,10 +115,12 @@ extension TodoRemoteRepositoryImple {
         let enumerator = EventRepeatTimeEnumerator(
             repeating.repeatOption, endOption: repeating.repeatingEndOption
         )
-        guard let next = enumerator?.nextEventTime(
-            from: .init(time: time, turn: origin.repeatingTurn ?? 1),
-            until: repeating.repeatingEndOption?.endTime
-        )
+        let current = RepeatingTimes(time: time, turn: origin.repeatingTurn ?? 1)
+        let endTime = repeating.repeatingEndOption?.endTime
+        let next = consumesTurn
+            ? enumerator?.nextEventTime(from: current, until: endTime)
+            : enumerator?.nextEventTimeWithoutTurnConsuming(from: current, until: endTime)
+        guard let next
         else {
             throw RuntimeError(key: ClientErrorKeys.repeatingIsEnd.rawValue, "repeaitng end")
         }
@@ -144,7 +148,7 @@ extension TodoRemoteRepositoryImple {
     
     private func replaceCurrentTodoToNext(_ eventid: String) async throws -> RemoveTodoResult {
         let origin = try await self.remote.loadTodo(eventid)
-        guard let next = try? self.findNextRepeatingEvent(origin)
+        guard let next = try? self.findNextRepeatingEvent(origin, consumesTurn: false)
         else {
             return try await self.removeTodo(eventId: eventid)
         }

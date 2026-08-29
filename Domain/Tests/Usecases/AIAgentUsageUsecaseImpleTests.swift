@@ -9,6 +9,8 @@
 import Foundation
 import Testing
 import Combine
+import Prelude
+import Optics
 import Extensions
 import UnitTestHelpKit
 
@@ -123,18 +125,165 @@ extension AIAgentUsageUsecaseImpleTests {
 }
 
 
+// MARK: - billingUserPlan 시딩 (I1)
+//
+// AIAgentUsageUsecaseImple.loadUsage() 가 sharedDataStore 에 넣는 billingUserPlan 은 프로덕션에서
+// paywall 의 currentUserPlan 이 처음 채워지는 유일한 경로다(e1a7ef3c). userPlan 이 있으면 넣고,
+// nil 이면 기존 값을 지우지 않는다는 계약이 테스트 없이 남아 있었다 — 여기 깨지면 유료 유저에게
+// paywall 이 조용히 "무료"를 보여준다
+
+extension AIAgentUsageUsecaseImpleTests {
+
+    private func makeUsecaseSeedingPlan(
+        _ responseUserPlan: BillingPlanId?, seeded: BillingPlanId? = nil
+    ) -> (AIAgentUsageUsecaseImple, SharedDataStore) {
+        let sharedDataStore = SharedDataStore()
+        seeded.map {
+            sharedDataStore.put(
+                BillingUserPlan.self,
+                key: ShareDataKeys.billingUserPlan.rawValue,
+                BillingUserPlan() |> \.planId .~ $0
+            )
+        }
+        let repository = PrivateStubRepository()
+        repository.stubResults = [.success(.init(input: 1, output: 1, limit: 1))]
+        repository.stubUserPlan = responseUserPlan.map { BillingUserPlan() |> \.planId .~ $0 }
+        let usecase = AIAgentUsageUsecaseImple(
+            repository: repository, sharedDataStore: sharedDataStore
+        )
+        return (usecase, sharedDataStore)
+    }
+
+    private func seededPlanId(_ store: SharedDataStore) -> BillingPlanId? {
+        return store.value(
+            BillingUserPlan.self, key: ShareDataKeys.billingUserPlan.rawValue
+        )?.planId
+    }
+
+    @Test func usecase_whenLoadUsageReturnsUserPlan_seedsBillingUserPlan() async throws {
+        // given
+        let (usecase, store) = self.makeUsecaseSeedingPlan(.standard)
+
+        // when
+        _ = try await usecase.loadUsage()
+
+        // then
+        #expect(self.seededPlanId(store) == .standard)
+    }
+
+    // userPlan 이 nil 인 응답을 그대로 덮어쓰면, 방금 구매로 갱신된 최신 플랜이 다음 usage
+    // 재조회 한 번에 지워진다 — nil 은 put 하지 않고 기존 값을 유지해야 한다
+    @Test func usecase_whenLoadUsageReturnsNilUserPlan_keepsExistingBillingUserPlan() async throws {
+        // given
+        let (usecase, store) = self.makeUsecaseSeedingPlan(nil, seeded: .lifetime)
+
+        // when
+        _ = try await usecase.loadUsage()
+
+        // then
+        #expect(self.seededPlanId(store) == .lifetime)
+    }
+}
+
+
+// MARK: - 캐시된 usage·plan 으로 소진 판정
+
+extension AIAgentUsageUsecaseImpleTests {
+
+    private func makeUsecaseWithCached(
+        usage: AIAgentUsage?,
+        userPlan: BillingUserPlan?
+    ) -> AIAgentUsageUsecaseImple {
+        let store = SharedDataStore()
+        if let usage {
+            store.put(AIAgentUsage.self, key: ShareDataKeys.aiAgentUsage.rawValue, usage)
+        }
+        if let userPlan {
+            store.put(BillingUserPlan.self, key: ShareDataKeys.billingUserPlan.rawValue, userPlan)
+        }
+        return AIAgentUsageUsecaseImple(
+            repository: PrivateStubRepository(),
+            sharedDataStore: store
+        )
+    }
+
+    private func exhaustedUsage() -> AIAgentUsage {
+        return AIAgentUsage(input: 0, output: 0, limit: 3000)
+            |> \.creditsUsed .~ 3000
+    }
+
+    @Test("캐시된 usage 가 소진이고 top-up 잔량이 없으면 소진")
+    func usecase_whenCachedUsageExhaustedWithoutTopup_isExhausted() {
+        // given
+        let usecase = self.makeUsecaseWithCached(
+            usage: self.exhaustedUsage(),
+            userPlan: BillingUserPlan() |> \.topupRemaining .~ 0
+        )
+
+        // when
+        let isExhausted = usecase.isCreditExhausted()
+
+        // then
+        #expect(isExhausted == true)
+    }
+
+    @Test("캐시된 usage 가 소진이어도 top-up 잔량이 있으면 소진 아님")
+    func usecase_whenCachedUsageExhaustedButTopupRemains_isNotExhausted() {
+        // given
+        let usecase = self.makeUsecaseWithCached(
+            usage: self.exhaustedUsage(),
+            userPlan: BillingUserPlan() |> \.topupRemaining .~ 500
+        )
+
+        // when
+        let isExhausted = usecase.isCreditExhausted()
+
+        // then
+        #expect(isExhausted == false)
+    }
+
+    @Test("캐시된 usage 가 없으면 소진 아님")
+    func usecase_whenUsageNotCached_isNotExhausted() {
+        // given
+        let usecase = self.makeUsecaseWithCached(usage: nil, userPlan: nil)
+
+        // when
+        let isExhausted = usecase.isCreditExhausted()
+
+        // then
+        #expect(isExhausted == false)
+    }
+
+    @Test("캐시된 plan 이 없으면 소진 아님")
+    func usecase_whenUserPlanNotCached_isNotExhausted() {
+        // given
+        let usecase = self.makeUsecaseWithCached(
+            usage: self.exhaustedUsage(), userPlan: nil
+        )
+
+        // when
+        let isExhausted = usecase.isCreditExhausted()
+
+        // then
+        #expect(isExhausted == false)
+    }
+}
+
+
 private final class PrivateStubRepository: BaseStubAICommandRepository, @unchecked Sendable {
 
     var stubResults: [Result<AIAgentUsage, any Error>] = []
+    // I1 — loadUsage() 응답에 실릴 플랜. nil 이면 "이번 응답엔 플랜 정보 없음"을 시뮬레이션
+    var stubUserPlan: BillingUserPlan?
 
-    override func loadUsage() async throws -> AIAgentUsage {
+    override func loadUsage() async throws -> AIAgentUsageLoadResult {
         guard !self.stubResults.isEmpty
         else {
             throw RuntimeError("failed")
         }
         let first = self.stubResults.removeFirst()
         switch first {
-        case .success(let usage): return usage
+        case .success(let usage): return AIAgentUsageLoadResult(usage: usage, userPlan: self.stubUserPlan)
         case .failure(let error): throw error
         }
     }

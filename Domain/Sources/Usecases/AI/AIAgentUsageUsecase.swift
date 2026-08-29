@@ -8,14 +8,16 @@
 
 import Foundation
 import Combine
+import Extensions
 import AsyncFlatMap
 
 
 public protocol AIAgentUsageUsecase: AnyObject {
-    
+
     func refresh()
     func loadUsage() async throws -> AIAgentUsage
-    
+    func isCreditExhausted() -> Bool
+
     var currentUsage: AnyPublisher<AIAgentUsage, Never> { get }
 }
 
@@ -39,7 +41,7 @@ public final class AIAgentUsageUsecaseImple: AIAgentUsageUsecase, @unchecked Sen
         let refresh = PassthroughSubject<Void, Never>()
     }
     private let subject = Subject()
-    private var cancellables = Set<AnyCancellable>()
+    private let cancellables = CancelBag()
 }
 
 
@@ -62,17 +64,25 @@ extension AIAgentUsageUsecaseImple {
             .map(loadUsageWithoutError)
             .switchToLatest()
             .sink(receiveValue: { _ in })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
     
     public func loadUsage() async throws -> AIAgentUsage {
-        let usage = try await self.repository.loadUsage()
+        let result = try await self.repository.loadUsage()
         self.sharedDataStore.put(
             AIAgentUsage.self,
             key: ShareDataKeys.aiAgentUsage.rawValue,
-            usage
+            result.usage
         )
-        return usage
+        // nil 이면 put 하지 않는다 — 기존 값을 덮어 구매로 갱신된 최신 플랜을 지우면 안 된다 (#739)
+        if let userPlan = result.userPlan {
+            self.sharedDataStore.put(
+                BillingUserPlan.self,
+                key: ShareDataKeys.billingUserPlan.rawValue,
+                userPlan
+            )
+        }
+        return result.usage
     }
     
     public var currentUsage: AnyPublisher<AIAgentUsage, Never> {
@@ -82,5 +92,15 @@ extension AIAgentUsageUsecaseImple {
         )
         .compactMap { $0 }
         .eraseToAnyPublisher()
+    }
+
+    public func isCreditExhausted() -> Bool {
+        guard let usage = self.sharedDataStore.value(
+            AIAgentUsage.self, key: ShareDataKeys.aiAgentUsage.rawValue
+        ) else { return false }
+        let userPlan = self.sharedDataStore.value(
+            BillingUserPlan.self, key: ShareDataKeys.billingUserPlan.rawValue
+        )
+        return usage.isCreditExhausted(topupRemaining: userPlan?.topupRemaining)
     }
 }

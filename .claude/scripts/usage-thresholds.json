@@ -3,5 +3,17 @@
   "partial_count": 3,
   "missing_rate": 0.5,
   "min_invocations_for_missing": 5,
-  "axis_leak_count": 3
+  "axis_leak_count": 3,
+  "plugin_prefixes": [
+    "superpowers:"
+  ],
+  "excluded_skills": [
+    "open-external"
+  ],
+  "missing_rate_exempt_skills": [
+    "commit",
+    "pair-programming",
+    "run-tests",
+    "snapshot-check"
+  ]
 }

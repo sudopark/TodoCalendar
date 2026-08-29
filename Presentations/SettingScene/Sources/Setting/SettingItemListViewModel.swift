@@ -9,8 +9,12 @@
 
 import Foundation
 import Combine
+import Prelude
+import Optics
 import Domain
+import Extensions
 import Scenes
+import CommonPresentation
 
 
 protocol SettingItemModelType {
@@ -22,11 +26,17 @@ struct SettingItemModel: SettingItemModelType {
         case appearance
         case editEvent
         case holidaySetting
+        case openWeb
+        case aiUsageGuide
         case feedback
         case help
         case shareApp
         case addReview
-        case sourceCode
+        case openSourceLicense
+        case billingPlan
+        case terms
+        case privacyPolicy
+        case adPrivacyOptions
     }
     
     let itemId: ItemId
@@ -45,6 +55,12 @@ struct SettingItemModel: SettingItemModelType {
         case .holidaySetting:
             self.iconNamge = "globe"
             self.text = "setting.holiday.item::name".localized()
+        case .openWeb:
+            self.iconNamge = "safari"
+            self.text = "setting.openWeb::name".localized()
+        case .aiUsageGuide:
+            self.iconNamge = "sparkles"
+            self.text = "setting.aiGuide::name".localized()
         case .feedback:
             self.iconNamge = "ellipsis.bubble"
             self.text = "setting.feedback::name".localized()
@@ -57,9 +73,21 @@ struct SettingItemModel: SettingItemModelType {
         case .addReview:
             self.iconNamge = "star"
             self.text = "setting.write_review::name".localized()
-        case .sourceCode:
-            self.iconNamge = "pc"
-            self.text = "Source Code"
+        case .openSourceLicense:
+            self.iconNamge = "doc.on.doc"
+            self.text = "setting.openSourceLicense::name".localized()
+        case .billingPlan:
+            self.iconNamge = "creditcard"
+            self.text = "setting.billing.plan::name".localized()
+        case .terms:
+            self.iconNamge = "doc.text"
+            self.text = "setting.terms::name".localized()
+        case .privacyPolicy:
+            self.iconNamge = "hand.raised"
+            self.text = "setting.privacyPolicy::name".localized()
+        case .adPrivacyOptions:
+            self.iconNamge = "checkmark.shield"
+            self.text = "setting.adPrivacyOptions::name".localized()
         }
     }
     
@@ -154,6 +182,7 @@ final class SettingItemListViewModelImple: SettingItemListViewModel, @unchecked 
     private let uiSettingUsecase: any UISettingUsecase
     private let deviceInfoFetchService: any DeviceInfoFetchService
     private let appUpdateCheckUsecase: any AppUpdateCheckUsecase
+    private let privacyOptionsFormRouter: (any PrivacyOptionsFormRouter)?
     var router: (any SettingItemListRouting)?
 
     init(
@@ -161,30 +190,37 @@ final class SettingItemListViewModelImple: SettingItemListViewModel, @unchecked 
         accountUsecase: any AccountUsecase,
         uiSettingUsecase: any UISettingUsecase,
         deviceInfoFetchService: any DeviceInfoFetchService,
-        appUpdateCheckUsecase: any AppUpdateCheckUsecase
+        appUpdateCheckUsecase: any AppUpdateCheckUsecase,
+        privacyOptionsFormRouter: (any PrivacyOptionsFormRouter)?
     ) {
         self.appstoreLinkPath = appstoreLinkPath
         self.accountUsecase = accountUsecase
         self.uiSettingUsecase = uiSettingUsecase
         self.deviceInfoFetchService = deviceInfoFetchService
         self.appUpdateCheckUsecase = appUpdateCheckUsecase
+        self.privacyOptionsFormRouter = privacyOptionsFormRouter
+
+        self.bindIsSignedIn()
+    }
+
+    private func bindIsSignedIn() {
+        self.accountUsecase.currentAccountInfo
+            .map { $0 != nil }
+            .sink(receiveValue: { [weak self] isSignedIn in
+                self?.subject.isSignedIn.send(isSignedIn)
+            })
+            .store(in: self.cancellables)
     }
     
     
     private struct Subject {
         let deviceInfo = CurrentValueSubject<DeviceInfo?, Never>(nil)
+        let isAdPrivacyOptionsRequired = CurrentValueSubject<Bool, Never>(false)
+        let isSignedIn = CurrentValueSubject<Bool, Never>(false)
     }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private let subject = Subject()
-    
-    private var helpPath_ko: String {
-        return "https://readmind.notion.site/To-do-Calendar-36cba0bdc84b44de9abdfd7d8721cd91"
-    }
-    
-    private var helpPath_en: String {
-        return "https://readmind.notion.site/To-do-Calendar-Help-a2183ee1a41946faa8e0658640fb4c6a?pvs=4"
-    }
 }
 
 
@@ -193,11 +229,24 @@ final class SettingItemListViewModelImple: SettingItemListViewModel, @unchecked 
 extension SettingItemListViewModelImple {
     
     func prepare() {
+        self.prepareDeviceInfo()
+        self.prepareAdPrivacyOptionsRequirement()
+    }
+    
+    private func prepareDeviceInfo() {
         Task { [weak self] in
             let info = await self?.deviceInfoFetchService.fetchDeviceInfo()
             self?.subject.deviceInfo.send(info)
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
+    }
+    
+    private func prepareAdPrivacyOptionsRequirement() {
+        Task { @MainActor [weak self] in
+            let isRequired = self?.privacyOptionsFormRouter?.isPrivacyOptionsRequired()
+            self?.subject.isAdPrivacyOptionsRequired.send(isRequired ?? false)
+        }
+        .store(in: self.cancellables)
     }
     
     func selectItem(_ model: any SettingItemModelType) {
@@ -230,15 +279,18 @@ extension SettingItemListViewModelImple {
             
         case .holidaySetting:
             self.router?.routeToHolidaySetting()
-            
+
+        case .openWeb:
+            self.router?.openSafari(WebAppLink.homePath)
+
+        case .aiUsageGuide:
+            self.router?.showWebView(GuideLink.aiInputPath)
+
         case .feedback:
             self.router?.routeToFeedbackPost()
             
         case .help:
-            let isKorean = Locale.current.language.languageCode == .korean
-            self.router?.openSafari(
-                isKorean ? self.helpPath_ko : self.helpPath_en
-            )
+            self.router?.showWebView(GuideLink.indexPath)
             
         case .shareApp:
             self.router?.openShare(link: self.appstoreLinkPath)
@@ -246,11 +298,35 @@ extension SettingItemListViewModelImple {
         case .addReview:
             self.router?.openSafari(self.appstoreLinkPath)
             
-        case .sourceCode:
-            self.router?.openSafari("https://github.com/sudopark/TodoCalendar")
+        case .openSourceLicense:
+            self.router?.routeToOpenSourceLicense()
+
+        case .billingPlan:
+            self.handleBillingPlanSelected()
+
+        case .terms:
+            self.router?.showWebView(LegalLink.termsPath)
+
+        case .privacyPolicy:
+            self.router?.showWebView(LegalLink.privacyPolicyPath)
+
+        case .adPrivacyOptions:
+            self.router?.routeToAdPrivacyOptions()
         }
     }
     
+    private func handleBillingPlanSelected() {
+        if self.subject.isSignedIn.value {
+            self.router?.routeToPaywall()
+        } else {
+            let info = ConfirmDialogInfo()
+                |> \.title .~ "billing::needSignIn::title".localized()
+                |> \.message .~ "billing::needSignIn::message".localized()
+                |> \.confirmed .~ { [weak self] in self?.router?.routeToSignIn() }
+            self.router?.showConfirm(dialog: info)
+        }
+    }
+
     private func handleSignIn(_ item: AccountSettingItemModel) {
         if item.isSignIn {
             self.router?.routeToAccountManage()
@@ -273,11 +349,12 @@ extension SettingItemListViewModelImple {
     
     var sectionModels: AnyPublisher<[any SettingSectionModelType], Never> {
 
-        let transform: (AccountInfo?, DeviceInfo?, Bool) -> [any SettingSectionModelType] = { account, device, isUpdateAvailable in
+        let transform: (AccountInfo?, DeviceInfo?, Bool, Bool) -> [any SettingSectionModelType] = { account, device, isUpdateAvailable, isAdPrivacyOptionsRequired in
             let baseSectionItems: [SettingItemModel] = [
                 .init(.appearance),
                 .init(.editEvent),
-                .init(.holidaySetting)
+                .init(.holidaySetting),
+                .init(.billingPlan)
             ]
             let accountItem = AccountSettingItemModel(account)
             let baseSection = SettingSectionModel(
@@ -286,6 +363,8 @@ extension SettingItemListViewModelImple {
             )
 
             let supportSectionItems: [SettingItemModel] = [
+                .init(.openWeb),
+                .init(.aiUsageGuide),
                 .init(.feedback),
                 .init(.help)
             ]
@@ -294,8 +373,10 @@ extension SettingItemListViewModelImple {
             let appInfoSectionItems: [SettingItemModel] = [
                 .init(.shareApp),
                 .init(.addReview),
-                .init(.sourceCode)
-            ]
+                .init(.openSourceLicense),
+                .init(.terms),
+                .init(.privacyPolicy)
+            ] + (isAdPrivacyOptionsRequired ? [.init(.adPrivacyOptions)] : [])
             let appInfoSection = AppInfoSectionModel(
                 headerText: "setting.section.app::name".localized(),
                 version: device?.appVersion.map { "v\($0)"},
@@ -313,10 +394,11 @@ extension SettingItemListViewModelImple {
         }
 
         return Publishers
-            .CombineLatest3(
+            .CombineLatest4(
                 self.accountUsecase.currentAccountInfo,
                 self.subject.deviceInfo,
-                self.appUpdateCheckUsecase.isUpdateAvailable
+                self.appUpdateCheckUsecase.isUpdateAvailable,
+                self.subject.isAdPrivacyOptionsRequired
             )
             .map(transform)
             .eraseToAnyPublisher()

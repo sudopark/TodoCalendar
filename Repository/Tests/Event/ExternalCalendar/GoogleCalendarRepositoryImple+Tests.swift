@@ -185,6 +185,188 @@ extension GoogleCalendarRepositoryImple_Tests {
         #expect(tag?.foregroundColorHex == "#000000")
         #expect(tag?.colorId == "12")
         #expect(tag?.isSelected == true)
+        #expect(tag?.accessRole == .owner)
+    }
+}
+
+// MARK: - accessRole 저장/복원
+
+extension GoogleCalendarRepositoryImple_Tests {
+
+    @Test func cacheStorage_saveAndLoad_preservesOwnerAccessRole() async throws {
+        try await self.runTestWithOpenClose("test_google_access_role_1") {
+            // given
+            let tag = GoogleCalendar.Tag(id: "owner_calendar", name: "owner calendar")
+                |> \.accessRole .~ .owner
+
+            // when
+            try await self.cacheStorage.updateCalendarList([tag], accountId: self.testAccountId)
+            let loaded = try await self.cacheStorage.loadCalendarList(accountId: self.testAccountId)
+
+            // then
+            #expect(loaded.first?.accessRole == .owner)
+            #expect(loaded.first?.isWritable == true)
+        }
+    }
+
+    @Test func cacheStorage_saveAndLoad_preservesReaderAccessRole() async throws {
+        try await self.runTestWithOpenClose("test_google_access_role_2") {
+            // given
+            let tag = GoogleCalendar.Tag(id: "reader_calendar", name: "reader calendar")
+                |> \.accessRole .~ .reader
+
+            // when
+            try await self.cacheStorage.updateCalendarList([tag], accountId: self.testAccountId)
+            let loaded = try await self.cacheStorage.loadCalendarList(accountId: self.testAccountId)
+
+            // then
+            #expect(loaded.first?.accessRole == .reader)
+            #expect(loaded.first?.isWritable == false)
+        }
+    }
+
+    @Test func cacheStorage_saveAndLoad_withNilAccessRole_doesNotShiftOtherColumns() async throws {
+        try await self.runTestWithOpenClose("test_google_access_role_3") {
+            // given
+            let tag = GoogleCalendar.Tag(id: "no_role_calendar", name: "no role calendar")
+                |> \.colorId .~ "12"
+                |> \.isSelected .~ true
+
+            // when
+            try await self.cacheStorage.updateCalendarList([tag], accountId: self.testAccountId)
+            let loaded = try await self.cacheStorage.loadCalendarList(accountId: self.testAccountId)
+
+            // then
+            #expect(loaded.first?.accessRole == nil)
+            #expect(loaded.first?.isWritable == false)
+            #expect(loaded.first?.name == "no role calendar")
+            #expect(loaded.first?.colorId == "12")
+            #expect(loaded.first?.isSelected == true)
+        }
+    }
+
+    @Test func mapper_whenAccessRoleIsUnrecognizedValue_decodesAsNilButOtherFieldsSurvive() throws {
+        // given
+        let json = """
+        {
+            "id": "future_role_calendar",
+            "summary": "future role calendar",
+            "colorId": "5",
+            "selected": true,
+            "accessRole": "futureRoleNotYetSupported"
+        }
+        """.data(using: .utf8)!
+
+        // when
+        let mapper = try JSONDecoder().decode(GoogleCalendarEventTagMapper.self, from: json)
+
+        // then
+        #expect(mapper.calendar.id == "future_role_calendar")
+        #expect(mapper.calendar.colorId == "5")
+        #expect(mapper.calendar.isSelected == true)
+        #expect(mapper.calendar.accessRole == nil)
+        #expect(mapper.calendar.isWritable == false)
+    }
+
+    @Test func migration_addsAccessRoleColumn_toExistingTable_withoutLosingData() async throws {
+        try await self.runTestWithOpenClose("test_google_access_role_migration") {
+            // given
+            let legacyTag = GoogleCalendar.Tag(id: "legacy_calendar", name: "legacy calendar")
+                |> \.colorId .~ "9"
+                |> \.isSelected .~ true
+            try await self.sqliteService.async.run { db in
+                try db.createTableOrNot(GoogleCalendarEventTagTableV0LegacyTable.self)
+                let entity = GoogleCalendarEventTagTable.Entity(accountId: self.testAccountId, legacyTag)
+                try db.insert(GoogleCalendarEventTagTableV0LegacyTable.self, entities: [entity], shouldReplace: true)
+            }
+
+            // when
+            try await self.sqliteService.async.run { db in
+                try GoogleCalendarEventTagTableMigration.runMigration(for: 0, database: db)
+            }
+            let migratedInTag = GoogleCalendar.Tag(id: "migrated_in_calendar", name: "migrated in calendar")
+                |> \.accessRole .~ .owner
+            try await self.sqliteService.async.run { db in
+                let entity = GoogleCalendarEventTagTable.Entity(accountId: self.testAccountId, migratedInTag)
+                try db.insert(GoogleCalendarEventTagTable.self, entities: [entity], shouldReplace: false)
+            }
+            let loaded = try await self.cacheStorage.loadCalendarList(accountId: self.testAccountId)
+
+            // then
+            let legacy = loaded.first { $0.id == "legacy_calendar" }
+            #expect(legacy?.colorId == "9")
+            #expect(legacy?.isSelected == true)
+            #expect(legacy?.accessRole == nil)
+
+            let migratedIn = loaded.first { $0.id == "migrated_in_calendar" }
+            #expect(migratedIn?.accessRole == .owner)
+        }
+    }
+
+    @Test func migration_whenTableNotCreatedYet_succeedsAndTableAcceptsAccessRole() async throws {
+        try await self.runTestWithOpenClose("test_google_access_role_migration_fresh") {
+            // given - 신규 설치: 캘린더 목록을 아직 한 번도 로드하지 않아 테이블이 없다
+
+            // when
+            try await self.sqliteService.async.run { db in
+                try GoogleCalendarEventTagTableMigration.runMigration(for: 0, database: db)
+            }
+
+            // then
+            let tag = GoogleCalendar.Tag(id: "fresh_calendar", name: "fresh calendar")
+                |> \.accessRole .~ .writer
+            try await self.sqliteService.async.run { db in
+                let entity = GoogleCalendarEventTagTable.Entity(accountId: self.testAccountId, tag)
+                try db.insert(GoogleCalendarEventTagTable.self, entities: [entity], shouldReplace: false)
+            }
+            let loaded = try await self.cacheStorage.loadCalendarList(accountId: self.testAccountId)
+            #expect(loaded.first?.id == "fresh_calendar")
+            #expect(loaded.first?.accessRole == .writer)
+        }
+    }
+}
+
+private struct GoogleCalendarEventTagTableV0LegacyTable: Table {
+
+    enum Columns: String, TableColumn {
+        case accountId = "account_id"
+        case tagId = "tag_id"
+        case name
+        case description
+        case background
+        case foreground
+        case colorId = "color_id"
+        case isSelected = "is_selected"
+
+        var dataType: ColumnDataType {
+            switch self {
+            case .accountId: return .text([.notNull])
+            case .tagId: return .text([.primaryKey(autoIncrement: false), .unique, .notNull])
+            case .name: return .text([.notNull])
+            case .description: return .text([])
+            case .background: return .text([])
+            case .foreground: return .text([])
+            case .colorId: return .text([])
+            case .isSelected: return .integer([])
+            }
+        }
+    }
+
+    typealias ColumnType = Columns
+    typealias EntityType = GoogleCalendarEventTagTable.Entity
+    static var tableName: String { GoogleCalendarEventTagTable.tableName }
+
+    static func scalar(_ entity: EntityType, for column: Columns) -> (any ScalarType)? {
+        switch column {
+        case .accountId: return entity.accountId
+        case .tagId: return entity.tag.id
+        case .name: return entity.tag.name
+        case .description: return entity.tag.description
+        case .background: return entity.tag.backgroundColorHex
+        case .foreground: return entity.tag.foregroundColorHex
+        case .colorId: return entity.tag.colorId
+        case .isSelected: return entity.tag.isSelected ?? false
+        }
     }
 }
 
@@ -411,12 +593,18 @@ extension GoogleCalendarRepositoryImple_Tests {
     }
     
     private var dummyOldEventListsAndEvents: (GoogleCalendar.EventOriginValueList, GoogleCalendar.Event) {
-        
+        return self.dummyOldEventListAndEvent("time_is_date")
+    }
+
+    private func dummyOldEventListAndEvent(
+        _ eventId: String
+    ) -> (GoogleCalendar.EventOriginValueList, GoogleCalendar.Event) {
+
         let start = GoogleCalendar.EventOrigin.GoogleEventTime()
             |> \.date .~ "2025-04-11"
         let end = GoogleCalendar.EventOrigin.GoogleEventTime()
             |> \.date .~ "2025-04-12"
-        let origin = GoogleCalendar.EventOrigin(id: "time_is_date", summary: "old")
+        let origin = GoogleCalendar.EventOrigin(id: eventId, summary: "old")
             |> \.start .~ start
             |> \.end .~ end
             |> \.colorId .~ "color"
@@ -427,13 +615,289 @@ extension GoogleCalendarRepositoryImple_Tests {
         let list = GoogleCalendar.EventOriginValueList()
             |> \.timeZone .~ timeZone
             |> \.items .~ [origin]
-        
+
         return (list, originEvent)
     }
-    
-    private func saveCache() async throws {
-        let (list, event) = self.dummyOldEventListsAndEvents
+
+    private func saveCache(_ eventId: String = "time_is_date") async throws {
+        let (list, event) = self.dummyOldEventListAndEvent(eventId)
         try await self.cacheStorage.updateEvents("c_id", list, [event], accountId: self.testAccountId)
+    }
+}
+
+// MARK: - write events
+
+extension GoogleCalendarRepositoryImple_Tests {
+
+    @Test func repository_updateEvent_sendsPatchWithOnlyEditedFields() async throws {
+        try await self.runTestWithOpenClose("test_google_event_update_1") {
+            // given
+            let expect = self.expectConfirm("이벤트 수정 요청")
+            let repository = self.makeRepository()
+            let params = GoogleCalendar.EventEditParams()
+                |> \.summary .~ "updated summary"
+
+            // when
+            let updated = try await self.firstOutput(
+                expect, for: repository.updateEvent("c_id", "Asia/Seoul", "time_is_date", params)
+            )
+
+            // then
+            #expect(self.stubRemote.didRequestedMethod == .patch)
+            let requestedParams = try #require(self.stubRemote.didRequestedParams)
+            #expect(requestedParams["summary"] as? String == "updated summary")
+            #expect(requestedParams["start"] == nil)
+            #expect(requestedParams["end"] == nil)
+            #expect(requestedParams["location"] == nil)
+            #expect(requestedParams["description"] == nil)
+            #expect(requestedParams["colorId"] == nil)
+            #expect(requestedParams["recurrence"] == nil)
+            #expect(requestedParams["attendees"] == nil)
+            #expect(requestedParams["conferenceData"] == nil)
+            #expect(requestedParams["attachments"] == nil)
+
+            self.assertUpdatedEventOrigin(updated)
+        }
+    }
+
+    @Test func repository_updateEvent_updatesLocalCache() async throws {
+        try await self.runTestWithOpenClose("test_google_event_update_2") {
+            // given
+            try await self.saveCache()
+            let expect = self.expectConfirm("이벤트 수정 후 로컬 캐시 갱신")
+            let repository = self.makeRepository()
+            let params = GoogleCalendar.EventEditParams()
+                |> \.summary .~ "updated summary"
+
+            // when
+            let _ = try await self.firstOutput(
+                expect, for: repository.updateEvent("c_id", "Asia/Seoul", "time_is_date", params)
+            )
+            let cached = try await self.cacheStorage.loadEventDetail("time_is_date", accountId: self.testAccountId)
+
+            // then
+            self.assertUpdatedEventOrigin(cached)
+        }
+    }
+
+    @Test func repository_updateEvent_createsTimesCacheEntry_forAllDayEvent() async throws {
+        try await self.runTestWithOpenClose("test_google_event_update_3") {
+            // given
+            let expect = self.expectConfirm("all-day 이벤트 수정 후 기간조회용 캐시 생성")
+            let repository = self.makeRepository()
+            let params = GoogleCalendar.EventEditParams()
+                |> \.summary .~ "updated summary"
+
+            // when
+            let _ = try await self.firstOutput(
+                expect, for: repository.updateEvent("c_id", "Asia/Seoul", "time_is_date", params)
+            )
+            let cachedEvents = try await self.cacheStorage.loadEvents("c_id", self.range, accountId: self.testAccountId)
+
+            // then
+            #expect(cachedEvents.map { $0.eventId } == ["time_is_date"])
+        }
+    }
+
+    @Test func repository_updateEventToAllDay_sendsNullDateTime() async throws {
+        try await self.runTestWithOpenClose("test_google_event_update_to_allday") {
+            // given
+            let expect = self.expectConfirm("시간 있는 이벤트를 종일로 바꾸면 dateTime 을 null 로 지운다")
+            let repository = self.makeRepository()
+            let start = GoogleCalendar.EventOrigin.GoogleEventTime() |> \.date .~ "2026-08-15"
+            let end = GoogleCalendar.EventOrigin.GoogleEventTime() |> \.date .~ "2026-08-16"
+            let params = GoogleCalendar.EventEditParams()
+                |> \.start .~ start
+                |> \.end .~ end
+
+            // when
+            let _ = try await self.firstOutput(
+                expect, for: repository.updateEvent("c_id", "Asia/Seoul", "time_is_date", params)
+            )
+
+            // then
+            let requestedParams = try #require(self.stubRemote.didRequestedParams)
+            let startJson = try #require(requestedParams["start"] as? [String: Any])
+            #expect(startJson["date"] as? String == "2026-08-15")
+            #expect(startJson["dateTime"] is NSNull)
+            let endJson = try #require(requestedParams["end"] as? [String: Any])
+            #expect(endJson["date"] as? String == "2026-08-16")
+            #expect(endJson["dateTime"] is NSNull)
+        }
+    }
+
+    @Test func repository_updateEventToTimed_sendsNullDate() async throws {
+        try await self.runTestWithOpenClose("test_google_event_update_to_timed") {
+            // given
+            let expect = self.expectConfirm("종일 이벤트를 시간 있는 이벤트로 바꾸면 date 를 null 로 지운다")
+            let repository = self.makeRepository()
+            let start = GoogleCalendar.EventOrigin.GoogleEventTime()
+                |> \.dateTime .~ "2026-08-15T10:00:00+09:00"
+                |> \.timeZone .~ "Asia/Seoul"
+            let end = GoogleCalendar.EventOrigin.GoogleEventTime()
+                |> \.dateTime .~ "2026-08-15T11:00:00+09:00"
+                |> \.timeZone .~ "Asia/Seoul"
+            let params = GoogleCalendar.EventEditParams()
+                |> \.start .~ start
+                |> \.end .~ end
+
+            // when
+            let _ = try await self.firstOutput(
+                expect, for: repository.updateEvent("c_id", "Asia/Seoul", "time_is_date", params)
+            )
+
+            // then
+            let requestedParams = try #require(self.stubRemote.didRequestedParams)
+            let startJson = try #require(requestedParams["start"] as? [String: Any])
+            #expect(startJson["dateTime"] as? String == "2026-08-15T10:00:00+09:00")
+            #expect(startJson["date"] is NSNull)
+            let endJson = try #require(requestedParams["end"] as? [String: Any])
+            #expect(endJson["dateTime"] as? String == "2026-08-15T11:00:00+09:00")
+            #expect(endJson["date"] is NSNull)
+        }
+    }
+
+    @Test func repository_updateEvent_sendsRecurrenceArray() async throws {
+        try await self.runTestWithOpenClose("test_google_event_update_recurrence_1") {
+            // given
+            let expect = self.expectConfirm("반복 규칙을 실은 patch 요청")
+            let repository = self.makeRepository()
+            let params = GoogleCalendar.EventEditParams()
+                |> \.recurrence .~ ["RRULE:FREQ=DAILY;COUNT=3", "EXDATE;TZID=Asia/Seoul:20260101T090000"]
+
+            // when
+            let _ = try await self.firstOutput(
+                expect, for: repository.updateEvent("c_id", "Asia/Seoul", "time_is_date", params)
+            )
+
+            // then
+            let requestedParams = try #require(self.stubRemote.didRequestedParams)
+            let recurrence = requestedParams["recurrence"] as? [String]
+            #expect(recurrence == ["RRULE:FREQ=DAILY;COUNT=3", "EXDATE;TZID=Asia/Seoul:20260101T090000"])
+        }
+    }
+
+    @Test func repository_updateEvent_whenRecurrenceIsNil_omitsKey() async throws {
+        try await self.runTestWithOpenClose("test_google_event_update_recurrence_2") {
+            // given
+            let expect = self.expectConfirm("반복을 안 건드리면 patch body 에 recurrence 키가 없다")
+            let repository = self.makeRepository()
+            let params = GoogleCalendar.EventEditParams()
+                |> \.summary .~ "updated summary"
+
+            // when
+            let _ = try await self.firstOutput(
+                expect, for: repository.updateEvent("c_id", "Asia/Seoul", "time_is_date", params)
+            )
+
+            // then
+            let requestedParams = try #require(self.stubRemote.didRequestedParams)
+            #expect(requestedParams["recurrence"] == nil)
+        }
+    }
+
+    @Test func repository_updateEvent_whenResponseIsSeriesMaster_doesNotCacheAsInstanceDetail() async throws {
+        try await self.runTestWithOpenClose("test_google_event_update_4") {
+            // given — "전체 일정" 저장은 시리즈 마스터(recurringEventId 없음 + recurrence 있음)를 돌려준다
+            let expect = self.expectConfirm("시리즈 마스터 응답은 인스턴스 캐시로 남기지 않는다")
+            let repository = self.makeRepository()
+            let params = GoogleCalendar.EventEditParams()
+                |> \.summary .~ "updated all"
+
+            // when
+            let updated = try await self.firstOutput(
+                expect, for: repository.updateEvent("c_id", "Asia/Seoul", "series1", params)
+            )
+
+            // then
+            #expect(updated?.recurringEventId == nil)
+            #expect(updated?.recurrence != nil)
+            await #expect(throws: (any Error).self) {
+                _ = try await self.cacheStorage.loadEventDetail("series1", accountId: self.testAccountId)
+            }
+        }
+    }
+
+    @Test func repository_removeEvent_sendsDeleteRequest() async throws {
+        try await self.runTestWithOpenClose("test_google_event_remove_1") {
+            // given
+            let expect = self.expectConfirm("이벤트 삭제 요청")
+            let repository = self.makeRepository()
+
+            // when
+            try await self.firstOutput(expect, for: repository.removeEvent("c_id", "time_is_date"))
+
+            // then
+            #expect(self.stubRemote.didRequestedMethod == .delete)
+        }
+    }
+
+    @Test func repository_removeEvent_removesFromLocalCache() async throws {
+        try await self.runTestWithOpenClose("test_google_event_remove_2") {
+            // given
+            try await self.saveCache()
+            let beforeRemove = try await self.cacheStorage.loadEventDetail("time_is_date", accountId: self.testAccountId)
+            #expect(beforeRemove.id == "time_is_date")
+
+            let expect = self.expectConfirm("이벤트 삭제 후 로컬 캐시 제거")
+            let repository = self.makeRepository()
+
+            // when
+            try await self.firstOutput(expect, for: repository.removeEvent("c_id", "time_is_date"))
+
+            // then
+            await #expect(throws: (any Error).self) {
+                _ = try await self.cacheStorage.loadEventDetail("time_is_date", accountId: self.testAccountId)
+            }
+        }
+    }
+
+    @Test func repository_updateEvent_whenRemoteFails_keepsLocalCacheUntouched() async throws {
+        try await self.runTestWithOpenClose("test_google_event_update_fail") {
+            // given
+            try await self.saveCache("fail_event")
+            let repository = self.makeRepository()
+            let params = GoogleCalendar.EventEditParams()
+                |> \.summary .~ "updated summary"
+
+            // when
+            let expect = self.expectConfirm("이벤트 수정 실패")
+            let error = try await self.failure(
+                expect, for: repository.updateEvent("c_id", "Asia/Seoul", "fail_event", params)
+            )
+
+            // then
+            #expect(error != nil)
+            let cached = try await self.cacheStorage.loadEventDetail("fail_event", accountId: self.testAccountId)
+            #expect(cached.summary == "old")
+        }
+    }
+
+    @Test func repository_removeEvent_whenRemoteFails_keepsLocalCacheUntouched() async throws {
+        try await self.runTestWithOpenClose("test_google_event_remove_fail") {
+            // given
+            try await self.saveCache("fail_event")
+            let repository = self.makeRepository()
+
+            // when
+            let expect = self.expectConfirm("이벤트 삭제 실패")
+            let error = try await self.failure(expect, for: repository.removeEvent("c_id", "fail_event"))
+
+            // then
+            #expect(error != nil)
+            let cached = try await self.cacheStorage.loadEventDetail("fail_event", accountId: self.testAccountId)
+            #expect(cached.id == "fail_event")
+        }
+    }
+
+    private func assertUpdatedEventOrigin(_ origin: GoogleCalendar.EventOrigin?) {
+        #expect(origin?.id == "time_is_date")
+        #expect(origin?.summary == "하루죙일")
+        #expect(origin?.description == "description")
+        #expect(origin?.location == "Hangang Kukdong Apartments, 38-6 Toseong-ro, Songpa District, Seoul, South Korea")
+        #expect(origin?.colorId == "2")
+        #expect(origin?.recurringEventId == "origin")
+        #expect(origin?.status == .confirmed)
     }
 }
 
@@ -515,6 +979,31 @@ private struct DummyResponse {
                 method: .get,
                 endpoint: GoogleCalendarEndpoint.event(calendarId: "c_id", eventId: "private_event"),
                 resultJsonString: .success(self.privateEvent)
+            ),
+            .init(
+                method: .patch,
+                endpoint: GoogleCalendarEndpoint.event(calendarId: "c_id", eventId: "time_is_date"),
+                resultJsonString: .success(self.dummyNewEvent("time_is_date"))
+            ),
+            .init(
+                method: .patch,
+                endpoint: GoogleCalendarEndpoint.event(calendarId: "c_id", eventId: "series1"),
+                resultJsonString: .success(self.dummyNewEvent("series1", isRepeatOrigin: true))
+            ),
+            .init(
+                method: .delete,
+                endpoint: GoogleCalendarEndpoint.event(calendarId: "c_id", eventId: "time_is_date"),
+                resultJsonString: .success("")
+            ),
+            .init(
+                method: .patch,
+                endpoint: GoogleCalendarEndpoint.event(calendarId: "c_id", eventId: "fail_event"),
+                resultJsonString: .failure(RuntimeError("failed"))
+            ),
+            .init(
+                method: .delete,
+                endpoint: GoogleCalendarEndpoint.event(calendarId: "c_id", eventId: "fail_event"),
+                resultJsonString: .failure(RuntimeError("failed"))
             )
         ]
     }

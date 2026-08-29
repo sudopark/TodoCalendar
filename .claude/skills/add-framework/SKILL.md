@@ -14,7 +14,7 @@ description: Use when creating a new framework (module) in this project — 신�
   - 테스트 없는 지원 모듈: `Project.framework(...)`
 - `<위치>/<Name>/<Name>.h` — **모듈 루트에 헤더 파일 필수** (팩토리가 `Headers.headers(public:)`로 요구).
 - `Sources/`, `Tests/` 디렉토리 생성. 테스트 배치는 testability §8.
-- 의존성은 `.project(target:path: .relativeToCurrentFile("../../<Layer>/<Module>"))` 상대경로. Presentation Scene 표준 세트: `Common3rdParty`·`CommonPresentation`·`Domain`·`Extensions`·`Scenes` (선례: `Presentations/AIAgentScene/Project.swift`).
+- 의존성은 `.project(target:path: .relativeToRoot("<Layer>/<Module>"))` — 레포 루트 기준. **`.relativeToCurrentFile`은 쓰지 않는다** (#794): 직렬화된 매니페스트에 `#file` 절대경로가 `callerPath`로 실리는데, tuist의 전역 manifest 캐시 키에는 매니페스트 위치가 없어서 같은 레포의 다른 체크아웃(워크트리·self-hosted CI 러너)과 충돌하면 의존 경로가 남의 트리로 샌다. Presentation Scene 표준 세트: `Common3rdParty`·`CommonPresentation`·`Domain`·`Extensions`·`Scenes` (선례: `Presentations/AIAgentScene/Project.swift`).
 - Service 프레임워크(Domain 프로토콜의 플랫폼·서드파티 SDK 결합 구현체): 위치 `Services/<Name>`, 네이밍 `XxxService`(여러 SDK를 묶는 성격이면 `XxxServices`), 의존 표준 세트 `Common3rdParty`·`Domain`·`Extensions` (선례: `Services/AuthService/Project.swift`). 분할 축은 의존 SDK 성격 — auth / MapKit(PlaceService) / AVFoundation(SpeechService) / 기타 1st party(FirstPartyServices) / 외부 서드파티(ExternalServices). 프로토콜은 Domain 잔류, 조립은 앱 타겟(ApplicationRootBuilder·Factories). 단일 소비자 SPM은 Common3rdParty가 아니라 해당 서비스가 `.external`로 직접 의존 (선례: ExternalServices ↔ SwiftLinkPreview).
 
 ## 2. 등록

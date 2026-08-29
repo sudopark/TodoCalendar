@@ -8,21 +8,23 @@
 
 import SwiftUI
 import Domain
+import Extensions
 import CommonPresentation
 
 
-// 사용량/일일 한도 미니 게이지 — 키보드 입력·커맨드 시트 공유 (#713)
-// 플랜 칩·top-up 잔량·하향 예약 안내는 값이 있을 때만 붙는다 (#720)
 struct AIAgentUsageGaugeView: View {
 
     @Environment(ViewAppearance.self) private var appearance
 
     private let usage: AIAgentUsage
+    // 플랜 정보 정본은 billingUserPlan 키 — usage 에서 흡수하지 않고 별도로 받는다 (#739)
+    private let userPlan: BillingUserPlan?
     // 사용률 90% 이상은 경고 틴트 — 한도 임박 알림을 게이지가 겸한다
     private static let warnThreshold: Double = 0.9
 
-    init(usage: AIAgentUsage) {
+    init(usage: AIAgentUsage, userPlan: BillingUserPlan?) {
         self.usage = usage
+        self.userPlan = userPlan
     }
 
     private var isNearLimit: Bool { self.usage.usedRatio >= Self.warnThreshold }
@@ -59,75 +61,67 @@ struct AIAgentUsageGaugeView: View {
 
                 Spacer()
 
-                if let plan = self.usage.plan {
-                    self.planChipView(plan)
+                if let plan = self.userPlan?.planId {
+                    BillingPlanChipView(plan: plan)
                 }
             }
 
-            if let remaining = self.usage.topupRemaining, remaining > 0 {
+            if self.usage.isLimitExceeded, let resetsAt = self.usage.resetsAt {
+                self.resetCountdownView(resetsAt)
+            }
+
+            if let remaining = self.userPlan?.topupRemaining, remaining > 0 {
                 Text("aiAgent::usage::topupRemaining".localized(with: remaining.formatted()))
                     .font(self.appearance.fontSet.size(12).asFont)
                     .foregroundStyle(self.appearance.colorSet.text2.asColor)
             }
 
-            if let change = self.usage.scheduledPlanChange {
-                self.scheduledChangeView(change)
+            if let change = self.userPlan?.scheduledChange {
+                BillingScheduledChangeView(change: change)
             }
         }
     }
 }
 
 
-// MARK: - plan chip
+// MARK: - 한도 리셋 카운트다운
 
-private extension AIAgentUsageGaugeView {
+extension AIAgentUsageGaugeView {
 
-    func planChipView(_ plan: BillingPlanId) -> some View {
-        Text(plan.name)
-            .font(self.appearance.fontSet.size(10, weight: .semibold).asFont)
-            .foregroundStyle(
-                plan == .free
-                    ? self.appearance.colorSet.text2.asColor
-                    : self.appearance.colorSet.primaryBtnText.asColor
+    // 매 초 도는 대신 표기가 바뀌는 시각에만 다시 그린다
+    struct ResetSchedule: TimelineSchedule {
+
+        private let resetsAt: Date
+
+        init(resetsAt: Date) {
+            self.resetsAt = resetsAt
+        }
+
+        func entries(from startDate: Date, mode: Mode) -> AnySequence<Date> {
+            let resetsAt = self.resetsAt
+            return AnySequence(
+                sequence(first: startDate) { $0.nextCountdownTick(until: resetsAt) }
             )
-            .padding(.horizontal, spacing: .xsmall)
-            .padding(.vertical, spacing: .xxsmall)
-            .background(
-                RoundedRectangle(cornerRadius: Metric.Radius.chip)
-                    .fill(
-                        plan == .free
-                            ? self.appearance.colorSet.bg1.asColor
-                            : self.appearance.colorSet.accentAI.asColor
-                    )
-            )
-    }
-
-}
-
-private extension BillingPlanId {
-
-    var name: String {
-        switch self {
-        case .free:     return "aiAgent::plan::free".localized()
-        case .standard: return "aiAgent::plan::standard".localized()
-        case .lifetime: return "aiAgent::plan::lifetime".localized()
         }
     }
 }
 
 
-// MARK: - scheduled plan change
-
 private extension AIAgentUsageGaugeView {
 
-    func scheduledChangeView(_ change: BillingUserPlan.ScheduledChange) -> some View {
-        HStack(alignment: .top, spacing: Metric.Spacing.xxsmall) {
-            Image(systemName: "info.circle")
-            Text("aiAgent::usage::planChangeScheduled".localized(
-                with: change.effectiveAt.text("date_form::MMM_d".localized()), change.planId.name
-            ))
+    func resetCountdownView(_ resetsAt: Date) -> some View {
+        TimelineView(ResetSchedule(resetsAt: resetsAt)) { context in
+            // 디스플레이 링크 없는 정적 렌더(스냅샷 캡처)에선 TimelineView 가 미래 스케줄 시각을
+            // context.date 로 줄 수 있어 벽시계로 클램프 — 온스크린에선 현재를 앞서지 않아 no-op
+            let now = min(context.date, Date())
+            if let remainingText = resetsAt.timeIntervalSince(now).countdownText() {
+                HStack(alignment: .top, spacing: Metric.Spacing.xxsmall) {
+                    Image(systemName: "hourglass")
+                    Text("aiAgent::usage::resetsIn".localized(with: remainingText))
+                }
+                .font(self.appearance.fontSet.size(12).asFont)
+                .foregroundStyle(self.appearance.colorSet.accentWarn.asColor)
+            }
         }
-        .font(self.appearance.fontSet.size(12).asFont)
-        .foregroundStyle(self.appearance.colorSet.accentInfo.asColor)
     }
 }

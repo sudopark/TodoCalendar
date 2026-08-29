@@ -1,0 +1,43 @@
+Les vostres tasques i la vostra agenda, en un sol calendari.
+
+L'agenda viu en un calendari. Les tasques viuen en un altre lloc. Per saber què us porta el mes i què us queda per fer, acabeu mirant en dos llocs.
+
+To-do Calendar manté totes dues coses al mateix calendari. Una cita se situa al dia en què passa, i una tasca es queda fins que la marqueu. Les tasques sense cap hora assignada tampoc no desapareixen.
+
+Funciona sense compte i sense connexió. Inicieu sessió només quan vulgueu tenir les dades amb còpia de seguretat i compartides entre els vostres dispositius.
+
+■ Un calendari, els dos tipus de feina
+· Les cites i les tasques conviuen al mateix lloc, amb el color dels tipus d'esdeveniment que creeu vosaltres
+· Les tasques pendents no queden enterrades en una data ja passada — es queden fixades a dalt del calendari
+· Trieu una data i l'aplicació us munta la repetició que hi correspon — cada dijous, el tercer dijous de cada mes, fins i tot una data anual del calendari lunar
+· Cada esdeveniment pot portar ubicació, enllaç, nota i recordatoris
+· Fixeu allò que no us podeu perdre com a esdeveniment principal i es queda a dalt, mireu el dia que mireu
+· Compartiu un dia, una setmana o un mes com a text o com a targeta d'imatge
+
+■ Entrada ràpida amb IA
+«dinar amb la Sara divendres al migdia», «mou el dentista a dimarts vinent», «marca la bugada com a feta».
+Descriviu-ho tal com ho diríeu. Cap formulari per omplir, cap data per triar camp a camp.
+· Veu, teclat i llegir des d'una imatge — fotografieu un horari de classe o el cartell d'un acte i el text es converteix en esdeveniments
+· Des de la Siri, el botó d'Acció, un widget, el Centre de Control o el full de compartir, sense obrir l'aplicació
+· No només afegir: també moure hores, canviar el nom, completar i esborrar, diverses coses alhora
+· Tot allò que esborra o canvia alguna cosa us ensenya exactament què està a punt de fer i espera que ho aproveu
+· L'entrada ràpida amb IA requereix haver iniciat sessió
+
+■ Veure el dia sense obrir l'aplicació
+· Widgets de la pantalla d'inici — avui i el que ve després, la llista d'esdeveniments, AVUI, el vostre esdeveniment principal, el mes i les setmanes, i combinacions que n'ajunten dos
+· Completeu una tasca directament des d'un widget
+· Widgets de pantalla bloquejada per a l'esdeveniment següent i el que queda del dia
+· Un esdeveniment a punt de començar fa el compte enrere a la pantalla bloquejada i a la Dynamic Island
+· Poseu Afegeix amb IA al Centre de Control i amb un gest arribeu a la pantalla d'entrada des d'on sigueu
+
+■ Porteu-hi els altres calendaris
+· Google Calendar — connecteu diversos comptes alhora. Cada calendari manté el color que li vau donar a Google, i els assistents, els enllaços de reunió i els adjunts hi són, editables al moment
+· Apple Calendar — els calendaris que ja teniu a l'iPhone, amb un sol permís
+· Trieu què es mostra, calendari a calendari, des de la llista de tipus d'esdeveniment
+· Desconnecteu i no s'esborra res del compte de Google ni del dispositiu
+
+■ A la vostra manera
+· Quant detall mostra cada esdeveniment, la mida del text i els colors dels esdeveniments: cada canvi es previsualitza a l'instant
+· Tema de color i tema del widget, el primer dia de la setmana i els dies destacats
+· Festius per país, calendari lunar, format de 24 hores i fus horari
+· Deixeu fixats el tipus d'esdeveniment i l'hora de recordatori amb què arrenquen els esdeveniments nous

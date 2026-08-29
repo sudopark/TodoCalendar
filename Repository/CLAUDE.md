@@ -60,24 +60,23 @@ extension TodoEvent: RowValueType {
 }
 ```
 
+### 컬럼 순서 = 읽기 순서 (위치 결합)
+
+`Columns` enum의 **case 선언 순서가 곧 물리 컬럼 순서**이고, `init(_ cursor:)`는 `cursor.next()`를 부른 횟수로 위치를 센다. 둘이 어긋나면 크래시가 아니라 **조용한 nil**이다 — 값은 SQLite 저장 타입으로 만들어진 뒤 `as? T`로 캐스팅되므로, 타입이 안 맞거나 컬럼 수를 넘어가면 그냥 nil이 된다.
+
+**한 `RowValueType.init(cursor)`를 여러 테이블이 공유하면 컬럼 추가가 다른 테이블을 깨뜨린다.** `TodoEvent.init(cursor)`는 `TodoEventTable`과 `PendingDoneTodoEventTable` 둘이 쓴다 — 한쪽에 컬럼을 붙이며 그 init에 읽기를 더하면 다른 쪽은 읽기만 늘어 그 지점부터 전부 밀린다 (#355·#544 → #835). 컬럼 추가 시 그 `init(cursor)`를 쓰는 **모든 테이블**을 grep해 각각의 `Columns`도 함께 갱신한다.
+
 ### DB 마이그레이션
 
-**두 가지를 반드시 함께 변경:**
+**세 위치를 반드시 함께 변경한다:**
 
 1. `AppEnvironment.dbVersion` 증가 (in `TodoCalendarApp`)
-2. 해당 `Table`의 `migrateStatement(for version:)`에 case 추가
+2. 해당 `Table`의 `migrateStatement(for version:)`에 case 추가 — 받는 숫자는 **떠나는 버전**이다 (`case 5`는 5 → 6에서 돈다)
+3. `AppDataMigrationImple` — `runDBMigration`의 switch에 case 추가 + `runMigrationVersionNtoM` 메서드 작성
 
-**중앙 오케스트레이터**: `SQLiteLocalStorage+Migration.swift`가 버전별로 모든 테이블의 마이그레이션을 실행.
+**3번이 빠지면 `migrateStatement`는 호출조차 되지 않는다.** 컴파일도 테스트도 통과하고 마이그레이션만 조용히 안 돈다.
 
-```swift
-// 예: v5 → v6 (repeatingTurn 컬럼 추가)
-static func migrateStatement(for version: Int32) -> String? {
-    switch version {
-    case 5: return Self.addColumnStatement(.repeatingTurn)
-    default: return nil
-    }
-}
-```
+절차 상세·버전 이력·컬럼 순서 변경(temp 테이블 재생성)은 [`docs/spec/infrastructure.md §5`](../docs/spec/infrastructure.md) 정본.
 
 ---
 
@@ -160,21 +159,12 @@ sequenceDiagram
 
 ### 테스트 인프라 (`Tests/Common/`)
 
-- **`BaseLocalTests: BaseTestCase`** — 테스트용 SQLite DB를 캐시 디렉터리에 별도 파일로 생성하고, 테스트 종료 시 삭제. 실제 앱의 DB에는 영향을 주지 않음.
+- **`BaseLocalTests: BaseTestCase`** — 테스트용 SQLite DB를 캐시 디렉터리에 별도 파일로 생성하고, 테스트 종료 시 닫은 뒤 삭제. 실제 앱의 DB에는 영향을 주지 않음.
 - **`LocalTestable` 프로토콜** — `runTestWithOpenClose(_:_:)` 헬퍼로 DB 생성→테스트→삭제를 자동화. Swift Testing (`@Suite`) 사용 시 채택.
 
-```swift
-// BaseLocalTests: 캐시 디렉터리에 테스트 전용 DB 파일 생성
-func testDBPath() -> String {
-    return FileManager.default
-        .url(for: .cachesDirectory, ...)
-        .appendingPathComponent("\(self.fileName).db").path
-}
-// tearDown 시 DB 파일 삭제 → 앱 데이터와 완전 격리
-override func tearDownWithError() throws {
-    try? FileManager.default.removeItem(atPath: self.testDBPath())
-}
-```
+**DB 파일명은 `fileName`에 테스트마다 다른 UUID를 붙이고, tearDown은 커넥션을 닫은 뒤 파일을 지운다.** 고정 파일명 + 미close 조합이면 앞 테스트의 커넥션이 살아 있는 채로 뒤 테스트가 같은 vnode를 열어 프로세스가 죽는다 (원인·측정치는 `docs/troubleshooting/2026-08-24-local-db-tests-random-crash.md`).
+
+`fileName` 지정은 `super.setUpWithError()` **앞**에 둔다 — 뒤에 두면 파일명이 기본값으로 남아 로그에서 어느 테스트의 DB인지 추적이 안 된다 (UUID 덕에 충돌 자체는 안 난다).
 
 ### Local Repository 테스트
 
@@ -187,9 +177,9 @@ override func tearDownWithError() throws {
 ```swift
 // 예: TodoLocalRepositoryImpleTests
 class TodoLocalRepositoryImpleTests: BaseLocalTests {
-    // setUp: 캐시 디렉터리에 test.db 생성
+    // setUp: 캐시 디렉터리에 todos_<UUID>.db 생성
     // 실제 SQLite에 TodoEvent 저장 → 조회하여 검증
-    // tearDown: test.db 파일 삭제
+    // tearDown: 커넥션 close 후 그 파일 삭제
 }
 ```
 

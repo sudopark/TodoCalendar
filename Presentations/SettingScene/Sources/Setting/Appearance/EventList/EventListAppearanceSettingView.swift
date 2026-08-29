@@ -8,13 +8,14 @@
 import SwiftUI
 import Combine
 import Domain
+import Extensions
 import CommonPresentation
 
 
 @Observable final class EventListAppearanceSettingViewState {
     
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
     var sampleModel: EventListAppearanceSampleModel?
     var additionalFontSizeModel: EventTextAdditionalSizeModel = .init(0)
     var showHolidayName: Bool = false
@@ -40,42 +41,42 @@ import CommonPresentation
             .sink(receiveValue: { [weak self] model in
                 self?.sampleModel = model
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.eventFontIncreasedSizeModel
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] model in
                 self?.additionalFontSizeModel = model
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.isShowHolidayName
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] flag in
                 self?.showHolidayName = flag
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.isShowLunarCalendarDate
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] flag in
                 self?.showLunarCalendarDate = flag
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.isShowTimeWith24HourForm
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] flag in
                 self?.is24hourTimeForm = flag
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.showUncompletedTodo
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] show in
                 self?.showUncompletedTodos = show
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

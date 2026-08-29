@@ -6,15 +6,15 @@ let project = Project.framework(name: "TestDoubles",
                                 iOSTargetVersion: "17.0",
                                 dependencies: [
                                     .project(target: "Common3rdParty",
-                                             path: .relativeToCurrentFile("../../Supports/Common3rdParty")),
+                                             path: .relativeToRoot("Supports/Common3rdParty")),
                                     .project(target: "Domain",
-                                             path: .relativeToCurrentFile("../../Domain")),
+                                             path: .relativeToRoot("Domain")),
                                     .project(target: "Extensions",
-                                             path: .relativeToCurrentFile("../../Supports/Extensions")),
+                                             path: .relativeToRoot("Supports/Extensions")),
                                     .project(target: "Scenes",
-                                             path: .relativeToCurrentFile("../../Presentations/Scenes")),
+                                             path: .relativeToRoot("Presentations/Scenes")),
                                     .project(target: "UnitTestHelpKit",
-                                             path: .relativeToCurrentFile("../../Supports/UnitTestHelpKit")),
+                                             path: .relativeToRoot("Supports/UnitTestHelpKit")),
                                     .xctest
                                 ])
 

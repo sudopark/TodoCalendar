@@ -34,7 +34,7 @@ enum SelectEndOptionType: Int {
 @Observable final class SelectEventRepeatOptionViewState {
     
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
     
     var optionList: [[SelectRepeatingOptionModel]] = []
     var selectedOptionId: String?
@@ -55,28 +55,28 @@ enum SelectEndOptionType: Int {
             .sink(receiveValue: { [weak self] text in
                 self?.repeatStartTimeText = text
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.options
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] list in
                 self?.optionList = list
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.selectedOptionId
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] id in
                 self?.selectedOptionId = id
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.defaultRepeatEndDate
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] date in
                 self?.selectedEndDate = date
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.repeatEndOption
             .receive(on: RunLoop.main)
@@ -94,14 +94,14 @@ enum SelectEndOptionType: Int {
                     self?.selectEndOptionType = .after
                 }
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.isNoRepeatOption
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] flag in
                 self?.isNoRepeatOption = flag
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

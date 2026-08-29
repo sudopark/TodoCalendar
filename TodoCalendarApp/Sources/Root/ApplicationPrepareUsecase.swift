@@ -7,11 +7,13 @@
 
 import Foundation
 import Combine
+@preconcurrency import ActivityKit
 import Domain
 import CommonPresentation
 import Extensions
 import Repository
 import SQLiteService
+import AdService
 
 struct ApplicationPrepareResult {
     
@@ -41,11 +43,13 @@ final class ApplicationPrepareUsecaseImple: ApplicationPrepareUsecase {
     private let latestAppSettingRepository: any AppSettingRepository
     private let sharedDataStore: SharedDataStore
     private let environmentStorage: any EnvironmentStorage
+    private let coldLaunchHistoryRepository: any AppColdLaunchHistoryRepository
+    private let mobileAdService: any MobileAdService
     private let database: SQLiteService
     private let appDataMigration: AppDataMigrationImple
     private let databasePathFinding: (String?) -> String
 
-    private var cancelBag: Set<AnyCancellable> = []
+    private let cancelBag = CancelBag()
 
     init(
         accountUsecase: any AccountUsecase,
@@ -54,6 +58,8 @@ final class ApplicationPrepareUsecaseImple: ApplicationPrepareUsecase {
         latestAppSettingRepository: any AppSettingRepository,
         sharedDataStore: SharedDataStore,
         environmentStorage: any EnvironmentStorage,
+        coldLaunchHistoryRepository: any AppColdLaunchHistoryRepository,
+        mobileAdService: any MobileAdService,
         database: SQLiteService,
         appDataMigration: AppDataMigrationImple,
         databasePathFinding: @escaping (String?) -> String = { AppEnvironment.dbFilePath(for: $0) }
@@ -64,6 +70,8 @@ final class ApplicationPrepareUsecaseImple: ApplicationPrepareUsecase {
         self.latestAppSettingRepository = latestAppSettingRepository
         self.sharedDataStore = sharedDataStore
         self.environmentStorage = environmentStorage
+        self.coldLaunchHistoryRepository = coldLaunchHistoryRepository
+        self.mobileAdService = mobileAdService
         self.database = database
         self.appDataMigration = appDataMigration
         self.databasePathFinding = databasePathFinding
@@ -74,6 +82,8 @@ final class ApplicationPrepareUsecaseImple: ApplicationPrepareUsecase {
 extension ApplicationPrepareUsecaseImple {
     
     func prepareLaunch() async throws -> ApplicationPrepareResult {
+        self.recordColdLaunch()
+        self.mobileAdService.start()
         let latestLoginAccount = try await self.accountUsecase.prepareLastSignInAccount()
         let appearance = try await self.prepareLatestAppearanceSeting()
 
@@ -91,6 +101,12 @@ extension ApplicationPrepareUsecaseImple {
         )
     }
     
+    private func recordColdLaunch() {
+        var history = self.coldLaunchHistoryRepository.loadColdLaunchHistory()
+        history.recordLaunch(at: Date())
+        self.coldLaunchHistoryRepository.updateColdLaunchHistory(history)
+    }
+
     func prepareEnterBackground() {
         
         let syncResult = self.database.run { db in
@@ -106,6 +122,7 @@ extension ApplicationPrepareUsecaseImple {
     }
     
     func prepareSignedIn(_ auth: Auth) async {
+        await self.endLiveActivities()
         self.sharedDataStore.clearAll {
             $0 != ShareDataKeys.accountInfo.rawValue
             && $0 != ShareDataKeys.externalCalendarAccounts.rawValue
@@ -121,6 +138,7 @@ extension ApplicationPrepareUsecaseImple {
     }
     
     func prepareSignedOut() async {
+        await self.endLiveActivities()
         self.sharedDataStore.clearAll {
             $0 != ShareDataKeys.externalCalendarAccounts.rawValue
         }
@@ -131,6 +149,13 @@ extension ApplicationPrepareUsecaseImple {
             try? await self.prepareDatabase(for: nil)
         } catch let error {
             logger.log(level: .critical, "signOut -> close db failed..: \(error)")
+        }
+    }
+    
+    /// 라이브액티비티는 계정 스코프다 — 안 끄면 전환된 계정 잠금화면에 이전 계정 이벤트가 남는다.
+    private func endLiveActivities() async {
+        for activity in Activity<EventCountdownActivityAttributes>.activities {
+            await activity.end(nil, dismissalPolicy: .immediate)
         }
     }
     

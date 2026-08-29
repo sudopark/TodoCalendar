@@ -1,0 +1,43 @@
+Je taken en je afspraken, op één kalender.
+
+Je afspraken staan in een kalender. Je taken staan ergens anders. Om te zien wat deze maand brengt en wat je nog niet hebt gedaan, kijk je uiteindelijk op twee plekken.
+
+To-do Calendar houdt allebei op dezelfde kalender. Een afspraak staat op de dag waarop hij plaatsvindt, en een taak blijft staan tot je hem afvinkt. Ook taken zonder tijd verdwijnen niet.
+
+De app werkt zonder account en zonder verbinding. Log alleen in als je een back-up van je gegevens wilt en ze wilt delen tussen je apparaten.
+
+■ Eén kalender, twee soorten werk
+· Afspraken en taken staan bij elkaar, met de kleuren van gebeurtenistypen die je zelf maakt
+· Onvoltooide taken blijven niet achter op een datum die al voorbij is — ze blijven boven aan de kalender staan
+· Kies een datum en de app bouwt de bijbehorende herhaling — elke donderdag, de derde donderdag van elke maand, zelfs een jaarlijkse datum in de maankalender
+· Elke gebeurtenis kan een locatie, een link, een notitie en meldingen meedragen
+· Zet wat je niet mag missen vast als belangrijkste gebeurtenis en het blijft boven staan, welke dag je ook bekijkt
+· Deel een dag, een week of een maand als tekst of als afbeeldingskaart
+
+■ AI-snelinvoer
+"vrijdag om twaalf uur lunchen met Sara", "verplaats de tandarts naar volgende week dinsdag", "vink de was af".
+Beschrijf het zoals je het zou zeggen. Geen formulieren invullen, geen datums veld voor veld kiezen.
+· Stem, toetsenbord en lezen vanuit een afbeelding — fotografeer een lesrooster of een poster en de tekst wordt gebeurtenissen
+· Via Siri, de actieknop, een widget, het bedieningspaneel of het deelmenu, zonder de app te openen
+· Niet alleen toevoegen: ook tijden verzetten, hernoemen, afvinken, verwijderen, meerdere tegelijk
+· Alles wat iets verwijdert of wijzigt laat je precies zien wat er staat te gebeuren en wacht op je goedkeuring
+· AI-snelinvoer werkt alleen als je bent ingelogd
+
+■ Je dag zien zonder de app te openen
+· Widgets op het beginscherm — vandaag en wat hierna komt, je gebeurtenissenlijst, VANDAAG, je belangrijkste gebeurtenis, de kalender en de weken, en combinaties die er twee naast elkaar zetten
+· Vink een taak rechtstreeks vanuit een widget af
+· Widgets op het toegangsscherm voor je volgende gebeurtenis en wat er van vandaag over is
+· Een gebeurtenis die bijna begint telt af op het toegangsscherm en in de Dynamic Island
+· Zet Toevoegen met AI in het bedieningspaneel en met één veeg kom je overal vandaan bij het invoerscherm
+
+■ Neem je andere agenda's mee
+· Google Calendar — koppel meerdere accounts tegelijk. Elke kalender houdt de kleur die je hem in Google gaf, en deelnemers, vergaderlinks en bijlagen staan er allemaal in, direct te bewerken
+· Apple Calendar — de kalenders die al op je iPhone staan, met één keer toestemming geven
+· Kies per kalender wat er wordt getoond, in de lijst met gebeurtenistypen
+· Ontkoppel en er wordt niets verwijderd uit je Google-account of van je apparaat
+
+■ Maak het van jou
+· Hoeveel detail elke gebeurtenis toont, de lettergrootte en de kleuren van gebeurtenistekst — elke wijziging zie je meteen
+· Kleurthema en widgetthema, de eerste dag van de week, geaccentueerde dagen
+· Feestdagen per land, de maankalender, 24-uursnotatie en tijdzone
+· Stel in met welk gebeurtenistype en welke meldingstijd nieuwe gebeurtenissen beginnen

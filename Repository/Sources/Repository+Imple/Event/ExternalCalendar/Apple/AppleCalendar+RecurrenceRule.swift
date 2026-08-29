@@ -8,6 +8,7 @@
 
 import Foundation
 import EventKit
+import Domain
 
 
 // MARK: - EKRecurrenceRule → RRULE string
@@ -60,7 +61,6 @@ extension EKRecurrenceRule {
             }
         }
 
-        // WKST=MO is the RFC 5545 default — omit unless it differs
         if firstDayOfTheWeek > 0 && firstDayOfTheWeek != 2 {
             parts.append("WKST=\(Self.weekStartValue(firstDayOfTheWeek))")
         }
@@ -83,6 +83,39 @@ extension EKRecurrenceRule {
 }
 
 
+// MARK: - RRULE string → EKRecurrenceRule
+
+extension EKRecurrenceRule {
+
+    convenience init?(rruleText: String) {
+        // 미지원 키는 되쓸 때 소실되므로 변환 자체를 막는다
+        guard let rule = RRuleParser.parse(rruleText),
+              rule.unsupportedKeys.isEmpty,
+              rule.interval > 0
+        else { return nil }
+
+        let daysOfTheWeek = rule.byDays.isEmpty
+            ? nil
+            : rule.byDays.map {
+                EKRecurrenceDayOfWeek($0.weekDay.ekWeekday, weekNumber: $0.ordinal ?? 0)
+            }
+        let daysOfTheMonth = rule.byMonthDays.isEmpty
+            ? nil : rule.byMonthDays.map { NSNumber(value: $0) }
+        let monthsOfTheYear = rule.byMonths.isEmpty
+            ? nil : rule.byMonths.map { NSNumber(value: $0) }
+        let end = rule.until.map { EKRecurrenceEnd(end: $0) }
+            ?? rule.count.map { EKRecurrenceEnd(occurrenceCount: $0) }
+
+        self.init(
+            recurrenceWith: rule.freq.ekFrequency, interval: rule.interval,
+            daysOfTheWeek: daysOfTheWeek, daysOfTheMonth: daysOfTheMonth,
+            monthsOfTheYear: monthsOfTheYear, weeksOfTheYear: nil,
+            daysOfTheYear: nil, setPositions: nil, end: end
+        )
+    }
+}
+
+
 // MARK: - EKRecurrenceFrequency → RRULE FREQ value
 
 private extension EKRecurrenceFrequency {
@@ -94,6 +127,21 @@ private extension EKRecurrenceFrequency {
         case .monthly: return "MONTHLY"
         case .yearly:  return "YEARLY"
         @unknown default: return "DAILY"
+        }
+    }
+}
+
+
+// MARK: - RRULE FREQ value → EKRecurrenceFrequency
+
+private extension RRule.Frequency {
+
+    var ekFrequency: EKRecurrenceFrequency {
+        switch self {
+        case .DAILY:   return .daily
+        case .WEEKLY:  return .weekly
+        case .MONTHLY: return .monthly
+        case .YEARLY:  return .yearly
         }
     }
 }
@@ -113,6 +161,24 @@ private extension EKWeekday {
         case .friday:    return "FR"
         case .saturday:  return "SA"
         @unknown default: return "MO"
+        }
+    }
+}
+
+
+// MARK: - RRULE day abbreviation → EKWeekday
+
+private extension RRule.ByDay.WeekDay {
+
+    var ekWeekday: EKWeekday {
+        switch self {
+        case .SU: return .sunday
+        case .MO: return .monday
+        case .TU: return .tuesday
+        case .WE: return .wednesday
+        case .TH: return .thursday
+        case .FR: return .friday
+        case .SA: return .saturday
         }
     }
 }

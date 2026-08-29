@@ -15,11 +15,12 @@ final class AIAgentCommandViewController: UIHostingController<AIAgentCommandStag
     var interactor: (any AIAgentCommandSceneInteractor)? { nil }
 
     private let viewModel: any AIAgentCommandViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
 
     init(
         viewModel: any AIAgentCommandViewModel,
-        viewAppearance: ViewAppearance
+        viewAppearance: ViewAppearance,
+        adViewBuilder: (any AdViewBuilder)?
     ) {
         self.viewModel = viewModel
         self.viewAppearance = viewAppearance
@@ -28,7 +29,8 @@ final class AIAgentCommandViewController: UIHostingController<AIAgentCommandStag
         eventHandlers.bind(viewModel)
         var containerView = AIAgentCommandStageContainerView(
             viewAppearance: viewAppearance,
-            eventHandlers: eventHandlers
+            eventHandlers: eventHandlers,
+            adViewBuilder: adViewBuilder
         )
         containerView.stateBinding = { $0.bind(viewModel) }
         super.init(rootView: containerView)

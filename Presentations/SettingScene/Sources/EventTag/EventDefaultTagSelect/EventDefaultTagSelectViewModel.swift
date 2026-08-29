@@ -13,6 +13,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import Scenes
 
 
@@ -58,7 +59,7 @@ final class EventDefaultTagSelectViewModelImple: EventDefaultTagSelectViewModel,
         let selectedId = CurrentValueSubject<EventTagId?, Never>(nil)
     }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private let subject = Subject()
 }
 

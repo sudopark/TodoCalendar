@@ -5,14 +5,14 @@
 #    "Map changes to test schemes" 스텝을 미러링한다. 한쪽 수정 시 반드시 동기화.
 #
 # Usage:
-#   impact-check.sh [--base <ref>]   # git 변경분(작업트리+커밋 vs ref, 기본 develop) 분석
+#   impact-check.sh [--base <ref>]   # git 변경분(작업트리+커밋 vs ref, 기본 origin/develop) 분석
 #   impact-check.sh --stdin          # "STATUS<TAB>PATH" 라인들을 stdin으로 (테스트용)
 set -o pipefail
 
-ALL_SCHEMES="Domain Repository AuthService CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene TodoCalendarApp TodoCalendarAppWidget"
-ALL_PRESENTATION="CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene"
+ALL_SCHEMES="Domain Repository AuthService BillingScenes CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene TodoCalendarApp TodoCalendarAppWidget TodoCalendarAppShare"
+ALL_PRESENTATION="BillingScenes CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene"
 
-MODE="git"; BASE="develop"
+MODE="git"; BASE="origin/develop"
 while [ $# -gt 0 ]; do
   case "$1" in
     --stdin) MODE="stdin"; shift ;;
@@ -44,8 +44,11 @@ fi
 if printf '%s\n' "$FILES" | grep -qE "^Supports/(Common3rdParty|Extensions/Sources|UnitTestHelpKit/Sources)/"; then
   schemes+=($ALL_SCHEMES)
 fi
+if printf '%s\n' "$FILES" | grep -q "^Supports/Extensions/"; then
+  schemes+=("Extensions")
+fi
 if printf '%s\n' "$FILES" | grep -q "^Supports/TestDoubles/Sources/"; then
-  schemes+=("Repository" $ALL_PRESENTATION "TodoCalendarApp" "TodoCalendarAppWidget")
+  schemes+=("Repository" $ALL_PRESENTATION "TodoCalendarApp" "TodoCalendarAppWidget" "TodoCalendarAppShare")
 fi
 if printf '%s\n' "$FILES" | grep -q "^Domain/Sources/"; then
   schemes+=($ALL_SCHEMES)
@@ -54,7 +57,7 @@ if printf '%s\n' "$FILES" | grep -q "^Domain/Tests/"; then
   schemes+=("Domain")
 fi
 if printf '%s\n' "$FILES" | grep -q "^Repository/Sources/"; then
-  schemes+=("Repository" "TodoCalendarApp" "TodoCalendarAppWidget")
+  schemes+=("Repository" "TodoCalendarApp" "TodoCalendarAppWidget" "TodoCalendarAppShare")
 fi
 if printf '%s\n' "$FILES" | grep -q "^Repository/Tests/"; then
   schemes+=("Repository")
@@ -65,14 +68,20 @@ fi
 if printf '%s\n' "$FILES" | grep -q "^Services/AuthService/Tests/"; then
   schemes+=("AuthService")
 fi
-if printf '%s\n' "$FILES" | grep -qE "^Services/(FirstPartyServices|SpeechService|PlaceService|ExternalServices|StoreKitService)/"; then
+if printf '%s\n' "$FILES" | grep -qE "^Services/(FirstPartyServices|SpeechService|PlaceService|ExternalServices|StoreKitService|AdService)/"; then
   schemes+=("TodoCalendarApp")
 fi
+if printf '%s\n' "$FILES" | grep -q "^Services/FirstPartyServices/"; then
+  schemes+=("TodoCalendarAppShare")
+fi
 if printf '%s\n' "$FILES" | grep -q "^Presentations/CommonPresentation/"; then
-  schemes+=($ALL_PRESENTATION "TodoCalendarApp" "TodoCalendarAppWidget")
+  schemes+=($ALL_PRESENTATION "TodoCalendarApp" "TodoCalendarAppWidget" "TodoCalendarAppShare")
 fi
 if printf '%s\n' "$FILES" | grep -q "^Presentations/Scenes/"; then
   schemes+=($ALL_PRESENTATION "TodoCalendarApp")
+fi
+if printf '%s\n' "$FILES" | grep -q "^Presentations/BillingScenes/"; then
+  schemes+=("BillingScenes")
 fi
 if printf '%s\n' "$FILES" | grep -q "^Presentations/CalendarScenes/"; then
   schemes+=("CalendarScenes" "TodoCalendarApp" "TodoCalendarAppWidget")
@@ -97,6 +106,18 @@ if printf '%s\n' "$FILES" | grep -qE "^TodoCalendarApp/(Sources|Tests)/"; then
 fi
 if printf '%s\n' "$FILES" | grep -q "^TodoCalendarApp/AppExtensions/Widget/"; then
   schemes+=("TodoCalendarAppWidget")
+fi
+# Base는 embed가 아니라 각 확장 타겟이 소스로 직접 컴파일한다(Project+Templates의 sources 글롭).
+# 위젯·공유 확장 모두 테스트 타겟이 있고 그 소스에도 Base가 들어가므로 두 스킴까지 켜야 실행된다.
+if printf '%s\n' "$FILES" | grep -q "^TodoCalendarApp/AppExtensions/Base/"; then
+  schemes+=("TodoCalendarApp" "TodoCalendarAppWidget" "TodoCalendarAppShare")
+fi
+if printf '%s\n' "$FILES" | grep -q "^TodoCalendarApp/AppExtensions/Share/"; then
+  schemes+=("TodoCalendarApp" "TodoCalendarAppShare")
+fi
+# LiveActivity 소스는 App+Widget+Share 세 타겟이 각자 직접 컴파일한다(Project+Templates의 sources 글롭).
+if printf '%s\n' "$FILES" | grep -q "^TodoCalendarApp/Sources/LiveActivity/"; then
+  schemes+=("TodoCalendarApp" "TodoCalendarAppWidget" "TodoCalendarAppShare")
 fi
 
 # ---- tuist generate (테스트보다 선행 액션 — 첫 섹션으로 출력) ----
@@ -126,9 +147,17 @@ if printf '%s\n' "$FILES" | grep -q "^\.github/workflows/pr_test\.yml$"; then
   warns+=("- ⚠️ pr_test.yml 변경 — detect-changes 매핑 ↔ Test step ↔ impact-check.sh 매핑 3곳 동기화 확인")
 fi
 if [ "$MODE" = "git" ] && printf '%s\n' "$FILES" | grep -q "^TodoCalendarApp/Sources/AppEnvironment\.swift$"; then
-  if git diff "$BASE" -- TodoCalendarApp/Sources/AppEnvironment.swift 2>/dev/null | grep -qi '^[+-].*dbVersion'; then
-    if ! git diff "$BASE" -- Repository 2>/dev/null | grep -q 'migrateStatement'; then
-      warns+=("- ⚠️ dbVersion 변경 감지 — Table.migrateStatement(for:) case 추가가 함께 안 됨. 짝 확인 필요")
+  # 떠나는 버전 N 을 뽑아 case N 추가 여부로 판정한다. migrateStatement 문자열 grep 은
+  # 컨텍스트를 좁히면 case 만 추가한 변경을 놓치고, 넓히면 무관한 테이블 편집이 누락을 가린다.
+  # let dbVersion 앵커 — googleCalendarDBVersion·appleCalendarDBVersion 은 별개 짝이다.
+  oldMainDBVersion=$(git diff "$BASE" -- TodoCalendarApp/Sources/AppEnvironment.swift 2>/dev/null \
+    | sed -n 's/^-[[:space:]]*static let dbVersion: Int32 = \([0-9][0-9]*\).*/\1/p' | head -1)
+  if [ -n "$oldMainDBVersion" ]; then
+    if ! git diff "$BASE" -- Repository 2>/dev/null | grep -qE "^\+[[:space:]]*case ${oldMainDBVersion}:"; then
+      warns+=("- ⚠️ dbVersion 변경 감지 — Table.migrateStatement(for:) 에 case ${oldMainDBVersion} 추가가 함께 안 됨. 짝 확인 필요")
+    fi
+    if ! printf '%s\n' "$FILES" | grep -q 'AppDataMigrationImple\.swift$'; then
+      warns+=("- ⚠️ dbVersion 변경 감지 — AppDataMigrationImple 의 runDBMigration case + runMigrationVersionNtoM 이 함께 안 됨. 없으면 migrateStatement 가 호출조차 안 된다")
     fi
   fi
 fi

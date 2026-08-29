@@ -1,0 +1,43 @@
+Sarcinile dvs. și programul dvs., într-un singur calendar.
+
+Programul stă într-un calendar. Sarcinile stau în altă parte. Ca să vedeți ce vă aduce luna aceasta și ce nu ați apucat să faceți, ajungeți să verificați în două locuri.
+
+To-do Calendar le ține pe amândouă în același calendar. O programare stă în ziua în care are loc, iar o sarcină rămâne până când o bifați. Nici sarcinile fără oră nu dispar.
+
+Aplicația merge fără cont și fără conexiune. Autentificați-vă doar când vreți un backup al datelor și același calendar pe toate dispozitivele dvs.
+
+■ Un singur calendar pentru amândouă felurile de treburi
+· Programările și sarcinile stau împreună, în culorile tipurilor de evenimente pe care le creați dvs.
+· Sarcinile neterminate nu rămân îngropate pe o dată trecută — stau fixate în capul calendarului
+· Alegeți o dată, iar aplicația construiește repetarea potrivită: în fiecare joi, a treia joi din fiecare lună, chiar și o dată anuală din calendarul lunar
+· Orice eveniment poate purta o locație, un link, o notă și notificări
+· Fixați ce nu aveți voie să ratați drept eveniment principal și rămâne în capul listei, indiferent de ziua la care vă uitați
+· Distribuiți o zi, o săptămână sau o lună, ca text sau ca imagine
+
+■ Introducere rapidă AI
+„prânz cu Sara vineri la ora 12”, „mută dentistul marțea viitoare”, „marchează rufele ca finalizate”.
+Descrieți lucrurile așa cum le-ați spune cu voce tare. Fără formulare de completat, fără date alese câmp cu câmp.
+· Voce, tastatură și citire dintr-o imagine — fotografiați un orar de cursuri sau un afiș, iar textul devine evenimente
+· Din Siri, butonul de Acțiune, un widget, Centrul de control sau fereastra de distribuire, fără să deschideți aplicația
+· Nu doar adăugare: mutarea orelor, redenumirea, finalizarea, ștergerea, chiar mai multe deodată
+· Orice șterge sau schimbă ceva vă arată mai întâi exact ce urmează să facă și așteaptă aprobarea dvs.
+· Introducerea rapidă AI cere un cont autentificat
+
+■ Vedeți-vă ziua fără să deschideți aplicația
+· Widget-uri pentru ecranul principal — astăzi și ce urmează, lista de evenimente, ASTĂZI, evenimentul dvs. principal, calendarul și săptămânile, plus widget-uri combinate care pun două panouri laolaltă
+· Bifați o sarcină direct dintr-un widget
+· Widget-uri pentru ecranul de blocare, cu următorul eveniment și cu ce a mai rămas din zi
+· Un eveniment care stă să înceapă își face numărătoarea inversă pe ecranul de blocare și în Dynamic Island
+· Puneți Adaugă cu AI în Centrul de control și o glisare vă duce de oriunde la ecranul de introducere
+
+■ Aduceți-vă și celelalte calendare
+· Google Calendar — conectați mai multe conturi deodată. Fiecare calendar își păstrează culoarea pe care i-ați dat-o în Google, iar participanții, linkurile întâlnirilor și atașamentele sunt toate acolo, editabile pe loc
+· Apple Calendar — calendarele pe care le aveți deja pe iPhone, cu o singură acordare de acces
+· Alegeți din lista de tipuri de evenimente ce apare, calendar cu calendar
+· Deconectați și nu se șterge nimic din contul dvs. Google sau de pe dispozitiv
+
+■ Faceți-o a dvs.
+· Cât de detaliat apare fiecare eveniment, dimensiunea textului evenimentului și culorile evenimentului — fiecare modificare se previzualizează pe loc
+· Tema de culoare și tema widgetului, prima zi a săptămânii, zilele evidențiate
+· Sărbătorile după țară, calendarul lunar, formatul de 24 de ore și fusul orar
+· Stabiliți tipul de eveniment și ora notificării cu care pornesc evenimentele noi

@@ -79,6 +79,14 @@
 "dayname::friday:very_short" = "V";
 "dayname::saturday:very_short" = "Z";
 
+"dayname::sunday:gender" = "m";
+"dayname::monday:gender" = "m";
+"dayname::tuesday:gender" = "m";
+"dayname::wednesday:gender" = "m";
+"dayname::thursday:gender" = "m";
+"dayname::friday:gender" = "m";
+"dayname::saturday:gender" = "m";
+
 
 // MARK: - event notification
 
@@ -112,8 +120,12 @@
 
 "calendar::foremostevent:title" = "Belangrijkste gebeurtenis";
 "calendar::uncompletedTodos:title" = "Onvoltooide taken";
+"calendar::guideTodo::name" = "Zo werkt To-do Calendar";
+"calendar::eventSync::loadingAllEvents::message" = "Alle gebeurtenissen worden opgehaald…";
 "calendar::event_time::todo" = "Taak";
 "calendar::event_time::allday" = "Hele dag";
+"calendar::event_time::start" = "Begin";
+"calendar::event_time::end" = "Einde";
 "calendar::event_time::allday::with" = "%@ de hele dag";
 "calendar::event_time::period:some_days" = "%d dagen";
 "calendar::event_time::period:some_minutes" = "%d minuten";
@@ -123,11 +135,13 @@
 "calendar::event::more_action::foremost_event:title" = "Belangrijkste gebeurtenis";
 "calendar::event::more_action::remove_only_thistime:message" = "Wil je alleen deze gebeurtenis verwijderen uit alle herhalende gebeurtenissen?";
 "calendar::event::more_action::remove:message" = "Wil je deze gebeurtenis verwijderen?";
+"calendar::event::more_action::remove_this_and_future:message" = "Wil je deze en alle toekomstige gebeurtenissen in de herhalingsreeks verwijderen?";
 "calendar::event::more_action::mark_as_foremost" = "Wil je deze gebeurtenis markeren als je belangrijkste gebeurtenis?";
 "calendar::event::more_action::unmark_as_foremost" = "Wil je deze gebeurtenis niet langer als je belangrijkste gebeurtenis markeren?";
 "calendar::event::more_action::mark_as_foremost::unavail" = "Een herhalende afspraak kan niet als belangrijkste gebeurtenis worden gemarkeerd.";
 "calendar::event::more_action:remove_only_thistime:item_name" = "Alleen deze gebeurtenis verwijderen";
 "calendar::event::more_action:remove:item_name" = "Gebeurtenis verwijderen";
+"calendar::event::more_action:remove_this_and_future:item_name" = "Deze en alle toekomstige gebeurtenissen verwijderen";
 "calendar::event::more_action:foremost:mark:item_name" = "Markeren als belangrijkste";
 "calendar::event::more_action:foremost:unmark:item_name" = "Markering als belangrijkste opheffen";
 "calendar::event::more_action:dday_candidate:register:item_name" = "Toevoegen aan D-Day-widget";
@@ -135,7 +149,25 @@
 "calendar::event::more_action:dday_candidate:title" = "Kandidaat voor D-Day-widget";
 "calendar::event::more_action:dday_candidate:register:message" = "Deze gebeurtenis toevoegen als kandidaat voor de D-Day-widget? Deze verschijnt boven aan de lijst wanneer je de widget bewerkt.";
 "calendar::event::more_action:dday_candidate:unregister:message" = "Deze gebeurtenis verwijderen uit de kandidaten voor de D-Day-widget?";
+"calendar::event::more_action:live_activity:title" = "Live-activiteit";
+"calendar::event::more_action:live_activity:register:item_name" = "Tonen op het toegangsscherm";
+"calendar::event::more_action:live_activity:unregister:item_name" = "Verwijderen van het toegangsscherm";
+"calendar::event::more_action:live_activity:unavail::not_found" = "Deze gebeurtenis is niet meer beschikbaar.";
+"calendar::event::more_action:live_activity:unavail::already_passed" = "Deze gebeurtenis is al begonnen.";
+"calendar::event::more_action:live_activity:unavail::too_far_future" = "Alleen gebeurtenissen die binnen 8 uur beginnen, kunnen worden getoond.";
+"calendar::event::more_action:live_activity:register:confirm" = "Wil je deze gebeurtenis op het toegangsscherm tonen?";
+"calendar::event::more_action:live_activity:unregister:confirm" = "Wil je deze gebeurtenis van het toegangsscherm verwijderen?";
+"calendar::event::more_action:live_activity:replace:confirm" = "Er wordt al een andere gebeurtenis op het toegangsscherm getoond. Wil je die vervangen door deze?";
+"calendar::event::more_action:live_activity:register:success" = "Wordt nu getoond op het toegangsscherm. Vergrendel je apparaat om het te zien.";
+"calendar::event::more_action:live_activity:showing" = "Wordt getoond op het toegangsscherm";
 "calendar::event::more_action:copy:item_name" = "Gebeurtenis kopiëren";
+"calendar::event::more_action:share:item_name" = "Delen";
+"event_detail::share::field::time" = "Tijd";
+"event_detail::share::field::repeating" = "Herhaling";
+"event_detail::share::field::calendar" = "Agenda";
+"event_detail::share::field::place" = "Locatie";
+"event_detail::share::field::url" = "Link";
+"event_detail::share::field::memo" = "Notitie";
 "calendar::event::more_action:transform_to::schedule" = "Omzetten naar afspraak";
 "calendar::event::more_action:transform_to::todo" = "Omzetten naar taak";
 "calendar::event::more_action:edit:item_name" = "Bewerken";
@@ -145,7 +177,9 @@
 "calednar::event::skip_todo_until" = "Kies een tijdstip om deze taak over te slaan";
 "calednar::event::copy" = "Gebeurtenis kopiëren";
 "calendar::move_date" = "Datum verplaatsen";
-"calednar::event::google::edit" = "Google Calendar-gebeurtenis bewerken";
+"calendar::share::this_day" = "Deze dag delen";
+"calendar::share::this_week" = "Deze week delen";
+"calendar::share::this_month" = "Deze maand delen";
 
 
 // MARK: - event detail
@@ -171,14 +205,33 @@
 "eventDetail.repeating.everyYearSomeDay:title" = "Elk jaar %@";
 "eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "Elk jaar %@ (maankalender)";
 "eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "Alle dagen van de laatste week van elke maand";
-"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "De eerste %@ van elke maand";
-"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "De tweede %@ van elke maand";
-"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "De derde %@ van elke maand";
-"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "De vierde %@ van elke maand";
-"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "De vijfde %@ van elke maand";
-"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "De zesde %@ van elke maand";
-"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "De zevende %@ van elke maand";
-"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "De laatste %@ van elke maand";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::m" = "De eerste %@ van elke maand";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::f" = "De eerste %@ van elke maand";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::n" = "De eerste %@ van elke maand";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::m" = "De tweede %@ van elke maand";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::f" = "De tweede %@ van elke maand";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::n" = "De tweede %@ van elke maand";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::m" = "De derde %@ van elke maand";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::f" = "De derde %@ van elke maand";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::n" = "De derde %@ van elke maand";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::m" = "De vierde %@ van elke maand";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::f" = "De vierde %@ van elke maand";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::n" = "De vierde %@ van elke maand";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::m" = "De vijfde %@ van elke maand";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::f" = "De vijfde %@ van elke maand";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::n" = "De vijfde %@ van elke maand";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::m" = "De zesde %@ van elke maand";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::f" = "De zesde %@ van elke maand";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::n" = "De zesde %@ van elke maand";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::m" = "De zevende %@ van elke maand";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::f" = "De zevende %@ van elke maand";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::n" = "De zevende %@ van elke maand";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::m" = "De laatste %@ van elke maand";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::f" = "De laatste %@ van elke maand";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::n" = "De laatste %@ van elke maand";
+"eventDetail.repeating.last::m" = "Laatste";
+"eventDetail.repeating.last::f" = "Laatste";
+"eventDetail.repeating.last::n" = "Laatste";
 "eventDetail.repeating.endtime::title" = "Einde van de herhaling";
 "eventDetail.repeating.endtime::option::never" = "Nooit";
 "eventDetail.repeating.endtime::option::on" = "Op";
@@ -188,7 +241,6 @@
 "eventDetail.repeating::period_endcount" = "Vanaf %@, %d keer";
 
 "eventDetail.repeating.everyNDays:title" = "Elke %d dagen";
-"eventDetail.repeating.last" = "Laatste";
 "eventDetail.repeating.everyNMonths:title" = "Elke %d maanden";
 "eventDetail.repeating.everyNYears:title" = "Elke %d jaar";
 "eventDetail.repeating::endoption_until" = "tot %@";
@@ -267,12 +319,33 @@
 "eventDetail::gogoleEvent::conference::password" = "Wachtwoord";
 "eventDetail::gogoleEvent::copy::message" = "Gekopieerd naar klembord.";
 "eventDetail::gogoleEvent::canceled::message" = "Deze gebeurtenis is geannuleerd.";
+"eventDetail::gogoleEvent::saved::message" = "De gebeurtenis is opgeslagen.";
+"eventDetail::gogoleEvent::readOnlyCalendar::message" = "Deze agenda is alleen-lezen, dus de gebeurtenis kan hier niet worden bewerkt.";
+"eventDetail::gogoleEvent::reauthenticate::title" = "Extra toestemming vereist";
+"eventDetail::gogoleEvent::reauthenticate::message" = "Dit Google-account is gekoppeld met alleen-leestoegang. Om gebeurtenissen te bewerken moet je apart bewerkrechten geven.";
+"eventDetail::gogoleEvent::writeScopeNotGranted::message" = "Er zijn geen bewerkrechten verleend. Bij een werk- of schoolaccount staat je beheerder dit mogelijk niet toe.";
+"eventDetail::gogoleEvent::repeating::title" = "Dit is een herhalende gebeurtenis";
+"eventDetail::gogoleEvent::repeating::onlyThisTime::button" = "Alleen deze gebeurtenis";
+"eventDetail::gogoleEvent::repeating::all::button" = "Alle gebeurtenissen";
+"eventDetail::gogoleEvent::remove::confirm::message" = "Deze gebeurtenis verwijderen uit Google Calendar?";
+"eventDetail::gogoleEvent::editOnCalendar" = "Bewerken in Google Calendar";
+"eventDetail::gogoleEvent::notEditableField::message" = "Dit kan hier niet worden bewerkt. Bewerk het in Google Calendar.";
+"eventDetail::gogoleEvent::description::formatLoss::message" = "Deze beschrijving bevat opmaak. Als je die hier bewerkt, gaat de opmaak verloren.";
 
 // MARK: - Apple calendar event
 "eventDetail::appleCalendarEvent::viewOnCalendar" = "Bekijken in Apple Calendar";
+"eventDetail::appleCalendarEvent::editOnCalendar" = "Bewerken in Apple Calendar";
 "eventDetail::appleCalendarEvent::calendar::event" = "Apple Calendar-gebeurtenis";
 "eventDetail::appleCalendarEvent::attendees" = "Deelnemers (%d personen)";
 "eventDetail::appleCalendarEvent::attendees::organizer" = "Organisator";
+"eventDetail::appleCalendarEvent::saved::message" = "Opgeslagen.";
+"eventDetail::appleCalendarEvent::remove::confirm::message" = "Deze gebeurtenis verwijderen?";
+"eventDetail::appleCalendarEvent::repeating::title" = "Herhalende gebeurtenis";
+"eventDetail::appleCalendarEvent::repeating::onlyThisTime::button" = "Alleen deze gebeurtenis";
+"eventDetail::appleCalendarEvent::repeating::thisAndFuture::button" = "Deze en alle toekomstige gebeurtenissen";
+"eventDetail::appleCalendarEvent::readOnlyCalendar::message" = "Deze agenda is alleen-lezen, dus de gebeurtenis kan niet worden bewerkt.";
+"eventDetail::appleCalendarEvent::notEditableField::message" = "Dit veld kan niet in de app worden bewerkt.";
+"eventDetail::appleCalendarEvent::url::placeholder" = "URL";
 
 // MARK: - event tag
 
@@ -311,6 +384,23 @@
 "eventList::remove::confirm::button::olderThan1y" = "Ouder dan 1 jaar";
 
 
+// MARK: - share preview
+
+"share_preview::title" = "Voorbeeld van delen";
+"share_preview::tag_filter::title" = "Gebeurtenistypen";
+"share_preview::tag_filter::select_all" = "Alles selecteren";
+"share_preview::tag_filter::deselect_all" = "Alles deselecteren";
+"share_preview::option::include_tag_name" = "Naam gebeurtenistype tonen";
+"share_preview::share_button" = "Delen";
+"share_preview::empty" = "Geen gebeurtenissen om te delen";
+"share_preview::header::this_week" = "Deze week";
+"share_preview::header::last_week" = "Vorige week";
+"share_preview::header::next_week" = "Volgende week";
+"share_preview::header::week_of_month" = "%1$@, week %2$d";
+"share_preview::format::text" = "Tekst";
+"share_preview::format::image" = "Afbeelding";
+
+
 // MARK: - account
 
 "manage_account::title" = "Accountbeheer";
@@ -327,7 +417,9 @@
 "manage_account::delete_account_button::confirm:message" = "Weet je zeker dat je je account wilt verwijderen?";
 "manage_account::delete_account_button::description" = "Nadat je het verwijderen van je account hebt aangevraagd, wordt je account verwijderd.\nEenmaal verwijderd, kunnen accountgegevens niet worden hersteld.";
 "signIn::title" = "Inloggen";
-"signIn:description" = "Back-up je gebeurtenislijst en synchroniseer deze op andere iOS-apparaten\n(Ondersteunde platforms worden uitgebreid.)";
+"signIn::feature::sync" = "Gebeurtenissen back-uppen, synchroniseren tussen apparaten";
+"signIn::feature::aiAgent" = "Beheer je agenda met de AI-agent";
+"signIn::feature::web" = "Ook op het web · todo-calendar.com";
 
 
 // MARK: - setting
@@ -410,10 +502,17 @@
 "setting.holiday.hide::confirm::message" = "Deze feestdag elk jaar verbergen?\nJe kunt hem weer tonen via Instellingen > Feestdagen.";
 "setting.holiday.hidden::sectionTitle" = "Verborgen feestdagen";
 "setting.holiday.show::button" = "Tonen";
+"setting.aiGuide::name" = "Toevoegen met AI – Siri & widgets";
 "setting.feedback::name" = "Feedback";
 "setting.help::name" = "Help";
+"setting.openWeb::name" = "Openen op het web";
 "setting.share::name" = "App delen";
 "setting.write_review::name" = "Schrijf een app-recensie";
+"setting.openSourceLicense::name" = "Opensourcelicenties";
+"setting.billing.plan::name" = "Abonnement";
+"setting.terms::name" = "Servicevoorwaarden";
+"setting.privacyPolicy::name" = "Privacybeleid";
+"setting.adPrivacyOptions::name" = "Privacyopties voor advertenties";
 "setting.account.signedIn::manageAccount" = "Account";
 "setting.account.needSignIn" = "Inloggen";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -513,6 +612,14 @@
 "widget.dday.target::registered" = "Vastgezet";
 "widget.dday.turn::name" = "Beurt %d";
 
+"widget.aiCommand::title" = "Toevoegen met AI";
+"widget.aiCommand::explain" = "Tik één keer om AI-invoer te openen.";
+
+// MARK: - liveActivity
+
+"liveActivity::stale" = "Begint nu";
+"liveActivity::action::end" = "Beëindigen";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "Dit linkformaat wordt niet ondersteund.\nWerk de app bij naar de nieuwste versie.";
@@ -543,20 +650,133 @@
 "aiAgent::state::failed" = "Opdracht mislukt";
 "aiAgent::done::default" = "Klaar";
 "aiAgent::failed::default" = "Kon dit niet voltooien";
+"aiAgent::failed::dailyLimitExceeded" = "Je AI-credits van vandaag zijn op.";
 "aiAgent::retry" = "Opnieuw proberen";
 "aiAgent::needSignIn::title" = "Inloggen vereist";
 "aiAgent::needSignIn::message" = "Log in om AI-snelinvoer te gebruiken.";
+"aiAgent::speechPermissionDenied::title" = "Toestemming vereist";
+"aiAgent::speechPermissionDenied::message" = "Sta toegang tot de microfoon en spraakherkenning toe in Instellingen om spraakinvoer te gebruiken.";
+"aiAgent::speechPermissionDenied::confirm" = "Instellingen openen";
 "aiAgent::title" = "AI-snelinvoer";
 "aiAgent::keyboard::stop" = "Stoppen";
 "aiAgent::keyboard::send" = "Verzenden";
 "aiAgent::stop" = "Stoppen";
 "aiAgent::usage" = "%@ / %@ credits";
-"aiAgent::plan::free" = "Gratis";
-"aiAgent::plan::standard" = "Standaard";
-"aiAgent::plan::lifetime" = "Levenslang";
 "aiAgent::usage::topupRemaining" = "Nog %@ extra credits over";
 "aiAgent::usage::planChangeScheduled" = "Overstap naar het %2$@-plan op %1$@";
+"aiAgent::usage::resetsIn" = "Over %@ weer beschikbaar";
+"aiAgent::notificationPermissionDenied::message" = "Schakel meldingen in bij Instellingen om AI-resultaten te ontvangen.";
 "aiAgent::stop::confirm::title" = "Verwerking stoppen?";
 "aiAgent::stop::confirm::message" = "Stoppen verwerpt de lopende opdracht, en deze kan niet worden hervat.";
 "aiAgent::confirm::countdown" = "resterend om goed te keuren";
 "aiAgent::confirm::expired::message" = "Tijd verlopen. Vraag het opnieuw aan.";
+"aiAgent::tip::externalEntry" = "Tip: je kunt ook toevoegen via Siri, de actieknop of widgets.";
+"aiAgent::failed::showPlans" = "Bekijk abonnementen";
+
+"aiAgent::image::title" = "Lezen vanuit afbeelding";
+"aiAgent::image::sourceSelect::title" = "Afbeelding toevoegen";
+"aiAgent::image::source::library" = "Kiezen uit bibliotheek";
+"aiAgent::image::source::camera" = "Foto maken";
+"aiAgent::image::recognizing" = "Afbeelding wordt gelezen…";
+"aiAgent::image::noText" = "Geen tekst gevonden in deze afbeelding";
+"aiAgent::image::readText" = "Tekst uit de afbeelding";
+"aiAgent::image::instruction" = "Extra instructies (optioneel)";
+"aiAgent::image::instruction::placeholder" = "Bijv. Voeg deze toe als taken";
+"aiAgent::image::empty" = "Er is geen tekst om te verzenden";
+"aiAgent::image::textTooLong" = "De tekst is te lang. Kort hem in en probeer het opnieuw.";
+"aiAgent::image::instructionTooLong" = "Je instructies zijn te lang. Kort ze in en probeer het opnieuw.";
+"aiAgent::image::busy" = "Er loopt nog een ander verzoek";
+"aiAgent::image::camera::denied::title" = "Cameratoegang vereist";
+"aiAgent::image::camera::denied::message" = "Sta cameratoegang toe in Instellingen om een foto te maken.";
+
+// MARK: - billing
+
+"billing::plan::free" = "Gratis";
+"billing::plan::standard" = "Standaard";
+"billing::plan::lifetime" = "Levenslang";
+
+"billing::paywall::title" = "Abonnement upgraden";
+"billing::paywall::current::description" = "%@ credits per dag";
+"billing::paywall::metric::dailyCredits" = "%@ credits/dag";
+"billing::paywall::period::weekly" = "/wk";
+"billing::paywall::period::monthly" = "/mnd";
+"billing::paywall::period::yearly" = "/jaar";
+"billing::paywall::price::unavailable" = "Prijs niet beschikbaar";
+"billing::paywall::badge::recommended" = "Aanbevolen";
+"billing::paywall::badge::owned" = "Huidig abonnement";
+"billing::paywall::features::title" = "%@ bevat";
+"billing::paywall::feature::dailyCredits" = "%@ credits per dag";
+"billing::paywall::feature::topup" = "Extra credits bijkopen als ze op zijn";
+"billing::paywall::feature::noAds" = "Geen advertenties";
+"billing::paywall::disclosure::subscription" = "Je abonnement wordt elke maand automatisch verlengd, tenzij je minstens 24 uur voor het einde van de huidige periode opzegt. Je kunt op elk moment opzeggen via de App Store-instellingen.";
+"billing::paywall::disclosure::subscription::generic" = "Je abonnement wordt automatisch verlengd aan het einde van elke factureringsperiode, tenzij je minstens 24 uur van tevoren opzegt. Je kunt op elk moment opzeggen via de App Store-instellingen.";
+"billing::paywall::disclosure::oneTime" = "Betaal eenmalig en behoud het voorgoed. Dit wordt niet automatisch verlengd.";
+"billing::paywall::disclosure::storeUnavailable" = "Kan geen verbinding maken met de App Store. Probeer het later opnieuw.";
+"billing::paywall::cta::subscribe" = "Abonneer op %@";
+"billing::paywall::cta::buy" = "Koop %@";
+"billing::paywall::cta::unavailable" = "Niet beschikbaar";
+"billing::paywall::allPlansOwned" = "Je hebt al het beste abonnement.";
+"billing::paywall::terms" = "Servicevoorwaarden";
+"billing::paywall::privacyPolicy" = "Privacybeleid";
+"billing::paywall::restore" = "Aankopen herstellen";
+"billing::paywall::restored" = "Aankopen hersteld";
+"billing::paywall::restore::empty" = "Geen aankopen om te herstellen.";
+"billing::paywall::manageSubscription" = "Abonnement beheren";
+"billing::paywall::purchase::applied" = "Abonnement bijgewerkt";
+"billing::paywall::pending::title" = "Goedkeuring in behandeling";
+"billing::paywall::pending::message" = "Vraag een gezinsbeheerder om deze aankoop goed te keuren. Deze wordt automatisch toegepast zodra hij is goedgekeurd.";
+"billing::paywall::userPlan::loadFailed" = "Kan je abonnement niet laden. Probeer het opnieuw.";
+"billing::paywall::retry" = "Opnieuw proberen";
+"billing::paywall::unfinished::title" = "Een aankoop is nog niet toegepast";
+"billing::paywall::unfinished::message" = "Je betaling is gelukt, maar je abonnement is nog niet bijgewerkt.";
+"billing::paywall::unfinished::action" = "Nu toepassen";
+"billing::paywall::unfinished::applied" = "Je aankoop is toegepast";
+"billing::paywall::processing::message" = "Je aankoop wordt bevestigd…";
+"billing::paywall::fail::purchase" = "De aankoop kon niet worden voltooid. Probeer het opnieuw.";
+"billing::paywall::fail::invalidTransaction" = "We konden je aankoop niet verifiëren. Probeer het zo meteen opnieuw.";
+"billing::paywall::fail::unknownProduct" = "We konden deze aankoop niet herkennen. Het bijwerken van de app lost dit mogelijk op.";
+"billing::paywall::fail::planChangeNotAllowed" = "Deze abonnementswijziging wordt niet ondersteund.";
+"billing::paywall::fail::ownedByAnotherAccount" = "Deze aankoop hoort bij een ander account. Log in met het account waarmee je hem hebt gekocht.";
+"billing::paywall::fail::reflectDelayed" = "Je betaling is gelukt, maar de verwerking loopt vertraging op. Deze wordt automatisch toegepast.";
+"billing::paywall::topup::credits" = "%@ credits";
+"billing::paywall::topup::credits::split" = "Basis %@ + bonus %@ credits";
+"billing::paywall::topup::bonus" = "+%@%% bonus";
+"billing::paywall::topup::title" = "Credits kopen";
+"billing::paywall::topup::title::withRemaining" = "Credits kopen · %@ in bezit";
+"billing::paywall::topup::description" = "Extra credits worden gebruikt zodra je daglimiet op is, en ze verlopen niet.";
+"billing::paywall::topup::applied" = "Credits toegevoegd";
+"billing::paywall::topup::applied::withCredits" = "%@ credits toegevoegd";
+
+"billing::needSignIn::title" = "Inloggen vereist";
+"billing::needSignIn::message" = "Log in om je abonnement te bekijken en te beheren.";
+
+// MARK: - share extension
+
+"share.ai::title" = "Naar AI sturen";
+"share.ai::text::placeholder" = "Te verzenden tekst";
+"share.ai::instruction::placeholder" = "Voeg een instructie toe (optioneel)";
+"share.ai::needSignIn" = "Open de app en log in om AI-snelinvoer te gebruiken.";
+"share.ai::pending" = "Een eerder verzoek is nog in behandeling. Open de app om de voortgang of het resultaat te bekijken.";
+"share.ai::sent" = "Verzonden. Je kunt het resultaat in de app bekijken.";
+"share.ai::failed" = "Verzenden mislukt. Probeer het opnieuw.";
+"share.ai::sentButUntracked" = "Verzonden, maar de app kan het resultaat niet volgen. Bekijk je agenda over een moment.";
+"share.ai::textTooLong" = "De tekst is te lang om te verzenden. Kort hem in en probeer het opnieuw.";
+"share.ai::instructionTooLong" = "Je instructie is te lang. Kort hem in.";
+"share.ai::limitExceeded" = "Je AI-credits van vandaag zijn op. Ze worden om middernacht UTC opnieuw ingesteld.";
+"share.ai::image::title" = "Afbeelding naar AI sturen";
+"share.ai::image::recognizing" = "Tekst uit de afbeelding lezen…";
+"share.ai::image::text::caption" = "Tekst uit de afbeelding gelezen – pas het aan als er iets niet klopt.";
+"share.ai::image::text::placeholder" = "Tekst uit de afbeelding";
+"share.ai::image::noTextFound" = "Er is geen tekst gevonden in deze afbeelding. Typ wat je wilt toevoegen.";
+
+// MARK: - webview
+
+"webview::error::message" = "Deze pagina kon niet worden geladen.";
+"webview::error::retry" = "Opnieuw proberen";
+"webview::openInBrowser" = "Openen in browser";
+
+// MARK: - legal notice
+
+"legal_notice.message::terms" = "Onze servicevoorwaarden zijn bijgewerkt.";
+"legal_notice.message::privacy" = "Ons privacybeleid is bijgewerkt.";
+"legal_notice.effectiveDate" = "Geldig vanaf %@";

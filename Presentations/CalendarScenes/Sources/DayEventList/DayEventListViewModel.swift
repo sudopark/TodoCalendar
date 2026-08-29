@@ -56,11 +56,13 @@ protocol DayEventListViewModel: AnyObject, Sendable, DayEventListSceneInteractor
     func makeEvent()
     func makeEventByTemplate()
     func showDoneTodoList()
+    func showSharePreview()
     func refreshUncompletedTodoEvents()
     func enterVoiceInput()
     func finishVoiceInput()
 
     func enterKeyboardInput()
+    func enterImageInput()
     func stopAIAgentInput()
     func submitAIAgent(_ text: String)
     func handleAIEntryButtonTap()
@@ -68,7 +70,6 @@ protocol DayEventListViewModel: AnyObject, Sendable, DayEventListSceneInteractor
     func attachListener(_ listener: any DayEventListSceneListener)
 
     // presenter
-    var isAIAgentEnabled: Bool { get }
     var foremostEventModel: AnyPublisher<(any EventCellViewModel)?, Never> { get }
     var uncompletedTodoEventModels: AnyPublisher<[TodoEventCellViewModel], Never> { get }
     var selectedDay: AnyPublisher<SelectedDayModel, Never> { get }
@@ -92,6 +93,8 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
     private let uiSettingUsecase: any UISettingUsecase
     private let accountUsecase: any AccountUsecase
     private let aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
+    private let eventLiveActivityUsecase: any EventLiveActivityUsecase
+    private let guideTodoUsecase: any GuideTodoUsecase
     var router: (any DayEventListRouting)?
     private weak var listener: (any DayEventListSceneListener)?
 
@@ -103,7 +106,9 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
         foremostEventUsecase: any ForemostEventUsecase,
         uiSettingUsecase: any UISettingUsecase,
         accountUsecase: any AccountUsecase,
-        aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
+        aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase,
+        eventLiveActivityUsecase: any EventLiveActivityUsecase,
+        guideTodoUsecase: any GuideTodoUsecase
     ) {
         self.calendarUsecase = calendarUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
@@ -113,6 +118,8 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
         self.uiSettingUsecase = uiSettingUsecase
         self.accountUsecase = accountUsecase
         self.aiAgentOrchestrationUsecase = aiAgentOrchestrationUsecase
+        self.eventLiveActivityUsecase = eventLiveActivityUsecase
+        self.guideTodoUsecase = guideTodoUsecase
 
         self.internalBind()
     }
@@ -131,7 +138,7 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
         let aiAgentState = CurrentValueSubject<AIAgentState?, Never>(nil)
     }
 
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private let subject = Subject()
     private let cvmCombineScheduler = DispatchQueue(label: "serial-combine")
 
@@ -141,15 +148,13 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
             .sink { [weak self] signedIn in
                 self?.subject.isSignedIn.send(signedIn)
             }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
-        // command phase 자동 시트 표시는 단일 인스턴스인 CalendarViewModel이 담당.
-        // 여기선 진입 버튼 분기에 쓸 현재 상태만 미러링한다.
         self.aiAgentOrchestrationUsecase.state
             .sink { [weak self] state in
                 self?.subject.aiAgentState.send(state)
             }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 
@@ -184,7 +189,7 @@ extension DayEventListViewModelImple {
                 $0.filter { $0.eventIdentifier != newPendingTodo.eventIdentifier }
             }
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
 
     private func updatePendingTodos(
@@ -223,6 +228,12 @@ extension DayEventListViewModelImple {
         self.router?.showDoneTodoList()
     }
 
+    func showSharePreview() {
+        guard let range = self.subject.currentDayAndEventLists.value?.currentDay.range
+        else { return }
+        self.router?.showSharePreview(range: range)
+    }
+
     func refreshUncompletedTodoEvents() {
         self.todoEventUsecase.refreshUncompletedTodos()
     }
@@ -241,7 +252,16 @@ extension DayEventListViewModelImple {
 
     func enterKeyboardInput() {
         self.aiAgentOrchestrationUsecase.enterKeyboardInput()
+        guard !self.aiAgentOrchestrationUsecase.isCreditExhausted else { return }
         self.router?.routeToAIKeyboardInput()
+    }
+
+    func enterImageInput() {
+        self.aiAgentOrchestrationUsecase.enterImageInput()
+        guard !self.aiAgentOrchestrationUsecase.isCreditExhausted else { return }
+        self.router?.routeToImageSourceSelect { [weak self] in
+            self?.aiAgentOrchestrationUsecase.enterVoiceInput()
+        }
     }
 
     func stopAIAgentInput() {
@@ -281,10 +301,9 @@ extension DayEventListViewModelImple {
     }
 
     private func confirmSignInForAIAgent() {
-        let info = ConfirmDialogInfo()
-            |> \.title .~ "aiAgent::needSignIn::title".localized()
-            |> \.message .~ "aiAgent::needSignIn::message".localized()
-            |> \.confirmed .~ { [weak self] in self?.router?.routeToSignIn() }
+        let info = ConfirmDialogInfo.aiAgentNeedSignIn { [weak self] in
+            self?.router?.routeToSignIn()
+        }
         self.router?.showConfirm(dialog: info)
     }
 }
@@ -327,6 +346,11 @@ extension DayEventListViewModelImple {
             default: return nil
             }
         }
+        let applyRegistration: ((any EventCellViewModel)?, LiveActivityTarget?) -> (any EventCellViewModel)?
+        applyRegistration = { cvm, target in
+            cvm?.liveActivityRegistrationApplied(target)
+        }
+
         let foremostModel = Publishers.CombineLatest4(
             self.foremostEventUsecase.foremostEvent,
             self.calendarUsecase.currentDay.removeDuplicates(),
@@ -335,7 +359,9 @@ extension DayEventListViewModelImple {
         )
         .map(asCellViewModel)
 
-        return foremostModel
+        return Publishers.CombineLatest(foremostModel, self.eventLiveActivityUsecase.registeredTarget)
+            .map(applyRegistration)
+            .removeDuplicates(by: { $0?.customCompareKey == $1?.customCompareKey })
             .eraseToAnyPublisher()
     }
 
@@ -349,16 +375,26 @@ extension DayEventListViewModelImple {
                 .filter { !$0.isForemost }
                 .compactMap {
                     TodoEventCellViewModel($0, in: todayRange, timeZone, is24Form, forceShowEventDateDurationText: true)
+                        .map { $0 |> \.isUncompletedTodo .~ true }
                 }
         }
-        return Publishers.CombineLatest4(
+        let applyRegistration: ([TodoEventCellViewModel], LiveActivityTarget?) -> [TodoEventCellViewModel]
+        applyRegistration = { todos, target in
+            todos.compactMap { $0.liveActivityRegistrationApplied(target) as? TodoEventCellViewModel }
+        }
+
+        let todos = Publishers.CombineLatest4(
             self.eventListUsecase.uncompletedTodos(),
             self.calendarUsecase.currentDay,
             self.calendarSettingUsecase.currentTimeZone,
             self.uiSettingUsecase.currentCalendarUISeting.map { $0.is24hourForm }.removeDuplicates()
         )
         .compactMap(asCellViewModels)
-        .eraseToAnyPublisher()
+
+        return Publishers.CombineLatest(todos, self.eventLiveActivityUsecase.registeredTarget)
+            .map(applyRegistration)
+            .removeDuplicates(by: { $0.map { $0.customCompareKey } == $1.map { $0.customCompareKey } })
+            .eraseToAnyPublisher()
     }
 
     var selectedDay: AnyPublisher<SelectedDayModel, Never> {
@@ -377,28 +413,32 @@ extension DayEventListViewModelImple {
 
     var cellViewModels: AnyPublisher<[any EventCellViewModel], Never> {
 
-        let combineEvents: (CurrentAndEvents, [PendingTodoEventCellViewModel]) -> [any EventCellViewModel]
-        combineEvents = { pair, pending in
-            return pair.0 + pending + pair.1
+        let combineEvents: (CurrentAndEvents, [PendingTodoEventCellViewModel], Bool) -> [any EventCellViewModel]
+        combineEvents = { pair, pending, isGuideTodoVisible in
+            let guides: [any EventCellViewModel] = isGuideTodoVisible
+                ? [GuideTodoEventCellViewModel()] : []
+            return guides + pair.0 + pending + pair.1
+        }
+        let applyRegistration: ([any EventCellViewModel], LiveActivityTarget?) -> [any EventCellViewModel]
+        applyRegistration = { cvms, target in
+            cvms.map { $0.liveActivityRegistrationApplied(target) }
         }
 
-        let cells = Publishers.CombineLatest(
+        let cells = Publishers.CombineLatest3(
             self.currentAndEventCellViewModels.receive(on: self.cvmCombineScheduler),
-            self.subject.pendingTodoEvents.receive(on: self.cvmCombineScheduler)
+            self.subject.pendingTodoEvents.receive(on: self.cvmCombineScheduler),
+            self.guideTodoUsecase.isGuideTodoVisible.receive(on: self.cvmCombineScheduler)
         )
         .map(combineEvents)
 
-        return cells
+        return Publishers.CombineLatest(cells, self.eventLiveActivityUsecase.registeredTarget)
+            .map(applyRegistration)
+            .removeDuplicates(by: { $0.map { $0.customCompareKey } == $1.map { $0.customCompareKey } })
             .eraseToAnyPublisher()
     }
 
     var foremostEventMarkingStatus: AnyPublisher<ForemostMarkingStatus, Never> {
         return self.foremostEventUsecase.foremostEventMarkingStatus
-    }
-
-    // 세션 중 불변 플래그라 publisher가 아닌 스냅샷 Bool로 노출
-    var isAIAgentEnabled: Bool {
-        return FeatureFlag.isEnable(.aiAgent)
     }
 
     var aiAgentState: AnyPublisher<AIAgentState, Never> {
@@ -426,27 +466,10 @@ extension DayEventListViewModelImple {
                 .sortedByCreateTime()
                 .compactMap { TodoEventCellViewModel($0, in: range, timeZone, is24HourForm) }
 
-            let eventCellsWithTime = dayAndEvents.events
-                .sortedByEventTime()
-                .compactMap { event -> (any EventCellViewModel)? in
-                    switch event {
-                    case let todo as TodoCalendarEvent:
-                        return TodoEventCellViewModel(todo, in: range, timeZone, is24HourForm)
-
-                    case let schedule as ScheduleCalendarEvent:
-                        return ScheduleEventCellViewModel(schedule, in: range, timeZone: timeZone, is24HourForm)
-                    case let holiday as HolidayCalendarEvent:
-                        return HolidayEventCellViewModel(holiday)
-
-                    case let google as GoogleCalendarEvent:
-                        return GoogleCalendarEventCellViewModel(google, in: range, timeZone, is24HourForm)
-
-                    case let apple as AppleCalendarEvent:
-                        return AppleCalendarEventCellViewModel(apple, in: range, timeZone, is24HourForm)
-
-                    default: return nil
-                }
-            }
+            let mapper = EventCellViewModelMapper(range: range, timeZone: timeZone, is24hourForm: is24HourForm)
+            let eventCellsWithTime = mapper.cellViewModels(
+                from: dayAndEvents.events.sortedByEventTime()
+            )
 
             return (currentTodoCells, eventCellsWithTime)
         }
@@ -472,6 +495,26 @@ extension DayEventListViewModelImple {
 
 
 // MARK: - private helpers
+
+private extension EventCellViewModel {
+
+    func liveActivityRegistrationApplied(_ registered: LiveActivityTarget?) -> any EventCellViewModel {
+        switch self {
+        case let todo as TodoEventCellViewModel:
+            return todo |> \.isLiveActivityRegistered .~ (registered != nil && todo.liveActivityTarget == registered)
+        case let schedule as ScheduleEventCellViewModel:
+            return schedule |> \.isLiveActivityRegistered .~ (registered != nil && schedule.liveActivityTarget == registered)
+        case let holiday as HolidayEventCellViewModel:
+            return holiday |> \.isLiveActivityRegistered .~ (registered != nil && holiday.liveActivityTarget == registered)
+        case let apple as AppleCalendarEventCellViewModel:
+            return apple |> \.isLiveActivityRegistered .~ (registered != nil && apple.liveActivityTarget == registered)
+        case let google as GoogleCalendarEventCellViewModel:
+            return google |> \.isLiveActivityRegistered .~ (registered != nil && google.liveActivityTarget == registered)
+        default:
+            return self
+        }
+    }
+}
 
 private extension EventTime {
 

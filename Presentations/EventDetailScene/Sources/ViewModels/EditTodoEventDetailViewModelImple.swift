@@ -12,10 +12,11 @@ import Optics
 import Domain
 import Extensions
 import Scenes
+import CommonPresentation
 
 
 final class EditTodoEventDetailViewModelImple: EventDetailViewModel, @unchecked Sendable {
-    
+
     private let todoId: String
     private let todoUsecase: any TodoEventUsecase
     private let eventTagUsecase: any EventTagUsecase
@@ -23,6 +24,7 @@ final class EditTodoEventDetailViewModelImple: EventDetailViewModel, @unchecked 
     private let scheduleEventUsecase: any ScheduleEventUsecase
     private let calendarSettingUsecase: any CalendarSettingUsecase
     private let foremostEventUsecase: any ForemostEventUsecase
+    private let liveActivityToggleViewModel: any LiveActivityToggleViewModel
     var router: (any EventDetailRouting)?
     weak var listener: EventDetailSceneListener?
     
@@ -33,7 +35,8 @@ final class EditTodoEventDetailViewModelImple: EventDetailViewModel, @unchecked 
         eventDetailDataUsecase: any EventDetailDataUsecase,
         scheduleEventUsecase: any ScheduleEventUsecase,
         calendarSettingUsecase: any CalendarSettingUsecase,
-        foremostEventUsecase: any ForemostEventUsecase
+        foremostEventUsecase: any ForemostEventUsecase,
+        liveActivityToggleViewModel: any LiveActivityToggleViewModel
     ) {
         self.todoId = todoId
         self.todoUsecase = todoUsecase
@@ -42,6 +45,7 @@ final class EditTodoEventDetailViewModelImple: EventDetailViewModel, @unchecked 
         self.scheduleEventUsecase = scheduleEventUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
         self.foremostEventUsecase = foremostEventUsecase
+        self.liveActivityToggleViewModel = liveActivityToggleViewModel
         
         self.internalBinding()
     }
@@ -56,7 +60,7 @@ final class EditTodoEventDetailViewModelImple: EventDetailViewModel, @unchecked 
         let timeZone = CurrentValueSubject<TimeZone?, Never>(nil)
     }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private let subject = Subject()
     private weak var inputInteractor: (any EventDetailInputInteractor)?
     
@@ -66,7 +70,7 @@ final class EditTodoEventDetailViewModelImple: EventDetailViewModel, @unchecked 
             .sink(receiveValue: { [weak self] timeZone in
                 self?.subject.timeZone.send(timeZone)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 
@@ -109,7 +113,7 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
             self.additionDataWithoutError().mapNever()
         )
         .sink(receiveCompletion: handleComplete, receiveValue: handlePrepared)
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     private func prepareBasicData() -> AnyPublisher<EventDetailBasicData, any Error> {
@@ -145,16 +149,47 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
             
         case .transformToSchedule:
             self.transformToScheduleAfterConfirm()
+
+        case .toggleLiveActivity(let isRegistered):
+            self.liveActivityToggleViewModel.startOrStopLiveActivity(.todo(id: self.todoId), isCurrentlyRegistered: isRegistered)
             
         case .addToTemplate:
             // TODO:
             break
         case .share:
-            // TODO:
-            break
-            
+            self.shareEvent()
+
         default: break
         }
+    }
+
+    private func shareEvent() {
+        guard let basic = self.subject.basicData.value?.current,
+              let name = basic.name
+        else { return }
+
+        let addition = self.subject.additionalData.value?.current
+        let builder = EventDetailShareTextBuilder()
+        let timeText = basic.selectedTime.map(builder.timeText(from:))
+
+        self.eventTagUsecase.eventTag(id: basic.eventTagId)
+            .first()
+            .sink { [weak self] tag in
+                let model = EventDetailShareModel(
+                    name: name,
+                    isTodo: true,
+                    timeText: timeText,
+                    repeatText: basic.eventRepeating?.text.emptyAsNil(),
+                    tagLine: tag?.name.emptyAsNil().map { .eventTag($0) },
+                    placeName: addition?.place?.placeName.emptyAsNil(),
+                    url: addition?.url?.emptyAsNil(),
+                    memo: addition?.memo?.emptyAsNil()
+                )
+                let text = builder.build(model)
+                guard !text.isEmpty else { return }
+                self?.router?.showShareSheet(text: text)
+            }
+            .store(in: self.cancellables)
     }
     
     private func removeEventAfterConfirm(onlyThisTime: Bool) {
@@ -183,7 +218,7 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
                     self?.router?.showError(error)
                 }
             }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         }
     }
     
@@ -230,7 +265,7 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
                     self?.router?.showError(error)
                 }
             }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         }
     }
     
@@ -292,7 +327,7 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
                 self.router?.showError(error)
             }
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     private func replaceEventDetailToSchedule(
@@ -404,7 +439,7 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
             }
             self?.subject.isSaving.send(false)
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     private func todoEditParams(from basic: EventDetailBasicData, _ timeZone: TimeZone) -> TodoEditParams {
@@ -476,23 +511,39 @@ extension EditTodoEventDetailViewModelImple {
     
     var moreActions: AnyPublisher<[[EventDetailMoreAction]], Never> {
         let todoId = self.todoId
-        let transform: (EventDetailBasicData, (any ForemostMarkableEvent)?) -> [[EventDetailMoreAction]] = { basic, foremostEvent in
+        let transform: (
+            EventDetailBasicData, (any ForemostMarkableEvent)?, LiveActivityTarget?
+        ) -> [[EventDetailMoreAction]] = { basic, foremostEvent, registeredTarget in
             let isRepeating = basic.selectedTime != nil && basic.eventRepeating != nil
             let isForemost = foremostEvent?.eventId == todoId
             let removeActions: [EventDetailMoreAction] = isRepeating
                 ? [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)]
                 : [.remove(onlyThisEvent: false)]
-            // TODO: share 기능 일단 비활성화
-//            return [removeActions, [.toggleTo(isForemost: !isForemost), .share]]
-            return [removeActions, [.toggleTo(isForemost: !isForemost), .copy, .transformToSchedule]]
+            let liveActivityActions: [EventDetailMoreAction] = basic.selectedTime != nil
+                ? [.toggleLiveActivity(isRegistered: registeredTarget == .todo(id: todoId))]
+                : []
+            return [
+                removeActions,
+                [.toggleTo(isForemost: !isForemost)] + liveActivityActions
+                    + [.copy, .transformToSchedule, .share]
+            ]
         }
-        return Publishers.CombineLatest(
+        return Publishers.CombineLatest3(
             self.subject.basicData.compactMap{ $0?.origin },
-            self.foremostEventUsecase.foremostEvent
+            self.foremostEventUsecase.foremostEvent,
+            self.liveActivityToggleViewModel.registeredTarget
         )
         .map(transform)
         .removeDuplicates()
         .eraseToAnyPublisher()
+    }
+
+    var isLiveActivityRegistered: AnyPublisher<Bool, Never> {
+        let todoId = self.todoId
+        return self.liveActivityToggleViewModel.registeredTarget
+            .map { $0 == .todo(id: todoId) }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
     }
 }
 

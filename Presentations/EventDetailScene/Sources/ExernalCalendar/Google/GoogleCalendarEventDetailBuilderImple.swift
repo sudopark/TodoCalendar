@@ -37,23 +37,35 @@ extension GoogleCalendarEventDetailSceneBuilerImple: GoogleCalendarEventDetailSc
         calendarId: String, accountId: String, eventId: String
     ) -> any GoogleCalendarEventDetailScene {
 
+        let liveActivityToggleViewModel = LiveActivityToggleViewModelImple(
+            eventLiveActivityUsecase: self.usecaseFactory.eventLiveActivityUsecase
+        )
         let viewModel = GoogleCalendarEventDetailViewModelImple(
             calenadrId: calendarId, accountId: accountId, eventId: eventId,
             googleCalendarUsecase: self.usecaseFactory.makeGoogleCalendarUsecase(),
             calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
-            daysIntervalCountUsecase: self.usecaseFactory.makeDaysIntervalCountUsecase()
+            externalCalendarIntegrationUsecase: self.usecaseFactory.externalCalenarIntegrationUsecase,
+            daysIntervalCountUsecase: self.usecaseFactory.makeDaysIntervalCountUsecase(),
+            liveActivityToggleViewModel: liveActivityToggleViewModel
         )
-        
+
         let viewController = GoogleCalendarEventDetailViewController(
             viewModel: viewModel,
             viewAppearance: self.viewAppearance
         )
-    
+
+        let selectRepeatOptionSceneBuilder = SelectEventRepeatOptionSceneBuilerImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearance
+        )
         let router = GoogleCalendarEventDetailRouter(
+            selectRepeatOptionSceneBuilder: selectRepeatOptionSceneBuilder
         )
         router.scene = viewController
         viewModel.router = router
-        
+        viewController.router = router
+        liveActivityToggleViewModel.router = router
+
         return viewController
     }
 }

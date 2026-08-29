@@ -17,4 +17,8 @@ extension Task {
         let anyCancellable = AnyCancellable(self)
         set.insert(anyCancellable)
     }
+    
+    public func store(in bag: CancelBag) {
+        bag.insert(AnyCancellable(self))
+    }
 }

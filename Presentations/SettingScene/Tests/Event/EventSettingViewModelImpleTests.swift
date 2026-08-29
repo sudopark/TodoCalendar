@@ -63,7 +63,7 @@ class EventSettingViewModelImpleTests: BaseTestCase, PublisherWaitable {
             eventNotificationSettingUsecase: self.stubEventNotificationSettingUsecase,
             eventTagUsecase: tagUsecase,
             supportExternalCalendarServices: [
-                GoogleCalendarService(scopes: [.readOnly]),
+                GoogleCalendarService(scopes: [.readWrite]),
                 AppleCalendarService()
             ],
             externalCalendarServiceUsecase: externalUsecase,
@@ -289,7 +289,7 @@ extension EventSettingViewModelImpleTests {
     func testViewModel_whenHasExternalCalendarAccount_provideExternalCalendarServiceModel() {
         // given
         let expect = expectation(description: "외부 캘린더 연동된경우 정보 제공")
-        let service = GoogleCalendarService(scopes: [.readOnly])
+        let service = GoogleCalendarService(scopes: [.readWrite])
         let account = ExternalServiceAccountinfo(service.identifier, email: "email")
         let viewModel = self.makeViewModel(accounts: [account])
         
@@ -317,7 +317,7 @@ extension EventSettingViewModelImpleTests {
         // when
         let isConnectings = self.waitOutputs(expect, for: viewModel.isConnectOrDisconnectExternalCalednar) {
             
-            let service = GoogleCalendarService(scopes: [.readOnly])
+            let service = GoogleCalendarService(scopes: [.readWrite])
             viewModel.connectExternalCalendar(service.identifier)
         }
         
@@ -331,7 +331,7 @@ extension EventSettingViewModelImpleTests {
         // given
         let expect = expectation(description: "외부서비스 연동 해제")
         expect.expectedFulfillmentCount = 3
-        let service = GoogleCalendarService(scopes: [.readOnly])
+        let service = GoogleCalendarService(scopes: [.readWrite])
         let account = ExternalServiceAccountinfo(service.identifier, email: "email")
         let viewModel = self.makeViewModel(accounts: [account])
         
@@ -351,7 +351,7 @@ extension EventSettingViewModelImpleTests {
         let expect = expectation(description: "외부서비스 연동 여부에 따라 연동정보 업데이트")
         expect.expectedFulfillmentCount = 3
         let viewModel = self.makeViewModel()
-        let service = GoogleCalendarService(scopes: [.readOnly])
+        let service = GoogleCalendarService(scopes: [.readWrite])
 
         // when
         let modelLists = self.waitOutputs(expect, for: viewModel.integratedExternalCalendars, timeout: 0.5) {
@@ -376,7 +376,7 @@ extension EventSettingViewModelImpleTests {
     func testViewModel_whenMultipleAccountsIntegrated_provideRowsPerAccount() {
         // given
         let expect = expectation(description: "다중 계정 연동 시 계정별 row + notIntegrated row 제공")
-        let service = GoogleCalendarService(scopes: [.readOnly])
+        let service = GoogleCalendarService(scopes: [.readWrite])
         let account1 = ExternalServiceAccountinfo(service.identifier, email: "email1")
         let account2 = ExternalServiceAccountinfo(service.identifier, email: "email2")
         let viewModel = self.makeViewModel(accounts: [account1, account2])
@@ -436,7 +436,7 @@ extension EventSettingViewModelImpleTests {
         // given
         let expect = expectation(description: "다중 계정 중 하나만 해제 시 나머지 계정 유지")
         expect.expectedFulfillmentCount = 2
-        let service = GoogleCalendarService(scopes: [.readOnly])
+        let service = GoogleCalendarService(scopes: [.readWrite])
         let account1 = ExternalServiceAccountinfo(service.identifier, email: "email1")
         let account2 = ExternalServiceAccountinfo(service.identifier, email: "email2")
         let viewModel = self.makeViewModel(accounts: [account1, account2])
@@ -514,7 +514,7 @@ extension EventSettingViewModelImpleTests {
         let expect = expectation(description: "구글+애플 동시 연동 후 애플만 해제")
         expect.expectedFulfillmentCount = 4
         let viewModel = self.makeViewModel()
-        let googleService = GoogleCalendarService(scopes: [.readOnly])
+        let googleService = GoogleCalendarService(scopes: [.readWrite])
 
         // when
         let modelLists = self.waitOutputs(expect, for: viewModel.integratedExternalCalendars, timeout: 1.0) {
@@ -566,10 +566,5 @@ private class SpyRouter: BaseSpyRouter, EventSettingRouting, @unchecked Sendable
     var didRouteToSelectDefaultMapApp: Bool?
     func routeToSelectDefaultMapApp() {
         self.didRouteToSelectDefaultMapApp = true
-    }
-
-    var didOpenSystemSetting: Bool?
-    func openSystemSetting() {
-        self.didOpenSystemSetting = true
     }
 }

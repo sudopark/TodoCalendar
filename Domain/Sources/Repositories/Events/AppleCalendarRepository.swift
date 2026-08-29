@@ -14,7 +14,6 @@ import Combine
 
 public protocol AppleCalendarRepository: Sendable {
 
-    // 캐시 데이터를 먼저 방출 → 이어 EventKit에서 refresh한 데이터 방출 후 완료
     func loadCalendarTags() -> AnyPublisher<[AppleCalendar.Tag], any Error>
 
     func loadEvents(
@@ -22,6 +21,17 @@ public protocol AppleCalendarRepository: Sendable {
     ) -> AnyPublisher<[AppleCalendar.Event], any Error>
 
     func loadEventOrigin(id: String) -> AnyPublisher<AppleCalendar.EventOrigin?, Never>
+
+    func updateEvent(
+        _ eventId: String,
+        _ params: AppleCalendar.EventEditParams,
+        scope: AppleCalendar.EventEditScope
+    ) async throws -> AppleCalendar.EventOrigin
+
+    func removeEvent(
+        _ eventId: String,
+        scope: AppleCalendar.EventEditScope
+    ) async throws
 
     func resetCache() async throws
 }

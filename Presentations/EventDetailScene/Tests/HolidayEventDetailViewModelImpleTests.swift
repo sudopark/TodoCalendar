@@ -14,6 +14,8 @@ import Domain
 import Extensions
 import UnitTestHelpKit
 import TestDoubles
+import Scenes
+import CommonPresentation
 
 @testable import EventDetailScene
 
@@ -22,16 +24,27 @@ final class HolidayEventDetailViewModelImpleTests: PublisherWaitable {
     
     var cancelBag: Set<AnyCancellable>! = []
     private let spyRouter = SpyRouter()
+    private let stubLiveActivityUsecase = StubEventLiveActivityUsecase()
     
-    private func makeViewModel() async throws -> HolidayEventDetailViewModelImple {
+    private func makeViewModel(
+        registeredLiveActivityTarget: LiveActivityTarget? = nil,
+        liveActivityStartError: (any Error)? = nil
+    ) async throws -> HolidayEventDetailViewModelImple {
         let usecase = PrivateStubHolidayUsecase()
         try await usecase.prepare()
+        self.stubLiveActivityUsecase.registeredTargetSubject.send(registeredLiveActivityTarget)
+        self.stubLiveActivityUsecase.stubStartError = liveActivityStartError
+        let liveActivityToggleViewModel = LiveActivityToggleViewModelImple(
+            eventLiveActivityUsecase: self.stubLiveActivityUsecase
+        )
         let viewModel = HolidayEventDetailViewModelImple(
             uuid: "some",
             holidayUsecase: usecase,
-            daysIntervalCountUsecase: StubDaysIntervalCountUsecase()
+            daysIntervalCountUsecase: StubDaysIntervalCountUsecase(),
+            liveActivityToggleViewModel: liveActivityToggleViewModel
         )
         viewModel.router = self.spyRouter
+        liveActivityToggleViewModel.router = self.spyRouter
         return viewModel
     }
 }
@@ -107,12 +120,17 @@ extension HolidayEventDetailViewModelImpleTests {
     private func makeViewModelWithUsecase() async throws -> (HolidayEventDetailViewModelImple, PrivateStubHolidayUsecase) {
         let usecase = PrivateStubHolidayUsecase()
         try await usecase.prepare()
+        let liveActivityToggleViewModel = LiveActivityToggleViewModelImple(
+            eventLiveActivityUsecase: self.stubLiveActivityUsecase
+        )
         let viewModel = HolidayEventDetailViewModelImple(
             uuid: "some",
             holidayUsecase: usecase,
-            daysIntervalCountUsecase: StubDaysIntervalCountUsecase()
+            daysIntervalCountUsecase: StubDaysIntervalCountUsecase(),
+            liveActivityToggleViewModel: liveActivityToggleViewModel
         )
         viewModel.router = self.spyRouter
+        liveActivityToggleViewModel.router = self.spyRouter
         return (viewModel, usecase)
     }
 
@@ -150,6 +168,101 @@ extension HolidayEventDetailViewModelImpleTests {
         #expect(usecase.hiddenHolidayNamesSubject.value.isEmpty)
     }
 }
+
+
+// MARK: - 라이브액티비티 등록·해제
+
+extension HolidayEventDetailViewModelImpleTests {
+
+    @Test func viewModel_whenHolidayLoaded_provideLiveActivityAction() async throws {
+        // given
+        let expect = expectConfirm("공휴일이 로드되면 등록 항목 노출")
+        expect.count = 2
+        let viewModel = try await self.makeViewModel()
+
+        // when
+        let models = try await self.outputs(expect, for: viewModel.liveActivityActionModel) {
+            viewModel.refresh()
+        }
+
+        // then
+        #expect(models == [nil, LiveActivityActionModel(isRegistered: false)])
+    }
+
+    @Test func viewModel_whenHolidayLiveActivityRegistered_provideUnregisterAction() async throws {
+        // given
+        let expect = expectConfirm("등록된 공휴일은 해제 항목으로 노출")
+        expect.count = 2
+        let viewModel = try await self.makeViewModel(
+            registeredLiveActivityTarget: .holiday(uuid: "some", dateString: "2025-03-01")
+        )
+
+        // when
+        let models = try await self.outputs(expect, for: viewModel.liveActivityActionModel) {
+            viewModel.refresh()
+        }
+
+        // then
+        #expect(models == [nil, LiveActivityActionModel(isRegistered: true)])
+    }
+
+    @Test func viewModel_whenToggleLiveActivity_startActivityWithHolidayTarget() async throws {
+        // given
+        let viewModel = try await self.makeViewModel()
+        viewModel.refresh()
+        try await Task.sleep(for: .milliseconds(100))
+
+        // when
+        viewModel.toggleLiveActivity(isRegistered: false)
+        try await Task.sleep(for: .milliseconds(100))
+
+        // then
+        #expect(
+            self.stubLiveActivityUsecase.didStartTarget
+            == .holiday(uuid: "some", dateString: "2025-03-01")
+        )
+        #expect(self.stubLiveActivityUsecase.didStopActivity == false)
+    }
+
+    @Test func viewModel_whenToggleRegisteredLiveActivity_stopActivity() async throws {
+        // given
+        let viewModel = try await self.makeViewModel(
+            registeredLiveActivityTarget: .holiday(uuid: "some", dateString: "2025-03-01")
+        )
+        viewModel.refresh()
+        try await Task.sleep(for: .milliseconds(100))
+
+        // when
+        viewModel.toggleLiveActivity(isRegistered: true)
+        try await Task.sleep(for: .milliseconds(100))
+
+        // then
+        #expect(self.stubLiveActivityUsecase.didStopActivity == true)
+        #expect(self.stubLiveActivityUsecase.didStartTarget == nil)
+    }
+
+    @Test func viewModel_whenStartLiveActivityFail_showUnavailableMessage() async throws {
+        // given
+        let viewModel = try await self.makeViewModel(
+            liveActivityStartError: EventLiveActivityStartFailReason.tooFarFuture
+        )
+        viewModel.refresh()
+        try await Task.sleep(for: .milliseconds(100))
+
+        // when
+        viewModel.toggleLiveActivity(isRegistered: false)
+        try await Task.sleep(for: .milliseconds(100))
+
+        // then
+        #expect(
+            self.spyRouter.didShowConfirmWith?.message
+            == "calendar::event::more_action:live_activity:unavail::too_far_future".localized()
+        )
+        #expect(self.spyRouter.didShowConfirmWith?.withCancel == false)
+        #expect(self.spyRouter.didShowError == nil)
+    }
+}
+
 
 private final class PrivateStubHolidayUsecase: StubHolidayUsecase {
     

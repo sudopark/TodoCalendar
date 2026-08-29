@@ -46,6 +46,14 @@ struct CalendarDeepLinkHandlerImpleTests {
         let path = "tc.app://calendar?select=2020_03_12"
         return PendingDeepLink(URL(string: path)!)!
     }
+
+    private var aiEntryLink: PendingDeepLink {
+        return PendingDeepLink(URL(string: "tc.app://calendar/ai")!)!
+    }
+
+    private var unknownPathLink: PendingDeepLink {
+        return PendingDeepLink(URL(string: "tc.app://calendar/unknown")!)!
+    }
 }
 
 extension CalendarDeepLinkHandlerImpleTests {
@@ -95,26 +103,106 @@ extension CalendarDeepLinkHandlerImpleTests {
     @Test func handler_handleSelectDateLink_afterAttachInteractor() {
         // given
         let handler = self.makeHandler(withCalendarInteractor: false)
-        
+
         // when
         _ = handler.handleLink(self.moveDateLink)
         #expect(self.spyCalendarInteractor.didMoveToDay == nil)
         handler.attach(calendarInteractor: self.spyCalendarInteractor)
-        
+
         // then
         #expect(self.spyCalendarInteractor.didMoveToDay == .init(2020, 3, 12))
+    }
+
+    // handle ai entry link
+    @Test func handler_whenAILink_requestAIEntry() {
+        // given
+        let handler = self.makeHandler()
+
+        // when
+        let result = handler.handleLink(self.aiEntryLink)
+
+        // then
+        #expect(result == .handle)
+        #expect(self.spyCalendarInteractor.didRequestAIEntry == true)
+    }
+
+    // handle pending ai entry link
+    @Test func handler_whenAILinkBeforeAttach_pendingAndFlush() {
+        // given
+        let handler = self.makeHandler(withCalendarInteractor: false)
+
+        // when
+        let result = handler.handleLink(self.aiEntryLink)
+        #expect(result == .handle)
+        #expect(self.spyCalendarInteractor.didRequestAIEntry == nil)
+        handler.attach(calendarInteractor: self.spyCalendarInteractor)
+
+        // then
+        #expect(self.spyCalendarInteractor.didRequestAIEntry == true)
+    }
+
+    // handle both pending ai entry and pending select calendar link
+    @Test func handler_whenAILinkAndSelectLinkBeforeAttach_flushesBoth() {
+        // given
+        let handler = self.makeHandler(withCalendarInteractor: false)
+        _ = handler.handleLink(self.aiEntryLink)
+        _ = handler.handleLink(self.moveDateLink)
+        #expect(self.spyCalendarInteractor.didRequestAIEntry == nil)
+        #expect(self.spyCalendarInteractor.didMoveToDay == nil)
+
+        // when
+        handler.attach(calendarInteractor: self.spyCalendarInteractor)
+
+        // then — 날짜 이동을 끝낸 뒤 AI 입력이 뜬다
+        #expect(self.spyCalendarInteractor.didMoveToDay == .init(2020, 3, 12))
+        #expect(self.spyCalendarInteractor.didCalls == [.moveDay, .requestAIEntry])
+    }
+
+    // handle unknown path link
+    @Test func handler_whenUnknownPath_needUpdate() {
+        // given
+        let handler = self.makeHandler()
+
+        // when
+        let result = handler.handleLink(self.unknownPathLink)
+
+        // then
+        #expect(result == .needUpdate)
     }
 }
 
 private final class SpyCalendarInteractor: CalendarSceneInteractor, @unchecked Sendable {
-    
+
+    enum Call: Equatable {
+        case moveDay
+        case requestAIEntry
+    }
+    var didCalls: [Call] = []
+
     func moveFocusToToday() { }
-    
+
+    var didMoveToPreviousMonth: Bool?
+    func moveToPreviousMonth() {
+        self.didMoveToPreviousMonth = true
+    }
+
+    var didMoveToNextMonth: Bool?
+    func moveToNextMonth() {
+        self.didMoveToNextMonth = true
+    }
+
     var didMoveToDay: CalendarDay?
     var didMoveToDayWithClearPresented: Bool?
     func moveDay(_ day: CalendarDay, withClearPresented: Bool) {
         self.didMoveToDay = day
         self.didMoveToDayWithClearPresented = withClearPresented
+        self.didCalls.append(.moveDay)
+    }
+
+    var didRequestAIEntry: Bool?
+    func requestAIEntry() {
+        self.didRequestAIEntry = true
+        self.didCalls.append(.requestAIEntry)
     }
 }
 

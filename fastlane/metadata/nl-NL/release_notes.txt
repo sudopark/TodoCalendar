@@ -1,0 +1,27 @@
+Deze update voegt nieuwe functies toe.
+
+■ AI-snelinvoer
+· Spreek of typ en het evenement staat er. "Vrijdag om 12 uur lunchen met Sarah", "verzet de tandarts naar volgende week dinsdag" – zoals je het echt zou zeggen
+· Lezen vanuit afbeelding: fotografeer een lesrooster of een evenementenposter, of kies er een uit je bibliotheek, en de tekst wordt omgezet in evenementen
+· Niet alleen toevoegen: tijd verzetten, hernoemen, afvinken, verwijderen. Verzoeken die iets wijzigen of verwijderen laten eerst zien wat er gaat gebeuren en vragen om bevestiging
+· Stuur het via Siri, een widget of Bedieningspaneel zonder de app te openen
+· Deel tekst of een foto vanuit een andere app en het loopt door naar Naar AI sturen
+· AI-snelinvoer is beschikbaar nadat je bent ingelogd
+
+■ Tonen op het toegangsscherm
+· Een evenement dat bijna begint telt af op het toegangsscherm en in de Dynamic Island
+· Voeg het toe vanuit de evenementdetails of de daglijst – ook evenementen uit Google Agenda en Apple Agenda
+· Vink een taak af of stop de weergave rechtstreeks vanaf het toegangsscherm, en tik om naar de details te gaan
+
+■ Je agenda delen
+· Houd een datum in de kalender ingedrukt voor Deze dag delen, Deze week delen of Deze maand delen
+· Kies in Voorbeeld van delen welke Gebeurtenistypen meegaan en of je deelt als Tekst of Afbeelding
+· Je kunt ook één evenement apart delen
+
+■ Evenementen in Google Agenda en Apple Agenda bewerken
+· Wijzig en verwijder evenementen van je gekoppelde agenda's rechtstreeks in de app, herhalingsregels inbegrepen
+· Houd ingedrukt in de lijst om te verwijderen
+
+■ Abonnementen
+· In Abonnement upgraden kies je tussen Standaard en Levenslang, elk met meer tegoed per dag
+· Raakt het op, dan vult Credits kopen het aan, en aangekocht tegoed verloopt niet

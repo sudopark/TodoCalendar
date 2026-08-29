@@ -57,7 +57,7 @@ extension WidgetUsecaseFactory {
     }
     
     func makeTodoToggleRepository() -> any TodoEventRepository {
-        return self.makeTodoRepositoryByUser()
+        return TodoEventRepositoryFactory(base: self.base).makeRepository()
     }
     
     func makeHolidaysFetchUsecase(
@@ -142,32 +142,5 @@ extension WidgetUsecaseFactory {
             eventDetailRepository: eventDetailRepository,
             cached: FetchCacheStores.shared.events
         )
-    }
-    
-    private func makeTodoRepositoryByUser() -> any TodoEventRepository {
-        let auth = self.base.authStore.loadCurrentAuth()
-        
-        if let auth {
-            let localStorage = TodoLocalStorageImple(
-                sqliteService: base.writableSqliteService
-            )
-            
-            let remote = base.remoteAPI
-            let credential = APICredential(auth: auth)
-            remote.setup(credential: credential)
-            return TodoRemoteRepositoryImple(
-                remote: TodoRemoteImple(remote: base.remoteAPI),
-                cacheStorage: localStorage
-            )
-        } else {
-            let localStorage = TodoLocalStorageImple(
-                sqliteService: base.commonSqliteService
-            )
-            
-            return TodoLocalRepositoryImple(
-                localStorage: localStorage,
-                environmentStorage: base.userDefaultEnvironmentStorage
-            )
-        }
     }
 }

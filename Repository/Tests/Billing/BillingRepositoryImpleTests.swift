@@ -18,6 +18,11 @@ final class BillingRepositoryImpleTests {
         let remote = StubRemoteAPI(responses: DummyResponse().responses)
         return BillingRepositoryImple(remote: remote)
     }
+
+    private func makeRepositoryWithUnwrappedTransactionResponse() -> BillingRepositoryImple {
+        let remote = StubRemoteAPI(responses: DummyResponse().unwrappedTransactionResponses)
+        return BillingRepositoryImple(remote: remote)
+    }
 }
 
 
@@ -57,6 +62,33 @@ extension BillingRepositoryImpleTests {
 }
 
 
+// MARK: - 유저 플랜 단독 조회
+
+extension BillingRepositoryImpleTests {
+
+    @Test func repository_loadUserAccount_returnsCurrentPlan() async throws {
+        // given
+        let repository = self.makeRepository()
+        // when
+        let account = try await repository.loadUserAccount()
+        // then
+        #expect(account.plan.planId == .standard)
+        #expect(account.plan.topupRemaining == 45600)
+        #expect(account.plan.scheduledChange?.planId == .free)
+    }
+
+    // 구매에 심을 결제 계정 식별자 — 이 값 없이 산 트랜잭션은 서버가 409 로 거절한다
+    @Test func repository_loadUserAccount_returnsAppAccountToken() async throws {
+        // given
+        let repository = self.makeRepository()
+        // when
+        let account = try await repository.loadUserAccount()
+        // then
+        #expect(account.appAccountToken == UUID(uuidString: "8f14e45f-ceea-467a-9c8f-1b3a2e5d7c04"))
+    }
+}
+
+
 // MARK: - 구매 반영
 
 extension BillingRepositoryImpleTests {
@@ -70,6 +102,34 @@ extension BillingRepositoryImpleTests {
         #expect(plan.planId == .standard)
         #expect(plan.topupRemaining == 12300)
         #expect(plan.scheduledChange?.planId == .free)
+    }
+}
+
+
+// MARK: - 트랜잭션 위임
+
+extension BillingRepositoryImpleTests {
+
+    // 앱 밖에서 발견한 트랜잭션은 구매 확정과 다른 경로로 올린다 —
+    // 종류 판별은 서버가 하므로 앱은 JWS 만 싣는다
+    @Test func repository_postTransactionUpdate_returnsAppliedPlan() async throws {
+        // given
+        let repository = self.makeRepository()
+        // when
+        let plan = try await repository.postTransactionUpdate(signedTransaction: "jws_token")
+        // then
+        #expect(plan.planId == .lifetime)
+        #expect(plan.topupRemaining == 7700)
+    }
+
+    // 서버가 계약을 어기고 user_plan 래핑 없이 평평한 응답을 주면 조용히 통과시키지 않는다
+    @Test func repository_postTransactionUpdate_whenResponseNotWrapped_throws() async throws {
+        // given
+        let repository = self.makeRepositoryWithUnwrappedTransactionResponse()
+        // when & then
+        await #expect(throws: (any Error).self) {
+            _ = try await repository.postTransactionUpdate(signedTransaction: "jws_token")
+        }
     }
 }
 
@@ -107,6 +167,41 @@ private struct DummyResponse {
         """
     }
 
+    // 구매 확정 응답과 값을 일부러 다르게 둔다 — 잘못해서 purchases 로 나가면 TC 가 잡는다.
+    // 이 엔드포인트만 user_plan 으로 감싼다
+    private var transactionResponse: String {
+        return """
+        {
+            "user_plan": {
+                "id": "lifetime",
+                "topup_remaining": 7700
+            }
+        }
+        """
+    }
+
+    private var unwrappedTransactionResponse: String {
+        return """
+        {
+            "id": "lifetime",
+            "topup_remaining": 7700
+        }
+        """
+    }
+
+    // GET /v1/ai/usage 의 plan 필드·POST /v1/billing/purchases 응답과 동일 스키마 +
+    // 이 엔드포인트에만 오는 app_account_token (플랜 속성이 아니라 결제 계정 식별자)
+    private var userPlanResponse: String {
+        return """
+        {
+            "id": "standard",
+            "scheduled_change": { "plan_id": "free", "effective_at": "2026-08-26T00:00:00.000Z" },
+            "topup_remaining": 45600,
+            "app_account_token": "8f14e45f-ceea-467a-9c8f-1b3a2e5d7c04"
+        }
+        """
+    }
+
     var responses: [StubRemoteAPI.Response] {
         return [
             .init(method: .get, endpoint: BillingAPIEndpoints.plans,
@@ -114,7 +209,18 @@ private struct DummyResponse {
             .init(method: .get, endpoint: BillingAPIEndpoints.topups,
                   resultJsonString: .success(self.topupsResponse)),
             .init(method: .post, endpoint: BillingAPIEndpoints.purchases,
-                  resultJsonString: .success(self.purchaseResponse))
+                  resultJsonString: .success(self.purchaseResponse)),
+            .init(method: .post, endpoint: BillingAPIEndpoints.transactions,
+                  resultJsonString: .success(self.transactionResponse)),
+            .init(method: .get, endpoint: BillingAPIEndpoints.userPlan,
+                  resultJsonString: .success(self.userPlanResponse))
+        ]
+    }
+
+    var unwrappedTransactionResponses: [StubRemoteAPI.Response] {
+        return [
+            .init(method: .post, endpoint: BillingAPIEndpoints.transactions,
+                  resultJsonString: .success(self.unwrappedTransactionResponse))
         ]
     }
 }

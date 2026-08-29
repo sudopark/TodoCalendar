@@ -10,6 +10,7 @@ import Foundation
 import Combine
 import Prelude
 import Optics
+import Extensions
 
 
 public protocol BillingUsecase: AnyObject, Sendable {
@@ -19,11 +20,25 @@ public protocol BillingUsecase: AnyObject, Sendable {
 
     // 유저 취소·승인대기(Ask to Buy) 는 에러가 아니다 — 결과를 구분해 반환
     func purchase(productId: String) async throws -> BillingPurchaseResult
-    func restorePurchases() async throws -> BillingUserPlan?
+    func restorePurchases() async throws -> BillingRestoreResult
 
-    // 앱 기동(로그인) 시 1회. 이후 생명주기 내내 유지된다.
-    // 중복 호출 방어가 락 없는 플래그라 메인에서만 부른다
+    // paywall 진입 등에서 현재 플랜을 재확인한다. 성공하면 sharedDataStore 에 반영돼
+    // currentUserPlan 구독자에게 흐른다. 실패는 호출측이 처리 (throws)
+    @discardableResult
+    func refreshUserPlan() async throws -> BillingUserPlan
+
     func startObservingTransactions()
+
+    func stopObservingTransactions()
+
+    func recoverUnfinishedTransactions()
+
+    func hasUnfinishedTransactions() async -> Bool
+
+    func applyUnfinishedTransactions() async throws -> BillingUserPlan?
+
+    // 구독을 걸 수 없는 순간에 즉시 판정해야 하는 호출부용 — currentUserPlan 과 같은 값을 본다
+    func latestUserPlan() -> BillingUserPlan?
 
     var currentUserPlan: AnyPublisher<BillingUserPlan, Never> { get }
 }
@@ -46,9 +61,11 @@ public final class BillingUsecaseImple: BillingUsecase, @unchecked Sendable {
     }
 
     private var observingTask: Task<Void, Never>?
+    private var recoveryTask: Task<Void, Never>?
 
     deinit {
         self.observingTask?.cancel()
+        self.recoveryTask?.cancel()
     }
 }
 
@@ -89,7 +106,10 @@ extension BillingUsecaseImple {
 extension BillingUsecaseImple {
 
     public func purchase(productId: String) async throws -> BillingPurchaseResult {
-        switch try await self.appStoreService.purchase(productId: productId) {
+        let appAccountToken = try await self.currentAppAccountToken()
+        switch try await self.appStoreService.purchase(
+            productId: productId, appAccountToken: appAccountToken
+        ) {
         case .verified(let transaction):
             return .applied(try await self.applyAndFinish(transaction))
         case .cancelled:
@@ -99,9 +119,16 @@ extension BillingUsecaseImple {
         }
     }
 
-    public func restorePurchases() async throws -> BillingUserPlan? {
-        let transactions = try await self.appStoreService.restorePurchases()
-        return try await self.applyEach(transactions)
+    public func restorePurchases() async throws -> BillingRestoreResult {
+        switch try await self.appStoreService.restorePurchases() {
+        case .synced(let transactions):
+            guard let userPlan = try await self.applyEach(transactions)
+            else { return .nothingToRestore }
+            return .applied(userPlan)
+
+        case .cancelled:
+            return .cancelled
+        }
     }
 
     // finish 는 서버 반영이 성공한 뒤에만. 먼저 부르면 실패 시 영수증이 사라져 복구 불가다
@@ -109,29 +136,116 @@ extension BillingUsecaseImple {
         _ transaction: BillingSignedTransaction
     ) async throws -> BillingUserPlan {
         // 서버가 믿는 건 서명 payload 안의 값 — 앱이 판단한 productId 는 올리지 않는다
-        let userPlan = try await self.repository.postPurchase(signedTransaction: transaction.jws)
+        let userPlan = try await self.wrappingReflectFailure {
+            try await self.repository.postPurchase(signedTransaction: transaction.jws)
+        }
         await self.appStoreService.finishTransaction(id: transaction.id)
+        self.updateSharedUserPlan(userPlan)
+        return userPlan
+    }
+
+    private func delegateAndFinish(
+        _ transaction: BillingSignedTransaction
+    ) async throws -> BillingUserPlan {
+        let userPlan = try await self.wrappingReflectFailure {
+            try await self.repository.postTransactionUpdate(signedTransaction: transaction.jws)
+        }
+        await self.appStoreService.finishTransaction(id: transaction.id)
+        guard !Task.isCancelled else { return userPlan }
+        self.updateSharedUserPlan(userPlan)
+        return userPlan
+    }
+
+    private func wrappingReflectFailure(
+        _ post: () async throws -> BillingUserPlan
+    ) async throws -> BillingUserPlan {
+        do {
+            return try await post()
+        } catch {
+            throw BillingReflectFailure(error)
+        }
+    }
+
+    private func updateSharedUserPlan(_ userPlan: BillingUserPlan) {
         self.sharedDataStore.put(
             BillingUserPlan.self,
             key: ShareDataKeys.billingUserPlan.rawValue,
             userPlan
         )
-        return userPlan
     }
 
-    // 서버가 transactionId ledger 로 멱등이라 전건 재제출이 안전하다.
-    // 순차 await 이라 for 루프가 필요하다 — 마지막 반영 결과가 최신 상태.
-    // recoverUnfinishedTransactions 와 달리 여기는 fail-fast 가 의도다 — restorePurchases 는
-    // 유저가 직접 누른 액션이라 실패가 화면에 그대로 노출되고 재시도도 유저가 다시 누르면 되므로,
-    // 앞 건 실패를 숨기고 뒤 건만 반영하는 게 오히려 혼란스럽다
+    // 한 건이 영구 실패해도 나머지는 반영돼야 한다 — fail-fast 면 앞의 실패가
+    // 매 시도마다 뒤 트랜잭션을 가려 영영 반영되지 않는다
     private func applyEach(
         _ transactions: [BillingSignedTransaction]
     ) async throws -> BillingUserPlan? {
         var latest: BillingUserPlan?
+        var firstFailure: (any Error)?
         for transaction in transactions {
-            latest = try await self.applyAndFinish(transaction)
+            guard !Task.isCancelled else { break }
+            do {
+                latest = try await self.delegateAndFinish(transaction)
+            } catch {
+                firstFailure = firstFailure ?? error
+                logger.log(
+                    level: .error, "billing transaction apply failed: \(error)",
+                    with: ["transactionId": transaction.id]
+                )
+            }
         }
+        if let firstFailure { throw firstFailure }
         return latest
+    }
+}
+
+
+// MARK: - user plan query
+
+extension BillingUsecaseImple {
+
+    @discardableResult
+    public func refreshUserPlan() async throws -> BillingUserPlan {
+        return try await self.loadAndShareUserAccount().plan
+    }
+
+    private func loadAndShareUserAccount() async throws -> BillingUserAccount {
+        let account = try await self.repository.loadUserAccount()
+        self.updateSharedAppAccountToken(account.appAccountToken)
+        self.updateSharedUserPlan(account.plan)
+        return account
+    }
+
+    // 토큰 없이 산 트랜잭션은 주인을 표시할 값이 없어 서버가 거절한다 — 청구부터 하고
+    // 실패를 알리느니 결제창을 안 띄운다
+    private func currentAppAccountToken() async throws -> UUID {
+        if let cached = self.sharedAppAccountToken() { return cached }
+
+        guard let token = try await self.loadAndShareUserAccount().appAccountToken
+        else { throw RuntimeError(key: "Billing.noAccountToken", "billing account token not secured") }
+        return token
+    }
+
+    private func sharedAppAccountToken() -> UUID? {
+        return self.sharedDataStore.value(
+            UUID.self, key: ShareDataKeys.billingAppAccountToken.rawValue
+        )
+    }
+
+    // 계정 전환 시 이전 유저의 토큰이 남으면 남의 구매를 자기 것으로 주장하게 된다 —
+    // 값이 없는 응답에는 캐시를 지운다
+    private func updateSharedAppAccountToken(_ token: UUID?) {
+        let key = ShareDataKeys.billingAppAccountToken.rawValue
+        guard let token else {
+            self.sharedDataStore.delete(key)
+            return
+        }
+        self.sharedDataStore.put(UUID.self, key: key, token)
+    }
+
+    public func latestUserPlan() -> BillingUserPlan? {
+        return self.sharedDataStore.value(
+            BillingUserPlan.self, key: ShareDataKeys.billingUserPlan.rawValue
+        )
     }
 }
 
@@ -145,24 +259,44 @@ extension BillingUsecaseImple {
         // 앱 밖 갱신·환불·가족공유·승인대기 통과가 들어오는 유일한 경로
         let updates = self.appStoreService.transactionUpdates
         self.observingTask = Task { [weak self] in
-            // 서버 반영 전에 앱이 죽은 트랜잭션을 먼저 복구한 뒤 스트림을 연다
-            await self?.recoverUnfinishedTransactions()
-            // 루프 본문에서만 self 를 잡는다 — 끝나지 않는 스트림을 strong self 로 돌면
-            // deinit 이 영영 오지 않아 아래 cancel 이 죽은 코드가 된다
             for await transaction in updates {
                 guard let self else { return }
-                _ = try? await self.applyAndFinish(transaction)
+                do {
+                    _ = try await self.delegateAndFinish(transaction)
+                } catch {
+                    logger.log(
+                        level: .error, "billing transaction delegate failed (stream): \(error)",
+                        with: ["transactionId": transaction.id]
+                    )
+                }
             }
         }
     }
 
-    // 한 건이 영구 실패해도 나머지는 반영돼야 한다 — fail-fast 면 앞의 실패가
-    // 매 기동마다 뒤 트랜잭션을 가려 영영 반영되지 않는다
-    private func recoverUnfinishedTransactions() async {
-        let transactions = await self.appStoreService.unfinishedTransactions()
-        for transaction in transactions {
-            _ = try? await self.applyAndFinish(transaction)
+    public func stopObservingTransactions() {
+        self.observingTask?.cancel()
+        self.observingTask = nil
+        self.recoveryTask?.cancel()
+        self.recoveryTask = nil
+    }
+
+    // unfinished 는 OS 전역이라 두 시도가 겹치면 같은 트랜잭션을 중복 전송한다
+    public func recoverUnfinishedTransactions() {
+        self.recoveryTask?.cancel()
+        self.recoveryTask = Task { [weak self] in
+            guard let self else { return }
+            let transactions = await self.appStoreService.unfinishedTransactions()
+            _ = try? await self.applyEach(transactions)
         }
+    }
+
+    public func hasUnfinishedTransactions() async -> Bool {
+        return await self.appStoreService.unfinishedTransactions().isEmpty == false
+    }
+
+    public func applyUnfinishedTransactions() async throws -> BillingUserPlan? {
+        let transactions = await self.appStoreService.unfinishedTransactions()
+        return try await self.applyEach(transactions)
     }
 
     public var currentUserPlan: AnyPublisher<BillingUserPlan, Never> {

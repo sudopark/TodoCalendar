@@ -11,6 +11,7 @@ import UIKit
 import SwiftUI
 import Combine
 import Domain
+import Extensions
 import Scenes
 import CommonPresentation
 
@@ -23,12 +24,12 @@ final class AppearanceSettingViewController: UIHostingController<AppearanceSetti
     private let calendarSectionViewModel: any CalendarSectionAppearnaceSettingViewModel
     private let eventOnCalednarSectionViewModel: any EventOnCalendarViewModel
     private let eventListAppearanceSettingViewModel: any EventListAppearnaceSettingViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
     
     @MainActor
     var interactor: (any AppearanceSettingSceneInteractor)? { self.viewModel }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     
     init(
         initial setting: CalendarAppearanceSettings,

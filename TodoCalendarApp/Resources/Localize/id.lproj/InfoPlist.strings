@@ -1,3 +1,5 @@
 "NSCalendarsFullAccessUsageDescription" = "Akses kalender diperlukan untuk menampilkan acara dan sinkronisasi dengan Apple Kalender.";
 "NSMicrophoneUsageDescription" = "Akses mikrofon diperlukan untuk memasukkan acara dan tugas melalui suara.";
 "NSSpeechRecognitionUsageDescription" = "Pengenalan suara diperlukan untuk mengubah suara Anda menjadi acara dan tugas.";
+"NSCameraUsageDescription" = "Akses kamera diperlukan untuk membaca teks dari foto yang Anda ambil.";
+"NSPhotoLibraryAddUsageDescription" = "Akses galeri foto diperlukan untuk menyimpan gambar acara yang dibagikan ke foto Anda.";

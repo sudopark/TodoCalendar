@@ -1,0 +1,10 @@
+"Add with AI" = "AI로 추가";
+"Send what you say to AI and let it create your events and to-dos." = "말한 내용을 AI에게 보내 일정과 할일을 만들어요.";
+"Command" = "명령";
+"What would you like to add?" = "무엇을 추가할까요?";
+"Got it. I'll notify you when it's done." = "알겠어요. 완료되면 알려드릴게요.";
+"Sign in to the app first to use AI." = "AI를 사용하려면 먼저 앱에 로그인해주세요.";
+"You've used up your AI credits for today." = "오늘의 AI 크레딧을 모두 사용했어요.";
+"Something went wrong. Please try again." = "문제가 발생했어요. 다시 시도해주세요.";
+"A previous request is still pending. Check the app to review it." = "이전 요청이 아직 처리되지 않았어요. 앱에서 확인해주세요.";
+"Sent, but the app can't track the result. Check your calendar after a moment." = "보냈지만 앱에서 결과를 추적할 수 없어요. 잠시 후 캘린더를 확인해 주세요.";

@@ -5,6 +5,7 @@
 import UIKit
 import SwiftUI
 import Combine
+import Extensions
 import Scenes
 import CommonPresentation
 
@@ -14,12 +15,12 @@ import CommonPresentation
 final class ___VARIABLE_sceneName___ViewController: UIHostingController<___VARIABLE_sceneName___ContainerView>, ___VARIABLE_sceneName___Scene {
     
     private let viewModel: any ___VARIABLE_sceneName___ViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
     
     @MainActor
     var interactor: (any ___VARIABLE_sceneName___SceneInteractor)? { self.viewModel }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     
     init(
         viewModel: any ___VARIABLE_sceneName___ViewModel,

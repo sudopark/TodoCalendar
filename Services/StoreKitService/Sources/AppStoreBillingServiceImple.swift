@@ -8,22 +8,16 @@
 
 import Foundation
 import StoreKit
+import Prelude
+import Optics
 import Domain
 import Extensions
 
 
-// StoreKit 을 아는 유일한 프레임워크(StoreKitService)의 유일한 구현. Repository 에 의존하지 않는다 —
-// Domain 프로토콜 시그니처에 StoreKit 타입이 없어 이동이 파일 위치 변경으로 끝났다
 public final class AppStoreBillingServiceImple: AppStoreBillingService, Sendable {
 
-    // transactionUpdates 를 접근할 때마다 새로 만들면 소비자가 둘 이상일 때 같은 트랜잭션이
-    // 이중 post 된다 — init 에서 1회만 만들어 저장. 리스너 Task 도 init 시점에 뜨므로
-    // 트랜잭션이 드문 특성상 버퍼링 부담 없이 startObservingTransactions 이전 도착분도 받는다
     public let transactionUpdates: AsyncStream<BillingSignedTransaction>
 
-    // Task 를 continuation 의 onTermination 클로저에 맡기면 순환이 닫힌다 —
-    // Transaction.updates 는 끝나지 않아 소비자가 스트림을 취소하기 전엔 안 풀린다.
-    // 서비스가 직접 소유해 deinit 에서 끊는다
     private let listenerTask: Task<Void, Never>
 
     public init() {
@@ -56,6 +50,7 @@ extension AppStoreBillingServiceImple {
                 displayName: $0.displayName,
                 displayPrice: $0.displayPrice
             )
+            |> \.kind .~ productKind($0)
         }
     }
 }
@@ -65,18 +60,20 @@ extension AppStoreBillingServiceImple {
 
 extension AppStoreBillingServiceImple {
 
-    public func purchase(productId: String) async throws -> BillingTransactionOutcome {
+    public func purchase(
+        productId: String, appAccountToken: UUID
+    ) async throws -> BillingTransactionOutcome {
         guard let product = try await Product.products(for: [productId]).first
         else { throw RuntimeError("unknown app store product: \(productId)") }
 
-        switch try await product.purchase() {
+        // 애플이 이 값을 트랜잭션에 기록하고 서명한다 — 서버가 구매의 주인을 가리는 근거
+        switch try await product.purchase(options: [.appAccountToken(appAccountToken)]) {
         case .success(let result):
             return .verified(try verifiedTransaction(result))
 
         case .userCancelled:
             return .cancelled
 
-        // 승인대기(Ask to Buy)는 나중에 Transaction.updates 로 도착한다
         case .pending:
             return .pending
 
@@ -109,16 +106,34 @@ private func verifiedTransaction(
     }
 }
 
+private func productKind(_ product: StoreKit.Product) -> BillingProductKind {
+    guard product.type == .autoRenewable, let subscription = product.subscription
+    else { return .oneTime }
+    return .subscription(period: subscriptionPeriod(subscription.subscriptionPeriod))
+}
+
+private func subscriptionPeriod(_ period: StoreKit.Product.SubscriptionPeriod) -> BillingSubscriptionPeriod? {
+    switch (period.unit, period.value) {
+    case (.week, 1):  return .weekly
+    case (.month, 1): return .monthly
+    case (.year, 1):  return .yearly
+    default:          return nil
+    }
+}
+
 
 // MARK: - restore / recovery / updates
 
 extension AppStoreBillingServiceImple {
 
-    // 소모품(top-up)은 currentEntitlements 에 잡히지 않는다 —
-    // 애플이 보유 상태를 들고 있지 않아서다. 잔량 원장의 진실은 서버뿐이다
-    public func restorePurchases() async throws -> [BillingSignedTransaction] {
-        try await AppStore.sync()
-        return await self.collect(StoreKit.Transaction.currentEntitlements)
+    public func restorePurchases() async throws -> BillingRestoreOutcome {
+        do {
+            try await AppStore.sync()
+        // 시스템 로그인 시트를 닫으면 sync() 가 이걸 던진다 — 실패가 아니다
+        } catch StoreKitError.userCancelled {
+            return .cancelled
+        }
+        return .synced(await self.collect(StoreKit.Transaction.currentEntitlements))
     }
 
     public func unfinishedTransactions() async -> [BillingSignedTransaction] {

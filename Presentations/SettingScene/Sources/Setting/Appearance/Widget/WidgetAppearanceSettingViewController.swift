@@ -9,6 +9,7 @@
 import UIKit
 import SwiftUI
 import Combine
+import Extensions
 import Scenes
 import CommonPresentation
 
@@ -16,12 +17,12 @@ import CommonPresentation
 final class WidgetAppearanceSettingViewController: UIHostingController<WidgetAppearanceSettingContainerView>, WidgetAppearanceSettingScene {
     
     private let viewModel: any WidgetAppearanceSettingViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
     
     @MainActor
     var interactor: (any WidgetAppearanceSettingSceneInteractor)? { self.viewModel }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     
     init(
         viewModel: any WidgetAppearanceSettingViewModel,

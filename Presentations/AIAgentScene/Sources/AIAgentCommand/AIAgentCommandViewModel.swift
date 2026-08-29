@@ -36,9 +36,13 @@ public protocol AIAgentCommandViewModel: AnyObject, Sendable {
     func cancel()
     func acknowledge()
     func close()
+    func showPlans()
+    func openNotificationSetting()
 
     var commandState: AnyPublisher<AIAgentCommandState?, Never> { get }
     var usage: AnyPublisher<AIAgentUsage, Never> { get }
+    var currentUserPlan: AnyPublisher<BillingUserPlan?, Never> { get }
+    var isNotificationPermissionDenied: AnyPublisher<Bool, Never> { get }
 }
 
 
@@ -47,10 +51,24 @@ public protocol AIAgentCommandViewModel: AnyObject, Sendable {
 final class AIAgentCommandViewModelImple: AIAgentCommandViewModel, @unchecked Sendable {
 
     private let orchestrationUsecase: any AIAgentOrchestrationUsecase
+    private let billingUsecase: any BillingUsecase
     var router: (any AIAgentRouting)?
+    weak var listener: (any AIAgentCommandSceneListener)?
 
-    init(orchestrationUsecase: any AIAgentOrchestrationUsecase) {
+    private let cancellables = CancelBag()
+
+    init(
+        orchestrationUsecase: any AIAgentOrchestrationUsecase,
+        billingUsecase: any BillingUsecase
+    ) {
         self.orchestrationUsecase = orchestrationUsecase
+        self.billingUsecase = billingUsecase
+
+        self.billingUsecase.currentUserPlan
+            .removeDuplicates()
+            .dropFirst()
+            .sink { [weak self] _ in self?.orchestrationUsecase.loadUsage() }
+            .store(in: self.cancellables)
     }
 }
 
@@ -59,9 +77,9 @@ final class AIAgentCommandViewModelImple: AIAgentCommandViewModel, @unchecked Se
 
 extension AIAgentCommandViewModelImple {
 
-    // 시트 진입 시 usage 최신화 — 갱신 트리거는 presentation 소유 (#713)
     func prepare() {
         self.orchestrationUsecase.loadUsage()
+        self.orchestrationUsecase.refreshNotificationPermissionStatus()
     }
 
     func sendCommand(_ text: String) {
@@ -96,6 +114,16 @@ extension AIAgentCommandViewModelImple {
 
     func close() {                         // 숨김 — 상태 보존, 재진입 가능
         self.router?.closeScene()
+    }
+
+    func showPlans() {
+        // reset 없이 idle로 안 돌아가면 다음 한도 초과 때 상위의 false→true 재전이 감지가 막혀 시트가 안 뜬다
+        self.orchestrationUsecase.reset()
+        self.listener?.aiAgentCommandDidRequestPaywall()
+    }
+
+    func openNotificationSetting() {
+        self.router?.openSystemSetting()
     }
 }
 
@@ -136,5 +164,19 @@ extension AIAgentCommandViewModelImple {
 
     var usage: AnyPublisher<AIAgentUsage, Never> {
         return self.orchestrationUsecase.usage
+    }
+
+    // seeding 전엔 currentUserPlan 이 무방출(.compactMap { $0 }) 이라 첫 값을 prepend 해
+    // 뷰가 플랜 없는 상태부터 그릴 수 있게 한다. usage 와 CombineLatest 로 합성하지 않는다 —
+    // 두 값은 독립 릴레이라 ViewState 가 각각 받으면 되고, 합성하면 한쪽이 안 오면 둘 다 막힌다 (#739)
+    var currentUserPlan: AnyPublisher<BillingUserPlan?, Never> {
+        return self.billingUsecase.currentUserPlan
+            .map { $0 as BillingUserPlan? }
+            .prepend(nil)
+            .eraseToAnyPublisher()
+    }
+
+    var isNotificationPermissionDenied: AnyPublisher<Bool, Never> {
+        return self.orchestrationUsecase.isNotificationPermissionDenied
     }
 }

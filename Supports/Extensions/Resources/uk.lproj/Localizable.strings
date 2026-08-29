@@ -55,13 +55,13 @@
 
 // MARK: - event
 
-"dayname::sunday" = "Неділя";
-"dayname::monday" = "Понеділок";
-"dayname::tuesday" = "Вівторок";
-"dayname::wednesday" = "Середа";
-"dayname::thursday" = "Четвер";
-"dayname::friday" = "П'ятниця";
-"dayname::saturday" = "Субота";
+"dayname::sunday" = "неділя";
+"dayname::monday" = "понеділок";
+"dayname::tuesday" = "вівторок";
+"dayname::wednesday" = "середа";
+"dayname::thursday" = "четвер";
+"dayname::friday" = "п'ятниця";
+"dayname::saturday" = "субота";
 
 "dayname::sunday:short" = "НД";
 "dayname::monday:short" = "ПН";
@@ -78,6 +78,14 @@
 "dayname::thursday:very_short" = "Ч";
 "dayname::friday:very_short" = "П";
 "dayname::saturday:very_short" = "С";
+
+"dayname::sunday:gender" = "f";
+"dayname::monday:gender" = "m";
+"dayname::tuesday:gender" = "m";
+"dayname::wednesday:gender" = "f";
+"dayname::thursday:gender" = "m";
+"dayname::friday:gender" = "f";
+"dayname::saturday:gender" = "f";
 
 
 // MARK: - event notification
@@ -112,8 +120,12 @@
 
 "calendar::foremostevent:title" = "Головна подія";
 "calendar::uncompletedTodos:title" = "Невиконані завдання";
+"calendar::guideTodo::name" = "Дізнайтеся, як працює To-do Calendar";
+"calendar::eventSync::loadingAllEvents::message" = "Завантаження всіх подій…";
 "calendar::event_time::todo" = "Завдання";
 "calendar::event_time::allday" = "Увесь день";
+"calendar::event_time::start" = "Початок";
+"calendar::event_time::end" = "Кінець";
 "calendar::event_time::allday::with" = "%@ увесь день";
 "calendar::event_time::period:some_days" = "%d дн.";
 "calendar::event_time::period:some_minutes" = "%d хв";
@@ -123,11 +135,13 @@
 "calendar::event::more_action::foremost_event:title" = "Головна подія";
 "calendar::event::more_action::remove_only_thistime:message" = "Видалити тільки цю подію з усіх повторюваних подій?";
 "calendar::event::more_action::remove:message" = "Видалити цю подію?";
+"calendar::event::more_action::remove_this_and_future:message" = "Видалити цю та всі майбутні події з повторюваної серії?";
 "calendar::event::more_action::mark_as_foremost" = "Позначити цю подію як найважливішу?";
 "calendar::event::more_action::unmark_as_foremost" = "Зняти позначку цієї події як найважливішої?";
 "calendar::event::more_action::mark_as_foremost::unavail" = "Повторювану подію розкладу не можна позначити як найважливішу.";
 "calendar::event::more_action:remove_only_thistime:item_name" = "Видалити тільки цю подію";
 "calendar::event::more_action:remove:item_name" = "Видалити подію";
+"calendar::event::more_action:remove_this_and_future:item_name" = "Видалити цю та всі майбутні події";
 "calendar::event::more_action:foremost:mark:item_name" = "Позначити як головну";
 "calendar::event::more_action:foremost:unmark:item_name" = "Зняти позначку головної";
 "calendar::event::more_action:dday_candidate:register:item_name" = "Додати до віджета зворотного відліку";
@@ -135,7 +149,25 @@
 "calendar::event::more_action:dday_candidate:title" = "Кандидат для віджета зворотного відліку";
 "calendar::event::more_action:dday_candidate:register:message" = "Додати цю подію як кандидата для віджета зворотного відліку? Вона з'явиться вгорі списку під час редагування віджета.";
 "calendar::event::more_action:dday_candidate:unregister:message" = "Видалити цю подію з кандидатів для віджета зворотного відліку?";
+"calendar::event::more_action:live_activity:title" = "Live-активність";
+"calendar::event::more_action:live_activity:register:item_name" = "Показати на екрані блокування";
+"calendar::event::more_action:live_activity:unregister:item_name" = "Видалити з екрана блокування";
+"calendar::event::more_action:live_activity:unavail::not_found" = "Ця подія більше недоступна.";
+"calendar::event::more_action:live_activity:unavail::already_passed" = "Ця подія вже почалася.";
+"calendar::event::more_action:live_activity:unavail::too_far_future" = "Показати можна лише події, що починаються протягом 8 годин.";
+"calendar::event::more_action:live_activity:register:confirm" = "Показати цю подію на екрані блокування?";
+"calendar::event::more_action:live_activity:unregister:confirm" = "Видалити цю подію з екрана блокування?";
+"calendar::event::more_action:live_activity:replace:confirm" = "На екрані блокування показується інша подія. Замінити її цією?";
+"calendar::event::more_action:live_activity:register:success" = "Показується на екрані блокування. Заблокуйте пристрій, щоб побачити.";
+"calendar::event::more_action:live_activity:showing" = "Показується на екрані блокування";
 "calendar::event::more_action:copy:item_name" = "Копіювати подію";
+"calendar::event::more_action:share:item_name" = "Поділитися";
+"event_detail::share::field::time" = "Час";
+"event_detail::share::field::repeating" = "Повторення";
+"event_detail::share::field::calendar" = "Календар";
+"event_detail::share::field::place" = "Місце";
+"event_detail::share::field::url" = "Посилання";
+"event_detail::share::field::memo" = "Нотатка";
 "calendar::event::more_action:transform_to::schedule" = "Перетворити на зустріч";
 "calendar::event::more_action:transform_to::todo" = "Перетворити на завдання";
 "calendar::event::more_action:edit:item_name" = "Редагувати";
@@ -145,7 +177,9 @@
 "calednar::event::skip_todo_until" = "Виберіть час, до якого пропустити це завдання";
 "calednar::event::copy" = "Копіювати подію";
 "calendar::move_date" = "Перенести дату";
-"calednar::event::google::edit" = "Редагувати подію Google Календаря";
+"calendar::share::this_day" = "Поділитися цим днем";
+"calendar::share::this_week" = "Поділитися цим тижнем";
+"calendar::share::this_month" = "Поділитися цим місяцем";
 
 
 // MARK: - event detail
@@ -160,10 +194,10 @@
 "eventDetail.repeating.starttime:title" = "Час початку повторення";
 "eventDetail.repeating.everyDay:title" = "Щодня";
 "eventDetail.repeating.everyWeek:title" = "Щотижня";
-"eventDetail.repeating.everyWeekSomeDay:title" = "Щотижня в %@";
+"eventDetail.repeating.everyWeekSomeDay:title" = "Щотижня: %@";
 "eventDetail.repeating.everySomeWeek:title" = "Кожні %d тиж.";
 "eventDetail.repeating.everyWeekDays:title" = "Щобудня";
-"eventDetail.repeating.everySomeWeekSomeDay:title" = "Кожні %d тиж. у %@";
+"eventDetail.repeating.everySomeWeekSomeDay:title" = "Кожні %d тиж.: %@";
 "eventDetail.repeating.everyMonth:title" = "Щомісяця";
 "eventDetail.repeating.everyMonth_someDay:title" = "%@ щомісяця.";
 "eventDetail.repeating.everyYear:title" = "Щороку";
@@ -171,14 +205,33 @@
 "eventDetail.repeating.everyYearSomeDay:title" = "Щороку %@";
 "eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "Щороку %@ (місячний календар)";
 "eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "Усі дні останнього тижня кожного місяця";
-"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "Перший %@ кожного місяця";
-"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "Другий %@ кожного місяця";
-"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "Третій %@ кожного місяця";
-"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "Четвертий %@ кожного місяця";
-"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "П'ятий %@ кожного місяця";
-"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "Шостий %@ кожного місяця";
-"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "Сьомий %@ кожного місяця";
-"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "Останній %@ кожного місяця";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::m" = "Перший %@ кожного місяця";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::f" = "Перша %@ кожного місяця";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::n" = "Перше %@ кожного місяця";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::m" = "Другий %@ кожного місяця";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::f" = "Друга %@ кожного місяця";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::n" = "Друге %@ кожного місяця";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::m" = "Третій %@ кожного місяця";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::f" = "Третя %@ кожного місяця";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::n" = "Третє %@ кожного місяця";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::m" = "Четвертий %@ кожного місяця";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::f" = "Четверта %@ кожного місяця";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::n" = "Четверте %@ кожного місяця";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::m" = "П'ятий %@ кожного місяця";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::f" = "П'ята %@ кожного місяця";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::n" = "П'яте %@ кожного місяця";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::m" = "Шостий %@ кожного місяця";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::f" = "Шоста %@ кожного місяця";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::n" = "Шосте %@ кожного місяця";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::m" = "Сьомий %@ кожного місяця";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::f" = "Сьома %@ кожного місяця";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::n" = "Сьоме %@ кожного місяця";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::m" = "Останній %@ кожного місяця";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::f" = "Остання %@ кожного місяця";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::n" = "Останнє %@ кожного місяця";
+"eventDetail.repeating.last::m" = "Останній";
+"eventDetail.repeating.last::f" = "Остання";
+"eventDetail.repeating.last::n" = "Останнє";
 "eventDetail.repeating.endtime::title" = "Закінчення повторення";
 "eventDetail.repeating.endtime::option::never" = "Ніколи";
 "eventDetail.repeating.endtime::option::on" = "У дату";
@@ -188,11 +241,10 @@
 "eventDetail.repeating::period_endcount" = "З %@, %d разів";
 
 "eventDetail.repeating.everyNDays:title" = "Кожні %d дн.";
-"eventDetail.repeating.last" = "Останній";
 "eventDetail.repeating.everyNMonths:title" = "Кожні %d міс.";
-"eventDetail.repeating.everyNYears:title" = "Кожні %d років";
+"eventDetail.repeating.everyNYears:title" = "Кожні %d р.";
 "eventDetail.repeating::endoption_until" = "до %@";
-"eventDetail.repeating::endoption_times" = "%d разів";
+"eventDetail.repeating::endoption_times" = "Повторів: %d";
 
 "eventDetail.place::placeholder" = "Місце";
 "eventDetail.place::remove_button" = "Видалити місце";
@@ -267,12 +319,33 @@
 "eventDetail::gogoleEvent::conference::password" = "Пароль";
 "eventDetail::gogoleEvent::copy::message" = "Скопійовано в буфер обміну.";
 "eventDetail::gogoleEvent::canceled::message" = "Цю подію скасовано.";
+"eventDetail::gogoleEvent::saved::message" = "Подію збережено.";
+"eventDetail::gogoleEvent::readOnlyCalendar::message" = "Цей календар доступний лише для читання, тому подію не можна редагувати тут.";
+"eventDetail::gogoleEvent::reauthenticate::title" = "Потрібен додатковий дозвіл";
+"eventDetail::gogoleEvent::reauthenticate::message" = "Цей обліковий запис Google підключено з доступом лише для читання. Щоб редагувати події, потрібно окремо надати дозвіл на редагування.";
+"eventDetail::gogoleEvent::writeScopeNotGranted::message" = "Дозвіл на редагування не надано. Якщо це робочий або навчальний обліковий запис, адміністратор може це забороняти.";
+"eventDetail::gogoleEvent::repeating::title" = "Це повторювана подія";
+"eventDetail::gogoleEvent::repeating::onlyThisTime::button" = "Тільки цю подію";
+"eventDetail::gogoleEvent::repeating::all::button" = "Усі події";
+"eventDetail::gogoleEvent::remove::confirm::message" = "Видалити цю подію з Google Календаря?";
+"eventDetail::gogoleEvent::editOnCalendar" = "Редагувати в Google Календарі";
+"eventDetail::gogoleEvent::notEditableField::message" = "Це не можна редагувати тут. Відредагуйте в Google Календарі.";
+"eventDetail::gogoleEvent::description::formatLoss::message" = "У цьому описі є форматування. Якщо редагувати тут, воно зникне.";
 
 // MARK: - Apple calendar event
 "eventDetail::appleCalendarEvent::viewOnCalendar" = "Переглянути в Apple Календарі";
+"eventDetail::appleCalendarEvent::editOnCalendar" = "Редагувати в Apple Календарі";
 "eventDetail::appleCalendarEvent::calendar::event" = "Подія Apple Календаря";
 "eventDetail::appleCalendarEvent::attendees" = "Учасники (%d осіб)";
 "eventDetail::appleCalendarEvent::attendees::organizer" = "Організатор";
+"eventDetail::appleCalendarEvent::saved::message" = "Збережено.";
+"eventDetail::appleCalendarEvent::remove::confirm::message" = "Видалити цю подію?";
+"eventDetail::appleCalendarEvent::repeating::title" = "Повторювана подія";
+"eventDetail::appleCalendarEvent::repeating::onlyThisTime::button" = "Тільки цю подію";
+"eventDetail::appleCalendarEvent::repeating::thisAndFuture::button" = "Цю та всі майбутні події";
+"eventDetail::appleCalendarEvent::readOnlyCalendar::message" = "Цей календар доступний лише для читання, тому подію не можна редагувати.";
+"eventDetail::appleCalendarEvent::notEditableField::message" = "Це поле не можна редагувати в додатку.";
+"eventDetail::appleCalendarEvent::url::placeholder" = "URL";
 
 // MARK: - event tag
 
@@ -310,6 +383,22 @@
 "eventList::remove::confirm::button::olderThan6m" = "Старші за 6 місяців";
 "eventList::remove::confirm::button::olderThan1y" = "Старші за 1 рік";
 
+// MARK: - share preview
+
+"share_preview::title" = "Попередній перегляд";
+"share_preview::tag_filter::title" = "Типи подій";
+"share_preview::tag_filter::select_all" = "Вибрати всі";
+"share_preview::tag_filter::deselect_all" = "Зняти позначки";
+"share_preview::option::include_tag_name" = "Показувати назву типу події";
+"share_preview::share_button" = "Поділитися";
+"share_preview::empty" = "Немає подій, якими можна поділитися";
+"share_preview::header::this_week" = "Цей тиждень";
+"share_preview::header::last_week" = "Минулий тиждень";
+"share_preview::header::next_week" = "Наступний тиждень";
+"share_preview::header::week_of_month" = "%1$@, %2$d-й тиждень";
+"share_preview::format::text" = "Текст";
+"share_preview::format::image" = "Зображення";
+
 
 // MARK: - account
 
@@ -327,7 +416,9 @@
 "manage_account::delete_account_button::confirm:message" = "Ви впевнені, що хочете видалити свій обліковий запис?";
 "manage_account::delete_account_button::description" = "Після запиту на видалення обліковий запис буде видалено.\nПісля видалення дані облікового запису неможливо відновити.";
 "signIn::title" = "Вхід";
-"signIn:description" = "Резервуйте копію списку подій і синхронізуйте його з іншими пристроями iOS\n(Перелік підтримуваних платформ буде розширено.)";
+"signIn::feature::sync" = "Резервне копіювання подій, синхронізація між пристроями";
+"signIn::feature::aiAgent" = "Керуйте розкладом за допомогою ШІ-агента";
+"signIn::feature::web" = "Користуйтеся у вебі · todo-calendar.com";
 
 
 // MARK: - setting
@@ -410,10 +501,17 @@
 "setting.holiday.hide::confirm::message" = "Приховувати це свято щороку?\nВи можете знову показати його в Налаштування > Свята.";
 "setting.holiday.hidden::sectionTitle" = "Приховані свята";
 "setting.holiday.show::button" = "Показати";
+"setting.aiGuide::name" = "Додати за допомогою ШІ — Siri й віджети";
 "setting.feedback::name" = "Зворотний зв'язок";
 "setting.help::name" = "Довідка";
+"setting.openWeb::name" = "Відкрити у вебверсії";
 "setting.share::name" = "Поділитися додатком";
 "setting.write_review::name" = "Написати відгук про додаток";
+"setting.openSourceLicense::name" = "Ліцензії відкритого ПЗ";
+"setting.billing.plan::name" = "Тариф";
+"setting.terms::name" = "Умови надання послуг";
+"setting.privacyPolicy::name" = "Політика конфіденційності";
+"setting.adPrivacyOptions::name" = "Налаштування конфіденційності реклами";
 "setting.account.signedIn::manageAccount" = "Обліковий запис";
 "setting.account.needSignIn" = "Вхід";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -513,6 +611,14 @@
 "widget.dday.target::registered" = "Закріплено";
 "widget.dday.turn::name" = "Повтор %d";
 
+"widget.aiCommand::title" = "Додати за допомогою ШІ";
+"widget.aiCommand::explain" = "Торкніться один раз, щоб відкрити введення ШІ.";
+
+// MARK: - liveActivity
+
+"liveActivity::stale" = "Починається зараз";
+"liveActivity::action::end" = "Завершити";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "Цей формат посилання не підтримується.\nБудь ласка, оновіть додаток до останньої версії.";
@@ -543,20 +649,133 @@
 "aiAgent::state::failed" = "Команду не виконано";
 "aiAgent::done::default" = "Готово";
 "aiAgent::failed::default" = "Не вдалося виконати";
+"aiAgent::failed::dailyLimitExceeded" = "Сьогоднішні кредити ШІ вичерпано.";
 "aiAgent::retry" = "Повторити";
 "aiAgent::needSignIn::title" = "Потрібен вхід";
 "aiAgent::needSignIn::message" = "Увійдіть, щоб використовувати швидке введення ШІ.";
+"aiAgent::speechPermissionDenied::title" = "Потрібен дозвіл";
+"aiAgent::speechPermissionDenied::message" = "Дозвольте доступ до мікрофона й розпізнавання мовлення в налаштуваннях, щоб використовувати голосове введення.";
+"aiAgent::speechPermissionDenied::confirm" = "Відкрити налаштування";
 "aiAgent::title" = "Швидке введення ШІ";
 "aiAgent::keyboard::stop" = "Стоп";
 "aiAgent::keyboard::send" = "Надіслати";
 "aiAgent::stop" = "Стоп";
 "aiAgent::usage" = "%@ / %@ кредитів";
-"aiAgent::plan::free" = "Безкоштовний";
-"aiAgent::plan::standard" = "Стандарт";
-"aiAgent::plan::lifetime" = "Довічний";
 "aiAgent::usage::topupRemaining" = "Залишилось %@ додаткових кредитів";
 "aiAgent::usage::planChangeScheduled" = "Перехід на план «%2$@» %1$@";
+"aiAgent::usage::resetsIn" = "Знову доступно через %@";
+"aiAgent::notificationPermissionDenied::message" = "Увімкніть сповіщення в налаштуваннях, щоб отримувати результати ШІ.";
 "aiAgent::stop::confirm::title" = "Зупинити обробку?";
 "aiAgent::stop::confirm::message" = "Зупинення скасовує команду, що виконується, і її не можна буде відновити.";
 "aiAgent::confirm::countdown" = "залишилося на підтвердження";
 "aiAgent::confirm::expired::message" = "Час минув. Будь ласка, повторіть запит.";
+"aiAgent::tip::externalEntry" = "Порада: додавати можна також через Siri, кнопку дії або віджети.";
+"aiAgent::failed::showPlans" = "Переглянути тарифи";
+
+"aiAgent::image::title" = "Прочитати із зображення";
+"aiAgent::image::sourceSelect::title" = "Додати зображення";
+"aiAgent::image::source::library" = "Вибрати з бібліотеки";
+"aiAgent::image::source::camera" = "Зробити фото";
+"aiAgent::image::recognizing" = "Читання зображення…";
+"aiAgent::image::noText" = "На цьому зображенні не знайдено тексту";
+"aiAgent::image::readText" = "Текст із зображення";
+"aiAgent::image::instruction" = "Додаткові вказівки (необов'язково)";
+"aiAgent::image::instruction::placeholder" = "Напр. Додай це як завдання";
+"aiAgent::image::empty" = "Немає тексту для надсилання";
+"aiAgent::image::textTooLong" = "Текст надто довгий. Скоротіть його і спробуйте ще раз.";
+"aiAgent::image::instructionTooLong" = "Ваші вказівки надто довгі. Скоротіть їх і спробуйте ще раз.";
+"aiAgent::image::busy" = "Інший запит ще виконується";
+"aiAgent::image::camera::denied::title" = "Потрібен доступ до камери";
+"aiAgent::image::camera::denied::message" = "Дозвольте доступ до камери в налаштуваннях, щоб зробити фото.";
+
+// MARK: - billing
+
+"billing::plan::free" = "Безкоштовний";
+"billing::plan::standard" = "Стандарт";
+"billing::plan::lifetime" = "Довічний";
+
+"billing::paywall::title" = "Покращити тариф";
+"billing::paywall::current::description" = "%@ кредитів на день";
+"billing::paywall::metric::dailyCredits" = "%@ кредитів/день";
+"billing::paywall::period::weekly" = "/тиж";
+"billing::paywall::period::monthly" = "/міс";
+"billing::paywall::period::yearly" = "/рік";
+"billing::paywall::price::unavailable" = "Не вдалося завантажити ціну";
+"billing::paywall::badge::recommended" = "Рекомендовано";
+"billing::paywall::badge::owned" = "Поточний тариф";
+"billing::paywall::features::title" = "Що входить у %@";
+"billing::paywall::feature::dailyCredits" = "%@ кредитів на день";
+"billing::paywall::feature::topup" = "Можна докупити кредити, коли вони закінчаться";
+"billing::paywall::feature::noAds" = "Без реклами";
+"billing::paywall::disclosure::subscription" = "Підписка автоматично поновлюється щомісяця, якщо ви не скасуєте її щонайменше за 24 години до завершення поточного періоду. Скасувати підписку можна будь-коли в налаштуваннях App Store.";
+"billing::paywall::disclosure::subscription::generic" = "Підписка автоматично поновлюється в кінці кожного розрахункового періоду, якщо ви не скасуєте її щонайменше за 24 години до його завершення. Скасувати підписку можна будь-коли в налаштуваннях App Store.";
+"billing::paywall::disclosure::oneTime" = "Заплатіть один раз і користуйтеся назавжди. Автоматичне поновлення відсутнє.";
+"billing::paywall::disclosure::storeUnavailable" = "Не вдалося підключитися до App Store. Спробуйте пізніше.";
+"billing::paywall::cta::subscribe" = "Підписатися на %@";
+"billing::paywall::cta::buy" = "Придбати %@";
+"billing::paywall::cta::unavailable" = "Недоступно";
+"billing::paywall::allPlansOwned" = "У вас уже найкращий тариф.";
+"billing::paywall::terms" = "Умови надання послуг";
+"billing::paywall::privacyPolicy" = "Політика конфіденційності";
+"billing::paywall::restore" = "Відновити покупки";
+"billing::paywall::restored" = "Покупки відновлено";
+"billing::paywall::restore::empty" = "Немає покупок для відновлення.";
+"billing::paywall::manageSubscription" = "Керування підпискою";
+"billing::paywall::purchase::applied" = "Тариф оновлено";
+"billing::paywall::pending::title" = "Очікує на схвалення";
+"billing::paywall::pending::message" = "Попросіть організатора родини схвалити цю покупку. Після схвалення вона застосується автоматично.";
+"billing::paywall::userPlan::loadFailed" = "Не вдалося завантажити ваш тариф. Спробуйте ще раз.";
+"billing::paywall::retry" = "Повторити";
+"billing::paywall::unfinished::title" = "Є незастосована покупка";
+"billing::paywall::unfinished::message" = "Оплата пройшла, але ваш тариф ще не оновлено.";
+"billing::paywall::unfinished::action" = "Застосувати зараз";
+"billing::paywall::unfinished::applied" = "Покупку застосовано";
+"billing::paywall::processing::message" = "Підтвердження покупки…";
+"billing::paywall::fail::purchase" = "Не вдалося завершити покупку. Спробуйте ще раз.";
+"billing::paywall::fail::invalidTransaction" = "Не вдалося підтвердити покупку. Спробуйте ще раз за мить.";
+"billing::paywall::fail::unknownProduct" = "Не вдалося розпізнати цю покупку. Можливо, допоможе оновлення додатка.";
+"billing::paywall::fail::planChangeNotAllowed" = "Така зміна тарифу не підтримується.";
+"billing::paywall::fail::ownedByAnotherAccount" = "Ця покупка належить іншому обліковому запису. Увійдіть в обліковий запис, у якому її здійснено.";
+"billing::paywall::fail::reflectDelayed" = "Оплата пройшла, але її застосування затримується. Її буде застосовано автоматично.";
+"billing::paywall::topup::credits" = "%@ кредитів";
+"billing::paywall::topup::credits::split" = "База %@ + бонус %@ кредитів";
+"billing::paywall::topup::bonus" = "+%@%% бонус";
+"billing::paywall::topup::title" = "Докупити кредити";
+"billing::paywall::topup::title::withRemaining" = "Докупити кредити · є %@";
+"billing::paywall::topup::description" = "Додаткові кредити використовуються після вичерпання денного ліміту й не згорають.";
+"billing::paywall::topup::applied" = "Кредити додано";
+"billing::paywall::topup::applied::withCredits" = "Додано %@ кредитів";
+
+"billing::needSignIn::title" = "Потрібен вхід";
+"billing::needSignIn::message" = "Увійдіть, щоб переглядати та змінювати свій тариф.";
+
+// MARK: - share extension
+
+"share.ai::title" = "Надіслати ШІ";
+"share.ai::text::placeholder" = "Текст для надсилання";
+"share.ai::instruction::placeholder" = "Додайте вказівку (необов'язково)";
+"share.ai::needSignIn" = "Увійдіть в обліковий запис у додатку, щоб використовувати швидке введення ШІ.";
+"share.ai::pending" = "Попередній запит ще не завершено. Відкрийте додаток, щоб переглянути хід виконання або результат.";
+"share.ai::sent" = "Надіслано. Результат можна переглянути в додатку.";
+"share.ai::failed" = "Не вдалося надіслати. Спробуйте ще раз.";
+"share.ai::sentButUntracked" = "Надіслано, але додаток не може відстежити результат. Перевірте календар за мить.";
+"share.ai::textTooLong" = "Текст надто довгий для надсилання. Скоротіть його і спробуйте ще раз.";
+"share.ai::instructionTooLong" = "Ваша вказівка надто довга. Скоротіть її.";
+"share.ai::limitExceeded" = "Сьогоднішні кредити ШІ вичерпано. Вони оновлюються опівночі за UTC.";
+"share.ai::image::title" = "Надіслати зображення ШІ";
+"share.ai::image::recognizing" = "Зчитування тексту із зображення…";
+"share.ai::image::text::caption" = "Текст, зчитаний із зображення — відредагуйте, якщо щось виглядає не так.";
+"share.ai::image::text::placeholder" = "Текст, зчитаний із зображення";
+"share.ai::image::noTextFound" = "На цьому зображенні не знайдено тексту. Введіть те, що хочете додати.";
+
+// MARK: - webview
+
+"webview::error::message" = "Не вдалося завантажити цю сторінку.";
+"webview::error::retry" = "Повторити";
+"webview::openInBrowser" = "Відкрити у браузері";
+
+// MARK: - legal notice
+
+"legal_notice.message::terms" = "Наші Умови надання послуг оновлено.";
+"legal_notice.message::privacy" = "Нашу Політику конфіденційності оновлено.";
+"legal_notice.effectiveDate" = "Набирає чинності %@";

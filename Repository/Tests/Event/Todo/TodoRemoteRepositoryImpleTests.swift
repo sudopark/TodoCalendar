@@ -288,6 +288,30 @@ extension TodoRemoteRepositoryImpleTests {
         XCTAssertNil(result?.nextRepeatingTodo)
         XCTAssertEqual(self.spyTodoCache.didRemoveTodoId, "not-repeating-todo")
     }
+
+    // 반복 이벤트 이번만 삭제시 회차는 소비하지 않고 그대로 전송
+    func testRepository_whenRemoveRepeatingTodoOnlyThisTime_notConsumeTurn() async {
+        // given
+        let repository = self.makeRepository()
+
+        // when
+        let _ = try? await repository.removeTodo("repeating-todo", onlyThisTime: true)
+
+        // then
+        XCTAssertEqual(self.stubRemote.didRequestedParams?["repeating_turn"] as? Int, 1)
+    }
+
+    // 건너뛰기는 현행대로 회차를 소비해서 전송
+    func testRepository_whenSkipRepeatingTodo_consumeTurn() async {
+        // given
+        let repository = self.makeRepository()
+
+        // when
+        let _ = try? await repository.skipRepeatingTodo("repeating-todo")
+
+        // then
+        XCTAssertEqual(self.stubRemote.didRequestedParams?["repeating_turn"] as? Int, 2)
+    }
 }
 
 // MARK: - load
@@ -722,6 +746,32 @@ extension TodoRemoteRepositoryImpleTests {
         )
     }
     
+    // toggle revert -> origin의 반복 회차도 함께 전송
+    func testRepository_whenRevertToggleRepeatingTodo_sendRepeatingTurn() async throws {
+        // given
+        let todoId = "origin"
+        let origin = TodoEvent(uuid: todoId, name: "origin")
+            |> \.time .~ .at(100)
+            |> \.repeating .~ pure(
+                EventRepeating(
+                    repeatingStartTime: 100,
+                    repeatOption: EventRepeatingOptions.EveryDay()
+                )
+                |> \.repeatingEndOption .~ .count(10)
+            )
+            |> \.repeatingTurn .~ 4
+        let repository = try await self.makeRepositoryWithUpdateToggleState(
+            todoId, .completing(origin: origin)
+        )
+
+        // when
+        let _ = try await repository.toggleTodo(todoId)
+
+        // then
+        let originPayload = self.stubRemote.didRequestedParams?["origin"] as? [String: Any]
+        XCTAssertEqual(originPayload?["repeating_turn"] as? Int, 4)
+    }
+
     // toggle -> reverting시에는 아무것도 안함
     func testRepository_whenToggleTodoIsRevertingAndToggleRequested_doNothing() async throws {
         // given

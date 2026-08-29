@@ -42,6 +42,24 @@ extension AICommandRepositoryImple {
         return try AIJobIdResponseMapper(json: json).jobId
     }
 
+    public func processInterpretCommand(
+        text: String,
+        additionalInstruction: String?,
+        inputSource: AICommandInputSource,
+        timeZone: String
+    ) async throws -> String {
+        var body: [String: Any] = [
+            "text": text,
+            "timezone": timeZone,
+            "input_source": inputSource.apiValue
+        ]
+        body["additional_instruction"] = additionalInstruction
+        let json = try await self.requestJson(
+            .post, AIAPIEndpoints.interpretCommand, parameters: body
+        )
+        return try AIJobIdResponseMapper(json: json).jobId
+    }
+
     public func processConfirmCommand(
         _ action: AIConfirmCommandAction,
         timeZone: String
@@ -95,9 +113,10 @@ extension AICommandRepositoryImple {
 
 extension AICommandRepositoryImple {
 
-    public func loadUsage() async throws -> AIAgentUsage {
+    public func loadUsage() async throws -> AIAgentUsageLoadResult {
         let json = try await self.requestJson(.get, AIAPIEndpoints.usage)
-        return try AIAgentUsageMapper(json: json).usage
+        let mapper = try AIAgentUsageMapper(json: json)
+        return AIAgentUsageLoadResult(usage: mapper.usage, userPlan: mapper.userPlan)
     }
 }
 
@@ -117,5 +136,16 @@ private extension AICommandRepositoryImple {
             throw RuntimeError("invalid AI API response")
         }
         return json
+    }
+}
+
+
+private extension AICommandInputSource {
+
+    var apiValue: String {
+        switch self {
+        case .text: return "text"
+        case .imageOcr: return "image_ocr"
+        }
     }
 }

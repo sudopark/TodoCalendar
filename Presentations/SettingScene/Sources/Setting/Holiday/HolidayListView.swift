@@ -11,6 +11,7 @@
 import SwiftUI
 import Combine
 import Domain
+import Extensions
 import CommonPresentation
 
 
@@ -19,7 +20,7 @@ import CommonPresentation
 @Observable final class HolidayListViewState {
     
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
     
     var countryName: String = ""
     var holidays: [HolidayItemModel] = []
@@ -36,28 +37,28 @@ import CommonPresentation
             .sink(receiveValue: { [weak self] isRefreshing in
                 self?.isRefreshing = isRefreshing
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.currentCountryName
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] name in
                 self?.countryName = name
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.currentYearHolidays
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] items in
                 self?.holidays = items
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.hiddenHolidayNames
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] names in
                 self?.hiddenHolidayNames = names
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

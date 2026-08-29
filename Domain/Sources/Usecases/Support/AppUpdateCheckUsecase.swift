@@ -44,7 +44,7 @@ public final class AppUpdateCheckUsecaseImple: AppUpdateCheckUsecase, @unchecked
         let currentUpdateInfo = CurrentValueSubject<AppUpdateInfo?, Never>(nil)
     }
     private let subject = Subject()
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
 }
 
 
@@ -70,7 +70,7 @@ extension AppUpdateCheckUsecaseImple {
             .sink(receiveValue: { [weak self] requirement in
                 self?.subject.appUpdateRequirement.send(requirement)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 
     private func loadUpdateInfoWithoutError() -> AnyPublisher<AppUpdateInfo?, any Error> {

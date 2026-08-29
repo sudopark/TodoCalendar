@@ -64,6 +64,21 @@ public struct AIJob: Sendable {
     }
 }
 
+// MARK: - AICommandProcessing
+
+public enum AICommandProcessing: Sendable {
+    case started(jobId: String)
+    case job(AIJob)
+
+    public var jobId: String {
+        switch self {
+        case .started(let jobId): return jobId
+        case .job(let job): return job.jobId
+        }
+    }
+}
+
+
 // MARK: - AIJobResult
 
 public enum AIJobResult: Sendable {
@@ -158,8 +173,6 @@ extension AIJobResult {
 
 extension AIJobDataMutation.DataType {
 
-    // 델타 event sync(eventTag/todo/schedule)로 커버되는 dataType.
-    // done은 동반 todo mutation으로 반영, event_detail은 상세화면 on-demand 로드라 제외.
     public var requiresEventSync: Bool {
         switch self {
         case .todo, .schedule, .tag: return true

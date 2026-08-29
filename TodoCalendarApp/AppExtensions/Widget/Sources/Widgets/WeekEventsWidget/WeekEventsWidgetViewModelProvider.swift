@@ -31,17 +31,13 @@ enum WeekEventsRange {
 private struct WeeksWithRange {
     let weeks: [CalendarComponent.Week]
     let range: Range<TimeInterval>
-    
-    init(_ weeks: [CalendarComponent.Week], _ calendar: Calendar) throws {
+
+    init(_ weeks: [CalendarComponent.Week], _ timeZone: TimeZone) throws {
         self.weeks = weeks
-        guard let startDay = weeks.first?.days.first,
-              let endDay = weeks.last?.days.last,
-              let startDate = calendar.date(from: startDay),
-              let endDate = calendar.date(from: endDay)
+        guard let firstWeekRange = weeks.first?.range(timeZone),
+              let lastWeekRange = weeks.last?.range(timeZone)
         else { throw RuntimeError("invalid period") }
-        let startTime = calendar.startOfDay(for: startDate)
-        let endTime = try calendar.endOfDay(for: endDate).unwrap()
-        self.range = startTime.timeIntervalSince1970..<endTime.timeIntervalSince1970
+        self.range = firstWeekRange.lowerBound..<lastWeekRange.upperBound
     }
 }
 
@@ -291,7 +287,7 @@ extension WeekEventsWidgetViewModelProvider {
         case .wholeMonth(let selection): try wholeWeeks(selection)
         }
         
-        return try WeeksWithRange(weeks, calendar)
+        return try WeeksWithRange(weeks, calendar.timeZone)
     }
     
     private func convertToWeekRowModels(

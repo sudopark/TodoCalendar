@@ -14,6 +14,7 @@ import CombineCocoa
 import Scenes
 import CommonPresentation
 import Extensions
+import AdService
 
 
 // MARK: - MainViewController
@@ -23,22 +24,34 @@ final class MainViewController: UIViewController, MainScene {
     private let headerAreaStackView = UIStackView()
     private let headerView = HeaderView()
     private let calendarContainerView = UIView()
+    private let bottomBannerView: UIView?
+    private let loadingAllEventsLabel = UILabel()
+    private let legalNoticeBannerView = LegalNoticeBannerView()
     private let compositeLoadingBarView = CompositeLoadingBarView()
     
     private let viewModel: any MainViewModel
-    private let viewAppearance: ViewAppearance
-    
+    let viewAppearance: ViewAppearance
+    private let mobileAdService: any MobileAdService
+    private let fullScreenAdRouter: (any FullScreenAdRouter)?
+    private var didPrepareAd: Bool = false
+
     @MainActor
     var interactor: (any MainSceneInteractor)? { self.viewModel }
-    
-    private var cancellables: Set<AnyCancellable> = []
-    
+
+    private let cancellables = CancelBag()
+
     init(
         viewModel: any MainViewModel,
-        viewAppearance: ViewAppearance
+        viewAppearance: ViewAppearance,
+        mobileAdService: any MobileAdService,
+        fullScreenAdRouter: (any FullScreenAdRouter)?,
+        adViewBuilder: (any AdViewBuilder)?
     ) {
         self.viewModel = viewModel
         self.viewAppearance = viewAppearance
+        self.mobileAdService = mobileAdService
+        self.fullScreenAdRouter = fullScreenAdRouter
+        self.bottomBannerView = adViewBuilder?.makeBannerUIView(size: .banner)
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -57,6 +70,27 @@ final class MainViewController: UIViewController, MainScene {
         self.viewModel.prepare()
     }
     
+    // UMP 동의 폼·ATT 프롬프트는 화면이 실제로 올라온 뒤라야 뜬다
+    public override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        guard self.didPrepareAd == false else { return }
+        self.didPrepareAd = true
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            await self.mobileAdService.presentConsentFormAndTrackingPromptIfNeeded(from: self)
+            await self.mobileAdService.preloadFullScreenAd()
+            
+            guard self.isLaunchedFromAppIcon else { return }
+            self.fullScreenAdRouter?.showFullScreenAd(
+                from: self, scope: .application, isFromAppLaunch: true
+            )
+        }
+    }
+    
+    private var isLaunchedFromAppIcon: Bool {
+        return self.view.window?.windowScene?.session.isLaunchedFromAppIcon ?? false
+    }
+
     func addCalendar(_ calendarScene: any CalendarScene) {
         self.addChild(calendarScene)
         self.calendarContainerView.addSubview(calendarScene.view)
@@ -81,49 +115,80 @@ extension MainViewController {
             .sink(receiveValue: { [weak self] tuple in
                 self?.setupStyling(tuple.1, tuple.2)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         self.viewModel.currentMonth
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] month in
                 self?.headerView.monthLabel.text = month.monthText
                 self?.headerView.yearLabel.text = month.yearText
+                self?.headerView.yearLabel.isHidden = month.yearText == nil
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         self.viewModel.isShowReturnToToday
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] show in
                 self?.headerView.returnTodayView.isHidden = !show
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         self.viewModel.temporaryUserDataMigrationStatus
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] status in
                 self?.headerView.updateMigrationStatus(status)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         self.viewModel.isLoadingCalendarEvents
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] isLoading in
                 self?.compositeLoadingBarView.updateIsLoading(isLoading)
             })
-            .store(in: &self.cancellables)
-        
+            .store(in: self.cancellables)
+
+        self.viewModel.isLoadingAllEvents
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] isLoading in
+                self?.loadingAllEventsLabel.isHidden = !isLoading
+            })
+            .store(in: self.cancellables)
+
+        self.viewModel.legalNoticeBanners
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] models in
+                self?.legalNoticeBannerView.update(models)
+            })
+            .store(in: self.cancellables)
+
+        self.legalNoticeBannerView.documentTapped
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] documentType in
+                self?.viewAppearance.impactIfNeed()
+                self?.viewModel.openLegalNoticeDocument(documentType)
+            })
+            .store(in: self.cancellables)
+
+        self.legalNoticeBannerView.closeTapped
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] documentType in
+                self?.viewAppearance.impactIfNeed()
+                self?.viewModel.closeLegalNoticeBanner(documentType)
+            })
+            .store(in: self.cancellables)
+
         self.headerView.returnTodayView.addTapGestureRecognizerPublisher()
             .sink(receiveValue: { [weak self] in
                 self?.viewModel.returnToToday()
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         self.headerView.migrationButton.addTapGestureRecognizerPublisher()
             .sink(receiveValue: { [weak self] in
                 self?.viewAppearance.impactIfNeed()
                 self?.viewModel.handleMigration()
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         self.headerView.eventTypeFilterButton
             .addTapGestureRecognizerPublisher()
@@ -131,30 +196,35 @@ extension MainViewController {
                 self?.viewAppearance.impactIfNeed()
                 self?.viewModel.moveToEventTypeFilterSetting()
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         self.headerView.settingButton.addTapGestureRecognizerPublisher()
             .sink { [weak self] in
                 self?.viewAppearance.impactIfNeed()
                 self?.viewModel.moveToSetting()
             }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         self.headerView.jumpButton.addTapGestureRecognizerPublisher()
             .sink { [weak self] in
                 self?.viewAppearance.impactIfNeed()
                 self?.viewModel.jumpDate()
             }
-            .store(in: &self.cancellables)
-        
-        self.headerView.logButton.addTapGestureRecognizerPublisher()
-            .sink(receiveValue: { [weak self] in
+            .store(in: self.cancellables)
+
+        self.headerView.previousMonthButton.addTapGestureRecognizerPublisher()
+            .sink { [weak self] in
                 self?.viewAppearance.impactIfNeed()
-                let consoleBuilder = LoggerConsoleBuilder()
-                let consoleVC = consoleBuilder.makeConsoleView()
-                self?.present(consoleVC, animated: true)
-            })
-            .store(in: &self.cancellables)
+                self?.viewModel.moveToPreviousMonth()
+            }
+            .store(in: self.cancellables)
+
+        self.headerView.nextMonthButton.addTapGestureRecognizerPublisher()
+            .sink { [weak self] in
+                self?.viewAppearance.impactIfNeed()
+                self?.viewModel.moveToNextMonth()
+            }
+            .store(in: self.cancellables)
     }
 }
 
@@ -178,18 +248,38 @@ extension MainViewController {
             $0.heightAnchor.constraint(equalToConstant: 44)
         }
         headerView.setupLayout()
-        
+
+        headerAreaStackView.addArrangedSubview(loadingAllEventsLabel)
+        loadingAllEventsLabel.text = "calendar::eventSync::loadingAllEvents::message".localized()
+        loadingAllEventsLabel.textAlignment = .center
+        loadingAllEventsLabel.isHidden = true
+
+        headerAreaStackView.addArrangedSubview(legalNoticeBannerView)
+        legalNoticeBannerView.isHidden = true
+
         headerAreaStackView.addArrangedSubview(compositeLoadingBarView)
         compositeLoadingBarView.autoLayout.active {
             $0.heightAnchor.constraint(equalToConstant: 3.2)
         }
+        
+        self.bottomBannerView.map { self.setupBottomBannerLayout($0) }
         
         self.view.addSubview(calendarContainerView)
         calendarContainerView.autoLayout.active(with: self.view) {
             $0.leadingAnchor.constraint(equalTo: $1.safeAreaLayoutGuide.leadingAnchor)
             $0.trailingAnchor.constraint(equalTo: $1.safeAreaLayoutGuide.trailingAnchor)
             $0.topAnchor.constraint(equalTo: headerAreaStackView.bottomAnchor, constant: 14)
-            $0.bottomAnchor.constraint(equalTo: $1.bottomAnchor)
+            $0.bottomAnchor.constraint(
+                equalTo: self.bottomBannerView?.topAnchor ?? $1.bottomAnchor
+            )
+        }
+    }
+    
+    private func setupBottomBannerLayout(_ bannerView: UIView) {
+        self.view.addSubview(bannerView)
+        bannerView.autoLayout.active(with: self.view) {
+            $0.centerXAnchor.constraint(equalTo: $1.centerXAnchor)
+            $0.bottomAnchor.constraint(equalTo: $1.safeAreaLayoutGuide.bottomAnchor)
         }
     }
     
@@ -198,6 +288,9 @@ extension MainViewController {
     ) {
         self.view.backgroundColor = colorSet.dayBackground
         self.headerView.setupStyling(fontSet, colorSet)
+        self.loadingAllEventsLabel.font = fontSet.subNormal
+        self.loadingAllEventsLabel.textColor = colorSet.text2
+        self.legalNoticeBannerView.setupStyling(fontSet, colorSet)
         self.compositeLoadingBarView.setupStyling(fontSet, colorSet)
     }
 }
@@ -209,6 +302,9 @@ private final class HeaderView: UIView {
     
     let monthLabel = UILabel()
     let yearLabel = UILabel()
+    private let titleStackView = UIStackView()
+    let previousMonthButton = UIButton()
+    let nextMonthButton = UIButton()
     let returnTodayView = UIView()
     private let returnTodayImage = UIImageView()
     private let returnTodayLabel = UILabel()
@@ -217,7 +313,6 @@ private final class HeaderView: UIView {
     let jumpButton = UIButton()
     let eventTypeFilterButton = UIButton()
     let settingButton = UIButton()
-    let logButton = UIButton()
     
     func updateMigrationStatus(_ status: TemporaryUserDataMigrationStatus?) {
          self.migrationStatus = status
@@ -257,21 +352,39 @@ private final class HeaderView: UIView {
     
     func setupLayout() {
         
-        self.addSubview(monthLabel)
-        monthLabel.autoLayout.active(with: self) {
-            $0.centerYAnchor.constraint(equalTo: $1.centerYAnchor)
+        self.addSubview(previousMonthButton)
+        previousMonthButton.autoLayout.active(with: self) {
             $0.leadingAnchor.constraint(equalTo: $1.leadingAnchor, constant: 16)
+            $0.centerYAnchor.constraint(equalTo: $1.centerYAnchor)
+            $0.widthAnchor.constraint(equalToConstant: 24)
+            $0.heightAnchor.constraint(equalToConstant: 44)
         }
-        self.addSubview(yearLabel)
-        yearLabel.autoLayout.active(with: self.monthLabel) {
-            $0.bottomAnchor.constraint(equalTo: $1.lastBaselineAnchor)
-            $0.leadingAnchor.constraint(equalTo: $1.trailingAnchor, constant: 4)
+
+        self.addSubview(titleStackView)
+        titleStackView.autoLayout.active(with: self) {
+            $0.leadingAnchor.constraint(equalTo: self.previousMonthButton.trailingAnchor, constant: 8)
+            $0.centerYAnchor.constraint(equalTo: $1.centerYAnchor)
         }
-        
+        titleStackView.axis = .horizontal
+        titleStackView.alignment = .lastBaseline
+        titleStackView.spacing = 4
+        titleStackView.addArrangedSubview(monthLabel)
+        titleStackView.addArrangedSubview(yearLabel)
+        monthLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
+
+        self.addSubview(nextMonthButton)
+        nextMonthButton.autoLayout.active(with: self) {
+            $0.leadingAnchor.constraint(equalTo: self.titleStackView.trailingAnchor, constant: 8)
+            $0.centerYAnchor.constraint(equalTo: $1.centerYAnchor)
+            $0.widthAnchor.constraint(equalToConstant: 24)
+            $0.heightAnchor.constraint(equalToConstant: 44)
+        }
+
         self.addSubview(returnTodayView)
         returnTodayView.autoLayout.active(with: self) {
             $0.centerXAnchor.constraint(equalTo: $1.centerXAnchor).setupPriority(.defaultLow)
             $0.centerYAnchor.constraint(equalTo: $1.centerYAnchor)
+            $0.leadingAnchor.constraint(greaterThanOrEqualTo: self.nextMonthButton.trailingAnchor, constant: 8).setupPriority(.defaultHigh)
         }
         
         self.returnTodayView.addSubview(returnTodayImage)
@@ -303,13 +416,6 @@ private final class HeaderView: UIView {
             $0.leadingAnchor.constraint(greaterThanOrEqualTo: returnTodayView.trailingAnchor, constant: 4)
         }
         buttonsStackView.spacing = 8
-        
-        #if DEBUG
-        buttonsStackView.addArrangedSubview(logButton)
-        logButton.setTitle("Log", for: .normal)
-        logButton.setTitleColor(.red, for: .normal)
-        logButton.titleLabel?.font = .systemFont(ofSize: 12, weight: .bold)
-        #endif
         
         buttonsStackView.addArrangedSubview(migrationButton)
         migrationButton.autoLayout.active {
@@ -363,6 +469,15 @@ private final class HeaderView: UIView {
             self.migrationButton.tintColor = colorSet.accentInfo
         default: break
         }
+        let chevronConfiguration = UIImage.SymbolConfiguration(pointSize: 13, weight: .semibold)
+        self.previousMonthButton.tintColor = colorSet.text2
+        self.previousMonthButton.setImage(
+            UIImage(systemName: "chevron.left", withConfiguration: chevronConfiguration), for: .normal
+        )
+        self.nextMonthButton.tintColor = colorSet.text2
+        self.nextMonthButton.setImage(
+            UIImage(systemName: "chevron.right", withConfiguration: chevronConfiguration), for: .normal
+        )
         self.jumpButton.tintColor = colorSet.text0
         self.jumpButton.setImage(UIImage(systemName: "calendar"), for: .normal)
         self.eventTypeFilterButton.tintColor = colorSet.text0

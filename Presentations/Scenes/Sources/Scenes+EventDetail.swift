@@ -62,6 +62,7 @@ public protocol GoogleCalendarEventDetailSceneInteractor: AnyObject { }
 public protocol GoogleCalendarEventDetailScene: Scene where Interactor == any GoogleCalendarEventDetailSceneInteractor
 { }
 
+
 // MARK: - HolidayEventDetailScene Interactable & Listenable
 
 public protocol HolidayEventDetailSceneInteractor: AnyObject { }

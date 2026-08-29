@@ -11,6 +11,7 @@
 import UIKit
 import SwiftUI
 import Combine
+import Extensions
 import Scenes
 import CommonPresentation
 
@@ -20,12 +21,12 @@ import CommonPresentation
 final class SelectMapAppDialogViewController: UIHostingController<SelectMapAppDialogContainerView>, SelectMapAppDialogScene {
     
     private let viewModel: any SelectMapAppDialogViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
     
     @MainActor
     var interactor: (any SelectMapAppDialogSceneInteractor)? { self.viewModel }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     
     init(
         viewModel: any SelectMapAppDialogViewModel,

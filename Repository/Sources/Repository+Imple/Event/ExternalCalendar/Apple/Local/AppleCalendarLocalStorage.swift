@@ -19,6 +19,8 @@ public protocol AppleCalendarLocalStorage: Sendable {
     func saveEventOrigins(_ origins: [AppleCalendar.EventOrigin], in period: Range<TimeInterval>) async throws
     func loadEvents(in period: Range<TimeInterval>) async throws -> [AppleCalendar.Event]
     func loadEventOrigin(id: String) async throws -> AppleCalendar.EventOrigin?
+    func updateEventOrigin(_ origin: AppleCalendar.EventOrigin) async throws
+    func removeEvents(_ eventIds: [String]) async throws
     func resetAll() async throws
 }
 
@@ -150,6 +152,27 @@ extension AppleCalendarLocalStorageImple {
             try db.createTableOrNot(Events.self)
             try db.createTableOrNot(Times.self)
             return try db.load(query, mapping: mapping).first
+        }
+    }
+
+    public func updateEventOrigin(_ origin: AppleCalendar.EventOrigin) async throws {
+        let connection = try await self.connection()
+        try await connection.async.run { db in
+            try db.createTableOrNot(Events.self)
+            try db.createTableOrNot(Times.self)
+            try db.insert(Events.self, entities: [Events.Entity(origin)])
+            try db.insert(Times.self, entities: [Times.Entity(origin.eventId, origin.eventTime, nil)])
+        }
+    }
+
+    public func removeEvents(_ eventIds: [String]) async throws {
+        guard !eventIds.isEmpty else { return }
+        let connection = try await self.connection()
+        try await connection.async.run { db in
+            let deleteEvents = Events.delete().where { $0.eventId.in(eventIds) }
+            try db.delete(Events.self, query: deleteEvents)
+            let deleteTimes = Times.delete().where { $0.eventId.in(eventIds) }
+            try db.delete(Times.self, query: deleteTimes)
         }
     }
 

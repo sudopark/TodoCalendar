@@ -61,3 +61,12 @@ public struct EventSyncResponse<T: Sendable>: Sendable {
     
     public init() { }
 }
+
+
+// MARK: - sync status
+
+public enum EventSyncStatus: Equatable, Sendable {
+    case idle
+    case incrementalSyncing
+    case fullSyncing
+}

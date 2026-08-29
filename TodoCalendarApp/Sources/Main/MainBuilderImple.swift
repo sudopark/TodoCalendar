@@ -8,8 +8,10 @@
 //
 
 import UIKit
+import Domain
 import Scenes
 import CommonPresentation
+import AdService
 
 
 // MARK: - MainSceneBuilerImple
@@ -20,17 +22,26 @@ public final class MainSceneBuilerImple {
     private let viewAppearance: ViewAppearance
     private let calendarSceneBulder: any CalendarSceneBuilder
     private let settingSceneBuilder: any SettingSceneBuiler
-    
+    private let mobileAdService: any MobileAdService
+    private let fullScreenAdRouter: (any FullScreenAdRouter)?
+    private let adViewBuilder: (any AdViewBuilder)?
+
     public init(
         usecaseFactory: any UsecaseFactory,
         viewAppearance: ViewAppearance,
         calendarSceneBulder: any CalendarSceneBuilder,
-        settingSceneBuilder: any SettingSceneBuiler
+        settingSceneBuilder: any SettingSceneBuiler,
+        mobileAdService: any MobileAdService,
+        fullScreenAdRouter: (any FullScreenAdRouter)?,
+        adViewBuilder: (any AdViewBuilder)?
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
         self.calendarSceneBulder = calendarSceneBulder
         self.settingSceneBuilder = settingSceneBuilder
+        self.mobileAdService = mobileAdService
+        self.fullScreenAdRouter = fullScreenAdRouter
+        self.adViewBuilder = adViewBuilder
     }
 }
 
@@ -48,17 +59,26 @@ extension MainSceneBuilerImple: MainSceneBuiler {
             eventNotifyService: self.usecaseFactory.eventNotifyService,
             googleCalendarUsecase: self.usecaseFactory.makeGoogleCalendarUsecase(),
             appleCalendarUsecase: self.usecaseFactory.makeAppleCalendarUsecase(),
-            eventSyncUsecase: self.usecaseFactory.eventSyncUsecase
+            eventSyncUsecase: self.usecaseFactory.eventSyncUsecase,
+            billingUsecase: self.usecaseFactory.billingUsecase,
+            aiAgentOrchestrationUsecase: self.usecaseFactory.aiAgentOrchestrationUsecase,
+            eventLiveActivityUsecase: self.usecaseFactory.eventLiveActivityUsecase,
+            guideTodoUsecase: self.usecaseFactory.makeGuideTodoUsecase(),
+            legalNoticeUsecase: self.usecaseFactory.makeLegalNoticeUsecase()
         )
         
         let viewController = MainViewController(
             viewModel: viewModel,
-            viewAppearance: self.viewAppearance
+            viewAppearance: self.viewAppearance,
+            mobileAdService: self.mobileAdService,
+            fullScreenAdRouter: self.fullScreenAdRouter,
+            adViewBuilder: self.adViewBuilder
         )
         
         let router = MainRouter(
             calendarSceneBulder: self.calendarSceneBulder,
-            settingSceneBuilder: self.settingSceneBuilder
+            settingSceneBuilder: self.settingSceneBuilder,
+            fullScreenAdRouter: self.fullScreenAdRouter
         )
         router.scene = viewController
         viewModel.router = router

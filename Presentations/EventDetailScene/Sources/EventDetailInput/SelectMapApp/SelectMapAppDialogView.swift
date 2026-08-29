@@ -12,6 +12,7 @@
 import SwiftUI
 import Combine
 import Domain
+import Extensions
 import CommonPresentation
 
 
@@ -20,7 +21,7 @@ import CommonPresentation
 @Observable final class SelectMapAppDialogViewState {
     
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
     
     var supportMapApps: [SupportMapApps] = []
     var openMapWithThisSelection: Bool = false
@@ -37,7 +38,7 @@ import CommonPresentation
             .sink(receiveValue: { [weak self] option in
                 self?.openMapWithThisSelection = option
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 
@@ -135,6 +136,7 @@ struct SelectMapAppDialogView: View {
                 .eventHandler(\.onTap, eventHandlers.close)
             }
         }
+        .eventHandler(\.outsideTap, eventHandlers.close)
     }
     
     private func mapAppView(_ app: SupportMapApps) -> some View {

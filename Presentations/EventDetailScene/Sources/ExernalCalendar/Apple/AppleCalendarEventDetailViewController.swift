@@ -9,6 +9,7 @@
 import UIKit
 import SwiftUI
 import Combine
+import Extensions
 import Scenes
 import CommonPresentation
 
@@ -18,12 +19,12 @@ import CommonPresentation
 final class AppleCalendarEventDetailViewController: UIHostingController<AppleCalendarEventDetailContainerView>, AppleCalendarEventDetailScene {
 
     private let viewModel: any AppleCalendarEventDetailViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
 
     @MainActor
     var interactor: (any AppleCalendarEventDetailSceneInteractor)? { self.viewModel }
 
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
 
     init(
         viewModel: any AppleCalendarEventDetailViewModel,

@@ -13,6 +13,7 @@ import Combine
 import Domain
 import Extensions
 import CommonPresentation
+import Scenes
 
 
 // MARK: - EventDetailViewState
@@ -20,7 +21,7 @@ import CommonPresentation
 @Observable final class EventDetailViewState {
     
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
     
     var selectedTag: SelectedTag?
     var enterName: String = ""
@@ -35,7 +36,8 @@ import CommonPresentation
     var isAllDay: Bool = false
     var availableMoreActions: [[EventDetailMoreAction]] = []
     var isForemost: Bool = false
-    
+    var isLiveActivityRegistered: Bool = false
+
     @ObservationIgnored var suggestEventEndTime: () -> Date? = { nil }
     var selectedStartDate: Date = Date()
     var selectedEndDate: Date = Date().addingTimeInterval(60)
@@ -68,42 +70,42 @@ import CommonPresentation
             .sink(receiveValue: { [weak self] model in
                 self?.eventDetailTypeModel = model
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         inputViewModel.initialName
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] name in
                 self?.enterName = name ?? ""
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         inputViewModel.initailURL
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] value in
                 self?.url = value ?? ""
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         inputViewModel.isValidURLEntered
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] isValid in
                 self?.isValidURLEntered = isValid
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         inputViewModel.linkPreview
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] model in
                 self?.linkPreviewModel = model
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         inputViewModel.initialMemo
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] value in
                 self?.memo = value ?? ""
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         inputViewModel.selectedTime
             .receive(on: RunLoop.main)
@@ -111,84 +113,91 @@ import CommonPresentation
                 self?.selectedTime = time
                 self?.isAllDay = time?.isAllDay ?? false
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         inputViewModel.selectedTimeDDay
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] text in
                 self?.ddayText = text
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         inputViewModel.repeatOption
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] option in
                 self?.selectedRepeat = option
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         inputViewModel.repeatOptionPeriod
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] period in
                 self?.selectedRepeatPeriod = period
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         inputViewModel.selectedTag
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] tag in
                 self?.selectedTag = tag
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         inputViewModel.selectedNotificationTimeText
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] text in
                 self?.selectedNotificationTimeText = text
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         inputViewModel.suggestPlaces
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] places in
                 self?.suggestPlaces = places
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         inputViewModel.selectedPlace
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] place in
                 self?.selectedPlace = place
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.isForemost
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] isForemost in
                 self?.isForemost = isForemost
             })
-            .store(in: &self.cancellables)
-        
+            .store(in: self.cancellables)
+
+        viewModel.isLiveActivityRegistered
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] isRegistered in
+                self?.isLiveActivityRegistered = isRegistered
+            })
+            .store(in: self.cancellables)
+
         viewModel.isSaving
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] isSaving in
                 self?.isSaving = isSaving
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.isSavable
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] isSavable in
                 self?.isSavable = isSavable
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.moreActions
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] actions in
                 self?.availableMoreActions = actions
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 
@@ -313,6 +322,9 @@ struct EventDetailView: View {
                     self.nameInputView
                     if state.isForemost {
                         self.foremostEventView
+                    }
+                    if state.isLiveActivityRegistered {
+                        LiveActivityBadgeView()
                     }
                     self.eventDetailTypeView
                     self.timeSelectView
@@ -1068,16 +1080,7 @@ struct EventDetailView: View {
                     }
                 }
                 label: {
-                    Image(systemName: "ellipsis")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .foregroundStyle(self.appearance.colorSet.text0.asColor)
-                        .frame(width: 20, height: 20)
-                        .padding()
-                        .background {
-                            RoundedRectangle(cornerRadius: Metric.Radius.regular)
-                                .fill(self.appearance.colorSet.secondaryBtnBackground.asColor)
-                        }
+                    MoreActionMenuLabel()
                 }
             }
             
@@ -1134,6 +1137,8 @@ extension EventDetailMoreAction: Identifiable {
             return "toggleTo:\(isForemost)"
         case .toggleDDayCandidate(let isRegistered):
             return "toggleDDayCandidate:\(isRegistered)"
+        case .toggleLiveActivity(let isRegistered):
+            return "toggleLiveActivity:\(isRegistered)"
         case .copy: return "copy"
         case .addToTemplate: return "addToTemplate"
         case .share: return "share"
@@ -1157,9 +1162,11 @@ extension EventDetailMoreAction: Identifiable {
             return isRegistered
                 ? "calendar::event::more_action:dday_candidate:unregister:item_name".localized()
                 : "calendar::event::more_action:dday_candidate:register:item_name".localized()
+        case .toggleLiveActivity(let isRegistered):
+            return LiveActivityActionModel(isRegistered: isRegistered).itemText
         case .copy: return "calendar::event::more_action:copy:item_name".localized()
         case .addToTemplate: return "add to template".localized()
-        case .share: return "share".localized()
+        case .share: return "calendar::event::more_action:share:item_name".localized()
         case .transformToSchedule: return "calendar::event::more_action:transform_to::schedule".localized()
         case .transformToTodo: return "calendar::event::more_action:transform_to::todo".localized()
         }
@@ -1170,6 +1177,7 @@ extension EventDetailMoreAction: Identifiable {
         case .remove: return "trash"
         case .toggleTo: return "exclamationmark.circle"
         case .toggleDDayCandidate: return "calendar.badge.clock"
+        case .toggleLiveActivity: return "timer"
         case .copy: return "doc.on.doc"
         case .addToTemplate: return "doc.plaintext"
         case .share: return "square.and.arrow.up"

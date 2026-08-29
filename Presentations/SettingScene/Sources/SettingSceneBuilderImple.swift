@@ -18,19 +18,25 @@ public final class SettingSceneBuilderImple: SettingSceneBuiler {
     private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
     private let memberSceneBuilder: any MemberSceneBuilder
-    
+    private let paywallSceneBuilder: any PaywallSceneBuilder
+    private let privacyOptionsFormRouter: (any PrivacyOptionsFormRouter)?
+
     public init(
         appstoreLinkPath: String,
         supportExternalCalendarServices: [any ExternalCalendarService],
         usecaseFactory: any UsecaseFactory,
         viewAppearance: ViewAppearance,
-        memberSceneBuilder: any MemberSceneBuilder
+        memberSceneBuilder: any MemberSceneBuilder,
+        paywallSceneBuilder: any PaywallSceneBuilder,
+        privacyOptionsFormRouter: (any PrivacyOptionsFormRouter)?
     ) {
         self.appstoreLinkPath = appstoreLinkPath
         self.supportExternalCalendarServices = supportExternalCalendarServices
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
         self.memberSceneBuilder = memberSceneBuilder
+        self.paywallSceneBuilder = paywallSceneBuilder
+        self.privacyOptionsFormRouter = privacyOptionsFormRouter
     }
 }
 
@@ -119,6 +125,10 @@ extension SettingSceneBuilderImple {
             viewAppearance: self.viewAppearance
         )
         
+        let openSourceLicenseSceneBuilder = OpenSourceLicenseSceneBuilerImple(
+            viewAppearance: self.viewAppearance
+        )
+        
         let builder = SettingItemListSceneBuilerImple(
             appstoreLinkPath: self.appstoreLinkPath,
             usecaseFactory: self.usecaseFactory,
@@ -127,7 +137,10 @@ extension SettingSceneBuilderImple {
             eventSettingSceneBuilder: eventSettingSceneBuilder,
             holidayListSceneBuilder: holidayListSceneBuilder,
             memberSceneBuilder: self.memberSceneBuilder,
-            feedbackPostSceneBuiler: feedbackSceneBuilder
+            feedbackPostSceneBuiler: feedbackSceneBuilder,
+            paywallSceneBuilder: self.paywallSceneBuilder,
+            openSourceLicenseSceneBuiler: openSourceLicenseSceneBuilder,
+            privacyOptionsFormRouter: self.privacyOptionsFormRouter
         )
         return builder.makeSettingItemListScene()
     }

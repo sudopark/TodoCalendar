@@ -14,6 +14,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import CommonPresentation
 
 
@@ -22,7 +23,7 @@ import CommonPresentation
 @Observable final class DoneTodoEventListViewState {
     
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
     
     var isRemovingDoneTodos = false
     var sections: [DoneTodoListSectionModel] = []
@@ -39,14 +40,14 @@ import CommonPresentation
             .sink(receiveValue: { [weak self] flag in
                 self?.isRemovingDoneTodos = flag
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.sectionModels
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] sections in
                 self?.sections = sections
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

@@ -65,8 +65,9 @@ struct GoogleCalendarEventTagMapper: Decodable {
         case foregroundColor
         case colorId
         case isSelected = "selected"
+        case accessRole
     }
-    
+
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.calendar = GoogleCalendar.Tag(
@@ -78,21 +79,52 @@ struct GoogleCalendarEventTagMapper: Decodable {
         |> \.foregroundColorHex .~ (try? container.decode(String.self, forKey: .foregroundColor))
         |> \.colorId .~ (try? container.decode(String.self, forKey: .colorId))
         |> \.isSelected .~ (try? container.decode(Bool.self, forKey: .isSelected))
+        |> \.accessRole .~ ((try? container.decode(String.self, forKey: .accessRole)).flatMap { GoogleCalendar.AccessRole(rawValue: $0) })
     }
 }
 
 
 struct GoogleCalendarEventTagListMapper: Decodable {
-    
+
     let calendars: [GoogleCalendar.Tag]
-    
+
     private enum CodingKeys: String, CodingKey {
         case items
     }
-    
+
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let mappers = try container.decode([GoogleCalendarEventTagMapper].self, forKey: .items)
         self.calendars = mappers.map { $0.calendar }
+    }
+}
+
+
+// MARK: - GoogleCalendar.EventEditParams
+
+extension GoogleCalendar.EventEditParams {
+
+    func asJson() -> [String: Any] {
+        var json: [String: Any] = [:]
+        json["summary"] = self.summary
+        json["location"] = self.location
+        json["description"] = self.description
+        json["colorId"] = self.colorId
+        json["start"] = self.start?.asJson()
+        json["end"] = self.end?.asJson()
+        json["recurrence"] = self.recurrence
+        return json
+    }
+}
+
+extension GoogleCalendar.EventOrigin.GoogleEventTime {
+
+    // patch 는 start/end 를 필드 단위로 병합해 이전 표현이 살아남는다 — 상호배타인 date/dateTime 은 명시적 null 로 지워야 한다
+    func asJson() -> [String: Any] {
+        var json: [String: Any] = [:]
+        json["date"] = self.date ?? NSNull()
+        json["dateTime"] = self.dateTime ?? NSNull()
+        json["timeZone"] = self.timeZone
+        return json
     }
 }

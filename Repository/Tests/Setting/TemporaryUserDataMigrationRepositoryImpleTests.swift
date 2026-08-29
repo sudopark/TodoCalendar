@@ -66,7 +66,8 @@ class TemporaryUserDataMigrationRepositoryImpleTests: BaseLocalTests {
             |> \.repeating .~ pure(self.dummyRepeating)
             |> \.notificationOptions .~ self.dummyNotificationOptions
             |> \.creatTimeStamp .~ 100
-        
+            |> \.repeatingTurn .~ 4
+
         let todo2 = TodoEvent(uuid: "todo2", name: "todo2")
             |> \.eventTagId .~ .custom("t2")
             |> \.creatTimeStamp .~ 200
@@ -155,6 +156,19 @@ extension TemporaryUserDataMigrationRepositoryImpleTests {
         XCTAssertEqual(createTimestamps, [
             "todo1": 100, "todo2": 200
         ])
+    }
+
+    // 반복 할일 이관시 회차도 함께 전송
+    func testRepository_whenMigrateRepeatingTodo_uploadRepeatingTurn() async throws {
+        // given
+        let repository = try await self.makeRepository()
+
+        // when
+        try await repository.migrateTodoEvents()
+
+        // then
+        let todo1Payload = self.stubRemote.didRequestedParams?["todo1"] as? [String: Any]
+        XCTAssertEqual(todo1Payload?["repeating_turn"] as? Int, 4)
     }
     
     func testRepository_migrationScheduleEvents() async throws {

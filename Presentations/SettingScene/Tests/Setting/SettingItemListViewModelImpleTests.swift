@@ -10,6 +10,8 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Scenes
+import CommonPresentation
 import UnitTestHelpKit
 import TestDoubles
 
@@ -36,7 +38,8 @@ class SettingItemListViewModelImpleTests: BaseTestCase, PublisherWaitable {
 
     private func makeViewModel(
         _ account: AccountInfo? = nil,
-        isUpdateAvailable: Bool = false
+        isUpdateAvailable: Bool = false,
+        privacyOptionsFormRouter: (any PrivacyOptionsFormRouter)? = nil
     ) -> SettingItemListViewModelImple {
         self.stubAppUpdateCheckUsecase.isUpdateAvailableSubject.send(isUpdateAvailable)
         let accountUsecase = StubAccountUsecase(account)
@@ -45,7 +48,8 @@ class SettingItemListViewModelImpleTests: BaseTestCase, PublisherWaitable {
             accountUsecase: accountUsecase,
             uiSettingUsecase: StubUISettingUsecase(),
             deviceInfoFetchService: StubDeviceInfoFetchService(),
-            appUpdateCheckUsecase: self.stubAppUpdateCheckUsecase
+            appUpdateCheckUsecase: self.stubAppUpdateCheckUsecase,
+            privacyOptionsFormRouter: privacyOptionsFormRouter
         )
         viewModel.router = self.spyRouter
         return viewModel
@@ -89,7 +93,7 @@ extension SettingItemListViewModelImpleTests {
         let baseSection = sections?[safe: 0]
         let baseItemIds = baseSection?.items.compactMap { $0 as? SettingItemModel }.map { $0.itemId }
         XCTAssertEqual(baseItemIds, [
-            .appearance, .editEvent, .holidaySetting
+            .appearance, .editEvent, .holidaySetting, .billingPlan
         ])
         let accountItem = baseSection?.items.last as? AccountSettingItemModel
         XCTAssertEqual(accountItem?.isSignIn, false)
@@ -97,20 +101,20 @@ extension SettingItemListViewModelImpleTests {
         let supportSection = sections?[safe: 1]
         let supportItemIds = supportSection?.items.compactMap { $0 as? SettingItemModel }.map { $0.itemId }
         XCTAssertEqual(supportItemIds, [
-            .feedback, .help
+            .openWeb, .aiUsageGuide, .feedback, .help
         ])
-        
+
         let appInfoSection = sections?[safe: 2]
         let infoItemIds = appInfoSection?.items.compactMap { $0 as? SettingItemModel }.map { $0.itemId }
         XCTAssertEqual(infoItemIds, [
-            .shareApp, .addReview, .sourceCode
+            .shareApp, .addReview, .openSourceLicense, .terms, .privacyPolicy
         ])
-        
+
         let suggestSection = sections?[safe: 3]
         let isSuggestItems = suggestSection?.items.map { $0 as? SuggestAppItemModel }.map { $0 != nil }
         XCTAssertEqual(isSuggestItems, [true])
     }
-    
+
     func testViewModel_whenSignIn_provideItemSections() {
         // given
         let expect = expectation(description: "세팅 항목 section 제공")
@@ -131,7 +135,7 @@ extension SettingItemListViewModelImpleTests {
         let baseSection = sections?[safe: 0]
         let baseItemIds = baseSection?.items.compactMap { $0 as? SettingItemModel }.map { $0.itemId }
         XCTAssertEqual(baseItemIds, [
-            .appearance, .editEvent, .holidaySetting
+            .appearance, .editEvent, .holidaySetting, .billingPlan
         ])
         let accountItem = baseSection?.items.last as? AccountSettingItemModel
         XCTAssertEqual(accountItem?.isSignIn, true)
@@ -139,14 +143,14 @@ extension SettingItemListViewModelImpleTests {
         let supportSection = sections?[safe: 1]
         let supportItemIds = supportSection?.items.compactMap { $0 as? SettingItemModel }.map { $0.itemId }
         XCTAssertEqual(supportItemIds, [
-            .feedback, .help
+            .openWeb, .aiUsageGuide, .feedback, .help
         ])
-        
+
         let appInfoSection = sections?[safe: 2]
         XCTAssertEqual(appInfoSection is AppInfoSectionModel, true)
         let infoItemIds = appInfoSection?.items.compactMap { $0 as? SettingItemModel }.map { $0.itemId }
         XCTAssertEqual(infoItemIds, [
-            .shareApp, .addReview, .sourceCode
+            .shareApp, .addReview, .openSourceLicense, .terms, .privacyPolicy
         ])
         
         let suggestSection = sections?[safe: 3]
@@ -295,7 +299,7 @@ extension SettingItemListViewModelImpleTests {
         // given
         let viewModel = self.makeViewModel()
         let items = self.WaitItemLoaded(viewModel)
-        
+
         // when
         guard let help = items.compactMap ({ $0 as? SettingItemModel }).first(where: { $0.itemId == .help })
         else {
@@ -303,29 +307,27 @@ extension SettingItemListViewModelImpleTests {
             return
         }
         viewModel.selectItem(help)
-        
+
         // then
-        let expectPath = Locale.current.language.languageCode == .korean
-        ? "https://readmind.notion.site/To-do-Calendar-36cba0bdc84b44de9abdfd7d8721cd91"
-        : "https://readmind.notion.site/To-do-Calendar-Help-a2183ee1a41946faa8e0658640fb4c6a?pvs=4"
-        XCTAssertEqual(self.spyRouter.didOpenSafariPath, expectPath)
+        XCTAssertEqual(self.spyRouter.didShowWebViewPath, GuideLink.indexPath)
     }
     
-    func testViewModel_routeToSourceCode() {
+    func testViewModel_routeToOpenSourceLicense() {
         // given
         let viewModel = self.makeViewModel()
         let items = self.WaitItemLoaded(viewModel)
         
         // when
-        guard let source = items.compactMap({ $0 as? SettingItemModel }).first(where: { $0.itemId == .sourceCode })
+        guard let license = items.compactMap({ $0 as? SettingItemModel }).first(where: { $0.itemId == .openSourceLicense })
         else {
             XCTAssert(false)
             return
         }
-        viewModel.selectItem(source)
+        viewModel.selectItem(license)
         
         // then
-        XCTAssertEqual(self.spyRouter.didOpenSafariPath, "https://github.com/sudopark/TodoCalendar")
+        XCTAssertEqual(self.spyRouter.didRouteToOpenSourceLicense, true)
+        XCTAssertNil(self.spyRouter.didOpenSafariPath)
     }
 }
 
@@ -366,6 +368,21 @@ private class SpyRouter: BaseSpyRouter, SettingItemListRouting, @unchecked Senda
     var didOpenShareLink: Bool?
     func openShare(link path: String) {
         self.didOpenShareLink = true
+    }
+
+    var didRouteToPaywall: Bool?
+    func routeToPaywall() {
+        self.didRouteToPaywall = true
+    }
+    
+    var didRouteToAdPrivacyOptions: Bool?
+    func routeToAdPrivacyOptions() {
+        self.didRouteToAdPrivacyOptions = true
+    }
+    
+    var didRouteToOpenSourceLicense: Bool?
+    func routeToOpenSourceLicense() {
+        self.didRouteToOpenSourceLicense = true
     }
 }
 
@@ -457,6 +474,168 @@ extension SettingItemListViewModelImpleTests {
 }
 
 
+// MARK: - billing plan 진입점 (#739, #1007)
+
+extension SettingItemListViewModelImpleTests {
+
+    func test_whenSignedIn_showsBillingPlanItem() {
+        // given
+        let viewModel = self.makeViewModel(AccountInfo("some"))
+        let items = self.WaitItemLoaded(viewModel)
+
+        // when
+        let billingItem = items.compactMap { $0 as? SettingItemModel }.first(where: { $0.itemId == .billingPlan })
+
+        // then
+        XCTAssertNotNil(billingItem)
+    }
+
+    func test_whenNotSignedIn_showsBillingPlanItem() {
+        // given
+        let viewModel = self.makeViewModel(nil)
+        let items = self.WaitItemLoaded(viewModel)
+
+        // when
+        let billingItem = items.compactMap { $0 as? SettingItemModel }.first(where: { $0.itemId == .billingPlan })
+
+        // then
+        XCTAssertNotNil(billingItem)
+    }
+
+    func test_whenNotSignedIn_selectBillingPlan_showsSignInConfirm() {
+        // given
+        self.spyRouter.shouldConfirmNotCancel = false
+        let viewModel = self.makeViewModel(nil)
+        let items = self.WaitItemLoaded(viewModel)
+        guard let billingItem = items.compactMap({ $0 as? SettingItemModel }).first(where: { $0.itemId == .billingPlan })
+        else {
+            XCTAssert(false)
+            return
+        }
+
+        // when
+        viewModel.selectItem(billingItem)
+
+        // then
+        XCTAssertEqual(self.spyRouter.didShowConfirmWith?.title, "billing::needSignIn::title".localized())
+        XCTAssertEqual(self.spyRouter.didShowConfirmWith?.message, "billing::needSignIn::message".localized())
+        XCTAssertNil(self.spyRouter.didRouteToSignIn)
+        XCTAssertNil(self.spyRouter.didRouteToPaywall)
+    }
+
+    func test_whenNotSignedIn_confirmSignIn_routesToSignInWithoutPaywall() {
+        // given
+        let viewModel = self.makeViewModel(nil)
+        let items = self.WaitItemLoaded(viewModel)
+        guard let billingItem = items.compactMap({ $0 as? SettingItemModel }).first(where: { $0.itemId == .billingPlan })
+        else {
+            XCTAssert(false)
+            return
+        }
+
+        // when
+        viewModel.selectItem(billingItem)
+
+        // then
+        XCTAssertEqual(self.spyRouter.didRouteToSignIn, true)
+        XCTAssertNil(self.spyRouter.didRouteToPaywall)
+    }
+
+    func test_selectBillingPlan_routesToPaywall() {
+        // given
+        let viewModel = self.makeViewModel(AccountInfo("some"))
+        let items = self.WaitItemLoaded(viewModel)
+        guard let billingItem = items.compactMap({ $0 as? SettingItemModel }).first(where: { $0.itemId == .billingPlan })
+        else {
+            XCTAssert(false)
+            return
+        }
+
+        // when
+        viewModel.selectItem(billingItem)
+
+        // then
+        XCTAssertEqual(self.spyRouter.didRouteToPaywall, true)
+    }
+}
+
+
+// MARK: - AI 사용법 안내 진입점 (#768)
+
+extension SettingItemListViewModelImpleTests {
+
+    func testViewModel_provideAIUsageGuideItem() {
+        // given
+        let viewModel = self.makeViewModel()
+        let items = self.WaitItemLoaded(viewModel)
+
+        // when
+        let guideItem = items.compactMap { $0 as? SettingItemModel }.first(where: { $0.itemId == .aiUsageGuide })
+
+        // then
+        XCTAssertNotNil(guideItem)
+    }
+
+    func testViewModel_whenSelectAIUsageGuide_openGuidePage() {
+        // given
+        let viewModel = self.makeViewModel()
+        let items = self.WaitItemLoaded(viewModel)
+        guard let guideItem = items.compactMap({ $0 as? SettingItemModel }).first(where: { $0.itemId == .aiUsageGuide })
+        else {
+            XCTAssert(false)
+            return
+        }
+
+        // when
+        viewModel.selectItem(guideItem)
+
+        // then
+        XCTAssertEqual(self.spyRouter.didShowWebViewPath, GuideLink.aiInputPath)
+    }
+}
+
+
+// MARK: - 웹 앱 진입점 (#982)
+
+extension SettingItemListViewModelImpleTests {
+
+    func testViewModel_provideOpenWebItem_atTopOfSupportSection() {
+        // given
+        let expect = expectation(description: "세팅 항목 section 제공")
+        let viewModel = self.makeViewModel()
+
+        // when
+        let sections = self.waitFirstOutput(expect, for: viewModel.sectionModels)
+
+        // then
+        let allItemIds = sections?.flatMap { $0.items }.compactMap { $0 as? SettingItemModel }.map { $0.itemId }
+        XCTAssertEqual(allItemIds?.contains(.openWeb), true)
+
+        let supportSection = sections?[safe: 1]
+        let firstSupportItemId = supportSection?.items.first.flatMap { $0 as? SettingItemModel }?.itemId
+        XCTAssertEqual(firstSupportItemId, .openWeb)
+    }
+
+    func testViewModel_whenSelectOpenWeb_openWebAppInSafari() {
+        // given
+        let viewModel = self.makeViewModel()
+        let items = self.WaitItemLoaded(viewModel)
+        guard let openWebItem = items.compactMap({ $0 as? SettingItemModel }).first(where: { $0.itemId == .openWeb })
+        else {
+            XCTAssert(false)
+            return
+        }
+
+        // when
+        viewModel.selectItem(openWebItem)
+
+        // then
+        XCTAssertEqual(self.spyRouter.didOpenSafariPath, WebAppLink.homePath)
+        XCTAssertNil(self.spyRouter.didShowWebViewPath)
+    }
+}
+
+
 // MARK: - 체크 트리거 호출 안함 정책
 
 extension SettingItemListViewModelImpleTests {
@@ -471,4 +650,211 @@ extension SettingItemListViewModelImpleTests {
         // then — Setting 화면은 구독만, checkUpdateIsNeed 호출 안 함
         XCTAssertFalse(self.stubAppUpdateCheckUsecase.didCheckUpdateIsNeed)
     }
+}
+
+
+// MARK: - 약관·개인정보처리방침 진입점 (#857)
+
+extension SettingItemListViewModelImpleTests {
+
+    private func settingItem(
+        _ itemId: SettingItemModel.ItemId, from viewModel: SettingItemListViewModelImple
+    ) -> SettingItemModel? {
+        let items = self.WaitItemLoaded(viewModel)
+        return items.compactMap { $0 as? SettingItemModel }.first(where: { $0.itemId == itemId })
+    }
+
+    func testViewModel_provideTermsAndPrivacyPolicyItems() {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when
+        let terms = self.settingItem(.terms, from: viewModel)
+        let privacyPolicy = self.settingItem(.privacyPolicy, from: viewModel)
+
+        // then
+        XCTAssertNotNil(terms)
+        XCTAssertNotNil(privacyPolicy)
+    }
+
+    func testViewModel_whenSelectTerms_showTermsPageOnInAppWebView() {
+        // given
+        let viewModel = self.makeViewModel()
+        guard let terms = self.settingItem(.terms, from: viewModel)
+        else {
+            XCTAssert(false)
+            return
+        }
+
+        // when
+        viewModel.selectItem(terms)
+
+        // then
+        XCTAssertEqual(self.spyRouter.didShowWebViewPath, LegalLink.termsPath)
+        XCTAssertNil(self.spyRouter.didOpenSafariPath)
+    }
+
+    func testViewModel_whenSelectPrivacyPolicy_showPrivacyPageOnInAppWebView() {
+        // given
+        let viewModel = self.makeViewModel()
+        guard let privacyPolicy = self.settingItem(.privacyPolicy, from: viewModel)
+        else {
+            XCTAssert(false)
+            return
+        }
+
+        // when
+        viewModel.selectItem(privacyPolicy)
+
+        // then
+        XCTAssertEqual(self.spyRouter.didShowWebViewPath, LegalLink.privacyPolicyPath)
+        XCTAssertNil(self.spyRouter.didOpenSafariPath)
+    }
+}
+
+
+// MARK: - 광고 개인정보 옵션 진입점 (#958)
+
+extension SettingItemListViewModelImpleTests {
+    
+    private func appInfoItems(
+        _ viewModel: SettingItemListViewModelImple
+    ) -> AnyPublisher<[SettingItemModel], Never> {
+        return viewModel.sectionModels
+            .compactMap { $0.compactMap { $0 as? AppInfoSectionModel }.first }
+            .map { $0.items.compactMap { $0 as? SettingItemModel } }
+            .eraseToAnyPublisher()
+    }
+    
+    private func waitAppInfoItemsWhenAdPrivacyOptionsShown(
+        _ viewModel: SettingItemListViewModelImple
+    ) -> [SettingItemModel] {
+        // given
+        let expect = expectation(description: "광고 개인정보 옵션 항목이 실린 방출")
+        let source = self.appInfoItems(viewModel)
+            .first(where: { $0.contains(where: { $0.itemId == .adPrivacyOptions }) })
+        
+        // when
+        let items = self.waitFirstOutput(expect, for: source) {
+            viewModel.prepare()
+        }
+        
+        // then
+        return items ?? []
+    }
+    
+    private func waitAdPrivacyOptionsNeverShown(_ viewModel: SettingItemListViewModelImple) {
+        // given
+        let expect = expectation(description: "광고 개인정보 옵션 항목이 끝내 안 실린다")
+        expect.isInverted = true
+        let source = self.appInfoItems(viewModel)
+            .first(where: { $0.contains(where: { $0.itemId == .adPrivacyOptions }) })
+        
+        // when
+        _ = self.waitOutputs(expect, for: source) {
+            viewModel.prepare()
+        }
+    }
+    
+    func test_whenPrivacyOptionsRequired_showsAdPrivacyOptionsItem() {
+        // given
+        let viewModel = self.makeViewModel(
+            privacyOptionsFormRouter: StubPrivacyOptionsFormRouter(isRequired: true)
+        )
+        
+        // when
+        let items = self.waitAppInfoItemsWhenAdPrivacyOptionsShown(viewModel)
+        
+        // then
+        let adPrivacyOptions = items.first(where: { $0.itemId == .adPrivacyOptions })
+        XCTAssertEqual(adPrivacyOptions?.iconNamge, "checkmark.shield")
+    }
+    
+    func test_whenPrivacyOptionsRequired_placesAdPrivacyOptionsItemAfterPrivacyPolicy() {
+        // given
+        let viewModel = self.makeViewModel(
+            privacyOptionsFormRouter: StubPrivacyOptionsFormRouter(isRequired: true)
+        )
+        
+        // when
+        let itemIds = self.waitAppInfoItemsWhenAdPrivacyOptionsShown(viewModel).map { $0.itemId }
+        
+        // then
+        XCTAssertEqual(itemIds, [
+            .shareApp, .addReview, .openSourceLicense, .terms, .privacyPolicy, .adPrivacyOptions
+        ])
+    }
+    
+    func test_whenPrivacyOptionsNotRequired_hidesAdPrivacyOptionsItem() {
+        // given
+        let viewModel = self.makeViewModel(
+            privacyOptionsFormRouter: StubPrivacyOptionsFormRouter(isRequired: false)
+        )
+        
+        // when & then
+        self.waitAdPrivacyOptionsNeverShown(viewModel)
+    }
+    
+    func test_whenPrivacyOptionsFormRouterIsNil_hidesAdPrivacyOptionsItem() {
+        // given
+        let viewModel = self.makeViewModel(privacyOptionsFormRouter: nil)
+        
+        // when & then
+        self.waitAdPrivacyOptionsNeverShown(viewModel)
+    }
+    
+    func test_beforePrepare_hidesAdPrivacyOptionsItem() {
+        // given
+        let expect = expectation(description: "prepare 이전 앱 정보 섹션 항목")
+        let viewModel = self.makeViewModel(
+            privacyOptionsFormRouter: StubPrivacyOptionsFormRouter(isRequired: true)
+        )
+        
+        // when
+        let sections = self.waitFirstOutput(expect, for: viewModel.sectionModels)
+        
+        // then
+        let appInfoSection = sections?.compactMap { $0 as? AppInfoSectionModel }.first
+        let itemIds = appInfoSection?.items.compactMap { $0 as? SettingItemModel }.map { $0.itemId }
+        XCTAssertEqual(itemIds, [
+            .shareApp, .addReview, .openSourceLicense, .terms, .privacyPolicy
+        ])
+    }
+    
+    func test_selectAdPrivacyOptions_routesToAdPrivacyOptionsForm() {
+        // given
+        let viewModel = self.makeViewModel(
+            privacyOptionsFormRouter: StubPrivacyOptionsFormRouter(isRequired: true)
+        )
+        let items = self.waitAppInfoItemsWhenAdPrivacyOptionsShown(viewModel)
+        guard let adPrivacyOptions = items.first(where: { $0.itemId == .adPrivacyOptions })
+        else {
+            XCTAssert(false)
+            return
+        }
+        
+        // when
+        viewModel.selectItem(adPrivacyOptions)
+        
+        // then
+        XCTAssertEqual(self.spyRouter.didRouteToAdPrivacyOptions, true)
+    }
+}
+
+
+private final class StubPrivacyOptionsFormRouter: PrivacyOptionsFormRouter {
+    
+    private let isRequired: Bool
+    
+    init(isRequired: Bool) {
+        self.isRequired = isRequired
+    }
+    
+    @MainActor
+    func isPrivacyOptionsRequired() -> Bool {
+        return self.isRequired
+    }
+    
+    @MainActor
+    func showPrivacyOptionsForm(from viewController: UIViewController) async throws { }
 }

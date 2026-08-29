@@ -8,10 +8,12 @@
 //
 
 import Foundation
+import UIKit
 import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import Scenes
 
 
@@ -27,21 +29,33 @@ public struct CurrentMonth: Equatable {
     var yearText: String?
 }
 
+struct LegalNoticeBannerModel: Equatable {
+    let documentType: LegalDocumentType
+    let message: String
+    let effectiveDateText: String
+}
+
 protocol MainViewModel: AnyObject, Sendable, MainSceneInteractor {
 
     // interactor
     func prepare()
     func returnToToday()
+    func moveToPreviousMonth()
+    func moveToNextMonth()
     func handleMigration()
     func moveToEventTypeFilterSetting()
     func moveToSetting()
     func jumpDate()
-    
+    func openLegalNoticeDocument(_ documentType: LegalDocumentType)
+    func closeLegalNoticeBanner(_ documentType: LegalDocumentType)
+
     // presenter
     var currentMonth: AnyPublisher<CurrentMonth, Never> { get }
     var isShowReturnToToday: AnyPublisher<Bool, Never> { get }
     var temporaryUserDataMigrationStatus: AnyPublisher<TemporaryUserDataMigrationStatus?, Never> { get }
     var isLoadingCalendarEvents: AnyPublisher<Bool, Never> { get }
+    var isLoadingAllEvents: AnyPublisher<Bool, Never> { get }
+    var legalNoticeBanners: AnyPublisher<[LegalNoticeBannerModel], Never> { get }
 }
 
 
@@ -57,6 +71,11 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
     private let googleCalendarUsecase: any GoogleCalendarUsecase
     private let appleCalendarUsecase: any AppleCalendarUsecase
     private let eventSyncUsecase: any EventSyncUsecase
+    private let billingUsecase: any BillingUsecase
+    private let aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
+    private let eventLiveActivityUsecase: any EventLiveActivityUsecase
+    private let guideTodoUsecase: any GuideTodoUsecase
+    private let legalNoticeUsecase: any LegalNoticeUsecase
     var router: (any MainRouting)?
 
     init(
@@ -67,7 +86,12 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
         eventNotifyService: SharedEventNotifyService,
         googleCalendarUsecase: any GoogleCalendarUsecase,
         appleCalendarUsecase: any AppleCalendarUsecase,
-        eventSyncUsecase: any EventSyncUsecase
+        eventSyncUsecase: any EventSyncUsecase,
+        billingUsecase: any BillingUsecase,
+        aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase,
+        eventLiveActivityUsecase: any EventLiveActivityUsecase,
+        guideTodoUsecase: any GuideTodoUsecase,
+        legalNoticeUsecase: any LegalNoticeUsecase
     ) {
         self.uiSettingUsecase = uiSettingUsecase
         self.temporaryUserDataMigrationUsecase = temporaryUserDataMigrationUsecase
@@ -77,16 +101,21 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
         self.googleCalendarUsecase = googleCalendarUsecase
         self.appleCalendarUsecase = appleCalendarUsecase
         self.eventSyncUsecase = eventSyncUsecase
-        
+        self.billingUsecase = billingUsecase
+        self.aiAgentOrchestrationUsecase = aiAgentOrchestrationUsecase
+        self.eventLiveActivityUsecase = eventLiveActivityUsecase
+        self.guideTodoUsecase = guideTodoUsecase
+        self.legalNoticeUsecase = legalNoticeUsecase
+
         self.internalBinding()
     }
-    
+
     private struct Subject {
         let focusedDayInfo = CurrentValueSubject<SelectDayInfo?, Never>(nil)
         let temporaryUserDataMigrationStatus = CurrentValueSubject<TemporaryUserDataMigrationStatus?, Never>(nil)
     }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private let subject = Subject()
     private var calendarSceneInteractor: (any CalendarSceneInteractor)?
     
@@ -97,14 +126,14 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
             .sink(receiveValue: { [weak self] _ in
                 self?.subject.temporaryUserDataMigrationStatus.send(.migrating)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         self.temporaryUserDataMigrationUsecase.migrationNeedEventCount
             .filter { $0 > 0 }
             .sink(receiveValue: { [weak self] count in
                 self?.subject.temporaryUserDataMigrationStatus.send(.need(count))
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         self.temporaryUserDataMigrationUsecase.migrationResult
             .sink(receiveValue: { [weak self] result in
@@ -116,9 +145,20 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
                     self?.router?.showError(error)
                 }
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
+
+        NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)
+            .sink(receiveValue: { [weak self] _ in
+                self?.billingUsecase.recoverUnfinishedTransactions()
+                self?.aiAgentOrchestrationUsecase.refreshProcessingJobIfNeeded()
+                self?.aiAgentOrchestrationUsecase.loadUsage()
+                self?.aiAgentOrchestrationUsecase.refreshNotificationPermissionStatus()
+                self?.handleWillEnterForeground()
+                self?.legalNoticeUsecase.checkNoticeIsNeed()
+            })
+            .store(in: self.cancellables)
     }
-    
+
 }
 
 
@@ -137,13 +177,26 @@ extension MainViewModelImple {
         self.bindEventTagColorMap()
         self.googleCalendarUsecase.prepare()
         self.appleCalendarUsecase.prepare()
+        self.billingUsecase.startObservingTransactions()
+        self.billingUsecase.recoverUnfinishedTransactions()
+        self.guideTodoUsecase.prepare()
+        self.legalNoticeUsecase.checkNoticeIsNeed()
+        Task { [weak self] in
+            await self?.eventLiveActivityUsecase.prepare()
+        }
+    }
+
+    private func handleWillEnterForeground() {
+        Task { [weak self] in
+            await self?.eventLiveActivityUsecase.handleWillEnterForeground()
+        }
     }
     
     private func refreshViewAppearanceSettings() {
         Task { [weak self] in
             _ = try await self?.uiSettingUsecase.refreshAppearanceSetting()
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     private func bindEventTagColorMap() {
@@ -153,13 +206,21 @@ extension MainViewModelImple {
             .sink(receiveValue: { [weak self] tags in
                 self?.uiSettingUsecase.applyEventTagColors(Array(tags.values))
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
     
     func returnToToday() {
         self.calendarSceneInteractor?.moveFocusToToday()
     }
-    
+
+    func moveToPreviousMonth() {
+        self.calendarSceneInteractor?.moveToPreviousMonth()
+    }
+
+    func moveToNextMonth() {
+        self.calendarSceneInteractor?.moveToNextMonth()
+    }
+
     func handleMigration() {
         guard let status = self.subject.temporaryUserDataMigrationStatus.value,
               case .need(let count) = status
@@ -193,11 +254,23 @@ extension MainViewModelImple {
         self.router?.showJumpDaySelectDialog(current: current.dayInfo)
     }
     
+    func handleAIJobStatusChanged(_ jobId: String) {
+        self.aiAgentOrchestrationUsecase.handleJobStatusChanged(jobId)
+    }
+
     func daySelectDialog(didSelect day: SelectDayInfo) {
         guard let current = self.subject.focusedDayInfo.value,
               current.dayInfo != day.dayInfo
         else { return }
         self.calendarSceneInteractor?.moveDay(day.dayInfo)
+    }
+
+    func openLegalNoticeDocument(_ documentType: LegalDocumentType) {
+        self.router?.showWebView(documentType.linkPath)
+    }
+
+    func closeLegalNoticeBanner(_ documentType: LegalDocumentType) {
+        self.legalNoticeUsecase.confirmNotice(documentType)
     }
 }
 
@@ -244,6 +317,41 @@ extension MainViewModelImple {
     
     var isLoadingCalendarEvents: AnyPublisher<Bool, Never> {
         return self.eventSyncUsecase.isSyncInProgress
+            .eraseToAnyPublisher()
+    }
+
+    var isLoadingAllEvents: AnyPublisher<Bool, Never> {
+        return self.eventSyncUsecase.syncStatus
+            .map { $0 == .fullSyncing }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+
+    var legalNoticeBanners: AnyPublisher<[LegalNoticeBannerModel], Never> {
+
+        let message: (LegalDocumentType) -> String = { documentType in
+            switch documentType {
+            case .terms: return "legal_notice.message::terms".localized()
+            case .privacy: return "legal_notice.message::privacy".localized()
+            }
+        }
+        let dateFormatter = DateFormatter()
+            |> \.dateFormat .~ "date_form.yyyy_MM_dd".localized()
+            |> \.timeZone .~ TimeZone(secondsFromGMT: 0)
+
+        return self.legalNoticeUsecase.pendingNoticeUpdates
+            .map { updates -> [LegalNoticeBannerModel] in
+                return updates.map { info in
+                    let effectiveDateText = "legal_notice.effectiveDate".localized(
+                        with: dateFormatter.string(from: info.effectiveDate)
+                    )
+                    return LegalNoticeBannerModel(
+                        documentType: info.documentType,
+                        message: message(info.documentType),
+                        effectiveDateText: effectiveDateText
+                    )
+                }
+            }
             .eraseToAnyPublisher()
     }
 }

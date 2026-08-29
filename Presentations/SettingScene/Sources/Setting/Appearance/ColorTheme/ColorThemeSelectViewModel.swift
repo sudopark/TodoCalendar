@@ -13,6 +13,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import Scenes
 
 
@@ -67,7 +68,7 @@ final class ColorThemeSelectViewModelImple: ColorThemeSelectViewModel, @unchecke
         let availableTheme = CurrentValueSubject<[ColorSetKeys]?, Never>(nil)
     }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private let subject = Subject()
 }
 
@@ -85,7 +86,7 @@ extension ColorThemeSelectViewModelImple {
                 self?.router?.showError(error)
             }
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     func selectTheme(_ model: ColorThemeModel) {

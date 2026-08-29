@@ -253,11 +253,14 @@ enum EventSyncEndPoints: Endpoint {
 
 public enum AppEndpoints: Endpoint {
     case updateInfo
+    case legalNotice
 
     public var subPath: String {
         switch self {
         case .updateInfo:
             return "update-info.json"
+        case .legalNotice:
+            return "legal-notice.json"
         }
     }
 }
@@ -267,6 +270,7 @@ public enum AppEndpoints: Endpoint {
 
 enum AIAPIEndpoints: Endpoint {
     case command
+    case interpretCommand
     case confirmCommand
     case rejectCommand
     case cancelCommand
@@ -276,6 +280,7 @@ enum AIAPIEndpoints: Endpoint {
     var subPath: String {
         switch self {
         case .command: return "command"
+        case .interpretCommand: return "command/interpret"
         case .confirmCommand: return "command/confirm"
         case .rejectCommand: return "command/reject"
         case .cancelCommand: return "command/cancel"
@@ -292,12 +297,16 @@ enum BillingAPIEndpoints: Endpoint {
     case plans
     case topups
     case purchases
+    case transactions
+    case userPlan
 
     var subPath: String {
         switch self {
         case .plans: return "plans"
         case .topups: return "topups"
         case .purchases: return "purchases"
+        case .transactions: return "transactions"
+        case .userPlan: return "user-plan"
         }
     }
 }
@@ -322,17 +331,20 @@ enum GoogleCalendarEndpoint: Endpoint {
     case calednarList
     case eventList(calendarId: String)
     case event(calendarId: String, eventId: String)
-    
+    case eventInstances(calendarId: String, eventId: String)
+
     var subPath: String {
         switch self {
-        case .colors: 
+        case .colors:
             return "colors"
-        case .calednarList: 
+        case .calednarList:
             return "users/me/calendarList"
-        case .eventList(let calendarId): 
+        case .eventList(let calendarId):
             return "calendars/\(calendarId)/events"
         case .event(let calendarId, let eventId):
             return "calendars/\(calendarId)/events/\(eventId)"
+        case .eventInstances(let calendarId, let eventId):
+            return "calendars/\(calendarId)/events/\(eventId)/instances"
         }
     }
 }

@@ -21,40 +21,32 @@ public enum DayOfWeeks: Int, Sendable {
         return self == .sunday || self == .saturday
     }
     
+    private var localizeKeyStem: String {
+        switch self {
+        case .sunday: return "dayname::sunday"
+        case .monday: return "dayname::monday"
+        case .tuesday: return "dayname::tuesday"
+        case .wednesday: return "dayname::wednesday"
+        case .thursday: return "dayname::thursday"
+        case .friday: return "dayname::friday"
+        case .saturday: return "dayname::saturday"
+        }
+    }
+
     public var text: String {
-        switch self {
-        case .sunday: return "dayname::sunday".localized()
-        case .monday: return "dayname::monday".localized()
-        case .tuesday: return "dayname::tuesday".localized()
-        case .wednesday: return "dayname::wednesday".localized()
-        case .thursday: return "dayname::thursday".localized()
-        case .friday: return "dayname::friday".localized()
-        case .saturday: return "dayname::saturday".localized()
-        }
+        return self.localizeKeyStem.localized()
     }
-    
+
+    public var localizedGrammaticalGender: String {
+        return "\(self.localizeKeyStem):gender".localized()
+    }
+
     public var shortText: String {
-        switch self {
-        case .sunday: return "dayname::sunday:short".localized()
-        case .monday: return "dayname::monday:short".localized()
-        case .tuesday: return "dayname::tuesday:short".localized()
-        case .wednesday: return "dayname::wednesday:short".localized()
-        case .thursday: return "dayname::thursday:short".localized()
-        case .friday: return "dayname::friday:short".localized()
-        case .saturday: return "dayname::saturday:short".localized()
-        }
+        return "\(self.localizeKeyStem):short".localized()
     }
-    
+
     public var veryShortText: String {
-        switch self {
-        case .sunday: return "dayname::sunday:very_short".localized()
-        case .monday: return "dayname::monday:very_short".localized()
-        case .tuesday: return "dayname::tuesday:very_short".localized()
-        case .wednesday: return "dayname::wednesday:very_short".localized()
-        case .thursday: return "dayname::thursday:very_short".localized()
-        case .friday: return "dayname::friday:very_short".localized()
-        case .saturday: return "dayname::saturday:very_short".localized()
-        }
+        return "\(self.localizeKeyStem):very_short".localized()
     }
 }
 

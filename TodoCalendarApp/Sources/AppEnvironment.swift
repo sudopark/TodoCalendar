@@ -65,14 +65,32 @@ struct AppEnvironment {
     
     static let eventUploadMaxFailCount: Int = 10
     
-    static let googleCalendarService = GoogleCalendarService(scopes: [.readOnly])
+    static let googleCalendarService = GoogleCalendarService(scopes: [.readonly])
     static let appleCalendarService = AppleCalendarService()
     static var supportExternalCalendarServices: [ExternalCalendarService] {
         return [googleCalendarService, appleCalendarService]
     }
 
-    static let dbVersion: Int32 = 6
-    static let googleCalendarDBVersion: Int32 = 0
+    struct AdUnitIds {
+        let banner: String
+        let mediumRectangle: String
+        let fullScreen: String
+    }
+
+    static var admobUnitIds: AdUnitIds {
+        // MREC 전용 단위를 따로 발급하지 않아 배너와 한 단위를 공유한다
+        let banner: String = "ca-app-pub-4980913859277199/4855632588"
+        return AdUnitIds(
+            banner: banner,
+            mediumRectangle: banner,
+            fullScreen: "ca-app-pub-4980913859277199/7394166018"
+        )
+    }
+    
+    static var admobTestDeviceIdentifiers: [String] { ["ae5e8b3d51ff482948d92b1ee888e81f"] }
+
+    static let dbVersion: Int32 = 7
+    static let googleCalendarDBVersion: Int32 = 1
     static let appleCalendarDBVersion: Int32 = 0
     
     static func deviceId(_ storage: any EnvironmentStorage) -> String {

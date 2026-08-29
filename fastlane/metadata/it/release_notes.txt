@@ -1,0 +1,27 @@
+Questo aggiornamento aggiunge nuove funzioni.
+
+■ Inserimento rapido IA
+· Parla o scrivi e l'evento è creato. "Pranzo con Sara venerdì a mezzogiorno", "sposta il dentista a martedì prossimo": come lo diresti davvero
+· Leggi da un'immagine: fotografa un orario delle lezioni o la locandina di un evento, oppure scegline una dalla libreria, e il testo diventa eventi
+· Non solo aggiungere: spostare l'ora, rinominare, segnare come fatto, eliminare. Le richieste che modificano o rimuovono qualcosa mostrano prima cosa succederà e chiedono conferma
+· Invia da Siri, da un widget o dal Centro di Controllo senza aprire l'app
+· Condividi testo o una foto da un'altra app e prosegui con Invia all'IA
+· Inserimento rapido IA è disponibile dopo l'accesso
+
+■ Mostra nella schermata di blocco
+· Un evento che sta per iniziare mostra il conto alla rovescia nella schermata di blocco e nella Dynamic Island
+· Aggiungilo dal dettaglio dell'evento o dall'elenco del giorno, anche per gli eventi di Google Calendar e Calendario Apple
+· Segna un'attività come fatta o interrompi la visualizzazione direttamente dalla schermata di blocco, e tocca per aprire il dettaglio
+
+■ Condivisione dell'agenda
+· Tieni premuta una data nel calendario per Condividi questo giorno, Condividi questa settimana o Condividi questo mese
+· In Anteprima di condivisione scegli quali Tipi di evento includere e se condividere come Testo o Immagine
+· Puoi anche condividere un solo evento
+
+■ Modifica degli eventi di Google Calendar e Calendario Apple
+· Modifica ed elimina gli eventi dei calendari collegati direttamente nell'app, regole di ripetizione comprese
+· Tieni premuto nell'elenco per eliminare
+
+■ Piani
+· Aggiorna piano ti fa scegliere tra Standard e A vita, ciascuno con più crediti al giorno
+· Se finiscono, Aggiungi crediti li ricarica, e i crediti aggiunti non scadono

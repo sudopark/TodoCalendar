@@ -1,3 +1,5 @@
 "NSCalendarsFullAccessUsageDescription" = "L'accès au calendrier est nécessaire pour afficher les événements et synchroniser avec Apple Calendar.";
 "NSMicrophoneUsageDescription" = "L'accès au microphone est nécessaire pour saisir des événements et des tâches par la voix.";
 "NSSpeechRecognitionUsageDescription" = "La reconnaissance vocale est nécessaire pour convertir votre voix en événements et en tâches.";
+"NSCameraUsageDescription" = "L'accès à l'appareil photo est nécessaire pour lire le texte d'une photo que vous prenez.";
+"NSPhotoLibraryAddUsageDescription" = "L'accès à la photothèque est nécessaire pour enregistrer dans vos photos l'image d'un événement partagé.";

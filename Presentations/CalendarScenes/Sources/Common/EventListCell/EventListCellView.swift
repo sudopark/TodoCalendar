@@ -11,6 +11,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Scenes
 import Extensions
 import CommonPresentation
 
@@ -20,7 +21,7 @@ import CommonPresentation
 @Observable final class PendingCompleteTodoState {
     
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
     var ids: Set<String> = []
     
     func bind(_ viewModel: EventListCellEventHanleViewModel, _ appearance: ViewAppearance) {
@@ -36,7 +37,7 @@ import CommonPresentation
                     self.ids.remove(result.id)
                 }
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 
@@ -87,6 +88,12 @@ struct EventListCellView: View {
         .padding(.vertical, spacing: .xsmall).padding(.horizontal, spacing: .small)
         .frame(idealHeight: 50)
         .backgroundAsRoundedRectForEventList(self.appearance)
+        .overlay(alignment: .topTrailing) {
+            if self.cellViewModel.isLiveActivityRegistered {
+                self.liveActivityBadgeView
+                    .offset(x: 6, y: -6)
+            }
+        }
         .onTapGesture {
             self.appearance.impactIfNeed()
             self.requestShowDetail(self.cellViewModel)
@@ -96,46 +103,58 @@ struct EventListCellView: View {
                 ForEach(0..<moreActions.basicActions.count, id: \.self) {
                     moreActionsView(moreActions.basicActions[$0])
                 }
-                
-                Divider()
-                
+
+                if !moreActions.basicActions.isEmpty && !moreActions.removeActions.isEmpty {
+                    Divider()
+                }
+
                 ForEach(0..<moreActions.removeActions.count, id: \.self) {
                     moreActionsView(moreActions.removeActions[$0])
                 }
             }
         }
     }
-    
+
     private func moreActionsView(_ action: EventListMoreAction) -> some View {
         switch action {
         case .edit:
             return editEventButton().asAnyView()
-        case .remove(let onlyThisTime):
-            return removeButton(onlyThisTime).asAnyView()
+        case .remove(let scope):
+            return removeButton(scope).asAnyView()
         case .toggleTo(let isForemost):
             return toggleForemostButton(isForemost).asAnyView()
+        case .toggleLiveActivity(let isRegistered):
+            return toggleLiveActivityButton(isRegistered).asAnyView()
         case .skipTodo:
             return skipTodoButton().asAnyView()
         case .copy:
             return copyButton().asAnyView()
-        case .editGoogleEvent(let link):
-            return editGoogleEventButton(link).asAnyView()
+        case .share:
+            return shareButton().asAnyView()
         }
     }
-    
-    private func removeButton(_ onlyThisTime: Bool) -> some View {
+
+    private func removeButton(_ scope: EventListRemoveScope) -> some View {
         return Button(role: .destructive) {
             self.handleMoreAction(
-                self.cellViewModel, .remove(onlyThisTime: onlyThisTime)
+                self.cellViewModel, .remove(scope: scope)
             )
         } label: {
             HStack {
-                Text(onlyThisTime
-                     ? R.String.calendarEventMoreActionRemoveOnlyThistimeItemName
-                     : R.String.calendarEventMoreActionRemoveItemName
-                )
+                Text(self.removeItemName(scope))
                 Image(systemName: "trash")
             }
+        }
+    }
+
+    private func removeItemName(_ scope: EventListRemoveScope) -> String {
+        switch scope {
+        case .onlyThisTime:
+            return R.String.calendarEventMoreActionRemoveOnlyThistimeItemName
+        case .thisAndFuture:
+            return "calendar::event::more_action:remove_this_and_future:item_name".localized()
+        case .all:
+            return R.String.calendarEventMoreActionRemoveItemName
         }
     }
     
@@ -155,6 +174,19 @@ struct EventListCellView: View {
         }
     }
     
+    private func toggleLiveActivityButton(_ isRegistered: Bool) -> some View {
+        return Button {
+            self.handleMoreAction(
+                self.cellViewModel, .toggleLiveActivity(isRegistered: isRegistered)
+            )
+        } label: {
+            HStack {
+                Text(LiveActivityActionModel(isRegistered: isRegistered).itemText)
+                Image(systemName: "timer")
+            }
+        }
+    }
+
     private func editEventButton() -> some View {
         return Button {
             self.requestShowDetail(self.cellViewModel)
@@ -187,15 +219,15 @@ struct EventListCellView: View {
             }
         }
     }
-    
-    private func editGoogleEventButton(_ link: String) -> some View {
+
+    private func shareButton() -> some View {
         return Button {
-            self.handleMoreAction(self.cellViewModel, .editGoogleEvent(link: link))
+            self.handleMoreAction(self.cellViewModel, .share)
         } label: {
-            Text("calednar::event::google::edit".localized())
-            Image("google_calendar_icon")
-                .resizable()
-                .scaledToFill()
+            HStack {
+                Text("calendar::event::more_action:share:item_name".localized())
+                Image(systemName: "square.and.arrow.up")
+            }
         }
     }
     
@@ -303,6 +335,16 @@ struct EventListCellView: View {
         return LoadingCircleView(appearance.colorSet.accent.asColor, lineWidth: 1.5)
             .frame(width: 24, height: 24)
     }
+
+    private var liveActivityBadgeView: some View {
+        return Image(systemName: "timer")
+            .font(.system(size: 10, weight: .bold))
+            .foregroundColor(appearance.colorSet.primaryBtnText.asColor)
+            .frame(width: 18, height: 18)
+            .background(
+                Circle().fill(appearance.colorSet.accent.asColor)
+            )
+    }
     
     private func todoDoneButton(_ todoId: String) -> some View {
         Button {
@@ -331,9 +373,13 @@ struct EventListCellView: View {
 // MARK: - extensions
 
 extension EventCellViewModel {
-    
+
     var todoEventId: String? {
-        return (self as? TodoEventCellViewModel)?.eventIdentifier
+        switch self {
+        case let todo as TodoEventCellViewModel: return todo.eventIdentifier
+        case let guide as GuideTodoEventCellViewModel: return guide.eventIdentifier
+        default: return nil
+        }
     }
 }
 

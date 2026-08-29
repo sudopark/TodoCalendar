@@ -38,8 +38,9 @@ class CalendarAPIAutenticatorTests: BaseTestCase {
         self.spyListener = nil
     }
     
-    private func makeAuthenticator() -> CalendarAPIAutenticator {
-        
+    private func makeAuthenticator(refreshFailError: (any Error)? = nil) -> CalendarAPIAutenticator {
+
+        self.stubFirebaseService.refreshFailError = refreshFailError
         let authenticator = CalendarAPIAutenticator(
             credentialStore: self.spyAuthStore,
             firebaseAuthService: self.stubFirebaseService
@@ -100,6 +101,9 @@ extension CalendarAPIAutenticatorTests {
             AIAPIEndpoints.command, method: .post, expecthasToken: true
         )
         parameterizeTest(
+            AIAPIEndpoints.interpretCommand, method: .post, expecthasToken: true
+        )
+        parameterizeTest(
             AIAPIEndpoints.confirmCommand, method: .post, expecthasToken: true
         )
         parameterizeTest(
@@ -123,6 +127,9 @@ extension CalendarAPIAutenticatorTests {
         )
         parameterizeTest(
             BillingAPIEndpoints.purchases, method: .post, expecthasToken: true
+        )
+        parameterizeTest(
+            BillingAPIEndpoints.transactions, method: .post, expecthasToken: true
         )
     }
 }
@@ -190,7 +197,7 @@ extension CalendarAPIAutenticatorTests {
         func parameterizeTest(_ shouldFail: Bool) {
             // given
             self.spyAuthStore.saveAuth(self.dummyAuth)
-            self.stubFirebaseService.shouldFailRefresh = shouldFail
+            self.stubFirebaseService.refreshFailError = shouldFail ? RuntimeError("failed") : nil
             let expect = expectation(description: "wait-refresh")
             var result: Result<APICredential, any Error>?
             
@@ -223,7 +230,38 @@ extension CalendarAPIAutenticatorTests {
         parameterizeTest(true)
         parameterizeTest(false)
     }
-    
+
+    func testAuthenticator_whenRefreshFailWithoutServerResponse_keepCredentialAndNotSignOut() {
+        // given
+        let refreshFailError = NSError(
+            domain: "FIRAuthErrorDomain",
+            code: 17020,
+            userInfo: [NSUnderlyingErrorKey: URLError(.timedOut)]
+        )
+        let authenticator = self.makeAuthenticator(refreshFailError: refreshFailError)
+        self.spyAuthStore.saveAuth(self.dummyAuth)
+        let expect = expectation(description: "wait-refresh")
+        var result: Result<APICredential, any Error>?
+
+        // when
+        let credential = APICredential(auth: self.dummyAuth)
+        authenticator.refresh(credential, for: Session()) {
+            result = $0
+            expect.fulfill()
+        }
+        self.wait(for: [expect], timeout: self.timeout)
+
+        // then
+        guard case .failure = result
+        else {
+            XCTFail("refresh should fail")
+            return
+        }
+        XCTAssertEqual(self.spyAuthStore.loadCurrentAuth()?.accessToken, "access")
+        XCTAssertEqual(self.spyListener?.didTokenRefreshFailed, nil)
+        XCTAssertEqual(self.stubFirebaseService.didSignout, nil)
+    }
+
     // check token has changed
     func testAuthenticator_checkTokenChanged() {
         // given

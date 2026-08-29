@@ -79,6 +79,14 @@
 "dayname::friday:very_short" = "五";
 "dayname::saturday:very_short" = "六";
 
+"dayname::sunday:gender" = "m";
+"dayname::monday:gender" = "m";
+"dayname::tuesday:gender" = "m";
+"dayname::wednesday:gender" = "m";
+"dayname::thursday:gender" = "m";
+"dayname::friday:gender" = "m";
+"dayname::saturday:gender" = "m";
+
 
 // MARK: - event notification
 
@@ -112,8 +120,12 @@
 
 "calendar::foremostevent:title" = "最重要事件";
 "calendar::uncompletedTodos:title" = "未完成待办";
+"calendar::guideTodo::name" = "了解 To-do Calendar 的使用方法";
+"calendar::eventSync::loadingAllEvents::message" = "正在获取您的全部事件…";
 "calendar::event_time::todo" = "待办";
 "calendar::event_time::allday" = "全天";
+"calendar::event_time::start" = "开始";
+"calendar::event_time::end" = "结束";
 "calendar::event_time::allday::with" = "%@ 全天";
 "calendar::event_time::period:some_days" = "%d天";
 "calendar::event_time::period:some_minutes" = "%d分钟";
@@ -123,11 +135,13 @@
 "calendar::event::more_action::foremost_event:title" = "最重要事件";
 "calendar::event::more_action::remove_only_thistime:message" = "是否仅删除本次重复事件？";
 "calendar::event::more_action::remove:message" = "是否删除此事件？";
+"calendar::event::more_action::remove_this_and_future:message" = "是否删除本次及之后所有的重复事件？";
 "calendar::event::more_action::mark_as_foremost" = "是否将此事件标记为最重要事件？";
 "calendar::event::more_action::unmark_as_foremost" = "是否取消此事件的最重要事件标记？";
 "calendar::event::more_action::mark_as_foremost::unavail" = "重复的日程事件无法标记为最重要事件。";
 "calendar::event::more_action:remove_only_thistime:item_name" = "仅删除本次";
 "calendar::event::more_action:remove:item_name" = "删除事件";
+"calendar::event::more_action:remove_this_and_future:item_name" = "删除本次及之后的事件";
 "calendar::event::more_action:foremost:mark:item_name" = "标记为最重要";
 "calendar::event::more_action:foremost:unmark:item_name" = "取消最重要标记";
 "calendar::event::more_action:dday_candidate:register:item_name" = "添加到倒计时小组件";
@@ -135,7 +149,25 @@
 "calendar::event::more_action:dday_candidate:title" = "倒计时小组件候选";
 "calendar::event::more_action:dday_candidate:register:message" = "是否要将此事件添加为倒计时小组件候选？编辑小组件时会显示在列表顶部。";
 "calendar::event::more_action:dday_candidate:unregister:message" = "是否要将此事件从倒计时小组件候选中移除？";
+"calendar::event::more_action:live_activity:title" = "实时活动";
+"calendar::event::more_action:live_activity:register:item_name" = "在锁定屏幕上显示";
+"calendar::event::more_action:live_activity:unregister:item_name" = "从锁定屏幕移除";
+"calendar::event::more_action:live_activity:unavail::not_found" = "此事件已不存在。";
+"calendar::event::more_action:live_activity:unavail::already_passed" = "此事件已经开始。";
+"calendar::event::more_action:live_activity:unavail::too_far_future" = "仅可显示8小时内开始的事件。";
+"calendar::event::more_action:live_activity:register:confirm" = "是否在锁定屏幕上显示此事件？";
+"calendar::event::more_action:live_activity:unregister:confirm" = "是否将此事件从锁定屏幕移除？";
+"calendar::event::more_action:live_activity:replace:confirm" = "锁定屏幕上正在显示其他事件。是否替换为此事件？";
+"calendar::event::more_action:live_activity:register:success" = "已在锁定屏幕上显示。锁屏后即可查看。";
+"calendar::event::more_action:live_activity:showing" = "正在锁定屏幕上显示";
 "calendar::event::more_action:copy:item_name" = "复制事件";
+"calendar::event::more_action:share:item_name" = "分享";
+"event_detail::share::field::time" = "时间";
+"event_detail::share::field::repeating" = "重复";
+"event_detail::share::field::calendar" = "日历";
+"event_detail::share::field::place" = "地点";
+"event_detail::share::field::url" = "链接";
+"event_detail::share::field::memo" = "备注";
 "calendar::event::more_action:transform_to::schedule" = "转换为日程";
 "calendar::event::more_action:transform_to::todo" = "转换为待办";
 "calendar::event::more_action:edit:item_name" = "编辑";
@@ -145,7 +177,9 @@
 "calednar::event::skip_todo_until" = "选择跳过此待办的时间";
 "calednar::event::copy" = "复制事件";
 "calendar::move_date" = "移动日期";
-"calednar::event::google::edit" = "编辑Google日历事件";
+"calendar::share::this_day" = "分享当天的事件";
+"calendar::share::this_week" = "分享本周的事件";
+"calendar::share::this_month" = "分享本月的事件";
 
 
 // MARK: - event detail
@@ -171,14 +205,33 @@
 "eventDetail.repeating.everyYearSomeDay:title" = "每年%@";
 "eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "每年%@（农历）";
 "eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "每月最后一周的所有日子";
-"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "每月第一个%@";
-"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "每月第二个%@";
-"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "每月第三个%@";
-"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "每月第四个%@";
-"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "每月第五个%@";
-"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "每月第六个%@";
-"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "每月第七个%@";
-"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "每月最后一个%@";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::m" = "每月第一个%@";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::f" = "每月第一个%@";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::n" = "每月第一个%@";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::m" = "每月第二个%@";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::f" = "每月第二个%@";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::n" = "每月第二个%@";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::m" = "每月第三个%@";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::f" = "每月第三个%@";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::n" = "每月第三个%@";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::m" = "每月第四个%@";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::f" = "每月第四个%@";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::n" = "每月第四个%@";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::m" = "每月第五个%@";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::f" = "每月第五个%@";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::n" = "每月第五个%@";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::m" = "每月第六个%@";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::f" = "每月第六个%@";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::n" = "每月第六个%@";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::m" = "每月第七个%@";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::f" = "每月第七个%@";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::n" = "每月第七个%@";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::m" = "每月最后一个%@";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::f" = "每月最后一个%@";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::n" = "每月最后一个%@";
+"eventDetail.repeating.last::m" = "最后";
+"eventDetail.repeating.last::f" = "最后";
+"eventDetail.repeating.last::n" = "最后";
 "eventDetail.repeating.endtime::title" = "重复结束";
 "eventDetail.repeating.endtime::option::never" = "永不";
 "eventDetail.repeating.endtime::option::on" = "于";
@@ -188,7 +241,6 @@
 "eventDetail.repeating::period_endcount" = "从%@开始，共%d次";
 
 "eventDetail.repeating.everyNDays:title" = "每%d天";
-"eventDetail.repeating.last" = "最后";
 "eventDetail.repeating.everyNMonths:title" = "每%d个月";
 "eventDetail.repeating.everyNYears:title" = "每%d年";
 "eventDetail.repeating::endoption_until" = "直到%@";
@@ -267,12 +319,33 @@
 "eventDetail::gogoleEvent::conference::password" = "密码";
 "eventDetail::gogoleEvent::copy::message" = "已复制到剪贴板。";
 "eventDetail::gogoleEvent::canceled::message" = "此事件已取消。";
+"eventDetail::gogoleEvent::saved::message" = "事件已保存。";
+"eventDetail::gogoleEvent::readOnlyCalendar::message" = "此日历为只读，无法在此编辑该事件。";
+"eventDetail::gogoleEvent::reauthenticate::title" = "需要额外权限";
+"eventDetail::gogoleEvent::reauthenticate::message" = "此Google账户以只读权限连接。若要编辑事件，需要另行授予编辑权限。";
+"eventDetail::gogoleEvent::writeScopeNotGranted::message" = "未获得编辑权限。如果这是单位或学校账户，可能是管理员不允许。";
+"eventDetail::gogoleEvent::repeating::title" = "这是一个重复事件";
+"eventDetail::gogoleEvent::repeating::onlyThisTime::button" = "仅此事件";
+"eventDetail::gogoleEvent::repeating::all::button" = "所有事件";
+"eventDetail::gogoleEvent::remove::confirm::message" = "是否从Google日历中删除此事件？";
+"eventDetail::gogoleEvent::editOnCalendar" = "在Google日历中编辑";
+"eventDetail::gogoleEvent::notEditableField::message" = "此项无法在此编辑。请在Google日历中修改。";
+"eventDetail::gogoleEvent::description::formatLoss::message" = "此描述含有格式。在此编辑将移除这些格式。";
 
 // MARK: - Apple calendar event
 "eventDetail::appleCalendarEvent::viewOnCalendar" = "在Apple日历中查看";
+"eventDetail::appleCalendarEvent::editOnCalendar" = "在Apple日历中编辑";
 "eventDetail::appleCalendarEvent::calendar::event" = "Apple日历事件";
 "eventDetail::appleCalendarEvent::attendees" = "参与者（%d人）";
 "eventDetail::appleCalendarEvent::attendees::organizer" = "组织者";
+"eventDetail::appleCalendarEvent::saved::message" = "已保存。";
+"eventDetail::appleCalendarEvent::remove::confirm::message" = "是否删除此事件？";
+"eventDetail::appleCalendarEvent::repeating::title" = "重复事件";
+"eventDetail::appleCalendarEvent::repeating::onlyThisTime::button" = "仅此事件";
+"eventDetail::appleCalendarEvent::repeating::thisAndFuture::button" = "此事件及之后所有事件";
+"eventDetail::appleCalendarEvent::readOnlyCalendar::message" = "此日历为只读，无法编辑该事件。";
+"eventDetail::appleCalendarEvent::notEditableField::message" = "此项无法在应用中编辑。";
+"eventDetail::appleCalendarEvent::url::placeholder" = "URL";
 
 // MARK: - event tag
 
@@ -310,6 +383,22 @@
 "eventList::remove::confirm::button::olderThan6m" = "6个月以前";
 "eventList::remove::confirm::button::olderThan1y" = "1年以前";
 
+// MARK: - share preview
+
+"share_preview::title" = "分享预览";
+"share_preview::tag_filter::title" = "事件类型";
+"share_preview::tag_filter::select_all" = "全选";
+"share_preview::tag_filter::deselect_all" = "全部取消";
+"share_preview::option::include_tag_name" = "显示事件类型名称";
+"share_preview::share_button" = "分享";
+"share_preview::empty" = "没有可分享的事件";
+"share_preview::header::this_week" = "本周";
+"share_preview::header::last_week" = "上周";
+"share_preview::header::next_week" = "下周";
+"share_preview::header::week_of_month" = "%1$@第%2$d周";
+"share_preview::format::text" = "文本";
+"share_preview::format::image" = "图片";
+
 
 // MARK: - account
 
@@ -327,7 +416,9 @@
 "manage_account::delete_account_button::confirm:message" = "确定要注销您的账户吗？";
 "manage_account::delete_account_button::description" = "提交注销申请后，您的账户将被删除。\n账户信息一经删除将无法恢复。";
 "signIn::title" = "登录";
-"signIn:description" = "备份您的事件列表，并在其他iOS设备间同步\n（支持的平台将持续扩展。）";
+"signIn::feature::sync" = "备份事件 · 多设备同步";
+"signIn::feature::aiAgent" = "用AI助手管理日程";
+"signIn::feature::web" = "网页端同样可用 · todo-calendar.com";
 
 
 // MARK: - setting
@@ -410,10 +501,17 @@
 "setting.holiday.hide::confirm::message" = "是否每年都隐藏此假期？\n您可以在设置 > 假期中重新显示。";
 "setting.holiday.hidden::sectionTitle" = "已隐藏的假期";
 "setting.holiday.show::button" = "显示";
+"setting.aiGuide::name" = "AI 添加 — Siri 与小组件";
 "setting.feedback::name" = "反馈";
 "setting.help::name" = "帮助";
+"setting.openWeb::name" = "在网页中打开";
 "setting.share::name" = "分享应用";
 "setting.write_review::name" = "撰写应用评价";
+"setting.openSourceLicense::name" = "开源许可";
+"setting.billing.plan::name" = "套餐";
+"setting.terms::name" = "服务条款";
+"setting.privacyPolicy::name" = "隐私政策";
+"setting.adPrivacyOptions::name" = "广告隐私选项";
 "setting.account.signedIn::manageAccount" = "账户";
 "setting.account.needSignIn" = "登录";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -513,6 +611,14 @@
 "widget.dday.target::registered" = "已固定";
 "widget.dday.turn::name" = "第%d次";
 
+"widget.aiCommand::title" = "使用AI添加";
+"widget.aiCommand::explain" = "轻触一次即可打开AI输入。";
+
+// MARK: - liveActivity
+
+"liveActivity::stale" = "即将开始";
+"liveActivity::action::end" = "结束";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "不支持此链接格式。\n请将应用更新到最新版本。";
@@ -543,20 +649,133 @@
 "aiAgent::state::failed" = "任务失败";
 "aiAgent::done::default" = "已完成";
 "aiAgent::failed::default" = "未能完成该操作";
+"aiAgent::failed::dailyLimitExceeded" = "今天的AI额度已用完。";
 "aiAgent::retry" = "重试";
 "aiAgent::needSignIn::title" = "需要登录";
 "aiAgent::needSignIn::message" = "登录后即可使用AI快捷输入。";
+"aiAgent::speechPermissionDenied::title" = "需要权限";
+"aiAgent::speechPermissionDenied::message" = "请在设置中允许访问麦克风和语音识别，以使用语音输入。";
+"aiAgent::speechPermissionDenied::confirm" = "打开设置";
 "aiAgent::title" = "AI快捷输入";
 "aiAgent::keyboard::stop" = "停止";
 "aiAgent::keyboard::send" = "发送";
 "aiAgent::stop" = "停止";
 "aiAgent::usage" = "%@ / %@ 额度";
-"aiAgent::plan::free" = "免费";
-"aiAgent::plan::standard" = "标准";
-"aiAgent::plan::lifetime" = "永久";
 "aiAgent::usage::topupRemaining" = "还剩%@附加额度";
 "aiAgent::usage::planChangeScheduled" = "将于%1$@切换至%2$@套餐";
+"aiAgent::usage::resetsIn" = "%@后可再次使用";
+"aiAgent::notificationPermissionDenied::message" = "请在设置中开启通知，以接收 AI 结果。";
 "aiAgent::stop::confirm::title" = "是否停止处理？";
 "aiAgent::stop::confirm::message" = "停止后将放弃正在进行的任务，且无法恢复。";
 "aiAgent::confirm::countdown" = "内确认";
 "aiAgent::confirm::expired::message" = "时间已到，请重新发起请求。";
+"aiAgent::tip::externalEntry" = "提示：你还可以通过 Siri、操作按钮或小组件添加。";
+"aiAgent::failed::showPlans" = "查看套餐";
+
+"aiAgent::image::title" = "从图片读取";
+"aiAgent::image::sourceSelect::title" = "添加图片";
+"aiAgent::image::source::library" = "从相册选择";
+"aiAgent::image::source::camera" = "拍照";
+"aiAgent::image::recognizing" = "正在读取图片…";
+"aiAgent::image::noText" = "未在此图片中找到任何文本";
+"aiAgent::image::readText" = "图片中的文本";
+"aiAgent::image::instruction" = "附加指令（可选）";
+"aiAgent::image::instruction::placeholder" = "例如：将这些添加为待办事项";
+"aiAgent::image::empty" = "没有可发送的文本";
+"aiAgent::image::textTooLong" = "文本太长，请缩短后重试。";
+"aiAgent::image::instructionTooLong" = "指令太长，请缩短后重试。";
+"aiAgent::image::busy" = "另一个请求仍在进行中";
+"aiAgent::image::camera::denied::title" = "需要相机权限";
+"aiAgent::image::camera::denied::message" = "请在设置中允许访问相机，以便拍照。";
+
+// MARK: - billing
+
+"billing::plan::free" = "免费";
+"billing::plan::standard" = "标准";
+"billing::plan::lifetime" = "永久";
+
+"billing::paywall::title" = "升级套餐";
+"billing::paywall::current::description" = "每天 %@ 积分";
+"billing::paywall::metric::dailyCredits" = "每天 %@ 积分";
+"billing::paywall::period::weekly" = "/周";
+"billing::paywall::period::monthly" = "/月";
+"billing::paywall::period::yearly" = "/年";
+"billing::paywall::price::unavailable" = "无法获取价格";
+"billing::paywall::badge::recommended" = "推荐";
+"billing::paywall::badge::owned" = "当前套餐";
+"billing::paywall::features::title" = "%@ 包含的功能";
+"billing::paywall::feature::dailyCredits" = "每天 %@ 积分";
+"billing::paywall::feature::topup" = "积分用完后可追加购买";
+"billing::paywall::feature::noAds" = "无广告";
+"billing::paywall::disclosure::subscription" = "订阅将每月自动续订，除非您在当前订阅期结束前至少24小时取消。您可以随时在App Store设置中取消订阅。";
+"billing::paywall::disclosure::subscription::generic" = "订阅将在每个计费周期结束时自动续订，除非您在该周期结束前至少24小时取消。您可以随时在App Store设置中取消订阅。";
+"billing::paywall::disclosure::oneTime" = "一次性付款，永久使用，不会自动续订。";
+"billing::paywall::disclosure::storeUnavailable" = "无法连接到App Store，请稍后再试。";
+"billing::paywall::cta::subscribe" = "订阅%@";
+"billing::paywall::cta::buy" = "购买%@";
+"billing::paywall::cta::unavailable" = "无法购买";
+"billing::paywall::allPlansOwned" = "您已在使用最高级的套餐。";
+"billing::paywall::terms" = "服务条款";
+"billing::paywall::privacyPolicy" = "隐私政策";
+"billing::paywall::restore" = "恢复购买";
+"billing::paywall::restored" = "已恢复购买";
+"billing::paywall::restore::empty" = "没有可恢复的购买记录。";
+"billing::paywall::manageSubscription" = "管理订阅";
+"billing::paywall::purchase::applied" = "套餐已生效";
+"billing::paywall::pending::title" = "等待批准";
+"billing::paywall::pending::message" = "请等待家庭组织者批准此购买，批准后将自动生效。";
+"billing::paywall::userPlan::loadFailed" = "无法加载您的套餐，请重试。";
+"billing::paywall::retry" = "重试";
+"billing::paywall::unfinished::title" = "有一笔购买尚未生效";
+"billing::paywall::unfinished::message" = "付款已完成，但套餐尚未更新。";
+"billing::paywall::unfinished::action" = "立即生效";
+"billing::paywall::unfinished::applied" = "您的购买已生效";
+"billing::paywall::processing::message" = "正在确认您的购买…";
+"billing::paywall::fail::purchase" = "未能完成购买，请重试。";
+"billing::paywall::fail::invalidTransaction" = "无法验证您的购买，请稍后再试。";
+"billing::paywall::fail::unknownProduct" = "无法识别此购买项目。更新应用后可能会解决。";
+"billing::paywall::fail::planChangeNotAllowed" = "不支持此套餐变更。";
+"billing::paywall::fail::ownedByAnotherAccount" = "此购买属于其他账户。请使用购买时的账户登录。";
+"billing::paywall::fail::reflectDelayed" = "付款已完成，但生效有所延迟。系统将自动为您生效。";
+"billing::paywall::topup::credits" = "%@ 积分";
+"billing::paywall::topup::credits::split" = "基础 %@ + 赠送 %@ 积分";
+"billing::paywall::topup::bonus" = "+%@%% 赠送";
+"billing::paywall::topup::title" = "追加购买积分";
+"billing::paywall::topup::title::withRemaining" = "追加购买积分 · 已有 %@";
+"billing::paywall::topup::description" = "附加积分会在每日额度用完后使用，且永不过期。";
+"billing::paywall::topup::applied" = "积分已添加";
+"billing::paywall::topup::applied::withCredits" = "已添加 %@ 积分";
+
+"billing::needSignIn::title" = "需要登录";
+"billing::needSignIn::message" = "登录后即可查看和管理您的套餐。";
+
+// MARK: - share extension
+
+"share.ai::title" = "发送给AI";
+"share.ai::text::placeholder" = "要发送的内容";
+"share.ai::instruction::placeholder" = "添加指令（可选）";
+"share.ai::needSignIn" = "请先在应用中登录，以使用AI快捷输入。";
+"share.ai::pending" = "上一个请求尚未处理完毕。请在应用中查看进度或结果。";
+"share.ai::sent" = "已发送。可在应用中查看结果。";
+"share.ai::failed" = "发送失败。请重试。";
+"share.ai::sentButUntracked" = "已发送，但应用无法跟踪结果。请稍后查看日历。";
+"share.ai::textTooLong" = "要发送的内容太长，无法发送。请缩短后重试。";
+"share.ai::instructionTooLong" = "指令太长，请缩短。";
+"share.ai::limitExceeded" = "今天的AI额度已用完，将在世界标准时间零点重置。";
+"share.ai::image::title" = "将图片发送给AI";
+"share.ai::image::recognizing" = "正在从图片中读取文字…";
+"share.ai::image::text::caption" = "从图片中读取的文字——如有不准确的地方，请编辑。";
+"share.ai::image::text::placeholder" = "从图片中读取的文字";
+"share.ai::image::noTextFound" = "未能在图片中找到任何文字。请输入想要添加的内容。";
+
+// MARK: - webview
+
+"webview::error::message" = "无法加载此页面。";
+"webview::error::retry" = "重试";
+"webview::openInBrowser" = "在浏览器中打开";
+
+// MARK: - legal notice
+
+"legal_notice.message::terms" = "我们的服务条款已更新。";
+"legal_notice.message::privacy" = "我们的隐私政策已更新。";
+"legal_notice.effectiveDate" = "生效日期 %@";

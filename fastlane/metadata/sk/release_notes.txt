@@ -1,0 +1,27 @@
+Táto aktualizácia prináša nové funkcie.
+
+■ Rýchle zadávanie AI
+· Povedz to alebo napíš a udalosť je hotová. „Obed so Sárou v piatok o 12“, „presuň zubára na budúci utorok“ – presne tak, ako by si to povedal
+· Čítať z obrázka: odfoť rozvrh alebo plagát k podujatiu, prípadne vyber snímku z knižnice, a text sa zmení na udalosti
+· Nielen pridávať: posunúť čas, premenovať, označiť za hotové, odstrániť. Požiadavky, ktoré niečo menia alebo odstraňujú, najprv ukážu, čo sa stane, a vypýtajú si potvrdenie
+· Pošli to cez Siri, widget alebo Ovládacie centrum bez otvárania aplikácie
+· Zdieľaj text alebo fotku z inej aplikácie a nadviaže na to Odoslať do AI
+· Rýchle zadávanie AI je k dispozícii po prihlásení
+
+■ Zobraziť na uzamknutej obrazovke
+· Udalosť, ktorá sa má začať, odpočítava na uzamknutej obrazovke a v Dynamic Islande
+· Pridaj ju z detailu udalosti alebo zo zoznamu dňa – aj udalosti z Kalendára Google a Kalendára Apple
+· Označ úlohu za hotovú alebo ukonči zobrazenie priamo z uzamknutej obrazovky a ťuknutím otvor detail
+
+■ Zdieľanie programu
+· Podrž dátum v kalendári a vyber Zdieľať tento deň, Zdieľať tento týždeň alebo Zdieľať tento mesiac
+· V Náhľad zdieľania vyber, ktoré Typy udalostí zahrnúť a či zdieľať ako Text, alebo Obrázok
+· Zdieľať môžeš aj jedinú udalosť
+
+■ Úpravy udalostí v Kalendári Google a Kalendári Apple
+· Uprav a odstráň udalosti pripojených kalendárov priamo v aplikácii, vrátane pravidiel opakovania
+· Odstrániš ich podržaním v zozname
+
+■ Plány
+· V Vylepšiť plán si vyberieš medzi Štandardný a Doživotný – s vyšším počtom kreditov na deň
+· Keď sa minú, Dokúpiť kredity ich doplní a dokúpené kredity neexpirujú

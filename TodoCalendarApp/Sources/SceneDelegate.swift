@@ -11,6 +11,9 @@ import CommonPresentation
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
+    #if DEBUG || TEST_DEPLOY
+    private var debugFloatingLoggerWindow: DebugFloatingLoggerWindow?
+    #endif
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
@@ -24,7 +27,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         app?.applicationRouter?.window = window
         
         app?.applicationViewModel.prepareInitialScene()
-        
+
+        #if DEBUG || TEST_DEPLOY
+        self.debugFloatingLoggerWindow = DebugFloatingLoggerWindow(windowScene: windowScene)
+        #endif
+
+        session.isLaunchedFromAppIcon = connectionOptions.urlContexts.isEmpty
+            && connectionOptions.notificationResponse == nil
+            && connectionOptions.shortcutItem == nil
+
         guard let url = connectionOptions.urlContexts.first?.url else { return }
         _ = app?.applicationViewModel.handle(open: url)
     }

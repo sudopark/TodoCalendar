@@ -38,10 +38,6 @@ final class CalendarScenesSnapshots: XCTestCase {
 
     // MARK: - Month/MonthView (rowHeight: small — eventDotsView 분기)
 
-    // MonthViewState의 필드가 fileprivate라 state를 직접 채우지 못하고, production의
-    // bind(viewModel:) 경로로 우회한다. bind()가 구독하는 퍼블리셔가 .receive(on: RunLoop.main)이라
-    // 캡처 시점까지 값이 도착하도록 런루프를 짧게 펌핑한 뒤 뷰에 주입한다.
-    // DummyMonthViewModel은 MonthView.swift의 #Preview에서 쓰는 프리뷰 더미를 그대로 재사용.
     @MainActor
     func test_month_smallRowHeight() {
         captureSnapshotPair(named: "month_smallRowHeight", layout: .fixed(width: 393, height: 350)) { theme in
@@ -87,11 +83,7 @@ final class CalendarScenesSnapshots: XCTestCase {
     }
 
     // MARK: - DayEventList/DayEventListView
-    // (covers EventListCellView·ForemostEventView·UncompletedTodoView·QuickAddNewTodoView(default stage))
 
-    // DayEventListViewState도 동일하게 fileprivate — FakeDayEventListViewModel로 bind() 경로 우회.
-    // isListening = false(idle) 상태만 다뤄 QuickAddNewTodoView의 defaultContent 분기를 캡처한다.
-    // listening 분기(NeonListeningBorder)는 애니메이션 의존이라 이 스위트에서 다루지 않는다.
     @MainActor
     func test_dayEventList() {
         captureSnapshotPair(named: "dayEventList", layout: .fixed(width: 393, height: 780)) { theme in
@@ -216,7 +208,6 @@ private final class FakeDayEventListViewModel: DayEventListViewModel, @unchecked
     }
 
     // 스냅샷 카탈로그는 AI 상태 화면까지 캡처해야 하므로 항상 노출
-    var isAIAgentEnabled: Bool { true }
 
     var foremostEventModel: AnyPublisher<(any EventCellViewModel)?, Never> {
         Just(self.foremostModel).eraseToAnyPublisher()
@@ -249,10 +240,12 @@ private final class FakeDayEventListViewModel: DayEventListViewModel, @unchecked
     func makeEvent() { }
     func makeEventByTemplate() { }
     func showDoneTodoList() { }
+    func showSharePreview() { }
     func refreshUncompletedTodoEvents() { }
     func enterVoiceInput() { }
     func finishVoiceInput() { }
     func enterKeyboardInput() { }
+    func enterImageInput() { }
     func stopAIAgentInput() { }
     func submitAIAgent(_ text: String) { }
     func handleAIEntryButtonTap() { }

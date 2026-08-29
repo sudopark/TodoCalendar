@@ -1,0 +1,42 @@
+/* 화면 카탈로그(app-catalog) 더미 텍스트 — 앱 번들에 실리지 않는다 */
+
+// MARK: - 캘린더 이벤트
+
+"catalog.event::holiday" = "Itsenäisyysliikkeen päivä";
+"catalog.event::project_kickoff" = "Projektin aloitus";
+"catalog.event::dentist" = "Hammaslääkäri";
+"catalog.event::trip" = "Matka Jejulle";
+"catalog.event::design_review" = "Designkatselmus";
+"catalog.event::dinner" = "Illallinen Saran kanssa";
+"catalog.event::sprint_planning" = "Sprintin suunnittelu";
+"catalog.event::team_workshop" = "Tiimityöpaja";
+"catalog.event::release_day" = "Julkaisupäivä";
+"catalog.event::lunch" = "Lounas Saran kanssa";
+
+// MARK: - 할일
+
+"catalog.todo::tax_return" = "Lähetä veroilmoitus";
+"catalog.todo::reply_landlord" = "Vastaa vuokranantajalle";
+"catalog.todo::water_plants" = "Kastele kasvit";
+"catalog.todo::book_flight" = "Varaa lento";
+"catalog.todo::renew_passport" = "Uusi passi";
+"catalog.todo::send_invoice" = "Lähetä lasku";
+"catalog.todo::cancel_subscription" = "Irtisano käyttämätön tilaus";
+"catalog.todo::return_books" = "Palauta kirjastokirjat";
+
+// MARK: - 이벤트 상세
+
+"catalog.place::startup_hub" = "Seoul Startup Hub";
+"catalog.memo::wireframes" = "Ota tulostetut rautalankamallit mukaan.";
+
+// MARK: - 이벤트 타입
+
+"catalog.tag::work" = "Työ";
+"catalog.tag::family" = "Perhe";
+"catalog.tag::health" = "Terveys";
+"catalog.tag::study" = "Opiskelu";
+
+// MARK: - AI 빠른 입력
+
+"catalog.ai::command" = "lounas Saran kanssa perjantaina keskipäivällä";
+"catalog.ai::result" = "”Lounas Saran kanssa” lisättiin perjantaille 13. maaliskuuta klo 12:00.";

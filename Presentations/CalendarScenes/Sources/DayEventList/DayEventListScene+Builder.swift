@@ -23,7 +23,6 @@ protocol DayEventListSceneInteractor: AnyObject {
 
 protocol DayEventListSceneListener: AnyObject {
 
-    // 진입 버튼 재진입 등 command 결과 시트 표시 요청을 상위(단일 Calendar)로 위임
     func dayEventListDidRequestShowAICommand()
 }
 

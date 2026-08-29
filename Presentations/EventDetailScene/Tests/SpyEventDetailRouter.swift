@@ -40,7 +40,12 @@ final class SpyEventDetailRouter: BaseSpyRouter, EventDetailRouting, @unchecked 
     }
     
     func showForemostEventGuide() {
-        
+
+    }
+
+    var didShareText: String?
+    func showShareSheet(text: String) {
+        self.didShareText = text
     }
 }
 

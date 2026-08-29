@@ -1,0 +1,42 @@
+/* 화면 카탈로그(app-catalog) 더미 텍스트 — 앱 번들에 실리지 않는다 */
+
+// MARK: - 캘린더 이벤트
+
+"catalog.event::holiday" = "三一節";
+"catalog.event::project_kickoff" = "プロジェクトキックオフ";
+"catalog.event::dentist" = "歯医者";
+"catalog.event::trip" = "済州旅行";
+"catalog.event::design_review" = "デザインレビュー";
+"catalog.event::dinner" = "サラと夕食";
+"catalog.event::sprint_planning" = "スプリント計画";
+"catalog.event::team_workshop" = "チームワークショップ";
+"catalog.event::release_day" = "リリース日";
+"catalog.event::lunch" = "サラとランチ";
+
+// MARK: - 할일
+
+"catalog.todo::tax_return" = "確定申告を出す";
+"catalog.todo::reply_landlord" = "大家さんに返信する";
+"catalog.todo::water_plants" = "植物に水をやる";
+"catalog.todo::book_flight" = "航空券を予約する";
+"catalog.todo::renew_passport" = "パスポートを更新する";
+"catalog.todo::send_invoice" = "請求書を送る";
+"catalog.todo::cancel_subscription" = "使っていないサブスクを解約する";
+"catalog.todo::return_books" = "図書館の本を返す";
+
+// MARK: - 이벤트 상세
+
+"catalog.place::startup_hub" = "ソウル・スタートアップハブ";
+"catalog.memo::wireframes" = "印刷したワイヤーフレームを持っていく。";
+
+// MARK: - 이벤트 타입
+
+"catalog.tag::work" = "仕事";
+"catalog.tag::family" = "家族";
+"catalog.tag::health" = "健康";
+"catalog.tag::study" = "勉強";
+
+// MARK: - AI 빠른 입력
+
+"catalog.ai::command" = "金曜のお昼にサラとランチ";
+"catalog.ai::result" = "「サラとランチ」を3月13日(金)の12:00に追加しました。";

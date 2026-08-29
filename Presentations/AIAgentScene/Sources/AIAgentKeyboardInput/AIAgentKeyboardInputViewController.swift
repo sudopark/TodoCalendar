@@ -15,7 +15,7 @@ final class AIAgentKeyboardInputViewController: UIHostingController<AIAgentKeybo
     var interactor: (any AIAgentKeyboardInputSceneInteractor)? { nil }
 
     private let viewModel: any AIAgentKeyboardInputViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
 
     init(
         viewModel: any AIAgentKeyboardInputViewModel,
@@ -26,10 +26,11 @@ final class AIAgentKeyboardInputViewController: UIHostingController<AIAgentKeybo
 
         let eventHandler = AIAgentKeyboardInputEventHandler()
         eventHandler.bind(viewModel)
-        let containerView = AIAgentKeyboardInputContainerView(
+        var containerView = AIAgentKeyboardInputContainerView(
             viewAppearance: viewAppearance,
             eventHandler: eventHandler
         )
+        containerView.stateBinding = { $0.bind(viewModel) }
         super.init(rootView: containerView)
         self.view.backgroundColor = .clear
     }

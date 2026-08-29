@@ -139,14 +139,21 @@ public enum EventPeriodText: Equatable, Sendable {
 
 // MARK: - EventEditAction
 
+public enum EventListRemoveScope: Sendable, Equatable {
+    case onlyThisTime
+    case thisAndFuture
+    case all
+}
+
 public enum EventListMoreAction: Sendable, Equatable {
-    
-    case remove(onlyThisTime: Bool)
+
+    case remove(scope: EventListRemoveScope)
     case toggleTo(isForemost: Bool)
+    case toggleLiveActivity(isRegistered: Bool)
     case skipTodo
     case edit
     case copy
-    case editGoogleEvent(link: String)
+    case share
 }
 
 public struct EventListMoreActionModel: Sendable, Equatable {
@@ -165,6 +172,37 @@ public protocol EventCellViewModel: Sendable {
     var isRepeating: Bool { get }
     var moreActions: EventListMoreActionModel? { get }
     var isAlldayEvent: Bool { get }
+    var liveActivityTarget: LiveActivityTarget? { get }
+    var isLiveActivityRegistered: Bool { get }
+
+    /// 셀이 그리는 값 + 셀 액션이 소비하는 값 전부를 담는다. 이 키가 같으면 셀 목록 재방출이 생략된다.
+    /// 프로토콜 밖 프로퍼티는 각 타입이 `makeCustomCompareKey`의 추가 성분으로 직접 얹어야 한다 — 빠뜨리면 그 값의 변경이 화면·동작에 안 붙는다.
+    var customCompareKey: String { get }
+}
+
+extension EventCellViewModel {
+
+    public var liveActivityTarget: LiveActivityTarget? { nil }
+    public var isLiveActivityRegistered: Bool { false }
+
+    fileprivate func makeCustomCompareKey(_ additionalComponents: [String?]) -> String {
+        let baseComponents: [String?] = [
+            "\(Self.self)",
+            self.eventIdentifier,
+            self.name,
+            "\(self.colorSource)",
+            self.periodText?.customCompareKey,
+            self.periodDescription,
+            "\(self.isForemost)",
+            "\(self.isRepeating)",
+            "\(self.isAlldayEvent)",
+            "\(self.isLiveActivityRegistered)",
+            String(describing: self.moreActions)
+        ]
+        return (baseComponents + additionalComponents)
+            .map { $0 ?? "nil" }
+            .joined(separator: "-")
+    }
 }
 
 
@@ -182,6 +220,8 @@ public struct TodoEventCellViewModel: EventCellViewModel {
     public var isForemost: Bool = false
     public var isAlldayEvent: Bool = false
     public var isCurrentTodo: Bool = false
+    public var isLiveActivityRegistered: Bool = false
+    public var isUncompletedTodo: Bool = false
 
     public init(_ id: String, name: String) {
         self.eventIdentifier = id
@@ -223,15 +263,31 @@ public struct TodoEventCellViewModel: EventCellViewModel {
     
     public var moreActions: EventListMoreActionModel? {
         let removeActions: [EventListMoreAction] = self.isRepeating
-            ? [.remove(onlyThisTime: true), .remove(onlyThisTime: false)]
-            : [.remove(onlyThisTime: false)]
+            ? [.remove(scope: .onlyThisTime), .remove(scope: .all)]
+            : [.remove(scope: .all)]
         let skipActions: [EventListMoreAction] = self.isRepeating
             ? [.skipTodo] : []
-        let basicActions: [EventListMoreAction] = [.toggleTo(isForemost: self.isForemost)] + skipActions + [.edit, .copy]
+        let liveActivityActions: [EventListMoreAction] = (self.liveActivityTarget != nil && !self.isUncompletedTodo)
+            ? [.toggleLiveActivity(isRegistered: self.isLiveActivityRegistered)]
+            : []
+        let basicActions: [EventListMoreAction] = [.toggleTo(isForemost: self.isForemost)]
+            + liveActivityActions + skipActions + [.edit, .copy, .share]
         return .init(
             basicActions: basicActions,
             removeActions: removeActions
         )
+    }
+
+    public var liveActivityTarget: LiveActivityTarget? {
+        guard self.eventTimeRawValue != nil else { return nil }
+        return .todo(id: self.eventIdentifier)
+    }
+
+    public var customCompareKey: String {
+        return self.makeCustomCompareKey([
+            self.eventTimeRawValue.map { "\($0)" },
+            "\(self.isCurrentTodo)"
+        ])
     }
 }
 
@@ -254,8 +310,32 @@ struct PendingTodoEventCellViewModel: EventCellViewModel {
         self.colorSource = defaultTagId.map { EventTagId.custom($0) } ?? EventTagId.default
     }
 
-    // TOOD: make custom compare key
     var moreActions: EventListMoreActionModel? { nil }
+
+    var customCompareKey: String { self.makeCustomCompareKey([]) }
+}
+
+public struct GuideTodoEventCellViewModel: EventCellViewModel {
+
+    /// private이 아닌 이유 — 이 식별자가 셀 타입과 완료 처리기 사이의 계약이다.
+    enum Constant {
+        static let identifier: String = "guide-todo"
+    }
+
+    public let eventIdentifier: String = Constant.identifier
+    public var colorSource: any EventTagColorSource = EventTagId.default
+    public let name: String = "calendar::guideTodo::name".localized()
+    public var periodText: EventPeriodText? = .currentTodoText
+    public var periodDescription: String?
+    public let isRepeating: Bool = false
+    public let isForemost: Bool = false
+    public let isAlldayEvent: Bool = false
+
+    public init() { }
+
+    public var moreActions: EventListMoreActionModel? { nil }
+
+    public var customCompareKey: String { self.makeCustomCompareKey([]) }
 }
 
 // MARK: - Schedule
@@ -273,6 +353,7 @@ public struct ScheduleEventCellViewModel: EventCellViewModel {
     public let isForemost: Bool
     public var isAlldayEvent: Bool { self.eventTimeRawValue?.isAllDay ?? false }
     public var eventTimeRawValue: EventTime?
+    public var isLiveActivityRegistered: Bool = false
 
     public init(_ id: String, turn: Int? = nil, name: String, isRepeating: Bool = false) {
         self.eventIdWithoutTurn = id
@@ -310,12 +391,30 @@ public struct ScheduleEventCellViewModel: EventCellViewModel {
     
     public var moreActions: EventListMoreActionModel? {
         let removeActions: [EventListMoreAction] = self.isRepeating
-            ? [.remove(onlyThisTime: true), .remove(onlyThisTime: false)]
-            : [.remove(onlyThisTime: false)]
+            ? [.remove(scope: .onlyThisTime), .remove(scope: .all)]
+            : [.remove(scope: .all)]
+        let liveActivityActions: [EventListMoreAction] = self.liveActivityTarget != nil
+            ? [.toggleLiveActivity(isRegistered: self.isLiveActivityRegistered)]
+            : []
         return .init(
-            basicActions: [.toggleTo(isForemost: self.isForemost), .edit, .copy],
+            basicActions: [.toggleTo(isForemost: self.isForemost)] + liveActivityActions + [.edit, .copy, .share],
             removeActions: removeActions
         )
+    }
+
+    public var liveActivityTarget: LiveActivityTarget? {
+        guard self.eventTimeRawValue != nil else { return nil }
+        return .schedule(
+            id: self.eventIdWithoutTurn,
+            turnKey: self.isRepeating ? self.eventTimeRawValue?.customKey : nil
+        )
+    }
+
+    public var customCompareKey: String {
+        return self.makeCustomCompareKey([
+            self.turn.map { "\($0)" },
+            self.eventTimeRawValue.map { "\($0)" }
+        ])
     }
 }
 
@@ -331,17 +430,31 @@ public struct HolidayEventCellViewModel: EventCellViewModel {
     public let isRepeating: Bool = false
     public let isForemost: Bool = false
     public let isAlldayEvent: Bool = true
+    public let dateString: String
+    public var isLiveActivityRegistered: Bool = false
 
     public init(_ holiday: HolidayCalendarEvent) {
         self.eventIdentifier = holiday.eventId
         self.name = holiday.name
+        self.dateString = holiday.dateString
         self.periodText = .singleText(
             .init(text: R.String.calendarEventTimeAllday)
         )
         self.colorSource = EventTagId.holiday
     }
 
-    public var moreActions: EventListMoreActionModel? { nil }
+    public var moreActions: EventListMoreActionModel? {
+        return .init(
+            basicActions: [.toggleLiveActivity(isRegistered: self.isLiveActivityRegistered)],
+            removeActions: []
+        )
+    }
+
+    public var liveActivityTarget: LiveActivityTarget? {
+        .holiday(uuid: self.eventIdentifier, dateString: self.dateString)
+    }
+
+    public var customCompareKey: String { self.makeCustomCompareKey([]) }
 }
 
 
@@ -357,7 +470,9 @@ public struct AppleCalendarEventCellViewModel: EventCellViewModel {
     public let isRepeating: Bool
     public var isForemost: Bool = false
     public let calendarId: String
+    public let isWritable: Bool
     public var isAlldayEvent: Bool = false
+    public var isLiveActivityRegistered: Bool = false
 
     public init?(
         _ event: AppleCalendarEvent,
@@ -374,10 +489,29 @@ public struct AppleCalendarEventCellViewModel: EventCellViewModel {
         self.periodText = EventPeriodText(schedule: time, in: todayRange, timeZone: timeZone, is24hourForm: is24hourForm)
         self.periodDescription = event.eventTime?.durationText(timeZone, forceShowEventDateDurationText: forceShowEventDateDurationText)
         self.calendarId = event.calendarId
+        self.isWritable = event.isWritable
         self.isAlldayEvent = event.eventTime?.isAllDay ?? false
     }
 
-    public var moreActions: EventListMoreActionModel? { nil }
+    public var moreActions: EventListMoreActionModel? {
+        let removeActions: [EventListMoreAction] = self.isWritable
+            ? (self.isRepeating
+                ? [.remove(scope: .onlyThisTime), .remove(scope: .thisAndFuture)]
+                : [.remove(scope: .all)])
+            : []
+        return .init(
+            basicActions: [.toggleLiveActivity(isRegistered: self.isLiveActivityRegistered), .share],
+            removeActions: removeActions
+        )
+    }
+
+    public var liveActivityTarget: LiveActivityTarget? {
+        .appleCalendar(calendarId: self.calendarId, eventId: self.eventIdentifier)
+    }
+
+    public var customCompareKey: String {
+        return self.makeCustomCompareKey([self.calendarId, "\(self.isWritable)"])
+    }
 }
 
 
@@ -389,12 +523,14 @@ public struct GoogleCalendarEventCellViewModel: EventCellViewModel {
     public let name: String
     public var periodText: EventPeriodText?
     public var periodDescription: String?
-    public let isRepeating: Bool = false
+    public let isRepeating: Bool
     public var isForemost: Bool = false
     public let calendarId: String
     public let accountId: String
-    public let htmlLink: String?
+    public let recurringEventId: String?
+    public let isWritable: Bool
     public var isAlldayEvent: Bool = false
+    public var isLiveActivityRegistered: Bool = false
 
     public init?(
         _ event: GoogleCalendarEvent,
@@ -409,18 +545,35 @@ public struct GoogleCalendarEventCellViewModel: EventCellViewModel {
         self.name = event.name
         self.periodText = EventPeriodText(schedule: time, in: todayRange, timeZone: timeZone, is24hourForm: is24hourForm)
         self.periodDescription = event.eventTime?.durationText(timeZone, forceShowEventDateDurationText: forceShowEventDateDurationText)
+        self.isRepeating = event.isRepeating
         self.isForemost = event.isForemost
         self.calendarId = event.calendarId
         self.accountId = event.accountId
-        self.htmlLink = event.htmlLink
+        self.recurringEventId = event.recurringEventId
+        self.isWritable = event.isWritable
         self.isAlldayEvent = event.eventTime?.isAllDay ?? false
     }
 
     public var moreActions: EventListMoreActionModel? {
-        guard let link = self.htmlLink else { return nil }
+        let removeActions: [EventListMoreAction] = self.isWritable
+            ? (self.isRepeating
+                ? [.remove(scope: .onlyThisTime), .remove(scope: .all)]
+                : [.remove(scope: .all)])
+            : []
         return .init(
-            basicActions: [.editGoogleEvent(link: link)], removeActions: []
+            basicActions: [.toggleLiveActivity(isRegistered: self.isLiveActivityRegistered), .share],
+            removeActions: removeActions
         )
+    }
+
+    public var liveActivityTarget: LiveActivityTarget? {
+        .googleCalendar(accountId: self.accountId, calendarId: self.calendarId, eventId: self.eventIdentifier)
+    }
+
+    public var customCompareKey: String {
+        return self.makeCustomCompareKey([
+            self.calendarId, self.accountId, self.recurringEventId, "\(self.isWritable)"
+        ])
     }
 }
 
@@ -517,8 +670,8 @@ private extension Range where Bound == TimeInterval {
 }
 
 
-private extension Range where Bound == TimeInterval {
-    
+extension Range where Bound == TimeInterval {
+
     func checkTodayRangeBound(_ time: EventTime, timeZone: TimeZone) -> (
         isAllTodayTimeContains: Bool,
         starttimeInToday: Bool,

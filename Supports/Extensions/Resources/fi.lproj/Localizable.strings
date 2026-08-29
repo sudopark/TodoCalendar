@@ -79,6 +79,14 @@
 "dayname::friday:very_short" = "P";
 "dayname::saturday:very_short" = "L";
 
+"dayname::sunday:gender" = "m";
+"dayname::monday:gender" = "m";
+"dayname::tuesday:gender" = "m";
+"dayname::wednesday:gender" = "m";
+"dayname::thursday:gender" = "m";
+"dayname::friday:gender" = "m";
+"dayname::saturday:gender" = "m";
+
 
 // MARK: - event notification
 
@@ -112,8 +120,12 @@
 
 "calendar::foremostevent:title" = "Tärkein tapahtuma";
 "calendar::uncompletedTodos:title" = "Keskeneräiset tehtävät";
+"calendar::guideTodo::name" = "Näin To-do Calendar toimii";
+"calendar::eventSync::loadingAllEvents::message" = "Haetaan kaikkia tapahtumiasi…";
 "calendar::event_time::todo" = "Tehtävä";
 "calendar::event_time::allday" = "Koko päivä";
+"calendar::event_time::start" = "Alkaa";
+"calendar::event_time::end" = "Päättyy";
 "calendar::event_time::allday::with" = "%@ koko päivän";
 "calendar::event_time::period:some_days" = "%d päivää";
 "calendar::event_time::period:some_minutes" = "%d minuuttia";
@@ -123,11 +135,13 @@
 "calendar::event::more_action::foremost_event:title" = "Tärkein tapahtuma";
 "calendar::event::more_action::remove_only_thistime:message" = "Haluatko poistaa vain tämän tapahtuman kaikista toistuvista tapahtumista?";
 "calendar::event::more_action::remove:message" = "Haluatko poistaa tämän tapahtuman?";
+"calendar::event::more_action::remove_this_and_future:message" = "Haluatko poistaa tämän ja kaikki tulevat tapahtumat toistuvasta sarjasta?";
 "calendar::event::more_action::mark_as_foremost" = "Haluatko merkitä tämän tapahtuman tärkeimmäksi tapahtumaksesi?";
 "calendar::event::more_action::unmark_as_foremost" = "Haluatko poistaa tämän tapahtuman merkinnän tärkeimpänä tapahtumana?";
 "calendar::event::more_action::mark_as_foremost::unavail" = "Toistuvaa aikataulutapahtumaa ei voi merkitä tärkeimmäksi tapahtumaksi.";
 "calendar::event::more_action:remove_only_thistime:item_name" = "Poista vain tämä tapahtuma";
 "calendar::event::more_action:remove:item_name" = "Poista tapahtuma";
+"calendar::event::more_action:remove_this_and_future:item_name" = "Poista tämä ja kaikki tulevat tapahtumat";
 "calendar::event::more_action:foremost:mark:item_name" = "Merkitse tärkeimmäksi";
 "calendar::event::more_action:foremost:unmark:item_name" = "Poista tärkeimmän merkintä";
 "calendar::event::more_action:dday_candidate:register:item_name" = "Lisää Lähtölaskenta-widgetiin";
@@ -135,7 +149,25 @@
 "calendar::event::more_action:dday_candidate:title" = "Lähtölaskenta-widgetin ehdokas";
 "calendar::event::more_action:dday_candidate:register:message" = "Lisätäänkö tämä tapahtuma Lähtölaskenta-widgetin ehdokkaaksi? Se näkyy listan ylimpänä, kun muokkaat widgetiä.";
 "calendar::event::more_action:dday_candidate:unregister:message" = "Poistetaanko tämä tapahtuma Lähtölaskenta-widgetin ehdokkaista?";
+"calendar::event::more_action:live_activity:title" = "Live-toiminto";
+"calendar::event::more_action:live_activity:register:item_name" = "Näytä lukitusnäytöllä";
+"calendar::event::more_action:live_activity:unregister:item_name" = "Poista lukitusnäytöltä";
+"calendar::event::more_action:live_activity:unavail::not_found" = "Tätä tapahtumaa ei ole enää saatavilla.";
+"calendar::event::more_action:live_activity:unavail::already_passed" = "Tämä tapahtuma on jo alkanut.";
+"calendar::event::more_action:live_activity:unavail::too_far_future" = "Vain 8 tunnin sisällä alkavat tapahtumat voidaan näyttää.";
+"calendar::event::more_action:live_activity:register:confirm" = "Haluatko näyttää tämän tapahtuman lukitusnäytöllä?";
+"calendar::event::more_action:live_activity:unregister:confirm" = "Haluatko poistaa tämän tapahtuman lukitusnäytöltä?";
+"calendar::event::more_action:live_activity:replace:confirm" = "Lukitusnäytöllä näkyy jo toinen tapahtuma. Korvataanko se tällä?";
+"calendar::event::more_action:live_activity:register:success" = "Näkyy nyt lukitusnäytöllä. Lukitse laitteesi nähdäksesi sen.";
+"calendar::event::more_action:live_activity:showing" = "Näkyy lukitusnäytöllä";
 "calendar::event::more_action:copy:item_name" = "Kopioi tapahtuma";
+"calendar::event::more_action:share:item_name" = "Jaa";
+"event_detail::share::field::time" = "Aika";
+"event_detail::share::field::repeating" = "Toistuminen";
+"event_detail::share::field::calendar" = "Kalenteri";
+"event_detail::share::field::place" = "Sijainti";
+"event_detail::share::field::url" = "Linkki";
+"event_detail::share::field::memo" = "Muistiinpano";
 "calendar::event::more_action:transform_to::schedule" = "Muunna aikatauluksi";
 "calendar::event::more_action:transform_to::todo" = "Muunna tehtäväksi";
 "calendar::event::more_action:edit:item_name" = "Muokkaa";
@@ -145,7 +177,9 @@
 "calednar::event::skip_todo_until" = "Valitse ajankohta, johon asti tämä tehtävä ohitetaan";
 "calednar::event::copy" = "Kopioi tapahtuma";
 "calendar::move_date" = "Siirrä päivämäärää";
-"calednar::event::google::edit" = "Muokkaa Google-kalenterin tapahtumaa";
+"calendar::share::this_day" = "Jaa tämä päivä";
+"calendar::share::this_week" = "Jaa tämä viikko";
+"calendar::share::this_month" = "Jaa tämä kuukausi";
 
 
 // MARK: - event detail
@@ -171,14 +205,33 @@
 "eventDetail.repeating.everyYearSomeDay:title" = "Joka vuosi %@";
 "eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "Joka vuosi %@ (kuukalenteri)";
 "eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "Kuukauden viimeisen viikon kaikki päivät";
-"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "Kuukauden ensimmäinen %@";
-"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "Kuukauden toinen %@";
-"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "Kuukauden kolmas %@";
-"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "Kuukauden neljäs %@";
-"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "Kuukauden viides %@";
-"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "Kuukauden kuudes %@";
-"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "Kuukauden seitsemäs %@";
-"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "Kuukauden viimeinen %@";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::m" = "Kuukauden ensimmäinen %@";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::f" = "Kuukauden ensimmäinen %@";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::n" = "Kuukauden ensimmäinen %@";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::m" = "Kuukauden toinen %@";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::f" = "Kuukauden toinen %@";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::n" = "Kuukauden toinen %@";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::m" = "Kuukauden kolmas %@";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::f" = "Kuukauden kolmas %@";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::n" = "Kuukauden kolmas %@";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::m" = "Kuukauden neljäs %@";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::f" = "Kuukauden neljäs %@";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::n" = "Kuukauden neljäs %@";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::m" = "Kuukauden viides %@";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::f" = "Kuukauden viides %@";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::n" = "Kuukauden viides %@";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::m" = "Kuukauden kuudes %@";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::f" = "Kuukauden kuudes %@";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::n" = "Kuukauden kuudes %@";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::m" = "Kuukauden seitsemäs %@";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::f" = "Kuukauden seitsemäs %@";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::n" = "Kuukauden seitsemäs %@";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::m" = "Kuukauden viimeinen %@";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::f" = "Kuukauden viimeinen %@";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::n" = "Kuukauden viimeinen %@";
+"eventDetail.repeating.last::m" = "Viimeinen";
+"eventDetail.repeating.last::f" = "Viimeinen";
+"eventDetail.repeating.last::n" = "Viimeinen";
 "eventDetail.repeating.endtime::title" = "Toisto päättyy";
 "eventDetail.repeating.endtime::option::never" = "Ei koskaan";
 "eventDetail.repeating.endtime::option::on" = "Päivänä";
@@ -188,7 +241,6 @@
 "eventDetail.repeating::period_endcount" = "Alkaen %@, %d kertaa";
 
 "eventDetail.repeating.everyNDays:title" = "Joka %d. päivä";
-"eventDetail.repeating.last" = "Viimeinen";
 "eventDetail.repeating.everyNMonths:title" = "Joka %d. kuukausi";
 "eventDetail.repeating.everyNYears:title" = "Joka %d. vuosi";
 "eventDetail.repeating::endoption_until" = "kunnes %@";
@@ -267,12 +319,33 @@
 "eventDetail::gogoleEvent::conference::password" = "Salasana";
 "eventDetail::gogoleEvent::copy::message" = "Kopioitu leikepöydälle.";
 "eventDetail::gogoleEvent::canceled::message" = "Tämä tapahtuma on peruttu.";
+"eventDetail::gogoleEvent::saved::message" = "Tapahtuma on tallennettu.";
+"eventDetail::gogoleEvent::readOnlyCalendar::message" = "Tämä kalenteri on vain luku -tilassa, joten tapahtumaa ei voi muokata täällä.";
+"eventDetail::gogoleEvent::reauthenticate::title" = "Lisäoikeus tarvitaan";
+"eventDetail::gogoleEvent::reauthenticate::message" = "Tämä Google-tili on yhdistetty vain luku -oikeuksin. Tapahtumien muokkaaminen edellyttää muokkausoikeuden myöntämistä erikseen.";
+"eventDetail::gogoleEvent::writeScopeNotGranted::message" = "Muokkausoikeutta ei myönnetty. Jos kyseessä on työ- tai oppilaitostili, järjestelmänvalvoja ei ehkä salli sitä.";
+"eventDetail::gogoleEvent::repeating::title" = "Tämä on toistuva tapahtuma";
+"eventDetail::gogoleEvent::repeating::onlyThisTime::button" = "Vain tämä tapahtuma";
+"eventDetail::gogoleEvent::repeating::all::button" = "Kaikki tapahtumat";
+"eventDetail::gogoleEvent::remove::confirm::message" = "Poistetaanko tämä tapahtuma Google-kalenterista?";
+"eventDetail::gogoleEvent::editOnCalendar" = "Muokkaa Google-kalenterissa";
+"eventDetail::gogoleEvent::notEditableField::message" = "Tätä ei voi muokata täällä. Muokkaa sitä Google-kalenterissa.";
+"eventDetail::gogoleEvent::description::formatLoss::message" = "Tässä kuvauksessa on muotoiluja. Jos muokkaat sitä täällä, muotoilut poistuvat.";
 
 // MARK: - Apple calendar event
 "eventDetail::appleCalendarEvent::viewOnCalendar" = "Näytä Apple-kalenterissa";
+"eventDetail::appleCalendarEvent::editOnCalendar" = "Muokkaa Apple-kalenterissa";
 "eventDetail::appleCalendarEvent::calendar::event" = "Apple-kalenterin tapahtuma";
 "eventDetail::appleCalendarEvent::attendees" = "Osallistujat (%d henkilöä)";
 "eventDetail::appleCalendarEvent::attendees::organizer" = "Järjestäjä";
+"eventDetail::appleCalendarEvent::saved::message" = "Tallennettu.";
+"eventDetail::appleCalendarEvent::remove::confirm::message" = "Poistetaanko tämä tapahtuma?";
+"eventDetail::appleCalendarEvent::repeating::title" = "Toistuva tapahtuma";
+"eventDetail::appleCalendarEvent::repeating::onlyThisTime::button" = "Vain tämä tapahtuma";
+"eventDetail::appleCalendarEvent::repeating::thisAndFuture::button" = "Tämä ja kaikki tulevat tapahtumat";
+"eventDetail::appleCalendarEvent::readOnlyCalendar::message" = "Tämä kalenteri on vain luku -tilassa, joten tapahtumaa ei voi muokata.";
+"eventDetail::appleCalendarEvent::notEditableField::message" = "Tätä kenttää ei voi muokata sovelluksessa.";
+"eventDetail::appleCalendarEvent::url::placeholder" = "URL";
 
 // MARK: - event tag
 
@@ -311,6 +384,23 @@
 "eventList::remove::confirm::button::olderThan1y" = "Yli 1 vuosi vanhat";
 
 
+// MARK: - share preview
+
+"share_preview::title" = "Jaon esikatselu";
+"share_preview::tag_filter::title" = "Tapahtumatyypit";
+"share_preview::tag_filter::select_all" = "Valitse kaikki";
+"share_preview::tag_filter::deselect_all" = "Poista kaikki valinnat";
+"share_preview::option::include_tag_name" = "Näytä tapahtumatyypin nimi";
+"share_preview::share_button" = "Jaa";
+"share_preview::empty" = "Ei jaettavia tapahtumia";
+"share_preview::header::this_week" = "Tämä viikko";
+"share_preview::header::last_week" = "Viime viikko";
+"share_preview::header::next_week" = "Ensi viikko";
+"share_preview::header::week_of_month" = "%1$@, viikko %2$d";
+"share_preview::format::text" = "Teksti";
+"share_preview::format::image" = "Kuva";
+
+
 // MARK: - account
 
 "manage_account::title" = "Tilin hallinta";
@@ -327,7 +417,9 @@
 "manage_account::delete_account_button::confirm:message" = "Haluatko varmasti poistaa tilisi?";
 "manage_account::delete_account_button::description" = "Kun olet pyytänyt tilin poistamista, tili poistetaan.\nPoistettuja tilitietoja ei voi palauttaa.";
 "signIn::title" = "Kirjaudu sisään";
-"signIn:description" = "Varmuuskopioi tapahtumaluettelosi ja synkronoi se muiden iOS-laitteiden kanssa\n(Tuettuja alustoja laajennetaan.)";
+"signIn::feature::sync" = "Varmuuskopioi tapahtumat, synkronoi laitteiden välillä";
+"signIn::feature::aiAgent" = "Hallitse kalenteriasi AI-agentin avulla";
+"signIn::feature::web" = "Käytä myös verkossa · todo-calendar.com";
 
 
 // MARK: - setting
@@ -410,10 +502,17 @@
 "setting.holiday.hide::confirm::message" = "Piilotetaanko tämä vapaapäivä joka vuosi?\nVoit näyttää sen uudelleen kohdassa Asetukset > Vapaapäivät.";
 "setting.holiday.hidden::sectionTitle" = "Piilotetut vapaapäivät";
 "setting.holiday.show::button" = "Näytä";
+"setting.aiGuide::name" = "Lisää tekoälyllä – Siri ja widgetit";
 "setting.feedback::name" = "Palaute";
 "setting.help::name" = "Ohje";
+"setting.openWeb::name" = "Avaa verkossa";
 "setting.share::name" = "Jaa sovellus";
 "setting.write_review::name" = "Kirjoita sovellusarvostelu";
+"setting.openSourceLicense::name" = "Avoimen lähdekoodin lisenssit";
+"setting.billing.plan::name" = "Tilaus";
+"setting.terms::name" = "Käyttöehdot";
+"setting.privacyPolicy::name" = "Tietosuojakäytäntö";
+"setting.adPrivacyOptions::name" = "Mainosten tietosuoja-asetukset";
 "setting.account.signedIn::manageAccount" = "Tili";
 "setting.account.needSignIn" = "Kirjaudu sisään";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -513,6 +612,14 @@
 "widget.dday.target::registered" = "Kiinnitetty";
 "widget.dday.turn::name" = "Kierros %d";
 
+"widget.aiCommand::title" = "Lisää AI:lla";
+"widget.aiCommand::explain" = "Avaa AI-syöttö yhdellä napautuksella.";
+
+// MARK: - liveActivity
+
+"liveActivity::stale" = "Alkaa nyt";
+"liveActivity::action::end" = "Lopeta";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "Tätä linkkimuotoa ei tueta.\nPäivitä sovellus uusimpaan versioon.";
@@ -543,20 +650,133 @@
 "aiAgent::state::failed" = "Komento epäonnistui";
 "aiAgent::done::default" = "Valmis";
 "aiAgent::failed::default" = "Tätä ei voitu suorittaa";
+"aiAgent::failed::dailyLimitExceeded" = "Olet käyttänyt tämän päivän AI-krediitit.";
 "aiAgent::retry" = "Yritä uudelleen";
 "aiAgent::needSignIn::title" = "Kirjautuminen vaaditaan";
 "aiAgent::needSignIn::message" = "Kirjaudu sisään käyttääksesi AI-pikasyöttöä.";
+"aiAgent::speechPermissionDenied::title" = "Käyttöoikeus tarvitaan";
+"aiAgent::speechPermissionDenied::message" = "Salli mikrofonin ja puheentunnistuksen käyttö Asetuksissa käyttääksesi äänisyöttöä.";
+"aiAgent::speechPermissionDenied::confirm" = "Avaa Asetukset";
 "aiAgent::title" = "AI-pikasyöttö";
 "aiAgent::keyboard::stop" = "Pysäytä";
 "aiAgent::keyboard::send" = "Lähetä";
 "aiAgent::stop" = "Pysäytä";
 "aiAgent::usage" = "%@ / %@ krediittiä";
-"aiAgent::plan::free" = "Ilmainen";
-"aiAgent::plan::standard" = "Vakio";
-"aiAgent::plan::lifetime" = "Elinikäinen";
 "aiAgent::usage::topupRemaining" = "%@ lisäkrediittiä jäljellä";
 "aiAgent::usage::planChangeScheduled" = "Vaihto %2$@-pakettiin %1$@";
+"aiAgent::usage::resetsIn" = "Käytettävissä taas %@ kuluttua";
+"aiAgent::notificationPermissionDenied::message" = "Ota ilmoitukset käyttöön Asetuksissa, jotta saat AI:n tulokset.";
 "aiAgent::stop::confirm::title" = "Pysäytetäänkö käsittely?";
 "aiAgent::stop::confirm::message" = "Pysäyttäminen hylkää käynnissä olevan komennon, eikä sitä voi jatkaa.";
 "aiAgent::confirm::countdown" = "aikaa hyväksyä";
 "aiAgent::confirm::expired::message" = "Aika loppui. Pyydä uudelleen.";
+"aiAgent::tip::externalEntry" = "Vinkki: voit lisätä myös Sirin, toimintopainikkeen tai widgetien avulla.";
+"aiAgent::failed::showPlans" = "Näytä tilaukset";
+
+"aiAgent::image::title" = "Lue kuvasta";
+"aiAgent::image::sourceSelect::title" = "Lisää kuva";
+"aiAgent::image::source::library" = "Valitse kirjastosta";
+"aiAgent::image::source::camera" = "Ota kuva";
+"aiAgent::image::recognizing" = "Luetaan kuvaa…";
+"aiAgent::image::noText" = "Tästä kuvasta ei löytynyt tekstiä";
+"aiAgent::image::readText" = "Kuvan teksti";
+"aiAgent::image::instruction" = "Lisäohjeet (valinnainen)";
+"aiAgent::image::instruction::placeholder" = "Esim. Lisää nämä tehtävinä";
+"aiAgent::image::empty" = "Ei lähetettävää tekstiä";
+"aiAgent::image::textTooLong" = "Teksti on liian pitkä. Lyhennä sitä ja yritä uudelleen.";
+"aiAgent::image::instructionTooLong" = "Ohjeesi ovat liian pitkät. Lyhennä niitä ja yritä uudelleen.";
+"aiAgent::image::busy" = "Toinen pyyntö on vielä käynnissä";
+"aiAgent::image::camera::denied::title" = "Kameran käyttöoikeus tarvitaan";
+"aiAgent::image::camera::denied::message" = "Salli kameran käyttö Asetuksissa ottaaksesi kuvan.";
+
+// MARK: - billing
+
+"billing::plan::free" = "Ilmainen";
+"billing::plan::standard" = "Vakio";
+"billing::plan::lifetime" = "Elinikäinen";
+
+"billing::paywall::title" = "Päivitä tilaus";
+"billing::paywall::current::description" = "%@ krediittiä päivässä";
+"billing::paywall::metric::dailyCredits" = "%@ krediittiä/pv";
+"billing::paywall::period::weekly" = "/vk";
+"billing::paywall::period::monthly" = "/kk";
+"billing::paywall::period::yearly" = "/v";
+"billing::paywall::price::unavailable" = "Hintaa ei voitu ladata";
+"billing::paywall::badge::recommended" = "Suositeltu";
+"billing::paywall::badge::owned" = "Nykyinen tilaus";
+"billing::paywall::features::title" = "%@ sisältää";
+"billing::paywall::feature::dailyCredits" = "%@ krediittiä päivässä";
+"billing::paywall::feature::topup" = "Voit ostaa lisää, kun krediitit loppuvat";
+"billing::paywall::feature::noAds" = "Ei mainoksia";
+"billing::paywall::disclosure::subscription" = "Tilaus uusiutuu automaattisesti kuukausittain, ellet peruuta sitä vähintään 24 tuntia ennen kuluvan jakson päättymistä. Voit peruuttaa milloin tahansa App Storen asetuksista.";
+"billing::paywall::disclosure::subscription::generic" = "Tilaus uusiutuu automaattisesti kunkin laskutusjakson lopussa, ellet peruuta sitä vähintään 24 tuntia ennen sen päättymistä. Voit peruuttaa milloin tahansa App Storen asetuksista.";
+"billing::paywall::disclosure::oneTime" = "Maksa kerran ja käytä ikuisesti. Tämä ei uusiudu automaattisesti.";
+"billing::paywall::disclosure::storeUnavailable" = "App Storeen ei saatu yhteyttä. Yritä myöhemmin uudelleen.";
+"billing::paywall::cta::subscribe" = "Tilaa %@";
+"billing::paywall::cta::buy" = "Osta %@";
+"billing::paywall::cta::unavailable" = "Ei saatavilla";
+"billing::paywall::allPlansOwned" = "Sinulla on jo paras tilaus käytössä.";
+"billing::paywall::terms" = "Käyttöehdot";
+"billing::paywall::privacyPolicy" = "Tietosuojakäytäntö";
+"billing::paywall::restore" = "Palauta ostokset";
+"billing::paywall::restored" = "Ostokset palautettu";
+"billing::paywall::restore::empty" = "Ei palautettavia ostoksia.";
+"billing::paywall::manageSubscription" = "Hallinnoi tilausta";
+"billing::paywall::purchase::applied" = "Tilaus päivitetty";
+"billing::paywall::pending::title" = "Odottaa hyväksyntää";
+"billing::paywall::pending::message" = "Pyydä perheen järjestäjää hyväksymään tämä ostos. Se otetaan käyttöön automaattisesti hyväksynnän jälkeen.";
+"billing::paywall::userPlan::loadFailed" = "Tilaustasi ei voitu ladata. Yritä uudelleen.";
+"billing::paywall::retry" = "Yritä uudelleen";
+"billing::paywall::unfinished::title" = "Ostoa ei ole otettu käyttöön";
+"billing::paywall::unfinished::message" = "Maksusi onnistui, mutta tilaustasi ei ole vielä päivitetty.";
+"billing::paywall::unfinished::action" = "Ota käyttöön nyt";
+"billing::paywall::unfinished::applied" = "Ostosi on otettu käyttöön";
+"billing::paywall::processing::message" = "Vahvistetaan ostoasi…";
+"billing::paywall::fail::purchase" = "Ostoa ei voitu viimeistellä. Yritä uudelleen.";
+"billing::paywall::fail::invalidTransaction" = "Ostoasi ei voitu vahvistaa. Yritä hetken kuluttua uudelleen.";
+"billing::paywall::fail::unknownProduct" = "Tätä ostoa ei tunnistettu. Sovelluksen päivittäminen voi auttaa.";
+"billing::paywall::fail::planChangeNotAllowed" = "Tätä tilauksen vaihtoa ei tueta.";
+"billing::paywall::fail::ownedByAnotherAccount" = "Tämä osto kuuluu toiselle tilille. Kirjaudu sisään sillä tilillä, jolla teit oston.";
+"billing::paywall::fail::reflectDelayed" = "Maksusi onnistui, mutta sen käyttöönotto viivästyy. Se otetaan käyttöön automaattisesti.";
+"billing::paywall::topup::credits" = "%@ krediittiä";
+"billing::paywall::topup::credits::split" = "Perus %@ + bonus %@ krediittiä";
+"billing::paywall::topup::bonus" = "+%@%% bonus";
+"billing::paywall::topup::title" = "Osta krediittejä";
+"billing::paywall::topup::title::withRemaining" = "Osta krediittejä · %@ jäljellä";
+"billing::paywall::topup::description" = "Lisäkrediittejä käytetään, kun päivittäinen rajasi on täynnä, eivätkä ne vanhene.";
+"billing::paywall::topup::applied" = "Krediitit lisätty";
+"billing::paywall::topup::applied::withCredits" = "%@ krediittiä lisätty";
+
+"billing::needSignIn::title" = "Kirjautuminen vaaditaan";
+"billing::needSignIn::message" = "Kirjaudu sisään nähdäksesi ja hallitaksesi tilaustasi.";
+
+// MARK: - share extension
+
+"share.ai::title" = "Lähetä AI:lle";
+"share.ai::text::placeholder" = "Lähetettävä teksti";
+"share.ai::instruction::placeholder" = "Lisää ohje (valinnainen)";
+"share.ai::needSignIn" = "Kirjaudu sisään sovelluksessa käyttääksesi AI-pikasyöttöä.";
+"share.ai::pending" = "Aiempi pyyntö on yhä kesken. Avaa sovellus nähdäksesi sen etenemisen tai tuloksen.";
+"share.ai::sent" = "Lähetetty. Näet tuloksen sovelluksessa.";
+"share.ai::failed" = "Lähetys epäonnistui. Yritä uudelleen.";
+"share.ai::sentButUntracked" = "Lähetetty, mutta sovellus ei voi seurata tulosta. Tarkista kalenterisi hetken kuluttua.";
+"share.ai::textTooLong" = "Teksti on liian pitkä lähetettäväksi. Lyhennä sitä ja yritä uudelleen.";
+"share.ai::instructionTooLong" = "Ohjeesi on liian pitkä. Lyhennä sitä.";
+"share.ai::limitExceeded" = "Olet käyttänyt tämän päivän AI-krediitit. Ne nollautuvat keskiyöllä UTC-aikaa.";
+"share.ai::image::title" = "Lähetä kuva AI:lle";
+"share.ai::image::recognizing" = "Luetaan tekstiä kuvasta…";
+"share.ai::image::text::caption" = "Kuvasta luettu teksti – muokkaa, jos jokin näyttää virheelliseltä.";
+"share.ai::image::text::placeholder" = "Kuvasta luettu teksti";
+"share.ai::image::noTextFound" = "Tästä kuvasta ei löytynyt tekstiä. Kirjoita, mitä haluat lisätä.";
+
+// MARK: - webview
+
+"webview::error::message" = "Sivua ei voitu ladata.";
+"webview::error::retry" = "Yritä uudelleen";
+"webview::openInBrowser" = "Avaa selaimessa";
+
+// MARK: - legal notice
+
+"legal_notice.message::terms" = "Käyttöehtomme on päivitetty.";
+"legal_notice.message::privacy" = "Tietosuojakäytäntömme on päivitetty.";
+"legal_notice.effectiveDate" = "Voimassa %@ alkaen";

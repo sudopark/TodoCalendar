@@ -33,7 +33,8 @@ description: Use when the user explicitly declares pair programming mode in this
 
 1. 잔여 상태를 보고한다: **미커밋 diff 요약 / 쌓인 테스트 공백 목록 / `bash .claude/skills/implement/scripts/impact-check.sh` 결과**(테스트 스킴·짝 경고).
 2. 처리(커밋 구성·테스트 보강·후속 기록)는 유저 결정을 기다린다 — wrap-up이 자동으로 커밋하지 않는다.
+3. 잔여 상태 보고 직후 `log-record.py skill_end --name pair-programming` (명령·compliance 규칙은 CLAUDE.md §1). 유저의 후속 결정을 기다리지 않고 여기서 남긴다 — 결정이 커밋이면 그때부턴 commit 스킬 소관이다.
 
-세션이 그냥 끊기면 자연 종료다 — 모드는 세션을 넘어 지속되지 않고, 다음 세션에서 재선언해야 켜진다.
+세션이 그냥 끊기면 자연 종료다 — 모드는 세션을 넘어 지속되지 않고, 다음 세션에서 재선언해야 켜진다. 이 경로엔 기록을 남길 주체가 없어 종료 레코드가 구조적으로 안 남는다. 그래서 이 스킬은 누락률 임계에서 면제돼 있다 (`.claude/scripts/usage-thresholds.json`의 `missing_rate_exempt_skills`) — 준수 신호는 위 명시 종료의 skill_end로만 잡는다.
 
 페어 중 이슈 기반 착수 요청(kickoff 트리거)이 오면 **모드 종료 여부를 먼저 확인한다** — 자동 종료하지 않는다.

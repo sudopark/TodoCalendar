@@ -41,7 +41,8 @@ final class SettingSceneCatalogSnapshots: XCTestCase {
                     SettingItemModel(.appearance),
                     SettingItemModel(.editEvent),
                     SettingItemModel(.holidaySetting),
-                    AccountSettingItemModel(nil)
+                    SettingItemModel(.billingPlan),
+                    AccountSettingItemModel(AccountInfo("some"))
                 ]
             )
             let supportSection = SettingSectionModel(
@@ -58,7 +59,7 @@ final class SettingSceneCatalogSnapshots: XCTestCase {
                 items: [
                     SettingItemModel(.shareApp),
                     SettingItemModel(.addReview),
-                    SettingItemModel(.sourceCode)
+                    SettingItemModel(.openSourceLicense)
                 ]
             )
             let suggestSection = SettingSectionModel(
@@ -93,6 +94,80 @@ final class SettingSceneCatalogSnapshots: XCTestCase {
                 .environment(state)
                 .environment(eventHandlers)
                 .environment(self.makeAppearance(theme))
+        }
+    }
+}
+
+
+// MARK: - 가이드 페이지용 화면 (#903)
+
+extension SettingSceneCatalogSnapshots {
+
+    @MainActor
+    func test_eventTypeList() {
+        captureSnapshotPair(
+            named: "eventTypeList", layout: .fullScreen, snapshotDirectory: catalogSnapshotDirectory()
+        ) { theme in
+            let state = EventTagListViewState()
+            let tags: [(String, String)] = [
+                ("catalog.tag::work".catalogLocalized(), "#088CDA"),
+                ("catalog.tag::family".catalogLocalized(), "#F9316D"),
+                ("catalog.tag::health".catalogLocalized(), "#3CB371"),
+                ("catalog.tag::study".catalogLocalized(), "#FFA02E")
+            ]
+            let customTags = tags.enumerated().map { idx, pair in
+                CustomEventTag(uuid: "tag:\(idx)", name: pair.0, colorHex: pair.1)
+            }
+            state.cellviewModels = customTags.map { BaseCalendarEventTagCellViewModel($0) }
+            state.externalCalendarTagSections = [
+                .init(
+                    serviceId: GoogleCalendarService.id,
+                    serviceTitle: "Google Calendar",
+                    cellViewModels: [],
+                    offIds: []
+                )
+            ]
+            let appearance = self.makeAppearance(theme)
+            appearance.updateEventColorMap(by: customTags)
+
+            return EventTagListView(isRootNavigation: true)
+                .environment(appearance)
+                .environment(state)
+                .environment(EventTagListEventHandlers())
+        }
+    }
+
+    @MainActor
+    func test_appearanceSetting() {
+        captureSnapshotPair(
+            named: "appearanceSetting", layout: .fullScreen, snapshotDirectory: catalogSnapshotDirectory()
+        ) { theme in
+            let calendar = CalendarAppearanceSettings(
+                colorSetKey: theme.isSystemDarkTheme ? .defaultDark : .defaultLight,
+                fontSetKey: .systemDefault
+            )
+            let appearance = self.makeAppearance(theme)
+            appearance.accnetDayPolicy = [.sunday: true, .saturday: true, .holiday: true]
+            appearance.showUnderLineOnEventDay = true
+
+            return AppearanceSettingContainerView(
+                calendar,
+                viewAppearance: appearance,
+                calendarSectionEventHandler: CalendarSectionAppearanceSettingViewEventHandler(),
+                eventOnCalendarSectionEventHandler: EventOnCalendarViewEventHandler(),
+                eventListSettingEventHandler: EventListAppearanceSettingViewEventHandler(),
+                appearanceSettingEventHandler: AppearanceSettingViewEventHandler()
+            )
+            .eventHandler(\.calendarSectionStateBinding) {
+                $0.calendarModel = .init(.monday)
+                $0.accentDays = [.holiday: true, .sunday: true]
+                $0.selectedWeekDay = .monday
+                $0.showUnderLine = true
+            }
+            .eventHandler(\.eventOnCalendarSectionStateBinding) {
+                $0.additionalFontSizeModel = .init(3)
+                $0.isShowEventTagColor = true
+            }
         }
     }
 }

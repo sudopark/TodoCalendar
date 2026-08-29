@@ -50,7 +50,7 @@ public final class ForemostEventUsecaseImple: ForemostEventUsecase, @unchecked S
         self.eventNotifyService = eventNotifyService
     }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
 }
 
 extension ForemostEventUsecaseImple {
@@ -74,7 +74,7 @@ extension ForemostEventUsecaseImple {
                 $0 ? RefreshingEvent.refreshForemostEvent(true) : .refreshForemostEvent(false)
             }
             .sink(receiveValue: handleRefreshed)
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
     
     public func update(foremost eventId: ForemostEventId) async throws {

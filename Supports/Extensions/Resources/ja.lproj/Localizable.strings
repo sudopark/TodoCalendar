@@ -79,6 +79,14 @@
 "dayname::friday:very_short" = "金";
 "dayname::saturday:very_short" = "土";
 
+"dayname::sunday:gender" = "m";
+"dayname::monday:gender" = "m";
+"dayname::tuesday:gender" = "m";
+"dayname::wednesday:gender" = "m";
+"dayname::thursday:gender" = "m";
+"dayname::friday:gender" = "m";
+"dayname::saturday:gender" = "m";
+
 
 // MARK: - event notification
 
@@ -112,8 +120,12 @@
 
 "calendar::foremostevent:title" = "最重要イベント";
 "calendar::uncompletedTodos:title" = "未完了のタスク";
+"calendar::guideTodo::name" = "To-do Calendarの使い方を見る";
+"calendar::eventSync::loadingAllEvents::message" = "すべてのイベントを読み込んでいます…";
 "calendar::event_time::todo" = "タスク";
 "calendar::event_time::allday" = "終日";
+"calendar::event_time::start" = "開始";
+"calendar::event_time::end" = "終了";
 "calendar::event_time::allday::with" = "%@終日";
 "calendar::event_time::period:some_days" = "%d日間";
 "calendar::event_time::period:some_minutes" = "%d分";
@@ -123,11 +135,13 @@
 "calendar::event::more_action::foremost_event:title" = "最重要イベント";
 "calendar::event::more_action::remove_only_thistime:message" = "繰り返しイベントの中からこの回だけ削除しますか？";
 "calendar::event::more_action::remove:message" = "このイベントを削除しますか？";
+"calendar::event::more_action::remove_this_and_future:message" = "この回以降の繰り返しイベントをすべて削除しますか？";
 "calendar::event::more_action::mark_as_foremost" = "このイベントを最重要イベントに設定しますか？";
 "calendar::event::more_action::unmark_as_foremost" = "このイベントの最重要設定を解除しますか？";
 "calendar::event::more_action::mark_as_foremost::unavail" = "繰り返しの予定は最重要イベントに設定できません。";
 "calendar::event::more_action:remove_only_thistime:item_name" = "この回だけ削除";
 "calendar::event::more_action:remove:item_name" = "イベントを削除";
+"calendar::event::more_action:remove_this_and_future:item_name" = "この回以降のイベントを削除";
 "calendar::event::more_action:foremost:mark:item_name" = "最重要イベントに設定";
 "calendar::event::more_action:foremost:unmark:item_name" = "最重要設定を解除";
 "calendar::event::more_action:dday_candidate:register:item_name" = "D-Dayウィジェットに追加";
@@ -135,7 +149,25 @@
 "calendar::event::more_action:dday_candidate:title" = "D-Dayウィジェットの候補";
 "calendar::event::more_action:dday_candidate:register:message" = "このイベントをD-Dayウィジェットの候補として追加しますか？ウィジェットを編集する際、リストの一番上に表示されます。";
 "calendar::event::more_action:dday_candidate:unregister:message" = "このイベントをD-Dayウィジェットの候補から削除しますか？";
+"calendar::event::more_action:live_activity:title" = "ライブアクティビティ";
+"calendar::event::more_action:live_activity:register:item_name" = "ロック画面に表示";
+"calendar::event::more_action:live_activity:unregister:item_name" = "ロック画面から削除";
+"calendar::event::more_action:live_activity:unavail::not_found" = "このイベントは利用できません。";
+"calendar::event::more_action:live_activity:unavail::already_passed" = "このイベントはすでに開始しています。";
+"calendar::event::more_action:live_activity:unavail::too_far_future" = "8時間以内に開始するイベントのみ表示できます。";
+"calendar::event::more_action:live_activity:register:confirm" = "このイベントをロック画面に表示しますか？";
+"calendar::event::more_action:live_activity:unregister:confirm" = "このイベントをロック画面から削除しますか？";
+"calendar::event::more_action:live_activity:replace:confirm" = "別のイベントがロック画面に表示されています。このイベントに置き換えますか？";
+"calendar::event::more_action:live_activity:register:success" = "ロック画面に表示しました。デバイスをロックして確認してください。";
+"calendar::event::more_action:live_activity:showing" = "ロック画面に表示中";
 "calendar::event::more_action:copy:item_name" = "イベントを複製";
+"calendar::event::more_action:share:item_name" = "共有";
+"event_detail::share::field::time" = "時間";
+"event_detail::share::field::repeating" = "繰り返し";
+"event_detail::share::field::calendar" = "カレンダー";
+"event_detail::share::field::place" = "場所";
+"event_detail::share::field::url" = "リンク";
+"event_detail::share::field::memo" = "メモ";
 "calendar::event::more_action:transform_to::schedule" = "予定に変換";
 "calendar::event::more_action:transform_to::todo" = "タスクに変換";
 "calendar::event::more_action:edit:item_name" = "編集";
@@ -145,7 +177,9 @@
 "calednar::event::skip_todo_until" = "スキップする日時を選択";
 "calednar::event::copy" = "イベントを複製";
 "calendar::move_date" = "日付を移動";
-"calednar::event::google::edit" = "Googleカレンダーのイベントを編集";
+"calendar::share::this_day" = "この日のイベントを共有";
+"calendar::share::this_week" = "今週のイベントを共有";
+"calendar::share::this_month" = "今月のイベントを共有";
 
 
 // MARK: - event detail
@@ -171,14 +205,33 @@
 "eventDetail.repeating.everyYearSomeDay:title" = "毎年%@";
 "eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "毎年%@（旧暦）";
 "eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "毎月最終週のすべての曜日";
-"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "毎月第1%@";
-"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "毎月第2%@";
-"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "毎月第3%@";
-"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "毎月第4%@";
-"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "毎月第5%@";
-"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "毎月第6%@";
-"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "毎月第7%@";
-"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "毎月最終%@";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::m" = "毎月第1%@";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::f" = "毎月第1%@";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::n" = "毎月第1%@";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::m" = "毎月第2%@";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::f" = "毎月第2%@";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::n" = "毎月第2%@";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::m" = "毎月第3%@";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::f" = "毎月第3%@";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::n" = "毎月第3%@";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::m" = "毎月第4%@";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::f" = "毎月第4%@";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::n" = "毎月第4%@";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::m" = "毎月第5%@";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::f" = "毎月第5%@";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::n" = "毎月第5%@";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::m" = "毎月第6%@";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::f" = "毎月第6%@";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::n" = "毎月第6%@";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::m" = "毎月第7%@";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::f" = "毎月第7%@";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::n" = "毎月第7%@";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::m" = "毎月最終%@";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::f" = "毎月最終%@";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::n" = "毎月最終%@";
+"eventDetail.repeating.last::m" = "最終";
+"eventDetail.repeating.last::f" = "最終";
+"eventDetail.repeating.last::n" = "最終";
 "eventDetail.repeating.endtime::title" = "繰り返しの終了";
 "eventDetail.repeating.endtime::option::never" = "しない";
 "eventDetail.repeating.endtime::option::on" = "日付指定";
@@ -188,7 +241,6 @@
 "eventDetail.repeating::period_endcount" = "%@から%d回";
 
 "eventDetail.repeating.everyNDays:title" = "%d日ごと";
-"eventDetail.repeating.last" = "最終";
 "eventDetail.repeating.everyNMonths:title" = "%dヶ月ごと";
 "eventDetail.repeating.everyNYears:title" = "%d年ごと";
 "eventDetail.repeating::endoption_until" = "%@まで";
@@ -267,12 +319,33 @@
 "eventDetail::gogoleEvent::conference::password" = "パスワード";
 "eventDetail::gogoleEvent::copy::message" = "クリップボードにコピーしました。";
 "eventDetail::gogoleEvent::canceled::message" = "このイベントはキャンセルされました。";
+"eventDetail::gogoleEvent::saved::message" = "イベントを保存しました。";
+"eventDetail::gogoleEvent::readOnlyCalendar::message" = "読み取り専用のカレンダーのため、ここではイベントを編集できません。";
+"eventDetail::gogoleEvent::reauthenticate::title" = "追加の権限が必要です";
+"eventDetail::gogoleEvent::reauthenticate::message" = "このGoogleアカウントは読み取り専用で連携されています。イベントを編集するには、編集権限を別途許可する必要があります。";
+"eventDetail::gogoleEvent::writeScopeNotGranted::message" = "編集権限を取得できませんでした。会社や学校のアカウントの場合、管理者によって許可されていない可能性があります。";
+"eventDetail::gogoleEvent::repeating::title" = "繰り返しイベントです";
+"eventDetail::gogoleEvent::repeating::onlyThisTime::button" = "このイベントのみ";
+"eventDetail::gogoleEvent::repeating::all::button" = "すべてのイベント";
+"eventDetail::gogoleEvent::remove::confirm::message" = "Googleカレンダーからこのイベントを削除しますか？";
+"eventDetail::gogoleEvent::editOnCalendar" = "Googleカレンダーで編集";
+"eventDetail::gogoleEvent::notEditableField::message" = "この項目はアプリでは編集できません。Googleカレンダーで編集してください。";
+"eventDetail::gogoleEvent::description::formatLoss::message" = "この説明には書式が設定されています。アプリで編集すると書式が失われます。";
 
 // MARK: - Apple calendar event
 "eventDetail::appleCalendarEvent::viewOnCalendar" = "Appleカレンダーで見る";
+"eventDetail::appleCalendarEvent::editOnCalendar" = "Appleカレンダーで編集";
 "eventDetail::appleCalendarEvent::calendar::event" = "Appleカレンダーのイベント";
 "eventDetail::appleCalendarEvent::attendees" = "参加者（%d人）";
 "eventDetail::appleCalendarEvent::attendees::organizer" = "主催者";
+"eventDetail::appleCalendarEvent::saved::message" = "保存しました。";
+"eventDetail::appleCalendarEvent::remove::confirm::message" = "このイベントを削除しますか？";
+"eventDetail::appleCalendarEvent::repeating::title" = "繰り返しイベント";
+"eventDetail::appleCalendarEvent::repeating::onlyThisTime::button" = "このイベントのみ";
+"eventDetail::appleCalendarEvent::repeating::thisAndFuture::button" = "このイベント以降すべて";
+"eventDetail::appleCalendarEvent::readOnlyCalendar::message" = "読み取り専用のカレンダーのため、イベントを編集できません。";
+"eventDetail::appleCalendarEvent::notEditableField::message" = "この項目はアプリでは編集できません。";
+"eventDetail::appleCalendarEvent::url::placeholder" = "URL";
 
 // MARK: - event tag
 
@@ -310,6 +383,22 @@
 "eventList::remove::confirm::button::olderThan6m" = "6ヶ月以上前";
 "eventList::remove::confirm::button::olderThan1y" = "1年以上前";
 
+// MARK: - share preview
+
+"share_preview::title" = "共有プレビュー";
+"share_preview::tag_filter::title" = "イベントタイプ";
+"share_preview::tag_filter::select_all" = "すべて選択";
+"share_preview::tag_filter::deselect_all" = "すべて解除";
+"share_preview::option::include_tag_name" = "イベントタイプ名も表示";
+"share_preview::share_button" = "共有";
+"share_preview::empty" = "共有できるイベントがありません";
+"share_preview::header::this_week" = "今週";
+"share_preview::header::last_week" = "先週";
+"share_preview::header::next_week" = "来週";
+"share_preview::header::week_of_month" = "%1$@第%2$d週";
+"share_preview::format::text" = "テキスト";
+"share_preview::format::image" = "画像";
+
 
 // MARK: - account
 
@@ -327,7 +416,9 @@
 "manage_account::delete_account_button::confirm:message" = "本当にアカウントを削除しますか？";
 "manage_account::delete_account_button::description" = "アカウント削除をリクエストすると、アカウントが削除されます。\n削除されたアカウント情報は復元できません。";
 "signIn::title" = "ログイン";
-"signIn:description" = "イベントリストをバックアップして、他のiOSデバイスと同期しましょう\n（対応プラットフォームは今後拡大予定です。）";
+"signIn::feature::sync" = "イベントのバックアップ・デバイス間で同期";
+"signIn::feature::aiAgent" = "AIエージェントで予定を管理";
+"signIn::feature::web" = "ウェブでも使える · todo-calendar.com";
 
 
 // MARK: - setting
@@ -410,10 +501,17 @@
 "setting.holiday.hide::confirm::message" = "この祝日を毎年非表示にしますか？\n設定 > 祝日でいつでも再表示できます。";
 "setting.holiday.hidden::sectionTitle" = "非表示の祝日";
 "setting.holiday.show::button" = "表示";
+"setting.aiGuide::name" = "AIで追加 — Siri・ウィジェット";
 "setting.feedback::name" = "フィードバック";
 "setting.help::name" = "ヘルプ";
+"setting.openWeb::name" = "ウェブで開く";
 "setting.share::name" = "アプリを共有";
 "setting.write_review::name" = "アプリのレビューを書く";
+"setting.openSourceLicense::name" = "オープンソースライセンス";
+"setting.billing.plan::name" = "プラン";
+"setting.terms::name" = "利用規約";
+"setting.privacyPolicy::name" = "プライバシーポリシー";
+"setting.adPrivacyOptions::name" = "広告のプライバシー設定";
 "setting.account.signedIn::manageAccount" = "アカウント";
 "setting.account.needSignIn" = "ログイン";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -513,6 +611,14 @@
 "widget.dday.target::registered" = "ピン留め済み";
 "widget.dday.turn::name" = "第%d回";
 
+"widget.aiCommand::title" = "AIで追加";
+"widget.aiCommand::explain" = "タップひとつでAI入力を開きます。";
+
+// MARK: - liveActivity
+
+"liveActivity::stale" = "まもなく開始";
+"liveActivity::action::end" = "終了";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "このリンク形式には対応していません。\nアプリを最新バージョンに更新してください。";
@@ -543,20 +649,133 @@
 "aiAgent::state::failed" = "コマンド失敗";
 "aiAgent::done::default" = "完了しました";
 "aiAgent::failed::default" = "処理できませんでした";
+"aiAgent::failed::dailyLimitExceeded" = "本日のAIクレジットを使い切りました。";
 "aiAgent::retry" = "再試行";
 "aiAgent::needSignIn::title" = "ログインが必要です";
 "aiAgent::needSignIn::message" = "AIクイック入力を使用するにはログインしてください。";
+"aiAgent::speechPermissionDenied::title" = "権限が必要です";
+"aiAgent::speechPermissionDenied::message" = "音声入力を使用するには、設定でマイクと音声認識へのアクセスを許可してください。";
+"aiAgent::speechPermissionDenied::confirm" = "設定を開く";
 "aiAgent::title" = "AIクイック入力";
 "aiAgent::keyboard::stop" = "停止";
 "aiAgent::keyboard::send" = "送信";
 "aiAgent::stop" = "停止";
 "aiAgent::usage" = "%@ / %@ クレジット";
-"aiAgent::plan::free" = "無料";
-"aiAgent::plan::standard" = "スタンダード";
-"aiAgent::plan::lifetime" = "永久";
 "aiAgent::usage::topupRemaining" = "追加クレジット残り%@";
 "aiAgent::usage::planChangeScheduled" = "%1$@に%2$@プランへ切り替わります";
+"aiAgent::usage::resetsIn" = "%@後にまた使えます";
+"aiAgent::notificationPermissionDenied::message" = "AIの結果を受け取るには、設定で通知をオンにしてください。";
 "aiAgent::stop::confirm::title" = "処理を中止しますか？";
 "aiAgent::stop::confirm::message" = "中止すると進行中のコマンドは破棄され、再開できません。";
 "aiAgent::confirm::countdown" = "以内に承認してください";
 "aiAgent::confirm::expired::message" = "時間が過ぎました。もう一度リクエストしてください。";
+"aiAgent::tip::externalEntry" = "ヒント: Siri、アクションボタン、ウィジェットからも追加できます。";
+"aiAgent::failed::showPlans" = "プランを見る";
+
+"aiAgent::image::title" = "画像から読み取る";
+"aiAgent::image::sourceSelect::title" = "画像を追加";
+"aiAgent::image::source::library" = "ライブラリから選択";
+"aiAgent::image::source::camera" = "写真を撮る";
+"aiAgent::image::recognizing" = "画像を読み取っています…";
+"aiAgent::image::noText" = "この画像からテキストが見つかりませんでした";
+"aiAgent::image::readText" = "画像内のテキスト";
+"aiAgent::image::instruction" = "追加の指示（任意）";
+"aiAgent::image::instruction::placeholder" = "例：これらをタスクとして追加";
+"aiAgent::image::empty" = "送信するテキストがありません";
+"aiAgent::image::textTooLong" = "テキストが長すぎます。短くしてもう一度お試しください。";
+"aiAgent::image::instructionTooLong" = "指示が長すぎます。短くしてもう一度お試しください。";
+"aiAgent::image::busy" = "別のリクエストがまだ処理中です";
+"aiAgent::image::camera::denied::title" = "カメラの権限が必要です";
+"aiAgent::image::camera::denied::message" = "写真を撮るには、設定でカメラへのアクセスを許可してください。";
+
+// MARK: - billing
+
+"billing::plan::free" = "無料";
+"billing::plan::standard" = "スタンダード";
+"billing::plan::lifetime" = "永久";
+
+"billing::paywall::title" = "プランをアップグレード";
+"billing::paywall::current::description" = "1日%@クレジット";
+"billing::paywall::metric::dailyCredits" = "1日%@クレジット";
+"billing::paywall::period::weekly" = "/週";
+"billing::paywall::period::monthly" = "/月";
+"billing::paywall::period::yearly" = "/年";
+"billing::paywall::price::unavailable" = "価格を取得できません";
+"billing::paywall::badge::recommended" = "おすすめ";
+"billing::paywall::badge::owned" = "現在のプラン";
+"billing::paywall::features::title" = "%@に含まれる機能";
+"billing::paywall::feature::dailyCredits" = "1日%@クレジット";
+"billing::paywall::feature::topup" = "クレジットがなくなったら追加購入できます";
+"billing::paywall::feature::noAds" = "広告なし";
+"billing::paywall::disclosure::subscription" = "サブスクリプションは毎月自動更新されます。現在の期間終了の24時間前までに解約しない限り、同じ料金で更新されます。解約はいつでもApp Storeの設定から行えます。";
+"billing::paywall::disclosure::subscription::generic" = "サブスクリプションは各請求期間の終了時に自動更新されます。終了の24時間前までに解約しない限り、同じ料金で更新されます。解約はいつでもApp Storeの設定から行えます。";
+"billing::paywall::disclosure::oneTime" = "一度のお支払いでずっと使えます。自動更新はされません。";
+"billing::paywall::disclosure::storeUnavailable" = "App Storeに接続できませんでした。しばらくしてからもう一度お試しください。";
+"billing::paywall::cta::subscribe" = "%@を購読する";
+"billing::paywall::cta::buy" = "%@を購入";
+"billing::paywall::cta::unavailable" = "購入不可";
+"billing::paywall::allPlansOwned" = "すでに最上位のプランをご利用中です。";
+"billing::paywall::terms" = "利用規約";
+"billing::paywall::privacyPolicy" = "プライバシーポリシー";
+"billing::paywall::restore" = "購入を復元";
+"billing::paywall::restored" = "購入を復元しました";
+"billing::paywall::restore::empty" = "復元できる購入はありません。";
+"billing::paywall::manageSubscription" = "サブスクリプションの管理";
+"billing::paywall::purchase::applied" = "プランを適用しました";
+"billing::paywall::pending::title" = "承認待ち";
+"billing::paywall::pending::message" = "ファミリーの管理者に購入の承認を依頼してください。承認されると自動的に反映されます。";
+"billing::paywall::userPlan::loadFailed" = "プランを読み込めませんでした。もう一度お試しください。";
+"billing::paywall::retry" = "再試行";
+"billing::paywall::unfinished::title" = "未反映の購入があります";
+"billing::paywall::unfinished::message" = "お支払いは完了しましたが、プランにまだ反映されていません。";
+"billing::paywall::unfinished::action" = "今すぐ反映";
+"billing::paywall::unfinished::applied" = "購入を反映しました";
+"billing::paywall::processing::message" = "購入を確認しています…";
+"billing::paywall::fail::purchase" = "購入を完了できませんでした。もう一度お試しください。";
+"billing::paywall::fail::invalidTransaction" = "購入を確認できませんでした。しばらくしてからもう一度お試しください。";
+"billing::paywall::fail::unknownProduct" = "この購入を認識できませんでした。アプリを更新すると解決する場合があります。";
+"billing::paywall::fail::planChangeNotAllowed" = "このプラン変更には対応していません。";
+"billing::paywall::fail::ownedByAnotherAccount" = "この購入は別のアカウントに登録されています。購入したアカウントでログインしてください。";
+"billing::paywall::fail::reflectDelayed" = "お支払いは完了しましたが、反映が遅れています。自動的に反映されます。";
+"billing::paywall::topup::credits" = "%@クレジット";
+"billing::paywall::topup::credits::split" = "基本%@ + ボーナス%@クレジット";
+"billing::paywall::topup::bonus" = "+%@%%ボーナス";
+"billing::paywall::topup::title" = "クレジットを追加";
+"billing::paywall::topup::title::withRemaining" = "クレジットを追加 · 保有%@";
+"billing::paywall::topup::description" = "追加クレジットは1日の上限を使い切った後に使用され、有効期限はありません。";
+"billing::paywall::topup::applied" = "クレジットを追加しました";
+"billing::paywall::topup::applied::withCredits" = "%@クレジットを追加しました";
+
+"billing::needSignIn::title" = "ログインが必要です";
+"billing::needSignIn::message" = "プランの確認と変更を行うにはログインしてください。";
+
+// MARK: - share extension
+
+"share.ai::title" = "AIに送信";
+"share.ai::text::placeholder" = "送信する内容";
+"share.ai::instruction::placeholder" = "追加の指示（任意）";
+"share.ai::needSignIn" = "AIクイック入力を使用するには、まずアプリでログインしてください。";
+"share.ai::pending" = "前のリクエストがまだ残っています。アプリで進行状況や結果を確認してください。";
+"share.ai::sent" = "送信しました。結果はアプリで確認できます。";
+"share.ai::failed" = "送信できませんでした。もう一度お試しください。";
+"share.ai::sentButUntracked" = "送信しましたが、アプリで結果を追跡できません。しばらくしてからカレンダーをご確認ください。";
+"share.ai::textTooLong" = "送信する内容が長すぎます。短くしてもう一度お試しください。";
+"share.ai::instructionTooLong" = "指示が長すぎます。短くしてください。";
+"share.ai::limitExceeded" = "本日のAIクレジットを使い切りました。世界標準時の午前0時にリセットされます。";
+"share.ai::image::title" = "画像をAIに送信";
+"share.ai::image::recognizing" = "画像からテキストを読み取っています…";
+"share.ai::image::text::caption" = "画像から読み取ったテキストです。おかしい部分があれば編集してください。";
+"share.ai::image::text::placeholder" = "画像から読み取ったテキスト";
+"share.ai::image::noTextFound" = "この画像からテキストが見つかりませんでした。追加したい内容を入力してください。";
+
+// MARK: - webview
+
+"webview::error::message" = "ページを読み込めませんでした。";
+"webview::error::retry" = "再試行";
+"webview::openInBrowser" = "ブラウザで開く";
+
+// MARK: - legal notice
+
+"legal_notice.message::terms" = "利用規約が改定されました。";
+"legal_notice.message::privacy" = "プライバシーポリシーが改定されました。";
+"legal_notice.effectiveDate" = "施行日 %@";

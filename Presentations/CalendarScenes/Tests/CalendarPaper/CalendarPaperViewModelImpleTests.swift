@@ -130,14 +130,27 @@ extension CalendarPaperViewModelImpleTests {
     func testViewModel_selectDay() {
         // given
         let viewModel = self.makeViewModel()
-        
+
         // when
         viewModel.selectDay(.init(2023, 01, 01))
-        
+
         // then
         XCTAssertEqual(
             self.spyMonthInteractor.didSelectDay, .init(2023, 01, 01)
         )
+    }
+
+    func testViewModel_whenMonthSceneRequestsShare_routesToSharePreview() {
+        // given
+        let viewModel = self.makeViewModel()
+        let range: Range<TimeInterval> = 0..<100
+
+        // when
+        viewModel.monthScene(didRequestShare: range, kind: .week)
+
+        // then
+        XCTAssertEqual(self.spyRouter.didShowSharePreviewWithRange, range)
+        XCTAssertEqual(self.spyRouter.didShowSharePreviewWithKind, .week)
     }
 }
 
@@ -145,6 +158,13 @@ extension CalendarPaperViewModelImpleTests {
 extension CalendarPaperViewModelImpleTests {
     
     private class SpyRouter: BaseSpyRouter, CalendarPaperRouting, @unchecked Sendable {
+
+        var didShowSharePreviewWithRange: Range<TimeInterval>?
+        var didShowSharePreviewWithKind: CalendarShareRangeKind?
+        func showSharePreview(range: Range<TimeInterval>, kind: CalendarShareRangeKind) {
+            self.didShowSharePreviewWithRange = range
+            self.didShowSharePreviewWithKind = kind
+        }
     }
     
     private class SpyMonthSceneInteractor: MonthSceneInteractor {

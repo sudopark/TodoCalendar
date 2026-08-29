@@ -11,6 +11,8 @@ import Prelude
 import Optics
 import Domain
 import Scenes
+import CommonPresentation
+import Extensions
 import UnitTestHelpKit
 import TestDoubles
 
@@ -24,6 +26,7 @@ class EditScheduleEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitabl
     private var spyEventDetailDataUsecase: StubEventDetailDataUsecase!
     private var stubForemostEventUsecase: StubForemostEventUsecase!
     private var stubDDayCandidateUsecase: PrivateStubDDayCandidateUsecase!
+    private var stubLiveActivityUsecase: StubEventLiveActivityUsecase!
     private var spyRouter: SpyEventDetailRouter!
     private var spyListener: SpyEventDetailListener!
     
@@ -31,6 +34,7 @@ class EditScheduleEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitabl
         self.cancelBag = .init()
         self.spyScheduleUsecase = .init()
         self.spyEventDetailDataUsecase = .init()
+        self.stubLiveActivityUsecase = .init()
         self.spyRouter = .init()
         self.spyListener = .init()
     }
@@ -41,6 +45,7 @@ class EditScheduleEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitabl
         self.spyEventDetailDataUsecase = nil
         self.stubForemostEventUsecase = nil
         self.stubDDayCandidateUsecase = nil
+        self.stubLiveActivityUsecase = nil
         FeatureFlag.disable(.ddayWidget)
         self.spyRouter = nil
         self.spyListener = nil
@@ -59,7 +64,9 @@ class EditScheduleEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitabl
         shouldFailToSaveDetail: Bool = false,
         shouldFailToRemoveSchedule: Bool = false,
         registeredCandidates: [DDayCandidate] = [],
-        isDDayWidgetEnabled: Bool = false
+        isDDayWidgetEnabled: Bool = false,
+        registeredLiveActivityTarget: LiveActivityTarget? = nil,
+        liveActivityStartError: (any Error)? = nil
     ) -> EditScheduleEventDetailViewModelImple {
 
         // 배포 기본값은 off — 후보 액션을 보려는 케이스만 켠다 (tearDown에서 원복)
@@ -88,7 +95,12 @@ class EditScheduleEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitabl
         todoUsecase.shouldFailMakeTodo = shouldFailToTransformToTodo
 
         self.stubDDayCandidateUsecase = .init(registeredCandidates)
+        self.stubLiveActivityUsecase.registeredTargetSubject.send(registeredLiveActivityTarget)
+        self.stubLiveActivityUsecase.stubStartError = liveActivityStartError
 
+        let liveActivityToggleViewModel = LiveActivityToggleViewModelImple(
+            eventLiveActivityUsecase: self.stubLiveActivityUsecase
+        )
         let viewModel = EditScheduleEventDetailViewModelImple(
             scheduleId: schedule.uuid,
             repeatingEventTargetTime: repeatingEventTargetTime,
@@ -98,9 +110,11 @@ class EditScheduleEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitabl
             todoEventUsecase: todoUsecase,
             calendarSettingUsecase: calendarSettingUsecase,
             foremostEventUsecase: self.stubForemostEventUsecase,
-            ddayCandidateUsecase: self.stubDDayCandidateUsecase
+            ddayCandidateUsecase: self.stubDDayCandidateUsecase,
+            liveActivityToggleViewModel: liveActivityToggleViewModel
         )
         viewModel.router = self.spyRouter
+        liveActivityToggleViewModel.router = self.spyRouter
         viewModel.listener = self.spyListener
         viewModel.attachInput()
         return viewModel
@@ -246,14 +260,14 @@ extension EditScheduleEventDetailViewModelImpleTests {
             self.makeViewModel(customSchedule: schedule),
             expect: [
                 [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)],
-                [.copy, .transformToTodo]
+                [.toggleLiveActivity(isRegistered: false), .copy, .transformToTodo, .share]
             ]
         )
         parameterizeTest(
             self.makeViewModel(customSchedule: schedule, isForemost: true),
             expect: [
                 [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)],
-                [.copy, .transformToTodo]
+                [.toggleLiveActivity(isRegistered: false), .copy, .transformToTodo, .share]
             ]
         )
         let scheduleNotRepeating = schedule |> \.repeating .~ nil
@@ -261,16 +275,83 @@ extension EditScheduleEventDetailViewModelImpleTests {
             self.makeViewModel(customSchedule: scheduleNotRepeating),
             expect: [
                 [.remove(onlyThisEvent: false)],
-                [.toggleTo(isForemost: true), .copy, .transformToTodo]
+                [.toggleTo(isForemost: true), .toggleLiveActivity(isRegistered: false), .copy, .transformToTodo, .share]
             ]
         )
         parameterizeTest(
             self.makeViewModel(customSchedule: scheduleNotRepeating, isForemost: true),
             expect: [
                 [.remove(onlyThisEvent: false)],
-                [.toggleTo(isForemost: false), .copy, .transformToTodo]
+                [.toggleTo(isForemost: false), .toggleLiveActivity(isRegistered: false), .copy, .transformToTodo, .share]
             ]
         )
+    }
+
+    func testViewModel_moreActions_containShare() {
+        // given
+        let expect = expectation(description: "more action에 공유 포함")
+        let viewModel = self.makeViewModel()
+
+        // when
+        let actions = self.waitFirstOutput(expect, for: viewModel.moreActions) {
+            viewModel.prepare()
+        }
+
+        // then
+        XCTAssertEqual(actions?.flatMap { $0 }.contains(.share), true)
+    }
+
+    func testViewModel_whenHandleShareAction_routesWithAssembledText() {
+        // given
+        let viewModel = self.makeViewModelWithPrepare()
+
+        // when
+        viewModel.handleMoreAction(.share)
+
+        // then
+        XCTAssertEqual(self.spyRouter.didShareText?.contains(self.dummyRepeatingSchedule.name), true)
+    }
+
+    func testViewModel_whenHandleShareAction_includesTagName() {
+        // given
+        let viewModel = self.makeViewModelWithPrepare()
+
+        // when
+        viewModel.handleMoreAction(.share)
+
+        // then
+        XCTAssertEqual(self.spyRouter.didShareText?.contains("some"), true)
+    }
+
+    func testViewModel_whenHandleShareAction_includesUrlAndMemoFields() {
+        // given
+        let viewModel = self.makeViewModelWithPrepare()
+
+        // when
+        viewModel.handleMoreAction(.share)
+
+        // then
+        let text = self.spyRouter.didShareText
+        XCTAssertEqual(text?.contains("\(self.shareFieldLabel("url")): url"), true)
+        XCTAssertEqual(text?.contains("\(self.shareFieldLabel("memo")): memo"), true)
+    }
+
+    func testViewModel_whenHandleShareAction_hasNoTodoMarkerOnName() {
+        // given
+        let viewModel = self.makeViewModelWithPrepare()
+
+        // when
+        viewModel.handleMoreAction(.share)
+
+        // then
+        let todoText = "calendar::event_time::todo".localized()
+        let text = self.spyRouter.didShareText
+        XCTAssertEqual(text?.hasPrefix(self.dummyRepeatingSchedule.name), true)
+        XCTAssertEqual(text?.contains("(\(todoText))"), false)
+    }
+
+    private func shareFieldLabel(_ key: String) -> String {
+        return "event_detail::share::field::\(key)".localized()
     }
 
     // #741 배포 보류 — 플래그가 꺼진 동안 후보 등록 메뉴가 새어나가면 안 된다
@@ -603,7 +684,9 @@ extension EditScheduleEventDetailViewModelImpleTests {
         shouldFailToTransformToTodo: Bool = false,
         shouldFailToSaveDetail: Bool = false,
         shouldFailToRemoveSchedule: Bool = false,
-        registeredCandidates: [DDayCandidate] = []
+        registeredCandidates: [DDayCandidate] = [],
+        registeredLiveActivityTarget: LiveActivityTarget? = nil,
+        liveActivityStartError: (any Error)? = nil
     ) -> EditScheduleEventDetailViewModelImple {
         // given
         let expect = expectation(description: "wait prepared")
@@ -621,7 +704,9 @@ extension EditScheduleEventDetailViewModelImpleTests {
             shouldFailToTransformToTodo: shouldFailToTransformToTodo,
             shouldFailToSaveDetail: shouldFailToSaveDetail,
             shouldFailToRemoveSchedule: shouldFailToRemoveSchedule,
-            registeredCandidates: registeredCandidates
+            registeredCandidates: registeredCandidates,
+            registeredLiveActivityTarget: registeredLiveActivityTarget,
+            liveActivityStartError: liveActivityStartError
         )
 
         // when
@@ -1161,3 +1246,154 @@ private final class PrivateStubScheduleEventUsecase: StubScheduleEventUsecase, @
         }
     }
 }
+
+
+// MARK: - 라이브액티비티 등록·해제
+
+extension EditScheduleEventDetailViewModelImpleTests {
+
+    func testViewModel_whenLiveActivityRegistered_provideUnregisterAction() {
+        // given
+        let expect = expectation(description: "등록된 일정은 해제 항목으로 노출")
+        let viewModel = self.makeViewModel(
+            registeredLiveActivityTarget: .schedule(id: "dummy_schedule", turnKey: nil)
+        )
+
+        // when
+        let actions = self.waitFirstOutput(expect, for: viewModel.moreActions) {
+            viewModel.prepare()
+        }
+
+        // then
+        let contains = actions?.flatMap { $0 }.contains(.toggleLiveActivity(isRegistered: true))
+        XCTAssertEqual(contains, true)
+    }
+
+    func testViewModel_whenOtherEventRegistered_provideRegisterAction() {
+        // given
+        let expect = expectation(description: "다른 이벤트가 등록됐으면 등록 항목으로 노출")
+        let viewModel = self.makeViewModel(
+            registeredLiveActivityTarget: .schedule(id: "other_schedule", turnKey: nil)
+        )
+
+        // when
+        let actions = self.waitFirstOutput(expect, for: viewModel.moreActions) {
+            viewModel.prepare()
+        }
+
+        // then
+        let contains = actions?.flatMap { $0 }.contains(.toggleLiveActivity(isRegistered: false))
+        XCTAssertEqual(contains, true)
+    }
+
+    func testViewModel_whenToggleLiveActivityOfRepeatingSchedule_startWithTurnKey() {
+        // given
+        let expect = expectation(description: "반복 일정은 열린 회차 키로 등록")
+        let targetTime = EventTime.at(300)
+        let viewModel = self.makeViewModelWithPrepare(repeatingEventTargetTime: targetTime)
+        self.stubLiveActivityUsecase.didStartTargetCallback = { _ in expect.fulfill() }
+
+        // when
+        viewModel.handleMoreAction(.toggleLiveActivity(isRegistered: false))
+
+        // then
+        self.wait(for: [expect], timeout: self.timeout)
+        XCTAssertEqual(
+            self.stubLiveActivityUsecase.didStartTarget,
+            .schedule(id: "dummy_schedule", turnKey: targetTime.customKey)
+        )
+    }
+
+    func testViewModel_whenToggleLiveActivityOfNotRepeatingSchedule_startWithoutTurnKey() {
+        // given
+        let expect = expectation(description: "비반복 일정은 회차 키 없이 등록")
+        let viewModel = self.makeViewModelWithPrepare(
+            isNotRepeating: true, repeatingEventTargetTime: .at(300)
+        )
+        self.stubLiveActivityUsecase.didStartTargetCallback = { _ in expect.fulfill() }
+
+        // when
+        viewModel.handleMoreAction(.toggleLiveActivity(isRegistered: false))
+
+        // then
+        self.wait(for: [expect], timeout: self.timeout)
+        XCTAssertEqual(
+            self.stubLiveActivityUsecase.didStartTarget,
+            .schedule(id: "dummy_schedule", turnKey: nil)
+        )
+    }
+
+    func testViewModel_whenToggleRegisteredLiveActivity_stopActivity() {
+        // given
+        let expect = expectation(description: "등록된 상태에서 누르면 해제")
+        let viewModel = self.makeViewModelWithPrepare(
+            registeredLiveActivityTarget: .schedule(id: "dummy_schedule", turnKey: nil)
+        )
+        self.stubLiveActivityUsecase.didStopActivityCallback = { expect.fulfill() }
+
+        // when
+        viewModel.handleMoreAction(.toggleLiveActivity(isRegistered: true))
+
+        // then
+        self.wait(for: [expect], timeout: self.timeout)
+        XCTAssertNil(self.stubLiveActivityUsecase.didStartTarget)
+    }
+
+    func testViewModel_whenStartLiveActivityFail_showUnavailableMessage() {
+        // given
+        let expect = expectation(description: "등록 실패 사유 안내")
+        let viewModel = self.makeViewModelWithPrepare(
+            liveActivityStartError: EventLiveActivityStartFailReason.tooFarFuture
+        )
+        self.spyRouter.didShowConfirmWithCallback = { _ in expect.fulfill() }
+
+        // when
+        viewModel.handleMoreAction(.toggleLiveActivity(isRegistered: false))
+
+        // then
+        self.wait(for: [expect], timeout: self.timeout)
+        XCTAssertEqual(
+            self.spyRouter.didShowConfirmWith?.message,
+            "calendar::event::more_action:live_activity:unavail::too_far_future".localized()
+        )
+        XCTAssertNil(self.spyRouter.didShowError)
+    }
+
+    func testViewModel_whenRegisteredTurnMatches_isLiveActivityRegisteredIsTrue() {
+        // given
+        let expect = expectation(description: "열린 회차와 같은 타겟이 등록되면 isLiveActivityRegistered 가 true")
+        let targetTime = EventTime.at(300)
+        let viewModel = self.makeViewModel(
+            repeatingEventTargetTime: targetTime,
+            registeredLiveActivityTarget: .schedule(id: "dummy_schedule", turnKey: targetTime.customKey)
+        )
+
+        // when
+        let isRegistered = self.waitFirstOutput(expect, for: viewModel.isLiveActivityRegistered) {
+            viewModel.prepare()
+        }
+
+        // then
+        XCTAssertEqual(isRegistered, true)
+    }
+
+    func testViewModel_whenRegisteredTurnIsOther_isLiveActivityRegisteredIsFalse() {
+        // given
+        let expect = expectation(description: "다른 회차가 등록되면 isLiveActivityRegistered 가 false")
+        let targetTime = EventTime.at(300)
+        let otherTurnTime = EventTime.at(900)
+        let viewModel = self.makeViewModel(
+            repeatingEventTargetTime: targetTime,
+            registeredLiveActivityTarget: .schedule(id: "dummy_schedule", turnKey: otherTurnTime.customKey)
+        )
+
+        // when
+        let isRegistered = self.waitFirstOutput(expect, for: viewModel.isLiveActivityRegistered) {
+            viewModel.prepare()
+        }
+
+        // then
+        XCTAssertEqual(isRegistered, false)
+    }
+}
+

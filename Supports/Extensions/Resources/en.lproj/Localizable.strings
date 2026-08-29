@@ -79,6 +79,14 @@
 "dayname::friday:very_short" = "F";
 "dayname::saturday:very_short" = "S";
 
+"dayname::sunday:gender" = "m";
+"dayname::monday:gender" = "m";
+"dayname::tuesday:gender" = "m";
+"dayname::wednesday:gender" = "m";
+"dayname::thursday:gender" = "m";
+"dayname::friday:gender" = "m";
+"dayname::saturday:gender" = "m";
+
 
 // MARK: - event notification
 
@@ -112,8 +120,12 @@
 
 "calendar::foremostevent:title" = "Foremost Event";
 "calendar::uncompletedTodos:title" = "Uncompleted To-do";
+"calendar::guideTodo::name" = "See how To-do Calendar works";
+"calendar::eventSync::loadingAllEvents::message" = "Fetching all your events…";
 "calendar::event_time::todo" = "Todo";
 "calendar::event_time::allday" = "All day";
+"calendar::event_time::start" = "Start";
+"calendar::event_time::end" = "End";
 "calendar::event_time::allday::with" = "%@ all day";
 "calendar::event_time::period:some_days" = "%d days";
 "calendar::event_time::period:some_minutes" = "%d minutes";
@@ -123,11 +135,13 @@
 "calendar::event::more_action::foremost_event:title" = "Foremost event";
 "calendar::event::more_action::remove_only_thistime:message" = "Do you want to delete only this event from all repeating events?";
 "calendar::event::more_action::remove:message" = "Do you want to remove this event?";
+"calendar::event::more_action::remove_this_and_future:message" = "Do you want to delete this and all future events in the repeating series?";
 "calendar::event::more_action::mark_as_foremost" = "Do you want to mark this event as your most important event?";
 "calendar::event::more_action::unmark_as_foremost" = "Do you want to unmark this event as your most important event?";
 "calendar::event::more_action::mark_as_foremost::unavail" = "A repeating schedule event cannot be marked as the most important event.";
 "calendar::event::more_action:remove_only_thistime:item_name" = "Remove only this event";
 "calendar::event::more_action:remove:item_name" = "Remove event";
+"calendar::event::more_action:remove_this_and_future:item_name" = "Remove this and all future events";
 "calendar::event::more_action:foremost:mark:item_name" = "Mark as foremost";
 "calendar::event::more_action:foremost:unmark:item_name" = "Unmark as foremost";
 "calendar::event::more_action:dday_candidate:register:item_name" = "Add to D-day widget";
@@ -135,7 +149,25 @@
 "calendar::event::more_action:dday_candidate:title" = "D-day widget candidate";
 "calendar::event::more_action:dday_candidate:register:message" = "Add this event as a D-day widget candidate? It will appear at the top of the list when you edit the widget.";
 "calendar::event::more_action:dday_candidate:unregister:message" = "Remove this event from D-day widget candidates?";
+"calendar::event::more_action:live_activity:title" = "Live Activity";
+"calendar::event::more_action:live_activity:register:item_name" = "Show on Lock Screen";
+"calendar::event::more_action:live_activity:unregister:item_name" = "Remove from Lock Screen";
+"calendar::event::more_action:live_activity:unavail::not_found" = "This event is no longer available.";
+"calendar::event::more_action:live_activity:unavail::already_passed" = "This event has already started.";
+"calendar::event::more_action:live_activity:unavail::too_far_future" = "Only events starting within 8 hours can be shown.";
+"calendar::event::more_action:live_activity:register:confirm" = "Do you want to show this event on the Lock Screen?";
+"calendar::event::more_action:live_activity:unregister:confirm" = "Do you want to remove this event from the Lock Screen?";
+"calendar::event::more_action:live_activity:replace:confirm" = "Another event is showing on the Lock Screen. Replace it with this one?";
+"calendar::event::more_action:live_activity:register:success" = "Now showing on the Lock Screen. Lock your device to see it.";
+"calendar::event::more_action:live_activity:showing" = "Showing on Lock Screen";
 "calendar::event::more_action:copy:item_name" = "Copy event";
+"calendar::event::more_action:share:item_name" = "Share";
+"event_detail::share::field::time" = "Time";
+"event_detail::share::field::repeating" = "Repeat";
+"event_detail::share::field::calendar" = "Calendar";
+"event_detail::share::field::place" = "Location";
+"event_detail::share::field::url" = "Link";
+"event_detail::share::field::memo" = "Memo";
 "calendar::event::more_action:transform_to::schedule" = "Convert to schedule";
 "calendar::event::more_action:transform_to::todo" = "Convert to to-do";
 "calendar::event::more_action:edit:item_name" = "Edit";
@@ -145,7 +177,9 @@
 "calednar::event::skip_todo_until" = "Select a time to skip this to-do";
 "calednar::event::copy" = "Copy event";
 "calendar::move_date" = "Move date";
-"calednar::event::google::edit" = "Edit Google Calendar Event";
+"calendar::share::this_day" = "Share this day";
+"calendar::share::this_week" = "Share this week";
+"calendar::share::this_month" = "Share this month";
 
 
 // MARK: - event detail
@@ -171,14 +205,33 @@
 "eventDetail.repeating.everyYearSomeDay:title" = "Every Year %@";
 "eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "Every year %@ (lunar calendar)";
 "eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "All days of the last week of every month";
-"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "The first %@ of every month";
-"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "The second %@ of every month";
-"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "The third %@ of every month";
-"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "The fourth %@ of every month";
-"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "The fifth %@ of every month";
-"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "The sixth %@ of every month";
-"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "The seventh %@ of every month";
-"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "The last %@ of every month";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::m" = "The first %@ of every month";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::f" = "The first %@ of every month";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::n" = "The first %@ of every month";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::m" = "The second %@ of every month";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::f" = "The second %@ of every month";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::n" = "The second %@ of every month";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::m" = "The third %@ of every month";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::f" = "The third %@ of every month";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::n" = "The third %@ of every month";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::m" = "The fourth %@ of every month";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::f" = "The fourth %@ of every month";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::n" = "The fourth %@ of every month";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::m" = "The fifth %@ of every month";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::f" = "The fifth %@ of every month";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::n" = "The fifth %@ of every month";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::m" = "The sixth %@ of every month";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::f" = "The sixth %@ of every month";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::n" = "The sixth %@ of every month";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::m" = "The seventh %@ of every month";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::f" = "The seventh %@ of every month";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::n" = "The seventh %@ of every month";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::m" = "The last %@ of every month";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::f" = "The last %@ of every month";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::n" = "The last %@ of every month";
+"eventDetail.repeating.last::m" = "Last";
+"eventDetail.repeating.last::f" = "Last";
+"eventDetail.repeating.last::n" = "Last";
 "eventDetail.repeating.endtime::title" = "Repeat Ends";
 "eventDetail.repeating.endtime::option::never" = "Never";
 "eventDetail.repeating.endtime::option::on" = "On";
@@ -188,7 +241,6 @@
 "eventDetail.repeating::period_endcount" = "Starting %@ %d times";
 
 "eventDetail.repeating.everyNDays:title" = "Every %d Days";
-"eventDetail.repeating.last" = "Last";
 "eventDetail.repeating.everyNMonths:title" = "Every %d Months";
 "eventDetail.repeating.everyNYears:title" = "Every %d Years";
 "eventDetail.repeating::endoption_until" = "until %@";
@@ -267,12 +319,33 @@
 "eventDetail::gogoleEvent::conference::password" = "Password";
 "eventDetail::gogoleEvent::copy::message" = "Copied to clipboard.";
 "eventDetail::gogoleEvent::canceled::message" = "This event has been cancelled.";
+"eventDetail::gogoleEvent::saved::message" = "The event has been saved.";
+"eventDetail::gogoleEvent::readOnlyCalendar::message" = "This calendar is read-only, so the event can't be edited here.";
+"eventDetail::gogoleEvent::reauthenticate::title" = "Additional permission needed";
+"eventDetail::gogoleEvent::reauthenticate::message" = "This Google account is connected with read-only access. To edit events, you need to grant edit permission separately.";
+"eventDetail::gogoleEvent::writeScopeNotGranted::message" = "Edit permission was not granted. If this is a work or school account, your administrator may not allow it.";
+"eventDetail::gogoleEvent::repeating::title" = "This is a repeating event";
+"eventDetail::gogoleEvent::repeating::onlyThisTime::button" = "This event only";
+"eventDetail::gogoleEvent::repeating::all::button" = "All events";
+"eventDetail::gogoleEvent::remove::confirm::message" = "Delete this event from Google Calendar?";
+"eventDetail::gogoleEvent::editOnCalendar" = "Edit in Google Calendar";
+"eventDetail::gogoleEvent::notEditableField::message" = "This can't be edited here. Please edit it in Google Calendar.";
+"eventDetail::gogoleEvent::description::formatLoss::message" = "This description has formatting. Editing it here will remove the formatting.";
 
 // MARK: - Apple calendar event
 "eventDetail::appleCalendarEvent::viewOnCalendar" = "View in Apple Calendar";
+"eventDetail::appleCalendarEvent::editOnCalendar" = "Edit in Apple Calendar";
 "eventDetail::appleCalendarEvent::calendar::event" = "Apple Calendar Event";
 "eventDetail::appleCalendarEvent::attendees" = "Attendees (%d people)";
 "eventDetail::appleCalendarEvent::attendees::organizer" = "Organizer";
+"eventDetail::appleCalendarEvent::saved::message" = "Saved.";
+"eventDetail::appleCalendarEvent::remove::confirm::message" = "Delete this event?";
+"eventDetail::appleCalendarEvent::repeating::title" = "Repeating event";
+"eventDetail::appleCalendarEvent::repeating::onlyThisTime::button" = "This event only";
+"eventDetail::appleCalendarEvent::repeating::thisAndFuture::button" = "This and all future events";
+"eventDetail::appleCalendarEvent::readOnlyCalendar::message" = "This calendar is read-only, so the event can't be edited.";
+"eventDetail::appleCalendarEvent::notEditableField::message" = "This field can't be edited in the app.";
+"eventDetail::appleCalendarEvent::url::placeholder" = "URL";
 
 // MARK: - event tag
 
@@ -311,6 +384,23 @@
 "eventList::remove::confirm::button::olderThan1y" = "Older than 1 year";
 
 
+// MARK: - share preview
+
+"share_preview::title" = "Share Preview";
+"share_preview::tag_filter::title" = "Event Types";
+"share_preview::tag_filter::select_all" = "Select all";
+"share_preview::tag_filter::deselect_all" = "Deselect all";
+"share_preview::option::include_tag_name" = "Include event type name";
+"share_preview::share_button" = "Share";
+"share_preview::empty" = "No events to share";
+"share_preview::header::this_week" = "This week";
+"share_preview::header::last_week" = "Last week";
+"share_preview::header::next_week" = "Next week";
+"share_preview::header::week_of_month" = "%1$@ week %2$d";
+"share_preview::format::text" = "Text";
+"share_preview::format::image" = "Image";
+
+
 // MARK: - account
 
 "manage_account::title" = "Account Management";
@@ -327,7 +417,9 @@
 "manage_account::delete_account_button::confirm:message" = "Are you sure you want to delete your account?";
 "manage_account::delete_account_button::description" = "After requesting account deletion, your account will be deleted.\nOnce deleted, account information cannot be recovered.";
 "signIn::title" = "Login";
-"signIn:description" = "Back up your event list and sync it across other iOS devices\n(Supported platforms will be expanded.)";
+"signIn::feature::sync" = "Back up events, sync across devices";
+"signIn::feature::aiAgent" = "Manage your schedule with the AI agent";
+"signIn::feature::web" = "Use on the web · todo-calendar.com";
 
 
 // MARK: - setting
@@ -410,10 +502,17 @@
 "setting.holiday.hide::confirm::message" = "Hide this holiday every year?\nYou can show it again in Settings > Holiday.";
 "setting.holiday.hidden::sectionTitle" = "Hidden Holidays";
 "setting.holiday.show::button" = "Show";
+"setting.aiGuide::name" = "Add with AI — Siri & widgets";
 "setting.feedback::name" = "Feedback";
 "setting.help::name" = "Help";
+"setting.openWeb::name" = "Open on the web";
 "setting.share::name" = "Share App";
 "setting.write_review::name" = "Write an app review";
+"setting.openSourceLicense::name" = "Open Source License";
+"setting.billing.plan::name" = "Plan";
+"setting.terms::name" = "Terms of Use";
+"setting.privacyPolicy::name" = "Privacy Policy";
+"setting.adPrivacyOptions::name" = "Ad Privacy Options";
 "setting.account.signedIn::manageAccount" = "Account";
 "setting.account.needSignIn" = "Login";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -513,6 +612,14 @@
 "widget.dday.target::registered" = "Pinned";
 "widget.dday.turn::name" = "Turn %d";
 
+"widget.aiCommand::title" = "Add with AI";
+"widget.aiCommand::explain" = "Open AI input with one tap.";
+
+// MARK: - liveActivity
+
+"liveActivity::stale" = "Starting now";
+"liveActivity::action::end" = "End";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "This link format is not supported.\nPlease update the app to the latest version.";
@@ -543,20 +650,133 @@
 "aiAgent::state::failed" = "Task failed";
 "aiAgent::done::default" = "Done";
 "aiAgent::failed::default" = "Couldn't complete that";
+"aiAgent::failed::dailyLimitExceeded" = "You've used up today's AI credits.";
 "aiAgent::retry" = "Retry";
 "aiAgent::needSignIn::title" = "Sign in required";
 "aiAgent::needSignIn::message" = "Sign in to use AI quick input.";
+"aiAgent::speechPermissionDenied::title" = "Permission required";
+"aiAgent::speechPermissionDenied::message" = "Allow microphone and speech recognition access in Settings to use voice input.";
+"aiAgent::speechPermissionDenied::confirm" = "Open Settings";
 "aiAgent::title" = "AI Quick Input";
 "aiAgent::keyboard::stop" = "Stop";
 "aiAgent::keyboard::send" = "Send";
 "aiAgent::stop" = "Stop";
 "aiAgent::usage" = "%@ / %@ credits";
-"aiAgent::plan::free" = "Free";
-"aiAgent::plan::standard" = "Standard";
-"aiAgent::plan::lifetime" = "Lifetime";
 "aiAgent::usage::topupRemaining" = "%@ extra credits left";
 "aiAgent::usage::planChangeScheduled" = "Switching to the %2$@ plan on %1$@";
+"aiAgent::usage::resetsIn" = "Available again in %@";
+"aiAgent::notificationPermissionDenied::message" = "Turn on notifications in Settings to receive AI results.";
 "aiAgent::stop::confirm::title" = "Stop processing?";
 "aiAgent::stop::confirm::message" = "Stopping discards the task in progress, and it can't be resumed.";
 "aiAgent::confirm::countdown" = "left to approve";
 "aiAgent::confirm::expired::message" = "Time expired. Please request again.";
+"aiAgent::tip::externalEntry" = "Tip: you can also add by Siri, the Action button, or widgets.";
+"aiAgent::failed::showPlans" = "View Plans";
+
+"aiAgent::image::title" = "Read from image";
+"aiAgent::image::sourceSelect::title" = "Add an image";
+"aiAgent::image::source::library" = "Choose from library";
+"aiAgent::image::source::camera" = "Take a photo";
+"aiAgent::image::recognizing" = "Reading the image…";
+"aiAgent::image::noText" = "Couldn't find any text in this image";
+"aiAgent::image::readText" = "Text from the image";
+"aiAgent::image::instruction" = "Extra instructions (optional)";
+"aiAgent::image::instruction::placeholder" = "e.g. Add these as to-dos";
+"aiAgent::image::empty" = "There's no text to send";
+"aiAgent::image::textTooLong" = "The text is too long. Trim it and try again.";
+"aiAgent::image::instructionTooLong" = "Your instructions are too long. Shorten them and try again.";
+"aiAgent::image::busy" = "Another request is still running";
+"aiAgent::image::camera::denied::title" = "Camera access needed";
+"aiAgent::image::camera::denied::message" = "Allow camera access in Settings to take a photo.";
+
+// MARK: - billing
+
+"billing::plan::free" = "Free";
+"billing::plan::standard" = "Standard";
+"billing::plan::lifetime" = "Lifetime";
+
+"billing::paywall::title" = "Upgrade Plan";
+"billing::paywall::current::description" = "%@ credits a day";
+"billing::paywall::metric::dailyCredits" = "%@ credits / day";
+"billing::paywall::period::weekly" = "/wk";
+"billing::paywall::period::monthly" = "/mo";
+"billing::paywall::period::yearly" = "/yr";
+"billing::paywall::price::unavailable" = "Price unavailable";
+"billing::paywall::badge::recommended" = "Recommended";
+"billing::paywall::badge::owned" = "Current plan";
+"billing::paywall::features::title" = "%@ includes";
+"billing::paywall::feature::dailyCredits" = "%@ credits a day";
+"billing::paywall::feature::topup" = "Top-up available when credits run out";
+"billing::paywall::feature::noAds" = "No ads";
+"billing::paywall::disclosure::subscription" = "Your subscription renews automatically each month unless you cancel at least 24 hours before the current period ends. You can cancel anytime in App Store settings.";
+"billing::paywall::disclosure::subscription::generic" = "Your subscription renews automatically at the end of each billing period unless you cancel at least 24 hours before it ends. You can cancel anytime in App Store settings.";
+"billing::paywall::disclosure::oneTime" = "Pay once and keep it. This does not renew.";
+"billing::paywall::disclosure::storeUnavailable" = "Couldn't reach the App Store. Please try again later.";
+"billing::paywall::cta::subscribe" = "Subscribe to %@";
+"billing::paywall::cta::buy" = "Get %@";
+"billing::paywall::cta::unavailable" = "Unavailable";
+"billing::paywall::allPlansOwned" = "You already own the best plan.";
+"billing::paywall::terms" = "Terms of Service";
+"billing::paywall::privacyPolicy" = "Privacy Policy";
+"billing::paywall::restore" = "Restore Purchases";
+"billing::paywall::restored" = "Purchases restored";
+"billing::paywall::restore::empty" = "No purchases to restore.";
+"billing::paywall::manageSubscription" = "Manage Subscription";
+"billing::paywall::purchase::applied" = "Plan updated";
+"billing::paywall::pending::title" = "Approval pending";
+"billing::paywall::pending::message" = "Ask a family organizer to approve this purchase. It'll apply automatically once approved.";
+"billing::paywall::userPlan::loadFailed" = "Couldn't load your plan. Please try again.";
+"billing::paywall::retry" = "Retry";
+"billing::paywall::unfinished::title" = "A purchase hasn't been applied";
+"billing::paywall::unfinished::message" = "Your payment went through, but your plan hasn't updated yet.";
+"billing::paywall::unfinished::action" = "Apply now";
+"billing::paywall::unfinished::applied" = "Your purchase has been applied";
+"billing::paywall::processing::message" = "Confirming your purchase…";
+"billing::paywall::fail::purchase" = "We couldn't complete the purchase. Please try again.";
+"billing::paywall::fail::invalidTransaction" = "We couldn't verify your purchase. Please try again in a moment.";
+"billing::paywall::fail::unknownProduct" = "We couldn't recognize this purchase. Updating the app may fix it.";
+"billing::paywall::fail::planChangeNotAllowed" = "This plan change isn't supported.";
+"billing::paywall::fail::ownedByAnotherAccount" = "This purchase belongs to another account. Sign in with the account you bought it on.";
+"billing::paywall::fail::reflectDelayed" = "Your payment went through, but applying it is delayed. It'll be applied automatically.";
+"billing::paywall::topup::credits" = "%@ credits";
+"billing::paywall::topup::credits::split" = "Base %@ + Bonus %@ credits";
+"billing::paywall::topup::bonus" = "+%@%% bonus";
+"billing::paywall::topup::title" = "Add credits";
+"billing::paywall::topup::title::withRemaining" = "Add credits · %@ owned";
+"billing::paywall::topup::description" = "Extra credits are used after your daily limit runs out, and they don't expire.";
+"billing::paywall::topup::applied" = "Credits added";
+"billing::paywall::topup::applied::withCredits" = "%@ credits added";
+
+"billing::needSignIn::title" = "Sign in required";
+"billing::needSignIn::message" = "Sign in to view and manage your plan.";
+
+// MARK: - share extension
+
+"share.ai::title" = "Send to AI";
+"share.ai::text::placeholder" = "Text to send";
+"share.ai::instruction::placeholder" = "Add an instruction (optional)";
+"share.ai::needSignIn" = "Sign in to the app first to use AI quick input.";
+"share.ai::pending" = "A previous request is still waiting. Open the app to check its progress or result.";
+"share.ai::sent" = "Sent. You can check the result in the app.";
+"share.ai::failed" = "Couldn't send that. Please try again.";
+"share.ai::sentButUntracked" = "Sent, but the app can't track the result. Check your calendar after a moment.";
+"share.ai::textTooLong" = "That text is too long to send. Shorten it and try again.";
+"share.ai::instructionTooLong" = "Your instruction is too long. Please shorten it.";
+"share.ai::limitExceeded" = "You've used up today's AI credits. They reset at midnight UTC.";
+"share.ai::image::title" = "Send image to AI";
+"share.ai::image::recognizing" = "Reading text from the image…";
+"share.ai::image::text::caption" = "Text read from the image — edit it if anything looks off.";
+"share.ai::image::text::placeholder" = "Text read from the image";
+"share.ai::image::noTextFound" = "Couldn't find any text in this image. Type what you want to add.";
+
+// MARK: - webview
+
+"webview::error::message" = "Couldn't load this page.";
+"webview::error::retry" = "Try again";
+"webview::openInBrowser" = "Open in browser";
+
+// MARK: - legal notice
+
+"legal_notice.message::terms" = "Our Terms of Service have been updated.";
+"legal_notice.message::privacy" = "Our Privacy Policy has been updated.";
+"legal_notice.effectiveDate" = "Effective %@";

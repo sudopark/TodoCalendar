@@ -8,6 +8,8 @@
 
 import XCTest
 import Combine
+import Prelude
+import Optics
 import Domain
 import UnitTestHelpKit
 
@@ -19,22 +21,29 @@ class AIAgentCommandViewModelImpleTests: BaseTestCase, PublisherWaitable {
     var cancelBag: Set<AnyCancellable>!
     private var stubAgent: StubAIAgentOrchestrationUsecase!
     private var spyRouter: SpyAIAgentRouter!
+    private var spyListener: SpyAIAgentCommandSceneListener!
 
     override func setUpWithError() throws {
         self.cancelBag = .init()
         self.stubAgent = .init()
         self.spyRouter = .init()
+        self.spyListener = .init()
     }
 
     override func tearDownWithError() throws {
         self.cancelBag = nil
         self.stubAgent = nil
         self.spyRouter = nil
+        self.spyListener = nil
     }
 
-    private func makeViewModel() -> AIAgentCommandViewModelImple {
-        let viewModel = AIAgentCommandViewModelImple(orchestrationUsecase: self.stubAgent)
+    private func makeViewModel(userPlan: BillingUserPlan? = nil) -> AIAgentCommandViewModelImple {
+        let viewModel = AIAgentCommandViewModelImple(
+            orchestrationUsecase: self.stubAgent,
+            billingUsecase: StubBillingUsecase(stubUserPlan: userPlan)
+        )
         viewModel.router = self.spyRouter
+        viewModel.listener = self.spyListener
         return viewModel
     }
 
@@ -250,5 +259,173 @@ extension AIAgentCommandViewModelImpleTests {
         // then
         XCTAssertEqual(self.stubAgent.didLoadUsage, false)
         _ = observe
+    }
+}
+
+
+// MARK: - currentUserPlan 릴레이 (#739)
+
+extension AIAgentCommandViewModelImpleTests {
+
+    // seeding 전(prepend nil) + billingUsecase 값 순서로 방출
+    func test_currentUserPlan_relaysBillingUsecase() {
+        // given
+        let viewModel = self.makeViewModel(userPlan: BillingUserPlan() |> \.planId .~ .standard)
+        var plans: [BillingUserPlan?] = []
+        // when
+        viewModel.currentUserPlan
+            .sink(receiveValue: { plans.append($0) })
+            .store(in: &self.cancelBag)
+        // then
+        XCTAssertEqual(plans.map { $0?.planId }, [nil, .standard])
+    }
+}
+
+
+// MARK: - paywall 진입점 (#739)
+
+extension AIAgentCommandViewModelImpleTests {
+
+    func test_showPlans_requestsPaywallViaListener() {
+        // given
+        let viewModel = self.makeViewModel()
+        // when
+        viewModel.showPlans()
+        // then — 자기 router로 직접 열지 않고 부모(Listener)에게 위임한다
+        XCTAssertEqual(self.spyListener.didRequestPaywall, true)
+    }
+
+    // reset 누락 시 다음 한도 초과에서 bindShowAICommandResultIfNeed의 false→true 전이가
+    // 다시 발생하지 않아 시트가 영영 안 뜨는 회귀가 생긴다
+    func test_showPlans_resetsOrchestrationState() {
+        // given
+        let viewModel = self.makeViewModel()
+        // when
+        viewModel.showPlans()
+        // then
+        XCTAssertEqual(self.stubAgent.didReset, true)
+    }
+}
+
+
+// MARK: - 알림 권한 거부 안내 (#998)
+
+extension AIAgentCommandViewModelImpleTests {
+
+    func testViewModel_whenPrepare_refreshNotificationPermissionStatus() {
+        // given
+        let viewModel = self.makeViewModel()
+        // when
+        viewModel.prepare()
+        // then
+        XCTAssertEqual(self.stubAgent.didRefreshNotificationPermissionStatus, true)
+    }
+
+    func testViewModel_relayNotificationPermissionDenied() {
+        // given
+        let viewModel = self.makeViewModel()
+        let expect = expectation(description: "알림 권한 거부 상태를 릴레이한다")
+        // when
+        let denied = self.waitFirstOutput(expect, for: viewModel.isNotificationPermissionDenied.dropFirst()) {
+            self.stubAgent.isNotificationPermissionDeniedSubject.send(true)
+        }
+        // then
+        XCTAssertEqual(denied, true)
+    }
+
+    func testViewModel_whenOpenNotificationSetting_routeToSystemSetting() {
+        // given
+        let viewModel = self.makeViewModel()
+        // when
+        viewModel.openNotificationSetting()
+        // then
+        XCTAssertEqual(self.spyRouter.didOpenSystemSetting, true)
+    }
+}
+
+
+// MARK: - 구매 후 usage 재조회 릴레이 (#739)
+
+extension AIAgentCommandViewModelImpleTests {
+
+    private func makeViewModelWithBillingStub(
+        userPlan: BillingUserPlan? = nil
+    ) -> (AIAgentCommandViewModelImple, StubBillingUsecase) {
+        let billingStub = StubBillingUsecase(stubUserPlan: userPlan)
+        let viewModel = AIAgentCommandViewModelImple(
+            orchestrationUsecase: self.stubAgent,
+            billingUsecase: billingStub
+        )
+        viewModel.router = self.spyRouter
+        return (viewModel, billingStub)
+    }
+
+    // 화면 진입 시점의 초기 seeding(첫 방출)만으로는 usage 를 재조회하지 않는다 — 안 그러면
+    // 진입마다 불필요한 호출이 나간다
+    func test_currentUserPlanFirstValue_doesNotRefreshUsage() {
+        // given — 구독을 유지하려면 viewModel 을 살려둬야 한다([weak self] 라 dealloc 되면
+        // 뒤이은 send() 가 무시된다)
+        let (viewModel, _) = self.makeViewModelWithBillingStub(
+            userPlan: BillingUserPlan() |> \.planId .~ .free
+        )
+        // when — 구독은 init 시점에 이미 시작됨(CurrentValueSubject 라 첫 값이 즉시 replay)
+        // then
+        XCTAssertFalse(self.stubAgent.didLoadUsage)
+        _ = viewModel
+    }
+
+    // 구매 성공 등으로 보유 플랜이 바뀌면(첫 값 이후) usage 를 재조회해 게이지·dailyLimit 을
+    // 최신화한다 — paywall 이 dismiss 후 onAppear 를 다시 못 태우는 상황(overFullScreen)의 대안
+    func test_currentUserPlanChanged_afterFirstValue_refreshesUsage() {
+        // given
+        let (viewModel, billingStub) = self.makeViewModelWithBillingStub(
+            userPlan: BillingUserPlan() |> \.planId .~ .free
+        )
+        XCTAssertFalse(self.stubAgent.didLoadUsage)
+        // when
+        billingStub.currentUserPlanSubject.send(BillingUserPlan() |> \.planId .~ .standard)
+        // then
+        XCTAssertTrue(self.stubAgent.didLoadUsage)
+        _ = viewModel
+    }
+
+    // 서버 응답이 같은 플랜을 재기록하는 경우를 재현
+    func test_currentUserPlanSameValueAsSeed_doesNotRefreshUsage() {
+        // given
+        let (viewModel, billingStub) = self.makeViewModelWithBillingStub(
+            userPlan: BillingUserPlan() |> \.planId .~ .free
+        )
+        // when
+        billingStub.currentUserPlanSubject.send(BillingUserPlan() |> \.planId .~ .free)
+        // then
+        XCTAssertEqual(self.stubAgent.didLoadUsageCount, 0)
+        _ = viewModel
+    }
+
+    func test_currentUserPlanSameValuePutTwice_refreshesUsageOnlyOnce() {
+        // given
+        let (viewModel, billingStub) = self.makeViewModelWithBillingStub(
+            userPlan: BillingUserPlan() |> \.planId .~ .free
+        )
+        // when
+        billingStub.currentUserPlanSubject.send(BillingUserPlan() |> \.planId .~ .standard)
+        billingStub.currentUserPlanSubject.send(BillingUserPlan() |> \.planId .~ .standard)
+        // then
+        XCTAssertEqual(self.stubAgent.didLoadUsageCount, 1)
+        _ = viewModel
+    }
+
+    // dedup이 정상적인 플랜 변경까지 막지는 않는다
+    func test_currentUserPlanDifferentValues_refreshesUsageForEachChange() {
+        // given
+        let (viewModel, billingStub) = self.makeViewModelWithBillingStub(
+            userPlan: BillingUserPlan() |> \.planId .~ .free
+        )
+        // when
+        billingStub.currentUserPlanSubject.send(BillingUserPlan() |> \.planId .~ .standard)
+        billingStub.currentUserPlanSubject.send(BillingUserPlan() |> \.planId .~ .lifetime)
+        // then
+        XCTAssertEqual(self.stubAgent.didLoadUsageCount, 2)
+        _ = viewModel
     }
 }

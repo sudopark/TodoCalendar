@@ -34,4 +34,6 @@ public protocol SpeechRecognizeService: Sendable {
 
     // raw 오디오 입력 세기 (0...1 정규화 레벨)
     var voiceLevel: AnyPublisher<Float, Never> { get }
+
+    var audioInputDisrupted: AnyPublisher<Void, Never> { get }
 }

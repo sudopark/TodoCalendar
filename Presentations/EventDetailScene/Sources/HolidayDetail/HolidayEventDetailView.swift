@@ -14,6 +14,7 @@ import Combine
 import Domain
 import Extensions
 import CommonPresentation
+import Scenes
 
 
 // MARK: - HolidayEventDetailViewState
@@ -21,12 +22,13 @@ import CommonPresentation
 @Observable final class HolidayEventDetailViewState {
     
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
     
     var name: String = ""
     var dateText: String = ""
     var ddayText: String = ""
     var countryModel: CountryModel?
+    var liveActivityActionModel: LiveActivityActionModel?
     
     func bind(_ viewModel: any HolidayEventDetailViewModel) {
         
@@ -38,28 +40,35 @@ import CommonPresentation
             .sink(receiveValue: { [weak self] name in
                 self?.name = name
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.dateText
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] text in
                 self?.dateText = text
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.ddayText
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] text in
                 self?.ddayText = text
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.countryModel
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] model in
                 self?.countryModel = model
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
+        
+        viewModel.liveActivityActionModel
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] model in
+                self?.liveActivityActionModel = model
+            })
+            .store(in: self.cancellables)
     }
 }
 
@@ -70,12 +79,14 @@ final class HolidayEventDetailViewEventHandler: Observable {
     var onAppear: () -> Void = { }
     var close: () -> Void = { }
     var hideHoliday: () -> Void = { }
+    var toggleLiveActivity: (Bool) -> Void = { _ in }
 
     func bind(_ viewModel: any HolidayEventDetailViewModel) {
 
         self.onAppear = viewModel.refresh
         self.close = viewModel.close
         self.hideHoliday = viewModel.hideHoliday
+        self.toggleLiveActivity = viewModel.toggleLiveActivity(isRegistered:)
     }
 }
 
@@ -125,6 +136,10 @@ struct HolidayEventDetailView: View {
                 Spacer(minLength: 5)
                 self.nameView
 
+                if self.state.liveActivityActionModel?.isRegistered == true {
+                    LiveActivityBadgeView()
+                }
+
                 VStack(spacing: Metric.Spacing.large) {
                     if let model = self.state.countryModel {
                         self.countryInfoView(model)
@@ -150,6 +165,14 @@ struct HolidayEventDetailView: View {
                 .eventHandler(\.onTap, self.eventHandlers.close)
 
             Menu {
+                if let model = self.state.liveActivityActionModel {
+                    Button {
+                        self.eventHandlers.toggleLiveActivity(model.isRegistered)
+                    } label: {
+                        Label(model.itemText, systemImage: "timer")
+                    }
+                }
+
                 Button(role: .destructive) {
                     self.eventHandlers.hideHoliday()
                 } label: {
@@ -159,16 +182,7 @@ struct HolidayEventDetailView: View {
                     )
                 }
             } label: {
-                Image(systemName: "ellipsis")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .foregroundStyle(self.appearance.colorSet.text0.asColor)
-                    .frame(width: 20, height: 20)
-                    .padding()
-                    .background {
-                        RoundedRectangle(cornerRadius: Metric.Radius.regular)
-                            .fill(self.appearance.colorSet.secondaryBtnBackground.asColor)
-                    }
+                MoreActionMenuLabel()
             }
         }
         .padding()

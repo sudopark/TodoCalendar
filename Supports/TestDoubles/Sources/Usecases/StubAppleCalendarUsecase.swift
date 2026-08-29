@@ -9,6 +9,7 @@
 import Foundation
 import Combine
 import Domain
+import Extensions
 
 
 open class StubAppleCalendarUsecase: AppleCalendarUsecase, @unchecked Sendable {
@@ -56,5 +57,39 @@ open class StubAppleCalendarUsecase: AppleCalendarUsecase, @unchecked Sendable {
             )
         }
         return Just(origin).eraseToAnyPublisher()
+    }
+
+    public var stubIsCalendarWritable: Bool? = true
+    open func isCalendarWritable(_ calendarId: String) -> AnyPublisher<Bool?, Never> {
+        return Just<Bool?>(stubIsCalendarWritable).eraseToAnyPublisher()
+    }
+
+    public var stubUpdatedOrigin: AppleCalendar.EventOrigin?
+    public var shouldFailWrite: Bool = false
+    public var didUpdateEventWith: (eventId: String, params: AppleCalendar.EventEditParams, scope: AppleCalendar.EventEditScope)?
+    open func updateEvent(
+        _ eventId: String,
+        params: AppleCalendar.EventEditParams,
+        scope: AppleCalendar.EventEditScope
+    ) async throws -> AppleCalendar.EventOrigin {
+        didUpdateEventWith = (eventId, params, scope)
+        if shouldFailWrite {
+            throw RuntimeError("failed to update apple calendar event")
+        }
+        return stubUpdatedOrigin ?? AppleCalendar.EventOrigin(
+            eventId: eventId, originalEventId: eventId,
+            calendarId: "cal-1", name: "Updated", eventTime: .period(0..<500)
+        )
+    }
+
+    public var didRemoveEventWith: (eventId: String, scope: AppleCalendar.EventEditScope)?
+    open func removeEvent(
+        _ eventId: String,
+        scope: AppleCalendar.EventEditScope
+    ) async throws {
+        didRemoveEventWith = (eventId, scope)
+        if shouldFailWrite {
+            throw RuntimeError("failed to remove apple calendar event")
+        }
     }
 }

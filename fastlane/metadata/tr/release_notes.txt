@@ -1,0 +1,27 @@
+Bu güncelleme yeni özellikler getiriyor.
+
+■ Hızlı AI Girişi
+· Söyle ya da yaz, etkinlik oluşsun. "Cuma 12'de Sara'yla öğle yemeği", "dişçiyi önümüzdeki salıya al" – tam da söyleyeceğin gibi
+· Görselden oku: ders programını ya da bir etkinlik afişini çek veya kitaplığından bir görsel seç, metin etkinliğe dönüşsün
+· Yalnızca ekleme değil: saati taşıma, yeniden adlandırma, tamamlandı olarak işaretleme, silme. Bir şeyi değiştiren ya da kaldıran istekler önce ne olacağını gösterir ve onay ister
+· Uygulamayı açmadan Siri'den, bir widget'tan ya da Denetim Merkezi'nden gönder
+· Başka bir uygulamadan metin veya fotoğraf paylaş, AI'ya gönder ile devam etsin
+· Hızlı AI Girişi oturum açtıktan sonra kullanılabilir
+
+■ Kilit Ekranı'nda göster
+· Birazdan başlayacak etkinlik kilit ekranında ve Dynamic Island'da geri sayar
+· Etkinlik ayrıntılarından ya da günün listesinden ekle – Google Takvim ve Apple Takvim etkinlikleri de dahil
+· Bir yapılacağı doğrudan kilit ekranından tamamlandı olarak işaretle veya gösterimi bitir, dokunduğunda ayrıntılar açılır
+
+■ Programı paylaşma
+· Takvimde bir tarihi basılı tutarak Bu günü paylaş, Bu haftayı paylaş veya Bu ayı paylaş seçeneklerine ulaş
+· Paylaşım Önizlemesi ekranında hangi Etkinlik Türleri dahil edileceğini ve Metin mi yoksa Görsel olarak mı paylaşacağını seç
+· Tek bir etkinliği de paylaşabilirsin
+
+■ Google Takvim ve Apple Takvim etkinliklerini düzenleme
+· Bağlı takvimlerindeki etkinlikleri doğrudan uygulamada değiştir ve sil, yineleme kuralları dahil
+· Silmek için listede basılı tut
+
+■ Planlar
+· Planı yükselt ekranında Standart ile Ömür Boyu arasında seçim yaparsın – her biri günlük daha çok kredi verir
+· Krediler biterse Kredi ekle tamamlar, sonradan alınan krediler de sona ermez

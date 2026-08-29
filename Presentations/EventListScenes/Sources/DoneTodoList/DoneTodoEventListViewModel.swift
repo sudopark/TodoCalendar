@@ -13,6 +13,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import Scenes
 
 
@@ -242,7 +243,7 @@ final class DoneTodoEventListViewModelImple: DoneTodoEventListViewModel, @unchec
         let revertedIdSet = CurrentValueSubject<Set<String>, Never>([])
     }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private let subject = Subject()
     private var todoRevertingTasks: [String: Task<Void, any Error>] = [:]
     
@@ -251,7 +252,7 @@ final class DoneTodoEventListViewModelImple: DoneTodoEventListViewModel, @unchec
             .sink(receiveValue: { [weak self] zone in
                 self?.subject.currentTimeZone.send(zone)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 
@@ -320,7 +321,7 @@ extension DoneTodoEventListViewModelImple {
                 self?.router?.showError(error)
             }
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     func close() {

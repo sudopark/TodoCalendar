@@ -79,6 +79,14 @@
 "dayname::friday:very_short" = "DV";
 "dayname::saturday:very_short" = "DS";
 
+"dayname::sunday:gender" = "m";
+"dayname::monday:gender" = "m";
+"dayname::tuesday:gender" = "m";
+"dayname::wednesday:gender" = "m";
+"dayname::thursday:gender" = "m";
+"dayname::friday:gender" = "m";
+"dayname::saturday:gender" = "m";
+
 
 // MARK: - event notification
 
@@ -112,8 +120,12 @@
 
 "calendar::foremostevent:title" = "Esdeveniment principal";
 "calendar::uncompletedTodos:title" = "Tasques pendents";
+"calendar::guideTodo::name" = "Descobriu com funciona To-do Calendar";
+"calendar::eventSync::loadingAllEvents::message" = "S'estan carregant tots els esdeveniments…";
 "calendar::event_time::todo" = "Tasca";
 "calendar::event_time::allday" = "Tot el dia";
+"calendar::event_time::start" = "Inici";
+"calendar::event_time::end" = "Fi";
 "calendar::event_time::allday::with" = "%@ tot el dia";
 "calendar::event_time::period:some_days" = "%d dies";
 "calendar::event_time::period:some_minutes" = "%d minuts";
@@ -123,11 +135,13 @@
 "calendar::event::more_action::foremost_event:title" = "Esdeveniment principal";
 "calendar::event::more_action::remove_only_thistime:message" = "Voleu suprimir només aquest esdeveniment de tots els esdeveniments repetitius?";
 "calendar::event::more_action::remove:message" = "Voleu eliminar aquest esdeveniment?";
+"calendar::event::more_action::remove_this_and_future:message" = "Voleu suprimir aquest esdeveniment i tots els futurs de la sèrie d'esdeveniments repetitius?";
 "calendar::event::more_action::mark_as_foremost" = "Voleu marcar aquest esdeveniment com a esdeveniment principal?";
 "calendar::event::more_action::unmark_as_foremost" = "Voleu desmarcar aquest esdeveniment com a esdeveniment principal?";
 "calendar::event::more_action::mark_as_foremost::unavail" = "Un esdeveniment de calendari repetitiu no es pot marcar com a esdeveniment principal.";
 "calendar::event::more_action:remove_only_thistime:item_name" = "Elimina només aquest esdeveniment";
 "calendar::event::more_action:remove:item_name" = "Elimina l'esdeveniment";
+"calendar::event::more_action:remove_this_and_future:item_name" = "Elimina aquest i tots els esdeveniments futurs";
 "calendar::event::more_action:foremost:mark:item_name" = "Marca com a principal";
 "calendar::event::more_action:foremost:unmark:item_name" = "Desmarca com a principal";
 "calendar::event::more_action:dday_candidate:register:item_name" = "Afegeix al widget de Dia D";
@@ -135,7 +149,25 @@
 "calendar::event::more_action:dday_candidate:title" = "Candidat al widget de Dia D";
 "calendar::event::more_action:dday_candidate:register:message" = "Voleu afegir aquest esdeveniment com a candidat al widget de Dia D? Apareixerà a la part superior de la llista quan editeu el widget.";
 "calendar::event::more_action:dday_candidate:unregister:message" = "Voleu eliminar aquest esdeveniment dels candidats al widget de Dia D?";
+"calendar::event::more_action:live_activity:title" = "Activitat en directe";
+"calendar::event::more_action:live_activity:register:item_name" = "Mostra a la pantalla bloquejada";
+"calendar::event::more_action:live_activity:unregister:item_name" = "Elimina de la pantalla bloquejada";
+"calendar::event::more_action:live_activity:unavail::not_found" = "Aquest esdeveniment ja no està disponible.";
+"calendar::event::more_action:live_activity:unavail::already_passed" = "Aquest esdeveniment ja ha començat.";
+"calendar::event::more_action:live_activity:unavail::too_far_future" = "Només es poden mostrar esdeveniments que comencin d'aquí a 8 hores.";
+"calendar::event::more_action:live_activity:register:confirm" = "Voleu mostrar aquest esdeveniment a la pantalla bloquejada?";
+"calendar::event::more_action:live_activity:unregister:confirm" = "Voleu eliminar aquest esdeveniment de la pantalla bloquejada?";
+"calendar::event::more_action:live_activity:replace:confirm" = "Hi ha un altre esdeveniment a la pantalla bloquejada. Voleu substituir-lo per aquest?";
+"calendar::event::more_action:live_activity:register:success" = "Ja es mostra a la pantalla bloquejada. Bloquegeu el dispositiu per veure-ho.";
+"calendar::event::more_action:live_activity:showing" = "Es mostra a la pantalla bloquejada";
 "calendar::event::more_action:copy:item_name" = "Copia l'esdeveniment";
+"calendar::event::more_action:share:item_name" = "Comparteix";
+"event_detail::share::field::time" = "Hora";
+"event_detail::share::field::repeating" = "Repetició";
+"event_detail::share::field::calendar" = "Calendari";
+"event_detail::share::field::place" = "Ubicació";
+"event_detail::share::field::url" = "Enllaç";
+"event_detail::share::field::memo" = "Nota";
 "calendar::event::more_action:transform_to::schedule" = "Converteix en cita";
 "calendar::event::more_action:transform_to::todo" = "Converteix en tasca";
 "calendar::event::more_action:edit:item_name" = "Edita";
@@ -145,7 +177,9 @@
 "calednar::event::skip_todo_until" = "Selecciona una hora per ometre aquesta tasca";
 "calednar::event::copy" = "Copia l'esdeveniment";
 "calendar::move_date" = "Mou la data";
-"calednar::event::google::edit" = "Edita l'esdeveniment de Google Calendar";
+"calendar::share::this_day" = "Comparteix aquest dia";
+"calendar::share::this_week" = "Comparteix aquesta setmana";
+"calendar::share::this_month" = "Comparteix aquest mes";
 
 
 // MARK: - event detail
@@ -171,14 +205,33 @@
 "eventDetail.repeating.everyYearSomeDay:title" = "Cada any %@";
 "eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "Cada any %@ (calendari lunar)";
 "eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "Tots els dies de l'última setmana de cada mes";
-"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "El primer %@ de cada mes";
-"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "El segon %@ de cada mes";
-"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "El tercer %@ de cada mes";
-"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "El quart %@ de cada mes";
-"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "El cinquè %@ de cada mes";
-"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "El sisè %@ de cada mes";
-"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "El setè %@ de cada mes";
-"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "L'últim %@ de cada mes";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::m" = "El primer %@ de cada mes";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::f" = "El primer %@ de cada mes";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::n" = "El primer %@ de cada mes";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::m" = "El segon %@ de cada mes";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::f" = "El segon %@ de cada mes";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::n" = "El segon %@ de cada mes";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::m" = "El tercer %@ de cada mes";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::f" = "El tercer %@ de cada mes";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::n" = "El tercer %@ de cada mes";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::m" = "El quart %@ de cada mes";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::f" = "El quart %@ de cada mes";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::n" = "El quart %@ de cada mes";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::m" = "El cinquè %@ de cada mes";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::f" = "El cinquè %@ de cada mes";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::n" = "El cinquè %@ de cada mes";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::m" = "El sisè %@ de cada mes";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::f" = "El sisè %@ de cada mes";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::n" = "El sisè %@ de cada mes";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::m" = "El setè %@ de cada mes";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::f" = "El setè %@ de cada mes";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::n" = "El setè %@ de cada mes";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::m" = "L'últim %@ de cada mes";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::f" = "L'últim %@ de cada mes";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::n" = "L'últim %@ de cada mes";
+"eventDetail.repeating.last::m" = "Últim";
+"eventDetail.repeating.last::f" = "Últim";
+"eventDetail.repeating.last::n" = "Últim";
 "eventDetail.repeating.endtime::title" = "Final de la repetició";
 "eventDetail.repeating.endtime::option::never" = "Mai";
 "eventDetail.repeating.endtime::option::on" = "El";
@@ -188,7 +241,6 @@
 "eventDetail.repeating::period_endcount" = "A partir de %@, %d vegades";
 
 "eventDetail.repeating.everyNDays:title" = "Cada %d dies";
-"eventDetail.repeating.last" = "Últim";
 "eventDetail.repeating.everyNMonths:title" = "Cada %d mesos";
 "eventDetail.repeating.everyNYears:title" = "Cada %d anys";
 "eventDetail.repeating::endoption_until" = "fins a %@";
@@ -267,12 +319,33 @@
 "eventDetail::gogoleEvent::conference::password" = "Contrasenya";
 "eventDetail::gogoleEvent::copy::message" = "S'ha copiat al porta-retalls.";
 "eventDetail::gogoleEvent::canceled::message" = "Aquest esdeveniment s'ha cancel·lat.";
+"eventDetail::gogoleEvent::saved::message" = "S'ha desat l'esdeveniment.";
+"eventDetail::gogoleEvent::readOnlyCalendar::message" = "Aquest calendari és de només lectura, així que l'esdeveniment no es pot editar aquí.";
+"eventDetail::gogoleEvent::reauthenticate::title" = "Cal un permís addicional";
+"eventDetail::gogoleEvent::reauthenticate::message" = "Aquest compte de Google està connectat amb accés de només lectura. Per editar esdeveniments, heu de concedir el permís d'edició per separat.";
+"eventDetail::gogoleEvent::writeScopeNotGranted::message" = "No s'ha concedit el permís d'edició. Si és un compte de feina o de centre educatiu, pot ser que l'administrador no ho permeti.";
+"eventDetail::gogoleEvent::repeating::title" = "Aquest és un esdeveniment repetitiu";
+"eventDetail::gogoleEvent::repeating::onlyThisTime::button" = "Només aquest esdeveniment";
+"eventDetail::gogoleEvent::repeating::all::button" = "Tots els esdeveniments";
+"eventDetail::gogoleEvent::remove::confirm::message" = "Voleu suprimir aquest esdeveniment de Google Calendar?";
+"eventDetail::gogoleEvent::editOnCalendar" = "Edita a Google Calendar";
+"eventDetail::gogoleEvent::notEditableField::message" = "Això no es pot editar aquí. Editeu-ho a Google Calendar.";
+"eventDetail::gogoleEvent::description::formatLoss::message" = "Aquesta descripció té format. Si l'editeu aquí, se'n perdrà el format.";
 
 // MARK: - Apple calendar event
 "eventDetail::appleCalendarEvent::viewOnCalendar" = "Visualitza a l'Apple Calendar";
+"eventDetail::appleCalendarEvent::editOnCalendar" = "Edita a l'Apple Calendar";
 "eventDetail::appleCalendarEvent::calendar::event" = "Esdeveniment de l'Apple Calendar";
 "eventDetail::appleCalendarEvent::attendees" = "Assistents (%d persones)";
 "eventDetail::appleCalendarEvent::attendees::organizer" = "Organitzador";
+"eventDetail::appleCalendarEvent::saved::message" = "S'ha desat.";
+"eventDetail::appleCalendarEvent::remove::confirm::message" = "Voleu suprimir aquest esdeveniment?";
+"eventDetail::appleCalendarEvent::repeating::title" = "Esdeveniment repetitiu";
+"eventDetail::appleCalendarEvent::repeating::onlyThisTime::button" = "Només aquest esdeveniment";
+"eventDetail::appleCalendarEvent::repeating::thisAndFuture::button" = "Aquest i tots els esdeveniments futurs";
+"eventDetail::appleCalendarEvent::readOnlyCalendar::message" = "Aquest calendari és de només lectura, així que l'esdeveniment no es pot editar.";
+"eventDetail::appleCalendarEvent::notEditableField::message" = "Aquest camp no es pot editar a l'aplicació.";
+"eventDetail::appleCalendarEvent::url::placeholder" = "URL";
 
 // MARK: - event tag
 
@@ -311,6 +384,23 @@
 "eventList::remove::confirm::button::olderThan1y" = "Més antigues d'1 any";
 
 
+// MARK: - share preview
+
+"share_preview::title" = "Previsualització per compartir";
+"share_preview::tag_filter::title" = "Tipus d'esdeveniment";
+"share_preview::tag_filter::select_all" = "Selecciona-ho tot";
+"share_preview::tag_filter::deselect_all" = "Desmarca-ho tot";
+"share_preview::option::include_tag_name" = "Inclou el tipus d'esdeveniment";
+"share_preview::share_button" = "Comparteix";
+"share_preview::empty" = "No hi ha cap esdeveniment per compartir";
+"share_preview::header::this_week" = "Aquesta setmana";
+"share_preview::header::last_week" = "La setmana passada";
+"share_preview::header::next_week" = "La setmana vinent";
+"share_preview::header::week_of_month" = "Setmana %2$d de %1$@";
+"share_preview::format::text" = "Text";
+"share_preview::format::image" = "Imatge";
+
+
 // MARK: - account
 
 "manage_account::title" = "Gestió del compte";
@@ -327,7 +417,9 @@
 "manage_account::delete_account_button::confirm:message" = "Segur que voleu suprimir el compte?";
 "manage_account::delete_account_button::description" = "Després de sol·licitar la supressió del compte, aquest s'eliminarà.\nUn cop suprimit, la informació del compte no es pot recuperar.";
 "signIn::title" = "Inicia sessió";
-"signIn:description" = "Feu una còpia de seguretat de la vostra llista d'esdeveniments i sincronitzeu-la amb altres dispositius iOS\n(Les plataformes compatibles s'ampliaran properament.)";
+"signIn::feature::sync" = "Còpia de seguretat dels esdeveniments i sincronització entre dispositius";
+"signIn::feature::aiAgent" = "Gestioneu la vostra agenda amb l'agent d'IA";
+"signIn::feature::web" = "Feu-lo servir al web · todo-calendar.com";
 
 
 // MARK: - setting
@@ -410,10 +502,17 @@
 "setting.holiday.hide::confirm::message" = "Voleu amagar aquest festiu cada any?\nEl podreu tornar a mostrar a Configuració > Festius.";
 "setting.holiday.hidden::sectionTitle" = "Festius amagats";
 "setting.holiday.show::button" = "Mostra";
+"setting.aiGuide::name" = "Afegir amb IA: Siri i widgets";
 "setting.feedback::name" = "Comentaris";
 "setting.help::name" = "Ajuda";
+"setting.openWeb::name" = "Obre al web";
 "setting.share::name" = "Comparteix l'aplicació";
 "setting.write_review::name" = "Escriu una ressenya de l'aplicació";
+"setting.openSourceLicense::name" = "Llicències de codi obert";
+"setting.billing.plan::name" = "Pla";
+"setting.terms::name" = "Condicions d'ús";
+"setting.privacyPolicy::name" = "Política de privadesa";
+"setting.adPrivacyOptions::name" = "Opcions de privadesa dels anuncis";
 "setting.account.signedIn::manageAccount" = "Compte";
 "setting.account.needSignIn" = "Inicia sessió";
 "setting.suggest::readmind::appName" = "Readminds";
@@ -513,6 +612,14 @@
 "widget.dday.target::registered" = "Fixat";
 "widget.dday.turn::name" = "Torn %d";
 
+"widget.aiCommand::title" = "Afegeix amb IA";
+"widget.aiCommand::explain" = "Toqueu una vegada per obrir l'entrada d'IA.";
+
+// MARK: - liveActivity
+
+"liveActivity::stale" = "Comença ara";
+"liveActivity::action::end" = "Finalitza";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "Aquest format d'enllaç no és compatible.\nActualitzeu l'aplicació a l'última versió.";
@@ -543,20 +650,133 @@
 "aiAgent::state::failed" = "Ordre fallida";
 "aiAgent::done::default" = "Fet";
 "aiAgent::failed::default" = "No s'ha pogut completar";
+"aiAgent::failed::dailyLimitExceeded" = "Heu esgotat els crèdits d'IA d'avui.";
 "aiAgent::retry" = "Torna-ho a provar";
 "aiAgent::needSignIn::title" = "Cal iniciar sessió";
 "aiAgent::needSignIn::message" = "Inicieu sessió per utilitzar l'entrada ràpida amb IA.";
+"aiAgent::speechPermissionDenied::title" = "Cal permís";
+"aiAgent::speechPermissionDenied::message" = "Permeteu l'accés al micròfon i al reconeixement de veu a Configuració per fer servir l'entrada per veu.";
+"aiAgent::speechPermissionDenied::confirm" = "Obre Configuració";
 "aiAgent::title" = "Entrada ràpida amb IA";
 "aiAgent::keyboard::stop" = "Atura";
 "aiAgent::keyboard::send" = "Envia";
 "aiAgent::stop" = "Atura";
 "aiAgent::usage" = "%@ / %@ crèdits";
-"aiAgent::plan::free" = "Gratuït";
-"aiAgent::plan::standard" = "Estàndard";
-"aiAgent::plan::lifetime" = "Vitalici";
 "aiAgent::usage::topupRemaining" = "Queden %@ crèdits addicionals";
 "aiAgent::usage::planChangeScheduled" = "Canvi al pla %2$@ el %1$@";
+"aiAgent::usage::resetsIn" = "Disponible de nou d'aquí a %@";
+"aiAgent::notificationPermissionDenied::message" = "Activeu les notificacions a Configuració per rebre els resultats de la IA.";
 "aiAgent::stop::confirm::title" = "Voleu aturar el processament?";
 "aiAgent::stop::confirm::message" = "En aturar-lo es descartarà l'ordre en curs i no es podrà reprendre.";
 "aiAgent::confirm::countdown" = "restant per aprovar";
 "aiAgent::confirm::expired::message" = "S'ha esgotat el temps. Torneu-ho a sol·licitar.";
+"aiAgent::tip::externalEntry" = "Consell: també pots afegir amb la Siri, el botó d'Acció o els widgets.";
+"aiAgent::failed::showPlans" = "Veure plans";
+
+"aiAgent::image::title" = "Llegeix des d'una imatge";
+"aiAgent::image::sourceSelect::title" = "Afegeix una imatge";
+"aiAgent::image::source::library" = "Tria de la biblioteca";
+"aiAgent::image::source::camera" = "Fes una foto";
+"aiAgent::image::recognizing" = "Llegint la imatge…";
+"aiAgent::image::noText" = "No s'ha trobat text en aquesta imatge";
+"aiAgent::image::readText" = "Text de la imatge";
+"aiAgent::image::instruction" = "Instruccions addicionals (opcional)";
+"aiAgent::image::instruction::placeholder" = "P. ex. Afegeix-ho com a tasques";
+"aiAgent::image::empty" = "No hi ha text per enviar";
+"aiAgent::image::textTooLong" = "El text és massa llarg. Escurceu-lo i torneu-ho a provar.";
+"aiAgent::image::instructionTooLong" = "Les instruccions són massa llargues. Escurceu-les i torneu-ho a provar.";
+"aiAgent::image::busy" = "Encara hi ha una altra sol·licitud en curs";
+"aiAgent::image::camera::denied::title" = "Cal accés a la càmera";
+"aiAgent::image::camera::denied::message" = "Permeteu l'accés a la càmera a Configuració per fer una foto.";
+
+// MARK: - billing
+
+"billing::plan::free" = "Gratuït";
+"billing::plan::standard" = "Estàndard";
+"billing::plan::lifetime" = "Vitalici";
+
+"billing::paywall::title" = "Millora el pla";
+"billing::paywall::current::description" = "%@ crèdits al dia";
+"billing::paywall::metric::dailyCredits" = "%@ crèdits/dia";
+"billing::paywall::period::weekly" = "/setm.";
+"billing::paywall::period::monthly" = "/mes";
+"billing::paywall::period::yearly" = "/any";
+"billing::paywall::price::unavailable" = "Preu no disponible";
+"billing::paywall::badge::recommended" = "Recomanat";
+"billing::paywall::badge::owned" = "Pla actual";
+"billing::paywall::features::title" = "%@ inclou";
+"billing::paywall::feature::dailyCredits" = "%@ crèdits al dia";
+"billing::paywall::feature::topup" = "Pots comprar-ne més quan s'esgotin els crèdits";
+"billing::paywall::feature::noAds" = "Sense anuncis";
+"billing::paywall::disclosure::subscription" = "La subscripció es renova automàticament cada mes, tret que la cancel·lis almenys 24 hores abans que finalitzi el període actual. Pots cancel·lar-la en qualsevol moment des dels ajustos de l'App Store.";
+"billing::paywall::disclosure::subscription::generic" = "La subscripció es renova automàticament al final de cada període de facturació, tret que la cancel·lis almenys 24 hores abans que finalitzi. Pots cancel·lar-la en qualsevol moment des dels ajustos de l'App Store.";
+"billing::paywall::disclosure::oneTime" = "Paga una vegada i queda't-ho per sempre. No es renova automàticament.";
+"billing::paywall::disclosure::storeUnavailable" = "No s'ha pogut connectar amb l'App Store. Torna-ho a provar més tard.";
+"billing::paywall::cta::subscribe" = "Subscriu-te a %@";
+"billing::paywall::cta::buy" = "Obtén %@";
+"billing::paywall::cta::unavailable" = "No disponible";
+"billing::paywall::allPlansOwned" = "Ja tens el millor pla.";
+"billing::paywall::terms" = "Condicions del servei";
+"billing::paywall::privacyPolicy" = "Política de privadesa";
+"billing::paywall::restore" = "Restaura les compres";
+"billing::paywall::restored" = "Compres restaurades";
+"billing::paywall::restore::empty" = "No hi ha cap compra per restaurar.";
+"billing::paywall::manageSubscription" = "Gestiona la subscripció";
+"billing::paywall::purchase::applied" = "Pla actualitzat";
+"billing::paywall::pending::title" = "Aprovació pendent";
+"billing::paywall::pending::message" = "Demana a un organitzador familiar que aprovi aquesta compra. S'aplicarà automàticament quan s'aprovi.";
+"billing::paywall::userPlan::loadFailed" = "No s'ha pogut carregar el teu pla. Torna-ho a provar.";
+"billing::paywall::retry" = "Torna-ho a provar";
+"billing::paywall::unfinished::title" = "Hi ha una compra sense aplicar";
+"billing::paywall::unfinished::message" = "El pagament s'ha fet, però el teu pla encara no s'ha actualitzat.";
+"billing::paywall::unfinished::action" = "Aplica-ho ara";
+"billing::paywall::unfinished::applied" = "S'ha aplicat la teva compra";
+"billing::paywall::processing::message" = "S'està confirmant la compra…";
+"billing::paywall::fail::purchase" = "No s'ha pogut completar la compra. Torna-ho a provar.";
+"billing::paywall::fail::invalidTransaction" = "No s'ha pogut verificar la teva compra. Torna-ho a provar d'aquí a un moment.";
+"billing::paywall::fail::unknownProduct" = "No s'ha pogut reconèixer aquesta compra. Actualitzar l'aplicació ho pot solucionar.";
+"billing::paywall::fail::planChangeNotAllowed" = "Aquest canvi de pla no és compatible.";
+"billing::paywall::fail::ownedByAnotherAccount" = "Aquesta compra pertany a un altre compte. Inicia sessió amb el compte amb què la vas fer.";
+"billing::paywall::fail::reflectDelayed" = "El pagament s'ha fet, però l'aplicació s'està endarrerint. S'aplicarà automàticament.";
+"billing::paywall::topup::credits" = "%@ crèdits";
+"billing::paywall::topup::credits::split" = "Crèdits: %@ base + %@ extra";
+"billing::paywall::topup::bonus" = "+%@%% més";
+"billing::paywall::topup::title" = "Afegeix crèdits";
+"billing::paywall::topup::title::withRemaining" = "Afegeix crèdits · %@ disponibles";
+"billing::paywall::topup::description" = "Els crèdits addicionals s'utilitzen quan s'esgota el límit diari i no caduquen.";
+"billing::paywall::topup::applied" = "Crèdits afegits";
+"billing::paywall::topup::applied::withCredits" = "%@ crèdits afegits";
+
+"billing::needSignIn::title" = "Cal iniciar sessió";
+"billing::needSignIn::message" = "Inicieu sessió per veure i gestionar el vostre pla.";
+
+// MARK: - share extension
+
+"share.ai::title" = "Envia a la IA";
+"share.ai::text::placeholder" = "Text per enviar";
+"share.ai::instruction::placeholder" = "Afegiu una instrucció (opcional)";
+"share.ai::needSignIn" = "Inicieu sessió a l'aplicació per utilitzar l'entrada ràpida amb IA.";
+"share.ai::pending" = "Una sol·licitud anterior encara està pendent. Obriu l'aplicació per veure'n el progrés o el resultat.";
+"share.ai::sent" = "Enviat. Podeu veure el resultat a l'aplicació.";
+"share.ai::failed" = "No s'ha pogut enviar. Torneu-ho a provar.";
+"share.ai::sentButUntracked" = "Enviat, però l'aplicació no pot fer el seguiment del resultat. Reviseu el calendari d'aquí a un moment.";
+"share.ai::textTooLong" = "El text és massa llarg per enviar-lo. Escurceu-lo i torneu-ho a provar.";
+"share.ai::instructionTooLong" = "La vostra instrucció és massa llarga. Escurceu-la.";
+"share.ai::limitExceeded" = "Heu esgotat els crèdits d'IA d'avui. Es reinicien a mitjanit UTC.";
+"share.ai::image::title" = "Envia la imatge a la IA";
+"share.ai::image::recognizing" = "Llegint el text de la imatge…";
+"share.ai::image::text::caption" = "Text llegit de la imatge. Editeu-lo si alguna cosa no sembla correcta.";
+"share.ai::image::text::placeholder" = "Text llegit de la imatge";
+"share.ai::image::noTextFound" = "No s'ha trobat cap text en aquesta imatge. Escriviu el que vulgueu afegir.";
+
+// MARK: - webview
+
+"webview::error::message" = "No s'ha pogut carregar aquesta pàgina.";
+"webview::error::retry" = "Torna-ho a provar";
+"webview::openInBrowser" = "Obre al navegador";
+
+// MARK: - legal notice
+
+"legal_notice.message::terms" = "Hem actualitzat les nostres Condicions del servei.";
+"legal_notice.message::privacy" = "Hem actualitzat la nostra Política de privadesa.";
+"legal_notice.effectiveDate" = "Vigent des del %@";

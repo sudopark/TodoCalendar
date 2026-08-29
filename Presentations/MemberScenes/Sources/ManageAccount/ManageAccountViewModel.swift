@@ -13,6 +13,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import Scenes
 
 
@@ -76,7 +77,7 @@ final class ManageAccountViewModelImple: ManageAccountViewModel, @unchecked Send
         let isDeletingAccount = CurrentValueSubject<Bool, Never>(false)
     }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private let subject = Subject()
     
     private func internalBinding() {
@@ -85,19 +86,19 @@ final class ManageAccountViewModelImple: ManageAccountViewModel, @unchecked Send
             .sink(receiveValue: { [weak self] info in
                 self?.subject.accountInfo.send(info)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         self.migrationUsecase.migrationNeedEventCount
             .sink(receiveValue: { [weak self] count in
                 self?.subject.migrationNeedEventCount.send(count)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         self.migrationUsecase.isMigrating
             .sink(receiveValue: { [weak self] flag in
                 self?.subject.isMigrating.send(flag)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         self.migrationUsecase.migrationResult
             .sink(receiveValue: { [weak self] result in
@@ -108,7 +109,7 @@ final class ManageAccountViewModelImple: ManageAccountViewModel, @unchecked Send
                     self?.router?.showError(error)
                 }
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 
@@ -159,7 +160,7 @@ extension ManageAccountViewModelImple {
                 self?.router?.showError(error)
             }
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     func deleteAccount() {
@@ -189,7 +190,7 @@ extension ManageAccountViewModelImple {
                 self?.router?.showError(error)
             }
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
 }
 

@@ -13,10 +13,4 @@ import TestDoubles
 @testable import AIAgentScene
 
 
-final class SpyAIAgentRouter: BaseSpyRouter, AIAgentRouting, @unchecked Sendable {
-
-    var didOpenSystemSetting = false
-    func openSystemSetting() {
-        self.didOpenSystemSetting = true
-    }
-}
+final class SpyAIAgentRouter: BaseSpyRouter, AIAgentRouting, @unchecked Sendable { }

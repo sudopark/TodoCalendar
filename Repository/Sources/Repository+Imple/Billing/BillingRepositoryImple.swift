@@ -39,6 +39,17 @@ extension BillingRepositoryImple {
 }
 
 
+// MARK: - user plan
+
+extension BillingRepositoryImple {
+
+    public func loadUserAccount() async throws -> BillingUserAccount {
+        let json = try await self.requestJson(.get, BillingAPIEndpoints.userPlan)
+        return BillingUserAccountMapper(json: json).account
+    }
+}
+
+
 // MARK: - purchase
 
 extension BillingRepositoryImple {
@@ -48,6 +59,16 @@ extension BillingRepositoryImple {
         let json = try await self.requestJson(.post, BillingAPIEndpoints.purchases, parameters: body)
         return BillingUserPlanMapper(
             json: json, topupRemaining: json["topup_remaining"] as? Int
+        ).userPlan
+    }
+
+    public func postTransactionUpdate(signedTransaction: String) async throws -> BillingUserPlan {
+        let body: [String: Any] = ["signed_transaction": signedTransaction]
+        let json = try await self.requestJson(.post, BillingAPIEndpoints.transactions, parameters: body)
+        guard let userPlan = json["user_plan"] as? [String: Any]
+        else { throw RuntimeError("invalid billing transaction response") }
+        return BillingUserPlanMapper(
+            json: userPlan, topupRemaining: userPlan["topup_remaining"] as? Int
         ).userPlan
     }
 }

@@ -39,7 +39,6 @@ private struct WaveformBars: View {
     private let minHeight: CGFloat = 3
     private let maxHeight: CGFloat = 26
 
-    // level 급변 시 막대가 톡 끊기지 않도록 시간 기반 smoothstep으로 보간.
     @State private var fromLevel: CGFloat = 0
     @State private var toLevel: CGFloat = 0
     @State private var transitionStart: TimeInterval = 0
@@ -77,7 +76,6 @@ private struct WaveformBars: View {
         }
     }
 
-    // 주어진 너비에서 좌우 여백을 뺀 뒤, 막대+최소간격 단위로 최대 몇 개가 들어가는지 계산.
     private func barCount(for width: CGFloat) -> Int {
         let available = width - self.horizontalMargin * 2
         guard available > self.barWidth else { return 1 }
@@ -85,7 +83,6 @@ private struct WaveformBars: View {
         return max(1, count)
     }
 
-    // fromLevel → toLevel 을 transitionDuration 동안 smoothstep 으로 보간.
     private func smoothedLevel(at time: TimeInterval) -> CGFloat {
         let elapsed = time - self.transitionStart
         guard elapsed < self.transitionDuration else { return self.toLevel }
@@ -94,8 +91,6 @@ private struct WaveformBars: View {
         return self.fromLevel + (self.toLevel - self.fromLevel) * CGFloat(eased)
     }
 
-    // 막대 높이: 다중 사인 합성으로 불규칙·역동적인 파형을 만들고, 피크를 뾰족하게(탄력적)
-    // 다듬는다. 막대별 고정 진폭 편차로 들쭉날쭉하게. level 0이면 전부 minHeight로 평평.
     private func barHeight(_ index: Int, _ count: Int, level: CGFloat, at time: TimeInterval) -> CGFloat {
         let i = Double(index)
         let phase = i * 0.7
@@ -110,7 +105,6 @@ private struct WaveformBars: View {
         // 막대마다 고정 진폭 편차를 줘서 높이가 균일하지 않게.
         let variance = 0.7 + 0.3 * sin(i * 2.3)
 
-        // 중앙이 살짝 더 크되(완만한 bell), 가장자리도 충분히 활발하게.
         let center = Double(count - 1) / 2
         let weight = center <= 0 ? 1.0 : 1.0 - abs(i - center) / (center + 1) * 0.5
 

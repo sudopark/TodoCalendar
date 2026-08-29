@@ -12,6 +12,18 @@ from datetime import datetime, timezone
 
 LOG_DIR = os.environ.get("USAGE_LOG_DIR") or os.path.expanduser("~/.claude/usage-log")
 
+PARTIAL_GATE = """partial 판정 재확인 — 아래 이탈이 정말 '조항이 허용하지 않은 이탈'인가?
+
+조항이 조건부 생략·갈음·대체 경로를 규정하고 그 조건을 충족해 그 경로를 탔으면 full이다.
+규정된 선택지를 고른 것은 이행이지 이탈이 아니다.
+판정은 규범 판단이 아니라 "그 조항이 이 생략을 문언으로 규정하고 있나"라는 사실 확인이다.
+
+기록하려는 이탈:
+{deviations}
+
+→ 재판정 결과 full이면  --compliance full 로 다시 호출
+→ 진짜 이탈이면        --deviation-reviewed 를 붙여 다시 호출"""
+
 
 def now_iso():
     return datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
@@ -48,8 +60,12 @@ def build_record(args):
         if not args.name or not args.compliance:
             usage_error("skill_end엔 --name·--compliance 필수")
         deviations = parse_deviations(args.deviation)
-        if args.compliance == "partial" and not deviations:
-            usage_error("partial엔 --deviation '조항::사유' 필수")
+        if args.compliance == "partial":
+            if not deviations:
+                usage_error("partial엔 --deviation '조항::사유' 필수")
+            if not args.deviation_reviewed:
+                listed = "\n".join(f"  - {d['clause']} :: {d['reason']}" for d in deviations)
+                usage_error(PARTIAL_GATE.format(deviations=listed))
         record.update({"name": args.name, "compliance": args.compliance, "deviations": deviations})
     elif args.event == "correction":
         if not args.summary:
@@ -73,6 +89,8 @@ def main():
     parser.add_argument("--name", help="대상 스킬명 (skill_end·improvement)")
     parser.add_argument("--compliance", choices=["full", "partial"])
     parser.add_argument("--deviation", action="append", default=[], help="'조항::사유' 형식, 반복 가능")
+    parser.add_argument("--deviation-reviewed", action="store_true",
+                        help="partial 게이트 통과 표식 — 조항이 허용하지 않은 이탈임을 재확인한 뒤에만 붙인다")
     parser.add_argument("--skills", default="", help="쉼표 구분 귀속 스킬 (correction)")
     parser.add_argument("--summary", help="교정 요지 (correction)")
     parser.add_argument("--gist", help="유저 발화 요지 (correction)")

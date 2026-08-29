@@ -64,6 +64,9 @@ public protocol ColorSet: Sendable {
     var accentWarn: UIColor { get }
     var accentAI: UIColor { get }
 
+    // AI 음성 입력 중 입력 바 배경 (그라데이션 stops — NeonListeningBorder와 같은 팔레트)
+    var aiListeningBackground: [UIColor] { get }
+
     // AI chat bubble (유저 메시지 말풍선)
     var aiUserBubbleBackground: UIColor { get }
     var aiUserBubbleText: UIColor { get }
@@ -113,6 +116,12 @@ public struct DefaultLightColorSet: ColorSet {
     public let accentInfo: UIColor = UIColor(rgb: 0xff7417)
     public let accentWarn: UIColor = UIColor(rgb: 0xea4444)
     public let accentAI: UIColor = UIColor(rgb: 0x6272a4)
+
+    public let aiListeningBackground: [UIColor] = [
+        UIColor(rgb: 0xbd93f9).withAlphaComponent(0.20),
+        UIColor(rgb: 0xff79c6).withAlphaComponent(0.13),
+        UIColor(rgb: 0x8be9fd).withAlphaComponent(0.20)
+    ]
 
     // AI chat bubble (유저 메시지 말풍선)
     public let aiUserBubbleBackground: UIColor = UIColor(rgb: 0x44475a)
@@ -165,6 +174,12 @@ public struct DefaultDarkColorSet: ColorSet {
     public let accentInfo: UIColor = UIColor(rgb: 0xff7417)
     public let accentWarn: UIColor = UIColor(rgb: 0xea4444)
     public let accentAI: UIColor = UIColor(rgb: 0x6272a4)
+
+    public let aiListeningBackground: [UIColor] = [
+        UIColor(rgb: 0xbd93f9).withAlphaComponent(0.28),
+        UIColor(rgb: 0xff79c6).withAlphaComponent(0.18),
+        UIColor(rgb: 0x8be9fd).withAlphaComponent(0.26)
+    ]
 
     // AI chat bubble (유저 메시지 말풍선)
     public let aiUserBubbleBackground: UIColor = UIColor(rgb: 0xccd0dc)

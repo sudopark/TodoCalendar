@@ -25,17 +25,21 @@ public enum ShareDataKeys: String {
     case calendarAppearance
     case defaultEventTagColor
     case eventSetting
+    case eventShareSetting
     case foremostEventId
     case uncompletedTodos
     case externalCalendarAccounts
     case googleCalendarTags
+    case googleCalendarColors
     case googleCalendarEvents
     case foremostMarkingStatus
     case appleCalendarTags
     case appleCalendarEvents
     case aiAgentUsage
     case billingUserPlan
+    case billingAppAccountToken
     case ddayCandidates
+    case isGuideTodoCompleted
 }
 
 

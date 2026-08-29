@@ -11,6 +11,7 @@
 import UIKit
 import SwiftUI
 import Combine
+import Extensions
 import Scenes
 import CommonPresentation
 
@@ -20,12 +21,12 @@ import CommonPresentation
 final class DoneTodoDetailViewController: UIHostingController<DoneTodoDetailContainerView>, DoneTodoDetailScene {
     
     private let viewModel: any DoneTodoDetailViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
     
     @MainActor
     var interactor: (any DoneTodoDetailSceneInteractor)? { self.viewModel }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     
     init(
         viewModel: any DoneTodoDetailViewModel,
@@ -62,6 +63,6 @@ final class DoneTodoDetailViewController: UIHostingController<DoneTodoDetailCont
             .sink(receiveValue: { [weak self] isReverting in
                 self?.isModalInPresentation = isReverting
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }

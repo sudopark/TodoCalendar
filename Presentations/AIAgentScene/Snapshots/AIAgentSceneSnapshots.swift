@@ -30,7 +30,6 @@ final class AIAgentSceneSnapshots: XCTestCase {
         return ViewAppearance(setting: setting, isSystemDarkTheme: theme.isSystemDarkTheme)
     }
 
-    // AIAgentKeyboardInputView는 private — public interface인 ContainerView로 캡처 (기본 empty 상태)
     @MainActor
     func test_keyboardInput() {
         captureSnapshotPair(named: "keyboardInput", layout: .fullScreen) { theme in
@@ -41,13 +40,31 @@ final class AIAgentSceneSnapshots: XCTestCase {
         }
     }
 
+    // 크레딧 소진 — 입력 시트에서도 게이지가 리셋까지 남은 시간을 함께 보여준다 (#763)
+    @MainActor
+    func test_keyboardInputLimitExceeded() {
+        captureSnapshotPair(named: "keyboardInputLimitExceeded", layout: .fullScreen) { theme in
+            AIAgentKeyboardInputContainerView(
+                viewAppearance: self.makeAppearance(theme),
+                eventHandler: AIAgentKeyboardInputEventHandler()
+            )
+            .eventHandler(\.stateBinding) { state in
+                state.usage = AIAgentUsage(input: 5000, output: 0, limit: 5000)
+                    |> \.resetsAt .~ Date().addingTimeInterval(3 * 3600 + 12 * 60 + 30)
+                state.userPlan = BillingUserPlan() |> \.planId .~ .free
+            }
+        }
+    }
+
+    // expireTime 은 캡처 시각 기준 상대값 — 카운트다운(초 단위 올림)이 4:29 로 찍히도록
+    // 268.9 초를 준다. 정수 경계(269)에서 0.9 초 떨어져 있어 렌더 지연이 그만큼 나도 표기가 안 바뀐다
     @MainActor
     func test_commandConfirm() {
         captureSnapshotPair(named: "commandConfirm", layout: .fullScreen) { theme in
             let state = AIAgentCommandViewState()
             state.commandState = .confirm(
                 command: "일정 삭제", message: "정말 삭제할까요?",
-                expireTime: Date().addingTimeInterval(4 * 60 + 30)
+                expireTime: Date().addingTimeInterval(4 * 60 + 28.9)
             )
             state.usage = .init(input: 1234, output: 0, limit: 5000)
             return AIAgentCommandStageView()
@@ -99,7 +116,6 @@ final class AIAgentSceneSnapshots: XCTestCase {
         }
     }
 
-    // 플랜 칩 + top-up 잔량 + 하향 예약이 전부 노출된 상태 (#720)
     @MainActor
     func test_commandDoneWithPlanInfo() {
         captureSnapshotPair(named: "commandDoneWithPlanInfo", layout: .fullScreen) { theme in
@@ -107,9 +123,10 @@ final class AIAgentSceneSnapshots: XCTestCase {
             state.commandState = .done(command: "일정 추가", message: "추가했어요")
             state.usage = AIAgentUsage(input: 1234, output: 0, limit: 20000)
                 |> \.creditsUsed .~ 1234
-                |> \.plan .~ .standard
+            state.userPlan = BillingUserPlan()
+                |> \.planId .~ .standard
                 |> \.topupRemaining .~ 12300
-                |> \.scheduledPlanChange .~ .init(
+                |> \.scheduledChange .~ .init(
                     planId: .free, effectiveAt: Date(timeIntervalSince1970: 1787702400)
                 )
             return AIAgentCommandStageView()
@@ -132,12 +149,32 @@ final class AIAgentSceneSnapshots: XCTestCase {
         }
     }
 
+    // 한도 소진 — 게이지에 리셋까지 남은 시간이 함께 노출된다 (#763).
+    // resetsAt 은 캡처 시각 기준 상대값, 오프셋에 30초 여유를 둬 렌더 지연으로 분 표기가 흔들리지 않게 한다
     @MainActor
     func test_commandFailedDailyLimit() {
         captureSnapshotPair(named: "commandFailedDailyLimit", layout: .fullScreen) { theme in
             let state = AIAgentCommandViewState()
             state.commandState = .failed(command: "일정 삭제", reason: "오늘 사용량을 모두 썼어요. 내일 다시 시도해 주세요.", errorCode: .dailyLimitExceeded)
-            state.usage = .init(input: 5000, output: 0, limit: 5000)
+            state.usage = AIAgentUsage(input: 5000, output: 0, limit: 5000)
+                |> \.resetsAt .~ Date().addingTimeInterval(3 * 3600 + 12 * 60 + 30)
+            state.userPlan = BillingUserPlan() |> \.planId .~ .free
+            return AIAgentCommandStageView()
+                .environment(state)
+                .environment(AIAgentCommandViewEventHandler())
+                .environment(self.makeAppearance(theme))
+        }
+    }
+
+    @MainActor
+    func test_commandDoneMultilineMessage() {
+        captureSnapshotPair(named: "commandDoneMultilineMessage", layout: .fullScreen) { theme in
+            let state = AIAgentCommandViewState()
+            state.commandState = .done(
+                command: "이번 주 일정 정리해줘",
+                message: AIAgentCommandStageViewPreviewProvider.sampleMultilineMessage
+            )
+            state.usage = .init(input: 1234, output: 0, limit: 5000)
             return AIAgentCommandStageView()
                 .environment(state)
                 .environment(AIAgentCommandViewEventHandler())

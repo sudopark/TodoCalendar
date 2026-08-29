@@ -12,6 +12,12 @@ import Domain
 public protocol AIAgentCommandSceneInteractor: AnyObject { }
 
 
+public protocol AIAgentCommandSceneListener: AnyObject, Sendable {
+
+    func aiAgentCommandDidRequestPaywall()
+}
+
+
 // MARK: - AIAgentCommandScene
 
 public protocol AIAgentCommandScene: Scene where Interactor == any AIAgentCommandSceneInteractor { }
@@ -22,7 +28,7 @@ public protocol AIAgentCommandScene: Scene where Interactor == any AIAgentComman
 public protocol AIAgentCommandSceneBuilder: AnyObject {
 
     @MainActor
-    func makeCommandScene() -> any AIAgentCommandScene
+    func makeCommandScene(listener: (any AIAgentCommandSceneListener)?) -> any AIAgentCommandScene
 }
 
 
@@ -42,4 +48,23 @@ public protocol AIAgentKeyboardInputSceneBuilder: AnyObject {
 
     @MainActor
     func makeKeyboardInputScene() -> any AIAgentKeyboardInputScene
+}
+
+
+// MARK: - AIAgentImageCommandScene Interactable & Listenable
+
+public protocol AIAgentImageCommandSceneInteractor: AnyObject { }
+
+
+// MARK: - AIAgentImageCommandScene
+
+public protocol AIAgentImageCommandScene: Scene where Interactor == any AIAgentImageCommandSceneInteractor { }
+
+
+// MARK: - Builder
+
+public protocol AIAgentImageCommandSceneBuilder: AnyObject {
+
+    @MainActor
+    func makeImageCommandScene(imageData: Data) -> any AIAgentImageCommandScene
 }

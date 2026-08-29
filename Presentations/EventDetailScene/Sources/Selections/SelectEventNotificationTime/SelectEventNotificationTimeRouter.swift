@@ -8,34 +8,15 @@
 //
 //
 
-import UIKit
+import Foundation
 import Scenes
 import CommonPresentation
 
 
 // MARK: - Routing
 
-protocol SelectEventNotificationTimeRouting: Routing, Sendable { 
-    
-    func openSystemNotificationSetting()
-}
+protocol SelectEventNotificationTimeRouting: Routing, Sendable { }
 
 // MARK: - Router
 
 final class SelectEventNotificationTimeRouter: BaseRouterImple, SelectEventNotificationTimeRouting, @unchecked Sendable { }
-
-
-extension SelectEventNotificationTimeRouter {
-    
-    private var currentScene: (any SelectEventNotificationTimeScene)? {
-        self.scene as? (any SelectEventNotificationTimeScene)
-    }
-    
-    func openSystemNotificationSetting() {
-        Task { @MainActor in
-            guard let url = URL(string: UIApplication.openSettingsURLString)
-            else { return }
-            UIApplication.shared.open(url)
-        }
-    }
-}

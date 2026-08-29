@@ -11,6 +11,7 @@
 import SwiftUI
 import Combine
 import Domain
+import Extensions
 import Scenes
 import CommonPresentation
 
@@ -20,7 +21,7 @@ import CommonPresentation
 @Observable final class EventTagDetailViewState {
     
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
     
     fileprivate var suggestColorHexes: [String] = []
     fileprivate var newTagName: String = ""
@@ -46,28 +47,28 @@ import CommonPresentation
             .sink(receiveValue: { [weak self] hex in
                 self?.originalColorHex = hex
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.isSavable
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] flag in
                 self?.isSavable = flag
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.selectedColorHex
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] color in
                 self?.selectedColorHex = color
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.isProcessing
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] flag in
                 self?.isProcessing = flag
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

@@ -94,6 +94,7 @@ public struct EmptyInteractor: Sendable { }
 public protocol Scene: UIViewController {
     associatedtype Interactor
     @MainActor var interactor: Interactor? { get }
+    @MainActor var viewAppearance: ViewAppearance { get }
 }
 
 
@@ -107,13 +108,24 @@ public protocol Routing: AnyObject {
     func showConfirm(dialog info: ConfirmDialogInfo)
     func showActionSheet(_ form: ActionSheetForm)
     func openSafari(_ path: String)
+    func showWebView(_ path: String)
+    func openSystemSetting()
     func dismissPresented(animated: Bool, _ completed: (@Sendable () -> Void)?)
 }
 
 extension Routing {
-    
+
     public func closeScene(_ dismissed: (@Sendable () -> Void)? = nil) {
         self.closeScene(animate: true, dismissed)
+    }
+
+    public func openSystemSetting() {
+        Task { @MainActor in
+            guard let url = URL(string: UIApplication.openSettingsURLString),
+                  UIApplication.shared.canOpenURL(url)
+            else { return }
+            UIApplication.shared.open(url)
+        }
     }
 }
 
@@ -192,6 +204,80 @@ open class BaseRouterImple: Routing, @unchecked Sendable {
         }
     }
     
+    public func showWebView(_ path: String) {
+        Task { @MainActor in
+
+            guard let url = path.asURL(), let appearance = self.scene?.viewAppearance
+            else { return }
+            let controller = InAppWebViewController(url: url, appearance: appearance)
+            let navigationController = UINavigationController(rootViewController: controller)
+            controller.navigationItem.leftBarButtonItem = UIBarButtonItem(
+                title: "common.close".localized(),
+                primaryAction: UIAction { [weak navigationController] _ in
+                    navigationController?.dismiss(animated: true)
+                }
+            )
+            navigationController.navigationBar.tintColor = appearance.colorSet.text0
+            navigationController.navigationBar.titleTextAttributes = [
+                .foregroundColor: appearance.colorSet.text0,
+                .font: appearance.fontSet.subNormalWithBold
+            ]
+
+            self.scene?.present(navigationController, animated: true)
+        }
+    }
+
+    public func showShareSheet(text: String) {
+        self.showShareSheet(text: text, onShared: nil)
+    }
+
+    public func showShareSheet(text: String, onShared: (@Sendable @MainActor () -> Void)?) {
+        Task { @MainActor in
+            let activityViewController = UIActivityViewController(
+                activityItems: [text], applicationActivities: nil
+            )
+            activityViewController.popoverPresentationController?.sourceView = self.scene?.view
+            activityViewController.completionWithItemsHandler = { _, completed, _, _ in
+                guard completed else { return }
+                Task { @MainActor in onShared?() }
+            }
+            self.scene?.present(activityViewController, animated: true)
+        }
+    }
+
+    public func showShareSheet(image: UIImage) {
+        self.showShareSheet(image: image, onShared: nil)
+    }
+
+    public func showShareSheet(image: UIImage, onShared: (@Sendable @MainActor () -> Void)?) {
+        Task { @MainActor in
+            // UIImage를 그대로 넘기면 사진 앱 저장 액션이 안 뜨고 이름도 매번 같아 덮어쓴다
+            let item: Any = self.temporaryPNGFileURL(image) ?? image
+            let activityViewController = UIActivityViewController(
+                activityItems: [item], applicationActivities: nil
+            )
+            activityViewController.popoverPresentationController?.sourceView = self.scene?.view
+            activityViewController.completionWithItemsHandler = { _, completed, _, _ in
+                guard completed else { return }
+                Task { @MainActor in onShared?() }
+            }
+            self.scene?.present(activityViewController, animated: true)
+        }
+    }
+
+    private func temporaryPNGFileURL(_ image: UIImage) -> URL? {
+        guard let data = image.pngData() else { return nil }
+        let formatter = DateFormatter() |> \.dateFormat .~ "yyyyMMdd_HHmmss"
+        let fileName = "TodoCalendar_\(formatter.string(from: Date())).png"
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
+        do {
+            try data.write(to: url, options: .atomic)
+            return url
+        } catch {
+            return nil
+        }
+    }
+
     @MainActor
     public func showBottomSlide(_ slide: UIViewController) {
         slide.modalPresentationStyle = .custom
@@ -199,6 +285,12 @@ open class BaseRouterImple: Routing, @unchecked Sendable {
         slide.transitioningDelegate = manager
         slide.attachBottomSlideDismiss(interactor: manager.interactor)
         self.scene?.present(slide, animated: true)
+    }
+
+    @MainActor
+    public func showFullScreen(_ next: UIViewController) {
+        next.modalPresentationStyle = .overFullScreen
+        self.scene?.present(next, animated: true)
     }
     
     @MainActor

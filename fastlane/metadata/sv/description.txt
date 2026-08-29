@@ -1,0 +1,43 @@
+Dina uppgifter och dina möten – i en och samma kalender.
+
+Dina möten ligger i en kalender. Dina uppgifter ligger någon annanstans. För att se vad månaden bjuder på och vad du fortfarande inte har gjort får du till slut titta på två ställen.
+
+To-do Calendar håller ihop båda i samma kalender. Ett möte ligger på dagen det händer, och en uppgift står kvar tills du bockar av den. Uppgifter utan tid försvinner inte heller.
+
+Appen fungerar utan konto och utan uppkoppling. Logga in bara när du vill säkerhetskopiera dina data och dela dem mellan dina enheter.
+
+■ En kalender, två sorters göromål
+· Möten och uppgifter ligger tillsammans, färgkodade efter händelsetyper som du skapar själv
+· Ej slutförda uppgifter blir inte kvar på ett datum som redan passerat – de stannar högst upp i kalendern
+· Välj ett datum så bygger appen upprepningen åt dig – varje torsdag, den tredje torsdagen i varje månad, till och med ett årligt datum i månkalendern
+· Varje händelse kan bära med sig en plats, en länk, en anteckning och påminnelser
+· Fäst det du inte får missa som viktigaste händelsen, så ligger den kvar högst upp vilken dag du än tittar på
+· Dela en dag, en vecka eller en månad som text eller som bildkort
+
+■ AI-snabbinmatning
+"lunch med Sara på fredag kl. 12", "flytta tandläkaren till nästa tisdag", "markera tvätten som klar".
+Beskriv det som du skulle säga det. Inga formulär att fylla i, inga datum att välja ett fält i taget.
+· Röst, tangentbord och läsning från bild – fotografera ett schema eller en evenemangsaffisch så blir texten till händelser
+· Från Siri, Åtgärdsknappen, en widget, Kontrollcenter eller delningsmenyn, utan att öppna appen
+· Inte bara lägga till: flytta tider, byta namn, bocka av, radera, flera saker på en gång
+· Allt som raderar eller ändrar något visar dig exakt vad som är på väg att hända och väntar på ditt godkännande
+· AI-snabbinmatning kräver att du är inloggad
+
+■ Se din dag utan att öppna appen
+· Widgetar för hemskärmen – idag och vad som väntar, din händelselista, IDAG, din viktigaste händelse, månad och veckor, och kombinationer som lägger två av dem sida vid sida
+· Bocka av en uppgift direkt från en widget
+· Widgetar för låsskärmen med nästa händelse och det som är kvar av dagen
+· En händelse som snart börjar räknar ner på låsskärmen och i Dynamic Island
+· Placera Lägg till med AI i Kontrollcenter, så tar en svepning dig till inmatningsskärmen varifrån du än är
+
+■ Ta med dina andra kalendrar
+· Google Kalender – anslut flera konton samtidigt. Varje kalender behåller färgen du gav den i Google, och deltagare, möteslänkar och bilagor finns med, redigerbara på plats
+· Apple Kalender – kalendrarna du redan har på din iPhone, med en enda behörighet
+· Välj vad som visas, en kalender i taget, från listan över händelsetyper
+· Koppla från och ingenting tas bort från ditt Google-konto eller din enhet
+
+■ Gör den till din
+· Hur mycket detalj varje händelse visar, textstorlek och färger för händelser – varje ändring förhandsvisas direkt
+· Färgtema och widget-tema, veckans startdag, markerade dagar
+· Helgdagar per land, månkalendern, 24-timmarsformat och tidszon
+· Bestäm vilken händelsetyp och vilken påminnelsetid nya händelser ska börja med

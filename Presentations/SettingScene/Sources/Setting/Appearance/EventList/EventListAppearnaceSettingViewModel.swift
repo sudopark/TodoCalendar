@@ -10,6 +10,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 
 
 struct EventListAppearanceSetting {
@@ -110,7 +111,7 @@ final class EventListAppearnaceSettingViewModelImple: EventListAppearnaceSetting
         let setting = CurrentValueSubject<EventListAppearanceSetting?, Never>(nil)
     }
     private let subject = Subject()
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
 }
 
 

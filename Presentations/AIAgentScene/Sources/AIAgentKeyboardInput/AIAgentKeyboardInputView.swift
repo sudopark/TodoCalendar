@@ -6,6 +6,7 @@
 import SwiftUI
 import Combine
 import Domain
+import Extensions
 import CommonPresentation
 
 
@@ -15,8 +16,10 @@ import CommonPresentation
     fileprivate var text: String = ""
     fileprivate var actionTaken: Bool = false
     var usage: AIAgentUsage?
+    var userPlan: BillingUserPlan?
+    var isNotificationPermissionDenied: Bool = false
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
 
     func bind(_ viewModel: any AIAgentKeyboardInputViewModel) {
         guard self.didBind == false else { return }
@@ -25,7 +28,17 @@ import CommonPresentation
         viewModel.usage
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] in self?.usage = $0 })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
+
+        viewModel.currentUserPlan
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] in self?.userPlan = $0 })
+            .store(in: self.cancellables)
+
+        viewModel.isNotificationPermissionDenied
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] in self?.isNotificationPermissionDenied = $0 })
+            .store(in: self.cancellables)
     }
 }
 
@@ -39,6 +52,7 @@ final class AIAgentKeyboardInputEventHandler: Observable {
     var stop: () -> Void = { }
     var close: () -> Void = { }
     var dismissByGesture: () -> Void = { }
+    var openNotificationSetting: () -> Void = { }
 
     func bind(_ viewModel: any AIAgentKeyboardInputViewModel) {
         self.prepare = viewModel.prepare
@@ -46,6 +60,7 @@ final class AIAgentKeyboardInputEventHandler: Observable {
         self.stop = viewModel.stop
         self.close = viewModel.close
         self.dismissByGesture = viewModel.dismissByGesture
+        self.openNotificationSetting = viewModel.openNotificationSetting
     }
 }
 
@@ -106,8 +121,15 @@ private struct AIAgentKeyboardInputView: View {
                         self.eventHandler.close()
                     }
 
+                if self.state.isNotificationPermissionDenied {
+                    AIAgentNotificationPermissionNoticeView()
+                        .eventHandler(\.onTap) {
+                            self.eventHandler.openNotificationSetting()
+                        }
+                }
+
                 if let usage = state.usage, usage.dailyLimit > 0 {
-                    AIAgentUsageGaugeView(usage: usage)
+                    AIAgentUsageGaugeView(usage: usage, userPlan: state.userPlan)
                 }
 
                 TextField(
@@ -153,8 +175,13 @@ private struct AIAgentKeyboardInputView: View {
                         self.eventHandler.send(self.trimmedText)
                     }
                 }
+
+                Text("aiAgent::tip::externalEntry".localized())
+                    .font(appearance.fontSet.size(12, weight: .regular).asFont)
+                    .foregroundStyle(appearance.colorSet.text2.asColor)
             }
         }
+        .eventHandler(\.outsideTap, self.eventHandler.close)
         .onAppear { self.isFocused = true }
         .onDisappear {
             // 전송/중지가 아니라 그냥 닫은(드래그·닫기 버튼) 경우 → 음성 입력으로 복귀

@@ -34,7 +34,11 @@ public protocol ExternalCalendarIntegrationUsecase: Sendable {
     func prepareIntegratedAccounts() async throws
         
     func integrate(external service: any ExternalCalendarService) async throws -> ExternalServiceAccountinfo
-    
+
+    func reauthenticateForWriteScope(
+        external service: any ExternalCalendarService, accountId: String
+    ) async throws -> ExternalServiceAccountinfo
+
     func stopIntegrate(external service: any ExternalCalendarService, accountId: String) async throws
 
     func handleAuthenticationResultOrNot(open url: URL) -> Bool
@@ -118,24 +122,88 @@ extension ExternalCalendarIntegrationUsecaseImple {
     }
 
     public func integrate(external service: any ExternalCalendarService) async throws -> ExternalServiceAccountinfo {
+        let usecase = try self.resolveOAuthUsecase(for: service)
+        self.lastestUsedOAuthUsecase = usecase; defer { self.lastestUsedOAuthUsecase = nil }
+        let credential = try await usecase.requestAuthentication()
+        return try await self.applyNewIntegration(credential, for: service)
+    }
+
+    public func reauthenticateForWriteScope(
+        external service: any ExternalCalendarService, accountId: String
+    ) async throws -> ExternalServiceAccountinfo {
+        let promotedService = self.resolveWriteScopePromotedService(for: service)
+        let usecase = try self.resolveOAuthUsecase(for: promotedService)
+        self.lastestUsedOAuthUsecase = usecase; defer { self.lastestUsedOAuthUsecase = nil }
+        let credential = try await usecase.requestAuthentication(hint: accountId)
+        try self.verifyReauthenticatedAccountIdentity(credential, expected: accountId)
+        try self.verifyWriteScopeGranted(credential)
+        return try await self.applyPromotedCredential(credential, for: service)
+    }
+
+    private func resolveOAuthUsecase(
+        for service: any ExternalCalendarService
+    ) throws -> any OAuth2ServiceUsecase {
         guard let usecase = self.oauth2ServiceProvider.usecase(for: service)
         else {
             throw RuntimeError("not support oauth service for: \(service)")
         }
-        self.lastestUsedOAuthUsecase = usecase; defer { self.lastestUsedOAuthUsecase = nil }
-        let credential = try await usecase.requestAuthentication()
+        return usecase
+    }
+
+    private func resolveWriteScopePromotedService(
+        for service: any ExternalCalendarService
+    ) -> any ExternalCalendarService {
+        guard service is GoogleCalendarService else { return service }
+        return GoogleCalendarService(scopes: [.readWrite])
+    }
+
+    // 다른 구글 계정으로 로그인하면 엉뚱한 계정의 토큰이 덮이므로 재인증 결과 이메일을 검증한다.
+    private func verifyReauthenticatedAccountIdentity(
+        _ credential: any OAuth2Credential, expected accountId: String
+    ) throws {
+        guard let google = credential as? GoogleOAuth2Credential, google.email == accountId
+        else {
+            throw RuntimeError("reauthenticated account does not match: \(accountId)")
+        }
+    }
+
+    private func verifyWriteScopeGranted(_ credential: any OAuth2Credential) throws {
+        guard let google = credential as? GoogleOAuth2Credential,
+              let scopes = google.grantedScopes,
+              scopes.contains(GoogleCalendarService.Scope.readWrite.rawValue)
+        else {
+            throw GoogleCalendarWriteScopeFailReason.notGranted
+        }
+    }
+
+    private func applyNewIntegration(
+        _ credential: any OAuth2Credential, for service: any ExternalCalendarService
+    ) async throws -> ExternalServiceAccountinfo {
+        let account = try await self.saveAndUpdateAccountsMap(credential, for: service)
+        try? await self.dbConnectionController.open(serviceId: service.identifier)
+        self.integrationStatusChangedSubject.send(
+            .integrated(serviceId: service.identifier, account: account)
+        )
+        return account
+    }
+
+    private func applyPromotedCredential(
+        _ credential: any OAuth2Credential, for service: any ExternalCalendarService
+    ) async throws -> ExternalServiceAccountinfo {
+        return try await self.saveAndUpdateAccountsMap(credential, for: service)
+    }
+
+    private func saveAndUpdateAccountsMap(
+        _ credential: any OAuth2Credential, for service: any ExternalCalendarService
+    ) async throws -> ExternalServiceAccountinfo {
         let account = try await self.externalServiceIntegrateRepository.save(credential, for: service)
             |> \.intergrationTime .~ Date()
-        try? await self.dbConnectionController.open(serviceId: service.identifier)
         self.sharedDataStore.update(AccountsMap.self, key: self.shareKey) { old in
             var map = old ?? [:]
             map[service.identifier, default: []].removeAll { $0.email == account.email }
             map[service.identifier, default: []].append(account)
             return map
         }
-        self.integrationStatusChangedSubject.send(
-            .integrated(serviceId: service.identifier, account: account)
-        )
         return account
     }
 

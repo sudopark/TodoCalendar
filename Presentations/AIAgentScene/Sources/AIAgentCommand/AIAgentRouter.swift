@@ -6,30 +6,15 @@
 //  Copyright © 2026 com.sudo.park. All rights reserved.
 //
 
-import UIKit
+import Foundation
 import Scenes
-import CommonPresentation
 
 
 // MARK: - AIAgentRouting
 
-protocol AIAgentRouting: Routing, Sendable {
-    func openSystemSetting()
-}
+protocol AIAgentRouting: Routing, Sendable { }
 
 
 // MARK: - AIAgentRouter
 
 final class AIAgentRouter: BaseRouterImple, AIAgentRouting, @unchecked Sendable { }
-
-extension AIAgentRouter {
-
-    func openSystemSetting() {
-        Task { @MainActor in
-            guard let url = URL(string: UIApplication.openSettingsURLString),
-                  UIApplication.shared.canOpenURL(url)
-            else { return }
-            UIApplication.shared.open(url)
-        }
-    }
-}

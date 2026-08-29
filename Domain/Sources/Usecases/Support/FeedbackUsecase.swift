@@ -9,6 +9,7 @@
 import Foundation
 import Prelude
 import Optics
+import Extensions
 import Combine
 
 
@@ -30,7 +31,7 @@ public final class FeedbackUsecaseImple: FeedbackUsecase, @unchecked Sendable {
     private let deviceInfoFetchService: any DeviceInfoFetchService
     
     private let userId = CurrentValueSubject<String?, Never>(nil)
-    private var cancellables = Set<AnyCancellable>()
+    private let cancellables = CancelBag()
     
     public init(
         accountUsecase: any AccountUsecase,
@@ -50,7 +51,7 @@ public final class FeedbackUsecaseImple: FeedbackUsecase, @unchecked Sendable {
             .sink(receiveValue: { [weak self] account in
                 self?.userId.send(account?.userId)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

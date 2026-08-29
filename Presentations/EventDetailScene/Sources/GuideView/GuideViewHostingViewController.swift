@@ -26,7 +26,7 @@ final class GuideViewRouter: BaseRouterImple { }
 
 final class GuideSceneBuilderImple: GuideSceneBuilder {
     
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
     init(viewAppearance: ViewAppearance) {
         self.viewAppearance = viewAppearance
     }
@@ -38,7 +38,7 @@ final class GuideSceneBuilderImple: GuideSceneBuilder {
             .eventHandler(\.onClose) { [weak router] in
                 router?.closeScene()
             }
-        let viewController = GuideViewHostingViewController(guideView, router)
+        let viewController = GuideViewHostingViewController(guideView, router, self.viewAppearance)
         router.scene = viewController
         return viewController
     }
@@ -50,7 +50,7 @@ final class GuideSceneBuilderImple: GuideSceneBuilder {
             .eventHandler(\.onClose) { [weak router] in
                 router?.closeScene()
             }
-        let viewController = GuideViewHostingViewController(guideView, router)
+        let viewController = GuideViewHostingViewController(guideView, router, self.viewAppearance)
         router.scene = viewController
         return viewController
     }
@@ -59,10 +59,12 @@ final class GuideSceneBuilderImple: GuideSceneBuilder {
 final class GuideViewHostingViewController<GuideView: View>: UIHostingController<GuideView>, GuideScene {
     typealias Interactor = EmptyInteractor
     var interactor: EmptyInteractor?
+    let viewAppearance: ViewAppearance
     private let router: GuideViewRouter
-    
-    init(_ guideView: GuideView, _ router: GuideViewRouter) {
+
+    init(_ guideView: GuideView, _ router: GuideViewRouter, _ viewAppearance: ViewAppearance) {
         self.router = router
+        self.viewAppearance = viewAppearance
         super.init(rootView: guideView)
         self.view.backgroundColor = .clear
     }

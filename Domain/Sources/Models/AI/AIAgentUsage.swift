@@ -15,17 +15,10 @@ public struct AIAgentUsage: Sendable {
     public let inputTokens: Int
     public let outputTokens: Int
     public let dailyLimit: Int
-    // 서버가 credit 단위로 집계한 사용량. 미배포 응답엔 없어 옵셔널
     public var creditsUsed: Int?
     // 일일 한도 리셋 시각 (UTC 자정)
     public var resetsAt: Date?
     public var updatedAt: Date?
-    // 서버가 내려준 플랜. 미배포 응답·미지 id 는 nil
-    public var plan: BillingPlanId?
-    // 하향 예약 — 다음 차수부터 적용될 플랜 변경
-    public var scheduledPlanChange: BillingUserPlan.ScheduledChange?
-    // top-up 잔량. daily_limit 과 합산되지 않는 별도 풀
-    public var topupRemaining: Int?
 
     public init(
         input: Int, output: Int, limit: Int
@@ -42,12 +35,47 @@ public struct AIAgentUsage: Sendable {
 
 public extension AIAgentUsage {
 
-    // 서버가 credit 집계를 안 내려주는 구간(미배포)에선 토큰 합으로 폴백
     var usedCredits: Int { self.creditsUsed ?? (self.inputTokens + self.outputTokens) }
+
+    // 한도 소진 여부 — usedRatio 는 1.0 클램프라 초과를 구분 못 해 별도 파생 (#763)
+    var isLimitExceeded: Bool {
+        return self.dailyLimit > 0 && self.usedCredits >= self.dailyLimit
+    }
 
     // 사용률 0~1 클램프 — 한도 미설정(0)은 0으로 취급
     var usedRatio: Double {
         guard self.dailyLimit > 0 else { return 0 }
         return min(Double(self.usedCredits) / Double(self.dailyLimit), 1.0)
+    }
+
+    // 일일 한도와 top-up 은 합산하지 않는다 — topupRemaining 은 이미 차감된 잔량이라
+    // usedCredits 와 더하면 초과분이 이중 반영된다.
+    func isCreditExhausted(topupRemaining: Int?) -> Bool {
+        guard let topupRemaining else { return false }
+        return self.isLimitExceeded && topupRemaining <= 0
+    }
+}
+
+
+// MARK: - AIAgentUsageLoadResult
+
+// GET /v1/ai/usage 응답 하나가 usage 와 plan 두 정보를 함께 내려주지만,
+// 플랜 정보의 정본은 billingUserPlan 키 하나 — usage 에 흡수시키지 않고 나란히 반환한다 (#739)
+public struct AIAgentUsageLoadResult: Sendable {
+
+    public let usage: AIAgentUsage
+    public let userPlan: BillingUserPlan?
+
+    public init(usage: AIAgentUsage, userPlan: BillingUserPlan?) {
+        self.usage = usage
+        self.userPlan = userPlan
+    }
+}
+
+
+public extension AIAgentUsageLoadResult {
+
+    var isCreditExhausted: Bool {
+        return self.usage.isCreditExhausted(topupRemaining: self.userPlan?.topupRemaining)
     }
 }

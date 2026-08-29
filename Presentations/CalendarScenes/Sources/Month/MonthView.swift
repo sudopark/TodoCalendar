@@ -10,6 +10,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import CommonPresentation
 
 @Observable final class MonthViewState {
@@ -26,7 +27,7 @@ import CommonPresentation
     }
     
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
     
     func bind(_ viewModel: any MonthViewModel) {
         guard self.didBind == false else { return }
@@ -40,36 +41,38 @@ import CommonPresentation
             .sink(receiveValue: { [weak self] days in
                 self?.weekDays = days
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.weekModels
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] models in
                 self?.weeks = models
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.currentSelectDayIdentifier
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] identifier in
                 self?.selectedDay = identifier
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.todayIdentifier
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] identifier in
                 self?.today = identifier
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 
 final class MonthViewEventHandler: Observable {
     var daySelected: (DayCellViewModel) -> Void = { _ in }
-    
+    var shareEvents: (CalendarShareRangeKind, DayCellViewModel) -> Void = { _, _ in }
+
     func bind(_ viewModel: any MonthViewModel) {
         self.daySelected = viewModel.select(_:)
+        self.shareEvents = viewModel.shareEvents(_:for:)
     }
 }
 
@@ -151,6 +154,7 @@ struct MonthView: View {
             ForEach(self.state.weeks, id: \.id) {
                 WeekRowView(week: $0, expectSize)
                     .eventHandler(\.daySelected, eventHandler.daySelected)
+                    .eventHandler(\.shareEvents, eventHandler.shareEvents)
                     .environment(state)
                     .environment(appearance)
             }
@@ -177,7 +181,8 @@ private struct WeekRowView: View {
     @State private var eventsPerDays: [[any CalendarEvent]] = []
     
     fileprivate var daySelected: (DayCellViewModel) -> Void = { _ in }
-    
+    fileprivate var shareEvents: (CalendarShareRangeKind, DayCellViewModel) -> Void = { _, _ in }
+
     init(
         week: WeekRowModel,
         _ expectSize: CGSize
@@ -187,6 +192,17 @@ private struct WeekRowView: View {
     }
     
     var body: some View {
+        self.weekContentView()
+            .overlay { self.dayInteractionLayer() }
+            .onReceive(state.eventsPerDay(week.id).receive(on: RunLoop.main)) {
+                self.eventsPerDays = $0
+            }
+            .onReceive(state.eventStacks(week.id).receive(on: RunLoop.main)) {
+                self.eventStackModel = $0
+            }
+    }
+
+    private func weekContentView() -> some View {
         ZStack(alignment: .top) {
             HStack(spacing: 0) {
                 ForEach(week.days, id: \.identifier) { dayView($0) }
@@ -197,14 +213,56 @@ private struct WeekRowView: View {
                 eventStackView()
             }
         }
-        .onReceive(state.eventsPerDay(week.id).receive(on: RunLoop.main)) {
-            self.eventsPerDays = $0
-        }
-        .onReceive(state.eventStacks(week.id).receive(on: RunLoop.main)) {
-            self.eventStackModel = $0
+    }
+
+    // 이벤트 바가 날짜 칸 위에 겹쳐 그려져 있어, 탭·롱프레스는 그 위를 덮는 별도 레이어가 받는다
+    private func dayInteractionLayer() -> some View {
+        HStack(spacing: 0) {
+            ForEach(Array(week.days.enumerated()), id: \.element.identifier) { sequence, day in
+                Color.clear
+                    .frame(width: dayWidth)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        appearance.impactIfNeed()
+                        self.daySelected(day)
+                    }
+                    .contextMenu {
+                        self.shareEventsMenuItems(day)
+                    } preview: {
+                        self.dayColumnPreview(at: sequence)
+                    }
+            }
         }
     }
-    
+
+    @ViewBuilder
+    private func shareEventsMenuItems(_ day: DayCellViewModel) -> some View {
+        Button {
+            self.shareEvents(.day, day)
+        } label: {
+            Text("calendar::share::this_day".localized())
+        }
+        Button {
+            self.shareEvents(.week, day)
+        } label: {
+            Text("calendar::share::this_week".localized())
+        }
+        Button {
+            self.shareEvents(.month, day)
+        } label: {
+            Text("calendar::share::this_month".localized())
+        }
+    }
+
+    private func dayColumnPreview(at sequence: Int) -> some View {
+        self.weekContentView()
+            .frame(width: expectSize.width, height: expectSize.height, alignment: .topLeading)
+            .offset(x: -self.dayWidth * CGFloat(sequence))
+            .frame(width: self.dayWidth, height: expectSize.height, alignment: .leading)
+            .clipped()
+            .background(self.appearance.colorSet.dayBackground.asColor)
+    }
+
     private func dayView(
         _ day: DayCellViewModel
     ) -> some View {
@@ -254,10 +312,6 @@ private struct WeekRowView: View {
                 .fill(backgroundColor)
         )
         .opacity(opacity)
-        .onTapGesture {
-            appearance.impactIfNeed()
-            self.daySelected(day)
-        }
     }
     
     
@@ -439,7 +493,10 @@ final class DummyMonthViewModel: MonthViewModel, @unchecked Sendable {
     func select(_ day: DayCellViewModel) {
         self.selectedDay.send(day.identifier)
     }
-    
+
+    func shareEvents(_ kind: CalendarShareRangeKind, for day: DayCellViewModel) {
+    }
+
     func selectDay(_ day: CalendarDay) {
         self.selectedDay.send("\(day.year)-\(day.month)-\(day.day)")
     }

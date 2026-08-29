@@ -61,6 +61,16 @@ open class BaseSpyRouter: Routing {
         self.didOpenSafariPath = path
     }
     
+    public var didShowWebViewPath: String?
+    public func showWebView(_ path: String) {
+        self.didShowWebViewPath = path
+    }
+
+    public var didOpenSystemSetting: Bool?
+    open func openSystemSetting() {
+        self.didOpenSystemSetting = true
+    }
+
     public var didDismissPresented: Bool?
     public func dismissPresented(animated: Bool, _ completed: (() -> Void)?) {
         

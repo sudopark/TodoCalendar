@@ -37,12 +37,14 @@ public protocol EventUsecaseFactory {
     func makeDaysIntervalCountUsecase() -> any DaysIntervalCountUsecase
     var eventSyncUsecase: any EventSyncUsecase { get }
     var eventUploadService: any EventUploadService { get }
+    var eventLiveActivityUsecase: any EventLiveActivityUsecase { get }
 }
 
 public protocol SettingUsecaseFactory {
     
     func makeUISettingUsecase() -> any UISettingUsecase
     func makeEventSettingUsecase() -> any EventSettingUsecase
+    func makeEventShareSettingUsecase() -> any EventShareSettingUsecase
     func makeNotificationPermissionUsecase() -> any NotificationPermissionUsecase
     func makeEventNotificationSettingUsecase() -> any EventNotificationSettingUsecase
     var temporaryUserDataMigrationUsecase: any TemporaryUserDataMigrationUescase { get }
@@ -63,6 +65,8 @@ public protocol CommonUsecaseFactory {
 public protocol SupportUsecaseFactory {
 
     func makeFeedbackUsecase() -> any FeedbackUsecase
+    func makeGuideTodoUsecase() -> any GuideTodoUsecase
+    func makeLegalNoticeUsecase() -> any LegalNoticeUsecase
     var appUpdateCheckUsecase: any AppUpdateCheckUsecase { get }
 }
 
@@ -75,10 +79,21 @@ public protocol ExternalCalendarUsecaseFactory {
 public protocol AIAgentUsecaseFactory {
 
     var aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase { get }
+    var imageTextRecognizeService: any ImageTextRecognizeService { get }
     func makeSpeechRecognizeUsecase() -> any SpeechRecognizeUsecase
 }
 
-public protocol UsecaseFactory: AccountUsecaseFactory, CalendarUsecaseFactory, EventUsecaseFactory, NotificationUsecaseFactory, SettingUsecaseFactory, CommonUsecaseFactory, SupportUsecaseFactory, ExternalCalendarUsecaseFactory, AIAgentUsecaseFactory {
+public protocol BillingUsecaseFactory {
+
+    var billingUsecase: any BillingUsecase { get }
+}
+
+public protocol AdUsecaseFactory {
+
+    var adExposureUsecase: any AdExposureUsecase { get }
+}
+
+public protocol UsecaseFactory: AccountUsecaseFactory, CalendarUsecaseFactory, EventUsecaseFactory, NotificationUsecaseFactory, SettingUsecaseFactory, CommonUsecaseFactory, SupportUsecaseFactory, ExternalCalendarUsecaseFactory, AIAgentUsecaseFactory, BillingUsecaseFactory, AdUsecaseFactory {
 
     var eventNotifyService: SharedEventNotifyService { get }
 }

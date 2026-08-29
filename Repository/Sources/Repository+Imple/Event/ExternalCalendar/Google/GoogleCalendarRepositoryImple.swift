@@ -125,6 +125,43 @@ extension GoogleCalendarRepositoryImple {
         .eraseToAnyPublisher()
     }
     
+    public func loadRepeatingEventInstances(
+        _ calendarId: String,
+        _ eventId: String,
+        in period: Range<TimeInterval>
+    ) -> AnyPublisher<[GoogleCalendar.Event], any Error> {
+
+        return AnyPublisher<[GoogleCalendar.Event], any Error>.create { @Sendable [weak self] subscriber in
+            let task = Task { [weak self] in
+                guard let self else { return }
+                do {
+                    let refreshedList = try await self.loadEventInstanceListFromRemote(
+                        calendarId, eventId, in: period
+                    )
+                    let events = refreshedList.items.compactMap {
+                        return GoogleCalendar.Event($0, calendarId, accountId: self.accountId, refreshedList.timeZone)
+                    }
+                    let cached = try? await self.cacheStorage.loadEvents(calendarId, period, accountId: self.accountId)
+                    let staleIds = (cached ?? [])
+                        .filter { $0.isInstance(of: eventId) }
+                        .map { $0.eventId }
+                    if !staleIds.isEmpty {
+                        try? await self.cacheStorage.removeEvents(staleIds, accountId: self.accountId)
+                    }
+                    try? await self.cacheStorage.updateEvents(
+                        calendarId, refreshedList, events, accountId: self.accountId
+                    )
+                    subscriber.send(events)
+                    subscriber.send(completion: .finished)
+                } catch {
+                    subscriber.send(completion: .failure(error))
+                }
+            }
+            return AnyCancellable { task.cancel() }
+        }
+        .eraseToAnyPublisher()
+    }
+
     public func loadEventDetail(
         _ calendarId: String, _ timeZone: String, _ eventId: String
     ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error> {
@@ -161,6 +198,32 @@ extension GoogleCalendarRepositoryImple {
         return accList
     }
     
+    private func loadEventInstanceListFromRemote(
+        _ calendarId: String, _ eventId: String, in period: Range<TimeInterval>
+    ) async throws -> GoogleCalendar.EventOriginValueList {
+
+        let (timeMin, timeMax) = self.timeMinAndMax(period)
+        let id = calendarId.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? calendarId
+        let endpoint = GoogleCalendarEndpoint.eventInstances(calendarId: id, eventId: eventId)
+
+        var nextPageToken: String?
+        var accList = GoogleCalendar.EventOriginValueList()
+        repeat {
+            var params: [String: Any] = [:]
+            params["timeMin"] = timeMin; params["timeMax"] = timeMax
+            params["pageToken"] = nextPageToken
+
+            let list: GoogleCalendar.EventOriginValueList = try await self.remote.request(
+                .get, endpoint, parameters: params
+            )
+            nextPageToken = list.nextPageToken
+            accList.timeZone = list.timeZone
+            accList.items.append(contentsOf: list.items)
+        } while nextPageToken != nil
+
+        return accList
+    }
+
     private func loadEventFromRemote(
         _ calendarId: String,
         _ timeMin: String, _ timeMax: String,
@@ -222,8 +285,77 @@ extension GoogleCalendarRepositoryImple {
     }
 }
 
+// MARK: - write event
+
 extension GoogleCalendarRepositoryImple {
-    
+
+    public func updateEvent(
+        _ calendarId: String,
+        _ timeZone: String,
+        _ eventId: String,
+        _ params: GoogleCalendar.EventEditParams
+    ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error> {
+
+        return AnyPublisher<GoogleCalendar.EventOrigin, any Error>.create { @Sendable [weak self] subscriber in
+            let task = Task { [weak self] in
+                guard let self else { return }
+                do {
+                    let updated = try await self.updateEventOnRemote(calendarId, eventId, params)
+                    if !updated.isRecurringSeriesMaster {
+                        try? await self.cacheStorage.updateEventDetail(calendarId, timeZone, updated, accountId: self.accountId)
+                    }
+                    subscriber.send(updated)
+                    subscriber.send(completion: .finished)
+                } catch {
+                    subscriber.send(completion: .failure(error))
+                }
+            }
+            return AnyCancellable { task.cancel() }
+        }
+        .eraseToAnyPublisher()
+    }
+
+    private func updateEventOnRemote(
+        _ calendarId: String,
+        _ eventId: String,
+        _ params: GoogleCalendar.EventEditParams
+    ) async throws -> GoogleCalendar.EventOrigin {
+        let id = calendarId.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? calendarId
+        let endpoint = GoogleCalendarEndpoint.event(calendarId: id, eventId: eventId)
+        let origin: GoogleCalendar.EventOrigin = try await self.remote.request(
+            .patch, endpoint, parameters: params.asJson()
+        )
+        return origin
+    }
+
+    public func removeEvent(
+        _ calendarId: String,
+        _ eventId: String
+    ) -> AnyPublisher<Void, any Error> {
+
+        return AnyPublisher<Void, any Error>.create { @Sendable [weak self] subscriber in
+            let task = Task { [weak self] in
+                guard let self else { return }
+                do {
+                    let id = calendarId.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? calendarId
+                    let endpoint = GoogleCalendarEndpoint.event(calendarId: id, eventId: eventId)
+                    let _ = try await self.remote.request(.delete, endpoint, with: nil, parameters: [:])
+                    try? await self.cacheStorage.removeEvents([eventId], accountId: self.accountId)
+                    subscriber.send(())
+                    subscriber.send(completion: .finished)
+                } catch {
+                    subscriber.send(completion: .failure(error))
+                }
+            }
+            return AnyCancellable { task.cancel() }
+        }
+        .eraseToAnyPublisher()
+    }
+}
+
+
+extension GoogleCalendarRepositoryImple {
+
     public func resetCache() async throws {
         try await self.cacheStorage.resetAll(accountId: self.accountId)
     }

@@ -43,6 +43,7 @@ public final class AppDataMigrationImple: @unchecked Sendable {
                     case 3: try self?.runMigrationVersion3to4(database)
                     case 4: try? self?.runMigrationVersion4to5(database)
                     case 5: try? self?.runMigrationVersion5to6(database)
+                    case 6: try? self?.runMigrationVersion6to7(database)
                     default: break
                     }
                 },
@@ -155,6 +156,18 @@ extension AppDataMigrationImple {
         } catch {
             logger.log(.sql, level: .error, "migration version 5 -> 6 failed.. will drop TodoEventTable")
             try? database.dropTable(TodoEventTable.self)
+        }
+    }
+
+    private func runMigrationVersion6to7(_ database: any DataBase) throws {
+        do {
+            try database.createTableOrNot(PendingDoneTodoEventTable.self)
+            try database.createTableOrNot(PendingDoneTodoEventTableV6TempTable.self)
+            try database.migrate(PendingDoneTodoEventTable.self, version: 6)
+            logger.log(.sql, level: .info, "migration version 6 -> 7, PendingDoneTodoEventTable finished")
+        } catch {
+            logger.log(.sql, level: .error, "migration version 6 -> 7 failed.. will drop PendingDoneTodoEventTable")
+            try? database.dropTable(PendingDoneTodoEventTable.self)
         }
     }
 

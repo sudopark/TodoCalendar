@@ -54,12 +54,14 @@ final class SettingSceneSnapshots: XCTestCase {
                     SettingItemModel(.appearance),
                     SettingItemModel(.editEvent),
                     SettingItemModel(.holidaySetting),
-                    AccountSettingItemModel(nil)
+                    SettingItemModel(.billingPlan),
+                    AccountSettingItemModel(AccountInfo("some"))
                 ]
             )
             let supportSection = SettingSectionModel(
                 headerText: "setting.section.support::name".localized(),
                 items: [
+                    SettingItemModel(.openWeb),
                     SettingItemModel(.feedback),
                     SettingItemModel(.help)
                 ]
@@ -71,10 +73,9 @@ final class SettingSceneSnapshots: XCTestCase {
                 items: [
                     SettingItemModel(.shareApp),
                     SettingItemModel(.addReview),
-                    SettingItemModel(.sourceCode)
+                    SettingItemModel(.openSourceLicense)
                 ]
             )
-            // suggest 섹션(SuggestAppItemModel)은 RemoteImageView 의존이라 결정성 확보를 위해 제외
             state.sections = [baseSection, supportSection, appInfoSection]
 
             return SettingItemListView()
@@ -148,7 +149,7 @@ final class SettingSceneSnapshots: XCTestCase {
             state.selectedAllDayEventNotificationTimeText = "so long text hahahahhahahha hahah"
             state.externalCalendarServiceModels = [
                 ExternalCalanserServiceModel(
-                    GoogleCalendarService(scopes: [.readOnly]),
+                    GoogleCalendarService(scopes: [.readonly]),
                     accountId: nil
                 )!
             ]
@@ -262,11 +263,6 @@ final class SettingSceneSnapshots: XCTestCase {
 
     // MARK: - EventTag/EventTagDetail/EventTagDetailView
 
-    // EventTagDetailViewState의 필드가 fileprivate(파일 내부 #Preview만 접근 가능)라
-    // state를 직접 채우지 못하고, production의 bind(viewModel:) 경로로 우회한다.
-    // bind()가 구독하는 퍼블리셔 다수가 .receive(on: RunLoop.main)이라 onAppear 시점에
-    // 트리거하면 캡처 시점까지 값이 도착하지 않을 수 있어 — 뷰 구성 전에 미리 bind하고
-    // 런루프를 짧게 펌핑해 방출을 확정한 뒤 뷰에 주입한다.
     @MainActor
     func test_eventTagDetail() {
         captureSnapshotPair(named: "eventTagDetail", layout: .fullScreen) { theme in
@@ -344,8 +340,6 @@ final class SettingSceneSnapshots: XCTestCase {
 
     // MARK: - Setting/Appearance/ColorTheme/ColorThemeSelectView (covers ColorThemePreviewView)
 
-    // ColorThemeSelectViewState의 필드도 fileprivate라 bind(viewModel:) 경로로 우회 — 이유는
-    // test_eventTagDetail 주석 참고 (런루프 펌핑으로 .receive(on: RunLoop.main) 방출 확정).
     @MainActor
     func test_colorThemeSelect() {
         captureSnapshotPair(named: "colorThemeSelect", layout: .fullScreen) { theme in

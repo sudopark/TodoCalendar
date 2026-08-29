@@ -1,3 +1,5 @@
 "NSCalendarsFullAccessUsageDescription" = "इवेंट दिखाने और Apple कैलेंडर के साथ सिंक करने के लिए कैलेंडर एक्सेस आवश्यक है।";
 "NSMicrophoneUsageDescription" = "आवाज़ से इवेंट और कार्य दर्ज करने के लिए माइक्रोफ़ोन एक्सेस आवश्यक है।";
 "NSSpeechRecognitionUsageDescription" = "आपकी आवाज़ को इवेंट और कार्यों में बदलने के लिए वाणी पहचान आवश्यक है।";
+"NSCameraUsageDescription" = "आपके द्वारा ली गई फ़ोटो से टेक्स्ट पढ़ने के लिए कैमरा एक्सेस आवश्यक है।";
+"NSPhotoLibraryAddUsageDescription" = "साझा किए गए इवेंट की छवि को अपनी फ़ोटो में सहेजने के लिए फ़ोटो लाइब्रेरी एक्सेस आवश्यक है।";

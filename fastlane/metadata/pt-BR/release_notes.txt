@@ -1,0 +1,27 @@
+Esta atualização traz novos recursos.
+
+■ Entrada Rápida por IA
+· Fale ou escreva e o evento é criado. "Almoço com a Sara sexta ao meio-dia", "passa o dentista para terça que vem": do jeito que você falaria
+· Ler a partir de uma imagem: fotografe um horário de aulas ou o cartaz de um evento, ou escolha uma imagem da sua biblioteca, e o texto vira eventos
+· Não só adicionar: mudar o horário, renomear, marcar como concluído, excluir. Pedidos que alteram ou removem algo mostram antes o que vai acontecer e pedem confirmação
+· Envie pela Siri, por um widget ou pela Central de Controle sem abrir o app
+· Compartilhe texto ou uma foto de outro app e siga em Enviar para a IA
+· Entrada Rápida por IA fica disponível depois de entrar na conta
+
+■ Mostrar na Tela Bloqueada
+· Um evento prestes a começar mostra a contagem regressiva na Tela Bloqueada e na Dynamic Island
+· Adicione pelo detalhe do evento ou pela lista do dia, inclusive eventos do Google Agenda e do Calendário da Apple
+· Marque um afazer como concluído ou encerre a exibição direto da Tela Bloqueada, e toque para abrir o detalhe
+
+■ Compartilhamento da agenda
+· Toque e segure uma data no calendário para Compartilhar este dia, Compartilhar esta semana ou Compartilhar este mês
+· Em Prévia do compartilhamento, escolha quais Tipos de evento incluir e se compartilha como Texto ou Imagem
+· Também dá para compartilhar um evento sozinho
+
+■ Edição de eventos do Google Agenda e do Calendário da Apple
+· Altere e exclua eventos dos calendários conectados direto no app, regras de repetição incluídas
+· Toque e segure na lista para excluir
+
+■ Planos
+· Atualizar plano deixa você escolher entre Padrão e Vitalício, cada um com mais créditos por dia
+· Se acabarem, Adicionar créditos repõe, e os créditos adicionados não expiram

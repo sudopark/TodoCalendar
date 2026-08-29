@@ -34,7 +34,7 @@ public protocol TodoEventUsecase {
     func refreshUncompletedTodos()
     var uncompletedTodos: AnyPublisher<[TodoEvent], Never> { get }
     
-    func skipRepeatingTodo(_ todoId: String, _ params: SkipTodoParams) async throws -> TodoEvent
+    func skipRepeatingTodo(_ todoId: String) async throws -> TodoEvent
 }
 
 
@@ -56,7 +56,7 @@ public final class TodoEventUsecaseImple: TodoEventUsecase {
         self.eventNotifyService = eventNotifyService
     }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
 }
 
 
@@ -206,7 +206,7 @@ extension TodoEventUsecaseImple {
                 $0 ? RefreshingEvent.refreshingCurrentTodo(true) : .refreshingCurrentTodo(false)
             }
             .sink(receiveCompletion: { _ in }, receiveValue: updateCached)
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
     
     public var currentTodoEvents: AnyPublisher<[TodoEvent], Never> {
@@ -235,7 +235,7 @@ extension TodoEventUsecaseImple {
                 $0 ? RefreshingEvent.refreshingTodo(true) : .refreshingTodo(false)
             }
             .sink(receiveCompletion: { _ in }, receiveValue: updateCache)
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
     
     public func todoEvents(in period: Range<TimeInterval>) -> AnyPublisher<[TodoEvent], Never> {
@@ -287,7 +287,7 @@ extension TodoEventUsecaseImple {
                 $0 ? RefreshingEvent.refreshingUncompletedTodo(true) : .refreshingUncompletedTodo(false)
             }
             .sink(receiveValue: refreshCached)
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
     
     public var uncompletedTodos: AnyPublisher<[TodoEvent], Never> {
@@ -335,23 +335,11 @@ extension TodoEventUsecaseImple {
 // MARK: - skip todo
 
 extension TodoEventUsecaseImple {
-    
-    public func skipRepeatingTodo(
-        _ todoId: String, _ params: SkipTodoParams
-    ) async throws -> TodoEvent {
-        
-        switch params {
-        case .next:
-            let skipped = try await self.todoRepository.skipRepeatingTodo(todoId)
-            self.notifyUpdatedEvent(skipped)
-            self.updateUncompletedTodoList(by: skipped)
-            return skipped
-            
-        case .until(let next):
-            let params = TodoEditParams(.patch) |> \.time .~ next
-            let skipped = try await self.updateTodoEvent(todoId, params)
-            self.updateUncompletedTodoList(by: skipped)
-            return skipped
-        }
+
+    public func skipRepeatingTodo(_ todoId: String) async throws -> TodoEvent {
+        let skipped = try await self.todoRepository.skipRepeatingTodo(todoId)
+        self.notifyUpdatedEvent(skipped)
+        self.updateUncompletedTodoList(by: skipped)
+        return skipped
     }
 }

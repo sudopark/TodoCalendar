@@ -36,6 +36,39 @@ public enum EventTime: Comparable, Sendable, Hashable {
             return nil
         }
     }
+
+    public init?(customKey: String) {
+        if customKey.contains("..<") {
+            let parts = customKey.split(separator: "+", maxSplits: 1, omittingEmptySubsequences: false)
+            let rangeString = String(parts[0])
+
+            let components = rangeString.components(separatedBy: "..<")
+
+            guard components.count == 2,
+                  let lowerBound = Int(components[0]).map({ TimeInterval($0) }),
+                  let upperBound = Int(components[1]).map({ TimeInterval($0) }) else {
+                return nil
+            }
+
+            guard lowerBound <= upperBound else {
+                return nil
+            }
+
+            if parts.count > 1 {
+                guard let offset = Int(parts[1]).map({ TimeInterval($0) }) else {
+                    return nil
+                }
+                self = .allDay(lowerBound..<upperBound, secondsFromGMT: offset)
+            } else {
+                self = .period(lowerBound..<upperBound)
+            }
+        } else {
+            guard let time = Int(customKey).map({ TimeInterval($0) }) else {
+                return nil
+            }
+            self = .at(time)
+        }
+    }
     
     public var queryParams: [String: String] {
         switch self {

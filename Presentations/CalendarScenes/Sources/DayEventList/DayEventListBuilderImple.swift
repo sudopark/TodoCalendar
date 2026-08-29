@@ -24,6 +24,8 @@ final class DayEventListSceneBuilerImple {
     private let accountUsecase: any AccountUsecase
     private let memberSceneBuilder: any MemberSceneBuilder
     private let aiKeyboardInputSceneBuilder: any AIAgentKeyboardInputSceneBuilder
+    private let aiImageCommandSceneBuilder: any AIAgentImageCommandSceneBuilder
+    private let sharePreviewSceneBuilder: any SharePreviewSceneBuilder
 
     init(
         usecaseFactory: any UsecaseFactory,
@@ -32,7 +34,9 @@ final class DayEventListSceneBuilerImple {
         eventListSceneBuilder: any EventListSceneBuiler,
         accountUsecase: any AccountUsecase,
         memberSceneBuilder: any MemberSceneBuilder,
-        aiKeyboardInputSceneBuilder: any AIAgentKeyboardInputSceneBuilder
+        aiKeyboardInputSceneBuilder: any AIAgentKeyboardInputSceneBuilder,
+        aiImageCommandSceneBuilder: any AIAgentImageCommandSceneBuilder,
+        sharePreviewSceneBuilder: any SharePreviewSceneBuilder
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
@@ -41,6 +45,8 @@ final class DayEventListSceneBuilerImple {
         self.accountUsecase = accountUsecase
         self.memberSceneBuilder = memberSceneBuilder
         self.aiKeyboardInputSceneBuilder = aiKeyboardInputSceneBuilder
+        self.aiImageCommandSceneBuilder = aiImageCommandSceneBuilder
+        self.sharePreviewSceneBuilder = sharePreviewSceneBuilder
     }
 }
 
@@ -70,13 +76,17 @@ extension DayEventListSceneBuilerImple: DayEventListSceneBuiler {
             foremostEventUsecase: foremostEventUsecase,
             uiSettingUsecase: uiSettingUsecase,
             accountUsecase: self.accountUsecase,
-            aiAgentOrchestrationUsecase: self.usecaseFactory.aiAgentOrchestrationUsecase
+            aiAgentOrchestrationUsecase: self.usecaseFactory.aiAgentOrchestrationUsecase,
+            eventLiveActivityUsecase: self.usecaseFactory.eventLiveActivityUsecase,
+            guideTodoUsecase: self.usecaseFactory.makeGuideTodoUsecase()
         )
         let router = DayEventListRouter(
             eventDetailSceneBuilder: self.eventDetailSceneBuilder,
             eventListSceneBuilder: self.eventListSceneBuilder,
             memberSceneBuilder: self.memberSceneBuilder,
             aiKeyboardInputSceneBuilder: self.aiKeyboardInputSceneBuilder,
+            aiImageCommandSceneBuilder: self.aiImageCommandSceneBuilder,
+            sharePreviewSceneBuilder: self.sharePreviewSceneBuilder,
             viewAppearance: self.viewAppearance
         )
         viewModel.router = router

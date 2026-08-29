@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Domain
+import Extensions
 import Combine
 import CommonPresentation
 
@@ -14,7 +15,7 @@ import CommonPresentation
 @Observable final class CalendarSectionAppearanceSettingViewState {
     
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
     var calendarModel: CalendarAppearanceModel = .init([], [])
     var accentDays: [AccentDays: Bool] = [:]
     var showUnderLine: Bool = false
@@ -37,7 +38,7 @@ import CommonPresentation
             .sink(receiveValue: { [weak self] day in
                 self?.selectedWeekDay = day
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.calendarAppearanceModel
             .receive(on: RunLoop.main)
@@ -51,28 +52,28 @@ import CommonPresentation
                     self?.didFirstCalendarModelUpdated = true
                 }
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.accentDaysActivatedMap
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] map in
                 self?.accentDays = map
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.isShowUnderLineOnEventDay
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] flag in
                 self?.showUnderLine = flag
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.selectedColorTheme
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] model in
                 self?.selectedColorTheme = model
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

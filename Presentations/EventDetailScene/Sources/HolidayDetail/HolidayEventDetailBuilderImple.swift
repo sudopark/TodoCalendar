@@ -9,6 +9,7 @@
 //
 
 import UIKit
+import Domain
 import Scenes
 import CommonPresentation
 
@@ -35,10 +36,14 @@ extension HolidayEventDetailSceneBuilerImple: HolidayEventDetailSceneBuiler {
     @MainActor
     public func makeHolidayEventDetailScene(uuid: String) -> any HolidayEventDetailScene {
         
+        let liveActivityToggleViewModel = LiveActivityToggleViewModelImple(
+            eventLiveActivityUsecase: self.usecaseFactory.eventLiveActivityUsecase
+        )
         let viewModel = HolidayEventDetailViewModelImple(
             uuid: uuid,
             holidayUsecase: self.usecaseFactory.makeHolidayUsecase(),
-            daysIntervalCountUsecase: self.usecaseFactory.makeDaysIntervalCountUsecase()
+            daysIntervalCountUsecase: self.usecaseFactory.makeDaysIntervalCountUsecase(),
+            liveActivityToggleViewModel: liveActivityToggleViewModel
         )
         
         let viewController = HolidayEventDetailViewController(
@@ -50,6 +55,7 @@ extension HolidayEventDetailSceneBuilerImple: HolidayEventDetailSceneBuiler {
         )
         router.scene = viewController
         viewModel.router = router
+        liveActivityToggleViewModel.router = router
         
         return viewController
     }

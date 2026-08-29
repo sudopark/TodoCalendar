@@ -33,8 +33,8 @@ jobs:
         run: |
           FILES="${{ steps.changed.outputs.files }}"
 
-          ALL_SCHEMES="Domain Repository AuthService CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene TodoCalendarApp TodoCalendarAppWidget"
-          ALL_PRESENTATION="CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene"
+          ALL_SCHEMES="Domain Repository AuthService BillingScenes CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene TodoCalendarApp TodoCalendarAppWidget TodoCalendarAppShare"
+          ALL_PRESENTATION="BillingScenes CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene"
 
           schemes=()
 
@@ -56,6 +56,11 @@ jobs:
             schemes+=($ALL_SCHEMES)
           fi
 
+          # Extensions 자체 테스트: Extensions 경로(Sources·Tests) 변경 시에만
+          if echo "$FILES" | grep -q "^Supports/Extensions/"; then
+            schemes+=("Extensions")
+          fi
+
           # UnitTestHelpKit: 테스트 인프라 → 모든 테스트 스킴
           if echo "$FILES" | grep -q "^Supports/UnitTestHelpKit/Sources/"; then
             schemes+=($ALL_SCHEMES)
@@ -64,7 +69,7 @@ jobs:
           # TestDoubles: Domain/Scenes 스텁 → Repository + Presentation + App 테스트
           # (Domain 테스트는 TestDoubles를 사용하지 않음)
           if echo "$FILES" | grep -q "^Supports/TestDoubles/Sources/"; then
-            schemes+=("Repository" $ALL_PRESENTATION "TodoCalendarApp" "TodoCalendarAppWidget")
+            schemes+=("Repository" $ALL_PRESENTATION "TodoCalendarApp" "TodoCalendarAppWidget" "TodoCalendarAppShare")
           fi
 
           # === Domain 레이어 ===
@@ -78,7 +83,7 @@ jobs:
 
           # === Repository 레이어 ===
           if echo "$FILES" | grep -q "^Repository/Sources/"; then
-            schemes+=("Repository" "TodoCalendarApp" "TodoCalendarAppWidget")
+            schemes+=("Repository" "TodoCalendarApp" "TodoCalendarAppWidget" "TodoCalendarAppShare")
           fi
           if echo "$FILES" | grep -q "^Repository/Tests/"; then
             schemes+=("Repository")
@@ -91,14 +96,17 @@ jobs:
           if echo "$FILES" | grep -q "^Services/AuthService/Tests/"; then
             schemes+=("AuthService")
           fi
-          if echo "$FILES" | grep -qE "^Services/(FirstPartyServices|SpeechService|PlaceService|ExternalServices|StoreKitService)/"; then
+          if echo "$FILES" | grep -qE "^Services/(FirstPartyServices|SpeechService|PlaceService|ExternalServices|StoreKitService|AdService)/"; then
             schemes+=("TodoCalendarApp")
+          fi
+          if echo "$FILES" | grep -q "^Services/FirstPartyServices/"; then
+            schemes+=("TodoCalendarAppShare")
           fi
 
           # === Presentation 공통 ===
           # CommonPresentation: 모든 Presentation Scene + App + Widget이 의존
           if echo "$FILES" | grep -q "^Presentations/CommonPresentation/"; then
-            schemes+=($ALL_PRESENTATION "TodoCalendarApp" "TodoCalendarAppWidget")
+            schemes+=($ALL_PRESENTATION "TodoCalendarApp" "TodoCalendarAppWidget" "TodoCalendarAppShare")
           fi
           # Scenes: 모든 Presentation Scene + App이 의존 (Widget은 미의존)
           if echo "$FILES" | grep -q "^Presentations/Scenes/"; then
@@ -106,6 +114,9 @@ jobs:
           fi
 
           # === Presentation 개별 Scene ===
+          if echo "$FILES" | grep -q "^Presentations/BillingScenes/"; then
+            schemes+=("BillingScenes")
+          fi
           if echo "$FILES" | grep -q "^Presentations/CalendarScenes/"; then
             schemes+=("CalendarScenes" "TodoCalendarApp" "TodoCalendarAppWidget")
           fi
@@ -131,6 +142,18 @@ jobs:
           fi
           if echo "$FILES" | grep -q "^TodoCalendarApp/AppExtensions/Widget/"; then
             schemes+=("TodoCalendarAppWidget")
+          fi
+          # Base는 embed가 아니라 각 확장 타겟이 소스로 직접 컴파일한다.
+          # 위젯·공유 확장 모두 테스트 타겟이 있고 그 소스에도 Base가 들어간다.
+          if echo "$FILES" | grep -q "^TodoCalendarApp/AppExtensions/Base/"; then
+            schemes+=("TodoCalendarApp" "TodoCalendarAppWidget" "TodoCalendarAppShare")
+          fi
+          if echo "$FILES" | grep -q "^TodoCalendarApp/AppExtensions/Share/"; then
+            schemes+=("TodoCalendarApp" "TodoCalendarAppShare")
+          fi
+          # LiveActivity 소스는 App+Widget+Share 세 타겟이 각자 직접 컴파일한다(Project+Templates의 sources 글롭).
+          if echo "$FILES" | grep -q "^TodoCalendarApp/Sources/LiveActivity/"; then
+            schemes+=("TodoCalendarApp" "TodoCalendarAppWidget" "TodoCalendarAppShare")
           fi
 
           # .github/, scripts/, docs/ 등 → 코드 빌드에 영향 없으므로 테스트 불필요
@@ -187,6 +210,18 @@ jobs:
           set -euo pipefail
           rm -rf ./DerivedData
 
+      - name: Test Extensions
+        if: contains(needs.detect-changes.outputs.schemes, ' Extensions ')
+        run: |
+          set -euo pipefail
+          xcodebuild test \
+            -workspace TodoCalendar.xcworkspace \
+            -scheme Extensions \
+            -derivedDataPath ./DerivedData \
+            -destination "$DESTINATION" \
+            -testLanguage en -testRegion en_US \
+            | xcpretty
+
       - name: Test Domain
         if: contains(needs.detect-changes.outputs.schemes, ' Domain ')
         run: |
@@ -218,6 +253,18 @@ jobs:
           xcodebuild test \
             -workspace TodoCalendar.xcworkspace \
             -scheme AuthService \
+            -derivedDataPath ./DerivedData \
+            -destination "$DESTINATION" \
+            -testLanguage en -testRegion en_US \
+            | xcpretty
+
+      - name: Test BillingScenes
+        if: contains(needs.detect-changes.outputs.schemes, ' BillingScenes ')
+        run: |
+          set -euo pipefail
+          xcodebuild test \
+            -workspace TodoCalendar.xcworkspace \
+            -scheme BillingScenes \
             -derivedDataPath ./DerivedData \
             -destination "$DESTINATION" \
             -testLanguage en -testRegion en_US \
@@ -314,6 +361,18 @@ jobs:
           xcodebuild test \
             -workspace TodoCalendar.xcworkspace \
             -scheme TodoCalendarAppWidget \
+            -derivedDataPath ./DerivedData \
+            -destination "$DESTINATION" \
+            -testLanguage en -testRegion en_US \
+            | xcpretty
+
+      - name: Test TodoCalendarAppShare
+        if: contains(needs.detect-changes.outputs.schemes, ' TodoCalendarAppShare ')
+        run: |
+          set -euo pipefail
+          xcodebuild test \
+            -workspace TodoCalendar.xcworkspace \
+            -scheme TodoCalendarAppShare \
             -derivedDataPath ./DerivedData \
             -destination "$DESTINATION" \
             -testLanguage en -testRegion en_US \

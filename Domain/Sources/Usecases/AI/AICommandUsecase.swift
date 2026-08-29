@@ -15,15 +15,23 @@ import Extensions
 
 public protocol AICommandUsecase: AnyObject, Sendable {
     
-    func processCommand(_ commandText: String) -> AnyPublisher<AIJob, any Error>
-    
-    func processConfirmCommand(_ action: AIConfirmCommandAction) -> AnyPublisher<AIJob, any Error>
+    func processCommand(_ commandText: String) -> AnyPublisher<AICommandProcessing, any Error>
+
+    func processInterpretCommand(
+        text: String,
+        additionalInstruction: String?,
+        inputSource: AICommandInputSource
+    ) -> AnyPublisher<AICommandProcessing, any Error>
+
+    func processConfirmCommand(_ action: AIConfirmCommandAction) -> AnyPublisher<AICommandProcessing, any Error>
 
     func rejectConfirmCommand(_ action: AIConfirmCommandAction)
 
     func cancelOngoingCommand(_ jobId: String)
 
-    func restoreCommandifNeed() -> AnyPublisher<AIJob?, any Error>
+    func clearProcessingCommandRecord() async
+
+    func restoreCommandifNeed() -> AnyPublisher<AICommandProcessing?, any Error>
 
     func refreshJobStatus(_ jobId: String)
 }
@@ -64,14 +72,14 @@ public final class AICommandUsecaseImple: AICommandUsecase, @unchecked Sendable 
         let jobFinishEvent = PassthroughSubject<String, Never>()
     }
     private let subject = Subject()
-    private var cancelBag = Set<AnyCancellable>()
+    private let cancelBag = CancelBag()
 
     private func internalBind() {
         self.calendarSettingUsecase.currentTimeZone
             .sink(receiveValue: { [weak self] timeZone in
                 self?.subject.timeZone.send(timeZone)
             })
-            .store(in: &self.cancelBag)
+            .store(in: self.cancelBag)
     }
 }
 
@@ -80,8 +88,8 @@ public final class AICommandUsecaseImple: AICommandUsecase, @unchecked Sendable 
 
 extension AICommandUsecaseImple {
     
-    public func processCommand(_ commandText: String) -> AnyPublisher<AIJob, any Error> {
-        
+    public func processCommand(_ commandText: String) -> AnyPublisher<AICommandProcessing, any Error> {
+
         let timeZone = self.currentIANATimeZone(); let repository = self.repository
 
         let makeJob: some Publisher<String, any Error> = Publishers.create(do: {
@@ -91,18 +99,35 @@ extension AICommandUsecaseImple {
             )
             return jobId
         })
-        
-        let waitJobUntilFinish = makeJob
-            .flatMap { [weak self] jobId in
-                return self?.checkJob(jobId) ?? Empty().eraseToAnyPublisher()
-            }
 
-        return waitJobUntilFinish
-            .handleClearProcessingCommand(repository)
-            .eraseToAnyPublisher()
+        return self.waitJobUntilFinish(makeJob)
     }
 
-    public func processConfirmCommand(_ action: AIConfirmCommandAction) -> AnyPublisher<AIJob, any Error> {
+    public func processInterpretCommand(
+        text: String,
+        additionalInstruction: String?,
+        inputSource: AICommandInputSource
+    ) -> AnyPublisher<AICommandProcessing, any Error> {
+
+        let timeZone = self.currentIANATimeZone(); let repository = self.repository
+
+        let makeJob: some Publisher<String, any Error> = Publishers.create(do: {
+            let jobId = try await repository.processInterpretCommand(
+                text: text,
+                additionalInstruction: additionalInstruction,
+                inputSource: inputSource,
+                timeZone: timeZone
+            )
+            try? await repository.updateProcessingAICommand(
+                .init(jobId: jobId, isConfirmJob: false)
+            )
+            return jobId
+        })
+
+        return self.waitJobUntilFinish(makeJob)
+    }
+
+    public func processConfirmCommand(_ action: AIConfirmCommandAction) -> AnyPublisher<AICommandProcessing, any Error> {
 
         let timeZone = self.currentIANATimeZone(); let repository = self.repository
 
@@ -114,31 +139,45 @@ extension AICommandUsecaseImple {
             return jobId
         })
 
-        let waitUntilFinish = makeConfirmJob
-            .flatMap { [weak self] jobId in
-                return self?.checkJob(jobId) ?? Empty().eraseToAnyPublisher()
-            }
+        return self.waitJobUntilFinish(makeConfirmJob)
+    }
 
-        return waitUntilFinish
-            .handleClearProcessingCommand(repository)
+    private func waitJobUntilFinish(
+        _ makeJobId: some Publisher<String, any Error>,
+        immediateCheck: Bool = false
+    ) -> AnyPublisher<AICommandProcessing, any Error> {
+
+        let repository = self.repository
+        return makeJobId
+            .flatMap { [weak self] jobId -> AnyPublisher<AICommandProcessing, any Error> in
+                guard let self else { return Empty().eraseToAnyPublisher() }
+                return self.checkJob(jobId, immediateCheck: immediateCheck)
+                    .handleClearProcessingCommand(repository)
+                    .map { AICommandProcessing.job($0) }
+                    .prepend(.started(jobId: jobId))
+                    .eraseToAnyPublisher()
+            }
             .eraseToAnyPublisher()
     }
     
     public func rejectConfirmCommand(_ action: AIConfirmCommandAction) {
         let repository = self.repository
-        // 서버 거부 API(Functions#243) 미구현 — 준비 전까지 fire-and-forget.
-        Task { try? await repository.rejectConfirmCommand(action) }
+        Task {
+            try? await repository.rejectConfirmCommand(action)
+            try? await repository.clearProcessingAICommand()
+        }
     }
 
     public func cancelOngoingCommand(_ jobId: String) {
-        // fire-and-forget — 호출 시점에 orchestration이 이미 구독을 끊고 idle로 보냈다.
-        // 서버의 CANCELED 통보를 클라가 소비하는 경로는 없다 (clear 전에 앱이 죽어
-        // 잔여 레코드가 restore되는 경우만 예외 — AIJob.Status.canceled가 이를 방어한다).
         let repository = self.repository
         Task {
             try? await repository.cancelCommand(jobId)
             try? await repository.clearProcessingAICommand()
         }
+    }
+
+    public func clearProcessingCommandRecord() async {
+        try? await self.repository.clearProcessingAICommand()
     }
 
     public func refreshJobStatus(_ jobId: String) {
@@ -197,21 +236,21 @@ extension AICommandUsecaseImple {
 
 extension AICommandUsecaseImple {
     
-    public func restoreCommandifNeed() -> AnyPublisher<AIJob?, any Error> {
+    public func restoreCommandifNeed() -> AnyPublisher<AICommandProcessing?, any Error> {
 
         let processingCmd = self.loadProcessingCommand()
 
         return processingCmd
-            .flatMap { [weak self] cmd -> AnyPublisher<AIJob?, any Error> in
+            .flatMap { [weak self] cmd -> AnyPublisher<AICommandProcessing?, any Error> in
                 guard let self, let cmd
                 else {
-                    return Just<AIJob?>(nil)
+                    return Just<AICommandProcessing?>(nil)
                         .setFailureType(to: (any Error).self)
                         .eraseToAnyPublisher()
                 }
 
-                return self.checkJob(cmd.jobId, immediateCheck: true)
-                    .handleClearProcessingCommand(self.repository)
+                let restoredJobId = Just(cmd.jobId).setFailureType(to: (any Error).self)
+                return self.waitJobUntilFinish(restoredJobId, immediateCheck: true)
                     .map { Optional($0) }
                     .eraseToAnyPublisher()
             }
@@ -260,8 +299,10 @@ private extension Publisher where Output == AIJob, Failure == any Error {
         _ repository: AICommandRepository
     ) -> some Publisher<AIJob, Failure> {
         
+        // confirm은 종료가 아니라 유저 응답 대기다. 여기서 지우면 콜드스타트 복원 근거가
+        // 사라져 대기 중이던 confirm이 유실된다 — 정리는 응답(confirm/decline/중지)이 한다.
         let handleOutput: (AIJob) -> Void = { job in
-            guard job.isFinish else { return }
+            guard job.isFinish, job.status != .confirm else { return }
             Task { try await repository.clearProcessingAICommand() }
         }
         

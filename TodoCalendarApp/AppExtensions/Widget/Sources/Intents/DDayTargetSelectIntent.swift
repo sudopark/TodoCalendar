@@ -247,7 +247,6 @@ struct DDayTargetEventQuery: EntityQuery, @unchecked Sendable {
         return events
             .compactMap { self.asCandidate($0, countryCode) }
             .sorted { $0.time.lowerBoundWithFixed < $1.time.lowerBoundWithFixed }
-            // 반복 일정은 회차마다 후보가 생기므로, 시간순 정렬 뒤 가장 이른 회차만 남긴다
             .removeDuplicates { $0.targetId }
             .sortedForSuggestion(
                 since: todayStart,
@@ -296,15 +295,12 @@ struct DDayTargetEventQuery: EntityQuery, @unchecked Sendable {
             )
 
         case let holiday as HolidayCalendarEvent:
-            // countryCode가 없으면(국가 미선택) 복원 키를 만들 수 없어 후보에서 뺀다.
             guard let countryCode else { return nil }
             let key = HolidayTargetKey(
                 countryCode: countryCode,
                 dateString: holiday.dateString,
                 name: holiday.name
             )
-            // HolidayCalendarEvent.isRepeating은 하드코딩 true(표시용)라 쓰지 않는다.
-            // 공휴일은 연도별 개별 데이터이므로 회차 선택 대상이 아니다.
             return DDayTargetCandidate(
                 targetId: .init(kind: .holiday, rawId: key.rawId),
                 name: holiday.name,
@@ -313,7 +309,6 @@ struct DDayTargetEventQuery: EntityQuery, @unchecked Sendable {
             )
 
         default:
-            // 할일(todo)·외부 캘린더 이벤트는 D-day 대상에서 제외한다.
             return nil
         }
     }

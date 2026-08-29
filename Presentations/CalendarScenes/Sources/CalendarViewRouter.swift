@@ -5,7 +5,7 @@
 //  Created by sudo.park on 2023/06/30.
 //
 
-import Foundation
+import UIKit
 import Domain
 import Scenes
 
@@ -17,23 +17,35 @@ protocol CalendarViewRouting: Routing, Sendable {
     @MainActor
     func changeFocus(at index: Int)
 
-    func routeToAICommand()
+    @MainActor
+    func slideFocus(to index: Int, isNext: Bool, completed: @escaping @Sendable () -> Void)
+
+    func routeToAICommand(listener: (any AIAgentCommandSceneListener)?)
+
+    func routeToPaywall()
+
+    func routeToSignIn()
 }
 
 final class CalendarViewRouterImple: BaseRouterImple, CalendarViewRouting, @unchecked Sendable {
 
     private let paperSceneBuilder: any CalendarPaperSceneBuiler
     private let aiAgentCommandSceneBuilder: any AIAgentCommandSceneBuilder
+    private let memberSceneBuilder: any MemberSceneBuilder
+    private let paywallSceneBuilder: any PaywallSceneBuilder
     init(
         _ paperSceneBuilder: any CalendarPaperSceneBuiler,
-        aiAgentCommandSceneBuilder: any AIAgentCommandSceneBuilder
+        aiAgentCommandSceneBuilder: any AIAgentCommandSceneBuilder,
+        memberSceneBuilder: any MemberSceneBuilder,
+        paywallSceneBuilder: any PaywallSceneBuilder
     ) {
         self.paperSceneBuilder = paperSceneBuilder
         self.aiAgentCommandSceneBuilder = aiAgentCommandSceneBuilder
+        self.memberSceneBuilder = memberSceneBuilder
+        self.paywallSceneBuilder = paywallSceneBuilder
     }
     private var currentScene: (any CalendarScene)? { self.scene as? (any CalendarScene) }
-    private weak var presentedAICommandScene: (any Scene)?
-    
+
     @MainActor
     func attachInitialMonths(_ months: [CalendarMonth]) -> [any CalendarPaperSceneInteractor] {
         guard let current = self.currentScene else { return [] }
@@ -53,24 +65,45 @@ final class CalendarViewRouterImple: BaseRouterImple, CalendarViewRouting, @unch
         current.changeFocus(at: index)
     }
 
-    func routeToAICommand() {
-        Task { @MainActor in
-            // 이미 떠 있는 결과 시트가 있으면 닫고 새로 띄운다.
-            // dismiss 완료 콜백에서 present해 전환 타이밍 충돌을 방지.
-            if self.presentedAICommandScene != nil {
-                self.scene?.dismiss(animated: true) { [weak self] in
-                    self?.presentAICommandScene()
-                }
-            } else {
-                self.presentAICommandScene()
+    @MainActor
+    func slideFocus(to index: Int, isNext: Bool, completed: @escaping @Sendable () -> Void) {
+        guard let current = self.currentScene else { return }
+        current.slideFocus(to: index, isNext: isNext, completed: completed)
+    }
+
+    func routeToAICommand(listener: (any AIAgentCommandSceneListener)?) {
+        self.dismissPresented(animated: true) { [weak self] in
+            Task { @MainActor in
+                self?.presentAICommandScene(listener: listener)
             }
         }
     }
 
     @MainActor
-    private func presentAICommandScene() {
-        let next = self.aiAgentCommandSceneBuilder.makeCommandScene()
-        self.presentedAICommandScene = next
+    private func presentAICommandScene(listener: (any AIAgentCommandSceneListener)?) {
+        let next = self.aiAgentCommandSceneBuilder.makeCommandScene(listener: listener)
         self.showBottomSlide(next)
+    }
+
+    // 시트를 얹은 채로 paywall을 올리면 top-up 후 복귀해도 시트가 다시 드러난다
+    func routeToPaywall() {
+        self.dismissPresented(animated: true) { [weak self] in
+            Task { @MainActor in
+                self?.presentPaywallScene()
+            }
+        }
+    }
+
+    @MainActor
+    private func presentPaywallScene() {
+        let next = self.paywallSceneBuilder.makePaywallScene(closesAfterPurchase: true)
+        self.showFullScreen(next)
+    }
+
+    func routeToSignIn() {
+        Task { @MainActor in
+            let next = self.memberSceneBuilder.makeSignInScene()
+            self.showBottomSlide(next)
+        }
     }
 }

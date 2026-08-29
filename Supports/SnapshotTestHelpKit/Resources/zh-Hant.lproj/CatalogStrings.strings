@@ -1,0 +1,42 @@
+/* 화면 카탈로그(app-catalog) 더미 텍스트 — 앱 번들에 실리지 않는다 */
+
+// MARK: - 캘린더 이벤트
+
+"catalog.event::holiday" = "三一節";
+"catalog.event::project_kickoff" = "專案啟動會";
+"catalog.event::dentist" = "牙醫";
+"catalog.event::trip" = "濟州島旅行";
+"catalog.event::design_review" = "設計審查";
+"catalog.event::dinner" = "和 Sara 吃晚餐";
+"catalog.event::sprint_planning" = "衝刺規劃";
+"catalog.event::team_workshop" = "團隊工作坊";
+"catalog.event::release_day" = "發布日";
+"catalog.event::lunch" = "和 Sara 吃午餐";
+
+// MARK: - 할일
+
+"catalog.todo::tax_return" = "報稅";
+"catalog.todo::reply_landlord" = "回覆房東";
+"catalog.todo::water_plants" = "幫植物澆水";
+"catalog.todo::book_flight" = "訂機票";
+"catalog.todo::renew_passport" = "更換護照";
+"catalog.todo::send_invoice" = "寄送帳單";
+"catalog.todo::cancel_subscription" = "取消不用的訂閱";
+"catalog.todo::return_books" = "還圖書館的書";
+
+// MARK: - 이벤트 상세
+
+"catalog.place::startup_hub" = "首爾創業中心";
+"catalog.memo::wireframes" = "帶上列印好的線框圖。";
+
+// MARK: - 이벤트 타입
+
+"catalog.tag::work" = "工作";
+"catalog.tag::family" = "家庭";
+"catalog.tag::health" = "健康";
+"catalog.tag::study" = "學習";
+
+// MARK: - AI 빠른 입력
+
+"catalog.ai::command" = "星期五中午和 Sara 吃午餐";
+"catalog.ai::result" = "已將「和 Sara 吃午餐」加到 3 月 13 日星期五 12:00。";

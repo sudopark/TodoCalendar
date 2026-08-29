@@ -14,7 +14,8 @@ extension Project {
         destinations: Destinations,
         iOSTargetVersion: String,
         dependencies: [TargetDependency] = [],
-        extensionTargets: [Target] = []
+        extensionTargets: [Target] = [],
+        schemes: [Scheme] = []
     ) -> Project {
         let targets = makeAppTargets(
             name: name,
@@ -39,7 +40,8 @@ extension Project {
                 disableBundleAccessors: true,
                 disableSynthesizedResourceAccessors: true
             ),
-            targets: targets + extensionTargets
+            targets: targets + extensionTargets,
+            schemes: schemes
         )
     }
 
@@ -79,6 +81,7 @@ extension Project {
         destinations: Destinations,
         iOSTargetVersion: String,
         withSourceFile: Bool = true,
+        resources: ResourceFileElements? = nil,
         snapshotTests: Bool = false,
         dependencies: [TargetDependency] = [],
         customSetting: [String: SettingValue] = [:]
@@ -88,6 +91,7 @@ extension Project {
             destinations: destinations,
             iOSTargetVersion: iOSTargetVersion,
             withSourceFile: withSourceFile,
+            resources: resources,
             dependencies: dependencies,
             customSetting: customSetting
         )
@@ -122,8 +126,8 @@ extension Project {
                              resources: [],
                              dependencies: [
                                 .target(name: name),
-                                .project(target: "SnapshotTestHelpKit", path: .relativeToCurrentFile("../../Supports/SnapshotTestHelpKit")),
-                                .project(target: "TestDoubles", path: .relativeToCurrentFile("../../Supports/TestDoubles")),
+                                .project(target: "SnapshotTestHelpKit", path: .relativeToRoot("Supports/SnapshotTestHelpKit")),
+                                .project(target: "TestDoubles", path: .relativeToRoot("Supports/TestDoubles")),
                              ])
     }
 
@@ -162,9 +166,9 @@ extension Project {
                            resources: [],
                            dependencies: [
                             .target(name: name),
-                            .project(target: "UnitTestHelpKit", path: .relativeToCurrentFile("../../Supports/UnitTestHelpKit")),
-                            .project(target: "TestDoubles", path: .relativeToCurrentFile("../../Supports/TestDoubles")),
-                            .project(target: "Common3rdParty", path: .relativeToCurrentFile("../../Supports/Common3rdParty")),
+                            .project(target: "UnitTestHelpKit", path: .relativeToRoot("Supports/UnitTestHelpKit")),
+                            .project(target: "TestDoubles", path: .relativeToRoot("Supports/TestDoubles")),
+                            .project(target: "Common3rdParty", path: .relativeToRoot("Supports/Common3rdParty")),
                            ])
         return [sources, tests]
     }
@@ -174,6 +178,7 @@ extension Project {
         destinations: Destinations,
         iOSTargetVersion: String,
         withSourceFile: Bool,
+        resources: ResourceFileElements? = nil,
         dependencies: [TargetDependency] = [],
         customSetting: [String: SettingValue] = [:]
     )
@@ -187,7 +192,7 @@ extension Project {
                              deploymentTargets: .iOS(iOSTargetVersion),
                              infoPlist: .default,
                              sources: withSourceFile ? ["Sources/**"] : [],
-                             resources: [],
+                             resources: resources,
                              headers: Headers.headers(public: "\(name).h"),
                              dependencies: dependencies,
                              settings: .settings(
@@ -236,6 +241,13 @@ extension Project {
                     ]
                 ],
                 "GIDClientID": "\(googleClientId)",
+                "GADApplicationIdentifier": "\(admobAppId)",
+                "NSUserTrackingUsageDescription": "Tracking permission is used to show you more relevant ads.",
+                "SKAdNetworkItems": .array(
+                    Project.skAdNetworkIdentifiers.map {
+                        .dictionary(["SKAdNetworkIdentifier": .string($0)])
+                    }
+                ),
                 "CFBundleURLTypes": [
                     [
                         "CFBundleTypeRole": "Editor",
@@ -261,10 +273,14 @@ extension Project {
                 "UIBackgroundModes": ["fetch"],
                 "NSCalendarsFullAccessUsageDescription": "Calendar access is required to display events and sync with Apple Calendar.",
                 "NSMicrophoneUsageDescription": "Microphone access is required to enter events and to-dos by voice.",
-                "NSSpeechRecognitionUsageDescription": "Speech recognition is required to convert your voice into events and to-dos."
+                "NSSpeechRecognitionUsageDescription": "Speech recognition is required to convert your voice into events and to-dos.",
+                "NSCameraUsageDescription": "Camera access is required to read text from a photo you take.",
+                "NSPhotoLibraryAddUsageDescription": "Photo library access is required to save a shared event image to your photos.",
+                "NSSupportsLiveActivities": true
             ]),
             sources: [
                 "Sources/**",
+                "AppExtensions/Base/**",
                 .glob("Intents/TodoCalendarWidgetIntents.intentdefinition", codeGen: .public)
             ],
             resources: ["Resources/**"],
@@ -291,9 +307,9 @@ extension Project {
             dependencies: [
                 .target(name: "\(name)"),
                 .project(target: "UnitTestHelpKit", path:
-                        .relativeToCurrentFile("../../Supports/UnitTestHelpKit")),
-                .project(target: "TestDoubles", path: .relativeToCurrentFile("../../Supports/TestDoubles")),
-                .project(target: "Common3rdParty", path: .relativeToCurrentFile("../../Supports/Common3rdParty")),
+                        .relativeToRoot("Supports/UnitTestHelpKit")),
+                .project(target: "TestDoubles", path: .relativeToRoot("Supports/TestDoubles")),
+                .project(target: "Common3rdParty", path: .relativeToRoot("Supports/Common3rdParty")),
             ])
         return [mainTarget, testTarget]
     }
@@ -306,10 +322,24 @@ extension Project {
         infoPlist: [String: Plist.Value] = [:],
         dependencies: [TargetDependency],
         signingConfigures: [ProjectDescription.Configuration],
-        withTest: Bool = true
+        withTest: Bool = true,
+        snapshotTests: Bool = false
     ) -> [Target] {
 
         let targetName = "\(appName)\(extensionName)"
+
+        // 확장 소스는 .appExtension product라 unit test가 host할 수 없다 —
+        // 테스트·스냅샷 타겟 모두 본 타겟과 같은 소스를 다시 컴파일해서 참조한다.
+        let extensionSources: [SourceFileGlob] = [
+            "AppExtensions/Base/**",
+            "AppExtensions/\(extensionName)/Sources/**",
+            "Sources/AppEnvironment.swift",
+            "Sources/NeverRemoveAuthStorage.swift",
+            // 컨트롤이 참조하는 AppIntent — 앱을 열려면 앱·확장 양쪽 타겟에 속해야 한다 (Apple 문서 요구)
+            "Sources/AppIntents/OpenAICommandInputIntent.swift",
+            .glob("Intents/TodoCalendarWidgetIntents.intentdefinition", codeGen: .public),
+            .glob("Sources/LiveActivity/**")
+        ]
 
         let target = Target.target(
             name: targetName,
@@ -318,12 +348,7 @@ extension Project {
             bundleId: "\(organizationName).\(appName).\(extensionName)",
             deploymentTargets: .iOS(iOSTargetVersion),
             infoPlist: .extendingDefault(with: infoPlist),
-            sources: [
-                "AppExtensions/Base/**",
-                "AppExtensions/\(extensionName)/Sources/**",
-                "Sources/AppEnvironment.swift",
-                .glob("Intents/TodoCalendarWidgetIntents.intentdefinition", codeGen: .public)
-            ],
+            sources: .init(globs: extensionSources),
             resources: [
                 "AppExtensions/\(extensionName)/Resources/**",
                 "Resources/secrets.json",
@@ -341,8 +366,6 @@ extension Project {
             )
         )
 
-        guard withTest else { return [target] }
-
         let testTarget = Target.target(
             name: "\(targetName)Tests",
             destinations: destinations,
@@ -350,30 +373,58 @@ extension Project {
             bundleId: "\(organizationName).\(appName).\(extensionName)Tests",
             deploymentTargets: .iOS(iOSTargetVersion),
             infoPlist: .default,
-            sources: [
-                "AppExtensions/Base/**",
-                "AppExtensions/\(extensionName)/Sources/**",
-                "Sources/AppEnvironment.swift",
-                .glob("Intents/TodoCalendarWidgetIntents.intentdefinition", codeGen: .public),
-                "AppExtensions/\(extensionName)/Tests/**"
-            ],
+            sources: .init(globs: extensionSources + ["AppExtensions/\(extensionName)/Tests/**"]),
             dependencies: [
                 .target(name: appName),
                 .project(
                     target: "UnitTestHelpKit",
-                    path: .relativeToCurrentFile("../../Supports/UnitTestHelpKit")
+                    path: .relativeToRoot("Supports/UnitTestHelpKit")
                 ),
                 .project(
                     target: "TestDoubles",
-                    path: .relativeToCurrentFile("../../Supports/TestDoubles")
+                    path: .relativeToRoot("Supports/TestDoubles")
                 ),
                 .project(
                     target: "Common3rdParty",
-                    path: .relativeToCurrentFile("../../Supports/Common3rdParty")
+                    path: .relativeToRoot("Supports/Common3rdParty")
                 )
             ]
         )
 
-        return [target, testTarget]
+        var targets: [Target] = [target]
+        if withTest {
+            targets.append(testTarget)
+        }
+
+        if snapshotTests {
+            targets.append(
+                Target.target(
+                    name: "\(targetName)Snapshots",
+                    destinations: destinations,
+                    product: .unitTests,
+                    bundleId: "\(organizationName).\(appName).\(extensionName)Snapshots",
+                    deploymentTargets: .iOS(iOSTargetVersion),
+                    infoPlist: .default,
+                    sources: .init(globs: extensionSources + ["AppExtensions/\(extensionName)/Snapshots/**"]),
+                    dependencies: [
+                        .target(name: appName),
+                        .project(
+                            target: "SnapshotTestHelpKit",
+                            path: .relativeToRoot("Supports/SnapshotTestHelpKit")
+                        ),
+                        .project(
+                            target: "TestDoubles",
+                            path: .relativeToRoot("Supports/TestDoubles")
+                        ),
+                        .project(
+                            target: "Common3rdParty",
+                            path: .relativeToRoot("Supports/Common3rdParty")
+                        )
+                    ]
+                )
+            )
+        }
+
+        return targets
     }
 }

@@ -11,6 +11,7 @@
 import UIKit
 import SwiftUI
 import Combine
+import Extensions
 import Scenes
 import CommonPresentation
 
@@ -20,12 +21,12 @@ import CommonPresentation
 final class TimeZoneSelectViewController: UIHostingController<TimeZoneSelectContainerView>, TimeZoneSelectScene {
     
     private let viewModel: any TimeZoneSelectViewModel
-    private let viewAppearance: ViewAppearance
+    let viewAppearance: ViewAppearance
     
     @MainActor
     var interactor: (any TimeZoneSelectSceneInteractor)? { self.viewModel }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     
     init(
         viewModel: any TimeZoneSelectViewModel,

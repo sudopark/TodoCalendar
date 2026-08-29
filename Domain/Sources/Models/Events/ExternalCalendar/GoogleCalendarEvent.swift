@@ -48,7 +48,21 @@ extension GoogleCalendar {
 // MARK: - Event Tag
 
 extension GoogleCalendar {
-    
+
+    public enum AccessRole: String, Sendable, Equatable {
+        case owner
+        case writer
+        case reader
+        case freeBusyReader
+
+        public var isWritable: Bool {
+            switch self {
+            case .owner, .writer: return true
+            case .reader, .freeBusyReader: return false
+            }
+        }
+    }
+
     public struct Tag: EventTag {
 
         public let tagId: EventTagId
@@ -61,11 +75,16 @@ extension GoogleCalendar {
         public var colorId: String?
         public var colorHex: String? { backgroundColorHex }
         public var isSelected: Bool?
+        public var accessRole: AccessRole?
 
         public init(id: String, name: String) {
             self.id = id
             self.tagId = .externalCalendar(serviceId: GoogleCalendarService.id, id: id)
             self.name = name
+        }
+
+        public var isWritable: Bool {
+            return self.accessRole?.isWritable ?? false
         }
     }
 }
@@ -106,7 +125,12 @@ extension GoogleCalendar {
         
         public var status: EventStatus?
         public var visibility: Visibility?
-        
+
+        // 구글 API는 시리즈 마스터를 가리키는 별도 플래그를 주지 않아 이 필드 조합으로만 구분 가능하다.
+        public var isRecurringSeriesMaster: Bool {
+            return self.recurringEventId == nil && self.recurrence != nil
+        }
+
         public init(
             id: String, summary: String?
         ) {
@@ -145,7 +169,7 @@ extension GoogleCalendar {
             public init() { }
         }
 
-        public struct GoogleEventTime: Codable, Sendable {
+        public struct GoogleEventTime: Codable, Sendable, Equatable {
             public var date: String?
             public var dateTime: String?
             public var timeZone: String?
@@ -256,7 +280,13 @@ extension GoogleCalendar {
         
         public var nextRepeatingTimes: [RepeatingTimes] = []
         public var repeatingTimeToExcludes: Set<String> = []
-        
+        public var recurringEventId: String?
+
+        // 구글 반복 인스턴스의 id 는 "{마스터id}_{원래시작시각}" 이다 — 시각이 바뀌면 id 도 바뀌므로 낡은 항목 판별에 쓴다
+        public func isInstance(of recurringEventId: String) -> Bool {
+            return self.eventId.hasPrefix("\(recurringEventId)_")
+        }
+
         public init(
             _ eventId: String, _ calendarId: String,
             accountId: String,
@@ -297,7 +327,8 @@ extension GoogleCalendar {
             self.status = origin.status
             
             self.location = origin.location
-            
+            self.recurringEventId = origin.recurringEventId
+
             switch (start, end) {
             case (.period(let st), .period(let et)):
                 self.eventTime = .period(

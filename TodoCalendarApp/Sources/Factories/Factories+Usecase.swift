@@ -13,6 +13,7 @@ import PlaceService
 import ExternalServices
 import Repository
 import StoreKitService
+import AdService
 import Scenes
 
 // MARK: - NonLoginUsecaseFactoryImple
@@ -27,6 +28,10 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
     let eventUploadService: any EventUploadService = NotNeedEventUploadService()
     let appUpdateCheckUsecase: any AppUpdateCheckUsecase
     let aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
+    let billingUsecase: any BillingUsecase
+    let eventLiveActivityUsecase: any EventLiveActivityUsecase
+    let adExposureUsecase: any AdExposureUsecase
+    let imageTextRecognizeService: any ImageTextRecognizeService = ImageTextRecognizeServiceImple()
     private let applicationBase: ApplicationBase
 
     init(
@@ -44,36 +49,29 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
         self.appUpdateCheckUsecase = appUpdateCheckUsecase
         self.eventSyncUsecase = NotNeedEventSyncUsecase()
         self.applicationBase = applicationBase
+        self.billingUsecase = NotNeedBillingUsecase(sharedDataStore: applicationBase.sharedDataStore)
 
-        let aiLocalStorage = AICommandLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
-        let aiRepository = AICommandRepositoryImple(
-            remote: applicationBase.remoteAPI,
-            localStorage: aiLocalStorage
+        self.aiAgentOrchestrationUsecase = NotNeedAIAgentOrchestrationUsecase()
+
+        let eventDetailStorage = EventDetailDataLocalStorageImple<EventDetailDataTable>(
+            sqliteService: applicationBase.commonSqliteService
         )
-        let calendarSettingRepository = CalendarSettingRepositoryImple(
-            environmentStorage: applicationBase.userDefaultEnvironmentStorage
+        self.eventLiveActivityUsecase = EventLiveActivityUsecaseImple(
+            controller: EventCountdownLiveActivityController(),
+            sharedDataStore: applicationBase.sharedDataStore,
+            eventDetailDataUsecase: EventDetailDataLocalRepostioryImple(
+                localStorage: eventDetailStorage
+            )
         )
-        let calendarSettingUsecase = CalendarSettingUsecaseImple(
-            settingRepository: calendarSettingRepository,
-            shareDataStore: applicationBase.sharedDataStore
-        )
-        let aiCommandUsecase = AICommandUsecaseImple(
-            repository: aiRepository,
-            calendarSettingUsecase: calendarSettingUsecase
-        )
-        let aiUsageUsecase = AIAgentUsageUsecaseImple(
-            repository: aiRepository,
-            sharedDataStore: applicationBase.sharedDataStore
-        )
-        let speech = SpeechRecognizeUsecaseImple(
-            service: SpeechRecognizeServiceImple(),
-            permissionChecker: SpeechRecognizePermissionCheckerImple()
-        )
-        self.aiAgentOrchestrationUsecase = AIAgentOrchestrationUsecaseImple(
-            commandUsecase: aiCommandUsecase,
-            usageUsecase: aiUsageUsecase,
-            speechRecognizeUsecase: speech,
-            eventSyncUsecase: self.eventSyncUsecase
+        self.adExposureUsecase = AdExposureUsecaseImple(
+            adAvailability: applicationBase.mobileAdService,
+            billingUsecase: self.billingUsecase,
+            adRepository: AdLocalRepositoryImple(
+                environmentStorage: applicationBase.userDefaultEnvironmentStorage
+            ),
+            coldLaunchHistoryRepository: AppColdLaunchHistoryLocalRepositoryImple(
+                environmentStorage: applicationBase.userDefaultEnvironmentStorage
+            )
         )
     }
 
@@ -83,7 +81,7 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
 }
 
 extension NonLoginUsecaseFactoryImple {
-    
+
     func makeCalendarSettingUsecase() -> any CalendarSettingUsecase {
         let settingRepository = CalendarSettingRepositoryImple(
             environmentStorage: applicationBase.userDefaultEnvironmentStorage
@@ -290,7 +288,11 @@ extension NonLoginUsecaseFactoryImple {
     func makeEventSettingUsecase() -> EventSettingUsecase {
         return self.makeAppSettingUsecase()
     }
-    
+
+    func makeEventShareSettingUsecase() -> any EventShareSettingUsecase {
+        return self.makeAppSettingUsecase()
+    }
+
     func makeNotificationPermissionUsecase() -> NotificationPermissionUsecase {
         return NotificationPermissionUsecaseImple(
             notificationService: UNLocalNotificationServiceImple()
@@ -332,13 +334,31 @@ extension NonLoginUsecaseFactoryImple {
 }
 
 extension NonLoginUsecaseFactoryImple {
-    
+
     func makeFeedbackUsecase() -> any FeedbackUsecase {
         let feedbackRepository = FeedbackRepositoryImple(remote: self.applicationBase.remoteAPI)
         return FeedbackUsecaseImple(
             accountUsecase: self.accountUescase,
             feedbackRepository: feedbackRepository,
             deviceInfoFetchService: DeviceInfoFetchServiceImple()
+        )
+    }
+
+    func makeGuideTodoUsecase() -> any GuideTodoUsecase {
+        return GuideTodoUsecaseImple(
+            repository: GuideTodoLocalRepositoryImple(
+                environmentStorage: self.applicationBase.userDefaultEnvironmentStorage
+            ),
+            sharedDataStore: self.applicationBase.sharedDataStore
+        )
+    }
+
+    func makeLegalNoticeUsecase() -> any LegalNoticeUsecase {
+        return LegalNoticeUsecaseImple(
+            legalNoticeRepository: LegalNoticeRepositoryImple(
+                remoteAPI: self.applicationBase.remoteAPI,
+                environmentStorage: self.applicationBase.userDefaultEnvironmentStorage
+            )
         )
     }
 }
@@ -395,6 +415,9 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
     let appUpdateCheckUsecase: any AppUpdateCheckUsecase
     let aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
     let billingUsecase: any BillingUsecase
+    let eventLiveActivityUsecase: any EventLiveActivityUsecase
+    let adExposureUsecase: any AdExposureUsecase
+    let imageTextRecognizeService: any ImageTextRecognizeService = ImageTextRecognizeServiceImple()
     private let applicationBase: ApplicationBase
 
     init(
@@ -492,17 +515,40 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
             commandUsecase: aiCommandUsecase,
             usageUsecase: aiUsageUsecase,
             speechRecognizeUsecase: speech,
-            eventSyncUsecase: self.eventSyncUsecase
+            eventSyncUsecase: self.eventSyncUsecase,
+            notificationPermissionUsecase: NotificationPermissionUsecaseImple(
+                notificationService: UNLocalNotificationServiceImple()
+            )
         )
 
-        let billingUsecase = BillingUsecaseImple(
+        self.billingUsecase = BillingUsecaseImple(
             repository: BillingRepositoryImple(remote: applicationBase.remoteAPI),
             appStoreService: AppStoreBillingServiceImple(),
             sharedDataStore: applicationBase.sharedDataStore
         )
-        // 앱 밖 갱신·환불·승인대기 통과와 미반영 트랜잭션은 이 리스너로만 들어온다
-        billingUsecase.startObservingTransactions()
-        self.billingUsecase = billingUsecase
+
+        self.eventLiveActivityUsecase = EventLiveActivityUsecaseImple(
+            controller: EventCountdownLiveActivityController(),
+            sharedDataStore: applicationBase.sharedDataStore,
+            eventDetailDataUsecase: EventDetailUploadDecorateRepositoryImple(
+                remote: EventDetailRemoteImple(remoteAPI: applicationBase.remoteAPI),
+                cacheStorage: EventDetailDataLocalStorageImple<EventDetailDataTable>(
+                    sqliteService: applicationBase.commonSqliteService
+                ),
+                uploadService: uploadService
+            )
+        )
+
+        self.adExposureUsecase = AdExposureUsecaseImple(
+            adAvailability: applicationBase.mobileAdService,
+            billingUsecase: self.billingUsecase,
+            adRepository: AdLocalRepositoryImple(
+                environmentStorage: applicationBase.userDefaultEnvironmentStorage
+            ),
+            coldLaunchHistoryRepository: AppColdLaunchHistoryLocalRepositoryImple(
+                environmentStorage: applicationBase.userDefaultEnvironmentStorage
+            )
+        )
     }
 
     var eventNotifyService: SharedEventNotifyService {
@@ -771,7 +817,11 @@ extension LoginUsecaseFactoryImple {
     func makeEventSettingUsecase() -> any EventSettingUsecase {
         return self.makeAppSettingUsecase()
     }
-    
+
+    func makeEventShareSettingUsecase() -> any EventShareSettingUsecase {
+        return self.makeAppSettingUsecase()
+    }
+
     func makeNotificationPermissionUsecase() -> any NotificationPermissionUsecase {
         return NotificationPermissionUsecaseImple(
             notificationService: UNLocalNotificationServiceImple()
@@ -810,13 +860,31 @@ extension LoginUsecaseFactoryImple {
 }
 
 extension LoginUsecaseFactoryImple {
-    
+
     func makeFeedbackUsecase() -> any FeedbackUsecase {
         let feedbackRepository = FeedbackRepositoryImple(remote: self.applicationBase.remoteAPI)
         return FeedbackUsecaseImple(
             accountUsecase: self.accountUescase,
             feedbackRepository: feedbackRepository,
             deviceInfoFetchService: DeviceInfoFetchServiceImple()
+        )
+    }
+
+    func makeGuideTodoUsecase() -> any GuideTodoUsecase {
+        return GuideTodoUsecaseImple(
+            repository: GuideTodoLocalRepositoryImple(
+                environmentStorage: self.applicationBase.userDefaultEnvironmentStorage
+            ),
+            sharedDataStore: self.applicationBase.sharedDataStore
+        )
+    }
+
+    func makeLegalNoticeUsecase() -> any LegalNoticeUsecase {
+        return LegalNoticeUsecaseImple(
+            legalNoticeRepository: LegalNoticeRepositoryImple(
+                remoteAPI: self.applicationBase.remoteAPI,
+                environmentStorage: self.applicationBase.userDefaultEnvironmentStorage
+            )
         )
     }
 }

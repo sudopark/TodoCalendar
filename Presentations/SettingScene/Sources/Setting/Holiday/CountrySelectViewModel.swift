@@ -12,6 +12,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import Scenes
 
 
@@ -53,7 +54,7 @@ final class CountrySelectViewModelImple: CountrySelectViewModel, @unchecked Send
         let isSaving = CurrentValueSubject<Bool, Never>(false)
     }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private let subject = Subject()
 }
 
@@ -69,18 +70,18 @@ extension CountrySelectViewModelImple {
             .sink(receiveValue: { [weak self] country in
                 self?.subject.selectedCode.send(country?.code)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         self.holidayUsecase.availableCountries
             .sink(receiveValue: { [weak self] countries in
                 self?.subject.countries.send(countries)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         Task { [weak self] in
             try? await self?.holidayUsecase.refreshAvailableCountries()
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     func selectCountry(_ code: String) {
@@ -119,7 +120,7 @@ extension CountrySelectViewModelImple {
                 self?.router?.showError(error)
             }
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     func close() {

@@ -24,7 +24,10 @@ final class SettingItemListSceneBuilerImple {
     private let holidayListSceneBuilder: any HolidayListSceneBuiler
     private let memberSceneBuilder: any MemberSceneBuilder
     private let feedbackPostSceneBuiler: any FeedbackPostSceneBuiler
-    
+    private let paywallSceneBuilder: any PaywallSceneBuilder
+    private let openSourceLicenseSceneBuiler: any OpenSourceLicenseSceneBuiler
+    private let privacyOptionsFormRouter: (any PrivacyOptionsFormRouter)?
+
     init(
         appstoreLinkPath: String,
         usecaseFactory: any UsecaseFactory,
@@ -33,7 +36,10 @@ final class SettingItemListSceneBuilerImple {
         eventSettingSceneBuilder: any EventSettingSceneBuiler,
         holidayListSceneBuilder: any HolidayListSceneBuiler,
         memberSceneBuilder: any MemberSceneBuilder,
-        feedbackPostSceneBuiler: any FeedbackPostSceneBuiler
+        feedbackPostSceneBuiler: any FeedbackPostSceneBuiler,
+        paywallSceneBuilder: any PaywallSceneBuilder,
+        openSourceLicenseSceneBuiler: any OpenSourceLicenseSceneBuiler,
+        privacyOptionsFormRouter: (any PrivacyOptionsFormRouter)?
     ) {
         self.appstoreLinkPath = appstoreLinkPath
         self.usecaseFactory = usecaseFactory
@@ -43,6 +49,9 @@ final class SettingItemListSceneBuilerImple {
         self.holidayListSceneBuilder = holidayListSceneBuilder
         self.memberSceneBuilder = memberSceneBuilder
         self.feedbackPostSceneBuiler = feedbackPostSceneBuiler
+        self.paywallSceneBuilder = paywallSceneBuilder
+        self.openSourceLicenseSceneBuiler = openSourceLicenseSceneBuiler
+        self.privacyOptionsFormRouter = privacyOptionsFormRouter
     }
 }
 
@@ -57,7 +66,8 @@ extension SettingItemListSceneBuilerImple: SettingItemListSceneBuiler {
             accountUsecase: self.usecaseFactory.accountUescase,
             uiSettingUsecase: self.usecaseFactory.makeUISettingUsecase(),
             deviceInfoFetchService: self.usecaseFactory.deviceInfoFetchService(),
-            appUpdateCheckUsecase: self.usecaseFactory.appUpdateCheckUsecase
+            appUpdateCheckUsecase: self.usecaseFactory.appUpdateCheckUsecase,
+            privacyOptionsFormRouter: self.privacyOptionsFormRouter
         )
         
         let viewController = SettingItemListViewController(
@@ -70,7 +80,10 @@ extension SettingItemListSceneBuilerImple: SettingItemListSceneBuiler {
             eventSettingSceneBuilder: self.eventSettingSceneBuilder,
             holidayListSceneBuilder: self.holidayListSceneBuilder,
             memberSceneBuilder: self.memberSceneBuilder,
-            feedbackPostSceneBuiler: self.feedbackPostSceneBuiler
+            feedbackPostSceneBuiler: self.feedbackPostSceneBuiler,
+            paywallSceneBuilder: self.paywallSceneBuilder,
+            openSourceLicenseSceneBuiler: self.openSourceLicenseSceneBuiler,
+            privacyOptionsFormRouter: self.privacyOptionsFormRouter
         )
         router.scene = viewController
         viewModel.router = router

@@ -1,3 +1,5 @@
 "NSCalendarsFullAccessUsageDescription" = "Dostęp do kalendarza jest wymagany do wyświetlania wydarzeń i synchronizacji z Kalendarzem Apple.";
 "NSMicrophoneUsageDescription" = "Dostęp do mikrofonu jest wymagany do wprowadzania wydarzeń i zadań głosowo.";
 "NSSpeechRecognitionUsageDescription" = "Rozpoznawanie mowy jest wymagane do zamiany Twojego głosu na wydarzenia i zadania.";
+"NSCameraUsageDescription" = "Dostęp do aparatu jest wymagany do odczytania tekstu ze zrobionego zdjęcia.";
+"NSPhotoLibraryAddUsageDescription" = "Dostęp do zdjęć jest wymagany do zapisania udostępnianego obrazu wydarzenia w Twoich zdjęciach.";

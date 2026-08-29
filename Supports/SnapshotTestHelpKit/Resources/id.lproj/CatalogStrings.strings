@@ -1,0 +1,42 @@
+/* 화면 카탈로그(app-catalog) 더미 텍스트 — 앱 번들에 실리지 않는다 */
+
+// MARK: - 캘린더 이벤트
+
+"catalog.event::holiday" = "Hari Gerakan Kemerdekaan";
+"catalog.event::project_kickoff" = "Kickoff proyek";
+"catalog.event::dentist" = "Dokter gigi";
+"catalog.event::trip" = "Liburan ke Jeju";
+"catalog.event::design_review" = "Review desain";
+"catalog.event::dinner" = "Makan malam dengan Sara";
+"catalog.event::sprint_planning" = "Perencanaan sprint";
+"catalog.event::team_workshop" = "Workshop tim";
+"catalog.event::release_day" = "Hari rilis";
+"catalog.event::lunch" = "Makan siang dengan Sara";
+
+// MARK: - 할일
+
+"catalog.todo::tax_return" = "Lapor pajak";
+"catalog.todo::reply_landlord" = "Balas pesan pemilik kos";
+"catalog.todo::water_plants" = "Siram tanaman";
+"catalog.todo::book_flight" = "Pesan tiket pesawat";
+"catalog.todo::renew_passport" = "Perpanjang paspor";
+"catalog.todo::send_invoice" = "Kirim tagihan";
+"catalog.todo::cancel_subscription" = "Berhenti langganan yang tidak dipakai";
+"catalog.todo::return_books" = "Kembalikan buku perpustakaan";
+
+// MARK: - 이벤트 상세
+
+"catalog.place::startup_hub" = "Seoul Startup Hub";
+"catalog.memo::wireframes" = "Bawa wireframe yang sudah dicetak.";
+
+// MARK: - 이벤트 타입
+
+"catalog.tag::work" = "Pekerjaan";
+"catalog.tag::family" = "Keluarga";
+"catalog.tag::health" = "Kesehatan";
+"catalog.tag::study" = "Belajar";
+
+// MARK: - AI 빠른 입력
+
+"catalog.ai::command" = "makan siang dengan Sara Jumat pukul 12";
+"catalog.ai::result" = "“Makan siang dengan Sara” ditambahkan pada Jumat, 13 Maret pukul 12.00.";

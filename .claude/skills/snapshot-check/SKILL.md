@@ -57,3 +57,11 @@ xcodebuild test -workspace TodoCalendar.xcworkspace \
 - 캡처 테스트는 검증 대상 구현과 같은 작업 커밋에 포함한다 — 삭제하지 않는다. 이후 그 뷰를 수정할 때 재실행으로 재검증.
 - 이미지(`__Snapshots__/`)도 캡처 테스트와 같은 커밋에 포함한다 — 재캡처 시 갱신분도 함께 커밋. 비커밋은 카탈로그(`snapshot-catalog/`)뿐.
 - app-catalog로의 전환·승격 없음 — 기록 용도 촬영은 처음부터 app-catalog 경로로 작성한다.
+
+## 7. 종료 기록 — skill_end
+
+**유저가 이 스킬을 직접 호출한 독립 런에서만** 남긴다. 대조 결과(스펙과 어긋난 항목 / 이상 없음)를 보고한 직후 `log-record.py skill_end --name snapshot-check` (명령·compliance 규칙은 CLAUDE.md §1).
+
+**다른 스킬 안에서 도구로 호출된 경우는 기록하지 않는다** — implement 구현 중 호출되는 위 §5 재검증, design 스킬 §5 검증 단계 등. 런을 마무리하는 전이는 호출한 스킬 쪽이고 종료 레코드도 거기서 남는다. 여기서 또 남기면 한 런에 종료가 두 겹으로 쌓여 호출 스킬의 준수 신호와 섞인다.
+
+종속 호출로 뜨는 구조적 누락률은 `usage-thresholds.json`의 `missing_rate_exempt_skills`로 처리한다 — 누락률 숫자를 근거로 위 기록 범위를 넓히지 않는다.

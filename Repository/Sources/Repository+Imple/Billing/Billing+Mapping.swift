@@ -19,7 +19,6 @@ struct BillingPlanMapper {
     let plan: BillingPlan?
 
     init(json: [String: Any]) {
-        // 앱이 모르는 플랜 id 는 통째로 버린다 — dailyLimit 만 있고 이름을 못 그리면 쓸모가 없다
         guard let idRaw = json["id"] as? String,
               let id = BillingPlanId(rawValue: idRaw),
               let dailyLimit = json["daily_limit"] as? Int
@@ -55,10 +54,6 @@ struct BillingTopupMapper {
 
 // MARK: - response: BillingUserPlan
 
-// GET /v1/ai/usage 의 plan 필드와 POST /v1/billing/purchases 응답이 동일 스키마라
-// 양쪽이 이 매퍼를 공유한다. topupRemaining 만 담기는 위치가 달라 인자로 받는다
-// 카탈로그와 달리 유저 플랜은 planId 를 몰라도 topupRemaining·scheduledChange 가 UI에 필요하다 —
-// planId 만 nil 로 두고 나머지는 살린다 (카탈로그처럼 항목 전체를 버리지 않음)
 struct BillingUserPlanMapper {
 
     let userPlan: BillingUserPlan
@@ -71,6 +66,21 @@ struct BillingUserPlanMapper {
             |> \.planId .~ (json["id"] as? String).flatMap { BillingPlanId(rawValue: $0) }
             |> \.scheduledChange .~ scheduledChange
             |> \.topupRemaining .~ topupRemaining
+    }
+}
+
+
+struct BillingUserAccountMapper {
+
+    let account: BillingUserAccount
+
+    init(json: [String: Any]) {
+        let plan = BillingUserPlanMapper(
+            json: json, topupRemaining: json["topup_remaining"] as? Int
+        ).userPlan
+
+        self.account = BillingUserAccount(plan: plan)
+            |> \.appAccountToken .~ (json["app_account_token"] as? String).flatMap { UUID(uuidString: $0) }
     }
 }
 

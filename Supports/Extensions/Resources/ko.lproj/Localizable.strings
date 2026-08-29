@@ -79,6 +79,14 @@
 "dayname::friday:very_short" = "금";
 "dayname::saturday:very_short" = "토";
 
+"dayname::sunday:gender" = "m";
+"dayname::monday:gender" = "m";
+"dayname::tuesday:gender" = "m";
+"dayname::wednesday:gender" = "m";
+"dayname::thursday:gender" = "m";
+"dayname::friday:gender" = "m";
+"dayname::saturday:gender" = "m";
+
 
 // MARK: - event notification
 
@@ -112,8 +120,12 @@
 
 "calendar::foremostevent:title" = "제일 중요한 이벤트";
 "calendar::uncompletedTodos:title" = "완료되지 않은 할일";
+"calendar::guideTodo::name" = "투두캘린더 사용법 보기";
+"calendar::eventSync::loadingAllEvents::message" = "모든 이벤트를 불러오는 중…";
 "calendar::event_time::todo" = "할일";
 "calendar::event_time::allday" = "하루종일";
+"calendar::event_time::start" = "시작";
+"calendar::event_time::end" = "종료";
 "calendar::event_time::allday::with" = "%@ 하루종일";
 "calendar::event_time::period:some_days" = "%d일";
 "calendar::event_time::period:some_minutes" = "%d분";
@@ -123,11 +135,13 @@
 "calendar::event::more_action::foremost_event:title" = "제일 중요한 이벤트";
 "calendar::event::more_action::remove_only_thistime:message" = "전체 반복 이벤트 중 이번 이벤트만을 삭제하기 원합니까?";
 "calendar::event::more_action::remove:message" = "이벤트를 삭제하시겠습니까?";
+"calendar::event::more_action::remove_this_and_future:message" = "이번 및 향후 반복 이벤트를 모두 삭제하시겠습니까?";
 "calendar::event::more_action::mark_as_foremost" = "제일 중요한 이벤트로 등록할까요?";
 "calendar::event::more_action::unmark_as_foremost" = "제일 중요한 이벤트를 해제할까요?";
 "calendar::event::more_action::mark_as_foremost::unavail" = "반복되는 일정 이벤트는 가장 중요한 이벤트로 등록할 수 없습니다.";
 "calendar::event::more_action:remove_only_thistime:item_name" = "이번만 삭제";
 "calendar::event::more_action:remove:item_name" = "이벤트 삭제";
+"calendar::event::more_action:remove_this_and_future:item_name" = "이번 및 향후 이벤트 삭제";
 "calendar::event::more_action:foremost:mark:item_name" = "제일 중요 이벤트 등록";
 "calendar::event::more_action:foremost:unmark:item_name" = "제일 중요 이벤트 해제";
 "calendar::event::more_action:dday_candidate:register:item_name" = "D-day 위젯 후보로 추가";
@@ -135,7 +149,25 @@
 "calendar::event::more_action:dday_candidate:title" = "D-day 위젯 후보";
 "calendar::event::more_action:dday_candidate:register:message" = "이 일정을 D-day 위젯 후보로 추가할까요? 위젯을 편집할 때 목록 맨 위에 표시됩니다.";
 "calendar::event::more_action:dday_candidate:unregister:message" = "이 일정을 D-day 위젯 후보에서 제거할까요?";
+"calendar::event::more_action:live_activity:title" = "라이브 액티비티";
+"calendar::event::more_action:live_activity:register:item_name" = "잠금화면에 표시";
+"calendar::event::more_action:live_activity:unregister:item_name" = "잠금화면에서 제거";
+"calendar::event::more_action:live_activity:unavail::not_found" = "이벤트 정보를 찾을 수 없어요.";
+"calendar::event::more_action:live_activity:unavail::already_passed" = "이미 시작한 이벤트예요.";
+"calendar::event::more_action:live_activity:unavail::too_far_future" = "8시간 이내에 시작하는 이벤트만 표시할 수 있어요.";
+"calendar::event::more_action:live_activity:register:confirm" = "이 이벤트를 잠금화면에 표시할까요?";
+"calendar::event::more_action:live_activity:unregister:confirm" = "이 이벤트를 잠금화면에서 제거할까요?";
+"calendar::event::more_action:live_activity:replace:confirm" = "다른 이벤트가 잠금화면에 표시 중이에요. 이 이벤트로 바꿀까요?";
+"calendar::event::more_action:live_activity:register:success" = "잠금화면에 표시했어요. 기기를 잠그고 확인해보세요.";
+"calendar::event::more_action:live_activity:showing" = "잠금화면에 표시 중";
 "calendar::event::more_action:copy:item_name" = "이벤트 복사";
+"calendar::event::more_action:share:item_name" = "공유";
+"event_detail::share::field::time" = "시간";
+"event_detail::share::field::repeating" = "반복옵션";
+"event_detail::share::field::calendar" = "캘린더";
+"event_detail::share::field::place" = "장소";
+"event_detail::share::field::url" = "링크";
+"event_detail::share::field::memo" = "메모";
 "calendar::event::more_action:transform_to::schedule" = "일정으로 전환";
 "calendar::event::more_action:transform_to::todo" = "할일로 전환";
 "calendar::event::more_action:edit:item_name" = "수정";
@@ -145,7 +177,9 @@
 "calednar::event::skip_todo_until" = "할일 건너뛰기할 날짜 선택";
 "calednar::event::copy" = "이벤트 복사";
 "calendar::move_date" = "날짜 이동";
-"calednar::event::google::edit" = "구글캘린더 이벤트 수정";
+"calendar::share::this_day" = "이 날 일정 공유";
+"calendar::share::this_week" = "이 주 일정 공유";
+"calendar::share::this_month" = "이 달 일정 공유";
 
 
 // MARK: - event detail
@@ -171,14 +205,33 @@
 "eventDetail.repeating.everyYearSomeDay:title" = "매년 %@";
 "eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "매년 음력 %@";
 "eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "매달의 마지막주의 모든일";
-"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "매달 첫번째 %@";
-"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "매달 두번째 %@";
-"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "매달 세번째 %@";
-"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "매달 네번째 %@";
-"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "매달 다섯번째 %@";
-"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "매달 여섯번째 %@";
-"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "매달 일곱번째 %@";
-"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "매달 마지막 %@";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::m" = "매달 첫번째 %@";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::f" = "매달 첫번째 %@";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday::n" = "매달 첫번째 %@";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::m" = "매달 두번째 %@";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::f" = "매달 두번째 %@";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday::n" = "매달 두번째 %@";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::m" = "매달 세번째 %@";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::f" = "매달 세번째 %@";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday::n" = "매달 세번째 %@";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::m" = "매달 네번째 %@";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::f" = "매달 네번째 %@";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday::n" = "매달 네번째 %@";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::m" = "매달 다섯번째 %@";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::f" = "매달 다섯번째 %@";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday::n" = "매달 다섯번째 %@";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::m" = "매달 여섯번째 %@";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::f" = "매달 여섯번째 %@";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday::n" = "매달 여섯번째 %@";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::m" = "매달 일곱번째 %@";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::f" = "매달 일곱번째 %@";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday::n" = "매달 일곱번째 %@";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::m" = "매달 마지막 %@";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::f" = "매달 마지막 %@";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday::n" = "매달 마지막 %@";
+"eventDetail.repeating.last::m" = "마지막";
+"eventDetail.repeating.last::f" = "마지막";
+"eventDetail.repeating.last::n" = "마지막";
 "eventDetail.repeating.endtime::title" = "반복 종료";
 "eventDetail.repeating.endtime::option::never" = "안함";
 "eventDetail.repeating.endtime::option::on" = "시간";
@@ -188,7 +241,6 @@
 "eventDetail.repeating::period_endcount" = "%@ 부터 %d회";
 
 "eventDetail.repeating.everyNDays:title" = "매%d일";
-"eventDetail.repeating.last" = "마지막";
 "eventDetail.repeating.everyNMonths:title" = "매%d달";
 "eventDetail.repeating.everyNYears:title" = "매%d년";
 "eventDetail.repeating::endoption_until" = "%@ 까지";
@@ -267,12 +319,33 @@
 "eventDetail::gogoleEvent::conference::password" = "비밀번호";
 "eventDetail::gogoleEvent::copy::message" = "클립보드에 복사되었습니다.";
 "eventDetail::gogoleEvent::canceled::message" = "취소된 일정입니다.";
+"eventDetail::gogoleEvent::saved::message" = "일정을 저장했습니다.";
+"eventDetail::gogoleEvent::readOnlyCalendar::message" = "읽기 전용 캘린더라 여기서는 일정을 수정할 수 없어요.";
+"eventDetail::gogoleEvent::reauthenticate::title" = "권한 추가가 필요해요";
+"eventDetail::gogoleEvent::reauthenticate::message" = "이 구글 계정은 읽기 전용으로 연동돼 있어요. 일정을 수정하려면 편집 권한을 따로 허용해야 해요.";
+"eventDetail::gogoleEvent::writeScopeNotGranted::message" = "편집 권한을 받지 못했어요. 회사·학교 계정이라면 관리자 정책으로 막혀 있을 수 있어요.";
+"eventDetail::gogoleEvent::repeating::title" = "반복되는 일정이에요";
+"eventDetail::gogoleEvent::repeating::onlyThisTime::button" = "이번 일정만";
+"eventDetail::gogoleEvent::repeating::all::button" = "전체 일정";
+"eventDetail::gogoleEvent::remove::confirm::message" = "구글 캘린더에서 이 일정을 삭제할까요?";
+"eventDetail::gogoleEvent::editOnCalendar" = "구글 캘린더에서 수정";
+"eventDetail::gogoleEvent::notEditableField::message" = "이 항목은 앱에서 수정할 수 없어요. 구글 캘린더에서 수정해 주세요.";
+"eventDetail::gogoleEvent::description::formatLoss::message" = "서식이 있는 설명이에요. 앱에서 수정하면 서식이 사라져요.";
 
 // MARK: - Apple calendar event
 "eventDetail::appleCalendarEvent::viewOnCalendar" = "애플 캘린더에서 보기";
+"eventDetail::appleCalendarEvent::editOnCalendar" = "애플 캘린더에서 수정";
 "eventDetail::appleCalendarEvent::calendar::event" = "애플 캘린더 이벤트";
 "eventDetail::appleCalendarEvent::attendees" = "참석자 (%d명)";
 "eventDetail::appleCalendarEvent::attendees::organizer" = "주최자";
+"eventDetail::appleCalendarEvent::saved::message" = "일정을 저장했어요.";
+"eventDetail::appleCalendarEvent::remove::confirm::message" = "이 일정을 삭제할까요?";
+"eventDetail::appleCalendarEvent::repeating::title" = "반복되는 일정이에요";
+"eventDetail::appleCalendarEvent::repeating::onlyThisTime::button" = "이번 일정만";
+"eventDetail::appleCalendarEvent::repeating::thisAndFuture::button" = "이후 모든 일정";
+"eventDetail::appleCalendarEvent::readOnlyCalendar::message" = "읽기 전용 캘린더라 일정을 수정할 수 없어요.";
+"eventDetail::appleCalendarEvent::notEditableField::message" = "이 항목은 앱에서 수정할 수 없어요.";
+"eventDetail::appleCalendarEvent::url::placeholder" = "URL";
 
 // MARK: - event tag
 
@@ -311,6 +384,23 @@
 "eventList::remove::confirm::button::olderThan1y" = "일년 이상 오래된";
 
 
+// MARK: - share preview
+
+"share_preview::title" = "공유 미리보기";
+"share_preview::tag_filter::title" = "이벤트 종류";
+"share_preview::tag_filter::select_all" = "전체 선택";
+"share_preview::tag_filter::deselect_all" = "전체 해제";
+"share_preview::option::include_tag_name" = "이벤트 종류 함께 표시";
+"share_preview::share_button" = "공유하기";
+"share_preview::empty" = "공유할 일정이 없어요";
+"share_preview::header::this_week" = "이번주";
+"share_preview::header::last_week" = "저번주";
+"share_preview::header::next_week" = "다음주";
+"share_preview::header::week_of_month" = "%1$@ %2$d주";
+"share_preview::format::text" = "텍스트";
+"share_preview::format::image" = "이미지";
+
+
 // MARK: - account
 
 "manage_account::title" = "계정 관리";
@@ -327,7 +417,9 @@
 "manage_account::delete_account_button::confirm:message" = "회원 탈퇴를 진행 하시겠습니까?";
 "manage_account::delete_account_button::description" = "계정 삭제 요청이후에, 귀하의 계정은 삭제됩니다.\n한번 삭제된 계정 정보는 다시 복구할 수 없습니다.";
 "signIn::title" = "로그인";
-"signIn:description" = "이벤트 목록을 백업하고 다른 iOS 기기와 동기화하세요\n(지원 플랫폼은 확장될 예정입니다.)";
+"signIn::feature::sync" = "이벤트 백업 · 기기 간 동기화";
+"signIn::feature::aiAgent" = "AI 에이전트로 일정 관리";
+"signIn::feature::web" = "웹에서도 사용 · todo-calendar.com";
 
 
 // MARK: - setting
@@ -410,10 +502,17 @@
 "setting.holiday.hide::confirm::message" = "이 공휴일을 매년 숨길까요?\n설정 > 공휴일에서 다시 표시할 수 있어요.";
 "setting.holiday.hidden::sectionTitle" = "숨긴 공휴일";
 "setting.holiday.show::button" = "표시";
+"setting.aiGuide::name" = "AI로 추가 — Siri·위젯";
 "setting.feedback::name" = "피드백";
 "setting.help::name" = "도움말";
+"setting.openWeb::name" = "웹에서 열기";
 "setting.share::name" = "앱 공유";
 "setting.write_review::name" = "앱 리뷰쓰기";
+"setting.openSourceLicense::name" = "오픈소스 라이선스";
+"setting.billing.plan::name" = "플랜";
+"setting.terms::name" = "이용약관";
+"setting.privacyPolicy::name" = "개인정보처리방침";
+"setting.adPrivacyOptions::name" = "광고 개인정보 옵션";
 "setting.account.signedIn::manageAccount" = "계정";
 "setting.account.needSignIn" = "로그인";
 "setting.suggest::readmind::appName" = "Readmind";
@@ -513,6 +612,14 @@
 "widget.dday.target::registered" = "지정한 후보";
 "widget.dday.turn::name" = "%d회차";
 
+"widget.aiCommand::title" = "AI로 추가";
+"widget.aiCommand::explain" = "탭 한 번으로 AI 입력을 여세요.";
+
+// MARK: - liveActivity
+
+"liveActivity::stale" = "지금 시작";
+"liveActivity::action::end" = "종료";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "지원하지 않는 형식의 링크입니다.\n앱을 최신 버전으로 업데이트 해주세요.";
@@ -543,20 +650,133 @@
 "aiAgent::state::failed" = "작업 실패";
 "aiAgent::done::default" = "완료했어요";
 "aiAgent::failed::default" = "처리하지 못했어요";
+"aiAgent::failed::dailyLimitExceeded" = "오늘 AI 크레딧을 다 썼어요.";
 "aiAgent::retry" = "다시";
 "aiAgent::needSignIn::title" = "로그인이 필요해요";
 "aiAgent::needSignIn::message" = "AI 빠른 입력은 로그인 후 이용할 수 있어요.";
+"aiAgent::speechPermissionDenied::title" = "권한이 필요해요";
+"aiAgent::speechPermissionDenied::message" = "음성 입력을 쓰려면 설정에서 마이크와 음성 인식 권한을 허용해 주세요.";
+"aiAgent::speechPermissionDenied::confirm" = "설정 열기";
 "aiAgent::title" = "AI 빠른 입력";
 "aiAgent::keyboard::stop" = "중지";
 "aiAgent::keyboard::send" = "전송";
 "aiAgent::stop" = "중지";
 "aiAgent::usage" = "%@ / %@ 크레딧";
-"aiAgent::plan::free" = "무료";
-"aiAgent::plan::standard" = "스탠다드";
-"aiAgent::plan::lifetime" = "평생";
 "aiAgent::usage::topupRemaining" = "추가 크레딧 %@ 남음";
 "aiAgent::usage::planChangeScheduled" = "%1$@부터 %2$@ 플랜으로 바뀌어요";
+"aiAgent::usage::resetsIn" = "%@ 뒤에 다시 쓸 수 있어요";
+"aiAgent::notificationPermissionDenied::message" = "AI 결과를 받으려면 설정에서 알림을 켜 주세요.";
 "aiAgent::stop::confirm::title" = "처리를 중지할까요?";
 "aiAgent::stop::confirm::message" = "중지하면 진행 중인 작업이 사라지고 다시 시작할 수 없어요.";
 "aiAgent::confirm::countdown" = "안에 승인해 주세요";
 "aiAgent::confirm::expired::message" = "시간이 만료됐어요. 다시 요청해 주세요.";
+"aiAgent::tip::externalEntry" = "팁: Siri, 액션 버튼, 위젯으로도 추가할 수 있어요.";
+"aiAgent::failed::showPlans" = "플랜 보기";
+
+"aiAgent::image::title" = "이미지에서 읽기";
+"aiAgent::image::sourceSelect::title" = "이미지 추가";
+"aiAgent::image::source::library" = "라이브러리에서 선택";
+"aiAgent::image::source::camera" = "사진 촬영";
+"aiAgent::image::recognizing" = "이미지를 읽고 있어요…";
+"aiAgent::image::noText" = "이 이미지에서 텍스트를 찾을 수 없어요";
+"aiAgent::image::readText" = "이미지의 텍스트";
+"aiAgent::image::instruction" = "추가 지시 (선택)";
+"aiAgent::image::instruction::placeholder" = "예: 이걸 할 일로 추가해줘";
+"aiAgent::image::empty" = "보낼 텍스트가 없어요";
+"aiAgent::image::textTooLong" = "텍스트가 너무 길어요. 줄여서 다시 시도해 주세요.";
+"aiAgent::image::instructionTooLong" = "지시가 너무 길어요. 줄여서 다시 시도해 주세요.";
+"aiAgent::image::busy" = "다른 요청이 아직 진행 중이에요";
+"aiAgent::image::camera::denied::title" = "카메라 권한이 필요해요";
+"aiAgent::image::camera::denied::message" = "설정에서 카메라 접근을 허용하면 사진을 찍을 수 있어요.";
+
+// MARK: - billing
+
+"billing::plan::free" = "무료";
+"billing::plan::standard" = "스탠다드";
+"billing::plan::lifetime" = "평생";
+
+"billing::paywall::title" = "플랜 업그레이드";
+"billing::paywall::current::description" = "하루 %@ 크레딧";
+"billing::paywall::metric::dailyCredits" = "하루 %@ 크레딧";
+"billing::paywall::period::weekly" = "/주";
+"billing::paywall::period::monthly" = "/월";
+"billing::paywall::period::yearly" = "/년";
+"billing::paywall::price::unavailable" = "가격을 불러올 수 없어요";
+"billing::paywall::badge::recommended" = "추천";
+"billing::paywall::badge::owned" = "이용 중인 플랜";
+"billing::paywall::features::title" = "%@에 포함된 기능";
+"billing::paywall::feature::dailyCredits" = "하루 %@ 크레딧";
+"billing::paywall::feature::topup" = "크레딧 소진 시 추가 구매 가능";
+"billing::paywall::feature::noAds" = "광고 없이 사용";
+"billing::paywall::disclosure::subscription" = "구독은 매월 자동 갱신되며, 현재 기간이 끝나기 24시간 전까지 해지하지 않으면 같은 금액으로 갱신됩니다. 해지는 App Store 설정에서 언제든 할 수 있어요.";
+"billing::paywall::disclosure::subscription::generic" = "구독은 각 결제 주기가 끝날 때 자동 갱신되며, 끝나기 24시간 전까지 해지하지 않으면 같은 금액으로 갱신됩니다. 해지는 App Store 설정에서 언제든 할 수 있어요.";
+"billing::paywall::disclosure::oneTime" = "한 번 결제하면 계속 사용할 수 있어요. 자동 갱신되지 않습니다.";
+"billing::paywall::disclosure::storeUnavailable" = "App Store에 연결하지 못했어요. 잠시 후 다시 시도해주세요.";
+"billing::paywall::cta::subscribe" = "%@ 구독하기";
+"billing::paywall::cta::buy" = "%@ 구매하기";
+"billing::paywall::cta::unavailable" = "구매 불가";
+"billing::paywall::allPlansOwned" = "이미 최고 플랜을 이용 중이에요.";
+"billing::paywall::terms" = "이용약관";
+"billing::paywall::privacyPolicy" = "개인정보처리방침";
+"billing::paywall::restore" = "구입 복원";
+"billing::paywall::restored" = "구입을 복원했어요";
+"billing::paywall::restore::empty" = "복원할 구입 내역이 없어요.";
+"billing::paywall::manageSubscription" = "구독 관리";
+"billing::paywall::purchase::applied" = "플랜이 적용됐어요";
+"billing::paywall::pending::title" = "승인 대기 중";
+"billing::paywall::pending::message" = "가족 구성원 관리자의 구매 승인을 기다리고 있어요. 승인되면 자동으로 반영됩니다.";
+"billing::paywall::userPlan::loadFailed" = "플랜을 불러오지 못했어요. 다시 시도해주세요.";
+"billing::paywall::retry" = "다시";
+"billing::paywall::unfinished::title" = "반영되지 않은 결제가 있어요";
+"billing::paywall::unfinished::message" = "결제는 완료됐지만 플랜에 아직 반영되지 않았어요.";
+"billing::paywall::unfinished::action" = "지금 반영";
+"billing::paywall::unfinished::applied" = "결제가 반영됐어요";
+"billing::paywall::processing::message" = "결제를 확인하는 중이에요";
+"billing::paywall::fail::purchase" = "결제를 완료하지 못했어요. 다시 시도해 주세요.";
+"billing::paywall::fail::invalidTransaction" = "결제 확인에 실패했어요. 잠시 후 다시 시도해 주세요.";
+"billing::paywall::fail::unknownProduct" = "인식할 수 없는 결제예요. 앱을 업데이트하면 해결될 수 있어요.";
+"billing::paywall::fail::planChangeNotAllowed" = "이 플랜 변경은 지원하지 않아요.";
+"billing::paywall::fail::ownedByAnotherAccount" = "다른 계정에 등록된 결제예요. 구매한 계정으로 로그인해 주세요.";
+"billing::paywall::fail::reflectDelayed" = "결제는 완료됐어요. 반영이 지연되고 있고, 곧 자동으로 반영됩니다.";
+"billing::paywall::topup::credits" = "%@ 크레딧";
+"billing::paywall::topup::credits::split" = "기본 %@ + 추가 %@ 크레딧";
+"billing::paywall::topup::bonus" = "%@%% 추가 증정";
+"billing::paywall::topup::title" = "크레딧 추가 구매";
+"billing::paywall::topup::title::withRemaining" = "크레딧 추가 구매 · 보유 %@";
+"billing::paywall::topup::description" = "추가 크레딧은 일일 한도를 다 쓴 뒤에 사용되고, 만료되지 않아요.";
+"billing::paywall::topup::applied" = "크레딧이 추가됐어요";
+"billing::paywall::topup::applied::withCredits" = "%@ 크레딧이 추가됐어요";
+
+"billing::needSignIn::title" = "로그인이 필요해요";
+"billing::needSignIn::message" = "플랜 확인과 변경은 로그인 후 이용할 수 있어요.";
+
+// MARK: - share extension
+
+"share.ai::title" = "AI로 보내기";
+"share.ai::text::placeholder" = "보낼 내용";
+"share.ai::instruction::placeholder" = "추가 지시 (선택)";
+"share.ai::needSignIn" = "AI 빠른 입력은 앱에서 로그인 후 이용할 수 있어요.";
+"share.ai::pending" = "앞선 요청이 아직 남아 있어요. 앱에서 진행 상태나 결과를 확인해 주세요.";
+"share.ai::sent" = "보냈어요. 결과는 앱에서 확인할 수 있어요.";
+"share.ai::failed" = "보내지 못했어요. 다시 시도해 주세요.";
+"share.ai::sentButUntracked" = "보냈지만 앱에서 결과를 추적할 수 없어요. 잠시 후 캘린더를 확인해 주세요.";
+"share.ai::textTooLong" = "보낼 내용이 너무 길어요. 줄여서 다시 시도해 주세요.";
+"share.ai::instructionTooLong" = "지시가 너무 길어요. 줄여 주세요.";
+"share.ai::limitExceeded" = "오늘 AI 크레딧을 다 썼어요. 세계 표준시 자정에 초기화돼요.";
+"share.ai::image::title" = "이미지를 AI로 보내기";
+"share.ai::image::recognizing" = "이미지에서 텍스트를 읽는 중…";
+"share.ai::image::text::caption" = "이미지에서 읽은 텍스트예요 — 어색한 부분이 있으면 수정해 주세요.";
+"share.ai::image::text::placeholder" = "이미지에서 읽은 텍스트";
+"share.ai::image::noTextFound" = "이 이미지에서 텍스트를 찾지 못했어요. 추가하고 싶은 내용을 입력해 주세요.";
+
+// MARK: - webview
+
+"webview::error::message" = "페이지를 불러오지 못했어요.";
+"webview::error::retry" = "다시 시도";
+"webview::openInBrowser" = "브라우저로 열기";
+
+// MARK: - legal notice
+
+"legal_notice.message::terms" = "이용약관이 개정됐어요.";
+"legal_notice.message::privacy" = "개인정보처리방침이 개정됐어요.";
+"legal_notice.effectiveDate" = "시행일 %@";

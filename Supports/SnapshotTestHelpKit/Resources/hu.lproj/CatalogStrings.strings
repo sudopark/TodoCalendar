@@ -1,0 +1,42 @@
+/* 화면 카탈로그(app-catalog) 더미 텍스트 — 앱 번들에 실리지 않는다 */
+
+// MARK: - 캘린더 이벤트
+
+"catalog.event::holiday" = "A függetlenségi mozgalom napja";
+"catalog.event::project_kickoff" = "Projektindító";
+"catalog.event::dentist" = "Fogorvos";
+"catalog.event::trip" = "Csedzsu-i utazás";
+"catalog.event::design_review" = "Design review";
+"catalog.event::dinner" = "Vacsora Sárával";
+"catalog.event::sprint_planning" = "Sprinttervezés";
+"catalog.event::team_workshop" = "Csapatworkshop";
+"catalog.event::release_day" = "Kiadás napja";
+"catalog.event::lunch" = "Ebéd Sárával";
+
+// MARK: - 할일
+
+"catalog.todo::tax_return" = "Adóbevallás beadása";
+"catalog.todo::reply_landlord" = "Válasz a főbérlőnek";
+"catalog.todo::water_plants" = "Növények meglocsolása";
+"catalog.todo::book_flight" = "Repülőjegy foglalása";
+"catalog.todo::renew_passport" = "Útlevél megújítása";
+"catalog.todo::send_invoice" = "Számla elküldése";
+"catalog.todo::cancel_subscription" = "Nem használt előfizetés lemondása";
+"catalog.todo::return_books" = "Könyvtári könyvek visszavitele";
+
+// MARK: - 이벤트 상세
+
+"catalog.place::startup_hub" = "Seoul Startup Hub";
+"catalog.memo::wireframes" = "Vidd magaddal a kinyomtatott drótvázakat.";
+
+// MARK: - 이벤트 타입
+
+"catalog.tag::work" = "Munka";
+"catalog.tag::family" = "Család";
+"catalog.tag::health" = "Egészség";
+"catalog.tag::study" = "Tanulás";
+
+// MARK: - AI 빠른 입력
+
+"catalog.ai::command" = "ebéd Sárával pénteken délben";
+"catalog.ai::result" = "Az „Ebéd Sárával” hozzáadva péntekre, március 13-ra, 12:00-ra.";

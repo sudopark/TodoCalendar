@@ -74,6 +74,17 @@ extension AppSettingLocalRepositoryImple {
         self.storage.saveEventSetting(newSetting, for: nil)
         return newSetting
     }
+
+    public func loadEventShareSetting() -> EventShareSettings {
+        return self.storage.loadEventShareSetting(for: nil)
+    }
+
+    public func changeEventShareSetting(_ params: EditEventShareSettingsParams) -> EventShareSettings {
+        let old = self.storage.loadEventShareSetting(for: nil)
+        let newSetting = old.update(params)
+        self.storage.saveEventShareSetting(newSetting, for: nil)
+        return newSetting
+    }
 }
 
 // MARK: - widget setting

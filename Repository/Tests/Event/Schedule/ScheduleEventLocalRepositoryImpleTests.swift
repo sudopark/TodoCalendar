@@ -228,7 +228,7 @@ extension ScheduleEventLocalRepositoryImpleTests {
         let saving: AsyncFlatMapPublisher<Void, Error, Void> = Publishers.create {
             return try await self.localStorage.updateScheduleEvents(events)
         }
-        let _ = self.waitFirstOutput(expect, for: saving, timeout: 1)
+        let _ = self.waitFirstOutput(expect, for: saving)
     }
     
     func testReposiotry_loadEventsInRange() {

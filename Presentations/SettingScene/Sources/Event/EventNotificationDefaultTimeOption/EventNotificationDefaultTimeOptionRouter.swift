@@ -15,10 +15,7 @@ import CommonPresentation
 
 // MARK: - Routing
 
-protocol EventNotificationDefaultTimeOptionRouting: Routing, Sendable { 
-    
-    func openSystemNotificationSetting()
-}
+protocol EventNotificationDefaultTimeOptionRouting: Routing, Sendable { }
 
 // MARK: - Router
 
@@ -36,13 +33,5 @@ extension EventNotificationDefaultTimeOptionRouter {
     
     private var currentScene: (any EventNotificationDefaultTimeOptionScene)? {
         self.scene as? (any EventNotificationDefaultTimeOptionScene)
-    }
-    
-    func openSystemNotificationSetting() {
-        Task { @MainActor in
-            guard let url = URL(string: UIApplication.openSettingsURLString)
-            else { return }
-            UIApplication.shared.open(url)
-        }
     }
 }

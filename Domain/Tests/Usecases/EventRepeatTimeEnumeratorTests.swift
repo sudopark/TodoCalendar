@@ -661,3 +661,90 @@ final class EventRepeatEnumeratorTests_EnmeratesEndByCount: BaseEventRepeatTimeE
         ])
     }
 }
+
+
+// MARK: - 회차 미소비 전진
+
+final class EventRepeatEnumeratorTests_withoutTurnConsuming: BaseEventRepeatTimeEnumeratorTests {
+
+    private var everyDayEnumeratorEndsWith10Count: EventRepeatTimeEnumerator {
+        return self.makeEnumerator(
+            EventRepeatingOptions.EveryDay(), endOption: .count(10)
+        )
+    }
+
+    // 미소비 전진시 시각만 다음으로 가고 회차는 유지된다
+    func testEnumerator_whenNextWithoutTurnConsuming_keepTurn() {
+        // given
+        let enumerator = self.everyDayEnumeratorEndsWith10Count
+        let current = RepeatingTimes(
+            time: .at(self.dummyDate("2023-05-20 01:00").timeIntervalSince1970),
+            turn: 4
+        )
+
+        // when
+        let next = enumerator.nextEventTimeWithoutTurnConsuming(from: current, until: nil)
+
+        // then
+        XCTAssertEqual(
+            next?.time,
+            .at(self.dummyDate("2023-05-21 01:00").timeIntervalSince1970)
+        )
+        XCTAssertEqual(next?.turn, 4)
+    }
+
+    // 마지막 회차에서 미소비 전진해도 count 종료로 판정하지 않는다
+    func testEnumerator_whenNextWithoutTurnConsumingAtLastTurn_notEndSeries() {
+        // given
+        let enumerator = self.everyDayEnumeratorEndsWith10Count
+        let current = RepeatingTimes(
+            time: .at(self.dummyDate("2023-05-20 01:00").timeIntervalSince1970),
+            turn: 10
+        )
+
+        // when
+        let next = enumerator.nextEventTimeWithoutTurnConsuming(from: current, until: nil)
+
+        // then
+        XCTAssertEqual(
+            next?.time,
+            .at(self.dummyDate("2023-05-21 01:00").timeIntervalSince1970)
+        )
+        XCTAssertEqual(next?.turn, 10)
+    }
+
+    // until 종료는 미소비 전진에서도 그대로 걸린다
+    func testEnumerator_whenNextWithoutTurnConsumingExceedEndTime_returnNil() {
+        // given
+        let endTime = self.dummyDate("2023-05-20 23:00").timeIntervalSince1970
+        let enumerator = self.makeEnumerator(
+            EventRepeatingOptions.EveryDay(), endOption: .until(endTime)
+        )
+        let current = RepeatingTimes(
+            time: .at(self.dummyDate("2023-05-20 01:00").timeIntervalSince1970),
+            turn: 3
+        )
+
+        // when
+        let next = enumerator.nextEventTimeWithoutTurnConsuming(from: current, until: endTime)
+
+        // then
+        XCTAssertNil(next)
+    }
+
+    // 기존 소비 전진은 마지막 회차에서 종료 판정을 유지한다
+    func testEnumerator_whenNextWithTurnConsumingAtLastTurn_returnNil() {
+        // given
+        let enumerator = self.everyDayEnumeratorEndsWith10Count
+        let current = RepeatingTimes(
+            time: .at(self.dummyDate("2023-05-20 01:00").timeIntervalSince1970),
+            turn: 10
+        )
+
+        // when
+        let next = enumerator.nextEventTime(from: current, until: nil)
+
+        // then
+        XCTAssertNil(next)
+    }
+}

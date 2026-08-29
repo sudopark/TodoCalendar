@@ -21,13 +21,13 @@ paths:
 
 ### CommonPresentation 컴포넌트 카탈로그
 
-전부 `CommonPresentation/Sources/UIComponents/` 소속. `import CommonPresentation` 누락 주의.
+`CommonPresentation/Sources/UIComponents/` 소속 — **재사용 뷰만** 여기 둔다. `import CommonPresentation` 누락 주의.
 
 | 컴포넌트 | 역할 | 이벤트 연결 |
 |---|---|---|
 | `ConfirmButton` | 표준 액션 버튼 — isEnable·isProcessing(로딩) 내장, 색 nil→appearance 폴백 | `.eventHandler(\.onTap)` |
 | `BottomConfirmButton` | 화면 하단 고정 ConfirmButton 래퍼 (패딩+배경+safe-area) | `.eventHandler(\.onTap)` |
-| `BottomSlideView` | 바텀시트 컨테이너 — 딤 영역 탭 닫기, 제네릭 content | `.eventHandler(\.outsideTap)` |
+| `BottomSlideView` | 바텀시트 컨테이너 — 딤 영역 + 제네릭 content. 딤 탭 닫기는 자동 아님(아래 참고) | `.eventHandler(\.outsideTap)` |
 | `SheetHeaderView` | 시트 상단 헤더 — 타이틀+닫기, iOS26 리퀴드 글래스 분기 | `.eventHandler(\.onClose)` |
 | `CloseButton` | `xmark.circle.fill` 닫기 버튼 | `.eventHandler(\.onTap)` |
 | `NavigationBackButton` | chevron 커스텀 뒤로가기 | `init(tapHandler:)` 클로저 |
@@ -39,10 +39,40 @@ paths:
 | `RemoteImageView` | Kingfisher 원격 이미지 — 다운샘플·캐시 | 체이닝 modifier (`resize` 등) |
 | `VoiceWaveformView` | 음성 입력 레벨 파형 바 | 없음 |
 | `LandmarkMapView` | 단일 마커 지도 (비인터랙티브) | 없음 |
-| `SignInButtonProvider` | OAuth 로그인 버튼 팩토리 (프로토콜 — §4 custom provider 선례) | init property 주입 |
+| `BillingPlanChipView` | 플랜 이름 칩 — 무료 회색/유료 accentAI (사용량 게이지·paywall 공유, #739) | 없음 (표시 전용) |
+| `BillingScheduledChangeView` | 하향·만료 예정 안내 한 줄 — info 아이콘 + "N월 d일부터 X 플랜" (사용량 게이지·paywall 공유, #852) | 없음 (표시 전용) |
+| `ImagePicker` | 사진 라이브러리(PHPicker)·카메라 피커 뷰컨트롤러 팩토리 — 선택 결과를 `Data`로 전달 | `makeViewController(source:onPick:)` 클로저 |
+| `InAppWebViewController` | 인앱 웹뷰 화면 (UIKit) — 진행바·문서 타이틀·뒤로/앞으로·브라우저로 열기 + 로드 실패 폴백 (#806) | 모달은 `BaseRouterImple.showWebView(_:)` / `init` = push·child VC |
 
 - 이벤트 연결 주류는 `.eventHandler(\.키패스)` (기본값 있는 var 클로저) — 신규 컴포넌트도 이 패턴으로. 표의 예외(init 클로저·render-prop·체이닝)는 기존 API 존중.
-- 카탈로그가 낡았을 수 있다 — `ls Presentations/CommonPresentation/Sources/UIComponents/`로 실물 확인. 표에 없는 파일을 발견하면 이 표를 갱신한다.
+- **컴포넌트를 새로 만들었으면 같은 커밋에서 이 표에 한 줄 추가한다** (CLAUDE.md §1 짝 규칙). 등재 안 된 컴포넌트는 다음 사람이 못 찾아 같은 걸 또 만든다.
+- 읽는 쪽에서도 카탈로그가 낡았을 수 있다 — `ls Presentations/CommonPresentation/Sources/UIComponents/`로 실물 확인. 표에 없는 파일을 발견하면 이 표를 갱신한다.
+
+### ServiceInterfaces — 서비스 추상 프로토콜
+
+`CommonPresentation/Sources/ServiceInterfaces/` 소속. **씬이 SDK를 모른 채 능력만 소비하도록** 프로토콜만 여기 두고 구현체는 앱 타겟에 있다. 뷰가 아니므로 UIComponents에 두지 않는다.
+
+| 타입 | 역할 | 진입 |
+|---|---|---|
+| `AdViewBuilder` | 배너 광고 뷰 팩토리 — Domain `AdBannerSize` 로 요청 (#898·#956·#981) | `makeBannerView(size:)` / `makeBannerUIView(size:)` |
+| `FullScreenAdRouter` | 전면 광고 노출 커맨드 — 씬 Router가 재위임. 노출 지점은 Domain `FullScreenAdExposureRecord.Scope` 로 표현하고, AdService의 `FullScreenAdRouterImple`이 앱 타겟 extension으로 채택 (#898·#956·#981) | `showFullScreenAd(from:scope:isFromAppLaunch:)` |
+| `PrivacyOptionsFormRouter` | UMP 개인정보 옵션 폼 — 요구 여부 조회 + 폼 표시. AdService의 `GoogleMobileAdsServiceImple`이 앱 타겟 extension으로 채택 (#958·#956) | `isPrivacyOptionsRequired()` / `showPrivacyOptionsForm(from:)` |
+| `SignInButtonProvider` | OAuth 로그인 버튼 팩토리 (§4 custom provider 선례) | init property 주입 |
+| `LiveActivityActionModel` | 라이브액티비티 등록/해제 메뉴 항목 문구 — 상세·리스트 두 진입점이 공유 (#910·#911) | `init(isRegistered:)` → `itemText` |
+
+- 새 SDK 능력을 씬에 노출할 땐 여기에 프로토콜을 더하고 이 표에 등재한다. UIComponents 표와 같은 짝 규칙이다.
+
+#### BottomSlideView — 딤 영역 탭 닫기는 수동 배선
+
+`BottomSlideView`를 쓰는 시트는 **`.eventHandler(\.outsideTap, ...)`를 직접 걸어야 딤 영역 탭에 닫힌다.** 안 걸면 no-op이라 아무 반응이 없다. 닫힘 동작은 다른 닫기 경로(헤더 X·닫기 버튼)와 같은 핸들러로 — ViewModel의 `close()` → `router.closeScene()` (rules §5 Navigation은 Router 경유).
+
+```swift
+BottomSlideView { ... }
+    .eventHandler(\.outsideTap, eventHandlers.close)   // ← 없으면 딤 탭에 안 닫힘
+```
+
+- 반대로 **딤 탭에 닫히면 안 되는 시트**(진행 중 이탈이 위험한 경우 등)는 배선을 걸지 않는다 — 배선 여부가 곧 옵션이다.
+- SwiftUI `@Environment(\.dismiss)`로 닫으려 하지 말 것. 이 시트들은 UIKit `present()`로 띄운 `UIHostingController`라 SwiftUI가 표시 주체를 몰라 no-op이다.
 
 ### 프레임워크 스코프 컴포넌트
 
@@ -142,7 +172,7 @@ case .command: builder.makeCommandView()
 ✅ self.router?.routeToSomewhere(param)
 ```
 
-Router는 `BaseRouterImple` 상속 + `XxxRouting` 채택. 공통 메서드(`showError`, `showToast`, `closeScene`, `showConfirm`, `showActionSheet`, `openSafari`, `showBottomSlide`, `dismissPresented`)는 먼저 재사용.
+Router는 `BaseRouterImple` 상속 + `XxxRouting` 채택. 공통 메서드(`showError`, `showToast`, `closeScene`, `showConfirm`, `showActionSheet`, `openSafari`, `showWebView`, `showBottomSlide`, `dismissPresented`)는 먼저 재사용.
 
 ### SwiftUI 타입 직접 참조 금지
 ViewModel에 `@Published` / `ObservableObject` / `@StateObject` ❌. 상태 노출은 **Combine `AnyPublisher`**, SwiftUI 변환은 `ViewState`가 담당.

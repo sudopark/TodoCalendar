@@ -19,17 +19,20 @@ final class GoogleCalendarUsecaseImpleTests: PublisherWaitable {
 
     private let spyViewAppearanceStore = SpyGoogleCalendarViewAppearanceStore()
     private let stubStore = SharedDataStore()
-    private let service = GoogleCalendarService(scopes: [.readOnly])
+    private let service = GoogleCalendarService(scopes: [.readWrite])
     private let stubEventTagUsecase = StubEventTagUsecase()
     private let stubIntegrationUsecase = PrivateStubIntegrationUsecase()
     private let stubRepositoryPool = PrivateStubRepositoryPool()
 
     var cancelBag: Set<AnyCancellable>! = []
 
-    private func updateAccount(email: String, integrated: Bool, isNew: Bool = false) {
+    private func updateAccount(
+        email: String, integrated: Bool, isNew: Bool = false, grantedScopes: [String]? = nil
+    ) {
         let serviceId = service.identifier
         if integrated {
             var account = ExternalServiceAccountinfo(serviceId, email: email)
+            account.grantedScopes = grantedScopes
             if isNew { account.intergrationTime = Date() }
             let current = stubIntegrationUsecase.currentIntegratedAccounts(for: serviceId)
             stubIntegrationUsecase.setAccounts(current + [account])
@@ -47,12 +50,13 @@ final class GoogleCalendarUsecaseImpleTests: PublisherWaitable {
 
     private func makeUsecase(
         accounts: [String] = [],
+        accountScopes: [String: [String]] = [:],
         defaultRepo: PrivateStubRepository = .init()
     ) -> GoogleCalendarUsecaseImple {
         stubRepositoryPool.setDefaultRepository(defaultRepo)
-        accounts.forEach { updateAccount(email: $0, integrated: true) }
+        accounts.forEach { updateAccount(email: $0, integrated: true, grantedScopes: accountScopes[$0]) }
         return .init(
-            googleService: GoogleCalendarService(scopes: [.readOnly]),
+            googleService: GoogleCalendarService(scopes: [.readWrite]),
             integrationUsecase: stubIntegrationUsecase,
             repositoryPool: stubRepositoryPool,
             eventTagUsecase: stubEventTagUsecase,
@@ -90,6 +94,22 @@ extension GoogleCalendarUsecaseImpleTests {
             usecase.prepare()
             try await Task.sleep(for: .milliseconds(100))
         }
+    }
+
+    /// #934 — 라이브액티비티가 팔레트(colorId→hex)를 읽을 수 있어야 이벤트 개별 색을 반영한다.
+    @Test func prepare_whenAccountExists_storesColorsInSharedDataStore() async throws {
+        // given
+        let usecase = makeUsecase(accounts: ["account@google.com"])
+
+        // when
+        usecase.prepare()
+        try await Task.sleep(for: .milliseconds(100))
+
+        // then
+        let colors = stubStore.value(
+            [String: GoogleCalendar.Colors].self, key: ShareDataKeys.googleCalendarColors.rawValue
+        )
+        #expect(colors?["account@google.com"] != nil)
     }
 
     @Test func prepare_whenCalledMultipleTimes_onlyLatestSubscriptionIsActive() async throws {
@@ -177,6 +197,50 @@ extension GoogleCalendarUsecaseImpleTests {
             ids.contains(where: { $0.externalServiceId == GoogleCalendarService.id })
         }
         #expect(hasGoogleOffId == [true, false])
+    }
+
+    /// #934 — 로그아웃한 계정의 팔레트가 SharedDataStore 에 남으면 라이브액티비티가 옛 색을 계속 쓴다.
+    @Test func integration_whenAccountDisconnected_removesColorsFromSharedDataStore() async throws {
+        // given
+        let usecase = makeUsecase(accounts: ["account@google.com"])
+        usecase.prepare()
+        try await Task.sleep(for: .milliseconds(100))
+        let seeded = stubStore.value(
+            [String: GoogleCalendar.Colors].self, key: ShareDataKeys.googleCalendarColors.rawValue
+        )
+        #expect(seeded?["account@google.com"] != nil)
+
+        // when
+        self.updateAccount(email: "account@google.com", integrated: false)
+        try await Task.sleep(for: .milliseconds(300))
+
+        // then
+        let cleared = stubStore.value(
+            [String: GoogleCalendar.Colors].self, key: ShareDataKeys.googleCalendarColors.rawValue
+        )
+        #expect(cleared?["account@google.com"] == nil)
+    }
+
+    @Test func integration_whenOneAccountDisconnected_otherAccountColorsRemainIntact() async throws {
+        // given
+        let repo1 = PrivateStubRepository(customCalendarsStubbing: [.init(id: "cal-a", name: "A")])
+        let repo2 = PrivateStubRepository(customCalendarsStubbing: [.init(id: "cal-b", name: "B")])
+        stubRepositoryPool.setRepository(repo1, for: "account1@google.com")
+        stubRepositoryPool.setRepository(repo2, for: "account2@google.com")
+        let usecase = makeUsecase(accounts: ["account1@google.com", "account2@google.com"])
+        usecase.prepare()
+        try await Task.sleep(for: .milliseconds(100))
+
+        // when
+        self.updateAccount(email: "account1@google.com", integrated: false)
+        try await Task.sleep(for: .milliseconds(100))
+
+        // then
+        let colors = stubStore.value(
+            [String: GoogleCalendar.Colors].self, key: ShareDataKeys.googleCalendarColors.rawValue
+        )
+        #expect(colors?["account1@google.com"] == nil)
+        #expect(colors?["account2@google.com"] != nil)
     }
 
     @Test func integration_whenOneAccountDisconnected_otherAccountRemainsIntact() async throws {
@@ -441,6 +505,431 @@ extension GoogleCalendarUsecaseImpleTests {
 }
 
 
+// MARK: - 역할 7: eventWritePermission() — 캘린더 층 우선 판정
+
+extension GoogleCalendarUsecaseImpleTests {
+
+    private var writableScope: [String] { [GoogleCalendarService.Scope.readWrite.rawValue] }
+
+    @Test func eventWritePermission_whenAccountLacksWriteScope_needsReauthentication() async throws {
+        // given — 캘린더는 owner(쓰기 가능)지만 계정에 쓰기 scope 가 없음
+        let tag = GoogleCalendar.Tag(id: "cal1", name: "cal1") |> \.accessRole .~ .owner
+        let usecase = makeUsecase(
+            accounts: ["account@google.com"],
+            defaultRepo: .init(customCalendarsStubbing: [tag])
+        )
+        usecase.prepare()
+        try await Task.sleep(for: .milliseconds(100))
+
+        // when
+        let expect = expectConfirm("캘린더는 쓰기 가능 → 계정 scope 없어 재인증 필요")
+        let permission = try await firstOutput(expect, for: usecase.eventWritePermission(
+            accountId: "account@google.com", calendarId: "cal1"
+        ))
+
+        // then
+        #expect(permission == .needReauthentication)
+    }
+
+    @Test func eventWritePermission_whenAccountLacksWriteScopeAndCalendarReadOnly_readOnlyCalendarTakesPrecedence() async throws {
+        // given — 계정 scope 없음 + 캘린더도 reader(둘 다 실패). 캘린더 층이 먼저 판정한다
+        let tag = GoogleCalendar.Tag(id: "cal1", name: "cal1") |> \.accessRole .~ .reader
+        let usecase = makeUsecase(
+            accounts: ["account@google.com"],
+            defaultRepo: .init(customCalendarsStubbing: [tag])
+        )
+        usecase.prepare()
+        try await Task.sleep(for: .milliseconds(100))
+
+        // when
+        let expect = expectConfirm("계정·캘린더 모두 쓰기 불가 → 재인증 아니라 readOnlyCalendar")
+        let permission = try await firstOutput(expect, for: usecase.eventWritePermission(
+            accountId: "account@google.com", calendarId: "cal1"
+        ))
+
+        // then
+        #expect(permission == .readOnlyCalendar)
+    }
+
+    @Test func eventWritePermission_whenAccountWritableButCalendarReadOnly_readOnlyCalendar() async throws {
+        // given — 계정은 쓰기 scope 보유, 캘린더는 reader(읽기 전용)
+        let tag = GoogleCalendar.Tag(id: "cal1", name: "cal1") |> \.accessRole .~ .reader
+        let usecase = makeUsecase(
+            accounts: ["account@google.com"],
+            accountScopes: ["account@google.com": writableScope],
+            defaultRepo: .init(customCalendarsStubbing: [tag])
+        )
+        usecase.prepare()
+        try await Task.sleep(for: .milliseconds(100))
+
+        // when
+        let expect = expectConfirm("계정은 쓰기 가능하나 캘린더가 읽기전용")
+        let permission = try await firstOutput(expect, for: usecase.eventWritePermission(
+            accountId: "account@google.com", calendarId: "cal1"
+        ))
+
+        // then
+        #expect(permission == .readOnlyCalendar)
+    }
+
+    @Test func eventWritePermission_whenAccountWritableAndCalendarOwner_writable() async throws {
+        // given — 계정 쓰기 scope + 캘린더 owner 모두 충족
+        let tag = GoogleCalendar.Tag(id: "cal1", name: "cal1") |> \.accessRole .~ .owner
+        let usecase = makeUsecase(
+            accounts: ["account@google.com"],
+            accountScopes: ["account@google.com": writableScope],
+            defaultRepo: .init(customCalendarsStubbing: [tag])
+        )
+        usecase.prepare()
+        try await Task.sleep(for: .milliseconds(100))
+
+        // when
+        let expect = expectConfirm("계정·캘린더 모두 쓰기 가능")
+        let permission = try await firstOutput(expect, for: usecase.eventWritePermission(
+            accountId: "account@google.com", calendarId: "cal1"
+        ))
+
+        // then
+        #expect(permission == .writable)
+    }
+
+    @Test func eventWritePermission_whenCalendarAccessRoleIsNil_readOnlyCalendar() async throws {
+        // given — 마이그레이션 직후 캐시된 태그에 accessRole 이 없는 상태 (fail-closed 대상)
+        let tag = GoogleCalendar.Tag(id: "cal1", name: "cal1")
+        let usecase = makeUsecase(
+            accounts: ["account@google.com"],
+            accountScopes: ["account@google.com": writableScope],
+            defaultRepo: .init(customCalendarsStubbing: [tag])
+        )
+        usecase.prepare()
+        try await Task.sleep(for: .milliseconds(100))
+
+        // when
+        let expect = expectConfirm("accessRole nil → fail-closed 로 readOnlyCalendar")
+        let permission = try await firstOutput(expect, for: usecase.eventWritePermission(
+            accountId: "account@google.com", calendarId: "cal1"
+        ))
+
+        // then
+        #expect(permission == .readOnlyCalendar)
+    }
+}
+
+
+// MARK: - 역할 8: updateEvent() / removeEvent()
+
+extension GoogleCalendarUsecaseImpleTests {
+
+    private var dummyUpdatedEventOrigin: GoogleCalendar.EventOrigin {
+        var origin = GoogleCalendar.EventOrigin(id: "event1", summary: "updated")
+        origin.start = .init() |> \.dateTime .~ "2023-03-05T00:00:00+09:00"
+        origin.end = .init() |> \.dateTime .~ "2023-03-06T00:00:00+09:00"
+        return origin
+    }
+
+    @Test func updateEvent_callsRepositoryAndUpdatesSharedDataStore() async throws {
+        // given
+        let usecase = makeUsecase(
+            accounts: ["account@google.com"],
+            defaultRepo: .init(customUpdateEventOriginStubbing: dummyUpdatedEventOrigin)
+        )
+        var params = GoogleCalendar.EventEditParams()
+        params.summary = "updated"
+
+        // when
+        let origin = try await usecase.updateEvent(
+            "cal1", "event1", accountId: "account@google.com",
+            at: TimeZone(identifier: "Asia/Seoul")!, params: params
+        )
+
+        // then
+        #expect(origin.id == "event1")
+        let cached = stubStore.value(
+            [String: GoogleCalendar.Event].self, key: ShareDataKeys.googleCalendarEvents.rawValue
+        )
+        #expect(cached?["event1"]?.name == "updated")
+    }
+
+    @Test func updateEvent_whenResponseIsSeriesMaster_doesNotCacheItAsTheDisplayedInstance() async throws {
+        // given — "전체 일정" 저장은 구글이 시리즈 마스터(recurringEventId 없음 + recurrence 있음)를 돌려준다
+        var seriesMaster = GoogleCalendar.EventOrigin(id: "series1", summary: "series updated")
+        seriesMaster.recurrence = ["RRULE:FREQ=DAILY;COUNT=3"]
+        let usecase = makeUsecase(
+            accounts: ["account@google.com"],
+            defaultRepo: .init(customUpdateEventOriginStubbing: seriesMaster)
+        )
+
+        // when
+        let origin = try await usecase.updateEvent(
+            "cal1", "series1", accountId: "account@google.com",
+            at: TimeZone(identifier: "Asia/Seoul")!, params: .init()
+        )
+
+        // then — 응답은 그대로 반환하되, 시리즈 마스터를 인스턴스인 양 SharedDataStore 에 캐시하지 않는다
+        #expect(origin.id == "series1")
+        let cached = stubStore.value(
+            [String: GoogleCalendar.Event].self, key: ShareDataKeys.googleCalendarEvents.rawValue
+        )
+        #expect(cached?["series1"] == nil)
+    }
+
+    @Test func updateEvent_whenResponseIsSeriesMaster_refreshesInstancesOverCachedPeriod() async throws {
+        // given — 이미 조회된 이벤트가 캐시에 있고, 그 span 이 인스턴스 재조회 구간이 된다
+        var seriesMaster = GoogleCalendar.EventOrigin(id: "series1", summary: "series updated")
+        seriesMaster.recurrence = ["RRULE:FREQ=DAILY;COUNT=3"]
+        let repo = PrivateStubRepository(customUpdateEventOriginStubbing: seriesMaster)
+        let usecase = makeUsecase(accounts: ["account@google.com"], defaultRepo: repo)
+        let alreadyLoaded = GoogleCalendar.Event(
+            "loaded", "cal1", accountId: "account@google.com",
+            name: "loaded", colorId: nil, time: .period(100..<200)
+        )
+        // 시각을 바꾸면 인스턴스 id 가 달라져 응답에 없는 낡은 항목이 된다
+        let staleInstance = GoogleCalendar.Event(
+            "series1_old", "cal1", accountId: "account@google.com",
+            name: "stale instance", colorId: nil, time: .period(100..<200)
+        )
+        stubStore.put(
+            [String: GoogleCalendar.Event].self,
+            key: ShareDataKeys.googleCalendarEvents.rawValue,
+            ["loaded": alreadyLoaded, "series1_old": staleInstance]
+        )
+
+        // when
+        _ = try await usecase.updateEvent(
+            "cal1", "series1", accountId: "account@google.com",
+            at: TimeZone(identifier: "Asia/Seoul")!, params: .init()
+        )
+        try await Task.sleep(for: .milliseconds(100))
+
+        // then — 캐시 span(100..<200)으로 그 시리즈의 인스턴스만 재조회하고 결과를 캐시에 병합한다
+        #expect(repo.didLoadRepeatingInstancesWith?.eventId == "series1")
+        #expect(repo.didLoadRepeatingInstancesWith?.calendarId == "cal1")
+        #expect(repo.didLoadRepeatingInstancesWith?.period == 100..<200)
+        let cached = stubStore.value(
+            [String: GoogleCalendar.Event].self, key: ShareDataKeys.googleCalendarEvents.rawValue
+        )
+        #expect(cached?["series1_0"]?.name == "refreshed instance")
+        #expect(cached?["series1_1"]?.name == "refreshed instance")
+        #expect(cached?["series1_old"] == nil)
+        #expect(cached?["loaded"] != nil)
+    }
+
+    @Test func updateEvent_whenRecurrenceRemoved_refreshesCachedPeriod() async throws {
+        // given — 반복 해제 응답은 마스터가 아니다(recurrence == nil) — 결과만 보면 재조회가 필요 없어 보인다
+        let notMasterAnymore = GoogleCalendar.EventOrigin(id: "series1", summary: "no longer repeating")
+        let repo = PrivateStubRepository(customUpdateEventOriginStubbing: notMasterAnymore)
+        let usecase = makeUsecase(accounts: ["account@google.com"], defaultRepo: repo)
+        stubStore.put(
+            [String: GoogleCalendar.Event].self,
+            key: ShareDataKeys.googleCalendarEvents.rawValue,
+            ["loaded": dummyEvent("loaded")]
+        )
+        var params = GoogleCalendar.EventEditParams()
+        params.recurrence = []
+
+        // when
+        _ = try await usecase.updateEvent(
+            "cal1", "series1", accountId: "account@google.com",
+            at: TimeZone(identifier: "Asia/Seoul")!, params: params
+        )
+        try await Task.sleep(for: .milliseconds(100))
+
+        // then — 대상이 반복 해제 대상이었으므로 펼쳐진 인스턴스를 걷어내는 재조회가 돈다
+        #expect(repo.didLoadRepeatingInstancesWith?.eventId == "series1")
+    }
+
+    @Test func updateEvent_whenRecurrenceAdded_refreshesCachedPeriod() async throws {
+        // given — 이번 응답 자체는 마스터가 아니지만(recurringEventId nil, recurrence nil), 대상에 반복을 새로 실었다
+        let notMasterYet = GoogleCalendar.EventOrigin(id: "event1", summary: "now repeating")
+        let repo = PrivateStubRepository(customUpdateEventOriginStubbing: notMasterYet)
+        let usecase = makeUsecase(accounts: ["account@google.com"], defaultRepo: repo)
+        stubStore.put(
+            [String: GoogleCalendar.Event].self,
+            key: ShareDataKeys.googleCalendarEvents.rawValue,
+            ["loaded": dummyEvent("loaded")]
+        )
+        var params = GoogleCalendar.EventEditParams()
+        params.recurrence = ["RRULE:FREQ=DAILY;COUNT=3"]
+
+        // when
+        _ = try await usecase.updateEvent(
+            "cal1", "event1", accountId: "account@google.com",
+            at: TimeZone(identifier: "Asia/Seoul")!, params: params
+        )
+        try await Task.sleep(for: .milliseconds(100))
+
+        // then
+        #expect(repo.didLoadRepeatingInstancesWith?.eventId == "event1")
+    }
+
+    @Test func updateEvent_whenOnlyOtherFieldsChanged_cachesResponseOnly() async throws {
+        // given — 반복과 무관한 필드만 바뀌었고 응답도 인스턴스다
+        let usecase = makeUsecase(
+            accounts: ["account@google.com"],
+            defaultRepo: .init(customUpdateEventOriginStubbing: dummyUpdatedEventOrigin)
+        )
+        var params = GoogleCalendar.EventEditParams()
+        params.summary = "updated"
+
+        // when
+        _ = try await usecase.updateEvent(
+            "cal1", "event1", accountId: "account@google.com",
+            at: TimeZone(identifier: "Asia/Seoul")!, params: params
+        )
+
+        // then — 재조회 없이 응답만 캐시에 반영
+        let cached = stubStore.value(
+            [String: GoogleCalendar.Event].self, key: ShareDataKeys.googleCalendarEvents.rawValue
+        )
+        #expect(cached?["event1"]?.name == "updated")
+    }
+
+    @Test func removeEvent_removesFromSharedDataStore() async throws {
+        // given
+        let usecase = makeUsecase(
+            accounts: ["account@google.com"],
+            defaultRepo: .init(customUpdateEventOriginStubbing: dummyUpdatedEventOrigin)
+        )
+        _ = try await usecase.updateEvent(
+            "cal1", "event1", accountId: "account@google.com",
+            at: TimeZone(identifier: "Asia/Seoul")!, params: .init()
+        )
+        let seeded = stubStore.value(
+            [String: GoogleCalendar.Event].self, key: ShareDataKeys.googleCalendarEvents.rawValue
+        )
+        #expect(seeded?["event1"] != nil)
+
+        // when
+        try await usecase.removeEvent(
+            "cal1", "event1", accountId: "account@google.com", scope: .thisEventOnly
+        )
+
+        // then
+        let cached = stubStore.value(
+            [String: GoogleCalendar.Event].self, key: ShareDataKeys.googleCalendarEvents.rawValue
+        )
+        #expect(cached?["event1"] == nil)
+    }
+
+    @Test func removeEvent_allEvents_removesExpandedInstancesOfSeries() async throws {
+        // given — 캐시엔 마스터가 아니라 펼쳐진 인스턴스들이 들어 있다
+        let usecase = makeUsecase(accounts: ["account@google.com"])
+        let instances: [String: GoogleCalendar.Event] = [
+            "event1_100": self.dummyEvent("event1_100"),
+            "event1_200": self.dummyEvent("event1_200"),
+            "other": self.dummyEvent("other")
+        ]
+        stubStore.put(
+            [String: GoogleCalendar.Event].self,
+            key: ShareDataKeys.googleCalendarEvents.rawValue, instances
+        )
+
+        // when
+        try await usecase.removeEvent(
+            "cal1", "event1", accountId: "account@google.com", scope: .allEvents
+        )
+
+        // then
+        let cached = stubStore.value(
+            [String: GoogleCalendar.Event].self, key: ShareDataKeys.googleCalendarEvents.rawValue
+        )
+        #expect(cached?["event1_100"] == nil)
+        #expect(cached?["event1_200"] == nil)
+        #expect(cached?["other"] != nil)
+    }
+
+    @Test func updateEvent_whenRecurrenceAdded_removesStaleSingleEventFromCache() async throws {
+        // given — 반복 없던 단일 이벤트가 eventId 키로 캐시돼 있다
+        var seriesMaster = GoogleCalendar.EventOrigin(id: "event1", summary: "now repeating")
+        seriesMaster.recurrence = ["RRULE:FREQ=DAILY;COUNT=3"]
+        let repo = PrivateStubRepository(customUpdateEventOriginStubbing: seriesMaster)
+        let usecase = makeUsecase(accounts: ["account@google.com"], defaultRepo: repo)
+        stubStore.put(
+            [String: GoogleCalendar.Event].self,
+            key: ShareDataKeys.googleCalendarEvents.rawValue,
+            ["event1": self.dummyEvent("event1")]
+        )
+        var params = GoogleCalendar.EventEditParams()
+        params.recurrence = ["RRULE:FREQ=DAILY;COUNT=3"]
+
+        // when
+        _ = try await usecase.updateEvent(
+            "cal1", "event1", accountId: "account@google.com",
+            at: TimeZone(identifier: "Asia/Seoul")!, params: params
+        )
+        try await Task.sleep(for: .milliseconds(100))
+
+        // then — 옛 단일 이벤트 캐시가 eventId 키에 남지 않는다
+        let cached = stubStore.value(
+            [String: GoogleCalendar.Event].self, key: ShareDataKeys.googleCalendarEvents.rawValue
+        )
+        #expect(cached?["event1"] == nil)
+    }
+
+    @Test func updateEvent_whenRecurrenceRemoved_cachesEventItself() async throws {
+        // given — 반복 해제 응답은 마스터가 아니다(recurrence == nil) — 반복이 풀린 단일 이벤트다
+        var notMasterAnymore = GoogleCalendar.EventOrigin(id: "series1", summary: "no longer repeating")
+        notMasterAnymore.start = .init() |> \.dateTime .~ "2023-03-05T00:00:00+09:00"
+        notMasterAnymore.end = .init() |> \.dateTime .~ "2023-03-06T00:00:00+09:00"
+        let repo = PrivateStubRepository(customUpdateEventOriginStubbing: notMasterAnymore)
+        let usecase = makeUsecase(accounts: ["account@google.com"], defaultRepo: repo)
+        var params = GoogleCalendar.EventEditParams()
+        params.recurrence = []
+
+        // when
+        _ = try await usecase.updateEvent(
+            "cal1", "series1", accountId: "account@google.com",
+            at: TimeZone(identifier: "Asia/Seoul")!, params: params
+        )
+        try await Task.sleep(for: .milliseconds(100))
+
+        // then — 본체가 eventId 키에 갱신되어 반영된다
+        let cached = stubStore.value(
+            [String: GoogleCalendar.Event].self, key: ShareDataKeys.googleCalendarEvents.rawValue
+        )
+        #expect(cached?["series1"]?.name == "no longer repeating")
+    }
+
+    @Test func updateEvent_whenRecurrenceRemoved_removesStaleInstancesFromCache() async throws {
+        // given — 기존에 펼쳐진 반복 인스턴스들이 series1_* 로 캐시돼 있다
+        var notMasterAnymore = GoogleCalendar.EventOrigin(id: "series1", summary: "no longer repeating")
+        notMasterAnymore.start = .init() |> \.dateTime .~ "2023-03-05T00:00:00+09:00"
+        notMasterAnymore.end = .init() |> \.dateTime .~ "2023-03-06T00:00:00+09:00"
+        let repo = PrivateStubRepository(customUpdateEventOriginStubbing: notMasterAnymore)
+        let usecase = makeUsecase(accounts: ["account@google.com"], defaultRepo: repo)
+        stubStore.put(
+            [String: GoogleCalendar.Event].self,
+            key: ShareDataKeys.googleCalendarEvents.rawValue,
+            ["series1_0": self.dummyEvent("series1_0"), "series1_1": self.dummyEvent("series1_1")]
+        )
+        var params = GoogleCalendar.EventEditParams()
+        params.recurrence = []
+
+        // when
+        _ = try await usecase.updateEvent(
+            "cal1", "series1", accountId: "account@google.com",
+            at: TimeZone(identifier: "Asia/Seoul")!, params: params
+        )
+        try await Task.sleep(for: .milliseconds(100))
+
+        // then — 걷힌 series1_* 옛 인스턴스는 사라지고 본체만 남는다
+        let cached = stubStore.value(
+            [String: GoogleCalendar.Event].self, key: ShareDataKeys.googleCalendarEvents.rawValue
+        )
+        #expect(cached?["series1_0"] == nil)
+        #expect(cached?["series1_1"] == nil)
+        #expect(cached?["series1"]?.name == "no longer repeating")
+    }
+
+    private func dummyEvent(_ eventId: String) -> GoogleCalendar.Event {
+        return GoogleCalendar.Event(
+            eventId, "cal1", accountId: "account@google.com",
+            name: eventId, colorId: nil, time: .period(0..<100)
+        )
+    }
+}
+
+
 // MARK: - Event 변환 단위 테스트
 
 extension GoogleCalendarUsecaseImpleTests {
@@ -525,6 +1014,9 @@ private final class PrivateStubIntegrationUsecase: ExternalCalendarIntegrationUs
 
     func prepareIntegratedAccounts() async throws {}
     func integrate(external service: any ExternalCalendarService) async throws -> ExternalServiceAccountinfo { fatalError() }
+    func reauthenticateForWriteScope(
+        external service: any ExternalCalendarService, accountId: String
+    ) async throws -> ExternalServiceAccountinfo { fatalError() }
     func stopIntegrate(external service: any ExternalCalendarService, accountId: String) async throws {}
     func handleAuthenticationResultOrNot(open url: URL) -> Bool { false }
 
@@ -547,11 +1039,14 @@ private final class PrivateStubRepository: GoogleCalendarRepository, @unchecked 
     private var stubColors: [GoogleCalendar.Colors]
     private var stubCalendarTags: [[GoogleCalendar.Tag]]
     var eventsMocking: PassthroughSubject<[GoogleCalendar.Event], any Error>?
+    private let customUpdateEventOriginStubbing: GoogleCalendar.EventOrigin?
 
     init(
         customCalendarsStubbing: [GoogleCalendar.Tag]? = nil,
-        eventsMocking: PassthroughSubject<[GoogleCalendar.Event], any Error>? = nil
+        eventsMocking: PassthroughSubject<[GoogleCalendar.Event], any Error>? = nil,
+        customUpdateEventOriginStubbing: GoogleCalendar.EventOrigin? = nil
     ) {
+        self.customUpdateEventOriginStubbing = customUpdateEventOriginStubbing
         self.stubColors = [
             .init(
                 ownerId: "account@google.com",
@@ -610,6 +1105,33 @@ private final class PrivateStubRepository: GoogleCalendarRepository, @unchecked 
     ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error> {
         let origin = GoogleCalendar.EventOrigin(id: eventId, summary: "some")
         return Just(origin).mapAsAnyError().eraseToAnyPublisher()
+    }
+
+    var didLoadRepeatingInstancesWith: (calendarId: String, eventId: String, period: Range<TimeInterval>)?
+    func loadRepeatingEventInstances(
+        _ calendarId: String, _ eventId: String, in period: Range<TimeInterval>
+    ) -> AnyPublisher<[GoogleCalendar.Event], any Error> {
+        self.didLoadRepeatingInstancesWith = (calendarId, eventId, period)
+        let instances = (0..<2).map { i -> GoogleCalendar.Event in
+            .init(
+                "\(eventId)_\(i)", calendarId,
+                accountId: "stub@gmail.com",
+                name: "refreshed instance", colorId: "color",
+                time: .period(period.lowerBound..<period.lowerBound + TimeInterval(i + 1))
+            )
+        }
+        return Just(instances).mapAsAnyError().eraseToAnyPublisher()
+    }
+
+    func updateEvent(
+        _ calendarId: String, _ timeZone: String, _ eventId: String, _ params: GoogleCalendar.EventEditParams
+    ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error> {
+        let origin = self.customUpdateEventOriginStubbing ?? GoogleCalendar.EventOrigin(id: eventId, summary: params.summary)
+        return Just(origin).mapAsAnyError().eraseToAnyPublisher()
+    }
+
+    func removeEvent(_ calendarId: String, _ eventId: String) -> AnyPublisher<Void, any Error> {
+        return Just(()).mapAsAnyError().eraseToAnyPublisher()
     }
 
     func resetCache() async throws {}

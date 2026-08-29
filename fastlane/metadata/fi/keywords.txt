@@ -1,0 +1,1 @@
+tehtävälista,muistilista,ajanhallinta,widget,muistutukset,tarkistuslista,google-kalenteri,tekoäly

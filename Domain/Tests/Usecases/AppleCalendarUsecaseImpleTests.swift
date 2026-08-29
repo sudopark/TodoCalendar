@@ -387,6 +387,275 @@ extension AppleCalendarUsecaseImpleTests {
 }
 
 
+// MARK: - isCalendarWritable
+
+extension AppleCalendarUsecaseImpleTests {
+
+    @Test func usecase_whenCalendarIsReadOnly_isCalendarWritableIsFalse() async throws {
+        // given
+        let expect = expectConfirm("읽기 전용 캘린더는 isCalendarWritable이 false")
+        expect.count = 2
+        let readOnlyTag = AppleCalendar.Tag(id: "cal:0", name: "Calendar 0", colorHex: nil)
+            |> \.isWritable .~ false
+        stubRepository.stubCalendarTags = [readOnlyTag]
+        let usecase = makeUsecase(isIntegrated: true)
+
+        // when
+        let results = try await outputs(expect, for: usecase.isCalendarWritable("cal:0")) {
+            usecase.prepare()
+        }
+
+        // then
+        let writable = try #require(results.last)
+        #expect(writable == false)
+    }
+
+    @Test func usecase_whenCalendarTagIsMissing_isCalendarWritableIsNil() async throws {
+        // given
+        let expect = expectConfirm("존재하지 않는 캘린더는 isCalendarWritable이 nil")
+        expect.count = 2
+        stubRepository.stubCalendarTags = [
+            AppleCalendar.Tag(id: "cal:0", name: "Calendar 0", colorHex: nil)
+        ]
+        let usecase = makeUsecase(isIntegrated: true)
+
+        // when
+        let results = try await outputs(expect, for: usecase.isCalendarWritable("cal:missing")) {
+            usecase.prepare()
+        }
+
+        // then
+        let writable = try #require(results.last)
+        #expect(writable == nil)
+    }
+
+    @Test func usecase_whenTagHasNoWritabilityYet_isCalendarWritableIsNil() async throws {
+        // given
+        let expect = expectConfirm("판정 전 태그는 isCalendarWritable이 nil")
+        expect.count = 2
+        stubRepository.stubCalendarTags = [
+            AppleCalendar.Tag(id: "cal:0", name: "Calendar 0", colorHex: nil)
+        ]
+        let usecase = makeUsecase(isIntegrated: true)
+
+        // when
+        let results = try await outputs(expect, for: usecase.isCalendarWritable("cal:0")) {
+            usecase.prepare()
+        }
+
+        // then
+        let writable = try #require(results.last)
+        #expect(writable == nil)
+    }
+}
+
+
+// MARK: - updateEvent / removeEvent
+
+extension AppleCalendarUsecaseImpleTests {
+
+    private func seedSharedCache(_ usecase: AppleCalendarUsecaseImple, in period: Range<TimeInterval>) async throws {
+        usecase.prepare()
+        usecase.refreshEvents(in: period)
+        try await Task.sleep(for: .milliseconds(100))
+    }
+
+    private func cachedEvents() -> [String: AppleCalendar.Event] {
+        stubStore.value(
+            [String: AppleCalendar.Event].self, key: ShareDataKeys.appleCalendarEvents.rawValue
+        ) ?? [:]
+    }
+
+    @Test func usecase_updateNonRepeatingEvent_replacesSharedCacheEntry() async throws {
+        // given
+        let usecase = makeUsecase(isIntegrated: true, stubEvents: makeStubEvents(count: 1))
+        try await seedSharedCache(usecase, in: 0..<1)
+
+        var updatedOrigin = AppleCalendar.EventOrigin(
+            eventId: "event:0", originalEventId: "event:0",
+            calendarId: "cal:0", name: "Updated Name", eventTime: .period(0..<1)
+        )
+        updatedOrigin.isRepeating = false
+        stubRepository.stubUpdatedOrigin = updatedOrigin
+
+        // when
+        _ = try await usecase.updateEvent("event:0", params: .init(), scope: .thisEventOnly)
+
+        // then
+        #expect(cachedEvents()["event:0"]?.name == "Updated Name")
+    }
+
+    @Test func usecase_updateRepeatingEvent_refreshesCachedPeriod() async throws {
+        // given
+        let usecase = makeUsecase(isIntegrated: true, stubEvents: makeStubEvents(count: 3))
+        try await seedSharedCache(usecase, in: 0..<3)
+
+        var repeatingOrigin = AppleCalendar.EventOrigin(
+            eventId: "event:0", originalEventId: "event:0",
+            calendarId: "cal:0", name: "Repeating Updated", eventTime: .period(0..<1)
+        )
+        repeatingOrigin.isRepeating = true
+        stubRepository.stubUpdatedOrigin = repeatingOrigin
+        stubRepository.didLoadEventsIn = nil
+
+        // when
+        _ = try await usecase.updateEvent("event:0#occ:0", params: .init(), scope: .thisAndFuture)
+        try await Task.sleep(for: .milliseconds(50))
+
+        // then
+        #expect(stubRepository.didLoadEventsIn == 0..<3)
+    }
+
+    @Test func usecase_updateRepeatingEvent_ignoresScopeAndRefreshesCachedPeriod() async throws {
+        // given - scope 가 thisEventOnly 여도 대상이 반복 회차면 재조회 경로를 타야 한다
+        let usecase = makeUsecase(isIntegrated: true, stubEvents: makeStubEvents(count: 3))
+        try await seedSharedCache(usecase, in: 0..<3)
+
+        var repeatingOrigin = AppleCalendar.EventOrigin(
+            eventId: "event:0", originalEventId: "event:0",
+            calendarId: "cal:0", name: "Repeating Updated", eventTime: .period(0..<1)
+        )
+        repeatingOrigin.isRepeating = true
+        stubRepository.stubUpdatedOrigin = repeatingOrigin
+        stubRepository.didLoadEventsIn = nil
+
+        // when
+        _ = try await usecase.updateEvent("event:0#occ:0", params: .init(), scope: .thisEventOnly)
+        try await Task.sleep(for: .milliseconds(50))
+
+        // then
+        #expect(stubRepository.didLoadEventsIn == 0..<3)
+    }
+
+    @Test func usecase_updateRepeatingOccurrence_whenDetachedIntoNonRepeating_stillRefreshesCachedPeriod() async throws {
+        // given - "이번만" 수정은 회차를 시리즈에서 떼어내 결과가 비반복이 된다.
+        // 재조회가 필요한 건 회차가 빠진 원본 시리즈 쪽이라 결과로 판단하면 안 된다
+        let usecase = makeUsecase(isIntegrated: true, stubEvents: makeStubEvents(count: 3))
+        try await seedSharedCache(usecase, in: 0..<3)
+
+        var detachedOrigin = AppleCalendar.EventOrigin(
+            eventId: "event:0", originalEventId: "event:0",
+            calendarId: "cal:0", name: "Detached", eventTime: .period(0..<1)
+        )
+        detachedOrigin.isRepeating = false
+        stubRepository.stubUpdatedOrigin = detachedOrigin
+        stubRepository.didLoadEventsIn = nil
+
+        // when
+        _ = try await usecase.updateEvent("event:0#occ:0", params: .init(), scope: .thisEventOnly)
+        try await Task.sleep(for: .milliseconds(50))
+
+        // then
+        #expect(stubRepository.didLoadEventsIn == 0..<3)
+    }
+
+    @Test func updateEvent_whenRecurrenceRulesChangedOnMaster_refreshesCachedPeriod() async throws {
+        // given - 반복 규칙 편집은 회차 날짜 없는 마스터 id 를 대상으로 삼는다.
+        // 규칙이 바뀌면 인스턴스 집합이 통째로 달라져 캐시를 다시 채워야 한다
+        let usecase = makeUsecase(isIntegrated: true, stubEvents: makeStubEvents(count: 3))
+        try await seedSharedCache(usecase, in: 0..<3)
+
+        var updatedOrigin = AppleCalendar.EventOrigin(
+            eventId: "event:0", originalEventId: "event:0",
+            calendarId: "cal:0", name: "Repeat Changed", eventTime: .period(0..<1)
+        )
+        updatedOrigin.isRepeating = true
+        stubRepository.stubUpdatedOrigin = updatedOrigin
+        stubRepository.didLoadEventsIn = nil
+        let params = AppleCalendar.EventEditParams()
+            |> \.recurrenceRules .~ ["RRULE:FREQ=DAILY;INTERVAL=1"]
+
+        // when
+        _ = try await usecase.updateEvent("event:0", params: params, scope: .thisAndFuture)
+        try await Task.sleep(for: .milliseconds(50))
+
+        // then
+        #expect(stubRepository.didLoadEventsIn == 0..<3)
+    }
+
+    @Test func updateEvent_whenOnlyOtherFieldsChangedOnMaster_cachesResponseOnly() async throws {
+        // given
+        let usecase = makeUsecase(isIntegrated: true, stubEvents: makeStubEvents(count: 3))
+        try await seedSharedCache(usecase, in: 0..<3)
+
+        var updatedOrigin = AppleCalendar.EventOrigin(
+            eventId: "event:0", originalEventId: "event:0",
+            calendarId: "cal:0", name: "Name Only Changed", eventTime: .period(0..<1)
+        )
+        updatedOrigin.isRepeating = true
+        stubRepository.stubUpdatedOrigin = updatedOrigin
+        stubRepository.didLoadEventsIn = nil
+        let params = AppleCalendar.EventEditParams()
+            |> \.name .~ "Name Only Changed"
+
+        // when
+        _ = try await usecase.updateEvent("event:0", params: params, scope: .thisEventOnly)
+        try await Task.sleep(for: .milliseconds(50))
+
+        // then
+        #expect(stubRepository.didLoadEventsIn == nil)
+        #expect(cachedEvents()["event:0"]?.name == "Name Only Changed")
+    }
+
+    @Test func usecase_removeEvent_removesFromSharedCache() async throws {
+        // given
+        let usecase = makeUsecase(isIntegrated: true, stubEvents: makeStubEvents(count: 3))
+        try await seedSharedCache(usecase, in: 0..<3)
+
+        // when
+        try await usecase.removeEvent("event:0", scope: .thisEventOnly)
+
+        // then
+        #expect(cachedEvents()["event:0"] == nil)
+    }
+
+    @Test func usecase_removeRepeatingEvent_thisAndFuture_refreshesCachedPeriod() async throws {
+        // given - EventKit 삭제는 N개 회차를 지우지만 캐시는 단건 키만 제거해 나머지 회차가 남는다.
+        // 경계가 아닌 중간 이벤트(event:1)를 지워 나머지 캐시(event:0, event:2)의 기간이 그대로 0..<3 유지되게 한다
+        let usecase = makeUsecase(isIntegrated: true, stubEvents: makeStubEvents(count: 3))
+        try await seedSharedCache(usecase, in: 0..<3)
+        stubRepository.didLoadEventsIn = nil
+
+        // when
+        try await usecase.removeEvent("event:1", scope: .thisAndFuture)
+        try await Task.sleep(for: .milliseconds(50))
+
+        // then
+        #expect(stubRepository.didLoadEventsIn == 0..<3)
+    }
+
+    @Test func usecase_whenRepositoryFails_updateThrowsAndKeepsCache() async throws {
+        // given
+        let usecase = makeUsecase(isIntegrated: true, stubEvents: makeStubEvents(count: 1))
+        try await seedSharedCache(usecase, in: 0..<1)
+        stubRepository.shouldFailUpdate = true
+
+        // when
+        await #expect(throws: (any Error).self) {
+            _ = try await usecase.updateEvent("event:0", params: .init(), scope: .thisEventOnly)
+        }
+
+        // then
+        #expect(cachedEvents()["event:0"]?.name == "Event 0")
+    }
+
+    @Test func usecase_whenRepositoryFails_removeThrowsAndKeepsCache() async throws {
+        // given
+        let usecase = makeUsecase(isIntegrated: true, stubEvents: makeStubEvents(count: 1))
+        try await seedSharedCache(usecase, in: 0..<1)
+        stubRepository.shouldFailRemove = true
+
+        // when
+        await #expect(throws: (any Error).self) {
+            try await usecase.removeEvent("event:0", scope: .thisEventOnly)
+        }
+
+        // then
+        #expect(cachedEvents()["event:0"]?.name == "Event 0")
+    }
+}
+
+
 // MARK: - Stubs
 
 private final class PrivateStubIntegrationUsecase: ExternalCalendarIntegrationUsecase, @unchecked Sendable {
@@ -403,6 +672,9 @@ private final class PrivateStubIntegrationUsecase: ExternalCalendarIntegrationUs
 
     func prepareIntegratedAccounts() async throws {}
     func integrate(external service: any ExternalCalendarService) async throws -> ExternalServiceAccountinfo { fatalError() }
+    func reauthenticateForWriteScope(
+        external service: any ExternalCalendarService, accountId: String
+    ) async throws -> ExternalServiceAccountinfo { fatalError() }
     func stopIntegrate(external service: any ExternalCalendarService, accountId: String) async throws {}
     func handleAuthenticationResultOrNot(open url: URL) -> Bool { false }
 

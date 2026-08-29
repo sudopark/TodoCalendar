@@ -12,6 +12,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import Scenes
 
 
@@ -72,7 +73,7 @@ final class EventTagDetailViewModelImple: EventTagDetailViewModel, @unchecked Se
         let isProcessing = CurrentValueSubject<Bool, Never>(false)
     }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private let subject = Subject()
 }
 
@@ -117,7 +118,7 @@ extension EventTagDetailViewModelImple {
             }
             self?.subject.isProcessing.send(false)
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     private func deleteTagWithEvents(_ tagId: String) {
@@ -133,7 +134,7 @@ extension EventTagDetailViewModelImple {
             }
             self?.subject.isProcessing.send(false)
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     func save() {
@@ -173,7 +174,7 @@ extension EventTagDetailViewModelImple {
             }
             self?.subject.isProcessing.send(false)
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     private func editTag(_ id: String) {
@@ -195,7 +196,7 @@ extension EventTagDetailViewModelImple {
             }
             self.subject.isProcessing.send(false)
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     private func saveNewTag() {
@@ -217,7 +218,7 @@ extension EventTagDetailViewModelImple {
             }
             self.subject.isProcessing.send(false)
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     private func show(

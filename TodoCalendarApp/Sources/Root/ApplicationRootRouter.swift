@@ -9,6 +9,7 @@ import UIKit
 import SwiftUI
 import Domain
 import Extensions
+import StoreKitService
 import Scenes
 import CommonPresentation
 import CalendarScenes
@@ -17,7 +18,9 @@ import EventListScenes
 import SettingScene
 import MemberScenes
 import AIAgentScene
+import BillingScenes
 import SQLiteService
+import AdService
 
 
 // MARK: - ApplicationViewAppearanceStore
@@ -202,8 +205,11 @@ extension ApplicationViewAppearanceStoreImple: AppleCalendarViewAppearanceStore 
 
 protocol ApplicationRouting: Routing {
 
-    func setupInitialScene(_ prepareResult: ApplicationPrepareResult)
-    func changeRootSceneAfter(signIn auth: Auth?)
+    @MainActor
+    func setupInitialScene(_ prepareResult: ApplicationPrepareResult) -> (any MainSceneInteractor)?
+
+    @MainActor
+    func changeRootSceneAfter(signIn auth: Auth?) -> (any MainSceneInteractor)?
     func showUpdatePopup(_ requirement: AppUpdateRequirement)
 }
 
@@ -217,7 +223,6 @@ final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
     private let accountUsecase: any AccountUsecase
     private let externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase
     private let backgroundEventSyncUsecase: any BackgroundEventSyncUsecase
-    private let aiJobRefreshUsecase: any AIJobRefreshUsecase
     private let applicationBase: ApplicationBase
     private let deepLinkHandler: ApplicationDeepLinkHandlerImple
     private let appUpdateCheckUsecase: any AppUpdateCheckUsecase
@@ -228,7 +233,6 @@ final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
         accountUsecase: any AccountUsecase,
         externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase,
         backgroundEventSyncUsecase: any BackgroundEventSyncUsecase,
-        aiJobRefreshUsecase: any AIJobRefreshUsecase,
         applicationBase: ApplicationBase,
         deepLinkHandler: ApplicationDeepLinkHandlerImple,
         appUpdateCheckUsecase: any AppUpdateCheckUsecase
@@ -237,7 +241,6 @@ final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
         self.accountUsecase = accountUsecase
         self.externalCalenarIntegrationUsecase = externalCalenarIntegrationUsecase
         self.backgroundEventSyncUsecase = backgroundEventSyncUsecase
-        self.aiJobRefreshUsecase = aiJobRefreshUsecase
         self.applicationBase = applicationBase
         self.deepLinkHandler = deepLinkHandler
         self.appUpdateCheckUsecase = appUpdateCheckUsecase
@@ -267,6 +270,10 @@ final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
         }
     }
     
+    func showWebView(_ path: String) {
+        // ignore
+    }
+
     func pop(animate: Bool) {
         // ignore
     }
@@ -279,31 +286,30 @@ final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
 
 extension ApplicationRootRouter {
     
+    @MainActor
     func setupInitialScene(
         _ prepareResult: ApplicationPrepareResult
-    ) {
+    ) -> (any MainSceneInteractor)? {
         
-        guard !AppEnvironment.isTestBuild else { return }
+        guard !AppEnvironment.isTestBuild else { return nil }
         
-        Task { @MainActor in
-            self.viewAppearanceStore = .init(prepareResult.appearnceSetings, self.window)
-            self.changeUsecaseFactroy(
-                by: prepareResult.latestLoginAcount?.auth
-            )
-            self.refreshRoot()
-            self.setupBaseViewAppearanceSetting()
-        }
+        self.viewAppearanceStore = .init(prepareResult.appearnceSetings, self.window)
+        self.changeUsecaseFactroy(
+            by: prepareResult.latestLoginAcount?.auth
+        )
+        let interactor = self.refreshRoot()
+        self.setupBaseViewAppearanceSetting()
+        return interactor
     }
     
     @MainActor private func setupBaseViewAppearanceSetting() {
         UIDatePicker.appearance().minuteInterval = 5
     }
 
-    func changeRootSceneAfter(signIn auth: Auth?) {
-        Task { @MainActor in
-            self.changeUsecaseFactroy(by: auth)
-            self.refreshRoot()
-        }
+    @MainActor
+    func changeRootSceneAfter(signIn auth: Auth?) -> (any MainSceneInteractor)? {
+        self.changeUsecaseFactroy(by: auth)
+        return self.refreshRoot()
     }
     
     func showConfirm(dialog info: ConfirmDialogInfo) {
@@ -348,9 +354,12 @@ extension ApplicationRootRouter {
         }
     }
     
+    @MainActor
     private func changeUsecaseFactroy(
         by auth: Auth?
     ) {
+        self.usecaseFactory?.billingUsecase.stopObservingTransactions()
+
         if let auth = auth {
             self.usecaseFactory = LoginUsecaseFactoryImple(
                 userId: auth.uid,
@@ -373,21 +382,37 @@ extension ApplicationRootRouter {
             )
         }
         self.backgroundEventSyncUsecase.change(factory: self.usecaseFactory)
-        self.aiJobRefreshUsecase.change(factory: self.usecaseFactory)
     }
     
     @MainActor
-    private func refreshRoot() {
+    private func refreshRoot() -> (any MainSceneInteractor)? {
         
         let builder = MainSceneBuilerImple(
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearanceStore.appearance,
             calendarSceneBulder: self.calendarSceneBulder(),
-            settingSceneBuilder: self.settingSceneBuilder()
+            settingSceneBuilder: self.settingSceneBuilder(),
+            mobileAdService: self.applicationBase.mobileAdService,
+            fullScreenAdRouter: self.fullScreenAdRouter(),
+            adViewBuilder: self.adViewBuilder()
         )
         let mainScene = builder.makeMainScene()
         self.window.rootViewController = mainScene
         self.window.makeKeyAndVisible()
+        return mainScene.interactor
+    }
+    
+    private func adViewBuilder() -> any AdViewBuilder {
+        return ApplicationAdViewBuilder(
+            adExposureUsecase: self.usecaseFactory.adExposureUsecase
+        )
+    }
+
+    private func fullScreenAdRouter() -> any FullScreenAdRouter {
+        return FullScreenAdRouterImple(
+            adService: self.applicationBase.mobileAdService,
+            adExposureUsecase: self.usecaseFactory.adExposureUsecase
+        )
     }
     
     private func calendarSceneBulder() -> any CalendarSceneBuilder {
@@ -399,7 +424,10 @@ extension ApplicationRootRouter {
             accountUsecase: self.accountUsecase,
             memberSceneBuilder: self.memberSceneBuilder(),
             aiAgentCommandSceneBuilder: self.aiAgentCommandSceneBuilder(),
-            aiAgentKeyboardInputSceneBuilder: self.aiAgentKeyboardInputSceneBuilder()
+            aiAgentKeyboardInputSceneBuilder: self.aiAgentKeyboardInputSceneBuilder(),
+            aiAgentImageCommandSceneBuilder: self.aiAgentImageCommandSceneBuilder(),
+            paywallSceneBuilder: self.paywallSceneBuilder(),
+            fullScreenAdRouter: self.fullScreenAdRouter()
         )
         self.deepLinkHandler.attach(calendarHandler: builder.calendarDeepLinkHandler)
         return builder
@@ -442,7 +470,17 @@ extension ApplicationRootRouter {
             supportExternalCalendarServices: AppEnvironment.supportExternalCalendarServices,
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearanceStore.appearance,
-            memberSceneBuilder: self.memberSceneBuilder()
+            memberSceneBuilder: self.memberSceneBuilder(),
+            paywallSceneBuilder: self.paywallSceneBuilder(),
+            privacyOptionsFormRouter: self.applicationBase.mobileAdService
+        )
+    }
+
+    private func paywallSceneBuilder() -> any PaywallSceneBuilder {
+        return PaywallBuilderImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearanceStore.appearance,
+            showManageSubscriptions: { try await AppStoreSubscriptionSheet().show(in: $0) }
         )
     }
     
@@ -456,12 +494,20 @@ extension ApplicationRootRouter {
     private func aiAgentCommandSceneBuilder() -> any AIAgentCommandSceneBuilder {
         return AIAgentCommandBuilderImple(
             usecaseFactory: self.usecaseFactory,
-            viewAppearance: self.viewAppearanceStore.appearance
+            viewAppearance: self.viewAppearanceStore.appearance,
+            adViewBuilder: self.adViewBuilder()
         )
     }
 
     private func aiAgentKeyboardInputSceneBuilder() -> any AIAgentKeyboardInputSceneBuilder {
         return AIAgentKeyboardInputBuilderImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearanceStore.appearance
+        )
+    }
+
+    private func aiAgentImageCommandSceneBuilder() -> any AIAgentImageCommandSceneBuilder {
+        return AIAgentImageCommandBuilderImple(
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearanceStore.appearance
         )

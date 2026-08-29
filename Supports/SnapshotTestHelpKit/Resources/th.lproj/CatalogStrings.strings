@@ -1,0 +1,42 @@
+/* 화면 카탈로그(app-catalog) 더미 텍스트 — 앱 번들에 실리지 않는다 */
+
+// MARK: - 캘린더 이벤트
+
+"catalog.event::holiday" = "วันขบวนการเอกราช";
+"catalog.event::project_kickoff" = "คิกออฟโปรเจกต์";
+"catalog.event::dentist" = "หมอฟัน";
+"catalog.event::trip" = "เที่ยวเชจู";
+"catalog.event::design_review" = "รีวิวงานออกแบบ";
+"catalog.event::dinner" = "มื้อเย็นกับซาร่า";
+"catalog.event::sprint_planning" = "วางแผนสปรินต์";
+"catalog.event::team_workshop" = "เวิร์กช็อปทีม";
+"catalog.event::release_day" = "วันปล่อยเวอร์ชัน";
+"catalog.event::lunch" = "มื้อเที่ยงกับซาร่า";
+
+// MARK: - 할일
+
+"catalog.todo::tax_return" = "ยื่นภาษี";
+"catalog.todo::reply_landlord" = "ตอบเจ้าของบ้าน";
+"catalog.todo::water_plants" = "รดน้ำต้นไม้";
+"catalog.todo::book_flight" = "จองตั๋วเครื่องบิน";
+"catalog.todo::renew_passport" = "ต่ออายุพาสปอร์ต";
+"catalog.todo::send_invoice" = "ส่งใบแจ้งหนี้";
+"catalog.todo::cancel_subscription" = "ยกเลิกสมาชิกที่ไม่ได้ใช้";
+"catalog.todo::return_books" = "คืนหนังสือห้องสมุด";
+
+// MARK: - 이벤트 상세
+
+"catalog.place::startup_hub" = "Seoul Startup Hub";
+"catalog.memo::wireframes" = "เอาแบบร่างที่ปรินต์ไว้ไปด้วย";
+
+// MARK: - 이벤트 타입
+
+"catalog.tag::work" = "งาน";
+"catalog.tag::family" = "ครอบครัว";
+"catalog.tag::health" = "สุขภาพ";
+"catalog.tag::study" = "การเรียน";
+
+// MARK: - AI 빠른 입력
+
+"catalog.ai::command" = "มื้อเที่ยงกับซาร่าวันศุกร์เที่ยงตรง";
+"catalog.ai::result" = "เพิ่ม “มื้อเที่ยงกับซาร่า” ในวันศุกร์ที่ 13 มีนาคม เวลา 12:00 แล้ว";

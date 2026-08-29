@@ -14,6 +14,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import CommonPresentation
 
 
@@ -22,7 +23,7 @@ import CommonPresentation
 @Observable final class TimeZoneSelectViewState {
     
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
     
     var searchKeyword: String = ""
     var systemTimeZone: TimeZoneModel?
@@ -42,14 +43,14 @@ import CommonPresentation
                 self?.systemTimeZone = list.systemTimeZone
                 self?.timeZones = list.timeZones
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         viewModel.selectedTimeZoneIdentifier
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] identifier in
                 self?.selectedIdentifier = identifier
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 

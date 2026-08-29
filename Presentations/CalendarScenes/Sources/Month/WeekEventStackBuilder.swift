@@ -87,7 +87,7 @@ public struct WeekEventStackBuilder {
 extension WeekEventStackBuilder {
     
     public func build(_ week: CalendarComponent.Week, events: [any CalendarEvent]) -> WeekEventStack {
-        guard let weekRange = self.calendar.weekRange(week)
+        guard let weekRange = week.range(self.calendar.timeZone)
         else { return .init(eventStacks: [], eventsPerDay: []) }
         
         let eventsOnThisWeek = events
@@ -199,16 +199,7 @@ extension WeekEventStackBuilder {
 
 
 private extension Calendar {
-    
-    // this_week_monday.start..<next_week_monday.start
-    func weekRange(_ week: CalendarComponent.Week) -> Range<TimeInterval>? {
-        guard let firstDay = week.days.first, let lastDay = week.days.last,
-              let lowerBoundDate = self.date(from: firstDay).flatMap(self.startOfDay(for:)),
-              let upperBoundDate = self.date(from: lastDay).flatMap(self.endOfDay(for:))
-        else { return nil }
-        return lowerBoundDate.timeIntervalSince1970..<upperBoundDate.timeIntervalSince1970
-    }
-    
+
     func overlapEventDays(
         _ eventOnWeekRange: Range<TimeInterval>,
         _ weekRange: Range<TimeInterval>

@@ -1,0 +1,42 @@
+/* 화면 카탈로그(app-catalog) 더미 텍스트 — 앱 번들에 실리지 않는다 */
+
+// MARK: - 캘린더 이벤트
+
+"catalog.event::holiday" = "День движения за независимость";
+"catalog.event::project_kickoff" = "Старт проекта";
+"catalog.event::dentist" = "Стоматолог";
+"catalog.event::trip" = "Поездка на Чеджу";
+"catalog.event::design_review" = "Дизайн-ревью";
+"catalog.event::dinner" = "Ужин с Сарой";
+"catalog.event::sprint_planning" = "Планирование спринта";
+"catalog.event::team_workshop" = "Командный воркшоп";
+"catalog.event::release_day" = "День релиза";
+"catalog.event::lunch" = "Обед с Сарой";
+
+// MARK: - 할일
+
+"catalog.todo::tax_return" = "Подать налоговую декларацию";
+"catalog.todo::reply_landlord" = "Ответить арендодателю";
+"catalog.todo::water_plants" = "Полить цветы";
+"catalog.todo::book_flight" = "Забронировать билет на самолёт";
+"catalog.todo::renew_passport" = "Продлить загранпаспорт";
+"catalog.todo::send_invoice" = "Отправить счёт";
+"catalog.todo::cancel_subscription" = "Отменить неиспользуемую подписку";
+"catalog.todo::return_books" = "Вернуть книги в библиотеку";
+
+// MARK: - 이벤트 상세
+
+"catalog.place::startup_hub" = "Seoul Startup Hub";
+"catalog.memo::wireframes" = "Взять распечатанные вайрфреймы.";
+
+// MARK: - 이벤트 타입
+
+"catalog.tag::work" = "Работа";
+"catalog.tag::family" = "Семья";
+"catalog.tag::health" = "Здоровье";
+"catalog.tag::study" = "Учёба";
+
+// MARK: - AI 빠른 입력
+
+"catalog.ai::command" = "обед с Сарой в пятницу в полдень";
+"catalog.ai::result" = "«Обед с Сарой» добавлен на пятницу, 13 марта, 12:00.";

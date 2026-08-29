@@ -12,6 +12,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import Scenes
 
 
@@ -73,7 +74,7 @@ final class HolidayListViewModelImple: HolidayListViewModel, @unchecked Sendable
         let isRefreshingHolidays = CurrentValueSubject<Bool, Never>(false)
     }
     
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private let subject = Subject()
 }
 
@@ -88,7 +89,7 @@ extension HolidayListViewModelImple {
             .sink(receiveValue: { [weak self] timeZone in
                 self?.setupCurrentYear(timeZone)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
     
     func refresh() {
@@ -103,7 +104,7 @@ extension HolidayListViewModelImple {
                 self?.router?.showError(error)
             }
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     private func setupCurrentYear(_ timeZone: TimeZone) {
@@ -114,7 +115,7 @@ extension HolidayListViewModelImple {
         Task { [weak self] in
             try await self?.holidayUsecase.refreshHolidays(year)
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     func selectCountry() {
@@ -129,7 +130,7 @@ extension HolidayListViewModelImple {
                 self?.router?.showError(error)
             }
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
 
     func close() {

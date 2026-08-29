@@ -42,6 +42,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
     private let eventUploadService: any EventUploadService
     private let eventSyncUsecase: any EventSyncUsecase
     private let aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
+    private let accountUsecase: any AccountUsecase
     var router: (any CalendarViewRouting)?
     private var calendarPaperInteractors: [any CalendarPaperSceneInteractor]?
     // TODO: calendarVC load 이후 바로 prepare를 할것이기때문에 라이프사이클상 listener는 setter 주입이 아니라 생성시에 받아야 할수도있음
@@ -61,7 +62,8 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         appleCalendarUsecase: any AppleCalendarUsecase,
         eventUploadService: any EventUploadService,
         eventSyncUsecase: any EventSyncUsecase,
-        aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
+        aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase,
+        accountUsecase: any AccountUsecase
     ) {
         self.calendarUsecase = calendarUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
@@ -77,7 +79,8 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         self.eventUploadService = eventUploadService
         self.eventSyncUsecase = eventSyncUsecase
         self.aiAgentOrchestrationUsecase = aiAgentOrchestrationUsecase
-        
+        self.accountUsecase = accountUsecase
+
         self.internalBind()
     }
     
@@ -91,9 +94,13 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
     private struct Subject {
         let monthsInCurrentRange = CurrentValueSubject<TotalMonthsInRange?, Never>(nil)
         let selectedDayPerMonths = CurrentValueSubject<[CalendarMonth: CurrentSelectDayModel], Never>([:])
+        let aiAgentState = CurrentValueSubject<AIAgentState?, Never>(nil)
+        let isSignedIn = CurrentValueSubject<Bool, Never>(false)
     }
-    private var cancellables: Set<AnyCancellable> = []
+    private let cancellables = CancelBag()
     private let subject = Subject()
+    // 슬라이드 도중 포커스가 통째로 바뀌면 뒤늦은 완료 콜백이 낡은 인덱스를 적용하지 않게 한다
+    private var focusGeneration: Int = 0
     
     private var monthsWithSort: AnyPublisher<[CalendarMonth], Never> {
         return self.subject.monthsInCurrentRange
@@ -111,11 +118,24 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
                     self?.calendarPaperInteractors?[safe: offset]?.updateMonthIfNeed(month)
                 }
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         self.bindEventUploadService()
         self.bindRefreshEvents()
         self.bindFocusedMonthChanged()
+
+        self.accountUsecase.currentAccountInfo
+            .map { $0 != nil }
+            .sink(receiveValue: { [weak self] isSignedIn in
+                self?.subject.isSignedIn.send(isSignedIn)
+            })
+            .store(in: self.cancellables)
+
+        self.aiAgentOrchestrationUsecase.state
+            .sink(receiveValue: { [weak self] state in
+                self?.subject.aiAgentState.send(state)
+            })
+            .store(in: self.cancellables)
     }
     
     private func bindRefreshEvents() {
@@ -135,7 +155,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
             .sink(receiveValue: { [weak self] ranges in
                 self?.refreshEvents(ranges)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         let refreshAfterEnterForeground = NotificationCenter.default.publisher(
             for: UIApplication.willEnterForegroundNotification
@@ -152,13 +172,13 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
             self?.refreshEvents([total])
             self?.todoEventUsecase.refreshCurentTodoEvents()
         })
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
         
         refreshAfterEnterForeground
             .sink(receiveValue: { [weak self] in
                 self?.eventSyncUsecase.sync()
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
     
     private func bindFocusedMonthChanged() {
@@ -197,7 +217,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
             logger.log(level: .debug, "select day changed: \(selected)")
             self?.listener?.calendarScene(focusChangedTo: selected)
         })
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     private func bindRefreshHoliday() {
@@ -210,7 +230,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
             .sink(receiveValue: { [weak self] newYears in
                 self?.refreshHolidays(for: newYears)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
     
     private func refreshHolidays(for newYears: [Int]) {
@@ -219,7 +239,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
                 try? await self?.holidayUsecase.refreshHolidays(year)
             }
         }
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
     
     private func refreshEvents(_ ranges: [Range<TimeInterval>]) {
@@ -246,7 +266,37 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
                 }
             }
         })
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
+    }
+
+    private func bindVoiceInputLifecycle() {
+
+        NotificationCenter.default
+            .publisher(for: UIApplication.didEnterBackgroundNotification)
+            .withLatestFrom(self.aiAgentOrchestrationUsecase.state) { $1 }
+            .filter { Self.isVoiceListeningPhase($0) }
+            .sink(receiveValue: { [weak self] _ in
+                self?.aiAgentOrchestrationUsecase.stopInput()
+            })
+            .store(in: self.cancellables)
+
+        self.aiAgentOrchestrationUsecase.speechPermissionDenied
+            .sink(receiveValue: { [weak self] _ in
+                self?.showSpeechPermissionSettingGuide()
+            })
+            .store(in: self.cancellables)
+    }
+
+    private func showSpeechPermissionSettingGuide() {
+        let info = ConfirmDialogInfo.aiAgentSpeechPermissionDenied { [weak self] in
+            self?.router?.openSystemSetting()
+        }
+        self.router?.showConfirm(dialog: info)
+    }
+
+    private static func isVoiceListeningPhase(_ state: AIAgentState) -> Bool {
+        guard case .listening(.voice) = state else { return false }
+        return true
     }
 }
 
@@ -260,7 +310,7 @@ extension CalendarViewModelImple {
             .sink(receiveValue: { [weak self] today in
                 self?.prepareInitialMonths(around: today)
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
         
         self.calendarSettingUsecase.prepare()
         Task { [weak self] in
@@ -279,10 +329,10 @@ extension CalendarViewModelImple {
         
         self.bindUncompletedTodoRefresh()
 
-        if FeatureFlag.isEnable(.aiAgent) {
-            self.aiAgentOrchestrationUsecase.prepare()
-            self.bindShowAICommandResultIfNeed()
-        }
+        self.bindShowAICommandResultIfNeed()
+        self.bindVoiceInputLifecycle()
+        self.bindScrollToVoiceInputOnFocusedMonth()
+        self.aiAgentOrchestrationUsecase.prepare()
     }
     
     private func prepareInitialMonths(around today: CalendarComponent.Day) {
@@ -328,7 +378,7 @@ extension CalendarViewModelImple {
                     thisMonthInteractor?.selectToday()
                 }
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
     
     func moveDay(_ day: CalendarDay, withClearPresented: Bool) {
@@ -343,11 +393,39 @@ extension CalendarViewModelImple {
         }
     }
     
+    func moveToPreviousMonth() {
+        self.slideFocusedMonth(isNext: false)
+    }
+
+    func moveToNextMonth() {
+        self.slideFocusedMonth(isNext: true)
+    }
+
+    private func slideFocusedMonth(isNext: Bool) {
+        Task { @MainActor in
+            guard let range = self.subject.monthsInCurrentRange.value,
+                  let focusedMonth = range.focusedMonth
+            else { return }
+
+            let targetMonth = isNext ? focusedMonth.nextMonth() : focusedMonth.previousMonth()
+            guard let targetIndex = range.totalMonths.firstIndex(of: targetMonth)
+            else { return }
+
+            let currentIndex = range.focusedIndex
+            let generationAtSlideStart = self.focusGeneration
+            self.router?.slideFocus(to: targetIndex, isNext: isNext) { [weak self] in
+                guard let self = self, self.focusGeneration == generationAtSlideStart else { return }
+                self.focusChanged(from: currentIndex, to: targetIndex)
+            }
+        }
+    }
+
     private func changeChilds(
         _ totalMonths: TotalMonthsInRange,
         andSelectDay: @Sendable @escaping ((any CalendarPaperSceneInteractor)?) -> Void
     ) {
         Task { @MainActor in
+            self.focusGeneration += 1
             self.router?.changeFocus(at: totalMonths.focusedIndex)
             self.subject.monthsInCurrentRange.send(totalMonths)
             totalMonths.totalMonths.enumerated().forEach { offset, month in
@@ -401,7 +479,7 @@ extension CalendarViewModelImple {
         .sink(receiveValue: { [weak self] _, _ in
             self?.todoEventUsecase.refreshUncompletedTodos()
         })
-        .store(in: &self.cancellables)
+        .store(in: self.cancellables)
     }
 }
 
@@ -414,7 +492,15 @@ extension CalendarViewModelImple: CalendarPaperSceneListener {
     }
 
     func calendarPaperDidRequestShowAICommand() {
-        self.router?.routeToAICommand()
+        self.router?.routeToAICommand(listener: self)
+    }
+}
+
+
+extension CalendarViewModelImple: AIAgentCommandSceneListener {
+
+    func aiAgentCommandDidRequestPaywall() {
+        self.router?.routeToPaywall()
     }
 }
 
@@ -429,15 +515,67 @@ extension CalendarViewModelImple {
             .removeDuplicates()
             .filter { $0 }
             .sink { [weak self] _ in
-                self?.router?.routeToAICommand()
+                guard let self else { return }
+                self.router?.routeToAICommand(listener: self)
             }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
+    }
+
+    // 음성 입력 '진입 순간'에만 스크롤한다 — 같은 상태의 반복 방출로는 재스크롤하지 않는다.
+    // paper는 화면당 3개(이전·현재·다음)라 전부에 보내면 안 보이는 달까지 목록 하단으로 내려간다.
+    private func bindScrollToVoiceInputOnFocusedMonth() {
+        self.aiAgentOrchestrationUsecase.state
+            .map { Self.isVoiceListeningPhase($0) }
+            .removeDuplicates()
+            .filter { $0 }
+            .sink { [weak self] _ in
+                guard let focusedIndex = self?.subject.monthsInCurrentRange.value?.focusedIndex
+                else { return }
+                self?.calendarPaperInteractors?[safe: focusedIndex]?.scrollToVoiceInput()
+            }
+            .store(in: self.cancellables)
     }
 
     private static func isAICommandPhase(_ state: AIAgentState) -> Bool {
         switch state {
         case .processing, .confirm, .done, .failed: return true
         case .idle, .listening: return false
+        }
+    }
+}
+
+
+// MARK: - 외부 진입점의 AI 입력 요청
+
+extension CalendarViewModelImple {
+
+    // 콜드런치 딥링크는 aiAgentState 미방출·달력 미부착 시점에 flush된다 — 그때 실행하면
+    // 상태를 idle로 오판독하고 스크롤도 유실된다. 웜 스타트면 구독 즉시 동기로 통과한다.
+    func requestAIEntry() {
+        Publishers.CombineLatest(
+            self.subject.aiAgentState.compactMap { $0 }.first(),
+            self.subject.monthsInCurrentRange.compactMap { $0 }.first()
+        )
+        .sink(receiveValue: { [weak self] _, _ in
+            self?.performAIEntry()
+        })
+        .store(in: self.cancellables)
+    }
+
+    private func performAIEntry() {
+        self.router?.dismissPresented(animated: true) { [weak self] in
+            guard let self = self else { return }
+            let state = self.subject.aiAgentState.value ?? .idle
+            if Self.isAICommandPhase(state) {
+                self.router?.routeToAICommand(listener: self)
+            } else if self.subject.isSignedIn.value {
+                self.aiAgentOrchestrationUsecase.enterVoiceInput()
+            } else {
+                let info = ConfirmDialogInfo.aiAgentNeedSignIn { [weak self] in
+                    self?.router?.routeToSignIn()
+                }
+                self.router?.showConfirm(dialog: info)
+            }
         }
     }
 }

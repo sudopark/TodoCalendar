@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Combine
 import EventKit
 import Prelude
 import Optics
@@ -16,15 +17,16 @@ import FirebaseAuth
 import Alamofire
 import SQLiteService
 import ExternalServices
+import CommonPresentation
+import GoogleMobileAds
+import AdService
 
 
 final class ApplicationBase {
-    
-    init() { }
-    
+
     let sharedDataStore: SharedDataStore = .init()
     let eventNotifyService: SharedEventNotifyService = .init()
-    
+
     let userDefaultEnvironmentStorage = UserDefaultEnvironmentStorageImple(
         suiteName: AppEnvironment.groupID
     )
@@ -56,6 +58,8 @@ final class ApplicationBase {
                     upto: googleDBVersion,
                     steps: { version, database in
                         switch version {
+                        case 0:
+                            try GoogleCalendarEventTagTableMigration.runMigration(for: version, database: database)
                         default: break
                         }
                     },
@@ -172,6 +176,16 @@ final class ApplicationBase {
             cacheStorage: cacheStorage
         )
     }()
+    
+    let mobileAdService: any MobileAdService & PrivacyOptionsFormRouter = {
+        if AppEnvironment.isTestBuild {
+            return DummyMobileAdService()
+        }
+        return GoogleMobileAdsServiceImple(
+            testDeviceIdentifiers: AppEnvironment.admobTestDeviceIdentifiers,
+            fullScreenAdUnitId: AppEnvironment.admobUnitIds.fullScreen
+        )
+    }()
 }
 
 
@@ -275,7 +289,33 @@ struct DeviceInfoFetchServiceImple: DeviceInfoFetchService {
 
 // MARK: - dummy
 
-class DummyFirebaseAuthService: FirebaseAuthService {
+private final class DummyMobileAdService: MobileAdService, PrivacyOptionsFormRouter, @unchecked Sendable {
+
+    func start() { }
+
+    @MainActor
+    func presentConsentFormAndTrackingPromptIfNeeded(from viewController: UIViewController) async { }
+
+    func preloadFullScreenAd() async { }
+
+    func takePreloadedFullScreenAd() -> InterstitialAd? { nil }
+
+    @MainActor
+    func isPrivacyOptionsRequired() -> Bool { false }
+
+    @MainActor
+    func showPrivacyOptionsForm(from viewController: UIViewController) async throws {
+        throw RuntimeError("not support")
+    }
+
+    var isStarted: AnyPublisher<Bool, Never> {
+        return Just(false).eraseToAnyPublisher()
+    }
+
+    var isStartedNow: Bool { false }
+}
+
+private class DummyFirebaseAuthService: FirebaseAuthService {
     
     func setup() throws { }
     

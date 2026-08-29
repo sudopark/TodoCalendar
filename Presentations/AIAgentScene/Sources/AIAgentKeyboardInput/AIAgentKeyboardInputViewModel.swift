@@ -16,8 +16,11 @@ protocol AIAgentKeyboardInputViewModel: AnyObject, Sendable {
     func stop()
     func close()
     func dismissByGesture()
+    func openNotificationSetting()
 
     var usage: AnyPublisher<AIAgentUsage, Never> { get }
+    var currentUserPlan: AnyPublisher<BillingUserPlan?, Never> { get }
+    var isNotificationPermissionDenied: AnyPublisher<Bool, Never> { get }
 }
 
 
@@ -26,15 +29,20 @@ protocol AIAgentKeyboardInputViewModel: AnyObject, Sendable {
 final class AIAgentKeyboardInputViewModelImple: AIAgentKeyboardInputViewModel, @unchecked Sendable {
 
     private let aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
+    private let billingUsecase: any BillingUsecase
     var router: (any AIAgentKeyboardInputRouting)?
 
-    init(aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase) {
+    init(
+        aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase,
+        billingUsecase: any BillingUsecase
+    ) {
         self.aiAgentOrchestrationUsecase = aiAgentOrchestrationUsecase
+        self.billingUsecase = billingUsecase
     }
 
-    // 시트 진입 시 usage 최신화 — 갱신 트리거는 presentation 소유 (#713)
     func prepare() {
         self.aiAgentOrchestrationUsecase.loadUsage()
+        self.aiAgentOrchestrationUsecase.refreshNotificationPermissionStatus()
     }
 
     func send(_ text: String) {
@@ -59,6 +67,10 @@ final class AIAgentKeyboardInputViewModelImple: AIAgentKeyboardInputViewModel, @
     func dismissByGesture() {
         self.aiAgentOrchestrationUsecase.enterVoiceInput()
     }
+
+    func openNotificationSetting() {
+        self.router?.openSystemSetting()
+    }
 }
 
 
@@ -68,5 +80,18 @@ extension AIAgentKeyboardInputViewModelImple {
 
     var usage: AnyPublisher<AIAgentUsage, Never> {
         return self.aiAgentOrchestrationUsecase.usage
+    }
+
+    // seeding 전엔 currentUserPlan 이 무방출(.compactMap { $0 }) 이라 첫 값을 prepend 해
+    // 뷰가 플랜 없는 상태부터 그릴 수 있게 한다. usage 와 CombineLatest 로 합성하지 않는다 (#739)
+    var currentUserPlan: AnyPublisher<BillingUserPlan?, Never> {
+        return self.billingUsecase.currentUserPlan
+            .map { $0 as BillingUserPlan? }
+            .prepend(nil)
+            .eraseToAnyPublisher()
+    }
+
+    var isNotificationPermissionDenied: AnyPublisher<Bool, Never> {
+        return self.aiAgentOrchestrationUsecase.isNotificationPermissionDenied
     }
 }

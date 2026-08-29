@@ -717,8 +717,102 @@ extension MonthViewModelImpleTests {
     }
 }
 
+// MARK: - share range
+
 extension MonthViewModelImpleTests {
-    
+
+    private static let shareEventsTestTimeZone = TimeZone(abbreviation: "KST")!
+
+    func testViewModel_whenShareDay_notifiesListenerWithThatDayRange() {
+        // given
+        let viewModel = self.makeViewModel()
+        let day = DayCellViewModel(
+            year: 2023, month: 9, day: 15, isNotCurrentMonth: false, accentDay: nil
+        )
+        let expectedRange = CalendarComponent.Day(
+            year: 2023, month: 9, day: 15, weekDay: 1
+        ).dayRange(Self.shareEventsTestTimeZone)
+
+        // when
+        viewModel.shareEvents(.day, for: day)
+
+        // then
+        XCTAssertNotNil(expectedRange)
+        XCTAssertEqual(self.spyListener?.didRequestShareRange, expectedRange)
+    }
+
+    func testViewModel_whenShareWeek_notifiesListenerWithThatWeekRange() {
+        // given
+        let viewModel = self.makeViewModel()
+        let day = DayCellViewModel(
+            year: 2023, month: 9, day: 15, isNotCurrentMonth: false, accentDay: nil
+        )
+        let expectedRange = CalendarComponent.dummy2023_9().weeks[safe: 2]?
+            .range(Self.shareEventsTestTimeZone)
+
+        // when
+        viewModel.shareEvents(.week, for: day)
+
+        // then
+        XCTAssertNotNil(expectedRange)
+        XCTAssertEqual(self.spyListener?.didRequestShareRange, expectedRange)
+    }
+
+    func testViewModel_whenShareMonth_notifiesListenerWithCurrentMonthRange() {
+        // given
+        let viewModel = self.makeViewModel()
+        let day = DayCellViewModel(
+            year: 2023, month: 9, day: 15, isNotCurrentMonth: false, accentDay: nil
+        )
+        let expectedRange = CalendarComponent.dummy2023_9()
+            .monthRange(Self.shareEventsTestTimeZone)
+
+        // when
+        viewModel.shareEvents(.month, for: day)
+
+        // then
+        XCTAssertNotNil(expectedRange)
+        XCTAssertEqual(self.spyListener?.didRequestShareRange, expectedRange)
+    }
+
+    // 8월 그리드에 딸린 7/31 대신, 9월 그리드에 딸린 8/31 셀로 같은 스펙을 검증한다(더미 픽스처가 그 형태로만 존재).
+    func testViewModel_whenShareMonth_fromAdjacentMonthCell_stillUsesCurrentMonth() {
+        // given
+        let viewModel = self.makeViewModel()
+        let adjacentMonthDay = DayCellViewModel(
+            year: 2023, month: 8, day: 31, isNotCurrentMonth: true, accentDay: nil
+        )
+        let expectedRange = CalendarComponent.dummy2023_9()
+            .monthRange(Self.shareEventsTestTimeZone)
+        let wrongRange = CalendarComponent.dummy2023_8()
+            .monthRange(Self.shareEventsTestTimeZone)
+
+        // when
+        viewModel.shareEvents(.month, for: adjacentMonthDay)
+
+        // then
+        XCTAssertNotEqual(expectedRange, wrongRange)
+        XCTAssertEqual(self.spyListener?.didRequestShareRange, expectedRange)
+    }
+
+    func testViewModel_whenShareWeekForDayNotInGrid_doesNotNotifyListener() {
+        // given
+        let viewModel = self.makeViewModel()
+        let dayNotInGrid = DayCellViewModel(
+            year: 2099, month: 1, day: 1, isNotCurrentMonth: true, accentDay: nil
+        )
+
+        // when
+        viewModel.shareEvents(.week, for: dayNotInGrid)
+
+        // then
+        XCTAssertNil(self.spyListener?.didRequestShareRange)
+    }
+}
+
+
+extension MonthViewModelImpleTests {
+
     private func makeViewModelWith8Loaded() -> MonthViewModelImple {
         // given
         let expect = expectation(description: "wait")
@@ -877,10 +971,17 @@ extension MonthViewModelImpleTests {
     }
     
     private class SpyListener: MonthSceneListener {
-        
+
         var didCurrentDayChanged: ((CurrentSelectDayModel, [any CalendarEvent]) -> Void)?
         func monthScene(didChange currentSelectedDay: CurrentSelectDayModel, and eventsThatDay: [any CalendarEvent]) {
             self.didCurrentDayChanged?(currentSelectedDay, eventsThatDay)
+        }
+
+        var didRequestShareRange: Range<TimeInterval>?
+        var didRequestShareKind: CalendarShareRangeKind?
+        func monthScene(didRequestShare range: Range<TimeInterval>, kind: CalendarShareRangeKind) {
+            self.didRequestShareRange = range
+            self.didRequestShareKind = kind
         }
     }
 }

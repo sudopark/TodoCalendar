@@ -6,6 +6,7 @@
 //
 
 import XCTest
+import UIKit
 import Combine
 import Prelude
 import Optics
@@ -17,7 +18,7 @@ import UnitTestHelpKit
 @testable import CalendarScenes
 
 
-class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
+class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable, AsyncEffectWaitable {
     
     var cancelBag: Set<AnyCancellable>!
     private var spyRouter: SpyRouter!
@@ -74,16 +75,17 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.spyEventSyncUsecase = nil
         self.spyEventUploadService = nil
         self.stubOrchestration = nil
-        FeatureFlag.disable(.aiAgent)
     }
     
     private func makeViewModel(
-        today: CalendarComponent.Day = .init(year: 2023, month: 02, day: 02, weekDay: 5)
+        today: CalendarComponent.Day = .init(year: 2023, month: 02, day: 02, weekDay: 5),
+        isSignedIn: Bool = true
     ) -> CalendarViewModelImple {
-        
+
         let calendarUsecase = StubCalendarUsecase(today: today)
         self.stubCalendarUsecase = calendarUsecase
-        
+        let account: AccountInfo? = isSignedIn ? AccountInfo("uid") : nil
+
         let viewModel = CalendarViewModelImple(
             calendarUsecase: calendarUsecase,
             calendarSettingUsecase: self.stubSettingUsecase,
@@ -98,7 +100,8 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
             appleCalendarUsecase: self.spyAppleCalendarUsecase,
             eventUploadService: self.spyEventUploadService,
             eventSyncUsecase: self.spyEventSyncUsecase,
-            aiAgentOrchestrationUsecase: self.stubOrchestration
+            aiAgentOrchestrationUsecase: self.stubOrchestration,
+            accountUsecase: StubAccountUsecase(account)
         )
         viewModel.router = self.spyRouter
         viewModel.listener = self.spyListener
@@ -196,9 +199,8 @@ extension CalendarViewModelImpleTests {
         XCTAssertEqual(isForemostEventPrepared, [false, true])
     }
 
-    func testViewModel_whenAIAgentFlagOn_prepareCallsOrchestrationPrepare() async throws {
+    func testViewModel_whenPrepare_callsOrchestrationPrepare() async throws {
         // given
-        FeatureFlag.enable(.aiAgent)
         let viewModel = self.makeViewModel()
 
         // when
@@ -207,18 +209,6 @@ extension CalendarViewModelImpleTests {
         // then
         try await Task.sleep(for: .milliseconds(10))
         XCTAssertEqual(self.stubOrchestration.didPrepare, true)
-    }
-
-    func testViewModel_whenAIAgentFlagOff_prepareNotCallsOrchestrationPrepare() async throws {
-        // given
-        let viewModel = self.makeViewModel()
-
-        // when
-        viewModel.prepare()
-
-        // then
-        try await Task.sleep(for: .milliseconds(10))
-        XCTAssertNil(self.stubOrchestration.didPrepare)
     }
 
     private func makeViewModelWithInitialSetup(_ today: CalendarComponent.Day) -> CalendarViewModelImple {
@@ -406,7 +396,107 @@ extension CalendarViewModelImpleTests {
         let requesteds = self.spyRouter.spyInteractors.map { $0.didSelectTodayRequested }
         XCTAssertEqual(requesteds, [nil, true, nil])
     }
-    
+
+    func testViewModel_whenMoveToNextMonth_slideToNextPageAndUpdateMonths() {
+        // given
+        let expect = expectation(description: "다음달로 슬라이드 이동")
+        let viewModel = self.makeViewModelWithInitialSetup(
+            .init(year: 2023, month: 08, day: 02, weekDay: 3)
+        )
+        self.spyRouter.didSlideFocusCallback = { [weak self] in
+            self?.spyRouter.slideFocusCompletion?()
+            expect.fulfill()
+        }
+
+        // when
+        viewModel.moveToNextMonth()
+        self.wait(for: [expect], timeout: self.timeout)
+
+        // then
+        XCTAssertEqual(self.spyRouter.didSlideFocusToIndex, 2)
+        XCTAssertEqual(self.spyRouter.didSlideFocusToNext, true)
+        let currentMonths = self.spyRouter.spyInteractors.map { $0.currentMonth }
+        XCTAssertEqual(currentMonths, [
+            .init(year: 2023, month: 10), .init(year: 2023, month: 08), .init(year: 2023, month: 09)
+        ])
+    }
+
+    func testViewModel_whenMoveToPreviousMonth_slideToPreviousPageAndUpdateMonths() {
+        // given
+        let expect = expectation(description: "이전달로 슬라이드 이동")
+        let viewModel = self.makeViewModelWithInitialSetup(
+            .init(year: 2023, month: 08, day: 02, weekDay: 3)
+        )
+        self.spyRouter.didSlideFocusCallback = { [weak self] in
+            self?.spyRouter.slideFocusCompletion?()
+            expect.fulfill()
+        }
+
+        // when
+        viewModel.moveToPreviousMonth()
+        self.wait(for: [expect], timeout: self.timeout)
+
+        // then
+        XCTAssertEqual(self.spyRouter.didSlideFocusToIndex, 0)
+        XCTAssertEqual(self.spyRouter.didSlideFocusToNext, false)
+        let currentMonths = self.spyRouter.spyInteractors.map { $0.currentMonth }
+        XCTAssertEqual(currentMonths, [
+            .init(year: 2023, month: 07), .init(year: 2023, month: 08), .init(year: 2023, month: 06)
+        ])
+    }
+
+    func testViewModel_whenMoveToPreviousMonthTwice_slideAcrossPageBoundary() {
+        // given
+        let expect = expectation(description: "페이지 경계를 넘어 연속 이동")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModelWithInitialSetup(
+            .init(year: 2023, month: 08, day: 02, weekDay: 3)
+        )
+        self.spyRouter.didSlideFocusCallback = { [weak self] in
+            self?.spyRouter.slideFocusCompletion?()
+            expect.fulfill()
+        }
+
+        // when
+        viewModel.moveToPreviousMonth()
+        viewModel.moveToPreviousMonth()
+        self.wait(for: [expect], timeout: self.timeout)
+
+        // then
+        XCTAssertEqual(self.spyRouter.didSlideFocusToIndex, 2)
+        XCTAssertEqual(self.spyRouter.didSlideFocusToNext, false)
+        let currentMonths = self.spyRouter.spyInteractors.map { $0.currentMonth }
+        XCTAssertEqual(currentMonths, [
+            .init(year: 2023, month: 07), .init(year: 2023, month: 05), .init(year: 2023, month: 06)
+        ])
+    }
+
+    func testViewModel_whenTodayRequestedDuringSlideAnimation_staleSlideCompletionDoesNotOverwriteFocus() {
+        // given
+        let viewModel = self.makeViewModelWithInitialSetup(
+            .init(year: 2023, month: 08, day: 02, weekDay: 3)
+        )
+        let slideRequested = expectation(description: "슬라이드 요청 도착 대기")
+        self.spyRouter.didSlideFocusCallback = { slideRequested.fulfill() }
+        viewModel.moveToNextMonth()
+        self.wait(for: [slideRequested], timeout: self.timeout)
+
+        // when
+        let todayApplied = expectation(description: "애니메이션 진행 중 TODAY 복귀 완료 대기")
+        self.spyRouter.spyInteractors[1].didSelectTodayRequestedCallback = { todayApplied.fulfill() }
+        viewModel.moveFocusToToday()
+        self.wait(for: [todayApplied], timeout: self.timeout)
+        // 슬라이드 애니메이션 완료 콜백이 TODAY 복귀보다 늦게 도착
+        self.spyRouter.slideFocusCompletion?()
+
+        // then
+        let currentMonths = self.spyRouter.spyInteractors.map { $0.currentMonth }
+        XCTAssertEqual(currentMonths, [
+            .init(year: 2023, month: 07), .init(year: 2023, month: 08), .init(year: 2023, month: 09)
+        ])
+        XCTAssertEqual(self.spyRouter.spyInteractors[1].didSelectTodayRequested, true)
+    }
+
     func testViewModel_moveDay() {
         // given
         let expect = expectation(description: "특정 일자로 이동")
@@ -983,7 +1073,6 @@ extension CalendarViewModelImpleTests {
 
     func testViewModel_whenAIEntersCommandPhase_routesToAICommand() {
         // given
-        FeatureFlag.enable(.aiAgent)
         let viewModel = self.makeViewModel()
         viewModel.prepare()
 
@@ -997,7 +1086,6 @@ extension CalendarViewModelImpleTests {
 
     func testViewModel_whenStayInCommandPhase_routesOnlyOncePerEntry() {
         // given
-        FeatureFlag.enable(.aiAgent)
         let viewModel = self.makeViewModel()
         viewModel.prepare()
 
@@ -1019,6 +1107,209 @@ extension CalendarViewModelImpleTests {
         // then
         XCTAssertEqual(self.spyRouter.didRouteToAICommandCount, 1)
     }
+
+    // AI 커맨드 시트가 paywall 요청을 되돌려 보낼 대상은 자기 자신(AIAgentCommandSceneListener)이어야 한다
+    func testViewModel_whenRoutingToAICommand_passesSelfAsListener() {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when
+        viewModel.calendarPaperDidRequestShowAICommand()
+
+        // then
+        XCTAssertTrue(self.spyRouter.didRouteToAICommandListener === viewModel)
+    }
+}
+
+// MARK: - 한도 초과 시트 → paywall 진입 위임 (#887)
+
+extension CalendarViewModelImpleTests {
+
+    func testViewModel_whenAIAgentCommandRequestsPaywall_routesToPaywall() {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when
+        viewModel.aiAgentCommandDidRequestPaywall()
+
+        // then
+        XCTAssertEqual(self.spyRouter.didRouteToPaywallCount, 1)
+    }
+}
+
+// MARK: - 음성 입력 진입 시 포커스된 달만 스크롤
+
+extension CalendarViewModelImpleTests {
+
+    func testViewModel_whenVoiceInputStarts_scrollsOnlyFocusedMonthPaper() async throws {
+        // given
+        let viewModel = self.makeViewModel()
+        try await self.prepareInitialMonths(viewModel)
+
+        // when
+        self.stubOrchestration.stateSubject.send(.listening(.voice))
+
+        // then — 초기 포커스는 가운데(index 1) 달
+        try await self.assertScrollToVoiceInputCounts([0, 1, 0])
+        withExtendedLifetime(viewModel) { }
+    }
+
+    func testViewModel_whenFocusMovedToOtherMonth_scrollsThatMonthPaper() async throws {
+        // given
+        let viewModel = self.makeViewModel()
+        try await self.prepareInitialMonths(viewModel)
+
+        // when
+        viewModel.focusChanged(from: 1, to: 2)
+        self.stubOrchestration.stateSubject.send(.listening(.voice))
+
+        // then
+        try await self.assertScrollToVoiceInputCounts([0, 0, 1])
+        withExtendedLifetime(viewModel) { }
+    }
+
+    func testViewModel_whenStayInVoiceListening_scrollsOnlyOncePerEntry() async throws {
+        // given
+        let viewModel = self.makeViewModel()
+        try await self.prepareInitialMonths(viewModel)
+
+        // when — 같은 상태가 반복 방출돼도 진입 edge는 1회
+        self.stubOrchestration.stateSubject.send(.listening(.voice))
+        self.stubOrchestration.stateSubject.send(.listening(.voice))
+
+        // then
+        try await self.assertScrollToVoiceInputCounts([0, 1, 0])
+        withExtendedLifetime(viewModel) { }
+    }
+
+    private var scrollToVoiceInputCounts: [Int] {
+        return self.spyRouter.spyInteractors.map { $0.didScrollToVoiceInputCount }
+    }
+
+    // 스크롤이 도착할 때까지 기다린 뒤, 뒤늦은 추가 방출이 없는지 정착 시간을 두고 다시 본다
+    private func assertScrollToVoiceInputCounts(_ expected: [Int]) async throws {
+        try await self.waitEffect("스크롤 횟수 \(expected) 도달") { self.scrollToVoiceInputCounts == expected }
+        try await Task.sleep(for: .milliseconds(50))
+        XCTAssertEqual(self.scrollToVoiceInputCounts, expected)
+    }
+}
+
+// MARK: - 외부 진입점의 AI 입력 요청 (requestAIEntry)
+
+extension CalendarViewModelImpleTests {
+
+    // prepare() → prepareInitialMonths의 Task가 monthsInCurrentRange를 채울 때까지 대기.
+    // didInitialMonthsAttached는 send 직전에 불려 한 틱 양보가 필요하다.
+    private func prepareInitialMonths(_ viewModel: CalendarViewModelImple) async throws {
+        let expect = expectation(description: "초기 월 구성 완료 대기")
+        self.spyRouter.didInitialMonthsAttached = { expect.fulfill() }
+        viewModel.prepare()
+        await self.fulfillment(of: [expect], timeout: self.timeout)
+        self.spyRouter.didInitialMonthsAttached = nil
+        try await Task.sleep(for: .milliseconds(10))
+    }
+
+    func testViewModel_whenRequestAIEntryOnCommandPhase_routeToAICommand() async throws {
+        // given
+        let viewModel = self.makeViewModel()
+        self.stubOrchestration.stateSubject.send(.processing(command: "회의"))
+        try await self.prepareInitialMonths(viewModel)
+
+        // when
+        viewModel.requestAIEntry()
+
+        // then — command phase 진입으로 자동 표시가 1회, 진입 요청이 1회
+        XCTAssertEqual(self.spyRouter.didRouteToAICommandCount, 2)
+        XCTAssertNil(self.stubOrchestration.didEnterVoiceInput)
+        XCTAssertNil(self.spyRouter.didShowConfirmWith)
+    }
+
+    func testViewModel_whenRequestAIEntryOnIdleAndSignedIn_enterVoiceInput() async throws {
+        // given
+        let viewModel = self.makeViewModel(isSignedIn: true)
+        self.stubOrchestration.stateSubject.send(.idle)
+        try await self.prepareInitialMonths(viewModel)
+
+        // when
+        viewModel.requestAIEntry()
+
+        // then
+        XCTAssertEqual(self.stubOrchestration.didEnterVoiceInput, true)
+        XCTAssertEqual(self.spyRouter.didRouteToAICommandCount, 0)
+        XCTAssertNil(self.spyRouter.didShowConfirmWith)
+    }
+
+    func testViewModel_whenRequestAIEntryWithoutSignIn_askSignIn() async throws {
+        // given
+        let viewModel = self.makeViewModel(isSignedIn: false)
+        self.stubOrchestration.stateSubject.send(.idle)
+        try await self.prepareInitialMonths(viewModel)
+
+        // when
+        viewModel.requestAIEntry()
+
+        // then
+        XCTAssertNotNil(self.spyRouter.didShowConfirmWith)
+        XCTAssertNil(self.stubOrchestration.didEnterVoiceInput)
+        // SpyRouter.showConfirm은 기본적으로 confirmed?()를 즉시 실행
+        XCTAssertEqual(self.spyRouter.didRouteToSignIn, true)
+    }
+
+    func testViewModel_whenRequestAIEntryBeforeAIStateEmitted_notEnterVoiceInput() async throws {
+        // given
+        let viewModel = self.makeViewModel(isSignedIn: true)
+        try await self.prepareInitialMonths(viewModel)
+
+        // when
+        viewModel.requestAIEntry()
+        try await Task.sleep(for: .milliseconds(10))
+
+        // then
+        XCTAssertNil(self.stubOrchestration.didEnterVoiceInput)
+        XCTAssertEqual(self.spyRouter.didRouteToAICommandCount, 0)
+    }
+
+    func testViewModel_whenAIStateEmittedAfterRequestAIEntry_enterVoiceInput() async throws {
+        // given
+        let viewModel = self.makeViewModel(isSignedIn: true)
+        try await self.prepareInitialMonths(viewModel)
+        viewModel.requestAIEntry()
+
+        // when
+        self.stubOrchestration.stateSubject.send(.idle)
+        try await Task.sleep(for: .milliseconds(10))
+
+        // then
+        XCTAssertEqual(self.stubOrchestration.didEnterVoiceInput, true)
+    }
+
+    func testViewModel_whenProcessingStateEmittedAfterRequestAIEntry_routeToAICommand() async throws {
+        // given
+        let viewModel = self.makeViewModel(isSignedIn: true)
+        try await self.prepareInitialMonths(viewModel)
+        viewModel.requestAIEntry()
+
+        // when
+        self.stubOrchestration.stateSubject.send(.processing(command: "회의"))
+        try await Task.sleep(for: .milliseconds(10))
+
+        // then — command phase 진입으로 자동 표시가 1회, 대기하던 진입 요청이 1회
+        XCTAssertEqual(self.spyRouter.didRouteToAICommandCount, 2)
+        XCTAssertNil(self.stubOrchestration.didEnterVoiceInput)
+    }
+
+    func testViewModel_whenRequestAIEntryBeforeCalendarAttached_notEnterVoiceInput() async throws {
+        // given
+        let viewModel = self.makeViewModel(isSignedIn: true)
+        self.stubOrchestration.stateSubject.send(.idle)
+
+        // when
+        viewModel.requestAIEntry()
+        try await Task.sleep(for: .milliseconds(10))
+
+        // then
+        XCTAssertNil(self.stubOrchestration.didEnterVoiceInput)
+    }
 }
 
 private extension CalendarViewModelImpleTests {
@@ -1039,9 +1330,32 @@ private extension CalendarViewModelImpleTests {
             self.didChangedFocusIndex = index
         }
 
+        var didSlideFocusToIndex: Int?
+        var didSlideFocusToNext: Bool?
+        var didSlideFocusCallback: (() -> Void)?
+        var slideFocusCompletion: (() -> Void)?
+        func slideFocus(to index: Int, isNext: Bool, completed: @escaping @Sendable () -> Void) {
+            self.didSlideFocusToIndex = index
+            self.didSlideFocusToNext = isNext
+            self.slideFocusCompletion = completed
+            self.didSlideFocusCallback?()
+        }
+
         var didRouteToAICommandCount: Int = 0
-        func routeToAICommand() {
+        var didRouteToAICommandListener: (any AIAgentCommandSceneListener)?
+        func routeToAICommand(listener: (any AIAgentCommandSceneListener)?) {
             self.didRouteToAICommandCount += 1
+            self.didRouteToAICommandListener = listener
+        }
+
+        var didRouteToPaywallCount: Int = 0
+        func routeToPaywall() {
+            self.didRouteToPaywallCount += 1
+        }
+
+        var didRouteToSignIn: Bool?
+        func routeToSignIn() {
+            self.didRouteToSignIn = true
         }
     }
     
@@ -1070,7 +1384,13 @@ private extension CalendarViewModelImpleTests {
             self.didSelectDayCallback?()
         }
         
+        var didScrollToVoiceInputCount: Int = 0
+        func scrollToVoiceInput() {
+            self.didScrollToVoiceInputCount += 1
+        }
+
         func monthScene(didChange currentSelectedDay: CurrentSelectDayModel, and eventsThatDay: [any CalendarEvent]) { }
+        func monthScene(didRequestShare range: Range<TimeInterval>, kind: CalendarShareRangeKind) { }
         func dayEventListDidRequestShowAICommand() { }
     }
     
@@ -1211,16 +1531,105 @@ private extension CalendarViewModelImpleTests {
     }
     
     private class PrivateStubEventSyncUsecase: StubEventSyncUsecase, @unchecked Sendable {
-        
-        private let isSyncing = CurrentValueSubject<Bool, Never>(false)
+
+        private let isSyncing = CurrentValueSubject<EventSyncStatus, Never>(.idle)
         func updateIsSync(_ isSync: Bool) {
-            self.isSyncing.send(isSync)
+            self.isSyncing.send(isSync ? .incrementalSyncing : .idle)
         }
-        
-        override var isSyncInProgress: AnyPublisher<Bool, Never> {
+
+        override var syncStatus: AnyPublisher<EventSyncStatus, Never> {
             return isSyncing.removeDuplicates()
                 .eraseToAnyPublisher()
         }
+    }
+}
+
+// MARK: - 앱 백그라운드 전환과 음성 입력
+
+extension CalendarViewModelImpleTests {
+
+    // VM이 해제되면 구독도 끊겨 단언이 무의미해지므로 호출측이 받아 살려둔다
+    private func postAppLifecycleAfterPrepared(
+        _ notificationName: Notification.Name,
+        state: AIAgentState?
+    ) async throws -> CalendarViewModelImple {
+        let viewModel = self.makeViewModel()
+        try await self.prepareInitialMonths(viewModel)
+        state.map { self.stubOrchestration.stateSubject.send($0) }
+
+        NotificationCenter.default.post(name: notificationName, object: nil)
+        return viewModel
+    }
+
+    private func enterBackgroundAfterPrepared(state: AIAgentState?) async throws -> CalendarViewModelImple {
+        return try await self.postAppLifecycleAfterPrepared(
+            UIApplication.didEnterBackgroundNotification, state: state
+        )
+    }
+
+    // 중지가 일어나지 '않음'을 보는 케이스는 기다릴 조건이 없어 정착 시간만 둔다
+    private func assertKeepsInputAfterSettling() async throws {
+        try await Task.sleep(for: .milliseconds(50))
+        XCTAssertNil(self.stubOrchestration.didStopInput)
+    }
+
+    func testViewModel_whenAppEntersBackgroundWhileVoiceListening_stopsInput() async throws {
+        // given, when
+        let viewModel = try await self.enterBackgroundAfterPrepared(state: .listening(.voice))
+
+        // then
+        try await self.waitEffect("백그라운드 전환으로 입력 중지") { self.stubOrchestration.didStopInput == true }
+        XCTAssertEqual(self.stubOrchestration.didStopInput, true)
+        withExtendedLifetime(viewModel) { }
+    }
+
+    func testViewModel_whenAppEntersBackgroundWhileKeyboardListening_keepsInput() async throws {
+        // given, when
+        let viewModel = try await self.enterBackgroundAfterPrepared(state: .listening(.keyboard))
+
+        // then
+        try await self.assertKeepsInputAfterSettling()
+        withExtendedLifetime(viewModel) { }
+    }
+
+    func testViewModel_whenAppEntersBackgroundWhileIdle_keepsInput() async throws {
+        // given, when
+        let viewModel = try await self.enterBackgroundAfterPrepared(state: .idle)
+
+        // then
+        try await self.assertKeepsInputAfterSettling()
+        withExtendedLifetime(viewModel) { }
+    }
+
+    func testViewModel_whenAppResignsActiveWhileVoiceListening_keepsInput() async throws {
+        // given, when
+        let viewModel = try await self.postAppLifecycleAfterPrepared(
+            UIApplication.willResignActiveNotification, state: .listening(.voice)
+        )
+
+        // then
+        try await self.assertKeepsInputAfterSettling()
+        withExtendedLifetime(viewModel) { }
+    }
+
+    private func makePreparedViewModel() async throws -> CalendarViewModelImple {
+        let viewModel = self.makeViewModel()
+        try await self.prepareInitialMonths(viewModel)
+        return viewModel
+    }
+
+    func testViewModel_whenSpeechPermissionDenied_showsSettingGuide() async throws {
+        // given
+        let viewModel = try await self.makePreparedViewModel()
+
+        // when
+        self.stubOrchestration.speechPermissionDeniedSubject.send(())
+        try await Task.sleep(for: .milliseconds(50))
+
+        // then
+        XCTAssertNotNil(self.spyRouter.didShowConfirmWith)
+        XCTAssertEqual(self.spyRouter.didOpenSystemSetting, true)
+        withExtendedLifetime(viewModel) { }
     }
 }
 

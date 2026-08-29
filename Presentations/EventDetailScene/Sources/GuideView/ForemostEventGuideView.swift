@@ -73,6 +73,7 @@ private struct ForemostEventGuideContentView: View {
                     .eventHandler(\.onTap, onClose)
             }
         }
+        .eventHandler(\.outsideTap, onClose)
     }
     
     private func bulletView(_ text: String) -> some View {

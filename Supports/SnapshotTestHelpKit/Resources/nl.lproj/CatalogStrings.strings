@@ -1,0 +1,42 @@
+/* 화면 카탈로그(app-catalog) 더미 텍스트 — 앱 번들에 실리지 않는다 */
+
+// MARK: - 캘린더 이벤트
+
+"catalog.event::holiday" = "Dag van de Onafhankelijkheidsbeweging";
+"catalog.event::project_kickoff" = "Projectkickoff";
+"catalog.event::dentist" = "Tandarts";
+"catalog.event::trip" = "Reis naar Jeju";
+"catalog.event::design_review" = "Designreview";
+"catalog.event::dinner" = "Diner met Sara";
+"catalog.event::sprint_planning" = "Sprintplanning";
+"catalog.event::team_workshop" = "Teamworkshop";
+"catalog.event::release_day" = "Releasedag";
+"catalog.event::lunch" = "Lunch met Sara";
+
+// MARK: - 할일
+
+"catalog.todo::tax_return" = "Belastingaangifte indienen";
+"catalog.todo::reply_landlord" = "De verhuurder antwoorden";
+"catalog.todo::water_plants" = "Planten water geven";
+"catalog.todo::book_flight" = "Vlucht boeken";
+"catalog.todo::renew_passport" = "Paspoort verlengen";
+"catalog.todo::send_invoice" = "Factuur versturen";
+"catalog.todo::cancel_subscription" = "Ongebruikt abonnement opzeggen";
+"catalog.todo::return_books" = "Bibliotheekboeken terugbrengen";
+
+// MARK: - 이벤트 상세
+
+"catalog.place::startup_hub" = "Seoul Startup Hub";
+"catalog.memo::wireframes" = "Geprinte wireframes meenemen.";
+
+// MARK: - 이벤트 타입
+
+"catalog.tag::work" = "Werk";
+"catalog.tag::family" = "Gezin";
+"catalog.tag::health" = "Gezondheid";
+"catalog.tag::study" = "Studie";
+
+// MARK: - AI 빠른 입력
+
+"catalog.ai::command" = "vrijdag om twaalf uur lunchen met Sara";
+"catalog.ai::result" = "“Lunch met Sara” toegevoegd op vrijdag 13 maart om 12:00.";

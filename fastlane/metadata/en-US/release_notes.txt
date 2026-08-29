@@ -1,0 +1,27 @@
+This update adds new features.
+
+■ AI Quick Input
+· Speak or type and the event is created. "Lunch with Sarah Friday at noon", "move my dentist to next Tuesday" — the way you'd actually say it
+· Read from image — photograph a class timetable or an event poster, or pick one from your library, and the text becomes events
+· Not just adding: move the time, rename, mark done, delete. Requests that change or remove something show you what will happen and ask first
+· Send from Siri, a widget or Control Center without opening the app
+· Share text or a photo from another app and it goes to Send to AI
+· AI Quick Input is available after you sign in
+
+■ Show on Lock Screen
+· An event that's about to start counts down on the Lock Screen and in the Dynamic Island
+· Add it from the event detail or the day's event list — Google and Apple Calendar events too
+· Check a to-do off or stop showing it right from the Lock Screen, and tap through to the event detail
+
+■ Sharing your schedule
+· Press and hold a date in the calendar for Share this day, Share this week or Share this month
+· In Share Preview, choose which Event Types to include and whether to share as Text or Image
+· A single event can be shared on its own
+
+■ Editing Google and Apple Calendar events
+· Change and delete events from your connected calendars right in the app, repeat rules included
+· Press and hold in the list to delete
+
+■ Plans
+· Upgrade Plan lets you choose between Standard and Lifetime, each with more daily credits
+· If you run out, Add credits tops you up, and added credits don't expire

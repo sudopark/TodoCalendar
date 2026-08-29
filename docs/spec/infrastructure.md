@@ -97,6 +97,7 @@ public final class SharedDataStore: @unchecked Sendable {
 |---|---|---|
 | 날짜 이동 | `tc.app://calendar/?select=YYYY_MM_DD` | `select`: `year_month_day` 형식 |
 | 이벤트 상세 | `tc.app://calendar/event/?id=<eventId>&type=<eventType>` | `id`, `type` |
+| AI 입력 진입 | `tc.app://calendar/ai` | 없음 |
 
 ### 2.2 딥링크 처리 구조
 
@@ -212,7 +213,7 @@ ApplicationDeepLinkHandlerImple:
 
 ### 5.1 메인 DB (`todo_calendar.db`)
 
-**현재 버전**: `AppEnvironment.dbVersion = 6`
+**현재 버전**: `AppEnvironment.dbVersion = 7`
 
 **마이그레이션 메커니즘** (`SQLiteService`):
 1. 앱 시작 시 `AppDataMigrationImple.runDBMigration()` 호출
@@ -233,6 +234,7 @@ ApplicationDeepLinkHandlerImple:
 | 3→4 | 구글 캘린더 이벤트 가시성 컬럼 | `google_calendar_event_origin` (레거시) | `ALTER TABLE ... ADD COLUMN visibility TEXT` |
 | 4→5 | 업로드 큐 테이블 재구성 | `event_upload_pending_queue` | 임시 테이블 생성 → 데이터 이동 → 원본 삭제 → 이름 변경 |
 | 5→6 | 할일 반복 회차 컬럼 추가 | `TodoEvents` | `ALTER TABLE ... ADD COLUMN repeating_turn INTEGER` |
+| 6→7 | 완료 처리 중 원본 보관 테이블의 컬럼 순서 교정 + 회차 컬럼 추가 | `PendingDoneTodoEvent` | 임시 테이블 생성 → 데이터 이동 → 원본 삭제 → 이름 변경 |
 
 **전체 테이블 목록** (`prepareTables()` 순서):
 
@@ -262,7 +264,7 @@ ApplicationDeepLinkHandlerImple:
 | 버전 | 에러 처리 | 이유 |
 |---|---|---|
 | 0→1, 1→2, 2→3, 3→4 | `try` (hard fail) | 핵심 스키마 변경 |
-| 4→5, 5→6 | `try?` (soft fail) | 큐 재구성/부가 컬럼, 실패해도 앱 동작에 큰 영향 없음 |
+| 4→5, 5→6, 6→7 | `try?` (soft fail) | 큐 재구성/부가 컬럼, 실패해도 앱 동작에 큰 영향 없음 |
 
 **전체 실패 시**: 최상위 try-catch에서 에러 로깅만 수행, 앱 크래시 방지.
 
@@ -285,10 +287,41 @@ ApplicationDeepLinkHandlerImple:
 
 ### 5.5 새 마이그레이션 추가 절차
 
+**세 위치를 반드시 함께 변경한다:**
+
 1. `AppEnvironment.dbVersion` (또는 `googleCalendarDBVersion`) 증가
 2. 해당 `Table` 타입의 `migrateStatement(for version:)`에 새 case 추가
-3. `AppDataMigrationImple.runDBMigration()`의 switch에 새 version case 추가
-4. 두 곳을 반드시 함께 변경해야 마이그레이션이 실행됨
+3. `AppDataMigrationImple` — `runDBMigration`의 switch에 case 추가 + `runMigrationVersionNtoM` 메서드 작성
+
+**3번이 빠지면 `migrateStatement`는 호출조차 되지 않는다.** 컴파일도 테스트도 통과하고 마이그레이션만 조용히 안 돈다.
+
+`migrateStatement(for:)`가 받는 숫자는 **떠나는 버전**이다 — `case 5`는 5 → 6 스텝에서 돈다.
+
+위 표에 새 행을 추가하고 §5.1의 "현재 버전"도 함께 올린다.
+
+### 5.6 컬럼 순서 변경·삭제 — temp 테이블 재생성
+
+SQLite의 `ALTER TABLE ADD COLUMN`은 **맨 뒤에 붙이는 것만** 된다. 순서 교정·컬럼 제거는 `modfiyColumns(tempTable:to:from:)`로 간다 — `INSERT INTO temp SELECT ... FROM 원본` → 원본 DROP → temp를 원본 이름으로 RENAME, 세 문장을 만들어준다.
+
+- **temp 테이블은 라이브러리가 안 만든다.** 마이그레이션 스텝에서 `createTableOrNot(<Temp>Table.self)`로 직접 생성한다. 새 컬럼 순서는 이 temp 테이블의 `Columns` 정의가 결정한다.
+- `to`/`from`은 컬럼 **이름** 매핑 표다. 각 이름은 해당 테이블에서 이름으로 해석되고, 두 리스트끼리는 위치로 짝지어진다. 이름이 안 바뀌면 같은 배열을 양쪽에 넘긴다.
+- **새로 추가하는 컬럼은 두 리스트에서 뺀다.** 원본에 없어 SELECT가 실패한다. 빠진 컬럼은 NULL로 남는다.
+- **temp 테이블의 `Columns`는 그 버전 스키마로 동결한다.** 살아있는 원본 `Columns`를 typealias·참조로 끌어쓰면, 이후 컬럼을 추가하는 순간 과거 마이그레이션의 복사 목록에 그 버전 원본엔 없는 이름이 실려 SELECT가 깨진다. 그러면 위 예시의 실패 경로를 타 원본 테이블이 드롭되고 사용자 데이터가 사라진다. 컬럼 나열이 중복돼 보여도 각 temp 테이블은 자기 case를 통째로 적는다.
+- 선례: `EventUploadPendingQueueTableV4TempTable`(v4 → v5), `PendingDoneTodoEventTableV6TempTable`(v6 → v7)
+
+```swift
+private func runMigrationVersion6to7(_ database: any DataBase) throws {
+    do {
+        try database.createTableOrNot(PendingDoneTodoEventTable.self)
+        try database.createTableOrNot(PendingDoneTodoEventTableV6TempTable.self)
+        try database.migrate(PendingDoneTodoEventTable.self, version: 6)
+    } catch {
+        try? database.dropTable(PendingDoneTodoEventTable.self)   // 실패 시 드롭 — prepareTables가 새 스키마로 재생성
+    }
+}
+```
+
+> 컬럼 순서가 곧 cursor 읽기 순서라는 위치 결합은 [`Repository/CLAUDE.md`](../../Repository/CLAUDE.md) 참조.
 
 ---
 
@@ -423,6 +456,133 @@ ApplicationDeepLinkHandlerImple:
 - **recommended 재노출 억제 없음**: 포그라운드 복귀마다 같은 조건이면 매번 팝업이 뜬다. "나중에" 선택 후 일정 기간 억제하려면 마지막 dismiss 시점을 로컬(UserDefaults 등)에 저장하고 `checkUpdateIsNeed`에서 참조하는 정책이 필요.
 - **semver pre-release 미대응**: `1.0-beta`, `2.0.0-rc.1` 같은 접미사는 현재 비교 로직이 예측 불가 동작. 필요 시 `isVersionLessThan`에 pre-release 파싱 추가.
 - **원격 실패 시 조용한 무효화**: `AppUpdateCheckUsecaseImple.loadUpdateInfoWithoutError`가 에러를 nil로 삼켜 JSON 디코딩 실패·네트워크 오류가 운영 지표에 드러나지 않음. 로그/텔레메트리 추가 검토 여지.
+
+---
+
+## 8. 약관·개인정보처리방침 개정 고지 (법적 배너)
+
+사용자에게 중요한 개정(요금·이용 한도 축소·책임 제한 확대·개인정보 수집 항목·제3자 제공처 추가)을 원격 설정으로 푸시하고, 메인 화면 배너로 고지한다. 약관과 방침은 각자 독립적으로 개정되고 확인되므로, 모델·저장·UI 전부 **문서 단위**로 분리돼 있다 — 배너는 미확인 문서 수만큼(0~2줄) 뜨고 줄마다 개별로 확인한다.
+
+### 8.1 원격 설정
+
+**위치**: `sudopark/TodoCalendar-Terms` 레포 `main` 브랜치의 `app-config/legal-notice.json`
+**서빙**: `https://raw.githubusercontent.com/sudopark/TodoCalendar-Terms/main/app-config/legal-notice.json` (GitHub raw URL, §7.1과 동일 prefix)
+**포맷**:
+```json
+{
+  "terms":   { "id": "2026-09-01-terms",   "effective_date": "2026-09-01" },
+  "privacy": { "id": "2026-09-15-privacy", "effective_date": "2026-09-15" }
+}
+```
+
+- 최상위 키가 `LegalDocumentType`(`terms` / `privacy`) raw value다.
+- 고지 없음은 `{}` (빈 객체).
+- 디코딩은 Repository 레이어의 `LegalNoticeMapper`(`Decodable`)가 담당하고, Domain 모델(`LegalDocumentType` / `LegalNoticeUpdateInfo` / `LegalNoticeUpdates = [LegalDocumentType: LegalNoticeUpdateInfo]`)은 Decodable 미채택. `LegalNoticeMapper.init(from:)`는 `LegalDocumentType.allCases`를 순회하며 문서별로 독립 디코딩해 **항목 단위로 흡수**한다 — 한 문서가 깨져도 나머지는 산다.
+- 시행일 파싱은 `dateFormat = "yyyy-MM-dd"`, `timeZone = TimeZone(secondsFromGMT: 0)`, `locale = Locale(identifier: "en_US_POSIX")` 고정.
+
+**항목 단위 흡수 — 엣지 케이스**:
+
+| 입력 | 결과 |
+|---|---|
+| `{}` | 빈 딕셔너리 |
+| `{"terms": {...}, "privacy": {...}}` | 두 항목 모두 반영 |
+| `{"unknown": {...}}` | 빈 딕셔너리 — 모르는 문서 종류는 무시 (forward compatibility) |
+| `{"terms": {...}, "unknown": {...}}` | `terms`만 반영 |
+| 항목의 `id` 누락 | 그 문서만 버림 |
+| 항목의 `effective_date` 파싱 실패 | 그 문서만 버림 |
+| 네트워크 실패 | `loadNoticeUpdates`가 throw — 삼키는 건 usecase 책임(§8.2) |
+
+### 8.2 판정 알고리즘
+
+```swift
+protocol LegalNoticeRepository: Sendable {
+    func loadNoticeUpdates() async throws -> LegalNoticeUpdates
+    func fetchConfirmedNoticeId(_ documentType: LegalDocumentType) -> String?
+    func updateConfirmedNoticeId(_ id: String, for documentType: LegalDocumentType)
+}
+```
+
+확인 이력은 `LegalNoticeRepositoryImple`이 `EnvironmentStorage`(UserDefaults 백엔드)에 문서별 키 `"confirmed_legal_notice_id_\(documentType.rawValue)"`로 저장·조회한다.
+
+`LegalNoticeUsecaseImple.checkNoticeIsNeed()` 호출 시:
+
+```
+1. checkTrigger 발생 → 원격 loadNoticeUpdates() 실행 (실패 시 빈 딕셔너리로 삼킴)
+2. LegalDocumentType.allCases 순서로 순회하며 각 문서의 원격 id와 fetchConfirmedNoticeId(documentType)를 비교
+3. 다르면 pending 목록에 포함, 같으면 제외
+4. pendingNoticeUpdates: AnyPublisher<[LegalNoticeUpdateInfo], Never>로 방출
+```
+
+- **정렬 근거**: `LegalNoticeUpdates`는 딕셔너리라 순서가 없다. `LegalDocumentType.allCases`(선언 순서 terms → privacy)로 순회해 배열을 만들기 때문에 방출 순서가 고정되고, 이 순회가 없으면 배너 줄 순서가 실행마다 흔들린다.
+- 초기값·조회 실패·고지 없음은 전부 **빈 배열**이다. `pendingUpdates`가 `CurrentValueSubject<[LegalNoticeUpdateInfo], Never>([])`라 무방출이나 empty completion이 아니라 명시적 빈 배열로 표현된다.
+- `confirmNotice(_ documentType:)` — pending 배열에서 그 문서의 항목을 찾아 `updateConfirmedNoticeId(info.id, for: documentType)`를 호출한 뒤, pending 에서 그 항목만 뺀 배열을 재방출한다. pending 에 없는 문서를 넘기면 아무 일도 하지 않는다.
+
+### 8.3 체크 트리거
+
+`LegalNoticeUsecase.checkNoticeIsNeed()` 호출 시점:
+
+| 시점 | 트리거 지점 |
+|---|---|
+| 앱 시작 | `MainViewModelImple.prepare()` |
+| 포그라운드 복귀 | `MainViewModelImple.internalBinding()`의 `UIApplication.willEnterForegroundNotification` 구독 |
+
+내부는 `Subject.checkTrigger: PassthroughSubject<Void, Never>`를 send. `flatMapLatest`로 원격 조회(§8.2 1번)에 연결하고, 문서별 비교를 거친 배열이 `Subject.pendingUpdates: CurrentValueSubject<[LegalNoticeUpdateInfo], Never>([])`에 저장되어 `pendingNoticeUpdates` Publisher로 노출된다. `PassthroughSubject`가 아니라 `CurrentValueSubject`인 이유 — `confirmNotice(_:)`가 갱신된 배열을 재방출해야 그 줄이 내려가기 때문이다.
+
+`MainViewModelImple.legalNoticeBanners`는 별도 상태로 미러링하지 않고, `legalNoticeUsecase.pendingNoticeUpdates`를 매번 직접 `map`해 `[LegalNoticeBannerModel]`로 변환한다.
+
+**Usecase 공급**: `SupportUsecaseFactory.makeLegalNoticeUsecase()` (`NonLoginUsecaseFactoryImple` / `LoginUsecaseFactoryImple` 둘 다 구현). 소비자가 `MainViewModel` 하나뿐이라 단일 인스턴스 공유 계약은 없다 — 호출마다 새 인스턴스를 만든다.
+
+### 8.4 노출 동작
+
+**위치**: `MainViewController.headerAreaStackView`의 `addArrangedSubview` 순서상 `loadingAllEventsLabel` 아래, `compositeLoadingBarView` 위 (`headerView` → `loadingAllEventsLabel` → `legalNoticeBannerView` → `compositeLoadingBarView`). 초기 `isHidden = true`.
+
+배너는 `LegalNoticeBannerView` — 세로 `UIStackView` 컨테이너다. `MainViewModel.legalNoticeBanners: AnyPublisher<[LegalNoticeBannerModel], Never>`가 방출하면 `update(_:)`가 행을 재구성한다:
+- 모델이 0개면 `isHidden = true`
+- 1개 이상이면 문서마다 행(`LegalNoticeBannerRowView`)을 하나씩 만들어 채운다
+- 행 사이에는 1px 구분선(`colorSet.line`)을 넣는다. 첫 행 위·마지막 행 아래에는 없다.
+
+`LegalNoticeBannerModel`(`documentType` / `message` / `effectiveDateText`)의 `message`는 문서 종류에 따라 `legal_notice.message::terms` 또는 `legal_notice.message::privacy`로 분기하고, `effectiveDateText`는 `legal_notice.effectiveDate`(en `Effective %@` / ko `시행일 %@`)에 `date_form.yyyy_MM_dd` 패턴(en `MM/dd/yyyy` / ko `yyyy.MM.dd`)으로 UTC 고정 포맷한 날짜를 채운다. 문서가 한 줄에 하나이므로 한 줄에 두 문서를 담는 문구는 없다.
+
+**행 구성**(`LegalNoticeBannerRowView`): 아이콘(`doc.text`, 18×18, `colorSet.accentInfo`) · 세로 스택(메시지 `fontSet.normal`/`colorSet.text0`, `numberOfLines = 0` · 시행일 `fontSet.subNormal`/`colorSet.text2`) · 닫기 버튼(`xmark`, 24×24, `colorSet.text2`). 좌우 16 / 상하 10 padding.
+
+**주요 설계**: 배너는 modal present가 아니라 `headerAreaStackView`에 포함된 subview다 — 업데이트 팝업(강제·권장 모달)·UMP 동의 폼·ATT 프롬프트·전면 광고와 노출 순서를 다투지 않는다.
+
+**사용자 액션**:
+- **행 탭** — `LegalNoticeBannerView.documentTapped: AnyPublisher<LegalDocumentType, Never>`를 거쳐 `MainViewModelImple.openLegalNoticeDocument(_:)` → `router?.showWebView(documentType.linkPath)`로 그 문서 웹뷰를 바로 연다. 문서가 한 줄에 하나뿐이라 액션시트 분기는 없다.
+  - 탭 제스처는 행(`LegalNoticeBannerRowView`)이 직접 소유하고 닫기 버튼 위 터치는 받지 않는다 — 상위 뷰의 제스처는 버튼 터치까지 받아 두 액션이 함께 발화하는 게 UIKit 기본 동작이다.
+- **닫기 버튼** — `LegalNoticeBannerView.closeTapped: AnyPublisher<LegalDocumentType, Never>` → `MainViewModelImple.closeLegalNoticeBanner(_:)` → `legalNoticeUsecase.confirmNotice(documentType)`. 그 문서의 확인 id가 `EnvironmentStorage`에 저장되고 `pendingNoticeUpdates`가 그 문서를 뺀 배열을 재방출한다 — 그 줄만 사라지고 나머지 줄은 유지된다.
+
+### 8.5 고지 등급 정책
+
+**원격에 올리는 것** (중요 변경만):
+- 요금 인상·변경 (플랜 전환, 신규 가격 정책)
+- 이용 한도 축소 (AI Agent 일일 한도 감소, 저장소 용량 제한 신설 등)
+- 책임 제한 확대 (서비스 중단 면책 조건 추가 등)
+- 개인정보 수집 항목 추가 (위치, 연락처 등 신규 항목)
+- 제3자 제공처 추가 (외부 서비스 통합 시)
+
+**원격에 안 올리는 것**: 오탈자·표현 정리 — 웹 게시 + 시행일 갱신만으로 끝낸다.
+
+**개인정보 수집 항목·제공처 추가 시 유의**:
+약관 또는 개인정보 수집 동의서 개정만으로는 부족할 수 있다 — 법령에 따라 별도 명시적 동의가 필요한 경우가 있다. 이 경우 배너 고지는 선언 목적이고, 실제 수집은 동의 폼으로 별도 처리한다.
+
+**시행 시점 정책**: 약관·개인정보처리방침 §12는 "중요한 변경은 시행 전에 앱에서 안내합니다"로 규정한다 — 시행 **전**에만 고지하면 되고 구체적인 일수는 박지 않는다. 시행일이 지나도 배너 줄은 자동으로 내려가지 않는다. 문서별 줄이 사라지는 경로는 (a) 유저가 그 줄의 닫기 버튼을 눌러 `confirmNotice(documentType)`가 그 문서의 확인 id를 저장하거나, (b) 원격 `legal-notice.json`에서 그 문서 항목을 내려 다음 체크에서 pending 목록에서 빠지는 두 가지뿐이다.
+
+### 8.6 관련 파일
+
+| 레이어 | 파일 |
+|---|---|
+| Domain Model | `Domain/Sources/Models/LegalNotice.swift` |
+| Domain Repo | `Domain/Sources/Repositories/LegalNoticeRepository.swift` |
+| Domain Usecase | `Domain/Sources/Usecases/Support/LegalNoticeUsecase.swift` |
+| Repository Impl | `Repository/Sources/Repository+Imple/Support/LegalNoticeRepositoryImple.swift` |
+| Mapper | `Repository/Sources/Repository+Imple/Support/LegalNotice+Mapping.swift` |
+| Endpoint | `Repository/Sources/Remote/Endpoint.swift` (`AppEndpoints.legalNotice`) |
+| Main View | `TodoCalendarApp/Sources/Main/LegalNoticeBannerView.swift` |
+| Main ViewController | `TodoCalendarApp/Sources/Main/MainViewController.swift` (배너 layout) |
+| Main VM | `TodoCalendarApp/Sources/Main/MainViewModel.swift` (`openLegalNoticeDocument` / `closeLegalNoticeBanner` / `legalNoticeBanners` publisher) |
+| Factory | `Presentations/Scenes/Sources/Factories.swift` / `TodoCalendarApp/Sources/Factories/Factories+Usecase.swift` (`SupportUsecaseFactory.makeLegalNoticeUsecase`) |
+| 원격 설정 | `sudopark/TodoCalendar-Terms` 레포의 `app-config/legal-notice.json` |
 
 ---
 

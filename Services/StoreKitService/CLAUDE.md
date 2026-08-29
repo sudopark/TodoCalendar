@@ -32,4 +32,5 @@ TodoCalendarApp → Domain ← StoreKitService
 ## 알아둘 것
 
 - **소모품(top-up)은 `Transaction.currentEntitlements` 에 안 잡힌다** — 애플이 보유 상태를 들고 있지 않다. 잔량 원장의 진실은 서버뿐이고, 여기서 잔량을 계산하지 않는다.
-- **`.storekit` Configuration File 은 아직 없다.** 로컬 결제 시뮬레이션은 스킴 Run 액션 설정이라 파일만 추가해선 동작하지 않고, Tuist 가 스킴을 자동 생성하므로 Xcode UI 수동 지정은 `tuist generate` 에 덮인다. 구매 트리거 UI 가 생기는 Phase B 에서 커스텀 스킴과 함께 배선한다.
+- **`.storekit` Configuration File 은 `TodoCalendarApp/Resources/Billing.storekit`.** 로컬 결제 시뮬레이션은 스킴 Run 액션 설정이라 파일만 추가해선 동작하지 않는다 — `Project.app(schemes:)`(`Tuist/ProjectDescriptionHelpers/Project+Templates.swift`)가 만드는 공유 Run 스킴 `TodoCalendarApp-StoreKit` 이 그 파일을 Run 액션에 연결한다(Phase B, #739). Tuist 가 스킴을 자동 생성하므로 Xcode UI 로 수동 지정해도 다음 `tuist generate` 에 덮인다 — 스킴 정의는 항상 `Project+Templates.swift` 를 통해서만 바꾼다. Run 전용이라 CI 테스트 스킴 목록엔 안 들어간다(`<Name>Snapshots` 와 동일한 의도된 예외).
+- **로컬 `.storekit` 서명은 애플 서버를 타지 않는다.** 로컬 인증서로 서명한 트랜잭션이라 `postPurchase` 가 서버로 올리는 JWS 검증은 이 스킴에서 항상 통과하는 것처럼 보일 수 있다 — **서버의 JWS 서명 검증이 진짜로 검증되는 건 App Store 샌드박스(TestFlight·샌드박스 계정)뿐이다.** 결제 플로우를 신뢰할 근거로 로컬 시뮬레이션만 쓰지 말 것.

@@ -74,6 +74,13 @@ extension RemoteEnvironmentPathTests {
         // then
         #expect(path == "https://api.example.com/v1/billing/purchases")
     }
+
+    @Test func path_billingUserPlanEndpoint_returnsV1BillingUserPlanURL() {
+        // when
+        let path = self.env.path(BillingAPIEndpoints.userPlan)
+        // then
+        #expect(path == "https://api.example.com/v1/billing/user-plan")
+    }
 }
 
 
@@ -86,5 +93,12 @@ extension RemoteEnvironmentPathTests {
         let path = self.env.path(AppEndpoints.updateInfo)
         // then
         #expect(path == "https://raw.githubusercontent.com/sudopark/TodoCalendar-Terms/main/app-config/update-info.json")
+    }
+
+    @Test func path_legalNoticeEndpoint_returnsTermsRepositoryRawURL() {
+        // when
+        let path = self.env.path(AppEndpoints.legalNotice)
+        // then
+        #expect(path == "https://raw.githubusercontent.com/sudopark/TodoCalendar-Terms/main/app-config/legal-notice.json")
     }
 }

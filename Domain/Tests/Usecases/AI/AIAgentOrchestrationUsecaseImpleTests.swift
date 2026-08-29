@@ -18,26 +18,43 @@ import Extensions
 @testable import Domain
 
 
-class AIAgentOrchestrationUsecaseImpleTests: PublisherWaitable {
+class AIAgentOrchestrationUsecaseImpleTests: PublisherWaitable, AsyncEffectWaitable {
 
     var cancelBag: Set<AnyCancellable>! = []
     private var stubCommand: StubAICommandUsecase!
     private var stubUsage: StubAIAgentUsageUsecase!
     private var stubSpeech: StubSpeechRecognizeUsecase!
     private var stubSync: StubEventSyncUsecase!
+    private var stubNotificationPermission: StubNotificationPermissionUsecase!
 
-    private func makeUsecase(shouldFail: Bool = false) -> AIAgentOrchestrationUsecaseImple {
+    private func makeUsecase(
+        shouldFail: Bool = false,
+        isCreditExhausted: Bool = false,
+        notificationStatus: NotificationAuthorizationStatus = .authorized,
+        shouldGrantNotification: Bool = true
+    ) -> AIAgentOrchestrationUsecaseImple {
         self.stubCommand = .init()
         self.stubCommand.shouldFail = shouldFail
         self.stubUsage = .init()
+        self.stubUsage.stubIsCreditExhausted = isCreditExhausted
         self.stubSpeech = .init()
         self.stubSync = .init()
+        self.stubNotificationPermission = .init()
+        self.stubNotificationPermission.stubAuthorizationStatusCheckResult = .success(notificationStatus)
+        self.stubNotificationPermission.stubRequestPermissionResult = .success(shouldGrantNotification)
         return AIAgentOrchestrationUsecaseImple(
             commandUsecase: self.stubCommand,
             usageUsecase: self.stubUsage,
             speechRecognizeUsecase: self.stubSpeech,
-            eventSyncUsecase: self.stubSync
+            eventSyncUsecase: self.stubSync,
+            notificationPermissionUsecase: self.stubNotificationPermission
         )
+    }
+
+    private func makeUsecaseWithNotificationCheckFailure() -> AIAgentOrchestrationUsecaseImple {
+        let usecase = self.makeUsecase()
+        self.stubNotificationPermission.stubAuthorizationStatusCheckResult = .failure(RuntimeError("check fail"))
+        return usecase
     }
 
     private func makeUsecaseWithCommandJob(_ job: AIJob) -> AIAgentOrchestrationUsecaseImple {
@@ -528,6 +545,18 @@ extension AIAgentOrchestrationUsecaseImpleTests {
         // then — status 우선 판정으로 confirm 아닌 idle
         #expect(state.map(self.stateName) == "idle")
     }
+
+    @Test func usecase_restoreIfNeeded_whenFailed_staysIdleNotFailed() async throws {
+        // given — 복원 조회 자체가 실패 (로그아웃 직후 401 등)
+        let expect = expectConfirm("복원 실패는 결과 화면 없이 idle")
+        let usecase = self.makeUsecase(shouldFail: true)
+        // when
+        let state = try await self.firstOutput(expect, for: usecase.state) {
+            usecase.restoreIfNeeded()
+        }
+        // then
+        #expect(state.map(self.stateName) == "idle")
+    }
 }
 
 
@@ -541,7 +570,9 @@ extension AIAgentOrchestrationUsecaseImpleTests {
         expect.count = 2
         var done = AIJobResult.DoneResult()
         done.text = "완료"
-        let usecase = self.makeUsecaseWithCommandJob(self.dummyJob(.done(done)))
+        let usecase = self.makeUsecaseWithCommandJob(
+            self.dummyJob(.done(done), status: .running)
+        )
         usecase.reset()
         try? usecase.submit("회의")
         try await Task.sleep(for: .milliseconds(30))
@@ -552,6 +583,38 @@ extension AIAgentOrchestrationUsecaseImpleTests {
         // then
         #expect(states.last.map(self.stateName) == "idle")
         #expect(self.stubCommand.didCancelJobId == "job-1")
+    }
+
+    // job 조회가 한 번도 안 끝난 시점 — 생성 응답의 started 이벤트로 받아둔 jobId로 중지한다
+    @Test func usecase_reset_cancelsWithJobIdFromStartedEvent() async throws {
+        // given — started만 방출되고 job은 아직 없다
+        let usecase = self.makeUsecase()
+        usecase.reset()
+        try? usecase.submit("회의")
+        try await Task.sleep(for: .milliseconds(30))
+
+        // when
+        usecase.reset()
+
+        // then
+        #expect(self.stubCommand.didCancelJobId == "job-1")
+    }
+
+    // 결과 확인(acknowledge)도 reset을 타는데, 이미 끝난 job에 취소가 나가면 안 된다
+    @Test func usecase_whenJobFinished_resetDoesNotCancel() async throws {
+        // given
+        var done = AIJobResult.DoneResult()
+        done.text = "완료"
+        let usecase = self.makeUsecaseWithCommandJob(self.dummyJob(.done(done)))
+        usecase.reset()
+        try? usecase.submit("회의")
+        try await Task.sleep(for: .milliseconds(30))
+
+        // when
+        usecase.reset()
+
+        // then
+        #expect(self.stubCommand.didCancelJobId == nil)
     }
 
     @Test func usecase_decline_rejectsButDoesNotCancelOngoing() async throws {
@@ -721,13 +784,24 @@ private final class StubAICommandUsecase: AICommandUsecase, @unchecked Sendable 
     var didCancelJobId: String?
     var didProcessConfirmToken: String?
 
-    func processCommand(_ commandText: String) -> AnyPublisher<AIJob, any Error> {
+    func processCommand(_ commandText: String) -> AnyPublisher<AICommandProcessing, any Error> {
         self.didProcessCommand = commandText
-        return self.jobPublisher(self.stubCommandJob)
+        return self.processingPublisher(self.stubCommandJob)
     }
-    func processConfirmCommand(_ action: AIConfirmCommandAction) -> AnyPublisher<AIJob, any Error> {
+
+    private(set) var didProcessInterpretWith: (text: String, instruction: String?, source: AICommandInputSource)?
+    func processInterpretCommand(
+        text: String,
+        additionalInstruction: String?,
+        inputSource: AICommandInputSource
+    ) -> AnyPublisher<AICommandProcessing, any Error> {
+        self.didProcessInterpretWith = (text, additionalInstruction, inputSource)
+        return self.processingPublisher(self.stubCommandJob)
+    }
+
+    func processConfirmCommand(_ action: AIConfirmCommandAction) -> AnyPublisher<AICommandProcessing, any Error> {
         self.didProcessConfirmToken = action.confirmToken
-        return self.jobPublisher(self.stubConfirmJob)
+        return self.processingPublisher(self.stubConfirmJob)
     }
     func rejectConfirmCommand(_ action: AIConfirmCommandAction) {
         self.didRejectParentJobId = action.parentJobId
@@ -735,12 +809,16 @@ private final class StubAICommandUsecase: AICommandUsecase, @unchecked Sendable 
     func cancelOngoingCommand(_ jobId: String) {
         self.didCancelJobId = jobId
     }
-    func restoreCommandifNeed() -> AnyPublisher<AIJob?, any Error> {
+    func restoreCommandifNeed() -> AnyPublisher<AICommandProcessing?, any Error> {
         self.didRestore = true
         if self.shouldFail {
             return Fail(error: RuntimeError("stub fail")).eraseToAnyPublisher()
         }
-        return Just(self.stubRestoreJob)
+        guard let job = self.stubRestoreJob else {
+            return Just(nil).setFailureType(to: (any Error).self).eraseToAnyPublisher()
+        }
+        return [.started(jobId: job.jobId), .job(job)].publisher
+            .map { Optional($0) }
             .setFailureType(to: (any Error).self)
             .eraseToAnyPublisher()
     }
@@ -749,12 +827,24 @@ private final class StubAICommandUsecase: AICommandUsecase, @unchecked Sendable 
         self.didRefreshJobStatusWith = jobId
     }
 
-    private func jobPublisher(_ job: AIJob?) -> AnyPublisher<AIJob, any Error> {
+    var didClearProcessingCommandRecord: Bool = false
+    func clearProcessingCommandRecord() async {
+        self.didClearProcessingCommandRecord = true
+    }
+
+    // 실물과 같은 순서로 방출한다 — 생성 응답(jobId)이 먼저, 조회된 job이 뒤
+    var stubStartedJobId: String = "job-1"
+    private func processingPublisher(_ job: AIJob?) -> AnyPublisher<AICommandProcessing, any Error> {
         if self.shouldFail {
             return Fail(error: RuntimeError("stub fail")).eraseToAnyPublisher()
         }
-        guard let job else { return Empty().eraseToAnyPublisher() }
-        return Just(job).setFailureType(to: (any Error).self).eraseToAnyPublisher()
+        let started = AICommandProcessing.started(jobId: self.stubStartedJobId)
+        guard let job else {
+            return Just(started).setFailureType(to: (any Error).self).eraseToAnyPublisher()
+        }
+        return [started, .job(job)].publisher
+            .setFailureType(to: (any Error).self)
+            .eraseToAnyPublisher()
     }
 }
 
@@ -762,17 +852,49 @@ private final class StubAIAgentUsageUsecase: AIAgentUsageUsecase, @unchecked Sen
 
     let usageSubject = CurrentValueSubject<AIAgentUsage?, Never>(nil)
     var didRefresh: Bool = false
+    var stubIsCreditExhausted: Bool = false
 
     func refresh() { self.didRefresh = true }
     func loadUsage() async throws -> AIAgentUsage { throw RuntimeError("not imple") }
+    func isCreditExhausted() -> Bool { return self.stubIsCreditExhausted }
     var currentUsage: AnyPublisher<AIAgentUsage, Never> {
         return self.usageSubject.compactMap { $0 }.eraseToAnyPublisher()
     }
 }
 
+// 권한 응답 도착 시점을 테스트가 정하는 게이트 — 응답 전/후 동작을 결정적으로 가른다
+private final class PermissionGate: @unchecked Sendable {
+
+    private let lock = NSLock()
+    private var continuation: CheckedContinuation<Void, Never>?
+    private var isOpened = false
+
+    func wait() async {
+        await withCheckedContinuation { continuation in
+            self.lock.lock()
+            if self.isOpened {
+                self.lock.unlock()
+                continuation.resume()
+            } else {
+                self.continuation = continuation
+                self.lock.unlock()
+            }
+        }
+    }
+
+    func open() {
+        self.lock.lock()
+        let continuation = self.continuation
+        self.continuation = nil
+        self.isOpened = true
+        self.lock.unlock()
+        continuation?.resume()
+    }
+}
+
 private final class StubSpeechRecognizeUsecase: SpeechRecognizeUsecase, @unchecked Sendable {
 
-    let recognizeResultSubject = PassthroughSubject<Result<String, any Error>, Never>()
+    let recognizeResultSubject = PassthroughSubject<Result<SpeechRecognizeResult, any Error>, Never>()
     let recognizingTextSubject = CurrentValueSubject<String, Never>("")
     let levelSubject = CurrentValueSubject<Float?, Never>(nil)
 
@@ -785,7 +907,7 @@ private final class StubSpeechRecognizeUsecase: SpeechRecognizeUsecase, @uncheck
     func stopListening() { self.didStopListening = true }
     func finishListening() { self.didFinishListening = true }
 
-    var recognizeResult: AnyPublisher<Result<String, any Error>, Never> {
+    var recognizeResult: AnyPublisher<Result<SpeechRecognizeResult, any Error>, Never> {
         self.recognizeResultSubject.eraseToAnyPublisher()
     }
     var recognizingText: AnyPublisher<String, Never> {
@@ -811,7 +933,7 @@ extension AIAgentOrchestrationUsecaseImpleTests {
             usecase.enterVoiceInput()
         }
         // then
-        #expect(self.stubSpeech.didStartListening == true)
+        try await self.waitEffect("음성 인식이 시작됨") { self.stubSpeech.didStartListening }
         if case .listening(.voice) = state {} else {
             Issue.record("expected listening(.voice), got \(String(describing: state))")
         }
@@ -840,7 +962,7 @@ extension AIAgentOrchestrationUsecaseImpleTests {
         expect.count = 2
         // when
         let states = try await self.outputs(expect, for: usecase.state.dropFirst()) {
-            self.stubSpeech.recognizeResultSubject.send(.success("내일 회의"))
+            self.stubSpeech.recognizeResultSubject.send(.success(.recognized("내일 회의")))
         }
         // then — listening → idle → processing
         #expect(self.stubCommand.didProcessCommand == "내일 회의")
@@ -869,6 +991,53 @@ extension AIAgentOrchestrationUsecaseImpleTests {
         }
     }
 
+    @Test func usecase_permissionDenied_notifiesSpeechPermissionDenied() async throws {
+        // given
+        let usecase = self.makeUsecaseInIdle()
+        usecase.enterVoiceInput()
+        let expect = expectConfirm("권한 거부 안내")
+        // when
+        let notified = try await self.outputs(expect, for: usecase.speechPermissionDenied) {
+            self.stubSpeech.recognizeResultSubject.send(
+                .failure(SpeechRecognizeAuthError(micNotAvail: .denied))
+            )
+        }
+        // then
+        #expect(notified.count == 1)
+    }
+
+    @Test func usecase_permissionRestricted_doesNotNotifySpeechPermissionDenied() async throws {
+        // given
+        let usecase = self.makeUsecaseInIdle()
+        usecase.enterVoiceInput()
+        let expect = expectConfirm("제한 상태는 안내 없음")
+        expect.count = 0
+        expect.timeout = .milliseconds(100)
+        // when
+        let notified = try await self.outputs(expect, for: usecase.speechPermissionDenied) {
+            self.stubSpeech.recognizeResultSubject.send(
+                .failure(SpeechRecognizeAuthError(speechNotAvail: .restricted))
+            )
+        }
+        // then
+        #expect(notified.isEmpty)
+    }
+
+    @Test func usecase_recognizeFailedWithoutPermissionIssue_doesNotNotifySpeechPermissionDenied() async throws {
+        // given
+        let usecase = self.makeUsecaseInIdle()
+        usecase.enterVoiceInput()
+        let expect = expectConfirm("일반 실패는 안내 없음")
+        expect.count = 0
+        expect.timeout = .milliseconds(100)
+        // when
+        let notified = try await self.outputs(expect, for: usecase.speechPermissionDenied) {
+            self.stubSpeech.recognizeResultSubject.send(.failure(RuntimeError("speech fail")))
+        }
+        // then
+        #expect(notified.isEmpty)
+    }
+
     // 일반 인식 실패 → state.idle
     @Test func usecase_recognizeFailed_stateBecomesIdle() async throws {
         // given
@@ -883,6 +1052,57 @@ extension AIAgentOrchestrationUsecaseImpleTests {
         if case .idle = state {} else {
             Issue.record("expected idle, got \(String(describing: state))")
         }
+    }
+
+    // 침묵 타임아웃·오디오 끊김 등 무인식 종료 → idle 복귀 (커맨드 전송 없음)
+    @Test func usecase_recognizeEndedWithoutText_stateBecomesIdle() async throws {
+        // given
+        let usecase = self.makeUsecaseInIdle()
+        usecase.enterVoiceInput()
+        let expect = expectConfirm("idle on ended without recognizing")
+        // when
+        let state = try await self.firstOutput(expect, for: usecase.state.dropFirst()) {
+            self.stubSpeech.recognizeResultSubject.send(.success(.endedWithoutRecognizing))
+        }
+        // then
+        if case .idle = state {} else {
+            Issue.record("expected idle, got \(String(describing: state))")
+        }
+        #expect(self.stubCommand.didProcessCommand == nil)
+    }
+
+    // 무인식 종료 후 이전 음성 구독이 남지 않는다
+    @Test func usecase_afterRecognizeEndedWithoutText_stopsForwardingRecognizingText() async throws {
+        // given
+        let usecase = self.makeUsecaseInIdle()
+        usecase.enterVoiceInput()
+        self.stubSpeech.recognizeResultSubject.send(.success(.endedWithoutRecognizing))
+        let expect = expectConfirm("바인딩 해제 후 인식 텍스트 미전달")
+        expect.count = 0
+        expect.timeout = .milliseconds(100)
+        // when
+        let texts = try await self.outputs(expect, for: usecase.recognizingText) {
+            self.stubSpeech.recognizingTextSubject.send("남은 구독이 흘리면 안 되는 텍스트")
+        }
+        // then
+        #expect(texts.isEmpty)
+    }
+
+    // 인식 실패 후에도 이전 음성 구독이 남지 않는다
+    @Test func usecase_afterRecognizeFailed_stopsForwardingRecognizingText() async throws {
+        // given
+        let usecase = self.makeUsecaseInIdle()
+        usecase.enterVoiceInput()
+        self.stubSpeech.recognizeResultSubject.send(.failure(RuntimeError("speech fail")))
+        let expect = expectConfirm("실패 후 인식 텍스트 미전달")
+        expect.count = 0
+        expect.timeout = .milliseconds(100)
+        // when
+        let texts = try await self.outputs(expect, for: usecase.recognizingText) {
+            self.stubSpeech.recognizingTextSubject.send("남은 구독이 흘리면 안 되는 텍스트")
+        }
+        // then
+        #expect(texts.isEmpty)
     }
 
     // stopInput → idle, speech stop
@@ -974,20 +1194,23 @@ extension AIAgentOrchestrationUsecaseImpleTests {
             usecase.enterVoiceInput()
         }
         // then — .listening(.voice) 전환 + speech 시작
-        #expect(self.stubSpeech.didStartListening == true)
+        try await self.waitEffect("음성 인식이 시작됨") { self.stubSpeech.didStartListening }
         if case .listening(.voice) = state {} else {
             Issue.record("expected listening(.voice), got \(String(describing: state))")
         }
     }
 
-    // 이미 .listening(.voice) 상태에서 enterVoiceInput → no-op, speech 재시작 없음
-    @Test func usecase_enterVoiceInput_alreadyVoice_isNoOp() async throws {
+    // 이미 .listening(.voice) 상태에서 enterVoiceInput → 조용히 무시, speech 재시작 없음
+    @Test func usecase_enterVoiceInput_alreadyVoice_doesNotRestartSpeech() async throws {
         // given — idle에서 enterVoiceInput으로 .listening(.voice)
         let usecase = self.makeUsecaseInIdle()
         usecase.enterVoiceInput()
+        try await self.waitEffect("첫 인식 시작이 도달") { self.stubSpeech.startListeningCount == 1 }
         // when — 이미 voice-listening 상태에서 재호출
         usecase.enterVoiceInput()
-        // then — startListening은 첫 번째 한 번만 (두 번째 호출은 no-op)
+        // then — 재진입이 조용히 무시돼 startListening은 첫 번째 한 번만.
+        // 뒤늦은 두 번째 호출을 놓치지 않게 정착 시간을 두고 다시 본다
+        try await Task.sleep(for: .milliseconds(50))
         #expect(self.stubSpeech.startListeningCount == 1)
     }
 }
@@ -1022,6 +1245,7 @@ extension AIAgentOrchestrationUsecaseImpleTests {
         // given — 음성 입력 → 키보드 전환
         let usecase = self.makeUsecaseInIdle()
         usecase.enterVoiceInput()          // .listening(.voice), startListening 1회
+        try await self.waitEffect("첫 인식 시작이 도달") { self.stubSpeech.startListeningCount == 1 }
         usecase.enterKeyboardInput()       // .listening(.keyboard), stopListening
         let expect = expectConfirm("keyboard 닫기 → voice 복귀")
         // when — 키보드 시트 닫힘(dismissByGesture) → enterVoiceInput
@@ -1029,10 +1253,44 @@ extension AIAgentOrchestrationUsecaseImpleTests {
             usecase.enterVoiceInput()
         }
         // then — .listening(.voice) 복귀 + speech 재시작 (2번째 start)
-        #expect(self.stubSpeech.startListeningCount == 2)
+        try await self.waitEffect("음성 인식이 재시작됨") { self.stubSpeech.startListeningCount == 2 }
         if case .listening(.voice) = state {} else {
             Issue.record("expected listening(.voice), got \(String(describing: state))")
         }
+    }
+
+    // 키보드 전환 후 이전 음성 구독이 남지 않는다
+    @Test func usecase_afterEnterKeyboardInput_stopsForwardingRecognizingText() async throws {
+        // given
+        let usecase = self.makeUsecaseInIdle()
+        usecase.enterVoiceInput()
+        usecase.enterKeyboardInput()
+        let expect = expectConfirm("키보드 전환 후 인식 텍스트 미전달")
+        expect.count = 0
+        expect.timeout = .milliseconds(100)
+        // when
+        let texts = try await self.outputs(expect, for: usecase.recognizingText) {
+            self.stubSpeech.recognizingTextSubject.send("음성 잔여 텍스트")
+        }
+        // then
+        #expect(texts.isEmpty)
+    }
+
+    // 뒤늦게 도착한 음성 종료가 키보드 입력 상태를 덮지 않는다
+    @Test func usecase_lateRecognizeEndAfterEnterKeyboardInput_keepsKeyboardListening() async throws {
+        // given
+        let usecase = self.makeUsecaseInIdle()
+        usecase.enterVoiceInput()
+        usecase.enterKeyboardInput()
+        let expect = expectConfirm("키보드 입력 상태 유지")
+        expect.count = 0
+        expect.timeout = .milliseconds(100)
+        // when
+        let states = try await self.outputs(expect, for: usecase.state.dropFirst()) {
+            self.stubSpeech.recognizeResultSubject.send(.success(.endedWithoutRecognizing))
+        }
+        // then
+        #expect(states.isEmpty)
     }
 }
 
@@ -1055,6 +1313,48 @@ extension AIAgentOrchestrationUsecaseImpleTests {
 
         // then
         #expect(states.map(self.stateName) == ["idle"])
+    }
+}
+
+
+// MARK: - 아직 진행 중인 job 복원
+
+extension AIAgentOrchestrationUsecaseImpleTests {
+
+    // 앱 밖(확장·인텐트)에서 만들어진 job은 복원 시점에 아직 running이다.
+    // processing으로 올려야 유저가 진행 상태를 보고, 제출 가드도 이 job을 인지한다.
+    @Test("복원한 job이 아직 진행 중이면 processing으로 올린다")
+    func usecase_whenRestoredJobIsRunning_enterProcessing() async throws {
+        // given
+        let expect = expectConfirm("running 잔여 job 복원 시 processing 방출")
+        let job = AIJob(jobId: "some_job")
+            |> \.status .~ AIJob.Status.running
+            |> \.command .~ "9월 10일 약속"
+        let usecase = self.makeUsecaseWithRestoredJob(job)
+
+        // when
+        let states = try await self.outputs(expect, for: usecase.state) {
+            usecase.restoreIfNeeded()
+        }
+
+        // then
+        #expect(states.map(self.stateName) == ["processing"])
+    }
+
+    @Test("진행 중인 job을 복원하면 새 command 제출이 막힌다")
+    func usecase_whenRestoredJobIsRunning_blockSubmit() async throws {
+        // given
+        let job = AIJob(jobId: "some_job") |> \.status .~ AIJob.Status.running
+        let usecase = self.makeUsecaseWithRestoredJob(job)
+
+        // when
+        usecase.restoreIfNeeded()
+        try await Task.sleep(for: .milliseconds(30))
+
+        // then
+        #expect(throws: (any Error).self) {
+            try usecase.submit("내일 3시 미팅")
+        }
     }
 }
 
@@ -1099,16 +1399,76 @@ extension AIAgentOrchestrationUsecaseImpleTests {
         #expect(self.stubCommand.didRefreshJobStatusWith == nil)
     }
 
-    @Test("처리 중인 job이 없으면 포그라운드 복귀 새로고침은 아무것도 하지 않는다")
-    func usecase_whenNoProcessingJob_foregroundRefreshDoesNothing() async throws {
+    // 회귀: 인텐트·확장이 앱 밖에서 만든 job은 currentProcessingJobId가 nil이라 위 가드에
+    // 걸려 그냥 버려졌다. 앱이 이미 포그라운드면 refreshProcessingJobIfNeeded(포그라운드
+    // 복귀 트리거)도 안 타서 아무도 못 받는다 — idle 상태에서 온 미추적 푸시는 복원으로 이어받는다.
+    @Test("추적 중이 아닌 job 푸시라도 idle 상태면 저장소에서 복원을 시도한다")
+    func usecase_whenPushReceivedForUntrackedJob_whileIdle_restoresFromStorage() async throws {
+        // given — 인텐트가 만든 job(앱 메모리엔 없음), idle 상태
+        let usecase = self.makeUsecaseInIdle()
+
+        // when
+        usecase.handleJobStatusChanged("intent-made-job")
+
+        // then — 추적 대상이 아니므로 즉시 조회가 아니라 복원 경로를 탄다
+        #expect(self.stubCommand.didRefreshJobStatusWith == nil)
+        #expect(self.stubCommand.didRestore == true)
+    }
+
+    // 복원이 화면 상태를 덮으면 안 되는 구간 — refreshProcessingJobIfNeeded의 가드와 동일 기준.
+    @Test("추적 중이 아닌 job 푸시라도 결과를 보고 있는 중이면 복원하지 않는다")
+    func usecase_whenPushReceivedForUntrackedJob_whileShowingResult_doesNotRestore() async throws {
+        // given — 다른 job(job-1)의 결과를 이미 done으로 보여주고 있는 중
+        let expect = expectConfirm("done 진입")
+        expect.count = 2
+        var done = AIJobResult.DoneResult()
+        done.text = "완료"
+        let usecase = self.makeUsecaseWithCommandJob(self.dummyJob(.done(done)))
+        let _ = try await self.outputs(expect, for: usecase.state) {
+            try? usecase.submit("회의")
+        }
+
+        // when — 추적 중이 아닌 다른 job의 푸시
+        usecase.handleJobStatusChanged("intent-made-job")
+
+        // then — done 화면을 덮지 않는다
+        #expect(self.stubCommand.didRestore == false)
+        #expect(self.stubCommand.didRefreshJobStatusWith == nil)
+    }
+
+    // 앱이 노는 동안 확장·인텐트가 job을 만들었을 수 있다 — 앱 메모리엔 없으니 DB에서 이어받는다
+    @Test("처리 중인 job이 없으면 포그라운드 복귀 시 DB에서 복원을 시도한다")
+    func usecase_whenIdleOnForeground_restoreFromStorage() async throws {
         // given
         let usecase = self.makeUsecaseInIdle()
 
         // when
         usecase.refreshProcessingJobIfNeeded()
 
+        // then — 즉시 조회가 아니라 복원 경로를 탄다
+        #expect(self.stubCommand.didRefreshJobStatusWith == nil)
+        #expect(self.stubCommand.didRestore == true)
+    }
+
+    // 복원이 화면 상태를 덮으면 안 되는 구간
+    @Test("결과를 보고 있는 중이면 포그라운드 복귀 새로고침은 아무것도 하지 않는다")
+    func usecase_whenShowingResult_foregroundRefreshDoesNothing() async throws {
+        // given
+        let expect = expectConfirm("done 진입")
+        expect.count = 2
+        var done = AIJobResult.DoneResult()
+        done.text = "완료"
+        let usecase = self.makeUsecaseWithCommandJob(self.dummyJob(.done(done)))
+        let _ = try await self.outputs(expect, for: usecase.state) {
+            try? usecase.submit("회의")
+        }
+
+        // when
+        usecase.refreshProcessingJobIfNeeded()
+
         // then
         #expect(self.stubCommand.didRefreshJobStatusWith == nil)
+        #expect(self.stubCommand.didRestore == false)
     }
 
     @Test("처리 중인 job이 있으면 포그라운드 복귀 시 즉시 조회를 트리거한다")
@@ -1127,5 +1487,568 @@ extension AIAgentOrchestrationUsecaseImpleTests {
 
         // then
         #expect(self.stubCommand.didRefreshJobStatusWith == "some_job")
+    }
+}
+
+
+// MARK: - 이미지 커맨드 제출
+
+extension AIAgentOrchestrationUsecaseImpleTests {
+
+    // 이미지 입력 진입 시 음성 인식이 멈추고 상태가 .listening(.image)가 된다
+    @Test func usecase_enterImageInput_stopsListeningAndEmitsListeningImage() async throws {
+        // given
+        let usecase = self.makeUsecaseInIdle()
+        usecase.enterVoiceInput()
+        let expect = expectConfirm("listening(.image)")
+        // when
+        let state = try await self.firstOutput(expect, for: usecase.state.dropFirst()) {
+            usecase.enterImageInput()
+        }
+        // then
+        #expect(self.stubSpeech.didStopListening == true)
+        if case .listening(.image) = state {} else {
+            Issue.record("expected listening(.image), got \(String(describing: state))")
+        }
+    }
+
+    // submitImageCommand가 .processing(command:)로 전이하고 interpret 경로로 나간다
+    @Test func usecase_submitImageCommand_entersProcessingViaInterpretPath() async throws {
+        // given
+        let expect = expectConfirm("이미지 커맨드 전송 → processing → done")
+        expect.count = 2
+        var done = AIJobResult.DoneResult()
+        done.text = "영수증 등록 완료"
+        let usecase = self.makeUsecaseWithCommandJob(self.dummyJob(.done(done)))
+        usecase.reset()
+        usecase.enterImageInput()
+        // when
+        let states = try await self.outputs(expect, for: usecase.state.dropFirst()) {
+            try? usecase.submitImageCommand(text: "영수증 텍스트", additionalInstruction: "카드값만")
+        }
+        // then
+        #expect(states.map(self.stateName) == ["processing", "done"])
+        #expect(self.stubCommand.didProcessInterpretWith?.text == "영수증 텍스트")
+        #expect(self.stubCommand.didProcessInterpretWith?.instruction == "카드값만")
+        #expect(self.stubCommand.didProcessInterpretWith?.source == .imageOcr)
+    }
+
+    // 원문이 10,000자를 넘으면 textTooLong을 던지고 상태는 그대로다
+    @Test func usecase_submitImageCommand_whenTextTooLong_throwsAndKeepsState() throws {
+        // given
+        let usecase = self.makeUsecaseInIdle()
+        let tooLongText = String(repeating: "a", count: 10001)
+        // when
+        var caughtError: AIImageCommandSubmitFailReason?
+        do {
+            try usecase.submitImageCommand(text: tooLongText, additionalInstruction: nil)
+        } catch let error as AIImageCommandSubmitFailReason {
+            caughtError = error
+        }
+        // then
+        #expect(caughtError == .textTooLong)
+        #expect(self.stubCommand.didProcessInterpretWith == nil)
+    }
+
+    // 원문이 정확히 10,000자면 상한을 넘지 않아 처리로 진행한다
+    @Test func usecase_submitImageCommand_whenTextIsExactlyAtLimit_doesNotThrow() throws {
+        // given
+        let usecase = self.makeUsecaseInIdle()
+        let exactText = String(repeating: "a", count: 10000)
+        // when
+        var caughtError: AIImageCommandSubmitFailReason?
+        do {
+            try usecase.submitImageCommand(text: exactText, additionalInstruction: nil)
+        } catch let error as AIImageCommandSubmitFailReason {
+            caughtError = error
+        }
+        // then
+        #expect(caughtError == nil)
+        #expect(self.stubCommand.didProcessInterpretWith?.text.count == 10000)
+    }
+
+    // 부가지시가 1,000자를 넘으면 instructionTooLong을 던진다
+    @Test func usecase_submitImageCommand_whenInstructionTooLong_throws() throws {
+        // given
+        let usecase = self.makeUsecaseInIdle()
+        let tooLongInstruction = String(repeating: "b", count: 1001)
+        // when
+        var caughtError: AIImageCommandSubmitFailReason?
+        do {
+            try usecase.submitImageCommand(text: "영수증 텍스트", additionalInstruction: tooLongInstruction)
+        } catch let error as AIImageCommandSubmitFailReason {
+            caughtError = error
+        }
+        // then
+        #expect(caughtError == .instructionTooLong)
+        #expect(self.stubCommand.didProcessInterpretWith == nil)
+    }
+
+    // 부가지시가 정확히 1,000자면 상한을 넘지 않아 처리로 진행한다
+    @Test func usecase_submitImageCommand_whenInstructionIsExactlyAtLimit_doesNotThrow() throws {
+        // given
+        let usecase = self.makeUsecaseInIdle()
+        let exactInstruction = String(repeating: "b", count: 1000)
+        // when
+        var caughtError: AIImageCommandSubmitFailReason?
+        do {
+            try usecase.submitImageCommand(text: "영수증 텍스트", additionalInstruction: exactInstruction)
+        } catch let error as AIImageCommandSubmitFailReason {
+            caughtError = error
+        }
+        // then
+        #expect(caughtError == nil)
+        #expect(self.stubCommand.didProcessInterpretWith?.instruction?.count == 1000)
+    }
+
+    // 빈 텍스트는 emptyText를 던진다
+    @Test func usecase_submitImageCommand_whenEmptyText_throws() throws {
+        // given
+        let usecase = self.makeUsecaseInIdle()
+        // when
+        var caughtError: AIImageCommandSubmitFailReason?
+        do {
+            try usecase.submitImageCommand(text: "   ", additionalInstruction: nil)
+        } catch let error as AIImageCommandSubmitFailReason {
+            caughtError = error
+        }
+        // then
+        #expect(caughtError == .emptyText)
+    }
+
+    // 이미 처리 중이면 busy를 던진다
+    @Test func usecase_submitImageCommand_whileProcessing_throwsBusy() async throws {
+        // given — confirm 대기 중(진짜 busy 상태)
+        let usecase = self.makeUsecaseInConfirm()
+        // when
+        var caughtError: AIImageCommandSubmitFailReason?
+        do {
+            try usecase.submitImageCommand(text: "영수증 텍스트", additionalInstruction: nil)
+        } catch let error as AIImageCommandSubmitFailReason {
+            caughtError = error
+        }
+        // then
+        #expect(caughtError == .busy)
+    }
+}
+
+
+// MARK: - 크레딧 소진 시 제출 차단
+
+extension AIAgentOrchestrationUsecaseImpleTests {
+
+    @Test("크레딧이 소진됐으면 요청 없이 소진 실패 상태를 방출한다")
+    func usecase_whenCreditExhausted_emitsFailedWithoutRequest() async throws {
+        // given
+        let expect = expectConfirm("소진 실패 상태 방출")
+        let usecase = self.makeUsecase(isCreditExhausted: true)
+
+        // when
+        let state = try await self.firstOutput(expect, for: usecase.state) {
+            try? usecase.submit("내일 회의 잡아줘")
+        }
+
+        // then
+        guard case .failed(let command, let reason, let errorCode) = state
+        else { Issue.record("failed 상태가 아니다"); return }
+        #expect(command == "내일 회의 잡아줘")
+        #expect(reason == nil)
+        #expect(errorCode == .dailyLimitExceeded)
+        #expect(self.stubCommand.didProcessCommand == nil)
+    }
+
+    @Test("크레딧이 소진됐으면 차단 후 usage 를 재조회한다")
+    func usecase_whenCreditExhausted_refreshesUsage() {
+        // given
+        let usecase = self.makeUsecase(isCreditExhausted: true)
+
+        // when
+        try? usecase.submit("내일 회의 잡아줘")
+
+        // then
+        #expect(self.stubUsage.didRefresh == true)
+    }
+
+    @Test("이미지 command 도 크레딧 소진이면 요청 없이 차단된다")
+    func usecase_whenCreditExhausted_blocksImageCommand() async throws {
+        // given
+        let expect = expectConfirm("소진 실패 상태 방출")
+        let usecase = self.makeUsecase(isCreditExhausted: true)
+
+        // when
+        let state = try await self.firstOutput(expect, for: usecase.state) {
+            try? usecase.submitImageCommand(text: "영수증 내용", additionalInstruction: nil)
+        }
+
+        // then
+        guard case .failed(_, _, let errorCode) = state
+        else { Issue.record("failed 상태가 아니다"); return }
+        #expect(errorCode == .dailyLimitExceeded)
+    }
+
+    @Test("크레딧이 남아 있으면 그대로 제출된다")
+    func usecase_whenCreditRemains_submitsCommand() async throws {
+        // given
+        let expect = expectConfirm("처리중 상태 방출")
+        let usecase = self.makeUsecase(isCreditExhausted: false)
+
+        // when
+        let state = try await self.firstOutput(expect, for: usecase.state) {
+            try? usecase.submit("내일 회의 잡아줘")
+        }
+
+        // then
+        guard case .processing(let command) = state
+        else { Issue.record("processing 상태가 아니다"); return }
+        #expect(command == "내일 회의 잡아줘")
+    }
+}
+
+
+// MARK: - 크레딧 소진 시 입력 진입 차단
+
+extension AIAgentOrchestrationUsecaseImpleTests {
+
+    @Test("크레딧이 소진됐으면 음성 입력에 진입하지 않는다")
+    func usecase_whenCreditExhausted_blocksEnterVoiceInput() async throws {
+        // given
+        let expect = expectConfirm("소진 시 상태 방출")
+        let usecase = self.makeUsecase(isCreditExhausted: true)
+
+        // when
+        let state = try await self.firstOutput(expect, for: usecase.state) {
+            usecase.enterVoiceInput()
+        }
+
+        // then — listening으로 전이되지 않고 speech도 시작하지 않는다
+        if case .listening = state {
+            Issue.record("listening 상태로 전이되면 안 된다: \(String(describing: state))")
+        }
+        #expect(self.stubSpeech.didStartListening == false)
+    }
+
+    @Test("음성 입력 진입이 크레딧으로 막히면 소진 실패 상태를 방출한다")
+    func usecase_whenCreditExhausted_emitsFailedOnEnterVoiceInput() async throws {
+        // given
+        let expect = expectConfirm("소진 실패 상태 방출")
+        let usecase = self.makeUsecase(isCreditExhausted: true)
+
+        // when
+        let state = try await self.firstOutput(expect, for: usecase.state) {
+            usecase.enterVoiceInput()
+        }
+
+        // then
+        guard case .failed(let command, let reason, let errorCode) = state
+        else { Issue.record("failed 상태가 아니다"); return }
+        #expect(command == "")
+        #expect(reason == nil)
+        #expect(errorCode == .dailyLimitExceeded)
+    }
+
+    @Test("크레딧이 소진됐으면 키보드 입력에 진입하지 않는다")
+    func usecase_whenCreditExhausted_blocksEnterKeyboardInput() async throws {
+        // given
+        let expect = expectConfirm("소진 시 상태 방출")
+        let usecase = self.makeUsecase(isCreditExhausted: true)
+
+        // when
+        let state = try await self.firstOutput(expect, for: usecase.state) {
+            usecase.enterKeyboardInput()
+        }
+
+        // then — listening으로 전이되지 않는다
+        if case .listening = state {
+            Issue.record("listening 상태로 전이되면 안 된다: \(String(describing: state))")
+        }
+    }
+
+    @Test("키보드 입력 진입이 크레딧으로 막히면 소진 실패 상태를 방출한다")
+    func usecase_whenCreditExhausted_emitsFailedOnEnterKeyboardInput() async throws {
+        // given
+        let expect = expectConfirm("소진 실패 상태 방출")
+        let usecase = self.makeUsecase(isCreditExhausted: true)
+
+        // when
+        let state = try await self.firstOutput(expect, for: usecase.state) {
+            usecase.enterKeyboardInput()
+        }
+
+        // then
+        guard case .failed(let command, let reason, let errorCode) = state
+        else { Issue.record("failed 상태가 아니다"); return }
+        #expect(command == "")
+        #expect(reason == nil)
+        #expect(errorCode == .dailyLimitExceeded)
+    }
+
+    @Test("크레딧이 소진됐으면 이미지 입력에 진입하지 않는다")
+    func usecase_whenCreditExhausted_blocksEnterImageInput() async throws {
+        // given
+        let expect = expectConfirm("소진 시 상태 방출")
+        let usecase = self.makeUsecase(isCreditExhausted: true)
+
+        // when
+        let state = try await self.firstOutput(expect, for: usecase.state) {
+            usecase.enterImageInput()
+        }
+
+        // then — listening으로 전이되지 않는다
+        if case .listening = state {
+            Issue.record("listening 상태로 전이되면 안 된다: \(String(describing: state))")
+        }
+    }
+
+    @Test("이미지 입력 진입이 크레딧으로 막히면 소진 실패 상태를 방출한다")
+    func usecase_whenCreditExhausted_emitsFailedOnEnterImageInput() async throws {
+        // given
+        let expect = expectConfirm("소진 실패 상태 방출")
+        let usecase = self.makeUsecase(isCreditExhausted: true)
+
+        // when
+        let state = try await self.firstOutput(expect, for: usecase.state) {
+            usecase.enterImageInput()
+        }
+
+        // then
+        guard case .failed(let command, let reason, let errorCode) = state
+        else { Issue.record("failed 상태가 아니다"); return }
+        #expect(command == "")
+        #expect(reason == nil)
+        #expect(errorCode == .dailyLimitExceeded)
+    }
+
+    @Test("크레딧이 남아 있으면 음성 입력에 진입한다")
+    func usecase_whenCreditRemains_entersVoiceInput() async throws {
+        // given
+        let expect = expectConfirm("listening 상태 방출")
+        let usecase = self.makeUsecase(isCreditExhausted: false)
+
+        // when
+        let state = try await self.firstOutput(expect, for: usecase.state) {
+            usecase.enterVoiceInput()
+        }
+
+        // then
+        guard case .listening(let inputMode) = state
+        else { Issue.record("listening 상태가 아니다"); return }
+        #expect(inputMode == .voice)
+        try await self.waitEffect("음성 인식이 시작됨") { self.stubSpeech.didStartListening }
+    }
+}
+
+
+// MARK: - 처리 중 입력 진입 시도 — state 가드가 크레딧 판정보다 우선
+
+extension AIAgentOrchestrationUsecaseImpleTests {
+
+    private func makeUsecaseInProcessing(isCreditExhausted: Bool = false) -> AIAgentOrchestrationUsecaseImple {
+        let usecase = self.makeUsecaseWithCommandJob(
+            AIJob(jobId: "some_job") |> \.status .~ AIJob.Status.running
+        )
+        try? usecase.submit("회의 잡아줘")
+        self.stubUsage.stubIsCreditExhausted = isCreditExhausted
+        return usecase
+    }
+
+    @Test("처리 중 상태에서는 크레딧이 소진돼도 조용히 무시하고 소진 실패 상태로 덮지 않는다")
+    func usecase_whenProcessingAndCreditExhausted_enterKeyboardInput_keepsProcessingWithoutEmittingFailed() async throws {
+        // given — .processing 진입 후 크레딧 소진 플래그를 켠다 (state 가드가 먼저 걸려야 한다)
+        let usecase = self.makeUsecaseInProcessing(isCreditExhausted: true)
+
+        // when
+        usecase.enterKeyboardInput()
+
+        // then — 상태는 여전히 processing(소진 실패로 덮이지 않음)
+        let expect = expectConfirm("상태는 processing 그대로")
+        let state = try await self.firstOutput(expect, for: usecase.state)
+        guard case .processing = state
+        else { Issue.record("processing 상태가 아니다: \(String(describing: state))"); return }
+    }
+}
+
+
+// MARK: - 알림 권한
+
+extension AIAgentOrchestrationUsecaseImpleTests {
+
+    // 마이크·음성인식 알럿보다 알림 알럿이 먼저 뜨려면, 권한 응답이 오기 전엔 인식이 시작되면 안 된다
+    @Test func usecase_whenEnterVoiceInput_notStartRecognizingUntilNotificationPermissionResolved() async throws {
+        // given — 권한 응답을 게이트로 잡아둔다
+        let gate = PermissionGate()
+        let usecase = self.makeUsecase(notificationStatus: .notDetermined)
+        self.stubNotificationPermission.requestPermissionGate = { await gate.wait() }
+        // when
+        usecase.enterVoiceInput()
+        try await self.waitEffect("알림 권한 요청이 도달") {
+            self.stubNotificationPermission.didRequestPermission == true
+        }
+        // then — 응답 전이라 인식은 아직 시작되지 않았다
+        #expect(self.stubSpeech.didStartListening == false)
+        // when — 권한 응답 도착
+        gate.open()
+        // then
+        try await self.waitEffect("응답 뒤에야 인식이 시작됨") { self.stubSpeech.didStartListening }
+    }
+
+    // 권한 응답을 기다리는 사이 취소하면 뒤늦은 응답이 인식을 시작시키지 않는다
+    @Test func usecase_whenStopInputBeforeNotificationPermissionResolved_notStartRecognizing() async throws {
+        // given
+        let gate = PermissionGate()
+        let usecase = self.makeUsecase(notificationStatus: .notDetermined)
+        self.stubNotificationPermission.requestPermissionGate = { await gate.wait() }
+        usecase.enterVoiceInput()
+        try await self.waitEffect("알림 권한 요청이 도달") {
+            self.stubNotificationPermission.didRequestPermission == true
+        }
+        // when — 응답 도착 전에 취소
+        usecase.stopInput()
+        gate.open()
+        // then — 뒤늦은 응답이 인식을 시작시키지 않는다
+        try await Task.sleep(for: .milliseconds(50))
+        #expect(self.stubSpeech.didStartListening == false)
+    }
+
+    @Test func usecase_whenEnterKeyboardInput_notCheckNotificationPermission() async throws {
+        // given — 키보드 전환은 listening 진입 이후라 알림 권한을 다시 건드리지 않는다
+        let expect = expectConfirm("키보드 전환에는 값 변화 없음")
+        expect.count = 0
+        expect.timeout = .milliseconds(100)
+        let usecase = self.makeUsecase(notificationStatus: .notDetermined, shouldGrantNotification: false)
+        // when
+        let values = try await self.outputs(expect, for: usecase.isNotificationPermissionDenied.dropFirst()) {
+            usecase.enterKeyboardInput()
+        }
+        // then
+        #expect(values.isEmpty)
+        #expect(self.stubNotificationPermission.didCheckAuthorizationStatus == nil)
+    }
+
+    @Test func usecase_whenEnterImageInput_notCheckNotificationPermission() async throws {
+        // given — 이미지 전환도 listening 진입 이후라 알림 권한을 다시 건드리지 않는다
+        let expect = expectConfirm("이미지 전환에는 값 변화 없음")
+        expect.count = 0
+        expect.timeout = .milliseconds(100)
+        let usecase = self.makeUsecase(notificationStatus: .notDetermined, shouldGrantNotification: false)
+        // when
+        let values = try await self.outputs(expect, for: usecase.isNotificationPermissionDenied.dropFirst()) {
+            usecase.enterImageInput()
+        }
+        // then
+        #expect(values.isEmpty)
+        #expect(self.stubNotificationPermission.didCheckAuthorizationStatus == nil)
+    }
+
+    @Test func usecase_whenNotificationPermissionRequestDenied_emitDenied() async throws {
+        // given
+        let expect = expectConfirm("notDetermined + 거부 → isNotificationPermissionDenied true 방출")
+        expect.count = 2
+        let usecase = self.makeUsecase(notificationStatus: .notDetermined, shouldGrantNotification: false)
+        // when
+        let values = try await self.outputs(expect, for: usecase.isNotificationPermissionDenied) {
+            usecase.enterVoiceInput()
+        }
+        // then
+        #expect(values == [false, true])
+    }
+
+    @Test func usecase_whenNotificationPermissionAlreadyDenied_emitDeniedWithoutRequest() async throws {
+        // given
+        let expect = expectConfirm("이미 denied → 요청 없이 true 방출")
+        expect.count = 2
+        let usecase = self.makeUsecase(notificationStatus: .denied)
+        // when
+        let values = try await self.outputs(expect, for: usecase.isNotificationPermissionDenied) {
+            usecase.enterVoiceInput()
+        }
+        // then — true 방출이 도달한 시점 = 상태 판정이 끝난 시점이라 여기서 요청 여부를 단언해도 안전하다
+        #expect(values == [false, true])
+        #expect(self.stubNotificationPermission.didRequestPermission == nil)
+    }
+
+    @Test func usecase_whenNotificationPermissionAuthorized_notEmitDenied() async throws {
+        // given
+        let usecase = self.makeUsecase(notificationStatus: .authorized)
+        // when — authorized는 값이 바뀌지 않아 기다릴 조건이 없다. 조회 도달을 기다린 뒤 현재값을 본다
+        usecase.enterVoiceInput()
+        // then
+        try await self.waitEffect("알림 권한 조회가 도달") {
+            self.stubNotificationPermission.didCheckAuthorizationStatus == true
+        }
+        #expect(self.stubNotificationPermission.didRequestPermission == nil)
+        let expect = expectConfirm("false 유지")
+        let value = try await self.firstOutput(expect, for: usecase.isNotificationPermissionDenied)
+        #expect(value == false)
+    }
+
+    @Test func usecase_whenNotificationPermissionCheckFails_notEmitDenied() async throws {
+        // given
+        let usecase = self.makeUsecaseWithNotificationCheckFailure()
+        // when — throw 시 fail-open(false)이라 값이 바뀌지 않아 기다릴 조건이 없다. 조회 도달을 기다린 뒤 현재값을 본다
+        usecase.enterVoiceInput()
+        // then
+        try await self.waitEffect("알림 권한 조회가 도달") {
+            self.stubNotificationPermission.didCheckAuthorizationStatus == true
+        }
+        let expect = expectConfirm("체크 실패 → fail-open, false 유지")
+        let value = try await self.firstOutput(expect, for: usecase.isNotificationPermissionDenied)
+        #expect(value == false)
+    }
+
+    @Test func usecase_whenEnterVoiceInputBlockedByCreditExhausted_notCheckNotificationPermission() async throws {
+        // given — credit 가드가 알림 권한 호출보다 먼저 걸린다
+        let expect = expectConfirm("크레딧 소진 → failed 상태")
+        let usecase = self.makeUsecase(isCreditExhausted: true, notificationStatus: .notDetermined)
+        // when
+        let state = try await self.firstOutput(expect, for: usecase.state) {
+            usecase.enterVoiceInput()
+        }
+        // then — failed 도달 시점 = 가드가 이미 막은 뒤라 여기서 요청 여부를 단언해도 안전하다
+        guard case .failed(_, _, let errorCode) = state
+        else { Issue.record("failed 상태가 아니다: \(String(describing: state))"); return }
+        #expect(errorCode == .dailyLimitExceeded)
+        #expect(self.stubNotificationPermission.didRequestPermission == nil)
+    }
+
+    @Test func usecase_whenRefreshNotificationPermissionStatusWithDenied_emitDenied() async throws {
+        // given
+        let expect = expectConfirm("refresh + denied → true 방출")
+        expect.count = 2
+        let usecase = self.makeUsecase(notificationStatus: .denied)
+        // when
+        let values = try await self.outputs(expect, for: usecase.isNotificationPermissionDenied) {
+            usecase.refreshNotificationPermissionStatus()
+        }
+        // then
+        #expect(values == [false, true])
+    }
+
+    @Test func usecase_whenRefreshNotificationPermissionStatusWithNotDetermined_notRequestPermission() async throws {
+        // given
+        let usecase = self.makeUsecase(notificationStatus: .notDetermined)
+        // when — notDetermined는 refresh에서 요청하지 않아 값이 바뀌지 않는다. 조회 도달을 기다린 뒤 단언한다
+        usecase.refreshNotificationPermissionStatus()
+        // then
+        try await self.waitEffect("알림 권한 조회가 도달") {
+            self.stubNotificationPermission.didCheckAuthorizationStatus == true
+        }
+        #expect(self.stubNotificationPermission.didRequestPermission == nil)
+        let expect = expectConfirm("false 유지")
+        let value = try await self.firstOutput(expect, for: usecase.isNotificationPermissionDenied)
+        #expect(value == false)
+    }
+
+    @Test func usecase_whenEnterVoiceInputWithDeniedNotification_stillEnterListening() async throws {
+        // given
+        let usecase = self.makeUsecase(notificationStatus: .denied)
+        usecase.reset()
+        let expect = expectConfirm("권한 거부와 무관하게 listening 전이")
+        // when
+        let state = try await self.firstOutput(expect, for: usecase.state.dropFirst()) {
+            usecase.enterVoiceInput()
+        }
+        // then
+        guard case .listening(.voice) = state
+        else { Issue.record("listening(.voice) 상태가 아니다: \(String(describing: state))"); return }
     }
 }

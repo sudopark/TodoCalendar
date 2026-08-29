@@ -29,27 +29,27 @@ private enum AICommandBadge: Equatable {
     case failed
 }
 
+enum DayEventListScrollAnchor {
+    static let quickAddField: String = "day-event-list-quick-add-field"
+}
+
 
 // MARK: - DayEventListViewController
 
 @Observable final class DayEventListViewState {
 
     @ObservationIgnored private var didBind = false
-    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private let cancellables = CancelBag()
 
     fileprivate var foremostModel: (any EventCellViewModel)?
     fileprivate var uncompletedTodos: [TodoEventCellViewModel] = []
     fileprivate var dayModel: SelectedDayModel?
     fileprivate var cellViewModels: [any EventCellViewModel] = []
     fileprivate var foremostEventMarkingStatus: ForemostMarkingStatus = .idle
-    fileprivate var isAIAgentEnabled: Bool = false
     fileprivate var aiAgentState: AIAgentState = .idle
     fileprivate var recognizingText: String = ""
     fileprivate var voiceLevel: Float = 0
 
-    // 음성 리스닝 UI(파형·네온 테두리·AI pill)는 음성 입력일 때만 켠다.
-    // 키보드 입력(.listening(.keyboard)) 중엔 뒤 배경을 평소 상태로 둬야
-    // 키보드 시트가 닫힐 때 파형 잔상이 노출되지 않는다.
     fileprivate var isVoiceListening: Bool {
         if case .listening(.voice) = aiAgentState { return true }
         return false
@@ -76,8 +76,6 @@ private enum AICommandBadge: Equatable {
         guard self.didBind == false else { return }
         self.didBind = true
 
-        self.isAIAgentEnabled = viewModel.isAIAgentEnabled
-
         viewModel.foremostEventModel
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self, weak appearance] model in
@@ -85,7 +83,7 @@ private enum AICommandBadge: Equatable {
                     self?.foremostModel = model
                 }
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.uncompletedTodoEventModels
             .receive(on: RunLoop.main)
@@ -94,14 +92,14 @@ private enum AICommandBadge: Equatable {
                     self?.uncompletedTodos = models
                 }
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.selectedDay
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] model in
                 self?.dayModel = model
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.cellViewModels
             .receive(on: RunLoop.main)
@@ -110,7 +108,7 @@ private enum AICommandBadge: Equatable {
                     self?.cellViewModels = cellViewModels
                 }
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.foremostEventMarkingStatus
             .receive(on: RunLoop.main)
@@ -119,24 +117,24 @@ private enum AICommandBadge: Equatable {
                     self?.foremostEventMarkingStatus = status
                 }
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.aiAgentState
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] state in
                 self?.aiAgentState = state
             })
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.recognizingText
             .receive(on: RunLoop.main)
             .sink { [weak self] text in self?.recognizingText = text }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
 
         viewModel.voiceLevel
             .receive(on: RunLoop.main)
             .sink { [weak self] level in self?.voiceLevel = level }
-            .store(in: &self.cancellables)
+            .store(in: self.cancellables)
     }
 }
 
@@ -149,11 +147,13 @@ final class DayEventListViewEventHandler: Observable {
     var makeNewTodoWithGivenNameAndDetails: (String) -> Void = { _ in }
     var requestShowDetail: (any EventCellViewModel) -> Void = { _ in }
     var showDoneTodoList: () -> Void = { }
+    var showSharePreview: () -> Void = { }
     var handleMoreAction: (any EventCellViewModel, EventListMoreAction) -> Void = { _, _ in }
     var refreshUncompletedTodos: () -> Void = { }
     var enterVoiceInput: () -> Void = { }
     var finishVoiceInput: () -> Void = { }
     var enterKeyboardInput: () -> Void = { }
+    var enterImageInput: () -> Void = { }
     var stopAIAgentInput: () -> Void = { }
     var submitAIAgent: (String) -> Void = { _ in }
     var handleAIEntryButtonTap: () -> Void = { }
@@ -173,11 +173,13 @@ final class DayEventListViewEventHandler: Observable {
         self.makeNewTodoWithGivenNameAndDetails = viewModel.makeTodoEvent(with:)
         self.requestShowDetail = eventListCellEventHandleViewModel.selectEvent(_:)
         self.showDoneTodoList = viewModel.showDoneTodoList
+        self.showSharePreview = viewModel.showSharePreview
         self.handleMoreAction = eventListCellEventHandleViewModel.handleMoreAction(_:_:)
         self.refreshUncompletedTodos = viewModel.refreshUncompletedTodoEvents
         self.enterVoiceInput = viewModel.enterVoiceInput
         self.finishVoiceInput = viewModel.finishVoiceInput
         self.enterKeyboardInput = viewModel.enterKeyboardInput
+        self.enterImageInput = viewModel.enterImageInput
         self.stopAIAgentInput = viewModel.stopAIAgentInput
         self.submitAIAgent = viewModel.submitAIAgent(_:)
         self.handleAIEntryButtonTap = viewModel.handleAIEntryButtonTap
@@ -253,6 +255,7 @@ struct DayEventListView: View {
                     QuickAddNewTodoView(isFocusInput: $isFocusInput)
                         .eventHandler(\.addNewTodoQuickly, eventHandler.addNewTodoQuickly)
                         .eventHandler(\.makeNewTodoWithGivenNameAndDetails, eventHandler.makeNewTodoWithGivenNameAndDetails)
+                        .id(DayEventListScrollAnchor.quickAddField)
                     addNewButton()
                 }
                 .animation(.easeInOut(duration: 0.3), value: self.state.isVoiceListening)
@@ -264,7 +267,6 @@ struct DayEventListView: View {
         .padding()
         .background(self.appearance.colorSet.bg0.asColor)
         .onChange(of: self.state.isVoiceListening) { _, listening in
-            // listening on/off 전환에 반대되는 세기의 햅틱 + 녹음 시작/종료 시스템 사운드.
             self.appearance.impactIfNeed(listening ? .medium : .soft)
             AudioServicesPlaySystemSound(listening ? 1113 : 1114)
         }
@@ -377,6 +379,13 @@ struct DayEventListView: View {
 
                 Button {
                     self.isFocusInput = false
+                    self.eventHandler.showSharePreview()
+                } label: {
+                    Image(systemName: "square.and.arrow.up")
+                }
+
+                Button {
+                    self.isFocusInput = false
                     self.eventHandler.showDoneTodoList()
                 } label: {
                     Image(systemName: "checklist.checked")
@@ -431,7 +440,6 @@ private struct QuickAddNewTodoView: View {
     fileprivate var addNewTodoQuickly: (String) -> Void = { _ in }
     fileprivate var makeNewTodoWithGivenNameAndDetails: (String) -> Void = { _ in }
 
-    // 입력 전 todo 필드만 흐리게. AI 진입 버튼은 딤 대상 아님.
     private var inputDimOpacity: Double {
         (self.state.isVoiceListening || self.isEntering) ? 1.0 : 0.5
     }
@@ -440,13 +448,31 @@ private struct QuickAddNewTodoView: View {
         quickAddField()
             .padding(.vertical, spacing: .xsmall).padding(.horizontal, spacing: .small)
             .frame(height: 50)
-            .backgroundAsRoundedRectForEventList(self.appearance)
+            .background(self.fieldBackground())
             .overlay {
                 if self.state.isVoiceListening {
                     NeonListeningBorder(cornerRadius: 5)
                         .transition(.opacity)
                 }
             }
+    }
+
+    // listening 중엔 이벤트 셀과 같은 bg1을 벗고 네온 그라데이션을 입어 목록에서 분리된다.
+    @ViewBuilder
+    private func fieldBackground() -> some View {
+        if self.state.isVoiceListening {
+            RoundedRectangle(cornerRadius: Metric.Radius.chip)
+                .fill(
+                    LinearGradient(
+                        colors: self.appearance.colorSet.aiListeningBackground.map { $0.asColor },
+                        startPoint: .init(x: 0, y: 0.15),
+                        endPoint: .init(x: 1, y: 0.85)
+                    )
+                )
+        } else {
+            RoundedRectangle(cornerRadius: Metric.Radius.chip)
+                .fill(self.appearance.colorSet.bg1.asColor)
+        }
     }
 
     private func quickAddField() -> some View {
@@ -467,7 +493,6 @@ private struct QuickAddNewTodoView: View {
     @ViewBuilder
     private func leadingLabel() -> some View {
         if self.state.isVoiceListening {
-            // pill + 테두리로 "누르면 설명" affordance. 탭 시 안내 표시.
             Button {
                 self.eventHandler.showAIGuide()
             } label: {
@@ -514,11 +539,9 @@ private struct QuickAddNewTodoView: View {
             }
             .opacity(self.inputDimOpacity)
 
-            if self.state.isAIAgentEnabled {
-                AIAgentEntryButton(badge: self.state.aiCommandBadge) {
-                    self.isFocusInput = false
-                    self.eventHandler.handleAIEntryButtonTap()
-                }
+            AIAgentEntryButton(badge: self.state.aiCommandBadge) {
+                self.isFocusInput = false
+                self.eventHandler.handleAIEntryButtonTap()
             }
         }
     }
@@ -527,8 +550,6 @@ private struct QuickAddNewTodoView: View {
     private func listeningContent() -> some View {
         HStack(spacing: 8) {
             VoiceWaveformView(
-                // raw voiceLevel은 실기기 마이크 dynamic range가 좁아 변동이 작다.
-                // sqrt로 파형을 시각 증폭한다 (표현 관심사라 도메인 아닌 여기서).
                 level: sqrt(self.state.voiceLevel),
                 tintColor: self.appearance.colorSet.text1.asColor
             )
@@ -539,6 +560,9 @@ private struct QuickAddNewTodoView: View {
             }
             self.circleControlButton(icon: "stop.fill", isPrimary: false) {
                 self.eventHandler.stopAIAgentInput()
+            }
+            self.circleControlButton(icon: "photo", isPrimary: false) {
+                self.eventHandler.enterImageInput()
             }
             self.circleControlButton(icon: "arrow.up", isPrimary: true) {
                 self.eventHandler.finishVoiceInput()
@@ -609,7 +633,6 @@ private struct QuickAddNewTodoView: View {
 
 // MARK: - NeonListeningBorder
 
-// listening 중 입력창을 감싸는 네온 그라데이션 테두리. Siri 입력처럼 색이 흐른다.
 private struct NeonListeningBorder: View {
 
     let cornerRadius: CGFloat
@@ -710,9 +733,6 @@ private struct AIAgentEntryButton: View {
     @ViewBuilder
     private func entryButtonIcon() -> some View {
         if self.badge == .processing {
-            // 부모(인라인 바)가 키보드 avoidance로 위치를 바꿀 때, LoadingCircleView의
-            // repeatForever 애니가 그 위치 변화까지 보간해 인디케이터가 "떨어지듯" 움직인다.
-            // geometryGroup으로 부모 geometry 변화를 격리해 편승을 끊는다.
             LoadingCircleView(self.appearance.colorSet.primaryBtnText.asColor, lineWidth: 2)
                 .frame(width: 18, height: 18)
                 .geometryGroup()

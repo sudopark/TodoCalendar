@@ -16,7 +16,8 @@ final class CompositeLoadingBarView: UIView {
     private enum Constant {
         static let animationDuration: CGFloat = 2.0
         static let animationStartDebouncing: CGFloat = 1.0
-        static let animtionTimeout: TimeInterval = 10.0
+        // 전체 sync(마이그레이션 대기 + 3 dataType 페이징) 소요 상한을 덮는 안전장치 값
+        static let animtionTimeout: TimeInterval = 180.0
     }
     private let barLayer = CALayer()
     private var isLoadingCount = 0

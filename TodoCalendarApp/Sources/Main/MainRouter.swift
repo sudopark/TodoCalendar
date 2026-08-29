@@ -31,12 +31,15 @@ final class MainRouter: BaseRouterImple, MainRouting, @unchecked Sendable {
     
     private let calendarSceneBulder: any CalendarSceneBuilder
     private let settingSceneBuilder: any SettingSceneBuiler
+    private let fullScreenAdRouter: (any FullScreenAdRouter)?
     init(
         calendarSceneBulder: any CalendarSceneBuilder,
-        settingSceneBuilder: any SettingSceneBuiler
+        settingSceneBuilder: any SettingSceneBuiler,
+        fullScreenAdRouter: (any FullScreenAdRouter)?
     ) {
         self.calendarSceneBulder = calendarSceneBulder
         self.settingSceneBuilder = settingSceneBuilder
+        self.fullScreenAdRouter = fullScreenAdRouter
     }
 }
 
@@ -74,11 +77,18 @@ extension MainRouter {
     
     func routeToSettingScene() {
         Task { @MainActor in
-            
+
             let scene = self.settingSceneBuilder.makeSettingItemListScene()
-            let navigation = UINavigationController(rootViewController: scene)
+            let navigation = SettingNavigationController(rootViewController: scene)
+            navigation.onDismissed = { [weak self] in self?.showFullScreenAdAfterSettingExit() }
             self.currentScene?.present(navigation, animated: true)
         }
+    }
+
+    @MainActor
+    private func showFullScreenAdAfterSettingExit() {
+        guard let scene = self.currentScene, let adRouter = self.fullScreenAdRouter else { return }
+        adRouter.showFullScreenAd(from: scene, scope: .application, isFromAppLaunch: false)
     }
     
     func showJumpDaySelectDialog(current: CalendarDay) {

@@ -36,6 +36,4 @@
 
 ## DB 마이그레이션
 
-- `AppEnvironment.dbVersion` 증가
-- 해당 `Table` 타입의 `migrateStatement(for version:)` 에 case 추가
-- 두 가지를 함께 변경해야 마이그레이션이 실행됨
+절차·버전 이력 정본은 [`docs/spec/infrastructure.md §5`](spec/infrastructure.md). 짝은 **세 위치**다 — `AppEnvironment.dbVersion` ↔ `Table.migrateStatement(for:)` case ↔ `AppDataMigrationImple`의 `runDBMigration` case + `runMigrationVersionNtoM`. 마지막이 빠지면 `migrateStatement`가 호출조차 안 되고 조용히 안 돈다.

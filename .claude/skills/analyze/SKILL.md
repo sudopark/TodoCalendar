@@ -25,7 +25,7 @@ dispatch마다 (Agent tool, `subagent_type: code-analyzer`) 프롬프트에 반�
 - 보고가 길어질 규모면 산출 파일 경로(스크래치패드) — 컨트롤러 컨텍스트에 전문을 싣지 않는다
 - **유저가 이 세션에서 지정한 제외·집중 조건** — subagent 기본 제외와 별개로 반드시 명시한다
 
-모델: 단일 축·좁은 영역은 sonnet급, 교차 영역 추적·아키텍처 수준 질문은 세션 모델.
+모델: dispatch에 `model`을 지정하지 않는다 — agent frontmatter의 sonnet이 기본이다. 1차 보고의 "확인하지 못한 것"이 분석 목적의 답을 막고 있을 때만 `model: opus`로 재dispatch하고, 이미 확인된 사실(1차 보고 파일 경로)과 남은 질문을 함께 넘긴다.
 
 ## 4. 합산·보고
 
