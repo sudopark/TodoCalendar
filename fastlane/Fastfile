@@ -248,8 +248,10 @@ platform :ios do
       skip_binary_upload: true,
       skip_screenshots: true,
       submit_for_review: false,
-      # HTML 프리뷰 확인 프롬프트를 남겨 업로드 직전에 사람이 최종 확인한다
-      force: false,
+      # HTML 프리뷰 확인 프롬프트를 남겨 업로드 직전에 사람이 최종 확인한다.
+      # TTY 없는 자리(에이전트 셸·CI)에서는 그 프롬프트에 답할 수 없어 lane 이 죽으므로
+      # DELIVER_FORCE=true 로 건너뛴다 — 명시 인자는 env 를 덮으므로 여기서 직접 읽어야 한다
+      force: ENV["DELIVER_FORCE"] == "true",
       # precheck 는 아래에서 직접 돌린다 — deliver 내부 실행은 위반을 찾아도 lane 을 세우지 않는다
       run_precheck_before_submit: false
     )
