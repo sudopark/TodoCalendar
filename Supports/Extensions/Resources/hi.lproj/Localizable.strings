@@ -387,10 +387,10 @@
 // MARK: - share preview
 
 "share_preview::title" = "साझा करने का पूर्वावलोकन";
-"share_preview::tag_filter::title" = "टैग";
+"share_preview::tag_filter::title" = "इवेंट प्रकार";
 "share_preview::tag_filter::select_all" = "सभी चुनें";
 "share_preview::tag_filter::deselect_all" = "सभी अचयनित करें";
-"share_preview::option::include_tag_name" = "टैग का नाम शामिल करें";
+"share_preview::option::include_tag_name" = "इवेंट प्रकार का नाम शामिल करें";
 "share_preview::share_button" = "साझा करें";
 "share_preview::empty" = "साझा करने के लिए कोई इवेंट नहीं है";
 "share_preview::header::this_week" = "इस सप्ताह";

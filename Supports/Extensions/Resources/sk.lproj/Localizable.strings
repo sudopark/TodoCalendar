@@ -386,10 +386,10 @@
 // MARK: - share preview
 
 "share_preview::title" = "Náhľad zdieľania";
-"share_preview::tag_filter::title" = "Štítky";
+"share_preview::tag_filter::title" = "Typy udalostí";
 "share_preview::tag_filter::select_all" = "Vybrať všetko";
 "share_preview::tag_filter::deselect_all" = "Zrušiť výber";
-"share_preview::option::include_tag_name" = "Zobraziť názov štítka";
+"share_preview::option::include_tag_name" = "Zobraziť názov typu udalosti";
 "share_preview::share_button" = "Zdieľať";
 "share_preview::empty" = "Žiadne udalosti na zdieľanie";
 "share_preview::header::this_week" = "Tento týždeň";

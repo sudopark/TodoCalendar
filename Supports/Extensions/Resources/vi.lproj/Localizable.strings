@@ -387,10 +387,10 @@
 // MARK: - share preview
 
 "share_preview::title" = "Xem trước chia sẻ";
-"share_preview::tag_filter::title" = "Thẻ";
+"share_preview::tag_filter::title" = "Loại sự kiện";
 "share_preview::tag_filter::select_all" = "Chọn tất cả";
 "share_preview::tag_filter::deselect_all" = "Bỏ chọn tất cả";
-"share_preview::option::include_tag_name" = "Hiển thị tên thẻ";
+"share_preview::option::include_tag_name" = "Hiển thị tên loại sự kiện";
 "share_preview::share_button" = "Chia sẻ";
 "share_preview::empty" = "Không có sự kiện nào để chia sẻ";
 "share_preview::header::this_week" = "Tuần này";

@@ -387,10 +387,10 @@
 // MARK: - share preview
 
 "share_preview::title" = "Προεπισκόπηση κοινοποίησης";
-"share_preview::tag_filter::title" = "Ετικέτες";
+"share_preview::tag_filter::title" = "Τύποι συμβάντων";
 "share_preview::tag_filter::select_all" = "Επιλογή όλων";
 "share_preview::tag_filter::deselect_all" = "Αποεπιλογή όλων";
-"share_preview::option::include_tag_name" = "Συμπερίληψη ονόματος ετικέτας";
+"share_preview::option::include_tag_name" = "Συμπερίληψη ονόματος τύπου συμβάντος";
 "share_preview::share_button" = "Κοινοποίηση";
 "share_preview::empty" = "Δεν υπάρχουν συμβάντα για κοινοποίηση";
 "share_preview::header::this_week" = "Αυτή η εβδομάδα";

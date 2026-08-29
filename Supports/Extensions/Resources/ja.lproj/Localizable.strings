@@ -386,10 +386,10 @@
 // MARK: - share preview
 
 "share_preview::title" = "共有プレビュー";
-"share_preview::tag_filter::title" = "タグ";
+"share_preview::tag_filter::title" = "イベントタイプ";
 "share_preview::tag_filter::select_all" = "すべて選択";
 "share_preview::tag_filter::deselect_all" = "すべて解除";
-"share_preview::option::include_tag_name" = "タグ名も表示";
+"share_preview::option::include_tag_name" = "イベントタイプ名も表示";
 "share_preview::share_button" = "共有";
 "share_preview::empty" = "共有できるイベントがありません";
 "share_preview::header::this_week" = "今週";

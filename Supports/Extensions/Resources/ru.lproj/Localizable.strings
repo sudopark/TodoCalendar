@@ -386,10 +386,10 @@
 // MARK: - share preview
 
 "share_preview::title" = "Предпросмотр";
-"share_preview::tag_filter::title" = "Теги";
+"share_preview::tag_filter::title" = "Типы событий";
 "share_preview::tag_filter::select_all" = "Выбрать все";
 "share_preview::tag_filter::deselect_all" = "Снять выделение";
-"share_preview::option::include_tag_name" = "Показывать название тега";
+"share_preview::option::include_tag_name" = "Показывать название типа события";
 "share_preview::share_button" = "Поделиться";
 "share_preview::empty" = "Нет событий, которыми можно поделиться";
 "share_preview::header::this_week" = "Эта неделя";

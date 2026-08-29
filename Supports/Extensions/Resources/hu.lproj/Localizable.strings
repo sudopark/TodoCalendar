@@ -387,10 +387,10 @@
 // MARK: - share preview
 
 "share_preview::title" = "Megosztás előnézete";
-"share_preview::tag_filter::title" = "Címkék";
+"share_preview::tag_filter::title" = "Eseménytípusok";
 "share_preview::tag_filter::select_all" = "Összes kijelölése";
 "share_preview::tag_filter::deselect_all" = "Kijelölés törlése";
-"share_preview::option::include_tag_name" = "Címke nevének megjelenítése";
+"share_preview::option::include_tag_name" = "Eseménytípus nevének megjelenítése";
 "share_preview::share_button" = "Megosztás";
 "share_preview::empty" = "Nincs megosztható esemény";
 "share_preview::header::this_week" = "Ez a hét";

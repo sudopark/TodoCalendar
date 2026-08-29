@@ -386,10 +386,10 @@
 // MARK: - share preview
 
 "share_preview::title" = "分享预览";
-"share_preview::tag_filter::title" = "标签";
+"share_preview::tag_filter::title" = "事件类型";
 "share_preview::tag_filter::select_all" = "全选";
 "share_preview::tag_filter::deselect_all" = "全部取消";
-"share_preview::option::include_tag_name" = "显示标签名称";
+"share_preview::option::include_tag_name" = "显示事件类型名称";
 "share_preview::share_button" = "分享";
 "share_preview::empty" = "没有可分享的事件";
 "share_preview::header::this_week" = "本周";
