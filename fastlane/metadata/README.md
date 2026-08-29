@@ -3,48 +3,37 @@
 App Store Connect(ASC)에 올릴 텍스트 메타데이터를 fastlane `deliver` 규약대로 담아둔 곳이다.
 `metadata/<ASC 로케일>/<필드>.txt` 구조이고, **파일명이 곧 ASC 필드**다.
 
-## ⚠️ 이 디렉토리를 지금 상태로 업로드하지 마라
-
-`deliver`는 **디렉토리에 있는 로케일을 ASC에 새로 활성화한다.** 지금은 4개 필드뿐이라
-그대로 올리면 31개 로케일이 `name`·`support_url`·`release_notes`가 빈 채로 생긴다.
-ASC 심사 제출에 필수인 필드라 제출이 막히고, 31개 로케일을 콘솔에서 손으로 채워야 한다.
-(파일이 없는 필드 자체는 `deliver`가 건너뛰므로 ASC 값이 지워지지는 않는다.)
-
-**아직 `deliver init`을 돌리지 않았다.** 작업 당시 세션에 App Store Connect API 키가 없어서
-현재 ASC 상태를 내려받지 못했고, 여기 있는 건 새로 쓴 원고 4종뿐이다.
-
-`upload_app_store_metadata` lane은 업로드 전에 두 가지를 본다. `deliver init`이 항상 만드는
-`copyright.txt`가 이 디렉토리에 있는지(= 기준선 확보 여부), 그리고 모든 로케일이 ASC 심사 필수 필드
-(`name`·`description`·`keywords`·`support_url`·`privacy_url`)를 갖췄는지. 하나라도 어긋나면
-빠진 로케일 목록과 함께 중단한다.
-
-## 업로드 전에 반드시 이 순서로
+## 업로드
 
 ```sh
-# 1. ASC API 키 JSON (레포 밖에 두고 끝나면 지운다). ASC_* 값은 upload lane과 같은 것
-cat > /tmp/asc_api_key.json <<JSON
-{"key_id":"$ASC_KEY_ID","issuer_id":"$ASC_ISSUER_ID","key":"$ASC_KEY_CONTENT","is_key_content_base64":true,"in_house":false}
-JSON
-
-# 2. 현재 ASC 메타데이터를 통째로 내려받아 기준선을 만든다
-#    name·release_notes·privacy_url·support_url·copyright·review_information/ 이 실제 값으로 채워진다
-#    스크린샷은 sub-work C 소관이라 건너뛴다
-DELIVER_SKIP_SCREENSHOTS=true bundle exec fastlane deliver init --api_key_path /tmp/asc_api_key.json
-
-# 3. init이 덮어쓴 우리 원고를 되돌린다 (init이 건드리는 건 ASC에 이미 있는 로케일의 파일뿐이라
-#    수정된 tracked 파일 = 우리 4필드)
-git checkout -- $(git diff --name-only -- fastlane/metadata)
-
-# 4. init이 못 만든 신규 로케일의 비번역 필드를 en-US 값으로 채운다
-#    init은 ASC에 이미 있던 로케일(en-US·ko)만 내려받으므로 나머지는 빈 채로 남는다
-#    이미 있는 파일은 덮지 않으므로 ko 값과 번역 원고는 그대로다. --apply 없이 돌리면 계획만 나온다
-python3 scripts/propagate-appstore-metadata.py --apply
-
-# 5. 업로드 (업로드 뒤 precheck가 자동으로 돈다)
+export ASC_KEY_ID=... ASC_ISSUER_ID=...
+export ASC_KEY_CONTENT=$(base64 -i AuthKey_<키ID>.p8)   # base64 한 줄
 bundle exec fastlane ios upload_app_store_metadata
 ```
 
-스크린샷은 이 lane이 건드리지 않는다. 촬영·합성·업로드 절차는 [`../screenshots.md`](../screenshots.md).
+`deliver init` 기준선은 이미 레포에 있다 — 다시 돌릴 필요 없다. 업로드 직전 HTML 프리뷰 확인 프롬프트가
+뜨므로 TTY 에서 돌린다.
+
+`deliver` 는 **이 디렉토리에 있는 로케일을 ASC 에 새로 활성화한다.** 그래서 lane 은 올리기 전에 두 가지를
+본다. `copyright.txt` 가 있는지(= 기준선 확보 여부), 그리고 모든 로케일이 ASC 심사 필수 필드
+(`name`·`description`·`keywords`·`support_url`·`privacy_url`)를 갖췄는지. 하나라도 어긋나면 빠진 로케일
+목록과 함께 중단한다. 파일이 없는 필드 자체는 `deliver` 가 건너뛰므로 ASC 값이 지워지지는 않는다.
+
+`review_information/`(데모 계정·담당자 연락처)은 public 레포라 `.gitignore` 대상이다. 그 파일들이 없어도
+업로드는 되고 ASC 의 기존 심사 정보가 유지된다. 심사 정보를 파일로 고치려면 그때만 `deliver init` 으로
+내려받는다.
+
+**lane 경로는 절대경로여야 한다** — `FastlaneCore::FastlaneFolder.path` 는 상대경로를 돌려주는데 fastlane 은
+액션을 프로젝트 루트로 `chdir` 해서 실행한다. 상대경로로 두면 가드는 통과하고 업로드만 조용히 no-op 이 된다
+([레코드](../../docs/troubleshooting/2026-08-29-deliver-metadata-upload-silent-noop.md)).
+
+로케일을 새로 추가할 땐 `name`·`support_url`·`marketing_url`·`privacy_url` 을 en-US 값으로 채운다:
+
+```sh
+python3 scripts/propagate-appstore-metadata.py --apply   # --apply 없이 돌리면 계획만
+```
+
+스크린샷은 이 lane 이 건드리지 않는다. 촬영·합성·업로드 절차는 [`../screenshots.md`](../screenshots.md).
 
 ## 지금 들어 있는 것
 
