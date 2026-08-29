@@ -275,7 +275,6 @@ extension MainViewController {
         }
     }
     
-    // 로드 전·실패·유료 플랜이면 배너가 intrinsic size 0 이라 캘린더가 하단까지 채운다
     private func setupBottomBannerLayout(_ bannerView: UIView) {
         self.view.addSubview(bannerView)
         bannerView.autoLayout.active(with: self.view) {

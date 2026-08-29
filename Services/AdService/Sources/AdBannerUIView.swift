@@ -21,6 +21,7 @@ public final class AdBannerUIView: UIView {
     private var isLoaded: Bool = false
     private var isAllowed: Bool = false
     private var didRequestLoad: Bool = false
+    private lazy var heightConstraint: NSLayoutConstraint = self.heightAnchor.constraint(equalToConstant: 0)
     private let cancellables = CancelBag()
 
     public init(
@@ -35,6 +36,7 @@ public final class AdBannerUIView: UIView {
 
         self.bannerView.adUnitID = adUnitId
         self.bannerView.delegate = self
+        self.heightConstraint.isActive = true
         self.bindLoadWhenBannerAdAllowed(adExposureUsecase)
     }
 
@@ -45,8 +47,13 @@ public final class AdBannerUIView: UIView {
     private var isVisible: Bool { self.isLoaded && self.isAllowed }
 
     public override var intrinsicContentSize: CGSize {
-        guard self.isVisible else { return .zero }
         return cgSize(for: self.bannerView.adSize)
+    }
+
+    private func applyHeight() {
+        self.heightConstraint.constant = self.isVisible
+            ? cgSize(for: self.bannerView.adSize).height
+            : 0
     }
 
     private func bindLoadWhenBannerAdAllowed(_ adExposureUsecase: any AdExposureUsecase) {
@@ -60,9 +67,8 @@ public final class AdBannerUIView: UIView {
 
     private func apply(isAllowed: Bool) {
         self.isAllowed = isAllowed
-        // 소비자가 명시 높이 제약을 걸어도 새어나가지 않게 intrinsic size 와 별도로 직접 숨긴다
         self.bannerView.isHidden = !isAllowed
-        self.invalidateIntrinsicContentSize()
+        self.applyHeight()
         self.onVisibilityChange?(self.isVisible)
         guard isAllowed, self.didRequestLoad == false else { return }
         self.didRequestLoad = true
@@ -83,13 +89,15 @@ extension AdBannerUIView: BannerViewDelegate {
 
         self.addSubview(bannerView)
         bannerView.translatesAutoresizingMaskIntoConstraints = false
+        let bottom = bannerView.bottomAnchor.constraint(equalTo: self.bottomAnchor)
+        bottom.priority = .defaultHigh
         NSLayoutConstraint.activate([
             bannerView.topAnchor.constraint(equalTo: self.topAnchor),
             bannerView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
             bannerView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
-            bannerView.bottomAnchor.constraint(equalTo: self.bottomAnchor)
+            bottom
         ])
-        self.invalidateIntrinsicContentSize()
+        self.applyHeight()
         self.onVisibilityChange?(self.isVisible)
     }
     
