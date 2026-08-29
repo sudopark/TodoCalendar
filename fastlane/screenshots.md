@@ -27,7 +27,7 @@ bundle exec fastlane ios upload_app_store_screenshots
 `upload_app_store_screenshots`는 `overwrite_screenshots`로 돌아 ASC에 이미 올라간 스샷을 갈아끼운다.
 두 번 돌려도 뒤에 덧붙지 않는다. 자격증명은 메타데이터 lane과 같은 `ASC_KEY_ID`·`ASC_ISSUER_ID`·`ASC_KEY_CONTENT`.
 
-**이 lane은 아직 한 번도 실행된 적이 없다.** 배선한 세션에 ASC API 키가 없어 가드까지만 확인했다.
+ASC에 올라간 뒤엔 로케일마다 6장이 `COMPLETE` 상태인지 확인한다 — 확인 방법은 운영 문서 §4.
 심사 제출은 lane이 하지 않는다 — 업로드만 하고 제출은 콘솔에서 직접.
 
 ## 촬영 전에 반드시 — 구글 아이콘 로컬 수정
