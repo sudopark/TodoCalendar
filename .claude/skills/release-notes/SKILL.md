@@ -1,6 +1,6 @@
 ---
 name: release-notes
-description: Use when writing the App Store "What's New" copy for a new app version — ko 원고 워싱과 en 원문 확정에 각각 걸린 두 승인 게이트, 29개 ASC 로케일 현지화 원칙, 업로드 전 검증과 fastlane 업로드를 다룬다. Triggers on "릴리즈 노트 쓰자", "이번 버전 변경내용 정리해줘", "새 버전 출시 문구 만들어줘". Does NOT trigger on 버전과 무관한 메타데이터 수정(앱 설명·키워드·subtitle — fastlane/metadata/README.md 절차), 스크린샷 작업(fastlane/screenshots.md), 앱 내 문구 번역(.claude/rules/localization.md), 테스트 빌드 배포(test-deploy 스킬).
+description: Use when writing the App Store "What's New" copy for a new app version — ko 원고 워싱과 en 원문 확정에 각각 걸린 두 승인 게이트, 29개 ASC 로케일 현지화 원칙, 업로드 전 검증과 fastlane 업로드를 다룬다. Triggers on "릴리즈 노트 쓰자", "이번 버전 변경내용 정리해줘", "새 버전 출시 문구 만들어줘". Does NOT trigger on 앱 내 이벤트 현지화(in-app-event 스킬), 버전과 무관한 메타데이터 수정(앱 설명·키워드·subtitle — fastlane/metadata/README.md 절차), 스크린샷 작업(fastlane/screenshots.md), 앱 내 문구 번역(.claude/rules/localization.md), 테스트 빌드 배포(test-deploy 스킬).
 ---
 
 # Release Notes — 버전별 변경내용 원고·현지화
