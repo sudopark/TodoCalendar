@@ -21,7 +21,7 @@ description: Use when the user requests an agent review of pushed harness change
 - **하네스 경로만** 필터해 스크래치패드에 diff 패키지를 만든다 (리뷰어들이 공유해 Read):
 
 ```bash
-HARNESS_PATHS=(.claude CLAUDE.md Domain/CLAUDE.md Repository/CLAUDE.md scripts docs/coding-style-and-philosophy.md docs/scene-spec.md docs/domain-context-map.md)
+HARNESS_PATHS=(.claude CLAUDE.md Domain/CLAUDE.md Repository/CLAUDE.md scripts docs/coding-style-and-philosophy.md docs/화면단위구조.md docs/domain-context-map.md)
 { git log --oneline <BASE>..<HEAD> -- "${HARNESS_PATHS[@]}"; echo '---'; git diff --stat <BASE>..<HEAD> -- "${HARNESS_PATHS[@]}"; echo '---'; git diff -U10 <BASE>..<HEAD> -- "${HARNESS_PATHS[@]}"; } > <scratchpad>/harness-review-<PR번호 또는 커밋 SHA 앞7자>.diff
 wc -l <scratchpad>/harness-review-<PR번호 또는 커밋 SHA 앞7자>.diff
 ```

@@ -98,6 +98,9 @@ tuist generate --no-open      # 파일 추가/삭제 후 재실행 필수
 | 반복 이벤트·turn 규칙·수정 범위 | [`docs/spec/repeating-events.md`](docs/spec/repeating-events.md) |
 | 이벤트 태그·색상·보이기숨기기 | [`Domain/CLAUDE.md`](Domain/CLAUDE.md), [`docs/spec/tags-foremost-notifications.md`](docs/spec/tags-foremost-notifications.md) |
 | 외부 캘린더 다중 계정·Pool | [`Domain/CLAUDE.md`](Domain/CLAUDE.md), [`Repository/CLAUDE.md`](Repository/CLAUDE.md), [`docs/spec/google-calendar.md`](docs/spec/google-calendar.md) |
+| Apple 캘린더 권한·EventKit·쓰기 | [`docs/spec/apple-calendar.md`](docs/spec/apple-calendar.md) |
+| AI 에이전트 command·job·사용량 | [`docs/spec/ai-agent.md`](docs/spec/ai-agent.md) |
+| 플랜·구매·광고 노출 | [`docs/spec/billing.md`](docs/spec/billing.md) |
 | ForemostEvent | [`docs/spec/tags-foremost-notifications.md`](docs/spec/tags-foremost-notifications.md) |
 | SharedDataStore 키·구독 | [`Domain/CLAUDE.md`](Domain/CLAUDE.md) |
 | 앱 버전 체크 | [`docs/spec/infrastructure.md §7`](docs/spec/infrastructure.md) |
@@ -135,5 +138,5 @@ tuist generate --no-open      # 파일 추가/삭제 후 재실행 필수
 
 ## 6. Scene 스펙
 
-- 상세 스펙(6파일, 생성 순서, SwiftUI 템플릿, Scene 간 통신): [`docs/scene-spec.md`](docs/scene-spec.md)
+- 상세 스펙(6파일, 생성 순서, SwiftUI 템플릿, Scene 간 통신): [`docs/화면단위구조.md`](docs/화면단위구조.md)
 - MUST/MUST NOT 규칙: [`.claude/rules/presentations-rules.md`](.claude/rules/presentations-rules.md)
