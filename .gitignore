@@ -103,3 +103,17 @@ fastlane/screenshots/
 
 # ASC 심사 정보(데모 계정·담당자 연락처) — deliver init 이 내려받는다. public 레포라 커밋 금지
 fastlane/metadata/review_information/
+
+# 앱 내 이벤트 소스 장면 (촬영마다 재생성)
+snapshot-event/
+
+# 앱 내 이벤트 원고·설정·합성 이미지 — 정본은 ASC 다. README 만 커밋한다
+fastlane/in_app_events/*
+!fastlane/in_app_events/README.md
+
+# importlib 로 하이픈 파일명 스크립트를 불러올 때 생긴다
+scripts/__pycache__/
+
+# 자격증명 — README 만 커밋한다
+secret/*
+!secret/README.md
