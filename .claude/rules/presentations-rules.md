@@ -91,7 +91,7 @@ XXXBuilderImple.swift     — 의존성 조립 (UsecaseFactory + ViewAppearance 
 XXXView.swift             — ViewState + ViewEventHandler + ContainerView + View
 ```
 
-세부 템플릿·생성 순서·UsecaseFactory: `docs/scene-spec.md`.
+세부 템플릿·생성 순서·UsecaseFactory: `docs/화면단위구조.md`.
 
 ### Scene 폴더 조직
 
@@ -172,7 +172,9 @@ case .command: builder.makeCommandView()
 ✅ self.router?.routeToSomewhere(param)
 ```
 
-Router는 `BaseRouterImple` 상속 + `XxxRouting` 채택. 공통 메서드(`showError`, `showToast`, `closeScene`, `showConfirm`, `showActionSheet`, `openSafari`, `showWebView`, `showBottomSlide`, `dismissPresented`)는 먼저 재사용.
+Router는 `BaseRouterImple` 상속 + `XxxRouting` 채택. 공통 메서드는 먼저 재사용 — 새로 만들기 전에 이 목록에 있는지 본다.
+
+`showError` · `showToast` · `closeScene` · `showConfirm` · `showActionSheet` · `openSafari` · `showWebView` · `showShareSheet`(text·image × `onShared` 유무 4종) · `showBottomSlide` · `showFullScreen` · `dismissPresented`
 
 ### SwiftUI 타입 직접 참조 금지
 ViewModel에 `@Published` / `ObservableObject` / `@StateObject` ❌. 상태 노출은 **Combine `AnyPublisher`**, SwiftUI 변환은 `ViewState`가 담당.
@@ -222,12 +224,16 @@ private struct Subject {
 | 파일 | 포함 프로토콜 |
 |---|---|
 | `Scenes/Sources/Scenes+Calendar.swift` | CalendarScene, SelectDayDialogScene |
-| `Scenes/Sources/Scenes+EventDetail.swift` | EventDetailScene, HolidayEventDetailScene, GoogleCalendarEventDetailScene, DoneTodoDetailScene |
+| `Scenes/Sources/Scenes+EventDetail.swift` | EventDetailScene, HolidayEventDetailScene, GoogleCalendarEventDetailScene, AppleCalendarEventDetailScene, DoneTodoDetailScene |
 | `Scenes/Sources/Scenes+EventList.swift` | DoneTodoEventListScene |
 | `Scenes/Sources/Scenes+Member.swift` | SignInScene, ManageAccountScene |
-| `Scenes/Sources/Scenes+Setting.swift` | SettingItemListScene, EventTagDetailScene 등 |
+| `Scenes/Sources/Scenes+Setting.swift` | SettingItemListScene, EventTagListScene, EventTagDetailScene |
+| `Scenes/Sources/Scenes+AIAgent.swift` | AIAgentCommandScene, AIAgentKeyboardInputScene, AIAgentImageCommandScene |
+| `Scenes/Sources/Scenes+Billing.swift` | PaywallScene |
 
 다른 모듈에서 참조 필요한 신규 Scene 프로토콜은 위 파일에 추가. 모듈 내부 전용은 해당 모듈 `XxxScene+Builder.swift`.
+
+**ViewController가 보관하는 `viewAppearance`를 `private`으로 두지 말 것.** `Scene` 프로토콜이 `interactor`와 함께 요구하는 값이고, `BaseRouterImple`이 `self.scene?.viewAppearance`를 읽어 `showWebView` 같은 공통 화면의 테마를 맞춘다.
 
 **Why:** 모듈 간 결합을 끊어 빌드 시간·순환 의존을 관리. 공유 인터페이스만 노출해 구현 디테일 숨김.
 

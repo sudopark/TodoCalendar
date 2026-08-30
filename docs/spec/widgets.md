@@ -1,4 +1,4 @@
-# 위젯 상세 스펙 (19종 + ControlWidget 1종)
+# 위젯 상세 스펙 (19종 + ControlWidget 1종 + Live Activity 1종)
 
 > Phase 5 고도화: 섹션 9(위젯)의 L1 상세
 
@@ -47,6 +47,21 @@ WidgetBundle이 아닌 별도 `ControlWidget` — 컨트롤 센터에 배치.
 | # | 위젯 | kind | 배치 | Configuration |
 |---|---|---|---|---|
 | — | AICommandControlWidget | `AICommandControlWidget` | 컨트롤 센터 | Static — `OpenAICommandInputIntent`으로 `tc.app://calendar/ai` 딥링크 진입 (#768) |
+
+---
+
+### 1.5 Live Activity (1종)
+
+`EventCountdownLiveActivity`는 `BaseWidgetBundle`에 함께 선언되지만 갤러리 위젯이 아니다 — 앱이 대상을 등록해야 뜨고, 동시에 하나만 산다. 등록·갱신·종료의 정책 정본은 [product-specification.md §24](../product-specification.md#24-live-activity-이벤트-카운트다운).
+
+| 구성 | 파일 |
+|---|---|
+| Activity 선언 | `LiveActivities/EventCountdownLiveActivity.swift` |
+| 잠금화면 뷰 | `LiveActivities/EventCountdownLockScreenView.swift` |
+| 진행 링 배지 | `LiveActivities/EventCountdownRingBadge.swift` |
+| 표시 모델 | `LiveActivities/EventCountdownActivityViewModel.swift` |
+
+앱 쪽 등록·복원은 `TodoCalendarApp/Sources/Root/EventLiveActivityUsecaseImple.swift`, 잠금화면 인텐트는 `TodoCalendarApp/Sources/LiveActivity/EventCountdownLiveActivityIntents.swift`.
 
 ---
 
