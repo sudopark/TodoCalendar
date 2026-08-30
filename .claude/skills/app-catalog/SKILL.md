@@ -37,6 +37,7 @@ xcodebuild test -workspace TodoCalendar.xcworkspace -scheme <Name>Snapshots \
 - **`-only-testing` 은 필수다.** 같은 스킴에 검증 스위트(`__Snapshots__/`, 커밋 대상)가 함께 살아서, 한정하지 않으면 그쪽이 이 언어·이 시점으로 재기록돼 워킹트리가 오염된다. 실행 후 `git status --short -- '*__Snapshots__*'` 가 비어 있어야 한다.
 - **언어는 요청받은 것으로 바꾼다.** 지정이 없으면 en/en_US.
 - 서비스 이용 가이드용 전 언어 촬영은 `scripts/capture-guide-screenshots.sh` 가 위 절차와 파일명 매핑을 감싼다 (`.claude/rules/localization.md` §1 가이드 절).
+- 앱 내 이벤트 이미지의 소스 장면은 `scripts/capture-event-screenshots.sh` 가 감싼다 — 어느 장면을 뜰지는 `fastlane/in_app_events/<event_id>/event.json` 이 지정한다 (in-app-event 스킬).
 
 - **기기 변경 가능**: 유저가 다른 기기·OS로 요청하면 `-destination`의 name/OS 교체 (`xcrun simctl list devices available`로 가용 확인). 여러 기기 세트 요청이면 destination만 바꿔 반복 실행.
 - 기본 시뮬레이터가 없으면 생성: `xcrun simctl create 'iPhone 17 - snapshot_ref' 'iPhone 17' iOS26.2`.
