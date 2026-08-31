@@ -13,14 +13,14 @@ usage:
 non-transferable 이라 public 레포에 커밋하지 않고 캐시 디렉토리에 받아 쓴다.
 """
 
-import shutil
-import subprocess
 import sys
-import tempfile
-from collections import Counter
 from pathlib import Path
 
-from PIL import Image, ImageChops, ImageDraw, ImageFilter
+from PIL import Image
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from device_bezel import load_bezel, screen_hole  # noqa: E402
+from store_screen import home_screen, inset_screenshot  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -29,13 +29,6 @@ CANVAS_COLOR = "#F5F5F7"
 DEVICE_WIDTH = 1150
 DEVICE_TOP = 620
 CAPTION_TOP = 100
-# iPhone 16 Pro Max 상단 safe area 62pt @3x — 콘텐츠가 Dynamic Island 밑에 깔리지 않게 한다
-SCREEN_TOP_INSET = 186
-
-BEZEL_URL = "https://devimages-cdn.apple.com/design/resources/download/Bezel-iPhone-16.dmg"
-BEZEL_IN_DMG = "PNG/iPhone 16 Pro Max/iPhone 16 Pro Max - Black Titanium - Portrait.png"
-BEZEL_CACHE_DIR = Path.home() / "Library/Caches/todocalendar-appstore-bezel"
-BEZEL_CACHE_PATH = BEZEL_CACHE_DIR / "iPhone-16-Pro-Max-Black-Titanium-Portrait.png"
 
 ALL_LANGS = [
     "en", "ko", "ja", "zh-Hans", "zh-Hant", "vi", "th", "es", "fr", "it", "pt-BR",
@@ -58,16 +51,6 @@ SLUGS = [
 ]
 
 HOME_SCREEN_SLUG = "05-widgets"
-HOME_SCREEN_WIDGETS = ["today-and-next", "month"]
-# 라이트 테마 위젯이 떠 보이는 배경 — 홈화면 벽지 자리라 앱 컬러셋과 무관하다
-WALLPAPER_TOP_COLOR = (58, 74, 128)
-WALLPAPER_BOTTOM_COLOR = (146, 122, 168)
-WIDGET_RADIUS = 78                  # 위젯 코너 26pt @3x — 캡처에 구워진 곡률과 같은 값
-WIDGET_TOP = 430
-WIDGET_GAP = 90
-WIDGET_SHADOW_BLUR = 34
-WIDGET_SHADOW_OFFSET = 14
-WIDGET_SHADOW_ALPHA = 90
 
 
 def asc_locale(lang):
@@ -79,124 +62,7 @@ def upload_name(slug):
     return f"{number}_{rest}.png"
 
 
-# MARK: - 베젤 확보
-
-def download_bezel():
-    BEZEL_CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    with tempfile.TemporaryDirectory() as workspace:
-        dmg_path = Path(workspace) / "bezel.dmg"
-        print(f"▶︎ 베젤 내려받는 중 — {BEZEL_URL}")
-        subprocess.run(["curl", "-fsSL", "-o", str(dmg_path), BEZEL_URL], check=True)
-
-        mount_point = Path(workspace) / "mount"
-        mount_point.mkdir()
-        # dmg 에 SLA 가 걸려 있어 동의 입력 없이는 attach 가 멈춘다
-        subprocess.run(
-            f'yes | hdiutil attach "{dmg_path}" -mountpoint "{mount_point}" -nobrowse -readonly',
-            shell=True, check=True, capture_output=True,
-        )
-        try:
-            source = mount_point / BEZEL_IN_DMG
-            if not source.exists():
-                raise SystemExit(f"✗ dmg 안에 {BEZEL_IN_DMG} 가 없다 — 베젤 배포 구조가 바뀌었다")
-            shutil.copyfile(source, BEZEL_CACHE_PATH)
-        finally:
-            subprocess.run(["hdiutil", "detach", str(mount_point)], check=False, capture_output=True)
-    print(f"  ✓ 캐시 — {BEZEL_CACHE_PATH}")
-
-
-def load_bezel():
-    if not BEZEL_CACHE_PATH.exists():
-        download_bezel()
-    return Image.open(BEZEL_CACHE_PATH).convert("RGBA")
-
-
-def screen_hole(bezel):
-    """베젤 갱신에도 안 깨지게 좌표를 박지 않고 알파 채널 flood-fill 로 화면 구멍을 찾는다."""
-    transparent = bezel.getchannel("A").point(lambda alpha: 255 if alpha == 0 else 0)
-    seed = (bezel.width // 2, bezel.height // 2)
-    if transparent.getpixel(seed) != 255:
-        raise SystemExit("✗ 베젤 중앙이 투명하지 않다 — 화면 구멍을 못 찾는다")
-    ImageDraw.floodfill(transparent, seed, 128)
-    mask = transparent.point(lambda value: 255 if value == 128 else 0)
-    box = mask.getbbox()
-    if box is None:
-        raise SystemExit("✗ 화면 구멍 영역이 비었다")
-    return mask, box
-
-
-# MARK: - 홈화면 위젯
-
-def wallpaper(size):
-    width, height = size
-    column = Image.new("RGB", (1, height))
-    painter = ImageDraw.Draw(column)
-    for y in range(height):
-        ratio = y / (height - 1)
-        painter.point((0, y), tuple(
-            round(top + (bottom - top) * ratio)
-            for top, bottom in zip(WALLPAPER_TOP_COLOR, WALLPAPER_BOTTOM_COLOR)
-        ))
-    return column.resize((width, height), Image.BILINEAR).convert("RGBA")
-
-
-def trim_widget_margin(capture):
-    """위젯 캡처엔 위젯 바깥 여백이 함께 들어 있다 — 그대로 얹으면 카드 테두리가 이중으로 보인다."""
-    opaque = capture.convert("RGB")
-    background = Image.new("RGB", opaque.size, opaque.getpixel((0, 0)))
-    difference = ImageChops.difference(opaque, background).convert("L")
-    box = difference.point(lambda value: 255 if value > 6 else 0).getbbox()
-    if box is None:
-        raise SystemExit("✗ 위젯 캡처가 배경색 한 장이다 — 잘라낼 내용이 없다")
-    return capture.crop(box)
-
-
-def rounded(widget, radius):
-    mask = Image.new("L", widget.size, 0)
-    ImageDraw.Draw(mask).rounded_rectangle(
-        [0, 0, widget.width - 1, widget.height - 1], radius=radius, fill=255
-    )
-    shaped = widget.convert("RGBA")
-    shaped.putalpha(mask)
-    return shaped
-
-
-def paste_with_shadow(screen, widget, position):
-    shadow = Image.new("RGBA", screen.size, (0, 0, 0, 0))
-    cast = Image.new("RGBA", widget.size, (0, 0, 0, WIDGET_SHADOW_ALPHA))
-    cast.putalpha(widget.getchannel("A").point(lambda alpha: alpha * WIDGET_SHADOW_ALPHA // 255))
-    shadow.paste(cast, (position[0], position[1] + WIDGET_SHADOW_OFFSET), cast)
-    screen.alpha_composite(shadow.filter(ImageFilter.GaussianBlur(WIDGET_SHADOW_BLUR)))
-    screen.alpha_composite(widget, position)
-
-
-def home_screen(source_dir, size):
-    widgets = []
-    for name in HOME_SCREEN_WIDGETS:
-        path = source_dir / "widgets" / f"{name}.png"
-        if not path.exists():
-            raise SystemExit(f"  ✗ 누락: {path.relative_to(ROOT)} — 먼저 촬영 스크립트를 돌려라")
-        with Image.open(path) as capture:
-            widgets.append(rounded(trim_widget_margin(capture), WIDGET_RADIUS))
-
-    screen = wallpaper(size)
-    top = WIDGET_TOP
-    for widget in widgets:
-        paste_with_shadow(screen, widget, ((size[0] - widget.width) // 2, top))
-        top += widget.height + WIDGET_GAP
-    return screen
-
-
 # MARK: - 합성
-
-def inset_screenshot(screenshot, size):
-    """상단에 화면 배경색 인셋을 둔 뒤 구멍 크기에 맞춰 자른다."""
-    top_row = [screenshot.getpixel((x, 0)) for x in range(screenshot.width)]
-    background = Counter(top_row).most_common(1)[0][0]
-    inset = Image.new("RGBA", size, background)
-    inset.paste(screenshot, (0, SCREEN_TOP_INSET))
-    return inset
-
 
 def screen_image(slug, source_dir, size):
     if slug == HOME_SCREEN_SLUG:
