@@ -9,7 +9,7 @@
 
 from PIL import Image, ImageDraw
 
-SCREEN = (1206, 2622)          # iPhone 17 @3x — 카탈로그 촬영 규격과 같다
+SCREEN = (1206, 2622)          # iPhone 17 @3x — 카탈로그 촬영 기본 규격. 앱스토어 스샷은 자기 규격을 넘긴다
 DIM_RATIO = 0.3                # .black.withAlphaComponent(0.3)
 SHEET_CORNER = 30              # topLeadingRadius/topTrailingRadius 10pt @3x
 SHEET_PADDING = 48             # BottomSlideView 가 시트 콘텐츠에 주는 .padding() 16pt @3x
@@ -50,23 +50,23 @@ def extended_to_bottom(sheet, height):
     return extended
 
 
-def compose(background, sheet):
-    screen = background.convert("RGB").resize(SCREEN, Image.LANCZOS)
-    dimmed = Image.blend(screen, Image.new("RGB", SCREEN, (0, 0, 0)), DIM_RATIO)
+def compose(background, sheet, screen_size=SCREEN):
+    screen = background.convert("RGB").resize(screen_size, Image.LANCZOS)
+    dimmed = Image.blend(screen, Image.new("RGB", screen_size, (0, 0, 0)), DIM_RATIO)
 
     cropped = sheet.convert("RGB")
     cropped = cropped.crop((0, sheet_top(cropped), cropped.width, cropped.height))
-    ratio = SCREEN[0] / cropped.width
-    cropped = cropped.resize((SCREEN[0], round(cropped.height * ratio)), Image.LANCZOS)
+    ratio = screen_size[0] / cropped.width
+    cropped = cropped.resize((screen_size[0], round(cropped.height * ratio)), Image.LANCZOS)
 
     # 시트 배경은 .ignoresSafeArea(edges: .bottom) 으로 홈 인디케이터까지 내려가고 콘텐츠는
     # 그 위에서 끝난다. 고정 프레임 스냅샷엔 그 여백이 없어 버튼이 화면 끝에 붙어 나온다.
     cropped = extended_to_bottom(cropped, SAFE_AREA_BOTTOM)
 
-    if cropped.height >= SCREEN[1]:
+    if cropped.height >= screen_size[1]:
         raise SystemExit("✗ AI 시트가 화면을 다 덮는다 — 뒤 캘린더가 안 보인다")
 
     dimmed.paste(
-        cropped, (0, SCREEN[1] - cropped.height), rounded_top_mask(cropped.size, SHEET_CORNER)
+        cropped, (0, screen_size[1] - cropped.height), rounded_top_mask(cropped.size, SHEET_CORNER)
     )
     return dimmed
