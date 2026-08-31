@@ -7,8 +7,11 @@
 #
 # 결과: snapshot-appstore/<lang>/<NN-슬러그>.png (gitignore 대상, 언어별 격리)
 #       snapshot-appstore/<lang>/captions/<NN-슬러그>.png — 합성 캔버스 상단에 얹을 캡션
-#       snapshot-appstore/<lang>/widgets/<슬러그>.png — 홈화면 합성 전 위젯 원본
-# 홈화면 위젯 스샷은 위젯 원본을 홈화면에 합성해 만드는 별도 단계다 — 여기서는 원본까지만 뽑는다.
+#       snapshot-appstore/<lang>/captions/cpp/<장면>.png — 맞춤형 제품 페이지 캡션
+#       snapshot-appstore/<lang>/widgets/<슬러그>.png — 홈화면·잠금화면 합성 전 위젯 원본
+#       snapshot-appstore/<lang>/sheets/<슬러그>.png — 캘린더 위에 얹을 시트 조각
+# 홈화면·잠금화면 스샷은 위젯 원본을 배경에 합성해 만드는 별도 단계다 — 여기서는 원본까지만 뽑는다.
+# 기본 스토어 페이지와 맞춤형 제품 페이지가 장면을 나눠 쓰므로 한 실행이 양쪽을 다 뜬다.
 #
 # capture-guide-screenshots.sh 와 촬영 절차는 같고 세 가지가 다르다:
 #   - 6.9" 업로드 규격(1320×2868)이 나오는 iPhone 16 Pro Max 전용 시뮬레이터를 쓴다.
@@ -47,6 +50,7 @@ SUITES=(
     "SettingSceneSnapshots|SettingSceneCatalogSnapshots|SettingScene"
     "CommonPresentationSnapshots|AppStoreCaptionSnapshots|CommonPresentation"
     "TodoCalendarAppWidgetSnapshots|WidgetCatalogSnapshots|Widget"
+    "AIAgentSceneSnapshots|AIAgentSceneCatalogSnapshots|AIAgentScene"
 )
 
 # <업로드 파일명>|<모듈 디렉토리>/<스위트>/<캡처 파일명>
@@ -56,6 +60,8 @@ MAPPING=(
     "03-event-detail|EventDetailScene/EventDetailSceneCatalogSnapshots/test_eventDetail.eventDetail-light.png"
     "04-google-event|EventDetailScene/EventDetailSceneCatalogSnapshots/test_storeGoogleEventDetail.storeGoogleEventDetail-light.png"
     "06-appearance|SettingScene/SettingSceneCatalogSnapshots/test_appearanceSetting.appearanceSetting-light.png"
+    "07-todo-list|CalendarScenes/CalendarScenesCatalogSnapshots/test_storeTodoList.storeTodoList-light.png"
+    "08-share-preview|CalendarScenes/CalendarScenesCatalogSnapshots/test_storeSharePreview.storeSharePreview-light.png"
 )
 
 # 캡션·위젯 원본 — 화면 규격이 아니라 각자의 캔버스 규격이라 규격 검사·알파 제거 대상이 아니다
@@ -75,6 +81,29 @@ WIDGET_MAPPING=(
     "foremost|Widget/WidgetCatalogSnapshots/test_widgetForemost.widget-foremost-light.png"
     "month|Widget/WidgetCatalogSnapshots/test_widgetMonth.widget-month-light.png"
     "ai-command|Widget/WidgetCatalogSnapshots/test_widgetAICommand.widget-ai-command-light.png"
+    # 잠금화면 조각만 dark 다 — lock_screen.py 가 검정 배경을 lighten 으로 떨궈 벽지 위에 얹는다
+    "lockscreen-foremost|Widget/WidgetCatalogSnapshots/test_widgetLockScreenForemost.lockscreen-foremost-dark.png"
+    "lockscreen-next|Widget/WidgetCatalogSnapshots/test_widgetLockScreenNext.lockscreen-next-dark.png"
+    "lockscreen-next-remain|Widget/WidgetCatalogSnapshots/test_widgetLockScreenNextRemain.lockscreen-next-remain-dark.png"
+    "lockscreen-live-activity|Widget/WidgetCatalogSnapshots/test_widgetLockScreenLiveActivity.lockscreen-live-activity-dark.png"
+)
+
+# 캘린더 위에 얹을 시트 조각 — 화면 규격이 아니라 시트 자기 크기다
+SHEET_MAPPING=(
+    "ai-command-processing|AIAgentScene/AIAgentSceneCatalogSnapshots/test_storeAICommandProcessing.storeAICommandProcessing-light.png"
+    "ai-command-done|AIAgentScene/AIAgentSceneCatalogSnapshots/test_storeAICommandDone.storeAICommandDone-light.png"
+)
+
+# 맞춤형 제품 페이지 캡션 — 장면 id 가 곧 파일명이다
+CPP_CAPTION_MAPPING=(
+    "C1|CommonPresentation/AppStoreCaptionSnapshots/test_customProductPageCaptions.C1-light.png"
+    "C2|CommonPresentation/AppStoreCaptionSnapshots/test_customProductPageCaptions.C2-light.png"
+    "C3|CommonPresentation/AppStoreCaptionSnapshots/test_customProductPageCaptions.C3-light.png"
+    "C4|CommonPresentation/AppStoreCaptionSnapshots/test_customProductPageCaptions.C4-light.png"
+    "C5|CommonPresentation/AppStoreCaptionSnapshots/test_customProductPageCaptions.C5-light.png"
+    "C6|CommonPresentation/AppStoreCaptionSnapshots/test_customProductPageCaptions.C6-light.png"
+    "C7|CommonPresentation/AppStoreCaptionSnapshots/test_customProductPageCaptions.C7-light.png"
+    "C8|CommonPresentation/AppStoreCaptionSnapshots/test_customProductPageCaptions.C8-light.png"
 )
 
 latest_ios_runtime() {
@@ -169,7 +198,7 @@ capture_lang() {
 
     local out="$ROOT/snapshot-appstore/$lang"
     rm -rf "$out"
-    mkdir -p "$out/captions" "$out/widgets"
+    mkdir -p "$out/captions/cpp" "$out/widgets" "$out/sheets"
     for entry in "${MAPPING[@]}" ; do
         IFS='|' read -r name source <<< "$entry"
         local src="$ROOT/snapshot-catalog/$source"
@@ -188,7 +217,19 @@ capture_lang() {
         [ -f "$src" ] || { echo "  ✗ 누락: $source"; return 1; }
         cp "$src" "$out/widgets/$name.png"
     done
-    echo "  ✓ [$lang] ${#MAPPING[@]}장 + 캡션 ${#CAPTION_MAPPING[@]}장 + 위젯 원본 ${#WIDGET_MAPPING[@]}종 → snapshot-appstore/$lang/"
+    for entry in "${SHEET_MAPPING[@]}" ; do
+        IFS='|' read -r name source <<< "$entry"
+        local src="$ROOT/snapshot-catalog/$source"
+        [ -f "$src" ] || { echo "  ✗ 누락: $source"; return 1; }
+        cp "$src" "$out/sheets/$name.png"
+    done
+    for entry in "${CPP_CAPTION_MAPPING[@]}" ; do
+        IFS='|' read -r name source <<< "$entry"
+        local src="$ROOT/snapshot-catalog/$source"
+        [ -f "$src" ] || { echo "  ✗ 누락: $source — fastlane/custom_product_pages/captions.json 에 $lang 원고가 있는지 확인해라"; return 1; }
+        cp "$src" "$out/captions/cpp/$name.png"
+    done
+    echo "  ✓ [$lang] ${#MAPPING[@]}장 + 캡션 ${#CAPTION_MAPPING[@]}+${#CPP_CAPTION_MAPPING[@]}장 + 위젯 원본 ${#WIDGET_MAPPING[@]}종 + 시트 ${#SHEET_MAPPING[@]}종 → snapshot-appstore/$lang/"
 
     verify_and_strip_alpha "$python_bin" "$out" || return 1
 

@@ -183,6 +183,69 @@ extension CalendarScenesCatalogSnapshots {
             .environment(appearance)
         }
     }
+    /// 달력을 위로 스크롤해 일별 목록만 남은 상태 — 앱에 별도의 할일 목록 화면은 없다.
+    @MainActor
+    func test_storeTodoList() {
+        captureSnapshotPair(
+            named: "storeTodoList", layout: .fullScreen, snapshotDirectory: catalogSnapshotDirectory()
+        ) { theme in
+            let appearance = self.makeStoreAppearance(theme)
+
+            let dayListState = DayEventListViewState()
+            dayListState.bind(
+                CatalogDayEventListViewModel(extraTodoKeys: [
+                    "catalog.todo::send_invoice",
+                    "catalog.todo::renew_passport",
+                    "catalog.todo::return_books"
+                ]),
+                appearance
+            )
+            RunLoop.main.run(until: Date().addingTimeInterval(0.05))
+
+            let pendingDone = PendingCompleteTodoState()
+            pendingDone.ids = ["todo1"]
+
+            return VStack(spacing: 0) {
+                self.storeCalendarHeaderView(appearance)
+                ScrollView {
+                    DayEventListView()
+                        .environment(dayListState)
+                        .environment(pendingDone)
+                        .environment(DayEventListViewEventHandler())
+                }
+            }
+            .background(appearance.colorSet.bg0.asColor)
+            .environment(appearance)
+        }
+    }
+
+    /// 하단에 고정 버튼이 있는 유일한 스토어 장면이라 safe area 를 여기서 직접 넣는다 —
+    /// 합성 단계의 상단 인셋은 그만큼 화면 아래를 버려서 버튼이 잘린다.
+    @MainActor
+    func test_storeSharePreview() {
+        captureSnapshotPair(
+            named: "storeSharePreview", layout: .fullScreen, snapshotDirectory: catalogSnapshotDirectory()
+        ) { theme in
+            let appearance = self.makeStoreAppearance(theme)
+
+            let state = SharePreviewViewState()
+            state.bind(CatalogSharePreviewViewModel())
+            RunLoop.main.run(until: Date().addingTimeInterval(0.05))
+
+            return VStack(spacing: 0) {
+                Color.clear.frame(height: StoreSafeArea.top)
+                SharePreviewView()
+                    .environment(state)
+                    .environment(SharePreviewViewEventHandler())
+                    // 세그먼트 컨트롤은 선택 배경을 첫 레이아웃 뒤에 그린다 — 안 기다리면 pill 이 빈다
+                    .onAppear { RunLoop.main.run(until: Date().addingTimeInterval(0.3)) }
+                Color.clear.frame(height: StoreSafeArea.bottom)
+            }
+            .background(appearance.colorSet.bg0.asColor)
+            .environment(appearance)
+        }
+    }
+
 }
 
 
@@ -324,6 +387,13 @@ private struct CatalogCalendarEvent: CalendarEvent {
 /// DayEventListViewState 의 필드가 fileprivate 라 bind(viewModel:appearance:) 경로로만 채울 수 있다.
 private final class CatalogDayEventListViewModel: DayEventListViewModel, @unchecked Sendable {
 
+    /// 달력 없이 목록만 채우는 화면은 기본 구성으로는 아래가 비어, 그 화면만 할일을 더 얹는다.
+    private let extraTodoKeys: [String]
+
+    init(extraTodoKeys: [String] = []) {
+        self.extraTodoKeys = extraTodoKeys
+    }
+
     private enum Constant {
         /// 2026-03-12(목) 00:00 ~ 03-13 00:00 KST
         static let todayRange: Range<TimeInterval> = 1_773_241_200..<1_773_327_600
@@ -352,7 +422,9 @@ private final class CatalogDayEventListViewModel: DayEventListViewModel, @unchec
         let todos: [TodoEventCellViewModel] = [
             self.currentTodoCell("todo1", "catalog.todo::water_plants".catalogLocalized()),
             self.currentTodoCell("todo2", "catalog.todo::book_flight".catalogLocalized())
-        ]
+        ] + self.extraTodoKeys.enumerated().map { index, key in
+            self.currentTodoCell("todo-extra-\(index)", key.catalogLocalized())
+        }
         let schedules: [ScheduleEventCellViewModel] = [
             ScheduleEvent(uuid: "sc1", name: "catalog.event::design_review".catalogLocalized(), time: .at(Constant.designReviewTime)),
             ScheduleEvent(uuid: "sc2", name: "catalog.event::lunch".catalogLocalized(), time: .period(Constant.lunchPeriod)),
@@ -426,6 +498,145 @@ private final class CatalogDayEventListViewModel: DayEventListViewModel, @unchec
     func attachListener(_ listener: any DayEventListSceneListener) { }
 }
 
+
+
+/// SharePreviewViewState 의 표시 필드가 fileprivate 라 bind(_:) 경로로만 채울 수 있다.
+private final class CatalogSharePreviewViewModel: SharePreviewViewModel, @unchecked Sendable {
+
+    private enum Constant {
+        /// 2026-03-08(일) 00:00 ~ 03-15 00:00 KST — 한 주를 공유하는 상태
+        static let weekRange: Range<TimeInterval> = 1_772_895_600..<1_773_500_400
+        static let sprintTime: TimeInterval = 1_773_016_200                         // 03-09 09:30
+        static let releaseTime: TimeInterval = 1_773_118_800                        // 03-10 14:00
+        static let reviewTime: TimeInterval = 1_773_275_400                         // 03-12 09:30
+        static let lunchPeriod: Range<TimeInterval> = 1_773_370_800..<1_773_374_400 // 03-13 12:00~13:00
+        /// 03-09 ~ 03-11 종일
+        static let tripPeriod: Range<TimeInterval> = 1_772_982_000..<1_773_154_800
+    }
+
+    private let timeZone = TimeZone(identifier: "Asia/Seoul")!
+
+    private lazy var events: [any CalendarEvent] = {
+        return [
+            ScheduleEvent(
+                uuid: "share-sprint", name: "catalog.event::sprint_planning".catalogLocalized(),
+                time: .at(Constant.sprintTime)
+            ) |> \.eventTagId .~ StoreCatalogEventTag.work.tagId,
+            ScheduleEvent(
+                uuid: "share-release", name: "catalog.event::release_day".catalogLocalized(),
+                time: .at(Constant.releaseTime)
+            ),
+            ScheduleEvent(
+                uuid: "share-review", name: "catalog.event::design_review".catalogLocalized(),
+                time: .at(Constant.reviewTime)
+            ) |> \.eventTagId .~ StoreCatalogEventTag.work.tagId,
+            ScheduleEvent(
+                uuid: "share-lunch", name: "catalog.event::lunch".catalogLocalized(),
+                time: .period(Constant.lunchPeriod)
+            ) |> \.eventTagId .~ StoreCatalogEventTag.family.tagId,
+            ScheduleEvent(
+                uuid: "share-trip", name: "catalog.event::trip".catalogLocalized(),
+                time: .allDay(
+                    Constant.tripPeriod, secondsFromGMT: TimeInterval(self.timeZone.secondsFromGMT())
+                )
+            ) |> \.eventTagId .~ StoreCatalogEventTag.family.tagId
+        ]
+        .flatMap { ScheduleCalendarEvent.events(from: $0, in: self.timeZone) }
+    }()
+
+    private lazy var currentTodos: [TodoCalendarEvent] = {
+        return [
+            ("share-todo-water", "catalog.todo::water_plants"),
+            ("share-todo-flight", "catalog.todo::book_flight")
+        ].map { id, key in
+            TodoCalendarEvent(current: TodoEvent(uuid: id, name: key.catalogLocalized()), isForemost: false)
+        }
+    }()
+
+    private lazy var lines: [SharePreviewLineModel] = {
+        let eventLines = self.events.map {
+            SharePreviewLineModel($0, range: Constant.weekRange, timeZone: self.timeZone, isShort: false)
+        }
+        let todoLines = self.currentTodos.map {
+            SharePreviewLineModel($0, range: Constant.weekRange, timeZone: self.timeZone, isShort: false)
+        }
+        return todoLines + eventLines
+    }()
+
+    private var composer: SharePreviewSectionComposer {
+        return SharePreviewSectionComposer(timeZone: self.timeZone)
+    }
+
+    private lazy var sections: [SharePreviewSectionModel] = self.composer.sections(of: self.lines)
+
+    private lazy var headerText: String = self.composer.rangeHeaderText(
+        of: self.sections, in: Constant.weekRange, kind: .week
+    )
+
+    private lazy var imageContent: ShareImageContentModel = ShareImageContentComposer(
+        timeZone: self.timeZone, is24hourForm: false
+    )
+    .listContent(
+        events: self.events, currentTodos: self.currentTodos,
+        range: Constant.weekRange, excludedEventIds: []
+    )
+
+    var isTagFilterExpanded: AnyPublisher<Bool, Never> {
+        Just(false).eraseToAnyPublisher()
+    }
+    var tagCellViewModels: AnyPublisher<[SharePreviewTagCellViewModel], Never> {
+        let models = [StoreCatalogEventTag.work, .family, .health, .study].map {
+            SharePreviewTagCellViewModel(tagId: $0.tagId, name: $0.customTag.name, isOn: true)
+        }
+        return Just(models).eraseToAnyPublisher()
+    }
+    var lineModels: AnyPublisher<[SharePreviewLineModel], Never> {
+        Just(self.lines).eraseToAnyPublisher()
+    }
+    var sectionModels: AnyPublisher<[SharePreviewSectionModel], Never> {
+        Just(self.sections).eraseToAnyPublisher()
+    }
+    var dateHeaderText: AnyPublisher<String, Never> {
+        Just(self.headerText).eraseToAnyPublisher()
+    }
+    var includeTagName: AnyPublisher<Bool, Never> {
+        Just(false).eraseToAnyPublisher()
+    }
+    var isShareEnabled: AnyPublisher<Bool, Never> {
+        Just(true).eraseToAnyPublisher()
+    }
+    var format: AnyPublisher<SharePreviewFormat, Never> {
+        Just(.image).eraseToAnyPublisher()
+    }
+    var imageContentModel: AnyPublisher<ShareImageContentModel?, Never> {
+        Just(self.imageContent).eraseToAnyPublisher()
+    }
+    var imageHeaderText: AnyPublisher<String, Never> {
+        Just(self.headerText).eraseToAnyPublisher()
+    }
+    /// 프로덕션은 format == .text 일 때만 노출한다
+    var isIncludeTagNameOptionVisible: AnyPublisher<Bool, Never> {
+        Just(false).eraseToAnyPublisher()
+    }
+
+    func prepare() { }
+    func toggleTagFilterExpanded() { }
+    func toggleTag(_ tagId: EventTagId) { }
+    func selectAllTags() { }
+    func deselectAllTags() { }
+    func toggleLine(_ eventId: String) { }
+    func toggleIncludeTagName(_ newValue: Bool) { }
+    func selectFormat(_ format: SharePreviewFormat) { }
+    func share() { }
+    func close() { }
+}
+
+
+/// 다이나믹 아일랜드 기기의 상하 safe area (pt)
+private enum StoreSafeArea {
+    static let top: CGFloat = 59
+    static let bottom: CGFloat = 34
+}
 
 private enum StoreCatalogEventTag: String {
     case work
