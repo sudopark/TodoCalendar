@@ -41,3 +41,5 @@ Descríbelo tal y como lo dirías. Sin formularios que rellenar y sin fechas que
 · Tema de color y tema del widget, el primer día de la semana y los días destacados
 · Días festivos por país, calendario lunar, formato de 24 horas y zona horaria
 · Deja fijado el tipo de evento y la hora de recordatorio con los que arrancan los eventos nuevos
+
+Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/

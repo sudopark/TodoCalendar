@@ -41,3 +41,5 @@ Describe it the way you'd say it. No forms to fill in, no dates to pick one fiel
 · Color theme and widget theme, the first day of the week, accented days
 · Holidays by country, the lunar calendar, 24-hour time, and time zone
 · Set the event type and reminder time new events should start with
+
+Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/

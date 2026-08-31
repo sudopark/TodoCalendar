@@ -41,3 +41,5 @@ Beschrijf het zoals je het zou zeggen. Geen formulieren invullen, geen datums ve
 · Kleurthema en widgetthema, de eerste dag van de week, geaccentueerde dagen
 · Feestdagen per land, de maankalender, 24-uursnotatie en tijdzone
 · Stel in met welk gebeurtenistype en welke meldingstijd nieuwe gebeurtenissen beginnen
+
+Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/

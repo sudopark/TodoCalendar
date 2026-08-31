@@ -41,3 +41,5 @@ Beskriv det slik du ville sagt det. Ingen skjemaer å fylle ut, ingen datoer å 
 · Fargetema og widget-tema, ukens første dag, fremhevede dager
 · Helligdager etter land, månekalenderen, 24-timers format og tidssone
 · Bestem hvilken hendelsestype og hvilket varslingstidspunkt nye hendelser starter med
+
+Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/

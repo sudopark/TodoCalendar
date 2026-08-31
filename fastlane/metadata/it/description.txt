@@ -41,3 +41,5 @@ Descrivilo come lo diresti a voce. Niente moduli da compilare, nessuna data da s
 · Tema colore e tema widget, il primo giorno della settimana, i giorni in evidenza
 · Festività per paese, calendario lunare, formato 24 ore e fuso orario
 · Imposta il tipo di evento e l'orario di promemoria con cui partono i nuovi eventi
+
+Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/

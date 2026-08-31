@@ -41,3 +41,5 @@ Descriviu-ho tal com ho diríeu. Cap formulari per omplir, cap data per triar ca
 · Tema de color i tema del widget, el primer dia de la setmana i els dies destacats
 · Festius per país, calendari lunar, format de 24 hores i fus horari
 · Deixeu fixats el tipus d'esdeveniment i l'hora de recordatori amb què arrenquen els esdeveniments nous
+
+Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/

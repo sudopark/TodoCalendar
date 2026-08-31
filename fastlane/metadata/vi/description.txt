@@ -41,3 +41,5 @@ Cứ mô tả theo cách bạn vẫn nói. Không biểu mẫu phải điền, k
 · Chủ đề màu và chủ đề tiện ích, ngày bắt đầu tuần, ngày nhấn mạnh
 · Ngày lễ theo quốc gia, âm lịch, định dạng 24 giờ và múi giờ
 · Đặt sẵn loại sự kiện và thời gian nhắc nhở mà sự kiện mới sẽ dùng
+
+Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/

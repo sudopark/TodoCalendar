@@ -41,3 +41,5 @@ Fiók és internetkapcsolat nélkül is működik. Csak akkor jelentkezzen be, h
 · Színtéma és widget témája, a hét első napja, kiemelt napok
 · Országonkénti ünnepnapok, holdnaptár, 24 órás formátum és időzóna
 · Állítsa be, milyen eseménytípussal és értesítési idővel induljanak az új események
+
+Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/

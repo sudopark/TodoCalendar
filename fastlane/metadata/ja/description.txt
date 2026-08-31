@@ -41,3 +41,5 @@ To-do Calendar は、その両方を同じカレンダーに置きます。予�
 · カラーテーマとウィジェットテーマ、週の開始曜日、強調する曜日
 · 国別の祝日、旧暦、24時間表示、タイムゾーン
 · 新しいイベントに最初から入るイベントタイプと通知時刻も、あらかじめ決めておけます
+
+Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/

@@ -41,3 +41,5 @@ To-do Calendar 把两者放进同一个日历。日程落在它发生的那天�
 · 颜色主题和小组件主题、每周从哪天开始、强调日期
 · 各国假期、农历、24小时制和时区
 · 新建事件时默认使用的事件类型和提醒时间，也可以先定好
+
+Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/

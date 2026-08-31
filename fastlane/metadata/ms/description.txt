@@ -41,3 +41,5 @@ Huraikannya seperti cara anda bercakap. Tiada borang untuk diisi, tiada tarikh u
 · Tema warna dan tema widget, hari permulaan minggu, hari ditonjolkan
 · Cuti umum mengikut negara, kalendar lunar, format 24 jam dan zon waktu
 · Tetapkan jenis acara dan waktu pemberitahuan yang digunakan oleh acara baharu
+
+Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/

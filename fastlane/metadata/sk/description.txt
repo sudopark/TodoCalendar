@@ -41,3 +41,5 @@ Opíšte to tak, ako by ste to povedali. Žiadne formuláre na vypĺňanie, žia
 · Farebná téma a motív widgetu, prvý deň týždňa, zvýraznené dni
 · Sviatky podľa krajiny, lunárny kalendár, 24-hodinový formát a časové pásmo
 · Určte typ udalosti a čas upozornenia, s ktorými nové udalosti štartujú
+
+Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/

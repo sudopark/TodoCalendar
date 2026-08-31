@@ -41,3 +41,5 @@ Opišite to onako kako biste rekli naglas. Bez obrazaca za ispunjavanje, bez bir
 · Tema boja i tema widgeta, prvi dan u tjednu, istaknuti dani
 · Blagdani po državi, lunarni kalendar, 24-satni format i vremenska zona
 · Postavite tip događaja i vrijeme obavijesti s kojima kreću novi događaji
+
+Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/

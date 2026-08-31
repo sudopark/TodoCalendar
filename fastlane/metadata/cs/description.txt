@@ -41,3 +41,5 @@ Popište to tak, jak byste to řekli. Žádné formuláře k vyplnění, žádn�
 · Barevné téma a motiv widgetu, první den v týdnu, zvýrazněné dny
 · Svátky podle země, lunární kalendář, 24hodinový formát a časové pásmo
 · Určete typ události a čas připomenutí, se kterými nové události startují
+
+Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
