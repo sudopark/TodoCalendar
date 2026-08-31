@@ -117,3 +117,6 @@ scripts/__pycache__/
 # 자격증명 — README 만 커밋한다
 secret/*
 !secret/README.md
+
+fastlane/custom_product_pages/*
+!fastlane/custom_product_pages/README.md

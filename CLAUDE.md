@@ -69,6 +69,7 @@ tuist generate --no-open      # 파일 추가/삭제 후 재실행 필수
 | 테스트 빌드 배포 | test-deploy 스킬 (Firebase App Distribution) |
 | 새 버전 출시 변경내용 작성 | release-notes 스킬 (한글 초안 → 31개 로케일 → ASC 업로드) |
 | 앱 내 이벤트 현지화·이미지·업로드 | in-app-event 스킬 (한글 원고 → 31개 로케일 → 촬영·합성 → ASC 업로드) |
+| 맞춤형 제품 페이지 제작·업로드 | custom-product-page 스킬 (한글 원고 → 31개 로케일 → 촬영·합성 → ASC 업로드) |
 | UI 디자인 | design 스킬 |
 | 스냅샷 검증·화면 카탈로그 | snapshot-check / app-catalog 스킬 |
 | 코드 분석 (로직·추적·관계·영향도) | analyze 스킬 → code-analyzer subagent |
