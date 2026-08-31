@@ -26,7 +26,7 @@
 
 // MARK: - 이벤트 상세
 
-"catalog.place::startup_hub" = "Seoul Startup Hub";
+"catalog.place::meeting_room" = "Переговорна, 2-й поверх";
 "catalog.memo::wireframes" = "Взяти роздруковані вайрфрейми.";
 
 // MARK: - 이벤트 타입

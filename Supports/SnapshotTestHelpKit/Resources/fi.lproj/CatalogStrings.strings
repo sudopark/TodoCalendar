@@ -26,7 +26,7 @@
 
 // MARK: - 이벤트 상세
 
-"catalog.place::startup_hub" = "Seoul Startup Hub";
+"catalog.place::meeting_room" = "Kokoushuone, 2. kerros";
 "catalog.memo::wireframes" = "Ota tulostetut rautalankamallit mukaan.";
 
 // MARK: - 이벤트 타입

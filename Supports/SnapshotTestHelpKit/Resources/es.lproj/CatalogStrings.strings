@@ -26,7 +26,7 @@
 
 // MARK: - 이벤트 상세
 
-"catalog.place::startup_hub" = "Seoul Startup Hub";
+"catalog.place::meeting_room" = "Sala de reuniones, 2.ª planta";
 "catalog.memo::wireframes" = "Llevar los wireframes impresos.";
 
 // MARK: - 이벤트 타입

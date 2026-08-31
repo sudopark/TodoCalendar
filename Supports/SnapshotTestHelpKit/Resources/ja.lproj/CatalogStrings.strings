@@ -26,7 +26,7 @@
 
 // MARK: - 이벤트 상세
 
-"catalog.place::startup_hub" = "ソウル・スタートアップハブ";
+"catalog.place::meeting_room" = "2階 会議室";
 "catalog.memo::wireframes" = "印刷したワイヤーフレームを持っていく。";
 
 // MARK: - 이벤트 타입

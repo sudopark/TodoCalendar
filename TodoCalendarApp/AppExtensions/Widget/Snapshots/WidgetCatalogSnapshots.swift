@@ -197,7 +197,7 @@ final class WidgetCatalogSnapshots: XCTestCase {
                 tagColorHex: "#2F6FED",
                 eventDate: eventDate,
                 startDate: eventDate.addingTimeInterval(-75 * 60),
-                placeName: "catalog.place::startup_hub".catalogLocalized()
+                placeName: "catalog.place::meeting_room".catalogLocalized()
             )
             return EventCountdownLockScreenView(
                 model: EventCountdownActivityViewModel(attributes, state),
