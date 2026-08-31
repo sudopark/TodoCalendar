@@ -26,7 +26,7 @@
 
 // MARK: - 이벤트 상세
 
-"catalog.place::startup_hub" = "首爾創業中心";
+"catalog.place::meeting_room" = "二樓會議室";
 "catalog.memo::wireframes" = "帶上列印好的線框圖。";
 
 // MARK: - 이벤트 타입

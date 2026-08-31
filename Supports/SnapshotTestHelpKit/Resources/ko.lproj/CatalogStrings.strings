@@ -26,7 +26,7 @@
 
 // MARK: - 이벤트 상세
 
-"catalog.place::startup_hub" = "서울 창업허브";
+"catalog.place::meeting_room" = "2층 회의실";
 "catalog.memo::wireframes" = "출력한 와이어프레임 챙기기.";
 
 // MARK: - 이벤트 타입

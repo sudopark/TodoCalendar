@@ -49,8 +49,8 @@ final class EventDetailSceneCatalogSnapshots: XCTestCase {
             )
             state.selectedRepeat = "eventDetail.repeating.everySomeWeek:title".localized(with: 2)
             state.selectedNotificationTimeText = "event_notification_setting::option_title::before_minutes".localized(with: 10)
-            state.enterPlaceName = "catalog.place::startup_hub".catalogLocalized()
-            state.selectedPlace = .customPlace("catalog.place::startup_hub".catalogLocalized())
+            state.enterPlaceName = "catalog.place::meeting_room".catalogLocalized()
+            state.selectedPlace = .customPlace("catalog.place::meeting_room".catalogLocalized())
             state.memo = "catalog.memo::wireframes".catalogLocalized()
             state.isSavable = true
             return EventDetailView()
@@ -180,7 +180,7 @@ extension EventDetailSceneCatalogSnapshots {
                 .init(self.start, .current), .init(self.end, .current)
             )
             state.repeatOptionText = "eventDetail.repeating.everyWeek:title".localized()
-            state.location = "catalog.place::startup_hub".catalogLocalized()
+            state.location = "catalog.place::meeting_room".catalogLocalized()
             state.conferenceData = self.googleConference
             state.attendees = self.googleAttendees
             state.memo = "catalog.memo::wireframes".catalogLocalized()
