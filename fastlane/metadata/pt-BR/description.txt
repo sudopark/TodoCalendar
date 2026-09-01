@@ -41,3 +41,5 @@ Descreva do jeito que você falaria. Sem formulário para preencher, sem data pa
 · Tema de cores e tema do widget, o primeiro dia da semana e os dias em destaque
 · Feriados por país, calendário lunar, formato de 24 horas e fuso horário
 · Defina o tipo de evento e o horário de lembrete com que os eventos novos já começam
+
+Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/

@@ -41,3 +41,5 @@ Beskriv det som du skulle säga det. Inga formulär att fylla i, inga datum att 
 · Färgtema och widget-tema, veckans startdag, markerade dagar
 · Helgdagar per land, månkalendern, 24-timmarsformat och tidszon
 · Bestäm vilken händelsetyp och vilken påminnelsetid nya händelser ska börja med
+
+Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/

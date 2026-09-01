@@ -15,13 +15,13 @@
 |---|---|---|---|---|
 | 1 | **Event** | 🟥 Core | Todo/Schedule 생성·수정·반복·완료·태깅·강조 | [todo](spec/todo-event.md) · [schedule](spec/schedule-event.md) · [repeating](spec/repeating-events.md) · [tags/foremost](spec/tags-foremost-notifications.md) |
 | 2 | **Calendar** | 🟥 Core | 시간 프레임(연/월/일·주·음력)·포커스 날짜·공휴일 | `Models/Calendar`, `CalendarUsecase`, `HolidayUsecase` |
-| 3 | **External Calendar** | 🟧 Supporting | Google/Apple 외부 캘린더 다중계정 연동·합산 | [google-calendar](spec/google-calendar.md) |
+| 3 | **External Calendar** | 🟧 Supporting | Google/Apple 외부 캘린더 다중계정 연동·합산 | [google-calendar](spec/google-calendar.md) · [apple-calendar](spec/apple-calendar.md) |
 | 4 | **Account / Auth** | 🟧 Supporting | 로그인·토큰·OAuth2·외부 서비스 계정 | [account-auth](spec/account-auth.md) |
-| 5 | **AI Agent** | 🟧→🟥 Supporting (Core 승격 유력) | 음성/키보드 command → 이벤트 변경 오케스트레이션 | `Models/AI`, `AIAgentOrchestrationUsecase` |
+| 5 | **AI Agent** | 🟧→🟥 Supporting (Core 승격 유력) | 음성/키보드/이미지 command → 이벤트 변경 오케스트레이션 | [ai-agent](spec/ai-agent.md) |
 | 6 | **Notification** | 🟧 Supporting | 이벤트 알림 스케줄링·권한 | [tags/foremost/notifications](spec/tags-foremost-notifications.md) |
 | 7 | **Settings** | 🟩 Generic | 외형·이벤트 표시·UI 설정 | [settings](spec/settings.md) |
 | 8 | **Support** | 🟩 Generic | 앱 업데이트·피드백·링크프리뷰·장소검색·STT | [infrastructure](spec/infrastructure.md) |
-| 9 | **Billing** | 🟧 Supporting | 플랜·top-up 카탈로그, StoreKit 구매 → 서명 서버 반영 | `Models/Billing`, `BillingUsecase`, `StoreKitService` |
+| 9 | **Billing** | 🟧 Supporting | 플랜·top-up 카탈로그, StoreKit 구매 → 서명 서버 반영, 광고 노출 판정 | [billing](spec/billing.md) |
 
 **분류 의미** — 🟥 Core: 제품 차별점, 투자 집중 / 🟧 Supporting: Core를 떠받침 / 🟩 Generic: 어디서든 동일, 대체 가능.
 
@@ -38,7 +38,7 @@
 | **series vs occurrence** | Schedule 수정범위: `.onlyThisTime`(이 회차만) / `.fromNow`(여기부터 분기) / 전체 시리즈 | "이 일정 수정"이 시리즈 전체인지 한 회차인지 모호 |
 | **Foremost** | 사용자가 **딱 1개** 지정하는 강조 이벤트(위젯용) | 복수로 오해 |
 | **Tag** | `EventTagId` 4종: `.default`/`.holiday`/`.custom`/`.externalCalendar`. 표시 semantics 다름(커스텀 기본보임, 외부 기본숨김) | 단순 라벨로만 |
-| **Command vs Job** (AI) | `ProcessingAICommand`=클라 의도 / `AIJob`=서버 실행단위(PENDING·RUNNING·DONE·CONFIRM·FAILED·REJECTED) / `AIJobDataMutation`=결과 반영(todo/doneTodo/schedule/tag/eventDetail × created/updated/deleted) | 셋을 뭉뚱그려 "AI 요청" |
+| **Command vs Job** (AI) | `ProcessingAICommand`=클라 의도 / `AIJob`=서버 실행단위(PENDING·RUNNING·DONE·CONFIRM·FAILED·REJECTED·CANCELED) / `AIJobDataMutation`=결과 반영(todo/doneTodo/schedule/tag/eventDetail × created/updated/deleted) | 셋을 뭉뚱그려 "AI 요청" |
 | **External Calendar** | Google/Apple **한정**, accountId별 Pool로 다중계정, `LocalAggregated`가 합산 | "외부 = Google만" |
 | **Done** | Todo 전용 완료 상태(`DoneTodoEvent`) | Schedule에도 있다고 가정 |
 

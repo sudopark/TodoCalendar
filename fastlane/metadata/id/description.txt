@@ -41,3 +41,5 @@ Jelaskan seperti saat Anda mengucapkannya. Tanpa formulir yang harus diisi, tanp
 · Tema warna dan tema widget, hari awal minggu, hari yang ditonjolkan
 · Hari libur menurut negara, kalender lunar, format 24 jam, dan zona waktu
 · Tetapkan jenis acara dan waktu notifikasi yang dipakai acara baru sejak awal
+
+Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/

@@ -53,6 +53,44 @@ final class AppStoreCaptionSnapshots: XCTestCase {
 }
 
 
+// MARK: - 맞춤형 제품 페이지 캡션 (#1029)
+
+/// 원고는 gitignore 대상이라 신선한 클론·CI 에는 없다 — 그때는 건너뛴다.
+extension AppStoreCaptionSnapshots {
+
+    private var customProductPageCaptionsPath: String {
+        return "\(self.repositoryRootPath)/fastlane/custom_product_pages/captions.json"
+    }
+
+    @MainActor
+    func test_customProductPageCaptions() throws {
+        let path = self.customProductPageCaptionsPath
+        guard let data = FileManager.default.contents(atPath: path) else {
+            throw XCTSkip("captions.json 이 없다 — 맞춤형 제품 페이지 원고를 아직 안 채웠다 (\(path))")
+        }
+        guard let language = self.currentTestLanguage else {
+            XCTFail("AppleLanguages 를 읽을 수 없다 — -testLanguage 없이 돌린 것이다")
+            return
+        }
+        let captions = try JSONDecoder().decode([String: [String: String]].self, from: data)
+
+        captions.keys.sorted().forEach { sceneId in
+            guard let caption = captions[sceneId]?[language] else {
+                XCTFail("\(sceneId): \(language) 캡션 원고가 없다")
+                return
+            }
+            captureSnapshotPair(
+                named: sceneId,
+                layout: .fixed(width: self.canvasWidth, height: self.canvasHeight),
+                snapshotDirectory: catalogSnapshotDirectory()
+            ) { _ in
+                self.captionView(caption)
+            }
+        }
+    }
+}
+
+
 // MARK: - caption view
 
 extension AppStoreCaptionSnapshots {

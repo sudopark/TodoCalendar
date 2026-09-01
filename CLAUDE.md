@@ -68,6 +68,8 @@ tuist generate --no-open      # 파일 추가/삭제 후 재실행 필수
 | 테스트 실행 | run-tests 스킬 (스킴 목록 정본) |
 | 테스트 빌드 배포 | test-deploy 스킬 (Firebase App Distribution) |
 | 새 버전 출시 변경내용 작성 | release-notes 스킬 (한글 초안 → 31개 로케일 → ASC 업로드) |
+| 앱 내 이벤트 현지화·이미지·업로드 | in-app-event 스킬 (한글 원고 → 31개 로케일 → 촬영·합성 → ASC 업로드) |
+| 맞춤형 제품 페이지 제작·업로드 | custom-product-page 스킬 (한글 원고 → 31개 로케일 → 촬영·합성 → ASC 업로드) |
 | UI 디자인 | design 스킬 |
 | 스냅샷 검증·화면 카탈로그 | snapshot-check / app-catalog 스킬 |
 | 코드 분석 (로직·추적·관계·영향도) | analyze 스킬 → code-analyzer subagent |
@@ -97,6 +99,9 @@ tuist generate --no-open      # 파일 추가/삭제 후 재실행 필수
 | 반복 이벤트·turn 규칙·수정 범위 | [`docs/spec/repeating-events.md`](docs/spec/repeating-events.md) |
 | 이벤트 태그·색상·보이기숨기기 | [`Domain/CLAUDE.md`](Domain/CLAUDE.md), [`docs/spec/tags-foremost-notifications.md`](docs/spec/tags-foremost-notifications.md) |
 | 외부 캘린더 다중 계정·Pool | [`Domain/CLAUDE.md`](Domain/CLAUDE.md), [`Repository/CLAUDE.md`](Repository/CLAUDE.md), [`docs/spec/google-calendar.md`](docs/spec/google-calendar.md) |
+| Apple 캘린더 권한·EventKit·쓰기 | [`docs/spec/apple-calendar.md`](docs/spec/apple-calendar.md) |
+| AI 에이전트 command·job·사용량 | [`docs/spec/ai-agent.md`](docs/spec/ai-agent.md) |
+| 플랜·구매·광고 노출 | [`docs/spec/billing.md`](docs/spec/billing.md) |
 | ForemostEvent | [`docs/spec/tags-foremost-notifications.md`](docs/spec/tags-foremost-notifications.md) |
 | SharedDataStore 키·구독 | [`Domain/CLAUDE.md`](Domain/CLAUDE.md) |
 | 앱 버전 체크 | [`docs/spec/infrastructure.md §7`](docs/spec/infrastructure.md) |
@@ -134,5 +139,5 @@ tuist generate --no-open      # 파일 추가/삭제 후 재실행 필수
 
 ## 6. Scene 스펙
 
-- 상세 스펙(6파일, 생성 순서, SwiftUI 템플릿, Scene 간 통신): [`docs/scene-spec.md`](docs/scene-spec.md)
+- 상세 스펙(6파일, 생성 순서, SwiftUI 템플릿, Scene 간 통신): [`docs/화면단위구조.md`](docs/화면단위구조.md)
 - MUST/MUST NOT 규칙: [`.claude/rules/presentations-rules.md`](.claude/rules/presentations-rules.md)

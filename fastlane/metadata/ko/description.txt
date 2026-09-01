@@ -41,3 +41,5 @@ To-do Calendar는 둘을 같은 달력에 담습니다. 일정은 약속한 날�
 · 컬러 테마와 위젯 테마, 주 시작 요일, 강조 요일
 · 국가별 공휴일 표시, 음력 표시, 24시간 표시, 타임존
 · 새 이벤트를 만들 때 기본으로 쓸 이벤트 종류와 미리알림 시간을 미리 정해둘 수 있습니다
+
+Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/

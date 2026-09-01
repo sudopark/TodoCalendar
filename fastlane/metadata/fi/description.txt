@@ -41,3 +41,5 @@ Kuvaile se niin kuin sanoisit sen ääneen. Ei lomakkeita täytettäväksi, ei p
 · Väriteema ja widgetin teema, viikon ensimmäinen päivä, korostetut päivät
 · Maakohtaiset vapaapäivät, kuukalenteri, 24 tunnin muoto ja aikavyöhyke
 · Aseta tapahtumatyyppi ja muistutusaika, joilla uudet tapahtumat alkavat
+
+Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/

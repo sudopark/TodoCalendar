@@ -41,3 +41,5 @@ Beschreiben Sie es so, wie Sie es sagen würden. Keine Formulare zum Ausfüllen,
 · Farbschema und Widget-Design, erster Wochentag, hervorgehobene Tage
 · Feiertage nach Land, Mondkalender, 24-Stunden-Format und Zeitzone
 · Legen Sie fest, mit welchem Ereignistyp und welcher Benachrichtigungszeit neue Ereignisse starten
+
+Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/

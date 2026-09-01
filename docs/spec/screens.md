@@ -486,29 +486,37 @@ ActionSheet로 삭제 범위를 선택한다:
 ```
 설정
 ├── 계정 (로그인/계정 관리)
-├── 외형 설정
+├── 플랜 (billingPlan → paywall)
+├── 외형 설정 (appearance)
 │   ├── 캘린더 외형
 │   ├── 컬러 테마
 │   ├── 타임존
 │   └── 위젯 외형
-├── 이벤트 설정
+├── 이벤트 설정 (editEvent)
 │   ├── 기본 태그
 │   ├── 기본 알림 시간
 │   └── 기본 지도 앱
-├── 공휴일 설정
+├── 공휴일 설정 (holidaySetting)
 │   └── 국가 선택
-├── 피드백 전송
-├── 도움말 (외부 링크)
-├── 앱 공유
-├── 앱스토어 리뷰
+├── AI로 추가 — Siri·위젯 (aiUsageGuide, 외부 링크)
+├── 웹에서 열기 (openWeb, 외부 링크)
+├── 피드백 전송 (feedback)
+├── 광고 개인정보 옵션 (adPrivacyOptions)
+├── 도움말 (help, 외부 링크)
+├── 앱 공유 (shareApp)
+├── 앱스토어 리뷰 (addReview)
+├── 이용약관 (terms) / 개인정보처리방침 (privacyPolicy)
+├── 오픈소스 라이선스 (openSourceLicense)
 └── 소스코드 (GitHub)
 ```
+
+항목 식별자는 `SettingItemListViewModel.ItemId`.
 
 ## 5. 인증 (`MemberScenes`)
 
 | 화면 | 설명 |
 |---|---|
-| 로그인 | 바텀시트 모달, 구글 OAuth2 |
+| 로그인 | 바텀시트 모달, 구글·애플 OAuth2 |
 | 계정 관리 | 로그인 방법, 이메일, 최종 로그인 시간 표시. 로그아웃/계정 삭제/데이터 마이그레이션 |
 
 ## 6. 에러 표시 패턴

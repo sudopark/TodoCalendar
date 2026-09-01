@@ -41,3 +41,5 @@ Descrieți lucrurile așa cum le-ați spune cu voce tare. Fără formulare de co
 · Tema de culoare și tema widgetului, prima zi a săptămânii, zilele evidențiate
 · Sărbătorile după țară, calendarul lunar, formatul de 24 de ore și fusul orar
 · Stabiliți tipul de eveniment și ora notificării cu care pornesc evenimentele noi
+
+Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/

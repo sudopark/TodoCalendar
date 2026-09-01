@@ -41,3 +41,5 @@ Opisz to zwykłymi słowami, tak jak w rozmowie. Bez formularzy do wypełnienia,
 · Motyw kolorystyczny i motyw widżetu, pierwszy dzień tygodnia, wyróżnione dni
 · Święta według kraju, kalendarz księżycowy, format 24-godzinny i strefa czasowa
 · Ustal typ wydarzenia i czas przypomnienia, z jakimi startują nowe wydarzenia
+
+Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/

@@ -41,3 +41,5 @@ Nasıl söylüyorsanız öyle anlatın. Doldurulacak form yok, alan alan seçile
 · Renk teması ve widget teması, haftanın başlangıç günü, vurgulanan günler
 · Ülkeye göre tatiller, ay takvimi, 24 saat biçimi ve saat dilimi
 · Yeni etkinliklerin hangi etkinlik türü ve hangi bildirim zamanıyla başlayacağını belirleyin
+
+Terms of Use (EULA): https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
