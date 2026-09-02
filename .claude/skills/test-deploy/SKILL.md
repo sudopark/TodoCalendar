@@ -1,6 +1,6 @@
 ---
 name: test-deploy
-description: Use when the user wants a test build distributed to Firebase App Distribution — 개발 완료·핫픽스 검증 시점에 특정 브랜치를 테스터에게 내보내는 절차. 피처플래그를 켠 빌드도 배포 브랜치를 따서 내보낸다. Triggers on "테스트 배포 돌려", "이 브랜치 배포해서 확인해볼게", "ddayWidget 켜서 배포해줘". Does NOT trigger on TestFlight·앱스토어 제출(#918 후속 레인 소관), 테스트 실행(run-tests 스킬), PR 생성(pr 스킬), 코드 수정(implement 스킬) — 이 스킬의 FeatureFlag.swift 편집은 사전 규정된 리터럴 치환이라 별도 발동 대상이 아니다.
+description: Use when the user wants a test build distributed to Firebase App Distribution — 개발 완료·핫픽스 검증 시점에 특정 브랜치를 테스터에게 내보내는 절차. 피처플래그를 켠 빌드도 배포 브랜치를 따서 내보낸다. Triggers on "테스트 배포 돌려", "이 브랜치 배포해서 확인해볼게", "ddayWidget 켜서 배포해줘". Does NOT trigger on TestFlight 업로드(testflight-deploy 스킬)·앱스토어 심사 제출, 테스트 실행(run-tests 스킬), PR 생성(pr 스킬), 코드 수정(implement 스킬) — 이 스킬의 FeatureFlag.swift 편집은 사전 규정된 리터럴 치환이라 별도 발동 대상이 아니다.
 argument-hint: "[flags]"
 ---
 

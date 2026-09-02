@@ -67,6 +67,7 @@ tuist generate --no-open      # 파일 추가/삭제 후 재실행 필수
 | 파일·프레임워크 추가 | add-file / add-framework 스킬 |
 | 테스트 실행 | run-tests 스킬 (스킴 목록 정본) |
 | 테스트 빌드 배포 | test-deploy 스킬 (Firebase App Distribution) |
+| TestFlight 업로드 | testflight-deploy 스킬 (App Store 서명 + dSYM Crashlytics 업로드) |
 | 새 버전 출시 변경내용 작성 | release-notes 스킬 (한글 초안 → 31개 로케일 → ASC 업로드) |
 | 앱 내 이벤트 현지화·이미지·업로드 | in-app-event 스킬 (한글 원고 → 31개 로케일 → 촬영·합성 → ASC 업로드) |
 | 맞춤형 제품 페이지 제작·업로드 | custom-product-page 스킬 (한글 원고 → 31개 로케일 → 촬영·합성 → ASC 업로드) |
