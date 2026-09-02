@@ -6,6 +6,15 @@ def required_env(name, hint)
   value
 end
 
+def asc_api_key
+  app_store_connect_api_key(
+    key_id: required_env("ASC_KEY_ID", "App Store Connect > 사용자 및 액세스 > 통합에서 발급한 키 ID"),
+    issuer_id: required_env("ASC_ISSUER_ID", "같은 화면의 Issuer ID"),
+    key_content: required_env("ASC_KEY_CONTENT", "AuthKey_<키ID>.p8 를 base64 로 인코딩한 값 — base64 -i AuthKey_<키ID>.p8"),
+    is_key_content_base64: true
+  )
+end
+
 # fastlane 은 액션을 프로젝트 루트로 chdir 해서 실행하는데 FastlaneFolder.path 는 상대경로("./")를
 # 돌려준다 — 레인 본문에서 절대경로로 굳히지 않으면 가드와 액션이 서로 다른 디렉토리를 본다
 def app_store_metadata_path
@@ -228,6 +237,43 @@ platform :ios do
     )
   end
 
+  desc "App Store 서명 IPA 를 빌드해 TestFlight 에 올리고 dSYM 을 Crashlytics 에 업로드"
+  lane :testflight_deploy do
+    build_app(
+      workspace: "TodoCalendar.xcworkspace",
+      scheme: "TodoCalendarApp",
+      configuration: "Release",
+      export_method: "app-store",
+      export_options: {
+        signingStyle: "manual",
+        signingCertificate: "Apple Distribution",
+        provisioningProfiles: {
+          "com.sudo.park.TodoCalendarApp" => "match AppStore com.sudo.park.TodoCalendarApp",
+          "com.sudo.park.TodoCalendarApp.Widget" => "match AppStore com.sudo.park.TodoCalendarApp.Widget",
+          "com.sudo.park.TodoCalendarApp.IntentExtensions" => "match AppStore com.sudo.park.TodoCalendarApp.IntentExtensions",
+          "com.sudo.park.TodoCalendarApp.Share" => "match AppStore com.sudo.park.TodoCalendarApp.Share"
+        }
+      },
+      output_directory: "build",
+      output_name: "TodoCalendarApp.ipa",
+      clean: false
+    )
+
+    upload_to_testflight(
+      api_key: asc_api_key,
+      ipa: lane_context[SharedValues::IPA_OUTPUT_PATH],
+      # 업로드까지만 한다 — 내부 테스터는 ASC 처리가 끝나면 자동으로 받는다
+      skip_waiting_for_build_processing: true
+    )
+
+    upload_symbols_to_crashlytics(
+      dsym_path: lane_context[SharedValues::DSYM_OUTPUT_PATH],
+      gsp_path: "TodoCalendarApp/Resources/GoogleService-Info.plist",
+      # Firebase 를 SPM 으로 받아 Pods 경로가 없다. 기본 탐색이 실패하므로 바이너리를 직접 짚는다
+      binary_path: ".build/checkouts/firebase-ios-sdk/Crashlytics/upload-symbols"
+    )
+  end
+
   desc "fastlane/metadata 의 텍스트 메타데이터만 App Store Connect 에 올리고 precheck 로 검사 (바이너리·스크린샷 제외, 심사 제출은 콘솔에서 직접)"
   lane :upload_app_store_metadata do
     metadata_path = app_store_metadata_path
@@ -235,12 +281,7 @@ platform :ios do
     ensure_required_locale_fields!(metadata_path)
     warn_missing_release_notes(metadata_path)
 
-    api_key = app_store_connect_api_key(
-      key_id: required_env("ASC_KEY_ID", "App Store Connect > 사용자 및 액세스 > 통합에서 발급한 키 ID"),
-      issuer_id: required_env("ASC_ISSUER_ID", "같은 화면의 Issuer ID"),
-      key_content: required_env("ASC_KEY_CONTENT", "AuthKey_<키ID>.p8 를 base64 로 인코딩한 값 — base64 -i AuthKey_<키ID>.p8"),
-      is_key_content_base64: true
-    )
+    api_key = asc_api_key
 
     deliver(
       api_key: api_key,
@@ -273,12 +314,7 @@ platform :ios do
     ensure_screenshot_slots_complete!(screenshots_path)
     ensure_screenshots_meet_upload_spec!(screenshots_path)
 
-    api_key = app_store_connect_api_key(
-      key_id: required_env("ASC_KEY_ID", "App Store Connect > 사용자 및 액세스 > 통합에서 발급한 키 ID"),
-      issuer_id: required_env("ASC_ISSUER_ID", "같은 화면의 Issuer ID"),
-      key_content: required_env("ASC_KEY_CONTENT", "AuthKey_<키ID>.p8 를 base64 로 인코딩한 값 — base64 -i AuthKey_<키ID>.p8"),
-      is_key_content_base64: true
-    )
+    api_key = asc_api_key
 
     deliver(
       api_key: api_key,
