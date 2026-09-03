@@ -1,7 +1,8 @@
 "Add with AI" = "Pridať pomocou AI";
-"Send what you say to AI and let it create your events and to-dos." = "Pošlite AI to, čo poviete, a nechajte ju vytvoriť vaše termíny a úlohy.";
+"Send" = "Poslať";
+"Send what you say to AI and let it add, change, complete, or delete your events and to-dos." = "Pošlite AI to, čo poviete, a nechajte ju pridať, zmeniť, dokončiť alebo odstrániť vaše termíny a úlohy.";
 "Command" = "Príkaz";
-"What would you like to add?" = "Čo by ste chceli pridať?";
+"What should I do?" = "Čo mám urobiť?";
 "Got it. I'll notify you when it's done." = "Rozumiem. Dám vám vedieť, keď to bude hotové.";
 "Sign in to the app first to use AI." = "Najprv sa prihláste do aplikácie, aby ste mohli používať AI.";
 "You've used up your AI credits for today." = "Vyčerpali ste dnešné kredity AI.";

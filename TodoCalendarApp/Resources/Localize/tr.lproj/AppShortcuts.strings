@@ -1,4 +1,6 @@
+"Hey ${applicationName}" = "Hey ${applicationName}";
+"Request in ${applicationName}" = "${applicationName} uygulamasına istek";
+"Ask ${applicationName}" = "${applicationName} uygulamasına sor";
+"Send a request to ${applicationName}" = "${applicationName} uygulamasına istek gönder";
 "Add with AI in ${applicationName}" = "${applicationName} uygulamasında AI ile ekle";
-"Add a schedule in ${applicationName}" = "${applicationName} uygulamasında randevu ekle";
-"Add a to-do in ${applicationName}" = "${applicationName} uygulamasında görev ekle";
-"Add with AI" = "AI ile Ekle";
+"Send" = "Gönder";

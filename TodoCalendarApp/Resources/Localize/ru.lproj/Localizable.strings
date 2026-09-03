@@ -1,7 +1,8 @@
 "Add with AI" = "Добавить с помощью ИИ";
-"Send what you say to AI and let it create your events and to-dos." = "Отправьте ИИ то, что вы скажете, и он создаст ваши события и задачи.";
+"Send" = "Отправить";
+"Send what you say to AI and let it add, change, complete, or delete your events and to-dos." = "Отправьте ИИ то, что вы скажете, и он добавит, изменит, завершит или удалит ваши события и задачи.";
 "Command" = "Команда";
-"What would you like to add?" = "Что вы хотите добавить?";
+"What should I do?" = "Что мне сделать?";
 "Got it. I'll notify you when it's done." = "Понял. Сообщу, когда будет готово.";
 "Sign in to the app first to use AI." = "Сначала войдите в приложение, чтобы использовать ИИ.";
 "You've used up your AI credits for today." = "Вы исчерпали кредиты ИИ на сегодня.";

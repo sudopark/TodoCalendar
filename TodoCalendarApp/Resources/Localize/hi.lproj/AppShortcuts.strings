@@ -1,4 +1,6 @@
+"Hey ${applicationName}" = "अरे ${applicationName}";
+"Request in ${applicationName}" = "${applicationName} में अनुरोध";
+"Ask ${applicationName}" = "${applicationName} से पूछें";
+"Send a request to ${applicationName}" = "${applicationName} को अनुरोध भेजें";
 "Add with AI in ${applicationName}" = "${applicationName} में AI से जोड़ें";
-"Add a schedule in ${applicationName}" = "${applicationName} में अनुसूची जोड़ें";
-"Add a to-do in ${applicationName}" = "${applicationName} में कार्य जोड़ें";
-"Add with AI" = "AI से जोड़ें";
+"Send" = "भेजें";
