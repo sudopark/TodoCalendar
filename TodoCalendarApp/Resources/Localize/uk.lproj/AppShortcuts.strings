@@ -1,4 +1,6 @@
+"Hey ${applicationName}" = "Гей, ${applicationName}";
+"Request in ${applicationName}" = "Запит у ${applicationName}";
+"Ask ${applicationName}" = "Запитати застосунок ${applicationName}";
+"Send a request to ${applicationName}" = "Надіслати запит застосунку ${applicationName}";
 "Add with AI in ${applicationName}" = "Додати за допомогою ШІ в ${applicationName}";
-"Add a schedule in ${applicationName}" = "Додати зустріч в ${applicationName}";
-"Add a to-do in ${applicationName}" = "Додати завдання в ${applicationName}";
-"Add with AI" = "Додати за допомогою ШІ";
+"Send" = "Надіслати";

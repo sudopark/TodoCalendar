@@ -15,11 +15,13 @@ struct TodoCalendarAppShortcuts: AppShortcutsProvider {
         AppShortcut(
             intent: SendAICommandIntent(),
             phrases: [
-                "Add with AI in \(.applicationName)",
-                "Add a schedule in \(.applicationName)",
-                "Add a to-do in \(.applicationName)"
+                "Hey \(.applicationName)",
+                "Request in \(.applicationName)",
+                "Ask \(.applicationName)",
+                "Send a request to \(.applicationName)",
+                "Add with AI in \(.applicationName)"
             ],
-            shortTitle: "Add with AI",
+            shortTitle: "Send",
             systemImageName: "sparkles"
         )
     }

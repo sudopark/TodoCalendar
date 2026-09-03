@@ -1,4 +1,6 @@
+"Hey ${applicationName}" = "ねえ、${applicationName}";
+"Request in ${applicationName}" = "${applicationName}にリクエスト";
+"Ask ${applicationName}" = "${applicationName}に頼む";
+"Send a request to ${applicationName}" = "${applicationName}にリクエストを送る";
 "Add with AI in ${applicationName}" = "${applicationName}でAIに追加";
-"Add a schedule in ${applicationName}" = "${applicationName}で予定を追加";
-"Add a to-do in ${applicationName}" = "${applicationName}でタスクを追加";
-"Add with AI" = "AIで追加";
+"Send" = "送る";

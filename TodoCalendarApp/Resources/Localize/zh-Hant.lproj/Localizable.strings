@@ -1,7 +1,8 @@
 "Add with AI" = "用AI新增";
-"Send what you say to AI and let it create your events and to-dos." = "把你說的內容傳送給AI，讓它為你建立行程和待辦事項。";
+"Send" = "傳送";
+"Send what you say to AI and let it add, change, complete, or delete your events and to-dos." = "把你說的內容傳送給AI，讓它為你新增、修改、完成或刪除行程和待辦事項。";
 "Command" = "指令";
-"What would you like to add?" = "你想新增什麼？";
+"What should I do?" = "要我做什麼？";
 "Got it. I'll notify you when it's done." = "好的，完成後會通知你。";
 "Sign in to the app first to use AI." = "請先登入應用程式才能使用AI。";
 "You've used up your AI credits for today." = "你今天的AI點數已經用完了。";

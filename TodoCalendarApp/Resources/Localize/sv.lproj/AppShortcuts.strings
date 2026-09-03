@@ -1,4 +1,6 @@
+"Hey ${applicationName}" = "Hej ${applicationName}";
+"Request in ${applicationName}" = "Förfrågan till ${applicationName}";
+"Ask ${applicationName}" = "Fråga ${applicationName}";
+"Send a request to ${applicationName}" = "Skicka en förfrågan till ${applicationName}";
 "Add with AI in ${applicationName}" = "Lägg till med AI i ${applicationName}";
-"Add a schedule in ${applicationName}" = "Lägg till ett möte i ${applicationName}";
-"Add a to-do in ${applicationName}" = "Lägg till en uppgift i ${applicationName}";
-"Add with AI" = "Lägg till med AI";
+"Send" = "Skicka";

@@ -1,7 +1,8 @@
 "Add with AI" = "Додати за допомогою ШІ";
-"Send what you say to AI and let it create your events and to-dos." = "Надішліть ШІ те, що ви скажете, і він створить ваші зустрічі та завдання.";
+"Send" = "Надіслати";
+"Send what you say to AI and let it add, change, complete, or delete your events and to-dos." = "Надішліть ШІ те, що ви скажете, і він додасть, змінить, завершить або видалить ваші зустрічі та завдання.";
 "Command" = "Команда";
-"What would you like to add?" = "Що б ви хотіли додати?";
+"What should I do?" = "Що мені зробити?";
 "Got it. I'll notify you when it's done." = "Зрозуміло. Повідомлю, коли буде готово.";
 "Sign in to the app first to use AI." = "Спочатку увійдіть в застосунок, щоб використовувати ШІ.";
 "You've used up your AI credits for today." = "Ви вичерпали кредити ШІ на сьогодні.";

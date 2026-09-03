@@ -1,7 +1,8 @@
 "Add with AI" = "Adicionar com IA";
-"Send what you say to AI and let it create your events and to-dos." = "Envie o que você disser para a IA criar seus eventos e tarefas.";
+"Send" = "Enviar";
+"Send what you say to AI and let it add, change, complete, or delete your events and to-dos." = "Envie o que você disser para a IA adicionar, alterar, concluir ou excluir seus eventos e tarefas.";
 "Command" = "Comando";
-"What would you like to add?" = "O que você gostaria de adicionar?";
+"What should I do?" = "O que devo fazer?";
 "Got it. I'll notify you when it's done." = "Entendido. Vou te avisar quando terminar.";
 "Sign in to the app first to use AI." = "Faça login no app primeiro para usar a IA.";
 "You've used up your AI credits for today." = "Você usou todos os seus créditos de IA hoje.";

@@ -1,7 +1,8 @@
 "Add with AI" = "Legg til med AI";
-"Send what you say to AI and let it create your events and to-dos." = "Send det du sier til AI, så oppretter den avtalene og oppgavene dine.";
+"Send" = "Send";
+"Send what you say to AI and let it add, change, complete, or delete your events and to-dos." = "Send det du sier til AI, så kan den legge til, endre, fullføre eller slette avtalene og oppgavene dine.";
 "Command" = "Kommando";
-"What would you like to add?" = "Hva vil du legge til?";
+"What should I do?" = "Hva skal jeg gjøre?";
 "Got it. I'll notify you when it's done." = "Skjønner. Jeg varsler deg når det er ferdig.";
 "Sign in to the app first to use AI." = "Logg inn i appen først for å bruke AI.";
 "You've used up your AI credits for today." = "Du har brukt opp AI-kredittene dine for i dag.";

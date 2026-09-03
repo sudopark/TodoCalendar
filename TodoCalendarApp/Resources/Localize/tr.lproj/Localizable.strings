@@ -1,7 +1,8 @@
 "Add with AI" = "AI ile Ekle";
-"Send what you say to AI and let it create your events and to-dos." = "Söylediklerinizi AI'ya gönderin, o da randevularınızı ve görevlerinizi oluştursun.";
+"Send" = "Gönder";
+"Send what you say to AI and let it add, change, complete, or delete your events and to-dos." = "Söylediklerinizi AI'ya gönderin; randevularınızı ve görevlerinizi eklesin, değiştirsin, tamamlasın veya silsin.";
 "Command" = "Komut";
-"What would you like to add?" = "Ne eklemek istersiniz?";
+"What should I do?" = "Ne yapayım?";
 "Got it. I'll notify you when it's done." = "Anlaşıldı. Tamamlandığında size bildireceğim.";
 "Sign in to the app first to use AI." = "AI kullanmak için önce uygulamaya giriş yapın.";
 "You've used up your AI credits for today." = "Bugünkü AI kredinizi tükettiniz.";

@@ -1,7 +1,8 @@
 "Add with AI" = "Προσθήκη με AI";
-"Send what you say to AI and let it create your events and to-dos." = "Στείλτε στο AI αυτό που λέτε για να δημιουργήσει τα ραντεβού και τις εργασίες σας.";
+"Send" = "Στείλε";
+"Send what you say to AI and let it add, change, complete, or delete your events and to-dos." = "Στείλτε στο AI αυτό που λέτε για να προσθέσει, να αλλάξει, να ολοκληρώσει ή να διαγράψει τα ραντεβού και τις εργασίες σας.";
 "Command" = "Εντολή";
-"What would you like to add?" = "Τι θα θέλατε να προσθέσετε;";
+"What should I do?" = "Τι να κάνω;";
 "Got it. I'll notify you when it's done." = "Έγινε. Θα σας ειδοποιήσω όταν ολοκληρωθεί.";
 "Sign in to the app first to use AI." = "Συνδεθείτε πρώτα στην εφαρμογή για να χρησιμοποιήσετε το AI.";
 "You've used up your AI credits for today." = "Έχετε εξαντλήσει τις μονάδες AI για σήμερα.";

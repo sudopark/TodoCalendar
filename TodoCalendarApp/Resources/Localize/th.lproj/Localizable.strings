@@ -1,7 +1,8 @@
 "Add with AI" = "เพิ่มด้วย AI";
-"Send what you say to AI and let it create your events and to-dos." = "ส่งสิ่งที่คุณพูดให้ AI เพื่อสร้างนัดหมายและสิ่งที่ต้องทำให้คุณ";
+"Send" = "ส่ง";
+"Send what you say to AI and let it add, change, complete, or delete your events and to-dos." = "ส่งสิ่งที่คุณพูดให้ AI เพื่อเพิ่ม เปลี่ยน ทำเครื่องหมายว่าเสร็จ หรือลบนัดหมายและสิ่งที่ต้องทำของคุณ";
 "Command" = "คำสั่ง";
-"What would you like to add?" = "คุณต้องการเพิ่มอะไร?";
+"What should I do?" = "ให้ฉันทำอะไร?";
 "Got it. I'll notify you when it's done." = "รับทราบ เดี๋ยวแจ้งให้ทราบเมื่อเสร็จ";
 "Sign in to the app first to use AI." = "กรุณาเข้าสู่ระบบแอปก่อนใช้งาน AI";
 "You've used up your AI credits for today." = "คุณใช้เครดิต AI ของวันนี้หมดแล้ว";
