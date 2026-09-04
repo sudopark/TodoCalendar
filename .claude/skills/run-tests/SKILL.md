@@ -17,8 +17,17 @@ description: Use when the user wants to run tests for the TodoCalendar project -
 ./scripts/run-all-tests.sh Domain Repository
 
 # destination 오버라이드
-DESTINATION='platform=iOS Simulator,name=iPhone 16,OS=18.1' ./scripts/run-all-tests.sh
+DESTINATION='platform=iOS Simulator,name=iPhone 16,OS=18.0' ./scripts/run-all-tests.sh
 ```
+
+## 시뮬레이터
+
+`DESTINATION` 을 안 주면 `scripts/ensure-test-simulator.sh` 가 **iPhone 16 / iOS 18.0** 을
+확보해 UDID 로 넘긴다 — 없으면 만든다. CI(`pr_test.yml`)도 같은 스크립트를 부르므로
+로컬과 CI 의 실행 기기가 갈리지 않는다.
+
+기기·OS 를 바꿔야 하면 그 스크립트 한 곳만 고친다. 촬영 기준(snapshot-check §3 — iPhone 17
+/ iOS 26.2)과는 별개다 — 스냅샷은 시뮬 상태에 의존해 전용기를 따로 쓴다.
 
 ## Available Schemes
 

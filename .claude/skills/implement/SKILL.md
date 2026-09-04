@@ -87,7 +87,7 @@ description: Use when writing or modifying code in this project — 구현 착�
 - **증분 빌드 유지** — 반복 빌드·테스트는 증분을 전제로 돈다:
   - `xcodebuild clean`·DerivedData 삭제 금지 (빌드 오염 진단 같은 명시적 사유가 있을 때만)
   - `-derivedDataPath`로 새 경로를 만들지 않는다 — 기본 공유 DerivedData가 증분의 원천. `./DerivedData` + reset은 pr_test.yml의 CI 전용 패턴이니 로컬에 복제 금지
-  - destination(시뮬레이터)을 바꾸지 않는다 — run-all-tests.sh의 UDID 고정을 따른다. destination이 바뀌면 전 모듈 재빌드
+  - destination(시뮬레이터)을 바꾸지 않는다 — `scripts/ensure-test-simulator.sh`가 돌려주는 기기(iPhone 16 / iOS 18.0)를 따른다. 단발 `xcodebuild`도 같다. destination이 바뀌면 전 모듈 재빌드
 - **객체 시그니처(특히 init) 변경 시 콜사이트 전수 grep** — 수정 전에 참조처를 확인한다. 이 짝은 스크립트가 못 잡는다.
 - Query/Command 분리 유지 — 읽기와 사이드이펙트를 한 흐름에 섞지 않는다.
 

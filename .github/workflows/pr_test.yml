@@ -175,10 +175,14 @@ jobs:
     defaults:
       run:
         shell: bash -eo pipefail {0}
-    env:
-      DESTINATION: 'platform=iOS Simulator,name=iPhone 16,OS=18.1'
     steps:
       - uses: actions/checkout@v5
+
+      - name: Ensure test simulator
+        run: |
+          set -euo pipefail
+          udid="$(scripts/ensure-test-simulator.sh)"
+          echo "DESTINATION=platform=iOS Simulator,id=${udid}" >> "$GITHUB_ENV"
 
       - name: Setup dummy config
         run: |
