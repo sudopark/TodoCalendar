@@ -22,10 +22,10 @@ description: Use when writing or modifying code in this project — 구현 착�
 
 ## 착수
 
-**플랜 파일 유무로 흐름만 갈리고 절차는 동일하다:**
+**작전명령 유무로 흐름만 갈리고 절차는 동일하다:**
 
-- **플랜 있음** → superpowers executing-plans/subagent-driven-development가 태스크 순서를 이끈다. 각 태스크에 아래 절차를 적용한다.
-- **플랜 없음** (즉흥 수정) → superpowers TDD + 이 스킬만으로 진행한다. 플랜 단계만 빠질 뿐, rules 확인 → 패턴 파악 → 구현 → 완료 판정은 동일하게 탄다.
+- **작전명령 있음** (`docs/operations/<이슈>/opord.md`, 부록 A 가 태스크 순서) → superpowers executing-plans/subagent-driven-development가 부록 A 를 이끈다. 첫 태스크 착수 시 헤더 `상태:` 를 `실행` 으로 갱신하고, 태스크 완료·커밋마다 부록 E 의 상태·커밋 sha 를 갱신한다 (opord §8 — SDD ledger 와 별개). 각 태스크에 아래 절차를 적용한다.
+- **작전명령 없음** (구두지시·즉흥 수정) → superpowers TDD + 이 스킬만으로 진행한다. 계획 단계만 빠질 뿐, rules 확인 → 패턴 파악 → 구현 → 완료 판정은 동일하게 탄다.
 - **페어 프로그래밍 모드** (유저가 명시 선언한 세션) → 턴 규칙·TDD 수준·커밋 시점은 pair-programming 스킬이 이끈다. 이 스킬은 프로젝트 종속 규칙(rules·tuist generate·짝지어진 두 위치·콜사이트 grep) 공급자로만 동작한다.
 - **서브에이전트 dispatch 구현** (subagent-driven-development·병렬 dispatch 등) → 서브에이전트는 이 스킬을 스스로 invoke하지 못한다. dispatch하는 메인 세션이 첫 브리프 작성 전에 이 스킬을 invoke하고, 아래 절차를 브리프로 승계시킨다. "내가 직접 코드를 안 만지니 해당 없음"은 성립하지 않는다 — 코드 diff가 시작되는 주체가 누구든 발동한다. 갭 보고 루프(rules·플랜)의 유저 반문은 메인 세션이 중계한다 — 브리프에 "갭 발견 시 추측으로 채우지 말고 보고 후 중단"을 명시한다. 축1 선언·리팩터 게이트 선언은 브리프 승계와 컨트롤러 검수로 갈음한다 — 컨트롤러가 매 GREEN마다 선언을 재생산하지 않는다 (직접 구현 시에만 선언 관문).
   - **갈음 대상엔 산출물 3종이 든다** — 축1 3칸 선언·TC 실효 줄·리팩터 게이트 신설·수정물 줄. 브리프에 그 형식을 그대로 싣고 서브에이전트 보고로 받는다. **대상에 TC가 존재할 수 없으면**(리소스·문서·record 전용 스냅샷 스위트) 축1 3칸 선언·TC 실효 줄 대신 **그 대상의 검증 수단 보고**(parity·plutil·lint·촬영 이미지 확인)를 싣는다. 직접 구현일 때도 같다 — 축1 선언은 §구현 중 `TC 작성이 구조적으로 불가할 때`의 생략 형식으로 남긴다. 이 경로는 이행이다.
@@ -100,11 +100,12 @@ description: Use when writing or modifying code in this project — 구현 착�
 
 ### 플랜 갭 보고 루프
 
-플랜(또는 유저 지시)이 커버하지 않는 상황을 실행 중 만나면 — 예상 밖 의존 발견, 플랜에 없는 결정 분기, 범위 밖 결함 — **추측으로 채우지 말고 유저에게 선택을 반문한다.**
+작전명령(또는 유저 지시)이 커버하지 않는 상황을 실행 중 만나면 — 예상 밖 의존 발견, 명령에 없는 결정 분기, 범위 밖 결함 — **추측으로 채우지 말고 유저에게 선택을 반문한다.**
 
-- 유저 답으로 실행을 잇는다.
+- 유저 답으로 실행을 잇는다. 그 결과는 작전명령 부록 D 에 단편명령(`docs/operations/templates/frago.md` 서식 — 바뀐 항목만)으로 누적한다.
+- 사후보고 등급의 자율 결정(태스크 순서·커밋 시퀀스 변경 등)은 반문 없이 진행하고 종결보고 7항에 한 줄로 누적한다.
 - 범위 밖 작업으로 드러난 것은 **후속 이슈로 따거나 같은 이슈 내 추가 할일로 정리한다** — 형태는 그 시점에 유저와 결정. 잃어버리지 않는 것이 불변 조건.
-- 이 루프는 우발상황의 escape hatch다. 빈발하면 플랜 단계의 범위 명확성이 부실했다는 신호 — 그 사실도 유저에게 함께 보고한다.
+- 이 루프는 우발상황의 escape hatch다. 빈발하면 작전명령 단계의 범위 명확성이 부실했다는 신호 — 그 사실도 유저에게 함께 보고한다.
 
 ### 리뷰 지시 게이트
 
@@ -181,5 +182,5 @@ superpowers TDD의 REFACTOR 단계를 이 게이트로 수행한다. **아래 �
 ## 종료 기록 — skill_end (#712)
 
 - **시점: commit 또는 pr 스킬로 전이하는 순간** — 완료 판정을 통과하고 더 만들 diff가 없어 커밋·PR 절차로 넘어갈 때, 해당 스킬 invoke 직전에 `log-record.py skill_end`를 기록한다 (명령·compliance 규칙은 CLAUDE.md §1).
-- **동반 superpowers 코딩 스킬도 같은 시점에 각각 기록 (#715)** — superpowers:subagent-driven-development·superpowers:executing-plans·superpowers:test-driven-development는 자체 종료 조항이 없어 여기가 기록 주체다. superpowers:brainstorming은 **플랜을 안 거치고 바로 구현으로 온 런에서만** 여기서 기록한다 — 플랜을 거쳤으면 plan 스킬이 이미 기록했다. 이 런에 실제 발동(invoke)된 것만, 발동 레코드와 동일한 `superpowers:` prefix 포함 이름으로 기록한다 (집계가 문자열 완전일치 버킷팅). compliance는 스킬별 따로 판정 — implement가 full이어도 동반 스킬 절차 이탈이 있으면 그 스킬만 partial.
+- **동반 superpowers 코딩 스킬도 같은 시점에 각각 기록 (#715)** — superpowers:subagent-driven-development·superpowers:executing-plans·superpowers:test-driven-development는 자체 종료 조항이 없어 여기가 기록 주체다. superpowers:brainstorming은 **작전명령을 안 거치고 바로 구현으로 온 런에서만** 여기서 기록한다 — 작전명령을 거쳤으면 opord 스킬이 이미 기록했다. 이 런에 실제 발동(invoke)된 것만, 발동 레코드와 동일한 `superpowers:` prefix 포함 이름으로 기록한다 (집계가 문자열 완전일치 버킷팅). compliance는 스킬별 따로 판정 — implement가 full이어도 동반 스킬 절차 이탈이 있으면 그 스킬만 partial.
 - **런당 1회** — 기준은 한 작업 단위(플랜 실행 전체·이슈 단위 즉흥 수정)다. 세션 재개·컨텍스트 복원·SDD 태스크 진행으로 이 스킬이 여러 번 재발동돼도, 이어진 런이면 종료 기록은 런을 마무리하는 전이에서 한 번만 남긴다. SDD 중간 태스크의 커밋 전이는 런의 끝이 아니므로 기록하지 않는다.

@@ -61,7 +61,7 @@ tuist generate --no-open      # 파일 추가/삭제 후 재실행 필수
 | 분해된 큰 작업의 멀티 PR 실행 | orchestrate 스킬 |
 | 페어 프로그래밍 선언 | pair-programming 스킬 |
 | 방향 수렴 선언 | converge 스킬 |
-| 구현 계획 작성 | plan 스킬 (superpowers writing-plans 컴패니언) |
+| 작전명령 작성 (M·DP 플랜) | opord 스킬 |
 | 코드 작성·수정 | implement 스킬 (superpowers 코딩 절차 컴패니언) |
 | 버그·논리 모순 수정 | troubleshoot 스킬 (superpowers systematic-debugging 컴패니언 — 아카이브 `docs/troubleshooting/`) |
 | 파일·프레임워크 추가 | add-file / add-framework 스킬 |
