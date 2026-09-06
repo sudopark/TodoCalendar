@@ -11,5 +11,5 @@ import ProjectDescription
 extension Project {
     
     public static let appVersion = "3.0.1"
-    public static let buildNumber = "2"
+    public static let buildNumber = "3"
 }
