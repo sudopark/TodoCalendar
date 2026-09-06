@@ -59,7 +59,7 @@ git diff origin/develop...HEAD -- '*.swift' | grep -n '^+.*static '
 작전명령(`docs/operations/<이슈>/opord.md`)이 있는 작업의 PR 은 종결보고(`docs/operations/templates/report-debrief.md`)가 본문의 골격이다:
 
 - **1(최종상태 대조)·3(알려진 한계)·10(리뷰어 체크리스트)** 을 본문 섹션으로 싣는다. **2(산출물·검증)** 는 위 서사(문제→접근)와 "유저 검증 대기" 승계 항목에 흡수한다 — 별도 섹션으로 중복하지 않는다.
-- **전문**은 이슈 코멘트 `<!-- debrief -->` 로 남긴다. 4(잔여 위험)·5(가정 검증)·9(상위 계획 피드백)의 campaign.md 반영은 L 의 DP 일 때만 — campaign 평가 모드를 호출한다. 8(하네스 갭)은 사이즈 무관 rules 예약 레코드로 처리한다(implement 갭 보고 루프) — campaign.md 반영 대상이 아니다.
+- **전문**은 `report-debrief.md` 머리 게시 줄대로 봇 코멘트(`mcp__github-reviewer__add_issue_comment`)로 이슈에 `<!-- debrief -->` 게시하고 `@sudopark` 를 멘션한다(리뷰 대기). 4(잔여 위험)·5(가정 검증)·9(상위 계획 피드백)의 campaign.md 반영은 L 의 DP 일 때만 — campaign 평가 모드를 호출한다. 8(하네스 갭)은 사이즈 무관 rules 예약 레코드로 처리한다(implement 갭 보고 루프) — campaign.md 반영 대상이 아니다.
 - PR 생성 시 진행 파일(`.operations/<이슈>/progress.md`)의 `명령 상태:` 를 `종결` 로 올리고 이슈 본문 미러를 재조립한다 (opord §6·§7).
 - 작전명령 없는 런(S·하네스 정비)은 종결보고를 만들지 않는다 — 위 본문 규정만 따른다.
 
