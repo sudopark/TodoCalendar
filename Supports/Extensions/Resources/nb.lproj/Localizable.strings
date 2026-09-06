@@ -313,6 +313,12 @@
 "eventDetail::gogoleEvent::attendee::unknown" = "Ukjent";
 "eventDetail::gogoleEvent::attendees" = "Deltakere (%d personer)";
 "eventDetail::gogoleEvent::attendees::organizer" = "Arrangør";
+"eventDetail::gogoleEvent::attendees::me" = "Deg";
+"eventDetail::gogoleEvent::attendees::response::title" = "Skal du delta?";
+"eventDetail::gogoleEvent::attendees::response::accepted" = "Ja";
+"eventDetail::gogoleEvent::attendees::response::tentative" = "Kanskje";
+"eventDetail::gogoleEvent::attendees::response::declined" = "Nei";
+"eventDetail::gogoleEvent::attendees::response::needsAction" = "Ingen svar";
 "eventDetail::gogoleEvent::conference::accessCode" = "Tilgangskode";
 "eventDetail::gogoleEvent::conference::meetingCode" = "Møtekode";
 "eventDetail::gogoleEvent::conference::passCode" = "Hemmelig kode";

@@ -313,6 +313,12 @@
 "eventDetail::gogoleEvent::attendee::unknown" = "Ismeretlen";
 "eventDetail::gogoleEvent::attendees" = "Résztvevők (%d fő)";
 "eventDetail::gogoleEvent::attendees::organizer" = "Szervező";
+"eventDetail::gogoleEvent::attendees::me" = "Ön";
+"eventDetail::gogoleEvent::attendees::response::title" = "Részt vesz?";
+"eventDetail::gogoleEvent::attendees::response::accepted" = "Igen";
+"eventDetail::gogoleEvent::attendees::response::tentative" = "Talán";
+"eventDetail::gogoleEvent::attendees::response::declined" = "Nem";
+"eventDetail::gogoleEvent::attendees::response::needsAction" = "Nincs válasz";
 "eventDetail::gogoleEvent::conference::accessCode" = "Hozzáférési kód";
 "eventDetail::gogoleEvent::conference::meetingCode" = "Értekezletkód";
 "eventDetail::gogoleEvent::conference::passCode" = "Belépőkód";

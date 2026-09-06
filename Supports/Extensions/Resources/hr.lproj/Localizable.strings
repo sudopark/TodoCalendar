@@ -313,6 +313,12 @@
 "eventDetail::gogoleEvent::attendee::unknown" = "Nepoznato";
 "eventDetail::gogoleEvent::attendees" = "Sudionici (%d osoba)";
 "eventDetail::gogoleEvent::attendees::organizer" = "Organizator";
+"eventDetail::gogoleEvent::attendees::me" = "Vi";
+"eventDetail::gogoleEvent::attendees::response::title" = "Hoćete li prisustvovati?";
+"eventDetail::gogoleEvent::attendees::response::accepted" = "Da";
+"eventDetail::gogoleEvent::attendees::response::tentative" = "Možda";
+"eventDetail::gogoleEvent::attendees::response::declined" = "Ne";
+"eventDetail::gogoleEvent::attendees::response::needsAction" = "Bez odgovora";
 "eventDetail::gogoleEvent::conference::accessCode" = "Pristupni kod";
 "eventDetail::gogoleEvent::conference::meetingCode" = "Kod sastanka";
 "eventDetail::gogoleEvent::conference::passCode" = "Kod za prolaz";

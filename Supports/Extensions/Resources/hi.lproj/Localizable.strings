@@ -313,6 +313,12 @@
 "eventDetail::gogoleEvent::attendee::unknown" = "अज्ञात";
 "eventDetail::gogoleEvent::attendees" = "उपस्थित लोग (%d लोग)";
 "eventDetail::gogoleEvent::attendees::organizer" = "आयोजक";
+"eventDetail::gogoleEvent::attendees::me" = "आप";
+"eventDetail::gogoleEvent::attendees::response::title" = "क्या आप शामिल होंगे?";
+"eventDetail::gogoleEvent::attendees::response::accepted" = "हाँ";
+"eventDetail::gogoleEvent::attendees::response::tentative" = "शायद";
+"eventDetail::gogoleEvent::attendees::response::declined" = "नहीं";
+"eventDetail::gogoleEvent::attendees::response::needsAction" = "कोई जवाब नहीं";
 "eventDetail::gogoleEvent::conference::accessCode" = "एक्सेस कोड";
 "eventDetail::gogoleEvent::conference::meetingCode" = "मीटिंग कोड";
 "eventDetail::gogoleEvent::conference::passCode" = "पास कोड";

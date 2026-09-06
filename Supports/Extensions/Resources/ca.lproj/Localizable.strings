@@ -313,6 +313,12 @@
 "eventDetail::gogoleEvent::attendee::unknown" = "Desconegut";
 "eventDetail::gogoleEvent::attendees" = "Assistents (%d persones)";
 "eventDetail::gogoleEvent::attendees::organizer" = "Organitzador";
+"eventDetail::gogoleEvent::attendees::me" = "Tu";
+"eventDetail::gogoleEvent::attendees::response::title" = "Hi assistireu?";
+"eventDetail::gogoleEvent::attendees::response::accepted" = "Sí";
+"eventDetail::gogoleEvent::attendees::response::tentative" = "Potser";
+"eventDetail::gogoleEvent::attendees::response::declined" = "No";
+"eventDetail::gogoleEvent::attendees::response::needsAction" = "Sense resposta";
 "eventDetail::gogoleEvent::conference::accessCode" = "Codi d'accés";
 "eventDetail::gogoleEvent::conference::meetingCode" = "Codi de la reunió";
 "eventDetail::gogoleEvent::conference::passCode" = "Codi PIN";

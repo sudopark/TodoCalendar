@@ -313,6 +313,12 @@
 "eventDetail::gogoleEvent::attendee::unknown" = "不明";
 "eventDetail::gogoleEvent::attendees" = "出席者（%d人）";
 "eventDetail::gogoleEvent::attendees::organizer" = "主辦人";
+"eventDetail::gogoleEvent::attendees::me" = "我";
+"eventDetail::gogoleEvent::attendees::response::title" = "您要出席嗎？";
+"eventDetail::gogoleEvent::attendees::response::accepted" = "出席";
+"eventDetail::gogoleEvent::attendees::response::tentative" = "待定";
+"eventDetail::gogoleEvent::attendees::response::declined" = "不出席";
+"eventDetail::gogoleEvent::attendees::response::needsAction" = "未回覆";
 "eventDetail::gogoleEvent::conference::accessCode" = "存取代碼";
 "eventDetail::gogoleEvent::conference::meetingCode" = "會議代碼";
 "eventDetail::gogoleEvent::conference::passCode" = "通行碼";

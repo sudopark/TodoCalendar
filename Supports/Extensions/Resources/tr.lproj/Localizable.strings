@@ -313,6 +313,12 @@
 "eventDetail::gogoleEvent::attendee::unknown" = "Bilinmiyor";
 "eventDetail::gogoleEvent::attendees" = "Katılımcılar (%d kişi)";
 "eventDetail::gogoleEvent::attendees::organizer" = "Organizatör";
+"eventDetail::gogoleEvent::attendees::me" = "Siz";
+"eventDetail::gogoleEvent::attendees::response::title" = "Katılacak mısınız?";
+"eventDetail::gogoleEvent::attendees::response::accepted" = "Evet";
+"eventDetail::gogoleEvent::attendees::response::tentative" = "Belki";
+"eventDetail::gogoleEvent::attendees::response::declined" = "Hayır";
+"eventDetail::gogoleEvent::attendees::response::needsAction" = "Yanıt yok";
 "eventDetail::gogoleEvent::conference::accessCode" = "Erişim Kodu";
 "eventDetail::gogoleEvent::conference::meetingCode" = "Toplantı Kodu";
 "eventDetail::gogoleEvent::conference::passCode" = "Geçiş Kodu";

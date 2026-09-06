@@ -313,6 +313,12 @@
 "eventDetail::gogoleEvent::attendee::unknown" = "Άγνωστο";
 "eventDetail::gogoleEvent::attendees" = "Συμμετέχοντες (%d άτομα)";
 "eventDetail::gogoleEvent::attendees::organizer" = "Διοργανωτής";
+"eventDetail::gogoleEvent::attendees::me" = "Εσείς";
+"eventDetail::gogoleEvent::attendees::response::title" = "Θα συμμετάσχετε;";
+"eventDetail::gogoleEvent::attendees::response::accepted" = "Ναι";
+"eventDetail::gogoleEvent::attendees::response::tentative" = "Ίσως";
+"eventDetail::gogoleEvent::attendees::response::declined" = "Όχι";
+"eventDetail::gogoleEvent::attendees::response::needsAction" = "Καμία απάντηση";
 "eventDetail::gogoleEvent::conference::accessCode" = "Κωδικός πρόσβασης";
 "eventDetail::gogoleEvent::conference::meetingCode" = "Κωδικός συνάντησης";
 "eventDetail::gogoleEvent::conference::passCode" = "Κωδικός εισόδου";
