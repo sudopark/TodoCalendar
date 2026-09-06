@@ -33,3 +33,4 @@
 - [2026-08-25 CI 가 브랜치와 무관하게 매번 다른 테스트에서 타임아웃으로 깨진다](2026-08-25-ci-wallclock-timeout-flaky.md) — Infra / workaround / CI 반복 실패·Exceeded timeout of·매번 다른 테스트·로컬은 통과
 - [2026-08-26 `Text(timerInterval:)` 을 좁은 행에 넣으면 크래시하거나 자릿수가 `--` 로 빠진다](2026-08-26-live-activity-timer-text-layout-traps.md) — Event / fixed / 라이브액티비티 잠금화면 크래시·LayoutSubview.place·GeometryReaderLayout·카운트다운 1:15:--·fixedSize
 - [2026-08-29 `upload_app_store_metadata` 가 에러 없이 아무것도 안 올린다](2026-08-29-deliver-metadata-upload-silent-noop.md) — Infra / fixed / fastlane deliver 무반응·ASC 로케일 활성화 안 됨·Preview.html 비어 있음·precheck found google·metadata_path 상대경로
+- [2026-09-03 구글 캘린더 만료 알림이 다시 떴는데, 재현 빌드가 수정 이전 버전이었다](2026-09-03-google-token-expiry-recurs-on-pre-fix-build.md) — ExternalCalendar / non-issue / 구글 연동 만료·401 Invalid Credentials·토큰 갱신 타임아웃·재현 빌드가 수정 이전
