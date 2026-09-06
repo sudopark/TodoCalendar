@@ -97,6 +97,7 @@ description: Use when writing or modifying code in this project — 구현 착�
 
 - 유저가 준 해결책으로 구현을 잇는다.
 - 그 해결책은 **rules 고도화 후속으로 예약한다** — 잃어버리지 않는 것이 불변 조건. 형태(이슈 따기 / 같은 PR 내 rules 커밋 / 별도 커밋)는 그 시점에 유저와 결정한다.
+- 작전명령·작전계획 있는 런이면 이 보고를 즉시보고(`report-immediate.md`)로 이슈에도 게시한다 — 머리 게시 줄대로 봇 코멘트(`mcp__github-reviewer__add_issue_comment`) + `@sudopark` 멘션.
 
 ### 플랜 갭 보고 루프
 
@@ -105,6 +106,7 @@ description: Use when writing or modifying code in this project — 구현 착�
 - 유저 답으로 실행을 잇는다. 그 결과는 작전명령 부록 D 에 단편명령(`docs/operations/templates/frago.md` 서식 — 바뀐 항목만)으로 누적한다.
 - 사후보고 등급의 자율 결정(태스크 순서·커밋 시퀀스 변경 등)은 반문 없이 진행하고 종결보고 7항에 한 줄로 누적한다.
 - 범위 밖 작업으로 드러난 것은 **후속 이슈로 따거나 같은 이슈 내 추가 할일로 정리한다** — 형태는 그 시점에 유저와 결정. 잃어버리지 않는 것이 불변 조건.
+- 즉시보고 게시는 Rules 갭 루프와 같다 — 작전명령·작전계획 있는 런만.
 - 이 루프는 우발상황의 escape hatch다. 빈발하면 작전명령 단계의 범위 명확성이 부실했다는 신호 — 그 사실도 유저에게 함께 보고한다.
 
 ### 리뷰 지시 게이트
