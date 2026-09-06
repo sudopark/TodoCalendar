@@ -313,6 +313,12 @@
 "eventDetail::gogoleEvent::attendee::unknown" = "Tuntematon";
 "eventDetail::gogoleEvent::attendees" = "Osallistujat (%d henkilöä)";
 "eventDetail::gogoleEvent::attendees::organizer" = "Järjestäjä";
+"eventDetail::gogoleEvent::attendees::me" = "Sinä";
+"eventDetail::gogoleEvent::attendees::response::title" = "Osallistutko?";
+"eventDetail::gogoleEvent::attendees::response::accepted" = "Kyllä";
+"eventDetail::gogoleEvent::attendees::response::tentative" = "Ehkä";
+"eventDetail::gogoleEvent::attendees::response::declined" = "Ei";
+"eventDetail::gogoleEvent::attendees::response::needsAction" = "Ei vastausta";
 "eventDetail::gogoleEvent::conference::accessCode" = "Pääsykoodi";
 "eventDetail::gogoleEvent::conference::meetingCode" = "Kokouskoodi";
 "eventDetail::gogoleEvent::conference::passCode" = "Tunnuskoodi";

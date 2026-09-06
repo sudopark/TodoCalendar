@@ -313,6 +313,12 @@
 "eventDetail::gogoleEvent::attendee::unknown" = "ไม่ทราบ";
 "eventDetail::gogoleEvent::attendees" = "ผู้เข้าร่วม (%dคน)";
 "eventDetail::gogoleEvent::attendees::organizer" = "ผู้จัด";
+"eventDetail::gogoleEvent::attendees::me" = "คุณ";
+"eventDetail::gogoleEvent::attendees::response::title" = "คุณจะเข้าร่วมไหม?";
+"eventDetail::gogoleEvent::attendees::response::accepted" = "ใช่";
+"eventDetail::gogoleEvent::attendees::response::tentative" = "ไม่แน่ใจ";
+"eventDetail::gogoleEvent::attendees::response::declined" = "ไม่";
+"eventDetail::gogoleEvent::attendees::response::needsAction" = "ยังไม่ตอบ";
 "eventDetail::gogoleEvent::conference::accessCode" = "รหัสเข้าใช้งาน";
 "eventDetail::gogoleEvent::conference::meetingCode" = "รหัสการประชุม";
 "eventDetail::gogoleEvent::conference::passCode" = "รหัสผ่าน";

@@ -313,6 +313,12 @@
 "eventDetail::gogoleEvent::attendee::unknown" = "Onbekend";
 "eventDetail::gogoleEvent::attendees" = "Deelnemers (%d personen)";
 "eventDetail::gogoleEvent::attendees::organizer" = "Organisator";
+"eventDetail::gogoleEvent::attendees::me" = "Jij";
+"eventDetail::gogoleEvent::attendees::response::title" = "Ben je erbij?";
+"eventDetail::gogoleEvent::attendees::response::accepted" = "Ja";
+"eventDetail::gogoleEvent::attendees::response::tentative" = "Misschien";
+"eventDetail::gogoleEvent::attendees::response::declined" = "Nee";
+"eventDetail::gogoleEvent::attendees::response::needsAction" = "Geen reactie";
 "eventDetail::gogoleEvent::conference::accessCode" = "Toegangscode";
 "eventDetail::gogoleEvent::conference::meetingCode" = "Vergadercode";
 "eventDetail::gogoleEvent::conference::passCode" = "Pascode";

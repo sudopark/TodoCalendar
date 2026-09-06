@@ -313,6 +313,12 @@
 "eventDetail::gogoleEvent::attendee::unknown" = "Neznámý";
 "eventDetail::gogoleEvent::attendees" = "Účastníci (%d osob)";
 "eventDetail::gogoleEvent::attendees::organizer" = "Organizátor";
+"eventDetail::gogoleEvent::attendees::me" = "Vy";
+"eventDetail::gogoleEvent::attendees::response::title" = "Zúčastníte se?";
+"eventDetail::gogoleEvent::attendees::response::accepted" = "Ano";
+"eventDetail::gogoleEvent::attendees::response::tentative" = "Možná";
+"eventDetail::gogoleEvent::attendees::response::declined" = "Ne";
+"eventDetail::gogoleEvent::attendees::response::needsAction" = "Bez odpovědi";
 "eventDetail::gogoleEvent::conference::accessCode" = "Přístupový kód";
 "eventDetail::gogoleEvent::conference::meetingCode" = "Kód schůzky";
 "eventDetail::gogoleEvent::conference::passCode" = "Kód pro vstup";

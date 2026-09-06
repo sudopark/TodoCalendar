@@ -313,6 +313,12 @@
 "eventDetail::gogoleEvent::attendee::unknown" = "Không xác định";
 "eventDetail::gogoleEvent::attendees" = "Người tham dự (%d người)";
 "eventDetail::gogoleEvent::attendees::organizer" = "Người tổ chức";
+"eventDetail::gogoleEvent::attendees::me" = "Bạn";
+"eventDetail::gogoleEvent::attendees::response::title" = "Bạn sẽ tham dự chứ?";
+"eventDetail::gogoleEvent::attendees::response::accepted" = "Có";
+"eventDetail::gogoleEvent::attendees::response::tentative" = "Có thể";
+"eventDetail::gogoleEvent::attendees::response::declined" = "Không";
+"eventDetail::gogoleEvent::attendees::response::needsAction" = "Chưa trả lời";
 "eventDetail::gogoleEvent::conference::accessCode" = "Mã truy cập";
 "eventDetail::gogoleEvent::conference::meetingCode" = "Mã cuộc họp";
 "eventDetail::gogoleEvent::conference::passCode" = "Mã số";

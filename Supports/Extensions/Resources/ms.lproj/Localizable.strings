@@ -313,6 +313,12 @@
 "eventDetail::gogoleEvent::attendee::unknown" = "Tidak diketahui";
 "eventDetail::gogoleEvent::attendees" = "Peserta (%d orang)";
 "eventDetail::gogoleEvent::attendees::organizer" = "Penganjur";
+"eventDetail::gogoleEvent::attendees::me" = "Anda";
+"eventDetail::gogoleEvent::attendees::response::title" = "Akan hadir?";
+"eventDetail::gogoleEvent::attendees::response::accepted" = "Ya";
+"eventDetail::gogoleEvent::attendees::response::tentative" = "Mungkin";
+"eventDetail::gogoleEvent::attendees::response::declined" = "Tidak";
+"eventDetail::gogoleEvent::attendees::response::needsAction" = "Tiada jawapan";
 "eventDetail::gogoleEvent::conference::accessCode" = "Kod Akses";
 "eventDetail::gogoleEvent::conference::meetingCode" = "Kod Mesyuarat";
 "eventDetail::gogoleEvent::conference::passCode" = "Kod Laluan";
