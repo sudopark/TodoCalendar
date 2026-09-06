@@ -24,7 +24,7 @@ description: Use when writing or modifying code in this project — 구현 착�
 
 **작전명령 유무로 흐름만 갈리고 절차는 동일하다:**
 
-- **작전명령 있음** (`docs/operations/<이슈>/opord.md`, 부록 A 가 태스크 순서) → superpowers executing-plans/subagent-driven-development가 부록 A 를 이끈다. 첫 태스크 착수 시 헤더 `상태:` 를 `실행` 으로 갱신하고, 태스크 완료·커밋마다 부록 E 의 상태·커밋 sha 를 갱신한다 (opord §8 — SDD ledger 와 별개). 각 태스크에 아래 절차를 적용한다.
+- **작전명령 있음** (`docs/operations/<이슈>/opord.md`, 부록 A 가 태스크 순서) → superpowers executing-plans/subagent-driven-development가 부록 A 를 이끈다. 첫 태스크 착수 시 진행 파일(`.operations/<이슈>/progress.md`)의 `명령 상태:` 를 `실행` 으로 갱신하고, 태스크 완료·커밋마다 진행 파일의 태스크 표(상태·커밋 sha·보고)를 갱신한 뒤 이슈 본문 미러를 재조립한다 (opord §6·§8 — SDD ledger 와 별개, 진행 파일은 커밋하지 않는다). 각 태스크에 아래 절차를 적용한다.
 - **작전명령 없음** (구두지시·즉흥 수정) → superpowers TDD + 이 스킬만으로 진행한다. 계획 단계만 빠질 뿐, rules 확인 → 패턴 파악 → 구현 → 완료 판정은 동일하게 탄다.
 - **페어 프로그래밍 모드** (유저가 명시 선언한 세션) → 턴 규칙·TDD 수준·커밋 시점은 pair-programming 스킬이 이끈다. 이 스킬은 프로젝트 종속 규칙(rules·tuist generate·짝지어진 두 위치·콜사이트 grep) 공급자로만 동작한다.
 - **서브에이전트 dispatch 구현** (subagent-driven-development·병렬 dispatch 등) → 서브에이전트는 이 스킬을 스스로 invoke하지 못한다. dispatch하는 메인 세션이 첫 브리프 작성 전에 이 스킬을 invoke하고, 아래 절차를 브리프로 승계시킨다. "내가 직접 코드를 안 만지니 해당 없음"은 성립하지 않는다 — 코드 diff가 시작되는 주체가 누구든 발동한다. 갭 보고 루프(rules·플랜)의 유저 반문은 메인 세션이 중계한다 — 브리프에 "갭 발견 시 추측으로 채우지 말고 보고 후 중단"을 명시한다. 축1 선언·리팩터 게이트 선언은 브리프 승계와 컨트롤러 검수로 갈음한다 — 컨트롤러가 매 GREEN마다 선언을 재생산하지 않는다 (직접 구현 시에만 선언 관문).
