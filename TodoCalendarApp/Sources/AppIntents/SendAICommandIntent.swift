@@ -12,17 +12,17 @@ import AppIntents
 
 struct SendAICommandIntent: AppIntent {
 
-    static let title: LocalizedStringResource = "Add with AI"
+    static let title: LocalizedStringResource = "Send"
 
     static let description = IntentDescription(
-        "Send what you say to AI and let it create your events and to-dos."
+        "Send what you say to AI and let it add, change, complete, or delete your events and to-dos."
     )
 
     static let openAppWhenRun: Bool = false
 
     @Parameter(
         title: "Command",
-        requestValueDialog: IntentDialog("What would you like to add?")
+        requestValueDialog: IntentDialog("What should I do?")
     )
     var commandText: String
 

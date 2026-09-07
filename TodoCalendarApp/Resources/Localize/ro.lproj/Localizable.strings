@@ -1,7 +1,8 @@
 "Add with AI" = "Adaugă cu AI";
-"Send what you say to AI and let it create your events and to-dos." = "Trimiteți către AI ce spuneți, ca să vă creeze programările și sarcinile.";
+"Send" = "Trimite";
+"Send what you say to AI and let it add, change, complete, or delete your events and to-dos." = "Trimiteți către AI ce spuneți, ca să vă adauge, modifice, finalizeze sau șteargă programările și sarcinile.";
 "Command" = "Comandă";
-"What would you like to add?" = "Ce ați dori să adăugați?";
+"What should I do?" = "Ce să fac?";
 "Got it. I'll notify you when it's done." = "Am înțeles. Vă anunț când e gata.";
 "Sign in to the app first to use AI." = "Autentificați-vă mai întâi în aplicație ca să folosiți AI.";
 "You've used up your AI credits for today." = "V-ați epuizat creditele AI de azi.";

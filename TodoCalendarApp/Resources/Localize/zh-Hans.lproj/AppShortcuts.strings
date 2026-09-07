@@ -1,4 +1,6 @@
+"Hey ${applicationName}" = "嘿，${applicationName}";
+"Request in ${applicationName}" = "向${applicationName}发请求";
+"Ask ${applicationName}" = "问${applicationName}";
+"Send a request to ${applicationName}" = "向${applicationName}发送请求";
 "Add with AI in ${applicationName}" = "在${applicationName}中用AI添加";
-"Add a schedule in ${applicationName}" = "在${applicationName}中添加日程";
-"Add a to-do in ${applicationName}" = "在${applicationName}中添加待办事项";
-"Add with AI" = "用AI添加";
+"Send" = "发送";

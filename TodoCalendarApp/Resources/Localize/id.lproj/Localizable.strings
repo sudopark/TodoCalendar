@@ -1,7 +1,8 @@
 "Add with AI" = "Tambah dengan AI";
-"Send what you say to AI and let it create your events and to-dos." = "Kirim apa yang Anda katakan ke AI agar ia membuat jadwal dan tugas Anda.";
+"Send" = "Kirim";
+"Send what you say to AI and let it add, change, complete, or delete your events and to-dos." = "Kirim apa yang Anda katakan ke AI agar ia menambah, mengubah, menyelesaikan, atau menghapus jadwal dan tugas Anda.";
 "Command" = "Perintah";
-"What would you like to add?" = "Apa yang ingin Anda tambahkan?";
+"What should I do?" = "Apa yang harus saya lakukan?";
 "Got it. I'll notify you when it's done." = "Baik. Saya akan memberi tahu Anda saat selesai.";
 "Sign in to the app first to use AI." = "Masuk ke aplikasi terlebih dahulu untuk menggunakan AI.";
 "You've used up your AI credits for today." = "Anda sudah menghabiskan kredit AI hari ini.";

@@ -116,6 +116,26 @@ open class StubGoogleCalendarUsecase: GoogleCalendarUsecase, @unchecked Sendable
         return origin
     }
 
+    public var didRespondToEventWith: (calendarId: String, eventId: String, accountId: String, responseStatus: GoogleCalendar.AttendeeResponseStatus)?
+    public var stubRespondedEventOrigin: GoogleCalendar.EventOrigin?
+    open func respondToEvent(
+        _ calendarId: String,
+        _ eventId: String,
+        accountId: String,
+        at timeZone: TimeZone,
+        responseStatus: GoogleCalendar.AttendeeResponseStatus
+    ) async throws -> GoogleCalendar.EventOrigin {
+        self.didRespondToEventWith = (calendarId, eventId, accountId, responseStatus)
+        if shouldFailWrite {
+            throw RuntimeError("failed to respond to google calendar event")
+        }
+        guard let origin = self.stubRespondedEventOrigin
+        else {
+            throw RuntimeError("stubRespondedEventOrigin not set")
+        }
+        return origin
+    }
+
     public var didRemoveEventWith: (calendarId: String, eventId: String, accountId: String, scope: GoogleCalendar.EventRemoveScope)?
     open func removeEvent(
         _ calendarId: String,

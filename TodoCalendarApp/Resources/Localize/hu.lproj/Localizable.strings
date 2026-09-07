@@ -1,7 +1,8 @@
 "Add with AI" = "Hozzáadás AI-val";
-"Send what you say to AI and let it create your events and to-dos." = "Küldje el az AI-nak, amit mond, hogy létrehozza az eseményeit és feladatait.";
+"Send" = "Küldés";
+"Send what you say to AI and let it add, change, complete, or delete your events and to-dos." = "Küldje el az AI-nak, amit mond, hogy hozzáadja, módosítsa, elvégezze vagy törölje az eseményeit és feladatait.";
 "Command" = "Parancs";
-"What would you like to add?" = "Mit szeretne hozzáadni?";
+"What should I do?" = "Mit tegyek?";
 "Got it. I'll notify you when it's done." = "Rendben. Szólok, ha elkészült.";
 "Sign in to the app first to use AI." = "Az AI használatához előbb jelentkezzen be az appba.";
 "You've used up your AI credits for today." = "Mára elfogyott az AI kreditkeret.";

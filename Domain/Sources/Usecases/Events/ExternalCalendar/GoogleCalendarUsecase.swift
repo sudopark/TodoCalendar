@@ -70,6 +70,14 @@ public protocol GoogleCalendarUsecase: Sendable {
         params: GoogleCalendar.EventEditParams
     ) async throws -> GoogleCalendar.EventOrigin
 
+    func respondToEvent(
+        _ calendarId: String,
+        _ eventId: String,
+        accountId: String,
+        at timeZone: TimeZone,
+        responseStatus: GoogleCalendar.AttendeeResponseStatus
+    ) async throws -> GoogleCalendar.EventOrigin
+
     func removeEvent(
         _ calendarId: String,
         _ eventId: String,
@@ -450,6 +458,20 @@ extension GoogleCalendarUsecaseImple {
             self.cacheUpdatedEvent(origin, calendarId, accountId: accountId, timeZone: timeZone)
         }
         return origin
+    }
+
+    // RSVP 는 목록 표시에 영향 없는 변화라 updateEvent 의 인스턴스 재조회·캐시 갱신을 재사용하지 않는다
+    public func respondToEvent(
+        _ calendarId: String,
+        _ eventId: String,
+        accountId: String,
+        at timeZone: TimeZone,
+        responseStatus: GoogleCalendar.AttendeeResponseStatus
+    ) async throws -> GoogleCalendar.EventOrigin {
+        let repository = self.repositoryPool.repository(for: accountId)
+        return try await repository.respondToEvent(
+            calendarId, timeZone.identifier, eventId, responseStatus
+        )
     }
 
     private func cachedEventsPeriod() -> Range<TimeInterval>? {

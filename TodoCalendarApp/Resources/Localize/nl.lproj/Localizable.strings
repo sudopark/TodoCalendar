@@ -1,7 +1,8 @@
 "Add with AI" = "Toevoegen met AI";
-"Send what you say to AI and let it create your events and to-dos." = "Stuur wat je zegt naar AI en laat het je afspraken en taken aanmaken.";
+"Send" = "Sturen";
+"Send what you say to AI and let it add, change, complete, or delete your events and to-dos." = "Stuur wat je zegt naar AI en laat het je afspraken en taken toevoegen, wijzigen, voltooien of verwijderen.";
 "Command" = "Opdracht";
-"What would you like to add?" = "Wat wil je toevoegen?";
+"What should I do?" = "Wat moet ik doen?";
 "Got it. I'll notify you when it's done." = "Begrepen. Ik laat het je weten zodra het klaar is.";
 "Sign in to the app first to use AI." = "Log eerst in op de app om AI te gebruiken.";
 "You've used up your AI credits for today." = "Je hebt je AI-credits voor vandaag opgebruikt.";

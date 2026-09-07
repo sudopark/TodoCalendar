@@ -1,4 +1,6 @@
+"Hey ${applicationName}" = "เฮ้ ${applicationName}";
+"Request in ${applicationName}" = "คำขอไปยัง ${applicationName}";
+"Ask ${applicationName}" = "ถาม ${applicationName}";
+"Send a request to ${applicationName}" = "ส่งคำขอไปยัง ${applicationName}";
 "Add with AI in ${applicationName}" = "เพิ่มด้วย AI ใน ${applicationName}";
-"Add a schedule in ${applicationName}" = "เพิ่มนัดหมายใน ${applicationName}";
-"Add a to-do in ${applicationName}" = "เพิ่มสิ่งที่ต้องทำใน ${applicationName}";
-"Add with AI" = "เพิ่มด้วย AI";
+"Send" = "ส่ง";

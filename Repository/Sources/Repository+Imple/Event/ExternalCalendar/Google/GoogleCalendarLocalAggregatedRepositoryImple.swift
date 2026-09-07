@@ -111,6 +111,15 @@ extension GoogleCalendarLocalAggregatedRepositoryImple {
             .eraseToAnyPublisher()
     }
 
+    public func respondToEvent(
+        _ calendarId: String,
+        _ timeZone: String,
+        _ eventId: String,
+        _ responseStatus: GoogleCalendar.AttendeeResponseStatus
+    ) async throws -> GoogleCalendar.EventOrigin {
+        throw RuntimeError("google calendar event write is not supported by the aggregated local repository")
+    }
+
     public func removeEvent(
         _ calendarId: String,
         _ eventId: String

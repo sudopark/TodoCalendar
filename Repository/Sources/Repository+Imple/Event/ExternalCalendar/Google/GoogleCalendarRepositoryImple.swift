@@ -315,6 +315,32 @@ extension GoogleCalendarRepositoryImple {
         .eraseToAnyPublisher()
     }
 
+    // patch 는 attendees 배열을 통째 교체한다 — 캐시를 읽으면 그 사이 바뀐 다른 참석자의 응답을 덮어쓴다
+    public func respondToEvent(
+        _ calendarId: String,
+        _ timeZone: String,
+        _ eventId: String,
+        _ responseStatus: GoogleCalendar.AttendeeResponseStatus
+    ) async throws -> GoogleCalendar.EventOrigin {
+
+        let latest = try await self.loadEventDetailFromRemoteWithRecurrenceIfNeed(
+            calendarId, eventId, at: timeZone
+        )
+        guard let attendees = latest.attendees, attendees.contains(where: { $0.isSelf })
+        else {
+            throw RuntimeError("no self attendee to respond")
+        }
+        let params = GoogleCalendar.EventEditParams()
+            |> \.attendees .~ attendees.map {
+                $0.isSelf ? ($0 |> \.responseStatus .~ responseStatus.rawValue) : $0
+            }
+        let updated = try await self.updateEventOnRemote(calendarId, eventId, params)
+        if !updated.isRecurringSeriesMaster {
+            try? await self.cacheStorage.updateEventDetail(calendarId, timeZone, updated, accountId: self.accountId)
+        }
+        return updated
+    }
+
     private func updateEventOnRemote(
         _ calendarId: String,
         _ eventId: String,

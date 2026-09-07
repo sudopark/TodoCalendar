@@ -20,22 +20,35 @@ import CommonPresentation
 
 
 struct AttendeeViewModelModel: Equatable {
-    
+
     var id: String?
     let name: String
     var isOrganizer: Bool = false
     var isAccepted: Bool = false
-    
+    var isSelf: Bool = false
+    var response: GoogleCalendar.AttendeeResponseStatus?
+
     init(_ id: String, _ name: String) {
         self.id = id
         self.name = name
     }
-    
+
     init(_ attendee: GoogleCalendar.EventOrigin.Attendee) {
         self.id = attendee.identifier
         self.name = attendee.displayNameOrEmail ?? "eventDetail::gogoleEvent::attendee::unknown".localized()
         self.isOrganizer = attendee.organizer ?? false
         self.isAccepted = attendee.isAccepted
+        self.isSelf = attendee.isSelf
+        self.response = attendee.response
+    }
+
+    var responseStatusText: String {
+        switch self.response {
+        case .accepted: return "eventDetail::gogoleEvent::attendees::response::accepted".localized()
+        case .tentative: return "eventDetail::gogoleEvent::attendees::response::tentative".localized()
+        case .declined: return "eventDetail::gogoleEvent::attendees::response::declined".localized()
+        case .needsAction, .none: return "eventDetail::gogoleEvent::attendees::response::needsAction".localized()
+        }
     }
 }
 
@@ -144,6 +157,7 @@ protocol GoogleCalendarEventDetailViewModel: AnyObject, Sendable, GoogleCalendar
     func startEditDescription()
     func share()
     func toggleLiveActivity(isRegistered: Bool)
+    func selectAttendanceResponse()
 
     // presenter
     var isEditable: AnyPublisher<Bool, Never> { get }
@@ -165,6 +179,7 @@ protocol GoogleCalendarEventDetailViewModel: AnyObject, Sendable, GoogleCalendar
     var isSaving: AnyPublisher<Bool, Never> { get }
     var hasChanges: AnyPublisher<Bool, Never> { get }
     var liveActivityActionModel: AnyPublisher<LiveActivityActionModel?, Never> { get }
+    var isRespondingAttendance: AnyPublisher<Bool, Never> { get }
 }
 
 
@@ -225,6 +240,7 @@ final class GoogleCalendarEventDetailViewModelImple: GoogleCalendarEventDetailVi
         let fields = CurrentValueSubject<OriginalAndCurrent<EditableFields>?, Never>(nil)
         let isSaving = CurrentValueSubject<Bool, Never>(false)
         let isDescriptionPlainEditing = CurrentValueSubject<Bool, Never>(false)
+        let isResponding = CurrentValueSubject<Bool, Never>(false)
     }
     
     private let cancellables = CancelBag()
@@ -731,6 +747,75 @@ extension GoogleCalendarEventDetailViewModelImple {
 }
 
 
+// MARK: - GoogleCalendarEventDetailViewModelImple Attendance Response
+
+extension GoogleCalendarEventDetailViewModelImple {
+
+    func selectAttendanceResponse() {
+        guard !self.subject.isResponding.value else { return }
+        // 저장 버튼과 달리 참석자 행은 readOnlyCalendar 에서도 항상 렌더된다 — 조용히 무시하면 안쪽 탭 제스처가 컨테이너의 토스트를 가려 무반응처럼 보인다
+        guard self.subject.writePermission.value != .readOnlyCalendar else {
+            self.selectNotEditableField()
+            return
+        }
+        self.runWithWritePermission { [weak self] in
+            self?.showAttendanceResponseActionSheet()
+        }
+    }
+
+    private func showAttendanceResponseActionSheet() {
+        var form = ActionSheetForm()
+            |> \.title .~ pure("eventDetail::gogoleEvent::attendees::response::title".localized())
+
+        form.actions.append(
+            .init("eventDetail::gogoleEvent::attendees::response::accepted".localized()) { [weak self] in
+                self?.respondAttendance(.accepted)
+            }
+        )
+        form.actions.append(
+            .init("eventDetail::gogoleEvent::attendees::response::tentative".localized()) { [weak self] in
+                self?.respondAttendance(.tentative)
+            }
+        )
+        form.actions.append(
+            .init("eventDetail::gogoleEvent::attendees::response::declined".localized()) { [weak self] in
+                self?.respondAttendance(.declined)
+            }
+        )
+        form.actions.append(.init("common.cancel".localized(), style: .cancel))
+
+        self.router?.showActionSheet(form)
+    }
+
+    private func respondAttendance(_ responseStatus: GoogleCalendar.AttendeeResponseStatus) {
+        guard let origin = self.subject.origin.value,
+              let timeZone = self.subject.timeZone.value
+        else { return }
+
+        // 참석 의사는 보통 시리즈 단위다 — 탭 한 번에 즉시 반영해야 하는 이 기능 특성상 범위 선택 시트 없이 마스터로 고정한다
+        let eventId = origin.recurringEventId ?? origin.id
+        let calendarId = self.calendarId
+        let accountId = self.accountId
+        self.subject.isResponding.send(true)
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                let updated = try await self.googleCalendarUsecase.respondToEvent(
+                    calendarId, eventId, accountId: accountId, at: timeZone, responseStatus: responseStatus
+                )
+                self.subject.isResponding.send(false)
+                guard let current = self.subject.origin.value else { return }
+                self.subject.origin.send(current |> \.attendees .~ updated.attendees)
+            } catch {
+                self.subject.isResponding.send(false)
+                self.router?.showError(error)
+            }
+        }
+        .store(in: self.cancellables)
+    }
+}
+
+
 // MARK: - GoogleCalendarEventDetailViewModelImple Presenter
 
 extension GoogleCalendarEventDetailViewModelImple {
@@ -925,6 +1010,12 @@ extension GoogleCalendarEventDetailViewModelImple {
         .map(transform)
         .removeDuplicates()
         .eraseToAnyPublisher()
+    }
+
+    var isRespondingAttendance: AnyPublisher<Bool, Never> {
+        return self.subject.isResponding
+            .removeDuplicates()
+            .eraseToAnyPublisher()
     }
 
     var descriptionModel: AnyPublisher<GoogleCalendarEventDescriptionModel, Never> {

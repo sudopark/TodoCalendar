@@ -265,6 +265,10 @@ extension Project {
                 "LSApplicationQueriesSchemes": ["comgooglemaps"],
                 "ITSAppUsesNonExemptEncryption": false,
                 "CFBundleDisplayName": "To-do Calendar",
+                "INAlternativeAppNames": .array([
+                    .dictionary(["INAlternativeAppName": .string("Todo Calendar")]),
+                    .dictionary(["INAlternativeAppName": .string("투두캘린더")])
+                ]),
                 "CFBundleShortVersionString": "\(self.appVersion)",
                 "CFBundleVersion": "\(self.buildNumber)",
                 "BGTaskSchedulerPermittedIdentifiers": [

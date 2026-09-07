@@ -113,6 +113,7 @@ extension GoogleCalendar.EventEditParams {
         json["start"] = self.start?.asJson()
         json["end"] = self.end?.asJson()
         json["recurrence"] = self.recurrence
+        json["attendees"] = self.attendees?.map { $0.asJson() }
         return json
     }
 }
@@ -125,6 +126,20 @@ extension GoogleCalendar.EventOrigin.GoogleEventTime {
         json["date"] = self.date ?? NSNull()
         json["dateTime"] = self.dateTime ?? NSNull()
         json["timeZone"] = self.timeZone
+        return json
+    }
+}
+
+extension GoogleCalendar.EventOrigin.Attendee {
+
+    // id·self·organizer 는 구글 문서상 read-only 라 patch body 에서 뺀다
+    func asJson() -> [String: Any] {
+        var json: [String: Any] = [:]
+        json["email"] = self.email
+        json["displayName"] = self.displayName
+        json["responseStatus"] = self.responseStatus
+        json["optional"] = self.optional
+        json["resource"] = self.resource
         return json
     }
 }

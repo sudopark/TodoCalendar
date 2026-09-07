@@ -313,6 +313,12 @@
 "eventDetail::gogoleEvent::attendee::unknown" = "Nieznany";
 "eventDetail::gogoleEvent::attendees" = "Uczestnicy (%d osób)";
 "eventDetail::gogoleEvent::attendees::organizer" = "Organizator";
+"eventDetail::gogoleEvent::attendees::me" = "Ty";
+"eventDetail::gogoleEvent::attendees::response::title" = "Czy weźmiesz udział?";
+"eventDetail::gogoleEvent::attendees::response::accepted" = "Tak";
+"eventDetail::gogoleEvent::attendees::response::tentative" = "Może";
+"eventDetail::gogoleEvent::attendees::response::declined" = "Nie";
+"eventDetail::gogoleEvent::attendees::response::needsAction" = "Brak odpowiedzi";
 "eventDetail::gogoleEvent::conference::accessCode" = "Kod dostępu";
 "eventDetail::gogoleEvent::conference::meetingCode" = "Kod spotkania";
 "eventDetail::gogoleEvent::conference::passCode" = "Kod dostępu";

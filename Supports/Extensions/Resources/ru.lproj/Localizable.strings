@@ -313,6 +313,12 @@
 "eventDetail::gogoleEvent::attendee::unknown" = "Неизвестно";
 "eventDetail::gogoleEvent::attendees" = "Участники (%d чел.)";
 "eventDetail::gogoleEvent::attendees::organizer" = "Организатор";
+"eventDetail::gogoleEvent::attendees::me" = "Вы";
+"eventDetail::gogoleEvent::attendees::response::title" = "Вы придёте?";
+"eventDetail::gogoleEvent::attendees::response::accepted" = "Да";
+"eventDetail::gogoleEvent::attendees::response::tentative" = "Возможно";
+"eventDetail::gogoleEvent::attendees::response::declined" = "Нет";
+"eventDetail::gogoleEvent::attendees::response::needsAction" = "Нет ответа";
 "eventDetail::gogoleEvent::conference::accessCode" = "Код доступа";
 "eventDetail::gogoleEvent::conference::meetingCode" = "Код встречи";
 "eventDetail::gogoleEvent::conference::passCode" = "Код пропуска";

@@ -1,4 +1,6 @@
+"Hey ${applicationName}" = "Έι ${applicationName}";
+"Request in ${applicationName}" = "Αίτημα στο ${applicationName}";
+"Ask ${applicationName}" = "Ρώτα το ${applicationName}";
+"Send a request to ${applicationName}" = "Στείλε αίτημα στο ${applicationName}";
 "Add with AI in ${applicationName}" = "Προσθήκη με AI στο ${applicationName}";
-"Add a schedule in ${applicationName}" = "Προσθήκη ραντεβού στο ${applicationName}";
-"Add a to-do in ${applicationName}" = "Προσθήκη εργασίας στο ${applicationName}";
-"Add with AI" = "Προσθήκη με AI";
+"Send" = "Στείλε";

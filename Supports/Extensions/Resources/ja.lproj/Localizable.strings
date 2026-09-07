@@ -313,6 +313,12 @@
 "eventDetail::gogoleEvent::attendee::unknown" = "不明";
 "eventDetail::gogoleEvent::attendees" = "参加者（%d人）";
 "eventDetail::gogoleEvent::attendees::organizer" = "主催者";
+"eventDetail::gogoleEvent::attendees::me" = "自分";
+"eventDetail::gogoleEvent::attendees::response::title" = "参加しますか？";
+"eventDetail::gogoleEvent::attendees::response::accepted" = "はい";
+"eventDetail::gogoleEvent::attendees::response::tentative" = "未定";
+"eventDetail::gogoleEvent::attendees::response::declined" = "いいえ";
+"eventDetail::gogoleEvent::attendees::response::needsAction" = "未回答";
 "eventDetail::gogoleEvent::conference::accessCode" = "アクセスコード";
 "eventDetail::gogoleEvent::conference::meetingCode" = "会議コード";
 "eventDetail::gogoleEvent::conference::passCode" = "パスコード";

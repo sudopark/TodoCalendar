@@ -1,7 +1,8 @@
 "Add with AI" = "Lisää AI:lla";
-"Send what you say to AI and let it create your events and to-dos." = "Lähetä sanomasi AI:lle, niin se luo tapahtumasi ja tehtäväsi.";
+"Send" = "Lähetä";
+"Send what you say to AI and let it add, change, complete, or delete your events and to-dos." = "Lähetä sanomasi AI:lle, niin se lisää, muuttaa, merkitsee valmiiksi tai poistaa tapahtumasi ja tehtäväsi.";
 "Command" = "Komento";
-"What would you like to add?" = "Mitä haluaisit lisätä?";
+"What should I do?" = "Mitä teen?";
 "Got it. I'll notify you when it's done." = "Selvä. Ilmoitan sinulle, kun se on valmis.";
 "Sign in to the app first to use AI." = "Kirjaudu ensin sisään sovellukseen käyttääksesi AI:ta.";
 "You've used up your AI credits for today." = "Olet käyttänyt tämän päivän AI-krediitit loppuun.";

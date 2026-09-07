@@ -1,7 +1,8 @@
 "Add with AI" = "AI से जोड़ें";
-"Send what you say to AI and let it create your events and to-dos." = "आप जो कहें उसे AI को भेजें और अपने इवेंट और कार्य बनवाएं।";
+"Send" = "भेजें";
+"Send what you say to AI and let it add, change, complete, or delete your events and to-dos." = "आप जो कहें उसे AI को भेजें और अपने इवेंट और कार्य जोड़ें, बदलें, पूरे करें या हटाएं।";
 "Command" = "कमांड";
-"What would you like to add?" = "आप क्या जोड़ना चाहेंगे?";
+"What should I do?" = "मैं क्या करूं?";
 "Got it. I'll notify you when it's done." = "ठीक है। पूरा होने पर मैं आपको बता दूँगा।";
 "Sign in to the app first to use AI." = "AI इस्तेमाल करने के लिए पहले ऐप में लॉगिन करें।";
 "You've used up your AI credits for today." = "आपने आज के अपने AI क्रेडिट इस्तेमाल कर लिए हैं।";
