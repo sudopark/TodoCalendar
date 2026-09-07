@@ -11,7 +11,7 @@ description: Use when executing decomposed large work as multiple PRs from one s
 
 ## 단위 정의 — 두 층을 혼동하지 않는다
 
-- **sub-work = DP = PR 하나.** 분할 정본은 campaign.md 7항 DP 목록(또는 유저와 합의한 분할)이다. PR로서 의미 있는 서사(문제→접근)가 서는 크기로 가른다 — 자잘한 PR 남발은 이 스킬의 목적이 아니다.
+- **sub-work = DP = PR 하나.** 분할 정본은 campaign.md 9항 DP 목록(또는 유저와 합의한 분할)이다. PR로서 의미 있는 서사(문제→접근)가 서는 크기로 가른다 — 자잘한 PR 남발은 이 스킬의 목적이 아니다.
 - **dispatch = 서브에이전트 한 번이 완주 가능한 크기.** sub-work 하나는 1~N개의 순차 dispatch로 구현된다. sub-work을 PR 크기에 맞추고, dispatch를 완주 크기에 맞춘다 — 두 축은 독립이다.
 - **dispatch가 넘치면 쪼개는 게 답이다 — "이어받기" 재dispatch 금지.** 브리프 작성 시점에 "한 번에 끝낼 수 있나"를 판단하고, 아니면 dispatch를 나눈다. 실행 중 넘침이 드러나면(중단·미완 보고) 잔여를 새 dispatch로 정의해 다시 브리프한다 — "하던거 계속해"로 잇지 않는다. 단, **검수 findings 교정을 위한 재개는 이어받기가 아니다**(§4-3) — 이어받기 금지는 크기 오판의 연장을 막는 것이고, findings 교정은 완결된 작업의 수정이라 원 에이전트 재개가 정당하다.
 
@@ -19,12 +19,12 @@ description: Use when executing decomposed large work as multiple PRs from one s
 
 ### 1. 분할 입력 — campaign.md 가 정본
 
-분할은 이 스킬이 확정하지 않는다 — campaign.md 7항 DP 목록·선행 관계·소유 범위를 그대로 받아 실행한다. DP 이슈 생성은 L 실행 루프의 issue 단계(campaign 스킬 참조) — DP = 이슈 = PR 필수, 커밋·PR은 `[#DP이슈]`. 계획이 없으면 campaign 스킬로 먼저 간다.
+분할은 이 스킬이 확정하지 않는다 — campaign.md 9항 DP 목록·선행 관계·소유 범위를 그대로 받아 실행한다. DP 이슈 생성은 L 실행 루프의 issue 단계(campaign 스킬 참조) — DP = 이슈 = PR 필수, 커밋·PR은 `[#DP이슈]`. 계획이 없으면 campaign 스킬로 먼저 간다.
 
 ### 2. 실행 모드 판정 — 의존성 그래프
 
 - **독립 sub-work → 병렬 가능.** 단 셋 다 충족할 때만: 파일 겹침 없음 / 각자 워크트리 확보 / **동시 진행 sub-work 2개 상한** (상한의 단위는 sub-work — 각 sub-work 내부 dispatch는 순차라, 동시에 활성인 워크트리·xcodebuild가 2개를 넘지 않게 하는 기준이다).
-- **의존 sub-work → stacked 체인.** 앞 sub-work의 PR 머지를 기다리지 않는다 — 앞 브랜치를 베이스로 다음 sub-work을 진행하고, PR도 앞 브랜치를 base로 올린다. **단 sub-work이 campaign DP 면 기본은 opord 착수 자격(선행 DP 머지)이다** — stacked 는 유저가 명시 허용할 때만 타고, 그때 게이트의 "선행 DP 머지"는 "선행 DP PR 존재 + 인터페이스 계약 확정(campaign.md 6항 통제수단)"으로 완화된다 (opord §3-2). 리뷰 반영으로 앞이 바뀌는 리스크는 §5 rebase 규정이 흡수한다.
+- **의존 sub-work → stacked 체인.** 앞 sub-work의 PR 머지를 기다리지 않는다 — 앞 브랜치를 베이스로 다음 sub-work을 진행하고, PR도 앞 브랜치를 base로 올린다. **단 sub-work이 campaign DP 면 기본은 opord 착수 자격(선행 DP 머지)이다** — stacked 는 유저가 명시 허용할 때만 타고, 그때 게이트의 "선행 DP 머지"는 "선행 DP PR 존재 + 인터페이스 계약 확정(campaign.md 8항 작전 배열의 통제수단)"으로 완화된다 (opord §3-2). 리뷰 반영으로 앞이 바뀌는 리스크는 §5 rebase 규정이 흡수한다.
 
 ### 3. 원장 — 컴팩션 생존 장부
 
