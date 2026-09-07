@@ -33,7 +33,7 @@ sub-work(DP)별 상태(브랜치·base·PR#·머지)는 campaign 원장 `.operat
 ### 4. sub-work 실행 루프
 
 1. **브랜치**: `features/` 브랜치를 base(develop 또는 앞 sub-work 브랜치)에서 딴다.
-2. **브리프·dispatch**: sub-work이 DP 면 브리프 = 해당 DP의 작전명령(`docs/operations/<DP이슈>/opord-<DP>.md`)이고, 첫 보고에 백브리프(`report-backbrief.md` 7항)를 요구한다 — 명령을 쓴 세션이 아니어도 같다 (opord §3.8). implement 스킬을 invoke하고 §착수의 서브에이전트 dispatch 조항을 따른다 — rules 요지 발췌, 테스트 스킴, 구조 패턴, "갭 발견 시 추측 금지·보고 후 중단" 명시. 보고는 report 파일로 받는다 (전문을 컨트롤러 컨텍스트에 싣지 않는다).
+2. **브리프·dispatch**: sub-work이 DP 면 브리프 = 해당 DP의 작전명령(`docs/operations/<DP이슈>/opord-<DP>.md`)이고, 첫 보고에 백브리프(`report-backbrief.md` 7항)를 요구한다 — 명령을 쓴 세션이 아니어도 같다 (opord §3-9). implement 스킬을 invoke하고 §착수의 서브에이전트 dispatch 조항을 따른다 — rules 요지 발췌, 테스트 스킴, 구조 패턴, "갭 발견 시 추측 금지·보고 후 중단" 명시. 보고는 report 파일로 받는다 (전문을 컨트롤러 컨텍스트에 싣지 않는다).
 3. **검수**: dispatch 보고마다 브리프에 실은 rules 조항 위반 여부를 항목별로 스캔하고, 테스트 통과를 확인한다. 결함이면 **원 서브에이전트를 재개해**(SendMessage) findings를 되돌린다 — 자기 작업 컨텍스트가 남아 있어 싸다. 재개가 불가하면 브리프·report 경로·findings를 실어 새 dispatch. 컨트롤러가 직접 고치지 않는다.
 4. **커밋·PR**: 커밋은 서브에이전트가 논리 단위로 만든다(commit 스킬 컨벤션 승계). sub-work의 dispatch가 모두 끝나면 컨트롤러가 pr 스킬로 PR을 올린다 — stacked면 `gh pr create --base <앞 브랜치>`.
 5. 원장(§3) 갱신 후 다음 sub-work으로.
