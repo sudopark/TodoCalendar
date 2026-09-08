@@ -83,18 +83,8 @@ final class ApplicationBase {
             
             return (try? JSONSerialization.jsonObject(with: jsonData, options: .allowFragments) as? [String: Any]) ?? [:]
         }
-        func readAPIHost(_ secrets: [String: Any]) -> String? {
-            guard AppEnvironment.isExternalDependencyBlocked == false
-            else {
-                return ProcessInfo.processInfo.environment["E2E_API_HOST"]
-                    ?? AppEnvironment.blockedAPIHost
-            }
-            return AppEnvironment.useEmulator
-                ? secrets["emulator_caleandar_api_host"] as? String
-                : secrets["caleandar_api_host"] as? String
-        }
         let secrets = readSecret()
-        let host = readAPIHost(secrets)
+        let host = AppEnvironment.calendarAPIHost(secrets: secrets)
         let csAPi = secrets["cs_api"] as? String
         let environment = RemoteEnvironment(
             calendarAPIHost: host ?? "https://dummy.com",
@@ -323,23 +313,4 @@ private final class DummyMobileAdService: MobileAdService, PrivacyOptionsFormRou
     var isStartedNow: Bool { false }
 }
 
-private class DummyFirebaseAuthService: FirebaseAuthService {
-    
-    func setup() throws { }
-    
-    func signOut() throws {
-        
-    }
-    
-    func deleteAccount() async throws {
-        
-    }
-    
-    func authorize(with credential: any OAuth2Credential) async throws -> any FirebaseAuthDataResult {
-        throw RuntimeError("failed")
-    }
-    
-    func refreshToken(_ resultHandler: @escaping (Result<AuthRefreshResult, Error>) -> Void) {
-        
-    }
-}
+

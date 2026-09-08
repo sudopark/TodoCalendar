@@ -17,7 +17,7 @@ final class AppExtensionBase {
     init() { }
     
     let userDefaultEnvironmentStorage = UserDefaultEnvironmentStorageImple(
-        suiteName: AppEnvironment.groupID
+        suiteName: AppEnvironment.userDefaultSuiteName
     )
     
     let keyChainStorage: KeyChainStorageImple = {
@@ -65,7 +65,7 @@ final class AppExtensionBase {
     }()
     
     lazy var firebaseAuthService: any FirebaseAuthService = {
-        if AppEnvironment.isTestBuild {
+        if AppEnvironment.isExternalDependencyBlocked {
             return DummyFirebaseAuthService()
         } else {
             // 앱 프로세스에서는 AppDelegate가 먼저 configure 한다 — 두 번 부르면 예외가 난다.
@@ -90,9 +90,7 @@ final class AppExtensionBase {
             return (try? JSONSerialization.jsonObject(with: jsonData, options: .allowFragments) as? [String: Any]) ?? [:]
         }
         let secrets = readSecret()
-        let host = AppEnvironment.useEmulator
-            ? secrets["emulator_caleandar_api_host"] as? String
-            : secrets["caleandar_api_host"] as? String
+        let host = AppEnvironment.calendarAPIHost(secrets: secrets)
         let csAPi = secrets["cs_api"] as? String
         let environment = RemoteEnvironment(
             calendarAPIHost: host ?? "https://dummy.com",
@@ -128,31 +126,6 @@ final class AppExtensionBase {
             interceptor: interceptor
         )
     }()
-}
-
-// MARK: - dummy
-
-private class DummyFirebaseAuthService: FirebaseAuthService {
-    
-    func setup() throws {
-        
-    }
-    
-    func signOut() throws {
-        
-    }
-    
-    func deleteAccount() async throws {
-        
-    }
-    
-    func authorize(with credential: any OAuth2Credential) async throws -> any FirebaseAuthDataResult {
-        throw RuntimeError("failed")
-    }
-    
-    func refreshToken(_ resultHandler: @escaping (Result<AuthRefreshResult, Error>) -> Void) {
-        
-    }
 }
 
 

@@ -12,6 +12,7 @@ import Repository
 struct AppEnvironment {
     
     private enum Constant {
+        static let testDBFileNamePrefix: String = "test_dummy"
         static let e2eRunMarkerFileName: String = "e2e-run.marker"
         // 1회 실행이 67초라 한 실행을 충분히 덮으면서, 잔존 시 오염 창을 짧게 남긴다
         static let e2eRunMarkerTTL: TimeInterval = 600
@@ -88,10 +89,16 @@ struct AppEnvironment {
     
     private static var dbFileName: String {
         if self.isExternalDependencyBlocked {
-            return "test_dummy"
+            return Constant.testDBFileNamePrefix
         } else {
             return "models"
         }
+    }
+    
+    // AppDelegate 의 접두 매칭 청소가 그대로 커버하도록 실행별 DB 도 같은 접두를 쓴다
+    private static func isolatedDBFileName(_ name: String) -> String {
+        guard self.isExternalDependencyBlocked else { return name }
+        return "\(Constant.testDBFileNamePrefix)_\(name)"
     }
     
     static var groupID: String {
@@ -120,8 +127,12 @@ struct AppEnvironment {
     }
     
     static func externalCalendarDBPaths() -> [String: String] {
-        let googlePath = self.dbPath(fileName: "\(GoogleCalendarService.id)_calendar")
-        let applePath = self.dbPath(fileName: "\(AppleCalendarService.id)__calendar")
+        let googlePath = self.dbPath(
+            fileName: self.isolatedDBFileName("\(GoogleCalendarService.id)_calendar")
+        )
+        let applePath = self.dbPath(
+            fileName: self.isolatedDBFileName("\(AppleCalendarService.id)__calendar")
+        )
         return [
             GoogleCalendarService.id: googlePath,
             AppleCalendarService.id: applePath
@@ -134,7 +145,23 @@ struct AppEnvironment {
         return dbUrl?.path() ?? ""
     }
     
-    static var keyChainStoreName: String { "TodoCalendar" }
+    static var keyChainStoreName: String {
+        if self.isExternalDependencyBlocked {
+            return "TodoCalendar.test"
+        } else {
+            return "TodoCalendar"
+        }
+    }
+    
+    static func calendarAPIHost(secrets: [String: Any]) -> String? {
+        guard self.isExternalDependencyBlocked == false
+        else {
+            return self.e2eLaunchAPIHost ?? self.e2eMarkedAPIHost ?? self.blockedAPIHost
+        }
+        return self.useEmulator
+            ? secrets["emulator_caleandar_api_host"] as? String
+            : secrets["caleandar_api_host"] as? String
+    }
     
     static let apiDefaultTimeoutSeconds: TimeInterval = 30
     

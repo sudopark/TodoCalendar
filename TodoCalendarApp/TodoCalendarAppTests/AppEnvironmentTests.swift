@@ -60,3 +60,43 @@ extension AppEnvironmentTests {
         #expect(try self.loadMarkerData() == nil)
     }
 }
+
+// MARK: - 격리 축에 매달린 저장소·host
+
+extension AppEnvironmentTests {
+    
+    @Test("격리 실행에서는 외부 캘린더 DB 도 테스트 접두를 달아 실 파일과 갈린다")
+    func externalCalendarDBPaths_inIsolatedRun_useTestPrefix() {
+        // given & when
+        let paths = AppEnvironment.externalCalendarDBPaths()
+        
+        // then
+        #expect(paths.count == 2)
+        #expect(paths.values.allSatisfy { $0.contains("/test_dummy_") } == true)
+        #expect(paths.values.contains { $0.hasSuffix("_calendar.db") } == true)
+    }
+    
+    @Test("격리 실행에서는 keychain 저장소 이름이 실 저장소와 갈린다")
+    func keyChainStoreName_inIsolatedRun_isSeparatedFromProduction() {
+        // given & when
+        let name = AppEnvironment.keyChainStoreName
+        
+        // then
+        #expect(name == "TodoCalendar.test")
+    }
+    
+    @Test("격리 실행에서는 secrets 의 실 host 를 읽지 않고 도달 불가 주소로 떨어진다")
+    func calendarAPIHost_inIsolatedRun_doesNotReadSecrets() {
+        // given
+        let secrets: [String: Any] = [
+            "caleandar_api_host": "https://real.example.com",
+            "emulator_caleandar_api_host": "https://emulator.example.com"
+        ]
+        
+        // when
+        let host = AppEnvironment.calendarAPIHost(secrets: secrets)
+        
+        // then
+        #expect(host == "http://127.0.0.1:1")
+    }
+}
