@@ -12,53 +12,7 @@ import Optics
 import Domain
 import Extensions
 import CommonPresentation
-
-
-// MARK: - DDayWidgetViewModel
-
-struct DDayWidgetViewModel: Sendable {
-
-    let eventTitle: String
-    let ddayText: String
-    let dateText: String
-    let timeText: String
-    let repeatText: String
-    var refreshAfter: Date?
-    var link: URL?
-    var widgetSetting: WidgetAppearanceSettings = .init()
-
-    var isRepeating: Bool {
-        return self.repeatText.isEmpty == false
-    }
-
-    /// 잠금화면 inline 한 줄. D-n을 앞에 두는 이유 — inline은 폭이 좁아 뒤에서부터 잘리는데,
-    /// 제목이 길 때 남은 일수가 사라지면 이 위젯을 둘 이유가 없어진다.
-    var lockScreenInlineText: String {
-        return [self.ddayText, self.eventTitle].joinedNonEmpty(separator: " · ")
-    }
-
-    static var sample: Self {
-        return .init(
-            eventTitle: "widget.dday.sample::title".localized(),
-            ddayText: "D-14",
-            dateText: DDayTargetDateFormatter.dateText(
-                of: .at(Date().timeIntervalSince1970 + 3600 * 24 * 14), in: .current
-            ),
-            timeText: "",
-            repeatText: ""
-        )
-    }
-
-    static func noTarget() -> Self {
-        return .init(
-            eventTitle: "widget.dday::noTarget".localized(),
-            ddayText: "–",
-            dateText: "",
-            timeText: "",
-            repeatText: ""
-        )
-    }
-}
+import WidgetScenes
 
 
 // MARK: - DDayWidgetViewModelProvider
@@ -111,8 +65,8 @@ extension DDayWidgetViewModelProvider {
         return DDayWidgetViewModel(
             eventTitle: event.name,
             ddayText: DDayText(interval).text,
-            dateText: DDayTargetDateFormatter.dateText(of: event.time, in: timeZone),
-            timeText: DDayTargetDateFormatter.timeText(of: event.time, in: timeZone),
+            dateText: event.time.ddayDateText(in: timeZone),
+            timeText: event.time.ddayTimeText(in: timeZone),
             repeatText: self.repeatText(event, timeZone)
         )
         |> \.refreshAfter .~ refreshAfter

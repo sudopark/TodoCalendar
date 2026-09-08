@@ -13,6 +13,7 @@ import Optics
 import Domain
 import UnitTestHelpKit
 import TestDoubles
+import WidgetScenes
 
 @testable import TodoCalendarAppWidget
 

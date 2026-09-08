@@ -56,6 +56,10 @@ let project = Project.app(
             path: .relativeToRoot("Presentations/MemberScenes")
         ),
         .project(
+            target: "WidgetScenes",
+            path: .relativeToRoot("Presentations/WidgetScenes")
+        ),
+        .project(
             target: "EventListScenes",
             path: .relativeToRoot("Presentations/EventListScenes")
         ),
@@ -134,6 +138,10 @@ let project = Project.app(
                 .project(
                     target: "CalendarScenes",
                     path: .relativeToRoot("Presentations/CalendarScenes")
+                ),
+                .project(
+                    target: "WidgetScenes",
+                    path: .relativeToRoot("Presentations/WidgetScenes")
                 )
             ],
             signingConfigures: [
