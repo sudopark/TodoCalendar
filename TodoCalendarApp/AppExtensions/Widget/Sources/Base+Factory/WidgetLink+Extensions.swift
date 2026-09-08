@@ -8,7 +8,7 @@
 
 import Foundation
 import Domain
-import CalendarScenes
+import CalendarPresentation
 
 
 enum EventDeepLinkBuilder {

@@ -10,7 +10,7 @@ import Foundation
 import Prelude
 import Optics
 import Domain
-import CalendarScenes
+import CalendarPresentation
 
 
 class StubCalendarEventsFetchUescase: CalendarEventFetchUsecase {

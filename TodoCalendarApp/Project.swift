@@ -140,8 +140,8 @@ let project = Project.app(
                     path: .relativeToRoot("Presentations/CommonPresentation")
                 ),
                 .project(
-                    target: "CalendarScenes",
-                    path: .relativeToRoot("Presentations/CalendarScenes")
+                    target: "CalendarPresentation",
+                    path: .relativeToRoot("Presentations/CalendarPresentation")
                 ),
                 .project(
                     target: "WidgetScenes",

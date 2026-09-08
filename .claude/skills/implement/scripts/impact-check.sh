@@ -87,7 +87,7 @@ if printf '%s\n' "$FILES" | grep -q "^Presentations/CalendarPresentation/"; then
   schemes+=("CalendarPresentation" "CalendarScenes" "TodoCalendarApp" "TodoCalendarAppWidget")
 fi
 if printf '%s\n' "$FILES" | grep -q "^Presentations/CalendarScenes/"; then
-  schemes+=("CalendarScenes" "TodoCalendarApp" "TodoCalendarAppWidget")
+  schemes+=("CalendarScenes" "TodoCalendarApp")
 fi
 if printf '%s\n' "$FILES" | grep -q "^Presentations/EventDetailScene/"; then
   schemes+=("EventDetailScene" "TodoCalendarApp")
