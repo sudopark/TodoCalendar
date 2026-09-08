@@ -10,7 +10,7 @@
 - **짝지어진 두 위치는 함께 갱신.** 한쪽만 바꾸면 무효가 되는 쌍은 추가/변경 시 대응처도 반드시 확인:
   - `AppEnvironment.dbVersion` ↔ `Table.migrateStatement(for:)` case ↔ `AppDataMigrationImple`의 `runDBMigration` case + `runMigrationVersionNtoM` (셋 다여야 한다 — 마지막이 빠지면 `migrateStatement`가 호출조차 안 되고 조용히 안 돈다)
   - CI `pr_test.yml` — `detect-changes`의 scheme 매핑(grep) ↔ `test` job의 `Test <scheme>` 실행 step (둘 중 하나만 추가하면 감지만 되고 실행 안 됨)
-  - 신규 테스트 스킴 ↔ 스킴 목록 하드코딩 전부 (`pr_test.yml` 3곳·`scripts/run-all-tests.sh`·`impact-check.sh`+테스트·`run-tests` 스킬 — 상세는 add-framework 스킬. 단 `<Name>Snapshots` 스킴은 의도된 예외 — 로컬 전용, snapshot-check 스킬)
+  - 신규 테스트 스킴 ↔ 스킴 목록 하드코딩 전부 (`pr_test.yml` 3곳·`scripts/run-all-tests.sh`·`impact-check.sh`+테스트·`run-tests` 스킬 — 상세는 add-framework 스킬. 단 `<Name>Snapshots`·`<Name>E2E` 스킴은 의도된 예외 — 둘 다 로컬 전용이라 CI 가 안 돌린다. 스냅샷은 snapshot-check 스킬, e2e 는 #826 작전계획 0항 결심으로 CI 미배선)
   - init 시그니처 ↔ 콜사이트
   - 인증 필요 신규 Endpoint enum ↔ `CalendarAPIAutenticator.shouldAdapt` case ↔ 회귀 테스트 (누락 시 무인증 요청 → 401, 리트라이도 안 됨)
   - CommonPresentation 신규 컴포넌트 ↔ `.claude/rules/presentations-rules.md` §2 카탈로그 표 등재 (누락 시 다음 사람이 못 찾아 같은 컴포넌트를 또 만든다)
