@@ -30,6 +30,7 @@ ALL_SCHEMES=(
   "SettingScene"
   "MemberScenes"
   "AIAgentScene"
+  "WidgetScenes"
   "TodoCalendarApp"
   "TodoCalendarAppWidget"
   "TodoCalendarAppShare"

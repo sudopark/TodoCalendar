@@ -10,8 +10,7 @@ import XCTest
 import SwiftUI
 import WidgetKit
 import SnapshotTestHelpKit
-
-@testable import TodoCalendarAppWidget
+import WidgetScenes
 
 
 /// `snapshotDirectory` 를 안 넘긴다 — `catalogSnapshotDirectory()` 는 gitignore 된 경로라 png 비교가 성립하지 않는다.

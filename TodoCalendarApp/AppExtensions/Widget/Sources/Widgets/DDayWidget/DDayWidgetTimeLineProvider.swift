@@ -12,6 +12,7 @@ import Prelude
 import Optics
 import Domain
 import Extensions
+import WidgetScenes
 
 
 struct DDayWidgetTimeLineProvider: AppIntentTimelineProvider {

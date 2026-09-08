@@ -1,0 +1,6 @@
+# Reuse this repository's existing Claude guidance instead of duplicating it.
+# Codex reads CLAUDE.md whenever no nearer AGENTS.md is present.
+project_doc_fallback_filenames = ["CLAUDE.md"]
+
+# The root guide plus a nested module guide can exceed Codex's default 32 KiB.
+project_doc_max_bytes = 65536

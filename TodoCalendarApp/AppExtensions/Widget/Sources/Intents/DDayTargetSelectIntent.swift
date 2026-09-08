@@ -15,6 +15,7 @@ import Domain
 import Extensions
 import CommonPresentation
 import CalendarScenes
+import WidgetScenes
 
 
 // MARK: - DDayTargetEventId + entity id
@@ -53,38 +54,6 @@ extension DDayTargetEventId {
             rawId: segments[2],
             turnKey: segments.count >= 4 ? segments[3] : nil
         )
-    }
-}
-
-
-// MARK: - DDayTargetDateFormatter
-
-enum DDayTargetDateFormatter {
-
-    /// "2027년 3월 15일 (월)" 계열 — 로케일 템플릿.
-    static func dateText(of time: EventTime, in timeZone: TimeZone) -> String {
-        return self.text(of: time, in: timeZone, template: "yMMMdEEE")
-    }
-
-    /// "오전 7:00". 종일 일정은 시각이 의미 없어 빈 문자열.
-    static func timeText(of time: EventTime, in timeZone: TimeZone) -> String {
-        guard case .allDay = time else {
-            return self.text(of: time, in: timeZone, template: "jm")
-        }
-        return ""
-    }
-
-    private static func text(
-        of time: EventTime, in timeZone: TimeZone, template: String
-    ) -> String {
-        let date = Date(
-            timeIntervalSince1970: time.rangeWithShifttingifNeed(on: timeZone).lowerBound
-        )
-        let formatter = DateFormatter()
-        formatter.timeZone = timeZone
-        formatter.locale = .current
-        formatter.setLocalizedDateFormatFromTemplate(template)
-        return formatter.string(from: date)
     }
 }
 
@@ -180,7 +149,7 @@ struct DDayTargetEventQuery: EntityQuery, @unchecked Sendable {
                     name: event.name,
                     subtitle: event.isRepeating
                         ? "widget.dday.target::repeating".localized()
-                        : DDayTargetDateFormatter.dateText(of: event.time, in: timeZone)
+                        : event.time.ddayDateText(in: timeZone)
                 )
             )
         }
@@ -274,7 +243,7 @@ struct DDayTargetEventQuery: EntityQuery, @unchecked Sendable {
     ) -> String {
         let base = candidate.isRepeating
             ? "widget.dday.target::repeating".localized()
-            : DDayTargetDateFormatter.dateText(of: candidate.time, in: timeZone)
+            : candidate.time.ddayDateText(in: timeZone)
         guard isPinned else { return base }
         return "\("widget.dday.target::registered".localized()) · \(base)"
     }
@@ -361,8 +330,8 @@ struct DDayTargetTurnQuery: EntityQuery, @unchecked Sendable {
             entities.append(
                 DDayTargetTurnEntity(
                     id: identifier,
-                    name: DDayTargetDateFormatter.dateText(of: event.time, in: timeZone),
-                    subtitle: DDayTargetDateFormatter.timeText(of: event.time, in: timeZone)
+                    name: event.time.ddayDateText(in: timeZone),
+                    subtitle: event.time.ddayTimeText(in: timeZone)
                 )
             )
         }
@@ -399,8 +368,8 @@ struct DDayTargetTurnQuery: EntityQuery, @unchecked Sendable {
                 .entityId(isRepeating: true),
                 name: "widget.dday.turn::name".localized(with: turn.turn),
                 subtitle: [
-                    DDayTargetDateFormatter.dateText(of: turn.time, in: timeZone),
-                    DDayTargetDateFormatter.timeText(of: turn.time, in: timeZone)
+                    turn.time.ddayDateText(in: timeZone),
+                    turn.time.ddayTimeText(in: timeZone)
                 ]
                 .joinedNonEmpty(separator: " ")
             )
