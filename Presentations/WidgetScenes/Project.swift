@@ -5,6 +5,8 @@ let project = Project.frameworkWithTest(name: "WidgetScenes",
                                         destinations: [.iPhone],
                                         iOSTargetVersion: "17.0",
                                         dependencies: [
+                                            .project(target: "CalendarPresentation",
+                                                     path: .relativeToRoot("Presentations/CalendarPresentation")),
                                             .project(target: "Common3rdParty",
                                                      path: .relativeToRoot("Supports/Common3rdParty")),
                                             .project(target: "CommonPresentation",
