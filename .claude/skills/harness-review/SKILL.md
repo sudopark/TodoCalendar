@@ -11,7 +11,7 @@ description: Use when the user requests an agent review of pushed harness change
 
 **유저가 지시했을 때만** 돈다 — 하네스 파일이 바뀌었다고 자동 실행하지 않고, PR 올리기 전 셀프리뷰도 없다.
 
-대상은 **공개된 PR** 또는 **PR 없이 푸시된 하네스 커밋**이다. 후자는 대상이 develop 직행 커밋이거나, 유저가 게시 전 반영을 지시해 앵커 커밋이 rebase로 사라진 경우다 — §1~4는 동일하게 돌고 §5 인라인 게시만 대화 보고로 갈음한다. 이 경로는 이행이다.
+대상은 **공개된 PR** 또는 **PR 없이 푸시된 하네스 커밋**이다. **커밋 전 워킹트리 변경**도 유저가 지시하면 대상이다 — diff 패키지를 워킹트리 diff(`git diff -U10 -- <하네스 경로>`)로 만들고, §5 게시는 대화 보고로 갈음한다. 후자는 대상이 develop 직행 커밋이거나, 유저가 게시 전 반영을 지시해 앵커 커밋이 rebase로 사라진 경우다 — §1~4는 동일하게 돌고 §5 인라인 게시만 대화 보고로 갈음한다. 이 경로는 이행이다.
 
 ## 1. 범위 확정 — 하네스 diff 패키지
 
@@ -21,7 +21,7 @@ description: Use when the user requests an agent review of pushed harness change
 - **하네스 경로만** 필터해 스크래치패드에 diff 패키지를 만든다 (리뷰어들이 공유해 Read):
 
 ```bash
-HARNESS_PATHS=(.claude CLAUDE.md Domain/CLAUDE.md Repository/CLAUDE.md scripts docs/coding-style-and-philosophy.md docs/화면단위구조.md docs/domain-context-map.md)
+HARNESS_PATHS=(.claude CLAUDE.md Domain/CLAUDE.md Repository/CLAUDE.md scripts docs/coding-style-and-philosophy.md docs/화면단위구조.md docs/domain-context-map.md docs/operations/templates)
 { git log --oneline <BASE>..<HEAD> -- "${HARNESS_PATHS[@]}"; echo '---'; git diff --stat <BASE>..<HEAD> -- "${HARNESS_PATHS[@]}"; echo '---'; git diff -U10 <BASE>..<HEAD> -- "${HARNESS_PATHS[@]}"; } > <scratchpad>/harness-review-<PR번호 또는 커밋 SHA 앞7자>.diff
 wc -l <scratchpad>/harness-review-<PR번호 또는 커밋 SHA 앞7자>.diff
 ```
