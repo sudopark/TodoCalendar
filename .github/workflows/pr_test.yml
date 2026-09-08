@@ -122,7 +122,7 @@ jobs:
             schemes+=("CalendarPresentation" "CalendarScenes" "TodoCalendarApp" "TodoCalendarAppWidget")
           fi
           if echo "$FILES" | grep -q "^Presentations/CalendarScenes/"; then
-            schemes+=("CalendarScenes" "TodoCalendarApp" "TodoCalendarAppWidget")
+            schemes+=("CalendarScenes" "TodoCalendarApp")
           fi
           if echo "$FILES" | grep -q "^Presentations/EventDetailScene/"; then
             schemes+=("EventDetailScene" "TodoCalendarApp")

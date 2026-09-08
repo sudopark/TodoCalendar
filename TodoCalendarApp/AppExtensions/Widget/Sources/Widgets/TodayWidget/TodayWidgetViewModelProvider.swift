@@ -11,7 +11,7 @@ import Prelude
 import Optics
 import Domain
 import Extensions
-import CalendarScenes
+import CalendarPresentation
 
 
 // MARK: - TodayWidgetViewModel

@@ -7,7 +7,7 @@
 //
 
 import SwiftUI
-import CalendarScenes
+import CalendarPresentation
 
 extension EventTimeText {
     
