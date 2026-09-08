@@ -98,17 +98,18 @@ sequel — 1단계 종료 상태별 후속:
 | | 1단계 기반 |
 |---|---|
 | LOE-1 격리 종단 | DP-1.1 (앱 프로세스) · DP-1.3 (확장 프로세스) |
-| LOE-2 픽스처 공급 | DP-1.2 |
+| LOE-2 픽스처 공급 | DP-1.2 (스텁 종단) · DP-1.4 (기본 스터빙 세트) |
 | LOE-3 실행 배선 | DP-1.1 (타겟·스킴) |
 
-**시퀀스** — 직렬 사슬: DP-1.1 → DP-1.2 → DP-1.3.
+**시퀀스** — 직렬 사슬: DP-1.1 → DP-1.2 → DP-1.3, DP-1.4 는 DP-1.2 뒤 어디든.
 
-근거: DP-1.1 이 만드는 판정축·타겟이 DP-1.2 의 전제이자 검증 수단이다 — 타겟 없이는 격리가 도는지 확인할 방법이 없다. DP-1.3 이 DP-1.2 뒤인 것은 스텁 서버가 서야 "확장이 실 host 로 안 나간다"를 미등록 요청 카운트로 실제 검증할 수 있기 때문이다. 병렬 슬롯 대응 없음. 유저가 단일 세션 연속 실행(orchestrate)을 지정했고 의존이 직렬이라 병렬 이득이 없다.
+근거: DP-1.1 이 만드는 판정축·타겟이 DP-1.2 의 전제이자 검증 수단이다 — 타겟 없이는 격리가 도는지 확인할 방법이 없다. DP-1.3 이 DP-1.2 뒤인 것은 스텁 서버가 서야 "확장이 실 host 로 안 나간다"를 미등록 요청 카운트로 실제 검증할 수 있기 때문이다. DP-1.4 는 DP-1.3 과 소유 범위가 갈려(E2E 러너 코드 vs 확장 타겟) 선후가 자유롭다. 병렬 슬롯 대응 없음 — 유저가 단일 세션 연속 실행(orchestrate)을 지정했다.
 
 **통제수단** (인접 DP 사이 인터페이스 계약)
 
 - DP-1.1 → DP-1.2: 앱이 e2e 를 인지하는 **실행 인자 키**(`-uiTest`)와, 러너가 host 를 주입하는 **환경변수 키**(`E2E_API_HOST`) 두 이름을 DP-1.1 이 확정하고 **양쪽 다 구현까지 한다**. DP-1.2 는 후자에 값을 채우고, 단언·재실행 가능성이 요구하는 프로덕션 개입 둘(접근성 식별자·청정 상태 초기화)을 `-uiTest` 축 위에 얹는다.
 - DP-1.2 → DP-1.3: DP-1.2 가 만든 **스텁 서버 미등록 요청 로그**가 DP-1.3 의 검증 수단이다. DP-1.3 은 확장 프로세스 요청이 그 로그에 잡히는 것으로 격리를 판정한다.
+- DP-1.2 → DP-1.4: DP-1.2 가 만든 `E2ETestCase` 와 `E2EFixture` 가 기본 스터빙이 얹힐 자리다. DP-1.4 는 시나리오가 쓰던 등록을 그 베이스로 올린다.
 - 머지 순서 = 시퀀스 순서. stacked 없음.
 
 **요도**
@@ -119,9 +120,12 @@ flowchart TD
         DP11["DP-1.1<br/>격리 축 + e2e 타겟·스킴<br/>(LOE-1·LOE-3)"]
         DP12["DP-1.2<br/>스텁 서버 + 콜드스타트 스모크<br/>(LOE-2)"]
         DP13["DP-1.3<br/>확장 프로세스 격리<br/>(LOE-1)"]
+        DP14["DP-1.4<br/>기본 스터빙 세트<br/>(LOE-2)"]
         DP11 --> DP12 --> DP13
+        DP12 --> DP14
     end
     DP13 --> END(["캠페인 종결<br/>MOE 판정"])
+    DP14 --> END
     DP12 -. "D-1 스모크 불안정" .-> B1["branch B-1<br/>안정화 집중·종결 보류"]
     DP13 -. "D-2 요청 누출" .-> B2["branch B-2<br/>누출 종단 처리 DP 추가"]
     DP11 -. "D-3 서버 경로 불성립" .-> B3["branch B-3<br/>픽스처 공급 수단 전환"]
@@ -134,6 +138,7 @@ flowchart TD
 | DP-1.1 | LOE-1, LOE-3 | 1 | `isTestBuild` 를 "외부 의존 차단"과 "화면 억제" 두 축으로 분리하고 e2e 실행 인지를 전자에 편입. **host 종단도 같은 축에 넣어 미주입 시 도달 불가 주소로 떨어뜨린다** (안 그러면 스모크 첫 실행이 실 API 를 탄다). uiTests 타겟·독립 스킴 신설 + 앱이 뜨는지만 확인하는 최소 테스트 | 없음 | `TodoCalendarApp/Sources/AppEnvironment.swift`, `TodoCalendarApp/Sources/AppDelegate.swift`, `TodoCalendarApp/Sources/Factories/ApplicationBase.swift`, `TodoCalendarApp/Project.swift`, `Tuist/ProjectDescriptionHelpers/Project+Templates.swift`, `TodoCalendarApp/E2E/**` (신규) | M |
 | DP-1.2 | LOE-2 | 1 | 러너 프로세스에 스텁 HTTP 서버(자체 구현)를 띄우고 그 주소를 `E2E_API_HOST` 로 넘긴다. 콜드런치 픽스처(`holidays`) 공급 + 캘린더 루트 렌더 단언까지 스모크 완성. **프로덕션 개입 둘을 동반한다** — 접근성 식별자 카탈로그 신설과 월 그리드 등재(단언 대상이 없다: 코드베이스에 식별자 0개. 뷰마다 리터럴을 흩뿌리지 않고 모듈 간 공유 계약 자리인 `Scenes` 정본에 모아 e2e 가 심볼로 쓴다), `-uiTest` 시 DB·UserDefaults 청정화(안 하면 2회차부터 캐시로 통과해 스텁 공급을 검증 못 한다) | DP-1.1 | `TodoCalendarApp/E2E/**`, `TodoCalendarApp/Sources/AppDelegate.swift`, `Presentations/Scenes/Sources/AccessibilityID.swift`, `Presentations/CalendarScenes/Sources/Month/MonthView.swift`, `Tuist/ProjectDescriptionHelpers/Project+Templates.swift`, `.claude/rules/presentations-rules.md` | M |
 | DP-1.3 | LOE-1 | 1 | 확장 프로세스(Widget·IntentExtensions·Share)도 e2e 실행을 인지해 실 DB·실 host 를 안 타게 한다. **설계 난점 셋을 풀어야 한다**: (가) 확장은 `launchArguments` 를 못 받아 인지 수단이 앱과 다르다 (나) 위젯이 앱보다 먼저·오래 뜬다(실측 #1054) — 앱이 세팅해주는 플래그는 순서상 늦을 수 있다 (다) XCUITest 가 앱을 강제 종료해 플래그 정리가 보장 안 된다 — 일반 실행 오염을 막을 fail-safe 필요 | DP-1.2 | `TodoCalendarApp/AppExtensions/Base/AppExtensionBase.swift`, `TodoCalendarApp/Sources/AppEnvironment.swift`, `TodoCalendarApp/E2E/**` | M |
+| DP-1.4 | LOE-2 | 1 | 콜드런치가 부르는 API 응답 세트를 `E2ETestCase` 가 기본으로 스터빙하게 한다. 지금은 시나리오마다 등록해서 시나리오가 늘수록 같은 등록이 복제되고 "콜드런치가 무엇을 부르는가"라는 지식이 흩어진다. 스텁 소비 단언도 시나리오가 아니라 베이스 tearDown 으로 옮긴다 — 스터빙을 베이스가 책임지면 소비 여부도 베이스 관심사다. 미등록 요청 로그가 기본 세트에 더할 목록을 준다 | DP-1.2 | `TodoCalendarApp/E2E/**` | M |
 
 ## 10. 결정지점·branch
 
