@@ -27,7 +27,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         logger.prepare()
         #endif
         
-        if AppEnvironment.isTestBuild == false {
+        if AppEnvironment.isExternalDependencyBlocked == false {
             FirebaseApp.configure()
             Messaging.messaging().delegate = self
             UNUserNotificationCenter.current().delegate = self

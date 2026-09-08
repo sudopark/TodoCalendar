@@ -83,10 +83,18 @@ final class ApplicationBase {
             
             return (try? JSONSerialization.jsonObject(with: jsonData, options: .allowFragments) as? [String: Any]) ?? [:]
         }
+        func readAPIHost(_ secrets: [String: Any]) -> String? {
+            guard AppEnvironment.isExternalDependencyBlocked == false
+            else {
+                return ProcessInfo.processInfo.environment["E2E_API_HOST"]
+                    ?? AppEnvironment.blockedAPIHost
+            }
+            return AppEnvironment.useEmulator
+                ? secrets["emulator_caleandar_api_host"] as? String
+                : secrets["caleandar_api_host"] as? String
+        }
         let secrets = readSecret()
-        let host = AppEnvironment.useEmulator 
-            ? secrets["emulator_caleandar_api_host"] as? String
-            : secrets["caleandar_api_host"] as? String
+        let host = readAPIHost(secrets)
         let csAPi = secrets["cs_api"] as? String
         let environment = RemoteEnvironment(
             calendarAPIHost: host ?? "https://dummy.com",
@@ -98,7 +106,7 @@ final class ApplicationBase {
     }()
     
     let firebaseAuthService: any FirebaseAuthService = {
-        if AppEnvironment.isTestBuild {
+        if AppEnvironment.isExternalDependencyBlocked {
             return DummyFirebaseAuthService()
         } else {
             return FirebaseAuthServiceImple(
@@ -178,7 +186,7 @@ final class ApplicationBase {
     }()
     
     let mobileAdService: any MobileAdService & PrivacyOptionsFormRouter = {
-        if AppEnvironment.isTestBuild {
+        if AppEnvironment.isExternalDependencyBlocked {
             return DummyMobileAdService()
         }
         return GoogleMobileAdsServiceImple(
