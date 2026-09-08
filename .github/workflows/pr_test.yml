@@ -33,8 +33,8 @@ jobs:
         run: |
           FILES="${{ steps.changed.outputs.files }}"
 
-          ALL_SCHEMES="Domain Repository AuthService BillingScenes CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene WidgetScenes TodoCalendarApp TodoCalendarAppWidget TodoCalendarAppShare"
-          ALL_PRESENTATION="BillingScenes CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene WidgetScenes"
+          ALL_SCHEMES="Domain Repository AuthService BillingScenes CalendarPresentation CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene WidgetScenes TodoCalendarApp TodoCalendarAppWidget TodoCalendarAppShare"
+          ALL_PRESENTATION="BillingScenes CalendarPresentation CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene WidgetScenes"
 
           schemes=()
 
@@ -116,6 +116,10 @@ jobs:
           # === Presentation 개별 Scene ===
           if echo "$FILES" | grep -q "^Presentations/BillingScenes/"; then
             schemes+=("BillingScenes")
+          fi
+          # CalendarPresentation: CalendarScenes + Widget 확장이 표시·이벤트 모델을 의존
+          if echo "$FILES" | grep -q "^Presentations/CalendarPresentation/"; then
+            schemes+=("CalendarPresentation" "CalendarScenes" "TodoCalendarApp" "TodoCalendarAppWidget")
           fi
           if echo "$FILES" | grep -q "^Presentations/CalendarScenes/"; then
             schemes+=("CalendarScenes" "TodoCalendarApp" "TodoCalendarAppWidget")
@@ -272,6 +276,18 @@ jobs:
           xcodebuild test \
             -workspace TodoCalendar.xcworkspace \
             -scheme BillingScenes \
+            -derivedDataPath ./DerivedData \
+            -destination "$DESTINATION" \
+            -testLanguage en -testRegion en_US \
+            | xcpretty
+
+      - name: Test CalendarPresentation
+        if: contains(needs.detect-changes.outputs.schemes, ' CalendarPresentation ')
+        run: |
+          set -euo pipefail
+          xcodebuild test \
+            -workspace TodoCalendar.xcworkspace \
+            -scheme CalendarPresentation \
             -derivedDataPath ./DerivedData \
             -destination "$DESTINATION" \
             -testLanguage en -testRegion en_US \
