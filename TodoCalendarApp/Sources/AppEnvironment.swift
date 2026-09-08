@@ -46,6 +46,15 @@ struct AppEnvironment {
         return "group.sudo.park.todo-calendar"
     }
     
+    // 실 저장소와 갈라야 테스트 실행이 앱이 쌓은 값을 못 본다 — dbFileName 과 같은 축이다
+    static var userDefaultSuiteName: String {
+        if self.isExternalDependencyBlocked {
+            return "\(self.groupID).test"
+        } else {
+            return self.groupID
+        }
+    }
+    
     static var appId: String { "6639620385" }
     static var appstoreLinkPath: String {
         return "https://itunes.apple.com/app/id/\(self.appId)"
