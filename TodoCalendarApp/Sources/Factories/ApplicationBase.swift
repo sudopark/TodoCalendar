@@ -28,7 +28,7 @@ final class ApplicationBase {
     let eventNotifyService: SharedEventNotifyService = .init()
 
     let userDefaultEnvironmentStorage = UserDefaultEnvironmentStorageImple(
-        suiteName: AppEnvironment.groupID
+        suiteName: AppEnvironment.userDefaultSuiteName
     )
     
     let keyChainStorage: KeyChainStorageImple = {

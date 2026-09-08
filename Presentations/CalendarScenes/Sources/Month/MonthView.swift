@@ -11,6 +11,7 @@ import Prelude
 import Optics
 import Domain
 import Extensions
+import Scenes
 import CommonPresentation
 
 @Observable final class MonthViewState {
@@ -159,6 +160,8 @@ struct MonthView: View {
                     .environment(appearance)
             }
         }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier(AccessibilityID.CalendarScene.monthGrid)
     }
     
     private func emptyGridView() -> some View {

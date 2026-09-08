@@ -27,6 +27,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         logger.prepare()
         #endif
         
+        self.resetStateForUITestRunIfNeeded()
+        
         if AppEnvironment.isExternalDependencyBlocked == false {
             FirebaseApp.configure()
             Messaging.messaging().delegate = self
@@ -54,6 +56,35 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Called when the user discards a scene session.
         // If any sessions were discarded while the application was not running, this will be called shortly after application:didFinishLaunchingWithOptions.
         // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
+    }
+}
+
+
+// MARK: - reset state for ui test
+
+extension AppDelegate {
+    
+    // ApplicationBase 가 UserDefaults 를 읽어 잡으므로 루트 조립보다 앞이어야 한다
+    fileprivate func resetStateForUITestRunIfNeeded() {
+        guard AppEnvironment.isUITestRun else { return }
+        
+        let testDBFilePath = AppEnvironment.dbFilePath(for: nil)
+        guard testDBFilePath.isEmpty == false else { return }
+        
+        let testDBFileURL = URL(fileURLWithPath: testDBFilePath)
+        let namePrefix = testDBFileURL.deletingPathExtension().lastPathComponent
+        let containerURL = testDBFileURL.deletingLastPathComponent()
+        
+        let manager = FileManager.default
+        let files = (try? manager.contentsOfDirectory(
+            at: containerURL, includingPropertiesForKeys: nil
+        )) ?? []
+        files
+            .filter { $0.lastPathComponent.hasPrefix(namePrefix) }
+            .forEach { try? manager.removeItem(at: $0) }
+        
+        let suiteName = AppEnvironment.userDefaultSuiteName
+        UserDefaults(suiteName: suiteName)?.removePersistentDomain(forName: suiteName)
     }
 }
 
