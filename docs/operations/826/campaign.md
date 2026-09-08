@@ -60,10 +60,10 @@
 | 관점 | 상태 | 판정 |
 |---|---|---|
 | 동작 | e2e 스킴으로 콜드스타트 스모크를 돌리면 앱이 실행돼 캘린더 루트가 렌더된 것을 단언하고 통과한다 | `xcodebuild test -scheme <e2e 스킴>` 통과 |
-| 코드 | 프로덕션 코드의 e2e 관련 개입이 판정축 1개 + host 주입 1곳으로 끝나 있다 | 브랜치 전체 diff 에서 프로덕션 파일 변경 라인 열거 |
+| 코드 | 프로덕션 코드의 e2e 관련 개입이 판정축 1개 · host 주입 1곳 · 청정 상태 초기화 1곳 · 접근성 식별자 카탈로그 1개(캘린더 월 그리드 1건 등재)로 끝나 있다 | 브랜치 전체 diff 에서 프로덕션 파일 변경 라인 열거 |
 | 구조 | e2e 타겟이 독립 스킴을 갖고 기존 유닛 테스트 스킴(`TodoCalendarApp`)에 섞이지 않는다 | `xcodebuild -list` 로 스킴 분리 확인 |
 | 검증 | e2e 실행 중 **앱과 확장 프로세스 둘 다** 실 API host·Firebase·AdMob 로 내보낸 요청이 0 이고 실 DB 를 열지 않는다 (gist `supportCountry` 는 0항 결심으로 수용) | 스텁 서버 미등록 요청 카운트 + 실행 로그 + App Group DB 파일 mtime |
-| 품질 | 시나리오를 하나 더 추가할 때 프로덕션 코드 변경이 필요 없다 | DP-1.2 종결보고의 확장 경로 서술 + 픽스처·시나리오 파일만으로 구성됨을 diff 로 확인 |
+| 품질 | 시나리오를 하나 더 추가할 때 픽스처·시나리오 파일만 늘면 되고, 단언 대상은 식별자 카탈로그 한 파일에서 화면별로 찾는다 — 프로덕션 변경은 새 화면을 카탈로그에 등재할 때만 발생한다 | DP-1.2 종결보고의 확장 경로 서술 + 픽스처·시나리오 파일만으로 구성됨을 diff 로 확인 |
 | 외부 | 없음 (CI 배선은 범위 밖) | — |
 
 ## 5. 중심 분석
@@ -107,7 +107,7 @@ sequel — 1단계 종료 상태별 후속:
 
 **통제수단** (인접 DP 사이 인터페이스 계약)
 
-- DP-1.1 → DP-1.2: 앱이 e2e 를 인지하는 **실행 인자 키**(`-uiTest`)와, 러너가 host 를 주입하는 **환경변수 키**(`E2E_API_HOST`) 두 이름을 DP-1.1 이 확정하고 **양쪽 다 구현까지 한다**. DP-1.2 는 후자에 값을 채우기만 하므로 프로덕션 코드를 안 건드린다.
+- DP-1.1 → DP-1.2: 앱이 e2e 를 인지하는 **실행 인자 키**(`-uiTest`)와, 러너가 host 를 주입하는 **환경변수 키**(`E2E_API_HOST`) 두 이름을 DP-1.1 이 확정하고 **양쪽 다 구현까지 한다**. DP-1.2 는 후자에 값을 채우고, 단언·재실행 가능성이 요구하는 프로덕션 개입 둘(접근성 식별자·청정 상태 초기화)을 `-uiTest` 축 위에 얹는다.
 - DP-1.2 → DP-1.3: DP-1.2 가 만든 **스텁 서버 미등록 요청 로그**가 DP-1.3 의 검증 수단이다. DP-1.3 은 확장 프로세스 요청이 그 로그에 잡히는 것으로 격리를 판정한다.
 - 머지 순서 = 시퀀스 순서. stacked 없음.
 
@@ -132,7 +132,7 @@ flowchart TD
 | DP | LOE | 단계 | 내용 | 선행 DP | 소유 범위 (모듈·파일) | 사이즈 |
 |---|---|---|---|---|---|---|
 | DP-1.1 | LOE-1, LOE-3 | 1 | `isTestBuild` 를 "외부 의존 차단"과 "화면 억제" 두 축으로 분리하고 e2e 실행 인지를 전자에 편입. **host 종단도 같은 축에 넣어 미주입 시 도달 불가 주소로 떨어뜨린다** (안 그러면 스모크 첫 실행이 실 API 를 탄다). uiTests 타겟·독립 스킴 신설 + 앱이 뜨는지만 확인하는 최소 테스트 | 없음 | `TodoCalendarApp/Sources/AppEnvironment.swift`, `TodoCalendarApp/Sources/AppDelegate.swift`, `TodoCalendarApp/Sources/Factories/ApplicationBase.swift`, `TodoCalendarApp/Project.swift`, `Tuist/ProjectDescriptionHelpers/Project+Templates.swift`, `TodoCalendarApp/E2E/**` (신규) | M |
-| DP-1.2 | LOE-2 | 1 | 러너 프로세스에 스텁 HTTP 서버(자체 구현)를 띄우고 그 주소를 `E2E_API_HOST` 로 넘긴다. 콜드런치 픽스처(`holidays`) 공급 + 캘린더 루트 렌더 단언까지 스모크 완성. **프로덕션 코드 변경 없음** — 주입 자리는 DP-1.1 이 뚫는다 | DP-1.1 | `TodoCalendarApp/E2E/**` | M |
+| DP-1.2 | LOE-2 | 1 | 러너 프로세스에 스텁 HTTP 서버(자체 구현)를 띄우고 그 주소를 `E2E_API_HOST` 로 넘긴다. 콜드런치 픽스처(`holidays`) 공급 + 캘린더 루트 렌더 단언까지 스모크 완성. **프로덕션 개입 둘을 동반한다** — 접근성 식별자 카탈로그 신설과 월 그리드 등재(단언 대상이 없다: 코드베이스에 식별자 0개. 뷰마다 리터럴을 흩뿌리지 않고 모듈 간 공유 계약 자리인 `Scenes` 정본에 모아 e2e 가 심볼로 쓴다), `-uiTest` 시 DB·UserDefaults 청정화(안 하면 2회차부터 캐시로 통과해 스텁 공급을 검증 못 한다) | DP-1.1 | `TodoCalendarApp/E2E/**`, `TodoCalendarApp/Sources/AppDelegate.swift`, `Presentations/Scenes/Sources/AccessibilityID.swift`, `Presentations/CalendarScenes/Sources/Month/MonthView.swift`, `Tuist/ProjectDescriptionHelpers/Project+Templates.swift`, `.claude/rules/presentations-rules.md` | M |
 | DP-1.3 | LOE-1 | 1 | 확장 프로세스(Widget·IntentExtensions·Share)도 e2e 실행을 인지해 실 DB·실 host 를 안 타게 한다. **설계 난점 셋을 풀어야 한다**: (가) 확장은 `launchArguments` 를 못 받아 인지 수단이 앱과 다르다 (나) 위젯이 앱보다 먼저·오래 뜬다(실측 #1054) — 앱이 세팅해주는 플래그는 순서상 늦을 수 있다 (다) XCUITest 가 앱을 강제 종료해 플래그 정리가 보장 안 된다 — 일반 실행 오염을 막을 fail-safe 필요 | DP-1.2 | `TodoCalendarApp/AppExtensions/Base/AppExtensionBase.swift`, `TodoCalendarApp/Sources/AppEnvironment.swift`, `TodoCalendarApp/E2E/**` | M |
 
 ## 10. 결정지점·branch
@@ -168,6 +168,7 @@ flowchart TD
 | UI 테스트 플레이키로 e2e 가 확장 기반 구실을 못 한다 | LOE-2 | 완화 — 작전한계점 지표로 게이트하고 D-1 로 결심 | 이 레포는 병렬 실행 전용 플레이키 이력이 있어 신규 테스트 종단의 안정성을 실측 없이 못 믿는다 |
 | 스텁 서버 포트 충돌·수명 누수로 연속 실행이 깨진다 | LOE-2 | 완화 — 포트 0 바인딩(OS 할당) + tearDown 종료를 DP-1.2 작전명령에 과업으로 박는다 | 고정 포트·수동 종료는 이 레포 DB 파일명 충돌 플레이키와 같은 부류의 실패다 |
 | 판정축 분리가 화면 억제 판정을 뒤집어 기존 유닛 테스트가 조용히 깨진다 | LOE-1 | 완화 — A-5 검증을 DP-1.1 완료 조건에 넣고, 15항이 `isTestBuild` 이름·동작 변경을 금지 | 소비처가 7곳이고 두 성격이 한 이름에 얹혀 있어 오분류 여지가 크다 |
+| gist `supportCountry` 실호출이 실패하면 국가가 안 정해져 홀리데이 요청 자체가 안 나가고 스모크가 깨진다 | LOE-2 | 수용 — 0항이 gist 실호출을 결심했고, 실패 시 스텁 미수신 로그로 원인이 즉시 드러난다 | `HolidayUsecaseImple.prepare` 가 로컬 저장 국가가 없을 때만 gist 를 타고, 청정화 때문에 e2e 는 항상 이 경로다 |
 
 **작전한계점** — 콜드스타트 스모크를 로컬에서 5회 연속 실행해 통과율이 5/5 가 아니거나 1회 실행이 3분을 넘으면, 종결 보고를 내지 않고 안정화에 집중한다(D-1). 지표: 연속 통과율, 1회 실행 소요.
 
