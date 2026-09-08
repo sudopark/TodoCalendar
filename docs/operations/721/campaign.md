@@ -82,7 +82,7 @@
 1. **분리선이 이미 그어져 있다.** 순수 뷰는 ViewModel 하나만 받고 WidgetKit 을 안 쓰며 `.sample` 까지 갖고 있다. `PreviewProvider` 와 `WidgetCatalogSnapshots` 가 이미 위젯 밖에서 그린다. 다만 뷰가 WidgetKit 코드와, ViewModel 이 Provider 와 한 파일에 있어서 먼저 쪼개야 한다.
 2. **확장이 Scene 프레임워크를 무는 길이 이미 뚫려 있다.** 확장이 `CalendarScenes` 를 문다. 그래서 순수 뷰를 담을 모듈을 따로 세우지 않아도 된다. 갤러리 Scene 과 같은 모듈에 두고 확장이 그걸 물면 끝이다.
 3. **표시 모델은 다섯 자리에만 있다.** `EventCellViewModel` 은 자기 파일에 있고(`Common/EventListCell/EventCellViewModel.swift`), 나머지 넷은 `Month/MonthViewModel.swift` 와 `Month/WeekEventStackBuilder.swift` 안에 섞여 있다. 파일 셋만 손대면 뽑힌다.
-4. **무손실을 증명할 파일럿이 있다.** D-day 는 `CalendarScenes` 를 안 물고, 이미 완성돼 있고, 스냅샷도 붙어 있다. 표시 모델을 건드리기 전에 이관 계약만 따로 검증할 수 있다.
+4. **무손실을 증명할 파일럿이 있다.** D-day 는 `CalendarScenes` 를 안 물고, 이미 완성돼 있고, 아직 노출도 안 됐다. 표시 모델을 건드리기 전에 이관 계약만 따로 검증할 수 있다. 다만 `WidgetCatalogSnapshots` 에 D-day 케이스가 없다 — 대조할 baseline 을 DP-1.1 이 먼저 찍는다.
 5. **미리보기 데이터가 대부분 있다.** `.sample` 팩토리가 8개다 — Foremost·EventList·NextEvent·NextRemain·WeekEvents·D-day·TodayAndNext·Today. 새로 만들 건 Composed 4종과 AICommand 뿐이다.
 6. **문자열은 안 깨진다.** `localized()` 가 `Extensions` 프레임워크의 `Bundle.module` 을 쓴다. 뷰를 어느 모듈로 옮겨도 위젯 문구는 그대로 찾아진다.
 
@@ -153,7 +153,7 @@ DP-1.1 이 정하고 DP-2.x·DP-5.1 이 따른다.
 
 지금은 배경을 순수 뷰 **바깥**에서 그린다. `ResultTimelineEntry.backgroundShape` 를 `.containerBackground(for: .widget)` 에 넘긴다. 이러면 갤러리 미리보기가 배경을 못 그린다. 미리보기와 실물이 달라 보이니 1단계부터 중심이 깨진다.
 
-그래서 배경·스타일 해석을 `WidgetScenes` 로 내리고 **순수 뷰가 자기 배경을 직접 그리게** 한다. 그러면 확장에서 `.containerBackground` 와 겹칠 수 있다. 컨테이너를 투명으로 둘지 같은 값을 넘길지는 DP-1.1 이 실제로 돌려보고 정해서 종결보고에 적는다. 정해진 답을 DP-2.x 가 그대로 반복한다.
+그래서 배경·스타일 **해석**(`Background` → `ShapeStyle`)을 `WidgetScenes` 로 내려 확장과 갤러리가 같은 코드를 부르게 한다. 적용하는 자리는 각자다 — 확장은 `.containerBackground(for: .widget)` 를 그대로 쓰고, 갤러리는 미리보기 프레임이 같은 shape 를 깐다. 순수 뷰 안에서 배경을 그리면 모서리 곡률·content margin·StandBy 렌더를 뷰가 떠안게 되고 확장 픽셀이 흔들린다. WidgetKit 이 `.containerBackground` 를 요구하기도 한다. **DP-1.1 이 이렇게 정했다** (2026-09-08 재가). DP-2.x·DP-5.1 이 그대로 반복한다.
 
 #### C3. 꾸미기 값을 어떻게 담고 흘리나
 
@@ -190,7 +190,7 @@ DP 번호 순으로 간다. 각 DP 의 base 는 바로 앞 DP 를 머지한 deve
 
 | DP | LOE | 단계 | 산출물 | 선행 DP | 소유 범위 (모듈·파일) | 사이즈 |
 |---|---|---|---|---|---|---|
-| DP-1.1 | LOE-1 | 1 | `Presentations/WidgetScenes` 프레임워크를 세운다. `DDayWidget.swift` 와 `DDayWidgetViewModelProvider.swift` 를 C1 대로 쪼개 순수 뷰 5개·ViewModel·`.sample` 을 옮기고 `public` 을 연다. 확장이 `WidgetScenes` 를 물게 배선한다. C2 의 배경 겹침을 정리한다. 스냅샷 import 경로를 바꾸고 이관 전후 이미지를 대조한다 | — | `Presentations/WidgetScenes/**`(신규), `Widget/Sources/Widgets/DDayWidget/**`, `Widget/Snapshots/WidgetCatalogSnapshots.swift`, `Workspace.swift`, `TodoCalendarApp/Project.swift`, 스킴 하드코딩(`pr_test.yml`·`run-all-tests.sh`·`impact-check.sh`+테스트·run-tests 스킬) | M |
+| DP-1.1 | LOE-1 | 1 | `Presentations/WidgetScenes` 프레임워크를 세운다. `DDayWidget.swift` 와 `DDayWidgetViewModelProvider.swift` 를 C1 대로 쪼개 순수 뷰 5개·ViewModel·`.sample` 을 옮기고 `public` 을 연다. 확장이 `WidgetScenes` 를 물게 배선한다. C2 의 배경 겹침을 정리한다. 스냅샷 import 경로를 바꾸고 이관 전후 이미지를 대조한다 | — | `Presentations/WidgetScenes/**`(신규), `Widget/Sources/Widgets/DDayWidget/**`, `Widget/Sources/Intents/DDayTargetSelectIntent.swift`(포맷터 이동), `Widget/Snapshots/WidgetCatalogSnapshots.swift`, `Workspace.swift`, `TodoCalendarApp/Project.swift`, 스킴 하드코딩(`pr_test.yml`·`run-all-tests.sh`·`impact-check.sh`+테스트·run-tests 스킬) | M |
 | DP-2.1 | LOE-1 | 2 | `Presentations/CalendarPresentation` 프레임워크를 세우고 표시 모델 6종을 옮긴다. `EventCellViewModel` 은 파일째, 나머지 넷은 `MonthViewModel.swift`·`WeekEventStackBuilder.swift` 에서 떼어낸다. `CalendarScenes` 가 새 모듈을 물게 바꾼다. 캘린더·이벤트 목록 화면 동작은 안 바뀐다 | DP-1.1 | `Presentations/CalendarPresentation/**`(신규), `Presentations/CalendarScenes/Sources/{Common/EventListCell,Month}`, `CalendarScenes/Project.swift`, `Workspace.swift`, 스킴 하드코딩 | M |
 | DP-2.2 | LOE-1 | 2 | 단일 위젯군 순수 뷰를 `WidgetScenes` 로 옮긴다 — AICommand·Today·Foremost·NextEvent·NextRemain·TodayAndNext. C1 의 쪼개는 자리 둘을 그대로 적용한다 | DP-2.1 | `Presentations/WidgetScenes/**`, `Widget/Sources/Widgets/{AICommandWidget,TodayWidget,ForemostWidget,NextEventWidget,TodayAndNext}`, `Widget/Snapshots/` | M |
 | DP-2.3 | LOE-1 | 2 | 복합 위젯군 순수 뷰를 옮긴다 — Month·WeekEvents·EventList·Composed 4종. 마지막에 확장 의존에서 `CalendarScenes` 를 뗀다 | DP-2.2 | `Presentations/WidgetScenes/**`, `Widget/Sources/Widgets/{MonthWidget,WeekEventsWidget,EventListWidget,ComposedWidget}`, `Widget/Sources/{Usecases,Base+Factory,Intents}`, `TodoCalendarApp/Project.swift`, `Widget/Tests/**` | M |
