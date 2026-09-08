@@ -11,6 +11,12 @@ import Repository
 
 struct AppEnvironment {
     
+    private enum Constant {
+        static let e2eRunMarkerFileName: String = "e2e-run.marker"
+        // 1회 실행이 67초라 한 실행을 충분히 덮으면서, 잔존 시 오염 창을 짧게 남긴다
+        static let e2eRunMarkerTTL: TimeInterval = 600
+    }
+    
     static var useEmulator: Bool { false }
     
     static var isTestBuild: Bool {
@@ -28,11 +34,57 @@ struct AppEnvironment {
     }
     
     static var isExternalDependencyBlocked: Bool {
-        return self.isTestBuild || self.isUITestRun
+        return self.isTestBuild || self.isUITestRun || self.isE2ERunMarked
     }
     
     // 포트 1은 예약 포트라 즉시 refuse — 타임아웃 대기가 없다
     static var blockedAPIHost: String { "http://127.0.0.1:1" }
+    
+    static var e2eLaunchAPIHost: String? {
+        return ProcessInfo.processInfo.environment["E2E_API_HOST"]
+    }
+    
+    // 확장 프로세스는 실행 인자·환경변수를 못 받아 마커 파일이 유일한 인지 수단이다
+    static var isE2ERunMarked: Bool {
+        return self.e2eRunMarker?.isValid(at: Date()) == true
+    }
+    
+    private static var e2eMarkedAPIHost: String? {
+        guard let marker = self.e2eRunMarker, marker.isValid(at: Date()) else { return nil }
+        return marker.host
+    }
+    
+    // 캐싱하면 앱보다 먼저 뜬 확장이 뒤늦게 생긴 마커를 영영 못 본다 (실측: 위젯이 1초 앞선다)
+    private static var e2eRunMarker: E2ERunMarker? {
+#if DEBUG
+        guard let url = self.e2eRunMarkerURL,
+              let data = try? Data(contentsOf: url)
+        else { return nil }
+        return E2ERunMarker(data: data)
+#else
+        return nil
+#endif
+    }
+    
+    private static var e2eRunMarkerURL: URL? {
+        return FileManager.default
+            .containerURL(forSecurityApplicationGroupIdentifier: self.groupID)?
+            .appending(path: Constant.e2eRunMarkerFileName)
+    }
+    
+    static func writeE2ERunMarker(host: String) {
+        guard let url = self.e2eRunMarkerURL else { return }
+        let marker = E2ERunMarker(
+            host: host,
+            expiresAt: Date().addingTimeInterval(Constant.e2eRunMarkerTTL)
+        )
+        try? marker.encoded().write(to: url, options: .atomic)
+    }
+    
+    static func removeE2ERunMarker() {
+        guard let url = self.e2eRunMarkerURL else { return }
+        try? FileManager.default.removeItem(at: url)
+    }
     
     private static var dbFileName: String {
         if self.isExternalDependencyBlocked {
