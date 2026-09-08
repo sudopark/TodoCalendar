@@ -6,24 +6,25 @@
 //
 
 import XCTest
+import Scenes
 
 
-final class AppLaunchE2ETests: XCTestCase {
+final class AppLaunchE2ETests: E2ETestCase {
     
-    override func setUp() {
-        super.setUp()
-        self.continueAfterFailure = false
-    }
-    
-    func test_whenLaunchAsUITestRun_appShowsRootWindow() {
+    func test_whenColdLaunchWithStubbedHolidays_calendarGridRendersFromStub() {
         // given
-        let app = XCUIApplication()
-        app.launchArguments += ["-uiTest"]
+        let holidayName = "e2e-holiday-\(UUID().uuidString.prefix(8))"
+        self.stubServer.register(
+            path: "/v2/holiday",
+            json: E2EFixture().holidaysJSON(named: holidayName, on: Date())
+        )
         
         // when
-        app.launch()
+        let app = self.launchApp()
         
         // then
-        XCTAssertTrue(app.windows.firstMatch.waitForExistence(timeout: 30))
+        let monthGrid = app.otherElements[AccessibilityID.CalendarScene.monthGrid]
+        XCTAssertTrue(monthGrid.waitForExistence(timeout: 30))
+        self.waitStubReceives(path: "/v2/holiday", timeout: 30)
     }
 }
