@@ -143,9 +143,10 @@ DP-1.1 이 이 선을 긋고, DP-2.x 가 나머지 위젯에 반복 적용한다
 - **`WidgetScenes` 는 `CalendarScenes` 를 안 문다.** 물어야 할 것 같으면 그건 아직 안 뽑은 표시 모델이 있다는 뜻이다. 몰래 import 하지 말고 DP-2.1 로 되돌려 뽑는다.
 - `WidgetScenes` 는 WidgetKit 도 안 문다. 순수 뷰가 WidgetKit 을 쓰기 시작하면 앱에서 그릴 수 없게 되고 갤러리가 죽는다.
 - 확장은 최종적으로 `WidgetScenes` 만 문다. `CalendarScenes` 의존은 DP-2.3 에서 뗀다.
+- **`WidgetScenes` 는 DP-4.1 전까지 `Scenes` 도 안 문다.** 지금 물리면 확장 링크 표면에 `UIApplication.shared`(`Scenes/BaseComponents.swift:125`)가 다시 들어와 DP-2.3 의 의존 정리 효과가 반감된다. 갤러리 Scene 프로토콜이 필요한 DP-4.1 이 그때 추가한다.
 - **쪼개는 자리가 둘이다.** 뷰 파일은 순수 뷰 / 엔트리 뷰·`Widget` 선언으로, Provider 파일은 ViewModel·`.sample` / Provider 로 가른다. 앞엣것이 `WidgetScenes` 로 가고 뒤엣것이 확장에 남는다.
 - 옮기는 타입은 `public` 이 되고 `public init` 을 연다. 지금은 internal 이고 `WidgetCatalogSnapshots` 이 `@testable import TodoCalendarAppWidget` 으로 본다. 이관하면 그 경로가 끊기므로 스냅샷도 `import WidgetScenes` 로 바꾼다.
-- 순수 뷰 생성자는 `init(model:style:)` 하나로 맞춘다. 엔트리 뷰든 갤러리 미리보기든 같은 걸 부른다. `style` 은 DP-5.1 전까지 기본값을 받는다.
+- 순수 뷰 생성자는 최종적으로 `init(model:style:)` 하나로 맞춘다. 엔트리 뷰든 갤러리 미리보기든 같은 걸 부른다. **DP-5.1 전까지는 `init(model:)` 이다** — `WidgetStyle` 이 DP-5.1 산출물이라 미리 만들면 소비자 없는 간접층이 된다 (DP-1.1 확인보고에서 재가).
 
 #### C2. 배경을 어디서 그리나
 
@@ -204,7 +205,7 @@ DP 번호 순으로 간다. 각 DP 의 base 는 바로 앞 DP 를 머지한 deve
 
 | ID | 가정 | 검증 방법 | 깨지면 |
 |---|---|---|---|
-| A1 | 순수 뷰를 `WidgetScenes` 로 옮겨도 확장이 그리는 모양이 안 바뀐다. C2 대로 배경 그리는 자리를 옮기는 것까지 포함해서다 | DP-1.1 에서 D-day 로 먼저 확인하고, DP-2.2·2.3 에서 위젯군마다 스냅샷을 대조한다 | 배경은 확장에 남기고 갤러리는 미리보기용 배경을 따로 그린다. 중심이 약해지므로 즉시보고한다 |
+| A1 | 순수 뷰를 `WidgetScenes` 로 옮겨도 확장이 그리는 모양이 안 바뀐다. C2 대로 배경 그리는 자리를 옮기는 것까지 포함해서다 | **DP-1.1 에서 확인됨** (2026-09-08, PR #1058 — D-day 5패밀리 png 무변화). DP-2.2·2.3 에서 위젯군마다 스냅샷을 대조한다 | 배경은 확장에 남기고 갤러리는 미리보기용 배경을 따로 그린다. 중심이 약해지므로 즉시보고한다 |
 | A2 | 표시 모델 6종을 `CalendarPresentation` 으로 옮겨도 `CalendarScenes`·`EventListScenes` 동작이 안 바뀐다 | DP-2.1 착수 전에 참조하는 곳을 다 세고, 두 스킴 테스트로 확인한다 | 2단계를 하위 캠페인으로 올린다 |
 | A3 | 확장의 `CalendarScenes` 참조가 표시 모델뿐이라, 뽑고 나면 의존을 뗄 수 있다 | DP-2.1 에서 확장의 45파일 참조를 표시 모델 / 그 외로 분류한다. `CalendarEventFetchUsecase`·`WidgetLink+Extensions`·`DDayTargetSelectIntent` 를 특히 본다 | 표시 모델 외에 뽑을 게 더 있으면 DP-2.1 범위를 넓힌다. 못 뗄 정도면 확장의 `CalendarScenes` 의존을 남긴 채 간다 — 갤러리는 그래도 선다 |
 | A4 | 조정 4축을 environment + 공통 modifier 로 걸면 위젯 21종에 다 먹는다 | DP-5.1 에서 프리셋을 그렇게 걸어보고 위젯군마다 확인한다 | 축별로 뷰가 직접 받는 자리를 만든다. DP-5.2 를 위젯군별로 쪼개는 계획 개정으로 간다 |
