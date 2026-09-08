@@ -17,6 +17,7 @@ import TestDoubles
 import CommonPresentation
 
 @testable import CalendarScenes
+import CalendarPresentation
 
 
 class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {

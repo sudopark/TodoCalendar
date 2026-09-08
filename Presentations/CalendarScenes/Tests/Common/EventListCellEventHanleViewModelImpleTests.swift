@@ -18,6 +18,7 @@ import UnitTestHelpKit
 import TestDoubles
 
 @testable import CalendarScenes
+import CalendarPresentation
 
 class EventListCellEventHanleViewModelImpleTests: BaseTestCase, PublisherWaitable {
     

@@ -14,6 +14,7 @@ import UnitTestHelpKit
 import TestDoubles
 
 @testable import CalendarScenes
+import CalendarPresentation
 
 
 class MonthViewModelImpleTests: BaseTestCase, PublisherWaitable {

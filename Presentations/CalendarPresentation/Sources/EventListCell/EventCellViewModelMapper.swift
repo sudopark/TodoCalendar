@@ -1,6 +1,6 @@
 //
 //  EventCellViewModelMapper.swift
-//  CalendarScenes
+//  CalendarPresentation
 //
 //  Created by sudo.park on 8/17/26.
 //  Copyright © 2026 com.sudo.park. All rights reserved.
@@ -9,13 +9,19 @@
 import Foundation
 
 
-struct EventCellViewModelMapper {
+public struct EventCellViewModelMapper {
 
-    let range: Range<TimeInterval>
-    let timeZone: TimeZone
-    let is24hourForm: Bool
+    public let range: Range<TimeInterval>
+    public let timeZone: TimeZone
+    public let is24hourForm: Bool
 
-    func cellViewModel(from event: any CalendarEvent) -> (any EventCellViewModel)? {
+    public init(range: Range<TimeInterval>, timeZone: TimeZone, is24hourForm: Bool) {
+        self.range = range
+        self.timeZone = timeZone
+        self.is24hourForm = is24hourForm
+    }
+
+    public func cellViewModel(from event: any CalendarEvent) -> (any EventCellViewModel)? {
         switch event {
         case let todo as TodoCalendarEvent:
             return TodoEventCellViewModel(todo, in: self.range, self.timeZone, self.is24hourForm)
@@ -36,7 +42,7 @@ struct EventCellViewModelMapper {
         }
     }
 
-    func cellViewModels(from events: [any CalendarEvent]) -> [any EventCellViewModel] {
+    public func cellViewModels(from events: [any CalendarEvent]) -> [any EventCellViewModel] {
         return events.compactMap(self.cellViewModel(from:))
     }
 }

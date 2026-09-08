@@ -1,6 +1,6 @@
 //
 //  WeekEventStackBuilderTests.swift
-//  CalendarScenesTests
+//  CalendarPresentationTests
 //
 //  Created by sudo.park on 2023/07/07.
 //
@@ -10,9 +10,10 @@ import Domain
 import Prelude
 import Optics
 import UnitTestHelpKit
+import TestDoubles
 import CommonPresentation
 
-@testable import CalendarScenes
+@testable import CalendarPresentation
 
 
 class WeekEventStackBuilderTests: BaseTestCase {

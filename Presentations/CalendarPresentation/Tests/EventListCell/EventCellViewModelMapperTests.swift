@@ -1,6 +1,6 @@
 //
 //  EventCellViewModelMapperTests.swift
-//  CalendarScenesTests
+//  CalendarPresentationTests
 //
 //  Created by sudo.park on 8/17/26.
 //  Copyright © 2026 com.sudo.park. All rights reserved.
@@ -10,7 +10,7 @@ import Testing
 import Foundation
 import Domain
 
-@testable import CalendarScenes
+@testable import CalendarPresentation
 
 
 final class EventCellViewModelMapperTests {

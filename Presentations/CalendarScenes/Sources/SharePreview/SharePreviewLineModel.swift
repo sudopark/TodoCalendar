@@ -9,6 +9,7 @@
 import Foundation
 import Domain
 import Extensions
+import CalendarPresentation
 
 
 struct SharePreviewLineModel: Equatable, Sendable, Identifiable {

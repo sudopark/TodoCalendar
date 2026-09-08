@@ -12,6 +12,7 @@ import Optics
 import Domain
 import Extensions
 import CommonPresentation
+import CalendarPresentation
 
 
 struct ForemostEventView: View {

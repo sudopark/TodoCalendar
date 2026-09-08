@@ -8,6 +8,8 @@ let project = Project.frameworkWithTest(name: "CalendarScenes",
                                         dependencies: [
                                             .project(target: "Common3rdParty",
                                                      path: .relativeToRoot("Supports/Common3rdParty")),
+                                            .project(target: "CalendarPresentation",
+                                                     path: .relativeToRoot("Presentations/CalendarPresentation")),
                                             .project(target: "CommonPresentation",
                                                      path: .relativeToRoot("Presentations/CommonPresentation")),
                                             .project(target: "Domain",
