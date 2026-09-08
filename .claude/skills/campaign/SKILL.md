@@ -11,7 +11,7 @@ description: Use when planning or evaluating multi-PR work (L·XL) — kickoff �
 
 - 진입은 양방향 — kickoff 사이즈 판정(L·XL)의 위임, 또는 유저의 직접 호출. **kickoff 가 안 돌았으면 먼저 invoke 한다** (정찰은 kickoff 소관 — 여기서 중복 구현하지 않는다).
 - 분해 브리프는 이 계획이 갈음한다 — 9항 DP 목록이 리스트업이고, 미결 목록이 "미분해 잔여"다.
-- 계획 파일은 `docs/operations/<상위이슈>/campaign.md` 로 커밋한다. 이슈 본문 = 이 파일 전문 + `<!-- progress -->` 블록 (§5).
+- 계획 파일은 `docs/operations/<상위이슈>/campaign.md` 로, **재가 시점에 develop 에 바로 커밋한다** — PR 도 안 만들고 DP 브랜치 base 로도 쓰지 않는다. 계획을 브랜치에 묶어두면 그 브랜치가 DP 전부를 받는 장수 integration 브랜치가 돼 캠페인이 끝날 때까지 develop 이 아무것도 못 받는다. DP base 는 orchestrate §3-1 대로 develop 또는 앞 DP 브랜치다. 이슈 본문 = 이 파일 전문 + `<!-- progress -->` 블록 (§5).
 - **해상도 경계 — campaign 은 DP 수준까지만 다룬다.** branch 도 "DP 재배열·대체·범위 축소"까지다. 태스크 수준 결정지점·우발계획은 opord 소관 — 그 아래로 내려가면 opord 를 복제하며 비대해진다.
 
 **L 실행 루프** — 이 스킬은 루프의 양 끝(계획·평가)만 맡는다:
@@ -47,7 +47,7 @@ M 은 kickoff → opord → implement → pr, S 는 kickoff → 구두지시 →
 
 ## 3. XL 전략 모드
 
-캠페인 둘 이상이 한 목적을 공유하면 `docs/operations/templates/strategy.md` **전 항목**을 채워 `docs/operations/<이슈>/strategy.md` 로 커밋한다 — 작성 모드 절차를 전략 고도로 그대로 적용한다: 질문(목적 → 최종상태 → 종결·중단 → 수단·제한·ends-ways-means-risk 정합 → 위임 → 캠페인 목록·배열 → 가정·위험·한계점 → 결정지점 → 평가), 캠페인 배열이 갈리면 COA 비교, 초안 후 워게임(캠페인 배열 순서로 걸어보며 전략 가정·위험이 10항 결정지점에 흡수되는지). 캠페인 내부(LOE·DP)로는 내려가지 않는다 — 그건 각 campaign.md 소관이다. 각 캠페인의 campaign.md 는 0항에 이 문서를 인용한다.
+캠페인 둘 이상이 한 목적을 공유하면 `docs/operations/templates/strategy.md` **전 항목**을 채워 `docs/operations/<이슈>/strategy.md` 로 커밋한다 (§1 대로 develop 직접) — 작성 모드 절차를 전략 고도로 그대로 적용한다: 질문(목적 → 최종상태 → 종결·중단 → 수단·제한·ends-ways-means-risk 정합 → 위임 → 캠페인 목록·배열 → 가정·위험·한계점 → 결정지점 → 평가), 캠페인 배열이 갈리면 COA 비교, 초안 후 워게임(캠페인 배열 순서로 걸어보며 전략 가정·위험이 10항 결정지점에 흡수되는지). 캠페인 내부(LOE·DP)로는 내려가지 않는다 — 그건 각 campaign.md 소관이다. 각 캠페인의 campaign.md 는 0항에 이 문서를 인용한다.
 
 - 원장: `.operations/<이슈>/strategy-progress.md` — `<!-- progress -->` 헤딩 + 캠페인 원장 표(strategy.md 템플릿 12항 서식). 갱신 시점은 캠페인 착수·종결 — 종결 판정은 §4 평가 모드(캠페인 종결)가 맡는다.
 - 이슈 본문 = strategy.md 전문 + progress 블록 — 재조립 규칙은 §5 와 같다.
