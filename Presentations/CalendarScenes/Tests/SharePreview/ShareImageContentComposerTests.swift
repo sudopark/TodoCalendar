@@ -14,6 +14,7 @@ import Domain
 import Extensions
 
 @testable import CalendarScenes
+import CalendarPresentation
 
 
 final class ShareImageContentComposerTests {

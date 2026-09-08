@@ -11,6 +11,7 @@ import Foundation
 import Combine
 import Domain
 import Scenes
+import CalendarPresentation
 
 
 // MARK: - CalendarPaperViewModel

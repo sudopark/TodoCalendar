@@ -1,6 +1,6 @@
 //
 //  EventCellViewModel.swift
-//  CalendarScenes
+//  CalendarPresentation
 //
 //  Created by sudo.park on 2023/09/17.
 //
@@ -42,7 +42,7 @@ public enum EventPeriodText: Equatable, Sendable {
     case singleText(_ text: EventTimeText)
     case doubleText(_ topText: EventTimeText, _ bottomText: EventTimeText)
     
-    static var currentTodoText: EventPeriodText {
+    public static var currentTodoText: EventPeriodText {
         return .singleText(.init(text: R.String.calendarEventTimeTodo))
     }
     
@@ -157,8 +157,13 @@ public enum EventListMoreAction: Sendable, Equatable {
 }
 
 public struct EventListMoreActionModel: Sendable, Equatable {
-    let basicActions: [EventListMoreAction]
-    let removeActions: [EventListMoreAction]
+    public let basicActions: [EventListMoreAction]
+    public let removeActions: [EventListMoreAction]
+
+    public init(basicActions: [EventListMoreAction], removeActions: [EventListMoreAction]) {
+        self.basicActions = basicActions
+        self.removeActions = removeActions
+    }
 }
 
 // MARK: - EventCellViewModel
@@ -291,35 +296,35 @@ public struct TodoEventCellViewModel: EventCellViewModel {
     }
 }
 
-struct PendingTodoEventCellViewModel: EventCellViewModel {
+public struct PendingTodoEventCellViewModel: EventCellViewModel {
 
-    let eventIdentifier: String
-    var colorSource: any EventTagColorSource
-    let name: String
-    var periodText: EventPeriodText? = .singleText(
+    public let eventIdentifier: String
+    public var colorSource: any EventTagColorSource
+    public let name: String
+    public var periodText: EventPeriodText? = .singleText(
         .init(text: R.String.calendarEventTimeTodo)
     )
-    var periodDescription: String?
-    let isRepeating: Bool = false
-    let isForemost: Bool = false
-    let isAlldayEvent: Bool = false
+    public var periodDescription: String?
+    public let isRepeating: Bool = false
+    public let isForemost: Bool = false
+    public let isAlldayEvent: Bool = false
 
-    init(name: String, defaultTagId: String?) {
+    public init(name: String, defaultTagId: String?) {
         self.eventIdentifier = "pending:\(UUID().uuidString)"
         self.name = name
         self.colorSource = defaultTagId.map { EventTagId.custom($0) } ?? EventTagId.default
     }
 
-    var moreActions: EventListMoreActionModel? { nil }
+    public var moreActions: EventListMoreActionModel? { nil }
 
-    var customCompareKey: String { self.makeCustomCompareKey([]) }
+    public var customCompareKey: String { self.makeCustomCompareKey([]) }
 }
 
 public struct GuideTodoEventCellViewModel: EventCellViewModel {
 
     /// private이 아닌 이유 — 이 식별자가 셀 타입과 완료 처리기 사이의 계약이다.
-    enum Constant {
-        static let identifier: String = "guide-todo"
+    public enum Constant {
+        public static let identifier: String = "guide-todo"
     }
 
     public let eventIdentifier: String = Constant.identifier
@@ -672,7 +677,7 @@ private extension Range where Bound == TimeInterval {
 
 extension Range where Bound == TimeInterval {
 
-    func checkTodayRangeBound(_ time: EventTime, timeZone: TimeZone) -> (
+    public func checkTodayRangeBound(_ time: EventTime, timeZone: TimeZone) -> (
         isAllTodayTimeContains: Bool,
         starttimeInToday: Bool,
         endTimeInToday: Bool

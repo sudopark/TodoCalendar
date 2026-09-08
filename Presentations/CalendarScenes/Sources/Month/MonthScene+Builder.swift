@@ -8,6 +8,7 @@
 import Foundation
 import Domain
 import Scenes
+import CalendarPresentation
 
 
 // MARK: CurrentSelectedDay and Event components

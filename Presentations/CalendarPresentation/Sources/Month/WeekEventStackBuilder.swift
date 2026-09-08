@@ -1,6 +1,6 @@
 //
 //  WeekEventStackBuilder.swift
-//  CalendarScenes
+//  CalendarPresentation
 //
 //  Created by sudo.park on 2023/07/05.
 //
@@ -26,7 +26,7 @@ public struct EventOnWeek: Equatable {
     public var hasPeriod: Bool { self.event.eventTimeOnCalendar?.isPeriod == true }
     public var isHoliday: Bool { self.event is HolidayCalendarEvent }
     
-    var eventStartDayIdentifierOnWeek: String? { self.daysIdentifiers.first }
+    public var eventStartDayIdentifierOnWeek: String? { self.daysIdentifiers.first }
     
     fileprivate var length: Int { self.overlapDays.count }
     

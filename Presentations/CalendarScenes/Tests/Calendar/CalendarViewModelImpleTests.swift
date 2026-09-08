@@ -16,6 +16,7 @@ import TestDoubles
 import UnitTestHelpKit
 
 @testable import CalendarScenes
+import CalendarPresentation
 
 
 class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable, AsyncEffectWaitable {

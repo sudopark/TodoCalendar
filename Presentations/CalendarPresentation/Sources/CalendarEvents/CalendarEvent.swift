@@ -1,6 +1,6 @@
 //
 //  CalendarEvent.swift
-//  CalendarScenes
+//  CalendarPresentation
 //
 //  Created by sudo.park on 10/14/23.
 //
@@ -156,6 +156,30 @@ public struct ScheduleCalendarEvent: CalendarEvent {
     public var isForemost: Bool = false
     // TODO: locationText 세팅 필요
     public var locationText: String?
+
+    public init(
+        eventIdWithoutTurn: String,
+        eventId: String,
+        name: String,
+        eventTime: EventTime?,
+        eventTimeOnCalendar: EventTimeOnCalendar?,
+        eventTagId: EventTagId,
+        turn: Int = 0,
+        isRepeating: Bool,
+        isForemost: Bool = false,
+        locationText: String? = nil
+    ) {
+        self.eventIdWithoutTurn = eventIdWithoutTurn
+        self.eventId = eventId
+        self.name = name
+        self.eventTime = eventTime
+        self.eventTimeOnCalendar = eventTimeOnCalendar
+        self.eventTagId = eventTagId
+        self.turn = turn
+        self.isRepeating = isRepeating
+        self.isForemost = isForemost
+        self.locationText = locationText
+    }
     
     public static func events(
         from schedule: ScheduleEvent,

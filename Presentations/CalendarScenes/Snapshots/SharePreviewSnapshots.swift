@@ -17,6 +17,7 @@ import Extensions
 import SnapshotTestHelpKit
 
 @testable import CalendarScenes
+import CalendarPresentation
 
 
 final class SharePreviewSnapshots: XCTestCase {

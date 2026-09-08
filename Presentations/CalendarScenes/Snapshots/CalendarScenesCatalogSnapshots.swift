@@ -17,6 +17,7 @@ import CommonPresentation
 import SnapshotTestHelpKit
 
 @testable import CalendarScenes
+import CalendarPresentation
 
 
 final class CalendarScenesCatalogSnapshots: XCTestCase {
