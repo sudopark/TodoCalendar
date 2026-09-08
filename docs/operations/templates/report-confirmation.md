@@ -1,4 +1,4 @@
-# 확인보고 (Confirmation Brief) — 작전명령 서두
+# 확인보고 (Confirmation Brief) — 작업 지침 서두
 
 게시: 이슈 봇 코멘트(github-reviewer 계정 — 유저 알림용) + `@sudopark` 멘션 — 재가 대기
 
