@@ -269,5 +269,6 @@ let project = Project.app(
                 )
             )
         )
-    ]
+    ],
+    e2eTests: true
 )

@@ -15,9 +15,10 @@ extension Project {
         iOSTargetVersion: String,
         dependencies: [TargetDependency] = [],
         extensionTargets: [Target] = [],
-        schemes: [Scheme] = []
+        schemes: [Scheme] = [],
+        e2eTests: Bool = false
     ) -> Project {
-        let targets = makeAppTargets(
+        var targets = makeAppTargets(
             name: name,
             destinations: destinations,
             iOSTargetVersion: iOSTargetVersion,
@@ -33,6 +34,15 @@ extension Project {
                 )
             ]
         )
+        if e2eTests {
+            targets.append(
+                makeE2ETarget(
+                    name: name,
+                    destinations: destinations,
+                    iOSTargetVersion: iOSTargetVersion
+                )
+            )
+        }
         return Project(
             name: name,
             organizationName: organizationName,
@@ -128,6 +138,24 @@ extension Project {
                                 .target(name: name),
                                 .project(target: "SnapshotTestHelpKit", path: .relativeToRoot("Supports/SnapshotTestHelpKit")),
                                 .project(target: "TestDoubles", path: .relativeToRoot("Supports/TestDoubles")),
+                             ])
+    }
+
+    private static func makeE2ETarget(
+        name: String,
+        destinations: Destinations,
+        iOSTargetVersion: String
+    ) -> Target {
+        return Target.target(name: "\(name)E2E",
+                             destinations: destinations,
+                             product: .uiTests,
+                             bundleId: "\(organizationName).\(name)E2E",
+                             deploymentTargets: .iOS(iOSTargetVersion),
+                             infoPlist: .default,
+                             sources: ["E2E/**"],
+                             resources: [],
+                             dependencies: [
+                                .target(name: name)
                              ])
     }
 
