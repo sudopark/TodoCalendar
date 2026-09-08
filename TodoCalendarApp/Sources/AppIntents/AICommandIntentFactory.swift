@@ -21,18 +21,24 @@ struct AICommandIntentFactory {
 
     init() {
         let environmentStorage = UserDefaultEnvironmentStorageImple(
-            suiteName: AppEnvironment.groupID
+            suiteName: AppEnvironment.userDefaultSuiteName
         )
         let keyChainStorage = KeyChainStorageImple(
             identifier: AppEnvironment.keyChainStoreName
         )
         keyChainStorage.setupSharedGroup(AppEnvironment.groupID)
 
-        let firebaseAuthService = FirebaseAuthServiceImple(
-            appGroupId: AppEnvironment.groupID,
-            useEmulator: AppEnvironment.useEmulator
-        )
-        try? firebaseAuthService.setup()
+        let firebaseAuthService: any FirebaseAuthService = {
+            if AppEnvironment.isExternalDependencyBlocked {
+                return DummyFirebaseAuthService()
+            }
+            let service = FirebaseAuthServiceImple(
+                appGroupId: AppEnvironment.groupID,
+                useEmulator: AppEnvironment.useEmulator
+            )
+            try? service.setup()
+            return service
+        }()
 
         self.environmentStorage = environmentStorage
         self.authStore = AuthStoreImple(
@@ -81,9 +87,7 @@ extension AICommandIntentFactory {
             ) as? [String: Any]) ?? [:]
         }
         let secrets = readSecret()
-        let host = AppEnvironment.useEmulator
-            ? secrets["emulator_caleandar_api_host"] as? String
-            : secrets["caleandar_api_host"] as? String
+        let host = AppEnvironment.calendarAPIHost(secrets: secrets)
         let environment = RemoteEnvironment(
             calendarAPIHost: host ?? "https://dummy.com",
             csAPI: secrets["cs_api"] as? String ?? "https://dummy.com",
