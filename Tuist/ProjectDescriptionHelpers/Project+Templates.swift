@@ -153,9 +153,10 @@ extension Project {
                              deploymentTargets: .iOS(iOSTargetVersion),
                              infoPlist: .default,
                              sources: ["E2E/**"],
-                             resources: [],
+                             resources: ["E2E/Fixtures/**/*.json"],
                              dependencies: [
-                                .target(name: name)
+                                .target(name: name),
+                                .project(target: "Scenes", path: .relativeToRoot("Presentations/Scenes")),
                              ])
     }
 

@@ -1,0 +1,9 @@
+{
+  "items": [
+    {
+      "id": "e2e-holiday",
+      "summary": "{{NAME}}",
+      "start": { "date": "{{DATE}}" }
+    }
+  ]
+}
