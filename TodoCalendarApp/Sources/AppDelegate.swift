@@ -27,6 +27,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         logger.prepare()
         #endif
         
+        self.syncE2ERunMarker()
         self.resetStateForUITestRunIfNeeded()
         
         if AppEnvironment.isExternalDependencyBlocked == false {
@@ -63,6 +64,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 // MARK: - reset state for ui test
 
 extension AppDelegate {
+    
+    // 잔존 마커를 걷는 것이 아래 격리 축 판정보다 앞이어야 지난 실행이 이번 실행을 오염시키지 않는다
+    fileprivate func syncE2ERunMarker() {
+#if DEBUG
+        guard AppEnvironment.isUITestRun else {
+            // 일반 실행이 잔존 마커를 걷는다 — 만료 시각과 함께 fail-safe 를 이룬다
+            AppEnvironment.removeE2ERunMarker()
+            return
+        }
+        guard let host = AppEnvironment.e2eLaunchAPIHost else { return }
+        AppEnvironment.writeE2ERunMarker(host: host)
+#endif
+    }
     
     // ApplicationBase 가 UserDefaults 를 읽어 잡으므로 루트 조립보다 앞이어야 한다
     fileprivate func resetStateForUITestRunIfNeeded() {
