@@ -3,7 +3,7 @@
 > 용어 — DP: 결정적 지점(작전명령 하나 = PR 하나) · LOE: 노력선(최종상태 한 관점을 담당하는 줄기) · FRAGO: 단편명령 · MOP / MOE: 과업 수행 여부 / 효과 발생 여부 · PIR / FFIR: 즉시보고 조건 중 환경·외부 정보 / 아군·내부 정보
 
 ```
-작전계획 — #721 프리미엄 위젯 팩        작성: 유저   개정:
+작전계획 — #721 프리미엄 위젯 팩        작성: 유저   개정: 2026-09-09 (DP-2.2·DP-2.3 병합)
 ```
 
 ## 0. 전략 지침
@@ -121,7 +121,7 @@
 
 | | 1 파일럿 | 2 매듭 풀기 | 3 라인업 | 4 그릇 | 5 깊이 | 6 노출 |
 |---|---|---|---|---|---|---|
-| LOE-1 공유 뷰 층 | DP-1.1 | DP-2.1 · DP-2.2 · DP-2.3 | — | (DP-4.1 이 겸한다) | — | — |
+| LOE-1 공유 뷰 층 | DP-1.1 | DP-2.1 · DP-2.2 | — | (DP-4.1 이 겸한다) | — | — |
 | LOE-2 라인업 | — | — | DP-3.1 | — | — | DP-6.1 |
 | LOE-3 꾸미기 | — | — | — | DP-4.1 | DP-5.1 · DP-5.2 | — |
 
@@ -142,8 +142,8 @@ DP-1.1 이 이 선을 긋고, DP-2.x 가 나머지 위젯에 반복 적용한다
 - 의존 방향은 `WidgetScenes → CalendarPresentation` 이고 `CalendarScenes → CalendarPresentation` 이다. `WidgetScenes` 와 `CalendarScenes` 는 서로 안 문다.
 - **`WidgetScenes` 는 `CalendarScenes` 를 안 문다.** 물어야 할 것 같으면 그건 아직 안 뽑은 표시 모델이 있다는 뜻이다. 몰래 import 하지 말고 DP-2.1 로 되돌려 뽑는다.
 - `WidgetScenes` 는 WidgetKit 도 안 문다. 순수 뷰가 WidgetKit 을 쓰기 시작하면 앱에서 그릴 수 없게 되고 갤러리가 죽는다.
-- 확장은 최종적으로 `WidgetScenes` 만 문다. `CalendarScenes` 의존은 DP-2.3 에서 뗀다.
-- **`WidgetScenes` 는 DP-4.1 전까지 `Scenes` 도 안 문다.** 지금 물리면 확장 링크 표면에 `UIApplication.shared`(`Scenes/BaseComponents.swift:125`)가 다시 들어와 DP-2.3 의 의존 정리 효과가 반감된다. 갤러리 Scene 프로토콜이 필요한 DP-4.1 이 그때 추가한다.
+- 확장은 최종적으로 `WidgetScenes` 만 문다. `CalendarScenes` 의존은 DP-2.1 이 이미 뗐다.
+- **`WidgetScenes` 는 DP-4.1 전까지 `Scenes` 도 안 문다.** 지금 물리면 확장 링크 표면에 `UIApplication.shared`(`Scenes/BaseComponents.swift:125`)가 다시 들어와 DP-2.1 이 끝낸 의존 정리 효과가 반감된다. 갤러리 Scene 프로토콜이 필요한 DP-4.1 이 그때 추가한다.
 - **쪼개는 자리가 둘이다.** 뷰 파일은 순수 뷰 / 엔트리 뷰·`Widget` 선언으로, Provider 파일은 ViewModel·`.sample` / Provider 로 가른다. 앞엣것이 `WidgetScenes` 로 가고 뒤엣것이 확장에 남는다.
 - 옮기는 타입은 `public` 이 되고 `public init` 을 연다. 지금은 internal 이고 `WidgetCatalogSnapshots` 이 `@testable import TodoCalendarAppWidget` 으로 본다. 이관하면 그 경로가 끊기므로 스냅샷도 `import WidgetScenes` 로 바꾼다.
 - 순수 뷰 생성자는 최종적으로 `init(model:style:)` 하나로 맞춘다. 엔트리 뷰든 갤러리 미리보기든 같은 걸 부른다. **DP-5.1 전까지는 `init(model:)` 이다** — `WidgetStyle` 이 DP-5.1 산출물이라 미리 만들면 소비자 없는 간접층이 된다 (DP-1.1 확인보고에서 재가).
@@ -193,9 +193,8 @@ DP 번호 순으로 간다. 각 DP 의 base 는 바로 앞 DP 를 머지한 deve
 |---|---|---|---|---|---|---|
 | DP-1.1 | LOE-1 | 1 | `Presentations/WidgetScenes` 프레임워크를 세운다. `DDayWidget.swift` 와 `DDayWidgetViewModelProvider.swift` 를 C1 대로 쪼개 순수 뷰 5개·ViewModel·`.sample` 을 옮기고 `public` 을 연다. 확장이 `WidgetScenes` 를 물게 배선한다. C2 의 배경 겹침을 정리한다. 스냅샷 import 경로를 바꾸고 이관 전후 이미지를 대조한다 | — | `Presentations/WidgetScenes/**`(신규), `Widget/Sources/Widgets/DDayWidget/**`, `Widget/Sources/Intents/DDayTargetSelectIntent.swift`(포맷터 이동), `Widget/Snapshots/WidgetCatalogSnapshots.swift`, `Workspace.swift`, `TodoCalendarApp/Project.swift`, 스킴 하드코딩(`pr_test.yml`·`run-all-tests.sh`·`impact-check.sh`+테스트·run-tests 스킬) | M |
 | DP-2.1 | LOE-1 | 2 | `Presentations/CalendarPresentation` 프레임워크를 세우고 표시·이벤트 모델 5파일을 옮긴다 — `CalendarEvent.swift`·`EventCellViewModel.swift`·`EventCellViewModelMapper.swift`·`WeekEventStackBuilder.swift` 는 파일째, Month 표시 모델 5종은 `MonthViewModel.swift` 에서 떼어낸다. `CalendarScenes` 와 위젯 확장이 새 모듈을 물게 바꾸고, 확장 의존에서 `CalendarScenes` 를 뗀다. 캘린더·이벤트 목록 화면 동작은 안 바뀐다 | DP-1.1 | `Presentations/CalendarPresentation/**`(신규), `Presentations/CalendarScenes/Sources/{Common/CalendarEvents,Common/EventListCell,Month}`, `CalendarScenes/Project.swift`, `Widget/Sources/**`·`Widget/Tests/**` 의 import, `TodoCalendarApp/Project.swift`, `Workspace.swift`, 스킴 하드코딩 | M |
-| DP-2.2 | LOE-1 | 2 | 단일 위젯군 순수 뷰를 `WidgetScenes` 로 옮긴다 — AICommand·Today·Foremost·NextEvent·NextRemain·TodayAndNext. C1 의 쪼개는 자리 둘을 그대로 적용한다 | DP-2.1 | `Presentations/WidgetScenes/**`, `Widget/Sources/Widgets/{AICommandWidget,TodayWidget,ForemostWidget,NextEventWidget,TodayAndNext}`, `Widget/Snapshots/` | M |
-| DP-2.3 | LOE-1 | 2 | 복합 위젯군 순수 뷰를 옮긴다 — Month·WeekEvents·EventList·Composed 4종. 확장의 `CalendarScenes` 의존은 DP-2.1 이 이미 뗐다 | DP-2.2 | `Presentations/WidgetScenes/**`, `Widget/Sources/Widgets/{MonthWidget,WeekEventsWidget,EventListWidget,ComposedWidget}`, `Widget/Sources/{Usecases,Base+Factory,Intents}`, `Widget/Tests/**` | M |
-| DP-3.1 | LOE-2 | 3 | 타임라인 위젯. 시간 축을 산출하고(현재~자정, 남은 시간이 4시간 미만이면 12시간으로 연장) 일정을 블록으로 얹고 겹치면 열을 나눈다. medium·large 와 `EventTypeSelectIntent` 연결까지. 순수 뷰는 처음부터 `WidgetScenes` 에 만든다 | DP-2.3 | `Presentations/WidgetScenes/**`, `Widget/Sources/Widgets/TimelineWidget/**`(신규), `Widget/Sources/Base+Factory/`, `TodoCalendarWidgetBundle.swift`, `Widget/Tests/ViewModelProviders/`, `Supports/Extensions/Resources/*.lproj` | M |
+| DP-2.2 | LOE-1 | 2 | D-day 를 뺀 전 위젯군의 순수 뷰를 `WidgetScenes` 로 옮긴다 — 단일 위젯군 AICommand·Today·Foremost·NextEvent·NextRemain·TodayAndNext 와 복합 위젯군 Month·WeekEvents·EventList·Composed 4종을 함께. C1 의 쪼개는 자리 둘을 위젯군마다 그대로 적용한다. 확장의 `CalendarScenes` 의존은 DP-2.1 이 이미 뗐다 | DP-2.1 | `Presentations/WidgetScenes/**`, `Widget/Sources/Widgets/**`(D-day 제외), `Widget/Sources/{Usecases,Base+Factory,Intents}`, `Widget/Snapshots/`, `Widget/Tests/**` | M |
+| DP-3.1 | LOE-2 | 3 | 타임라인 위젯. 시간 축을 산출하고(현재~자정, 남은 시간이 4시간 미만이면 12시간으로 연장) 일정을 블록으로 얹고 겹치면 열을 나눈다. medium·large 와 `EventTypeSelectIntent` 연결까지. 순수 뷰는 처음부터 `WidgetScenes` 에 만든다 | DP-2.2 | `Presentations/WidgetScenes/**`, `Widget/Sources/Widgets/TimelineWidget/**`(신규), `Widget/Sources/Base+Factory/`, `TodoCalendarWidgetBundle.swift`, `Widget/Tests/ViewModelProviders/`, `Supports/Extensions/Resources/*.lproj` | M |
 | DP-4.1 | LOE-3 (LOE-1 겸) | 4 | 갤러리 Scene 을 `WidgetScenes` 안에 세운다. `Scenes+WidgetGallery.swift` 프로토콜, 전 위젯 목록, `.sample` ViewModel 을 넣은 실뷰 미리보기, 설정 > 외관 > 위젯 진입, 앱 루트 조립까지. Composed 4종과 AICommand 의 `.sample` 을 새로 만든다 | DP-3.1 | `Presentations/WidgetScenes/Sources/Gallery/**`, `Presentations/Scenes/Sources/Scenes+WidgetGallery.swift`, `SettingScene` 진입 라우팅, `TodoCalendarApp/Sources/Root/`, `Supports/Extensions/Resources/*.lproj` | M |
 | DP-5.1 | LOE-3 | 5 | C3 의 프리셋 층을 만든다. `WidgetStyle`·`WidgetStylePreset` 과 `resolved` 합성, 위젯 종류별 저장·조회 usecase, environment 전파와 공통 modifier, 확장 진입에서 값 주입, 갤러리 프리셋 선택 UI | DP-4.1 | `Domain/Sources/Models/Settings/`, `Domain/Sources/Usecases/`, `Repository`(App Group 저장), `Presentations/WidgetScenes/**`, `Widget/Sources/Widgets/**` 진입, `Domain/Tests` | M |
 | DP-5.2 | LOE-3 | 5 | C3 의 조정 층을 채운다. `WidgetStyleAdjustment` 4축(배경·투명도·글자크기·강조색), `requiresPro` 판정, 갤러리 세부조정 UI. 판정만 하고 잠그진 않는다 | DP-5.1 | `Domain` 모델·판정, `WidgetScenes` 조정 UI·공통 modifier, `Domain/Tests`, `WidgetScenes/Tests` | M |
@@ -205,7 +204,7 @@ DP 번호 순으로 간다. 각 DP 의 base 는 바로 앞 DP 를 머지한 deve
 
 | ID | 가정 | 검증 방법 | 깨지면 |
 |---|---|---|---|
-| A1 | 순수 뷰를 `WidgetScenes` 로 옮겨도 확장이 그리는 모양이 안 바뀐다. C2 대로 배경 그리는 자리를 옮기는 것까지 포함해서다 | **DP-1.1 에서 확인됨** (2026-09-08, PR #1058 — D-day 5패밀리 png 무변화). DP-2.2·2.3 에서 위젯군마다 스냅샷을 대조한다. **대조 방법을 지정한다** — 스냅샷 스위트는 `withSnapshotTesting(record: .all)` 이라 비교를 안 하고 매번 다시 쓴다. 스위트 통과는 동일의 증거가 아니다. 기준 브랜치를 임시로 체크아웃해 같은 스위트를 돌리고, 거기서 나온 png 와 작업 브랜치 png 를 바이트 비교해야 판정이 선다 (DP-2.1 에서 이 방법으로 18/18 동일 확인, 2026-09-09) | 배경은 확장에 남기고 갤러리는 미리보기용 배경을 따로 그린다. 중심이 약해지므로 즉시보고한다 |
+| A1 | 순수 뷰를 `WidgetScenes` 로 옮겨도 확장이 그리는 모양이 안 바뀐다. C2 대로 배경 그리는 자리를 옮기는 것까지 포함해서다 | **DP-1.1 에서 확인됨** (2026-09-08, PR #1058 — D-day 5패밀리 png 무변화). DP-2.2 에서 위젯군마다 스냅샷을 대조한다. **대조 방법을 지정한다** — 스냅샷 스위트는 `withSnapshotTesting(record: .all)` 이라 비교를 안 하고 매번 다시 쓴다. 스위트 통과는 동일의 증거가 아니다. 기준 브랜치를 임시로 체크아웃해 같은 스위트를 돌리고, 거기서 나온 png 와 작업 브랜치 png 를 바이트 비교해야 판정이 선다 (DP-2.1 에서 이 방법으로 18/18 동일 확인, 2026-09-09) | 배경은 확장에 남기고 갤러리는 미리보기용 배경을 따로 그린다. 중심이 약해지므로 즉시보고한다 |
 | A2 | 표시·이벤트 모델을 `CalendarPresentation` 으로 옮겨도 `CalendarScenes` 동작이 안 바뀐다 | **DP-2.1 에서 확인됨** (2026-09-09, PR #1062 — `CalendarScenes` 119 tests 통과, 스냅샷 18장 바이트 동일). 파급은 예상보다 좁았다 — `EventListScenes` 는 `CalendarScenes` 를 아예 물지 않고, 모듈 밖 참조는 앱 루트 2파일(Scene 빌더·딥링크)뿐이다 | 2단계를 하위 캠페인으로 올린다 |
 | A3 | 확장의 `CalendarScenes` 참조를 다 뽑고 나면 의존을 뗄 수 있다 | **DP-2.1 정찰에서 확인됨** (2026-09-09, #1060). 확장이 무는 public 심볼 23개를 전수 조사했다. 안 쓰는 것은 `CalendarSceneBuilderImple` 하나뿐이고 나머지는 전부 이동 5파일 안에 있다. 다만 **"표시 모델뿐"이라는 원래 범위 문언은 깨졌다** — 이벤트 모델 계열 7종과 주 단위 계산기 3종이 섞여 있고, `EventOnWeek.event` 가 `any CalendarEvent` 라 분리도 불가능하다. 그래서 대응 조항대로 DP-2.1 범위를 5파일로 넓혔다. **의존 제거까지 DP-2.1 에서 끝났다** (2026-09-09, PR #1062 — 확장 45파일 import 치환, 잔여 참조 0) | 못 뗄 심볼이 남으면 확장의 `CalendarScenes` 의존을 남긴 채 간다 — 갤러리는 그래도 선다 |
 | A4 | 조정 4축을 environment + 공통 modifier 로 걸면 위젯 21종에 다 먹는다 | DP-5.1 에서 프리셋을 그렇게 걸어보고 위젯군마다 확인한다 | 축별로 뷰가 직접 받는 자리를 만든다. DP-5.2 를 위젯군별로 쪼개는 계획 개정으로 간다 |
@@ -224,6 +223,7 @@ DP 번호 순으로 간다. 각 DP 의 base 는 바로 앞 DP 를 머지한 deve
 | 배경을 순수 뷰 안으로 옮겼는데 확장에서 컨테이너 배경과 겹쳐 모양이 바뀐다 | LOE-1 | 완화 — DP-1.1 완료 판정에 이관 전후 스냅샷 대조를 넣는다 | `DDayWidget.swift:262` 가 `.containerBackground(entry.backgroundShape, for: .widget)` 를 부른다 |
 | 파일을 쪼개다 접근 제어가 어긋난다. `private struct DDayTitleView` 처럼 같은 파일이라 보이던 타입이 안 보이게 된다 | LOE-1 | 완화 — 쪼개는 커밋과 옮기는 커밋을 나눈다. 쪼갠 뒤 확장 빌드가 통과하는 걸 먼저 확인한다 | `DDayWidget.swift:19` 가 `private struct DDayTitleView` 다 |
 | 글자크기 조정을 키우면 작은 패밀리에서 레이아웃이 넘친다 | LOE-3 | 완화 — DP-5.2 에서 축의 상하한을 패밀리별로 자르고, 스냅샷으로 극단값을 찍어본다 | 위젯 캔버스가 small 170×170 로 고정이다 (`WidgetCatalogSnapshots.swift`) |
+| DP-2.2 가 위젯군 9개·33파일을 한 PR 에 담아 리뷰 단위를 넘긴다 | LOE-1 | 완화 — 커밋을 위젯군 단위로 끊어 각 커밋이 그 위젯군의 쪼개기·이동·스냅샷 대조를 함께 담게 한다. 그래도 넘치면 남은 위젯군을 후속 DP 로 떼는 계획 개정으로 간다 | 유저 지시로 DP-2.2·DP-2.3 을 병합했다 (2026-09-09). 대상이 약 5,900 줄이다 |
 | 타임라인 위젯이 PR 하나를 넘긴다. 축 산출·겹침 배치·패밀리 둘·Intent 연결이 한 DP 에 있다 | LOE-2 | 완화 — opord 에서 커밋 시퀀스를 계산·뷰·등록으로 나눈다. 그래도 넘치면 DP 를 쪼개는 계획 개정으로 간다 | #751 플랜이 1692줄 44 체크박스다 |
 | 프레임워크 둘을 신설하니 스킴 하드코딩 짝을 두 번 맞춰야 한다. 한쪽만 넣으면 감지만 되고 실행이 안 된다 | 검증 | 완화 — DP-1.1·DP-2.1 각각 add-framework 스킬 절차를 탄다 | CLAUDE.md §1 짝규칙 |
 | 프리셋·조정 문구와 갤러리 위젯 이름이 31개 로케일 짝을 요구한다 | 품질 | 완화 — `check-localization-parity.py` 로 확인하고 `localization` 라벨 최신 열린 이슈에 등록한다 | `.claude/rules/localization.md` §1 |
@@ -232,9 +232,9 @@ DP 번호 순으로 간다. 각 DP 의 base 는 바로 앞 DP 를 머지한 deve
 
 | 단계 | 주노력 자원 | 부노력 자원 |
 |---|---|---|
-| 1~6 | 순차로 한 세션이 간다. DP 마다 앞 DP 의 계약(C1~C4)을 입력으로 받는다 | 유저 시간 — DP 마다 작전명령 재가. DP-1.1·DP-2.3·DP-5.1 은 실기 확인도 필요하다 |
+| 1~6 | 순차로 한 세션이 간다. DP 마다 앞 DP 의 계약(C1~C4)을 입력으로 받는다 | 유저 시간 — DP 마다 작전명령 재가. DP-1.1·DP-2.2·DP-5.1 은 실기 확인도 필요하다 |
 
-DP 가 9개라 이전보다 길다. 그래도 병렬 슬롯은 안 둔다. DP 마다 재가 게이트가 있어 병렬 이득이 작고, DP-2.x 는 같은 계약을 반복 적용하는 줄이라 소유 범위가 `WidgetScenes` 에서 계속 겹친다.
+DP 가 8개다. 그래도 병렬 슬롯은 안 둔다. DP 마다 재가 게이트가 있어 병렬 이득이 작고, DP-2.x 는 같은 계약을 반복 적용하는 줄이라 소유 범위가 `WidgetScenes` 에서 계속 겹친다.
 
 외부 계정이나 심사에 안 걸린다. 워크트리는 지금 쓰는 `southpaw` 하나로 충분하다.
 
