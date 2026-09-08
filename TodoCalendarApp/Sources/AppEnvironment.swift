@@ -20,8 +20,22 @@ struct AppEnvironment {
         return false
     }
     
+    static var isUITestRun: Bool {
+#if DEBUG
+        return ProcessInfo.processInfo.arguments.contains("-uiTest")
+#endif
+        return false
+    }
+    
+    static var isExternalDependencyBlocked: Bool {
+        return self.isTestBuild || self.isUITestRun
+    }
+    
+    // 포트 1은 예약 포트라 즉시 refuse — 타임아웃 대기가 없다
+    static var blockedAPIHost: String { "http://127.0.0.1:1" }
+    
     private static var dbFileName: String {
-        if self.isTestBuild {
+        if self.isExternalDependencyBlocked {
             return "test_dummy"
         } else {
             return "models"
