@@ -40,7 +40,7 @@ public struct WeekEventsViewModel {
     public var googleCalendarColor: GoogleCalendar.Colors?
     public var googleCalendarTags: [String: GoogleCalendar.Tag]
     public var appleCalendarTags: [String: AppleCalendar.Tag]
-    public let widgetSetting: WidgetAppearanceSettings
+    public var widgetSetting: WidgetAppearanceSettings
     
     public init(
         range: WeekEventsRange,

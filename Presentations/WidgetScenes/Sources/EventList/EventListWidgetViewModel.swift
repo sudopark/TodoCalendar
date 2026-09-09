@@ -17,7 +17,7 @@ import CalendarPresentation
 
 // MARK: - EventListWidgetViewModel
 
-public enum EventListWidgetSize {
+public enum EventListWidgetSize: Sendable {
     case small
     case medium
     case large

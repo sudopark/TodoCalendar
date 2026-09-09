@@ -15,5 +15,7 @@ let project = Project.frameworkWithTest(name: "WidgetScenes",
                                             .project(target: "Domain",
                                                      path: .relativeToRoot("Domain")),
                                             .project(target: "Extensions",
-                                                     path: .relativeToRoot("Supports/Extensions"))
+                                                     path: .relativeToRoot("Supports/Extensions")),
+                                            .project(target: "Scenes",
+                                                     path: .relativeToRoot("Presentations/Scenes"))
                                         ])
