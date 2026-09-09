@@ -97,13 +97,14 @@
 ### 다. 과업
 
 - **T-1**: `WidgetScenes` 에 `CalendarPresentation` 의존을 잇고 develop 기준 스냅샷 png 를 확보하여, 이관 작업의 컴파일 기반과 무손실 판정 기준선을 세운다.
-- **T-2**: Today·Month 의 순수 뷰와 ViewModel 을 옮겨, Composed 가 쓰는 기초 뷰 둘을 공유 층에 올린다.
-- **T-3**: Foremost·EventList 의 순수 뷰와 ViewModel 을 옮기고 `EventCellViewModel.widgetURL` 을 함께 내려, Composed 가 쓰는 나머지 기초 뷰 둘을 공유 층에 올린다.
-- **T-4**: WeekEvents 의 순수 뷰와 ViewModel·`WeekEventsRange` 를 옮겨, 주 단위 위젯 7종이 공유 뷰를 쓰게 한다.
-- **T-5**: NextEvent·NextRemain·TodayAndNext 의 순수 뷰와 ViewModel 을 옮겨, 잠금화면·복합 라인업의 뷰를 공유 층에 올린다.
-- **T-6**: AICommand 순수 뷰를 옮기면서 WidgetKit 심볼을 엔트리 뷰로 올려, 마지막 남은 WidgetKit 의존을 끊는다.
-- **T-7**: Composed 4종의 ViewModel 을 옮겨, 갤러리가 복합 위젯 미리보기를 만들 재료를 갖게 한다.
-- **T-8**: 스냅샷을 기준선과 대조하고 테스트 import 를 정리하여, 이관이 무손실임을 판정한다.
+- **T-2**: 앱 스킴 상수를 `Domain` 으로, 딥링크 계산식을 `CalendarPresentation` 으로 내려, 순수 뷰가 프레임워크 안에서도 링크를 그대로 계산하게 한다.
+- **T-3**: Today·Month 의 순수 뷰와 ViewModel 을 옮겨, Composed 가 쓰는 기초 뷰 둘을 공유 층에 올린다.
+- **T-4**: Foremost·EventList 의 순수 뷰와 ViewModel 을 옮기고 `EventCellViewModel.widgetURL` 을 함께 내려, Composed 가 쓰는 나머지 기초 뷰 둘을 공유 층에 올린다.
+- **T-5**: WeekEvents 의 순수 뷰와 ViewModel·`WeekEventsRange` 를 옮겨, 주 단위 위젯 7종이 공유 뷰를 쓰게 한다.
+- **T-6**: NextEvent·NextRemain·TodayAndNext 의 순수 뷰와 ViewModel 을 옮겨, 잠금화면·복합 라인업의 뷰를 공유 층에 올린다.
+- **T-7**: AICommand 순수 뷰를 옮기면서 WidgetKit 심볼을 엔트리 뷰로 올려, 마지막 남은 WidgetKit 의존을 끊는다.
+- **T-8**: Composed 4종의 ViewModel 을 옮겨, 갤러리가 복합 위젯 미리보기를 만들 재료를 갖게 한다.
+- **T-9**: 스냅샷을 기준선과 대조하고 테스트 import 를 정리하여, 이관이 무손실임을 판정한다.
 
 ### 라. 협조지시
 
@@ -141,7 +142,7 @@
 
 | ID | 결정 | 판단 정보 | 시한(조건) | 미결 시 기본 행동 |
 |---|---|---|---|---|
-| D-1 | 달라진 스냅샷을 회귀로 볼지 기준선 노후로 볼지 | 달라진 케이스 목록과 diff 이미지, develop 재기록 png 와의 비교 | T-8 중 차이를 발견한 즉시 | 회귀로 보고 그 위젯군 이관을 되돌린 뒤 유저에게 보고한다 |
+| D-1 | 달라진 스냅샷을 회귀로 볼지 기준선 노후로 볼지 | 달라진 케이스 목록과 diff 이미지, develop 재기록 png 와의 비교 | T-9 중 차이를 발견한 즉시 | 회귀로 보고 그 위젯군 이관을 되돌린 뒤 유저에게 보고한다 |
 | D-2 | WidgetKit 을 못 떼는 뷰를 확장에 남길지 계약을 고칠지 | 그 뷰가 쓰는 WidgetKit 심볼과 대체 표현 유무 | 해당 위젯군 태스크 안에서 | 그 뷰만 확장에 남기고 나머지를 옮긴다. 종결보고 3항에 싣는다 |
 | D-3 | `CalendarPresentation` 에 안 내려온 타입이 발견되면 이 DP 에서 내릴지 DP-2.1 로 되돌릴지 | 그 타입의 참조처 수와 `CalendarScenes` 잔여 의존 | 발견 즉시 | 유저에게 보고하고 답을 기다린다. 임의로 모듈 경계를 옮기지 않는다 |
 | D-4 | 계획 밖 `public` 개방을 수용할지 | 개방 대상 심볼과 그것을 요구하는 소비자 | 컴파일 오류가 난 시점 | `WidgetScenes` 안에서 해소되는 개방은 진행하고 종결보고 3항에 목록으로 싣는다. 다른 모듈의 공개 API 를 바꿔야 하면 멈추고 보고한다 |
@@ -157,9 +158,9 @@
 
 ## 4. 검증·자원
 
-**테스트 스킴·검증 사다리** — `bash .claude/skills/implement/scripts/impact-check.sh` 가 산출하는 스킴이 상한이다. 실행 범위는 최소부터 산정한다: 위젯군 이관 태스크는 빌드 통과까지, 모듈 경계가 바뀌는 T-1 과 마지막 T-8 에서 `WidgetScenes`·`TodoCalendarAppWidget`·`TodoCalendarApp` 스킴을 돌린다. TC·파일 단위는 `xcodebuild test -only-testing:<테스트타겟>/<클래스>[/<메서드>]`, 스킴 단위는 run-tests 스킬을 쓴다.
+**테스트 스킴·검증 사다리** — `bash .claude/skills/implement/scripts/impact-check.sh` 가 산출하는 스킴이 상한이다. 실행 범위는 최소부터 산정한다: 위젯군 이관 태스크는 빌드 통과까지, 모듈 경계가 바뀌는 T-1 과 마지막 T-9 에서 `WidgetScenes`·`TodoCalendarAppWidget`·`TodoCalendarApp` 스킴을 돌린다. TC·파일 단위는 `xcodebuild test -only-testing:<테스트타겟>/<클래스>[/<메서드>]`, 스킴 단위는 run-tests 스킬을 쓴다.
 
-**스냅샷·실기** — `WidgetCatalogSnapshots` 은 `withSnapshotTesting(record: .all)` 로 도는 기록 전용이라 통과가 동일의 증거가 아니다. 판정은 바이트 비교로 한다. T-1 에서 develop 상태의 png 를 `snapshot-catalog/Widget/WidgetCatalogSnapshots/` 밖 임시 경로로 복사해 두고, T-8 에서 브랜치 png 와 `cmp` 로 대조한다. 잠금화면 vibrancy 는 스냅샷이 재현하지 못하므로 실기 확인을 유저에게 인계한다.
+**스냅샷·실기** — `WidgetCatalogSnapshots` 은 `withSnapshotTesting(record: .all)` 로 도는 기록 전용이라 통과가 동일의 증거가 아니다. 판정은 바이트 비교로 한다. T-1 에서 develop 상태의 png 를 `snapshot-catalog/Widget/WidgetCatalogSnapshots/` 밖 임시 경로로 복사해 두고, T-9 에서 브랜치 png 와 `cmp` 로 대조한다. 잠금화면 vibrancy 는 스냅샷이 재현하지 못하므로 실기 확인을 유저에게 인계한다.
 
 **모델 티어·병렬 슬롯·워크트리** — 부록 C 표를 따른다. 병렬 슬롯은 두지 않는다. 워크트리는 지금 쓰는 `southpaw` 하나다.
 
@@ -192,7 +193,24 @@
 - [ ] Step 4 — 복사한 png 가 10 케이스분(잠금화면 4종 포함) 다 있는지 파일 수로 확인한다. 빠진 케이스가 있으면 그 케이스는 T-8 대조 대상에서 빠진다는 사실을 진행 파일에 적는다.
 - [ ] Step 5 — 부록 B 커밋 1.
 
-### Task 2: Today·Month 순수 뷰와 ViewModel 이관
+### Task 2: 앱 스킴과 딥링크 계산식 하향
+
+**Files**
+- Create: `Domain/Sources/Utils/AppDeepLink.swift`, `Presentations/CalendarPresentation/Sources/DeepLink/EventDeepLinkBuilder.swift`
+- Modify: `TodoCalendarApp/Sources/AppEnvironment.swift`(`appScheme` 삭제), `TodoCalendarApp/Sources/Root/ApplicationDeepLinkHandler.swift`, `TodoCalendarApp/Sources/AppIntents/OpenAICommandInputIntent.swift`, `TodoCalendarApp/AppExtensions/Widget/Sources/Base+Factory/WidgetLink+Extensions.swift`(→ `LiveActivityLink+Extensions.swift` 로 rename, `LiveActivityEventTarget.eventDetailURL` 만 남긴다)
+
+**Interfaces**
+- Produces: `public enum AppDeepLink { public static var scheme: String }`, `public enum EventDeepLinkBuilder`, `public extension EventCellViewModel { var widgetURL: URL? }`, `public extension CalendarDay { var link: URL? }`, `public enum AICommandEntryLink`
+
+**Steps**
+- [ ] Step 1 — `Domain/Sources/Utils/AppDeepLink.swift` 를 만들어 `public enum AppDeepLink { private enum Constant { static let scheme: String = "tc.app" }; public static var scheme: String { Constant.scheme } }` 형태로 쓴다. 같은 폴더의 `WebAppLink.swift` 가 그 서식의 형제다 — `private enum Constant` 로 리터럴을 응집하고 public 접근자를 따로 둔다.
+- [ ] Step 2 — `AppEnvironment.swift:63` 의 `appScheme` 을 지운다. 정본을 둘로 남기면 짝이 어긋나므로 원본을 남기지 않는다. 소비처 `ApplicationDeepLinkHandler.swift:38` 과 `OpenAICommandInputIntent.swift:46` 을 `AppDeepLink.scheme` 으로 바꾼다.
+- [ ] Step 3 — `WidgetLink+Extensions.swift` 의 `EventDeepLinkBuilder`(`:14`~:50)·`EventCellViewModel.widgetURL`(`:78`~:103)·`CalendarDay.link`(`:106`~:115)·`AICommandEntryLink`(`:118`~:122)를 `EventDeepLinkBuilder.swift` 로 옮기고 `public` 을 연다. 넷 다 `EventCellViewModel`·`CalendarDay`·`EventTime` 을 아는 자리가 필요한데 `CalendarPresentation` 이 그 셋을 다 보는 최하위 모듈이다.
+- [ ] Step 4 — 남은 `LiveActivityEventTarget.eventDetailURL`(`:53`~:75) 하나만 담도록 파일을 `LiveActivityLink+Extensions.swift` 로 `git mv` 하고 `import CalendarPresentation` 을 확인한다. `LiveActivityEventTarget` 은 `TodoCalendarApp/Sources/LiveActivity/LiveActivityEventTarget.swift:12` 의 확장 공용 소스라 이 extension 은 확장에 남는다.
+- [ ] Step 5 — `mise exec -- tuist generate --no-open` 후 `TodoCalendarApp`·`TodoCalendarAppWidget` 빌드를 확인한다. `Domain` 스킴도 돌려 상수 신설이 기존 테스트를 안 깨는지 본다.
+- [ ] Step 6 — 부록 B 커밋 2.
+
+### Task 3: Today·Month 순수 뷰와 ViewModel 이관
 
 **Files**
 - Create: `Presentations/WidgetScenes/Sources/Today/TodayWidgetViews.swift`, `Presentations/WidgetScenes/Sources/Today/TodayWidgetViewModel.swift`, `Presentations/WidgetScenes/Sources/Month/MonthWidgetViews.swift`, `Presentations/WidgetScenes/Sources/Month/MonthWidgetViewModel.swift`
@@ -209,29 +227,28 @@
 - [ ] Step 4 — `MonthWidget.swift:19`~:112 의 `SingleMonthView` 와 `MonthWidgetViewModelProvider.swift:19`~:116 의 `MonthWidgetViewModel` 에 같은 처리를 한다.
 - [ ] Step 5 — 확장에 남은 네 파일(`TodayWidget.swift`·`TodayWidgetViewModelProvider.swift`·`MonthWidget.swift`·`MonthWidgetViewModelProvider.swift`)과 두 TimelineProvider 에 `import WidgetScenes` 를 더한다. 안 쓰게 된 import 는 지운다.
 - [ ] Step 6 — `mise exec -- tuist generate --no-open` 후 `TodoCalendarAppWidget` 스킴 빌드가 통과하는지 확인한다.
-- [ ] Step 7 — 부록 B 커밋 2.
+- [ ] Step 7 — 부록 B 커밋 3.
 
-### Task 3: Foremost·EventList 순수 뷰와 ViewModel 이관
+### Task 4: Foremost·EventList 순수 뷰와 ViewModel 이관
 
 **Files**
-- Create: `Presentations/WidgetScenes/Sources/Foremost/ForemostWidgetViews.swift`, `Presentations/WidgetScenes/Sources/Foremost/ForemostEventWidgetViewModel.swift`, `Presentations/WidgetScenes/Sources/EventList/EventListWidgetViews.swift`, `Presentations/WidgetScenes/Sources/EventList/EventListWidgetViewModel.swift`, `Presentations/WidgetScenes/Sources/Link/EventCellViewModel+WidgetURL.swift`
-- Modify: `.../ForemostWidget/ForemostEventWidget.swift`, `.../ForemostWidget/ForemostEventWidgetViewModel+Provider.swift`, `.../ForemostWidget/ForemostEventWidgetTimelineProvider.swift`, `.../EventListWidget/EventListWidget.swift`, `.../EventListWidget/EventListWidgetViewModelProvider.swift`, `.../EventListWidget/EventListWidgetTimeLineProvider.swift`, `TodoCalendarApp/AppExtensions/Widget/Sources/Base+Factory/WidgetLink+Extensions.swift`
+- Create: `Presentations/WidgetScenes/Sources/Foremost/ForemostWidgetViews.swift`, `Presentations/WidgetScenes/Sources/Foremost/ForemostEventWidgetViewModel.swift`, `Presentations/WidgetScenes/Sources/EventList/EventListWidgetViews.swift`, `Presentations/WidgetScenes/Sources/EventList/EventListWidgetViewModel.swift`
+- Modify: `.../ForemostWidget/ForemostEventWidget.swift`, `.../ForemostWidget/ForemostEventWidgetViewModel+Provider.swift`, `.../ForemostWidget/ForemostEventWidgetTimelineProvider.swift`, `.../EventListWidget/EventListWidget.swift`, `.../EventListWidget/EventListWidgetViewModelProvider.swift`, `.../EventListWidget/EventListWidgetTimeLineProvider.swift`
 
 **Interfaces**
-- Produces: `public struct InlineSizeForemostEventView`, `public struct SystemSizeForemostEventView`, `public struct ForemostEventWidgetViewModel` (+ `sample()`), `public struct EventListView`, `public struct TodoToggleButton`, `public struct EventListWidgetViewModel` (+ `sample(size:)`), `public enum EventListWidgetSize`, `public extension EventCellViewModel { var widgetURL: URL? }`
+- Produces: `public struct InlineSizeForemostEventView`, `public struct SystemSizeForemostEventView`, `public struct ForemostEventWidgetViewModel` (+ `sample()`), `public struct EventListView`, `public struct TodoToggleButton`, `public struct EventListWidgetViewModel` (+ `sample(size:)`), `public enum EventListWidgetSize`
 
 **Steps**
-- [ ] Step 1 — `WidgetLink+Extensions.swift:78`~:90 의 `extension EventCellViewModel { var widgetURL }` 를 `EventCellViewModel+WidgetURL.swift` 로 옮기고 `public` 으로 연다. 그 extension 이 부르는 링크 빌더가 확장 타겟에만 있으면 그 계산에 필요한 최소 조각까지 함께 내리고, 딥링크 빌더 자체의 동작은 바꾸지 않는다 (campaign 13항).
-- [ ] Step 2 — `InlineSizeForemostEventView`(`ForemostEventWidget.swift:22`~:39)를 옮기면서 `:33`·`:36` 의 `.widgetAccentable()` 을 걷어낸다. 그 modifier 는 `ForemostEventWidgetView`(`:239`)의 accessoryInline 분기가 뷰를 부른 자리에 붙인다. `DDayWidget.swift:24`~:38 이 같은 처리의 동형이다.
-- [ ] Step 3 — `SystemSizeForemostEventView`(`:41`~:237, 내부 `ForemostTodoToggleButton:203` 포함)를 옮긴다. 이 뷰의 시그니처는 `init(model:isSmallSize:)` 다 — `EventAndForemostWidget.swift:35` 가 그렇게 부른다.
-- [ ] Step 4 — `ForemostEventWidgetViewModel`(`ForemostEventWidgetViewModel+Provider.swift:19`~:40, `sample()` 포함)을 옮긴다.
-- [ ] Step 5 — `EventListView`(`EventListWidget.swift:21`~:180)·`TodoToggleButton`(`:182`~:210)·`extension ViewAppearance`(`:253`~:269)를 `EventListWidgetViews.swift` 로 옮긴다. `extension ViewAppearance` 는 순수 뷰가 쓰는 경우에만 옮기고, 엔트리 뷰만 쓰면 확장에 남긴다 — 컴파일러가 판정한다.
-- [ ] Step 6 — `EventListWidgetSize`(`EventListWidgetViewModelProvider.swift:20`~:33)와 `EventListWidgetViewModel`(`:35`~:292, `sample(size:)` 포함)을 `EventListWidgetViewModel.swift` 로 옮긴다. `EventListWidgetSize` 의 `init(_ family:)` 가 `WidgetFamily` 를 받으면 그 이니셜라이저만 확장에 extension 으로 남긴다 — `WidgetScenes` 는 WidgetKit 을 안 문다 (C1).
-- [ ] Step 7 — 확장 파일들에 `import WidgetScenes` 를 더하고 안 쓰는 import 를 지운다.
-- [ ] Step 8 — `mise exec -- tuist generate --no-open` 후 `TodoCalendarAppWidget` 빌드를 확인한다.
-- [ ] Step 9 — 부록 B 커밋 3.
+- [ ] Step 1 — `InlineSizeForemostEventView`(`ForemostEventWidget.swift:22`~:39)를 옮기면서 `:33`·`:36` 의 `.widgetAccentable()` 을 걷어낸다. 그 modifier 는 `ForemostEventWidgetView`(`:239`)의 accessoryInline 분기가 뷰를 부른 자리에 붙인다. `DDayWidget.swift:24`~:38 이 같은 처리의 동형이다.
+- [ ] Step 2 — `SystemSizeForemostEventView`(`:41`~:237, 내부 `ForemostTodoToggleButton:203` 포함)를 옮긴다. 이 뷰의 시그니처는 `init(model:isSmallSize:)` 다 — `EventAndForemostWidget.swift:35` 가 그렇게 부른다.
+- [ ] Step 3 — `ForemostEventWidgetViewModel`(`ForemostEventWidgetViewModel+Provider.swift:19`~:40, `sample()` 포함)을 옮긴다.
+- [ ] Step 4 — `EventListView`(`EventListWidget.swift:21`~:180)·`TodoToggleButton`(`:182`~:210)·`extension ViewAppearance`(`:253`~:269)를 `EventListWidgetViews.swift` 로 옮긴다. `extension ViewAppearance` 는 순수 뷰가 쓰는 경우에만 옮기고, 엔트리 뷰만 쓰면 확장에 남긴다 — 컴파일러가 판정한다.
+- [ ] Step 5 — `EventListWidgetSize`(`EventListWidgetViewModelProvider.swift:20`~:33)와 `EventListWidgetViewModel`(`:35`~:292, `sample(size:)` 포함)을 `EventListWidgetViewModel.swift` 로 옮긴다. `EventListWidgetSize` 의 `init(_ family:)` 가 `WidgetFamily` 를 받으면 그 이니셜라이저만 확장에 extension 으로 남긴다 — `WidgetScenes` 는 WidgetKit 을 안 문다 (C1).
+- [ ] Step 6 — 확장 파일들에 `import WidgetScenes` 를 더하고 안 쓰는 import 를 지운다.
+- [ ] Step 7 — `mise exec -- tuist generate --no-open` 후 `TodoCalendarAppWidget` 빌드를 확인한다.
+- [ ] Step 8 — 부록 B 커밋 4.
 
-### Task 4: WeekEvents 순수 뷰와 ViewModel 이관
+### Task 5: WeekEvents 순수 뷰와 ViewModel 이관
 
 **Files**
 - Create: `Presentations/WidgetScenes/Sources/WeekEvents/WeekEventsViews.swift`, `Presentations/WidgetScenes/Sources/WeekEvents/WeekEventsViewModel.swift`
@@ -249,9 +266,9 @@
 - [ ] Step 5 — 옮긴 타입을 `public` 으로 연다. `WeekEventsRange` 는 associated value 를 갖는 enum 이니 case 자체가 public 이 되고, 부수 메서드도 컴파일러가 지목하는 것만 연다.
 - [ ] Step 6 — `WeekEventsWidgetViewModelProviderTests.swift` 가 옮긴 타입을 참조하면 `import WidgetScenes` 를 더한다.
 - [ ] Step 7 — `mise exec -- tuist generate --no-open` 후 `TodoCalendarAppWidget` 빌드를 확인한다.
-- [ ] Step 8 — 부록 B 커밋 4.
+- [ ] Step 8 — 부록 B 커밋 5.
 
-### Task 5: NextEvent·NextRemain·TodayAndNext 순수 뷰와 ViewModel 이관
+### Task 6: NextEvent·NextRemain·TodayAndNext 순수 뷰와 ViewModel 이관
 
 **Files**
 - Create: `Presentations/WidgetScenes/Sources/NextEvent/NextEventWidgetViews.swift`, `Presentations/WidgetScenes/Sources/NextEvent/NextEventWidgetViewModel.swift`, `Presentations/WidgetScenes/Sources/TodayAndNext/TodayAndNextWidgetViews.swift`, `Presentations/WidgetScenes/Sources/TodayAndNext/TodayAndNextWidgetViewModel.swift`
@@ -269,9 +286,9 @@
 - [ ] Step 5 — 옮긴 타입을 `public` 으로 열고 확장 파일에 `import WidgetScenes` 를 더한다.
 - [ ] Step 6 — 두 Provider 테스트가 옮긴 타입을 참조하면 `import WidgetScenes` 를 더한다.
 - [ ] Step 7 — `mise exec -- tuist generate --no-open` 후 `TodoCalendarAppWidget` 빌드를 확인한다.
-- [ ] Step 8 — 부록 B 커밋 5.
+- [ ] Step 8 — 부록 B 커밋 6.
 
-### Task 6: AICommand 순수 뷰 이관과 WidgetKit 심볼 이동
+### Task 7: AICommand 순수 뷰 이관과 WidgetKit 심볼 이동
 
 **Files**
 - Create: `Presentations/WidgetScenes/Sources/AICommand/AICommandWidgetViews.swift`
@@ -286,9 +303,9 @@
 - [ ] Step 3 — 확장에 `AICommandShortcutWidgetView` 를 엔트리 뷰로 남기되, 본문은 family 분기와 위 세 modifier 만 갖고 콘텐츠는 옮긴 두 뷰를 부른다.
 - [ ] Step 4 — 이 뷰는 `WidgetCatalogSnapshots.swift:212` 가 `AICommandShortcutWidgetView()` 로 직접 부른다. 엔트리 뷰가 확장에 남고 이름도 유지되므로 스냅샷 호출부는 안 바뀐다.
 - [ ] Step 5 — `mise exec -- tuist generate --no-open` 후 `TodoCalendarAppWidget` 빌드를 확인한다.
-- [ ] Step 6 — 부록 B 커밋 6.
+- [ ] Step 6 — 부록 B 커밋 7.
 
-### Task 7: Composed 4종 ViewModel 이관
+### Task 8: Composed 4종 ViewModel 이관
 
 **Files**
 - Create: `Presentations/WidgetScenes/Sources/Composed/ComposedWidgetViewModels.swift`
@@ -304,9 +321,9 @@
 - [ ] Step 3 — 네 ViewModelProvider(`DoubleMonthWidgetViewModelProvider:26` 등)는 Domain 조회를 하므로 확장에 남긴다. 각 파일에 `import WidgetScenes` 를 더한다.
 - [ ] Step 4 — 네 엔트리 뷰(`DoubleMonthWidgetView` 등)에도 `import WidgetScenes` 를 더한다. 뷰 본문은 안 바꾼다.
 - [ ] Step 5 — `mise exec -- tuist generate --no-open` 후 `TodoCalendarAppWidget` 빌드를 확인한다.
-- [ ] Step 6 — 부록 B 커밋 7.
+- [ ] Step 6 — 부록 B 커밋 8.
 
-### Task 8: 스냅샷 대조와 최종 검증
+### Task 9: 스냅샷 대조와 최종 검증
 
 **Files**
 - Modify: `TodoCalendarApp/AppExtensions/Widget/Snapshots/WidgetCatalogSnapshots.swift`
@@ -320,20 +337,21 @@
 - [ ] Step 2 — `grep -rn "import WidgetKit\|import CalendarScenes\|import Scenes" Presentations/WidgetScenes/Sources/` 가 0건인지 확인한다. 걸리면 FFIR-2·FFIR-3 이다.
 - [ ] Step 3 — 스냅샷 스위트를 실행해 png 를 다시 뽑고, T-1 의 기준 png 와 `cmp` 로 전수 비교한다. 다른 파일이 나오면 D-1 로 간다.
 - [ ] Step 4 — `bash .claude/skills/implement/scripts/impact-check.sh` 를 돌려 tuist generate 필요 여부와 짝 경고를 확인하고, 산출된 스킴 중 `WidgetScenes`·`TodoCalendarAppWidget`·`TodoCalendarApp` 을 실행한다.
-- [ ] Step 5 — 부록 B 커밋 8.
+- [ ] Step 5 — 부록 B 커밋 9.
 
 ## 부록 B. 커밋 시퀀스
 
 | # | 태스크 | 메시지 |
 |---|---|---|
 | 1 | T-1 | `[#1065] WidgetScenes 가 CalendarPresentation 을 물게 한다` |
-| 2 | T-2 | `[#1065] Today·Month 순수 뷰와 ViewModel 을 WidgetScenes 로 내린다` |
-| 3 | T-3 | `[#1065] Foremost·EventList 순수 뷰와 ViewModel 을 WidgetScenes 로 내린다` |
-| 4 | T-4 | `[#1065] WeekEvents 순수 뷰와 표시 모델을 WidgetScenes 로 내린다` |
-| 5 | T-5 | `[#1065] NextEvent·NextRemain·TodayAndNext 순수 뷰와 ViewModel 을 WidgetScenes 로 내린다` |
-| 6 | T-6 | `[#1065] AICommand 순수 뷰를 패밀리별로 가르고 WidgetKit 심볼을 엔트리 뷰로 올린다` |
-| 7 | T-7 | `[#1065] Composed 4종 ViewModel 을 WidgetScenes 로 내린다` |
-| 8 | T-8 | `[#1065] 스냅샷과 테스트가 WidgetScenes 를 보게 하고 이관 무손실을 확인한다` |
+| 2 | T-2 | `[#1065] 앱 스킴을 Domain 으로, 딥링크 계산식을 CalendarPresentation 으로 내린다` |
+| 3 | T-3 | `[#1065] Today·Month 순수 뷰와 ViewModel 을 WidgetScenes 로 내린다` |
+| 4 | T-4 | `[#1065] Foremost·EventList 순수 뷰와 ViewModel 을 WidgetScenes 로 내린다` |
+| 5 | T-5 | `[#1065] WeekEvents 순수 뷰와 표시 모델을 WidgetScenes 로 내린다` |
+| 6 | T-6 | `[#1065] NextEvent·NextRemain·TodayAndNext 순수 뷰와 ViewModel 을 WidgetScenes 로 내린다` |
+| 7 | T-7 | `[#1065] AICommand 순수 뷰를 패밀리별로 가르고 WidgetKit 심볼을 엔트리 뷰로 올린다` |
+| 8 | T-8 | `[#1065] Composed 4종 ViewModel 을 WidgetScenes 로 내린다` |
+| 9 | T-9 | `[#1065] 스냅샷과 테스트가 WidgetScenes 를 보게 하고 이관 무손실을 확인한다` |
 
 커밋 1 은 `Project.swift` 한 줄과 그에 따른 프로젝트 재생성만 담는다. 기준 png 는 gitignore 대상이라 커밋에 안 들어간다.
 
@@ -342,14 +360,25 @@
 | 태스크 | 티어 | 근거 |
 |---|---|---|
 | T-1 | 하위 (haiku급) | 의존 한 줄 추가와 스위트 실행이다. 결정이 경로 수준까지 확정돼 있다 |
-| T-2 | 표준 (sonnet급) | 파일을 가르고 접근 제어를 순차로 여는 멀티 파일 조율이다 |
-| T-3 | 표준 (sonnet급) | 같은 성격에 `widgetURL` extension 판별이 붙는다 |
-| T-4 | 표준 (sonnet급) | `WeekEventsRange` 가 양쪽에서 쓰여 경계 판정이 필요하다 |
-| T-5 | 표준 (sonnet급) | 세 위젯군에 걸치고 Builder 잔류 판정이 붙는다 |
-| T-6 | 표준 (sonnet급) | WidgetKit 심볼을 걷어내며 뷰를 가르는 판단이다 |
-| T-7 | 하위 (haiku급) | 5줄짜리 구조체 넷을 옮기고 import 를 더한다 |
-| T-8 | 표준 (sonnet급) | 대조 결과 판정과 스킴 실행이다 |
+| T-2 | 표준 (sonnet급) | 정본을 옮기면서 소비처를 전수로 맞추는 조율이다 |
+| T-3 | 표준 (sonnet급) | 파일을 가르고 접근 제어를 순차로 여는 멀티 파일 조율이다 |
+| T-4 | 표준 (sonnet급) | 같은 성격에 `widgetURL` extension 판별이 붙는다 |
+| T-5 | 표준 (sonnet급) | `WeekEventsRange` 가 양쪽에서 쓰여 경계 판정이 필요하다 |
+| T-6 | 표준 (sonnet급) | 세 위젯군에 걸치고 Builder 잔류 판정이 붙는다 |
+| T-7 | 표준 (sonnet급) | WidgetKit 심볼을 걷어내며 뷰를 가르는 판단이다 |
+| T-8 | 하위 (haiku급) | 5줄짜리 구조체 넷을 옮기고 import 를 더한다 |
+| T-9 | 표준 (sonnet급) | 대조 결과 판정과 스킴 실행이다 |
 
 ## 부록 D. 단편명령 누적
 
-없음.
+### FRAGO-1 (2026-09-09) — 딥링크 계산식의 하향 대상과 자리를 바꾼다
+
+**3-다 과업** — T-2 를 신설하고 기존 T-2~T-8 을 T-3~T-9 로 민다. 나머지 변경 없음.
+
+**부록 A Task 4(옛 Task 3) Step 1** — "`WidgetLink+Extensions.swift:78`~:90 의 `extension EventCellViewModel { var widgetURL }` 를 `EventCellViewModel+WidgetURL.swift` 로 옮기고 `public` 으로 연다" 를 삭제한다. 새 Task 2 가 그 일을 더 넓게 대신한다.
+
+**사유** — 링크 계산이 `AppEnvironment.appScheme`(`TodoCalendarApp/Sources/AppEnvironment.swift:63`)에 걸려 있는데 그 파일은 확장 타겟이 직접 컴파일하는 소스라(`Project+Templates.swift:369`) 프레임워크에서 안 보인다. 원안대로 `WidgetScenes` 로 내리면 컴파일이 안 된다. 순수 뷰가 링크를 계산하는 자리가 6개 위젯군 16곳이라 이 매듭을 안 풀면 이관 대상이 절반 아래로 준다.
+
+**결심** — 앱 스킴 상수를 `Domain/Sources/Utils/AppDeepLink.swift` 로, 계산식 넷을 `CalendarPresentation` 으로 내린다 (2026-09-09 유저 재가). `Domain/Sources/Utils/` 에 `WebAppLink`·`LegalLink`·`GuideLink` 가 이미 링크 상수 정본으로 살아 그 자리의 형제가 된다. 이러면 순수 뷰 코드가 한 줄도 안 바뀐 채 옮겨가 3-라 의 "옮길 땐 옮기기만 한다" 제한도 유지된다.
+
+**나머지 항목** — 변경 없음.
