@@ -8,6 +8,7 @@
 
 import SwiftUI
 import AppIntents
+import Domain
 
 
 @available(iOS 18.0, *)
@@ -43,7 +44,7 @@ enum AIEntryTarget: String, AppEnum {
     var link: URL? {
         switch self {
         case .commandInput:
-            return URL(string: "\(AppEnvironment.appScheme)://calendar/ai")
+            return URL(string: "\(AppDeepLink.scheme)://calendar/ai")
         }
     }
 
