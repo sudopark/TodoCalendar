@@ -33,14 +33,15 @@ struct EventAndForemostWidgetView: View {
         case .success(let model):
             let eventColorSet = model.event.widgetSetting.background.colorSet(colorScheme == .light)
             let foremostColorSet = model.foremost.widgetSetting.background.colorSet(colorScheme == .light)
-            HStack(alignment: .center, spacing: 12) {
-                EventListView(model: model.event) { todo in
+            EventAndForemostWidgetContentView(
+                model: model,
+                todoToggle: { todo in
                     AnyView(TodoToggleButton(todo: todo, colorSet: eventColorSet))
-                }
-                SystemSizeForemostEventView(model: model.foremost, isSmallSize: true) { todo in
+                },
+                foremostTodoToggle: { todo in
                     AnyView(ForemostTodoToggleButton(todo: todo, colorSet: foremostColorSet))
                 }
-            }
+            )
         case .failure(let error):
             FailView(errorModel: error)
         }

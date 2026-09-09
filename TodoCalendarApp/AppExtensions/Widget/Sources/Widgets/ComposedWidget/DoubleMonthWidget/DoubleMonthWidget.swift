@@ -19,11 +19,6 @@ import WidgetScenes
 
 struct DoubleMonthWidgetView: View {
     
-    @Environment(\.colorScheme) var colorScheme
-    var colorSet: any ColorSet {
-        return colorScheme == .light ? DefaultLightColorSet() : DefaultDarkColorSet()
-    }
-    
     private let entry: ResultTimelineEntry<DoubleMonthWidgetViewModel>
     init(entry: ResultTimelineEntry<DoubleMonthWidgetViewModel>) {
         self.entry = entry
@@ -32,10 +27,7 @@ struct DoubleMonthWidgetView: View {
     var body: some View {
         switch self.entry.result {
         case .success(let model):
-            HStack {
-                SingleMonthView(model: model.current)
-                SingleMonthView(model: model.next)
-            }
+            DoubleMonthWidgetContentView(model: model)
         case .failure(let error):
             FailView(errorModel: error)
         }
