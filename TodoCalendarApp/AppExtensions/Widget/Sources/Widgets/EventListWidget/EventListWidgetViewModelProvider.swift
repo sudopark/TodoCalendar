@@ -13,277 +13,105 @@ import Optics
 import Domain
 import Extensions
 import CalendarPresentation
+import WidgetScenes
 
 
-// MARK: - EventListWidgetViewModel
+// MARK: - SectionModel.Builder
 
-enum EventListWidgetSize {
-    case small
-    case medium
-    case large
-    
+extension EventListWidgetViewModel.SectionModel {
+
+    struct Builder {
+        let calendar: Calendar
+        let timeZone: TimeZone
+        let is24Form: Bool
+        let events: CalendarEvents
+        
+        func makeCurrentTodoListModel(
+            _ events: [TodoCalendarEvent],
+            _ range: Range<TimeInterval>
+        ) -> EventListWidgetViewModel.SectionModel? {
+            let models: [any EventCellViewModel] = events
+                .sortedByCreateTime()
+                .compactMap {
+                    TodoEventCellViewModel($0, in: range, self.timeZone, self.is24Form)
+                }
+            guard !models.isEmpty else { return nil }
+            return .init(
+                title: "widget.events.currentTodos".localized(),
+                events: models,
+                shouldAccentTitle: true,
+                isCurrentTodos: true
+            )
+        }
+        
+        func make(
+            events: [any CalendarEvent],
+            in range: Range<TimeInterval>,
+            size: Int
+        ) -> [EventListWidgetViewModel.SectionModel] {
+            
+            let start = Date(timeIntervalSince1970: range.lowerBound)
+            
+            let gatherEventsPerDay: (Int) -> EventListWidgetViewModel.SectionModel? = { offset in
+                guard let dayRange = calendar.addDays(offset, from: start).flatMap(calendar.dayRange(_:))
+                else { return nil }
+                
+                let eventsThisDay = events
+                    .filter { $0.eventTime?.isOverlap(with: dayRange, in: self.timeZone) ?? false }
+                    .sortedByEventTime()
+                let models = eventsThisDay.compactMap { event -> (any EventCellViewModel)? in
+                    switch event {
+                    case let todo as TodoCalendarEvent:
+                        return TodoEventCellViewModel(todo, in: dayRange, timeZone, is24Form)
+                    case let schedule as ScheduleCalendarEvent:
+                        return ScheduleEventCellViewModel(schedule, in: dayRange, timeZone: timeZone, is24Form)
+                    case let holiday as HolidayCalendarEvent:
+                        return HolidayEventCellViewModel(holiday)
+                    case let google as GoogleCalendarEvent:
+                        return GoogleCalendarEventCellViewModel(google, in: dayRange, timeZone, is24Form)
+                    case let apple as AppleCalendarEvent:
+                        return AppleCalendarEventCellViewModel(apple, in: dayRange, timeZone, is24Form)
+                    default: return nil
+                    }
+                }
+                
+                guard offset == 0 || !models.isEmpty else { return nil }
+
+                let dateText = Date(timeIntervalSince1970: dayRange.lowerBound)
+                    .text("date_form.EEE_MMM_d".localized(), timeZone: timeZone)
+                return .init(
+                    title: dateText,
+                    events: models,
+                    shouldAccentTitle: offset == 0,
+                    isCurrentDay: offset == 0
+                )
+            }
+            
+            let models = (0..<size+1).compactMap(gatherEventsPerDay)
+            if models.isEmpty {
+                let dateText = Date(timeIntervalSince1970: start.timeIntervalSince1970)
+                    .text("date_form.EEE_MMM_d".localized(), timeZone: timeZone)
+                let startDateModel = EventListWidgetViewModel.SectionModel(
+                    title: dateText, events: [],
+                    shouldAccentTitle: true,
+                    isCurrentDay: true
+                )
+                return [startDateModel]
+            }
+            return models
+        }
+    }
+}
+
+
+extension EventListWidgetSize {
+
     init(_ family: WidgetFamily) {
         switch family {
         case .systemSmall: self = .small
         case .systemMedium: self = .medium
         case .systemLarge: self = .large
         default: self = .large
-        }
-    }
-}
-
-struct EventListWidgetViewModel {
-    
-    struct SectionModel {
-        var sectionTitle: String?
-        var events: [any EventCellViewModel]
-        var shouldAccentTitle: Bool = false
-        var isCurrentDay = false
-        var isCurrentTodos = false
-        
-        init(
-            title: String?,
-            events: [any EventCellViewModel],
-            shouldAccentTitle: Bool = false,
-            isCurrentDay: Bool = false,
-            isCurrentTodos: Bool = false
-        ) {
-            self.sectionTitle = title
-            self.events = events
-            self.shouldAccentTitle = shouldAccentTitle
-            self.isCurrentDay = isCurrentDay
-            self.isCurrentTodos = isCurrentTodos
-        }
-        
-        fileprivate struct Builder {
-            let calendar: Calendar
-            let timeZone: TimeZone
-            let is24Form: Bool
-            let events: CalendarEvents
-            
-            func makeCurrentTodoListModel(
-                _ events: [TodoCalendarEvent],
-                _ range: Range<TimeInterval>
-            ) -> SectionModel? {
-                let models: [any EventCellViewModel] = events
-                    .sortedByCreateTime()
-                    .compactMap {
-                        TodoEventCellViewModel($0, in: range, self.timeZone, self.is24Form)
-                    }
-                guard !models.isEmpty else { return nil }
-                return .init(
-                    title: "widget.events.currentTodos".localized(),
-                    events: models,
-                    shouldAccentTitle: true,
-                    isCurrentTodos: true
-                )
-            }
-            
-            func make(
-                events: [any CalendarEvent],
-                in range: Range<TimeInterval>,
-                size: Int
-            ) -> [SectionModel] {
-                
-                let start = Date(timeIntervalSince1970: range.lowerBound)
-                
-                let gatherEventsPerDay: (Int) -> EventListWidgetViewModel.SectionModel? = { offset in
-                    guard let dayRange = calendar.addDays(offset, from: start).flatMap(calendar.dayRange(_:))
-                    else { return nil }
-                    
-                    let eventsThisDay = events
-                        .filter { $0.eventTime?.isOverlap(with: dayRange, in: self.timeZone) ?? false }
-                        .sortedByEventTime()
-                    let models = eventsThisDay.compactMap { event -> (any EventCellViewModel)? in
-                        switch event {
-                        case let todo as TodoCalendarEvent:
-                            return TodoEventCellViewModel(todo, in: dayRange, timeZone, is24Form)
-                        case let schedule as ScheduleCalendarEvent:
-                            return ScheduleEventCellViewModel(schedule, in: dayRange, timeZone: timeZone, is24Form)
-                        case let holiday as HolidayCalendarEvent:
-                            return HolidayEventCellViewModel(holiday)
-                        case let google as GoogleCalendarEvent:
-                            return GoogleCalendarEventCellViewModel(google, in: dayRange, timeZone, is24Form)
-                        case let apple as AppleCalendarEvent:
-                            return AppleCalendarEventCellViewModel(apple, in: dayRange, timeZone, is24Form)
-                        default: return nil
-                        }
-                    }
-                    
-                    guard offset == 0 || !models.isEmpty else { return nil }
-
-                    let dateText = Date(timeIntervalSince1970: dayRange.lowerBound)
-                        .text("date_form.EEE_MMM_d".localized(), timeZone: timeZone)
-                    return .init(
-                        title: dateText,
-                        events: models,
-                        shouldAccentTitle: offset == 0,
-                        isCurrentDay: offset == 0
-                    )
-                }
-                
-                let models = (0..<size+1).compactMap(gatherEventsPerDay)
-                if models.isEmpty {
-                    let dateText = Date(timeIntervalSince1970: start.timeIntervalSince1970)
-                        .text("date_form.EEE_MMM_d".localized(), timeZone: timeZone)
-                    let startDateModel = SectionModel(
-                        title: dateText, events: [],
-                        shouldAccentTitle: true,
-                        isCurrentDay: true
-                    )
-                    return [startDateModel]
-                }
-                return models
-            }
-        }
-    }
-    struct PageModel {
-        var sections: [SectionModel]
-        var needBottomSpace: Bool = false
-        
-        mutating func append(section: SectionModel) {
-            self.sections.append(section)
-        }
-        
-        mutating func append(event: any EventCellViewModel) {
-            guard !self.sections.isEmpty else { return }
-            self.sections[self.sections.count-1].events.append(event)
-        }
-    }
-    
-    var pages: [PageModel]
-    let defaultTagColorSetting: DefaultEventTagColorSetting
-    let customTagMap: [String: any EventTag]
-    var googleCalendarColors: GoogleCalendar.Colors = .init(ownerId: "", calendars: [:], events: [:])
-    var googleCalendarTags: [String: GoogleCalendar.Tag] = [:]
-    var appleCalendarTags: [String: AppleCalendar.Tag] = [:]
-    var widgetSetting: WidgetAppearanceSettings = .init()
-    
-    static func sample(size: EventListWidgetSize) -> EventListWidgetViewModel {
-        
-        let runningEvent = ScheduleEventCellViewModel("running", name: "🏃‍♂️ \("widget.events.sample::running".localized())")
-            |> \.periodText .~ .singleText(.init(text: "8:00"))
-        
-        let lunchEvent = ScheduleEventCellViewModel("lunch", name: "🍔 \("widget.events.sample::luch".localized())")
-            |> \.periodText .~ .singleText(.init(text: "1:00"))
-        
-        let callTodoEvent = TodoEventCellViewModel("call", name: "📞 \("Call Sara".localized())")
-            |> \.periodText .~ .singleText(.init(text: "3:00"))
-        
-        let surfingEvent = ScheduleEventCellViewModel("surfing", name: "🏄‍♂️ \("widget.events.sample::surfing".localized())")
-            |> \.periodText .~ .singleText(.init(text: "calendar::event_time::allday".localized()))
-        
-        let meeting = ScheduleEventCellViewModel("meeting", name: "widget.events.sample::meeting".localized())
-        |> \.periodText .~ .singleText(.init(text: "10:00"))
-        
-        let golf = ScheduleEventCellViewModel("golf", name: "widget.weeks.sample::golf".localized())
-        |> \.periodText .~ .singleText(.init(text: "calendar::event_time::allday".localized()))
-        
-        let recycle = TodoEventCellViewModel("recycle", name: "widget.events.sample::recycle".localized())
-        |> \.periodText .~ .singleText(.init(text: "8:00"))
-        
-        let takeMedicine = TodoEventCellViewModel("take", name: "widget.events.sample::take_medicine".localized())
-        |> \.periodText .~ .singleText(.init(text: "9:00"))
-        
-        let watering = TodoEventCellViewModel("water", name: "widget.events.sample::watering".localized())
-        |> \.periodText .~ .singleText(.init(text: "12:00"))
-        
-        let holiday = HolidayEventCellViewModel(
-            .init(.init(uuid: "hd", dateString: "2023-10-10", name: "widget.weeks.sample::holiday".localized()), in: .current)!
-        )
-        
-        let defaultTagColorSetting = DefaultEventTagColorSetting(
-            holiday: "#D6236A", default: "#088CDA"
-        )
-        
-        switch size {
-        case .small:
-            let june3 = SectionModel(
-                title: "widget.events.sample::june3".localized(),
-                events: [ lunchEvent, callTodoEvent ],
-                shouldAccentTitle: true
-            )
-            
-            let july = SectionModel(title: "widget.events.sample::july16".localized(), events: [
-                runningEvent, surfingEvent
-            ])
-            return .init(
-                pages: [
-                    .init(sections: [june3, july])
-                ],
-                defaultTagColorSetting: defaultTagColorSetting, customTagMap: [:]
-            )
-            
-        case .medium:
-            let june3 = SectionModel(
-                title: "widget.events.sample::june3".localized(),
-                events: [ lunchEvent, callTodoEvent ],
-                shouldAccentTitle: true
-            )
-            
-            let july = SectionModel(title: "widget.events.sample::july16".localized(), events: [
-                runningEvent, surfingEvent
-            ])
-            let july21 = SectionModel(
-                title: "widget.events.sample::july21".localized(), events: [
-                    meeting
-                ]
-            )
-            let oct = SectionModel(
-                title: "widget.events.sample::oct10".localized(), events: [
-                    holiday
-                ]
-            )
-            return .init(
-                pages: [
-                    .init(sections: [june3, july]),
-                    .init(sections: [july21, oct], needBottomSpace: true)
-                ],
-                defaultTagColorSetting: defaultTagColorSetting, customTagMap: [:]
-            )
-            
-        case .large:
-            let june3 = SectionModel(
-                title: "widget.events.sample::june3".localized(),
-                events: [ runningEvent, lunchEvent, callTodoEvent ],
-                shouldAccentTitle: true
-            )
-            
-            let july = SectionModel(title: "widget.events.sample::july16".localized(), events: [
-                runningEvent, surfingEvent
-            ])
-            let july21 = SectionModel(
-                title: "widget.events.sample::july21".localized(), events: [
-                    meeting
-                ]
-            )
-            let july27 = SectionModel(
-                title: "widget.events.sample::july29".localized(), events: [
-                    golf, recycle
-                ]
-            )
-            let aug2 = SectionModel(
-                title: "widget.events.sample::aug2".localized(), events: [
-                    takeMedicine, meeting
-                ]
-            )
-            let aug3 = SectionModel(
-                title: "widget.events.sample::aug3".localized(), events: [
-                    watering
-                ]
-            )
-            let oct = SectionModel(
-                title: "widget.events.sample::oct10".localized(), events: [
-                    holiday
-                ]
-            )
-            return .init(
-                pages: [
-                    .init(sections: [june3, july, july21, july27]),
-                    .init(sections: [aug2, aug3, oct], needBottomSpace: true)
-                ],
-                defaultTagColorSetting: defaultTagColorSetting, customTagMap: [:]
-            )
         }
     }
 }

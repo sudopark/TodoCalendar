@@ -14,6 +14,7 @@ import Domain
 import Extensions
 import CommonPresentation
 import CalendarPresentation
+import WidgetScenes
 
 
 // MARK: - EventAndForemostWidgetView
@@ -30,9 +31,15 @@ struct EventAndForemostWidgetView: View {
     var body: some View {
         switch self.entry.result {
         case .success(let model):
+            let eventColorSet = model.event.widgetSetting.background.colorSet(colorScheme == .light)
+            let foremostColorSet = model.foremost.widgetSetting.background.colorSet(colorScheme == .light)
             HStack(alignment: .center, spacing: 12) {
-                EventListView(model: model.event)
-                SystemSizeForemostEventView(model: model.foremost, isSmallSize: true)
+                EventListView(model: model.event) { todo in
+                    AnyView(TodoToggleButton(todo: todo, colorSet: eventColorSet))
+                }
+                SystemSizeForemostEventView(model: model.foremost, isSmallSize: true) { todo in
+                    AnyView(ForemostTodoToggleButton(todo: todo, colorSet: foremostColorSet))
+                }
             }
         case .failure(let error):
             FailView(errorModel: error)

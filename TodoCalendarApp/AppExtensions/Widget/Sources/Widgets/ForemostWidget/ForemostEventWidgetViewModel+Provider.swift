@@ -12,29 +12,7 @@ import Optics
 import Domain
 import Extensions
 import CalendarPresentation
-
-
-// MARK: - ForemostEventWidgetViewModel
-
-struct ForemostEventWidgetViewModel {
-    
-    var eventModel: (any EventCellViewModel)?
-    let defaultTagColorSetting: DefaultEventTagColorSetting
-    var tag: CustomEventTag?
-    var widgetSetting = WidgetAppearanceSettings()
-    
-    static func sample() -> ForemostEventWidgetViewModel {
-        
-        let event = TodoEventCellViewModel("tood", name: "widget.events.foremost::sample::message".localized())
-            |> \.periodText .~ .doubleText(
-                .init(text: "calendar::event_time::todo".localized()), .init(text: "13:00")
-            )
-        let defaultTagColorSetting = DefaultEventTagColorSetting(
-            holiday: "#D6236A", default: "#088CDA"
-        )
-        return .init(eventModel: event, defaultTagColorSetting: defaultTagColorSetting)
-    }
-}
+import WidgetScenes
 
 
 // MARK: ForemostEventWidgetViewModelProvider
