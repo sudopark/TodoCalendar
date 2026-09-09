@@ -16,12 +16,6 @@ import CalendarPresentation
 import WidgetScenes
 
 
-struct EventAndForemostWidgetViewModel {
-    let event: EventListWidgetViewModel
-    let foremost: ForemostEventWidgetViewModel
-}
-
-
 struct EventAndForemostWidgetViewModelProvider {
     
     private let eventListViewModelProvider: EventListWidgetViewModelProvider

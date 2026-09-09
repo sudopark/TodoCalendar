@@ -15,15 +15,6 @@ import Extensions
 import CalendarPresentation
 import WidgetScenes
 
-
-// MARK: - widgetViewModel
-
-struct DoubleMonthWidgetViewModel {
-    
-    let current: MonthWidgetViewModel
-    let next: MonthWidgetViewModel
-}
-
 struct DoubleMonthWidgetViewModelProvider {
     
     private let settingRepository: any CalendarSettingRepository
