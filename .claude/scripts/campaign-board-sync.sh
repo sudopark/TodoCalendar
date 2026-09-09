@@ -1,5 +1,5 @@
 #!/bin/bash
-# 캠페인 상황판 스풀 sync — 계획·진행 파일을 레포 밖 스풀로 복사한다.
+# 캠페인 상황판 sync — 계획·진행 파일을 레포 밖 스풀로 복사하고 정적 미러를 다시 렌더한다.
 # 부수 작업이라 어떤 실패도 본 절차를 막지 않는다 (항상 exit 0, stderr 로만 남긴다).
 ISSUE="$1"
 BOARD="${CAMPAIGN_BOARD_DIR:-$HOME/.claude/campaign-board}"
@@ -18,4 +18,22 @@ for SRC in "$REPO/docs/operations/$ISSUE/campaign.md" \
   [ -f "$SRC" ] || continue
   cp "$SRC" "$DEST/" 2>/dev/null || echo "campaign-board-sync: 복사 실패 — $SRC" >&2
 done
+
+# 스풀만 갱신하면 화면은 옛 상태로 남는다 — 렌더까지가 한 호출이다.
+RENDERED=0
+if [ -f "$BOARD/render.py" ]; then
+  if python3 "$BOARD/render.py" >/dev/null 2>&1; then
+    RENDERED=1
+  else
+    echo "campaign-board-sync: 렌더 실패 — 재게시 보류" >&2
+  fi
+fi
+
+# 원격 미러는 Artifact tool 이 필요해 스크립트가 못 한다 — 호출자에게 남은 한 걸음을 지시한다.
+# 이번 호출이 실제로 렌더한 board.html 일 때만 지시한다 — 렌더가 실패하면 파일은 남아도 옛 내용이다.
+URL=""
+[ -s "$BOARD/artifact-url.txt" ] && URL=$(tr -d '\r\n' < "$BOARD/artifact-url.txt")
+if [ "$RENDERED" -eq 1 ] && [ -n "$URL" ] && [ -f "$BOARD/board.html" ]; then
+  echo "재게시 필요: $BOARD/board.html 을 $URL 로 Artifact 재게시하라"
+fi
 exit 0

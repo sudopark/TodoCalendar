@@ -1,5 +1,5 @@
 #!/bin/bash
-# campaign-board-sync.sh 회귀 테스트 — 스풀 부재 no-op·부분 복사·전체 복사·실패 비차단 검증
+# campaign-board-sync.sh 회귀 테스트 — 스풀 부재 no-op·부분 복사·전체 복사·렌더·재게시 지시 게이팅·실패 비차단 검증
 cd "$(dirname "$0")" || exit 1
 PASS=0; FAIL=0
 
@@ -58,7 +58,46 @@ assert_eq "failure_still_exit0" "0" "$RC"
 assert_no_file "failure_creates_nothing" "$BOARD/state/503"
 case "$ERR" in *"생성 실패"*) PASS=$((PASS+1));; *) FAIL=$((FAIL+1)); echo "FAIL: failure_stderr_message — [$ERR]";; esac
 
-# 5. 인자 없음 → exit 0 + stderr 안내
+# 5. 렌더 호출 — render.py 가 있으면 sync 가 함께 돌린다
+cat > "$BOARD/render.py" <<'PY'
+import pathlib, sys
+pathlib.Path(pathlib.Path(__file__).parent / "board.html").write_text("rendered")
+PY
+CAMPAIGN_BOARD_DIR="$BOARD" REPO_ROOT="$REPO" bash campaign-board-sync.sh 500 >/dev/null 2>&1
+assert_file "render_invoked" "$BOARD/board.html"
+assert_eq "render_output" "rendered" "$(cat "$BOARD/board.html")"
+
+# 6. 재게시 지시 줄 — artifact-url.txt 가 있을 때만 stdout 에 나온다
+OUT=$(CAMPAIGN_BOARD_DIR="$BOARD" REPO_ROOT="$REPO" bash campaign-board-sync.sh 500 2>/dev/null)
+assert_eq "no_url_no_directive" "" "$OUT"
+echo "https://claude.ai/code/artifact/abc" > "$BOARD/artifact-url.txt"
+OUT=$(CAMPAIGN_BOARD_DIR="$BOARD" REPO_ROOT="$REPO" bash campaign-board-sync.sh 500 2>/dev/null)
+assert_eq "url_directive" "재게시 필요: $BOARD/board.html 을 https://claude.ai/code/artifact/abc 로 Artifact 재게시하라" "$OUT"
+
+# 7. 빈 URL 파일 → 지시 줄 없음 (URL 자리가 빈 채로 나가면 세션이 빈 주소로 재게시한다)
+: > "$BOARD/artifact-url.txt"
+OUT=$(CAMPAIGN_BOARD_DIR="$BOARD" REPO_ROOT="$REPO" bash campaign-board-sync.sh 500 2>/dev/null)
+assert_eq "empty_url_no_directive" "" "$OUT"
+echo "https://claude.ai/code/artifact/abc" > "$BOARD/artifact-url.txt"
+
+# 8. 렌더 실패 → 비차단(exit 0)이되 지시 줄은 억제한다 — 남아있는 board.html 은 옛 내용이라 재게시하면 안 된다
+echo "STALE" > "$BOARD/board.html"
+echo "import sys; sys.exit(1)" > "$BOARD/render.py"
+OUT=$(CAMPAIGN_BOARD_DIR="$BOARD" REPO_ROOT="$REPO" bash campaign-board-sync.sh 500 2>/dev/null)
+ERR=$(CAMPAIGN_BOARD_DIR="$BOARD" REPO_ROOT="$REPO" bash campaign-board-sync.sh 500 2>&1 >/dev/null)
+RC=$(CAMPAIGN_BOARD_DIR="$BOARD" REPO_ROOT="$REPO" bash campaign-board-sync.sh 500 >/dev/null 2>&1; echo $?)
+assert_eq "render_failure_exit0" "0" "$RC"
+assert_eq "render_failure_no_directive" "" "$OUT"
+assert_eq "render_failure_keeps_stale_file" "STALE" "$(cat "$BOARD/board.html")"
+case "$ERR" in *"렌더 실패"*) PASS=$((PASS+1));; *) FAIL=$((FAIL+1)); echo "FAIL: render_failure_stderr — [$ERR]";; esac
+
+# 9. render.py 부재 → 이번 호출이 렌더한 게 없으니 지시도 없다
+rm "$BOARD/render.py"
+OUT=$(CAMPAIGN_BOARD_DIR="$BOARD" REPO_ROOT="$REPO" bash campaign-board-sync.sh 500 2>/dev/null)
+assert_eq "no_renderer_no_directive" "" "$OUT"
+rm "$BOARD/artifact-url.txt" "$BOARD/board.html"
+
+# 10. 인자 없음 → exit 0 + stderr 안내
 ERR=$(CAMPAIGN_BOARD_DIR="$BOARD" REPO_ROOT="$REPO" bash campaign-board-sync.sh 2>&1 >/dev/null; true)
 RC=$(CAMPAIGN_BOARD_DIR="$BOARD" REPO_ROOT="$REPO" bash campaign-board-sync.sh >/dev/null 2>&1; echo $?)
 assert_eq "no_arg_exit0" "0" "$RC"

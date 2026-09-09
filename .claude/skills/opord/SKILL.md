@@ -120,7 +120,7 @@ description: Use when writing an operation order (작전명령) for a single-PR 
 - 경로: `docs/operations/<이슈번호>/opord.md`. DP 면 `opord-<DP>.md`.
 - 커밋 층과 진행 층을 가른다 — **커밋 층**(1~5절·부록 A~D)은 초안 커밋(실행 브랜치 첫 커밋)과 단편명령(부록 D) 반영 때만 커밋한다. **진행**(명령 상태·태스크 진행)은 진행 파일(§8)에 자유 갱신하고 커밋하지 않는다 — 상태 전용 커밋을 만들지 않는다 (#1043 e1d38c9b 재발 방지).
 - 이슈 본문 = 커밋 층 전문 + `<!-- progress -->` 블록. 초안 저장 직후·재가 직후와 진행 갱신마다 재조립한다 — opord.md 와 progress.md 를 이어 붙여 `gh issue edit <N> --body-file <합본>`. 별도 요약 코멘트는 없다(kickoff A-4 갈음). 마커 코멘트도 없다 — 본문 자체가 최신 확정 상태다. 보고 봇 코멘트(확인보고·종결보고 등 게시 줄이 ○인 것)는 이 금지의 대상이 아니다 — 그건 히스토리 층이다(issue 스킬).
-- 상황판 스풀 동기화가 미러와 짝이다 — 미러를 재조립할 때마다 `.claude/scripts/campaign-board-sync.sh <이슈번호>` 를 함께 호출하고, `~/.claude/campaign-board/artifact-url.txt` 가 있으면 `~/.claude/campaign-board/render.py` 출력을 그 URL 로 Artifact 재게시한다 — 둘 다 실패 비차단이라 절차를 막지 않는다.
+- 상황판 동기화가 미러와 짝이다 — 미러를 재조립할 때마다 `.claude/scripts/campaign-board-sync.sh <이슈번호>` 를 함께 호출한다. 스크립트가 스풀 복사와 정적 렌더까지 하고, 렌더가 성공했고 원격 미러가 개통돼 있을 때만 `재게시 필요:` 줄을 뱉는다 — 그 줄이 나오면 지시한 파일을 지시한 URL 로 Artifact 재게시하는 것까지가 한 재조립이다. 줄을 흘리면 원격 미러만 스풀보다 뒤처져 유저가 옛 상태를 본다. 실패 비차단이라 절차를 막지 않는다.
 - 부록 A Step 체크박스는 커밋 층에선 실행 지시서 원형([ ]) 그대로 두고, 미러 재조립 시 진행 파일 기준 완료된 태스크의 Step 만 [x] 로 치환해 싣는다 — 갱신 주체·시점은 태스크 완료(implement)다.
 
 ## 8. 진행 파일 ↔ SDD ledger
