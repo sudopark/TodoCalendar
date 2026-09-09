@@ -97,5 +97,15 @@ RC=$(CAMPAIGN_BOARD_DIR="$BOARD" REPO_ROOT="$REPO" bash campaign-board-sync.sh >
 assert_eq "no_arg_exit0" "0" "$RC"
 case "$ERR" in *"이슈번호"*) PASS=$((PASS+1));; *) FAIL=$((FAIL+1)); echo "FAIL: no_arg_stderr_message — [$ERR]";; esac
 
+# 10. 원본 파일이 하나도 없는 이슈 → exit 0 유지 + stderr 경고 (조용한 no-op 금지)
+ERR=$(CAMPAIGN_BOARD_DIR="$BOARD" REPO_ROOT="$REPO" bash campaign-board-sync.sh 999 2>&1 >/dev/null; true)
+RC=$(CAMPAIGN_BOARD_DIR="$BOARD" REPO_ROOT="$REPO" bash campaign-board-sync.sh 999 >/dev/null 2>&1; echo $?)
+assert_eq "no_source_exit0" "0" "$RC"
+case "$ERR" in *"원본이"*) PASS=$((PASS+1));; *) FAIL=$((FAIL+1)); echo "FAIL: no_source_stderr_warning — [$ERR]";; esac
+
+# 11. 원본이 있는 정상 호출은 경고 없음 (10번의 경고가 정상 경로를 오염하지 않는다)
+ERR=$(CAMPAIGN_BOARD_DIR="$BOARD" REPO_ROOT="$REPO" bash campaign-board-sync.sh 501 2>&1 >/dev/null; true)
+case "$ERR" in *"원본이"*) FAIL=$((FAIL+1)); echo "FAIL: source_present_no_warning — [$ERR]";; *) PASS=$((PASS+1));; esac
+
 echo "PASS=$PASS FAIL=$FAIL"
 [ "$FAIL" -eq 0 ]

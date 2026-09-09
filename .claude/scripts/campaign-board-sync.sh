@@ -11,14 +11,17 @@ REPO="${REPO_ROOT:-$(cd "$(dirname "$0")/../.." && pwd)}"
 DEST="$BOARD/state/$ISSUE"
 mkdir -p "$DEST" 2>/dev/null || { echo "campaign-board-sync: $DEST 생성 실패" >&2; exit 0; }
 
+COPIED=0
 for SRC in "$REPO/docs/operations/$ISSUE/campaign.md" \
            "$REPO/docs/operations/$ISSUE"/opord*.md \
            "$REPO/.operations/$ISSUE/campaign-progress.md" \
            "$REPO/.operations/$ISSUE/progress.md" \
            "$REPO/.operations/$ISSUE/activity.md"; do
   [ -f "$SRC" ] || continue
-  cp "$SRC" "$DEST/" 2>/dev/null || echo "campaign-board-sync: 복사 실패 — $SRC" >&2
+  if cp "$SRC" "$DEST/" 2>/dev/null; then COPIED=$((COPIED+1)); else echo "campaign-board-sync: 복사 실패 — $SRC" >&2; fi
 done
+# 원본 0건은 정상 no-op 이 아니다 — 계획 파일이 없는 워크트리에서 부른 잘못된 호출일 가능성이 높다
+[ "$COPIED" -eq 0 ] && echo "campaign-board-sync: $ISSUE 원본이 이 워크트리에 하나도 없다 — 스풀이 갱신되지 않았다" >&2
 
 # 스풀만 갱신하면 화면은 옛 상태로 남는다 — 렌더까지가 한 호출이다.
 if [ -f "$BOARD/render.py" ]; then
