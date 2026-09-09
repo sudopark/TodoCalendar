@@ -1,6 +1,6 @@
 //
-//  WeekEventsView.swift
-//  TodoCalendarApp
+//  WeekEventsViews.swift
+//  WidgetScenes
 //
 //  Created by sudo.park on 7/3/24.
 //  Copyright © 2024 com.sudo.park. All rights reserved.
@@ -15,7 +15,7 @@ import CalendarPresentation
 
 // MARK: - WeekEventsView
 
-struct WeekEventsView: View {
+public struct WeekEventsView: View {
     
     private enum Metric {
         static let eventRowHeightWithSpacing: CGFloat = 10
@@ -30,13 +30,13 @@ struct WeekEventsView: View {
     
     private let model: WeekEventsViewModel
     
-    init(
+    public init(
         model: WeekEventsViewModel
     ) {
         self.model = model
     }
     
-    var body: some View {
+    public var body: some View {
         VStack(alignment: .leading) {
             monthInfoView
             
