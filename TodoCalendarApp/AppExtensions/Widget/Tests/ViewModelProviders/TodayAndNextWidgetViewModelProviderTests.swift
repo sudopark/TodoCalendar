@@ -14,6 +14,7 @@ import Extensions
 import CalendarPresentation
 import UnitTestHelpKit
 import TestDoubles
+import WidgetScenes
 
 
 // MARK: - TodayAndNextWidgetViewModelBuilderTests
