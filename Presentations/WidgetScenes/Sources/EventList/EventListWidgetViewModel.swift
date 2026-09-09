@@ -219,3 +219,5 @@ public struct EventListWidgetViewModel {
         }
     }
 }
+
+extension EventListWidgetViewModel: EventColorMaterials { }
