@@ -87,7 +87,7 @@ public final class SharedDataStore: @unchecked Sendable {
 
 | 항목 | 값 |
 |---|---|
-| 스킴 | `tc.app` (`AppEnvironment.appScheme`) |
+| 스킴 | `tc.app` (`AppDeepLink.scheme`) |
 | 호스트 | `calendar` |
 | 처리 | `ApplicationDeepLinkHandlerImple` |
 

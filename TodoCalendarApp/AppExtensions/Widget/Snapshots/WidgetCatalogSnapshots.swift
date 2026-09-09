@@ -104,6 +104,30 @@ final class WidgetCatalogSnapshots: XCTestCase {
     }
 
     @MainActor
+    func test_widgetEventAndForemost() {
+        self.capture("widget-event-and-foremost", family: .systemMedium, canvas: WidgetCanvas.medium) {
+            let model = EventAndForemostWidgetViewModel(
+                event: .sample(size: .medium), foremost: .sample()
+            )
+            return EventAndForemostWidgetView(
+                entry: ResultTimelineEntry(date: Date(), result: .success(model))
+            )
+        }
+    }
+
+    @MainActor
+    func test_widgetEventAndMonth() {
+        self.capture("widget-event-and-month", family: .systemMedium, canvas: WidgetCanvas.medium) {
+            let model = EventAndMonthWidgetViewModel(
+                event: .sample(size: .medium), month: try! MonthWidgetViewModel.makeSample()
+            )
+            return EventAndMonthWidgetView(
+                entry: ResultTimelineEntry(date: Date(), result: .success(model))
+            )
+        }
+    }
+
+    @MainActor
     func test_widgetToday() {
         self.capture("widget-today", family: .systemSmall, canvas: WidgetCanvas.small) {
             TodayWidgetView(
