@@ -485,7 +485,6 @@
 "setting.appearance.widget::useSystemTheme::title" = "Использовать системную тему";
 "setting.appearance.widget::useSystemTheme::background" = "Цвет фона виджета";
 "setting.appearance.widget::useCustomTheme::title" = "Выбрать свой цвет";
-"setting.appearance.widget::sample::eventName" = "Событие виджета";
 "setting.appearance.event.boldText" = "Жирный текст";
 "setting.appearance.event.eventColor" = "Цвет события";
 "setting.timezone::title" = "Часовой пояс";

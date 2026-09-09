@@ -486,7 +486,6 @@
 "setting.appearance.widget::useSystemTheme::title" = "Använd systemtema";
 "setting.appearance.widget::useSystemTheme::background" = "Bakgrundsfärg för widget";
 "setting.appearance.widget::useCustomTheme::title" = "Välj anpassad färg";
-"setting.appearance.widget::sample::eventName" = "Widget-händelse";
 "setting.appearance.event.boldText" = "Fet text";
 "setting.appearance.event.eventColor" = "Händelsefärg";
 "setting.timezone::title" = "Tidszon";

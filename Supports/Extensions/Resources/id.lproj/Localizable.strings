@@ -486,7 +486,6 @@
 "setting.appearance.widget::useSystemTheme::title" = "Gunakan tema sistem";
 "setting.appearance.widget::useSystemTheme::background" = "Warna latar belakang widget";
 "setting.appearance.widget::useCustomTheme::title" = "Pilih warna kustom";
-"setting.appearance.widget::sample::eventName" = "Acara Widget";
 "setting.appearance.event.boldText" = "Teks tebal";
 "setting.appearance.event.eventColor" = "Warna acara";
 "setting.timezone::title" = "Zona Waktu";

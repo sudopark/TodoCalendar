@@ -486,7 +486,6 @@
 "setting.appearance.widget::useSystemTheme::title" = "Rendszertéma használata";
 "setting.appearance.widget::useSystemTheme::background" = "Widget háttérszíne";
 "setting.appearance.widget::useCustomTheme::title" = "Egyéni szín kiválasztása";
-"setting.appearance.widget::sample::eventName" = "Widget esemény";
 "setting.appearance.event.boldText" = "Félkövér szöveg";
 "setting.appearance.event.eventColor" = "Esemény színe";
 "setting.timezone::title" = "Időzóna";

@@ -486,7 +486,6 @@
 "setting.appearance.widget::useSystemTheme::title" = "Utilitza el tema del sistema";
 "setting.appearance.widget::useSystemTheme::background" = "Color de fons del widget";
 "setting.appearance.widget::useCustomTheme::title" = "Selecciona un color personalitzat";
-"setting.appearance.widget::sample::eventName" = "Esdeveniment del widget";
 "setting.appearance.event.boldText" = "Text en negreta";
 "setting.appearance.event.eventColor" = "Color de l'esdeveniment";
 "setting.timezone::title" = "Fus horari";

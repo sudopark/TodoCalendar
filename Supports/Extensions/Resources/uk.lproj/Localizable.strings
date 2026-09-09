@@ -485,7 +485,6 @@
 "setting.appearance.widget::useSystemTheme::title" = "Використовувати системну тему";
 "setting.appearance.widget::useSystemTheme::background" = "Колір фону віджета";
 "setting.appearance.widget::useCustomTheme::title" = "Вибрати свій колір";
-"setting.appearance.widget::sample::eventName" = "Подія віджета";
 "setting.appearance.event.boldText" = "Жирний текст";
 "setting.appearance.event.eventColor" = "Колір події";
 "setting.timezone::title" = "Часовий пояс";

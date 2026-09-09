@@ -485,7 +485,6 @@
 "setting.appearance.widget::useSystemTheme::title" = "使用系統主題";
 "setting.appearance.widget::useSystemTheme::background" = "小工具背景色";
 "setting.appearance.widget::useCustomTheme::title" = "選擇自訂色彩";
-"setting.appearance.widget::sample::eventName" = "小工具活動";
 "setting.appearance.event.boldText" = "粗體文字";
 "setting.appearance.event.eventColor" = "活動色彩";
 "setting.timezone::title" = "時區";

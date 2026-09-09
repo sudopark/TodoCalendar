@@ -486,7 +486,6 @@
 "setting.appearance.widget::useSystemTheme::title" = "Systemdesign verwenden";
 "setting.appearance.widget::useSystemTheme::background" = "Widget-Hintergrundfarbe";
 "setting.appearance.widget::useCustomTheme::title" = "Eigene Farbe auswählen";
-"setting.appearance.widget::sample::eventName" = "Widget-Ereignis";
 "setting.appearance.event.boldText" = "Fetter Text";
 "setting.appearance.event.eventColor" = "Ereignisfarbe";
 "setting.timezone::title" = "Zeitzone";

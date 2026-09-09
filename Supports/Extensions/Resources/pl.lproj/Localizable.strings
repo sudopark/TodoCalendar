@@ -485,7 +485,6 @@
 "setting.appearance.widget::useSystemTheme::title" = "Użyj motywu systemowego";
 "setting.appearance.widget::useSystemTheme::background" = "Kolor tła widżetu";
 "setting.appearance.widget::useCustomTheme::title" = "Wybierz własny kolor";
-"setting.appearance.widget::sample::eventName" = "Wydarzenie widżetu";
 "setting.appearance.event.boldText" = "Pogrubiony tekst";
 "setting.appearance.event.eventColor" = "Kolor wydarzenia";
 "setting.timezone::title" = "Strefa czasowa";

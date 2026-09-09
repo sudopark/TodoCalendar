@@ -486,7 +486,6 @@
 "setting.appearance.widget::useSystemTheme::title" = "Folosește tema sistemului";
 "setting.appearance.widget::useSystemTheme::background" = "Culoarea fundalului widgetului";
 "setting.appearance.widget::useCustomTheme::title" = "Selectează o culoare personalizată";
-"setting.appearance.widget::sample::eventName" = "Eveniment widget";
 "setting.appearance.event.boldText" = "Text îngroșat";
 "setting.appearance.event.eventColor" = "Culoarea evenimentului";
 "setting.timezone::title" = "Fus orar";

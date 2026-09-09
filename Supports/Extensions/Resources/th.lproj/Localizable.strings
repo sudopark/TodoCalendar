@@ -486,7 +486,6 @@
 "setting.appearance.widget::useSystemTheme::title" = "ใช้ธีมระบบ";
 "setting.appearance.widget::useSystemTheme::background" = "สีพื้นหลังวิดเจ็ต";
 "setting.appearance.widget::useCustomTheme::title" = "เลือกสีกำหนดเอง";
-"setting.appearance.widget::sample::eventName" = "กิจกรรมวิดเจ็ต";
 "setting.appearance.event.boldText" = "ตัวหนา";
 "setting.appearance.event.eventColor" = "สีกิจกรรม";
 "setting.timezone::title" = "เขตเวลา";

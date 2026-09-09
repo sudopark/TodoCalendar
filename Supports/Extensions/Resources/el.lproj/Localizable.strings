@@ -486,7 +486,6 @@
 "setting.appearance.widget::useSystemTheme::title" = "Χρήση θέματος συστήματος";
 "setting.appearance.widget::useSystemTheme::background" = "Χρώμα φόντου widget";
 "setting.appearance.widget::useCustomTheme::title" = "Επιλογή προσαρμοσμένου χρώματος";
-"setting.appearance.widget::sample::eventName" = "Συμβάν widget";
 "setting.appearance.event.boldText" = "Έντονο κείμενο";
 "setting.appearance.event.eventColor" = "Χρώμα συμβάντος";
 "setting.timezone::title" = "Ζώνη ώρας";
