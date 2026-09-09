@@ -4,6 +4,7 @@ import ProjectDescription
 let project = Project.frameworkWithTest(name: "WidgetScenes",
                                         destinations: [.iPhone],
                                         iOSTargetVersion: "17.0",
+                                        snapshotTests: true,
                                         dependencies: [
                                             .project(target: "CalendarPresentation",
                                                      path: .relativeToRoot("Presentations/CalendarPresentation")),
