@@ -119,8 +119,8 @@ description: Use when writing an operation order (작전명령) for a single-PR 
 
 - 경로: `docs/operations/<이슈번호>/opord.md`. DP 면 `opord-<DP>.md`.
 - 커밋 층과 진행 층을 가른다 — **커밋 층**(1~5절·부록 A~D)은 초안 커밋(실행 브랜치 첫 커밋)과 단편명령(부록 D) 반영 때만 커밋한다. **진행**(명령 상태·태스크 진행)은 진행 파일(§8)에 자유 갱신하고 커밋하지 않는다 — 상태 전용 커밋을 만들지 않는다 (#1043 e1d38c9b 재발 방지).
-- 이슈 본문 = 커밋 층 전문 + `<!-- progress -->` 블록. 초안 저장 직후·재가 직후와 진행 갱신마다 재조립한다 — opord.md 와 progress.md 를 이어 붙여 `gh issue edit <N> --body-file <합본>`. 별도 요약 코멘트는 없다(kickoff A-4 갈음). 마커 코멘트도 없다 — 본문 자체가 최신 확정 상태다. 보고 봇 코멘트(확인보고·종결보고 등 게시 줄이 ○인 것)는 이 금지의 대상이 아니다 — 그건 히스토리 층이다(issue 스킬).
-- 상황판 동기화가 미러와 짝이다 — 미러를 재조립할 때마다 `.claude/scripts/campaign-board-sync.sh <이슈번호>` 를 함께 호출한다. 스크립트가 스풀 복사와 정적 렌더까지 하고, 렌더가 성공했고 원격 미러가 개통돼 있을 때만 `재게시 필요:` 줄을 뱉는다 — 그 줄이 나오면 지시한 파일을 지시한 URL 로 Artifact 재게시하는 것까지가 한 재조립이다. 줄을 흘리면 원격 미러만 스풀보다 뒤처져 유저가 옛 상태를 본다. 실패 비차단이라 절차를 막지 않는다.
+- 이슈 본문 = 커밋 층 전문 + `<!-- progress -->` 블록. 초안 저장 직후·재가 직후와 태스크 완료·§6 상태 전이 갱신마다 재조립한다 — 태스크 착수 표기·활동 로그는 board-sync 만 타고 미러 재조립 대상이 아니다(§8·implement §착수) — opord.md 와 progress.md 를 이어 붙여 `gh issue edit <N> --body-file <합본>`. 별도 요약 코멘트는 없다(kickoff A-4 갈음). 마커 코멘트도 없다 — 본문 자체가 최신 확정 상태다. 보고 봇 코멘트(확인보고·종결보고 등 게시 줄이 ○인 것)는 이 금지의 대상이 아니다 — 그건 히스토리 층이다(issue 스킬).
+- 상황판 동기화는 미러보다 잦다 — 미러 재조립 때만이 아니라 **진행 파일·활동 로그(§8)를 쓸 때마다** `.claude/scripts/campaign-board-sync.sh <이슈번호>` 를 짝으로 호출한다 (스크립트가 스풀 복사와 정적 렌더까지 한다, 실패 비차단). Artifact 재게시는 자동으로 하지 않는다 — 유저가 상황판 원격 미러를 요청할 때만 그 세션이 `~/.claude/campaign-board/board.html` 을 `~/.claude/campaign-board/artifact-url.txt` 의 URL 로 수동 재게시한다.
 - 부록 A Step 체크박스는 커밋 층에선 실행 지시서 원형([ ]) 그대로 두고, 미러 재조립 시 진행 파일 기준 완료된 태스크의 Step 만 [x] 로 치환해 싣는다 — 갱신 주체·시점은 태스크 완료(implement)다.
 
 ## 8. 진행 파일 ↔ SDD ledger
@@ -128,9 +128,10 @@ description: Use when writing an operation order (작전명령) for a single-PR 
 둘 다 쓴다 — 층이 다르다:
 
 - **진행 파일 `.operations/<이슈번호>/progress.md`** = 계획 층의 진행 정본 (옛 부록 E 대체). 서식: `<!-- progress -->` 헤딩 + `명령 상태:` 줄 + 태스크 표 `| 태스크 | 상태 | 커밋 | 보고 |` (정기보고 근거). gitignore 대상이지만 이슈 본문 미러로 GitHub 에 남는다 — 다른 세션·워크트리는 이슈 본문에서 복원한다.
+- **활동 로그 `.operations/<이슈번호>/activity.md`** = 실행 층의 실시간 피드 — 상황판 드릴다운이 읽는다. 태스크 착수·GREEN·커밋·보고·블로커처럼 유의미한 활동마다 `- MM-DD HH:MM 내용` 한 줄을 append 한다 (갱신 주체는 implement). gitignore 대상이고 이슈 미러엔 싣지 않는다 — 미러는 확정 상태, 활동 로그는 흐름이다.
 - **SDD `.superpowers/sdd/<plan-basename>/progress.md`** = superpowers 플러그인의 실행 층 장부. ruling·복구·재개용 — 플러그인 소관이라 그대로 둔다.
 
-진행 파일 갱신은 태스크 완료·커밋 시점 + §6 상태 전이 시점, ledger 갱신은 SDD 절차대로.
+진행 파일 갱신은 태스크 상태 전이(착수 시 `실행` 표기 포함)·완료·커밋 시점 + §6 상태 전이 시점, ledger 갱신은 SDD 절차대로.
 
 ## 9. 종료 기록 — skill_end
 
