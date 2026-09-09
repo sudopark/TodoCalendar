@@ -13,6 +13,7 @@ import Optics
 import Domain
 import Extensions
 import CalendarPresentation
+import WidgetScenes
 
 
 struct EventListWidgetTimeLineProvider: AppIntentTimelineProvider {

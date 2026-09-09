@@ -1,6 +1,6 @@
 //
 //  EventTimeText+Extensions.swift
-//  TodoCalendarApp
+//  WidgetScenes
 //
 //  Created by sudo.park on 9/13/25.
 //  Copyright © 2025 com.sudo.park. All rights reserved.
@@ -11,7 +11,7 @@ import CalendarPresentation
 
 extension EventTimeText {
     
-    func singleLineAttrText(fontSize: CGFloat = 12) -> AttributedString {
+    public func singleLineAttrText(fontSize: CGFloat = 12) -> AttributedString {
         var attrText = AttributedString(self.text)
         attrText.font = .systemFont(ofSize: fontSize)
         

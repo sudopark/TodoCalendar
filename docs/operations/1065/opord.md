@@ -371,6 +371,16 @@
 
 ## 부록 D. 단편명령 누적
 
+### FRAGO-2 (2026-09-09) — 순수 뷰가 할일 토글 자리를 주입받는다
+
+**3-라 인터페이스 계약** — C1 의 "순수 뷰 생성자는 DP-5.1 전까지 `init(model:)` 이다" 를 `EventListView` 와 `SystemSizeForemostEventView` 둘에 한해 푼다. 두 뷰는 `init(model:todoToggle:)`(Foremost 는 `init(model:isSmallSize:todoToggle:)`)를 받는다. 나머지 순수 뷰의 생성자는 그대로다.
+
+**사유** — 두 뷰 안의 할일 체크박스가 `Toggle("", isOn:intent:)` 로 `TodoToggleIntent` 를 직접 만든다(`EventListWidget.swift` 구 `:203`, `ForemostEventWidget.swift` 구 `:224`). 그 intent 의 `perform()` 이 `AppExtensionBase`·`WidgetUsecaseFactory` 라는 확장 전용 DI 인프라를 쓰므로 프레임워크로 내려갈 수 없다. 토글 자리가 리스트 셀 루프와 Foremost 본문 **안**이라 확장이 바깥에서 감쌀 자리도 없다.
+
+**결심 (2026-09-09 유저 재가)** — 순수 뷰는 토글 자리를 `(TodoEventCellViewModel) -> AnyView` 클로저로 받는다. 확장은 `Toggle(intent:)` 을 감싼 버튼을 넘기고, 갤러리(DP-4.1)는 같은 `TodoToggleStyle` 로 그린 모양만 넘긴다. 그림을 그리는 `TodoToggleStyle`·`ForemostTodoToggleStyle` 은 `WidgetScenes` 에 두어 확장과 갤러리가 같은 모양을 공유한다. 대안이던 "순수 뷰가 항상 모양만 그린다" 는 확장에서도 체크박스가 안 눌리게 만들어 13항의 "기존 위젯의 동작을 그대로 둔다" 를 깬다.
+
+**나머지 항목** — 변경 없음.
+
 ### FRAGO-1 (2026-09-09) — 딥링크 계산식의 하향 대상과 자리를 바꾼다
 
 **3-다 과업** — T-2 를 신설하고 기존 T-2~T-8 을 T-3~T-9 로 민다. 나머지 변경 없음.
