@@ -69,15 +69,3 @@ extension Date {
         return interval < 3600 ? nextDayStartTime : nextHour
     }
 }
-
-
-extension WidgetAppearanceSettings.Background {
-    
-    func colorSet(_ systemIsLight: Bool) -> any ColorSet {
-        let isLight = switch self {
-            case .system: systemIsLight
-            case .custom(let hex): UIColor.from(hex: hex)?.isLight ?? systemIsLight
-        }
-        return isLight ? DefaultLightColorSet() : DefaultDarkColorSet()
-    }
-}
