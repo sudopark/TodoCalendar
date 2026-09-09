@@ -7,7 +7,7 @@ description: Use when planning or evaluating multi-PR work (L·XL) — kickoff �
 
 ## 1. 개요
 
-**campaign.md 가 L 사이즈(PR 여러 개) 작업의 플랜이다.** 템플릿은 `docs/operations/templates/campaign.md` — 항목 밖 서술 금지, 해당 없는 항목은 "없음". 문장은 완결된 자연문으로 쓴다 — 어떤 항목이든 조사·서술어를 갖춰 소리 내 읽으면 말이 되게. 템플릿의 축약 표기(· 나열, — 대시)는 항목 라벨이지 문체 지시가 아니다. 용어(DP·LOE·FRAGO·MOP/MOE·PIR/FFIR·branch/sequel)는 템플릿 머리의 용어 줄이 정본이다.
+**campaign.md 가 L 사이즈(PR 여러 개) 작업의 플랜이다.** 템플릿은 `docs/operations/templates/campaign.md` — 항목 밖 서술 금지, 해당 없는 항목은 "없음". **간결하게 쓴다**: 항목마다 핵심만 남기고 반복·배경 늘어놓기·수식을 걷어낸다 — 줄이는 대상은 문장이지 담을 결정·정보가 아니다. 문장은 완결된 자연문으로 쓴다 — 어떤 항목이든 조사·서술어를 갖춰 소리 내 읽으면 말이 되게. 간결도 이 요건 안에서다 — 조사·서술어를 생략한 비문은 간결이 아니다. 템플릿의 축약 표기(· 나열, — 대시)는 항목 라벨이지 문체 지시가 아니다. 용어(DP·LOE·FRAGO·MOP/MOE·PIR/FFIR·branch/sequel)는 템플릿 머리의 용어 줄이 정본이다.
 
 - 진입은 양방향 — kickoff 사이즈 판정(L·XL)의 위임, 또는 유저의 직접 호출. **kickoff 가 안 돌았으면 먼저 invoke 한다** (정찰은 kickoff 소관 — 여기서 중복 구현하지 않는다).
 - 분해 브리프는 이 계획이 갈음한다 — 9항 DP 목록이 리스트업이고, 미결 목록이 "미분해 잔여"다.
