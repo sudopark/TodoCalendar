@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import Domain
 import Extensions
 import CommonPresentation
 
@@ -27,10 +28,14 @@ public struct AICommandSmallView: View {
 
     @Environment(\.colorScheme) private var colorScheme
     private var colorSet: any ColorSet {
-        return colorScheme == .light ? DefaultLightColorSet() : DefaultDarkColorSet()
+        return self.setting.background.colorSet(colorScheme == .light)
     }
 
-    public init() { }
+    private let setting: WidgetAppearanceSettings
+
+    public init(setting: WidgetAppearanceSettings) {
+        self.setting = setting
+    }
 
     public var body: some View {
         VStack(alignment: .leading, spacing: 8) {

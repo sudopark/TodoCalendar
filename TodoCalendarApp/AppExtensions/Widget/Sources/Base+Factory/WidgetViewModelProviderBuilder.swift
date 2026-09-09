@@ -24,6 +24,15 @@ struct WidgetViewModelProviderBuilder {
         self.usecaseFactory = .init(base: base)
     }
     
+    func loadWidgetAppearanceSetting() -> WidgetAppearanceSettings {
+        let repository = AppSettingLocalRepositoryImple(
+            storage: AppSettingLocalStorage(
+                environmentStorage: base.userDefaultEnvironmentStorage
+            )
+        )
+        return repository.loadWidgetAppearanceSetting()
+    }
+
     private func checkShouldReset() async {
         
         let storage = base.userDefaultEnvironmentStorage
