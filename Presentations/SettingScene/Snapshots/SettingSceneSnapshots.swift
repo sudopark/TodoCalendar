@@ -116,24 +116,6 @@ final class SettingSceneSnapshots: XCTestCase {
         }
     }
 
-    // MARK: - Setting/Appearance/Widget/WidgetAppearanceSettingView
-
-    @MainActor
-    func test_widgetAppearanceSetting() {
-        captureSnapshotPair(named: "widgetAppearanceSetting", layout: .fullScreen) { theme in
-            let state = WidgetAppearanceSettingViewState()
-            let eventHandlers = WidgetAppearanceSettingViewEventHandler()
-            state.background = .custom(hex: "#3355FF")
-            state.isSystemTheme = false
-            state.customBackground = UIColor.from(hex: "#3355FF")?.asColor
-
-            return WidgetAppearanceSettingView()
-                .environment(state)
-                .environment(eventHandlers)
-                .environment(self.makeAppearance(theme))
-        }
-    }
-
     // MARK: - Event/EventSettingView
 
     @MainActor

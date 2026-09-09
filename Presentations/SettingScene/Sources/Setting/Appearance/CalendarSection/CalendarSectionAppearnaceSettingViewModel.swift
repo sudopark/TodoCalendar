@@ -106,7 +106,7 @@ protocol CalendarSectionAppearnaceSettingViewModel: AnyObject, Sendable {
     func changeStartOfWeekDay(_ day: DayOfWeeks)
     func toggleAccentDay(_ type: AccentDays)
     func changeColorTheme()
-    func changeWidgetTheme()
+    func showWidgetGallery()
     func toggleIsShowUnderLineOnEventDay(_ newValue: Bool)
     
  
@@ -120,7 +120,7 @@ protocol CalendarSectionAppearnaceSettingViewModel: AnyObject, Sendable {
 protocol CalendarSectionRouting: Routing {
     
     func routeToSelectColorTheme()
-    func routeToChangeWidgetTheme(_ setting: WidgetAppearanceSettings)
+    func routeToWidgetGallery(_ setting: WidgetAppearanceSettings)
 }
 
 final class CalendarSectionViewModelImple: CalendarSectionAppearnaceSettingViewModel, @unchecked Sendable {
@@ -167,9 +167,9 @@ extension CalendarSectionViewModelImple {
         self.calendarSettingUsecase.updateFirstWeekDay(day)
     }
     
-    func changeWidgetTheme() {
+    func showWidgetGallery() {
         let setting = self.uiSettingUsecase.loadSavedAppearanceSetting()
-        self.router?.routeToChangeWidgetTheme(setting.widget)
+        self.router?.routeToWidgetGallery(setting.widget)
     }
     
     func changeColorTheme() {
