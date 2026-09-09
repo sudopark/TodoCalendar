@@ -11,6 +11,7 @@ import SwiftUI
 import Extensions
 import CommonPresentation
 import CalendarPresentation
+import WidgetScenes
 
 
 // MARK: - AICommandShortcutWidgetEntry
@@ -46,43 +47,18 @@ struct AICommandShortcutWidgetTimeLineProvider: TimelineProvider {
 struct AICommandShortcutWidgetView: View {
 
     @Environment(\.widgetFamily) private var family
-    @Environment(\.colorScheme) private var colorScheme
-    var colorSet: any ColorSet {
-        return colorScheme == .light ? DefaultLightColorSet() : DefaultDarkColorSet()
-    }
 
     var body: some View {
         switch self.family {
         case .accessoryCircular:
-            self.circularView
+            ZStack {
+                AccessoryWidgetBackground()
+                AICommandCircularView()
+            }
+            .widgetAccentable()
         default:
-            self.smallView
+            AICommandSmallView()
         }
-    }
-
-    private var circularView: some View {
-        ZStack {
-            AccessoryWidgetBackground()
-            Image("custom.calendar.badge.sparkles")
-                .font(.system(size: 20, weight: .semibold))
-        }
-        .widgetAccentable()
-    }
-
-    private var smallView: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Image("custom.calendar.badge.sparkles")
-                .font(.system(size: 22, weight: .semibold))
-                .foregroundStyle(colorSet.accentAI.asColor)
-            Spacer()
-            Text("widget.aiCommand::title".localized())
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(colorSet.text0.asColor)
-            Text("widget.aiCommand::explain".localized())
-                .font(.system(size: 11))
-                .foregroundStyle(colorSet.text1.asColor)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
     }
 }
 
