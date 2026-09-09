@@ -13,6 +13,7 @@ import Prelude
 import Optics
 import Domain
 import SnapshotTestHelpKit
+import WidgetScenes
 
 @testable import TodoCalendarAppWidget
 
@@ -77,7 +78,18 @@ final class WidgetCatalogSnapshots: XCTestCase {
     @MainActor
     func test_widgetTodayAndNext() {
         self.capture("widget-today-and-next", family: .systemMedium, canvas: WidgetCanvas.medium) {
-            TodayAndNextWidgetView(model: TodayAndNextWidgetViewModel.sample())
+            let model = TodayAndNextWidgetViewModel.sample()
+            return TodayAndNextWidgetView(model: model) { _, color in
+                AnyView(
+                    Toggle("", isOn: .constant(false))
+                        .toggleStyle(
+                            TodoToggleStyle(
+                                colorSet: model.widgetSetting.background.colorSet(true),
+                                size: 16, customColor: color
+                            )
+                        )
+                )
+            }
         }
     }
 
