@@ -135,30 +135,7 @@ public struct EventListView: View {
     }
     
     private func tagLineView(_ cvm: any EventCellViewModel) -> some View {
-        let defColors = EventTagColorSet(model.defaultTagColorSetting)
-        let color = {
-            if let google = cvm.colorSource as? GoogleCalendarEventColorSource {
-                let appearance = ViewAppearance(
-                    google: model.googleCalendarColors,
-                    model.googleCalendarTags
-                )
-                return appearance.googleEventColor(google.colorId, google.calendarId)
-            }
-            if let apple = cvm.colorSource as? AppleCalendarEventColorSource {
-                return model.appleCalendarTags[apple.calendarId]?.colorHex
-                    .flatMap { UIColor.from(hex: $0) } ?? defColors.defaultColor
-            }
-            switch cvm.colorSource as? EventTagId {
-            case .holiday:
-                return defColors.holiday
-            case .default:
-                return defColors.defaultColor
-            case .custom(let id):
-                return self.model.customTagMap[id]?.colorHex.flatMap { UIColor.from(hex: $0) } ?? defColors.defaultColor
-            default:
-                return defColors.defaultColor
-            }
-        }()
+        let color = self.model.colorPalette.color(for: cvm.colorSource)
         
         return RoundedRectangle(cornerRadius: 1.5)
             .fill(color.asColor)
@@ -203,23 +180,5 @@ public struct TodoToggleStyle: ToggleStyle {
         Image(systemName: configuration.isOn ? "circle.inset.filled" : "circle")
             .font(.system(size: self.size))
             .foregroundStyle(customColor ?? colorSet.accent.asColor)
-    }
-}
-
-
-// MARK: - ViewAppearance + GoogleCalendar
-
-extension ViewAppearance {
-
-    public convenience init(google colors: GoogleCalendar.Colors, _ tags: [String: GoogleCalendar.Tag]) {
-        self.init(
-            setting: .init(
-                calendar: .init(colorSetKey: .systemTheme, fontSetKey: .systemDefault),
-                defaultTagColor: .default),
-            isSystemDarkTheme: false
-        )
-        let ownerIds = Set(tags.values.map { $0.ownerId })
-        ownerIds.forEach { self.googleCalendarColors[$0] = colors }
-        self.googleCalendarTagMap.merge(tags) { $1 }
     }
 }
