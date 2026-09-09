@@ -18,26 +18,37 @@ import WidgetScenes
 
 struct AICommandShortcutWidgetEntry: TimelineEntry {
     let date: Date
+    var setting: WidgetAppearanceSettings = .init()
+
+    var backgroundShape: AnyShapeStyle {
+        return WidgetBackgroundStyle(self.setting.background).shape
+    }
 }
 
 struct AICommandShortcutWidgetTimeLineProvider: TimelineProvider {
 
     func placeholder(in context: Context) -> AICommandShortcutWidgetEntry {
-        return .init(date: Date())
+        return self.entry()
     }
 
     func getSnapshot(
         in context: Context,
         completion: @escaping (AICommandShortcutWidgetEntry) -> Void
     ) {
-        completion(.init(date: Date()))
+        completion(self.entry())
     }
 
     func getTimeline(
         in context: Context,
         completion: @escaping (Timeline<AICommandShortcutWidgetEntry>) -> Void
     ) {
-        completion(Timeline(entries: [.init(date: Date())], policy: .never))
+        completion(Timeline(entries: [self.entry()], policy: .never))
+    }
+
+    private func entry() -> AICommandShortcutWidgetEntry {
+        let setting = WidgetViewModelProviderBuilder(base: .init())
+            .loadWidgetAppearanceSetting()
+        return .init(date: Date(), setting: setting)
     }
 }
 
@@ -48,6 +59,8 @@ struct AICommandShortcutWidgetView: View {
 
     @Environment(\.widgetFamily) private var family
 
+    let setting: WidgetAppearanceSettings
+
     var body: some View {
         switch self.family {
         case .accessoryCircular:
@@ -57,7 +70,7 @@ struct AICommandShortcutWidgetView: View {
             }
             .widgetAccentable()
         default:
-            AICommandSmallView()
+            AICommandSmallView(setting: self.setting)
         }
     }
 }
@@ -73,9 +86,9 @@ struct AICommandShortcutWidget: Widget {
         StaticConfiguration(
             kind: Self.kind,
             provider: AICommandShortcutWidgetTimeLineProvider()
-        ) { _ in
-            AICommandShortcutWidgetView()
-                .containerBackground(.background, for: .widget)
+        ) { entry in
+            AICommandShortcutWidgetView(setting: entry.setting)
+                .containerBackground(entry.backgroundShape, for: .widget)
                 .widgetURL(AICommandEntryLink.url)
         }
         .supportedFamilies([.accessoryCircular, .systemSmall])
@@ -91,11 +104,11 @@ struct AICommandShortcutWidget_PreviewProvider: PreviewProvider {
 
     static var previews: some View {
         Group {
-            AICommandShortcutWidgetView()
+            AICommandShortcutWidgetView(setting: .init())
                 .previewContext(WidgetPreviewContext(family: .accessoryCircular))
                 .containerBackground(.background, for: .widget)
 
-            AICommandShortcutWidgetView()
+            AICommandShortcutWidgetView(setting: .init())
                 .previewContext(WidgetPreviewContext(family: .systemSmall))
                 .containerBackground(.background, for: .widget)
         }
