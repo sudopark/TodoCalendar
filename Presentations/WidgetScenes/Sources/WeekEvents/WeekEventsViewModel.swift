@@ -180,7 +180,7 @@ public struct WeekEventsViewModel {
 }
 
 
-extension EventOnWeek {
+private extension EventOnWeek {
     
     static func dummy(
         _ dayNumber: Int, _ dateId: String,
@@ -192,7 +192,7 @@ extension EventOnWeek {
 }
 
 
-struct DummyCalendarEvent: CalendarEvent {
+private struct DummyCalendarEvent: CalendarEvent {
     var eventId: String
     var name: String
     var eventTime: EventTime?
