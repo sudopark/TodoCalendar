@@ -486,7 +486,6 @@
 "setting.appearance.widget::useSystemTheme::title" = "Usar tema do sistema";
 "setting.appearance.widget::useSystemTheme::background" = "Cor de fundo do widget";
 "setting.appearance.widget::useCustomTheme::title" = "Selecionar cor personalizada";
-"setting.appearance.widget::sample::eventName" = "Evento do Widget";
 "setting.appearance.event.boldText" = "Texto em negrito";
 "setting.appearance.event.eventColor" = "Cor do evento";
 "setting.timezone::title" = "Fuso Horário";

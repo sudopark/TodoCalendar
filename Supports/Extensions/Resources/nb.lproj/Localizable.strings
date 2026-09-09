@@ -486,7 +486,6 @@
 "setting.appearance.widget::useSystemTheme::title" = "Bruk systemtema";
 "setting.appearance.widget::useSystemTheme::background" = "Bakgrunnsfarge for widget";
 "setting.appearance.widget::useCustomTheme::title" = "Velg egendefinert farge";
-"setting.appearance.widget::sample::eventName" = "Widget-hendelse";
 "setting.appearance.event.boldText" = "Fet tekst";
 "setting.appearance.event.eventColor" = "Hendelsesfarge";
 "setting.timezone::title" = "Tidssone";

@@ -485,7 +485,6 @@
 "setting.appearance.widget::useSystemTheme::title" = "使用系统主题";
 "setting.appearance.widget::useSystemTheme::background" = "小组件背景颜色";
 "setting.appearance.widget::useCustomTheme::title" = "选择自定义颜色";
-"setting.appearance.widget::sample::eventName" = "小组件事件";
 "setting.appearance.event.boldText" = "文字加粗";
 "setting.appearance.event.eventColor" = "事件颜色";
 "setting.timezone::title" = "时区";

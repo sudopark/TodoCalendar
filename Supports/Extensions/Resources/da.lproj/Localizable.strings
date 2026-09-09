@@ -486,7 +486,6 @@
 "setting.appearance.widget::useSystemTheme::title" = "Brug systemtema";
 "setting.appearance.widget::useSystemTheme::background" = "Widget-baggrundsfarve";
 "setting.appearance.widget::useCustomTheme::title" = "Vælg brugerdefineret farve";
-"setting.appearance.widget::sample::eventName" = "Widget-begivenhed";
 "setting.appearance.event.boldText" = "Fed tekst";
 "setting.appearance.event.eventColor" = "Begivenhedsfarve";
 "setting.timezone::title" = "Tidszone";

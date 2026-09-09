@@ -485,7 +485,6 @@
 "setting.appearance.widget::useSystemTheme::title" = "Koristi temu sustava";
 "setting.appearance.widget::useSystemTheme::background" = "Boja pozadine widgeta";
 "setting.appearance.widget::useCustomTheme::title" = "Odaberi prilagođenu boju";
-"setting.appearance.widget::sample::eventName" = "Događaj widgeta";
 "setting.appearance.event.boldText" = "Podebljani tekst";
 "setting.appearance.event.eventColor" = "Boja događaja";
 "setting.timezone::title" = "Vremenska zona";

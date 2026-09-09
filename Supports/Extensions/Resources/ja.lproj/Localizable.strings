@@ -485,7 +485,6 @@
 "setting.appearance.widget::useSystemTheme::title" = "システムテーマを使用";
 "setting.appearance.widget::useSystemTheme::background" = "ウィジェットの背景色";
 "setting.appearance.widget::useCustomTheme::title" = "カスタムカラーを選択";
-"setting.appearance.widget::sample::eventName" = "ウィジェットイベント";
 "setting.appearance.event.boldText" = "太字";
 "setting.appearance.event.eventColor" = "イベントカラー";
 "setting.timezone::title" = "タイムゾーン";

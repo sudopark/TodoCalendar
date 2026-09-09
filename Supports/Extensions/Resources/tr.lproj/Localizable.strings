@@ -486,7 +486,6 @@
 "setting.appearance.widget::useSystemTheme::title" = "Sistem temasını kullan";
 "setting.appearance.widget::useSystemTheme::background" = "Widget arka plan rengi";
 "setting.appearance.widget::useCustomTheme::title" = "Özel renk seç";
-"setting.appearance.widget::sample::eventName" = "Widget Etkinliği";
 "setting.appearance.event.boldText" = "Kalın metin";
 "setting.appearance.event.eventColor" = "Etkinlik rengi";
 "setting.timezone::title" = "Saat Dilimi";

@@ -486,7 +486,6 @@
 "setting.appearance.widget::useSystemTheme::title" = "Käytä järjestelmän teemaa";
 "setting.appearance.widget::useSystemTheme::background" = "Widgetin taustaväri";
 "setting.appearance.widget::useCustomTheme::title" = "Valitse oma väri";
-"setting.appearance.widget::sample::eventName" = "Widget-tapahtuma";
 "setting.appearance.event.boldText" = "Lihavoitu teksti";
 "setting.appearance.event.eventColor" = "Tapahtuman väri";
 "setting.timezone::title" = "Aikavyöhyke";

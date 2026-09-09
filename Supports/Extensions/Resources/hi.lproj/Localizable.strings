@@ -486,7 +486,6 @@
 "setting.appearance.widget::useSystemTheme::title" = "सिस्टम थीम का उपयोग करें";
 "setting.appearance.widget::useSystemTheme::background" = "विजेट पृष्ठभूमि रंग";
 "setting.appearance.widget::useCustomTheme::title" = "कस्टम रंग चुनें";
-"setting.appearance.widget::sample::eventName" = "विजेट इवेंट";
 "setting.appearance.event.boldText" = "बोल्ड टेक्स्ट";
 "setting.appearance.event.eventColor" = "इवेंट रंग";
 "setting.timezone::title" = "समय क्षेत्र";

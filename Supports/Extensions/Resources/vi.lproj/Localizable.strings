@@ -486,7 +486,6 @@
 "setting.appearance.widget::useSystemTheme::title" = "Dùng chủ đề hệ thống";
 "setting.appearance.widget::useSystemTheme::background" = "Màu nền tiện ích";
 "setting.appearance.widget::useCustomTheme::title" = "Chọn màu tùy chỉnh";
-"setting.appearance.widget::sample::eventName" = "Sự kiện tiện ích";
 "setting.appearance.event.boldText" = "Chữ đậm";
 "setting.appearance.event.eventColor" = "Màu sự kiện";
 "setting.timezone::title" = "Múi giờ";

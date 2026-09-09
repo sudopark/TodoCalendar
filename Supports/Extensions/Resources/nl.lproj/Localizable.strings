@@ -486,7 +486,6 @@
 "setting.appearance.widget::useSystemTheme::title" = "Systeemthema gebruiken";
 "setting.appearance.widget::useSystemTheme::background" = "Achtergrondkleur van widget";
 "setting.appearance.widget::useCustomTheme::title" = "Aangepaste kleur selecteren";
-"setting.appearance.widget::sample::eventName" = "Widgetgebeurtenis";
 "setting.appearance.event.boldText" = "Vetgedrukte tekst";
 "setting.appearance.event.eventColor" = "Kleur van gebeurtenis";
 "setting.timezone::title" = "Tijdzone";

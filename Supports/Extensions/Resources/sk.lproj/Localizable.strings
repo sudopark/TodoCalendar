@@ -485,7 +485,6 @@
 "setting.appearance.widget::useSystemTheme::title" = "Použiť systémový motív";
 "setting.appearance.widget::useSystemTheme::background" = "Farba pozadia widgetu";
 "setting.appearance.widget::useCustomTheme::title" = "Vybrať vlastnú farbu";
-"setting.appearance.widget::sample::eventName" = "Udalosť widgetu";
 "setting.appearance.event.boldText" = "Tučný text";
 "setting.appearance.event.eventColor" = "Farba udalosti";
 "setting.timezone::title" = "Časové pásmo";
