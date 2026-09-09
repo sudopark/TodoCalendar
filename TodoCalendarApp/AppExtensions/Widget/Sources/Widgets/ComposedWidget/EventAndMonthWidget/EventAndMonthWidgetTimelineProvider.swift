@@ -16,12 +16,6 @@ import CalendarPresentation
 import WidgetScenes
 
 
-struct EventAndMonthWidgetViewModel {
-    let event: EventListWidgetViewModel
-    let month: MonthWidgetViewModel
-}
-
-
 struct EventAndMonthWidgetViewModelProvider {
     
     private let eventListViewModelProvider: EventListWidgetViewModelProvider

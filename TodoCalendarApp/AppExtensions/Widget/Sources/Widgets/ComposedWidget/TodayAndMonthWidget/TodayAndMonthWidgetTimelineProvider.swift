@@ -16,12 +16,6 @@ import CalendarPresentation
 import WidgetScenes
 
 
-struct TodayAndMonthWidgetViewModel {
-    let today: TodayWidgetViewModel
-    let month: MonthWidgetViewModel
-}
-
-
 struct TodayAndMonthWidgetViewModelProvider {
     
     private let todayViewModelProvider: TodayWidgetViewModelProvider
