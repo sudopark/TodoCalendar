@@ -1,5 +1,5 @@
 #!/bin/bash
-# campaign-board-sync.sh 회귀 테스트 — 스풀 부재 no-op·부분 복사·전체 복사·렌더·재게시 지시 게이팅·실패 비차단 검증
+# campaign-board-sync.sh 회귀 테스트 — 스풀 부재 no-op·부분 복사·전체 복사·렌더·재게시 지시 부재·실패 비차단 검증
 cd "$(dirname "$0")" || exit 1
 PASS=0; FAIL=0
 
@@ -23,6 +23,7 @@ echo "campaign" > "$REPO/docs/operations/500/campaign.md"
 echo "ledger" > "$REPO/.operations/500/campaign-progress.md"
 echo "opord" > "$REPO/docs/operations/500/opord.md"
 echo "progress" > "$REPO/.operations/500/progress.md"
+echo "- 09-09 20:00 activity" > "$REPO/.operations/500/activity.md"
 echo "plan only" > "$REPO/docs/operations/501/campaign.md"
 
 BOARD="$TMP_DIR/board"
@@ -32,7 +33,7 @@ OUT=$(CAMPAIGN_BOARD_DIR="$BOARD" REPO_ROOT="$REPO" bash campaign-board-sync.sh 
 assert_eq "spool_absent_noop_exit0" "rc=0" "$OUT"
 assert_no_file "spool_absent_creates_nothing" "$BOARD"
 
-# 2. 전체 복사 — 4파일 모두
+# 2. 전체 복사 — 5파일 모두
 mkdir -p "$BOARD/state"
 RC=$(CAMPAIGN_BOARD_DIR="$BOARD" REPO_ROOT="$REPO" bash campaign-board-sync.sh 500 2>/dev/null; echo $?)
 assert_eq "all_files_exit0" "0" "$RC"
@@ -40,6 +41,7 @@ assert_file "all_copied_campaign" "$BOARD/state/500/campaign.md"
 assert_file "all_copied_ledger" "$BOARD/state/500/campaign-progress.md"
 assert_file "all_copied_opord" "$BOARD/state/500/opord.md"
 assert_file "all_copied_progress" "$BOARD/state/500/progress.md"
+assert_file "all_copied_activity" "$BOARD/state/500/activity.md"
 
 # 3. 부분 복사 — 계획만 있는 이슈는 있는 것만
 RC=$(CAMPAIGN_BOARD_DIR="$BOARD" REPO_ROOT="$REPO" bash campaign-board-sync.sh 501 2>/dev/null; echo $?)
@@ -67,37 +69,29 @@ CAMPAIGN_BOARD_DIR="$BOARD" REPO_ROOT="$REPO" bash campaign-board-sync.sh 500 >/
 assert_file "render_invoked" "$BOARD/board.html"
 assert_eq "render_output" "rendered" "$(cat "$BOARD/board.html")"
 
-# 6. 재게시 지시 줄 — artifact-url.txt 가 있을 때만 stdout 에 나온다
-OUT=$(CAMPAIGN_BOARD_DIR="$BOARD" REPO_ROOT="$REPO" bash campaign-board-sync.sh 500 2>/dev/null)
-assert_eq "no_url_no_directive" "" "$OUT"
+# 6. 재게시 지시 없음 — Artifact 재게시는 수동이라(#1070) URL 파일이 있어도 stdout 은 조용하다
 echo "https://claude.ai/code/artifact/abc" > "$BOARD/artifact-url.txt"
 OUT=$(CAMPAIGN_BOARD_DIR="$BOARD" REPO_ROOT="$REPO" bash campaign-board-sync.sh 500 2>/dev/null)
-assert_eq "url_directive" "재게시 필요: $BOARD/board.html 을 https://claude.ai/code/artifact/abc 로 Artifact 재게시하라" "$OUT"
+assert_eq "url_no_directive" "" "$OUT"
 
-# 7. 빈 URL 파일 → 지시 줄 없음 (URL 자리가 빈 채로 나가면 세션이 빈 주소로 재게시한다)
-: > "$BOARD/artifact-url.txt"
-OUT=$(CAMPAIGN_BOARD_DIR="$BOARD" REPO_ROOT="$REPO" bash campaign-board-sync.sh 500 2>/dev/null)
-assert_eq "empty_url_no_directive" "" "$OUT"
-echo "https://claude.ai/code/artifact/abc" > "$BOARD/artifact-url.txt"
-
-# 8. 렌더 실패 → 비차단(exit 0)이되 지시 줄은 억제한다 — 남아있는 board.html 은 옛 내용이라 재게시하면 안 된다
+# 7. 렌더 실패 → 비차단(exit 0), stderr 로만 남긴다
 echo "STALE" > "$BOARD/board.html"
 echo "import sys; sys.exit(1)" > "$BOARD/render.py"
 OUT=$(CAMPAIGN_BOARD_DIR="$BOARD" REPO_ROOT="$REPO" bash campaign-board-sync.sh 500 2>/dev/null)
 ERR=$(CAMPAIGN_BOARD_DIR="$BOARD" REPO_ROOT="$REPO" bash campaign-board-sync.sh 500 2>&1 >/dev/null)
 RC=$(CAMPAIGN_BOARD_DIR="$BOARD" REPO_ROOT="$REPO" bash campaign-board-sync.sh 500 >/dev/null 2>&1; echo $?)
 assert_eq "render_failure_exit0" "0" "$RC"
-assert_eq "render_failure_no_directive" "" "$OUT"
+assert_eq "render_failure_silent_stdout" "" "$OUT"
 assert_eq "render_failure_keeps_stale_file" "STALE" "$(cat "$BOARD/board.html")"
 case "$ERR" in *"렌더 실패"*) PASS=$((PASS+1));; *) FAIL=$((FAIL+1)); echo "FAIL: render_failure_stderr — [$ERR]";; esac
 
-# 9. render.py 부재 → 이번 호출이 렌더한 게 없으니 지시도 없다
+# 8. render.py 부재 → stdout 조용, 크래시 없음
 rm "$BOARD/render.py"
 OUT=$(CAMPAIGN_BOARD_DIR="$BOARD" REPO_ROOT="$REPO" bash campaign-board-sync.sh 500 2>/dev/null)
-assert_eq "no_renderer_no_directive" "" "$OUT"
+assert_eq "no_renderer_silent_stdout" "" "$OUT"
 rm "$BOARD/artifact-url.txt" "$BOARD/board.html"
 
-# 10. 인자 없음 → exit 0 + stderr 안내
+# 9. 인자 없음 → exit 0 + stderr 안내
 ERR=$(CAMPAIGN_BOARD_DIR="$BOARD" REPO_ROOT="$REPO" bash campaign-board-sync.sh 2>&1 >/dev/null; true)
 RC=$(CAMPAIGN_BOARD_DIR="$BOARD" REPO_ROOT="$REPO" bash campaign-board-sync.sh >/dev/null 2>&1; echo $?)
 assert_eq "no_arg_exit0" "0" "$RC"
