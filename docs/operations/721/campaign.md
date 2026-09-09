@@ -3,7 +3,7 @@
 > 용어 — DP: 결정적 지점(작전명령 하나 = PR 하나) · LOE: 노력선(최종상태 한 관점을 담당하는 줄기) · FRAGO: 단편명령 · MOP / MOE: 과업 수행 여부 / 효과 발생 여부 · PIR / FFIR: 즉시보고 조건 중 환경·외부 정보 / 아군·내부 정보
 
 ```
-작전계획 — #721 프리미엄 위젯 팩        작성: 유저   개정: 2026-09-09 (DP-2.2·DP-2.3 병합)
+작전계획 — #721 프리미엄 위젯 팩        작성: 유저   개정: 2026-09-09 (DP-3.1·DP-4.1 병행 착수)
 ```
 
 ## 0. 전략 지침
@@ -117,6 +117,8 @@
 | 5. 깊이 | `WidgetStyle` 프리셋·조정 2층이 전 위젯에 저장·합성·반영되고 `requiresPro` 판정이 Domain 에 있다 | LOE-3 | Pro 가 파는 것을 만든다 |
 | 6. 노출 | D-day 가 시스템 위젯 갤러리와 일정 상세 후보 등록 메뉴에 보인다 | LOE-2 | 감춘 것을 푼다 |
 
+**3 단계와 4 단계는 함께 돈다** (2026-09-09 개정, 10항). 3 단계 종료 조건이 서기 전에 4 단계 DP-4.1 이 착수한다는 뜻이고, 종료 조건 자체는 그대로다 — 각 단계는 자기 조건이 상태로 찼을 때 닫힌다. 갤러리에 타임라인이 들어가는 접점은 머지 순서로 흡수한다 (C5·C6).
+
 ## 6. 노력선 × 단계 격자 → DP 좌표
 
 | | 1 파일럿 | 2 매듭 풀기 | 3 라인업 | 4 그릇 | 5 깊이 | 6 노출 |
@@ -185,7 +187,21 @@ DP-4.1 이 세운다.
 
 #### C5. 머지 순서
 
-DP 번호 순으로 간다. 각 DP 의 base 는 바로 앞 DP 를 머지한 develop 이다. 병렬 슬롯은 안 둔다 (10항).
+기본은 DP 번호 순이고, 각 DP 의 base 는 바로 앞 DP 를 머지한 develop 이다.
+
+**DP-3.1 과 DP-4.1 만 병행한다** (2026-09-09 개정, 10항). 둘 다 base 는 DP-2.2 를 머지한 develop 이고 서로를 base 로 삼지 않는다. 소유 범위가 `WidgetScenes` 안에서 하위 디렉토리로 갈리기 때문이다 — DP-3.1 은 `Sources/Timeline/`, DP-4.1 은 `Sources/Gallery/` 다.
+
+머지 순서는 **DP-3.1 이 먼저, DP-4.1 이 나중**이다. DP-4.1 은 DP-3.1 머지 후 develop 에 rebase 하고 그때 타임라인 위젯을 갤러리에 얹는다 (C6). 순서를 고정하는 이유는 갤러리가 "전 위젯 목록"이어야 하는데 타임라인이 빠진 채 머지되면 그 최종상태가 한 번 깨진 상태로 develop 에 남기 때문이다.
+
+두 DP 가 함께 만지는 자리는 `Supports/Extensions/Resources/*.lproj/Localizable.strings` 하나다. 각자 자기 키만 추가하고 남의 키 줄을 건드리지 않는다.
+
+#### C6. 갤러리에 위젯을 어떻게 등재하나
+
+DP-4.1 이 세우고, 그 뒤 위젯을 더하는 DP 가 따른다.
+
+- 갤러리 목록은 **한 곳의 레지스트리**로 둔다. 위젯을 하나 더하면 그 레지스트리에 항목 하나가 붙고 그게 전부여야 한다. 목록·미리보기·진입을 각각 고쳐야 하면 위젯이 늘 때마다 빠뜨릴 자리가 생긴다.
+- 등재 항목이 요구하는 것은 **순수 뷰 + 그 뷰가 받는 ViewModel 의 `.sample`** 둘이다. 그래서 **위젯을 신설하는 DP 는 자기 ViewModel 의 `.sample` 을 함께 낸다** — 갤러리를 그 DP 가 안 건드려도 그렇다. DP-3.1 이 `TimelineWidgetViewModel.sample` 을 내는 근거가 이 조항이다.
+- 미리보기는 인터랙션 없는 표시용이다. 할일 토글처럼 확장 전용 intent 가 들어가는 자리는 클로저 주입 지점에 표시 전용 체크박스를 넣는다 (C1 의 세 뷰 예외, A10).
 
 ## 7. DP 목록
 
@@ -194,8 +210,8 @@ DP 번호 순으로 간다. 각 DP 의 base 는 바로 앞 DP 를 머지한 deve
 | DP-1.1 | LOE-1 | 1 | `Presentations/WidgetScenes` 프레임워크를 세운다. `DDayWidget.swift` 와 `DDayWidgetViewModelProvider.swift` 를 C1 대로 쪼개 순수 뷰 5개·ViewModel·`.sample` 을 옮기고 `public` 을 연다. 확장이 `WidgetScenes` 를 물게 배선한다. C2 의 배경 겹침을 정리한다. 스냅샷 import 경로를 바꾸고 이관 전후 이미지를 대조한다 | — | `Presentations/WidgetScenes/**`(신규), `Widget/Sources/Widgets/DDayWidget/**`, `Widget/Sources/Intents/DDayTargetSelectIntent.swift`(포맷터 이동), `Widget/Snapshots/WidgetCatalogSnapshots.swift`, `Workspace.swift`, `TodoCalendarApp/Project.swift`, 스킴 하드코딩(`pr_test.yml`·`run-all-tests.sh`·`impact-check.sh`+테스트·run-tests 스킬) | M |
 | DP-2.1 | LOE-1 | 2 | `Presentations/CalendarPresentation` 프레임워크를 세우고 표시·이벤트 모델 5파일을 옮긴다 — `CalendarEvent.swift`·`EventCellViewModel.swift`·`EventCellViewModelMapper.swift`·`WeekEventStackBuilder.swift` 는 파일째, Month 표시 모델 5종은 `MonthViewModel.swift` 에서 떼어낸다. `CalendarScenes` 와 위젯 확장이 새 모듈을 물게 바꾸고, 확장 의존에서 `CalendarScenes` 를 뗀다. 캘린더·이벤트 목록 화면 동작은 안 바뀐다 | DP-1.1 | `Presentations/CalendarPresentation/**`(신규), `Presentations/CalendarScenes/Sources/{Common/CalendarEvents,Common/EventListCell,Month}`, `CalendarScenes/Project.swift`, `Widget/Sources/**`·`Widget/Tests/**` 의 import, `TodoCalendarApp/Project.swift`, `Workspace.swift`, 스킴 하드코딩 | M |
 | DP-2.2 | LOE-1 | 2 | D-day 를 뺀 전 위젯군의 순수 뷰를 `WidgetScenes` 로 옮긴다 — 단일 위젯군 AICommand·Today·Foremost·NextEvent·NextRemain·TodayAndNext 와 복합 위젯군 Month·WeekEvents·EventList·Composed 4종을 함께. C1 의 쪼개는 자리 둘을 위젯군마다 그대로 적용한다. 확장의 `CalendarScenes` 의존은 DP-2.1 이 이미 뗐다 | DP-2.1 | `Presentations/WidgetScenes/**`, `Widget/Sources/Widgets/**`(D-day 제외), `Widget/Sources/{Usecases,Base+Factory,Intents}`, `Widget/Snapshots/`, `Widget/Tests/**` | M |
-| DP-3.1 | LOE-2 | 3 | 타임라인 위젯. 시간 축을 산출하고(현재~자정, 남은 시간이 4시간 미만이면 12시간으로 연장) 일정을 블록으로 얹고 겹치면 열을 나눈다. medium·large 와 `EventTypeSelectIntent` 연결까지. 순수 뷰는 처음부터 `WidgetScenes` 에 만든다 | DP-2.2 | `Presentations/WidgetScenes/**`, `Widget/Sources/Widgets/TimelineWidget/**`(신규), `Widget/Sources/Base+Factory/`, `TodoCalendarWidgetBundle.swift`, `Widget/Tests/ViewModelProviders/`, `Supports/Extensions/Resources/*.lproj` | M |
-| DP-4.1 | LOE-3 (LOE-1 겸) | 4 | 갤러리 Scene 을 `WidgetScenes` 안에 세운다. `Scenes+WidgetGallery.swift` 프로토콜, 전 위젯 목록, `.sample` ViewModel 을 넣은 실뷰 미리보기, 설정 > 외관 > 위젯 진입, 앱 루트 조립까지. Composed 4종과 AICommand 의 `.sample` 을 새로 만든다 | DP-3.1 | `Presentations/WidgetScenes/Sources/Gallery/**`, `Presentations/Scenes/Sources/Scenes+WidgetGallery.swift`, `SettingScene` 진입 라우팅, `TodoCalendarApp/Sources/Root/`, `Supports/Extensions/Resources/*.lproj` | M |
+| DP-3.1 | LOE-2 | 3 | 타임라인 위젯. 시간 축을 산출하고(현재~자정, 남은 시간이 4시간 미만이면 12시간으로 연장) 일정을 블록으로 얹고 겹치면 열을 나눈다. medium·large 와 `EventTypeSelectIntent` 연결까지. 순수 뷰는 처음부터 `WidgetScenes` 에 만들고 ViewModel 의 `.sample` 도 함께 낸다 (C6) | DP-2.2 | `Presentations/WidgetScenes/**`, `Widget/Sources/Widgets/TimelineWidget/**`(신규), `Widget/Sources/Base+Factory/`, `TodoCalendarWidgetBundle.swift`, `Widget/Tests/ViewModelProviders/`, `Supports/Extensions/Resources/*.lproj` | M |
+| DP-4.1 | LOE-3 (LOE-1 겸) | 4 | 갤러리 Scene 을 `WidgetScenes` 안에 세운다. `Scenes+WidgetGallery.swift` 프로토콜, 전 위젯 목록, `.sample` ViewModel 을 넣은 실뷰 미리보기, 설정 > 외관 > 위젯 진입, 앱 루트 조립까지. Composed 4종과 AICommand 의 `.sample` 을 새로 만든다. 목록은 C6 레지스트리로 세우고, **타임라인 위젯 등재는 DP-3.1 이 머지된 뒤 rebase 해서 얹는다** | DP-2.2 (DP-3.1 과 병행, 머지는 그 뒤) | `Presentations/WidgetScenes/Sources/Gallery/**`, `Presentations/Scenes/Sources/Scenes+WidgetGallery.swift`, `SettingScene` 진입 라우팅, `TodoCalendarApp/Sources/Root/`, `Supports/Extensions/Resources/*.lproj` | M |
 | DP-5.1 | LOE-3 | 5 | C3 의 프리셋 층을 만든다. `WidgetStyle`·`WidgetStylePreset` 과 `resolved` 합성, 위젯 종류별 저장·조회 usecase, environment 전파와 공통 modifier, 확장 진입에서 값 주입, 갤러리 프리셋 선택 UI | DP-4.1 | `Domain/Sources/Models/Settings/`, `Domain/Sources/Usecases/`, `Repository`(App Group 저장), `Presentations/WidgetScenes/**`, `Widget/Sources/Widgets/**` 진입, `Domain/Tests` | M |
 | DP-5.2 | LOE-3 | 5 | C3 의 조정 층을 채운다. `WidgetStyleAdjustment` 4축(배경·투명도·글자크기·강조색), `requiresPro` 판정, 갤러리 세부조정 UI. 판정만 하고 잠그진 않는다 | DP-5.1 | `Domain` 모델·판정, `WidgetScenes` 조정 UI·공통 modifier, `Domain/Tests`, `WidgetScenes/Tests` | M |
 | DP-6.1 | LOE-2 | 6 | D-day 를 노출한다. `BaseWidgetBundle` 등록 줄을 되살리고 `FeatureFlag.ddayWidget` 을 기본 on 으로 바꾼 뒤 일정 상세 후보 등록 메뉴를 확인한다 | DP-5.2 | `TodoCalendarWidgetBundle.swift`, `Domain/Sources/Utils/FeatureFlag.swift` | S |
@@ -228,16 +244,20 @@ DP 번호 순으로 간다. 각 DP 의 base 는 바로 앞 DP 를 머지한 deve
 | 타임라인 위젯이 PR 하나를 넘긴다. 축 산출·겹침 배치·패밀리 둘·Intent 연결이 한 DP 에 있다 | LOE-2 | 완화 — opord 에서 커밋 시퀀스를 계산·뷰·등록으로 나눈다. 그래도 넘치면 DP 를 쪼개는 계획 개정으로 간다 | #751 플랜이 1692줄 44 체크박스다 |
 | 프레임워크 둘을 신설하니 스킴 하드코딩 짝을 두 번 맞춰야 한다. 한쪽만 넣으면 감지만 되고 실행이 안 된다 | 검증 | 완화 — DP-1.1·DP-2.1 각각 add-framework 스킬 절차를 탄다 | CLAUDE.md §1 짝규칙 |
 | 프리셋·조정 문구와 갤러리 위젯 이름이 31개 로케일 짝을 요구한다 | 품질 | 완화 — `check-localization-parity.py` 로 확인하고 `localization` 라벨 최신 열린 이슈에 등록한다 | `.claude/rules/localization.md` §1 |
+| DP-3.1 과 DP-4.1 이 같은 `Localizable.strings` 31개를 동시에 고쳐 나중 브랜치가 rebase 에서 충돌한다 | 검증 | 수용 — 각자 자기 키만 추가하는 한 충돌은 한 파일 안 인접 줄이라 기계적으로 풀린다. 푼 뒤 `check-localization-parity.py` 로 재확인한다 (C5) | 두 DP 의 소유 범위가 `Supports/Extensions/Resources/*.lproj` 에서 겹친다 (7항) |
+| 갤러리가 타임라인 없이 머지돼 "전 위젯 목록"이라는 최종상태가 깨진 채 develop 에 남는다 | LOE-3 | 회피 — 머지 순서를 DP-3.1 → DP-4.1 로 고정한다. DP-4.1 은 rebase 후 등재를 얹고 나서 머지한다 (C5·C6) | 병행 착수로 두 DP 가 develop 을 같은 base 로 갖는다 |
 
 ## 10. 자원
 
 | 단계 | 주노력 자원 | 부노력 자원 |
 |---|---|---|
-| 1~6 | 순차로 한 세션이 간다. DP 마다 앞 DP 의 계약(C1~C4)을 입력으로 받는다 | 유저 시간 — DP 마다 작전명령 재가. DP-1.1·DP-2.2·DP-5.1 은 실기 확인도 필요하다 |
+| 1·2 | 순차로 한 세션이 갔다. DP 마다 앞 DP 의 계약(C1~C4)을 입력으로 받았다 | 유저 시간 — DP 마다 작전명령 재가. DP-1.1·DP-2.2 는 실기 확인도 했다 |
+| 3·4 | 병렬 슬롯 2개. DP-3.1 은 `southpaw` 워크트리, DP-4.1 은 `orthodox` 워크트리 | 유저 시간 — 작전명령 재가 둘, 타임라인 실기 확인 |
+| 5·6 | 다시 순차로 한 세션이 간다 | 유저 시간 — DP-5.1 실기 확인 |
 
-DP 가 8개다. 그래도 병렬 슬롯은 안 둔다. DP 마다 재가 게이트가 있어 병렬 이득이 작고, DP-2.x 는 같은 계약을 반복 적용하는 줄이라 소유 범위가 `WidgetScenes` 에서 계속 겹친다.
+**3·4 단계만 병렬로 간다** (2026-09-09 개정). 2 단계까지는 DP-2.x 가 같은 계약을 `WidgetScenes` 에 반복 적용하는 줄이라 소유 범위가 계속 겹쳤지만, DP-3.1 과 DP-4.1 은 `WidgetScenes` 안에서도 다루는 하위 디렉토리가 다르고 서로의 산출물을 입력으로 받지 않는다. 갤러리가 타임라인을 등재하는 접점 하나만 남고, 그건 C6 레지스트리 항목 하나라 머지 순서로 흡수된다.
 
-외부 계정이나 심사에 안 걸린다. 워크트리는 지금 쓰는 `southpaw` 하나로 충분하다.
+워크트리는 `southpaw` 와 `orthodox` 둘을 쓴다. 세션도 둘이고, 컨트롤러가 `southpaw` 다. 외부 계정이나 심사에 안 걸린다.
 
 ## 11. 평가
 
