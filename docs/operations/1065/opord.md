@@ -371,6 +371,20 @@
 
 ## 부록 D. 단편명령 누적
 
+### FRAGO-3 (2026-09-09) — 토글 주입 대상에 `TodayAndNextWidgetView` 를 더하고 딥링크 빌더를 Domain 으로 올린다
+
+**3-라 인터페이스 계약 (FRAGO-2 개정)** — 토글 자리를 주입받는 순수 뷰가 셋이다. `EventListView`·`SystemSizeForemostEventView` 에 `TodayAndNextWidgetView` 를 더한다. 셋째는 셀마다 태그 색이 달라 `(TodoEventCellViewModel, Color) -> AnyView` 를 받는다.
+
+**사유** — FRAGO-2 는 대상을 둘로 적었으나 `TodayAndNextWidget.swift`(`19e17684` 기준 `:243`·`:290`)도 같은 `TodoToggleButton` 임베드를 갖고 있었다. `TodoToggleIntent` 가 확장 전용 DI 를 문다는 FRAGO-2 의 사유가 이 뷰에도 그대로 적용된다. 실행 중 셋째를 편입했으나 문서에 반영하지 않아 PR #1068 리뷰에서 계획-실행 추적성 단절로 지적됐다.
+
+**부록 A Task 2 (FRAGO-1 개정)** — 딥링크 계산식의 하향 자리를 둘로 가른다. `EventDeepLinkBuilder`·`CalendarDay.link`·`AICommandEntryLink` 는 `Domain/Sources/Utils/EventDeepLink.swift` 로, `EventCellViewModel.widgetURL` 만 `CalendarPresentation` 에 남는다.
+
+**사유** — 빌더가 받는 입력이 전부 `String` 과 `EventTime`(Domain)이라 "어떤 식별자 조합이 어떤 URL 이 되는가"는 Domain 지식이다. `EventTime.queryParams`·`init?(deepLink:)` 가 이미 `Domain/Sources/Models/Events/EventTime.swift:21,73` 에 살아 그 지식이 Domain 에 있는데 빌더만 위층에 있었다. `widgetURL` 은 표시 모델 6종을 switch 하므로 `CalendarPresentation` 을 벗어날 수 없다 — Domain 이 Presentations 를 물 수 없기 때문이다. 이렇게 가르면 빌더는 도메인 식별자만, 어댑터는 표시 모델만 안다.
+
+**부록 A Task 9** — Composed 2종(`EventAndForemost`·`EventAndMonth`)의 스냅샷 케이스를 더한다. 토글 주입 배선이 이번에 생긴 코드인데 어느 그물도 안 지났다. 다만 기준 브랜치의 `EventListView` 가 `init(model:)` 이라 이 케이스로는 이번 이관의 무손실을 판정할 수 없다 — 앞으로의 회귀 그물이고, 이번 판정은 실기가 맡는다 (2026-09-09 빌드 16 로 통과).
+
+**나머지 항목** — 변경 없음.
+
 ### FRAGO-2 (2026-09-09) — 순수 뷰가 할일 토글 자리를 주입받는다
 
 **3-라 인터페이스 계약** — C1 의 "순수 뷰 생성자는 DP-5.1 전까지 `init(model:)` 이다" 를 `EventListView` 와 `SystemSizeForemostEventView` 둘에 한해 푼다. 두 뷰는 `init(model:todoToggle:)`(Foremost 는 `init(model:isSmallSize:todoToggle:)`)를 받는다. 나머지 순수 뷰의 생성자는 그대로다.
