@@ -89,6 +89,10 @@ docs/superpowers/
 .superpowers/
 .operations/
 
+### 계획 산출물(작전명령·작전계획·전략) 미커밋 — 정본 공유는 이슈 본문 미러·상황판 스풀 (campaign 스킬 §1) ###
+docs/operations/*
+!docs/operations/templates
+
 ### Snapshot testing ###
 snapshot-catalog/
 
