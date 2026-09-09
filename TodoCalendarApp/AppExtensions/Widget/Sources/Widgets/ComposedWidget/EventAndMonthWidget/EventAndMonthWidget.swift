@@ -30,11 +30,8 @@ struct EventAndMonthWidgetView: View {
         switch self.entry.result {
         case .success(let model):
             let colorSet = model.event.widgetSetting.background.colorSet(colorScheme == .light)
-            HStack(spacing: 12) {
-                EventListView(model: model.event) { todo in
-                    AnyView(TodoToggleButton(todo: todo, colorSet: colorSet))
-                }
-                SingleMonthView(model: model.month)
+            EventAndMonthWidgetContentView(model: model) { todo in
+                AnyView(TodoToggleButton(todo: todo, colorSet: colorSet))
             }
         case .failure(let error):
             FailView(errorModel: error)

@@ -128,6 +128,27 @@ final class WidgetCatalogSnapshots: XCTestCase {
     }
 
     @MainActor
+    func test_widgetDoubleMonth() {
+        self.capture("widget-double-month", family: .systemMedium, canvas: WidgetCanvas.medium) {
+            let model = DoubleMonthWidgetViewModel(
+                current: try! MonthWidgetViewModel.makeSample(),
+                next: try! MonthWidgetViewModel.makeSampleNextMonth()
+            )
+            return DoubleMonthWidgetContentView(model: model)
+        }
+    }
+
+    @MainActor
+    func test_widgetTodayAndMonth() {
+        self.capture("widget-today-and-month", family: .systemMedium, canvas: WidgetCanvas.medium) {
+            let model = TodayAndMonthWidgetViewModel(
+                today: .sample(), month: try! MonthWidgetViewModel.makeSample()
+            )
+            return TodayAndMonthWidgetContentView(model: model)
+        }
+    }
+
+    @MainActor
     func test_widgetToday() {
         self.capture("widget-today", family: .systemSmall, canvas: WidgetCanvas.small) {
             TodayWidgetView(

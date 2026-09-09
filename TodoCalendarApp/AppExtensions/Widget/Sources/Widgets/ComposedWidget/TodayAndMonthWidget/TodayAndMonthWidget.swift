@@ -19,8 +19,6 @@ import WidgetScenes
 
 struct TodayAndMonthWidgetView: View {
     
-    @Environment(\.colorScheme) var colorScheme
-    
     private let entry: ResultTimelineEntry<TodayAndMonthWidgetViewModel>
     init(entry: ResultTimelineEntry<TodayAndMonthWidgetViewModel>) {
         self.entry = entry
@@ -29,10 +27,7 @@ struct TodayAndMonthWidgetView: View {
     var body: some View {
         switch self.entry.result {
         case .success(let model):
-            HStack(spacing: 12) {
-                TodaySummaryView(model: model.today)
-                SingleMonthView(model: model.month)
-            }
+            TodayAndMonthWidgetContentView(model: model)
         case .failure(let error):
             FailView(errorModel: error)
         }
