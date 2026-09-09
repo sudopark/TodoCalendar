@@ -19,6 +19,7 @@ import SettingScene
 import MemberScenes
 import AIAgentScene
 import BillingScenes
+import WidgetScenes
 import SQLiteService
 import AdService
 
@@ -472,7 +473,15 @@ extension ApplicationRootRouter {
             viewAppearance: self.viewAppearanceStore.appearance,
             memberSceneBuilder: self.memberSceneBuilder(),
             paywallSceneBuilder: self.paywallSceneBuilder(),
+            widgetGallerySceneBuilder: self.widgetGallerySceneBuilder(),
             privacyOptionsFormRouter: self.applicationBase.mobileAdService
+        )
+    }
+
+    private func widgetGallerySceneBuilder() -> any WidgetGallerySceneBuilder {
+        return WidgetGalleryBuilderImple(
+            uiSettingUsecase: self.usecaseFactory.makeUISettingUsecase(),
+            viewAppearance: self.viewAppearanceStore.appearance
         )
     }
 

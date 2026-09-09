@@ -68,7 +68,7 @@ open class StubUISettingUsecase: UISettingUsecase, @unchecked Sendable {
         return newSetting.defaultTagColor
     }
     
-    public func changeWidgetAppearanceSetting(_ params: EditWidgetAppearanceSettingParams) throws -> WidgetAppearanceSettings {
+    open func changeWidgetAppearanceSetting(_ params: EditWidgetAppearanceSettingParams) throws -> WidgetAppearanceSettings {
         let old = self.readSetting()
         let new = old.widget.update(params)
         let newSetting = old |> \.widget .~ new

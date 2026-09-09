@@ -11,8 +11,8 @@ import Foundation
 
 public struct DoubleMonthWidgetViewModel {
 
-    public let current: MonthWidgetViewModel
-    public let next: MonthWidgetViewModel
+    public var current: MonthWidgetViewModel
+    public var next: MonthWidgetViewModel
 
     public init(current: MonthWidgetViewModel, next: MonthWidgetViewModel) {
         self.current = current
@@ -23,8 +23,8 @@ public struct DoubleMonthWidgetViewModel {
 
 public struct EventAndForemostWidgetViewModel {
 
-    public let event: EventListWidgetViewModel
-    public let foremost: ForemostEventWidgetViewModel
+    public var event: EventListWidgetViewModel
+    public var foremost: ForemostEventWidgetViewModel
 
     public init(event: EventListWidgetViewModel, foremost: ForemostEventWidgetViewModel) {
         self.event = event
@@ -35,8 +35,8 @@ public struct EventAndForemostWidgetViewModel {
 
 public struct EventAndMonthWidgetViewModel {
 
-    public let event: EventListWidgetViewModel
-    public let month: MonthWidgetViewModel
+    public var event: EventListWidgetViewModel
+    public var month: MonthWidgetViewModel
 
     public init(event: EventListWidgetViewModel, month: MonthWidgetViewModel) {
         self.event = event
@@ -47,8 +47,8 @@ public struct EventAndMonthWidgetViewModel {
 
 public struct TodayAndMonthWidgetViewModel {
 
-    public let today: TodayWidgetViewModel
-    public let month: MonthWidgetViewModel
+    public var today: TodayWidgetViewModel
+    public var month: MonthWidgetViewModel
 
     public init(today: TodayWidgetViewModel, month: MonthWidgetViewModel) {
         self.today = today
