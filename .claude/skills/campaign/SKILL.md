@@ -74,7 +74,7 @@ DP 의 PR 이 생성돼 종결보고가 오면 (pr 스킬이 호출한다):
 
 - 경로: `.operations/<상위이슈>/campaign-progress.md` — gitignore 대상, 시점 무관 자유 갱신.
 - 서식: `<!-- progress -->` 헤딩 + 현재 국면 줄 + 원장 표 `| DP | 상태 미착수/착수/실행/검토/머지 | 이슈# | 브랜치 | base | PR# | 비고 |`.
-- 갱신 시점: DP 착수(issue 단계)·PR 생성·종결보고 접수·머지·branch 발동. 갱신마다 **이슈 본문 미러 재조립** — 본문 = `campaign.md` 전문 + 진행 파일 내용, `gh issue edit <상위이슈> --body-file` 로. 다른 세션·워크트리는 이슈 본문에서 상태를 복원한다. 상황판 동기화가 미러와 짝이다 — 미러를 재조립할 때마다 `.claude/scripts/campaign-board-sync.sh <이슈번호>` 를 함께 호출한다. 스크립트가 스풀 복사와 정적 렌더까지 하고, 렌더가 성공했고 원격 미러가 개통돼 있을 때만 `재게시 필요:` 줄을 뱉는다 — 그 줄이 나오면 지시한 파일을 지시한 URL 로 Artifact 재게시하는 것까지가 한 재조립이다. 줄을 흘리면 원격 미러만 스풀보다 뒤처져 유저가 옛 상태를 본다. 실패 비차단이라 절차를 막지 않는다.
+- 갱신 시점: DP 착수(issue 단계)·PR 생성·종결보고 접수·머지·branch 발동. 갱신마다 **이슈 본문 미러 재조립** — 본문 = `campaign.md` 전문 + 진행 파일 내용, `gh issue edit <상위이슈> --body-file` 로. 다른 세션·워크트리는 이슈 본문에서 상태를 복원한다. 상황판 동기화가 미러와 짝이다 — 미러를 재조립할 때마다 `.claude/scripts/campaign-board-sync.sh <이슈번호>` 를 함께 호출한다 (스크립트가 스풀 복사와 정적 렌더까지 한다, 실패 비차단). Artifact 재게시는 자동으로 하지 않는다 — 유저가 상황판 원격 미러를 요청할 때만 그 세션이 `~/.claude/campaign-board/board.html` 을 `~/.claude/campaign-board/artifact-url.txt` 의 URL 로 수동 재게시한다.
 
 ## 6. 종료 기록 — skill_end
 
