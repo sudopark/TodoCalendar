@@ -14,71 +14,8 @@ import Domain
 import Extensions
 import CommonPresentation
 import CalendarPresentation
+import WidgetScenes
 
-
-// MARK: - NextEventWidgetView
-
-struct NextEventWidgetInlineView: View {
-    
-    private let model: NextEventWidgetViewModel
-    init(model: NextEventWidgetViewModel) {
-        self.model = model
-    }
-    
-    var body: some View {
-        VStack {
-            Text(
-                model.timeText.map { "\($0.singleLineText) - \(model.eventTitle)" } ?? model.eventTitle
-            )
-        }
-    }
-}
-
-struct NextEventRectangleWidgetView: View {
-    
-    private let model: NextEventWidgetViewModel
-    init(model: NextEventWidgetViewModel) {
-        self.model = model
-    }
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            HStack(alignment: .center, spacing: 2) {
-                Image("small_icon")
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 24, height: 24)
-                
-                Text("widget.next.rect_widget::title".localized())
-                    .font(.footnote)
-            }
-            .foregroundStyle(.primary)
-            .opacity(0.8)
-            
-            VStack(alignment: .leading) {
-                VStack(alignment: .leading) {
-                    if let time = model.timeText {
-                        Text(time.singleLineAttrText())
-                    }
-                    if let location = model.locationText {
-                        Text(location)
-                    }
-                }
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                
-                HStack {
-                    Text(model.eventTitle)
-                        .font(.subheadline)
-                        .foregroundStyle(.primary)
-                    
-                    Spacer()
-                }
-            }
-            .padding(.leading, 4)
-        }
-    }
-}
 
 struct NextEventWidgetEntryView: View {
     

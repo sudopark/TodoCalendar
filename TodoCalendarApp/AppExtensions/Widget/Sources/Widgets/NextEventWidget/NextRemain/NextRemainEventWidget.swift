@@ -12,44 +12,7 @@ import Domain
 import Extensions
 import CommonPresentation
 import CalendarPresentation
-
-
-// MARK: - NextRemainEventView
-
-struct NextRemainEventVListiew: View {
-    
-    private let model: NextEventListWidgetViewModel
-    init(model: NextEventListWidgetViewModel) {
-        self.model = model
-    }
-    
-    var body: some View {
-        if model.models.isEmpty {
-            NextEventRectangleWidgetView(model: .empty)
-        } else {
-            VStack(alignment: .leading, spacing: 2) {
-                ForEach(0..<model.models.count, id: \.self) {
-                    rowView(model.models[$0])
-                }
-            }
-        }
-    }
-    
-    private func rowView(_ model: NextEventWidgetViewModel) -> some View {
-        HStack {
-            if let time = model.timeText {
-                Text(time.singleLineAttrText())
-                    .font(.callout)
-                    .minimumScaleFactor(0.4)
-            }
-            Text(model.eventTitle)
-                .font(.body)
-                .minimumScaleFactor(0.4)
-                .asLinkIfPossible(model.eventLink)
-            Spacer()
-        }
-    }
-}
+import WidgetScenes
 
 
 // MARK: - NextRemainEventWidgetView
