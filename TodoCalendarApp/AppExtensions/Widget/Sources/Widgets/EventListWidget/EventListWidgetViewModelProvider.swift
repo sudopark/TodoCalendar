@@ -59,21 +59,10 @@ extension EventListWidgetViewModel.SectionModel {
                 let eventsThisDay = events
                     .filter { $0.eventTime?.isOverlap(with: dayRange, in: self.timeZone) ?? false }
                     .sortedByEventTime()
-                let models = eventsThisDay.compactMap { event -> (any EventCellViewModel)? in
-                    switch event {
-                    case let todo as TodoCalendarEvent:
-                        return TodoEventCellViewModel(todo, in: dayRange, timeZone, is24Form)
-                    case let schedule as ScheduleCalendarEvent:
-                        return ScheduleEventCellViewModel(schedule, in: dayRange, timeZone: timeZone, is24Form)
-                    case let holiday as HolidayCalendarEvent:
-                        return HolidayEventCellViewModel(holiday)
-                    case let google as GoogleCalendarEvent:
-                        return GoogleCalendarEventCellViewModel(google, in: dayRange, timeZone, is24Form)
-                    case let apple as AppleCalendarEvent:
-                        return AppleCalendarEventCellViewModel(apple, in: dayRange, timeZone, is24Form)
-                    default: return nil
-                    }
-                }
+                let mapper = EventCellViewModelMapper(
+                    range: dayRange, timeZone: self.timeZone, is24hourForm: self.is24Form
+                )
+                let models = mapper.cellViewModels(from: eventsThisDay)
                 
                 guard offset == 0 || !models.isEmpty else { return nil }
 

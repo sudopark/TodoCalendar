@@ -227,6 +227,41 @@ extension EventListWidgetViewModelProviderTests {
         )
     }
     
+    // 이틀에 걸친 일정은 날짜별 섹션에서 그날 범위 기준으로 시간이 표기된다
+    func testProvider_multiDayEvent_periodTextIsBuiltPerDayRange() async throws {
+        // given
+        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ kst
+        let startOfDay = calendar.startOfDay(for: self.refDate).timeIntervalSince1970
+        let schedule = ScheduleEvent(
+            uuid: "spanning", name: "spanning",
+            time: .period(startOfDay + 10*3600 ..< startOfDay + 34*3600)
+        )
+        let usecase = PrivateStubEventFetchUsecase(
+            currentTodos: [],
+            eventWithTimes: ScheduleCalendarEvent.events(from: schedule, in: kst)
+        )
+        let provider = EventListWidgetViewModelProvider(
+            targetEventTagIds: nil,
+            eventsFetchUsecase: usecase,
+            appSettingRepository: StubAppSettingRepository(),
+            calendarSettingRepository: StubCalendarSettingRepository(),
+            localeProvider: Locale.current
+        )
+        
+        // when
+        let model = try await provider.getEventListViewModel(for: self.refDate, widgetSize: .large)
+        
+        // then
+        let sections = model.pages.flatMap { $0.sections }
+        let firstDayText = sections.first(where: { $0.sectionTitle == "Fri, Mar 1" })?
+            .events.first?.periodText
+        let secondDayText = sections.first(where: { $0.sectionTitle == "Sat, Mar 2" })?
+            .events.first?.periodText
+        XCTAssertNotNil(firstDayText)
+        XCTAssertNotNil(secondDayText)
+        XCTAssertNotEqual(firstDayText, secondDayText)
+    }
+    
     // 첫날에 해당하는 이벤트는 없는경우 빈 모델로 반환
     func testProvider_whenFirstDayIsEmpty_provideEmptyFirstDateModel() async throws {
         // given

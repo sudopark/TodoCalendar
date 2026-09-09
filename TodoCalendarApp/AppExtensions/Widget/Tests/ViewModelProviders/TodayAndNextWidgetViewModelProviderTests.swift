@@ -452,6 +452,28 @@ extension TodayAndNextWidgetViewModelBuilderTests {
     }
     
     // fill right with other day events
+    // 이틀에 걸친 일정은 날짜별로 그날 범위 기준의 시간이 표기된다
+    @Test func builder_multiDayEvent_periodTextIsBuiltPerDayRange() throws {
+        // given
+        let builder = self.makeBuilder()
+        let schedule = ScheduleEvent(
+            uuid: "spanning", name: "spanning", time: .period(0..<90000)
+        )
+        let events = CalendarEvents()
+            |> \.eventWithTimes .~ ScheduleCalendarEvent.events(from: schedule, in: kst)
+        
+        // when
+        let model = builder.build(refDate, events)
+        
+        // then
+        let periodTexts = (model.left.rows + model.right.rows)
+            .compactMap { ($0 as? TodayAndNextWidgetViewModel.EventModel)?.cvm }
+            .filter { $0.name == "spanning" }
+            .map { $0.periodText }
+        try #require(periodTexts.count == 2)
+        #expect(periodTexts[0] != periodTexts[1])
+    }
+    
     @Test func builder_fillRightWithOtherDayEvents() throws {
         // given
         let builder = self.makeBuilder()

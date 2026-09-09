@@ -119,34 +119,10 @@ struct TodayAndNextWidgetViewModelBuilder {
                 default: day.text("date_form.MMM_dd_E".localized(), timeZone: timeZone)
             }
             
-            let cvms = eventsThisDay.compactMap { event -> (any EventCellViewModel)? in
-                switch event {
-                case let todo as TodoCalendarEvent:
-                    return TodoEventCellViewModel(
-                        todo, in: daysrange, timeZone, is24Form
-                    )
-                    
-                case let schedule as ScheduleCalendarEvent:
-                    return ScheduleEventCellViewModel(
-                        schedule, in: daysrange, timeZone: timeZone, is24Form
-                    )
-                    
-                case let holiday as HolidayCalendarEvent:
-                    return HolidayEventCellViewModel(holiday)
-                    
-                case let google as GoogleCalendarEvent:
-                    return GoogleCalendarEventCellViewModel(
-                        google, in: daysrange, timeZone, is24Form
-                    )
-
-                case let apple as AppleCalendarEvent:
-                    return AppleCalendarEventCellViewModel(
-                        apple, in: daysrange, timeZone, is24Form
-                    )
-
-                default: return nil
-                }
-            }
+            let mapper = EventCellViewModelMapper(
+                range: daysrange, timeZone: timeZone, is24hourForm: is24Form
+            )
+            let cvms = mapper.cellViewModels(from: eventsThisDay)
 
             return .init(offset: offset, dateText: dateText, events: cvms, eventsThisDay: eventsThisDay)
         }
