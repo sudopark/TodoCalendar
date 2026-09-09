@@ -19,6 +19,7 @@ public final class SettingSceneBuilderImple: SettingSceneBuiler {
     private let viewAppearance: ViewAppearance
     private let memberSceneBuilder: any MemberSceneBuilder
     private let paywallSceneBuilder: any PaywallSceneBuilder
+    private let widgetGallerySceneBuilder: any WidgetGallerySceneBuilder
     private let privacyOptionsFormRouter: (any PrivacyOptionsFormRouter)?
 
     public init(
@@ -28,6 +29,7 @@ public final class SettingSceneBuilderImple: SettingSceneBuiler {
         viewAppearance: ViewAppearance,
         memberSceneBuilder: any MemberSceneBuilder,
         paywallSceneBuilder: any PaywallSceneBuilder,
+        widgetGallerySceneBuilder: any WidgetGallerySceneBuilder,
         privacyOptionsFormRouter: (any PrivacyOptionsFormRouter)?
     ) {
         self.appstoreLinkPath = appstoreLinkPath
@@ -36,6 +38,7 @@ public final class SettingSceneBuilderImple: SettingSceneBuiler {
         self.viewAppearance = viewAppearance
         self.memberSceneBuilder = memberSceneBuilder
         self.paywallSceneBuilder = paywallSceneBuilder
+        self.widgetGallerySceneBuilder = widgetGallerySceneBuilder
         self.privacyOptionsFormRouter = privacyOptionsFormRouter
     }
 }
@@ -89,11 +92,6 @@ extension SettingSceneBuilderImple {
             viewAppearance: self.viewAppearance
         )
         
-        let widgetSettingSceneBuilder = WidgetAppearanceSettingSceneBuilderImple(
-            usecaseFactory: self.usecaseFactory,
-            viewAppearance: self.viewAppearance
-        )
-        
         let timeZoneSelectSceneBuilder = TimeZoneSelectSceneBuilerImple(
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearance
@@ -103,7 +101,7 @@ extension SettingSceneBuilderImple {
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearance,
             colorThemeSelectSceneBuiler: colorThemeSelectSceneBuilder,
-            widgetSettingSceneBuilder: widgetSettingSceneBuilder,
+            widgetGallerySceneBuilder: self.widgetGallerySceneBuilder,
             timeZoneSelectSceneBuilder: timeZoneSelectSceneBuilder
         )
         

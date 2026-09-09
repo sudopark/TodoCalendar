@@ -21,7 +21,7 @@ graph TD
     SIL -->|bottomSlide| SI[SignIn<br/>MemberScenes]
 
     AS -->|push| CT[ColorThemeSelect<br/>색상 테마]
-    AS -->|push| WA[WidgetAppearance<br/>위젯 외형]
+    AS -->|push| WG[WidgetGallery<br/>WidgetScenes]
     AS -->|push| TZ[TimeZoneSelect<br/>타임존]
 
     ES -->|push| ETS[EventDefaultTagSelect<br/>기본 태그]
@@ -58,7 +58,7 @@ graph TD
 | `EventOnCalendarViewModelImple` | 캘린더 이벤트 | 태그 색상 표시, 할일 표시 등 |
 | `EventListAppearnaceSettingViewModelImple` | 이벤트 목록 | 12/24시 형식 등 |
 
-하위 화면: ColorThemeSelect, WidgetAppearanceSetting, TimeZoneSelect (모두 leaf)
+하위 화면: ColorThemeSelect, TimeZoneSelect (leaf), WidgetGallery (WidgetScenes — 위젯 기본 테마 설정을 그 화면 상단이 담는다)
 
 ### EventSetting (이벤트 기본값)
 
@@ -142,7 +142,7 @@ graph TD
     SSB -->|생성| OSLB[OpenSourceLicenseBuilder]
 
     ASB -->|하위| CTB[ColorThemeSelectBuilder]
-    ASB -->|하위| WAB[WidgetAppearanceBuilder]
+    ASB -->|주입받음| WGB[WidgetGallerySceneBuilder<br/>구현체는 WidgetScenes]
     ASB -->|하위| TZB[TimeZoneSelectBuilder]
 
     ESB -->|하위| ETSB[EventDefaultTagSelectBuilder]
@@ -170,5 +170,6 @@ graph TD
 | 방향 | 대상 | 용도 |
 |---|---|---|
 | → | MemberScenes | 로그인/계정 관리 (MemberSceneBuilder) |
+| → | `Scenes.WidgetGallerySceneBuilder` | 위젯 갤러리 (구현체는 WidgetScenes — 앱 루트가 `SettingSceneBuilderImple` 에 주입) |
 | ← | TodoCalendarApp | ApplicationRootBuilder에서 생성 |
 | ← | EventDetailScene | SelectEventTag에서 태그 관리 화면 사용 (SettingSceneBuilder) |

@@ -25,16 +25,16 @@ protocol AppearanceSettingRouting: Routing, Sendable {
 final class AppearanceSettingRouter: BaseRouterImple, AppearanceSettingRouting, CalendarSectionRouting, EventListAppearnaceSettingViewRouting, EventOnCalendarViewRouting, @unchecked Sendable {
     
     private let colorThemeSelectSceneBuiler: any ColorThemeSelectSceneBuiler
-    private let widgetSettingSceneBuilder: any WidgetAppearanceSettingSceneBuilder
+    private let widgetGallerySceneBuilder: any WidgetGallerySceneBuilder
     private let timeZoneSelectBuilder: any TimeZoneSelectSceneBuiler
     
     init(
         colorThemeSelectSceneBuiler: any ColorThemeSelectSceneBuiler,
-        widgetSettingSceneBuilder: any WidgetAppearanceSettingSceneBuilder,
+        widgetGallerySceneBuilder: any WidgetGallerySceneBuilder,
         timeZoneSelectBuilder: any TimeZoneSelectSceneBuiler
     ) {
         self.colorThemeSelectSceneBuiler = colorThemeSelectSceneBuiler
-        self.widgetSettingSceneBuilder = widgetSettingSceneBuilder
+        self.widgetGallerySceneBuilder = widgetGallerySceneBuilder
         self.timeZoneSelectBuilder = timeZoneSelectBuilder
     }
     
@@ -61,9 +61,9 @@ extension AppearanceSettingRouter {
         }
     }
     
-    func routeToChangeWidgetTheme(_ setting: WidgetAppearanceSettings) {
+    func routeToWidgetGallery(_ setting: WidgetAppearanceSettings) {
         Task { @MainActor in
-            let next = self.widgetSettingSceneBuilder.makeWidgetAppearanceSettingScene(setting: setting)
+            let next = self.widgetGallerySceneBuilder.makeWidgetGalleryScene(setting: setting)
             self.currentScene?.navigationController?.pushViewController(next, animated: true)
         }
     }
