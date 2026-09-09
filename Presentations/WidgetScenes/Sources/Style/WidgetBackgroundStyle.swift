@@ -43,3 +43,15 @@ public struct WidgetBackgroundStyle {
         }
     }
 }
+
+
+extension WidgetAppearanceSettings.Background {
+    
+    public func colorSet(_ systemIsLight: Bool) -> any ColorSet {
+        let isLight = switch self {
+            case .system: systemIsLight
+            case .custom(let hex): UIColor.from(hex: hex)?.isLight ?? systemIsLight
+        }
+        return isLight ? DefaultLightColorSet() : DefaultDarkColorSet()
+    }
+}

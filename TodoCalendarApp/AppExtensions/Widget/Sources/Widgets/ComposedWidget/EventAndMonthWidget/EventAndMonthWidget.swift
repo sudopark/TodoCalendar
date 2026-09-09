@@ -12,6 +12,7 @@ import Domain
 import Extensions
 import CommonPresentation
 import CalendarPresentation
+import WidgetScenes
 
 
 // MARK: - EventAndMonthWidgetView
