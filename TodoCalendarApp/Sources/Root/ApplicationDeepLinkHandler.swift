@@ -9,6 +9,7 @@
 import Foundation
 import Prelude
 import Optics
+import Domain
 import Scenes
 import CalendarScenes
 import Extensions
@@ -35,7 +36,7 @@ extension ApplicationDeepLinkHandlerImple {
     func handleLink(_ url: URL) -> Bool {
         
         guard let link = PendingDeepLink(url),
-              link.scheme == AppEnvironment.appScheme
+              link.scheme == AppDeepLink.scheme
         else {
             return false
         }

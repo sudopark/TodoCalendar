@@ -119,8 +119,6 @@ struct AppEnvironment {
         return "https://itunes.apple.com/app/id/\(self.appId)"
     }
     
-    static var appScheme: String { "tc.app" }
-    
     static func dbFilePath(for userId: String?) -> String {
         let fileName = userId.map { "\(self.dbFileName)_\($0)" } ?? self.dbFileName
         return self.dbPath(fileName: fileName)

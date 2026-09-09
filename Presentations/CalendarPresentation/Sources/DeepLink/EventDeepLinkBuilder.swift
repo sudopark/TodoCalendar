@@ -1,6 +1,6 @@
 //
-//  WidgetLink+Extensions.swift
-//  TodoCalendarApp
+//  EventDeepLinkBuilder.swift
+//  CalendarPresentation
 //
 //  Created by sudo.park on 1/1/26.
 //  Copyright © 2026 com.sudo.park. All rights reserved.
@@ -8,20 +8,19 @@
 
 import Foundation
 import Domain
-import CalendarPresentation
 
 
-enum EventDeepLinkBuilder {
+public enum EventDeepLinkBuilder {
     case todo(id: String)
     case schedule(id: String, time: EventTime)
     case holiday(id: String)
     case google(id: String, calendarId: String, accountId: String)
     case apple(id: String, calendarId: String)
 
-    func build() -> URL? {
+    public func build() -> URL? {
         
         func make(_ path: String, queries: [String: String]) -> URL? {
-            let fullPath = "\(AppEnvironment.appScheme)://calendar/event/\(path)"
+            let fullPath = "\(AppDeepLink.scheme)://calendar/event/\(path)"
             var components = URLComponents(string: fullPath)
             components?.queryItems = queries.map {
                 URLQueryItem(name: $0.key, value: $0.value.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed))
@@ -50,34 +49,9 @@ enum EventDeepLinkBuilder {
 }
 
 
-extension LiveActivityEventTarget {
-
-    func eventDetailURL(scheduleTimeQuery: [String: String]?) -> URL? {
-        switch self {
-        case .todo(let id):
-            return EventDeepLinkBuilder.todo(id: id).build()
-
-        case .schedule(let id, _):
-            return scheduleTimeQuery
-                .flatMap { EventTime(deepLink: $0) }
-                .flatMap { EventDeepLinkBuilder.schedule(id: id, time: $0).build() }
-
-        case .holiday(let uuid, _):
-            return EventDeepLinkBuilder.holiday(id: uuid).build()
-
-        case .googleCalendar(let accountId, let calendarId, let eventId):
-            return EventDeepLinkBuilder.google(id: eventId, calendarId: calendarId, accountId: accountId).build()
-
-        case .appleCalendar(let calendarId, let eventId):
-            return EventDeepLinkBuilder.apple(id: eventId, calendarId: calendarId).build()
-        }
-    }
-}
-
-
 extension EventCellViewModel {
     
-    var widgetURL: URL? {
+    public var widgetURL: URL? {
         
         switch self {
         case let todo as TodoEventCellViewModel:
@@ -105,8 +79,8 @@ extension EventCellViewModel {
 
 extension CalendarDay {
 
-    var link: URL? {
-        var component = URLComponents(string: "\(AppEnvironment.appScheme)://calendar")
+    public var link: URL? {
+        var component = URLComponents(string: "\(AppDeepLink.scheme)://calendar")
         component?.queryItems = [
             .init(name: "select", value: "\(self.year)_\(self.month.withLeadingZero())_\(self.day.withLeadingZero())")
         ]
@@ -115,8 +89,8 @@ extension CalendarDay {
 }
 
 
-enum AICommandEntryLink {
-    static var url: URL? {
-        return URL(string: "\(AppEnvironment.appScheme)://calendar/ai")
+public enum AICommandEntryLink {
+    public static var url: URL? {
+        return URL(string: "\(AppDeepLink.scheme)://calendar/ai")
     }
 }

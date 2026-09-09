@@ -10,6 +10,7 @@ import WidgetKit
 import SwiftUI
 import Extensions
 import CommonPresentation
+import CalendarPresentation
 
 
 // MARK: - AICommandShortcutWidgetEntry
