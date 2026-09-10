@@ -95,10 +95,7 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
     func prepare() {
         
         self.subject.isLoading.send(true)
-        // 플래그가 꺼져 있으면 후보 목록을 읽지 않는다 (#741 배포 보류)
-        if FeatureFlag.isEnable(.ddayWidget) {
-            self.ddayCandidateUsecase.refresh()
-        }
+        self.ddayCandidateUsecase.refresh()
 
         let handlePrepared: (EventDetailBasicData, EventDetailData) -> Void = { [weak self] basic, addition in
             self?.subject.basicData.send(
@@ -592,9 +589,6 @@ extension EditScheduleEventDetailViewModelImple {
     var moreActions: AnyPublisher<[[EventDetailMoreAction]], Never> {
         let scheduleId = self.scheduleId
         let targetTime = self.repeatingEventTargetTime
-        // #741 D-day 위젯이 배포 보류라 플래그가 꺼진 동안은 후보 등록 메뉴를 감춘다 —
-        // 위젯 없이 후보만 등록하게 두면 갈 곳 없는 기능이 된다. 처리 로직은 살아 있다
-        let isDDayWidgetEnabled = FeatureFlag.isEnable(.ddayWidget)
         let transform: (
             EventDetailBasicData, (any ForemostMarkableEvent)?, [DDayCandidate], LiveActivityTarget?
         ) -> [[EventDetailMoreAction]] = { basic, foremostEvent, candidates, registeredTarget in
@@ -603,19 +597,17 @@ extension EditScheduleEventDetailViewModelImple {
             let removeActions: [EventDetailMoreAction] = isRepeating
                 ? [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)]
                 : [.remove(onlyThisEvent: false)]
-            let ddayActions: [EventDetailMoreAction] = isDDayWidgetEnabled
-                ? [
-                    .toggleDDayCandidate(
-                        isRegistered: candidates.contains(
-                            DDayCandidate(
-                                scheduleId: scheduleId,
-                                targetTime: targetTime,
-                                isRepeating: isRepeating
-                            )
+            let ddayActions: [EventDetailMoreAction] = [
+                .toggleDDayCandidate(
+                    isRegistered: candidates.contains(
+                        DDayCandidate(
+                            scheduleId: scheduleId,
+                            targetTime: targetTime,
+                            isRepeating: isRepeating
                         )
                     )
-                ]
-                : []
+                )
+            ]
             let liveActivityActions: [EventDetailMoreAction] = basic.selectedTime != nil
                 ? [
                     .toggleLiveActivity(
@@ -636,10 +628,7 @@ extension EditScheduleEventDetailViewModelImple {
         return Publishers.CombineLatest4(
             self.subject.basicData.compactMap { $0?.origin },
             self.foremostEventUsecase.foremostEvent,
-            // 플래그가 꺼져 있으면 후보 목록을 조회·구독하지 않는다
-            isDDayWidgetEnabled
-                ? self.ddayCandidateUsecase.candidates
-                : Just<[DDayCandidate]>([]).eraseToAnyPublisher(),
+            self.ddayCandidateUsecase.candidates,
             self.liveActivityToggleViewModel.registeredTarget
         )
         .map(transform)

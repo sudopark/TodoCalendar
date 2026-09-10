@@ -45,7 +45,6 @@ final class WidgetGalleryViewModelImpleTests: PublisherWaitable {
 
     private func makeViewModel(
         router: SpyWidgetGalleryRouter = .init(),
-        isDDayWidgetEnabled: Bool = false,
         setting: WidgetAppearanceSettings = .init(),
         shouldFailChangeSetting: Bool = false
     ) -> WidgetGalleryViewModelImple {
@@ -53,8 +52,7 @@ final class WidgetGalleryViewModelImpleTests: PublisherWaitable {
             ? FailingUISettingUsecase() : StubUISettingUsecase()
         let viewModel = WidgetGalleryViewModelImple(
             setting: setting,
-            uiSettingUsecase: usecase,
-            isDDayWidgetEnabled: isDDayWidgetEnabled
+            uiSettingUsecase: usecase
         )
         viewModel.router = router
         return viewModel
@@ -67,30 +65,17 @@ final class WidgetGalleryViewModelImpleTests: PublisherWaitable {
 extension WidgetGalleryViewModelImpleTests {
 
     @Test
-    func viewModel_emitsAllItems() async throws {
+    func viewModel_emitsAllItemsIncludingDDay() async throws {
         // given
-        let expect = expectConfirm("D-day 를 켜면 전 종류가 나온다")
-        let viewModel = self.makeViewModel(isDDayWidgetEnabled: true)
+        let expect = expectConfirm("D-day 를 포함한 전 종류가 나온다")
+        let viewModel = self.makeViewModel()
 
         // when
         let items = try await self.firstOutput(expect, for: viewModel.items)
 
         // then
         #expect(items?.map { $0.id } == WidgetGalleryItem.allCases.map { $0.id })
-    }
-
-    @Test
-    func viewModel_whenDDayDisabled_emitsItemsWithoutDDay() async throws {
-        // given
-        let expect = expectConfirm("D-day 를 끄면 그 종류만 빠진다")
-        let viewModel = self.makeViewModel(isDDayWidgetEnabled: false)
-
-        // when
-        let items = try await self.firstOutput(expect, for: viewModel.items)
-
-        // then
-        #expect(items?.contains(.dday) == false)
-        #expect(items?.count == WidgetGalleryItem.allCases.count - 1)
+        #expect(items?.contains(.dday) == true)
     }
 }
 
@@ -115,13 +100,13 @@ extension WidgetGalleryViewModelImpleTests {
     }
 
     @Test
-    func viewModel_whenSelectHiddenItem_doesNotRoute() {
+    func viewModel_whenSelectUnknownItem_doesNotRoute() {
         // given
         let router = SpyWidgetGalleryRouter()
-        let viewModel = self.makeViewModel(router: router, isDDayWidgetEnabled: false)
+        let viewModel = self.makeViewModel(router: router)
 
         // when
-        viewModel.selectItem(WidgetGalleryItem.dday.id)
+        viewModel.selectItem("not_exist_item")
 
         // then
         #expect(router.didRouteToDetailItem == nil)
