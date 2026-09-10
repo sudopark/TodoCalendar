@@ -95,6 +95,7 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
     private let accountUsecase: any AccountUsecase
     private let aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
     private let eventLiveActivityUsecase: any EventLiveActivityUsecase
+    private let ddayCandidateUsecase: any DDayCandidateUsecase
     private let guideTodoUsecase: any GuideTodoUsecase
     var router: (any DayEventListRouting)?
     private weak var listener: (any DayEventListSceneListener)?
@@ -109,6 +110,7 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
         accountUsecase: any AccountUsecase,
         aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase,
         eventLiveActivityUsecase: any EventLiveActivityUsecase,
+        ddayCandidateUsecase: any DDayCandidateUsecase,
         guideTodoUsecase: any GuideTodoUsecase
     ) {
         self.calendarUsecase = calendarUsecase
@@ -120,6 +122,7 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
         self.accountUsecase = accountUsecase
         self.aiAgentOrchestrationUsecase = aiAgentOrchestrationUsecase
         self.eventLiveActivityUsecase = eventLiveActivityUsecase
+        self.ddayCandidateUsecase = ddayCandidateUsecase
         self.guideTodoUsecase = guideTodoUsecase
 
         self.internalBind()
@@ -347,9 +350,12 @@ extension DayEventListViewModelImple {
             default: return nil
             }
         }
-        let applyRegistration: ((any EventCellViewModel)?, LiveActivityTarget?) -> (any EventCellViewModel)?
-        applyRegistration = { cvm, target in
+        let applyRegistration: (
+            (any EventCellViewModel)?, LiveActivityTarget?, [DDayCandidate]
+        ) -> (any EventCellViewModel)?
+        applyRegistration = { cvm, target, candidates in
             cvm?.liveActivityRegistrationApplied(target)
+                .ddayCandidateRegistrationApplied(candidates)
         }
 
         let foremostModel = Publishers.CombineLatest4(
@@ -360,7 +366,11 @@ extension DayEventListViewModelImple {
         )
         .map(asCellViewModel)
 
-        return Publishers.CombineLatest(foremostModel, self.eventLiveActivityUsecase.registeredTarget)
+        return Publishers.CombineLatest3(
+            foremostModel,
+            self.eventLiveActivityUsecase.registeredTarget,
+            self.ddayCandidateUsecase.candidates
+        )
             .map(applyRegistration)
             .removeDuplicates(by: { $0?.customCompareKey == $1?.customCompareKey })
             .eraseToAnyPublisher()
@@ -420,9 +430,14 @@ extension DayEventListViewModelImple {
                 ? [GuideTodoEventCellViewModel()] : []
             return guides + pair.0 + pending + pair.1
         }
-        let applyRegistration: ([any EventCellViewModel], LiveActivityTarget?) -> [any EventCellViewModel]
-        applyRegistration = { cvms, target in
-            cvms.map { $0.liveActivityRegistrationApplied(target) }
+        let applyRegistration: (
+            [any EventCellViewModel], LiveActivityTarget?, [DDayCandidate]
+        ) -> [any EventCellViewModel]
+        applyRegistration = { cvms, target, candidates in
+            cvms.map {
+                $0.liveActivityRegistrationApplied(target)
+                    .ddayCandidateRegistrationApplied(candidates)
+            }
         }
 
         let cells = Publishers.CombineLatest3(
@@ -432,7 +447,11 @@ extension DayEventListViewModelImple {
         )
         .map(combineEvents)
 
-        return Publishers.CombineLatest(cells, self.eventLiveActivityUsecase.registeredTarget)
+        return Publishers.CombineLatest3(
+            cells,
+            self.eventLiveActivityUsecase.registeredTarget,
+            self.ddayCandidateUsecase.candidates
+        )
             .map(applyRegistration)
             .removeDuplicates(by: { $0.map { $0.customCompareKey } == $1.map { $0.customCompareKey } })
             .eraseToAnyPublisher()
@@ -498,6 +517,12 @@ extension DayEventListViewModelImple {
 // MARK: - private helpers
 
 private extension EventCellViewModel {
+
+    func ddayCandidateRegistrationApplied(_ candidates: [DDayCandidate]) -> any EventCellViewModel {
+        guard let schedule = self as? ScheduleEventCellViewModel else { return self }
+        return schedule
+            |> \.isDDayCandidateRegistered .~ candidates.contains(schedule.ddayCandidate)
+    }
 
     func liveActivityRegistrationApplied(_ registered: LiveActivityTarget?) -> any EventCellViewModel {
         switch self {

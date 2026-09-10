@@ -29,6 +29,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var stubTagUsecase: StubEventTagUsecase!
     private var stubUISettingUsecase: StubUISettingUsecase!
     private var stubLiveActivityUsecase: StubEventLiveActivityUsecase!
+    private var stubDDayCandidateUsecase: StubDDayCandidateUsecase!
     private var stubGuideTodoUsecase: StubGuideTodoUsecase!
     private var spyRouter: SpyRouter!
     private var spyListener: SpyListener!
@@ -53,6 +54,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubTagUsecase = nil
         self.stubUISettingUsecase = nil
         self.stubLiveActivityUsecase = nil
+        self.stubDDayCandidateUsecase = nil
         self.stubGuideTodoUsecase = nil
         self.spyRouter = nil
         self.spyListener = nil
@@ -70,6 +72,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         isSignedIn: Bool = true,
         isCreditExhausted: Bool = false,
         registeredLiveActivityTarget: LiveActivityTarget? = nil,
+        registeredDDayCandidates: [DDayCandidate] = [],
         isGuideTodoVisible: Bool = true
     ) -> DayEventListViewModelImple {
         let currentTodos: [TodoEvent] = [
@@ -108,6 +111,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         
         self.stubOrchestrationUsecase.stubIsCreditExhausted = isCreditExhausted
         self.stubLiveActivityUsecase = StubEventLiveActivityUsecase(registeredTarget: registeredLiveActivityTarget)
+        self.stubDDayCandidateUsecase = .init(registeredDDayCandidates)
         self.stubGuideTodoUsecase = .init(isVisible: isGuideTodoVisible)
         let account: AccountInfo? = isSignedIn ? AccountInfo("uid") : nil
         let viewModel = DayEventListViewModelImple(
@@ -120,6 +124,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
             accountUsecase: StubAccountUsecase(account),
             aiAgentOrchestrationUsecase: self.stubOrchestrationUsecase,
             eventLiveActivityUsecase: self.stubLiveActivityUsecase,
+            ddayCandidateUsecase: self.stubDDayCandidateUsecase,
             guideTodoUsecase: self.stubGuideTodoUsecase
         )
         viewModel.router = self.spyRouter
@@ -580,15 +585,18 @@ extension DayEventListViewModelImpleTests {
 
         // then
         XCTAssertEqual(repeating?.moreActions, .init(
-            basicActions: [.toggleTo(isForemost: false), .toggleLiveActivity(isRegistered: false), .edit, .copy, .share],
+            basicActions: [.toggleTo(isForemost: false), .toggleDDayCandidate(isRegistered: false),
+                .toggleLiveActivity(isRegistered: false), .edit, .copy, .share],
             removeActions: [.remove(scope: .onlyThisTime), .remove(scope: .all)]
         ))
         XCTAssertEqual(notRepeating?.moreActions, .init(
-            basicActions: [.toggleTo(isForemost: false), .toggleLiveActivity(isRegistered: false), .edit, .copy, .share],
+            basicActions: [.toggleTo(isForemost: false), .toggleDDayCandidate(isRegistered: false),
+                .toggleLiveActivity(isRegistered: false), .edit, .copy, .share],
             removeActions: [.remove(scope: .all)]
         ))
         XCTAssertEqual(foremostEvent?.moreActions, .init(
-            basicActions: [.toggleTo(isForemost: true), .toggleLiveActivity(isRegistered: false), .edit, .copy, .share],
+            basicActions: [.toggleTo(isForemost: true), .toggleDDayCandidate(isRegistered: false),
+                .toggleLiveActivity(isRegistered: false), .edit, .copy, .share],
             removeActions: [.remove(scope: .all)]
         ))
     }
@@ -771,7 +779,8 @@ extension DayEventListViewModelImpleTests {
     private func makeViewModelWithInitialListLoaded(
         shouldFailDoneTodo: Bool = false,
         shouldFailMakeTodo: Bool = false,
-        registeredLiveActivityTarget: LiveActivityTarget? = nil
+        registeredLiveActivityTarget: LiveActivityTarget? = nil,
+        registeredDDayCandidates: [DDayCandidate] = []
     ) -> DayEventListViewModelImple {
         // given
         let expect = expectation(description: "wait first cells loaded")
@@ -779,7 +788,8 @@ extension DayEventListViewModelImpleTests {
         let viewModel = self.makeViewModel(
             shouldFailDoneTodo: shouldFailDoneTodo,
             shouldFailMakeTodo: shouldFailMakeTodo,
-            registeredLiveActivityTarget: registeredLiveActivityTarget
+            registeredLiveActivityTarget: registeredLiveActivityTarget,
+            registeredDDayCandidates: registeredDDayCandidates
         )
 
         // when
@@ -834,6 +844,47 @@ extension DayEventListViewModelImpleTests {
             removeActionsPerEmit.last,
             [.remove(scope: .onlyThisTime), .remove(scope: .all)]
         )
+    }
+}
+
+// MARK: - D-day 후보 등록 표시
+
+extension DayEventListViewModelImpleTests {
+
+    func testViewModel_scheduleCellMoreActions_containsToggleDDayCandidate() {
+        // given
+        let expect = expectation(description: "schedule 셀 더보기에 D-day 후보 토글이 있고 todo 셀엔 없다")
+        let viewModel = self.makeViewModelWithInitialListLoaded()
+
+        // when
+        let cvms = self.waitFirstOutput(expect, for: viewModel.cellViewModels, timeout: 0.1)
+
+        // then
+        let hasDDayAction: (String) -> Bool? = { id in
+            cvms?.first(where: { $0.eventIdentifier == id })?.moreActions?.basicActions.contains {
+                if case .toggleDDayCandidate = $0 { return true } else { return false }
+            }
+        }
+        XCTAssertEqual(hasDDayAction("not-repeating-schedule"), true)
+        XCTAssertEqual(hasDDayAction("todo-with-time"), false)
+    }
+
+    func testViewModel_whenCandidateRegistered_scheduleCellReflectsRegisteredState() {
+        // given
+        let expect = expectation(description: "등록된 후보와 일치하는 schedule 셀만 등록 상태가 켜진다")
+        let viewModel = self.makeViewModelWithInitialListLoaded(
+            registeredDDayCandidates: [.init(scheduleId: "ev", turnKey: nil)]
+        )
+
+        // when
+        let cvms = self.waitFirstOutput(expect, for: viewModel.cellViewModels, timeout: 0.1)
+
+        // then
+        let registeredIds = cvms?
+            .compactMap { $0 as? ScheduleEventCellViewModel }
+            .filter { $0.isDDayCandidateRegistered }
+            .map { $0.eventIdentifier }
+        XCTAssertEqual(registeredIds, ["not-repeating-schedule"])
     }
 }
 

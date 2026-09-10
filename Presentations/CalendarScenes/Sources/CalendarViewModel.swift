@@ -34,6 +34,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
     private let todoEventUsecase: any TodoEventUsecase
     private let scheduleEventUsecase: any ScheduleEventUsecase
     private let foremostEventusecase: any ForemostEventUsecase
+    private let ddayCandidateUsecase: any DDayCandidateUsecase
     private let eventTagUsecase: any EventTagUsecase
     private let migrationUsecase: any TemporaryUserDataMigrationUescase
     private let uiSettingUsecase: any UISettingUsecase
@@ -55,6 +56,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         todoEventUsecase: any TodoEventUsecase,
         scheduleEventUsecase: any ScheduleEventUsecase,
         foremostEventusecase: any ForemostEventUsecase,
+        ddayCandidateUsecase: any DDayCandidateUsecase,
         eventTagUsecase: any EventTagUsecase,
         migrationUsecase: any TemporaryUserDataMigrationUescase,
         uiSettingUsecase: any UISettingUsecase,
@@ -71,6 +73,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         self.todoEventUsecase = todoEventUsecase
         self.scheduleEventUsecase = scheduleEventUsecase
         self.foremostEventusecase = foremostEventusecase
+        self.ddayCandidateUsecase = ddayCandidateUsecase
         self.eventTagUsecase = eventTagUsecase
         self.migrationUsecase = migrationUsecase
         self.uiSettingUsecase = uiSettingUsecase
@@ -326,7 +329,9 @@ extension CalendarViewModelImple {
         self.eventTagUsecase.prepare()
         
         self.foremostEventusecase.refresh()
-        
+
+        self.ddayCandidateUsecase.refresh()
+
         self.bindUncompletedTodoRefresh()
 
         self.bindShowAICommandResultIfNeed()
