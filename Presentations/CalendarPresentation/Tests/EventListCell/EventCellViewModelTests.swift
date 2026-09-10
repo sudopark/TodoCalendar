@@ -273,3 +273,79 @@ extension EventCellViewModelTests {
         #expect(registeredCell?.moreActions?.basicActions == [.toggleLiveActivity(isRegistered: true), .share])
     }
 }
+
+
+// MARK: - D-day 후보
+
+extension EventCellViewModelTests {
+
+    @Test("schedule 셀의 D-day 후보는 반복일 때만 회차 키를 싣는다")
+    func scheduleCell_ddayCandidateTurnKey_dependsOnRepeating() {
+        // given
+        let repeatingCell = ScheduleEventCellViewModel("schedule", turn: 1, name: "name", isRepeating: true)
+            |> \.eventTimeRawValue .~ .at(100)
+        let nonRepeatingCell = ScheduleEventCellViewModel("schedule", turn: 1, name: "name", isRepeating: false)
+            |> \.eventTimeRawValue .~ .at(100)
+
+        // when + then
+        #expect(
+            repeatingCell.ddayCandidate
+            == DDayCandidate(scheduleId: "schedule", turnKey: EventTime.at(100).customKey)
+        )
+        #expect(
+            nonRepeatingCell.ddayCandidate
+            == DDayCandidate(scheduleId: "schedule", turnKey: nil)
+        )
+    }
+
+    @Test("schedule 셀의 moreActions는 D-day 후보 토글을 담고 등록 여부를 반영한다")
+    func scheduleCell_moreActions_containsToggleDDayCandidate() {
+        // given
+        let cell = self.makeScheduleCell(rawTime: .at(100))
+        let registeredCell = cell |> \.isDDayCandidateRegistered .~ true
+
+        // when + then
+        #expect(cell.moreActions?.basicActions.contains(.toggleDDayCandidate(isRegistered: false)) == true)
+        #expect(registeredCell.moreActions?.basicActions.contains(.toggleDDayCandidate(isRegistered: true)) == true)
+    }
+
+    @Test("schedule 셀의 D-day 후보 토글은 최우선 표시 다음, 라이브액티비티 앞에 온다")
+    func scheduleCell_moreActions_ddayCandidateComesBeforeLiveActivity() {
+        // given
+        let cell = self.makeScheduleCell(rawTime: .at(100))
+
+        // when
+        let actions = cell.moreActions?.basicActions
+
+        // then
+        #expect(actions == [
+            .toggleTo(isForemost: false),
+            .toggleDDayCandidate(isRegistered: false),
+            .toggleLiveActivity(isRegistered: false),
+            .edit, .copy, .share
+        ])
+    }
+
+    @Test("D-day 등록 상태가 바뀌면 schedule 셀의 비교키도 바뀐다")
+    func scheduleCell_customCompareKey_changesWhenDDayRegistrationChanges() {
+        // given
+        let cell = self.makeScheduleCell(rawTime: .at(100))
+        let registeredCell = cell |> \.isDDayCandidateRegistered .~ true
+
+        // when + then
+        #expect(cell.customCompareKey != registeredCell.customCompareKey)
+    }
+
+    @Test("todo 셀의 moreActions엔 D-day 후보 토글이 없다")
+    func todoCell_moreActions_hasNoToggleDDayCandidate() {
+        // given
+        let cell = self.makeTodoCell(rawTime: .at(100))
+
+        // when + then
+        #expect(
+            cell.moreActions?.basicActions.contains(where: {
+                if case .toggleDDayCandidate = $0 { return true } else { return false }
+            }) == false
+        )
+    }
+}

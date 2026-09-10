@@ -30,6 +30,7 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable, AsyncEffectW
     private var stubSettingUsecase: StubCalendarSettingUsecase!
     private var spyEventTagUsecase: PrivateSpyEventTagUsecase!
     private var spyForemostEventUsecase: StubForemostEventUsecase!
+    private var stubDDayCandidateUsecase: StubDDayCandidateUsecase!
     private var stubMigrationUsecase: PrivateStubMigrationUsecase!
     private var stubUISettingUsecase: StubUISettingUsecase!
     private var spyGoogleCalednarUsecase: PrivateStubGoogleCalendarUsecase!
@@ -48,6 +49,7 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable, AsyncEffectW
         self.stubSettingUsecase = .init()
         self.spyEventTagUsecase = .init()
         self.spyForemostEventUsecase = .init(foremostId: .init("some", true))
+        self.stubDDayCandidateUsecase = .init()
         self.stubMigrationUsecase = .init()
         self.stubUISettingUsecase = .init()
         self.spyGoogleCalednarUsecase = .init()
@@ -68,6 +70,7 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable, AsyncEffectW
         self.stubSettingUsecase = nil
         self.spyEventTagUsecase = nil
         self.spyForemostEventUsecase = nil
+        self.stubDDayCandidateUsecase = nil
         self.stubMigrationUsecase = nil
         self.stubUISettingUsecase = nil
         self.spyGoogleCalednarUsecase = nil
@@ -94,6 +97,7 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable, AsyncEffectW
             todoEventUsecase: self.spyTodoUsecase,
             scheduleEventUsecase: self.spyScheduleUsecase,
             foremostEventusecase: self.spyForemostEventUsecase,
+            ddayCandidateUsecase: self.stubDDayCandidateUsecase,
             eventTagUsecase: self.spyEventTagUsecase,
             migrationUsecase: self.stubMigrationUsecase,
             uiSettingUsecase: self.stubUISettingUsecase,
@@ -133,6 +137,17 @@ extension CalendarViewModelImpleTests {
         ])
     }
     
+    func testViewModel_whenPrepare_refreshDDayCandidates() {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when
+        viewModel.prepare()
+
+        // then
+        XCTAssertEqual(self.stubDDayCandidateUsecase.didRefresh, true)
+    }
+
     func testViewModel_whenPrepare_prepareHoliday() {
         // given
         let expect = expectation(description: "prepare시에 holiday도 준비 -> 현재 국가정보 반환됨")

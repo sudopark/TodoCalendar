@@ -34,6 +34,7 @@ class EventListCellEventHanleViewModelImpleTests: BaseTestCase, PublisherWaitabl
     private var stubCalendarSettingUsecase: StubCalendarSettingUsecase!
     private var stubLiveActivityUsecase: StubEventLiveActivityUsecase!
     private var stubGuideTodoUsecase: StubGuideTodoUsecase!
+    private var stubDDayCandidateUsecase: StubDDayCandidateUsecase!
     private var spyRouter: SpyEventListCellEventHanleRouter!
 
     override func setUpWithError() throws {
@@ -65,6 +66,7 @@ class EventListCellEventHanleViewModelImpleTests: BaseTestCase, PublisherWaitabl
         self.stubCalendarSettingUsecase = nil
         self.stubLiveActivityUsecase = nil
         self.stubGuideTodoUsecase = nil
+        self.stubDDayCandidateUsecase = nil
         self.spyRouter = nil
     }
 
@@ -85,6 +87,7 @@ class EventListCellEventHanleViewModelImpleTests: BaseTestCase, PublisherWaitabl
         stubGoogleCalendarTags: [GoogleCalendar.Tag]? = nil,
         stubAppleEventOrigin: AppleCalendar.EventOrigin? = nil,
         stubAppleCalendarTags: [AppleCalendar.Tag]? = nil,
+        registeredDDayCandidates: [DDayCandidate] = [],
         registeredLiveActivityTarget: LiveActivityTarget? = nil,
         liveActivityStartError: (any Error)? = nil
     ) -> EventListCellEventHanleViewModelImple {
@@ -112,6 +115,8 @@ class EventListCellEventHanleViewModelImpleTests: BaseTestCase, PublisherWaitabl
         self.stubLiveActivityUsecase = .init(registeredTarget: registeredLiveActivityTarget)
         self.stubLiveActivityUsecase.stubStartError = liveActivityStartError
 
+        self.stubDDayCandidateUsecase = .init(registeredDDayCandidates)
+
         let liveActivityToggleViewModel = LiveActivityToggleViewModelImple(
             eventLiveActivityUsecase: self.stubLiveActivityUsecase
         )
@@ -127,6 +132,7 @@ class EventListCellEventHanleViewModelImpleTests: BaseTestCase, PublisherWaitabl
             eventDetailDataUsecase: self.spyEventDetailDataUsecase,
             calendarSettingUsecase: self.stubCalendarSettingUsecase,
             guideTodoUsecase: self.stubGuideTodoUsecase,
+            ddayCandidateUsecase: self.stubDDayCandidateUsecase,
             liveActivityToggleViewModel: liveActivityToggleViewModel
         )
         viewModel.router = self.spyRouter
@@ -680,6 +686,90 @@ extension EventListCellEventHanleViewModelImpleTests {
         // then
         XCTAssertNil(self.spyRouter.didShowConfirmWith)
         XCTAssertNil(self.stubLiveActivityUsecase.didStartTarget)
+    }
+
+    func testViewModel_whenToggleDDayCandidateOnUnregisteredSchedule_appendsAfterConfirm() {
+        // given
+        let viewModel = self.makeViewModel()
+        let cellViewModel = ScheduleEventCellViewModel("schedule", turn: 1, name: "name")
+            |> \.eventTimeRawValue .~ .at(100)
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .toggleDDayCandidate(isRegistered: false))
+
+        // then
+        XCTAssertEqual(self.stubDDayCandidateUsecase.didAppendCandidate, cellViewModel.ddayCandidate)
+        XCTAssertNil(self.stubDDayCandidateUsecase.didRemoveCandidate)
+        XCTAssertEqual(
+            self.spyRouter.didShowConfirmWith?.message,
+            "calendar::event::more_action:dday_candidate:register:message".localized()
+        )
+    }
+
+    func testViewModel_whenToggleDDayCandidateOnRegisteredSchedule_removesAfterConfirm() {
+        // given
+        let viewModel = self.makeViewModel()
+        let cellViewModel = ScheduleEventCellViewModel("schedule", turn: 1, name: "name")
+            |> \.eventTimeRawValue .~ .at(100)
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .toggleDDayCandidate(isRegistered: true))
+
+        // then
+        XCTAssertEqual(self.stubDDayCandidateUsecase.didRemoveCandidate, cellViewModel.ddayCandidate)
+        XCTAssertNil(self.stubDDayCandidateUsecase.didAppendCandidate)
+        XCTAssertEqual(
+            self.spyRouter.didShowConfirmWith?.message,
+            "calendar::event::more_action:dday_candidate:unregister:message".localized()
+        )
+    }
+
+    func testViewModel_whenToggleDDayCandidateOnRepeatingSchedule_appendsWithTurnKey() {
+        // given
+        let viewModel = self.makeViewModel()
+        let turnTime = EventTime.at(1_705_000_000)
+        let cellViewModel = ScheduleEventCellViewModel(
+            "schedule", turn: 3, name: "name", isRepeating: true
+        )
+        |> \.eventTimeRawValue .~ turnTime
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .toggleDDayCandidate(isRegistered: false))
+
+        // then
+        XCTAssertEqual(
+            self.stubDDayCandidateUsecase.didAppendCandidate,
+            DDayCandidate(scheduleId: "schedule", turnKey: turnTime.customKey)
+        )
+    }
+
+    func testViewModel_whenToggleDDayCandidateOnTodoCell_doesNothing() {
+        // given
+        let viewModel = self.makeViewModel()
+        let cellViewModel = TodoEventCellViewModel("todo", name: "name")
+            |> \.eventTimeRawValue .~ .at(100)
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .toggleDDayCandidate(isRegistered: false))
+
+        // then
+        XCTAssertNil(self.spyRouter.didShowConfirmWith)
+        XCTAssertNil(self.stubDDayCandidateUsecase.didAppendCandidate)
+    }
+
+    func testViewModel_whenCancelToggleDDayCandidateConfirm_doesNothing() {
+        // given
+        let viewModel = self.makeViewModel()
+        self.spyRouter.shouldConfirmNotCancel = false
+        let cellViewModel = ScheduleEventCellViewModel("schedule", turn: 1, name: "name")
+            |> \.eventTimeRawValue .~ .at(100)
+
+        // when
+        viewModel.handleMoreAction(cellViewModel, .toggleDDayCandidate(isRegistered: false))
+
+        // then
+        XCTAssertNotNil(self.spyRouter.didShowConfirmWith)
+        XCTAssertNil(self.stubDDayCandidateUsecase.didAppendCandidate)
     }
 
 

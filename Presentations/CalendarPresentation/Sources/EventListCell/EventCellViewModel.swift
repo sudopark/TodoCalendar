@@ -149,6 +149,7 @@ public enum EventListMoreAction: Sendable, Equatable {
 
     case remove(scope: EventListRemoveScope)
     case toggleTo(isForemost: Bool)
+    case toggleDDayCandidate(isRegistered: Bool)
     case toggleLiveActivity(isRegistered: Bool)
     case skipTodo
     case edit
@@ -359,6 +360,7 @@ public struct ScheduleEventCellViewModel: EventCellViewModel {
     public var isAlldayEvent: Bool { self.eventTimeRawValue?.isAllDay ?? false }
     public var eventTimeRawValue: EventTime?
     public var isLiveActivityRegistered: Bool = false
+    public var isDDayCandidateRegistered: Bool = false
 
     public init(_ id: String, turn: Int? = nil, name: String, isRepeating: Bool = false) {
         self.eventIdWithoutTurn = id
@@ -401,8 +403,12 @@ public struct ScheduleEventCellViewModel: EventCellViewModel {
         let liveActivityActions: [EventListMoreAction] = self.liveActivityTarget != nil
             ? [.toggleLiveActivity(isRegistered: self.isLiveActivityRegistered)]
             : []
+        let ddayActions: [EventListMoreAction] = [
+            .toggleDDayCandidate(isRegistered: self.isDDayCandidateRegistered)
+        ]
         return .init(
-            basicActions: [.toggleTo(isForemost: self.isForemost)] + liveActivityActions + [.edit, .copy, .share],
+            basicActions: [.toggleTo(isForemost: self.isForemost)]
+                + ddayActions + liveActivityActions + [.edit, .copy, .share],
             removeActions: removeActions
         )
     }
@@ -415,10 +421,18 @@ public struct ScheduleEventCellViewModel: EventCellViewModel {
         )
     }
 
+    public var ddayCandidate: DDayCandidate {
+        return DDayCandidate(
+            scheduleId: self.eventIdWithoutTurn,
+            turnKey: self.isRepeating ? self.eventTimeRawValue?.customKey : nil
+        )
+    }
+
     public var customCompareKey: String {
         return self.makeCustomCompareKey([
             self.turn.map { "\($0)" },
-            self.eventTimeRawValue.map { "\($0)" }
+            self.eventTimeRawValue.map { "\($0)" },
+            "\(self.isDDayCandidateRegistered)"
         ])
     }
 }

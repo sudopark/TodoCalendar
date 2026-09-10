@@ -25,7 +25,7 @@ class EditScheduleEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitabl
     private var spyScheduleUsecase: PrivateStubScheduleEventUsecase!
     private var spyEventDetailDataUsecase: StubEventDetailDataUsecase!
     private var stubForemostEventUsecase: StubForemostEventUsecase!
-    private var stubDDayCandidateUsecase: PrivateStubDDayCandidateUsecase!
+    private var stubDDayCandidateUsecase: StubDDayCandidateUsecase!
     private var stubLiveActivityUsecase: StubEventLiveActivityUsecase!
     private var spyRouter: SpyEventDetailRouter!
     private var spyListener: SpyEventDetailListener!
@@ -1190,35 +1190,6 @@ extension EditScheduleEventDetailViewModelImpleTests {
         // then
         self.wait(for: [expect], timeout: 0.1)
     }
-}
-
-private final class PrivateStubDDayCandidateUsecase: DDayCandidateUsecase, @unchecked Sendable {
-
-    private let subject: CurrentValueSubject<[DDayCandidate], Never>
-
-    init(_ candidates: [DDayCandidate] = []) {
-        self.subject = .init(candidates)
-    }
-
-    private(set) var didRefresh: Bool = false
-    func refresh() {
-        self.didRefresh = true
-    }
-
-    func append(_ candidate: DDayCandidate) {
-        self.subject.send(self.subject.value + [candidate])
-    }
-
-    func remove(_ candidate: DDayCandidate) {
-        self.subject.send(self.subject.value.filter { $0 != candidate })
-    }
-
-    var candidates: AnyPublisher<[DDayCandidate], Never> {
-        return self.subject.eraseToAnyPublisher()
-    }
-
-    /// 테스트 케이스가 직접 검사하는 raw 기록 — 검증은 케이스 책임(stub은 기록만).
-    var currentCandidates: [DDayCandidate] { self.subject.value }
 }
 
 private final class PrivateStubScheduleEventUsecase: StubScheduleEventUsecase, @unchecked Sendable {

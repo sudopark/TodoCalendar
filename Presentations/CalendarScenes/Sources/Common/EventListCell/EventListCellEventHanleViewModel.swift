@@ -54,6 +54,7 @@ final class EventListCellEventHanleViewModelImple: EventListCellEventHanleViewMo
     private let eventDetailDataUsecase: any EventDetailDataUsecase
     private let calendarSettingUsecase: any CalendarSettingUsecase
     private let guideTodoUsecase: any GuideTodoUsecase
+    private let ddayCandidateUsecase: any DDayCandidateUsecase
     private let liveActivityToggleViewModel: any LiveActivityToggleViewModel
 
     var router: (any EventListCellEventHanleRouting)?
@@ -69,6 +70,7 @@ final class EventListCellEventHanleViewModelImple: EventListCellEventHanleViewMo
         eventDetailDataUsecase: any EventDetailDataUsecase,
         calendarSettingUsecase: any CalendarSettingUsecase,
         guideTodoUsecase: any GuideTodoUsecase,
+        ddayCandidateUsecase: any DDayCandidateUsecase,
         liveActivityToggleViewModel: any LiveActivityToggleViewModel
     ) {
         self.todoEventUsecase = todoEventUsecase
@@ -81,6 +83,7 @@ final class EventListCellEventHanleViewModelImple: EventListCellEventHanleViewMo
         self.eventDetailDataUsecase = eventDetailDataUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
         self.guideTodoUsecase = guideTodoUsecase
+        self.ddayCandidateUsecase = ddayCandidateUsecase
         self.liveActivityToggleViewModel = liveActivityToggleViewModel
 
         self.internalBind()
@@ -176,6 +179,9 @@ extension EventListCellEventHanleViewModelImple {
             
         case .toggleTo(let isForemost):
             self.toggleForemostEvent(cellViewModel, isForemost)
+
+        case .toggleDDayCandidate(let isRegistered):
+            self.toggleDDayCandidate(cellViewModel, isRegistered)
 
         case .toggleLiveActivity(let isRegistered):
             self.toggleLiveActivity(cellViewModel, isRegistered)
@@ -410,6 +416,24 @@ extension EventListCellEventHanleViewModelImple {
         }
     }
     
+    private func toggleDDayCandidate(
+        _ cellViewModel: any EventCellViewModel,
+        _ isRegistered: Bool
+    ) {
+        guard let schedule = cellViewModel as? ScheduleEventCellViewModel else { return }
+        let candidate = schedule.ddayCandidate
+
+        let title = "calendar::event::more_action:dday_candidate:title".localized()
+        let message = isRegistered
+            ? "calendar::event::more_action:dday_candidate:unregister:message".localized()
+            : "calendar::event::more_action:dday_candidate:register:message".localized()
+        self.runMoreActionAfterConfirm(title, message) { [ddayCandidateUsecase] in
+            isRegistered
+                ? ddayCandidateUsecase.remove(candidate)
+                : ddayCandidateUsecase.append(candidate)
+        }
+    }
+
     private func toggleLiveActivity(
         _ cellViewModel: any EventCellViewModel,
         _ isRegistered: Bool

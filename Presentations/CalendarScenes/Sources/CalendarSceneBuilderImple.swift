@@ -70,6 +70,7 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
             todoEventUsecase: self.usecaseFactory.makeTodoEventUsecase(),
             scheduleEventUsecase: self.usecaseFactory.makeScheduleEventUsecase(),
             foremostEventusecase: self.usecaseFactory.makeForemostEventUsecase(),
+            ddayCandidateUsecase: self.usecaseFactory.makeDDayCandidateUsecase(),
             eventTagUsecase: self.usecaseFactory.makeEventTagUsecase(),
             migrationUsecase: self.usecaseFactory.temporaryUserDataMigrationUsecase,
             uiSettingUsecase: self.usecaseFactory.makeUISettingUsecase(),
