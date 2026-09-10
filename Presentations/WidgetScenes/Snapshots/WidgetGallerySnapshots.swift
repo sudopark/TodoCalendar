@@ -40,31 +40,19 @@ final class WidgetGallerySnapshots: XCTestCase {
     }
     
     @MainActor
-    private func listState(isDDayWidgetEnabled: Bool) -> WidgetGalleryViewState {
+    private func listState() -> WidgetGalleryViewState {
         let state = WidgetGalleryViewState()
-        state.items = WidgetGalleryItem.allCases.filter {
-            $0 != .dday || isDDayWidgetEnabled
-        }
+        state.items = WidgetGalleryItem.allCases
         return state
     }
     
     // MARK: - 1뎁스 종류 목록
     
     @MainActor
-    func test_widgetGalleryList_ddayHidden() {
-        captureSnapshotPair(named: "widgetGalleryList-ddayHidden", layout: .fullScreen) { theme in
+    func test_widgetGalleryList() {
+        captureSnapshotPair(named: "widgetGalleryList", layout: .fullScreen) { theme in
             WidgetGalleryView()
-                .environment(self.listState(isDDayWidgetEnabled: false))
-                .environment(WidgetGalleryViewEventHandler())
-                .environment(self.makeAppearance(theme))
-        }
-    }
-    
-    @MainActor
-    func test_widgetGalleryList_ddayShown() {
-        captureSnapshotPair(named: "widgetGalleryList-ddayShown", layout: .fullScreen) { theme in
-            WidgetGalleryView()
-                .environment(self.listState(isDDayWidgetEnabled: true))
+                .environment(self.listState())
                 .environment(WidgetGalleryViewEventHandler())
                 .environment(self.makeAppearance(theme))
         }

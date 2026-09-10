@@ -46,7 +46,6 @@ class EditScheduleEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitabl
         self.stubForemostEventUsecase = nil
         self.stubDDayCandidateUsecase = nil
         self.stubLiveActivityUsecase = nil
-        FeatureFlag.disable(.ddayWidget)
         self.spyRouter = nil
         self.spyListener = nil
     }
@@ -64,15 +63,9 @@ class EditScheduleEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitabl
         shouldFailToSaveDetail: Bool = false,
         shouldFailToRemoveSchedule: Bool = false,
         registeredCandidates: [DDayCandidate] = [],
-        isDDayWidgetEnabled: Bool = false,
         registeredLiveActivityTarget: LiveActivityTarget? = nil,
         liveActivityStartError: (any Error)? = nil
     ) -> EditScheduleEventDetailViewModelImple {
-
-        // 배포 기본값은 off — 후보 액션을 보려는 케이스만 켠다 (tearDown에서 원복)
-        isDDayWidgetEnabled
-            ? FeatureFlag.enable(.ddayWidget)
-            : FeatureFlag.disable(.ddayWidget)
 
         let (schedule, detail) = (customSchedule ?? self.dummyRepeatingSchedule, self.dummyDetail)
         self.spyScheduleUsecase.stubEvent = schedule
@@ -260,14 +253,16 @@ extension EditScheduleEventDetailViewModelImpleTests {
             self.makeViewModel(customSchedule: schedule),
             expect: [
                 [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)],
-                [.toggleLiveActivity(isRegistered: false), .copy, .transformToTodo, .share]
+                [.toggleDDayCandidate(isRegistered: false), .toggleLiveActivity(isRegistered: false),
+                 .copy, .transformToTodo, .share]
             ]
         )
         parameterizeTest(
             self.makeViewModel(customSchedule: schedule, isForemost: true),
             expect: [
                 [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)],
-                [.toggleLiveActivity(isRegistered: false), .copy, .transformToTodo, .share]
+                [.toggleDDayCandidate(isRegistered: false), .toggleLiveActivity(isRegistered: false),
+                 .copy, .transformToTodo, .share]
             ]
         )
         let scheduleNotRepeating = schedule |> \.repeating .~ nil
@@ -275,14 +270,16 @@ extension EditScheduleEventDetailViewModelImpleTests {
             self.makeViewModel(customSchedule: scheduleNotRepeating),
             expect: [
                 [.remove(onlyThisEvent: false)],
-                [.toggleTo(isForemost: true), .toggleLiveActivity(isRegistered: false), .copy, .transformToTodo, .share]
+                [.toggleTo(isForemost: true), .toggleDDayCandidate(isRegistered: false),
+                 .toggleLiveActivity(isRegistered: false), .copy, .transformToTodo, .share]
             ]
         )
         parameterizeTest(
             self.makeViewModel(customSchedule: scheduleNotRepeating, isForemost: true),
             expect: [
                 [.remove(onlyThisEvent: false)],
-                [.toggleTo(isForemost: false), .toggleLiveActivity(isRegistered: false), .copy, .transformToTodo, .share]
+                [.toggleTo(isForemost: false), .toggleDDayCandidate(isRegistered: false),
+                 .toggleLiveActivity(isRegistered: false), .copy, .transformToTodo, .share]
             ]
         )
     }
@@ -355,9 +352,9 @@ extension EditScheduleEventDetailViewModelImpleTests {
     }
 
     // #741 배포 보류 — 플래그가 꺼진 동안 후보 등록 메뉴가 새어나가면 안 된다
-    func testViewModel_whenDDayWidgetDisabled_hideDDayCandidateAction() {
+    func testViewModel_whenPrepare_refreshCandidatesAndProvideDDayAction() {
         // given
-        let expect = expectation(description: "플래그 off면 후보 액션 없음")
+        let expect = expectation(description: "후보 목록을 조회하고 후보 액션을 제공한다")
         let viewModel = self.makeViewModel(customSchedule: self.dummyRepeatingSchedule)
 
         // when
@@ -369,16 +366,15 @@ extension EditScheduleEventDetailViewModelImpleTests {
         let hasDDayAction = actions?.flatMap { $0 }.contains {
             if case .toggleDDayCandidate = $0 { return true } else { return false }
         }
-        XCTAssertEqual(hasDDayAction, false)
-        // 메뉴만 감추는 게 아니라 후보 목록 조회 자체를 안 한다
-        XCTAssertEqual(self.stubDDayCandidateUsecase.didRefresh, false)
+        XCTAssertEqual(hasDDayAction, true)
+        XCTAssertEqual(self.stubDDayCandidateUsecase.didRefresh, true)
     }
 
     func testViewModel_whenRepeatingSchedule_provideDDayCandidateAction() {
         // given
         let expect = expectation(description: "반복 일정에도 후보 액션이 제공된다")
         let viewModel = self.makeViewModel(
-            customSchedule: self.dummyRepeatingSchedule, isDDayWidgetEnabled: true
+            customSchedule: self.dummyRepeatingSchedule
         )
 
         // when
@@ -401,8 +397,7 @@ extension EditScheduleEventDetailViewModelImpleTests {
             repeatingEventTargetTime: targetTime,
             registeredCandidates: [
                 .init(scheduleId: "dummy_schedule", turnKey: targetTime.customKey)
-            ],
-            isDDayWidgetEnabled: true
+            ]
         )
 
         // when
@@ -476,8 +471,7 @@ extension EditScheduleEventDetailViewModelImpleTests {
         let viewModel = self.makeViewModel(
             customSchedule: self.dummyRepeatingSchedule |> \.repeating .~ nil,
             repeatingEventTargetTime: .at(300),
-            registeredCandidates: [.init(scheduleId: "dummy_schedule", turnKey: nil)],
-            isDDayWidgetEnabled: true
+            registeredCandidates: [.init(scheduleId: "dummy_schedule", turnKey: nil)]
         )
 
         // when

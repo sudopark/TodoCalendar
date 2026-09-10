@@ -29,16 +29,13 @@ protocol WidgetGalleryViewModel: AnyObject, WidgetGallerySceneInteractor {
 final class WidgetGalleryViewModelImple: WidgetGalleryViewModel, @unchecked Sendable {
 
     private let uiSettingUsecase: any UISettingUsecase
-    private let isDDayWidgetEnabled: Bool
     var router: (any WidgetGalleryRouting)?
 
     init(
         setting: WidgetAppearanceSettings,
-        uiSettingUsecase: any UISettingUsecase,
-        isDDayWidgetEnabled: Bool = FeatureFlag.isEnable(.ddayWidget)
+        uiSettingUsecase: any UISettingUsecase
     ) {
         self.uiSettingUsecase = uiSettingUsecase
-        self.isDDayWidgetEnabled = isDDayWidgetEnabled
         self.subject.setting.send(setting)
     }
 
@@ -92,9 +89,7 @@ extension WidgetGalleryViewModelImple {
 extension WidgetGalleryViewModelImple {
 
     private var availableItems: [WidgetGalleryItem] {
-        return WidgetGalleryItem.allCases.filter {
-            $0 != .dday || self.isDDayWidgetEnabled
-        }
+        return WidgetGalleryItem.allCases
     }
 
     var items: AnyPublisher<[WidgetGalleryItem], Never> {
