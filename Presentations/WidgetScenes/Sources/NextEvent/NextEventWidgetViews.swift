@@ -41,7 +41,7 @@ public struct NextEventRectangleWidgetView: View {
     public var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .center, spacing: 2) {
-                Image("small_icon")
+                Image("small_icon", bundle: .module)
                     .resizable()
                     .scaledToFill()
                     .frame(width: 24, height: 24)

@@ -18,7 +18,7 @@ public struct AICommandCircularView: View {
     public init() { }
 
     public var body: some View {
-        Image("custom.calendar.badge.sparkles")
+        Image("custom.calendar.badge.sparkles", bundle: .module)
             .font(.system(size: 20, weight: .semibold))
     }
 }
@@ -39,7 +39,7 @@ public struct AICommandSmallView: View {
 
     public var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Image("custom.calendar.badge.sparkles")
+            Image("custom.calendar.badge.sparkles", bundle: .module)
                 .font(.system(size: 22, weight: .semibold))
                 .foregroundStyle(colorSet.accentAI.asColor)
             Spacer()
