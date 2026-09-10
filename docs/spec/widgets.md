@@ -1,4 +1,4 @@
-# 위젯 상세 스펙 (19종 + ControlWidget 1종 + Live Activity 1종)
+# 위젯 상세 스펙 (20종 + ControlWidget 1종 + Live Activity 1종)
 
 > Phase 5 고도화: 섹션 9(위젯)의 L1 상세
 
@@ -6,7 +6,7 @@
 
 ## 1. 위젯 카탈로그
 
-### 1.1 BaseWidgetBundle (8종)
+### 1.1 BaseWidgetBundle (9종)
 
 | # | 위젯 | kind | 지원 사이즈 | Configuration |
 |---|---|---|---|---|
@@ -18,6 +18,7 @@
 | 6 | NextEventWidget | `NextEventWidget` | `.accessoryInline`, `.accessoryRectangular` | Static |
 | 7 | NextRemainEventWidget | `NextRemainEventWidget` | `.accessoryRectangular` | Static |
 | 8 | AICommandShortcutWidget | `AICommandShortcutWidget` | `.accessoryCircular`, `.systemSmall` | Static — 잠금화면·홈에서 원탭 AI 입력 진입 (#768) |
+| 9 | DDayWidget | `DDayWidget` | `.systemSmall`, `.systemMedium`, `.accessoryCircular`, `.accessoryRectangular`, `.accessoryInline` | `DDayWidgetConfigurationIntent` |
 
 ### 1.2 ComposedWidgetBundle (4종)
 
@@ -389,6 +390,36 @@ WeekEventsRange
 | EventAndMonthWidget | 이벤트 목록 + 월 캘린더 그리드 |
 | EventAndForemostWidget | 이벤트 목록 + 강조 이벤트 |
 | DoubleMonthWidget | 연속 2개월 캘린더 그리드 |
+
+### 9.8 DDayWidget (D-day 카운트다운)
+
+**사이즈**: `.systemSmall`, `.systemMedium`, `.accessoryCircular`, `.accessoryRectangular`, `.accessoryInline`
+
+**표시**: 대상 이벤트 이름 + D-n 카운트 + 대상 날짜. 대상을 아직 안 고른 상태면 안내 문구를 띄운다.
+
+**대상 선택 — `DDayWidgetConfigurationIntent`**
+
+| 파라미터 | 타입 | 노출 조건 |
+|---|---|---|
+| `target` | `DDayTargetEventEntity` | 항상 |
+| `turn` | `DDayTargetTurnEntity` | `target` 의 entity id에 `\|repeating\|` 조각이 있을 때만 |
+
+`parameterSummary`의 `When` 조건은 entity id 문자열 비교만 할 수 있어, "이 대상이 반복 일정인가"를 id에 실어 회차 파라미터 노출을 가른다 (`DDayTargetEventId.entityId(isRepeating:)`).
+
+**후보 목록 (`DDayTargetEventQuery.suggestedEntities`)**: 앞뒤 일정 기간의 일정·공휴일을 훑어 만든 자동 목록에, 유저가 직접 등록한 후보를 앞에 붙인다. 등록 후보 중 삭제된 일정은 조회 실패로 자연히 빠진다.
+
+**후보 등록 진입점 (2곳)**
+
+| 진입점 | 위치 |
+|---|---|
+| 일정 상세 더보기 | `EditScheduleEventDetailViewModelImple.moreActions` — `.toggleDDayCandidate` |
+| 이벤트 리스트 셀 컨텍스트 메뉴 | `ScheduleEventCellViewModel.moreActions` — `.toggleDDayCandidate` (Schedule 셀 전용) |
+
+둘 다 확인 다이얼로그를 거쳐 `DDayCandidateUsecase.append` / `remove` 를 호출한다.
+
+**후보 저장**: `EnvironmentStorage` 키 `dday_candidates` (App Group 공유). 복수 등록이고 중복만 막는다 — 상한도 교체도 없다. 목록이 비면 키 자체를 지운다.
+
+**회차 키 규칙**: `DDayCandidate.turnKey` 는 **반복 일정일 때만** 싣는다. 비반복 일정에 회차 키를 실으면 위젯의 대상 조회가 실패해 후보가 사라진다.
 
 ---
 

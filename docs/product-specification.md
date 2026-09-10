@@ -220,18 +220,16 @@
 
 ---
 
-## 9. 위젯 (19종 + Control Widget 1종)
+## 9. 위젯 (20종 + Control Widget 1종)
 
 > **상세 스펙**: [spec/widgets.md](spec/widgets.md) — 위젯별 사이즈 매트릭스, Timeline 갱신 정책, Intent 파라미터, 데이터 소스, App Group 공유, 딥링크 URL, 캐시 메커니즘
 
 | 분류 | 위젯 |
 |---|---|
-| 기본 (8) | TodayAndNext, Today, NextEvent, NextRemainEvent, ForemostEvent, Month, EventList, AICommandShortcut |
+| 기본 (9) | TodayAndNext, Today, NextEvent, NextRemainEvent, ForemostEvent, Month, EventList, AICommandShortcut, DDay |
 | 주/월 (7) | 1~4주, 이번달/지난달/다음달 |
 | 조합 (4) | TodayAndMonth, EventAndMonth, EventAndForemost, DoubleMonth |
 | Control (1, iOS 18+) | AICommandControl — 제어 센터에서 AI 입력 진입 |
-
-`DDayWidget`은 #741로 배포 보류 중이다. 갤러리 노출은 `TodoCalendarWidgetBundle`에서 주석으로 막혀 있고(`@WidgetBundleBuilder`가 런타임 조건을 못 받는다), 앱 쪽 후보 등록 메뉴는 `FeatureFlag.ddayWidget`이 가린다. 재개할 땐 **둘 다** 되살려야 한다.
 
 - `TodoToggleIntent`: 위젯에서 할일 완료 토글 (SQLite 직접 쓰기 + 캐시 리셋)
 - `EventTypeSelectIntent`: 태그 기반 위젯 필터링 (커스텀+외부 캘린더 태그 지원)
