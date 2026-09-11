@@ -30,7 +30,7 @@ final class WidgetGallerySnapshots: XCTestCase {
     
     @MainActor
     private func detailState(
-        _ item: WidgetGalleryItem, selecting variant: WidgetGalleryVariant? = nil
+        _ item: WidgetGalleryItem, selecting variant: WidgetVariant? = nil
     ) -> WidgetGalleryDetailViewState {
         let state = WidgetGalleryDetailViewState()
         state.itemName = item.name

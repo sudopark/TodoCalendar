@@ -7,6 +7,7 @@
 //
 
 import Testing
+import Domain
 import Extensions
 
 @testable import WidgetScenes
@@ -46,7 +47,7 @@ struct WidgetGalleryItemTests {
         let listed = Set(items.flatMap { $0.variants })
 
         // then
-        #expect(listed == Set(WidgetGalleryVariant.allCases))
+        #expect(listed == Set(WidgetVariant.allCases))
     }
 
     @Test
@@ -61,11 +62,23 @@ struct WidgetGalleryItemTests {
         #expect(Set(ids).count == ids.count)
     }
 
+    @Test("꾸미기 설정을 갖는 변형만 isCustomizable 이다")
+    func variant_customizableOnlyForStyledVariants() {
+        // given
+        let variants = WidgetVariant.allCases
+
+        // when
+        let customizables = variants.filter { $0.isCustomizable }
+
+        // then
+        #expect(customizables == [.todaySummarySmall])
+    }
+
     @Test(
         "잠금화면 변형의 라벨은 사이즈와 함께 잠금화면임을 알린다",
-        arguments: WidgetGalleryVariant.allCases
+        arguments: WidgetVariant.allCases
     )
-    func variant_labelTellsLockScreen(_ variant: WidgetGalleryVariant) {
+    func variant_labelTellsLockScreen(_ variant: WidgetVariant) {
         // given
         let lockScreenLabel = "widget.gallery::lockScreen::label"
             .localized(with: variant.label)

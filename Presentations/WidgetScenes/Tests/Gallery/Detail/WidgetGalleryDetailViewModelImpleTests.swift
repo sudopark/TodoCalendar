@@ -41,7 +41,7 @@ struct WidgetGalleryDetailViewModelImpleTests {
         // given
         let item = self.ddayItem
         let viewModel = self.makeViewModel(item, router: .init())
-        var emitted: [WidgetGalleryVariant]?
+        var emitted: [WidgetVariant]?
 
         // when
         viewModel.variants

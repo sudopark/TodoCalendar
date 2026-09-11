@@ -70,7 +70,7 @@ extension WidgetPreviewCanvas {
 
 // MARK: - variant preview
 
-extension WidgetGalleryVariant {
+extension WidgetVariant {
 
     @MainActor
     func previewView(_ setting: WidgetAppearanceSettings) -> AnyView {
@@ -123,7 +123,7 @@ extension WidgetGalleryVariant {
 
 // MARK: - single widget previews
 
-extension WidgetGalleryVariant {
+extension WidgetVariant {
 
     @MainActor
     private func todayAndNextPreview(_ setting: WidgetAppearanceSettings) -> AnyView {
@@ -196,7 +196,7 @@ extension WidgetGalleryVariant {
 
 // MARK: - composed widget previews
 
-extension WidgetGalleryVariant {
+extension WidgetVariant {
 
     @MainActor
     private func doubleMonthPreview(_ setting: WidgetAppearanceSettings) -> AnyView {
