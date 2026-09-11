@@ -266,7 +266,7 @@ final class WidgetCatalogSnapshots: XCTestCase {
     @MainActor
     func test_widgetAICommand() {
         self.capture("widget-ai-command", family: .systemSmall, canvas: WidgetCanvas.small) {
-            AICommandShortcutWidgetView()
+            AICommandShortcutWidgetView(setting: .init())
         }
     }
 }
