@@ -42,13 +42,38 @@ final class CalendarScenesSnapshots: XCTestCase {
     @MainActor
     func test_month_smallRowHeight() {
         captureSnapshotPair(named: "month_smallRowHeight", layout: .fixed(width: 393, height: 350)) { theme in
-            let viewModel = DummyMonthViewModel()
-            let state = MonthViewState()
-            state.bind(viewModel)
-            RunLoop.main.run(until: Date().addingTimeInterval(0.05))
-
             let appearance = self.makeAppearance(theme)
             appearance.rowHeightOnCalendar = .small
+
+            let viewModel = DummyMonthViewModel()
+            let state = MonthViewState()
+            state.bind(viewModel, appearance)
+            RunLoop.main.run(until: Date().addingTimeInterval(0.05))
+
+            return MonthView()
+                .environment(state)
+                .environment(MonthViewEventHandler())
+                .environment(appearance)
+                .onAppear {
+                    RunLoop.main.run(until: Date().addingTimeInterval(0.1))
+                }
+        }
+    }
+
+    // MARK: - Month/MonthView (접힘 — 선택 주 한 줄 + eventDotsView, rowHeight 설정 무관)
+
+    @MainActor
+    func test_month_collapsed() {
+        captureSnapshotPair(named: "month_collapsed", layout: .fixed(width: 393, height: 100)) { theme in
+            let appearance = self.makeAppearance(theme)
+            appearance.rowHeightOnCalendar = .medium
+
+            let viewModel = DummyMonthViewModel()
+            let state = MonthViewState()
+            state.bind(viewModel, appearance)
+            viewModel.selectDay(.init(2023, 9, 13))
+            viewModel.updateMonthCollapsed(true)
+            RunLoop.main.run(until: Date().addingTimeInterval(0.05))
 
             return MonthView()
                 .environment(state)
@@ -65,13 +90,13 @@ final class CalendarScenesSnapshots: XCTestCase {
     @MainActor
     func test_month_mediumRowHeight() {
         captureSnapshotPair(named: "month_mediumRowHeight", layout: .fixed(width: 393, height: 500)) { theme in
-            let viewModel = DummyMonthViewModel()
-            let state = MonthViewState()
-            state.bind(viewModel)
-            RunLoop.main.run(until: Date().addingTimeInterval(0.05))
-
             let appearance = self.makeAppearance(theme)
             appearance.rowHeightOnCalendar = .medium
+
+            let viewModel = DummyMonthViewModel()
+            let state = MonthViewState()
+            state.bind(viewModel, appearance)
+            RunLoop.main.run(until: Date().addingTimeInterval(0.05))
 
             return MonthView()
                 .environment(state)
