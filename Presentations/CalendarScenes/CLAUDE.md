@@ -32,7 +32,7 @@ UIPageViewController로 월별 페이지를 좌우 스와이프로 전환한다.
 
 | 항목 | 설명 |
 |---|---|
-| Interactor | `moveFocusToToday()`, `moveDay(_:withClearPresented:)`, `moveToPreviousMonth()`, `moveToNextMonth()` |
+| Interactor | `moveDay(_:withClearPresented:)`, `moveToPreviousMonth()`, `moveToNextMonth()`, `requestAIEntry()` |
 | Listener | `CalendarSceneListener` — 포커스 월 변경 알림 |
 | 주요 Usecase | Calendar, Holiday, TodoEvent, ScheduleEvent, GoogleCalendar, ForemostEvent, EventTag, EventSync |
 
@@ -44,7 +44,7 @@ UIPageViewController로 월별 페이지를 좌우 스와이프로 전환한다.
 
 | 항목 | 설명 |
 |---|---|
-| Interactor | `updateMonthIfNeed(_:)`, `selectToday()`, `selectDay(_:)` |
+| Interactor | `updateMonthIfNeed(_:)`, `selectToday()`, `selectDay(_:)`, `scrollToVoiceInput()`, `selectedDayIsToday(_:)`, `updateMonthCollapsed(_:)` |
 | Listener | `CalendarPaperSceneListener` — 선택일 변경을 부모에 전달 |
 | 역할 | Month의 날짜 선택 → DayEventList에 중계 |
 
@@ -53,7 +53,7 @@ UIPageViewController로 월별 페이지를 좌우 스와이프로 전환한다.
 | 항목 | 설명 |
 |---|---|
 | 반환 타입 | `MonthSceneComponent` (viewModel만 포함) |
-| Interactor | `updateMonthIfNeed(_:)`, `clearDaySelection()`, `selectDay(_:)` |
+| Interactor | `updateMonthIfNeed(_:)`, `clearDaySelection()`, `selectDay(_:)`, `updateMonthCollapsed(_:)` |
 | Listener | `MonthSceneListener` — 선택일 + 해당일 이벤트를 부모에 전달 |
 | 핵심 로직 | `WeekEventStackBuilder`로 주간 이벤트 바 레이아웃 계산 |
 
@@ -62,7 +62,7 @@ UIPageViewController로 월별 페이지를 좌우 스와이프로 전환한다.
 | 항목 | 설명 |
 |---|---|
 | 반환 타입 | `DayEventListSceneComponent` (viewModel + router) |
-| Interactor | `selectedDayChanaged(_:and:)` — 부모로부터 선택일 수신 |
+| Interactor | `selectedDayChanaged(_:and:)`, `selectedDayIsToday(_:)` — 부모로부터 선택일 수신 |
 | 라우팅 | 새 이벤트 생성, 완료 할일 목록 표시 |
 
 ### SelectDayDialog (날짜 선택 모달)
