@@ -4,11 +4,16 @@
 aggregate-usage.py 는 "임계를 넘었다"까지만 말한다. 그 다음 판단(이미 정비된 신호인가,
 이미 이슈에 적힌 신호인가)을 매번 추론으로 하면 세션마다 결론이 튄다. 그 판정을 여기로 옮긴다.
 
-판정 셋:
+판정 넷:
 - duplicate — 누적 이슈에 이미 적힌 신호(`<!-- signal: <bucket>/<kind> -->`). 재보고하지 않는다.
 - stale — 기여 레코드가 전부 대상 스킬 파일의 마지막 커밋보다 과거다. 정비가 이미 들어갔고
   소비 마킹만 안 된 상태 → 보고 대상이 아니라 상태 정리 대상이다.
-- actionable — 그 외. 기여 레코드 전문과 함께 보고한다.
+- below_threshold — 마지막 커밋보다 과거인 레코드를 떨어내면 남은 신선 레코드가 임계 미달이다.
+  보고도 마킹도 하지 않는다 — 마킹하면 아직 정비 안 된 신선 레코드까지 함께 소비된다.
+- actionable — 그 외. 신선한 기여 레코드 전문과 함께 보고한다.
+
+stale·below_threshold 판정은 레코드 단위다. 버킷 단위로 "하나라도 신선하면 전부 actionable" 로
+넘기면 이미 흡수된 과거 레코드가 카운트를 부풀려, 유효 1건짜리 신호가 임계를 넘은 것처럼 보인다.
 
 stale 판정에 파일 mtime을 쓰지 않는다 — 체크아웃 시각이라 정비 시점을 나타내지 못한다.
 
@@ -35,6 +40,7 @@ DEFAULT_SKILLS_ROOT = os.path.join(os.path.dirname(SCRIPT_DIR), "skills")
 CONFIG_PATH = os.path.join(SCRIPT_DIR, "usage-thresholds.json")
 SIGNAL_MARKER = re.compile(r"<!--\s*signal:\s*([^\s>]+)\s*-->")
 AXIS_OWNER = "implement"
+THRESHOLD_KEY = {"correction": "correction_count", "partial": "partial_count"}
 
 
 def load_aggregate_module():
@@ -82,18 +88,21 @@ def recorded_signals(path):
         return set()
 
 
-def triage(violations, contributors, skills_root, recorded):
+def triage(violations, contributors, skills_root, recorded, thresholds):
     items = []
     for violation in violations:
         bucket, kind = violation["bucket"], violation["kind"]
         records = contributors.get((bucket, kind), [])
-        newest = max((r.get("ts", "") for r in records), default="")
         revision = last_revision(skills_root, bucket)
+        fresh = [r for r in records if not (revision and r.get("ts", "") < revision)]
+        threshold = thresholds.get(THRESHOLD_KEY.get(kind, ""), 0)
 
         if f"{bucket}/{kind}" in recorded:
             verdict = "duplicate"
-        elif revision and newest and revision > newest:
+        elif records and not fresh:
             verdict = "stale"
+        elif records and len(fresh) < threshold:
+            verdict = "below_threshold"
         else:
             verdict = "actionable"
 
@@ -102,8 +111,8 @@ def triage(violations, contributors, skills_root, recorded):
             "signal": f"{bucket}/{kind}",
             "verdict": verdict,
             "last_revision": revision,
-            "newest_record": newest,
-            "records": records,
+            "newest_record": max((r.get("ts", "") for r in fresh), default=""),
+            "records": fresh,
         })
     return items
 
@@ -156,7 +165,10 @@ def main():
 
     stats, axis_stats, contributors = aggregate_usage.aggregate(aggregate_usage.load_records())
     violations = aggregate_usage.violation_records(stats, axis_stats, thresholds)
-    items = triage(violations, contributors, args.skills_root, recorded_signals(args.recorded_file))
+    items = triage(
+        violations, contributors, args.skills_root,
+        recorded_signals(args.recorded_file), thresholds,
+    )
 
     if args.json:
         print(json.dumps(items, ensure_ascii=False, indent=2))
