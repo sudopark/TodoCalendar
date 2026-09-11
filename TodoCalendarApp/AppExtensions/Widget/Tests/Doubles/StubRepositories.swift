@@ -161,3 +161,26 @@ final class PrivateStubAppleCalendarRepository: AppleCalendarRepository, @unchec
 
     func resetCache() async throws { }
 }
+
+
+final class StubWidgetStyleRepository: WidgetStyleRepository, @unchecked Sendable {
+
+    private let todayStyles: [WidgetStyleId: TodayStyleSetting]
+    init(todayStyles: [WidgetStyleId: TodayStyleSetting] = [:]) {
+        self.todayStyles = todayStyles
+    }
+
+    func loadSetting<S: WidgetStyleSetting>(_ type: S.Type, for id: WidgetStyleId) -> S? {
+        return self.todayStyles[id] as? S
+    }
+
+    func loadStyles<S: WidgetStyleSetting>(
+        _ type: S.Type, of variant: WidgetVariant
+    ) -> [WidgetStyle<S>] {
+        return []
+    }
+
+    func updateSetting<S: WidgetStyleSetting>(_ setting: S, for id: WidgetStyleId) { }
+
+    func removeStyle(_ id: WidgetStyleId) { }
+}

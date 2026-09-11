@@ -292,6 +292,22 @@ hex 색상으로 UIColor 생성
   → gradient + drop shadow 효과
 ```
 
+### 8.3 변형별 스타일 설정
+
+배경(8.1)이 전 위젯 공통이라면, 스타일 설정은 **변형(variant) 단위**다 — 같은 위젯이라도 사이즈·캔버스마다 꾸밀 수 있는 항목이 달라서다. 잠금화면 변형처럼 손댈 축이 없는 변형은 `WidgetVariant.isCustomizable` 이 false 고 저장 대상이 아니다.
+
+| 요소 | 코드 | 비고 |
+|---|---|---|
+| 변형 식별자 | `WidgetVariant`(Domain) | 30종. `kind` 로 WidgetKit 위젯에, `canvas`(WidgetScenes)로 미리보기 규격에 대응 |
+| 저장 좌표 | `WidgetStyleId` = `variant` × `.default` / `.custom(id:)` | 한 변형이 기본 스타일 하나와 커스텀 스타일 N 개를 갖는다 |
+| 설정 payload | `WidgetStyleSetting` 채택 타입 (변형별로 다름) | 예: `TodayStyleSetting.showHolidayName` |
+| 저장소 | App Group UserDefaults 키 `widget_styles` | `[변형: [스타일: payload JSON]]` 한 벌. 남은 스타일이 없으면 변형 묶음을, 남은 변형이 없으면 키를 지운다 |
+
+- 바깥 키가 변형(`WidgetVariant.rawValue`), 안쪽 키가 스타일(`default` / `custom::<id>`)이다. 인코딩은 Repository 내부 사항이라 `WidgetStyleId` 는 모른다.
+- 필드는 전부 Optional 이고 nil 은 "미설정"이다 — 기본값 적용은 읽는 쪽이 한다(미설정이면 지금 동작을 유지).
+- 소비 우선순위 계약은 **인스턴스가 고른 커스텀 스타일 > 변형의 기본 스타일 > 위젯 전체 설정(8.1)** 이다. 뒤 단계는 앞 단계가 다루지 않은 속성만 채운다 — 커스텀 스타일이 정한 항목을 전체 설정이 덮지 않는다. 인스턴스 선택(`WidgetConfigurationIntent` 에 저장되는 커스텀 스타일 id)은 아직 없어서 현재 소비되는 것은 기본 스타일뿐이다.
+- 위젯 갱신은 **스타일을 바꾸는 화면이 `WidgetCenter.reloadTimelines(ofKind:)` 를 직접 건다.** 저장소·usecase 는 리로드를 모른다.
+
 ---
 
 ## 9. 주요 위젯 상세
