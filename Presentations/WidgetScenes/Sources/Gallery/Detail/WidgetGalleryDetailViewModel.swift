@@ -18,7 +18,7 @@ protocol WidgetGalleryDetailViewModel: AnyObject, WidgetGalleryDetailSceneIntera
     func close()
     
     var itemName: AnyPublisher<String, Never> { get }
-    var variants: AnyPublisher<[WidgetGalleryVariant], Never> { get }
+    var variants: AnyPublisher<[WidgetVariant], Never> { get }
     var setting: AnyPublisher<WidgetAppearanceSettings, Never> { get }
 }
 
@@ -47,7 +47,7 @@ extension WidgetGalleryDetailViewModelImple {
         return Just(self.item.name).eraseToAnyPublisher()
     }
     
-    var variants: AnyPublisher<[WidgetGalleryVariant], Never> {
+    var variants: AnyPublisher<[WidgetVariant], Never> {
         return Just(self.item.variants).eraseToAnyPublisher()
     }
     

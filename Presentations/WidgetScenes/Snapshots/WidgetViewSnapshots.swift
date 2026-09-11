@@ -28,6 +28,17 @@ final class WidgetViewSnapshots: XCTestCase {
         static let outerInset: CGFloat = 14
     }
 
+    /// `.sample` 은 dateText 를 실행 시각으로 만들어 날이 바뀌면 png 가 달라진다.
+    private var fixedDDayModel: DDayWidgetViewModel {
+        return DDayWidgetViewModel(
+            eventTitle: "Team workshop",
+            ddayText: "D-14",
+            dateText: "Mar 15, 2027",
+            timeText: "",
+            repeatText: ""
+        )
+    }
+
     @MainActor
     private func capture<V: View>(
         _ name: String,
@@ -69,7 +80,7 @@ final class WidgetViewSnapshots: XCTestCase {
     @MainActor
     func test_ddaySmallWidgetView() {
         self.capture("dday-small", canvas: WidgetCanvas.small) {
-            DDaySmallWidgetView(model: .sample)
+            DDaySmallWidgetView(model: self.fixedDDayModel)
         }
     }
 }

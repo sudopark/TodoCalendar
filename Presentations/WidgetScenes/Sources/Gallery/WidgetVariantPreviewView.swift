@@ -20,10 +20,10 @@ struct WidgetVariantPreviewView: View {
 
     @Environment(ViewAppearance.self) private var appearance
 
-    private let variant: WidgetGalleryVariant
+    private let variant: WidgetVariant
     private let setting: WidgetAppearanceSettings
 
-    init(variant: WidgetGalleryVariant, setting: WidgetAppearanceSettings) {
+    init(variant: WidgetVariant, setting: WidgetAppearanceSettings) {
         self.variant = variant
         self.setting = setting
     }

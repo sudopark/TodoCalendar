@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Domain
 import Extensions
 
 
@@ -41,68 +42,9 @@ public enum WidgetPreviewCanvas: String, Sendable {
 }
 
 
-// MARK: - WidgetGalleryVariant
+// MARK: - WidgetVariant + gallery presentation
 
-public enum WidgetGalleryVariant: String, Sendable, Identifiable, CaseIterable {
-
-    case todayAndNextMedium
-    case eventListSmall
-    case eventListMedium
-    case eventListLarge
-    case monthSmall
-    case todaySummarySmall
-    case foremostInline
-    case foremostSmall
-    case foremostMedium
-    case ddaySmall
-    case ddayMedium
-    case ddayCircular
-    case ddayRectangular
-    case ddayInline
-    case oneWeekEvents
-    case twoWeekEvents
-    case threeWeekEvents
-    case fourWeekEvents
-    case currentMonthEvents
-    case lastMonthEvents
-    case nextMonthEvents
-    case aiCommandCircular
-    case aiCommandSmall
-    case nextEventInline
-    case nextEventRectangular
-    case nextRemainRectangular
-    case doubleMonthMedium
-    case eventAndMonthMedium
-    case eventAndForemostMedium
-    case todayAndMonthMedium
-
-    public var id: String { return self.rawValue }
-
-    public var kind: String {
-        switch self {
-        case .todayAndNextMedium: return "TodayAndNextWidget"
-        case .eventListSmall, .eventListMedium, .eventListLarge: return "EventList"
-        case .monthSmall: return "MonthWidget"
-        case .todaySummarySmall: return "TodaySummary"
-        case .foremostInline, .foremostSmall, .foremostMedium: return "ForemostEventWidget"
-        case .ddaySmall, .ddayMedium, .ddayCircular, .ddayRectangular, .ddayInline:
-            return "DDayWidget"
-        case .oneWeekEvents: return "OneWeekEventsWidget"
-        case .twoWeekEvents: return "TwoWeekEventsWidget"
-        case .threeWeekEvents: return "ThreeWeekEventsWidget"
-        case .fourWeekEvents: return "FourWeekEventsWidget"
-        case .currentMonthEvents: return "CurrentMonthEventsWidget"
-        case .lastMonthEvents: return "LastMonthEventsWidget"
-        case .nextMonthEvents: return "NextMonthEventsWidget"
-        case .aiCommandCircular, .aiCommandSmall: return "AICommandShortcutWidget"
-        case .nextEventInline, .nextEventRectangular: return "NextEventWidget"
-        case .nextRemainRectangular: return "NextRemainEventWidget"
-        case .doubleMonthMedium: return "DoubleMonthWidget"
-        case .eventAndMonthMedium: return "EventAndMonthWidget"
-        case .eventAndForemostMedium: return "EventAndForemostWidget"
-        case .todayAndMonthMedium: return "TodayAndMonthWidget"
-        }
-    }
+extension WidgetVariant {
 
     public var canvas: WidgetPreviewCanvas {
         switch self {
@@ -193,7 +135,7 @@ public enum WidgetGalleryItem: String, Sendable, Identifiable, CaseIterable {
         }
     }
 
-    public var variants: [WidgetGalleryVariant] {
+    public var variants: [WidgetVariant] {
         switch self {
         case .todayAndNext: return [.todayAndNextMedium]
         case .eventList: return [.eventListSmall, .eventListMedium, .eventListLarge]

@@ -19,7 +19,7 @@ import CommonPresentation
     @ObservationIgnored private let cancellables = CancelBag()
 
     var itemName: String = ""
-    var variants: [WidgetGalleryVariant] = []
+    var variants: [WidgetVariant] = []
     var setting: WidgetAppearanceSettings = .init()
     var selectedVariantId: String?
 
@@ -165,7 +165,7 @@ struct WidgetGalleryDetailView: View {
     }
 
     private func variantPage(
-        _ variant: WidgetGalleryVariant, pageAspect: CGFloat
+        _ variant: WidgetVariant, pageAspect: CGFloat
     ) -> some View {
         VStack(spacing: 0) {
 
@@ -185,7 +185,7 @@ struct WidgetGalleryDetailView: View {
         }
     }
 
-    private func labelView(_ variant: WidgetGalleryVariant) -> some View {
+    private func labelView(_ variant: WidgetVariant) -> some View {
         HStack(spacing: Metric.SpacingToken.xxsmall.value) {
             Text(variant.detailLabel)
                 .font(appearance.fontSet.normal.asFont)
