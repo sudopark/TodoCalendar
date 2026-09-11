@@ -14,6 +14,7 @@ Repository 프로토콜 또는 구현체를 수정·생성할 때 아래 원칙�
 - **`fetch`** — 로컬 데이터 조회 전용 (SQLite, UserDefaults, Keychain 등)
 - **`load`** — 원격(네트워크) 포함 조회. Remote API 호출이 수반되면 무조건 `load`.
 - 예: `fetchTodoEvents()` (로컬 캐시) / `loadTodoEvents()` (원격 API + 로컬 반영)
+- **예외 — `EnvironmentStorage`(App Group UserDefaults) 기반 설정 저장소는 `load` 를 쓴다.** 이 구분은 "원격 호출이 수반되나"를 알리려는 것인데 설정 계열엔 원격 변형이 아예 없어 구분이 할 일이 없다. 기존 예: `AppSettingRepository.loadWidgetAppearanceSetting()`, `DDayCandidateRepository.loadCandidates()`, `WidgetStyleRepository.loadSetting(_:for:)`.
 
 ## 2. JSON 디코딩 분리
 
