@@ -406,7 +406,7 @@ private final class HeaderView: UIView {
         self.monthLabel.font = fontSet.bigMonth
         self.monthLabel.textColor = colorSet.text0
         
-        self.yearLabel.font = fontSet.normal
+        self.yearLabel.font = fontSet.size(22, weight: .semibold)
         self.yearLabel.textColor = colorSet.text0
         
         switch self.migrationStatus {
