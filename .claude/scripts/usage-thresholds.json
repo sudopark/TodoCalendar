@@ -11,6 +11,7 @@
     "open-external"
   ],
   "missing_rate_exempt_skills": [
+    "artifact-design",
     "commit",
     "pair-programming",
     "run-tests",

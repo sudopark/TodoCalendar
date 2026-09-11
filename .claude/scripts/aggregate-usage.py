@@ -14,7 +14,8 @@
   --all 진단 표에는 그대로 남는다.
 - missing_rate_exempt_skills 는 누락률만 뺀다 (plugin_prefixes의 대칭). 정상 종료 경로에 기록 주체가
   없어 종료 레코드가 구조적으로 안 남는 대상용 — 모드형 스킬의 세션 단절 자연 종료(pair-programming),
-  도구형 스킬의 타 스킬 종속 호출(run-tests). partial·correction 은 유효한 신호라 유지한다.
+  도구형 스킬의 타 스킬 종속 호출(run-tests), 조항이 이 레포 밖이라 개정도 못 하고 기록 주체를 지정할
+  프로젝트 조항도 없는 외부 스킬(artifact-design). partial·correction 은 유효한 신호라 유지한다.
 - axis_leak 이벤트는 missed_axis(1/2/3)별로 별도 집계하며, improvement name이 합성 버킷 "axis:<n>" 형식이면 그 ts 이후만 신선 처리(소비 마킹) — 스킬 stats와 섞지 않는다.
 - exit 0 고정: 게이트가 아니라 제안이다. 임계는 usage-thresholds.json.
 """
