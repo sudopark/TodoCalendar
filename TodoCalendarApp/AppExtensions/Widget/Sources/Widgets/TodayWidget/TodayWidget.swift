@@ -40,7 +40,11 @@ struct TodayWidget: Widget {
     let kind: String = "TodaySummary"
     
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: TodayWidgetTimelineProvider()) { entry in
+        AppIntentConfiguration(
+            kind: kind,
+            intent: TodayWidgetConfigurationIntent.self,
+            provider: TodayWidgetTimelineProvider()
+        ) { entry in
             TodayWidgetView(entry: entry)
                 .containerBackground(entry.backgroundShape, for: .widget)
         }
