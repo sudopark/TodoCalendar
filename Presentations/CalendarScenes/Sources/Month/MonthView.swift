@@ -21,6 +21,7 @@ import CalendarPresentation
     fileprivate var weeks: [WeekRowModel] = []
     fileprivate var selectedDay: String?
     fileprivate var today: String?
+    fileprivate var isCollapsed: Bool = false
     @ObservationIgnored var eventStacks: (String) -> AnyPublisher<WeekEventStackViewModel, Never> = { _ in
         Empty().eraseToAnyPublisher()
     }
@@ -31,7 +32,7 @@ import CalendarPresentation
     @ObservationIgnored private var didBind = false
     @ObservationIgnored private let cancellables = CancelBag()
     
-    func bind(_ viewModel: any MonthViewModel) {
+    func bind(_ viewModel: any MonthViewModel, _ appearance: ViewAppearance) {
         guard self.didBind == false else { return }
         self.didBind = true
         
@@ -65,16 +66,32 @@ import CalendarPresentation
                 self?.today = identifier
             })
             .store(in: self.cancellables)
+
+        // 첫 값은 이 페이지의 초기 상태 반영이라 애니메이션을 태우지 않는다 —
+        // 아직 안 그려진 달 페이지가 뒤늦게 구독하면 펼쳐진 채 그려졌다 접히는 게 보인다
+        var isInitialCollapsedValue = true
+        viewModel.isMonthCollapsed
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self, weak appearance] isCollapsed in
+                let animation: Animation? = isInitialCollapsedValue ? nil : .easeInOut(duration: 0.3)
+                isInitialCollapsedValue = false
+                appearance?.withAnimationIfNeed(animation) {
+                    self?.isCollapsed = isCollapsed
+                }
+            })
+            .store(in: self.cancellables)
     }
 }
 
 final class MonthViewEventHandler: Observable {
     var daySelected: (DayCellViewModel) -> Void = { _ in }
     var shareEvents: (CalendarShareRangeKind, DayCellViewModel) -> Void = { _, _ in }
+    var toggleMonthCollapse: () -> Void = { }
 
     func bind(_ viewModel: any MonthViewModel) {
         self.daySelected = viewModel.select(_:)
         self.shareEvents = viewModel.shareEvents(_:for:)
+        self.toggleMonthCollapse = viewModel.toggleMonthCollapse
     }
 }
 
@@ -126,9 +143,25 @@ struct MonthView: View {
             } else {
                 self.gridWeeksView()
             }
+            if state.isCollapsed {
+                self.expandMonthButton()
+            }
         }
         .padding([.leading, .trailing], 8)
         .background(self.appearance.colorSet.dayBackground.asColor)
+    }
+
+    private func expandMonthButton() -> some View {
+        Button {
+            self.appearance.impactIfNeed()
+            self.eventHandler.toggleMonthCollapse()
+        } label: {
+            Image(systemName: "chevron.down")
+                .foregroundStyle(self.appearance.colorSet.text2.asColor)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, spacing: .xsmall)
+                .contentShape(Rectangle())
+        }
     }
     
     private var headerView: some View {
@@ -148,13 +181,14 @@ struct MonthView: View {
     }
     
     private func gridWeeksView() -> some View {
+        let isCollapsed = self.state.isCollapsed
         let expectSize = CGSize(
             width: UIScreen.main.bounds.width - 16,
-            height: appearance.rowHeightOnCalendar.cgValue
+            height: isCollapsed ? RowHeightOnCalendar.small.cgValue : appearance.rowHeightOnCalendar.cgValue
         )
         return VStack(spacing: 0) {
-            ForEach(self.state.weeks, id: \.id) {
-                WeekRowView(week: $0, expectSize)
+            ForEach(isCollapsed ? self.collapsedWeeks : self.state.weeks, id: \.id) {
+                WeekRowView(week: $0, expectSize, isCollapsed: isCollapsed)
                     .eventHandler(\.daySelected, eventHandler.daySelected)
                     .eventHandler(\.shareEvents, eventHandler.shareEvents)
                     .environment(state)
@@ -165,6 +199,14 @@ struct MonthView: View {
         .accessibilityIdentifier(AccessibilityID.CalendarScene.monthGrid)
     }
     
+    private var collapsedWeeks: [WeekRowModel] {
+        let weekOfSelectedDay = self.state.weeks.first { week in
+            week.days.contains { $0.identifier == self.state.selectedDay }
+        }
+        guard let week = weekOfSelectedDay ?? self.state.weeks.first else { return [] }
+        return [week]
+    }
+
     private func emptyGridView() -> some View {
         Rectangle()
             .fill(appearance.colorSet.dayBackground.asColor)
@@ -176,6 +218,7 @@ private struct WeekRowView: View {
     
     private let week: WeekRowModel
     private let expectSize: CGSize
+    private let isCollapsed: Bool
     private var dayWidth: CGFloat { expectSize.width / 7 }
     
     @Environment(MonthViewState.self) private var state
@@ -189,10 +232,12 @@ private struct WeekRowView: View {
 
     init(
         week: WeekRowModel,
-        _ expectSize: CGSize
+        _ expectSize: CGSize,
+        isCollapsed: Bool
     ) {
         self.week = week
         self.expectSize = expectSize
+        self.isCollapsed = isCollapsed
     }
     
     var body: some View {
@@ -211,10 +256,12 @@ private struct WeekRowView: View {
             HStack(spacing: 0) {
                 ForEach(week.days, id: \.identifier) { dayView($0) }
             }
-            if appearance.rowHeightOnCalendar == .small {
+            if isCollapsed || appearance.rowHeightOnCalendar == .small {
                 eventDotPerDaysView()
+                    .transition(.opacity)
             } else {
                 eventStackView()
+                    .transition(.opacity)
             }
         }
     }
@@ -632,7 +679,7 @@ struct MonthViewPreviewProvider: PreviewProvider {
         let eventHandler = MonthViewEventHandler()
         eventHandler.daySelected = viewModel.select(_:)
         let containerView = MonthContainerView(viewAppearance: viewAppearance, eventHandler: eventHandler)
-            .eventHandler(\.stateBinding, { $0.bind(viewModel) })
+            .eventHandler(\.stateBinding, { $0.bind(viewModel, viewAppearance) })
         return containerView
     }
 }
