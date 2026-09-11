@@ -121,7 +121,6 @@ private final class SpyMainSceneInteractor: MainSceneInteractor, @unchecked Send
     }
 
     func calendarScene(focusChangedTo selected: SelectDayInfo) { }
-    func calendarSceneDidRequestReturnToToday() { }
     func daySelectDialog(didSelect day: SelectDayInfo) { }
 }
 

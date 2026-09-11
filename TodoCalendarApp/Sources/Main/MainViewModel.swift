@@ -243,9 +243,6 @@ extension MainViewModelImple {
         self.subject.focusedDayInfo.send(selected)
     }
 
-    func calendarSceneDidRequestReturnToToday() {
-        self.calendarSceneInteractor?.moveFocusToToday()
-    }
     
     func jumpDate() {
         guard let current = self.subject.focusedDayInfo.value else { return }

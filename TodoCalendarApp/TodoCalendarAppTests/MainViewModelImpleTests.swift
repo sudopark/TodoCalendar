@@ -263,16 +263,6 @@ extension MainViewModelImpleTests {
         XCTAssertEqual(months.map { $0.yearText }, [nil, nil, nil, "2022"])
     }
     
-    func testViewModel_whenCalendarSceneRequestReturnToToday_moveFocusToToday() {
-        // given
-        let viewModel = self.makeViewModel()
-
-        // when
-        viewModel.calendarSceneDidRequestReturnToToday()
-
-        // then
-        XCTAssertEqual(self.spyRouter.interactor.didFocusMovedToToday, true)
-    }
      
     func testViewModel_rouetToEventTypeSettingScene() {
         // given
@@ -474,11 +464,6 @@ extension MainViewModelImpleTests {
     
     private class SpyCalendarInteractor: CalendarSceneInteractor, @unchecked Sendable {
         
-        var didFocusMovedToToday: Bool?
-        func moveFocusToToday() {
-            self.didFocusMovedToToday = true
-        }
-
         var didMoveToPreviousMonth: Bool?
         func moveToPreviousMonth() {
             self.didMoveToPreviousMonth = true
