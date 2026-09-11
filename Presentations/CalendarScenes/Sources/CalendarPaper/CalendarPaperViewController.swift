@@ -43,7 +43,7 @@ final class CalendarPaperViewController: UIHostingController<CalenarPaperContain
         let monthView = MonthContainerView(
             viewAppearance: viewAppearance, eventHandler: monthViewEventHandler
         )
-        .eventHandler(\.stateBinding, { $0.bind(monthViewModel) })
+        .eventHandler(\.stateBinding, { $0.bind(monthViewModel, viewAppearance) })
         
         let eventListViewEventHandler = DayEventListViewEventHandler()
         eventListViewEventHandler.bind(

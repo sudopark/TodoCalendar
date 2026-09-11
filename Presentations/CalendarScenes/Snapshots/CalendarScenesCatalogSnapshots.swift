@@ -50,7 +50,7 @@ final class CalendarScenesCatalogSnapshots: XCTestCase {
             let appearance = self.makeAppearance(theme)
 
             let monthState = MonthViewState()
-            monthState.bind(CatalogMonthViewModel())
+            monthState.bind(CatalogMonthViewModel(), appearance)
             RunLoop.main.run(until: Date().addingTimeInterval(0.05))
 
             let dayListState = DayEventListViewState()
@@ -156,7 +156,7 @@ extension CalendarScenesCatalogSnapshots {
             let appearance = self.makeStoreAppearance(theme)
 
             let monthState = MonthViewState()
-            monthState.bind(StoreCatalogMonthViewModel())
+            monthState.bind(StoreCatalogMonthViewModel(), appearance)
             RunLoop.main.run(until: Date().addingTimeInterval(0.05))
 
             let dayListState = DayEventListViewState()
