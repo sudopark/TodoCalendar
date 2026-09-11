@@ -12,6 +12,8 @@ Domain 모듈 내 파일을 수정하거나 생성할 때 아래 원칙을 따�
 ## 1. 모델 정의
 
 - **`Decodable` / `Codable` 채택 금지.** Domain 모델은 순수 비즈니스 타입만 담는다. JSON 매핑은 Repository 레이어의 `XxxMapper` 타입(`Repository/Sources/Repository+Imple/**/Xxx+Mapping.swift`)에 분리. 기존 예: `TodoEventMapper`, `ForemostEventIdMapper`.
+  - **예외 — `EnvironmentStorage`(App Group UserDefaults)에 저장되는 로컬 설정 타입.** 담기는 값이 서버 스키마가 아니라 우리가 정의한 설정이고, 앱·위젯 확장·Presentation 이 같은 타입을 공유해야 해서 Repository 에 둘 수 없다(Presentation 은 Repository 를 import 하지 않는다). Mapper 로 빼면 설정 타입마다 Mapper 가 하나씩 따라붙어 확장이 저장소 코드를 늘린다. 기존 예: `WidgetAppearanceSettings.Background`, `WidgetStyleSetting` 계열(#1091).
+  - 이 예외는 **서버 응답 모델에 적용되지 않는다** — 원격 DTO 는 여전히 Mapper 분리다.
 - **Optional 프로퍼티는 `var`로 선언**. 옵셔널은 "값이 없을 수 있다"는 의미이므로 변경 가능성을 열어두는 `var`가 자연스럽다 (struct에서도 동일).
 
 ## 2. 프로토콜 정의
