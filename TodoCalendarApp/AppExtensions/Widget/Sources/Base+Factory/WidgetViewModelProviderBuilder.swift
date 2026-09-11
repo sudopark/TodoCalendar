@@ -229,7 +229,10 @@ extension WidgetViewModelProviderBuilder {
         return TodayWidgetViewModelProvider(
             eventsFetchusecase: fetchUsecase,
             appSettingRepository: appSettingRepository,
-            calednarSettingRepository: calendarSettingRepository
+            calednarSettingRepository: calendarSettingRepository,
+            styleRepository: WidgetStyleLocalRepositoryImple(
+                environmentStorage: base.userDefaultEnvironmentStorage
+            )
         )
     }
 }

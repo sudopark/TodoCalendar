@@ -28,6 +28,11 @@ extension TodayWidgetViewModel {
             |> \.todoEventCount .~ todoCount
             |> \.scheduleEventcount .~ scheduleCount
     }
+
+    func applied(style: TodayStyleSetting) -> TodayWidgetViewModel {
+        guard style.showHolidayName == false else { return self }
+        return self |> \.holidayName .~ nil
+    }
 }
 
 
@@ -36,15 +41,18 @@ final class TodayWidgetViewModelProvider {
     private let eventsFetchusecase: any CalendarEventFetchUsecase
     private let appSettingRepository: any AppSettingRepository
     private let calednarSettingRepository: any CalendarSettingRepository
+    private let styleRepository: any WidgetStyleRepository
     
     init(
         eventsFetchusecase: any CalendarEventFetchUsecase,
         appSettingRepository: any AppSettingRepository,
-        calednarSettingRepository: any CalendarSettingRepository
+        calednarSettingRepository: any CalendarSettingRepository,
+        styleRepository: any WidgetStyleRepository
     ) {
         self.eventsFetchusecase = eventsFetchusecase
         self.appSettingRepository = appSettingRepository
         self.calednarSettingRepository = calednarSettingRepository
+        self.styleRepository = styleRepository
     }
 }
 
@@ -54,12 +62,16 @@ extension TodayWidgetViewModelProvider {
     func getTodayViewModel(for today: Date) async throws -> TodayWidgetViewModel {
         
         let setting = self.appSettingRepository.loadWidgetAppearanceSetting()
+        let style = self.styleRepository.loadSetting(
+            TodayStyleSetting.self, for: .init(variant: .todaySummarySmall, style: .default)
+        ) ?? .init()
         let timeZone = self.calednarSettingRepository.loadUserSelectedTImeZone() ?? .current
         let calednar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
         let todayRange = try calednar.dayRange(today).unwrap()
         let events = try await self.todayEvents(todayRange, timeZone)
         return TodayWidgetViewModel(today, calednar)
             .updated(events: events)
+            .applied(style: style)
             |> \.widgetSetting .~ setting
     }
     

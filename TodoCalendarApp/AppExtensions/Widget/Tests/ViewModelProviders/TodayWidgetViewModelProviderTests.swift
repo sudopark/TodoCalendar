@@ -21,7 +21,8 @@ class TodayWidgetViewModelProviderTests: BaseTestCase {
     private func makeProvider(
         withoutCustomTimeZone: Bool = true,
         todayIsHoliday: Bool = false,
-        withoutEvent: Bool = false
+        withoutEvent: Bool = false,
+        showHolidayNameStyle: Bool? = nil
     ) -> TodayWidgetViewModelProvider {
         
         let fetchUsecase = StubCalendarEventsFetchUescase()
@@ -33,10 +34,14 @@ class TodayWidgetViewModelProviderTests: BaseTestCase {
             repository.saveTimeZone(self.gmt)
         }
         
+        let styles = showHolidayNameStyle.map {
+            [WidgetStyleId(variant: .todaySummarySmall, style: .default): TodayStyleSetting() |> \.showHolidayName .~ $0]
+        }
         return TodayWidgetViewModelProvider(
             eventsFetchusecase: fetchUsecase,
             appSettingRepository: StubAppSettingRepository(),
-            calednarSettingRepository: repository
+            calednarSettingRepository: repository,
+            styleRepository: StubWidgetStyleRepository(todayStyles: styles ?? [:])
         )
     }
     
@@ -113,5 +118,45 @@ extension TodayWidgetViewModelProviderTests {
         // when + then
         try await parameterizeTest(isHoliday: false)
         try await parameterizeTest(isHoliday: true)
+    }
+}
+
+
+// MARK: - 공휴일명 표시 스타일
+
+extension TodayWidgetViewModelProviderTests {
+    
+    func testProvider_whenStyleNotSaved_showHolidayName() async throws {
+        // given
+        let provider = self.makeProvider(todayIsHoliday: true)
+        
+        // when
+        let viewModel = try await provider.getTodayViewModel(for: self.dummyDate)
+        
+        // then
+        XCTAssertEqual(viewModel.holidayName, "holiday")
+    }
+    
+    func testProvider_whenStyleTurnsOffHolidayName_hideIt() async throws {
+        // given
+        let provider = self.makeProvider(todayIsHoliday: true, showHolidayNameStyle: false)
+        
+        // when
+        let viewModel = try await provider.getTodayViewModel(for: self.dummyDate)
+        
+        // then
+        XCTAssertEqual(viewModel.holidayName, nil)
+        XCTAssertEqual(viewModel.isHoliday, false)
+    }
+    
+    func testProvider_whenStyleTurnsOnHolidayName_showIt() async throws {
+        // given
+        let provider = self.makeProvider(todayIsHoliday: true, showHolidayNameStyle: true)
+        
+        // when
+        let viewModel = try await provider.getTodayViewModel(for: self.dummyDate)
+        
+        // then
+        XCTAssertEqual(viewModel.holidayName, "holiday")
     }
 }
