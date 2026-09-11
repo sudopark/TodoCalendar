@@ -136,6 +136,7 @@ TodoToggleIntent.perform()
 ```
 EventTypeSelectIntent (WidgetConfigurationIntent)
 ├── eventTypes: [EventTypeEntity]?  — 선택된 태그 목록
+└── excludeAllDayEvent: Bool = false — 하루종일 이벤트 제외
 
 EventListComponentSelectIntent (WidgetConfigurationIntent)
 ├── eventTypes: [EventTypeEntity]?  — 선택된 태그 목록

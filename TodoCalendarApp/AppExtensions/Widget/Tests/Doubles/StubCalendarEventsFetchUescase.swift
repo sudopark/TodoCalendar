@@ -18,6 +18,7 @@ class StubCalendarEventsFetchUescase: CalendarEventFetchUsecase {
     var hasCurrentTodo: Bool = true
     var hasEventAtStartDate: Bool = true
     var hasHoliday: Bool = true
+    var hasAllDayEvent: Bool = false
     var withoutAnyEvents: Bool = false
     
     func fetchEvents(
@@ -45,6 +46,19 @@ class StubCalendarEventsFetchUescase: CalendarEventFetchUsecase {
             if let holidayEvent = HolidayCalendarEvent(holiday, in: timeZone) {
                 sender.eventWithTimes.append(holidayEvent)
             }
+        }
+        
+        if !withoutAnyEvents && hasAllDayEvent {
+            let allDaySchedule = ScheduleEvent(
+                uuid: "allday", name: "allday_event",
+                time: .allDay(
+                    range.lowerBound..<range.lowerBound+24*3600,
+                    secondsFromGMT: TimeInterval(timeZone.secondsFromGMT())
+                )
+            )
+            sender.eventWithTimes.append(
+                contentsOf: ScheduleCalendarEvent.events(from: allDaySchedule, in: timeZone)
+            )
         }
         
         if !withoutAnyEvents {

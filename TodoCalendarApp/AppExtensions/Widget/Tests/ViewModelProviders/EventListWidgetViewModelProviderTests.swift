@@ -22,7 +22,9 @@ class EventListWidgetViewModelProviderTests: BaseTestCase {
         selectTagIds: [EventTagId]? = nil,
         withCurrentTodo: Bool = true,
         withStartDateEvent: Bool = true,
-        withoutAnyEventsIncludeHoliday: Bool = false
+        withoutAnyEventsIncludeHoliday: Bool = false,
+        withAllDayEvent: Bool = false,
+        excludeAllDayEvents: Bool = false
     ) -> EventListWidgetViewModelProvider {
         
         let fetchUsecase = StubCalendarEventsFetchUescase()
@@ -30,12 +32,14 @@ class EventListWidgetViewModelProviderTests: BaseTestCase {
         fetchUsecase.hasEventAtStartDate = withStartDateEvent
         fetchUsecase.withoutAnyEvents = withoutAnyEventsIncludeHoliday
         fetchUsecase.hasHoliday = !withoutAnyEventsIncludeHoliday
+        fetchUsecase.hasAllDayEvent = withAllDayEvent
         
         let calendarSettingRepository = StubCalendarSettingRepository()
         let appSettingRepository = StubAppSettingRepository()
         
         return .init(
             targetEventTagIds: selectTagIds,
+            excludeAllDayEvents: excludeAllDayEvents,
             eventsFetchUsecase: fetchUsecase,
             appSettingRepository: appSettingRepository,
             calendarSettingRepository: calendarSettingRepository,
@@ -85,6 +89,33 @@ extension EventListWidgetViewModelProviderTests {
         XCTAssertEqual(firstDateModel?.events.map { $0.name }, [
             "todo_at_start"
         ])
+    }
+    
+    func testProvider_whenNotExcludeAllDayEvents_containsAllDayEvent() async throws {
+        // given
+        let provider = self.makeProvider(withAllDayEvent: true)
+        
+        // when
+        let viewModel = try await provider.getEventListViewModel(for: self.refDate, widgetSize: .small)
+        
+        // then
+        let firstDateModel = viewModel.pages.first?.sections[safe: 1]
+        XCTAssertEqual(
+            firstDateModel?.events.map { $0.name }.sorted(),
+            ["allday_event", "todo_at_start"]
+        )
+    }
+    
+    func testProvider_whenExcludeAllDayEvents_filterOutAllDayEvent() async throws {
+        // given
+        let provider = self.makeProvider(withAllDayEvent: true, excludeAllDayEvents: true)
+        
+        // when
+        let viewModel = try await provider.getEventListViewModel(for: self.refDate, widgetSize: .small)
+        
+        // then
+        let firstDateModel = viewModel.pages.first?.sections[safe: 1]
+        XCTAssertEqual(firstDateModel?.events.map { $0.name }, ["todo_at_start"])
     }
     
     func testProvider_whenCurrentTodoNotExists_doNotProvideCurrentTodoDayModel() async throws {
@@ -220,6 +251,7 @@ extension EventListWidgetViewModelProviderTests {
         
         return EventListWidgetViewModelProvider(
             targetEventTagIds: nil,
+            excludeAllDayEvents: false,
             eventsFetchUsecase: usecase,
             appSettingRepository: appSettingRepository,
             calendarSettingRepository: calendarSettingRepository,
@@ -242,6 +274,7 @@ extension EventListWidgetViewModelProviderTests {
         )
         let provider = EventListWidgetViewModelProvider(
             targetEventTagIds: nil,
+            excludeAllDayEvents: false,
             eventsFetchUsecase: usecase,
             appSettingRepository: StubAppSettingRepository(),
             calendarSettingRepository: StubCalendarSettingRepository(),
@@ -491,6 +524,7 @@ extension EventListWidgetViewModelProviderTests {
         
         return EventListWidgetViewModelProvider(
             targetEventTagIds: nil,
+            excludeAllDayEvents: false,
             eventsFetchUsecase: usecase,
             appSettingRepository: appSettingRepository,
             calendarSettingRepository: calendarSettingRepository,
@@ -590,6 +624,7 @@ extension EventListWidgetViewModelProviderTests {
         let appSettingRepository = StubAppSettingRepository()
         return .init(
             targetEventTagIds: nil,
+            excludeAllDayEvents: false,
             eventsFetchUsecase: fetchUsecase,
             appSettingRepository: appSettingRepository,
             calendarSettingRepository: calendarSettingRepository,
@@ -674,6 +709,7 @@ extension EventListWidgetViewModelProviderTests {
         let appSettingRepository = StubAppSettingRepository()
         return .init(
             targetEventTagIds: tagIds,
+            excludeAllDayEvents: false,
             eventsFetchUsecase: fetchUsecase,
             appSettingRepository: appSettingRepository,
             calendarSettingRepository: calendarSettingRepository,
