@@ -111,6 +111,7 @@ extension EventListWidgetSize {
 final class EventListWidgetViewModelProvider {
     
     private let targetEventTagIds: [EventTagId]?
+    private let excludeAllDayEvents: Bool
     private let eventsFetchUsecase: any CalendarEventFetchUsecase
     private let appSettingRepository: any AppSettingRepository
     private let calendarSettingRepository: any CalendarSettingRepository
@@ -118,12 +119,14 @@ final class EventListWidgetViewModelProvider {
     
     init(
         targetEventTagIds: [EventTagId]?,
+        excludeAllDayEvents: Bool,
         eventsFetchUsecase: any CalendarEventFetchUsecase,
         appSettingRepository: any AppSettingRepository,
         calendarSettingRepository: any CalendarSettingRepository,
         localeProvider: any LocaleProvider
     ) {
         self.targetEventTagIds = targetEventTagIds
+        self.excludeAllDayEvents = excludeAllDayEvents
         self.eventsFetchUsecase = eventsFetchUsecase
         self.appSettingRepository = appSettingRepository
         self.calendarSettingRepository = calendarSettingRepository
@@ -189,13 +192,20 @@ extension EventListWidgetViewModelProvider {
         _ timeZone: TimeZone
     ) async throws -> CalendarEvents {
         let total = try await self.eventsFetchUsecase.fetchEvents(in: range, timeZone)
-        guard let selecteds = self.targetEventTagIds.map({ Set($0) })
-        else {
-            return total
+        
+        var currents = total.currentTodos
+        var eventWithTimes = total.eventWithTimes
+        if let selecteds = self.targetEventTagIds.map({ Set($0) }) {
+            currents = currents.filter { selecteds.contains($0.eventTagId) }
+            eventWithTimes = eventWithTimes.filter { selecteds.contains($0.eventTagId) }
         }
+        if self.excludeAllDayEvents {
+            eventWithTimes = eventWithTimes.filter { !($0.eventTime?.isAllDay ?? false) }
+        }
+        
         return total
-            |> \.currentTodos .~ total.currentTodos.filter { selecteds.contains($0.eventTagId) }
-            |> \.eventWithTimes .~ total.eventWithTimes.filter { selecteds.contains($0.eventTagId) }
+            |> \.currentTodos .~ currents
+            |> \.eventWithTimes .~ eventWithTimes
     }
 }
 
