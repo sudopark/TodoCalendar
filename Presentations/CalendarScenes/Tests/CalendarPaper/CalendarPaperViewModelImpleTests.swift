@@ -163,6 +163,28 @@ extension CalendarPaperViewModelImpleTests {
         XCTAssertEqual(self.spyListner.didRequestReturnToToday, true)
     }
 
+    func testViewModel_whenUpdateMonthCollapsed_notifyToMonth() {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when
+        viewModel.updateMonthCollapsed(true)
+
+        // then
+        XCTAssertEqual(self.spyMonthInteractor.didUpdateMonthCollapsed, true)
+    }
+
+    func testViewModel_whenMonthRequestToggleCollapse_notifyToListener() {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when
+        viewModel.monthSceneDidRequestToggleMonthCollapse()
+
+        // then
+        XCTAssertEqual(self.spyListner.didRequestToggleMonthCollapse, true)
+    }
+
     func testViewModel_whenMonthSceneRequestsShare_routesToSharePreview() {
         // given
         let viewModel = self.makeViewModel()
@@ -206,6 +228,11 @@ extension CalendarPaperViewModelImpleTests {
         func selectDay(_ day: CalendarDay) {
             self.didSelectDay = day
         }
+
+        var didUpdateMonthCollapsed: Bool?
+        func updateMonthCollapsed(_ isCollapsed: Bool) {
+            self.didUpdateMonthCollapsed = isCollapsed
+        }
     }
     
     private class SpyEventInteractor: DayEventListSceneInteractor {
@@ -238,6 +265,11 @@ extension CalendarPaperViewModelImpleTests {
         var didRequestReturnToToday: Bool?
         func calendarPaperDidRequestReturnToToday() {
             self.didRequestReturnToToday = true
+        }
+
+        var didRequestToggleMonthCollapse: Bool?
+        func calendarPaperDidRequestToggleMonthCollapse() {
+            self.didRequestToggleMonthCollapse = true
         }
     }
 }

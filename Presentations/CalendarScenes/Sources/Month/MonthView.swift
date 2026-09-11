@@ -491,6 +491,7 @@ private struct WeekRowView: View {
 final class DummyMonthViewModel: MonthViewModel, @unchecked Sendable {
     
     private let selectedDay = CurrentValueSubject<String?, Never>(nil)
+    private let collapsed = CurrentValueSubject<Bool, Never>(false)
     func attachListener(_ listener: any MonthSceneListener) {
         
     }
@@ -507,6 +508,18 @@ final class DummyMonthViewModel: MonthViewModel, @unchecked Sendable {
     
     func clearDaySelection() {
         self.selectedDay.send(nil)
+    }
+
+    func updateMonthCollapsed(_ isCollapsed: Bool) {
+        self.collapsed.send(isCollapsed)
+    }
+
+    func toggleMonthCollapse() {
+        self.collapsed.send(!self.collapsed.value)
+    }
+
+    var isMonthCollapsed: AnyPublisher<Bool, Never> {
+        return self.collapsed.eraseToAnyPublisher()
     }
 
     var weekDays: AnyPublisher<[WeekDayModel], Never> {

@@ -363,6 +363,11 @@ private class CatalogMonthViewModel: MonthViewModel, @unchecked Sendable {
     func selectDay(_ day: CalendarDay) { }
     func clearDaySelection() { }
     func updateMonthIfNeed(_ newMonth: CalendarMonth) { }
+    func updateMonthCollapsed(_ isCollapsed: Bool) { }
+    func toggleMonthCollapse() { }
+    var isMonthCollapsed: AnyPublisher<Bool, Never> {
+        return Just(false).eraseToAnyPublisher()
+    }
 }
 
 private struct CatalogCalendarEvent: CalendarEvent {

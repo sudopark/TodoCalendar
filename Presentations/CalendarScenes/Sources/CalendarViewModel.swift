@@ -99,6 +99,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         let selectedDayPerMonths = CurrentValueSubject<[CalendarMonth: CurrentSelectDayModel], Never>([:])
         let aiAgentState = CurrentValueSubject<AIAgentState?, Never>(nil)
         let isSignedIn = CurrentValueSubject<Bool, Never>(false)
+        let isMonthCollapsed = CurrentValueSubject<Bool, Never>(false)
     }
     private let cancellables = CancelBag()
     private let subject = Subject()
@@ -509,6 +510,12 @@ extension CalendarViewModelImple: CalendarPaperSceneListener {
 
     func calendarPaperDidRequestShowAICommand() {
         self.router?.routeToAICommand(listener: self)
+    }
+
+    func calendarPaperDidRequestToggleMonthCollapse() {
+        let newValue = !self.subject.isMonthCollapsed.value
+        self.subject.isMonthCollapsed.send(newValue)
+        self.calendarPaperInteractors?.forEach { $0.updateMonthCollapsed(newValue) }
     }
 }
 

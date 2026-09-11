@@ -1252,6 +1252,35 @@ extension CalendarViewModelImpleTests {
         XCTAssertEqual(self.spyRouter.spyInteractors.map { $0.didSelectTodayRequested }, [nil, true, nil])
     }
 
+    func testViewModel_whenPaperRequestToggleCollapse_broadcastToAllPapers() async throws {
+        // given
+        let viewModel = self.makeViewModel()
+        try await self.prepareInitialMonths(viewModel)
+
+        // when
+        viewModel.calendarPaperDidRequestToggleMonthCollapse()
+
+        // then
+        XCTAssertEqual(self.monthCollapsedsPerPaper, [[true], [true], [true]])
+    }
+
+    func testViewModel_whenPaperRequestToggleCollapseTwice_returnToExpanded() async throws {
+        // given
+        let viewModel = self.makeViewModel()
+        try await self.prepareInitialMonths(viewModel)
+
+        // when
+        viewModel.calendarPaperDidRequestToggleMonthCollapse()
+        viewModel.calendarPaperDidRequestToggleMonthCollapse()
+
+        // then
+        XCTAssertEqual(self.monthCollapsedsPerPaper, [[true, false], [true, false], [true, false]])
+    }
+
+    private var monthCollapsedsPerPaper: [[Bool]] {
+        return self.spyRouter.spyInteractors.map { $0.didUpdateMonthCollapseds }
+    }
+
     private var selectedDayIsTodays: [[Bool]] {
         return self.spyRouter.spyInteractors.map { $0.didSelectedDayIsTodays }
     }
@@ -1463,8 +1492,14 @@ private extension CalendarViewModelImpleTests {
             self.didSelectedDayIsTodays.append(isToday)
         }
 
+        var didUpdateMonthCollapseds: [Bool] = []
+        func updateMonthCollapsed(_ isCollapsed: Bool) {
+            self.didUpdateMonthCollapseds.append(isCollapsed)
+        }
+
         func monthScene(didChange currentSelectedDay: CurrentSelectDayModel, and eventsThatDay: [any CalendarEvent]) { }
         func monthScene(didRequestShare range: Range<TimeInterval>, kind: CalendarShareRangeKind) { }
+        func monthSceneDidRequestToggleMonthCollapse() { }
         func dayEventListDidRequestShowAICommand() { }
         func dayEventListDidRequestReturnToToday() { }
     }

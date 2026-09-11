@@ -43,6 +43,7 @@ protocol MonthSceneInteractor: AnyObject {
     func updateMonthIfNeed(_ newMonth: CalendarMonth)
     func clearDaySelection()
     func selectDay(_ day: CalendarDay)
+    func updateMonthCollapsed(_ isCollapsed: Bool)
 }
 
 protocol MonthSceneListener: AnyObject {
@@ -52,6 +53,7 @@ protocol MonthSceneListener: AnyObject {
         and eventsThatDay: [any CalendarEvent]
     )
     func monthScene(didRequestShare range: Range<TimeInterval>, kind: CalendarShareRangeKind)
+    func monthSceneDidRequestToggleMonthCollapse()
 }
 
 protocol MonthScene: Scene where Interactor == any MonthSceneInteractor {
