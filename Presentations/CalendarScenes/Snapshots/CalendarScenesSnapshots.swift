@@ -235,7 +235,12 @@ private final class FakeDayEventListViewModel: DayEventListViewModel, @unchecked
         Just(0).eraseToAnyPublisher()
     }
 
+    var isShowReturnToToday: AnyPublisher<Bool, Never> {
+        Just(false).eraseToAnyPublisher()
+    }
+
     func selectedDayChanaged(_ newDay: CurrentSelectDayModel, and eventThatDay: [any CalendarEvent]) { }
+    func selectedDayIsToday(_ isToday: Bool) { }
     func addNewTodoQuickly(withName: String) { }
     func makeTodoEvent(with givenName: String) { }
     func makeEvent() { }
@@ -251,5 +256,6 @@ private final class FakeDayEventListViewModel: DayEventListViewModel, @unchecked
     func submitAIAgent(_ text: String) { }
     func handleAIEntryButtonTap() { }
     func showAIGuide() { }
+    func returnToToday() { }
     func attachListener(_ listener: any DayEventListSceneListener) { }
 }

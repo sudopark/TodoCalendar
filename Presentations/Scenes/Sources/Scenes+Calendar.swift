@@ -30,6 +30,7 @@ extension CalendarSceneInteractor {
 public protocol CalendarSceneListener: Sendable, AnyObject {
     
     func calendarScene(focusChangedTo selected: SelectDayInfo)
+    func calendarSceneDidRequestReturnToToday()
 }
 
 public protocol CalendarScene: Scene where Interactor == any CalendarSceneInteractor {

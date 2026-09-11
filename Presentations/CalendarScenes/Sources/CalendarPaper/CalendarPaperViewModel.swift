@@ -88,8 +88,16 @@ extension CalendarPaperViewModelImple {
         self.listener?.calendarPaper(on: self.currentMonth, didChange: currentSelectedDay)
     }
 
+    func selectedDayIsToday(_ isToday: Bool) {
+        self.eventListInteractor.selectedDayIsToday(isToday)
+    }
+
     func dayEventListDidRequestShowAICommand() {
         self.listener?.calendarPaperDidRequestShowAICommand()
+    }
+
+    func dayEventListDidRequestReturnToToday() {
+        self.listener?.calendarPaperDidRequestReturnToToday()
     }
 
     func monthScene(didRequestShare range: Range<TimeInterval>, kind: CalendarShareRangeKind) {

@@ -39,7 +39,6 @@ protocol MainViewModel: AnyObject, Sendable, MainSceneInteractor {
 
     // interactor
     func prepare()
-    func returnToToday()
     func moveToPreviousMonth()
     func moveToNextMonth()
     func handleMigration()
@@ -51,7 +50,6 @@ protocol MainViewModel: AnyObject, Sendable, MainSceneInteractor {
 
     // presenter
     var currentMonth: AnyPublisher<CurrentMonth, Never> { get }
-    var isShowReturnToToday: AnyPublisher<Bool, Never> { get }
     var temporaryUserDataMigrationStatus: AnyPublisher<TemporaryUserDataMigrationStatus?, Never> { get }
     var isLoadingCalendarEvents: AnyPublisher<Bool, Never> { get }
     var isLoadingAllEvents: AnyPublisher<Bool, Never> { get }
@@ -209,10 +207,6 @@ extension MainViewModelImple {
             .store(in: self.cancellables)
     }
     
-    func returnToToday() {
-        self.calendarSceneInteractor?.moveFocusToToday()
-    }
-
     func moveToPreviousMonth() {
         self.calendarSceneInteractor?.moveToPreviousMonth()
     }
@@ -247,6 +241,10 @@ extension MainViewModelImple {
     
     func calendarScene(focusChangedTo selected: SelectDayInfo) {
         self.subject.focusedDayInfo.send(selected)
+    }
+
+    func calendarSceneDidRequestReturnToToday() {
+        self.calendarSceneInteractor?.moveFocusToToday()
     }
     
     func jumpDate() {
@@ -297,14 +295,6 @@ extension MainViewModelImple {
         
         return self.subject.focusedDayInfo
             .compactMap(transform)
-            .removeDuplicates()
-            .eraseToAnyPublisher()
-    }
-    
-    var isShowReturnToToday: AnyPublisher<Bool, Never> {
-        return self.subject.focusedDayInfo
-            .compactMap { $0 }
-            .map { !$0.isCurrentDay }
             .removeDuplicates()
             .eraseToAnyPublisher()
     }

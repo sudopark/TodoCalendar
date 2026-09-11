@@ -126,13 +126,6 @@ extension MainViewController {
             })
             .store(in: self.cancellables)
         
-        self.viewModel.isShowReturnToToday
-            .receive(on: RunLoop.main)
-            .sink(receiveValue: { [weak self] show in
-                self?.headerView.returnTodayView.isHidden = !show
-            })
-            .store(in: self.cancellables)
-        
         self.viewModel.temporaryUserDataMigrationStatus
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] status in
@@ -177,12 +170,6 @@ extension MainViewController {
             })
             .store(in: self.cancellables)
 
-        self.headerView.returnTodayView.addTapGestureRecognizerPublisher()
-            .sink(receiveValue: { [weak self] in
-                self?.viewModel.returnToToday()
-            })
-            .store(in: self.cancellables)
-        
         self.headerView.migrationButton.addTapGestureRecognizerPublisher()
             .sink(receiveValue: { [weak self] in
                 self?.viewAppearance.impactIfNeed()
@@ -305,9 +292,6 @@ private final class HeaderView: UIView {
     private let titleStackView = UIStackView()
     let previousMonthButton = UIButton()
     let nextMonthButton = UIButton()
-    let returnTodayView = UIView()
-    private let returnTodayImage = UIImageView()
-    private let returnTodayLabel = UILabel()
     private let buttonsStackView = UIStackView()
     let migrationButton = UIButton()
     let jumpButton = UIButton()
@@ -380,40 +364,11 @@ private final class HeaderView: UIView {
             $0.heightAnchor.constraint(equalToConstant: 44)
         }
 
-        self.addSubview(returnTodayView)
-        returnTodayView.autoLayout.active(with: self) {
-            $0.centerXAnchor.constraint(equalTo: $1.centerXAnchor).setupPriority(.defaultLow)
-            $0.centerYAnchor.constraint(equalTo: $1.centerYAnchor)
-            $0.leadingAnchor.constraint(greaterThanOrEqualTo: self.nextMonthButton.trailingAnchor, constant: 8).setupPriority(.defaultHigh)
-        }
-        
-        self.returnTodayView.addSubview(returnTodayImage)
-        returnTodayImage.autoLayout.active {
-            $0.widthAnchor.constraint(equalToConstant: 15)
-            $0.heightAnchor.constraint(equalToConstant: 15)
-            $0.leadingAnchor.constraint(equalTo: returnTodayView.leadingAnchor, constant: 8)
-            $0.centerYAnchor.constraint(equalTo: returnTodayView.centerYAnchor)
-        }
-        
-        self.returnTodayView.addSubview(returnTodayLabel)
-        returnTodayLabel.autoLayout.active {
-            $0.leadingAnchor.constraint(equalTo: returnTodayImage.trailingAnchor, constant: 4)
-            $0.trailingAnchor.constraint(equalTo: returnTodayView.trailingAnchor, constant: -8)
-            $0.topAnchor.constraint(equalTo: returnTodayView.topAnchor, constant: 6)
-            $0.bottomAnchor.constraint(equalTo: returnTodayView.bottomAnchor, constant: -6)
-        }
-        
-        self.returnTodayView.layer.borderWidth = 1.5
-        self.returnTodayView.clipsToBounds = true
-        self.returnTodayView.layer.cornerRadius = 12
-        self.returnTodayLabel.text = "TODAY".localized()
-        self.returnTodayView.isHidden = true
-        
         self.addSubview(buttonsStackView)
         buttonsStackView.autoLayout.active {
             $0.centerYAnchor.constraint(equalTo: self.centerYAnchor)
             $0.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -16)
-            $0.leadingAnchor.constraint(greaterThanOrEqualTo: returnTodayView.trailingAnchor, constant: 4)
+            $0.leadingAnchor.constraint(greaterThanOrEqualTo: self.nextMonthButton.trailingAnchor, constant: 4)
         }
         buttonsStackView.spacing = 8
         
@@ -453,14 +408,6 @@ private final class HeaderView: UIView {
         
         self.yearLabel.font = fontSet.normal
         self.yearLabel.textColor = colorSet.text0
-        
-        self.returnTodayImage.tintColor = colorSet.text0
-        self.returnTodayImage.image = UIImage(systemName: "arrow.uturn.right")
-        
-        self.returnTodayLabel.font = fontSet.subNormalWithBold
-        self.returnTodayLabel.textColor = colorSet.text0
-        
-        self.returnTodayView.layer.borderColor = colorSet.text0.cgColor
         
         switch self.migrationStatus {
         case .migrating:

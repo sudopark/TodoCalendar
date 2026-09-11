@@ -50,6 +50,7 @@ enum DayEventListScrollAnchor {
     fileprivate var aiAgentState: AIAgentState = .idle
     fileprivate var recognizingText: String = ""
     fileprivate var voiceLevel: Float = 0
+    fileprivate var isShowReturnToToday: Bool = false
 
     fileprivate var isVoiceListening: Bool {
         if case .listening(.voice) = aiAgentState { return true }
@@ -136,6 +137,15 @@ enum DayEventListScrollAnchor {
             .receive(on: RunLoop.main)
             .sink { [weak self] level in self?.voiceLevel = level }
             .store(in: self.cancellables)
+
+        viewModel.isShowReturnToToday
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self, weak appearance] isShow in
+                appearance?.withAnimationIfNeed {
+                    self?.isShowReturnToToday = isShow
+                }
+            })
+            .store(in: self.cancellables)
     }
 }
 
@@ -159,6 +169,7 @@ final class DayEventListViewEventHandler: Observable {
     var submitAIAgent: (String) -> Void = { _ in }
     var handleAIEntryButtonTap: () -> Void = { }
     var showAIGuide: () -> Void = { }
+    var returnToToday: () -> Void = { }
 
     func bind(
         _ viewModel: any DayEventListViewModel,
@@ -185,6 +196,7 @@ final class DayEventListViewEventHandler: Observable {
         self.submitAIAgent = viewModel.submitAIAgent(_:)
         self.handleAIEntryButtonTap = viewModel.handleAIEntryButtonTap
         self.showAIGuide = viewModel.showAIGuide
+        self.returnToToday = viewModel.returnToToday
     }
 }
 
@@ -351,6 +363,29 @@ struct DayEventListView: View {
             }
     }
 
+    private func returnToTodayView() -> some View {
+        Button {
+            self.isFocusInput = false
+            self.appearance.impactIfNeed()
+            self.eventHandler.returnToToday()
+        } label: {
+            HStack(spacing: Metric.Spacing.xsmall) {
+                Image(systemName: "arrow.uturn.right")
+                    .resizable()
+                    .frame(width: 15, height: 15)
+                Text("TODAY".localized())
+                    .font(self.appearance.fontSet.subNormalWithBold.asFont)
+            }
+            .foregroundStyle(self.appearance.colorSet.text0.asColor)
+            .padding(.horizontal, spacing: .small)
+            .padding(.vertical, spacing: .xsmall)
+            .overlay {
+                RoundedRectangle(cornerRadius: Metric.Radius.large)
+                    .stroke(self.appearance.colorSet.text0.asColor, lineWidth: 1.5)
+            }
+        }
+    }
+
     private func dateInfoView() -> some View {
         VStack(alignment: .leading) {
 
@@ -374,6 +409,10 @@ struct DayEventListView: View {
                             self.appearance.fontSet.size(20+appearance.eventTextAdditionalSize, weight: .semibold).asFont
                         )
                         .foregroundColor(self.appearance.colorSet.text2.asColor)
+                }
+
+                if self.state.isShowReturnToToday {
+                    self.returnToTodayView()
                 }
 
                 Spacer()
