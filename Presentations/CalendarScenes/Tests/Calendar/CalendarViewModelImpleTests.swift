@@ -1230,15 +1230,26 @@ extension CalendarViewModelImpleTests {
         withExtendedLifetime(viewModel) { }
     }
 
-    func testViewModel_whenPaperRequestReturnToToday_notifyToListener() {
+    func testViewModel_whenPaperRequestReturnToToday_moveFocusToToday() async throws {
         // given
-        let viewModel = self.makeViewModel()
+        let viewModel = self.makeViewModel(
+            today: .init(year: 2023, month: 08, day: 02, weekDay: 3)
+        )
+        try await self.prepareInitialMonths(viewModel)
+        viewModel.focusChanged(from: 1, to: 2)
 
         // when
         viewModel.calendarPaperDidRequestReturnToToday()
 
         // then
-        XCTAssertEqual(self.spyListener.didRequestReturnToToday, true)
+        try await self.waitEffect("오늘이 속한 달로 되돌아온다") {
+            self.spyRouter.spyInteractors.map { $0.currentMonth } == [
+                .init(year: 2023, month: 07),
+                .init(year: 2023, month: 08),
+                .init(year: 2023, month: 09)
+            ]
+        }
+        XCTAssertEqual(self.spyRouter.spyInteractors.map { $0.didSelectTodayRequested }, [nil, true, nil])
     }
 
     private var selectedDayIsTodays: [[Bool]] {
@@ -1464,11 +1475,6 @@ private extension CalendarViewModelImpleTests {
         
         func calendarScene(focusChangedTo selected: SelectDayInfo) {
             self.didSelectionChanged?(selected)
-        }
-
-        var didRequestReturnToToday: Bool?
-        func calendarSceneDidRequestReturnToToday() {
-            self.didRequestReturnToToday = true
         }
     }
     

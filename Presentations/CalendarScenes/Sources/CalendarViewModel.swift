@@ -504,7 +504,7 @@ extension CalendarViewModelImple: CalendarPaperSceneListener {
     }
 
     func calendarPaperDidRequestReturnToToday() {
-        self.listener?.calendarSceneDidRequestReturnToToday()
+        self.moveFocusToToday()
     }
 
     func calendarPaperDidRequestShowAICommand() {
