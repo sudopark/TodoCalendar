@@ -1210,6 +1210,48 @@ extension CalendarViewModelImpleTests {
     }
 }
 
+// MARK: - 선택일이 오늘인지 하향 전달
+
+extension CalendarViewModelImpleTests {
+
+    func testViewModel_whenSelectedDayChanged_notifyIsTodayToFocusedPaperOnly() async throws {
+        // given
+        let viewModel = self.makeViewModel(
+            today: .init(year: 2023, month: 08, day: 02, weekDay: 3)
+        )
+        try await self.prepareInitialMonths(viewModel)
+
+        // when
+        viewModel.calendarPaper(on: .init(year: 2023, month: 08), didChange: .dummy(2023, 08, 02))
+        viewModel.calendarPaper(on: .init(year: 2023, month: 08), didChange: .dummy(2023, 08, 03))
+
+        // then
+        try await self.assertSelectedDayIsTodays([[], [true, false], []])
+        withExtendedLifetime(viewModel) { }
+    }
+
+    func testViewModel_whenPaperRequestReturnToToday_notifyToListener() {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when
+        viewModel.calendarPaperDidRequestReturnToToday()
+
+        // then
+        XCTAssertEqual(self.spyListener.didRequestReturnToToday, true)
+    }
+
+    private var selectedDayIsTodays: [[Bool]] {
+        return self.spyRouter.spyInteractors.map { $0.didSelectedDayIsTodays }
+    }
+
+    private func assertSelectedDayIsTodays(_ expected: [[Bool]]) async throws {
+        try await self.waitEffect("하향 전달 \(expected) 도달") { self.selectedDayIsTodays == expected }
+        try await Task.sleep(for: .milliseconds(50))
+        XCTAssertEqual(self.selectedDayIsTodays, expected)
+    }
+}
+
 // MARK: - 외부 진입점의 AI 입력 요청 (requestAIEntry)
 
 extension CalendarViewModelImpleTests {
@@ -1405,9 +1447,15 @@ private extension CalendarViewModelImpleTests {
             self.didScrollToVoiceInputCount += 1
         }
 
+        var didSelectedDayIsTodays: [Bool] = []
+        func selectedDayIsToday(_ isToday: Bool) {
+            self.didSelectedDayIsTodays.append(isToday)
+        }
+
         func monthScene(didChange currentSelectedDay: CurrentSelectDayModel, and eventsThatDay: [any CalendarEvent]) { }
         func monthScene(didRequestShare range: Range<TimeInterval>, kind: CalendarShareRangeKind) { }
         func dayEventListDidRequestShowAICommand() { }
+        func dayEventListDidRequestReturnToToday() { }
     }
     
     final class SpyListener: CalendarSceneListener, @unchecked Sendable {
@@ -1416,6 +1464,11 @@ private extension CalendarViewModelImpleTests {
         
         func calendarScene(focusChangedTo selected: SelectDayInfo) {
             self.didSelectionChanged?(selected)
+        }
+
+        var didRequestReturnToToday: Bool?
+        func calendarSceneDidRequestReturnToToday() {
+            self.didRequestReturnToToday = true
         }
     }
     

@@ -141,6 +141,28 @@ extension CalendarPaperViewModelImpleTests {
         )
     }
 
+    func testViewModel_whenSelectedDayIsTodayChanged_notifyToEventList() {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when
+        viewModel.selectedDayIsToday(false)
+
+        // then
+        XCTAssertEqual(self.spyEventListInteractor.didSelectedDayIsToday, false)
+    }
+
+    func testViewModel_whenEventListRequestReturnToToday_notifyToListener() {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when
+        viewModel.dayEventListDidRequestReturnToToday()
+
+        // then
+        XCTAssertEqual(self.spyListner.didRequestReturnToToday, true)
+    }
+
     func testViewModel_whenMonthSceneRequestsShare_routesToSharePreview() {
         // given
         let viewModel = self.makeViewModel()
@@ -194,6 +216,11 @@ extension CalendarPaperViewModelImpleTests {
             self.selectedDays.append(newDay)
             self.selectedDayEvents.append(eventThatDay)
         }
+
+        var didSelectedDayIsToday: Bool?
+        func selectedDayIsToday(_ isToday: Bool) {
+            self.didSelectedDayIsToday = isToday
+        }
     }
     
     private final class SpyCalendarPaperSceneListener: CalendarPaperSceneListener {
@@ -206,6 +233,11 @@ extension CalendarPaperViewModelImpleTests {
         var didRequestShowAICommand: Bool?
         func calendarPaperDidRequestShowAICommand() {
             self.didRequestShowAICommand = true
+        }
+
+        var didRequestReturnToToday: Bool?
+        func calendarPaperDidRequestReturnToToday() {
+            self.didRequestReturnToToday = true
         }
     }
 }

@@ -1414,6 +1414,75 @@ extension DayEventListViewModelImpleTests {
         func dayEventListDidRequestShowAICommand() {
             self.didRequestShowAICommand = true
         }
+
+        var didRequestReturnToToday: Bool?
+        func dayEventListDidRequestReturnToToday() {
+            self.didRequestReturnToToday = true
+        }
+    }
+}
+
+// MARK: - 오늘로 돌아가기 버튼 노출
+
+extension DayEventListViewModelImpleTests {
+
+    func testViewModel_whenSelectedDayIsNotToday_showReturnToToday() {
+        // given
+        let expect = expectation(description: "오늘이 아닌 날을 고르면 오늘 버튼을 보인다")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModel()
+
+        // when
+        let isShows = self.waitOutputs(expect, for: viewModel.isShowReturnToToday) {
+            viewModel.selectedDayIsToday(false)
+        }
+
+        // then
+        XCTAssertEqual(isShows, [false, true])
+    }
+
+    func testViewModel_whenSelectedDayIsToday_hideReturnToToday() {
+        // given
+        let expect = expectation(description: "다시 오늘을 고르면 오늘 버튼을 감춘다")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModel()
+
+        // when
+        let isShows = self.waitOutputs(expect, for: viewModel.isShowReturnToToday) {
+            viewModel.selectedDayIsToday(false)
+            viewModel.selectedDayIsToday(true)
+        }
+
+        // then
+        XCTAssertEqual(isShows, [false, true, false])
+    }
+
+    func testViewModel_whenReturnToToday_notifyToListener() {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when
+        viewModel.returnToToday()
+
+        // then
+        XCTAssertEqual(self.spyListener.didRequestReturnToToday, true)
+    }
+
+    func testViewModel_whenSelectedDayIsTodayRepeated_notEmitDuplicate() {
+        // given
+        let expect = expectation(description: "같은 날짜 상태가 반복돼도 중복 방출하지 않는다")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModel()
+
+        // when
+        let isShows = self.waitOutputs(expect, for: viewModel.isShowReturnToToday) {
+            viewModel.selectedDayIsToday(false)
+            viewModel.selectedDayIsToday(false)
+            viewModel.selectedDayIsToday(true)
+        }
+
+        // then
+        XCTAssertEqual(isShows, [false, true, false])
     }
 }
 

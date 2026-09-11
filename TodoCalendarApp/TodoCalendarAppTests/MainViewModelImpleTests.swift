@@ -263,38 +263,13 @@ extension MainViewModelImpleTests {
         XCTAssertEqual(months.map { $0.yearText }, [nil, nil, nil, "2022"])
     }
     
-    func testViewModle_whenFocusChanged_updateIsShowReturnToToday() {
+    func testViewModel_whenCalendarSceneRequestReturnToToday_moveFocusToToday() {
         // given
-        let expect = expectation(description: "update is show today")
-        expect.expectedFulfillmentCount = 4
         let viewModel = self.makeViewModel()
-        
+
         // when
-        let isShow = self.waitOutputs(expect, for: viewModel.isShowReturnToToday) {
-            viewModel.calendarScene(focusChangedTo: .init(2023, 08, 1, isCurrentYear: true, isCurrentDay: true))
-            viewModel.calendarScene(focusChangedTo: .init(2023, 09, 1, isCurrentYear: true, isCurrentDay: false))
-            viewModel.calendarScene(focusChangedTo: .init(2023, 10, 1, isCurrentYear: true, isCurrentDay: false))
-            viewModel.calendarScene(focusChangedTo: .init(2023, 09, 1, isCurrentYear: true, isCurrentDay: false))
-            viewModel.calendarScene(focusChangedTo: .init(2023, 08, 1, isCurrentYear: true, isCurrentDay: true))
-            viewModel.calendarScene(focusChangedTo: .init(2023, 08, 2, isCurrentYear: true, isCurrentDay: false))
-        }
-        
-        // then
-        XCTAssertEqual(isShow, [false, true, false, true])
-    }
-    
-    // request return to today
-    func testViewModel_requestReturnToToday() {
-        // given
-        let expect = expectation(description: "wait-return to today show")
-        let viewModel = self.makeViewModel()
-        
-        // when
-        let _ = self.waitFirstOutput(expect, for: viewModel.isShowReturnToToday) {
-            viewModel.calendarScene(focusChangedTo: .init(2023, 09, 1, isCurrentYear: true, isCurrentDay: false))
-        }
-        viewModel.returnToToday()
-        
+        viewModel.calendarSceneDidRequestReturnToToday()
+
         // then
         XCTAssertEqual(self.spyRouter.interactor.didFocusMovedToToday, true)
     }

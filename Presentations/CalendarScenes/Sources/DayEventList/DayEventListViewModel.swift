@@ -68,6 +68,7 @@ protocol DayEventListViewModel: AnyObject, Sendable, DayEventListSceneInteractor
     func submitAIAgent(_ text: String)
     func handleAIEntryButtonTap()
     func showAIGuide()
+    func returnToToday()
     func attachListener(_ listener: any DayEventListSceneListener)
 
     // presenter
@@ -79,6 +80,7 @@ protocol DayEventListViewModel: AnyObject, Sendable, DayEventListSceneInteractor
     var aiAgentState: AnyPublisher<AIAgentState, Never> { get }
     var recognizingText: AnyPublisher<String, Never> { get }
     var voiceLevel: AnyPublisher<Float, Never> { get }
+    var isShowReturnToToday: AnyPublisher<Bool, Never> { get }
 }
 
 
@@ -140,6 +142,7 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
         let pendingTodoEvents = CurrentValueSubject<[PendingTodoEventCellViewModel], Never>([])
         let isSignedIn = CurrentValueSubject<Bool, Never>(false)
         let aiAgentState = CurrentValueSubject<AIAgentState?, Never>(nil)
+        let selectedDayIsToday = CurrentValueSubject<Bool, Never>(true)
     }
 
     private let cancellables = CancelBag()
@@ -174,6 +177,10 @@ extension DayEventListViewModelImple {
         self.subject.currentDayAndEventLists.send(
             .init(currentDay: newDay, events: eventThatDay)
         )
+    }
+
+    func selectedDayIsToday(_ isToday: Bool) {
+        self.subject.selectedDayIsToday.send(isToday)
     }
 
     func addNewTodoQuickly(withName: String) {
@@ -297,6 +304,10 @@ extension DayEventListViewModelImple {
         self.router?.routeToAIGuide()
     }
 
+    func returnToToday() {
+        self.listener?.dayEventListDidRequestReturnToToday()
+    }
+
     private static func isCommandPhase(_ state: AIAgentState) -> Bool {
         switch state {
         case .processing, .confirm, .done, .failed: return true
@@ -316,6 +327,13 @@ extension DayEventListViewModelImple {
 // MARK: - DayEventListViewModelImple Presenter
 
 extension DayEventListViewModelImple {
+
+    var isShowReturnToToday: AnyPublisher<Bool, Never> {
+        return self.subject.selectedDayIsToday
+            .map { !$0 }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
 
     var foremostEventModel: AnyPublisher<
         (any EventCellViewModel)?, Never

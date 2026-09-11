@@ -219,8 +219,15 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         .sink(receiveValue: { [weak self] selected in
             logger.log(level: .debug, "select day changed: \(selected)")
             self?.listener?.calendarScene(focusChangedTo: selected)
+            self?.notifySelectedDayIsTodayToFocusedPaper(selected.isCurrentDay)
         })
         .store(in: self.cancellables)
+    }
+
+    private func notifySelectedDayIsTodayToFocusedPaper(_ isToday: Bool) {
+        guard let focusedIndex = self.subject.monthsInCurrentRange.value?.focusedIndex
+        else { return }
+        self.calendarPaperInteractors?[safe: focusedIndex]?.selectedDayIsToday(isToday)
     }
     
     private func bindRefreshHoliday() {
@@ -494,6 +501,10 @@ extension CalendarViewModelImple: CalendarPaperSceneListener {
         let newMap = self.subject.selectedDayPerMonths.value
             |> key(month) .~ selectedDay
         self.subject.selectedDayPerMonths.send(newMap)
+    }
+
+    func calendarPaperDidRequestReturnToToday() {
+        self.listener?.calendarSceneDidRequestReturnToToday()
     }
 
     func calendarPaperDidRequestShowAICommand() {
