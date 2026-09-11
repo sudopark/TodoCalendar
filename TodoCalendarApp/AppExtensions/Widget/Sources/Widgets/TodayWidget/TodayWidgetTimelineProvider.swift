@@ -16,54 +16,54 @@ import CalendarPresentation
 import WidgetScenes
 
 
-struct TodayWidgetTimelineProvider: TimelineProvider {
+struct TodayWidgetTimelineProvider: AppIntentTimelineProvider {
     
+    typealias Intent = TodayWidgetConfigurationIntent
     typealias Entry = ResultTimelineEntry<TodayWidgetViewModel>
     
-    func placeholder(in context: Context) -> ResultTimelineEntry<TodayWidgetViewModel> {
+    init() { }
+}
+
+extension TodayWidgetTimelineProvider {
+    
+    func placeholder(in context: Context) -> Entry {
         let now = Date()
         return .init(date: now) { TodayWidgetViewModel.sample() }
     }
     
-    func getSnapshot(in context: Context, completion: @Sendable @escaping (ResultTimelineEntry<TodayWidgetViewModel>) -> Void) {
+    func snapshot(
+        for configuration: TodayWidgetConfigurationIntent,
+        in context: Context
+    ) async -> Entry {
         
         guard context.isPreview == false
         else {
-            completion(
-                .init(date: Date()) { TodayWidgetViewModel.sample() }
-            )
-            return
+            return self.placeholder(in: context)
         }
-        self.getEntry { entry in
-            completion(entry)
-        }
+        return await self.loadEntry()
     }
     
-    func getTimeline(in context: Context, completion: @Sendable @escaping (Timeline<ResultTimelineEntry<TodayWidgetViewModel>>) -> Void) {
+    func timeline(
+        for configuration: TodayWidgetConfigurationIntent,
+        in context: Context
+    ) async -> Timeline<Entry> {
         
-        self.getEntry { entry in
-            let timeline = Timeline(entries: [entry], policy: .after(Date().nextUpdateTime))
-            completion(timeline)
-        }
+        let entry = await self.loadEntry()
+        return Timeline(entries: [entry], policy: .after(Date().nextUpdateTime))
     }
     
-    private func getEntry(_ completion: @Sendable @escaping (Entry) -> Void) {
+    private func loadEntry() async -> Entry {
         
-        Task {
-            let builder = WidgetViewModelProviderBuilder(base: .init())
-            let viewModelProvider = await builder.makeTodayViewModelProvider()
-            let now = Date()
-            do {
-                let model = try await viewModelProvider.getTodayViewModel(for: now)
-                completion(
-                    .init(date: now, result: .success(model))
-                    |> \.background .~ model.widgetSetting.background
-                )
-            } catch {
-                completion(
-                    .init(date: now, result: .failure(.init(error: error)))
-                )
-            }
+        let builder = WidgetViewModelProviderBuilder(base: .init())
+        let viewModelProvider = await builder.makeTodayViewModelProvider()
+        let now = Date()
+        do {
+            let model = try await viewModelProvider.getTodayViewModel(for: now)
+            return .init(date: now, result: .success(model))
+                |> \.background .~ model.widgetSetting.background
+            
+        } catch {
+            return .init(date: now, result: .failure(.init(error: error)))
         }
     }
 }
