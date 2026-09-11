@@ -92,6 +92,14 @@ extension CalendarPaperViewModelImple {
         self.eventListInteractor.selectedDayIsToday(isToday)
     }
 
+    func updateMonthCollapsed(_ isCollapsed: Bool) {
+        self.monthInteractor.updateMonthCollapsed(isCollapsed)
+    }
+
+    func monthSceneDidRequestToggleMonthCollapse() {
+        self.listener?.calendarPaperDidRequestToggleMonthCollapse()
+    }
+
     func dayEventListDidRequestShowAICommand() {
         self.listener?.calendarPaperDidRequestShowAICommand()
     }

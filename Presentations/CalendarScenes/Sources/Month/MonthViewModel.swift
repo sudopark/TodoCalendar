@@ -22,8 +22,10 @@ protocol MonthViewModel: AnyObject, Sendable, MonthSceneInteractor {
     func attachListener(_ listener: any MonthSceneListener)
     func select(_ day: DayCellViewModel)
     func shareEvents(_ kind: CalendarShareRangeKind, for day: DayCellViewModel)
+    func toggleMonthCollapse()
 
     var weekDays: AnyPublisher<[WeekDayModel], Never> { get }
+    var isMonthCollapsed: AnyPublisher<Bool, Never> { get }
     var weekModels: AnyPublisher<[WeekRowModel], Never> { get }
     var currentSelectDayIdentifier: AnyPublisher<String, Never> { get }
     var todayIdentifier: AnyPublisher<String, Never> { get }
@@ -89,6 +91,8 @@ final class MonthViewModelImple: MonthViewModel, @unchecked Sendable {
         let currentMonthComponent = CurrentValueSubject<CalendarComponent?, Never>(nil)
         let currentMonthInfo = CurrentValueSubject<CurrentMonthInfo?, Never>(nil)
         let userSelectedDay = CurrentValueSubject<CalendarDay?, Never>(nil)
+        let latestSelectedDay = CurrentValueSubject<CurrentSelectDayModel?, Never>(nil)
+        let isMonthCollapsed = CurrentValueSubject<Bool, Never>(false)
         let eventStackMap = CurrentValueSubject<[String: WeekEventStack], Never>([:])
     }
     private let subject = Subject()
@@ -161,6 +165,9 @@ final class MonthViewModelImple: MonthViewModel, @unchecked Sendable {
         }
         
         self.currentSelectedDay
+            .handleEvents(receiveOutput: { [weak self] model in
+                self?.subject.latestSelectedDay.send(model)
+            })
             .map(withEvents)
             .switchToLatest()
             .sink(receiveValue: { [weak self] pair in
@@ -194,9 +201,12 @@ extension MonthViewModelImple {
     }
     
     func select(_ day: DayCellViewModel) {
+        let isReselect = self.subject.latestSelectedDay.value?.identifier == day.identifier
         self.subject.userSelectedDay.send(
             .init(day.year, day.month, day.day)
         )
+        guard isReselect else { return }
+        self.listener?.monthSceneDidRequestToggleMonthCollapse()
     }
 
     func shareEvents(_ kind: CalendarShareRangeKind, for day: DayCellViewModel) {
@@ -212,6 +222,14 @@ extension MonthViewModelImple {
     
     func selectDay(_ day: CalendarDay) {
         self.subject.userSelectedDay.send(day)
+    }
+
+    func updateMonthCollapsed(_ isCollapsed: Bool) {
+        self.subject.isMonthCollapsed.send(isCollapsed)
+    }
+
+    func toggleMonthCollapse() {
+        self.listener?.monthSceneDidRequestToggleMonthCollapse()
     }
 }
 
@@ -287,6 +305,12 @@ extension MonthViewModelImple {
     var currentSelectDayIdentifier: AnyPublisher<String, Never> {
         return self.currentSelectedDay
             .map { $0.identifier }
+            .eraseToAnyPublisher()
+    }
+    
+    var isMonthCollapsed: AnyPublisher<Bool, Never> {
+        return self.subject.isMonthCollapsed
+            .removeDuplicates()
             .eraseToAnyPublisher()
     }
     

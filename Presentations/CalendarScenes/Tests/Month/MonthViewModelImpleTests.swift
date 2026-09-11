@@ -718,6 +718,93 @@ extension MonthViewModelImpleTests {
     }
 }
 
+// MARK: - 접힘 토글
+
+extension MonthViewModelImpleTests {
+
+    private func dayCell(_ day: Int) -> DayCellViewModel {
+        return .init(year: 2023, month: 9, day: day, isNotCurrentMonth: false, accentDay: nil)
+    }
+
+    func testViewModel_whenSelectAlreadySelectedDay_requestToggleCollapse() {
+        // given
+        let expect = expectation(description: "이미 선택된 날을 다시 탭하면 접힘 토글을 요청한다")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModel()
+        let selecteds = self.waitOutputs(expect, for: viewModel.currentSelectDayIdentifier) {
+            viewModel.select(self.dayCell(23))
+        }
+        XCTAssertEqual(selecteds, ["2023-9-10", "2023-9-23"])
+        XCTAssertEqual(self.spyListener?.didRequestToggleMonthCollapseCount, 0)
+
+        // when
+        viewModel.select(self.dayCell(23))
+
+        // then
+        XCTAssertEqual(self.spyListener?.didRequestToggleMonthCollapseCount, 1)
+    }
+
+    func testViewModel_whenSelectOtherDay_notRequestToggleCollapse() {
+        // given
+        let expect = expectation(description: "다른 날을 탭하면 접힘 토글을 요청하지 않는다")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModel()
+
+        // when
+        let selecteds = self.waitOutputs(expect, for: viewModel.currentSelectDayIdentifier) {
+            viewModel.select(self.dayCell(23))
+            viewModel.select(self.dayCell(24))
+        }
+
+        // then
+        XCTAssertEqual(selecteds, ["2023-9-10", "2023-9-23", "2023-9-24"])
+        XCTAssertEqual(self.spyListener?.didRequestToggleMonthCollapseCount, 0)
+    }
+
+    func testViewModel_whenSelectDayWithoutExplicitSelection_reselectingTodayRequestsToggleCollapse() {
+        // given
+        let expect = expectation(description: "명시 선택 없이 오늘이 선택으로 보이는 상태에서 오늘을 탭해도 재탭으로 본다")
+        let viewModel = self.makeViewModel()
+        let selected = self.waitFirstOutput(expect, for: viewModel.currentSelectDayIdentifier) { } ?? nil
+        XCTAssertEqual(selected, "2023-9-10")
+
+        // when
+        viewModel.select(self.dayCell(10))
+
+        // then
+        XCTAssertEqual(self.spyListener?.didRequestToggleMonthCollapseCount, 1)
+    }
+
+    func testViewModel_whenToggleMonthCollapse_requestToListener() {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when
+        viewModel.toggleMonthCollapse()
+
+        // then
+        XCTAssertEqual(self.spyListener?.didRequestToggleMonthCollapseCount, 1)
+    }
+
+    func testViewModel_whenUpdateMonthCollapsed_provideIsMonthCollapsed() {
+        // given
+        let expect = expectation(description: "접힘 값은 펼침으로 시작하고, 하향으로 받은 값을 내되 같은 값은 다시 내지 않는다")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModel()
+
+        // when
+        let isCollapseds = self.waitOutputs(expect, for: viewModel.isMonthCollapsed) {
+            viewModel.updateMonthCollapsed(true)
+            viewModel.updateMonthCollapsed(true)
+            viewModel.updateMonthCollapsed(false)
+        }
+
+        // then
+        XCTAssertEqual(isCollapseds, [false, true, false])
+    }
+}
+
+
 // MARK: - share range
 
 extension MonthViewModelImpleTests {
@@ -983,6 +1070,11 @@ extension MonthViewModelImpleTests {
         func monthScene(didRequestShare range: Range<TimeInterval>, kind: CalendarShareRangeKind) {
             self.didRequestShareRange = range
             self.didRequestShareKind = kind
+        }
+
+        var didRequestToggleMonthCollapseCount: Int = 0
+        func monthSceneDidRequestToggleMonthCollapse() {
+            self.didRequestToggleMonthCollapseCount += 1
         }
     }
 }
