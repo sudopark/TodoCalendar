@@ -22,6 +22,7 @@ import CommonPresentation
     var variants: [WidgetVariant] = []
     var setting: WidgetAppearanceSettings = .init()
     var selectedVariantId: String?
+    var defaultStyles: [String: any WidgetStyleSetting] = [:]
 
     func bind(_ viewModel: any WidgetGalleryDetailViewModel) {
         guard self.didBind == false else { return }
@@ -48,15 +49,25 @@ import CommonPresentation
                 self?.setting = setting
             })
             .store(in: self.cancellables)
+        
+        viewModel.defaultStyles
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] styles in
+                self?.defaultStyles = styles
+            })
+            .store(in: self.cancellables)
     }
 }
 
 final class WidgetGalleryDetailViewEventHandler: Observable {
 
     var onAppear: () -> Void = { }
+    var editStyle: (WidgetVariant) -> Void = { _ in }
     var close: () -> Void = { }
 
     func bind(_ viewModel: any WidgetGalleryDetailViewModel) {
+        self.onAppear = viewModel.refresh
+        self.editStyle = viewModel.editStyle
         self.close = viewModel.close
     }
 }
@@ -107,6 +118,13 @@ struct WidgetGalleryDetailView: View {
         static let indicatorAreaHeight: CGFloat = 40
     }
 
+    /// 페이저가 가리키는 변형이 꾸미기 대상일 때만 하단 버튼이 선다.
+    private var customizableSelectedVariant: WidgetVariant? {
+        return state.variants
+            .first { $0.id == state.selectedVariantId }
+            .flatMap { $0.isCustomizable ? $0 : nil }
+    }
+
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 0) {
@@ -114,6 +132,11 @@ struct WidgetGalleryDetailView: View {
                 explainView
 
                 pagerView
+
+                if let variant = self.customizableSelectedVariant {
+                    BottomConfirmButton(title: "widget.style.edit::entry".localized())
+                        .eventHandler(\.onTap, { self.eventHandlers.editStyle(variant) })
+                }
             }
             .background(appearance.colorSet.bg0.asColor)
             .navigationTitle("")
@@ -171,9 +194,13 @@ struct WidgetGalleryDetailView: View {
 
             Spacer(minLength: 0)
 
-            WidgetVariantPreviewView(variant: variant, setting: state.setting)
-                .aspectRatio(pageAspect, contentMode: .fit)
-                .padding(.horizontal, Constant.previewHorizontalInset)
+            WidgetVariantPreviewView(
+                variant: variant,
+                setting: state.setting,
+                style: state.defaultStyles[variant.id]
+            )
+            .aspectRatio(pageAspect, contentMode: .fit)
+            .padding(.horizontal, Constant.previewHorizontalInset)
 
             labelView(variant)
                 .frame(height: Constant.labelAreaHeight)

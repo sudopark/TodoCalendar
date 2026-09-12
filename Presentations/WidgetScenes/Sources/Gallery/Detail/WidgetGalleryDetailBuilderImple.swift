@@ -14,9 +14,14 @@ import CommonPresentation
 
 final class WidgetGalleryDetailBuilderImple {
     
+    private let widgetStyleUsecase: any WidgetStyleUsecase
     private let viewAppearance: ViewAppearance
     
-    init(viewAppearance: ViewAppearance) {
+    init(
+        widgetStyleUsecase: any WidgetStyleUsecase,
+        viewAppearance: ViewAppearance
+    ) {
+        self.widgetStyleUsecase = widgetStyleUsecase
         self.viewAppearance = viewAppearance
     }
 }
@@ -29,11 +34,17 @@ extension WidgetGalleryDetailBuilderImple: WidgetGalleryDetailSceneBuilder {
         setting: WidgetAppearanceSettings
     ) -> any WidgetGalleryDetailScene {
         
-        let viewModel = WidgetGalleryDetailViewModelImple(item: item, setting: setting)
+        let viewModel = WidgetGalleryDetailViewModelImple(
+            item: item, setting: setting, widgetStyleUsecase: self.widgetStyleUsecase
+        )
         let viewController = WidgetGalleryDetailViewController(
             viewModel: viewModel, viewAppearance: viewAppearance
         )
-        let router = WidgetGalleryDetailRouter()
+        let router = WidgetGalleryDetailRouter(
+            styleEditSceneBuilder: WidgetStyleEditBuilderImple(
+                widgetStyleUsecase: self.widgetStyleUsecase, viewAppearance: viewAppearance
+            )
+        )
         router.scene = viewController
         viewModel.router = router
         return viewController

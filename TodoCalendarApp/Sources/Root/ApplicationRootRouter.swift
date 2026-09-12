@@ -481,6 +481,7 @@ extension ApplicationRootRouter {
     private func widgetGallerySceneBuilder() -> any WidgetGallerySceneBuilder {
         return WidgetGalleryBuilderImple(
             uiSettingUsecase: self.usecaseFactory.makeUISettingUsecase(),
+            widgetStyleUsecase: self.usecaseFactory.makeWidgetStyleUsecase(),
             viewAppearance: self.viewAppearanceStore.appearance
         )
     }
