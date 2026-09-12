@@ -552,6 +552,17 @@
 // MARK: - widget
 
 "widget.common::explain" = "View your upcoming events.";
+"widget.events.today::sample::holiday" = "Holiday";
+"widget.style.today::showHolidayName::note" = "Shown only on holidays.";
+"widget.style.today::showTimeZone::note" = "Shown only when a different time zone is set.";
+"widget.style.edit::entry" = "Customize";
+"widget.style.edit::title" = "Customize widget";
+"widget.style::default" = "Default";
+"widget.style.today::showHolidayName" = "Holiday name";
+"widget.style.today::showTimeZone" = "Time zone";
+"widget.style.today::showTotalCount" = "Total event count";
+"widget.style.today::showTodoCount" = "Todo count";
+"widget.style.today::showScheduleCount" = "Schedule count";
 "widget.doubleMonth::name" = "Calendar + Calendar";
 "widget.eventAndMonth::name" = "Events + Calendar";
 "widget.todayAndMonth::name" = "TODAY + Calendar";

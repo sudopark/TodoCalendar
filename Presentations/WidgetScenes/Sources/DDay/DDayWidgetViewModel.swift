@@ -15,6 +15,12 @@ import Extensions
 
 public struct DDayWidgetViewModel: Sendable {
 
+    private enum Constant {
+        /// 갤러리 샘플의 기준 시각 — 현재 시각을 쓰면 미리보기 스냅샷이 촬영일마다 밀린다.
+        static let sampleBaseDate: TimeInterval = 1710374400
+        static let sampleRemainSeconds: TimeInterval = 3600 * 24 * 14
+    }
+
     public let eventTitle: String
     public let ddayText: String
     public let dateText: String
@@ -52,7 +58,7 @@ public struct DDayWidgetViewModel: Sendable {
         return .init(
             eventTitle: "widget.dday.sample::title".localized(),
             ddayText: "D-14",
-            dateText: EventTime.at(Date().timeIntervalSince1970 + 3600 * 24 * 14)
+            dateText: EventTime.at(Constant.sampleBaseDate + Constant.sampleRemainSeconds)
                 .ddayDateText(in: .current),
             timeText: "",
             repeatText: ""
