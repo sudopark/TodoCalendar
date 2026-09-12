@@ -73,14 +73,16 @@ extension WidgetPreviewCanvas {
 extension WidgetVariant {
 
     @MainActor
-    func previewView(_ setting: WidgetAppearanceSettings) -> AnyView {
+    func previewView(
+        _ setting: WidgetAppearanceSettings, style: (any WidgetStyleSetting)? = nil
+    ) -> AnyView {
         switch self {
         case .todayAndNextMedium: return self.todayAndNextPreview(setting)
         case .eventListSmall: return self.eventListPreview(setting, size: .small)
         case .eventListMedium: return self.eventListPreview(setting, size: .medium)
         case .eventListLarge: return self.eventListPreview(setting, size: .large)
         case .monthSmall: return self.monthPreview(setting)
-        case .todaySummarySmall: return self.todaySummaryPreview(setting)
+        case .todaySummarySmall: return self.todaySummaryPreview(setting, style)
         case .foremostInline: return self.foremostInlinePreview(setting)
         case .foremostSmall: return self.foremostSystemPreview(setting, isSmallSize: true)
         case .foremostMedium: return self.foremostSystemPreview(setting, isSmallSize: false)
@@ -157,8 +159,12 @@ extension WidgetVariant {
     }
 
     @MainActor
-    private func todaySummaryPreview(_ setting: WidgetAppearanceSettings) -> AnyView {
-        let model = TodayWidgetViewModel.sample() |> \.widgetSetting .~ setting
+    private func todaySummaryPreview(
+        _ setting: WidgetAppearanceSettings, _ style: (any WidgetStyleSetting)?
+    ) -> AnyView {
+        let model = TodayWidgetViewModel.sample()
+            |> \.widgetSetting .~ setting
+            |> \.style .~ (style as? TodayStyleSetting ?? .init())
         return AnyView(TodaySummaryView(model: model))
     }
 

@@ -22,10 +22,16 @@ struct WidgetVariantPreviewView: View {
 
     private let variant: WidgetVariant
     private let setting: WidgetAppearanceSettings
+    private let style: (any WidgetStyleSetting)?
 
-    init(variant: WidgetVariant, setting: WidgetAppearanceSettings) {
+    init(
+        variant: WidgetVariant,
+        setting: WidgetAppearanceSettings,
+        style: (any WidgetStyleSetting)? = nil
+    ) {
         self.variant = variant
         self.setting = setting
+        self.style = style
     }
 
     var body: some View {
@@ -48,16 +54,18 @@ struct WidgetVariantPreviewView: View {
             .scaleEffect(scale)
             .frame(width: canvas.size.width * scale, height: canvas.size.height * scale)
             .padding(canvas.previewPlateInset)
+            // 위젯 뷰는 본문이 Link 라 탭하면 딥링크가 열린다 — 미리보기에선 탭을 상위(페이저·카드 선택)로 넘긴다.
+            .allowsHitTesting(false)
     }
 
     @ViewBuilder
     private var contentView: some View {
         if variant.canvas.isLockScreen {
             // 잠금화면 요소는 벽지 위에 흰 글씨로 얹힌다 — 미리보기는 벽지 대신 어두운 판을 깐다.
-            variant.previewView(setting)
+            variant.previewView(setting, style: style)
                 .environment(\.colorScheme, .dark)
         } else {
-            variant.previewView(setting)
+            variant.previewView(setting, style: style)
         }
     }
 
