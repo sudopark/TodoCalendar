@@ -126,7 +126,7 @@ extension TodayWidgetViewModelProviderTests {
 
 extension TodayWidgetViewModelProviderTests {
     
-    func testProvider_whenStyleNotSaved_showHolidayName() async throws {
+    func testProvider_whenStyleNotSaved_useInitialSettingAndShowHolidayName() async throws {
         // given
         let provider = self.makeProvider(todayIsHoliday: true)
         
@@ -134,10 +134,11 @@ extension TodayWidgetViewModelProviderTests {
         let viewModel = try await provider.getTodayViewModel(for: self.dummyDate)
         
         // then
-        XCTAssertEqual(viewModel.holidayName, "holiday")
+        XCTAssertEqual(viewModel.style, TodayStyleSetting())
+        XCTAssertEqual(viewModel.displayHolidayName, "holiday")
     }
     
-    func testProvider_whenStyleTurnsOffHolidayName_hideIt() async throws {
+    func testProvider_whenStyleTurnsOffHolidayName_applyItToViewModel() async throws {
         // given
         let provider = self.makeProvider(todayIsHoliday: true, showHolidayNameStyle: false)
         
@@ -145,8 +146,9 @@ extension TodayWidgetViewModelProviderTests {
         let viewModel = try await provider.getTodayViewModel(for: self.dummyDate)
         
         // then
-        XCTAssertEqual(viewModel.holidayName, nil)
-        XCTAssertEqual(viewModel.isHoliday, false)
+        XCTAssertEqual(viewModel.style.showHolidayName, false)
+        XCTAssertEqual(viewModel.displayHolidayName, nil)
+        XCTAssertEqual(viewModel.holidayName, "holiday")
     }
     
     func testProvider_whenStyleTurnsOnHolidayName_showIt() async throws {
@@ -157,6 +159,7 @@ extension TodayWidgetViewModelProviderTests {
         let viewModel = try await provider.getTodayViewModel(for: self.dummyDate)
         
         // then
-        XCTAssertEqual(viewModel.holidayName, "holiday")
+        XCTAssertEqual(viewModel.style.showHolidayName, true)
+        XCTAssertEqual(viewModel.displayHolidayName, "holiday")
     }
 }
