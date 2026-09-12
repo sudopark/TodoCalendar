@@ -36,9 +36,25 @@ import CommonPresentation
 final class CalenarPaperViewEventHandelr: Observable {
     
     var onAppear: () -> Void = { }
+    var expandMonthIfCollapsed: () -> Void = { }
     
     func bind(_ viewModel: any CalendarPaperViewModel) {
         self.onAppear = viewModel.prepare
+        self.expandMonthIfCollapsed = viewModel.expandMonthIfCollapsed
+    }
+}
+
+private enum Constant {
+    static let scrollSpace: String = "calendarPaperScroll"
+    static let pullToExpandDistance: CGFloat = 60
+}
+
+private struct ScrollReleaseNotifyingBehavior: ScrollTargetBehavior {
+
+    let onRelease: () -> Void
+
+    func updateTarget(_ target: inout ScrollTarget, context: TargetContext) {
+        self.onRelease()
     }
 }
 
@@ -96,6 +112,8 @@ struct CalenarPaperContainerView: View {
             self.eventListView = eventListView
         }
 
+        @State private var didPullPastExpandDistance: Bool = false
+
         var body: some View {
             ScrollViewReader { proxy in
                 ScrollView {
@@ -103,8 +121,13 @@ struct CalenarPaperContainerView: View {
                         self.monthView
                         self.eventListView
                     }
+                    .overlay(alignment: .top) { self.pullDistanceProbe() }
                     .offset(y: -keyboardHeightObserver.showingKeyboardHeight)
                 }
+                .coordinateSpace(.named(Constant.scrollSpace))
+                .scrollTargetBehavior(
+                    ScrollReleaseNotifyingBehavior { self.expandMonthIfPulledEnough() }
+                )
                 .background(appearance.colorSet.bg0.asColor)
                 .onChange(of: self.state.scrollToVoiceInputTrigger) { _, _ in
                     withAnimation(.easeInOut(duration: 0.3)) {
@@ -112,6 +135,24 @@ struct CalenarPaperContainerView: View {
                     }
                 }
             }
+        }
+
+        private func pullDistanceProbe() -> some View {
+            GeometryReader { geometry in
+                let distance = geometry.frame(in: .named(Constant.scrollSpace)).minY
+                Color.clear
+                    .onChange(of: distance) { _, newDistance in
+                        guard newDistance > Constant.pullToExpandDistance else { return }
+                        self.didPullPastExpandDistance = true
+                    }
+            }
+            .frame(height: 0)
+        }
+
+        private func expandMonthIfPulledEnough() {
+            guard self.didPullPastExpandDistance else { return }
+            self.didPullPastExpandDistance = false
+            self.eventHandler.expandMonthIfCollapsed()
         }
     }
 }

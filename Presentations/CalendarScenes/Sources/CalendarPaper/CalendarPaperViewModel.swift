@@ -20,6 +20,7 @@ protocol CalendarPaperViewModel: AnyObject, Sendable, CalendarPaperSceneInteract
 
     // interactor
     func prepare()
+    func expandMonthIfCollapsed()
 
     // presenter
     var requestScrollToVoiceInput: AnyPublisher<Void, Never> { get }
@@ -48,6 +49,7 @@ final class CalendarPaperViewModelImple: CalendarPaperViewModel, @unchecked Send
     }
     
     private var currentSelectedDayAndEvents: (CurrentSelectDayModel, [any CalendarEvent])?
+    private var isMonthCollapsed: Bool = false
 
     private struct Subject {
         let requestScrollToVoiceInput = PassthroughSubject<Void, Never>()
@@ -93,7 +95,13 @@ extension CalendarPaperViewModelImple {
     }
 
     func updateMonthCollapsed(_ isCollapsed: Bool) {
+        self.isMonthCollapsed = isCollapsed
         self.monthInteractor.updateMonthCollapsed(isCollapsed)
+    }
+
+    func expandMonthIfCollapsed() {
+        guard self.isMonthCollapsed else { return }
+        self.listener?.calendarPaperDidRequestToggleMonthCollapse()
     }
 
     func monthSceneDidRequestToggleMonthCollapse() {

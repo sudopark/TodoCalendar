@@ -70,8 +70,10 @@ import CalendarPresentation
         // 첫 값은 이 페이지의 초기 상태 반영이라 애니메이션을 태우지 않는다 —
         // 아직 안 그려진 달 페이지가 뒤늦게 구독하면 펼쳐진 채 그려졌다 접히는 게 보인다
         var isInitialCollapsedValue = true
+        // 당겨서 펼치기는 스크롤 도중에 발화한다 — RunLoop.main 은 default 모드에서만
+        // 전달해 트래킹·감속이 끝나야 반영된다
         viewModel.isMonthCollapsed
-            .receive(on: RunLoop.main)
+            .receive(on: DispatchQueue.main)
             .sink(receiveValue: { [weak self, weak appearance] isCollapsed in
                 let animation: Animation? = isInitialCollapsedValue ? nil : .easeInOut(duration: 0.3)
                 isInitialCollapsedValue = false

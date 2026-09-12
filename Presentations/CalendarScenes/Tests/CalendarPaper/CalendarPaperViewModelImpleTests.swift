@@ -185,6 +185,30 @@ extension CalendarPaperViewModelImpleTests {
         XCTAssertEqual(self.spyListner.didRequestToggleMonthCollapse, true)
     }
 
+    func testViewModel_whenExpandMonthWhileCollapsed_requestToggleToListener() {
+        // given
+        let viewModel = self.makeViewModel()
+        viewModel.updateMonthCollapsed(true)
+
+        // when
+        viewModel.expandMonthIfCollapsed()
+
+        // then
+        XCTAssertEqual(self.spyListner.didRequestToggleMonthCollapse, true)
+    }
+
+    func testViewModel_whenExpandMonthWhileNotCollapsed_notRequestToggle() {
+        // given
+        let viewModel = self.makeViewModel()
+        viewModel.updateMonthCollapsed(false)
+
+        // when
+        viewModel.expandMonthIfCollapsed()
+
+        // then
+        XCTAssertNil(self.spyListner.didRequestToggleMonthCollapse)
+    }
+
     func testViewModel_whenMonthSceneRequestsShare_routesToSharePreview() {
         // given
         let viewModel = self.makeViewModel()
