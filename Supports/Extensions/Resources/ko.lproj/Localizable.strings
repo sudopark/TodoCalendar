@@ -552,6 +552,17 @@
 // MARK: - widget
 
 "widget.common::explain" = "다가오는 일정을 관리하세요.";
+"widget.events.today::sample::holiday" = "공휴일";
+"widget.style.today::showHolidayName::note" = "공휴일인 날에만 표시됩니다.";
+"widget.style.today::showTimeZone::note" = "다른 타임존을 쓸 때만 표시됩니다.";
+"widget.style.edit::entry" = "꾸미기";
+"widget.style.edit::title" = "위젯 꾸미기";
+"widget.style::default" = "기본";
+"widget.style.today::showHolidayName" = "공휴일 이름";
+"widget.style.today::showTimeZone" = "타임존";
+"widget.style.today::showTotalCount" = "전체 개수";
+"widget.style.today::showTodoCount" = "할일 개수";
+"widget.style.today::showScheduleCount" = "일정 개수";
 "widget.doubleMonth::name" = "캘린더 + 캘린더";
 "widget.eventAndMonth::name" = "이벤트 + 캘린더";
 "widget.todayAndMonth::name" = "TODAY + 캘린더";
