@@ -1,6 +1,6 @@
 ---
 name: pr
-description: Use when creating or merging a pull request in this project — PR 본문 작성, 브랜치 구성, 머지·머지 후 정리 시점. 본문 서사(문제→접근), rebase 머지 원칙, 머지 후 브랜치 정리(워크트리 제약 우회 포함), 머지 후 하네스 신호 보고를 다룬다. Triggers on "PR 올리자", "PR 만들어", "머지하자", "브랜치 정리해". Does NOT trigger on PR 코드 리뷰 수행(review 스킬 또는 유저 직접), 커밋 메시지 작성(commit 스킬), 이슈 작성(issue 스킬).
+description: Use when creating or merging a pull request in this project — PR 본문 작성, 브랜치 구성, 머지·머지 후 정리 시점. 본문 서사(문제→접근), rebase 머지 원칙, 머지 후 브랜치 정리(워크트리 베이스 브랜치 복귀 포함), 머지 후 하네스 신호 보고를 다룬다. Triggers on "PR 올리자", "PR 만들어", "머지하자", "브랜치 정리해". Does NOT trigger on PR 코드 리뷰 수행(review 스킬 또는 유저 직접), 커밋 메시지 작성(commit 스킬), 이슈 작성(issue 스킬).
 ---
 
 # PR — 생성·머지·정리
@@ -82,7 +82,19 @@ PR을 올리면 대응 이슈를 개발 대시보드(Project #2)의 `Review + QA
 - 머지는 `gh pr merge --rebase`, squash 금지 — 단계별 커밋이 develop에 보존돼야 회귀 분석 시 변경 의도를 추적할 수 있다.
 - **머지 직후 종결 처리를 수행한다** — 대응 이슈 클로즈(한 줄 코멘트: 해소한 PR# — issue 스킬 규정), 보드 `Done` 이동(`.claude/scripts/project-board.sh <이슈번호> "Done"`), 진행 파일 `명령 상태:` 를 `종결` 로 전이 + 미러·board-sync (opord §6 — 머지까지가 명령 달성이다). 상위 계획이 있으면(L 의 DP) campaign 원장 규칙(§5)대로 원장(`머지`)·상위 이슈 미러를 갱신하고 — 국면 확정은 §4 말미 조건(종료 조건이 머지를 요구하는 단계만 재대조)대로, §4 평가 모드 재실행 아님 —, 단독 M·S 는 상위 이슈가 있을 때만 진행 코멘트 한 줄. 이 처리 누락이 2026-09-06 correction 2건의 원인이었다 — 머지 보고 전에 수행한다.
 - 머지 후 브랜치(로컬·리모트) 정리 여부를 유저에게 확인한다. 확인을 요청한 시점이 이 조항의 이행이다 — 답변 대기로 끝나도 이탈이 아니다.
-- 브랜치가 워크트리에 체크아웃돼 있으면 삭제가 거부된다 — 그 워크트리에서 임시 브랜치를 만들어 이동(`git switch -c <임시-브랜치>`)한 뒤 대상 브랜치를 삭제한다.
+- **작업 브랜치를 지우기 전에, 그 브랜치가 체크아웃된 워크트리를 자기 베이스 브랜치로 되돌린다.** 체크아웃 중인 브랜치는 삭제가 거부되기 때문이다. 임시 브랜치(`tmp/...`·`wip/...`)를 만들어 피하지 않는다 — 그 우회는 정리될 주인이 없는 브랜치를 매번 하나씩 남긴다.
+  - 워크트리마다 develop 을 미러링하는 **상시 베이스 브랜치**가 있다 — 메인 워크트리는 `develop`, 서브 워크트리는 `base/<워크트리명>` (`base/orthodox`·`base/southpaw`).
+  - 메인 워크트리: `git switch develop && git pull origin develop`
+  - 서브 워크트리: 베이스를 최신 develop 에 맞춘 뒤 거기로 이동한다. **얹힌 커밋 확인이 리셋보다 먼저다** — `switch -C` 가 돌고 나면 베이스가 origin/develop 과 같아져 사후 확인은 항상 0건으로 나온다.
+
+    ```bash
+    git -C <워크트리경로> fetch origin develop
+    git -C <워크트리경로> log --oneline origin/develop..base/<워크트리명>  # 커밋이 잡히면 아래를 실행하지 말고 유저에게 보고한다
+    git -C <워크트리경로> switch --no-track -C base/<워크트리명> origin/develop
+    ```
+
+    `--no-track -C` 는 upstream 을 달지 않고 베이스를 origin/develop 으로 리셋한다 — upstream 이 develop 이면 베이스에서 실수로 push 했을 때 develop 에 바로 꽂힌다.
+  - 그 다음 작업 브랜치를 지운다 — **PR 이 머지된 걸 확인한 뒤** 로컬 `git branch -D <브랜치>`, 리모트 `git push origin --delete <브랜치>`. rebase 머지는 커밋을 새 SHA 로 재작성해 얹어서 로컬 브랜치가 develop 의 조상이 아니다 — `-d` 는 `not fully merged` 로 거부된다. 머지 확인을 건너뛰고 `-D` 를 쓰면 머지 안 된 작업을 지운다.
 - 머지 후 신호 판정 (#690 flywheel):
 
   ```bash
