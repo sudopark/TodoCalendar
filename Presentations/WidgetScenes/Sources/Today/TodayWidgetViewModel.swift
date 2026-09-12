@@ -91,11 +91,3 @@ public struct TodayWidgetViewModel {
     }
 }
 
-
-// MARK: - 스타일 항목 기본값
-
-private extension Optional where Wrapped == Bool {
-    
-    /// 스타일 항목은 미설정(nil)이면 표시가 기본이다.
-    var isDisplayed: Bool { self != false }
-}

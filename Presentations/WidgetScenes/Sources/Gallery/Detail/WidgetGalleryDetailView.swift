@@ -22,6 +22,7 @@ import CommonPresentation
     var variants: [WidgetVariant] = []
     var setting: WidgetAppearanceSettings = .init()
     var selectedVariantId: String?
+    var defaultStyles: [String: any WidgetStyleSetting] = [:]
 
     func bind(_ viewModel: any WidgetGalleryDetailViewModel) {
         guard self.didBind == false else { return }
@@ -48,15 +49,25 @@ import CommonPresentation
                 self?.setting = setting
             })
             .store(in: self.cancellables)
+        
+        viewModel.defaultStyles
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] styles in
+                self?.defaultStyles = styles
+            })
+            .store(in: self.cancellables)
     }
 }
 
 final class WidgetGalleryDetailViewEventHandler: Observable {
 
     var onAppear: () -> Void = { }
+    var editStyle: (WidgetVariant) -> Void = { _ in }
     var close: () -> Void = { }
 
     func bind(_ viewModel: any WidgetGalleryDetailViewModel) {
+        self.onAppear = viewModel.refresh
+        self.editStyle = viewModel.editStyle
         self.close = viewModel.close
     }
 }
@@ -171,17 +182,35 @@ struct WidgetGalleryDetailView: View {
 
             Spacer(minLength: 0)
 
-            WidgetVariantPreviewView(variant: variant, setting: state.setting)
-                .aspectRatio(pageAspect, contentMode: .fit)
-                .padding(.horizontal, Constant.previewHorizontalInset)
+            WidgetVariantPreviewView(
+                variant: variant,
+                setting: state.setting,
+                style: state.defaultStyles[variant.id]
+            )
+            .aspectRatio(pageAspect, contentMode: .fit)
+            .padding(.horizontal, Constant.previewHorizontalInset)
 
             labelView(variant)
                 .frame(height: Constant.labelAreaHeight)
+
+            if variant.isCustomizable {
+                editEntryButton(variant)
+            }
 
             Spacer(minLength: 0)
 
             // 페이지 인디케이터가 앉는 자리 — 라벨과 겹치지 않게 비워 둔다.
             Color.clear.frame(height: Constant.indicatorAreaHeight)
+        }
+    }
+
+    private func editEntryButton(_ variant: WidgetVariant) -> some View {
+        Button {
+            self.eventHandlers.editStyle(variant)
+        } label: {
+            Text("widget.style.edit::entry".localized())
+                .font(appearance.fontSet.normal.asFont)
+                .foregroundStyle(appearance.colorSet.accent.asColor)
         }
     }
 

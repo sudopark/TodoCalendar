@@ -285,6 +285,14 @@ extension NonLoginUsecaseFactoryImple {
         return self.makeAppSettingUsecase()
     }
     
+    func makeWidgetStyleUsecase() -> any WidgetStyleUsecase {
+        return WidgetStyleUsecaseImple(
+            styleRepository: WidgetStyleLocalRepositoryImple(
+                environmentStorage: applicationBase.userDefaultEnvironmentStorage
+            )
+        )
+    }
+    
     func makeEventSettingUsecase() -> EventSettingUsecase {
         return self.makeAppSettingUsecase()
     }
@@ -812,6 +820,14 @@ extension LoginUsecaseFactoryImple {
     
     func makeUISettingUsecase() -> any UISettingUsecase {
         return self.makeAppSettingUsecase()
+    }
+    
+    func makeWidgetStyleUsecase() -> any WidgetStyleUsecase {
+        return WidgetStyleUsecaseImple(
+            styleRepository: WidgetStyleLocalRepositoryImple(
+                environmentStorage: applicationBase.userDefaultEnvironmentStorage
+            )
+        )
     }
     
     func makeEventSettingUsecase() -> any EventSettingUsecase {
