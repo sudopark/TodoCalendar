@@ -28,11 +28,6 @@ extension TodayWidgetViewModel {
             |> \.todoEventCount .~ todoCount
             |> \.scheduleEventcount .~ scheduleCount
     }
-
-    func applied(style: TodayStyleSetting) -> TodayWidgetViewModel {
-        guard style.showHolidayName == false else { return self }
-        return self |> \.holidayName .~ nil
-    }
 }
 
 
@@ -71,7 +66,7 @@ extension TodayWidgetViewModelProvider {
         let events = try await self.todayEvents(todayRange, timeZone)
         return TodayWidgetViewModel(today, calednar)
             .updated(events: events)
-            .applied(style: style)
+            |> \.style .~ style
             |> \.widgetSetting .~ setting
     }
     
