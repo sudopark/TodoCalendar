@@ -47,6 +47,7 @@ public protocol SettingUsecaseFactory {
     func makeEventShareSettingUsecase() -> any EventShareSettingUsecase
     func makeNotificationPermissionUsecase() -> any NotificationPermissionUsecase
     func makeEventNotificationSettingUsecase() -> any EventNotificationSettingUsecase
+    func makeWidgetStyleUsecase() -> any WidgetStyleUsecase
     var temporaryUserDataMigrationUsecase: any TemporaryUserDataMigrationUescase { get }
 }
 
