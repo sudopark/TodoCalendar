@@ -17,7 +17,14 @@ import TestDoubles
 @testable import WidgetScenes
 
 
-final class SpyWidgetGalleryDetailRouter: BaseSpyRouter, WidgetGalleryDetailRouting, @unchecked Sendable { }
+final class SpyWidgetGalleryDetailRouter: BaseSpyRouter, WidgetGalleryDetailRouting, @unchecked Sendable {
+
+    private(set) var routedStyleEditVariant: WidgetVariant?
+
+    func routeToStyleEdit(_ variant: WidgetVariant, setting: WidgetAppearanceSettings) {
+        self.routedStyleEditVariant = variant
+    }
+}
 
 
 struct WidgetGalleryDetailViewModelImpleTests {
@@ -27,9 +34,12 @@ struct WidgetGalleryDetailViewModelImpleTests {
     private func makeViewModel(
         _ item: WidgetGalleryItem,
         router: SpyWidgetGalleryDetailRouter,
-        setting: WidgetAppearanceSettings = .init()
+        setting: WidgetAppearanceSettings = .init(),
+        styleUsecase: StubWidgetStyleUsecase = .init()
     ) -> WidgetGalleryDetailViewModelImple {
-        let viewModel = WidgetGalleryDetailViewModelImple(item: item, setting: setting)
+        let viewModel = WidgetGalleryDetailViewModelImple(
+            item: item, setting: setting, widgetStyleUsecase: styleUsecase
+        )
         viewModel.router = router
         return viewModel
     }
@@ -96,5 +106,72 @@ struct WidgetGalleryDetailViewModelImpleTests {
 
         // then
         #expect(router.didClosed == true)
+    }
+}
+
+
+// MARK: - 스타일 편집 진입·미리보기
+
+extension WidgetGalleryDetailViewModelImpleTests {
+
+    private func makeTodayViewModel(
+        savedHolidayName: Bool?,
+        router: SpyWidgetGalleryDetailRouter = .init()
+    ) -> WidgetGalleryDetailViewModelImple {
+        let usecase = StubWidgetStyleUsecase()
+        usecase.stubStyles = [
+            WidgetStyle(
+                id: .init(variant: .todaySummarySmall, style: .default),
+                setting: TodayStyleSetting() |> \.showHolidayName .~ savedHolidayName
+            )
+        ]
+        return self.makeViewModel(.todaySummary, router: router, styleUsecase: usecase)
+    }
+
+    @Test("꾸미기 가능한 변형의 저장된 기본 스타일을 미리보기에 준다")
+    func refresh_provideDefaultStyleOfCustomizableVariant() {
+        // given
+        let viewModel = self.makeTodayViewModel(savedHolidayName: false)
+        var emitted: [String: any WidgetStyleSetting]?
+        viewModel.defaultStyles
+            .sink(receiveValue: { emitted = $0 })
+            .store(in: self.cancellables)
+
+        // when
+        viewModel.refresh()
+
+        // then
+        let todayStyle = emitted?[WidgetVariant.todaySummarySmall.id] as? TodayStyleSetting
+        #expect(todayStyle?.showHolidayName == false)
+    }
+
+    @Test("꾸미기 대상이 아닌 변형은 미리보기 스타일을 갖지 않는다")
+    func refresh_notProvideStyleForNotCustomizableVariant() {
+        // given
+        let viewModel = self.makeViewModel(self.ddayItem, router: .init())
+        var emitted: [String: any WidgetStyleSetting]?
+        viewModel.defaultStyles
+            .sink(receiveValue: { emitted = $0 })
+            .store(in: self.cancellables)
+
+        // when
+        viewModel.refresh()
+
+        // then
+        #expect(emitted?.isEmpty == true)
+        #expect(self.ddayItem.variants.allSatisfy { $0.isCustomizable == false } == true)
+    }
+
+    @Test("편집을 고르면 그 변형의 스타일 편집 화면으로 간다")
+    func editStyle_routeToStyleEditOfVariant() {
+        // given
+        let router = SpyWidgetGalleryDetailRouter()
+        let viewModel = self.makeTodayViewModel(savedHolidayName: nil, router: router)
+
+        // when
+        viewModel.editStyle(.todaySummarySmall)
+
+        // then
+        #expect(router.routedStyleEditVariant == .todaySummarySmall)
     }
 }

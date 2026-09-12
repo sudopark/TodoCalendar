@@ -17,6 +17,10 @@ import Extensions
 
 public struct TodayWidgetViewModel {
     
+    private enum Constant {
+        static let sampleTimeZoneText: String = "GMT+9"
+    }
+    
     public let id: CalendarDay
     public let weekDayText: String
     public let day: Int
@@ -28,6 +32,23 @@ public struct TodayWidgetViewModel {
     public var scheduleEventcount: Int = 0
     public var totalEventCount: Int { self.todoEventCount + self.scheduleEventcount }
     public var widgetSetting = WidgetAppearanceSettings()
+    public var style = TodayStyleSetting()
+    
+    public var displayHolidayName: String? {
+        return self.style.showHolidayName.isDisplayed ? self.holidayName : nil
+    }
+    public var displayTimeZoneText: String? {
+        return self.style.showTimeZone.isDisplayed ? self.timeZoneText : nil
+    }
+    public var showsTotalCount: Bool { self.style.showTotalCount.isDisplayed }
+    public var showsTodoCount: Bool { self.style.showTodoCount.isDisplayed }
+    public var showsScheduleCount: Bool { self.style.showScheduleCount.isDisplayed }
+    
+    public var showsAnyEventCount: Bool {
+        return self.showsTotalCount
+            || (self.showsTodoCount && self.todoEventCount > 0)
+            || (self.showsScheduleCount && self.scheduleEventcount > 0)
+    }
     
     public init(
         id: CalendarDay,
@@ -63,7 +84,10 @@ public struct TodayWidgetViewModel {
             day: 14,
             monthAndYearText: "widget.events.today::sample::march2024".localized()
         )
+        |> \.holidayName .~ "widget.events.today::sample::holiday".localized()
+        |> \.timeZoneText .~ Constant.sampleTimeZoneText
         |> \.todoEventCount .~ 3
         |> \.scheduleEventcount .~ 4
     }
 }
+

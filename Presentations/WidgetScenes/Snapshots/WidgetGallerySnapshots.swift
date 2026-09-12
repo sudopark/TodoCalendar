@@ -99,4 +99,65 @@ final class WidgetGallerySnapshots: XCTestCase {
                 .environment(self.makeAppearance(theme))
         }
     }
+    
+    @MainActor
+    func test_widgetGalleryDetail_customizableVariant() {
+        captureSnapshotPair(named: "widgetGalleryDetail-customizable", layout: .fullScreen) { theme in
+            WidgetGalleryDetailView()
+                .environment(self.detailState(.todaySummary))
+                .environment(WidgetGalleryDetailViewEventHandler())
+                .environment(self.makeAppearance(theme))
+        }
+    }
+    
+    // MARK: - 3뎁스 스타일 편집
+    
+    @MainActor
+    private func styleEditState(_ turnedOffItems: Set<TodayStyleItem> = []) -> WidgetStyleEditViewState {
+        let styleId = WidgetStyleId(variant: .todaySummarySmall, style: .default)
+        let setting = TodayStyleItem.allCases.reduce(into: TodayStyleSetting()) { acc, item in
+            acc[keyPath: item.settingKeyPath] = turnedOffItems.contains(item) ? false : nil
+        }
+        let state = WidgetStyleEditViewState()
+        state.styles = [
+            .init(styleId: styleId, name: styleId.style.name, setting: setting)
+        ]
+        state.selectedStyleId = styleId
+        state.items = TodayStyleItem.allCases.map {
+            .init(item: $0, isOn: turnedOffItems.contains($0) == false)
+        }
+        return state
+    }
+    
+    @MainActor
+    func test_widgetStyleEdit_allItemsOn() {
+        captureSnapshotPair(named: "widgetStyleEdit-allOn", layout: .fullScreen) { theme in
+            WidgetStyleEditView(variant: .todaySummarySmall, setting: .init())
+                .environment(self.styleEditState())
+                .environment(WidgetStyleEditViewEventHandler())
+                .environment(self.makeAppearance(theme))
+        }
+    }
+    
+    @MainActor
+    func test_widgetStyleEdit_countItemsAllOff() {
+        captureSnapshotPair(named: "widgetStyleEdit-countsOff", layout: .fullScreen) { theme in
+            WidgetStyleEditView(variant: .todaySummarySmall, setting: .init())
+                .environment(
+                    self.styleEditState([.showTotalCount, .showTodoCount, .showScheduleCount])
+                )
+                .environment(WidgetStyleEditViewEventHandler())
+                .environment(self.makeAppearance(theme))
+        }
+    }
+    
+    @MainActor
+    func test_widgetStyleEdit_someItemsOff() {
+        captureSnapshotPair(named: "widgetStyleEdit-someOff", layout: .fullScreen) { theme in
+            WidgetStyleEditView(variant: .todaySummarySmall, setting: .init())
+                .environment(self.styleEditState([.showTimeZone, .showTotalCount]))
+                .environment(WidgetStyleEditViewEventHandler())
+                .environment(self.makeAppearance(theme))
+        }
+    }
 }

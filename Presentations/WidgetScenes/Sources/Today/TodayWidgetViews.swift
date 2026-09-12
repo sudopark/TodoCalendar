@@ -20,6 +20,13 @@ public struct TodaySummaryView: View {
         return model.widgetSetting.background.colorSet(colorScheme == .light)
     }
     
+    private enum Constant {
+        static let dayFontSize: CGFloat = 44
+        static let expandedDayFontSize: CGFloat = 56
+        static let monthFontSize: CGFloat = 13
+        static let expandedMonthFontSize: CGFloat = 20
+    }
+    
     private let model: TodayWidgetViewModel
     public init(model: TodayWidgetViewModel) {
         self.model = model
@@ -29,18 +36,33 @@ public struct TodaySummaryView: View {
         HStack {
             VStack(alignment: .leading) {
                 
-                dayView(model)
-                
-                Spacer()
-                
-                eventCountView(model)
+                // 개수 블록이 통째로 비면 그만큼 빈 자리가 생긴다 — 날짜를 키워 세로 가운데로 옮긴다.
+                if model.showsAnyEventCount {
+                    dayView(model, dayFontSize: Constant.dayFontSize, inlinesMonthAndYear: true)
+                    
+                    Spacer()
+                    
+                    eventCountView(model)
+                } else {
+                    dayView(
+                        model,
+                        dayFontSize: Constant.expandedDayFontSize,
+                        inlinesMonthAndYear: false
+                    )
+                    
+                    Spacer()
+                    
+                    monthAndYearView(model, fontSize: Constant.expandedMonthFontSize)
+                }
             }
             Spacer(minLength: 0)
         }
         .asLinkIfPossible(model.id.link)
     }
     
-    private func dayView(_ model: TodayWidgetViewModel) -> some View {
+    private func dayView(
+        _ model: TodayWidgetViewModel, dayFontSize: CGFloat, inlinesMonthAndYear: Bool
+    ) -> some View {
         VStack(alignment: .leading) {
             
             VStack(alignment: .leading, spacing: -2) {
@@ -48,7 +70,7 @@ public struct TodaySummaryView: View {
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(colorSet.text0.asColor)
                 
-                if let holiday = model.holidayName {
+                if let holiday = model.displayHolidayName {
                     Text(holiday)
                         .font(.system(size: 10, weight: .semibold))
                         .foregroundStyle(colorSet.holidayOrWeekEndWithAccent.asColor)
@@ -59,43 +81,55 @@ public struct TodaySummaryView: View {
                 
                 HStack(alignment: .lastTextBaseline) {
                     Text("\(model.day)")
-                        .font(.system(size: 44, weight: .semibold))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
+                        .font(.system(size: dayFontSize, weight: .semibold))
                         .foregroundStyle(colorSet.text0.asColor)
                         
                     VStack(alignment: .leading) {
                         
-                        if let timeZone = model.timeZoneText {
+                        if let timeZone = model.displayTimeZoneText {
                             Text(timeZone)
                                 .font(.system(size: 10))
                                 .foregroundStyle(colorSet.text1.asColor)
                         }
                         
-                        Text(model.monthAndYearText)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.7)
-                            .font(.system(size: 13))
-                            .foregroundStyle(colorSet.text1.asColor)
+                        if inlinesMonthAndYear {
+                            monthAndYearView(model, fontSize: Constant.monthFontSize)
+                        }
                     }
                 }
             }
         }
     }
     
+    private func monthAndYearView(
+        _ model: TodayWidgetViewModel, fontSize: CGFloat
+    ) -> some View {
+        Text(model.monthAndYearText)
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
+            .font(.system(size: fontSize))
+            .foregroundStyle(colorSet.text1.asColor)
+    }
+    
     private func eventCountView(_ model: TodayWidgetViewModel) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             VStack(alignment: .leading, spacing: -2) {
-                Text(String(format: "total::event::count".localized(), model.totalEventCount))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(colorSet.text0.asColor)
+                if model.showsTotalCount {
+                    Text(String(format: "total::event::count".localized(), model.totalEventCount))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(colorSet.text0.asColor)
+                }
                 HStack(spacing: 2) {
-                    if model.todoEventCount > 0 {
+                    if model.showsTodoCount, model.todoEventCount > 0 {
                         Text(String(format: "todo::count".localized(), model.todoEventCount))
                             .font(.system(size: 10))
                             .foregroundStyle(colorSet.text2.asColor)
                     }
-                    if model.scheduleEventcount > 0 {
+                    if model.showsScheduleCount, model.scheduleEventcount > 0 {
                         Text(String(format: "schedule::count".localized(), model.scheduleEventcount))
                             .font(.system(size: 10))
                             .foregroundStyle(colorSet.text2.asColor)

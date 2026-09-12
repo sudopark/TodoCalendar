@@ -15,13 +15,16 @@ import CommonPresentation
 public final class WidgetGalleryBuilderImple {
 
     private let uiSettingUsecase: any UISettingUsecase
+    private let widgetStyleUsecase: any WidgetStyleUsecase
     private let viewAppearance: ViewAppearance
 
     public init(
         uiSettingUsecase: any UISettingUsecase,
+        widgetStyleUsecase: any WidgetStyleUsecase,
         viewAppearance: ViewAppearance
     ) {
         self.uiSettingUsecase = uiSettingUsecase
+        self.widgetStyleUsecase = widgetStyleUsecase
         self.viewAppearance = viewAppearance
     }
 }
@@ -40,7 +43,9 @@ extension WidgetGalleryBuilderImple: WidgetGallerySceneBuilder {
             viewModel: viewModel, viewAppearance: viewAppearance
         )
         let router = WidgetGalleryRouter(
-            detailSceneBuilder: WidgetGalleryDetailBuilderImple(viewAppearance: viewAppearance)
+            detailSceneBuilder: WidgetGalleryDetailBuilderImple(
+                widgetStyleUsecase: self.widgetStyleUsecase, viewAppearance: viewAppearance
+            )
         )
         router.scene = viewController
         viewModel.router = router
