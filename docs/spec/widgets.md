@@ -300,7 +300,8 @@ hex 색상으로 UIColor 생성
 |---|---|---|
 | 변형 식별자 | `WidgetVariant`(Domain) | 30종. `kind` 로 WidgetKit 위젯에, `canvas`(WidgetScenes)로 미리보기 규격에 대응 |
 | 저장 좌표 | `WidgetStyleId` = `variant` × `.default` / `.custom(id:)` | 한 변형이 기본 스타일 하나와 커스텀 스타일 N 개를 갖는다 |
-| 설정 payload | `WidgetStyleSetting` 채택 타입 (변형별로 다름) | 예: `TodayStyleSetting.showHolidayName` |
+| 설정 payload | `WidgetStyleSetting` 채택 타입 (변형별로 다름) | `TodayStyleSetting` 은 공휴일명·타임존·총 개수·할일 개수·일정 개수 다섯을 담는다 |
+| 조회 계약 | `WidgetStyleUsecase`(Domain) | 저장소는 저장된 스타일만 주므로, 기본 스타일을 항상 첫 원소로 세워 화면에 준다 — 저장값이 없으면 초기 설정이다 |
 | 저장소 | App Group UserDefaults 키 `widget_styles` | `[변형: [스타일: payload JSON]]` 한 벌. 남은 스타일이 없으면 변형 묶음을, 남은 변형이 없으면 키를 지운다 |
 
 - 바깥 키가 변형(`WidgetVariant.rawValue`), 안쪽 키가 스타일(`default` / `custom::<id>`)이다. 인코딩은 Repository 내부 사항이라 `WidgetStyleId` 는 모른다.

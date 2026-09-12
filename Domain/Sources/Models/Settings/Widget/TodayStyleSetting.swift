@@ -12,6 +12,10 @@ import Foundation
 public struct TodayStyleSetting: WidgetStyleSetting {
 
     public var showHolidayName: Bool?
+    public var showTimeZone: Bool?
+    public var showTotalCount: Bool?
+    public var showTodoCount: Bool?
+    public var showScheduleCount: Bool?
 
     public init() { }
 }
