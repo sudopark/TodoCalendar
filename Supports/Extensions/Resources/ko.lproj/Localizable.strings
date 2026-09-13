@@ -237,7 +237,8 @@
 "eventDetail.repeating.endtime::option::on" = "시간";
 "eventDetail.repeating.endtime::option::after" = "횟수";
 "eventDetail.repeating.endtime::option::after_occurrences" = "회 반복";
-"eventDetail.repeating.endtime::shouldFutureThanStartTime" = "이벤트 반복 종료시간은 시작시간보다 미래의 시간이여야 합니다.\n(반복 시작시간: %@)";
+"eventDetail.repeating.endtime::shouldFutureThanStartTime" = "이벤트 반복 종료시간
+은 시작시간보다 미래의 시간이여야 합니다.\n(반복 시작시간: %@)";
 "eventDetail.repeating::period_endcount" = "%@ 부터 %d회";
 
 "eventDetail.repeating.everyNDays:title" = "매%d일";
@@ -563,6 +564,17 @@
 "widget.style.today::showTotalCount" = "전체 개수";
 "widget.style.today::showTodoCount" = "할일 개수";
 "widget.style.today::showScheduleCount" = "일정 개수";
+"widget.style.edit::add" = "새 스타일";
+"widget.style.edit::name" = "이름";
+"widget.style.edit::duplicate" = "복사";
+"widget.style.edit::remove::message" = "이 스타일을 삭제할까요?";
+"widget.style.edit::unsaved::message" = "저장하지 않은 변경이 있습니다.";
+"widget.style.edit::unsaved::save" = "변경 저장";
+"widget.style.edit::unsaved::discard" = "변경 버리기";
+"widget.style::custom::unnamed" = "이름 없음";
+"widget.style.edit::name::section" = "스타일 이름";
+"widget.style.edit::items::section" = "세부 옵션";
+"widget.style::custom::copy_format" = "%@ - 복사됨";
 "widget.doubleMonth::name" = "캘린더 + 캘린더";
 "widget.eventAndMonth::name" = "이벤트 + 캘린더";
 "widget.todayAndMonth::name" = "TODAY + 캘린더";

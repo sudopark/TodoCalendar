@@ -12,6 +12,7 @@ import Prelude
 import Optics
 import Domain
 import Extensions
+import UnitTestHelpKit
 import TestDoubles
 
 @testable import WidgetScenes
@@ -20,9 +21,17 @@ import TestDoubles
 final class SpyWidgetStyleEditRouter: BaseSpyRouter, WidgetStyleEditRouting, @unchecked Sendable { }
 
 
-struct WidgetStyleEditViewModelImpleTests {
+final class WidgetStyleEditViewModelImpleTests: PublisherWaitable {
 
-    private let cancellables = CancelBag()
+    var cancelBag: Set<AnyCancellable>! = .init()
+
+    private var defaultId: WidgetStyleId {
+        return .init(variant: .todaySummarySmall, style: .default)
+    }
+
+    private var customId: WidgetStyleId {
+        return .init(variant: .todaySummarySmall, style: .custom(id: "c1"))
+    }
 
     private func todayStyle(
         _ style: WidgetStyleId.Style, name: String? = nil, showHolidayName: Bool? = nil
@@ -32,6 +41,20 @@ struct WidgetStyleEditViewModelImpleTests {
             name: name,
             setting: TodayStyleSetting() |> \.showHolidayName .~ showHolidayName
         )
+    }
+}
+
+
+// MARK: - 화면 만들기
+
+extension WidgetStyleEditViewModelImpleTests {
+
+    private func makeUsecase(
+        saved styles: [WidgetStyle<TodayStyleSetting>]
+    ) -> StubWidgetStyleUsecase {
+        let usecase = StubWidgetStyleUsecase()
+        usecase.stubStyles = styles
+        return usecase
     }
 
     private func makeViewModel(
@@ -44,6 +67,138 @@ struct WidgetStyleEditViewModelImpleTests {
         viewModel.router = router
         return viewModel
     }
+
+    /// 저장된 목록으로 화면을 세우고 진입까지 마친다.
+    private func makeViewModel(
+        saved styles: [WidgetStyle<TodayStyleSetting>],
+        router: SpyWidgetStyleEditRouter = .init()
+    ) -> (WidgetStyleEditViewModelImple, StubWidgetStyleUsecase) {
+        let usecase = self.makeUsecase(saved: styles)
+        let viewModel = self.makeViewModel(usecase, router: router)
+        viewModel.refresh()
+        return (viewModel, usecase)
+    }
+
+    private func makeViewModelWithDefaultOnly(
+        name: String? = nil,
+        showHolidayName: Bool? = nil,
+        router: SpyWidgetStyleEditRouter = .init()
+    ) -> (WidgetStyleEditViewModelImple, StubWidgetStyleUsecase) {
+        return self.makeViewModel(
+            saved: [self.todayStyle(.default, name: name, showHolidayName: showHolidayName)],
+            router: router
+        )
+    }
+
+    /// 기본 카드와 커스텀 카드 하나가 저장된 화면 — 고른 것은 기본 카드다.
+    private func makeViewModelWithCustom(
+        name: String? = nil,
+        showHolidayName: Bool? = nil,
+        router: SpyWidgetStyleEditRouter = .init()
+    ) -> (WidgetStyleEditViewModelImple, StubWidgetStyleUsecase) {
+        return self.makeViewModel(
+            saved: [
+                self.todayStyle(.default),
+                self.todayStyle(.custom(id: "c1"), name: name, showHolidayName: showHolidayName)
+            ],
+            router: router
+        )
+    }
+
+    private func makeViewModelSelectingCustom(
+        name: String? = nil,
+        router: SpyWidgetStyleEditRouter = .init()
+    ) -> (WidgetStyleEditViewModelImple, StubWidgetStyleUsecase) {
+        let made = self.makeViewModelWithCustom(name: name, router: router)
+        made.0.selectStyle(self.customId)
+        return made
+    }
+
+    /// 기본 카드에만 미저장 편집분이 있는 화면 — 고른 것도 기본 카드다.
+    private func makeViewModelWithEdit(
+        router: SpyWidgetStyleEditRouter = .init()
+    ) -> (WidgetStyleEditViewModelImple, StubWidgetStyleUsecase) {
+        let made = self.makeViewModelWithCustom(name: "밤 모드", router: router)
+        made.0.toggleItem(.showTodoCount)
+        return made
+    }
+
+    /// 기본·커스텀 양쪽에 미저장 편집분이 있고 커스텀을 고른 화면.
+    private func makeViewModelWithEditOnBothCards(
+        router: SpyWidgetStyleEditRouter = .init()
+    ) -> (WidgetStyleEditViewModelImple, StubWidgetStyleUsecase) {
+        let made = self.makeViewModelWithCustom(router: router)
+        made.0.toggleItem(.showTodoCount)
+        made.0.selectStyle(self.customId)
+        made.0.toggleItem(.showScheduleCount)
+        return made
+    }
+
+    /// 닫기 시트에서 고를 항목을 미리 정해 둔다.
+    private func mockSheetSelection(_ router: SpyWidgetStyleEditRouter, key: String) {
+        router.actionSheetSelectionMocking = { form in
+            form.actions.first(where: { $0.text == key.localized() })
+        }
+    }
+}
+
+
+// MARK: - 출력 읽기
+
+extension WidgetStyleEditViewModelImpleTests {
+
+    private func current<P: Publisher>(
+        _ description: String, of source: P
+    ) async throws -> P.Output? where P.Output: Sendable {
+        return try await self.firstOutput(self.expectConfirm(description), for: source)
+    }
+
+    private func styles(
+        of viewModel: WidgetStyleEditViewModelImple
+    ) async throws -> [WidgetStyleCellViewModel] {
+        return try await self.current("카드 목록", of: viewModel.styles) ?? []
+    }
+
+    private func items(
+        of viewModel: WidgetStyleEditViewModelImple
+    ) async throws -> [WidgetStyleItemCellViewModel] {
+        return try await self.current("항목 목록", of: viewModel.items) ?? []
+    }
+
+    private func selectedStyleId(
+        of viewModel: WidgetStyleEditViewModelImple
+    ) async throws -> WidgetStyleId? {
+        return try await self.current("고른 카드", of: viewModel.selectedStyleId)
+    }
+
+    private func editingName(
+        of viewModel: WidgetStyleEditViewModelImple
+    ) async throws -> String? {
+        return try await self.current("이름 입력 값", of: viewModel.editingName)
+    }
+
+    private func hasUnsavedChange(
+        of viewModel: WidgetStyleEditViewModelImple
+    ) async throws -> Bool? {
+        return try await self.current("고른 카드 미저장 여부", of: viewModel.hasUnsavedChange)
+    }
+
+    private func hasAnyUnsavedEdit(
+        of viewModel: WidgetStyleEditViewModelImple
+    ) async throws -> Bool? {
+        return try await self.current("목록 전체 미저장 여부", of: viewModel.hasAnyUnsavedEdit)
+    }
+
+    /// 이름 입력 값이 되돌아오는 흐름 자체를 봐야 하는 케이스용 — 방출 순서를 모은다.
+    private func editingNames(
+        of viewModel: WidgetStyleEditViewModelImple,
+        count: Int,
+        whileDoing action: @escaping () -> Void
+    ) async throws -> [String] {
+        let expect = self.expectConfirm("이름 입력 값 방출")
+        expect.count = count
+        return try await self.outputs(expect, for: viewModel.editingName) { action() }
+    }
 }
 
 
@@ -52,87 +207,64 @@ struct WidgetStyleEditViewModelImpleTests {
 extension WidgetStyleEditViewModelImpleTests {
 
     @Test("진입하면 조회한 변형의 스타일 목록을 낸다")
-    func refresh_provideStyleListOfVariant() {
+    func refresh_provideStyleListOfVariant() async throws {
         // given
-        let usecase = StubWidgetStyleUsecase()
-        usecase.stubStyles = [
+        let usecase = self.makeUsecase(saved: [
             self.todayStyle(.default, showHolidayName: false),
-            self.todayStyle(.custom(id: "여름"))
-        ]
+            self.todayStyle(.custom(id: "c1"), name: "여름")
+        ])
         let viewModel = self.makeViewModel(usecase)
-        var emitted: [WidgetStyleCellViewModel]?
-        viewModel.styles
-            .sink(receiveValue: { emitted = $0 })
-            .store(in: self.cancellables)
 
         // when
         viewModel.refresh()
 
         // then
+        let emitted = try await self.styles(of: viewModel)
         #expect(usecase.requestedVariant == .todaySummarySmall)
-        #expect(emitted?.map { $0.styleId.style } == [.default, .custom(id: "여름")])
-        #expect(emitted?.map { $0.name } == ["widget.style::default".localized(), "여름"])
-        #expect(emitted?.first?.setting.showHolidayName == false)
+        #expect(emitted.map { $0.styleId.style } == [.default, .custom(id: "c1")])
+        #expect(emitted.map { $0.name } == ["widget.style::default".localized(), "여름"])
+        #expect(emitted.first?.setting.showHolidayName == false)
     }
 
     @Test("다른 스타일을 고르면 항목 값이 그 스타일 내용으로 바뀐다")
-    func selectStyle_updateItemValues() {
+    func selectStyle_updateItemValues() async throws {
         // given
-        let usecase = StubWidgetStyleUsecase()
-        usecase.stubStyles = [
+        let (viewModel, _) = self.makeViewModel(saved: [
             self.todayStyle(.default, showHolidayName: false),
             self.todayStyle(.custom(id: "c1"), showHolidayName: true)
-        ]
-        let viewModel = self.makeViewModel(usecase)
-        var emitted: [WidgetStyleItemCellViewModel]?
-        viewModel.items
-            .sink(receiveValue: { emitted = $0 })
-            .store(in: self.cancellables)
-        viewModel.refresh()
+        ])
 
         // when
-        viewModel.selectStyle(.init(variant: .todaySummarySmall, style: .custom(id: "c1")))
+        viewModel.selectStyle(self.customId)
 
         // then
-        #expect(emitted?.first(where: { $0.item == .showHolidayName })?.isOn == true)
+        let emitted = try await self.items(of: viewModel)
+        #expect(emitted.first(where: { $0.item == .showHolidayName })?.isOn == true)
     }
 
     @Test("값이 상황을 타는 항목에만 부연 설명이 붙는다")
-    func items_onlyConditionalOnesHaveNote() {
+    func items_onlyConditionalOnesHaveNote() async throws {
         // given
-        let usecase = StubWidgetStyleUsecase()
-        usecase.stubStyles = [self.todayStyle(.default)]
-        let viewModel = self.makeViewModel(usecase)
-        var emitted: [WidgetStyleItemCellViewModel]?
-        viewModel.items
-            .sink(receiveValue: { emitted = $0 })
-            .store(in: self.cancellables)
+        let (viewModel, _) = self.makeViewModelWithDefaultOnly()
 
         // when
-        viewModel.refresh()
+        let emitted = try await self.items(of: viewModel)
 
         // then
-        let withNote = emitted?.filter { $0.note != nil }.map { $0.item }
-        #expect(withNote == [.showHolidayName, .showTimeZone])
+        #expect(emitted.filter { $0.note != nil }.map { $0.item } == [.showHolidayName, .showTimeZone])
     }
 
     @Test("스타일 항목은 미설정이면 켜진 것으로 보인다")
-    func items_whenNotSpecified_areOn() {
+    func items_whenNotSpecified_areOn() async throws {
         // given
-        let usecase = StubWidgetStyleUsecase()
-        usecase.stubStyles = [self.todayStyle(.default)]
-        let viewModel = self.makeViewModel(usecase)
-        var emitted: [WidgetStyleItemCellViewModel]?
-        viewModel.items
-            .sink(receiveValue: { emitted = $0 })
-            .store(in: self.cancellables)
+        let (viewModel, _) = self.makeViewModelWithDefaultOnly()
 
         // when
-        viewModel.refresh()
+        let emitted = try await self.items(of: viewModel)
 
         // then
-        #expect(emitted?.map { $0.item } == TodayStyleItem.allCases)
-        #expect(emitted?.allSatisfy { $0.isOn } == true)
+        #expect(emitted.map { $0.item } == TodayStyleItem.allCases)
+        #expect(emitted.allSatisfy { $0.isOn } == true)
     }
 }
 
@@ -141,80 +273,404 @@ extension WidgetStyleEditViewModelImpleTests {
 
 extension WidgetStyleEditViewModelImpleTests {
 
-    @Test("항목을 꺼도 확인 전에는 저장하지 않는다")
-    func toggleItem_notSaveUntilConfirm() {
+    @Test("항목을 꺼도 저장 전에는 저장소로 가지 않는다")
+    func toggleItem_notSaveUntilConfirm() async throws {
         // given
-        let usecase = StubWidgetStyleUsecase()
-        usecase.stubStyles = [self.todayStyle(.default)]
-        let viewModel = self.makeViewModel(usecase)
-        var emitted: [WidgetStyleItemCellViewModel]?
-        viewModel.items
-            .sink(receiveValue: { emitted = $0 })
-            .store(in: self.cancellables)
-        viewModel.refresh()
+        let (viewModel, usecase) = self.makeViewModelWithDefaultOnly()
 
         // when
         viewModel.toggleItem(.showTimeZone)
 
         // then
-        #expect(emitted?.first(where: { $0.item == .showTimeZone })?.isOn == false)
+        let emitted = try await self.items(of: viewModel)
+        #expect(emitted.first(where: { $0.item == .showTimeZone })?.isOn == false)
         #expect(usecase.updatedStyles.isEmpty)
     }
 
-    @Test("확인하면 조작한 설정을 고른 스타일 좌표에 저장하고 화면을 닫는다")
+    @Test("저장하면 조작한 설정이 고른 스타일 좌표로 가고 화면은 그대로 남는다")
     func confirm_saveToggledSettingToSelectedStyle() {
         // given
-        let usecase = StubWidgetStyleUsecase()
-        usecase.stubStyles = [
-            self.todayStyle(.default),
-            self.todayStyle(.custom(id: "c1"))
-        ]
         let router = SpyWidgetStyleEditRouter()
-        let viewModel = self.makeViewModel(usecase, router: router)
-        viewModel.refresh()
-        viewModel.selectStyle(.init(variant: .todaySummarySmall, style: .custom(id: "c1")))
+        let (viewModel, usecase) = self.makeViewModelSelectingCustom(router: router)
 
         // when
         viewModel.toggleItem(.showScheduleCount)
         viewModel.confirm()
 
         // then
-        let saved = usecase.updatedStyles.first as? WidgetStyle<TodayStyleSetting>
+        let saved = usecase.updatedStyles.first
         #expect(saved?.setting.showScheduleCount == false)
         #expect(saved?.setting.showHolidayName == nil)
-        #expect(saved?.id == .init(variant: .todaySummarySmall, style: .custom(id: "c1")))
-        #expect(router.didClosed == true)
+        #expect(saved?.id == self.customId)
+        #expect(router.didClosed == nil)
     }
 
-    @Test("확인하면 고른 스타일의 이름이 그대로 함께 저장된다")
-    func confirm_keepsNameOfSelectedStyle() {
+    @Test("저장하면 바꾼 이름이 설정과 함께 저장된다")
+    func confirm_savesEditedNameWithSetting() {
         // given
-        let usecase = StubWidgetStyleUsecase()
-        usecase.stubStyles = [
-            self.todayStyle(.default),
-            self.todayStyle(.custom(id: "c1"), name: "밤 모드")
-        ]
-        let viewModel = self.makeViewModel(usecase)
-        viewModel.refresh()
-        viewModel.selectStyle(.init(variant: .todaySummarySmall, style: .custom(id: "c1")))
+        let (viewModel, usecase) = self.makeViewModelSelectingCustom(name: "밤 모드")
+        viewModel.editName("낮 모드")
 
         // when
         viewModel.confirm()
 
         // then
-        let saved = usecase.updatedStyles.first as? WidgetStyle<TodayStyleSetting>
-        #expect(saved?.name == "밤 모드")
+        let saved = usecase.updatedStyles.first
+        #expect(saved?.name == "낮 모드")
+        #expect(saved?.id.style == .custom(id: "c1"))
     }
 
-    @Test("확인 없이 닫으면 저장하지 않는다")
-    func close_withoutConfirm_notSave() {
+    @Test("바꾼 게 없으면 저장을 눌러도 아무 일도 없다")
+    func confirm_whenNothingChanged_doesNothing() {
         // given
-        let usecase = StubWidgetStyleUsecase()
-        usecase.stubStyles = [self.todayStyle(.default)]
         let router = SpyWidgetStyleEditRouter()
-        let viewModel = self.makeViewModel(usecase, router: router)
-        viewModel.refresh()
+        let (viewModel, usecase) = self.makeViewModelWithDefaultOnly(router: router)
+
+        // when
+        viewModel.confirm()
+
+        // then
+        #expect(usecase.updatedStyles.isEmpty)
+        #expect(router.didClosed == nil)
+    }
+
+    @Test("저장은 고른 카드만 반영하고 다른 카드 편집분은 남긴다")
+    func confirm_savesOnlySelectedStyle() async throws {
+        // given
+        let (viewModel, usecase) = self.makeViewModelWithEditOnBothCards()
+
+        // when
+        viewModel.confirm()
+
+        // then
+        let emitted = try await self.styles(of: viewModel)
+        #expect(usecase.updatedStyles.map { $0.id.style } == [.custom(id: "c1")])
+        #expect(emitted.first?.hasUnsavedChange == true)
+        #expect(emitted.first?.setting.showTodoCount == false)
+        #expect(emitted.last?.hasUnsavedChange == false)
+    }
+
+    @Test("고른 카드는 편집 중인 설정을 그린다")
+    func styles_selectedCardShowsEditingSetting() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModelWithDefaultOnly()
+
+        // when
+        viewModel.toggleItem(.showTotalCount)
+
+        // then
+        let emitted = try await self.styles(of: viewModel)
+        #expect(emitted.first?.setting.showTotalCount == false)
+    }
+}
+
+
+// MARK: - 카드 추가·복사 — 저장 전까지는 초안
+
+extension WidgetStyleEditViewModelImpleTests {
+
+    @Test("카드를 추가하면 목록에 붙고 그 카드가 선택된다")
+    func appendStyle_addsDraftCardAndSelectsIt() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModelWithDefaultOnly(showHolidayName: false)
+
+        // when
+        viewModel.appendStyle(copying: self.defaultId)
+
+        // then
+        let emitted = try await self.styles(of: viewModel)
+        let selected = try await self.selectedStyleId(of: viewModel)
+        #expect(emitted.count == 2)
+        #expect(emitted.last?.setting.showHolidayName == false)
+        #expect(selected == emitted.last?.styleId)
+        #expect(selected?.style != .default)
+    }
+
+    @Test("카드를 추가해도 저장소로는 가지 않는다")
+    func appendStyle_doesNotReachStorage() {
+        // given
+        let (viewModel, usecase) = self.makeViewModelWithDefaultOnly()
+
+        // when
+        viewModel.appendStyle(copying: self.defaultId)
+
+        // then
+        #expect(usecase.updatedStyles.isEmpty)
+        #expect(usecase.stubStyles.count == 1)
+    }
+
+    @Test("추가한 카드 이름은 원본 이름에 복사 표시를 붙인다")
+    func appendStyle_namesAfterSourceWithCopySuffix() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModelWithCustom(name: "밤 모드")
+
+        // when
+        viewModel.appendStyle(copying: self.customId)
+
+        // then
+        let emitted = try await self.styles(of: viewModel)
+        #expect(emitted.last?.name == "widget.style::custom::copy_format".localized(with: "밤 모드"))
+    }
+
+    @Test("기본 카드에서 추가하면 기본 이름에 복사 표시를 붙인다")
+    func appendStyle_copyingDefault_namesAfterDefaultLabel() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModelWithDefaultOnly()
+
+        // when
+        viewModel.appendStyle(copying: self.defaultId)
+
+        // then
+        let emitted = try await self.styles(of: viewModel)
+        #expect(
+            emitted.last?.name
+            == "widget.style::custom::copy_format".localized(
+                with: "widget.style::default".localized()
+            )
+        )
+    }
+
+    @Test("복사 이름이 이미 있으면 뒤에 번호를 붙인다")
+    func appendStyle_whenCopyNameTaken_appendsNumber() async throws {
+        // given
+        let copied = "widget.style::custom::copy_format".localized(with: "밤 모드")
+        let (viewModel, _) = self.makeViewModel(saved: [
+            self.todayStyle(.default),
+            self.todayStyle(.custom(id: "c1"), name: "밤 모드"),
+            self.todayStyle(.custom(id: "c2"), name: copied)
+        ])
+
+        // when
+        viewModel.appendStyle(copying: self.customId)
+
+        // then
+        let emitted = try await self.styles(of: viewModel)
+        #expect(emitted.last?.name == "\(copied) 2")
+    }
+
+    @Test("같은 카드를 연달아 복사하면 번호가 하나씩 올라간다")
+    func appendStyle_repeatedly_incrementsNumber() async throws {
+        // given
+        let copied = "widget.style::custom::copy_format".localized(with: "밤 모드")
+        let (viewModel, _) = self.makeViewModelWithCustom(name: "밤 모드")
+
+        // when
+        viewModel.appendStyle(copying: self.customId)
+        viewModel.appendStyle(copying: self.customId)
+        viewModel.appendStyle(copying: self.customId)
+
+        // then
+        let emitted = try await self.styles(of: viewModel)
+        #expect(emitted.map { $0.name }.suffix(3) == [copied, "\(copied) 2", "\(copied) 3"])
+    }
+
+    @Test("카드를 복사하면 원본 설정이 그대로 실린다")
+    func appendStyle_copyingCustom_carriesSourceSetting() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModelWithCustom(name: "밤 모드", showHolidayName: true)
+
+        // when
+        viewModel.appendStyle(copying: self.customId)
+
+        // then
+        let emitted = try await self.styles(of: viewModel)
+        #expect(emitted.last?.setting.showHolidayName == true)
+        #expect(emitted.last?.styleId != self.customId)
+    }
+}
+
+
+// MARK: - 카드 전환은 편집분을 잃지 않는다
+
+extension WidgetStyleEditViewModelImpleTests {
+
+    @Test("카드를 바꿀 때는 묻지 않는다")
+    func selectStyle_neverAsks() {
+        // given
+        let router = SpyWidgetStyleEditRouter()
+        let (viewModel, _) = self.makeViewModelWithEdit(router: router)
+
+        // when
+        viewModel.selectStyle(self.customId)
+
+        // then
+        #expect(router.didShowActionSheetWith == nil)
+    }
+
+    @Test("카드를 옮겼다 돌아와도 편집분이 남아 있다")
+    func selectStyle_keepsEditOfLeftCard() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModelWithEdit()
+
+        // when
+        viewModel.selectStyle(self.customId)
+        viewModel.selectStyle(self.defaultId)
+
+        // then
+        let emitted = try await self.items(of: viewModel)
+        #expect(emitted.first(where: { $0.item == .showTodoCount })?.isOn == false)
+    }
+}
+
+
+// MARK: - 미저장 표시
+
+extension WidgetStyleEditViewModelImpleTests {
+
+    @Test("바꾼 게 없으면 미저장 표시가 없다")
+    func hasUnsavedChange_whenUntouched_isFalse() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModelWithDefaultOnly()
+
+        // when
+        let emitted = try await self.hasUnsavedChange(of: viewModel)
+
+        // then
+        #expect(emitted == false)
+    }
+
+    @Test("항목을 바꾸면 미저장 표시가 켜진다")
+    func hasUnsavedChange_whenToggled_isTrue() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModelWithDefaultOnly()
+
+        // when
         viewModel.toggleItem(.showTodoCount)
+
+        // then
+        let emitted = try await self.hasUnsavedChange(of: viewModel)
+        #expect(emitted == true)
+    }
+
+    @Test("다른 카드만 바뀌었으면 하단 버튼은 꺼져 있다")
+    func hasUnsavedChange_whenOtherCardEdited_isFalse() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModelWithEdit()
+
+        // when
+        viewModel.selectStyle(self.customId)
+
+        // then
+        let emitted = try await self.hasUnsavedChange(of: viewModel)
+        #expect(emitted == false)
+    }
+
+    @Test("고르지 않은 카드가 바뀌어도 이탈 잠금은 걸린다")
+    func hasAnyUnsavedEdit_whenOtherCardEdited_isTrue() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModelWithEdit()
+
+        // when
+        viewModel.selectStyle(self.customId)
+
+        // then
+        let emitted = try await self.hasAnyUnsavedEdit(of: viewModel)
+        #expect(emitted == true)
+    }
+
+    @Test("바뀐 카드에만 미저장 점이 붙는다")
+    func styles_markOnlyChangedCard() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModelWithCustom()
+
+        // when
+        viewModel.toggleItem(.showTodoCount)
+
+        // then
+        let emitted = try await self.styles(of: viewModel)
+        #expect(emitted.map { $0.hasUnsavedChange } == [true, false])
+    }
+
+    @Test("추가한 카드는 저장 전까지 미저장 점이 붙는다")
+    func styles_markAppendedCardAsUnsaved() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModelWithDefaultOnly()
+
+        // when
+        viewModel.appendStyle(copying: self.defaultId)
+
+        // then
+        let emitted = try await self.styles(of: viewModel)
+        #expect(emitted.map { $0.hasUnsavedChange } == [false, true])
+    }
+}
+
+
+// MARK: - 화면 이탈
+
+extension WidgetStyleEditViewModelImpleTests {
+
+    @Test("편집분이 없으면 묻지 않고 화면이 닫힌다")
+    func close_whenNotEdited_closesWithoutAsking() {
+        // given
+        let router = SpyWidgetStyleEditRouter()
+        let (viewModel, _) = self.makeViewModelWithDefaultOnly(router: router)
+
+        // when
+        viewModel.close()
+
+        // then
+        #expect(router.didShowActionSheetWith == nil)
+        #expect(router.didClosed == true)
+    }
+
+    @Test("편집 중 닫으면 저장 여부를 묻는다")
+    func close_whenEdited_asksToSave() {
+        // given
+        let router = SpyWidgetStyleEditRouter()
+        let (viewModel, _) = self.makeViewModelWithEdit(router: router)
+
+        // when
+        viewModel.close()
+
+        // then
+        #expect(router.didShowActionSheetWith?.actions.map { $0.text } == [
+            "widget.style.edit::unsaved::save".localized(),
+            "widget.style.edit::unsaved::discard".localized(),
+            "common.cancel".localized()
+        ])
+        #expect(router.didClosed == nil)
+    }
+
+    @Test("닫기에서 저장을 고르면 저장하고 닫는다")
+    func close_whenSaveChosen_savesThenCloses() {
+        // given
+        let router = SpyWidgetStyleEditRouter()
+        self.mockSheetSelection(router, key: "widget.style.edit::unsaved::save")
+        let (viewModel, usecase) = self.makeViewModelWithEdit(router: router)
+
+        // when
+        viewModel.close()
+
+        // then
+        let saved = usecase.updatedStyles.first
+        #expect(saved?.setting.showTodoCount == false)
+        #expect(router.didClosed == true)
+    }
+
+    @Test("닫기에서 저장을 고르면 초안으로 만든 카드도 함께 저장된다")
+    func close_whenSaveChosen_savesDraftCardsToo() {
+        // given
+        let router = SpyWidgetStyleEditRouter()
+        self.mockSheetSelection(router, key: "widget.style.edit::unsaved::save")
+        let (viewModel, usecase) = self.makeViewModelWithDefaultOnly(router: router)
+        viewModel.appendStyle(copying: self.defaultId)
+
+        // when
+        viewModel.close()
+
+        // then
+        let savedIds = usecase.updatedStyles.map { $0.id.style }
+        #expect(savedIds.count == 1)
+        #expect(savedIds.first != .default)
+    }
+
+    @Test("닫기에서 버리기를 고르면 저장하지 않고 닫는다")
+    func close_whenDiscardChosen_closesWithoutSaving() {
+        // given
+        let router = SpyWidgetStyleEditRouter()
+        self.mockSheetSelection(router, key: "widget.style.edit::unsaved::discard")
+        let (viewModel, usecase) = self.makeViewModelWithEdit(router: router)
 
         // when
         viewModel.close()
@@ -224,22 +680,311 @@ extension WidgetStyleEditViewModelImpleTests {
         #expect(router.didClosed == true)
     }
 
-    @Test("고른 카드는 편집 중인 설정을 그린다")
-    func styles_selectedCardShowsEditingSetting() {
+    @Test("닫기에서 취소를 고르면 저장도 닫기도 하지 않는다")
+    func close_whenCancelChosen_staysOnScreen() {
         // given
-        let usecase = StubWidgetStyleUsecase()
-        usecase.stubStyles = [self.todayStyle(.default)]
-        let viewModel = self.makeViewModel(usecase)
-        var emitted: [WidgetStyleCellViewModel]?
-        viewModel.styles
-            .sink(receiveValue: { emitted = $0 })
-            .store(in: self.cancellables)
-        viewModel.refresh()
+        let router = SpyWidgetStyleEditRouter()
+        self.mockSheetSelection(router, key: "common.cancel")
+        let (viewModel, usecase) = self.makeViewModelWithEdit(router: router)
 
         // when
-        viewModel.toggleItem(.showTotalCount)
+        viewModel.close()
 
         // then
-        #expect(emitted?.first?.setting.showTotalCount == false)
+        #expect(usecase.updatedStyles.isEmpty)
+        #expect(router.didClosed == nil)
+    }
+
+    @Test("저장하고 나면 미저장 표시가 사라진다")
+    func hasUnsavedChange_afterSave_isFalse() async throws {
+        // given
+        let router = SpyWidgetStyleEditRouter()
+        self.mockSheetSelection(router, key: "widget.style.edit::unsaved::save")
+        let (viewModel, _) = self.makeViewModelWithEdit(router: router)
+
+        // when
+        viewModel.close()
+
+        // then
+        let emitted = try await self.hasUnsavedChange(of: viewModel)
+        #expect(emitted == false)
+    }
+}
+
+
+// MARK: - 되돌리기·초기화
+
+extension WidgetStyleEditViewModelImpleTests {
+
+    @Test("되돌리면 고른 카드가 저장된 값으로 돌아간다")
+    func discard_restoresSavedStyles() async throws {
+        // given
+        let (viewModel, usecase) = self.makeViewModelWithDefaultOnly(showHolidayName: true)
+        viewModel.toggleItem(.showTodoCount)
+
+        // when
+        viewModel.discard()
+
+        // then
+        let emitted = try await self.styles(of: viewModel)
+        #expect(emitted.first?.setting.showTodoCount == nil)
+        #expect(emitted.first?.setting.showHolidayName == true)
+        #expect(usecase.updatedStyles.isEmpty)
+    }
+
+    @Test("되돌리기는 고른 카드만 되돌리고 다른 카드 편집분은 남긴다")
+    func discard_restoresOnlySelectedStyle() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModelWithEditOnBothCards()
+
+        // when
+        viewModel.discard()
+
+        // then
+        let emitted = try await self.styles(of: viewModel)
+        #expect(emitted.last?.setting.showScheduleCount == nil)
+        #expect(emitted.last?.hasUnsavedChange == false)
+        #expect(emitted.first?.setting.showTodoCount == false)
+        #expect(emitted.first?.hasUnsavedChange == true)
+    }
+
+    @Test("되돌리면 초안으로 만든 카드가 사라지고 선택도 옮겨간다")
+    func discard_dropsDraftCardsAndMovesSelection() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModelWithDefaultOnly()
+        viewModel.appendStyle(copying: self.defaultId)
+
+        // when
+        viewModel.discard()
+
+        // then
+        let emitted = try await self.styles(of: viewModel)
+        let selected = try await self.selectedStyleId(of: viewModel)
+        #expect(emitted.count == 1)
+        #expect(selected?.style == .default)
+    }
+
+    @Test("되돌린 뒤에는 미저장 표시가 사라진다")
+    func discard_clearsUnsavedMark() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModelWithDefaultOnly()
+        viewModel.toggleItem(.showTodoCount)
+
+        // when
+        viewModel.discard()
+
+        // then
+        let emitted = try await self.hasUnsavedChange(of: viewModel)
+        #expect(emitted == false)
+    }
+
+    @Test("되돌리면 입력 중이던 이름도 저장된 이름으로 돌아간다")
+    func discard_restoresEditingName() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModelSelectingCustom(name: "밤 모드")
+        viewModel.editName("낮 모드")
+
+        // when
+        viewModel.discard()
+
+        // then
+        let emitted = try await self.editingName(of: viewModel)
+        #expect(emitted == "밤 모드")
+    }
+
+    @Test("초기화하면 입력 중이던 이름도 비워진다")
+    func resetStyle_clearsEditingName() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModelWithDefaultOnly(name: "손댄 기본")
+
+        // when
+        viewModel.resetStyle(self.defaultId)
+
+        // then
+        let emitted = try await self.editingName(of: viewModel)
+        #expect(emitted == "")
+    }
+
+    @Test("기본 스타일을 초기화하면 설정이 코드 기본값으로 돌아간다")
+    func resetStyle_restoresCodeDefaults() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModelWithDefaultOnly(showHolidayName: false)
+
+        // when
+        viewModel.resetStyle(self.defaultId)
+
+        // then
+        let emitted = try await self.styles(of: viewModel)
+        #expect(emitted.first?.setting == TodayStyleSetting())
+    }
+
+    @Test("초기화도 저장을 눌러야 저장소에 반영된다")
+    func resetStyle_doesNotReachStorageUntilSaved() async throws {
+        // given
+        let (viewModel, usecase) = self.makeViewModelWithDefaultOnly(showHolidayName: false)
+
+        // when
+        viewModel.resetStyle(self.defaultId)
+
+        // then
+        let emitted = try await self.hasUnsavedChange(of: viewModel)
+        #expect(usecase.updatedStyles.isEmpty)
+        #expect(emitted == true)
+    }
+
+    @Test("초기화를 취소하면 설정이 그대로다")
+    func resetStyle_whenConfirmCanceled_keepsSetting() async throws {
+        // given
+        let router = SpyWidgetStyleEditRouter()
+        router.shouldConfirmNotCancel = false
+        let (viewModel, _) = self.makeViewModelWithDefaultOnly(
+            showHolidayName: false, router: router
+        )
+
+        // when
+        viewModel.resetStyle(self.defaultId)
+
+        // then
+        let emitted = try await self.styles(of: viewModel)
+        #expect(emitted.first?.setting.showHolidayName == false)
+    }
+}
+
+
+// MARK: - 이름 변경·삭제
+
+extension WidgetStyleEditViewModelImpleTests {
+
+    @Test("이름을 바꾸면 카드 라벨이 따라 바뀐다")
+    func editName_updatesCardLabel() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModelSelectingCustom(name: "밤 모드")
+
+        // when
+        viewModel.editName("낮 모드")
+
+        // then
+        let emitted = try await self.styles(of: viewModel)
+        #expect(emitted.last?.name == "낮 모드")
+    }
+
+    @Test("카드를 고르면 그 카드의 이름이 입력 값으로 나온다")
+    func editingName_followsSelectedCard() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModelWithCustom(name: "밤 모드")
+
+        // when
+        let emitted = try await self.editingNames(of: viewModel, count: 2) {
+            viewModel.selectStyle(self.customId)
+        }
+
+        // then
+        #expect(emitted == ["", "밤 모드"])
+    }
+
+    @Test("이름을 입력하는 동안에는 입력 값을 되돌려보내지 않는다")
+    func editingName_whileTyping_doesNotEchoBack() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModelSelectingCustom(name: "밤 모드")
+
+        // when
+        let emitted = try await self.editingNames(of: viewModel, count: 1) {
+            viewModel.editName("낮")
+            viewModel.editName("낮 모")
+        }
+
+        // then
+        #expect(emitted == ["밤 모드"])
+    }
+
+    @Test("이름을 비우면 카드 라벨이 기본 문구로 돌아간다")
+    func editName_whenBlank_fallsBackToUnnamedLabel() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModelSelectingCustom(name: "밤 모드")
+
+        // when
+        viewModel.editName("   ")
+
+        // then
+        let emitted = try await self.styles(of: viewModel)
+        #expect(emitted.last?.name == "widget.style::custom::unnamed".localized())
+    }
+
+    @Test("저장된 커스텀 스타일을 지우면 저장소에서도 지운다")
+    func removeStyle_whenSaved_reachesStorage() async throws {
+        // given
+        let (viewModel, usecase) = self.makeViewModelWithCustom(name: "밤 모드")
+
+        // when
+        viewModel.removeStyle(self.customId)
+
+        // then
+        let emitted = try await self.styles(of: viewModel)
+        #expect(usecase.removedStyleIds == [self.customId])
+        #expect(emitted.map { $0.styleId } == [self.defaultId])
+    }
+
+    @Test("저장된 적 없는 초안 카드를 지우면 저장소를 건드리지 않는다")
+    func removeStyle_whenDraft_doesNotReachStorage() async throws {
+        // given
+        let (viewModel, usecase) = self.makeViewModelWithDefaultOnly()
+        viewModel.appendStyle(copying: self.defaultId)
+        let draftId = try #require(try await self.styles(of: viewModel).last?.styleId)
+
+        // when
+        viewModel.removeStyle(draftId)
+
+        // then
+        let emitted = try await self.styles(of: viewModel)
+        #expect(usecase.removedStyleIds.isEmpty)
+        #expect(emitted.count == 1)
+    }
+
+    @Test("선택 중인 카드를 지우면 첫 카드가 선택된다")
+    func removeStyle_whenSelected_fallsBackToFirstCard() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModelSelectingCustom()
+
+        // when
+        viewModel.removeStyle(self.customId)
+
+        // then
+        let selected = try await self.selectedStyleId(of: viewModel)
+        #expect(selected?.style == .default)
+    }
+
+    @Test("삭제를 취소하면 스타일이 남는다")
+    func removeStyle_whenConfirmCanceled_keepsStyle() async throws {
+        // given
+        let router = SpyWidgetStyleEditRouter()
+        router.shouldConfirmNotCancel = false
+        let (viewModel, usecase) = self.makeViewModelWithCustom(router: router)
+
+        // when
+        viewModel.removeStyle(self.customId)
+
+        // then
+        let emitted = try await self.styles(of: viewModel)
+        #expect(usecase.removedStyleIds.isEmpty)
+        #expect(emitted.count == 2)
+    }
+
+    @Test("고르지 않은 카드를 지워도 선택은 그대로다")
+    func removeStyle_whenNotSelected_keepsSelection() async throws {
+        // given
+        let secondId = WidgetStyleId(variant: .todaySummarySmall, style: .custom(id: "c2"))
+        let (viewModel, _) = self.makeViewModel(saved: [
+            self.todayStyle(.default),
+            self.todayStyle(.custom(id: "c1")),
+            self.todayStyle(.custom(id: "c2"))
+        ])
+        viewModel.selectStyle(secondId)
+
+        // when
+        viewModel.removeStyle(self.customId)
+
+        // then
+        let selected = try await self.selectedStyleId(of: viewModel)
+        #expect(selected == secondId)
     }
 }

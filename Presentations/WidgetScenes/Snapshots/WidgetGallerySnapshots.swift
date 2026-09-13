@@ -8,6 +8,8 @@
 
 import XCTest
 import SwiftUI
+import Prelude
+import Optics
 import Domain
 import CommonPresentation
 import SnapshotTestHelpKit
@@ -118,15 +120,90 @@ final class WidgetGallerySnapshots: XCTestCase {
         let setting = TodayStyleItem.allCases.reduce(into: TodayStyleSetting()) { acc, item in
             acc[keyPath: item.settingKeyPath] = turnedOffItems.contains(item) ? false : nil
         }
+        let style = WidgetStyle(id: styleId, name: nil, setting: setting)
         let state = WidgetStyleEditViewState()
         state.styles = [
-            .init(styleId: styleId, name: styleId.style.name, setting: setting)
+            .init(
+                styleId: style.id, name: style.displayName,
+                hasUnsavedChange: false, setting: style.setting
+            )
         ]
         state.selectedStyleId = styleId
         state.items = TodayStyleItem.allCases.map {
             .init(item: $0, isOn: turnedOffItems.contains($0) == false)
         }
         return state
+    }
+    
+    @MainActor
+    private func styleEditStateWithCustoms(
+        hasUnsavedChanges: Bool = false
+    ) -> WidgetStyleEditViewState {
+        let variant = WidgetVariant.todaySummarySmall
+        let styles = [
+            WidgetStyle(
+                id: .init(variant: variant, style: .default),
+                name: nil,
+                setting: TodayStyleSetting()
+            ),
+            WidgetStyle(
+                id: .init(variant: variant, style: .custom(id: "c1")),
+                name: "Night",
+                setting: TodayStyleSetting() |> \.showHolidayName .~ false
+            ),
+            WidgetStyle(
+                id: .init(variant: variant, style: .custom(id: "c2")),
+                name: nil,
+                setting: TodayStyleSetting() |> \.showTimeZone .~ false
+            )
+        ]
+        let selected = styles[1]
+        let state = WidgetStyleEditViewState()
+        state.styles = styles.enumerated().map { index, style in
+            .init(
+                styleId: style.id, name: style.displayName,
+                hasUnsavedChange: index == 1 && hasUnsavedChanges, setting: style.setting
+            )
+        }
+        state.hasUnsavedChange = hasUnsavedChanges
+        state.selectedStyleId = selected.id
+        state.editingName = selected.name ?? ""
+        state.items = TodayStyleItem.allCases.map {
+            .init(item: $0, isOn: selected.setting[keyPath: $0.settingKeyPath].isDisplayed)
+        }
+        return state
+    }
+    
+    @MainActor
+    func test_widgetStyleEdit_withCustomStyles() {
+        captureSnapshotPair(named: "widgetStyleEdit-customStyles", layout: .fullScreen) { theme in
+            WidgetStyleEditView(variant: .todaySummarySmall, setting: .init())
+                .environment(self.styleEditStateWithCustoms())
+                .environment(WidgetStyleEditViewEventHandler())
+                .environment(self.makeAppearance(theme))
+        }
+    }
+    
+    @MainActor
+    func test_widgetStyleEdit_withUnsavedChanges() {
+        captureSnapshotPair(named: "widgetStyleEdit-unsaved", layout: .fullScreen) { theme in
+            WidgetStyleEditView(variant: .todaySummarySmall, setting: .init())
+                .environment(self.styleEditStateWithCustoms(hasUnsavedChanges: true))
+                .environment(WidgetStyleEditViewEventHandler())
+                .environment(self.makeAppearance(theme))
+        }
+    }
+    
+    @MainActor
+    func test_widgetStyleEdit_defaultSelected_hasNoNameRow() {
+        captureSnapshotPair(named: "widgetStyleEdit-defaultSelected", layout: .fullScreen) { theme in
+            let state = self.styleEditStateWithCustoms()
+            state.selectedStyleId = .init(variant: .todaySummarySmall, style: .default)
+            return WidgetStyleEditView(variant: .todaySummarySmall, setting: .init())
+                .environment(state)
+                .environment(WidgetStyleEditViewEventHandler())
+                .environment(self.makeAppearance(theme))
+        }
     }
     
     @MainActor

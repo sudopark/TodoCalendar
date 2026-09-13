@@ -563,6 +563,17 @@
 "widget.style.today::showTotalCount" = "Total event count";
 "widget.style.today::showTodoCount" = "Todo count";
 "widget.style.today::showScheduleCount" = "Schedule count";
+"widget.style.edit::add" = "New style";
+"widget.style.edit::name" = "Name";
+"widget.style.edit::duplicate" = "Duplicate";
+"widget.style.edit::remove::message" = "Delete this style?";
+"widget.style.edit::unsaved::message" = "You have unsaved changes.";
+"widget.style.edit::unsaved::save" = "Save changes";
+"widget.style.edit::unsaved::discard" = "Discard changes";
+"widget.style::custom::unnamed" = "Untitled";
+"widget.style.edit::name::section" = "Style name";
+"widget.style.edit::items::section" = "Details";
+"widget.style::custom::copy_format" = "%@ - Copy";
 "widget.doubleMonth::name" = "Calendar + Calendar";
 "widget.eventAndMonth::name" = "Events + Calendar";
 "widget.todayAndMonth::name" = "TODAY + Calendar";
