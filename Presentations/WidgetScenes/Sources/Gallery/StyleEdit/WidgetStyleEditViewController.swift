@@ -18,6 +18,7 @@ import CommonPresentation
 final class WidgetStyleEditViewController: UIHostingController<WidgetStyleEditContainerView>, WidgetStyleEditScene {
     
     private let viewModel: any WidgetStyleEditViewModel
+    private let cancellables = CancelBag()
     let viewAppearance: ViewAppearance
     
     @MainActor
@@ -48,5 +49,23 @@ final class WidgetStyleEditViewController: UIHostingController<WidgetStyleEditCo
     
     @MainActor required dynamic init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    /// 엣지 스와이프 팝은 화면의 닫기 경로를 거치지 않아, 막지 않으면 편집분이 안내 없이 사라진다.
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        self.viewModel.hasAnyUnsavedEdit
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] hasChanges in
+                self?.navigationController?
+                    .interactivePopGestureRecognizer?.isEnabled = !hasChanges
+            })
+            .store(in: self.cancellables)
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        self.navigationController?.interactivePopGestureRecognizer?.isEnabled = true
     }
 }
