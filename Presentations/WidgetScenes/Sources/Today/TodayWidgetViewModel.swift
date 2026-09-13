@@ -50,6 +50,7 @@ public struct TodayWidgetViewModel {
     public var displayTimeZoneText: String? {
         return self.style.showTimeZone.isDisplayed ? self.timeZoneText : nil
     }
+    public var showsMonthAndYear: Bool { self.style.showMonthYear.isDisplayed }
     public var showsTotalCount: Bool { self.style.showTotalCount.isDisplayed }
     public var showsTodoCount: Bool { self.style.showTodoCount.isDisplayed }
     public var showsScheduleCount: Bool { self.style.showScheduleCount.isDisplayed }
