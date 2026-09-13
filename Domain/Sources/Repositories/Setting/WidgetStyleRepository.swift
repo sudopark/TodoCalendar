@@ -17,7 +17,7 @@ public protocol WidgetStyleRepository: Sendable {
         _ type: S.Type, of variant: WidgetVariant
     ) -> [WidgetStyle<S>]
 
-    func updateSetting<S: WidgetStyleSetting>(_ setting: S, for id: WidgetStyleId)
+    func updateStyle<S: WidgetStyleSetting>(_ style: WidgetStyle<S>)
 
     func removeStyle(_ id: WidgetStyleId)
 }

@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Extensions
 
 
 public protocol WidgetStyleUsecase: Sendable {
@@ -15,7 +16,11 @@ public protocol WidgetStyleUsecase: Sendable {
         _ type: S.Type, of variant: WidgetVariant
     ) -> [WidgetStyle<S>]
 
-    func updateStyle<S: WidgetStyleSetting>(_ setting: S, for id: WidgetStyleId)
+    func updateStyle<S: WidgetStyleSetting>(_ style: WidgetStyle<S>)
+
+    func makeNewStyleId(for variant: WidgetVariant) -> WidgetStyleId
+
+    func removeStyle(_ id: WidgetStyleId)
 }
 
 
@@ -40,12 +45,45 @@ extension WidgetStyleUsecaseImple {
 
         let savedStyles = self.styleRepository.loadStyles(type, of: variant)
         let defaultStyle = savedStyles.first { $0.id.style == .default }
-            ?? WidgetStyle(id: .init(variant: variant, style: .default), setting: S())
+            ?? WidgetStyle(
+                id: .init(variant: variant, style: .default), name: nil, setting: S()
+            )
         let customStyles = savedStyles.filter { $0.id.style != .default }
         return [defaultStyle] + customStyles
     }
 
-    public func updateStyle<S: WidgetStyleSetting>(_ setting: S, for id: WidgetStyleId) {
-        self.styleRepository.updateSetting(setting, for: id)
+    public func updateStyle<S: WidgetStyleSetting>(_ style: WidgetStyle<S>) {
+        self.styleRepository.updateStyle(style.withNormalizedName())
+    }
+}
+
+
+// MARK: - 좌표 발급·삭제
+
+extension WidgetStyleUsecaseImple {
+
+    /// 좌표만 내주고 저장하지 않는다 — 새 스타일은 화면이 저장을 요청할 때까지 초안으로 남는다.
+    public func makeNewStyleId(for variant: WidgetVariant) -> WidgetStyleId {
+        return WidgetStyleId(variant: variant, style: .custom(id: UUID().uuidString))
+    }
+
+    /// 기본 스타일은 값이 없으면 조회가 코드 기본값으로 보충하는 자리라 지우는 것 자체가 성립하지 않는다.
+    public func removeStyle(_ id: WidgetStyleId) {
+        guard id.style != .default else { return }
+        self.styleRepository.removeStyle(id)
+    }
+}
+
+
+// MARK: - 이름 정규화
+
+private extension WidgetStyle {
+
+    func withNormalizedName() -> WidgetStyle<S> {
+        return WidgetStyle(
+            id: self.id,
+            name: self.name?.trimmingCharacters(in: .whitespacesAndNewlines).emptyAsNil(),
+            setting: self.setting
+        )
     }
 }

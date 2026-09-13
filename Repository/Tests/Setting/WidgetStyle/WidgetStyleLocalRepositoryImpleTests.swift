@@ -38,6 +38,14 @@ private struct DummyMonthStyle: WidgetStyleSetting {
 }
 
 
+private extension WidgetStyleLocalRepositoryImple {
+
+    func updateSetting<S: WidgetStyleSetting>(_ setting: S, for id: WidgetStyleId) {
+        self.updateStyle(WidgetStyle(id: id, name: nil, setting: setting))
+    }
+}
+
+
 struct WidgetStyleLocalRepositoryImpleTests {
 
     private let storage = FakeEnvironmentStorage()
@@ -153,6 +161,111 @@ extension WidgetStyleLocalRepositoryImpleTests {
             DummyTodayStyle.self, of: .todaySummarySmall
         )
         #expect(styles.map { $0.id.style } == [.custom(id: "a::b::c")])
+    }
+}
+
+
+// MARK: - 이름·저장 형식
+
+extension WidgetStyleLocalRepositoryImpleTests {
+
+    @Test("스타일을 이름과 함께 저장하고 다시 읽는다")
+    func updateStyle_withName_thenLoadStyles_roundTripsName() {
+        // given
+        let repository = self.makeRepository()
+        let id = WidgetStyleId(variant: .todaySummarySmall, style: .custom(id: "c1"))
+
+        // when
+        repository.updateStyle(
+            WidgetStyle(id: id, name: "밤 모드", setting: DummyTodayStyle(showHolidayName: false))
+        )
+
+        // then
+        let styles: [WidgetStyle<DummyTodayStyle>] = repository.loadStyles(
+            DummyTodayStyle.self, of: .todaySummarySmall
+        )
+        #expect(styles.map { $0.name } == ["밤 모드"])
+        #expect(styles.map { $0.setting.showHolidayName } == [false])
+    }
+
+    @Test("이름 없이 저장된 구버전 값도 설정이 유지된다")
+    func loadStyles_whenStoredAsLegacyPayload_keepsSettingWithoutName() {
+        // given
+        let repository = self.makeRepository(
+            storedRaw: ["todaySummarySmall": ["default": #"{"showHolidayName":true}"#]]
+        )
+
+        // when
+        let styles: [WidgetStyle<DummyTodayStyle>] = repository.loadStyles(
+            DummyTodayStyle.self, of: .todaySummarySmall
+        )
+
+        // then
+        #expect(styles.map { $0.name } == [nil])
+        #expect(styles.map { $0.setting.showHolidayName } == [true])
+    }
+
+    @Test("새 형식으로 저장된 값을 구버전 경로로 잘못 읽지 않는다")
+    func loadStyles_whenStoredAsRecord_doesNotFallBackToLegacyDecoding() {
+        // given
+        let repository = self.makeRepository(
+            storedRaw: [
+                "todaySummarySmall": [
+                    "default": #"{"name":"밤 모드","setting":{"showHolidayName":true}}"#
+                ]
+            ]
+        )
+
+        // when
+        let styles: [WidgetStyle<DummyTodayStyle>] = repository.loadStyles(
+            DummyTodayStyle.self, of: .todaySummarySmall
+        )
+
+        // then
+        #expect(styles.map { $0.name } == ["밤 모드"])
+        #expect(styles.map { $0.setting.showHolidayName } == [true])
+    }
+
+    @Test("한 variant 에 구버전 값과 새 형식 값이 섞여 있어도 둘 다 읽는다")
+    func loadStyles_whenLegacyAndRecordMixed_readsBoth() {
+        // given
+        let repository = self.makeRepository(
+            storedRaw: [
+                "todaySummarySmall": [
+                    "default": #"{"showHolidayName":true}"#,
+                    "custom::c1": #"{"name":"밤 모드","setting":{"showHolidayName":false}}"#
+                ]
+            ]
+        )
+
+        // when
+        let styles: [WidgetStyle<DummyTodayStyle>] = repository.loadStyles(
+            DummyTodayStyle.self, of: .todaySummarySmall
+        )
+
+        // then
+        #expect(styles.map { $0.name } == [nil, "밤 모드"])
+        #expect(styles.map { $0.setting.showHolidayName } == [true, false])
+    }
+
+    @Test("단건 조회도 새 형식 저장값에서 설정을 꺼낸다")
+    func loadSetting_whenStoredAsRecord_returnsSettingInside() {
+        // given
+        let repository = self.makeRepository(
+            storedRaw: [
+                "todaySummarySmall": [
+                    "default": #"{"name":"밤 모드","setting":{"showHolidayName":false}}"#
+                ]
+            ]
+        )
+
+        // when
+        let setting = repository.loadSetting(
+            DummyTodayStyle.self, for: .init(variant: .todaySummarySmall, style: .default)
+        )
+
+        // then
+        #expect(setting?.showHolidayName == false)
     }
 }
 

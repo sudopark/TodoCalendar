@@ -15,8 +15,7 @@ final class StubWidgetStyleUsecase: WidgetStyleUsecase, @unchecked Sendable {
     var stubStyles: [Any] = []
     
     private(set) var requestedVariant: WidgetVariant?
-    private(set) var updatedSetting: Any?
-    private(set) var updatedStyleId: WidgetStyleId?
+    private(set) var updatedStyles: [WidgetStyle<TodayStyleSetting>] = []
     
     func loadStyles<S: WidgetStyleSetting>(
         _ type: S.Type, of variant: WidgetVariant
@@ -25,8 +24,16 @@ final class StubWidgetStyleUsecase: WidgetStyleUsecase, @unchecked Sendable {
         return self.stubStyles.compactMap { $0 as? WidgetStyle<S> }
     }
     
-    func updateStyle<S: WidgetStyleSetting>(_ setting: S, for id: WidgetStyleId) {
-        self.updatedSetting = setting
-        self.updatedStyleId = id
+    func updateStyle<S: WidgetStyleSetting>(_ style: WidgetStyle<S>) {
+        guard let updated = style as? WidgetStyle<TodayStyleSetting> else { return }
+        self.updatedStyles.append(updated)
     }
+
+    func appendStyle<S: WidgetStyleSetting>(
+        _ setting: S, name: String?, to variant: WidgetVariant
+    ) -> WidgetStyleId {
+        return .init(variant: variant, style: .custom(id: UUID().uuidString))
+    }
+
+    func removeStyle(_ id: WidgetStyleId) { }
 }

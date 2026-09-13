@@ -22,7 +22,7 @@ public final class WidgetStyleLocalRepositoryImple: WidgetStyleRepository {
         static let key: String = "widget_styles"
     }
 
-    private typealias StoredStyles = [String: [String: String]]
+    private typealias StoredStyleTexts = [String: [String: String]]
 }
 
 
@@ -32,7 +32,7 @@ extension WidgetStyleLocalRepositoryImple {
 
     public func loadSetting<S: WidgetStyleSetting>(_ type: S.Type, for id: WidgetStyleId) -> S? {
         return self.loadStoredStyles()[id.variant.rawValue]?[id.style.storageKey]?
-            .decodedSetting(type)
+            .decodedStoredStyle(type)?.setting
     }
 
     public func loadStyles<S: WidgetStyleSetting>(
@@ -42,19 +42,23 @@ extension WidgetStyleLocalRepositoryImple {
         return stored
             .compactMap { key, text -> WidgetStyle<S>? in
                 guard let style = WidgetStyleId.Style(storageKey: key),
-                      let setting = text.decodedSetting(type)
+                      let stored = text.decodedStoredStyle(type)
                 else { return nil }
-                return WidgetStyle(id: .init(variant: variant, style: style), setting: setting)
+                return WidgetStyle(
+                    id: .init(variant: variant, style: style),
+                    name: stored.name,
+                    setting: stored.setting
+                )
             }
             .sorted { $0.id.style.sortKey < $1.id.style.sortKey }
     }
 
-    public func updateSetting<S: WidgetStyleSetting>(_ setting: S, for id: WidgetStyleId) {
-        guard let text = setting.encodedText() else { return }
+    public func updateStyle<S: WidgetStyleSetting>(_ style: WidgetStyle<S>) {
+        guard let text = style.encodedText() else { return }
         var stored = self.loadStoredStyles()
-        var styles = stored[id.variant.rawValue] ?? [:]
-        styles[id.style.storageKey] = text
-        stored[id.variant.rawValue] = styles
+        var styles = stored[style.id.variant.rawValue] ?? [:]
+        styles[style.id.style.storageKey] = text
+        stored[style.id.variant.rawValue] = styles
         self.saveStoredStyles(stored)
     }
 
@@ -66,12 +70,12 @@ extension WidgetStyleLocalRepositoryImple {
         self.saveStoredStyles(stored)
     }
 
-    private func loadStoredStyles() -> StoredStyles {
+    private func loadStoredStyles() -> StoredStyleTexts {
         return self.environmentStorage.load(Constant.key) ?? [:]
     }
 
     /// 남은 스타일이 없으면 키를 지운다 — 빈 사전을 남기면 "없음"을 두 형태로 표현하게 된다.
-    private func saveStoredStyles(_ stored: StoredStyles) {
+    private func saveStoredStyles(_ stored: StoredStyleTexts) {
         guard !stored.isEmpty
         else {
             self.environmentStorage.remove(Constant.key)
@@ -118,20 +122,33 @@ private extension WidgetStyleId.Style {
 }
 
 
-// MARK: - JSON 한 겹 감싸기
+// MARK: - 저장 레코드
 
-private extension WidgetStyleSetting {
+private struct StoredStyle<S: WidgetStyleSetting>: Codable {
+
+    let name: String?
+    let setting: S
+}
+
+private extension WidgetStyle {
 
     func encodedText() -> String? {
-        return (try? JSONEncoder().encode(self))
+        let stored = StoredStyle(name: self.name, setting: self.setting)
+        return (try? JSONEncoder().encode(stored))
             .flatMap { String(data: $0, encoding: .utf8) }
     }
 }
 
 private extension String {
 
-    func decodedSetting<S: WidgetStyleSetting>(_ type: S.Type) -> S? {
-        return self.data(using: .utf8)
-            .flatMap { try? JSONDecoder().decode(type, from: $0) }
+    /// 레코드를 먼저 본다 — 설정 타입은 전 필드가 Optional 이라 순서를 뒤집으면 레코드 JSON 도
+    /// payload 로 디코드에 성공해 설정이 통째로 비워진다.
+    func decodedStoredStyle<S: WidgetStyleSetting>(_ type: S.Type) -> StoredStyle<S>? {
+        guard let data = self.data(using: .utf8) else { return nil }
+        if let stored = try? JSONDecoder().decode(StoredStyle<S>.self, from: data) {
+            return stored
+        }
+        guard let setting = try? JSONDecoder().decode(type, from: data) else { return nil }
+        return StoredStyle(name: nil, setting: setting)
     }
 }
