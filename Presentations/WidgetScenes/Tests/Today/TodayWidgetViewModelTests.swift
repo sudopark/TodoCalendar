@@ -37,7 +37,7 @@ struct TodayWidgetViewModelTests {
 
 extension TodayWidgetViewModelTests {
 
-    @Test("스타일이 미설정이면 표시 항목 다섯을 전부 보인다")
+    @Test("스타일이 미설정이면 표시 항목 여섯을 전부 보인다")
     func displayItems_whenStyleNotSpecified_showAll() {
         // given
         let model = self.makeModel(.init())
@@ -45,9 +45,22 @@ extension TodayWidgetViewModelTests {
         // when & then
         #expect(model.displayHolidayName == "화이트데이")
         #expect(model.displayTimeZoneText == "GMT")
+        #expect(model.showsMonthAndYear == true)
         #expect(model.showsTotalCount == true)
         #expect(model.showsTodoCount == true)
         #expect(model.showsScheduleCount == true)
+    }
+
+    @Test("스타일이 년월을 끄면 년월만 감춘다")
+    func showsMonthAndYear_whenStyleTurnsItOff_isFalse() {
+        // given
+        let model = self.makeModel(.init() |> \.showMonthYear .~ false)
+
+        // when & then
+        #expect(model.showsMonthAndYear == false)
+        #expect(model.monthAndYearText == "MAR 2024")
+        #expect(model.displayHolidayName == "화이트데이")
+        #expect(model.showsTotalCount == true)
     }
 
     @Test("스타일이 공휴일명을 끄면 표시용 공휴일명만 사라진다")

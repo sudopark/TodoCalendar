@@ -560,6 +560,7 @@
 "widget.style::default" = "Default";
 "widget.style.today::showHolidayName" = "Holiday name";
 "widget.style.today::showTimeZone" = "Time zone";
+"widget.style.today::showMonthYear" = "Month and year";
 "widget.style.today::showTotalCount" = "Total event count";
 "widget.style.today::showTodoCount" = "Todo count";
 "widget.style.today::showScheduleCount" = "Schedule count";
@@ -567,6 +568,10 @@
 "widget.style.edit::name" = "Name";
 "widget.style.edit::duplicate" = "Duplicate";
 "widget.style.edit::remove::message" = "Delete this style?";
+"widget.style.edit::discard" = "Discard";
+"widget.style.edit::reset" = "Reset to default";
+"widget.style.edit::reset::confirm" = "Reset";
+"widget.style.edit::reset::message" = "Reset this style to its default?";
 "widget.style.edit::unsaved::message" = "You have unsaved changes.";
 "widget.style.edit::unsaved::save" = "Save changes";
 "widget.style.edit::unsaved::discard" = "Discard changes";

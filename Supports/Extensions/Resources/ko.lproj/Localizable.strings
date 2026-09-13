@@ -561,6 +561,7 @@
 "widget.style::default" = "기본";
 "widget.style.today::showHolidayName" = "공휴일 이름";
 "widget.style.today::showTimeZone" = "타임존";
+"widget.style.today::showMonthYear" = "년월";
 "widget.style.today::showTotalCount" = "전체 개수";
 "widget.style.today::showTodoCount" = "할일 개수";
 "widget.style.today::showScheduleCount" = "일정 개수";
@@ -568,6 +569,10 @@
 "widget.style.edit::name" = "이름";
 "widget.style.edit::duplicate" = "복사";
 "widget.style.edit::remove::message" = "이 스타일을 삭제할까요?";
+"widget.style.edit::discard" = "되돌리기";
+"widget.style.edit::reset" = "기본값으로 초기화";
+"widget.style.edit::reset::confirm" = "초기화";
+"widget.style.edit::reset::message" = "이 스타일을 기본값으로 되돌릴까요?";
 "widget.style.edit::unsaved::message" = "저장하지 않은 변경이 있습니다.";
 "widget.style.edit::unsaved::save" = "변경 저장";
 "widget.style.edit::unsaved::discard" = "변경 버리기";

@@ -27,6 +27,7 @@ public struct TodaySummaryView: View {
         static let monthFontSize: CGFloat = 13
         static let widerMonthFontSize: CGFloat = 15
         static let widestMonthFontSize: CGFloat = 17
+        static let hiddenMonthDayFontBonus: CGFloat = 4
     }
     
     private let model: TodayWidgetViewModel
@@ -35,11 +36,12 @@ public struct TodaySummaryView: View {
     }
     
     private var dayFontSize: CGFloat {
-        switch model.eventCountLines {
-        case .both: return Constant.dayFontSize
-        case .one: return Constant.widerDayFontSize
-        case .empty: return Constant.widestDayFontSize
+        let base: CGFloat = switch model.eventCountLines {
+        case .both: Constant.dayFontSize
+        case .one: Constant.widerDayFontSize
+        case .empty: Constant.widestDayFontSize
         }
+        return model.showsMonthAndYear ? base : base + Constant.hiddenMonthDayFontBonus
     }
     
     private var monthFontSize: CGFloat {
@@ -55,24 +57,35 @@ public struct TodaySummaryView: View {
         return model.eventCountLines == .both
     }
     
+    /// 월·년도 개수도 없으면 날짜만 남아 위로 붙는다 — 그때만 세로 가운데로 내린다.
+    private var showsDayOnly: Bool {
+        return model.showsMonthAndYear == false && model.eventCountLines == .empty
+    }
+    
     public var body: some View {
         HStack {
             VStack(alignment: .leading) {
                 
+                if showsDayOnly {
+                    Spacer(minLength: 0)
+                }
+                
                 dayView(model)
                 
-                if monthSitsUnderDay {
+                if model.showsMonthAndYear, monthSitsUnderDay {
                     monthAndYearView(model)
                 }
                 
                 Spacer(minLength: 0)
                 
-                VStack(alignment: .leading, spacing: 2) {
-                    if monthSitsUnderDay == false {
-                        monthAndYearView(model)
+                if showsDayOnly == false {
+                    VStack(alignment: .leading, spacing: 2) {
+                        if model.showsMonthAndYear, monthSitsUnderDay == false {
+                            monthAndYearView(model)
+                        }
+                        
+                        eventCountView(model)
                     }
-                    
-                    eventCountView(model)
                 }
             }
             Spacer(minLength: 0)

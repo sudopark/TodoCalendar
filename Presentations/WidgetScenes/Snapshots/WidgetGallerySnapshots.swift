@@ -175,6 +175,30 @@ final class WidgetGallerySnapshots: XCTestCase {
     }
     
     @MainActor
+    func test_widgetStyleEdit_monthYearOff() {
+        captureSnapshotPair(named: "widgetStyleEdit-monthYearOff", layout: .fullScreen) { theme in
+            WidgetStyleEditView(variant: .todaySummarySmall, setting: .init())
+                .environment(self.styleEditState([.showMonthYear]))
+                .environment(WidgetStyleEditViewEventHandler())
+                .environment(self.makeAppearance(theme))
+        }
+    }
+    
+    @MainActor
+    func test_widgetStyleEdit_dayOnly() {
+        captureSnapshotPair(named: "widgetStyleEdit-dayOnly", layout: .fullScreen) { theme in
+            WidgetStyleEditView(variant: .todaySummarySmall, setting: .init())
+                .environment(
+                    self.styleEditState([
+                        .showMonthYear, .showTotalCount, .showTodoCount, .showScheduleCount
+                    ])
+                )
+                .environment(WidgetStyleEditViewEventHandler())
+                .environment(self.makeAppearance(theme))
+        }
+    }
+    
+    @MainActor
     func test_widgetStyleEdit_withCustomStyles() {
         captureSnapshotPair(named: "widgetStyleEdit-customStyles", layout: .fullScreen) { theme in
             WidgetStyleEditView(variant: .todaySummarySmall, setting: .init())
