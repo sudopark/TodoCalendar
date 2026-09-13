@@ -15,6 +15,7 @@
   - 인증 필요 신규 Endpoint enum ↔ `CalendarAPIAutenticator.shouldAdapt` case ↔ 회귀 테스트 (누락 시 무인증 요청 → 401, 리트라이도 안 됨)
   - CommonPresentation 신규 컴포넌트 ↔ `.claude/rules/presentations-rules.md` §2 카탈로그 표 등재 (누락 시 다음 사람이 못 찾아 같은 컴포넌트를 또 만든다)
   - en `Localizable.strings` 키 추가/삭제 ↔ ko lproj 반영 ↔ 번역 대기 트래킹 이슈에 작업 링크 기록 (등록처는 `localization` 라벨 열린 이슈 중 최신 — 없으면 신설. 나머지 29개 언어는 그 이슈 처리 시점에 일괄 번역 — 상세는 `.claude/rules/localization.md`)
+  - opord 명령 상태 값(§6 표) 추가·개명 ↔ 상황판 `~/.claude/campaign-board/index.html` 의 뱃지 규칙·종결 필터(`o.state !== "종결"`) (레포 밖 앱이라 path 매칭이 안 걸린다 — 종결류 값을 새로 만들고 필터를 안 고치면 끝난 작업이 진행 중으로 계속 뜬다)
   - 계획–명령 체계 하네스(`opord`·`campaign`·`orchestrate`·`doctrine`·kickoff 탐색·implement 실행 보고 계약·`docs/operations/templates/`) 변경 ↔ #1098 본문의 이관 대상·선결 과제·미정 목록 갱신 (plugin 분리 준비 이슈 — 실물과 어긋나면 repo 신설 시점에 한 번에 못 옮긴다)
 - **스킬 종료·유저 교정은 레코드로 남긴다** (#690 flywheel 측정 신호):
   - 발동한 스킬의 절차가 끝나면: `python3 .claude/hooks/log-record.py skill_end --name <스킬> --compliance full|partial [--deviation "조항::사유" --deviation-reviewed]` — 조항을 의도적으로 이행 안 했으면 partial + 이탈 조항·사유 필수.
