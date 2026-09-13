@@ -180,7 +180,7 @@ final class StubWidgetStyleRepository: WidgetStyleRepository, @unchecked Sendabl
         return []
     }
 
-    func updateSetting<S: WidgetStyleSetting>(_ setting: S, for id: WidgetStyleId) { }
+    func updateStyle<S: WidgetStyleSetting>(_ style: WidgetStyle<S>) { }
 
     func removeStyle(_ id: WidgetStyleId) { }
 }

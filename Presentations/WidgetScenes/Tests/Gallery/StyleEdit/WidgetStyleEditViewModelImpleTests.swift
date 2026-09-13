@@ -25,10 +25,11 @@ struct WidgetStyleEditViewModelImpleTests {
     private let cancellables = CancelBag()
 
     private func todayStyle(
-        _ style: WidgetStyleId.Style, showHolidayName: Bool? = nil
+        _ style: WidgetStyleId.Style, name: String? = nil, showHolidayName: Bool? = nil
     ) -> WidgetStyle<TodayStyleSetting> {
         return .init(
             id: .init(variant: .todaySummarySmall, style: style),
+            name: name,
             setting: TodayStyleSetting() |> \.showHolidayName .~ showHolidayName
         )
     }
@@ -157,7 +158,7 @@ extension WidgetStyleEditViewModelImpleTests {
 
         // then
         #expect(emitted?.first(where: { $0.item == .showTimeZone })?.isOn == false)
-        #expect(usecase.updatedSetting == nil)
+        #expect(usecase.updatedStyles.isEmpty)
     }
 
     @Test("확인하면 조작한 설정을 고른 스타일 좌표에 저장하고 화면을 닫는다")
@@ -178,11 +179,31 @@ extension WidgetStyleEditViewModelImpleTests {
         viewModel.confirm()
 
         // then
-        let saved = usecase.updatedSetting as? TodayStyleSetting
-        #expect(saved?.showScheduleCount == false)
-        #expect(saved?.showHolidayName == nil)
-        #expect(usecase.updatedStyleId == .init(variant: .todaySummarySmall, style: .custom(id: "c1")))
+        let saved = usecase.updatedStyles.first as? WidgetStyle<TodayStyleSetting>
+        #expect(saved?.setting.showScheduleCount == false)
+        #expect(saved?.setting.showHolidayName == nil)
+        #expect(saved?.id == .init(variant: .todaySummarySmall, style: .custom(id: "c1")))
         #expect(router.didClosed == true)
+    }
+
+    @Test("확인하면 고른 스타일의 이름이 그대로 함께 저장된다")
+    func confirm_keepsNameOfSelectedStyle() {
+        // given
+        let usecase = StubWidgetStyleUsecase()
+        usecase.stubStyles = [
+            self.todayStyle(.default),
+            self.todayStyle(.custom(id: "c1"), name: "밤 모드")
+        ]
+        let viewModel = self.makeViewModel(usecase)
+        viewModel.refresh()
+        viewModel.selectStyle(.init(variant: .todaySummarySmall, style: .custom(id: "c1")))
+
+        // when
+        viewModel.confirm()
+
+        // then
+        let saved = usecase.updatedStyles.first as? WidgetStyle<TodayStyleSetting>
+        #expect(saved?.name == "밤 모드")
     }
 
     @Test("확인 없이 닫으면 저장하지 않는다")
@@ -199,8 +220,7 @@ extension WidgetStyleEditViewModelImpleTests {
         viewModel.close()
 
         // then
-        #expect(usecase.updatedSetting == nil)
-        #expect(usecase.updatedStyleId == nil)
+        #expect(usecase.updatedStyles.isEmpty)
         #expect(router.didClosed == true)
     }
 

@@ -12,6 +12,7 @@ import Prelude
 import Optics
 import Domain
 import Extensions
+import UnitTestHelpKit
 import TestDoubles
 
 @testable import WidgetScenes
@@ -27,9 +28,9 @@ final class SpyWidgetGalleryDetailRouter: BaseSpyRouter, WidgetGalleryDetailRout
 }
 
 
-struct WidgetGalleryDetailViewModelImpleTests {
+final class WidgetGalleryDetailViewModelImpleTests: PublisherWaitable {
 
-    private let cancellables = CancelBag()
+    var cancelBag: Set<AnyCancellable>! = .init()
 
     private func makeViewModel(
         _ item: WidgetGalleryItem,
@@ -47,16 +48,13 @@ struct WidgetGalleryDetailViewModelImpleTests {
     private var ddayItem: WidgetGalleryItem { return .dday }
 
     @Test
-    func viewModel_emitsVariantsOfGivenItem() {
+    func viewModel_emitsVariantsOfGivenItem() async throws {
         // given
         let item = self.ddayItem
         let viewModel = self.makeViewModel(item, router: .init())
-        var emitted: [WidgetVariant]?
 
         // when
-        viewModel.variants
-            .sink(receiveValue: { emitted = $0 })
-            .store(in: self.cancellables)
+        let emitted = try await self.current("변형 목록", of: viewModel.variants)
 
         // then
         #expect(emitted?.map { $0.id } == item.variants.map { $0.id })
@@ -64,33 +62,27 @@ struct WidgetGalleryDetailViewModelImpleTests {
     }
 
     @Test
-    func viewModel_emitsItemName() {
+    func viewModel_emitsItemName() async throws {
         // given
         let item = self.ddayItem
         let viewModel = self.makeViewModel(item, router: .init())
-        var emitted: String?
 
         // when
-        viewModel.itemName
-            .sink(receiveValue: { emitted = $0 })
-            .store(in: self.cancellables)
+        let emitted = try await self.current("항목 이름", of: viewModel.itemName)
 
         // then
         #expect(emitted == item.name)
     }
 
     @Test
-    func viewModel_emitsGivenSetting() {
+    func viewModel_emitsGivenSetting() async throws {
         // given
         let setting = WidgetAppearanceSettings() |> \.background .~ .custom(hex: "#123456")
         let viewModel = self.makeViewModel(self.ddayItem, router: .init(), setting: setting)
-        var emitted: WidgetAppearanceSettings?
-        
+
         // when
-        viewModel.setting
-            .sink(receiveValue: { emitted = $0 })
-            .store(in: self.cancellables)
-        
+        let emitted = try await self.current("위젯 전체 설정", of: viewModel.setting)
+
         // then
         #expect(emitted?.background == .custom(hex: "#123456"))
     }
@@ -122,6 +114,7 @@ extension WidgetGalleryDetailViewModelImpleTests {
         usecase.stubStyles = [
             WidgetStyle(
                 id: .init(variant: .todaySummarySmall, style: .default),
+                name: nil,
                 setting: TodayStyleSetting() |> \.showHolidayName .~ savedHolidayName
             )
         ]
@@ -129,35 +122,29 @@ extension WidgetGalleryDetailViewModelImpleTests {
     }
 
     @Test("꾸미기 가능한 변형의 저장된 기본 스타일을 미리보기에 준다")
-    func refresh_provideDefaultStyleOfCustomizableVariant() {
+    func refresh_provideDefaultStyleOfCustomizableVariant() async throws {
         // given
         let viewModel = self.makeTodayViewModel(savedHolidayName: false)
-        var emitted: [String: any WidgetStyleSetting]?
-        viewModel.defaultStyles
-            .sink(receiveValue: { emitted = $0 })
-            .store(in: self.cancellables)
 
         // when
         viewModel.refresh()
 
         // then
+        let emitted = try await self.current("미리보기 기본 스타일", of: viewModel.defaultStyles)
         let todayStyle = emitted?[WidgetVariant.todaySummarySmall.id] as? TodayStyleSetting
         #expect(todayStyle?.showHolidayName == false)
     }
 
     @Test("꾸미기 대상이 아닌 변형은 미리보기 스타일을 갖지 않는다")
-    func refresh_notProvideStyleForNotCustomizableVariant() {
+    func refresh_notProvideStyleForNotCustomizableVariant() async throws {
         // given
         let viewModel = self.makeViewModel(self.ddayItem, router: .init())
-        var emitted: [String: any WidgetStyleSetting]?
-        viewModel.defaultStyles
-            .sink(receiveValue: { emitted = $0 })
-            .store(in: self.cancellables)
 
         // when
         viewModel.refresh()
 
         // then
+        let emitted = try await self.current("미리보기 기본 스타일", of: viewModel.defaultStyles)
         #expect(emitted?.isEmpty == true)
         #expect(self.ddayItem.variants.allSatisfy { $0.isCustomizable == false } == true)
     }
@@ -173,5 +160,17 @@ extension WidgetGalleryDetailViewModelImpleTests {
 
         // then
         #expect(router.routedStyleEditVariant == .todaySummarySmall)
+    }
+}
+
+
+// MARK: - 출력 읽기
+
+extension WidgetGalleryDetailViewModelImpleTests {
+
+    private func current<P: Publisher>(
+        _ description: String, of source: P
+    ) async throws -> P.Output? where P.Output: Sendable {
+        return try await self.firstOutput(self.expectConfirm(description), for: source)
     }
 }

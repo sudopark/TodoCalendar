@@ -42,10 +42,12 @@ public protocol WidgetStyleSetting: Codable, Sendable, Equatable {
 public struct WidgetStyle<S: WidgetStyleSetting>: Sendable, Equatable {
 
     public let id: WidgetStyleId
-    public let setting: S
+    public var name: String?
+    public var setting: S
 
-    public init(id: WidgetStyleId, setting: S) {
+    public init(id: WidgetStyleId, name: String?, setting: S) {
         self.id = id
+        self.name = name
         self.setting = setting
     }
 }

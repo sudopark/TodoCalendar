@@ -113,7 +113,10 @@ extension WidgetStyleEditViewModelImple {
         guard let styleId = self.subject.selectedStyleId.value,
               let setting = self.subject.editingSetting.value
         else { return }
-        self.widgetStyleUsecase.updateStyle(setting, for: styleId)
+        let name = self.subject.styles.value?.first { $0.id == styleId }?.name
+        self.widgetStyleUsecase.updateStyle(
+            WidgetStyle(id: styleId, name: name, setting: setting)
+        )
         WidgetCenter.shared.reloadTimelines(ofKind: self.variant.kind)
         self.router?.closeScene()
     }
