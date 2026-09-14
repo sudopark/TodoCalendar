@@ -199,7 +199,7 @@ extension WidgetStyleEditViewModelImple {
     private func dropStyle(_ styleId: WidgetStyleId) {
         guard let styles = self.subject.editingStyles.value else { return }
         if let saved = self.subject.savedStyles.value, saved[styleId] != nil {
-            self.widgetStyleUsecase.removeStyle(styleId)
+            self.widgetStyleUsecase.removeStyle(TodayStyleSetting.self, styleId)
             self.subject.savedStyles.send(saved.filter { $0.key != styleId })
         }
         let remains = styles.filter { $0.id != styleId }

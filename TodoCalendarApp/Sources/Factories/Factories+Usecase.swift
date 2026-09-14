@@ -289,7 +289,8 @@ extension NonLoginUsecaseFactoryImple {
         return WidgetStyleUsecaseImple(
             styleRepository: WidgetStyleLocalRepositoryImple(
                 environmentStorage: applicationBase.userDefaultEnvironmentStorage
-            )
+            ),
+            sharedDataStore: applicationBase.sharedDataStore
         )
     }
     
@@ -826,7 +827,8 @@ extension LoginUsecaseFactoryImple {
         return WidgetStyleUsecaseImple(
             styleRepository: WidgetStyleLocalRepositoryImple(
                 environmentStorage: applicationBase.userDefaultEnvironmentStorage
-            )
+            ),
+            sharedDataStore: applicationBase.sharedDataStore
         )
     }
     
