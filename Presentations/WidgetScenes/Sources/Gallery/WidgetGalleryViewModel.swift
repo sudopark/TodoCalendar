@@ -17,6 +17,7 @@ import Scenes
 
 protocol WidgetGalleryViewModel: AnyObject, WidgetGallerySceneInteractor {
 
+    func refresh()
     func selectItem(_ itemId: String)
     func selectSystemTheme()
     func selectCustomBackground(hex: String)
@@ -24,18 +25,22 @@ protocol WidgetGalleryViewModel: AnyObject, WidgetGallerySceneInteractor {
 
     var items: AnyPublisher<[WidgetGalleryItem], Never> { get }
     var setting: AnyPublisher<WidgetAppearanceSettings, Never> { get }
+    var defaultStyles: AnyPublisher<[String: any WidgetStyleSetting], Never> { get }
 }
 
 final class WidgetGalleryViewModelImple: WidgetGalleryViewModel, @unchecked Sendable {
 
     private let uiSettingUsecase: any UISettingUsecase
+    private let widgetStyleUsecase: any WidgetStyleUsecase
     var router: (any WidgetGalleryRouting)?
 
     init(
         setting: WidgetAppearanceSettings,
-        uiSettingUsecase: any UISettingUsecase
+        uiSettingUsecase: any UISettingUsecase,
+        widgetStyleUsecase: any WidgetStyleUsecase
     ) {
         self.uiSettingUsecase = uiSettingUsecase
+        self.widgetStyleUsecase = widgetStyleUsecase
         self.subject.setting.send(setting)
     }
 
@@ -49,6 +54,12 @@ final class WidgetGalleryViewModelImple: WidgetGalleryViewModel, @unchecked Send
 // MARK: - handle events
 
 extension WidgetGalleryViewModelImple {
+
+    func refresh() {
+        self.customizableVariants.forEach {
+            self.widgetStyleUsecase.refreshStyles(TodayStyleSetting.self, of: $0)
+        }
+    }
 
     func selectItem(_ itemId: String) {
         guard let item = self.availableItems.first(where: { $0.id == itemId }),
@@ -92,6 +103,12 @@ extension WidgetGalleryViewModelImple {
         return WidgetGalleryItem.allCases
     }
 
+    private var customizableVariants: [WidgetVariant] {
+        return self.availableItems
+            .flatMap { $0.variants }
+            .filter { $0.isCustomizable }
+    }
+
     var items: AnyPublisher<[WidgetGalleryItem], Never> {
         return Just(self.availableItems).eraseToAnyPublisher()
     }
@@ -100,6 +117,21 @@ extension WidgetGalleryViewModelImple {
         return self.subject.setting
             .compactMap { $0 }
             .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+
+    var defaultStyles: AnyPublisher<[String: any WidgetStyleSetting], Never> {
+        // 꾸미기 가능한 변형이 Today 뿐이라 payload 타입도 하나다.
+        let entryStreams = self.customizableVariants.map { variant in
+            return self.widgetStyleUsecase.styles(TodayStyleSetting.self, of: variant)
+                .compactMap { $0.first }
+                .map { [variant.id: $0.setting as any WidgetStyleSetting] }
+                .eraseToAnyPublisher()
+        }
+        return Publishers.MergeMany(entryStreams)
+            .scan([String: any WidgetStyleSetting]()) { styles, entry in
+                return styles.merging(entry) { _, newStyle in newStyle }
+            }
             .eraseToAnyPublisher()
     }
 }

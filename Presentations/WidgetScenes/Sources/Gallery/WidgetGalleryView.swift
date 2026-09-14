@@ -20,6 +20,7 @@ import CommonPresentation
 
     var items: [WidgetGalleryItem] = []
     var setting: WidgetAppearanceSettings = .init()
+    var defaultStyles: [String: any WidgetStyleSetting] = [:]
     var isSystemTheme: Bool = true
     var customBackground: Color?
 
@@ -31,6 +32,13 @@ import CommonPresentation
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] items in
                 self?.items = items
+            })
+            .store(in: self.cancellables)
+
+        viewModel.defaultStyles
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] styles in
+                self?.defaultStyles = styles
             })
             .store(in: self.cancellables)
 
@@ -59,6 +67,7 @@ final class WidgetGalleryViewEventHandler: Observable {
     var close: () -> Void = { }
 
     func bind(_ viewModel: any WidgetGalleryViewModel) {
+        self.onAppear = viewModel.refresh
         self.selectItem = viewModel.selectItem(_:)
         self.selectSystemTheme = viewModel.selectSystemTheme
         self.selectCustomColorHex = viewModel.selectCustomBackground(hex:)
@@ -288,8 +297,12 @@ extension WidgetGalleryView {
         let thumbnailVariant = item.variants.first(where: { $0.canvas.isLockScreen == false })
             ?? item.variants.first
         if let thumbnailVariant {
-            WidgetVariantPreviewView(variant: thumbnailVariant, setting: state.setting)
-                .frame(width: side, height: side)
+            WidgetVariantPreviewView(
+                variant: thumbnailVariant,
+                setting: state.setting,
+                style: state.defaultStyles[thumbnailVariant.id]
+            )
+            .frame(width: side, height: side)
         } else {
             Color.clear.frame(width: side, height: side)
         }
