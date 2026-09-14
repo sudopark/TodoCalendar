@@ -22,7 +22,7 @@ import CommonPresentation
     var variants: [WidgetVariant] = []
     var setting: WidgetAppearanceSettings = .init()
     var selectedVariantId: String?
-    var defaultStyles: [String: any WidgetStyleSetting] = [:]
+    var previewStyles: [String: WidgetPreviewStyleStack] = [:]
 
     func bind(_ viewModel: any WidgetGalleryDetailViewModel) {
         guard self.didBind == false else { return }
@@ -50,10 +50,10 @@ import CommonPresentation
             })
             .store(in: self.cancellables)
         
-        viewModel.defaultStyles
+        viewModel.previewStyles
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] styles in
-                self?.defaultStyles = styles
+                self?.previewStyles = styles
             })
             .store(in: self.cancellables)
     }
@@ -114,6 +114,7 @@ struct WidgetGalleryDetailView: View {
 
     private enum Constant {
         static let previewHorizontalInset: CGFloat = 40
+        static let overlayOffsetStep: CGFloat = 12
         static let labelAreaHeight: CGFloat = 44
         static let indicatorAreaHeight: CGFloat = 40
     }
@@ -194,13 +195,7 @@ struct WidgetGalleryDetailView: View {
 
             Spacer(minLength: 0)
 
-            WidgetVariantPreviewView(
-                variant: variant,
-                setting: state.setting,
-                style: state.defaultStyles[variant.id]
-            )
-            .aspectRatio(pageAspect, contentMode: .fit)
-            .padding(.horizontal, Constant.previewHorizontalInset)
+            previewStackView(variant, pageAspect: pageAspect)
 
             labelView(variant)
                 .frame(height: Constant.labelAreaHeight)
@@ -210,6 +205,51 @@ struct WidgetGalleryDetailView: View {
             // 페이지 인디케이터가 앉는 자리 — 라벨과 겹치지 않게 비워 둔다.
             Color.clear.frame(height: Constant.indicatorAreaHeight)
         }
+    }
+
+    /// 밀린 만큼 trailing 여백을 줘야 겹친 카드가 프리뷰 박스를 넘지 않는다.
+    private func previewStackView(
+        _ variant: WidgetVariant, pageAspect: CGFloat
+    ) -> some View {
+        let stack = state.previewStyles[variant.id]
+        let overlayStyles = stack?.overlays ?? []
+        let emptyOverlayDepth = (stack?.showsEmptyOverlay == true)
+            ? overlayStyles.count + 1 : nil
+        let deepestDepth = emptyOverlayDepth ?? overlayStyles.count
+
+        return ZStack(alignment: .leading) {
+
+            if let emptyOverlayDepth {
+                overlayCardView(variant, style: nil, depth: emptyOverlayDepth)
+            }
+
+            ForEach(Array(overlayStyles.enumerated()).reversed(), id: \.offset) { index, style in
+                overlayCardView(variant, style: style, depth: index + 1)
+            }
+
+            WidgetVariantPreviewView(
+                variant: variant, setting: state.setting, style: stack?.base
+            )
+        }
+        .aspectRatio(pageAspect, contentMode: .fit)
+        .padding(.leading, Constant.previewHorizontalInset)
+        .padding(
+            .trailing,
+            Constant.previewHorizontalInset
+                + Constant.overlayOffsetStep * CGFloat(deepestDepth)
+        )
+    }
+
+    private func overlayCardView(
+        _ variant: WidgetVariant, style: (any WidgetStyleSetting)?, depth: Int
+    ) -> some View {
+        return WidgetVariantPreviewView(
+            variant: variant,
+            setting: state.setting,
+            style: style,
+            isEmptyStyle: style == nil
+        )
+        .offset(x: Constant.overlayOffsetStep * CGFloat(depth))
     }
 
     private func labelView(_ variant: WidgetVariant) -> some View {
