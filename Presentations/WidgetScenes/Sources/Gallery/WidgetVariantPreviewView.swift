@@ -23,15 +23,18 @@ struct WidgetVariantPreviewView: View {
     private let variant: WidgetVariant
     private let setting: WidgetAppearanceSettings
     private let style: (any WidgetStyleSetting)?
+    private let isEmptyStyle: Bool
 
     init(
         variant: WidgetVariant,
         setting: WidgetAppearanceSettings,
-        style: (any WidgetStyleSetting)? = nil
+        style: (any WidgetStyleSetting)? = nil,
+        isEmptyStyle: Bool = false
     ) {
         self.variant = variant
         self.setting = setting
         self.style = style
+        self.isEmptyStyle = isEmptyStyle
     }
 
     var body: some View {
@@ -60,7 +63,9 @@ struct WidgetVariantPreviewView: View {
 
     @ViewBuilder
     private var contentView: some View {
-        if variant.canvas.isLockScreen {
+        if isEmptyStyle {
+            Color.clear
+        } else if variant.canvas.isLockScreen {
             // 잠금화면 요소는 벽지 위에 흰 글씨로 얹힌다 — 미리보기는 벽지 대신 어두운 판을 깐다.
             variant.previewView(setting, style: style)
                 .environment(\.colorScheme, .dark)

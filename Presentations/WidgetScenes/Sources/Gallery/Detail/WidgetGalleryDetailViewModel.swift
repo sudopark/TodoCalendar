@@ -22,7 +22,7 @@ protocol WidgetGalleryDetailViewModel: AnyObject, WidgetGalleryDetailSceneIntera
     var itemName: AnyPublisher<String, Never> { get }
     var variants: AnyPublisher<[WidgetVariant], Never> { get }
     var setting: AnyPublisher<WidgetAppearanceSettings, Never> { get }
-    var defaultStyles: AnyPublisher<[String: any WidgetStyleSetting], Never> { get }
+    var previewStyles: AnyPublisher<[String: WidgetPreviewStyleStack], Never> { get }
 }
 
 final class WidgetGalleryDetailViewModelImple: WidgetGalleryDetailViewModel, @unchecked Sendable {
@@ -41,22 +41,14 @@ final class WidgetGalleryDetailViewModelImple: WidgetGalleryDetailViewModel, @un
         self.currentSetting = setting
         self.widgetStyleUsecase = widgetStyleUsecase
     }
-    
-    private let defaultStyleMap = CurrentValueSubject<[String: any WidgetStyleSetting], Never>([:])
 }
 
 extension WidgetGalleryDetailViewModelImple {
     
-    /// 편집 화면에서 돌아오면 저장된 스타일이 바뀌어 있을 수 있어 미리보기를 다시 읽는다.
     func refresh() {
-        let styles = self.item.variants
-            .filter { $0.isCustomizable }
-            .reduce(into: [String: any WidgetStyleSetting]()) { acc, variant in
-                // 꾸미기 가능한 변형이 Today 뿐이라 payload 타입도 하나다.
-                acc[variant.id] = self.widgetStyleUsecase
-                    .loadStyles(TodayStyleSetting.self, of: variant).first?.setting
-            }
-        self.defaultStyleMap.send(styles)
+        self.customizableVariants.forEach {
+            self.widgetStyleUsecase.refreshStyles(TodayStyleSetting.self, of: $0)
+        }
     }
     
     func editStyle(_ variant: WidgetVariant) {
@@ -82,7 +74,30 @@ extension WidgetGalleryDetailViewModelImple {
         return Just(self.currentSetting).eraseToAnyPublisher()
     }
     
-    var defaultStyles: AnyPublisher<[String: any WidgetStyleSetting], Never> {
-        return self.defaultStyleMap.eraseToAnyPublisher()
+    private var customizableVariants: [WidgetVariant] {
+        return self.item.variants.filter { $0.isCustomizable }
+    }
+    
+    var previewStyles: AnyPublisher<[String: WidgetPreviewStyleStack], Never> {
+        // 꾸미기 가능한 변형이 Today 뿐이라 payload 타입도 하나다.
+        let entryStreams = self.customizableVariants
+            .map { variant in
+                return self.widgetStyleUsecase.styles(TodayStyleSetting.self, of: variant)
+                    .compactMap { styles in
+                        return WidgetPreviewStyleStack(
+                            styles: styles.map { $0.setting as any WidgetStyleSetting }
+                        )
+                    }
+                    .map { [variant.id: $0] }
+                    .eraseToAnyPublisher()
+            }
+        guard entryStreams.isEmpty == false else {
+            return Just([:]).eraseToAnyPublisher()
+        }
+        return Publishers.MergeMany(entryStreams)
+            .scan([String: WidgetPreviewStyleStack]()) { stacks, entry in
+                return stacks.merging(entry) { _, newStack in newStack }
+            }
+            .eraseToAnyPublisher()
     }
 }

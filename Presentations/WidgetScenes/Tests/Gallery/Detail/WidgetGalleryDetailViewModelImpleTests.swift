@@ -106,45 +106,148 @@ final class WidgetGalleryDetailViewModelImpleTests: PublisherWaitable {
 
 extension WidgetGalleryDetailViewModelImpleTests {
 
-    private func makeTodayViewModel(
-        savedHolidayName: Bool?,
-        router: SpyWidgetGalleryDetailRouter = .init()
-    ) -> WidgetGalleryDetailViewModelImple {
-        let usecase = StubWidgetStyleUsecase()
-        usecase.stubStyles = [
-            WidgetStyle(
-                id: .init(variant: .todaySummarySmall, style: .default),
-                name: nil,
-                setting: TodayStyleSetting() |> \.showHolidayName .~ savedHolidayName
-            )
-        ]
-        return self.makeViewModel(.todaySummary, router: router, styleUsecase: usecase)
+    private func todayStyle(
+        _ style: WidgetStyleId.Style,
+        holiday: Bool? = nil,
+        timeZone: Bool? = nil,
+        monthYear: Bool? = nil
+    ) -> WidgetStyle<TodayStyleSetting> {
+        let setting = TodayStyleSetting()
+            |> \.showHolidayName .~ holiday
+            |> \.showTimeZone .~ timeZone
+            |> \.showMonthYear .~ monthYear
+        return .init(
+            id: .init(variant: .todaySummarySmall, style: style), name: nil, setting: setting
+        )
     }
 
-    @Test("꾸미기 가능한 변형의 저장된 기본 스타일을 미리보기에 준다")
-    func refresh_provideDefaultStyleOfCustomizableVariant() async throws {
+    private func makeTodayViewModel(
+        savedStyles: [WidgetStyle<TodayStyleSetting>] = [],
+        router: SpyWidgetGalleryDetailRouter = .init()
+    ) -> (WidgetGalleryDetailViewModelImple, StubWidgetStyleUsecase) {
+        let usecase = StubWidgetStyleUsecase()
+        usecase.stubStyles = savedStyles
+        let viewModel = self.makeViewModel(
+            .todaySummary, router: router, styleUsecase: usecase
+        )
+        return (viewModel, usecase)
+    }
+
+    private func todaySettings(
+        _ stack: WidgetPreviewStyleStack?
+    ) -> (base: TodayStyleSetting?, overlays: [TodayStyleSetting]) {
+        return (
+            stack?.base as? TodayStyleSetting,
+            stack?.overlays.compactMap { $0 as? TodayStyleSetting } ?? []
+        )
+    }
+
+    @Test("저장된 기본 스타일이 프리뷰 스택의 맨 앞 장이 된다")
+    func previewStyles_emitsDefaultStyleAsBase() async throws {
         // given
-        let viewModel = self.makeTodayViewModel(savedHolidayName: false)
+        let defaultStyle = self.todayStyle(.default, holiday: false)
+        let (viewModel, _) = self.makeTodayViewModel(savedStyles: [defaultStyle])
 
         // when
-        viewModel.refresh()
+        let emitted = try await self.currentAfterRefresh("프리뷰 스택", of: viewModel)
 
         // then
-        let emitted = try await self.current("미리보기 기본 스타일", of: viewModel.defaultStyles)
-        let todayStyle = emitted?[WidgetVariant.todaySummarySmall.id] as? TodayStyleSetting
-        #expect(todayStyle?.showHolidayName == false)
+        let stack = self.todaySettings(emitted?[WidgetVariant.todaySummarySmall.id])
+        #expect(stack.base == defaultStyle.setting)
     }
 
-    @Test("꾸미기 대상이 아닌 변형은 미리보기 스타일을 갖지 않는다")
-    func refresh_notProvideStyleForNotCustomizableVariant() async throws {
+    @Test("커스텀 스타일이 없으면 겹쳐 깔 장이 없다")
+    func previewStyles_whenNoCustomStyle_hasNoOverlay() async throws {
+        // given
+        let (viewModel, _) = self.makeTodayViewModel(
+            savedStyles: [self.todayStyle(.default, holiday: false)]
+        )
+
+        // when
+        let emitted = try await self.currentAfterRefresh("프리뷰 스택", of: viewModel)
+
+        // then
+        let stack = emitted?[WidgetVariant.todaySummarySmall.id]
+        #expect(stack?.overlays.isEmpty == true)
+        #expect(stack?.showsEmptyOverlay == false)
+    }
+
+    @Test("커스텀 스타일이 두 장이면 목록 순서 그대로 둘 다 겹쳐 깐다")
+    func previewStyles_whenTwoCustomStyles_stacksBothInListOrder() async throws {
+        // given
+        let customs = [
+            self.todayStyle(.custom(id: "c1"), timeZone: true),
+            self.todayStyle(.custom(id: "c2"), monthYear: true)
+        ]
+        let (viewModel, _) = self.makeTodayViewModel(
+            savedStyles: [self.todayStyle(.default, holiday: false)] + customs
+        )
+
+        // when
+        let emitted = try await self.currentAfterRefresh("프리뷰 스택", of: viewModel)
+
+        // then
+        let stack = emitted?[WidgetVariant.todaySummarySmall.id]
+        #expect(self.todaySettings(stack).overlays == customs.map { $0.setting })
+        #expect(stack?.showsEmptyOverlay == false)
+    }
+
+    @Test("커스텀 스타일이 두 장을 넘으면 앞 두 장만 깔고 빈 장 하나로 갈음한다")
+    func previewStyles_whenMoreThanTwoCustomStyles_stacksFirstTwoAndEmptyOverlay() async throws {
+        // given
+        let customs = [
+            self.todayStyle(.custom(id: "c1"), timeZone: true),
+            self.todayStyle(.custom(id: "c2"), monthYear: true),
+            self.todayStyle(.custom(id: "c3"), holiday: true)
+        ]
+        let (viewModel, _) = self.makeTodayViewModel(
+            savedStyles: [self.todayStyle(.default, holiday: false)] + customs
+        )
+
+        // when
+        let emitted = try await self.currentAfterRefresh("프리뷰 스택", of: viewModel)
+
+        // then
+        let stack = emitted?[WidgetVariant.todaySummarySmall.id]
+        #expect(self.todaySettings(stack).overlays == customs.prefix(2).map { $0.setting })
+        #expect(stack?.showsEmptyOverlay == true)
+    }
+
+    @Test("커스텀 스타일을 지우면 그만큼 줄어든 스택을 다시 낸다")
+    func previewStyles_whenCustomStyleRemoved_emitsShrunkStack() async throws {
+        // given
+        let expect = expectConfirm("줄어든 스택이 다시 나온다")
+        expect.count = 2
+        let removing = self.todayStyle(.custom(id: "c1"), timeZone: true)
+        let remaining = self.todayStyle(.custom(id: "c2"), monthYear: true)
+        let (viewModel, usecase) = self.makeTodayViewModel(
+            savedStyles: [self.todayStyle(.default, holiday: false), removing, remaining]
+        )
+
+        // when
+        let emitted = try await self.outputs(expect, for: viewModel.previewStyles) {
+            viewModel.refresh()
+            usecase.removeStyle(TodayStyleSetting.self, removing.id)
+        }
+
+        // then
+        let overlayLists = emitted.map {
+            self.todaySettings($0[WidgetVariant.todaySummarySmall.id]).overlays
+        }
+        #expect(overlayLists == [
+            [removing.setting, remaining.setting], [remaining.setting]
+        ])
+    }
+
+    @Test("꾸미기 대상이 아닌 항목은 프리뷰 스택을 갖지 않는다")
+    func previewStyles_hasNoEntryForNonCustomizableVariant() async throws {
         // given
         let viewModel = self.makeViewModel(self.ddayItem, router: .init())
 
         // when
-        viewModel.refresh()
+        let emitted = try await self.currentAfterRefresh("프리뷰 스택", of: viewModel)
 
         // then
-        let emitted = try await self.current("미리보기 기본 스타일", of: viewModel.defaultStyles)
         #expect(emitted?.isEmpty == true)
         #expect(self.ddayItem.variants.allSatisfy { $0.isCustomizable == false } == true)
     }
@@ -153,7 +256,7 @@ extension WidgetGalleryDetailViewModelImpleTests {
     func editStyle_routeToStyleEditOfVariant() {
         // given
         let router = SpyWidgetGalleryDetailRouter()
-        let viewModel = self.makeTodayViewModel(savedHolidayName: nil, router: router)
+        let (viewModel, _) = self.makeTodayViewModel(router: router)
 
         // when
         viewModel.editStyle(.todaySummarySmall)
@@ -172,5 +275,15 @@ extension WidgetGalleryDetailViewModelImpleTests {
         _ description: String, of source: P
     ) async throws -> P.Output? where P.Output: Sendable {
         return try await self.firstOutput(self.expectConfirm(description), for: source)
+    }
+
+    private func currentAfterRefresh(
+        _ description: String, of viewModel: WidgetGalleryDetailViewModelImple
+    ) async throws -> [String: WidgetPreviewStyleStack]? {
+        return try await self.firstOutput(
+            self.expectConfirm(description), for: viewModel.previewStyles
+        ) {
+            viewModel.refresh()
+        }
     }
 }
