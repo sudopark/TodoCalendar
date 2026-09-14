@@ -37,7 +37,9 @@ extension WidgetGalleryBuilderImple: WidgetGallerySceneBuilder {
     ) -> any WidgetGalleryScene {
         
         let viewModel = WidgetGalleryViewModelImple(
-            setting: setting, uiSettingUsecase: self.uiSettingUsecase
+            setting: setting,
+            uiSettingUsecase: self.uiSettingUsecase,
+            widgetStyleUsecase: self.widgetStyleUsecase
         )
         let viewController = WidgetGalleryViewController(
             viewModel: viewModel, viewAppearance: viewAppearance

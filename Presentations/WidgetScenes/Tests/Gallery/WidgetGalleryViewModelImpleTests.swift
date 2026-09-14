@@ -46,16 +46,108 @@ final class WidgetGalleryViewModelImpleTests: PublisherWaitable {
     private func makeViewModel(
         router: SpyWidgetGalleryRouter = .init(),
         setting: WidgetAppearanceSettings = .init(),
-        shouldFailChangeSetting: Bool = false
+        shouldFailChangeSetting: Bool = false,
+        styleUsecase: StubWidgetStyleUsecase = .init()
     ) -> WidgetGalleryViewModelImple {
         let usecase = shouldFailChangeSetting
             ? FailingUISettingUsecase() : StubUISettingUsecase()
         let viewModel = WidgetGalleryViewModelImple(
             setting: setting,
-            uiSettingUsecase: usecase
+            uiSettingUsecase: usecase,
+            widgetStyleUsecase: styleUsecase
         )
         viewModel.router = router
         return viewModel
+    }
+
+    private func todayStyle(
+        _ style: WidgetStyleId.Style,
+        variant: WidgetVariant = .todaySummarySmall,
+        showHolidayName: Bool?
+    ) -> WidgetStyle<TodayStyleSetting> {
+        return .init(
+            id: .init(variant: variant, style: style),
+            name: nil,
+            setting: TodayStyleSetting() |> \.showHolidayName .~ showHolidayName
+        )
+    }
+
+    private func makeStyleUsecase(
+        savedStyles: [WidgetStyle<TodayStyleSetting>]
+    ) -> StubWidgetStyleUsecase {
+        let usecase = StubWidgetStyleUsecase()
+        usecase.stubStyles = savedStyles
+        return usecase
+    }
+}
+
+
+// MARK: - 기본 스타일
+
+extension WidgetGalleryViewModelImpleTests {
+
+    @Test("꾸미기 가능한 변형의 저장된 기본 스타일을 그 변형 키로 낸다")
+    func viewModel_emitsDefaultStyleOfCustomizableVariant() async throws {
+        // given
+        let expect = expectConfirm("저장된 기본 스타일이 나온다")
+        let styleUsecase = self.makeStyleUsecase(
+            savedStyles: [self.todayStyle(.default, showHolidayName: false)]
+        )
+        let viewModel = self.makeViewModel(styleUsecase: styleUsecase)
+
+        // when
+        let styles = try await self.firstOutput(expect, for: viewModel.defaultStyles) {
+            viewModel.refresh()
+        }
+
+        // then
+        let todaySetting = styles?[WidgetVariant.todaySummarySmall.id] as? TodayStyleSetting
+        #expect(todaySetting?.showHolidayName == false)
+    }
+
+    @Test("스타일이 저장되면 바뀐 기본 스타일을 다시 낸다")
+    func viewModel_whenStyleUpdated_emitsChangedDefaultStyle() async throws {
+        // given
+        let expect = expectConfirm("바뀐 기본 스타일이 다시 나온다")
+        expect.count = 2
+        let styleUsecase = self.makeStyleUsecase(
+            savedStyles: [self.todayStyle(.default, showHolidayName: false)]
+        )
+        let viewModel = self.makeViewModel(styleUsecase: styleUsecase)
+
+        // when
+        let styleMaps = try await self.outputs(expect, for: viewModel.defaultStyles) {
+            viewModel.refresh()
+            styleUsecase.updateStyle(self.todayStyle(.default, showHolidayName: true))
+        }
+
+        // then
+        let flags = styleMaps.map {
+            ($0[WidgetVariant.todaySummarySmall.id] as? TodayStyleSetting)?.showHolidayName
+        }
+        #expect(flags == [false, true])
+    }
+
+    @Test("꾸미기 대상이 아닌 변형은 스타일 사전에 키가 없다")
+    func viewModel_hasNoStyleEntryForNonCustomizableVariant() async throws {
+        // given
+        let expect = expectConfirm("꾸미기 대상 변형만 키를 갖는다")
+        let styleUsecase = self.makeStyleUsecase(
+            savedStyles: [
+                self.todayStyle(.default, showHolidayName: false),
+                self.todayStyle(.default, variant: .monthSmall, showHolidayName: true)
+            ]
+        )
+        let viewModel = self.makeViewModel(styleUsecase: styleUsecase)
+
+        // when
+        let styles = try await self.firstOutput(expect, for: viewModel.defaultStyles) {
+            viewModel.refresh()
+        }
+
+        // then
+        #expect(styles?.keys.sorted() == [WidgetVariant.todaySummarySmall.id])
+        #expect(styles?[WidgetVariant.monthSmall.id] == nil)
     }
 }
 
