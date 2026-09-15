@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Extensions
 
 
 // MARK: - WidgetStyleId
@@ -49,5 +50,18 @@ public struct WidgetStyle<S: WidgetStyleSetting>: Sendable, Equatable {
         self.id = id
         self.name = name
         self.setting = setting
+    }
+}
+
+
+// MARK: - 표시 이름
+
+extension WidgetStyle {
+
+    public var displayName: String {
+        switch self.id.style {
+        case .default: return "widget.style::default".localized()
+        case .custom: return self.name ?? "widget.style::custom::unnamed".localized()
+        }
     }
 }

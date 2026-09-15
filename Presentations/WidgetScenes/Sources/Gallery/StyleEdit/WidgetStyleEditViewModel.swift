@@ -35,16 +35,6 @@ struct WidgetStyleItemCellViewModel: Equatable {
     var note: String? { self.item.note }
 }
 
-extension WidgetStyle {
-    
-    var displayName: String {
-        switch self.id.style {
-        case .default: return "widget.style::default".localized()
-        case .custom: return self.name ?? "widget.style::custom::unnamed".localized()
-        }
-    }
-}
-
 
 // MARK: - WidgetStyleEditViewModel
 
