@@ -24,7 +24,7 @@ description: Use when executing decomposed large work as multiple PRs from one s
 ### 2. 실행 모드 판정 — 의존성 그래프
 
 - **독립 sub-work → 병렬 가능.** 단 셋 다 충족할 때만: 파일 겹침 없음 / 각자 워크트리 확보 / **동시 진행 sub-work 2개 상한** (상한의 단위는 sub-work — 각 sub-work 내부 dispatch는 순차라, 동시에 활성인 워크트리·xcodebuild가 2개를 넘지 않게 하는 기준이다).
-- **의존 sub-work → stacked 체인.** 앞 sub-work의 PR 머지를 기다리지 않는다 — 앞 브랜치를 베이스로 다음 sub-work을 진행하고, PR도 앞 브랜치를 base로 올린다. **단 sub-work이 campaign DP 면 기본은 opord 착수 자격(선행 DP 머지)이다** — stacked 는 유저가 명시 허용할 때만 타고, 그때 게이트의 "선행 DP 머지"는 "선행 DP PR 존재 + 인터페이스 계약 확정(campaign.md 8항 작전 배열의 통제수단)"으로 완화된다 (opord §3-2). 리뷰 반영으로 앞이 바뀌는 리스크는 §5 rebase 규정이 흡수한다.
+- **의존 sub-work → stacked 체인.** 앞 sub-work의 PR 머지를 기다리지 않는다 — 앞 브랜치를 베이스로 다음 sub-work을 진행하고, PR도 앞 브랜치를 base로 올린다. **단 sub-work이 campaign DP 면 기본은 opord 착수 자격(선행 DP 머지)이다** — stacked 는 유저가 명시 허용할 때만 타고, 그때 게이트의 "선행 DP 머지"는 "선행 DP PR 존재 + 인터페이스 계약 확정(campaign.md 8항 작전 배열의 통제수단)"으로 완화된다 (opord §3-2). 리뷰 반영으로 앞이 바뀌는 리스크는 §5 rebase 규정이 흡수한다. 완화된 조건도 `회귀` 앞에선 무효다 — 선행 DP 가 되돌려지면 그 PR 로 확정했던 인터페이스 계약이 사라지므로, 스택 뒤를 잇지 않고 멈춘다.
 
 ### 3. 원장 — 컴팩션 생존 장부
 
