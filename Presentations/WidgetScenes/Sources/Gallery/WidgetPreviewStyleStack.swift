@@ -18,13 +18,10 @@ struct WidgetPreviewStyleStack {
 
     let base: any WidgetStyleSetting
     let overlays: [any WidgetStyleSetting]
-    let showsEmptyOverlay: Bool
 
     init?(styles: [any WidgetStyleSetting]) {
         guard let base = styles.first else { return nil }
-        let customStyles = styles.dropFirst()
         self.base = base
-        self.overlays = Array(customStyles.prefix(Constant.maxOverlayCount))
-        self.showsEmptyOverlay = customStyles.count > Constant.maxOverlayCount
+        self.overlays = Array(styles.dropFirst().prefix(Constant.maxOverlayCount))
     }
 }

@@ -42,6 +42,20 @@ final class WidgetGallerySnapshots: XCTestCase {
     }
     
     @MainActor
+    private func detailStateWithCustomStyles() -> WidgetGalleryDetailViewState {
+        let variant = WidgetVariant.todaySummarySmall
+        let styles: [any WidgetStyleSetting] = [
+            TodayStyleSetting(),
+            TodayStyleSetting() |> \.showMonthYear .~ false,
+            TodayStyleSetting() |> \.showTodoCount .~ false |> \.showScheduleCount .~ false
+        ]
+        let state = self.detailState(.todaySummary)
+        state.previewStyles = WidgetPreviewStyleStack(styles: styles)
+            .map { [variant.id: $0] } ?? [:]
+        return state
+    }
+    
+    @MainActor
     private func listState() -> WidgetGalleryViewState {
         let state = WidgetGalleryViewState()
         state.items = WidgetGalleryItem.allCases
@@ -107,6 +121,16 @@ final class WidgetGallerySnapshots: XCTestCase {
         captureSnapshotPair(named: "widgetGalleryDetail-customizable", layout: .fullScreen) { theme in
             WidgetGalleryDetailView()
                 .environment(self.detailState(.todaySummary))
+                .environment(WidgetGalleryDetailViewEventHandler())
+                .environment(self.makeAppearance(theme))
+        }
+    }
+    
+    @MainActor
+    func test_widgetGalleryDetail_withCustomStyles() {
+        captureSnapshotPair(named: "widgetGalleryDetail-customStyles", layout: .fullScreen) { theme in
+            WidgetGalleryDetailView()
+                .environment(self.detailStateWithCustomStyles())
                 .environment(WidgetGalleryDetailViewEventHandler())
                 .environment(self.makeAppearance(theme))
         }

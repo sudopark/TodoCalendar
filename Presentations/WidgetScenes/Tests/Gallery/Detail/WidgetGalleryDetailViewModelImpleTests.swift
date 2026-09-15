@@ -169,7 +169,6 @@ extension WidgetGalleryDetailViewModelImpleTests {
         // then
         let stack = emitted?[WidgetVariant.todaySummarySmall.id]
         #expect(stack?.overlays.isEmpty == true)
-        #expect(stack?.showsEmptyOverlay == false)
     }
 
     @Test("커스텀 스타일이 두 장이면 목록 순서 그대로 둘 다 겹쳐 깐다")
@@ -189,11 +188,10 @@ extension WidgetGalleryDetailViewModelImpleTests {
         // then
         let stack = emitted?[WidgetVariant.todaySummarySmall.id]
         #expect(self.todaySettings(stack).overlays == customs.map { $0.setting })
-        #expect(stack?.showsEmptyOverlay == false)
     }
 
-    @Test("커스텀 스타일이 두 장을 넘으면 앞 두 장만 깔고 빈 장 하나로 갈음한다")
-    func previewStyles_whenMoreThanTwoCustomStyles_stacksFirstTwoAndEmptyOverlay() async throws {
+    @Test("커스텀 스타일이 두 장을 넘어도 앞 두 장까지만 깐다")
+    func previewStyles_whenMoreThanTwoCustomStyles_stacksFirstTwoOnly() async throws {
         // given
         let customs = [
             self.todayStyle(.custom(id: "c1"), timeZone: true),
@@ -210,7 +208,6 @@ extension WidgetGalleryDetailViewModelImpleTests {
         // then
         let stack = emitted?[WidgetVariant.todaySummarySmall.id]
         #expect(self.todaySettings(stack).overlays == customs.prefix(2).map { $0.setting })
-        #expect(stack?.showsEmptyOverlay == true)
     }
 
     @Test("커스텀 스타일을 지우면 그만큼 줄어든 스택을 다시 낸다")
