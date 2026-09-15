@@ -10,6 +10,8 @@
 
 "Event" = "Event";
 "Turn" = "Repeat turn";
+"WidgetStyle" = "Widget style";
+"Style" = "Style";
 "EventType" = "Event type";
 "Event Types" = "Event types";
 "Exclude all day event" = "Exclude all-day events";
