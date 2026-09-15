@@ -108,11 +108,11 @@ extension WidgetGalleryDetailViewModelImpleTests {
 
     private func todayStyle(
         _ style: WidgetStyleId.Style,
-        holiday: Bool? = nil,
-        timeZone: Bool? = nil,
-        monthYear: Bool? = nil
+        holiday: Bool = true,
+        timeZone: Bool = true,
+        monthYear: Bool = true
     ) -> WidgetStyle<TodayStyleSetting> {
-        let setting = TodayStyleSetting()
+        let setting = TodayStyleSetting.initial
             |> \.showHolidayName .~ holiday
             |> \.showTimeZone .~ timeZone
             |> \.showMonthYear .~ monthYear

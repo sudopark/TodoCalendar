@@ -42,18 +42,18 @@ public struct TodayWidgetViewModel {
     public var scheduleEventcount: Int = 0
     public var totalEventCount: Int { self.todoEventCount + self.scheduleEventcount }
     public var widgetSetting = WidgetAppearanceSettings()
-    public var style = TodayStyleSetting()
+    public var style = TodayStyleSetting.initial
     
     public var displayHolidayName: String? {
-        return self.style.showHolidayName.isDisplayed ? self.holidayName : nil
+        return self.style.showHolidayName ? self.holidayName : nil
     }
     public var displayTimeZoneText: String? {
-        return self.style.showTimeZone.isDisplayed ? self.timeZoneText : nil
+        return self.style.showTimeZone ? self.timeZoneText : nil
     }
-    public var showsMonthAndYear: Bool { self.style.showMonthYear.isDisplayed }
-    public var showsTotalCount: Bool { self.style.showTotalCount.isDisplayed }
-    public var showsTodoCount: Bool { self.style.showTodoCount.isDisplayed }
-    public var showsScheduleCount: Bool { self.style.showScheduleCount.isDisplayed }
+    public var showsMonthAndYear: Bool { self.style.showMonthYear }
+    public var showsTotalCount: Bool { self.style.showTotalCount }
+    public var showsTodoCount: Bool { self.style.showTodoCount }
+    public var showsScheduleCount: Bool { self.style.showScheduleCount }
     
     public var eventCountLines: TodayEventCountLines {
         let showsEachCount = (self.showsTodoCount && self.todoEventCount > 0)

@@ -17,7 +17,7 @@ private struct DummyTodayStyle: WidgetStyleSetting {
 
     var showHolidayName: Bool?
 
-    init() { }
+    static let initial = DummyTodayStyle(showHolidayName: nil)
 
     init(showHolidayName: Bool?) {
         self.showHolidayName = showHolidayName
@@ -29,7 +29,7 @@ private struct DummyMonthStyle: WidgetStyleSetting {
     var showWeekDayHeader: Bool?
     var accentToday: Bool?
 
-    init() { }
+    static let initial = DummyMonthStyle(showWeekDayHeader: nil, accentToday: nil)
 
     init(showWeekDayHeader: Bool?, accentToday: Bool?) {
         self.showWeekDayHeader = showWeekDayHeader

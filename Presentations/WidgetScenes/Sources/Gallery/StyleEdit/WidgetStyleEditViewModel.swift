@@ -125,7 +125,7 @@ extension WidgetStyleEditViewModelImple {
     
     func resetStyle(_ styleId: WidgetStyleId) {
         let confirmed: () -> Void = { [weak self] in
-            self?.replaceStyle(styleId) { $0 |> \.setting .~ .init() |> \.name .~ nil }
+            self?.replaceStyle(styleId) { $0 |> \.setting .~ .initial |> \.name .~ nil }
             self?.refreshEditingName()
         }
         let info = ConfirmDialogInfo()
@@ -155,7 +155,7 @@ extension WidgetStyleEditViewModelImple {
     func toggleItem(_ item: TodayStyleItem) {
         let settingPath: WritableKeyPath<WidgetStyle<TodayStyleSetting>, TodayStyleSetting> = \.setting
         let keyPath = settingPath.appending(path: item.settingKeyPath)
-        self.updateSelectedStyle { $0 |> keyPath .~ !$0[keyPath: keyPath].isDisplayed }
+        self.updateSelectedStyle { $0 |> keyPath .~ !$0[keyPath: keyPath] }
     }
     
     /// 저장해도 화면에 남는다 — 다른 카드를 이어서 저장할 수 있어야 한다.
@@ -352,7 +352,7 @@ extension WidgetStyleEditViewModelImple {
         .map { setting in
             return TodayStyleItem.allCases.map { item in
                 WidgetStyleItemCellViewModel(
-                    item: item, isOn: setting[keyPath: item.settingKeyPath].isDisplayed
+                    item: item, isOn: setting[keyPath: item.settingKeyPath]
                 )
             }
         }

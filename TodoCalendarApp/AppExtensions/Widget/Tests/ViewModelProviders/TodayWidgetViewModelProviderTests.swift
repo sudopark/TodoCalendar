@@ -36,7 +36,7 @@ class TodayWidgetViewModelProviderTests: BaseTestCase {
         }
         
         let defaultStyle = showHolidayNameStyle.map {
-            [WidgetStyleId(variant: .todaySummarySmall, style: .default): TodayStyleSetting() |> \.showHolidayName .~ $0]
+            [WidgetStyleId(variant: .todaySummarySmall, style: .default): TodayStyleSetting.initial |> \.showHolidayName .~ $0]
         }
         let customs = customStyles.reduce(into: [WidgetStyleId: TodayStyleSetting]()) { acc, pair in
             acc[WidgetStyleId(variant: .todaySummarySmall, style: .custom(id: pair.key))] = pair.value
@@ -140,7 +140,7 @@ extension TodayWidgetViewModelProviderTests {
         let viewModel = try await provider.getTodayViewModel(for: self.dummyDate)
         
         // then
-        XCTAssertEqual(viewModel.style, TodayStyleSetting())
+        XCTAssertEqual(viewModel.style, TodayStyleSetting.initial)
         XCTAssertEqual(viewModel.displayHolidayName, "holiday")
     }
     
@@ -180,7 +180,7 @@ extension TodayWidgetViewModelProviderTests {
         let provider = self.makeProvider(
             todayIsHoliday: true,
             showHolidayNameStyle: true,
-            customStyles: ["c1": TodayStyleSetting() |> \.showHolidayName .~ false]
+            customStyles: ["c1": TodayStyleSetting.initial |> \.showHolidayName .~ false]
         )
         
         // when
@@ -217,7 +217,7 @@ extension TodayWidgetViewModelProviderTests {
         )
         
         // then
-        XCTAssertEqual(viewModel.style, TodayStyleSetting())
+        XCTAssertEqual(viewModel.style, TodayStyleSetting.initial)
         XCTAssertEqual(viewModel.displayHolidayName, "holiday")
     }
 }

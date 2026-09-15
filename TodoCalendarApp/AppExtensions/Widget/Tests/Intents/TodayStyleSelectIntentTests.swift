@@ -63,7 +63,7 @@ struct TodayStyleEntityListTests {
         _ style: WidgetStyleId.Style, name: String?
     ) -> WidgetStyle<TodayStyleSetting> {
         return .init(
-            id: .init(variant: .todaySummarySmall, style: style), name: name, setting: .init()
+            id: .init(variant: .todaySummarySmall, style: style), name: name, setting: .initial
         )
     }
 

@@ -164,7 +164,7 @@ extension WidgetVariant {
     ) -> AnyView {
         let model = TodayWidgetViewModel.sample()
             |> \.widgetSetting .~ setting
-            |> \.style .~ (style as? TodayStyleSetting ?? .init())
+            |> \.style .~ (style as? TodayStyleSetting ?? .initial)
         return AnyView(TodaySummaryView(model: model))
     }
 
