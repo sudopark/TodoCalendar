@@ -22,7 +22,8 @@ class TodayWidgetViewModelProviderTests: BaseTestCase {
         withoutCustomTimeZone: Bool = true,
         todayIsHoliday: Bool = false,
         withoutEvent: Bool = false,
-        showHolidayNameStyle: Bool? = nil
+        showHolidayNameStyle: Bool? = nil,
+        customStyles: [String: TodayStyleSetting] = [:]
     ) -> TodayWidgetViewModelProvider {
         
         let fetchUsecase = StubCalendarEventsFetchUescase()
@@ -34,14 +35,19 @@ class TodayWidgetViewModelProviderTests: BaseTestCase {
             repository.saveTimeZone(self.gmt)
         }
         
-        let styles = showHolidayNameStyle.map {
+        let defaultStyle = showHolidayNameStyle.map {
             [WidgetStyleId(variant: .todaySummarySmall, style: .default): TodayStyleSetting() |> \.showHolidayName .~ $0]
+        }
+        let customs = customStyles.reduce(into: [WidgetStyleId: TodayStyleSetting]()) { acc, pair in
+            acc[WidgetStyleId(variant: .todaySummarySmall, style: .custom(id: pair.key))] = pair.value
         }
         return TodayWidgetViewModelProvider(
             eventsFetchusecase: fetchUsecase,
             appSettingRepository: StubAppSettingRepository(),
             calednarSettingRepository: repository,
-            styleRepository: StubWidgetStyleRepository(todayStyles: styles ?? [:])
+            styleRepository: StubWidgetStyleRepository(
+                todayStyles: (defaultStyle ?? [:]).merging(customs) { _, custom in custom }
+            )
         )
     }
     
@@ -160,6 +166,58 @@ extension TodayWidgetViewModelProviderTests {
         
         // then
         XCTAssertEqual(viewModel.style.showHolidayName, true)
+        XCTAssertEqual(viewModel.displayHolidayName, "holiday")
+    }
+}
+
+
+// MARK: - 인스턴스가 고른 스타일
+
+extension TodayWidgetViewModelProviderTests {
+    
+    func testProvider_whenInstanceSelectsCustomStyle_applyIt() async throws {
+        // given
+        let provider = self.makeProvider(
+            todayIsHoliday: true,
+            showHolidayNameStyle: true,
+            customStyles: ["c1": TodayStyleSetting() |> \.showHolidayName .~ false]
+        )
+        
+        // when
+        let viewModel = try await provider.getTodayViewModel(
+            for: self.dummyDate, style: .custom(id: "c1")
+        )
+        
+        // then
+        XCTAssertEqual(viewModel.style.showHolidayName, false)
+        XCTAssertEqual(viewModel.displayHolidayName, nil)
+    }
+    
+    func testProvider_whenSelectedCustomStyleRemoved_fallbackToVariantDefaultStyle() async throws {
+        // given
+        let provider = self.makeProvider(todayIsHoliday: true, showHolidayNameStyle: false)
+        
+        // when
+        let viewModel = try await provider.getTodayViewModel(
+            for: self.dummyDate, style: .custom(id: "removed")
+        )
+        
+        // then
+        XCTAssertEqual(viewModel.style.showHolidayName, false)
+        XCTAssertEqual(viewModel.displayHolidayName, nil)
+    }
+    
+    func testProvider_whenSelectedCustomStyleRemovedAndNoDefaultSaved_useInitialSetting() async throws {
+        // given
+        let provider = self.makeProvider(todayIsHoliday: true)
+        
+        // when
+        let viewModel = try await provider.getTodayViewModel(
+            for: self.dummyDate, style: .custom(id: "removed")
+        )
+        
+        // then
+        XCTAssertEqual(viewModel.style, TodayStyleSetting())
         XCTAssertEqual(viewModel.displayHolidayName, "holiday")
     }
 }

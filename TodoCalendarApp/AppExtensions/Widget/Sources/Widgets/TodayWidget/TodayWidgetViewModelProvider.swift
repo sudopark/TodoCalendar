@@ -54,20 +54,32 @@ final class TodayWidgetViewModelProvider {
 extension TodayWidgetViewModelProvider {
     
     
-    func getTodayViewModel(for today: Date) async throws -> TodayWidgetViewModel {
+    /// 인스턴스가 스타일을 안 고르는 합성 위젯도 같은 경로를 쓴다 — 그쪽은 변형 기본 스타일이다.
+    func getTodayViewModel(
+        for today: Date, style: WidgetStyleId.Style = .default
+    ) async throws -> TodayWidgetViewModel {
         
         let setting = self.appSettingRepository.loadWidgetAppearanceSetting()
-        let style = self.styleRepository.loadSetting(
-            TodayStyleSetting.self, for: .init(variant: .todaySummarySmall, style: .default)
-        ) ?? .init()
+        let styleSetting = self.styleSetting(style)
         let timeZone = self.calednarSettingRepository.loadUserSelectedTImeZone() ?? .current
         let calednar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
         let todayRange = try calednar.dayRange(today).unwrap()
         let events = try await self.todayEvents(todayRange, timeZone)
         return TodayWidgetViewModel(today, calednar)
             .updated(events: events)
-            |> \.style .~ style
+            |> \.style .~ styleSetting
             |> \.widgetSetting .~ setting
+    }
+    
+    /// 인스턴스가 고른 스타일 → 변형 기본 스타일 → 코드 기본값 순으로 내려간다.
+    private func styleSetting(_ style: WidgetStyleId.Style) -> TodayStyleSetting {
+        return self.savedStyleSetting(style) ?? self.savedStyleSetting(.default) ?? .init()
+    }
+    
+    private func savedStyleSetting(_ style: WidgetStyleId.Style) -> TodayStyleSetting? {
+        return self.styleRepository.loadSetting(
+            TodayStyleSetting.self, for: .init(variant: .todaySummarySmall, style: style)
+        )
     }
     
     private func todayEvents(

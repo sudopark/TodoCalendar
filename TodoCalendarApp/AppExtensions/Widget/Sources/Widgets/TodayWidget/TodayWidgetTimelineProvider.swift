@@ -40,7 +40,7 @@ extension TodayWidgetTimelineProvider {
         else {
             return self.placeholder(in: context)
         }
-        return await self.loadEntry()
+        return await self.loadEntry(configuration.resolvedStyle)
     }
     
     func timeline(
@@ -48,17 +48,17 @@ extension TodayWidgetTimelineProvider {
         in context: Context
     ) async -> Timeline<Entry> {
         
-        let entry = await self.loadEntry()
+        let entry = await self.loadEntry(configuration.resolvedStyle)
         return Timeline(entries: [entry], policy: .after(Date().nextUpdateTime))
     }
     
-    private func loadEntry() async -> Entry {
+    private func loadEntry(_ style: WidgetStyleId.Style) async -> Entry {
         
         let builder = WidgetViewModelProviderBuilder(base: .init())
         let viewModelProvider = await builder.makeTodayViewModelProvider()
         let now = Date()
         do {
-            let model = try await viewModelProvider.getTodayViewModel(for: now)
+            let model = try await viewModelProvider.getTodayViewModel(for: now, style: style)
             return .init(date: now, result: .success(model))
                 |> \.background .~ model.widgetSetting.background
             
