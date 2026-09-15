@@ -96,3 +96,42 @@ struct TodayStyleEntityListTests {
         #expect(entities.map { $0.name } == ["Untitled"])
     }
 }
+
+
+// MARK: - 인스턴스 선택 해석
+
+struct TodayWidgetConfigurationIntentTests {
+
+    private func intent(selecting entityId: String?) -> TodayWidgetConfigurationIntent {
+        let intent = TodayWidgetConfigurationIntent()
+        intent.style = entityId.map { TodayStyleEntity(id: $0, name: "any") }
+        return intent
+    }
+
+    @Test("고른 스타일이 없으면 기본 스타일로 읽는다")
+    func resolvedStyle_whenNoSelection_isDefault() {
+        // given
+        let intent = self.intent(selecting: nil)
+
+        // when + then
+        #expect(intent.resolvedStyle == .default)
+    }
+
+    @Test("커스텀 스타일을 골랐으면 그 좌표로 읽는다")
+    func resolvedStyle_whenCustomSelected_isThatCustom() {
+        // given
+        let intent = self.intent(selecting: "custom::c1")
+
+        // when + then
+        #expect(intent.resolvedStyle == .custom(id: "c1"))
+    }
+
+    @Test("해석할 수 없는 선택값은 기본 스타일로 읽는다")
+    func resolvedStyle_whenMalformedEntityId_isDefault() {
+        // given
+        let intent = self.intent(selecting: "broken")
+
+        // when + then
+        #expect(intent.resolvedStyle == .default)
+    }
+}
