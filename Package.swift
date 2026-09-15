@@ -16,7 +16,7 @@ let package = Package(
         .package(url: "https://github.com/onevcat/Kingfisher.git", from: "7.12.0"),
         .package(url: "https://github.com/pointfreeco/swift-prelude.git", branch: "main"),
         .package(url: "https://github.com/apple/swift-async-algorithms.git", from: "0.1.0"),
-        .package(url: "https://github.com/sudopark/publisher-async-bind.git", from: "0.0.2"),
+        .package(url: "https://github.com/sudopark/publisher-async-bind.git", from: "0.1.0"),
         .package(url: "https://github.com/sudopark/SQLiteService.git", from: "0.3.2"),
         .package(url: "https://github.com/CombineCommunity/CombineCocoa.git", from: "0.4.1"),
         .package(url: "https://github.com/kean/Pulse", from: "4.1.0"),

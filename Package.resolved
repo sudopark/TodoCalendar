@@ -203,8 +203,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/sudopark/publisher-async-bind.git",
       "state" : {
-        "revision" : "c2e39e1b8d26e1a832078d6cf54114874527618f",
-        "version" : "0.0.2"
+        "revision" : "526afe64c5f6084ca7c375d25acf7fe621a07999",
+        "version" : "0.1.0"
       }
     },
     {
