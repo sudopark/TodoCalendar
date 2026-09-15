@@ -114,7 +114,9 @@ struct WidgetGalleryDetailView: View {
 
     private enum Constant {
         static let previewHorizontalInset: CGFloat = 40
-        static let overlayOffsetStep: CGFloat = 12
+        static let overlayOffsetStep: CGFloat = 16
+        static let overlayAngle: CGFloat = 20
+        static let overlayScale: CGFloat = 0.88
         static let labelAreaHeight: CGFloat = 44
         static let indicatorAreaHeight: CGFloat = 40
     }
@@ -207,49 +209,39 @@ struct WidgetGalleryDetailView: View {
         }
     }
 
-    /// 밀린 만큼 trailing 여백을 줘야 겹친 카드가 프리뷰 박스를 넘지 않는다.
     private func previewStackView(
         _ variant: WidgetVariant, pageAspect: CGFloat
     ) -> some View {
         let stack = state.previewStyles[variant.id]
         let overlayStyles = stack?.overlays ?? []
-        let emptyOverlayDepth = (stack?.showsEmptyOverlay == true)
-            ? overlayStyles.count + 1 : nil
-        let deepestDepth = emptyOverlayDepth ?? overlayStyles.count
 
-        return ZStack(alignment: .leading) {
-
-            if let emptyOverlayDepth {
-                overlayCardView(variant, style: nil, depth: emptyOverlayDepth)
-            }
+        return ZStack {
 
             ForEach(Array(overlayStyles.enumerated()).reversed(), id: \.offset) { index, style in
-                overlayCardView(variant, style: style, depth: index + 1)
+                overlayCardView(variant, style: style, depth: index)
             }
 
             WidgetVariantPreviewView(
                 variant: variant, setting: state.setting, style: stack?.base
             )
+            .if(condition: overlayStyles.isEmpty == false) { $0.cardDepthShadow() }
         }
         .aspectRatio(pageAspect, contentMode: .fit)
-        .padding(.leading, Constant.previewHorizontalInset)
-        .padding(
-            .trailing,
-            Constant.previewHorizontalInset
-                + Constant.overlayOffsetStep * CGFloat(deepestDepth)
-        )
+        .padding(.horizontal, Constant.previewHorizontalInset)
     }
 
+    /// 뒷장을 좌우로 번갈아 눕혀야 앞장에 가리지 않고 카드로 읽힌다.
     private func overlayCardView(
-        _ variant: WidgetVariant, style: (any WidgetStyleSetting)?, depth: Int
+        _ variant: WidgetVariant, style: any WidgetStyleSetting, depth: Int
     ) -> some View {
+        let direction: CGFloat = depth.isMultiple(of: 2) ? -1 : 1
         return WidgetVariantPreviewView(
-            variant: variant,
-            setting: state.setting,
-            style: style,
-            isEmptyStyle: style == nil
+            variant: variant, setting: state.setting, style: style
         )
-        .offset(x: Constant.overlayOffsetStep * CGFloat(depth))
+        .cardDepthShadow()
+        .scaleEffect(Constant.overlayScale)
+        .rotationEffect(.degrees(Constant.overlayAngle * direction))
+        .offset(x: Constant.overlayOffsetStep * direction)
     }
 
     private func labelView(_ variant: WidgetVariant) -> some View {
@@ -258,6 +250,26 @@ struct WidgetGalleryDetailView: View {
                 .font(appearance.fontSet.normal.asFont)
                 .foregroundStyle(appearance.colorSet.text1.asColor)
         }
+    }
+}
+
+
+private enum CardShadow {
+    static let radius: CGFloat = 12
+    static let opacity: CGFloat = 0.2
+    static let offsetY: CGFloat = 4
+}
+
+private extension View {
+
+    /// 앱은 그림자를 쓰지 않지만, 겹친 카드가 층으로 안 갈려 미리보기에만 준다 (presentations-rules §8 예외).
+    func cardDepthShadow() -> some View {
+        return self.shadow(
+            color: .black.opacity(CardShadow.opacity),
+            radius: CardShadow.radius,
+            x: 0,
+            y: CardShadow.offsetY
+        )
     }
 }
 
