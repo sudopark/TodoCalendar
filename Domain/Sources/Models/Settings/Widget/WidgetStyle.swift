@@ -34,7 +34,8 @@ public struct WidgetStyleId: Hashable, Sendable {
 
 public protocol WidgetStyleSetting: Codable, Sendable, Equatable {
 
-    init()
+    /// 저장값이 없거나 항목이 비었을 때 채워 넣을 값 — 스타일 좌표의 `.default` 와 다른 층이다.
+    static var initial: Self { get }
 }
 
 

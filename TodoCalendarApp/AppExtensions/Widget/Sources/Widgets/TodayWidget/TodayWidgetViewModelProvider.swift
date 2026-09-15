@@ -73,7 +73,7 @@ extension TodayWidgetViewModelProvider {
     
     /// 인스턴스가 고른 스타일 → 변형 기본 스타일 → 코드 기본값 순으로 내려간다.
     private func styleSetting(_ style: WidgetStyleId.Style) -> TodayStyleSetting {
-        return self.savedStyleSetting(style) ?? self.savedStyleSetting(.default) ?? .init()
+        return self.savedStyleSetting(style) ?? self.savedStyleSetting(.default) ?? .initial
     }
     
     private func savedStyleSetting(_ style: WidgetStyleId.Style) -> TodayStyleSetting? {

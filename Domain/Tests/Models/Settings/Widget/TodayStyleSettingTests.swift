@@ -25,10 +25,24 @@ struct TodayStyleSettingTests {
 
 extension TodayStyleSettingTests {
 
-    @Test("표시 항목 다섯을 인코딩했다가 디코딩해도 값이 유지된다")
+    @Test("초기값은 표시 항목을 전부 보여준다")
+    func initial_showsEveryItem() {
+        // given
+        let setting = TodayStyleSetting.initial
+
+        // when + then
+        #expect(setting.showHolidayName == true)
+        #expect(setting.showTimeZone == true)
+        #expect(setting.showMonthYear == true)
+        #expect(setting.showTotalCount == true)
+        #expect(setting.showTodoCount == true)
+        #expect(setting.showScheduleCount == true)
+    }
+
+    @Test("표시 항목을 인코딩했다가 디코딩해도 끈 항목이 그대로 남는다")
     func encodeAndDecode_keepAllDisplayItems() throws {
         // given
-        let setting = TodayStyleSetting()
+        let setting = TodayStyleSetting.initial
             |> \.showHolidayName .~ false
             |> \.showTimeZone .~ true
             |> \.showTotalCount .~ false
@@ -47,21 +61,30 @@ extension TodayStyleSettingTests {
         #expect(restored.showScheduleCount == false)
     }
 
-    @Test("표시 항목이 늘기 전에 저장된 payload 도 디코딩되고 새 항목은 미지정이다")
-    func decodeLegacyPayload_newItemsAreNotSpecified() throws {
+    @Test("표시 항목이 늘기 전에 저장된 payload 는 없는 항목이 초기값으로 채워진다")
+    func decodeLegacyPayload_fillsMissingItemsWithInitial() throws {
         // given
         let legacyText = """
-        { "showHolidayName": true }
+        { "showHolidayName": false }
         """
 
         // when
         let setting = try self.decoded(legacyText)
 
         // then
-        #expect(setting.showHolidayName == true)
-        #expect(setting.showTimeZone == nil)
-        #expect(setting.showTotalCount == nil)
-        #expect(setting.showTodoCount == nil)
-        #expect(setting.showScheduleCount == nil)
+        #expect(setting.showHolidayName == false)
+        #expect(setting.showTimeZone == TodayStyleSetting.initial.showTimeZone)
+        #expect(setting.showTotalCount == TodayStyleSetting.initial.showTotalCount)
+        #expect(setting.showTodoCount == TodayStyleSetting.initial.showTodoCount)
+        #expect(setting.showScheduleCount == TodayStyleSetting.initial.showScheduleCount)
+    }
+
+    @Test("항목이 하나도 없는 payload 는 초기값 그대로다")
+    func decodeEmptyPayload_isInitial() throws {
+        // when
+        let setting = try self.decoded("{ }")
+
+        // then
+        #expect(setting == TodayStyleSetting.initial)
     }
 }

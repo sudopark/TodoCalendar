@@ -45,9 +45,9 @@ final class WidgetGallerySnapshots: XCTestCase {
     private func detailStateWithCustomStyles() -> WidgetGalleryDetailViewState {
         let variant = WidgetVariant.todaySummarySmall
         let styles: [any WidgetStyleSetting] = [
-            TodayStyleSetting(),
-            TodayStyleSetting() |> \.showMonthYear .~ false,
-            TodayStyleSetting() |> \.showTodoCount .~ false |> \.showScheduleCount .~ false
+            TodayStyleSetting.initial,
+            TodayStyleSetting.initial |> \.showMonthYear .~ false,
+            TodayStyleSetting.initial |> \.showTodoCount .~ false |> \.showScheduleCount .~ false
         ]
         let state = self.detailState(.todaySummary)
         state.previewStyles = WidgetPreviewStyleStack(styles: styles)
@@ -141,8 +141,8 @@ final class WidgetGallerySnapshots: XCTestCase {
     @MainActor
     private func styleEditState(_ turnedOffItems: Set<TodayStyleItem> = []) -> WidgetStyleEditViewState {
         let styleId = WidgetStyleId(variant: .todaySummarySmall, style: .default)
-        let setting = TodayStyleItem.allCases.reduce(into: TodayStyleSetting()) { acc, item in
-            acc[keyPath: item.settingKeyPath] = turnedOffItems.contains(item) ? false : nil
+        let setting = TodayStyleItem.allCases.reduce(into: TodayStyleSetting.initial) { acc, item in
+            acc[keyPath: item.settingKeyPath] = turnedOffItems.contains(item) == false
         }
         let style = WidgetStyle(id: styleId, name: nil, setting: setting)
         let state = WidgetStyleEditViewState()
@@ -168,17 +168,17 @@ final class WidgetGallerySnapshots: XCTestCase {
             WidgetStyle(
                 id: .init(variant: variant, style: .default),
                 name: nil,
-                setting: TodayStyleSetting()
+                setting: TodayStyleSetting.initial
             ),
             WidgetStyle(
                 id: .init(variant: variant, style: .custom(id: "c1")),
                 name: "Night",
-                setting: TodayStyleSetting() |> \.showHolidayName .~ false
+                setting: TodayStyleSetting.initial |> \.showHolidayName .~ false
             ),
             WidgetStyle(
                 id: .init(variant: variant, style: .custom(id: "c2")),
                 name: nil,
-                setting: TodayStyleSetting() |> \.showTimeZone .~ false
+                setting: TodayStyleSetting.initial |> \.showTimeZone .~ false
             )
         ]
         let selected = styles[1]
@@ -193,7 +193,7 @@ final class WidgetGallerySnapshots: XCTestCase {
         state.selectedStyleId = selected.id
         state.editingName = selected.name ?? ""
         state.items = TodayStyleItem.allCases.map {
-            .init(item: $0, isOn: selected.setting[keyPath: $0.settingKeyPath].isDisplayed)
+            .init(item: $0, isOn: selected.setting[keyPath: $0.settingKeyPath])
         }
         return state
     }

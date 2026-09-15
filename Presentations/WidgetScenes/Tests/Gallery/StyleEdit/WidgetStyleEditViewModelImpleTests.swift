@@ -34,12 +34,12 @@ final class WidgetStyleEditViewModelImpleTests: PublisherWaitable {
     }
 
     private func todayStyle(
-        _ style: WidgetStyleId.Style, name: String? = nil, showHolidayName: Bool? = nil
+        _ style: WidgetStyleId.Style, name: String? = nil, showHolidayName: Bool = true
     ) -> WidgetStyle<TodayStyleSetting> {
         return .init(
             id: .init(variant: .todaySummarySmall, style: style),
             name: name,
-            setting: TodayStyleSetting() |> \.showHolidayName .~ showHolidayName
+            setting: TodayStyleSetting.initial |> \.showHolidayName .~ showHolidayName
         )
     }
 }
@@ -81,7 +81,7 @@ extension WidgetStyleEditViewModelImpleTests {
 
     private func makeViewModelWithDefaultOnly(
         name: String? = nil,
-        showHolidayName: Bool? = nil,
+        showHolidayName: Bool = true,
         router: SpyWidgetStyleEditRouter = .init()
     ) -> (WidgetStyleEditViewModelImple, StubWidgetStyleUsecase) {
         return self.makeViewModel(
@@ -93,7 +93,7 @@ extension WidgetStyleEditViewModelImpleTests {
     /// 기본 카드와 커스텀 카드 하나가 저장된 화면 — 고른 것은 기본 카드다.
     private func makeViewModelWithCustom(
         name: String? = nil,
-        showHolidayName: Bool? = nil,
+        showHolidayName: Bool = true,
         router: SpyWidgetStyleEditRouter = .init()
     ) -> (WidgetStyleEditViewModelImple, StubWidgetStyleUsecase) {
         return self.makeViewModel(
@@ -300,7 +300,7 @@ extension WidgetStyleEditViewModelImpleTests {
         // then
         let saved = usecase.updatedStyles.first
         #expect(saved?.setting.showScheduleCount == false)
-        #expect(saved?.setting.showHolidayName == nil)
+        #expect(saved?.setting.showHolidayName == true)
         #expect(saved?.id == self.customId)
         #expect(router.didClosed == nil)
     }
@@ -727,7 +727,7 @@ extension WidgetStyleEditViewModelImpleTests {
 
         // then
         let emitted = try await self.styles(of: viewModel)
-        #expect(emitted.first?.setting.showTodoCount == nil)
+        #expect(emitted.first?.setting.showTodoCount == true)
         #expect(emitted.first?.setting.showHolidayName == true)
         #expect(usecase.updatedStyles.isEmpty)
     }
@@ -742,7 +742,7 @@ extension WidgetStyleEditViewModelImpleTests {
 
         // then
         let emitted = try await self.styles(of: viewModel)
-        #expect(emitted.last?.setting.showScheduleCount == nil)
+        #expect(emitted.last?.setting.showScheduleCount == true)
         #expect(emitted.last?.hasUnsavedChange == false)
         #expect(emitted.first?.setting.showTodoCount == false)
         #expect(emitted.first?.hasUnsavedChange == true)
@@ -815,7 +815,7 @@ extension WidgetStyleEditViewModelImpleTests {
 
         // then
         let emitted = try await self.styles(of: viewModel)
-        #expect(emitted.first?.setting == TodayStyleSetting())
+        #expect(emitted.first?.setting == TodayStyleSetting.initial)
     }
 
     @Test("초기화도 저장을 눌러야 저장소에 반영된다")

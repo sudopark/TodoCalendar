@@ -79,7 +79,7 @@ extension WidgetStyleUsecaseImple {
         let savedStyles = self.styleRepository.loadStyles(type, of: variant)
         let defaultStyle = savedStyles.first { $0.id.style == .default }
             ?? WidgetStyle(
-                id: .init(variant: variant, style: .default), name: nil, setting: S()
+                id: .init(variant: variant, style: .default), name: nil, setting: S.initial
             )
         let customStyles = savedStyles.filter { $0.id.style != .default }
         return [defaultStyle] + customStyles

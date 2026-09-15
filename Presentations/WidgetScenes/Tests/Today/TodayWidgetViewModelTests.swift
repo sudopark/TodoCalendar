@@ -37,10 +37,10 @@ struct TodayWidgetViewModelTests {
 
 extension TodayWidgetViewModelTests {
 
-    @Test("스타일이 미설정이면 표시 항목 여섯을 전부 보인다")
-    func displayItems_whenStyleNotSpecified_showAll() {
+    @Test("초기값 스타일이면 표시 항목 여섯을 전부 보인다")
+    func displayItems_whenInitialStyle_showAll() {
         // given
-        let model = self.makeModel(.init())
+        let model = self.makeModel(.initial)
 
         // when & then
         #expect(model.displayHolidayName == "화이트데이")
@@ -54,7 +54,7 @@ extension TodayWidgetViewModelTests {
     @Test("스타일이 년월을 끄면 년월만 감춘다")
     func showsMonthAndYear_whenStyleTurnsItOff_isFalse() {
         // given
-        let model = self.makeModel(.init() |> \.showMonthYear .~ false)
+        let model = self.makeModel(.initial |> \.showMonthYear .~ false)
 
         // when & then
         #expect(model.showsMonthAndYear == false)
@@ -66,7 +66,7 @@ extension TodayWidgetViewModelTests {
     @Test("스타일이 공휴일명을 끄면 표시용 공휴일명만 사라진다")
     func displayHolidayName_whenStyleTurnsItOff_isNil() {
         // given
-        let model = self.makeModel(.init() |> \.showHolidayName .~ false)
+        let model = self.makeModel(.initial |> \.showHolidayName .~ false)
 
         // when & then
         #expect(model.displayHolidayName == nil)
@@ -77,7 +77,7 @@ extension TodayWidgetViewModelTests {
     @Test("스타일이 타임존을 끄면 표시용 타임존 텍스트만 사라진다")
     func displayTimeZoneText_whenStyleTurnsItOff_isNil() {
         // given
-        let model = self.makeModel(.init() |> \.showTimeZone .~ false)
+        let model = self.makeModel(.initial |> \.showTimeZone .~ false)
 
         // when & then
         #expect(model.displayTimeZoneText == nil)
@@ -88,7 +88,7 @@ extension TodayWidgetViewModelTests {
     @Test("스타일이 총 개수를 끄면 총 개수만 감춘다")
     func showsTotalCount_whenStyleTurnsItOff_isFalse() {
         // given
-        let model = self.makeModel(.init() |> \.showTotalCount .~ false)
+        let model = self.makeModel(.initial |> \.showTotalCount .~ false)
 
         // when & then
         #expect(model.showsTotalCount == false)
@@ -99,7 +99,7 @@ extension TodayWidgetViewModelTests {
     @Test("스타일이 일정 개수를 끄면 일정 개수만 감춘다")
     func showsScheduleCount_whenStyleTurnsItOff_isFalse() {
         // given
-        let model = self.makeModel(.init() |> \.showScheduleCount .~ false)
+        let model = self.makeModel(.initial |> \.showScheduleCount .~ false)
 
         // when & then
         #expect(model.showsScheduleCount == false)
@@ -110,7 +110,7 @@ extension TodayWidgetViewModelTests {
     @Test("할일 개수를 꺼도 총합은 할일을 그대로 센다")
     func totalEventCount_whenTodoCountTurnedOff_stillCountsTodo() {
         // given
-        let model = self.makeModel(.init() |> \.showTodoCount .~ false)
+        let model = self.makeModel(.initial |> \.showTodoCount .~ false)
 
         // when & then
         #expect(model.showsTodoCount == false)
@@ -126,7 +126,7 @@ extension TodayWidgetViewModelTests {
     @Test("개수 항목 셋이 다 켜져 있으면 두 줄을 채운다")
     func eventCountLines_whenAllCountItemsOn_isBoth() {
         // given
-        let model = self.makeModel(.init())
+        let model = self.makeModel(.initial)
 
         // when & then
         #expect(model.eventCountLines == .both)
@@ -135,7 +135,7 @@ extension TodayWidgetViewModelTests {
     @Test("총 개수만 끄면 항목별 줄만 남는다")
     func eventCountLines_whenTotalCountTurnedOff_isOne() {
         // given
-        let model = self.makeModel(.init() |> \.showTotalCount .~ false)
+        let model = self.makeModel(.initial |> \.showTotalCount .~ false)
 
         // when & then
         #expect(model.eventCountLines == .one)
@@ -145,7 +145,7 @@ extension TodayWidgetViewModelTests {
     func eventCountLines_whenEachCountTurnedOff_isOne() {
         // given
         let model = self.makeModel(
-            .init()
+            .initial
             |> \.showTodoCount .~ false
             |> \.showScheduleCount .~ false
         )
@@ -158,7 +158,7 @@ extension TodayWidgetViewModelTests {
     func eventCountLines_whenAllCountItemsTurnedOff_isEmpty() {
         // given
         let model = self.makeModel(
-            .init()
+            .initial
             |> \.showTotalCount .~ false
             |> \.showTodoCount .~ false
             |> \.showScheduleCount .~ false
@@ -171,7 +171,7 @@ extension TodayWidgetViewModelTests {
     @Test("총 개수를 껐고 남은 항목의 셀 값이 모두 0이면 두 줄이 모두 빈다")
     func eventCountLines_whenTotalOffAndRemainingCountsAreZero_isEmpty() {
         // given
-        let model = self.makeModel(.init() |> \.showTotalCount .~ false)
+        let model = self.makeModel(.initial |> \.showTotalCount .~ false)
             |> \.todoEventCount .~ 0
             |> \.scheduleEventcount .~ 0
 

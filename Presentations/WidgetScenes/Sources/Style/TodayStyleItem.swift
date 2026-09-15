@@ -21,7 +21,7 @@ enum TodayStyleItem: String, CaseIterable {
     case showTodoCount
     case showScheduleCount
 
-    var settingKeyPath: WritableKeyPath<TodayStyleSetting, Bool?> {
+    var settingKeyPath: WritableKeyPath<TodayStyleSetting, Bool> {
         switch self {
         case .showHolidayName: return \.showHolidayName
         case .showTimeZone: return \.showTimeZone
@@ -51,13 +51,4 @@ enum TodayStyleItem: String, CaseIterable {
         case .showScheduleCount: return "widget.style.today::showScheduleCount".localized()
         }
     }
-}
-
-
-// MARK: - 스타일 항목 기본값
-
-extension Optional where Wrapped == Bool {
-
-    /// 스타일 항목은 미설정(nil)이면 표시가 기본이다.
-    var isDisplayed: Bool { self != false }
 }

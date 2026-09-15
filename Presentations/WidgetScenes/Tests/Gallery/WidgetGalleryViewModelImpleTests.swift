@@ -63,12 +63,12 @@ final class WidgetGalleryViewModelImpleTests: PublisherWaitable {
     private func todayStyle(
         _ style: WidgetStyleId.Style,
         variant: WidgetVariant = .todaySummarySmall,
-        showHolidayName: Bool?
+        showHolidayName: Bool
     ) -> WidgetStyle<TodayStyleSetting> {
         return .init(
             id: .init(variant: variant, style: style),
             name: nil,
-            setting: TodayStyleSetting() |> \.showHolidayName .~ showHolidayName
+            setting: TodayStyleSetting.initial |> \.showHolidayName .~ showHolidayName
         )
     }
 

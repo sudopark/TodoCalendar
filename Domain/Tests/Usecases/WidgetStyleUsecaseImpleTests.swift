@@ -60,12 +60,12 @@ final class WidgetStyleUsecaseImpleTests: PublisherWaitable {
         _ style: WidgetStyleId.Style,
         variant: WidgetVariant = .todaySummarySmall,
         name: String? = nil,
-        showHolidayName: Bool?
+        showHolidayName: Bool
     ) -> WidgetStyle<TodayStyleSetting> {
         return .init(
             id: .init(variant: variant, style: style),
             name: name,
-            setting: TodayStyleSetting() |> \.showHolidayName .~ showHolidayName
+            setting: TodayStyleSetting.initial |> \.showHolidayName .~ showHolidayName
         )
     }
 
@@ -94,7 +94,7 @@ extension WidgetStyleUsecaseImpleTests {
         #expect(styles.count == 1)
         #expect(styles.first?.id == .init(variant: .todaySummarySmall, style: .default))
         #expect(styles.first?.name == nil)
-        #expect(styles.first?.setting == TodayStyleSetting())
+        #expect(styles.first?.setting == TodayStyleSetting.initial)
     }
 
     @Test("기본 스타일이 저장돼 있으면 그 저장값을 첫 원소로 쓰고 덧붙이지 않는다")
@@ -125,7 +125,7 @@ extension WidgetStyleUsecaseImpleTests {
 
         // then
         #expect(styles.map { $0.id.style } == [.default, .custom(id: "c1"), .custom(id: "c2")])
-        #expect(styles.first?.setting == TodayStyleSetting())
+        #expect(styles.first?.setting == TodayStyleSetting.initial)
     }
 
     @Test("조회한 변형을 저장소에 그대로 넘긴다")
@@ -205,7 +205,7 @@ extension WidgetStyleUsecaseImpleTests {
 
         // then
         #expect(styles?.map { $0.id.style } == [.default])
-        #expect(styles?.first?.setting == TodayStyleSetting())
+        #expect(styles?.first?.setting == TodayStyleSetting.initial)
     }
 
     @Test("스타일을 저장하면 같은 변형 스트림이 갱신된 목록을 다시 낸다")
@@ -220,11 +220,11 @@ extension WidgetStyleUsecaseImpleTests {
             expect, for: usecase.styles(TodayStyleSetting.self, of: .todaySummarySmall)
         ) {
             usecase.refreshStyles(TodayStyleSetting.self, of: .todaySummarySmall)
-            usecase.updateStyle(self.todayStyle(.default, showHolidayName: true))
+            usecase.updateStyle(self.todayStyle(.default, showHolidayName: false))
         }
 
         // then
-        #expect(styleLists.map { $0.first?.setting.showHolidayName } == [nil, true])
+        #expect(styleLists.map { $0.first?.setting.showHolidayName } == [true, false])
     }
 
     @Test("커스텀 스타일을 지우면 그 스타일이 빠진 목록을 다시 낸다")
@@ -294,7 +294,7 @@ extension WidgetStyleUsecaseImpleTests {
 
         // then
         #expect(styleLists.map { $0.map { $0.id.style } } == [[.default], [.default]])
-        #expect(styleLists.map { $0.first?.setting.showHolidayName } == [nil, false])
+        #expect(styleLists.map { $0.first?.setting.showHolidayName } == [true, false])
     }
 }
 
