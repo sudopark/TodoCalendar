@@ -49,8 +49,9 @@ M 은 kickoff → opord → implement → pr, S 는 kickoff → 구두지시 →
 
 캠페인 둘 이상이 한 목적을 공유하면 `docs/operations/templates/strategy.md` **전 항목**을 채워 `docs/operations/<이슈>/strategy.md` 로 저장한다 (§1 대로 미커밋 — 정본 공유는 이슈 본문 미러) — 작성 모드 절차를 전략 고도로 그대로 적용한다: 질문(목적 → 최종상태 → 종결·중단 → 수단·제한·ends-ways-means-risk 정합 → 위임 → 캠페인 목록·배열 → 가정·위험·한계점 → 결정지점 → 평가), 캠페인 배열이 갈리면 COA 비교, 초안 후 워게임(캠페인 배열 순서로 걸어보며 전략 가정·위험이 10항 결정지점에 흡수되는지). 캠페인 내부(LOE·DP)로는 내려가지 않는다 — 그건 각 campaign.md 소관이다. 각 캠페인의 campaign.md 는 0항에 이 문서를 인용한다.
 
-- 원장: `.operations/<이슈>/strategy-progress.md` — `<!-- progress -->` 헤딩 + 캠페인 원장 표(strategy.md 템플릿 12항 서식). 갱신 시점은 캠페인 착수·종결 — 종결 판정은 §4 평가 모드(캠페인 종결)가 맡는다.
-- 이슈 본문 = strategy.md 전문 + progress 블록 — 재조립 규칙은 §5 와 같다.
+- **캠페인마다 `C<n>` id 를 붙인다** — 6항 목록의 캠페인 칸은 `C1 위젯 커스터마이징` 처럼 id 로 시작하고, 12항 원장 첫 칸·8항 가정의 검증 방법·9항 위험의 영향 칸이 같은 id 로 그 캠페인을 가리킨다. 상황판이 이 id 로 원장 상태를 노드에 붙이고 선행 사슬로 배열 열을 세운다 (CLAUDE.md §1 짝).
+- 원장: `.operations/<이슈>/strategy-progress.md` — `<!-- progress -->` 헤딩 + 캠페인 원장 표 `| 캠페인 | 상태 미착수/진행/종결 | 최근 종결보고 | 비고 |`. 갱신 시점은 캠페인 착수·종결 — 종결 판정은 §4 평가 모드(캠페인 종결)가 맡는다.
+- 이슈 본문 = strategy.md 전문 + progress 블록 — 재조립 규칙은 §5 와 같다. **미러를 재조립할 때마다 `.claude/scripts/campaign-board-sync.sh <이슈번호>` 를 함께 호출한다** (§5 와 같은 짝 — 스크립트가 `strategy.md`·`strategy-progress.md` 를 스풀로 복사하고 상황판 전략 격자를 다시 렌더한다).
 - 초안 완료 게시·재가는 작성 모드(§2)와 같다.
 
 ## 4. 평가 모드 — 종결보고 접수

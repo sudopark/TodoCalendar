@@ -17,6 +17,8 @@
   - en `Localizable.strings` 키 추가/삭제 ↔ ko lproj 반영 ↔ 번역 대기 트래킹 이슈에 작업 링크 기록 (등록처는 `localization` 라벨 열린 이슈 중 최신 — 없으면 신설. 나머지 29개 언어는 그 이슈 처리 시점에 일괄 번역 — 상세는 `.claude/rules/localization.md`)
   - opord 명령 상태 값(§6 표) 추가·개명 ↔ 상황판 `~/.claude/campaign-board/index.html` 의 뱃지 규칙·종결 필터(`o.state !== "종결"`) (레포 밖 앱이라 path 매칭이 안 걸린다 — 종결류 값을 새로 만들고 필터를 안 고치면 끝난 작업이 진행 중으로 계속 뜬다)
   - campaign 원장 DP 상태 값(`docs/operations/templates/campaign.md` 18항 표) 추가·개명 ↔ `campaign` 스킬 §5 서식 줄 ↔ 상황판 `~/.claude/campaign-board/index.html` 의 `STATUSES`·`COLORS`·`.dp.s<상태>` CSS ↔ `parser.py` 종결 튜플 (같은 레포 밖 앱이다. 색을 안 넣으면 그 DP 가 격자에서 색을 잃고, 진행 상태를 종결 튜플에 넣으면 캠페인이 조기 종결로 판정된다)
+  - strategy 원장 캠페인 상태 값(`docs/operations/templates/strategy.md` 12항 표) 추가·개명 ↔ `campaign` 스킬 §3 서식 줄 ↔ 상황판 `~/.claude/campaign-board/index.html` 의 `STRATEGY_STATUSES`·`STRATEGY_COLORS`·`.dp.s<상태>` CSS ↔ `parser.py` 의 `_parse_strategy` 종결 판정 (DP 상태와 같은 구조의 레포 밖 짝이다. 전략 격자는 캠페인 노드를 이 값으로 칠하므로, 색이 없는 값을 새로 만들면 그 캠페인이 격자에서 무채색이 된다)
+  - strategy 6항 캠페인 목록의 `C<n>` id ↔ 12항 원장 첫 칸 ↔ 8항 가정의 검증 방법 칸·9항 위험의 영향 칸 (상황판이 이 id 로 원장 상태를 붙이고 가정·위험을 캠페인 노드에 건다 — 6항에만 있고 원장에 없는 id 는 영영 `미착수` 로 뜬다)
   - 계획–명령 체계 하네스(`opord`·`campaign`·`orchestrate`·`doctrine`·kickoff 탐색·implement 실행 보고 계약·`docs/operations/templates/`) 변경 ↔ #1098 본문의 이관 대상·선결 과제·미정 목록 갱신 (plugin 분리 준비 이슈 — 실물과 어긋나면 repo 신설 시점에 한 번에 못 옮긴다)
 - **스킬 종료·유저 교정은 레코드로 남긴다** (#690 flywheel 측정 신호):
   - 발동한 스킬의 절차가 끝나면: `python3 .claude/hooks/log-record.py skill_end --name <스킬> --compliance full|partial [--deviation "조항::사유" --deviation-reviewed]` — 조항을 의도적으로 이행 안 했으면 partial + 이탈 조항·사유 필수.
