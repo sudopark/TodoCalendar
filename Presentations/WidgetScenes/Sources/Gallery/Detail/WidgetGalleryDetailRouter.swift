@@ -14,7 +14,7 @@ import CommonPresentation
 
 protocol WidgetGalleryDetailRouting: Routing {
     
-    func routeToStyleEdit(_ variant: WidgetVariant, setting: WidgetAppearanceSettings)
+    func routeToStyleEdit(_ variants: [WidgetVariant], setting: WidgetAppearanceSettings)
 }
 
 final class WidgetGalleryDetailRouter: BaseRouterImple, WidgetGalleryDetailRouting, @unchecked Sendable {
@@ -39,10 +39,10 @@ final class WidgetGalleryDetailRouter: BaseRouterImple, WidgetGalleryDetailRouti
 
 extension WidgetGalleryDetailRouter {
     
-    func routeToStyleEdit(_ variant: WidgetVariant, setting: WidgetAppearanceSettings) {
+    func routeToStyleEdit(_ variants: [WidgetVariant], setting: WidgetAppearanceSettings) {
         Task { @MainActor in
             let next = self.styleEditSceneBuilder.makeWidgetStyleEditScene(
-                variant: variant, setting: setting
+                variants: variants, setting: setting
             )
             self.currentScene?.navigationController?.pushViewController(next, animated: true)
         }
