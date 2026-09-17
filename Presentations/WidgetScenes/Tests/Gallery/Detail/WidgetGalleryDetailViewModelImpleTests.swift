@@ -20,10 +20,10 @@ import TestDoubles
 
 final class SpyWidgetGalleryDetailRouter: BaseSpyRouter, WidgetGalleryDetailRouting, @unchecked Sendable {
 
-    private(set) var routedStyleEditVariant: WidgetVariant?
+    private(set) var routedStyleEditVariants: [WidgetVariant]?
 
-    func routeToStyleEdit(_ variant: WidgetVariant, setting: WidgetAppearanceSettings) {
-        self.routedStyleEditVariant = variant
+    func routeToStyleEdit(_ variants: [WidgetVariant], setting: WidgetAppearanceSettings) {
+        self.routedStyleEditVariants = variants
     }
 }
 
@@ -111,7 +111,7 @@ extension WidgetGalleryDetailViewModelImpleTests {
         holiday: Bool = true,
         timeZone: Bool = true,
         monthYear: Bool = true
-    ) -> WidgetStyle<TodayStyleSetting> {
+    ) -> WidgetStyle {
         let setting = TodayStyleSetting.initial
             |> \.showHolidayName .~ holiday
             |> \.showTimeZone .~ timeZone
@@ -122,7 +122,7 @@ extension WidgetGalleryDetailViewModelImpleTests {
     }
 
     private func makeTodayViewModel(
-        savedStyles: [WidgetStyle<TodayStyleSetting>] = [],
+        savedStyles: [WidgetStyle] = [],
         router: SpyWidgetGalleryDetailRouter = .init()
     ) -> (WidgetGalleryDetailViewModelImple, StubWidgetStyleUsecase) {
         let usecase = StubWidgetStyleUsecase()
@@ -153,7 +153,7 @@ extension WidgetGalleryDetailViewModelImpleTests {
 
         // then
         let stack = self.todaySettings(emitted?[WidgetVariant.todaySummarySmall.id])
-        #expect(stack.base == defaultStyle.setting)
+        #expect(stack.base == defaultStyle.setting as? TodayStyleSetting)
     }
 
     @Test("커스텀 스타일이 없으면 겹쳐 깔 장이 없다")
@@ -187,7 +187,7 @@ extension WidgetGalleryDetailViewModelImpleTests {
 
         // then
         let stack = emitted?[WidgetVariant.todaySummarySmall.id]
-        #expect(self.todaySettings(stack).overlays == customs.map { $0.setting })
+        #expect(self.todaySettings(stack).overlays == customs.compactMap { $0.setting as? TodayStyleSetting })
     }
 
     @Test("커스텀 스타일이 두 장을 넘어도 앞 두 장까지만 깐다")
@@ -207,7 +207,7 @@ extension WidgetGalleryDetailViewModelImpleTests {
 
         // then
         let stack = emitted?[WidgetVariant.todaySummarySmall.id]
-        #expect(self.todaySettings(stack).overlays == customs.prefix(2).map { $0.setting })
+        #expect(self.todaySettings(stack).overlays == customs.prefix(2).compactMap { $0.setting as? TodayStyleSetting })
     }
 
     @Test("커스텀 스타일을 지우면 그만큼 줄어든 스택을 다시 낸다")
@@ -224,7 +224,7 @@ extension WidgetGalleryDetailViewModelImpleTests {
         // when
         let emitted = try await self.outputs(expect, for: viewModel.previewStyles) {
             viewModel.refresh()
-            usecase.removeStyle(TodayStyleSetting.self, removing.id)
+            usecase.removeStyle(removing.id)
         }
 
         // then
@@ -232,7 +232,8 @@ extension WidgetGalleryDetailViewModelImpleTests {
             self.todaySettings($0[WidgetVariant.todaySummarySmall.id]).overlays
         }
         #expect(overlayLists == [
-            [removing.setting, remaining.setting], [remaining.setting]
+            [removing, remaining].compactMap { $0.setting as? TodayStyleSetting },
+            [remaining].compactMap { $0.setting as? TodayStyleSetting }
         ])
     }
 
@@ -259,7 +260,7 @@ extension WidgetGalleryDetailViewModelImpleTests {
         viewModel.editStyle(.todaySummarySmall)
 
         // then
-        #expect(router.routedStyleEditVariant == .todaySummarySmall)
+        #expect(router.routedStyleEditVariants == [.todaySummarySmall])
     }
 }
 

@@ -47,12 +47,12 @@ extension WidgetGalleryDetailViewModelImple {
     
     func refresh() {
         self.customizableVariants.forEach {
-            self.widgetStyleUsecase.refreshStyles(TodayStyleSetting.self, of: $0)
+            self.widgetStyleUsecase.refreshStyles(of: $0)
         }
     }
     
     func editStyle(_ variant: WidgetVariant) {
-        self.router?.routeToStyleEdit(variant, setting: self.currentSetting)
+        self.router?.routeToStyleEdit([variant], setting: self.currentSetting)
     }
     
     func close() {
@@ -79,14 +79,11 @@ extension WidgetGalleryDetailViewModelImple {
     }
     
     var previewStyles: AnyPublisher<[String: WidgetPreviewStyleStack], Never> {
-        // 꾸미기 가능한 변형이 Today 뿐이라 payload 타입도 하나다.
         let entryStreams = self.customizableVariants
             .map { variant in
-                return self.widgetStyleUsecase.styles(TodayStyleSetting.self, of: variant)
+                return self.widgetStyleUsecase.styles(of: variant)
                     .compactMap { styles in
-                        return WidgetPreviewStyleStack(
-                            styles: styles.map { $0.setting as any WidgetStyleSetting }
-                        )
+                        return WidgetPreviewStyleStack(styles: styles.map { $0.setting })
                     }
                     .map { [variant.id: $0] }
                     .eraseToAnyPublisher()

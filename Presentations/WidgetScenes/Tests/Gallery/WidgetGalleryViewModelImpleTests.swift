@@ -64,7 +64,7 @@ final class WidgetGalleryViewModelImpleTests: PublisherWaitable {
         _ style: WidgetStyleId.Style,
         variant: WidgetVariant = .todaySummarySmall,
         showHolidayName: Bool
-    ) -> WidgetStyle<TodayStyleSetting> {
+    ) -> WidgetStyle {
         return .init(
             id: .init(variant: variant, style: style),
             name: nil,
@@ -73,7 +73,7 @@ final class WidgetGalleryViewModelImpleTests: PublisherWaitable {
     }
 
     private func makeStyleUsecase(
-        savedStyles: [WidgetStyle<TodayStyleSetting>]
+        savedStyles: [WidgetStyle]
     ) -> StubWidgetStyleUsecase {
         let usecase = StubWidgetStyleUsecase()
         usecase.stubStyles = savedStyles
