@@ -13,21 +13,17 @@ import Extensions
 
 public protocol WidgetStyleUsecase: Sendable {
 
-    func refreshStyles<S: WidgetStyleSetting>(_ type: S.Type, of variant: WidgetVariant)
+    func refreshStyles(of variant: WidgetVariant)
 
-    func styles<S: WidgetStyleSetting>(
-        _ type: S.Type, of variant: WidgetVariant
-    ) -> AnyPublisher<[WidgetStyle<S>], Never>
+    func styles(of variant: WidgetVariant) -> AnyPublisher<[WidgetStyle], Never>
 
-    func loadStyles<S: WidgetStyleSetting>(
-        _ type: S.Type, of variant: WidgetVariant
-    ) -> [WidgetStyle<S>]
+    func loadStyles(of variant: WidgetVariant) -> [WidgetStyle]
 
-    func updateStyle<S: WidgetStyleSetting>(_ style: WidgetStyle<S>)
+    func updateStyle(_ style: WidgetStyle)
 
     func makeNewStyleId(for variant: WidgetVariant) -> WidgetStyleId
 
-    func removeStyle<S: WidgetStyleSetting>(_ type: S.Type, _ id: WidgetStyleId)
+    func removeStyle(_ id: WidgetStyleId)
 }
 
 
@@ -44,7 +40,6 @@ public final class WidgetStyleUsecaseImple: WidgetStyleUsecase {
         self.sharedDataStore = sharedDataStore
     }
 
-    /// 변형마다 payload 타입이 달라 한 키에 모으면 캐스팅이 변형군 단위로 깨진다.
     private func shareKey(_ variant: WidgetVariant) -> String {
         return "\(ShareDataKeys.widgetStyles.rawValue):\(variant.rawValue)"
     }
@@ -55,47 +50,44 @@ public final class WidgetStyleUsecaseImple: WidgetStyleUsecase {
 
 extension WidgetStyleUsecaseImple {
 
-    public func refreshStyles<S: WidgetStyleSetting>(
-        _ type: S.Type, of variant: WidgetVariant
-    ) {
-        self.shareLatestStyles(type, of: variant)
+    public func refreshStyles(of variant: WidgetVariant) {
+        self.shareLatestStyles(of: variant)
     }
 
-    public func styles<S: WidgetStyleSetting>(
-        _ type: S.Type, of variant: WidgetVariant
-    ) -> AnyPublisher<[WidgetStyle<S>], Never> {
+    public func styles(of variant: WidgetVariant) -> AnyPublisher<[WidgetStyle], Never> {
 
         return self.sharedDataStore
-            .observe([WidgetStyle<S>].self, key: self.shareKey(variant))
+            .observe([WidgetStyle].self, key: self.shareKey(variant))
             .compactMap { $0 }
             .eraseToAnyPublisher()
     }
 
     /// 저장소는 저장된 스타일만 주지만 화면은 기본 스타일을 항상 요구한다.
-    public func loadStyles<S: WidgetStyleSetting>(
-        _ type: S.Type, of variant: WidgetVariant
-    ) -> [WidgetStyle<S>] {
+    public func loadStyles(of variant: WidgetVariant) -> [WidgetStyle] {
 
-        let savedStyles = self.styleRepository.loadStyles(type, of: variant)
+        guard let initialSetting = variant.initialSetting else { return [] }
+        let savedStyles = self.styleRepository.loadStyles(of: variant)
         let defaultStyle = savedStyles.first { $0.id.style == .default }
             ?? WidgetStyle(
-                id: .init(variant: variant, style: .default), name: nil, setting: S.initial
+                id: .init(variant: variant, style: .default),
+                name: nil,
+                setting: initialSetting
             )
         let customStyles = savedStyles.filter { $0.id.style != .default }
         return [defaultStyle] + customStyles
     }
 
-    public func updateStyle<S: WidgetStyleSetting>(_ style: WidgetStyle<S>) {
+    /// 변형이 쓰는 payload 타입이 아니면 저장하지 않는다 — 다른 변형의 설정이 이 좌표를 덮는다.
+    public func updateStyle(_ style: WidgetStyle) {
+        guard style.id.variant.isOwnSetting(style.setting) else { return }
         self.styleRepository.updateStyle(style.withNormalizedName())
-        self.shareLatestStyles(S.self, of: style.id.variant)
+        self.shareLatestStyles(of: style.id.variant)
     }
 
-    private func shareLatestStyles<S: WidgetStyleSetting>(
-        _ type: S.Type, of variant: WidgetVariant
-    ) {
-        let latestStyles = self.loadStyles(type, of: variant)
+    private func shareLatestStyles(of variant: WidgetVariant) {
+        let latestStyles = self.loadStyles(of: variant)
         self.sharedDataStore.put(
-            [WidgetStyle<S>].self, key: self.shareKey(variant), latestStyles
+            [WidgetStyle].self, key: self.shareKey(variant), latestStyles
         )
     }
 }
@@ -111,10 +103,10 @@ extension WidgetStyleUsecaseImple {
     }
 
     /// 기본 스타일은 값이 없으면 조회가 코드 기본값으로 보충하는 자리라 지우는 것 자체가 성립하지 않는다.
-    public func removeStyle<S: WidgetStyleSetting>(_ type: S.Type, _ id: WidgetStyleId) {
+    public func removeStyle(_ id: WidgetStyleId) {
         guard id.style != .default else { return }
         self.styleRepository.removeStyle(id)
-        self.shareLatestStyles(type, of: id.variant)
+        self.shareLatestStyles(of: id.variant)
     }
 }
 
@@ -123,7 +115,7 @@ extension WidgetStyleUsecaseImple {
 
 private extension WidgetStyle {
 
-    func withNormalizedName() -> WidgetStyle<S> {
+    func withNormalizedName() -> WidgetStyle {
         return WidgetStyle(
             id: self.id,
             name: self.name?.trimmingCharacters(in: .whitespacesAndNewlines).emptyAsNil(),

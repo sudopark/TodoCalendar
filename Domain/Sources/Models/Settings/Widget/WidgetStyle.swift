@@ -39,15 +39,25 @@ public protocol WidgetStyleSetting: Codable, Sendable, Equatable {
 }
 
 
+extension WidgetStyleSetting {
+
+    /// 존재 타입끼리는 == 가 안 걸린다 — Self 가 구체 타입인 이 자리에서만 열린다.
+    public func isSame(_ other: any WidgetStyleSetting) -> Bool {
+        return (other as? Self) == self
+    }
+}
+
+
 // MARK: - WidgetStyle
 
-public struct WidgetStyle<S: WidgetStyleSetting>: Sendable, Equatable {
+/// 화면은 어느 변형인지를 런타임에 알아서 payload 타입을 컴파일 타임에 못 박을 수 없다.
+public struct WidgetStyle: Sendable {
 
     public let id: WidgetStyleId
     public var name: String?
-    public var setting: S
+    public var setting: any WidgetStyleSetting
 
-    public init(id: WidgetStyleId, name: String?, setting: S) {
+    public init(id: WidgetStyleId, name: String?, setting: any WidgetStyleSetting) {
         self.id = id
         self.name = name
         self.setting = setting
@@ -55,7 +65,7 @@ public struct WidgetStyle<S: WidgetStyleSetting>: Sendable, Equatable {
 }
 
 
-// MARK: - 표시 이름
+// MARK: - 표시 이름·동치
 
 extension WidgetStyle {
 
@@ -64,5 +74,12 @@ extension WidgetStyle {
         case .default: return "widget.style::default".localized()
         case .custom: return self.name ?? "widget.style::custom::unnamed".localized()
         }
+    }
+
+    public func isSame(_ other: WidgetStyle?) -> Bool {
+        guard let other else { return false }
+        return self.id == other.id
+            && self.name == other.name
+            && self.setting.isSame(other.setting)
     }
 }

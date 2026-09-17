@@ -74,9 +74,14 @@ public enum WidgetVariant: String, Sendable, Identifiable, CaseIterable {
 
     /// 꾸미기 설정을 갖는 변형만 true. 나머지는 스타일 저장 대상이 아니다.
     public var isCustomizable: Bool {
+        return self.settingType != nil
+    }
+
+    /// 변형마다 담는 꾸미기 항목이 달라 payload 타입이 갈린다.
+    public var settingType: (any WidgetStyleSetting.Type)? {
         switch self {
         case .todaySummarySmall:
-            return true
+            return TodayStyleSetting.self
         case .todayAndNextMedium, .eventListSmall, .eventListMedium, .eventListLarge,
              .monthSmall, .foremostInline, .foremostSmall, .foremostMedium,
              .ddaySmall, .ddayMedium, .ddayCircular, .ddayRectangular, .ddayInline,
@@ -85,7 +90,25 @@ public enum WidgetVariant: String, Sendable, Identifiable, CaseIterable {
              .aiCommandCircular, .aiCommandSmall, .nextEventInline,
              .nextEventRectangular, .nextRemainRectangular, .doubleMonthMedium,
              .eventAndMonthMedium, .eventAndForemostMedium, .todayAndMonthMedium:
-            return false
+            return nil
         }
+    }
+
+    public var initialSetting: (any WidgetStyleSetting)? {
+        return self.settingType.map { self.initial(of: $0) }
+    }
+
+    public func isOwnSetting(_ setting: any WidgetStyleSetting) -> Bool {
+        return self.settingType.map { self.isInstance(setting, of: $0) } ?? false
+    }
+
+    private func initial<S: WidgetStyleSetting>(of type: S.Type) -> any WidgetStyleSetting {
+        return S.initial
+    }
+
+    private func isInstance<S: WidgetStyleSetting>(
+        _ setting: any WidgetStyleSetting, of type: S.Type
+    ) -> Bool {
+        return setting is S
     }
 }

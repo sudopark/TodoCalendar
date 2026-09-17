@@ -61,9 +61,9 @@ struct TodayStyleEntityListTests {
 
     private func style(
         _ style: WidgetStyleId.Style, name: String?
-    ) -> WidgetStyle<TodayStyleSetting> {
+    ) -> WidgetStyle {
         return .init(
-            id: .init(variant: .todaySummarySmall, style: style), name: name, setting: .initial
+            id: .init(variant: .todaySummarySmall, style: style), name: name, setting: TodayStyleSetting.initial
         )
     }
 
