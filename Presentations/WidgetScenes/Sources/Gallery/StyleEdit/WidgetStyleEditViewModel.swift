@@ -23,16 +23,14 @@ struct WidgetStyleCellViewModel: Equatable {
     let styleId: WidgetStyleId
     let name: String
     let hasUnsavedChange: Bool
-    let setting: TodayStyleSetting
-}
-
-struct WidgetStyleItemCellViewModel: Equatable {
+    let setting: any WidgetStyleSetting
     
-    let item: TodayStyleItem
-    let isOn: Bool
-    
-    var name: String { self.item.name }
-    var note: String? { self.item.note }
+    static func == (lhs: Self, rhs: Self) -> Bool {
+        return lhs.styleId == rhs.styleId
+            && lhs.name == rhs.name
+            && lhs.hasUnsavedChange == rhs.hasUnsavedChange
+            && lhs.setting.isSame(rhs.setting)
+    }
 }
 
 
@@ -42,12 +40,13 @@ protocol WidgetStyleEditViewModel: AnyObject, WidgetStyleEditSceneInteractor {
     
     func refresh()
     func selectStyle(_ styleId: WidgetStyleId)
+    func addStyle()
     func appendStyle(copying styleId: WidgetStyleId)
     func removeStyle(_ styleId: WidgetStyleId)
     func resetStyle(_ styleId: WidgetStyleId)
     func discard()
     func editName(_ name: String)
-    func toggleItem(_ item: TodayStyleItem)
+    func updateSetting(_ setting: any WidgetStyleSetting)
     func confirm()
     func close()
     
@@ -56,26 +55,26 @@ protocol WidgetStyleEditViewModel: AnyObject, WidgetStyleEditSceneInteractor {
     var editingName: AnyPublisher<String, Never> { get }
     var hasUnsavedChange: AnyPublisher<Bool, Never> { get }
     var hasAnyUnsavedEdit: AnyPublisher<Bool, Never> { get }
-    var items: AnyPublisher<[WidgetStyleItemCellViewModel], Never> { get }
+    var selectedSetting: AnyPublisher<any WidgetStyleSetting, Never> { get }
 }
 
 final class WidgetStyleEditViewModelImple: WidgetStyleEditViewModel, @unchecked Sendable {
     
-    private let variant: WidgetVariant
+    private let variants: [WidgetVariant]
     private let widgetStyleUsecase: any WidgetStyleUsecase
     var router: (any WidgetStyleEditRouting)?
     
     init(
-        variant: WidgetVariant,
+        variants: [WidgetVariant],
         widgetStyleUsecase: any WidgetStyleUsecase
     ) {
-        self.variant = variant
+        self.variants = variants
         self.widgetStyleUsecase = widgetStyleUsecase
     }
     
     private struct Subject {
-        let savedStyles = CurrentValueSubject<[WidgetStyleId: WidgetStyle<TodayStyleSetting>]?, Never>(nil)
-        let editingStyles = CurrentValueSubject<[WidgetStyle<TodayStyleSetting>]?, Never>(nil)
+        let savedStyles = CurrentValueSubject<[WidgetStyleId: WidgetStyle]?, Never>(nil)
+        let editingStyles = CurrentValueSubject<[WidgetStyle]?, Never>(nil)
         let selectedStyleId = CurrentValueSubject<WidgetStyleId?, Never>(nil)
         let editingName = CurrentValueSubject<String?, Never>(nil)
     }
@@ -88,7 +87,7 @@ final class WidgetStyleEditViewModelImple: WidgetStyleEditViewModel, @unchecked 
 extension WidgetStyleEditViewModelImple {
     
     func refresh() {
-        let styles = self.widgetStyleUsecase.loadStyles(TodayStyleSetting.self, of: self.variant)
+        let styles = self.variants.flatMap { self.widgetStyleUsecase.loadStyles(of: $0) }
         self.subject.savedStyles.send(styles.asDictionary { $0.id })
         self.subject.editingStyles.send(styles)
         guard let first = styles.first else { return }
@@ -100,12 +99,18 @@ extension WidgetStyleEditViewModelImple {
         self.select(styleId)
     }
     
+    /// 추가 카드는 복제할 카드를 고르지 않는다 — 목록 맨 앞의 기본 스타일에서 시작한다.
+    func addStyle() {
+        guard let first = self.subject.editingStyles.value?.first else { return }
+        self.appendStyle(copying: first.id)
+    }
+    
     func appendStyle(copying styleId: WidgetStyleId) {
         guard let styles = self.subject.editingStyles.value,
               let source = styles.first(where: { $0.id == styleId })
         else { return }
         let newStyle = WidgetStyle(
-            id: self.widgetStyleUsecase.makeNewStyleId(for: self.variant),
+            id: self.widgetStyleUsecase.makeNewStyleId(for: source.id.variant),
             name: self.copiedName(from: source, in: styles),
             setting: source.setting
         )
@@ -124,8 +129,11 @@ extension WidgetStyleEditViewModelImple {
     }
     
     func resetStyle(_ styleId: WidgetStyleId) {
+        guard let initialSetting = styleId.variant.initialSetting else { return }
         let confirmed: () -> Void = { [weak self] in
-            self?.replaceStyle(styleId) { $0 |> \.setting .~ .initial |> \.name .~ nil }
+            self?.replaceStyle(styleId) {
+                $0 |> \.setting .~ initialSetting |> \.name .~ nil
+            }
             self?.refreshEditingName()
         }
         let info = ConfirmDialogInfo()
@@ -152,10 +160,10 @@ extension WidgetStyleEditViewModelImple {
         self.updateSelectedStyle { $0 |> \.name .~ trimmed }
     }
     
-    func toggleItem(_ item: TodayStyleItem) {
-        let settingPath: WritableKeyPath<WidgetStyle<TodayStyleSetting>, TodayStyleSetting> = \.setting
-        let keyPath = settingPath.appending(path: item.settingKeyPath)
-        self.updateSelectedStyle { $0 |> keyPath .~ !$0[keyPath: keyPath] }
+    /// 다른 변형의 설정이 섞이면 저장 때 조용히 막힌다 — 들어오는 자리에서 끊는다.
+    func updateSetting(_ setting: any WidgetStyleSetting) {
+        guard self.variants.first?.isOwnSetting(setting) == true else { return }
+        self.updateSelectedStyle { $0 |> \.setting .~ setting }
     }
     
     /// 저장해도 화면에 남는다 — 다른 카드를 이어서 저장할 수 있어야 한다.
@@ -189,7 +197,7 @@ extension WidgetStyleEditViewModelImple {
     private func dropStyle(_ styleId: WidgetStyleId) {
         guard let styles = self.subject.editingStyles.value else { return }
         if let saved = self.subject.savedStyles.value, saved[styleId] != nil {
-            self.widgetStyleUsecase.removeStyle(TodayStyleSetting.self, styleId)
+            self.widgetStyleUsecase.removeStyle(styleId)
             self.subject.savedStyles.send(saved.filter { $0.key != styleId })
         }
         let remains = styles.filter { $0.id != styleId }
@@ -200,7 +208,7 @@ extension WidgetStyleEditViewModelImple {
     }
     
     private func updateSelectedStyle(
-        _ mutating: (WidgetStyle<TodayStyleSetting>) -> WidgetStyle<TodayStyleSetting>
+        _ mutating: (WidgetStyle) -> WidgetStyle
     ) {
         guard let selectedId = self.subject.selectedStyleId.value else { return }
         self.replaceStyle(selectedId, mutating)
@@ -208,7 +216,7 @@ extension WidgetStyleEditViewModelImple {
     
     private func replaceStyle(
         _ styleId: WidgetStyleId,
-        _ mutating: (WidgetStyle<TodayStyleSetting>) -> WidgetStyle<TodayStyleSetting>
+        _ mutating: (WidgetStyle) -> WidgetStyle
     ) {
         guard let styles = self.subject.editingStyles.value else { return }
         self.subject.editingStyles.send(
@@ -219,7 +227,7 @@ extension WidgetStyleEditViewModelImple {
     private func saveSelectedStyle() {
         guard let selectedId = self.subject.selectedStyleId.value,
               let editing = self.editingStyle(of: selectedId),
-              self.subject.savedStyles.value?[selectedId] != editing
+              editing.isSame(self.subject.savedStyles.value?[selectedId]) == false
         else { return }
         self.save([editing])
     }
@@ -228,13 +236,15 @@ extension WidgetStyleEditViewModelImple {
     private func saveAllEditingStyles() {
         guard let editings = self.subject.editingStyles.value else { return }
         let saved = self.subject.savedStyles.value ?? [:]
-        self.save(editings.filter { saved[$0.id] != $0 })
+        self.save(editings.filter { $0.isSame(saved[$0.id]) == false })
     }
 
-    private func save(_ styles: [WidgetStyle<TodayStyleSetting>]) {
+    private func save(_ styles: [WidgetStyle]) {
         guard !styles.isEmpty else { return }
         styles.forEach { self.widgetStyleUsecase.updateStyle($0) }
-        WidgetCenter.shared.reloadTimelines(ofKind: self.variant.kind)
+        Set(self.variants.map { $0.kind }).forEach {
+            WidgetCenter.shared.reloadTimelines(ofKind: $0)
+        }
         self.subject.savedStyles.send(
             (self.subject.savedStyles.value ?? [:])
                 .merging(styles.asDictionary { $0.id }) { _, saved in saved }
@@ -253,8 +263,8 @@ extension WidgetStyleEditViewModelImple {
     }
     
     private func copiedName(
-        from source: WidgetStyle<TodayStyleSetting>,
-        in styles: [WidgetStyle<TodayStyleSetting>]
+        from source: WidgetStyle,
+        in styles: [WidgetStyle]
     ) -> String {
         let baseName = "widget.style::custom::copy_format".localized(with: source.displayName)
         let takenNames = Set(styles.map { $0.displayName })
@@ -264,7 +274,7 @@ extension WidgetStyleEditViewModelImple {
             .first { takenNames.contains($0) == false } ?? baseName
     }
     
-    private func editingStyle(of styleId: WidgetStyleId) -> WidgetStyle<TodayStyleSetting>? {
+    private func editingStyle(of styleId: WidgetStyleId) -> WidgetStyle? {
         return self.subject.editingStyles.value?.first { $0.id == styleId }
     }
     
@@ -291,7 +301,7 @@ extension WidgetStyleEditViewModelImple {
                 WidgetStyleCellViewModel(
                     styleId: style.id,
                     name: style.displayName,
-                    hasUnsavedChange: saved[style.id] != style,
+                    hasUnsavedChange: style.isSame(saved[style.id]) == false,
                     setting: style.setting
                 )
             }
@@ -324,7 +334,7 @@ extension WidgetStyleEditViewModelImple {
         .map { editings, saved, selectedId in
             guard let editing = editings.first(where: { $0.id == selectedId })
             else { return false }
-            return saved[selectedId] != editing
+            return editing.isSame(saved[selectedId]) == false
         }
         .removeDuplicates()
         .eraseToAnyPublisher()
@@ -341,7 +351,7 @@ extension WidgetStyleEditViewModelImple {
         .eraseToAnyPublisher()
     }
     
-    var items: AnyPublisher<[WidgetStyleItemCellViewModel], Never> {
+    var selectedSetting: AnyPublisher<any WidgetStyleSetting, Never> {
         return Publishers.CombineLatest(
             self.subject.editingStyles.compactMap { $0 },
             self.subject.selectedStyleId.compactMap { $0 }
@@ -349,14 +359,7 @@ extension WidgetStyleEditViewModelImple {
         .compactMap { editings, selectedId in
             return editings.first { $0.id == selectedId }?.setting
         }
-        .map { setting in
-            return TodayStyleItem.allCases.map { item in
-                WidgetStyleItemCellViewModel(
-                    item: item, isOn: setting[keyPath: item.settingKeyPath]
-                )
-            }
-        }
-        .removeDuplicates()
+        .removeDuplicates { $0.isSame($1) }
         .eraseToAnyPublisher()
     }
 }
@@ -364,9 +367,9 @@ extension WidgetStyleEditViewModelImple {
 
 // MARK: - 편집분 대조
 
-private extension Array where Element == WidgetStyle<TodayStyleSetting> {
+private extension Array where Element == WidgetStyle {
 
     func hasUnsavedEdit(against saved: [WidgetStyleId: Element]) -> Bool {
-        return self.contains { saved[$0.id] != $0 }
+        return self.contains { $0.isSame(saved[$0.id]) == false }
     }
 }

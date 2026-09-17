@@ -22,7 +22,7 @@ import CommonPresentation
     var selectedStyleId: WidgetStyleId?
     var editingName: String = ""
     var hasUnsavedChange: Bool = false
-    var items: [WidgetStyleItemCellViewModel] = []
+    var selectedSetting: (any WidgetStyleSetting)?
     
     func bind(_ viewModel: any WidgetStyleEditViewModel) {
         guard self.didBind == false else { return }
@@ -56,10 +56,10 @@ import CommonPresentation
             })
             .store(in: self.cancellables)
         
-        viewModel.items
+        viewModel.selectedSetting
             .receive(on: RunLoop.main)
-            .sink(receiveValue: { [weak self] items in
-                self?.items = items
+            .sink(receiveValue: { [weak self] setting in
+                self?.selectedSetting = setting
             })
             .store(in: self.cancellables)
     }
@@ -69,24 +69,26 @@ final class WidgetStyleEditViewEventHandler: Observable {
     
     var onAppear: () -> Void = { }
     var selectStyle: (WidgetStyleId) -> Void = { _ in }
+    var addStyle: () -> Void = { }
     var appendStyle: (WidgetStyleId) -> Void = { _ in }
     var removeStyle: (WidgetStyleId) -> Void = { _ in }
     var resetStyle: (WidgetStyleId) -> Void = { _ in }
     var discard: () -> Void = { }
     var editName: (String) -> Void = { _ in }
-    var toggleItem: (TodayStyleItem) -> Void = { _ in }
+    var updateSetting: (any WidgetStyleSetting) -> Void = { _ in }
     var confirm: () -> Void = { }
     var close: () -> Void = { }
     
     func bind(_ viewModel: any WidgetStyleEditViewModel) {
         self.onAppear = viewModel.refresh
         self.selectStyle = viewModel.selectStyle
+        self.addStyle = viewModel.addStyle
         self.appendStyle = viewModel.appendStyle(copying:)
         self.removeStyle = viewModel.removeStyle
         self.resetStyle = viewModel.resetStyle
         self.discard = viewModel.discard
         self.editName = viewModel.editName
-        self.toggleItem = viewModel.toggleItem
+        self.updateSetting = viewModel.updateSetting
         self.confirm = viewModel.confirm
         self.close = viewModel.close
     }
@@ -98,7 +100,7 @@ final class WidgetStyleEditViewEventHandler: Observable {
 struct WidgetStyleEditContainerView: View {
     
     @State private var state: WidgetStyleEditViewState = .init()
-    private let variant: WidgetVariant
+    private let variants: [WidgetVariant]
     private let setting: WidgetAppearanceSettings
     private let viewAppearance: ViewAppearance
     private let eventHandler: WidgetStyleEditViewEventHandler
@@ -106,19 +108,19 @@ struct WidgetStyleEditContainerView: View {
     var stateBinding: (WidgetStyleEditViewState) -> Void = { _ in }
     
     init(
-        variant: WidgetVariant,
+        variants: [WidgetVariant],
         setting: WidgetAppearanceSettings,
         eventHandler: WidgetStyleEditViewEventHandler,
         viewAppearance: ViewAppearance
     ) {
-        self.variant = variant
+        self.variants = variants
         self.setting = setting
         self.eventHandler = eventHandler
         self.viewAppearance = viewAppearance
     }
     
     var body: some View {
-        WidgetStyleEditView(variant: variant, setting: setting)
+        WidgetStyleEditView(variants: variants, setting: setting)
             .onAppear {
                 self.stateBinding(self.state)
                 self.eventHandler.onAppear()
@@ -147,12 +149,16 @@ struct WidgetStyleEditView: View {
         static let focusedNameUnderlineHeight: CGFloat = 2
     }
     
-    private let variant: WidgetVariant
+    private let variants: [WidgetVariant]
     private let setting: WidgetAppearanceSettings
     
-    init(variant: WidgetVariant, setting: WidgetAppearanceSettings) {
-        self.variant = variant
+    init(variants: [WidgetVariant], setting: WidgetAppearanceSettings) {
+        self.variants = variants
         self.setting = setting
+    }
+    
+    private var previewVariant: WidgetVariant? {
+        return self.variants.first
     }
     
     var body: some View {
@@ -229,25 +235,29 @@ struct WidgetStyleEditView: View {
     
     /// 선택 테두리를 미리보기 판과 같은 모양으로 그리려면 판이 쓰는 배율을 그대로 써야 한다.
     private var previewScale: CGFloat {
-        return Constant.cardWidth / variant.canvas.size.width
+        guard let previewVariant else { return 1 }
+        return Constant.cardWidth / previewVariant.canvas.size.width
     }
     
     private var cardAreaHeight: CGFloat {
-        let previewHeight = Constant.cardWidth / variant.canvas.previewAspect
-        return previewHeight + Constant.cardLabelHeight + Metric.Spacing.large * 2
+        return self.previewHeight + Constant.cardLabelHeight + Metric.Spacing.large * 2
+    }
+    
+    private var previewHeight: CGFloat {
+        guard let previewVariant else { return 0 }
+        return Constant.cardWidth / previewVariant.canvas.previewAspect
     }
     
     private func styleCard(_ style: WidgetStyleCellViewModel) -> some View {
         let isSelected = state.selectedStyleId == style.styleId
         return VStack(spacing: Metric.SpacingToken.small.value) {
             
-            WidgetVariantPreviewView(variant: variant, setting: setting, style: style.setting)
-                .frame(
-                    width: Constant.cardWidth,
-                    height: Constant.cardWidth / variant.canvas.previewAspect
-                )
+            WidgetVariantPreviewView(
+                variant: style.styleId.variant, setting: setting, style: style.setting
+            )
+                .frame(width: Constant.cardWidth, height: self.previewHeight)
                 .overlay(
-                    variant.canvas.previewPlateShape(self.previewScale)
+                    style.styleId.variant.canvas.previewPlateShape(self.previewScale)
                         .strokeBorder(
                             isSelected
                             ? appearance.colorSet.accent.asColor
@@ -318,10 +328,7 @@ struct WidgetStyleEditView: View {
                         .font(appearance.fontSet.normal.asFont)
                         .foregroundStyle(appearance.colorSet.text2.asColor)
                 )
-                .frame(
-                    width: Constant.cardWidth,
-                    height: Constant.cardWidth / variant.canvas.previewAspect
-                )
+                .frame(width: Constant.cardWidth, height: self.previewHeight)
             
             Text("widget.style.edit::add".localized())
                 .font(appearance.fontSet.subNormal.asFont)
@@ -329,7 +336,7 @@ struct WidgetStyleEditView: View {
         }
         .frame(width: Constant.cardWidth)
         .onTapGesture {
-            self.eventHandlers.appendStyle(.init(variant: self.variant, style: .default))
+            self.eventHandlers.addStyle()
         }
     }
     
@@ -344,13 +351,10 @@ struct WidgetStyleEditView: View {
                 }
             }
             
-            Section {
-                ForEach(state.items, id: \.item) { item in
-                    itemRow(item)
-                        .listRowBackground(appearance.colorSet.bg1.asColor)
-                }
-            } header: {
-                sectionHeader("widget.style.edit::items::section".localized())
+            if let previewVariant, let setting = state.selectedSetting {
+                previewVariant.styleFormView(
+                    setting: setting, onChange: self.eventHandlers.updateSetting
+                )
             }
         }
         .listStyle(.insetGrouped)
@@ -404,29 +408,5 @@ struct WidgetStyleEditView: View {
         }
         .autocorrectionDisabled()
         .submitLabel(.done)
-    }
-    
-    private func itemRow(_ item: WidgetStyleItemCellViewModel) -> some View {
-        HStack {
-            VStack(alignment: .leading, spacing: Metric.SpacingToken.xxsmall.value) {
-                Text(item.name)
-                    .font(appearance.fontSet.normal.asFont)
-                    .foregroundStyle(appearance.colorSet.text0.asColor)
-                
-                if let note = item.note {
-                    Text(note)
-                        .font(appearance.fontSet.subNormal.asFont)
-                        .foregroundStyle(appearance.colorSet.text2.asColor)
-                }
-            }
-            
-            Spacer()
-            
-            Toggle("", isOn: .init(get: { item.isOn }, set: { _ in
-                self.eventHandlers.toggleItem(item.item)
-            }))
-            .controlSize(.small)
-            .labelsHidden()
-        }
     }
 }

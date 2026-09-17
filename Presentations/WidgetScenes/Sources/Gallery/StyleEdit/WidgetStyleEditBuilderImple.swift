@@ -30,15 +30,15 @@ extension WidgetStyleEditBuilderImple: WidgetStyleEditSceneBuilder {
     
     @MainActor
     func makeWidgetStyleEditScene(
-        variant: WidgetVariant,
+        variants: [WidgetVariant],
         setting: WidgetAppearanceSettings
     ) -> any WidgetStyleEditScene {
         
         let viewModel = WidgetStyleEditViewModelImple(
-            variant: variant, widgetStyleUsecase: self.widgetStyleUsecase
+            variants: variants, widgetStyleUsecase: self.widgetStyleUsecase
         )
         let viewController = WidgetStyleEditViewController(
-            variant: variant,
+            variants: variants,
             setting: setting,
             viewModel: viewModel,
             viewAppearance: viewAppearance

@@ -25,7 +25,7 @@ final class WidgetStyleEditViewController: UIHostingController<WidgetStyleEditCo
     var interactor: (any WidgetStyleEditSceneInteractor)? { self.viewModel }
     
     init(
-        variant: WidgetVariant,
+        variants: [WidgetVariant],
         setting: WidgetAppearanceSettings,
         viewModel: any WidgetStyleEditViewModel,
         viewAppearance: ViewAppearance
@@ -37,7 +37,7 @@ final class WidgetStyleEditViewController: UIHostingController<WidgetStyleEditCo
         eventHandlers.bind(viewModel)
         
         let containerView = WidgetStyleEditContainerView(
-            variant: variant,
+            variants: variants,
             setting: setting,
             eventHandler: eventHandlers,
             viewAppearance: viewAppearance
