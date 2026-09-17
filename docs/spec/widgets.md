@@ -294,16 +294,17 @@ hex 색상으로 UIColor 생성
 
 ### 8.3 변형별 스타일 설정
 
-배경(8.1)이 전 위젯 공통이라면, 스타일 설정은 **변형(variant) 단위**다 — 같은 위젯이라도 사이즈·캔버스마다 꾸밀 수 있는 항목이 달라서다. 잠금화면 변형처럼 손댈 축이 없는 변형은 `WidgetVariant.isCustomizable` 이 false 고 저장 대상이 아니다.
+배경(8.1)이 전 위젯 공통이라면, 스타일 설정은 **변형(variant) 단위**다 — 같은 위젯이라도 사이즈·캔버스마다 꾸밀 수 있는 항목이 달라서다. 잠금화면 변형처럼 손댈 축이 없는 변형은 스타일 스펙을 갖지 않고 `WidgetVariant.isCustomizable` 이 false 다 — 그 값은 스펙의 존재 여부에서 파생되므로 둘이 어긋날 자리가 없다.
 
 | 요소 | 코드 | 비고 |
 |---|---|---|
 | 변형 식별자 | `WidgetVariant`(Domain) | 30종. `kind` 로 WidgetKit 위젯에, `canvas`(WidgetScenes)로 미리보기 규격에 대응 |
 | 저장 좌표 | `WidgetStyleId` = `variant` × `.default` / `.custom(id:)` | 한 변형이 기본 스타일 하나와 커스텀 스타일 N 개를 갖는다 |
 | 설정 payload | `WidgetStyleSetting` 채택 타입 (변형별로 다름) | `TodayStyleSetting` 은 공휴일명·타임존·년월·총 개수·할일 개수·일정 개수 여섯을 담는다 |
+| payload 타입 매핑 | `WidgetVariant.settingType: (any WidgetStyleSetting.Type)?`(Domain) | 변형이 자기 payload 타입을 가리키는 자리. 꾸미기 대상이 아니면 nil 이고, `isCustomizable` 이 그 파생이다 |
 | 스타일 이름 | `WidgetStyle.name: String?` | 커스텀 스타일을 사람이 부르는 이름. 기본 스타일은 갖지 않고, 공백뿐인 이름은 저장 전에 nil 로 내려간다 |
-| 조회 계약 | `WidgetStyleUsecase.loadStyles(_:of:)` · `styles(_:of:)`(Domain) | 저장소는 저장된 스타일만 주므로, 기본 스타일을 항상 첫 원소로 세워 화면에 준다 — 저장값이 없으면 초기 설정이다. `styles` 는 공유 상태(`SharedDataStore` 키 `widget_styles:<변형>`)를 그대로 흘려보내기만 하고, 저장소 조회는 `refreshStyles(_:of:)` 가 맡아 그 상태를 채운다 — 화면이 진입할 때 건다. 공유 키는 변형별로 가른다: 변형마다 payload 타입이 달라 한 키에 모으면 캐스팅이 통째로 깨진다 |
-| 좌표 발급·삭제 계약 | `WidgetStyleUsecase.makeNewStyleId(for:)` · `removeStyle(_:_:)` | 발급은 새 `.custom` 좌표를 내주기만 하고 저장하지 않는다. 기본 스타일은 삭제되지 않는다 — 값이 없으면 조회가 코드 기본값으로 보충하는 자리라 지우는 것 자체가 성립하지 않는다 |
+| 조회 계약 | `WidgetStyleUsecase.loadStyles(of:)` · `styles(of:)`(Domain) | 저장소는 저장된 스타일만 주므로, 기본 스타일을 항상 첫 원소로 세워 화면에 준다 — 저장값이 없으면 초기 설정이다. `styles` 는 공유 상태(`SharedDataStore` 키 `widget_styles:<변형>`)를 그대로 흘려보내기만 하고, 저장소 조회는 `refreshStyles(_:of:)` 가 맡아 그 상태를 채운다 — 화면이 진입할 때 건다. 공유 키는 변형별로 가른다 — 목록이 변형 단위이기 때문이다 |
+| 좌표 발급·삭제 계약 | `WidgetStyleUsecase.makeNewStyleId(for:)` · `removeStyle(_:)` | 발급은 새 `.custom` 좌표를 내주기만 하고 저장하지 않는다. 기본 스타일은 삭제되지 않는다 — 값이 없으면 조회가 코드 기본값으로 보충하는 자리라 지우는 것 자체가 성립하지 않는다 |
 | 저장소 | App Group UserDefaults 키 `widget_styles` | `[변형: [스타일: 레코드 JSON]]` 한 벌. 레코드는 `{ "name": String?, "setting": payload }`. 남은 스타일이 없으면 변형 묶음을, 남은 변형이 없으면 키를 지운다 |
 
 - 바깥 키가 변형(`WidgetVariant.rawValue`), 안쪽 키가 스타일(`default` / `custom::<id>`)이다. 인코딩은 Repository 내부 사항이라 `WidgetStyleId` 는 모른다.
@@ -319,7 +320,18 @@ hex 색상으로 UIColor 생성
 - **갱신 요청 전에는 스트림이 아무것도 내보내지 않는다** — 공유 상태가 비어 있는 동안 화면은 기본값 그대로다.
 - **저장·삭제는 그 변형의 공유 상태를 최신 목록으로 갱신한다** — 구독 중인 화면이 재진입 없이 따라간다. 기본 스타일 삭제 요청은 위 계약대로 저장소도 공유 상태도 건드리지 않는다.
 - **갤러리 프리뷰는 그 스트림을 구독한다.** 1 depth 썸네일은 변형의 기본 스타일을 그리고, 2 depth 는 기본 스타일을 맨 앞 장으로 두고 커스텀 스타일을 목록 순서 그대로 뒤에 깐다 — 뒷장은 두 장 고정이라 커스텀이 그보다 많아도 두 장만 선다. 2 depth 는 커스텀이 있다는 신호만 주는 자리라 개수·내용은 전하지 않는다 — 뒷장을 좌우로 번갈아 눕혀 부채꼴로 펼쳐 앞장에 가리지 않게만 한다.
-- 위젯 갱신은 **스타일을 바꾸는 화면이 `WidgetCenter.reloadTimelines(ofKind:)` 를 직접 건다.** 저장소·usecase 는 리로드를 모른다.
+- 위젯 갱신은 **스타일을 바꾸는 화면이 `WidgetCenter.reloadTimelines(ofKind:)` 를 직접 건다.** 저장소·usecase 는 리로드를 모른다. 한 화면이 변형 여럿을 다루면 kind 로 묶어 중복을 걷고 kind 마다 한 번만 건다.
+
+#### 표현 층 계약 (#1114)
+
+**스타일 계약은 payload 타입을 제네릭으로 들지 않는다.** `WidgetStyle` 은 `setting: any WidgetStyleSetting` 을 담는 비제네릭 값이고, usecase·저장소가 그대로 주고받는다 — 화면은 어느 변형인지를 런타임에 알아서 제네릭을 컴파일 타임에 못 박을 수 없기 때문이다. **구체 타입 캐스팅은 두 자리로 모인다**: 저장소의 디코딩과 편집 폼 진입점. 새 위젯군을 여는 DP 는 아래 셋을 채우면 편집 화면·갤러리를 고치지 않는다.
+
+1. **payload 타입** — `WidgetStyleSetting` 을 따르고 `static var initial` 을 갖는다. 꾸밀 항목이 없는 위젯군도 타입은 가진다.
+2. **변형이 타입을 가리킨다** — `WidgetVariant.settingType` 의 switch 에 케이스를 더한다. exhaustive 라 빠뜨리면 컴파일이 막는다.
+3. **편집 폼** — `WidgetVariant.styleFormView(setting:onChange:)` 의 switch 에 케이스를 더하고, 폼 뷰는 `(setting, onChange)` 만 받고 자체 상태를 갖지 않는다. 설정이 그 변형의 타입이 아니면 빈 뷰다.
+
+- **편집 화면은 변형 하나가 아니라 변형 집합을 받는다** (`WidgetStyleEditViewModelImple.init(variants:)`). 스타일 목록은 변형 순서대로 이어붙이고, payload 타입은 첫 변형 것을 따른다 — **한 화면이 다루는 변형들은 같은 payload 타입을 가리킨다는 것이 전제다.** 변형 여럿이 kind 하나를 공유하는 위젯군(EventList·Foremost·AICommand)에서 좌표를 어떻게 가를지는 그 위젯군을 여는 DP 가 정한다.
+- 좌표의 변형이 쓰는 payload 타입이 아니면 **저장하지 않고 편집분도 바뀌지 않는다** — 캐스팅 실패를 흘리면 다른 변형의 설정이 그 좌표를 덮는다. 꾸미기 대상이 아닌 변형은 조회가 빈 목록이다.
 
 ---
 
