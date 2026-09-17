@@ -170,17 +170,15 @@ final class StubWidgetStyleRepository: WidgetStyleRepository, @unchecked Sendabl
         self.todayStyles = todayStyles
     }
 
-    func loadSetting<S: WidgetStyleSetting>(_ type: S.Type, for id: WidgetStyleId) -> S? {
-        return self.todayStyles[id] as? S
+    func loadSetting(for id: WidgetStyleId) -> (any WidgetStyleSetting)? {
+        return self.todayStyles[id]
     }
 
-    func loadStyles<S: WidgetStyleSetting>(
-        _ type: S.Type, of variant: WidgetVariant
-    ) -> [WidgetStyle<S>] {
+    func loadStyles(of variant: WidgetVariant) -> [WidgetStyle] {
         return []
     }
 
-    func updateStyle<S: WidgetStyleSetting>(_ style: WidgetStyle<S>) { }
+    func updateStyle(_ style: WidgetStyle) { }
 
     func removeStyle(_ id: WidgetStyleId) { }
 }

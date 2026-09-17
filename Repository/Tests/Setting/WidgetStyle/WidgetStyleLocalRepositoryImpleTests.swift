@@ -8,41 +8,24 @@
 
 import Testing
 import Foundation
+import Prelude
+import Optics
 import Domain
 
 @testable import Repository
 
 
-private struct DummyTodayStyle: WidgetStyleSetting {
-
-    var showHolidayName: Bool?
-
-    static let initial = DummyTodayStyle(showHolidayName: nil)
-
-    init(showHolidayName: Bool?) {
-        self.showHolidayName = showHolidayName
-    }
-}
-
-private struct DummyMonthStyle: WidgetStyleSetting {
-
-    var showWeekDayHeader: Bool?
-    var accentToday: Bool?
-
-    static let initial = DummyMonthStyle(showWeekDayHeader: nil, accentToday: nil)
-
-    init(showWeekDayHeader: Bool?, accentToday: Bool?) {
-        self.showWeekDayHeader = showWeekDayHeader
-        self.accentToday = accentToday
-    }
-}
-
-
 private extension WidgetStyleLocalRepositoryImple {
 
-    func updateSetting<S: WidgetStyleSetting>(_ setting: S, for id: WidgetStyleId) {
+    func updateSetting(_ setting: any WidgetStyleSetting, for id: WidgetStyleId) {
         self.updateStyle(WidgetStyle(id: id, name: nil, setting: setting))
     }
+}
+
+
+private extension WidgetStyleSetting {
+
+    var asToday: TodayStyleSetting? { self as? TodayStyleSetting }
 }
 
 
@@ -72,7 +55,7 @@ extension WidgetStyleLocalRepositoryImpleTests {
 
         // when
         let setting = repository.loadSetting(
-            DummyTodayStyle.self, for: .init(variant: .todaySummarySmall, style: .default)
+            for: .init(variant: .todaySummarySmall, style: .default)
         )
 
         // then
@@ -86,8 +69,8 @@ extension WidgetStyleLocalRepositoryImpleTests {
         let id = WidgetStyleId(variant: .todaySummarySmall, style: .default)
 
         // when
-        repository.updateSetting(DummyTodayStyle(showHolidayName: false), for: id)
-        let loaded = repository.loadSetting(DummyTodayStyle.self, for: id)
+        repository.updateSetting(TodayStyleSetting.initial |> \.showHolidayName .~ false, for: id)
+        let loaded = repository.loadSetting(for: id)?.asToday
 
         // then
         #expect(loaded?.showHolidayName == false)
@@ -101,49 +84,46 @@ extension WidgetStyleLocalRepositoryImpleTests {
         let customId = WidgetStyleId(variant: .todaySummarySmall, style: .custom(id: "c1"))
 
         // when
-        repository.updateSetting(DummyTodayStyle(showHolidayName: true), for: defaultId)
-        repository.updateSetting(DummyTodayStyle(showHolidayName: false), for: customId)
+        repository.updateSetting(TodayStyleSetting.initial |> \.showHolidayName .~ true, for: defaultId)
+        repository.updateSetting(TodayStyleSetting.initial |> \.showHolidayName .~ false, for: customId)
 
         // then
-        #expect(repository.loadSetting(DummyTodayStyle.self, for: defaultId)?.showHolidayName == true)
-        #expect(repository.loadSetting(DummyTodayStyle.self, for: customId)?.showHolidayName == false)
+        #expect(repository.loadSetting(for: defaultId)?.asToday?.showHolidayName == true)
+        #expect(repository.loadSetting(for: customId)?.asToday?.showHolidayName == false)
     }
 
-    @Test("variant 가 달라도 각자 다른 타입의 설정을 왕복한다")
-    func updateSetting_differentVariantsKeepOwnPayloadTypes() {
+    @Test("꾸미기 대상이 아닌 variant 는 저장돼 있어도 설정을 내지 않는다")
+    func loadSetting_whenVariantHasNoSettingType_isNil() {
         // given
-        let repository = self.makeRepository()
-        let todayId = WidgetStyleId(variant: .todaySummarySmall, style: .default)
         let monthId = WidgetStyleId(variant: .monthSmall, style: .default)
-        let monthSetting = DummyMonthStyle(showWeekDayHeader: false, accentToday: true)
+        let repository = self.makeRepository()
+        repository.updateSetting(TodayStyleSetting.initial, for: monthId)
 
         // when
-        repository.updateSetting(DummyTodayStyle(showHolidayName: false), for: todayId)
-        repository.updateSetting(monthSetting, for: monthId)
+        let setting = repository.loadSetting(for: monthId)
 
         // then
-        #expect(repository.loadSetting(DummyTodayStyle.self, for: todayId)?.showHolidayName == false)
-        let loadedMonth = repository.loadSetting(DummyMonthStyle.self, for: monthId)
-        #expect(loadedMonth?.showWeekDayHeader == false)
-        #expect(loadedMonth?.accentToday == true)
+        #expect(setting == nil)
+        #expect(repository.loadStyles(of: .monthSmall).isEmpty == true)
     }
 
     @Test("한 좌표를 갱신해도 다른 좌표 설정이 남는다")
     func updateSetting_keepsOtherCoordinates() {
         // given
         let repository = self.makeRepository()
-        let keptId = WidgetStyleId(variant: .monthSmall, style: .default)
-        let kept = DummyMonthStyle(showWeekDayHeader: nil, accentToday: true)
-        repository.updateSetting(kept, for: keptId)
+        let keptId = WidgetStyleId(variant: .todaySummarySmall, style: .custom(id: "c1"))
+        repository.updateSetting(
+            TodayStyleSetting.initial |> \.showTimeZone .~ false, for: keptId
+        )
 
         // when
         repository.updateSetting(
-            DummyTodayStyle(showHolidayName: false),
+            TodayStyleSetting.initial |> \.showHolidayName .~ false,
             for: .init(variant: .todaySummarySmall, style: .default)
         )
 
         // then
-        #expect(repository.loadSetting(DummyMonthStyle.self, for: keptId)?.accentToday == true)
+        #expect(repository.loadSetting(for: keptId)?.asToday?.showTimeZone == false)
     }
 
     @Test("구분자가 든 커스텀 id 도 그대로 복원한다")
@@ -153,13 +133,11 @@ extension WidgetStyleLocalRepositoryImpleTests {
         let id = WidgetStyleId(variant: .todaySummarySmall, style: .custom(id: "a::b::c"))
 
         // when
-        repository.updateSetting(DummyTodayStyle(showHolidayName: true), for: id)
+        repository.updateSetting(TodayStyleSetting.initial |> \.showHolidayName .~ true, for: id)
 
         // then
-        #expect(repository.loadSetting(DummyTodayStyle.self, for: id)?.showHolidayName == true)
-        let styles: [WidgetStyle<DummyTodayStyle>] = repository.loadStyles(
-            DummyTodayStyle.self, of: .todaySummarySmall
-        )
+        #expect(repository.loadSetting(for: id)?.asToday?.showHolidayName == true)
+        let styles = repository.loadStyles(of: .todaySummarySmall)
         #expect(styles.map { $0.id.style } == [.custom(id: "a::b::c")])
     }
 }
@@ -177,15 +155,13 @@ extension WidgetStyleLocalRepositoryImpleTests {
 
         // when
         repository.updateStyle(
-            WidgetStyle(id: id, name: "밤 모드", setting: DummyTodayStyle(showHolidayName: false))
+            WidgetStyle(id: id, name: "밤 모드", setting: TodayStyleSetting.initial |> \.showHolidayName .~ false)
         )
 
         // then
-        let styles: [WidgetStyle<DummyTodayStyle>] = repository.loadStyles(
-            DummyTodayStyle.self, of: .todaySummarySmall
-        )
+        let styles = repository.loadStyles(of: .todaySummarySmall)
         #expect(styles.map { $0.name } == ["밤 모드"])
-        #expect(styles.map { $0.setting.showHolidayName } == [false])
+        #expect(styles.map { $0.setting.asToday?.showHolidayName } == [false])
     }
 
     @Test("이름 없이 저장된 구버전 값도 설정이 유지된다")
@@ -196,13 +172,11 @@ extension WidgetStyleLocalRepositoryImpleTests {
         )
 
         // when
-        let styles: [WidgetStyle<DummyTodayStyle>] = repository.loadStyles(
-            DummyTodayStyle.self, of: .todaySummarySmall
-        )
+        let styles = repository.loadStyles(of: .todaySummarySmall)
 
         // then
         #expect(styles.map { $0.name } == [nil])
-        #expect(styles.map { $0.setting.showHolidayName } == [true])
+        #expect(styles.map { $0.setting.asToday?.showHolidayName } == [true])
     }
 
     @Test("새 형식으로 저장된 값을 구버전 경로로 잘못 읽지 않는다")
@@ -217,13 +191,11 @@ extension WidgetStyleLocalRepositoryImpleTests {
         )
 
         // when
-        let styles: [WidgetStyle<DummyTodayStyle>] = repository.loadStyles(
-            DummyTodayStyle.self, of: .todaySummarySmall
-        )
+        let styles = repository.loadStyles(of: .todaySummarySmall)
 
         // then
         #expect(styles.map { $0.name } == ["밤 모드"])
-        #expect(styles.map { $0.setting.showHolidayName } == [true])
+        #expect(styles.map { $0.setting.asToday?.showHolidayName } == [true])
     }
 
     @Test("한 variant 에 구버전 값과 새 형식 값이 섞여 있어도 둘 다 읽는다")
@@ -239,13 +211,11 @@ extension WidgetStyleLocalRepositoryImpleTests {
         )
 
         // when
-        let styles: [WidgetStyle<DummyTodayStyle>] = repository.loadStyles(
-            DummyTodayStyle.self, of: .todaySummarySmall
-        )
+        let styles = repository.loadStyles(of: .todaySummarySmall)
 
         // then
         #expect(styles.map { $0.name } == [nil, "밤 모드"])
-        #expect(styles.map { $0.setting.showHolidayName } == [true, false])
+        #expect(styles.map { $0.setting.asToday?.showHolidayName } == [true, false])
     }
 
     @Test("단건 조회도 새 형식 저장값에서 설정을 꺼낸다")
@@ -261,11 +231,11 @@ extension WidgetStyleLocalRepositoryImpleTests {
 
         // when
         let setting = repository.loadSetting(
-            DummyTodayStyle.self, for: .init(variant: .todaySummarySmall, style: .default)
+            for: .init(variant: .todaySummarySmall, style: .default)
         )
 
         // then
-        #expect(setting?.showHolidayName == false)
+        #expect(setting?.asToday?.showHolidayName == false)
     }
 }
 
@@ -280,25 +250,25 @@ extension WidgetStyleLocalRepositoryImpleTests {
         let repository = self.makeRepository()
         let variant = WidgetVariant.todaySummarySmall
         repository.updateSetting(
-            DummyTodayStyle(showHolidayName: false),
+            TodayStyleSetting.initial |> \.showHolidayName .~ false,
             for: .init(variant: variant, style: .custom(id: "b"))
         )
         repository.updateSetting(
-            DummyTodayStyle(showHolidayName: true),
+            TodayStyleSetting.initial |> \.showHolidayName .~ true,
             for: .init(variant: variant, style: .custom(id: "a"))
         )
         repository.updateSetting(
-            DummyTodayStyle(showHolidayName: nil), for: .init(variant: variant, style: .default)
+            TodayStyleSetting.initial |> \.showMonthYear .~ false,
+            for: .init(variant: variant, style: .default)
         )
 
         // when
-        let styles: [WidgetStyle<DummyTodayStyle>] = repository.loadStyles(
-            DummyTodayStyle.self, of: variant
-        )
+        let styles = repository.loadStyles(of: variant)
 
         // then
         #expect(styles.map { $0.id.style } == [.default, .custom(id: "a"), .custom(id: "b")])
-        #expect(styles.map { $0.setting.showHolidayName } == [nil, true, false])
+        #expect(styles.map { $0.setting.asToday?.showMonthYear } == [false, true, true])
+        #expect(styles.map { $0.setting.asToday?.showHolidayName } == [true, true, false])
     }
 
     @Test("다른 variant 의 스타일은 목록에 섞이지 않는다")
@@ -306,15 +276,15 @@ extension WidgetStyleLocalRepositoryImpleTests {
         // given
         let repository = self.makeRepository()
         repository.updateSetting(
-            DummyTodayStyle(showHolidayName: true), for: .init(variant: .todaySummarySmall, style: .default)
+            TodayStyleSetting.initial |> \.showHolidayName .~ true, for: .init(variant: .todaySummarySmall, style: .default)
         )
-        let monthSetting = DummyMonthStyle(showWeekDayHeader: nil, accentToday: true)
-        repository.updateSetting(monthSetting, for: .init(variant: .monthSmall, style: .default))
+        repository.updateSetting(
+            TodayStyleSetting.initial |> \.showHolidayName .~ false,
+            for: .init(variant: .eventListSmall, style: .default)
+        )
 
         // when
-        let styles: [WidgetStyle<DummyTodayStyle>] = repository.loadStyles(
-            DummyTodayStyle.self, of: .todaySummarySmall
-        )
+        let styles = repository.loadStyles(of: .todaySummarySmall)
 
         // then
         #expect(styles.map { $0.id.variant } == [.todaySummarySmall])
@@ -332,15 +302,15 @@ extension WidgetStyleLocalRepositoryImpleTests {
         let repository = self.makeRepository()
         let removedId = WidgetStyleId(variant: .todaySummarySmall, style: .custom(id: "c1"))
         let keptId = WidgetStyleId(variant: .todaySummarySmall, style: .default)
-        repository.updateSetting(DummyTodayStyle(showHolidayName: false), for: removedId)
-        repository.updateSetting(DummyTodayStyle(showHolidayName: true), for: keptId)
+        repository.updateSetting(TodayStyleSetting.initial |> \.showHolidayName .~ false, for: removedId)
+        repository.updateSetting(TodayStyleSetting.initial |> \.showHolidayName .~ true, for: keptId)
 
         // when
         repository.removeStyle(removedId)
 
         // then
-        #expect(repository.loadSetting(DummyTodayStyle.self, for: removedId) == nil)
-        #expect(repository.loadSetting(DummyTodayStyle.self, for: keptId)?.showHolidayName == true)
+        #expect(repository.loadSetting(for: removedId)?.asToday == nil)
+        #expect(repository.loadSetting(for: keptId)?.asToday?.showHolidayName == true)
     }
 
     @Test("variant 별로 묶고 그 안에서 스타일 축으로 가른다")
@@ -350,10 +320,10 @@ extension WidgetStyleLocalRepositoryImpleTests {
 
         // when
         repository.updateSetting(
-            DummyTodayStyle(showHolidayName: false), for: .init(variant: .todaySummarySmall, style: .default)
+            TodayStyleSetting.initial |> \.showHolidayName .~ false, for: .init(variant: .todaySummarySmall, style: .default)
         )
         repository.updateSetting(
-            DummyTodayStyle(showHolidayName: true),
+            TodayStyleSetting.initial |> \.showHolidayName .~ true,
             for: .init(variant: .monthSmall, style: .custom(id: "c1"))
         )
 
@@ -369,7 +339,7 @@ extension WidgetStyleLocalRepositoryImpleTests {
         // given
         let repository = self.makeRepository()
         let id = WidgetStyleId(variant: .todaySummarySmall, style: .default)
-        repository.updateSetting(DummyTodayStyle(showHolidayName: false), for: id)
+        repository.updateSetting(TodayStyleSetting.initial |> \.showHolidayName .~ false, for: id)
 
         // when
         repository.removeStyle(id)
@@ -394,7 +364,7 @@ extension WidgetStyleLocalRepositoryImpleTests {
 
         // when
         let setting = repository.loadSetting(
-            DummyTodayStyle.self, for: .init(variant: .todaySummarySmall, style: .default)
+            for: .init(variant: .todaySummarySmall, style: .default)
         )
 
         // then
@@ -415,11 +385,9 @@ extension WidgetStyleLocalRepositoryImpleTests {
         )
 
         // when
-        let styles: [WidgetStyle<DummyTodayStyle>] = repository.loadStyles(
-            DummyTodayStyle.self, of: .todaySummarySmall
-        )
+        let styles = repository.loadStyles(of: .todaySummarySmall)
 
         // then
-        #expect(styles.map { $0.setting.showHolidayName } == [true])
+        #expect(styles.map { $0.setting.asToday?.showHolidayName } == [true])
     }
 }

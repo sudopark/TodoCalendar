@@ -30,17 +30,17 @@ public final class WidgetStyleLocalRepositoryImple: WidgetStyleRepository {
 
 extension WidgetStyleLocalRepositoryImple {
 
-    public func loadSetting<S: WidgetStyleSetting>(_ type: S.Type, for id: WidgetStyleId) -> S? {
+    public func loadSetting(for id: WidgetStyleId) -> (any WidgetStyleSetting)? {
+        guard let type = id.variant.settingType else { return nil }
         return self.loadStoredStyles()[id.variant.rawValue]?[id.style.storageKey]?
             .decodedStoredStyle(type)?.setting
     }
 
-    public func loadStyles<S: WidgetStyleSetting>(
-        _ type: S.Type, of variant: WidgetVariant
-    ) -> [WidgetStyle<S>] {
+    public func loadStyles(of variant: WidgetVariant) -> [WidgetStyle] {
+        guard let type = variant.settingType else { return [] }
         let stored = self.loadStoredStyles()[variant.rawValue] ?? [:]
         return stored
-            .compactMap { key, text -> WidgetStyle<S>? in
+            .compactMap { key, text -> WidgetStyle? in
                 guard let style = WidgetStyleId.Style(storageKey: key),
                       let stored = text.decodedStoredStyle(type)
                 else { return nil }
@@ -53,7 +53,7 @@ extension WidgetStyleLocalRepositoryImple {
             .sorted { $0.id.style.sortKey < $1.id.style.sortKey }
     }
 
-    public func updateStyle<S: WidgetStyleSetting>(_ style: WidgetStyle<S>) {
+    public func updateStyle(_ style: WidgetStyle) {
         guard let text = style.encodedText() else { return }
         var stored = self.loadStoredStyles()
         var styles = stored[style.id.variant.rawValue] ?? [:]
@@ -130,10 +130,21 @@ private struct StoredStyle<S: WidgetStyleSetting>: Codable {
     let setting: S
 }
 
+private struct DecodedStyle {
+
+    let name: String?
+    let setting: any WidgetStyleSetting
+}
+
 private extension WidgetStyle {
 
+    /// 반환 타입에 payload 타입이 안 나와 존재 타입인 setting 을 그대로 넘겨 열 수 있다.
     func encodedText() -> String? {
-        let stored = StoredStyle(name: self.name, setting: self.setting)
+        return self.encodedText(self.setting)
+    }
+
+    private func encodedText<S: WidgetStyleSetting>(_ setting: S) -> String? {
+        let stored = StoredStyle(name: self.name, setting: setting)
         return (try? JSONEncoder().encode(stored))
             .flatMap { String(data: $0, encoding: .utf8) }
     }
@@ -141,14 +152,18 @@ private extension WidgetStyle {
 
 private extension String {
 
+    func decodedStoredStyle(_ type: any WidgetStyleSetting.Type) -> DecodedStyle? {
+        return self.decodedStoredStyle(typed: type)
+    }
+
     /// 레코드를 먼저 본다 — 설정 타입은 전 필드가 Optional 이라 순서를 뒤집으면 레코드 JSON 도
     /// payload 로 디코드에 성공해 설정이 통째로 비워진다.
-    func decodedStoredStyle<S: WidgetStyleSetting>(_ type: S.Type) -> StoredStyle<S>? {
+    private func decodedStoredStyle<S: WidgetStyleSetting>(typed type: S.Type) -> DecodedStyle? {
         guard let data = self.data(using: .utf8) else { return nil }
         if let stored = try? JSONDecoder().decode(StoredStyle<S>.self, from: data) {
-            return stored
+            return DecodedStyle(name: stored.name, setting: stored.setting)
         }
         guard let setting = try? JSONDecoder().decode(type, from: data) else { return nil }
-        return StoredStyle(name: nil, setting: setting)
+        return DecodedStyle(name: nil, setting: setting)
     }
 }

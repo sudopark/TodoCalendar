@@ -16,6 +16,14 @@ import UnitTestHelpKit
 @testable import Domain
 
 
+private struct OtherStyleSetting: WidgetStyleSetting {
+
+    var isOn: Bool
+
+    static let initial = OtherStyleSetting(isOn: true)
+}
+
+
 final class WidgetStyleUsecaseImpleTests: PublisherWaitable {
 
     var cancelBag: Set<AnyCancellable>! = .init()
@@ -23,31 +31,27 @@ final class WidgetStyleUsecaseImpleTests: PublisherWaitable {
 
     private final class StubRepository: WidgetStyleRepository, @unchecked Sendable {
 
-        private var savedStyles: [WidgetStyle<TodayStyleSetting>]
-        init(savedStyles: [WidgetStyle<TodayStyleSetting>] = []) {
+        private var savedStyles: [WidgetStyle]
+        init(savedStyles: [WidgetStyle] = []) {
             self.savedStyles = savedStyles
         }
 
         private(set) var requestedVariant: WidgetVariant?
-        private(set) var updatedStyles: [WidgetStyle<TodayStyleSetting>] = []
+        private(set) var updatedStyles: [WidgetStyle] = []
         private(set) var removedStyleIds: [WidgetStyleId] = []
 
-        func loadSetting<S: WidgetStyleSetting>(_ type: S.Type, for id: WidgetStyleId) -> S? {
+        func loadSetting(for id: WidgetStyleId) -> (any WidgetStyleSetting)? {
             return nil
         }
 
-        func loadStyles<S: WidgetStyleSetting>(
-            _ type: S.Type, of variant: WidgetVariant
-        ) -> [WidgetStyle<S>] {
+        func loadStyles(of variant: WidgetVariant) -> [WidgetStyle] {
             self.requestedVariant = variant
-            let styles = self.savedStyles.filter { $0.id.variant == variant }
-            return styles as? [WidgetStyle<S>] ?? []
+            return self.savedStyles.filter { $0.id.variant == variant }
         }
 
-        func updateStyle<S: WidgetStyleSetting>(_ style: WidgetStyle<S>) {
-            guard let updated = style as? WidgetStyle<TodayStyleSetting> else { return }
-            self.updatedStyles.append(updated)
-            self.savedStyles = self.savedStyles.filter { $0.id != updated.id } + [updated]
+        func updateStyle(_ style: WidgetStyle) {
+            self.updatedStyles.append(style)
+            self.savedStyles = self.savedStyles.filter { $0.id != style.id } + [style]
         }
 
         func removeStyle(_ id: WidgetStyleId) {
@@ -61,7 +65,7 @@ final class WidgetStyleUsecaseImpleTests: PublisherWaitable {
         variant: WidgetVariant = .todaySummarySmall,
         name: String? = nil,
         showHolidayName: Bool
-    ) -> WidgetStyle<TodayStyleSetting> {
+    ) -> WidgetStyle {
         return .init(
             id: .init(variant: variant, style: style),
             name: name,
@@ -88,13 +92,13 @@ extension WidgetStyleUsecaseImpleTests {
         let usecase = self.makeUsecase(with: .init())
 
         // when
-        let styles = usecase.loadStyles(TodayStyleSetting.self, of: .todaySummarySmall)
+        let styles = usecase.loadStyles(of: .todaySummarySmall)
 
         // then
         #expect(styles.count == 1)
         #expect(styles.first?.id == .init(variant: .todaySummarySmall, style: .default))
         #expect(styles.first?.name == nil)
-        #expect(styles.first?.setting == TodayStyleSetting.initial)
+        #expect(styles.first?.setting as? TodayStyleSetting == TodayStyleSetting.initial)
     }
 
     @Test("기본 스타일이 저장돼 있으면 그 저장값을 첫 원소로 쓰고 덧붙이지 않는다")
@@ -104,11 +108,11 @@ extension WidgetStyleUsecaseImpleTests {
         let usecase = self.makeUsecase(with: .init(savedStyles: [saved]))
 
         // when
-        let styles = usecase.loadStyles(TodayStyleSetting.self, of: .todaySummarySmall)
+        let styles = usecase.loadStyles(of: .todaySummarySmall)
 
         // then
         #expect(styles.count == 1)
-        #expect(styles.first?.setting.showHolidayName == false)
+        #expect(styles.first?.setting.asToday?.showHolidayName == false)
     }
 
     @Test("커스텀 스타일만 저장돼 있으면 기본 스타일을 앞세우고 커스텀을 뒤에 붙인다")
@@ -121,11 +125,11 @@ extension WidgetStyleUsecaseImpleTests {
         let usecase = self.makeUsecase(with: .init(savedStyles: customs))
 
         // when
-        let styles = usecase.loadStyles(TodayStyleSetting.self, of: .todaySummarySmall)
+        let styles = usecase.loadStyles(of: .todaySummarySmall)
 
         // then
         #expect(styles.map { $0.id.style } == [.default, .custom(id: "c1"), .custom(id: "c2")])
-        #expect(styles.first?.setting == TodayStyleSetting.initial)
+        #expect(styles.first?.setting as? TodayStyleSetting == TodayStyleSetting.initial)
     }
 
     @Test("조회한 변형을 저장소에 그대로 넘긴다")
@@ -135,11 +139,25 @@ extension WidgetStyleUsecaseImpleTests {
         let usecase = self.makeUsecase(with: repository)
 
         // when
-        let styles = usecase.loadStyles(TodayStyleSetting.self, of: .monthSmall)
+        let styles = usecase.loadStyles(of: .todaySummarySmall)
 
         // then
-        #expect(repository.requestedVariant == .monthSmall)
-        #expect(styles.first?.id.variant == .monthSmall)
+        #expect(repository.requestedVariant == .todaySummarySmall)
+        #expect(styles.first?.id.variant == .todaySummarySmall)
+    }
+
+    @Test("꾸미기 대상이 아닌 변형은 저장소를 부르지 않고 빈 목록을 낸다")
+    func loadStyles_whenVariantHasNoSettingType_isEmpty() {
+        // given
+        let repository = StubRepository()
+        let usecase = self.makeUsecase(with: repository)
+
+        // when
+        let styles = usecase.loadStyles(of: .monthSmall)
+
+        // then
+        #expect(styles.isEmpty == true)
+        #expect(repository.requestedVariant == nil)
     }
 }
 
@@ -159,9 +177,9 @@ extension WidgetStyleUsecaseImpleTests {
 
         // when
         let styleLists = try await self.outputs(
-            expect, for: usecase.styles(TodayStyleSetting.self, of: .todaySummarySmall)
+            expect, for: usecase.styles(of: .todaySummarySmall)
         ) {
-            usecase.refreshStyles(TodayStyleSetting.self, of: .monthSmall)
+            usecase.refreshStyles(of: .monthSmall)
         }
 
         // then
@@ -180,14 +198,14 @@ extension WidgetStyleUsecaseImpleTests {
 
         // when
         let styles = try await self.firstOutput(
-            expect, for: usecase.styles(TodayStyleSetting.self, of: .todaySummarySmall)
+            expect, for: usecase.styles(of: .todaySummarySmall)
         ) {
-            usecase.refreshStyles(TodayStyleSetting.self, of: .todaySummarySmall)
+            usecase.refreshStyles(of: .todaySummarySmall)
         }
 
         // then
         #expect(styles?.map { $0.id.style } == [.default, .custom(id: "c1")])
-        #expect(styles?.first?.setting.showHolidayName == false)
+        #expect(styles?.first?.setting.asToday?.showHolidayName == false)
     }
 
     @Test("저장된 스타일이 없으면 갱신 후에도 기본 스타일 한 장만 낸다")
@@ -198,14 +216,14 @@ extension WidgetStyleUsecaseImpleTests {
 
         // when
         let styles = try await self.firstOutput(
-            expect, for: usecase.styles(TodayStyleSetting.self, of: .todaySummarySmall)
+            expect, for: usecase.styles(of: .todaySummarySmall)
         ) {
-            usecase.refreshStyles(TodayStyleSetting.self, of: .todaySummarySmall)
+            usecase.refreshStyles(of: .todaySummarySmall)
         }
 
         // then
         #expect(styles?.map { $0.id.style } == [.default])
-        #expect(styles?.first?.setting == TodayStyleSetting.initial)
+        #expect(styles?.first?.setting as? TodayStyleSetting == TodayStyleSetting.initial)
     }
 
     @Test("스타일을 저장하면 같은 변형 스트림이 갱신된 목록을 다시 낸다")
@@ -217,14 +235,14 @@ extension WidgetStyleUsecaseImpleTests {
 
         // when
         let styleLists = try await self.outputs(
-            expect, for: usecase.styles(TodayStyleSetting.self, of: .todaySummarySmall)
+            expect, for: usecase.styles(of: .todaySummarySmall)
         ) {
-            usecase.refreshStyles(TodayStyleSetting.self, of: .todaySummarySmall)
+            usecase.refreshStyles(of: .todaySummarySmall)
             usecase.updateStyle(self.todayStyle(.default, showHolidayName: false))
         }
 
         // then
-        #expect(styleLists.map { $0.first?.setting.showHolidayName } == [true, false])
+        #expect(styleLists.map { $0.first?.setting.asToday?.showHolidayName } == [true, false])
     }
 
     @Test("커스텀 스타일을 지우면 그 스타일이 빠진 목록을 다시 낸다")
@@ -237,10 +255,10 @@ extension WidgetStyleUsecaseImpleTests {
 
         // when
         let styleLists = try await self.outputs(
-            expect, for: usecase.styles(TodayStyleSetting.self, of: .todaySummarySmall)
+            expect, for: usecase.styles(of: .todaySummarySmall)
         ) {
-            usecase.refreshStyles(TodayStyleSetting.self, of: .todaySummarySmall)
-            usecase.removeStyle(TodayStyleSetting.self, custom.id)
+            usecase.refreshStyles(of: .todaySummarySmall)
+            usecase.removeStyle(custom.id)
         }
 
         // then
@@ -259,13 +277,11 @@ extension WidgetStyleUsecaseImpleTests {
 
         // when
         let styleLists = try await self.outputs(
-            expect, for: usecase.styles(TodayStyleSetting.self, of: .todaySummarySmall)
+            expect, for: usecase.styles(of: .todaySummarySmall)
         ) {
-            usecase.refreshStyles(TodayStyleSetting.self, of: .todaySummarySmall)
-            usecase.removeStyle(
-                TodayStyleSetting.self, .init(variant: .todaySummarySmall, style: .default)
-            )
-            usecase.removeStyle(TodayStyleSetting.self, custom.id)
+            usecase.refreshStyles(of: .todaySummarySmall)
+            usecase.removeStyle(.init(variant: .todaySummarySmall, style: .default))
+            usecase.removeStyle(custom.id)
         }
 
         // then
@@ -283,9 +299,9 @@ extension WidgetStyleUsecaseImpleTests {
 
         // when
         let styleLists = try await self.outputs(
-            expect, for: usecase.styles(TodayStyleSetting.self, of: .todaySummarySmall)
+            expect, for: usecase.styles(of: .todaySummarySmall)
         ) {
-            usecase.refreshStyles(TodayStyleSetting.self, of: .todaySummarySmall)
+            usecase.refreshStyles(of: .todaySummarySmall)
             usecase.updateStyle(
                 self.todayStyle(.custom(id: "m1"), variant: .monthSmall, showHolidayName: true)
             )
@@ -294,7 +310,7 @@ extension WidgetStyleUsecaseImpleTests {
 
         // then
         #expect(styleLists.map { $0.map { $0.id.style } } == [[.default], [.default]])
-        #expect(styleLists.map { $0.first?.setting.showHolidayName } == [true, false])
+        #expect(styleLists.map { $0.first?.setting.asToday?.showHolidayName } == [true, false])
     }
 }
 
@@ -315,7 +331,25 @@ extension WidgetStyleUsecaseImpleTests {
 
         // then
         let updated = repository.updatedStyles.first
-        #expect(updated == style)
+        #expect(updated?.isSame(style) == true)
+    }
+
+    @Test("좌표의 변형이 쓰는 타입이 아닌 설정은 저장소로 가지 않는다")
+    func updateStyle_whenSettingTypeDoesNotMatchVariant_doesNotSave() {
+        // given
+        let repository = StubRepository()
+        let usecase = self.makeUsecase(with: repository)
+        let style = WidgetStyle(
+            id: .init(variant: .todaySummarySmall, style: .custom(id: "c1")),
+            name: "밤 모드",
+            setting: OtherStyleSetting.initial
+        )
+
+        // when
+        usecase.updateStyle(style)
+
+        // then
+        #expect(repository.updatedStyles.isEmpty == true)
     }
 
     @Test("공백뿐인 이름은 없는 것으로 저장된다")
@@ -331,7 +365,7 @@ extension WidgetStyleUsecaseImpleTests {
         // then
         let updated = repository.updatedStyles.first
         #expect(updated?.name == nil)
-        #expect(updated?.setting.showHolidayName == false)
+        #expect(updated?.setting.asToday?.showHolidayName == false)
     }
 }
 
@@ -382,7 +416,7 @@ extension WidgetStyleUsecaseImpleTests {
         let styleId = WidgetStyleId(variant: .todaySummarySmall, style: .custom(id: "c1"))
 
         // when
-        usecase.removeStyle(TodayStyleSetting.self, styleId)
+        usecase.removeStyle(styleId)
 
         // then
         #expect(repository.removedStyleIds == [styleId])
@@ -395,11 +429,15 @@ extension WidgetStyleUsecaseImpleTests {
         let usecase = self.makeUsecase(with: repository)
 
         // when
-        usecase.removeStyle(
-            TodayStyleSetting.self, .init(variant: .todaySummarySmall, style: .default)
-        )
+        usecase.removeStyle(.init(variant: .todaySummarySmall, style: .default))
 
         // then
         #expect(repository.removedStyleIds.isEmpty)
     }
+}
+
+
+private extension WidgetStyleSetting {
+
+    var asToday: TodayStyleSetting? { self as? TodayStyleSetting }
 }

@@ -62,7 +62,7 @@ struct TodayStyleEntity: AppEntity, Sendable {
 
 extension TodayStyleEntity {
 
-    init(style: WidgetStyle<TodayStyleSetting>) {
+    init(style: WidgetStyle) {
         self.init(id: style.id.style.entityId, name: style.displayName)
     }
 }
@@ -90,7 +90,7 @@ struct TodayStyleQuery: EntityQuery, @unchecked Sendable {
 
     private func savedStyleEntities() -> [TodayStyleEntity] {
         return self.factory.makeStyleUsecase()
-            .loadStyles(TodayStyleSetting.self, of: .todaySummarySmall)
+            .loadStyles(of: .todaySummarySmall)
             .map { TodayStyleEntity(style: $0) }
     }
 }
