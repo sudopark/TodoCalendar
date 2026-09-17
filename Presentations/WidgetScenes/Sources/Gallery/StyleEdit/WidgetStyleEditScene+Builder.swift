@@ -28,7 +28,7 @@ protocol WidgetStyleEditSceneBuilder: AnyObject {
     
     @MainActor
     func makeWidgetStyleEditScene(
-        variant: WidgetVariant,
+        variants: [WidgetVariant],
         setting: WidgetAppearanceSettings
     ) -> any WidgetStyleEditScene
 }

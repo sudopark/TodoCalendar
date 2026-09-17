@@ -153,9 +153,7 @@ final class WidgetGallerySnapshots: XCTestCase {
             )
         ]
         state.selectedStyleId = styleId
-        state.items = TodayStyleItem.allCases.map {
-            .init(item: $0, isOn: turnedOffItems.contains($0) == false)
-        }
+        state.selectedSetting = setting
         return state
     }
     
@@ -192,16 +190,14 @@ final class WidgetGallerySnapshots: XCTestCase {
         state.hasUnsavedChange = hasUnsavedChanges
         state.selectedStyleId = selected.id
         state.editingName = selected.name ?? ""
-        state.items = TodayStyleItem.allCases.map {
-            .init(item: $0, isOn: selected.setting[keyPath: $0.settingKeyPath])
-        }
+        state.selectedSetting = selected.setting
         return state
     }
     
     @MainActor
     func test_widgetStyleEdit_monthYearOff() {
         captureSnapshotPair(named: "widgetStyleEdit-monthYearOff", layout: .fullScreen) { theme in
-            WidgetStyleEditView(variant: .todaySummarySmall, setting: .init())
+            WidgetStyleEditView(variants: [.todaySummarySmall], setting: .init())
                 .environment(self.styleEditState([.showMonthYear]))
                 .environment(WidgetStyleEditViewEventHandler())
                 .environment(self.makeAppearance(theme))
@@ -211,7 +207,7 @@ final class WidgetGallerySnapshots: XCTestCase {
     @MainActor
     func test_widgetStyleEdit_dayOnly() {
         captureSnapshotPair(named: "widgetStyleEdit-dayOnly", layout: .fullScreen) { theme in
-            WidgetStyleEditView(variant: .todaySummarySmall, setting: .init())
+            WidgetStyleEditView(variants: [.todaySummarySmall], setting: .init())
                 .environment(
                     self.styleEditState([
                         .showMonthYear, .showTotalCount, .showTodoCount, .showScheduleCount
@@ -225,7 +221,7 @@ final class WidgetGallerySnapshots: XCTestCase {
     @MainActor
     func test_widgetStyleEdit_withCustomStyles() {
         captureSnapshotPair(named: "widgetStyleEdit-customStyles", layout: .fullScreen) { theme in
-            WidgetStyleEditView(variant: .todaySummarySmall, setting: .init())
+            WidgetStyleEditView(variants: [.todaySummarySmall], setting: .init())
                 .environment(self.styleEditStateWithCustoms())
                 .environment(WidgetStyleEditViewEventHandler())
                 .environment(self.makeAppearance(theme))
@@ -235,7 +231,7 @@ final class WidgetGallerySnapshots: XCTestCase {
     @MainActor
     func test_widgetStyleEdit_withUnsavedChanges() {
         captureSnapshotPair(named: "widgetStyleEdit-unsaved", layout: .fullScreen) { theme in
-            WidgetStyleEditView(variant: .todaySummarySmall, setting: .init())
+            WidgetStyleEditView(variants: [.todaySummarySmall], setting: .init())
                 .environment(self.styleEditStateWithCustoms(hasUnsavedChanges: true))
                 .environment(WidgetStyleEditViewEventHandler())
                 .environment(self.makeAppearance(theme))
@@ -247,7 +243,7 @@ final class WidgetGallerySnapshots: XCTestCase {
         captureSnapshotPair(named: "widgetStyleEdit-defaultSelected", layout: .fullScreen) { theme in
             let state = self.styleEditStateWithCustoms()
             state.selectedStyleId = .init(variant: .todaySummarySmall, style: .default)
-            return WidgetStyleEditView(variant: .todaySummarySmall, setting: .init())
+            return WidgetStyleEditView(variants: [.todaySummarySmall], setting: .init())
                 .environment(state)
                 .environment(WidgetStyleEditViewEventHandler())
                 .environment(self.makeAppearance(theme))
@@ -257,7 +253,7 @@ final class WidgetGallerySnapshots: XCTestCase {
     @MainActor
     func test_widgetStyleEdit_allItemsOn() {
         captureSnapshotPair(named: "widgetStyleEdit-allOn", layout: .fullScreen) { theme in
-            WidgetStyleEditView(variant: .todaySummarySmall, setting: .init())
+            WidgetStyleEditView(variants: [.todaySummarySmall], setting: .init())
                 .environment(self.styleEditState())
                 .environment(WidgetStyleEditViewEventHandler())
                 .environment(self.makeAppearance(theme))
@@ -267,7 +263,7 @@ final class WidgetGallerySnapshots: XCTestCase {
     @MainActor
     func test_widgetStyleEdit_countItemsAllOff() {
         captureSnapshotPair(named: "widgetStyleEdit-countsOff", layout: .fullScreen) { theme in
-            WidgetStyleEditView(variant: .todaySummarySmall, setting: .init())
+            WidgetStyleEditView(variants: [.todaySummarySmall], setting: .init())
                 .environment(
                     self.styleEditState([.showTotalCount, .showTodoCount, .showScheduleCount])
                 )
@@ -279,7 +275,7 @@ final class WidgetGallerySnapshots: XCTestCase {
     @MainActor
     func test_widgetStyleEdit_someItemsOff() {
         captureSnapshotPair(named: "widgetStyleEdit-someOff", layout: .fullScreen) { theme in
-            WidgetStyleEditView(variant: .todaySummarySmall, setting: .init())
+            WidgetStyleEditView(variants: [.todaySummarySmall], setting: .init())
                 .environment(self.styleEditState([.showTimeZone, .showTotalCount]))
                 .environment(WidgetStyleEditViewEventHandler())
                 .environment(self.makeAppearance(theme))
