@@ -16,10 +16,10 @@ struct WidgetPreviewStyleStack {
         static let maxOverlayCount: Int = 2
     }
 
-    let base: any WidgetStyleSetting
-    let overlays: [any WidgetStyleSetting]
+    let base: WidgetStyle
+    let overlays: [WidgetStyle]
 
-    init?(styles: [any WidgetStyleSetting]) {
+    init?(styles: [WidgetStyle]) {
         guard let base = styles.first else { return nil }
         self.base = base
         self.overlays = Array(styles.dropFirst().prefix(Constant.maxOverlayCount))

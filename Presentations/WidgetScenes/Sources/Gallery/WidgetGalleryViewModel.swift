@@ -25,7 +25,7 @@ protocol WidgetGalleryViewModel: AnyObject, WidgetGallerySceneInteractor {
 
     var items: AnyPublisher<[WidgetGalleryItem], Never> { get }
     var setting: AnyPublisher<WidgetAppearanceSettings, Never> { get }
-    var defaultStyles: AnyPublisher<[String: any WidgetStyleSetting], Never> { get }
+    var defaultStyles: AnyPublisher<[String: WidgetStyle], Never> { get }
 }
 
 final class WidgetGalleryViewModelImple: WidgetGalleryViewModel, @unchecked Sendable {
@@ -120,15 +120,15 @@ extension WidgetGalleryViewModelImple {
             .eraseToAnyPublisher()
     }
 
-    var defaultStyles: AnyPublisher<[String: any WidgetStyleSetting], Never> {
+    var defaultStyles: AnyPublisher<[String: WidgetStyle], Never> {
         let entryStreams = self.customizableVariants.map { variant in
             return self.widgetStyleUsecase.styles(of: variant)
                 .compactMap { $0.first }
-                .map { [variant.id: $0.setting] }
+                .map { [variant.id: $0] }
                 .eraseToAnyPublisher()
         }
         return Publishers.MergeMany(entryStreams)
-            .scan([String: any WidgetStyleSetting]()) { styles, entry in
+            .scan([String: WidgetStyle]()) { styles, entry in
                 return styles.merging(entry) { _, newStyle in newStyle }
             }
             .eraseToAnyPublisher()

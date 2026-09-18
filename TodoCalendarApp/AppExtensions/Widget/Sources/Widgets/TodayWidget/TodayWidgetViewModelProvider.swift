@@ -60,26 +60,46 @@ extension TodayWidgetViewModelProvider {
     ) async throws -> TodayWidgetViewModel {
         
         let setting = self.appSettingRepository.loadWidgetAppearanceSetting()
-        let styleSetting = self.styleSetting(style)
+        // 타임라인 생성마다 도는 자리라 저장소는 두 번만 읽고 두 해석이 그 값을 나눠 쓴다.
+        let instance = self.savedStyle(style)
+        let variantDefault = style == .default ? instance : self.savedStyle(.default)
         let timeZone = self.calednarSettingRepository.loadUserSelectedTImeZone() ?? .current
         let calednar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
         let todayRange = try calednar.dayRange(today).unwrap()
         let events = try await self.todayEvents(todayRange, timeZone)
         return TodayWidgetViewModel(today, calednar)
             .updated(events: events)
-            |> \.style .~ styleSetting
-            |> \.widgetSetting .~ setting
+            |> \.style .~ self.styleSetting(instance: instance, variantDefault: variantDefault)
+            |> \.widgetSetting .~ (
+                setting |> \.background .~ self.background(
+                    instance: instance, variantDefault: variantDefault, global: setting
+                )
+            )
     }
     
     /// 인스턴스가 고른 스타일 → 변형 기본 스타일 → 코드 기본값 순으로 내려간다.
-    private func styleSetting(_ style: WidgetStyleId.Style) -> TodayStyleSetting {
-        return self.savedStyleSetting(style) ?? self.savedStyleSetting(.default) ?? .initial
+    private func styleSetting(
+        instance: WidgetStyle?, variantDefault: WidgetStyle?
+    ) -> TodayStyleSetting {
+        return instance?.setting as? TodayStyleSetting
+            ?? variantDefault?.setting as? TodayStyleSetting
+            ?? .initial
     }
     
-    private func savedStyleSetting(_ style: WidgetStyleId.Style) -> TodayStyleSetting? {
+    /// 폴백은 스타일 단위다 — 고른 스타일이 색을 안 걸었으면 그 스타일이 "전역 따름"인 것이지
+    /// 기본 스타일의 색을 빌려오는 게 아니다. 변형 기본으로 내려가는 건 고른 스타일이 지워졌을 때뿐이다.
+    private func background(
+        instance: WidgetStyle?,
+        variantDefault: WidgetStyle?,
+        global: WidgetAppearanceSettings
+    ) -> WidgetAppearanceSettings.Background {
+        return (instance ?? variantDefault)?.background ?? global.background
+    }
+    
+    private func savedStyle(_ style: WidgetStyleId.Style) -> WidgetStyle? {
         return self.styleRepository.loadStyle(
             for: .init(variant: .todaySummarySmall, style: style)
-        )?.setting as? TodayStyleSetting
+        )
     }
     
     private func todayEvents(

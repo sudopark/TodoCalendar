@@ -110,14 +110,16 @@ extension WidgetGalleryDetailViewModelImpleTests {
         _ style: WidgetStyleId.Style,
         holiday: Bool = true,
         timeZone: Bool = true,
-        monthYear: Bool = true
+        monthYear: Bool = true,
+        background: WidgetAppearanceSettings.Background? = nil
     ) -> WidgetStyle {
         let setting = TodayStyleSetting.initial
             |> \.showHolidayName .~ holiday
             |> \.showTimeZone .~ timeZone
             |> \.showMonthYear .~ monthYear
         return .init(
-            id: .init(variant: .todaySummarySmall, style: style), name: nil, setting: setting
+            id: .init(variant: .todaySummarySmall, style: style), name: nil,
+            setting: setting, background: background
         )
     }
 
@@ -137,8 +139,8 @@ extension WidgetGalleryDetailViewModelImpleTests {
         _ stack: WidgetPreviewStyleStack?
     ) -> (base: TodayStyleSetting?, overlays: [TodayStyleSetting]) {
         return (
-            stack?.base as? TodayStyleSetting,
-            stack?.overlays.compactMap { $0 as? TodayStyleSetting } ?? []
+            stack?.base.setting as? TodayStyleSetting,
+            stack?.overlays.compactMap { $0.setting as? TodayStyleSetting } ?? []
         )
     }
 
@@ -154,6 +156,26 @@ extension WidgetGalleryDetailViewModelImpleTests {
         // then
         let stack = self.todaySettings(emitted?[WidgetVariant.todaySummarySmall.id])
         #expect(stack.base == defaultStyle.setting as? TodayStyleSetting)
+    }
+
+    @Test("겹쳐 깐 장들이 각자 자기 배경색을 갖는다")
+    func previewStyles_carryBackgroundOfEachStyle() async throws {
+        // given
+        let (viewModel, _) = self.makeTodayViewModel(
+            savedStyles: [
+                self.todayStyle(.default, background: .custom(hex: "#ffffff")),
+                self.todayStyle(.custom(id: "c1"), background: .custom(hex: "#101820")),
+                self.todayStyle(.custom(id: "c2"), background: nil)
+            ]
+        )
+
+        // when
+        let emitted = try await self.currentAfterRefresh("프리뷰 스택", of: viewModel)
+
+        // then
+        let stack = emitted?[WidgetVariant.todaySummarySmall.id]
+        #expect(stack?.base.background == .custom(hex: "#ffffff"))
+        #expect(stack?.overlays.map { $0.background } == [.custom(hex: "#101820"), nil])
     }
 
     @Test("커스텀 스타일이 없으면 겹쳐 깔 장이 없다")

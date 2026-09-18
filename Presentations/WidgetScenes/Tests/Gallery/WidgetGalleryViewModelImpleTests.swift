@@ -63,12 +63,14 @@ final class WidgetGalleryViewModelImpleTests: PublisherWaitable {
     private func todayStyle(
         _ style: WidgetStyleId.Style,
         variant: WidgetVariant = .todaySummarySmall,
-        showHolidayName: Bool
+        showHolidayName: Bool,
+        background: WidgetAppearanceSettings.Background? = nil
     ) -> WidgetStyle {
         return .init(
             id: .init(variant: variant, style: style),
             name: nil,
-            setting: TodayStyleSetting.initial |> \.showHolidayName .~ showHolidayName
+            setting: TodayStyleSetting.initial |> \.showHolidayName .~ showHolidayName,
+            background: background
         )
     }
 
@@ -101,7 +103,7 @@ extension WidgetGalleryViewModelImpleTests {
         }
 
         // then
-        let todaySetting = styles?[WidgetVariant.todaySummarySmall.id] as? TodayStyleSetting
+        let todaySetting = styles?[WidgetVariant.todaySummarySmall.id]?.setting as? TodayStyleSetting
         #expect(todaySetting?.showHolidayName == false)
     }
 
@@ -123,9 +125,33 @@ extension WidgetGalleryViewModelImpleTests {
 
         // then
         let flags = styleMaps.map {
-            ($0[WidgetVariant.todaySummarySmall.id] as? TodayStyleSetting)?.showHolidayName
+            ($0[WidgetVariant.todaySummarySmall.id]?.setting as? TodayStyleSetting)?.showHolidayName
         }
         #expect(flags == [false, true])
+    }
+
+    @Test("기본 스타일에 건 배경색이 함께 실린다 — 썸네일이 이걸 읽는다")
+    func viewModel_defaultStyle_carriesBackground() async throws {
+        // given
+        let expect = expectConfirm("기본 스타일 배경색이 나온다")
+        let styleUsecase = self.makeStyleUsecase(
+            savedStyles: [
+                self.todayStyle(
+                    .default, showHolidayName: false, background: .custom(hex: "#101820")
+                )
+            ]
+        )
+        let viewModel = self.makeViewModel(styleUsecase: styleUsecase)
+
+        // when
+        let styles = try await self.firstOutput(expect, for: viewModel.defaultStyles) {
+            viewModel.refresh()
+        }
+
+        // then
+        #expect(
+            styles?[WidgetVariant.todaySummarySmall.id]?.background == .custom(hex: "#101820")
+        )
     }
 
     @Test("꾸미기 대상이 아닌 변형은 스타일 사전에 키가 없다")

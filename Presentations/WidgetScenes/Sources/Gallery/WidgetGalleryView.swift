@@ -20,7 +20,7 @@ import CommonPresentation
 
     var items: [WidgetGalleryItem] = []
     var setting: WidgetAppearanceSettings = .init()
-    var defaultStyles: [String: any WidgetStyleSetting] = [:]
+    var defaultStyles: [String: WidgetStyle] = [:]
     var isSystemTheme: Bool = true
     var customBackground: Color?
 
@@ -297,10 +297,11 @@ extension WidgetGalleryView {
         let thumbnailVariant = item.variants.first(where: { $0.canvas.isLockScreen == false })
             ?? item.variants.first
         if let thumbnailVariant {
+            let defaultStyle = state.defaultStyles[thumbnailVariant.id]
             WidgetVariantPreviewView(
                 variant: thumbnailVariant,
-                setting: state.setting,
-                style: state.defaultStyles[thumbnailVariant.id]
+                setting: state.setting.overridingBackground(defaultStyle?.background),
+                style: defaultStyle?.setting
             )
             .frame(width: side, height: side)
         } else {
