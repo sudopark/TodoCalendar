@@ -72,7 +72,7 @@ extension TodayStyleEntity {
 
 struct TodayStyleQuery: EntityQuery, @unchecked Sendable {
 
-    private let factory: TodayStyleSelectIntentFactory
+    private let factory: WidgetStyleIntentFactory
 
     init() {
         self.factory = .init(base: AppExtensionBase())

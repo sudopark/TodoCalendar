@@ -1,5 +1,5 @@
 //
-//  TodayStyleSelectIntentFactory.swift
+//  WidgetStyleIntentFactory.swift
 //  TodoCalendarApp
 //
 //  Created by sudo.park on 9/15/26.
@@ -11,7 +11,7 @@ import Domain
 import Repository
 
 
-struct TodayStyleSelectIntentFactory {
+struct WidgetStyleIntentFactory {
 
     private let base: AppExtensionBase
 
@@ -20,7 +20,7 @@ struct TodayStyleSelectIntentFactory {
     }
 }
 
-extension TodayStyleSelectIntentFactory {
+extension WidgetStyleIntentFactory {
 
     /// 기본 스타일을 맨 앞에 세우는 규칙이 usecase 에 있어 저장소를 직접 부르지 않는다.
     func makeStyleUsecase() -> any WidgetStyleUsecase {
