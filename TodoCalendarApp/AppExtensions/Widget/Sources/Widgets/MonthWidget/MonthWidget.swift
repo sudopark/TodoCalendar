@@ -43,7 +43,11 @@ struct MonthWidget: Widget {
     let kind: String = "MonthWidget"
     
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: self.kind, provider: MonthWidgetTimelineProvider()) { entry in
+        AppIntentConfiguration(
+            kind: self.kind,
+            intent: MonthWidgetConfigurationIntent.self,
+            provider: MonthWidgetTimelineProvider()
+        ) { entry in
             MonthWidgetView(entry: entry)
                 .containerBackground(entry.backgroundShape, for: .widget)
         }

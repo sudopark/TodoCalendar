@@ -16,11 +16,15 @@ import CalendarPresentation
 import WidgetScenes
 
 
-struct MonthWidgetTimelineProvider: TimelineProvider {
+struct MonthWidgetTimelineProvider: AppIntentTimelineProvider {
     
+    typealias Intent = MonthWidgetConfigurationIntent
     typealias Entry = ResultTimelineEntry<MonthWidgetViewModel>
     
     init() { }
+}
+
+extension MonthWidgetTimelineProvider {
     
     func placeholder(in context: Context) -> Entry {
         let now = Date()
@@ -29,47 +33,39 @@ struct MonthWidgetTimelineProvider: TimelineProvider {
         }
     }
     
-    func getSnapshot(in context: Context, completion: @Sendable @escaping (Entry) -> Void) {
+    func snapshot(
+        for configuration: MonthWidgetConfigurationIntent,
+        in context: Context
+    ) async -> Entry {
+        
         guard context.isPreview == false
         else {
-            completion(
-                .init(date: Date()) { try MonthWidgetViewModel.makeSample() }
-            )
-            return
+            return self.placeholder(in: context)
         }
-        self.getEntry { entry in
-            completion(entry)
-        }
+        return await self.loadEntry()
     }
     
-    func getTimeline(in context: Context, completion: @Sendable @escaping (Timeline<Entry>) -> Void) {
-     
-        self.getEntry { entry in
-            let timeline = Timeline(
-                entries: [entry],
-                policy: .after(Date().nextUpdateTime)
-            )
-            completion(timeline)
-        }
-    }
-    
-    private func getEntry(_ completion: @Sendable @escaping (Entry) -> Void) {
+    func timeline(
+        for configuration: MonthWidgetConfigurationIntent,
+        in context: Context
+    ) async -> Timeline<Entry> {
         
-        Task {
-            let bulder = WidgetViewModelProviderBuilder(base: .init())
-            let viewModelProvider = await bulder.makeMonthViewModelProvider()
-            let now = Date()
-            do {
-                let model = try await viewModelProvider.getMonthViewModel(now)
-                completion(
-                    .init(date: now, result: .success(model))
-                        |> \.background .~ model.widgetSetting.background
-                )
-            } catch {
-                completion(.init(
-                    date: now, result: .failure(.init(error: error)))
-                )
-            }
+        let entry = await self.loadEntry()
+        return Timeline(entries: [entry], policy: .after(Date().nextUpdateTime))
+    }
+    
+    private func loadEntry() async -> Entry {
+        
+        let builder = WidgetViewModelProviderBuilder(base: .init())
+        let viewModelProvider = await builder.makeMonthViewModelProvider()
+        let now = Date()
+        do {
+            let model = try await viewModelProvider.getMonthViewModel(now)
+            return .init(date: now, result: .success(model))
+                |> \.background .~ model.widgetSetting.background
+            
+        } catch {
+            return .init(date: now, result: .failure(.init(error: error)))
         }
     }
 }
