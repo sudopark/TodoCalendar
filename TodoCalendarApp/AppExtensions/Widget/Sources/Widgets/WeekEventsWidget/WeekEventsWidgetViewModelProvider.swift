@@ -36,29 +36,34 @@ final class WeekEventsWidgetViewModelProvider {
     private let eventFetchUsecase: any CalendarEventFetchUsecase
     private let settingRepository: any CalendarSettingRepository
     private let appSettingRepository: any AppSettingRepository
+    private let styleRepository: any WidgetStyleRepository
     
     init(
         calendarUsecase: any CalendarUsecase,
         eventFetchUsecase: any CalendarEventFetchUsecase,
         settingRepository: any CalendarSettingRepository,
-        appSettingRepository: any AppSettingRepository
+        appSettingRepository: any AppSettingRepository,
+        styleRepository: any WidgetStyleRepository
     ) {
         self.calendarUsecase = calendarUsecase
         self.eventFetchUsecase = eventFetchUsecase
         self.settingRepository = settingRepository
         self.appSettingRepository = appSettingRepository
+        self.styleRepository = styleRepository
     }
 }
 
 extension WeekEventsWidgetViewModelProvider {
     
     func getWeekEventsModel(
-        from date: Date, range: WeekEventsRange
+        from date: Date, range: WeekEventsRange,
+        style: WidgetStyleId.Style = .default
     ) async throws -> WeekEventsViewModel {
         
         let timeZone = self.settingRepository.loadUserSelectedTImeZone() ?? .current
         let firstWeekDay = self.settingRepository.firstWeekDay() ?? .sunday
         let appearSetting = self.appSettingRepository.loadSavedViewAppearance()
+        let resolved = self.styleRepository.resolveStyle(of: .oneWeekEvents, style: style)
         let defaultTagColorSetting = appearSetting.defaultTagColor
         let calenar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
         let targetMonthDate = calenar.targetMonthRefDate(date, for: range)
@@ -79,8 +84,11 @@ extension WeekEventsWidgetViewModelProvider {
             googleCalendarColor: events.googleCalendarColors,
             googleCalendarTags: events.googleCalendarTags,
             appleCalendarTags: events.appleCalendarTags,
-            widgetSetting: appearSetting.widget
+            widgetSetting: appearSetting.widget |> \.background .~ (
+                resolved?.background ?? appearSetting.widget.background
+            )
         )
+        |> \.style .~ (resolved?.setting as? WeekEventsStyleSetting ?? .initial)
     }
     
     private func getWeeks(

@@ -73,7 +73,7 @@ class TodayWidgetViewModelProviderTests: BaseTestCase {
             appSettingRepository: appSettingRepository,
             calednarSettingRepository: repository,
             styleRepository: StubWidgetStyleRepository(
-                todayStyles: defaultStyle.merging(customs) { _, custom in custom }
+                styles: defaultStyle.merging(customs) { _, custom in custom }
             )
         )
     }

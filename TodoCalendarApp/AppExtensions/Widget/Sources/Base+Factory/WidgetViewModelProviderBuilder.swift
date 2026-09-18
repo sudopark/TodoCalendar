@@ -113,7 +113,10 @@ extension WidgetViewModelProviderBuilder {
             settingRepository: calendarSettingRepository,
             appSettingRepository: appSettingRepository,
             holidayFetchUsecase: holidaysFetchUsecase,
-            eventFetchUsecase: eventsFetchUsecase
+            eventFetchUsecase: eventsFetchUsecase,
+            styleRepository: WidgetStyleLocalRepositoryImple(
+                environmentStorage: base.userDefaultEnvironmentStorage
+            )
         )
     }
     
@@ -276,7 +279,10 @@ extension WidgetViewModelProviderBuilder {
             calendarUsecase: calendarUsecase,
             eventFetchUsecase: eventFetchUsecase,
             settingRepository: calendarSettingRepository,
-            appSettingRepository: appSettingRepository
+            appSettingRepository: appSettingRepository,
+            styleRepository: WidgetStyleLocalRepositoryImple(
+                environmentStorage: base.userDefaultEnvironmentStorage
+            )
         )
     }
     

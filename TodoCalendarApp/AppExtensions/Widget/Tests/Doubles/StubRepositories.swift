@@ -165,13 +165,13 @@ final class PrivateStubAppleCalendarRepository: AppleCalendarRepository, @unchec
 
 final class StubWidgetStyleRepository: WidgetStyleRepository, @unchecked Sendable {
 
-    private let todayStyles: [WidgetStyleId: WidgetStyle]
-    init(todayStyles: [WidgetStyleId: WidgetStyle] = [:]) {
-        self.todayStyles = todayStyles
+    private let styles: [WidgetStyleId: WidgetStyle]
+    init(styles: [WidgetStyleId: WidgetStyle] = [:]) {
+        self.styles = styles
     }
 
     func loadStyle(for id: WidgetStyleId) -> WidgetStyle? {
-        return self.todayStyles[id]
+        return self.styles[id]
     }
 
     func loadStyles(of variant: WidgetVariant) -> [WidgetStyle] {
