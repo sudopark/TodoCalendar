@@ -11,7 +11,7 @@ import Foundation
 
 public protocol WidgetStyleRepository: Sendable {
 
-    func loadSetting(for id: WidgetStyleId) -> (any WidgetStyleSetting)?
+    func loadStyle(for id: WidgetStyleId) -> WidgetStyle?
 
     func loadStyles(of variant: WidgetVariant) -> [WidgetStyle]
 

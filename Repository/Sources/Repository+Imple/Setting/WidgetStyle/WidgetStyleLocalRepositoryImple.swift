@@ -30,10 +30,12 @@ public final class WidgetStyleLocalRepositoryImple: WidgetStyleRepository {
 
 extension WidgetStyleLocalRepositoryImple {
 
-    public func loadSetting(for id: WidgetStyleId) -> (any WidgetStyleSetting)? {
-        guard let type = id.variant.settingType else { return nil }
-        return self.loadStoredStyles()[id.variant.rawValue]?[id.style.storageKey]?
-            .decodedStoredStyle(type)?.setting
+    public func loadStyle(for id: WidgetStyleId) -> WidgetStyle? {
+        guard let type = id.variant.settingType,
+              let decoded = self.loadStoredStyles()[id.variant.rawValue]?[id.style.storageKey]?
+                .decodedStoredStyle(type)
+        else { return nil }
+        return decoded.asStyle(id)
     }
 
     public func loadStyles(of variant: WidgetVariant) -> [WidgetStyle] {
@@ -44,11 +46,7 @@ extension WidgetStyleLocalRepositoryImple {
                 guard let style = WidgetStyleId.Style(storageKey: key),
                       let stored = text.decodedStoredStyle(type)
                 else { return nil }
-                return WidgetStyle(
-                    id: .init(variant: variant, style: style),
-                    name: stored.name,
-                    setting: stored.setting
-                )
+                return stored.asStyle(.init(variant: variant, style: style))
             }
             .sorted { $0.id.style.sortKey < $1.id.style.sortKey }
     }
@@ -128,12 +126,20 @@ private struct StoredStyle<S: WidgetStyleSetting>: Codable {
 
     let name: String?
     let setting: S
+    let background: WidgetAppearanceSettings.Background?
 }
 
 private struct DecodedStyle {
 
     let name: String?
     let setting: any WidgetStyleSetting
+    let background: WidgetAppearanceSettings.Background?
+
+    func asStyle(_ id: WidgetStyleId) -> WidgetStyle {
+        return WidgetStyle(
+            id: id, name: self.name, setting: self.setting, background: self.background
+        )
+    }
 }
 
 private extension WidgetStyle {
@@ -144,7 +150,9 @@ private extension WidgetStyle {
     }
 
     private func encodedText<S: WidgetStyleSetting>(_ setting: S) -> String? {
-        let stored = StoredStyle(name: self.name, setting: setting)
+        let stored = StoredStyle(
+            name: self.name, setting: setting, background: self.background
+        )
         return (try? JSONEncoder().encode(stored))
             .flatMap { String(data: $0, encoding: .utf8) }
     }
@@ -161,9 +169,11 @@ private extension String {
     private func decodedStoredStyle<S: WidgetStyleSetting>(typed type: S.Type) -> DecodedStyle? {
         guard let data = self.data(using: .utf8) else { return nil }
         if let stored = try? JSONDecoder().decode(StoredStyle<S>.self, from: data) {
-            return DecodedStyle(name: stored.name, setting: stored.setting)
+            return DecodedStyle(
+                name: stored.name, setting: stored.setting, background: stored.background
+            )
         }
         guard let setting = try? JSONDecoder().decode(type, from: data) else { return nil }
-        return DecodedStyle(name: nil, setting: setting)
+        return DecodedStyle(name: nil, setting: setting, background: nil)
     }
 }

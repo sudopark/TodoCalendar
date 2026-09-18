@@ -20,6 +20,10 @@ private extension WidgetStyleLocalRepositoryImple {
     func updateSetting(_ setting: any WidgetStyleSetting, for id: WidgetStyleId) {
         self.updateStyle(WidgetStyle(id: id, name: nil, setting: setting))
     }
+
+    func loadSetting(for id: WidgetStyleId) -> (any WidgetStyleSetting)? {
+        return self.loadStyle(for: id)?.setting
+    }
 }
 
 
@@ -389,5 +393,95 @@ extension WidgetStyleLocalRepositoryImpleTests {
 
         // then
         #expect(styles.map { $0.setting.asToday?.showHolidayName } == [true])
+    }
+}
+
+
+// MARK: - 배경색
+
+extension WidgetStyleLocalRepositoryImpleTests {
+
+    @Test("스타일에 건 배경색을 그대로 읽는다")
+    func updateStyle_withBackground_thenLoadStyle_roundTripsBackground() {
+        // given
+        let repository = self.makeRepository()
+        let id = WidgetStyleId(variant: .todaySummarySmall, style: .custom(id: "c1"))
+
+        // when
+        repository.updateStyle(
+            WidgetStyle(
+                id: id, name: "밤 모드", setting: TodayStyleSetting.initial,
+                background: .custom(hex: "#101820")
+            )
+        )
+
+        // then
+        let loaded = repository.loadStyle(for: id)
+        #expect(loaded?.background == .custom(hex: "#101820"))
+        #expect(loaded?.name == "밤 모드")
+    }
+
+    @Test("목록 조회도 스타일마다 자기 배경색을 싣는다")
+    func loadStyles_carriesBackgroundOfEachStyle() {
+        // given
+        let repository = self.makeRepository()
+        let variant = WidgetVariant.todaySummarySmall
+        repository.updateStyle(
+            WidgetStyle(
+                id: .init(variant: variant, style: .default), name: nil,
+                setting: TodayStyleSetting.initial, background: .custom(hex: "#ffffff")
+            )
+        )
+        repository.updateStyle(
+            WidgetStyle(
+                id: .init(variant: variant, style: .custom(id: "c1")), name: nil,
+                setting: TodayStyleSetting.initial, background: nil
+            )
+        )
+
+        // when
+        let styles = repository.loadStyles(of: variant)
+
+        // then
+        #expect(styles.map { $0.background } == [.custom(hex: "#ffffff"), nil])
+    }
+
+    @Test("배경색이 없던 시절 레코드는 이름·설정을 유지한 채 배경색만 비어 있다")
+    func loadStyle_whenStoredRecordHasNoBackground_keepsNameAndSetting() {
+        // given
+        let repository = self.makeRepository(
+            storedRaw: [
+                "todaySummarySmall": [
+                    "default": #"{"name":"밤 모드","setting":{"showHolidayName":true}}"#
+                ]
+            ]
+        )
+
+        // when
+        let loaded = repository.loadStyle(
+            for: .init(variant: .todaySummarySmall, style: .default)
+        )
+
+        // then
+        #expect(loaded?.background == nil)
+        #expect(loaded?.name == "밤 모드")
+        #expect(loaded?.setting.asToday?.showHolidayName == true)
+    }
+
+    @Test("구버전 payload 단독 저장값도 배경색이 비어 있다")
+    func loadStyle_whenStoredAsLegacyPayload_backgroundIsNil() {
+        // given
+        let repository = self.makeRepository(
+            storedRaw: ["todaySummarySmall": ["default": #"{"showHolidayName":true}"#]]
+        )
+
+        // when
+        let loaded = repository.loadStyle(
+            for: .init(variant: .todaySummarySmall, style: .default)
+        )
+
+        // then
+        #expect(loaded?.background == nil)
+        #expect(loaded?.setting.asToday?.showHolidayName == true)
     }
 }

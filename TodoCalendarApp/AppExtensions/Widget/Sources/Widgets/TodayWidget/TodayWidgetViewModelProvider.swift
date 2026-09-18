@@ -77,9 +77,9 @@ extension TodayWidgetViewModelProvider {
     }
     
     private func savedStyleSetting(_ style: WidgetStyleId.Style) -> TodayStyleSetting? {
-        return self.styleRepository.loadSetting(
+        return self.styleRepository.loadStyle(
             for: .init(variant: .todaySummarySmall, style: style)
-        ) as? TodayStyleSetting
+        )?.setting as? TodayStyleSetting
     }
     
     private func todayEvents(
