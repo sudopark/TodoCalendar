@@ -21,8 +21,8 @@
 | 위젯군 | 변형 | 항목 | 렌더 지점 |
 |---|---|---|---|
 | **Today** ✅완료 | `todaySummarySmall` 1 | 공휴일 이름 · 타임존 · 월/년 · 총 개수 · 할일 개수 · 일정 개수 | `TodayWidgetViews.swift:105~154` |
-| **Month** | `monthSmall` 1 | 월 이름 · 요일 헤더 · 오늘 강조 · 이벤트 밑줄 | `MonthWidgetViews.swift:32·37·68·92` |
-| **WeekEvents** | 7종 → **스타일 하나 공유** | 월 텍스트 · 요일 헤더 | `WeekEventsViews.swift:53·75` |
+| **Month** ✅완료 | `monthSmall` 1 | 월 이름 · 요일 헤더 · 오늘 강조 · 이벤트 밑줄 | `MonthWidgetViews.swift:32·39·72·96` |
+| **WeekEvents** ✅완료 | 7종 → **스타일 하나 공유** | 요일 헤더 | `WeekEventsViews.swift:43` |
 | **TodayAndNext** | `todayAndNextMedium` 1 | 타임존 | `TodayAndNextWidgetViews.swift:103-105` |
 | **Foremost** | 홈 2 (small·medium) | "가장 중요한 일정" 라벨 | `ForemostWidgetViews.swift:80-84` |
 | **AICommand** | 홈 1 (`aiCommandSmall`) | 설명 문구 | `AICommandWidgetViews.swift:48-50` |
@@ -34,7 +34,7 @@
 
 ### 빠진 것 (유저 결정 2026-09-16)
 
-- WeekEvents 의 **오늘 강조**·**+N 표기**
+- WeekEvents 의 **오늘 강조**·**+N 표기**·**월 텍스트** (월 텍스트는 2026-09-18 결정 — 끄는 의미가 없어 항목에서 뺐다)
 - EventList 의 개별 토글 전부 (날짜 섹션 제목·시각·태그 색선·할일 완료 버튼·"일정 없음" 메시지)
 - TodayAndNext 의 날짜 텍스트·이벤트 시각·미완료 할일 요약·빈 메시지
 - Foremost 의 시각·태그 색선·완료 버튼·빈 상태 이모지
@@ -129,7 +129,7 @@ campaign 2항 범위 밖의 "폰트 크기·텍스트 색 공통 축"은 **그�
 | 위젯군 | 토글 | 전환 필요 | 스타일 파라미터 |
 |---|---|---|---|
 | Month | 4 | `StaticConfiguration` → AppIntent 1개 | 필요 |
-| WeekEvents | 2 (7변형 공유) | 7개 | 필요 |
+| WeekEvents | 1 (7변형 공유) | 7개 | 필요 |
 | TodayAndNext | 1 | 이미 AppIntent | 파라미터 추가만 |
 | EventList | 0 (색만) | 이미 AppIntent | 파라미터 추가만 |
 | Foremost | 1 | 홈 2개 | 필요 |
@@ -137,7 +137,7 @@ campaign 2항 범위 밖의 "폰트 크기·텍스트 색 공통 축"은 **그�
 | DDay | 0 (색만) | 이미 AppIntent | 파라미터 추가만 · 사진 배경은 별건 |
 | Composed | 0 (색만 + 하위 상속) | 4개 | 필요 |
 
-토글 총량은 9개다 (Today 6 은 완료분). 위젯군별 작업의 무게중심은 **전환 + 스타일 파라미터 + payload·폼 신설**이고, 색은 봉투에 있어 위젯군마다 따로 만들 게 없다.
+토글 총량은 8개다 (Today 6·Month 4·WeekEvents 1 은 완료분). 위젯군별 작업의 무게중심은 **전환 + 스타일 파라미터 + payload·폼 신설**이고, 색은 봉투에 있어 위젯군마다 따로 만들 게 없다.
 
 ## 5. 확정 사항 정리
 
@@ -149,6 +149,8 @@ campaign 2항 범위 밖의 "폰트 크기·텍스트 색 공통 축"은 **그�
 | 글자색 | 범위 밖 — 배경 밝기에서 자동으로 따라간다 | 2026-09-16 |
 | 배경색 저장 위치 | `WidgetStyle` 봉투 (payload 아님) — 색 편집 UI 한 벌 | 2026-09-16 |
 | WeekEvents 7변형 | 스타일 하나 공유 | 2026-09-16 |
+| WeekEvents 월 텍스트 | 항목에서 제외 — 끄는 의미가 없다 | 2026-09-18 |
+| Month 오늘 강조를 끈 모양 | 평일과 완전히 같게 (주말·공휴일 색은 유지) | 2026-09-18 |
 | 기존 인스턴스 파라미터 | 병존 (흡수하지 않음) | 2026-09-15 |
 | 편집 화면 구조 | 편집 뷰모델 1 + 위젯별 편집 폼 (브릿지) | 2026-09-16 · DP-3.0 재가 |
 
