@@ -32,7 +32,11 @@ class MonthWidgetViewModelProviderImpleTests: BaseTestCase {
     private func makeProvider(
         isEmptyEvent: Bool = false,
         shouldFailLoadEvent: Bool = false,
-        shouldFailLoadHolidays: Bool = false
+        shouldFailLoadHolidays: Bool = false,
+        showMonthNameStyle: Bool? = nil,
+        customStyles: [String: MonthStyleSetting] = [:],
+        defaultStyleBackground: WidgetAppearanceSettings.Background? = nil,
+        customStyleBackgrounds: [String: WidgetAppearanceSettings.Background] = [:]
     ) -> MonthWidgetViewModelProvider {
         let calendarUsecase = StubCalendarUsecase()
         let settingRepository = StubCalendarSettingRepository()
@@ -66,13 +70,133 @@ class MonthWidgetViewModelProviderImpleTests: BaseTestCase {
             cached: .init()
         )
         
+        let defaultId = WidgetStyleId(variant: .monthSmall, style: .default)
+        let hasDefault = showMonthNameStyle != nil || defaultStyleBackground != nil
+        let defaultStyle = hasDefault
+        ? [
+            defaultId: WidgetStyle(
+                id: defaultId, name: nil,
+                setting: MonthStyleSetting.initial |> \.showMonthName .~ (showMonthNameStyle ?? true),
+                background: defaultStyleBackground
+            )
+        ]
+        : [:]
+        let customKeys = Set(customStyles.keys).union(customStyleBackgrounds.keys)
+        let customs = customKeys.reduce(
+            into: [WidgetStyleId: WidgetStyle]()
+        ) { acc, key in
+            let id = WidgetStyleId(variant: .monthSmall, style: .custom(id: key))
+            acc[id] = WidgetStyle(
+                id: id, name: nil,
+                setting: customStyles[key] ?? MonthStyleSetting.initial,
+                background: customStyleBackgrounds[key]
+            )
+        }
+        
         return MonthWidgetViewModelProvider(
             calendarUsecase: calendarUsecase,
             settingRepository: settingRepository,
             appSettingRepository: StubAppSettingRepository(),
             holidayFetchUsecase: holidaysFetchUSecase,
-            eventFetchUsecase: eventsFetchUsecase
+            eventFetchUsecase: eventsFetchUsecase,
+            styleRepository: StubWidgetStyleRepository(
+                styles: defaultStyle.merging(customs) { _, custom in custom }
+            )
         )
+    }
+}
+
+
+// MARK: - 스타일 해석
+
+extension MonthWidgetViewModelProviderImpleTests {
+    
+    func testProvider_whenStyleTurnsOffMonthName_applyItToViewModel() async throws {
+        // given
+        let provider = self.makeProvider(showMonthNameStyle: false)
+        
+        // when
+        let model = try await provider.getMonthViewModel(self.dummyNow)
+        
+        // then
+        XCTAssertEqual(model.showsMonthName, false)
+        XCTAssertEqual(model.showsWeekDayHeader, true)
+    }
+    
+    func testProvider_whenInstanceSelectsCustomStyle_applyThatStyle() async throws {
+        // given
+        let provider = self.makeProvider(
+            showMonthNameStyle: true,
+            customStyles: [
+                "c1": MonthStyleSetting.initial |> \.highlightToday .~ false
+            ]
+        )
+        
+        // when
+        let model = try await provider.getMonthViewModel(
+            self.dummyNow, style: .custom(id: "c1")
+        )
+        
+        // then
+        XCTAssertNil(model.highlightedTodayIdentifier)
+        XCTAssertEqual(model.showsMonthName, true)
+    }
+    
+    func testProvider_whenSelectedCustomStyleRemoved_fallbackToVariantDefaultStyle() async throws {
+        // given
+        let provider = self.makeProvider(showMonthNameStyle: false)
+        
+        // when
+        let model = try await provider.getMonthViewModel(
+            self.dummyNow, style: .custom(id: "removed")
+        )
+        
+        // then
+        XCTAssertEqual(model.showsMonthName, false)
+    }
+    
+    func testProvider_whenStyleHasBackground_appliesItToWidgetSetting() async throws {
+        // given
+        let provider = self.makeProvider(
+            defaultStyleBackground: .custom(hex: "#ffffff"),
+            customStyleBackgrounds: ["c1": .custom(hex: "#101820")]
+        )
+
+        // when
+        let model = try await provider.getMonthViewModel(
+            self.dummyNow, style: .custom(id: "c1")
+        )
+
+        // then
+        XCTAssertEqual(model.widgetSetting.background, .custom(hex: "#101820"))
+    }
+
+    /// 폴백이 스타일 단위라, 고른 스타일이 색을 안 걸었으면 기본 스타일 색을 빌려오지 않는다.
+    func testProvider_whenSelectedStyleHasNoBackground_useGlobalNotDefaultStyle() async throws {
+        // given
+        let provider = self.makeProvider(
+            customStyles: ["c1": MonthStyleSetting.initial],
+            defaultStyleBackground: .custom(hex: "#ffffff")
+        )
+
+        // when
+        let model = try await provider.getMonthViewModel(
+            self.dummyNow, style: .custom(id: "c1")
+        )
+
+        // then
+        XCTAssertNotEqual(model.widgetSetting.background, .custom(hex: "#ffffff"))
+    }
+
+    func testProvider_whenNoStyleSaved_useInitialSetting() async throws {
+        // given
+        let provider = self.makeProvider()
+        
+        // when
+        let model = try await provider.getMonthViewModel(self.dummyNow)
+        
+        // then
+        XCTAssertEqual(model.style, MonthStyleSetting.initial)
     }
 }
 

@@ -29,7 +29,12 @@ class WeekEventsWidgetViewModelProviderTests: BaseTestCase {
         return TimeZone(abbreviation: "KST")!
     }
     
-    private func makeProvider() -> WeekEventsWidgetViewModelProvider {
+    private func makeProvider(
+        showWeekDayHeaderStyle: Bool? = nil,
+        customStyles: [String: WeekEventsStyleSetting] = [:],
+        defaultStyleBackground: WidgetAppearanceSettings.Background? = nil,
+        customStyleBackgrounds: [String: WidgetAppearanceSettings.Background] = [:]
+    ) -> WeekEventsWidgetViewModelProvider {
         let calendarUsecase = CalendarUsecaseImple(
             calendarSettingUsecase: StubCalendarSettingUsecase(),
             holidayUsecase: StubHolidayUsecase()
@@ -38,12 +43,152 @@ class WeekEventsWidgetViewModelProviderTests: BaseTestCase {
         let calendarSettingRepository = StubCalendarSettingRepository()
         calendarSettingRepository.saveTimeZone(kst)
         
+        let defaultId = WidgetStyleId(variant: .oneWeekEvents, style: .default)
+        let hasDefault = showWeekDayHeaderStyle != nil || defaultStyleBackground != nil
+        let defaultStyle = hasDefault
+        ? [
+            defaultId: WidgetStyle(
+                id: defaultId, name: nil,
+                setting: WeekEventsStyleSetting.initial |> \.showWeekDayHeader .~ (showWeekDayHeaderStyle ?? true),
+                background: defaultStyleBackground
+            )
+        ]
+        : [:]
+        let customKeys = Set(customStyles.keys).union(customStyleBackgrounds.keys)
+        let customs = customKeys.reduce(
+            into: [WidgetStyleId: WidgetStyle]()
+        ) { acc, key in
+            let id = WidgetStyleId(variant: .oneWeekEvents, style: .custom(id: key))
+            acc[id] = WidgetStyle(
+                id: id, name: nil,
+                setting: customStyles[key] ?? WeekEventsStyleSetting.initial,
+                background: customStyleBackgrounds[key]
+            )
+        }
+        
         return WeekEventsWidgetViewModelProvider(
             calendarUsecase: calendarUsecase,
             eventFetchUsecase: fetchUsecase,
             settingRepository: calendarSettingRepository,
-            appSettingRepository: StubAppSettingRepository()
+            appSettingRepository: StubAppSettingRepository(),
+            styleRepository: StubWidgetStyleRepository(
+                styles: defaultStyle.merging(customs) { _, custom in custom }
+            )
         )
+    }
+}
+
+
+// MARK: - 스타일 해석
+
+extension WeekEventsWidgetViewModelProviderTests {
+    
+    func testProvider_whenStyleTurnsOffWeekDayHeader_applyItToViewModel() async throws {
+        // given
+        let provider = self.makeProvider(showWeekDayHeaderStyle: false)
+        
+        // when
+        let model = try await provider.getWeekEventsModel(
+            from: dummyDate, range: .weeks(count: 1)
+        )
+        
+        // then
+        XCTAssertEqual(model.showsWeekDayHeader, false)
+    }
+    
+    func testProvider_whenInstanceSelectsCustomStyle_applyThatStyle() async throws {
+        // given
+        let provider = self.makeProvider(
+            showWeekDayHeaderStyle: true,
+            customStyles: [
+                "c1": WeekEventsStyleSetting.initial |> \.showWeekDayHeader .~ false
+            ]
+        )
+        
+        // when
+        let model = try await provider.getWeekEventsModel(
+            from: dummyDate, range: .weeks(count: 1), style: .custom(id: "c1")
+        )
+        
+        // then
+        XCTAssertEqual(model.showsWeekDayHeader, false)
+    }
+    
+    /// 7변형이 좌표 하나를 공유하므로 어느 범위로 조회해도 같은 스타일이 붙는다.
+    func testProvider_whateverRangeGiven_applySameSharedStyle() async throws {
+        // given
+        let provider = self.makeProvider(showWeekDayHeaderStyle: false)
+        
+        // when
+        let thisWeek = try await provider.getWeekEventsModel(
+            from: dummyDate, range: .weeks(count: 1)
+        )
+        let lastMonth = try await provider.getWeekEventsModel(
+            from: dummyDate, range: .wholeMonth(.previous)
+        )
+        
+        // then
+        XCTAssertEqual(thisWeek.showsWeekDayHeader, false)
+        XCTAssertEqual(lastMonth.showsWeekDayHeader, false)
+    }
+    
+    func testProvider_whenSelectedCustomStyleRemoved_fallbackToVariantDefaultStyle() async throws {
+        // given
+        let provider = self.makeProvider(showWeekDayHeaderStyle: false)
+        
+        // when
+        let model = try await provider.getWeekEventsModel(
+            from: dummyDate, range: .weeks(count: 1), style: .custom(id: "removed")
+        )
+        
+        // then
+        XCTAssertEqual(model.showsWeekDayHeader, false)
+    }
+    
+    func testProvider_whenStyleHasBackground_appliesItToWidgetSetting() async throws {
+        // given
+        let provider = self.makeProvider(
+            defaultStyleBackground: .custom(hex: "#ffffff"),
+            customStyleBackgrounds: ["c1": .custom(hex: "#101820")]
+        )
+
+        // when
+        let model = try await provider.getWeekEventsModel(
+            from: dummyDate, range: .weeks(count: 1), style: .custom(id: "c1")
+        )
+
+        // then
+        XCTAssertEqual(model.widgetSetting.background, .custom(hex: "#101820"))
+    }
+
+    /// 폴백이 스타일 단위라, 고른 스타일이 색을 안 걸었으면 기본 스타일 색을 빌려오지 않는다.
+    func testProvider_whenSelectedStyleHasNoBackground_useGlobalNotDefaultStyle() async throws {
+        // given
+        let provider = self.makeProvider(
+            customStyles: ["c1": WeekEventsStyleSetting.initial],
+            defaultStyleBackground: .custom(hex: "#ffffff")
+        )
+
+        // when
+        let model = try await provider.getWeekEventsModel(
+            from: dummyDate, range: .weeks(count: 1), style: .custom(id: "c1")
+        )
+
+        // then
+        XCTAssertNotEqual(model.widgetSetting.background, .custom(hex: "#ffffff"))
+    }
+
+    func testProvider_whenNoStyleSaved_useInitialSetting() async throws {
+        // given
+        let provider = self.makeProvider()
+        
+        // when
+        let model = try await provider.getWeekEventsModel(
+            from: dummyDate, range: .weeks(count: 1)
+        )
+        
+        // then
+        XCTAssertEqual(model.style, WeekEventsStyleSetting.initial)
     }
 }
 
