@@ -78,16 +78,16 @@
 
 ### 글자색은 배경에서 자동으로 나온다 (지금 구조 유지)
 
-`Background.colorSet(_ systemIsLight:)`(`WidgetBackgroundStyle.swift:47-58`)가 배경색 밝기(`UIColor.isLight`)로 `DefaultLightColorSet` / `DefaultDarkColorSet` 을 고르고, 위젯 뷰가 거기서 `text0`·`text1`·`text2`·`accent` 를 꺼내 쓴다. 이 경로를 그대로 둔다.
+`Background.colorSet(_ systemIsLight:)`(`WidgetBackgroundStyle.swift:50-59`)가 배경색 밝기(`UIColor.isLight`)로 `DefaultLightColorSet` / `DefaultDarkColorSet` 을 고르고, 위젯 뷰가 거기서 `text0`·`text1`·`text2`·`accent` 를 꺼내 쓴다. 이 경로를 그대로 둔다.
 
 ### 전역이 기본, 스타일이 덮는다
 
-| 순위 | 출처 |
+| 걸음 | 내용 |
 |---|---|
-| 1 | 인스턴스가 고른 스타일의 배경색 |
-| 2 | 변형 기본 스타일의 배경색 |
-| 3 | 전역 배경색 (`WidgetAppearanceSettings.background`) |
-| 4 | 시스템 기본 |
+| 1 스타일 선택 | 인스턴스가 고른 스타일 — 지워졌으면 변형 기본 스타일 |
+| 2 색 결정 | 그 스타일의 배경색 → 없으면 전역 배경색(`WidgetAppearanceSettings.background`) → 전역이 시스템이면 시스템 기본 |
+
+스타일 경계를 넘어 필드만 폴백하면 안 된다 — 고른 스타일이 색을 안 걸었을 때 기본 스타일 색을 빌려오면 편집 화면·갤러리 프리뷰와 실제 위젯이 어긋난다.
 
 "전체 적용"은 전역을 바꾸는 것이다. 지금은 전역 하나뿐이라 모든 위젯이 같은 배경인데, **위젯마다 다른 배경을 걸 수 있게 되는 것**이 이번에 느는 부분이다.
 
@@ -96,13 +96,15 @@
 배경색은 위젯군과 무관하게 똑같다. payload(`XxxStyleSetting`)마다 반복하는 대신 **스타일 봉투에 한 번만** 둔다.
 
 ```swift
-public struct WidgetStyle<S: WidgetStyleSetting> {
+public struct WidgetStyle {
     public let id: WidgetStyleId
     public var name: String?
-    public var background: WidgetAppearanceSettings.Background?   // 신규 — nil 이면 전역을 따른다
-    public var setting: S                                          // 표시 토글
+    public var setting: any WidgetStyleSetting                    // 표시 토글
+    public var background: WidgetAppearanceSettings.Background?   // nil 이면 전역을 따른다
 }
 ```
+
+> 봉투는 DP-3.0 FRAGO-2 로 비제네릭이 됐다 — 화면이 어느 변형인지를 런타임에 알아서 payload 타입을 컴파일 타임에 못 박을 수 없다.
 
 DP-3.0 구조에서 편집 뷰모델은 payload 내용을 모르지만 봉투는 안다 — 배경색이 봉투에 있으면 **편집 뷰모델이 배경색 편집을 직접 다루고 색 편집 UI 를 한 벌만 만든다.** 위젯별 폼은 토글만 그린다.
 
@@ -111,6 +113,10 @@ DP-3.0 구조에서 편집 뷰모델은 payload 내용을 모르지만 봉투는
 ### DDay 는 배경색조차 글자에 반영이 안 된다
 
 홈 변형까지 `.primary`/`.secondary` 고정이라 ColorSet 을 안 쓴다 (`DDayWidgetViews.swift`). 배경색만 열어도 **DDay ColorSet 정합은 필요하다** — 안 하면 DDay 만 배경을 바꿔도 글자가 안 따라온다.
+
+### 구현된 계약은 `widgets.md` §8.3 이 정본이다
+
+위 판단으로 DP-3.A 가 구현됐다. 해석 4단·렌더용 사본 채우기·편집 UI 한 벌·프리뷰 반영·DDay ColorSet 정합의 **실제 계약**은 [`widgets.md` §8.3 배경색 계약](widgets.md)에 등재돼 있다 — 이 문서는 그 결정에 이르는 범위 판단 기록이다.
 
 ### 계획과 충돌하지 않는다
 
