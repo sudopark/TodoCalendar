@@ -12,6 +12,8 @@ import Optics
 import Domain
 import Extensions
 import CalendarPresentation
+import CommonPresentation
+import WidgetScenes
 import UnitTestHelpKit
 import TestDoubles
 
@@ -23,7 +25,10 @@ class TodayWidgetViewModelProviderTests: BaseTestCase {
         todayIsHoliday: Bool = false,
         withoutEvent: Bool = false,
         showHolidayNameStyle: Bool? = nil,
-        customStyles: [String: TodayStyleSetting] = [:]
+        customStyles: [String: TodayStyleSetting] = [:],
+        defaultStyleBackground: WidgetAppearanceSettings.Background? = nil,
+        customStyleBackgrounds: [String: WidgetAppearanceSettings.Background] = [:],
+        globalBackground: WidgetAppearanceSettings.Background? = nil
     ) -> TodayWidgetViewModelProvider {
         
         let fetchUsecase = StubCalendarEventsFetchUescase()
@@ -35,18 +40,40 @@ class TodayWidgetViewModelProviderTests: BaseTestCase {
             repository.saveTimeZone(self.gmt)
         }
         
-        let defaultStyle = showHolidayNameStyle.map {
-            [WidgetStyleId(variant: .todaySummarySmall, style: .default): TodayStyleSetting.initial |> \.showHolidayName .~ $0]
+        let appSettingRepository = StubAppSettingRepository()
+        if let globalBackground {
+            _ = appSettingRepository.updateWidgetAppearance(
+                EditWidgetAppearanceSettingParams() |> \.background .~ globalBackground
+            )
         }
-        let customs = customStyles.reduce(into: [WidgetStyleId: TodayStyleSetting]()) { acc, pair in
-            acc[WidgetStyleId(variant: .todaySummarySmall, style: .custom(id: pair.key))] = pair.value
+        
+        let defaultId = WidgetStyleId(variant: .todaySummarySmall, style: .default)
+        let hasDefault = showHolidayNameStyle != nil || defaultStyleBackground != nil
+        let defaultStyle = hasDefault
+        ? [
+            defaultId: WidgetStyle(
+                id: defaultId, name: nil,
+                setting: TodayStyleSetting.initial
+                    |> \.showHolidayName .~ (showHolidayNameStyle ?? true),
+                background: defaultStyleBackground
+            )
+        ]
+        : [:]
+        let customKeys = Set(customStyles.keys).union(customStyleBackgrounds.keys)
+        let customs = customKeys.reduce(into: [WidgetStyleId: WidgetStyle]()) { acc, key in
+            let id = WidgetStyleId(variant: .todaySummarySmall, style: .custom(id: key))
+            acc[id] = WidgetStyle(
+                id: id, name: nil,
+                setting: customStyles[key] ?? TodayStyleSetting.initial,
+                background: customStyleBackgrounds[key]
+            )
         }
         return TodayWidgetViewModelProvider(
             eventsFetchusecase: fetchUsecase,
-            appSettingRepository: StubAppSettingRepository(),
+            appSettingRepository: appSettingRepository,
             calednarSettingRepository: repository,
             styleRepository: StubWidgetStyleRepository(
-                todayStyles: (defaultStyle ?? [:]).merging(customs) { _, custom in custom }
+                todayStyles: defaultStyle.merging(customs) { _, custom in custom }
             )
         )
     }
@@ -219,5 +246,107 @@ extension TodayWidgetViewModelProviderTests {
         // then
         XCTAssertEqual(viewModel.style, TodayStyleSetting.initial)
         XCTAssertEqual(viewModel.displayHolidayName, "holiday")
+    }
+}
+
+// MARK: - 배경색 해석
+
+extension TodayWidgetViewModelProviderTests {
+    
+    func testProvider_whenInstanceStyleHasBackground_useIt() async throws {
+        // given
+        let provider = self.makeProvider(
+            defaultStyleBackground: .custom(hex: "#ffffff"),
+            customStyleBackgrounds: ["c1": .custom(hex: "#101820")],
+            globalBackground: .custom(hex: "#123456")
+        )
+        
+        // when
+        let viewModel = try await provider.getTodayViewModel(
+            for: self.dummyDate, style: .custom(id: "c1")
+        )
+        
+        // then
+        XCTAssertEqual(viewModel.widgetSetting.background, .custom(hex: "#101820"))
+    }
+    
+    /// 고른 스타일이 색을 안 걸었으면 기본 스타일이 아니라 전역으로 간다 — 편집 화면이 "공통 위젯 테마 따름"이라 적는 자리다.
+    func testProvider_whenInstanceStyleHasNoBackground_useGlobalNotDefaultStyle() async throws {
+        // given
+        let provider = self.makeProvider(
+            customStyles: ["c1": TodayStyleSetting.initial],
+            defaultStyleBackground: .custom(hex: "#ffffff"),
+            globalBackground: .custom(hex: "#123456")
+        )
+        
+        // when
+        let viewModel = try await provider.getTodayViewModel(
+            for: self.dummyDate, style: .custom(id: "c1")
+        )
+        
+        // then
+        XCTAssertEqual(viewModel.widgetSetting.background, .custom(hex: "#123456"))
+    }
+    
+    /// 고른 스타일이 지워졌을 때만 변형 기본 스타일로 내려간다 — 표시 항목과 같은 축이다.
+    func testProvider_whenInstanceStyleRemoved_useDefaultStyleBackground() async throws {
+        // given
+        let provider = self.makeProvider(
+            defaultStyleBackground: .custom(hex: "#ffffff"),
+            globalBackground: .custom(hex: "#123456")
+        )
+        
+        // when
+        let viewModel = try await provider.getTodayViewModel(
+            for: self.dummyDate, style: .custom(id: "removed")
+        )
+        
+        // then
+        XCTAssertEqual(viewModel.widgetSetting.background, .custom(hex: "#ffffff"))
+    }
+    
+    func testProvider_whenNoStyleHasBackground_useGlobalBackground() async throws {
+        // given
+        let provider = self.makeProvider(
+            customStyles: ["c1": TodayStyleSetting.initial],
+            globalBackground: .custom(hex: "#123456")
+        )
+        
+        // when
+        let viewModel = try await provider.getTodayViewModel(
+            for: self.dummyDate, style: .custom(id: "c1")
+        )
+        
+        // then
+        XCTAssertEqual(viewModel.widgetSetting.background, .custom(hex: "#123456"))
+    }
+    
+    func testProvider_whenNoStyleSavedAndGlobalIsSystem_useSystemBackground() async throws {
+        // given
+        let provider = self.makeProvider()
+        
+        // when
+        let viewModel = try await provider.getTodayViewModel(for: self.dummyDate)
+        
+        // then
+        XCTAssertEqual(viewModel.widgetSetting.background, .system)
+    }
+    
+    /// 배경이 밝으면 밝은 글자색 세트를 고른다 — 배경만 해석해도 글자색이 따라온다.
+    func testProvider_resolvedBackground_drivesTextColorSet() async throws {
+        // given
+        let provider = self.makeProvider(
+            customStyleBackgrounds: ["c1": .custom(hex: "#101820")],
+            globalBackground: .custom(hex: "#ffffff")
+        )
+        
+        // when
+        let viewModel = try await provider.getTodayViewModel(
+            for: self.dummyDate, style: .custom(id: "c1")
+        )
+        
+        // then
+        let colorSet = viewModel.widgetSetting.background.colorSet(true)
+        XCTAssertTrue(colorSet is DefaultDarkColorSet)
     }
 }

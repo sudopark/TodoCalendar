@@ -83,7 +83,7 @@ extension WidgetGalleryDetailViewModelImple {
             .map { variant in
                 return self.widgetStyleUsecase.styles(of: variant)
                     .compactMap { styles in
-                        return WidgetPreviewStyleStack(styles: styles.map { $0.setting })
+                        return WidgetPreviewStyleStack(styles: styles)
                     }
                     .map { [variant.id: $0] }
                     .eraseToAnyPublisher()

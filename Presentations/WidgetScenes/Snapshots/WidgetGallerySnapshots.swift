@@ -44,10 +44,17 @@ final class WidgetGallerySnapshots: XCTestCase {
     @MainActor
     private func detailStateWithCustomStyles() -> WidgetGalleryDetailViewState {
         let variant = WidgetVariant.todaySummarySmall
-        let styles: [any WidgetStyleSetting] = [
-            TodayStyleSetting.initial,
-            TodayStyleSetting.initial |> \.showMonthYear .~ false,
-            TodayStyleSetting.initial |> \.showTodoCount .~ false |> \.showScheduleCount .~ false
+        let styles: [WidgetStyle] = [
+            self.todayStyle(.default, TodayStyleSetting.initial),
+            self.todayStyle(
+                .custom(id: "c1"),
+                TodayStyleSetting.initial |> \.showMonthYear .~ false,
+                background: .custom(hex: "#101820")
+            ),
+            self.todayStyle(
+                .custom(id: "c2"),
+                TodayStyleSetting.initial |> \.showTodoCount .~ false |> \.showScheduleCount .~ false
+            )
         ]
         let state = self.detailState(.todaySummary)
         state.previewStyles = WidgetPreviewStyleStack(styles: styles)
@@ -55,10 +62,26 @@ final class WidgetGallerySnapshots: XCTestCase {
         return state
     }
     
+    private func todayStyle(
+        _ style: WidgetStyleId.Style,
+        _ setting: TodayStyleSetting,
+        background: WidgetAppearanceSettings.Background? = nil
+    ) -> WidgetStyle {
+        return .init(
+            id: .init(variant: .todaySummarySmall, style: style),
+            name: nil, setting: setting, background: background
+        )
+    }
+    
     @MainActor
     private func listState() -> WidgetGalleryViewState {
         let state = WidgetGalleryViewState()
         state.items = WidgetGalleryItem.allCases
+        state.defaultStyles = [
+            WidgetVariant.todaySummarySmall.id: self.todayStyle(
+                .default, TodayStyleSetting.initial, background: .custom(hex: "#101820")
+            )
+        ]
         return state
     }
     

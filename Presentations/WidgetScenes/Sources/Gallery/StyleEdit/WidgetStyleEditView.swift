@@ -264,7 +264,9 @@ struct WidgetStyleEditView: View {
         return VStack(spacing: Metric.SpacingToken.small.value) {
             
             WidgetVariantPreviewView(
-                variant: style.styleId.variant, setting: setting, style: style.setting
+                variant: style.styleId.variant,
+                setting: setting.overridingBackground(style.background),
+                style: style.setting
             )
                 .frame(width: Constant.cardWidth, height: self.previewHeight)
                 .overlay(

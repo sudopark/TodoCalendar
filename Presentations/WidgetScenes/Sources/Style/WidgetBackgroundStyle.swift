@@ -7,6 +7,8 @@
 //
 
 import SwiftUI
+import Prelude
+import Optics
 import Domain
 import CommonPresentation
 
@@ -53,5 +55,17 @@ extension WidgetAppearanceSettings.Background {
             case .custom(let hex): UIColor.from(hex: hex)?.isLight ?? systemIsLight
         }
         return isLight ? DefaultLightColorSet() : DefaultDarkColorSet()
+    }
+}
+
+
+// MARK: - 스타일이 건 배경색 얹기
+
+extension WidgetAppearanceSettings {
+
+    /// 스타일이 색을 안 걸었으면(nil) 전역 설정 그대로다 — 저장값이 아니라 렌더용 사본을 낸다.
+    func overridingBackground(_ background: Background?) -> WidgetAppearanceSettings {
+        guard let background else { return self }
+        return self |> \.background .~ background
     }
 }

@@ -222,7 +222,9 @@ struct WidgetGalleryDetailView: View {
             }
 
             WidgetVariantPreviewView(
-                variant: variant, setting: state.setting, style: stack?.base
+                variant: variant,
+                setting: state.setting.overridingBackground(stack?.base.background),
+                style: stack?.base.setting
             )
             .if(condition: overlayStyles.isEmpty == false) { $0.cardDepthShadow() }
         }
@@ -232,11 +234,13 @@ struct WidgetGalleryDetailView: View {
 
     /// 뒷장을 좌우로 번갈아 눕혀야 앞장에 가리지 않고 카드로 읽힌다.
     private func overlayCardView(
-        _ variant: WidgetVariant, style: any WidgetStyleSetting, depth: Int
+        _ variant: WidgetVariant, style: WidgetStyle, depth: Int
     ) -> some View {
         let direction: CGFloat = depth.isMultiple(of: 2) ? -1 : 1
         return WidgetVariantPreviewView(
-            variant: variant, setting: state.setting, style: style
+            variant: variant,
+            setting: state.setting.overridingBackground(style.background),
+            style: style.setting
         )
         .cardDepthShadow()
         .scaleEffect(Constant.overlayScale)
