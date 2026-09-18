@@ -81,7 +81,7 @@ extension WidgetVariant {
         case .eventListSmall: return self.eventListPreview(setting, size: .small)
         case .eventListMedium: return self.eventListPreview(setting, size: .medium)
         case .eventListLarge: return self.eventListPreview(setting, size: .large)
-        case .monthSmall: return self.monthPreview(setting)
+        case .monthSmall: return self.monthPreview(setting, style)
         case .todaySummarySmall: return self.todaySummaryPreview(setting, style)
         case .foremostInline: return self.foremostInlinePreview(setting)
         case .foremostSmall: return self.foremostSystemPreview(setting, isSmallSize: true)
@@ -96,16 +96,16 @@ extension WidgetVariant {
             return AnyView(DDayRectangularWidgetView(model: self.ddaySample(setting)))
         case .ddayInline:
             return AnyView(DDayInlineWidgetView(model: self.ddaySample(setting)))
-        case .oneWeekEvents: return self.weekEventsPreview(setting, range: .weeks(count: 1))
-        case .twoWeekEvents: return self.weekEventsPreview(setting, range: .weeks(count: 2))
-        case .threeWeekEvents: return self.weekEventsPreview(setting, range: .weeks(count: 3))
-        case .fourWeekEvents: return self.weekEventsPreview(setting, range: .weeks(count: 4))
+        case .oneWeekEvents: return self.weekEventsPreview(setting, style, range: .weeks(count: 1))
+        case .twoWeekEvents: return self.weekEventsPreview(setting, style, range: .weeks(count: 2))
+        case .threeWeekEvents: return self.weekEventsPreview(setting, style, range: .weeks(count: 3))
+        case .fourWeekEvents: return self.weekEventsPreview(setting, style, range: .weeks(count: 4))
         case .currentMonthEvents:
-            return self.weekEventsPreview(setting, range: .wholeMonth(.current))
+            return self.weekEventsPreview(setting, style, range: .wholeMonth(.current))
         case .lastMonthEvents:
-            return self.weekEventsPreview(setting, range: .wholeMonth(.previous))
+            return self.weekEventsPreview(setting, style, range: .wholeMonth(.previous))
         case .nextMonthEvents:
-            return self.weekEventsPreview(setting, range: .wholeMonth(.next))
+            return self.weekEventsPreview(setting, style, range: .wholeMonth(.next))
         case .aiCommandCircular: return AnyView(AICommandCircularView())
         case .aiCommandSmall: return AnyView(AICommandSmallView(setting: setting))
         case .nextEventInline:
@@ -152,10 +152,18 @@ extension WidgetVariant {
     }
 
     @MainActor
-    private func monthPreview(_ setting: WidgetAppearanceSettings) -> AnyView {
+    private func monthPreview(
+        _ setting: WidgetAppearanceSettings, _ style: (any WidgetStyleSetting)?
+    ) -> AnyView {
         guard let model = try? MonthWidgetViewModel.makeSample()
         else { return AnyView(EmptyView()) }
-        return AnyView(SingleMonthView(model: model |> \.widgetSetting .~ setting))
+        return AnyView(
+            SingleMonthView(
+                model: model
+                    |> \.widgetSetting .~ setting
+                    |> \.style .~ (style as? MonthStyleSetting ?? .initial)
+            )
+        )
     }
 
     @MainActor
@@ -192,9 +200,13 @@ extension WidgetVariant {
 
     @MainActor
     private func weekEventsPreview(
-        _ setting: WidgetAppearanceSettings, range: WeekEventsRange
+        _ setting: WidgetAppearanceSettings,
+        _ style: (any WidgetStyleSetting)?,
+        range: WeekEventsRange
     ) -> AnyView {
-        let model = WeekEventsViewModel.sample(range) |> \.widgetSetting .~ setting
+        let model = WeekEventsViewModel.sample(range)
+            |> \.widgetSetting .~ setting
+            |> \.style .~ (style as? WeekEventsStyleSetting ?? .initial)
         return AnyView(WeekEventsView(model: model))
     }
 }

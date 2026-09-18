@@ -40,7 +40,9 @@ public struct WeekEventsView: View {
         VStack(alignment: .leading) {
             monthInfoView
             
-            weekDaysHeaderView
+            if model.showsWeekDayHeader {
+                weekDaysHeaderView
+            }
             
             GeometryReader { proxy in
                 gridWeeksView(proxy)

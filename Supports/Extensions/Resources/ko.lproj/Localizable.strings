@@ -565,6 +565,11 @@
 "widget.style.today::showTotalCount" = "전체 개수";
 "widget.style.today::showTodoCount" = "할일 개수";
 "widget.style.today::showScheduleCount" = "일정 개수";
+"widget.style.month::showMonthName" = "월 이름";
+"widget.style.month::showWeekDayHeader" = "요일 헤더";
+"widget.style.month::highlightToday" = "오늘 강조";
+"widget.style.month::showEventUnderline" = "이벤트 밑줄";
+"widget.style.weekEvents::showWeekDayHeader" = "요일 헤더";
 "widget.style.edit::add" = "새 스타일";
 "widget.style.edit::name" = "이름";
 "widget.style.edit::duplicate" = "복사";

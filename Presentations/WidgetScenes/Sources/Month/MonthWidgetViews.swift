@@ -29,14 +29,18 @@ public struct SingleMonthView: View {
     
     public var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(model.monthName)
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(colorSet.text0.asColor)
+            if model.showsMonthName {
+                Text(model.monthName)
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(colorSet.text0.asColor)
+            }
             
             Grid(alignment: .center, horizontalSpacing: 4, verticalSpacing: 2) {
-                GridRow {
-                    ForEach(model.dayOfWeeksModels, id: \.identifier) { day in
-                        dayOfWeekLabel(day)
+                if model.showsWeekDayHeader {
+                    GridRow {
+                        ForEach(model.dayOfWeeksModels, id: \.identifier) { day in
+                            dayOfWeekLabel(day)
+                        }
                     }
                 }
                 ForEach(0..<model.weeks.count, id: \.self) { index in
@@ -65,21 +69,21 @@ public struct SingleMonthView: View {
         _ model: DayCellViewModel, in monthModel: MonthWidgetViewModel
     ) -> some View {
         let textColor: Color = {
-            if model.identifier == monthModel.todayIdentifier {
+            if model.identifier == monthModel.highlightedTodayIdentifier {
                 return colorSet.selectedDayText.asColor
             } else {
                 return self.accentDayText(model.accentDay)
             }
         }()
         let backgroundColor: Color = {
-            if model.identifier == monthModel.todayIdentifier {
+            if model.identifier == monthModel.highlightedTodayIdentifier {
                 return colorSet.selectedDayBackground.asColor
             } else {
                 return colorSet.dayBackground.asColor
             }
         }()
         let lineColor: Color = {
-            if model.identifier == monthModel.todayIdentifier {
+            if model.identifier == monthModel.highlightedTodayIdentifier {
                 return colorSet.selectedDayText.asColor
             } else {
                 return colorSet.weekDayText.asColor
@@ -89,7 +93,8 @@ public struct SingleMonthView: View {
             Text(model.isNotCurrentMonth ? "" : "\(model.day)")
                 .font(.system(size: 10))
                 .foregroundStyle(textColor)
-            if !model.isNotCurrentMonth && monthModel.hasEventDaysIdentifiers.contains(model.identifier) {
+            if monthModel.showsEventUnderline && !model.isNotCurrentMonth
+                && monthModel.hasEventDaysIdentifiers.contains(model.identifier) {
                 Divider()
                     .background()
                     .background(lineColor)

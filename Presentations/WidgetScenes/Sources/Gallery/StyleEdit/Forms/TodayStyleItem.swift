@@ -11,8 +11,7 @@ import Domain
 import Extensions
 
 
-/// Today 위젯이 켜고 끌 수 있는 표시 항목 — 나열 순서는 위젯 뷰의 위에서 아래 순이다.
-enum TodayStyleItem: String, CaseIterable {
+enum TodayStyleItem: String, WidgetStyleItem {
 
     case showHolidayName
     case showTimeZone
@@ -32,7 +31,6 @@ enum TodayStyleItem: String, CaseIterable {
         }
     }
 
-    /// 값 자체가 상황에 따라 없을 수 있는 항목만 부연을 갖는다.
     var note: String? {
         switch self {
         case .showHolidayName: return "widget.style.today::showHolidayName::note".localized()
