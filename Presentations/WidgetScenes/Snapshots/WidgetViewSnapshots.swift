@@ -8,6 +8,9 @@
 
 import XCTest
 import SwiftUI
+import Prelude
+import Optics
+import Domain
 import SnapshotTestHelpKit
 
 @testable import WidgetScenes
@@ -29,7 +32,9 @@ final class WidgetViewSnapshots: XCTestCase {
     }
 
     /// `.sample` 은 dateText 를 실행 시각으로 만들어 날이 바뀌면 png 가 달라진다.
-    private var fixedDDayModel: DDayWidgetViewModel {
+    private func fixedDDayModel(
+        background: WidgetAppearanceSettings.Background = .system
+    ) -> DDayWidgetViewModel {
         return DDayWidgetViewModel(
             eventTitle: "Team workshop",
             ddayText: "D-14",
@@ -37,12 +42,14 @@ final class WidgetViewSnapshots: XCTestCase {
             timeText: "",
             repeatText: ""
         )
+        |> \.widgetSetting .~ (WidgetAppearanceSettings() |> \.background .~ background)
     }
 
     @MainActor
     private func capture<V: View>(
         _ name: String,
         canvas: CGSize,
+        plate: AnyShapeStyle = AnyShapeStyle(.background),
         testName: String = #function,
         @ViewBuilder makeView: @escaping () -> V
     ) {
@@ -57,7 +64,7 @@ final class WidgetViewSnapshots: XCTestCase {
         ) { _ in
             ZStack {
                 Rectangle()
-                    .fill(.background)
+                    .fill(plate)
                 makeView()
                     .padding(WidgetCanvas.contentMargin)
             }
@@ -80,7 +87,39 @@ final class WidgetViewSnapshots: XCTestCase {
     @MainActor
     func test_ddaySmallWidgetView() {
         self.capture("dday-small", canvas: WidgetCanvas.small) {
-            DDaySmallWidgetView(model: self.fixedDDayModel)
+            DDaySmallWidgetView(model: self.fixedDDayModel())
+        }
+    }
+
+    @MainActor
+    func test_ddayMediumWidgetView() {
+        self.capture("dday-medium", canvas: WidgetCanvas.medium) {
+            DDayMediumWidgetView(model: self.fixedDDayModel())
+        }
+    }
+
+    /// 확장은 같은 배경색으로 판(`containerBackground`)까지 칠한다 — 글자색이 그 판을 따라오는지 본다.
+    @MainActor
+    func test_ddaySmallWidgetView_onDarkCustomBackground() {
+        let background = WidgetAppearanceSettings.Background.custom(hex: "#101820")
+        self.capture(
+            "dday-small-darkBackground",
+            canvas: WidgetCanvas.small,
+            plate: WidgetBackgroundStyle(background).shape
+        ) {
+            DDaySmallWidgetView(model: self.fixedDDayModel(background: background))
+        }
+    }
+
+    @MainActor
+    func test_ddayMediumWidgetView_onDarkCustomBackground() {
+        let background = WidgetAppearanceSettings.Background.custom(hex: "#101820")
+        self.capture(
+            "dday-medium-darkBackground",
+            canvas: WidgetCanvas.medium,
+            plate: WidgetBackgroundStyle(background).shape
+        ) {
+            DDayMediumWidgetView(model: self.fixedDDayModel(background: background))
         }
     }
 }

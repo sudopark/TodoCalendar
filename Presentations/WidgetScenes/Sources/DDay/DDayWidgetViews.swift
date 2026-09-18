@@ -8,20 +8,32 @@
 
 import SwiftUI
 import Extensions
+import CommonPresentation
 
 
 // MARK: - 공통 조각
 
+/// 홈은 배경색에서 고른 ColorSet 을, 잠금화면은 시스템 계층 색을 넘긴다 — 한 레이아웃을 둘이 쓴다.
 private struct DDayTitleView: View {
 
     private let model: DDayWidgetViewModel
     private let fontSize: CGFloat
     private let lineLimit: Int
+    private let titleStyle: AnyShapeStyle
+    private let markStyle: AnyShapeStyle
 
-    init(model: DDayWidgetViewModel, fontSize: CGFloat, lineLimit: Int) {
+    init(
+        model: DDayWidgetViewModel,
+        fontSize: CGFloat,
+        lineLimit: Int,
+        titleStyle: AnyShapeStyle,
+        markStyle: AnyShapeStyle
+    ) {
         self.model = model
         self.fontSize = fontSize
         self.lineLimit = lineLimit
+        self.titleStyle = titleStyle
+        self.markStyle = markStyle
     }
 
     var body: some View {
@@ -29,12 +41,12 @@ private struct DDayTitleView: View {
             if model.isRepeating {
                 Image(systemName: "repeat")
                     .font(.system(size: fontSize - 2))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(markStyle)
             }
             Text(model.eventTitle)
                 .font(.system(size: fontSize, weight: .semibold))
                 .lineLimit(lineLimit)
-                .foregroundStyle(.primary)
+                .foregroundStyle(titleStyle)
         }
     }
 }
@@ -59,6 +71,11 @@ private extension DDayWidgetViewModel {
 
 public struct DDaySmallWidgetView: View {
 
+    @Environment(\.colorScheme) var colorScheme
+    var colorSet: any ColorSet {
+        return model.widgetSetting.background.colorSet(colorScheme == .light)
+    }
+
     private let model: DDayWidgetViewModel
     public init(model: DDayWidgetViewModel) {
         self.model = model
@@ -66,7 +83,11 @@ public struct DDaySmallWidgetView: View {
 
     public var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            DDayTitleView(model: model, fontSize: 13, lineLimit: 2)
+            DDayTitleView(
+                model: model, fontSize: 13, lineLimit: 2,
+                titleStyle: AnyShapeStyle(colorSet.text0.asColor),
+                markStyle: AnyShapeStyle(colorSet.text2.asColor)
+            )
 
             Spacer(minLength: 0)
 
@@ -74,14 +95,14 @@ public struct DDaySmallWidgetView: View {
                 .font(.system(size: 32, weight: .bold))
                 .minimumScaleFactor(0.6)
                 .lineLimit(1)
-                .foregroundStyle(.primary)
+                .foregroundStyle(colorSet.text0.asColor)
 
             if !model.compactDetailText.isEmpty {
                 Text(model.compactDetailText)
                     .font(.system(size: 11))
                     .minimumScaleFactor(0.8)
                     .lineLimit(1)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(colorSet.text2.asColor)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -93,6 +114,11 @@ public struct DDaySmallWidgetView: View {
 
 public struct DDayMediumWidgetView: View {
 
+    @Environment(\.colorScheme) var colorScheme
+    var colorSet: any ColorSet {
+        return model.widgetSetting.background.colorSet(colorScheme == .light)
+    }
+
     private let model: DDayWidgetViewModel
     public init(model: DDayWidgetViewModel) {
         self.model = model
@@ -100,7 +126,11 @@ public struct DDayMediumWidgetView: View {
 
     public var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            DDayTitleView(model: model, fontSize: 15, lineLimit: 1)
+            DDayTitleView(
+                model: model, fontSize: 15, lineLimit: 1,
+                titleStyle: AnyShapeStyle(colorSet.text0.asColor),
+                markStyle: AnyShapeStyle(colorSet.text2.asColor)
+            )
 
             Spacer(minLength: 0)
 
@@ -109,7 +139,7 @@ public struct DDayMediumWidgetView: View {
                     .font(.system(size: 36, weight: .bold))
                     .minimumScaleFactor(0.6)
                     .lineLimit(1)
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(colorSet.text0.asColor)
 
                 Spacer()
 
@@ -118,14 +148,14 @@ public struct DDayMediumWidgetView: View {
                         Text(model.dateText)
                             .font(.system(size: 12))
                             .lineLimit(1)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(colorSet.text2.asColor)
                     }
 
                     if !model.detailText.isEmpty {
                         Text(model.detailText)
                             .font(.system(size: 12))
                             .lineLimit(1)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(colorSet.text2.asColor)
                     }
                 }
             }
@@ -164,7 +194,11 @@ public struct DDayRectangularWidgetView: View {
 
     public var body: some View {
         VStack(alignment: .leading, spacing: 1) {
-            DDayTitleView(model: model, fontSize: 13, lineLimit: 1)
+            DDayTitleView(
+                model: model, fontSize: 13, lineLimit: 1,
+                titleStyle: AnyShapeStyle(.primary),
+                markStyle: AnyShapeStyle(.secondary)
+            )
 
             Text(model.ddayText)
                 .font(.system(size: 18, weight: .bold))
