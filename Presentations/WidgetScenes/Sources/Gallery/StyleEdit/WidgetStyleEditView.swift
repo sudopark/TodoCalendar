@@ -23,6 +23,7 @@ import CommonPresentation
     var editingName: String = ""
     var hasUnsavedChange: Bool = false
     var selectedSetting: (any WidgetStyleSetting)?
+    var selectedBackground: WidgetAppearanceSettings.Background?
     
     func bind(_ viewModel: any WidgetStyleEditViewModel) {
         guard self.didBind == false else { return }
@@ -62,6 +63,13 @@ import CommonPresentation
                 self?.selectedSetting = setting
             })
             .store(in: self.cancellables)
+        
+        viewModel.selectedBackground
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] background in
+                self?.selectedBackground = background
+            })
+            .store(in: self.cancellables)
     }
 }
 
@@ -76,6 +84,7 @@ final class WidgetStyleEditViewEventHandler: Observable {
     var discard: () -> Void = { }
     var editName: (String) -> Void = { _ in }
     var updateSetting: (any WidgetStyleSetting) -> Void = { _ in }
+    var updateBackground: (String) -> Void = { _ in }
     var confirm: () -> Void = { }
     var close: () -> Void = { }
     
@@ -89,6 +98,7 @@ final class WidgetStyleEditViewEventHandler: Observable {
         self.discard = viewModel.discard
         self.editName = viewModel.editName
         self.updateSetting = viewModel.updateSetting
+        self.updateBackground = viewModel.updateBackground
         self.confirm = viewModel.confirm
         self.close = viewModel.close
     }
@@ -139,6 +149,7 @@ struct WidgetStyleEditView: View {
     @Environment(WidgetStyleEditViewState.self) private var state
     @Environment(WidgetStyleEditViewEventHandler.self) private var eventHandlers
     @Environment(ViewAppearance.self) private var appearance
+    @Environment(\.self) private var environment
     @FocusState private var isNameFocused: Bool
     
     private enum Constant {
@@ -351,6 +362,13 @@ struct WidgetStyleEditView: View {
                 }
             }
             
+            Section {
+                backgroundRow
+                    .listRowBackground(Color.clear)
+            } header: {
+                sectionHeader("widget.style.edit::background::section".localized())
+            }
+            
             if let previewVariant, let setting = state.selectedSetting {
                 previewVariant.styleFormView(
                     setting: setting, onChange: self.eventHandlers.updateSetting
@@ -366,6 +384,42 @@ struct WidgetStyleEditView: View {
         return Text(text)
             .font(appearance.fontSet.subNormal.asFont)
             .foregroundStyle(appearance.colorSet.text2.asColor)
+    }
+    
+    private var backgroundRow: some View {
+        HStack {
+            Text(self.backgroundSourceText)
+                .font(appearance.fontSet.normal.asFont)
+                .foregroundStyle(appearance.colorSet.text1.asColor)
+            
+            Spacer()
+            
+            ColorSelectView(self.backgroundColor)
+                .eventHandler(\.colorSelected) { newColor in
+                    guard let hex = newColor.hex(environment) else { return }
+                    self.eventHandlers.updateBackground(hex)
+                }
+                .id(self.backgroundSwatchId)
+        }
+    }
+    
+    /// ColorSelectView 는 초기값을 한 번만 읽는다 — 카드가 바뀌거나 전역 따름으로 되돌아가면 다시 세워야 한다.
+    /// 고른 색끼리는 구분하지 않는다 — 색을 고르는 동안 다시 세우면 시스템 피커가 끊긴다.
+    private var backgroundSwatchId: [AnyHashable] {
+        return [state.selectedStyleId, state.selectedBackground == nil]
+    }
+    
+    private var backgroundSourceText: String {
+        return state.selectedBackground == nil
+        ? "widget.style.edit::background::following_global".localized()
+        : "widget.style.edit::background::style_own".localized()
+    }
+    
+    private var backgroundColor: Color {
+        switch state.selectedBackground ?? setting.background {
+        case .system: return appearance.colorSet.bg0.asColor
+        case .custom(let hex): return UIColor.from(hex: hex)?.asColor ?? appearance.colorSet.bg0.asColor
+        }
     }
     
     private var nameRow: some View {
