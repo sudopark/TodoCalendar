@@ -578,6 +578,9 @@
 "widget.style.edit::unsaved::discard" = "변경 버리기";
 "widget.style::custom::unnamed" = "이름 없음";
 "widget.style.edit::name::section" = "스타일 이름";
+"widget.style.edit::background::section" = "배경색";
+"widget.style.edit::background::following_global" = "공통 위젯 테마 따름";
+"widget.style.edit::background::style_own" = "이 스타일 전용";
 "widget.style.edit::items::section" = "세부 옵션";
 "widget.style::custom::copy_format" = "%@ - 복사됨";
 "widget.doubleMonth::name" = "캘린더 + 캘린더";

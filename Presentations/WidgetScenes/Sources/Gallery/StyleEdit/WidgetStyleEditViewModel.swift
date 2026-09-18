@@ -24,11 +24,13 @@ struct WidgetStyleCellViewModel: Equatable {
     let name: String
     let hasUnsavedChange: Bool
     let setting: any WidgetStyleSetting
+    let background: WidgetAppearanceSettings.Background?
     
     static func == (lhs: Self, rhs: Self) -> Bool {
         return lhs.styleId == rhs.styleId
             && lhs.name == rhs.name
             && lhs.hasUnsavedChange == rhs.hasUnsavedChange
+            && lhs.background == rhs.background
             && lhs.setting.isSame(rhs.setting)
     }
 }
@@ -47,6 +49,7 @@ protocol WidgetStyleEditViewModel: AnyObject, WidgetStyleEditSceneInteractor {
     func discard()
     func editName(_ name: String)
     func updateSetting(_ setting: any WidgetStyleSetting)
+    func updateBackground(_ hex: String)
     func confirm()
     func close()
     
@@ -56,6 +59,7 @@ protocol WidgetStyleEditViewModel: AnyObject, WidgetStyleEditSceneInteractor {
     var hasUnsavedChange: AnyPublisher<Bool, Never> { get }
     var hasAnyUnsavedEdit: AnyPublisher<Bool, Never> { get }
     var selectedSetting: AnyPublisher<any WidgetStyleSetting, Never> { get }
+    var selectedBackground: AnyPublisher<WidgetAppearanceSettings.Background?, Never> { get }
 }
 
 final class WidgetStyleEditViewModelImple: WidgetStyleEditViewModel, @unchecked Sendable {
@@ -112,7 +116,8 @@ extension WidgetStyleEditViewModelImple {
         let newStyle = WidgetStyle(
             id: self.widgetStyleUsecase.makeNewStyleId(for: source.id.variant),
             name: self.copiedName(from: source, in: styles),
-            setting: source.setting
+            setting: source.setting,
+            background: source.background
         )
         self.subject.editingStyles.send(styles + [newStyle])
         self.select(newStyle.id)
@@ -132,7 +137,7 @@ extension WidgetStyleEditViewModelImple {
         guard let initialSetting = styleId.variant.initialSetting else { return }
         let confirmed: () -> Void = { [weak self] in
             self?.replaceStyle(styleId) {
-                $0 |> \.setting .~ initialSetting |> \.name .~ nil
+                $0 |> \.setting .~ initialSetting |> \.name .~ nil |> \.background .~ nil
             }
             self?.refreshEditingName()
         }
@@ -164,6 +169,10 @@ extension WidgetStyleEditViewModelImple {
     func updateSetting(_ setting: any WidgetStyleSetting) {
         guard self.variants.first?.isOwnSetting(setting) == true else { return }
         self.updateSelectedStyle { $0 |> \.setting .~ setting }
+    }
+    
+    func updateBackground(_ hex: String) {
+        self.updateSelectedStyle { $0 |> \.background .~ .custom(hex: hex) }
     }
     
     /// 저장해도 화면에 남는다 — 다른 카드를 이어서 저장할 수 있어야 한다.
@@ -302,7 +311,8 @@ extension WidgetStyleEditViewModelImple {
                     styleId: style.id,
                     name: style.displayName,
                     hasUnsavedChange: style.isSame(saved[style.id]) == false,
-                    setting: style.setting
+                    setting: style.setting,
+                    background: style.background
                 )
             }
         }
@@ -360,6 +370,18 @@ extension WidgetStyleEditViewModelImple {
             return editings.first { $0.id == selectedId }?.setting
         }
         .removeDuplicates { $0.isSame($1) }
+        .eraseToAnyPublisher()
+    }
+    
+    var selectedBackground: AnyPublisher<WidgetAppearanceSettings.Background?, Never> {
+        return Publishers.CombineLatest(
+            self.subject.editingStyles.compactMap { $0 },
+            self.subject.selectedStyleId.compactMap { $0 }
+        )
+        .map { editings, selectedId in
+            return editings.first { $0.id == selectedId }?.background
+        }
+        .removeDuplicates()
         .eraseToAnyPublisher()
     }
 }

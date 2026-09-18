@@ -149,11 +149,13 @@ final class WidgetGallerySnapshots: XCTestCase {
         state.styles = [
             .init(
                 styleId: style.id, name: style.displayName,
-                hasUnsavedChange: false, setting: style.setting
+                hasUnsavedChange: false, setting: style.setting,
+                background: style.background
             )
         ]
         state.selectedStyleId = styleId
         state.selectedSetting = setting
+        state.selectedBackground = style.background
         return state
     }
     
@@ -171,7 +173,8 @@ final class WidgetGallerySnapshots: XCTestCase {
             WidgetStyle(
                 id: .init(variant: variant, style: .custom(id: "c1")),
                 name: "Night",
-                setting: TodayStyleSetting.initial |> \.showHolidayName .~ false
+                setting: TodayStyleSetting.initial |> \.showHolidayName .~ false,
+                background: .custom(hex: "#101820")
             ),
             WidgetStyle(
                 id: .init(variant: variant, style: .custom(id: "c2")),
@@ -184,13 +187,15 @@ final class WidgetGallerySnapshots: XCTestCase {
         state.styles = styles.enumerated().map { index, style in
             .init(
                 styleId: style.id, name: style.displayName,
-                hasUnsavedChange: index == 1 && hasUnsavedChanges, setting: style.setting
+                hasUnsavedChange: index == 1 && hasUnsavedChanges, setting: style.setting,
+                background: style.background
             )
         }
         state.hasUnsavedChange = hasUnsavedChanges
         state.selectedStyleId = selected.id
         state.editingName = selected.name ?? ""
         state.selectedSetting = selected.setting
+        state.selectedBackground = selected.background
         return state
     }
     
@@ -243,6 +248,7 @@ final class WidgetGallerySnapshots: XCTestCase {
         captureSnapshotPair(named: "widgetStyleEdit-defaultSelected", layout: .fullScreen) { theme in
             let state = self.styleEditStateWithCustoms()
             state.selectedStyleId = .init(variant: .todaySummarySmall, style: .default)
+            state.selectedBackground = nil
             return WidgetStyleEditView(variants: [.todaySummarySmall], setting: .init())
                 .environment(state)
                 .environment(WidgetStyleEditViewEventHandler())

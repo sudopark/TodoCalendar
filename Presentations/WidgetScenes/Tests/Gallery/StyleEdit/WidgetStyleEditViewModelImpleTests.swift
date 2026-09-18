@@ -45,12 +45,14 @@ final class WidgetStyleEditViewModelImpleTests: PublisherWaitable {
         _ style: WidgetStyleId.Style,
         variant: WidgetVariant = .todaySummarySmall,
         name: String? = nil,
-        showHolidayName: Bool = true
+        showHolidayName: Bool = true,
+        background: WidgetAppearanceSettings.Background? = nil
     ) -> WidgetStyle {
         return .init(
             id: .init(variant: variant, style: style),
             name: name,
-            setting: TodayStyleSetting.initial |> \.showHolidayName .~ showHolidayName
+            setting: TodayStyleSetting.initial |> \.showHolidayName .~ showHolidayName,
+            background: background
         )
     }
 
@@ -206,6 +208,13 @@ extension WidgetStyleEditViewModelImpleTests {
         of viewModel: WidgetStyleEditViewModelImple
     ) async throws -> Bool? {
         return try await self.current("목록 전체 미저장 여부", of: viewModel.hasAnyUnsavedEdit)
+    }
+
+    /// 바깥은 이중 Optional 이다 — 방출 여부와 "전역 따름(nil)"을 갈라 봐야 한다.
+    private func selectedBackground(
+        of viewModel: WidgetStyleEditViewModelImple
+    ) async throws -> WidgetAppearanceSettings.Background?? {
+        return try await self.current("고른 카드 배경색", of: viewModel.selectedBackground)
     }
 
     /// 이름 입력 값이 되돌아오는 흐름 자체를 봐야 하는 케이스용 — 방출 순서를 모은다.
@@ -1103,5 +1112,140 @@ extension WidgetStyleEditViewModelImpleTests {
         // then
         let selected = try await self.selectedStyleId(of: viewModel)
         #expect(selected == secondId)
+    }
+}
+
+
+// MARK: - 배경색
+
+extension WidgetStyleEditViewModelImpleTests {
+
+    @Test("색을 안 고른 스타일은 배경색이 비어 있다 — 전역 설정을 따른다")
+    func refresh_whenStyleHasNoBackground_selectedBackgroundIsNil() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModelWithDefaultOnly()
+
+        // when
+        let emitted = try await self.selectedBackground(of: viewModel)
+
+        // then
+        #expect(emitted == .some(nil))
+    }
+
+    @Test("저장된 배경색이 있으면 고른 카드의 그 색이 흘러나온다")
+    func selectStyle_emitsBackgroundOfThatCard() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModel(
+            saved: [
+                self.todayStyle(.default, background: .custom(hex: "#ffffff")),
+                self.todayStyle(.custom(id: "c1"), background: .custom(hex: "#101820"))
+            ]
+        )
+
+        // when
+        viewModel.selectStyle(self.customId)
+        let emitted = try await self.selectedBackground(of: viewModel)
+
+        // then
+        #expect(emitted == .custom(hex: "#101820"))
+    }
+
+    @Test("색을 고르면 그 스타일이 전역을 따르지 않게 된다")
+    func updateBackground_selectedBackgroundBecomesCustom() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModelWithDefaultOnly()
+
+        // when
+        viewModel.updateBackground("#101820")
+        let emitted = try await self.selectedBackground(of: viewModel)
+
+        // then
+        #expect(emitted == .custom(hex: "#101820"))
+    }
+
+    @Test("색을 고르면 미저장 표시가 켜진다")
+    func updateBackground_marksUnsavedChange() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModelWithDefaultOnly()
+
+        // when
+        viewModel.updateBackground("#101820")
+
+        // then
+        let emitted = try await self.hasUnsavedChange(of: viewModel)
+        #expect(emitted == true)
+    }
+
+    @Test("색은 고른 카드에만 실리고 저장 전에는 저장소로 가지 않는다")
+    func updateBackground_appliesToSelectedCardOnly() async throws {
+        // given
+        let (viewModel, usecase) = self.makeViewModelWithCustom()
+
+        // when
+        viewModel.updateBackground("#101820")
+
+        // then
+        let emitted = try await self.styles(of: viewModel)
+        #expect(emitted.map { $0.background } == [.custom(hex: "#101820"), nil])
+        #expect(usecase.updatedStyles.isEmpty)
+    }
+
+    @Test("저장하면 고른 색이 스타일과 함께 저장된다")
+    func confirm_savesBackgroundWithStyle() async throws {
+        // given
+        let (viewModel, usecase) = self.makeViewModelWithDefaultOnly()
+        viewModel.updateBackground("#101820")
+
+        // when
+        viewModel.confirm()
+
+        // then
+        #expect(usecase.updatedStyles.map { $0.background } == [.custom(hex: "#101820")])
+    }
+
+    @Test("되돌리면 색도 전역 따름으로 돌아간다")
+    func resetStyle_clearsBackground() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModel(
+            saved: [self.todayStyle(.default, background: .custom(hex: "#101820"))]
+        )
+
+        // when
+        viewModel.resetStyle(self.defaultId)
+        let emitted = try await self.selectedBackground(of: viewModel)
+
+        // then
+        #expect(emitted == .some(nil))
+    }
+
+    @Test("색을 걸었다 되돌리면 그 카드가 다시 전역을 따른다")
+    func resetStyle_afterUpdateBackground_followsGlobalAgain() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModelWithDefaultOnly()
+        viewModel.updateBackground("#101820")
+
+        // when
+        viewModel.resetStyle(self.defaultId)
+        let emitted = try await self.selectedBackground(of: viewModel)
+
+        // then
+        #expect(emitted == .some(nil))
+        let styles = try await self.styles(of: viewModel)
+        #expect(styles.first?.background == nil)
+    }
+
+    @Test("카드를 복제하면 원본 배경색도 그대로 실린다")
+    func appendStyle_copiesBackground() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModel(
+            saved: [self.todayStyle(.default, background: .custom(hex: "#101820"))]
+        )
+
+        // when
+        viewModel.appendStyle(copying: self.defaultId)
+        let emitted = try await self.selectedBackground(of: viewModel)
+
+        // then
+        #expect(emitted == .custom(hex: "#101820"))
     }
 }
