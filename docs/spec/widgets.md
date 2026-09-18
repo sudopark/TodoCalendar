@@ -344,6 +344,17 @@ hex 색상으로 UIColor 생성
 - **갤러리 프리뷰 넷이 모두 반영한다** — 1 depth 썸네일은 변형의 기본 스타일 배경색을, 2 depth 앞장·뒷장과 편집 화면 카드는 카드마다 그 스타일의 배경색을 쓴다. 잠금화면 변형은 프리뷰 판이 검은 판 고정이라 배경색이 안 먹는다.
 - **DDay 홈 2변형도 ColorSet 을 쓴다** — 고정 `.primary`/`.secondary` 라 배경색조차 글자에 안 닿던 자리를 8.2 경로에 맞췄다. 잠금화면 4변형은 시스템이 단색 렌더링을 강제해 그대로다.
 
+#### 스타일 공유 변형군 (#1112)
+
+**변형이 여럿이어도 꾸밀 항목이 같으면 스타일 하나를 공유한다** — WeekEvents 7변형(`oneWeekEvents`·`twoWeekEvents`·`threeWeekEvents`·`fourWeekEvents`·`currentMonthEvents`·`lastMonthEvents`·`nextMonthEvents`)이 그 경우다. 뷰와 provider 가 하나고 표시 항목도 같아서, 유저가 7벌을 따로 편집할 이유가 없다.
+
+- **대표 변형을 `WidgetVariant.styleVariant` 가 가리킨다.** 공유하지 않는 변형은 자기 자신을 낸다. `styleSharingVariants` 는 그 역으로, 한 변형과 스타일을 공유하는 변형 전부(자기 포함)를 낸다.
+- **정규화는 두 층이다.** 좌표를 받는 경로는 `WidgetStyleId.init(variant:style:)` 이 대표 변형으로 접고, `WidgetVariant` 를 좌표 없이 직접 받는 경로(`WidgetStyleUsecaseImple` 의 `shareKey`·`loadStyles`)는 그 자리에서 접는다. **한 층만으로는 샌다** — 저장소와 공유 상태 키가 `variant.rawValue` 라, 좌표만 접으면 `.twoWeekEvents` 로 연 편집 화면이 `oneWeekEvents` 키에 저장된 스타일을 못 읽는다.
+- **공유하면 레코드를 통째로 공유한다** — 설정·이름·배경색이 한 JSON 레코드(`{ name, setting, background }`)로 `[변형][스타일]` 한 칸에 들어가므로, 키가 같아지면 셋이 함께 공유된다. 배경색만 변형별로 가를 수는 없다.
+- **편집 화면은 공유 변형 전부를 받는다** (`WidgetGalleryDetailViewModelImple.editStyle` 이 `styleSharingVariants` 를 넘긴다). 저장 후 리로드가 받은 변형들의 kind 를 훑기 때문에, 한 변형만 넘기면 7종 중 하나만 갱신된다. 받는 쪽은 좌표로 접어 중복을 걷는다 — 그대로 훑으면 같은 목록이 7벌 이어붙는다.
+- **인스턴스 선택도 대표 변형 기준이다** — `WeekEventsStyleQuery` 가 `.oneWeekEvents` 로 조회하므로 7종 어디서 편집 시트를 열어도 같은 후보 목록이 뜬다.
+- 그 대가로 `WidgetStyleId.variant` 는 "그 위젯의 변형"이 아니라 **"스타일 좌표의 변형"** 이라는 뜻을 갖는다.
+
 ---
 
 ## 9. 주요 위젯 상세
