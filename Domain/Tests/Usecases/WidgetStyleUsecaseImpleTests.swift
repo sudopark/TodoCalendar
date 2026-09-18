@@ -40,8 +40,8 @@ final class WidgetStyleUsecaseImpleTests: PublisherWaitable {
         private(set) var updatedStyles: [WidgetStyle] = []
         private(set) var removedStyleIds: [WidgetStyleId] = []
 
-        func loadSetting(for id: WidgetStyleId) -> (any WidgetStyleSetting)? {
-            return nil
+        func loadStyle(for id: WidgetStyleId) -> WidgetStyle? {
+            return self.savedStyles.first { $0.id == id }
         }
 
         func loadStyles(of variant: WidgetVariant) -> [WidgetStyle] {
@@ -64,12 +64,14 @@ final class WidgetStyleUsecaseImpleTests: PublisherWaitable {
         _ style: WidgetStyleId.Style,
         variant: WidgetVariant = .todaySummarySmall,
         name: String? = nil,
-        showHolidayName: Bool
+        showHolidayName: Bool,
+        background: WidgetAppearanceSettings.Background? = nil
     ) -> WidgetStyle {
         return .init(
             id: .init(variant: variant, style: style),
             name: name,
-            setting: TodayStyleSetting.initial |> \.showHolidayName .~ showHolidayName
+            setting: TodayStyleSetting.initial |> \.showHolidayName .~ showHolidayName,
+            background: background
         )
     }
 
@@ -440,4 +442,62 @@ extension WidgetStyleUsecaseImpleTests {
 private extension WidgetStyleSetting {
 
     var asToday: TodayStyleSetting? { self as? TodayStyleSetting }
+}
+
+
+// MARK: - 배경색
+
+extension WidgetStyleUsecaseImpleTests {
+
+    @Test("저장하면 고른 배경색이 저장소까지 간다")
+    func updateStyle_carriesBackgroundToRepository() {
+        // given
+        let repository = StubRepository()
+        let usecase = self.makeUsecase(with: repository)
+
+        // when
+        usecase.updateStyle(
+            self.todayStyle(
+                .custom(id: "c1"), name: "  밤 모드  ", showHolidayName: false,
+                background: .custom(hex: "#101820")
+            )
+        )
+
+        // then
+        #expect(repository.updatedStyles.map { $0.background } == [.custom(hex: "#101820")])
+        #expect(repository.updatedStyles.map { $0.name } == ["밤 모드"])
+    }
+
+    @Test("저장한 배경색이 다시 조회한 목록에도 실린다")
+    func loadStyles_afterUpdate_carriesBackground() {
+        // given
+        let repository = StubRepository()
+        let usecase = self.makeUsecase(with: repository)
+        usecase.updateStyle(
+            self.todayStyle(
+                .custom(id: "c1"), showHolidayName: false, background: .custom(hex: "#101820")
+            )
+        )
+
+        // when
+        let styles = usecase.loadStyles(of: .todaySummarySmall)
+
+        // then
+        #expect(styles.map { $0.background } == [nil, .custom(hex: "#101820")])
+    }
+
+    @Test("저장된 기본 스타일의 배경색도 첫 원소에 실린다")
+    func loadStyles_whenDefaultSavedWithBackground_carriesIt() {
+        // given
+        let saved = self.todayStyle(
+            .default, showHolidayName: false, background: .custom(hex: "#ffffff")
+        )
+        let usecase = self.makeUsecase(with: .init(savedStyles: [saved]))
+
+        // when
+        let styles = usecase.loadStyles(of: .todaySummarySmall)
+
+        // then
+        #expect(styles.first?.background == .custom(hex: "#ffffff"))
+    }
 }

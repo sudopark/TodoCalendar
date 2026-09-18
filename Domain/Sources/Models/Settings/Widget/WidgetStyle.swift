@@ -57,10 +57,19 @@ public struct WidgetStyle: Sendable {
     public var name: String?
     public var setting: any WidgetStyleSetting
 
-    public init(id: WidgetStyleId, name: String?, setting: any WidgetStyleSetting) {
+    /// nil 이면 전역 배경색을 따른다.
+    public var background: WidgetAppearanceSettings.Background?
+
+    public init(
+        id: WidgetStyleId,
+        name: String?,
+        setting: any WidgetStyleSetting,
+        background: WidgetAppearanceSettings.Background? = nil
+    ) {
         self.id = id
         self.name = name
         self.setting = setting
+        self.background = background
     }
 }
 
@@ -80,6 +89,7 @@ extension WidgetStyle {
         guard let other else { return false }
         return self.id == other.id
             && self.name == other.name
+            && self.background == other.background
             && self.setting.isSame(other.setting)
     }
 }

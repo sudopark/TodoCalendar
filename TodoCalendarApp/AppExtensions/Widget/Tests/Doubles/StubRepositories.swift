@@ -170,8 +170,10 @@ final class StubWidgetStyleRepository: WidgetStyleRepository, @unchecked Sendabl
         self.todayStyles = todayStyles
     }
 
-    func loadSetting(for id: WidgetStyleId) -> (any WidgetStyleSetting)? {
-        return self.todayStyles[id]
+    func loadStyle(for id: WidgetStyleId) -> WidgetStyle? {
+        return self.todayStyles[id].map {
+            WidgetStyle(id: id, name: nil, setting: $0)
+        }
     }
 
     func loadStyles(of variant: WidgetVariant) -> [WidgetStyle] {

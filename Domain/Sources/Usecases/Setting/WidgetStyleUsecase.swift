@@ -8,6 +8,8 @@
 
 import Foundation
 import Combine
+import Prelude
+import Optics
 import Extensions
 
 
@@ -116,10 +118,7 @@ extension WidgetStyleUsecaseImple {
 private extension WidgetStyle {
 
     func withNormalizedName() -> WidgetStyle {
-        return WidgetStyle(
-            id: self.id,
-            name: self.name?.trimmingCharacters(in: .whitespacesAndNewlines).emptyAsNil(),
-            setting: self.setting
-        )
+        return self
+            |> \.name .~ self.name?.trimmingCharacters(in: .whitespacesAndNewlines).emptyAsNil()
     }
 }
