@@ -82,16 +82,40 @@ public enum WidgetVariant: String, Sendable, Identifiable, CaseIterable {
         switch self {
         case .todaySummarySmall:
             return TodayStyleSetting.self
+        case .monthSmall:
+            return MonthStyleSetting.self
+        case .oneWeekEvents, .twoWeekEvents, .threeWeekEvents, .fourWeekEvents,
+             .currentMonthEvents, .lastMonthEvents, .nextMonthEvents:
+            return WeekEventsStyleSetting.self
         case .todayAndNextMedium, .eventListSmall, .eventListMedium, .eventListLarge,
-             .monthSmall, .foremostInline, .foremostSmall, .foremostMedium,
+             .foremostInline, .foremostSmall, .foremostMedium,
              .ddaySmall, .ddayMedium, .ddayCircular, .ddayRectangular, .ddayInline,
-             .oneWeekEvents, .twoWeekEvents, .threeWeekEvents, .fourWeekEvents,
-             .currentMonthEvents, .lastMonthEvents, .nextMonthEvents,
              .aiCommandCircular, .aiCommandSmall, .nextEventInline,
              .nextEventRectangular, .nextRemainRectangular, .doubleMonthMedium,
              .eventAndMonthMedium, .eventAndForemostMedium, .todayAndMonthMedium:
             return nil
         }
+    }
+
+    /// 스타일을 공유하는 변형군의 대표 변형 — 저장 좌표는 이 값으로 접힌다.
+    public var styleVariant: WidgetVariant {
+        switch self {
+        case .oneWeekEvents, .twoWeekEvents, .threeWeekEvents, .fourWeekEvents,
+             .currentMonthEvents, .lastMonthEvents, .nextMonthEvents:
+            return .oneWeekEvents
+        case .todayAndNextMedium, .eventListSmall, .eventListMedium, .eventListLarge,
+             .monthSmall, .todaySummarySmall, .foremostInline, .foremostSmall,
+             .foremostMedium, .ddaySmall, .ddayMedium, .ddayCircular, .ddayRectangular,
+             .ddayInline, .aiCommandCircular, .aiCommandSmall, .nextEventInline,
+             .nextEventRectangular, .nextRemainRectangular, .doubleMonthMedium,
+             .eventAndMonthMedium, .eventAndForemostMedium, .todayAndMonthMedium:
+            return self
+        }
+    }
+
+    /// 이 변형과 스타일을 공유하는 변형 전부 — 자기 자신을 포함한다.
+    public var styleSharingVariants: [WidgetVariant] {
+        return Self.allCases.filter { $0.styleVariant == self.styleVariant }
     }
 
     public var initialSetting: (any WidgetStyleSetting)? {

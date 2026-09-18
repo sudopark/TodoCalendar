@@ -49,3 +49,49 @@ struct WidgetStyleTests {
         #expect(custom.isSame(self.makeStyle(background: .system)) == false)
     }
 }
+
+
+// MARK: - 스타일 좌표
+
+struct WidgetStyleIdTests {
+
+    @Test("스타일을 공유하는 변형으로 만든 좌표는 대표 변형으로 접힌다")
+    func styleId_whenMadeFromSharingVariant_normalizedToRepresentative() {
+        // given
+        let variants: [WidgetVariant] = [
+            .twoWeekEvents, .threeWeekEvents, .fourWeekEvents,
+            .currentMonthEvents, .lastMonthEvents, .nextMonthEvents
+        ]
+
+        // when
+        let ids = variants.map { WidgetStyleId(variant: $0, style: .default) }
+
+        // then
+        #expect(ids.allSatisfy { $0.variant == .oneWeekEvents })
+        #expect(Set(ids).count == 1)
+    }
+
+    @Test("스타일을 공유하지 않는 변형으로 만든 좌표는 그 변형 그대로다")
+    func styleId_whenMadeFromNonSharingVariant_keepsItsOwn() {
+        // given
+        let month = WidgetStyleId(variant: .monthSmall, style: .default)
+        let today = WidgetStyleId(variant: .todaySummarySmall, style: .default)
+
+        // when + then
+        #expect(month.variant == .monthSmall)
+        #expect(today.variant == .todaySummarySmall)
+        #expect(month != today)
+    }
+
+    @Test("공유 변형이 달라도 커스텀 스타일 좌표는 같은 것으로 본다")
+    func styleId_whenCustomFromDifferentSharingVariants_areEqual() {
+        // given
+        let fromTwoWeeks = WidgetStyleId(variant: .twoWeekEvents, style: .custom(id: "abc"))
+        let fromLastMonth = WidgetStyleId(
+            variant: .lastMonthEvents, style: .custom(id: "abc")
+        )
+
+        // when + then
+        #expect(fromTwoWeeks == fromLastMonth)
+    }
+}

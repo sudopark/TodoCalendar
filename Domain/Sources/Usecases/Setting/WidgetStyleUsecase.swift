@@ -42,8 +42,9 @@ public final class WidgetStyleUsecaseImple: WidgetStyleUsecase {
         self.sharedDataStore = sharedDataStore
     }
 
+    /// 변형이 아니라 스타일 좌표 기준이다 — 스타일을 공유하는 변형군은 스트림도 하나를 본다.
     private func shareKey(_ variant: WidgetVariant) -> String {
-        return "\(ShareDataKeys.widgetStyles.rawValue):\(variant.rawValue)"
+        return "\(ShareDataKeys.widgetStyles.rawValue):\(variant.styleVariant.rawValue)"
     }
 }
 
@@ -67,8 +68,9 @@ extension WidgetStyleUsecaseImple {
     /// 저장소는 저장된 스타일만 주지만 화면은 기본 스타일을 항상 요구한다.
     public func loadStyles(of variant: WidgetVariant) -> [WidgetStyle] {
 
-        guard let initialSetting = variant.initialSetting else { return [] }
-        let savedStyles = self.styleRepository.loadStyles(of: variant)
+        let styleVariant = variant.styleVariant
+        guard let initialSetting = styleVariant.initialSetting else { return [] }
+        let savedStyles = self.styleRepository.loadStyles(of: styleVariant)
         let defaultStyle = savedStyles.first { $0.id.style == .default }
             ?? WidgetStyle(
                 id: .init(variant: variant, style: .default),

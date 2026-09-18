@@ -91,7 +91,9 @@ final class WidgetStyleEditViewModelImple: WidgetStyleEditViewModel, @unchecked 
 extension WidgetStyleEditViewModelImple {
     
     func refresh() {
-        let styles = self.variants.flatMap { self.widgetStyleUsecase.loadStyles(of: $0) }
+        let styles = self.styleVariants().flatMap {
+            self.widgetStyleUsecase.loadStyles(of: $0)
+        }
         self.subject.savedStyles.send(styles.asDictionary { $0.id })
         self.subject.editingStyles.send(styles)
         guard let first = styles.first else { return }
@@ -203,6 +205,11 @@ extension WidgetStyleEditViewModelImple {
         self.router?.showActionSheet(form)
     }
     
+    /// 스타일을 공유하는 변형끼리는 좌표가 같아 그대로 훑으면 같은 목록이 여러 벌 이어붙는다.
+    private func styleVariants() -> [WidgetVariant] {
+        return self.variants.map { $0.styleVariant }.removeDuplicates { $0 }
+    }
+
     private func dropStyle(_ styleId: WidgetStyleId) {
         guard let styles = self.subject.editingStyles.value else { return }
         if let saved = self.subject.savedStyles.value, saved[styleId] != nil {

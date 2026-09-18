@@ -13,12 +13,16 @@ import Domain
 
 final class StubWidgetStyleUsecase: WidgetStyleUsecase, @unchecked Sendable {
     
-    /// 프로덕션과 같이 갱신 요청 전에는 아무것도 내보내지 않는다 — 배선 누락이 테스트에서 드러나야 한다.
-    private let styleSubject = CurrentValueSubject<[WidgetStyle]?, Never>(nil)
+    /// 프로덕션이 스타일 좌표별로 스트림을 가르므로 스텁도 좌표별로 나눈다 — 하나로 묶으면
+    /// 좌표 하나를 갱신해도 다른 좌표 구독이 함께 흔들려 방출 수가 변형 수를 탄다.
+    private var styleSubjects: [WidgetVariant: CurrentValueSubject<[WidgetStyle]?, Never>] = [:]
     var stubStyles: [WidgetStyle] = [] {
         didSet {
-            guard self.styleSubject.value != nil else { return }
-            self.styleSubject.send(self.stubStyles)
+            self.styleSubjects
+                .filter { $0.value.value != nil }
+                .forEach { variant, subject in
+                    subject.send(self.styles(in: self.stubStyles, of: variant))
+                }
         }
     }
     
@@ -30,20 +34,35 @@ final class StubWidgetStyleUsecase: WidgetStyleUsecase, @unchecked Sendable {
     
     func refreshStyles(of variant: WidgetVariant) {
         self.refreshedVariants.append(variant)
-        self.styleSubject.send(self.stubStyles)
+        self.subject(of: variant).send(self.styles(in: self.stubStyles, of: variant))
     }
     
     func styles(of variant: WidgetVariant) -> AnyPublisher<[WidgetStyle], Never> {
         self.requestedVariant = variant
-        return self.styleSubject
+        return self.subject(of: variant)
             .compactMap { $0 }
-            .map { styles in styles.filter { $0.id.variant == variant } }
             .eraseToAnyPublisher()
     }
     
     func loadStyles(of variant: WidgetVariant) -> [WidgetStyle] {
         self.requestedVariant = variant
-        return self.stubStyles.filter { $0.id.variant == variant }
+        return self.styles(in: self.stubStyles, of: variant)
+    }
+    
+    private func subject(
+        of variant: WidgetVariant
+    ) -> CurrentValueSubject<[WidgetStyle]?, Never> {
+        let key = variant.styleVariant
+        if let existing = self.styleSubjects[key] { return existing }
+        let created = CurrentValueSubject<[WidgetStyle]?, Never>(nil)
+        self.styleSubjects[key] = created
+        return created
+    }
+    
+    private func styles(
+        in styles: [WidgetStyle], of variant: WidgetVariant
+    ) -> [WidgetStyle] {
+        return styles.filter { $0.id.variant == variant.styleVariant }
     }
     
     func updateStyle(_ style: WidgetStyle) {

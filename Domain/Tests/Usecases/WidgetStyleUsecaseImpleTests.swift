@@ -75,6 +75,19 @@ final class WidgetStyleUsecaseImpleTests: PublisherWaitable {
         )
     }
 
+    private func weekEventsStyle(
+        _ style: WidgetStyleId.Style,
+        variant: WidgetVariant,
+        name: String? = nil,
+        showWeekDayHeader: Bool
+    ) -> WidgetStyle {
+        return .init(
+            id: .init(variant: variant, style: style),
+            name: name,
+            setting: WeekEventsStyleSetting.initial |> \.showWeekDayHeader .~ showWeekDayHeader
+        )
+    }
+
     private func makeUsecase(with repository: StubRepository) -> WidgetStyleUsecaseImple {
         return WidgetStyleUsecaseImple(
             styleRepository: repository,
@@ -155,11 +168,41 @@ extension WidgetStyleUsecaseImpleTests {
         let usecase = self.makeUsecase(with: repository)
 
         // when
-        let styles = usecase.loadStyles(of: .monthSmall)
+        let styles = usecase.loadStyles(of: .doubleMonthMedium)
 
         // then
         #expect(styles.isEmpty == true)
         #expect(repository.requestedVariant == nil)
+    }
+
+    @Test("저장분이 없어도 공유 변형 조회는 대표 좌표의 기본 스타일을 낸다")
+    func loadStyles_fromSharingVariant_returnsRepresentativeCoordinate() {
+        // given
+        let usecase = self.makeUsecase(with: .init())
+
+        // when
+        let styles = usecase.loadStyles(of: .threeWeekEvents)
+
+        // then
+        #expect(styles.map { $0.id } == [.init(variant: .oneWeekEvents, style: .default)])
+    }
+
+    @Test("한 WeekEvents 변형으로 저장한 스타일이 다른 변형 조회에 그대로 나온다")
+    func loadStyles_fromAnotherWeekEventsVariant_returnsSameSavedStyle() {
+        // given
+        let saved = self.weekEventsStyle(
+            .custom(id: "c1"), variant: .twoWeekEvents, showWeekDayHeader: false
+        )
+        let usecase = self.makeUsecase(with: .init(savedStyles: [saved]))
+
+        // when
+        let styles = usecase.loadStyles(of: .lastMonthEvents)
+
+        // then
+        #expect(styles.map { $0.id.style } == [.default, .custom(id: "c1")])
+        #expect(
+            (styles.last?.setting as? WeekEventsStyleSetting)?.showWeekDayHeader == false
+        )
     }
 }
 
@@ -226,6 +269,28 @@ extension WidgetStyleUsecaseImpleTests {
         // then
         #expect(styles?.map { $0.id.style } == [.default])
         #expect(styles?.first?.setting as? TodayStyleSetting == TodayStyleSetting.initial)
+    }
+
+    @Test("한 WeekEvents 변형으로 갱신하면 다른 변형 스트림도 같은 목록을 받는다")
+    func styles_fromAnotherWeekEventsVariant_sharesOneStream() async throws {
+        // given
+        let expect = expectConfirm("공유 스트림이 목록을 낸다")
+        let saved = self.weekEventsStyle(
+            .default, variant: .oneWeekEvents, showWeekDayHeader: false
+        )
+        let usecase = self.makeUsecase(with: .init(savedStyles: [saved]))
+
+        // when
+        let styles = try await self.firstOutput(
+            expect, for: usecase.styles(of: .fourWeekEvents)
+        ) {
+            usecase.refreshStyles(of: .currentMonthEvents)
+        }
+
+        // then
+        #expect(
+            (styles?.first?.setting as? WeekEventsStyleSetting)?.showWeekDayHeader == false
+        )
     }
 
     @Test("스타일을 저장하면 같은 변형 스트림이 갱신된 목록을 다시 낸다")
@@ -352,6 +417,28 @@ extension WidgetStyleUsecaseImpleTests {
 
         // then
         #expect(repository.updatedStyles.isEmpty == true)
+    }
+
+    @Test("비대표 WeekEvents 변형으로 저장해도 공유 좌표에 들어가 다른 변형이 읽는다")
+    func updateStyle_fromAnyWeekEventsVariant_savesToSharedCoordinate() {
+        // given
+        let usecase = self.makeUsecase(with: .init())
+        let style = self.weekEventsStyle(
+            .custom(id: "c1"), variant: .twoWeekEvents, showWeekDayHeader: false
+        )
+
+        // when
+        usecase.updateStyle(style)
+        let styles = usecase.loadStyles(of: .lastMonthEvents)
+
+        // then
+        #expect(styles.map { $0.id } == [
+            .init(variant: .oneWeekEvents, style: .default),
+            .init(variant: .oneWeekEvents, style: .custom(id: "c1"))
+        ])
+        #expect(
+            (styles.last?.setting as? WeekEventsStyleSetting)?.showWeekDayHeader == false
+        )
     }
 
     @Test("공백뿐인 이름은 없는 것으로 저장된다")
