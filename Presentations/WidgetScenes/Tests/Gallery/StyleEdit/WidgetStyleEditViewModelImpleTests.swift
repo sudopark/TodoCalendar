@@ -56,6 +56,19 @@ final class WidgetStyleEditViewModelImpleTests: PublisherWaitable {
         )
     }
 
+    private func weekEventsStyle(
+        _ style: WidgetStyleId.Style,
+        variant: WidgetVariant = .oneWeekEvents,
+        name: String? = nil,
+        showWeekDayHeader: Bool = true
+    ) -> WidgetStyle {
+        return .init(
+            id: .init(variant: variant, style: style),
+            name: name,
+            setting: WeekEventsStyleSetting.initial |> \.showWeekDayHeader .~ showWeekDayHeader
+        )
+    }
+
     /// 편집 뷰모델은 항목이 아니라 설정 전체를 받으므로, 초기값에서 항목을 끈 설정을 만들어 넘긴다.
     private func settingTurningOff(_ items: TodayStyleItem...) -> TodayStyleSetting {
         return items.reduce(TodayStyleSetting.initial) { acc, item in
@@ -329,6 +342,30 @@ extension WidgetStyleEditViewModelImpleTests {
             .todaySummarySmall, .todaySummarySmall, .monthSmall, .monthSmall
         ])
         #expect(emitted.map { $0.name }.last == "달력")
+    }
+
+    @Test("스타일을 공유하는 변형군을 주면 목록이 한 벌만 선다")
+    func refresh_withSharingVariants_listsStylesOnce() async throws {
+        // given
+        let usecase = self.makeUsecase(saved: [
+            self.weekEventsStyle(.default),
+            self.weekEventsStyle(.custom(id: "w1"), name: "주간")
+        ])
+        let viewModel = WidgetStyleEditViewModelImple(
+            variants: [
+                .oneWeekEvents, .twoWeekEvents, .threeWeekEvents, .fourWeekEvents,
+                .currentMonthEvents, .lastMonthEvents, .nextMonthEvents
+            ],
+            widgetStyleUsecase: usecase
+        )
+
+        // when
+        viewModel.refresh()
+
+        // then
+        let emitted = try await self.styles(of: viewModel)
+        #expect(emitted.map { $0.styleId.style } == [.default, .custom(id: "w1")])
+        #expect(emitted.map { $0.name }.last == "주간")
     }
 
     @Test("추가 카드를 누르면 목록 맨 앞 스타일을 본떠 새 카드가 선다")

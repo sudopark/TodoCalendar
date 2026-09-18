@@ -31,7 +31,67 @@ struct WidgetVariantTests {
         let variantsHavingType = variants.filter { $0.settingType != nil }
 
         // then
-        #expect(variantsHavingType == [.todaySummarySmall])
+        #expect(variantsHavingType == [
+            .monthSmall, .todaySummarySmall,
+            .oneWeekEvents, .twoWeekEvents, .threeWeekEvents, .fourWeekEvents,
+            .currentMonthEvents, .lastMonthEvents, .nextMonthEvents
+        ])
+    }
+
+    @Test("Month 와 WeekEvents 는 각자의 payload 타입을 갖는다")
+    func settingType_monthAndWeekEventsHaveOwnPayload() {
+        // given
+        let weekEvents = WidgetVariant.allCases.filter { $0.styleVariant == .oneWeekEvents }
+
+        // when + then
+        #expect(WidgetVariant.monthSmall.settingType == MonthStyleSetting.self)
+        #expect(weekEvents.allSatisfy { $0.settingType == WeekEventsStyleSetting.self })
+        #expect(weekEvents.count == 7)
+    }
+
+    @Test("WeekEvents 7변형은 스타일 좌표 하나를 공유한다")
+    func styleVariant_weekEventsShareOneCoordinate() {
+        // given
+        let weekEvents: [WidgetVariant] = [
+            .oneWeekEvents, .twoWeekEvents, .threeWeekEvents, .fourWeekEvents,
+            .currentMonthEvents, .lastMonthEvents, .nextMonthEvents
+        ]
+
+        // when
+        let styleVariants = weekEvents.map { $0.styleVariant }
+
+        // then
+        #expect(styleVariants == Array(repeating: .oneWeekEvents, count: 7))
+    }
+
+    @Test("공유 변형군은 어느 변형에서 물어도 같은 목록을 낸다")
+    func styleSharingVariants_fromAnyMember_listsWholeGroup() {
+        // given
+        let weekEvents: [WidgetVariant] = [
+            .oneWeekEvents, .twoWeekEvents, .threeWeekEvents, .fourWeekEvents,
+            .currentMonthEvents, .lastMonthEvents, .nextMonthEvents
+        ]
+
+        // when
+        let groups = weekEvents.map { $0.styleSharingVariants }
+
+        // then
+        #expect(groups.allSatisfy { $0 == weekEvents })
+        #expect(WidgetVariant.monthSmall.styleSharingVariants == [.monthSmall])
+    }
+
+    @Test("스타일을 공유하지 않는 변형은 자기 자신을 좌표로 쓴다")
+    func styleVariant_nonSharingVariantPointsItself() {
+        // given
+        let weekEvents = Set<WidgetVariant>([
+            .oneWeekEvents, .twoWeekEvents, .threeWeekEvents, .fourWeekEvents,
+            .currentMonthEvents, .lastMonthEvents, .nextMonthEvents
+        ])
+        let others = WidgetVariant.allCases.filter { weekEvents.contains($0) == false }
+
+        // when + then
+        #expect(others.allSatisfy { $0.styleVariant == $0 })
+        #expect(WidgetVariant.monthSmall.styleVariant == .monthSmall)
     }
 
     @Test("변형이 내는 초기 설정은 그 payload 타입의 초기값이다")
@@ -41,7 +101,11 @@ struct WidgetVariantTests {
 
         // when + then
         #expect(today.initialSetting as? TodayStyleSetting == TodayStyleSetting.initial)
-        #expect(WidgetVariant.monthSmall.initialSetting == nil)
+        #expect(
+            WidgetVariant.monthSmall.initialSetting as? MonthStyleSetting
+                == MonthStyleSetting.initial
+        )
+        #expect(WidgetVariant.doubleMonthMedium.initialSetting == nil)
     }
 
     @Test("변형은 자기 payload 타입만 자기 설정으로 본다")
@@ -53,6 +117,10 @@ struct WidgetVariantTests {
         #expect(today.isOwnSetting(TodayStyleSetting.initial) == true)
         #expect(today.isOwnSetting(OtherStyleSetting.initial) == false)
         #expect(WidgetVariant.monthSmall.isOwnSetting(TodayStyleSetting.initial) == false)
+        #expect(WidgetVariant.monthSmall.isOwnSetting(MonthStyleSetting.initial) == true)
+        #expect(
+            WidgetVariant.threeWeekEvents.isOwnSetting(WeekEventsStyleSetting.initial) == true
+        )
     }
 
     @Test("payload 타입이 다르면 같은 설정으로 보지 않는다")

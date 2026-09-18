@@ -51,8 +51,11 @@ extension WidgetGalleryDetailViewModelImple {
         }
     }
     
+    /// 저장 후 리로드가 받은 변형들의 kind 를 훑으므로, 좌표를 공유하는 변형을 다 넘겨야 전부 갱신된다.
     func editStyle(_ variant: WidgetVariant) {
-        self.router?.routeToStyleEdit([variant], setting: self.currentSetting)
+        self.router?.routeToStyleEdit(
+            variant.styleSharingVariants, setting: self.currentSetting
+        )
     }
     
     func close() {

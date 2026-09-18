@@ -23,8 +23,9 @@ public struct WidgetStyleId: Hashable, Sendable {
     public let variant: WidgetVariant
     public let style: Style
 
+    /// 스타일을 공유하는 변형군은 대표 변형 좌표 하나만 갖는다 — 좌표를 만드는 자리가 여기 하나다.
     public init(variant: WidgetVariant, style: Style) {
-        self.variant = variant
+        self.variant = variant.styleVariant
         self.style = style
     }
 }

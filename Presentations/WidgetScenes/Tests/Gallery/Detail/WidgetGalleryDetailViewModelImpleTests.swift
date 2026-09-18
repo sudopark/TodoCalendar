@@ -284,6 +284,22 @@ extension WidgetGalleryDetailViewModelImpleTests {
         // then
         #expect(router.routedStyleEditVariants == [.todaySummarySmall])
     }
+
+    @Test("스타일을 공유하는 변형이면 그 변형군 전부를 넘긴다")
+    func editStyle_whenVariantSharesStyle_routeWithWholeSharingGroup() {
+        // given
+        let router = SpyWidgetGalleryDetailRouter()
+        let (viewModel, _) = self.makeTodayViewModel(router: router)
+
+        // when
+        viewModel.editStyle(.threeWeekEvents)
+
+        // then
+        #expect(router.routedStyleEditVariants == [
+            .oneWeekEvents, .twoWeekEvents, .threeWeekEvents, .fourWeekEvents,
+            .currentMonthEvents, .lastMonthEvents, .nextMonthEvents
+        ])
+    }
 }
 
 

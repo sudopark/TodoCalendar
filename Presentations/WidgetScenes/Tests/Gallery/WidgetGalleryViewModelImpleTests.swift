@@ -161,7 +161,7 @@ extension WidgetGalleryViewModelImpleTests {
         let styleUsecase = self.makeStyleUsecase(
             savedStyles: [
                 self.todayStyle(.default, showHolidayName: false),
-                self.todayStyle(.default, variant: .monthSmall, showHolidayName: true)
+                self.todayStyle(.default, variant: .doubleMonthMedium, showHolidayName: true)
             ]
         )
         let viewModel = self.makeViewModel(styleUsecase: styleUsecase)
@@ -173,7 +173,7 @@ extension WidgetGalleryViewModelImpleTests {
 
         // then
         #expect(styles?.keys.sorted() == [WidgetVariant.todaySummarySmall.id])
-        #expect(styles?[WidgetVariant.monthSmall.id] == nil)
+        #expect(styles?[WidgetVariant.doubleMonthMedium.id] == nil)
     }
 }
 

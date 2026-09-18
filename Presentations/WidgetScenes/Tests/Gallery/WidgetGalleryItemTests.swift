@@ -71,7 +71,11 @@ struct WidgetGalleryItemTests {
         let customizables = variants.filter { $0.isCustomizable }
 
         // then
-        #expect(customizables == [.todaySummarySmall])
+        #expect(customizables == [
+            .monthSmall, .todaySummarySmall,
+            .oneWeekEvents, .twoWeekEvents, .threeWeekEvents, .fourWeekEvents,
+            .currentMonthEvents, .lastMonthEvents, .nextMonthEvents
+        ])
     }
 
     @Test(
