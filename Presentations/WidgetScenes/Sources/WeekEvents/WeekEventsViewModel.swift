@@ -41,6 +41,9 @@ public struct WeekEventsViewModel {
     public var googleCalendarTags: [String: GoogleCalendar.Tag]
     public var appleCalendarTags: [String: AppleCalendar.Tag]
     public var widgetSetting: WidgetAppearanceSettings
+    public var style = WeekEventsStyleSetting.initial
+    
+    public var showsWeekDayHeader: Bool { self.style.showWeekDayHeader }
     
     public init(
         range: WeekEventsRange,

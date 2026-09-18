@@ -24,6 +24,16 @@ public struct MonthWidgetViewModel {
     public var todayIdentifier: String?
     public var hasEventDaysIdentifiers: Set<String> = []
     public var widgetSetting = WidgetAppearanceSettings()
+    public var style = MonthStyleSetting.initial
+    
+    public var showsMonthName: Bool { self.style.showMonthName }
+    public var showsWeekDayHeader: Bool { self.style.showWeekDayHeader }
+    public var showsEventUnderline: Bool { self.style.showEventUnderline }
+    
+    /// 강조를 끄면 오늘도 평일과 같게 그려진다 — 글자색·배경색·밑줄색 셋이 이 값 하나를 본다.
+    public var highlightedTodayIdentifier: String? {
+        return self.style.highlightToday ? self.todayIdentifier : nil
+    }
     
     public internal(set) var eventRange: Range<TimeInterval>?
     

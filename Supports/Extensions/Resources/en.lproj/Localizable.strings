@@ -564,6 +564,11 @@
 "widget.style.today::showTotalCount" = "Total event count";
 "widget.style.today::showTodoCount" = "Todo count";
 "widget.style.today::showScheduleCount" = "Schedule count";
+"widget.style.month::showMonthName" = "Month name";
+"widget.style.month::showWeekDayHeader" = "Weekday header";
+"widget.style.month::highlightToday" = "Highlight today";
+"widget.style.month::showEventUnderline" = "Event underline";
+"widget.style.weekEvents::showWeekDayHeader" = "Weekday header";
 "widget.style.edit::add" = "New style";
 "widget.style.edit::name" = "Name";
 "widget.style.edit::duplicate" = "Duplicate";

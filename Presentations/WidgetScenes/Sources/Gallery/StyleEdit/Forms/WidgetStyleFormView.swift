@@ -23,13 +23,22 @@ extension WidgetVariant {
         switch self {
         case .todaySummarySmall:
             if let today = setting as? TodayStyleSetting {
-                TodayStyleFormView(setting: today, onChange: onChange)
+                WidgetStyleToggleFormView<TodayStyleItem>(setting: today, onChange: onChange)
+            }
+        case .monthSmall:
+            if let month = setting as? MonthStyleSetting {
+                WidgetStyleToggleFormView<MonthStyleItem>(setting: month, onChange: onChange)
+            }
+        case .oneWeekEvents, .twoWeekEvents, .threeWeekEvents, .fourWeekEvents,
+             .currentMonthEvents, .lastMonthEvents, .nextMonthEvents:
+            if let weekEvents = setting as? WeekEventsStyleSetting {
+                WidgetStyleToggleFormView<WeekEventsStyleItem>(
+                    setting: weekEvents, onChange: onChange
+                )
             }
         case .todayAndNextMedium, .eventListSmall, .eventListMedium, .eventListLarge,
-             .monthSmall, .foremostInline, .foremostSmall, .foremostMedium,
+             .foremostInline, .foremostSmall, .foremostMedium,
              .ddaySmall, .ddayMedium, .ddayCircular, .ddayRectangular, .ddayInline,
-             .oneWeekEvents, .twoWeekEvents, .threeWeekEvents, .fourWeekEvents,
-             .currentMonthEvents, .lastMonthEvents, .nextMonthEvents,
              .aiCommandCircular, .aiCommandSmall, .nextEventInline,
              .nextEventRectangular, .nextRemainRectangular, .doubleMonthMedium,
              .eventAndMonthMedium, .eventAndForemostMedium, .todayAndMonthMedium:

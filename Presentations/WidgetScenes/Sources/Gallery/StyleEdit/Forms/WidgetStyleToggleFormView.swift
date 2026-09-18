@@ -1,8 +1,8 @@
 //
-//  TodayStyleFormView.swift
+//  WidgetStyleToggleFormView.swift
 //  WidgetScenes
 //
-//  Created by sudo.park on 9/17/26.
+//  Created by sudo.park on 9/18/26.
 //  Copyright © 2026 com.sudo.park. All rights reserved.
 //
 
@@ -14,16 +14,16 @@ import Extensions
 import CommonPresentation
 
 
-struct TodayStyleFormView: View {
+struct WidgetStyleToggleFormView<Item: WidgetStyleItem>: View {
 
     @Environment(ViewAppearance.self) private var appearance
 
-    let setting: TodayStyleSetting
+    let setting: Item.Setting
     let onChange: (any WidgetStyleSetting) -> Void
 
     var body: some View {
         Section {
-            ForEach(TodayStyleItem.allCases, id: \.self) { item in
+            ForEach(Array(Item.allCases), id: \.self) { item in
                 self.itemRow(item)
                     .listRowBackground(appearance.colorSet.bg1.asColor)
             }
@@ -34,7 +34,7 @@ struct TodayStyleFormView: View {
         }
     }
 
-    private func itemRow(_ item: TodayStyleItem) -> some View {
+    private func itemRow(_ item: Item) -> some View {
         HStack {
             VStack(alignment: .leading, spacing: Metric.SpacingToken.xxsmall.value) {
                 Text(item.name)
