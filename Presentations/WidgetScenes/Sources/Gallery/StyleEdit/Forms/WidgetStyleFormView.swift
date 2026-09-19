@@ -36,10 +36,29 @@ extension WidgetVariant {
                     setting: weekEvents, onChange: onChange
                 )
             }
-        case .todayAndNextMedium, .eventListSmall, .eventListMedium, .eventListLarge,
-             .foremostInline, .foremostSmall, .foremostMedium,
+        case .todayAndNextMedium:
+            if let todayAndNext = setting as? TodayAndNextStyleSetting {
+                WidgetStyleToggleFormView<TodayAndNextStyleItem>(
+                    setting: todayAndNext, onChange: onChange
+                )
+            }
+        case .foremostSmall, .foremostMedium:
+            if let foremost = setting as? ForemostStyleSetting {
+                WidgetStyleToggleFormView<ForemostStyleItem>(
+                    setting: foremost, onChange: onChange
+                )
+            }
+        case .aiCommandSmall:
+            if let aiCommand = setting as? AICommandStyleSetting {
+                WidgetStyleToggleFormView<AICommandStyleItem>(
+                    setting: aiCommand, onChange: onChange
+                )
+            }
+        // EventList 는 끄고 켤 항목이 없다 — 편집 화면엔 이름·배경색 섹션만 선다.
+        case .eventListSmall, .eventListMedium, .eventListLarge,
+             .foremostInline,
              .ddaySmall, .ddayMedium, .ddayCircular, .ddayRectangular, .ddayInline,
-             .aiCommandCircular, .aiCommandSmall, .nextEventInline,
+             .aiCommandCircular, .nextEventInline,
              .nextEventRectangular, .nextRemainRectangular, .doubleMonthMedium,
              .eventAndMonthMedium, .eventAndForemostMedium, .todayAndMonthMedium:
             EmptyView()

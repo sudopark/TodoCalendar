@@ -80,10 +80,13 @@ public struct SystemSizeForemostEventView: View {
         }
     }
     
+    @ViewBuilder
     private func eventTypeView() -> some View {
-        Text("calendar::foremostevent:title".localized())
-            .font(.system(size: 12))
-            .foregroundStyle(colorSet.text2.asColor)
+        if self.model.showsTypeLabel {
+            Text("calendar::foremostevent:title".localized())
+                .font(.system(size: 12))
+                .foregroundStyle(colorSet.text2.asColor)
+        }
     }
     
     private func emptyForemostEventView() -> some View {

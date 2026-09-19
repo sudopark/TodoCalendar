@@ -570,6 +570,9 @@
 "widget.style.month::highlightToday" = "오늘 강조";
 "widget.style.month::showEventUnderline" = "이벤트 밑줄";
 "widget.style.weekEvents::showWeekDayHeader" = "요일 헤더";
+"widget.style.todayAndNext::showTimeZone" = "타임존";
+"widget.style.foremost::showTypeLabel" = "\"가장 중요한 일정\" 라벨";
+"widget.style.aiCommand::showExplain" = "설명 문구";
 "widget.style.edit::add" = "새 스타일";
 "widget.style.edit::name" = "이름";
 "widget.style.edit::duplicate" = "복사";
