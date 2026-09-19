@@ -9,8 +9,8 @@
 #   impact-check.sh --stdin          # "STATUS<TAB>PATH" 라인들을 stdin으로 (테스트용)
 set -o pipefail
 
-ALL_SCHEMES="Domain Repository AuthService BillingScenes CalendarPresentation CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene WidgetScenes TodoCalendarApp TodoCalendarAppWidget TodoCalendarAppShare"
-ALL_PRESENTATION="BillingScenes CalendarPresentation CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene WidgetScenes"
+ALL_SCHEMES="Domain Repository AuthService CommonPresentation BillingScenes CalendarPresentation CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene WidgetScenes TodoCalendarApp TodoCalendarAppWidget TodoCalendarAppShare"
+ALL_PRESENTATION="CommonPresentation BillingScenes CalendarPresentation CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene WidgetScenes"
 
 MODE="git"; BASE="origin/develop"
 while [ $# -gt 0 ]; do

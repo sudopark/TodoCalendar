@@ -20,7 +20,7 @@ assert_contains() { # desc pattern actual
   if printf '%s' "$3" | grep -q "$2"; then PASS=$((PASS+1)); else FAIL=$((FAIL+1)); echo "FAIL: $1"; echo "  pattern [$2] not in: [$3]"; fi
 }
 
-ALL="AIAgentScene AuthService BillingScenes CalendarPresentation CalendarScenes Domain EventDetailScene EventListScenes MemberScenes Repository SettingScene TodoCalendarApp TodoCalendarAppShare TodoCalendarAppWidget WidgetScenes"
+ALL="AIAgentScene AuthService BillingScenes CalendarPresentation CalendarScenes CommonPresentation Domain EventDetailScene EventListScenes MemberScenes Repository SettingScene TodoCalendarApp TodoCalendarAppShare TodoCalendarAppWidget WidgetScenes"
 
 # --- 스킴 매핑 (pr_test.yml detect-changes 미러) ---
 assert_eq "Domain/Sources → 전체" "$ALL" "$(schemes_for 'M\tDomain/Sources/Events/TodoEvent.swift')"
@@ -41,10 +41,10 @@ assert_eq "CalendarPresentation → +CalendarScenes+App+Widget" "CalendarPresent
 assert_eq "CalendarScenes → +App (위젯 확장은 #1060 으로 의존을 뗐다)" "CalendarScenes TodoCalendarApp" "$(schemes_for 'M\tPresentations/CalendarScenes/Sources/Foo.swift')"
 assert_eq "WidgetScenes → +App+Widget" "TodoCalendarApp TodoCalendarAppWidget WidgetScenes" "$(schemes_for 'M\tPresentations/WidgetScenes/Sources/Foo.swift')"
 assert_eq "EventDetailScene → +App" "EventDetailScene TodoCalendarApp" "$(schemes_for 'M\tPresentations/EventDetailScene/Sources/Foo.swift')"
-assert_eq "CommonPresentation → 전 Presentation+App+Widget+Share" "AIAgentScene BillingScenes CalendarPresentation CalendarScenes EventDetailScene EventListScenes MemberScenes SettingScene TodoCalendarApp TodoCalendarAppShare TodoCalendarAppWidget WidgetScenes" "$(schemes_for 'M\tPresentations/CommonPresentation/Sources/Foo.swift')"
-assert_eq "Scenes → 전 Presentation+App (Widget 미의존, WidgetScenes·CalendarPresentation 은 Scenes 를 안 물어 과대 매핑)" "AIAgentScene BillingScenes CalendarPresentation CalendarScenes EventDetailScene EventListScenes MemberScenes SettingScene TodoCalendarApp WidgetScenes" "$(schemes_for 'M\tPresentations/Scenes/Foo.swift')"
+assert_eq "CommonPresentation → 자기+전 Presentation+App+Widget+Share" "AIAgentScene BillingScenes CalendarPresentation CalendarScenes CommonPresentation EventDetailScene EventListScenes MemberScenes SettingScene TodoCalendarApp TodoCalendarAppShare TodoCalendarAppWidget WidgetScenes" "$(schemes_for 'M\tPresentations/CommonPresentation/Sources/Foo.swift')"
+assert_eq "Scenes → 전 Presentation+App (Widget 미의존, WidgetScenes·CalendarPresentation 은 Scenes 를 안 물어 과대 매핑)" "AIAgentScene BillingScenes CalendarPresentation CalendarScenes CommonPresentation EventDetailScene EventListScenes MemberScenes SettingScene TodoCalendarApp WidgetScenes" "$(schemes_for 'M\tPresentations/Scenes/Foo.swift')"
 assert_eq "Tuist/ → 전체" "$ALL" "$(schemes_for 'M\tTuist/ProjectDescriptionHelpers/Foo.swift')"
-assert_eq "TestDoubles → Domain 제외 전체" "AIAgentScene BillingScenes CalendarPresentation CalendarScenes EventDetailScene EventListScenes MemberScenes Repository SettingScene TodoCalendarApp TodoCalendarAppShare TodoCalendarAppWidget WidgetScenes" "$(schemes_for 'M\tSupports/TestDoubles/Sources/Foo.swift')"
+assert_eq "TestDoubles → Domain 제외 전체" "AIAgentScene BillingScenes CalendarPresentation CalendarScenes CommonPresentation EventDetailScene EventListScenes MemberScenes Repository SettingScene TodoCalendarApp TodoCalendarAppShare TodoCalendarAppWidget WidgetScenes" "$(schemes_for 'M\tSupports/TestDoubles/Sources/Foo.swift')"
 assert_eq "App Sources → App만" "TodoCalendarApp" "$(schemes_for 'M\tTodoCalendarApp/Sources/Root/Foo.swift')"
 assert_eq "Widget → Widget만" "TodoCalendarAppWidget" "$(schemes_for 'M\tTodoCalendarApp/AppExtensions/Widget/Foo.swift')"
 assert_eq "확장 Base → App+Widget+Share (두 테스트 타겟이 Base를 컴파일)" "TodoCalendarApp TodoCalendarAppShare TodoCalendarAppWidget" "$(schemes_for 'M\tTodoCalendarApp/AppExtensions/Base/Foo.swift')"
@@ -53,7 +53,7 @@ assert_eq "LiveActivity → App+Widget+Share" "TodoCalendarApp TodoCalendarAppSh
 assert_eq "docs만 → 테스트 무관" "(테스트 무관 변경)" "$(schemes_for 'M\tdocs/spec/foo.md')"
 assert_eq "복수 영역 합산·중복 제거" "AIAgentScene Repository TodoCalendarApp TodoCalendarAppShare TodoCalendarAppWidget" "$(schemes_for 'M\tRepository/Sources/A.swift\nM\tPresentations/AIAgentScene/Sources/B.swift')"
 
-ALL_WITH_EXTENSIONS="AIAgentScene AuthService BillingScenes CalendarPresentation CalendarScenes Domain EventDetailScene EventListScenes Extensions MemberScenes Repository SettingScene TodoCalendarApp TodoCalendarAppShare TodoCalendarAppWidget WidgetScenes"
+ALL_WITH_EXTENSIONS="AIAgentScene AuthService BillingScenes CalendarPresentation CalendarScenes CommonPresentation Domain EventDetailScene EventListScenes Extensions MemberScenes Repository SettingScene TodoCalendarApp TodoCalendarAppShare TodoCalendarAppWidget WidgetScenes"
 assert_eq "Extensions/Sources → 전체+Extensions" "$ALL_WITH_EXTENSIONS" "$(schemes_for 'M\tSupports/Extensions/Sources/Foo.swift')"
 assert_eq "Extensions/Tests → Extensions만" "Extensions" "$(schemes_for 'M\tSupports/Extensions/Tests/FooTests.swift')"
 
