@@ -42,7 +42,11 @@ struct DoubleMonthWidget: Widget {
     let kind = "DoubleMonthWidget"
     
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: DoubleMonthWidgetTimlineProvider()) { entry in
+        AppIntentConfiguration(
+            kind: kind,
+            intent: DoubleMonthWidgetConfigurationIntent.self,
+            provider: DoubleMonthWidgetTimlineProvider()
+        ) { entry in
             DoubleMonthWidgetView(entry: entry)
                 .containerBackground(entry.backgroundShape, for: .widget)
         }

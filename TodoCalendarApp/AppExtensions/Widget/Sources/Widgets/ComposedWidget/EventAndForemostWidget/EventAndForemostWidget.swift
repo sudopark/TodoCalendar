@@ -56,7 +56,11 @@ struct EventAndForemostWidget: Widget {
     nonisolated static let kind: String = "EventAndForemostWidget"
     
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: EventAndForemostWidget.kind, provider: EventAndForemostWidgetViewTimelineProvider()) { entry in
+        AppIntentConfiguration(
+            kind: EventAndForemostWidget.kind,
+            intent: EventAndForemostWidgetConfigurationIntent.self,
+            provider: EventAndForemostWidgetViewTimelineProvider()
+        ) { entry in
             
             EventAndForemostWidgetView(entry: entry)
                 .containerBackground(entry.backgroundShape, for: .widget)

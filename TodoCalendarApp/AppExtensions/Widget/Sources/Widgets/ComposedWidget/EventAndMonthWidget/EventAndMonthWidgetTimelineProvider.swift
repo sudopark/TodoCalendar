@@ -47,8 +47,9 @@ struct EventAndMonthWidgetViewModelProvider {
     }
 }
 
-struct EventAndMonthWidgetTimelineProvider: TimelineProvider {
+struct EventAndMonthWidgetTimelineProvider: AppIntentTimelineProvider {
     
+    typealias Intent = EventAndMonthWidgetConfigurationIntent
     typealias Entry = ResultTimelineEntry<EventAndMonthWidgetViewModel>
     
     func placeholder(in context: Context) -> Entry {
@@ -62,39 +63,35 @@ struct EventAndMonthWidgetTimelineProvider: TimelineProvider {
         }
     }
     
-    func getSnapshot(in context: Context, completion: @Sendable @escaping (Entry) -> Void) {
+    func snapshot(
+        for configuration: EventAndMonthWidgetConfigurationIntent,
+        in context: Context
+    ) async -> Entry {
         guard context.isPreview == false
         else {
-            completion(placeholder(in: context))
-            return
+            return self.placeholder(in: context)
         }
-        getEntry(context) { entry in
-            completion(entry)
-        }
+        return await self.loadEntry(configuration.resolvedStyle)
     }
     
-    func getTimeline(in context: Context, completion: @Sendable @escaping (Timeline<Entry>) -> Void) {
-        self.getEntry(context) { entry in
-            let timeline = Timeline(entries: [entry], policy: .after(Date().nextUpdateTime))
-            completion(timeline)
-        }
+    func timeline(
+        for configuration: EventAndMonthWidgetConfigurationIntent,
+        in context: Context
+    ) async -> Timeline<Entry> {
+        let entry = await self.loadEntry(configuration.resolvedStyle)
+        return Timeline(entries: [entry], policy: .after(Date().nextUpdateTime))
     }
     
-    private func getEntry(_ context: Context, _ completion: @Sendable @escaping (Entry) -> Void) {
-        
-        Task {
-            let builer = WidgetViewModelProviderBuilder(base: .init())
-            let viewModelProvider = await builer.makeEventAndMonthWidgetViewModelProvider(targetEventTagId: .default)
-            let now = Date()
-            do {
-                let model = try await viewModelProvider.getViewModel(now)
-                completion(
-                    .init(date: now, result: .success(model))
-                    |> \.background .~ model.event.look.background
-                )
-            } catch {
-                completion(.init(date: now, result: .failure(.init(error: error))))
-            }
+    private func loadEntry(_ style: WidgetStyleId.Style) async -> Entry {
+        let builder = WidgetViewModelProviderBuilder(base: .init())
+        let viewModelProvider = await builder.makeEventAndMonthWidgetViewModelProvider(targetEventTagId: .default)
+        let now = Date()
+        do {
+            let model = try await viewModelProvider.getViewModel(now, style: style)
+            return .init(date: now, result: .success(model))
+                |> \.background .~ model.event.look.background
+        } catch {
+            return .init(date: now, result: .failure(.init(error: error)))
         }
     }
 }

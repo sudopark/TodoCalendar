@@ -42,7 +42,11 @@ struct TodayAndMonthWidget: Widget {
     let kind = "TodayAndMonthWidget"
     
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: TodayAndMonthWidgetTimelineProvider()) { entry in
+        AppIntentConfiguration(
+            kind: kind,
+            intent: TodayAndMonthWidgetConfigurationIntent.self,
+            provider: TodayAndMonthWidgetTimelineProvider()
+        ) { entry in
             TodayAndMonthWidgetView(entry: entry)
                 .containerBackground(entry.backgroundShape, for: .widget)
         }
