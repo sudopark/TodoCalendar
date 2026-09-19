@@ -129,3 +129,87 @@ struct WidgetLookTests {
         #expect(setting == saved)
     }
 }
+
+
+// MARK: - 합성 위젯의 절반
+
+extension WidgetLookTests {
+
+    private func makeComposedStyle(
+        _ setting: TodayAndMonthStyleSetting,
+        background: WidgetAppearanceSettings.Background?
+    ) -> WidgetStyle {
+        return WidgetStyle(
+            id: .init(variant: .todayAndMonthMedium, style: .custom(id: "composed")),
+            name: "composed",
+            setting: setting,
+            background: background
+        )
+    }
+
+    @Test("합성 스타일이 없으면 절반도 스타일이 없어 초기값과 전역 배경색을 쓴다")
+    func part_whenNoAppliedStyle_hasNoAppliedStyle() {
+        // given
+        let look = WidgetLook(
+            globalSetting: self.makeGlobalSetting(.custom(hex: "#111111")),
+            appliedStyle: nil
+        )
+
+        // when
+        let part = look.part(\TodayAndMonthStyleSetting.month)
+
+        // then
+        #expect(part.appliedStyle == nil)
+        #expect(part.background == .custom(hex: "#111111"))
+    }
+
+    @Test("절반은 합성 payload 에서 keyPath 로 고른 하위 payload 를 읽는다")
+    func part_takesChildSettingByKeyPath() {
+        // given
+        let composed = TodayAndMonthStyleSetting.initial
+            |> \.month.showMonthName .~ false
+        let look = WidgetLook(
+            globalSetting: self.makeGlobalSetting(.system),
+            appliedStyle: self.makeComposedStyle(composed, background: nil)
+        )
+
+        // when
+        let month: MonthStyleSetting = look.part(\TodayAndMonthStyleSetting.month).setting()
+        let today: TodayStyleSetting = look.part(\TodayAndMonthStyleSetting.today).setting()
+
+        // then
+        #expect(month.showMonthName == false)
+        #expect(today == TodayStyleSetting.initial)
+    }
+
+    @Test("절반은 합성 스타일의 배경색을 그대로 쓴다")
+    func part_keepsComposedBackground() {
+        // given
+        let look = WidgetLook(
+            globalSetting: self.makeGlobalSetting(.custom(hex: "#111111")),
+            appliedStyle: self.makeComposedStyle(.initial, background: .custom(hex: "#333333"))
+        )
+
+        // when
+        let part = look.part(\TodayAndMonthStyleSetting.today)
+
+        // then
+        #expect(part.background == .custom(hex: "#333333"))
+    }
+
+    @Test("고른 스타일이 그 합성 payload 가 아니면 절반은 스타일 없이 전역을 쓴다")
+    func part_whenComposedTypeMismatches_hasNoAppliedStyle() {
+        // given
+        let look = WidgetLook(
+            globalSetting: self.makeGlobalSetting(.custom(hex: "#111111")),
+            appliedStyle: self.makeStyle(background: .custom(hex: "#222222"))
+        )
+
+        // when
+        let part = look.part(\TodayAndMonthStyleSetting.month)
+
+        // then
+        #expect(part.appliedStyle == nil)
+        #expect(part.background == .custom(hex: "#111111"))
+    }
+}
