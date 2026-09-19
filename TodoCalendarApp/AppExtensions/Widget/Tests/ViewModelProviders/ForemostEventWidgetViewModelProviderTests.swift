@@ -20,7 +20,8 @@ class ForemostEventWidgetViewModelProviderTests: XCTestCase {
     
     private func makeProvider(
         _ foremostEvent: (any ForemostMarkableEvent)?,
-        shouldFail: Bool = false
+        shouldFail: Bool = false,
+        styles: [WidgetStyleId: WidgetStyle] = [:]
     ) -> ForemostEventWidgetViewModelProvider {
         
         let usecase = PrivateStubEventFetchUsecase()
@@ -34,7 +35,8 @@ class ForemostEventWidgetViewModelProviderTests: XCTestCase {
             eventFetchUsecase: usecase,
             calendarSettingRepository: calendarSettingRepository,
             appSettingRepository: appSettingRepository,
-            localeProvider: Locale.current
+            localeProvider: Locale.current,
+            styleRepository: StubWidgetStyleRepository(styles: styles)
         )
     }
     
@@ -140,5 +142,113 @@ private final class PrivateStubEventFetchUsecase: StubCalendarEventsFetchUescase
         }
         
         return .init(foremostEvent: foremostEvent, tag: nil)
+    }
+}
+
+
+// MARK: - 스타일 해석
+
+extension ForemostEventWidgetViewModelProviderTests {
+
+    private func foremostStyle(
+        _ style: WidgetStyleId.Style,
+        showTypeLabel: Bool = true,
+        background: WidgetAppearanceSettings.Background? = nil
+    ) -> (WidgetStyleId, WidgetStyle) {
+        let id = WidgetStyleId(variant: .foremostSmall, style: style)
+        return (
+            id,
+            WidgetStyle(
+                id: id, name: nil,
+                setting: ForemostStyleSetting.initial |> \.showTypeLabel .~ showTypeLabel,
+                background: background
+            )
+        )
+    }
+
+    func testProvider_whenNoSavedStyle_usesInitialAndGlobalBackground() async throws {
+        // given
+        let provider = self.makeProvider(self.dummyTodo)
+
+        // when
+        let model = try await provider.getViewModel(self.refTime)
+
+        // then
+        XCTAssertEqual(model.style, ForemostStyleSetting.initial)
+        XCTAssertEqual(model.look.background, .system)
+    }
+
+    func testProvider_whenDefaultStyleSaved_appliesItsSettingAndBackground() async throws {
+        // given
+        let saved = self.foremostStyle(
+            .default, showTypeLabel: false, background: .custom(hex: "#101820")
+        )
+        let provider = self.makeProvider(self.dummyTodo, styles: [saved.0: saved.1])
+
+        // when
+        let model = try await provider.getViewModel(self.refTime)
+
+        // then
+        XCTAssertEqual(model.showsTypeLabel, false)
+        XCTAssertEqual(model.look.background, .custom(hex: "#101820"))
+    }
+
+    /// 홈 2변형이 좌표 하나를 공유하므로 medium 도 같은 저장분을 읽는다.
+    func testProvider_whenMediumVariant_readsSameSharedCoordinate() async throws {
+        // given
+        let saved = self.foremostStyle(.default, showTypeLabel: false)
+        let provider = self.makeProvider(self.dummyTodo, styles: [saved.0: saved.1])
+
+        // when
+        let model = try await provider.getViewModel(self.refTime, variant: .foremostMedium)
+
+        // then
+        XCTAssertEqual(model.showsTypeLabel, false)
+    }
+
+    func testProvider_whenInstanceStyleRemoved_fallsBackToDefaultStyle() async throws {
+        // given
+        let def = self.foremostStyle(.default, showTypeLabel: false)
+        let provider = self.makeProvider(self.dummyTodo, styles: [def.0: def.1])
+
+        // when
+        let model = try await provider.getViewModel(
+            self.refTime, style: .custom(id: "removed")
+        )
+
+        // then
+        XCTAssertEqual(model.showsTypeLabel, false)
+    }
+
+    /// 폴백이 스타일 단위라, 고른 스타일이 색을 안 걸었으면 기본 스타일 색을 빌려오지 않는다.
+    func testProvider_whenStyleHasNoBackground_usesGlobalNotDefaultStyle() async throws {
+        // given
+        let def = self.foremostStyle(.default, background: .custom(hex: "#ffffff"))
+        let custom = self.foremostStyle(.custom(id: "c1"))
+        let provider = self.makeProvider(
+            self.dummyTodo, styles: [def.0: def.1, custom.0: custom.1]
+        )
+
+        // when
+        let model = try await provider.getViewModel(self.refTime, style: .custom(id: "c1"))
+
+        // then
+        XCTAssertEqual(model.look.background, .system)
+    }
+
+    /// 잠금화면 변형은 꾸미기 대상이 아니라 저장된 스타일을 읽지 않는다.
+    func testProvider_whenLockScreenFamily_ignoresStyle() async throws {
+        // given
+        let saved = self.foremostStyle(
+            .default, showTypeLabel: false, background: .custom(hex: "#101820")
+        )
+        let provider = self.makeProvider(self.dummyTodo, styles: [saved.0: saved.1])
+
+        // when
+        let model = try await provider.getViewModel(self.refTime, variant: .foremostInline)
+
+        // then
+        XCTAssertEqual(model.showsTypeLabel, true)
+        XCTAssertEqual(model.look.background, .system)
     }
 }

@@ -39,7 +39,10 @@ struct DoubleMonthWidgetViewModelProvider {
         let nextMonthModel = try await self.monthViewModelProvider.getMonthViewModel(nextMonth)
         |> \.todayIdentifier .~ nil
         
+        let look = WidgetLook(globalSetting: currentMonthModel.look.globalSetting)
         return .init(current: currentMonthModel, next: nextMonthModel)
+            |> \.current.look .~ look
+            |> \.next.look .~ look
     }
 }
 

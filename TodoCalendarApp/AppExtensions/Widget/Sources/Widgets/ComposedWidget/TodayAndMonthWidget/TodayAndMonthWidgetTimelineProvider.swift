@@ -31,10 +31,12 @@ struct TodayAndMonthWidgetViewModelProvider {
     
     func getViewModel(_ time: Date) async throws -> TodayAndMonthWidgetViewModel {
         
-        return TodayAndMonthWidgetViewModel(
-            today: try await todayViewModelProvider.getTodayViewModel(for: time),
-            month: try await monthViewModelProvider.getMonthViewModel(time)
-        )
+        let today = try await todayViewModelProvider.getTodayViewModel(for: time)
+        let month = try await monthViewModelProvider.getMonthViewModel(time)
+        let look = WidgetLook(globalSetting: today.look.globalSetting)
+        return TodayAndMonthWidgetViewModel(today: today, month: month)
+            |> \.today.look .~ look
+            |> \.month.look .~ look
     }
 }
 

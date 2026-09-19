@@ -31,12 +31,14 @@ struct EventAndMonthWidgetViewModelProvider {
     
     func getViewModel(_ time: Date) async throws -> EventAndMonthWidgetViewModel {
         
-        return EventAndMonthWidgetViewModel(
-            event: try await eventListViewModelProvider.getEventListViewModel(
-                for: time, widgetSize: .small
-            ),
-            month: try await monthViewModelProvider.getMonthViewModel(time)
+        let event = try await eventListViewModelProvider.getEventListViewModel(
+            for: time, widgetSize: .small
         )
+        let month = try await monthViewModelProvider.getMonthViewModel(time)
+        let look = WidgetLook(globalSetting: event.look.globalSetting)
+        return EventAndMonthWidgetViewModel(event: event, month: month)
+            |> \.event.look .~ look
+            |> \.month.look .~ look
     }
 }
 

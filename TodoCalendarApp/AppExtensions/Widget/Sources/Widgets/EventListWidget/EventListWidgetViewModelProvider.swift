@@ -116,6 +116,7 @@ final class EventListWidgetViewModelProvider {
     private let appSettingRepository: any AppSettingRepository
     private let calendarSettingRepository: any CalendarSettingRepository
     private let localeProvider: any LocaleProvider
+    private let styleRepository: any WidgetStyleRepository
     
     init(
         targetEventTagIds: [EventTagId]?,
@@ -123,7 +124,8 @@ final class EventListWidgetViewModelProvider {
         eventsFetchUsecase: any CalendarEventFetchUsecase,
         appSettingRepository: any AppSettingRepository,
         calendarSettingRepository: any CalendarSettingRepository,
-        localeProvider: any LocaleProvider
+        localeProvider: any LocaleProvider,
+        styleRepository: any WidgetStyleRepository
     ) {
         self.targetEventTagIds = targetEventTagIds
         self.excludeAllDayEvents = excludeAllDayEvents
@@ -131,18 +133,22 @@ final class EventListWidgetViewModelProvider {
         self.appSettingRepository = appSettingRepository
         self.calendarSettingRepository = calendarSettingRepository
         self.localeProvider = localeProvider
+        self.styleRepository = styleRepository
     }
 }
 
 extension EventListWidgetViewModelProvider {
     
+    /// 인스턴스가 스타일을 안 고르는 합성 위젯도 같은 경로를 쓴다 — 그쪽은 변형 기본 스타일이다.
     func getEventListViewModel(
         for refDate: Date,
-        widgetSize: EventListWidgetSize
+        widgetSize: EventListWidgetSize,
+        style: WidgetStyleId.Style = .default
     ) async throws -> EventListWidgetViewModel {
         
         let timeZone = self.calendarSettingRepository.loadUserSelectedTImeZone() ?? .current
         let setting = self.appSettingRepository.loadSavedViewAppearance()
+        let resolved = self.styleRepository.resolveStyle(of: .eventListSmall, style: style)
         
         let dayEventLists = try await self.loadDayEventListModel(
             refDate, timeZone, localeProvider.is24HourFormat()
@@ -156,7 +162,7 @@ extension EventListWidgetViewModelProvider {
         |> \.googleCalendarColors .~ (dayEventLists.1.googleCalendarColors ?? .init(ownerId: "", calendars: [:], events: [:]))
         |> \.googleCalendarTags .~ dayEventLists.1.googleCalendarTags
         |> \.appleCalendarTags .~ dayEventLists.1.appleCalendarTags
-        |> \.look .~ .init(globalSetting: setting.widget)
+        |> \.look .~ .init(globalSetting: setting.widget, appliedStyle: resolved)
     }
    
     private func loadDayEventListModel(

@@ -18,37 +18,44 @@ import WidgetScenes
 
 struct AICommandShortcutWidgetEntry: TimelineEntry {
     let date: Date
-    var setting: WidgetAppearanceSettings = .init()
+    var look: WidgetLook = .init(globalSetting: .init())
 
     var backgroundShape: AnyShapeStyle {
-        return WidgetBackgroundStyle(self.setting.background).shape
+        return WidgetBackgroundStyle(self.look.background).shape
     }
 }
 
 struct AICommandShortcutWidgetTimeLineProvider: TimelineProvider {
 
     func placeholder(in context: Context) -> AICommandShortcutWidgetEntry {
-        return self.entry()
+        return self.entry(context.family)
     }
 
     func getSnapshot(
         in context: Context,
         completion: @escaping (AICommandShortcutWidgetEntry) -> Void
     ) {
-        completion(self.entry())
+        completion(self.entry(context.family))
     }
 
     func getTimeline(
         in context: Context,
         completion: @escaping (Timeline<AICommandShortcutWidgetEntry>) -> Void
     ) {
-        completion(Timeline(entries: [self.entry()], policy: .never))
+        completion(Timeline(entries: [self.entry(context.family)], policy: .never))
     }
 
-    private func entry() -> AICommandShortcutWidgetEntry {
-        let setting = WidgetViewModelProviderBuilder(base: .init())
-            .loadWidgetAppearanceSetting()
-        return .init(date: Date(), setting: setting)
+    private func entry(_ family: WidgetFamily) -> AICommandShortcutWidgetEntry {
+        let builder = WidgetViewModelProviderBuilder(base: .init())
+        let variant: WidgetVariant =
+            family == .accessoryCircular ? .aiCommandCircular : .aiCommandSmall
+        return .init(
+            date: Date(),
+            look: .init(
+                globalSetting: builder.loadWidgetAppearanceSetting(),
+                appliedStyle: builder.resolveWidgetStyle(of: variant)
+            )
+        )
     }
 }
 
@@ -87,7 +94,7 @@ struct AICommandShortcutWidget: Widget {
             kind: Self.kind,
             provider: AICommandShortcutWidgetTimeLineProvider()
         ) { entry in
-            AICommandShortcutWidgetView(look: .init(globalSetting: entry.setting))
+            AICommandShortcutWidgetView(look: entry.look)
                 .containerBackground(entry.backgroundShape, for: .widget)
                 .widgetURL(AICommandEntryLink.url)
         }

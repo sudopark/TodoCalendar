@@ -292,6 +292,7 @@ final class TodayAndNextWidgetViewModelProvider {
     private let calendarSettingRepository: any CalendarSettingRepository
     private let appSettingRepository: any AppSettingRepository
     private let localeProvider: any LocaleProvider
+    private let styleRepository: any WidgetStyleRepository
     
     init(
         targetEventTagIds: [EventTagId]?,
@@ -299,7 +300,8 @@ final class TodayAndNextWidgetViewModelProvider {
         eventsFetchUsecase: any CalendarEventFetchUsecase,
         calendarSettingRepository: any CalendarSettingRepository,
         appSettingRepository: any AppSettingRepository,
-        localeProvider: any LocaleProvider
+        localeProvider: any LocaleProvider,
+        styleRepository: any WidgetStyleRepository
     ) {
         self.targetEventTagIds = targetEventTagIds
         self.excludeAllDayEvents = excludeAllDayEvents
@@ -307,17 +309,20 @@ final class TodayAndNextWidgetViewModelProvider {
         self.calendarSettingRepository = calendarSettingRepository
         self.appSettingRepository = appSettingRepository
         self.localeProvider = localeProvider
+        self.styleRepository = styleRepository
     }
 }
 
 extension TodayAndNextWidgetViewModelProvider {
     
     func getViewModel(
-        for refDate: Date
+        for refDate: Date,
+        style: WidgetStyleId.Style = .default
     ) async throws -> TodayAndNextWidgetViewModel {
         
         let timeZone = self.calendarSettingRepository.loadUserSelectedTImeZone() ?? .current
         let setting = self.appSettingRepository.loadSavedViewAppearance()
+        let resolved = self.styleRepository.resolveStyle(of: .todayAndNextMedium, style: style)
         let events = try await self.loadEvnets(from: refDate, timeZone)
         let builder = TodayAndNextWidgetViewModelBuilder(
             max: Constant.maxRowSpaceWeight, daysRangeSize: Constant.daysRangeCount,
@@ -329,7 +334,7 @@ extension TodayAndNextWidgetViewModelProvider {
             |> \.googleCalendarColors .~ (events.googleCalendarColors ?? .init(ownerId: "", calendars: [:], events: [:]))
             |> \.googleCalendarTags .~ events.googleCalendarTags
             |> \.appleCalendarTags .~ events.appleCalendarTags
-            |> \.look .~ .init(globalSetting: setting.widget)
+            |> \.look .~ .init(globalSetting: setting.widget, appliedStyle: resolved)
     }
     
     private func loadEvnets(

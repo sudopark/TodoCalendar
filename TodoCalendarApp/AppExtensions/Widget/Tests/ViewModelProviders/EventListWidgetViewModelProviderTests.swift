@@ -24,7 +24,8 @@ class EventListWidgetViewModelProviderTests: BaseTestCase {
         withStartDateEvent: Bool = true,
         withoutAnyEventsIncludeHoliday: Bool = false,
         withAllDayEvent: Bool = false,
-        excludeAllDayEvents: Bool = false
+        excludeAllDayEvents: Bool = false,
+        styles: [WidgetStyleId: WidgetStyle] = [:]
     ) -> EventListWidgetViewModelProvider {
         
         let fetchUsecase = StubCalendarEventsFetchUescase()
@@ -43,7 +44,8 @@ class EventListWidgetViewModelProviderTests: BaseTestCase {
             eventsFetchUsecase: fetchUsecase,
             appSettingRepository: appSettingRepository,
             calendarSettingRepository: calendarSettingRepository,
-            localeProvider: Locale.current
+            localeProvider: Locale.current,
+            styleRepository: StubWidgetStyleRepository(styles: styles)
         )
     }
 }
@@ -255,7 +257,8 @@ extension EventListWidgetViewModelProviderTests {
             eventsFetchUsecase: usecase,
             appSettingRepository: appSettingRepository,
             calendarSettingRepository: calendarSettingRepository,
-            localeProvider: Locale.current
+            localeProvider: Locale.current,
+            styleRepository: StubWidgetStyleRepository()
         )
     }
     
@@ -278,7 +281,8 @@ extension EventListWidgetViewModelProviderTests {
             eventsFetchUsecase: usecase,
             appSettingRepository: StubAppSettingRepository(),
             calendarSettingRepository: StubCalendarSettingRepository(),
-            localeProvider: Locale.current
+            localeProvider: Locale.current,
+            styleRepository: StubWidgetStyleRepository()
         )
         
         // when
@@ -528,7 +532,8 @@ extension EventListWidgetViewModelProviderTests {
             eventsFetchUsecase: usecase,
             appSettingRepository: appSettingRepository,
             calendarSettingRepository: calendarSettingRepository,
-            localeProvider: Locale.current
+            localeProvider: Locale.current,
+            styleRepository: StubWidgetStyleRepository()
         )
     }
     
@@ -628,7 +633,8 @@ extension EventListWidgetViewModelProviderTests {
             eventsFetchUsecase: fetchUsecase,
             appSettingRepository: appSettingRepository,
             calendarSettingRepository: calendarSettingRepository,
-            localeProvider: Locale.current
+            localeProvider: Locale.current,
+            styleRepository: StubWidgetStyleRepository()
         )
     }
     
@@ -713,7 +719,8 @@ extension EventListWidgetViewModelProviderTests {
             eventsFetchUsecase: fetchUsecase,
             appSettingRepository: appSettingRepository,
             calendarSettingRepository: calendarSettingRepository,
-            localeProvider: Locale.current
+            localeProvider: Locale.current,
+            styleRepository: StubWidgetStyleRepository()
         )
     }
     
@@ -743,5 +750,116 @@ extension EventListWidgetViewModelProviderTests {
         try await parameterizeTest([.custom("t3"), .custom("t5")], expectIds: ["0", "3", "5", "6", "9"])
         try await parameterizeTest([.custom("t5")], expectIds: ["5"])
         try await parameterizeTest([], expectIds: nil)
+    }
+}
+
+
+// MARK: - 스타일 해석
+
+extension EventListWidgetViewModelProviderTests {
+
+    private func eventListStyle(
+        _ style: WidgetStyleId.Style,
+        background: WidgetAppearanceSettings.Background? = nil
+    ) -> (WidgetStyleId, WidgetStyle) {
+        let id = WidgetStyleId(variant: .eventListSmall, style: style)
+        return (
+            id,
+            WidgetStyle(
+                id: id, name: nil,
+                setting: EventListStyleSetting.initial, background: background
+            )
+        )
+    }
+
+    func testProvider_whenNoSavedStyle_usesGlobalBackground() async throws {
+        // given
+        let provider = self.makeProvider()
+
+        // when
+        let model = try await provider.getEventListViewModel(
+            for: self.refDate, widgetSize: .small
+        )
+
+        // then
+        XCTAssertEqual(model.look.appliedStyle == nil, true)
+        XCTAssertEqual(model.look.background, .system)
+    }
+
+    func testProvider_whenDefaultStyleSaved_appliesItsBackground() async throws {
+        // given
+        let saved = self.eventListStyle(.default, background: .custom(hex: "#101820"))
+        let provider = self.makeProvider(styles: [saved.0: saved.1])
+
+        // when
+        let model = try await provider.getEventListViewModel(
+            for: self.refDate, widgetSize: .small
+        )
+
+        // then
+        XCTAssertEqual(model.look.background, .custom(hex: "#101820"))
+    }
+
+    /// 3변형이 좌표 하나를 공유하므로 medium·large 도 같은 저장분을 읽는다.
+    func testProvider_whenSizeDiffers_readsSameSharedCoordinate() async throws {
+        // given
+        let saved = self.eventListStyle(.default, background: .custom(hex: "#101820"))
+        let provider = self.makeProvider(styles: [saved.0: saved.1])
+
+        // when
+        let large = try await provider.getEventListViewModel(
+            for: self.refDate, widgetSize: .large
+        )
+
+        // then
+        XCTAssertEqual(large.look.background, .custom(hex: "#101820"))
+    }
+
+    func testProvider_whenInstanceStyleSaved_appliesThatStyle() async throws {
+        // given
+        let def = self.eventListStyle(.default, background: .custom(hex: "#ffffff"))
+        let custom = self.eventListStyle(
+            .custom(id: "c1"), background: .custom(hex: "#101820")
+        )
+        let provider = self.makeProvider(styles: [def.0: def.1, custom.0: custom.1])
+
+        // when
+        let model = try await provider.getEventListViewModel(
+            for: self.refDate, widgetSize: .small, style: .custom(id: "c1")
+        )
+
+        // then
+        XCTAssertEqual(model.look.background, .custom(hex: "#101820"))
+    }
+
+    func testProvider_whenInstanceStyleRemoved_fallsBackToDefaultStyle() async throws {
+        // given
+        let def = self.eventListStyle(.default, background: .custom(hex: "#ffffff"))
+        let provider = self.makeProvider(styles: [def.0: def.1])
+
+        // when
+        let model = try await provider.getEventListViewModel(
+            for: self.refDate, widgetSize: .small, style: .custom(id: "removed")
+        )
+
+        // then
+        XCTAssertEqual(model.look.background, .custom(hex: "#ffffff"))
+    }
+
+    /// 폴백이 스타일 단위라, 고른 스타일이 색을 안 걸었으면 기본 스타일 색을 빌려오지 않는다.
+    func testProvider_whenStyleHasNoBackground_usesGlobalNotDefaultStyle() async throws {
+        // given
+        let def = self.eventListStyle(.default, background: .custom(hex: "#ffffff"))
+        let custom = self.eventListStyle(.custom(id: "c1"))
+        let provider = self.makeProvider(styles: [def.0: def.1, custom.0: custom.1])
+
+        // when
+        let model = try await provider.getEventListViewModel(
+            for: self.refDate, widgetSize: .small, style: .custom(id: "c1")
+        )
+
+        // then
+        XCTAssertNotEqual(model.look.background, .custom(hex: "#ffffff"))
+        XCTAssertEqual(model.look.background, .system)
     }
 }

@@ -518,7 +518,8 @@ struct TodayAndNextWidgetViewModelProviderTests {
     
     private func makeProvider(
         targetTags: [EventTagId]? = nil,
-        excludeAllDay: Bool = false
+        excludeAllDay: Bool = false,
+        styles: [WidgetStyleId: WidgetStyle] = [:]
     ) -> TodayAndNextWidgetViewModelProvider {
         
         return TodayAndNextWidgetViewModelProvider(
@@ -527,7 +528,8 @@ struct TodayAndNextWidgetViewModelProviderTests {
             eventsFetchUsecase: PrivateStubCalendarEventsFetchUsecase(),
             calendarSettingRepository: StubCalendarSettingRepository(),
             appSettingRepository: StubAppSettingRepository(),
-            localeProvider: Locale.current
+            localeProvider: Locale.current,
+            styleRepository: StubWidgetStyleRepository(styles: styles)
         )
     }
 }
@@ -657,5 +659,99 @@ private final class PrivateStubCalendarEventsFetchUsecase: StubCalendarEventsFet
         let events = CalendarEvents()
             |> \.eventWithTimes .~ (todayAll + tomorrowAll + schedules)
         return events
+    }
+}
+
+
+// MARK: - 스타일 해석
+
+extension TodayAndNextWidgetViewModelProviderTests {
+
+    private func todayAndNextStyle(
+        _ style: WidgetStyleId.Style,
+        showTimeZone: Bool = true,
+        background: WidgetAppearanceSettings.Background? = nil
+    ) -> (WidgetStyleId, WidgetStyle) {
+        let id = WidgetStyleId(variant: .todayAndNextMedium, style: style)
+        return (
+            id,
+            WidgetStyle(
+                id: id, name: nil,
+                setting: TodayAndNextStyleSetting.initial |> \.showTimeZone .~ showTimeZone,
+                background: background
+            )
+        )
+    }
+
+    @Test func provider_whenNoSavedStyle_usesInitialAndGlobalBackground() async throws {
+        // given
+        let provider = self.makeProvider()
+
+        // when
+        let model = try await provider.getViewModel(for: Date(timeIntervalSince1970: 0))
+
+        // then
+        #expect(model.style == TodayAndNextStyleSetting.initial)
+        #expect(model.look.background == .system)
+    }
+
+    @Test func provider_whenDefaultStyleSaved_appliesItsSettingAndBackground() async throws {
+        // given
+        let saved = self.todayAndNextStyle(
+            .default, showTimeZone: false, background: .custom(hex: "#101820")
+        )
+        let provider = self.makeProvider(styles: [saved.0: saved.1])
+
+        // when
+        let model = try await provider.getViewModel(for: Date(timeIntervalSince1970: 0))
+
+        // then
+        #expect(model.showsTimeZone == false)
+        #expect(model.look.background == .custom(hex: "#101820"))
+    }
+
+    @Test func provider_whenInstanceStyleSaved_appliesThatStyle() async throws {
+        // given
+        let def = self.todayAndNextStyle(.default, showTimeZone: true)
+        let custom = self.todayAndNextStyle(.custom(id: "c1"), showTimeZone: false)
+        let provider = self.makeProvider(styles: [def.0: def.1, custom.0: custom.1])
+
+        // when
+        let model = try await provider.getViewModel(
+            for: Date(timeIntervalSince1970: 0), style: .custom(id: "c1")
+        )
+
+        // then
+        #expect(model.showsTimeZone == false)
+    }
+
+    @Test func provider_whenInstanceStyleRemoved_fallsBackToDefaultStyle() async throws {
+        // given
+        let def = self.todayAndNextStyle(.default, showTimeZone: false)
+        let provider = self.makeProvider(styles: [def.0: def.1])
+
+        // when
+        let model = try await provider.getViewModel(
+            for: Date(timeIntervalSince1970: 0), style: .custom(id: "removed")
+        )
+
+        // then
+        #expect(model.showsTimeZone == false)
+    }
+
+    /// 폴백이 스타일 단위라, 고른 스타일이 색을 안 걸었으면 기본 스타일 색을 빌려오지 않는다.
+    @Test func provider_whenStyleHasNoBackground_usesGlobalNotDefaultStyle() async throws {
+        // given
+        let def = self.todayAndNextStyle(.default, background: .custom(hex: "#ffffff"))
+        let custom = self.todayAndNextStyle(.custom(id: "c1"))
+        let provider = self.makeProvider(styles: [def.0: def.1, custom.0: custom.1])
+
+        // when
+        let model = try await provider.getViewModel(
+            for: Date(timeIntervalSince1970: 0), style: .custom(id: "c1")
+        )
+
+        // then
+        #expect(model.look.background == .system)
     }
 }
