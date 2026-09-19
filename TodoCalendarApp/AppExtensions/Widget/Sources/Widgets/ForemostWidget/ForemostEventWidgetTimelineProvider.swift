@@ -16,8 +16,9 @@ import CalendarPresentation
 import WidgetScenes
 
 
-struct ForemostEventWidgetTimelineProvider: TimelineProvider {
+struct ForemostEventWidgetTimelineProvider: AppIntentTimelineProvider {
     
+    typealias Intent = ForemostWidgetConfigurationIntent
     typealias Entry = ResultTimelineEntry<ForemostEventWidgetViewModel>
     init() { }
 }
@@ -29,51 +30,44 @@ extension ForemostEventWidgetTimelineProvider {
         return .init(date: Date(), result: .success(sample))
     }
     
-    func getSnapshot(in context: Context, completion: @Sendable @escaping (Entry) -> Void) {
+    func snapshot(
+        for configuration: ForemostWidgetConfigurationIntent,
+        in context: Context
+    ) async -> Entry {
         
         guard context.isPreview == false
         else {
-            let sample = self.placeholder(in: context)
-            completion(sample)
-            return
+            return self.placeholder(in: context)
         }
-        
-        self.getEntry(context) { entry in
-            completion(entry)
-        }
+        return await self.loadEntry(context.family, configuration.resolvedStyle)
     }
     
-    func getTimeline(in context: Context, completion: @Sendable @escaping (Timeline<Entry>) -> Void) {
+    func timeline(
+        for configuration: ForemostWidgetConfigurationIntent,
+        in context: Context
+    ) async -> Timeline<Entry> {
         
-        self.getEntry(context) { entry in
-            let timeline = Timeline(
-                entries: [entry], policy: .after(Date().nextUpdateTime)
+        let entry = await self.loadEntry(context.family, configuration.resolvedStyle)
+        return Timeline(entries: [entry], policy: .after(Date().nextUpdateTime))
+    }
+    
+    private func loadEntry(
+        _ family: WidgetFamily, _ style: WidgetStyleId.Style
+    ) async -> Entry {
+        
+        let builder = WidgetViewModelProviderBuilder(base: .init())
+        let viewModelProvider = await builder.makeForemostEventWidgetViewModelProvider()
+        let now = Date()
+        do {
+            let model = try await viewModelProvider.getViewModel(
+                now,
+                variant: family == .accessoryInline ? .foremostInline : .foremostSmall,
+                style: style
             )
-            completion(timeline)
-        }
-    }
-    
-    private func getEntry(_ context: Context, _  completion: @Sendable @escaping (Entry) -> Void) {
-        
-        let family = context.family
-        Task {
-            let builder = WidgetViewModelProviderBuilder(base: .init())
-            let viewModelProvider = await builder.makeForemostEventWidgetViewModelProvider()
-            let now = Date()
-            do {
-                let model = try await viewModelProvider.getViewModel(
-                    now,
-                    variant: family == .accessoryInline ? .foremostInline : .foremostSmall
-                )
-                completion(
-                    .init(date: now, result: .success(model))
-                        |> \.background .~ model.look.background
-                )
-            } catch {
-                completion(
-                    .init(date: now, result: .failure(.init(error: error)))
-                )
-            }
+            return .init(date: now, result: .success(model))
+                |> \.background .~ model.look.background
+        } catch {
+            return .init(date: now, result: .failure(.init(error: error)))
         }
     }
 }
