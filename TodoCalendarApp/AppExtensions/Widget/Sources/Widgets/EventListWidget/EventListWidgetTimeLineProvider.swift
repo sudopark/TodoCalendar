@@ -45,7 +45,10 @@ extension EventListWidgetTimeLineProvider {
             return self.placeholder(in: context)
         }
         
-        return await self.loadEntry(configuration.eventTypes, configuration.excludeAllDayEvent, context)
+        return await self.loadEntry(
+            configuration.eventTypes, configuration.excludeAllDayEvent,
+            context, configuration.resolvedStyle
+        )
     }
     
     func timeline(
@@ -53,7 +56,8 @@ extension EventListWidgetTimeLineProvider {
     ) async -> Timeline<ResultTimelineEntry<EventListWidgetViewModel>> {
         
         let entry = await self.loadEntry(
-            configuration.eventTypes, configuration.excludeAllDayEvent, context
+            configuration.eventTypes, configuration.excludeAllDayEvent,
+            context, configuration.resolvedStyle
         )
         return Timeline(entries: [entry], policy: .after(Date().nextUpdateTime))
     }
@@ -61,7 +65,8 @@ extension EventListWidgetTimeLineProvider {
     private func loadEntry(
         _ selected: [EventTypeEntity]?,
         _ excludeAllDayEvent: Bool,
-        _ context: Context
+        _ context: Context,
+        _ style: WidgetStyleId.Style
     ) async -> Entry {
         
         let tagIds = selected?.map { EventTagId($0) }
@@ -75,7 +80,8 @@ extension EventListWidgetTimeLineProvider {
         do {
             let model = try await viewModelProvider.getEventListViewModel(
                 for: now,
-                widgetSize: size
+                widgetSize: size,
+                style: style
             )
             return .init(date: now, result: .success(model))
                 |> \.background .~ model.look.background

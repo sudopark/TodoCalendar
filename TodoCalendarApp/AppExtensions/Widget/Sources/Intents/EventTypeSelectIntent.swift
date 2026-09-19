@@ -158,6 +158,16 @@ struct EventTypeSelectIntent: WidgetConfigurationIntent {
     
     @Parameter(title: "Exclude all day event", default: false)
     var excludeAllDayEvent: Bool
+
+    @Parameter(title: "Style", default: nil)
+    var style: EventListStyleEntity?
+
+    /// 미선택도 해석 실패도 기본 스타일로 내려, 읽는 쪽에 분기를 남기지 않는다.
+    var resolvedStyle: WidgetStyleId.Style {
+        return self.style
+            .flatMap { WidgetStyleId.Style(entityId: $0.id) }
+            ?? .default
+    }
 }
 
 
@@ -170,4 +180,14 @@ struct EventListComponentSelectIntent: WidgetConfigurationIntent {
     
     @Parameter(title: "Exclude all day event", default: false)
     var excludeAllDayEvent: Bool
+
+    @Parameter(title: "Style", default: nil)
+    var style: TodayAndNextStyleEntity?
+
+    /// 미선택도 해석 실패도 기본 스타일로 내려, 읽는 쪽에 분기를 남기지 않는다.
+    var resolvedStyle: WidgetStyleId.Style {
+        return self.style
+            .flatMap { WidgetStyleId.Style(entityId: $0.id) }
+            ?? .default
+    }
 }
