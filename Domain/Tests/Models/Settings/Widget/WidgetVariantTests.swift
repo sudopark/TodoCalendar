@@ -45,8 +45,31 @@ struct WidgetVariantTests {
             .foremostSmall, .foremostMedium,
             .oneWeekEvents, .twoWeekEvents, .threeWeekEvents, .fourWeekEvents,
             .currentMonthEvents, .lastMonthEvents, .nextMonthEvents,
-            .aiCommandSmall
+            .aiCommandSmall,
+            .doubleMonthMedium, .eventAndMonthMedium,
+            .eventAndForemostMedium, .todayAndMonthMedium
         ])
+    }
+
+    @Test("합성 4종은 각자의 합성 payload 타입으로 꾸미기 대상이다")
+    func composedVariants_areCustomizable() {
+        // when + then
+        #expect(WidgetVariant.doubleMonthMedium.settingType == DoubleMonthStyleSetting.self)
+        #expect(WidgetVariant.eventAndMonthMedium.settingType == EventAndMonthStyleSetting.self)
+        #expect(WidgetVariant.eventAndForemostMedium.settingType == EventAndForemostStyleSetting.self)
+        #expect(WidgetVariant.todayAndMonthMedium.settingType == TodayAndMonthStyleSetting.self)
+    }
+
+    @Test("합성 4종은 스타일을 공유하지 않고 자기 자신을 좌표로 쓴다")
+    func composedVariants_styleVariantIsSelf() {
+        // given
+        let composed: [WidgetVariant] = [
+            .doubleMonthMedium, .eventAndMonthMedium,
+            .eventAndForemostMedium, .todayAndMonthMedium
+        ]
+
+        // when + then
+        #expect(composed.map { $0.styleVariant } == composed)
     }
 
     @Test("Month 와 WeekEvents 는 각자의 payload 타입을 갖는다")
@@ -156,7 +179,7 @@ struct WidgetVariantTests {
             WidgetVariant.monthSmall.initialSetting as? MonthStyleSetting
                 == MonthStyleSetting.initial
         )
-        #expect(WidgetVariant.doubleMonthMedium.initialSetting == nil)
+        #expect(WidgetVariant.nextEventInline.initialSetting == nil)
     }
 
     @Test("변형은 자기 payload 타입만 자기 설정으로 본다")

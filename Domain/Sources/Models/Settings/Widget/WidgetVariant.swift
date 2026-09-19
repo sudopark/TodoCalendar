@@ -95,11 +95,18 @@ public enum WidgetVariant: String, Sendable, Identifiable, CaseIterable {
             return ForemostStyleSetting.self
         case .aiCommandSmall:
             return AICommandStyleSetting.self
+        case .doubleMonthMedium:
+            return DoubleMonthStyleSetting.self
+        case .eventAndMonthMedium:
+            return EventAndMonthStyleSetting.self
+        case .eventAndForemostMedium:
+            return EventAndForemostStyleSetting.self
+        case .todayAndMonthMedium:
+            return TodayAndMonthStyleSetting.self
         case .foremostInline,
              .ddaySmall, .ddayMedium, .ddayCircular, .ddayRectangular, .ddayInline,
              .aiCommandCircular, .nextEventInline,
-             .nextEventRectangular, .nextRemainRectangular, .doubleMonthMedium,
-             .eventAndMonthMedium, .eventAndForemostMedium, .todayAndMonthMedium:
+             .nextEventRectangular, .nextRemainRectangular:
             return nil
         }
     }

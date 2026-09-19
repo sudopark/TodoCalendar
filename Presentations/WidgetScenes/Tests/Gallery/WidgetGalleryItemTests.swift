@@ -78,7 +78,9 @@ struct WidgetGalleryItemTests {
             .foremostSmall, .foremostMedium,
             .oneWeekEvents, .twoWeekEvents, .threeWeekEvents, .fourWeekEvents,
             .currentMonthEvents, .lastMonthEvents, .nextMonthEvents,
-            .aiCommandSmall
+            .aiCommandSmall,
+            .doubleMonthMedium, .eventAndMonthMedium,
+            .eventAndForemostMedium, .todayAndMonthMedium
         ])
     }
 

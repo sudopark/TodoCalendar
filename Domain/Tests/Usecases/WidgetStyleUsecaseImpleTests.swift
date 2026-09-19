@@ -160,7 +160,7 @@ extension WidgetStyleUsecaseImpleTests {
         let usecase = self.makeUsecase(with: .init())
 
         // when
-        let styles = usecase.loadStyles(of: .doubleMonthMedium)
+        let styles = usecase.loadStyles(of: .nextEventInline)
 
         // then
         #expect(styles.isEmpty == true)

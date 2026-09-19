@@ -38,3 +38,26 @@ extension WidgetLook {
         return self.appliedStyle?.setting as? S ?? .initial
     }
 }
+
+
+// MARK: - 합성 위젯의 절반
+
+extension WidgetLook {
+
+    /// 판 색은 합성 스타일 것을 그대로 둔다 — 두 절반이 한 배경에서 글자색을 파생해야 한다.
+    public func part<C: WidgetStyleSetting, H: WidgetStyleSetting>(
+        _ keyPath: KeyPath<C, H>
+    ) -> WidgetLook {
+        guard let style = self.appliedStyle,
+              let composed = style.setting as? C
+        else {
+            return WidgetLook(globalSetting: self.globalSetting, appliedStyle: nil)
+        }
+        let partStyle = WidgetStyle(
+            id: style.id, name: style.name,
+            setting: composed[keyPath: keyPath],
+            background: style.background
+        )
+        return WidgetLook(globalSetting: self.globalSetting, appliedStyle: partStyle)
+    }
+}

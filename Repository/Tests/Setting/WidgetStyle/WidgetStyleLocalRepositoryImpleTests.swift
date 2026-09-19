@@ -99,16 +99,16 @@ extension WidgetStyleLocalRepositoryImpleTests {
     @Test("꾸미기 대상이 아닌 variant 는 저장돼 있어도 설정을 내지 않는다")
     func loadSetting_whenVariantHasNoSettingType_isNil() {
         // given
-        let composedId = WidgetStyleId(variant: .doubleMonthMedium, style: .default)
+        let nonCustomizableId = WidgetStyleId(variant: .nextEventInline, style: .default)
         let repository = self.makeRepository()
-        repository.updateSetting(TodayStyleSetting.initial, for: composedId)
+        repository.updateSetting(TodayStyleSetting.initial, for: nonCustomizableId)
 
         // when
-        let setting = repository.loadSetting(for: composedId)
+        let setting = repository.loadSetting(for: nonCustomizableId)
 
         // then
         #expect(setting == nil)
-        #expect(repository.loadStyles(of: .doubleMonthMedium).isEmpty == true)
+        #expect(repository.loadStyles(of: .nextEventInline).isEmpty == true)
     }
 
     @Test("한 좌표를 갱신해도 다른 좌표 설정이 남는다")
