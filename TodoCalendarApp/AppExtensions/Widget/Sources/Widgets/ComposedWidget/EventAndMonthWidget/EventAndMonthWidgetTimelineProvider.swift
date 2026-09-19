@@ -20,25 +20,30 @@ struct EventAndMonthWidgetViewModelProvider {
     
     private let eventListViewModelProvider: EventListWidgetViewModelProvider
     private let monthViewModelProvider: MonthWidgetViewModelProvider
+    private let styleRepository: any WidgetStyleRepository
     
     init(
         eventListViewModelProvider: EventListWidgetViewModelProvider,
-        monthViewModelProvider: MonthWidgetViewModelProvider
+        monthViewModelProvider: MonthWidgetViewModelProvider,
+        styleRepository: any WidgetStyleRepository
     ) {
         self.eventListViewModelProvider = eventListViewModelProvider
         self.monthViewModelProvider = monthViewModelProvider
+        self.styleRepository = styleRepository
     }
     
-    func getViewModel(_ time: Date) async throws -> EventAndMonthWidgetViewModel {
+    func getViewModel(
+        _ time: Date, style: WidgetStyleId.Style = .default
+    ) async throws -> EventAndMonthWidgetViewModel {
         
         let event = try await eventListViewModelProvider.getEventListViewModel(
             for: time, widgetSize: .small
         )
         let month = try await monthViewModelProvider.getMonthViewModel(time)
-        let look = WidgetLook(globalSetting: event.look.globalSetting)
+        let resolved = self.styleRepository.resolveStyle(of: .eventAndMonthMedium, style: style)
+        let look = WidgetLook(globalSetting: event.look.globalSetting, appliedStyle: resolved)
         return EventAndMonthWidgetViewModel(event: event, month: month)
-            |> \.event.look .~ look
-            |> \.month.look .~ look
+            .applying(look)
     }
 }
 

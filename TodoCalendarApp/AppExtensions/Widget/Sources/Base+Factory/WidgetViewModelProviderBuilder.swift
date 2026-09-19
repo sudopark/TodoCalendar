@@ -139,7 +139,10 @@ extension WidgetViewModelProviderBuilder {
             calendarSettingRepository: repository
         )
         return DoubleMonthWidgetViewModelProvider(
-            settingRepository: repository, monthViewModelProvider: provider
+            settingRepository: repository, monthViewModelProvider: provider,
+            styleRepository: WidgetStyleLocalRepositoryImple(
+                environmentStorage: base.userDefaultEnvironmentStorage
+            )
         )
     }
 }
@@ -416,8 +419,11 @@ extension WidgetViewModelProviderBuilder {
         )
 
         return EventAndMonthWidgetViewModelProvider(
-            eventListViewModelProvider: eventList, 
-            monthViewModelProvider: month
+            eventListViewModelProvider: eventList,
+            monthViewModelProvider: month,
+            styleRepository: WidgetStyleLocalRepositoryImple(
+                environmentStorage: base.userDefaultEnvironmentStorage
+            )
         )
     }
     
@@ -433,7 +439,10 @@ extension WidgetViewModelProviderBuilder {
 
         return TodayAndMonthWidgetViewModelProvider(
             todayViewModelProvider: today,
-            monthViewModelProvider: month
+            monthViewModelProvider: month,
+            styleRepository: WidgetStyleLocalRepositoryImple(
+                environmentStorage: base.userDefaultEnvironmentStorage
+            )
         )
     }
     
@@ -453,7 +462,10 @@ extension WidgetViewModelProviderBuilder {
         
         return .init(
             eventListViewModelProvider: eventList,
-            foremostEventViewModelProvider: foremost
+            foremostEventViewModelProvider: foremost,
+            styleRepository: WidgetStyleLocalRepositoryImple(
+                environmentStorage: base.userDefaultEnvironmentStorage
+            )
         )
     }
 }
