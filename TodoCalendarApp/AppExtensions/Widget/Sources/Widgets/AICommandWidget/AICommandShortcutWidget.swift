@@ -8,6 +8,7 @@
 
 import WidgetKit
 import SwiftUI
+import AppIntents
 import Extensions
 import CommonPresentation
 import Domain
@@ -25,27 +26,32 @@ struct AICommandShortcutWidgetEntry: TimelineEntry {
     }
 }
 
-struct AICommandShortcutWidgetTimeLineProvider: TimelineProvider {
+struct AICommandShortcutWidgetTimeLineProvider: AppIntentTimelineProvider {
+
+    typealias Intent = AICommandWidgetConfigurationIntent
 
     func placeholder(in context: Context) -> AICommandShortcutWidgetEntry {
-        return self.entry(context.family)
+        return self.entry(context.family, .default)
     }
 
-    func getSnapshot(
-        in context: Context,
-        completion: @escaping (AICommandShortcutWidgetEntry) -> Void
-    ) {
-        completion(self.entry(context.family))
+    func snapshot(
+        for configuration: AICommandWidgetConfigurationIntent,
+        in context: Context
+    ) async -> AICommandShortcutWidgetEntry {
+        return self.entry(context.family, configuration.resolvedStyle)
     }
 
-    func getTimeline(
-        in context: Context,
-        completion: @escaping (Timeline<AICommandShortcutWidgetEntry>) -> Void
-    ) {
-        completion(Timeline(entries: [self.entry(context.family)], policy: .never))
+    func timeline(
+        for configuration: AICommandWidgetConfigurationIntent,
+        in context: Context
+    ) async -> Timeline<AICommandShortcutWidgetEntry> {
+        let entry = self.entry(context.family, configuration.resolvedStyle)
+        return Timeline(entries: [entry], policy: .never)
     }
 
-    private func entry(_ family: WidgetFamily) -> AICommandShortcutWidgetEntry {
+    private func entry(
+        _ family: WidgetFamily, _ style: WidgetStyleId.Style
+    ) -> AICommandShortcutWidgetEntry {
         let builder = WidgetViewModelProviderBuilder(base: .init())
         let variant: WidgetVariant =
             family == .accessoryCircular ? .aiCommandCircular : .aiCommandSmall
@@ -53,7 +59,7 @@ struct AICommandShortcutWidgetTimeLineProvider: TimelineProvider {
             date: Date(),
             look: .init(
                 globalSetting: builder.loadWidgetAppearanceSetting(),
-                appliedStyle: builder.resolveWidgetStyle(of: variant)
+                appliedStyle: builder.resolveWidgetStyle(of: variant, style: style)
             )
         )
     }
@@ -90,8 +96,9 @@ struct AICommandShortcutWidget: Widget {
     nonisolated static let kind: String = "AICommandShortcutWidget"
 
     var body: some WidgetConfiguration {
-        StaticConfiguration(
+        AppIntentConfiguration(
             kind: Self.kind,
+            intent: AICommandWidgetConfigurationIntent.self,
             provider: AICommandShortcutWidgetTimeLineProvider()
         ) { entry in
             AICommandShortcutWidgetView(look: entry.look)

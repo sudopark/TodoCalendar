@@ -81,7 +81,11 @@ struct ForemostEventWidget: Widget {
     nonisolated static let kind: String = "ForemostEventWidget"
     
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: ForemostEventWidget.kind, provider: ForemostEventWidgetTimelineProvider()) { entry in
+        AppIntentConfiguration(
+            kind: ForemostEventWidget.kind,
+            intent: ForemostWidgetConfigurationIntent.self,
+            provider: ForemostEventWidgetTimelineProvider()
+        ) { entry in
             ForemostEventWidgetView(entry: entry)
                 .containerBackground(entry.backgroundShape, for: .widget)
         }
