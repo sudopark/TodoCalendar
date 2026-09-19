@@ -23,6 +23,7 @@ ALL_SCHEMES=(
   "Domain"
   "Repository"
   "AuthService"
+  "CommonPresentation"
   "BillingScenes"
   "CalendarPresentation"
   "CalendarScenes"

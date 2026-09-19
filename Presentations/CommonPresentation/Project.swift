@@ -1,7 +1,7 @@
 import ProjectDescriptionHelpers
 import ProjectDescription
 
-let project = Project.framework(
+let project = Project.frameworkWithTest(
     name: "CommonPresentation",
     destinations: [.iPhone],
     iOSTargetVersion: "17.0",
