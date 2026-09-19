@@ -126,18 +126,18 @@ campaign 2항 범위 밖의 "폰트 크기·텍스트 색 공통 축"은 **그�
 
 전 위젯군이 스타일을 갖는다 — 토글이 0인 위젯군도 색이 있어 payload 가 비지 않는다.
 
-| 위젯군 | 토글 | 전환 필요 | 스타일 파라미터 |
-|---|---|---|---|
-| Month | 4 | `StaticConfiguration` → AppIntent 1개 | 필요 |
-| WeekEvents | 1 (7변형 공유) | 7개 | 필요 |
-| TodayAndNext | 1 | 이미 AppIntent | 파라미터 추가만 |
-| EventList | 0 (색만) | 이미 AppIntent | 파라미터 추가만 |
-| Foremost | 1 | 홈 2개 | 필요 |
-| AICommand | 1 | 홈 1개 | 필요 |
-| DDay | 0 (색만) | 이미 AppIntent | 파라미터 추가만 · 사진 배경은 별건 |
-| Composed | 0 (색만 + 하위 상속) | 4개 | 필요 |
+| 위젯군 | 토글 | 전환 필요 | 스타일 파라미터 | 상태 |
+|---|---|---|---|---|
+| Month | 4 | `StaticConfiguration` → AppIntent 1개 | 필요 | 완료 (#1112) |
+| WeekEvents | 1 (7변형 공유) | 7개 | 필요 | 완료 (#1112) |
+| TodayAndNext | 1 | 이미 AppIntent | 파라미터 추가만 | 완료 (#1113) |
+| EventList | 0 (색만, 3변형 공유) | 이미 AppIntent | 파라미터 추가만 | 완료 (#1113) |
+| Foremost | 1 (홈 2변형 공유) | 홈 2개 | 필요 | 완료 (#1113) |
+| AICommand | 1 | 홈 1개 | 필요 | 완료 (#1113) |
+| DDay | 0 (색만) | 이미 AppIntent | 파라미터 추가만 · 사진 배경은 별건 | 남음 |
+| Composed | 0 (색만 + 하위 상속) | 4개 | 필요 | 남음 |
 
-토글 총량은 8개다 (Today 6·Month 4·WeekEvents 1 은 완료분). 위젯군별 작업의 무게중심은 **전환 + 스타일 파라미터 + payload·폼 신설**이고, 색은 봉투에 있어 위젯군마다 따로 만들 게 없다.
+남은 토글은 0개다 — DDay·Composed 는 색만 쓴다. 두 위젯군의 무게중심은 **전환 + 스타일 파라미터 + 빈 payload 신설**이고, 색은 봉투에 있어 위젯군마다 따로 만들 게 없다. 소비 경로(`WidgetLook`)와 빈 payload 계약은 `docs/spec/widgets.md` §8.3 이 정본이다.
 
 ## 5. 확정 사항 정리
 
