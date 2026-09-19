@@ -26,26 +26,19 @@ final class StubWidgetStyleUsecase: WidgetStyleUsecase, @unchecked Sendable {
         }
     }
     
-    private(set) var requestedVariant: WidgetVariant?
-    private(set) var refreshedVariants: [WidgetVariant] = []
-    private(set) var updatedStyles: [WidgetStyle] = []
-    private(set) var removedStyleIds: [WidgetStyleId] = []
     private var mintedStyleIdCount: Int = 0
     
     func refreshStyles(of variant: WidgetVariant) {
-        self.refreshedVariants.append(variant)
         self.subject(of: variant).send(self.styles(in: self.stubStyles, of: variant))
     }
     
     func styles(of variant: WidgetVariant) -> AnyPublisher<[WidgetStyle], Never> {
-        self.requestedVariant = variant
         return self.subject(of: variant)
             .compactMap { $0 }
             .eraseToAnyPublisher()
     }
     
     func loadStyles(of variant: WidgetVariant) -> [WidgetStyle] {
-        self.requestedVariant = variant
         return self.styles(in: self.stubStyles, of: variant)
     }
     
@@ -65,8 +58,14 @@ final class StubWidgetStyleUsecase: WidgetStyleUsecase, @unchecked Sendable {
         return styles.filter { $0.id.variant == variant.styleVariant }
     }
     
+    /// 기존 좌표는 자리를 지키고 새 좌표만 뒤에 붙는다 — 저장소도 정렬 키로 순서를 정해
+    /// 갱신이 목록 순서를 바꾸지 않는다.
     func updateStyle(_ style: WidgetStyle) {
-        self.updatedStyles.append(style)
+        guard self.stubStyles.contains(where: { $0.id == style.id })
+        else {
+            self.stubStyles = self.stubStyles + [style]
+            return
+        }
         self.stubStyles = self.stubStyles.map { $0.id == style.id ? style : $0 }
     }
     
@@ -76,7 +75,6 @@ final class StubWidgetStyleUsecase: WidgetStyleUsecase, @unchecked Sendable {
     }
     
     func removeStyle(_ id: WidgetStyleId) {
-        self.removedStyleIds.append(id)
         self.stubStyles = self.stubStyles.filter { $0.id != id }
     }
 }
