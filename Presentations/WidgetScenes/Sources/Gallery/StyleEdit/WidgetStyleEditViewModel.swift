@@ -56,7 +56,7 @@ protocol WidgetStyleEditViewModel: AnyObject, WidgetStyleEditSceneInteractor {
     func discard()
     func editName(_ name: String)
     func updateSetting(_ setting: any WidgetStyleSetting)
-    func updateBackground(_ hex: String)
+    func updateBackground(_ background: WidgetAppearanceSettings.Background?)
     func confirm()
     func close()
     
@@ -180,8 +180,9 @@ extension WidgetStyleEditViewModelImple {
         self.updateSelectedStyle { $0 |> \.setting .~ setting }
     }
     
-    func updateBackground(_ hex: String) {
-        self.updateSelectedStyle { $0 |> \.background .~ .custom(hex: hex) }
+    /// nil 은 전역 설정을 따른다는 뜻이라, 되돌리는 것도 색을 고르는 것과 같은 명령이다.
+    func updateBackground(_ background: WidgetAppearanceSettings.Background?) {
+        self.updateSelectedStyle { $0 |> \.background .~ background }
     }
     
     /// 저장해도 화면에 남는다 — 다른 카드를 이어서 저장할 수 있어야 한다.
