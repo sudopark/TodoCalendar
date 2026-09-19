@@ -33,6 +33,8 @@ public struct AICommandSmallView: View {
 
     private let look: WidgetLook
 
+    private var style: AICommandStyleSetting { self.look.setting() }
+
     public init(look: WidgetLook) {
         self.look = look
     }
@@ -46,9 +48,11 @@ public struct AICommandSmallView: View {
             Text("widget.aiCommand::title".localized())
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundStyle(colorSet.text0.asColor)
-            Text("widget.aiCommand::explain".localized())
-                .font(.system(size: 11))
-                .foregroundStyle(colorSet.text1.asColor)
+            if self.style.showExplain {
+                Text("widget.aiCommand::explain".localized())
+                    .font(.system(size: 11))
+                    .foregroundStyle(colorSet.text1.asColor)
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
     }

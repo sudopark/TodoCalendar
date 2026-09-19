@@ -99,7 +99,7 @@ public struct TodayAndNextWidgetView: View {
                         .font(.system(size: 28, weight: .medium))
                         .foregroundStyle(colorSet.text0.asColor)
                     
-                    if let timeZonetext = model.timeZonetext {
+                    if self.model.showsTimeZone, let timeZonetext = model.timeZonetext {
                         Text("(\(timeZonetext))")
                             .font(.system(size: 8))
                             .foregroundStyle(colorSet.text0.asColor)

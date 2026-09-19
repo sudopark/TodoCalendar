@@ -27,6 +27,10 @@ public struct TodayAndNextWidgetViewModel {
     public var appleCalendarTags: [String: AppleCalendar.Tag] = [:]
     public var look = WidgetLook(globalSetting: .init())
 
+    public var style: TodayAndNextStyleSetting { self.look.setting() }
+
+    public var showsTimeZone: Bool { self.style.showTimeZone }
+
     public init(
         left: PageModel,
         right: PageModel,

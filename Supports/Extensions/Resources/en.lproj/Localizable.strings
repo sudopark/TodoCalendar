@@ -569,6 +569,9 @@
 "widget.style.month::highlightToday" = "Highlight today";
 "widget.style.month::showEventUnderline" = "Event underline";
 "widget.style.weekEvents::showWeekDayHeader" = "Weekday header";
+"widget.style.todayAndNext::showTimeZone" = "Time zone";
+"widget.style.foremost::showTypeLabel" = "\"Foremost event\" label";
+"widget.style.aiCommand::showExplain" = "Description";
 "widget.style.edit::add" = "New style";
 "widget.style.edit::name" = "Name";
 "widget.style.edit::duplicate" = "Duplicate";

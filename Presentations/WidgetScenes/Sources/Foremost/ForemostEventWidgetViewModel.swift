@@ -23,6 +23,10 @@ public struct ForemostEventWidgetViewModel {
     public var tag: CustomEventTag?
     public var look = WidgetLook(globalSetting: .init())
 
+    public var style: ForemostStyleSetting { self.look.setting() }
+
+    public var showsTypeLabel: Bool { self.style.showTypeLabel }
+
     public init(
         eventModel: (any EventCellViewModel)? = nil,
         defaultTagColorSetting: DefaultEventTagColorSetting,
