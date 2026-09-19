@@ -20,23 +20,28 @@ struct TodayAndMonthWidgetViewModelProvider {
     
     private let todayViewModelProvider: TodayWidgetViewModelProvider
     private let monthViewModelProvider: MonthWidgetViewModelProvider
+    private let styleRepository: any WidgetStyleRepository
     
     init(
         todayViewModelProvider: TodayWidgetViewModelProvider,
-        monthViewModelProvider: MonthWidgetViewModelProvider
+        monthViewModelProvider: MonthWidgetViewModelProvider,
+        styleRepository: any WidgetStyleRepository
     ) {
         self.todayViewModelProvider = todayViewModelProvider
         self.monthViewModelProvider = monthViewModelProvider
+        self.styleRepository = styleRepository
     }
     
-    func getViewModel(_ time: Date) async throws -> TodayAndMonthWidgetViewModel {
+    func getViewModel(
+        _ time: Date, style: WidgetStyleId.Style = .default
+    ) async throws -> TodayAndMonthWidgetViewModel {
         
         let today = try await todayViewModelProvider.getTodayViewModel(for: time)
         let month = try await monthViewModelProvider.getMonthViewModel(time)
-        let look = WidgetLook(globalSetting: today.look.globalSetting)
+        let resolved = self.styleRepository.resolveStyle(of: .todayAndMonthMedium, style: style)
+        let look = WidgetLook(globalSetting: today.look.globalSetting, appliedStyle: resolved)
         return TodayAndMonthWidgetViewModel(today: today, month: month)
-            |> \.today.look .~ look
-            |> \.month.look .~ look
+            .applying(look)
     }
 }
 

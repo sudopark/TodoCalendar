@@ -19,16 +19,21 @@ struct DoubleMonthWidgetViewModelProvider {
     
     private let settingRepository: any CalendarSettingRepository
     private let monthViewModelProvider: MonthWidgetViewModelProvider
+    private let styleRepository: any WidgetStyleRepository
     
     init(
         settingRepository: any CalendarSettingRepository,
-        monthViewModelProvider: MonthWidgetViewModelProvider
+        monthViewModelProvider: MonthWidgetViewModelProvider,
+        styleRepository: any WidgetStyleRepository
     ) {
         self.settingRepository = settingRepository
         self.monthViewModelProvider = monthViewModelProvider
+        self.styleRepository = styleRepository
     }
     
-    func getviewModel(_ now: Date) async throws -> DoubleMonthWidgetViewModel {
+    func getviewModel(
+        _ now: Date, style: WidgetStyleId.Style = .default
+    ) async throws -> DoubleMonthWidgetViewModel {
         
         let currentMonthModel = try await self.monthViewModelProvider.getMonthViewModel(now)
         
@@ -39,10 +44,10 @@ struct DoubleMonthWidgetViewModelProvider {
         let nextMonthModel = try await self.monthViewModelProvider.getMonthViewModel(nextMonth)
         |> \.todayIdentifier .~ nil
         
-        let look = WidgetLook(globalSetting: currentMonthModel.look.globalSetting)
-        return .init(current: currentMonthModel, next: nextMonthModel)
-            |> \.current.look .~ look
-            |> \.next.look .~ look
+        let resolved = self.styleRepository.resolveStyle(of: .doubleMonthMedium, style: style)
+        let look = WidgetLook(globalSetting: currentMonthModel.look.globalSetting, appliedStyle: resolved)
+        return DoubleMonthWidgetViewModel(current: currentMonthModel, next: nextMonthModel)
+            .applying(look)
     }
 }
 

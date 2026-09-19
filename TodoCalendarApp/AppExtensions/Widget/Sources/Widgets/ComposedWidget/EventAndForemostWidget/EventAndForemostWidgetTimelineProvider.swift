@@ -20,26 +20,29 @@ struct EventAndForemostWidgetViewModelProvider {
     
     private let eventListViewModelProvider: EventListWidgetViewModelProvider
     private let foremostEventViewModelProvider: ForemostEventWidgetViewModelProvider
+    private let styleRepository: any WidgetStyleRepository
     
     init(
         eventListViewModelProvider: EventListWidgetViewModelProvider,
-        foremostEventViewModelProvider: ForemostEventWidgetViewModelProvider
+        foremostEventViewModelProvider: ForemostEventWidgetViewModelProvider,
+        styleRepository: any WidgetStyleRepository
     ) {
         self.eventListViewModelProvider = eventListViewModelProvider
         self.foremostEventViewModelProvider = foremostEventViewModelProvider
+        self.styleRepository = styleRepository
     }
     
-    func getViewModel(_ time: Date) async throws -> EventAndForemostWidgetViewModel {
+    func getViewModel(
+        _ time: Date, style: WidgetStyleId.Style = .default
+    ) async throws -> EventAndForemostWidgetViewModel {
         let eventList = try await self.eventListViewModelProvider.getEventListViewModel(
             for: time, widgetSize: .small
         )
         let foremost = try await self.foremostEventViewModelProvider.getViewModel(time)
-        // 판과 두 절반의 글자색이 한 값에서 나와야 한다 — 하위 위젯군의 기본 스타일을 절반씩 물려받으면
-        // 검은 판 위에 흰 배경용 글자색이 얹힌다. 합성 위젯의 배경색은 제 스타일 소관이다.
-        let look = WidgetLook(globalSetting: eventList.look.globalSetting)
-        return .init(event: eventList, foremost: foremost)
-            |> \.event.look .~ look
-            |> \.foremost.look .~ look
+        let resolved = self.styleRepository.resolveStyle(of: .eventAndForemostMedium, style: style)
+        let look = WidgetLook(globalSetting: eventList.look.globalSetting, appliedStyle: resolved)
+        return EventAndForemostWidgetViewModel(event: eventList, foremost: foremost)
+            .applying(look)
     }
 }
 
