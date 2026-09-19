@@ -29,7 +29,7 @@ assert_eq "Repository/Sources → Repo+App+Widget+Share" "Repository TodoCalenda
 assert_eq "Repository/Tests → Repository만" "Repository" "$(schemes_for 'M\tRepository/Tests/FooTests.swift')"
 assert_eq "Services/AuthService/Sources → AuthService+App" "AuthService TodoCalendarApp" "$(schemes_for 'M\tServices/AuthService/Sources/Foo.swift')"
 assert_eq "Services/AuthService/Tests → AuthService만" "AuthService" "$(schemes_for 'M\tServices/AuthService/Tests/FooTests.swift')"
-assert_eq "Services/FirstPartyServices → App(테스트 스킴 없음)" "TodoCalendarApp" "$(schemes_for 'M\tServices/FirstPartyServices/Sources/Foo.swift')"
+assert_eq "Services/FirstPartyServices → App+Share(Share 확장이 FirstPartyServices 를 문다)" "TodoCalendarApp TodoCalendarAppShare" "$(schemes_for 'M\tServices/FirstPartyServices/Sources/Foo.swift')"
 assert_eq "Services/SpeechService → App(테스트 스킴 없음)" "TodoCalendarApp" "$(schemes_for 'M\tServices/SpeechService/Sources/Foo.swift')"
 assert_eq "Services/PlaceService → App(테스트 스킴 없음)" "TodoCalendarApp" "$(schemes_for 'M\tServices/PlaceService/Sources/Foo.swift')"
 assert_eq "Services/ExternalServices → App(테스트 스킴 없음)" "TodoCalendarApp" "$(schemes_for 'M\tServices/ExternalServices/Sources/Foo.swift')"
