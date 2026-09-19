@@ -61,7 +61,10 @@ extension ForemostEventWidgetTimelineProvider {
             let viewModelProvider = await builder.makeForemostEventWidgetViewModelProvider()
             let now = Date()
             do {
-                let model = try await viewModelProvider.getViewModel(now)
+                let model = try await viewModelProvider.getViewModel(
+                    now,
+                    variant: family == .accessoryInline ? .foremostInline : .foremostSmall
+                )
                 completion(
                     .init(date: now, result: .success(model))
                         |> \.background .~ model.look.background

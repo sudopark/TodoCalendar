@@ -23,32 +23,43 @@ final class ForemostEventWidgetViewModelProvider {
     private let calendarSettingRepository: any CalendarSettingRepository
     private let appSettingRepository: any AppSettingRepository
     private let localeProvider: any LocaleProvider
+    private let styleRepository: any WidgetStyleRepository
     
     init(
         eventFetchUsecase: any CalendarEventFetchUsecase,
         calendarSettingRepository: any CalendarSettingRepository,
         appSettingRepository: any AppSettingRepository,
-        localeProvider: any LocaleProvider
+        localeProvider: any LocaleProvider,
+        styleRepository: any WidgetStyleRepository
     ) {
         self.eventFetchUsecase = eventFetchUsecase
         self.calendarSettingRepository = calendarSettingRepository
         self.appSettingRepository = appSettingRepository
         self.localeProvider = localeProvider
+        self.styleRepository = styleRepository
     }
 }
 
 extension ForemostEventWidgetViewModelProvider {
     
-    func getViewModel(_ refTime: Date) async throws -> ForemostEventWidgetViewModel {
+    /// 잠금화면 변형은 꾸미기 대상이 아니라 스타일 좌표를 읽지 않는다 — 전역 설정만 따른다.
+    func getViewModel(
+        _ refTime: Date,
+        variant: WidgetVariant = .foremostSmall,
+        style: WidgetStyleId.Style = .default
+    ) async throws -> ForemostEventWidgetViewModel {
         
         let setting = self.appSettingRepository.loadSavedViewAppearance()
+        let resolved = variant.isCustomizable
+            ? self.styleRepository.resolveStyle(of: variant, style: style)
+            : nil
         let eventModel = try await self.loadForemostEventModel(refTime, setting.calendar)
         return ForemostEventWidgetViewModel(
             eventModel: eventModel.0,
             defaultTagColorSetting: setting.defaultTagColor,
             tag: eventModel.1
         )
-        |> \.look .~ .init(globalSetting: setting.widget)
+        |> \.look .~ .init(globalSetting: setting.widget, appliedStyle: resolved)
     }
     
     private func loadForemostEventModel(

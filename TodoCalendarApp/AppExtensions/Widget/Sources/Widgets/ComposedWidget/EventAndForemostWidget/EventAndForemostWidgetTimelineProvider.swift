@@ -34,7 +34,12 @@ struct EventAndForemostWidgetViewModelProvider {
             for: time, widgetSize: .small
         )
         let foremost = try await self.foremostEventViewModelProvider.getViewModel(time)
+        // 판과 두 절반의 글자색이 한 값에서 나와야 한다 — 하위 위젯군의 기본 스타일을 절반씩 물려받으면
+        // 검은 판 위에 흰 배경용 글자색이 얹힌다. 합성 위젯의 배경색은 제 스타일 소관이다.
+        let look = WidgetLook(globalSetting: eventList.look.globalSetting)
         return .init(event: eventList, foremost: foremost)
+            |> \.event.look .~ look
+            |> \.foremost.look .~ look
     }
 }
 

@@ -33,6 +33,17 @@ struct WidgetViewModelProviderBuilder {
         return repository.loadWidgetAppearanceSetting()
     }
 
+    /// 뷰모델 provider 를 두지 않는 위젯이 스타일을 읽는 자리.
+    func resolveWidgetStyle(
+        of variant: WidgetVariant, style: WidgetStyleId.Style = .default
+    ) -> WidgetStyle? {
+        guard variant.isCustomizable else { return nil }
+        let repository = WidgetStyleLocalRepositoryImple(
+            environmentStorage: base.userDefaultEnvironmentStorage
+        )
+        return repository.resolveStyle(of: variant, style: style)
+    }
+
     private func checkShouldReset() async {
         
         let storage = base.userDefaultEnvironmentStorage
@@ -166,7 +177,10 @@ extension WidgetViewModelProviderBuilder {
             eventsFetchUsecase: fetchUsecase,
             appSettingRepository: appSettingRepository,
             calendarSettingRepository: calendarSettingRepository,
-            localeProvider: Locale.current
+            localeProvider: Locale.current,
+            styleRepository: WidgetStyleLocalRepositoryImple(
+                environmentStorage: base.userDefaultEnvironmentStorage
+            )
         )
     }
 }
@@ -204,7 +218,10 @@ extension WidgetViewModelProviderBuilder {
             eventsFetchUsecase: fetchUsecase,
             calendarSettingRepository: calendarSettingRepository,
             appSettingRepository: appSettingRepository,
-            localeProvider: Locale.current
+            localeProvider: Locale.current,
+            styleRepository: WidgetStyleLocalRepositoryImple(
+                environmentStorage: base.userDefaultEnvironmentStorage
+            )
         )
     }
 }
@@ -316,7 +333,10 @@ extension WidgetViewModelProviderBuilder {
             eventFetchUsecase: eventFetchUsecase,
             calendarSettingRepository: calendarSettingRepository,
             appSettingRepository: appSettingRepository,
-            localeProvider: Locale.current
+            localeProvider: Locale.current,
+            styleRepository: WidgetStyleLocalRepositoryImple(
+                environmentStorage: base.userDefaultEnvironmentStorage
+            )
         )
     }
 }
