@@ -20,6 +20,13 @@ private struct OtherStyleSetting: WidgetStyleSetting {
 }
 
 
+/// 필드가 없으면 Equatable 합성이 늘 true 라, 타입 캐스트가 유일한 구분자다.
+private struct OtherEmptyStyleSetting: WidgetStyleSetting {
+
+    static let initial = OtherEmptyStyleSetting()
+}
+
+
 struct WidgetVariantTests {
 
     @Test("꾸미기 대상이 아닌 변형은 payload 타입을 갖지 않는다")
@@ -32,9 +39,13 @@ struct WidgetVariantTests {
 
         // then
         #expect(variantsHavingType == [
+            .todayAndNextMedium,
+            .eventListSmall, .eventListMedium, .eventListLarge,
             .monthSmall, .todaySummarySmall,
+            .foremostSmall, .foremostMedium,
             .oneWeekEvents, .twoWeekEvents, .threeWeekEvents, .fourWeekEvents,
-            .currentMonthEvents, .lastMonthEvents, .nextMonthEvents
+            .currentMonthEvents, .lastMonthEvents, .nextMonthEvents,
+            .aiCommandSmall
         ])
     }
 
@@ -83,15 +94,55 @@ struct WidgetVariantTests {
     @Test("스타일을 공유하지 않는 변형은 자기 자신을 좌표로 쓴다")
     func styleVariant_nonSharingVariantPointsItself() {
         // given
-        let weekEvents = Set<WidgetVariant>([
+        let sharing = Set<WidgetVariant>([
             .oneWeekEvents, .twoWeekEvents, .threeWeekEvents, .fourWeekEvents,
-            .currentMonthEvents, .lastMonthEvents, .nextMonthEvents
+            .currentMonthEvents, .lastMonthEvents, .nextMonthEvents,
+            .eventListMedium, .eventListLarge, .foremostMedium
         ])
-        let others = WidgetVariant.allCases.filter { weekEvents.contains($0) == false }
+        let others = WidgetVariant.allCases.filter { sharing.contains($0) == false }
 
         // when + then
         #expect(others.allSatisfy { $0.styleVariant == $0 })
         #expect(WidgetVariant.monthSmall.styleVariant == .monthSmall)
+    }
+
+    @Test("EventList 3변형과 Foremost 홈 2변형은 각각 대표 좌표로 접힌다")
+    func styleVariant_sharingVariantsFoldIntoRepresentative() {
+        // given
+        let eventList: [WidgetVariant] = [.eventListSmall, .eventListMedium, .eventListLarge]
+        let foremostHome: [WidgetVariant] = [.foremostSmall, .foremostMedium]
+
+        // when + then
+        #expect(eventList.map { $0.styleVariant } == Array(repeating: .eventListSmall, count: 3))
+        #expect(foremostHome.map { $0.styleVariant } == Array(repeating: .foremostSmall, count: 2))
+        #expect(WidgetVariant.eventListLarge.styleSharingVariants == eventList)
+        #expect(WidgetVariant.foremostMedium.styleSharingVariants == foremostHome)
+    }
+
+    @Test("Foremost 잠금화면 변형은 홈 변형에 접히지 않는다")
+    func styleVariant_lockScreenVariantsDoNotFold() {
+        // given
+        let inline = WidgetVariant.foremostInline
+
+        // when + then
+        #expect(inline.styleVariant == .foremostInline)
+        #expect(inline.styleSharingVariants == [.foremostInline])
+        #expect(inline.isCustomizable == false)
+        #expect(WidgetVariant.aiCommandCircular.styleVariant == .aiCommandCircular)
+        #expect(WidgetVariant.aiCommandCircular.isCustomizable == false)
+    }
+
+    @Test("항목이 없는 payload 끼리도 타입으로 갈린다")
+    func isOwnSetting_distinguishesEmptyPayloadTypes() {
+        // given
+        let eventList = WidgetVariant.eventListSmall
+
+        // when + then
+        #expect(eventList.isOwnSetting(EventListStyleSetting.initial) == true)
+        #expect(eventList.isOwnSetting(OtherEmptyStyleSetting.initial) == false)
+        #expect(
+            WidgetVariant.todayAndNextMedium.isOwnSetting(EventListStyleSetting.initial) == false
+        )
     }
 
     @Test("변형이 내는 초기 설정은 그 payload 타입의 초기값이다")
