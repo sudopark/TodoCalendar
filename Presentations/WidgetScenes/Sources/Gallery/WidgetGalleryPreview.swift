@@ -202,9 +202,7 @@ extension WidgetVariant {
         else { return AnyView(EmptyView()) }
         return AnyView(
             DoubleMonthWidgetContentView(
-                model: model
-                |> \.current.look .~ look
-                |> \.next.look .~ look
+                model: model.applying(look)
             )
         )
     }
@@ -215,9 +213,7 @@ extension WidgetVariant {
         else { return AnyView(EmptyView()) }
         return AnyView(
             EventAndMonthWidgetContentView(
-                model: model
-                |> \.event.look .~ look
-                |> \.month.look .~ look
+                model: model.applying(look)
             ) { _ in
                 AnyView(WidgetPreviewTodoToggle(look: look))
             }
@@ -226,9 +222,7 @@ extension WidgetVariant {
 
     @MainActor
     private func eventAndForemostPreview(_ look: WidgetLook) -> AnyView {
-        let model = ComposedWidgetSampleFactory().eventAndForemost()
-        |> \.event.look .~ look
-        |> \.foremost.look .~ look
+        let model = ComposedWidgetSampleFactory().eventAndForemost().applying(look)
         return AnyView(
             EventAndForemostWidgetContentView(
                 model: model,
@@ -248,9 +242,7 @@ extension WidgetVariant {
         else { return AnyView(EmptyView()) }
         return AnyView(
             TodayAndMonthWidgetContentView(
-                model: model
-                |> \.today.look .~ look
-                |> \.month.look .~ look
+                model: model.applying(look)
             )
         )
     }

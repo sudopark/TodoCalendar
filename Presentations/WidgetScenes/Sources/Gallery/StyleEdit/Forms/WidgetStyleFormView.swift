@@ -8,6 +8,7 @@
 
 import SwiftUI
 import Domain
+import Extensions
 
 
 // MARK: - variant style form
@@ -54,13 +55,49 @@ extension WidgetVariant {
                     setting: aiCommand, onChange: onChange
                 )
             }
+        case .doubleMonthMedium:
+            if let composed = setting as? DoubleMonthStyleSetting {
+                WidgetStyleToggleFormView<MonthStyleItem>(
+                    title: "widget.events.calendar".localized(),
+                    setting: composed.month,
+                    onChange: { onChange(composed.replacingPart($0)) }
+                )
+            }
+        case .eventAndMonthMedium:
+            if let composed = setting as? EventAndMonthStyleSetting {
+                WidgetStyleToggleFormView<MonthStyleItem>(
+                    title: "widget.events.calendar".localized(),
+                    setting: composed.month,
+                    onChange: { onChange(composed.replacingPart($0)) }
+                )
+            }
+        case .eventAndForemostMedium:
+            if let composed = setting as? EventAndForemostStyleSetting {
+                WidgetStyleToggleFormView<ForemostStyleItem>(
+                    title: "widget.events.foremost".localized(),
+                    setting: composed.foremost,
+                    onChange: { onChange(composed.replacingPart($0)) }
+                )
+            }
+        case .todayAndMonthMedium:
+            if let composed = setting as? TodayAndMonthStyleSetting {
+                WidgetStyleToggleFormView<TodayStyleItem>(
+                    title: "widget.events.today".localized(),
+                    setting: composed.today,
+                    onChange: { onChange(composed.replacingPart($0)) }
+                )
+                WidgetStyleToggleFormView<MonthStyleItem>(
+                    title: "widget.events.calendar".localized(),
+                    setting: composed.month,
+                    onChange: { onChange(composed.replacingPart($0)) }
+                )
+            }
         // EventList 는 끄고 켤 항목이 없다 — 편집 화면엔 이름·배경색 섹션만 선다.
         case .eventListSmall, .eventListMedium, .eventListLarge,
              .foremostInline,
              .ddaySmall, .ddayMedium, .ddayCircular, .ddayRectangular, .ddayInline,
              .aiCommandCircular, .nextEventInline,
-             .nextEventRectangular, .nextRemainRectangular, .doubleMonthMedium,
-             .eventAndMonthMedium, .eventAndForemostMedium, .todayAndMonthMedium:
+             .nextEventRectangular, .nextRemainRectangular:
             EmptyView()
         }
     }
