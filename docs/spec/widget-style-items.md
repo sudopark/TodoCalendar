@@ -28,9 +28,9 @@
 | **AICommand** | 홈 1 (`aiCommandSmall`) | 설명 문구 | `AICommandWidgetViews.swift:48-50` |
 | **EventList** | 3 (small·medium·large) | **없음** — 색만 | — |
 | **DDay** | 홈 2 (small·medium) | **없음** — 색만 | — |
-| **Composed** | 4 | **없음** — 하위 상속 + 색 | `ComposedWidgetViews.swift` 전체가 하위 뷰 `HStack` 합성 |
+| **Composed** | 4 | 두 절반의 하위 토글 + 색 (제 스타일) | `ComposedWidgetViews.swift` 전체가 하위 뷰 `HStack` 합성 |
 
-> **토글이 0이어도 꾸미기 대상이다.** 색이 스타일에 들어가므로 EventList·DDay·Composed 도 스타일을 갖고, 인스턴스마다 다른 색을 걸 수 있다.
+> **토글이 0이어도 꾸미기 대상이다.** 색이 스타일에 들어가므로 EventList·DDay 도 스타일을 갖고, 인스턴스마다 다른 색을 걸 수 있다.
 
 ### 빠진 것 (유저 결정 2026-09-16)
 
@@ -135,9 +135,9 @@ campaign 2항 범위 밖의 "폰트 크기·텍스트 색 공통 축"은 **그�
 | Foremost | 1 (홈 2변형 공유) | 홈 2개 | 필요 | 완료 (#1113) |
 | AICommand | 1 | 홈 1개 | 필요 | 완료 (#1113) |
 | DDay | 0 (색만) | 이미 AppIntent | 파라미터 추가만 · 사진 배경은 별건 | 남음 |
-| Composed | 0 (색만 + 하위 상속) | 4개 | 필요 | 남음 |
+| Composed | 합성별 (하위 payload 를 담는다) | 4개 | 필요 | 완료 (#1133) |
 
-남은 토글은 0개다 — DDay·Composed 는 색만 쓴다. 두 위젯군의 무게중심은 **전환 + 스타일 파라미터 + 빈 payload 신설**이고, 색은 봉투에 있어 위젯군마다 따로 만들 게 없다. 소비 경로(`WidgetLook`)와 빈 payload 계약은 `docs/spec/widgets.md` §8.3 이 정본이다.
+남은 위젯군은 DDay 하나이고 색만 쓴다. 이미 AppIntent 라 무게중심은 **스타일 파라미터 + 빈 payload 신설**이고, 색은 봉투에 있어 따로 만들 게 없다. 소비 경로(`WidgetLook`)와 빈 payload 계약은 `docs/spec/widgets.md` §8.3 이 정본이다.
 
 ## 5. 확정 사항 정리
 

@@ -360,9 +360,15 @@ hex 색상으로 UIColor 생성
 | EventList | `EventListStyleSetting` | 없음 (배경색만) | `eventListSmall` (3변형 공유) |
 | Foremost | `ForemostStyleSetting` | "가장 중요한 일정" 라벨 | `foremostSmall` (홈 2변형 공유) |
 | AICommand | `AICommandStyleSetting` | 설명 문구 | `aiCommandSmall` |
+| DoubleMonth | `DoubleMonthStyleSetting { month }` | Month 4 — 두 달이 같이 따른다 | `doubleMonthMedium` |
+| EventAndMonth | `EventAndMonthStyleSetting { month }` | Month 4 | `eventAndMonthMedium` |
+| EventAndForemost | `EventAndForemostStyleSetting { foremost }` | Foremost 라벨 | `eventAndForemostMedium` |
+| TodayAndMonth | `TodayAndMonthStyleSetting { today, month }` | Today 6 + Month 4 | `todayAndMonthMedium` |
 
 - AICommand 는 뷰모델이 없어 뷰가 봉투에서 직접 설정을 꺼내고, 타임라인 entry 가 그 봉투를 담는다(`WidgetViewModelProviderBuilder.resolveWidgetStyle(of:style:)`).
-- **합성 위젯은 제 스타일 좌표가 없어 두 절반이 한 봉투를 쓴다** — 합성 provider 가 전역 기준 `WidgetLook` 하나를 만들어 두 하위 뷰모델에 같이 꽂는다. 하위 위젯군의 기본 스타일을 절반씩 물려받으면 판은 한쪽 색으로 칠하고 글자색은 다른 쪽 배경에서 파생돼 한 절반이 안 읽힌다. 표시 토글도 같이 차단된다 — 합성 위젯엔 그 토글을 고를 자리가 없다. 합성 위젯 자신의 배경색·토글 상속은 DP-3.5 가 스타일 좌표를 열 때 그 자리에 들어간다.
+- **합성 위젯은 제 스타일로 그린다** (#1133) — 합성 payload 가 하위 위젯군 payload 를 필드로 담고(위 표), 배경색은 봉투가 담는다. 하위 위젯군의 스타일과는 끊겨, 하위 쪽 토글·배경색을 바꿔도 합성 위젯은 안 바뀐다 — 놓이는 자리가 달라 따로 꾸민다.
+- **두 절반은 한 합성 봉투에서 읽는다** — `WidgetLook.part(_:)` 가 합성 봉투에서 한 절반의 봉투를 꺼낸다: 하위 payload 를 keyPath 로 꺼내 `setting` 에 꽂고, 판 색은 합성 스타일 것을 그대로 둔다. 판과 두 절반의 글자색이 한 배경에서 파생돼야 한 절반이 안 읽히는 일이 없다. 토글이 없는 이벤트 절반은 합성 봉투를 그대로 받는다. 이 배선은 `<합성>WidgetViewModel.applying(_:)` 한 곳에 있고 provider 와 갤러리 프리뷰가 같이 쓴다.
+- **편집 폼은 하위 폼을 절반마다 재사용한다** — 하위 폼이 내보낸 하위 payload 를 `<합성>StyleSetting.replacingPart(_:)` 로 합성 payload 에 감싸 올린다. 감싸지 않으면 좌표의 payload 타입이 아니어서 저장되지 않는다(표현 층 계약). 섹션 제목은 절반의 위젯 이름이다.
 
 #### 스타일 공유 변형군 (#1112)
 
