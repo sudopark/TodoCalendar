@@ -54,14 +54,14 @@
 | AICommand | 1 | 홈 1개 | 필요 |
 | EventList | 0 | 이미 AppIntent | 없음 — 배경색만 |
 | DDay | 0 | 이미 AppIntent | 없음 — 배경색만 |
-| Composed | 0 | 4개 | 없음 — 배경색 + 하위 상속 |
+| Composed | 합성별 (하위 payload 를 담는다) | 4개 | 필요 — 제 스타일이 두 절반 토글과 배경색을 갖는다 |
 
 ### C. 별건
 
 | 과업 | 내용 |
 |---|---|
 | C-1 | **DDay 사진 배경** — App Group 이미지 저장·다운샘플, 배경 적용 지점 확장, 사진 위 대비 보정. A2·A6 가정을 spike 로 판정하고 D2 결심으로 간다 |
-| C-2 | **Composed 하위 상속** — 하위 뷰의 표시 토글을 물려받아 그린다. 배경색은 자기 스타일이 갖는다 |
+| C-2 | **Composed 제 스타일** — 합성 스타일이 두 절반의 표시 토글과 배경색을 갖는다. 하위 스타일과는 끊긴다 (#1133) |
 
 ## 3. DP 재편안
 
@@ -72,7 +72,7 @@
 | **DP-3.1** | Month + WeekEvents — payload·폼·전환 8·파라미터 | 3.0 | M |
 | **DP-3.2** | TodayAndNext + EventList + Foremost + AICommand — payload 4·폼 3·전환 3·파라미터 | 3.0 | M |
 | **DP-3.4** | DDay — 색 정합 확인 + 사진 배경 | 3.A | M |
-| **DP-3.5** | Composed — 전환 4 + 하위 상속 | 3.1 · 3.2 | S |
+| **DP-3.5** | Composed — 합성 payload·편집 폼·전환 4·파라미터 + 토글 OFF 스냅샷 | 3.1 · 3.2 | M |
 
 **DP-3.3 은 사라진다** — Foremost·AICommand 가 3.2 로 흡수되고, NextEvent 계열은 잠금화면 전용이라 대상 밖이다.
 
@@ -96,7 +96,8 @@
 - **TodayAndNext** — 타임존
 - **Foremost** — "가장 중요한 일정" 라벨
 - **AICommand** — 설명 문구
-- **EventList · DDay · Composed** — 켜고 끌 항목은 없고 배경색만 고른다
+- **EventList · DDay** — 켜고 끌 항목은 없고 배경색만 고른다
+- **Composed** — 두 절반의 표시 토글을 제 스타일로 갖는다 (#1133)
 
 고치는 즉시 미리보기가 바뀌고, 저장하면 홈 위젯도 다음 갱신에 따라온다.
 
