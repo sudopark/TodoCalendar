@@ -338,15 +338,38 @@ hex 색상으로 UIColor 생성
 **배경색은 payload 가 아니라 봉투가 담는다** — `WidgetStyle.background: WidgetAppearanceSettings.Background?`. 위젯군과 무관하게 같은 값이라 payload 마다 반복할 이유가 없고, 그래서 색 편집 UI 도 한 벌이다 — 위젯군별 폼(위 3번)은 표시 토글만 그린다. **nil 은 "전역 설정(8.1)을 따른다"** 는 뜻이고, 저장 레코드에서도 Optional 이라 배경색이 없던 시절 값이 그대로 디코딩된다.
 
 - **해석은 두 걸음이다 — 스타일을 먼저 고르고, 그 스타일 안에서 색을 정한다.** ① 인스턴스가 고른 스타일, 그 스타일이 지워졌으면 변형의 기본 스타일 ② 그 스타일의 `background`, nil 이면 전역 설정(8.1), 전역이 `.system` 이면 시스템. **폴백을 필드 단위로 하면 안 된다** — 고른 스타일이 색을 안 걸었을 때 기본 스타일의 색을 빌려오면, 편집 화면이 그 스타일에 "공통 위젯 테마 따름"이라 적고 갤러리 프리뷰도 전역 색으로 그리는데 실제 위젯만 다른 색이 된다. 스타일 선택은 표시 항목(위 소비 우선순위 계약)과 같은 축이고, 배경색은 거기에 전역 단이 하나 더 붙는 것뿐이다.
-- **해석 결과는 렌더용 `WidgetAppearanceSettings` 사본의 배경 칸에 채워 넘긴다** — provider(`TodayWidgetViewModelProvider.getTodayViewModel`)와 갤러리 프리뷰(`WidgetAppearanceSettings.overridingBackground(_:)`)가 같은 관례를 쓴다. **저장된 전역 설정은 바뀌지 않는다** — 그걸 바꾸는 길은 설정 > 외형 > 위젯 하나뿐이다.
+- **렌더로 가는 해석은 `WidgetLook` 안에서만 일어난다** — 전역 설정과 고른 스타일을 함께 든 값이고, `background` 가 위 두 걸음을 푼다. provider·갤러리 프리뷰·편집 카드가 모두 이 값을 넘겨 받는다(#1113 소비 계약). **예외는 편집 화면의 색 피커 초기값 하나다** — 아직 저장 전 초안이라 `WidgetStyle` 이 없어 봉투를 만들 수 없고, 렌더가 아니라 피커가 열릴 때의 시작색이라 같은 2단 폴백을 그 자리에서 푼다. **저장된 전역 설정은 바뀌지 않는다** — 그걸 바꾸는 길은 설정 > 외형 > 위젯 하나뿐이다.
 - 이 한 자리가 배경판과 글자색 양쪽으로 흐른다. 8.2 대로 글자색은 배경 밝기에서 파생되므로 배경만 갈아끼우면 글자색이 따라온다 — **글자색은 스타일 항목이 아니다.**
 - **편집 화면의 배경 Section 에는 토글이 없다** — 색 선택 줄 하나이고, 고르는 순간 nil 이 `.custom(hex:)` 가 돼 그 스타일이 전역을 따르지 않게 된다. 아직 안 고른 스타일은 해석된 전역 색을 띄워 보여주고, 색이 어디서 왔는지(공통 위젯 테마 따름 / 이 스타일 전용)를 함께 적는다. **전역 따름으로 되돌리는 길은 기본 스타일 초기화(`resetStyle`)** 이고, 카드를 복제하면 배경색도 따라간다.
 - **갤러리 프리뷰 넷이 모두 반영한다** — 1 depth 썸네일은 변형의 기본 스타일 배경색을, 2 depth 앞장·뒷장과 편집 화면 카드는 카드마다 그 스타일의 배경색을 쓴다. 잠금화면 변형은 프리뷰 판이 검은 판 고정이라 배경색이 안 먹는다.
 - **DDay 홈 2변형도 ColorSet 을 쓴다** — 고정 `.primary`/`.secondary` 라 배경색조차 글자에 안 닿던 자리를 8.2 경로에 맞췄다. 잠금화면 4변형은 시스템이 단색 렌더링을 강제해 그대로다.
 
+#### 소비 경로와 빈 payload (#1113)
+
+**전역 설정과 고른 스타일은 한 값으로 소비된다** — `WidgetLook { globalSetting, appliedStyle }`(Domain). 뷰모델·provider·프리뷰가 둘을 따로 주입받지 않고 이 봉투 하나를 든다.
+
+- `background` 는 위 배경색 계약의 두 걸음을 푼다 — `appliedStyle?.background ?? globalSetting.background`. 스타일이 색을 안 걸었으면 전역이고, 변형 기본의 색을 빌려오지 않는다. 변형 기본으로 내려가는 것은 `WidgetStyleRepository.resolveStyle(of:style:)` 이 `appliedStyle` 을 채울 때 이미 끝난다.
+- `setting<S>()` 는 payload 를 그 타입으로 돌려주고, 타입이 어긋나면 `S.initial` 이다 — 다른 변형 payload 가 섞여도 크래시하지 않는다. 뷰모델은 `var style: <Group>StyleSetting { self.look.setting() }` 계산 프로퍼티로 받아, 뷰의 표기는 `model.style.showXxx` 그대로다.
+- 비제네릭인 이유는 표현 층 계약과 같다 — 프리뷰가 런타임에 변형을 정하므로 payload 타입을 컴파일 타임에 못 박을 수 없다.
+
+**끄고 켤 항목이 없는 위젯군도 payload 타입을 갖는다** — `isCustomizable` 이 `settingType != nil` 의 파생이라, 배경색만 꾸미는 위젯군도 타입이 없으면 스타일 좌표 자체를 못 갖는다. `EventListStyleSetting` 이 그 경우로 필드가 없고 `init(from:)` 도 두지 않는다(읽을 키가 없어 합성으로 충분). 편집 화면엔 이름·배경색 섹션만 서고 표시 항목 폼은 빈 뷰다.
+
+| 위젯군 | payload | 표시 토글 | 좌표 |
+|---|---|---|---|
+| TodayAndNext | `TodayAndNextStyleSetting` | 타임존 | `todayAndNextMedium` |
+| EventList | `EventListStyleSetting` | 없음 (배경색만) | `eventListSmall` (3변형 공유) |
+| Foremost | `ForemostStyleSetting` | "가장 중요한 일정" 라벨 | `foremostSmall` (홈 2변형 공유) |
+| AICommand | `AICommandStyleSetting` | 설명 문구 | `aiCommandSmall` |
+
+- AICommand 는 뷰모델이 없어 뷰가 봉투에서 직접 설정을 꺼내고, 타임라인 entry 가 그 봉투를 담는다(`WidgetViewModelProviderBuilder.resolveWidgetStyle(of:style:)`).
+- **합성 위젯은 제 스타일 좌표가 없어 두 절반이 한 봉투를 쓴다** — 합성 provider 가 전역 기준 `WidgetLook` 하나를 만들어 두 하위 뷰모델에 같이 꽂는다. 하위 위젯군의 기본 스타일을 절반씩 물려받으면 판은 한쪽 색으로 칠하고 글자색은 다른 쪽 배경에서 파생돼 한 절반이 안 읽힌다. 표시 토글도 같이 차단된다 — 합성 위젯엔 그 토글을 고를 자리가 없다. 합성 위젯 자신의 배경색·토글 상속은 DP-3.5 가 스타일 좌표를 열 때 그 자리에 들어간다.
+
 #### 스타일 공유 변형군 (#1112)
 
-**변형이 여럿이어도 꾸밀 항목이 같으면 스타일 하나를 공유한다** — WeekEvents 7변형(`oneWeekEvents`·`twoWeekEvents`·`threeWeekEvents`·`fourWeekEvents`·`currentMonthEvents`·`lastMonthEvents`·`nextMonthEvents`)이 그 경우다. 뷰와 provider 가 하나고 표시 항목도 같아서, 유저가 7벌을 따로 편집할 이유가 없다.
+**변형이 여럿이어도 꾸밀 항목이 같으면 스타일 하나를 공유한다** — WeekEvents 7변형(`oneWeekEvents`·`twoWeekEvents`·`threeWeekEvents`·`fourWeekEvents`·`currentMonthEvents`·`lastMonthEvents`·`nextMonthEvents`), EventList 3변형(`eventListSmall`·`eventListMedium`·`eventListLarge` → `eventListSmall`), Foremost 홈 2변형(`foremostSmall`·`foremostMedium` → `foremostSmall`)이 그 경우다. 뷰와 provider 가 하나고 표시 항목도 같아서, 유저가 여러 벌을 따로 편집할 이유가 없다.
+
+- **접는 이유는 편집 진입이 아니라 인스턴스 선택이다** — `EntityQuery` 는 자기가 어느 family 에 뜨는지 모르므로 변형마다 좌표를 가르면 Small 인스턴스가 Large 스타일까지 후보로 보게 된다. 같은 kind 를 쓰는 변형군은 스타일 풀 하나로 접는다.
+- **잠금화면 변형은 접지 않는다** — `foremostInline`·`aiCommandCircular` 는 꾸미기 대상이 아니라 자기 자신을 좌표로 내고 `isCustomizable` 이 false 다. provider 도 이 값을 보고 스타일 조회를 건너뛴다.
 
 - **대표 변형을 `WidgetVariant.styleVariant` 가 가리킨다.** 공유하지 않는 변형은 자기 자신을 낸다. `styleSharingVariants` 는 그 역으로, 한 변형과 스타일을 공유하는 변형 전부(자기 포함)를 낸다.
 - **정규화는 두 층이다.** 좌표를 받는 경로는 `WidgetStyleId.init(variant:style:)` 이 대표 변형으로 접고, `WidgetVariant` 를 좌표 없이 직접 받는 경로(`WidgetStyleUsecaseImple` 의 `shareKey`·`loadStyles`)는 그 자리에서 접는다. **한 층만으로는 샌다** — 저장소와 공유 상태 키가 `variant.rawValue` 라, 좌표만 접으면 `.twoWeekEvents` 로 연 편집 화면이 `oneWeekEvents` 키에 저장된 스타일을 못 읽는다.

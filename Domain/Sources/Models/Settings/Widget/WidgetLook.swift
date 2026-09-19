@@ -9,7 +9,7 @@
 import Foundation
 
 
-/// 전역 위젯 설정과 이 인스턴스가 고른 스타일을 한 벌로 묶는다 — 둘의 해석은 여기서만 일어난다.
+/// 전역 위젯 설정과 이 인스턴스가 고른 스타일을 한 벌로 묶는다 — 렌더로 가는 해석은 여기서만 일어난다.
 public struct WidgetLook: Sendable {
 
     public let globalSetting: WidgetAppearanceSettings
