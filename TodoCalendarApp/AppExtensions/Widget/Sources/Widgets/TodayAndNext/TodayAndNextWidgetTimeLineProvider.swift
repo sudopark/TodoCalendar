@@ -42,7 +42,8 @@ extension TodayAndNextWidgetTimeLineProvider {
         
         return await self.loadEntry(
             selected: configuration.eventTypes,
-            excludeAllDayEvent: configuration.excludeAllDayEvent
+            excludeAllDayEvent: configuration.excludeAllDayEvent,
+            style: configuration.resolvedStyle
         )
     }
     
@@ -51,7 +52,9 @@ extension TodayAndNextWidgetTimeLineProvider {
         in context: Context
     ) async -> Timeline<ResultTimelineEntry<TodayAndNextWidgetViewModel>> {
         let entry = await self.loadEntry(
-            selected: configuration.eventTypes, excludeAllDayEvent: configuration.excludeAllDayEvent
+            selected: configuration.eventTypes,
+            excludeAllDayEvent: configuration.excludeAllDayEvent,
+            style: configuration.resolvedStyle
         )
         switch entry.result {
         case .success(let model):
@@ -67,7 +70,8 @@ extension TodayAndNextWidgetTimeLineProvider {
     
     private func loadEntry(
         selected: [EventTypeEntity]?,
-        excludeAllDayEvent: Bool
+        excludeAllDayEvent: Bool,
+        style: WidgetStyleId.Style
     ) async -> Entry {
         
         let tagIds = selected?.map { EventTagId($0) }
@@ -77,7 +81,7 @@ extension TodayAndNextWidgetTimeLineProvider {
         )
         let now = Date()
         do {
-            let model = try await viewModelProvider.getViewModel(for: now)
+            let model = try await viewModelProvider.getViewModel(for: now, style: style)
             return .init(date: now, result: .success(model))
                 |> \.background .~ model.look.background
         } catch {
