@@ -36,3 +36,4 @@
 - [2026-09-03 구글 캘린더 만료 알림이 다시 떴는데, 재현 빌드가 수정 이전 버전이었다](2026-09-03-google-token-expiry-recurs-on-pre-fix-build.md) — ExternalCalendar / non-issue / 구글 연동 만료·401 Invalid Credentials·토큰 갱신 타임아웃·재현 빌드가 수정 이전
 - [2026-09-10 위젯 갤러리에서 AI·다음이벤트 위젯 아이콘이 빈칸으로 나온다](2026-09-10-widget-gallery-named-image-assets-blank.md) — Settings / fixed / 갤러리 아이콘 안보임·AI 위젯 빈칸·Bundle.main 이름 해석·확장 카탈로그 전용 에셋
 - [2026-09-16 취소된 event sync 가 완료를 보고해, 뒤이어 시작된 sync 의 종료 신호가 사라진다](2026-09-16-cancelled-sync-reports-idle.md) — Event / fixed / AI 커맨드 결과 이벤트 안보임·포그라운드 복귀 이벤트 누락·syncEnd 안옴·removeDuplicates 유령 idle
+- [2026-09-19 Month 위젯 오늘 강조가 배경과 같은 계열로 나와 안 보인다](2026-09-19-month-widget-today-highlight-invisible.md) — Calendar / fixed / 오늘 강조·selectedDayBackground·다크모드·backgroundColor 미적용
