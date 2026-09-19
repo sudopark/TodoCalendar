@@ -47,14 +47,12 @@ struct EventAndForemostWidgetViewModelProvider {
 }
 
 
-struct EventAndForemostWidgetViewTimelineProvider: TimelineProvider {
+struct EventAndForemostWidgetViewTimelineProvider: AppIntentTimelineProvider {
     
+    typealias Intent = EventAndForemostWidgetConfigurationIntent
     typealias Entry = ResultTimelineEntry<EventAndForemostWidgetViewModel>
     
-    func placeholder(
-        in context: Context
-    ) -> ResultTimelineEntry<EventAndForemostWidgetViewModel> {
-        
+    func placeholder(in context: Context) -> Entry {
         return .init(date: Date()) {
             .init(
                 event: EventListWidgetViewModel.sample(size: .small),
@@ -63,52 +61,37 @@ struct EventAndForemostWidgetViewTimelineProvider: TimelineProvider {
         }
     }
     
-    func getSnapshot(
-        in context: Context,
-        completion: @Sendable @escaping (ResultTimelineEntry<EventAndForemostWidgetViewModel>
-        ) -> Void) {
-        
+    func snapshot(
+        for configuration: EventAndForemostWidgetConfigurationIntent,
+        in context: Context
+    ) async -> Entry {
         guard context.isPreview == false
         else {
-            completion(placeholder(in: context))
-            return
+            return self.placeholder(in: context)
         }
-        self.getEntry(context) { entry in
-            completion(entry)
-        }
+        return await self.loadEntry(configuration.resolvedStyle)
     }
     
-    func getTimeline(
-        in context: Context,
-        completion: @Sendable @escaping (Timeline<ResultTimelineEntry<EventAndForemostWidgetViewModel>>) -> Void
-    ) {
-        self.getEntry(context) { entry in
-            let timeline = Timeline(entries: [entry], policy: .after(Date().nextUpdateTime))
-            completion(timeline)
-        }
+    func timeline(
+        for configuration: EventAndForemostWidgetConfigurationIntent,
+        in context: Context
+    ) async -> Timeline<Entry> {
+        let entry = await self.loadEntry(configuration.resolvedStyle)
+        return Timeline(entries: [entry], policy: .after(Date().nextUpdateTime))
     }
     
-    private func getEntry(
-        _ context: Context,
-        _ completion: @Sendable @escaping (Entry) -> Void
-    ) {
-        
-        Task {
-            
-            let builder = WidgetViewModelProviderBuilder(base: .init())
-            let viewModelProvider = await builder.makeEventListAndForemostWidgetViewModelProvider(
-                targetEventTagId: .default
-            )
-            let now = Date()
-            do {
-                let model = try await viewModelProvider.getViewModel(now)
-                completion(
-                    .init(date: now, result: .success(model))
-                    |> \.background .~ model.event.look.background
-                )
-            } catch {
-                completion(.init(date: now, result: .failure(.init(error: error))))
-            }
+    private func loadEntry(_ style: WidgetStyleId.Style) async -> Entry {
+        let builder = WidgetViewModelProviderBuilder(base: .init())
+        let viewModelProvider = await builder.makeEventListAndForemostWidgetViewModelProvider(
+            targetEventTagId: .default
+        )
+        let now = Date()
+        do {
+            let model = try await viewModelProvider.getViewModel(now, style: style)
+            return .init(date: now, result: .success(model))
+                |> \.background .~ model.event.look.background
+        } catch {
+            return .init(date: now, result: .failure(.init(error: error)))
         }
     }
 }

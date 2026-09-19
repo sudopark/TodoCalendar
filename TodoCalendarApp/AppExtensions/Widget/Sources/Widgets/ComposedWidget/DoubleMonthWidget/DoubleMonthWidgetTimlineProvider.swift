@@ -51,8 +51,9 @@ struct DoubleMonthWidgetViewModelProvider {
     }
 }
 
-struct DoubleMonthWidgetTimlineProvider: TimelineProvider {
+struct DoubleMonthWidgetTimlineProvider: AppIntentTimelineProvider {
     
+    typealias Intent = DoubleMonthWidgetConfigurationIntent
     typealias Entry = ResultTimelineEntry<DoubleMonthWidgetViewModel>
     
     func placeholder(in context: Context) -> Entry {
@@ -64,40 +65,35 @@ struct DoubleMonthWidgetTimlineProvider: TimelineProvider {
         }
     }
     
-    func getSnapshot(in context: Context, completion: @Sendable @escaping (Entry) -> Void) {
+    func snapshot(
+        for configuration: DoubleMonthWidgetConfigurationIntent,
+        in context: Context
+    ) async -> Entry {
         guard context.isPreview == false
         else {
-            completion(placeholder(in: context))
-            return
+            return self.placeholder(in: context)
         }
-        self.getEntry { entry in
-            completion(entry)
-        }
+        return await self.loadEntry(configuration.resolvedStyle)
     }
     
-    func getTimeline(in context: Context, completion: @Sendable @escaping (Timeline<Entry>) -> Void) {
-        
-        self.getEntry { entry in
-            let timeline = Timeline(entries: [entry], policy: .after(Date().nextUpdateTime))
-            completion(timeline)
-        }
+    func timeline(
+        for configuration: DoubleMonthWidgetConfigurationIntent,
+        in context: Context
+    ) async -> Timeline<Entry> {
+        let entry = await self.loadEntry(configuration.resolvedStyle)
+        return Timeline(entries: [entry], policy: .after(Date().nextUpdateTime))
     }
     
-    private func getEntry(_ completion: @Sendable @escaping (Entry) -> Void) {
-     
-        Task {
-            let builer = WidgetViewModelProviderBuilder(base: .init())
-            let viewModelProvider = await builer.makeDoubleMonthViewModelProvider()
-            let now = Date()
-            do {
-                let model = try await viewModelProvider.getviewModel(now)
-                completion(
-                    .init(date: now, result: .success(model))
-                    |> \.background .~ model.current.look.background
-                )
-            } catch {
-                completion(.init(date: now, result: .failure(.init(error: error))))
-            }
+    private func loadEntry(_ style: WidgetStyleId.Style) async -> Entry {
+        let builder = WidgetViewModelProviderBuilder(base: .init())
+        let viewModelProvider = await builder.makeDoubleMonthViewModelProvider()
+        let now = Date()
+        do {
+            let model = try await viewModelProvider.getviewModel(now, style: style)
+            return .init(date: now, result: .success(model))
+                |> \.background .~ model.current.look.background
+        } catch {
+            return .init(date: now, result: .failure(.init(error: error)))
         }
     }
 }

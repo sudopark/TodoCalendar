@@ -47,7 +47,11 @@ struct EventAndMonthWidget: Widget {
     nonisolated static let kind = "EventAndMonthWidget"
     
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: EventAndMonthWidget.kind, provider: EventAndMonthWidgetTimelineProvider()) { entry in
+        AppIntentConfiguration(
+            kind: EventAndMonthWidget.kind,
+            intent: EventAndMonthWidgetConfigurationIntent.self,
+            provider: EventAndMonthWidgetTimelineProvider()
+        ) { entry in
             EventAndMonthWidgetView(entry: entry)
                 .containerBackground(entry.backgroundShape, for: .widget)
         }
