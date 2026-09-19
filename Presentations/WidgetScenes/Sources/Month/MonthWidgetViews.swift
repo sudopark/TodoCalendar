@@ -75,13 +75,9 @@ public struct SingleMonthView: View {
                 return self.accentDayText(model.accentDay)
             }
         }()
-        let backgroundColor: Color = {
-            if model.identifier == monthModel.highlightedTodayIdentifier {
-                return colorSet.selectedDayBackground.asColor
-            } else {
-                return colorSet.dayBackground.asColor
-            }
-        }()
+        // 평일 칸은 판을 깔지 않는다 — 위젯은 셀이 빽빽해 칸마다 배지를 그리면 격자가 드러난다.
+        let highlightColor: Color = model.identifier == monthModel.highlightedTodayIdentifier
+            ? colorSet.selectedDayBackground.asColor : .clear
         let lineColor: Color = {
             if model.identifier == monthModel.highlightedTodayIdentifier {
                 return colorSet.selectedDayText.asColor
@@ -101,6 +97,10 @@ public struct SingleMonthView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(
+            RoundedRectangle(cornerRadius: Metric.Radius.chip)
+                .fill(highlightColor)
+        )
     }
     
     private func accentDayText(_ accent: AccentDays?) -> Color {
