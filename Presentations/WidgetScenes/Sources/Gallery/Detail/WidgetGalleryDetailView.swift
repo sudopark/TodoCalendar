@@ -223,8 +223,7 @@ struct WidgetGalleryDetailView: View {
 
             WidgetVariantPreviewView(
                 variant: variant,
-                setting: state.setting.overridingBackground(stack?.base.background),
-                style: stack?.base.setting
+                look: .init(globalSetting: state.setting, appliedStyle: stack?.base)
             )
             .if(condition: overlayStyles.isEmpty == false) { $0.cardDepthShadow() }
         }
@@ -239,8 +238,7 @@ struct WidgetGalleryDetailView: View {
         let direction: CGFloat = depth.isMultiple(of: 2) ? -1 : 1
         return WidgetVariantPreviewView(
             variant: variant,
-            setting: state.setting.overridingBackground(style.background),
-            style: style.setting
+            look: .init(globalSetting: state.setting, appliedStyle: style)
         )
         .cardDepthShadow()
         .scaleEffect(Constant.overlayScale)

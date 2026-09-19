@@ -60,7 +60,7 @@ extension TodayWidgetTimelineProvider {
         do {
             let model = try await viewModelProvider.getTodayViewModel(for: now, style: style)
             return .init(date: now, result: .success(model))
-                |> \.background .~ model.widgetSetting.background
+                |> \.background .~ model.look.background
             
         } catch {
             return .init(date: now, result: .failure(.init(error: error)))

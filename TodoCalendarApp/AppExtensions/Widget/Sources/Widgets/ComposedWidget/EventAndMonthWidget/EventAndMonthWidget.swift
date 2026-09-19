@@ -29,7 +29,7 @@ struct EventAndMonthWidgetView: View {
     var body: some View {
         switch self.entry.result {
         case .success(let model):
-            let colorSet = model.event.widgetSetting.background.colorSet(colorScheme == .light)
+            let colorSet = model.event.look.background.colorSet(colorScheme == .light)
             EventAndMonthWidgetContentView(model: model) { todo in
                 AnyView(TodoToggleButton(todo: todo, colorSet: colorSet))
             }

@@ -17,7 +17,7 @@ import CalendarPresentation
 public struct TodaySummaryView: View {
     @Environment(\.colorScheme) var colorScheme
     var colorSet: any ColorSet {
-        return model.widgetSetting.background.colorSet(colorScheme == .light)
+        return model.look.background.colorSet(colorScheme == .light)
     }
     
     private enum Constant {

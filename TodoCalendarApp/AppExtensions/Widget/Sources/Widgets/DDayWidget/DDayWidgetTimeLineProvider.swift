@@ -62,7 +62,7 @@ extension DDayWidgetTimeLineProvider {
                 for: now, target: configuration.resolvedTargetId
             )
             return .init(date: now, result: .success(model))
-                |> \.background .~ model.widgetSetting.background
+                |> \.background .~ model.look.background
         } catch {
             return .init(date: now, result: .failure(.init(error: error)))
         }

@@ -300,8 +300,7 @@ extension WidgetGalleryView {
             let defaultStyle = state.defaultStyles[thumbnailVariant.id]
             WidgetVariantPreviewView(
                 variant: thumbnailVariant,
-                setting: state.setting.overridingBackground(defaultStyle?.background),
-                style: defaultStyle?.setting
+                look: .init(globalSetting: state.setting, appliedStyle: defaultStyle)
             )
             .frame(width: side, height: side)
         } else {

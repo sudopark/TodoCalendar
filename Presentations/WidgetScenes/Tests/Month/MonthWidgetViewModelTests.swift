@@ -22,7 +22,14 @@ struct MonthWidgetViewModelTests {
         let style = items.reduce(into: MonthStyleSetting.initial) { acc, item in
             acc[keyPath: item.settingKeyPath] = false
         }
-        return try MonthWidgetViewModel.makeSample() |> \.style .~ style
+        return try MonthWidgetViewModel.makeSample()
+            |> \.look .~ .init(
+                globalSetting: .init(),
+                appliedStyle: .init(
+                    id: .init(variant: .monthSmall, style: .default),
+                    name: nil, setting: style
+                )
+            )
     }
 }
 

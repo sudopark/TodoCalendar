@@ -67,7 +67,7 @@ struct ForemostEventWidgetView: View {
     private func systemSizeView(
         _ model: ForemostEventWidgetViewModel, isSmallSize: Bool
     ) -> some View {
-        let colorSet = model.widgetSetting.background.colorSet(colorScheme == .light)
+        let colorSet = model.look.background.colorSet(colorScheme == .light)
         return SystemSizeForemostEventView(model: model, isSmallSize: isSmallSize) { todo in
             AnyView(ForemostTodoToggleButton(todo: todo, colorSet: colorSet))
         }

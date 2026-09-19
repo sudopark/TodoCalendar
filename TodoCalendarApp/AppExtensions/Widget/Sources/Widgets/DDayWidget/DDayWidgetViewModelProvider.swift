@@ -54,7 +54,7 @@ extension DDayWidgetViewModelProvider {
         else {
             return DDayWidgetViewModel.noTarget()
                 |> \.refreshAfter .~ refreshAfter
-                |> \.widgetSetting .~ setting
+                |> \.look .~ .init(globalSetting: setting)
         }
 
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
@@ -72,7 +72,7 @@ extension DDayWidgetViewModelProvider {
         )
         |> \.refreshAfter .~ refreshAfter
         |> \.link .~ self.link(for: event, in: timeZone)
-        |> \.widgetSetting .~ setting
+        |> \.look .~ .init(globalSetting: setting)
     }
 
     /// 일정은 그 회차 상세로, 공휴일은 해당 날짜 선택으로 보낸다.

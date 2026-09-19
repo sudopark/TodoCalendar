@@ -25,7 +25,7 @@ public struct TodayAndNextWidgetViewModel {
     public var googleCalendarColors: GoogleCalendar.Colors = .init(ownerId: "", calendars: [:], events: [:])
     public var googleCalendarTags: [String: GoogleCalendar.Tag] = [:]
     public var appleCalendarTags: [String: AppleCalendar.Tag] = [:]
-    public var widgetSetting = WidgetAppearanceSettings()
+    public var look = WidgetLook(globalSetting: .init())
 
     public init(
         left: PageModel,
@@ -36,7 +36,7 @@ public struct TodayAndNextWidgetViewModel {
         googleCalendarColors: GoogleCalendar.Colors = .init(ownerId: "", calendars: [:], events: [:]),
         googleCalendarTags: [String: GoogleCalendar.Tag] = [:],
         appleCalendarTags: [String: AppleCalendar.Tag] = [:],
-        widgetSetting: WidgetAppearanceSettings = WidgetAppearanceSettings()
+        look: WidgetLook = .init(globalSetting: .init())
     ) {
         self.left = left
         self.right = right
@@ -46,7 +46,7 @@ public struct TodayAndNextWidgetViewModel {
         self.googleCalendarColors = googleCalendarColors
         self.googleCalendarTags = googleCalendarTags
         self.appleCalendarTags = appleCalendarTags
-        self.widgetSetting = widgetSetting
+        self.look = look
     }
 
     public static func sample() -> TodayAndNextWidgetViewModel {

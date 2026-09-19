@@ -329,7 +329,7 @@ extension TodayAndNextWidgetViewModelProvider {
             |> \.googleCalendarColors .~ (events.googleCalendarColors ?? .init(ownerId: "", calendars: [:], events: [:]))
             |> \.googleCalendarTags .~ events.googleCalendarTags
             |> \.appleCalendarTags .~ events.appleCalendarTags
-            |> \.widgetSetting .~ setting.widget
+            |> \.look .~ .init(globalSetting: setting.widget)
     }
     
     private func loadEvnets(

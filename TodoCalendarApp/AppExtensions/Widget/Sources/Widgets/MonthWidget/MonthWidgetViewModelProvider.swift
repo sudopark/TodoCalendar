@@ -59,10 +59,7 @@ extension MonthWidgetViewModelProvider {
             )
         }
         return model
-            |> \.widgetSetting .~ (
-                setting |> \.background .~ (resolved?.background ?? setting.background)
-            )
-            |> \.style .~ (resolved?.setting as? MonthStyleSetting ?? .initial)
+            |> \.look .~ .init(globalSetting: setting, appliedStyle: resolved)
     }
     
     private func currentMonthModel(_ now: Date, _ timeZone: TimeZone) async throws -> MonthWidgetViewModel {

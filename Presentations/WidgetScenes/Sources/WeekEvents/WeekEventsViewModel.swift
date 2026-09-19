@@ -40,8 +40,8 @@ public struct WeekEventsViewModel {
     public var googleCalendarColor: GoogleCalendar.Colors?
     public var googleCalendarTags: [String: GoogleCalendar.Tag]
     public var appleCalendarTags: [String: AppleCalendar.Tag]
-    public var widgetSetting: WidgetAppearanceSettings
-    public var style = WeekEventsStyleSetting.initial
+    public var look: WidgetLook
+    public var style: WeekEventsStyleSetting { self.look.setting() }
     
     public var showsWeekDayHeader: Bool { self.style.showWeekDayHeader }
     
@@ -57,7 +57,7 @@ public struct WeekEventsViewModel {
         googleCalendarColor: GoogleCalendar.Colors? = nil,
         googleCalendarTags: [String: GoogleCalendar.Tag] = [:],
         appleCalendarTags: [String: AppleCalendar.Tag] = [:],
-        widgetSetting: WidgetAppearanceSettings
+        look: WidgetLook
     ) {
         self.range = range
         self.targetMonthText = targetMonthText
@@ -70,7 +70,7 @@ public struct WeekEventsViewModel {
         self.googleCalendarColor = googleCalendarColor
         self.googleCalendarTags = googleCalendarTags
         self.appleCalendarTags = appleCalendarTags
-        self.widgetSetting = widgetSetting
+        self.look = look
     }
     
     public static func sample(_ range: WeekEventsRange) -> WeekEventsViewModel {
@@ -96,7 +96,7 @@ public struct WeekEventsViewModel {
             eventStackModelMap: wholeModel.eventStackModelMap,
             defaultTagColorSetting: .init(holiday: "#D6236A", default: "#088CDA"),
             tagMap: [:],
-            widgetSetting: .init()
+            look: .init(globalSetting: .init())
         )
     }
     
@@ -177,7 +177,7 @@ public struct WeekEventsViewModel {
             eventStackModelMap: eventStacks,
             defaultTagColorSetting: .init(holiday: "#D6236A", default: "#088CDA"),
             tagMap: [:],
-            widgetSetting: .init()
+            look: .init(globalSetting: .init())
         )
     }
 }

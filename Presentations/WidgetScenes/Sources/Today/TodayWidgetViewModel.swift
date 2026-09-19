@@ -41,8 +41,8 @@ public struct TodayWidgetViewModel {
     public var todoEventCount: Int = 0
     public var scheduleEventcount: Int = 0
     public var totalEventCount: Int { self.todoEventCount + self.scheduleEventcount }
-    public var widgetSetting = WidgetAppearanceSettings()
-    public var style = TodayStyleSetting.initial
+    public var look = WidgetLook(globalSetting: .init())
+    public var style: TodayStyleSetting { self.look.setting() }
     
     public var displayHolidayName: String? {
         return self.style.showHolidayName ? self.holidayName : nil

@@ -21,18 +21,18 @@ public struct ForemostEventWidgetViewModel {
     public var eventModel: (any EventCellViewModel)?
     public let defaultTagColorSetting: DefaultEventTagColorSetting
     public var tag: CustomEventTag?
-    public var widgetSetting = WidgetAppearanceSettings()
+    public var look = WidgetLook(globalSetting: .init())
 
     public init(
         eventModel: (any EventCellViewModel)? = nil,
         defaultTagColorSetting: DefaultEventTagColorSetting,
         tag: CustomEventTag? = nil,
-        widgetSetting: WidgetAppearanceSettings = WidgetAppearanceSettings()
+        look: WidgetLook = .init(globalSetting: .init())
     ) {
         self.eventModel = eventModel
         self.defaultTagColorSetting = defaultTagColorSetting
         self.tag = tag
-        self.widgetSetting = widgetSetting
+        self.look = look
     }
 
     public static func sample() -> ForemostEventWidgetViewModel {

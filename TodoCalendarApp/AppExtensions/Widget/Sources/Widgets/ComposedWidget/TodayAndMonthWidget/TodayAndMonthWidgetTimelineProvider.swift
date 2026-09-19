@@ -78,7 +78,7 @@ struct TodayAndMonthWidgetTimelineProvider: TimelineProvider {
                 let model = try await viewModelProvider.getViewModel(now)
                 completion(
                     .init(date: now, result: .success(model))
-                    |> \.background .~ model.month.widgetSetting.background
+                    |> \.background .~ model.month.look.background
                 )
             } catch {
                 completion(.init(date: now, result: .failure(.init(error: error))))

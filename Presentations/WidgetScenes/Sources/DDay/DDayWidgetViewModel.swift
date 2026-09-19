@@ -28,7 +28,7 @@ public struct DDayWidgetViewModel: Sendable {
     public let repeatText: String
     public var refreshAfter: Date?
     public var link: URL?
-    public var widgetSetting: WidgetAppearanceSettings = .init()
+    public var look: WidgetLook = .init(globalSetting: .init())
 
     public init(
         eventTitle: String,

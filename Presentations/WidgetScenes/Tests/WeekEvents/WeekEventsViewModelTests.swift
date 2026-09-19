@@ -19,7 +19,14 @@ struct WeekEventsViewModelTests {
     private func makeModel(showWeekDayHeader: Bool) -> WeekEventsViewModel {
         let style = WeekEventsStyleSetting.initial
             |> \.showWeekDayHeader .~ showWeekDayHeader
-        return WeekEventsViewModel.sample(.weeks(count: 1)) |> \.style .~ style
+        return WeekEventsViewModel.sample(.weeks(count: 1))
+            |> \.look .~ .init(
+                globalSetting: .init(),
+                appliedStyle: .init(
+                    id: .init(variant: .oneWeekEvents, style: .default),
+                    name: nil, setting: style
+                )
+            )
     }
 }
 

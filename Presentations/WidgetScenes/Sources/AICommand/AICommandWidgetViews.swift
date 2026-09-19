@@ -28,13 +28,13 @@ public struct AICommandSmallView: View {
 
     @Environment(\.colorScheme) private var colorScheme
     private var colorSet: any ColorSet {
-        return self.setting.background.colorSet(colorScheme == .light)
+        return self.look.background.colorSet(colorScheme == .light)
     }
 
-    private let setting: WidgetAppearanceSettings
+    private let look: WidgetLook
 
-    public init(setting: WidgetAppearanceSettings) {
-        self.setting = setting
+    public init(look: WidgetLook) {
+        self.look = look
     }
 
     public var body: some View {

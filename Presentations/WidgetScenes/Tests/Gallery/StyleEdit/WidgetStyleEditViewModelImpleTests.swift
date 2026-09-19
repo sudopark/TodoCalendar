@@ -1294,3 +1294,30 @@ extension WidgetStyleEditViewModelImpleTests {
         #expect(emitted == .custom(hex: "#101820"))
     }
 }
+
+
+// MARK: - 미리보기에 넘길 봉투
+
+extension WidgetStyleEditViewModelImpleTests {
+
+    @Test("카드가 내는 봉투는 그 카드의 좌표·이름·설정·배경색을 그대로 싣는다")
+    func appliedStyle_carriesCardValues() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModel(saved: [
+            self.todayStyle(
+                .custom(id: "c1"), name: "여름",
+                showHolidayName: false, background: .custom(hex: "#101820")
+            )
+        ])
+
+        // when
+        let card = try await self.styles(of: viewModel).first.unwrap()
+
+        // then
+        let applied = card.appliedStyle
+        #expect(applied.id == .init(variant: .todaySummarySmall, style: .custom(id: "c1")))
+        #expect(applied.name == "여름")
+        #expect(applied.background == .custom(hex: "#101820"))
+        #expect((applied.setting as? TodayStyleSetting)?.showHolidayName == false)
+    }
+}

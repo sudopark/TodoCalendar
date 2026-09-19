@@ -21,17 +21,11 @@ struct WidgetVariantPreviewView: View {
     @Environment(ViewAppearance.self) private var appearance
 
     private let variant: WidgetVariant
-    private let setting: WidgetAppearanceSettings
-    private let style: (any WidgetStyleSetting)?
+    private let look: WidgetLook
 
-    init(
-        variant: WidgetVariant,
-        setting: WidgetAppearanceSettings,
-        style: (any WidgetStyleSetting)? = nil
-    ) {
+    init(variant: WidgetVariant, look: WidgetLook) {
         self.variant = variant
-        self.setting = setting
-        self.style = style
+        self.look = look
     }
 
     var body: some View {
@@ -62,17 +56,17 @@ struct WidgetVariantPreviewView: View {
     private var contentView: some View {
         if variant.canvas.isLockScreen {
             // 잠금화면 요소는 벽지 위에 흰 글씨로 얹힌다 — 미리보기는 벽지 대신 어두운 판을 깐다.
-            variant.previewView(setting, style: style)
+            variant.previewView(look)
                 .environment(\.colorScheme, .dark)
         } else {
-            variant.previewView(setting, style: style)
+            variant.previewView(look)
         }
     }
 
     private var plateStyle: AnyShapeStyle {
         return variant.canvas.isLockScreen
         ? AnyShapeStyle(Color.black.opacity(Constant.lockScreenPlateOpacity))
-        : WidgetBackgroundStyle(setting.background).shape
+        : WidgetBackgroundStyle(look.background).shape
     }
 
     private func plateShape(_ scale: CGFloat) -> RoundedRectangle {

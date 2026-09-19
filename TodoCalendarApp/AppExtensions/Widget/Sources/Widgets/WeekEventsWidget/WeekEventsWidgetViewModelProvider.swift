@@ -84,11 +84,8 @@ extension WeekEventsWidgetViewModelProvider {
             googleCalendarColor: events.googleCalendarColors,
             googleCalendarTags: events.googleCalendarTags,
             appleCalendarTags: events.appleCalendarTags,
-            widgetSetting: appearSetting.widget |> \.background .~ (
-                resolved?.background ?? appearSetting.widget.background
-            )
+            look: .init(globalSetting: appearSetting.widget, appliedStyle: resolved)
         )
-        |> \.style .~ (resolved?.setting as? WeekEventsStyleSetting ?? .initial)
     }
     
     private func getWeeks(

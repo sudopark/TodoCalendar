@@ -42,7 +42,9 @@ final class WidgetViewSnapshots: XCTestCase {
             timeText: "",
             repeatText: ""
         )
-        |> \.widgetSetting .~ (WidgetAppearanceSettings() |> \.background .~ background)
+        |> \.look .~ .init(
+            globalSetting: WidgetAppearanceSettings() |> \.background .~ background
+        )
     }
 
     @MainActor
