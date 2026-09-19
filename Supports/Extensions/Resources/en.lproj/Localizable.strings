@@ -586,7 +586,7 @@
 "widget.style::custom::unnamed" = "Untitled";
 "widget.style.edit::name::section" = "Style name";
 "widget.style.edit::background::section" = "Background color";
-"widget.style.edit::background::following_global" = "Following the shared widget theme";
+"widget.style.edit::background::following_global" = "Follow the shared widget theme";
 "widget.style.edit::background::style_own" = "This style only";
 "widget.style.edit::items::section" = "Details";
 "widget.style::custom::copy_format" = "%@ - Copy";

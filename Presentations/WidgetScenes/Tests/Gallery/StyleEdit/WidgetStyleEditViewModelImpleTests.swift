@@ -1201,7 +1201,7 @@ extension WidgetStyleEditViewModelImpleTests {
         let (viewModel, _) = self.makeViewModelWithDefaultOnly()
 
         // when
-        viewModel.updateBackground("#101820")
+        viewModel.updateBackground(.custom(hex: "#101820"))
         let emitted = try await self.selectedBackground(of: viewModel)
 
         // then
@@ -1214,7 +1214,7 @@ extension WidgetStyleEditViewModelImpleTests {
         let (viewModel, _) = self.makeViewModelWithDefaultOnly()
 
         // when
-        viewModel.updateBackground("#101820")
+        viewModel.updateBackground(.custom(hex: "#101820"))
 
         // then
         let emitted = try await self.hasUnsavedChange(of: viewModel)
@@ -1227,7 +1227,7 @@ extension WidgetStyleEditViewModelImpleTests {
         let (viewModel, usecase) = self.makeViewModelWithCustom()
 
         // when
-        viewModel.updateBackground("#101820")
+        viewModel.updateBackground(.custom(hex: "#101820"))
 
         // then
         let emitted = try await self.styles(of: viewModel)
@@ -1235,11 +1235,56 @@ extension WidgetStyleEditViewModelImpleTests {
         #expect(self.savedStyles(usecase).map { $0.background } == [nil, nil])
     }
 
+    @Test("공통 테마 따름으로 되돌리면 표시 항목과 이름은 그대로 남는다")
+    func updateBackground_whenClearedToNil_keepsOtherEdits() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModelWithDefaultOnly()
+        viewModel.updateBackground(.custom(hex: "#101820"))
+        viewModel.updateSetting(TodayStyleSetting.initial |> \.showTimeZone .~ false)
+
+        // when
+        viewModel.updateBackground(nil)
+
+        // then
+        let emitted = try await self.selectedBackground(of: viewModel)
+        #expect(emitted == .some(nil))
+        let setting = try await self.selectedSetting(of: viewModel) as? TodayStyleSetting
+        #expect(setting?.showTimeZone == false)
+    }
+
+    @Test("되돌린 상태를 저장하면 저장소의 색도 비워진다")
+    func confirm_whenBackgroundCleared_savesNilBackground() async throws {
+        // given
+        let (viewModel, usecase) = self.makeViewModel(
+            saved: [self.todayStyle(.default, background: .custom(hex: "#101820"))]
+        )
+
+        // when
+        viewModel.updateBackground(nil)
+        viewModel.confirm()
+
+        // then
+        #expect(self.savedStyles(usecase).map { $0.background } == [nil])
+    }
+
+    @Test("스타일에 시스템 테마를 명시로 걸 수 있다")
+    func updateBackground_canPinSystemTheme() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModelWithDefaultOnly()
+
+        // when
+        viewModel.updateBackground(.system)
+
+        // then
+        let emitted = try await self.selectedBackground(of: viewModel)
+        #expect(emitted == .system)
+    }
+
     @Test("저장하면 고른 색이 스타일과 함께 저장된다")
     func confirm_savesBackgroundWithStyle() async throws {
         // given
         let (viewModel, usecase) = self.makeViewModelWithDefaultOnly()
-        viewModel.updateBackground("#101820")
+        viewModel.updateBackground(.custom(hex: "#101820"))
 
         // when
         viewModel.confirm()
@@ -1267,7 +1312,7 @@ extension WidgetStyleEditViewModelImpleTests {
     func resetStyle_afterUpdateBackground_followsGlobalAgain() async throws {
         // given
         let (viewModel, _) = self.makeViewModelWithDefaultOnly()
-        viewModel.updateBackground("#101820")
+        viewModel.updateBackground(.custom(hex: "#101820"))
 
         // when
         viewModel.resetStyle(self.defaultId)

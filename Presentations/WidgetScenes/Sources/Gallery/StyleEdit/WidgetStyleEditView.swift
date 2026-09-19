@@ -84,7 +84,7 @@ final class WidgetStyleEditViewEventHandler: Observable {
     var discard: () -> Void = { }
     var editName: (String) -> Void = { _ in }
     var updateSetting: (any WidgetStyleSetting) -> Void = { _ in }
-    var updateBackground: (String) -> Void = { _ in }
+    var updateBackground: (WidgetAppearanceSettings.Background?) -> Void = { _ in }
     var confirm: () -> Void = { }
     var close: () -> Void = { }
     
@@ -364,8 +364,13 @@ struct WidgetStyleEditView: View {
             }
             
             Section {
-                backgroundRow
+                followGlobalThemeRow
                     .listRowBackground(Color.clear)
+
+                if state.selectedBackground != nil {
+                    backgroundRow
+                        .listRowBackground(Color.clear)
+                }
             } header: {
                 sectionHeader("widget.style.edit::background::section".localized())
             }
@@ -387,9 +392,38 @@ struct WidgetStyleEditView: View {
             .foregroundStyle(appearance.colorSet.text2.asColor)
     }
     
+    private var followGlobalThemeRow: some View {
+        HStack {
+            Text("widget.style.edit::background::following_global".localized())
+                .font(appearance.fontSet.normal.asFont)
+                .foregroundStyle(appearance.colorSet.text1.asColor)
+
+            Spacer()
+
+            Toggle("", isOn: self.followGlobalBinding)
+                .controlSize(.small)
+                .labelsHidden()
+        }
+    }
+
+    /// 끄는 순간 지금 보이는 색을 그대로 굳힌다 — 토글만 눌렀는데 배경이 튀지 않게.
+    private var followGlobalBinding: Binding<Bool> {
+        return .init(
+            get: { state.selectedBackground == nil },
+            set: { followGlobal in
+                guard followGlobal == false else {
+                    self.eventHandlers.updateBackground(nil)
+                    return
+                }
+                guard let hex = self.backgroundColor.hex(environment) else { return }
+                self.eventHandlers.updateBackground(.custom(hex: hex))
+            }
+        )
+    }
+
     private var backgroundRow: some View {
         HStack {
-            Text(self.backgroundSourceText)
+            Text("widget.style.edit::background::style_own".localized())
                 .font(appearance.fontSet.normal.asFont)
                 .foregroundStyle(appearance.colorSet.text1.asColor)
             
@@ -398,7 +432,7 @@ struct WidgetStyleEditView: View {
             ColorSelectView(self.backgroundColor)
                 .eventHandler(\.colorSelected) { newColor in
                     guard let hex = newColor.hex(environment) else { return }
-                    self.eventHandlers.updateBackground(hex)
+                    self.eventHandlers.updateBackground(.custom(hex: hex))
                 }
                 .id(self.backgroundSwatchId)
         }
@@ -408,12 +442,6 @@ struct WidgetStyleEditView: View {
     /// 고른 색끼리는 구분하지 않는다 — 색을 고르는 동안 다시 세우면 시스템 피커가 끊긴다.
     private var backgroundSwatchId: [AnyHashable] {
         return [state.selectedStyleId, state.selectedBackground == nil]
-    }
-    
-    private var backgroundSourceText: String {
-        return state.selectedBackground == nil
-        ? "widget.style.edit::background::following_global".localized()
-        : "widget.style.edit::background::style_own".localized()
     }
     
     private var backgroundColor: Color {
