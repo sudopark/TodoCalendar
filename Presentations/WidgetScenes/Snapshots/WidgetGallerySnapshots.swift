@@ -311,3 +311,86 @@ final class WidgetGallerySnapshots: XCTestCase {
         }
     }
 }
+
+
+// MARK: - 합성 위젯 스타일 편집 — 토글 OFF
+
+extension WidgetGallerySnapshots {
+
+    private func allOff<Item: WidgetStyleItem>(_ item: Item.Type) -> Item.Setting {
+        return Item.allCases.reduce(Item.Setting.initial) { acc, item in
+            acc |> item.settingKeyPath .~ false
+        }
+    }
+
+    @MainActor
+    private func composedEditState(
+        _ variant: WidgetVariant, setting: any WidgetStyleSetting
+    ) -> WidgetStyleEditViewState {
+        let style = WidgetStyle(
+            id: .init(variant: variant, style: .default), name: nil,
+            setting: setting, background: .custom(hex: "#1F3A5F")
+        )
+        let state = WidgetStyleEditViewState()
+        state.styles = [
+            .init(
+                styleId: style.id, name: style.displayName,
+                hasUnsavedChange: false, setting: style.setting,
+                background: style.background
+            )
+        ]
+        state.selectedStyleId = style.id
+        state.selectedSetting = style.setting
+        state.selectedBackground = style.background
+        return state
+    }
+
+    @MainActor
+    private func captureComposedEdit(
+        _ name: String,
+        _ variant: WidgetVariant,
+        setting: any WidgetStyleSetting,
+        testName: String = #function
+    ) {
+        captureSnapshotPair(named: name, layout: .fullScreen, testName: testName) { theme in
+            WidgetStyleEditView(variants: [variant], setting: .init())
+                .environment(self.composedEditState(variant, setting: setting))
+                .environment(WidgetStyleEditViewEventHandler())
+                .environment(self.makeAppearance(theme))
+        }
+    }
+
+    @MainActor
+    func test_widgetStyleEdit_doubleMonth_allTogglesOff() {
+        self.captureComposedEdit(
+            "widgetStyleEdit-doubleMonth-allOff", .doubleMonthMedium,
+            setting: DoubleMonthStyleSetting.initial |> \.month .~ self.allOff(MonthStyleItem.self)
+        )
+    }
+
+    @MainActor
+    func test_widgetStyleEdit_eventAndMonth_allTogglesOff() {
+        self.captureComposedEdit(
+            "widgetStyleEdit-eventAndMonth-allOff", .eventAndMonthMedium,
+            setting: EventAndMonthStyleSetting.initial |> \.month .~ self.allOff(MonthStyleItem.self)
+        )
+    }
+
+    @MainActor
+    func test_widgetStyleEdit_eventAndForemost_allTogglesOff() {
+        self.captureComposedEdit(
+            "widgetStyleEdit-eventAndForemost-allOff", .eventAndForemostMedium,
+            setting: EventAndForemostStyleSetting.initial |> \.foremost .~ self.allOff(ForemostStyleItem.self)
+        )
+    }
+
+    @MainActor
+    func test_widgetStyleEdit_todayAndMonth_allTogglesOff() {
+        self.captureComposedEdit(
+            "widgetStyleEdit-todayAndMonth-allOff", .todayAndMonthMedium,
+            setting: TodayAndMonthStyleSetting.initial
+                |> \.today .~ self.allOff(TodayStyleItem.self)
+                |> \.month .~ self.allOff(MonthStyleItem.self)
+        )
+    }
+}

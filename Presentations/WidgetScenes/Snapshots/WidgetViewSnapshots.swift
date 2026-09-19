@@ -125,3 +125,74 @@ final class WidgetViewSnapshots: XCTestCase {
         }
     }
 }
+
+
+// MARK: - 표시 토글 OFF
+
+extension WidgetViewSnapshots {
+
+    private func allOffLook<Item: WidgetStyleItem>(
+        _ variant: WidgetVariant, _ item: Item.Type
+    ) -> WidgetLook {
+        let setting = Item.allCases.reduce(Item.Setting.initial) { acc, item in
+            acc |> item.settingKeyPath .~ false
+        }
+        return WidgetLook(
+            globalSetting: WidgetAppearanceSettings(),
+            appliedStyle: WidgetStyle(
+                id: .init(variant: variant, style: .default), name: nil, setting: setting
+            )
+        )
+    }
+
+    @MainActor
+    func test_monthView_allTogglesOff() {
+        let look = self.allOffLook(.monthSmall, MonthStyleItem.self)
+        self.capture("month-allTogglesOff", canvas: WidgetCanvas.small) {
+            WidgetVariant.monthSmall.previewView(look)
+        }
+    }
+
+    @MainActor
+    func test_weekEventsView_allTogglesOff() {
+        let look = self.allOffLook(.twoWeekEvents, WeekEventsStyleItem.self)
+        self.capture("weekEvents-allTogglesOff", canvas: WidgetCanvas.medium) {
+            WidgetVariant.twoWeekEvents.previewView(look)
+        }
+    }
+
+    @MainActor
+    func test_todayAndNextView_timeZoneOff() {
+        let look = self.allOffLook(.todayAndNextMedium, TodayAndNextStyleItem.self)
+        let sample = TodayAndNextWidgetViewModel.sample()
+        // 샘플엔 타임존 문자열이 없고 날짜가 실행일이다 — 고정값을 넣어야 OFF 가 드러나고 png 가 안 밀린다.
+        let fixedToday = TodayAndNextWidgetViewModel.TodayModel(
+            weekOfDay: "Friday", day: 12, timeZonetext: "KST"
+        )
+        let leftRows: [any TodayAndNextWidgetViewModelRow] = [fixedToday] + Array(sample.left.rows.dropFirst())
+        let model = sample
+            |> \.left.rows .~ leftRows
+            |> \.look .~ look
+        self.capture("todayAndNext-timeZoneOff", canvas: WidgetCanvas.medium) {
+            TodayAndNextWidgetView(model: model) { _, color in
+                AnyView(WidgetPreviewTodoToggle(look: look, size: 16, customColor: color))
+            }
+        }
+    }
+
+    @MainActor
+    func test_foremostView_typeLabelOff() {
+        let look = self.allOffLook(.foremostSmall, ForemostStyleItem.self)
+        self.capture("foremost-typeLabelOff", canvas: WidgetCanvas.small) {
+            WidgetVariant.foremostSmall.previewView(look)
+        }
+    }
+
+    @MainActor
+    func test_aiCommandView_explainOff() {
+        let look = self.allOffLook(.aiCommandSmall, AICommandStyleItem.self)
+        self.capture("aiCommand-explainOff", canvas: WidgetCanvas.small) {
+            WidgetVariant.aiCommandSmall.previewView(look)
+        }
+    }
+}
