@@ -36,26 +36,19 @@ final class WidgetStyleUsecaseImpleTests: PublisherWaitable {
             self.savedStyles = savedStyles
         }
 
-        private(set) var requestedVariant: WidgetVariant?
-        private(set) var updatedStyles: [WidgetStyle] = []
-        private(set) var removedStyleIds: [WidgetStyleId] = []
-
         func loadStyle(for id: WidgetStyleId) -> WidgetStyle? {
             return self.savedStyles.first { $0.id == id }
         }
 
         func loadStyles(of variant: WidgetVariant) -> [WidgetStyle] {
-            self.requestedVariant = variant
             return self.savedStyles.filter { $0.id.variant == variant }
         }
 
         func updateStyle(_ style: WidgetStyle) {
-            self.updatedStyles.append(style)
             self.savedStyles = self.savedStyles.filter { $0.id != style.id } + [style]
         }
 
         func removeStyle(_ id: WidgetStyleId) {
-            self.removedStyleIds.append(id)
             self.savedStyles = self.savedStyles.filter { $0.id != id }
         }
     }
@@ -147,32 +140,30 @@ extension WidgetStyleUsecaseImpleTests {
         #expect(styles.first?.setting as? TodayStyleSetting == TodayStyleSetting.initial)
     }
 
-    @Test("조회한 변형을 저장소에 그대로 넘긴다")
-    func loadStyles_passGivenVariantToRepository() {
+    @Test("조회한 변형의 좌표로 목록이 선다")
+    func loadStyles_returnsStylesOfGivenVariant() {
         // given
-        let repository = StubRepository()
-        let usecase = self.makeUsecase(with: repository)
+        let usecase = self.makeUsecase(with: .init())
 
         // when
         let styles = usecase.loadStyles(of: .todaySummarySmall)
 
         // then
-        #expect(repository.requestedVariant == .todaySummarySmall)
-        #expect(styles.first?.id.variant == .todaySummarySmall)
+        #expect(styles.map { $0.id } == [
+            .init(variant: .todaySummarySmall, style: .default)
+        ])
     }
 
-    @Test("꾸미기 대상이 아닌 변형은 저장소를 부르지 않고 빈 목록을 낸다")
+    @Test("꾸미기 대상이 아닌 변형은 빈 목록을 낸다")
     func loadStyles_whenVariantHasNoSettingType_isEmpty() {
         // given
-        let repository = StubRepository()
-        let usecase = self.makeUsecase(with: repository)
+        let usecase = self.makeUsecase(with: .init())
 
         // when
         let styles = usecase.loadStyles(of: .doubleMonthMedium)
 
         // then
         #expect(styles.isEmpty == true)
-        #expect(repository.requestedVariant == nil)
     }
 
     @Test("저장분이 없어도 공유 변형 조회는 대표 좌표의 기본 스타일을 낸다")
@@ -397,8 +388,8 @@ extension WidgetStyleUsecaseImpleTests {
         usecase.updateStyle(style)
 
         // then
-        let updated = repository.updatedStyles.first
-        #expect(updated?.isSame(style) == true)
+        let saved = usecase.loadStyles(of: .todaySummarySmall).last
+        #expect(saved?.isSame(style) == true)
     }
 
     @Test("좌표의 변형이 쓰는 타입이 아닌 설정은 저장소로 가지 않는다")
@@ -416,7 +407,7 @@ extension WidgetStyleUsecaseImpleTests {
         usecase.updateStyle(style)
 
         // then
-        #expect(repository.updatedStyles.isEmpty == true)
+        #expect(usecase.loadStyles(of: .todaySummarySmall).map { $0.id.style } == [.default])
     }
 
     @Test("비대표 WeekEvents 변형으로 저장해도 공유 좌표에 들어가 다른 변형이 읽는다")
@@ -452,9 +443,9 @@ extension WidgetStyleUsecaseImpleTests {
         usecase.updateStyle(style)
 
         // then
-        let updated = repository.updatedStyles.first
-        #expect(updated?.name == nil)
-        #expect(updated?.setting.asToday?.showHolidayName == false)
+        let saved = usecase.loadStyles(of: .todaySummarySmall).last
+        #expect(saved?.name == nil)
+        #expect(saved?.setting.asToday?.showHolidayName == false)
     }
 }
 
@@ -475,7 +466,9 @@ extension WidgetStyleUsecaseImpleTests {
         // then
         #expect(newId.variant == .todaySummarySmall)
         #expect(newId.style != .default)
-        #expect(repository.updatedStyles.isEmpty)
+        #expect(usecase.loadStyles(of: .todaySummarySmall).map { $0.id } == [
+            .init(variant: .todaySummarySmall, style: .default)
+        ])
     }
 
     @Test("두 번 발급하면 서로 다른 좌표가 나온다")
@@ -497,31 +490,33 @@ extension WidgetStyleUsecaseImpleTests {
 
 extension WidgetStyleUsecaseImpleTests {
 
-    @Test("커스텀 스타일 삭제 요청은 저장소로 그대로 간다")
-    func removeStyle_whenCustom_passesIdToRepository() {
+    @Test("커스텀 스타일을 지우면 목록에서 빠진다")
+    func removeStyle_whenCustom_dropsItFromList() {
         // given
-        let repository = StubRepository()
-        let usecase = self.makeUsecase(with: repository)
         let styleId = WidgetStyleId(variant: .todaySummarySmall, style: .custom(id: "c1"))
+        let saved = self.todayStyle(.custom(id: "c1"), showHolidayName: true)
+        let usecase = self.makeUsecase(with: .init(savedStyles: [saved]))
 
         // when
         usecase.removeStyle(styleId)
 
         // then
-        #expect(repository.removedStyleIds == [styleId])
+        #expect(usecase.loadStyles(of: .todaySummarySmall).map { $0.id.style } == [.default])
     }
 
-    @Test("기본 스타일은 삭제 요청이 저장소로 가지 않는다")
-    func removeStyle_whenDefault_doesNotReachRepository() {
+    @Test("기본 스타일은 지워지지 않고 목록에 남는다")
+    func removeStyle_whenDefault_keepsItInList() {
         // given
-        let repository = StubRepository()
-        let usecase = self.makeUsecase(with: repository)
+        let saved = self.todayStyle(.default, showHolidayName: false)
+        let usecase = self.makeUsecase(with: .init(savedStyles: [saved]))
 
         // when
         usecase.removeStyle(.init(variant: .todaySummarySmall, style: .default))
 
         // then
-        #expect(repository.removedStyleIds.isEmpty)
+        let styles = usecase.loadStyles(of: .todaySummarySmall)
+        #expect(styles.map { $0.id.style } == [.default])
+        #expect(styles.first?.setting.asToday?.showHolidayName == false)
     }
 }
 
@@ -536,11 +531,10 @@ private extension WidgetStyleSetting {
 
 extension WidgetStyleUsecaseImpleTests {
 
-    @Test("저장하면 고른 배경색이 저장소까지 간다")
-    func updateStyle_carriesBackgroundToRepository() {
+    @Test("저장하면 고른 배경색과 다듬은 이름이 함께 실린다")
+    func updateStyle_carriesBackgroundAndTrimmedName() {
         // given
-        let repository = StubRepository()
-        let usecase = self.makeUsecase(with: repository)
+        let usecase = self.makeUsecase(with: .init())
 
         // when
         usecase.updateStyle(
@@ -551,8 +545,9 @@ extension WidgetStyleUsecaseImpleTests {
         )
 
         // then
-        #expect(repository.updatedStyles.map { $0.background } == [.custom(hex: "#101820")])
-        #expect(repository.updatedStyles.map { $0.name } == ["밤 모드"])
+        let saved = usecase.loadStyles(of: .todaySummarySmall).last
+        #expect(saved?.background == .custom(hex: "#101820"))
+        #expect(saved?.name == "밤 모드")
     }
 
     @Test("저장한 배경색이 다시 조회한 목록에도 실린다")
