@@ -59,7 +59,7 @@ struct AICommandShortcutWidgetView: View {
 
     @Environment(\.widgetFamily) private var family
 
-    let setting: WidgetAppearanceSettings
+    let look: WidgetLook
 
     var body: some View {
         switch self.family {
@@ -70,7 +70,7 @@ struct AICommandShortcutWidgetView: View {
             }
             .widgetAccentable()
         default:
-            AICommandSmallView(setting: self.setting)
+            AICommandSmallView(look: self.look)
         }
     }
 }
@@ -87,7 +87,7 @@ struct AICommandShortcutWidget: Widget {
             kind: Self.kind,
             provider: AICommandShortcutWidgetTimeLineProvider()
         ) { entry in
-            AICommandShortcutWidgetView(setting: entry.setting)
+            AICommandShortcutWidgetView(look: .init(globalSetting: entry.setting))
                 .containerBackground(entry.backgroundShape, for: .widget)
                 .widgetURL(AICommandEntryLink.url)
         }
@@ -104,11 +104,11 @@ struct AICommandShortcutWidget_PreviewProvider: PreviewProvider {
 
     static var previews: some View {
         Group {
-            AICommandShortcutWidgetView(setting: .init())
+            AICommandShortcutWidgetView(look: .init(globalSetting: .init()))
                 .previewContext(WidgetPreviewContext(family: .accessoryCircular))
                 .containerBackground(.background, for: .widget)
 
-            AICommandShortcutWidgetView(setting: .init())
+            AICommandShortcutWidgetView(look: .init(globalSetting: .init()))
                 .previewContext(WidgetPreviewContext(family: .systemSmall))
                 .containerBackground(.background, for: .widget)
         }

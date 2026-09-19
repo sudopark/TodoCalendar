@@ -26,6 +26,13 @@ struct WidgetStyleCellViewModel: Equatable {
     let setting: any WidgetStyleSetting
     let background: WidgetAppearanceSettings.Background?
     
+    var appliedStyle: WidgetStyle {
+        return .init(
+            id: self.styleId, name: self.name,
+            setting: self.setting, background: self.background
+        )
+    }
+
     static func == (lhs: Self, rhs: Self) -> Bool {
         return lhs.styleId == rhs.styleId
             && lhs.name == rhs.name

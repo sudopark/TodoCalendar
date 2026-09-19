@@ -31,8 +31,8 @@ struct EventAndForemostWidgetView: View {
     var body: some View {
         switch self.entry.result {
         case .success(let model):
-            let eventColorSet = model.event.widgetSetting.background.colorSet(colorScheme == .light)
-            let foremostColorSet = model.foremost.widgetSetting.background.colorSet(colorScheme == .light)
+            let eventColorSet = model.event.look.background.colorSet(colorScheme == .light)
+            let foremostColorSet = model.foremost.look.background.colorSet(colorScheme == .light)
             EventAndForemostWidgetContentView(
                 model: model,
                 todoToggle: { todo in

@@ -49,7 +49,7 @@ struct EventListWidgetView: View {
     var body: some View {
         switch self.entry.result {
         case .success(let model):
-            let colorSet = model.widgetSetting.background.colorSet(colorScheme == .light)
+            let colorSet = model.look.background.colorSet(colorScheme == .light)
             EventListView(model: model) { todo in
                 AnyView(TodoToggleButton(todo: todo, colorSet: colorSet))
             }

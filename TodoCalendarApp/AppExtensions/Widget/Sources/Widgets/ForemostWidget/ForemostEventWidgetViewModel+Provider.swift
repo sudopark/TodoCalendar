@@ -48,7 +48,7 @@ extension ForemostEventWidgetViewModelProvider {
             defaultTagColorSetting: setting.defaultTagColor,
             tag: eventModel.1
         )
-        |> \.widgetSetting .~ setting.widget
+        |> \.look .~ .init(globalSetting: setting.widget)
     }
     
     private func loadForemostEventModel(

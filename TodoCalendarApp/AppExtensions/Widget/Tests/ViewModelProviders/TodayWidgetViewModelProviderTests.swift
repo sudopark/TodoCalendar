@@ -267,7 +267,7 @@ extension TodayWidgetViewModelProviderTests {
         )
         
         // then
-        XCTAssertEqual(viewModel.widgetSetting.background, .custom(hex: "#101820"))
+        XCTAssertEqual(viewModel.look.background, .custom(hex: "#101820"))
     }
     
     /// 고른 스타일이 색을 안 걸었으면 기본 스타일이 아니라 전역으로 간다 — 편집 화면이 "공통 위젯 테마 따름"이라 적는 자리다.
@@ -285,7 +285,7 @@ extension TodayWidgetViewModelProviderTests {
         )
         
         // then
-        XCTAssertEqual(viewModel.widgetSetting.background, .custom(hex: "#123456"))
+        XCTAssertEqual(viewModel.look.background, .custom(hex: "#123456"))
     }
     
     /// 고른 스타일이 지워졌을 때만 변형 기본 스타일로 내려간다 — 표시 항목과 같은 축이다.
@@ -302,7 +302,7 @@ extension TodayWidgetViewModelProviderTests {
         )
         
         // then
-        XCTAssertEqual(viewModel.widgetSetting.background, .custom(hex: "#ffffff"))
+        XCTAssertEqual(viewModel.look.background, .custom(hex: "#ffffff"))
     }
     
     func testProvider_whenNoStyleHasBackground_useGlobalBackground() async throws {
@@ -318,7 +318,7 @@ extension TodayWidgetViewModelProviderTests {
         )
         
         // then
-        XCTAssertEqual(viewModel.widgetSetting.background, .custom(hex: "#123456"))
+        XCTAssertEqual(viewModel.look.background, .custom(hex: "#123456"))
     }
     
     func testProvider_whenNoStyleSavedAndGlobalIsSystem_useSystemBackground() async throws {
@@ -329,7 +329,7 @@ extension TodayWidgetViewModelProviderTests {
         let viewModel = try await provider.getTodayViewModel(for: self.dummyDate)
         
         // then
-        XCTAssertEqual(viewModel.widgetSetting.background, .system)
+        XCTAssertEqual(viewModel.look.background, .system)
     }
     
     /// 배경이 밝으면 밝은 글자색 세트를 고른다 — 배경만 해석해도 글자색이 따라온다.
@@ -346,7 +346,7 @@ extension TodayWidgetViewModelProviderTests {
         )
         
         // then
-        let colorSet = viewModel.widgetSetting.background.colorSet(true)
+        let colorSet = viewModel.look.background.colorSet(true)
         XCTAssertTrue(colorSet is DefaultDarkColorSet)
     }
 }

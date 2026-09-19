@@ -31,7 +31,7 @@ struct TodayAndNextWidgetEntryView: View {
     var body: some View {
         switch self.entry.result {
         case .success(let model):
-            let colorSet = model.widgetSetting.background.colorSet(colorScheme == .light)
+            let colorSet = model.look.background.colorSet(colorScheme == .light)
             TodayAndNextWidgetView(model: model) { todo, color in
                 AnyView(
                     TodoToggleButton(
@@ -116,7 +116,7 @@ struct TodayAndNextWidgetView_Provider: PreviewProvider {
             AnyView(
                 TodoToggleButton(
                     todo: todo,
-                    colorSet: model.widgetSetting.background.colorSet(true),
+                    colorSet: model.look.background.colorSet(true),
                     size: 16, customColor: color
                 )
             )

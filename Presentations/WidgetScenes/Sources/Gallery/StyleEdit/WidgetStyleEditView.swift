@@ -265,8 +265,7 @@ struct WidgetStyleEditView: View {
             
             WidgetVariantPreviewView(
                 variant: style.styleId.variant,
-                setting: setting.overridingBackground(style.background),
-                style: style.setting
+                look: .init(globalSetting: setting, appliedStyle: style.appliedStyle)
             )
                 .frame(width: Constant.cardWidth, height: self.previewHeight)
                 .overlay(

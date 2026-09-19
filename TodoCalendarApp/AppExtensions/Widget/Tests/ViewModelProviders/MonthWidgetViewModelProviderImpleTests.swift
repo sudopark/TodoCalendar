@@ -168,7 +168,7 @@ extension MonthWidgetViewModelProviderImpleTests {
         )
 
         // then
-        XCTAssertEqual(model.widgetSetting.background, .custom(hex: "#101820"))
+        XCTAssertEqual(model.look.background, .custom(hex: "#101820"))
     }
 
     /// 폴백이 스타일 단위라, 고른 스타일이 색을 안 걸었으면 기본 스타일 색을 빌려오지 않는다.
@@ -185,7 +185,7 @@ extension MonthWidgetViewModelProviderImpleTests {
         )
 
         // then
-        XCTAssertNotEqual(model.widgetSetting.background, .custom(hex: "#ffffff"))
+        XCTAssertNotEqual(model.look.background, .custom(hex: "#ffffff"))
     }
 
     func testProvider_whenNoStyleSaved_useInitialSetting() async throws {

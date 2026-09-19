@@ -23,8 +23,8 @@ public struct MonthWidgetViewModel {
     public let weeks: [WeekRowModel]
     public var todayIdentifier: String?
     public var hasEventDaysIdentifiers: Set<String> = []
-    public var widgetSetting = WidgetAppearanceSettings()
-    public var style = MonthStyleSetting.initial
+    public var look = WidgetLook(globalSetting: .init())
+    public var style: MonthStyleSetting { self.look.setting() }
     
     public var showsMonthName: Bool { self.style.showMonthName }
     public var showsWeekDayHeader: Bool { self.style.showWeekDayHeader }

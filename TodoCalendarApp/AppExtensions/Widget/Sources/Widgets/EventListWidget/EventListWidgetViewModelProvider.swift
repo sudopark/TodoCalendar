@@ -156,7 +156,7 @@ extension EventListWidgetViewModelProvider {
         |> \.googleCalendarColors .~ (dayEventLists.1.googleCalendarColors ?? .init(ownerId: "", calendars: [:], events: [:]))
         |> \.googleCalendarTags .~ dayEventLists.1.googleCalendarTags
         |> \.appleCalendarTags .~ dayEventLists.1.appleCalendarTags
-        |> \.widgetSetting .~ setting.widget
+        |> \.look .~ .init(globalSetting: setting.widget)
     }
    
     private func loadDayEventListModel(

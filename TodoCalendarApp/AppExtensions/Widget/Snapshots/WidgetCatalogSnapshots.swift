@@ -84,7 +84,7 @@ final class WidgetCatalogSnapshots: XCTestCase {
                     Toggle("", isOn: .constant(false))
                         .toggleStyle(
                             TodoToggleStyle(
-                                colorSet: model.widgetSetting.background.colorSet(true),
+                                colorSet: model.look.background.colorSet(true),
                                 size: 16, customColor: color
                             )
                         )

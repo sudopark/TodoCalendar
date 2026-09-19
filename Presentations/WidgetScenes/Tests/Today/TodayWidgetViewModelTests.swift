@@ -28,7 +28,13 @@ struct TodayWidgetViewModelTests {
         |> \.timeZoneText .~ "GMT"
         |> \.todoEventCount .~ 3
         |> \.scheduleEventcount .~ 4
-        |> \.style .~ style
+        |> \.look .~ .init(
+            globalSetting: .init(),
+            appliedStyle: .init(
+                id: .init(variant: .todaySummarySmall, style: .default),
+                name: nil, setting: style
+            )
+        )
     }
 }
 
