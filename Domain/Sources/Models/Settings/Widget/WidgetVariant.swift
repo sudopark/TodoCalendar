@@ -87,10 +87,17 @@ public enum WidgetVariant: String, Sendable, Identifiable, CaseIterable {
         case .oneWeekEvents, .twoWeekEvents, .threeWeekEvents, .fourWeekEvents,
              .currentMonthEvents, .lastMonthEvents, .nextMonthEvents:
             return WeekEventsStyleSetting.self
-        case .todayAndNextMedium, .eventListSmall, .eventListMedium, .eventListLarge,
-             .foremostInline, .foremostSmall, .foremostMedium,
+        case .todayAndNextMedium:
+            return TodayAndNextStyleSetting.self
+        case .eventListSmall, .eventListMedium, .eventListLarge:
+            return EventListStyleSetting.self
+        case .foremostSmall, .foremostMedium:
+            return ForemostStyleSetting.self
+        case .aiCommandSmall:
+            return AICommandStyleSetting.self
+        case .foremostInline,
              .ddaySmall, .ddayMedium, .ddayCircular, .ddayRectangular, .ddayInline,
-             .aiCommandCircular, .aiCommandSmall, .nextEventInline,
+             .aiCommandCircular, .nextEventInline,
              .nextEventRectangular, .nextRemainRectangular, .doubleMonthMedium,
              .eventAndMonthMedium, .eventAndForemostMedium, .todayAndMonthMedium:
             return nil
@@ -103,9 +110,12 @@ public enum WidgetVariant: String, Sendable, Identifiable, CaseIterable {
         case .oneWeekEvents, .twoWeekEvents, .threeWeekEvents, .fourWeekEvents,
              .currentMonthEvents, .lastMonthEvents, .nextMonthEvents:
             return .oneWeekEvents
-        case .todayAndNextMedium, .eventListSmall, .eventListMedium, .eventListLarge,
-             .monthSmall, .todaySummarySmall, .foremostInline, .foremostSmall,
-             .foremostMedium, .ddaySmall, .ddayMedium, .ddayCircular, .ddayRectangular,
+        case .eventListSmall, .eventListMedium, .eventListLarge:
+            return .eventListSmall
+        case .foremostSmall, .foremostMedium:
+            return .foremostSmall
+        case .todayAndNextMedium, .monthSmall, .todaySummarySmall, .foremostInline,
+             .ddaySmall, .ddayMedium, .ddayCircular, .ddayRectangular,
              .ddayInline, .aiCommandCircular, .aiCommandSmall, .nextEventInline,
              .nextEventRectangular, .nextRemainRectangular, .doubleMonthMedium,
              .eventAndMonthMedium, .eventAndForemostMedium, .todayAndMonthMedium:

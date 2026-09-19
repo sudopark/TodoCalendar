@@ -72,9 +72,13 @@ struct WidgetGalleryItemTests {
 
         // then
         #expect(customizables == [
+            .todayAndNextMedium,
+            .eventListSmall, .eventListMedium, .eventListLarge,
             .monthSmall, .todaySummarySmall,
+            .foremostSmall, .foremostMedium,
             .oneWeekEvents, .twoWeekEvents, .threeWeekEvents, .fourWeekEvents,
-            .currentMonthEvents, .lastMonthEvents, .nextMonthEvents
+            .currentMonthEvents, .lastMonthEvents, .nextMonthEvents,
+            .aiCommandSmall
         ])
     }
 
