@@ -18,6 +18,7 @@ struct WidgetStyleToggleFormView<Item: WidgetStyleItem>: View {
 
     @Environment(ViewAppearance.self) private var appearance
 
+    var title: String = "widget.style.edit::items::section".localized()
     let setting: Item.Setting
     let onChange: (any WidgetStyleSetting) -> Void
 
@@ -28,7 +29,7 @@ struct WidgetStyleToggleFormView<Item: WidgetStyleItem>: View {
                     .listRowBackground(appearance.colorSet.bg1.asColor)
             }
         } header: {
-            Text("widget.style.edit::items::section".localized())
+            Text(self.title)
                 .font(appearance.fontSet.subNormal.asFont)
                 .foregroundStyle(appearance.colorSet.text2.asColor)
         }

@@ -7,6 +7,9 @@
 //
 
 import Foundation
+import Prelude
+import Optics
+import Domain
 
 
 public struct DoubleMonthWidgetViewModel {
@@ -56,6 +59,47 @@ public struct TodayAndMonthWidgetViewModel {
     }
 }
 
+
+
+// MARK: - 합성 스타일 적용
+
+/// 두 절반이 한 합성 스타일에서 읽는다 — 토글이 없는 이벤트 절반은 합성 봉투를 그대로 받는다.
+extension DoubleMonthWidgetViewModel {
+
+    public func applying(_ look: WidgetLook) -> Self {
+        let monthLook = look.part(\DoubleMonthStyleSetting.month)
+        return self
+            |> \.current.look .~ monthLook
+            |> \.next.look .~ monthLook
+    }
+}
+
+extension EventAndForemostWidgetViewModel {
+
+    public func applying(_ look: WidgetLook) -> Self {
+        return self
+            |> \.event.look .~ look
+            |> \.foremost.look .~ look.part(\EventAndForemostStyleSetting.foremost)
+    }
+}
+
+extension EventAndMonthWidgetViewModel {
+
+    public func applying(_ look: WidgetLook) -> Self {
+        return self
+            |> \.event.look .~ look
+            |> \.month.look .~ look.part(\EventAndMonthStyleSetting.month)
+    }
+}
+
+extension TodayAndMonthWidgetViewModel {
+
+    public func applying(_ look: WidgetLook) -> Self {
+        return self
+            |> \.today.look .~ look.part(\TodayAndMonthStyleSetting.today)
+            |> \.month.look .~ look.part(\TodayAndMonthStyleSetting.month)
+    }
+}
 
 
 // MARK: - ComposedWidgetSampleFactory
