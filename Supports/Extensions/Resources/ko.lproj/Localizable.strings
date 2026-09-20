@@ -589,6 +589,9 @@
 "widget.style.edit::background::section" = "배경색";
 "widget.style.edit::background::following_global" = "공통 위젯 테마 따름";
 "widget.style.edit::background::style_own" = "이 스타일 전용";
+"widget.style.edit::background::photo" = "배경 사진";
+"widget.style.edit::background::photo::none" = "선택 안 함";
+"widget.style.edit::background::photo::remove" = "사진 지우기";
 "widget.style.edit::items::section" = "세부 옵션";
 "widget.style::custom::copy_format" = "%@ - 복사됨";
 "widget.doubleMonth::name" = "캘린더 + 캘린더";
