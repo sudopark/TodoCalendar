@@ -23,15 +23,18 @@ final class DDayWidgetViewModelProvider {
     private let eventFetchUsecase: any CalendarEventFetchUsecase
     private let calendarSettingRepository: any CalendarSettingRepository
     private let appSettingRepository: any AppSettingRepository
+    private let styleRepository: any WidgetStyleRepository
 
     init(
         eventFetchUsecase: any CalendarEventFetchUsecase,
         calendarSettingRepository: any CalendarSettingRepository,
-        appSettingRepository: any AppSettingRepository
+        appSettingRepository: any AppSettingRepository,
+        styleRepository: any WidgetStyleRepository
     ) {
         self.eventFetchUsecase = eventFetchUsecase
         self.calendarSettingRepository = calendarSettingRepository
         self.appSettingRepository = appSettingRepository
+        self.styleRepository = styleRepository
     }
 }
 
@@ -42,11 +45,12 @@ extension DDayWidgetViewModelProvider {
     }
 
     func getDDayModel(
-        for now: Date, target: DDayTargetEventId?
+        for now: Date, target: DDayTargetEventId?, style: WidgetStyleId.Style = .default
     ) async throws -> DDayWidgetViewModel {
 
         let timeZone = self.calendarSettingRepository.loadUserSelectedTImeZone() ?? .current
         let setting = self.appSettingRepository.loadWidgetAppearanceSetting()
+        let resolved = self.styleRepository.resolveStyle(of: .ddaySmall, style: style)
         let refreshAfter = self.nextMidnight(after: now, in: timeZone)
 
         guard let target,
@@ -54,7 +58,7 @@ extension DDayWidgetViewModelProvider {
         else {
             return DDayWidgetViewModel.noTarget()
                 |> \.refreshAfter .~ refreshAfter
-                |> \.look .~ .init(globalSetting: setting)
+                |> \.look .~ .init(globalSetting: setting, appliedStyle: resolved)
         }
 
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
@@ -72,7 +76,7 @@ extension DDayWidgetViewModelProvider {
         )
         |> \.refreshAfter .~ refreshAfter
         |> \.link .~ self.link(for: event, in: timeZone)
-        |> \.look .~ .init(globalSetting: setting)
+        |> \.look .~ .init(globalSetting: setting, appliedStyle: resolved)
     }
 
     /// 일정은 그 회차 상세로, 공휴일은 해당 날짜 선택으로 보낸다.

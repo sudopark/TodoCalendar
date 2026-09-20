@@ -59,7 +59,9 @@ extension DDayWidgetTimeLineProvider {
         let now = Date()
         do {
             let model = try await viewModelProvider.getDDayModel(
-                for: now, target: configuration.resolvedTargetId
+                for: now,
+                target: configuration.resolvedTargetId,
+                style: configuration.resolvedStyle
             )
             return .init(date: now, result: .success(model))
                 |> \.background .~ model.look.background
