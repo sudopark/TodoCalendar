@@ -34,7 +34,7 @@ struct WidgetVariantPreviewView: View {
             let scale = variant.canvas.previewScale(fitting: proxy.size)
 
             scaledContentView(scale)
-                .background(plateStyle, in: plateShape(scale))
+                .background { plateView(scale) }
                 .overlay(borderView(scale))
                 .frame(width: proxy.size.width, height: proxy.size.height)
         }
@@ -63,10 +63,13 @@ struct WidgetVariantPreviewView: View {
         }
     }
 
-    private var plateStyle: AnyShapeStyle {
-        return variant.canvas.isLockScreen
-        ? AnyShapeStyle(Color.black.opacity(Constant.lockScreenPlateOpacity))
-        : WidgetBackgroundStyle(look.background).shape
+    @ViewBuilder
+    private func plateView(_ scale: CGFloat) -> some View {
+        if variant.canvas.isLockScreen {
+            plateShape(scale).fill(Color.black.opacity(Constant.lockScreenPlateOpacity))
+        } else {
+            WidgetBackgroundView(look: look, in: plateShape(scale))
+        }
     }
 
     private func plateShape(_ scale: CGFloat) -> RoundedRectangle {
