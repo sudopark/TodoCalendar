@@ -77,6 +77,23 @@ public enum WidgetVariant: String, Sendable, Identifiable, CaseIterable {
         return self.settingType != nil
     }
 
+    public var supportsPhotoBackground: Bool {
+        switch self {
+        case .ddaySmall, .ddayMedium:
+            return true
+        case .todayAndNextMedium, .eventListSmall, .eventListMedium, .eventListLarge,
+             .monthSmall, .todaySummarySmall,
+             .foremostInline, .foremostSmall, .foremostMedium,
+             .ddayCircular, .ddayRectangular, .ddayInline,
+             .oneWeekEvents, .twoWeekEvents, .threeWeekEvents, .fourWeekEvents,
+             .currentMonthEvents, .lastMonthEvents, .nextMonthEvents,
+             .aiCommandCircular, .aiCommandSmall, .nextEventInline,
+             .nextEventRectangular, .nextRemainRectangular, .doubleMonthMedium,
+             .eventAndMonthMedium, .eventAndForemostMedium, .todayAndMonthMedium:
+            return false
+        }
+    }
+
     /// 변형마다 담는 꾸미기 항목이 달라 payload 타입이 갈린다.
     public var settingType: (any WidgetStyleSetting.Type)? {
         switch self {
@@ -95,6 +112,8 @@ public enum WidgetVariant: String, Sendable, Identifiable, CaseIterable {
             return ForemostStyleSetting.self
         case .aiCommandSmall:
             return AICommandStyleSetting.self
+        case .ddaySmall, .ddayMedium:
+            return DDayStyleSetting.self
         case .doubleMonthMedium:
             return DoubleMonthStyleSetting.self
         case .eventAndMonthMedium:
@@ -104,7 +123,7 @@ public enum WidgetVariant: String, Sendable, Identifiable, CaseIterable {
         case .todayAndMonthMedium:
             return TodayAndMonthStyleSetting.self
         case .foremostInline,
-             .ddaySmall, .ddayMedium, .ddayCircular, .ddayRectangular, .ddayInline,
+             .ddayCircular, .ddayRectangular, .ddayInline,
              .aiCommandCircular, .nextEventInline,
              .nextEventRectangular, .nextRemainRectangular:
             return nil
@@ -121,8 +140,10 @@ public enum WidgetVariant: String, Sendable, Identifiable, CaseIterable {
             return .eventListSmall
         case .foremostSmall, .foremostMedium:
             return .foremostSmall
+        case .ddaySmall, .ddayMedium:
+            return .ddaySmall
         case .todayAndNextMedium, .monthSmall, .todaySummarySmall, .foremostInline,
-             .ddaySmall, .ddayMedium, .ddayCircular, .ddayRectangular,
+             .ddayCircular, .ddayRectangular,
              .ddayInline, .aiCommandCircular, .aiCommandSmall, .nextEventInline,
              .nextEventRectangular, .nextRemainRectangular, .doubleMonthMedium,
              .eventAndMonthMedium, .eventAndForemostMedium, .todayAndMonthMedium:

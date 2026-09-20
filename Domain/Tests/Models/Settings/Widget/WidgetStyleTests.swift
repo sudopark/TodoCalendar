@@ -15,13 +15,15 @@ import Foundation
 struct WidgetStyleTests {
 
     private func makeStyle(
-        background: WidgetAppearanceSettings.Background?
+        background: WidgetAppearanceSettings.Background?,
+        photo: WidgetStylePhoto? = nil
     ) -> WidgetStyle {
         return WidgetStyle(
             id: .init(variant: .todaySummarySmall, style: .default),
             name: "밤 모드",
             setting: TodayStyleSetting.initial,
-            background: background
+            background: background,
+            photo: photo
         )
     }
 
@@ -47,6 +49,29 @@ struct WidgetStyleTests {
         #expect(custom.isSame(self.makeStyle(background: .custom(hex: "#ffffff"))) == false)
         #expect(custom.isSame(self.makeStyle(background: nil)) == false)
         #expect(custom.isSame(self.makeStyle(background: .system)) == false)
+    }
+
+    private func photo(_ id: String) -> WidgetStylePhoto {
+        return .init(
+            id: id,
+            original: URL(filePath: "/tmp/\(id).original"),
+            rendering: URL(filePath: "/tmp/\(id).render.jpg")
+        )
+    }
+
+    @Test("사진만 달라도 같은 스타일로 보지 않는다")
+    func isSame_whenOnlyPhotoDiffers_isFalse() {
+        // given
+        let background = WidgetAppearanceSettings.Background.custom(hex: "#101820")
+        let withPhoto = self.makeStyle(background: background, photo: self.photo("p1"))
+
+        // when + then
+        #expect(
+            withPhoto.isSame(
+                self.makeStyle(background: background, photo: self.photo("p2"))
+            ) == false
+        )
+        #expect(withPhoto.isSame(self.makeStyle(background: background)) == false)
     }
 }
 

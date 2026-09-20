@@ -61,16 +61,20 @@ public struct WidgetStyle: Sendable {
     /// nil 이면 전역 배경색을 따른다.
     public var background: WidgetAppearanceSettings.Background?
 
+    public var photo: WidgetStylePhoto?
+
     public init(
         id: WidgetStyleId,
         name: String?,
         setting: any WidgetStyleSetting,
-        background: WidgetAppearanceSettings.Background? = nil
+        background: WidgetAppearanceSettings.Background? = nil,
+        photo: WidgetStylePhoto? = nil
     ) {
         self.id = id
         self.name = name
         self.setting = setting
         self.background = background
+        self.photo = photo
     }
 }
 
@@ -91,6 +95,7 @@ extension WidgetStyle {
         return self.id == other.id
             && self.name == other.name
             && self.background == other.background
+            && self.photo == other.photo
             && self.setting.isSame(other.setting)
     }
 }

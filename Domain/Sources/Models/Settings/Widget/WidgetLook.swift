@@ -34,6 +34,10 @@ extension WidgetLook {
         return self.appliedStyle?.background ?? self.globalSetting.background
     }
 
+    public var photo: URL? {
+        return self.appliedStyle?.photo?.rendering
+    }
+
     public func setting<S: WidgetStyleSetting>() -> S {
         return self.appliedStyle?.setting as? S ?? .initial
     }
