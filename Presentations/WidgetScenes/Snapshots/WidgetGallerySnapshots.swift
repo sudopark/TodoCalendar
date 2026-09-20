@@ -173,7 +173,7 @@ final class WidgetGallerySnapshots: XCTestCase {
             .init(
                 styleId: style.id, name: style.displayName,
                 hasUnsavedChange: false, setting: style.setting,
-                background: style.background
+                background: style.background, photo: style.photo
             )
         ]
         state.selectedStyleId = styleId
@@ -211,7 +211,7 @@ final class WidgetGallerySnapshots: XCTestCase {
             .init(
                 styleId: style.id, name: style.displayName,
                 hasUnsavedChange: index == 1 && hasUnsavedChanges, setting: style.setting,
-                background: style.background
+                background: style.background, photo: style.photo
             )
         }
         state.hasUnsavedChange = hasUnsavedChanges
@@ -222,6 +222,40 @@ final class WidgetGallerySnapshots: XCTestCase {
         return state
     }
     
+
+    @MainActor
+    private func ddayStyleEditState() -> WidgetStyleEditViewState {
+        let photo = GradientPhotoFixture(CGSize(width: 170, height: 170)).photo
+        let style = WidgetStyle(
+            id: .init(variant: .ddaySmall, style: .default),
+            name: nil, setting: DDayStyleSetting.initial,
+            background: .custom(hex: "#101820"), photo: photo
+        )
+        let state = WidgetStyleEditViewState()
+        state.styles = [
+            .init(
+                styleId: style.id, name: style.displayName,
+                hasUnsavedChange: false, setting: style.setting,
+                background: style.background, photo: style.photo
+            )
+        ]
+        state.selectedStyleId = style.id
+        state.selectedSetting = style.setting
+        state.selectedBackground = style.background
+        state.selectedPhoto = photo.rendering
+        return state
+    }
+
+    @MainActor
+    func test_widgetStyleEdit_dday_photoRow() {
+        captureSnapshotPair(named: "widgetStyleEdit-dday-photoRow", layout: .fullScreen) { theme in
+            WidgetStyleEditView(variants: [.ddaySmall, .ddayMedium], setting: .init())
+                .environment(self.ddayStyleEditState())
+                .environment(WidgetStyleEditViewEventHandler())
+                .environment(self.makeAppearance(theme))
+        }
+    }
+
     @MainActor
     func test_widgetStyleEdit_monthYearOff() {
         captureSnapshotPair(named: "widgetStyleEdit-monthYearOff", layout: .fullScreen) { theme in
@@ -336,7 +370,7 @@ extension WidgetGallerySnapshots {
             .init(
                 styleId: style.id, name: style.displayName,
                 hasUnsavedChange: false, setting: style.setting,
-                background: style.background
+                background: style.background, photo: style.photo
             )
         ]
         state.selectedStyleId = style.id

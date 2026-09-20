@@ -31,9 +31,11 @@ final class WidgetViewSnapshots: XCTestCase {
         static let outerInset: CGFloat = 14
     }
 
+
     /// `.sample` 은 dateText 를 실행 시각으로 만들어 날이 바뀌면 png 가 달라진다.
     private func fixedDDayModel(
-        background: WidgetAppearanceSettings.Background = .system
+        background: WidgetAppearanceSettings.Background = .system,
+        photo: WidgetStylePhoto? = nil
     ) -> DDayWidgetViewModel {
         return DDayWidgetViewModel(
             eventTitle: "Team workshop",
@@ -43,7 +45,13 @@ final class WidgetViewSnapshots: XCTestCase {
             repeatText: ""
         )
         |> \.look .~ .init(
-            globalSetting: WidgetAppearanceSettings() |> \.background .~ background
+            globalSetting: WidgetAppearanceSettings() |> \.background .~ background,
+            appliedStyle: photo.map {
+                WidgetStyle(
+                    id: .init(variant: .ddaySmall, style: .default),
+                    name: nil, setting: DDayStyleSetting.initial, photo: $0
+                )
+            }
         )
     }
 
@@ -52,6 +60,21 @@ final class WidgetViewSnapshots: XCTestCase {
         _ name: String,
         canvas: CGSize,
         plate: AnyShapeStyle = AnyShapeStyle(.background),
+        testName: String = #function,
+        @ViewBuilder makeView: @escaping () -> V
+    ) {
+        self.capture(
+            name, canvas: canvas,
+            plateView: { Rectangle().fill(plate) },
+            testName: testName, makeView: makeView
+        )
+    }
+
+    @MainActor
+    private func capture<P: View, V: View>(
+        _ name: String,
+        canvas: CGSize,
+        @ViewBuilder plateView: @escaping () -> P,
         testName: String = #function,
         @ViewBuilder makeView: @escaping () -> V
     ) {
@@ -65,8 +88,7 @@ final class WidgetViewSnapshots: XCTestCase {
             testName: testName
         ) { _ in
             ZStack {
-                Rectangle()
-                    .fill(plate)
+                plateView()
                 makeView()
                     .padding(WidgetCanvas.contentMargin)
             }
@@ -97,6 +119,48 @@ final class WidgetViewSnapshots: XCTestCase {
     func test_ddayMediumWidgetView() {
         self.capture("dday-medium", canvas: WidgetCanvas.medium) {
             DDayMediumWidgetView(model: self.fixedDDayModel())
+        }
+    }
+
+    @MainActor
+    func test_ddaySmallWidgetView_photoBackground() {
+        let model = self.fixedDDayModel(
+            photo: GradientPhotoFixture(WidgetCanvas.small).photo
+        )
+        self.capture(
+            "dday-small-photoBackground",
+            canvas: WidgetCanvas.small,
+            plateView: {
+                WidgetBackgroundView(
+                    look: model.look,
+                    in: RoundedRectangle(
+                        cornerRadius: WidgetCanvas.cornerRadius, style: .continuous
+                    )
+                )
+            }
+        ) {
+            DDaySmallWidgetView(model: model)
+        }
+    }
+
+    @MainActor
+    func test_ddayMediumWidgetView_photoBackground() {
+        let model = self.fixedDDayModel(
+            photo: GradientPhotoFixture(WidgetCanvas.medium).photo
+        )
+        self.capture(
+            "dday-medium-photoBackground",
+            canvas: WidgetCanvas.medium,
+            plateView: {
+                WidgetBackgroundView(
+                    look: model.look,
+                    in: RoundedRectangle(
+                        cornerRadius: WidgetCanvas.cornerRadius, style: .continuous
+                    )
+                )
+            }
+        ) {
+            DDayMediumWidgetView(model: model)
         }
     }
 
