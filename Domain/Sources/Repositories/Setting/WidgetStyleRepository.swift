@@ -18,4 +18,8 @@ public protocol WidgetStyleRepository: Sendable {
     func updateStyle(_ style: WidgetStyle)
 
     func removeStyle(_ id: WidgetStyleId)
+
+    func makeDraftPhoto(from picked: Data) -> WidgetStylePhoto?
+
+    func makeDraftPhoto(copying photo: WidgetStylePhoto) -> WidgetStylePhoto?
 }

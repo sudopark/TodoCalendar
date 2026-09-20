@@ -288,7 +288,8 @@ extension NonLoginUsecaseFactoryImple {
     func makeWidgetStyleUsecase() -> any WidgetStyleUsecase {
         return WidgetStyleUsecaseImple(
             styleRepository: WidgetStyleLocalRepositoryImple(
-                environmentStorage: applicationBase.userDefaultEnvironmentStorage
+                environmentStorage: applicationBase.userDefaultEnvironmentStorage,
+                photoDirectory: AppEnvironment.widgetPhotoDirectory
             ),
             sharedDataStore: applicationBase.sharedDataStore
         )
@@ -826,7 +827,8 @@ extension LoginUsecaseFactoryImple {
     func makeWidgetStyleUsecase() -> any WidgetStyleUsecase {
         return WidgetStyleUsecaseImple(
             styleRepository: WidgetStyleLocalRepositoryImple(
-                environmentStorage: applicationBase.userDefaultEnvironmentStorage
+                environmentStorage: applicationBase.userDefaultEnvironmentStorage,
+                photoDirectory: AppEnvironment.widgetPhotoDirectory
             ),
             sharedDataStore: applicationBase.sharedDataStore
         )

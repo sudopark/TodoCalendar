@@ -26,6 +26,10 @@ public protocol WidgetStyleUsecase: Sendable {
     func makeNewStyleId(for variant: WidgetVariant) -> WidgetStyleId
 
     func removeStyle(_ id: WidgetStyleId)
+
+    func makeDraftPhoto(from picked: Data) -> WidgetStylePhoto?
+
+    func makeDraftPhoto(copying photo: WidgetStylePhoto) -> WidgetStylePhoto?
 }
 
 
@@ -111,6 +115,20 @@ extension WidgetStyleUsecaseImple {
         guard id.style != .default else { return }
         self.styleRepository.removeStyle(id)
         self.shareLatestStyles(of: id.variant)
+    }
+}
+
+
+// MARK: - 초안 사진
+
+extension WidgetStyleUsecaseImple {
+
+    public func makeDraftPhoto(from picked: Data) -> WidgetStylePhoto? {
+        return self.styleRepository.makeDraftPhoto(from: picked)
+    }
+
+    public func makeDraftPhoto(copying photo: WidgetStylePhoto) -> WidgetStylePhoto? {
+        return self.styleRepository.makeDraftPhoto(copying: photo)
     }
 }
 

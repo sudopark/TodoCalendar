@@ -26,7 +26,8 @@ extension WidgetStyleIntentFactory {
     func makeStyleUsecase() -> any WidgetStyleUsecase {
         return WidgetStyleUsecaseImple(
             styleRepository: WidgetStyleLocalRepositoryImple(
-                environmentStorage: self.base.userDefaultEnvironmentStorage
+                environmentStorage: self.base.userDefaultEnvironmentStorage,
+                photoDirectory: AppEnvironment.widgetPhotoDirectory
             ),
             sharedDataStore: SharedDataStore()
         )

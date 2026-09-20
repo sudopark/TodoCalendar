@@ -51,6 +51,10 @@ final class WidgetStyleUsecaseImpleTests: PublisherWaitable {
         func removeStyle(_ id: WidgetStyleId) {
             self.savedStyles = self.savedStyles.filter { $0.id != id }
         }
+
+        func makeDraftPhoto(from picked: Data) -> WidgetStylePhoto? { return nil }
+
+        func makeDraftPhoto(copying photo: WidgetStylePhoto) -> WidgetStylePhoto? { return nil }
     }
 
     private func todayStyle(

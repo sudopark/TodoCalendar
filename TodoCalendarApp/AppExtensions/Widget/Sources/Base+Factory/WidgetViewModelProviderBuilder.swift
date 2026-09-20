@@ -38,10 +38,15 @@ struct WidgetViewModelProviderBuilder {
         of variant: WidgetVariant, style: WidgetStyleId.Style = .default
     ) -> WidgetStyle? {
         guard variant.isCustomizable else { return nil }
-        let repository = WidgetStyleLocalRepositoryImple(
-            environmentStorage: base.userDefaultEnvironmentStorage
-        )
+        let repository = self.makeStyleRepository()
         return repository.resolveStyle(of: variant, style: style)
+    }
+
+    private func makeStyleRepository() -> WidgetStyleLocalRepositoryImple {
+        return WidgetStyleLocalRepositoryImple(
+            environmentStorage: base.userDefaultEnvironmentStorage,
+            photoDirectory: AppEnvironment.widgetPhotoDirectory
+        )
     }
 
     private func checkShouldReset() async {
@@ -125,9 +130,7 @@ extension WidgetViewModelProviderBuilder {
             appSettingRepository: appSettingRepository,
             holidayFetchUsecase: holidaysFetchUsecase,
             eventFetchUsecase: eventsFetchUsecase,
-            styleRepository: WidgetStyleLocalRepositoryImple(
-                environmentStorage: base.userDefaultEnvironmentStorage
-            )
+            styleRepository: self.makeStyleRepository()
         )
     }
     
@@ -140,9 +143,7 @@ extension WidgetViewModelProviderBuilder {
         )
         return DoubleMonthWidgetViewModelProvider(
             settingRepository: repository, monthViewModelProvider: provider,
-            styleRepository: WidgetStyleLocalRepositoryImple(
-                environmentStorage: base.userDefaultEnvironmentStorage
-            )
+            styleRepository: self.makeStyleRepository()
         )
     }
 }
@@ -181,9 +182,7 @@ extension WidgetViewModelProviderBuilder {
             appSettingRepository: appSettingRepository,
             calendarSettingRepository: calendarSettingRepository,
             localeProvider: Locale.current,
-            styleRepository: WidgetStyleLocalRepositoryImple(
-                environmentStorage: base.userDefaultEnvironmentStorage
-            )
+            styleRepository: self.makeStyleRepository()
         )
     }
 }
@@ -222,9 +221,7 @@ extension WidgetViewModelProviderBuilder {
             calendarSettingRepository: calendarSettingRepository,
             appSettingRepository: appSettingRepository,
             localeProvider: Locale.current,
-            styleRepository: WidgetStyleLocalRepositoryImple(
-                environmentStorage: base.userDefaultEnvironmentStorage
-            )
+            styleRepository: self.makeStyleRepository()
         )
     }
 }
@@ -253,9 +250,7 @@ extension WidgetViewModelProviderBuilder {
             eventsFetchusecase: fetchUsecase,
             appSettingRepository: appSettingRepository,
             calednarSettingRepository: calendarSettingRepository,
-            styleRepository: WidgetStyleLocalRepositoryImple(
-                environmentStorage: base.userDefaultEnvironmentStorage
-            )
+            styleRepository: self.makeStyleRepository()
         )
     }
 }
@@ -300,9 +295,7 @@ extension WidgetViewModelProviderBuilder {
             eventFetchUsecase: eventFetchUsecase,
             settingRepository: calendarSettingRepository,
             appSettingRepository: appSettingRepository,
-            styleRepository: WidgetStyleLocalRepositoryImple(
-                environmentStorage: base.userDefaultEnvironmentStorage
-            )
+            styleRepository: self.makeStyleRepository()
         )
     }
     
@@ -337,9 +330,7 @@ extension WidgetViewModelProviderBuilder {
             calendarSettingRepository: calendarSettingRepository,
             appSettingRepository: appSettingRepository,
             localeProvider: Locale.current,
-            styleRepository: WidgetStyleLocalRepositoryImple(
-                environmentStorage: base.userDefaultEnvironmentStorage
-            )
+            styleRepository: self.makeStyleRepository()
         )
     }
 }
@@ -421,9 +412,7 @@ extension WidgetViewModelProviderBuilder {
         return EventAndMonthWidgetViewModelProvider(
             eventListViewModelProvider: eventList,
             monthViewModelProvider: month,
-            styleRepository: WidgetStyleLocalRepositoryImple(
-                environmentStorage: base.userDefaultEnvironmentStorage
-            )
+            styleRepository: self.makeStyleRepository()
         )
     }
     
@@ -440,9 +429,7 @@ extension WidgetViewModelProviderBuilder {
         return TodayAndMonthWidgetViewModelProvider(
             todayViewModelProvider: today,
             monthViewModelProvider: month,
-            styleRepository: WidgetStyleLocalRepositoryImple(
-                environmentStorage: base.userDefaultEnvironmentStorage
-            )
+            styleRepository: self.makeStyleRepository()
         )
     }
     
@@ -463,9 +450,7 @@ extension WidgetViewModelProviderBuilder {
         return .init(
             eventListViewModelProvider: eventList,
             foremostEventViewModelProvider: foremost,
-            styleRepository: WidgetStyleLocalRepositoryImple(
-                environmentStorage: base.userDefaultEnvironmentStorage
-            )
+            styleRepository: self.makeStyleRepository()
         )
     }
 }
