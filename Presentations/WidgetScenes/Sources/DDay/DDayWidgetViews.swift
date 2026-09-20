@@ -73,7 +73,10 @@ public struct DDaySmallWidgetView: View {
 
     @Environment(\.colorScheme) var colorScheme
     var colorSet: any ColorSet {
-        return model.look.background.colorSet(colorScheme == .light)
+        return model.look.colorSet(colorScheme == .light)
+    }
+    var subTextColor: UIColor {
+        return model.look.subTextColor(colorScheme == .light)
     }
 
     private let model: DDayWidgetViewModel
@@ -86,7 +89,7 @@ public struct DDaySmallWidgetView: View {
             DDayTitleView(
                 model: model, fontSize: 13, lineLimit: 2,
                 titleStyle: AnyShapeStyle(colorSet.text0.asColor),
-                markStyle: AnyShapeStyle(colorSet.text2.asColor)
+                markStyle: AnyShapeStyle(subTextColor.asColor)
             )
 
             Spacer(minLength: 0)
@@ -102,7 +105,7 @@ public struct DDaySmallWidgetView: View {
                     .font(.system(size: 11))
                     .minimumScaleFactor(0.8)
                     .lineLimit(1)
-                    .foregroundStyle(colorSet.text2.asColor)
+                    .foregroundStyle(subTextColor.asColor)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -116,7 +119,10 @@ public struct DDayMediumWidgetView: View {
 
     @Environment(\.colorScheme) var colorScheme
     var colorSet: any ColorSet {
-        return model.look.background.colorSet(colorScheme == .light)
+        return model.look.colorSet(colorScheme == .light)
+    }
+    var subTextColor: UIColor {
+        return model.look.subTextColor(colorScheme == .light)
     }
 
     private let model: DDayWidgetViewModel
@@ -129,7 +135,7 @@ public struct DDayMediumWidgetView: View {
             DDayTitleView(
                 model: model, fontSize: 15, lineLimit: 1,
                 titleStyle: AnyShapeStyle(colorSet.text0.asColor),
-                markStyle: AnyShapeStyle(colorSet.text2.asColor)
+                markStyle: AnyShapeStyle(subTextColor.asColor)
             )
 
             Spacer(minLength: 0)
@@ -148,14 +154,14 @@ public struct DDayMediumWidgetView: View {
                         Text(model.dateText)
                             .font(.system(size: 12))
                             .lineLimit(1)
-                            .foregroundStyle(colorSet.text2.asColor)
+                            .foregroundStyle(subTextColor.asColor)
                     }
 
                     if !model.detailText.isEmpty {
                         Text(model.detailText)
                             .font(.system(size: 12))
                             .lineLimit(1)
-                            .foregroundStyle(colorSet.text2.asColor)
+                            .foregroundStyle(subTextColor.asColor)
                     }
                 }
             }

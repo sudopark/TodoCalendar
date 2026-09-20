@@ -47,8 +47,22 @@ public struct WidgetBackgroundStyle {
 }
 
 
+extension WidgetLook {
+
+    public func colorSet(_ systemIsLight: Bool) -> any ColorSet {
+        guard self.photo == nil else { return DefaultDarkColorSet() }
+        return self.background.colorSet(systemIsLight)
+    }
+
+    public func subTextColor(_ systemIsLight: Bool) -> UIColor {
+        let colorSet = self.colorSet(systemIsLight)
+        return self.photo == nil ? colorSet.text2 : colorSet.text1
+    }
+}
+
+
 extension WidgetAppearanceSettings.Background {
-    
+
     public func colorSet(_ systemIsLight: Bool) -> any ColorSet {
         let isLight = switch self {
             case .system: systemIsLight

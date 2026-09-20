@@ -60,6 +60,41 @@ struct DDayWidgetEntryView: View {
 }
 
 
+// MARK: - 배경
+
+private struct DDayWidgetBackgroundView: View {
+
+    @Environment(\.widgetFamily) var family: WidgetFamily
+
+    let entry: ResultTimelineEntry<DDayWidgetViewModel>
+
+    var body: some View {
+        switch family {
+        // 잠금화면은 시스템이 단색 렌더를 강제한다 — 사진을 깔아도 뭉개지기만 한다
+        case .accessoryCircular, .accessoryRectangular, .accessoryInline:
+            Rectangle().fill(entry.backgroundShape)
+        default:
+            WidgetBackgroundView(look: entry.look, in: ContainerRelativeShape())
+        }
+    }
+}
+
+
+private extension ResultTimelineEntry where T == DDayWidgetViewModel {
+
+    var look: WidgetLook {
+        switch self.result {
+        case .success(let model):
+            return model.look
+        case .failure:
+            return WidgetLook(
+                globalSetting: WidgetAppearanceSettings() |> \.background .~ self.background
+            )
+        }
+    }
+}
+
+
 // MARK: - DDayWidget
 
 struct DDayWidget: Widget {
@@ -73,7 +108,9 @@ struct DDayWidget: Widget {
             provider: DDayWidgetTimeLineProvider()
         ) { entry in
             DDayWidgetEntryView(entry: entry)
-                .containerBackground(entry.backgroundShape, for: .widget)
+                .containerBackground(for: .widget) {
+                    DDayWidgetBackgroundView(entry: entry)
+                }
         }
         .supportedFamilies([
             .systemSmall, .systemMedium,
