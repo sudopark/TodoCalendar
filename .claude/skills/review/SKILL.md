@@ -1,6 +1,6 @@
 ---
 name: review
-description: Use when running an agent code review in this project — code-reviewer subagent를 다관점 병렬 dispatch하고 결과를 합산·검증해 게시한다. 레인이 둘이다: 공개된 PR에 대한 유저 지시 리뷰(인라인 코멘트 게시), 그리고 implement §착수가 강제하는 PR 직전 최종 whole-branch 리뷰(pre-PR 레인 — 유저 지시 불요, 대화 보고로 게시 갈음). Triggers on "리뷰 돌려보자", "리뷰해줘" (PR이 올라간 상태에서), PR 직전 최종 whole-branch 리뷰 시점. Does NOT trigger on PR 공개 시점의 자동 실행(공개 PR 레인은 유저 지시가 유일한 트리거), 하네스 변경분 리뷰(harness-review 스킬), 리뷰 반영 커밋 구성(commit 스킬), PR 본문 작성(pr 스킬).
+description: Use when running an agent code review in this project — code-reviewer subagent를 다관점 병렬 dispatch하고 결과를 합산·검증해 게시한다. 레인이 둘이다: 공개된 PR에 대한 유저 지시 리뷰(인라인 코멘트 게시), 그리고 implement §착수가 강제하는 PR 직전 최종 whole-branch 리뷰(pre-PR 레인 — 유저 지시 불요, 대화 보고로 게시 갈음). Triggers on "리뷰 돌려보자", "리뷰해줘" (PR이 올라간 상태에서), PR 직전 최종 whole-branch 리뷰 시점. Does NOT trigger on PR 공개 시점의 자동 실행(공개 PR 레인은 유저 지시가 유일한 트리거), 하네스 변경분 리뷰(harness-review 스킬), 계획 문서 리뷰(plan-review 스킬), 리뷰 반영 커밋 구성(commit 스킬), PR 본문 작성(pr 스킬).
 ---
 
 # Review — 에이전트 리뷰 수행
