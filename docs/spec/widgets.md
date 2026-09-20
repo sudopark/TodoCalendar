@@ -281,6 +281,7 @@ AICommandShortcutWidget·AICommandControlWidget 탭 시 인앱 AI 버튼과 같�
 |---|---|---|
 | 시스템 기본 | `.system` | OS 기본 위젯 배경 |
 | 커스텀 색상 | `.custom(hex: "#FF5733")` | 지정 색상 + 그라데이션 + 그림자 |
+| 배경 사진 | `WidgetStyle.photo` | D-day 홈 2변형만. 스타일 단위이고 전역 설정엔 이 축이 없다 (8.3 사진 배경 계약) |
 
 ### 8.2 커스텀 배경 렌더링
 
@@ -291,6 +292,8 @@ hex 색상으로 UIColor 생성
   → 텍스트 색상이 배경 밝기에 따라 자동 조정
   → gradient + drop shadow 효과
 ```
+
+**사진 배경은 이 경로를 안 탄다.** 사진에는 밝기를 잴 hex 가 없어 판정 입력 자체가 없다 — 대신 어둡게 덮는 판(검정 35%)을 깔고 ColorSet 을 다크로 고정한다. 보조 글자는 사진일 때만 `text2` 에서 `text1` 로 한 단계 올린다. 농도와 한 단계는 밝은 하늘·어두운 사진·중형 셋을 실제 뷰로 찍어 0/25/35/45% 를 비교해 정했다 (2026-09-20).
 
 ### 8.3 변형별 스타일 설정
 
@@ -364,18 +367,36 @@ hex 색상으로 UIColor 생성
 | EventAndMonth | `EventAndMonthStyleSetting { month }` | Month 4 | `eventAndMonthMedium` |
 | EventAndForemost | `EventAndForemostStyleSetting { foremost }` | Foremost 라벨 | `eventAndForemostMedium` |
 | TodayAndMonth | `TodayAndMonthStyleSetting { today, month }` | Today 6 + Month 4 | `todayAndMonthMedium` |
+| DDay | `DDayStyleSetting` | 없음 (사진·배경색만) | `ddaySmall` (홈 2변형 공유) |
 
 - AICommand 는 뷰모델이 없어 뷰가 봉투에서 직접 설정을 꺼내고, 타임라인 entry 가 그 봉투를 담는다(`WidgetViewModelProviderBuilder.resolveWidgetStyle(of:style:)`).
 - **합성 위젯은 제 스타일로 그린다** (#1133) — 합성 payload 가 하위 위젯군 payload 를 필드로 담고(위 표), 배경색은 봉투가 담는다. 하위 위젯군의 스타일과는 끊겨, 하위 쪽 토글·배경색을 바꿔도 합성 위젯은 안 바뀐다 — 놓이는 자리가 달라 따로 꾸민다.
 - **두 절반은 한 합성 봉투에서 읽는다** — `WidgetLook.part(_:)` 가 합성 봉투에서 한 절반의 봉투를 꺼낸다: 하위 payload 를 keyPath 로 꺼내 `setting` 에 꽂고, 판 색은 합성 스타일 것을 그대로 둔다. 판과 두 절반의 글자색이 한 배경에서 파생돼야 한 절반이 안 읽히는 일이 없다. 토글이 없는 이벤트 절반은 합성 봉투를 그대로 받는다. 이 배선은 `<합성>WidgetViewModel.applying(_:)` 한 곳에 있고 provider 와 갤러리 프리뷰가 같이 쓴다.
 - **편집 폼은 하위 폼을 절반마다 재사용한다** — 하위 폼이 내보낸 하위 payload 를 `<합성>StyleSetting.replacingPart(_:)` 로 합성 payload 에 감싸 올린다. 감싸지 않으면 좌표의 payload 타입이 아니어서 저장되지 않는다(표현 층 계약). 섹션 제목은 절반의 위젯 이름이다.
 
+#### 사진 배경 계약 (#1140)
+
+**사진도 배경색처럼 봉투가 담는다** — `WidgetStyle.photo: WidgetStylePhoto?`. 배경색과 같은 층이라 payload 에 두지 않았고, `WidgetLook` 이 해석 지점인 것도 같다. **사진이 색보다 앞선다** — 사진이 걸려 있으면 배경은 사진이고 그 스타일의 배경색은 안 그려진다. 편집 화면도 사진이 걸린 동안 색 선택 줄을 비활성으로 두어 같은 말을 한다.
+
+- **사진 바이트는 UserDefaults 에 안 들어간다.** 저장 레코드가 갖는 것은 UUID 식별자 문자열 하나다(`{ name, setting, background, photo }`). `WidgetStyle` 을 통째로 `Codable` 로 만들면 그 순간 바이트가 UserDefaults 로 새므로, 인코딩은 `StoredStyle` 을 거치는 구조를 유지한다. 사진 칸도 Optional 이라 사진이 없던 시절 저장값이 그대로 디코딩된다.
+- **실물은 App Group 컨테이너에 두 장으로 산다** — `widget-photos/<uuid>.original`(유저가 고른 원본)과 `<uuid>.render.jpg`(렌더용 축소본). **위젯은 축소본만 읽는다.** 원본을 남기는 값어치는 재생성이다 — 상한이 바뀌거나 변형이 늘거나 대비 보정을 다시 잡을 때 원본에서 다시 만든다. 디렉토리 경로는 앱 본체(`AppEnvironment.widgetPhotoDirectory`)가 저장소에 주입하고 — Repository 모듈은 App Group 을 모른다 —, 디렉토리 자체는 저장소가 첫 쓰기에서 만든다. 경로를 내주는 자리에서 만들면 사진과 무관한 위젯도 타임라인 갱신마다 그 값을 치른다.
+- **다운샘플은 저장 시점 한 번이다.** 렌더마다 하면 타임라인 갱신마다 확장의 메모리·시간 예산을 쓰는데 얻을 것이 없다. 규격은 **최대 변 1000px 그리고 총 면적 700,000 px² 이하**이고 JPEG 압축률 0.9 로 굽는다. 근거는 WidgetKit 아카이브의 이미지 총 면적 상한이다 — 약 1,069,415 px² 를 넘기면 `ArchivingError.imageTooLarge` 로 **타임라인 전체가 실패**하고 위젯이 빈 골격으로 남는다(사진만 빠지는 우아한 실패가 없고 재시도는 한 시간 뒤다, 2026-09-20 실측). 정사각 사진을 medium 캔버스에 @3x 로 채우려면 1080×1080(1.17M px²)이 필요해 상한을 넘으므로, 어느 경로를 골라도 축소는 강제다.
+- **사진은 스타일 좌표마다 제 파일을 갖는다.** 복제는 복제 시점에 갈라진다 — 편집 화면이 저장본을 제 임시 파일로 복사해 초안으로 들고, 저장하면 그 초안이 새 식별자를 받는다. 참조 카운팅은 두지 않고, 스타일 삭제는 그 좌표의 두 장을 지운다. 초안을 거치지 않고 저장본 좌표가 그대로 넘어오면 저장 시점에 갈라낸다.
+- **레코드에 들어가는 식별자는 뒤에 파일이 선다.** 저장소는 저장본 식별자를 다시 쓰기 전에 그 파일이 남아 있는지 보고, 없으면 식별자를 지운다 — 남겨 두면 조회가 nil 을 내 유저에겐 사진이 사라진 것으로 보인다. 복제가 복제 시점에 갈라지므로 초안이 남의 파일을 가리키는 구간은 없다.
+- **조회는 파일을 쓰지도 열지도 않는다** — 두 장의 자리만 돌려준다. 축소본이 없으면 렌더 자리로 원본을 내주고(그 사이엔 원본 해상도로 그린다), 두 장 다 없을 때만 사진이 없다. 축소본 파일 복구는 저장 흐름이 맡는다. 조회가 디스크에 쓰면 CQS 가 깨지고, 확장이 타임라인을 만드는 중에 공유 컨테이너에 쓰면 앱 쪽 쓰기와 겹친다.
+- **컨테이너를 못 잡으면 레코드의 사진 칸을 통째로 안 건드린다.** 식별자만 지우면 파일 두 장은 남고 가리키는 값이 없어, 유저에겐 사진 유실이고 디스크엔 고아다.
+- **모델은 사진 바이트를 안 든다** — `WidgetStylePhoto` 는 `{ id, original, rendering }` 으로 파일 자리만 갖는다. 편집 화면과 AppIntent 스타일 피커가 스타일 목록을 통째로 들기 때문에, 바이트를 실으면 사진을 하나도 안 그리는 화면이 저장된 사진 전부를 메모리에 올린다 — 위젯 확장은 예산이 그걸 감당하지 못한다.
+- **초안과 저장본이 한 타입에 앉는다** — 식별자가 없으면 초안이고 그 두 장은 임시 디렉토리에 산다. 피커가 돌려준 바이트는 `makeDraftPhoto(from:)` 이 곧장 임시 파일로 옮기고, 저장 시점에 저장소가 컨테이너로 들이며 식별자를 발급한다. 편집 화면이 스타일 목록을 통째로 초안으로 다뤄서, 저장 전과 저장 후가 같은 자리에 앉아야 별도 대기 맵이 안 생긴다.
+- **초안 좌표는 저장으로 소비된다** — 저장소가 두 장을 컨테이너로 들이면서 임시 파일을 지운다. 그래서 편집 화면은 저장 직후 저장된 좌표를 다시 읽어 편집 목록과 저장본 사전에 넣는다. 안 읽으면 화면이 지워진 임시 파일을 계속 가리켜, 위젯은 컨테이너 파일로 멀쩡히 그리는데 편집 카드만 다음 렌더에서 빈칸이 된다.
+- **잠금화면 3변형엔 사진이 안 깔린다.** provider 는 family 를 모르고 한 모델이 5변형에 가므로, 확장의 배경 뷰가 family 로 갈라 잠금화면엔 배경색만 칠한다 — 시스템이 단색 렌더를 강제하는 자리다.
+- **받고 가는 것: 고아 파일.** 파일 삭제가 실패하거나 삭제 직전에 프로세스가 죽으면 어느 레코드도 안 가리키는 파일이 남는다. `updateStyle`·`removeStyle` 이 non-throwing 이라 실패를 삼키고, 사진 한 장당 파일이 둘이라 누적이 눈에 띈다. 참조 카운팅도 정리 경로도 두지 않았다.
+
 #### 스타일 공유 변형군 (#1112)
 
-**변형이 여럿이어도 꾸밀 항목이 같으면 스타일 하나를 공유한다** — WeekEvents 7변형(`oneWeekEvents`·`twoWeekEvents`·`threeWeekEvents`·`fourWeekEvents`·`currentMonthEvents`·`lastMonthEvents`·`nextMonthEvents`), EventList 3변형(`eventListSmall`·`eventListMedium`·`eventListLarge` → `eventListSmall`), Foremost 홈 2변형(`foremostSmall`·`foremostMedium` → `foremostSmall`)이 그 경우다. 뷰와 provider 가 하나고 표시 항목도 같아서, 유저가 여러 벌을 따로 편집할 이유가 없다.
+**변형이 여럿이어도 꾸밀 항목이 같으면 스타일 하나를 공유한다** — WeekEvents 7변형(`oneWeekEvents`·`twoWeekEvents`·`threeWeekEvents`·`fourWeekEvents`·`currentMonthEvents`·`lastMonthEvents`·`nextMonthEvents`), EventList 3변형(`eventListSmall`·`eventListMedium`·`eventListLarge` → `eventListSmall`), Foremost 홈 2변형(`foremostSmall`·`foremostMedium` → `foremostSmall`), DDay 홈 2변형(`ddaySmall`·`ddayMedium` → `ddaySmall`)이 그 경우다. 뷰와 provider 가 하나고 표시 항목도 같아서, 유저가 여러 벌을 따로 편집할 이유가 없다.
 
 - **접는 이유는 편집 진입이 아니라 인스턴스 선택이다** — `EntityQuery` 는 자기가 어느 family 에 뜨는지 모르므로 변형마다 좌표를 가르면 Small 인스턴스가 Large 스타일까지 후보로 보게 된다. 같은 kind 를 쓰는 변형군은 스타일 풀 하나로 접는다.
-- **잠금화면 변형은 접지 않는다** — `foremostInline`·`aiCommandCircular` 는 꾸미기 대상이 아니라 자기 자신을 좌표로 내고 `isCustomizable` 이 false 다. provider 도 이 값을 보고 스타일 조회를 건너뛴다.
+- **잠금화면 변형은 접지 않는다** — `foremostInline`·`aiCommandCircular`·DDay 3변형(`ddayCircular`·`ddayRectangular`·`ddayInline`)은 꾸미기 대상이 아니라 자기 자신을 좌표로 내고 `isCustomizable` 이 false 다. provider 도 이 값을 보고 스타일 조회를 건너뛴다.
 
 - **대표 변형을 `WidgetVariant.styleVariant` 가 가리킨다.** 공유하지 않는 변형은 자기 자신을 낸다. `styleSharingVariants` 는 그 역으로, 한 변형과 스타일을 공유하는 변형 전부(자기 포함)를 낸다.
 - **정규화는 두 층이다.** 좌표를 받는 경로는 `WidgetStyleId.init(variant:style:)` 이 대표 변형으로 접고, `WidgetVariant` 를 좌표 없이 직접 받는 경로(`WidgetStyleUsecaseImple` 의 `shareKey`·`loadStyles`)는 그 자리에서 접는다. **한 층만으로는 샌다** — 저장소와 공유 상태 키가 `variant.rawValue` 라, 좌표만 접으면 `.twoWeekEvents` 로 연 편집 화면이 `oneWeekEvents` 키에 저장된 스타일을 못 읽는다.
