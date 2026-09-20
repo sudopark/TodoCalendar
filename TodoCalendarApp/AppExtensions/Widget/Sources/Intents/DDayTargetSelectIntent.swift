@@ -390,6 +390,9 @@ struct DDayWidgetConfigurationIntent: WidgetConfigurationIntent {
     @Parameter(title: "Turn", default: nil)
     var turn: DDayTargetTurnEntity?
 
+    @Parameter(title: "Style", default: nil)
+    var style: DDayStyleEntity?
+
     /// 반복 일정을 골랐을 때만 회차 파라미터를 노출한다 — 비반복 일정엔 고를 회차가 없다.
     ///
     /// 조건 값은 **반드시 문자열 리터럴**이어야 한다. AppIntents 메타데이터 추출기는 이 자리의
@@ -401,10 +404,12 @@ struct DDayWidgetConfigurationIntent: WidgetConfigurationIntent {
             Summary {
                 \.$target
                 \.$turn
+                \.$style
             }
         } otherwise: {
             Summary {
                 \.$target
+                \.$style
             }
         }
     }
@@ -419,5 +424,11 @@ struct DDayWidgetConfigurationIntent: WidgetConfigurationIntent {
               turn.kind == target.kind, turn.rawId == target.rawId
         else { return target }
         return turn
+    }
+
+    var resolvedStyle: WidgetStyleId.Style {
+        return self.style
+            .flatMap { WidgetStyleId.Style(entityId: $0.id) }
+            ?? .default
     }
 }

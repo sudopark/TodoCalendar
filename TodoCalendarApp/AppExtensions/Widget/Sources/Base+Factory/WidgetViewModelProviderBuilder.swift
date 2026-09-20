@@ -384,7 +384,8 @@ extension WidgetViewModelProviderBuilder {
         return DDayWidgetViewModelProvider(
             eventFetchUsecase: self.usecaseFactory.makeEventsFetchUsecase(),
             calendarSettingRepository: calendarSettingRepository,
-            appSettingRepository: appSettingRepository
+            appSettingRepository: appSettingRepository,
+            styleRepository: self.makeStyleRepository()
         )
     }
 }

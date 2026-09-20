@@ -23,7 +23,8 @@ struct DDayWidgetViewModelProviderTests {
     private var utc: TimeZone { TimeZone(abbreviation: "UTC")! }
 
     private func makeProvider(
-        stubTarget: DDayTargetEvent?
+        stubTarget: DDayTargetEvent?,
+        savedStyles: [WidgetStyle] = []
     ) -> DDayWidgetViewModelProvider {
 
         let eventFetchUsecase = StubCalendarEventsFetchUescase()
@@ -35,7 +36,10 @@ struct DDayWidgetViewModelProviderTests {
         return DDayWidgetViewModelProvider(
             eventFetchUsecase: eventFetchUsecase,
             calendarSettingRepository: calendarSettingRepository,
-            appSettingRepository: StubAppSettingRepository()
+            appSettingRepository: StubAppSettingRepository(),
+            styleRepository: StubWidgetStyleRepository(
+                styles: savedStyles.asDictionary { $0.id }
+            )
         )
     }
 
@@ -366,5 +370,106 @@ extension DDayWidgetViewModelProviderTests {
 
         // then
         #expect(text.contains(model.eventTitle) == true)
+    }
+}
+
+
+// MARK: - 인스턴스가 고른 스타일
+
+extension DDayWidgetViewModelProviderTests {
+
+    private func ddayStyle(
+        _ style: WidgetStyleId.Style,
+        variant: WidgetVariant = .ddaySmall,
+        background: WidgetAppearanceSettings.Background? = nil,
+        photo: WidgetStylePhoto? = nil
+    ) -> WidgetStyle {
+        return .init(
+            id: .init(variant: variant, style: style),
+            name: nil, setting: DDayStyleSetting.initial,
+            background: background, photo: photo
+        )
+    }
+
+    @Test("자기 변형 좌표의 스타일을 읽는다")
+    func provider_readsItsOwnVariantStyle() async throws {
+        // given
+        let provider = self.makeProvider(
+            stubTarget: self.makeTarget(time: .at(3600)),
+            savedStyles: [
+                self.ddayStyle(.default, background: .custom(hex: "#101820")),
+                self.ddayStyle(.default, variant: .monthSmall, background: .custom(hex: "#ffffff"))
+            ]
+        )
+
+        // when
+        let model = try await provider.getDDayModel(
+            for: Date(timeIntervalSince1970: 0), target: .init(kind: .schedule, rawId: "s1")
+        )
+
+        // then
+        #expect(model.eventTitle == "워크숍")
+        #expect(model.look.background == .custom(hex: "#101820"))
+    }
+
+    private func storedPhoto(_ id: String) -> WidgetStylePhoto {
+        return .init(
+            id: id,
+            original: URL(filePath: "/tmp/\(id).original"),
+            rendering: URL(filePath: "/tmp/\(id).render.jpg")
+        )
+    }
+
+    @Test("고른 스타일의 사진이 봉투에 실린다")
+    func provider_appliesPhotoFromResolvedStyle() async throws {
+        // given
+        let provider = self.makeProvider(
+            stubTarget: self.makeTarget(time: .at(3600)),
+            savedStyles: [
+                self.ddayStyle(.custom(id: "c1"), photo: self.storedPhoto("p1"))
+            ]
+        )
+
+        // when
+        let model = try await provider.getDDayModel(
+            for: Date(timeIntervalSince1970: 0),
+            target: .init(kind: .schedule, rawId: "s1"),
+            style: .custom(id: "c1")
+        )
+
+        // then
+        #expect(model.eventTitle == "워크숍")
+        #expect(model.look.photo == self.storedPhoto("p1").rendering)
+    }
+
+    @Test("대상이 없어도 고른 스타일은 그대로 실린다")
+    func provider_whenNoTarget_stillAppliesStyle() async throws {
+        // given
+        let provider = self.makeProvider(
+            stubTarget: nil,
+            savedStyles: [
+                self.ddayStyle(.default, photo: self.storedPhoto("p1"))
+            ]
+        )
+
+        // when
+        let model = try await provider.getDDayModel(for: Date(timeIntervalSince1970: 0), target: nil)
+
+        // then
+        #expect(model.look.photo == self.storedPhoto("p1").rendering)
+    }
+
+    @Test("저장된 스타일이 없으면 전역 배경으로 떨어진다")
+    func provider_whenStyleMissing_fallsBackToGlobalBackground() async throws {
+        // given
+        let provider = self.makeProvider(stubTarget: self.makeTarget(time: .at(3600)))
+
+        // when
+        let model = try await provider.getDDayModel(for: Date(timeIntervalSince1970: 0), target: nil)
+
+        // then
+        #expect(model.look.appliedStyle == nil)
+        #expect(model.look.photo == nil)
+        #expect(model.look.background == .system)
     }
 }
