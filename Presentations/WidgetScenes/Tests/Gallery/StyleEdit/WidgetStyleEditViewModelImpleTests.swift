@@ -18,7 +18,20 @@ import TestDoubles
 @testable import WidgetScenes
 
 
-final class SpyWidgetStyleEditRouter: BaseSpyRouter, WidgetStyleEditRouting, @unchecked Sendable { }
+final class SpyWidgetStyleEditRouter: BaseSpyRouter, WidgetStyleEditRouting, @unchecked Sendable {
+
+    var didRequestPhotoPick: Bool = false
+    private var onPick: (@Sendable (Data?) -> Void)?
+
+    func routeToPhotoPick(onPick: @escaping @Sendable (Data?) -> Void) {
+        self.didRequestPhotoPick = true
+        self.onPick = onPick
+    }
+
+    func finishPhotoPick(with data: Data?) {
+        self.onPick?(data)
+    }
+}
 
 
 private struct OtherWidgetStyleSetting: WidgetStyleSetting {
@@ -1364,5 +1377,284 @@ extension WidgetStyleEditViewModelImpleTests {
         #expect(applied.name == "여름")
         #expect(applied.background == .custom(hex: "#101820"))
         #expect((applied.setting as? TodayStyleSetting)?.showHolidayName == false)
+    }
+}
+
+
+// MARK: - 배경 사진
+
+extension WidgetStyleEditViewModelImpleTests {
+
+    private var ddayDefaultId: WidgetStyleId {
+        return .init(variant: .ddaySmall, style: .default)
+    }
+
+    private func ddayStyle(
+        _ style: WidgetStyleId.Style,
+        name: String? = nil,
+        photo: WidgetStylePhoto? = nil
+    ) -> WidgetStyle {
+        return .init(
+            id: .init(variant: .ddaySmall, style: style),
+            name: name, setting: DDayStyleSetting.initial, photo: photo
+        )
+    }
+
+    private func makeDDayViewModel(
+        saved styles: [WidgetStyle],
+        router: SpyWidgetStyleEditRouter = .init()
+    ) -> (WidgetStyleEditViewModelImple, StubWidgetStyleUsecase) {
+        let usecase = StubWidgetStyleUsecase()
+        usecase.stubStyles = styles
+        let viewModel = WidgetStyleEditViewModelImple(
+            variants: [.ddaySmall, .ddayMedium], widgetStyleUsecase: usecase
+        )
+        viewModel.router = router
+        viewModel.refresh()
+        return (viewModel, usecase)
+    }
+
+    private func selectedPhoto(
+        of viewModel: WidgetStyleEditViewModelImple
+    ) async throws -> URL?? {
+        return try await self.current("고른 카드 사진", of: viewModel.selectedPhoto)
+    }
+
+    private func storedPhoto(_ id: String) -> WidgetStylePhoto {
+        return .init(
+            id: id,
+            original: URL(filePath: "/tmp/\(id).original"),
+            rendering: URL(filePath: "/tmp/\(id).render.jpg")
+        )
+    }
+
+    private func draftPhoto(_ order: Int) -> WidgetStylePhoto {
+        return .init(
+            id: nil,
+            original: URL(filePath: "/tmp/draft\(order).original"),
+            rendering: URL(filePath: "/tmp/draft\(order).render.jpg")
+        )
+    }
+
+    private func savedPhoto(
+        _ usecase: StubWidgetStyleUsecase, of style: WidgetStyleId.Style = .default
+    ) -> WidgetStylePhoto? {
+        return usecase.loadStyles(of: .ddaySmall)
+            .first { $0.id.style == style }?.photo
+    }
+
+    @Test("사진을 고르면 초안에 실리고 미저장 표시가 선다")
+    func updatePhoto_marksUnsavedChange() async throws {
+        // given
+        let (viewModel, usecase) = self.makeDDayViewModel(saved: [self.ddayStyle(.default)])
+
+        // when
+        viewModel.updatePhoto(Data([0x01, 0x02]))
+
+        // then
+        #expect(usecase.didMakeDraftPhotoFrom == Data([0x01, 0x02]))
+        #expect(
+            try await self.selectedPhoto(of: viewModel) == .some(self.draftPhoto(1).rendering)
+        )
+        #expect(try await self.hasUnsavedChange(of: viewModel) == true)
+        #expect(self.savedPhoto(usecase) == nil)
+    }
+
+    @Test("사진 줄을 누르면 피커를 띄우고 고른 바이트가 임시 파일로 간다")
+    func selectPhoto_whenPicked_putsDraftFileIntoStyle() async throws {
+        // given
+        let router = SpyWidgetStyleEditRouter()
+        let (viewModel, usecase) = self.makeDDayViewModel(
+            saved: [self.ddayStyle(.default)], router: router
+        )
+
+        // when
+        viewModel.selectPhoto()
+        router.finishPhotoPick(with: Data([0x07]))
+
+        // then
+        #expect(router.didRequestPhotoPick == true)
+        #expect(usecase.didMakeDraftPhotoFrom == Data([0x07]))
+        #expect(
+            try await self.selectedPhoto(of: viewModel) == .some(self.draftPhoto(1).rendering)
+        )
+    }
+
+    @Test("피커를 그냥 닫으면 걸려 있던 사진이 그대로 남는다")
+    func selectPhoto_whenPickerCancelled_keepsDraft() async throws {
+        // given
+        let router = SpyWidgetStyleEditRouter()
+        let (viewModel, _) = self.makeDDayViewModel(
+            saved: [self.ddayStyle(.default, photo: self.storedPhoto("p1"))],
+            router: router
+        )
+
+        // when
+        viewModel.selectPhoto()
+        router.finishPhotoPick(with: nil)
+
+        // then
+        #expect(
+            try await self.selectedPhoto(of: viewModel) == .some(self.storedPhoto("p1").rendering)
+        )
+        #expect(try await self.hasUnsavedChange(of: viewModel) == false)
+    }
+
+    @Test("사진을 고른 뒤 저장하면 사진이 실린 스타일이 저장된다")
+    func updatePhoto_thenConfirm_savesStyleWithPhoto() async throws {
+        // given
+        let (viewModel, usecase) = self.makeDDayViewModel(saved: [self.ddayStyle(.default)])
+
+        // when
+        viewModel.updatePhoto(Data([0x01, 0x02]))
+        viewModel.confirm()
+
+        // then
+        #expect(self.savedPhoto(usecase) == self.storedPhoto("stored1"))
+        #expect(try await self.hasUnsavedChange(of: viewModel) == false)
+    }
+
+    @Test("사진을 지우면 초안에서 사진이 빠진다")
+    func updatePhoto_withNil_clearsPhotoFromDraft() async throws {
+        // given
+        let (viewModel, _) = self.makeDDayViewModel(
+            saved: [self.ddayStyle(.default, photo: self.storedPhoto("p1"))]
+        )
+
+        // when
+        viewModel.updatePhoto(nil)
+
+        // then
+        #expect(try await self.selectedPhoto(of: viewModel) == .some(nil))
+        #expect(try await self.hasUnsavedChange(of: viewModel) == true)
+    }
+
+    @Test("저장된 사진은 렌더용 파일 자리로 흘러나온다")
+    func refresh_whenStyleHasStoredPhoto_emitsRenderingURL() async throws {
+        // given
+        let (viewModel, _) = self.makeDDayViewModel(
+            saved: [self.ddayStyle(.default, photo: self.storedPhoto("p1"))]
+        )
+
+        // when
+        let emitted = try await self.selectedPhoto(of: viewModel)
+
+        // then
+        #expect(emitted == .some(self.storedPhoto("p1").rendering))
+    }
+
+    @Test("카드를 바꾸면 그 카드의 사진이 흘러나온다")
+    func selectStyle_emitsPhotoOfThatCard() async throws {
+        // given
+        let (viewModel, _) = self.makeDDayViewModel(
+            saved: [
+                self.ddayStyle(.default, photo: self.storedPhoto("p1")),
+                self.ddayStyle(.custom(id: "c1"), name: "밤", photo: nil)
+            ]
+        )
+
+        // when
+        viewModel.selectStyle(.init(variant: .ddaySmall, style: .custom(id: "c1")))
+
+        // then
+        #expect(try await self.selectedPhoto(of: viewModel) == .some(nil))
+    }
+
+    @Test("복제한 카드는 원본 사진의 제 사본을 받는다")
+    func appendStyle_copying_takesOwnCopyOfPhoto() async throws {
+        // given
+        let (viewModel, usecase) = self.makeDDayViewModel(
+            saved: [self.ddayStyle(.default, photo: self.storedPhoto("p1"))]
+        )
+
+        // when
+        viewModel.appendStyle(copying: self.ddayDefaultId)
+        viewModel.confirm()
+
+        // then
+        #expect(usecase.didMakeDraftPhotoCopying == self.storedPhoto("p1"))
+        #expect(
+            try await self.selectedPhoto(of: viewModel)
+                == .some(self.storedPhoto("stored1").rendering)
+        )
+        #expect(self.savedPhoto(usecase, of: .custom(id: "new1")) == self.storedPhoto("stored1"))
+        #expect(self.savedPhoto(usecase) == self.storedPhoto("p1"))
+    }
+
+    @Test("되돌리면 사진도 함께 지워진다")
+    func resetStyle_clearsPhoto() async throws {
+        // given
+        let (viewModel, _) = self.makeDDayViewModel(
+            saved: [self.ddayStyle(.default, photo: self.storedPhoto("p1"))]
+        )
+
+        // when
+        viewModel.resetStyle(self.ddayDefaultId)
+
+        // then
+        #expect(try await self.selectedPhoto(of: viewModel) == .some(nil))
+    }
+
+    @Test("편집분을 버리면 저장된 사진으로 돌아간다")
+    func discard_restoresSavedPhoto() async throws {
+        // given
+        let (viewModel, _) = self.makeDDayViewModel(
+            saved: [self.ddayStyle(.default, photo: self.storedPhoto("p1"))]
+        )
+        viewModel.updatePhoto(Data([0x01]))
+
+        // when
+        viewModel.discard()
+
+        // then
+        #expect(
+            try await self.selectedPhoto(of: viewModel) == .some(self.storedPhoto("p1").rendering)
+        )
+        #expect(try await self.hasUnsavedChange(of: viewModel) == false)
+    }
+
+    @Test("카드 목록도 사진을 실어 미리보기가 그린다")
+    func styles_carryPhotoForPreview() async throws {
+        // given
+        let (viewModel, _) = self.makeDDayViewModel(
+            saved: [self.ddayStyle(.default, photo: self.storedPhoto("p1"))]
+        )
+
+        // when
+        let cells = try await self.current("카드 목록", of: viewModel.styles)
+
+        // then
+        #expect(cells?.map { $0.appliedStyle.photo } == [self.storedPhoto("p1")])
+    }
+
+    @Test("사진을 고르고 저장하면 편집분이 저장본 좌표를 든다")
+    func updatePhoto_thenConfirm_editingStyleTakesStoredPhoto() async throws {
+        // given
+        let (viewModel, usecase) = self.makeDDayViewModel(saved: [self.ddayStyle(.default)])
+
+        // when
+        viewModel.updatePhoto(Data([0x01]))
+        viewModel.confirm()
+
+        // then
+        let stored = try #require(self.savedPhoto(usecase))
+        #expect(stored.isDraft == false)
+        #expect(try await self.selectedPhoto(of: viewModel) == .some(stored.rendering))
+    }
+
+    @Test("사진을 저장한 뒤 이름을 바꿔도 카드가 저장본 사진을 그린다")
+    func editName_afterPhotoSaved_cardKeepsStoredPhoto() async throws {
+        // given
+        let (viewModel, usecase) = self.makeDDayViewModel(saved: [self.ddayStyle(.default)])
+        viewModel.updatePhoto(Data([0x01]))
+        viewModel.confirm()
+
+        // when
+        viewModel.editName("밤 모드")
+
+        // then
+        let stored = try #require(self.savedPhoto(usecase))
+        let cells = try await self.current("카드 목록", of: viewModel.styles)
+        #expect(cells?.map { $0.appliedStyle.photo } == [stored])
     }
 }

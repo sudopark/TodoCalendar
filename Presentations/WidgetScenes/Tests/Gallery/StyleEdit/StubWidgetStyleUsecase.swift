@@ -8,6 +8,8 @@
 
 import Foundation
 import Combine
+import Prelude
+import Optics
 import Domain
 
 
@@ -27,6 +29,8 @@ final class StubWidgetStyleUsecase: WidgetStyleUsecase, @unchecked Sendable {
     }
     
     private var mintedStyleIdCount: Int = 0
+    private var mintedDraftPhotoCount: Int = 0
+    private var mintedStoredPhotoCount: Int = 0
     
     func refreshStyles(of variant: WidgetVariant) {
         self.subject(of: variant).send(self.styles(in: self.stubStyles, of: variant))
@@ -61,12 +65,24 @@ final class StubWidgetStyleUsecase: WidgetStyleUsecase, @unchecked Sendable {
     /// 기존 좌표는 자리를 지키고 새 좌표만 뒤에 붙는다 — 저장소도 정렬 키로 순서를 정해
     /// 갱신이 목록 순서를 바꾸지 않는다.
     func updateStyle(_ style: WidgetStyle) {
-        guard self.stubStyles.contains(where: { $0.id == style.id })
+        let stored = self.storing(style)
+        guard self.stubStyles.contains(where: { $0.id == stored.id })
         else {
-            self.stubStyles = self.stubStyles + [style]
+            self.stubStyles = self.stubStyles + [stored]
             return
         }
-        self.stubStyles = self.stubStyles.map { $0.id == style.id ? style : $0 }
+        self.stubStyles = self.stubStyles.map { $0.id == stored.id ? stored : $0 }
+    }
+
+    private func storing(_ style: WidgetStyle) -> WidgetStyle {
+        guard let photo = style.photo, photo.isDraft else { return style }
+        self.mintedStoredPhotoCount += 1
+        let id = "stored\(self.mintedStoredPhotoCount)"
+        return style |> \.photo .~ .init(
+            id: id,
+            original: URL(filePath: "/tmp/\(id).original"),
+            rendering: URL(filePath: "/tmp/\(id).render.jpg")
+        )
     }
     
     func makeNewStyleId(for variant: WidgetVariant) -> WidgetStyleId {
@@ -76,5 +92,28 @@ final class StubWidgetStyleUsecase: WidgetStyleUsecase, @unchecked Sendable {
     
     func removeStyle(_ id: WidgetStyleId) {
         self.stubStyles = self.stubStyles.filter { $0.id != id }
+    }
+    
+    private(set) var didMakeDraftPhotoFrom: Data?
+    private(set) var didMakeDraftPhotoCopying: WidgetStylePhoto?
+    
+    func makeDraftPhoto(from picked: Data) -> WidgetStylePhoto? {
+        self.didMakeDraftPhotoFrom = picked
+        return self.draftPhoto()
+    }
+    
+    func makeDraftPhoto(copying photo: WidgetStylePhoto) -> WidgetStylePhoto? {
+        self.didMakeDraftPhotoCopying = photo
+        return self.draftPhoto()
+    }
+    
+    private func draftPhoto() -> WidgetStylePhoto {
+        self.mintedDraftPhotoCount += 1
+        let name = "draft\(self.mintedDraftPhotoCount)"
+        return .init(
+            id: nil,
+            original: URL(filePath: "/tmp/\(name).original"),
+            rendering: URL(filePath: "/tmp/\(name).render.jpg")
+        )
     }
 }

@@ -24,6 +24,7 @@ import CommonPresentation
     var hasUnsavedChange: Bool = false
     var selectedSetting: (any WidgetStyleSetting)?
     var selectedBackground: WidgetAppearanceSettings.Background?
+    var selectedPhoto: URL?
     
     func bind(_ viewModel: any WidgetStyleEditViewModel) {
         guard self.didBind == false else { return }
@@ -70,6 +71,13 @@ import CommonPresentation
                 self?.selectedBackground = background
             })
             .store(in: self.cancellables)
+        
+        viewModel.selectedPhoto
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] photo in
+                self?.selectedPhoto = photo
+            })
+            .store(in: self.cancellables)
     }
 }
 
@@ -85,6 +93,8 @@ final class WidgetStyleEditViewEventHandler: Observable {
     var editName: (String) -> Void = { _ in }
     var updateSetting: (any WidgetStyleSetting) -> Void = { _ in }
     var updateBackground: (WidgetAppearanceSettings.Background?) -> Void = { _ in }
+    var selectPhoto: () -> Void = { }
+    var updatePhoto: (Data?) -> Void = { _ in }
     var confirm: () -> Void = { }
     var close: () -> Void = { }
     
@@ -99,6 +109,8 @@ final class WidgetStyleEditViewEventHandler: Observable {
         self.editName = viewModel.editName
         self.updateSetting = viewModel.updateSetting
         self.updateBackground = viewModel.updateBackground
+        self.selectPhoto = viewModel.selectPhoto
+        self.updatePhoto = viewModel.updatePhoto
         self.confirm = viewModel.confirm
         self.close = viewModel.close
     }
@@ -158,6 +170,8 @@ struct WidgetStyleEditView: View {
         static let selectedBorderWidth: CGFloat = 2
         static let nameUnderlineHeight: CGFloat = 1
         static let focusedNameUnderlineHeight: CGFloat = 2
+        static let photoThumbnailSize: CGFloat = 32
+        static let disabledRowOpacity: CGFloat = 0.4
     }
     
     private let variants: [WidgetVariant]
@@ -371,6 +385,16 @@ struct WidgetStyleEditView: View {
                     backgroundRow
                         .listRowBackground(Color.clear)
                 }
+
+                if previewVariant?.supportsPhotoBackground == true {
+                    photoRow
+                        .listRowBackground(Color.clear)
+
+                    if state.selectedPhoto != nil {
+                        photoRemoveRow
+                            .listRowBackground(Color.clear)
+                    }
+                }
             } header: {
                 sectionHeader("widget.style.edit::background::section".localized())
             }
@@ -421,6 +445,51 @@ struct WidgetStyleEditView: View {
         )
     }
 
+    private var photoRow: some View {
+        HStack {
+            Text("widget.style.edit::background::photo".localized())
+                .font(appearance.fontSet.normal.asFont)
+                .foregroundStyle(appearance.colorSet.text1.asColor)
+
+            Spacer()
+
+            if let photo = state.selectedPhoto, let image = UIImage(contentsOfFile: photo.path()) {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(
+                        width: Constant.photoThumbnailSize,
+                        height: Constant.photoThumbnailSize
+                    )
+                    .clipShape(
+                        RoundedRectangle(cornerRadius: Metric.Radius.chip, style: .continuous)
+                    )
+            } else {
+                Text("widget.style.edit::background::photo::none".localized())
+                    .font(appearance.fontSet.subNormal.asFont)
+                    .foregroundStyle(appearance.colorSet.text2.asColor)
+            }
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            self.eventHandlers.selectPhoto()
+        }
+    }
+
+    private var photoRemoveRow: some View {
+        HStack {
+            Text("widget.style.edit::background::photo::remove".localized())
+                .font(appearance.fontSet.normal.asFont)
+                .foregroundStyle(appearance.colorSet.accentWarn.asColor)
+
+            Spacer()
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            self.eventHandlers.updatePhoto(nil)
+        }
+    }
+
     private var backgroundRow: some View {
         HStack {
             Text("widget.style.edit::background::style_own".localized())
@@ -436,6 +505,8 @@ struct WidgetStyleEditView: View {
                 }
                 .id(self.backgroundSwatchId)
         }
+        .disabled(state.selectedPhoto != nil)
+        .opacity(state.selectedPhoto != nil ? Constant.disabledRowOpacity : 1)
     }
     
     /// ColorSelectView 는 초기값을 한 번만 읽는다 — 카드가 바뀌거나 전역 따름으로 되돌아가면 다시 세워야 한다.

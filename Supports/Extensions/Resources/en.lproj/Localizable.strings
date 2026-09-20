@@ -588,6 +588,9 @@
 "widget.style.edit::background::section" = "Background color";
 "widget.style.edit::background::following_global" = "Follow the shared widget theme";
 "widget.style.edit::background::style_own" = "This style only";
+"widget.style.edit::background::photo" = "Background photo";
+"widget.style.edit::background::photo::none" = "None";
+"widget.style.edit::background::photo::remove" = "Remove photo";
 "widget.style.edit::items::section" = "Details";
 "widget.style::custom::copy_format" = "%@ - Copy";
 "widget.doubleMonth::name" = "Calendar + Calendar";

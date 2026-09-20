@@ -25,11 +25,12 @@ struct WidgetStyleCellViewModel: Equatable {
     let hasUnsavedChange: Bool
     let setting: any WidgetStyleSetting
     let background: WidgetAppearanceSettings.Background?
+    let photo: WidgetStylePhoto?
     
     var appliedStyle: WidgetStyle {
         return .init(
             id: self.styleId, name: self.name,
-            setting: self.setting, background: self.background
+            setting: self.setting, background: self.background, photo: self.photo
         )
     }
 
@@ -38,6 +39,7 @@ struct WidgetStyleCellViewModel: Equatable {
             && lhs.name == rhs.name
             && lhs.hasUnsavedChange == rhs.hasUnsavedChange
             && lhs.background == rhs.background
+            && lhs.photo == rhs.photo
             && lhs.setting.isSame(rhs.setting)
     }
 }
@@ -57,6 +59,8 @@ protocol WidgetStyleEditViewModel: AnyObject, WidgetStyleEditSceneInteractor {
     func editName(_ name: String)
     func updateSetting(_ setting: any WidgetStyleSetting)
     func updateBackground(_ background: WidgetAppearanceSettings.Background?)
+    func selectPhoto()
+    func updatePhoto(_ data: Data?)
     func confirm()
     func close()
     
@@ -67,6 +71,7 @@ protocol WidgetStyleEditViewModel: AnyObject, WidgetStyleEditSceneInteractor {
     var hasAnyUnsavedEdit: AnyPublisher<Bool, Never> { get }
     var selectedSetting: AnyPublisher<any WidgetStyleSetting, Never> { get }
     var selectedBackground: AnyPublisher<WidgetAppearanceSettings.Background?, Never> { get }
+    var selectedPhoto: AnyPublisher<URL?, Never> { get }
 }
 
 final class WidgetStyleEditViewModelImple: WidgetStyleEditViewModel, @unchecked Sendable {
@@ -98,9 +103,7 @@ final class WidgetStyleEditViewModelImple: WidgetStyleEditViewModel, @unchecked 
 extension WidgetStyleEditViewModelImple {
     
     func refresh() {
-        let styles = self.styleVariants().flatMap {
-            self.widgetStyleUsecase.loadStyles(of: $0)
-        }
+        let styles = self.loadedStyles()
         self.subject.savedStyles.send(styles.asDictionary { $0.id })
         self.subject.editingStyles.send(styles)
         guard let first = styles.first else { return }
@@ -126,7 +129,8 @@ extension WidgetStyleEditViewModelImple {
             id: self.widgetStyleUsecase.makeNewStyleId(for: source.id.variant),
             name: self.copiedName(from: source, in: styles),
             setting: source.setting,
-            background: source.background
+            background: source.background,
+            photo: source.photo.flatMap { self.widgetStyleUsecase.makeDraftPhoto(copying: $0) }
         )
         self.subject.editingStyles.send(styles + [newStyle])
         self.select(newStyle.id)
@@ -146,7 +150,8 @@ extension WidgetStyleEditViewModelImple {
         guard let initialSetting = styleId.variant.initialSetting else { return }
         let confirmed: () -> Void = { [weak self] in
             self?.replaceStyle(styleId) {
-                $0 |> \.setting .~ initialSetting |> \.name .~ nil |> \.background .~ nil
+                $0 |> \.setting .~ initialSetting |> \.name .~ nil
+                    |> \.background .~ nil |> \.photo .~ nil
             }
             self?.refreshEditingName()
         }
@@ -183,6 +188,18 @@ extension WidgetStyleEditViewModelImple {
     /// nil 은 전역 설정을 따른다는 뜻이라, 되돌리는 것도 색을 고르는 것과 같은 명령이다.
     func updateBackground(_ background: WidgetAppearanceSettings.Background?) {
         self.updateSelectedStyle { $0 |> \.background .~ background }
+    }
+    
+    func selectPhoto() {
+        self.router?.routeToPhotoPick { [weak self] data in
+            guard let data else { return }
+            self?.updatePhoto(data)
+        }
+    }
+    
+    func updatePhoto(_ data: Data?) {
+        let draft = data.flatMap { self.widgetStyleUsecase.makeDraftPhoto(from: $0) }
+        self.updateSelectedStyle { $0 |> \.photo .~ draft }
     }
     
     /// 저장해도 화면에 남는다 — 다른 카드를 이어서 저장할 수 있어야 한다.
@@ -266,13 +283,36 @@ extension WidgetStyleEditViewModelImple {
     private func save(_ styles: [WidgetStyle]) {
         guard !styles.isEmpty else { return }
         styles.forEach { self.widgetStyleUsecase.updateStyle($0) }
+        self.reloadWidgetTimelines()
+        self.takeStoredStyles(of: styles)
+    }
+
+    private func reloadWidgetTimelines() {
         Set(self.variants.map { $0.kind }).forEach {
             WidgetCenter.shared.reloadTimelines(ofKind: $0)
         }
+    }
+
+    private func takeStoredStyles(of styles: [WidgetStyle]) {
+        let taken = styles.asDictionary { $0.id }
+            .merging(self.storedStyles(among: styles)) { _, stored in stored }
+        if let editings = self.subject.editingStyles.value {
+            self.subject.editingStyles.send(editings.map { taken[$0.id] ?? $0 })
+        }
         self.subject.savedStyles.send(
-            (self.subject.savedStyles.value ?? [:])
-                .merging(styles.asDictionary { $0.id }) { _, saved in saved }
+            (self.subject.savedStyles.value ?? [:]).merging(taken) { _, new in new }
         )
+    }
+
+    private func storedStyles(among styles: [WidgetStyle]) -> [WidgetStyleId: WidgetStyle] {
+        let ids = Set(styles.map { $0.id })
+        return self.loadedStyles()
+            .filter { ids.contains($0.id) }
+            .asDictionary { $0.id }
+    }
+
+    private func loadedStyles() -> [WidgetStyle] {
+        return self.styleVariants().flatMap { self.widgetStyleUsecase.loadStyles(of: $0) }
     }
     
     private func select(_ styleId: WidgetStyleId) {
@@ -327,7 +367,8 @@ extension WidgetStyleEditViewModelImple {
                     name: style.displayName,
                     hasUnsavedChange: style.isSame(saved[style.id]) == false,
                     setting: style.setting,
-                    background: style.background
+                    background: style.background,
+                    photo: style.photo
                 )
             }
         }
@@ -395,6 +436,18 @@ extension WidgetStyleEditViewModelImple {
         )
         .map { editings, selectedId in
             return editings.first { $0.id == selectedId }?.background
+        }
+        .removeDuplicates()
+        .eraseToAnyPublisher()
+    }
+    
+    var selectedPhoto: AnyPublisher<URL?, Never> {
+        return Publishers.CombineLatest(
+            self.subject.editingStyles.compactMap { $0 },
+            self.subject.selectedStyleId.compactMap { $0 }
+        )
+        .map { editings, selectedId in
+            return editings.first { $0.id == selectedId }?.photo?.rendering
         }
         .removeDuplicates()
         .eraseToAnyPublisher()
