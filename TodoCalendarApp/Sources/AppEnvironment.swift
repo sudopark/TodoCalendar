@@ -137,6 +137,13 @@ struct AppEnvironment {
         ]
     }
     
+    static var widgetPhotoDirectory: URL? {
+        let name = self.isExternalDependencyBlocked ? "widget-photos.test" : "widget-photos"
+        return FileManager.default
+            .containerURL(forSecurityApplicationGroupIdentifier: self.groupID)?
+            .appending(path: name)
+    }
+
     private static func dbPath(fileName: String) -> String {
         let directory = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: self.groupID)
         let dbUrl = directory?.appending(path: "\(fileName).db")

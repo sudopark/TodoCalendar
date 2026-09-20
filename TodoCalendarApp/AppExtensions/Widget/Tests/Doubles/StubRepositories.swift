@@ -181,4 +181,8 @@ final class StubWidgetStyleRepository: WidgetStyleRepository, @unchecked Sendabl
     func updateStyle(_ style: WidgetStyle) { }
 
     func removeStyle(_ id: WidgetStyleId) { }
+
+    func makeDraftPhoto(from picked: Data) -> WidgetStylePhoto? { return nil }
+
+    func makeDraftPhoto(copying photo: WidgetStylePhoto) -> WidgetStylePhoto? { return nil }
 }
