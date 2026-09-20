@@ -24,13 +24,15 @@ struct WidgetLookTests {
 
     private func makeStyle(
         setting: any WidgetStyleSetting = TodayStyleSetting.initial,
-        background: WidgetAppearanceSettings.Background? = nil
+        background: WidgetAppearanceSettings.Background? = nil,
+        photo: WidgetStylePhoto? = nil
     ) -> WidgetStyle {
         return WidgetStyle(
             id: .init(variant: .todaySummarySmall, style: .default),
             name: nil,
             setting: setting,
-            background: background
+            background: background,
+            photo: photo
         )
     }
 
@@ -127,6 +129,40 @@ struct WidgetLookTests {
         // then
         #expect(setting.showTimeZone == false)
         #expect(setting == saved)
+    }
+
+    @Test("고른 스타일이 건 사진의 축소본 파일 자리가 나온다")
+    func photo_readsAppliedStyleRenderingURL() {
+        // given
+        let rendering = URL(filePath: "/tmp/uuid-1.render.jpg")
+        let look = WidgetLook(
+            globalSetting: self.makeGlobalSetting(.system),
+            appliedStyle: self.makeStyle(
+                photo: .init(
+                    id: "uuid-1",
+                    original: URL(filePath: "/tmp/uuid-1.original"),
+                    rendering: rendering
+                )
+            )
+        )
+
+        // when + then
+        #expect(look.photo == rendering)
+    }
+
+    @Test("고른 스타일이 없거나 사진을 안 걸었으면 사진이 없다")
+    func photo_whenNoAppliedStyle_isNil() {
+        // given
+        let noStyle = WidgetLook(
+            globalSetting: self.makeGlobalSetting(.system), appliedStyle: nil
+        )
+        let noPhoto = WidgetLook(
+            globalSetting: self.makeGlobalSetting(.system), appliedStyle: self.makeStyle()
+        )
+
+        // when + then
+        #expect(noStyle.photo == nil)
+        #expect(noPhoto.photo == nil)
     }
 }
 

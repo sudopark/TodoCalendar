@@ -43,6 +43,7 @@ struct WidgetVariantTests {
             .eventListSmall, .eventListMedium, .eventListLarge,
             .monthSmall, .todaySummarySmall,
             .foremostSmall, .foremostMedium,
+            .ddaySmall, .ddayMedium,
             .oneWeekEvents, .twoWeekEvents, .threeWeekEvents, .fourWeekEvents,
             .currentMonthEvents, .lastMonthEvents, .nextMonthEvents,
             .aiCommandSmall,
@@ -120,7 +121,7 @@ struct WidgetVariantTests {
         let sharing = Set<WidgetVariant>([
             .oneWeekEvents, .twoWeekEvents, .threeWeekEvents, .fourWeekEvents,
             .currentMonthEvents, .lastMonthEvents, .nextMonthEvents,
-            .eventListMedium, .eventListLarge, .foremostMedium
+            .eventListMedium, .eventListLarge, .foremostMedium, .ddayMedium
         ])
         let others = WidgetVariant.allCases.filter { sharing.contains($0) == false }
 
@@ -140,6 +141,50 @@ struct WidgetVariantTests {
         #expect(foremostHome.map { $0.styleVariant } == Array(repeating: .foremostSmall, count: 2))
         #expect(WidgetVariant.eventListLarge.styleSharingVariants == eventList)
         #expect(WidgetVariant.foremostMedium.styleSharingVariants == foremostHome)
+    }
+
+    @Test("D-day 홈 2변형은 항목 없는 payload 타입을 갖는다")
+    func settingType_ddayHomeVariants_isDDayStyleSetting() {
+        // when + then
+        #expect(WidgetVariant.ddaySmall.settingType == DDayStyleSetting.self)
+        #expect(WidgetVariant.ddayMedium.settingType == DDayStyleSetting.self)
+        #expect(WidgetVariant.ddaySmall.isOwnSetting(DDayStyleSetting.initial) == true)
+        #expect(WidgetVariant.ddaySmall.isOwnSetting(OtherEmptyStyleSetting.initial) == false)
+    }
+
+    @Test("D-day 홈 2변형은 소형 좌표 하나를 공유한다")
+    func styleVariant_ddayHomeVariants_foldsToSmall() {
+        // given
+        let home: [WidgetVariant] = [.ddaySmall, .ddayMedium]
+
+        // when
+        let styleVariants = home.map { $0.styleVariant }
+
+        // then
+        #expect(styleVariants == [.ddaySmall, .ddaySmall])
+        #expect(WidgetVariant.ddayMedium.styleSharingVariants == home)
+    }
+
+    @Test("D-day 잠금화면 3변형은 꾸미기 대상이 아니고 홈 좌표에 접히지도 않는다")
+    func isCustomizable_ddayLockScreenVariants_isFalse() {
+        // given
+        let lockScreen: [WidgetVariant] = [.ddayCircular, .ddayRectangular, .ddayInline]
+
+        // when + then
+        #expect(lockScreen.allSatisfy { $0.isCustomizable == false })
+        #expect(lockScreen.map { $0.styleVariant } == lockScreen)
+    }
+
+    @Test("사진 배경은 D-day 홈 2변형만 받는다")
+    func supportsPhotoBackground_isTrueOnlyForDDayHomeVariants() {
+        // given
+        let variants = WidgetVariant.allCases
+
+        // when
+        let supporting = variants.filter { $0.supportsPhotoBackground }
+
+        // then
+        #expect(supporting == [.ddaySmall, .ddayMedium])
     }
 
     @Test("Foremost 잠금화면 변형은 홈 변형에 접히지 않는다")

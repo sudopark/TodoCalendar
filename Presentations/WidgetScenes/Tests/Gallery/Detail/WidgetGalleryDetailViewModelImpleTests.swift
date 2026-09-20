@@ -47,6 +47,8 @@ final class WidgetGalleryDetailViewModelImpleTests: PublisherWaitable {
 
     private var ddayItem: WidgetGalleryItem { return .dday }
 
+    private var nextEventItem: WidgetGalleryItem { return .nextEvent }
+
     @Test
     func viewModel_emitsVariantsOfGivenItem() async throws {
         // given
@@ -262,14 +264,14 @@ extension WidgetGalleryDetailViewModelImpleTests {
     @Test("꾸미기 대상이 아닌 항목은 프리뷰 스택을 갖지 않는다")
     func previewStyles_hasNoEntryForNonCustomizableVariant() async throws {
         // given
-        let viewModel = self.makeViewModel(self.ddayItem, router: .init())
+        let viewModel = self.makeViewModel(self.nextEventItem, router: .init())
 
         // when
         let emitted = try await self.currentAfterRefresh("프리뷰 스택", of: viewModel)
 
         // then
         #expect(emitted?.isEmpty == true)
-        #expect(self.ddayItem.variants.allSatisfy { $0.isCustomizable == false } == true)
+        #expect(self.nextEventItem.variants.allSatisfy { $0.isCustomizable == false } == true)
     }
 
     @Test("편집을 고르면 그 변형의 스타일 편집 화면으로 간다")
