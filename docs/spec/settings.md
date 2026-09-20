@@ -90,6 +90,8 @@
 
 테마 변경 시 `ViewAppearance` 전체가 갱신 → 모든 화면 즉시 반영.
 
+기본 제공 테마 라인업(컨셉·팔레트)은 [`color-themes.md`](color-themes.md) 가 정본이다.
+
 ### 6 기본 태그 색상
 
 | 태그 | UserDefaults 키 | 기본값 |
