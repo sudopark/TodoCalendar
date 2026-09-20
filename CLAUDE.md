@@ -92,6 +92,7 @@ tuist generate --no-open      # 파일 추가/삭제 후 재실행 필수
 | 커밋 / PR / 이슈 | commit / pr / issue 스킬 |
 | 공개 PR 에이전트 리뷰 | review 스킬 → code-reviewer subagent |
 | 하네스 수정분 리뷰 (PR·PR 없는 커밋) | harness-review 스킬 → harness-reviewer subagent |
+| 계획 문서 재가 전 1차 리뷰 (strategy·campaign·opord) | plan-review 스킬 |
 
 > 테스트 작성 원칙: [`.claude/rules/testability.md`](.claude/rules/testability.md) (path 매칭 자동 로드)
 

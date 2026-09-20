@@ -1,6 +1,6 @@
 ---
 name: harness-review
-description: Use when the user requests an agent review of pushed harness changes — 하네스 변경분(.claude 스킬·agents·rules·hooks, CLAUDE.md 계층, 지시문 정본 docs)이 포함된 공개 PR(또는 PR 없이 푸시된 하네스 커밋)에 대해 harness-reviewer subagent를 관점별 병렬 dispatch하고 결과를 합산·검증해 인라인 코멘트로 게시한다 — 게시할 앵커가 없으면 대화 보고로 갈음. Triggers on "하네스 리뷰 돌려", "스킬 수정분 리뷰해줘" (PR 또는 푸시된 커밋이 있는 상태에서). Does NOT trigger on 프로덕트 코드 리뷰(review 스킬), 스킬 신규 작성 중 검증(superpowers:writing-skills), usage-log 기반 정비(improve-skill), PR 올리기 전 셀프리뷰(수행하지 않음), PR 공개 시점 자동 실행(유저 지시가 유일한 트리거), 리뷰 반영 커밋 구성(commit 스킬), PR 본문 작성(pr 스킬).
+description: Use when the user requests an agent review of pushed harness changes — 하네스 변경분(.claude 스킬·agents·rules·hooks, CLAUDE.md 계층, 지시문 정본 docs)이 포함된 공개 PR(또는 PR 없이 푸시된 하네스 커밋)에 대해 harness-reviewer subagent를 관점별 병렬 dispatch하고 결과를 합산·검증해 인라인 코멘트로 게시한다 — 게시할 앵커가 없으면 대화 보고로 갈음. Triggers on "하네스 리뷰 돌려", "스킬 수정분 리뷰해줘" (PR 또는 푸시된 커밋이 있는 상태에서). Does NOT trigger on 프로덕트 코드 리뷰(review 스킬), 계획 문서 리뷰(plan-review 스킬), 스킬 신규 작성 중 검증(superpowers:writing-skills), usage-log 기반 정비(improve-skill), PR 올리기 전 셀프리뷰(수행하지 않음), PR 공개 시점 자동 실행(유저 지시가 유일한 트리거), 리뷰 반영 커밋 구성(commit 스킬), PR 본문 작성(pr 스킬).
 ---
 
 # Harness Review — 하네스 수정분 에이전트 리뷰
