@@ -21,6 +21,10 @@ CODEY = re.compile(
     r"public |private |struct |class |protocol )"
 )
 MARKER = re.compile(r"TODO|FIXME|TOOD|MARK")
+# 한 메서드가 대개 이 안에 든다 — 함수 경계를 파싱하는 대신 줄 간격으로 가른다
+CLUSTER_SPAN = 30
+# 블록 셋이 한 구간에 몰리면 주석 하나하나가 아니라 그 코드가 문제다
+CLUSTER_MIN = 3
 
 
 def added_comment_lines(base: str, head: str) -> dict[str, list[tuple[int, str]]]:
@@ -53,13 +57,55 @@ def added_comment_lines(base: str, head: str) -> dict[str, list[tuple[int, str]]
     return out
 
 
-def flag(block: list[tuple[int, str]]) -> str | None:
-    """주석 블록 하나를 보고 지적 사유를 돌려준다. 해당 없으면 None."""
+def is_target(block: list[tuple[int, str]]) -> bool:
+    """이 스크립트가 볼 대상인가 — 지시자·주석 처리된 코드·작업 마커는 뺀다."""
     texts = [t for _, t in block]
     if any(MARKER.search(t) or DIRECTIVE.match(t) for t in texts):
+        return False
+    return not any(CODEY.match(t) for t in texts)
+
+
+def blocks_of(lines: list[tuple[int, str]]) -> list[list[tuple[int, str]]]:
+    """줄 목록을 연속 주석 블록으로 묶는다."""
+    out: list[list[tuple[int, str]]] = []
+    block: list[tuple[int, str]] = []
+    for n, text in lines:
+        if block and n == block[-1][0] + 1:
+            block.append((n, text))
+            continue
+        if block:
+            out.append(block)
+        block = [(n, text)]
+    if block:
+        out.append(block)
+    return out
+
+
+def clusters(blocks: list[list[tuple[int, str]]]) -> list[list[list[tuple[int, str]]]]:
+    """한 구간에 몰린 블록 묶음을 돌려준다 — 낱개 판정이 못 보는 밀도 축.
+
+    블록 하나하나는 짧고 평범해도, 한 메서드가 주석을 여럿 이고 있으면 그건 주석
+    문제가 아니라 그 코드가 결정을 여럿 이고 있다는 신호다.
+    """
+    out: list[list[list[tuple[int, str]]]] = []
+    group: list[list[tuple[int, str]]] = []
+    for block in blocks:
+        if group and block[-1][0] - group[0][0][0] <= CLUSTER_SPAN:
+            group.append(block)
+            continue
+        if len(group) >= CLUSTER_MIN:
+            out.append(group)
+        group = [block]
+    if len(group) >= CLUSTER_MIN:
+        out.append(group)
+    return out
+
+
+def flag(block: list[tuple[int, str]]) -> str | None:
+    """주석 블록 하나를 보고 지적 사유를 돌려준다. 해당 없으면 None."""
+    if not is_target(block):
         return None
-    if any(CODEY.match(t) for t in texts):
-        return None
+    texts = [t for _, t in block]
     if len(block) >= 3:
         return f"{len(block)}줄 블록 — why는 한두 줄로 줄거나 이름·구조로 드러낼 것"
     joined = " ".join(texts)
@@ -75,21 +121,19 @@ def flag(block: list[tuple[int, str]]) -> str | None:
 def main() -> int:
     base = sys.argv[1] if len(sys.argv) > 1 else "develop"
     head = sys.argv[2] if len(sys.argv) > 2 else "HEAD"
-    findings, total = [], 0
+    findings, crowded, total = [], [], 0
     for path, lines in sorted(added_comment_lines(base, head).items()):
-        block: list[tuple[int, str]] = []
-        for n, text in lines + [(-1, "")]:
-            if block and n == block[-1][0] + 1:
-                block.append((n, text))
-                continue
-            if block:
-                total += len(block)
-                reason = flag(block)
-                if reason:
-                    findings.append((path, block, reason))
-            block = [(n, text)] if n > 0 else []
+        blocks = blocks_of(lines)
+        total += sum(len(b) for b in blocks)
+        for block in blocks:
+            reason = flag(block)
+            if reason:
+                findings.append((path, block, reason))
+        # 밀도는 낱개 판정을 대체하지 않고 덧붙는다 — 길이로 잡힌 건 그 사유가 더 쓸모 있다
+        for group in clusters([b for b in blocks if is_target(b)]):
+            crowded.append((path, group))
 
-    if not findings:
+    if not findings and not crowded:
         print(f"주석 검토 대상 없음 (추가된 주석 {total}줄)")
         return 0
 
@@ -100,7 +144,13 @@ def main() -> int:
         for _, text in block:
             print(f"    {text[:100]}")
         print()
-    print("각 건을 지울지 남길지 판단하고, 남기는 건 그 이유를 유저에게 한 줄로 밝힌다.")
+    if crowded:
+        print("주석이 몰린 구간 — 낱개로는 평범해도 한 자리에 여럿이면 주석이 아니라 그 코드를 고칠 자리다\n")
+        for path, group in crowded:
+            span = f"{group[0][0][0]}-{group[-1][-1][0]}"
+            print(f"{path}:{span}  — 주석 블록 {len(group)}개 / {sum(len(b) for b in group)}줄")
+        print()
+    print("처분은 삭제 · 구조 수정 · 남기기 순으로 본다. 남기는 건 그 이유를 유저에게 한 줄로 밝힌다.")
     return 0
 
 

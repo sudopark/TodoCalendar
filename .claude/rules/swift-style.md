@@ -77,7 +77,7 @@ self.someFunction { [repository] in repository.load() }
 
 ### 검증
 
-PR 올리기 전 `python3 .claude/scripts/check-comments.py`로 이번 브랜치가 추가한 주석을 훑는다 (pr 스킬 소관). 지적된 건은 기본이 삭제다.
+PR 올리기 전 `python3 .claude/scripts/check-comments.py`로 이번 브랜치가 추가한 주석을 훑는다 (pr 스킬 소관 — 처분은 삭제 · 구조 수정 · 남기기 순으로 본다). 스크립트는 낱개 주석의 길이·형태와 함께 **한 구간에 몰린 주석 다발**도 낸다. 다발은 대개 그 메서드가 결정을 여럿 이고 있다는 신호라, 고칠 대상이 주석이 아니라 코드다.
 
 배경: #820 — AI 작업으로 유입된 서술형 주석 354줄을 사후 일괄 정리했다.
 
