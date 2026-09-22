@@ -26,7 +26,14 @@ struct DDayWidgetTimeLineProvider: AppIntentTimelineProvider {
 extension DDayWidgetTimeLineProvider {
 
     func placeholder(in context: Context) -> Entry {
-        return .init(date: Date(), result: .success(.sample))
+        let builder = WidgetViewModelProviderBuilder(base: .init())
+        let look = WidgetLook(
+            globalSetting: builder.loadWidgetAppearanceSetting(),
+            appliedStyle: builder.resolveWidgetStyle(of: .ddaySmall, style: .default)
+        )
+        let sample = DDayWidgetViewModel.sample |> \.look .~ look
+        return .init(date: Date(), result: .success(sample))
+            |> \.background .~ look.background
     }
 
     func snapshot(

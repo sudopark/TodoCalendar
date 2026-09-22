@@ -26,8 +26,17 @@ struct ForemostEventWidgetTimelineProvider: AppIntentTimelineProvider {
 extension ForemostEventWidgetTimelineProvider {
     
     func placeholder(in context: Context) -> Entry {
-        let sample = ForemostEventWidgetViewModel.sample()
+        let builder = WidgetViewModelProviderBuilder(base: .init())
+        let look = WidgetLook(
+            globalSetting: builder.loadWidgetAppearanceSetting(),
+            appliedStyle: builder.resolveWidgetStyle(
+                of: context.family == .accessoryInline ? .foremostInline : .foremostSmall,
+                style: .default
+            )
+        )
+        let sample = ForemostEventWidgetViewModel.sample() |> \.look .~ look
         return .init(date: Date(), result: .success(sample))
+            |> \.background .~ look.background
     }
     
     func snapshot(

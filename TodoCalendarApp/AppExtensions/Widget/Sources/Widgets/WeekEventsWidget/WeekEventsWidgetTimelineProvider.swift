@@ -31,9 +31,15 @@ extension WeekEventsWidgetTimelineProvider {
     
     func placeholder(in context: Context) -> Entry {
         let now = Date()
-        return .init(date: now) {
-            WeekEventsViewModel.sample(range)
+        let builder = WidgetViewModelProviderBuilder(base: .init())
+        let look = WidgetLook(
+            globalSetting: builder.loadWidgetAppearanceSetting(),
+            appliedStyle: builder.resolveWidgetStyle(of: .oneWeekEvents, style: .default)
+        )
+        let entry = Entry(date: now) {
+            WeekEventsViewModel.sample(range) |> \.look .~ look
         }
+        return entry |> \.background .~ look.background
     }
     
     func snapshot(

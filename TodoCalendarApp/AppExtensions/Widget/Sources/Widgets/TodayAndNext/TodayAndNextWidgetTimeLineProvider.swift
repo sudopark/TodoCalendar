@@ -26,8 +26,14 @@ struct TodayAndNextWidgetTimeLineProvider: AppIntentTimelineProvider {
 extension TodayAndNextWidgetTimeLineProvider {
     
     func placeholder(in context: Context) -> ResultTimelineEntry<TodayAndNextWidgetViewModel> {
-        let sample = TodayAndNextWidgetViewModel.sample()
+        let builder = WidgetViewModelProviderBuilder(base: .init())
+        let look = WidgetLook(
+            globalSetting: builder.loadWidgetAppearanceSetting(),
+            appliedStyle: builder.resolveWidgetStyle(of: .todayAndNextMedium, style: .default)
+        )
+        let sample = TodayAndNextWidgetViewModel.sample() |> \.look .~ look
         return .init(date: Date(), result: .success(sample))
+            |> \.background .~ look.background
     }
     
     func snapshot(
