@@ -57,12 +57,20 @@ struct DoubleMonthWidgetTimlineProvider: AppIntentTimelineProvider {
     typealias Entry = ResultTimelineEntry<DoubleMonthWidgetViewModel>
     
     func placeholder(in context: Context) -> Entry {
-        return .init(date: Date()) {
-            .init(
+        let builder = WidgetViewModelProviderBuilder(base: .init())
+        let look = WidgetLook(
+            globalSetting: builder.loadWidgetAppearanceSetting(),
+            appliedStyle: builder.resolveWidgetStyle(of: .doubleMonthMedium, style: .default)
+        )
+        let entry = Entry(date: Date()) {
+            DoubleMonthWidgetViewModel(
                 current: try MonthWidgetViewModel.makeSample(),
                 next: try MonthWidgetViewModel.makeSampleNextMonth()
             )
+            .applying(look)
         }
+        guard case .success(let model) = entry.result else { return entry }
+        return entry |> \.background .~ model.current.look.background
     }
     
     func snapshot(

@@ -53,12 +53,18 @@ struct EventAndForemostWidgetViewTimelineProvider: AppIntentTimelineProvider {
     typealias Entry = ResultTimelineEntry<EventAndForemostWidgetViewModel>
     
     func placeholder(in context: Context) -> Entry {
-        return .init(date: Date()) {
-            .init(
-                event: EventListWidgetViewModel.sample(size: .small),
-                foremost: ForemostEventWidgetViewModel.sample()
-            )
-        }
+        let builder = WidgetViewModelProviderBuilder(base: .init())
+        let look = WidgetLook(
+            globalSetting: builder.loadWidgetAppearanceSetting(),
+            appliedStyle: builder.resolveWidgetStyle(of: .eventAndForemostMedium, style: .default)
+        )
+        let model = EventAndForemostWidgetViewModel(
+            event: EventListWidgetViewModel.sample(size: .small),
+            foremost: ForemostEventWidgetViewModel.sample()
+        )
+        .applying(look)
+        return .init(date: Date(), result: .success(model))
+            |> \.background .~ model.event.look.background
     }
     
     func snapshot(

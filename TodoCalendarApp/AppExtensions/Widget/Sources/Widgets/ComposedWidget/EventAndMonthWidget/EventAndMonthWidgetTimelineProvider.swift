@@ -53,14 +53,20 @@ struct EventAndMonthWidgetTimelineProvider: AppIntentTimelineProvider {
     typealias Entry = ResultTimelineEntry<EventAndMonthWidgetViewModel>
     
     func placeholder(in context: Context) -> Entry {
-        return .init(date: Date()) {
-            .init(
-                event: EventListWidgetViewModel.sample(
-                    size: .small
-                ),
+        let builder = WidgetViewModelProviderBuilder(base: .init())
+        let look = WidgetLook(
+            globalSetting: builder.loadWidgetAppearanceSetting(),
+            appliedStyle: builder.resolveWidgetStyle(of: .eventAndMonthMedium, style: .default)
+        )
+        let entry = Entry(date: Date()) {
+            EventAndMonthWidgetViewModel(
+                event: EventListWidgetViewModel.sample(size: .small),
                 month: try MonthWidgetViewModel.makeSample()
             )
+            .applying(look)
         }
+        guard case .success(let model) = entry.result else { return entry }
+        return entry |> \.background .~ model.event.look.background
     }
     
     func snapshot(
