@@ -29,10 +29,16 @@ extension EventListWidgetTimeLineProvider {
     func placeholder(
         in context: Context
     ) -> ResultTimelineEntry<EventListWidgetViewModel> {
+        let builder = WidgetViewModelProviderBuilder(base: .init())
+        let look = WidgetLook(
+            globalSetting: builder.loadWidgetAppearanceSetting(),
+            appliedStyle: builder.resolveWidgetStyle(of: .eventListSmall, style: .default)
+        )
         let sample = EventListWidgetViewModel.sample(
             size: .init(context.family)
-        )
+        ) |> \.look .~ look
         return .init(date: Date(), result: .success(sample))
+            |> \.background .~ look.background
     }
     
     func snapshot(
