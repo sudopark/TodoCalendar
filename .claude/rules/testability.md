@@ -109,6 +109,8 @@ final class SpyEventDetailRouter: BaseSpyRouter, EventDetailRouting {
 
 내부 로직 테스트하려고 `internal/public static`으로 뚫지 않는다.
 
+**가시성은 의도가 아니라 결과로 판정한다.** 구현체를 여러 파일로 쪼개 `private`·`fileprivate`이던 헬퍼가 `internal`로 넓어진 것도 뚫은 것이다 — 파일 분리는 그 자체가 접근 수준을 올리는 변경이라, 쪼개기 전에 그 헬퍼들이 계속 닫힌 채로 있을 수 있는지부터 본다.
+
 **Why:** 구현체(Imple)는 프로토콜의 한 구현. static 노출은 프로토콜 계약과 무관한 구현 세부에 테스트가 결합되고, 다른 구현체에선 그 로직이 없을 수 있어 "앱에서 동작한다"는 보장이 사라진다.
 
 **대응:**
