@@ -391,6 +391,15 @@ hex 색상으로 UIColor 생성
 - **잠금화면 3변형엔 사진이 안 깔린다.** provider 는 family 를 모르고 한 모델이 5변형에 가므로, 확장의 배경 뷰가 family 로 갈라 잠금화면엔 배경색만 칠한다 — 시스템이 단색 렌더를 강제하는 자리다.
 - **받고 가는 것: 고아 파일.** 파일 삭제가 실패하거나 삭제 직전에 프로세스가 죽으면 어느 레코드도 안 가리키는 파일이 남는다. `updateStyle`·`removeStyle` 이 non-throwing 이라 실패를 삼키고, 사진 한 장당 파일이 둘이라 누적이 눈에 띈다. 참조 카운팅도 정리 경로도 두지 않았다.
 
+#### 추가 화면 프리뷰 계약 (#1144)
+
+**시스템 위젯 추가 화면은 `placeholder(in:)` 이 그린다** — `snapshot(for:in:)` 이 `context.isPreview` 로 갈라 그 자리로 위임한다. `placeholder` 는 이벤트를 읽지 않고, 저장소에서 그 변형의 **기본 스타일**(`style: .default`)만 읽어 `WidgetLook` 을 조립한다. 갤러리를 훑는 동안 위젯 수만큼 fetch 가 돌면 안 되고, 아직 놓이지 않은 위젯에는 고른 인스턴스 스타일이 없다. 합성 위젯은 그 봉투를 `applying(_:)` 으로 두 절반에 나눠 준다.
+
+- **배치 가능한 위젯을 새로 더할 때, 그 provider 가 `snapshot` 을 `placeholder` 로 위임한다면 `placeholder` 에도 이 조립을 넣는다.** 안 넣으면 홈 실물과 앱 갤러리 미리보기는 꾸민 대로 나오는데 추가 화면만 기본 모양으로 남는다.
+- **구형 `TimelineProvider` 는 `placeholder` 를 안 거친다** — `getSnapshot(in:completion:)` 이 샘플 엔트리를 그 자리에서 만든다. `NextEventWidget`·`NextRemainEventWidget` 이 그 형태다. 이런 provider 는 `getSnapshot` 쪽에 같은 조립이 필요하다. 규약대로 넣었는데 추가 화면이 안 바뀌면 여기를 먼저 본다.
+- **조립은 provider 마다 복제한다** — 공용 함수를 두지 않는 것이 결정이다(#1144, 2026-09-22). builder 를 만들고 두 함수를 부르고 `WidgetLook` 을 세우는 네 줄인데 넷 다 이미 있는 public API 라, 간접층을 세워 얻을 것이 없다.
+- **잠금화면 전용 변형은 대상이 아니다** — `isCustomizable` 이 false 라 `resolveWidgetStyle` 이 nil 을 내고, 봉투엔 전역 설정만 남는다.
+
 #### 스타일 공유 변형군 (#1112)
 
 **변형이 여럿이어도 꾸밀 항목이 같으면 스타일 하나를 공유한다** — WeekEvents 7변형(`oneWeekEvents`·`twoWeekEvents`·`threeWeekEvents`·`fourWeekEvents`·`currentMonthEvents`·`lastMonthEvents`·`nextMonthEvents`), EventList 3변형(`eventListSmall`·`eventListMedium`·`eventListLarge` → `eventListSmall`), Foremost 홈 2변형(`foremostSmall`·`foremostMedium` → `foremostSmall`), DDay 홈 2변형(`ddaySmall`·`ddayMedium` → `ddaySmall`)이 그 경우다. 뷰와 provider 가 하나고 표시 항목도 같아서, 유저가 여러 벌을 따로 편집할 이유가 없다.
