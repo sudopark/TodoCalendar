@@ -51,11 +51,20 @@ struct TodayAndMonthWidgetTimelineProvider: AppIntentTimelineProvider {
     typealias Entry = ResultTimelineEntry<TodayAndMonthWidgetViewModel>
     
     func placeholder(in context: Context) -> Entry {
-        return .init(date: Date()) {
-            .init(today: TodayWidgetViewModel.sample(),
-                  month: try MonthWidgetViewModel.makeSample()
+        let builder = WidgetViewModelProviderBuilder(base: .init())
+        let look = WidgetLook(
+            globalSetting: builder.loadWidgetAppearanceSetting(),
+            appliedStyle: builder.resolveWidgetStyle(of: .todayAndMonthMedium, style: .default)
+        )
+        let entry = Entry(date: Date()) {
+            TodayAndMonthWidgetViewModel(
+                today: TodayWidgetViewModel.sample(),
+                month: try MonthWidgetViewModel.makeSample()
             )
+            .applying(look)
         }
+        guard case .success(let model) = entry.result else { return entry }
+        return entry |> \.background .~ model.month.look.background
     }
     
     func snapshot(
