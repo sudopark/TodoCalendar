@@ -466,6 +466,7 @@
 "setting.appearance.calendar.colorTheme::system" = "시스템";
 "setting.appearance.calendar.colorTheme::light" = "라이트";
 "setting.appearance.calendar.colorTheme::dark" = "다크";
+"setting.appearance.calendar.colorTheme::tomato" = "토마토";
 "setting.appearance.calendar.underline" = "이벤트있는 날에 밑줄표시";
 "setting.appearance.event.edit::name_old" = "이벤트 수정";
 "setting.appearance.event.edit::name" = "이벤트 설정 및 외부 캘린더";

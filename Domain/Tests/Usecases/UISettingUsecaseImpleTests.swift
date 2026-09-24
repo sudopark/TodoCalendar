@@ -46,6 +46,23 @@ class AppSettingUsecaseImpleTests: BaseTestCase, PublisherWaitable {
 
 extension AppSettingUsecaseImpleTests {
     
+    func testUsecase_loadAvailableColorThemes_listsSystemKeysThenEveryAppThemeKey() async throws {
+        // given
+        let usecase = self.makeUsecase()
+        
+        // when
+        let keys = try await usecase.loadAvailableColorThemes()
+        
+        // then
+        let appThemeKeys = keys.compactMap { key -> AppThemeColorSetKey? in
+            guard case .appTheme(let appThemeKey) = key else { return nil }
+            return appThemeKey
+        }
+        XCTAssertEqual(keys.prefix(3).map { $0 }, [.systemTheme, .defaultLight, .defaultDark])
+        XCTAssertEqual(appThemeKeys, AppThemeColorSetKey.allCases)
+        XCTAssertEqual(keys.count, 3 + AppThemeColorSetKey.allCases.count)
+    }
+    
     func testUsecase_loadAppAppearanceSetting() async throws {
         // given
         let usecase = self.makeUsecase()

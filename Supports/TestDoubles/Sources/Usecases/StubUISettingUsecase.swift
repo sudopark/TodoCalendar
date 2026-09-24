@@ -25,6 +25,7 @@ open class StubUISettingUsecase: UISettingUsecase, @unchecked Sendable {
     
     public func loadAvailableColorThemes() async throws -> [ColorSetKeys] {
         return [.systemTheme, .defaultLight, .defaultDark]
+            + AppThemeColorSetKey.allCases.map { ColorSetKeys.appTheme($0) }
     }
     
     private let settingSubject = CurrentValueSubject<AppearanceSettings?, Never>(nil)

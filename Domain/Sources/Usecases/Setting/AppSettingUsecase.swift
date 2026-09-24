@@ -48,8 +48,8 @@ extension AppSettingUsecaseImple: UISettingUsecase {
     }
     
     public func loadAvailableColorThemes() async throws -> [ColorSetKeys] {
-        // TODO: 추후 커스텀 테마도 지원하도록 확장할 예정
         return [.systemTheme, .defaultLight, .defaultDark]
+            + AppThemeColorSetKey.allCases.map { ColorSetKeys.appTheme($0) }
     }
     
     public func applyEventTagColors(_ tags: [any EventTag]) {

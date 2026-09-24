@@ -465,6 +465,7 @@
 "setting.appearance.calendar.colorTheme::system" = "System";
 "setting.appearance.calendar.colorTheme::light" = "Light";
 "setting.appearance.calendar.colorTheme::dark" = "Dark";
+"setting.appearance.calendar.colorTheme::tomato" = "Tomato";
 "setting.appearance.calendar.underline" = "Underline on event days";
 "setting.appearance.event.edit::name_old" = "Edit Event";
 "setting.appearance.event.edit::name" = "Event settings and external calendars";
