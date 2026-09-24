@@ -139,6 +139,7 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
             ),
             speechRecognizeUsecase: speechFactory.makeSpeechRecognizeUsecase(),
             eventSyncUsecase: eventSyncUsecase,
+            foremostEventUsecase: eventFactory.makeForemostEventUsecase(),
             notificationPermissionUsecase: settingFactory.makeNotificationPermissionUsecase()
         )
 
