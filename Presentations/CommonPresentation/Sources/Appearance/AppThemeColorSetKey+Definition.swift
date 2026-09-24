@@ -30,7 +30,11 @@ extension AppThemeColorSetKey {
                 bg2: UIColor(rgb: 0xF9F9F8),
                 text2: UIColor(rgb: 0x8B8B87),
                 placeHolder: UIColor(rgb: 0xC4C3C0),
-                secondaryBtnBackground: UIColor(rgb: 0xDAD9D6)
+                secondaryBtnBackground: UIColor(rgb: 0xDAD9D6),
+                accentAI: UIColor(rgb: 0xBB5380),
+                aiListeningBackgroundBase: [
+                    UIColor(rgb: 0x9C5FB5), UIColor(rgb: 0xBB5380), UIColor(rgb: 0xC1573D)
+                ]
             )
         }
     }

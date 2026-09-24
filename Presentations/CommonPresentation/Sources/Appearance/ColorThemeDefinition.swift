@@ -48,6 +48,9 @@ public struct ColorThemeDefinition: Sendable {
     public let placeHolder: UIColor
     public let secondaryBtnBackground: UIColor
 
+    public let accentAI: UIColor
+    public let aiListeningBackgroundBase: [UIColor]
+
     public let eventTextOverride: UIColor?
     public let primaryBtnTextOverride: UIColor?
 
@@ -67,6 +70,8 @@ public struct ColorThemeDefinition: Sendable {
         text2: UIColor,
         placeHolder: UIColor,
         secondaryBtnBackground: UIColor,
+        accentAI: UIColor,
+        aiListeningBackgroundBase: [UIColor],
         eventTextOverride: UIColor? = nil,
         primaryBtnTextOverride: UIColor? = nil
     ) {
@@ -85,6 +90,8 @@ public struct ColorThemeDefinition: Sendable {
         self.text2 = text2
         self.placeHolder = placeHolder
         self.secondaryBtnBackground = secondaryBtnBackground
+        self.accentAI = accentAI
+        self.aiListeningBackgroundBase = aiListeningBackgroundBase
         self.eventTextOverride = eventTextOverride
         self.primaryBtnTextOverride = primaryBtnTextOverride
     }
@@ -155,10 +162,6 @@ extension ColorThemeDefinition: ColorSet {
         return Constant.accentWarn
     }
 
-    public var accentAI: UIColor {
-        return Constant.accentAI
-    }
-
     public var primaryBtnText: UIColor {
         return self.primaryBtnTextOverride ?? Constant.white
     }
@@ -174,9 +177,11 @@ extension ColorThemeDefinition: ColorSet {
     }
 
     public var aiListeningBackground: [UIColor] {
-        return self.isLightTheme
-            ? Constant.aiListeningBackgroundLight
-            : Constant.aiListeningBackgroundDark
+        let alphas = self.isLightTheme
+            ? Constant.aiListeningBackgroundAlphasLight
+            : Constant.aiListeningBackgroundAlphasDark
+        return zip(self.aiListeningBackgroundBase, alphas)
+            .map { color, alpha in color.withAlphaComponent(alpha) }
     }
 }
 
@@ -187,19 +192,10 @@ private enum Constant {
     static let uncompletedTodo: UIColor = UIColor(rgb: 0xea4444)
     static let accentInfo: UIColor = UIColor(rgb: 0xff7417)
     static let accentWarn: UIColor = UIColor(rgb: 0xea4444)
-    static let accentAI: UIColor = UIColor(rgb: 0x6272a4)
     static let white: UIColor = UIColor(rgb: 0xffffff)
     static let negativeBtnBackgroundLight: UIColor = UIColor(rgb: 0xff3b30)
     static let negativeBtnBackgroundDark: UIColor = UIColor(rgb: 0xff453a)
 
-    static let aiListeningBackgroundLight: [UIColor] = [
-        UIColor(rgb: 0xbd93f9).withAlphaComponent(0.20),
-        UIColor(rgb: 0xff79c6).withAlphaComponent(0.13),
-        UIColor(rgb: 0x8be9fd).withAlphaComponent(0.20)
-    ]
-    static let aiListeningBackgroundDark: [UIColor] = [
-        UIColor(rgb: 0xbd93f9).withAlphaComponent(0.28),
-        UIColor(rgb: 0xff79c6).withAlphaComponent(0.18),
-        UIColor(rgb: 0x8be9fd).withAlphaComponent(0.26)
-    ]
+    static let aiListeningBackgroundAlphasLight: [CGFloat] = [0.20, 0.13, 0.20]
+    static let aiListeningBackgroundAlphasDark: [CGFloat] = [0.28, 0.18, 0.26]
 }
