@@ -49,6 +49,12 @@ struct AppThemeColorSetKeyTests {
         #expect(colorSet.weekDayText == UIColor(rgb: 0x21201C))
         #expect(colorSet.eventText == UIColor(rgb: 0x63635E))
         #expect(colorSet.text0_inverted == UIColor(rgb: 0xF1F0EF))
+        #expect(colorSet.accentAI == UIColor(rgb: 0xBB5380))
+        #expect(colorSet.aiListeningBackground == [
+            UIColor(rgb: 0x9C5FB5).withAlphaComponent(0.20),
+            UIColor(rgb: 0xBB5380).withAlphaComponent(0.13),
+            UIColor(rgb: 0xC1573D).withAlphaComponent(0.20)
+        ])
     }
 
     @Test("기본 제공 테마 이름은 키에서 만든 문구 키를 든다")
