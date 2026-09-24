@@ -9,9 +9,19 @@
 import UIKit
 
 
+// MARK: - ColorThemeName
+
+public enum ColorThemeName: Sendable, Equatable {
+    case `default`(localizeKey: String)
+    case custom(String)
+}
+
+
 // MARK: - ColorThemeDefinition
 
 public struct ColorThemeDefinition: Sendable {
+
+    public let name: ColorThemeName
 
     // 값 14개는 스펙 §2 의 라인업 10·명시 4 다.
     public let bg0: UIColor
@@ -34,6 +44,7 @@ public struct ColorThemeDefinition: Sendable {
     public let primaryBtnTextOverride: UIColor?
 
     public init(
+        name: ColorThemeName,
         bg0: UIColor,
         bg1: UIColor,
         todayBackground: UIColor,
@@ -51,6 +62,7 @@ public struct ColorThemeDefinition: Sendable {
         eventTextOverride: UIColor? = nil,
         primaryBtnTextOverride: UIColor? = nil
     ) {
+        self.name = name
         self.bg0 = bg0
         self.bg1 = bg1
         self.todayBackground = todayBackground
