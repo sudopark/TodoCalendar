@@ -270,6 +270,8 @@ extension ColorSetKeys {
             return DefaultLightColorSet()
         case .defaultDark:
             return DefaultDarkColorSet()
+        case .appTheme(let key):
+            return key.definition
         }
     }
 }
