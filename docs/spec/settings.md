@@ -86,7 +86,7 @@
 
 ### 5 컬러 테마
 
-사용 가능 (`color_set` 키): `systemTheme` (시스템 따라감), `defaultLight`, `defaultDark`
+저장되는 `color_set` 키는 두 부류다. 시스템 테마는 `systemTheme` (시스템 따라감)·`defaultLight`·`defaultDark` 셋이고, 기본 제공 테마는 `appTheme:<테마 이름>` 꼴이다 (예: `appTheme:tomato`). 접두사가 부류를 가르므로 모르는 값은 복원하지 않고 `systemTheme` 으로 떨어진다.
 
 테마 변경 시 `ViewAppearance` 전체가 갱신 → 모든 화면 즉시 반영.
 
