@@ -9,8 +9,6 @@
 import Foundation
 import Domain
 import FirstPartyServices
-import SpeechService
-import PlaceService
 import Repository
 import Scenes
 
@@ -32,6 +30,15 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
     let imageTextRecognizeService: any ImageTextRecognizeService = ImageTextRecognizeServiceImple()
     private let applicationBase: ApplicationBase
 
+    private let eventFactory: NonLoginEventFactory
+    private let calendarFactory: CalendarFactory
+    private let notificationFactory: NonLoginNotificationFactory
+    private let settingFactory: NonLoginSettingFactory
+    private let commonFactory: CommonFactory
+    private let supportFactory: SupportFactory
+    private let speechFactory: SpeechFactory
+    private let externalCalendarFactory: NonLoginExternalCalendarFactory
+
     init(
         authUsecase: any AuthUsecase,
         accountUescase: any AccountUsecase,
@@ -47,23 +54,39 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
         self.appUpdateCheckUsecase = appUpdateCheckUsecase
         self.eventSyncUsecase = NotNeedEventSyncUsecase()
         self.applicationBase = applicationBase
-        self.billingUsecase = NotNeedBillingUsecase(sharedDataStore: applicationBase.sharedDataStore)
-
+        let billingUsecase = NotNeedBillingUsecase(sharedDataStore: applicationBase.sharedDataStore)
+        self.billingUsecase = billingUsecase
         self.aiAgentOrchestrationUsecase = NotNeedAIAgentOrchestrationUsecase()
 
-        let eventDetailStorage = EventDetailDataLocalStorageImple<EventDetailDataTable>(
-            sqliteService: applicationBase.commonSqliteService
+        let eventFactory = NonLoginEventFactory(applicationBase: applicationBase)
+        self.eventFactory = eventFactory
+        self.calendarFactory = CalendarFactory(applicationBase: applicationBase)
+        self.notificationFactory = NonLoginNotificationFactory(
+            applicationBase: applicationBase, eventFactory: eventFactory
         )
+        self.settingFactory = NonLoginSettingFactory(
+            applicationBase: applicationBase, viewAppearanceStore: viewAppearanceStore
+        )
+        self.commonFactory = CommonFactory(applicationBase: applicationBase)
+        self.supportFactory = SupportFactory(
+            applicationBase: applicationBase, accountUsecase: accountUescase
+        )
+        self.speechFactory = SpeechFactory()
+        self.externalCalendarFactory = NonLoginExternalCalendarFactory(
+            applicationBase: applicationBase,
+            eventFactory: eventFactory,
+            viewAppearanceStore: viewAppearanceStore,
+            externalCalenarIntegrationUsecase: externalCalenarIntegrationUsecase
+        )
+
         self.eventLiveActivityUsecase = EventLiveActivityUsecaseImple(
             controller: EventCountdownLiveActivityController(),
             sharedDataStore: applicationBase.sharedDataStore,
-            eventDetailDataUsecase: EventDetailDataLocalRepostioryImple(
-                localStorage: eventDetailStorage
-            )
+            eventDetailDataUsecase: eventFactory.makeEventDetailDataUsecase()
         )
         self.adExposureUsecase = AdExposureUsecaseImple(
             adAvailability: applicationBase.mobileAdService,
-            billingUsecase: self.billingUsecase,
+            billingUsecase: billingUsecase,
             adRepository: AdLocalRepositoryImple(
                 environmentStorage: applicationBase.userDefaultEnvironmentStorage
             ),
@@ -76,46 +99,139 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
     var eventNotifyService: SharedEventNotifyService {
         return self.applicationBase.eventNotifyService
     }
+
+    var temporaryUserDataMigrationUsecase: any TemporaryUserDataMigrationUescase {
+        return NotNeedTemporaryUserDataMigrationUescaseImple()
+    }
 }
+
+
+// MARK: - 하위 팩토리 위임
 
 extension NonLoginUsecaseFactoryImple {
 
     func makeCalendarSettingUsecase() -> any CalendarSettingUsecase {
-        let settingRepository = CalendarSettingRepositoryImple(
-            environmentStorage: applicationBase.userDefaultEnvironmentStorage
-        )
-        return CalendarSettingUsecaseImple(
-            settingRepository: settingRepository,
-            shareDataStore: applicationBase.sharedDataStore
-        )
+        return self.calendarFactory.makeCalendarSettingUsecase()
     }
-    
+
     func makeHolidayUsecase() -> any HolidayUsecase {
-        let holidayRepository = HolidayRepositoryImple(
-            localEnvironmentStorage: applicationBase.userDefaultEnvironmentStorage,
-            sqliteService: applicationBase.commonSqliteService,
-            remoteAPI: applicationBase.remoteAPI
-        )
-        return HolidayUsecaseImple(
-            holidayRepository: holidayRepository,
-            dataStore: applicationBase.sharedDataStore,
-            localeProvider: Locale.current
-        )
+        return self.calendarFactory.makeHolidayUsecase()
     }
-    
+
     func makeCalendarUsecase() -> any CalendarUsecase {
-        return CalendarUsecaseImple(
-            calendarSettingUsecase: self.makeCalendarSettingUsecase(),
-            holidayUsecase: self.makeHolidayUsecase()
-        )
+        return self.calendarFactory.makeCalendarUsecase()
+    }
+
+    func makeTodoEventUsecase() -> any TodoEventUsecase {
+        return self.eventFactory.makeTodoEventUsecase()
+    }
+
+    func makeScheduleEventUsecase() -> any ScheduleEventUsecase {
+        return self.eventFactory.makeScheduleEventUsecase()
+    }
+
+    func makeEventTagUsecase() -> any EventTagUsecase {
+        return self.eventFactory.makeEventTagUsecase()
+    }
+
+    func makeEventDetailDataUsecase() -> any EventDetailDataUsecase {
+        return self.eventFactory.makeEventDetailDataUsecase()
+    }
+
+    func makeDoneTodoDetailDataUsecase() -> any EventDetailDataUsecase {
+        return self.eventFactory.makeDoneTodoDetailDataUsecase()
+    }
+
+    func makeDoneTodoPagingUsecase() -> any DoneTodoEventsPagingUsecase {
+        return self.eventFactory.makeDoneTodoPagingUsecase()
+    }
+
+    func makeForemostEventUsecase() -> any ForemostEventUsecase {
+        return self.eventFactory.makeForemostEventUsecase()
+    }
+
+    func makeDDayCandidateUsecase() -> any DDayCandidateUsecase {
+        return self.eventFactory.makeDDayCandidateUsecase()
+    }
+
+    func makeDaysIntervalCountUsecase() -> any DaysIntervalCountUsecase {
+        return self.eventFactory.makeDaysIntervalCountUsecase()
+    }
+
+    func makeEventNotificationUsecase() -> any EventNotificationUsecase {
+        return self.notificationFactory.makeEventNotificationUsecase()
+    }
+
+    func makeUISettingUsecase() -> any UISettingUsecase {
+        return self.settingFactory.makeUISettingUsecase()
+    }
+
+    func makeWidgetStyleUsecase() -> any WidgetStyleUsecase {
+        return self.settingFactory.makeWidgetStyleUsecase()
+    }
+
+    func makeEventSettingUsecase() -> any EventSettingUsecase {
+        return self.settingFactory.makeEventSettingUsecase()
+    }
+
+    func makeEventShareSettingUsecase() -> any EventShareSettingUsecase {
+        return self.settingFactory.makeEventShareSettingUsecase()
+    }
+
+    func makeNotificationPermissionUsecase() -> any NotificationPermissionUsecase {
+        return self.settingFactory.makeNotificationPermissionUsecase()
+    }
+
+    func makeEventNotificationSettingUsecase() -> any EventNotificationSettingUsecase {
+        return self.settingFactory.makeEventNotificationSettingUsecase()
+    }
+
+    func makeLinkPreviewFetchUsecase() -> any LinkPreviewFetchUsecase {
+        return self.commonFactory.makeLinkPreviewFetchUsecase()
+    }
+
+    func makePlaceSuggestUsecase() -> any PlaceSuggestUsecase {
+        return self.commonFactory.makePlaceSuggestUsecase()
+    }
+
+    func deviceInfoFetchService() -> any DeviceInfoFetchService {
+        return self.commonFactory.deviceInfoFetchService()
+    }
+
+    func makeFeedbackUsecase() -> any FeedbackUsecase {
+        return self.supportFactory.makeFeedbackUsecase()
+    }
+
+    func makeGuideTodoUsecase() -> any GuideTodoUsecase {
+        return self.supportFactory.makeGuideTodoUsecase()
+    }
+
+    func makeLegalNoticeUsecase() -> any LegalNoticeUsecase {
+        return self.supportFactory.makeLegalNoticeUsecase()
+    }
+
+    func makeSpeechRecognizeUsecase() -> any SpeechRecognizeUsecase {
+        return self.speechFactory.makeSpeechRecognizeUsecase()
+    }
+
+    func makeGoogleCalendarUsecase() -> any GoogleCalendarUsecase {
+        return self.externalCalendarFactory.makeGoogleCalendarUsecase()
+    }
+
+    func makeAppleCalendarUsecase() -> any AppleCalendarUsecase {
+        return self.externalCalendarFactory.makeAppleCalendarUsecase()
     }
 }
 
 
-extension NonLoginUsecaseFactoryImple {
-    
+
+// MARK: - NonLoginEventFactory
+
+private struct NonLoginEventFactory {
+
+    let applicationBase: ApplicationBase
+
     func makeTodoEventUsecase() -> any TodoEventUsecase {
-            
         let storage = TodoLocalStorageImple(
             sqliteService: applicationBase.commonSqliteService
         )
@@ -129,7 +245,7 @@ extension NonLoginUsecaseFactoryImple {
             eventNotifyService: applicationBase.eventNotifyService
         )
     }
-    
+
     func makeScheduleEventUsecase() -> any ScheduleEventUsecase {
         let storage = ScheduleEventLocalStorageImple(
             sqliteService: applicationBase.commonSqliteService
@@ -144,7 +260,7 @@ extension NonLoginUsecaseFactoryImple {
             eventNotifyService: applicationBase.eventNotifyService
         )
     }
-    
+
     private func makeEventTagRepository() -> any EventTagRepository {
         let storage = EventTagLocalStorageImple(
             sqliteService: applicationBase.commonSqliteService,
@@ -163,7 +279,7 @@ extension NonLoginUsecaseFactoryImple {
         )
         return repository
     }
-    
+
     func makeEventTagUsecase() -> any EventTagUsecase {
         return EventTagUsecaseImple(
             tagRepository: self.makeEventTagRepository(),
@@ -172,7 +288,7 @@ extension NonLoginUsecaseFactoryImple {
             sharedDataStore: applicationBase.sharedDataStore
         )
     }
-    
+
     func makeEventDetailDataUsecase() -> any EventDetailDataUsecase {
         let storage = EventDetailDataLocalStorageImple<EventDetailDataTable>(
             sqliteService: applicationBase.commonSqliteService
@@ -181,7 +297,7 @@ extension NonLoginUsecaseFactoryImple {
             localStorage: storage
         )
     }
-    
+
     func makeDoneTodoDetailDataUsecase() -> any EventDetailDataUsecase {
         let storage = EventDetailDataLocalStorageImple<DoneTodoEventDetailTable>(
             sqliteService: applicationBase.commonSqliteService
@@ -190,7 +306,7 @@ extension NonLoginUsecaseFactoryImple {
             localStorage: storage
         )
     }
-    
+
     func makeDoneTodoPagingUsecase() -> any DoneTodoEventsPagingUsecase {
         let storage = TodoLocalStorageImple(
             sqliteService: applicationBase.commonSqliteService
@@ -204,7 +320,7 @@ extension NonLoginUsecaseFactoryImple {
             todoRepository: repository
         )
     }
-    
+
     func makeForemostEventUsecase() -> any ForemostEventUsecase {
         let storage = ForemostLocalStorageImple(
             environmentStorage: applicationBase.userDefaultEnvironmentStorage,
@@ -249,16 +365,21 @@ extension NonLoginUsecaseFactoryImple {
 }
 
 
-extension NonLoginUsecaseFactoryImple {
-    
+// MARK: - NonLoginNotificationFactory
+
+private struct NonLoginNotificationFactory {
+
+    let applicationBase: ApplicationBase
+    let eventFactory: NonLoginEventFactory
+
     func makeEventNotificationUsecase() -> any EventNotificationUsecase {
         let notificaitonRepository = EventNotificationRepositoryImple(
             sqliteService: applicationBase.commonSqliteService,
             environmentStorage: applicationBase.userDefaultEnvironmentStorage
         )
         return EventNotificationUsecaseImple(
-            todoEventUsecase: self.makeTodoEventUsecase(),
-            scheduleEventUescase: self.makeScheduleEventUsecase(),
+            todoEventUsecase: self.eventFactory.makeTodoEventUsecase(),
+            scheduleEventUescase: self.eventFactory.makeScheduleEventUsecase(),
             notificationRepository: notificaitonRepository,
             notificationService: UNLocalNotificationServiceImple()
         )
@@ -266,8 +387,13 @@ extension NonLoginUsecaseFactoryImple {
 }
 
 
-extension NonLoginUsecaseFactoryImple {
-    
+// MARK: - NonLoginSettingFactory
+
+private struct NonLoginSettingFactory {
+
+    let applicationBase: ApplicationBase
+    let viewAppearanceStore: ApplicationViewAppearanceStoreImple
+
     private func makeAppSettingUsecase() -> AppSettingUsecaseImple {
         let repository = AppSettingLocalRepositoryImple(
             storage: .init(environmentStorage: applicationBase.userDefaultEnvironmentStorage)
@@ -278,11 +404,11 @@ extension NonLoginUsecaseFactoryImple {
             sharedDataStore: applicationBase.sharedDataStore
         )
     }
-    
+
     func makeUISettingUsecase() -> any UISettingUsecase {
         return self.makeAppSettingUsecase()
     }
-    
+
     func makeWidgetStyleUsecase() -> any WidgetStyleUsecase {
         return WidgetStyleUsecaseImple(
             styleRepository: WidgetStyleLocalRepositoryImple(
@@ -292,8 +418,8 @@ extension NonLoginUsecaseFactoryImple {
             sharedDataStore: applicationBase.sharedDataStore
         )
     }
-    
-    func makeEventSettingUsecase() -> EventSettingUsecase {
+
+    func makeEventSettingUsecase() -> any EventSettingUsecase {
         return self.makeAppSettingUsecase()
     }
 
@@ -301,13 +427,13 @@ extension NonLoginUsecaseFactoryImple {
         return self.makeAppSettingUsecase()
     }
 
-    func makeNotificationPermissionUsecase() -> NotificationPermissionUsecase {
+    func makeNotificationPermissionUsecase() -> any NotificationPermissionUsecase {
         return NotificationPermissionUsecaseImple(
             notificationService: UNLocalNotificationServiceImple()
         )
     }
-    
-    func makeEventNotificationSettingUsecase() -> EventNotificationSettingUsecase {
+
+    func makeEventNotificationSettingUsecase() -> any EventNotificationSettingUsecase {
         let repository = EventNotificationRepositoryImple(
             sqliteService: applicationBase.commonSqliteService,
             environmentStorage: applicationBase.userDefaultEnvironmentStorage
@@ -316,79 +442,27 @@ extension NonLoginUsecaseFactoryImple {
             notificationRepository: repository
         )
     }
-    
-    var temporaryUserDataMigrationUsecase: any TemporaryUserDataMigrationUescase {
-        return NotNeedTemporaryUserDataMigrationUescaseImple()
-    }
 }
 
-extension NonLoginUsecaseFactoryImple {
-    
-    func makeLinkPreviewFetchUsecase() -> any LinkPreviewFetchUsecase {
-        return LinkPreviewFetchUsecaseImple(
-            previewEngine: applicationBase.linkPreviewFetchEngine
-        )
-    }
-    
-    func makePlaceSuggestUsecase() -> any PlaceSuggestUsecase {
-        return PlaceSuggestUsecaseImple(
-            suggestEngine: MapKitBasePlaceSuggestEngineImple()
-        )
-    }
-    
-    func deviceInfoFetchService() -> any DeviceInfoFetchService {
-        return DeviceInfoFetchServiceImple()
-    }
-}
 
-extension NonLoginUsecaseFactoryImple {
 
-    func makeFeedbackUsecase() -> any FeedbackUsecase {
-        let feedbackRepository = FeedbackRepositoryImple(remote: self.applicationBase.remoteAPI)
-        return FeedbackUsecaseImple(
-            accountUsecase: self.accountUescase,
-            feedbackRepository: feedbackRepository,
-            deviceInfoFetchService: DeviceInfoFetchServiceImple()
-        )
-    }
 
-    func makeGuideTodoUsecase() -> any GuideTodoUsecase {
-        return GuideTodoUsecaseImple(
-            repository: GuideTodoLocalRepositoryImple(
-                environmentStorage: self.applicationBase.userDefaultEnvironmentStorage
-            ),
-            sharedDataStore: self.applicationBase.sharedDataStore
-        )
-    }
 
-    func makeLegalNoticeUsecase() -> any LegalNoticeUsecase {
-        return LegalNoticeUsecaseImple(
-            legalNoticeRepository: LegalNoticeRepositoryImple(
-                remoteAPI: self.applicationBase.remoteAPI,
-                environmentStorage: self.applicationBase.userDefaultEnvironmentStorage
-            )
-        )
-    }
-}
+// MARK: - NonLoginExternalCalendarFactory
 
-extension NonLoginUsecaseFactoryImple {
+private struct NonLoginExternalCalendarFactory {
 
-    func makeSpeechRecognizeUsecase() -> any SpeechRecognizeUsecase {
-        return SpeechRecognizeUsecaseImple(
-            service: SpeechRecognizeServiceImple(),
-            permissionChecker: SpeechRecognizePermissionCheckerImple()
-        )
-    }
-}
-
-extension NonLoginUsecaseFactoryImple {
+    let applicationBase: ApplicationBase
+    let eventFactory: NonLoginEventFactory
+    let viewAppearanceStore: ApplicationViewAppearanceStoreImple
+    let externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase
 
     func makeGoogleCalendarUsecase() -> any GoogleCalendarUsecase {
         return GoogleCalendarUsecaseImple(
             googleService: AppEnvironment.googleCalendarService,
             integrationUsecase: self.externalCalenarIntegrationUsecase,
             repositoryPool: self.applicationBase.googleCalendarRepositoryPool,
-            eventTagUsecase: self.makeEventTagUsecase(),
+            eventTagUsecase: self.eventFactory.makeEventTagUsecase(),
             appearanceStore: self.viewAppearanceStore,
             sharedDataStore: self.applicationBase.sharedDataStore
         )
@@ -399,7 +473,7 @@ extension NonLoginUsecaseFactoryImple {
             appleService: AppEnvironment.appleCalendarService,
             integrationUsecase: self.externalCalenarIntegrationUsecase,
             repository: self.applicationBase.appleCalendarRepository,
-            eventTagUsecase: self.makeEventTagUsecase(),
+            eventTagUsecase: self.eventFactory.makeEventTagUsecase(),
             appearanceStore: self.viewAppearanceStore,
             sharedDataStore: self.applicationBase.sharedDataStore
         )
