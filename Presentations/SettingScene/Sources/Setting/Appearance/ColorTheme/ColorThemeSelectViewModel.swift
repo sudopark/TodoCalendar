@@ -15,6 +15,7 @@ import Optics
 import Domain
 import Extensions
 import Scenes
+import CommonPresentation
 
 
 struct ColorThemeModel: Equatable {
@@ -28,6 +29,7 @@ struct ColorThemeModel: Equatable {
         case .systemTheme: self.title = "setting.appearance.calendar.colorTheme::system".localized()
         case .defaultLight: self.title = "setting.appearance.calendar.colorTheme::light".localized()
         case .defaultDark: self.title = "setting.appearance.calendar.colorTheme::dark".localized()
+        case .appTheme(let key): self.title = key.definition.name.localized
         }
     }
 }

@@ -77,8 +77,33 @@ extension ColorThemeSelectViewModelImpleTests {
         } ?? []
         
         // then
-        XCTAssertEqual(models.map { $0.key }, [.systemTheme, .defaultLight, .defaultDark])
-        XCTAssertEqual(models.map { $0.isSelected }, [false, true, false])
+        let appThemeKeys = models.compactMap { model -> AppThemeColorSetKey? in
+            guard case .appTheme(let key) = model.key else { return nil }
+            return key
+        }
+        XCTAssertEqual(
+            models.prefix(3).map { $0.key }, [.systemTheme, .defaultLight, .defaultDark]
+        )
+        XCTAssertEqual(appThemeKeys, AppThemeColorSetKey.allCases)
+        XCTAssertEqual(models.count, 3 + AppThemeColorSetKey.allCases.count)
+        XCTAssertEqual(models.prefix(3).map { $0.isSelected }, [false, true, false])
+    }
+    
+    func testViewModel_appThemeTitleComesFromDefinitionName() {
+        // given
+        let expect = expectation(description: "기본 제공 테마 제목은 테마 정의가 든 이름에서 온다")
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let models = self.waitFirstOutput(expect, for: viewModel.colorThemeModels, timeout: 0.1) {
+            viewModel.prepare()
+        } ?? []
+        
+        // then
+        let tomato = models.first { $0.key == .appTheme(.tomato) }
+        XCTAssertEqual(
+            tomato?.title, "setting.appearance.calendar.colorTheme::tomato".localized()
+        )
     }
     
     func testViewModel_whenSelectTheme_updateSelectedModel() async throws {

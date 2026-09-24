@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Extensions
 
 
 // MARK: - ColorThemeName
@@ -14,6 +15,13 @@ import UIKit
 public enum ColorThemeName: Sendable, Equatable {
     case `default`(localizeKey: String)
     case custom(String)
+
+    public var localized: String {
+        switch self {
+        case .default(let localizeKey): return localizeKey.localized()
+        case .custom(let name): return name
+        }
+    }
 }
 
 

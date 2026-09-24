@@ -280,7 +280,7 @@
 
 ### 타임존/테마/태그 색상
 - 타임존: 시스템 기본, 전체 목록에서 선택
-- 컬러 테마: systemTheme, defaultLight, defaultDark
+- 컬러 테마: 시스템 따라가기 · 기본 라이트/다크 · 앱이 기본 제공하는 테마 (라인업은 [spec/color-themes.md](spec/color-themes.md))
 - 기본 태그 색상: default=`#088CDA`, holiday=`#D6236A`
 
 ---
