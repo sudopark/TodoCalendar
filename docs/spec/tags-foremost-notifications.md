@@ -43,7 +43,7 @@ flowchart TD
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Idle: 앱 시작\nrefresh()
+    [*] --> Idle: refresh()\n앱 시작·포그라운드 복귀·AI 의 최상위 변경
 
     state Idle {
         [*] --> NoForemost: foremostEventId == nil

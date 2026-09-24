@@ -32,6 +32,7 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var spyEventLiveActivityUsecase: SpyEventLiveActivityUsecase!
     private var stubGuideTodoUsecase: StubGuideTodoUsecase!
     private var stubLegalNoticeUsecase: StubLegalNoticeUsecase!
+    private var stubForemostEventUsecase: StubForemostEventUsecase!
     var cancelBag: Set<AnyCancellable>!
 
     override func setUpWithError() throws {
@@ -49,6 +50,7 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.spyEventLiveActivityUsecase = .init()
         self.stubGuideTodoUsecase = .init()
         self.stubLegalNoticeUsecase = .init()
+        self.stubForemostEventUsecase = .init()
         self.cancelBag = .init()
         self.timeout = 0.01
     }
@@ -68,6 +70,7 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.spyEventLiveActivityUsecase = nil
         self.stubGuideTodoUsecase = nil
         self.stubLegalNoticeUsecase = nil
+        self.stubForemostEventUsecase = nil
         self.cancelBag = nil
     }
 
@@ -91,7 +94,8 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
             aiAgentOrchestrationUsecase: self.stubAIOrchestrationUsecase,
             eventLiveActivityUsecase: self.spyEventLiveActivityUsecase,
             guideTodoUsecase: self.stubGuideTodoUsecase,
-            legalNoticeUsecase: self.stubLegalNoticeUsecase
+            legalNoticeUsecase: self.stubLegalNoticeUsecase,
+            foremostEventUsecase: self.stubForemostEventUsecase
         )
         viewModel.router = self.spyRouter
         self.spyRouter.didCalendarAttached = {
@@ -122,7 +126,8 @@ extension MainViewModelImpleTests {
             aiAgentOrchestrationUsecase: self.stubAIOrchestrationUsecase,
             eventLiveActivityUsecase: self.spyEventLiveActivityUsecase,
             guideTodoUsecase: self.stubGuideTodoUsecase,
-            legalNoticeUsecase: self.stubLegalNoticeUsecase
+            legalNoticeUsecase: self.stubLegalNoticeUsecase,
+            foremostEventUsecase: self.stubForemostEventUsecase
         )
         viewModel.router = self.spyRouter
         return viewModel
@@ -183,6 +188,31 @@ extension MainViewModelImpleTests {
         XCTAssertEqual(self.spyBillingUsecase.didRecoverUnfinishedTimes, 2)
     }
     
+    func testViewModel_whenWillEnterForeground_refreshForemostEvent() {
+        // given
+        let viewModel = self.makeViewModelWithoutPrepare()
+        viewModel.prepare()
+
+        // when
+        NotificationCenter.default.post(
+            name: UIApplication.willEnterForegroundNotification, object: nil
+        )
+
+        // then
+        XCTAssertEqual(self.stubForemostEventUsecase.didRefreshRequested, true)
+    }
+
+    func testViewModel_whenPrepare_notRefreshForemostEvent() {
+        // given
+        let viewModel = self.makeViewModelWithoutPrepare()
+
+        // when
+        viewModel.prepare()
+
+        // then
+        XCTAssertEqual(self.stubForemostEventUsecase.didRefreshRequested, false)
+    }
+
     func testViewModel_whenPrepare_refreshViewAppearance() {
         // given
         let expect = expectation(description: "prepare시에 viewApeparance refresh")

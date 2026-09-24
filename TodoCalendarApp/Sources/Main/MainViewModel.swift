@@ -74,6 +74,7 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
     private let eventLiveActivityUsecase: any EventLiveActivityUsecase
     private let guideTodoUsecase: any GuideTodoUsecase
     private let legalNoticeUsecase: any LegalNoticeUsecase
+    private let foremostEventUsecase: any ForemostEventUsecase
     var router: (any MainRouting)?
 
     init(
@@ -89,7 +90,8 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
         aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase,
         eventLiveActivityUsecase: any EventLiveActivityUsecase,
         guideTodoUsecase: any GuideTodoUsecase,
-        legalNoticeUsecase: any LegalNoticeUsecase
+        legalNoticeUsecase: any LegalNoticeUsecase,
+        foremostEventUsecase: any ForemostEventUsecase
     ) {
         self.uiSettingUsecase = uiSettingUsecase
         self.temporaryUserDataMigrationUsecase = temporaryUserDataMigrationUsecase
@@ -104,6 +106,7 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
         self.eventLiveActivityUsecase = eventLiveActivityUsecase
         self.guideTodoUsecase = guideTodoUsecase
         self.legalNoticeUsecase = legalNoticeUsecase
+        self.foremostEventUsecase = foremostEventUsecase
 
         self.internalBinding()
     }
@@ -153,6 +156,7 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
                 self?.aiAgentOrchestrationUsecase.refreshNotificationPermissionStatus()
                 self?.handleWillEnterForeground()
                 self?.legalNoticeUsecase.checkNoticeIsNeed()
+                self?.foremostEventUsecase.refresh()
             })
             .store(in: self.cancellables)
     }
