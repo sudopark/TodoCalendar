@@ -64,7 +64,8 @@ extension MainSceneBuilerImple: MainSceneBuiler {
             aiAgentOrchestrationUsecase: self.usecaseFactory.aiAgentOrchestrationUsecase,
             eventLiveActivityUsecase: self.usecaseFactory.eventLiveActivityUsecase,
             guideTodoUsecase: self.usecaseFactory.makeGuideTodoUsecase(),
-            legalNoticeUsecase: self.usecaseFactory.makeLegalNoticeUsecase()
+            legalNoticeUsecase: self.usecaseFactory.makeLegalNoticeUsecase(),
+            foremostEventUsecase: self.usecaseFactory.makeForemostEventUsecase()
         )
         
         let viewController = MainViewController(
