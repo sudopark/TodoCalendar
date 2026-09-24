@@ -9,10 +9,52 @@ import Foundation
 import Prelude
 import Optics
 
-public enum ColorSetKeys: String, Sendable {
+public enum AppThemeColorSetKey: String, CaseIterable, Sendable {
+    case tomato
+}
+
+public enum ColorSetKeys: Sendable, Equatable {
     case systemTheme
     case defaultLight
     case defaultDark
+    case appTheme(AppThemeColorSetKey)
+}
+
+extension ColorSetKeys: RawRepresentable {
+    
+    private enum Constant {
+        static let categorySeparator: Character = ":"
+        static let appThemeCategory: String = "appTheme"
+    }
+    
+    public var rawValue: String {
+        switch self {
+        case .systemTheme: return "systemTheme"
+        case .defaultLight: return "defaultLight"
+        case .defaultDark: return "defaultDark"
+        case .appTheme(let key):
+            return "\(Constant.appThemeCategory)\(Constant.categorySeparator)\(key.rawValue)"
+        }
+    }
+    
+    public init?(rawValue: String) {
+        switch rawValue {
+        case "systemTheme": self = .systemTheme
+        case "defaultLight": self = .defaultLight
+        case "defaultDark": self = .defaultDark
+        default:
+            let components = rawValue.split(
+                separator: Constant.categorySeparator,
+                maxSplits: 1,
+                omittingEmptySubsequences: false
+            )
+            guard components.count == 2,
+                  components[0] == Constant.appThemeCategory,
+                  let key = AppThemeColorSetKey(rawValue: String(components[1]))
+            else { return nil }
+            self = .appTheme(key)
+        }
+    }
 }
 
 public enum FontSetKeys: String, Sendable {
