@@ -57,6 +57,19 @@ struct AppThemeColorSetKeyTests {
         ])
     }
 
+    @Test("어두운 계열 테마는 듣기 배경에 어두운 계열 투명도를 입힌다")
+    func definition_darkThemeAppliesDarkListeningAlphas() {
+        // given + when
+        let colorSet: any ColorSet = AppThemeColorSetKey.midnight.definition
+
+        // then
+        #expect(colorSet.aiListeningBackground == [
+            UIColor(rgb: 0x0C7EAE).withAlphaComponent(0.28),
+            UIColor(rgb: 0x5760E9).withAlphaComponent(0.18),
+            UIColor(rgb: 0xA042C5).withAlphaComponent(0.26)
+        ])
+    }
+
     @Test("기본 제공 테마 이름은 키에서 만든 문구 키를 든다")
     func definition_nameCarriesLocalizeKeyBuiltFromRawValue() {
         // given + when

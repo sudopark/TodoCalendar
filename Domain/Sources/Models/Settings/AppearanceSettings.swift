@@ -11,6 +11,24 @@ import Optics
 
 public enum AppThemeColorSetKey: String, CaseIterable, Sendable {
     case tomato
+    case ruby
+    case crimson
+    case pink
+    case plum
+    case purple
+    case violet
+    case indigo
+    case blue
+    case jade
+    case scarlet
+    case midnight
+    case ink
+    case abyss
+    case wine
+    case dusk
+    case amethyst
+    case camellia
+    case sunset
 }
 
 public enum ColorSetKeys: Sendable, Equatable {
