@@ -32,12 +32,25 @@ struct ColorThemePreviewView: View {
     }
     
     var body: some View {
+        self.card
+            .padding(metric.circlePadding)
+            .background(
+                RoundedRectangle(cornerRadius: Metric.Radius.regular)
+                    .fill(colorSet.bg0.asColor)
+                    .shadow(
+                        color: appearance.colorSet.text0.withAlphaComponent(0.1).asColor,
+                        radius: 8
+                    )
+            )
+    }
+    
+    private var card: some View {
         ZStack {
             VStack {
                 HStack {
                     Spacer()
                     Circle()
-                        .fill(colorSet.holidayOrWeekEndWithAccent.asColor)
+                        .fill(colorSet.accent.asColor)
                         .frame(width: metric.circleSize, height: metric.circleSize)
                         .padding(.trailing, metric.circlePadding)
                         .padding(.top, metric.circlePadding)
@@ -53,12 +66,8 @@ struct ColorThemePreviewView: View {
             }
         }
         .background(
-            RoundedRectangle(cornerRadius: Metric.Radius.regular)
-                .fill(colorSet.bg0.asColor)
-                .shadow(
-                    color: appearance.colorSet.text0.withAlphaComponent(0.1).asColor,
-                    radius: 8
-                )
+            RoundedRectangle(cornerRadius: Metric.Radius.chip)
+                .fill(colorSet.bg1.asColor)
         )
     }
 }

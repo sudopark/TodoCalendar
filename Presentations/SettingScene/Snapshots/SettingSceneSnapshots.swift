@@ -422,7 +422,8 @@ private final class FakeColorThemeSelectViewModel: ColorThemeSelectViewModel, @u
         Just([
             .init(.systemTheme) |> \.isSelected .~ true,
             .init(.defaultLight),
-            .init(.defaultDark)
+            .init(.defaultDark),
+            .init(.appTheme(.tomato))
         ]).eraseToAnyPublisher()
     }
 
