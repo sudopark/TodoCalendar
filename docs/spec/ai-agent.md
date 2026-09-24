@@ -12,7 +12,7 @@
 |---|---|---|
 | Command | `ProcessingAICommand` | 클라이언트의 의도. jobId + confirm job 여부만 들고 로컬에 보관된다 |
 | Job | `AIJob` | 서버의 실행 단위. `PENDING`·`RUNNING`·`DONE`·`CONFIRM`·`FAILED`·`REJECTED`·`CANCELED` |
-| Mutation | `AIJobDataMutation` | job이 실제로 바꾼 데이터. `dataType`(todo/done/schedule/tag/event_detail) × `operation`(created/updated/deleted) |
+| Mutation | `AIJobDataMutation` | job이 실제로 바꾼 데이터. `dataType`(todo/done/schedule/tag/event_detail/foremost) × `operation`(created/updated/deleted) |
 
 셋을 "AI 요청" 하나로 뭉치면 안 된다. 하나의 command가 confirm을 거치면 job이 둘 생기고(원본 job → confirm job), mutation은 그중 어느 job에서든 나올 수 있다.
 
@@ -141,11 +141,14 @@ job 발급 시점에 `updateProcessingAICommand`로 로컬에 기록하고, 종�
 ## 7. 이벤트 동기화 판정
 
 job 결과의 mutation 중 **하나라도** `requiresEventSync`면 `EventSyncUsecase.sync()`를 건다.
+mutation에 `foremost`가 있으면 `ForemostEventUsecase.refresh()`를 건다 — 최상위 이벤트는 증분 sync가 아니라 전용 API로 조회하므로 판정이 따로 선다.
 
 | dataType | requiresEventSync |
 |---|---|
 | `todo` · `schedule` · `tag` | ✅ |
-| `doneTodo` · `eventDetail` | ❌ |
+| `doneTodo` · `eventDetail` · `foremost` | ❌ |
+
+두 판정은 서로를 배제하지 않는다. `foremost`와 `todo`가 함께 오면 재조회와 증분 sync가 둘 다 나간다.
 
 mutation은 `done`·`confirm`·`failed`·`canceled` 어느 결과에도 실릴 수 있다 — 실패한 job도 일부는 반영했을 수 있으므로 결과 종류로 거르지 않는다.
 
