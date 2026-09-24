@@ -76,6 +76,15 @@ public protocol ColorSet: Sendable {
     var bg0: UIColor { get }
     var bg1: UIColor { get }
     var bg2: UIColor { get }
+
+    var isLightTheme: Bool { get }
+}
+
+extension ColorSet {
+
+    public var isLightTheme: Bool {
+        return self.bg0.isLight
+    }
 }
 
 

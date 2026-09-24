@@ -87,10 +87,6 @@ public struct ColorThemeDefinition: Sendable {
 
 extension ColorThemeDefinition: ColorSet {
 
-    private var isLightFamily: Bool {
-        return self.bg0.isLight
-    }
-
     // 관계로 채우는 토큰
 
     public var dayBackground: UIColor {
@@ -134,7 +130,7 @@ extension ColorThemeDefinition: ColorSet {
     }
 
     public var text0_inverted: UIColor {
-        return self.isLightFamily ? self.bg0 : self.bg2
+        return self.isLightTheme ? self.bg0 : self.bg2
     }
 
     // 테마와 무관한 토큰
@@ -164,13 +160,13 @@ extension ColorThemeDefinition: ColorSet {
     }
 
     public var negativeBtnBackground: UIColor {
-        return self.isLightFamily
+        return self.isLightTheme
             ? Constant.negativeBtnBackgroundLight
             : Constant.negativeBtnBackgroundDark
     }
 
     public var aiListeningBackground: [UIColor] {
-        return self.isLightFamily
+        return self.isLightTheme
             ? Constant.aiListeningBackgroundLight
             : Constant.aiListeningBackgroundDark
     }

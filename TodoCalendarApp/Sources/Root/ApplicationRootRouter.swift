@@ -57,7 +57,7 @@ final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked
     private func notifySystemColorThemeChangedIfNeed(isDark: Bool) {
         guard self.appearance.colorSetKey == .systemTheme else { return }
         let newSet = self.appearance.colorSetKey.convert(isSystemDarkTheme: isDark)
-        let didSetChanged = type(of: self.appearance.colorSet) != type(of: newSet)
+        let didSetChanged = self.appearance.colorSet.isLightTheme != newSet.isLightTheme
         guard didSetChanged else { return }
         self.changeNavigationBarAppearnace(newSet)
         self.appearance.colorSet = newSet

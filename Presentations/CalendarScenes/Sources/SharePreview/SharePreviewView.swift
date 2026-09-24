@@ -208,7 +208,7 @@ struct SharePreviewView: View {
         }
         .pickerStyle(.segmented)
         // 세그먼트 색은 시스템 트레이트를 따라가므로 앱 테마에 국소 고정한다.
-        .colorScheme(self.appearance.colorSet is DefaultDarkColorSet ? .dark : .light)
+        .colorScheme(self.appearance.colorSet.isLightTheme ? .light : .dark)
     }
 
     // MARK: - tag filter dropdown
