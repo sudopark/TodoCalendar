@@ -88,7 +88,7 @@ public struct CustomEventTag: EventTag {
     }
 }
 
-public struct CustomEventTagMakeParams {
+public struct CustomEventTagMakeParams: Sendable {
     public var name: String
     public var colorHex: String
     public var skipCheckDuplicationName = false

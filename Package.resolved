@@ -1,5 +1,5 @@
 {
-  "originHash" : "4f5a7b947f016cdf5ef0af83bfb9d0011165c41c48ce72413e051887a8f86157",
+  "originHash" : "6b1789f488486e2770dfeb07eec8a35e9f94ea15d2ec48042324c40f4d6e00a2",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -231,8 +231,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/sudopark/SQLiteService",
       "state" : {
-        "revision" : "d52bb1b4427f642b6802479345b10a5d982deb53",
-        "version" : "0.3.2"
+        "branch" : "master",
+        "revision" : "9b275232200261234d107c723cfd53493eaa7d1c"
       }
     },
     {
@@ -294,8 +294,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/pointfreeco/swift-issue-reporting",
       "state" : {
-        "revision" : "71c7c9a761d1ca6ed4ccb6ced040fe1c1a39e8e7",
-        "version" : "2.1.0"
+        "revision" : "75b000cea2ca6d7527a57e1b9cc0bdf21a9abe9f",
+        "version" : "2.1.1"
       }
     },
     {
@@ -348,8 +348,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/swiftlang/swift-syntax",
       "state" : {
-        "revision" : "050f1a346fbbac0ca2cfb15a95274f7bd1cf0ccf",
-        "version" : "604.0.0"
+        "revision" : "4799286537280063c85a32f09884cfbca301b1a1",
+        "version" : "602.0.0"
       }
     },
     {
