@@ -675,11 +675,15 @@ private struct QuickAddNewTodoView: View {
 
 private struct NeonListeningBorder: View {
 
+    @Environment(ViewAppearance.self) private var appearance
+
     let cornerRadius: CGFloat
 
     private var neonColors: [Color] {
-        [0xbd93f9, 0xff79c6, 0x8be9fd, 0x6272a4, 0xbd93f9]
-            .map { UIColor(rgb: $0).asColor }
+        let colorSet = self.appearance.colorSet
+        let listeningColors = colorSet.aiListeningBackground.map { $0.withAlphaComponent(1) }
+        return (listeningColors + [colorSet.accentAI] + listeningColors.prefix(1))
+            .map { $0.asColor }
     }
 
     var body: some View {
@@ -695,7 +699,7 @@ private struct NeonListeningBorder: View {
                     ),
                     lineWidth: 2
                 )
-                .shadow(color: UIColor(rgb: 0xbd93f9).asColor.opacity(0.5), radius: 4)
+                .shadow(color: self.neonColors[0].opacity(0.5), radius: 4)
         }
     }
 }
