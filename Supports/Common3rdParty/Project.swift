@@ -12,6 +12,7 @@ let project = Project.framework(
         .external(name: "AsyncAlgorithms"),
         .external(name: "AsyncFlatMap"),
         .external(name: "SQLiteService"),
+        .external(name: "SQLiteServiceMacros"),
         .external(name: "CombineCocoa"),
         .external(name: "Pulse"),
         .external(name: "PulseUI"),
