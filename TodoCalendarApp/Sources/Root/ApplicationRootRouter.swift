@@ -37,20 +37,31 @@ final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked
         self.window = window
         self.appearance = .init(
             setting: setting, 
-            isSystemDarkTheme: window?.traitCollection.userInterfaceStyle == .dark
+            isSystemDarkTheme: window?.windowScene?.traitCollection.userInterfaceStyle == .dark
         )
         self.bindSystemColorThemeChanged()
         self.changeNavigationBarAppearnace(self.appearance.colorSet)
+        self.applyPreferredColorSchemeToWindow()
+    }
+    
+    // 창에 스킴을 덮으면 창의 trait 은 기기 모드를 잃는다. 기기 모드는 윈도우 씬에서 받는다.
+    @MainActor
+    private func bindSystemColorThemeChanged() {
+        guard let windowScene = self.window?.windowScene else { return }
+        
+        windowScene.registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (scene: UIWindowScene, _) in
+            let isDark = scene.traitCollection.userInterfaceStyle == .dark
+            if self.appearance.isSystemDarkTheme != isDark {
+                self.appearance.isSystemDarkTheme = isDark
+            }
+            self.notifySystemColorThemeChangedIfNeed(isDark: isDark)
+        }
     }
     
     @MainActor
-    private func bindSystemColorThemeChanged() {
-        guard let window = self.window else { return }
-        
-        window.registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (wd: UIWindow, _) in
-            let isDark = wd.traitCollection.userInterfaceStyle == .dark
-            self.notifySystemColorThemeChangedIfNeed(isDark: isDark)
-        }
+    private func applyPreferredColorSchemeToWindow() {
+        self.window?.overrideUserInterfaceStyle = self.appearance.preferredColorScheme
+            .map { UIUserInterfaceStyle($0) } ?? .unspecified
     }
     
     @MainActor
@@ -62,6 +73,7 @@ final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked
         self.changeNavigationBarAppearnace(newSet)
         self.appearance.colorSet = newSet
         self.appearance.forceReloadNavigationBar()
+        self.applyPreferredColorSchemeToWindow()
     }
     
     func notifySettingChanged(_ newSetting: AppearanceSettings) {
@@ -74,11 +86,12 @@ final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked
             if self.appearance.colorSetKey != newSetting.colorSetKey {
                 self.appearance.colorSetKey = newSetting.colorSetKey
                 let newSet = newSetting.colorSetKey.convert(
-                    isSystemDarkTheme: self.window?.traitCollection.userInterfaceStyle == .dark
+                    isSystemDarkTheme: self.appearance.isSystemDarkTheme
                 )
                 self.changeNavigationBarAppearnace(newSet)
                 self.appearance.colorSet = newSet
                 self.appearance.forceReloadNavigationBar()
+                self.applyPreferredColorSchemeToWindow()
             }
             if self.appearance.fontSet.key != newSetting.fontSetKey {
                 self.appearance.fontSet = newSetting.fontSetKey.convert()
