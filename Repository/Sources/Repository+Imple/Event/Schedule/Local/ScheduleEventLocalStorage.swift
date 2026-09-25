@@ -83,7 +83,7 @@ extension ScheduleEventLocalStorageImple {
     ) async throws -> [ScheduleEvent] {
         
         let query = eventQuery.innerJoin(with: timeQuery, on: { ($0.uuid, $1.eventId) })
-        let mapping: (CursorIterator) throws -> ScheduleEvent = { cursor  in
+        let mapping: @Sendable (CursorIterator) throws -> ScheduleEvent = { cursor  in
             let entity = try Schedules.Entity(cursor)
             guard let time: EventTime = try? Times.Entity(cursor).eventTime
             else {
