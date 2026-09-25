@@ -684,7 +684,6 @@ struct EventDetailView: View {
                 }
             }
             .labelsHidden()
-            .invertColorIfNeed(appearance)
             
             HStack {
                 removeEventTimeView

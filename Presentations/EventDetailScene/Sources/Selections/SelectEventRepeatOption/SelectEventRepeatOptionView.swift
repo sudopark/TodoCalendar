@@ -310,7 +310,6 @@ struct SelectEventRepeatOptionView: View {
                             .foregroundStyle(appearance.colorSet.text0.asColor)
                     }
                     .buttonStyle(BorderedButtonStyle())
-                    .invertColorIfNeed(appearance)
                 }
                 
                 switch self.state.selectEndOptionType {
@@ -339,7 +338,6 @@ struct SelectEventRepeatOptionView: View {
             selection: $state.selectedEndDate,
             displayedComponents: [.date]
         )
-        .invertColorIfNeed(appearance)
         .labelsHidden()
         .onChange(of: self.state.selectedEndDate) { _, date in
             self.eventHandlers.endTimeSelect(date)
@@ -359,7 +357,6 @@ struct SelectEventRepeatOptionView: View {
                 .multilineTextAlignment(.trailing)
                 .frame(maxWidth: 50)
                 .textFieldStyle(.roundedBorder)
-                .invertColorIfNeed(appearance)
             Text("eventDetail.repeating.endtime::option::after_occurrences".localized())
                 .font(appearance.fontSet.normal.asFont)
                 .foregroundStyle(appearance.colorSet.text0.asColor)

@@ -197,7 +197,6 @@ struct CalendarSectionAppearanceSettingView: View {
     @State private var state: CalendarSectionAppearanceSettingViewState
     @Environment(CalendarSectionAppearanceSettingViewEventHandler.self) private var eventHandlers
     @Environment(ViewAppearance.self) private var appearance
-    @Environment(\.colorScheme) var colorScheme
     
     var stateBinding: (CalendarSectionAppearanceSettingViewState) -> Void = { _ in }
     
@@ -318,7 +317,7 @@ extension CalendarSectionAppearanceSettingView {
             ColorThemePreviewView(
                 model: self.state.selectedColorTheme,
                 metric: .init(fontSize: 15, circleSize: 4, circlePadding: 6),
-                isSystemDark: colorScheme == .dark
+                isSystemDark: self.appearance.isSystemDarkTheme
             )
             .frame(width: 40, height: 40)
             
