@@ -143,7 +143,7 @@ extension GoogleCalendarLocalStorageImple {
             .selectSome { [$0.id, $0.summary, $0.colorId, $0.htmlLink, $0.location, $0.visibility] }
             .where { $0.accountId == accountId && $0.calendarId == calendarId }
         let query = eventQuery.innerJoin(with: timeQuery, on: { ($0.id, $1.eventId) })
-        let mapping: (CursorIterator) throws -> GoogleCalendar.Event = { cursor in
+        let mapping: @Sendable (CursorIterator) throws -> GoogleCalendar.Event = { cursor in
             let eventId: String = try cursor.next().unwrap()
             let summary: String? = cursor.next()
             let colorId: String? = cursor.next()

@@ -111,7 +111,7 @@ extension TodoLocalStorageImple {
     ) async throws -> [TodoEvent] {
         
         let query = eventQuery.innerJoin(with: timeQuery, on: { ($0.uuid, $1.eventId) })
-        let mapping: (CursorIterator) throws -> TodoEvent = { cursor in
+        let mapping: @Sendable (CursorIterator) throws -> TodoEvent = { cursor in
             return try TodoEvent(cursor)
                 |> \.time .~ (try? Times.Entity(cursor).eventTime)
         }
@@ -125,7 +125,7 @@ extension TodoLocalStorageImple {
         let timeQuery = Times.selectAll()
         let doneQuery = Dones.selectAll()
         let query = doneQuery.innerJoin(with: timeQuery, on: { ($0.uuid, $1.eventId) })
-        let mapping: (CursorIterator) throws -> DoneTodoEvent = { cursor in
+        let mapping: @Sendable (CursorIterator) throws -> DoneTodoEvent = { cursor in
             return try DoneTodoEvent(cursor)
             |> \.eventTime .~ (try? Times.Entity(cursor).eventTime)
         }
@@ -232,7 +232,7 @@ extension TodoLocalStorageImple {
     }
     
     private func loadDoneEvent(_ query: JoinQuery<Dones>) async throws -> DoneTodoEvent? {
-        let mapping: (CursorIterator) throws -> DoneTodoEvent = { cursor in
+        let mapping: @Sendable (CursorIterator) throws -> DoneTodoEvent = { cursor in
             return try DoneTodoEvent(cursor)
             |> \.eventTime .~ (try? Times.Entity(cursor).eventTime)
         }
@@ -254,7 +254,7 @@ extension TodoLocalStorageImple {
                 .orderBy(isAscending: false) { $0.doneTime }
                 .limit(size)
         }
-        let mapping: (CursorIterator) throws -> DoneTodoEvent = {
+        let mapping: @Sendable (CursorIterator) throws -> DoneTodoEvent = {
             return try DoneTodoEvent($0)
         }
         return try await self.sqliteService.async.run { db in
@@ -265,7 +265,7 @@ extension TodoLocalStorageImple {
     private func loadDoneTodoTimes(_ dones: [DoneTodoEvent]) async throws -> [Times.Entity] {
         let eventIds = dones.map { $0.uuid }
         let query = Times.selectAll { $0.eventId.in(eventIds) }
-        let mapping: (CursorIterator) throws -> Times.Entity? = {
+        let mapping: @Sendable (CursorIterator) throws -> Times.Entity? = {
             return try? Times.Entity($0)
         }
         return try await self.sqliteService.async.run { db in
