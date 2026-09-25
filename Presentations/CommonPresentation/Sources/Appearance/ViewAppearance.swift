@@ -13,6 +13,7 @@ import Domain
 @Observable public class ViewAppearance: @unchecked Sendable {
     
     @ObservationIgnored public var colorSetKey: ColorSetKeys
+    public var isSystemDarkTheme: Bool
     public var tagColors: EventTagColorSet
     public var colorSet: any ColorSet
     public var fontSet: any FontSet
@@ -126,6 +127,7 @@ import Domain
             defaultColor: UIColor.from(hex: defaultTagColor.default) ?? .clear
         )
         self.colorSetKey = calendar.colorSetKey
+        self.isSystemDarkTheme = isSystemDarkTheme
         self.colorSet = calendar.colorSetKey.convert(isSystemDarkTheme: isSystemDarkTheme)
         self.fontSet = calendar.fontSetKey.convert()
         
@@ -156,6 +158,11 @@ import Domain
 // MARK: - combined property
 
 extension ViewAppearance {
+    
+    public var preferredColorScheme: ColorScheme? {
+        guard self.colorSetKey != .systemTheme else { return nil }
+        return self.colorSet.isLightTheme ? .light : .dark
+    }
     
     public func accentCalendarDayColor(_ accent: AccentDays?) -> UIColor {
         switch accent {
