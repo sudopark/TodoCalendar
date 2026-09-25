@@ -38,6 +38,8 @@ struct WidgetVariantPreviewView: View {
                 .overlay(borderView(scale))
                 .frame(width: proxy.size.width, height: proxy.size.height)
         }
+        // 창은 테마 계열로 덮이지만 홈 화면 위젯은 기기 모드로 그려진다.
+        .environment(\.colorScheme, appearance.isSystemDarkTheme ? .dark : .light)
     }
 
     private func scaledContentView(_ scale: CGFloat) -> some View {

@@ -22,19 +22,6 @@ extension View {
         return self |> keyPath .~ handler
     }
     
-    public func invertColorIfNeed(_ appearance: ViewAppearance) -> some View {
-        let systemScheme = UITraitCollection.current.userInterfaceStyle
-        let themeFollowsSystemScheme = appearance.colorSetKey == .systemTheme
-        // 따라가는 쪽은 트레이트 콜백이 뒤늦게 맞춰 한 프레임 어긋나고, 모르는 스킴은 fail-closed 다.
-        guard systemScheme != .unspecified, !themeFollowsSystemScheme
-        else { return self.asAnyView() }
-
-        let systemIsLight = systemScheme == .light
-        guard appearance.colorSet.isLightTheme != systemIsLight
-        else { return self.asAnyView() }
-        return self.colorInvert().asAnyView()
-    }
-    
     public func asLinkIfPossible(_ url: URL?) -> some View {
         if let url {
             return Link(destination: url) { self }.asAnyView()
