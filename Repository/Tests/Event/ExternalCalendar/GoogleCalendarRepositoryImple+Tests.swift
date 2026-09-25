@@ -271,12 +271,13 @@ extension GoogleCalendarRepositoryImple_Tests {
     @Test func migration_addsAccessRoleColumn_toExistingTable_withoutLosingData() async throws {
         try await self.runTestWithOpenClose("test_google_access_role_migration") {
             // given
+            let accountId = self.testAccountId
             let legacyTag = GoogleCalendar.Tag(id: "legacy_calendar", name: "legacy calendar")
                 |> \.colorId .~ "9"
                 |> \.isSelected .~ true
             try await self.sqliteService.async.run { db in
                 try db.createTableOrNot(GoogleCalendarEventTagTableV0LegacyTable.self)
-                let entity = GoogleCalendarEventTagTable.Entity(accountId: self.testAccountId, legacyTag)
+                let entity = GoogleCalendarEventTagTable.Entity(accountId: accountId, legacyTag)
                 try db.insert(GoogleCalendarEventTagTableV0LegacyTable.self, entities: [entity], shouldReplace: true)
             }
 
@@ -287,7 +288,7 @@ extension GoogleCalendarRepositoryImple_Tests {
             let migratedInTag = GoogleCalendar.Tag(id: "migrated_in_calendar", name: "migrated in calendar")
                 |> \.accessRole .~ .owner
             try await self.sqliteService.async.run { db in
-                let entity = GoogleCalendarEventTagTable.Entity(accountId: self.testAccountId, migratedInTag)
+                let entity = GoogleCalendarEventTagTable.Entity(accountId: accountId, migratedInTag)
                 try db.insert(GoogleCalendarEventTagTable.self, entities: [entity], shouldReplace: false)
             }
             let loaded = try await self.cacheStorage.loadCalendarList(accountId: self.testAccountId)
@@ -306,6 +307,7 @@ extension GoogleCalendarRepositoryImple_Tests {
     @Test func migration_whenTableNotCreatedYet_succeedsAndTableAcceptsAccessRole() async throws {
         try await self.runTestWithOpenClose("test_google_access_role_migration_fresh") {
             // given - 신규 설치: 캘린더 목록을 아직 한 번도 로드하지 않아 테이블이 없다
+            let accountId = self.testAccountId
 
             // when
             try await self.sqliteService.async.run { db in
@@ -316,7 +318,7 @@ extension GoogleCalendarRepositoryImple_Tests {
             let tag = GoogleCalendar.Tag(id: "fresh_calendar", name: "fresh calendar")
                 |> \.accessRole .~ .writer
             try await self.sqliteService.async.run { db in
-                let entity = GoogleCalendarEventTagTable.Entity(accountId: self.testAccountId, tag)
+                let entity = GoogleCalendarEventTagTable.Entity(accountId: accountId, tag)
                 try db.insert(GoogleCalendarEventTagTable.self, entities: [entity], shouldReplace: false)
             }
             let loaded = try await self.cacheStorage.loadCalendarList(accountId: self.testAccountId)
