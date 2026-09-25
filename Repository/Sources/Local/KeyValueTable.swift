@@ -7,57 +7,26 @@
 //
 
 import Foundation
-import SQLiteService
+import SQLiteServiceMacros
 
 
 enum KeyValueTableKeys: String {
     case fcmToken = "fcm_token"
 }
 
-struct KeyValueTable: Table {
+@Table("KeyValues")
+struct KeyValueTable {
     
-    struct Entity: RowValueType {
-        let key: String
-        var value: String?
-        
-        init(_ key: KeyValueTableKeys, value: String? = nil) {
-            self.key = key.rawValue
-            self.value = value
-        }
-        
-        init(key: String, value: String? = nil) {
-            self.key = key
-            self.value = value
-        }
-        
-        init(_ cursor: CursorIterator) throws {
-            self.key = try cursor.next().unwrap()
-            self.value = cursor.next()
-        }
-    }
+    @Column(.primaryKey(autoIncrement: false), .unique, .notNull)
+    let key: String
     
-    enum Columns: String, TableColumn {
-        case key
-        case value
-        
-        var dataType: ColumnDataType {
-            switch self {
-            case .key:
-                return .text([.primaryKey(autoIncrement: false), .unique, .notNull])
-            case .value:
-                return .text([])
-            }
-        }
-    }
+    @Column()
+    var value: String?
+}
+
+extension KeyValueTable.Entity {
     
-    typealias ColumnType = Columns
-    typealias EntityType = Entity
-    static var tableName: String { "KeyValues" }
-    
-    static func scalar(_ entity: Entity, for column: Columns) -> (any ScalarType)? {
-        switch column {
-        case .key: return entity.key
-        case .value: return entity.value
-        }
+    init(_ key: KeyValueTableKeys, value: String? = nil) {
+        self.init(key: key.rawValue, value: value)
     }
 }
