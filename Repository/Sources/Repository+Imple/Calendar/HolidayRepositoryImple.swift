@@ -110,7 +110,7 @@ extension HolidayRepositoryImple {
             .where { $0.countryCode == countryCode }
             .where { $0.locale == locale }
             .where { $0.year == year }
-        let mappging: (CursorIterator) throws -> Holiday = { cursor in
+        let mappging: @Sendable (CursorIterator) throws -> Holiday = { cursor in
             return try HolidayTable.Entity(cursor).holiday
         }
         return try await self.sqliteService.async.run { try $0.load(query, mapping: mappging) }

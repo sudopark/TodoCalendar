@@ -17,7 +17,10 @@ let package = Package(
         .package(url: "https://github.com/pointfreeco/swift-prelude.git", branch: "main"),
         .package(url: "https://github.com/apple/swift-async-algorithms.git", from: "0.1.0"),
         .package(url: "https://github.com/sudopark/publisher-async-bind.git", from: "0.1.0"),
-        .package(url: "https://github.com/sudopark/SQLiteService.git", from: "0.3.2"),
+        .package(url: "https://github.com/sudopark/SQLiteService.git", branch: "master"),
+        // 1.7.0 은 iOS 27 에만 있는 `swift_initBorrow` 를 strong 으로 링크해 최소 지원 iOS 17 인 앱이 안 뜬다.
+        // 전이 의존이라 re-resolve 때마다 최신 1.x 로 뛴다 — 배경·해제 절차는 #1165.
+        .package(url: "https://github.com/apple/swift-collections.git", exact: "1.6.0"),
         .package(url: "https://github.com/CombineCommunity/CombineCocoa.git", from: "0.4.1"),
         .package(url: "https://github.com/kean/Pulse", from: "4.1.0"),
         .package(url: "https://github.com/google/GoogleSignIn-iOS", from: "7.1.0"),
