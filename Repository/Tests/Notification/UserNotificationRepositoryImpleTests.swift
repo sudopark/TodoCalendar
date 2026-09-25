@@ -54,6 +54,13 @@ final class UserNotificationRepositoryImpleTests: LocalTestable {
         }
         return try? result.get()?.value
     }
+    
+    private func fetchAllKeyValueRows() -> [KeyValueTable.Entity] {
+        let result = self.sqliteService.run { db in
+            try db.load(KeyValueTable.self, query: KeyValueTable.selectAll())
+        }
+        return (try? result.get()) ?? []
+    }
 }
 
 
@@ -94,6 +101,22 @@ extension UserNotificationRepositoryImpleTests {
             
             // then
             #expect(self.stubRemote.didRequestedPath == nil)
+        }
+    }
+    
+    // register with new token + replace the row in place
+    @Test func repository_whenRegisterWithNewToken_replaceRowInPlace() async throws {
+        try await self.runTestWithOpenClose("user_noti_4") {
+            // given
+            let repository = try self.makeRepository(previousToken: "first_token")
+            let info = DeviceInfo() |> \.deviceModel .~ "model"
+            
+            // when
+            try await repository.register(fcmToken: "second_token", deviceInfo: info)
+            
+            // then
+            #expect(self.fetchAllKeyValueRows().count == 1)
+            #expect(self.fetchFcmToken() == "second_token")
         }
     }
     
