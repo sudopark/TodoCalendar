@@ -41,7 +41,7 @@ final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked
         )
         self.bindSystemColorThemeChanged()
         self.changeNavigationBarAppearnace(self.appearance.colorSet)
-        self.applyPreferredColorSchemeToWindow()
+        self.applyColorThemeToWindow()
     }
     
     // 창에 스킴을 덮으면 창의 trait 은 기기 모드를 잃는다. 기기 모드는 윈도우 씬에서 받는다.
@@ -59,9 +59,10 @@ final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked
     }
     
     @MainActor
-    private func applyPreferredColorSchemeToWindow() {
+    private func applyColorThemeToWindow() {
         self.window?.overrideUserInterfaceStyle = self.appearance.preferredColorScheme
             .map { UIUserInterfaceStyle($0) } ?? .unspecified
+        self.window?.tintColor = self.appearance.colorSet.accent
     }
     
     @MainActor
@@ -73,7 +74,7 @@ final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked
         self.changeNavigationBarAppearnace(newSet)
         self.appearance.colorSet = newSet
         self.appearance.forceReloadNavigationBar()
-        self.applyPreferredColorSchemeToWindow()
+        self.applyColorThemeToWindow()
     }
     
     func notifySettingChanged(_ newSetting: AppearanceSettings) {
@@ -91,7 +92,7 @@ final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked
                 self.changeNavigationBarAppearnace(newSet)
                 self.appearance.colorSet = newSet
                 self.appearance.forceReloadNavigationBar()
-                self.applyPreferredColorSchemeToWindow()
+                self.applyColorThemeToWindow()
             }
             if self.appearance.fontSet.key != newSetting.fontSetKey {
                 self.appearance.fontSet = newSetting.fontSetKey.convert()
