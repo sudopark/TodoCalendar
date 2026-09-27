@@ -288,7 +288,7 @@ AICommandShortcutWidget·AICommandControlWidget 탭 시 인앱 AI 버튼과 같�
 ```
 hex 색상으로 UIColor 생성
   → isLight 판정 (밝은색/어두운색)
-  → 밝으면 DefaultLightColorSet, 어두우면 DefaultDarkColorSet 적용
+  → 밝으면 기본 라이트 테마, 어두우면 기본 다크 테마 적용
   → 텍스트 색상이 배경 밝기에 따라 자동 조정
   → gradient + drop shadow 효과
 ```
@@ -657,8 +657,8 @@ flowchart TD
     Parse -->|실패| System
     Parse -->|성공| Detect{UIColor.isLight?}
 
-    Detect -->|밝은 색| Light["DefaultLightColorSet\n(어두운 텍스트/아이콘)"]
-    Detect -->|어두운 색| Dark["DefaultDarkColorSet\n(밝은 텍스트/아이콘)"]
+    Detect -->|밝은 색| Light["기본 라이트 테마\n(어두운 텍스트/아이콘)"]
+    Detect -->|어두운 색| Dark["기본 다크 테마\n(밝은 텍스트/아이콘)"]
 
     Light --> Render["gradient + shadow 적용\n.containerBackground()"]
     Dark --> Render
