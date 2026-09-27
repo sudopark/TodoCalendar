@@ -118,6 +118,7 @@ tuist generate --no-open      # 파일 추가/삭제 후 재실행 필수
 | 외부 캘린더 다중 계정·Pool | [`Domain/CLAUDE.md`](Domain/CLAUDE.md), [`Repository/CLAUDE.md`](Repository/CLAUDE.md), [`docs/spec/google-calendar.md`](docs/spec/google-calendar.md) |
 | Apple 캘린더 권한·EventKit·쓰기 | [`docs/spec/apple-calendar.md`](docs/spec/apple-calendar.md) |
 | AI 에이전트 command·job·사용량 | [`docs/spec/ai-agent.md`](docs/spec/ai-agent.md) |
+| Siri·App Intents 연동 | [`docs/spec/siri.md`](docs/spec/siri.md) |
 | 플랜·구매·광고 노출 | [`docs/spec/billing.md`](docs/spec/billing.md) |
 | ForemostEvent | [`docs/spec/tags-foremost-notifications.md`](docs/spec/tags-foremost-notifications.md) |
 | SharedDataStore 키·구독 | [`Domain/CLAUDE.md`](Domain/CLAUDE.md) |
