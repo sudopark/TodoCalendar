@@ -197,7 +197,7 @@ extension AppDataMigrationImpleTests {
 |---|---|
 | `UnitTestHelpKit` | `BaseTestCase`, `PublisherWaitable`, `AsyncEffectWaitable`, `BaseStub`, `TestError` |
 | `TestDoubles` | 공유 Stub repositories / stub usecases |
-| `SnapshotTestHelpKit` | `captureSnapshotPair`·`SnapshotTheme`·`catalogSnapshotDirectory` — 스냅샷 캡처 (snapshot-check 스킬) |
+| `SnapshotTestHelpKit` | `captureSnapshotPair`·`captureSnapshot`·`SnapshotTheme`·`catalogSnapshotDirectory` — 스냅샷 캡처 (snapshot-check 스킬) |
 
 ---
 
