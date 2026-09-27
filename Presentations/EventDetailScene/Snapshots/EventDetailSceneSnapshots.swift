@@ -12,6 +12,7 @@ import Domain
 import Extensions
 import CommonPresentation
 import SnapshotTestHelpKit
+import TestDoubles
 
 @testable import EventDetailScene
 
@@ -23,31 +24,66 @@ final class EventDetailSceneSnapshots: XCTestCase {
 
     @MainActor
     private func makeAppearance(_ theme: SnapshotTheme) -> ViewAppearance {
+        return self.makeAppearance(
+            theme.isSystemDarkTheme ? .defaultDark : .defaultLight,
+            isSystemDarkTheme: theme.isSystemDarkTheme
+        )
+    }
+
+    @MainActor
+    private func makeLineupAppearance(_ key: AppThemeColorSetKey) -> ViewAppearance {
+        let colorSetKey = ColorSetKeys.appTheme(key)
+        let isLightTheme = colorSetKey.convert(isSystemDarkTheme: false).isLightTheme
+        return self.makeAppearance(colorSetKey, isSystemDarkTheme: !isLightTheme)
+    }
+
+    @MainActor
+    private func makeAppearance(_ key: ColorSetKeys, isSystemDarkTheme: Bool) -> ViewAppearance {
         let calendar = CalendarAppearanceSettings(
-            colorSetKey: theme.isSystemDarkTheme ? .defaultDark : .defaultLight,
+            colorSetKey: key,
             fontSetKey: .systemDefault
         )
         let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")
         let setting = AppearanceSettings(calendar: calendar, defaultTagColor: tag)
-        return ViewAppearance(setting: setting, isSystemDarkTheme: theme.isSystemDarkTheme)
+        return ViewAppearance(setting: setting, isSystemDarkTheme: isSystemDarkTheme)
     }
 
     @MainActor
     func test_eventDetail() {
         captureSnapshotPair(named: "eventDetail", layout: .fullScreen) { theme in
-            let state = EventDetailViewState()
-            state.eventDetailTypeModel = .makeCase(true)
-            state.selectedTag = .init(.default, "default", "#ff00ff")
-            state.selectedTime = .period(
-                .init(self.start, .current), .init(self.end, .current)
-            )
-            state.selectedRepeat = "some repeat"
-            state.selectedPlace = .customPlace("경복궁")
-            return EventDetailView()
-                .environment(state)
-                .environment(EventDetailViewEventHandlers())
-                .environment(self.makeAppearance(theme))
+            self.makeEventDetailView(self.makeAppearance(theme))
         }
+    }
+
+    @MainActor
+    func test_eventDetail_lineupThemes() {
+        AppThemeColorSetKey.snapshotRepresentatives.forEach { key in
+            let appearance = self.makeLineupAppearance(key)
+            captureSnapshot(
+                named: "eventDetail-\(key.rawValue)",
+                theme: appearance.colorSet.isLightTheme ? .light : .dark,
+                layout: .fullScreen
+            ) {
+                self.makeEventDetailView(appearance)
+                    .tint(appearance.colorSet.accent.asColor)
+            }
+        }
+    }
+
+    @MainActor
+    private func makeEventDetailView(_ appearance: ViewAppearance) -> some View {
+        let state = EventDetailViewState()
+        state.eventDetailTypeModel = .makeCase(true)
+        state.selectedTag = .init(.default, "default", "#ff00ff")
+        state.selectedTime = .period(
+            .init(self.start, .current), .init(self.end, .current)
+        )
+        state.selectedRepeat = "some repeat"
+        state.selectedPlace = .customPlace("경복궁")
+        return EventDetailView()
+            .environment(state)
+            .environment(EventDetailViewEventHandlers())
+            .environment(appearance)
     }
 
     @MainActor

@@ -14,6 +14,7 @@ import Optics
 import Domain
 import CommonPresentation
 import SnapshotTestHelpKit
+import TestDoubles
 
 @testable import SettingScene
 
@@ -22,13 +23,28 @@ final class SettingSceneSnapshots: XCTestCase {
 
     @MainActor
     private func makeAppearance(_ theme: SnapshotTheme) -> ViewAppearance {
+        return self.makeAppearance(
+            theme.isSystemDarkTheme ? .defaultDark : .defaultLight,
+            isSystemDarkTheme: theme.isSystemDarkTheme
+        )
+    }
+
+    @MainActor
+    private func makeLineupAppearance(_ key: AppThemeColorSetKey) -> ViewAppearance {
+        let colorSetKey = ColorSetKeys.appTheme(key)
+        let isLightTheme = colorSetKey.convert(isSystemDarkTheme: false).isLightTheme
+        return self.makeAppearance(colorSetKey, isSystemDarkTheme: !isLightTheme)
+    }
+
+    @MainActor
+    private func makeAppearance(_ key: ColorSetKeys, isSystemDarkTheme: Bool) -> ViewAppearance {
         let calendar = CalendarAppearanceSettings(
-            colorSetKey: theme.isSystemDarkTheme ? .defaultDark : .defaultLight,
+            colorSetKey: key,
             fontSetKey: .systemDefault
         )
         let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")
         let setting = AppearanceSettings(calendar: calendar, defaultTagColor: tag)
-        return ViewAppearance(setting: setting, isSystemDarkTheme: theme.isSystemDarkTheme)
+        return ViewAppearance(setting: setting, isSystemDarkTheme: isSystemDarkTheme)
     }
 
     @MainActor
@@ -46,43 +62,63 @@ final class SettingSceneSnapshots: XCTestCase {
     @MainActor
     func test_settingItemList() {
         captureSnapshotPair(named: "settingItemList", layout: .fullScreen) { theme in
-            let state = SettingItemListViewState()
-            let eventHandlers = SettingItemListViewEventHandler()
-            let baseSection = SettingSectionModel(
-                headerText: nil,
-                items: [
-                    SettingItemModel(.appearance),
-                    SettingItemModel(.editEvent),
-                    SettingItemModel(.holidaySetting),
-                    SettingItemModel(.billingPlan),
-                    AccountSettingItemModel(AccountInfo("some"))
-                ]
-            )
-            let supportSection = SettingSectionModel(
-                headerText: "setting.section.support::name".localized(),
-                items: [
-                    SettingItemModel(.openWeb),
-                    SettingItemModel(.feedback),
-                    SettingItemModel(.help)
-                ]
-            )
-            let appInfoSection = AppInfoSectionModel(
-                headerText: "setting.section.app::name".localized(),
-                version: "v2.9.2",
-                isUpdateAvailable: true,
-                items: [
-                    SettingItemModel(.shareApp),
-                    SettingItemModel(.addReview),
-                    SettingItemModel(.openSourceLicense)
-                ]
-            )
-            state.sections = [baseSection, supportSection, appInfoSection]
-
-            return SettingItemListView()
-                .environment(state)
-                .environment(eventHandlers)
-                .environment(self.makeAppearance(theme))
+            self.makeSettingItemListView(self.makeAppearance(theme))
         }
+    }
+
+    @MainActor
+    func test_settingItemList_lineupThemes() {
+        AppThemeColorSetKey.snapshotRepresentatives.forEach { key in
+            let appearance = self.makeLineupAppearance(key)
+            captureSnapshot(
+                named: "settingItemList-\(key.rawValue)",
+                theme: appearance.colorSet.isLightTheme ? .light : .dark,
+                layout: .fullScreen
+            ) {
+                self.makeSettingItemListView(appearance)
+                    .tint(appearance.colorSet.accent.asColor)
+            }
+        }
+    }
+
+    @MainActor
+    private func makeSettingItemListView(_ appearance: ViewAppearance) -> some View {
+        let state = SettingItemListViewState()
+        let eventHandlers = SettingItemListViewEventHandler()
+        let baseSection = SettingSectionModel(
+            headerText: nil,
+            items: [
+                SettingItemModel(.appearance),
+                SettingItemModel(.editEvent),
+                SettingItemModel(.holidaySetting),
+                SettingItemModel(.billingPlan),
+                AccountSettingItemModel(AccountInfo("some"))
+            ]
+        )
+        let supportSection = SettingSectionModel(
+            headerText: "setting.section.support::name".localized(),
+            items: [
+                SettingItemModel(.openWeb),
+                SettingItemModel(.feedback),
+                SettingItemModel(.help)
+            ]
+        )
+        let appInfoSection = AppInfoSectionModel(
+            headerText: "setting.section.app::name".localized(),
+            version: "v2.9.2",
+            isUpdateAvailable: true,
+            items: [
+                SettingItemModel(.shareApp),
+                SettingItemModel(.addReview),
+                SettingItemModel(.openSourceLicense)
+            ]
+        )
+        state.sections = [baseSection, supportSection, appInfoSection]
+
+        return SettingItemListView()
+            .environment(state)
+            .environment(eventHandlers)
+            .environment(appearance)
     }
 
     // MARK: - Setting/Appearance/TimeZone/TimeZoneSelectView
