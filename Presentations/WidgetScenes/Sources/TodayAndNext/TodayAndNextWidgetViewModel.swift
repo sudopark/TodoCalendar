@@ -54,8 +54,10 @@ public struct TodayAndNextWidgetViewModel {
     }
 
     public static func sample() -> TodayAndNextWidgetViewModel {
-        let now = Date()
         let calendar = Calendar(identifier: .gregorian)
+        let now = calendar.dateBySetting(from: Date()) {
+            $0.year = 2024; $0.month = 3; $0.day = 10
+        } ?? Date()
         let today = TodayAndNextWidgetViewModel.TodayModel(
             weekOfDay: now.text("date_form.EEEE".localized()),
             day: calendar.component(.day, from: now)
