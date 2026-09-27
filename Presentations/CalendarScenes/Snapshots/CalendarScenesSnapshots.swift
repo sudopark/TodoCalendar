@@ -14,6 +14,7 @@ import Optics
 import Domain
 import CommonPresentation
 import SnapshotTestHelpKit
+import TestDoubles
 
 @testable import CalendarScenes
 import CalendarPresentation
@@ -23,13 +24,28 @@ final class CalendarScenesSnapshots: XCTestCase {
 
     @MainActor
     private func makeAppearance(_ theme: SnapshotTheme) -> ViewAppearance {
+        return self.makeAppearance(
+            theme.isSystemDarkTheme ? .defaultDark : .defaultLight,
+            isSystemDarkTheme: theme.isSystemDarkTheme
+        )
+    }
+
+    @MainActor
+    private func makeLineupAppearance(_ key: AppThemeColorSetKey) -> ViewAppearance {
+        let colorSetKey = ColorSetKeys.appTheme(key)
+        let isLightTheme = colorSetKey.convert(isSystemDarkTheme: false).isLightTheme
+        return self.makeAppearance(colorSetKey, isSystemDarkTheme: !isLightTheme)
+    }
+
+    @MainActor
+    private func makeAppearance(_ key: ColorSetKeys, isSystemDarkTheme: Bool) -> ViewAppearance {
         let calendar = CalendarAppearanceSettings(
-            colorSetKey: theme.isSystemDarkTheme ? .defaultDark : .defaultLight,
+            colorSetKey: key,
             fontSetKey: .systemDefault
         )
         let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")
         let setting = AppearanceSettings(calendar: calendar, defaultTagColor: tag)
-        let appearance = ViewAppearance(setting: setting, isSystemDarkTheme: theme.isSystemDarkTheme)
+        let appearance = ViewAppearance(setting: setting, isSystemDarkTheme: isSystemDarkTheme)
         appearance.updateEventColorMap(by: [
             DefaultEventTag.default("#ff00ff"),
             DefaultEventTag.holiday("#ff0000")
@@ -90,22 +106,41 @@ final class CalendarScenesSnapshots: XCTestCase {
     @MainActor
     func test_month_mediumRowHeight() {
         captureSnapshotPair(named: "month_mediumRowHeight", layout: .fixed(width: 393, height: 500)) { theme in
-            let appearance = self.makeAppearance(theme)
-            appearance.rowHeightOnCalendar = .medium
-
-            let viewModel = DummyMonthViewModel()
-            let state = MonthViewState()
-            state.bind(viewModel, appearance)
-            RunLoop.main.run(until: Date().addingTimeInterval(0.05))
-
-            return MonthView()
-                .environment(state)
-                .environment(MonthViewEventHandler())
-                .environment(appearance)
-                .onAppear {
-                    RunLoop.main.run(until: Date().addingTimeInterval(0.1))
-                }
+            self.makeMonthMediumRowHeightView(self.makeAppearance(theme))
         }
+    }
+
+    @MainActor
+    func test_month_mediumRowHeight_lineupThemes() {
+        AppThemeColorSetKey.allCases.forEach { key in
+            let appearance = self.makeLineupAppearance(key)
+            captureSnapshot(
+                named: "month_mediumRowHeight-\(key.rawValue)",
+                theme: appearance.colorSet.isLightTheme ? .light : .dark,
+                layout: .fixed(width: 393, height: 500)
+            ) {
+                self.makeMonthMediumRowHeightView(appearance)
+                    .tint(appearance.colorSet.accent.asColor)
+            }
+        }
+    }
+
+    @MainActor
+    private func makeMonthMediumRowHeightView(_ appearance: ViewAppearance) -> some View {
+        appearance.rowHeightOnCalendar = .medium
+
+        let viewModel = DummyMonthViewModel()
+        let state = MonthViewState()
+        state.bind(viewModel, appearance)
+        RunLoop.main.run(until: Date().addingTimeInterval(0.05))
+
+        return MonthView()
+            .environment(state)
+            .environment(MonthViewEventHandler())
+            .environment(appearance)
+            .onAppear {
+                RunLoop.main.run(until: Date().addingTimeInterval(0.1))
+            }
     }
 
     // MARK: - DayEventList/DayEventListView
@@ -113,30 +148,49 @@ final class CalendarScenesSnapshots: XCTestCase {
     @MainActor
     func test_dayEventList() {
         captureSnapshotPair(named: "dayEventList", layout: .fixed(width: 393, height: 780)) { theme in
-            let cells = self.makeDummyCells()
-            let dayModel = SelectedDayModel(dateText: "2026년 7월 12일(일)", lunarDateText: "5월 28일")
-                |> \.holidayName .~ "테스트 공휴일"
-
-            let viewModel = FakeDayEventListViewModel(
-                dayModel: dayModel,
-                foremostModel: cells.first,
-                uncompletedModels: self.makeDummyUncompleteds(),
-                cellModels: cells
-            )
-            let appearance = self.makeAppearance(theme)
-            appearance.showHoliday = true
-            appearance.showLunarCalendarDate = true
-
-            let state = DayEventListViewState()
-            state.bind(viewModel, appearance)
-            RunLoop.main.run(until: Date().addingTimeInterval(0.05))
-
-            return DayEventListView()
-                .environment(state)
-                .environment(PendingCompleteTodoState())
-                .environment(DayEventListViewEventHandler())
-                .environment(appearance)
+            self.makeDayEventListView(self.makeAppearance(theme))
         }
+    }
+
+    @MainActor
+    func test_dayEventList_lineupThemes() {
+        AppThemeColorSetKey.snapshotRepresentatives.forEach { key in
+            let appearance = self.makeLineupAppearance(key)
+            captureSnapshot(
+                named: "dayEventList-\(key.rawValue)",
+                theme: appearance.colorSet.isLightTheme ? .light : .dark,
+                layout: .fixed(width: 393, height: 780)
+            ) {
+                self.makeDayEventListView(appearance)
+                    .tint(appearance.colorSet.accent.asColor)
+            }
+        }
+    }
+
+    @MainActor
+    private func makeDayEventListView(_ appearance: ViewAppearance) -> some View {
+        let cells = self.makeDummyCells()
+        let dayModel = SelectedDayModel(dateText: "2026년 7월 12일(일)", lunarDateText: "5월 28일")
+            |> \.holidayName .~ "테스트 공휴일"
+
+        let viewModel = FakeDayEventListViewModel(
+            dayModel: dayModel,
+            foremostModel: cells.first,
+            uncompletedModels: self.makeDummyUncompleteds(),
+            cellModels: cells
+        )
+        appearance.showHoliday = true
+        appearance.showLunarCalendarDate = true
+
+        let state = DayEventListViewState()
+        state.bind(viewModel, appearance)
+        RunLoop.main.run(until: Date().addingTimeInterval(0.05))
+
+        return DayEventListView()
+            .environment(state)
+            .environment(PendingCompleteTodoState())
+            .environment(DayEventListViewEventHandler())
+            .environment(appearance)
     }
 
     // AI 진입 버튼이 confirm 대기 중 원형 → 카운트다운 캡슐로 확장되는 케이스.
