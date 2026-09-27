@@ -37,6 +37,44 @@ final class TodoLocalStorageImpleTests: LocalTestable {
             |> \.repeatingTurn .~ 3
             |> \.notificationOptions .~ [.atTime]
     }
+
+    private var dummyUntilRepeatingTodo: TodoEvent {
+        let option = EventRepeatingOptions.EveryWeek(TimeZone(abbreviation: "KST")!)
+        let repeating = EventRepeating(repeatingStartTime: 100, repeatOption: option)
+            |> \.repeatingEndOption .~ .until(4000)
+        return TodoEvent(uuid: "until-repeating", name: "some")
+            |> \.creatTimeStamp .~ 2500
+            |> \.eventTagId .~ .custom("tag")
+            |> \.time .~ .at(300)
+            |> \.repeating .~ pure(repeating)
+            |> \.repeatingTurn .~ 7
+            |> \.notificationOptions .~ [.atTime, .before(seconds: 600)]
+    }
+}
+
+
+// MARK: - 반복 종료 옵션 왕복
+
+extension TodoLocalStorageImpleTests {
+
+    @Test func storage_whenSaveTodoWithUntilRepeating_loadRestoresUntilOption() async throws {
+        try await self.runTestWithOpenClose("todo-until-repeating") {
+            // given
+            let storage = self.makeStorage()
+            let origin = self.dummyUntilRepeatingTodo
+
+            // when
+            try await storage.saveTodoEvent(origin)
+            let restored = try await storage.loadTodoEvent(origin.uuid)
+
+            // then
+            #expect(restored.repeating?.repeatingEndOption == .until(4000))
+            #expect(restored.repeating?.repeatingStartTime == 100)
+            #expect(restored.repeatingTurn == 7)
+            #expect(restored.creatTimeStamp == 2500)
+            #expect(restored.notificationOptions == [.atTime, .before(seconds: 600)])
+        }
+    }
 }
 
 
