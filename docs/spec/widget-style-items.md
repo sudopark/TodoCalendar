@@ -78,7 +78,7 @@
 
 ### 글자색은 배경에서 자동으로 나온다 (지금 구조 유지)
 
-`Background.colorSet(_ systemIsLight:)`(`WidgetBackgroundStyle.swift:50-59`)가 배경색 밝기(`UIColor.isLight`)로 `DefaultLightColorSet` / `DefaultDarkColorSet` 을 고르고, 위젯 뷰가 거기서 `text0`·`text1`·`text2`·`accent` 를 꺼내 쓴다. 이 경로를 그대로 둔다.
+`Background.colorSet(_ systemIsLight:)`(`WidgetBackgroundStyle.swift:64-73`)가 배경색 밝기(`UIColor.isLight`)로 기본 라이트·다크 테마 중 하나를 고르고, 위젯 뷰가 거기서 `text0`·`text1`·`text2`·`accent` 를 꺼내 쓴다. 이 경로를 그대로 둔다.
 
 ### 전역이 기본, 스타일이 덮는다
 
