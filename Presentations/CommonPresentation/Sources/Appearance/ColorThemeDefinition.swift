@@ -53,6 +53,12 @@ public struct ColorThemeDefinition: Sendable {
 
     public let eventTextOverride: UIColor?
     public let primaryBtnTextOverride: UIColor?
+    public let weekDayTextOverride: UIColor?
+    public let holidayTextOverride: UIColor?
+    public let weekEndTextOverride: UIColor?
+    public let eventTextSelectedOverride: UIColor?
+    public let aiUserBubbleBackgroundOverride: UIColor?
+    public let negativeBtnBackgroundOverride: UIColor?
 
     public init(
         name: ColorThemeName,
@@ -73,7 +79,13 @@ public struct ColorThemeDefinition: Sendable {
         accentAI: UIColor,
         aiListeningBackgroundBase: [UIColor],
         eventTextOverride: UIColor? = nil,
-        primaryBtnTextOverride: UIColor? = nil
+        primaryBtnTextOverride: UIColor? = nil,
+        weekDayTextOverride: UIColor? = nil,
+        holidayTextOverride: UIColor? = nil,
+        weekEndTextOverride: UIColor? = nil,
+        eventTextSelectedOverride: UIColor? = nil,
+        aiUserBubbleBackgroundOverride: UIColor? = nil,
+        negativeBtnBackgroundOverride: UIColor? = nil
     ) {
         self.name = name
         self.bg0 = bg0
@@ -94,6 +106,12 @@ public struct ColorThemeDefinition: Sendable {
         self.aiListeningBackgroundBase = aiListeningBackgroundBase
         self.eventTextOverride = eventTextOverride
         self.primaryBtnTextOverride = primaryBtnTextOverride
+        self.weekDayTextOverride = weekDayTextOverride
+        self.holidayTextOverride = holidayTextOverride
+        self.weekEndTextOverride = weekEndTextOverride
+        self.eventTextSelectedOverride = eventTextSelectedOverride
+        self.aiUserBubbleBackgroundOverride = aiUserBubbleBackgroundOverride
+        self.negativeBtnBackgroundOverride = negativeBtnBackgroundOverride
     }
 }
 
@@ -109,15 +127,15 @@ extension ColorThemeDefinition: ColorSet {
     }
 
     public var weekDayText: UIColor {
-        return self.text0
+        return self.weekDayTextOverride ?? self.text0
     }
 
     public var holidayText: UIColor {
-        return self.text0
+        return self.holidayTextOverride ?? self.text0
     }
 
     public var weekEndText: UIColor {
-        return self.text1
+        return self.weekEndTextOverride ?? self.text1
     }
 
     public var eventText: UIColor {
@@ -125,11 +143,11 @@ extension ColorThemeDefinition: ColorSet {
     }
 
     public var eventTextSelected: UIColor {
-        return self.selectedDayText
+        return self.eventTextSelectedOverride ?? self.selectedDayText
     }
 
     public var aiUserBubbleBackground: UIColor {
-        return self.selectedDayBackground
+        return self.aiUserBubbleBackgroundOverride ?? self.selectedDayBackground
     }
 
     public var aiUserBubbleText: UIColor {
@@ -171,9 +189,11 @@ extension ColorThemeDefinition: ColorSet {
     }
 
     public var negativeBtnBackground: UIColor {
-        return self.isLightTheme
-            ? Constant.negativeBtnBackgroundLight
-            : Constant.negativeBtnBackgroundDark
+        return self.negativeBtnBackgroundOverride ?? (
+            self.isLightTheme
+                ? Constant.negativeBtnBackgroundLight
+                : Constant.negativeBtnBackgroundDark
+        )
     }
 
     public var aiListeningBackground: [UIColor] {
