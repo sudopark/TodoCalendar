@@ -65,31 +65,56 @@ public func captureSnapshotPair<V: View>(
     @ViewBuilder makeView: (_ theme: SnapshotTheme) -> V
 ) {
     for theme in SnapshotTheme.allCases {
-        let view = makeView(theme)
-            .environment(\.colorScheme, theme.colorScheme)
-        let startTime = Date()
-        var libraryMessage: String?
-        withSnapshotTesting(record: .all) {
-            libraryMessage = verifySnapshot(
-                of: view,
-                as: .image(
-                    layout: layout.swiftUILayout,
-                    traits: snapshotTraits(theme)
-                ),
-                named: "\(name)-\(theme.rawValue)",
-                snapshotDirectory: snapshotDirectory,
-                file: file,
-                testName: testName
-            )
-        }
-        assertRecorded(
-            fileNameKey: "\(name)-\(theme.rawValue)",
-            since: startTime,
+        captureSnapshot(
+            named: "\(name)-\(theme.rawValue)",
+            theme: theme,
+            layout: layout,
             snapshotDirectory: snapshotDirectory,
-            libraryMessage: libraryMessage,
-            file: file, line: line
+            file: file,
+            testName: testName,
+            line: line
+        ) {
+            makeView(theme)
+        }
+    }
+}
+
+
+@MainActor
+public func captureSnapshot<V: View>(
+    named name: String,
+    theme: SnapshotTheme,
+    layout: SnapshotLayout = .component,
+    snapshotDirectory: String? = nil,
+    file: StaticString = #filePath,
+    testName: String = #function,
+    line: UInt = #line,
+    @ViewBuilder makeView: () -> V
+) {
+    let view = makeView()
+        .environment(\.colorScheme, theme.colorScheme)
+    let startTime = Date()
+    var libraryMessage: String?
+    withSnapshotTesting(record: .all) {
+        libraryMessage = verifySnapshot(
+            of: view,
+            as: .image(
+                layout: layout.swiftUILayout,
+                traits: snapshotTraits(theme)
+            ),
+            named: name,
+            snapshotDirectory: snapshotDirectory,
+            file: file,
+            testName: testName
         )
     }
+    assertRecorded(
+        fileNameKey: name,
+        since: startTime,
+        snapshotDirectory: snapshotDirectory,
+        libraryMessage: libraryMessage,
+        file: file, line: line
+    )
 }
 
 
