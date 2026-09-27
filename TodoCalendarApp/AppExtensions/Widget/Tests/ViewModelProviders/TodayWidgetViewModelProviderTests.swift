@@ -347,6 +347,6 @@ extension TodayWidgetViewModelProviderTests {
         
         // then
         let colorSet = viewModel.look.background.colorSet(true)
-        XCTAssertTrue(colorSet is DefaultDarkColorSet)
+        XCTAssertFalse(colorSet.isLightTheme)
     }
 }

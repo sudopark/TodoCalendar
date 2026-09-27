@@ -27,7 +27,7 @@ struct WidgetBackgroundColorSetTests {
         let colorSet = background.colorSet(systemIsLight)
 
         // then
-        #expect((colorSet is DefaultLightColorSet) == systemIsLight)
+        #expect(colorSet.isLightTheme == systemIsLight)
     }
 
     @Test(arguments: [true, false])
@@ -39,7 +39,7 @@ struct WidgetBackgroundColorSetTests {
         let colorSet = background.colorSet(systemIsLight)
 
         // then
-        #expect(colorSet is DefaultLightColorSet)
+        #expect(colorSet.isLightTheme == true)
     }
 
     @Test(arguments: [true, false])
@@ -51,7 +51,7 @@ struct WidgetBackgroundColorSetTests {
         let colorSet = background.colorSet(systemIsLight)
 
         // then
-        #expect(colorSet is DefaultDarkColorSet)
+        #expect(colorSet.isLightTheme == false)
     }
 
     @Test(arguments: [true, false])
@@ -63,7 +63,7 @@ struct WidgetBackgroundColorSetTests {
         let colorSet = background.colorSet(systemIsLight)
 
         // then
-        #expect((colorSet is DefaultLightColorSet) == systemIsLight)
+        #expect(colorSet.isLightTheme == systemIsLight)
     }
 }
 
@@ -86,6 +86,10 @@ struct WidgetLookColorSetTests {
         )
     }
 
+    private var shippedDark: any ColorSet {
+        return ColorSetKeys.defaultDark.convert(isSystemDarkTheme: true)
+    }
+
     private var somePhoto: WidgetStylePhoto {
         return .init(
             id: "p1",
@@ -105,7 +109,7 @@ struct WidgetLookColorSetTests {
         let colorSet = look.colorSet(systemIsLight)
 
         // then
-        #expect(colorSet is DefaultDarkColorSet)
+        #expect(colorSet.isLightTheme == false)
     }
 
     @Test("사진이 없으면 배경색 판정을 그대로 탄다", arguments: [true, false])
@@ -115,8 +119,8 @@ struct WidgetLookColorSetTests {
         let dark = self.makeLook(background: .custom(hex: "#000000"), photo: nil)
 
         // when + then
-        #expect(light.colorSet(systemIsLight) is DefaultLightColorSet)
-        #expect(dark.colorSet(systemIsLight) is DefaultDarkColorSet)
+        #expect(light.colorSet(systemIsLight).isLightTheme == true)
+        #expect(dark.colorSet(systemIsLight).isLightTheme == false)
     }
 
     @Test("사진 위에선 보조 글자를 한 단계 올린다", arguments: [true, false])
@@ -130,8 +134,8 @@ struct WidgetLookColorSetTests {
         let color = look.subTextColor(systemIsLight)
 
         // then
-        #expect(color == DefaultDarkColorSet().text1)
-        #expect(color != DefaultDarkColorSet().text2)
+        #expect(color == self.shippedDark.text1)
+        #expect(color != self.shippedDark.text2)
     }
 
     @Test("사진이 없으면 보조 글자는 text2 그대로다", arguments: [true, false])
@@ -143,7 +147,7 @@ struct WidgetLookColorSetTests {
         let color = look.subTextColor(systemIsLight)
 
         // then
-        #expect(color == DefaultDarkColorSet().text2)
-        #expect(color != DefaultDarkColorSet().text1)
+        #expect(color == self.shippedDark.text2)
+        #expect(color != self.shippedDark.text1)
     }
 }

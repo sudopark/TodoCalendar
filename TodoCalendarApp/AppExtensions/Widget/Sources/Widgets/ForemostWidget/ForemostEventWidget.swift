@@ -41,7 +41,7 @@ struct ForemostEventWidgetView: View {
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.widgetFamily) var family: WidgetFamily
     var colorSet: any ColorSet {
-        return colorScheme == .light ? DefaultLightColorSet() : DefaultDarkColorSet()
+        return ColorSetKeys.systemTheme.convert(isSystemDarkTheme: colorScheme != .light)
     }
     
     private let entry: ResultTimelineEntry<ForemostEventWidgetViewModel>

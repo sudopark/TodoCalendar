@@ -265,24 +265,6 @@ extension ViewAppearance {
 extension ViewAppearance: AppleCalendarViewAppearanceStore { }
 
 
-extension ColorSetKeys {
-    
-    public func convert(isSystemDarkTheme: Bool) -> any ColorSet {
-        switch self {
-        case .systemTheme where isSystemDarkTheme:
-            return DefaultDarkColorSet()
-        case .systemTheme:
-            return DefaultLightColorSet()
-        case .defaultLight:
-            return DefaultLightColorSet()
-        case .defaultDark:
-            return DefaultDarkColorSet()
-        case .appTheme(let key):
-            return key.definition
-        }
-    }
-}
-
 extension FontSetKeys {
     
     public func convert() -> any FontSet {

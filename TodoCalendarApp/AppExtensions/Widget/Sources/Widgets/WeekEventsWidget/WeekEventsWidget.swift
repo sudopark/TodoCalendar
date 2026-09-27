@@ -20,7 +20,7 @@ struct WeekEventsWidgetView: View {
  
     @Environment(\.colorScheme) var colorScheme
     var colorSet: any ColorSet {
-        return colorScheme == .light ? DefaultLightColorSet() : DefaultDarkColorSet()
+        return ColorSetKeys.systemTheme.convert(isSystemDarkTheme: colorScheme != .light)
     }
     
     private let entry: ResultTimelineEntry<WeekEventsViewModel>
