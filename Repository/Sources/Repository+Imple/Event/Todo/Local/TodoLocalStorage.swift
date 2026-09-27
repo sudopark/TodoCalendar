@@ -112,7 +112,7 @@ extension TodoLocalStorageImple {
         
         let query = eventQuery.innerJoin(with: timeQuery, on: { ($0.uuid, $1.eventId) })
         let mapping: @Sendable (CursorIterator) throws -> TodoEvent = { cursor in
-            return try TodoEvent(cursor)
+            return try Todo.Entity(cursor).asTodoEvent()
                 |> \.time .~ (try? Times.Entity(cursor).eventTime)
         }
         return try await self.sqliteService.async.run([TodoEvent].self) { db in
@@ -152,7 +152,7 @@ extension TodoLocalStorageImple {
             try db.insert(Times.self, entities: times, shouldReplace: true)
         }
         try await self.sqliteService.async.run { db in
-            try db.insert(Todo.self, entities: todos, shouldReplace: true)
+            try db.insert(Todo.self, entities: todos.map { Todo.Entity($0) }, shouldReplace: true)
         }
     }
     

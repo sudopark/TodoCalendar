@@ -58,7 +58,7 @@ struct PendingDoneTodoEventTable: Table {
         }
         
         init(_ cursor: CursorIterator) throws {
-            todoEvent = try TodoEvent(cursor)
+            todoEvent = try TodoEventTable.Entity(cursor).asTodoEvent()
             let timeType: String? = cursor.next()
             let timeLowerInterval: Double? = cursor.next()
             let timeUpperInterval: Double? = cursor.next()
