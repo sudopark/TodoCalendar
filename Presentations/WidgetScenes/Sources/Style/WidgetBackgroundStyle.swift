@@ -32,8 +32,8 @@ public struct WidgetBackgroundStyle {
             else {
                 return AnyShapeStyle(.background)
             }
-            let colors: any ColorSet = color.isLight
-                ? DefaultLightColorSet() : DefaultDarkColorSet()
+            let colors: any ColorSet = ColorSetKeys.systemTheme
+                .convert(isSystemDarkTheme: !color.isLight)
             return AnyShapeStyle(
                 color.asColor.gradient.shadow(
                     .drop(
@@ -50,7 +50,7 @@ public struct WidgetBackgroundStyle {
 extension WidgetLook {
 
     public func colorSet(_ systemIsLight: Bool) -> any ColorSet {
-        guard self.photo == nil else { return DefaultDarkColorSet() }
+        guard self.photo == nil else { return ColorSetKeys.defaultDark.convert(isSystemDarkTheme: true) }
         return self.background.colorSet(systemIsLight)
     }
 
@@ -68,6 +68,6 @@ extension WidgetAppearanceSettings.Background {
             case .system: systemIsLight
             case .custom(let hex): UIColor.from(hex: hex)?.isLight ?? systemIsLight
         }
-        return isLight ? DefaultLightColorSet() : DefaultDarkColorSet()
+        return ColorSetKeys.systemTheme.convert(isSystemDarkTheme: !isLight)
     }
 }

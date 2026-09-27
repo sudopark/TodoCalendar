@@ -8,6 +8,7 @@
 
 import SwiftUI
 import WidgetKit
+import Domain
 import CommonPresentation
 import Extensions
 
@@ -16,7 +17,7 @@ struct FailView: View {
     
     @Environment(\.colorScheme) var colorScheme
     var colorSet: any ColorSet {
-        return colorScheme == .light ? DefaultLightColorSet() : DefaultDarkColorSet()
+        return ColorSetKeys.systemTheme.convert(isSystemDarkTheme: colorScheme != .light)
     }
     
     private let errorModel: WidgetErrorModel
