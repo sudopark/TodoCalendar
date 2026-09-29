@@ -22,6 +22,7 @@ description: Use when verifying implemented UI against a design spec or referenc
 - `Snapshots/`에 XCTestCase 작성 — SnapshotTestHelpKit의 `captureSnapshotPair(named:layout:makeView:)` 사용. `makeView`가 theme별 ViewAppearance를 구성한다 (`colorSetKey` 라이트/다크 키 + `isSystemDarkTheme`). 구성 패턴은 대상 뷰 파일의 #Preview/PreviewProvider와 기존 Snapshots 테스트(`CommonPresentation/Snapshots/`)를 재사용.
 - 테마 하나를 그 계열 환경으로 한 장만 찍을 땐 `captureSnapshot(named:theme:layout:makeView:)` 을 쓴다 — 라인업 테마처럼 기기 모드를 따르지 않는 테마가 대상이다. 파일 이름은 `named` 그대로다.
 - layout: 컴포넌트 → `.component`(sizeThatFits) / 화면 → `.fullScreen` / 필요 시 `.fixed(width:height:)`.
+  - iPhone Duo 커버·내부 화면은 `.duoCover`·`.duoInner` 로 따로 뜬다. 기존 기기 이미지를 대체하지 않고 `<모듈>DuoSnapshots` 스위트에 둔다.
 
 ## 3. 실행 — 촬영 규격
 

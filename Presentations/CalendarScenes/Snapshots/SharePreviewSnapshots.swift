@@ -510,7 +510,7 @@ private extension SharePreviewSnapshots {
 
 /// SharePreviewViewState의 필드가 fileprivate라 state를 직접 채울 수 없어
 /// production의 bind(_:) 경로로 상태를 주입하기 위한 최소 스텁.
-private final class FakeSharePreviewViewModel: SharePreviewViewModel, @unchecked Sendable {
+final class FakeSharePreviewViewModel: SharePreviewViewModel, @unchecked Sendable {
 
     private let stubIsTagFilterExpanded: Bool
     private let stubTagCellViewModels: [SharePreviewTagCellViewModel]
