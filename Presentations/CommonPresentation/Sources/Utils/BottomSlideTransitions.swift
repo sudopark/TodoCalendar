@@ -14,34 +14,34 @@ import UIKit
 public struct BottomSlideAnimationConstants {
     
     let animationDuration: TimeInterval
-    let sliderShowingFrameHeight: CGFloat
-    
-    private static var screenSize: CGSize {
-        return UIScreen.main.bounds.size
-    }
+    let sliderShowingFrameHeight: CGFloat?
     
     public init(animationDuration: TimeInterval = 0.25,
                 sliderShowingFrameHeight: CGFloat? = nil) {
         self.animationDuration = animationDuration
-        
-        let defaultHeight: () -> CGFloat = {
-            return Self.screenSize.height
-        }
-        self.sliderShowingFrameHeight = sliderShowingFrameHeight ?? defaultHeight()
+        self.sliderShowingFrameHeight = sliderShowingFrameHeight
     }
     
-    private var sliderSize: CGSize {
-        return .init(width: Self.screenSize.width, height: self.sliderShowingFrameHeight)
+    private func sliderSize(in containerBounds: CGRect) -> CGSize {
+        let height = self.sliderShowingFrameHeight ?? containerBounds.height
+        return .init(width: containerBounds.width, height: height)
     }
     
-    var sliderHideFrame: CGRect {
-        let origin = CGPoint(x: 0, y: Self.screenSize.height)
-        return .init(origin: origin, size: self.sliderSize)
+    func sliderHideFrame(in containerBounds: CGRect) -> CGRect {
+        let origin = CGPoint(x: containerBounds.minX, y: containerBounds.maxY)
+        return .init(origin: origin, size: self.sliderSize(in: containerBounds))
     }
     
-    var sliderShowingFrame: CGRect {
-        let origin = CGPoint(x: 0, y: Self.screenSize.height - self.sliderShowingFrameHeight)
-        return .init(origin: origin, size: self.sliderSize)
+    func sliderShowingFrame(in containerBounds: CGRect) -> CGRect {
+        let size = self.sliderSize(in: containerBounds)
+        let origin = CGPoint(x: containerBounds.minX, y: containerBounds.maxY - size.height)
+        return .init(origin: origin, size: size)
+    }
+    
+    var sliderAutoresizingMask: UIView.AutoresizingMask {
+        return self.sliderShowingFrameHeight == nil
+            ? [.flexibleWidth, .flexibleHeight]
+            : [.flexibleWidth, .flexibleTopMargin]
     }
 }
 
@@ -64,18 +64,21 @@ public final class BottomSlidShowing: NSObject, UIViewControllerAnimatedTransiti
             return
         }
         let constant = self.constant
+        let containerView = transitionContext.containerView
         
-        let shadowView = ShadowView(frame: UIScreen.main.bounds)
+        let shadowView = ShadowView(frame: containerView.bounds)
+        shadowView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         shadowView.updateDimpercent(0.1)
-        transitionContext.containerView.addSubview(shadowView)
+        containerView.addSubview(shadowView)
         
-        transitionContext.containerView.addSubview(showingView)
+        containerView.addSubview(showingView)
         
-        showingView.frame = constant.sliderHideFrame
+        showingView.autoresizingMask = constant.sliderAutoresizingMask
+        showingView.frame = constant.sliderHideFrame(in: containerView.bounds)
         
         let duration = transitionDuration(using: transitionContext)
         UIView.animate(withDuration: duration, animations: {
-            showingView.frame = constant.sliderShowingFrame
+            showingView.frame = constant.sliderShowingFrame(in: containerView.bounds)
             
             shadowView.updateDimpercent(1.0)
         }, completion: { success in
@@ -106,15 +109,16 @@ public final class BottomSlideHiding: NSObject, UIViewControllerAnimatedTransiti
         }
         
         let constant = self.constant
+        let containerView = transitionContext.containerView
         
-        let shadowView = transitionContext.containerView.subviews.first(where: { $0 is ShadowView }) as? ShadowView
+        let shadowView = containerView.subviews.first(where: { $0 is ShadowView }) as? ShadowView
         shadowView?.updateDimpercent(1.0)
         
-        slideView.frame = constant.sliderShowingFrame
+        slideView.frame = constant.sliderShowingFrame(in: containerView.bounds)
         
         let duration = transitionDuration(using: transitionContext)
         UIView.animate(withDuration: duration, animations: {
-            slideView.frame = constant.sliderHideFrame
+            slideView.frame = constant.sliderHideFrame(in: containerView.bounds)
             shadowView?.updateDimpercent(0.1)
         }, completion: { _ in
             if transitionContext.transitionWasCancelled {
@@ -177,13 +181,12 @@ extension BottomPullPangestureDimissalInteractor: UIGestureRecognizerDelegate {
     
     @objc private func handlePangesture(_ gesture: UIPanGestureRecognizer) {
         
-        let transition = gesture.translation(in: gesture.view)
+        guard let view = gesture.view else { return }
+        let transition = gesture.translation(in: view)
         
-        let safeAreaBottomPadding = gesture.view?.window?.safeAreaInsets.bottom ?? 0
-        let totalLength = (gesture.view?.frame.height ?? UIScreen.main.bounds.height) - safeAreaBottomPadding
-        var percent = transition.y / totalLength
-        
-        percent = min(1, percent); percent = max(0, percent)
+        let safeAreaBottomPadding = view.window?.safeAreaInsets.bottom ?? 0
+        let totalLength = view.bounds.height - safeAreaBottomPadding
+        let percent = totalLength > 0 ? min(1, max(0, transition.y / totalLength)) : 0
         
         switch gesture.state {
         case .began:
