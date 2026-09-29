@@ -136,6 +136,7 @@ struct MonthView: View {
     @Environment(MonthViewState.self) private var state
     @Environment(MonthViewEventHandler.self) private var eventHandler
     @Environment(ViewAppearance.self) private var appearance
+    @State private var gridHeight: CGFloat?
     
     var body: some View {
         VStack(spacing: 0) {
@@ -184,19 +185,24 @@ struct MonthView: View {
     
     private func gridWeeksView() -> some View {
         let isCollapsed = self.state.isCollapsed
-        let expectSize = CGSize(
-            width: UIScreen.main.bounds.width - 16,
-            height: isCollapsed ? RowHeightOnCalendar.small.cgValue : appearance.rowHeightOnCalendar.cgValue
-        )
-        return VStack(spacing: 0) {
-            ForEach(isCollapsed ? self.collapsedWeeks : self.state.weeks, id: \.id) {
-                WeekRowView(week: $0, expectSize, isCollapsed: isCollapsed)
-                    .eventHandler(\.daySelected, eventHandler.daySelected)
-                    .eventHandler(\.shareEvents, eventHandler.shareEvents)
-                    .environment(state)
-                    .environment(appearance)
+        let rowHeight = isCollapsed ? RowHeightOnCalendar.small.cgValue : appearance.rowHeightOnCalendar.cgValue
+        let weeks = isCollapsed ? self.collapsedWeeks : self.state.weeks
+        return GeometryReader { proxy in
+            let expectSize = CGSize(width: proxy.size.width, height: rowHeight)
+            VStack(spacing: 0) {
+                ForEach(weeks, id: \.id) {
+                    WeekRowView(week: $0, expectSize, isCollapsed: isCollapsed)
+                        .eventHandler(\.daySelected, eventHandler.daySelected)
+                        .eventHandler(\.shareEvents, eventHandler.shareEvents)
+                        .environment(state)
+                        .environment(appearance)
+                }
             }
+            .fixedSize(horizontal: false, vertical: true)
+            .onGeometryChange(for: CGFloat.self, of: { $0.size.height }) { self.gridHeight = $0 }
         }
+        // 행은 날짜 글자 높이만큼 rowHeight 보다 커서, 첫 프레임 뒤엔 실제 그린 높이를 쓴다
+        .frame(height: self.gridHeight ?? rowHeight * CGFloat(weeks.count))
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier(AccessibilityID.CalendarScene.monthGrid)
     }
@@ -400,7 +406,7 @@ private struct WeekRowView: View {
                 return self.appearance.colorOnCalendar(event.eventTagId, offColor: { $0.text1 }).asColor
             }
         }
-        let availables: Int = Int(floor((dayWidth-15)/6))
+        let availables: Int = max(0, Int(floor((dayWidth-15)/6)))
         
         let prefix = events.prefix(availables)
         
