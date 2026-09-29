@@ -38,6 +38,8 @@ public enum SnapshotLayout {
     case component
     case fullScreen
     case fixed(width: CGFloat, height: CGFloat)
+    case duoCover
+    case duoInner
 
     @MainActor
     var swiftUILayout: SwiftUISnapshotLayout {
@@ -49,6 +51,11 @@ public enum SnapshotLayout {
             return .fixed(width: size.width, height: size.height)
         case .fixed(let width, let height):
             return .fixed(width: width, height: height)
+        // iPhone Duo 시뮬레이터 디스플레이 px ÷ scale 3
+        case .duoCover:
+            return .fixed(width: 466, height: 678)
+        case .duoInner:
+            return .fixed(width: 669, height: 951)
         }
     }
 }
