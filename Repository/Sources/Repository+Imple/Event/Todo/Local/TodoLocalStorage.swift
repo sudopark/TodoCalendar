@@ -342,12 +342,11 @@ extension TodoLocalStorageImple {
     
     private func loadPendingDoneTodo(_ id: String) async throws -> TodoEvent {
         typealias PendingTable = PendingDoneTodoEventTable
-        typealias Pending = PendingTable.PendingDoneTodo
-        let pending = try await self.sqliteService.async.run(Pending.self) { db in
+        let pending = try await self.sqliteService.async.run(PendingTable.Entity.self) { db in
             let query = PendingTable.selectAll { $0.uuid == id }
             return try db.loadOne(query).unwrap()
         }
-        return pending.todoEvent
+        return try pending.asTodoEvent()
     }
     
     private func findDoneTodoEvent(
@@ -378,7 +377,7 @@ extension TodoLocalStorageImple {
             }
         case .completing(let origin):
             try await self.sqliteService.async.run { db in
-                let pending = PendingDoneTodoEventTable.PendingDoneTodo(todoEvent: origin)
+                let pending = PendingDoneTodoEventTable.Entity(origin)
                 try db.insert(PendingDoneTodoEventTable.self, entities: [pending], shouldReplace: true)
                 let state = ToggleTable.Entity(todoId: id, state: .completing)
                 try db.insert(ToggleTable.self, entities: [state], shouldReplace: true)
