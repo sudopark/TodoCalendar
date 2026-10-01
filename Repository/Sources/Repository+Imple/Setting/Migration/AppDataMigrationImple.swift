@@ -151,7 +151,7 @@ extension AppDataMigrationImple {
 
     private func runMigrationVersion5to6(_ database: any DataBase) throws {
         do {
-            try database.createTableOrNot(TodoEventTable.self)
+            try database.createTableOrNot(TodoEventTableV1.self)
             try database.migrate(TodoEventTable.self, version: 5)
             logger.log(.sql, level: .info, "migration version 5 -> 6, TodoEventTable finished")
         } catch {
