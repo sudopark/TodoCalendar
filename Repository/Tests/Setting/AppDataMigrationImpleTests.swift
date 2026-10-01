@@ -358,6 +358,27 @@ final class AppDataMigrationImpleTests {
         }
     }
 
+    private var dummyCurrentTodoEvent: TodoEventTable.Entity {
+        return TodoEventTable.Entity(
+            uuid: "fresh-uuid",
+            name: "fresh-name",
+            createTimeStamp: 1100,
+            eventTagId: "fresh-tag",
+            repeatingStart: 2200,
+            repeatingOption: "fresh-option",
+            repeatingEnd: 3300,
+            notificationOptions: "fresh-notification",
+            repeatingEndCount: 44,
+            repeatingTurn: 55
+        )
+    }
+
+    private func insertCurrentTodoEvent(_ mainDB: SQLiteService) async throws {
+        try await mainDB.async.run { db in
+            try db.insert(TodoEventTable.self, entities: [self.dummyCurrentTodoEvent], shouldReplace: true)
+        }
+    }
+
     private func expectSeededRowUnchanged(_ row: TodoEventTable.Entity) {
         #expect(row.uuid == "seed-uuid")
         #expect(row.name == "seed-name")
@@ -639,6 +660,34 @@ extension AppDataMigrationImpleTests {
         }
     }
 
+    // 빈 DB 에 전 구간을 태워도 TodoEvents 가 살아남고 두 마이그레이션 컬럼을 갖는다
+    @Test func runDBMigration_onEmptyDB_keepsTodoEventTable() async throws {
+        // given
+        try await withMigrationDB(at: mainDBPath) { mainDB, pool in
+            // when
+            try await self.makeMigration(mainDB: mainDB, pool: pool).runDBMigration()
+
+            // then
+            try await self.requireMigratedColumnsExist(mainDB)
+            let version = try await self.loadUserVersion(mainDB)
+            #expect(version == 7)
+
+            try await self.insertCurrentTodoEvent(mainDB)
+            let loaded = try await self.loadTodoEvents(mainDB)
+            let row = try #require(loaded.first)
+            #expect(loaded.count == 1)
+            #expect(row.uuid == "fresh-uuid")
+            #expect(row.name == "fresh-name")
+            #expect(row.createTimeStamp == 1100)
+            #expect(row.eventTagId == "fresh-tag")
+            #expect(row.repeatingStart == 2200)
+            #expect(row.repeatingOption == "fresh-option")
+            #expect(row.repeatingEnd == 3300)
+            #expect(row.notificationOptions == "fresh-notification")
+            #expect(row.repeatingEndCount == 44)
+            #expect(row.repeatingTurn == 55)
+        }
+    }
 }
 
 
