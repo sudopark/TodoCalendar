@@ -425,13 +425,13 @@ private struct PendingDoneTodoEventTableV6LegacyTable: Table {
     }
 
     typealias ColumnType = Columns
-    typealias EntityType = PendingDoneTodoEventTable.PendingDoneTodo
+    typealias EntityType = PendingDoneTodoEventTableV1.Entity
     static var tableName: String { PendingDoneTodoEventTable.tableName }
 
     static func scalar(_ entity: EntityType, for column: Columns) -> (any ScalarType)? {
-        guard let newColumn = PendingDoneTodoEventTable.Columns(rawValue: column.rawValue)
+        guard let newColumn = PendingDoneTodoEventTableV1.Columns(rawValue: column.rawValue)
         else { return nil }
-        return PendingDoneTodoEventTable.scalar(entity, for: newColumn)
+        return PendingDoneTodoEventTableV1.scalar(entity, for: newColumn)
     }
 }
 
@@ -440,7 +440,7 @@ extension TodoLocalStorageImpleTests {
     private func saveLegacyPendingDoneTodo(_ origin: TodoEvent) async throws {
         try await self.sqliteService.async.run { db in
             typealias Legacy = PendingDoneTodoEventTableV6LegacyTable
-            let pending = PendingDoneTodoEventTable.PendingDoneTodo(todoEvent: origin)
+            let pending = PendingDoneTodoEventTableV1.Entity(PendingDoneTodoEventTable.Entity(origin))
             try db.createTableOrNot(Legacy.self)
             try db.insert(Legacy.self, entities: [pending], shouldReplace: true)
 
@@ -513,5 +513,64 @@ extension TodoLocalStorageImpleTests {
         #expect(values.count == TodoToggleStateTable.Columns.allCases.count)
         #expect(values.isEmpty == false)
         #expect(values.allSatisfy { $0 != nil })
+    }
+
+    @Test func pendingTodoEntity_serialize_leavesNoColumnUnmapped() throws {
+        // given
+        let todo = self.dummyPendingTodo()
+
+        // when
+        let values = try PendingDoneTodoEventTable.serialize(entity: .init(todo))
+
+        // then — 상호 배타인 종료 컬럼 둘은 아래 케이스가 맡는다
+        let exclusiveColumns: Set<PendingDoneTodoEventTable.Columns> = [.repeatingEnd, .repeatingEndCount]
+        let unmapped = zip(PendingDoneTodoEventTable.Columns.allCases, values)
+            .filter { !exclusiveColumns.contains($0.0) && $0.1 == nil }
+            .map { $0.0 }
+        #expect(values.count == PendingDoneTodoEventTable.Columns.allCases.count)
+        #expect(values.isEmpty == false)
+        #expect(unmapped.isEmpty)
+    }
+
+    @Test func pendingTodoEntity_serializeRepeatingEndedByCount_leavesNoColumnUnmapped() throws {
+        // given
+        let untilTodo = self.dummyPendingTodo(endOption: .until(3300))
+        let countTodo = self.dummyPendingTodo(endOption: .count(44))
+
+        // when
+        let untilValues = try PendingDoneTodoEventTable.serialize(entity: .init(untilTodo))
+        let countValues = try PendingDoneTodoEventTable.serialize(entity: .init(countTodo))
+
+        // then
+        let mapped = zip(untilValues, countValues).map { $0 != nil || $1 != nil }
+        #expect(mapped.count == PendingDoneTodoEventTable.Columns.allCases.count)
+        #expect(mapped.isEmpty == false)
+        #expect(mapped.allSatisfy { $0 })
+    }
+
+    @Test func pendingTodoEntity_serializeWithEveryTimeKind_leavesNoColumnUnmapped() throws {
+        // given
+        let times: [EventTime] = [
+            .at(6600),
+            .period(7700..<7800),
+            .allDay(8800..<8900, secondsFromGMT: 32400)
+        ]
+
+        // when
+        let rows = try times.map { time -> [String: (any ScalarType)?] in
+            let todo = self.dummyPendingTodo(time: time)
+            let values = try PendingDoneTodoEventTable.serialize(entity: .init(todo))
+            return Dictionary(
+                uniqueKeysWithValues: zip(PendingDoneTodoEventTable.Columns.allCases.map { $0.rawValue }, values)
+            )
+        }
+
+        // then
+        let timeColumns = ["time_type", "time_lower_bound", "time_upper_bound", "seconds_from_gmt"]
+        let unmapped = rows.map { row in timeColumns.filter { row[$0].flatMap { $0 } == nil } }
+        #expect(rows.count == times.count)
+        #expect(unmapped.allSatisfy { $0.isEmpty })
+        #expect(rows.map { $0["time_type"].flatMap { $0 } as? String } == ["at", "period", "allday"])
+        #expect(rows.map { $0["seconds_from_gmt"].flatMap { $0 } as? Double } == [0, 0, 32400])
     }
 }
