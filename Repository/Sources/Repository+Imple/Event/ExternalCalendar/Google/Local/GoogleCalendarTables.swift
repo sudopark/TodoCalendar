@@ -443,3 +443,133 @@ private extension CursorIterator {
         }
     }
 }
+
+// v1 스키마로 동결 — 1→2 가 status 를 붙이기 전 상태다
+struct OldGoogleCalendarEventOriginTableV1: Table {
+
+    enum Columns: String, TableColumn {
+        case calendarId
+        case defaultTimeZone
+        case id
+        case summary
+        case htmlLink
+        case description
+        case location
+        case colorId
+        case creator
+        case organizer
+        case start
+        case end
+        case endTimeUnspecified
+        case recurrence
+        case recurringEventId
+        case sequence
+        case attendees
+        case hangoutLink
+        case conferenceData
+        case attachments
+        case eventType
+
+        var dataType: ColumnDataType {
+            switch self {
+            case .calendarId: return .text([.notNull])
+            case .defaultTimeZone: return .text([])
+            case .id: return .text([.primaryKey(autoIncrement: false), .unique, .notNull])
+            case .summary: return .text([.notNull])
+            case .htmlLink: return .text([])
+            case .description: return .text([])
+            case .location: return .text([])
+            case .colorId: return .text([])
+            case .creator: return .text([])
+            case .organizer: return .text([])
+            case .start: return .text([])
+            case .end: return .text([])
+            case .endTimeUnspecified: return .integer([.default(0)])
+            case .recurrence: return .text([])
+            case .recurringEventId: return .text([])
+            case .sequence: return .integer([])
+            case .attendees: return .text([])
+            case .hangoutLink: return .text([])
+            case .conferenceData: return .text([])
+            case .attachments: return .text([])
+            case .eventType: return .text([])
+            }
+        }
+    }
+
+    typealias ColumnType = Columns
+    typealias EntityType = OldGoogleCalendarEventOriginTable.Entity
+    static let tableName: String = "google_calendar_event_origin"
+
+    static func scalar(_ entity: EntityType, for column: Columns) -> (any ScalarType)? {
+        guard let liveColumn = OldGoogleCalendarEventOriginTable.Columns(rawValue: column.rawValue)
+        else { return nil }
+        return OldGoogleCalendarEventOriginTable.scalar(entity, for: liveColumn)
+    }
+}
+
+// v3 스키마로 동결 — 3→4 가 visibility 를 붙이기 전 상태다
+struct OldGoogleCalendarEventOriginTableV3: Table {
+
+    enum Columns: String, TableColumn {
+        case calendarId
+        case defaultTimeZone
+        case id
+        case summary
+        case htmlLink
+        case description
+        case location
+        case colorId
+        case creator
+        case organizer
+        case start
+        case end
+        case endTimeUnspecified
+        case recurrence
+        case recurringEventId
+        case sequence
+        case attendees
+        case hangoutLink
+        case conferenceData
+        case attachments
+        case eventType
+        case status
+
+        var dataType: ColumnDataType {
+            switch self {
+            case .calendarId: return .text([.notNull])
+            case .defaultTimeZone: return .text([])
+            case .id: return .text([.primaryKey(autoIncrement: false), .unique, .notNull])
+            case .summary: return .text([.notNull])
+            case .htmlLink: return .text([])
+            case .description: return .text([])
+            case .location: return .text([])
+            case .colorId: return .text([])
+            case .creator: return .text([])
+            case .organizer: return .text([])
+            case .start: return .text([])
+            case .end: return .text([])
+            case .endTimeUnspecified: return .integer([.default(0)])
+            case .recurrence: return .text([])
+            case .recurringEventId: return .text([])
+            case .sequence: return .integer([])
+            case .attendees: return .text([])
+            case .hangoutLink: return .text([])
+            case .conferenceData: return .text([])
+            case .attachments: return .text([])
+            case .eventType: return .text([])
+            case .status: return .text([])
+            }
+        }
+    }
+
+    typealias ColumnType = Columns
+    typealias EntityType = OldGoogleCalendarEventOriginTable.Entity
+    static let tableName: String = "google_calendar_event_origin"
+
+    static func scalar(_ entity: EntityType, for column: Columns) -> (any ScalarType)? {
+        guard let liveColumn = OldGoogleCalendarEventOriginTable.Columns(rawValue: column.rawValue)
+        else { return nil }
+        return OldGoogleCalendarEventOriginTable.scalar(entity, for: liveColumn)
+    }
+}
