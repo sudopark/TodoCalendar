@@ -329,3 +329,121 @@ extension ScheduleEventLocalRepositoryImpleTests {
         XCTAssertEqual(loadedOrigin?.repeatingTimeToExcludes, result?.originEvent.repeatingTimeToExcludes)
     }
 }
+
+
+extension ScheduleEventLocalRepositoryImpleTests {
+    
+    private func dummyWeeklyRepeating(_ endOption: EventRepeating.RepeatEndOption) -> EventRepeating {
+        var option = EventRepeatingOptions.EveryWeek(TimeZone(abbreviation: "KST")!)
+        option.interval = 2
+        option.dayOfWeeks = [.monday, .friday]
+        return EventRepeating(repeatingStartTime: 2200, repeatOption: option)
+            |> \.repeatingEndOption .~ endOption
+    }
+    
+    private func dummyFullSchedule(
+        uuid: String = "schedule-uuid",
+        tag: EventTagId? = .custom("tag-id"),
+        showTurn: Bool = true,
+        endOption: EventRepeating.RepeatEndOption = .until(3300)
+    ) -> ScheduleEvent {
+        return ScheduleEvent(uuid: uuid, name: "schedule name", time: .period(5500..<5600))
+            |> \.eventTagId .~ tag
+            |> \.repeating .~ pure(self.dummyWeeklyRepeating(endOption))
+            |> \.showTurn .~ showTurn
+            |> \.repeatingTimeToExcludes .~ ["exclude-1", "exclude-2", "exclude-3"]
+            |> \.notificationOptions .~ [.atTime, .before(seconds: 600)]
+    }
+    
+    func testRepository_whenSaveScheduleWithEveryColumn_loadRestoresSameValues() async throws {
+        // given
+        let origin = self.dummyFullSchedule()
+        
+        // when
+        try await self.localStorage.saveScheduleEvent(origin)
+        let restored = try await self.localStorage.loadScheduleEvent("schedule-uuid")
+        
+        // then
+        XCTAssertEqual(restored.uuid, "schedule-uuid")
+        XCTAssertEqual(restored.name, "schedule name")
+        XCTAssertEqual(restored.eventTagId, .custom("tag-id"))
+        XCTAssertEqual(restored.repeating, self.dummyWeeklyRepeating(.until(3300)))
+        XCTAssertEqual(restored.repeating?.repeatingStartTime, 2200)
+        XCTAssertEqual(restored.repeating?.repeatingEndOption, .until(3300))
+        XCTAssertEqual(restored.showTurn, true)
+        XCTAssertEqual(restored.repeatingTimeToExcludes, ["exclude-1", "exclude-2", "exclude-3"])
+        XCTAssertEqual(restored.notificationOptions, [.atTime, .before(seconds: 600)])
+        XCTAssertEqual(restored.time, .period(5500..<5600))
+    }
+    
+    func testRepository_whenSaveScheduleRepeatsByCount_loadRestoresCountEndOption() async throws {
+        // given
+        let origin = self.dummyFullSchedule(endOption: .count(44))
+        
+        // when
+        try await self.localStorage.saveScheduleEvent(origin)
+        let restored = try await self.localStorage.loadScheduleEvent("schedule-uuid")
+        
+        // then
+        XCTAssertEqual(restored.repeating?.repeatingEndOption, .count(44))
+    }
+    
+    func testRepository_whenSaveScheduleRepeatsUntilTime_loadRestoresUntilEndOption() async throws {
+        // given
+        let origin = self.dummyFullSchedule(endOption: .until(3300))
+        
+        // when
+        try await self.localStorage.saveScheduleEvent(origin)
+        let restored = try await self.localStorage.loadScheduleEvent("schedule-uuid")
+        
+        // then
+        XCTAssertEqual(restored.repeating?.repeatingEndOption, .until(3300))
+    }
+    
+    func testRepository_whenSaveSchedulesWithEveryTagKind_loadRestoresSameTagId() async throws {
+        // given
+        let tags: [EventTagId] = [
+            .holiday,
+            .default,
+            .custom("custom-tag"),
+            .externalCalendar(serviceId: "google", id: "calendar-id")
+        ]
+        let origins = tags.enumerated().map { offset, tag in
+            self.dummyFullSchedule(uuid: "schedule-\(offset)", tag: tag)
+        }
+        
+        // when
+        for origin in origins {
+            try await self.localStorage.saveScheduleEvent(origin)
+        }
+        var restoredTags: [EventTagId?] = []
+        for origin in origins {
+            let restored = try await self.localStorage.loadScheduleEvent(origin.uuid)
+            restoredTags.append(restored.eventTagId)
+        }
+        
+        // then
+        XCTAssertEqual(restoredTags, [
+            .holiday,
+            .default,
+            .custom("custom-tag"),
+            .externalCalendar(serviceId: "google", id: "calendar-id")
+        ])
+    }
+    
+    func testRepository_whenSaveSchedulesWithShowTurnOnAndOff_loadRestoresSameFlag() async throws {
+        // given
+        let showing = self.dummyFullSchedule(uuid: "show-on", showTurn: true)
+        let hiding = self.dummyFullSchedule(uuid: "show-off", showTurn: false)
+        
+        // when
+        try await self.localStorage.saveScheduleEvent(showing)
+        try await self.localStorage.saveScheduleEvent(hiding)
+        let restoredShowing = try await self.localStorage.loadScheduleEvent("show-on")
+        let restoredHiding = try await self.localStorage.loadScheduleEvent("show-off")
+        
+        // then
+        XCTAssertEqual(restoredShowing.showTurn, true)
+        XCTAssertEqual(restoredHiding.showTurn, false)
+    }
+}
