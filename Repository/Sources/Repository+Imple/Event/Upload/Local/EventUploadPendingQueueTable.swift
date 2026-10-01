@@ -110,3 +110,35 @@ extension EventUploadingTask: @retroactive RowValueType {
         self.uploadFailCount = try cursor.next().unwrap()
     }
 }
+
+// 4→5 가 uuid 의 unique 를 떼기 전 스키마다 — ALTER 로 제약을 못 떼 temp 로 복사·교체한다(#545)
+struct EventUploadPendingQueueTableV4: Table {
+
+    enum Colunms: String, TableColumn {
+        case timestamp
+        case dataType = "data_type"
+        case uuid
+        case isRemove = "is_remove"
+        case uploadFailCount = "upload_fail_count"
+
+        var dataType: ColumnDataType {
+            switch self {
+            case .timestamp: return .real([.notNull])
+            case .dataType: return .text([.notNull])
+            case .uuid: return .text([.unique, .notNull])
+            case .isRemove: return .integer([.default(0), .notNull])
+            case .uploadFailCount: return .integer([.default(0), .notNull])
+            }
+        }
+    }
+
+    typealias ColumnType = Colunms
+    typealias EntityType = EventUploadingTask
+    static var tableName: String { "event_upload_pending_queue" }
+
+    static func scalar(_ entity: EntityType, for column: Colunms) -> (any ScalarType)? {
+        guard let liveColumn = EventUploadPendingQueueTable.Colunms(rawValue: column.rawValue)
+        else { return nil }
+        return EventUploadPendingQueueTable.scalar(entity, for: liveColumn)
+    }
+}

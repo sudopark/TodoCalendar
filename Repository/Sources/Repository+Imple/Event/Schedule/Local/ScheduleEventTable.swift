@@ -138,3 +138,43 @@ struct ScheduleEventTable: Table {
         }
     }
 }
+
+// v0 스키마로 동결 — 0→1 이 repeating_count 를 붙이기 전 상태다
+struct ScheduleEventTableV0: Table {
+
+    enum Columns: String, TableColumn {
+        case uuid
+        case name
+        case eventTagId = "tag_id"
+        case repeatingStart = "repeating_start"
+        case repeatingOption = "repeating_option"
+        case repeatingEnd = "repeating_end"
+        case showTurn = "show_turn"
+        case excludeTimes = "exclude_times"
+        case notificationOptions = "notification_options"
+
+        var dataType: ColumnDataType {
+            switch self {
+            case .uuid: return .text([.primaryKey(autoIncrement: false), .unique, .notNull])
+            case .name: return .text([.notNull])
+            case .eventTagId: return .text([])
+            case .repeatingStart: return .real([])
+            case .repeatingOption: return .text([])
+            case .repeatingEnd: return .real([])
+            case .showTurn: return .integer([.notNull, .default(0)])
+            case .excludeTimes: return .text([])
+            case .notificationOptions: return .text([])
+            }
+        }
+    }
+
+    typealias ColumnType = Columns
+    typealias EntityType = ScheduleEventTable.Entity
+    static var tableName: String { "Schedules" }
+
+    static func scalar(_ entity: EntityType, for column: Columns) -> (any ScalarType)? {
+        guard let liveColumn = ScheduleEventTable.Columns(rawValue: column.rawValue)
+        else { return nil }
+        return ScheduleEventTable.scalar(entity, for: liveColumn)
+    }
+}
