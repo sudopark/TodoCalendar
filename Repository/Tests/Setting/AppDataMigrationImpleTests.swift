@@ -224,7 +224,7 @@ final class AppDataMigrationImpleTests {
         try await requireSelectSucceeds(mainDB, "SELECT repeating_count, repeating_turn FROM TodoEvents;")
     }
 
-    private var dummySchedule: ScheduleEventTable.Entity {
+    private var dummySchedule: ScheduleEventTableV0.Entity {
         let repeating = EventRepeating(
             repeatingStartTime: 2200,
             repeatOption: EventRepeatingOptions.EveryDay()
@@ -233,7 +233,18 @@ final class AppDataMigrationImpleTests {
             |> \.eventTagId .~ EventTagId("seed-schedule-tag")
             |> \.showTurn .~ true
             |> \.repeating .~ pure(repeating)
-        return ScheduleEventTable.Entity(event)
+        let entity = ScheduleEventTable.Entity(event)
+        return ScheduleEventTableV0.Entity(
+            uuid: entity.uuid,
+            name: entity.name,
+            eventTagId: entity.eventTagId,
+            repeatingStart: entity.repeatingStart,
+            repeatingOption: entity.repeatingOption,
+            repeatingEnd: entity.repeatingEnd,
+            showTurn: entity.showTurn,
+            excludeTimes: entity.excludeTimes,
+            notificationOptions: entity.notificationOptions
+        )
     }
 
     // 복사 목록의 컬럼마다 값을 싣는다 — 두 행으로 갈라야 상호 배타인
@@ -746,9 +757,10 @@ extension AppDataMigrationImpleTests {
             #expect(row.name == "seed-schedule-name")
             #expect(row.eventTagId == "seed-schedule-tag")
             #expect(row.showTurn == true)
-            #expect(row.repeating?.repeatingStartTime == 2200)
+            #expect(row.repeatingStart == 2200)
             // 0→1 이 붙인 컬럼은 기존 행에서 NULL 이라 종료 옵션이 안 잡힌다
-            #expect(row.repeating?.repeatingEndOption == nil)
+            #expect(row.repeatingEnd == nil)
+            #expect(row.repeatingEndCount == nil)
             #expect(version == 1)
         }
     }
