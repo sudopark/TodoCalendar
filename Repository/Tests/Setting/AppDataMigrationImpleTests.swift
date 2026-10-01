@@ -198,7 +198,9 @@ final class AppDataMigrationImpleTests {
         try db.insert(ScheduleEventTableV0.self, entities: [self.dummySchedule], shouldReplace: true)
         try db.createTableOrNot(PendingDoneTodoEventTableV0.self)
         try db.insert(
-            PendingDoneTodoEventTableV0.self, entities: self.dummyPendingDoneTodos, shouldReplace: true
+            PendingDoneTodoEventTableV0.self,
+            entities: self.dummyPendingDoneTodos.map { PendingDoneTodoEventTableV0.Entity($0) },
+            shouldReplace: true
         )
         try db.createTableOrNot(OldGoogleCalendarEventOriginTableV1.self)
         try db.insert(
@@ -249,7 +251,7 @@ final class AppDataMigrationImpleTests {
 
     // 복사 목록의 컬럼마다 값을 싣는다 — 두 행으로 갈라야 상호 배타인
     // repeating_end 와 repeating_count 를 둘 다 덮는다
-    private var dummyPendingDoneTodos: [PendingDoneTodoEventTable.PendingDoneTodo] {
+    private var dummyPendingDoneTodos: [PendingDoneTodoEventTable.Entity] {
         let countEnd = EventRepeating(
             repeatingStartTime: 2200,
             repeatOption: EventRepeatingOptions.EveryDay()
@@ -271,8 +273,8 @@ final class AppDataMigrationImpleTests {
             |> \.repeating .~ pure(timeEnd)
 
         return [
-            .init(todoEvent: allDayTodo),
-            .init(todoEvent: periodTodo)
+            .init(allDayTodo),
+            .init(periodTodo)
         ]
     }
 
@@ -342,13 +344,28 @@ final class AppDataMigrationImpleTests {
         }
     }
 
-    private func loadPendingDoneTodos(_ mainDB: SQLiteService) async throws -> [PendingDoneTodoEventTable.PendingDoneTodo] {
-        return try await mainDB.async.run([PendingDoneTodoEventTable.PendingDoneTodo].self) { db in
+    private func loadPendingDoneTodos(_ mainDB: SQLiteService) async throws -> [PendingDoneTodoEventTable.Entity] {
+        return try await mainDB.async.run([PendingDoneTodoEventTable.Entity].self) { db in
             try db.load(
                 PendingDoneTodoEventTable.self,
                 query: PendingDoneTodoEventTable.selectAll()
             )
         }
+    }
+
+    private func decodedNotificationOptions(_ text: String?) -> [EventNotificationTimeOption]? {
+        return text?.data(using: .utf8)
+            .flatMap { try? JSONDecoder().decode([EventNotificationTimeOptionMapper].self, from: $0) }
+            .map { $0.map { $0.option } }
+    }
+
+    private func decodedRepeatOptionIsEveryDay(_ text: String?) -> Bool {
+        guard let data = text?.data(using: .utf8),
+              let mapper = try? JSONDecoder().decode(
+                EventRepeatingOptionCodableMapper.self, from: data
+              )
+        else { return false }
+        return mapper.option is EventRepeatingOptions.EveryDay
     }
 
     private func loadSchedules(_ mainDB: SQLiteService) async throws -> [ScheduleEventTable.Entity] {
@@ -636,14 +653,14 @@ extension AppDataMigrationImpleTests {
             self.expectSeededRowUnchanged(try #require(todos.first))
             #expect(try #require(schedules.first).uuid == "seed-schedule")
             #expect(pendingDones.count == 2)
-            let pendingAllDay = try #require(pendingDones.first { $0.todoEvent.uuid == "seed-pending" })
-            let pendingPeriod = try #require(pendingDones.first { $0.todoEvent.uuid == "seed-pending-2" })
-            #expect(pendingAllDay.todoEvent.time == .allDay(5500..<5600, secondsFromGMT: 32400))
-            #expect(pendingAllDay.todoEvent.notificationOptions == [.before(seconds: 300)])
+            let pendingAllDay = try #require(pendingDones.first { $0.uuid == "seed-pending" }).asTodoEvent()
+            let pendingPeriod = try #require(pendingDones.first { $0.uuid == "seed-pending-2" }).asTodoEvent()
+            #expect(pendingAllDay.time == .allDay(5500..<5600, secondsFromGMT: 32400))
+            #expect(pendingAllDay.notificationOptions == [.before(seconds: 300)])
             // v0 테이블엔 repeating_count 자리가 없어 시드가 버려지고, 0→1 은 기존 행을 NULL 로 채운다
-            #expect(pendingAllDay.todoEvent.repeating?.repeatingEndOption == nil)
-            #expect(pendingPeriod.todoEvent.time == .period(7700..<7800))
-            #expect(pendingPeriod.todoEvent.repeating?.repeatingEndOption?.endTime == 8800)
+            #expect(pendingAllDay.repeating?.repeatingEndOption == nil)
+            #expect(pendingPeriod.time == .period(7700..<7800))
+            #expect(pendingPeriod.repeating?.repeatingEndOption?.endTime == 8800)
             #expect(try #require(origins.first).origin.id == "seed-origin")
             #expect(try #require(uploads.first).uuid == "seed-upload-uuid")
             #expect(version == 7)
@@ -758,6 +775,7 @@ extension AppDataMigrationImpleTests {
             #expect(row.eventTagId == "seed-schedule-tag")
             #expect(row.showTurn == true)
             #expect(row.repeatingStart == 2200)
+            #expect(self.decodedRepeatOptionIsEveryDay(row.repeatingOption))
             // 0→1 이 붙인 컬럼은 기존 행에서 NULL 이라 종료 옵션이 안 잡힌다
             #expect(row.repeatingEnd == nil)
             #expect(row.repeatingEndCount == nil)
@@ -772,7 +790,7 @@ extension AppDataMigrationImpleTests {
             try db.createTableOrNot(PendingDoneTodoEventTableV0.self)
             try db.insert(
                 PendingDoneTodoEventTableV0.self,
-                entities: self.dummyPendingDoneTodos,
+                entities: self.dummyPendingDoneTodos.map { PendingDoneTodoEventTableV0.Entity($0) },
                 shouldReplace: true
             )
         }) { mainDB, pool in
@@ -785,17 +803,17 @@ extension AppDataMigrationImpleTests {
                 try db.load(PendingDoneTodoEventTableV1.self, query: PendingDoneTodoEventTableV1.selectAll())
             }
             let version = try await self.loadUserVersion(mainDB)
-            let row = try #require(loaded.first { $0.todoEvent.uuid == "seed-pending" })
+            let row = try #require(loaded.first { $0.uuid == "seed-pending" })
             #expect(loaded.count == 2)
-            #expect(row.todoEvent.name == "seed-pending-name")
-            #expect(row.todoEvent.creatTimeStamp == 1100)
-            #expect(row.todoEvent.eventTagId == EventTagId("seed-pending-tag"))
-            #expect(row.todoEvent.notificationOptions == [.before(seconds: 300)])
-            #expect(row.todoEvent.repeating?.repeatingStartTime == 2200)
+            #expect(row.name == "seed-pending-name")
+            #expect(row.createTimeStamp == 1100)
+            #expect(row.eventTagId == "seed-pending-tag")
+            #expect(self.decodedNotificationOptions(row.notificationOptions) == [.before(seconds: 300)])
+            #expect(row.repeatingStart == 2200)
+            #expect(self.decodedRepeatOptionIsEveryDay(row.repeatingOption))
             // 0→1 이 붙인 컬럼은 기존 행에서 NULL 이라 종료 옵션이 안 잡힌다
-            #expect(row.todoEvent.repeating?.repeatingEndOption == nil)
-            // time_* 은 단언하지 않는다 — 공유 리더가 v6 의 열 컬럼을 먼저 읽어
-            // v1 물리 순서(13컬럼)의 아홉 번째부터 어긋난다. 6→7 이 고치는 그 결합이다
+            #expect(row.repeatingEnd == nil)
+            #expect(row.repeatingEndCount == nil)
             #expect(version == 1)
         }
     }
@@ -972,7 +990,7 @@ extension AppDataMigrationImpleTests {
             try db.createTableOrNot(PendingDoneTodoEventTableV1.self)
             try db.insert(
                 PendingDoneTodoEventTableV1.self,
-                entities: self.dummyPendingDoneTodos,
+                entities: self.dummyPendingDoneTodos.map { PendingDoneTodoEventTableV1.Entity($0) },
                 shouldReplace: true
             )
         }) { mainDB, pool in
@@ -989,20 +1007,20 @@ extension AppDataMigrationImpleTests {
             }
             let loaded = try await self.loadPendingDoneTodos(mainDB)
             let version = try await self.loadUserVersion(mainDB)
-            let allDayRow = try #require(loaded.first { $0.todoEvent.uuid == "seed-pending" })
-            let periodRow = try #require(loaded.first { $0.todoEvent.uuid == "seed-pending-2" })
+            let allDayRow = try #require(loaded.first { $0.uuid == "seed-pending" }).asTodoEvent()
+            let periodRow = try #require(loaded.first { $0.uuid == "seed-pending-2" }).asTodoEvent()
             #expect(loaded.count == 2)
-            #expect(allDayRow.todoEvent.name == "seed-pending-name")
-            #expect(allDayRow.todoEvent.creatTimeStamp == 1100)
-            #expect(allDayRow.todoEvent.eventTagId == EventTagId("seed-pending-tag"))
-            #expect(allDayRow.todoEvent.time == .allDay(5500..<5600, secondsFromGMT: 32400))
-            #expect(allDayRow.todoEvent.notificationOptions == [.before(seconds: 300)])
-            #expect(allDayRow.todoEvent.repeating?.repeatingStartTime == 2200)
-            #expect(allDayRow.todoEvent.repeating?.repeatingEndOption?.endCount == 44)
-            #expect(periodRow.todoEvent.creatTimeStamp == 9900)
-            #expect(periodRow.todoEvent.time == .period(7700..<7800))
-            #expect(periodRow.todoEvent.repeating?.repeatingStartTime == 3300)
-            #expect(periodRow.todoEvent.repeating?.repeatingEndOption?.endTime == 8800)
+            #expect(allDayRow.name == "seed-pending-name")
+            #expect(allDayRow.creatTimeStamp == 1100)
+            #expect(allDayRow.eventTagId == EventTagId("seed-pending-tag"))
+            #expect(allDayRow.time == .allDay(5500..<5600, secondsFromGMT: 32400))
+            #expect(allDayRow.notificationOptions == [.before(seconds: 300)])
+            #expect(allDayRow.repeating?.repeatingStartTime == 2200)
+            #expect(allDayRow.repeating?.repeatingEndOption?.endCount == 44)
+            #expect(periodRow.creatTimeStamp == 9900)
+            #expect(periodRow.time == .period(7700..<7800))
+            #expect(periodRow.repeating?.repeatingStartTime == 3300)
+            #expect(periodRow.repeating?.repeatingEndOption?.endTime == 8800)
             #expect(version == 7)
         }
     }
