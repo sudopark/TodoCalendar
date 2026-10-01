@@ -483,3 +483,22 @@ extension TodoLocalStorageImpleTests {
         }
     }
 }
+
+
+// MARK: - 변환이 컬럼을 다 채우는지 (DB 미사용)
+
+extension TodoLocalStorageImpleTests {
+
+    @Test func doneTodoEntity_serialize_leavesNoColumnUnmapped() throws {
+        // given
+        let done = self.dummyDoneTodo()
+
+        // when
+        let values = try DoneTodoEventTable.serialize(entity: .init(done))
+
+        // then
+        #expect(values.count == DoneTodoEventTable.Columns.allCases.count)
+        #expect(values.isEmpty == false)
+        #expect(values.allSatisfy { $0 != nil })
+    }
+}
