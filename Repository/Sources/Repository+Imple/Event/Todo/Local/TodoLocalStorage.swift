@@ -314,7 +314,7 @@ extension TodoLocalStorageImple {
     private typealias ToggleTable = TodoToggleStateTable
     
     public func todoToggleState(_ id: String) async throws -> TodoTogglingState {
-        let state = try await self.loadTodoToggleState(id)?.state
+        let state = try await self.loadTodoToggleState(id)
         switch state {
         case .none, .idle:
             let origin = try await self.findTodoEvent(id)
@@ -330,13 +330,14 @@ extension TodoLocalStorageImple {
         }
     }
     
-    private func loadTodoToggleState(_ id: String) async throws -> ToggleTable.ToggleState? {
+    private func loadTodoToggleState(_ id: String) async throws -> ToggleTable.State? {
         let query = ToggleTable.selectAll { $0.todoId == id }
-        let entity = try await self.sqliteService.async.run(ToggleTable.ToggleState?.self) { db in
+        let state = try await self.sqliteService.async.run(ToggleTable.State?.self) { db in
             try db.createTableOrNot(ToggleTable.self)
-            return try db.loadOne(query)
+            let entity: ToggleTable.Entity? = try db.loadOne(query)
+            return try entity.map { try $0.asState() }
         }
-        return entity
+        return state
     }
     
     private func loadPendingDoneTodo(_ id: String) async throws -> TodoEvent {
@@ -368,7 +369,7 @@ extension TodoLocalStorageImple {
         switch params {
         case .idle:
             try await self.sqliteService.async.run { db in
-                let state = ToggleTable.ToggleState(todoId: id, state: .idle)
+                let state = ToggleTable.Entity(todoId: id, state: .idle)
                 try db.insert(ToggleTable.self, entities: [state], shouldReplace: true)
                 try db.delete(
                     PendingDoneTodoEventTable.self, 
@@ -379,13 +380,13 @@ extension TodoLocalStorageImple {
             try await self.sqliteService.async.run { db in
                 let pending = PendingDoneTodoEventTable.PendingDoneTodo(todoEvent: origin)
                 try db.insert(PendingDoneTodoEventTable.self, entities: [pending], shouldReplace: true)
-                let state = ToggleTable.ToggleState(todoId: id, state: .completing)
+                let state = ToggleTable.Entity(todoId: id, state: .completing)
                 try db.insert(ToggleTable.self, entities: [state], shouldReplace: true)
             }
             
         case .reverting:
             try await self.sqliteService.async.run { db in
-                let state = ToggleTable.ToggleState(todoId: id, state: .reverting)
+                let state = ToggleTable.Entity(todoId: id, state: .reverting)
                 try db.insert(ToggleTable.self, entities: [state], shouldReplace: true)
             }
         }
