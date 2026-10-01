@@ -307,3 +307,22 @@ extension EventTagLocalRepositoryImpleTests {
         XCTAssertEqual(ids, [.custom("t2"), .holiday])
     }
 }
+
+
+// MARK: - 변환이 컬럼을 다 채우는지 (DB 미사용)
+
+extension EventTagLocalRepositoryImpleTests {
+    
+    func testTagEntity_serialize_leavesNoColumnUnmapped() throws {
+        // given
+        let tag = CustomEventTag(uuid: "tag-uuid", name: "tag name", colorHex: "#FF8800")
+        
+        // when
+        let values = try CustomEventTagTable.serialize(entity: .init(tag))
+        
+        // then
+        XCTAssertEqual(values.count, CustomEventTagTable.Columns.allCases.count)
+        XCTAssertFalse(values.isEmpty)
+        XCTAssertTrue(values.allSatisfy { $0 != nil })
+    }
+}
