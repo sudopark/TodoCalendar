@@ -7,8 +7,6 @@
 
 import Foundation
 @preconcurrency import SQLiteService
-import Prelude
-import Optics
 import Domain
 import Extensions
 
@@ -89,7 +87,7 @@ extension ScheduleEventLocalStorageImple {
             else {
                 throw RuntimeError("event time is not exists for schedule event")
             }
-            return ScheduleEvent(entity, time)
+            return try entity.asScheduleEvent(with: time)
         }
         return try await sqliteService.async.run([ScheduleEvent].self) { db in
             try db.createTableOrNot(Times.self)
@@ -157,17 +155,5 @@ extension ScheduleEventLocalStorageImple {
             let query = Detail.delete().where { $0.uuid == eventId }
             try db.delete(Detail.self, query: query)
         }
-    }
-}
-
-private extension ScheduleEvent {
-    
-    init(_ entity: ScheduleEventTable.Entity, _ time: EventTime) {
-        self.init(uuid: entity.uuid, name: entity.name, time: time)
-        self.eventTagId = entity.eventTagId.flatMap { EventTagId($0) }
-        self.repeating = entity.repeating
-        self.showTurn = entity.showTurn
-        self.repeatingTimeToExcludes = entity.excludeTimes |> Set.init
-        self.notificationOptions = entity.notificationOptions
     }
 }

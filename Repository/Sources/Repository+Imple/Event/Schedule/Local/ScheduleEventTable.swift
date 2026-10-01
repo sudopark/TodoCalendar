@@ -6,104 +6,85 @@
 //
 
 import Foundation
-import SQLiteService
+import Prelude
+import Optics
+import SQLiteServiceMacros
 import Domain
 import Extensions
 
 
-struct ScheduleEventTable: Table {
+typealias ScheduleEventTable = ScheduleEventTableV1
+
+@Table("Schedules")
+struct ScheduleEventTableV1 {
     
-    enum Columns: String, TableColumn {
-        case uuid
-        case name
-        case eventTagId = "tag_id"
-        case repeatingStart = "repeating_start"
-        case repeatingOption = "repeating_option"
-        case repeatingEnd = "repeating_end"
-        case showTurn = "show_turn"
-        case excludeTimes = "exclude_times"
-        case notificationOptions = "notification_options"
-        case repeatingEndCount = "repeating_count"
-        
-        var dataType: ColumnDataType {
-            switch self {
-            case .uuid: return .text([.primaryKey(autoIncrement: false), .unique, .notNull])
-            case .name: return .text([.notNull])
-            case .eventTagId: return .text([])
-            case .repeatingStart: return .real([])
-            case .repeatingOption: return .text([])
-            case .repeatingEnd: return .real([])
-            case .showTurn: return .integer([.notNull, .default(0)])
-            case .excludeTimes: return .text([])
-            case .notificationOptions: return .text([])
-            case .repeatingEndCount: return .integer([])
-            }
-        }
-    }
+    @Column(.primaryKey(autoIncrement: false), .unique, .notNull)
+    let uuid: String
     
-    struct Entity: RowValueType {
-        let uuid: String
-        let name: String
-        var eventTagId: String?
-        var repeating: EventRepeating?
-        let showTurn: Bool
-        var excludeTimes: [String] = []
-        var notificationOptions: [EventNotificationTimeOption] = []
-        
-        init(_ event: ScheduleEvent) {
-            self.uuid = event.uuid
-            self.name = event.name
-            self.eventTagId = event.eventTagId?.stringValue
-            self.repeating = event.repeating
-            self.showTurn = event.showTurn
-            self.excludeTimes = Array(event.repeatingTimeToExcludes)
-            self.notificationOptions = event.notificationOptions
-        }
-        
-        init(_ cursor: CursorIterator) throws {
-            self.uuid = try cursor.next().unwrap()
-            self.name = try cursor.next().unwrap()
-            self.eventTagId = cursor.next()
-            
-            let start: Double? = cursor.next()
-            let optionText: String? = cursor.next()
-            let end: Double? = cursor.next()
-            self.showTurn = try cursor.next().unwrap()
-            let excludeTimesStr: String? = cursor.next()
-            self.excludeTimes = excludeTimesStr?.data(using: .utf8)
-                .flatMap { try? JSONDecoder().decode([String].self, from: $0) }
-                ?? []
-            let notificationOptionsText: String? = cursor.next()
-            let endCount: Int? = cursor.next()
-            
-            let notificationOptionsMappers = notificationOptionsText?.data(using: .utf8)
-                .flatMap {
-                    try? JSONDecoder().decode([EventNotificationTimeOptionMapper].self, from: $0)
-                }
-            self.notificationOptions = notificationOptionsMappers?.map { $0.option } ?? []
-            
-            let optionMapper = optionText?.data(using: .utf8)
-                .flatMap { try? JSONDecoder().decode(EventRepeatingOptionCodableMapper.self, from: $0) }
-            guard let option = optionMapper?.option else { return }
-            guard let startInterval = start
-            else {
-                throw RuntimeError("invalid event repeating option")
-            }
-            self.repeating = .init(
-                repeatingStartTime: startInterval,
-                repeatOption: option
-            )
-            if let end {
-                self.repeating?.repeatingEndOption = .until(end)
-            } else if let endCount {
-                self.repeating?.repeatingEndOption = .count(endCount)
-            }
-        }
-    }
+    @Column(.notNull)
+    let name: String
     
-    typealias ColumnType = Columns
-    typealias EntityType = Entity
-    static var tableName: String { "Schedules" }
+    @Column(name: "tag_id")
+    var eventTagId: String?
+    
+    @Column(name: "repeating_start")
+    var repeatingStart: Double?
+    
+    @Column(name: "repeating_option")
+    var repeatingOption: String?
+    
+    @Column(name: "repeating_end")
+    var repeatingEnd: Double?
+    
+    @Column(.notNull, .default(0), name: "show_turn")
+    let showTurn: Bool
+    
+    @Column(name: "exclude_times")
+    var excludeTimes: String?
+    
+    @Column(name: "notification_options")
+    var notificationOptions: String?
+    
+    @Column(name: "repeating_count")
+    var repeatingEndCount: Int?
+}
+
+
+// MARK: - 과거 버전 스키마 선언
+
+@Table("Schedules")
+struct ScheduleEventTableV0 {
+    
+    @Column(.primaryKey(autoIncrement: false), .unique, .notNull)
+    let uuid: String
+    
+    @Column(.notNull)
+    let name: String
+    
+    @Column(name: "tag_id")
+    var eventTagId: String?
+    
+    @Column(name: "repeating_start")
+    var repeatingStart: Double?
+    
+    @Column(name: "repeating_option")
+    var repeatingOption: String?
+    
+    @Column(name: "repeating_end")
+    var repeatingEnd: Double?
+    
+    @Column(.notNull, .default(0), name: "show_turn")
+    let showTurn: Bool
+    
+    @Column(name: "exclude_times")
+    var excludeTimes: String?
+    
+    @Column(name: "notification_options")
+    var notificationOptions: String?
+}
+
+
+extension ScheduleEventTable {
     
     static func migrateStatement(for version: Int32) -> String? {
         switch version {
@@ -112,69 +93,84 @@ struct ScheduleEventTable: Table {
         default: return nil
         }
     }
-    
-    static func scalar(_ entity: EntityType, for column: Columns) -> (any ScalarType)? {
-        switch column {
-        case .uuid: return entity.uuid
-        case .name: return entity.name
-        case .eventTagId: return entity.eventTagId
-        case .repeatingStart: return entity.repeating?.repeatingStartTime
-        case .repeatingOption: return entity.repeating
-                .map { EventRepeatingOptionCodableMapper(option: $0.repeatOption) }
-                .flatMap { try? JSONEncoder().encode($0) }
-                .flatMap { String(data: $0, encoding: .utf8) }
-        case .repeatingEnd: return entity.repeating?.repeatingEndOption?.endTime
-        case .showTurn: return entity.showTurn
-        case .excludeTimes: return (try? JSONEncoder().encode(entity.excludeTimes))
-                .flatMap { String(data: $0, encoding: .utf8) }
-        case .notificationOptions:
-            let mappers = entity.notificationOptions.map {
-                EventNotificationTimeOptionMapper(option: $0)
-            }
-            let data = try? JSONEncoder().encode(mappers)
-            return data.flatMap { String(data: $0, encoding: .utf8) }
-        case .repeatingEndCount:
-            return entity.repeating?.repeatingEndOption?.endCount
-        }
-    }
 }
 
-// v0 스키마로 동결 — 0→1 이 repeating_count 를 붙이기 전 상태다
-struct ScheduleEventTableV0: Table {
 
-    enum Columns: String, TableColumn {
-        case uuid
-        case name
-        case eventTagId = "tag_id"
-        case repeatingStart = "repeating_start"
-        case repeatingOption = "repeating_option"
-        case repeatingEnd = "repeating_end"
-        case showTurn = "show_turn"
-        case excludeTimes = "exclude_times"
-        case notificationOptions = "notification_options"
+// MARK: - ScheduleEvent 변환
 
-        var dataType: ColumnDataType {
-            switch self {
-            case .uuid: return .text([.primaryKey(autoIncrement: false), .unique, .notNull])
-            case .name: return .text([.notNull])
-            case .eventTagId: return .text([])
-            case .repeatingStart: return .real([])
-            case .repeatingOption: return .text([])
-            case .repeatingEnd: return .real([])
-            case .showTurn: return .integer([.notNull, .default(0)])
-            case .excludeTimes: return .text([])
-            case .notificationOptions: return .text([])
-            }
+extension ScheduleEventTable.Entity {
+    
+    init(_ event: ScheduleEvent) {
+        let optionText = event.repeating
+            .map { EventRepeatingOptionCodableMapper(option: $0.repeatOption) }
+            .flatMap { try? JSONEncoder().encode($0) }
+            .flatMap { String(data: $0, encoding: .utf8) }
+        let excludeTimesText = (try? JSONEncoder().encode(Array(event.repeatingTimeToExcludes)))
+            .flatMap { String(data: $0, encoding: .utf8) }
+        let notificationMappers = event.notificationOptions.map {
+            EventNotificationTimeOptionMapper(option: $0)
         }
+        let notificationText = (try? JSONEncoder().encode(notificationMappers))
+            .flatMap { String(data: $0, encoding: .utf8) }
+        
+        self.init(
+            uuid: event.uuid,
+            name: event.name,
+            eventTagId: event.eventTagId?.stringValue,
+            repeatingStart: event.repeating?.repeatingStartTime,
+            repeatingOption: optionText,
+            repeatingEnd: event.repeating?.repeatingEndOption?.endTime,
+            showTurn: event.showTurn,
+            excludeTimes: excludeTimesText,
+            notificationOptions: notificationText,
+            repeatingEndCount: event.repeating?.repeatingEndOption?.endCount
+        )
     }
-
-    typealias ColumnType = Columns
-    typealias EntityType = ScheduleEventTable.Entity
-    static var tableName: String { "Schedules" }
-
-    static func scalar(_ entity: EntityType, for column: Columns) -> (any ScalarType)? {
-        guard let liveColumn = ScheduleEventTable.Columns(rawValue: column.rawValue)
-        else { return nil }
-        return ScheduleEventTable.scalar(entity, for: liveColumn)
+    
+    func asScheduleEvent(with time: EventTime) throws -> ScheduleEvent {
+        let event = ScheduleEvent(uuid: self.uuid, name: self.name, time: time)
+            |> \.eventTagId .~ self.eventTagId.flatMap { EventTagId($0) }
+            |> \.showTurn .~ self.showTurn
+            |> \.repeatingTimeToExcludes .~ Set(self.decodedExcludeTimes())
+            |> \.notificationOptions .~ self.decodedNotificationOptions()
+        
+        guard let repeating = try self.decodedRepeating() else { return event }
+        return event |> \.repeating .~ pure(repeating)
+    }
+    
+    private func decodedExcludeTimes() -> [String] {
+        return self.excludeTimes?.data(using: .utf8)
+            .flatMap { try? JSONDecoder().decode([String].self, from: $0) }
+            ?? []
+    }
+    
+    private func decodedNotificationOptions() -> [EventNotificationTimeOption] {
+        let mappers = self.notificationOptions?.data(using: .utf8)
+            .flatMap {
+                try? JSONDecoder().decode([EventNotificationTimeOptionMapper].self, from: $0)
+            }
+        return mappers?.map { $0.option } ?? []
+    }
+    
+    private func decodedRepeating() throws -> EventRepeating? {
+        let optionMapper = self.repeatingOption?.data(using: .utf8)
+            .flatMap { try? JSONDecoder().decode(EventRepeatingOptionCodableMapper.self, from: $0) }
+        guard let option = optionMapper?.option else { return nil }
+        
+        guard let startInterval = self.repeatingStart
+        else {
+            throw RuntimeError("invalid event repeating option")
+        }
+        let repeating = EventRepeating(
+            repeatingStartTime: startInterval,
+            repeatOption: option
+        )
+        if let end = self.repeatingEnd {
+            return repeating |> \.repeatingEndOption .~ .until(end)
+        }
+        if let endCount = self.repeatingEndCount {
+            return repeating |> \.repeatingEndOption .~ .count(endCount)
+        }
+        return repeating
     }
 }

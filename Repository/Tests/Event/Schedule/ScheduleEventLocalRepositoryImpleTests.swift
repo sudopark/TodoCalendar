@@ -447,3 +447,42 @@ extension ScheduleEventLocalRepositoryImpleTests {
         XCTAssertEqual(restoredHiding.showTurn, false)
     }
 }
+
+
+// MARK: - 변환이 컬럼을 다 채우는지 (DB 미사용)
+
+extension ScheduleEventLocalRepositoryImpleTests {
+    
+    func testScheduleEntity_serialize_leavesNoColumnUnmapped() throws {
+        // given
+        let schedule = self.dummyFullSchedule()
+        
+        // when
+        let values = try ScheduleEventTable.serialize(entity: .init(schedule))
+        
+        // then — 상호 배타인 종료 컬럼 둘은 아래 케이스가 맡는다
+        let exclusiveColumns: Set<ScheduleEventTable.Columns> = [.repeatingEnd, .repeatingEndCount]
+        let unmapped = zip(ScheduleEventTable.Columns.allCases, values)
+            .filter { !exclusiveColumns.contains($0.0) && $0.1 == nil }
+            .map { $0.0 }
+        XCTAssertEqual(values.count, ScheduleEventTable.Columns.allCases.count)
+        XCTAssertFalse(values.isEmpty)
+        XCTAssertTrue(unmapped.isEmpty)
+    }
+    
+    func testScheduleEntity_serializeRepeatingEndedByCount_leavesNoColumnUnmapped() throws {
+        // given
+        let untilSchedule = self.dummyFullSchedule(endOption: .until(3300))
+        let countSchedule = self.dummyFullSchedule(endOption: .count(44))
+        
+        // when
+        let untilValues = try ScheduleEventTable.serialize(entity: .init(untilSchedule))
+        let countValues = try ScheduleEventTable.serialize(entity: .init(countSchedule))
+        
+        // then
+        let mapped = zip(untilValues, countValues).map { $0 != nil || $1 != nil }
+        XCTAssertEqual(mapped.count, ScheduleEventTable.Columns.allCases.count)
+        XCTAssertFalse(mapped.isEmpty)
+        XCTAssertTrue(mapped.allSatisfy { $0 })
+    }
+}
