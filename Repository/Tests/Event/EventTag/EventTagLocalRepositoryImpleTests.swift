@@ -270,6 +270,22 @@ extension EventTagLocalRepositoryImpleTests {
         // then
         XCTAssertEqual(tags?.map { $0.uuid }, totalTags.map { $0.uuid })
     }
+    
+    func testRepository_whenSaveTagWithEveryColumn_loadRestoresSameValues() async throws {
+        // given
+        let origin = CustomEventTag(uuid: "tag-uuid", name: "tag name", colorHex: "#FF8800")
+        
+        // when
+        try await self.localStorage.saveTag(origin)
+        let restored = try await self.localStorage.loadTags(in: ["tag-uuid"])
+        
+        // then
+        let tag = try XCTUnwrap(restored.first)
+        XCTAssertEqual(restored.count, 1)
+        XCTAssertEqual(tag.uuid, "tag-uuid")
+        XCTAssertEqual(tag.name, "tag name")
+        XCTAssertEqual(tag.colorHex, "#FF8800")
+    }
 }
 
 extension EventTagLocalRepositoryImpleTests {
