@@ -498,3 +498,4 @@
 | [spec/apple-calendar.md](spec/apple-calendar.md) | Apple 캘린더 — 권한 분기, EventKit 캐시, RRULE 변환, 쓰기 범위 |
 | [spec/ai-agent.md](spec/ai-agent.md) | AI 에이전트 — Command/Job/Mutation, 상태 머신, 폴링·푸시, 확인 플로우, 사용량 |
 | [spec/billing.md](spec/billing.md) | 과금 — 플랜·top-up, 구매·복원 순서, paywall, 광고 노출 판정 |
+| [spec/adaptive-layout.md](spec/adaptive-layout.md) | 적응형 레이아웃 — Duo·창 크기 표, 2단 기준 |
