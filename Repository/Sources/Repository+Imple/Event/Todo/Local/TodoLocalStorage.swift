@@ -126,7 +126,7 @@ extension TodoLocalStorageImple {
         let doneQuery = Dones.selectAll()
         let query = doneQuery.innerJoin(with: timeQuery, on: { ($0.uuid, $1.eventId) })
         let mapping: @Sendable (CursorIterator) throws -> DoneTodoEvent = { cursor in
-            return try DoneTodoEvent(cursor)
+            return try Dones.Entity(cursor).asDoneTodoEvent()
             |> \.eventTime .~ (try? Times.Entity(cursor).eventTime)
         }
         return try await self.sqliteService.async.run([DoneTodoEvent].self) { db in
@@ -162,7 +162,7 @@ extension TodoLocalStorageImple {
             try db.insert(Times.self, entities: [time])
         }
         try await self.sqliteService.async.run { db in
-            try db.insert(Dones.self, entities: [doneEvent])
+            try db.insert(Dones.self, entities: [Dones.Entity(doneEvent)])
         }
     }
     
@@ -233,7 +233,7 @@ extension TodoLocalStorageImple {
     
     private func loadDoneEvent(_ query: JoinQuery<Dones>) async throws -> DoneTodoEvent? {
         let mapping: @Sendable (CursorIterator) throws -> DoneTodoEvent = { cursor in
-            return try DoneTodoEvent(cursor)
+            return try Dones.Entity(cursor).asDoneTodoEvent()
             |> \.eventTime .~ (try? Times.Entity(cursor).eventTime)
         }
         return try await self.sqliteService.async.run(DoneTodoEvent?.self) { db in
@@ -255,7 +255,7 @@ extension TodoLocalStorageImple {
                 .limit(size)
         }
         let mapping: @Sendable (CursorIterator) throws -> DoneTodoEvent = {
-            return try DoneTodoEvent($0)
+            return try Dones.Entity($0).asDoneTodoEvent()
         }
         return try await self.sqliteService.async.run { db in
             return try db.load(query, mapping: mapping)
@@ -276,7 +276,7 @@ extension TodoLocalStorageImple {
     public func removeDoneTodos(pastThan cursor: TimeInterval) async throws -> [String] {
         let dones = try await self.sqliteService.async.run { db in
             let query = Dones.selectAll { $0.doneTime < cursor }
-            return try db.load(query, mapping: { try DoneTodoEvent($0) })
+            return try db.load(query, mapping: { try Dones.Entity($0).asDoneTodoEvent() })
         }
         let ids = dones.map { $0.uuid }
         try await self.sqliteService.async.run { db in
@@ -307,7 +307,7 @@ extension TodoLocalStorageImple {
             try db.insert(Times.self, entities: times)
         }
         try await self.sqliteService.async.run { db in
-            try db.insert(Dones.self, entities: dones)
+            try db.insert(Dones.self, entities: dones.map { Dones.Entity($0) })
         }
     }
     
