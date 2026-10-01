@@ -103,6 +103,9 @@ let todo = try TodoEventTable.Entity(cursor).asTodoEvent()
 - 세 타입이 같은 `tableName` 을 가진다. 한 DB 에서 둘을 만들면 `createTableOrNot` 이 뒤엣것을 무시하므로 **테스트마다 DB 를 가른다.**
 - 선언이 실제 마이그레이션 결과와 같은지는 **마이그레이션을 루프에 넣어** 확인한다 — 옛 버전 타입으로 테이블을 만들고 `migrate` 를 태운 뒤, 검증 대상 선언으로 읽어 필드를 단언한다. 같은 선언으로 만들고 같은 선언으로 읽는 형태는 자기비교라 컬럼이 빠지든 순서가 틀리든 늘 초록이다.
 - 그 확인이 성립하는 근거는 읽기·쓰기의 비대칭이다. `insert` 는 컬럼명을 적어 이름으로 붙고, `selectAll()` 은 `SELECT *` 를 내 **물리 순서로 위치 결합**한다. 그래서 물리 스키마를 마이그레이션이 만들고 읽기를 선언이 하면, 선언이 어긋난 만큼 값이 밀린다. 픽스처는 컬럼마다 값을 다르게 골라야 그 밀림이 드러난다.
+- **마이그레이션 회귀는 시드를 구운 `.db` 가 아니라 옛 선언 코드로 세운다.** 번들 리소스로 넣지 않는다 — `Project+Templates.swift` 가 테스트 타겟을 `resources: []` 로 못박아 전 프레임워크에 걸리는 변경이 된다. **스텝마다 케이스를 가른다** — 그 스텝이 건드리는 테이블만 옛 선언으로 세우고, `updateUserVersion(N)` 으로 출발 버전을 놓고 `dbVersion: N+1` 을 주입하면 그 스텝만 돈다. 단언은 **테이블을 만들지 않는 `execute` raw SELECT 로 컬럼 존재를 먼저 보고** 그다음 왕복으로 순서를 본다 — Entity 읽기는 없는 컬럼을 nil 로 돌려주고 `insert`·`load` 는 드롭된 테이블을 다시 만들어, 그 둘만으로는 스텝이 통째로 빠져도 초록이다.
+- **옛 선언은 현재 선언에서 컬럼을 빼 역산하지 말고 `git show <그 마이그레이션 커밋>^:<파일>` 로 직전 선언을 읽는다.** 제약 변경과 선언 순서 교정은 컬럼 목록에 안 남아서, 역산하면 그 스텝을 검증하지 못하는 시드가 나온다 — 4→5 는 `uuid` 의 `unique` 를 뗐고(#545), 6→7 은 `repeating_count` 를 13번에서 9번으로 옮겼다(#835). 자리가 움직인 컬럼에는 값을 실어야 그 이동이 단언에 드러난다.
+- **닫기를 `defer { Task { ... } }` 로 떼어놓지 않는다.** 삭제가 먼저 돌아 sqlite 가 `vnode unlinked while in use` 로 프로세스를 죽인다. 열기·시드·본문·닫기·삭제를 한 헬퍼에 묶는다 (`AppDataMigrationImpleTests.withMigrationDB`). 파일명 UUID 와 닫은 뒤 삭제는 아래 "테스트" 절이 정본이다.
 
 ### 아직 전환 안 된 테이블
 
@@ -127,6 +130,8 @@ let todo = try TodoEventTable.Entity(cursor).asTodoEvent()
 3. `AppDataMigrationImple` — `runDBMigration`의 switch에 case 추가 + `runMigrationVersionNtoM` 메서드 작성
 
 **3번이 빠지면 `migrateStatement`는 호출조차 되지 않는다.** 컴파일도 테스트도 통과하고 마이그레이션만 조용히 안 돈다.
+
+**생성 뒤 ALTER 가 따르는 스텝은 `createTableOrNot` 에 출발 시점 스키마 선언을 준다.** `typealias` 를 주면 테이블이 아직 없는 신선 설치에서 최신 스키마가 서고, 뒤따르는 ALTER 가 중복 컬럼으로 던져 스텝 catch 가 그 테이블을 드롭한다. `migrateStatement` 는 반대로 `typealias` 쪽에 남긴다 — **만드는 쪽은 출발 버전, 옮기는 쪽은 최신이다.** temp 테이블로 복사·교체하는 스텝(`modfiyColumns`)은 원본을 통째로 갈아끼우므로 이 항목 대상이 아니다. 선례는 `AppDataMigrationImple.runMigrationVersion5to6` 이고, 스텝별 회귀와 전 구간 회귀가 `AppDataMigrationImpleTests` 에 있다 — 쓰는 법은 위 "버전 선언" 절의 마이그레이션 회귀 항목들이다.
 
 절차 상세·버전 이력·컬럼 순서 변경(temp 테이블 재생성)은 [`docs/spec/infrastructure.md §5`](../docs/spec/infrastructure.md) 정본.
 
