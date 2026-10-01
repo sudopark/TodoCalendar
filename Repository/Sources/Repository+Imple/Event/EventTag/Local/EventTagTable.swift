@@ -6,46 +6,40 @@
 //
 
 import Foundation
-import SQLiteService
+import SQLiteServiceMacros
 import Domain
 import Extensions
 
-struct CustomEventTagTable: Table {
+
+typealias CustomEventTagTable = CustomEventTagTableV0
+
+@Table("EventTags")
+struct CustomEventTagTableV0 {
     
-    enum Columns: String, TableColumn {
-        case uuid
-        case name
-        case colorHex
-        
-        var dataType: ColumnDataType {
-            switch self {
-            case .uuid: return .text([.primaryKey(autoIncrement: false), .unique, .notNull])
-            case .name: return .text([.unique, .notNull])
-            case .colorHex: return .text([.notNull])
-            }
-        }
-    }
+    @Column(.primaryKey(autoIncrement: false), .unique, .notNull)
+    let uuid: String
     
-    typealias ColumnType = Columns
-    typealias EntityType = CustomEventTag
-    static var tableName: String { "EventTags" }
+    @Column(.unique, .notNull)
+    let name: String
     
-    static func scalar(_ entity: EntityType, for column: Columns) -> (any ScalarType)? {
-        switch column {
-        case .uuid: return entity.uuid
-        case .name: return entity.name
-        case .colorHex: return entity.colorHex
-        }
-    }
+    @Column(.notNull)
+    var colorHex: String?
 }
 
-extension CustomEventTag: @retroactive RowValueType {
+
+// MARK: - CustomEventTag 변환
+
+extension CustomEventTagTable.Entity {
     
-    public init(_ cursor: CursorIterator) throws {
-        self.init(
-            uuid: try cursor.next().unwrap(),
-            name: try cursor.next().unwrap(),
-            colorHex: try cursor.next().unwrap()
+    init(_ tag: CustomEventTag) {
+        self.init(uuid: tag.uuid, name: tag.name, colorHex: tag.colorHex)
+    }
+    
+    func asCustomEventTag() throws -> CustomEventTag {
+        return CustomEventTag(
+            uuid: self.uuid,
+            name: self.name,
+            colorHex: try self.colorHex.unwrap()
         )
     }
 }

@@ -444,7 +444,7 @@ extension TodoLocalStorageImpleTests {
             try db.createTableOrNot(Legacy.self)
             try db.insert(Legacy.self, entities: [pending], shouldReplace: true)
 
-            let state = TodoToggleStateTable.ToggleState(todoId: origin.uuid, state: .completing)
+            let state = TodoToggleStateTable.Entity(todoId: origin.uuid, state: .completing)
             try db.insert(TodoToggleStateTable.self, entities: [state], shouldReplace: true)
         }
     }
@@ -498,6 +498,19 @@ extension TodoLocalStorageImpleTests {
 
         // then
         #expect(values.count == DoneTodoEventTable.Columns.allCases.count)
+        #expect(values.isEmpty == false)
+        #expect(values.allSatisfy { $0 != nil })
+    }
+
+    @Test func toggleStateEntity_serialize_leavesNoColumnUnmapped() throws {
+        // given
+        let entity = TodoToggleStateTable.Entity(todoId: "todo-id", state: .completing)
+
+        // when
+        let values = try TodoToggleStateTable.serialize(entity: entity)
+
+        // then
+        #expect(values.count == TodoToggleStateTable.Columns.allCases.count)
         #expect(values.isEmpty == false)
         #expect(values.allSatisfy { $0 != nil })
     }
