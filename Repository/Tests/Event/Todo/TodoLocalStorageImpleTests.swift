@@ -50,6 +50,58 @@ final class TodoLocalStorageImpleTests: LocalTestable {
             |> \.repeatingTurn .~ 7
             |> \.notificationOptions .~ [.atTime, .before(seconds: 600)]
     }
+
+    private func dummyDoneTodo(
+        uuid: String = "done-uuid",
+        tag: EventTagId? = .custom("tag-id")
+    ) -> DoneTodoEvent {
+        return DoneTodoEvent(
+            uuid: uuid,
+            name: "done todo name",
+            originEventId: "origin-todo-id",
+            doneTime: Date(timeIntervalSince1970: 7700)
+        )
+        |> \.eventTagId .~ tag
+        |> \.eventTime .~ .period(5500..<5600)
+        |> \.notificationOptions .~ [.atTime, .before(seconds: 600), .allDay9AM]
+    }
+
+    private func dummyPendingRepeating(_ endOption: EventRepeating.RepeatEndOption) -> EventRepeating {
+        var option = EventRepeatingOptions.EveryWeek(TimeZone(abbreviation: "KST")!)
+        option.interval = 2
+        option.dayOfWeeks = [.monday, .friday]
+        return EventRepeating(repeatingStartTime: 2200, repeatOption: option)
+            |> \.repeatingEndOption .~ endOption
+    }
+
+    private func dummyPendingTodo(
+        uuid: String = "pending-todo",
+        tag: EventTagId? = .custom("tag-id"),
+        time: EventTime = .period(5500..<5600),
+        endOption: EventRepeating.RepeatEndOption = .until(3300)
+    ) -> TodoEvent {
+        return TodoEvent(uuid: uuid, name: "pending todo name")
+            |> \.creatTimeStamp .~ 1100
+            |> \.eventTagId .~ tag
+            |> \.time .~ time
+            |> \.repeating .~ pure(self.dummyPendingRepeating(endOption))
+            |> \.repeatingTurn .~ 55
+            |> \.notificationOptions .~ [.atTime, .before(seconds: 600)]
+    }
+
+    private func dummyToggleTodo(_ uuid: String) -> TodoEvent {
+        return TodoEvent(uuid: uuid, name: "name of \(uuid)")
+            |> \.creatTimeStamp .~ 1100
+            |> \.time .~ .at(5500)
+    }
+
+    private func loadPendingOrigin(
+        _ storage: TodoLocalStorageImple, _ uuid: String
+    ) async throws -> TodoEvent? {
+        let state = try await storage.todoToggleState(uuid)
+        guard case .completing(let origin, _) = state else { return nil }
+        return origin
+    }
 }
 
 
@@ -109,6 +161,233 @@ extension TodoLocalStorageImpleTests {
             #expect(restored.time == .at(300))
             #expect(restored.repeatingTurn == 3)
             #expect(restored.repeating?.repeatingEndOption == .count(10))
+        }
+    }
+}
+
+
+// MARK: - 완료한 Todo 저장
+
+extension TodoLocalStorageImpleTests {
+
+    @Test func storage_whenSaveDoneTodo_loadRestoresEveryColumn() async throws {
+        try await self.runTestWithOpenClose("done-table-every-column") {
+            // given
+            let storage = self.makeStorage()
+            let origin = self.dummyDoneTodo()
+
+            // when
+            try await storage.saveDoneTodoEvent(origin)
+            let restored = try await storage.loadDoneTodoEvent(doneEventId: "done-uuid")
+
+            // then
+            #expect(restored.uuid == "done-uuid")
+            #expect(restored.originEventId == "origin-todo-id")
+            #expect(restored.name == "done todo name")
+            #expect(restored.doneTime == Date(timeIntervalSince1970: 7700))
+            #expect(restored.eventTagId == .custom("tag-id"))
+            #expect(restored.notificationOptions == [.atTime, .before(seconds: 600), .allDay9AM])
+            #expect(restored.eventTime == .period(5500..<5600))
+        }
+    }
+
+    @Test func storage_whenSaveDoneTodosWithEveryTagKind_loadRestoresSameTagId() async throws {
+        try await self.runTestWithOpenClose("done-table-every-tag-kind") {
+            // given
+            let storage = self.makeStorage()
+            let tags: [EventTagId] = [
+                .holiday,
+                .default,
+                .custom("custom-tag"),
+                .externalCalendar(serviceId: "google", id: "calendar-id")
+            ]
+            let origins = tags.enumerated().map { offset, tag in
+                self.dummyDoneTodo(uuid: "done-\(offset)", tag: tag)
+            }
+
+            // when
+            for origin in origins {
+                try await storage.saveDoneTodoEvent(origin)
+            }
+            var restoredTags: [EventTagId?] = []
+            for origin in origins {
+                let restored = try await storage.loadDoneTodoEvent(doneEventId: origin.uuid)
+                restoredTags.append(restored.eventTagId)
+            }
+
+            // then
+            #expect(restoredTags == [
+                .holiday,
+                .default,
+                .custom("custom-tag"),
+                .externalCalendar(serviceId: "google", id: "calendar-id")
+            ])
+        }
+    }
+}
+
+
+// MARK: - 완료 처리 중(completing) 원본의 컬럼 보관
+
+extension TodoLocalStorageImpleTests {
+
+    @Test func storage_whenCompleting_loadRestoresEveryPendingOriginColumn() async throws {
+        try await self.runTestWithOpenClose("pending-table-every-column") {
+            // given
+            let storage = self.makeStorage()
+            let origin = self.dummyPendingTodo()
+
+            // when
+            try await storage.updateTodoToggleState("pending-todo", .completing(origin: origin))
+            let restored = try #require(await self.loadPendingOrigin(storage, "pending-todo"))
+
+            // then
+            #expect(restored.uuid == "pending-todo")
+            #expect(restored.name == "pending todo name")
+            #expect(restored.creatTimeStamp == 1100)
+            #expect(restored.eventTagId == .custom("tag-id"))
+            #expect(restored.repeating == self.dummyPendingRepeating(.until(3300)))
+            #expect(restored.repeating?.repeatingStartTime == 2200)
+            #expect(restored.repeating?.repeatingEndOption == .until(3300))
+            #expect(restored.notificationOptions == [.atTime, .before(seconds: 600)])
+            #expect(restored.repeatingTurn == 55)
+            #expect(restored.time == .period(5500..<5600))
+        }
+    }
+
+    @Test func storage_whenCompletingTodoRepeatsByCount_loadRestoresCountEndOption() async throws {
+        try await self.runTestWithOpenClose("pending-table-end-by-count") {
+            // given
+            let storage = self.makeStorage()
+            let origin = self.dummyPendingTodo(endOption: .count(44))
+
+            // when
+            try await storage.updateTodoToggleState("pending-todo", .completing(origin: origin))
+            let restored = try #require(await self.loadPendingOrigin(storage, "pending-todo"))
+
+            // then
+            #expect(restored.repeating?.repeatingEndOption == .count(44))
+        }
+    }
+
+    @Test func storage_whenCompletingTodoRepeatsUntilTime_loadRestoresUntilEndOption() async throws {
+        try await self.runTestWithOpenClose("pending-table-end-by-time") {
+            // given
+            let storage = self.makeStorage()
+            let origin = self.dummyPendingTodo(endOption: .until(3300))
+
+            // when
+            try await storage.updateTodoToggleState("pending-todo", .completing(origin: origin))
+            let restored = try #require(await self.loadPendingOrigin(storage, "pending-todo"))
+
+            // then
+            #expect(restored.repeating?.repeatingEndOption == .until(3300))
+        }
+    }
+
+    @Test func storage_whenCompletingTodosWithNotCustomTag_loadLeavesTagNil() async throws {
+        try await self.runTestWithOpenClose("pending-table-not-custom-tag") {
+            // given
+            let storage = self.makeStorage()
+            let tags: [EventTagId] = [
+                .holiday, .default, .externalCalendar(serviceId: "google", id: "calendar-id")
+            ]
+            let origins = tags.enumerated().map { offset, tag in
+                self.dummyPendingTodo(uuid: "pending-\(offset)", tag: tag)
+            }
+
+            // when
+            for origin in origins {
+                try await storage.updateTodoToggleState(origin.uuid, .completing(origin: origin))
+            }
+            var restoredTags: [EventTagId?] = []
+            for origin in origins {
+                let restored = try #require(await self.loadPendingOrigin(storage, origin.uuid))
+                restoredTags.append(restored.eventTagId)
+            }
+
+            // then
+            #expect(restoredTags == [nil, nil, nil])
+        }
+    }
+
+    @Test func storage_whenCompletingTodosWithEveryTimeKind_loadRestoresSameTime() async throws {
+        try await self.runTestWithOpenClose("pending-table-every-time-kind") {
+            // given
+            let storage = self.makeStorage()
+            let times: [EventTime] = [
+                .at(6600),
+                .period(7700..<7800),
+                .allDay(8800..<8900, secondsFromGMT: 32400)
+            ]
+            let origins = times.enumerated().map { offset, time in
+                self.dummyPendingTodo(uuid: "pending-\(offset)", time: time)
+            }
+
+            // when
+            for origin in origins {
+                try await storage.updateTodoToggleState(origin.uuid, .completing(origin: origin))
+            }
+            var restoredTimes: [EventTime?] = []
+            for origin in origins {
+                let restored = try #require(await self.loadPendingOrigin(storage, origin.uuid))
+                restoredTimes.append(restored.time)
+            }
+
+            // then
+            #expect(restoredTimes == [
+                .at(6600),
+                .period(7700..<7800),
+                .allDay(8800..<8900, secondsFromGMT: 32400)
+            ])
+        }
+    }
+}
+
+
+// MARK: - Todo 토글 상태 저장
+
+extension TodoLocalStorageImpleTests {
+
+    @Test func storage_whenUpdateToggleState_loadRestoresEachState() async throws {
+        try await self.runTestWithOpenClose("toggle-table-every-state") {
+            // given
+            let storage = self.makeStorage()
+            let completingTodo = self.dummyToggleTodo("completing-todo")
+            let idleTodo = self.dummyToggleTodo("idle-todo")
+
+            // when
+            try await storage.updateTodoToggleState("reverting-todo", .reverting)
+            try await storage.updateTodoToggleState(
+                "completing-todo", .completing(origin: completingTodo)
+            )
+            try await storage.saveTodoEvent(idleTodo)
+            try await storage.updateTodoToggleState("idle-todo", .completing(origin: idleTodo))
+            try await storage.updateTodoToggleState("idle-todo", .idle)
+
+            let revertingState = try await storage.todoToggleState("reverting-todo")
+            let completingState = try await storage.todoToggleState("completing-todo")
+            let idleState = try await storage.todoToggleState("idle-todo")
+
+            // then
+            guard case .reverting = revertingState
+            else {
+                Issue.record("reverting 상태가 아님: \(revertingState)")
+                return
+            }
+            guard case .completing(let origin, _) = completingState
+            else {
+                Issue.record("completing 상태가 아님: \(completingState)")
+                return
+            }
+            #expect(origin.uuid == "completing-todo")
+            #expect(origin.name == "name of completing-todo")
+            guard case .idle(let target) = idleState
+            else {
+                Issue.record("idle 상태가 아님: \(idleState)")
+                return
+            }
+            #expect(target.uuid == "idle-todo")
         }
     }
 }
