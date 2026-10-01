@@ -186,3 +186,97 @@ struct PendingDoneTodoEventTableV6TempTable: Table {
         return PendingDoneTodoEventTable.scalar(entity, for: liveColumn)
     }
 }
+
+// 0→1 과 6→7 이 두 컬럼을 붙이기 전 스키마다
+struct PendingDoneTodoEventTableV0: Table {
+
+    enum Columns: String, TableColumn {
+        case uuid
+        case name
+        case createTimeStamp = "create_timestamp"
+        case eventTagId = "tag_id"
+        case repeatingStart = "repeating_start"
+        case repeatingOption = "repeating_option"
+        case repeatingEnd = "repeating_end"
+        case notificationOptions = "notification_options"
+        case timeType = "time_type"
+        case timeLowerBound = "time_lower_bound"
+        case timeUpperBound = "time_upper_bound"
+        case secondsFromGMT = "seconds_from_gmt"
+
+        var dataType: ColumnDataType {
+            switch self {
+            case .uuid: return .text([.primaryKey(autoIncrement: false), .unique, .notNull])
+            case .name: return .text([.notNull])
+            case .createTimeStamp: return .real([])
+            case .eventTagId: return .text([])
+            case .repeatingStart: return .real([])
+            case .repeatingOption: return .text([])
+            case .repeatingEnd: return .real([])
+            case .notificationOptions: return .text([])
+            case .timeType: return .text([])
+            case .timeLowerBound: return .real([])
+            case .timeUpperBound: return .real([])
+            case .secondsFromGMT: return .real([])
+            }
+        }
+    }
+
+    typealias ColumnType = Columns
+    typealias EntityType = PendingDoneTodoEventTable.PendingDoneTodo
+    static var tableName: String { "PendingDoneTodoEvent" }
+
+    static func scalar(_ entity: EntityType, for column: Columns) -> (any ScalarType)? {
+        guard let liveColumn = PendingDoneTodoEventTable.Columns(rawValue: column.rawValue)
+        else { return nil }
+        return PendingDoneTodoEventTable.scalar(entity, for: liveColumn)
+    }
+}
+
+// 0→1 이 붙인 repeating_count 가 ALTER 탓에 맨 뒤에 온 상태다 — 6→7 이 선언 순서로 바로잡는다
+struct PendingDoneTodoEventTableV1: Table {
+
+    enum Columns: String, TableColumn {
+        case uuid
+        case name
+        case createTimeStamp = "create_timestamp"
+        case eventTagId = "tag_id"
+        case repeatingStart = "repeating_start"
+        case repeatingOption = "repeating_option"
+        case repeatingEnd = "repeating_end"
+        case notificationOptions = "notification_options"
+        case timeType = "time_type"
+        case timeLowerBound = "time_lower_bound"
+        case timeUpperBound = "time_upper_bound"
+        case secondsFromGMT = "seconds_from_gmt"
+        case repeatingEndCount = "repeating_count"
+
+        var dataType: ColumnDataType {
+            switch self {
+            case .uuid: return .text([.primaryKey(autoIncrement: false), .unique, .notNull])
+            case .name: return .text([.notNull])
+            case .createTimeStamp: return .real([])
+            case .eventTagId: return .text([])
+            case .repeatingStart: return .real([])
+            case .repeatingOption: return .text([])
+            case .repeatingEnd: return .real([])
+            case .notificationOptions: return .text([])
+            case .timeType: return .text([])
+            case .timeLowerBound: return .real([])
+            case .timeUpperBound: return .real([])
+            case .secondsFromGMT: return .real([])
+            case .repeatingEndCount: return .integer([])
+            }
+        }
+    }
+
+    typealias ColumnType = Columns
+    typealias EntityType = PendingDoneTodoEventTable.PendingDoneTodo
+    static var tableName: String { "PendingDoneTodoEvent" }
+
+    static func scalar(_ entity: EntityType, for column: Columns) -> (any ScalarType)? {
+        guard let liveColumn = PendingDoneTodoEventTable.Columns(rawValue: column.rawValue)
+        else { return nil }
+        return PendingDoneTodoEventTable.scalar(entity, for: liveColumn)
+    }
+}
