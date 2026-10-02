@@ -169,37 +169,3 @@ public enum GoogleCalendarEventTagTableMigration {
         }
     }
 }
-
-// 2→3 이 is_selected 를 붙이기 전 스키마다. access_role 은 #863 이 선언에만 더해 이 테이블엔 없다
-struct OldGoogleCalendarEventTagTableV2: Table {
-
-    enum Columns: String, TableColumn {
-        case tagId = "tag_id"
-        case name
-        case description
-        case background
-        case foreground
-        case colorId = "color_id"
-
-        var dataType: ColumnDataType {
-            switch self {
-            case .tagId: return .text([.primaryKey(autoIncrement: false), .unique, .notNull])
-            case .name: return .text([.notNull])
-            case .description: return .text([])
-            case .background: return .text([])
-            case .foreground: return .text([])
-            case .colorId: return .text([])
-            }
-        }
-    }
-
-    typealias ColumnType = Columns
-    typealias EntityType = GoogleCalendar.Tag
-    static let tableName: String = "google_calendar_list"
-
-    static func scalar(_ entity: GoogleCalendar.Tag, for column: Columns) -> (any ScalarType)? {
-        guard let liveColumn = OldGoogleCalendarEventTagTable.Columns(rawValue: column.rawValue)
-        else { return nil }
-        return OldGoogleCalendarEventTagTable.scalar(entity, for: liveColumn)
-    }
-}
