@@ -209,7 +209,7 @@ extension GoogleCalendarLocalStorageImple {
         let entity = try await connection.async.run { db in
             return try db.loadOne(Events.self, query: query)
         }
-        return try entity.unwrap().origin
+        return try entity.unwrap().asEventOrigin()
     }
 
     public func updateEventDetail(

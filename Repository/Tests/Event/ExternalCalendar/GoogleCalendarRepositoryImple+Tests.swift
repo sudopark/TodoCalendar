@@ -671,6 +671,39 @@ extension GoogleCalendarRepositoryImple_Tests {
         #expect(externalV1Values.isEmpty == false)
         #expect(externalV1Values.allSatisfy { $0 != nil })
     }
+
+    @Test func eventOriginEntity_serialize_leavesNoColumnUnmapped() throws {
+        // given
+        let entity = GoogleCalendarEventOriginTable.Entity(
+            accountId: self.testAccountId,
+            "serialize-calendar",
+            "Asia/Seoul",
+            self.everyColumnEventOrigin
+        )
+
+        // when
+        let values = try GoogleCalendarEventOriginTable.serialize(entity: entity)
+
+        // then
+        #expect(values.count == GoogleCalendarEventOriginTable.Columns.allCases.count)
+        #expect(values.isEmpty == false)
+        #expect(values.allSatisfy { $0 != nil })
+    }
+
+    @Test func legacyEventOriginEntity_serialize_leavesNoColumnUnmapped() throws {
+        // given
+        let entity = GoogleCalendarEventOriginTableV0.Entity(
+            "serialize-calendar", "Asia/Seoul", self.everyColumnEventOrigin
+        )
+
+        // when
+        let values = try GoogleCalendarEventOriginTableV0.serialize(entity: entity)
+
+        // then
+        #expect(values.count == GoogleCalendarEventOriginTableV0.Columns.allCases.count)
+        #expect(values.isEmpty == false)
+        #expect(values.allSatisfy { $0 != nil })
+    }
 }
 
 
