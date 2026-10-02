@@ -84,12 +84,12 @@ final class AppDataMigrationImpleTests {
 
     private func insertOldColors(_ mainDB: SQLiteService) async throws {
         try await mainDB.async.run { db in
-            try db.createTableOrNot(OldGoogleCalendarColorsTable.self)
-            let entities: [OldGoogleCalendarColorsTable.Entity] = [
+            try db.createTableOrNot(GoogleCalendarColorsTableV0.self)
+            let entities: [GoogleCalendarColorsTableV0.Entity] = [
                 .init(calendar: "1", .init(foregroundHex: "#ffffff", backgroudHex: "#111111")),
                 .init(event: "2", .init(foregroundHex: "#ffffff", backgroudHex: "#222222"))
             ]
-            try db.insert(OldGoogleCalendarColorsTable.self, entities: entities)
+            try db.insert(GoogleCalendarColorsTableV0.self, entities: entities)
         }
     }
 
@@ -121,12 +121,12 @@ final class AppDataMigrationImpleTests {
 
     private func insertEveryColumnOldColors(_ mainDB: SQLiteService) async throws {
         try await mainDB.async.run { db in
-            try db.createTableOrNot(OldGoogleCalendarColorsTable.self)
-            let entities: [OldGoogleCalendarColorsTable.Entity] = [
+            try db.createTableOrNot(GoogleCalendarColorsTableV0.self)
+            let entities: [GoogleCalendarColorsTableV0.Entity] = [
                 .init(calendar: "calendar-key-1", .init(foregroundHex: "#calendarFore", backgroudHex: "#calendarBack")),
                 .init(event: "event-key-2", .init(foregroundHex: "#eventFore", backgroudHex: "#eventBack"))
             ]
-            try db.insert(OldGoogleCalendarColorsTable.self, entities: entities)
+            try db.insert(GoogleCalendarColorsTableV0.self, entities: entities)
         }
     }
 
