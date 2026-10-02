@@ -9,8 +9,6 @@
 import Foundation
 import SQLiteServiceMacros
 import Domain
-import SQLiteService
-import Extensions
 
 
 // MARK: - Colors 메인DB 스키마 (이관이 읽고 drop 한다)
@@ -103,88 +101,85 @@ extension GoogleCalendarColorsTable.Entity {
 }
 
 
-// MARK: - Old event (공통DB 레거시 테이블)
 
-struct OldGoogleCalendarEventOriginTable: Table {
-    
-    enum Columns: String, TableColumn {
-        case calendarId
-        case defaultTimeZone
-        case id
-        case summary
-        case htmlLink
-        case description
-        case location
-        case colorId
-        case creator
-        case organizer
-        case start
-        case end
-        case endTimeUnspecified
-        case recurrence
-        case recurringEventId
-        case sequence
-        case attendees
-        case hangoutLink
-        case conferenceData
-        case attachments
-        case eventType
-        case status
-        case visibility
-        
-        var dataType: ColumnDataType {
-            switch self {
-            case .calendarId: return .text([.notNull])
-            case .defaultTimeZone: return .text([])
-            case .id: return .text([.primaryKey(autoIncrement: false), .unique, .notNull])
-            case .summary: return .text([.notNull])
-            case .htmlLink: return .text([])
-            case .description: return .text([])
-            case .location: return .text([])
-            case .colorId: return .text([])
-            case .creator: return .text([])
-            case .organizer: return .text([])
-            case .start: return .text([])
-            case .end: return .text([])
-            case .endTimeUnspecified: return .integer([.default(0)])
-            case .recurrence: return .text([])
-            case .recurringEventId: return .text([])
-            case .sequence: return .integer([])
-            case .attendees: return .text([])
-            case .hangoutLink: return .text([])
-            case .conferenceData: return .text([])
-            case .attachments: return .text([])
-            case .eventType: return .text([])
-            case .status: return .text([])
-            case .visibility: return .text([])
-            }
-        }
-    }
-    struct Entity: RowValueType {
-        let calendarId: String
-        let defaultTimeZone: String?
-        let origin: GoogleCalendar.EventOrigin
-        init(
-            _ calendarId: String,
-            _ defaultTimeZone: String?,
-            _ origin: GoogleCalendar.EventOrigin
-        ) {
-            self.calendarId = calendarId
-            self.defaultTimeZone = defaultTimeZone
-            self.origin = origin
-        }
-        
-        init(_ cursor: CursorIterator) throws {
-            self.calendarId = try cursor.next().unwrap()
-            self.defaultTimeZone = cursor.next()
-            self.origin = try GoogleCalendar.EventOrigin(cursor)
-        }
-    }
-    
-    typealias ColumnType = Columns
-    typealias EntityType = Entity
-    static let tableName: String = "google_calendar_event_origin"
-    
+// MARK: - EventOrigin 메인DB 스키마 (이관이 읽고 drop 한다)
+
+@Table("google_calendar_event_origin")
+struct GoogleCalendarEventOriginTableV0 {
+
+    @Column(.notNull)
+    let calendarId: String
+
+    @Column()
+    var defaultTimeZone: String?
+
+    @Column(.primaryKey(autoIncrement: false), .unique, .notNull)
+    let id: String
+
+    @Column(.notNull)
+    var summary: String?
+
+    @Column()
+    var htmlLink: String?
+
+    @Column()
+    var description: String?
+
+    @Column()
+    var location: String?
+
+    @Column()
+    var colorId: String?
+
+    @Column()
+    var creator: String?
+
+    @Column()
+    var organizer: String?
+
+    @Column()
+    var start: String?
+
+    @Column()
+    var end: String?
+
+    @Column(.default(0))
+    var endTimeUnspecified: Bool?
+
+    @Column()
+    var recurrence: String?
+
+    @Column()
+    var recurringEventId: String?
+
+    @Column()
+    var sequence: Int?
+
+    @Column()
+    var attendees: String?
+
+    @Column()
+    var hangoutLink: String?
+
+    @Column()
+    var conferenceData: String?
+
+    @Column()
+    var attachments: String?
+
+    @Column()
+    var eventType: String?
+
+    @Column()
+    var status: String?
+
+    @Column()
+    var visibility: String?
+}
+
+
+extension GoogleCalendarEventOriginTableV0 {
+
     static func migrateStatement(for version: Int32) -> String? {
         switch version {
         case 1:
@@ -194,196 +189,217 @@ struct OldGoogleCalendarEventOriginTable: Table {
         default: return nil
         }
     }
-    
-    static func scalar(
-        _ entity: Entity, for column: Columns
-    ) -> (any ScalarType)? {
-        
-        switch column {
-        case .calendarId: return entity.calendarId
-        case .defaultTimeZone: return entity.defaultTimeZone
-        case .id: return entity.origin.id
-        case .summary: return entity.origin.summary ?? ""
-        case .htmlLink: return entity.origin.htmlLink
-        case .description: return entity.origin.description
-        case .location: return entity.origin.location
-        case .colorId: return entity.origin.colorId
-        case .creator: return entity.origin.creator?.asText()
-        case .organizer: return entity.origin.organizer?.asText()
-        case .start: return entity.origin.start?.asText()
-        case .end: return entity.origin.end?.asText()
-        case .endTimeUnspecified: return entity.origin.endTimeUnspecified
-        case .recurrence: return entity.origin.recurrence?.asText()
-        case .recurringEventId: return entity.origin.recurringEventId
-        case .sequence: return entity.origin.sequence
-        case .attendees: return entity.origin.attendees?.asText()
-        case .hangoutLink: return entity.origin.hangoutLink
-        case .conferenceData: return entity.origin.conferenceData?.asText()
-        case .attachments: return entity.origin.attachments?.asText()
-        case .eventType: return entity.origin.eventType
-        case .status: return entity.origin.status?.rawValue
-        case .visibility: return entity.origin.visibility?.rawValue
-        }
-    }
-    
-}
-
-// MARK: - event (google_calendar.db 신규 테이블, accountId 포함)
-
-struct GoogleCalendarEventOriginTable: Table {
-
-    enum Columns: String, TableColumn {
-        case accountId = "account_id"
-        case calendarId
-        case defaultTimeZone
-        case id
-        case summary
-        case htmlLink
-        case description
-        case location
-        case colorId
-        case creator
-        case organizer
-        case start
-        case end
-        case endTimeUnspecified
-        case recurrence
-        case recurringEventId
-        case sequence
-        case attendees
-        case hangoutLink
-        case conferenceData
-        case attachments
-        case eventType
-        case status
-        case visibility
-
-        var dataType: ColumnDataType {
-            switch self {
-            case .accountId: return .text([.notNull])
-            case .calendarId: return .text([.notNull])
-            case .defaultTimeZone: return .text([])
-            case .id: return .text([.primaryKey(autoIncrement: false), .unique, .notNull])
-            case .summary: return .text([.notNull])
-            case .htmlLink: return .text([])
-            case .description: return .text([])
-            case .location: return .text([])
-            case .colorId: return .text([])
-            case .creator: return .text([])
-            case .organizer: return .text([])
-            case .start: return .text([])
-            case .end: return .text([])
-            case .endTimeUnspecified: return .integer([.default(0)])
-            case .recurrence: return .text([])
-            case .recurringEventId: return .text([])
-            case .sequence: return .integer([])
-            case .attendees: return .text([])
-            case .hangoutLink: return .text([])
-            case .conferenceData: return .text([])
-            case .attachments: return .text([])
-            case .eventType: return .text([])
-            case .status: return .text([])
-            case .visibility: return .text([])
-            }
-        }
-    }
-
-    struct Entity: RowValueType {
-        let accountId: String
-        let calendarId: String
-        let defaultTimeZone: String?
-        let origin: GoogleCalendar.EventOrigin
-
-        init(
-            accountId: String,
-            _ calendarId: String,
-            _ defaultTimeZone: String?,
-            _ origin: GoogleCalendar.EventOrigin
-        ) {
-            self.accountId = accountId
-            self.calendarId = calendarId
-            self.defaultTimeZone = defaultTimeZone
-            self.origin = origin
-        }
-
-        init(_ cursor: CursorIterator) throws {
-            self.accountId = try cursor.next().unwrap()
-            self.calendarId = try cursor.next().unwrap()
-            self.defaultTimeZone = cursor.next()
-            self.origin = try GoogleCalendar.EventOrigin(cursor)
-        }
-    }
-
-    typealias ColumnType = Columns
-    typealias EntityType = Entity
-    static let tableName: String = "google_calendar_event_origin"
-
-    static func scalar(
-        _ entity: Entity, for column: Columns
-    ) -> (any ScalarType)? {
-        switch column {
-        case .accountId: return entity.accountId
-        case .calendarId: return entity.calendarId
-        case .defaultTimeZone: return entity.defaultTimeZone
-        case .id: return entity.origin.id
-        case .summary: return entity.origin.summary ?? ""
-        case .htmlLink: return entity.origin.htmlLink
-        case .description: return entity.origin.description
-        case .location: return entity.origin.location
-        case .colorId: return entity.origin.colorId
-        case .creator: return entity.origin.creator?.asText()
-        case .organizer: return entity.origin.organizer?.asText()
-        case .start: return entity.origin.start?.asText()
-        case .end: return entity.origin.end?.asText()
-        case .endTimeUnspecified: return entity.origin.endTimeUnspecified
-        case .recurrence: return entity.origin.recurrence?.asText()
-        case .recurringEventId: return entity.origin.recurringEventId
-        case .sequence: return entity.origin.sequence
-        case .attendees: return entity.origin.attendees?.asText()
-        case .hangoutLink: return entity.origin.hangoutLink
-        case .conferenceData: return entity.origin.conferenceData?.asText()
-        case .attachments: return entity.origin.attachments?.asText()
-        case .eventType: return entity.origin.eventType
-        case .status: return entity.origin.status?.rawValue
-        case .visibility: return entity.origin.visibility?.rawValue
-        }
-    }
 }
 
 
-extension GoogleCalendar.EventOrigin {
- 
-    public init(_ cursor: CursorIterator) throws {
+// MARK: - EventOrigin (google_calendar.db 신규 테이블, accountId 포함)
+
+typealias GoogleCalendarEventOriginTable = GoogleCalendarEventOriginTableV1
+
+@Table("google_calendar_event_origin")
+struct GoogleCalendarEventOriginTableV1 {
+
+    @Column(.notNull, name: "account_id")
+    let accountId: String
+
+    @Column(.notNull)
+    let calendarId: String
+
+    @Column()
+    var defaultTimeZone: String?
+
+    @Column(.primaryKey(autoIncrement: false), .unique, .notNull)
+    let id: String
+
+    @Column(.notNull)
+    var summary: String?
+
+    @Column()
+    var htmlLink: String?
+
+    @Column()
+    var description: String?
+
+    @Column()
+    var location: String?
+
+    @Column()
+    var colorId: String?
+
+    @Column()
+    var creator: String?
+
+    @Column()
+    var organizer: String?
+
+    @Column()
+    var start: String?
+
+    @Column()
+    var end: String?
+
+    @Column(.default(0))
+    var endTimeUnspecified: Bool?
+
+    @Column()
+    var recurrence: String?
+
+    @Column()
+    var recurringEventId: String?
+
+    @Column()
+    var sequence: Int?
+
+    @Column()
+    var attendees: String?
+
+    @Column()
+    var hangoutLink: String?
+
+    @Column()
+    var conferenceData: String?
+
+    @Column()
+    var attachments: String?
+
+    @Column()
+    var eventType: String?
+
+    @Column()
+    var status: String?
+
+    @Column()
+    var visibility: String?
+}
+
+
+// MARK: - EventOrigin 변환
+
+extension GoogleCalendarEventOriginTableV0.Entity {
+
+    init(
+        _ calendarId: String,
+        _ defaultTimeZone: String?,
+        _ origin: GoogleCalendar.EventOrigin
+    ) {
         self.init(
-            id: try cursor.next().unwrap(),
-            summary: cursor.next()
+            calendarId: calendarId,
+            defaultTimeZone: defaultTimeZone,
+            id: origin.id,
+            summary: origin.summary ?? "",
+            htmlLink: origin.htmlLink,
+            description: origin.description,
+            location: origin.location,
+            colorId: origin.colorId,
+            creator: origin.creator?.asText(),
+            organizer: origin.organizer?.asText(),
+            start: origin.start?.asText(),
+            end: origin.end?.asText(),
+            endTimeUnspecified: origin.endTimeUnspecified,
+            recurrence: origin.recurrence?.asText(),
+            recurringEventId: origin.recurringEventId,
+            sequence: origin.sequence,
+            attendees: origin.attendees?.asText(),
+            hangoutLink: origin.hangoutLink,
+            conferenceData: origin.conferenceData?.asText(),
+            attachments: origin.attachments?.asText(),
+            eventType: origin.eventType,
+            status: origin.status?.rawValue,
+            visibility: origin.visibility?.rawValue
         )
-        self.htmlLink = cursor.next()
-        self.description = cursor.next()
-        self.location = cursor.next()
-        self.colorId = cursor.next()
-        self.creator = cursor.nextDecodable()
-        self.organizer = cursor.nextDecodable()
-        self.start = cursor.nextDecodable()
-        self.end = cursor.nextDecodable()
-        self.endTimeUnspecified = cursor.next()
-        self.recurrence = cursor.nextDecodable()
-        self.recurringEventId = cursor.next()
-        self.sequence = cursor.next()
-        self.attendees = cursor.nextDecodable()
-        self.hangoutLink = cursor.next()
-        self.conferenceData = cursor.nextDecodable()
-        self.attachments = cursor.nextDecodable()
-        self.eventType = cursor.next()
-        let statusText: String? = cursor.next()
-        self.status = statusText.flatMap { .init(rawValue: $0) }
-        let visibilityText: String? = cursor.next()
-        self.visibility = visibilityText.flatMap { .init(rawValue: $0) }
+    }
+
+    func asEventOrigin() -> GoogleCalendar.EventOrigin {
+        var origin = GoogleCalendar.EventOrigin(id: self.id, summary: self.summary)
+        origin.htmlLink = self.htmlLink
+        origin.description = self.description
+        origin.location = self.location
+        origin.colorId = self.colorId
+        origin.creator = self.creator.decodeJSON()
+        origin.organizer = self.organizer.decodeJSON()
+        origin.start = self.start.decodeJSON()
+        origin.end = self.end.decodeJSON()
+        origin.endTimeUnspecified = self.endTimeUnspecified
+        origin.recurrence = self.recurrence.decodeJSON()
+        origin.recurringEventId = self.recurringEventId
+        origin.sequence = self.sequence
+        origin.attendees = self.attendees.decodeJSON()
+        origin.hangoutLink = self.hangoutLink
+        origin.conferenceData = self.conferenceData.decodeJSON()
+        origin.attachments = self.attachments.decodeJSON()
+        origin.eventType = self.eventType
+        origin.status = self.status.flatMap { .init(rawValue: $0) }
+        origin.visibility = self.visibility.flatMap { .init(rawValue: $0) }
+        return origin
     }
 }
+
+extension GoogleCalendarEventOriginTable.Entity {
+
+    init(
+        accountId: String,
+        _ calendarId: String,
+        _ defaultTimeZone: String?,
+        _ origin: GoogleCalendar.EventOrigin
+    ) {
+        self.init(
+            accountId: accountId,
+            calendarId: calendarId,
+            defaultTimeZone: defaultTimeZone,
+            id: origin.id,
+            summary: origin.summary ?? "",
+            htmlLink: origin.htmlLink,
+            description: origin.description,
+            location: origin.location,
+            colorId: origin.colorId,
+            creator: origin.creator?.asText(),
+            organizer: origin.organizer?.asText(),
+            start: origin.start?.asText(),
+            end: origin.end?.asText(),
+            endTimeUnspecified: origin.endTimeUnspecified,
+            recurrence: origin.recurrence?.asText(),
+            recurringEventId: origin.recurringEventId,
+            sequence: origin.sequence,
+            attendees: origin.attendees?.asText(),
+            hangoutLink: origin.hangoutLink,
+            conferenceData: origin.conferenceData?.asText(),
+            attachments: origin.attachments?.asText(),
+            eventType: origin.eventType,
+            status: origin.status?.rawValue,
+            visibility: origin.visibility?.rawValue
+        )
+    }
+
+    func asEventOrigin() -> GoogleCalendar.EventOrigin {
+        var origin = GoogleCalendar.EventOrigin(id: self.id, summary: self.summary)
+        origin.htmlLink = self.htmlLink
+        origin.description = self.description
+        origin.location = self.location
+        origin.colorId = self.colorId
+        origin.creator = self.creator.decodeJSON()
+        origin.organizer = self.organizer.decodeJSON()
+        origin.start = self.start.decodeJSON()
+        origin.end = self.end.decodeJSON()
+        origin.endTimeUnspecified = self.endTimeUnspecified
+        origin.recurrence = self.recurrence.decodeJSON()
+        origin.recurringEventId = self.recurringEventId
+        origin.sequence = self.sequence
+        origin.attendees = self.attendees.decodeJSON()
+        origin.hangoutLink = self.hangoutLink
+        origin.conferenceData = self.conferenceData.decodeJSON()
+        origin.attachments = self.attachments.decodeJSON()
+        origin.eventType = self.eventType
+        origin.status = self.status.flatMap { .init(rawValue: $0) }
+        origin.visibility = self.visibility.flatMap { .init(rawValue: $0) }
+        return origin
+    }
+}
+
+
+// MARK: - JSON 컬럼 직렬화
 
 private extension Encodable {
-    
+
     func asText() -> String? {
         let encoder = JSONEncoder()
         return (try? encoder.encode(self))
@@ -391,11 +407,10 @@ private extension Encodable {
     }
 }
 
-private extension CursorIterator {
-    
-    func nextDecodable<D: Decodable>() -> D? {
-        let text: String? = self.next()
-        return text?.data(using: .utf8).flatMap {
+private extension Optional where Wrapped == String {
+
+    func decodeJSON<D: Decodable>() -> D? {
+        return self?.data(using: .utf8).flatMap {
             let decoder = JSONDecoder()
             return try? decoder.decode(D.self, from: $0)
         }
