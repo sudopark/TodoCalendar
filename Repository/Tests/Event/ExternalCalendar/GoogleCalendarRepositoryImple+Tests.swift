@@ -653,6 +653,36 @@ extension GoogleCalendarRepositoryImple_Tests {
     }
 }
 
+
+// MARK: - 변환이 컬럼을 다 채우는지 (DB 미사용)
+
+extension GoogleCalendarRepositoryImple_Tests {
+
+    @Test func colorsEntity_serialize_leavesNoColumnUnmapped() throws {
+        // given
+        let colorSet = GoogleCalendar.Colors.ColorSet(
+            foregroundHex: "#calendarFore", backgroudHex: "#calendarBack"
+        )
+        let current = GoogleCalendarColorsTable.Entity(
+            accountId: self.testAccountId, calendar: "calendar-key-1", colorSet
+        )
+        let legacy = GoogleCalendarColorsTableV0.Entity(event: "event-key-2", colorSet)
+
+        // when
+        let currentValues = try GoogleCalendarColorsTable.serialize(entity: current)
+        let legacyValues = try GoogleCalendarColorsTableV0.serialize(entity: legacy)
+
+        // then
+        #expect(currentValues.count == GoogleCalendarColorsTable.Columns.allCases.count)
+        #expect(currentValues.isEmpty == false)
+        #expect(currentValues.allSatisfy { $0 != nil })
+        #expect(legacyValues.count == GoogleCalendarColorsTableV0.Columns.allCases.count)
+        #expect(legacyValues.isEmpty == false)
+        #expect(legacyValues.allSatisfy { $0 != nil })
+    }
+}
+
+
 // MARK: - events
 
 extension GoogleCalendarRepositoryImple_Tests {
