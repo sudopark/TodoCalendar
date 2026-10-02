@@ -107,4 +107,21 @@ extension EventNotificationRepositoryImpleTests {
         XCTAssertEqual(removeEv1Result, [])
         XCTAssertEqual(removeEv3Result.sorted(), ["n3-1", "n3-2"])
     }
+
+    func testRepository_whenSaveNotificationIdsOfTwoEvents_removeReturnsIdsOfRequestedEventOnly() async throws {
+        // given
+        let repository = self.makeRepository()
+        try await repository.batchSaveNotificationId([
+            "event-id-A": ["noti-a1", "noti-a2"],
+            "event-id-B": ["noti-b1"]
+        ])
+
+        // when
+        let removeB = try await repository.removeAllSavedNotificationId(of: ["event-id-B"])
+        let removeA = try await repository.removeAllSavedNotificationId(of: ["event-id-A"])
+
+        // then
+        XCTAssertEqual(removeB, ["noti-b1"])
+        XCTAssertEqual(removeA.sorted(), ["noti-a1", "noti-a2"])
+    }
 }
