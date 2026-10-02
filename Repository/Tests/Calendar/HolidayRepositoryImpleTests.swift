@@ -201,6 +201,45 @@ extension HolidayRepositoryImpleTests {
 }
 
 
+// MARK: - 변환이 컬럼을 다 채우는지 (DB 미사용)
+
+extension HolidayRepositoryImpleTests {
+    
+    func testHolidayEntity_serialize_leavesNoColumnUnmapped() throws {
+        // given
+        let holiday = Holiday(uuid: "hd-serialize", dateString: "2033-04-27", name: "Koningsdag 2033")
+        
+        // when
+        let values = try HolidayRepositoryImple.HolidayTable.serialize(
+            entity: .init("NL", "nl", 2033, holiday)
+        )
+        
+        // then
+        let unmapped = zip(HolidayRepositoryImple.HolidayTable.Columns.allCases, values)
+            .filter { $0.1 == nil }
+            .map { $0.0 }
+        XCTAssertEqual(values.count, HolidayRepositoryImple.HolidayTable.Columns.allCases.count)
+        XCTAssertFalse(values.isEmpty)
+        XCTAssertTrue(unmapped.isEmpty)
+    }
+}
+
+
+// MARK: - 선언이 만드는 CREATE 문이 전환 전 스키마와 같은지 (DB 미사용)
+
+extension HolidayRepositoryImpleTests {
+
+    func testHolidayTableCreateStatement_matchesPreMigrationSchema() {
+        // given
+        // when
+        let statement = HolidayRepositoryImple.HolidayTable.createStatement
+
+        // then
+        XCTAssertEqual(statement, "CREATE TABLE IF NOT EXISTS Holidays_v3 (c_code TEXT NOT NULL, year INTEGER NOT NULL, locale TEXT NOT NULL, uuid TEXT NOT NULL, d_txt TEXT NOT NULL, name TEXT NOT NULL);")
+    }
+}
+
+
 // MARK: - test hidden holiday names
 
 extension HolidayRepositoryImpleTests {
