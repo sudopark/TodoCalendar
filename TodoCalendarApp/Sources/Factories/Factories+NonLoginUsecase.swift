@@ -27,6 +27,7 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
     let billingUsecase: any BillingUsecase
     let eventLiveActivityUsecase: any EventLiveActivityUsecase
     let adExposureUsecase: any AdExposureUsecase
+    let colorThemeLicenseUsecase: any ColorThemeLicenseUsecase
     let imageTextRecognizeService: any ImageTextRecognizeService = ImageTextRecognizeServiceImple()
     private let applicationBase: ApplicationBase
 
@@ -92,6 +93,20 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
             ),
             coldLaunchHistoryRepository: AppColdLaunchHistoryLocalRepositoryImple(
                 environmentStorage: applicationBase.userDefaultEnvironmentStorage
+            )
+        )
+
+        self.colorThemeLicenseUsecase = ColorThemeLicenseUsecaseImple(
+            billingUsecase: billingUsecase,
+            licenseRepository: ColorThemeLicenseLocalRepositoryImple(
+                environmentStorage: applicationBase.userDefaultEnvironmentStorage
+            ),
+            policyRepository: AppPolicyRepositoryImple(
+                remoteAPI: applicationBase.remoteAPI,
+                environmentStorage: applicationBase.userDefaultEnvironmentStorage,
+                defaultPolicyFileURL: Bundle.main.url(
+                    forResource: "app-policy", withExtension: "json"
+                )
             )
         )
     }

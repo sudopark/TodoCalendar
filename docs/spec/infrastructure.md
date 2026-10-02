@@ -586,6 +586,49 @@ protocol LegalNoticeRepository: Sendable {
 
 ---
 
+## 9. 앱 정책 (`app-policy.json`)
+
+앱 코드를 바꾸지 않고 도메인별 정책 값과 기능 스위치를 내려 보내는 통로다. 정책 값은 코드 상수로 두지 않는다.
+
+### 9.1 원격 설정
+
+**위치**: `sudopark/TodoCalendar-Terms` 레포 `main` 브랜치의 `app-config/app-policy.json`
+**서빙**: `https://raw.githubusercontent.com/sudopark/TodoCalendar-Terms/main/app-config/app-policy.json` (GitHub raw URL)
+**포맷**:
+```json
+{
+  "color_theme_license": { "license_days": 7 },
+  "feature_switches": {
+    "<기능키>": { "enabled": true, "min_app_version": "3.1.0" }
+  }
+}
+```
+
+- `color_theme_license` — 테마 사용권 기간이다. 항목이 없거나 `license_days` 가 0 이하이면 사용권 정책 없음으로 읽는다. 파일 전체를 버리지 않는다.
+- `feature_switches` — 기능 키별 스위치다. `min_app_version` 은 없을 수 있다. 이 절은 모델과 저장까지만 다룬다. 기능 플래그 연결과 실제 사용은 각 기능 작업이 한다.
+- 디코딩은 Repository 의 `AppPolicyMapper` 가 맡고, Domain 모델 `AppPolicy`·`FeatureSwitch` 는 Decodable 을 채택하지 않는다.
+
+### 9.2 읽는 순서
+
+1. 마지막으로 받아 둔 원격 정책(캐시)
+2. 번들 기본값 `TodoCalendarApp/Resources/app-policy.json` — Factories 가 파일 URL 을 넘기고 Repository 가 읽는다. 파일이 없거나 못 읽으면 기본값 없음이다.
+3. 둘 다 없으면 정책 없음
+
+`refreshPolicy()` 가 원격을 받아 캐시에 쓴다. 요청이나 디코딩이 실패하면 throw 하고 캐시를 그대로 둔다. 호출은 앱 시작 쪽 작업이 맡는다.
+
+### 9.3 관련 파일
+
+| 레이어 | 파일 |
+|---|---|
+| Domain Model | `Domain/Sources/Models/AppPolicy.swift` |
+| Domain Repo | `Domain/Sources/Repositories/AppPolicyRepository.swift` |
+| Repository Impl | `Repository/Sources/Repository+Imple/Support/AppPolicyRepositoryImple.swift` |
+| Mapper | `Repository/Sources/Repository+Imple/Support/AppPolicy+Mapping.swift` |
+| Endpoint | `Repository/Sources/Remote/Endpoint.swift` (`AppEndpoints.appPolicy`) |
+| 번들 기본값 | `TodoCalendarApp/Resources/app-policy.json` |
+
+---
+
 ## 상태 전이 다이어그램
 
 ### SharedDataStore 동시성 모델
