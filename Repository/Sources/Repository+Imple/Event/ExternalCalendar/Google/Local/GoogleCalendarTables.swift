@@ -7,140 +7,98 @@
 //
 
 import Foundation
+import SQLiteServiceMacros
 import Domain
 import SQLiteService
 import Extensions
 
 
-// MARK: - Old Colors (공통DB 레거시 테이블)
+// MARK: - Colors 메인DB 스키마 (이관이 읽고 drop 한다)
 
-struct OldGoogleCalendarColorsTable: Table {
+@Table("google_calendar_colors")
+struct GoogleCalendarColorsTableV0 {
 
-    enum Columns: String, TableColumn {
-        case colorType = "color_type"
-        case colorKey = "color_key"
-        case background
-        case foreground
+    @Column(.notNull, name: "color_type")
+    let colorType: String
 
-        var dataType: ColumnDataType {
-            switch self {
-            case .colorType: return .text([.notNull])
-            case .colorKey: return .text([.notNull])
-            case .background: return .text([.notNull])
-            case .foreground: return .text([.notNull])
-            }
-        }
-    }
+    @Column(.notNull, name: "color_key")
+    let colorKey: String
 
-    struct Entity: RowValueType {
-        let colorType: String
-        let colorKey: String
-        let background: String
-        let foreground: String
+    @Column(.notNull)
+    let background: String
 
-        init(calendar key: String, _ colorSet: GoogleCalendar.Colors.ColorSet) {
-            self.colorType = "calendar"
-            self.colorKey = key
-            self.background = colorSet.backgroudHex
-            self.foreground = colorSet.foregroundHex
-        }
-
-        init(event key: String, _ colorSet: GoogleCalendar.Colors.ColorSet) {
-            self.colorType = "event"
-            self.colorKey = key
-            self.background = colorSet.backgroudHex
-            self.foreground = colorSet.foregroundHex
-        }
-
-        init(_ cursor: CursorIterator) throws {
-            self.colorType = try cursor.next().unwrap()
-            self.colorKey = try cursor.next().unwrap()
-            self.background = try cursor.next().unwrap()
-            self.foreground = try cursor.next().unwrap()
-        }
-    }
-
-    typealias EntityType = Entity
-    typealias ColumnType = Columns
-    static let tableName: String = "google_calendar_colors"
-
-    static func scalar(_ entity: Entity, for column: Columns) -> (any ScalarType)? {
-        switch column {
-        case .colorType: return entity.colorType
-        case .colorKey: return entity.colorKey
-        case .background: return entity.background
-        case .foreground: return entity.foreground
-        }
-    }
+    @Column(.notNull)
+    let foreground: String
 }
 
 
 // MARK: - Colors (google_calendar.db 신규 테이블, accountId 포함)
 
-struct GoogleCalendarColorsTable: Table {
+typealias GoogleCalendarColorsTable = GoogleCalendarColorsTableV1
 
-    enum Columns: String, TableColumn {
-        case accountId = "account_id"
-        case colorType = "color_type"
-        case colorKey = "color_key"
-        case background
-        case foreground
+@Table("google_calendar_colors")
+struct GoogleCalendarColorsTableV1 {
 
-        var dataType: ColumnDataType {
-            switch self {
-            case .accountId: return .text([.notNull])
-            case .colorType: return .text([.notNull])
-            case .colorKey: return .text([.notNull])
-            case .background: return .text([.notNull])
-            case .foreground: return .text([.notNull])
-            }
-        }
+    @Column(.notNull, name: "account_id")
+    let accountId: String
+
+    @Column(.notNull, name: "color_type")
+    let colorType: String
+
+    @Column(.notNull, name: "color_key")
+    let colorKey: String
+
+    @Column(.notNull)
+    let background: String
+
+    @Column(.notNull)
+    let foreground: String
+}
+
+
+// MARK: - Colors 변환
+
+extension GoogleCalendarColorsTableV0.Entity {
+
+    init(calendar key: String, _ colorSet: GoogleCalendar.Colors.ColorSet) {
+        self.init(
+            colorType: "calendar",
+            colorKey: key,
+            background: colorSet.backgroudHex,
+            foreground: colorSet.foregroundHex
+        )
     }
 
-    struct Entity: RowValueType {
-        let accountId: String
-        let colorType: String
-        let colorKey: String
-        let background: String
-        let foreground: String
+    init(event key: String, _ colorSet: GoogleCalendar.Colors.ColorSet) {
+        self.init(
+            colorType: "event",
+            colorKey: key,
+            background: colorSet.backgroudHex,
+            foreground: colorSet.foregroundHex
+        )
+    }
+}
 
-        init(accountId: String, calendar key: String, _ colorSet: GoogleCalendar.Colors.ColorSet) {
-            self.accountId = accountId
-            self.colorType = "calendar"
-            self.colorKey = key
-            self.background = colorSet.backgroudHex
-            self.foreground = colorSet.foregroundHex
-        }
+extension GoogleCalendarColorsTable.Entity {
 
-        init(accountId: String, event key: String, _ colorSet: GoogleCalendar.Colors.ColorSet) {
-            self.accountId = accountId
-            self.colorType = "event"
-            self.colorKey = key
-            self.background = colorSet.backgroudHex
-            self.foreground = colorSet.foregroundHex
-        }
-
-        init(_ cursor: CursorIterator) throws {
-            self.accountId = try cursor.next().unwrap()
-            self.colorType = try cursor.next().unwrap()
-            self.colorKey = try cursor.next().unwrap()
-            self.background = try cursor.next().unwrap()
-            self.foreground = try cursor.next().unwrap()
-        }
+    init(accountId: String, calendar key: String, _ colorSet: GoogleCalendar.Colors.ColorSet) {
+        self.init(
+            accountId: accountId,
+            colorType: "calendar",
+            colorKey: key,
+            background: colorSet.backgroudHex,
+            foreground: colorSet.foregroundHex
+        )
     }
 
-    typealias EntityType = Entity
-    typealias ColumnType = Columns
-    static let tableName: String = "google_calendar_colors"
-
-    static func scalar(_ entity: Entity, for column: Columns) -> (any ScalarType)? {
-        switch column {
-        case .accountId: return entity.accountId
-        case .colorType: return entity.colorType
-        case .colorKey: return entity.colorKey
-        case .background: return entity.background
-        case .foreground: return entity.foreground
-        }
+    init(accountId: String, event key: String, _ colorSet: GoogleCalendar.Colors.ColorSet) {
+        self.init(
+            accountId: accountId,
+            colorType: "event",
+            colorKey: key,
+            background: colorSet.backgroudHex,
+            foreground: colorSet.foregroundHex
+        )
     }
 }
 
