@@ -54,7 +54,7 @@ extension AppleCalendarLocalStorageImple {
         try await connection.async.run { db in
             try db.createTableOrNot(Tags.self)
             try db.delete(Tags.self, query: Tags.delete())
-            try db.insert(Tags.self, entities: tags)
+            try db.insert(Tags.self, entities: tags.map { Tags.Entity($0) })
         }
     }
 
@@ -62,7 +62,7 @@ extension AppleCalendarLocalStorageImple {
         let connection = try await self.connection()
         return try await connection.async.run { db in
             try db.createTableOrNot(Tags.self)
-            return try db.load(Tags.self, query: Tags.selectAll())
+            return try db.load(Tags.self, query: Tags.selectAll()).map { $0.asTag() }
         }
     }
 }

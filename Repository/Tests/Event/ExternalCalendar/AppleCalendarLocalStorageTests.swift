@@ -87,6 +87,14 @@ final class AppleCalendarLocalStorageTests: PublisherWaitable, LocalTestable {
         |> \.url .~ "https://example.com/event/42"
         |> \.notes .~ "bring the report"
     }
+    
+    private func plainOrigin() -> AppleCalendar.EventOrigin {
+        return AppleCalendar.EventOrigin(
+            eventId: "event-id-E", originalEventId: "original-id-F",
+            calendarId: "calendar-id-G", name: "Event Name H",
+            eventTime: .allDay(500..<900, secondsFromGMT: 32400)
+        )
+    }
 }
 
 
@@ -243,17 +251,35 @@ extension AppleCalendarLocalStorageTests {
         }
     }
 
+    @Test func saveOrigins_whenSaveEventWithOptionalColumnsEmpty_loadEventOriginRestoresEmptyValues() async throws {
+        try await runTestWithOpenClose("apple_events_optional_columns_empty") { [self] in
+            // given
+            let storage = self.makeStorage()
+            let period: Range<TimeInterval> = 0..<1000
+            let plain = self.plainOrigin()
+
+            // when
+            try await storage.saveEventOrigins([plain], in: period)
+            let loaded = try await storage.loadEventOrigin(id: "event-id-E")
+
+            // then
+            let result = try #require(loaded)
+            #expect(result.isRepeating == false)
+            #expect(result.location == nil)
+            #expect(result.recurrenceRules == [])
+            #expect(result.attendees == [])
+            #expect(result.url == nil)
+            #expect(result.notes == nil)
+        }
+    }
+
     @Test func loadEvents_whenSaveEventWithEveryColumn_restoresJoinedColumnsInOrder() async throws {
         try await runTestWithOpenClose("apple_events_every_column_joined") { [self] in
             // given
             let storage = self.makeStorage()
             let period: Range<TimeInterval> = 0..<1000
             let full = self.everyColumnOrigin(eventTime: .period(120..<480))
-            let plain = AppleCalendar.EventOrigin(
-                eventId: "event-id-E", originalEventId: "original-id-F",
-                calendarId: "calendar-id-G", name: "Event Name H",
-                eventTime: .allDay(500..<900, secondsFromGMT: 32400)
-            )
+            let plain = self.plainOrigin()
 
             // when
             try await storage.saveEventOrigins([full, plain], in: period)
@@ -356,6 +382,61 @@ extension AppleCalendarLocalStorageTests {
             #expect(tags.isEmpty)
             #expect(events.isEmpty)
         }
+    }
+}
+
+
+// MARK: - 변환이 컬럼을 다 채우는지 (DB 미사용)
+
+extension AppleCalendarLocalStorageTests {
+
+    @Test func appleTagEntity_serialize_leavesNoColumnUnmapped() throws {
+        // given
+        let tag = AppleCalendar.Tag(id: "cal-1", name: "Calendar 1", colorHex: "FF0000")
+
+        // when
+        let values = try AppleCalendarTagTable.serialize(entity: .init(tag))
+
+        // then
+        let unmapped = zip(AppleCalendarTagTable.Columns.allCases, values)
+            .filter { $0.1 == nil }
+            .map { $0.0 }
+        #expect(values.count == AppleCalendarTagTable.Columns.allCases.count)
+        #expect(!values.isEmpty)
+        #expect(unmapped.isEmpty)
+    }
+
+    @Test func appleEventEntity_serialize_leavesNoColumnUnmapped() throws {
+        // given
+        let origin = self.everyColumnOrigin(eventTime: .period(120..<480))
+
+        // when
+        let values = try AppleCalendarEventTable.serialize(entity: .init(origin))
+
+        // then
+        let unmapped = zip(AppleCalendarEventTable.Columns.allCases, values)
+            .filter { $0.1 == nil }
+            .map { $0.0 }
+        #expect(values.count == AppleCalendarEventTable.Columns.allCases.count)
+        #expect(!values.isEmpty)
+        #expect(unmapped.isEmpty)
+    }
+}
+
+
+// MARK: - 선언이 만드는 CREATE 문이 전환 전 스키마와 같은지 (DB 미사용)
+
+extension AppleCalendarLocalStorageTests {
+
+    @Test func appleTablesCreateStatement_matchesPreMigrationSchema() throws {
+        // given
+        // when
+        let tagStatement = AppleCalendarTagTable.createStatement
+        let eventStatement = AppleCalendarEventTable.createStatement
+
+        // then
+        #expect(tagStatement == "CREATE TABLE IF NOT EXISTS apple_calendar_tags (tag_id TEXT UNIQUE NOT NULL, name TEXT NOT NULL, color_hex TEXT,PRIMARY KEY (tag_id));")
+        #expect(eventStatement == "CREATE TABLE IF NOT EXISTS apple_calendar_events (event_id TEXT UNIQUE NOT NULL, original_event_id TEXT NOT NULL, calendar_id TEXT NOT NULL, name TEXT NOT NULL, is_repeating INTEGER, location TEXT, recurrence_rules TEXT, attendees TEXT, url TEXT, notes TEXT,PRIMARY KEY (event_id));")
     }
 }
 
