@@ -8,6 +8,7 @@
 import Foundation
 import Prelude
 import Optics
+import SQLiteServiceMacros
 import Domain
 import Extensions
 import SQLiteService
@@ -111,7 +112,7 @@ extension HolidayRepositoryImple {
             .where { $0.locale == locale }
             .where { $0.year == year }
         let mappging: @Sendable (CursorIterator) throws -> Holiday = { cursor in
-            return try HolidayTable.Entity(cursor).holiday
+            return try HolidayTable.Entity(cursor).asHoliday()
         }
         return try await self.sqliteService.async.run { try $0.load(query, mapping: mappging) }
     }
@@ -173,70 +174,28 @@ extension HolidayRepositoryImple {
         return updated
     }
     
-    struct HolidayTable: Table {
+    typealias HolidayTable = HolidayTableV0
+    
+    @Table("Holidays_v3")
+    struct HolidayTableV0 {
         
-        enum Columns: String, TableColumn {
-            case countryCode = "c_code"
-            case year
-            case locale
-            case uuid
-            case dateString = "d_txt"
-            case name
-            
-            var dataType: ColumnDataType {
-                switch self {
-                case .countryCode: return .text([.notNull])
-                case .year: return .integer([.notNull])
-                case .locale: return .text([.notNull])
-                case .uuid: return .text([.notNull])
-                case .dateString: return .text([.notNull])
-                case .name: return .text([.notNull])
-                }
-            }
-        }
+        @Column(.notNull, name: "c_code")
+        let countryCode: String
         
-        struct Entity: RowValueType {
-            let countryCode: String
-            let year: Int
-            let locale: String
-            let holiday: Holiday
-            
-            init(
-                _ countryCode: String, _ locale: String, _ year: Int,
-                _ holiday: Holiday
-            ) {
-                self.countryCode = countryCode
-                self.locale = locale
-                self.year = year
-                self.holiday = holiday
-            }
-            
-            init(_ cursor: CursorIterator) throws {
-                self.countryCode = try cursor.next().unwrap()
-                self.year = try cursor.next().unwrap()
-                self.locale = try cursor.next().unwrap()
-                self.holiday = .init(
-                    uuid: try cursor.next().unwrap(),
-                    dateString: try cursor.next().unwrap(),
-                    name: try cursor.next().unwrap()
-                )
-            }
-        }
+        @Column(.notNull)
+        let year: Int
         
-        typealias ColumnType = Columns
-        typealias EntityType = Entity
-        static var tableName: String { "Holidays_v3" }
+        @Column(.notNull)
+        let locale: String
         
-        static func scalar(_ entity: Entity, for column: Columns) -> (any ScalarType)? {
-            switch column {
-            case .countryCode: return entity.countryCode
-            case .locale: return entity.locale
-            case .year: return entity.year
-            case .uuid: return entity.holiday.uuid
-            case .dateString: return entity.holiday.dateString
-            case .name: return entity.holiday.name
-            }
-        }
+        @Column(.notNull)
+        let uuid: String
+        
+        @Column(.notNull, name: "d_txt")
+        let dateString: String
+        
+        @Column(.notNull)
+        let name: String
     }
     
     private struct HolidayListDTO: Decodable {
@@ -266,5 +225,29 @@ extension HolidayRepositoryImple {
                 name: try container.decode(String.self, forKey: .summary))
             )
         }
+    }
+}
+
+
+// MARK: - Holiday 변환
+
+extension HolidayRepositoryImple.HolidayTable.Entity {
+    
+    init(
+        _ countryCode: String, _ locale: String, _ year: Int,
+        _ holiday: Holiday
+    ) {
+        self.init(
+            countryCode: countryCode,
+            year: year,
+            locale: locale,
+            uuid: holiday.uuid,
+            dateString: holiday.dateString,
+            name: holiday.name
+        )
+    }
+    
+    func asHoliday() -> Holiday {
+        return Holiday(uuid: self.uuid, dateString: self.dateString, name: self.name)
     }
 }
