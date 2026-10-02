@@ -12,6 +12,8 @@ public enum EnvironmentKeys: String {
     case needCheckResetCurrentTodo
     case fullScreenAdExposureRecords
     case appColdLaunchHistory
+    case colorThemeLicense
+    case appPolicy
 }
 
 public protocol EnvironmentStorage: AnyObject, Sendable {

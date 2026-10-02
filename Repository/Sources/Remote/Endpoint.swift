@@ -254,6 +254,7 @@ enum EventSyncEndPoints: Endpoint {
 public enum AppEndpoints: Endpoint {
     case updateInfo
     case legalNotice
+    case appPolicy
 
     public var subPath: String {
         switch self {
@@ -261,6 +262,8 @@ public enum AppEndpoints: Endpoint {
             return "update-info.json"
         case .legalNotice:
             return "legal-notice.json"
+        case .appPolicy:
+            return "app-policy.json"
         }
     }
 }
