@@ -95,7 +95,7 @@ final class EventUploadServiceImpleTests: LocalTestable {
             let query = EventUploadPendingQueueTable.selectAll()
                 .where { $0.uploadFailCount < 3 }
                 .orderBy(isAscending: true) { $0.timestamp }
-            return try db.loadOne(query)
+            return try db.loadOne(EventUploadPendingQueueTable.self, query: query)?.asUploadingTask()
         }
     }
     
@@ -107,7 +107,7 @@ final class EventUploadServiceImpleTests: LocalTestable {
                 query = query.where { $0.uploadFailCount < 3 }
             }
             query = query.orderBy(isAscending: true) { $0.timestamp }
-            return try db.load(query)
+            return try db.load(EventUploadPendingQueueTable.self, query: query).map { try $0.asUploadingTask() }
         }
     }
 }

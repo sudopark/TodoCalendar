@@ -54,15 +54,15 @@ extension EventUploadPendingQueueLocalStorageImple {
             
             let deleteQuery = Queue.delete()
                 .where { $0.uuid == firstTask.uuid }
-                .where { $0.dataType == firstTask.dataType.rawValue }
+                .where { $0.dataType == firstTask.dataType }
             try db.delete(Queue.self, query: deleteQuery)
-            return firstTask
+            return try firstTask.asUploadingTask()
         }
     }
     
     public func pushTasks(_ tasks: [EventUploadingTask]) async throws {
         try await self.sqliteService.async.run { db in
-            try db.insert(Queue.self, entities: tasks, shouldReplace: true)
+            try db.insert(Queue.self, entities: tasks.map { Queue.Entity($0) }, shouldReplace: true)
         }
     }
 }
