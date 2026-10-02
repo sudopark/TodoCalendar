@@ -10,56 +10,74 @@ import Foundation
 import Prelude
 import Optics
 import SQLiteService
+import SQLiteServiceMacros
 import Domain
 import Extensions
 
 
-struct EventUploadPendingQueueTable: Table {
+typealias EventUploadPendingQueueTable = EventUploadPendingQueueTableV5
+
+@Table("event_upload_pending_queue")
+struct EventUploadPendingQueueTableV5 {
     
-    enum Colunms: String, TableColumn {
-        case timestamp
-        case dataType = "data_type"
-        case uuid
-        case isRemove = "is_remove"
-        case uploadFailCount = "upload_fail_count"
-        
-        var dataType: ColumnDataType {
-            switch self {
-            case .timestamp: return .real([.notNull])
-            case .dataType: return .text([.notNull])
-            case .uuid: return .text([.notNull])
-            case .isRemove: return .integer([.default(0), .notNull])
-            case .uploadFailCount: return .integer([.default(0), .notNull])
-            }
-        }
-    }
+    @Column(.notNull)
+    let timestamp: Double
     
-    typealias ColumnType = Colunms
-    typealias EntityType = EventUploadingTask
-    static var tableName: String { "event_upload_pending_queue" }
+    @Column(.notNull, name: "data_type")
+    let dataType: String
     
-    static func scalar(_ entity: EntityType, for column: Colunms) -> (any ScalarType)? {
-        switch column {
-        case .timestamp: return entity.timestamp
-        case .dataType: return entity.dataType.rawValue
-        case .uuid: return entity.uuid
-        case .isRemove: return entity.isRemovingTask
-        case .uploadFailCount: return entity.uploadFailCount
-        }
-    }
+    @Column(.notNull)
+    let uuid: String
+    
+    @Column(.default(0), .notNull, name: "is_remove")
+    let isRemove: Bool
+    
+    @Column(.default(0), .notNull, name: "upload_fail_count")
+    let uploadFailCount: Int
+}
+
+
+extension EventUploadPendingQueueTable {
     
     static func migrateStatement(for version: Int32) -> String? {
         switch version {
         case 4:
             return Self.modfiyColumns(
                 tempTable: EventUploadPendingQueueTableV4TempTable.tableName,
-                to: Colunms.allCases.map { $0.rawValue },
-                from: Colunms.allCases.map { $0.rawValue }
+                to: Columns.allCases.map { $0.rawValue },
+                from: Columns.allCases.map { $0.rawValue }
             )
         default: return nil
         }
     }
 }
+
+
+// MARK: - EventUploadingTask 변환
+
+extension EventUploadPendingQueueTable.Entity {
+    
+    init(_ task: EventUploadingTask) {
+        self.init(
+            timestamp: task.timestamp,
+            dataType: task.dataType.rawValue,
+            uuid: task.uuid,
+            isRemove: task.isRemovingTask,
+            uploadFailCount: task.uploadFailCount
+        )
+    }
+    
+    func asUploadingTask() throws -> EventUploadingTask {
+        return EventUploadingTask(
+            timestamp: self.timestamp,
+            dataType: try EventUploadingTask.DataType(rawValue: self.dataType).unwrap(),
+            uuid: self.uuid,
+            isRemovingTask: self.isRemove
+        )
+        |> \.uploadFailCount .~ self.uploadFailCount
+    }
+}
+
 
 struct EventUploadPendingQueueTableV4TempTable: Table {
     
@@ -82,63 +100,49 @@ struct EventUploadPendingQueueTableV4TempTable: Table {
     }
     
     typealias ColumnType = Colunms
-    typealias EntityType = EventUploadingTask
+    typealias EntityType = EventUploadPendingQueueTableV5.Entity
     static var tableName: String { "event_upload_pending_queue_v4" }
     
     static func scalar(_ entity: EntityType, for column: Colunms) -> (any ScalarType)? {
-        switch column {
-        case .timestamp: return entity.timestamp
-        case .dataType: return entity.dataType.rawValue
-        case .uuid: return entity.uuid
-        case .isRemove: return entity.isRemovingTask
-        case .uploadFailCount: return entity.uploadFailCount
-        }
+        guard let liveColumn = EventUploadPendingQueueTableV5.Columns(rawValue: column.rawValue)
+        else { return nil }
+        return EventUploadPendingQueueTableV5.scalar(entity, for: liveColumn)
     }
 }
 
-extension EventUploadingTask: @retroactive RowValueType {
-    
-    public init(_ cursor: CursorIterator) throws {
-        
-        self.init(
-            timestamp: try cursor.next().unwrap(),
-            dataType: try EventUploadingTask.DataType(
-                rawValue: try cursor.next().unwrap()).unwrap(),
-            uuid: try cursor.next().unwrap(),
-            isRemovingTask: try cursor.next().unwrap(),
-        )
-        self.uploadFailCount = try cursor.next().unwrap()
-    }
-}
 
 // 4→5 가 uuid 의 unique 를 떼기 전 스키마다 — ALTER 로 제약을 못 떼 temp 로 복사·교체한다(#545)
-struct EventUploadPendingQueueTableV4: Table {
+@Table("event_upload_pending_queue")
+struct EventUploadPendingQueueTableV4 {
+    
+    @Column(.notNull)
+    let timestamp: Double
+    
+    @Column(.notNull, name: "data_type")
+    let dataType: String
+    
+    @Column(.unique, .notNull)
+    let uuid: String
+    
+    @Column(.default(0), .notNull, name: "is_remove")
+    let isRemove: Bool
+    
+    @Column(.default(0), .notNull, name: "upload_fail_count")
+    let uploadFailCount: Int
+}
 
-    enum Colunms: String, TableColumn {
-        case timestamp
-        case dataType = "data_type"
-        case uuid
-        case isRemove = "is_remove"
-        case uploadFailCount = "upload_fail_count"
 
-        var dataType: ColumnDataType {
-            switch self {
-            case .timestamp: return .real([.notNull])
-            case .dataType: return .text([.notNull])
-            case .uuid: return .text([.unique, .notNull])
-            case .isRemove: return .integer([.default(0), .notNull])
-            case .uploadFailCount: return .integer([.default(0), .notNull])
-            }
-        }
-    }
+// MARK: - EventUploadingTask 변환 (V4)
 
-    typealias ColumnType = Colunms
-    typealias EntityType = EventUploadingTask
-    static var tableName: String { "event_upload_pending_queue" }
-
-    static func scalar(_ entity: EntityType, for column: Colunms) -> (any ScalarType)? {
-        guard let liveColumn = EventUploadPendingQueueTable.Colunms(rawValue: column.rawValue)
-        else { return nil }
-        return EventUploadPendingQueueTable.scalar(entity, for: liveColumn)
+extension EventUploadPendingQueueTableV4.Entity {
+    
+    init(_ task: EventUploadingTask) {
+        self.init(
+            timestamp: task.timestamp,
+            dataType: task.dataType.rawValue,
+            uuid: task.uuid,
+            isRemove: task.isRemovingTask,
+            uploadFailCount: task.uploadFailCount
+        )
     }
 }
