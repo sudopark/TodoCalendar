@@ -80,6 +80,116 @@ struct ColorSetKeysTests {
         #expect(colorSet.bg0 == UIColor(rgb: 0xF1F0EF))
     }
 
+    private func customTheme(
+        _ id: String, background: String, accent: String = "#E54D2E"
+    ) -> CustomColorTheme {
+        return CustomColorTheme(
+            uuid: id,
+            name: "t-\(id)",
+            schemaVersion: 1,
+            seeds: .init(background: background, accent: accent, form: .grouped),
+            colors: [:],
+            createdAt: 0,
+            updatedAt: 0
+        )
+    }
+
+    private func expectedDefinition(background: Int) -> ColorThemeDefinition {
+        return CustomColorThemeBuilder().build(
+            name: "expected",
+            seeds: .init(
+                background: UIColor(rgb: background), accent: UIColor(rgb: 0xE54D2E), form: .grouped
+            )
+        )
+    }
+
+    private func shippedSystemBackground(isSystemDarkTheme: Bool) -> UIColor {
+        return isSystemDarkTheme ? UIColor(rgb: 0x18181a) : .white
+    }
+
+    @Test("커스텀 키는 같은 uuid 테마의 시드로 파생한 색 세트를 돌려준다", arguments: [true, false])
+    func convert_custom_whenThemeExists_buildsFromSeeds(_ isSystemDarkTheme: Bool) {
+        // given
+        let dark = self.customTheme("dark", background: "#18181A")
+        let light = self.customTheme("light", background: "#F1F0EF")
+
+        // when
+        let darkSet = ColorSetKeys.custom("dark")
+            .convert(isSystemDarkTheme: isSystemDarkTheme, customColorTheme: dark)
+        let lightSet = ColorSetKeys.custom("light")
+            .convert(isSystemDarkTheme: isSystemDarkTheme, customColorTheme: light)
+
+        // then
+        #expect(darkSet.isLightTheme == false)
+        #expect(lightSet.isLightTheme == true)
+        #expect(darkSet.accent == self.expectedDefinition(background: 0x18181A).accent)
+        #expect(darkSet.bg0 == self.expectedDefinition(background: 0x18181A).bg0)
+        #expect(lightSet.accent == self.expectedDefinition(background: 0xF1F0EF).accent)
+        #expect(lightSet.bg0 == self.expectedDefinition(background: 0xF1F0EF).bg0)
+    }
+
+    @Test(
+        "커스텀 키에 넘긴 테마가 없으면 시스템 테마 결과를 돌려준다",
+        arguments: [true, false]
+    )
+    func convert_custom_whenThemeIsNil_fallsBackToSystem(_ isSystemDarkTheme: Bool) {
+        // given + when
+        let colorSet = ColorSetKeys.custom("missing")
+            .convert(isSystemDarkTheme: isSystemDarkTheme, customColorTheme: nil)
+
+        // then
+        #expect(colorSet.isLightTheme == (isSystemDarkTheme == false))
+        #expect(colorSet.bg0 == self.shippedSystemBackground(isSystemDarkTheme: isSystemDarkTheme))
+    }
+
+    @Test(
+        "넘긴 테마의 uuid 가 키의 id 와 다르면 시스템 테마 결과를 돌려준다",
+        arguments: [true, false]
+    )
+    func convert_custom_whenThemeUuidDiffersFromKey_fallsBackToSystem(_ isSystemDarkTheme: Bool) {
+        // given
+        let other = self.customTheme("other", background: "#18181A")
+
+        // when
+        let colorSet = ColorSetKeys.custom("missing")
+            .convert(isSystemDarkTheme: isSystemDarkTheme, customColorTheme: other)
+
+        // then
+        #expect(colorSet.isLightTheme == (isSystemDarkTheme == false))
+        #expect(colorSet.bg0 == self.shippedSystemBackground(isSystemDarkTheme: isSystemDarkTheme))
+    }
+
+    @Test(
+        "커스텀 시드 hex 가 깨졌으면 시스템 테마 결과를 돌려준다",
+        arguments: [true, false]
+    )
+    func convert_custom_whenSeedHexInvalid_fallsBackToSystem(_ isSystemDarkTheme: Bool) {
+        // given
+        let broken = self.customTheme("broken", background: "zzz")
+
+        // when
+        let colorSet = ColorSetKeys.custom("broken")
+            .convert(isSystemDarkTheme: isSystemDarkTheme, customColorTheme: broken)
+
+        // then
+        #expect(colorSet.isLightTheme == (isSystemDarkTheme == false))
+        #expect(colorSet.bg0 == self.shippedSystemBackground(isSystemDarkTheme: isSystemDarkTheme))
+    }
+
+    @Test("테마 없이 부르는 기존 시그니처는 커스텀 키를 시스템 테마로 푼다", arguments: [true, false])
+    func convert_withoutCustomThemes_keepsExistingResult(_ isSystemDarkTheme: Bool) {
+        // given + when
+        let custom = ColorSetKeys.custom("any").convert(isSystemDarkTheme: isSystemDarkTheme)
+        let appTheme = ColorSetKeys.appTheme(.tomato).convert(isSystemDarkTheme: isSystemDarkTheme)
+        let appThemeWithEmpty = ColorSetKeys.appTheme(.tomato)
+            .convert(isSystemDarkTheme: isSystemDarkTheme, customColorTheme: nil)
+
+        // then
+        #expect(custom.isLightTheme == (isSystemDarkTheme == false))
+        #expect(appTheme.accent == UIColor(rgb: 0xE54D2E))
+        #expect(appThemeWithEmpty.accent == UIColor(rgb: 0xE54D2E))
+    }
+
     @Test("출시된 색 묶음 셋이 밝기를 제 값으로 답한다")
     func isLightTheme_answersForEveryShippedColorSet() {
         // given + when + then

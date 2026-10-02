@@ -13,6 +13,7 @@ import Domain
 @Observable public class ViewAppearance: @unchecked Sendable {
     
     @ObservationIgnored public var colorSetKey: ColorSetKeys
+    @ObservationIgnored public var customColorTheme: CustomColorTheme?
     public var isSystemDarkTheme: Bool
     public var tagColors: EventTagColorSet
     public var colorSet: any ColorSet
@@ -118,7 +119,10 @@ import Domain
         return appleCalendarColor(calendarId)
     }
     
-    public init(setting: AppearanceSettings, isSystemDarkTheme: Bool) {
+    public init(
+        setting: AppearanceSettings,
+        isSystemDarkTheme: Bool
+    ) {
         
         let (calendar, defaultTagColor) = (setting.calendar, setting.defaultTagColor)
         
@@ -128,7 +132,10 @@ import Domain
         )
         self.colorSetKey = calendar.colorSetKey
         self.isSystemDarkTheme = isSystemDarkTheme
-        self.colorSet = calendar.colorSetKey.convert(isSystemDarkTheme: isSystemDarkTheme)
+        self.customColorTheme = calendar.currentCustomColorTheme
+        self.colorSet = calendar.colorSetKey.convert(
+            isSystemDarkTheme: isSystemDarkTheme, customColorTheme: calendar.currentCustomColorTheme
+        )
         self.fontSet = calendar.fontSetKey.convert()
         
         self.accnetDayPolicy = calendar.accnetDayPolicy
@@ -159,8 +166,18 @@ import Domain
 
 extension ViewAppearance {
     
+    public var isFollowingSystemTheme: Bool {
+        switch self.colorSetKey {
+        case .systemTheme: return true
+        case .custom(let id):
+            guard let theme = self.customColorTheme, theme.uuid == id else { return true }
+            return theme.hasReadableRequiredSeeds == false
+        case .defaultLight, .defaultDark, .appTheme: return false
+        }
+    }
+
     public var preferredColorScheme: ColorScheme? {
-        guard self.colorSetKey != .systemTheme else { return nil }
+        guard self.isFollowingSystemTheme == false else { return nil }
         return self.colorSet.isLightTheme ? .light : .dark
     }
     
