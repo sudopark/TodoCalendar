@@ -221,14 +221,14 @@ extension AppDataMigrationImple {
     }
 
     private func readFromMainDB() async throws -> (
-        [OldGoogleCalendarColorsTable.Entity],
+        [GoogleCalendarColorsTableV0.Entity],
         [GoogleCalendar.Tag],
         [OldGoogleCalendarEventOriginTable.Entity]
     ) {
-        let colors = try await mainDB.async.run { db -> [OldGoogleCalendarColorsTable.Entity] in
-            try? db.createTableOrNot(OldGoogleCalendarColorsTable.self)
-            let query = OldGoogleCalendarColorsTable.selectAll()
-            return (try? db.load(OldGoogleCalendarColorsTable.self, query: query)) ?? []
+        let colors = try await mainDB.async.run { db -> [GoogleCalendarColorsTableV0.Entity] in
+            try? db.createTableOrNot(GoogleCalendarColorsTableV0.self)
+            let query = GoogleCalendarColorsTableV0.selectAll()
+            return (try? db.load(GoogleCalendarColorsTableV0.self, query: query)) ?? []
         }
 
         let tags = try await mainDB.async.run { db -> [GoogleCalendar.Tag] in
@@ -256,7 +256,7 @@ extension AppDataMigrationImple {
 
     private func writeToGoogleCalendarDB(
         accountId: String,
-        colors: [OldGoogleCalendarColorsTable.Entity],
+        colors: [GoogleCalendarColorsTableV0.Entity],
         tags: [GoogleCalendar.Tag],
         origins: [OldGoogleCalendarEventOriginTable.Entity],
         times: [EventTimeTable.Entity]
@@ -295,7 +295,7 @@ extension AppDataMigrationImple {
 
     private func cleanupMainDB(eventIds: [String]) async throws {
         try await mainDB.async.run { db in
-            try? db.dropTable(OldGoogleCalendarColorsTable.self)
+            try? db.dropTable(GoogleCalendarColorsTableV0.self)
             try? db.dropTable(OldGoogleCalendarEventTagTable.self)
             try? db.dropTable(OldGoogleCalendarEventOriginTable.self)
             if !eventIds.isEmpty {
@@ -311,11 +311,13 @@ extension AppDataMigrationImple {
 
 private extension GoogleCalendarColorsTable.Entity {
 
-    init(accountId: String, migrating old: OldGoogleCalendarColorsTable.Entity) {
-        self.accountId = accountId
-        self.colorType = old.colorType
-        self.colorKey = old.colorKey
-        self.background = old.background
-        self.foreground = old.foreground
+    init(accountId: String, migrating old: GoogleCalendarColorsTableV0.Entity) {
+        self.init(
+            accountId: accountId,
+            colorType: old.colorType,
+            colorKey: old.colorKey,
+            background: old.background,
+            foreground: old.foreground
+        )
     }
 }
