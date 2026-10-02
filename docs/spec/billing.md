@@ -115,6 +115,19 @@ StoreKit purchase
 
 플랜 정보를 얻는 자리가 셋(플랜 카탈로그 / AI usage 응답 / 구매 응답)이라 어디서 온 값인지 헷갈리기 쉽다. **화면이 믿을 것은 `currentUserPlan` 하나**다.
 
+### 유료 판정
+
+유료 기능 게이트는 플랜 id 를 직접 비교하지 않고 `BillingUserPlan.isPaid` 를 읽는다.
+
+| 상태 | 판정 |
+|---|---|
+| `isPaid == true` | 유료 — standard·lifetime |
+| `isPaid == false` | 무료 — free. 미로그인 세션도 `NotNeedBillingUsecase` 가 plan 을 `.free` 로 채우므로 여기에 든다 |
+| `isPaid == nil` | 판단 불가 — 앱이 모르는 플랜 id(`planId == nil`) |
+| plan 미수신 | 판정 보류 — 로그인 직후 AI usage 응답 전엔 `billingUserPlan` 키가 비어 있다 |
+
+판단 불가와 판정 보류를 유료·무료 중 어느 쪽으로 다룰지, 보류 중에 게이트를 걸지는 소비자가 맥락에 따라 정한다. 광고(§6)는 이 판정을 쓰지 않고 `== .free` 일치 판정을 그대로 쓴다.
+
 ---
 
 ## 5. Paywall 화면 (`BillingScenes`)
