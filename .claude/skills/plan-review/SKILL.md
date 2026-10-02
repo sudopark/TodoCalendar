@@ -1,6 +1,6 @@
 ---
 name: plan-review
-description: Use when a planning document written by another session — strategy.md, campaign.md (작전계획) 초안·개정본, 또는 DP·M opord (작업 지침) 초안 — must be reviewed before the user's 재가. Triggers on "1차 리뷰 요청" from a peer session, "(다른 세션이 올린) 계획 리뷰해줘", "(저쪽 세션) 작전계획·작업 지침 봐줘". Does NOT trigger on PR 코드 리뷰(review 스킬), 하네스 파일 리뷰(harness-review 스킬), 계획을 직접 쓰거나 고치는 일(campaign·opord 스킬), 종결보고 접수·평가(campaign 평가 모드).
+description: Use when a planning document written by another session — strategy.md, campaign.md (작전계획) 초안·개정본, 또는 DP·M opord (작업 지침) 초안 — must be reviewed before the user's 재가. Triggers on "1차 리뷰 요청" from a peer session, "(다른 세션이 올린) 계획 리뷰해줘", "(저쪽 세션) 작전계획·작업 지침 봐줘". Does NOT trigger on PR 코드 리뷰(review 스킬), 하네스 파일 리뷰(harness-review 스킬), 계획을 직접 쓰거나 고치는 일(campaign·opord 스킬), 유저 보고·PR 문안 검수(report-review 스킬), 종결보고 접수·평가(campaign 평가 모드).
 ---
 
 # Plan Review — 계획 문서 1차 리뷰

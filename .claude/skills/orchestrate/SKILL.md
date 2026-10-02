@@ -30,6 +30,8 @@ description: Use when executing decomposed large work as multiple PRs from one s
 
 sub-work(DP)별 상태(브랜치·base·PR#·머지)는 campaign 원장 `.operations/<상위이슈번호>/campaign-progress.md` 가 정본이다 — PR 생성·머지·rebase마다 갱신하고 상위 이슈 본문 미러를 재조립한다(campaign 스킬 §5). dispatch 내부 진행(몇 번째 dispatch, 보고 파일 경로)만 세션 장부로 같은 파일 하단에 둔다. 컴팩션 후엔 기억보다 이슈 본문 미러와 `git log`를 믿는다.
 
+**런이 열려 있다는 사실도 원장에 둔다.** 착수 시 그 세션 장부(원장 하단)의 첫 줄에 `orchestrate 런: <대상 DP 목록> — 진행` 을 쓴다. 원장 전체가 이슈 미러에 실리므로 `/clear` 뒤 세션도 미러에서 이 줄을 찾는다. 런은 DP 경계의 `/clear` 를 넘어 이어지는데, 대화에만 있으면 마지막 PR 을 만드는 세션이 런이 열린 줄 몰라 종료 기록이 빠진다.
+
 ### 4. sub-work 실행 루프
 
 1. **브랜치**: `features/` 브랜치를 base(develop 또는 앞 sub-work 브랜치)에서 딴다.
@@ -56,4 +58,4 @@ sub-work(DP)별 상태(브랜치·base·PR#·머지)는 campaign 원장 `.operat
 
 ## 종료 기록 — skill_end
 
-모든 sub-work의 PR 생성이 끝나 오케스트레이션이 마무리되는 시점에 `log-record.py skill_end`를 기록한다 (명령·compliance 규칙은 CLAUDE.md §1). 런당 1회 — sub-work 하나의 PR 생성은 런의 끝이 아니다. 런이 완주 못 하고 접히면(유저의 중단 선언) 그 시점에 partial + 사유로 기록한다.
+모든 sub-work의 PR 생성이 끝나 오케스트레이션이 마무리되는 시점에 `log-record.py skill_end`를 기록한다 (명령·compliance 규칙은 CLAUDE.md §1). 기록 주체는 원장의 `orchestrate 런:` 줄을 보고 마지막 PR 을 만든 세션이다 — 런을 시작한 세션이 아니어도 된다. 기록한 뒤 그 줄을 `— 종료` 로 바꾼다. 런당 1회 — sub-work 하나의 PR 생성은 런의 끝이 아니다. 런이 완주 못 하고 접히면(유저의 중단 선언) 그 시점에 partial + 사유로 기록한다.
