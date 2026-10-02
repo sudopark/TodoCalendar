@@ -7,48 +7,17 @@
 //
 
 import Foundation
-import SQLiteService
+import SQLiteServiceMacros
 
 
-struct EventNotificationIdTable: Table {
+typealias EventNotificationIdTable = EventNotificationIdTableV0
+
+@Table("EventNotificationIds")
+struct EventNotificationIdTableV0 {
     
-    enum Columns: String, TableColumn {
-        case eventId = "event_id"
-        case notificationReqId = "not_req_id"
-        
-        var dataType: ColumnDataType {
-            switch self {
-            case .eventId: return .text([.notNull])
-            case .notificationReqId: return .text([.notNull])
-            }
-        }
-    }
+    @Column(.notNull, name: "event_id")
+    let eventId: String
     
-    struct Entity: RowValueType {
-        let eventId: String
-        let notificationReqId: String
-        
-        init(_ eventId: String, _ notificationReqId: String) {
-            self.eventId = eventId
-            self.notificationReqId = notificationReqId
-        }
-        
-        init(_ cursor: CursorIterator) throws {
-            self.init(
-                try cursor.next().unwrap(),
-                try cursor.next().unwrap()
-            )
-        }
-    }
-    
-    typealias ColumnType = Columns
-    typealias EntityType = Entity
-    static var tableName: String { "EventNotificationIds" }
-    
-    static func scalar(_ entity: Entity, for column: Columns) -> ScalarType? {
-        switch column {
-        case .eventId: return entity.eventId
-        case .notificationReqId: return entity.notificationReqId
-        }
-    }
+    @Column(.notNull, name: "not_req_id")
+    let notificationReqId: String
 }
