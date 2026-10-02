@@ -13,6 +13,13 @@ import Domain
 extension ColorSetKeys {
 
     public func convert(isSystemDarkTheme: Bool) -> any ColorSet {
+        return self.convert(isSystemDarkTheme: isSystemDarkTheme, customColorTheme: nil)
+    }
+
+    public func convert(
+        isSystemDarkTheme: Bool,
+        customColorTheme: CustomColorTheme?
+    ) -> any ColorSet {
         switch self {
         case .systemTheme where isSystemDarkTheme:
             return Constant.defaultDark
@@ -24,6 +31,9 @@ extension ColorSetKeys {
             return Constant.defaultDark
         case .appTheme(let key):
             return key.definition
+        case .custom(let id):
+            return customColorTheme.flatMap { $0.uuid == id ? $0.definition() : nil }
+                ?? ColorSetKeys.systemTheme.convert(isSystemDarkTheme: isSystemDarkTheme)
         }
     }
 }

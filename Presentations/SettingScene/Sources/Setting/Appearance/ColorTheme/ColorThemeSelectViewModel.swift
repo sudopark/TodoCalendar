@@ -30,6 +30,7 @@ struct ColorThemeModel: Equatable {
         case .defaultLight: self.title = "setting.appearance.calendar.colorTheme::light".localized()
         case .defaultDark: self.title = "setting.appearance.calendar.colorTheme::dark".localized()
         case .appTheme(let key): self.title = key.definition.name.localized
+        case .custom(let id): self.title = id
         }
     }
 }
