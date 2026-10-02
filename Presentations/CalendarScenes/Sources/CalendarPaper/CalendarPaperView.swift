@@ -47,6 +47,8 @@ final class CalenarPaperViewEventHandelr: Observable {
 private enum Constant {
     static let scrollSpace: String = "calendarPaperScroll"
     static let pullToExpandDistance: CGFloat = 60
+    static let listColumnWidth: CGFloat = 390
+    static let columnDividerWidth: CGFloat = 0.5
 }
 
 private struct ScrollReleaseNotifyingBehavior: ScrollTargetBehavior {
@@ -101,6 +103,8 @@ struct CalenarPaperContainerView: View {
         @Environment(ViewAppearance.self) private var appearance
         @Environment(CalenarPaperViewEventHandelr.self) private var eventHandler
         @Environment(CalendarPaperViewState.self) private var state
+        @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+        @Environment(\.verticalSizeClass) private var verticalSizeClass
 
         @State private var keyboardHeightObserver = KeyboardHeightObserver()
 
@@ -115,6 +119,21 @@ struct CalenarPaperContainerView: View {
         @State private var didPullPastExpandDistance: Bool = false
 
         var body: some View {
+            let layout = CalendarPaperColumnLayout(
+                horizontal: self.horizontalSizeClass, vertical: self.verticalSizeClass
+            )
+            Group {
+                switch layout {
+                case .singleColumn:
+                    self.singleColumnBody()
+                case .twoColumns:
+                    self.twoColumnsBody()
+                }
+            }
+            .environment(\.calendarPaperColumnLayout, layout)
+        }
+
+        private func singleColumnBody() -> some View {
             ScrollViewReader { proxy in
                 ScrollView {
                     VStack {
@@ -130,10 +149,38 @@ struct CalenarPaperContainerView: View {
                 )
                 .background(appearance.colorSet.bg0.asColor)
                 .onChange(of: self.state.scrollToVoiceInputTrigger) { _, _ in
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        proxy.scrollTo(DayEventListScrollAnchor.quickAddField, anchor: .bottom)
+                    self.scrollToQuickAddField(proxy)
+                }
+            }
+        }
+
+        private func twoColumnsBody() -> some View {
+            HStack(spacing: 0) {
+                ScrollView {
+                    self.monthView
+                }
+
+                Rectangle()
+                    .fill(appearance.colorSet.line.asColor)
+                    .frame(width: Constant.columnDividerWidth)
+
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        self.eventListView
+                            .offset(y: -keyboardHeightObserver.showingKeyboardHeight)
+                    }
+                    .onChange(of: self.state.scrollToVoiceInputTrigger) { _, _ in
+                        self.scrollToQuickAddField(proxy)
                     }
                 }
+                .frame(width: Constant.listColumnWidth)
+            }
+            .background(appearance.colorSet.bg0.asColor)
+        }
+
+        private func scrollToQuickAddField(_ proxy: ScrollViewProxy) {
+            withAnimation(.easeInOut(duration: 0.3)) {
+                proxy.scrollTo(DayEventListScrollAnchor.quickAddField, anchor: .bottom)
             }
         }
 

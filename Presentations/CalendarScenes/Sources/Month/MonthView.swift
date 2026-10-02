@@ -136,6 +136,7 @@ struct MonthView: View {
     @Environment(MonthViewState.self) private var state
     @Environment(MonthViewEventHandler.self) private var eventHandler
     @Environment(ViewAppearance.self) private var appearance
+    @Environment(\.calendarPaperColumnLayout) private var columnLayout
     @State private var gridHeight: CGFloat?
     
     var body: some View {
@@ -146,12 +147,22 @@ struct MonthView: View {
             } else {
                 self.gridWeeksView()
             }
-            if state.isCollapsed {
+            if self.showsCollapsedMonth {
                 self.expandMonthButton()
             }
         }
         .padding([.leading, .trailing], 8)
         .background(self.appearance.colorSet.dayBackground.asColor)
+    }
+
+    private var showsCollapsedMonth: Bool {
+        return self.columnLayout.showsCollapsedMonth(isCollapsed: self.state.isCollapsed)
+    }
+
+    private func forwardDayTapIfNeed(_ day: DayCellViewModel) {
+        let isReselect = day.identifier == self.state.selectedDay
+        guard self.columnLayout.forwardsDayTap(isReselect: isReselect) else { return }
+        self.eventHandler.daySelected(day)
     }
 
     private func expandMonthButton() -> some View {
@@ -184,7 +195,7 @@ struct MonthView: View {
     }
     
     private func gridWeeksView() -> some View {
-        let isCollapsed = self.state.isCollapsed
+        let isCollapsed = self.showsCollapsedMonth
         let rowHeight = isCollapsed ? RowHeightOnCalendar.small.cgValue : appearance.rowHeightOnCalendar.cgValue
         let weeks = isCollapsed ? self.collapsedWeeks : self.state.weeks
         return GeometryReader { proxy in
@@ -192,7 +203,7 @@ struct MonthView: View {
             VStack(spacing: 0) {
                 ForEach(weeks, id: \.id) {
                     WeekRowView(week: $0, expectSize, isCollapsed: isCollapsed)
-                        .eventHandler(\.daySelected, eventHandler.daySelected)
+                        .eventHandler(\.daySelected, self.forwardDayTapIfNeed)
                         .eventHandler(\.shareEvents, eventHandler.shareEvents)
                         .environment(state)
                         .environment(appearance)
