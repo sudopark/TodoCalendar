@@ -105,12 +105,12 @@ final class AppDataMigrationImpleTests {
     private func insertOldEventOrigins(_ mainDB: SQLiteService) async throws -> [String] {
         let eventIds = ["event1", "event2"]
         try await mainDB.async.run { db in
-            try db.createTableOrNot(OldGoogleCalendarEventOriginTable.self)
+            try db.createTableOrNot(GoogleCalendarEventOriginTableV0.self)
             try db.createTableOrNot(EventTimeTable.self)
-            let origins: [OldGoogleCalendarEventOriginTable.Entity] = eventIds.map {
+            let origins: [GoogleCalendarEventOriginTableV0.Entity] = eventIds.map {
                 .init("cal1", "Asia/Seoul", GoogleCalendar.EventOrigin(id: $0, summary: "Event \($0)"))
             }
-            try db.insert(OldGoogleCalendarEventOriginTable.self, entities: origins)
+            try db.insert(GoogleCalendarEventOriginTableV0.self, entities: origins)
             let times: [EventTimeTable.Entity] = eventIds.map {
                 EventTimeTable.Entity($0, .at(0), nil)
             }
@@ -121,7 +121,6 @@ final class AppDataMigrationImpleTests {
 
     private func insertEveryColumnOldColors(_ mainDB: SQLiteService) async throws {
         try await mainDB.async.run { db in
-            try db.createTableOrNot(GoogleCalendarColorsTableV0.self)
             let entities: [GoogleCalendarColorsTableV0.Entity] = [
                 .init(calendar: "calendar-key-1", .init(foregroundHex: "#calendarFore", backgroudHex: "#calendarBack")),
                 .init(event: "event-key-2", .init(foregroundHex: "#eventFore", backgroudHex: "#eventBack"))
@@ -151,7 +150,6 @@ final class AppDataMigrationImpleTests {
 
     private func insertEveryColumnOldTags(_ mainDB: SQLiteService) async throws {
         try await mainDB.async.run { db in
-            try db.createTableOrNot(GoogleCalendarEventTagTableV0.self)
             try db.insert(GoogleCalendarEventTagTableV0.self, entities: self.everyColumnOldTagEntities)
         }
     }
@@ -238,12 +236,11 @@ final class AppDataMigrationImpleTests {
 
     private func insertEveryColumnOldOrigins(_ mainDB: SQLiteService) async throws {
         try await mainDB.async.run { db in
-            try db.createTableOrNot(OldGoogleCalendarEventOriginTable.self)
-            let entities: [OldGoogleCalendarEventOriginTable.Entity] = [
+            let entities: [GoogleCalendarEventOriginTableV0.Entity] = [
                 .init("migrating-calendar", "Asia/Seoul", self.everyColumnOldOrigin),
                 .init("migrating-calendar", "Asia/Seoul", GoogleCalendar.EventOrigin(id: "migrating-blank-origin", summary: nil))
             ]
-            try db.insert(OldGoogleCalendarEventOriginTable.self, entities: entities)
+            try db.insert(GoogleCalendarEventOriginTableV0.self, entities: entities)
         }
     }
 
@@ -315,7 +312,7 @@ final class AppDataMigrationImpleTests {
         #expect(origin.visibility == .confidential)
     }
 
-    private func loadGoogleDBColors(_ pool: ExternalCalendarSQLiteConnectionPoolImple) async throws -> [GoogleCalendarColorsTable.Entity] {
+    private func loadGoogleDBColors(_ pool: any ExternalCalendarDBConnectionPool) async throws -> [GoogleCalendarColorsTable.Entity] {
         let googleDB = try await pool.connection(serviceId: googleServiceId)
         return try await googleDB.async.run { db in
             try? db.createTableOrNot(GoogleCalendarColorsTable.self)
@@ -323,7 +320,7 @@ final class AppDataMigrationImpleTests {
         }
     }
 
-    private func loadGoogleDBTags(_ pool: ExternalCalendarSQLiteConnectionPoolImple) async throws -> [GoogleCalendarEventTagTable.Entity] {
+    private func loadGoogleDBTags(_ pool: any ExternalCalendarDBConnectionPool) async throws -> [GoogleCalendarEventTagTable.Entity] {
         let googleDB = try await pool.connection(serviceId: googleServiceId)
         return try await googleDB.async.run { db in
             try? db.createTableOrNot(GoogleCalendarEventTagTable.self)
@@ -331,7 +328,7 @@ final class AppDataMigrationImpleTests {
         }
     }
 
-    private func loadGoogleDBOrigins(_ pool: ExternalCalendarSQLiteConnectionPoolImple) async throws -> [GoogleCalendarEventOriginTable.Entity] {
+    private func loadGoogleDBOrigins(_ pool: any ExternalCalendarDBConnectionPool) async throws -> [GoogleCalendarEventOriginTable.Entity] {
         let googleDB = try await pool.connection(serviceId: googleServiceId)
         return try await googleDB.async.run { db in
             try? db.createTableOrNot(GoogleCalendarEventOriginTable.self)
@@ -622,63 +619,75 @@ extension AppDataMigrationImpleTests {
         #expect(times.count == 2)
     }
 
-    // 레거시 세 테이블의 컬럼마다 다른 값을 싣고 이관한 뒤, 현재 테이블 행의 전 컬럼을 단언한다
+    // 물리 스키마는 스텝 전 선언과 마이그레이션이 만들고 읽기만 현재 V0 선언이 한다 — 컬럼마다
+    // 다른 값을 싣고 이관한 뒤 현재 테이블 행의 전 컬럼을 단언한다
     @Test func migration_movesEveryGoogleColumn() async throws {
-        defer { cleanup() }
         // given
-        let mainDB = try await openMainDB()
-        let pool = try await makePool()
-        try await insertEveryColumnOldColors(mainDB)
-        try await insertEveryColumnOldTags(mainDB)
-        try await insertEveryColumnOldOrigins(mainDB)
+        try await withMigrationDB(at: mainDBPath, userVersion: 1, seed: { db in
+            try db.createTableOrNot(SeedGoogleCalendarColorsTable.self)
+            try db.createTableOrNot(SeedGoogleCalendarEventTagTableV2.self)
+            try db.createTableOrNot(SeedGoogleCalendarEventOriginTableV1.self)
+        }) { mainDB, pool in
+            let migration = self.makeMigration(mainDB: mainDB, pool: pool, dbVersion: 4)
+            try await migration.runDBMigration()
+            // 스텝이 실패하면 테이블을 drop 하고, 그러면 이관이 V0 선언으로 테이블을 다시 세워
+            // 자기비교로 되돌아간다 — 붙은 컬럼을 raw SELECT 로 먼저 확인한다
+            try await self.requireSelectSucceeds(
+                mainDB, "SELECT status, visibility FROM google_calendar_event_origin;"
+            )
+            try await self.requireSelectSucceeds(mainDB, "SELECT is_selected FROM google_calendar_list;")
+            try await self.insertEveryColumnOldColors(mainDB)
+            try await self.insertEveryColumnOldTags(mainDB)
+            try await self.insertEveryColumnOldOrigins(mainDB)
 
-        // when
-        await makeMigration(mainDB: mainDB, pool: pool).migrateGoogleCalendarDataIfNeeded(accountId: accountId)
+            // when
+            await migration.migrateGoogleCalendarDataIfNeeded(accountId: self.accountId)
 
-        // then
-        let colors = try await loadGoogleDBColors(pool)
-        #expect(colors.count == 2)
-        let calendarColor = try #require(colors.first { $0.colorType == "calendar" })
-        #expect(calendarColor.accountId == accountId)
-        #expect(calendarColor.colorKey == "calendar-key-1")
-        #expect(calendarColor.background == "#calendarBack")
-        #expect(calendarColor.foreground == "#calendarFore")
-        let eventColor = try #require(colors.first { $0.colorType == "event" })
-        #expect(eventColor.accountId == accountId)
-        #expect(eventColor.colorKey == "event-key-2")
-        #expect(eventColor.background == "#eventBack")
-        #expect(eventColor.foreground == "#eventFore")
+            // then
+            let colors = try await self.loadGoogleDBColors(pool)
+            #expect(colors.count == 2)
+            let calendarColor = try #require(colors.first { $0.colorType == "calendar" })
+            #expect(calendarColor.accountId == self.accountId)
+            #expect(calendarColor.colorKey == "calendar-key-1")
+            #expect(calendarColor.background == "#calendarBack")
+            #expect(calendarColor.foreground == "#calendarFore")
+            let eventColor = try #require(colors.first { $0.colorType == "event" })
+            #expect(eventColor.accountId == self.accountId)
+            #expect(eventColor.colorKey == "event-key-2")
+            #expect(eventColor.background == "#eventBack")
+            #expect(eventColor.foreground == "#eventFore")
 
-        let tags = try await loadGoogleDBTags(pool)
-        #expect(tags.count == 2)
-        let tag = try #require(tags.first { $0.tagId == "migrating-calendar" })
-        #expect(tag.accountId == accountId)
-        #expect(tag.tagId == "migrating-calendar")
-        #expect(tag.asTag().ownerId == accountId)
-        #expect(tag.name == "migrating calendar name")
-        #expect(tag.description == "migrating calendar description")
-        #expect(tag.background == "#migratingBack")
-        #expect(tag.foreground == "#migratingFore")
-        #expect(tag.colorId == "23")
-        #expect(tag.isSelected == false)
-        #expect(tag.accessRole == nil)
+            let tags = try await self.loadGoogleDBTags(pool)
+            #expect(tags.count == 2)
+            let tag = try #require(tags.first { $0.tagId == "migrating-calendar" })
+            #expect(tag.accountId == self.accountId)
+            #expect(tag.tagId == "migrating-calendar")
+            #expect(tag.asTag().ownerId == self.accountId)
+            #expect(tag.name == "migrating calendar name")
+            #expect(tag.description == "migrating calendar description")
+            #expect(tag.background == "#migratingBack")
+            #expect(tag.foreground == "#migratingFore")
+            #expect(tag.colorId == "23")
+            #expect(tag.isSelected == false)
+            #expect(tag.accessRole == nil)
 
-        let selectedTag = try #require(tags.first { $0.tagId == "migrating-selected-calendar" })
-        #expect(selectedTag.accountId == accountId)
-        #expect(selectedTag.isSelected == true)
-        #expect(selectedTag.asTag().isSelected == true)
+            let selectedTag = try #require(tags.first { $0.tagId == "migrating-selected-calendar" })
+            #expect(selectedTag.accountId == self.accountId)
+            #expect(selectedTag.isSelected == true)
+            #expect(selectedTag.asTag().isSelected == true)
 
-        let origins = try await loadGoogleDBOrigins(pool)
-        #expect(origins.count == 2)
-        let filled = try #require(origins.first { $0.origin.id == "migrating-origin" })
-        #expect(filled.accountId == accountId)
-        #expect(filled.calendarId == "migrating-calendar")
-        #expect(filled.defaultTimeZone == "Asia/Seoul")
-        expectEveryColumnMigrated(filled.origin)
+            let origins = try await self.loadGoogleDBOrigins(pool)
+            #expect(origins.count == 2)
+            let filled = try #require(origins.first { $0.id == "migrating-origin" })
+            #expect(filled.accountId == self.accountId)
+            #expect(filled.calendarId == "migrating-calendar")
+            #expect(filled.defaultTimeZone == "Asia/Seoul")
+            self.expectEveryColumnMigrated(filled.asEventOrigin())
 
-        let blank = try #require(origins.first { $0.origin.id == "migrating-blank-origin" })
-        #expect(blank.origin.summary == "")
-        #expect(blank.origin.visibility == nil)
+            let blank = try #require(origins.first { $0.id == "migrating-blank-origin" })
+            #expect(blank.summary == "")
+            #expect(blank.visibility == nil)
+        }
     }
 
     // google_calendar DB 연결이 없으면 마이그레이션을 건너뛰고 flag도 설정하지 않음
@@ -1163,5 +1172,133 @@ private final class FailingExternalCalendarSQLiteConnectionPool: ExternalCalenda
     func hasConnection(serviceId: String) async -> Bool { return false }
     func connection(serviceId: String) async throws -> SQLiteService {
         throw RuntimeError("no connection available")
+    }
+}
+
+
+// MARK: - 메인 DB google 테이블의 스텝 전 스키마 (시드 전용)
+
+// 스텝이 안 건드리는 테이블이라 이 선언 그대로가 실사용자 물리 스키마다
+private struct SeedGoogleCalendarColorsTable: Table {
+
+    enum Columns: String, TableColumn {
+        case colorType = "color_type"
+        case colorKey = "color_key"
+        case background
+        case foreground
+
+        var dataType: ColumnDataType {
+            switch self {
+            case .colorType: return .text([.notNull])
+            case .colorKey: return .text([.notNull])
+            case .background: return .text([.notNull])
+            case .foreground: return .text([.notNull])
+            }
+        }
+    }
+
+    typealias ColumnType = Columns
+    typealias EntityType = GoogleCalendarColorsTableV0.Entity
+    static let tableName: String = "google_calendar_colors"
+
+    static func scalar(_ entity: EntityType, for column: Columns) -> (any ScalarType)? {
+        return GoogleCalendarColorsTableV0.Columns(rawValue: column.rawValue)
+            .flatMap { GoogleCalendarColorsTableV0.scalar(entity, for: $0) }
+    }
+}
+
+// 2→3 이 is_selected 를 붙이기 전 스키마다. access_role 은 외부 DB 쪽에만 붙어 여기 없다
+private struct SeedGoogleCalendarEventTagTableV2: Table {
+
+    enum Columns: String, TableColumn {
+        case tagId = "tag_id"
+        case name
+        case description
+        case background
+        case foreground
+        case colorId = "color_id"
+
+        var dataType: ColumnDataType {
+            switch self {
+            case .tagId: return .text([.primaryKey(autoIncrement: false), .unique, .notNull])
+            case .name: return .text([.notNull])
+            case .description: return .text([])
+            case .background: return .text([])
+            case .foreground: return .text([])
+            case .colorId: return .text([])
+            }
+        }
+    }
+
+    typealias ColumnType = Columns
+    typealias EntityType = GoogleCalendarEventTagTableV0.Entity
+    static let tableName: String = "google_calendar_list"
+
+    static func scalar(_ entity: EntityType, for column: Columns) -> (any ScalarType)? {
+        return GoogleCalendarEventTagTableV0.Columns(rawValue: column.rawValue)
+            .flatMap { GoogleCalendarEventTagTableV0.scalar(entity, for: $0) }
+    }
+}
+
+// 1→2 가 status 를, 3→4 가 visibility 를 붙이기 전 스키마다
+private struct SeedGoogleCalendarEventOriginTableV1: Table {
+
+    enum Columns: String, TableColumn {
+        case calendarId
+        case defaultTimeZone
+        case id
+        case summary
+        case htmlLink
+        case description
+        case location
+        case colorId
+        case creator
+        case organizer
+        case start
+        case end
+        case endTimeUnspecified
+        case recurrence
+        case recurringEventId
+        case sequence
+        case attendees
+        case hangoutLink
+        case conferenceData
+        case attachments
+        case eventType
+
+        var dataType: ColumnDataType {
+            switch self {
+            case .calendarId: return .text([.notNull])
+            case .defaultTimeZone: return .text([])
+            case .id: return .text([.primaryKey(autoIncrement: false), .unique, .notNull])
+            case .summary: return .text([.notNull])
+            case .htmlLink: return .text([])
+            case .description: return .text([])
+            case .location: return .text([])
+            case .colorId: return .text([])
+            case .creator: return .text([])
+            case .organizer: return .text([])
+            case .start: return .text([])
+            case .end: return .text([])
+            case .endTimeUnspecified: return .integer([.default(0)])
+            case .recurrence: return .text([])
+            case .recurringEventId: return .text([])
+            case .sequence: return .integer([])
+            case .attendees: return .text([])
+            case .hangoutLink: return .text([])
+            case .conferenceData: return .text([])
+            case .attachments: return .text([])
+            case .eventType: return .text([])
+            }
+        }
+    }
+
+    typealias ColumnType = Columns
+    typealias EntityType = GoogleCalendarEventOriginTableV0.Entity
+    static let tableName: String = "google_calendar_event_origin"
+
+    static func scalar(_ entity: EntityType, for column: Columns) -> (any ScalarType)? {
+        return GoogleCalendarEventOriginTableV0.Columns(rawValue: column.rawValue)
+            .flatMap { GoogleCalendarEventOriginTableV0.scalar(entity, for: $0) }
     }
 }
