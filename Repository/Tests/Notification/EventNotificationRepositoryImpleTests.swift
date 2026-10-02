@@ -125,3 +125,40 @@ extension EventNotificationRepositoryImpleTests {
         XCTAssertEqual(removeA.sorted(), ["noti-a1", "noti-a2"])
     }
 }
+
+
+// MARK: - 변환이 컬럼을 다 채우는지 (DB 미사용)
+
+extension EventNotificationRepositoryImpleTests {
+
+    func testNotificationIdEntity_serialize_leavesNoColumnUnmapped() throws {
+        // given
+        let entity = EventNotificationIdTable.Entity(eventId: "event-1", notificationReqId: "noti-1")
+
+        // when
+        let values = try EventNotificationIdTable.serialize(entity: entity)
+
+        // then
+        let unmapped = zip(EventNotificationIdTable.Columns.allCases, values)
+            .filter { $0.1 == nil }
+            .map { $0.0 }
+        XCTAssertEqual(values.count, EventNotificationIdTable.Columns.allCases.count)
+        XCTAssertFalse(values.isEmpty)
+        XCTAssertTrue(unmapped.isEmpty)
+    }
+}
+
+
+// MARK: - 선언이 만드는 CREATE 문이 전환 전 스키마와 같은지 (DB 미사용)
+
+extension EventNotificationRepositoryImpleTests {
+
+    func testNotificationIdTableCreateStatement_matchesPreMigrationSchema() {
+        // given
+        // when
+        let statement = EventNotificationIdTable.createStatement
+
+        // then
+        XCTAssertEqual(statement, "CREATE TABLE IF NOT EXISTS EventNotificationIds (event_id TEXT NOT NULL, not_req_id TEXT NOT NULL);")
+    }
+}

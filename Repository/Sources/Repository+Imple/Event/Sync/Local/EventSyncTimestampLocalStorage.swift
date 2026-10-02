@@ -45,7 +45,7 @@ extension EventSyncTimestampLocalStorageImple {
     ) async throws -> EventSyncTimestamp? {
         return try await self.sqliteService.async.run { db in
             let query = SyncTimeStamp.selectAll { $0.dataType == dataType.rawValue }
-            return try db.loadOne(query)
+            return try db.loadOne(SyncTimeStamp.self, query: query).map { try $0.asSyncTimestamp() }
         }
     }
     
@@ -54,7 +54,7 @@ extension EventSyncTimestampLocalStorageImple {
     ) async throws {
         return try await self.sqliteService.async.run { db in
             try db.insert(
-                SyncTimeStamp.self, entities: [serverTimestamp],
+                SyncTimeStamp.self, entities: [.init(serverTimestamp)],
                 shouldReplace: true
             )
         }
