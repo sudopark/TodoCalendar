@@ -95,10 +95,10 @@ final class AppDataMigrationImpleTests {
 
     private func insertOldTags(_ mainDB: SQLiteService, tagId: String = "cal1") async throws {
         try await mainDB.async.run { db in
-            try db.createTableOrNot(OldGoogleCalendarEventTagTable.self)
+            try db.createTableOrNot(GoogleCalendarEventTagTableV0.self)
             var tag = GoogleCalendar.Tag(id: tagId, name: "Calendar \(tagId)")
             tag.backgroundColorHex = "#aaaaaa"
-            try db.insert(OldGoogleCalendarEventTagTable.self, entities: [tag])
+            try db.insert(GoogleCalendarEventTagTableV0.self, entities: [.init(tag)])
         }
     }
 
@@ -130,21 +130,29 @@ final class AppDataMigrationImpleTests {
         }
     }
 
-    // accessRole·isSelected 를 비워 둔다 — 미이관 사용자의 물리 테이블엔 access_role 컬럼이 없고
-    // is_selected 는 NULL 이라, 실값을 실으면 재현되지 않는 상태를 기준선으로 굳힌다
-    private var everyColumnOldTag: GoogleCalendar.Tag {
-        var tag = GoogleCalendar.Tag(id: "migrating-calendar", name: "migrating calendar name")
-        tag.description = "migrating calendar description"
-        tag.backgroundColorHex = "#migratingBack"
-        tag.foregroundColorHex = "#migratingFore"
-        tag.colorId = "23"
-        return tag
+    // Entity.init(_ tag:) 는 isSelected 를 false 로 눌러 담아 NULL 행을 못 만든다
+    private var everyColumnOldTagEntities: [GoogleCalendarEventTagTableV0.Entity] {
+        return [
+            .init(
+                tagId: "migrating-calendar",
+                name: "migrating calendar name",
+                description: "migrating calendar description",
+                background: "#migratingBack",
+                foreground: "#migratingFore",
+                colorId: "23"
+            ),
+            .init(
+                tagId: "migrating-selected-calendar",
+                name: "migrating selected calendar name",
+                isSelected: true
+            )
+        ]
     }
 
-    private func insertEveryColumnOldTag(_ mainDB: SQLiteService) async throws {
+    private func insertEveryColumnOldTags(_ mainDB: SQLiteService) async throws {
         try await mainDB.async.run { db in
-            try db.createTableOrNot(OldGoogleCalendarEventTagTable.self)
-            try db.insert(OldGoogleCalendarEventTagTable.self, entities: [self.everyColumnOldTag])
+            try db.createTableOrNot(GoogleCalendarEventTagTableV0.self)
+            try db.insert(GoogleCalendarEventTagTableV0.self, entities: self.everyColumnOldTagEntities)
         }
     }
 
@@ -621,7 +629,7 @@ extension AppDataMigrationImpleTests {
         let mainDB = try await openMainDB()
         let pool = try await makePool()
         try await insertEveryColumnOldColors(mainDB)
-        try await insertEveryColumnOldTag(mainDB)
+        try await insertEveryColumnOldTags(mainDB)
         try await insertEveryColumnOldOrigins(mainDB)
 
         // when
@@ -642,18 +650,23 @@ extension AppDataMigrationImpleTests {
         #expect(eventColor.foreground == "#eventFore")
 
         let tags = try await loadGoogleDBTags(pool)
-        #expect(tags.count == 1)
-        let tag = try #require(tags.first)
+        #expect(tags.count == 2)
+        let tag = try #require(tags.first { $0.tagId == "migrating-calendar" })
         #expect(tag.accountId == accountId)
-        #expect(tag.tag.id == "migrating-calendar")
-        #expect(tag.tag.ownerId == "")
-        #expect(tag.tag.name == "migrating calendar name")
-        #expect(tag.tag.description == "migrating calendar description")
-        #expect(tag.tag.backgroundColorHex == "#migratingBack")
-        #expect(tag.tag.foregroundColorHex == "#migratingFore")
-        #expect(tag.tag.colorId == "23")
-        #expect(tag.tag.isSelected == false)
-        #expect(tag.tag.accessRole == nil)
+        #expect(tag.tagId == "migrating-calendar")
+        #expect(tag.asTag().ownerId == accountId)
+        #expect(tag.name == "migrating calendar name")
+        #expect(tag.description == "migrating calendar description")
+        #expect(tag.background == "#migratingBack")
+        #expect(tag.foreground == "#migratingFore")
+        #expect(tag.colorId == "23")
+        #expect(tag.isSelected == false)
+        #expect(tag.accessRole == nil)
+
+        let selectedTag = try #require(tags.first { $0.tagId == "migrating-selected-calendar" })
+        #expect(selectedTag.accountId == accountId)
+        #expect(selectedTag.isSelected == true)
+        #expect(selectedTag.asTag().isSelected == true)
 
         let origins = try await loadGoogleDBOrigins(pool)
         #expect(origins.count == 2)
