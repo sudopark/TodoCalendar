@@ -253,9 +253,14 @@ extension CalendarScenesCatalogSnapshots {
 // MARK: - Test Doubles
 
 /// 2026년 3월 — 1일이 일요일이라 앞 빈칸 없이 5주로 떨어진다.
-private class CatalogMonthViewModel: MonthViewModel, @unchecked Sendable {
+class CatalogMonthViewModel: MonthViewModel, @unchecked Sendable {
 
     private let selectedDay = CurrentValueSubject<String?, Never>("2026-3-12")
+    private let isCollapsed: Bool
+
+    init(isMonthCollapsed: Bool = false) {
+        self.isCollapsed = isMonthCollapsed
+    }
 
     var weekDays: AnyPublisher<[WeekDayModel], Never> {
         return Just(WeekDayModel.allModels()).eraseToAnyPublisher()
@@ -366,7 +371,7 @@ private class CatalogMonthViewModel: MonthViewModel, @unchecked Sendable {
     func updateMonthCollapsed(_ isCollapsed: Bool) { }
     func toggleMonthCollapse() { }
     var isMonthCollapsed: AnyPublisher<Bool, Never> {
-        return Just(false).eraseToAnyPublisher()
+        return Just(self.isCollapsed).eraseToAnyPublisher()
     }
 }
 
@@ -391,7 +396,7 @@ private struct CatalogCalendarEvent: CalendarEvent {
 }
 
 /// DayEventListViewState 의 필드가 fileprivate 라 bind(viewModel:appearance:) 경로로만 채울 수 있다.
-private final class CatalogDayEventListViewModel: DayEventListViewModel, @unchecked Sendable {
+final class CatalogDayEventListViewModel: DayEventListViewModel, @unchecked Sendable {
 
     /// 달력 없이 목록만 채우는 화면은 기본 구성으로는 아래가 비어, 그 화면만 할일을 더 얹는다.
     private let extraTodoKeys: [String]

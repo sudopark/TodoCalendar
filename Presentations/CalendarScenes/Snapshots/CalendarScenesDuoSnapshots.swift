@@ -49,6 +49,26 @@ final class CalendarScenesDuoSnapshots: XCTestCase {
             self.makeSharePreviewImageDayListView(theme)
         }
     }
+
+    // MARK: - CalendarPaper (달력 접힘 상태 — 내부 2단은 펼쳐 그리고, 커버 1단은 접어 그린다)
+
+    @MainActor
+    func test_duoInner_calendarPaper_twoColumns() {
+        captureSnapshotPair(named: "duoInner_calendarPaper_twoColumns", layout: .duoInner) { theme in
+            self.makeCalendarPaperView(theme)
+                .environment(\.horizontalSizeClass, .regular)
+                .environment(\.verticalSizeClass, .regular)
+        }
+    }
+
+    @MainActor
+    func test_duoCover_calendarPaper_singleColumn() {
+        captureSnapshotPair(named: "duoCover_calendarPaper_singleColumn", layout: .duoCover) { theme in
+            self.makeCalendarPaperView(theme)
+                .environment(\.horizontalSizeClass, .compact)
+                .environment(\.verticalSizeClass, .regular)
+        }
+    }
 }
 
 
@@ -73,6 +93,42 @@ private extension CalendarScenesDuoSnapshots {
             .onAppear {
                 RunLoop.main.run(until: Date().addingTimeInterval(0.1))
             }
+    }
+
+    @MainActor
+    func makeCalendarPaperView(_ theme: SnapshotTheme) -> some View {
+        let appearance = self.makeAppearance(theme, customTags: [])
+        appearance.rowHeightOnCalendar = .medium
+
+        let monthViewModel = CatalogMonthViewModel(isMonthCollapsed: true)
+        let monthView = MonthContainerView(
+            viewAppearance: appearance, eventHandler: MonthViewEventHandler()
+        )
+        .eventHandler(\.stateBinding, {
+            $0.bind(monthViewModel, appearance)
+            RunLoop.main.run(until: Date().addingTimeInterval(0.05))
+        })
+
+        let eventListViewModel = CatalogDayEventListViewModel()
+        let eventListView = DayEventListContainerView(
+            viewAppearance: appearance,
+            eventHandler: DayEventListViewEventHandler(),
+            pendingDoneState: PendingCompleteTodoState()
+        )
+        .eventHandler(\.stateBinding, {
+            $0.bind(eventListViewModel, appearance)
+            RunLoop.main.run(until: Date().addingTimeInterval(0.05))
+        })
+
+        return CalenarPaperContainerView(
+            monthView: monthView,
+            eventListView: eventListView,
+            viewAppearance: appearance,
+            eventHandler: CalenarPaperViewEventHandelr()
+        )
+        .onAppear {
+            RunLoop.main.run(until: Date().addingTimeInterval(0.1))
+        }
     }
 
     @MainActor
