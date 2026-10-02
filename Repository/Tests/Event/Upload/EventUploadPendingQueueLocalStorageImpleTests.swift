@@ -55,10 +55,7 @@ extension EventUploadPendingQueueLocalStorageImpleTests {
         try await self.runTestWithOpenClose("pending-every-column") {
             // given
             let storage = self.makeStorage()
-            let task = EventUploadingTask(
-                timestamp: 1_234.5, dataType: .eventDetail, uuid: "task-uuid-A", isRemovingTask: true
-            )
-            |> \.uploadFailCount .~ 2
+            let task = self.everyColumnTask
 
             // when
             try await storage.pushTask(task)
@@ -171,5 +168,83 @@ extension EventUploadPendingQueueLocalStorageImpleTests {
             let types = popTasks.map { $0?.dataType }
             #expect(types == [.todo, .eventDetail])
         }
+    }
+}
+
+
+// MARK: - 변환이 컬럼을 다 채우는지
+
+extension EventUploadPendingQueueLocalStorageImpleTests {
+    
+    private var everyColumnTask: EventUploadingTask {
+        return EventUploadingTask(
+            timestamp: 1_234.5, dataType: .eventDetail, uuid: "task-uuid-A", isRemovingTask: true
+        )
+        |> \.uploadFailCount .~ 2
+    }
+    
+    @Test func uploadingTaskEntity_serialize_leavesNoColumnUnmapped() throws {
+        // given
+        let task = self.everyColumnTask
+        
+        // when
+        let values = try EventUploadPendingQueueTable.serialize(entity: .init(task))
+        
+        // then
+        let unmapped = zip(EventUploadPendingQueueTable.Columns.allCases, values)
+            .filter { $0.1 == nil }
+            .map { $0.0 }
+        #expect(values.count == EventUploadPendingQueueTable.Columns.allCases.count)
+        #expect(!values.isEmpty)
+        #expect(unmapped.isEmpty)
+    }
+    
+    @Test func legacyUploadingTaskEntity_serialize_leavesNoColumnUnmapped() throws {
+        // given
+        let task = self.everyColumnTask
+        
+        // when
+        let values = try EventUploadPendingQueueTableV4.serialize(entity: .init(task))
+        
+        // then
+        let unmapped = zip(EventUploadPendingQueueTableV4.Columns.allCases, values)
+            .filter { $0.1 == nil }
+            .map { $0.0 }
+        #expect(values.count == EventUploadPendingQueueTableV4.Columns.allCases.count)
+        #expect(!values.isEmpty)
+        #expect(unmapped.isEmpty)
+    }
+    
+    @Test func tempUploadingTaskEntity_serialize_leavesNoColumnUnmapped() throws {
+        // given
+        let task = self.everyColumnTask
+        
+        // when
+        let values = try EventUploadPendingQueueTableV4TempTable.serialize(entity: .init(task))
+        
+        // then
+        let unmapped = zip(EventUploadPendingQueueTableV4TempTable.Colunms.allCases, values)
+            .filter { $0.1 == nil }
+            .map { $0.0 }
+        #expect(values.count == EventUploadPendingQueueTableV4TempTable.Colunms.allCases.count)
+        #expect(!values.isEmpty)
+        #expect(unmapped.isEmpty)
+    }
+}
+
+
+// MARK: - 선언이 만드는 CREATE 문이 전환 전 스키마와 같은지 (DB 미사용)
+
+extension EventUploadPendingQueueLocalStorageImpleTests {
+
+    @Test func pendingQueueTablesCreateStatement_matchesPreMigrationSchema() throws {
+        // given
+        // when
+        let v5Statement = EventUploadPendingQueueTableV5.createStatement
+        let v4Statement = EventUploadPendingQueueTableV4.createStatement
+
+        // then
+        #expect(v5Statement == "CREATE TABLE IF NOT EXISTS event_upload_pending_queue (timestamp REAL NOT NULL, data_type TEXT NOT NULL, uuid TEXT NOT NULL, is_remove INTEGER DEFAULT 0 NOT NULL, upload_fail_count INTEGER DEFAULT 0 NOT NULL);")
+        #expect(v4Statement == "CREATE TABLE IF NOT EXISTS event_upload_pending_queue (timestamp REAL NOT NULL, data_type TEXT NOT NULL, uuid TEXT UNIQUE NOT NULL, is_remove INTEGER DEFAULT 0 NOT NULL, upload_fail_count INTEGER DEFAULT 0 NOT NULL);")
     }
 }

@@ -212,7 +212,7 @@ final class AppDataMigrationImpleTests {
         )
         try db.createTableOrNot(EventUploadPendingQueueTableV4.self)
         try db.insert(
-            EventUploadPendingQueueTableV4.self, entities: [self.dummyUploadingTask], shouldReplace: true
+            EventUploadPendingQueueTableV4.self, entities: [.init(self.dummyUploadingTask)], shouldReplace: true
         )
     }
 
@@ -341,6 +341,7 @@ final class AppDataMigrationImpleTests {
                 EventUploadPendingQueueTable.self,
                 query: EventUploadPendingQueueTable.selectAll()
             )
+            .map { try $0.asUploadingTask() }
         }
     }
 
@@ -916,7 +917,7 @@ extension AppDataMigrationImpleTests {
             try db.createTableOrNot(EventUploadPendingQueueTableV4.self)
             try db.insert(
                 EventUploadPendingQueueTableV4.self,
-                entities: [self.dummyUploadingTask],
+                entities: [.init(self.dummyUploadingTask)],
                 shouldReplace: true
             )
         }) { mainDB, pool in
@@ -936,7 +937,7 @@ extension AppDataMigrationImpleTests {
             try await mainDB.async.run { db in
                 try db.insert(
                     EventUploadPendingQueueTable.self,
-                    entities: [self.dummyUploadingTaskSharingUUID],
+                    entities: [.init(self.dummyUploadingTaskSharingUUID)],
                     shouldReplace: false
                 )
             }
