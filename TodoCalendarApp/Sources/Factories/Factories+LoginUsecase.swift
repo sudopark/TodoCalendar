@@ -526,6 +526,11 @@ private struct LoginSettingFactory {
         )
         return AppSettingUsecaseImple(
             appSettingRepository: repository,
+            customColorThemeRepository: CustomColorThemeLocalRepositoryImple(
+                localStorage: CustomColorThemeLocalStorageImple(
+                    sqliteService: applicationBase.commonSqliteService
+                )
+            ),
             viewAppearanceStore: self.viewAppearanceStore,
             sharedDataStore: applicationBase.sharedDataStore
         )

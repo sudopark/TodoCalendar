@@ -67,14 +67,36 @@ final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked
     
     @MainActor
     private func notifySystemColorThemeChangedIfNeed(isDark: Bool) {
-        guard self.appearance.colorSetKey == .systemTheme else { return }
-        let newSet = self.appearance.colorSetKey.convert(isSystemDarkTheme: isDark)
+        guard self.appearance.isFollowingSystemTheme else { return }
+        let newSet = self.appearance.colorSetKey.convert(
+            isSystemDarkTheme: isDark, customColorTheme: self.appearance.customColorTheme
+        )
         let didSetChanged = self.appearance.colorSet.isLightTheme != newSet.isLightTheme
         guard didSetChanged else { return }
+        self.replaceColorSet(newSet)
+    }
+    
+    @MainActor
+    private func replaceColorSet(_ newSet: any ColorSet) {
         self.changeNavigationBarAppearnace(newSet)
         self.appearance.colorSet = newSet
         self.appearance.forceReloadNavigationBar()
         self.applyColorThemeToWindow()
+    }
+    
+    @MainActor
+    func replaceCurrentCustomColorTheme(_ theme: CustomColorTheme?) {
+        self.appearance.customColorTheme = theme
+        guard case .custom = self.appearance.colorSetKey else { return }
+        self.reconvertColorSet()
+    }
+    
+    @MainActor
+    private func reconvertColorSet() {
+        self.replaceColorSet(self.appearance.colorSetKey.convert(
+            isSystemDarkTheme: self.appearance.isSystemDarkTheme,
+            customColorTheme: self.appearance.customColorTheme
+        ))
     }
     
     func notifySettingChanged(_ newSetting: AppearanceSettings) {
@@ -84,15 +106,12 @@ final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked
     
     func notifyCalendarSettingChanged(_ newSetting: CalendarAppearanceSettings) {
         Task { @MainActor in
-            if self.appearance.colorSetKey != newSetting.colorSetKey {
+            let didColorSetChanged = self.appearance.colorSetKey != newSetting.colorSetKey
+                || self.appearance.customColorTheme != newSetting.currentCustomColorTheme
+            if didColorSetChanged {
                 self.appearance.colorSetKey = newSetting.colorSetKey
-                let newSet = newSetting.colorSetKey.convert(
-                    isSystemDarkTheme: self.appearance.isSystemDarkTheme
-                )
-                self.changeNavigationBarAppearnace(newSet)
-                self.appearance.colorSet = newSet
-                self.appearance.forceReloadNavigationBar()
-                self.applyColorThemeToWindow()
+                self.appearance.customColorTheme = newSetting.currentCustomColorTheme
+                self.reconvertColorSet()
             }
             if self.appearance.fontSet.key != newSetting.fontSetKey {
                 self.appearance.fontSet = newSetting.fontSetKey.convert()
@@ -224,7 +243,9 @@ protocol ApplicationRouting: Routing {
     func setupInitialScene(_ prepareResult: ApplicationPrepareResult) -> (any MainSceneInteractor)?
 
     @MainActor
-    func changeRootSceneAfter(signIn auth: Auth?) -> (any MainSceneInteractor)?
+    func changeRootSceneAfter(
+        signIn auth: Auth?, prepareResult: AccountChangePrepareResult?
+    ) -> (any MainSceneInteractor)?
     func showUpdatePopup(_ requirement: AppUpdateRequirement)
 }
 
@@ -322,7 +343,10 @@ extension ApplicationRootRouter {
     }
 
     @MainActor
-    func changeRootSceneAfter(signIn auth: Auth?) -> (any MainSceneInteractor)? {
+    func changeRootSceneAfter(
+        signIn auth: Auth?, prepareResult: AccountChangePrepareResult?
+    ) -> (any MainSceneInteractor)? {
+        self.viewAppearanceStore.replaceCurrentCustomColorTheme(prepareResult?.currentCustomColorTheme)
         self.changeUsecaseFactroy(by: auth)
         return self.refreshRoot()
     }

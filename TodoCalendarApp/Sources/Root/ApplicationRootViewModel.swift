@@ -120,10 +120,12 @@ extension ApplicationRootViewModelImple: AutenticatorTokenRefreshListener {
     private func handleUserSignedIn(_ account: Account) {
         Task { [weak self] in
             self?.subject.isSignIn.send(true)
-            await self?.prepareUsecase.prepareSignedIn(account.auth)
+            let prepareResult = await self?.prepareUsecase.prepareSignedIn(account.auth)
             
             try? await Task.sleep(for: .milliseconds(100))
-            let interactor = await self?.router?.changeRootSceneAfter(signIn: account.auth)
+            let interactor = await self?.router?.changeRootSceneAfter(
+                signIn: account.auth, prepareResult: prepareResult
+            )
             await self?.attach(mainSceneInteractor: interactor)
             self?.registerTokenIfNeed()
         }
@@ -133,10 +135,12 @@ extension ApplicationRootViewModelImple: AutenticatorTokenRefreshListener {
     private func handleUserSignedOut() {
         Task { [weak self] in
             self?.subject.isSignIn.send(false)
-            await self?.prepareUsecase.prepareSignedOut()
+            let prepareResult = await self?.prepareUsecase.prepareSignedOut()
             
             try? await Task.sleep(for: .milliseconds(100))
-            let interactor = await self?.router?.changeRootSceneAfter(signIn: nil)
+            let interactor = await self?.router?.changeRootSceneAfter(
+                signIn: nil, prepareResult: prepareResult
+            )
             await self?.attach(mainSceneInteractor: interactor)
         }
     }

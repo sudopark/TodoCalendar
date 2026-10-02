@@ -57,6 +57,11 @@ final class ApplicationRootBuilder {
             coldLaunchHistoryRepository: AppColdLaunchHistoryLocalRepositoryImple(
                 environmentStorage: applicationBase.userDefaultEnvironmentStorage
             ),
+            customColorThemeRepository: CustomColorThemeLocalRepositoryImple(
+                localStorage: CustomColorThemeLocalStorageImple(
+                    sqliteService: applicationBase.commonSqliteService
+                )
+            ),
             mobileAdService: applicationBase.mobileAdService,
             database: applicationBase.commonSqliteService,
             appDataMigration: appDataMigration
