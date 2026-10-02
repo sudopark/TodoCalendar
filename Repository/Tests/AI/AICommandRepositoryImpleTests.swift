@@ -683,3 +683,40 @@ private struct DummyResponse {
         """
     }
 }
+
+
+// MARK: - 변환이 컬럼을 다 채우는지 (DB 미사용)
+
+extension AICommandRepositoryImpleTests {
+
+    func testProcessingAICommandEntity_serialize_leavesNoColumnUnmapped() throws {
+        // given
+        let command = ProcessingAICommand(jobId: "job-1", isConfirmJob: true)
+
+        // when
+        let values = try ProcessingAICommandTable.serialize(entity: .init(command))
+
+        // then
+        let unmapped = zip(ProcessingAICommandTable.Columns.allCases, values)
+            .filter { $0.1 == nil }
+            .map { $0.0 }
+        XCTAssertEqual(values.count, ProcessingAICommandTable.Columns.allCases.count)
+        XCTAssertFalse(values.isEmpty)
+        XCTAssertTrue(unmapped.isEmpty)
+    }
+}
+
+
+// MARK: - 선언이 만드는 CREATE 문이 전환 전 스키마와 같은지 (DB 미사용)
+
+extension AICommandRepositoryImpleTests {
+
+    func testProcessingAICommandTableCreateStatement_matchesPreMigrationSchema() {
+        // given
+        // when
+        let statement = ProcessingAICommandTable.createStatement
+
+        // then
+        XCTAssertEqual(statement, "CREATE TABLE IF NOT EXISTS ProcessingAICommand (job_id TEXT UNIQUE NOT NULL, is_confirm_job INTEGER NOT NULL,PRIMARY KEY (job_id));")
+    }
+}

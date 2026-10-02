@@ -69,7 +69,7 @@ extension EventNotificationRepositoryImple {
     public func batchSaveNotificationId(_ eventIdNotificationIdMap: [String: [String]]) async throws {
         try await self.sqliteService.async.run {
             let entities = eventIdNotificationIdMap.flatMap { pair in
-                return pair.value.map { Ids.Entity(pair.key, $0) }
+                return pair.value.map { Ids.Entity(eventId: pair.key, notificationReqId: $0) }
             }
             try $0.insert(Ids.self, entities: entities)
         }

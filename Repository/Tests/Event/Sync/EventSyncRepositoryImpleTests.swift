@@ -698,6 +698,43 @@ private struct DummyResponse {
     }
 }
 
+// MARK: - 변환이 컬럼을 다 채우는지 (DB 미사용)
+
+extension EventSyncRepositoryImpleTests {
+
+    @Test func syncTimestampEntity_serialize_leavesNoColumnUnmapped() throws {
+        // given
+        let timestamp = EventSyncTimestamp(.todo, 12345)
+
+        // when
+        let values = try EventSyncTimestampTable.serialize(entity: .init(timestamp))
+
+        // then
+        let unmapped = zip(EventSyncTimestampTable.Columns.allCases, values)
+            .filter { $0.1 == nil }
+            .map { $0.0 }
+        #expect(values.count == EventSyncTimestampTable.Columns.allCases.count)
+        #expect(!values.isEmpty)
+        #expect(unmapped.isEmpty)
+    }
+}
+
+
+// MARK: - 선언이 만드는 CREATE 문이 전환 전 스키마와 같은지 (DB 미사용)
+
+extension EventSyncRepositoryImpleTests {
+
+    @Test func syncTimestampTableCreateStatement_matchesPreMigrationSchema() throws {
+        // given
+        // when
+        let statement = EventSyncTimestampTable.createStatement
+
+        // then
+        #expect(statement == "CREATE TABLE IF NOT EXISTS SyncTimestamp (data_type TEXT UNIQUE NOT NULL, timestamp INTEGER NOT NULL,PRIMARY KEY (data_type));")
+    }
+}
+
+
 private extension Int {
     
     static var syncNotNeedTimestamp: Int = 100
