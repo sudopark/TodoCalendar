@@ -8,6 +8,8 @@
 
 import Testing
 import Combine
+import Prelude
+import Optics
 import Domain
 import Extensions
 import SQLiteService
@@ -59,6 +61,32 @@ final class AppleCalendarLocalStorageTests: PublisherWaitable, LocalTestable {
 
         return [origin1, origin2]
     }
+
+    private func everyColumnAttendees() -> [AppleCalendar.Attendee] {
+        let organizer = AppleCalendar.Attendee(name: "Alice Kim", email: "alice@example.com")
+            |> \.isOrganizer .~ true
+            |> \.status .~ .accepted
+        let currentUser = AppleCalendar.Attendee(name: "Bob Lee", email: "bob@example.com")
+            |> \.isCurrentUser .~ true
+            |> \.status .~ .tentative
+        let nameless = AppleCalendar.Attendee(name: nil, email: "carol@example.com")
+            |> \.status .~ .declined
+        return [organizer, currentUser, nameless]
+    }
+
+    private func everyColumnOrigin(eventTime: EventTime) -> AppleCalendar.EventOrigin {
+        return AppleCalendar.EventOrigin(
+            eventId: "event-id-A", originalEventId: "original-id-B",
+            calendarId: "calendar-id-C", name: "Event Name D",
+            eventTime: eventTime
+        )
+        |> \.isRepeating .~ true
+        |> \.location .~ "Seoul City Hall"
+        |> \.recurrenceRules .~ ["RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=MO", "EXDATE:20261012T090000Z"]
+        |> \.attendees .~ self.everyColumnAttendees()
+        |> \.url .~ "https://example.com/event/42"
+        |> \.notes .~ "bring the report"
+    }
 }
 
 
@@ -79,6 +107,26 @@ extension AppleCalendarLocalStorageTests {
             // then
             #expect(loaded.count == tags.count)
             #expect(loaded.map(\.id).sorted() == tags.map(\.id).sorted())
+        }
+    }
+
+    @Test func tags_whenSaveTagWithEveryColumn_loadRestoresSameValues() async throws {
+        try await runTestWithOpenClose("apple_tags_every_column") { [self] in
+            // given
+            let storage = self.makeStorage()
+            let tags: [AppleCalendar.Tag] = [
+                .init(id: "calendar-id-A", name: "Work Calendar", colorHex: "1A2B3C"),
+                .init(id: "calendar-id-B", name: "Home", colorHex: nil)
+            ]
+
+            // when
+            try await storage.saveCalendarTags(tags)
+            let loaded = try await storage.loadCalendarTags().sorted { $0.id < $1.id }
+
+            // then
+            #expect(loaded.map(\.id) == ["calendar-id-A", "calendar-id-B"])
+            #expect(loaded.map(\.name) == ["Work Calendar", "Home"])
+            #expect(loaded.map(\.colorHex) == ["1A2B3C", nil])
         }
     }
 
@@ -165,6 +213,60 @@ extension AppleCalendarLocalStorageTests {
             #expect(result.attendees.first?.email == "alice@example.com")
             #expect(result.attendees.first?.isOrganizer == true)
             #expect(result.attendees.first?.status == .accepted)
+        }
+    }
+
+    @Test func saveOrigins_whenSaveEventWithEveryColumn_loadEventOriginRestoresSameValues() async throws {
+        try await runTestWithOpenClose("apple_events_every_column_origin") { [self] in
+            // given
+            let storage = self.makeStorage()
+            let period: Range<TimeInterval> = 0..<1000
+            let origin = self.everyColumnOrigin(eventTime: .period(120..<480))
+
+            // when
+            try await storage.saveEventOrigins([origin], in: period)
+            let loaded = try await storage.loadEventOrigin(id: "event-id-A")
+
+            // then
+            let result = try #require(loaded)
+            #expect(result.eventId == "event-id-A")
+            #expect(result.originalEventId == "original-id-B")
+            #expect(result.calendarId == "calendar-id-C")
+            #expect(result.name == "Event Name D")
+            #expect(result.isRepeating == true)
+            #expect(result.location == "Seoul City Hall")
+            #expect(result.recurrenceRules == ["RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=MO", "EXDATE:20261012T090000Z"])
+            #expect(result.attendees == self.everyColumnAttendees())
+            #expect(result.url == "https://example.com/event/42")
+            #expect(result.notes == "bring the report")
+            #expect(result.eventTime == .period(120..<480))
+        }
+    }
+
+    @Test func loadEvents_whenSaveEventWithEveryColumn_restoresJoinedColumnsInOrder() async throws {
+        try await runTestWithOpenClose("apple_events_every_column_joined") { [self] in
+            // given
+            let storage = self.makeStorage()
+            let period: Range<TimeInterval> = 0..<1000
+            let full = self.everyColumnOrigin(eventTime: .period(120..<480))
+            let plain = AppleCalendar.EventOrigin(
+                eventId: "event-id-E", originalEventId: "original-id-F",
+                calendarId: "calendar-id-G", name: "Event Name H",
+                eventTime: .allDay(500..<900, secondsFromGMT: 32400)
+            )
+
+            // when
+            try await storage.saveEventOrigins([full, plain], in: period)
+            let loaded = try await storage.loadEvents(in: period).sorted { $0.eventId < $1.eventId }
+
+            // then
+            #expect(loaded.map(\.eventId) == ["event-id-A", "event-id-E"])
+            #expect(loaded.map(\.originalEventId) == ["original-id-B", "original-id-F"])
+            #expect(loaded.map(\.calendarId) == ["calendar-id-C", "calendar-id-G"])
+            #expect(loaded.map(\.name) == ["Event Name D", "Event Name H"])
+            #expect(loaded.map(\.isRepeating) == [true, false])
+            #expect(loaded.map(\.location) == ["Seoul City Hall", nil])
+            #expect(loaded.map(\.eventTime) == [.period(120..<480), .allDay(500..<900, secondsFromGMT: 32400)])
         }
     }
 
