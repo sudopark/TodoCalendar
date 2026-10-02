@@ -346,6 +346,20 @@ extension AICommandRepositoryImpleTests {
         XCTAssertEqual(loaded?.isConfirmJob, true)
     }
 
+    func testRepository_whenSaveProcessingCommandWithEveryColumn_loadRestoresSameValues() async throws {
+        // given
+        let repository = self.makeRepository()
+        let cmd = ProcessingAICommand(jobId: "job-id-7f3a", isConfirmJob: true)
+
+        // when
+        try await repository.updateProcessingAICommand(cmd)
+        let loaded = try await repository.loadProcessingAICommand()
+
+        // then
+        XCTAssertEqual(loaded?.jobId, "job-id-7f3a")
+        XCTAssertEqual(loaded?.isConfirmJob, true)
+    }
+
     func testRepository_updateProcessingCommand_replacesPrevious() async throws {
         // given
         let repository = self.makeRepository()
