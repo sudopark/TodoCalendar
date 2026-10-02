@@ -138,9 +138,13 @@ private final class StubApplicationPrepareUsecase: ApplicationPrepareUsecase {
 
     func prepareEnterBackground() { }
 
-    func prepareSignedIn(_ auth: Auth) async { }
+    func prepareSignedIn(_ auth: Auth) async -> AccountChangePrepareResult {
+        return AccountChangePrepareResult(currentCustomColorTheme: nil)
+    }
 
-    func prepareSignedOut() async { }
+    func prepareSignedOut() async -> AccountChangePrepareResult {
+        return AccountChangePrepareResult(currentCustomColorTheme: nil)
+    }
 
     func prepareExternalCalendarIntegrated(_ serviceId: String) { }
 

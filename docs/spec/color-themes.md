@@ -205,6 +205,22 @@ Radix 스케일은 12단계이고 단계마다 쓰임이 정해져 있다 — 1 
 
 **검증** — `CustomColorThemeContrastGridTests` 가 §3 대비 19검사에 `accentAI`/`primaryBtnText` 3:1 을 더한 20검사를 격자 전수로 확인한다. 격자 A 는 필수 시드만, 격자 B 는 AI 를 포함한 선택 시드에 배경과 같은 색·강조와 같은 색·흰색·검정을 넣은 조합이다. 배경 명도 표본에는 구간 밖(중간 명도)이 들어 있어 구간 고정 경로도 지난다.
 
+### 커스텀 테마 저장
+
+**식별** — 선택값(`color_set`)은 `custom:<uuid>` 로 저장한다. `custom:` 뒤가 빈 문자열이면 알 수 없는 값이다. 선택값은 서버와 동기화하지 않는다.
+
+**저장 매체** — 계정별 DB 의 `CustomColorThemes` 테이블이다. DB 파일이 계정 단위라 user 컬럼이 없고, 로그아웃하면 미로그인 DB 를 다시 열기 때문에 로그인 계정의 테마는 미로그인 화면에 보이지 않는다. 같은 uuid 를 저장하면 덮어쓰고 목록은 `created_at` 오름차순이다.
+
+**필드** — `uuid`·`name`·`schema_version`(현재 1)·`seeds`·`colors`·`created_at`·`updated_at`(Unix 초)이다. `seeds` 와 `colors` 는 JSON 텍스트 한 칸이다.
+- `seeds` 키는 `background`·`accent`·`text`·`surface`·`today`·`selectedDay`·`holidayOrWeekEnd`·`ai`·`form`(`filled`·`grouped`·`outlined`)이다. 색은 `#RRGGBB` 이고, 없는 선택 시드는 키를 뺀다.
+- `colors` 는 `ColorThemeDefinition.exportedColors` 가 펼친 `#RRGGBB` 맵이다. 서버 필수 필드라 저장하는 쪽이 저장 시점에 계산해 함께 둔다. 화면은 `colors` 를 읽지 않고 시드에서 매번 파생한다.
+
+**그리기** — 현재 선택된 커스텀 테마 하나는 calendar 외형 설정(`CalendarAppearanceSettings.currentCustomColorTheme`)에 담겨 설정 통지로 흐른다. 키가 `custom:<uuid>` 이고 uuid 가 같은 테마일 때만 채우며, UserDefaults 에는 저장하지 않는다(정본은 DB 다). `ViewAppearance` 는 테마 목록을 들지 않고 그 테마 하나(`customColorTheme`)만 든다. `ColorSetKeys.convert(isSystemDarkTheme:customColorTheme:)` 는 키의 uuid 와 테마의 uuid 가 같고 필수 시드가 `#RRGGBB` 로 읽힐 때만 시드로 파생한 정의를 내고, 아니면 시스템 테마로 그린다. 이 폴백 동안엔 창 스킴을 강제하지 않고 기기 라이트·다크 전환을 따른다 (`ViewAppearance.isFollowingSystemTheme`). 선택값은 계정과 무관한 전역 설정이라 로그아웃·계정 전환 뒤 그 id 가 새 계정에 없을 수 있다.
+
+**읽는 시점** — 앱을 켤 때는 DB 를 먼저 열고, 외형 설정을 읽으면서 선택값이 커스텀이면 그 테마 하나만 읽어 설정에 담는다. 계정이 바뀌면 DB 를 다시 연 뒤 저장된 설정 키가 커스텀일 때 새 계정 DB 에서 그 테마 하나를 읽어 store 에 갈아 끼우고 루트 화면을 새로 만든다. 메인 화면이 외형 설정을 새로 읽을 때도 같은 방식으로 채운다.
+
+**관리** — 테마 목록 조회·저장·삭제는 `UISettingUsecase`(`loadCustomColorThemes`·`saveCustomColorTheme`·`removeCustomColorTheme`)가 맡고, 목록은 메모리에 올리지 않고 커스텀 테마 화면이 직접 조회한다. 저장·삭제한 테마가 현재 선택이면 usecase 가 calendar 설정의 현재 테마를 갈아 끼워 설정 통지를 보내고, 아니면 통지하지 않는다. 폰트처럼 다른 항목만 바꿔도 키가 그대로면 들고 있던 현재 테마를 이어 담고, 다른 커스텀 키로 바뀌면 비운다.
+
 ## 3. 검사
 
 ### 대비

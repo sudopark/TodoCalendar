@@ -8,6 +8,8 @@
 import Foundation
 import Combine
 @preconcurrency import ActivityKit
+import Prelude
+import Optics
 import Domain
 import CommonPresentation
 import Extensions
@@ -22,14 +24,20 @@ struct ApplicationPrepareResult {
 }
 
 
+struct AccountChangePrepareResult {
+    
+    let currentCustomColorTheme: CustomColorTheme?
+}
+
+
 // MARK: - ApplicationRootUsecase
 
 protocol ApplicationPrepareUsecase {
     
     func prepareLaunch() async throws -> ApplicationPrepareResult
     func prepareEnterBackground()
-    func prepareSignedIn(_ auth: Auth) async
-    func prepareSignedOut() async
+    func prepareSignedIn(_ auth: Auth) async -> AccountChangePrepareResult
+    func prepareSignedOut() async -> AccountChangePrepareResult
     func prepareExternalCalendarIntegrated(_ serviceId: String)
     func prepareExternalCalendarStopIntegrated(_ serviceId: String)
 }
@@ -44,6 +52,7 @@ final class ApplicationPrepareUsecaseImple: ApplicationPrepareUsecase {
     private let sharedDataStore: SharedDataStore
     private let environmentStorage: any EnvironmentStorage
     private let coldLaunchHistoryRepository: any AppColdLaunchHistoryRepository
+    private let customColorThemeRepository: any CustomColorThemeRepository
     private let mobileAdService: any MobileAdService
     private let database: SQLiteService
     private let appDataMigration: AppDataMigrationImple
@@ -59,6 +68,7 @@ final class ApplicationPrepareUsecaseImple: ApplicationPrepareUsecase {
         sharedDataStore: SharedDataStore,
         environmentStorage: any EnvironmentStorage,
         coldLaunchHistoryRepository: any AppColdLaunchHistoryRepository,
+        customColorThemeRepository: any CustomColorThemeRepository,
         mobileAdService: any MobileAdService,
         database: SQLiteService,
         appDataMigration: AppDataMigrationImple,
@@ -71,6 +81,7 @@ final class ApplicationPrepareUsecaseImple: ApplicationPrepareUsecase {
         self.sharedDataStore = sharedDataStore
         self.environmentStorage = environmentStorage
         self.coldLaunchHistoryRepository = coldLaunchHistoryRepository
+        self.customColorThemeRepository = customColorThemeRepository
         self.mobileAdService = mobileAdService
         self.database = database
         self.appDataMigration = appDataMigration
@@ -85,9 +96,8 @@ extension ApplicationPrepareUsecaseImple {
         self.recordColdLaunch()
         self.mobileAdService.start()
         let latestLoginAccount = try await self.accountUsecase.prepareLastSignInAccount()
-        let appearance = try await self.prepareLatestAppearanceSeting()
-
         try? await self.prepareDatabase(for: latestLoginAccount?.auth.uid)
+        let appearance = try await self.prepareLatestAppearanceSeting()
 
         try? await self.externalCalenarIntegrationUsecase.prepareIntegratedAccounts()
 
@@ -121,7 +131,7 @@ extension ApplicationPrepareUsecaseImple {
         self.environmentStorage.synchronize()
     }
     
-    func prepareSignedIn(_ auth: Auth) async {
+    func prepareSignedIn(_ auth: Auth) async -> AccountChangePrepareResult {
         await self.endLiveActivities()
         self.sharedDataStore.clearAll {
             $0 != ShareDataKeys.accountInfo.rawValue
@@ -135,9 +145,10 @@ extension ApplicationPrepareUsecaseImple {
         } catch let error {
             logger.log(level: .critical, "signIn -> close db failed..: \(error)")
         }
+        return await self.prepareAccountChangeResult()
     }
     
-    func prepareSignedOut() async {
+    func prepareSignedOut() async -> AccountChangePrepareResult {
         await self.endLiveActivities()
         self.sharedDataStore.clearAll {
             $0 != ShareDataKeys.externalCalendarAccounts.rawValue
@@ -150,6 +161,17 @@ extension ApplicationPrepareUsecaseImple {
         } catch let error {
             logger.log(level: .critical, "signOut -> close db failed..: \(error)")
         }
+        return await self.prepareAccountChangeResult()
+    }
+    
+    private func prepareAccountChangeResult() async -> AccountChangePrepareResult {
+        let appearance = try? await self.prepareLatestAppearanceSeting()
+        return .init(currentCustomColorTheme: appearance?.calendar.currentCustomColorTheme)
+    }
+    
+    private func loadCustomColorTheme(for colorSetKey: ColorSetKeys) async -> CustomColorTheme? {
+        guard case .custom(let themeId) = colorSetKey else { return nil }
+        return try? await self.customColorThemeRepository.loadTheme(themeId)
     }
     
     /// 라이브액티비티는 계정 스코프다 — 안 끄면 전환된 계정 잠금화면에 이전 계정 이벤트가 남는다.
@@ -159,8 +181,10 @@ extension ApplicationPrepareUsecaseImple {
         }
     }
     
-    private func prepareLatestAppearanceSeting() async throws -> AppearanceSettings  {
-        let appearance = self.latestAppSettingRepository.loadSavedViewAppearance()
+    private func prepareLatestAppearanceSeting() async throws -> AppearanceSettings {
+        let saved = self.latestAppSettingRepository.loadSavedViewAppearance()
+        let currentTheme = await self.loadCustomColorTheme(for: saved.calendar.colorSetKey)
+        let appearance = saved |> \.calendar.currentCustomColorTheme .~ currentTheme
         self.sharedDataStore.put(
             CalendarAppearanceSettings.self,
             key: ShareDataKeys.calendarAppearance.rawValue,
