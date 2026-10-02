@@ -46,7 +46,7 @@ struct ColorSetKeysTests {
 
     @Test(
         "모르는 저장 문자열은 복원하지 않는다",
-        arguments: ["appTheme:unknown", "appTheme:", "garbage", "tomato", "custom:tomato", ""]
+        arguments: ["appTheme:unknown", "appTheme:", "garbage", "tomato", "custom:", "custom", "other:abc", ""]
     )
     func init_returnsNilForUnknownStrings(_ raw: String) {
         // given + when
@@ -68,5 +68,40 @@ struct ColorSetKeysTests {
             #expect(raw == "appTheme:\(key.rawValue)")
             #expect(ColorSetKeys(rawValue: raw) == .appTheme(key))
         }
+    }
+
+    @Test("커스텀 테마 키는 id 를 담은 저장 문자열을 왕복한다")
+    func colorSetKeys_customRawValue_roundTrips() {
+        // given
+        let key = ColorSetKeys.custom("uuid-1")
+
+        // when
+        let raw = key.rawValue
+        let restored = ColorSetKeys(rawValue: raw)
+
+        // then
+        #expect(raw == "custom:uuid-1")
+        #expect(restored == key)
+    }
+
+    @Test("id 가 빈 커스텀 테마 문자열은 복원하지 않는다")
+    func colorSetKeys_customWithEmptyId_isNil() {
+        // given + when
+        let key = ColorSetKeys(rawValue: "custom:")
+
+        // then
+        #expect(key == nil)
+    }
+
+    @Test("id 에 구분자가 들어 있어도 첫 구분자만 가르고 id 를 보존한다")
+    func colorSetKeys_customIdContainingSeparator_roundTrips() {
+        // given
+        let key = ColorSetKeys.custom("a:b")
+
+        // when
+        let restored = ColorSetKeys(rawValue: key.rawValue)
+
+        // then
+        #expect(restored == key)
     }
 }

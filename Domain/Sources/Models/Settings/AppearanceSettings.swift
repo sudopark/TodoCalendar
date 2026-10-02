@@ -36,6 +36,7 @@ public enum ColorSetKeys: Sendable, Equatable {
     case defaultLight
     case defaultDark
     case appTheme(AppThemeColorSetKey)
+    case custom(String)
 }
 
 extension ColorSetKeys: RawRepresentable {
@@ -43,6 +44,7 @@ extension ColorSetKeys: RawRepresentable {
     private enum Constant {
         static let categorySeparator: Character = ":"
         static let appThemeCategory: String = "appTheme"
+        static let customCategory: String = "custom"
     }
     
     public var rawValue: String {
@@ -52,6 +54,8 @@ extension ColorSetKeys: RawRepresentable {
         case .defaultDark: return "defaultDark"
         case .appTheme(let key):
             return "\(Constant.appThemeCategory)\(Constant.categorySeparator)\(key.rawValue)"
+        case .custom(let id):
+            return "\(Constant.customCategory)\(Constant.categorySeparator)\(id)"
         }
     }
     
@@ -66,11 +70,18 @@ extension ColorSetKeys: RawRepresentable {
                 maxSplits: 1,
                 omittingEmptySubsequences: false
             )
-            guard components.count == 2,
-                  components[0] == Constant.appThemeCategory,
-                  let key = AppThemeColorSetKey(rawValue: String(components[1]))
-            else { return nil }
-            self = .appTheme(key)
+            guard components.count == 2 else { return nil }
+            let value = String(components[1])
+            switch components[0] {
+            case Constant.appThemeCategory:
+                guard let key = AppThemeColorSetKey(rawValue: value) else { return nil }
+                self = .appTheme(key)
+            case Constant.customCategory:
+                guard value.isEmpty == false else { return nil }
+                self = .custom(value)
+            default:
+                return nil
+            }
         }
     }
 }
@@ -116,6 +127,7 @@ public struct CalendarAppearanceSettings: Equatable, Sendable {
     
     public let colorSetKey: ColorSetKeys
     public let fontSetKey: FontSetKeys
+    public var currentCustomColorTheme: CustomColorTheme?
     
     // calendar
     public var accnetDayPolicy: [AccentDays: Bool] = [:]
