@@ -377,8 +377,8 @@ final class AppDataMigrationImpleTests {
         try outcome.get()
     }
 
-    // 일곱 스텝이 건드리는 여섯 테이블을 전부 v0 시점 선언으로 세운다 —
-    // 하나라도 빠지면 그 스텝이 테이블 없음으로 빠져 돌았는지 구분이 안 된다
+    // 스텝이 건드리는 메인 DB 테이블 넷을 v0 시점 선언으로 세운다 — 하나라도 빠지면 그 스텝이
+    // 테이블 없음으로 빠져 돌았는지 구분이 안 된다. google 셋은 안 세워 1→2·2→3·3→4 가 빈손으로 지난다
     private func seedEveryV0Table(_ db: any DataBase) throws {
         try db.createTableOrNot(TodoEventTableV0.self)
         try db.insert(TodoEventTableV0.self, entities: [self.dummyV0TodoEvent], shouldReplace: true)
@@ -389,14 +389,6 @@ final class AppDataMigrationImpleTests {
             PendingDoneTodoEventTableV0.self,
             entities: self.dummyPendingDoneTodos.map { PendingDoneTodoEventTableV0.Entity($0) },
             shouldReplace: true
-        )
-        try db.createTableOrNot(OldGoogleCalendarEventOriginTableV1.self)
-        try db.insert(
-            OldGoogleCalendarEventOriginTableV1.self, entities: [self.dummyEventOrigin], shouldReplace: true
-        )
-        try db.createTableOrNot(OldGoogleCalendarEventTagTableV2.self)
-        try db.insert(
-            OldGoogleCalendarEventTagTableV2.self, entities: [self.dummyGoogleTag], shouldReplace: true
         )
         try db.createTableOrNot(EventUploadPendingQueueTableV4.self)
         try db.insert(
@@ -464,29 +456,6 @@ final class AppDataMigrationImpleTests {
             .init(allDayTodo),
             .init(periodTodo)
         ]
-    }
-
-    private var dummyEventOrigin: OldGoogleCalendarEventOriginTable.Entity {
-        return .init(
-            "seed-calendar",
-            "Asia/Seoul",
-            GoogleCalendar.EventOrigin(id: "seed-origin", summary: "seed-origin-summary")
-        )
-    }
-
-    private var dummyGoogleTag: GoogleCalendar.Tag {
-        var tag = GoogleCalendar.Tag(id: "seed-tag", name: "seed-tag-name")
-        tag.backgroundColorHex = "seed-background"
-        return tag
-    }
-
-    private func loadEventOrigins(_ mainDB: SQLiteService) async throws -> [OldGoogleCalendarEventOriginTable.Entity] {
-        return try await mainDB.async.run([OldGoogleCalendarEventOriginTable.Entity].self) { db in
-            try db.load(
-                OldGoogleCalendarEventOriginTable.self,
-                query: OldGoogleCalendarEventOriginTable.selectAll()
-            )
-        }
     }
 
     private var dummyV1TodoEvent: TodoEventTableV1.Entity {
@@ -869,7 +838,7 @@ extension AppDataMigrationImpleTests {
 
 extension AppDataMigrationImpleTests {
 
-    // 여섯 테이블을 v0 시점 선언으로 세우고 전 구간을 태우면 일곱 스텝이 다 돌고 데이터가 남는다
+    // 메인 DB 테이블 넷을 v0 시점 선언으로 세우고 전 구간을 태우면 일곱 스텝이 다 돌고 데이터가 남는다
     @Test func runDBMigration_fromV0_runsEveryStepAndKeepsData() async throws {
         // given
         try await withMigrationDB(at: mainDBPath, seed: { db in
@@ -882,14 +851,11 @@ extension AppDataMigrationImpleTests {
             try await self.requireMigratedColumnsExist(mainDB)
             try await self.requireSelectSucceeds(mainDB, "SELECT repeating_count FROM Schedules;")
             try await self.requireSelectSucceeds(mainDB, "SELECT repeating_count, repeating_turn FROM PendingDoneTodoEvent;")
-            try await self.requireSelectSucceeds(mainDB, "SELECT status, visibility FROM google_calendar_event_origin;")
-            try await self.requireSelectSucceeds(mainDB, "SELECT is_selected FROM google_calendar_list;")
             try await self.requireSelectSucceeds(mainDB, "SELECT upload_fail_count FROM event_upload_pending_queue;")
 
             let todos = try await self.loadTodoEvents(mainDB)
             let schedules = try await self.loadSchedules(mainDB)
             let pendingDones = try await self.loadPendingDoneTodos(mainDB)
-            let origins = try await self.loadEventOrigins(mainDB)
             let uploads = try await self.loadUploadingTasks(mainDB)
             let version = try await self.loadUserVersion(mainDB)
 
@@ -904,7 +870,6 @@ extension AppDataMigrationImpleTests {
             #expect(pendingAllDay.repeating?.repeatingEndOption == nil)
             #expect(pendingPeriod.time == .period(7700..<7800))
             #expect(pendingPeriod.repeating?.repeatingEndOption?.endTime == 8800)
-            #expect(try #require(origins.first).origin.id == "seed-origin")
             #expect(try #require(uploads.first).uuid == "seed-upload-uuid")
             #expect(version == 7)
         }
@@ -1058,97 +1023,6 @@ extension AppDataMigrationImpleTests {
             #expect(row.repeatingEnd == nil)
             #expect(row.repeatingEndCount == nil)
             #expect(version == 1)
-        }
-    }
-
-    // 1→2 만 태우면 google_calendar_event_origin 에 status 가 붙고 시드한 행이 그대로 남는다
-    @Test func runDBMigration_v1ToV2_addsStatusToGoogleEventOrigin() async throws {
-        // given
-        try await withMigrationDB(at: mainDBPath, userVersion: 1, seed: { db in
-            try db.createTableOrNot(OldGoogleCalendarEventOriginTableV1.self)
-            try db.insert(
-                OldGoogleCalendarEventOriginTableV1.self,
-                entities: [self.dummyEventOrigin],
-                shouldReplace: true
-            )
-        }) { mainDB, pool in
-            // when
-            try await self.makeMigration(mainDB: mainDB, pool: pool, dbVersion: 2).runDBMigration()
-
-            // then
-            try await self.requireSelectSucceeds(mainDB, "SELECT status FROM google_calendar_event_origin;")
-            let loaded = try await self.loadEventOrigins(mainDB)
-            let version = try await self.loadUserVersion(mainDB)
-            let row = try #require(loaded.first)
-            #expect(loaded.count == 1)
-            #expect(row.calendarId == "seed-calendar")
-            #expect(row.defaultTimeZone == "Asia/Seoul")
-            #expect(row.origin.id == "seed-origin")
-            #expect(row.origin.summary == "seed-origin-summary")
-            #expect(row.origin.status == nil)
-            #expect(version == 2)
-        }
-    }
-
-    // 2→3 만 태우면 google_calendar_list 에 is_selected 가 붙는다
-    @Test func runDBMigration_v2ToV3_addsIsSelectedToGoogleCalendarList() async throws {
-        // given
-        try await withMigrationDB(at: mainDBPath, userVersion: 2, seed: { db in
-            try db.createTableOrNot(OldGoogleCalendarEventTagTableV2.self)
-            try db.insert(
-                OldGoogleCalendarEventTagTableV2.self,
-                entities: [self.dummyGoogleTag],
-                shouldReplace: true
-            )
-        }) { mainDB, pool in
-            // when
-            try await self.makeMigration(mainDB: mainDB, pool: pool, dbVersion: 3).runDBMigration()
-
-            // then
-            try await self.requireSelectSucceeds(mainDB, "SELECT is_selected FROM google_calendar_list;")
-            let loaded = try await mainDB.async.run([GoogleCalendar.Tag].self) { db in
-                try db.load(
-                    OldGoogleCalendarEventTagTable.self,
-                    query: OldGoogleCalendarEventTagTable.selectAll()
-                )
-            }
-            let version = try await self.loadUserVersion(mainDB)
-            let row = try #require(loaded.first)
-            #expect(loaded.count == 1)
-            #expect(row.id == "seed-tag")
-            #expect(row.name == "seed-tag-name")
-            #expect(row.backgroundColorHex == "seed-background")
-            #expect(row.isSelected == nil)
-            // access_role 은 메인 DB 에 물리적으로 없다 — #863 이 선언에만 더했고 마이그레이션이 없다
-            #expect(row.accessRole == nil)
-            #expect(version == 3)
-        }
-    }
-
-    // 3→4 만 태우면 google_calendar_event_origin 에 visibility 가 붙고 시드한 행이 그대로 남는다
-    @Test func runDBMigration_v3ToV4_addsVisibilityToGoogleEventOrigin() async throws {
-        // given
-        try await withMigrationDB(at: mainDBPath, userVersion: 3, seed: { db in
-            try db.createTableOrNot(OldGoogleCalendarEventOriginTableV3.self)
-            try db.insert(
-                OldGoogleCalendarEventOriginTableV3.self,
-                entities: [self.dummyEventOrigin],
-                shouldReplace: true
-            )
-        }) { mainDB, pool in
-            // when
-            try await self.makeMigration(mainDB: mainDB, pool: pool, dbVersion: 4).runDBMigration()
-
-            // then
-            try await self.requireSelectSucceeds(mainDB, "SELECT visibility FROM google_calendar_event_origin;")
-            let loaded = try await self.loadEventOrigins(mainDB)
-            let version = try await self.loadUserVersion(mainDB)
-            let row = try #require(loaded.first)
-            #expect(loaded.count == 1)
-            #expect(row.calendarId == "seed-calendar")
-            #expect(row.origin.id == "seed-origin")
-            #expect(row.origin.visibility == nil)
-            #expect(version == 4)
         }
     }
 
