@@ -119,6 +119,194 @@ final class AppDataMigrationImpleTests {
         return eventIds
     }
 
+    private func insertEveryColumnOldColors(_ mainDB: SQLiteService) async throws {
+        try await mainDB.async.run { db in
+            try db.createTableOrNot(OldGoogleCalendarColorsTable.self)
+            let entities: [OldGoogleCalendarColorsTable.Entity] = [
+                .init(calendar: "calendar-key-1", .init(foregroundHex: "#calendarFore", backgroudHex: "#calendarBack")),
+                .init(event: "event-key-2", .init(foregroundHex: "#eventFore", backgroudHex: "#eventBack"))
+            ]
+            try db.insert(OldGoogleCalendarColorsTable.self, entities: entities)
+        }
+    }
+
+    // accessRole·isSelected 를 비워 둔다 — 미이관 사용자의 물리 테이블엔 access_role 컬럼이 없고
+    // is_selected 는 NULL 이라, 실값을 실으면 재현되지 않는 상태를 기준선으로 굳힌다
+    private var everyColumnOldTag: GoogleCalendar.Tag {
+        var tag = GoogleCalendar.Tag(id: "migrating-calendar", name: "migrating calendar name")
+        tag.description = "migrating calendar description"
+        tag.backgroundColorHex = "#migratingBack"
+        tag.foregroundColorHex = "#migratingFore"
+        tag.colorId = "23"
+        return tag
+    }
+
+    private func insertEveryColumnOldTag(_ mainDB: SQLiteService) async throws {
+        try await mainDB.async.run { db in
+            try db.createTableOrNot(OldGoogleCalendarEventTagTable.self)
+            try db.insert(OldGoogleCalendarEventTagTable.self, entities: [self.everyColumnOldTag])
+        }
+    }
+
+    private var everyColumnOldOrigin: GoogleCalendar.EventOrigin {
+        var creator = GoogleCalendar.EventOrigin.Creator()
+        creator.id = "creator-id"
+        creator.email = "creator@example.com"
+        creator.displayName = "creator name"
+        creator.`self` = false
+
+        var organizer = GoogleCalendar.EventOrigin.Organizer()
+        organizer.id = "organizer-id"
+        organizer.email = "organizer@example.com"
+        organizer.displayName = "organizer name"
+        organizer.`self` = true
+
+        var start = GoogleCalendar.EventOrigin.GoogleEventTime()
+        start.dateTime = "2025-04-11T10:00:00+09:00"
+        start.timeZone = "Asia/Seoul"
+
+        var end = GoogleCalendar.EventOrigin.GoogleEventTime()
+        end.date = "2025-04-12"
+        end.timeZone = "Asia/Tokyo"
+
+        var attendee = GoogleCalendar.EventOrigin.Attendee()
+        attendee.id = "attendee-id"
+        attendee.email = "attendee@example.com"
+        attendee.displayName = "attendee name"
+        attendee.organizer = false
+        attendee.selfValue = true
+        attendee.resource = false
+        attendee.optional = true
+        attendee.responseStatus = "tentative"
+
+        var solution = GoogleCalendar.EventOrigin.ConferenceData.Solution()
+        solution.iconUri = "https://example.com/solution-icon"
+        solution.name = "solution name"
+
+        var entryPoint = GoogleCalendar.EventOrigin.ConferenceData.EntryPoint()
+        entryPoint.entryPointType = "video"
+        entryPoint.uri = "https://example.com/entry-uri"
+        entryPoint.label = "entry label"
+        entryPoint.pin = "entry-pin"
+        entryPoint.accessCode = "entry-access-code"
+        entryPoint.meetingCode = "entry-meeting-code"
+        entryPoint.passcode = "entry-passcode"
+        entryPoint.password = "entry-password"
+
+        var conferenceData = GoogleCalendar.EventOrigin.ConferenceData()
+        conferenceData.conferenceId = "conference-id"
+        conferenceData.conferenceSolution = solution
+        conferenceData.entryPoints = [entryPoint]
+
+        var attachment = GoogleCalendar.EventOrigin.Attachment()
+        attachment.fileUrl = "https://example.com/attachment-file"
+        attachment.title = "attachment title"
+        attachment.mimeType = "application/pdf"
+        attachment.iconLink = "https://example.com/attachment-icon"
+        attachment.fileId = "attachment-file-id"
+
+        var origin = GoogleCalendar.EventOrigin(id: "migrating-origin", summary: "migrating origin summary")
+        origin.htmlLink = "https://example.com/migrating-html-link"
+        origin.description = "migrating origin description"
+        origin.location = "migrating origin location"
+        origin.colorId = "17"
+        origin.creator = creator
+        origin.organizer = organizer
+        origin.start = start
+        origin.end = end
+        origin.endTimeUnspecified = true
+        origin.recurrence = ["RRULE:FREQ=WEEKLY;COUNT=5", "EXDATE;TZID=Asia/Seoul:20250418T100000"]
+        origin.recurringEventId = "migrating-recurring-id"
+        origin.sequence = 13
+        origin.attendees = [attendee]
+        origin.hangoutLink = "https://example.com/migrating-hangout"
+        origin.conferenceData = conferenceData
+        origin.attachments = [attachment]
+        origin.eventType = "outOfOffice"
+        origin.status = .tentative
+        origin.visibility = .confidential
+        return origin
+    }
+
+    private func insertEveryColumnOldOrigins(_ mainDB: SQLiteService) async throws {
+        try await mainDB.async.run { db in
+            try db.createTableOrNot(OldGoogleCalendarEventOriginTable.self)
+            let entities: [OldGoogleCalendarEventOriginTable.Entity] = [
+                .init("migrating-calendar", "Asia/Seoul", self.everyColumnOldOrigin),
+                .init("migrating-calendar", "Asia/Seoul", GoogleCalendar.EventOrigin(id: "migrating-blank-origin", summary: nil))
+            ]
+            try db.insert(OldGoogleCalendarEventOriginTable.self, entities: entities)
+        }
+    }
+
+    private func expectEveryColumnMigrated(_ origin: GoogleCalendar.EventOrigin) {
+        #expect(origin.id == "migrating-origin")
+        #expect(origin.summary == "migrating origin summary")
+        #expect(origin.htmlLink == "https://example.com/migrating-html-link")
+        #expect(origin.description == "migrating origin description")
+        #expect(origin.location == "migrating origin location")
+        #expect(origin.colorId == "17")
+
+        #expect(origin.creator?.id == "creator-id")
+        #expect(origin.creator?.email == "creator@example.com")
+        #expect(origin.creator?.displayName == "creator name")
+        #expect(origin.creator?.`self` == false)
+
+        #expect(origin.organizer?.id == "organizer-id")
+        #expect(origin.organizer?.email == "organizer@example.com")
+        #expect(origin.organizer?.displayName == "organizer name")
+        #expect(origin.organizer?.`self` == true)
+
+        #expect(origin.start?.date == nil)
+        #expect(origin.start?.dateTime == "2025-04-11T10:00:00+09:00")
+        #expect(origin.start?.timeZone == "Asia/Seoul")
+        #expect(origin.end?.date == "2025-04-12")
+        #expect(origin.end?.dateTime == nil)
+        #expect(origin.end?.timeZone == "Asia/Tokyo")
+
+        #expect(origin.endTimeUnspecified == true)
+        #expect(origin.recurrence == ["RRULE:FREQ=WEEKLY;COUNT=5", "EXDATE;TZID=Asia/Seoul:20250418T100000"])
+        #expect(origin.recurringEventId == "migrating-recurring-id")
+        #expect(origin.sequence == 13)
+
+        #expect(origin.attendees?.count == 1)
+        #expect(origin.attendees?.first?.id == "attendee-id")
+        #expect(origin.attendees?.first?.email == "attendee@example.com")
+        #expect(origin.attendees?.first?.displayName == "attendee name")
+        #expect(origin.attendees?.first?.organizer == false)
+        #expect(origin.attendees?.first?.selfValue == true)
+        #expect(origin.attendees?.first?.resource == false)
+        #expect(origin.attendees?.first?.optional == true)
+        #expect(origin.attendees?.first?.responseStatus == "tentative")
+
+        #expect(origin.hangoutLink == "https://example.com/migrating-hangout")
+
+        #expect(origin.conferenceData?.conferenceId == "conference-id")
+        #expect(origin.conferenceData?.conferenceSolution?.iconUri == "https://example.com/solution-icon")
+        #expect(origin.conferenceData?.conferenceSolution?.name == "solution name")
+        #expect(origin.conferenceData?.entryPoints?.count == 1)
+        let entryPoint = origin.conferenceData?.entryPoints?.first
+        #expect(entryPoint?.entryPointType == "video")
+        #expect(entryPoint?.uri == "https://example.com/entry-uri")
+        #expect(entryPoint?.label == "entry label")
+        #expect(entryPoint?.pin == "entry-pin")
+        #expect(entryPoint?.accessCode == "entry-access-code")
+        #expect(entryPoint?.meetingCode == "entry-meeting-code")
+        #expect(entryPoint?.passcode == "entry-passcode")
+        #expect(entryPoint?.password == "entry-password")
+
+        #expect(origin.attachments?.count == 1)
+        #expect(origin.attachments?.first?.fileUrl == "https://example.com/attachment-file")
+        #expect(origin.attachments?.first?.title == "attachment title")
+        #expect(origin.attachments?.first?.mimeType == "application/pdf")
+        #expect(origin.attachments?.first?.iconLink == "https://example.com/attachment-icon")
+        #expect(origin.attachments?.first?.fileId == "attachment-file-id")
+
+        #expect(origin.eventType == "outOfOffice")
+        #expect(origin.status == .tentative)
+        #expect(origin.visibility == .confidential)
+    }
+
     private func loadGoogleDBColors(_ pool: ExternalCalendarSQLiteConnectionPoolImple) async throws -> [GoogleCalendarColorsTable.Entity] {
         let googleDB = try await pool.connection(serviceId: googleServiceId)
         return try await googleDB.async.run { db in
@@ -455,6 +643,60 @@ extension AppDataMigrationImpleTests {
         #expect(origins.count == 2)
         #expect(origins.allSatisfy { $0.accountId == accountId })
         #expect(times.count == 2)
+    }
+
+    // 레거시 세 테이블의 컬럼마다 다른 값을 싣고 이관한 뒤, 현재 테이블 행의 전 컬럼을 단언한다
+    @Test func migration_movesEveryGoogleColumn() async throws {
+        defer { cleanup() }
+        // given
+        let mainDB = try await openMainDB()
+        let pool = try await makePool()
+        try await insertEveryColumnOldColors(mainDB)
+        try await insertEveryColumnOldTag(mainDB)
+        try await insertEveryColumnOldOrigins(mainDB)
+
+        // when
+        await makeMigration(mainDB: mainDB, pool: pool).migrateGoogleCalendarDataIfNeeded(accountId: accountId)
+
+        // then
+        let colors = try await loadGoogleDBColors(pool)
+        #expect(colors.count == 2)
+        let calendarColor = try #require(colors.first { $0.colorType == "calendar" })
+        #expect(calendarColor.accountId == accountId)
+        #expect(calendarColor.colorKey == "calendar-key-1")
+        #expect(calendarColor.background == "#calendarBack")
+        #expect(calendarColor.foreground == "#calendarFore")
+        let eventColor = try #require(colors.first { $0.colorType == "event" })
+        #expect(eventColor.accountId == accountId)
+        #expect(eventColor.colorKey == "event-key-2")
+        #expect(eventColor.background == "#eventBack")
+        #expect(eventColor.foreground == "#eventFore")
+
+        let tags = try await loadGoogleDBTags(pool)
+        #expect(tags.count == 1)
+        let tag = try #require(tags.first)
+        #expect(tag.accountId == accountId)
+        #expect(tag.tag.id == "migrating-calendar")
+        #expect(tag.tag.ownerId == "")
+        #expect(tag.tag.name == "migrating calendar name")
+        #expect(tag.tag.description == "migrating calendar description")
+        #expect(tag.tag.backgroundColorHex == "#migratingBack")
+        #expect(tag.tag.foregroundColorHex == "#migratingFore")
+        #expect(tag.tag.colorId == "23")
+        #expect(tag.tag.isSelected == false)
+        #expect(tag.tag.accessRole == nil)
+
+        let origins = try await loadGoogleDBOrigins(pool)
+        #expect(origins.count == 2)
+        let filled = try #require(origins.first { $0.origin.id == "migrating-origin" })
+        #expect(filled.accountId == accountId)
+        #expect(filled.calendarId == "migrating-calendar")
+        #expect(filled.defaultTimeZone == "Asia/Seoul")
+        expectEveryColumnMigrated(filled.origin)
+
+        let blank = try #require(origins.first { $0.origin.id == "migrating-blank-origin" })
+        #expect(blank.origin.summary == "")
+        #expect(blank.origin.visibility == nil)
     }
 
     // google_calendar DB 연결이 없으면 마이그레이션을 건너뛰고 flag도 설정하지 않음

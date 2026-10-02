@@ -372,10 +372,291 @@ private struct GoogleCalendarEventTagTableV0LegacyTable: Table {
     }
 }
 
+// MARK: - 전 컬럼 왕복 (매크로 전환 전 기준선)
+
+extension GoogleCalendarRepositoryImple_Tests {
+
+    @Test func cacheStorage_whenSaveColorsWithEveryColumn_loadRestoresSameValues() async throws {
+        try await self.runTestWithOpenClose("test_google_colors_every_column_\(UUID().uuidString)") {
+            // given
+            let colors = GoogleCalendar.Colors(
+                ownerId: self.testAccountId,
+                calendars: ["calendar-key-1": .init(foregroundHex: "#calendarFore", backgroudHex: "#calendarBack")],
+                events: ["event-key-2": .init(foregroundHex: "#eventFore", backgroudHex: "#eventBack")]
+            )
+
+            // when
+            try await self.cacheStorage.updateColors(colors, accountId: self.testAccountId)
+            let restored = try await self.cacheStorage.loadColors(accountId: self.testAccountId)
+
+            // then
+            #expect(restored?.ownerId == self.testAccountId)
+            #expect(restored?.calendars.count == 1)
+            #expect(restored?.calendars["calendar-key-1"]?.foregroundHex == "#calendarFore")
+            #expect(restored?.calendars["calendar-key-1"]?.backgroudHex == "#calendarBack")
+            #expect(restored?.events.count == 1)
+            #expect(restored?.events["event-key-2"]?.foregroundHex == "#eventFore")
+            #expect(restored?.events["event-key-2"]?.backgroudHex == "#eventBack")
+        }
+    }
+
+    @Test func cacheStorage_whenSaveCalendarListWithEveryColumn_loadRestoresSameValues() async throws {
+        try await self.runTestWithOpenClose("test_google_list_every_column_\(UUID().uuidString)") {
+            // given
+            let filled = self.everyColumnTag
+            let blank = GoogleCalendar.Tag(id: "blank-calendar", name: "blank calendar name")
+
+            // when
+            try await self.cacheStorage.updateCalendarList([filled, blank], accountId: self.testAccountId)
+            let restored = try await self.cacheStorage.loadCalendarList(accountId: self.testAccountId)
+
+            // then
+            let restoredFilled = try #require(restored.first { $0.id == "filled-calendar" })
+            #expect(restoredFilled.ownerId == self.testAccountId)
+            #expect(restoredFilled.tagId == .externalCalendar(serviceId: GoogleCalendarService.id, id: "filled-calendar"))
+            #expect(restoredFilled.name == "filled calendar name")
+            #expect(restoredFilled.description == "filled calendar description")
+            #expect(restoredFilled.backgroundColorHex == "#listBack")
+            #expect(restoredFilled.foregroundColorHex == "#listFore")
+            #expect(restoredFilled.colorId == "19")
+            #expect(restoredFilled.isSelected == true)
+            #expect(restoredFilled.accessRole == .freeBusyReader)
+
+            let restoredBlank = try #require(restored.first { $0.id == "blank-calendar" })
+            #expect(restoredBlank.name == "blank calendar name")
+            #expect(restoredBlank.description == nil)
+            #expect(restoredBlank.backgroundColorHex == nil)
+            #expect(restoredBlank.foregroundColorHex == nil)
+            #expect(restoredBlank.colorId == nil)
+            #expect(restoredBlank.isSelected == false)
+            #expect(restoredBlank.accessRole == nil)
+        }
+    }
+
+    @Test func cacheStorage_whenSaveEventOriginWithEveryColumn_loadRestoresSameValues() async throws {
+        try await self.runTestWithOpenClose("test_google_origin_every_column_\(UUID().uuidString)") {
+            // given
+            let filled = self.everyColumnEventOrigin
+            let hidden = self.hiddenEventOrigin
+
+            // when
+            try await self.cacheStorage.updateEventDetail(
+                "roundtrip-calendar", "Asia/Seoul", filled, accountId: self.testAccountId
+            )
+            try await self.cacheStorage.updateEventDetail(
+                "roundtrip-calendar", "Asia/Seoul", hidden, accountId: self.testAccountId
+            )
+            let restoredFilled = try await self.cacheStorage.loadEventDetail(
+                "roundtrip-origin", accountId: self.testAccountId
+            )
+            let restoredHidden = try await self.cacheStorage.loadEventDetail(
+                "roundtrip-hidden-origin", accountId: self.testAccountId
+            )
+            let events = try await self.cacheStorage.loadEvents(
+                "roundtrip-calendar", self.range, accountId: self.testAccountId
+            )
+
+            // then
+            self.assertEveryColumnEventOrigin(restoredFilled)
+
+            #expect(restoredHidden.summary == "")
+            #expect(restoredHidden.visibility == .private)
+            #expect(restoredHidden.summaryText == "external_service::google::hidden_event".localized())
+
+            let filledEvent = try #require(events.first { $0.eventId == "roundtrip-origin" })
+            #expect(filledEvent.name == "roundtrip summary")
+            #expect(filledEvent.colorId == "17")
+            #expect(filledEvent.htmlLink == "https://example.com/roundtrip-html-link")
+            #expect(filledEvent.location == "roundtrip location")
+            #expect(filledEvent.eventTime == .period(
+                try self.internetDate("2025-04-11T10:00:00+09:00").timeIntervalSince1970
+                ..< self.internetDate("2025-04-11T11:30:00+09:00").timeIntervalSince1970
+            ))
+
+            let hiddenEvent = try #require(events.first { $0.eventId == "roundtrip-hidden-origin" })
+            #expect(hiddenEvent.name == "external_service::google::hidden_event".localized())
+        }
+    }
+
+    private var everyColumnTag: GoogleCalendar.Tag {
+        var tag = GoogleCalendar.Tag(id: "filled-calendar", name: "filled calendar name")
+        tag.description = "filled calendar description"
+        tag.backgroundColorHex = "#listBack"
+        tag.foregroundColorHex = "#listFore"
+        tag.colorId = "19"
+        tag.isSelected = true
+        tag.accessRole = .freeBusyReader
+        return tag
+    }
+
+    private var everyColumnEventOrigin: GoogleCalendar.EventOrigin {
+        var creator = GoogleCalendar.EventOrigin.Creator()
+        creator.id = "creator-id"
+        creator.email = "creator@example.com"
+        creator.displayName = "creator name"
+        creator.`self` = false
+
+        var organizer = GoogleCalendar.EventOrigin.Organizer()
+        organizer.id = "organizer-id"
+        organizer.email = "organizer@example.com"
+        organizer.displayName = "organizer name"
+        organizer.`self` = true
+
+        var attendee = GoogleCalendar.EventOrigin.Attendee()
+        attendee.id = "attendee-id"
+        attendee.email = "attendee@example.com"
+        attendee.displayName = "attendee name"
+        attendee.organizer = false
+        attendee.selfValue = true
+        attendee.resource = false
+        attendee.optional = true
+        attendee.responseStatus = "tentative"
+
+        var solution = GoogleCalendar.EventOrigin.ConferenceData.Solution()
+        solution.iconUri = "https://example.com/solution-icon"
+        solution.name = "solution name"
+
+        var entryPoint = GoogleCalendar.EventOrigin.ConferenceData.EntryPoint()
+        entryPoint.entryPointType = "video"
+        entryPoint.uri = "https://example.com/entry-uri"
+        entryPoint.label = "entry label"
+        entryPoint.pin = "entry-pin"
+        entryPoint.accessCode = "entry-access-code"
+        entryPoint.meetingCode = "entry-meeting-code"
+        entryPoint.passcode = "entry-passcode"
+        entryPoint.password = "entry-password"
+
+        var conferenceData = GoogleCalendar.EventOrigin.ConferenceData()
+        conferenceData.conferenceId = "conference-id"
+        conferenceData.conferenceSolution = solution
+        conferenceData.entryPoints = [entryPoint]
+
+        var attachment = GoogleCalendar.EventOrigin.Attachment()
+        attachment.fileUrl = "https://example.com/attachment-file"
+        attachment.title = "attachment title"
+        attachment.mimeType = "application/pdf"
+        attachment.iconLink = "https://example.com/attachment-icon"
+        attachment.fileId = "attachment-file-id"
+
+        var origin = GoogleCalendar.EventOrigin(id: "roundtrip-origin", summary: "roundtrip summary")
+        origin.htmlLink = "https://example.com/roundtrip-html-link"
+        origin.description = "roundtrip description"
+        origin.location = "roundtrip location"
+        origin.colorId = "17"
+        origin.creator = creator
+        origin.organizer = organizer
+        origin.start = self.eventTime(dateTime: "2025-04-11T10:00:00+09:00", timeZone: "Asia/Seoul")
+        origin.end = self.eventTime(dateTime: "2025-04-11T11:30:00+09:00", timeZone: "Asia/Tokyo")
+        origin.endTimeUnspecified = true
+        origin.recurrence = ["RRULE:FREQ=WEEKLY;COUNT=5", "EXDATE;TZID=Asia/Seoul:20250418T100000"]
+        origin.recurringEventId = "roundtrip-recurring-id"
+        origin.sequence = 13
+        origin.attendees = [attendee]
+        origin.hangoutLink = "https://example.com/roundtrip-hangout"
+        origin.conferenceData = conferenceData
+        origin.attachments = [attachment]
+        origin.eventType = "outOfOffice"
+        origin.status = .tentative
+        origin.visibility = .confidential
+        return origin
+    }
+
+    private var hiddenEventOrigin: GoogleCalendar.EventOrigin {
+        var origin = GoogleCalendar.EventOrigin(id: "roundtrip-hidden-origin", summary: nil)
+        origin.start = self.eventTime(dateTime: "2025-04-12T10:00:00+09:00", timeZone: "Asia/Seoul")
+        origin.end = self.eventTime(dateTime: "2025-04-12T11:30:00+09:00", timeZone: "Asia/Seoul")
+        origin.visibility = .private
+        return origin
+    }
+
+    private func eventTime(
+        dateTime: String, timeZone: String
+    ) -> GoogleCalendar.EventOrigin.GoogleEventTime {
+        var time = GoogleCalendar.EventOrigin.GoogleEventTime()
+        time.dateTime = dateTime
+        time.timeZone = timeZone
+        return time
+    }
+
+    private func internetDate(_ text: String) throws -> Date {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime]
+        return try formatter.date(from: text).unwrap()
+    }
+
+    private func assertEveryColumnEventOrigin(_ origin: GoogleCalendar.EventOrigin) {
+        #expect(origin.id == "roundtrip-origin")
+        #expect(origin.summary == "roundtrip summary")
+        #expect(origin.htmlLink == "https://example.com/roundtrip-html-link")
+        #expect(origin.description == "roundtrip description")
+        #expect(origin.location == "roundtrip location")
+        #expect(origin.colorId == "17")
+
+        #expect(origin.creator?.id == "creator-id")
+        #expect(origin.creator?.email == "creator@example.com")
+        #expect(origin.creator?.displayName == "creator name")
+        #expect(origin.creator?.`self` == false)
+
+        #expect(origin.organizer?.id == "organizer-id")
+        #expect(origin.organizer?.email == "organizer@example.com")
+        #expect(origin.organizer?.displayName == "organizer name")
+        #expect(origin.organizer?.`self` == true)
+
+        #expect(origin.start?.date == nil)
+        #expect(origin.start?.dateTime == "2025-04-11T10:00:00+09:00")
+        #expect(origin.start?.timeZone == "Asia/Seoul")
+        #expect(origin.end?.date == nil)
+        #expect(origin.end?.dateTime == "2025-04-11T11:30:00+09:00")
+        #expect(origin.end?.timeZone == "Asia/Tokyo")
+
+        #expect(origin.endTimeUnspecified == true)
+        #expect(origin.recurrence == ["RRULE:FREQ=WEEKLY;COUNT=5", "EXDATE;TZID=Asia/Seoul:20250418T100000"])
+        #expect(origin.recurringEventId == "roundtrip-recurring-id")
+        #expect(origin.sequence == 13)
+
+        #expect(origin.attendees?.count == 1)
+        #expect(origin.attendees?.first?.id == "attendee-id")
+        #expect(origin.attendees?.first?.email == "attendee@example.com")
+        #expect(origin.attendees?.first?.displayName == "attendee name")
+        #expect(origin.attendees?.first?.organizer == false)
+        #expect(origin.attendees?.first?.selfValue == true)
+        #expect(origin.attendees?.first?.resource == false)
+        #expect(origin.attendees?.first?.optional == true)
+        #expect(origin.attendees?.first?.responseStatus == "tentative")
+
+        #expect(origin.hangoutLink == "https://example.com/roundtrip-hangout")
+
+        #expect(origin.conferenceData?.conferenceId == "conference-id")
+        #expect(origin.conferenceData?.conferenceSolution?.iconUri == "https://example.com/solution-icon")
+        #expect(origin.conferenceData?.conferenceSolution?.name == "solution name")
+        let entryPoint = origin.conferenceData?.entryPoints?.first
+        #expect(origin.conferenceData?.entryPoints?.count == 1)
+        #expect(entryPoint?.entryPointType == "video")
+        #expect(entryPoint?.uri == "https://example.com/entry-uri")
+        #expect(entryPoint?.label == "entry label")
+        #expect(entryPoint?.pin == "entry-pin")
+        #expect(entryPoint?.accessCode == "entry-access-code")
+        #expect(entryPoint?.meetingCode == "entry-meeting-code")
+        #expect(entryPoint?.passcode == "entry-passcode")
+        #expect(entryPoint?.password == "entry-password")
+
+        #expect(origin.attachments?.count == 1)
+        #expect(origin.attachments?.first?.fileUrl == "https://example.com/attachment-file")
+        #expect(origin.attachments?.first?.title == "attachment title")
+        #expect(origin.attachments?.first?.mimeType == "application/pdf")
+        #expect(origin.attachments?.first?.iconLink == "https://example.com/attachment-icon")
+        #expect(origin.attachments?.first?.fileId == "attachment-file-id")
+
+        #expect(origin.eventType == "outOfOffice")
+        #expect(origin.status == .tentative)
+        #expect(origin.visibility == .confidential)
+    }
+}
+
 // MARK: - events
 
 extension GoogleCalendarRepositoryImple_Tests {
-    
+
     private var range: Range<TimeInterval> {
         let start = "2025.04.01 00:00:00".date()
         let end = "2025.05.01 00:00:00".date()
