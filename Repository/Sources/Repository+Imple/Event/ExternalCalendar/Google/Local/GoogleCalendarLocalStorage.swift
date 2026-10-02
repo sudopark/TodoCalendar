@@ -109,11 +109,7 @@ extension GoogleCalendarLocalStorageImple {
             let query = Calendars.selectAll { $0.accountId == accountId }
             return try db.load(query)
         }
-        return entities.map { entity in
-            var tag = entity.tag
-            tag.ownerId = entity.accountId
-            return tag
-        }
+        return entities.map { $0.asTag() }
     }
 
     public func updateCalendarList(_ calendars: [GoogleCalendar.Tag], accountId: String) async throws {

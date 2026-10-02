@@ -120,11 +120,11 @@ extension AppDataMigrationImple {
 
     private func runMigrationVersion2to3(_ database: any DataBase) throws {
         do {
-            try database.migrate(OldGoogleCalendarEventTagTable.self, version: 2)
-            logger.log(.sql, level: .info, "migration version 2 -> 3, OldGoogleCalendarEventTagTable finished")
+            try database.migrate(GoogleCalendarEventTagTableV0.self, version: 2)
+            logger.log(.sql, level: .info, "migration version 2 -> 3, GoogleCalendarEventTagTableV0 finished")
         } catch {
-            logger.log(.sql, level: .error, "migration version 2 -> 3 failed.. will drop OldGoogleCalendarEventTagTable")
-            try? database.dropTable(OldGoogleCalendarEventTagTable.self)
+            logger.log(.sql, level: .error, "migration version 2 -> 3 failed.. will drop GoogleCalendarEventTagTableV0")
+            try? database.dropTable(GoogleCalendarEventTagTableV0.self)
         }
     }
 
@@ -232,9 +232,10 @@ extension AppDataMigrationImple {
         }
 
         let tags = try await mainDB.async.run { db -> [GoogleCalendar.Tag] in
-            try? db.createTableOrNot(OldGoogleCalendarEventTagTable.self)
-            let query = OldGoogleCalendarEventTagTable.selectAll()
-            return (try? db.load(query)) ?? []
+            try? db.createTableOrNot(GoogleCalendarEventTagTableV0.self)
+            let query = GoogleCalendarEventTagTableV0.selectAll()
+            let entities = (try? db.load(GoogleCalendarEventTagTableV0.self, query: query)) ?? []
+            return entities.map { $0.asTag() }
         }
 
         let origins = try await mainDB.async.run { db -> [OldGoogleCalendarEventOriginTable.Entity] in
@@ -296,7 +297,7 @@ extension AppDataMigrationImple {
     private func cleanupMainDB(eventIds: [String]) async throws {
         try await mainDB.async.run { db in
             try? db.dropTable(GoogleCalendarColorsTableV0.self)
-            try? db.dropTable(OldGoogleCalendarEventTagTable.self)
+            try? db.dropTable(GoogleCalendarEventTagTableV0.self)
             try? db.dropTable(OldGoogleCalendarEventOriginTable.self)
             if !eventIds.isEmpty {
                 let deleteQuery = EventTimeTable.delete().where { $0.eventId.in(eventIds) }
