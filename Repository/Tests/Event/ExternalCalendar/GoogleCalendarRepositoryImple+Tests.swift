@@ -276,9 +276,9 @@ extension GoogleCalendarRepositoryImple_Tests {
                 |> \.colorId .~ "9"
                 |> \.isSelected .~ true
             try await self.sqliteService.async.run { db in
-                try db.createTableOrNot(GoogleCalendarEventTagTableV0LegacyTable.self)
-                let entity = GoogleCalendarEventTagTable.Entity(accountId: accountId, legacyTag)
-                try db.insert(GoogleCalendarEventTagTableV0LegacyTable.self, entities: [entity], shouldReplace: true)
+                try db.createTableOrNot(GoogleCalendarEventTagTableV1.self)
+                let entity = GoogleCalendarEventTagTableV1.Entity(accountId: accountId, legacyTag)
+                try db.insert(GoogleCalendarEventTagTableV1.self, entities: [entity], shouldReplace: true)
             }
 
             // when
@@ -324,50 +324,6 @@ extension GoogleCalendarRepositoryImple_Tests {
             let loaded = try await self.cacheStorage.loadCalendarList(accountId: self.testAccountId)
             #expect(loaded.first?.id == "fresh_calendar")
             #expect(loaded.first?.accessRole == .writer)
-        }
-    }
-}
-
-private struct GoogleCalendarEventTagTableV0LegacyTable: Table {
-
-    enum Columns: String, TableColumn {
-        case accountId = "account_id"
-        case tagId = "tag_id"
-        case name
-        case description
-        case background
-        case foreground
-        case colorId = "color_id"
-        case isSelected = "is_selected"
-
-        var dataType: ColumnDataType {
-            switch self {
-            case .accountId: return .text([.notNull])
-            case .tagId: return .text([.primaryKey(autoIncrement: false), .unique, .notNull])
-            case .name: return .text([.notNull])
-            case .description: return .text([])
-            case .background: return .text([])
-            case .foreground: return .text([])
-            case .colorId: return .text([])
-            case .isSelected: return .integer([])
-            }
-        }
-    }
-
-    typealias ColumnType = Columns
-    typealias EntityType = GoogleCalendarEventTagTable.Entity
-    static var tableName: String { GoogleCalendarEventTagTable.tableName }
-
-    static func scalar(_ entity: EntityType, for column: Columns) -> (any ScalarType)? {
-        switch column {
-        case .accountId: return entity.accountId
-        case .tagId: return entity.tag.id
-        case .name: return entity.tag.name
-        case .description: return entity.tag.description
-        case .background: return entity.tag.backgroundColorHex
-        case .foreground: return entity.tag.foregroundColorHex
-        case .colorId: return entity.tag.colorId
-        case .isSelected: return entity.tag.isSelected ?? false
         }
     }
 }
@@ -679,6 +635,41 @@ extension GoogleCalendarRepositoryImple_Tests {
         #expect(legacyValues.count == GoogleCalendarColorsTableV0.Columns.allCases.count)
         #expect(legacyValues.isEmpty == false)
         #expect(legacyValues.allSatisfy { $0 != nil })
+    }
+
+    @Test func tagEntity_serialize_leavesNoColumnUnmapped() throws {
+        // given
+        let entity = GoogleCalendarEventTagTable.Entity(
+            accountId: self.testAccountId, self.everyColumnTag
+        )
+
+        // when
+        let values = try GoogleCalendarEventTagTable.serialize(entity: entity)
+
+        // then
+        #expect(values.count == GoogleCalendarEventTagTable.Columns.allCases.count)
+        #expect(values.isEmpty == false)
+        #expect(values.allSatisfy { $0 != nil })
+    }
+
+    @Test func legacyTagEntity_serialize_leavesNoColumnUnmapped() throws {
+        // given
+        let mainDBEntity = GoogleCalendarEventTagTableV0.Entity(self.everyColumnTag)
+        let externalV1Entity = GoogleCalendarEventTagTableV1.Entity(
+            accountId: self.testAccountId, self.everyColumnTag
+        )
+
+        // when
+        let mainDBValues = try GoogleCalendarEventTagTableV0.serialize(entity: mainDBEntity)
+        let externalV1Values = try GoogleCalendarEventTagTableV1.serialize(entity: externalV1Entity)
+
+        // then
+        #expect(mainDBValues.count == GoogleCalendarEventTagTableV0.Columns.allCases.count)
+        #expect(mainDBValues.isEmpty == false)
+        #expect(mainDBValues.allSatisfy { $0 != nil })
+        #expect(externalV1Values.count == GoogleCalendarEventTagTableV1.Columns.allCases.count)
+        #expect(externalV1Values.isEmpty == false)
+        #expect(externalV1Values.allSatisfy { $0 != nil })
     }
 }
 
