@@ -111,6 +111,25 @@ extension EventSyncRepositoryImpleTests {
         }
     }
     
+    @Test func repository_whenSaveSyncTimestampWithEveryColumn_loadRestoresSameValues() async throws {
+        try await self.runTestWithOpenClose("every_column_ts") {
+            // given
+            try await self.saveTimeStamp(.eventTag, 1_790_000_123)
+            try await self.saveTimeStamp(.schedule, 7_301)
+            try await self.saveTimeStamp(.todo, 42)
+
+            // when
+            let tag = try await self.syncTimestampLocalStorage.loadLocalTimestamp(for: .eventTag)
+            let schedule = try await self.syncTimestampLocalStorage.loadLocalTimestamp(for: .schedule)
+            let todo = try await self.syncTimestampLocalStorage.loadLocalTimestamp(for: .todo)
+
+            // then
+            #expect(tag == .init(.eventTag, 1_790_000_123))
+            #expect(schedule == .init(.schedule, 7_301))
+            #expect(todo == .init(.todo, 42))
+        }
+    }
+
     @Test func repository_clearSyncTimestamp() async throws {
         try await self.runTestWithOpenClose("clear_ts") {
             // given
