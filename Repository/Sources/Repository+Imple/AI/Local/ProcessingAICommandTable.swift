@@ -7,43 +7,36 @@
 //
 
 import Foundation
-import SQLiteService
+import SQLiteServiceMacros
 import Domain
 
 
-struct ProcessingAICommandTable: Table {
+typealias ProcessingAICommandTable = ProcessingAICommandTableV0
 
-    enum Columns: String, TableColumn {
-        case jobId = "job_id"
-        case isConfirmJob = "is_confirm_job"
-
-        var dataType: ColumnDataType {
-            switch self {
-            case .jobId: return .text([.primaryKey(autoIncrement: false), .unique, .notNull])
-            case .isConfirmJob: return .integer([.notNull])
-            }
-        }
-    }
-
-    typealias ColumnType = Columns
-    typealias EntityType = ProcessingAICommand
-    static var tableName: String { "ProcessingAICommand" }
-
-    static func scalar(_ entity: ProcessingAICommand, for column: Columns) -> (any ScalarType)? {
-        switch column {
-        case .jobId: return entity.jobId
-        case .isConfirmJob: return entity.isConfirmJob
-        }
-    }
+@Table("ProcessingAICommand")
+struct ProcessingAICommandTableV0 {
+    
+    @Column(.primaryKey(autoIncrement: false), .unique, .notNull, name: "job_id")
+    let jobId: String
+    
+    @Column(.notNull, name: "is_confirm_job")
+    let isConfirmJob: Bool
 }
 
 
-extension ProcessingAICommand: @retroactive RowValueType {
+extension ProcessingAICommandTable.Entity {
 
-    public init(_ cursor: CursorIterator) throws {
+    init(_ command: ProcessingAICommand) {
         self.init(
-            jobId: try cursor.next().unwrap(),
-            isConfirmJob: try cursor.next().unwrap()
+            jobId: command.jobId,
+            isConfirmJob: command.isConfirmJob
+        )
+    }
+
+    func asProcessingAICommand() -> ProcessingAICommand {
+        return ProcessingAICommand(
+            jobId: self.jobId,
+            isConfirmJob: self.isConfirmJob
         )
     }
 }
