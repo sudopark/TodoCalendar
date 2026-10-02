@@ -28,6 +28,14 @@ open class StubUISettingUsecase: UISettingUsecase, @unchecked Sendable {
             + AppThemeColorSetKey.allCases.map { ColorSetKeys.appTheme($0) }
     }
     
+    public var stubCustomColorThemes: [CustomColorTheme] = []
+    open func loadCustomColorThemes() async throws -> [CustomColorTheme] {
+        return self.stubCustomColorThemes
+    }
+    
+    public func saveCustomColorTheme(_ theme: CustomColorTheme) async throws { }
+    public func removeCustomColorTheme(_ uuid: String) async throws { }
+    
     private let settingSubject = CurrentValueSubject<AppearanceSettings?, Never>(nil)
     open func refreshAppearanceSetting() async throws -> AppearanceSettings {
         let setting = self.readSetting()

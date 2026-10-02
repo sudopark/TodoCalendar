@@ -8,21 +8,26 @@
 
 import Foundation
 import Combine
+import Prelude
+import Optics
 import Extensions
 
 
 public final class AppSettingUsecaseImple: @unchecked Sendable {
     
     private let appSettingRepository: any AppSettingRepository
+    private let customColorThemeRepository: any CustomColorThemeRepository
     private let viewAppearanceStore: any ViewAppearanceStore
     private let sharedDataStore: SharedDataStore
     
     public init(
         appSettingRepository: any AppSettingRepository,
+        customColorThemeRepository: any CustomColorThemeRepository,
         viewAppearanceStore: any ViewAppearanceStore,
         sharedDataStore: SharedDataStore
     ) {
         self.appSettingRepository = appSettingRepository
+        self.customColorThemeRepository = customColorThemeRepository
         self.viewAppearanceStore = viewAppearanceStore
         self.sharedDataStore = sharedDataStore
     }
@@ -36,7 +41,8 @@ extension AppSettingUsecaseImple: UISettingUsecase {
     private var defaultEventTagColorKey: String { ShareDataKeys.defaultEventTagColor.rawValue }
     
     public func loadSavedAppearanceSetting() -> AppearanceSettings {
-        let setting = self.appSettingRepository.loadSavedViewAppearance()
+        let saved = self.appSettingRepository.loadSavedViewAppearance()
+        let setting = saved |> \.calendar .~ self.carryingCurrentCustomColorTheme(saved.calendar)
         self.sharedDataStore.put(
             CalendarAppearanceSettings.self, key: self.calednarSettingKey, setting.calendar
         )
@@ -57,7 +63,9 @@ extension AppSettingUsecaseImple: UISettingUsecase {
     }
     
     public func refreshAppearanceSetting() async throws -> AppearanceSettings {
-        let setting = try await self.appSettingRepository.refreshAppearanceSetting()
+        let refreshed = try await self.appSettingRepository.refreshAppearanceSetting()
+        let currentTheme = await self.loadCustomColorTheme(for: refreshed.calendar.colorSetKey)
+        let setting = refreshed |> \.calendar.currentCustomColorTheme .~ currentTheme
         self.sharedDataStore.put(
             CalendarAppearanceSettings.self, key: self.calednarSettingKey, setting.calendar
         )
@@ -75,7 +83,8 @@ extension AppSettingUsecaseImple: UISettingUsecase {
         else {
             throw RuntimeError("invalid edit appearance params")
         }
-        let newSetting = try self.appSettingRepository.changeCalendarAppearanceSetting(params)
+        let changed = try self.appSettingRepository.changeCalendarAppearanceSetting(params)
+        let newSetting = self.carryingCurrentCustomColorTheme(changed)
         self.viewAppearanceStore.notifyCalendarSettingChanged(newSetting)
         self.sharedDataStore.put(
             CalendarAppearanceSettings.self, key: self.calednarSettingKey, newSetting
@@ -108,6 +117,48 @@ extension AppSettingUsecaseImple: UISettingUsecase {
         
         let newSetting =  self.appSettingRepository.updateWidgetAppearance(params)
         return newSetting
+    }
+    
+    public func loadCustomColorThemes() async throws -> [CustomColorTheme] {
+        return try await self.customColorThemeRepository.loadThemes()
+    }
+    
+    public func saveCustomColorTheme(_ theme: CustomColorTheme) async throws {
+        try await self.customColorThemeRepository.saveTheme(theme)
+        self.replaceCurrentCustomColorTheme(of: theme.uuid, with: theme)
+    }
+    
+    public func removeCustomColorTheme(_ uuid: String) async throws {
+        try await self.customColorThemeRepository.removeTheme(uuid)
+        self.replaceCurrentCustomColorTheme(of: uuid, with: nil)
+    }
+    
+    private func loadCustomColorTheme(for colorSetKey: ColorSetKeys) async -> CustomColorTheme? {
+        guard case .custom(let themeId) = colorSetKey else { return nil }
+        return try? await self.customColorThemeRepository.loadTheme(themeId)
+    }
+    
+    private func carryingCurrentCustomColorTheme(
+        _ setting: CalendarAppearanceSettings
+    ) -> CalendarAppearanceSettings {
+        guard case .custom = setting.colorSetKey,
+              let current = self.sharedDataStore
+                .value(CalendarAppearanceSettings.self, key: self.calednarSettingKey),
+              current.colorSetKey == setting.colorSetKey
+        else { return setting }
+        return setting |> \.currentCustomColorTheme .~ current.currentCustomColorTheme
+    }
+    
+    private func replaceCurrentCustomColorTheme(of uuid: String, with theme: CustomColorTheme?) {
+        guard let current = self.sharedDataStore
+            .value(CalendarAppearanceSettings.self, key: self.calednarSettingKey),
+              current.colorSetKey == .custom(uuid)
+        else { return }
+        let newSetting = current |> \.currentCustomColorTheme .~ theme
+        self.viewAppearanceStore.notifyCalendarSettingChanged(newSetting)
+        self.sharedDataStore.put(
+            CalendarAppearanceSettings.self, key: self.calednarSettingKey, newSetting
+        )
     }
     
     public var currentCalendarUISeting: AnyPublisher<CalendarAppearanceSettings, Never> {
