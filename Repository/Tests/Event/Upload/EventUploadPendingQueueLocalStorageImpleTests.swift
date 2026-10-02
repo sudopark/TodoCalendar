@@ -51,6 +51,28 @@ extension EventUploadPendingQueueLocalStorageImpleTests {
         }
     }
     
+    @Test func storage_whenPushTaskWithEveryColumn_popRestoresSameValues() async throws {
+        try await self.runTestWithOpenClose("pending-every-column") {
+            // given
+            let storage = self.makeStorage()
+            let task = EventUploadingTask(
+                timestamp: 1_234.5, dataType: .eventDetail, uuid: "task-uuid-A", isRemovingTask: true
+            )
+            |> \.uploadFailCount .~ 2
+
+            // when
+            try await storage.pushTask(task)
+            let popedTask = try await storage.popTask()
+
+            // then
+            #expect(popedTask?.timestamp == 1_234.5)
+            #expect(popedTask?.dataType == .eventDetail)
+            #expect(popedTask?.uuid == "task-uuid-A")
+            #expect(popedTask?.isRemovingTask == true)
+            #expect(popedTask?.uploadFailCount == 2)
+        }
+    }
+
     private func saveTasks(
         _ storage: EventUploadPendingQueueLocalStorageImple,
         _ tasks: [EventUploadingTask]? = nil
