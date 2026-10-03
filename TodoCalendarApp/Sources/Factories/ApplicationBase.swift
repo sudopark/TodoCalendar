@@ -50,24 +50,14 @@ final class ApplicationBase {
     }()
     
     lazy var externalCalendarDBConnectionPool: ExternalCalendarSQLiteConnectionPoolImple = {
+        let migration = ExternalCalendarDBMigrationImple(
+            googleCalendarDBVersion: AppEnvironment.googleCalendarDBVersion,
+            appleCalendarDBVersion: AppEnvironment.appleCalendarDBVersion
+        )
         return ExternalCalendarSQLiteConnectionPoolImple(
             dbPathMap: AppEnvironment.externalCalendarDBPaths(),
             onFirstOpen: { service in
-                let googleDBVersion = AppEnvironment.googleCalendarDBVersion
-                let _ = try await service.async.migrate(
-                    upto: googleDBVersion,
-                    steps: { version, database in
-                        switch version {
-                        case 0:
-                            try GoogleCalendarEventTagTableMigration.runMigration(for: version, database: database)
-                        default: break
-                        }
-                    },
-                    finalized: { version, database in
-                        logger.log(.sql, level: .info, "external calendar db migration finished to: \(version)")
-                        try? database.updateJournalMode("WAL")
-                    }
-                )
+                try await migration.runMigration(serviceId: GoogleCalendarService.id, dbService: service)
             }
         )
     }()
