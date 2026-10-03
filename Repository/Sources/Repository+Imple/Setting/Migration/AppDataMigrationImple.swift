@@ -41,9 +41,9 @@ public final class AppDataMigrationImple: @unchecked Sendable {
                     case 1: try self?.runMigrationVersion1to2(database)
                     case 2: try self?.runMigrationVersion2to3(database)
                     case 3: try self?.runMigrationVersion3to4(database)
-                    case 4: try? self?.runMigrationVersion4to5(database)
-                    case 5: try? self?.runMigrationVersion5to6(database)
-                    case 6: try? self?.runMigrationVersion6to7(database)
+                    case 4: try self?.runMigrationVersion4to5(database)
+                    case 5: try self?.runMigrationVersion5to6(database)
+                    case 6: try self?.runMigrationVersion6to7(database)
                     default: break
                     }
                 },
