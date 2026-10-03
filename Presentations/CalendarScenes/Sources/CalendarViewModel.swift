@@ -355,6 +355,7 @@ extension CalendarViewModelImple {
     
     private func prepareInitialMonths(around today: CalendarComponent.Day) {
         let totalMonths = self.makeTotalMonths(around: today.year, today.month)
+        self.updateSelectedDay(CalendarDay(today.year, today.month, today.day))
         Task { @MainActor in
             self.calendarPaperInteractors = self.router?.attachInitialMonths(totalMonths.totalMonths)
             self.subject.monthsInCurrentRange.send(totalMonths)
@@ -390,11 +391,7 @@ extension CalendarViewModelImple {
         self.calendarUsecase.currentDay
             .first()
             .sink(receiveValue: { [weak self] today in
-                guard let self = self else { return }
-                let totalMonths = self.makeTotalMonths(around: today.year, today.month)
-                self.changeChilds(totalMonths) { thisMonthInteractor in
-                    thisMonthInteractor?.selectToday()
-                }
+                self?.moveFocus(toToday: today)
             })
             .store(in: self.cancellables)
     }
@@ -402,12 +399,7 @@ extension CalendarViewModelImple {
     func moveDay(_ day: CalendarDay, withClearPresented: Bool) {
         
         self.router?.dismissPresented(animated: true) { [weak self] in
-            guard let self = self else { return }
-            
-            let totalMonths = self.makeTotalMonths(around: day.year, day.month)
-            self.changeChilds(totalMonths) { selectMontthInteractor in
-                selectMontthInteractor?.selectDay(day)
-            }
+            self?.moveFocus(to: day) { $0?.selectDay(day) }
         }
     }
     
