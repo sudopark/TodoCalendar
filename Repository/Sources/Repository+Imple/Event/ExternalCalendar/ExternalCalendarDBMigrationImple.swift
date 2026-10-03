@@ -23,6 +23,20 @@ public final class ExternalCalendarDBMigrationImple: @unchecked Sendable {
     }
 
     public func runMigration(serviceId: String, dbService: SQLiteService) async throws {
+        switch serviceId {
+        case GoogleCalendarService.id: try await self.runGoogleCalendarDBMigration(dbService)
+        case AppleCalendarService.id: try await self.runAppleCalendarDBMigration(dbService)
+        default: break
+        }
+    }
+}
+
+
+// MARK: - DB Migration steps
+
+extension ExternalCalendarDBMigrationImple {
+
+    private func runGoogleCalendarDBMigration(_ dbService: SQLiteService) async throws {
         let _ = try await dbService.async.migrate(
             upto: self.googleCalendarDBVersion,
             steps: { [weak self] version, database in
@@ -31,18 +45,30 @@ public final class ExternalCalendarDBMigrationImple: @unchecked Sendable {
                 default: break
                 }
             },
-            finalized: { version, database in
-                logger.log(.sql, level: .info, "external calendar db migration finished to: \(version)")
-                try? database.updateJournalMode("WAL")
+            finalized: { [weak self] version, database in
+                self?.finishMigration(serviceId: GoogleCalendarService.id, version, database)
             }
         )
     }
-}
 
+    private func runAppleCalendarDBMigration(_ dbService: SQLiteService) async throws {
+        let _ = try await dbService.async.migrate(
+            upto: self.appleCalendarDBVersion,
+            steps: { version, _ in
+                switch version {
+                default: break
+                }
+            },
+            finalized: { [weak self] version, database in
+                self?.finishMigration(serviceId: AppleCalendarService.id, version, database)
+            }
+        )
+    }
 
-// MARK: - DB Migration steps
-
-extension ExternalCalendarDBMigrationImple {
+    private func finishMigration(serviceId: String, _ version: Int32, _ database: any DataBase) {
+        logger.log(.sql, level: .info, "external calendar db migration finished, service: \(serviceId), to: \(version)")
+        try? database.updateJournalMode("WAL")
+    }
 
     private func runGoogleCalendarEventTagMigration(_ version: Int32, _ database: any DataBase) throws {
         do {

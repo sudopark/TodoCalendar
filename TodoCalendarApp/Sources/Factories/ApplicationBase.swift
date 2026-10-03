@@ -56,8 +56,8 @@ final class ApplicationBase {
         )
         return ExternalCalendarSQLiteConnectionPoolImple(
             dbPathMap: AppEnvironment.externalCalendarDBPaths(),
-            onFirstOpen: { service in
-                try await migration.runMigration(serviceId: GoogleCalendarService.id, dbService: service)
+            onFirstOpen: { serviceId, service in
+                try await migration.runMigration(serviceId: serviceId, dbService: service)
             }
         )
     }()
