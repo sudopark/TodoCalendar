@@ -382,8 +382,8 @@ final class AppDataMigrationImpleTests {
         try outcome.get()
     }
 
-    // 스텝이 건드리는 메인 DB 테이블 넷을 v0 시점 선언으로 세운다 — 하나라도 빠지면 그 스텝이
-    // 테이블 없음으로 빠져 돌았는지 구분이 안 된다. google 셋은 안 세워 1→2·2→3·3→4 가 빈손으로 지난다
+    // 스텝이 건드리는 메인 DB 테이블 넷을 v0 시점 선언으로 세운다 — 큐는 안 세우면 4→5 가 빈손으로 지나고,
+    // 나머지 셋은 0→1 이 스스로 세우므로 시드 행이 보존을 증명한다. google 셋은 안 세워 1→2·2→3·3→4 가 빈손이다
     private func seedEveryV0Table(_ db: any DataBase) throws {
         try db.createTableOrNot(TodoEventTableV0.self)
         try db.insert(TodoEventTableV0.self, entities: [self.dummyV0TodoEvent], shouldReplace: true)
@@ -567,6 +567,54 @@ final class AppDataMigrationImpleTests {
     private func insertCurrentTodoEvent(_ mainDB: SQLiteService) async throws {
         try await mainDB.async.run { db in
             try db.insert(TodoEventTable.self, entities: [self.dummyCurrentTodoEvent], shouldReplace: true)
+        }
+    }
+
+    private var dummyCurrentSchedule: ScheduleEventTable.Entity {
+        return ScheduleEventTable.Entity(
+            uuid: "fresh-schedule-uuid",
+            name: "fresh-schedule-name",
+            eventTagId: "fresh-schedule-tag",
+            repeatingStart: 2200,
+            repeatingOption: "fresh-schedule-option",
+            repeatingEnd: 3300,
+            showTurn: true,
+            excludeTimes: "fresh-schedule-excludes",
+            notificationOptions: "fresh-schedule-notification",
+            repeatingEndCount: 44
+        )
+    }
+
+    private func insertCurrentSchedule(_ mainDB: SQLiteService) async throws {
+        try await mainDB.async.run { db in
+            try db.insert(ScheduleEventTable.self, entities: [self.dummyCurrentSchedule], shouldReplace: true)
+        }
+    }
+
+    private var dummyCurrentPendingDoneTodo: PendingDoneTodoEventTable.Entity {
+        return PendingDoneTodoEventTable.Entity(
+            uuid: "fresh-pending-uuid",
+            name: "fresh-pending-name",
+            createTimeStamp: 1100,
+            eventTagId: "fresh-pending-tag",
+            repeatingStart: 2200,
+            repeatingOption: "fresh-pending-option",
+            repeatingEnd: 3300,
+            notificationOptions: "fresh-pending-notification",
+            repeatingEndCount: 44,
+            repeatingTurn: 55,
+            timeType: "fresh-pending-time-type",
+            timeLowerBound: 6600,
+            timeUpperBound: 7700,
+            secondsFromGMT: 8800
+        )
+    }
+
+    private func insertCurrentPendingDoneTodo(_ mainDB: SQLiteService) async throws {
+        try await mainDB.async.run { db in
+            try db.insert(
+                PendingDoneTodoEventTable.self, entities: [self.dummyCurrentPendingDoneTodo], shouldReplace: true
+            )
         }
     }
 
@@ -946,6 +994,70 @@ extension AppDataMigrationImpleTests {
             #expect(row.repeatingTurn == 55)
         }
     }
+
+    // 빈 DB 에 전 구간을 태우면 Schedules 가 마이그레이션만으로 서고 컬럼마다 다른 값이 자리대로 왕복한다
+    @Test func runDBMigration_onEmptyDB_keepsSchedulesTable() async throws {
+        // given
+        try await withMigrationDB(at: mainDBPath) { mainDB, pool in
+            // when
+            try await self.makeMigration(mainDB: mainDB, pool: pool).runDBMigration()
+
+            // then
+            try await self.requireSelectSucceeds(mainDB, "SELECT repeating_count FROM Schedules;")
+            let version = try await self.loadUserVersion(mainDB)
+            #expect(version == 7)
+
+            try await self.insertCurrentSchedule(mainDB)
+            let loaded = try await self.loadSchedules(mainDB)
+            let row = try #require(loaded.first)
+            #expect(loaded.count == 1)
+            #expect(row.uuid == "fresh-schedule-uuid")
+            #expect(row.name == "fresh-schedule-name")
+            #expect(row.eventTagId == "fresh-schedule-tag")
+            #expect(row.repeatingStart == 2200)
+            #expect(row.repeatingOption == "fresh-schedule-option")
+            #expect(row.repeatingEnd == 3300)
+            #expect(row.showTurn == true)
+            #expect(row.excludeTimes == "fresh-schedule-excludes")
+            #expect(row.notificationOptions == "fresh-schedule-notification")
+            #expect(row.repeatingEndCount == 44)
+        }
+    }
+
+    // 빈 DB 에 전 구간을 태워도 PendingDoneTodoEvent 가 살아남고 컬럼 열넷이 자리대로 왕복한다
+    @Test func runDBMigration_onEmptyDB_keepsPendingDoneTodoEventTable() async throws {
+        // given
+        try await withMigrationDB(at: mainDBPath) { mainDB, pool in
+            // when
+            try await self.makeMigration(mainDB: mainDB, pool: pool).runDBMigration()
+
+            // then
+            try await self.requireSelectSucceeds(
+                mainDB, "SELECT repeating_count, repeating_turn FROM PendingDoneTodoEvent;"
+            )
+            let version = try await self.loadUserVersion(mainDB)
+            #expect(version == 7)
+
+            try await self.insertCurrentPendingDoneTodo(mainDB)
+            let loaded = try await self.loadPendingDoneTodos(mainDB)
+            let row = try #require(loaded.first)
+            #expect(loaded.count == 1)
+            #expect(row.uuid == "fresh-pending-uuid")
+            #expect(row.name == "fresh-pending-name")
+            #expect(row.createTimeStamp == 1100)
+            #expect(row.eventTagId == "fresh-pending-tag")
+            #expect(row.repeatingStart == 2200)
+            #expect(row.repeatingOption == "fresh-pending-option")
+            #expect(row.repeatingEnd == 3300)
+            #expect(row.notificationOptions == "fresh-pending-notification")
+            #expect(row.repeatingEndCount == 44)
+            #expect(row.repeatingTurn == 55)
+            #expect(row.timeType == "fresh-pending-time-type")
+            #expect(row.timeLowerBound == 6600)
+            #expect(row.timeUpperBound == 7700)
+            #expect(row.secondsFromGMT == 8800)
+        }
+    }
 }
 
 
@@ -1044,6 +1156,22 @@ extension AppDataMigrationImpleTests {
             // 0→1 이 붙인 컬럼은 기존 행에서 NULL 이라 종료 옵션이 안 잡힌다
             #expect(row.repeatingEnd == nil)
             #expect(row.repeatingEndCount == nil)
+            #expect(version == 1)
+        }
+    }
+
+    // 빈 DB 에 0→1 만 태워도 세 테이블이 v0 선언에서 출발해 repeating_count 를 갖는다
+    @Test func runDBMigration_v0ToV1_onEmptyDB_standsThreeTablesFromV0Declarations() async throws {
+        // given
+        try await withMigrationDB(at: mainDBPath) { mainDB, pool in
+            // when
+            try await self.makeMigration(mainDB: mainDB, pool: pool, dbVersion: 1).runDBMigration()
+
+            // then
+            try await self.requireSelectSucceeds(mainDB, "SELECT repeating_count FROM TodoEvents;")
+            try await self.requireSelectSucceeds(mainDB, "SELECT repeating_count FROM Schedules;")
+            try await self.requireSelectSucceeds(mainDB, "SELECT repeating_count FROM PendingDoneTodoEvent;")
+            let version = try await self.loadUserVersion(mainDB)
             #expect(version == 1)
         }
     }
