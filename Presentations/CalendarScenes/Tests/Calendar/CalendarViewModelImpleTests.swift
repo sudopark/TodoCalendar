@@ -535,6 +535,276 @@ extension CalendarViewModelImpleTests {
     }
 }
 
+// MARK: - 2단 포커스 월·선택일
+
+extension CalendarViewModelImpleTests {
+
+    func testViewModel_whenPaperSelectDayOnFocusedMonth_emitSelectedDay() {
+        // given
+        let expect = expectation(description: "포커스 월의 선택일만 방출")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModelWithInitialSetup(
+            .init(year: 2023, month: 08, day: 02, weekDay: 3)
+        )
+        viewModel.calendarPaper(on: .init(year: 2023, month: 08), didChange: .dummy(2023, 08, 03))
+
+        // when
+        let days = self.waitOutputs(expect, for: viewModel.selectedDay) {
+            viewModel.calendarPaper(on: .init(year: 2023, month: 09), didChange: .dummy(2023, 09, 10))
+            viewModel.calendarPaper(on: .init(year: 2023, month: 08), didChange: .dummy(2023, 08, 05))
+        }
+
+        // then
+        XCTAssertEqual(days, [.init(2023, 08, 03), .init(2023, 08, 05)])
+    }
+
+    func testViewModel_whenFocusChangedBySlot_emitFocusedMonth() {
+        // given
+        let expect = expectation(description: "슬롯 회전으로 바뀐 포커스 월 방출")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModelWithInitialSetup(
+            .init(year: 2023, month: 08, day: 02, weekDay: 3)
+        )
+
+        // when
+        let months = self.waitOutputs(expect, for: viewModel.focusedMonth) {
+            viewModel.focusChanged(from: 1, to: 2)
+            viewModel.focusChanged(from: 2, to: 0)
+        }
+
+        // then
+        XCTAssertEqual(months, [
+            .init(year: 2023, month: 08), .init(year: 2023, month: 09), .init(year: 2023, month: 10)
+        ])
+    }
+
+    func testViewModel_whenChangeFocusedMonth_rebuildWindowAroundMonth() async throws {
+        // given
+        let viewModel = self.makeViewModelWithInitialSetup(
+            .init(year: 2023, month: 08, day: 02, weekDay: 3)
+        )
+        let focusedMonths = self.record(viewModel.focusedMonth)
+
+        // when
+        viewModel.changeFocusedMonth(to: .init(year: 2023, month: 11))
+        try await self.waitEffect("포커스 월이 11월로 바뀜") {
+            focusedMonths.values.last == .init(year: 2023, month: 11)
+        }
+
+        // then
+        XCTAssertEqual(self.spyRouter.didChangedFocusIndex, 1)
+        XCTAssertEqual(self.spyRouter.spyInteractors.map { $0.currentMonth }, [
+            .init(year: 2023, month: 10), .init(year: 2023, month: 11), .init(year: 2023, month: 12)
+        ])
+    }
+
+    func testViewModel_whenChangeFocusedMonthToTodayMonth_selectToday() async throws {
+        // given
+        let viewModel = self.makeViewModelWithInitialSetup(
+            .init(year: 2023, month: 08, day: 02, weekDay: 3)
+        )
+        viewModel.focusChanged(from: 1, to: 2)
+        viewModel.calendarPaper(on: .init(year: 2023, month: 08), didChange: .dummy(2023, 08, 15))
+        let selectedDays = self.record(viewModel.selectedDay)
+
+        // when
+        viewModel.changeFocusedMonth(to: .init(year: 2023, month: 08))
+        try await self.waitEffect("오늘이 속한 달로 포커스가 오면 오늘을 선택") {
+            selectedDays.values.last == .init(2023, 08, 02)
+        }
+
+        // then
+        XCTAssertEqual(self.spyRouter.spyInteractors[1].didSelectTodayRequested, true)
+        XCTAssertNil(self.spyRouter.spyInteractors[1].didSelectDay)
+    }
+
+    func testViewModel_whenChangeFocusedMonthToOtherMonth_selectFirstDay() async throws {
+        // given
+        let viewModel = self.makeViewModelWithInitialSetup(
+            .init(year: 2023, month: 08, day: 02, weekDay: 3)
+        )
+        let selectedDays = self.record(viewModel.selectedDay)
+
+        // when
+        viewModel.changeFocusedMonth(to: .init(year: 2023, month: 11))
+        try await self.waitEffect("다른 달로 포커스가 오면 1일을 선택") {
+            selectedDays.values.last == .init(2023, 11, 01)
+        }
+
+        // then
+        XCTAssertEqual(self.spyRouter.spyInteractors[1].didSelectDay, .init(2023, 11, 01))
+        XCTAssertNil(self.spyRouter.spyInteractors[1].didSelectTodayRequested)
+    }
+
+    func testViewModel_whenChangeFocusedMonth_notifyFocusChangedToListener() async throws {
+        // given
+        let viewModel = self.makeViewModelWithInitialSetup(
+            .init(year: 2023, month: 08, day: 02, weekDay: 3)
+        )
+        let notifications = self.recordFocusChangedNotifications()
+
+        // when
+        viewModel.changeFocusedMonth(to: .init(year: 2024, month: 08))
+        try await self.waitEffect("오늘과 같은 달이라도 다른 해면 1일로 헤더에 통지") {
+            notifications.values.last?.dayInfo == .init(2024, 08, 01)
+        }
+
+        // then
+        XCTAssertEqual(notifications.values.last?.isCurrentYear, false)
+        XCTAssertEqual(notifications.values.last?.isCurrentDay, false)
+    }
+
+    func testViewModel_whenChangeFocusedMonthToSameMonth_keepSelectedDay() async throws {
+        // given
+        let viewModel = self.makeViewModelWithInitialSetup(
+            .init(year: 2023, month: 08, day: 02, weekDay: 3)
+        )
+        viewModel.calendarPaper(on: .init(year: 2023, month: 08), didChange: .dummy(2023, 08, 15))
+        let selectedDays = self.record(viewModel.selectedDay)
+
+        // when
+        viewModel.changeFocusedMonth(to: .init(year: 2023, month: 08))
+        try await self.settle()
+
+        // then
+        XCTAssertEqual(selectedDays.values, [.init(2023, 08, 15)])
+        XCTAssertNil(self.spyRouter.didChangedFocusIndex)
+        XCTAssertNil(self.spyRouter.spyInteractors[1].didSelectDay)
+        XCTAssertNil(self.spyRouter.spyInteractors[1].didSelectTodayRequested)
+    }
+
+    func testViewModel_whenChangeFocusedMonthToNewYear_refreshEventsAndHolidays() {
+        // given
+        let expect = expectation(description: "새 연도로 포커스가 오면 그 해 공휴일 적재")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModelWithInitialSetup(
+            .init(year: 2023, month: 08, day: 02, weekDay: 3)
+        )
+
+        // when
+        let holidaysPerYears = self.waitOutputs(expect, for: self.spyHolidayUsecase.holidays()) {
+            viewModel.changeFocusedMonth(to: .init(year: 2025, month: 03))
+        }
+
+        // then
+        let holidayLoadedYears = holidaysPerYears.map { $0.keys.sorted() }
+        XCTAssertEqual(holidayLoadedYears, [[2023], [2023, 2025]])
+        let todoExpect = expectation(description: "새로 조회 범위에 든 기간의 할일 적재")
+        let todos = self.waitFirstOutput(
+            todoExpect, for: self.spyTodoUsecase.todoEvents(in: self.range((2023, 01, 01), (2026, 01, 01)))
+        )
+        XCTAssertEqual(todos?.map { $0.uuid }, [
+            "kst-month: 2023.01.01_00:00..<2024.01.01_00:00",
+            "kst-month: 2024.01.01_00:00..<2026.01.01_00:00"
+        ])
+        XCTAssertEqual(self.spyRouter.spyInteractors.map { $0.currentMonth }, [
+            .init(year: 2025, month: 02), .init(year: 2025, month: 03), .init(year: 2025, month: 04)
+        ])
+    }
+
+    func testViewModel_whenSelectDayInFocusedMonth_updateSelectedDayAndNotify() async throws {
+        // given
+        let viewModel = self.makeViewModelWithInitialSetup(
+            .init(year: 2023, month: 08, day: 02, weekDay: 3)
+        )
+        let selectedDays = self.record(viewModel.selectedDay)
+        let notifications = self.recordFocusChangedNotifications()
+
+        // when
+        viewModel.selectDay(.init(2023, 08, 20))
+        try await self.waitEffect("헤더에 8월 20일 통지") {
+            notifications.values.last?.dayInfo == .init(2023, 08, 20)
+        }
+
+        // then
+        XCTAssertEqual(selectedDays.values.last, .init(2023, 08, 20))
+        XCTAssertEqual(self.spyRouter.spyInteractors[1].didSelectDay, .init(2023, 08, 20))
+        XCTAssertNil(self.spyRouter.didChangedFocusIndex)
+    }
+
+    func testViewModel_whenSelectDayInFocusedMonthOnSideSlot_selectOnFocusedPaper() async throws {
+        // given
+        let viewModel = self.makeViewModelWithInitialSetup(
+            .init(year: 2023, month: 08, day: 02, weekDay: 3)
+        )
+        viewModel.focusChanged(from: 1, to: 2)
+        let selectedDays = self.record(viewModel.selectedDay)
+
+        // when
+        viewModel.selectDay(.init(2023, 09, 20))
+        try await self.waitEffect("9월 20일 선택") {
+            selectedDays.values.last == .init(2023, 09, 20)
+        }
+
+        // then
+        XCTAssertEqual(self.spyRouter.spyInteractors[2].didSelectDay, .init(2023, 09, 20))
+        XCTAssertNil(self.spyRouter.spyInteractors[1].didSelectDay)
+        XCTAssertNil(self.spyRouter.didChangedFocusIndex)
+    }
+
+    func testViewModel_whenPaperReportsDayWithPreviousMonth_keepDayInReportedMonth() async throws {
+        // given
+        let viewModel = self.makeViewModelWithInitialSetup(
+            .init(year: 2023, month: 08, day: 02, weekDay: 3)
+        )
+        viewModel.focusChanged(from: 1, to: 2)
+        let selectedDays = self.record(viewModel.selectedDay)
+
+        // when
+        viewModel.calendarPaper(on: .init(year: 2023, month: 09), didChange: .dummy(2023, 08, 05))
+        try await self.waitEffect("9월의 선택일 방출") {
+            selectedDays.values.last != nil
+        }
+
+        // then
+        XCTAssertEqual(selectedDays.values, [.init(2023, 09, 05)])
+    }
+
+    func testViewModel_whenSelectDayInOtherMonth_moveFocusToThatMonth() async throws {
+        // given
+        let viewModel = self.makeViewModelWithInitialSetup(
+            .init(year: 2023, month: 08, day: 02, weekDay: 3)
+        )
+        let focusedMonths = self.record(viewModel.focusedMonth)
+        let selectedDays = self.record(viewModel.selectedDay)
+
+        // when
+        viewModel.selectDay(.init(2023, 09, 20))
+        try await self.waitEffect("9월 20일 선택") {
+            selectedDays.values.last == .init(2023, 09, 20)
+        }
+
+        // then
+        XCTAssertEqual(focusedMonths.values.last, .init(year: 2023, month: 09))
+        XCTAssertFalse(selectedDays.values.contains(.init(2023, 09, 01)))
+        XCTAssertEqual(self.spyRouter.spyInteractors[1].didSelectDay, .init(2023, 09, 20))
+        XCTAssertEqual(self.spyRouter.spyInteractors.map { $0.currentMonth }, [
+            .init(year: 2023, month: 08), .init(year: 2023, month: 09), .init(year: 2023, month: 10)
+        ])
+    }
+
+    func testViewModel_whenChangeFocusedMonthToMonthAlreadyInCenterSlot_resetFocusedPaperSelection() async throws {
+        // given
+        let viewModel = self.makeViewModelWithInitialSetup(
+            .init(year: 2023, month: 08, day: 02, weekDay: 3)
+        )
+        viewModel.focusChanged(from: 1, to: 2)
+        viewModel.focusChanged(from: 2, to: 0)
+        viewModel.calendarPaper(on: .init(year: 2023, month: 11), didChange: .dummy(2023, 11, 15))
+        let selectedDays = self.record(viewModel.selectedDay)
+
+        // when
+        viewModel.changeFocusedMonth(to: .init(year: 2023, month: 11))
+        try await self.waitEffect("가운데 칸에 있던 11월로 포커스가 오면 1일로 다시 선택") {
+            selectedDays.values.last == .init(2023, 11, 01)
+        }
+
+        // then
+        XCTAssertEqual(self.spyRouter.spyInteractors[1].currentMonth, .init(year: 2023, month: 11))
+        XCTAssertEqual(self.spyRouter.spyInteractors[1].didSelectDay, .init(2023, 11, 01))
+    }
+}
+
 // MARK: - 기타 정보 갱신
 
 extension CalendarViewModelImpleTests {
@@ -1407,6 +1677,42 @@ extension CalendarViewModelImpleTests {
 
         // then
         XCTAssertNil(self.stubOrchestration.didEnterVoiceInput)
+    }
+}
+
+private extension CalendarViewModelImpleTests {
+
+    final class OutputRecorder<T>: @unchecked Sendable {
+        private let lock = NSLock()
+        private var recorded: [T] = []
+
+        var values: [T] {
+            self.lock.lock(); defer { self.lock.unlock() }
+            return self.recorded
+        }
+
+        func append(_ value: T) {
+            self.lock.lock(); defer { self.lock.unlock() }
+            self.recorded.append(value)
+        }
+    }
+
+    func record<T>(_ publisher: AnyPublisher<T, Never>) -> OutputRecorder<T> {
+        let recorder = OutputRecorder<T>()
+        publisher
+            .sink(receiveValue: { recorder.append($0) })
+            .store(in: &self.cancelBag)
+        return recorder
+    }
+
+    func recordFocusChangedNotifications() -> OutputRecorder<SelectDayInfo> {
+        let recorder = OutputRecorder<SelectDayInfo>()
+        self.spyListener.didSelectionChanged = { recorder.append($0) }
+        return recorder
+    }
+
+    func settle() async throws {
+        try await Task.sleep(for: .milliseconds(50))
     }
 }
 
