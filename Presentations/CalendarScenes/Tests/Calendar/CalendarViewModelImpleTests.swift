@@ -803,6 +803,67 @@ extension CalendarViewModelImpleTests {
         XCTAssertEqual(self.spyRouter.spyInteractors[1].currentMonth, .init(year: 2023, month: 11))
         XCTAssertEqual(self.spyRouter.spyInteractors[1].didSelectDay, .init(2023, 11, 01))
     }
+
+    func testViewModel_whenPrepare_emitTodayAsSelectedDay() {
+        // given
+        let expect = expectation(description: "paper 보고 전에도 준비가 끝나면 오늘을 선택일로 방출")
+        let viewModel = self.makeViewModelWithInitialSetup(
+            .init(year: 2023, month: 08, day: 02, weekDay: 3)
+        )
+
+        // when
+        let selected = self.waitFirstOutput(expect, for: viewModel.selectedDay)
+
+        // then
+        XCTAssertEqual(selected, .init(2023, 08, 02))
+    }
+
+    func testViewModel_whenMoveDay_emitFocusedMonthAndSelectedDay() async throws {
+        // given
+        let viewModel = self.makeViewModelWithInitialSetup(
+            .init(year: 2023, month: 08, day: 02, weekDay: 3)
+        )
+        let focusedMonths = self.record(viewModel.focusedMonth)
+        let selectedDays = self.record(viewModel.selectedDay)
+
+        // when
+        viewModel.moveDay(.init(2024, 04, 03))
+        try await self.waitEffect("4월 3일로 이동") {
+            selectedDays.values.last == .init(2024, 04, 03)
+        }
+        viewModel.moveDay(.init(2024, 04, 10))
+        try await self.waitEffect("같은 달 4월 10일로 이동") {
+            selectedDays.values.last == .init(2024, 04, 10)
+        }
+        try await self.settle()
+
+        // then
+        XCTAssertEqual(focusedMonths.values, [
+            .init(year: 2023, month: 08), .init(year: 2024, month: 04)
+        ])
+    }
+
+    func testViewModel_whenMoveFocusToToday_emitTodayAsSelectedDay() async throws {
+        // given
+        let viewModel = self.makeViewModelWithInitialSetup(
+            .init(year: 2023, month: 08, day: 02, weekDay: 3)
+        )
+        let selectedDays = self.record(viewModel.selectedDay)
+        viewModel.selectDay(.init(2023, 08, 20))
+        viewModel.selectDay(.init(2023, 11, 20))
+        try await self.waitEffect("11월 20일 선택") {
+            selectedDays.values.last == .init(2023, 11, 20)
+        }
+
+        // when
+        viewModel.moveFocusToToday()
+        try await self.waitEffect("오늘로 복귀") {
+            selectedDays.values.last == .init(2023, 08, 02)
+        }
+
+        // then
+        XCTAssertEqual(selectedDays.values.suffix(2), [.init(2023, 11, 20), .init(2023, 08, 02)])
+    }
 }
 
 // MARK: - 기타 정보 갱신
