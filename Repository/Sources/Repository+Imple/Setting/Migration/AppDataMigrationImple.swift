@@ -85,6 +85,7 @@ extension AppDataMigrationImple {
 
     private func runMigrationVersion0To1(_ database: any DataBase) throws {
         do {
+            try database.createTableOrNot(TodoEventTableV0.self)
             try database.migrate(TodoEventTable.self, version: 0)
             logger.log(.sql, level: .info, "migration version 0 -> 1, TodoEventTable finished")
         } catch {
@@ -92,6 +93,7 @@ extension AppDataMigrationImple {
             try? database.dropTable(TodoEventTable.self)
         }
         do {
+            try database.createTableOrNot(ScheduleEventTableV0.self)
             try database.migrate(ScheduleEventTable.self, version: 0)
             logger.log(.sql, level: .info, "migration version 0 -> 1, ScheduleEventTable finished")
         } catch {
@@ -99,6 +101,7 @@ extension AppDataMigrationImple {
             try? database.dropTable(ScheduleEventTable.self)
         }
         do {
+            try database.createTableOrNot(PendingDoneTodoEventTableV0.self)
             try database.migrate(PendingDoneTodoEventTable.self, version: 0)
             logger.log(.sql, level: .info, "migration version 0 -> 1, PendingDoneTodoEventTable finished")
         } catch {
