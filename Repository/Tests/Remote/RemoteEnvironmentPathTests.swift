@@ -101,4 +101,11 @@ extension RemoteEnvironmentPathTests {
         // then
         #expect(path == "https://raw.githubusercontent.com/sudopark/TodoCalendar-Terms/main/app-config/legal-notice.json")
     }
+
+    @Test func path_appPolicyEndpoint_returnsTermsRepositoryRawURL() {
+        // when
+        let path = self.env.path(AppEndpoints.appPolicy)
+        // then
+        #expect(path == "https://raw.githubusercontent.com/sudopark/TodoCalendar-Terms/main/app-config/app-policy.json")
+    }
 }
