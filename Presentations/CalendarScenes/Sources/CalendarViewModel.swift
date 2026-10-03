@@ -21,6 +21,11 @@ protocol CalendarViewModel: AnyObject, Sendable, CalendarSceneInteractor {
     
     func prepare()
     func focusChanged(from previousIndex: Int, to nextIndex: Int)
+
+    func changeFocusedMonth(to month: CalendarMonth)
+    func selectDay(_ day: CalendarDay)
+    var focusedMonth: AnyPublisher<CalendarMonth, Never> { get }
+    var selectedDay: AnyPublisher<CalendarDay, Never> { get }
 }
 
 
@@ -96,7 +101,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
     }
     private struct Subject {
         let monthsInCurrentRange = CurrentValueSubject<TotalMonthsInRange?, Never>(nil)
-        let selectedDayPerMonths = CurrentValueSubject<[CalendarMonth: CurrentSelectDayModel], Never>([:])
+        let selectedDayPerMonths = CurrentValueSubject<[CalendarMonth: CalendarDay], Never>([:])
         let aiAgentState = CurrentValueSubject<AIAgentState?, Never>(nil)
         let isSignedIn = CurrentValueSubject<Bool, Never>(false)
         let isMonthCollapsed = CurrentValueSubject<Bool, Never>(false)
@@ -188,7 +193,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
     private func bindFocusedMonthChanged() {
         typealias CurrentAndFocusInfo = (
             focusedMonth: CalendarMonth,
-            focusedDayMap: [CalendarMonth: CurrentSelectDayModel],
+            focusedDayMap: [CalendarMonth: CalendarDay],
             currentDay: CalendarComponent.Day
         )
         let transformWithFocusedMonthAnsIsCurrentDay: (CurrentAndFocusInfo) -> SelectDayInfo?
@@ -350,6 +355,7 @@ extension CalendarViewModelImple {
     
     private func prepareInitialMonths(around today: CalendarComponent.Day) {
         let totalMonths = self.makeTotalMonths(around: today.year, today.month)
+        self.updateSelectedDay(CalendarDay(today.year, today.month, today.day))
         Task { @MainActor in
             self.calendarPaperInteractors = self.router?.attachInitialMonths(totalMonths.totalMonths)
             self.subject.monthsInCurrentRange.send(totalMonths)
@@ -385,11 +391,7 @@ extension CalendarViewModelImple {
         self.calendarUsecase.currentDay
             .first()
             .sink(receiveValue: { [weak self] today in
-                guard let self = self else { return }
-                let totalMonths = self.makeTotalMonths(around: today.year, today.month)
-                self.changeChilds(totalMonths) { thisMonthInteractor in
-                    thisMonthInteractor?.selectToday()
-                }
+                self?.moveFocus(toToday: today)
             })
             .store(in: self.cancellables)
     }
@@ -397,12 +399,7 @@ extension CalendarViewModelImple {
     func moveDay(_ day: CalendarDay, withClearPresented: Bool) {
         
         self.router?.dismissPresented(animated: true) { [weak self] in
-            guard let self = self else { return }
-            
-            let totalMonths = self.makeTotalMonths(around: day.year, day.month)
-            self.changeChilds(totalMonths) { selectMontthInteractor in
-                selectMontthInteractor?.selectDay(day)
-            }
+            self?.moveFocus(to: day) { $0?.selectDay(day) }
         }
     }
     
@@ -465,6 +462,76 @@ extension CalendarViewModelImple {
 }
 
 
+// MARK: - 포커스 월·선택일
+
+extension CalendarViewModelImple {
+
+    var focusedMonth: AnyPublisher<CalendarMonth, Never> {
+        return self.subject.monthsInCurrentRange
+            .compactMap { $0?.focusedMonth }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+
+    var selectedDay: AnyPublisher<CalendarDay, Never> {
+        return Publishers.CombineLatest(
+            self.focusedMonth,
+            self.subject.selectedDayPerMonths
+        )
+        .compactMap { month, selectedDays in selectedDays[month] }
+        .removeDuplicates()
+        .eraseToAnyPublisher()
+    }
+
+    func changeFocusedMonth(to month: CalendarMonth) {
+        guard self.subject.monthsInCurrentRange.value?.focusedMonth != month else { return }
+        self.calendarUsecase.currentDay
+            .first()
+            .sink(receiveValue: { [weak self] today in
+                let isTodayMonth = today.year == month.year && today.month == month.month
+                if isTodayMonth {
+                    self?.moveFocus(toToday: today)
+                } else {
+                    let firstDay = CalendarDay(month.year, month.month, 1)
+                    self?.moveFocus(to: firstDay) { $0?.selectDay(firstDay) }
+                }
+            })
+            .store(in: self.cancellables)
+    }
+
+    func selectDay(_ day: CalendarDay) {
+        let month = CalendarMonth(year: day.year, month: day.month)
+        guard let range = self.subject.monthsInCurrentRange.value,
+              range.focusedMonth == month
+        else {
+            self.moveFocus(to: day) { $0?.selectDay(day) }
+            return
+        }
+        self.updateSelectedDay(day)
+        self.calendarPaperInteractors?[safe: range.focusedIndex]?.selectDay(day)
+    }
+
+    private func moveFocus(toToday today: CalendarComponent.Day) {
+        self.moveFocus(to: CalendarDay(today.year, today.month, today.day)) { $0?.selectToday() }
+    }
+
+    private func moveFocus(
+        to day: CalendarDay,
+        andSelectDay: @Sendable @escaping ((any CalendarPaperSceneInteractor)?) -> Void
+    ) {
+        self.updateSelectedDay(day)
+        let totalMonths = self.makeTotalMonths(around: day.year, day.month)
+        self.changeChilds(totalMonths, andSelectDay: andSelectDay)
+    }
+
+    private func updateSelectedDay(_ day: CalendarDay) {
+        let month = CalendarMonth(year: day.year, month: day.month)
+        let newMap = self.subject.selectedDayPerMonths.value |> key(month) .~ day
+        self.subject.selectedDayPerMonths.send(newMap)
+    }
+}
+
+
 // MARK: - uncompleted todo
 
 extension CalendarViewModelImple {
@@ -499,9 +566,7 @@ extension CalendarViewModelImple {
 extension CalendarViewModelImple: CalendarPaperSceneListener {
 
     func calendarPaper(on month: CalendarMonth, didChange selectedDay: CurrentSelectDayModel) {
-        let newMap = self.subject.selectedDayPerMonths.value
-            |> key(month) .~ selectedDay
-        self.subject.selectedDayPerMonths.send(newMap)
+        self.updateSelectedDay(CalendarDay(month.year, month.month, selectedDay.day))
     }
 
     func calendarPaperDidRequestReturnToToday() {
