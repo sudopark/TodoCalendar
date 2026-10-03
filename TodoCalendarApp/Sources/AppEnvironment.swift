@@ -207,7 +207,8 @@ struct AppEnvironment {
 
     static let dbVersion: Int32 = 7
     static let googleCalendarDBVersion: Int32 = 1
-    static let appleCalendarDBVersion: Int32 = 0
+    // 애플 DB 의 1 은 어떤 스키마 변경에도 대응하지 않는 빈 번호다 — 구글 스텝이 모든 외부 DB 에 돌던 시절 올라간 값이고, 애플 선언은 V0 이다
+    static let appleCalendarDBVersion: Int32 = 1
     
     static func deviceId(_ storage: any EnvironmentStorage) -> String {
         let installKey = "install_id"
