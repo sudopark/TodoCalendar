@@ -202,19 +202,3 @@ extension GoogleCalendarEventTagTable.Entity {
         return tag
     }
 }
-
-
-// MARK: - migration entrypoint for external calendar DB (app 층은 이 타입을 통해서만 접근)
-
-public enum GoogleCalendarEventTagTableMigration {
-
-    public static func runMigration(for version: Int32, database: any DataBase) throws {
-        do {
-            try database.migrate(GoogleCalendarEventTagTable.self, version: version)
-            logger.log(.sql, level: .info, "google calendar db migration version \(version) -> \(version + 1), GoogleCalendarEventTagTable finished")
-        } catch {
-            logger.log(.sql, level: .error, "google calendar db migration version \(version) -> \(version + 1) failed, reason: \(error).. will drop GoogleCalendarEventTagTable")
-            try? database.dropTable(GoogleCalendarEventTagTable.self)
-        }
-    }
-}
