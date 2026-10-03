@@ -26,6 +26,7 @@ final class GoogleCalendarRepositoryImple_Tests: PublisherWaitable, LocalTestabl
     let cacheStorage: GoogleCalendarLocalStorageImple
     private let stubRemote: StubRemoteAPI
     private let testAccountId = "test@google.com"
+    private let migration = ExternalCalendarDBMigrationImple(googleCalendarDBVersion: 1, appleCalendarDBVersion: 1)
 
     init() {
         self.stubRemote = .init(responses: DummyResponse().reponse)
@@ -282,9 +283,7 @@ extension GoogleCalendarRepositoryImple_Tests {
             }
 
             // when
-            try await self.sqliteService.async.run { db in
-                try GoogleCalendarEventTagTableMigration.runMigration(for: 0, database: db)
-            }
+            try await self.migration.runMigration(serviceId: GoogleCalendarService.id, dbService: self.sqliteService)
             let migratedInTag = GoogleCalendar.Tag(id: "migrated_in_calendar", name: "migrated in calendar")
                 |> \.accessRole .~ .owner
             try await self.sqliteService.async.run { db in
@@ -310,9 +309,7 @@ extension GoogleCalendarRepositoryImple_Tests {
             let accountId = self.testAccountId
 
             // when
-            try await self.sqliteService.async.run { db in
-                try GoogleCalendarEventTagTableMigration.runMigration(for: 0, database: db)
-            }
+            try await self.migration.runMigration(serviceId: GoogleCalendarService.id, dbService: self.sqliteService)
 
             // then
             let tag = GoogleCalendar.Tag(id: "fresh_calendar", name: "fresh calendar")
