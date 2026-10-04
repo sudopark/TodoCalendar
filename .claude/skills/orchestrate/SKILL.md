@@ -11,7 +11,7 @@ description: Use when executing decomposed large work as multiple PRs from one s
 
 ## 단위 정의 — 두 층을 혼동하지 않는다
 
-- **sub-work = DP = PR 하나.** 분할 정본은 campaign.md 9항 DP 목록(또는 유저와 합의한 분할)이다. PR로서 의미 있는 서사(문제→접근)가 서는 크기로 가른다 — 자잘한 PR 남발은 이 스킬의 목적이 아니다.
+- **sub-work = DP = PR 하나.** 분할 정본은 campaign.md 9항 DP 목록(또는 유저와 합의한 분할)이다. PR 하나가 무엇을 바꿨는지 한두 문장으로 말할 수 있는 크기로 가른다 — 자잘한 PR 남발은 이 스킬의 목적이 아니다.
 - **dispatch = 서브에이전트 한 번이 완주 가능한 크기.** sub-work 하나는 1~N개의 순차 dispatch로 구현된다. sub-work을 PR 크기에 맞추고, dispatch를 완주 크기에 맞춘다 — 두 축은 독립이다.
 - **dispatch가 넘치면 쪼개는 게 답이다 — "이어받기" 재dispatch 금지.** 브리프 작성 시점에 "한 번에 끝낼 수 있나"를 판단하고, 아니면 dispatch를 나눈다. 실행 중 넘침이 드러나면(중단·미완 보고) 잔여를 새 dispatch로 정의해 다시 브리프한다 — "하던거 계속해"로 잇지 않는다. 단, **검수 findings 교정을 위한 재개는 이어받기가 아니다**(§4-3) — 이어받기 금지는 크기 오판의 연장을 막는 것이고, findings 교정은 완결된 작업의 수정이라 원 에이전트 재개가 정당하다.
 

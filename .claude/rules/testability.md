@@ -52,7 +52,7 @@ extension DaysIntervalCountUsecaseImpleTests {
 ## 2. 테스트 더블
 
 ### Stub — 생성 시점 고정
-생성 시점에만 설정, 테스트 본문에서 **mutation 금지**. 시나리오별 분기는 `makeSUT(...)` 팩토리 파라미터로 주입.
+생성 시점에만 설정, 테스트 본문에서 **mutation 금지**. 시나리오별 분기는 `makeViewModel(...)`·`makeUsecase(...)` 같은 팩토리 파라미터로 주입.
 
 ```swift
 public var shouldFailMake: Bool = false
@@ -60,7 +60,7 @@ public var stubCurrentTodoEvents: [TodoEvent] = []
 
 private func makeViewModel(shouldFailMigration: Bool = false) -> MainViewModelImple {
     self.stubMigrationUsecase.shouldFail = shouldFailMigration
-    // ... create SUT
+    // ... create view model
 }
 ```
 
@@ -100,7 +100,7 @@ final class SpyEventDetailRouter: BaseSpyRouter, EventDetailRouting {
 ```
 
 ### 검증 우선순위
-- **1순위: SUT public interface** — 반환값, throw, publisher 방출, 외부 관찰 가능 상태(DB write 등)
+- **1순위: 검증 대상의 public interface** — 반환값, throw, publisher 방출, 외부 관찰 가능 상태(DB write 등)
 - Spy 호출 추적은 public interface로 관찰 불가능할 때만.
 
 ---
@@ -131,7 +131,7 @@ final class SpyEventDetailRouter: BaseSpyRouter, EventDetailRouting {
 
 ## 5. `PublisherWaitable` — Publisher 방출 검증
 
-`UnitTestHelpKit`의 프로토콜. SUT가 publisher를 노출할 때만 채택. `cancelBag: Set<AnyCancellable>!` 필수.
+`UnitTestHelpKit`의 프로토콜. 검증 대상이 publisher를 노출할 때만 채택. `cancelBag: Set<AnyCancellable>!` 필수.
 
 ### Swift Testing
 ```swift
@@ -207,6 +207,9 @@ extension AppDataMigrationImpleTests {
 - `Tests/`는 `Sources/`의 폴더 구조를 미러링한다 (예: `Sources/Usecases/…` → `Tests/Usecases/…`).
 - 구현체 테스트 파일명은 대상 타입명 + `Tests`: `XxxImpleTests.swift` (예: `EventTagDetailViewModelImpleTests.swift`).
 - 테스트 더블은 해당 프레임워크 `Tests/Doubles/`에. 여러 프레임워크가 공유하면 `TestDoubles` 모듈에 (§7).
+
+### 검증 대상 이름 — 역할 이름으로
+테스트에서 검증 대상 인스턴스와 그 팩토리를 `sut`·`makeSut`·`makeSUT` 로 부르지 않는다. 역할 이름을 쓴다 — `let usecase`·`makeUsecase(...)`, `let viewModel`·`makeViewModel(...)`, `let repository` 처럼. `sut` 는 어떤 타입인지 이름에서 안 읽혀 케이스를 읽는 사람이 팩토리까지 따라가야 한다 (유저 지시 2026-10-04, PR #1203). 선례: `Domain/Tests/Usecases/Ad/AdExposureUsecaseImpleTests.swift`.
 
 ---
 
