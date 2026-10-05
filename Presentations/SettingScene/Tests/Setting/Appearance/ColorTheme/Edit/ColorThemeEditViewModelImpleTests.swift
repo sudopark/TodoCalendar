@@ -55,14 +55,18 @@ final class ColorThemeEditViewModelImpleTests: PublisherWaitable, AsyncEffectWai
         original: CustomColorTheme? = nil,
         shouldSaveFail: Bool = false,
         shouldRemoveFail: Bool = false,
+        firstWeekDay: DayOfWeeks = .sunday,
         uiSettingUsecase: StubUISettingUsecase = StubUISettingUsecase()
     ) -> (ColorThemeEditViewModelImple, StubUISettingUsecase) {
         let usecase = uiSettingUsecase
         usecase.shouldFailSaveCustomColorTheme = shouldSaveFail
         usecase.shouldFailRemoveCustomColorTheme = shouldRemoveFail
+        let calendarSettingUsecase = StubCalendarSettingUsecase()
+        calendarSettingUsecase.updateFirstWeekDay(firstWeekDay)
         let viewModel = ColorThemeEditViewModelImple(
             original: original,
             initialSeeds: original?.seeds ?? self.initialSeeds,
+            calendarSettingUsecase: calendarSettingUsecase,
             uiSettingUsecase: usecase
         )
         viewModel.router = self.spyRouter
@@ -105,6 +109,18 @@ extension ColorThemeEditViewModelImpleTests {
         #expect(seeds == self.initialSeeds)
         #expect(viewModel.initialName == nil)
         #expect(viewModel.isDeletable == false)
+    }
+
+    @Test func viewModel_providesSampleModelFromFirstWeekDay() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModel(firstWeekDay: .monday)
+
+        // when
+        let expect = expectConfirm("샘플 모델 제공")
+        let model = try await self.firstOutput(expect, for: viewModel.sampleModel)
+
+        // then
+        #expect(model?.weekDays.first == .monday)
     }
 
     @Test func viewModel_whenNew_saveCreatesThemeWithNewUuidAndComputedColors() async throws {

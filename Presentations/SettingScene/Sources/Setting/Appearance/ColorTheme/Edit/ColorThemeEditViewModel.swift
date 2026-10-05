@@ -45,6 +45,7 @@ protocol ColorThemeEditViewModel: AnyObject, Sendable, ColorThemeEditSceneIntera
 
     // presenter
     var initialName: String? { get }
+    var sampleModel: AnyPublisher<CalendarAppearanceModel, Never> { get }
     var previewColorSet: AnyPublisher<ColorThemeDefinition, Never> { get }
     var seeds: AnyPublisher<CustomColorThemeSeeds, Never> { get }
     var isSavable: AnyPublisher<Bool, Never> { get }
@@ -58,6 +59,7 @@ protocol ColorThemeEditViewModel: AnyObject, Sendable, ColorThemeEditSceneIntera
 final class ColorThemeEditViewModelImple: ColorThemeEditViewModel, @unchecked Sendable {
 
     private let original: CustomColorTheme?
+    private let calendarSettingUsecase: any CalendarSettingUsecase
     private let uiSettingUsecase: any UISettingUsecase
     var router: (any ColorThemeEditRouting)?
     weak var listener: (any ColorThemeEditSceneListener)?
@@ -65,9 +67,11 @@ final class ColorThemeEditViewModelImple: ColorThemeEditViewModel, @unchecked Se
     init(
         original: CustomColorTheme?,
         initialSeeds: CustomColorThemeSeeds,
+        calendarSettingUsecase: any CalendarSettingUsecase,
         uiSettingUsecase: any UISettingUsecase
     ) {
         self.original = original
+        self.calendarSettingUsecase = calendarSettingUsecase
         self.uiSettingUsecase = uiSettingUsecase
 
         self.subject.name.send(original?.name ?? "")
@@ -226,6 +230,13 @@ extension ColorThemeEditViewModelImple {
 
     var initialName: String? {
         return self.original?.name
+    }
+
+    var sampleModel: AnyPublisher<CalendarAppearanceModel, Never> {
+        return self.calendarSettingUsecase.firstWeekDay
+            .map { CalendarAppearanceModel($0) }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
     }
 
     var previewColorSet: AnyPublisher<ColorThemeDefinition, Never> {
