@@ -98,6 +98,29 @@ assert_contains "dbVersion↑ + case 미추가 → migrateStatement 경고" "cas
 assert_contains "dbVersion↑ + 마이그레이션 스텝 미변경 → AppDataMigrationImple 경고" "AppDataMigrationImple" "$(pairs_in_repo 6 n)"
 assert_eq "dbVersion↑ + 세 위치 전부 → 경고 없음" "(해당 없음)" "$(pairs_in_repo 6 y)"
 
+# --- 외부 캘린더 DB 짝 경고 (서비스별로 따로 센다) ---
+pairs_in_external_repo() { # migrateCase(빈문자열이면 미추가) externalMigrationTouched(y/n) → 짝 섹션
+  local repo; repo=$(mktemp -d)
+  (
+    cd "$repo" || exit 1
+    git init -q .; git config user.email t@t; git config user.name t
+    mkdir -p TodoCalendarApp/Sources Repository/A "Repository/Event/ExternalCalendar" "Repository/Setting/Migration"
+    printf '    static let dbVersion: Int32 = 7\n    static let googleCalendarDBVersion: Int32 = 1\n    static let appleCalendarDBVersion: Int32 = 1\n' > TodoCalendarApp/Sources/AppEnvironment.swift
+    printf 'struct TableA {\n    static func migrateStatement(for v: Int32) -> String? {\n        switch v {\n        case 0: return nil\n        default: return nil\n        }\n    }\n    var pad = 0\n}\n' > Repository/A/TableA.swift
+    printf 'final class ExternalCalendarDBMigrationImple {\n    var pad = 0\n}\n' > Repository/Event/ExternalCalendar/ExternalCalendarDBMigrationImple.swift
+    printf 'final class AppDataMigrationImple {\n    var pad = 0\n}\n' > Repository/Setting/Migration/AppDataMigrationImple.swift
+    git add -A; git commit -qm base
+    sed -i '' 's/googleCalendarDBVersion: Int32 = 1/googleCalendarDBVersion: Int32 = 2/' TodoCalendarApp/Sources/AppEnvironment.swift
+    [ -n "$1" ] && sed -i '' "s/        case 0: return nil/        case $1: return nil\n        case 0: return nil/" Repository/A/TableA.swift
+    [ "$2" = "y" ] && sed -i '' 's/var pad = 0/var pad = 1/' Repository/Event/ExternalCalendar/ExternalCalendarDBMigrationImple.swift
+    bash "$SCRIPT_DIR/impact-check.sh" --base HEAD | awk '/^## 짝지어진 두 위치/{flag=1; next} flag'
+  )
+  rm -rf "$repo"
+}
+assert_contains "googleCalendarDBVersion↑ + case 미추가 → migrateStatement 경고" "case 1 추가가 함께 안 됨" "$(pairs_in_external_repo '' y)"
+assert_contains "googleCalendarDBVersion↑ + 외부 마이그레이션 미변경 → ExternalCalendarDBMigrationImple 경고" "runGoogleCalendarDBMigration" "$(pairs_in_external_repo 1 n)"
+assert_eq "googleCalendarDBVersion↑ + 세 위치 전부 → 경고 없음" "(해당 없음)" "$(pairs_in_external_repo 1 y)"
+
 echo "---"
 echo "PASS: $PASS / FAIL: $FAIL"
 [ "$FAIL" -eq 0 ]
