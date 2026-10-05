@@ -155,7 +155,6 @@ fi
 if [ "$MODE" = "git" ] && printf '%s\n' "$FILES" | grep -q "^TodoCalendarApp/Sources/AppEnvironment\.swift$"; then
   # 떠나는 버전 N 을 뽑아 case N 추가 여부로 판정한다. migrateStatement 문자열 grep 은
   # 컨텍스트를 좁히면 case 만 추가한 변경을 놓치고, 넓히면 무관한 테이블 편집이 누락을 가린다.
-  # let dbVersion 앵커 — googleCalendarDBVersion·appleCalendarDBVersion 은 별개 짝이다.
   oldMainDBVersion=$(git diff "$BASE" -- TodoCalendarApp/Sources/AppEnvironment.swift 2>/dev/null \
     | sed -n 's/^-[[:space:]]*static let dbVersion: Int32 = \([0-9][0-9]*\).*/\1/p' | head -1)
   if [ -n "$oldMainDBVersion" ]; then
@@ -166,6 +165,22 @@ if [ "$MODE" = "git" ] && printf '%s\n' "$FILES" | grep -q "^TodoCalendarApp/Sou
       warns+=("- ⚠️ dbVersion 변경 감지 — AppDataMigrationImple 의 runDBMigration case + runMigrationVersionNtoM 이 함께 안 됨. 없으면 migrateStatement 가 호출조차 안 된다")
     fi
   fi
+  # 외부 캘린더 DB 는 서비스마다 같은 짝을 따로 가진다. 스텝 메서드 이름이 runMigrationVersionNtoM
+  # 패턴이 아니라 대상 테이블을 담으므로, 위 메인 DB 검사의 앵커로는 안 걸린다.
+  for externalDBPair in "googleCalendarDBVersion:runGoogleCalendarDBMigration" \
+                        "appleCalendarDBVersion:runAppleCalendarDBMigration"; do
+    externalDBConst=${externalDBPair%%:*}
+    externalDBFunc=${externalDBPair##*:}
+    oldExternalDBVersion=$(git diff "$BASE" -- TodoCalendarApp/Sources/AppEnvironment.swift 2>/dev/null \
+      | sed -n "s/^-[[:space:]]*static let ${externalDBConst}: Int32 = \([0-9][0-9]*\).*/\1/p" | head -1)
+    [ -n "$oldExternalDBVersion" ] || continue
+    if ! git diff "$BASE" -- Repository 2>/dev/null | grep -qE "^\+[[:space:]]*case ${oldExternalDBVersion}:"; then
+      warns+=("- ⚠️ ${externalDBConst} 변경 감지 — Table.migrateStatement(for:) 에 case ${oldExternalDBVersion} 추가가 함께 안 됨. 짝 확인 필요")
+    fi
+    if ! printf '%s\n' "$FILES" | grep -q 'ExternalCalendarDBMigrationImple\.swift$'; then
+      warns+=("- ⚠️ ${externalDBConst} 변경 감지 — ExternalCalendarDBMigrationImple 의 ${externalDBFunc} switch case + 스텝 메서드가 함께 안 됨. 없으면 migrateStatement 가 호출조차 안 된다")
+    fi
+  done
 fi
 if [ ${#warns[@]} -eq 0 ]; then
   echo "(해당 없음)"

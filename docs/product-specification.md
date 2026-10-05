@@ -311,8 +311,9 @@
 - 타임존 인지 일수 계산, 1초 타이머 실시간 업데이트
 
 ### DB 마이그레이션
-- 메인 DB v7. 외부 캘린더 DB는 서비스별로 따로 센다 — Google v1, Apple v0
-- `AppEnvironment.dbVersion` + `Table.migrateStatement` + `AppDataMigrationImple` 스텝, 세 위치 동시 변경 필수
+- 메인 DB v7. 외부 캘린더 DB는 서비스별로 따로 센다 — Google v1, Apple v1 (애플의 1 은 어떤 스키마 변경에도 대응하지 않는 빈 번호다)
+- 메인 DB 는 `AppEnvironment.dbVersion` + `Table.migrateStatement` + `AppDataMigrationImple` 스텝, 세 위치 동시 변경 필수
+- 외부 캘린더 DB 는 서비스별 버전 상수 + `Table.migrateStatement` + `ExternalCalendarDBMigrationImple` 의 서비스별 스텝, 역시 세 위치 동시 변경 필수
 
 ### 외부 의존성
 - 네트워크·데이터: Alamofire, SQLiteService, Kingfisher, Pulse

@@ -16,6 +16,7 @@
 - **객체 변경 시** 참조하는 다른 객체 영향도 확인 (빌드 + 테스트) — 절차는 implement 스킬의 impact-check가 기계화.
 - **짝지어진 두 위치는 함께 갱신.** 한쪽만 바꾸면 무효가 되는 쌍은 추가/변경 시 대응처도 반드시 확인:
   - `AppEnvironment.dbVersion` ↔ `Table.migrateStatement(for:)` case ↔ `AppDataMigrationImple`의 `runDBMigration` case + `runMigrationVersionNtoM` (셋 다여야 한다 — 마지막이 빠지면 `migrateStatement`가 호출조차 안 되고 조용히 안 돈다)
+  - 외부 캘린더 DB 는 서비스마다 같은 짝을 따로 가진다 — `AppEnvironment.googleCalendarDBVersion` ↔ 그 테이블의 `migrateStatement(for:)` case ↔ `ExternalCalendarDBMigrationImple.runGoogleCalendarDBMigration` 의 switch case + 그 case 가 부르는 스텝 메서드이고, 애플은 `appleCalendarDBVersion` ↔ 그 테이블의 `migrateStatement(for:)` case ↔ `runAppleCalendarDBMigration` 의 switch 다. 스텝 메서드 이름이 `runMigrationVersionNtoM` 패턴이 아니라 `runGoogleCalendarEventTagMigration` 처럼 대상 테이블을 담아서, 위 메인 DB 짝을 이름으로 훑으면 이쪽은 안 걸린다. 빠졌을 때 실패하는 모양은 메인 DB 와 같다 — `migrateStatement` 가 호출조차 안 되고 조용히 안 돈다
   - CI `pr_test.yml` — `detect-changes`의 scheme 매핑(grep) ↔ `test` job의 `Test <scheme>` 실행 step (둘 중 하나만 추가하면 감지만 되고 실행 안 됨)
   - 신규 테스트 스킴 ↔ 스킴 목록 하드코딩 전부 (`pr_test.yml` 3곳·`scripts/run-all-tests.sh`·`impact-check.sh`+테스트·`run-tests` 스킬 — 상세는 add-framework 스킬. 단 `<Name>Snapshots`·`<Name>E2E` 스킴은 의도된 예외 — 둘 다 로컬 전용이라 CI 가 안 돌린다. 스냅샷은 snapshot-check 스킬, e2e 는 #826 작전계획 0항 결심으로 CI 미배선)
   - init 시그니처 ↔ 콜사이트
@@ -126,7 +127,7 @@ tuist generate --no-open      # 파일 추가/삭제 후 재실행 필수
 | SharedDataStore 키·구독 | [`Domain/CLAUDE.md`](Domain/CLAUDE.md) |
 | 앱 버전 체크 | [`docs/spec/infrastructure.md §7`](docs/spec/infrastructure.md) |
 | App Store Connect 업로드 운영 | [`docs/appstore-connect-operations.md`](docs/appstore-connect-operations.md) |
-| DB 마이그레이션 | §1 짝규칙 (`dbVersion` ↔ `migrateStatement` ↔ `AppDataMigrationImple` 스텝) + [`Repository/CLAUDE.md`](Repository/CLAUDE.md) |
+| DB 마이그레이션 | §1 짝규칙 (메인 DB 는 `dbVersion` ↔ `migrateStatement` ↔ `AppDataMigrationImple` 스텝, 외부 캘린더 DB 는 서비스별 버전 상수 ↔ `migrateStatement` ↔ `ExternalCalendarDBMigrationImple` 스텝) + [`Repository/CLAUDE.md`](Repository/CLAUDE.md) |
 
 ---
 
