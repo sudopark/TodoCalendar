@@ -50,7 +50,11 @@ class TemporaryUserDataMigrationRepositoryImpleTests: BaseLocalTests {
     }
     
     private func prepareDummyData() async throws {
-        defer { self.sqliteService.close() }
+        // 시드 커넥션은 repo 가 같은 파일을 열기 전에 닫는다 — 닫은 뒤엔 tearDown 이 지울 파일만 남는다
+        defer {
+            self.sqliteService.close()
+            self.sqliteService = nil
+        }
         let tags = [
             CustomEventTag(uuid: "t1", name: "n1", colorHex: "some"),
             CustomEventTag(uuid: "t2", name: "n2", colorHex: "some"),

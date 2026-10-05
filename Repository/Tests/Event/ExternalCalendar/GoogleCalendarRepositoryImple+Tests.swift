@@ -330,7 +330,7 @@ extension GoogleCalendarRepositoryImple_Tests {
 extension GoogleCalendarRepositoryImple_Tests {
 
     @Test func cacheStorage_whenSaveColorsWithEveryColumn_loadRestoresSameValues() async throws {
-        try await self.runTestWithOpenClose("test_google_colors_every_column_\(UUID().uuidString)") {
+        try await self.runTestWithOpenClose("test_google_colors_every_column") {
             // given
             let colors = GoogleCalendar.Colors(
                 ownerId: self.testAccountId,
@@ -354,7 +354,7 @@ extension GoogleCalendarRepositoryImple_Tests {
     }
 
     @Test func cacheStorage_whenSaveCalendarListWithEveryColumn_loadRestoresSameValues() async throws {
-        try await self.runTestWithOpenClose("test_google_list_every_column_\(UUID().uuidString)") {
+        try await self.runTestWithOpenClose("test_google_list_every_column") {
             // given
             let filled = self.everyColumnTag
             let blank = GoogleCalendar.Tag(id: "blank-calendar", name: "blank calendar name")
@@ -387,7 +387,7 @@ extension GoogleCalendarRepositoryImple_Tests {
     }
 
     @Test func cacheStorage_whenSaveEventOriginWithEveryColumn_loadRestoresSameValues() async throws {
-        try await self.runTestWithOpenClose("test_google_origin_every_column_\(UUID().uuidString)") {
+        try await self.runTestWithOpenClose("test_google_origin_every_column") {
             // given
             let filled = self.everyColumnEventOrigin
             let hidden = self.hiddenEventOrigin
