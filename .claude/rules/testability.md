@@ -177,7 +177,7 @@ extension AppDataMigrationImpleTests {
 
 // MARK: - 마이그레이션 실패
 extension AppDataMigrationImpleTests {
-    @Test func migration_whenReadFails_throwsError() ...
+    @Test func migration_whenReadFails_marksCompletedAndSkipsNextTime() ...
 }
 ```
 
