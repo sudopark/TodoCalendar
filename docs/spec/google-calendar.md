@@ -78,16 +78,19 @@ AppEnvironment.googleCalendarService (GoogleCalendarService)
 
 ```
 ExternalCalendarSQLiteConnectionPoolImple (Actor)
-├── connectionCount: [serviceId: Int]    — 참조 카운팅
-├── connections: [serviceId: DBConnection] — DB 연결 인스턴스
-├── open(serviceId) → connectionCount + 1, 첫 open 시 DB 생성
-├── close(serviceId) → connectionCount - 1, 0이면 DB 연결 해제
+├── dbPathMap: [serviceId: String]       — 서비스별 DB 파일 경로
+├── onFirstOpen: (serviceId, SQLiteService) async throws -> Void
+├── connectionPool: [serviceId: DBConnection]
+│     └── DBConnection { connectionCount, sqliteService }
+├── open(serviceId) → connectionCount + 1, 첫 open 시 DB 열고 onFirstOpen 실행
+├── close(serviceId) → connectionCount - 1, 0 이하면 close + pool 항목 제거
+├── hasConnection(serviceId) → pool 에 항목이 있나
 └── connection(serviceId) → SQLiteService 반환
 ```
 
 **참조 카운팅**:
 - 같은 서비스("google")의 모든 계정이 하나의 `google_calendar.db` 공유
-- 첫 계정 연동 시 DB 생성 + 테이블 생성 + 마이그레이션 실행 (`onFirstOpen`)
+- 첫 계정 연동 시 DB 를 열고 서비스별 마이그레이션을 실행 (`onFirstOpen`). 테이블은 여기서 안 만든다 — 아래 "마이그레이션" 절을 본다
 - 마지막 계정 해제 시에만 DB 연결 종료
 
 #### GoogleCalendarRepositoryPool (Repository 캐싱)
@@ -115,7 +118,7 @@ ExternalCalendarAccountRemotePoolImple (NSLock 기반)
 
 ### 3.2 데이터 격리
 
-- **DB 레벨**: 모든 테이블에 `account_id` 컬럼으로 계정별 데이터 파티셔닝
+- **DB 레벨**: 이벤트·태그·색상 테이블에 `account_id` 컬럼으로 계정별 데이터 파티셔닝. `EventTimes` 에는 `account_id` 가 없고 `event_id` 로 원본과 묶인다 (`EventTimeTable.swift:53-70`) — 계정 단위로 지울 때는 그 계정의 이벤트 id 를 먼저 모아 `EventTimes` 를 지운다 (`GoogleCalendarLocalStorage.swift:238-250`)
 - **메모리 레벨**: SharedDataStore에서 계정별 키로 구분
 - **ID 충돌 방지**: 구글 이벤트 ID는 자체적으로 유니크, accountId와 함께 저장
 
@@ -208,7 +211,7 @@ Google Calendar API v3 응답 전체 구조. RFC 5545 호환.
 
 4. DB 연결 Pool 열기
    → dbConnectionController.open("google")
-   → 첫 계정이면: google_calendar.db 생성, 테이블 생성, 마이그레이션
+   → 첫 계정이면: google_calendar.db 열기 + 구글 마이그레이션 (테이블 생성은 안 한다)
    → 참조 카운트 +1
 
 5. SharedDataStore 업데이트
@@ -456,41 +459,57 @@ GoogleCalendarViewAppearanceStore protocol
 | `background` | TEXT NOT NULL | 배경색 hex |
 | `foreground` | TEXT NOT NULL | 전경색 hex |
 
-#### google_calendar_event_tag
+#### google_calendar_list
+
+`GoogleCalendarEventTagTableV2` 선언 순서 그대로다 (`GoogleCalendarEventTagTable.swift:90-119`).
 
 | 컬럼 | 타입 | 설명 |
 |---|---|---|
 | `account_id` | TEXT NOT NULL | 계정 이메일 |
-| `id` | TEXT PRIMARY KEY | 캘린더 ID |
-| `summary` | TEXT NOT NULL | 캘린더 이름 |
+| `tag_id` | TEXT PRIMARY KEY UNIQUE NOT NULL | 캘린더 ID |
+| `name` | TEXT NOT NULL | 캘린더 이름 |
 | `description` | TEXT | 설명 |
-| `backgroundColor` | TEXT | 배경색 |
-| `foregroundColor` | TEXT | 전경색 |
-| `colorId` | TEXT | 구글 색상 ID |
-| `isSelected` | INTEGER | 선택 상태 |
-| `access_role` | TEXT | owner / writer / reader / freeBusyReader (v1에서 추가) |
+| `background` | TEXT | 배경색 |
+| `foreground` | TEXT | 전경색 |
+| `color_id` | TEXT | 구글 색상 ID |
+| `is_selected` | INTEGER | 선택 상태 |
+| `access_role` | TEXT | owner / writer / reader / freeBusyReader (0 → 1 에서 추가) |
 
 #### google_calendar_event_origin
 
+`GoogleCalendarEventOriginTableV1` 선언 순서 그대로다 (`GoogleCalendarTables.swift:199-273`). `account_id` 만 `@Column(name:)` 으로 이름을 주고, 나머지는 프로퍼티명이 그대로 컬럼명이 된다 — 그래서 camelCase 다.
+
 | 컬럼 | 타입 | 설명 |
 |---|---|---|
 | `account_id` | TEXT NOT NULL | 계정 이메일 |
-| `calendar_id` | TEXT NOT NULL | 캘린더 ID |
-| `id` | TEXT PRIMARY KEY UNIQUE | 이벤트 ID |
+| `calendarId` | TEXT NOT NULL | 캘린더 ID |
+| `defaultTimeZone` | TEXT | 저장 시 함께 싣는 그 캘린더의 기본 타임존 |
+| `id` | TEXT PRIMARY KEY UNIQUE NOT NULL | 이벤트 ID |
 | `summary` | TEXT NOT NULL | 제목 |
-| `html_link` | TEXT | 웹 링크 |
+| `htmlLink` | TEXT | 웹 링크 |
 | `description` | TEXT | 설명 |
 | `location` | TEXT | 장소 |
-| `color_id` | TEXT | 이벤트 색상 ID |
+| `colorId` | TEXT | 이벤트 색상 ID |
 | `creator` | TEXT | JSON (생성자) |
 | `organizer` | TEXT | JSON (주최자) |
 | `start` / `end` | TEXT | JSON (GoogleEventTime) |
+| `endTimeUnspecified` | INTEGER DEFAULT 0 | 종료 시각 미지정 플래그 |
 | `recurrence` | TEXT | JSON (RRULE 배열) |
-| `recurring_event_id` | TEXT | 반복 시리즈 부모 ID |
+| `recurringEventId` | TEXT | 반복 시리즈 부모 ID |
+| `sequence` | INTEGER | 구글이 매기는 `sequence` 값 |
 | `attendees` | TEXT | JSON (참석자 배열) |
-| `conference_data` | TEXT | JSON (회의 데이터) |
+| `hangoutLink` | TEXT | 화상회의 링크 |
+| `conferenceData` | TEXT | JSON (회의 데이터) |
+| `attachments` | TEXT | JSON (첨부 배열) |
+| `eventType` | TEXT | 구글 이벤트 종류 |
 | `status` | TEXT | confirmed/tentative/cancelled |
 | `visibility` | TEXT | default/public/private/confidential |
+
+JSON 으로 싣는 컬럼은 `creator`·`organizer`·`start`·`end`·`recurrence`·`attendees`·`conferenceData`·`attachments` 여덟이고, 변환 extension 의 `asText()`·`decodeJSON()` 이 양방향을 맡는다 (`GoogleCalendarTables.swift:337-396`).
+
+#### EventTimes
+
+메인 DB 와 같은 `EventTimeTable` 선언을 쓴다 (`GoogleCalendarLocalStorage.swift:132`). `account_id` 가 없고 `event_id` 로 이벤트 원본과 묶인다 — §3.2 데이터 격리를 본다.
 
 ### 자격증명 저장 (Keychain)
 
@@ -502,14 +521,14 @@ GoogleCalendarViewAppearanceStore protocol
 ### 마이그레이션
 
 - `AppEnvironment.googleCalendarDBVersion`으로 스키마 버전 관리
-- `onFirstOpen` 콜백에서 테이블 생성 + 마이그레이션 실행
+- `onFirstOpen` 콜백에서 `ExternalCalendarDBMigrationImple.runMigration(serviceId:dbService:)` 실행 — 테이블 생성은 하지 않는다
 - 단일 계정 → 다중 계정 마이그레이션: `AppDataMigrationImple` (1회성, 플래그 기반 멱등성)
 
 | 버전 | 스텝 | 대상 |
 |---|---|---|
 | 0 → 1 | `access_role` 컬럼 추가 | `google_calendar_list` |
 
-**테이블은 `onFirstOpen` 이 아니라 캘린더 목록 최초 로드 시 lazy 생성된다.** 신규 설치에서는 마이그레이션이 테이블보다 먼저 돌아 `ALTER TABLE` 이 실패하므로, 각 스텝은 메인 DB(`AppDataMigrationImple`)와 같이 실패를 로그로 남기고 대상 테이블을 drop 한 뒤 통과시킨다 (`GoogleCalendarEventTagTableMigration`). 이렇게 해야 `user_version` 이 전진하고, 테이블은 다음 로드 때 최신 스키마로 다시 만들어진다. 스텝이 throw 하면 `user_version` 이 0에 고정돼 이후 모든 스텝이 조용히 안 돈다.
+**테이블은 `onFirstOpen` 이 아니라 각 테이블의 첫 읽기·쓰기에서 lazy 생성된다** (`GoogleCalendarLocalStorage` 가 쓰기와 목록·구간 조회 쿼리에서 `createTableOrNot` 을 부른다 — `removeEvents`·`loadEventDetail` 은 부르지 않는다). 신규 설치에서는 마이그레이션이 테이블보다 먼저 돌아 `ALTER TABLE` 이 실패하므로, 스텝은 메인 DB(`AppDataMigrationImple`)와 같이 실패를 로그로 남기고 대상 테이블을 drop 한 뒤 통과시킨다 (`ExternalCalendarDBMigrationImple.runGoogleCalendarEventTagMigration`, 지금 스텝은 0→1 하나다). 이렇게 해야 `user_version` 이 전진하고, 테이블은 다음 접근에서 최신 스키마로 만들어진다. 스텝이 throw 하면 `user_version` 이 그 자리에 고정돼 이후 모든 스텝이 조용히 안 돈다 — 신규 설치라면 0 에 고정된다.
 
 ---
 
@@ -557,8 +576,9 @@ stateDiagram-v2
 
     note right of Connected
         onFirstOpen:
-        테이블 생성 + 마이그레이션
-        (최초 1회만 실행)
+        서비스별 마이그레이션
+        (풀에 연결이 없는 상태에서 열 때마다,
+         테이블 생성 없음)
     end note
 ```
 
@@ -676,8 +696,8 @@ RRuleParser 지원 범위:
 
 DB 저장:
   google_calendar_event_origin 테이블:
-    - account_id = "user1@gmail.com", calendar_id = "primary", event_id = "abc"
-    - account_id = "user2@gmail.com", calendar_id = "primary", event_id = "xyz"
+    - account_id = "user1@gmail.com", calendarId = "primary", id = "abc"
+    - account_id = "user2@gmail.com", calendarId = "primary", id = "xyz"
 
 조회:
   GoogleCalendarLocalAggregatedRepositoryImple.loadEvents("primary", period)
@@ -689,7 +709,7 @@ DB 저장:
     → 모든 계정을 순회하며 검색
     → user1에서 발견 → 반환
 
-의미: calendar_id가 같아도 account_id로 구분됨.
+의미: calendarId가 같아도 account_id로 구분됨.
      UI에서는 합산되어 하나의 "primary" 캘린더 이벤트처럼 보임.
 ```
 

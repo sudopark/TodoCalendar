@@ -233,8 +233,8 @@ UserDefaultEnvironmentStorageImple(suiteName: AppEnvironment.groupID)
 ```
 App Group Container/
 ├── models.db (또는 models_{userId}.db) — 할일, 일정, 태그, 설정
-├── google_calendar_calendar.db         — 구글 캘린더 이벤트/태그/색상
-└── apple_calendar_calendar.db          — 애플 캘린더 (향후)
+├── google_calendar.db                  — 구글 캘린더 이벤트/태그/색상
+└── apple__calendar.db                  — 애플 캘린더 이벤트/태그
 ```
 
 | 컨텍스트 | 접근 모드 | 용도 |
