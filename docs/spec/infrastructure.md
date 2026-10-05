@@ -586,6 +586,49 @@ protocol LegalNoticeRepository: Sendable {
 
 ---
 
+## 9. 앱 정책 (`app-policy.json`)
+
+앱 코드를 바꾸지 않고 도메인별 정책 값과 기능 스위치를 내려 보내는 통로다. 정책 값은 코드 상수로 두지 않는다.
+
+### 9.1 원격 설정
+
+**위치**: `sudopark/TodoCalendar-Terms` 레포 `main` 브랜치의 `app-config/app-policy.json`
+**서빙**: `https://raw.githubusercontent.com/sudopark/TodoCalendar-Terms/main/app-config/app-policy.json` (GitHub raw URL)
+**포맷**:
+```json
+{
+  "color_theme_license": { "enabled": true, "license_days": 7 },
+  "feature_switches": {
+    "<기능키>": { "enabled": true, "min_app_version": "3.1.0", "rollout_percentage": 30 }
+  }
+}
+```
+
+- `color_theme_license` — 테마 사용권 게이트다. `enabled` 가 `false` 이면 게이트를 끈다. `enabled`·`license_days` 는 각각 읽는다. 없거나 `license_days` 가 0 이하인 속성은 그 속성만 비워 두고(nil), 기본값은 `PaidFeatureGateUsecase` 가 채운다. 항목이 없어도 파일 전체를 버리지 않는다.
+- `feature_switches` — 기능 키별 스위치다. `min_app_version` 은 없을 수 있다. `rollout_percentage`(0~100)가 없으면 전체 배포로 본다. 범위 밖 값은 읽을 때 0~100 으로 맞춘다 — 150 은 전체, -5 는 배포 안 함이다. 이 절은 모델과 저장까지만 다룬다. 기능 플래그 연결과 실제 사용은 각 기능 작업이 한다.
+- 디코딩은 Repository 의 `AppPolicyMapper` 가 맡고, Domain 모델 `AppPolicy`·`FeatureSwitch` 는 Decodable 을 채택하지 않는다.
+
+### 9.2 읽는 순서
+
+Repository 는 받아 둔 원격 정책(캐시)만 돌려준다. 캐시가 없으면 정책 없음이다. 번들 기본값 파일은 없다.
+
+`refreshPolicy()` 가 원격을 받아 캐시에 쓴다. 요청이나 디코딩이 실패하면 throw 하고 캐시를 그대로 둔다. 호출은 앱 시작 쪽 작업이 맡는다.
+
+기본 정책은 앱이 정의해 정책을 쓰는 usecase 에 주입하고, usecase 가 원격 정책에서 판단할 수 없는 속성만 기본값으로 채운다. 사용권은 `color-themes.md` §4 가 다룬다. 기능 스위치의 속성별 기본값은 그 스위치를 쓰는 작업이 정한다.
+
+### 9.3 관련 파일
+
+| 레이어 | 파일 |
+|---|---|
+| Domain Model | `Domain/Sources/Models/AppPolicy.swift` |
+| Domain Repo | `Domain/Sources/Repositories/AppPolicyRepository.swift` |
+| Repository Impl | `Repository/Sources/Repository+Imple/Support/AppPolicyRepositoryImple.swift` |
+| Mapper | `Repository/Sources/Repository+Imple/Support/AppPolicy+Mapping.swift` |
+| Endpoint | `Repository/Sources/Remote/Endpoint.swift` (`AppEndpoints.appPolicy`) |
+| 기본 정책 | `TodoCalendarApp/Sources/AppEnvironment.swift` (`defaultAppPolicy`) |
+
+---
+
 ## 상태 전이 다이어그램
 
 ### SharedDataStore 동시성 모델

@@ -30,6 +30,7 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
     let billingUsecase: any BillingUsecase
     let eventLiveActivityUsecase: any EventLiveActivityUsecase
     let adExposureUsecase: any AdExposureUsecase
+    let paidFeatureGateUsecase: any PaidFeatureGateUsecase
     let imageTextRecognizeService: any ImageTextRecognizeService = ImageTextRecognizeServiceImple()
     private let applicationBase: ApplicationBase
 
@@ -165,6 +166,18 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
             coldLaunchHistoryRepository: AppColdLaunchHistoryLocalRepositoryImple(
                 environmentStorage: applicationBase.userDefaultEnvironmentStorage
             )
+        )
+
+        self.paidFeatureGateUsecase = PaidFeatureGateUsecaseImple(
+            billingUsecase: billingUsecase,
+            licenseRepository: ColorThemeLicenseLocalRepositoryImple(
+                environmentStorage: applicationBase.userDefaultEnvironmentStorage
+            ),
+            policyRepository: AppPolicyRepositoryImple(
+                remoteAPI: applicationBase.remoteAPI,
+                environmentStorage: applicationBase.userDefaultEnvironmentStorage
+            ),
+            defaultPolicy: AppEnvironment.defaultAppPolicy
         )
     }
 

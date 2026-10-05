@@ -180,6 +180,8 @@ enum PaywallScreenState {
 
 ## 6. 광고 노출 판정
 
+테마 사용권 광고는 `PaidFeatureGateUsecase` 가 판정한다. 규칙은 [`color-themes.md`](color-themes.md) §4 사용권 절이 다룬다.
+
 무료 플랜에만 광고를 노출한다. Google Mobile Ads(`AdService`).
 
 ### 배너
