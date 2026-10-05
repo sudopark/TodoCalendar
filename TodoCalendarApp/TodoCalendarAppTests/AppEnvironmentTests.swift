@@ -8,6 +8,7 @@
 
 import Foundation
 import Testing
+import Domain
 
 @testable import TodoCalendarApp
 
@@ -98,5 +99,20 @@ extension AppEnvironmentTests {
         
         // then
         #expect(host == "http://127.0.0.1:1")
+    }
+}
+
+
+// MARK: - 기본 앱 정책
+
+extension AppEnvironmentTests {
+
+    @Test("기본 앱 정책은 사용권 게이트 켜짐·7일이다")
+    func defaultAppPolicy_isEnabledForSevenDays() {
+        // when
+        let policy = AppEnvironment.defaultAppPolicy
+
+        // then
+        #expect(policy == AppPolicy(colorThemeLicense: .init(isEnabled: true, licenseDays: 7)))
     }
 }
