@@ -185,3 +185,40 @@ struct CustomColorThemeLocalRepositoryImpleTests {
         }
     }
 }
+
+
+// MARK: - 변환이 컬럼을 다 채우는지 (DB 미사용)
+
+extension CustomColorThemeLocalRepositoryImpleTests {
+
+    @Test("변환한 Entity 를 직렬화하면 빈 컬럼이 없다")
+    func tableSerialize_fromConvertedEntity_leavesNoColumnUnmapped() throws {
+        // given
+        let theme = self.makeTheme("a")
+
+        // when
+        let values = try CustomColorThemeTable.serialize(entity: .init(theme))
+
+        // then
+        let unmapped = zip(CustomColorThemeTable.Columns.allCases, values)
+            .filter { $0.1 == nil }
+            .map { $0.0 }
+        #expect(values.isEmpty == false)
+        #expect(unmapped.isEmpty)
+    }
+}
+
+
+// MARK: - 선언이 만드는 CREATE 문이 전환 전 스키마와 같은지 (DB 미사용)
+
+extension CustomColorThemeLocalRepositoryImpleTests {
+
+    @Test("선언이 내는 CREATE 문이 전환 전 물리 스키마와 같다")
+    func tableCreateStatement_matchesPreTransitionSchema() {
+        // given + when
+        let statement = CustomColorThemeTable.createStatement
+
+        // then
+        #expect(statement == "CREATE TABLE IF NOT EXISTS CustomColorThemes (uuid TEXT UNIQUE NOT NULL, name TEXT NOT NULL, schema_version INTEGER NOT NULL, seeds TEXT NOT NULL, colors TEXT NOT NULL, created_at REAL NOT NULL, updated_at REAL NOT NULL,PRIMARY KEY (uuid));")
+    }
+}

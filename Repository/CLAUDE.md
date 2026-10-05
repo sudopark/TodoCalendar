@@ -81,7 +81,7 @@ let todo = try TodoEventTable.Entity(cursor).asTodoEvent()
 
 이렇게 하면 물리 컬럼 순서에 매달리는 자리가 매크로 `Entity` 하나로 준다. 도메인 타입이 직접 커서를 읽으면 `Columns` 와 그 `init(cursor)` 둘이 각각 순서를 이고, 둘이 어긋나도 컴파일은 통과한다. 도메인 타입이 Repository 의 프로토콜을 안 이고 가는 것도 같이 따라온다. **다만 한 커서를 여러 `Entity` 가 이어 읽는 위험은 사라지지 않고 그 `Entity` 로 옮겨간다** — 아래 "컬럼 순서 = 읽기 순서" 절을 본다.
 
-**아직 안 옮긴 자리** — `EventDetailData`(`EventDetailDataTable.swift:37`)와 `CustomColorTheme`(`CustomColorThemeTable.swift:57`)가 도메인 타입에 `RowValueType` 을 붙이고 있다. 그 테이블을 매크로로 옮길 때 같이 걷는다.
+**아직 안 옮긴 자리** — `EventDetailData`(`EventDetailDataTable.swift:37`)가 도메인 타입에 `RowValueType` 을 붙이고 있다. 그 테이블을 매크로로 옮길 때 같이 걷는다.
 
 ### 버전 선언 — 과거 스키마를 타입으로 세운다
 

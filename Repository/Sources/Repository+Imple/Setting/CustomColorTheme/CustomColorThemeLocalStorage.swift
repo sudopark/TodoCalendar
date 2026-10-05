@@ -38,6 +38,7 @@ extension CustomColorThemeLocalStorageImple {
             let query = CustomColorThemeTable.selectAll()
                 .orderBy(isAscending: true) { $0.createdAt }
             return try db.load(CustomColorThemeTable.self, query: query)
+                .map { try $0.asCustomColorTheme() }
         }
     }
 
@@ -45,14 +46,19 @@ extension CustomColorThemeLocalStorageImple {
         return try await self.sqliteService.async.run { db -> CustomColorTheme? in
             try? db.createTableOrNot(CustomColorThemeTable.self)
             let query = CustomColorThemeTable.selectAll().where { $0.uuid == uuid }
-            return try db.load(CustomColorThemeTable.self, query: query).first
+            return try db.load(CustomColorThemeTable.self, query: query)
+                .first?.asCustomColorTheme()
         }
     }
 
     public func saveTheme(_ theme: CustomColorTheme) async throws {
         try await self.sqliteService.async.run { db in
             try? db.createTableOrNot(CustomColorThemeTable.self)
-            try db.insertOne(CustomColorThemeTable.self, entity: theme, shouldReplace: true)
+            try db.insertOne(
+                CustomColorThemeTable.self,
+                entity: CustomColorThemeTable.Entity(theme),
+                shouldReplace: true
+            )
         }
     }
 
