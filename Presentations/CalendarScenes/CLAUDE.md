@@ -65,6 +65,19 @@ UIPageViewController로 월별 페이지를 좌우 스와이프로 전환한다.
 | Interactor | `selectedDayChanaged(_:and:)`, `selectedDayIsToday(_:)` — 부모로부터 선택일 수신 |
 | 라우팅 | 새 이벤트 생성, 완료 할일 목록 표시 |
 
+### ContinuousMonths (수직 연속 달력 Component)
+
+넓은 창 2단 왼쪽 칸에 놓이는 부품이다. 화면 연결(조립)은 아직 없다 — 조립하는 쪽이 `ContinuousMonthsViewModelImple` 과 `ContinuousMonthsViewController` 를 직접 만든다 (builder 없음).
+
+| 항목 | 설명 |
+|---|---|
+| 구성 | `UICollectionView` (섹션 = 달, 아이템 = 주, `UIHostingConfiguration` 셀) + 고정 요일 헤더 |
+| 버퍼 | 포커스 월 앞뒤 두 달씩 다섯 섹션. 섹션은 그 달 1일이 든 주부터 다음 달 1일이 든 주 직전까지라 경계 주가 한 번만 나온다 |
+| 스크롤 | 제스처당 한 달씩 스냅(`scrollViewWillEndDragging` 이 손 뗀 위치에 관성 거리를 더한 시스템 목표 오프셋을 본다. 이웃 달 높이의 절반을 넘으면 그 달 맨 위로, 아니면 지금 달 맨 위로 바꾼다). 멈춘 뒤 버퍼를 다시 짠다. 셀 높이가 가변이라, 멈춰 있는 동안은 컬렉션 뷰 레이아웃이 끝날 때마다 포커스 섹션 맨 위로 오프셋을 다시 붙인다. 스크롤 중 도착한 섹션은 멈출 때까지 보류한다 |
+| Interactor | `changeFocusedMonth(to:)` (버퍼 안이면 애니메이션 이동), `selectDay(_:)` (강조만) |
+| Listener | `ContinuousMonthsSceneListener` — 사용자 스냅(`didScrollTo`)·탭(`didSelect`)·공유 범위 요청 |
+| 흐림 | 포커스 월 밖 날짜를 화면 단에서 흐리게 그린다 (`WeekRowView` 의 `focusedMonth`). `DayCellViewModel.isNotCurrentMonth` 는 쓰지 않는다 |
+
 ### SelectDayDialog (날짜 선택 모달)
 
 | 항목 | 설명 |
@@ -136,6 +149,9 @@ graph LR
 |---|---|---|
 | `EventListCellView` (`Common/EventListCell/`) | 모든 이벤트(할일/일정/휴일/구글)를 렌더링하는 이벤트 셀 공용 뷰 — 완료 처리·상세 이동·more 액션 콜백 포함. 그리는 UI 모델 `EventCellViewModel` 계열은 `CalendarPresentation` 소관이다 (#1060) | DayEventListView, ForemostEventView, UncompletedTodoView |
 | `Common/AIAgentSignInConfirm` | AI 기능 미로그인 시 로그인 유도 confirm 다이얼로그 팩토리 (`ConfirmDialogInfo.aiAgentNeedSignIn`, DayEventList·Calendar VM 공유, #768) | DayEventListViewModelImple, CalendarViewModelImple |
+| `WeekRowView` (`Common/WeekRowView.swift`) | 달력 주 한 줄 — 날짜 칸·이벤트 바/점·탭·길게 눌러 공유. 선택일·오늘·포커스 월·주별 이벤트 publisher 를 파라미터로 받는다 | MonthView, ContinuousMonthsWeekCellView |
+| `WeekDaysHeaderView` (`Common/WeekDaysHeaderView.swift`) | 요일 헤더 한 줄 | MonthView, ContinuousMonthsHeaderView |
+| `CalendarComponent+Range` (`Common/CalendarComponent+Range.swift`) | 달 구성의 조회 범위·공휴일 이벤트·날/주/달 공유 범위 계산 | MonthViewModelImple, ContinuousMonthsViewModelImple |
 | `Common/AIAgentSpeechPermissionConfirm` | 마이크·음성인식 권한 거부 시 설정 이동 confirm 다이얼로그 팩토리 (`ConfirmDialogInfo.aiAgentSpeechPermissionDenied`, #809) | CalendarViewModelImple |
 
 `CalendarEvent` 계열·`EventCellViewModel` 계열·Month 표시 모델·`WeekEventStackBuilder`·`EventCellViewModelMapper` 는 `Presentations/CalendarPresentation` 으로 내려갔다 (#1060). 위젯 확장이 같은 모델을 쓰기 때문이다 — 이 프레임워크는 그 모듈을 물어서 쓴다.
