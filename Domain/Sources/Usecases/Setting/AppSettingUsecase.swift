@@ -130,7 +130,16 @@ extension AppSettingUsecaseImple: UISettingUsecase {
     
     public func removeCustomColorTheme(_ uuid: String) async throws {
         try await self.customColorThemeRepository.removeTheme(uuid)
-        self.replaceCurrentCustomColorTheme(of: uuid, with: nil)
+
+        guard let current = self.sharedDataStore
+            .value(CalendarAppearanceSettings.self, key: self.calednarSettingKey),
+              current.colorSetKey == .custom(uuid)
+        else {
+            return
+        }
+
+        let params = EditCalendarAppearanceSettingParams() |> \.newColorSetKey .~ .systemTheme
+        _ = try self.changeCalendarAppearanceSetting(params)
     }
     
     private func loadCustomColorTheme(for colorSetKey: ColorSetKeys) async -> CustomColorTheme? {
@@ -149,7 +158,7 @@ extension AppSettingUsecaseImple: UISettingUsecase {
         return setting |> \.currentCustomColorTheme .~ current.currentCustomColorTheme
     }
     
-    private func replaceCurrentCustomColorTheme(of uuid: String, with theme: CustomColorTheme?) {
+    private func replaceCurrentCustomColorTheme(of uuid: String, with theme: CustomColorTheme) {
         guard let current = self.sharedDataStore
             .value(CalendarAppearanceSettings.self, key: self.calednarSettingKey),
               current.colorSetKey == .custom(uuid)
