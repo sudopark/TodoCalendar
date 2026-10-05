@@ -93,10 +93,16 @@ final class CalendarSectionAppearanceSettingViewEventHandler: Observable {
 struct CalendarAppearanceSampleView: View {
     
     private let model: CalendarAppearanceModel
+    private let injectedColorSet: (any ColorSet)?
     @Environment(ViewAppearance.self) private var appearance
     
-    init(model: CalendarAppearanceModel) {
+    init(model: CalendarAppearanceModel, colorSet: (any ColorSet)? = nil) {
         self.model = model
+        self.injectedColorSet = colorSet
+    }
+    
+    private var colorSet: any ColorSet {
+        self.injectedColorSet ?? self.appearance.colorSet
     }
     
     var body: some View {
@@ -105,7 +111,7 @@ struct CalendarAppearanceSampleView: View {
             VStack(alignment: .leading, spacing: Metric.Spacing.xsmall) {
                 Text("setting.appearance.calendar.samplemonth::march".localized())
                     .font(self.appearance.fontSet.size(12, weight: .semibold).asFont)
-                    .foregroundStyle(self.appearance.colorSet.text0.asColor)
+                    .foregroundStyle(self.colorSet.text0.asColor)
                 Grid(alignment: .center, horizontalSpacing: 4, verticalSpacing: 5) {
                     GridRow {
                         ForEach(model.weekDays, id: \.rawValue) { day in
@@ -129,9 +135,9 @@ struct CalendarAppearanceSampleView: View {
             .padding(.horizontal, spacing: .large)
             .background(
                 RoundedRectangle(cornerRadius: Metric.Radius.large)
-                    .fill(self.appearance.colorSet.dayBackground.asColor)
+                    .fill(self.colorSet.dayBackground.asColor)
                     .shadow(
-                        color: appearance.colorSet.text0.withAlphaComponent(0.4).asColor,
+                        color: colorSet.text0.withAlphaComponent(0.4).asColor,
                         radius: 10
                     )
             )
@@ -158,9 +164,9 @@ struct CalendarAppearanceSampleView: View {
     ) -> some View {
         let textColor: UIColor = {
             if isSelected {
-                return self.appearance.colorSet.selectedDayText
+                return self.colorSet.selectedDayText
             } else {
-                return self.appearance.accentCalendarDayColor(accent)
+                return self.appearance.accentCalendarDayColor(accent, on: self.colorSet)
             }
         }()
         
@@ -174,7 +180,7 @@ struct CalendarAppearanceSampleView: View {
                     Spacer()
                     
                     RoundedRectangle(cornerRadius: 0.5)
-                        .fill(self.appearance.colorSet.eventText.asColor)
+                        .fill(self.colorSet.eventText.asColor)
                         .frame(height: 0.5)
                         .padding(.horizontal, 2.5)
                         .padding(.vertical, 1)
@@ -184,7 +190,7 @@ struct CalendarAppearanceSampleView: View {
         .frame(width: 15, height: 16)
         .background(
             RoundedRectangle(cornerRadius: 2)
-                .fill(isSelected ? self.appearance.colorSet.selectedDayBackground.asColor : self.appearance.colorSet.dayBackground.asColor)
+                .fill(isSelected ? self.colorSet.selectedDayBackground.asColor : self.colorSet.dayBackground.asColor)
         )
     }
 }

@@ -182,15 +182,19 @@ extension ViewAppearance {
     }
     
     public func accentCalendarDayColor(_ accent: AccentDays?) -> UIColor {
+        return self.accentCalendarDayColor(accent, on: self.colorSet)
+    }
+    
+    public func accentCalendarDayColor(_ accent: AccentDays?, on colorSet: any ColorSet) -> UIColor {
         switch accent {
         case .holiday:
-            return self.accnetDayPolicy[.holiday] == true ? self.colorSet.holidayOrWeekEndWithAccent : self.colorSet.holidayText
+            return self.accnetDayPolicy[.holiday] == true ? colorSet.holidayOrWeekEndWithAccent : colorSet.holidayText
         case .sunday:
-            return self.accnetDayPolicy[.sunday] == true ? self.colorSet.holidayOrWeekEndWithAccent : self.colorSet.weekEndText
+            return self.accnetDayPolicy[.sunday] == true ? colorSet.holidayOrWeekEndWithAccent : colorSet.weekEndText
         case .saturday:
-            return self.accnetDayPolicy[.saturday] == true ? self.colorSet.holidayOrWeekEndWithAccent : self.colorSet.weekEndText
+            return self.accnetDayPolicy[.saturday] == true ? colorSet.holidayOrWeekEndWithAccent : colorSet.weekEndText
         default:
-            return self.colorSet.weekDayText
+            return colorSet.weekDayText
         }
     }
     
