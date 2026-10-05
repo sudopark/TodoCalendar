@@ -144,4 +144,62 @@ struct ViewAppearanceTests {
         #expect(appearance.customColorTheme == theme)
         #expect(appearance.preferredColorScheme == .dark)
     }
+
+    @Test("주입한 색 세트로 요일 강조색을 고른다 — 강조 꺼짐")
+    func accentCalendarDayColor_onInjectedColorSet_withoutAccent() {
+        // given
+        let appearance = self.makeAppearance(.defaultLight, isSystemDarkTheme: false)
+        appearance.accnetDayPolicy = [.holiday: false, .sunday: false, .saturday: false]
+        let dark = ColorSetKeys.defaultDark.convert(isSystemDarkTheme: true)
+
+        // when
+        let holiday = appearance.accentCalendarDayColor(.holiday, on: dark)
+        let sunday = appearance.accentCalendarDayColor(.sunday, on: dark)
+        let saturday = appearance.accentCalendarDayColor(.saturday, on: dark)
+        let weekDay = appearance.accentCalendarDayColor(nil, on: dark)
+
+        // then
+        #expect(holiday == UIColor(rgb: 0xF4F2F8))
+        #expect(sunday == UIColor(rgb: 0xE2E4EB))
+        #expect(saturday == UIColor(rgb: 0xE2E4EB))
+        #expect(weekDay == UIColor(rgb: 0xF3F4F7))
+    }
+
+    @Test("주입한 색 세트로 요일 강조색을 고른다 — 강조 켜짐")
+    func accentCalendarDayColor_onInjectedColorSet_withAccent() {
+        // given
+        let appearance = self.makeAppearance(.defaultLight, isSystemDarkTheme: false)
+        appearance.accnetDayPolicy = [.holiday: true, .sunday: true, .saturday: true]
+        let custom = CustomColorThemeBuilder().build(
+            name: "t",
+            seeds: .init(
+                background: UIColor(rgb: 0x18181A), accent: UIColor(rgb: 0xE54D2E), form: .filled
+            )
+        )
+
+        // when
+        let colors = [AccentDays.holiday, .sunday, .saturday]
+            .map { appearance.accentCalendarDayColor($0, on: custom) }
+
+        // then
+        colors.forEach { #expect($0 == custom.holidayOrWeekEndWithAccent) }
+        #expect(custom.holidayOrWeekEndWithAccent != appearance.colorSet.holidayOrWeekEndWithAccent)
+    }
+
+    @Test("색 세트를 안 넘기면 전역 색 세트로 요일 강조색을 고른다")
+    func accentCalendarDayColor_withoutColorSet_usesOwnColorSet() {
+        // given
+        let appearance = self.makeAppearance(.defaultLight, isSystemDarkTheme: false)
+        appearance.accnetDayPolicy = [.holiday: false, .sunday: false, .saturday: false]
+
+        // when
+        let holiday = appearance.accentCalendarDayColor(.holiday)
+        let sunday = appearance.accentCalendarDayColor(.sunday)
+        let weekDay = appearance.accentCalendarDayColor(nil)
+
+        // then
+        #expect(holiday == UIColor(rgb: 0x233238))
+        #expect(sunday == UIColor(rgb: 0x646464))
+        #expect(weekDay == UIColor(rgb: 0x323232))
+    }
 }

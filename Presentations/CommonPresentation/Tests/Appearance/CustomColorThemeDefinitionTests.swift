@@ -224,4 +224,13 @@ struct CustomColorThemeDefinitionTests {
             #expect($0.range(of: "^#[0-9A-F]{6}$", options: .regularExpression) != nil, "\($0)")
         }
     }
+
+    @Test("UIColor 를 대문자 #RRGGBB 로 바꾸고 반올림한다")
+    func rgbHexString_formatsAsUppercaseRRGGBB() {
+        // given + when + then
+        #expect(UIColor(rgb: 0x18181A).rgbHexString == "#18181A")
+        #expect(UIColor(rgb: 0xE54D2E).rgbHexString == "#E54D2E")
+        #expect(UIColor.white.rgbHexString == "#FFFFFF")
+        #expect(UIColor(red: 0.5, green: 0.0, blue: 1.0, alpha: 1.0).rgbHexString == "#8000FF")
+    }
 }

@@ -77,16 +77,3 @@ extension ColorThemeDefinition {
             .mapValues { $0.rgbHexString }
     }
 }
-
-
-private extension UIColor {
-
-    var rgbHexString: String {
-        var (red, green, blue, alpha): (CGFloat, CGFloat, CGFloat, CGFloat) = (0, 0, 0, 0)
-        self.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
-        return String(
-            format: "#%02X%02X%02X",
-            Int((red * 255).rounded()), Int((green * 255).rounded()), Int((blue * 255).rounded())
-        )
-    }
-}
