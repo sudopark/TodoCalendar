@@ -75,13 +75,13 @@ extension TodoEventTable.Entity {
     func asTodoEvent() throws -> TodoEvent { ... }
 }
 
-// 커서를 읽는 자리 (TodoLocalStorage · PendingDoneTodoEventTable)
+// 커서를 읽는 자리 (TodoLocalStorage 의 조인 조회)
 let todo = try TodoEventTable.Entity(cursor).asTodoEvent()
 ```
 
-이렇게 하면 물리 컬럼 순서에 매달리는 자리가 매크로 `Entity` 하나로 준다. 도메인 타입이 직접 커서를 읽으면 `Columns` 와 그 `init(cursor)` 둘이 각각 순서를 이고, 둘이 어긋나도 컴파일은 통과한다. 도메인 타입이 Repository 의 프로토콜을 안 이고 가는 것도 같이 따라온다. **다만 여러 테이블이 한 커서 읽기를 공유하는 위험은 사라지지 않고 `Entity` 로 옮겨간다** — 아래 "컬럼 순서 = 읽기 순서" 절을 본다.
+이렇게 하면 물리 컬럼 순서에 매달리는 자리가 매크로 `Entity` 하나로 준다. 도메인 타입이 직접 커서를 읽으면 `Columns` 와 그 `init(cursor)` 둘이 각각 순서를 이고, 둘이 어긋나도 컴파일은 통과한다. 도메인 타입이 Repository 의 프로토콜을 안 이고 가는 것도 같이 따라온다. **다만 한 커서를 여러 `Entity` 가 이어 읽는 위험은 사라지지 않고 그 `Entity` 로 옮겨간다** — 아래 "컬럼 순서 = 읽기 순서" 절을 본다.
 
-**아직 안 옮긴 자리** — `DoneTodoEvent`(`DoneTodoEventTable.swift:57`)와 `EventDetailData`(`EventDetailDataTable.swift:37`)가 도메인 타입에 `RowValueType` 을 붙이고 있다. 그 테이블을 매크로로 옮길 때 같이 걷는다.
+**아직 안 옮긴 자리** — `EventDetailData`(`EventDetailDataTable.swift:37`)와 `CustomColorTheme`(`CustomColorThemeTable.swift:57`)가 도메인 타입에 `RowValueType` 을 붙이고 있다. 그 테이블을 매크로로 옮길 때 같이 걷는다.
 
 ### 버전 선언 — 과거 스키마를 타입으로 세운다
 
@@ -100,6 +100,7 @@ let todo = try TodoEventTable.Entity(cursor).asTodoEvent()
   버전은 **그 스키마가 선 DB 버전**이다 — `repeating_turn` 이 5→6 마이그레이션에서 붙었으므로 현재 `TodoEvents` 는 V6 이다. `AppEnvironment.dbVersion`(지금 7)과는 다르다. 그 테이블이 안 바뀐 버전에서는 번호가 안 오른다.
 - 새 버전이 서면 새 타입을 더하고 `typealias` 를 그리로 옮긴다. **변환 extension 과 `migrateStatement(for:)` extension 은 둘 다 `typealias` 쪽 이름으로 쓴다** — 그래야 alias 를 옮길 때 같이 따라온다.
 - `migrateStatement` 를 구체 타입 이름으로 달면 **마이그레이션이 조용히 멈춘다.** `Table` 프로토콜에 `nil` 을 돌려주는 기본 구현이 있어서, alias 가 새 타입으로 옮겨간 뒤 `migrate(TodoEventTable.self, ...)` 가 그 기본값을 집는다. 컴파일도 테스트도 통과하고 옛 스텝만 안 돈다.
+- **예외는 alias 가 가리키지 않는 얼린 선언이다.** 메인 DB 의 구글 테이블 둘은 구체 이름 `GoogleCalendarEventOriginTableV0`·`GoogleCalendarEventTagTableV0` 에 `migrateStatement` 를 달고 있고(`GoogleCalendarTables.swift:183` · `GoogleCalendarEventTagTable.swift:45`), 스텝도 그 이름을 그대로 부른다(`AppDataMigrationImple.swift:116`·`:126`·`:136`). alias 는 외부 DB 가 쓰는 현재 버전(`GoogleCalendarEventOriginTableV1`·`GoogleCalendarEventTagTableV2`)을 가리켜 이 둘에 영영 닿지 않으니 위 함정이 서지 않는다. 대신 이 짝을 지키는 것은 alias 가 아니라 스텝과 선언이 같은 구체 이름을 쓴다는 사실뿐이다 — 한쪽 이름을 바꾸면 다른 쪽도 함께 바꾼다.
 - 세 타입이 같은 `tableName` 을 가진다. 한 DB 에서 둘을 만들면 `createTableOrNot` 이 뒤엣것을 무시하므로 **테스트마다 DB 를 가른다.**
 - 선언이 실제 마이그레이션 결과와 같은지는 **마이그레이션을 루프에 넣어** 확인한다 — 옛 버전 타입으로 테이블을 만들고 `migrate` 를 태운 뒤, 검증 대상 선언으로 읽어 필드를 단언한다. 같은 선언으로 만들고 같은 선언으로 읽는 형태는 자기비교라 컬럼이 빠지든 순서가 틀리든 늘 초록이다.
 - 그 확인이 성립하는 근거는 읽기·쓰기의 비대칭이다. `insert` 는 컬럼명을 적어 이름으로 붙고, `selectAll()` 은 `SELECT *` 를 내 **물리 순서로 위치 결합**한다. 그래서 물리 스키마를 마이그레이션이 만들고 읽기를 선언이 하면, 선언이 어긋난 만큼 값이 밀린다. 픽스처는 컬럼마다 값을 다르게 골라야 그 밀림이 드러난다.
@@ -109,17 +110,22 @@ let todo = try TodoEventTable.Entity(cursor).asTodoEvent()
 
 ### 아직 전환 안 된 테이블
 
-전환 전 형태는 `Columns` enum 과 `scalar(_:for:)`·`init(cursor)` 를 손으로 쓴다. 실물은 `ScheduleEventTable.swift` 를 본다 — 컬럼 구성이 `TodoEventTable` 과 거의 같아 전환 전후를 나란히 놓고 읽기 좋다. 아직 안 옮긴 테이블을 만질 땐 그 자리에서 위 매크로 형태로 옮긴다.
+전환 전 형태는 `Columns` enum 과 `scalar(_:for:)`·`init(cursor)` 를 손으로 쓴다. 아직 안 옮긴 테이블을 만질 땐 그 자리에서 위 매크로 형태로 옮긴다. 남은 대상은 `grep -rn 'struct .*: Table {\|struct .*: DetailTable {' Repository/Sources` 로 센다 — 매크로를 쓴 선언은 `: Table` 을 직접 적지 않고 `@Table` 이 적합을 붙여 주므로 그 목록에 안 걸린다. 개수는 이관이 도는 동안 계속 바뀌니 여기 적지 않는다.
 
-**이관이 끝나도 이 절은 남는다.** 구체 테이블 25개 중 매크로로 옮길 수 있는 것은 20개다. 나머지 다섯은 구조가 매크로를 못 받는다 — 넷은 다른 테이블과 `Entity` 를 공유하고(`EventDetailDataTable`·`DoneTodoEventDetailTable`·`PendingDoneTodoEventTableV6TempTable`·`EventUploadPendingQueueTableV4TempTable`), `EventTimeTable` 은 `scalar` 가 저장 안 되는 필드를 조합한 계산 파생값을 낸다. 매크로는 테이블마다 자기 `Entity` 를 만들고 프로퍼티와 컬럼을 기계적으로 묶으므로 둘 다 표현할 수 없다.
+**이관이 끝나도 이 절은 남는다.** 구조가 매크로를 못 받는 테이블이 있고, 범주는 둘이다.
+
+- **다른 테이블과 `Entity` 를 공유한다.** `EventDetailDataTable` 과 `DoneTodoEventDetailTable` 은 `DetailTable` 이 `EntityType == EventDetailData` 를 못박아 한 `Entity` 를 나눠 쓴다(`EventDetailDataTable.swift:60`). `PendingDoneTodoEventTableV6TempTable` 과 `EventUploadPendingQueueTableV4TempTable` 은 현재 버전 테이블의 `Entity` 를 그대로 받아 쓴다(`PendingDoneTodoEventTable.swift:277` · `EventUploadPendingQueueTable.swift:103`).
+- **`scalar` 가 계산 파생값을 낸다.** `EventTimeTable` 은 컬럼이 아닌 필드를 조합해 컬럼 값을 만든다 — `lowerInterval`·`upperInterval` 은 `eventTime` 과 `repeating` 을 함께 봐야 나온다(`EventTimeTable.swift:113-140`).
+
+매크로는 테이블마다 자기 `Entity` 를 만들고 프로퍼티와 컬럼을 기계적으로 묶으므로 둘 다 표현할 수 없다.
 
 ### 컬럼 순서 = 읽기 순서 (위치 결합)
 
 `Columns` enum의 **case 선언 순서가 곧 물리 컬럼 순서**이고, `init(_ cursor:)`는 `cursor.next()`를 부른 횟수로 위치를 센다. 둘이 어긋나면 크래시가 아니라 **조용한 nil**이다 — 값은 SQLite 저장 타입으로 만들어진 뒤 `as? T`로 캐스팅되므로, 타입이 안 맞거나 컬럼 수를 넘어가면 그냥 nil이 된다.
 
-**한 `RowValueType.init(cursor)`를 여러 테이블이 공유하면 컬럼 추가가 다른 테이블을 깨뜨린다.** `TodoEventTable.Entity(cursor)`는 Todo 조인 조회(`TodoLocalStorage`)와 `PendingDoneTodoEventTable` 둘이 쓴다 — 한쪽에 컬럼을 붙여 그 읽기가 한 칸 늘면 다른 쪽은 이어 읽는 자리가 그만큼 밀린다 (#355·#544 → #835). 컬럼 추가 시 그 `init(cursor)`를 쓰는 **모든 테이블**을 grep해 각각의 `Columns`도 함께 갱신한다.
+**한 커서를 두 `Entity` 가 이어 읽으면 앞 테이블의 컬럼 추가가 뒤 테이블의 읽기를 밀어낸다.** 조인 조회가 그 자리다 — `TodoLocalStorage.loadTodoEvents` 는 `TodoEventTable.Entity(cursor)` 를 읽고 그 커서로 이어서 `EventTimeTable.Entity(cursor)` 를 읽는다(`TodoLocalStorage.swift:114-116`). `loadAllDoneEvents` 도 `DoneTodoEventTable` 과 `EventTimeTable` 을 같은 모양으로 잇는다(`:128-130`). 앞 테이블에 컬럼을 붙여 그 읽기가 한 칸 늘면 뒤 테이블은 그만큼 밀린 자리를 읽는다. 컬럼을 더할 땐 그 `Entity` 를 커서에서 읽는 자리를 전부 grep 해 뒤따라 읽는 테이블이 있는지 본다. 이 결합이 실제로 깨진 이력은 #355·#544 → #835 다.
 
-**매크로로 전환한 테이블은 이 위험이 선언 순서 하나로 모인다.** 손 구현은 `Columns` 와 `init(cursor)` 둘이 따로 순서를 이고 있어 한쪽만 고쳐도 컴파일이 통과하는데, 전환하면 매크로가 그 둘을 같은 선언에서 내므로 어긋날 자리가 사라진다. 대신 프로퍼티 선언 순서 하나가 물리 순서와 읽기 순서를 동시에 정하니, 순서를 바꾸는 것이 곧 스키마 변경이다. 위 공유 경고는 그대로 유효하다 — `TodoEventTable.Entity(cursor)` 가 소비하는 컬럼 수가 바뀌면 `PendingDoneTodoEventTable` 이 이어 읽는 자리가 그만큼 밀린다. 컬럼을 더할 땐 그 `Entity` 를 읽는 자리를 전부 grep 한다.
+**매크로로 전환한 테이블은 이 위험이 선언 순서 하나로 모인다.** 손 구현은 `Columns` 와 `init(cursor)` 둘이 따로 순서를 이고 있어 한쪽만 고쳐도 컴파일이 통과하는데, 전환하면 매크로가 그 둘을 같은 선언에서 내므로 어긋날 자리가 사라진다. 대신 프로퍼티 선언 순서 하나가 물리 순서와 읽기 순서를 동시에 정하니, 순서를 바꾸는 것이 곧 스키마 변경이다. 위 이어 읽기 경고는 그대로 유효하다 — 조인 조회에서 앞 `Entity` 가 소비하는 컬럼 수가 바뀌면 뒤 `Entity` 가 읽는 자리가 그만큼 밀린다.
 
 ### DB 마이그레이션
 
@@ -131,7 +137,9 @@ let todo = try TodoEventTable.Entity(cursor).asTodoEvent()
 
 **3번이 빠지면 `migrateStatement`는 호출조차 되지 않는다.** 컴파일도 테스트도 통과하고 마이그레이션만 조용히 안 돈다.
 
-**생성 뒤 ALTER 가 따르는 스텝은 `createTableOrNot` 에 출발 시점 스키마 선언을 준다.** `typealias` 를 주면 테이블이 아직 없는 신선 설치에서 최신 스키마가 서고, 뒤따르는 ALTER 가 중복 컬럼으로 던져 스텝 catch 가 그 테이블을 드롭한다. `migrateStatement` 는 반대로 `typealias` 쪽에 남긴다 — **만드는 쪽은 출발 버전, 옮기는 쪽은 최신이다.** temp 테이블로 복사·교체하는 스텝(`modfiyColumns`)은 원본을 통째로 갈아끼우므로 이 항목 대상이 아니다. 선례는 `AppDataMigrationImple.runMigrationVersion5to6` 이고, 스텝별 회귀와 전 구간 회귀가 `AppDataMigrationImpleTests` 에 있다 — 쓰는 법은 위 "버전 선언" 절의 마이그레이션 회귀 항목들이다.
+**외부 캘린더 DB 는 짝이 따로다.** 서비스마다 DB 파일·버전 상수·마이그레이션 함수를 각각 가져서 메인 DB 의 셋과 섞이지 않는다. 구글을 올릴 땐 세 자리를 함께 바꾼다 — `AppEnvironment.googleCalendarDBVersion`, 그 테이블의 `migrateStatement(for:)` case, `ExternalCalendarDBMigrationImple.runGoogleCalendarDBMigration` 의 `steps` case. 애플은 같은 자리가 `appleCalendarDBVersion` 과 `runAppleCalendarDBMigration` 이고, 지금 그 `steps` 는 비어 있다 — `appleCalendarDBVersion` 의 1 은 어떤 스키마 변경에도 대응하지 않는 빈 번호다(`AppEnvironment.swift:209-211`). 메인 DB 쪽 셋만 고치면 외부 DB 는 조용히 안 돈다.
+
+**생성 뒤 ALTER 가 따르는 스텝은 `createTableOrNot` 에 출발 시점 스키마 선언을 준다.** `typealias` 를 주면 테이블이 아직 없는 신선 설치에서 최신 스키마가 서고, 뒤따르는 ALTER 가 중복 컬럼으로 던져 스텝 catch 가 그 테이블을 드롭한다. `migrateStatement` 는 반대로 `typealias` 쪽에 남긴다 — **만드는 쪽은 출발 버전, 옮기는 쪽은 최신이다.** temp 테이블로 복사·교체하는 스텝(`modfiyColumns`)은 원본을 통째로 갈아끼우므로 이 항목 대상이 아니다. **메인 DB 의 구글 스텝 셋(1→2·2→3·3→4)도 대상이 아니다** — `V0` 선언이 이미 ALTER 를 거친 뒤의 스키마라 `createTableOrNot` 에 주면 뒤따르는 ALTER 가 중복 컬럼으로 던지고, 출발 스키마를 주려면 중간 선언을 새로 만들어야 하는데 그러면 구글을 안 붙이는 사용자의 메인 DB 에 빈 테이블 셋이 영영 남는다. **외부 DB 의 구글 0→1 도 대상이 아니다** — 그 테이블은 `LocalStorage` 가 접근할 때 만들어져서 신선 설치엔 생성 자체가 없다. 선례는 `AppDataMigrationImple.runMigrationVersion5to6` 이고, 스텝별 회귀와 전 구간 회귀가 `AppDataMigrationImpleTests` 에 있다 — 쓰는 법은 위 "버전 선언" 절의 마이그레이션 회귀 항목들이다.
 
 절차 상세·버전 이력·컬럼 순서 변경(temp 테이블 재생성)은 [`docs/spec/infrastructure.md §5`](../docs/spec/infrastructure.md) 정본.
 
@@ -198,17 +206,18 @@ sequenceDiagram
 
 ## 외부 캘린더 DB 구조
 
-- 메인 DB (`todo_calendar.db`): 앱 자체 데이터. `AppEnvironment.dbVersion`으로 마이그레이션 관리.
-- 외부 캘린더 DB (`google_calendar.db`): 계정별 테이블에 `accountId` 컬럼 포함. `AppEnvironment.googleCalendarDBVersion`으로 별도 관리.
-- `AppDataMigrationImple`: 단일 계정 → 다중 계정 1회성 마이그레이션 (플래그 기반 멱등성)
-- DB 연결은 `ExternalCalendarDBConnectionPool`이 관리하며, `onFirstOpen` 시 테이블 생성 + 마이그레이션 실행.
+- 메인 DB 는 `models.db` 이고, 로그인 계정이 있으면 `models_{userId}.db` 로 갈린다. 앱 자체 데이터를 담고 `AppEnvironment.dbVersion` 으로 마이그레이션을 관리한다(`AppEnvironment.swift:91-97`·`:123-126`).
+- **외부 캘린더 DB 는 서비스마다 파일·버전 상수·마이그레이션 함수가 따로다.** 구글은 `google_calendar.db`·`googleCalendarDBVersion`·`runGoogleCalendarDBMigration` 이고, 애플은 `apple__calendar.db`·`appleCalendarDBVersion`·`runAppleCalendarDBMigration` 이다(`AppEnvironment.swift:128-139`·`:209-211` · `ExternalCalendarDBMigrationImple.swift:39-66`). 구글의 이벤트·태그·색상 테이블은 계정을 가리는 `account_id` 컬럼을 가진다. 애플은 단일 계정 서비스라 그 컬럼이 없고, 양쪽이 함께 쓰는 `EventTimeTable` 에도 없다. 애플 DB 의 버전 1 은 어떤 스키마 변경에도 대응하지 않는 빈 번호다.
+- `AppDataMigrationImple` 은 셋을 맡는다 — 메인 DB 스키마 스텝(`runDBMigration`), 메인 DB 테이블 준비(`prepareTables`), 단일 계정 시절 구글 데이터를 외부 DB 로 옮기는 1회성 이관(`migrateGoogleCalendarDataIfNeeded`, 플래그로 멱등성을 지킨다).
+- DB 연결은 `ExternalCalendarSQLiteConnectionPoolImple` 이 참조 카운팅으로 관리하고, **`onFirstOpen` 은 서비스별 마이그레이션만 돌린다**(`ApplicationBase.swift:52-63`). 테이블은 거기서 안 만든다 — 외부 DB 테이블은 `LocalStorage` 가 처음 접근할 때 `createTableOrNot` 으로 선다.
 
 | 파일 | 역할 |
 |---|---|
 | `ExternalCalendarDBConnectionPoolImple.swift` | 참조 카운팅 DB 연결 관리 |
+| `ExternalCalendarDBMigrationImple.swift` | 서비스별 외부 DB 마이그레이션 스텝 |
 | `ExternalCalendarAccountRemotePool.swift` | 계정별 Remote API + 토큰 갱신 |
 | `GoogleCalendarLocalAggregatedRepositoryImple.swift` | 다중 계정 데이터 집계 |
-| `AppDataMigrationImple.swift` | 단일→다중 계정 DB 마이그레이션 |
+| `AppDataMigrationImple.swift` | 메인 DB 마이그레이션·테이블 준비 + 구글 데이터 1회 이관 |
 
 ---
 
@@ -216,19 +225,21 @@ sequenceDiagram
 
 ### 테스트 인프라 (`Tests/Common/`)
 
-- **`BaseLocalTests: BaseTestCase`** — 테스트용 SQLite DB를 캐시 디렉터리에 별도 파일로 생성하고, 테스트 종료 시 닫은 뒤 삭제. 실제 앱의 DB에는 영향을 주지 않음.
-- **`LocalTestable` 프로토콜** — `runTestWithOpenClose(_:_:)` 헬퍼로 DB 생성→테스트→삭제를 자동화. Swift Testing (`@Suite`) 사용 시 채택.
+- **`BaseLocalTests: BaseTestCase`** — 테스트용 SQLite DB 를 캐시 디렉터리에 별도 파일로 만들고, `tearDown` 이 커넥션을 닫은 뒤 지운다. 앱의 실제 DB 는 건드리지 않는다.
+- **`LocalTestable` 프로토콜** — `runTestWithOpenClose(_:_:)` 헬퍼가 DB 생성·테스트·삭제를 묶는다. 첫 인자는 파일명이 아니라 **접두 라벨**이고, 고유화는 헬퍼가 UUID 를 붙여 한다(`BaseLocalTests.swift:82-84`). Swift Testing(`@Suite`)을 쓸 때 채택한다.
 
-**DB 파일명은 `fileName`에 테스트마다 다른 UUID를 붙이고, tearDown은 커넥션을 닫은 뒤 파일을 지운다.** 고정 파일명 + 미close 조합이면 앞 테스트의 커넥션이 살아 있는 채로 뒤 테스트가 같은 vnode를 열어 프로세스가 죽는다 (원인·측정치는 `docs/troubleshooting/2026-08-24-local-db-tests-random-crash.md`).
+**DB 파일명은 테스트마다 다른 UUID 를 달고, 지우는 것은 닫기가 성공한 뒤뿐이다.** 고정 파일명에 close 가 빠지면 앞 테스트의 커넥션이 살아 있는 채로 뒤 테스트가 같은 vnode 를 열어 프로세스가 죽는다(원인·측정치는 `docs/troubleshooting/2026-08-24-local-db-tests-random-crash.md`). **닫기가 실패하면 파일을 남긴다** — 열린 커넥션이 물고 있는 vnode 를 unlink 하면 sqlite 가 같은 방식으로 프로세스를 죽이기 때문이다(`BaseLocalTests.swift:38-52`).
 
-`fileName` 지정은 `super.setUpWithError()` **앞**에 둔다 — 뒤에 두면 파일명이 기본값으로 남아 로그에서 어느 테스트의 DB인지 추적이 안 된다 (UUID 덕에 충돌 자체는 안 난다).
+이 "닫기 성공 뒤에만 지운다" 는 공유 헬퍼 둘(`BaseLocalTests.tearDown`·`LocalTestable.runTestWithOpenClose`)의 계약이다. 공유 헬퍼를 안 쓰고 열기·닫기·삭제를 직접 묶는 수작업 헬퍼도 있는데, 그쪽은 `try? close()` 뒤에 무조건 지운다(`GoogleCalendarLocalAggregatedRepositoryImpleTests.swift:56-58` · `CustomColorThemeLocalRepositoryImpleTests.swift:58-63`). 새 수작업 헬퍼를 쓸 땐 공유 헬퍼 쪽 계약을 따를지 먼저 정한다.
+
+`BaseLocalTests` 를 상속할 땐 `fileName` 지정을 `super.setUpWithError()` **앞**에 둔다 — 뒤에 두면 접두가 기본값으로 남아 로그에서 어느 테스트의 DB 인지 추적이 안 된다(UUID 덕에 충돌 자체는 안 난다).
 
 ### Local Repository 테스트
 
 **실제 SQLite DB를 사용하여 테스트한다.** 단, 앱의 실제 DB와는 별도 파일을 사용하여 격리.
 
 - `BaseLocalTests` 상속 또는 `LocalTestable` 채택
-- 테스트마다 캐시 디렉터리에 임시 `.db` 파일을 생성하고 테스트 후 삭제
+- 테스트마다 캐시 디렉터리에 임시 `.db` 파일을 만들고, 테스트가 끝나면 닫고 지운다
 - 실제 데이터를 저장/조회하여 Table 스키마, RowValueType 변환, 마이그레이션 등을 검증
 
 ```swift
@@ -236,7 +247,7 @@ sequenceDiagram
 class TodoLocalRepositoryImpleTests: BaseLocalTests {
     // setUp: 캐시 디렉터리에 todos_<UUID>.db 생성
     // 실제 SQLite에 TodoEvent 저장 → 조회하여 검증
-    // tearDown: 커넥션 close 후 그 파일 삭제
+    // tearDown: 커넥션 close 가 성공하면 그 파일 삭제
 }
 ```
 
