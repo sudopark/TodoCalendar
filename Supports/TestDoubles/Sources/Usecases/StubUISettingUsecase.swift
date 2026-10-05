@@ -8,6 +8,7 @@
 import Foundation
 import Combine
 import Domain
+import Extensions
 import Prelude
 import Optics
 
@@ -33,8 +34,21 @@ open class StubUISettingUsecase: UISettingUsecase, @unchecked Sendable {
         return self.stubCustomColorThemes
     }
     
-    public func saveCustomColorTheme(_ theme: CustomColorTheme) async throws { }
-    public func removeCustomColorTheme(_ uuid: String) async throws { }
+    public var shouldFailSaveCustomColorTheme: Bool = false
+    public var didSaveCustomColorTheme: CustomColorTheme?
+    open func saveCustomColorTheme(_ theme: CustomColorTheme) async throws {
+        guard self.shouldFailSaveCustomColorTheme == false
+        else { throw RuntimeError("failed") }
+        self.didSaveCustomColorTheme = theme
+    }
+    
+    public var shouldFailRemoveCustomColorTheme: Bool = false
+    public var didRemoveCustomColorThemeUuid: String?
+    public func removeCustomColorTheme(_ uuid: String) async throws {
+        guard self.shouldFailRemoveCustomColorTheme == false
+        else { throw RuntimeError("failed") }
+        self.didRemoveCustomColorThemeUuid = uuid
+    }
     
     private let settingSubject = CurrentValueSubject<AppearanceSettings?, Never>(nil)
     open func refreshAppearanceSetting() async throws -> AppearanceSettings {
