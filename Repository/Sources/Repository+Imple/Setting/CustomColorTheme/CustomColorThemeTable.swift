@@ -7,70 +7,67 @@
 //
 
 import Foundation
-import SQLiteService
+import SQLiteServiceMacros
 import Domain
 
 
-struct CustomColorThemeTable: Table {
+typealias CustomColorThemeTable = CustomColorThemeTableV0
 
-    enum Columns: String, TableColumn {
-        case uuid
-        case name
-        case schemaVersion = "schema_version"
-        case seeds
-        case colors
-        case createdAt = "created_at"
-        case updatedAt = "updated_at"
+@Table("CustomColorThemes")
+struct CustomColorThemeTableV0 {
 
-        var dataType: ColumnDataType {
-            switch self {
-            case .uuid: return .text([.primaryKey(autoIncrement: false), .unique, .notNull])
-            case .name: return .text([.notNull])
-            case .schemaVersion: return .integer([.notNull])
-            case .seeds: return .text([.notNull])
-            case .colors: return .text([.notNull])
-            case .createdAt: return .real([.notNull])
-            case .updatedAt: return .real([.notNull])
-            }
-        }
-    }
+    @Column(.primaryKey(autoIncrement: false), .unique, .notNull)
+    let uuid: String
 
-    typealias ColumnType = Columns
-    typealias EntityType = CustomColorTheme
-    static var tableName: String { "CustomColorThemes" }
+    @Column(.notNull)
+    let name: String
 
-    static func scalar(_ entity: CustomColorTheme, for column: Columns) -> (any ScalarType)? {
-        let mapper = CustomColorThemeJSONMapper()
-        switch column {
-        case .uuid: return entity.uuid
-        case .name: return entity.name
-        case .schemaVersion: return entity.schemaVersion
-        case .seeds: return try? mapper.encodeSeeds(entity.seeds)
-        case .colors: return try? mapper.encodeColors(entity.colors)
-        case .createdAt: return entity.createdAt
-        case .updatedAt: return entity.updatedAt
-        }
-    }
+    @Column(.notNull, name: "schema_version")
+    let schemaVersion: Int
+
+    @Column(.notNull)
+    var seeds: String?
+
+    @Column(.notNull)
+    var colors: String?
+
+    @Column(.notNull, name: "created_at")
+    let createdAt: Double
+
+    @Column(.notNull, name: "updated_at")
+    let updatedAt: Double
 }
 
 
-extension CustomColorTheme: @retroactive RowValueType {
+// MARK: - CustomColorTheme 변환
 
-    public init(_ cursor: CursorIterator) throws {
+extension CustomColorThemeTable.Entity {
+
+    init(_ theme: CustomColorTheme) {
         let mapper = CustomColorThemeJSONMapper()
-        let uuid: String = try cursor.next().unwrap()
-        let name: String = try cursor.next().unwrap()
-        let schemaVersion: Int = try cursor.next().unwrap()
-        let seedsText: String = try cursor.next().unwrap()
-        let colorsText: String = try cursor.next().unwrap()
         self.init(
-            uuid: uuid,
-            name: name,
-            schemaVersion: schemaVersion,
+            uuid: theme.uuid,
+            name: theme.name,
+            schemaVersion: theme.schemaVersion,
+            seeds: try? mapper.encodeSeeds(theme.seeds),
+            colors: try? mapper.encodeColors(theme.colors),
+            createdAt: theme.createdAt,
+            updatedAt: theme.updatedAt
+        )
+    }
+
+    func asCustomColorTheme() throws -> CustomColorTheme {
+        let mapper = CustomColorThemeJSONMapper()
+        let seedsText: String = try self.seeds.unwrap()
+        let colorsText: String = try self.colors.unwrap()
+        return CustomColorTheme(
+            uuid: self.uuid,
+            name: self.name,
+            schemaVersion: self.schemaVersion,
             seeds: try mapper.decodeSeeds(seedsText),
             colors: try mapper.decodeColors(colorsText),
-            createdAt: try cursor.next().unwrap(),
-            updatedAt: try cursor.next().unwrap()
+            createdAt: self.createdAt,
+            updatedAt: self.updatedAt
         )
     }
 }
