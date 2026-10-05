@@ -62,7 +62,7 @@
 6. `ApplicationPrepareUsecase.prepareSignedIn(auth)`:
    - SharedDataStore 초기화 (accountInfo, externalCalendarAccounts 키는 유지)
    - 비로그인 DB close → 100ms 대기
-   - 사용자별 DB open (`todocal_<uid>.db`)
+   - 사용자별 DB open (`models_<uid>.db`)
 7. `ApplicationRootRouter.changeUsecaseFactroy(auth)`:
    - `LoginUsecaseFactoryImple` 생성 (Remote + Upload 인프라 포함)
    - `backgroundEventSyncUsecase.change(factory:)` 호출
@@ -78,7 +78,7 @@
 5. `AccountChangedEvent.signOut` 이벤트 발행
 6. `ApplicationPrepareUsecase.prepareSignedOut()`:
    - 사용자 DB close → 100ms 대기
-   - 비로그인 DB open (`todocal.db` — uid 없음)
+   - 비로그인 DB open (`models.db` — uid 없음)
 7. `NonLoginUsecaseFactoryImple`로 전환 → UI 재구성
 
 **계정 삭제 시** (`AccountUsecaseImple.deleteAccount`):
@@ -99,12 +99,12 @@
 | EventUpload Service | `NotNeedEventUploadService` (no-op) | `EventUploadServiceImple` (오프라인 큐) |
 | 데이터 마이그레이션 | `NotNeedTemporaryUserDataMigrationUescaseImple` | `TemporaryUserDataMigrationUescaseImple` |
 
-**DB 분리 정책**
+**DB 분리 정책** (파일명 정본은 `AppEnvironment.dbFileName`·`dbFilePath(for:)` — `AppEnvironment.swift:91-97`·`:123-126`)
 
 | 상태 | DB 경로 | 설명 |
 |---|---|---|
-| 비로그인 | `todocal.db` | 공용 로컬 DB |
-| 로그인 (uid: abc123) | `todocal_abc123.db` | 사용자별 격리 DB |
+| 비로그인 | `models.db` | 공용 로컬 DB |
+| 로그인 (uid: abc123) | `models_abc123.db` | 사용자별 격리 DB |
 | 외부 캘린더 | `google_calendar.db` | 서비스별 별도 DB (ExternalCalendarDBConnectionPool) |
 
 ### 3. 데이터 마이그레이션
@@ -142,7 +142,7 @@ stateDiagram-v2
 
     state NonLogin {
         note right of NonLogin
-            DB: todocal.db
+            DB: models.db
             Repository: Local only
             Sync: no-op
             Upload: no-op
@@ -151,7 +151,7 @@ stateDiagram-v2
 
     state Login {
         note right of Login
-            DB: todocal_{uid}.db
+            DB: models_{uid}.db
             Repository: Upload Decorator
             Sync: EventSyncUsecaseImple
             Upload: EventUploadServiceImple
@@ -213,7 +213,7 @@ sequenceDiagram
 
 전환 과정:
   1. OAuth 완료 → uid 획득
-  2. LoginUsecaseFactory 생성 (todocal_{uid}.db)
+  2. LoginUsecaseFactory 생성 (models_{uid}.db)
   3. SharedDataStore 초기화:
      - todos: [:] (비로그인 할일 제거)
      - schedules: MemorizedEventsContainer() (빈 컨테이너)
