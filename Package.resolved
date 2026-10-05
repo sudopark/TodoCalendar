@@ -1,5 +1,5 @@
 {
-  "originHash" : "c2f09b87e12ad6a3645177b4e8ea1809c88c512cef5931f89fd5eacc7c5c96d7",
+  "originHash" : "d492c501e933218d7b3d56b2bd6f74cf51fa62d544e38b943146f2ac5e2251af",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -114,8 +114,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/google/GoogleUtilities",
       "state" : {
-        "revision" : "92c8f6dc3ac375d6febdfcb3db68bc3d10633db3",
-        "version" : "8.1.3"
+        "revision" : "cc31f5ed464b111f877ce8554cbef4455d410d91",
+        "version" : "8.1.4"
       }
     },
     {
@@ -231,8 +231,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/sudopark/SQLiteService",
       "state" : {
-        "branch" : "master",
-        "revision" : "767a36d1121bf0bd58d6b20c3995b57029c80810"
+        "revision" : "4772de6aba13d8ad5fbb353ea1577dd47d25955f",
+        "version" : "1.0.0"
       }
     },
     {
