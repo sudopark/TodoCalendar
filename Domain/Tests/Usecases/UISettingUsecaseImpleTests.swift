@@ -495,19 +495,27 @@ extension AppSettingUsecaseImpleTests {
         XCTAssertEqual(self.spyViewAppearanceStore.calendarNotifyCount, countBefore)
     }
     
-    func testUsecase_removeCustomColorTheme_whenSelected_clearsCurrentThemeAndNotifies() async throws {
+    func testUsecase_removeCustomColorTheme_whenSelected_resetsColorSetKeyToSystemThemeAndNotifies() async throws {
         // given
         let repository = StubCustomColorThemeRepository(themes: [self.makeCustomTheme("c1")])
-        let usecase = self.makeUsecase(selectedColorSetKey: .custom("c1"), customColorThemeRepository: repository)
+        let appSettingRepository = StubAppSettingRepository()
+        let usecase = self.makeUsecase(
+            selectedColorSetKey: .custom("c1"),
+            customColorThemeRepository: repository,
+            repository: appSettingRepository
+        )
         _ = try await usecase.refreshAppearanceSetting()
-        
+        let countBefore = self.spyViewAppearanceStore.calendarNotifyCount
+
         // when
         try await usecase.removeCustomColorTheme("c1")
-        
+
         // then
         XCTAssertEqual(repository.didRemovedUuids, ["c1"])
-        XCTAssertEqual(self.spyViewAppearanceStore.didChangedCalendarSetting?.colorSetKey, .custom("c1"))
+        XCTAssertEqual(self.spyViewAppearanceStore.didChangedCalendarSetting?.colorSetKey, .systemTheme)
         XCTAssertNil(self.spyViewAppearanceStore.didChangedCalendarSetting?.currentCustomColorTheme)
+        XCTAssertEqual(appSettingRepository.didChangeCalendarAppearanceSettingParams?.newColorSetKey, .systemTheme)
+        XCTAssertEqual(self.spyViewAppearanceStore.calendarNotifyCount, countBefore + 1)
     }
     
     func testUsecase_removeCustomColorTheme_whenNotSelected_removesWithoutNotify() async throws {
@@ -530,20 +538,26 @@ extension AppSettingUsecaseImpleTests {
         let repository = StubCustomColorThemeRepository(
             themes: [self.makeCustomTheme("c1")], shouldFailSave: true, shouldFailRemove: true
         )
-        let usecase = self.makeUsecase(selectedColorSetKey: .custom("c1"), customColorThemeRepository: repository)
+        let appSettingRepository = StubAppSettingRepository()
+        let usecase = self.makeUsecase(
+            selectedColorSetKey: .custom("c1"),
+            customColorThemeRepository: repository,
+            repository: appSettingRepository
+        )
         _ = try await usecase.refreshAppearanceSetting()
         let countBefore = self.spyViewAppearanceStore.calendarNotifyCount
-        
+
         // when
         var saveError: Error?
         var removeError: Error?
         do { try await usecase.saveCustomColorTheme(self.makeCustomTheme("c1")) } catch { saveError = error }
         do { try await usecase.removeCustomColorTheme("c1") } catch { removeError = error }
-        
+
         // then
         XCTAssertNotNil(saveError)
         XCTAssertNotNil(removeError)
         XCTAssertEqual(self.spyViewAppearanceStore.calendarNotifyCount, countBefore)
+        XCTAssertNil(appSettingRepository.didChangeCalendarAppearanceSettingParams)
     }
 }
 
