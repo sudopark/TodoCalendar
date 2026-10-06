@@ -20,6 +20,7 @@ description: Use when writing GitHub issues or issue comments in this project �
 - 문제 서술·배경은 결론을 이해하는 데 필요한 최소량까지만 — 결론보다 앞에 깔지 않는다.
 - 킥오프 마커 코멘트(`<!-- kickoff -->` 류) 포맷은 kickoff 스킬 소관 — 여기서 재정의하지 않는다.
 - 클로즈 시 한 줄 코멘트를 남긴다: 뭘로 해소됐는지(커밋 sha·PR#) 또는 왜 안 하는지.
+- **봇 계정 코멘트는 `mcp__github-reviewer__add_issue_comment` 로만 올린다.** 이 절이 보고 계약(opord·campaign·pr·implement)이 가리키는 도구명의 단일 정본이다. **셸 `gh` 로는 그 요건을 못 지킨다** — `gh auth` 는 유저 계정으로 인증하고 봇 토큰은 MCP 서버 환경에만 있어 셸에 없다. `gh api .../issues/<n>/comments` 로 올리면 유저 본인 계정이 자기를 멘션하는 꼴이 되어 알림이 안 간다. 게시 목적이 그 알림이다 (`docs/operations/templates/report-confirmation.md`). 긴 본문이 인자와 결과로 컨텍스트를 두 번 먹는 것은 사실이지만 수단을 바꿀 사유가 못 된다. **전문을 싣는 코멘트는 전문을 싣는다** — 재가 원문(opord §7)·종결보고·확인보고는 다른 세션·워크트리가 전문을 복원하는 유일한 자리라(`opord.md` 는 gitignore 대상 — opord §6) 요약과 로컬 경로로 줄이면 그 복원이 끊긴다 (#1208 opord partial — 2026-10-02 에 컨텍스트 절약을 사유로 `gh api` 를 쓴 것이 이탈로 판정됐고, 그 판정이 옳았다).
 
 ## 보드
 
