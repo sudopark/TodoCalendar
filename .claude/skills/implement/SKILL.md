@@ -117,7 +117,7 @@ description: Use when writing or modifying code in this project — 구현 착�
 
 - 유저가 준 해결책으로 구현을 잇는다.
 - **보고와 동시에 doctrine 스킬을 invoke 한다** — 갭 확증·요구 형식·신설/보강 판정·반영 시점이 그 스킬 소관이다. 이 루프는 보고까지고, 받은 답을 룰로 정착시키는 것이 doctrine 이다. 예약으로 미루지 않는다 — 잃어버리지 않는 것이 불변 조건이다.
-- 작전명령·작전계획 있는 런이면 이 보고를 즉시보고(`report-immediate.md`)로 이슈에도 게시한다 — 머리 게시 줄대로 봇 코멘트(`mcp__github-reviewer__add_issue_comment`) + `@sudopark` 멘션.
+- 작전명령·작전계획 있는 런이면 이 보고를 즉시보고(`report-immediate.md`)로 이슈에도 게시한다 — 머리 게시 줄대로 봇 계정 코멘트 + `@sudopark` 멘션 (수단은 issue 스킬 §코멘트).
 
 ### 플랜 갭 보고 루프
 
