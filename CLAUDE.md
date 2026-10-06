@@ -17,6 +17,7 @@
 - **짝지어진 두 위치는 함께 갱신.** 한쪽만 바꾸면 무효가 되는 쌍은 추가/변경 시 대응처도 반드시 확인:
   - `AppEnvironment.dbVersion` ↔ `Table.migrateStatement(for:)` case ↔ `AppDataMigrationImple`의 `runDBMigration` case + `runMigrationVersionNtoM` (셋 다여야 한다 — 마지막이 빠지면 `migrateStatement`가 호출조차 안 되고 조용히 안 돈다)
   - 외부 캘린더 DB 는 서비스마다 같은 짝을 따로 가진다 — `AppEnvironment.googleCalendarDBVersion` ↔ 그 테이블의 `migrateStatement(for:)` case ↔ `ExternalCalendarDBMigrationImple.runGoogleCalendarDBMigration` 의 switch case + 그 case 가 부르는 스텝 메서드이고, 애플은 `appleCalendarDBVersion` ↔ 그 테이블의 `migrateStatement(for:)` case ↔ `runAppleCalendarDBMigration` 의 switch 다. 스텝 메서드 이름이 `runMigrationVersionNtoM` 패턴이 아니라 `runGoogleCalendarEventTagMigration` 처럼 대상 테이블을 담아서, 위 메인 DB 짝을 이름으로 훑으면 이쪽은 안 걸린다. 빠졌을 때 실패하는 모양은 메인 DB 와 같다 — `migrateStatement` 가 호출조차 안 되고 조용히 안 돈다
+  - 커밋 메시지 기준(§5) ↔ `commit` 스킬 §메시지 ↔ `report-review` P2 (작성 기준 둘과 검수 기준 하나가 같은 것을 말해야 한다 — 검수 쪽만 고치면 §5 가 ❌ 로 든 예시가 관문을 통과한다)
   - CI `pr_test.yml` — `detect-changes`의 scheme 매핑(grep) ↔ `test` job의 `Test <scheme>` 실행 step (둘 중 하나만 추가하면 감지만 되고 실행 안 됨)
   - 신규 테스트 스킴 ↔ 스킴 목록 하드코딩 전부 (`pr_test.yml` 3곳·`scripts/run-all-tests.sh`·`impact-check.sh`+테스트·`run-tests` 스킬 — 상세는 add-framework 스킬. 단 `<Name>Snapshots`·`<Name>E2E` 스킴은 의도된 예외 — 둘 다 로컬 전용이라 CI 가 안 돌린다. 스냅샷은 snapshot-check 스킬, e2e 는 #826 작전계획 0항 결심으로 CI 미배선)
   - init 시그니처 ↔ 콜사이트
@@ -148,12 +149,20 @@ tuist generate --no-open      # 파일 추가/삭제 후 재실행 필수
 
 ### 커밋 메시지
 
-`[#이슈번호] 동작 변화 요약`. 파일/클래스 목록 ❌ → 동작이 어떻게 달라졌나 ✅.
+`[#이슈번호] 동작 변화 요약`. 파일/클래스 목록 ❌ → 동작이 어떻게 달라졌나 ✅. **"왜"는 이 첫 줄이 전담하고, 본문 불릿은 한 줄로 앵커와 동작 변화만 담는다** — 상세는 commit 스킬.
 
 ```
 ❌ [#563] AppleCalendarOAuth2ServiceUsecaseImple 로직 변경 및 테스트 추가
 ✅ [#563] AppleCalendar 권한을 상태별로 갈라 확인한다
    — fullAccess 는 바로 성공, denied·restricted 는 즉시 throw, notDetermined 는 시스템 요청 후 재확인
+```
+
+불릿은 제목의 해설문이 아니다 — 근거를 불릿에 달면 제목이 한 말을 두 번 한다:
+
+```
+❌ - Package.swift — 핀을 `branch: "master"` 에서 `from: "1.0.0"` 으로 되돌렸다. 승격 전 형태인
+     `from:` 으로 돌아가 re-resolve 가 말없이 다른 커밋을 집지 않는다
+✅ - Package.swift — SQLiteService 핀을 `branch: "master"` 에서 `from: "1.0.0"` 으로 되돌렸다
 ```
 
 ---
