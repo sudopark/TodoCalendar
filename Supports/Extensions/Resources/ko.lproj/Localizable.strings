@@ -485,6 +485,9 @@
 "setting.appearance.calendar.colorTheme::amethyst" = "자수정";
 "setting.appearance.calendar.colorTheme::camellia" = "동백";
 "setting.appearance.calendar.colorTheme::sunset" = "노을";
+"setting.appearance.calendar.colorTheme::myThemes" = "내 테마";
+"setting.appearance.calendar.colorTheme::newTheme" = "새 테마";
+"setting.appearance.calendar.colorTheme::edit" = "편집";
 "setting.appearance.calendar.colorTheme.edit::title::new" = "새 테마";
 "setting.appearance.calendar.colorTheme.edit::title::edit" = "테마 편집";
 "setting.appearance.calendar.colorTheme.edit::name" = "이름";
