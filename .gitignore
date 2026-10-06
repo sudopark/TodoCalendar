@@ -117,7 +117,7 @@ fastlane/in_app_events/*
 !fastlane/in_app_events/README.md
 
 # importlib 로 하이픈 파일명 스크립트를 불러올 때 생긴다
-scripts/__pycache__/
+__pycache__/
 
 # 자격증명 — README 만 커밋한다
 secret/*
