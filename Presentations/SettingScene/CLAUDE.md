@@ -21,6 +21,7 @@ graph TD
     SIL -->|bottomSlide| SI[SignIn<br/>MemberScenes]
 
     AS -->|push| CT[ColorThemeSelect<br/>색상 테마]
+    CT -->|push| CTE[ColorThemeEdit<br/>커스텀 테마 편집]
     AS -->|push| WG[WidgetGallery<br/>WidgetScenes]
     AS -->|push| TZ[TimeZoneSelect<br/>타임존]
 
@@ -58,7 +59,7 @@ graph TD
 | `EventOnCalendarViewModelImple` | 캘린더 이벤트 | 태그 색상 표시, 할일 표시 등 |
 | `EventListAppearnaceSettingViewModelImple` | 이벤트 목록 | 12/24시 형식 등 |
 
-하위 화면: ColorThemeSelect, TimeZoneSelect (leaf), WidgetGallery (WidgetScenes — 위젯 기본 테마 설정을 그 화면 상단이 담는다)
+하위 화면: ColorThemeSelect (커스텀 테마 편집 ColorThemeEdit으로 push), TimeZoneSelect (leaf), WidgetGallery (WidgetScenes — 위젯 기본 테마 설정을 그 화면 상단이 담는다)
 
 ### EventSetting (이벤트 기본값)
 
@@ -142,6 +143,7 @@ graph TD
     SSB -->|생성| OSLB[OpenSourceLicenseBuilder]
 
     ASB -->|하위| CTB[ColorThemeSelectBuilder]
+    CTB -->|하위| CTEB[ColorThemeEditBuilder]
     ASB -->|주입받음| WGB[WidgetGallerySceneBuilder<br/>구현체는 WidgetScenes]
     ASB -->|하위| TZB[TimeZoneSelectBuilder]
 
