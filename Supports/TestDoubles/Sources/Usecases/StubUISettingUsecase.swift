@@ -70,10 +70,24 @@ open class StubUISettingUsecase: UISettingUsecase, @unchecked Sendable {
     }
     
     public var didChangeAppearanceSetting: AppearanceSettings?
-    
+
     open func changeCalendarAppearanceSetting(_ params: EditCalendarAppearanceSettingParams) throws -> CalendarAppearanceSettings {
         let old = self.readSetting()
         let newSetting = old |> \.calendar .~ old.calendar.update(params)
+        self.didChangeAppearanceSetting = newSetting
+        self.stubAppearanceSetting = newSetting
+        self.settingSubject.send(newSetting)
+        return newSetting.calendar
+    }
+
+    public var didSelectCustomColorTheme: CustomColorTheme?
+    open func selectCustomColorTheme(_ theme: CustomColorTheme) throws -> CalendarAppearanceSettings {
+        let old = self.readSetting()
+        let params = EditCalendarAppearanceSettingParams() |> \.newColorSetKey .~ .custom(theme.uuid)
+        let calendarAfterUpdate = old.calendar.update(params)
+        let newCalendar = calendarAfterUpdate |> \.currentCustomColorTheme .~ theme
+        let newSetting = old |> \.calendar .~ newCalendar
+        self.didSelectCustomColorTheme = theme
         self.didChangeAppearanceSetting = newSetting
         self.stubAppearanceSetting = newSetting
         self.settingSubject.send(newSetting)

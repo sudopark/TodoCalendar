@@ -559,6 +559,49 @@ extension AppSettingUsecaseImpleTests {
         XCTAssertEqual(self.spyViewAppearanceStore.calendarNotifyCount, countBefore)
         XCTAssertNil(appSettingRepository.didChangeCalendarAppearanceSettingParams)
     }
+
+    func testUsecase_selectCustomColorTheme_savesKeyAndCarriesTheme() throws {
+        // given
+        let theme = self.makeCustomTheme("c1")
+        let appSettingRepository = StubAppSettingRepository()
+        let usecase = self.makeUsecase(repository: appSettingRepository)
+
+        // when
+        let result = try usecase.selectCustomColorTheme(theme)
+
+        // then
+        XCTAssertEqual(appSettingRepository.didChangeCalendarAppearanceSettingParams?.newColorSetKey, .custom("c1"))
+        XCTAssertEqual(result.currentCustomColorTheme, theme)
+        XCTAssertEqual(result.colorSetKey, .custom("c1"))
+    }
+
+    func testUsecase_selectCustomColorTheme_notifiesViewAppearanceStoreWithTheme() throws {
+        // given
+        let theme = self.makeCustomTheme("c1")
+        let usecase = self.makeUsecase()
+
+        // when
+        _ = try usecase.selectCustomColorTheme(theme)
+
+        // then
+        XCTAssertEqual(self.spyViewAppearanceStore.didChangedCalendarSetting?.colorSetKey, .custom("c1"))
+        XCTAssertEqual(self.spyViewAppearanceStore.didChangedCalendarSetting?.currentCustomColorTheme, theme)
+    }
+
+    func testUsecase_selectCustomColorTheme_thenChangeOtherSetting_keepsTheme() throws {
+        // given
+        let theme = self.makeCustomTheme("c1")
+        let usecase = self.makeUsecase()
+        _ = try usecase.selectCustomColorTheme(theme)
+
+        // when
+        let params = EditCalendarAppearanceSettingParams() |> \.animationEffectIsOn .~ true
+        let result = try usecase.changeCalendarAppearanceSetting(params)
+
+        // then
+        XCTAssertEqual(result.colorSetKey, .custom("c1"))
+        XCTAssertEqual(result.currentCustomColorTheme, theme)
+    }
 }
 
 private class SpyViewAppearanceStore: ViewAppearanceStore, @unchecked Sendable {
