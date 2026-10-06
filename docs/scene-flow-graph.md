@@ -48,6 +48,7 @@ graph TD
         SettingList[SettingItemList]
         AppearanceSetting[AppearanceSetting]
         ColorTheme[ColorThemeSelect]
+        ColorThemeEdit[ColorThemeEdit]
         WidgetAppearance[WidgetAppearanceSetting]
         TimeZoneSelect[TimeZoneSelect]
         EventSetting[EventSetting]
@@ -131,6 +132,7 @@ graph TD
     SettingList -.-> SignIn
 
     AppearanceSetting --> ColorTheme
+    ColorTheme --> ColorThemeEdit
     AppearanceSetting --> WidgetAppearance
     AppearanceSetting --> TimeZoneSelect
 
