@@ -9,17 +9,30 @@
 //
 
 import UIKit
+import Domain
 import Scenes
 import CommonPresentation
 
 
 // MARK: - Routing
 
-protocol ColorThemeSelectRouting: Routing, Sendable { }
+protocol ColorThemeSelectRouting: Routing, Sendable {
+    
+    func routeToEditCustomTheme(
+        original: CustomColorTheme?,
+        listener: (any ColorThemeEditSceneListener)?
+    )
+}
 
 // MARK: - Router
 
 final class ColorThemeSelectRouter: BaseRouterImple, ColorThemeSelectRouting, @unchecked Sendable { 
+    
+    private let editSceneBuilder: any ColorThemeEditSceneBuiler
+    
+    init(editSceneBuilder: any ColorThemeEditSceneBuiler) {
+        self.editSceneBuilder = editSceneBuilder
+    }
     
     override func closeScene(animate: Bool, _ dismissed: (() -> Void)?) {
         Task { @MainActor in
@@ -35,5 +48,15 @@ extension ColorThemeSelectRouter {
         self.scene as? (any ColorThemeSelectScene)
     }
     
-    // TODO: router implememnts
+    func routeToEditCustomTheme(
+        original: CustomColorTheme?,
+        listener: (any ColorThemeEditSceneListener)?
+    ) {
+        Task { @MainActor in
+            let next = self.editSceneBuilder.makeColorThemeEditScene(
+                original: original, listener: listener
+            )
+            self.currentScene?.navigationController?.pushViewController(next, animated: true)
+        }
+    }
 }

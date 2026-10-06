@@ -19,13 +19,16 @@ final class ColorThemeSelectSceneBuilerImple {
     
     private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
+    private let editSceneBuilder: any ColorThemeEditSceneBuiler
     
     init(
         usecaseFactory: any UsecaseFactory,
-        viewAppearance: ViewAppearance
+        viewAppearance: ViewAppearance,
+        editSceneBuilder: any ColorThemeEditSceneBuiler
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
+        self.editSceneBuilder = editSceneBuilder
     }
 }
 
@@ -46,6 +49,7 @@ extension ColorThemeSelectSceneBuilerImple: ColorThemeSelectSceneBuiler {
         )
     
         let router = ColorThemeSelectRouter(
+            editSceneBuilder: self.editSceneBuilder
         )
         router.scene = viewController
         viewModel.router = router

@@ -22,9 +22,17 @@ struct ColorThemeModel: Equatable {
     let title: String
     let key: ColorSetKeys
     var isSelected: Bool = false
+    let customColorTheme: CustomColorTheme?
+    
+    init(_ theme: CustomColorTheme) {
+        self.key = .custom(theme.uuid)
+        self.title = theme.name
+        self.customColorTheme = theme
+    }
     
     init(_ colorSetKey: ColorSetKeys) {
         self.key = colorSetKey
+        self.customColorTheme = nil
         switch colorSetKey {
         case .systemTheme: self.title = "setting.appearance.calendar.colorTheme::system".localized()
         case .defaultLight: self.title = "setting.appearance.calendar.colorTheme::light".localized()
@@ -42,11 +50,14 @@ protocol ColorThemeSelectViewModel: AnyObject, Sendable, ColorThemeSelectSceneIn
     // interactor
     func prepare()
     func selectTheme(_ model: ColorThemeModel)
+    func createCustomTheme()
+    func editCustomTheme(_ model: ColorThemeModel)
     func close()
     
     // presenter
     var sampleModel: AnyPublisher<CalendarAppearanceModel, Never> { get }
     var colorThemeModels: AnyPublisher<[ColorThemeModel], Never> { get }
+    var customColorThemeModels: AnyPublisher<[ColorThemeModel], Never> { get }
 }
 
 
@@ -69,6 +80,7 @@ final class ColorThemeSelectViewModelImple: ColorThemeSelectViewModel, @unchecke
     
     private struct Subject {
         let availableTheme = CurrentValueSubject<[ColorSetKeys]?, Never>(nil)
+        let customThemes = CurrentValueSubject<[CustomColorTheme]?, Never>(nil)
     }
     
     private let cancellables = CancelBag()
@@ -90,13 +102,40 @@ extension ColorThemeSelectViewModelImple {
             }
         }
         .store(in: self.cancellables)
+        
+        Task { [weak self] in
+            do {
+                let themes = try await self?.uiSettingUsecase.loadCustomColorThemes()
+                self?.subject.customThemes.send(themes)
+            } catch {
+                self?.router?.showError(error)
+            }
+        }
+        .store(in: self.cancellables)
     }
     
     func selectTheme(_ model: ColorThemeModel) {
+        self.applyTheme(model)
+    }
+    
+    func createCustomTheme() {
+        self.router?.routeToEditCustomTheme(original: nil, listener: self)
+    }
+    
+    func editCustomTheme(_ model: ColorThemeModel) {
+        guard let theme = model.customColorTheme else { return }
+        self.router?.routeToEditCustomTheme(original: theme, listener: self)
+    }
+    
+    private func applyTheme(_ model: ColorThemeModel) {
         do {
-            let params = EditCalendarAppearanceSettingParams()
-                |> \.newColorSetKey .~ model.key
-            let _ = try self.uiSettingUsecase.changeCalendarAppearanceSetting(params)
+            if let theme = model.customColorTheme {
+                let _ = try self.uiSettingUsecase.selectCustomColorTheme(theme)
+            } else {
+                let params = EditCalendarAppearanceSettingParams()
+                    |> \.newColorSetKey .~ model.key
+                let _ = try self.uiSettingUsecase.changeCalendarAppearanceSetting(params)
+            }
         } catch {
             self.router?.showError(error)
         }
@@ -135,5 +174,47 @@ extension ColorThemeSelectViewModelImple {
         .map(transform)
         .removeDuplicates()
         .eraseToAnyPublisher()
+    }
+    
+    var customColorThemeModels: AnyPublisher<[ColorThemeModel], Never> {
+        
+        let transform: (ColorSetKeys, [CustomColorTheme]) -> [ColorThemeModel]
+        transform = { current, themes in
+            return themes.map { theme in
+                let model = ColorThemeModel(theme)
+                return model |> \.isSelected .~ (model.key == current)
+            }
+        }
+        
+        return Publishers.CombineLatest(
+            uiSettingUsecase.currentCalendarUISeting.map { $0.colorSetKey },
+            self.subject.customThemes.compactMap { $0 }
+        )
+        .map(transform)
+        .removeDuplicates()
+        .eraseToAnyPublisher()
+    }
+}
+
+
+// MARK: - ColorThemeSelectViewModelImple + ColorThemeEditSceneListener
+
+extension ColorThemeSelectViewModelImple: ColorThemeEditSceneListener {
+    
+    func customColorTheme(saved theme: CustomColorTheme) {
+        let themes = self.subject.customThemes.value ?? []
+        guard let index = themes.firstIndex(where: { $0.uuid == theme.uuid })
+        else {
+            self.subject.customThemes.send(themes + [theme])
+            self.applyTheme(ColorThemeModel(theme))
+            return
+        }
+        let replaced = themes.enumerated().map { $0.offset == index ? theme : $0.element }
+        self.subject.customThemes.send(replaced)
+    }
+    
+    func customColorTheme(removed uuid: String) {
+        let themes = self.subject.customThemes.value ?? []
+        self.subject.customThemes.send(themes.filter { $0.uuid != uuid })
     }
 }
