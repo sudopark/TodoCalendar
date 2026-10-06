@@ -91,6 +91,17 @@ extension AppSettingUsecaseImple: UISettingUsecase {
         )
         return newSetting
     }
+
+    public func selectCustomColorTheme(_ theme: CustomColorTheme) throws -> CalendarAppearanceSettings {
+        let params = EditCalendarAppearanceSettingParams() |> \.newColorSetKey .~ .custom(theme.uuid)
+        let changed = try self.appSettingRepository.changeCalendarAppearanceSetting(params)
+        let newSetting = changed |> \.currentCustomColorTheme .~ theme
+        self.viewAppearanceStore.notifyCalendarSettingChanged(newSetting)
+        self.sharedDataStore.put(
+            CalendarAppearanceSettings.self, key: self.calednarSettingKey, newSetting
+        )
+        return newSetting
+    }
     
     public func changeDefaultEventTagColor(
         _ params: EditDefaultEventTagColorParams
