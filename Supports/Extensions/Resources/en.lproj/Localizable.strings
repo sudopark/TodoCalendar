@@ -484,6 +484,9 @@
 "setting.appearance.calendar.colorTheme::amethyst" = "Amethyst";
 "setting.appearance.calendar.colorTheme::camellia" = "Camellia";
 "setting.appearance.calendar.colorTheme::sunset" = "Sunset";
+"setting.appearance.calendar.colorTheme::myThemes" = "My themes";
+"setting.appearance.calendar.colorTheme::newTheme" = "New theme";
+"setting.appearance.calendar.colorTheme::edit" = "Edit";
 "setting.appearance.calendar.colorTheme.edit::title::new" = "New theme";
 "setting.appearance.calendar.colorTheme.edit::title::edit" = "Edit theme";
 "setting.appearance.calendar.colorTheme.edit::name" = "Name";

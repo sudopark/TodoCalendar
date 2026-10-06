@@ -28,7 +28,10 @@ struct ColorThemePreviewView: View {
     init(model: ColorThemeModel, metric: Layout, isSystemDark: Bool) {
         self.model = model
         self.metric = metric
-        self.colorSet = model.key.convert(isSystemDarkTheme: isSystemDark)
+        self.colorSet = model.key.convert(
+            isSystemDarkTheme: isSystemDark,
+            customColorTheme: model.customColorTheme
+        )
     }
     
     var body: some View {
@@ -107,6 +110,31 @@ struct ColorThemeItemView: View {
                             : .clear
                         )
                 )
+        }
+    }
+}
+
+
+struct NewColorThemeItemView: View {
+    
+    @Environment(ViewAppearance.self) private var appearance
+    
+    var body: some View {
+        VStack(spacing: Metric.Spacing.xlarge) {
+            
+            Image(systemName: "plus")
+                .font(appearance.fontSet.bigBold.asFont)
+                .foregroundStyle(appearance.colorSet.accent.asColor)
+                .frame(width: 60, height: 60)
+                .background(
+                    RoundedRectangle(cornerRadius: Metric.Radius.regular)
+                        .fill(appearance.colorSet.bg1.asColor)
+                )
+            
+            Text("setting.appearance.calendar.colorTheme::newTheme".localized())
+                .font(appearance.fontSet.normal.asFont)
+                .foregroundStyle(appearance.colorSet.weekDayText.asColor)
+                .padding(spacing: .small)
         }
     }
 }

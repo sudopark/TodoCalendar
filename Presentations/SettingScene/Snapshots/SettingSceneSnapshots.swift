@@ -463,7 +463,26 @@ private final class FakeColorThemeSelectViewModel: ColorThemeSelectViewModel, @u
         ]).eraseToAnyPublisher()
     }
 
+    var customColorThemeModels: AnyPublisher<[ColorThemeModel], Never> {
+        Just([
+            .init(self.makeCustomTheme(uuid: "c1", name: "Forest", background: "#F1F5EF", accent: "#2E7D32")),
+            .init(self.makeCustomTheme(uuid: "c2", name: "Dusk", background: "#2B2438", accent: "#E5A04D"))
+        ]).eraseToAnyPublisher()
+    }
+
+    private func makeCustomTheme(
+        uuid: String, name: String, background: String, accent: String
+    ) -> CustomColorTheme {
+        return CustomColorTheme(
+            uuid: uuid, name: name, schemaVersion: 1,
+            seeds: .init(background: background, accent: accent, form: .filled),
+            colors: [:], createdAt: 0, updatedAt: 0
+        )
+    }
+
     func prepare() { }
     func selectTheme(_ model: ColorThemeModel) { }
+    func createCustomTheme() { }
+    func editCustomTheme(_ model: ColorThemeModel) { }
     func close() { }
 }
