@@ -61,6 +61,20 @@ extension RemoteEnvironmentPathTests {
         #expect(path == "https://api.example.com/v2/setting/event/tag/default/color")
     }
 
+    @Test func path_appSettingColorThemesEndpoint_returnsV2SettingColorThemesURL() {
+        // when
+        let path = self.env.path(AppSettingEndpoints.colorThemes)
+        // then
+        #expect(path == "https://api.example.com/v2/setting/color_themes")
+    }
+
+    @Test func path_appSettingColorThemeEndpoint_returnsV2SettingColorThemeURLWithUUID() {
+        // when
+        let path = self.env.path(AppSettingEndpoints.colorTheme(uuid: "theme-1"))
+        // then
+        #expect(path == "https://api.example.com/v2/setting/color_themes/theme-1")
+    }
+
     @Test func path_eventSyncCheckEndpoint_returnsV2SyncCheckURL() {
         // when
         let path = self.env.path(EventSyncEndPoints.check)
