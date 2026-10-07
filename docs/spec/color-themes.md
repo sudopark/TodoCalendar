@@ -209,11 +209,13 @@ Radix 스케일은 12단계이고 단계마다 쓰임이 정해져 있다 — 1 
 
 **식별** — 선택값(`color_set`)은 `custom:<uuid>` 로 저장한다. `custom:` 뒤가 빈 문자열이면 알 수 없는 값이다. 선택값은 서버와 동기화하지 않는다.
 
-**저장 매체** — 계정별 DB 의 `CustomColorThemes` 테이블이다. DB 파일이 계정 단위라 user 컬럼이 없고, 로그아웃하면 미로그인 DB 를 다시 열기 때문에 로그인 계정의 테마는 미로그인 화면에 보이지 않는다. 같은 uuid 를 저장하면 덮어쓰고 목록은 `created_at` 오름차순이다.
+**저장 매체** — 계정별 DB 의 `CustomColorThemes` 테이블이다. 로그인 유저에게 이 테이블은 서버의 캐시다(아래 동기화). DB 파일이 계정 단위라 user 컬럼이 없고, 로그아웃하면 미로그인 DB 를 다시 열기 때문에 로그인 계정의 테마는 미로그인 화면에 보이지 않는다. 같은 uuid 를 저장하면 덮어쓰고 목록은 `created_at` 오름차순이다.
 
 **필드** — `uuid`·`name`·`schema_version`(현재 1)·`seeds`·`colors`·`created_at`·`updated_at`(Unix 초)이다. `seeds` 와 `colors` 는 JSON 텍스트 한 칸이다.
 - `seeds` 키는 `background`·`accent`·`text`·`surface`·`today`·`selectedDay`·`holidayOrWeekEnd`·`ai`·`form`(`filled`·`grouped`·`outlined`)이다. 색은 `#RRGGBB` 이고, 없는 선택 시드는 키를 뺀다.
 - `colors` 는 `ColorThemeDefinition.exportedColors` 가 펼친 `#RRGGBB` 맵이다. 서버 필수 필드라 저장하는 쪽이 저장 시점에 계산해 함께 둔다. 화면은 `colors` 를 읽지 않고 시드에서 매번 파생한다.
+
+**동기화** — 로그인 유저의 테마는 서버 `/v2/setting/color_themes` 에 저장한다(`CustomColorThemeRemoteRepositoryImple`). 저장·삭제는 서버가 성공해야 캐시에 반영하고, 서버가 실패하면 에러를 내고 캐시를 안 바꾼다. 목록 조회는 서버 목록으로 캐시를 통째로 갈아 끼우고 `created_at` 오름차순으로 돌려준다. 서버가 실패하면 캐시 목록을 돌려주므로, 다른 기기에서 지운 테마가 잠깐 남아 보일 수 있다. 단건 조회와 앱 시작은 캐시만 읽는다. 비로그인 유저는 서버를 거치지 않는다.
 
 **그리기** — 현재 선택된 커스텀 테마 하나는 calendar 외형 설정(`CalendarAppearanceSettings.currentCustomColorTheme`)에 담겨 설정 통지로 흐른다. 키가 `custom:<uuid>` 이고 uuid 가 같은 테마일 때만 채우며, UserDefaults 에는 저장하지 않는다(정본은 DB 다). `ViewAppearance` 는 테마 목록을 들지 않고 그 테마 하나(`customColorTheme`)만 든다. `ColorSetKeys.convert(isSystemDarkTheme:customColorTheme:)` 는 키의 uuid 와 테마의 uuid 가 같고 필수 시드가 `#RRGGBB` 로 읽힐 때만 시드로 파생한 정의를 내고, 아니면 시스템 테마로 그린다. 이 폴백 동안엔 창 스킴을 강제하지 않고 기기 라이트·다크 전환을 따른다 (`ViewAppearance.isFollowingSystemTheme`). 선택값은 계정과 무관한 전역 설정이라 로그아웃·계정 전환 뒤 그 id 가 새 계정에 없을 수 있다.
 
