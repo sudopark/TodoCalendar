@@ -90,3 +90,48 @@ struct CustomColorThemeJSONMapper {
         return map
     }
 }
+
+
+extension CustomColorTheme {
+
+    func asJson() -> [String: Any] {
+        return [
+            "uuid": self.uuid,
+            "name": self.name,
+            "schema_version": self.schemaVersion,
+            "seeds": CustomColorThemeJSONMapper().seedsMap(self.seeds),
+            "colors": self.colors,
+            "created_at": self.createdAt,
+            "updated_at": self.updatedAt
+        ]
+    }
+}
+
+struct CustomColorThemeRemoteMapper: Decodable {
+
+    private enum CodingKeys: String, CodingKey {
+        case uuid
+        case name
+        case schemaVersion = "schema_version"
+        case seeds
+        case colors
+        case createdAt = "created_at"
+        case updatedAt = "updated_at"
+    }
+
+    let theme: CustomColorTheme
+
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let seedsMap = try container.decode([String: String].self, forKey: .seeds)
+        self.theme = CustomColorTheme(
+            uuid: try container.decode(String.self, forKey: .uuid),
+            name: try container.decode(String.self, forKey: .name),
+            schemaVersion: try container.decode(Int.self, forKey: .schemaVersion),
+            seeds: try CustomColorThemeJSONMapper().seeds(from: seedsMap),
+            colors: try container.decode([String: String].self, forKey: .colors),
+            createdAt: try container.decode(TimeInterval.self, forKey: .createdAt),
+            updatedAt: try container.decode(TimeInterval.self, forKey: .updatedAt)
+        )
+    }
+}

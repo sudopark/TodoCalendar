@@ -39,7 +39,7 @@ final class StubCustomColorThemeRepository: CustomColorThemeRepository, @uncheck
         return self.themes
     }
 
-    func loadTheme(_ uuid: String) async throws -> CustomColorTheme? {
+    func fetchTheme(_ uuid: String) async throws -> CustomColorTheme? {
         guard self.shouldFailLoad == false else { throw RuntimeError("load failed") }
         return self.themes.first { $0.uuid == uuid }
     }

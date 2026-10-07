@@ -171,7 +171,7 @@ extension ApplicationPrepareUsecaseImple {
     
     private func loadCustomColorTheme(for colorSetKey: ColorSetKeys) async -> CustomColorTheme? {
         guard case .custom(let themeId) = colorSetKey else { return nil }
-        return try? await self.customColorThemeRepository.loadTheme(themeId)
+        return try? await self.customColorThemeRepository.fetchTheme(themeId)
     }
     
     /// 라이브액티비티는 계정 스코프다 — 안 끄면 전환된 계정 잠금화면에 이전 계정 이벤트가 남는다.

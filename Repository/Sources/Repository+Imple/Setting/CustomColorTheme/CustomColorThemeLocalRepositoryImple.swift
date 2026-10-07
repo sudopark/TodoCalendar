@@ -26,7 +26,7 @@ extension CustomColorThemeLocalRepositoryImple {
         return try await self.localStorage.fetchThemes()
     }
 
-    public func loadTheme(_ uuid: String) async throws -> CustomColorTheme? {
+    public func fetchTheme(_ uuid: String) async throws -> CustomColorTheme? {
         return try await self.localStorage.fetchTheme(uuid)
     }
 
