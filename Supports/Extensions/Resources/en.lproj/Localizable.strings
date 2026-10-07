@@ -120,6 +120,7 @@
 
 "calendar::foremostevent:title" = "Foremost Event";
 "calendar::uncompletedTodos:title" = "Uncompleted To-do";
+"calendar::event_list::next_day::empty" = "No events";
 "calendar::guideTodo::name" = "See how To-do Calendar works";
 "calendar::eventSync::loadingAllEvents::message" = "Fetching all your events…";
 "calendar::event_time::todo" = "Todo";
