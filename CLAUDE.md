@@ -19,7 +19,7 @@
   - 외부 캘린더 DB 는 서비스마다 같은 짝을 따로 가진다 — `AppEnvironment.googleCalendarDBVersion` ↔ 그 테이블의 `migrateStatement(for:)` case ↔ `ExternalCalendarDBMigrationImple.runGoogleCalendarDBMigration` 의 switch case + 그 case 가 부르는 스텝 메서드이고, 애플은 `appleCalendarDBVersion` ↔ 그 테이블의 `migrateStatement(for:)` case ↔ `runAppleCalendarDBMigration` 의 switch 다. 스텝 메서드 이름이 `runMigrationVersionNtoM` 패턴이 아니라 `runGoogleCalendarEventTagMigration` 처럼 대상 테이블을 담아서, 위 메인 DB 짝을 이름으로 훑으면 이쪽은 안 걸린다. 빠졌을 때 실패하는 모양은 메인 DB 와 같다 — `migrateStatement` 가 호출조차 안 되고 조용히 안 돈다
   - 커밋 메시지 기준(§5) ↔ `commit` 스킬 §메시지 ↔ `report-review` P2 (작성 기준 둘과 검수 기준 하나가 같은 것을 말해야 한다 — 검수 쪽만 고치면 §5 가 ❌ 로 든 예시가 관문을 통과한다)
   - CI `pr_test.yml` — `detect-changes`의 scheme 매핑(grep) ↔ `test` job의 `Test <scheme>` 실행 step (둘 중 하나만 추가하면 감지만 되고 실행 안 됨)
-  - 신규 테스트 스킴 ↔ 스킴 목록 하드코딩 전부 (`pr_test.yml` 3곳·`scripts/run-all-tests.sh`·`impact-check.sh`+테스트·`run-tests` 스킬 — 상세는 add-framework 스킬. 단 `<Name>Snapshots`·`<Name>E2E` 스킴은 의도된 예외 — 둘 다 로컬 전용이라 CI 가 안 돌린다. 스냅샷은 snapshot-check 스킬, e2e 는 #826 작전계획 0항 결심으로 CI 미배선)
+  - 신규 테스트 스킴 ↔ 스킴 목록 하드코딩 전부 (`pr_test.yml` 3곳·`scripts/run-all-tests.sh`·`impact-check.sh`+테스트·`run-tests` 스킬 — 상세는 add-framework 스킬. 단 `<Name>Snapshots`·`<Name>E2E` 스킴은 의도된 예외 — 둘 다 로컬 전용이라 CI 가 안 돌린다. 스냅샷은 snapshot-check 스킬, e2e 는 #826 캠페인 계획 0항 결심으로 CI 미배선)
   - init 시그니처 ↔ 콜사이트
   - 인증 필요 신규 Endpoint enum ↔ `CalendarAPIAutenticator.shouldAdapt` case ↔ 회귀 테스트 (누락 시 무인증 요청 → 401, 리트라이도 안 됨)
   - CommonPresentation 신규 컴포넌트 ↔ `.claude/rules/presentations-rules.md` §2 카탈로그 표 등재 (누락 시 다음 사람이 못 찾아 같은 컴포넌트를 또 만든다)
@@ -77,8 +77,8 @@ tuist generate --no-open      # 파일 추가/삭제 후 재실행 필수
 | 분해된 큰 작업의 멀티 PR 실행 | orchestrate 스킬 |
 | 페어 프로그래밍 선언 | pair-programming 스킬 |
 | 방향 수렴 선언 | converge 스킬 |
-| 작전계획 작성·평가 (L·XL 멀티 PR) | campaign 스킬 |
-| 작전명령 작성 (M·DP 플랜) | opord 스킬 |
+| 캠페인 계획 작성·평가 (L·XL 멀티 PR) | campaign 스킬 |
+| 작업 지침 작성 (M·DP 플랜) | opord 스킬 |
 | 코드 작성·수정 | implement 스킬 (superpowers 코딩 절차 컴패니언) |
 | 룰·선례 없어 결정이 막힘 | doctrine 스킬 (실행 교리 신설·보강 요구) |
 | 버그·논리 모순 수정 | troubleshoot 스킬 (superpowers systematic-debugging 컴패니언 — 아카이브 `docs/troubleshooting/`) |
@@ -95,7 +95,7 @@ tuist generate --no-open      # 파일 추가/삭제 후 재실행 필수
 | 커밋 / PR / 이슈 | commit / pr / issue 스킬 |
 | 공개 PR 에이전트 리뷰 | review 스킬 → code-reviewer subagent |
 | 하네스 수정분 리뷰 (PR·PR 없는 커밋) | harness-review 스킬 → harness-reviewer subagent |
-| 계획 문서 재가 전 1차 리뷰 (strategy·campaign·opord) | plan-review 스킬 |
+| 계획 문서 승인 전 1차 리뷰 (strategy·campaign·opord) | plan-review 스킬 |
 | 하위 세션에 통제 관문 재공지·일괄 지시 | control-brief 스킬 |
 | 하위 세션이 유저에게 낼 보고·커밋 메시지·PR 본문 초안 검수 | report-review 스킬 |
 

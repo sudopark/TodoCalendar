@@ -1,6 +1,6 @@
 ---
 name: orchestrate
-description: Use when executing decomposed large work as multiple PRs from one session — 분해된 하위 작업들을 한 세션이 서브에이전트 dispatch로 실행하고, 하위 작업 단위로 개별 PR(병렬 또는 stacked)을 내보내는 실행 모드. Triggers on campaign 작전계획의 DP 들을 같은 세션에서 실행 지시("이어서 실행하자", "오케스트레이션 하자"), 작전명령 실행 중 규모 초과로 campaign 승격을 거친 뒤의 DP 실행, 유저의 병렬·stacked PR 작업 지시. Does NOT trigger on 단일 PR 규모의 플랜 실행(superpowers subagent-driven-development·executing-plans), DP 이슈를 별도 세션이 각자 킥오프하는 경로(kickoff 재진입), 계획·평가(campaign), 사이즈 판정(kickoff).
+description: Use when executing decomposed large work as multiple PRs from one session — 분해된 하위 작업들을 한 세션이 서브에이전트 dispatch로 실행하고, 하위 작업 단위로 개별 PR(병렬 또는 stacked)을 내보내는 실행 모드. Triggers on campaign 캠페인 계획의 DP 들을 같은 세션에서 실행 지시("이어서 실행하자", "오케스트레이션 하자"), 작업 지침 실행 중 규모 초과로 campaign 승격을 거친 뒤의 DP 실행, 유저의 병렬·stacked PR 작업 지시. Does NOT trigger on 단일 PR 규모의 플랜 실행(superpowers subagent-driven-development·executing-plans), DP 이슈를 별도 세션이 각자 킥오프하는 경로(kickoff 재진입), 계획·평가(campaign), 사이즈 판정(kickoff).
 ---
 
 # Orchestrate — 멀티 PR 실행 오케스트레이션
@@ -24,7 +24,7 @@ description: Use when executing decomposed large work as multiple PRs from one s
 ### 2. 실행 모드 판정 — 의존성 그래프
 
 - **독립 sub-work → 병렬 가능.** 단 셋 다 충족할 때만: 파일 겹침 없음 / 각자 워크트리 확보 / **동시 진행 sub-work 2개 상한** (상한의 단위는 sub-work — 각 sub-work 내부 dispatch는 순차라, 동시에 활성인 워크트리·xcodebuild가 2개를 넘지 않게 하는 기준이다).
-- **의존 sub-work → stacked 체인.** 앞 sub-work의 PR 머지를 기다리지 않는다 — 앞 브랜치를 베이스로 다음 sub-work을 진행하고, PR도 앞 브랜치를 base로 올린다. **단 sub-work이 campaign DP 면 기본은 opord 착수 자격(선행 DP 머지)이다** — stacked 는 유저가 명시 허용할 때만 타고, 그때 게이트의 "선행 DP 머지"는 "선행 DP PR 존재 + 인터페이스 계약 확정(campaign.md 8항 작전 배열의 통제수단)"으로 완화된다 (opord §3-2). 리뷰 반영으로 앞이 바뀌는 리스크는 §5 rebase 규정이 흡수한다. 완화된 조건도 `회귀` 앞에선 무효다 — 선행 DP 가 되돌려지면 그 PR 로 확정했던 인터페이스 계약이 사라지므로, 스택 뒤를 잇지 않고 멈춘다.
+- **의존 sub-work → stacked 체인.** 앞 sub-work의 PR 머지를 기다리지 않는다 — 앞 브랜치를 베이스로 다음 sub-work을 진행하고, PR도 앞 브랜치를 base로 올린다. **단 sub-work이 campaign DP 면 기본은 opord 착수 자격(선행 DP 머지)이다** — stacked 는 유저가 명시 허용할 때만 타고, 그때 게이트의 "선행 DP 머지"는 "선행 DP PR 존재 + 인터페이스 계약 확정(campaign.md 8항 작업 순서의 작업 간 약속)"으로 완화된다 (opord §3-2). 리뷰 반영으로 앞이 바뀌는 리스크는 §5 rebase 규정이 흡수한다. 완화된 조건도 `회귀` 앞에선 무효다 — 선행 DP 가 되돌려지면 그 PR 로 확정했던 인터페이스 계약이 사라지므로, 스택 뒤를 잇지 않고 멈춘다.
 
 ### 3. 원장 — 컴팩션 생존 장부
 
@@ -35,7 +35,7 @@ sub-work(DP)별 상태(브랜치·base·PR#·머지)는 campaign 원장 `.operat
 ### 4. sub-work 실행 루프
 
 1. **브랜치**: `features/` 브랜치를 base(develop 또는 앞 sub-work 브랜치)에서 딴다.
-2. **브리프·dispatch**: sub-work이 DP 면 브리프 = 해당 DP의 작전명령(`docs/operations/<DP이슈>/opord-<DP>.md`)이고, 첫 보고에 백브리프(`report-backbrief.md` 7항)를 요구한다 — 명령을 쓴 세션이 아니어도 같다 (opord §3-9). implement 스킬을 invoke하고 §착수의 서브에이전트 dispatch 조항을 따른다 — rules 요지 발췌, CLAUDE.md §1 글 규범 발췌, 테스트 스킴, 구조 패턴, "갭 발견 시 추측 금지·보고 후 중단" 명시. 보고는 report 파일로 받는다 (전문을 컨트롤러 컨텍스트에 싣지 않는다).
+2. **브리프·dispatch**: sub-work이 DP 면 브리프 = 해당 DP의 작업 지침(`docs/operations/<DP이슈>/opord-<DP>.md`)이고, 첫 보고에 착수 보고(`report-backbrief.md` 7항)를 요구한다 — 명령을 쓴 세션이 아니어도 같다 (opord §3-9). implement 스킬을 invoke하고 §착수의 서브에이전트 dispatch 조항을 따른다 — rules 요지 발췌, CLAUDE.md §1 글 규범 발췌, 테스트 스킴, 구조 패턴, "갭 발견 시 추측 금지·보고 후 중단" 명시. 보고는 report 파일로 받는다 (전문을 컨트롤러 컨텍스트에 싣지 않는다).
 3. **검수**: dispatch 보고마다 브리프에 실은 rules 조항 위반 여부를 항목별로 스캔하고, 테스트 통과를 확인한다. 결함이면 **원 서브에이전트를 재개해**(SendMessage) findings를 되돌린다 — 자기 작업 컨텍스트가 남아 있어 싸다. 재개가 불가하면 브리프·report 경로·findings를 실어 새 dispatch. 컨트롤러가 직접 고치지 않는다.
 4. **커밋·PR**: 커밋은 서브에이전트가 논리 단위로 만든다(commit 스킬 컨벤션 승계). sub-work의 dispatch가 모두 끝나면 컨트롤러가 pr 스킬로 PR을 올린다 — stacked면 `gh pr create --base <앞 브랜치>`.
 5. 원장(§3) 갱신 후 다음 sub-work으로.

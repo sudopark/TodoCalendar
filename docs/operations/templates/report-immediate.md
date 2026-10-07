@@ -1,4 +1,4 @@
-# 즉시보고 (Spot Report)
+# 긴급 보고 (Spot Report)
 
 게시: 이슈 봇 코멘트 + `@sudopark` 멘션 — 결정 대기. 작업 지침·캠페인 계획 있는 런만
 

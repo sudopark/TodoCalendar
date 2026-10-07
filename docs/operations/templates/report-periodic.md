@@ -1,4 +1,4 @@
-# 정기보고 (Situation Report) — 단계 전환 · branch 발동 · 태스크 완료
+# 진행 보고 (Situation Report) — 단계 전환 · branch 발동 · 태스크 완료
 
 게시: 단계 전환·branch 발동은 이슈 봇 코멘트 + `@sudopark` 멘션 — 태스크 완료는 진행 파일만, 게시 없음
 

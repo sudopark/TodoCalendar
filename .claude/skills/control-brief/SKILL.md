@@ -3,9 +3,9 @@ name: control-brief
 description: Use when the central control session must (re)announce the reporting gates to its peer worktree sessions (southpaw·orthodox·spare 등) — 보고 체계 재구축, 관문을 건너뛴 세션이 나왔을 때, 또는 여러 하위 세션에 같은 지시를 함께 내릴 때. Triggers on "하위 세션들한테 보고 체계 다시 알려", "사우스포·오소독스·스페어에 전파해", "하위 세션들에 이거 지시 내려". Does NOT trigger on 계획 문서 리뷰(plan-review 스킬), PR 리뷰(review 스킬), 유저 보고 검수(report-review 스킬), 피어가 보낸 메시지에 한 세션만 답하는 일.
 ---
 
-# Control Brief — 하위 세션 보고 체계 하달
+# Control Brief — 하위 세션 보고 체계 전달
 
-**통제 관문은 약속일 뿐이고 기계로 막는 장치가 없다.** 하위 세션이 들르지 않으면 관문은 그냥 지나간다. 이 스킬은 관문을 다시 알리고, 필요하면 같은 전문에 지시를 얹어 보낸다. 2026-09-24 에 PR #1153 은 리뷰 없이 머지됐고, #801 campaign 3차 개정은 plan-review 없이 재가됐다.
+**통제 관문은 약속일 뿐이고 기계로 막는 장치가 없다.** 하위 세션이 들르지 않으면 관문은 그냥 지나간다. 이 스킬은 관문을 다시 알리고, 필요하면 같은 전문에 지시를 얹어 보낸다. 2026-09-24 에 PR #1153 은 리뷰 없이 머지됐고, #801 campaign 3차 개정은 plan-review 없이 승인됐다.
 
 ## 1. 대상 확보
 
@@ -24,9 +24,9 @@ description: Use when the central control session must (re)announce the reportin
 첫 줄은 요지 한 문장이다. 받는 쪽 유저는 첫 줄만 미리보기로 본다. 본문은 아래 고정 블록을 그대로 싣고, 지시가 있으면 그 뒤에 붙인다.
 
 ```
-[통제 관문 재공지] 계획 재가 전, PR 생성·머지 전, 유저 보고 출력 전에는 반드시 통제 세션을 거친다.
+[통제 관문 재공지] 계획 승인 전, PR 생성·머지 전, 유저 보고 출력 전에는 반드시 통제 세션을 거친다.
 
-1. 재가 전 plan-review — strategy·campaign·opord 초안과 개정본은 유저 재가를 받기 전에 통제 세션에 1차 리뷰를 요청한다. 통과해야 재가로 간다. 재가는 작성 세션이 유저에게 직접 받는다.
+1. 승인 전 plan-review — strategy·campaign·opord 초안과 개정본은 유저 승인을 받기 전에 통제 세션에 1차 리뷰를 요청한다. 통과해야 승인으로 간다. 승인은 작성 세션이 유저에게 직접 받는다.
 2. 머지 전 PR 리뷰 — PR 을 올리면 머지 전에 통제 세션에 리뷰를 요청한다. 통과해야 머지한다.
 3. 출력 전 보고 검수 — 멈춰서 유저에게 넘기는 메시지(완료 보고·결정 요청·분석 결과)는 출력하기 전에 초안을 `[보고 검수]` 머리로 통제 세션에 보낸다. 통과해야 유저에게 출력한다. 진행 한 줄과 유저 질문 즉답은 대상이 아니다. 기준과 요청에 실을 첨부는 `.claude/skills/report-review/SKILL.md` §1·§2 다 — 쓰기 전에 읽는다.
    커밋 메시지와 PR 본문도 같다 — PR 생성 전에 브랜치 커밋 메시지 전부와 본문 초안을 `[PR 문안 검수]` 머리로 보내고, 통과해야 PR 을 올린다 (첨부·기준은 같은 파일 §1·§2-1).
