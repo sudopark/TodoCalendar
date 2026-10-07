@@ -12,13 +12,16 @@ import Foundation
 public struct AppPolicy: Equatable, Sendable {
 
     public var colorThemeLicense: ColorThemeLicensePolicy?
+    public var widgetStyleLicense: WidgetStyleLicensePolicy?
     public var featureSwitches: [String: FeatureSwitch]
 
     public init(
         colorThemeLicense: ColorThemeLicensePolicy? = nil,
+        widgetStyleLicense: WidgetStyleLicensePolicy? = nil,
         featureSwitches: [String: FeatureSwitch] = [:]
     ) {
         self.colorThemeLicense = colorThemeLicense
+        self.widgetStyleLicense = widgetStyleLicense
         self.featureSwitches = featureSwitches
     }
 }

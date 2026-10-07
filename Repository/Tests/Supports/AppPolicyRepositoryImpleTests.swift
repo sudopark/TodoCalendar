@@ -18,6 +18,7 @@ final class AppPolicyRepositoryImpleTests {
     private let remoteText = #"""
     {
         "color_theme_license": {"enabled": true, "license_days": 14},
+        "widget_style_license": {"enabled": true, "license_days": 21},
         "feature_switches": {
             "alpha": {"enabled": true, "min_app_version": "3.1.0", "rollout_percentage": 30},
             "beta": {"enabled": false}
@@ -47,6 +48,14 @@ final class AppPolicyRepositoryImpleTests {
         """#))
         try await repository.refreshPolicy()
         return repository.loadPolicy()?.colorThemeLicense
+    }
+
+    private func refreshedWidgetLicense(_ licenseJson: String) async throws -> WidgetStyleLicensePolicy? {
+        let repository = self.makeRepository(remoteResult: .success(#"""
+        {"widget_style_license": \#(licenseJson)}
+        """#))
+        try await repository.refreshPolicy()
+        return repository.loadPolicy()?.widgetStyleLicense
     }
 
     private struct RemoteFailure: Error { }
@@ -89,6 +98,7 @@ extension AppPolicyRepositoryImpleTests {
 
         // then
         #expect(policy?.colorThemeLicense == .init(isEnabled: true, licenseDays: 14))
+        #expect(policy?.widgetStyleLicense == .init(isEnabled: true, licenseDays: 21))
     }
 }
 
@@ -109,6 +119,7 @@ extension AppPolicyRepositoryImpleTests {
         // then
         #expect(policy == AppPolicy(
             colorThemeLicense: .init(isEnabled: true, licenseDays: 14),
+            widgetStyleLicense: .init(isEnabled: true, licenseDays: 21),
             featureSwitches: [
                 "alpha": .init(isEnabled: true, minAppVersion: "3.1.0", rolloutPercentage: 30),
                 "beta": .init(isEnabled: false)
@@ -222,6 +233,69 @@ extension AppPolicyRepositoryImpleTests {
 
         // then
         #expect(license == .init(isEnabled: false, licenseDays: 14))
+    }
+}
+
+
+// MARK: - 위젯 사용권 항목 속성별 무효 처리
+
+extension AppPolicyRepositoryImpleTests {
+
+    @Test("위젯 사용권 항목을 enabled·license_days 로 읽는다")
+    func repository_refreshPolicy_decodesWidgetStyleLicense() async throws {
+        // when
+        let license = try await self.refreshedWidgetLicense(#"{"enabled": true, "license_days": 21}"#)
+
+        // then
+        #expect(license == .init(isEnabled: true, licenseDays: 21))
+    }
+
+    @Test("위젯 사용권 항목이 없으면 nil 이다")
+    func repository_refreshPolicy_whenWidgetLicenseItemMissing_isNil() async throws {
+        // given
+        let repository = self.makeRepository(remoteResult: .success(#"""
+        {"color_theme_license": {"enabled": true, "license_days": 14}}
+        """#))
+
+        // when
+        try await repository.refreshPolicy()
+        let policy = repository.loadPolicy()
+
+        // then
+        #expect(policy?.widgetStyleLicense == nil)
+        #expect(policy?.colorThemeLicense == .init(isEnabled: true, licenseDays: 14))
+    }
+
+    @Test("위젯 사용권의 enabled 가 없으면 그 속성만 nil 로 두고 기간은 살린다")
+    func repository_refreshPolicy_whenWidgetLicenseEnabledMissing_dropsOnlyEnabled() async throws {
+        // when
+        let license = try await self.refreshedWidgetLicense(#"{"license_days": 3}"#)
+
+        // then
+        #expect(license == .init(isEnabled: nil, licenseDays: 3))
+    }
+
+    @Test("위젯 사용권의 license_days 가 없으면 그 속성만 nil 로 두고 enabled 는 살린다")
+    func repository_refreshPolicy_whenWidgetLicenseDaysMissing_dropsOnlyDays() async throws {
+        // when
+        let license = try await self.refreshedWidgetLicense(#"{"enabled": false}"#)
+
+        // then
+        #expect(license == .init(isEnabled: false, licenseDays: nil))
+    }
+
+    @Test(
+        "위젯 사용권의 license_days 가 0 이하면 그 속성만 nil 로 두고 enabled 는 살린다",
+        arguments: [0, -3]
+    )
+    func repository_refreshPolicy_whenWidgetLicenseInvalidDays_dropsOnlyDays(_ days: Int) async throws {
+        // when
+        let license = try await self.refreshedWidgetLicense(
+            #"{"enabled": true, "license_days": \#(days)}"#
+        )
+
+        // then
+        #expect(license == .init(isEnabled: true, licenseDays: nil))
     }
 }
 
