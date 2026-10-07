@@ -14,6 +14,7 @@ struct AppPolicyMapper: Codable {
 
     private enum CodingKeys: String, CodingKey {
         case colorThemeLicense = "color_theme_license"
+        case widgetStyleLicense = "widget_style_license"
         case featureSwitches = "feature_switches"
     }
 
@@ -27,6 +28,23 @@ struct AppPolicyMapper: Codable {
         }
 
         var policy: ColorThemeLicensePolicy {
+            return .init(
+                isEnabled: self.enabled,
+                licenseDays: self.licenseDays.flatMap { $0 > 0 ? $0 : nil }
+            )
+        }
+    }
+
+    private struct WidgetStyleLicenseEntry: Codable {
+        let enabled: Bool?
+        let licenseDays: Int?
+
+        private enum CodingKeys: String, CodingKey {
+            case enabled
+            case licenseDays = "license_days"
+        }
+
+        var policy: WidgetStyleLicensePolicy {
             return .init(
                 isEnabled: self.enabled,
                 licenseDays: self.licenseDays.flatMap { $0 > 0 ? $0 : nil }
@@ -55,11 +73,15 @@ struct AppPolicyMapper: Codable {
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let license = try container.decodeIfPresent(ColorThemeLicenseEntry.self, forKey: .colorThemeLicense)
+        let widgetLicense = try container.decodeIfPresent(
+            WidgetStyleLicenseEntry.self, forKey: .widgetStyleLicense
+        )
         let switches = try container.decodeIfPresent(
             [String: FeatureSwitchEntry].self, forKey: .featureSwitches
         )
         self.policy = AppPolicy(
             colorThemeLicense: license?.policy,
+            widgetStyleLicense: widgetLicense?.policy,
             featureSwitches: (switches ?? [:]).mapValues { entry in
                 FeatureSwitch(
                     isEnabled: entry.enabled,
@@ -76,6 +98,11 @@ struct AppPolicyMapper: Codable {
             self.policy.colorThemeLicense
                 .map { ColorThemeLicenseEntry(enabled: $0.isEnabled, licenseDays: $0.licenseDays) },
             forKey: .colorThemeLicense
+        )
+        try container.encodeIfPresent(
+            self.policy.widgetStyleLicense
+                .map { WidgetStyleLicenseEntry(enabled: $0.isEnabled, licenseDays: $0.licenseDays) },
+            forKey: .widgetStyleLicense
         )
         try container.encode(
             self.policy.featureSwitches

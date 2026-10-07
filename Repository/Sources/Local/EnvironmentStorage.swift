@@ -13,6 +13,7 @@ public enum EnvironmentKeys: String {
     case fullScreenAdExposureRecords
     case appColdLaunchHistory
     case colorThemeLicense
+    case widgetStyleLicense
     case appPolicy
 }
 
