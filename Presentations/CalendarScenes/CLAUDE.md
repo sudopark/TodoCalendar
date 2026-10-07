@@ -65,6 +65,18 @@ UIPageViewController로 월별 페이지를 좌우 스와이프로 전환한다.
 | Interactor | `selectedDayChanaged(_:and:)`, `selectedDayIsToday(_:)` — 부모로부터 선택일 수신 |
 | 라우팅 | 새 이벤트 생성, 완료 할일 목록 표시 |
 
+### NextDayEventList (다음날 이벤트 섹션 Component)
+
+넓은 창 2단 오른쪽 칸에서 1단 일별 목록 아래에 이어 붙는 부품이다. 화면 연결(조립)은 아직 없다 — 조립하는 쪽이 `NextDayEventListViewModelImple` 과 `NextDayEventListContainerView` 를 직접 만들고, 다음날 날짜 모델과 그날 이벤트를 넣어 준다 (builder 없음).
+
+| 항목 | 설명 |
+|---|---|
+| Interactor | `nextDayChanged(_:and:)` — 1단 `selectedDayChanaged(_:and:)` 처럼 다음날 `CurrentSelectDayModel` 과 그날 이벤트(공휴일 포함)를 밖에서 받는다. 이벤트를 고르는 일은 달력 쪽 몫이다 |
+| 셀 | 받은 이벤트를 1단과 같은 사슬(정렬 → mapper → Foremost 제외 → 등록 반영)로 만든다 |
+| 헤더 | 공휴일명·날짜·음력만 그린다. 공유·완료 할일·오늘 복귀 버튼은 1단 헤더에만 있다. 셀이 없으면 "일정 없음" 을 보인다 |
+| 셀 액션 | `NextDayEventListViewEventHandler.bind` 가 1단과 같은 `EventListCellEventHanleViewModel` 에 넘긴다 |
+| 공유 | 등록 반영 함수(`EventCellViewModel+Registration`)와 `SelectedDayModel` 을 1단 VM 과 함께 쓴다 |
+
 ### ContinuousMonths (수직 연속 달력 Component)
 
 넓은 창 2단 왼쪽 칸에 놓이는 부품이다. 화면 연결(조립)은 아직 없다 — 조립하는 쪽이 `ContinuousMonthsViewModelImple` 과 `ContinuousMonthsViewController` 를 직접 만든다 (builder 없음).
