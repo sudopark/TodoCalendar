@@ -64,7 +64,7 @@ struct CustomColorThemeLocalRepositoryImpleTests {
     }
 
     @Test("uuid 로 읽으면 그 테마 하나만 돌려준다")
-    func repository_loadTheme_returnsMatchingTheme() async throws {
+    func repository_fetchTheme_returnsMatchingTheme() async throws {
         try await self.withRepository { repository in
             // given
             let target = self.makeTheme("b", name: "target", createdAt: 200)
@@ -72,7 +72,7 @@ struct CustomColorThemeLocalRepositoryImpleTests {
             try await repository.saveTheme(target)
 
             // when
-            let theme = try await repository.loadTheme("b")
+            let theme = try await repository.fetchTheme("b")
 
             // then
             #expect(theme == target)
@@ -80,13 +80,13 @@ struct CustomColorThemeLocalRepositoryImpleTests {
     }
 
     @Test("없는 uuid 로 읽으면 nil 이다")
-    func repository_loadTheme_whenMissing_isNil() async throws {
+    func repository_fetchTheme_whenMissing_isNil() async throws {
         try await self.withRepository { repository in
             // given
             try await repository.saveTheme(self.makeTheme("a"))
 
             // when
-            let theme = try await repository.loadTheme("missing")
+            let theme = try await repository.fetchTheme("missing")
 
             // then
             #expect(theme == nil)

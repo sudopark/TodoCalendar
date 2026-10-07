@@ -12,7 +12,7 @@ import Foundation
 public protocol CustomColorThemeRepository: Sendable {
 
     func loadThemes() async throws -> [CustomColorTheme]
-    func loadTheme(_ uuid: String) async throws -> CustomColorTheme?
+    func fetchTheme(_ uuid: String) async throws -> CustomColorTheme?
     func saveTheme(_ theme: CustomColorTheme) async throws
     func removeTheme(_ uuid: String) async throws
 }

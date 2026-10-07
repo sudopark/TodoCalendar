@@ -155,7 +155,7 @@ extension AppSettingUsecaseImple: UISettingUsecase {
     
     private func loadCustomColorTheme(for colorSetKey: ColorSetKeys) async -> CustomColorTheme? {
         guard case .custom(let themeId) = colorSetKey else { return nil }
-        return try? await self.customColorThemeRepository.loadTheme(themeId)
+        return try? await self.customColorThemeRepository.fetchTheme(themeId)
     }
     
     private func carryingCurrentCustomColorTheme(
