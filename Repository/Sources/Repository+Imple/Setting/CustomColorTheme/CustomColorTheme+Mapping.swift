@@ -28,6 +28,14 @@ struct CustomColorThemeJSONMapper {
     }
 
     func encodeSeeds(_ seeds: CustomColorThemeSeeds) throws -> String {
+        return try self.encode(self.seedsMap(seeds))
+    }
+
+    func decodeSeeds(_ text: String) throws -> CustomColorThemeSeeds {
+        return try self.seeds(from: self.decode(text))
+    }
+
+    func seedsMap(_ seeds: CustomColorThemeSeeds) -> [String: String] {
         let optionals: [String: String?] = [
             SeedKey.text: seeds.text,
             SeedKey.surface: seeds.surface,
@@ -41,12 +49,10 @@ struct CustomColorThemeJSONMapper {
             SeedKey.accent: seeds.accent,
             SeedKey.form: seeds.form.rawValue
         ]
-        let map = required.merging(optionals.compactMapValues { $0 }) { lhs, _ in lhs }
-        return try self.encode(map)
+        return required.merging(optionals.compactMapValues { $0 }) { lhs, _ in lhs }
     }
 
-    func decodeSeeds(_ text: String) throws -> CustomColorThemeSeeds {
-        let map = try self.decode(text)
+    func seeds(from map: [String: String]) throws -> CustomColorThemeSeeds {
         guard let background = map[SeedKey.background],
               let accent = map[SeedKey.accent],
               let form = map[SeedKey.form].flatMap(CustomColorThemeForm.init(rawValue:))

@@ -131,6 +131,12 @@ extension CalendarAPIAutenticatorTests {
         parameterizeTest(
             BillingAPIEndpoints.transactions, method: .post, expecthasToken: true
         )
+        parameterizeTest(
+            AppSettingEndpoints.colorThemes, method: .get, expecthasToken: true
+        )
+        parameterizeTest(
+            AppSettingEndpoints.colorTheme(uuid: "theme-1"), method: .put, expecthasToken: true
+        )
     }
 }
 

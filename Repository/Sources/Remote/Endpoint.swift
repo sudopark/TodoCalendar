@@ -192,10 +192,14 @@ enum EventDetailEndpoints: Endpoint {
 
 enum AppSettingEndpoints: Endpoint {
     case defaultEventTagColor
+    case colorThemes
+    case colorTheme(uuid: String)
     
     var subPath: String {
         switch self {
         case .defaultEventTagColor: return "event/tag/default/color"
+        case .colorThemes: return "color_themes"
+        case .colorTheme(let uuid): return "color_themes/\(uuid)"
         }
     }
 }
