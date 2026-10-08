@@ -294,6 +294,53 @@ extension MainViewModelImpleTests {
     }
     
      
+    func testViewModel_whenCalendarTwoColumns_hideMonthNavigation() {
+        // given
+        let expect = expectation(description: "2단이면 달 넘김 버튼을 숨긴다")
+        let viewModel = self.makeViewModel()
+
+        // when
+        let isHidden = self.waitFirstOutput(expect, for: viewModel.isMonthNavigationHidden) {
+            viewModel.calendarScene(didChangeColumnLayout: .twoColumns)
+        }
+
+        // then
+        XCTAssertEqual(isHidden, true)
+    }
+
+    func testViewModel_whenSameColumnLayoutRepeated_notifyMonthNavigationOnce() {
+        // given
+        let expect = expectation(description: "같은 단 수가 반복돼도 한 번만 알린다")
+        expect.expectedFulfillmentCount = 2
+        expect.isInverted = true
+        let viewModel = self.makeViewModel()
+
+        // when
+        let isHiddens = self.waitOutputs(expect, for: viewModel.isMonthNavigationHidden, timeout: 0.1) {
+            viewModel.calendarScene(didChangeColumnLayout: .twoColumns)
+            viewModel.calendarScene(didChangeColumnLayout: .twoColumns)
+        }
+
+        // then
+        XCTAssertEqual(isHiddens, [true])
+    }
+
+    func testViewModel_whenCalendarSingleColumn_showMonthNavigation() {
+        // given
+        let expect = expectation(description: "1단으로 돌아오면 달 넘김 버튼을 보인다")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModel()
+
+        // when
+        let isHiddens = self.waitOutputs(expect, for: viewModel.isMonthNavigationHidden) {
+            viewModel.calendarScene(didChangeColumnLayout: .twoColumns)
+            viewModel.calendarScene(didChangeColumnLayout: .singleColumn)
+        }
+
+        // then
+        XCTAssertEqual(isHiddens, [true, false])
+    }
+
     func testViewModel_rouetToEventTypeSettingScene() {
         // given
         let expect = expectation(description: "이벤트 타입 세팅 화면으로 이동")

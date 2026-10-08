@@ -121,6 +121,7 @@ private final class SpyMainSceneInteractor: MainSceneInteractor, @unchecked Send
     }
 
     func calendarScene(focusChangedTo selected: SelectDayInfo) { }
+    func calendarScene(didChangeColumnLayout layout: CalendarColumnLayout) { }
     func daySelectDialog(didSelect day: SelectDayInfo) { }
 }
 

@@ -563,6 +563,7 @@ extension CalendarViewModelImple {
             self.attachTwoColumnsIfNeeded(focusedMonth)
         }
         self.router?.showColumnLayout(layout)
+        self.listener?.calendarScene(didChangeColumnLayout: layout)
     }
 
     private func attachTwoColumnsIfNeeded(_ initialMonth: CalendarMonth) {

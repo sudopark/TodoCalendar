@@ -34,6 +34,7 @@ public enum CalendarColumnLayout: Sendable, Equatable {
 public protocol CalendarSceneListener: Sendable, AnyObject {
     
     func calendarScene(focusChangedTo selected: SelectDayInfo)
+    func calendarScene(didChangeColumnLayout layout: CalendarColumnLayout)
 }
 
 public protocol CalendarScene: Scene where Interactor == any CalendarSceneInteractor {

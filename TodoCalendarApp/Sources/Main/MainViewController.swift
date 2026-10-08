@@ -117,6 +117,13 @@ extension MainViewController {
             })
             .store(in: self.cancellables)
         
+        self.viewModel.isMonthNavigationHidden
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] isHidden in
+                self?.headerView.updateMonthNavigation(isHidden: isHidden)
+            })
+            .store(in: self.cancellables)
+
         self.viewModel.currentMonth
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] month in
@@ -292,6 +299,8 @@ private final class HeaderView: UIView {
     private let titleStackView = UIStackView()
     let previousMonthButton = UIButton()
     let nextMonthButton = UIButton()
+    private var titleLeadingAfterPreviousButton: NSLayoutConstraint?
+    private var titleLeadingAtEdge: NSLayoutConstraint?
     private let buttonsStackView = UIStackView()
     let migrationButton = UIButton()
     let jumpButton = UIButton()
@@ -334,6 +343,16 @@ private final class HeaderView: UIView {
         self.migrationButton.layer.removeAllAnimations()
     }
     
+    func updateMonthNavigation(isHidden: Bool) {
+        self.previousMonthButton.isHidden = isHidden
+        self.nextMonthButton.isHidden = isHidden
+        let (activating, deactivating) = isHidden
+            ? (self.titleLeadingAtEdge, self.titleLeadingAfterPreviousButton)
+            : (self.titleLeadingAfterPreviousButton, self.titleLeadingAtEdge)
+        deactivating?.isActive = false
+        activating?.isActive = true
+    }
+
     func setupLayout() {
         
         self.addSubview(previousMonthButton)
@@ -346,9 +365,13 @@ private final class HeaderView: UIView {
 
         self.addSubview(titleStackView)
         titleStackView.autoLayout.active(with: self) {
-            $0.leadingAnchor.constraint(equalTo: self.previousMonthButton.trailingAnchor, constant: 8)
             $0.centerYAnchor.constraint(equalTo: $1.centerYAnchor)
         }
+        self.titleLeadingAfterPreviousButton = titleStackView.leadingAnchor
+            .constraint(equalTo: self.previousMonthButton.trailingAnchor, constant: 8)
+        self.titleLeadingAtEdge = titleStackView.leadingAnchor
+            .constraint(equalTo: self.leadingAnchor, constant: 16)
+        self.titleLeadingAfterPreviousButton?.isActive = true
         titleStackView.axis = .horizontal
         titleStackView.alignment = .lastBaseline
         titleStackView.spacing = 4

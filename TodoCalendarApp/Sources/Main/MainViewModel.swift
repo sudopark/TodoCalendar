@@ -50,6 +50,7 @@ protocol MainViewModel: AnyObject, Sendable, MainSceneInteractor {
 
     // presenter
     var currentMonth: AnyPublisher<CurrentMonth, Never> { get }
+    var isMonthNavigationHidden: AnyPublisher<Bool, Never> { get }
     var temporaryUserDataMigrationStatus: AnyPublisher<TemporaryUserDataMigrationStatus?, Never> { get }
     var isLoadingCalendarEvents: AnyPublisher<Bool, Never> { get }
     var isLoadingAllEvents: AnyPublisher<Bool, Never> { get }
@@ -113,6 +114,7 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
 
     private struct Subject {
         let focusedDayInfo = CurrentValueSubject<SelectDayInfo?, Never>(nil)
+        let calendarColumnLayout = CurrentValueSubject<CalendarColumnLayout?, Never>(nil)
         let temporaryUserDataMigrationStatus = CurrentValueSubject<TemporaryUserDataMigrationStatus?, Never>(nil)
     }
     
@@ -247,6 +249,10 @@ extension MainViewModelImple {
         self.subject.focusedDayInfo.send(selected)
     }
 
+    func calendarScene(didChangeColumnLayout layout: CalendarColumnLayout) {
+        self.subject.calendarColumnLayout.send(layout)
+    }
+
     
     func jumpDate() {
         guard let current = self.subject.focusedDayInfo.value else { return }
@@ -277,6 +283,14 @@ extension MainViewModelImple {
 // MARK: - MainViewModelImple Presenter
 
 extension MainViewModelImple {
+
+    var isMonthNavigationHidden: AnyPublisher<Bool, Never> {
+        return self.subject.calendarColumnLayout
+            .compactMap { $0 }
+            .map { $0 == .twoColumns }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
     
     var currentMonth: AnyPublisher<CurrentMonth, Never> {
         
