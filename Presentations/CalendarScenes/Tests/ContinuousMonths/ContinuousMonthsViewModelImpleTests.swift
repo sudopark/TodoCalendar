@@ -454,6 +454,236 @@ extension ContinuousMonthsViewModelImpleTests {
 }
 
 
+// MARK: - 선택일·다음날 공급
+
+extension ContinuousMonthsViewModelImpleTests {
+
+    @Test func continuousMonths_whenSelectDay_notifySelectedDayWithEvents() async throws {
+        // given
+        let events = [
+            StubCalendarEvent("ev-9-12", self.dayRange(2023, 9, 12)),
+            StubCalendarEvent("ev-9-13", self.dayRange(2023, 9, 13))
+        ]
+        let viewModel = self.makeViewModel(events: events)
+        _ = try await self.firstSections(viewModel)
+
+        // when
+        viewModel.selectDay(.init(2023, 9, 12))
+        let selected = try await self.waitSelectedDay { $0.0.day == 12 && !$0.1.isEmpty }
+
+        // then
+        #expect(selected.0.identifier == "2023-9-12")
+        #expect(selected.0.weekId == "2023-9-10-2023-9-16")
+        #expect(selected.0.range == self.dayRange(2023, 9, 12))
+        #expect(selected.1 == ["ev-9-12"])
+    }
+
+    @Test func continuousMonths_whenSelectDay_notifyNextDayWithEvents() async throws {
+        // given
+        let events = [
+            StubCalendarEvent("ev-9-12", self.dayRange(2023, 9, 12)),
+            StubCalendarEvent("ev-9-13", self.dayRange(2023, 9, 13))
+        ]
+        let viewModel = self.makeViewModel(events: events)
+        _ = try await self.firstSections(viewModel)
+
+        // when
+        viewModel.selectDay(.init(2023, 9, 12))
+        let nextDay = try await self.waitNextDay { $0.0.day == 13 && !$0.1.isEmpty }
+
+        // then
+        #expect(nextDay.0.identifier == "2023-9-13")
+        #expect(nextDay.0.weekId == "2023-9-10-2023-9-16")
+        #expect(nextDay.0.range == self.dayRange(2023, 9, 13))
+        #expect(nextDay.1 == ["ev-9-13"])
+    }
+
+    @Test func continuousMonths_whenSelectDay_notifySelectedDayWithOneNextDayAtOnce() async throws {
+        // given
+        let events = [
+            StubCalendarEvent("ev-9-12", self.dayRange(2023, 9, 12)),
+            StubCalendarEvent("ev-9-13", self.dayRange(2023, 9, 13))
+        ]
+        let viewModel = self.makeViewModel(events: events)
+        _ = try await self.firstSections(viewModel)
+
+        // when
+        viewModel.selectDay(.init(2023, 9, 12))
+        _ = try await self.waitNextDay { $0.0.day == 13 && !$0.1.isEmpty }
+
+        // then
+        let notification = try #require(self.spyListener.didChangeSelectedDayNotifications.last)
+        #expect(notification.selected.0.identifier == "2023-9-12")
+        #expect(notification.selected.1 == ["ev-9-12"])
+        #expect(notification.nextDays.map { $0.0.identifier } == ["2023-9-13"])
+    }
+
+    @Test func continuousMonths_whenNextDayInNextWeek_notifyNextWeekEvents() async throws {
+        // given
+        let events = [
+            StubCalendarEvent("ev-9-16", self.dayRange(2023, 9, 16)),
+            StubCalendarEvent("ev-9-17", self.dayRange(2023, 9, 17))
+        ]
+        let viewModel = self.makeViewModel(events: events)
+        _ = try await self.firstSections(viewModel)
+
+        // when
+        viewModel.selectDay(.init(2023, 9, 16))
+        let nextDay = try await self.waitNextDay { $0.0.day == 17 && !$0.1.isEmpty }
+
+        // then
+        #expect(nextDay.0.identifier == "2023-9-17")
+        #expect(nextDay.0.weekId == "2023-9-17-2023-9-23")
+        #expect(nextDay.1 == ["ev-9-17"])
+    }
+
+    @Test func continuousMonths_whenNextDayInNextMonth_notifyNextMonthDay() async throws {
+        // given
+        let events = [
+            StubCalendarEvent("ev-10-1", self.dayRange(2023, 10, 1))
+        ]
+        let viewModel = self.makeViewModel(events: events)
+        _ = try await self.firstSections(viewModel)
+
+        // when
+        viewModel.selectDay(.init(2023, 9, 30))
+        let nextDay = try await self.waitNextDay { $0.0.month == 10 && !$0.1.isEmpty }
+
+        // then
+        #expect(nextDay.0.identifier == "2023-10-1")
+        #expect(nextDay.0.weekId == "2023-10-1-2023-10-7")
+        #expect(nextDay.1 == ["ev-10-1"])
+    }
+
+    @Test func continuousMonths_whenNextDayInBoundaryWeek_notifyNextDayOfSameWeek() async throws {
+        // given
+        let events = [
+            StubCalendarEvent("ev-8-31", self.dayRange(2023, 8, 31)),
+            StubCalendarEvent("ev-9-1", self.dayRange(2023, 9, 1))
+        ]
+        let viewModel = self.makeViewModel(events: events)
+        _ = try await self.firstSections(viewModel)
+
+        // when
+        viewModel.selectDay(.init(2023, 8, 31))
+        let selected = try await self.waitSelectedDay { $0.0.day == 31 && !$0.1.isEmpty }
+        let nextDay = try await self.waitNextDay { $0.0.month == 9 && !$0.1.isEmpty }
+
+        // then
+        #expect(selected.0.weekId == "2023-8-27-2023-9-2")
+        #expect(selected.1 == ["ev-8-31"])
+        #expect(nextDay.0.identifier == "2023-9-1")
+        #expect(nextDay.0.weekId == "2023-8-27-2023-9-2")
+        #expect(nextDay.1 == ["ev-9-1"])
+    }
+
+    @Test func continuousMonths_whenSelectedDayOutOfBuffer_notifyAfterBufferArrives() async throws {
+        // given
+        let events = [StubCalendarEvent("ev-24-3-12", self.dayRange(2024, 3, 12))]
+        let viewModel = self.makeViewModel(events: events)
+        _ = try await self.firstSections(viewModel)
+        viewModel.selectDay(.init(2024, 3, 12))
+        try await Task.sleep(for: .milliseconds(50))
+        let notifiedBeforeBuffer = self.spyListener.didChangeSelectedDays.isEmpty
+
+        // when
+        viewModel.changeFocusedMonth(to: .init(year: 2024, month: 3))
+        let selected = try await self.waitSelectedDay { !$0.1.isEmpty }
+
+        // then
+        #expect(notifiedBeforeBuffer)
+        #expect(selected.0.identifier == "2024-3-12")
+        #expect(selected.1 == ["ev-24-3-12"])
+    }
+
+    @Test func continuousMonths_whenEventsUpdated_renotifySelectedDay() async throws {
+        // given
+        let viewModel = self.makeViewModel()
+        _ = try await self.firstSections(viewModel)
+        viewModel.selectDay(.init(2023, 9, 12))
+        _ = try await self.waitSelectedDay { $0.0.day == 12 }
+
+        // when
+        self.spyEventListUsecase.mockEvents.send([StubCalendarEvent("new-9-12", self.dayRange(2023, 9, 12))])
+        let selected = try await self.waitSelectedDay { !$0.1.isEmpty }
+
+        // then
+        #expect(selected.0.identifier == "2023-9-12")
+        #expect(selected.1 == ["new-9-12"])
+    }
+
+    @Test func continuousMonths_whenSelectedDayIsHoliday_includeHoliday() async throws {
+        // given
+        let holiday = Holiday(uuid: "hd", dateString: "2023-09-12", name: "some-holiday")
+        let viewModel = self.makeViewModel(holidays: [2023: [holiday]])
+        _ = try await self.firstSections(viewModel)
+
+        // when
+        viewModel.selectDay(.init(2023, 9, 12))
+        let selected = try await self.waitSelectedDay { !$0.0.holidays.isEmpty && !$0.1.isEmpty }
+
+        // then
+        #expect(selected.0.holidays.map { $0.name } == ["some-holiday"])
+        #expect(selected.1 == ["hd"])
+    }
+
+    @Test func continuousMonths_whenFocusShiftsKeepingSelectedDay_notNotifyAgain() async throws {
+        // given
+        let events = [StubCalendarEvent("ev-9-12", self.dayRange(2023, 9, 12))]
+        let viewModel = self.makeViewModel(events: events)
+        _ = try await self.firstSections(viewModel)
+        viewModel.selectDay(.init(2023, 9, 12))
+        _ = try await self.waitSelectedDay { !$0.1.isEmpty }
+        _ = try await self.waitNextDay { $0.0.day == 13 }
+        let countBeforeShift = self.spyListener.didChangeSelectedDays.count
+        let nextDayCountBeforeShift = self.spyListener.didChangeNextDays.count
+
+        // when
+        let shifted = viewModel.sections.filter { $0.first?.month == CalendarMonth(year: 2023, month: 8) }
+        _ = try await self.firstOutput(self.expectConfirm("버퍼 이동"), for: shifted) {
+            viewModel.changeFocusedMonth(to: .init(year: 2023, month: 10))
+        }
+        try await Task.sleep(for: .milliseconds(50))
+
+        // then
+        #expect(self.spyListener.didChangeSelectedDays.count == countBeforeShift)
+        #expect(self.spyListener.didChangeNextDays.count == nextDayCountBeforeShift)
+    }
+
+    @Test func continuousMonths_whenNoSelectedDay_notNotify() async throws {
+        // given
+        let events = [StubCalendarEvent("ev-9-12", self.dayRange(2023, 9, 12))]
+        let viewModel = self.makeViewModel(events: events)
+
+        // when
+        _ = try await self.firstSections(viewModel)
+        try await Task.sleep(for: .milliseconds(50))
+
+        // then
+        #expect(self.spyListener.didChangeSelectedDays.isEmpty)
+        #expect(self.spyListener.didChangeNextDays.isEmpty)
+    }
+
+    private func waitSelectedDay(
+        _ condition: @escaping ((CurrentSelectDayModel, [String])) -> Bool
+    ) async throws -> (CurrentSelectDayModel, [String]) {
+        try await self.waitEffect("선택일 알림") {
+            self.spyListener.didChangeSelectedDays.last.map(condition) == true
+        }
+        return try #require(self.spyListener.didChangeSelectedDays.last)
+    }
+
+    private func waitNextDay(
+        _ condition: @escaping ((CurrentSelectDayModel, [String])) -> Bool
+    ) async throws -> (CurrentSelectDayModel, [String]) {
+        try await self.waitEffect("다음날 알림") {
+            self.spyListener.didChangeNextDays.last.map(condition) == true
+        }
+        return try #require(self.spyListener.didChangeNextDays.last)
+    }
+}
+
+
 // MARK: - doubles
 
 extension ContinuousMonthsViewModelImpleTests {
@@ -518,6 +748,20 @@ extension ContinuousMonthsViewModelImpleTests {
         func continuousMonths(didRequestShare range: Range<TimeInterval>, kind: CalendarShareRangeKind) {
             self.didRequestShareRange = range
             self.didRequestShareKind = kind
+        }
+
+        var didChangeSelectedDayNotifications: [(selected: (CurrentSelectDayModel, [String]), nextDays: [(CurrentSelectDayModel, [String])])] = []
+        func continuousMonths(didChangeSelectedDay day: SelectDayAndEvents, and nextDays: [SelectDayAndEvents]) {
+            self.didChangeSelectedDayNotifications.append((
+                (day.0, day.1.map { $0.eventId }),
+                nextDays.map { ($0.0, $0.1.map { $0.eventId }) }
+            ))
+        }
+        var didChangeSelectedDays: [(CurrentSelectDayModel, [String])] {
+            return self.didChangeSelectedDayNotifications.map { $0.selected }
+        }
+        var didChangeNextDays: [(CurrentSelectDayModel, [String])] {
+            return self.didChangeSelectedDayNotifications.compactMap { $0.nextDays.first }
         }
     }
 
