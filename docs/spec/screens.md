@@ -100,6 +100,8 @@ stateDiagram-v2
 
 월별 캘린더 그리드 + 선택일 이벤트 목록으로 구성된 메인 화면.
 
+> 넓은 창(size class 가 가로·세로 모두 Regular)에서는 왼쪽 연속 달력과 오른쪽 일별 목록의 2단으로 바뀐다. 전환 기준과 2단 구성은 [`adaptive-layout.md`](adaptive-layout.md) §2~§4 가 정본이다. 아래 절은 1단 기준이다.
+
 ### 1.1 캘린더 그리드
 
 좌우 스와이프로 월 이동하는 캘린더 그리드. UIPageViewController 기반 무한 페이징.
