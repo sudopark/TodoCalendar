@@ -19,6 +19,11 @@ import AdService
 
 // MARK: - MainViewController
 
+private enum Constant {
+    // iPhone Duo 는 상태바가 옆 띠로 가 safe area 위쪽이 0 이라, 헤더가 화면 모서리에 붙지 않게 최소 여백을 둔다
+    static let minimumHeaderTopInset: CGFloat = 20
+}
+
 final class MainViewController: UIViewController, MainScene {
     
     private let headerAreaStackView = UIStackView()
@@ -232,8 +237,14 @@ extension MainViewController {
         headerAreaStackView.autoLayout.active(with: self.view) {
             $0.leadingAnchor.constraint(equalTo: $1.safeAreaLayoutGuide.leadingAnchor)
             $0.trailingAnchor.constraint(equalTo: $1.safeAreaLayoutGuide.trailingAnchor)
-            $0.topAnchor.constraint(equalTo: $1.safeAreaLayoutGuide.topAnchor)
+            $0.topAnchor.constraint(greaterThanOrEqualTo: $1.safeAreaLayoutGuide.topAnchor)
+            $0.topAnchor.constraint(greaterThanOrEqualTo: $1.topAnchor, constant: Constant.minimumHeaderTopInset)
         }
+        let headerTopAtSafeArea = headerAreaStackView.topAnchor.constraint(
+            equalTo: self.view.safeAreaLayoutGuide.topAnchor
+        )
+        headerTopAtSafeArea.priority = .defaultHigh
+        headerTopAtSafeArea.isActive = true
         headerAreaStackView.axis = .vertical
         headerAreaStackView.spacing = 0
         
