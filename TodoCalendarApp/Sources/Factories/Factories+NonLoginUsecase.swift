@@ -101,6 +101,9 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
             licenseRepository: ColorThemeLicenseLocalRepositoryImple(
                 environmentStorage: applicationBase.userDefaultEnvironmentStorage
             ),
+            widgetStyleLicenseRepository: WidgetStyleLicenseLocalRepositoryImple(
+                environmentStorage: applicationBase.userDefaultEnvironmentStorage
+            ),
             policyRepository: AppPolicyRepositoryImple(
                 remoteAPI: applicationBase.remoteAPI,
                 environmentStorage: applicationBase.userDefaultEnvironmentStorage
