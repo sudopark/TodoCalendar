@@ -55,7 +55,7 @@ public enum SnapshotLayout {
         case .duoCover:
             return .fixed(width: 466, height: 678)
         case .duoInner:
-            return .fixed(width: 669, height: 951)
+            return .fixed(width: 951, height: 669)
         }
     }
 }
