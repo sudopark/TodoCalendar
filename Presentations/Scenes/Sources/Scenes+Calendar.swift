@@ -26,6 +26,11 @@ extension CalendarSceneInteractor {
     }
 }
 
+public enum CalendarColumnLayout: Sendable, Equatable {
+    case singleColumn
+    case twoColumns
+}
+
 public protocol CalendarSceneListener: Sendable, AnyObject {
     
     func calendarScene(focusChangedTo selected: SelectDayInfo)

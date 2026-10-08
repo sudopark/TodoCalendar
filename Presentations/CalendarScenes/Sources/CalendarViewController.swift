@@ -168,3 +168,14 @@ extension CalendarViewController {
         self.view.backgroundColor = colorSet.bg0
     }
 }
+
+
+// MARK: - CalendarColumnLayout + size class
+
+extension CalendarColumnLayout {
+
+    init(horizontal: UIUserInterfaceSizeClass, vertical: UIUserInterfaceSizeClass) {
+        let isBothRegular = horizontal == .regular && vertical == .regular
+        self = isBothRegular ? .twoColumns : .singleColumn
+    }
+}
