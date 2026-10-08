@@ -34,6 +34,10 @@ protocol ContinuousMonthsViewModel: AnyObject, Sendable, ContinuousMonthsSceneIn
 
 // MARK: - ContinuousMonthsViewModelImple
 
+private enum Constant {
+    static let nextDayCount = 1
+}
+
 final class ContinuousMonthsViewModelImple: ContinuousMonthsViewModel, @unchecked Sendable {
 
     private let calendarUsecase: any CalendarUsecase
@@ -61,7 +65,7 @@ final class ContinuousMonthsViewModelImple: ContinuousMonthsViewModel, @unchecke
         self.internalBind()
     }
 
-    private struct Buffer: Equatable {
+    private struct CalendarComponentRingBuffer: Equatable {
         let timeZone: TimeZone
         let components: [CalendarComponent]
         let sectionWeeks: [[CalendarComponent.Week]]
@@ -75,11 +79,32 @@ final class ContinuousMonthsViewModelImple: ContinuousMonthsViewModel, @unchecke
         func component(containing day: DayCellViewModel) -> CalendarComponent? {
             return self.components.first(where: { $0.year == day.year && $0.month == day.month })
         }
+
+        func positions(startingAt day: CalendarDay, count: Int) -> [DayPosition] {
+            let identifier = "\(day.year)-\(day.month)-\(day.day)"
+            let slots = self.sectionWeeks.flatMap { $0 }.flatMap { week in
+                week.days.indices.map { (week.days[$0], $0) }
+            }
+            guard let start = slots.firstIndex(where: { $0.0.identifier == identifier }) else { return [] }
+            return slots.dropFirst(start).prefix(count).compactMap { self.position(of: $0.0, indexInWeek: $0.1) }
+        }
+
+        private func position(of day: CalendarComponent.Day, indexInWeek: Int) -> DayPosition? {
+            guard let component = self.components.first(where: { $0.year == day.year && $0.month == day.month }),
+                  let model = CurrentSelectDayModel(day: .init(day.year, day.month, day.day), component, self.timeZone)
+            else { return nil }
+            return DayPosition(model: model, indexInWeek: indexInWeek)
+        }
+    }
+
+    private struct DayPosition: Equatable {
+        let model: CurrentSelectDayModel
+        let indexInWeek: Int
     }
 
     private struct Subject: @unchecked Sendable {
         let focusedMonth = CurrentValueSubject<CalendarMonth?, Never>(nil)
-        let buffer = CurrentValueSubject<Buffer?, Never>(nil)
+        let componentRingBuffer = CurrentValueSubject<CalendarComponentRingBuffer?, Never>(nil)
         let userSelectedDay = CurrentValueSubject<CalendarDay?, Never>(nil)
         let eventStackMap = CurrentValueSubject<[String: WeekEventStackEntry], Never>([:])
     }
@@ -91,14 +116,15 @@ final class ContinuousMonthsViewModelImple: ContinuousMonthsViewModel, @unchecke
     private var stackRevision: Int = 0
 
     private func internalBind() {
-        self.bindBuffer()
+        self.bindComponentRingBuffer()
         self.bindEventStacks()
+        self.bindSelectedDayNotifying()
     }
 
-    private func bindBuffer() {
+    private func bindComponentRingBuffer() {
         let componentsAroundFocus: (CalendarMonth) -> AnyPublisher<[CalendarComponent], Never> = { [weak self] focus in
             guard let self else { return Empty().eraseToAnyPublisher() }
-            let months = focus.bufferMonths()
+            let months = focus.ringBufferMonths()
             let components = months.map { self.calendarUsecase.components(for: $0.month, of: $0.year) }
             return Publishers.CombineLatest4(components[0], components[1], components[2], components[3])
                 .combineLatest(components[4])
@@ -113,20 +139,20 @@ final class ContinuousMonthsViewModelImple: ContinuousMonthsViewModel, @unchecke
 
         Publishers.CombineLatest(self.calendarSettingUsecase.currentTimeZone, components)
             .map { timeZone, components in
-                Buffer(timeZone: timeZone, components: components, sectionWeeks: components.sectionWeeks())
+                CalendarComponentRingBuffer(timeZone: timeZone, components: components, sectionWeeks: components.sectionWeeks())
             }
             .removeDuplicates()
-            .sink(receiveValue: { [weak self] buffer in
-                self?.subject.buffer.send(buffer)
+            .sink(receiveValue: { [weak self] ringBuffer in
+                self?.subject.componentRingBuffer.send(ringBuffer)
             })
             .store(in: self.cancellables)
     }
 
     private func bindEventStacks() {
-        self.subject.buffer.compactMap { $0 }
+        self.subject.componentRingBuffer.compactMap { $0 }
             .receive(on: self.eventStackBuildingQueue)
-            .sink(receiveValue: { [weak self] buffer in
-                self?.syncSectionStackBindings(buffer.sectionStackKeys)
+            .sink(receiveValue: { [weak self] ringBuffer in
+                self?.syncSectionStackBindings(ringBuffer.sectionStackKeys)
             })
             .store(in: self.cancellables)
     }
@@ -146,6 +172,35 @@ final class ContinuousMonthsViewModelImple: ContinuousMonthsViewModel, @unchecke
                     self?.updateEventStacks(of: key, with: events)
                 })
         }
+    }
+
+    private func bindSelectedDayNotifying() {
+        let withEvents: (DayPosition) -> AnyPublisher<SelectDayAndEvents, Never> = { [weak self] position in
+            guard let self else { return Empty().eraseToAnyPublisher() }
+            return self.eventsPerDay(at: position.model.weekId)
+                .map { (position.model, $0[safe: position.indexInWeek] ?? []) }
+                .eraseToAnyPublisher()
+        }
+        let allWithEvents: ([DayPosition]) -> AnyPublisher<[SelectDayAndEvents], Never> = { positions in
+            let initial = Just([SelectDayAndEvents]()).eraseToAnyPublisher()
+            return positions.map(withEvents).reduce(initial) { acc, next in
+                acc.combineLatest(next).map { $0 + [$1] }.eraseToAnyPublisher()
+            }
+        }
+        Publishers.CombineLatest(
+            self.subject.userSelectedDay.compactMap { $0 },
+            self.subject.componentRingBuffer.compactMap { $0 }
+        )
+        .map { day, ringBuffer in ringBuffer.positions(startingAt: day, count: 1 + Constant.nextDayCount) }
+        .filter { !$0.isEmpty }
+        .removeDuplicates()
+        .map(allWithEvents)
+        .switchToLatest()
+        .sink(receiveValue: { [weak self] days in
+            guard let selected = days.first else { return }
+            self?.listener?.continuousMonths(didChangeSelectedDay: selected, and: Array(days.dropFirst()))
+        })
+        .store(in: self.cancellables)
     }
 
     private func updateEventStacks(of key: SectionStackKey, with events: [any CalendarEvent]) {
@@ -205,8 +260,8 @@ extension ContinuousMonthsViewModelImple {
     }
 
     func shareEvents(_ kind: CalendarShareRangeKind, for day: DayCellViewModel) {
-        guard let buffer = self.subject.buffer.value,
-              let range = buffer.component(containing: day)?.shareRange(kind, for: day, timeZone: buffer.timeZone)
+        guard let ringBuffer = self.subject.componentRingBuffer.value,
+              let range = ringBuffer.component(containing: day)?.shareRange(kind, for: day, timeZone: ringBuffer.timeZone)
         else { return }
         self.listener?.continuousMonths(didRequestShare: range, kind: kind)
     }
@@ -224,15 +279,15 @@ extension ContinuousMonthsViewModelImple {
     }
 
     var sections: AnyPublisher<[ContinuousMonthSection], Never> {
-        let transform: (Buffer) -> [ContinuousMonthSection] = { buffer in
-            return zip(buffer.components, buffer.sectionWeeks).map { component, weeks in
+        let transform: (CalendarComponentRingBuffer) -> [ContinuousMonthSection] = { ringBuffer in
+            return zip(ringBuffer.components, ringBuffer.sectionWeeks).map { component, weeks in
                 ContinuousMonthSection(
                     month: .init(year: component.year, month: component.month),
                     weeks: weeks.map { WeekRowModel($0, month: component.month) }
                 )
             }
         }
-        return self.subject.buffer.compactMap { $0 }
+        return self.subject.componentRingBuffer.compactMap { $0 }
             .map(transform)
             .removeDuplicates()
             .eraseToAnyPublisher()
@@ -310,7 +365,7 @@ private struct WeekEventStackEntry {
 
 private extension CalendarMonth {
 
-    func bufferMonths() -> [CalendarMonth] {
+    func ringBufferMonths() -> [CalendarMonth] {
         let previous = self.previousMonth()
         let next = self.nextMonth()
         return [previous.previousMonth(), previous, self, next, next.nextMonth()]
