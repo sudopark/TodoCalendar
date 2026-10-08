@@ -1805,6 +1805,7 @@ extension CalendarViewModelImpleTests {
         try await self.settle()
         XCTAssertEqual(self.spyRouter.didAttachTwoColumnsInitialMonths, [.init(year: 2023, month: 08)])
         XCTAssertEqual(self.spyRouter.didShowColumnLayouts, [.twoColumns, .singleColumn, .twoColumns])
+        XCTAssertEqual(self.spyListener.didChangeColumnLayouts, [.twoColumns, .singleColumn, .twoColumns])
     }
 
     func testViewModel_whenColumnLayoutArrivesBeforePrepare_attachWithFocusedMonthAfterPrepare() async throws {
@@ -2123,6 +2124,11 @@ private extension CalendarViewModelImpleTests {
         
         func calendarScene(focusChangedTo selected: SelectDayInfo) {
             self.didSelectionChanged?(selected)
+        }
+
+        var didChangeColumnLayouts: [CalendarColumnLayout] = []
+        func calendarScene(didChangeColumnLayout layout: CalendarColumnLayout) {
+            self.didChangeColumnLayouts.append(layout)
         }
     }
     
