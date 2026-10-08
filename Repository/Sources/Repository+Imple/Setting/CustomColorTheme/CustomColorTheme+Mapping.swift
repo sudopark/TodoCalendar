@@ -101,8 +101,8 @@ extension CustomColorTheme {
             "schema_version": self.schemaVersion,
             "seeds": CustomColorThemeJSONMapper().seedsMap(self.seeds),
             "colors": self.colors,
-            "created_at": self.createdAt,
-            "updated_at": self.updatedAt
+            "created_at": Int(self.createdAt),
+            "updated_at": Int(self.updatedAt)
         ]
     }
 }

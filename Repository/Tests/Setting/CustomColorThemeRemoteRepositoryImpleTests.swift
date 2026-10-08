@@ -161,7 +161,7 @@ extension CustomColorThemeRemoteRepositoryImpleTests {
         let (repository, remote, storage) = self.makeRepository()
         let seeds = CustomColorThemeSeeds(background: "#000000", accent: "#FFFFFF", form: .filled)
             |> \.ai .~ "#ABCDEF"
-        let theme = self.makeTheme("early", createdAt: 100, seeds: seeds)
+        let theme = self.makeTheme("early", createdAt: 100.7, seeds: seeds)
 
         // when
         try await repository.saveTheme(theme)
@@ -177,8 +177,8 @@ extension CustomColorThemeRemoteRepositoryImpleTests {
             "background": "#000000", "accent": "#FFFFFF", "form": "filled", "ai": "#ABCDEF"
         ])
         #expect(params["colors"] as? [String: String] == [:])
-        #expect(params["created_at"] as? TimeInterval == 100)
-        #expect(params["updated_at"] as? TimeInterval == 100)
+        #expect(params["created_at"] as? Int == 100)
+        #expect(params["updated_at"] as? Int == 100)
         #expect(storage.didSavedThemes.map { $0.name } == ["바다"])
     }
 
