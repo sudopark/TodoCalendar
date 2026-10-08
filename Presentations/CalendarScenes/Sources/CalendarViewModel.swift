@@ -24,6 +24,7 @@ protocol CalendarViewModel: AnyObject, Sendable, CalendarSceneInteractor {
 
     func changeFocusedMonth(to month: CalendarMonth)
     func selectDay(_ day: CalendarDay)
+    func columnLayoutChanged(_ layout: CalendarColumnLayout)
     var focusedMonth: AnyPublisher<CalendarMonth, Never> { get }
     var selectedDay: AnyPublisher<CalendarDay, Never> { get }
 }
@@ -51,6 +52,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
     private let accountUsecase: any AccountUsecase
     var router: (any CalendarViewRouting)?
     private var calendarPaperInteractors: [any CalendarPaperSceneInteractor]?
+    private var twoColumnsInteractor: (any CalendarTwoColumnsSceneInteractor)?
     // TODO: calendarVC load 이후 바로 prepare를 할것이기때문에 라이프사이클상 listener는 setter 주입이 아니라 생성시에 받아야 할수도있음
     weak var listener: (any CalendarSceneListener)?
     
@@ -105,6 +107,8 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         let aiAgentState = CurrentValueSubject<AIAgentState?, Never>(nil)
         let isSignedIn = CurrentValueSubject<Bool, Never>(false)
         let isMonthCollapsed = CurrentValueSubject<Bool, Never>(false)
+        let columnLayout = CurrentValueSubject<CalendarColumnLayout?, Never>(nil)
+        let selectedDayInfo = CurrentValueSubject<SelectDayInfo?, Never>(nil)
     }
     private let cancellables = CancelBag()
     private let subject = Subject()
@@ -224,6 +228,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         .removeDuplicates()
         .sink(receiveValue: { [weak self] selected in
             logger.log(level: .debug, "select day changed: \(selected)")
+            self?.subject.selectedDayInfo.send(selected)
             self?.listener?.calendarScene(focusChangedTo: selected)
             self?.notifySelectedDayIsTodayToFocusedPaper(selected.isCurrentDay)
         })
@@ -350,6 +355,7 @@ extension CalendarViewModelImple {
         self.bindShowAICommandResultIfNeed()
         self.bindVoiceInputLifecycle()
         self.bindScrollToVoiceInputOnFocusedMonth()
+        self.bindColumnLayout()
         self.aiAgentOrchestrationUsecase.prepare()
     }
     
@@ -532,6 +538,85 @@ extension CalendarViewModelImple {
 }
 
 
+// MARK: - 단 수
+
+extension CalendarViewModelImple {
+
+    func columnLayoutChanged(_ layout: CalendarColumnLayout) {
+        self.subject.columnLayout.send(layout)
+    }
+
+    private func bindColumnLayout() {
+        Publishers.CombineLatest(
+            self.subject.columnLayout.compactMap { $0 },
+            self.focusedMonth
+        )
+        .removeDuplicates(by: { $0.0 == $1.0 })
+        .sink(receiveValue: { [weak self] layout, focusedMonth in
+            self?.applyColumnLayout(layout, focusedMonth: focusedMonth)
+        })
+        .store(in: self.cancellables)
+    }
+
+    private func applyColumnLayout(_ layout: CalendarColumnLayout, focusedMonth: CalendarMonth) {
+        if layout == .twoColumns {
+            self.attachTwoColumnsIfNeeded(focusedMonth)
+        }
+        self.router?.showColumnLayout(layout)
+    }
+
+    private func attachTwoColumnsIfNeeded(_ initialMonth: CalendarMonth) {
+        Task { @MainActor in
+            guard self.twoColumnsInteractor == nil,
+                  let interactor = self.router?.attachTwoColumns(initialMonth: initialMonth)
+            else { return }
+            self.twoColumnsInteractor = interactor
+            self.bindTwoColumnsForwarding(interactor)
+        }
+    }
+
+    // MainActor 클로저 안에서 만든 구독 클로저는 그 격리를 물려받아, 메인 밖에서 오는 방출에 격리 검사로 죽는다
+    private func bindTwoColumnsForwarding(_ interactor: any CalendarTwoColumnsSceneInteractor) {
+        self.focusedMonth
+            .sink(receiveValue: { [weak interactor] month in
+                interactor?.changeFocusedMonth(to: month)
+            })
+            .store(in: self.cancellables)
+
+        self.selectedDay
+            .sink(receiveValue: { [weak interactor] day in
+                interactor?.selectDay(day)
+            })
+            .store(in: self.cancellables)
+
+        self.subject.selectedDayInfo.compactMap { $0?.isCurrentDay }
+            .sink(receiveValue: { [weak interactor] isToday in
+                interactor?.selectedDayIsToday(isToday)
+            })
+            .store(in: self.cancellables)
+    }
+}
+
+extension CalendarViewModelImple: CalendarTwoColumnsSceneListener {
+
+    func calendarTwoColumns(didScrollTo month: CalendarMonth) {
+        self.changeFocusedMonth(to: month)
+    }
+
+    func calendarTwoColumns(didSelect day: CalendarDay) {
+        self.selectDay(day)
+    }
+
+    func calendarTwoColumnsDidRequestShowAICommand() {
+        self.router?.routeToAICommand(listener: self)
+    }
+
+    func calendarTwoColumnsDidRequestReturnToToday() {
+        self.moveFocusToToday()
+    }
+}
+
+
 // MARK: - uncompleted todo
 
 extension CalendarViewModelImple {
@@ -617,11 +702,20 @@ extension CalendarViewModelImple {
             .removeDuplicates()
             .filter { $0 }
             .sink { [weak self] _ in
-                guard let focusedIndex = self?.subject.monthsInCurrentRange.value?.focusedIndex
-                else { return }
-                self?.calendarPaperInteractors?[safe: focusedIndex]?.scrollToVoiceInput()
+                self?.scrollToVoiceInputOnVisibleColumn()
             }
             .store(in: self.cancellables)
+    }
+
+    private func scrollToVoiceInputOnVisibleColumn() {
+        switch self.subject.columnLayout.value {
+        case .twoColumns:
+            self.twoColumnsInteractor?.scrollToVoiceInput()
+        case .singleColumn, .none:
+            guard let focusedIndex = self.subject.monthsInCurrentRange.value?.focusedIndex
+            else { return }
+            self.calendarPaperInteractors?[safe: focusedIndex]?.scrollToVoiceInput()
+        }
     }
 
     private static func isAICommandPhase(_ state: AIAgentState) -> Bool {
