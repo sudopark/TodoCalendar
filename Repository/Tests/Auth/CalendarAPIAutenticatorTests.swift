@@ -137,6 +137,9 @@ extension CalendarAPIAutenticatorTests {
         parameterizeTest(
             AppSettingEndpoints.colorTheme(uuid: "theme-1"), method: .put, expecthasToken: true
         )
+        parameterizeTest(
+            MigrationEndpoints.customColorThemes, method: .post, expecthasToken: true
+        )
     }
 }
 

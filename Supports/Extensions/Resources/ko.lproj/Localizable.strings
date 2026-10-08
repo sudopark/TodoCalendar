@@ -415,7 +415,7 @@
 "manage_account::email" = "이메일";
 "manage_account::last_signedIn_at" = "마지막 로그인 시간";
 "manage_account::migration::title" = "임시 유저 데이터";
-"manage_account::migration::description" = "로그인 이전에 생성한 모든 이벤트를(%d개) 로그인된 계정으로 마이그레이션 합니다.\n계정에 등록된 이벤트들은 장치에 관계없이 엑세스할 수 있습니다.";
+"manage_account::migration::description" = "로그인 이전에 만든 이벤트와 컬러 테마(%d개)를 로그인된 계정으로 마이그레이션 합니다.\n계정에 등록된 데이터는 장치에 관계없이 엑세스할 수 있습니다.";
 "manage_account::migration_finished::message" = "마이그레이션 완료!";
 "manage_account::signout_button::title" = "로그아웃";
 "manage_account::sign_out::confirm::title" = "로그아웃";

@@ -271,6 +271,11 @@ private final class SpyCustomColorThemeLocalStorage: CustomColorThemeLocalStorag
         self.didRemovedThemeIds.append(uuid)
         self.themes[uuid] = nil
     }
+
+    func removeThemes(_ uuids: [String]) async throws {
+        self.didRemovedThemeIds.append(contentsOf: uuids)
+        uuids.forEach { self.themes[$0] = nil }
+    }
 }
 
 private struct DummyResponse {

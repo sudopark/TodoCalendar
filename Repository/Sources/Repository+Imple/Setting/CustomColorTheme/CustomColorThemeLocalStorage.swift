@@ -17,6 +17,7 @@ public protocol CustomColorThemeLocalStorage: AnyObject, Sendable {
     func fetchTheme(_ uuid: String) async throws -> CustomColorTheme?
     func saveTheme(_ theme: CustomColorTheme) async throws
     func removeTheme(_ uuid: String) async throws
+    func removeThemes(_ uuids: [String]) async throws
 }
 
 
@@ -66,6 +67,14 @@ extension CustomColorThemeLocalStorageImple {
         try await self.sqliteService.async.run { db in
             try? db.createTableOrNot(CustomColorThemeTable.self)
             let query = CustomColorThemeTable.delete().where { $0.uuid == uuid }
+            try db.delete(CustomColorThemeTable.self, query: query)
+        }
+    }
+
+    public func removeThemes(_ uuids: [String]) async throws {
+        try await self.sqliteService.async.run { db in
+            try? db.createTableOrNot(CustomColorThemeTable.self)
+            let query = CustomColorThemeTable.delete().where { $0.uuid.in(uuids) }
             try db.delete(CustomColorThemeTable.self, query: query)
         }
     }

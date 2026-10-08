@@ -75,6 +75,13 @@ extension RemoteEnvironmentPathTests {
         #expect(path == "https://api.example.com/v2/setting/color_themes/theme-1")
     }
 
+    @Test func path_migrationCustomColorThemesEndpoint_returnsV2MigrationColorThemesURL() {
+        // when
+        let path = self.env.path(MigrationEndpoints.customColorThemes)
+        // then
+        #expect(path == "https://api.example.com/v2/migration/color_themes")
+    }
+
     @Test func path_eventSyncCheckEndpoint_returnsV2SyncCheckURL() {
         // when
         let path = self.env.path(EventSyncEndPoints.check)

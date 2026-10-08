@@ -49,8 +49,11 @@ extension TemporaryUserDataMigrationRepositoryImple {
         
         let scheduleEventStorage = ScheduleEventLocalStorageImple(sqliteService: service)
         let schedules = try await scheduleEventStorage.loadAllEvents()
+        
+        let themeStorage = CustomColorThemeLocalStorageImple(sqliteService: service)
+        let themes = try await themeStorage.fetchThemes()
                 
-        return todos.count + schedules.count
+        return todos.count + schedules.count + themes.count
     }
 }
 
@@ -167,6 +170,26 @@ extension TemporaryUserDataMigrationRepositoryImple {
         }
         
         try? await storage.removeAllDoneEvents()
+    }
+    
+    public func migrateCustomColorThemes() async throws {
+        let service = try await self.prepareTempDBsqliteService()
+        defer { service.close() }
+        
+        let storage = CustomColorThemeLocalStorageImple(sqliteService: service)
+        let themes = try await storage.fetchThemes()
+        
+        guard !themes.isEmpty else { return }
+        
+        let endpoint = MigrationEndpoints.customColorThemes
+        let payload = BatchCustomColorThemePayload(themes: themes)
+        let _: BatchWriteResult = try await self.remoteAPI.request(
+            .post,
+            endpoint,
+            parameters: payload.asJson()
+        )
+        
+        try? await storage.removeThemes(themes.map { $0.uuid })
     }
     
     public func clearTemporaryUserData() async throws {
