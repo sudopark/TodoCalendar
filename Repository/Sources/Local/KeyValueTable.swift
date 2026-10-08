@@ -12,6 +12,7 @@ import SQLiteServiceMacros
 
 enum KeyValueTableKeys: String {
     case fcmToken = "fcm_token"
+    case billingUserPlan = "billing_user_plan"
 }
 
 @Table("KeyValues")
