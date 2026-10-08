@@ -1777,6 +1777,208 @@ private extension CalendarViewModelImpleTests {
     }
 }
 
+
+// MARK: - 단 수에 따른 2단 배선
+
+extension CalendarViewModelImpleTests {
+
+    private var august2: CalendarComponent.Day { .init(year: 2023, month: 08, day: 02, weekDay: 3) }
+
+    private func attachTwoColumns(_ viewModel: CalendarViewModelImple) async throws -> SpyTwoColumnsInteractor {
+        viewModel.columnLayoutChanged(.twoColumns)
+        try await self.waitEffect("2단이 붙는다") { self.spyRouter.spyTwoColumnsInteractor != nil }
+        return try XCTUnwrap(self.spyRouter.spyTwoColumnsInteractor)
+    }
+
+    func testViewModel_whenColumnLayoutTwoColumns_attachTwoColumnsOnce() async throws {
+        // given
+        let viewModel = self.makeViewModel(today: self.august2)
+        try await self.prepareInitialMonths(viewModel)
+
+        // when
+        viewModel.columnLayoutChanged(.twoColumns)
+        viewModel.columnLayoutChanged(.singleColumn)
+        viewModel.columnLayoutChanged(.twoColumns)
+
+        // then
+        try await self.waitEffect("세 번 전환된다") { self.spyRouter.didShowColumnLayouts.count == 3 }
+        try await self.settle()
+        XCTAssertEqual(self.spyRouter.didAttachTwoColumnsInitialMonths, [.init(year: 2023, month: 08)])
+        XCTAssertEqual(self.spyRouter.didShowColumnLayouts, [.twoColumns, .singleColumn, .twoColumns])
+    }
+
+    func testViewModel_whenColumnLayoutArrivesBeforePrepare_attachWithFocusedMonthAfterPrepare() async throws {
+        // given
+        let viewModel = self.makeViewModel(today: self.august2)
+        viewModel.columnLayoutChanged(.twoColumns)
+
+        // when
+        try await self.prepareInitialMonths(viewModel)
+
+        // then
+        try await self.waitEffect("포커스가 생긴 뒤 붙는다") { !self.spyRouter.didAttachTwoColumnsInitialMonths.isEmpty }
+        XCTAssertEqual(self.spyRouter.didAttachTwoColumnsInitialMonths, [.init(year: 2023, month: 08)])
+    }
+
+    func testViewModel_whenColumnLayoutSingleColumn_showLayoutWithoutAttach() async throws {
+        // given
+        let viewModel = self.makeViewModel(today: self.august2)
+        try await self.prepareInitialMonths(viewModel)
+
+        // when
+        viewModel.columnLayoutChanged(.singleColumn)
+
+        // then
+        try await self.waitEffect("1단을 보인다") { self.spyRouter.didShowColumnLayouts == [.singleColumn] }
+        try await self.settle()
+        XCTAssertEqual(self.spyRouter.didAttachTwoColumnsInitialMonths, [])
+    }
+
+    func testViewModel_whenAttachTwoColumns_pushCurrentFocusAndSelectedDay() async throws {
+        // given
+        let viewModel = self.makeViewModel(today: self.august2)
+        try await self.prepareInitialMonths(viewModel)
+
+        // when
+        let twoColumns = try await self.attachTwoColumns(viewModel)
+
+        // then
+        try await self.waitEffect("현재 값이 한 번 간다") { !twoColumns.didSelectDays.isEmpty }
+        XCTAssertEqual(twoColumns.didChangeFocusedMonths, [.init(year: 2023, month: 08)])
+        XCTAssertEqual(twoColumns.didSelectDays, [.init(2023, 08, 02)])
+        XCTAssertEqual(twoColumns.didSelectedDayIsTodays, [true])
+    }
+
+    func testViewModel_whenFocusChangedInTwoColumns_forwardToTwoColumns() async throws {
+        // given
+        let viewModel = self.makeViewModel(today: self.august2)
+        try await self.prepareInitialMonths(viewModel)
+        let twoColumns = try await self.attachTwoColumns(viewModel)
+
+        // when
+        viewModel.changeFocusedMonth(to: .init(year: 2023, month: 11))
+
+        // then
+        try await self.waitEffect("11월이 넘어간다") {
+            twoColumns.didChangeFocusedMonths.last == .init(year: 2023, month: 11)
+        }
+        try await self.waitEffect("11월 1일이 넘어간다") { twoColumns.didSelectDays.last == .init(2023, 11, 1) }
+        try await self.settle()
+        XCTAssertEqual(self.spyRouter.didShowColumnLayouts, [.twoColumns])
+        XCTAssertEqual(self.spyListener.didChangeColumnLayouts, [.twoColumns])
+    }
+
+    func testViewModel_whenTwoColumnsScrolled_changeFocusedMonth() async throws {
+        // given
+        let viewModel = self.makeViewModel(today: self.august2)
+        try await self.prepareInitialMonths(viewModel)
+        _ = try await self.attachTwoColumns(viewModel)
+        let focusedMonths = self.record(viewModel.focusedMonth)
+
+        // when
+        viewModel.calendarTwoColumns(didScrollTo: .init(year: 2023, month: 10))
+
+        // then
+        try await self.waitEffect("포커스 월이 10월") { focusedMonths.values.last == .init(year: 2023, month: 10) }
+        XCTAssertEqual(self.spyRouter.spyInteractors.map { $0.currentMonth }, [
+            .init(year: 2023, month: 09), .init(year: 2023, month: 10), .init(year: 2023, month: 11)
+        ])
+    }
+
+    func testViewModel_whenTwoColumnsSelect_selectDayAndForwardToPaper() async throws {
+        // given
+        let viewModel = self.makeViewModel(today: self.august2)
+        try await self.prepareInitialMonths(viewModel)
+        let twoColumns = try await self.attachTwoColumns(viewModel)
+
+        // when
+        viewModel.calendarTwoColumns(didSelect: .init(2023, 08, 10))
+
+        // then
+        try await self.waitEffect("2단에 선택일이 돌아간다") { twoColumns.didSelectDays.last == .init(2023, 08, 10) }
+        XCTAssertEqual(self.spyRouter.spyInteractors.map { $0.didSelectDay }, [nil, .init(2023, 08, 10), nil])
+    }
+
+    func testViewModel_whenVoiceListeningInTwoColumns_scrollTwoColumns() async throws {
+        // given
+        let viewModel = self.makeViewModel(today: self.august2)
+        try await self.prepareInitialMonths(viewModel)
+        let twoColumns = try await self.attachTwoColumns(viewModel)
+
+        // when
+        self.stubOrchestration.stateSubject.send(.listening(.voice))
+
+        // then
+        try await self.waitEffect("2단으로 스크롤") { twoColumns.didScrollToVoiceInputCount == 1 }
+        try await self.settle()
+        XCTAssertEqual(twoColumns.didScrollToVoiceInputCount, 1)
+        XCTAssertEqual(self.scrollToVoiceInputCountsOfPapers, [0, 0, 0])
+    }
+
+    func testViewModel_whenVoiceListeningInSingleColumn_scrollFocusedPaper() async throws {
+        // given
+        let viewModel = self.makeViewModel(today: self.august2)
+        try await self.prepareInitialMonths(viewModel)
+        _ = try await self.attachTwoColumns(viewModel)
+        viewModel.columnLayoutChanged(.singleColumn)
+        try await self.waitEffect("1단으로 돌아온다") { self.spyRouter.didShowColumnLayouts.last == .singleColumn }
+
+        // when
+        self.stubOrchestration.stateSubject.send(.listening(.voice))
+
+        // then
+        try await self.waitEffect("포커스 paper 로 스크롤") { self.scrollToVoiceInputCountsOfPapers == [0, 1, 0] }
+        XCTAssertEqual(self.spyRouter.spyTwoColumnsInteractor?.didScrollToVoiceInputCount, 0)
+    }
+
+    func testViewModel_whenSelectedDayChangedInTwoColumns_notifyIsTodayToTwoColumns() async throws {
+        // given
+        let viewModel = self.makeViewModel(today: self.august2)
+        try await self.prepareInitialMonths(viewModel)
+        let twoColumns = try await self.attachTwoColumns(viewModel)
+        try await self.waitEffect("오늘이 먼저 간다") { twoColumns.didSelectedDayIsTodays == [true] }
+
+        // when
+        viewModel.calendarTwoColumns(didSelect: .init(2023, 08, 03))
+
+        // then
+        try await self.waitEffect("오늘이 아님이 간다") { twoColumns.didSelectedDayIsTodays == [true, false] }
+        try await self.settle()
+        XCTAssertEqual(twoColumns.didSelectedDayIsTodays, [true, false])
+    }
+
+    func testViewModel_whenTwoColumnsRequestToday_moveFocusToToday() async throws {
+        // given
+        let viewModel = self.makeViewModel(today: self.august2)
+        try await self.prepareInitialMonths(viewModel)
+        let twoColumns = try await self.attachTwoColumns(viewModel)
+        viewModel.changeFocusedMonth(to: .init(year: 2023, month: 11))
+        try await self.waitEffect("11월로 간다") { twoColumns.didChangeFocusedMonths.last == .init(year: 2023, month: 11) }
+
+        // when
+        viewModel.calendarTwoColumnsDidRequestReturnToToday()
+
+        // then
+        try await self.waitEffect("오늘로 돌아온다") { twoColumns.didSelectDays.last == .init(2023, 08, 02) }
+        XCTAssertEqual(twoColumns.didChangeFocusedMonths.last, .init(year: 2023, month: 08))
+    }
+
+    func testViewModel_whenTwoColumnsRequestAICommand_routeToAICommand() async throws {
+        // given
+        let viewModel = self.makeViewModel(today: self.august2)
+
+        // when
+        viewModel.calendarTwoColumnsDidRequestShowAICommand()
+
+        // then
+        XCTAssertEqual(self.spyRouter.didRouteToAICommandCount, 1)
+    }
+
+    private var scrollToVoiceInputCountsOfPapers: [Int] {
+        return self.spyRouter.spyInteractors.map { $0.didScrollToVoiceInputCount }
+    }
+}
+
 private extension CalendarViewModelImpleTests {
     
     class SpyRouter: BaseSpyRouter, CalendarViewRouting, @unchecked Sendable {
@@ -1804,6 +2006,20 @@ private extension CalendarViewModelImpleTests {
             self.didSlideFocusToNext = isNext
             self.slideFocusCompletion = completed
             self.didSlideFocusCallback?()
+        }
+
+        var spyTwoColumnsInteractor: SpyTwoColumnsInteractor?
+        var didAttachTwoColumnsInitialMonths: [CalendarMonth] = []
+        func attachTwoColumns(initialMonth: CalendarMonth) -> (any CalendarTwoColumnsSceneInteractor)? {
+            self.didAttachTwoColumnsInitialMonths.append(initialMonth)
+            let interactor = SpyTwoColumnsInteractor()
+            self.spyTwoColumnsInteractor = interactor
+            return interactor
+        }
+
+        var didShowColumnLayouts: [CalendarColumnLayout] = []
+        func showColumnLayout(_ layout: CalendarColumnLayout) {
+            self.didShowColumnLayouts.append(layout)
         }
 
         var didRouteToAICommandCount: Int = 0
@@ -1871,6 +2087,36 @@ private extension CalendarViewModelImpleTests {
         func dayEventListDidRequestReturnToToday() { }
     }
     
+    final class SpyTwoColumnsInteractor: CalendarTwoColumnsSceneInteractor, @unchecked Sendable {
+
+        var didChangeFocusedMonths: [CalendarMonth] = []
+        func changeFocusedMonth(to month: CalendarMonth) {
+            self.didChangeFocusedMonths.append(month)
+        }
+
+        var didSelectDays: [CalendarDay] = []
+        func selectDay(_ day: CalendarDay) {
+            self.didSelectDays.append(day)
+        }
+
+        var didSelectedDayIsTodays: [Bool] = []
+        func selectedDayIsToday(_ isToday: Bool) {
+            self.didSelectedDayIsTodays.append(isToday)
+        }
+
+        var didScrollToVoiceInputCount: Int = 0
+        func scrollToVoiceInput() {
+            self.didScrollToVoiceInputCount += 1
+        }
+
+        func continuousMonths(didScrollTo month: CalendarMonth) { }
+        func continuousMonths(didSelect day: CalendarDay) { }
+        func continuousMonths(didRequestShare range: Range<TimeInterval>, kind: CalendarShareRangeKind) { }
+        func continuousMonths(didChangeSelectedDay day: SelectDayAndEvents, and nextDays: [SelectDayAndEvents]) { }
+        func dayEventListDidRequestShowAICommand() { }
+        func dayEventListDidRequestReturnToToday() { }
+    }
+
     final class SpyListener: CalendarSceneListener, @unchecked Sendable {
         
         var didSelectionChanged: ((SelectDayInfo) -> Void)?

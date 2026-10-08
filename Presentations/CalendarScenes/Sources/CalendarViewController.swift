@@ -16,6 +16,7 @@ final class CalendarViewController: UIViewController, CalendarScene {
     
     private let viewModel: any CalendarViewModel
     private let pagerViewController: CalendarMonthPagerViewController
+    private var twoColumnsViewController: UIViewController?
     let viewAppearance: ViewAppearance
     
     @MainActor
@@ -43,6 +44,7 @@ final class CalendarViewController: UIViewController, CalendarScene {
         self.setupLayouts()
         self.viewModel.prepare()
         self.bind()
+        self.bindColumnLayout()
     }
     
     func addChildMonths(_ monthScenes: [any Scene]) {
@@ -55,6 +57,35 @@ final class CalendarViewController: UIViewController, CalendarScene {
 
     func slideFocus(to index: Int, isNext: Bool, completed: @escaping @Sendable () -> Void) {
         self.pagerViewController.slideFocus(to: index, isNext: isNext, completed: completed)
+    }
+
+    func attachTwoColumns(_ twoColumns: any CalendarTwoColumnsScene) {
+        self.twoColumnsViewController = twoColumns
+        self.embed(twoColumns)
+        twoColumns.view.isHidden = true
+    }
+
+    func showColumnLayout(_ layout: CalendarColumnLayout) {
+        let isTwoColumns = layout == .twoColumns
+        self.pagerViewController.view.isHidden = isTwoColumns
+        self.twoColumnsViewController?.view.isHidden = !isTwoColumns
+    }
+
+    private func bindColumnLayout() {
+        self.notifyColumnLayout()
+        self.registerForTraitChanges(
+            [UITraitHorizontalSizeClass.self, UITraitVerticalSizeClass.self]
+        ) { (self: Self, _: UITraitCollection) in
+            self.notifyColumnLayout()
+        }
+    }
+
+    private func notifyColumnLayout() {
+        let layout = CalendarColumnLayout(
+            horizontal: self.traitCollection.horizontalSizeClass,
+            vertical: self.traitCollection.verticalSizeClass
+        )
+        self.viewModel.columnLayoutChanged(layout)
     }
 
     private func bind() {

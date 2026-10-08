@@ -127,8 +127,17 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
             sharePreviewSceneBuilder: sharePreviewSceneBuilder,
             pendingCompleteTodoState: pendingCompleteTodoState
         )
+        let twoColumnsSceneBuilder = CalendarTwoColumnsBuilderImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearance,
+            eventListSceneBuilder: eventListSceneBuilder,
+            eventListCellEventHanleViewModelBuilder: handleViewModelBuilder,
+            sharePreviewSceneBuilder: sharePreviewSceneBuilder,
+            pendingCompleteTodoState: pendingCompleteTodoState
+        )
         let router = CalendarViewRouterImple(
             paperSceneBuilder,
+            twoColumnsSceneBuilder: twoColumnsSceneBuilder,
             aiAgentCommandSceneBuilder: self.aiAgentCommandSceneBuilder,
             memberSceneBuilder: self.memberSceneBuilder,
             paywallSceneBuilder: self.paywallSceneBuilder
