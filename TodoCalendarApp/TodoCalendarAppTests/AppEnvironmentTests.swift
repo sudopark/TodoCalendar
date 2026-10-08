@@ -107,12 +107,15 @@ extension AppEnvironmentTests {
 
 extension AppEnvironmentTests {
 
-    @Test("기본 앱 정책은 사용권 게이트 켜짐·7일이다")
+    @Test("기본 앱 정책은 컬러 테마·위젯 사용권 게이트를 켜고 둘 다 7일로 둔다")
     func defaultAppPolicy_isEnabledForSevenDays() {
         // when
         let policy = AppEnvironment.defaultAppPolicy
 
         // then
-        #expect(policy == AppPolicy(colorThemeLicense: .init(isEnabled: true, licenseDays: 7)))
+        #expect(policy == AppPolicy(
+            colorThemeLicense: .init(isEnabled: true, licenseDays: 7),
+            widgetStyleLicense: .init(isEnabled: true, licenseDays: 7)
+        ))
     }
 }

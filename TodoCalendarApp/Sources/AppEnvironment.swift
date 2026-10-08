@@ -15,6 +15,7 @@ struct AppEnvironment {
         static let testDBFileNamePrefix: String = "test_dummy"
         static let e2eRunMarkerFileName: String = "e2e-run.marker"
         static let defaultColorThemeLicenseDays: Int = 7
+        static let defaultWidgetStyleLicenseDays: Int = 7
         // 1회 실행이 67초라 한 실행을 충분히 덮으면서, 잔존 시 오염 창을 짧게 남긴다
         static let e2eRunMarkerTTL: TimeInterval = 600
     }
@@ -183,6 +184,9 @@ struct AppEnvironment {
         return AppPolicy(
             colorThemeLicense: .init(
                 isEnabled: true, licenseDays: Constant.defaultColorThemeLicenseDays
+            ),
+            widgetStyleLicense: .init(
+                isEnabled: true, licenseDays: Constant.defaultWidgetStyleLicenseDays
             )
         )
     }
