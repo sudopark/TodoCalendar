@@ -45,6 +45,14 @@ struct CustomColorThemeLocalRepositoryImpleTests {
     private func withRepository(
         _ body: (CustomColorThemeLocalRepositoryImple) async throws -> Void
     ) async throws {
+        try await self.withStorage { storage in
+            try await body(CustomColorThemeLocalRepositoryImple(localStorage: storage))
+        }
+    }
+
+    private func withStorage(
+        _ body: (CustomColorThemeLocalStorageImple) async throws -> Void
+    ) async throws {
         let path = try FileManager.default
             .url(for: .cachesDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
             .appendingPathComponent("custom_color_theme_\(UUID().uuidString).db")
@@ -53,7 +61,7 @@ struct CustomColorThemeLocalRepositoryImpleTests {
         try await service.async.open(path: path)
         let storage = CustomColorThemeLocalStorageImple(sqliteService: service)
         do {
-            try await body(CustomColorThemeLocalRepositoryImple(localStorage: storage))
+            try await body(storage)
         } catch {
             try? await service.async.close()
             try? FileManager.default.removeItem(atPath: path)
@@ -135,6 +143,24 @@ struct CustomColorThemeLocalRepositoryImpleTests {
             // when
             try await repository.removeTheme("gone")
             let themes = try await repository.loadThemes()
+
+            // then
+            #expect(themes == [kept])
+        }
+    }
+
+    @Test("여러 uuid 를 한 번에 지우면 그 테마들만 빠진다")
+    func storage_removeThemes() async throws {
+        try await self.withStorage { storage in
+            // given
+            let kept = self.makeTheme("keep", createdAt: 1)
+            try await storage.saveTheme(kept)
+            try await storage.saveTheme(self.makeTheme("gone1", createdAt: 2))
+            try await storage.saveTheme(self.makeTheme("gone2", createdAt: 3))
+
+            // when
+            try await storage.removeThemes(["gone1", "gone2"])
+            let themes = try await storage.fetchThemes()
 
             // then
             #expect(themes == [kept])

@@ -213,6 +213,7 @@ enum MigrationEndpoints: Endpoint {
     case eventDetails
     case doneTodos
     case doneTodoDetails
+    case customColorThemes
     
     var subPath: String {
         switch self {
@@ -222,6 +223,7 @@ enum MigrationEndpoints: Endpoint {
         case .eventDetails: return "event_details"
         case .doneTodos: return "todos/done"
         case .doneTodoDetails: return "todos/done/details"
+        case .customColorThemes: return "color_themes"
         }
     }
 }

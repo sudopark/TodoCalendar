@@ -11,6 +11,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import UnitTestHelpKit
 
 @testable import Repository
@@ -104,6 +105,22 @@ class TemporaryUserDataMigrationRepositoryImpleTests: BaseLocalTests {
         let doneTodoDetail1 = EventDetailData(done1.uuid)
         let doneTodoDetailStorage = EventDetailDataLocalStorageImple<DoneTodoEventDetailTable>(sqliteService: self.sqliteService)
         try await doneTodoDetailStorage.saveDetail(doneTodoDetail1)
+
+        let themeStorage = CustomColorThemeLocalStorageImple(sqliteService: self.sqliteService)
+        try await themeStorage.saveTheme(self.makeTheme("ct1", name: "theme1", createdAt: 100.7))
+        try await themeStorage.saveTheme(self.makeTheme("ct2", name: "theme2", createdAt: 200))
+    }
+
+    private func makeTheme(_ uuid: String, name: String, createdAt: TimeInterval) -> CustomColorTheme {
+        return CustomColorTheme(
+            uuid: uuid,
+            name: name,
+            schemaVersion: 1,
+            seeds: CustomColorThemeSeeds(background: "#000000", accent: "#FFFFFF", form: .filled),
+            colors: ["bg0": "#000000"],
+            createdAt: createdAt,
+            updatedAt: createdAt
+        )
     }
     
     private func makeRepository(withoutData: Bool = false) async throws -> TemporaryUserDataMigrationRepositoryImple {
@@ -129,7 +146,7 @@ extension TemporaryUserDataMigrationRepositoryImpleTests {
         let count = try await repository.loadMigrationNeedEventCount()
         
         // then
-        XCTAssertEqual(count, 4)
+        XCTAssertEqual(count, 6)
     }
     
     func testRepository_migrationEventTag() async throws {
@@ -236,11 +253,12 @@ extension TemporaryUserDataMigrationRepositoryImpleTests {
         try await repository.migrateTodoEvents()
         try await repository.migrateScheduleEvents()
         try await repository.migrateEventDetails()
+        try await repository.migrateCustomColorThemes()
         try await repository.clearTemporaryUserData()
         let countAfterMigration = try? await repository.loadMigrationNeedEventCount()
         
         // then
-        XCTAssertEqual(countBeforeMigration, 4)
+        XCTAssertEqual(countBeforeMigration, 6)
         XCTAssertEqual(countAfterMigration, nil)
     }
     
@@ -253,9 +271,68 @@ extension TemporaryUserDataMigrationRepositoryImpleTests {
         try await repository.migrateTodoEvents()
         try await repository.migrateScheduleEvents()
         try await repository.migrateEventDetails()
+        try await repository.migrateCustomColorThemes()
         
         // then
         XCTAssertEqual(self.stubRemote.didRequestedPaths.isEmpty, true)
+    }
+}
+
+extension TemporaryUserDataMigrationRepositoryImpleTests {
+
+    func testRepository_migrateCustomColorThemes_uploadUuidKeyedBatch() async throws {
+        // given
+        let repository = try await self.makeRepository()
+
+        // when
+        try await repository.migrateCustomColorThemes()
+
+        // then
+        XCTAssertEqual(self.stubRemote.didRequestedMethod, .post)
+        XCTAssertEqual(self.stubRemote.didRequestedPath, "dummy_calendar_api_host/v2/migration/color_themes")
+        let params = self.stubRemote.didRequestedParams
+        XCTAssertEqual(params?.keys.sorted(), ["ct1", "ct2"])
+        let ct1Payload = params?["ct1"] as? [String: Any]
+        XCTAssertEqual(ct1Payload?["name"] as? String, "theme1")
+        XCTAssertEqual(ct1Payload?["colors"] as? [String: String], ["bg0": "#000000"])
+        XCTAssertEqual(ct1Payload?["created_at"] as? Int, 100)
+    }
+
+    func testRepository_migrateCustomColorThemes_removeTempRows() async throws {
+        // given
+        let repository = try await self.makeRepository()
+
+        // when
+        try await repository.migrateCustomColorThemes()
+
+        // then
+        let countAfterMigration = try await repository.loadMigrationNeedEventCount()
+        XCTAssertEqual(countAfterMigration, 4)
+    }
+
+    func testRepository_whenMigrateCustomColorThemesFails_keepTempRows() async throws {
+        // given
+        self.stubRemote = .init(responses: [
+            .init(
+                method: .post,
+                endpoint: MigrationEndpoints.customColorThemes,
+                resultJsonString: .failure(RuntimeError("failed"))
+            )
+        ])
+        let repository = try await self.makeRepository()
+
+        // when
+        var failed = false
+        do {
+            try await repository.migrateCustomColorThemes()
+        } catch {
+            failed = true
+        }
+
+        // then
+        XCTAssertEqual(failed, true)
+        let countAfterFail = try await repository.loadMigrationNeedEventCount()
+        XCTAssertEqual(countAfterFail, 6)
     }
 }
 
@@ -299,6 +376,12 @@ extension TemporaryUserDataMigrationRepositoryImpleTests {
                 endpoint: MigrationEndpoints.doneTodoDetails,
                 resultJsonString: .success(self.okReponse)
             ),
+            .init(
+                method: .post,
+                endpoint: MigrationEndpoints.customColorThemes,
+                resultJsonString: .success(self.okReponse)
+            ),
         ]
     }
 }
+

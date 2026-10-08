@@ -17,5 +17,6 @@ public protocol TemporaryUserDataMigrationRepository {
     func migrateScheduleEvents() async throws
     func migrateEventDetails() async throws
     func migrateDoneEvents() async throws
+    func migrateCustomColorThemes() async throws
     func clearTemporaryUserData() async throws
 }

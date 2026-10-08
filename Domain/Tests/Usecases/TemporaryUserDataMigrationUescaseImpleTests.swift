@@ -155,9 +155,26 @@ extension TemporaryUserDataMigrationUescaseImpleTests {
         parameterizeTest("이벤트 태그 마이그레이션 실패시 실패") { $0.stubMigrateEventTagResult = .failure(RuntimeError("failed")) }
         parameterizeTest("todo event 마이그레이션 실패시 실패") { $0.stubMigrateTodoResult = .failure(RuntimeError("failed")) }
         parameterizeTest("schedule event 마이그레이션 실패시 실패") { $0.stubMigrateScheduleResult = .failure(RuntimeError("failed")) }
+        parameterizeTest("커스텀 테마 마이그레이션 실패시 실패") { $0.stubMigrateCustomColorThemesResult = .failure(RuntimeError("failed")) }
         parameterizeTest("done todo event 마이그레이션 실패는 성공으로 간주", expectIsFail: false) { $0.shouldFailMigratedDoneTodo = true }
         parameterizeTest("event detail 마이그레이션 실패는 성공으로 간주", expectIsFail: false) { $0.stubMigrateEventDetailResult = .failure(RuntimeError("failed")) }
         parameterizeTest("임시유저 데이터 삭제 실패는 성공으로 간주", expectIsFail: false) { $0.stubClearDataResult = .failure(RuntimeError("failed")) }
+    }
+    
+    func testUsecase_whenMigrateCustomColorThemesFails_notClearTemporaryUserData() {
+        // given
+        self.stubRepository.stubMigrateCustomColorThemesResult = .failure(RuntimeError("failed"))
+        let expect = expectation(description: "커스텀 테마 마이그레이션 실패시 임시 데이터를 지우지 않음")
+        let usecase = self.makeUsecase()
+        
+        // when
+        let result = self.waitFirstOutput(expect, for: usecase.migrationResult) {
+            usecase.startMigration()
+        }
+        
+        // then
+        XCTAssertEqual(result?.isSuccess, false)
+        XCTAssertEqual(self.stubRepository.didClearTemporaryUserData, false)
     }
     
     // migration -> update is migrating
@@ -266,8 +283,15 @@ private final class StubRepository: TemporaryUserDataMigrationRepository {
         return try self.stubMigrateEventDetailResult.get()
     }
     
+    var stubMigrateCustomColorThemesResult: Result<Void, any Error> = .success(())
+    func migrateCustomColorThemes() async throws {
+        return try self.stubMigrateCustomColorThemesResult.get()
+    }
+    
     var stubClearDataResult: Result<Void, any Error> = .success(())
+    private(set) var didClearTemporaryUserData: Bool = false
     func clearTemporaryUserData() async throws {
+        self.didClearTemporaryUserData = true
         switch self.stubClearDataResult {
         case .success:
             self.stubMigrationTargetEventCountLoadResult = .success(0)
