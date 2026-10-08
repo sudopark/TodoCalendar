@@ -115,8 +115,11 @@
 1. 이벤트 태그 (EventTag) — 태그가 이벤트에 선행해야 참조 무결
 2. 할일 (TodoEvent)
 3. 일정 (ScheduleEvent)
-4. 이벤트 상세 (EventDetailData)
-5. 완료 할일 (DoneTodoEvent)
+4. 커스텀 컬러 테마 (CustomColorTheme)
+5. 이벤트 상세 (EventDetailData)
+6. 완료 할일 (DoneTodoEvent)
+
+1~4 중 하나라도 실패하면 이전 전체가 실패하고 임시 DB 가 남는다. 5·6 의 실패는 무시한다. 이전 필요 건수는 할일·일정·커스텀 테마 개수의 합이다.
 
 **UI 상태 Publishers**:
 - `isNeedMigration: AnyPublisher<Bool, Never>` — 마이그레이션 필요 여부
@@ -190,10 +193,13 @@ sequenceDiagram
         Mig->>Local: 3. ScheduleEvent 로드
         Mig->>Remote: PUT /schedules
 
-        Mig->>Local: 4. EventDetailData 로드
+        Mig->>Local: 4. CustomColorTheme 로드
+        Mig->>Remote: POST /migration/color_themes
+
+        Mig->>Local: 5. EventDetailData 로드
         Mig->>Remote: POST /event_details
 
-        Mig->>Local: 5. DoneTodoEvent 로드
+        Mig->>Local: 6. DoneTodoEvent 로드
         Mig->>Remote: PUT /done_todos
     end
 
