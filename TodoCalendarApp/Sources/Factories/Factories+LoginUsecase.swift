@@ -30,8 +30,8 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
     let billingUsecase: any BillingUsecase
     let eventLiveActivityUsecase: any EventLiveActivityUsecase
     let adExposureUsecase: any AdExposureUsecase
-    let paidFeatureGateUsecase: any PaidFeatureGateUsecase
     let imageTextRecognizeService: any ImageTextRecognizeService = ImageTextRecognizeServiceImple()
+    private let planSource: any BillingUserPlanSource
     private let applicationBase: ApplicationBase
 
     private let eventFactory: LoginEventFactory
@@ -131,6 +131,7 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
                 sqliteService: applicationBase.commonSqliteService
             )
         )
+        self.planSource = planStore
 
         let aiRepository = AICommandRepositoryImple(
             remote: applicationBase.remoteAPI,
@@ -176,18 +177,21 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
                 environmentStorage: applicationBase.userDefaultEnvironmentStorage
             )
         )
+    }
 
-        self.paidFeatureGateUsecase = PaidFeatureGateUsecaseImple(
-            billingUsecase: billingUsecase,
+    func makePaidFeatureGateUsecase(
+    ) -> any ColorThemePaidFeatureGateUsecase & WidgetStylePaidFeatureGateUsecase {
+        return PaidFeatureGateUsecaseImple(
+            planSource: self.planSource,
             licenseRepository: ColorThemeLicenseLocalRepositoryImple(
-                environmentStorage: applicationBase.userDefaultEnvironmentStorage
+                environmentStorage: self.applicationBase.userDefaultEnvironmentStorage
             ),
             widgetStyleLicenseRepository: WidgetStyleLicenseLocalRepositoryImple(
-                environmentStorage: applicationBase.userDefaultEnvironmentStorage
+                environmentStorage: self.applicationBase.userDefaultEnvironmentStorage
             ),
             policyRepository: AppPolicyRepositoryImple(
-                remoteAPI: applicationBase.remoteAPI,
-                environmentStorage: applicationBase.userDefaultEnvironmentStorage
+                remoteAPI: self.applicationBase.remoteAPI,
+                environmentStorage: self.applicationBase.userDefaultEnvironmentStorage
             ),
             defaultPolicy: AppEnvironment.defaultAppPolicy
         )
