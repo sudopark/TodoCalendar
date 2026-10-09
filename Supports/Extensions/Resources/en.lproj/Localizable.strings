@@ -510,6 +510,14 @@
 "setting.appearance.calendar.colorTheme.edit::delete::confirm::message" = "Delete this theme? If it's in use, the system theme will be applied.";
 "setting.appearance.calendar.colorTheme.edit::saved::message" = "Theme saved";
 "setting.appearance.calendar.colorTheme.edit::removed::message" = "Theme deleted";
+"setting.appearance.calendar.colorTheme.adGuide::apply::title" = "Watch an ad to use this theme";
+"setting.appearance.calendar.colorTheme.adGuide::create::title" = "Watch an ad to create a theme";
+"setting.appearance.calendar.colorTheme.adGuide::apply::message" = "Watch one ad to use any theme freely for %d days.";
+"setting.appearance.calendar.colorTheme.adGuide::create::message" = "Watch one ad to save this theme and use any theme freely for %d days.";
+"setting.appearance.calendar.colorTheme.adGuide::freeThemes::message" = "System, Light, and Dark themes are always free.";
+"setting.appearance.calendar.colorTheme.adGuide::plan::message" = "Paid plans let you use themes without ads";
+"setting.appearance.calendar.colorTheme.adGuide::plan::button" = "View plans";
+"setting.appearance.calendar.colorTheme.adGuide::watchAd::button" = "Watch ad and use for %d days";
 "setting.appearance.calendar.underline" = "Underline on event days";
 "setting.appearance.event.edit::name_old" = "Edit Event";
 "setting.appearance.event.edit::name" = "Event settings and external calendars";

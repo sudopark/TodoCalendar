@@ -61,6 +61,7 @@ final class ColorThemeEditViewModelImple: ColorThemeEditViewModel, @unchecked Se
     private let original: CustomColorTheme?
     private let calendarSettingUsecase: any CalendarSettingUsecase
     private let uiSettingUsecase: any UISettingUsecase
+    private let paidFeatureGateUsecase: any ColorThemePaidFeatureGateUsecase
     var router: (any ColorThemeEditRouting)?
     weak var listener: (any ColorThemeEditSceneListener)?
 
@@ -68,11 +69,13 @@ final class ColorThemeEditViewModelImple: ColorThemeEditViewModel, @unchecked Se
         original: CustomColorTheme?,
         initialSeeds: CustomColorThemeSeeds,
         calendarSettingUsecase: any CalendarSettingUsecase,
-        uiSettingUsecase: any UISettingUsecase
+        uiSettingUsecase: any UISettingUsecase,
+        paidFeatureGateUsecase: any ColorThemePaidFeatureGateUsecase
     ) {
         self.original = original
         self.calendarSettingUsecase = calendarSettingUsecase
         self.uiSettingUsecase = uiSettingUsecase
+        self.paidFeatureGateUsecase = paidFeatureGateUsecase
 
         self.subject.name.send(original?.name ?? "")
         self.subject.seeds.send(initialSeeds)
@@ -83,6 +86,7 @@ final class ColorThemeEditViewModelImple: ColorThemeEditViewModel, @unchecked Se
         let name = CurrentValueSubject<String, Never>("")
         let seeds = CurrentValueSubject<CustomColorThemeSeeds?, Never>(nil)
         let isProcessing = CurrentValueSubject<Bool, Never>(false)
+        let isAdGuideInProgress = CurrentValueSubject<Bool, Never>(false)
     }
 
     private let subject = Subject()
@@ -132,6 +136,36 @@ extension ColorThemeEditViewModelImple {
 
     func save() {
         guard self.isSavableNow, let theme = self.makeThemeToSave() else { return }
+        let gate = self.paidFeatureGateUsecase
+        guard self.original == nil,
+              gate.canCreateCustomColorThemeWithoutAd() == false,
+              let licenseDays = gate.colorThemeLicenseDays()
+        else {
+            self.saveTheme(theme)
+            return
+        }
+        self.subject.isAdGuideInProgress.send(true)
+        self.router?.showColorThemeAdGuide(.createTheme, licenseDays: licenseDays) { [weak self] result in
+            guard self?.subject.isAdGuideInProgress.value == true else { return }
+            self?.subject.isAdGuideInProgress.send(false)
+            guard let result else { return }
+            self?.handleAdResult(result) { self?.saveTheme(theme) }
+        }
+    }
+
+    private func handleAdResult(_ result: RewardedAdResult, then proceed: () -> Void) {
+        switch self.paidFeatureGateUsecase.colorThemeAdOutcome(for: result) {
+        case .grantLicenseAndProceed:
+            self.paidFeatureGateUsecase.grantColorThemeLicense(at: Date())
+            proceed()
+        case .proceedWithoutLicense:
+            proceed()
+        case .stop:
+            break
+        }
+    }
+
+    private func saveTheme(_ theme: CustomColorTheme) {
         self.subject.isProcessing.send(true)
         Task { [weak self] in
             do {
@@ -198,7 +232,7 @@ extension ColorThemeEditViewModelImple {
     private var isSavableNow: Bool {
         return self.canSave(
             name: self.subject.name.value,
-            isProcessing: self.subject.isProcessing.value
+            isProcessing: self.subject.isProcessing.value || self.subject.isAdGuideInProgress.value
         )
     }
 
@@ -255,12 +289,13 @@ extension ColorThemeEditViewModelImple {
     }
 
     var isSavable: AnyPublisher<Bool, Never> {
-        return Publishers.CombineLatest(
+        return Publishers.CombineLatest3(
             self.subject.name,
-            self.subject.isProcessing
+            self.subject.isProcessing,
+            self.subject.isAdGuideInProgress
         )
-        .map { [weak self] name, isProcessing in
-            return self?.canSave(name: name, isProcessing: isProcessing) ?? false
+        .map { [weak self] name, isProcessing, isAdGuideInProgress in
+            return self?.canSave(name: name, isProcessing: isProcessing || isAdGuideInProgress) ?? false
         }
         .removeDuplicates()
         .eraseToAnyPublisher()

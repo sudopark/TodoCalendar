@@ -511,6 +511,14 @@
 "setting.appearance.calendar.colorTheme.edit::delete::confirm::message" = "이 테마를 삭제할까요? 사용 중이면 시스템 테마로 돌아가요.";
 "setting.appearance.calendar.colorTheme.edit::saved::message" = "테마를 저장했어요";
 "setting.appearance.calendar.colorTheme.edit::removed::message" = "테마를 삭제했어요";
+"setting.appearance.calendar.colorTheme.adGuide::apply::title" = "이 테마는 광고를 보고 쓸 수 있어요";
+"setting.appearance.calendar.colorTheme.adGuide::create::title" = "새 테마는 광고를 보고 만들 수 있어요";
+"setting.appearance.calendar.colorTheme.adGuide::apply::message" = "광고를 한 번 보면 %d일 동안 모든 테마를 자유롭게 쓸 수 있어요.";
+"setting.appearance.calendar.colorTheme.adGuide::create::message" = "광고를 한 번 보면 이 테마를 저장하고, %d일 동안 모든 테마를 자유롭게 쓸 수 있어요.";
+"setting.appearance.calendar.colorTheme.adGuide::freeThemes::message" = "시스템·라이트·다크 테마는 언제나 무료예요.";
+"setting.appearance.calendar.colorTheme.adGuide::plan::message" = "유료 플랜은 광고 없이 쓸 수 있어요";
+"setting.appearance.calendar.colorTheme.adGuide::plan::button" = "플랜 보기";
+"setting.appearance.calendar.colorTheme.adGuide::watchAd::button" = "광고 보고 %d일 동안 쓰기";
 "setting.appearance.calendar.underline" = "이벤트있는 날에 밑줄표시";
 "setting.appearance.event.edit::name_old" = "이벤트 수정";
 "setting.appearance.event.edit::name" = "이벤트 설정 및 외부 캘린더";

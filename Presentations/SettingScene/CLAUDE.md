@@ -22,6 +22,8 @@ graph TD
 
     AS -->|push| CT[ColorThemeSelect<br/>색상 테마]
     CT -->|push| CTE[ColorThemeEdit<br/>커스텀 테마 편집]
+    CT -.->|bottomSlide| CTAG[ColorThemeAdGuide<br/>테마 광고 안내]
+    CTE -.->|bottomSlide| CTAG
     AS -->|push| WG[WidgetGallery<br/>WidgetScenes]
     AS -->|push| TZ[TimeZoneSelect<br/>타임존]
 
@@ -59,7 +61,7 @@ graph TD
 | `EventOnCalendarViewModelImple` | 캘린더 이벤트 | 태그 색상 표시, 할일 표시 등 |
 | `EventListAppearnaceSettingViewModelImple` | 이벤트 목록 | 12/24시 형식 등 |
 
-하위 화면: ColorThemeSelect (커스텀 테마 편집 ColorThemeEdit으로 push), TimeZoneSelect (leaf), WidgetGallery (WidgetScenes — 위젯 기본 테마 설정을 그 화면 상단이 담는다)
+하위 화면: ColorThemeSelect (커스텀 테마 편집 ColorThemeEdit으로 push, 두 화면 모두 무료 유저에게 광고 안내 시트 ColorThemeAdGuide를 띄운다), TimeZoneSelect (leaf), WidgetGallery (WidgetScenes — 위젯 기본 테마 설정을 그 화면 상단이 담는다)
 
 ### EventSetting (이벤트 기본값)
 
@@ -164,6 +166,7 @@ graph TD
 |---|---|---|---|
 | `CalendarAppearanceSampleView` | `Setting/Appearance/CalendarSection/CalendarAppearancePreviewView.swift` | 설정 미리보기용 미니 월간 캘린더 샘플. 색 세트를 주입하면 그 색으로 칠한다 | CalendarAppearancePreviewView, ColorThemeSelectView, ColorThemeEditView |
 | `ColorThemePreviewView` / `ColorThemeItemView` | `Setting/Appearance/ColorTheme/ColorThemePreviewView.swift` | 색 테마 미리보기 / 선택 아이템 셀 | ColorTheme 내부 + CalendarAppearancePreviewView |
+| `ColorThemeAdGuideView` / `ColorThemeAdGuideRouter` | `Setting/Appearance/ColorTheme/AdGuide/` | 유료 테마 걸기·새 테마 저장 전 광고 안내 하단 시트와, 시트 → 광고·플랜 화면 흐름을 맡는 공용 Router | ColorThemeSelect, ColorThemeEdit |
 
 ---
 
