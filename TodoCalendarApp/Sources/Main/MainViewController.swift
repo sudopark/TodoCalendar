@@ -38,6 +38,7 @@ final class MainViewController: UIViewController, MainScene {
     let viewAppearance: ViewAppearance
     private let mobileAdService: any MobileAdService
     private let fullScreenAdRouter: (any FullScreenAdRouter)?
+    private let adExposureUsecase: any AdExposureUsecase
     private var didPrepareAd: Bool = false
 
     @MainActor
@@ -50,12 +51,14 @@ final class MainViewController: UIViewController, MainScene {
         viewAppearance: ViewAppearance,
         mobileAdService: any MobileAdService,
         fullScreenAdRouter: (any FullScreenAdRouter)?,
+        adExposureUsecase: any AdExposureUsecase,
         adViewBuilder: (any AdViewBuilder)?
     ) {
         self.viewModel = viewModel
         self.viewAppearance = viewAppearance
         self.mobileAdService = mobileAdService
         self.fullScreenAdRouter = fullScreenAdRouter
+        self.adExposureUsecase = adExposureUsecase
         self.bottomBannerView = adViewBuilder?.makeBannerUIView(size: .banner)
         super.init(nibName: nil, bundle: nil)
     }
@@ -83,7 +86,12 @@ final class MainViewController: UIViewController, MainScene {
         Task { @MainActor [weak self] in
             guard let self else { return }
             await self.mobileAdService.presentConsentFormAndTrackingPromptIfNeeded(from: self)
-            await self.mobileAdService.preloadFullScreenAd()
+            if self.adExposureUsecase.shouldPreloadFullScreenAds() {
+                await self.mobileAdService.preloadFullScreenAd()
+                Task { [weak self] in
+                    await self?.mobileAdService.preloadRewardedAd()
+                }
+            }
             
             guard self.isLaunchedFromAppIcon else { return }
             self.fullScreenAdRouter?.showFullScreenAd(

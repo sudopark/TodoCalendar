@@ -14,6 +14,8 @@ public protocol AdExposureUsecase: Sendable {
 
     var isBannerAdAllowed: AnyPublisher<Bool, Never> { get }
 
+    func shouldPreloadFullScreenAds() -> Bool
+
     func canExposeFullScreenAd(
         scope: FullScreenAdExposureRecord.Scope,
         isFromAppLaunch: Bool,
@@ -71,6 +73,11 @@ extension AdExposureUsecaseImple {
 // MARK: - full screen
 
 extension AdExposureUsecaseImple {
+
+    public func shouldPreloadFullScreenAds() -> Bool {
+        guard let planId = self.billingUsecase.latestUserPlan()?.planId else { return true }
+        return planId == .free
+    }
 
     public func canExposeFullScreenAd(
         scope: FullScreenAdExposureRecord.Scope,

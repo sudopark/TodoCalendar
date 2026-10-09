@@ -73,6 +73,7 @@ extension MainSceneBuilerImple: MainSceneBuiler {
             viewAppearance: self.viewAppearance,
             mobileAdService: self.mobileAdService,
             fullScreenAdRouter: self.fullScreenAdRouter,
+            adExposureUsecase: self.usecaseFactory.adExposureUsecase,
             adViewBuilder: self.adViewBuilder
         )
         
