@@ -578,11 +578,11 @@ struct EventDetailView: View {
         
         func backGroundView() -> some View {
             if self.state.isAllDay {
-                return RoundedRectangle(cornerRadius: Metric.Radius.sheet)
+                return RoundedRectangle(cornerRadius: Metric.Radius.sheet, style: .circular)
                     .fill(self.appearance.colorSet.selectedDayBackground.asColor)
                     .asAnyView()
             } else {
-                return RoundedRectangle(cornerRadius: Metric.Radius.sheet)
+                return RoundedRectangle(cornerRadius: Metric.Radius.sheet, style: .circular)
                     .stroke(self.appearance.colorSet.text2.asColor, lineWidth: 1)
                     .asAnyView()
             }
