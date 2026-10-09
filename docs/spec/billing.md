@@ -204,6 +204,21 @@ isBannerAdAllowed = adAvailability.isStarted && userPlan.planId == .free
 
 `scope`는 `.application`(앱 시작)과 `.service(identifier:)`(기능 진입)로 나뉘고, 노출 이력은 scope별로 하루 한 번을 센다.
 
+### 보상형 광고 (RewardedAdRouter)
+
+`RewardedAdRouter.showRewardedAd(from:completion:)` 는 Domain `RewardedAdResult` 네 case 중 하나를 돌려준다. 무료 판정과 사용권 기록은 호출자가 정책으로 정하며, 라우터는 광고를 보여주고 결과만 돌려준다.
+
+| 결과 | 의미 |
+|---|---|
+| `.rewarded` | 보상형을 끝까지 보고 보상을 받음 |
+| `.dismissedBeforeReward` | 보상형을 보상 전에 닫음 |
+| `.fallbackFullScreenShown` | 보상형이 없어 미리 로드된 전면을 보여줌 |
+| `.unavailable` | 보상형도 전면도 없거나 노출 중 다시 불림 |
+
+시도 순서는 보상형 → 미리 로드된 전면 → 없음이다. 보상형은 최대 5초 기다리고, 보상형 노출이 실패해도 전면으로 넘어간다. 대체 전면은 로드를 기다리지 않으며 `canExposeFullScreenAd` 를 거치지 않고 노출 이력도 남기지 않는다.
+
+보상형은 메인 화면이 UMP 동의·ATT 를 마친 뒤 전면과 함께 미리 로드하고, 캐시는 1시간 뒤 만료된다. 5초 안에 로드가 끝나지 않아도 로드는 이어져 다음 호출이 그 광고를 쓴다. 미리 로드는 `AdExposureUsecase.shouldPreloadFullScreenAds()` 가 정한다 — 무료 플랜이거나 플랜을 아직 모르면 하고, 유료로 확인되면 전면·보상형 모두 하지 않는다.
+
 설정의 `adPrivacyOptions` 항목에서 광고 개인정보 옵션을 다시 열 수 있다.
 
 ---

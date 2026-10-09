@@ -453,6 +453,10 @@ extension ApplicationRootRouter {
             adExposureUsecase: self.usecaseFactory.adExposureUsecase
         )
     }
+
+    private func rewardedAdRouter() -> any RewardedAdRouter {
+        return RewardedAdRouterImple(adService: self.applicationBase.mobileAdService)
+    }
     
     private func calendarSceneBulder() -> any CalendarSceneBuilder {
         let builder = CalendarSceneBuilderImple(

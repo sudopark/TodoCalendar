@@ -148,6 +148,48 @@ extension AdExposureUsecaseImpleTests {
 }
 
 
+// MARK: - 전면 광고 미리 로드 여부
+
+extension AdExposureUsecaseImpleTests {
+
+    @Test("무료 플랜이면 전면 광고를 미리 로드한다")
+    func usecase_whenFreePlan_shouldPreloadFullScreenAds() {
+        // given
+        let usecase = self.makeUsecase(userPlan: self.userPlan(.free))
+
+        // when
+        let shouldPreload = usecase.shouldPreloadFullScreenAds()
+
+        // then
+        #expect(shouldPreload == true)
+    }
+
+    @Test("유료 플랜이면 전면 광고를 미리 로드하지 않는다")
+    func usecase_whenPaidPlan_shouldNotPreloadFullScreenAds() {
+        // given
+        let usecase = self.makeUsecase(userPlan: self.userPlan(.standard))
+
+        // when
+        let shouldPreload = usecase.shouldPreloadFullScreenAds()
+
+        // then
+        #expect(shouldPreload == false)
+    }
+
+    @Test("플랜을 아직 모르면 전면 광고를 미리 로드한다")
+    func usecase_whenUserPlanUnknown_shouldPreloadFullScreenAds() {
+        // given
+        let usecase = self.makeUsecase(userPlan: nil)
+
+        // when
+        let shouldPreload = usecase.shouldPreloadFullScreenAds()
+
+        // then
+        #expect(shouldPreload == true)
+    }
+}
+
+
 // MARK: - 앱 실행 직후 추가 조건
 
 extension AdExposureUsecaseImpleTests {
