@@ -60,6 +60,7 @@ echo " Destination: ${DESTINATION}"
 echo "========================================"
 echo ""
 
+# 실패 시 시뮬레이터 진단 수집이 600초 타임아웃까지 기다려서 로컬 실행은 진단을 끈다 (CI 는 pr_test.yml 이 따로 부른다)
 # xcpretty 는 컴파일 경고의 `warning:` 줄을 지워서, 경고 확인은 이 raw 로그로 한다
 RAW_LOG_DIR=$(mktemp -d)
 
@@ -75,6 +76,7 @@ for scheme in "${SCHEMES[@]}"; do
     -destination "${DESTINATION}" \
     -testLanguage en \
     -testRegion en_US \
+    -collect-test-diagnostics never \
     2>&1 | tee "$TMPFILE" | xcpretty
   # PIPESTATUS[0]은 파이프 직후에만 유효 — xcpretty가 아닌 xcodebuild의 종료 코드
   EXIT_CODE=${PIPESTATUS[0]}
