@@ -509,6 +509,7 @@ struct EventDetailView: View {
                 : appearance.colorSet.text1.asColor
 
             return EventTimeTextView(timeText, textColor: textColor, isStrikethrough: isInvalid)
+                .minimumScaleFactor(0.8)
                 .onTapGesture {
                     self.appearance.impactIfNeed()
                     self.updateTimePickerShowing(position)
@@ -594,9 +595,11 @@ struct EventDetailView: View {
             
         } label: {
             Text("calendar::event_time::allday".localized())
+                .font(self.appearance.fontSet.size(14).asFont)
                 .foregroundStyle(textColor)
                 .padding(.vertical, spacing: .small)
                 .padding(.horizontal, spacing: .large)
+                .fixedSize()
         }
         .background(
             backGroundView()
@@ -613,6 +616,7 @@ struct EventDetailView: View {
                     .foregroundStyle(self.appearance.colorSet.text1.asColor)
 
                 selectedTimeView()
+                    .layoutPriority(1)
 
                 Spacer()
 
