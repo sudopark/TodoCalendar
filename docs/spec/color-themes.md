@@ -303,7 +303,22 @@ Radix 스케일은 12단계이고 단계마다 쓰임이 정해져 있다 — 1 
 - **보류**는 둘 중 하나다. plan 을 아직 못 받았거나(`latestUserPlan() == nil`), 앱이 모르는 plan 이라 `isPaid == nil` 이다. 보류에는 광고도 게이트도 요구하지 않는다. 정책을 받지 못한 상태는 보류가 아니다. 기본 정책으로 판정한다.
 - 정책의 `enabled` 가 `false` 이면 게이트를 끈 것이라 허용한다.
 - 소비자는 `canApplyColorThemeWithoutAd` 가 `false` 일 때 광고를 띄운다. 별도 게이트 판정 메서드는 없다. 유료 → 무료로 돌아와도 별도 상태 없이 기록된 부여 시각으로만 판정하므로, 남은 기간이 있으면 그대로 유효하다.
-- 테마 생성 광고 판정도 `ColorThemePaidFeatureGateUsecase` 에 요건 메서드로 더한다. 기능 enum 같은 일반화는 하지 않는다.
+- 테마 생성 광고 판정도 같은 usecase 의 요건 메서드(`canCreateCustomColorThemeWithoutAd()`)가 내린다. 기능 enum 같은 일반화는 하지 않는다.
+
+### 테마 생성 광고
+
+새 커스텀 테마를 저장할 때 `canCreateCustomColorThemeWithoutAd()` 가 `false` 면 광고를 띄운다. 무료 플랜에 정책이 켜져 있으면 사용권이 유효해도 만들 때마다 광고가 필요하다. 보류·유료·정책 꺼짐·기간 0 이하·정책 해석 불가면 광고 없이 만든다. 기존 테마 수정 저장은 이 판정을 보지 않는다. 생성 광고로 사용권을 받으므로 저장 직후 그 테마를 걸 때는 다시 광고를 띄우지 않는다.
+
+### 광고 결과 처리
+
+선택 화면의 걸기와 편집 화면의 생성 저장은 하단 안내 시트를 먼저 띄우고, 광고 결과를 `colorThemeAdOutcome(for:)` 로 해석한다. 시트를 취소하거나 딤을 탭하거나 플랜 보기로 넘어가면 걸지도 저장하지도 않는다. 시트와 광고가 끝날 때까지 다른 테마 선택·저장 재탭은 받지 않는다. 사용권 기간을 해석할 수 없으면 시트 없이 걸거나 저장한다.
+
+| 광고 결과 | 해석 | 동작 |
+|---|---|---|
+| `.rewarded` | `grantLicenseAndProceed` | 사용권을 지금 시각으로 기록하고 걸거나 저장한다 |
+| `.fallbackFullScreenShown` | `grantLicenseAndProceed` | 위와 같다 |
+| `.unavailable` | `proceedWithoutLicense` | 사용권 없이 이번만 걸거나 저장한다 |
+| `.dismissedBeforeReward` | `stop` | 걸지 않고 저장하지 않는다. 편집 화면은 그대로 남는다 |
 
 ### 만료 기산
 
