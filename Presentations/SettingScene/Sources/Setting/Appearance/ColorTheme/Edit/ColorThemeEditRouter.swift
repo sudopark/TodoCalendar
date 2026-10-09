@@ -13,11 +13,11 @@ import CommonPresentation
 
 // MARK: - Routing
 
-protocol ColorThemeEditRouting: Routing, Sendable { }
+protocol ColorThemeEditRouting: ColorThemeAdGuideRouting, Sendable { }
 
 // MARK: - Router
 
-final class ColorThemeEditRouter: BaseRouterImple, ColorThemeEditRouting, @unchecked Sendable {
+final class ColorThemeEditRouter: ColorThemeAdGuideRouter, ColorThemeEditRouting, @unchecked Sendable {
 
     override func closeScene(animate: Bool, _ dismissed: (@Sendable () -> Void)?) {
         Task { @MainActor in

@@ -16,7 +16,7 @@ import CommonPresentation
 
 // MARK: - Routing
 
-protocol ColorThemeSelectRouting: Routing, Sendable {
+protocol ColorThemeSelectRouting: ColorThemeAdGuideRouting, Sendable {
     
     func routeToEditCustomTheme(
         original: CustomColorTheme?,
@@ -26,12 +26,22 @@ protocol ColorThemeSelectRouting: Routing, Sendable {
 
 // MARK: - Router
 
-final class ColorThemeSelectRouter: BaseRouterImple, ColorThemeSelectRouting, @unchecked Sendable { 
+final class ColorThemeSelectRouter: ColorThemeAdGuideRouter, ColorThemeSelectRouting, @unchecked Sendable { 
     
     private let editSceneBuilder: any ColorThemeEditSceneBuiler
     
-    init(editSceneBuilder: any ColorThemeEditSceneBuiler) {
+    init(
+        editSceneBuilder: any ColorThemeEditSceneBuiler,
+        rewardedAdRouter: any RewardedAdRouter,
+        paywallSceneBuilder: any PaywallSceneBuilder,
+        viewAppearance: ViewAppearance
+    ) {
         self.editSceneBuilder = editSceneBuilder
+        super.init(
+            rewardedAdRouter: rewardedAdRouter,
+            paywallSceneBuilder: paywallSceneBuilder,
+            viewAppearance: viewAppearance
+        )
     }
     
     override func closeScene(animate: Bool, _ dismissed: (() -> Void)?) {

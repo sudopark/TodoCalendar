@@ -67,20 +67,24 @@ final class ColorThemeSelectViewModelImple: ColorThemeSelectViewModel, @unchecke
     
     private let calendarSettingUsecase: any CalendarSettingUsecase
     private let uiSettingUsecase: any UISettingUsecase
+    private let paidFeatureGateUsecase: any ColorThemePaidFeatureGateUsecase
     var router: (any ColorThemeSelectRouting)?
     
     init(
         calendarSettingUsecase: any CalendarSettingUsecase,
-        uiSettingUsecase: any UISettingUsecase
+        uiSettingUsecase: any UISettingUsecase,
+        paidFeatureGateUsecase: any ColorThemePaidFeatureGateUsecase
     ) {
         self.calendarSettingUsecase = calendarSettingUsecase
         self.uiSettingUsecase = uiSettingUsecase
+        self.paidFeatureGateUsecase = paidFeatureGateUsecase
     }
     
     
     private struct Subject {
         let availableTheme = CurrentValueSubject<[ColorSetKeys]?, Never>(nil)
         let customThemes = CurrentValueSubject<[CustomColorTheme]?, Never>(nil)
+        let isAdGuideInProgress = CurrentValueSubject<Bool, Never>(false)
     }
     
     private let cancellables = CancelBag()
@@ -115,7 +119,33 @@ extension ColorThemeSelectViewModelImple {
     }
     
     func selectTheme(_ model: ColorThemeModel) {
-        self.applyTheme(model)
+        guard self.subject.isAdGuideInProgress.value == false else { return }
+        let gate = self.paidFeatureGateUsecase
+        guard gate.canApplyColorThemeWithoutAd(model.key, at: Date()) == false,
+              let licenseDays = gate.colorThemeLicenseDays()
+        else {
+            self.applyTheme(model)
+            return
+        }
+        self.subject.isAdGuideInProgress.send(true)
+        self.router?.showColorThemeAdGuide(.applyTheme, licenseDays: licenseDays) { [weak self] result in
+            guard self?.subject.isAdGuideInProgress.value == true else { return }
+            self?.subject.isAdGuideInProgress.send(false)
+            guard let result else { return }
+            self?.handleAdResult(result) { self?.applyTheme(model) }
+        }
+    }
+
+    private func handleAdResult(_ result: RewardedAdResult, then proceed: () -> Void) {
+        switch self.paidFeatureGateUsecase.colorThemeAdOutcome(for: result) {
+        case .grantLicenseAndProceed:
+            self.paidFeatureGateUsecase.grantColorThemeLicense(at: Date())
+            proceed()
+        case .proceedWithoutLicense:
+            proceed()
+        case .stop:
+            break
+        }
     }
     
     func createCustomTheme() {

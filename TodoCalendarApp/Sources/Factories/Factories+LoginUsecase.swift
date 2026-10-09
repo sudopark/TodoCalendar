@@ -197,6 +197,10 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
         )
     }
 
+    func makeColorThemePaidFeatureGateUsecase() -> any ColorThemePaidFeatureGateUsecase {
+        return self.makePaidFeatureGateUsecase()
+    }
+
     var eventNotifyService: SharedEventNotifyService {
         return self.applicationBase.eventNotifyService
     }

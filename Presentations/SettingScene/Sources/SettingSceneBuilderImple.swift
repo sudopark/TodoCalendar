@@ -21,6 +21,7 @@ public final class SettingSceneBuilderImple: SettingSceneBuiler {
     private let paywallSceneBuilder: any PaywallSceneBuilder
     private let widgetGallerySceneBuilder: any WidgetGallerySceneBuilder
     private let privacyOptionsFormRouter: (any PrivacyOptionsFormRouter)?
+    private let rewardedAdRouter: any RewardedAdRouter
 
     public init(
         appstoreLinkPath: String,
@@ -30,7 +31,8 @@ public final class SettingSceneBuilderImple: SettingSceneBuiler {
         memberSceneBuilder: any MemberSceneBuilder,
         paywallSceneBuilder: any PaywallSceneBuilder,
         widgetGallerySceneBuilder: any WidgetGallerySceneBuilder,
-        privacyOptionsFormRouter: (any PrivacyOptionsFormRouter)?
+        privacyOptionsFormRouter: (any PrivacyOptionsFormRouter)?,
+        rewardedAdRouter: any RewardedAdRouter
     ) {
         self.appstoreLinkPath = appstoreLinkPath
         self.supportExternalCalendarServices = supportExternalCalendarServices
@@ -40,6 +42,7 @@ public final class SettingSceneBuilderImple: SettingSceneBuiler {
         self.paywallSceneBuilder = paywallSceneBuilder
         self.widgetGallerySceneBuilder = widgetGallerySceneBuilder
         self.privacyOptionsFormRouter = privacyOptionsFormRouter
+        self.rewardedAdRouter = rewardedAdRouter
     }
 }
 
@@ -89,13 +92,17 @@ extension SettingSceneBuilderImple {
         
         let colorThemeEditSceneBuilder = ColorThemeEditSceneBuilerImple(
             usecaseFactory: self.usecaseFactory,
-            viewAppearance: self.viewAppearance
+            viewAppearance: self.viewAppearance,
+            rewardedAdRouter: self.rewardedAdRouter,
+            paywallSceneBuilder: self.paywallSceneBuilder
         )
         
         let colorThemeSelectSceneBuilder = ColorThemeSelectSceneBuilerImple(
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearance,
-            editSceneBuilder: colorThemeEditSceneBuilder
+            editSceneBuilder: colorThemeEditSceneBuilder,
+            rewardedAdRouter: self.rewardedAdRouter,
+            paywallSceneBuilder: self.paywallSceneBuilder
         )
         
         let timeZoneSelectSceneBuilder = TimeZoneSelectSceneBuilerImple(
