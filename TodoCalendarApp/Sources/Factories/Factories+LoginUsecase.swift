@@ -125,6 +125,13 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
         let eventSyncUsecase = eventFactory.makeEventSyncUsecase()
         self.eventSyncUsecase = eventSyncUsecase
 
+        let planStore = BillingUserPlanStoreImple(
+            sharedDataStore: applicationBase.sharedDataStore,
+            repository: BillingUserPlanLocalRepositoryImple(
+                sqliteService: applicationBase.commonSqliteService
+            )
+        )
+
         let aiRepository = AICommandRepositoryImple(
             remote: applicationBase.remoteAPI,
             localStorage: AICommandLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
@@ -136,6 +143,7 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
             ),
             usageUsecase: AIAgentUsageUsecaseImple(
                 repository: aiRepository,
+                planStore: planStore,
                 sharedDataStore: applicationBase.sharedDataStore
             ),
             speechRecognizeUsecase: speechFactory.makeSpeechRecognizeUsecase(),
@@ -147,6 +155,7 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
         let billingUsecase = BillingUsecaseImple(
             repository: BillingRepositoryImple(remote: applicationBase.remoteAPI),
             appStoreService: AppStoreBillingServiceImple(),
+            planStore: planStore,
             sharedDataStore: applicationBase.sharedDataStore
         )
         self.billingUsecase = billingUsecase

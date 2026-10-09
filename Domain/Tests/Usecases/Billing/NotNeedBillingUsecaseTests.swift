@@ -18,11 +18,17 @@ final class NotNeedBillingUsecaseTests: PublisherWaitable {
 
     var cancelBag: Set<AnyCancellable>! = .init()
 
+    private let stubPlanRepository = StubBillingUserPlanRepository()
+
     private func makeUsecaseWithStore() -> (NotNeedBillingUsecase, SharedDataStore) {
         let store = SharedDataStore()
-        let usecase = NotNeedBillingUsecase(sharedDataStore: store)
+        let planStore = BillingUserPlanStoreImple(
+            sharedDataStore: store, repository: self.stubPlanRepository
+        )
+        let usecase = NotNeedBillingUsecase(planStore: planStore)
         return (usecase, store)
     }
+
 }
 
 
@@ -37,6 +43,15 @@ extension NotNeedBillingUsecaseTests {
         // then
         let plan = store.value(BillingUserPlan.self, key: ShareDataKeys.billingUserPlan.rawValue)
         #expect(plan?.planId == .free)
+    }
+
+    @Test("미로그인 free 플랜이 유저 없음으로 영속에 남는다")
+    func usecase_whenCreated_persistsFreePlanWithNilUserId() {
+        // given
+        // when
+        _ = self.makeUsecaseWithStore()
+        // then
+        #expect(self.stubPlanRepository.didUpdatedPlan?.planId == .free)
     }
 
     @Test func usecase_whenCreated_latestUserPlanIsFree() {
