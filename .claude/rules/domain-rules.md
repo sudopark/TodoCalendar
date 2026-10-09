@@ -22,7 +22,7 @@ Domain 모듈 내 파일을 수정하거나 생성할 때 아래 원칙을 따�
 - protocol extension에 **default implementation을 함부로 추가하지 말 것.** 구현체와 중복을 유발한다.
 - 모든 구현체가 동일하게 동작해야 하는 경우에만 default로 제공. 그 외에는 구현체 쪽 메서드로 둔다.
 - 예: `DeviceInfoFetchService.fetchAppVersion()`의 default를 Domain 쪽에 `Bundle.main` 직접 참조로 넣으면, `DeviceInfoFetchServiceImple`이 이미 같은 로직을 가지고 있어 중복이 된다. → Domain 프로토콜은 메서드 시그니처만 선언하고, `Bundle.main` 참조 같은 구체 구현은 App 타겟 구현체에 둔다.
-- Protocol-First 원칙상 "계약(인터페이스)만 선언하고, 구현은 별도 타입이 책임"이 기본값. default implementation은 예외적 수단.
+- 프로토콜을 둔 자리에서는 "계약(인터페이스)만 선언하고, 구현은 별도 타입이 책임"이 기본값이고 default implementation은 예외적 수단이다. 이 줄은 프로토콜을 **새로 만들라**는 뜻이 아니다 — 신설 여부는 file-conventions §3 이 정한다.
 
 ## 3. Usecase 구현 스타일
 
