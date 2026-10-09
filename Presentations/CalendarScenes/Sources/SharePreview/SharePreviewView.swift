@@ -160,13 +160,12 @@ struct SharePreviewView: View {
 
     var body: some View {
         GeometryReader { proxy in
-            let sceneWidth = proxy.size.width + proxy.safeAreaInsets.leading + proxy.safeAreaInsets.trailing
-            self.contentView(sceneWidth: sceneWidth)
+            self.contentView(contentWidth: proxy.size.width)
         }
         .background(self.appearance.colorSet.bg0.asColor)
     }
 
-    private func contentView(sceneWidth: CGFloat) -> some View {
+    private func contentView(contentWidth: CGFloat) -> some View {
         VStack(spacing: 0) {
             SheetHeaderView(title: "share_preview::title".localized())
                 .eventHandler(\.onClose, self.eventHandlers.close)
@@ -181,7 +180,7 @@ struct SharePreviewView: View {
                 .padding(.top, spacing: .regular)
 
             ScrollView {
-                self.formatBodyView(sceneWidth: sceneWidth)
+                self.formatBodyView(contentWidth: contentWidth)
                     .padding(spacing: .regular)
             }
 
@@ -310,14 +309,14 @@ struct SharePreviewView: View {
     // MARK: - event line list
 
     @ViewBuilder
-    private func formatBodyView(sceneWidth: CGFloat) -> some View {
+    private func formatBodyView(contentWidth: CGFloat) -> some View {
         switch self.state.format {
         case .text:
             self.bodyView()
         case .image:
             if let content = self.state.imageContentModel {
                 ShareImageCardView(
-                    headerText: self.state.imageHeaderText, content: content, cardWidth: self.cardWidth(sceneWidth: sceneWidth)
+                    headerText: self.state.imageHeaderText, content: content, cardWidth: self.cardWidth(contentWidth: contentWidth)
                 )
                 .eventHandler(\.lineTapped, self.eventHandlers.toggleLine)
             } else {
@@ -327,8 +326,8 @@ struct SharePreviewView: View {
     }
 
     // SharePreviewRouter의 cardWidth와 같은 값이어야 미리보기와 공유 이미지가 어긋나지 않는다.
-    private func cardWidth(sceneWidth: CGFloat) -> CGFloat {
-        max(sceneWidth - Metric.Spacing.regular * 2, 0)
+    private func cardWidth(contentWidth: CGFloat) -> CGFloat {
+        max(contentWidth - Metric.Spacing.regular * 2, 0)
     }
 
     private func bodyView() -> some View {

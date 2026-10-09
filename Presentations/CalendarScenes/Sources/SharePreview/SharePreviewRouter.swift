@@ -43,10 +43,11 @@ final class SharePreviewRouter: BaseRouterImple, SharePreviewRouting, @unchecked
 
     func shareImage(_ content: ShareImageContentModel, headerText: String) {
         Task { @MainActor in
-            guard let appearance = self.scene?.viewAppearance, let sceneWidth = self.scene?.view.bounds.width
+            guard let appearance = self.scene?.viewAppearance,
+                  let contentWidth = self.scene?.view.safeAreaLayoutGuide.layoutFrame.width
             else { return }
 
-            let cardWidth = sceneWidth - Metric.Spacing.regular * 2
+            let cardWidth = contentWidth - Metric.Spacing.regular * 2
             let card = ShareImageCardView(headerText: headerText, content: content, cardWidth: cardWidth)
                 .environment(appearance)
 
