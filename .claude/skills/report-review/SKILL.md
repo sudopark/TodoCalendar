@@ -59,6 +59,8 @@ description: Use when a peer worktree session (southpaw·orthodox·spare 등) se
 
 통과는 출력 허가일 뿐이다. 유저 승인·머지 승인을 갈음하지 않고, 받는 세션의 권한 프롬프트도 대신하지 않는다.
 
+회신한 뒤 유저에게는 그 건의 결론과 유저가 새로 할 일만 한두 줄로 알린다. 남은 일 전체 목록은 유저가 물을 때만 낸다 — 알림마다 목록을 다시 붙이면 읽을 거리만 늘고, 끝난 항목이 계속 실려 목록이 실물과 어긋난다.
+
 ## 4. 종료 기록 — skill_end
 
 한 보고(PR 문안은 한 PR 의 문안 묶음)가 통과로 끝나거나 요청자가 거둬들이면 `python3 .claude/hooks/log-record.py skill_end --name report-review` (명령·compliance 규칙은 CLAUDE.md §1). 반려 → 재검수 라운드는 같은 런이다.

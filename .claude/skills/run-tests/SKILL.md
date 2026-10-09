@@ -41,6 +41,7 @@ DESTINATION='platform=iOS Simulator,name=iPhone 16,OS=18.0' ./scripts/run-all-te
 2. 인자 없이 실행하면 17개 스킴 전체 순차 실행
 3. 실패 시 `FAILED` 스킴 목록과 상위 에러 라인 출력
 4. 빌드 실패(`BUILD FAILED`)도 FAILED로 판정됨
+5. **출력은 항상 로그 파일로 받는다** — `./scripts/run-all-tests.sh A B C > <스크래치패드>/test.log 2>&1` 로 돌리고 `grep -E "error:|✗ |Executed .*failures|Results:|FAILED:|Failing tests:"` 로 요약을 본다. 스킴 하나가 수 분씩 걸려서, `tail` 로 본 출력이 잘려 실패 원인을 놓치면 재실행 비용이 그대로 든다. 실패 원인은 그 로그에서 뽑고, 실패한 스킴을 하나씩 다시 돌리지 않는다. 재실행은 수정을 반영한 뒤 실패 스킴을 묶어 한 번만 한다
 
 ## Invoke
 
