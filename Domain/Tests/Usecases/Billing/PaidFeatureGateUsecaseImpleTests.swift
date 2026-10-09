@@ -310,6 +310,20 @@ extension PaidFeatureGateUsecaseImpleTests {
         #expect(canWithExpired == false)
         #expect(canWithValid == true)
     }
+    @Test("무료 plan 이라도 사용권 기간이 0 이하면 유료 테마를 허용한다", arguments: [0, -1])
+    func canApplyColorThemeWithoutAd_whenFreeAndLicenseDaysNotPositive_isTrue(_ days: Int) {
+        // given
+        let usecase = self.makeUsecase(
+            plan: self.userPlan(.free),
+            policy: AppPolicy(colorThemeLicense: .init(isEnabled: true, licenseDays: days))
+        )
+
+        // when
+        let can = usecase.canApplyColorThemeWithoutAd(self.paidTheme, at: self.now)
+
+        // then
+        #expect(can == true)
+    }
 }
 
 
@@ -328,6 +342,50 @@ extension PaidFeatureGateUsecaseImpleTests {
         // then
         #expect(self.stubLicenseRepository.didUpdatedLicense == .init(grantedAt: self.now))
         #expect(usecase.canApplyColorThemeWithoutAd(self.paidTheme, at: self.now) == true)
+    }
+}
+
+
+// MARK: - 컬러 테마 사용권 기간과 광고 결과 해석
+
+extension PaidFeatureGateUsecaseImpleTests {
+
+    @Test("사용권 기간은 정책에서 해석한 값이고, 해석할 수 없으면 nil 이다")
+    func colorThemeLicenseDays_returnsResolvedDays() {
+        // given
+        let fromPolicy = self.makeUsecase(
+            plan: self.userPlan(.free),
+            policy: AppPolicy(colorThemeLicense: .init(isEnabled: true, licenseDays: 14))
+        )
+        let fromDefault = self.makeUsecase(plan: self.userPlan(.free), policy: nil)
+        let undecidable = self.makeUsecase(
+            plan: self.userPlan(.free), policy: nil, defaultPolicy: AppPolicy()
+        )
+
+        // when
+        let days = [fromPolicy, fromDefault, undecidable].map { $0.colorThemeLicenseDays() }
+
+        // then
+        #expect(days == [14, 30, nil])
+    }
+
+    @Test("광고 결과를 사용권 부여·이번만 진행·멈춤으로 해석한다", arguments: [
+        (RewardedAdResult.rewarded, ColorThemeAdOutcome.grantLicenseAndProceed),
+        (.fallbackFullScreenShown, .grantLicenseAndProceed),
+        (.unavailable, .proceedWithoutLicense),
+        (.dismissedBeforeReward, .stop)
+    ])
+    func colorThemeAdOutcome_mapsEachResult(
+        _ result: RewardedAdResult, _ expected: ColorThemeAdOutcome
+    ) {
+        // given
+        let usecase = self.makeUsecase(plan: self.userPlan(.free))
+
+        // when
+        let outcome = usecase.colorThemeAdOutcome(for: result)
+
+        // then
+        #expect(outcome == expected)
     }
 }
 
