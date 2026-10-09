@@ -26,6 +26,7 @@ final class ColorThemeEditViewModelImpleTests: PublisherWaitable, AsyncEffectWai
     private let spyRouter = SpyRouter()
     private let spyListener = SpyListener()
     private let eventLog = EventLog()
+    private let stubGateUsecase = StubColorThemePaidFeatureGateUsecase()
 
     init() {
         self.spyRouter.eventLog = self.eventLog
@@ -56,18 +57,23 @@ final class ColorThemeEditViewModelImpleTests: PublisherWaitable, AsyncEffectWai
         shouldSaveFail: Bool = false,
         shouldRemoveFail: Bool = false,
         firstWeekDay: DayOfWeeks = .sunday,
-        uiSettingUsecase: StubUISettingUsecase = StubUISettingUsecase()
+        uiSettingUsecase: StubUISettingUsecase = StubUISettingUsecase(),
+        canApplyWithoutAd: Bool = true,
+        adResult: RewardedAdResult? = nil
     ) -> (ColorThemeEditViewModelImple, StubUISettingUsecase) {
         let usecase = uiSettingUsecase
         usecase.shouldFailSaveCustomColorTheme = shouldSaveFail
         usecase.shouldFailRemoveCustomColorTheme = shouldRemoveFail
         let calendarSettingUsecase = StubCalendarSettingUsecase()
         calendarSettingUsecase.updateFirstWeekDay(firstWeekDay)
+        self.stubGateUsecase.canApplyWithoutAd = canApplyWithoutAd
+        self.spyRouter.stubAdResult = adResult
         let viewModel = ColorThemeEditViewModelImple(
             original: original,
             initialSeeds: original?.seeds ?? self.initialSeeds,
             calendarSettingUsecase: calendarSettingUsecase,
-            uiSettingUsecase: usecase
+            uiSettingUsecase: usecase,
+            paidFeatureGateUsecase: self.stubGateUsecase
         )
         viewModel.router = self.spyRouter
         viewModel.listener = self.spyListener
@@ -490,6 +496,162 @@ extension ColorThemeEditViewModelImpleTests {
 }
 
 
+// MARK: - 새 테마 저장 광고
+
+extension ColorThemeEditViewModelImpleTests {
+
+    @Test func viewModel_whenNewAndAdRequired_showsCreateGuide() async throws {
+        // given
+        let (viewModel, usecase) = self.makeViewModel(canApplyWithoutAd: false)
+        viewModel.enterName("new theme")
+
+        // when
+        viewModel.save()
+        try await Task.sleep(for: .milliseconds(50))
+
+        // then
+        #expect(self.spyRouter.didShowColorThemeAdGuideWith == .createTheme)
+        #expect(usecase.didSaveCustomColorTheme == nil)
+    }
+
+    @Test("보상 완료·전면 대체면 사용권을 주고 저장한다", arguments: [
+        RewardedAdResult.rewarded, .fallbackFullScreenShown
+    ])
+    func viewModel_whenCreateAdRewarded_grantsLicenseAndSaves(
+        _ result: RewardedAdResult
+    ) async throws {
+        // given
+        let (viewModel, usecase) = self.makeViewModel(canApplyWithoutAd: false, adResult: result)
+        viewModel.enterName("new theme")
+        let before = Date()
+
+        // when
+        viewModel.save()
+        try await self.waitEffect("저장 호출") { usecase.didSaveCustomColorTheme != nil }
+
+        // then
+        let grantedAt = try #require(self.stubGateUsecase.didGrantLicenseAt)
+        let saved = try #require(usecase.didSaveCustomColorTheme)
+        #expect((before...Date()).contains(grantedAt))
+        #expect(saved.name == "new theme")
+        #expect(self.stubGateUsecase.didAskCanApplyWithKey == .custom(saved.uuid))
+    }
+
+    @Test func viewModel_whenCreateAdUnavailable_savesWithoutLicense() async throws {
+        // given
+        let (viewModel, usecase) = self.makeViewModel(canApplyWithoutAd: false, adResult: .unavailable)
+        viewModel.enterName("new theme")
+
+        // when
+        viewModel.save()
+        try await self.waitEffect("저장 호출") { usecase.didSaveCustomColorTheme != nil }
+
+        // then
+        #expect(usecase.didSaveCustomColorTheme?.name == "new theme")
+        #expect(self.stubGateUsecase.didGrantLicenseAt == nil)
+    }
+
+    @Test func viewModel_whenCreateAdDismissedBeforeReward_staysWithoutSaving() async throws {
+        // given
+        let (viewModel, usecase) = self.makeViewModel(
+            canApplyWithoutAd: false, adResult: .dismissedBeforeReward
+        )
+        viewModel.enterName("new theme")
+
+        // when
+        viewModel.save()
+        try await Task.sleep(for: .milliseconds(50))
+
+        // then
+        #expect(self.spyRouter.didShowColorThemeAdGuideWith == .createTheme)
+        #expect(usecase.didSaveCustomColorTheme == nil)
+        #expect(self.stubGateUsecase.didGrantLicenseAt == nil)
+        #expect(self.spyRouter.didClosed == nil)
+    }
+
+    @Test func viewModel_whenCreateGuideShowing_blocksSaveAgain() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModel(canApplyWithoutAd: false)
+        viewModel.enterName("new theme")
+
+        // when
+        viewModel.save()
+        self.spyRouter.didShowColorThemeAdGuideWith = nil
+        viewModel.save()
+        let expect = self.expectConfirm("시트가 떠 있는 동안 저장 불가")
+        let isSavable = try await self.firstOutput(expect, for: viewModel.isSavable)
+
+        // then
+        #expect(isSavable == false)
+        #expect(self.spyRouter.didShowColorThemeAdGuideWith == nil)
+    }
+
+    @Test func viewModel_whenCreateGuideClosedWithoutAd_savableAgainWithoutSaving() async throws {
+        // given
+        let (viewModel, usecase) = self.makeViewModel(canApplyWithoutAd: false)
+        viewModel.enterName("new theme")
+        viewModel.save()
+
+        // when
+        self.spyRouter.didShowColorThemeAdGuideOnFinished?(nil)
+        let expect = self.expectConfirm("시트를 닫으면 다시 저장 가능")
+        let isSavable = try await self.firstOutput(expect, for: viewModel.isSavable)
+        try await Task.sleep(for: .milliseconds(50))
+
+        // then
+        #expect(isSavable == true)
+        #expect(usecase.didSaveCustomColorTheme == nil)
+        #expect(self.stubGateUsecase.didGrantLicenseAt == nil)
+    }
+
+    @Test func viewModel_whenCreateGuideFinishedTwice_handlesFirstResultOnly() async throws {
+        // given
+        let (viewModel, usecase) = self.makeViewModel(canApplyWithoutAd: false)
+        viewModel.enterName("new theme")
+        viewModel.save()
+
+        // when
+        self.spyRouter.didShowColorThemeAdGuideOnFinished?(.unavailable)
+        self.spyRouter.didShowColorThemeAdGuideOnFinished?(.rewarded)
+        try await self.waitEffect("저장 호출") { usecase.didSaveCustomColorTheme != nil }
+        try await Task.sleep(for: .milliseconds(50))
+
+        // then
+        #expect(self.stubGateUsecase.didGrantLicenseAt == nil)
+    }
+
+    @Test func viewModel_whenEditExisting_savesWithoutGuide() async throws {
+        // given
+        let (viewModel, usecase) = self.makeViewModel(
+            original: self.originalTheme, canApplyWithoutAd: false
+        )
+
+        // when
+        viewModel.save()
+        try await self.waitEffect("저장 호출") { usecase.didSaveCustomColorTheme != nil }
+
+        // then
+        #expect(usecase.didSaveCustomColorTheme?.uuid == "original-uuid")
+        #expect(self.spyRouter.didShowColorThemeAdGuideWith == nil)
+    }
+
+    @Test func viewModel_whenAdNotRequired_savesWithoutGuide() async throws {
+        // given
+        let (viewModel, usecase) = self.makeViewModel(canApplyWithoutAd: true)
+        viewModel.enterName("new theme")
+
+        // when
+        viewModel.save()
+        try await self.waitEffect("저장 호출") { usecase.didSaveCustomColorTheme != nil }
+
+        // then
+        #expect(usecase.didSaveCustomColorTheme?.name == "new theme")
+        #expect(self.spyRouter.didShowColorThemeAdGuideWith == nil)
+    }
+
+}
+
+
 // MARK: - doubles
 
 private final class EventLog: @unchecked Sendable {
@@ -515,6 +677,19 @@ private final class SpyRouter: BaseSpyRouter, ColorThemeEditRouting, @unchecked 
     override func showToast(_ message: String) {
         super.showToast(message)
         self.eventLog?.append("toast")
+    }
+
+    var stubAdResult: RewardedAdResult?
+    var didShowColorThemeAdGuideWith: ColorThemeAdGuidePurpose?
+    var didShowColorThemeAdGuideOnFinished: (@Sendable (RewardedAdResult?) -> Void)?
+    func showColorThemeAdGuide(
+        _ purpose: ColorThemeAdGuidePurpose,
+        onFinished: @escaping @Sendable (RewardedAdResult?) -> Void
+    ) {
+        self.didShowColorThemeAdGuideWith = purpose
+        self.didShowColorThemeAdGuideOnFinished = onFinished
+        guard let result = self.stubAdResult else { return }
+        onFinished(result)
     }
 }
 

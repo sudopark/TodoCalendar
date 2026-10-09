@@ -373,6 +373,30 @@ final class SettingSceneSnapshots: XCTestCase {
         }
     }
 
+    // MARK: - Setting/Appearance/ColorTheme/AdGuide/ColorThemeAdGuideView
+
+    @MainActor
+    func test_colorThemeAdGuide_apply() {
+        captureSnapshotPair(named: "colorThemeAdGuide_apply", layout: .fullScreen) { theme in
+            let appearance = self.makeAppearance(theme)
+            return ZStack {
+                appearance.colorSet.bg1.asColor.ignoresSafeArea()
+                ColorThemeAdGuideView(purpose: .applyTheme, licenseDays: 7, appearance: appearance)
+            }
+        }
+    }
+
+    @MainActor
+    func test_colorThemeAdGuide_create() {
+        captureSnapshotPair(named: "colorThemeAdGuide_create", layout: .fullScreen) { theme in
+            let appearance = self.makeAppearance(theme)
+            return ZStack {
+                appearance.colorSet.bg1.asColor.ignoresSafeArea()
+                ColorThemeAdGuideView(purpose: .createTheme, licenseDays: 7, appearance: appearance)
+            }
+        }
+    }
+
     // MARK: - Setting/Appearance/AppearanceSettingView (covers CalendarAppearancePreviewView, EventOnCalendarView, EventListAppearanceSettingView)
 
     @MainActor
