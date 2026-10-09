@@ -195,6 +195,7 @@ struct AppEnvironment {
         let banner: String
         let mediumRectangle: String
         let fullScreen: String
+        let rewarded: String
     }
 
     static var admobUnitIds: AdUnitIds {
@@ -203,7 +204,8 @@ struct AppEnvironment {
         return AdUnitIds(
             banner: banner,
             mediumRectangle: banner,
-            fullScreen: "ca-app-pub-4980913859277199/7394166018"
+            fullScreen: "ca-app-pub-4980913859277199/7394166018",
+            rewarded: "ca-app-pub-4980913859277199/9681720291"
         )
     }
     

@@ -171,7 +171,8 @@ final class ApplicationBase {
         }
         return GoogleMobileAdsServiceImple(
             testDeviceIdentifiers: AppEnvironment.admobTestDeviceIdentifiers,
-            fullScreenAdUnitId: AppEnvironment.admobUnitIds.fullScreen
+            fullScreenAdUnitId: AppEnvironment.admobUnitIds.fullScreen,
+            rewardedAdUnitId: AppEnvironment.admobUnitIds.rewarded
         )
     }()
 }
@@ -287,6 +288,10 @@ private final class DummyMobileAdService: MobileAdService, PrivacyOptionsFormRou
     func preloadFullScreenAd() async { }
 
     func takePreloadedFullScreenAd() -> InterstitialAd? { nil }
+
+    func preloadRewardedAd() async { }
+
+    func takeRewardedAd(waitingUpTo timeout: TimeInterval) async -> RewardedAd? { nil }
 
     @MainActor
     func isPrivacyOptionsRequired() -> Bool { false }
