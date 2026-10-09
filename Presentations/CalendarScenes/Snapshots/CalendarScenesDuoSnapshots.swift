@@ -46,6 +46,17 @@ final class CalendarScenesDuoSnapshots: XCTestCase {
     }
 
     @MainActor
+    func test_duoCover_sharePreview_imageFormat_dayList_trailingSafeArea() {
+        let duoCoverSystemColumnWidth: CGFloat = 60
+        captureSnapshotPair(named: "duoCover_sharePreview_imageFormat_dayList_trailingSafeArea", layout: .duoCover) { theme in
+            self.makeSharePreviewImageDayListView(theme)
+                .safeAreaInset(edge: .trailing, spacing: 0) {
+                    Color.clear.frame(width: duoCoverSystemColumnWidth)
+                }
+        }
+    }
+
+    @MainActor
     func test_duoInner_sharePreview_imageFormat_dayList() {
         captureSnapshotPair(named: "duoInner_sharePreview_imageFormat_dayList", layout: .duoInner) { theme in
             self.makeSharePreviewImageDayListView(theme)
