@@ -71,11 +71,14 @@ final class EventDetailSceneSnapshots: XCTestCase {
     }
 
     @MainActor
-    private func makeEventDetailView(_ appearance: ViewAppearance) -> some View {
+    private func makeEventDetailView(
+        _ appearance: ViewAppearance,
+        selectedTime: SelectedTime? = nil
+    ) -> some View {
         let state = EventDetailViewState()
         state.eventDetailTypeModel = .makeCase(true)
         state.selectedTag = .init(.default, "default", "#ff00ff")
-        state.selectedTime = .period(
+        state.selectedTime = selectedTime ?? .period(
             .init(self.start, .current), .init(self.end, .current)
         )
         state.selectedRepeat = "some repeat"
@@ -84,6 +87,18 @@ final class EventDetailSceneSnapshots: XCTestCase {
             .environment(state)
             .environment(EventDetailViewEventHandlers())
             .environment(appearance)
+    }
+
+    @MainActor
+    func test_eventDetail_narrowWidth() {
+        let twoDigitMonthStart: TimeInterval = 1_791_162_000
+        let twoDigitMonthEnd: TimeInterval = 1_791_165_600
+        captureSnapshotPair(named: "eventDetail_narrowWidth", layout: .fixed(width: 370, height: 844)) { theme in
+            self.makeEventDetailView(
+                self.makeAppearance(theme),
+                selectedTime: .period(.init(twoDigitMonthStart, .current), .init(twoDigitMonthEnd, .current))
+            )
+        }
     }
 
     @MainActor
