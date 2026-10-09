@@ -23,17 +23,20 @@ class ColorThemeSelectViewModelImpleTests: BaseTestCase, PublisherWaitable {
     var cancelBag: Set<AnyCancellable>!
     private var spyRouter: SpyRouter!
     private var spyUISettingUsecase: StubUISettingUsecase!
+    private var stubGateUsecase: StubColorThemePaidFeatureGateUsecase!
     
     override func setUpWithError() throws {
         self.cancelBag = .init()
         self.spyUISettingUsecase = .init()
         self.spyRouter = .init()
+        self.stubGateUsecase = .init()
     }
     
     override func tearDownWithError() throws {
         self.cancelBag = nil
         self.spyUISettingUsecase = nil
         self.spyRouter = nil
+        self.stubGateUsecase = nil
     }
     
     private func makeCustomTheme(_ uuid: String, name: String? = nil) -> CustomColorTheme {
@@ -45,15 +48,20 @@ class ColorThemeSelectViewModelImpleTests: BaseTestCase, PublisherWaitable {
     }
     
     private func makeViewModel(
-        customThemes: [CustomColorTheme] = []
+        customThemes: [CustomColorTheme] = [],
+        canApplyWithoutAd: Bool = true,
+        adResult: RewardedAdResult? = nil
     ) -> ColorThemeSelectViewModelImple {
         self.spyUISettingUsecase.stubCustomColorThemes = customThemes
+        self.stubGateUsecase.canApplyWithoutAd = canApplyWithoutAd
+        self.spyRouter.stubAdResult = adResult
         let calendarSettingUsecase = StubCalendarSettingUsecase()
         calendarSettingUsecase.prepare()
         _ = self.spyUISettingUsecase.loadSavedAppearanceSetting()
         let viewModel = ColorThemeSelectViewModelImple(
             calendarSettingUsecase: calendarSettingUsecase,
-            uiSettingUsecase: self.spyUISettingUsecase
+            uiSettingUsecase: self.spyUISettingUsecase,
+            paidFeatureGateUsecase: self.stubGateUsecase
         )
         viewModel.router = self.spyRouter
         return viewModel
@@ -346,6 +354,144 @@ extension ColorThemeSelectViewModelImpleTests {
 }
 
 
+// MARK: - 유료 테마를 걸 때 광고
+
+extension ColorThemeSelectViewModelImpleTests {
+    
+    private var paidTheme: ColorThemeModel { .init(.appTheme(.tomato)) }
+    
+    private var appliedColorSetKey: ColorSetKeys? {
+        return self.spyUISettingUsecase.didChangeAppearanceSetting?.calendar.colorSetKey
+    }
+    
+    func testViewModel_whenGateAllowsWithoutAd_appliesWithoutGuide() {
+        // given
+        let viewModel = self.makeViewModel(canApplyWithoutAd: true)
+        
+        // when
+        viewModel.selectTheme(self.paidTheme)
+        
+        // then
+        XCTAssertEqual(self.appliedColorSetKey, .appTheme(.tomato))
+        XCTAssertNil(self.spyRouter.didShowColorThemeAdGuideWith)
+    }
+    
+    func testViewModel_whenPaidThemeWithoutLicense_showsApplyGuide() {
+        // given
+        let viewModel = self.makeViewModel(canApplyWithoutAd: false)
+        
+        // when
+        viewModel.selectTheme(self.paidTheme)
+        
+        // then
+        XCTAssertEqual(self.spyRouter.didShowColorThemeAdGuideWith, .applyTheme)
+        XCTAssertNil(self.spyUISettingUsecase.didChangeAppearanceSetting)
+    }
+    
+    func testViewModel_whenApplyAdRewarded_grantsLicenseAndApplies() {
+        [RewardedAdResult.rewarded, .fallbackFullScreenShown].forEach { result in
+            // given
+            self.spyUISettingUsecase = .init()
+            self.stubGateUsecase = .init()
+            let viewModel = self.makeViewModel(canApplyWithoutAd: false, adResult: result)
+            let before = Date()
+            
+            // when
+            viewModel.selectTheme(self.paidTheme)
+            
+            // then
+            let grantedAt = self.stubGateUsecase.didGrantLicenseAt
+            XCTAssertEqual(grantedAt.map { (before...Date()).contains($0) }, true, "\(result)")
+            XCTAssertEqual(self.appliedColorSetKey, .appTheme(.tomato), "\(result)")
+        }
+    }
+    
+    func testViewModel_whenApplyAdUnavailable_appliesWithoutLicense() {
+        // given
+        let viewModel = self.makeViewModel(canApplyWithoutAd: false, adResult: .unavailable)
+        
+        // when
+        viewModel.selectTheme(self.paidTheme)
+        
+        // then
+        XCTAssertEqual(self.appliedColorSetKey, .appTheme(.tomato))
+        XCTAssertNil(self.stubGateUsecase.didGrantLicenseAt)
+    }
+    
+    func testViewModel_whenApplyAdDismissedBeforeReward_doesNotApply() {
+        // given
+        let viewModel = self.makeViewModel(canApplyWithoutAd: false, adResult: .dismissedBeforeReward)
+        
+        // when
+        viewModel.selectTheme(self.paidTheme)
+        
+        // then
+        XCTAssertEqual(self.spyRouter.didShowColorThemeAdGuideWith, .applyTheme)
+        XCTAssertNil(self.spyUISettingUsecase.didChangeAppearanceSetting)
+        XCTAssertNil(self.stubGateUsecase.didGrantLicenseAt)
+    }
+    
+    func testViewModel_whenApplyGuideShowing_ignoresOtherSelection() {
+        // given
+        let viewModel = self.makeViewModel(canApplyWithoutAd: false)
+        viewModel.selectTheme(self.paidTheme)
+        
+        // when
+        viewModel.selectTheme(.init(.appTheme(.ruby)))
+        
+        // then
+        XCTAssertNil(self.spyUISettingUsecase.didChangeAppearanceSetting)
+        XCTAssertEqual(self.spyRouter.didShowColorThemeAdGuideWith, .applyTheme)
+        self.spyRouter.didShowColorThemeAdGuideWith = nil
+        viewModel.selectTheme(self.paidTheme)
+        XCTAssertNil(self.spyRouter.didShowColorThemeAdGuideWith)
+    }
+    
+    func testViewModel_whenApplyGuideClosedWithoutAd_allowsSelectionAgain() {
+        // given
+        let viewModel = self.makeViewModel(canApplyWithoutAd: false)
+        viewModel.selectTheme(self.paidTheme)
+        self.spyRouter.didShowColorThemeAdGuideOnFinished?(nil)
+        self.spyRouter.didShowColorThemeAdGuideWith = nil
+        
+        // when
+        viewModel.selectTheme(self.paidTheme)
+        
+        // then
+        XCTAssertEqual(self.spyRouter.didShowColorThemeAdGuideWith, .applyTheme)
+        XCTAssertNil(self.spyUISettingUsecase.didChangeAppearanceSetting)
+        XCTAssertNil(self.stubGateUsecase.didGrantLicenseAt)
+    }
+    
+    func testViewModel_whenApplyGuideFinishedTwice_handlesFirstResultOnly() {
+        // given
+        let viewModel = self.makeViewModel(canApplyWithoutAd: false)
+        viewModel.selectTheme(self.paidTheme)
+        
+        // when
+        self.spyRouter.didShowColorThemeAdGuideOnFinished?(.unavailable)
+        self.spyRouter.didShowColorThemeAdGuideOnFinished?(.rewarded)
+        
+        // then
+        XCTAssertEqual(self.appliedColorSetKey, .appTheme(.tomato))
+        XCTAssertNil(self.stubGateUsecase.didGrantLicenseAt)
+    }
+    
+    func testViewModel_whenNewThemeSaved_appliesWithoutGuide() {
+        // given
+        let newTheme = self.makeCustomTheme("new")
+        let viewModel = self.makeViewModel(canApplyWithoutAd: false)
+        
+        // when
+        viewModel.customColorTheme(saved: newTheme)
+        
+        // then
+        XCTAssertEqual(self.spyUISettingUsecase.didSelectCustomColorTheme, newTheme)
+        XCTAssertNil(self.spyRouter.didShowColorThemeAdGuideWith)
+    }
+}
+
+
 private final class SpyRouter: BaseSpyRouter, ColorThemeSelectRouting, @unchecked Sendable {
     
     var didRouteToEditCustomTheme: Bool?
@@ -358,5 +504,18 @@ private final class SpyRouter: BaseSpyRouter, ColorThemeSelectRouting, @unchecke
         self.didRouteToEditCustomTheme = true
         self.didRouteToEditCustomThemeOriginal = original
         self.didRouteToEditCustomThemeListener = listener
+    }
+
+    var stubAdResult: RewardedAdResult?
+    var didShowColorThemeAdGuideWith: ColorThemeAdGuidePurpose?
+    var didShowColorThemeAdGuideOnFinished: (@Sendable (RewardedAdResult?) -> Void)?
+    func showColorThemeAdGuide(
+        _ purpose: ColorThemeAdGuidePurpose,
+        onFinished: @escaping @Sendable (RewardedAdResult?) -> Void
+    ) {
+        self.didShowColorThemeAdGuideWith = purpose
+        self.didShowColorThemeAdGuideOnFinished = onFinished
+        guard let result = self.stubAdResult else { return }
+        onFinished(result)
     }
 }

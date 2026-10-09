@@ -516,7 +516,8 @@ extension ApplicationRootRouter {
             memberSceneBuilder: self.memberSceneBuilder(),
             paywallSceneBuilder: self.paywallSceneBuilder(),
             widgetGallerySceneBuilder: self.widgetGallerySceneBuilder(),
-            privacyOptionsFormRouter: self.applicationBase.mobileAdService
+            privacyOptionsFormRouter: self.applicationBase.mobileAdService,
+            rewardedAdRouter: self.rewardedAdRouter()
         )
     }
 
