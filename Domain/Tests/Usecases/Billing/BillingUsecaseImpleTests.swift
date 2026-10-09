@@ -18,6 +18,8 @@ import UnitTestHelpKit
 
 final class BillingUsecaseImpleTests: PublisherWaitable {
 
+    private let stubPlanRepository = StubBillingUserPlanRepository()
+
     var cancelBag: Set<AnyCancellable>! = .init()
 
     private func makeUsecase(
@@ -48,10 +50,14 @@ final class BillingUsecaseImpleTests: PublisherWaitable {
             unfinished: unfinished,
             restored: restored
         )
+        let sharedDataStore = SharedDataStore()
         let usecase = BillingUsecaseImple(
             repository: repository,
             appStoreService: service,
-            sharedDataStore: SharedDataStore()
+            planStore: BillingUserPlanStoreImple(
+                sharedDataStore: sharedDataStore, repository: self.stubPlanRepository
+            ),
+            sharedDataStore: sharedDataStore
         )
         return (usecase, repository, service)
     }
@@ -229,6 +235,7 @@ extension BillingUsecaseImpleTests {
         // then: 토큰 확보를 위한 조회분(45600) 뒤에 구매 반영분이 온다
         #expect(plans.last?.planId == .standard)
         #expect(plans.last?.topupRemaining == 12300)
+        #expect(self.stubPlanRepository.didUpdatedPlan?.topupRemaining == 12300)
     }
 
     @Test func usecase_purchase_whenServerReflectFails_throwsReflectFailure() async throws {
@@ -302,6 +309,16 @@ extension BillingUsecaseImpleTests {
         // then
         #expect(plan.planId == .standard)
         #expect(plan.topupRemaining == 45600)
+    }
+
+    @Test("재조회한 플랜이 창구를 거쳐 영속에 남는다")
+    func usecase_whenRefreshUserPlan_persistsPlan() async throws {
+        // given
+        let (usecase, _, _) = self.makeUsecase()
+        // when
+        _ = try await usecase.refreshUserPlan()
+        // then
+        #expect(self.stubPlanRepository.didUpdatedPlan?.planId == .standard)
     }
 
     // 조회 실패는 결제와 무관하다 — 감싸면 "결제는 완료됐다" 로 오분류된다
@@ -452,6 +469,9 @@ extension BillingUsecaseImpleTests {
         let usecase = BillingUsecaseImple(
             repository: StubBillingRepository(),
             appStoreService: StubAppStoreBillingService(),
+            planStore: BillingUserPlanStoreImple(
+                sharedDataStore: store, repository: self.stubPlanRepository
+            ),
             sharedDataStore: store
         )
         // when
@@ -485,6 +505,7 @@ extension BillingUsecaseImpleTests {
         #expect(repository.didPostedTransactionUpdates == ["jws:renewal"])
         #expect(repository.didPostedSignedTransactions == [])
         #expect(service.didFinishedTransactionIds == ["tx:renewal"])
+        #expect(self.stubPlanRepository.didUpdatedPlan?.topupRemaining == 12300)
     }
 
     // 복구는 이 루틴에서 떨어져 나갔다 — startObserving 만으로는 미완료 건이 안 올라간다

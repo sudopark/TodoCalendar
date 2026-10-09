@@ -55,7 +55,13 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
         self.appUpdateCheckUsecase = appUpdateCheckUsecase
         self.eventSyncUsecase = NotNeedEventSyncUsecase()
         self.applicationBase = applicationBase
-        let billingUsecase = NotNeedBillingUsecase(sharedDataStore: applicationBase.sharedDataStore)
+        let planStore = BillingUserPlanStoreImple(
+            sharedDataStore: applicationBase.sharedDataStore,
+            repository: BillingUserPlanLocalRepositoryImple(
+                sqliteService: applicationBase.commonSqliteService
+            )
+        )
+        let billingUsecase = NotNeedBillingUsecase(planStore: planStore)
         self.billingUsecase = billingUsecase
         self.aiAgentOrchestrationUsecase = NotNeedAIAgentOrchestrationUsecase()
 

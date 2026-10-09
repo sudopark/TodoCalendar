@@ -19,6 +19,8 @@ import UnitTestHelpKit
 
 final class AIAgentUsageUsecaseImpleTests: PublisherWaitable {
 
+    private let stubPlanRepository = StubBillingUserPlanRepository()
+
     var cancelBag: Set<AnyCancellable>! = []
 
     private func makeUsecase(
@@ -36,11 +38,16 @@ final class AIAgentUsageUsecaseImpleTests: PublisherWaitable {
                 .success(.init(input: $0, output: $0, limit: $0))
             }
         }
+        let sharedDataStore = SharedDataStore()
         return AIAgentUsageUsecaseImple(
             repository: repository,
-            sharedDataStore: .init()
+            planStore: BillingUserPlanStoreImple(
+                sharedDataStore: sharedDataStore, repository: self.stubPlanRepository
+            ),
+            sharedDataStore: sharedDataStore
         )
     }
+
 }
 
 
@@ -149,7 +156,11 @@ extension AIAgentUsageUsecaseImpleTests {
         repository.stubResults = [.success(.init(input: 1, output: 1, limit: 1))]
         repository.stubUserPlan = responseUserPlan.map { BillingUserPlan() |> \.planId .~ $0 }
         let usecase = AIAgentUsageUsecaseImple(
-            repository: repository, sharedDataStore: sharedDataStore
+            repository: repository,
+            planStore: BillingUserPlanStoreImple(
+                sharedDataStore: sharedDataStore, repository: self.stubPlanRepository
+            ),
+            sharedDataStore: sharedDataStore
         )
         return (usecase, sharedDataStore)
     }
@@ -169,6 +180,7 @@ extension AIAgentUsageUsecaseImpleTests {
 
         // then
         #expect(self.seededPlanId(store) == .standard)
+        #expect(self.stubPlanRepository.didUpdatedPlan?.planId == .standard)
     }
 
     // userPlan 이 nil 인 응답을 그대로 덮어쓰면, 방금 구매로 갱신된 최신 플랜이 다음 usage
@@ -182,6 +194,7 @@ extension AIAgentUsageUsecaseImpleTests {
 
         // then
         #expect(self.seededPlanId(store) == .lifetime)
+        #expect(self.stubPlanRepository.didUpdatedPlan == nil)
     }
 }
 
@@ -203,6 +216,9 @@ extension AIAgentUsageUsecaseImpleTests {
         }
         return AIAgentUsageUsecaseImple(
             repository: PrivateStubRepository(),
+            planStore: BillingUserPlanStoreImple(
+                sharedDataStore: store, repository: self.stubPlanRepository
+            ),
             sharedDataStore: store
         )
     }
