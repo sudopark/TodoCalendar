@@ -49,6 +49,7 @@ graph TD
         AppearanceSetting[AppearanceSetting]
         ColorTheme[ColorThemeSelect]
         ColorThemeEdit[ColorThemeEdit]
+        ColorThemeAdGuide[ColorThemeAdGuide]
         WidgetAppearance[WidgetAppearanceSetting]
         TimeZoneSelect[TimeZoneSelect]
         EventSetting[EventSetting]
@@ -133,6 +134,8 @@ graph TD
 
     AppearanceSetting --> ColorTheme
     ColorTheme --> ColorThemeEdit
+    ColorTheme -.-> ColorThemeAdGuide
+    ColorThemeEdit -.-> ColorThemeAdGuide
     AppearanceSetting --> WidgetAppearance
     AppearanceSetting --> TimeZoneSelect
 
