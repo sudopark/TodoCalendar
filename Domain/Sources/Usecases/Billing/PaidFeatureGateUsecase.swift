@@ -9,10 +9,14 @@
 import Foundation
 
 
-public protocol PaidFeatureGateUsecase: Sendable {
+public protocol ColorThemePaidFeatureGateUsecase: Sendable {
 
     func canApplyColorThemeWithoutAd(_ key: ColorSetKeys, at now: Date) -> Bool
     func grantColorThemeLicense(at now: Date)
+}
+
+
+public protocol WidgetStylePaidFeatureGateUsecase: Sendable {
 
     func canCreateCustomWidgetStyleWithoutAd(at now: Date) -> Bool
     func canRenderCustomWidgetStyle(at now: Date) -> Bool
@@ -20,13 +24,13 @@ public protocol PaidFeatureGateUsecase: Sendable {
 }
 
 
-public final class PaidFeatureGateUsecaseImple: PaidFeatureGateUsecase, Sendable {
+public final class PaidFeatureGateUsecaseImple: Sendable {
 
     private enum Constant {
         static let secondsPerDay: TimeInterval = 24 * 3600
     }
 
-    private let billingUsecase: any BillingUsecase
+    private let planSource: any BillingUserPlanSource
     private let licenseRepository: any ColorThemeLicenseRepository
     private let widgetStyleLicenseRepository: any WidgetStyleLicenseRepository
     private let policyRepository: any AppPolicyRepository
@@ -34,13 +38,13 @@ public final class PaidFeatureGateUsecaseImple: PaidFeatureGateUsecase, Sendable
     private let freeThemeKeys: [ColorSetKeys] = [.systemTheme, .defaultLight, .defaultDark]
 
     public init(
-        billingUsecase: any BillingUsecase,
+        planSource: any BillingUserPlanSource,
         licenseRepository: any ColorThemeLicenseRepository,
         widgetStyleLicenseRepository: any WidgetStyleLicenseRepository,
         policyRepository: any AppPolicyRepository,
         defaultPolicy: AppPolicy
     ) {
-        self.billingUsecase = billingUsecase
+        self.planSource = planSource
         self.licenseRepository = licenseRepository
         self.widgetStyleLicenseRepository = widgetStyleLicenseRepository
         self.policyRepository = policyRepository
@@ -51,11 +55,11 @@ public final class PaidFeatureGateUsecaseImple: PaidFeatureGateUsecase, Sendable
 
 // MARK: - 컬러 테마
 
-extension PaidFeatureGateUsecaseImple {
+extension PaidFeatureGateUsecaseImple: ColorThemePaidFeatureGateUsecase {
 
     public func canApplyColorThemeWithoutAd(_ key: ColorSetKeys, at now: Date) -> Bool {
         guard self.freeThemeKeys.contains(key) == false,
-              self.billingUsecase.latestUserPlan()?.isPaid == false,
+              self.planSource.latestUserPlan()?.isPaid == false,
               let policy = self.resolveColorThemeLicensePolicy(),
               policy.isEnabled,
               policy.licenseDays > 0
@@ -93,16 +97,16 @@ extension PaidFeatureGateUsecaseImple {
 
 // MARK: - 위젯 커스텀 스타일
 
-extension PaidFeatureGateUsecaseImple {
+extension PaidFeatureGateUsecaseImple: WidgetStylePaidFeatureGateUsecase {
 
     public func canCreateCustomWidgetStyleWithoutAd(at now: Date) -> Bool {
-        guard let plan = self.billingUsecase.latestUserPlan()
+        guard let plan = self.planSource.latestUserPlan()
         else { return self.isWidgetStyleLicenseGateDisabled() }
         return self.canUseCustomWidgetStyle(isPaid: plan.isPaid, at: now)
     }
 
     public func canRenderCustomWidgetStyle(at now: Date) -> Bool {
-        guard let plan = self.billingUsecase.latestUserPlan() else { return true }
+        guard let plan = self.planSource.latestUserPlan() else { return true }
         return self.canUseCustomWidgetStyle(isPaid: plan.isPaid, at: now)
     }
 

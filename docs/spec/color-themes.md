@@ -288,7 +288,7 @@ Radix 스케일은 12단계이고 단계마다 쓰임이 정해져 있다 — 1 
 
 ## 4. 사용권
 
-무료 유저가 유료 테마를 쓰는 권리다. 판단은 `PaidFeatureGateUsecase`(`Domain/Sources/Usecases/Billing/PaidFeatureGateUsecase.swift`)의 컬러 테마 요건 메서드에서 내리고, 선택 화면·생성 저장·앱 시작 게이트는 이 답만 읽는다. 사용권은 전체 테마에 하나다 (#1197).
+무료 유저가 유료 테마를 쓰는 권리다. 판단은 `ColorThemePaidFeatureGateUsecase`(`Domain/Sources/Usecases/Billing/PaidFeatureGateUsecase.swift`)의 요건 메서드에서 내리고, 선택 화면·생성 저장·앱 시작 게이트는 이 답만 읽는다. 사용권은 전체 테마에 하나다 (#1197).
 
 무료 테마는 `.systemTheme`·`.defaultLight`·`.defaultDark` 다. `.appTheme(_)` 와 커스텀 테마는 유료 테마다.
 
@@ -303,7 +303,7 @@ Radix 스케일은 12단계이고 단계마다 쓰임이 정해져 있다 — 1 
 - **보류**는 둘 중 하나다. plan 을 아직 못 받았거나(`latestUserPlan() == nil`), 앱이 모르는 plan 이라 `isPaid == nil` 이다. 보류에는 광고도 게이트도 요구하지 않는다. 정책을 받지 못한 상태는 보류가 아니다. 기본 정책으로 판정한다.
 - 정책의 `enabled` 가 `false` 이면 게이트를 끈 것이라 허용한다.
 - 소비자는 `canApplyColorThemeWithoutAd` 가 `false` 일 때 광고를 띄운다. 별도 게이트 판정 메서드는 없다. 유료 → 무료로 돌아와도 별도 상태 없이 기록된 부여 시각으로만 판정하므로, 남은 기간이 있으면 그대로 유효하다.
-- 테마 생성 광고 판정도 `PaidFeatureGateUsecase` 에 요건 메서드로 더한다. 기능 enum 같은 일반화는 하지 않는다.
+- 테마 생성 광고 판정도 `ColorThemePaidFeatureGateUsecase` 에 요건 메서드로 더한다. 기능 enum 같은 일반화는 하지 않는다.
 
 ### 만료 기산
 
@@ -311,7 +311,7 @@ Radix 스케일은 12단계이고 단계마다 쓰임이 정해져 있다 — 1 
 
 ### 기본값과 속성별 폴백
 
-기본 정책(게이트 켜짐·7일)은 앱이 정의해 `PaidFeatureGateUsecase` 에 주입한다(`AppEnvironment.defaultAppPolicy`). 번들 파일로 들고 있지 않다. 원격 정책(`app-policy.json` 의 `color_theme_license`, 스키마는 `infrastructure.md` §9)에서 판단할 수 없는 속성만 기본값을 쓴다. `enabled` 와 `license_days` 를 각각 본다.
+기본 정책(게이트 켜짐·7일)은 앱이 정의해 `PaidFeatureGateUsecaseImple` 에 주입한다(`AppEnvironment.defaultAppPolicy`). 번들 파일로 들고 있지 않다. 원격 정책(`app-policy.json` 의 `color_theme_license`, 스키마는 `infrastructure.md` §9)에서 판단할 수 없는 속성만 기본값을 쓴다. `enabled` 와 `license_days` 를 각각 본다.
 
 | 원격 정책 상태 | enabled | license_days |
 |---|---|---|

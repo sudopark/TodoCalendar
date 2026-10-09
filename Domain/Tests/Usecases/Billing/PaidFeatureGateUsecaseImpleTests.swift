@@ -54,7 +54,7 @@ final class PaidFeatureGateUsecaseImpleTests {
             license: widgetGrantedDaysFromNow.map { .init(grantedAt: self.date(daysFromNow: $0)) }
         )
         return PaidFeatureGateUsecaseImple(
-            billingUsecase: StubBillingUsecase(stubUserPlan: plan),
+            planSource: StubBillingUserPlanSource(plan: plan),
             licenseRepository: self.stubLicenseRepository,
             widgetStyleLicenseRepository: self.stubWidgetLicenseRepository,
             policyRepository: StubAppPolicyRepository(policy: policy),
