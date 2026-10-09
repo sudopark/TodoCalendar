@@ -35,6 +35,8 @@
   - 발동한 스킬의 절차가 끝나면: `python3 .claude/hooks/log-record.py skill_end --name <스킬> --compliance full|partial [--deviation "조항::사유" --deviation-reviewed]` — 조항을 의도적으로 이행 안 했으면 partial + 이탈 조항·사유 필수.
   - **partial은 조항이 허용하지 않은 이탈에만 쓴다.** 조항이 조건부 생략·갈음·대체 경로를 규정하고 그 조건을 충족해 그 경로를 탔으면 **full**이다 — 규정된 선택지를 고른 것은 이행이지 이탈이 아니다. 판정 기준은 규범 판단이 아니라 "그 조항이 이 생략을 문언으로 규정하고 있나"라는 사실 확인이다. 허용된 생략까지 partial로 세면 지표가 오염돼 진짜 이탈이 묻힌다. 그래서 `--deviation-reviewed` 없는 partial은 스크립트가 이 기준을 stderr로 되돌려주며 거부한다 — 재판정해 full이면 `--compliance full`로, 진짜 이탈이면 플래그를 붙여 다시 호출한다.
   - 유저가 작업 결과·방식을 교정하면 그 자리에서: `python3 .claude/hooks/log-record.py correction --skills <귀속 스킬(쉼표 구분)> --summary "교정 요지" --gist "발화 요지"`. **귀속은 발동 중이던 스킬이 아니라 교정 대상의 소관으로 정한다** — 그 사안을 다루는 조항이 그 스킬에 **실제로 있을 때만** `--skills`에 넣고(규범 판단이 아니라 조항 존재라는 사실 확인), 응답 톤·글쓰기처럼 전역 규칙(CLAUDE.md) 소관인 교정은 `--skills` 생략. 발동 중이라는 이유로 붙이면 스킬 신호가 오염돼 엉뚱한 조항이 정비 대상으로 올라온다.
+- **조항은 적용 범위 문언까지 읽는다.** 조항이 덮는 사안에서 다르게 처리하고 싶으면, "내 처리가 더 옳은가"가 아니라 "조항이 이 케이스를 문언으로 규정하나"를 확인한다. 규정하고 있으면 자체 판정하지 말고 근거와 함께 반문한다. "이 케이스는 성격이 다르다"는 생각이 그 신호다 — 조항이 예외를 두지 않았으면 예외는 만드는 게 아니다. 서브에이전트 브리프에도 재해석본이 아니라 원문을 싣는다.
+- **워크트리 경로(`TodoCalendar_worktrees/...`)로 파일을 받으면 매번 어느 워크트리에 반영할지 먼저 묻는다.** 경로 그대로 그 워크트리를 고칠지, 지금 세션의 같은 파일을 고칠지 추측하지 않는다 — 다른 세션이 작업 중인 워크트리를 건드리면 그 작업과 충돌한다.
 - **`.claude/rules/*.md`는 path 매칭 시 자동 로드** — 로드된 조항을 구현 결정 시점에 적극 invoke.
 - **외운 지식 말고 이 문서를 보고 판단할 것.** (도메인 경계·용어는 [`docs/domain-context-map.md`](docs/domain-context-map.md) 정본 기준)
 
@@ -100,6 +102,8 @@ tuist generate --no-open      # 파일 추가/삭제 후 재실행 필수
 | 하위 세션이 유저에게 낼 보고·커밋 메시지·PR 본문 초안 검수 | report-review 스킬 |
 
 > 테스트 작성 원칙: [`.claude/rules/testability.md`](.claude/rules/testability.md) (path 매칭 자동 로드)
+
+> `docs/` 의 큰 문서(기획서·스펙)는 메인 파일을 개요로 두고 상세는 하위 md 로 떼어 링크한다 (`docs/spec/*` 처럼).
 
 > 서비스 이용 가이드(`sudopark/TodoCalendar-Terms` `guide/`) 번역·수정은 [`.claude/rules/localization.md`](.claude/rules/localization.md) §1 소관. 원고가 다른 레포라 path 매칭에 안 걸리니 그 작업을 시작할 땐 여기서 찾아 연다.
 

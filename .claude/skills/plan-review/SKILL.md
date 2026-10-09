@@ -77,6 +77,8 @@ description: Use when a planning document written by another session — strateg
 
 **통과 뒤에 유저 승인으로 간다.** 승인은 작성 세션이 유저에게 직접 받는다.
 
+결과를 보낸 뒤 유저에게는 그 건의 결론과 유저가 새로 할 일만 한두 줄로 알린다. 남은 일 전체 목록은 유저가 물을 때만 낸다 (report-review §3 과 같다).
+
 ## 5. 종료 기록 — skill_end
 
 한 문서의 리뷰가 통과로 끝나거나 요청자가 리뷰를 거둬들이면 `python3 .claude/hooks/log-record.py skill_end --name plan-review` (명령·compliance 규칙은 CLAUDE.md §1). 수정 요청 → 재리뷰 라운드는 같은 런이다 — 통과 시점에 한 번 기록한다.
