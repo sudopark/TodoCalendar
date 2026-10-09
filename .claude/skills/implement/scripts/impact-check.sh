@@ -187,3 +187,27 @@ if [ ${#warns[@]} -eq 0 ]; then
 else
   printf '%s\n' "${warns[@]}"
 fi
+
+# ---- 테스트 고정 sleep (testability §9) ----
+# §9 는 "안 일어남" 단언·정착 대기에만 sleep 을 허용한다. 줄만 보고는 그 판별이 안 돼 경고만 낸다.
+echo "## 테스트 대기"
+sleepHits=()
+if [ "$MODE" = "git" ]; then
+  # rename 은 old 경로를 pathspec 에 같이 넣어야 git 이 쌍으로 보고 추가 줄을 0 으로 센다
+  while IFS=$'\t' read -r status firstPath secondPath; do
+    testFile=${secondPath:-$firstPath}
+    case "$status" in D*) continue ;; esac
+    printf '%s' "$testFile" | grep -qE '/Tests/.*\.swift$' || continue
+    if git ls-files --error-unmatch "$testFile" >/dev/null 2>&1; then
+      addedSleeps=$(git diff -M "$BASE" -- "$firstPath" "$testFile" 2>/dev/null | grep -E '^\+' | grep -cE 'Task\.sleep|usleep\(|asyncAfter')
+    else
+      addedSleeps=$(grep -cE 'Task\.sleep|usleep\(|asyncAfter' "$testFile" 2>/dev/null)
+    fi
+    [ "${addedSleeps:-0}" -gt 0 ] && sleepHits+=("- ⚠️ ${testFile} — 고정 대기 ${addedSleeps}건 추가. 각각이 \"안 일어남\" 단언이나 50ms 정착 대기인지 확인하고, 효과 도착을 기다리는 자리면 waitEffect 로 바꾼다")
+  done < <(printf '%s\n' "$CHANGES" | sort -u)
+fi
+if [ ${#sleepHits[@]} -eq 0 ]; then
+  echo "(해당 없음)"
+else
+  printf '%s\n' "${sleepHits[@]}"
+fi

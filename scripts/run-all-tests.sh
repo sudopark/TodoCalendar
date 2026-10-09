@@ -60,12 +60,15 @@ echo " Destination: ${DESTINATION}"
 echo "========================================"
 echo ""
 
+# xcpretty 는 컴파일 경고의 `warning:` 줄을 지워서, 경고 확인은 이 raw 로그로 한다
+RAW_LOG_DIR=$(mktemp -d)
+
 for scheme in "${SCHEMES[@]}"; do
   echo "----------------------------------------"
   echo " [$((${#PASSED[@]} + ${#FAILED[@]} + 1))/${TOTAL}] Testing: ${scheme}"
   echo "----------------------------------------"
 
-  TMPFILE=$(mktemp)
+  TMPFILE="${RAW_LOG_DIR}/${scheme}.log"
   xcodebuild test \
     -workspace "${WORKSPACE}" \
     -scheme "${scheme}" \
@@ -76,7 +79,6 @@ for scheme in "${SCHEMES[@]}"; do
   # PIPESTATUS[0]은 파이프 직후에만 유효 — xcpretty가 아닌 xcodebuild의 종료 코드
   EXIT_CODE=${PIPESTATUS[0]}
   OUTPUT=$(cat "$TMPFILE")
-  rm -f "$TMPFILE"
 
   # 실행된 테스트가 하나도 없으면 통과로 보지 않는다 (XCTest·Swift Testing 양쪽 마커 부재)
   RAN_XCTEST=$(echo "$OUTPUT" | grep -c "Executed [1-9][0-9]* test" || true)
@@ -98,6 +100,7 @@ done
 
 echo "========================================"
 echo " Results: ${#PASSED[@]} passed, ${#FAILED[@]} failed / ${TOTAL} total"
+echo " Raw logs: ${RAW_LOG_DIR}"
 echo "========================================"
 
 if [ ${#PASSED[@]} -gt 0 ]; then
