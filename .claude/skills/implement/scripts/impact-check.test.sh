@@ -10,7 +10,7 @@ tuist_for() {
   printf '%b\n' "$1" | bash impact-check.sh --stdin | awk '/^## tuist generate/{getline; print; exit}'
 }
 pairs_for() {
-  printf '%b\n' "$1" | bash impact-check.sh --stdin | awk '/^## 짝지어진 두 위치/{flag=1; next} flag'
+  printf '%b\n' "$1" | bash impact-check.sh --stdin | awk '/^## 짝지어진 두 위치/{flag=1; next} /^## /{flag=0} flag'
 }
 
 assert_eq() { # desc expected actual
@@ -130,6 +130,34 @@ pairs_in_external_repo() { # migrateCase(빈문자열이면 미추가) externalM
 assert_contains "googleCalendarDBVersion↑ + case 미추가 → migrateStatement 경고" "case 1 추가가 함께 안 됨" "$(pairs_in_external_repo '' y)"
 assert_contains "googleCalendarDBVersion↑ + 외부 마이그레이션 미변경 → ExternalCalendarDBMigrationImple 경고" "runGoogleCalendarDBMigration" "$(pairs_in_external_repo 1 n)"
 assert_eq "googleCalendarDBVersion↑ + 세 위치 전부 → 경고 없음" "(해당 없음)" "$(pairs_in_external_repo 1 y)"
+
+# --- 테스트 고정 sleep 경고 (testability §9) ---
+sleep_in_repo() { # 추가할 테스트 줄 · 대상(tracked/untracked/source) → 테스트 대기 섹션
+  local repo; repo=$(init_temp_repo)
+  (
+    cd "$repo" || exit 1
+    mkdir -p Domain/Tests Domain/Sources
+    printf 'final class FooTests {\n}\n' > Domain/Tests/FooTests.swift
+    printf 'final class Foo {\n}\n' > Domain/Sources/Foo.swift
+    git add -A; git commit -qm base
+    case "$2" in
+      tracked) printf '%s\n' "$1" >> Domain/Tests/FooTests.swift ;;
+      untracked) printf '%s\n' "$1" > Domain/Tests/NewTests.swift ;;
+      source) printf '%s\n' "$1" >> Domain/Sources/Foo.swift ;;
+      renamed)
+        printf 'final class SleepTests {\n%s\n}\n' "$1" > Domain/Tests/SleepTests.swift
+        git add -A; git commit -q --amend -m base
+        git mv Domain/Tests/SleepTests.swift Domain/Tests/RenamedTests.swift ;;
+    esac
+  )
+  section_in_repo "$repo" "테스트 대기"
+  rm -rf "$repo"
+}
+assert_contains "기존 테스트에 Task.sleep 추가 → 경고" "FooTests.swift" "$(sleep_in_repo '        try await Task.sleep(for: .milliseconds(50))' tracked)"
+assert_contains "새 테스트 파일의 Task.sleep → 경고" "NewTests.swift" "$(sleep_in_repo '        try await Task.sleep(nanoseconds: 50_000_000)' untracked)"
+assert_eq "프로덕션 코드의 Task.sleep → 경고 없음" "(해당 없음)" "$(sleep_in_repo '        try await Task.sleep(for: .seconds(1))' source)"
+assert_eq "sleep 이 든 테스트 파일을 rename 만 함 → 경고 없음" "(해당 없음)" "$(sleep_in_repo '        try await Task.sleep(for: .milliseconds(50))' renamed)"
+assert_eq "sleep 없는 테스트 변경 → 경고 없음" "(해당 없음)" "$(sleep_in_repo '        #expect(value == 1)' tracked)"
 
 echo "---"
 echo "PASS: $PASS / FAIL: $FAIL"
