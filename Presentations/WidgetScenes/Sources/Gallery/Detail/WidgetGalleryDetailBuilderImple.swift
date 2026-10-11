@@ -15,14 +15,14 @@ import CommonPresentation
 final class WidgetGalleryDetailBuilderImple {
     
     private let widgetStyleUsecase: any WidgetStyleUsecase
-    private let paidFeatureGateUsecase: any WidgetStylePaidFeatureGateUsecase
+    private let paidFeatureGateUsecase: any PaidFeatureGateUsecase
     private let paywallSceneBuilder: any PaywallSceneBuilder
     private let rewardedAdRouter: any RewardedAdRouter
     private let viewAppearance: ViewAppearance
     
     init(
         widgetStyleUsecase: any WidgetStyleUsecase,
-        paidFeatureGateUsecase: any WidgetStylePaidFeatureGateUsecase,
+        paidFeatureGateUsecase: any PaidFeatureGateUsecase,
         paywallSceneBuilder: any PaywallSceneBuilder,
         rewardedAdRouter: any RewardedAdRouter,
         viewAppearance: ViewAppearance

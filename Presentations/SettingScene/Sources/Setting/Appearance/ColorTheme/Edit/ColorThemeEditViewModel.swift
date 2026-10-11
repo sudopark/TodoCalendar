@@ -61,7 +61,7 @@ final class ColorThemeEditViewModelImple: ColorThemeEditViewModel, @unchecked Se
     private let original: CustomColorTheme?
     private let calendarSettingUsecase: any CalendarSettingUsecase
     private let uiSettingUsecase: any UISettingUsecase
-    private let paidFeatureGateUsecase: any ColorThemePaidFeatureGateUsecase
+    private let paidFeatureGateUsecase: any PaidFeatureGateUsecase
     var router: (any ColorThemeEditRouting)?
     weak var listener: (any ColorThemeEditSceneListener)?
 
@@ -70,7 +70,7 @@ final class ColorThemeEditViewModelImple: ColorThemeEditViewModel, @unchecked Se
         initialSeeds: CustomColorThemeSeeds,
         calendarSettingUsecase: any CalendarSettingUsecase,
         uiSettingUsecase: any UISettingUsecase,
-        paidFeatureGateUsecase: any ColorThemePaidFeatureGateUsecase
+        paidFeatureGateUsecase: any PaidFeatureGateUsecase
     ) {
         self.original = original
         self.calendarSettingUsecase = calendarSettingUsecase
@@ -136,38 +136,28 @@ extension ColorThemeEditViewModelImple {
 
     func save() {
         guard self.isSavableNow, let theme = self.makeThemeToSave() else { return }
-        if self.isAdRequiredToSave(theme) {
-            self.saveThemeAfterAdGuide(theme)
-        } else {
+        do {
+            try self.checkCreatableIfNew(theme)
             self.saveTheme(theme)
+        } catch let reason as PaidFeatureGateFailReason {
+            self.saveThemeAfterAdGuide(reason)
+        } catch {
+            self.router?.showError(error)
         }
     }
 
-    private func isAdRequiredToSave(_ theme: CustomColorTheme) -> Bool {
-        let key = ColorSetKeys.custom(theme.uuid)
-        return self.original == nil
-            && self.paidFeatureGateUsecase.canApplyColorThemeWithoutAd(key, at: Date()) == false
+    private func checkCreatableIfNew(_ theme: CustomColorTheme) throws {
+        guard self.original == nil else { return }
+        try self.paidFeatureGateUsecase.check(.colorTheme(.custom(theme.uuid)), at: Date())
     }
 
-    private func saveThemeAfterAdGuide(_ theme: CustomColorTheme) {
+    private func saveThemeAfterAdGuide(_ reason: PaidFeatureGateFailReason) {
         self.subject.isAdGuideInProgress.send(true)
-        self.router?.showColorThemeAdGuide(.createTheme) { [weak self] result in
+        self.router?.showPaidFeatureAdGuide(reason) { [weak self] shouldProceed in
             guard self?.subject.isAdGuideInProgress.value == true else { return }
             self?.subject.isAdGuideInProgress.send(false)
-            guard let result else { return }
-            self?.handleAdResult(result) { self?.saveTheme(theme) }
-        }
-    }
-
-    private func handleAdResult(_ result: RewardedAdResult, then proceed: () -> Void) {
-        switch self.paidFeatureGateUsecase.colorThemeLicenseDecision(for: result) {
-        case .grantLicenseAndContinue:
-            self.paidFeatureGateUsecase.grantColorThemeLicense(at: Date())
-            proceed()
-        case .continueWithoutLicense:
-            proceed()
-        case .notifyAdUnavailable, .cancel:
-            break
+            guard shouldProceed else { return }
+            self?.save()
         }
     }
 

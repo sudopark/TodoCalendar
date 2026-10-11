@@ -180,7 +180,9 @@ enum PaywallScreenState {
 
 ## 6. 광고 노출 판정
 
-테마 사용권 광고는 `ColorThemePaidFeatureGateUsecase` 가 판정한다. 규칙은 [`color-themes.md`](color-themes.md) §4 사용권 절이 다룬다.
+테마 사용권 광고는 `PaidFeatureGateUsecase.check(.colorTheme(_), at:)` 가 판정한다. 규칙은 [`color-themes.md`](color-themes.md) §4 사용권 절이 다룬다.
+
+위젯 꾸미기 사용권 광고는 `check(.customizeWidget, at:)` 가 판정한다. 컬러 테마와 달리 플랜을 아직 모르면 무료 플랜으로 보고 검사한다. 그때도 광고로 받은 사용권이 유효하면 통과시킨다. 위젯 확장은 앱의 플랜 스토어가 없어 `WidgetStyleFetchUsecase` 가 같은 규칙으로 판정한다.
 
 무료 플랜에만 광고를 노출한다. Google Mobile Ads(`AdService`).
 
@@ -215,7 +217,7 @@ isBannerAdAllowed = adAvailability.isStarted && userPlan.planId == .free
 | `.fallbackFullScreenShown` | 보상형이 없어 미리 로드된 전면을 보여줌 |
 | `.unavailable` | 보상형도 전면도 없거나 노출 중 다시 불림 |
 
-컬러 테마 걸기·생성 진입점은 이 결과를 `ColorThemePaidFeatureGateUsecase.colorThemeLicenseDecision(for:)` 로 해석한다 (`color-themes.md` §4).
+이 결과는 BillingScenes 의 광고 안내 시트 VM(`PaidFeatureAdGuideViewModelImple`)이 해석한다. 사용권 기록은 `PaidFeatureGateUsecase.grantLicense(for:at:)` 에 맡긴다 (`color-themes.md` §4).
 
 시도 순서는 보상형 → 미리 로드된 전면 → 없음이다. 보상형은 최대 5초 기다리고, 보상형 노출이 실패해도 전면으로 넘어간다. 대체 전면은 로드를 기다리지 않으며 `canExposeFullScreenAd` 를 거치지 않고 노출 이력도 남기지 않는다.
 

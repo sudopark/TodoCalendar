@@ -133,7 +133,7 @@ extension WidgetStyleEditViewModelImpleTests {
         _ usecase: StubWidgetStyleUsecase,
         variants: [WidgetVariant] = [.todaySummarySmall],
         router: SpyWidgetStyleEditRouter = .init(),
-        gate: StubWidgetStylePaidFeatureGateUsecase = .init()
+        gate: StubPaidFeatureGateUsecase = .init()
     ) -> WidgetStyleEditViewModelImple {
         let viewModel = WidgetStyleEditViewModelImple(
             variants: variants,
@@ -148,7 +148,7 @@ extension WidgetStyleEditViewModelImpleTests {
     private func makeViewModel(
         saved styles: [WidgetStyle],
         router: SpyWidgetStyleEditRouter = .init(),
-        gate: StubWidgetStylePaidFeatureGateUsecase = .init()
+        gate: StubPaidFeatureGateUsecase = .init()
     ) -> (WidgetStyleEditViewModelImple, StubWidgetStyleUsecase) {
         let usecase = self.makeUsecase(saved: styles)
         let viewModel = self.makeViewModel(usecase, router: router, gate: gate)
@@ -172,7 +172,7 @@ extension WidgetStyleEditViewModelImpleTests {
         name: String? = nil,
         showHolidayName: Bool = true,
         router: SpyWidgetStyleEditRouter = .init(),
-        gate: StubWidgetStylePaidFeatureGateUsecase = .init()
+        gate: StubPaidFeatureGateUsecase = .init()
     ) -> (WidgetStyleEditViewModelImple, StubWidgetStyleUsecase) {
         return self.makeViewModel(
             saved: [
@@ -1676,10 +1676,9 @@ extension WidgetStyleEditViewModelImpleTests {
 
 extension WidgetStyleEditViewModelImpleTests {
 
-    private func blockedGate(licenseDays: Int? = 9) -> StubWidgetStylePaidFeatureGateUsecase {
-        let gate = StubWidgetStylePaidFeatureGateUsecase()
-        gate.canCreateWithoutAd = false
-        gate.licenseDays = licenseDays
+    private func blockedGate(licenseDays: Int = 9) -> StubPaidFeatureGateUsecase {
+        let gate = StubPaidFeatureGateUsecase()
+        gate.mockBlockedReason = .init(feature: .customizeWidget, licenseDays: licenseDays)
         return gate
     }
 
@@ -1690,7 +1689,7 @@ extension WidgetStyleEditViewModelImpleTests {
     /// 무료 유저가 커스텀 카드를 복제하려다 시트에서 광고를 고르고, 광고가 끝나기 전 상태까지 세운다.
     private func makeViewModelWaitingAd(
         router: SpyWidgetStyleEditRouter,
-        gate: StubWidgetStylePaidFeatureGateUsecase
+        gate: StubPaidFeatureGateUsecase
     ) -> WidgetStyleEditViewModelImple {
         let (viewModel, _) = self.makeViewModelWithCustom(name: "여름", router: router, gate: gate)
         self.mockSheetSelection(router, key: "widget.style.license::watchAd")
@@ -1756,13 +1755,13 @@ extension WidgetStyleEditViewModelImpleTests {
         let router = SpyWidgetStyleEditRouter()
         let gate = self.blockedGate()
         let viewModel = self.makeViewModelWaitingAd(router: router, gate: gate)
-        gate.canCreateWithoutAd = true
+        gate.mockBlockedReason = nil
 
         // when
         router.finishRewardedAd(with: .rewarded)
 
         // then
-        let grantedAt = try #require(gate.didGrantLicenseAt)
+        let grantedAt = try #require(gate.didGrantLicenseWith?.at)
         #expect(abs(grantedAt.timeIntervalSinceNow) < 10)
         let emitted = try await self.styles(of: viewModel)
         #expect(emitted.map { $0.name } == [
@@ -1776,13 +1775,13 @@ extension WidgetStyleEditViewModelImpleTests {
         let router = SpyWidgetStyleEditRouter()
         let gate = self.blockedGate()
         let viewModel = self.makeViewModelWaitingAd(router: router, gate: gate)
-        gate.canCreateWithoutAd = true
+        gate.mockBlockedReason = nil
 
         // when
         router.finishRewardedAd(with: .fallbackFullScreenShown)
 
         // then
-        #expect(gate.didGrantLicenseAt != nil)
+        #expect(gate.didGrantLicenseWith != nil)
         let emitted = try await self.styles(of: viewModel)
         #expect(emitted.last?.name == self.copyOfSummerName)
     }
@@ -1798,7 +1797,7 @@ extension WidgetStyleEditViewModelImpleTests {
         router.finishRewardedAd(with: .rewarded)
 
         // then
-        #expect(gate.didGrantLicenseAt != nil)
+        #expect(gate.didGrantLicenseWith != nil)
         let emitted = try await self.styles(of: viewModel)
         #expect(emitted.count == 2)
     }
@@ -1809,13 +1808,13 @@ extension WidgetStyleEditViewModelImpleTests {
         let router = SpyWidgetStyleEditRouter()
         let gate = self.blockedGate()
         let viewModel = self.makeViewModelWaitingAd(router: router, gate: gate)
-        gate.canCreateWithoutAd = true
+        gate.mockBlockedReason = nil
 
         // when
         router.finishRewardedAd(with: .dismissedBeforeReward)
 
         // then
-        #expect(gate.didGrantLicenseAt == nil)
+        #expect(gate.didGrantLicenseWith == nil)
         #expect(router.didShowToastWithMessage == nil)
         let emitted = try await self.styles(of: viewModel)
         #expect(emitted.count == 2)
@@ -1827,14 +1826,14 @@ extension WidgetStyleEditViewModelImpleTests {
         let router = SpyWidgetStyleEditRouter()
         let gate = self.blockedGate()
         let viewModel = self.makeViewModelWaitingAd(router: router, gate: gate)
-        gate.canCreateWithoutAd = true
+        gate.mockBlockedReason = nil
 
         // when
         router.finishRewardedAd(with: .unavailable)
 
         // then
         #expect(router.didShowToastWithMessage == "widget.style.license::adUnavailable".localized())
-        #expect(gate.didGrantLicenseAt == nil)
+        #expect(gate.didGrantLicenseWith == nil)
         let emitted = try await self.styles(of: viewModel)
         #expect(emitted.count == 2)
     }
@@ -1873,24 +1872,6 @@ extension WidgetStyleEditViewModelImpleTests {
         #expect(emitted.count == 2)
     }
 
-    @Test("사용권 기간을 해석할 수 없으면 안내 없이 광고 없음을 알린다")
-    func viewModel_whenLicenseDaysUndecidable_showsToastWithoutSheet() async throws {
-        // given
-        let router = SpyWidgetStyleEditRouter()
-        let (viewModel, _) = self.makeViewModelWithCustom(
-            router: router, gate: self.blockedGate(licenseDays: nil)
-        )
-
-        // when
-        viewModel.addStyle()
-
-        // then
-        #expect(router.didShowActionSheetWith == nil)
-        #expect(router.didShowToastWithMessage == "widget.style.license::adUnavailable".localized())
-        let emitted = try await self.styles(of: viewModel)
-        #expect(emitted.count == 2)
-    }
-
     @Test("안내가 떠 있는 동안 다른 카드를 다시 누르면 마지막에 누른 복제를 이어서 한다")
     func viewModel_whenTappedAgainWhilePending_continuesLatestIntent() async throws {
         // given
@@ -1900,7 +1881,7 @@ extension WidgetStyleEditViewModelImpleTests {
         viewModel.appendStyle(copying: self.defaultId)
         self.mockSheetSelection(router, key: "widget.style.license::watchAd")
         viewModel.appendStyle(copying: self.customId)
-        gate.canCreateWithoutAd = true
+        gate.mockBlockedReason = nil
 
         // when
         router.finishRewardedAd(with: .rewarded)
@@ -1916,9 +1897,9 @@ extension WidgetStyleEditViewModelImpleTests {
 
 extension WidgetStyleEditViewModelImpleTests {
 
-    private func lockedGate() -> StubWidgetStylePaidFeatureGateUsecase {
+    private func lockedGate() -> StubPaidFeatureGateUsecase {
         let gate = self.blockedGate()
-        gate.canRender = false
+        gate.mockBlockedReason = .init(feature: .customizeWidget, licenseDays: 7)
         return gate
     }
 
@@ -1952,23 +1933,6 @@ extension WidgetStyleEditViewModelImpleTests {
 
         // then
         #expect(flags == [false])
-    }
-
-    @Test("커스텀을 그릴 수 없어도 아직 저장 안 한 초안 카드는 잠그지 않는다")
-    func viewModel_whenRenderNotAllowed_doesNotLockDraftCard() async throws {
-        // given
-        let gate = self.lockedGate()
-        gate.canCreateWithoutAd = true
-        let (viewModel, _) = self.makeViewModelWithCustom(gate: gate)
-        gate.canRender = false
-
-        // when
-        viewModel.appendStyle(copying: self.defaultId)
-
-        // then
-        let flags = try await self.lockedFlags(of: viewModel)
-        #expect(flags.count == 3)
-        #expect(flags.last == false)
     }
 
     @Test("커스텀을 그릴 수 있으면 어떤 카드도 잠그지 않는다")
@@ -2006,14 +1970,14 @@ extension WidgetStyleEditViewModelImpleTests {
         let (viewModel, _) = self.makeViewModelWithCustom(router: router, gate: gate)
         self.mockSheetSelection(router, key: "widget.style.license::watchAd")
         viewModel.selectStyle(self.customId)
-        gate.canCreateWithoutAd = true
-        gate.canRender = true
+        gate.mockBlockedReason = nil
+        gate.mockBlockedReason = nil
 
         // when
         router.finishRewardedAd(with: .rewarded)
 
         // then
-        #expect(gate.didGrantLicenseAt != nil)
+        #expect(gate.didGrantLicenseWith != nil)
         let flags = try await self.lockedFlags(of: viewModel)
         #expect(flags == [false, false])
         let selected = try await self.selectedStyleId(of: viewModel)
@@ -2026,8 +1990,8 @@ extension WidgetStyleEditViewModelImpleTests {
         let router = SpyWidgetStyleEditRouter()
         let gate = self.lockedGate()
         let (viewModel, _) = self.makeViewModelWithCustom(router: router, gate: gate)
-        gate.canCreateWithoutAd = true
-        gate.canRender = true
+        gate.mockBlockedReason = nil
+        gate.mockBlockedReason = nil
 
         // when
         viewModel.selectStyle(self.customId)
@@ -2043,9 +2007,9 @@ extension WidgetStyleEditViewModelImpleTests {
     @Test("다시 열 때 커스텀을 그릴 수 없게 됐으면 저장된 커스텀 카드를 잠근다")
     func viewModel_whenRenderTurnsOffOnRefresh_locksSavedCustomCard() async throws {
         // given
-        let gate = StubWidgetStylePaidFeatureGateUsecase()
+        let gate = StubPaidFeatureGateUsecase()
         let (viewModel, _) = self.makeViewModelWithCustom(gate: gate)
-        gate.canRender = false
+        gate.mockBlockedReason = .init(feature: .customizeWidget, licenseDays: 7)
 
         // when
         viewModel.refresh()
@@ -2068,8 +2032,8 @@ extension WidgetStyleEditViewModelImpleTests {
         // when
         let emitted = try await self.outputs(expect, for: viewModel.styles.map { $0.map { $0.isLocked } }) {
             viewModel.selectStyle(self.customId)
-            gate.canCreateWithoutAd = true
-            gate.canRender = true
+            gate.mockBlockedReason = nil
+            gate.mockBlockedReason = nil
             router.finishRewardedAd(with: .rewarded)
         }
 

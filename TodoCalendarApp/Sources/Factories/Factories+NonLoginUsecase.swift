@@ -104,8 +104,7 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
         )
     }
 
-    func makePaidFeatureGateUsecase(
-    ) -> any ColorThemePaidFeatureGateUsecase & WidgetStylePaidFeatureGateUsecase {
+    func makePaidFeatureGateUsecase() -> any PaidFeatureGateUsecase {
         return PaidFeatureGateUsecaseImple(
             planSource: self.planSource,
             licenseRepository: ColorThemeLicenseLocalRepositoryImple(
@@ -120,14 +119,6 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
             ),
             defaultPolicy: AppEnvironment.defaultAppPolicy
         )
-    }
-
-    func makeColorThemePaidFeatureGateUsecase() -> any ColorThemePaidFeatureGateUsecase {
-        return self.makePaidFeatureGateUsecase()
-    }
-
-    func makeWidgetStylePaidFeatureGateUsecase() -> any WidgetStylePaidFeatureGateUsecase {
-        return self.makePaidFeatureGateUsecase()
     }
 
     var eventNotifyService: SharedEventNotifyService {

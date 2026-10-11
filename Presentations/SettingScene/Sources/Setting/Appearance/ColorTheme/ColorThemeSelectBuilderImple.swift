@@ -20,21 +20,18 @@ final class ColorThemeSelectSceneBuilerImple {
     private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
     private let editSceneBuilder: any ColorThemeEditSceneBuiler
-    private let rewardedAdRouter: any RewardedAdRouter
-    private let paywallSceneBuilder: any PaywallSceneBuilder
+    private let adGuideSceneBuilder: any PaidFeatureAdGuideSceneBuilder
     
     init(
         usecaseFactory: any UsecaseFactory,
         viewAppearance: ViewAppearance,
         editSceneBuilder: any ColorThemeEditSceneBuiler,
-        rewardedAdRouter: any RewardedAdRouter,
-        paywallSceneBuilder: any PaywallSceneBuilder
+        adGuideSceneBuilder: any PaidFeatureAdGuideSceneBuilder
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
         self.editSceneBuilder = editSceneBuilder
-        self.rewardedAdRouter = rewardedAdRouter
-        self.paywallSceneBuilder = paywallSceneBuilder
+        self.adGuideSceneBuilder = adGuideSceneBuilder
     }
 }
 
@@ -44,7 +41,7 @@ extension ColorThemeSelectSceneBuilerImple: ColorThemeSelectSceneBuiler {
     @MainActor
     func makeColorThemeSelectScene() -> any ColorThemeSelectScene {
         
-        let paidFeatureGateUsecase = self.usecaseFactory.makeColorThemePaidFeatureGateUsecase()
+        let paidFeatureGateUsecase = self.usecaseFactory.makePaidFeatureGateUsecase()
         let viewModel = ColorThemeSelectViewModelImple(
             calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
             uiSettingUsecase: self.usecaseFactory.makeUISettingUsecase(),
@@ -58,10 +55,7 @@ extension ColorThemeSelectSceneBuilerImple: ColorThemeSelectSceneBuiler {
     
         let router = ColorThemeSelectRouter(
             editSceneBuilder: self.editSceneBuilder,
-            paidFeatureGateUsecase: paidFeatureGateUsecase,
-            rewardedAdRouter: self.rewardedAdRouter,
-            paywallSceneBuilder: self.paywallSceneBuilder,
-            viewAppearance: self.viewAppearance
+            adGuideSceneBuilder: self.adGuideSceneBuilder
         )
         router.scene = viewController
         viewModel.router = router

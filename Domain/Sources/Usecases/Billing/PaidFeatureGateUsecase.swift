@@ -9,26 +9,14 @@
 import Foundation
 
 
-public protocol ColorThemePaidFeatureGateUsecase: Sendable {
+public protocol PaidFeatureGateUsecase: Sendable {
 
-    func canApplyColorThemeWithoutAd(_ key: ColorSetKeys, at now: Date) -> Bool
-    func colorThemeLicenseDays() -> Int?
-    func colorThemeLicenseDecision(for result: RewardedAdResult) -> RewardedAdLicenseDecision
-    func grantColorThemeLicense(at now: Date)
+    func check(_ feature: PaidFeature, at now: Date) throws
+    func grantLicense(for feature: PaidFeature, at now: Date)
 }
 
 
-public protocol WidgetStylePaidFeatureGateUsecase: Sendable {
-
-    func canCreateCustomWidgetStyleWithoutAd(at now: Date) -> Bool
-    func canRenderCustomWidgetStyle(at now: Date) -> Bool
-    func widgetStyleLicenseDays() -> Int?
-    func widgetStyleLicenseDecision(for result: RewardedAdResult) -> RewardedAdLicenseDecision
-    func grantCustomWidgetStyleLicense(at now: Date)
-}
-
-
-public final class PaidFeatureGateUsecaseImple: Sendable {
+public final class PaidFeatureGateUsecaseImple: PaidFeatureGateUsecase {
 
     private enum Constant {
         static let secondsPerDay: TimeInterval = 24 * 3600
@@ -57,124 +45,78 @@ public final class PaidFeatureGateUsecaseImple: Sendable {
 }
 
 
-// MARK: - 컬러 테마
-
-extension PaidFeatureGateUsecaseImple: ColorThemePaidFeatureGateUsecase {
-
-    public func canApplyColorThemeWithoutAd(_ key: ColorSetKeys, at now: Date) -> Bool {
-        guard self.freeThemeKeys.contains(key) == false,
-              self.planSource.latestUserPlan()?.isPaid == false,
-              let policy = self.resolveColorThemeLicensePolicy(),
-              policy.isEnabled,
-              policy.licenseDays > 0
-        else { return true }
-        return self.isColorThemeLicenseValid(licenseDays: policy.licenseDays, at: now)
-    }
-
-    public func colorThemeLicenseDays() -> Int? {
-        return self.resolveColorThemeLicensePolicy()?.licenseDays
-    }
-
-    private func resolveColorThemeLicensePolicy() -> (isEnabled: Bool, licenseDays: Int)? {
-        let received = self.policyRepository.loadPolicy()?.colorThemeLicense
-        let fallback = self.defaultPolicy.colorThemeLicense
-        guard let isEnabled = received?.isEnabled ?? fallback?.isEnabled,
-              let licenseDays = received?.licenseDays ?? fallback?.licenseDays
-        else { return nil }
-        return (isEnabled, licenseDays)
-    }
-
-    private func isColorThemeLicenseValid(licenseDays: Int, at now: Date) -> Bool {
-        guard let license = self.licenseRepository.loadLicense() else { return false }
-        let expiresAt = license.grantedAt
-            .addingTimeInterval(TimeInterval(licenseDays) * Constant.secondsPerDay)
-        return license.grantedAt <= now && now < expiresAt
-    }
-}
-
-
-// MARK: - 컬러 테마 보상 반영
+// MARK: - 검사
 
 extension PaidFeatureGateUsecaseImple {
 
-    public func grantColorThemeLicense(at now: Date) {
-        self.licenseRepository.updateLicense(.init(grantedAt: now))
+    private typealias LicenseTerms = (isEnabled: Bool?, licenseDays: Int?)
+
+    public func check(_ feature: PaidFeature, at now: Date) throws {
+        guard self.isExemptByPlanOrTheme(feature) == false,
+              let licenseDays = self.enforcedLicenseDays(of: feature),
+              self.isLicenseValid(of: feature, licenseDays: licenseDays, at: now) == false
+        else { return }
+        throw PaidFeatureGateFailReason(feature: feature, licenseDays: licenseDays)
     }
 
-    public func colorThemeLicenseDecision(for result: RewardedAdResult) -> RewardedAdLicenseDecision {
-        switch result {
-        case .rewarded, .fallbackFullScreenShown: return .grantLicenseAndContinue
-        case .unavailable: return .continueWithoutLicense
-        case .dismissedBeforeReward: return .cancel
+    private func isExemptByPlanOrTheme(_ feature: PaidFeature) -> Bool {
+        let plan = self.planSource.latestUserPlan()
+        switch feature {
+        case .colorTheme(let key):
+            return self.freeThemeKeys.contains(key) || plan?.isPaid != false
+        case .customizeWidget:
+            let isPaid = plan.map { $0.isPaid } ?? false
+            return isPaid != false
         }
     }
-}
 
-
-// MARK: - 위젯 커스텀 스타일
-
-extension PaidFeatureGateUsecaseImple: WidgetStylePaidFeatureGateUsecase {
-
-    public func canCreateCustomWidgetStyleWithoutAd(at now: Date) -> Bool {
-        guard let plan = self.planSource.latestUserPlan()
-        else { return self.isWidgetStyleLicenseGateDisabled() }
-        return self.canUseCustomWidgetStyle(isPaid: plan.isPaid, at: now)
-    }
-
-    public func canRenderCustomWidgetStyle(at now: Date) -> Bool {
-        guard let plan = self.planSource.latestUserPlan() else { return true }
-        return self.canUseCustomWidgetStyle(isPaid: plan.isPaid, at: now)
-    }
-
-    private func canUseCustomWidgetStyle(isPaid: Bool?, at now: Date) -> Bool {
-        guard isPaid == false,
-              let policy = self.resolveWidgetStyleLicensePolicy(),
-              policy.isEnabled,
-              policy.licenseDays > 0
-        else { return true }
-        return self.isWidgetStyleLicenseValid(licenseDays: policy.licenseDays, at: now)
-    }
-
-    private func isWidgetStyleLicenseGateDisabled() -> Bool {
-        guard let policy = self.resolveWidgetStyleLicensePolicy() else { return true }
-        return policy.isEnabled == false || policy.licenseDays <= 0
-    }
-
-    public func widgetStyleLicenseDays() -> Int? {
-        return self.resolveWidgetStyleLicensePolicy()?.licenseDays
-    }
-
-    private func resolveWidgetStyleLicensePolicy() -> (isEnabled: Bool, licenseDays: Int)? {
-        let received = self.policyRepository.loadPolicy()?.widgetStyleLicense
-        let fallback = self.defaultPolicy.widgetStyleLicense
-        guard let isEnabled = received?.isEnabled ?? fallback?.isEnabled,
-              let licenseDays = received?.licenseDays ?? fallback?.licenseDays
+    private func enforcedLicenseDays(of feature: PaidFeature) -> Int? {
+        let (received, fallback) = self.licenseTerms(of: feature)
+        guard (received?.isEnabled ?? fallback?.isEnabled) == true,
+              let licenseDays = received?.licenseDays ?? fallback?.licenseDays,
+              licenseDays > 0
         else { return nil }
-        return (isEnabled, licenseDays)
+        return licenseDays
     }
 
-    private func isWidgetStyleLicenseValid(licenseDays: Int, at now: Date) -> Bool {
-        guard let license = self.widgetStyleLicenseRepository.loadLicense() else { return false }
-        let expiresAt = license.grantedAt
-            .addingTimeInterval(TimeInterval(licenseDays) * Constant.secondsPerDay)
-        return license.grantedAt <= now && now < expiresAt
+    private func licenseTerms(of feature: PaidFeature) -> (received: LicenseTerms?, fallback: LicenseTerms?) {
+        let received = self.policyRepository.loadPolicy()
+        switch feature {
+        case .colorTheme:
+            return (
+                received?.colorThemeLicense.map { (isEnabled: $0.isEnabled, licenseDays: $0.licenseDays) },
+                self.defaultPolicy.colorThemeLicense.map { (isEnabled: $0.isEnabled, licenseDays: $0.licenseDays) }
+            )
+        case .customizeWidget:
+            return (
+                received?.widgetStyleLicense.map { (isEnabled: $0.isEnabled, licenseDays: $0.licenseDays) },
+                self.defaultPolicy.widgetStyleLicense.map { (isEnabled: $0.isEnabled, licenseDays: $0.licenseDays) }
+            )
+        }
+    }
+
+    private func isLicenseValid(of feature: PaidFeature, licenseDays: Int, at now: Date) -> Bool {
+        let grantedAt: Date? = switch feature {
+        case .colorTheme: self.licenseRepository.loadLicense()?.grantedAt
+        case .customizeWidget: self.widgetStyleLicenseRepository.loadLicense()?.grantedAt
+        }
+        guard let grantedAt else { return false }
+        let expiresAt = grantedAt.addingTimeInterval(TimeInterval(licenseDays) * Constant.secondsPerDay)
+        return grantedAt <= now && now < expiresAt
     }
 }
 
 
-// MARK: - 위젯 커스텀 스타일 보상 반영
+// MARK: - 사용권 기록
 
 extension PaidFeatureGateUsecaseImple {
 
-    public func grantCustomWidgetStyleLicense(at now: Date) {
-        self.widgetStyleLicenseRepository.updateLicense(.init(grantedAt: now))
-    }
-
-    public func widgetStyleLicenseDecision(for result: RewardedAdResult) -> RewardedAdLicenseDecision {
-        switch result {
-        case .rewarded, .fallbackFullScreenShown: return .grantLicenseAndContinue
-        case .unavailable: return .notifyAdUnavailable
-        case .dismissedBeforeReward: return .cancel
+    public func grantLicense(for feature: PaidFeature, at now: Date) {
+        switch feature {
+        case .colorTheme:
+            self.licenseRepository.updateLicense(.init(grantedAt: now))
+        case .customizeWidget:
+            self.widgetStyleLicenseRepository.updateLicense(.init(grantedAt: now))
         }
     }
 }

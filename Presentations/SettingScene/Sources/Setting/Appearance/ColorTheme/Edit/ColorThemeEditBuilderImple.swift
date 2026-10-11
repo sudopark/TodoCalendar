@@ -18,19 +18,16 @@ final class ColorThemeEditSceneBuilerImple {
 
     private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
-    private let rewardedAdRouter: any RewardedAdRouter
-    private let paywallSceneBuilder: any PaywallSceneBuilder
+    private let adGuideSceneBuilder: any PaidFeatureAdGuideSceneBuilder
 
     init(
         usecaseFactory: any UsecaseFactory,
         viewAppearance: ViewAppearance,
-        rewardedAdRouter: any RewardedAdRouter,
-        paywallSceneBuilder: any PaywallSceneBuilder
+        adGuideSceneBuilder: any PaidFeatureAdGuideSceneBuilder
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
-        self.rewardedAdRouter = rewardedAdRouter
-        self.paywallSceneBuilder = paywallSceneBuilder
+        self.adGuideSceneBuilder = adGuideSceneBuilder
     }
 }
 
@@ -49,7 +46,7 @@ extension ColorThemeEditSceneBuilerImple: ColorThemeEditSceneBuiler {
             form: .filled
         )
 
-        let paidFeatureGateUsecase = self.usecaseFactory.makeColorThemePaidFeatureGateUsecase()
+        let paidFeatureGateUsecase = self.usecaseFactory.makePaidFeatureGateUsecase()
         let viewModel = ColorThemeEditViewModelImple(
             original: original,
             initialSeeds: initialSeeds,
@@ -64,10 +61,7 @@ extension ColorThemeEditSceneBuilerImple: ColorThemeEditSceneBuiler {
         )
 
         let router = ColorThemeEditRouter(
-            paidFeatureGateUsecase: paidFeatureGateUsecase,
-            rewardedAdRouter: self.rewardedAdRouter,
-            paywallSceneBuilder: self.paywallSceneBuilder,
-            viewAppearance: self.viewAppearance
+            adGuideSceneBuilder: self.adGuideSceneBuilder
         )
         router.scene = viewController
         viewModel.router = router

@@ -16,7 +16,11 @@ import CommonPresentation
 
 // MARK: - Routing
 
-protocol ColorThemeSelectRouting: ColorThemeAdGuideRouting, Sendable {
+protocol ColorThemeSelectRouting: Routing, Sendable {
+
+    func showPaidFeatureAdGuide(
+        _ reason: PaidFeatureGateFailReason, onFinished: @escaping @Sendable (Bool) -> Void
+    )
     
     func routeToEditCustomTheme(
         original: CustomColorTheme?,
@@ -26,24 +30,17 @@ protocol ColorThemeSelectRouting: ColorThemeAdGuideRouting, Sendable {
 
 // MARK: - Router
 
-final class ColorThemeSelectRouter: ColorThemeAdGuideRouter, ColorThemeSelectRouting, @unchecked Sendable { 
+final class ColorThemeSelectRouter: BaseRouterImple, ColorThemeSelectRouting, @unchecked Sendable { 
     
     private let editSceneBuilder: any ColorThemeEditSceneBuiler
+    private let adGuideSceneBuilder: any PaidFeatureAdGuideSceneBuilder
     
     init(
         editSceneBuilder: any ColorThemeEditSceneBuiler,
-        paidFeatureGateUsecase: any ColorThemePaidFeatureGateUsecase,
-        rewardedAdRouter: any RewardedAdRouter,
-        paywallSceneBuilder: any PaywallSceneBuilder,
-        viewAppearance: ViewAppearance
+        adGuideSceneBuilder: any PaidFeatureAdGuideSceneBuilder
     ) {
         self.editSceneBuilder = editSceneBuilder
-        super.init(
-            paidFeatureGateUsecase: paidFeatureGateUsecase,
-            rewardedAdRouter: rewardedAdRouter,
-            paywallSceneBuilder: paywallSceneBuilder,
-            viewAppearance: viewAppearance
-        )
+        self.adGuideSceneBuilder = adGuideSceneBuilder
     }
     
     override func closeScene(animate: Bool, _ dismissed: (() -> Void)?) {
@@ -69,6 +66,15 @@ extension ColorThemeSelectRouter {
                 original: original, listener: listener
             )
             self.currentScene?.navigationController?.pushViewController(next, animated: true)
+        }
+    }
+
+    func showPaidFeatureAdGuide(
+        _ reason: PaidFeatureGateFailReason, onFinished: @escaping @Sendable (Bool) -> Void
+    ) {
+        Task { @MainActor in
+            let guide = self.adGuideSceneBuilder.makePaidFeatureAdGuideScene(reason: reason, onFinished: onFinished)
+            self.showBottomSlide(guide)
         }
     }
 }

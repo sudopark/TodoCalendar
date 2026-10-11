@@ -67,13 +67,13 @@ final class ColorThemeSelectViewModelImple: ColorThemeSelectViewModel, @unchecke
     
     private let calendarSettingUsecase: any CalendarSettingUsecase
     private let uiSettingUsecase: any UISettingUsecase
-    private let paidFeatureGateUsecase: any ColorThemePaidFeatureGateUsecase
+    private let paidFeatureGateUsecase: any PaidFeatureGateUsecase
     var router: (any ColorThemeSelectRouting)?
     
     init(
         calendarSettingUsecase: any CalendarSettingUsecase,
         uiSettingUsecase: any UISettingUsecase,
-        paidFeatureGateUsecase: any ColorThemePaidFeatureGateUsecase
+        paidFeatureGateUsecase: any PaidFeatureGateUsecase
     ) {
         self.calendarSettingUsecase = calendarSettingUsecase
         self.uiSettingUsecase = uiSettingUsecase
@@ -120,32 +120,23 @@ extension ColorThemeSelectViewModelImple {
     
     func selectTheme(_ model: ColorThemeModel) {
         guard self.subject.isAdGuideInProgress.value == false else { return }
-        if self.paidFeatureGateUsecase.canApplyColorThemeWithoutAd(model.key, at: Date()) {
+        do {
+            try self.paidFeatureGateUsecase.check(.colorTheme(model.key), at: Date())
             self.applyTheme(model)
-        } else {
-            self.applyThemeAfterAdGuide(model)
+        } catch let reason as PaidFeatureGateFailReason {
+            self.applyThemeAfterAdGuide(model, reason)
+        } catch {
+            self.router?.showError(error)
         }
     }
 
-    private func applyThemeAfterAdGuide(_ model: ColorThemeModel) {
+    private func applyThemeAfterAdGuide(_ model: ColorThemeModel, _ reason: PaidFeatureGateFailReason) {
         self.subject.isAdGuideInProgress.send(true)
-        self.router?.showColorThemeAdGuide(.applyTheme) { [weak self] result in
+        self.router?.showPaidFeatureAdGuide(reason) { [weak self] shouldProceed in
             guard self?.subject.isAdGuideInProgress.value == true else { return }
             self?.subject.isAdGuideInProgress.send(false)
-            guard let result else { return }
-            self?.handleAdResult(result) { self?.applyTheme(model) }
-        }
-    }
-
-    private func handleAdResult(_ result: RewardedAdResult, then proceed: () -> Void) {
-        switch self.paidFeatureGateUsecase.colorThemeLicenseDecision(for: result) {
-        case .grantLicenseAndContinue:
-            self.paidFeatureGateUsecase.grantColorThemeLicense(at: Date())
-            proceed()
-        case .continueWithoutLicense:
-            proceed()
-        case .notifyAdUnavailable, .cancel:
-            break
+            guard shouldProceed else { return }
+            self?.selectTheme(model)
         }
     }
     

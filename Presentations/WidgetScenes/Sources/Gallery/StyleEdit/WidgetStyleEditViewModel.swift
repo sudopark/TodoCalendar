@@ -80,13 +80,13 @@ final class WidgetStyleEditViewModelImple: WidgetStyleEditViewModel, @unchecked 
     
     private let variants: [WidgetVariant]
     private let widgetStyleUsecase: any WidgetStyleUsecase
-    private let paidFeatureGateUsecase: any WidgetStylePaidFeatureGateUsecase
+    private let paidFeatureGateUsecase: any PaidFeatureGateUsecase
     var router: (any WidgetStyleEditRouting)?
     
     init(
         variants: [WidgetVariant],
         widgetStyleUsecase: any WidgetStyleUsecase,
-        paidFeatureGateUsecase: any WidgetStylePaidFeatureGateUsecase
+        paidFeatureGateUsecase: any PaidFeatureGateUsecase
     ) {
         self.variants = variants
         self.widgetStyleUsecase = widgetStyleUsecase
@@ -123,7 +123,11 @@ extension WidgetStyleEditViewModelImple {
             self.refreshCustomRenderAllowed()
         }
         guard self.isLocked(styleId) == false else {
-            self.showLicenseGuide { [weak self] in self?.selectStyle(styleId) }
+            do {
+                try self.paidFeatureGateUsecase.check(.customizeWidget, at: Date())
+            } catch let reason as PaidFeatureGateFailReason {
+                self.showLicenseGuide(reason) { [weak self] in self?.selectStyle(styleId) }
+            } catch { }
             return
         }
         self.select(styleId)
@@ -136,8 +140,12 @@ extension WidgetStyleEditViewModelImple {
     }
     
     func appendStyle(copying styleId: WidgetStyleId) {
-        guard self.paidFeatureGateUsecase.canCreateCustomWidgetStyleWithoutAd(at: Date()) else {
-            self.showLicenseGuide { [weak self] in self?.appendStyle(copying: styleId) }
+        do {
+            try self.paidFeatureGateUsecase.check(.customizeWidget, at: Date())
+        } catch let reason as PaidFeatureGateFailReason {
+            self.showLicenseGuide(reason) { [weak self] in self?.appendStyle(copying: styleId) }
+            return
+        } catch {
             return
         }
         guard let styles = self.subject.editingStyles.value,
@@ -375,7 +383,7 @@ extension WidgetStyleEditViewModelImple {
 
     private func refreshCustomRenderAllowed() {
         self.subject.isCustomRenderAllowed.send(
-            self.paidFeatureGateUsecase.canRenderCustomWidgetStyle(at: Date())
+            (try? self.paidFeatureGateUsecase.check(.customizeWidget, at: Date())) != nil
         )
     }
 
@@ -386,18 +394,16 @@ extension WidgetStyleEditViewModelImple {
         )
     }
 
-    private func showLicenseGuide(then retry: @escaping @Sendable () -> Void) {
-        guard let licenseDays = self.paidFeatureGateUsecase.widgetStyleLicenseDays() else {
-            self.notifyAdUnavailable()
-            return
-        }
+    private func showLicenseGuide(
+        _ reason: PaidFeatureGateFailReason, then retry: @escaping @Sendable () -> Void
+    ) {
         let form = ActionSheetForm()
             |> \.title .~ pure("widget.style.license::title".localized())
-            |> \.message .~ pure("widget.style.license::message".localized(with: licenseDays))
+            |> \.message .~ pure("widget.style.license::message".localized(with: reason.licenseDays))
             |> \.actions .~ [
                 .init("widget.style.license::watchAd".localized()) { [weak self] in
                     self?.router?.routeToRewardedAd { [weak self] result in
-                        self?.handleAdResult(result, then: retry)
+                        self?.handleAdResult(result, for: reason, then: retry)
                     }
                 },
                 .init("widget.style.license::showPlans".localized()) { [weak self] in
@@ -408,15 +414,17 @@ extension WidgetStyleEditViewModelImple {
         self.router?.showActionSheet(form)
     }
 
-    private func handleAdResult(_ result: RewardedAdResult, then retry: () -> Void) {
-        switch self.paidFeatureGateUsecase.widgetStyleLicenseDecision(for: result) {
-        case .grantLicenseAndContinue:
-            self.paidFeatureGateUsecase.grantCustomWidgetStyleLicense(at: Date())
+    private func handleAdResult(
+        _ result: RewardedAdResult, for reason: PaidFeatureGateFailReason, then retry: () -> Void
+    ) {
+        switch result {
+        case .rewarded, .fallbackFullScreenShown:
+            self.paidFeatureGateUsecase.grantLicense(for: reason.feature, at: Date())
             self.refreshCustomRenderAllowed()
             retry()
-        case .notifyAdUnavailable:
+        case .unavailable:
             self.notifyAdUnavailable()
-        case .continueWithoutLicense, .cancel:
+        case .dismissedBeforeReward:
             break
         }
     }

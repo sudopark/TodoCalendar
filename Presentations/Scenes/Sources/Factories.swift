@@ -87,8 +87,7 @@ public protocol AIAgentUsecaseFactory {
 public protocol BillingUsecaseFactory {
 
     var billingUsecase: any BillingUsecase { get }
-    func makeColorThemePaidFeatureGateUsecase() -> any ColorThemePaidFeatureGateUsecase
-    func makeWidgetStylePaidFeatureGateUsecase() -> any WidgetStylePaidFeatureGateUsecase
+    func makePaidFeatureGateUsecase() -> any PaidFeatureGateUsecase
 }
 
 public protocol AdUsecaseFactory {
