@@ -215,7 +215,7 @@ isBannerAdAllowed = adAvailability.isStarted && userPlan.planId == .free
 | `.fallbackFullScreenShown` | 보상형이 없어 미리 로드된 전면을 보여줌 |
 | `.unavailable` | 보상형도 전면도 없거나 노출 중 다시 불림 |
 
-컬러 테마 걸기·생성 진입점은 이 결과를 `ColorThemePaidFeatureGateUsecase.colorThemeAdOutcome(for:)` 로 해석한다 (`color-themes.md` §4).
+컬러 테마 걸기·생성 진입점은 이 결과를 `ColorThemePaidFeatureGateUsecase.colorThemeLicenseDecision(for:)` 로 해석한다 (`color-themes.md` §4).
 
 시도 순서는 보상형 → 미리 로드된 전면 → 없음이다. 보상형은 최대 5초 기다리고, 보상형 노출이 실패해도 전면으로 넘어간다. 대체 전면은 로드를 기다리지 않으며 `canExposeFullScreenAd` 를 거치지 않고 노출 이력도 남기지 않는다.
 

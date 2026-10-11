@@ -138,13 +138,13 @@ extension ColorThemeSelectViewModelImple {
     }
 
     private func handleAdResult(_ result: RewardedAdResult, then proceed: () -> Void) {
-        switch self.paidFeatureGateUsecase.colorThemeAdOutcome(for: result) {
-        case .grantLicenseAndProceed:
+        switch self.paidFeatureGateUsecase.colorThemeLicenseDecision(for: result) {
+        case .grantLicenseAndContinue:
             self.paidFeatureGateUsecase.grantColorThemeLicense(at: Date())
             proceed()
-        case .proceedWithoutLicense:
+        case .continueWithoutLicense:
             proceed()
-        case .stop:
+        case .notifyAdUnavailable, .cancel:
             break
         }
     }

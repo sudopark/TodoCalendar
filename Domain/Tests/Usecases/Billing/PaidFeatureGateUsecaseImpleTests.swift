@@ -369,20 +369,20 @@ extension PaidFeatureGateUsecaseImpleTests {
         #expect(days == [14, 30, nil])
     }
 
-    @Test("광고 결과를 사용권 부여·이번만 진행·멈춤으로 해석한다", arguments: [
-        (RewardedAdResult.rewarded, ColorThemeAdOutcome.grantLicenseAndProceed),
-        (.fallbackFullScreenShown, .grantLicenseAndProceed),
-        (.unavailable, .proceedWithoutLicense),
-        (.dismissedBeforeReward, .stop)
+    @Test("광고 결과를 사용권 부여·이번만 진행·취소로 해석한다", arguments: [
+        (RewardedAdResult.rewarded, RewardedAdLicenseDecision.grantLicenseAndContinue),
+        (.fallbackFullScreenShown, .grantLicenseAndContinue),
+        (.unavailable, .continueWithoutLicense),
+        (.dismissedBeforeReward, .cancel)
     ])
-    func colorThemeAdOutcome_mapsEachResult(
-        _ result: RewardedAdResult, _ expected: ColorThemeAdOutcome
+    func colorThemeLicenseDecision_mapsEachResult(
+        _ result: RewardedAdResult, _ expected: RewardedAdLicenseDecision
     ) {
         // given
         let usecase = self.makeUsecase(plan: self.userPlan(.free))
 
         // when
-        let outcome = usecase.colorThemeAdOutcome(for: result)
+        let outcome = usecase.colorThemeLicenseDecision(for: result)
 
         // then
         #expect(outcome == expected)
