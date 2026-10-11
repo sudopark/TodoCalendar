@@ -305,6 +305,8 @@
 "eventDetail.scheduleEvent::transform::todo_message" = "Would you like to convert this schedule to a to-do?";
 
 "eventDetail::revert" = "Undo completion";
+"eventDetail::complete::unsaved::title" = "Unsaved changes";
+"eventDetail::complete::unsaved::message" = "Changes you haven't saved won't be part of the completion record. Complete with the saved version?";
 
 // MARK: - Google calendar event
 

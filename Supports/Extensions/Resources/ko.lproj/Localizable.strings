@@ -306,6 +306,8 @@
 "eventDetail.scheduleEvent::transform::todo_message" = "이 일정을 할일로 전환할까요?";
 
 "eventDetail::revert" = "완료 취소";
+"eventDetail::complete::unsaved::title" = "저장하지 않은 변경";
+"eventDetail::complete::unsaved::message" = "저장하지 않은 변경은 완료 기록에 남지 않아요. 저장된 내용 그대로 완료할까요?";
 
 // MARK: - Google calendar event
 
