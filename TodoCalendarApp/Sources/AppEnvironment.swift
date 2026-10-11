@@ -199,11 +199,9 @@ struct AppEnvironment {
     }
 
     static var admobUnitIds: AdUnitIds {
-        // MREC 전용 단위를 따로 발급하지 않아 배너와 한 단위를 공유한다
-        let banner: String = "ca-app-pub-4980913859277199/4855632588"
         return AdUnitIds(
-            banner: banner,
-            mediumRectangle: banner,
+            banner: "ca-app-pub-4980913859277199/4855632588",
+            mediumRectangle: "ca-app-pub-4980913859277199/4957745333",
             fullScreen: "ca-app-pub-4980913859277199/7394166018",
             rewarded: "ca-app-pub-4980913859277199/9681720291"
         )
