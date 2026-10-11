@@ -78,14 +78,17 @@ final class WidgetStyleEditViewModelImple: WidgetStyleEditViewModel, @unchecked 
     
     private let variants: [WidgetVariant]
     private let widgetStyleUsecase: any WidgetStyleUsecase
+    private let paidFeatureGateUsecase: any WidgetStylePaidFeatureGateUsecase
     var router: (any WidgetStyleEditRouting)?
     
     init(
         variants: [WidgetVariant],
-        widgetStyleUsecase: any WidgetStyleUsecase
+        widgetStyleUsecase: any WidgetStyleUsecase,
+        paidFeatureGateUsecase: any WidgetStylePaidFeatureGateUsecase
     ) {
         self.variants = variants
         self.widgetStyleUsecase = widgetStyleUsecase
+        self.paidFeatureGateUsecase = paidFeatureGateUsecase
     }
     
     private struct Subject {
@@ -122,6 +125,10 @@ extension WidgetStyleEditViewModelImple {
     }
     
     func appendStyle(copying styleId: WidgetStyleId) {
+        guard self.paidFeatureGateUsecase.canCreateCustomWidgetStyleWithoutAd(at: Date()) else {
+            self.showLicenseGuide { [weak self] in self?.appendStyle(copying: styleId) }
+            return
+        }
         guard let styles = self.subject.editingStyles.value,
               let source = styles.first(where: { $0.id == styleId })
         else { return }
@@ -347,6 +354,50 @@ extension WidgetStyleEditViewModelImple {
               let saved = self.subject.savedStyles.value
         else { return false }
         return editings.hasUnsavedEdit(against: saved)
+    }
+}
+
+
+// MARK: - 커스텀 사용권
+
+extension WidgetStyleEditViewModelImple {
+
+    private func showLicenseGuide(then retry: @escaping @Sendable () -> Void) {
+        guard let licenseDays = self.paidFeatureGateUsecase.widgetStyleLicenseDays() else {
+            self.notifyAdUnavailable()
+            return
+        }
+        let form = ActionSheetForm()
+            |> \.title .~ pure("widget.style.license::title".localized())
+            |> \.message .~ pure("widget.style.license::message".localized(with: licenseDays))
+            |> \.actions .~ [
+                .init("widget.style.license::watchAd".localized()) { [weak self] in
+                    self?.router?.routeToRewardedAd { [weak self] result in
+                        self?.handleAdResult(result, then: retry)
+                    }
+                },
+                .init("widget.style.license::showPlans".localized()) { [weak self] in
+                    self?.router?.routeToPaywall()
+                },
+                .init("common.cancel".localized(), style: .cancel)
+            ]
+        self.router?.showActionSheet(form)
+    }
+
+    private func handleAdResult(_ result: RewardedAdResult, then retry: () -> Void) {
+        switch self.paidFeatureGateUsecase.widgetStyleLicenseDecision(for: result) {
+        case .grantLicenseAndContinue:
+            self.paidFeatureGateUsecase.grantCustomWidgetStyleLicense(at: Date())
+            retry()
+        case .notifyAdUnavailable:
+            self.notifyAdUnavailable()
+        case .continueWithoutLicense, .cancel:
+            break
+        }
+    }
+
+    private func notifyAdUnavailable() {
+        self.router?.showToast("widget.style.license::adUnavailable".localized())
     }
 }
 

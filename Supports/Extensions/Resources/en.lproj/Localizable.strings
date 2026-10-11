@@ -646,6 +646,11 @@
 "widget.style.edit::background::photo::remove" = "Remove photo";
 "widget.style.edit::items::section" = "Details";
 "widget.style::custom::copy_format" = "%@ - Copy";
+"widget.style.license::title" = "Custom styles need a paid plan";
+"widget.style.license::message" = "Watch a short ad to use them free for %d days.";
+"widget.style.license::watchAd" = "Watch ad";
+"widget.style.license::showPlans" = "See plans";
+"widget.style.license::adUnavailable" = "Couldn't load an ad. Please try again later.";
 "widget.doubleMonth::name" = "Calendar + Calendar";
 "widget.eventAndMonth::name" = "Events + Calendar";
 "widget.todayAndMonth::name" = "TODAY + Calendar";

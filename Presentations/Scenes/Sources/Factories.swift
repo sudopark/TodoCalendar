@@ -88,6 +88,7 @@ public protocol BillingUsecaseFactory {
 
     var billingUsecase: any BillingUsecase { get }
     func makeColorThemePaidFeatureGateUsecase() -> any ColorThemePaidFeatureGateUsecase
+    func makeWidgetStylePaidFeatureGateUsecase() -> any WidgetStylePaidFeatureGateUsecase
 }
 
 public protocol AdUsecaseFactory {

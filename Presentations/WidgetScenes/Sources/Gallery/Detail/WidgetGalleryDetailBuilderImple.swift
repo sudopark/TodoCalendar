@@ -15,13 +15,22 @@ import CommonPresentation
 final class WidgetGalleryDetailBuilderImple {
     
     private let widgetStyleUsecase: any WidgetStyleUsecase
+    private let paidFeatureGateUsecase: any WidgetStylePaidFeatureGateUsecase
+    private let paywallSceneBuilder: any PaywallSceneBuilder
+    private let rewardedAdRouter: any RewardedAdRouter
     private let viewAppearance: ViewAppearance
     
     init(
         widgetStyleUsecase: any WidgetStyleUsecase,
+        paidFeatureGateUsecase: any WidgetStylePaidFeatureGateUsecase,
+        paywallSceneBuilder: any PaywallSceneBuilder,
+        rewardedAdRouter: any RewardedAdRouter,
         viewAppearance: ViewAppearance
     ) {
         self.widgetStyleUsecase = widgetStyleUsecase
+        self.paidFeatureGateUsecase = paidFeatureGateUsecase
+        self.paywallSceneBuilder = paywallSceneBuilder
+        self.rewardedAdRouter = rewardedAdRouter
         self.viewAppearance = viewAppearance
     }
 }
@@ -42,7 +51,11 @@ extension WidgetGalleryDetailBuilderImple: WidgetGalleryDetailSceneBuilder {
         )
         let router = WidgetGalleryDetailRouter(
             styleEditSceneBuilder: WidgetStyleEditBuilderImple(
-                widgetStyleUsecase: self.widgetStyleUsecase, viewAppearance: viewAppearance
+                widgetStyleUsecase: self.widgetStyleUsecase,
+                paidFeatureGateUsecase: self.paidFeatureGateUsecase,
+                paywallSceneBuilder: self.paywallSceneBuilder,
+                rewardedAdRouter: self.rewardedAdRouter,
+                viewAppearance: viewAppearance
             )
         )
         router.scene = viewController
