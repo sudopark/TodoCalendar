@@ -22,6 +22,8 @@ public protocol WidgetStylePaidFeatureGateUsecase: Sendable {
 
     func canCreateCustomWidgetStyleWithoutAd(at now: Date) -> Bool
     func canRenderCustomWidgetStyle(at now: Date) -> Bool
+    func widgetStyleLicenseDays() -> Int?
+    func widgetStyleLicenseDecision(for result: RewardedAdResult) -> RewardedAdLicenseDecision
     func grantCustomWidgetStyleLicense(at now: Date)
 }
 
@@ -138,6 +140,10 @@ extension PaidFeatureGateUsecaseImple: WidgetStylePaidFeatureGateUsecase {
         return policy.isEnabled == false || policy.licenseDays <= 0
     }
 
+    public func widgetStyleLicenseDays() -> Int? {
+        return self.resolveWidgetStyleLicensePolicy()?.licenseDays
+    }
+
     private func resolveWidgetStyleLicensePolicy() -> (isEnabled: Bool, licenseDays: Int)? {
         let received = self.policyRepository.loadPolicy()?.widgetStyleLicense
         let fallback = self.defaultPolicy.widgetStyleLicense
@@ -162,5 +168,13 @@ extension PaidFeatureGateUsecaseImple {
 
     public func grantCustomWidgetStyleLicense(at now: Date) {
         self.widgetStyleLicenseRepository.updateLicense(.init(grantedAt: now))
+    }
+
+    public func widgetStyleLicenseDecision(for result: RewardedAdResult) -> RewardedAdLicenseDecision {
+        switch result {
+        case .rewarded, .fallbackFullScreenShown: return .grantLicenseAndContinue
+        case .unavailable: return .notifyAdUnavailable
+        case .dismissedBeforeReward: return .cancel
+        }
     }
 }
