@@ -579,9 +579,11 @@ private struct QuickAddNewTodoView: View {
             }
             .opacity(self.inputDimOpacity)
 
-            AIAgentEntryButton(badge: self.state.aiCommandBadge) {
-                self.isFocusInput = false
-                self.eventHandler.handleAIEntryButtonTap()
+            if !self.isEntering {
+                AIAgentEntryButton(badge: self.state.aiCommandBadge) {
+                    self.isFocusInput = false
+                    self.eventHandler.handleAIEntryButtonTap()
+                }
             }
         }
     }
