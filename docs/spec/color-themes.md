@@ -311,14 +311,14 @@ Radix 스케일은 12단계이고 단계마다 쓰임이 정해져 있다 — 1 
 
 ### 광고 결과 처리
 
-선택 화면의 걸기와 편집 화면의 생성 저장은 하단 안내 시트를 먼저 띄우고, 광고 결과를 `colorThemeAdOutcome(for:)` 로 해석한다. 시트를 취소하거나 딤을 탭하거나 플랜 보기로 넘어가면 걸지도 저장하지도 않는다. 시트와 광고가 끝날 때까지 다른 테마 선택·저장 재탭은 받지 않는다. 시트 문구의 사용권 기간은 Router 가 `colorThemeLicenseDays()` 로 조회하고, 해석할 수 없으면 시트 없이 광고 없음(`.unavailable`)과 같게 처리한다.
+선택 화면의 걸기와 편집 화면의 생성 저장은 하단 안내 시트를 먼저 띄우고, 광고 결과를 `colorThemeLicenseDecision(for:)` 로 해석한다. 시트를 취소하거나 딤을 탭하거나 플랜 보기로 넘어가면 걸지도 저장하지도 않는다. 시트와 광고가 끝날 때까지 다른 테마 선택·저장 재탭은 받지 않는다. 시트 문구의 사용권 기간은 Router 가 `colorThemeLicenseDays()` 로 조회하고, 해석할 수 없으면 시트 없이 광고 없음(`.unavailable`)과 같게 처리한다.
 
 | 광고 결과 | 해석 | 동작 |
 |---|---|---|
-| `.rewarded` | `grantLicenseAndProceed` | 사용권을 지금 시각으로 기록하고 걸거나 저장한다 |
-| `.fallbackFullScreenShown` | `grantLicenseAndProceed` | 위와 같다 |
-| `.unavailable` | `proceedWithoutLicense` | 사용권 없이 이번만 걸거나 저장한다 |
-| `.dismissedBeforeReward` | `stop` | 걸지 않고 저장하지 않는다. 편집 화면은 그대로 남는다 |
+| `.rewarded` | `grantLicenseAndContinue` | 사용권을 지금 시각으로 기록하고 걸거나 저장한다 |
+| `.fallbackFullScreenShown` | `grantLicenseAndContinue` | 위와 같다 |
+| `.unavailable` | `continueWithoutLicense` | 사용권 없이 이번만 걸거나 저장한다 |
+| `.dismissedBeforeReward` | `cancel` | 걸지 않고 저장하지 않는다. 편집 화면은 그대로 남는다 |
 
 ### 만료 기산
 

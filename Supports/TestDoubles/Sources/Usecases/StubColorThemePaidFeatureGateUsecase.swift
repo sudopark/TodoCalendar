@@ -26,11 +26,11 @@ open class StubColorThemePaidFeatureGateUsecase: ColorThemePaidFeatureGateUsecas
         return self.licenseDays
     }
 
-    open func colorThemeAdOutcome(for result: RewardedAdResult) -> ColorThemeAdOutcome {
+    open func colorThemeLicenseDecision(for result: RewardedAdResult) -> RewardedAdLicenseDecision {
         switch result {
-        case .rewarded, .fallbackFullScreenShown: return .grantLicenseAndProceed
-        case .unavailable: return .proceedWithoutLicense
-        case .dismissedBeforeReward: return .stop
+        case .rewarded, .fallbackFullScreenShown: return .grantLicenseAndContinue
+        case .unavailable: return .continueWithoutLicense
+        case .dismissedBeforeReward: return .cancel
         }
     }
 

@@ -13,7 +13,7 @@ public protocol ColorThemePaidFeatureGateUsecase: Sendable {
 
     func canApplyColorThemeWithoutAd(_ key: ColorSetKeys, at now: Date) -> Bool
     func colorThemeLicenseDays() -> Int?
-    func colorThemeAdOutcome(for result: RewardedAdResult) -> ColorThemeAdOutcome
+    func colorThemeLicenseDecision(for result: RewardedAdResult) -> RewardedAdLicenseDecision
     func grantColorThemeLicense(at now: Date)
 }
 
@@ -99,11 +99,11 @@ extension PaidFeatureGateUsecaseImple {
         self.licenseRepository.updateLicense(.init(grantedAt: now))
     }
 
-    public func colorThemeAdOutcome(for result: RewardedAdResult) -> ColorThemeAdOutcome {
+    public func colorThemeLicenseDecision(for result: RewardedAdResult) -> RewardedAdLicenseDecision {
         switch result {
-        case .rewarded, .fallbackFullScreenShown: return .grantLicenseAndProceed
-        case .unavailable: return .proceedWithoutLicense
-        case .dismissedBeforeReward: return .stop
+        case .rewarded, .fallbackFullScreenShown: return .grantLicenseAndContinue
+        case .unavailable: return .continueWithoutLicense
+        case .dismissedBeforeReward: return .cancel
         }
     }
 }
