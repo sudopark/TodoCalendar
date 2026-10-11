@@ -63,10 +63,12 @@ public struct CustomColorThemeBuilder: Sendable {
     public init() { }
 
     public func build(name: String, seeds: Seeds) -> ColorThemeDefinition {
-        let bg0: UIColor = self.colorMath.eightBit(self.fittedBackground(seeds.background))
-        let isLight: Bool = bg0.isLight
+        let fitted: UIColor = self.colorMath.eightBit(self.fittedBackground(seeds.background))
+        let isLight: Bool = fitted.isLight
+        let ladder: Ladder = self.ladder(form: seeds.form, isLight: isLight)
+        let bg0: UIColor = self.ceiledBackground(fitted, ladder: ladder)
         let palette = LadderPalette(
-            ladder: self.ladder(form: seeds.form, isLight: isLight),
+            ladder: ladder,
             background: OKLCH(bg0),
             accent: OKLCH(seeds.accent)
         )
@@ -316,6 +318,14 @@ extension CustomColorThemeBuilder {
             within: 0...1,
             until: towardLight ? lightBand : darkBand
         )
+    }
+
+    // 카드(bg1)가 배경보다 밝아질 자리를 남긴다
+    fileprivate func ceiledBackground(_ background: UIColor, ladder: Ladder) -> UIColor {
+        let ceiling: CGFloat = 1 - ladder.bg1.lightnessOffset
+        let current: OKLCH = OKLCH(background)
+        guard current.lightness > ceiling else { return background }
+        return self.colorMath.eightBit(current.with(lightness: ceiling).uiColor)
     }
 
     fileprivate func fittedSurface(_ seed: UIColor, isLight: Bool) -> UIColor {
