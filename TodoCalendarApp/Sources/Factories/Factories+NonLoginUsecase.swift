@@ -126,6 +126,10 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
         return self.makePaidFeatureGateUsecase()
     }
 
+    func makeWidgetStylePaidFeatureGateUsecase() -> any WidgetStylePaidFeatureGateUsecase {
+        return self.makePaidFeatureGateUsecase()
+    }
+
     var eventNotifyService: SharedEventNotifyService {
         return self.applicationBase.eventNotifyService
     }

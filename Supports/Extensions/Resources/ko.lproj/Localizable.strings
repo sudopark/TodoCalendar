@@ -647,6 +647,11 @@
 "widget.style.edit::background::photo::remove" = "사진 지우기";
 "widget.style.edit::items::section" = "세부 옵션";
 "widget.style::custom::copy_format" = "%@ - 복사됨";
+"widget.style.license::title" = "커스텀 스타일은 유료 플랜에서 쓸 수 있어요";
+"widget.style.license::message" = "짧은 광고를 보면 %d일 동안 무료로 쓸 수 있어요.";
+"widget.style.license::watchAd" = "광고 보고 쓰기";
+"widget.style.license::showPlans" = "플랜 보기";
+"widget.style.license::adUnavailable" = "광고를 불러오지 못했어요. 잠시 뒤 다시 시도해주세요.";
 "widget.doubleMonth::name" = "캘린더 + 캘린더";
 "widget.eventAndMonth::name" = "이벤트 + 캘린더";
 "widget.todayAndMonth::name" = "TODAY + 캘린더";

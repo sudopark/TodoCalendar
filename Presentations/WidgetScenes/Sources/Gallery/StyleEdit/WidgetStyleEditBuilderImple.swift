@@ -15,13 +15,22 @@ import CommonPresentation
 final class WidgetStyleEditBuilderImple {
     
     private let widgetStyleUsecase: any WidgetStyleUsecase
+    private let paidFeatureGateUsecase: any WidgetStylePaidFeatureGateUsecase
+    private let paywallSceneBuilder: any PaywallSceneBuilder
+    private let rewardedAdRouter: any RewardedAdRouter
     private let viewAppearance: ViewAppearance
     
     init(
         widgetStyleUsecase: any WidgetStyleUsecase,
+        paidFeatureGateUsecase: any WidgetStylePaidFeatureGateUsecase,
+        paywallSceneBuilder: any PaywallSceneBuilder,
+        rewardedAdRouter: any RewardedAdRouter,
         viewAppearance: ViewAppearance
     ) {
         self.widgetStyleUsecase = widgetStyleUsecase
+        self.paidFeatureGateUsecase = paidFeatureGateUsecase
+        self.paywallSceneBuilder = paywallSceneBuilder
+        self.rewardedAdRouter = rewardedAdRouter
         self.viewAppearance = viewAppearance
     }
 }
@@ -35,7 +44,9 @@ extension WidgetStyleEditBuilderImple: WidgetStyleEditSceneBuilder {
     ) -> any WidgetStyleEditScene {
         
         let viewModel = WidgetStyleEditViewModelImple(
-            variants: variants, widgetStyleUsecase: self.widgetStyleUsecase
+            variants: variants,
+            widgetStyleUsecase: self.widgetStyleUsecase,
+            paidFeatureGateUsecase: self.paidFeatureGateUsecase
         )
         let viewController = WidgetStyleEditViewController(
             variants: variants,
@@ -43,7 +54,10 @@ extension WidgetStyleEditBuilderImple: WidgetStyleEditSceneBuilder {
             viewModel: viewModel,
             viewAppearance: viewAppearance
         )
-        let router = WidgetStyleEditRouter()
+        let router = WidgetStyleEditRouter(
+            paywallSceneBuilder: self.paywallSceneBuilder,
+            rewardedAdRouter: self.rewardedAdRouter
+        )
         router.scene = viewController
         viewModel.router = router
         return viewController
