@@ -275,9 +275,61 @@ struct CustomColorThemeBuilderTests {
     @Test("구간 안의 배경은 그대로 둔다")
     func background_inBand_untouched() {
         [0xF1F0EF, 0xFFFFFF, 0x111113, 0x000000].forEach {
-            let seeds = self.seeds(background: $0, accent: 0xE54D2E, form: .grouped)
+            let seeds = self.seeds(background: $0, accent: 0xE54D2E, form: .filled)
             self.expectSameRGB(
                 self.builder.build(name: "t", seeds: seeds).bg0, UIColor(rgb: $0)
+            )
+        }
+    }
+
+    @Test("묶음 밝은 계열에서 배경이 카드 여유를 못 남기면 배경을 내려 카드와 오늘 칸이 뜬다")
+    func background_groupedLight_aboveCeiling_lowersSoSurfaceFloats() {
+        [0xFFFFFF, 0xF5F5F5].forEach {
+            // given
+            let seeds = self.seeds(background: $0, accent: 0xE54D2E, form: .grouped)
+
+            // when
+            let definition = self.builder.build(name: "t", seeds: seeds)
+
+            // then
+            self.expectSameRGB(definition.bg0, UIColor(rgb: 0xF0F0F0))
+            self.expectSameRGB(definition.bg1, UIColor(rgb: 0xFFFFFF))
+            #expect(definition.bg1.relativeLuminance > definition.bg0.relativeLuminance)
+            #expect(definition.todayBackground.maxChannelGap(to: definition.bg0) > 1.0 / 255)
+        }
+    }
+
+    @Test("채도가 있는 밝은 배경은 hue 와 채도를 두고 명도만 내려가 밝은 구간에 남는다")
+    func background_groupedLight_chromaticAboveCeiling_keepsHueAndBand() {
+        // given
+        let seeds = self.seeds(background: 0xFFF8E7, accent: 0xE54D2E, form: .grouped)
+
+        // when
+        let bg0 = self.builder.build(name: "t", seeds: seeds).bg0
+
+        // then
+        self.expectSameRGB(bg0, UIColor(rgb: 0xF7F0DF))
+        #expect(bg0.relativeLuminance >= 0.8161)
+        #expect(abs(bg0.oklch.hue - seeds.background.oklch.hue) < 3)
+    }
+
+    @Test("라인업 묶음 밝은 배경 #F1F0EF 는 상한과 거의 같아 값이 그대로다")
+    func background_groupedLight_lineupAtCeiling_keepsRGB() {
+        let seeds = self.seeds(background: 0xF1F0EF, accent: 0xE54D2E, form: .grouped)
+        self.expectSameRGB(
+            self.builder.build(name: "t", seeds: seeds).bg0, UIColor(rgb: 0xF1F0EF)
+        )
+    }
+
+    @Test("채움·선 형과 어두운 계열은 배경을 내리지 않는다")
+    func background_noCeiling_forOtherFormsAndDark() {
+        let cases: [(Int, CustomColorThemeBuilder.Seeds.Form)] = [
+            (0xFFFFFF, .filled), (0xFFFFFF, .outlined), (0x000000, .grouped), (0x111113, .grouped)
+        ]
+        cases.forEach { background, form in
+            let seeds = self.seeds(background: background, accent: 0xE54D2E, form: form)
+            self.expectSameRGB(
+                self.builder.build(name: "t", seeds: seeds).bg0, UIColor(rgb: background)
             )
         }
     }
@@ -617,5 +669,14 @@ private extension UIColor {
 
     func contrastRatio(with other: UIColor) -> CGFloat {
         return CustomColorThemeBuilder.ColorMath().contrastRatio(self, other)
+    }
+
+    func maxChannelGap(to other: UIColor) -> CGFloat {
+        let channels: (UIColor) -> [CGFloat] = { color in
+            var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+            color.getRed(&r, green: &g, blue: &b, alpha: &a)
+            return [r, g, b]
+        }
+        return zip(channels(self), channels(other)).map { abs($0 - $1) }.max() ?? 0
     }
 }
