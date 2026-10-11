@@ -33,6 +33,7 @@ public final class FullScreenAdRouterImple: NSObject, @unchecked Sendable {
         scope: FullScreenAdExposureRecord.Scope,
         isFromAppLaunch: Bool
     ) {
+        guard viewController.viewIfLoaded?.window != nil else { return }
         let now = Date()
         guard self.adExposureUsecase.canExposeFullScreenAd(
             scope: scope, isFromAppLaunch: isFromAppLaunch, at: now

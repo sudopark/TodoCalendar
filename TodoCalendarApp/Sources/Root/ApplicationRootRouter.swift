@@ -333,7 +333,7 @@ extension ApplicationRootRouter {
         self.changeUsecaseFactroy(
             by: prepareResult.latestLoginAcount?.auth
         )
-        let interactor = self.refreshRoot()
+        let interactor = self.refreshRoot(isInitialScene: true)
         self.setupBaseViewAppearanceSetting()
         return interactor
     }
@@ -348,7 +348,7 @@ extension ApplicationRootRouter {
     ) -> (any MainSceneInteractor)? {
         self.viewAppearanceStore.replaceCurrentCustomColorTheme(prepareResult?.currentCustomColorTheme)
         self.changeUsecaseFactroy(by: auth)
-        return self.refreshRoot()
+        return self.refreshRoot(isInitialScene: false)
     }
     
     func showConfirm(dialog info: ConfirmDialogInfo) {
@@ -424,7 +424,7 @@ extension ApplicationRootRouter {
     }
     
     @MainActor
-    private func refreshRoot() -> (any MainSceneInteractor)? {
+    private func refreshRoot(isInitialScene: Bool) -> (any MainSceneInteractor)? {
         
         let builder = MainSceneBuilerImple(
             usecaseFactory: self.usecaseFactory,
@@ -433,7 +433,8 @@ extension ApplicationRootRouter {
             settingSceneBuilder: self.settingSceneBuilder(),
             mobileAdService: self.applicationBase.mobileAdService,
             fullScreenAdRouter: self.fullScreenAdRouter(),
-            adViewBuilder: self.adViewBuilder()
+            adViewBuilder: self.adViewBuilder(),
+            isInitialScene: isInitialScene
         )
         let mainScene = builder.makeMainScene()
         self.window.rootViewController = mainScene

@@ -39,6 +39,7 @@ final class MainViewController: UIViewController, MainScene {
     private let mobileAdService: any MobileAdService
     private let fullScreenAdRouter: (any FullScreenAdRouter)?
     private let adExposureUsecase: any AdExposureUsecase
+    private let isInitialScene: Bool
     private var didPrepareAd: Bool = false
 
     @MainActor
@@ -52,7 +53,8 @@ final class MainViewController: UIViewController, MainScene {
         mobileAdService: any MobileAdService,
         fullScreenAdRouter: (any FullScreenAdRouter)?,
         adExposureUsecase: any AdExposureUsecase,
-        adViewBuilder: (any AdViewBuilder)?
+        adViewBuilder: (any AdViewBuilder)?,
+        isInitialScene: Bool
     ) {
         self.viewModel = viewModel
         self.viewAppearance = viewAppearance
@@ -60,6 +62,7 @@ final class MainViewController: UIViewController, MainScene {
         self.fullScreenAdRouter = fullScreenAdRouter
         self.adExposureUsecase = adExposureUsecase
         self.bottomBannerView = adViewBuilder?.makeBannerUIView(size: .banner)
+        self.isInitialScene = isInitialScene
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -93,7 +96,7 @@ final class MainViewController: UIViewController, MainScene {
                 }
             }
             
-            guard self.isLaunchedFromAppIcon else { return }
+            guard self.isInitialScene, self.isLaunchedFromAppIcon else { return }
             self.fullScreenAdRouter?.showFullScreenAd(
                 from: self, scope: .application, isFromAppLaunch: true
             )
