@@ -16,7 +16,7 @@ public final class WidgetGalleryBuilderImple {
 
     private let uiSettingUsecase: any UISettingUsecase
     private let widgetStyleUsecase: any WidgetStyleUsecase
-    private let paidFeatureGateUsecase: any WidgetStylePaidFeatureGateUsecase
+    private let paidFeatureGateUsecase: any PaidFeatureGateUsecase
     private let paywallSceneBuilder: any PaywallSceneBuilder
     private let rewardedAdRouter: any RewardedAdRouter
     private let viewAppearance: ViewAppearance
@@ -24,7 +24,7 @@ public final class WidgetGalleryBuilderImple {
     public init(
         uiSettingUsecase: any UISettingUsecase,
         widgetStyleUsecase: any WidgetStyleUsecase,
-        paidFeatureGateUsecase: any WidgetStylePaidFeatureGateUsecase,
+        paidFeatureGateUsecase: any PaidFeatureGateUsecase,
         paywallSceneBuilder: any PaywallSceneBuilder,
         rewardedAdRouter: any RewardedAdRouter,
         viewAppearance: ViewAppearance

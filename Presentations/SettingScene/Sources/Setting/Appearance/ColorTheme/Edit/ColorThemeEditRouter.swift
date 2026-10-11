@@ -7,22 +7,43 @@
 //
 
 import UIKit
+import Domain
 import Scenes
 import CommonPresentation
 
 
 // MARK: - Routing
 
-protocol ColorThemeEditRouting: ColorThemeAdGuideRouting, Sendable { }
+protocol ColorThemeEditRouting: Routing, Sendable {
+
+    func showPaidFeatureAdGuide(
+        _ reason: PaidFeatureGateFailReason, onFinished: @escaping @Sendable (Bool) -> Void
+    )
+}
 
 // MARK: - Router
 
-final class ColorThemeEditRouter: ColorThemeAdGuideRouter, ColorThemeEditRouting, @unchecked Sendable {
+final class ColorThemeEditRouter: BaseRouterImple, ColorThemeEditRouting, @unchecked Sendable {
+
+    private let adGuideSceneBuilder: any PaidFeatureAdGuideSceneBuilder
+
+    init(adGuideSceneBuilder: any PaidFeatureAdGuideSceneBuilder) {
+        self.adGuideSceneBuilder = adGuideSceneBuilder
+    }
 
     override func closeScene(animate: Bool, _ dismissed: (@Sendable () -> Void)?) {
         Task { @MainActor in
             self.scene?.navigationController?.popViewController(animated: animate)
             dismissed?()
+        }
+    }
+
+    func showPaidFeatureAdGuide(
+        _ reason: PaidFeatureGateFailReason, onFinished: @escaping @Sendable (Bool) -> Void
+    ) {
+        Task { @MainActor in
+            let guide = self.adGuideSceneBuilder.makePaidFeatureAdGuideScene(reason: reason, onFinished: onFinished)
+            self.showBottomSlide(guide)
         }
     }
 }

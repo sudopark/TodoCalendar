@@ -518,7 +518,16 @@ extension ApplicationRootRouter {
             paywallSceneBuilder: self.paywallSceneBuilder(),
             widgetGallerySceneBuilder: self.widgetGallerySceneBuilder(),
             privacyOptionsFormRouter: self.applicationBase.mobileAdService,
-            rewardedAdRouter: self.rewardedAdRouter()
+            adGuideSceneBuilder: self.paidFeatureAdGuideSceneBuilder()
+        )
+    }
+
+    private func paidFeatureAdGuideSceneBuilder() -> any PaidFeatureAdGuideSceneBuilder {
+        return PaidFeatureAdGuideBuilderImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearanceStore.appearance,
+            rewardedAdRouter: self.rewardedAdRouter(),
+            paywallSceneBuilder: self.paywallSceneBuilder()
         )
     }
 
@@ -526,7 +535,7 @@ extension ApplicationRootRouter {
         return WidgetGalleryBuilderImple(
             uiSettingUsecase: self.usecaseFactory.makeUISettingUsecase(),
             widgetStyleUsecase: self.usecaseFactory.makeWidgetStyleUsecase(),
-            paidFeatureGateUsecase: self.usecaseFactory.makeWidgetStylePaidFeatureGateUsecase(),
+            paidFeatureGateUsecase: self.usecaseFactory.makePaidFeatureGateUsecase(),
             paywallSceneBuilder: self.paywallSceneBuilder(),
             rewardedAdRouter: self.rewardedAdRouter(),
             viewAppearance: self.viewAppearanceStore.appearance

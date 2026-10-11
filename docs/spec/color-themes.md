@@ -290,7 +290,7 @@ Radix 스케일은 12단계이고 단계마다 쓰임이 정해져 있다 — 1 
 
 ## 4. 사용권
 
-무료 유저가 유료 테마를 쓰는 권리다. 판단은 `ColorThemePaidFeatureGateUsecase`(`Domain/Sources/Usecases/Billing/PaidFeatureGateUsecase.swift`)의 요건 메서드에서 내리고, 선택 화면·생성 저장·앱 시작 게이트는 이 답만 읽는다. 사용권은 전체 테마에 하나다 (#1197).
+무료 유저가 유료 테마를 쓰는 권리다. 판단은 `PaidFeatureGateUsecase.check(.colorTheme(_), at:)`(`Domain/Sources/Usecases/Billing/PaidFeatureGateUsecase.swift`)가 내리고, 선택 화면·생성 저장·앱 시작 게이트는 이 답만 읽는다. 사용권은 전체 테마에 하나다 (#1197).
 
 무료 테마는 `.systemTheme`·`.defaultLight`·`.defaultDark` 다. `.appTheme(_)` 와 커스텀 테마는 유료 테마다.
 
@@ -304,27 +304,27 @@ Radix 스케일은 12단계이고 단계마다 쓰임이 정해져 있다 — 1 
 
 - **보류**는 둘 중 하나다. plan 을 아직 못 받았거나(`latestUserPlan() == nil`), 앱이 모르는 plan 이라 `isPaid == nil` 이다. 보류에는 광고도 게이트도 요구하지 않는다. 정책을 받지 못한 상태는 보류가 아니다. 기본 정책으로 판정한다.
 - 정책의 `enabled` 가 `false` 이면 게이트를 끈 것이라 허용한다.
-- 소비자는 `canApplyColorThemeWithoutAd` 가 `false` 일 때 광고를 띄운다. 별도 게이트 판정 메서드는 없다. 유료 → 무료로 돌아와도 별도 상태 없이 기록된 부여 시각으로만 판정하므로, 남은 기간이 있으면 그대로 유효하다.
-- 테마 생성도 같은 판정을 쓴다. 기능 enum 같은 일반화는 하지 않는다.
+- 막히면 `check` 가 `PaidFeatureGateFailReason`(기능·사용권 일수)을 던지고, 소비자는 그 사유로 광고 안내 시트를 띄운다. 유료 → 무료로 돌아와도 별도 상태 없이 기록된 부여 시각으로만 판정하므로, 남은 기간이 있으면 그대로 유효하다.
+- 테마 생성도 같은 판정을 쓴다.
 
 ### 테마 생성 광고
 
-새 커스텀 테마를 저장할 때 그 테마 키(`.custom(uuid)`)로 `canApplyColorThemeWithoutAd` 를 물어 `false` 면 광고를 띄운다. 판정표대로 무료 플랜이라도 사용권이 유효하면 광고 없이 만든다. 기존 테마 수정 저장은 이 판정을 보지 않는다. 저장 직후 그 테마를 걸 때는 다시 광고를 띄우지 않는다.
+새 커스텀 테마를 저장할 때 그 테마 키(`.custom(uuid)`)로 `check(.colorTheme(_), at:)` 를 불러 막히면 광고 안내 시트를 띄운다. 판정표대로 무료 플랜이라도 사용권이 유효하면 광고 없이 만든다. 기존 테마 수정 저장은 이 판정을 보지 않는다. 저장 직후 그 테마를 걸 때는 다시 광고를 띄우지 않는다.
 
 ### 광고 결과 처리
 
-선택 화면의 걸기와 편집 화면의 생성 저장은 하단 안내 시트를 먼저 띄우고, 광고 결과를 `colorThemeLicenseDecision(for:)` 로 해석한다. 시트를 취소하거나 딤을 탭하거나 플랜 보기로 넘어가면 걸지도 저장하지도 않는다. 시트와 광고가 끝날 때까지 다른 테마 선택·저장 재탭은 받지 않는다. 시트 문구의 사용권 기간은 Router 가 `colorThemeLicenseDays()` 로 조회하고, 해석할 수 없으면 시트 없이 광고 없음(`.unavailable`)과 같게 처리한다.
+선택 화면의 걸기와 편집 화면의 생성 저장은 BillingScenes 의 하단 안내 시트를 먼저 띄운다. 광고 결과는 시트 VM 이 해석해 진행 여부만 돌려준다. 진행이면 화면이 같은 걸기·저장을 다시 부르고 게이트가 다시 검사한다. 시트를 취소하거나 딤을 탭하거나 플랜 보기로 넘어가면 걸지도 저장하지도 않는다. 시트와 광고가 끝날 때까지 다른 테마 선택·저장 재탭은 받지 않는다. 시트 문구의 사용권 기간은 막힌 사유에 실린 값이다.
 
-| 광고 결과 | 해석 | 동작 |
-|---|---|---|
-| `.rewarded` | `grantLicenseAndContinue` | 사용권을 지금 시각으로 기록하고 걸거나 저장한다 |
-| `.fallbackFullScreenShown` | `grantLicenseAndContinue` | 위와 같다 |
-| `.unavailable` | `continueWithoutLicense` | 사용권 없이 이번만 걸거나 저장한다 |
-| `.dismissedBeforeReward` | `cancel` | 걸지 않고 저장하지 않는다. 편집 화면은 그대로 남는다 |
+| 광고 결과 | 동작 |
+|---|---|
+| `.rewarded` | 사용권을 지금 시각으로 기록하고 진행을 넘긴다. 다시 검사하면 통과해 걸거나 저장한다 |
+| `.fallbackFullScreenShown` | 위와 같다 |
+| `.unavailable` | 기록 없이 진행을 넘긴다. 다시 검사하면 막혀 시트가 다시 뜬다. 보상형과 대체 전면이 모두 없을 때만 나온다 |
+| `.dismissedBeforeReward` | 걸지 않고 저장하지 않는다. 편집 화면은 그대로 남는다 |
 
 ### 만료 기산
 
-`grantColorThemeLicense(at:)` 가 기존 기록을 부여 시각으로 덮어쓴다. 사용권은 `부여 시각 <= now < 부여 시각 + n×24시간` 일 때만 유효하다. 달력 일수가 아니라 24시간 단위로 센다.
+`grantLicense(for: .colorTheme(_), at:)` 가 기존 기록을 부여 시각으로 덮어쓴다. 사용권은 `부여 시각 <= now < 부여 시각 + n×24시간` 일 때만 유효하다. 달력 일수가 아니라 24시간 단위로 센다.
 
 ### 기본값과 속성별 폴백
 

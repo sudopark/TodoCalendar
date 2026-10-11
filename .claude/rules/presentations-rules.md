@@ -230,7 +230,7 @@ private struct Subject {
 | `Scenes/Sources/Scenes+Member.swift` | SignInScene, ManageAccountScene |
 | `Scenes/Sources/Scenes+Setting.swift` | SettingItemListScene, EventTagListScene, EventTagDetailScene |
 | `Scenes/Sources/Scenes+AIAgent.swift` | AIAgentCommandScene, AIAgentKeyboardInputScene, AIAgentImageCommandScene |
-| `Scenes/Sources/Scenes+Billing.swift` | PaywallScene |
+| `Scenes/Sources/Scenes+Billing.swift` | PaywallScene, PaidFeatureAdGuideSceneBuilder |
 | `Scenes/Sources/AccessibilityID.swift` | AccessibilityID (e2e 접근성 식별자 정본) |
 
 다른 모듈에서 참조 필요한 신규 Scene 프로토콜은 위 파일에 추가. 모듈 내부 전용은 해당 모듈 `XxxScene+Builder.swift`.

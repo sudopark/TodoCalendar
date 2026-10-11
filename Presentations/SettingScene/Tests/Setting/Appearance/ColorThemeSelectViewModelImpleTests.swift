@@ -11,6 +11,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Scenes
 import Extensions
 import UnitTestHelpKit
 import TestDoubles
@@ -23,7 +24,7 @@ class ColorThemeSelectViewModelImpleTests: BaseTestCase, PublisherWaitable {
     var cancelBag: Set<AnyCancellable>!
     private var spyRouter: SpyRouter!
     private var spyUISettingUsecase: StubUISettingUsecase!
-    private var stubGateUsecase: StubColorThemePaidFeatureGateUsecase!
+    private var stubGateUsecase: StubPaidFeatureGateUsecase!
     
     override func setUpWithError() throws {
         self.cancelBag = .init()
@@ -49,12 +50,10 @@ class ColorThemeSelectViewModelImpleTests: BaseTestCase, PublisherWaitable {
     
     private func makeViewModel(
         customThemes: [CustomColorTheme] = [],
-        canApplyWithoutAd: Bool = true,
-        adResult: RewardedAdResult? = nil
+        canApplyWithoutAd: Bool = true
     ) -> ColorThemeSelectViewModelImple {
         self.spyUISettingUsecase.stubCustomColorThemes = customThemes
-        self.stubGateUsecase.canApplyWithoutAd = canApplyWithoutAd
-        self.spyRouter.stubAdResult = adResult
+        self.stubGateUsecase.mockBlockedReason = canApplyWithoutAd ? nil : self.applyReason
         let calendarSettingUsecase = StubCalendarSettingUsecase()
         calendarSettingUsecase.prepare()
         _ = self.spyUISettingUsecase.loadSavedAppearanceSetting()
@@ -364,6 +363,8 @@ extension ColorThemeSelectViewModelImpleTests {
         return self.spyUISettingUsecase.didChangeAppearanceSetting?.calendar.colorSetKey
     }
     
+    private var applyReason: PaidFeatureGateFailReason { .init(feature: .colorTheme(.appTheme(.tomato)), licenseDays: 7) }
+    
     func testViewModel_whenGateAllowsWithoutAd_appliesWithoutGuide() {
         // given
         let viewModel = self.makeViewModel(canApplyWithoutAd: true)
@@ -373,10 +374,10 @@ extension ColorThemeSelectViewModelImpleTests {
         
         // then
         XCTAssertEqual(self.appliedColorSetKey, .appTheme(.tomato))
-        XCTAssertNil(self.spyRouter.didShowColorThemeAdGuideWith)
+        XCTAssertNil(self.spyRouter.didShowPaidFeatureAdGuideWith)
     }
     
-    func testViewModel_whenPaidThemeWithoutLicense_showsApplyGuide() {
+    func testViewModel_whenPaidThemeWithoutLicense_showsGuideWithGateReason() {
         // given
         let viewModel = self.makeViewModel(canApplyWithoutAd: false)
         
@@ -384,51 +385,34 @@ extension ColorThemeSelectViewModelImpleTests {
         viewModel.selectTheme(self.paidTheme)
         
         // then
-        XCTAssertEqual(self.spyRouter.didShowColorThemeAdGuideWith, .applyTheme)
+        XCTAssertEqual(self.spyRouter.didShowPaidFeatureAdGuideWith, self.applyReason)
+        XCTAssertEqual(self.stubGateUsecase.didCheckFeature, .colorTheme(.appTheme(.tomato)))
         XCTAssertNil(self.spyUISettingUsecase.didChangeAppearanceSetting)
     }
     
-    func testViewModel_whenApplyAdRewarded_grantsLicenseAndApplies() {
-        [RewardedAdResult.rewarded, .fallbackFullScreenShown].forEach { result in
-            // given
-            self.spyUISettingUsecase = .init()
-            self.stubGateUsecase = .init()
-            let viewModel = self.makeViewModel(canApplyWithoutAd: false, adResult: result)
-            let before = Date()
-            
-            // when
-            viewModel.selectTheme(self.paidTheme)
-            
-            // then
-            let grantedAt = self.stubGateUsecase.didGrantLicenseAt
-            XCTAssertEqual(grantedAt.map { (before...Date()).contains($0) }, true, "\(result)")
-            XCTAssertEqual(self.appliedColorSetKey, .appTheme(.tomato), "\(result)")
-        }
-    }
-    
-    func testViewModel_whenApplyAdUnavailable_appliesWithoutLicense() {
+    func testViewModel_whenGuideFinishedToProceed_checksAgainAndApplies() {
         // given
-        let viewModel = self.makeViewModel(canApplyWithoutAd: false, adResult: .unavailable)
+        let viewModel = self.makeViewModel(canApplyWithoutAd: false)
+        viewModel.selectTheme(self.paidTheme)
         
         // when
-        viewModel.selectTheme(self.paidTheme)
+        self.stubGateUsecase.mockBlockedReason = nil
+        self.spyRouter.finishAdGuide(shouldProceed: true)
         
         // then
         XCTAssertEqual(self.appliedColorSetKey, .appTheme(.tomato))
-        XCTAssertNil(self.stubGateUsecase.didGrantLicenseAt)
     }
     
-    func testViewModel_whenApplyAdDismissedBeforeReward_doesNotApply() {
+    func testViewModel_whenGuideFinishedWithoutProceed_doesNotApply() {
         // given
-        let viewModel = self.makeViewModel(canApplyWithoutAd: false, adResult: .dismissedBeforeReward)
-        
-        // when
+        let viewModel = self.makeViewModel(canApplyWithoutAd: false)
         viewModel.selectTheme(self.paidTheme)
         
+        // when
+        self.spyRouter.finishAdGuide(shouldProceed: false)
+        
         // then
-        XCTAssertEqual(self.spyRouter.didShowColorThemeAdGuideWith, .applyTheme)
         XCTAssertNil(self.spyUISettingUsecase.didChangeAppearanceSetting)
-        XCTAssertNil(self.stubGateUsecase.didGrantLicenseAt)
     }
     
     func testViewModel_whenApplyGuideShowing_ignoresOtherSelection() {
@@ -441,40 +425,40 @@ extension ColorThemeSelectViewModelImpleTests {
         
         // then
         XCTAssertNil(self.spyUISettingUsecase.didChangeAppearanceSetting)
-        XCTAssertEqual(self.spyRouter.didShowColorThemeAdGuideWith, .applyTheme)
-        self.spyRouter.didShowColorThemeAdGuideWith = nil
+        XCTAssertEqual(self.spyRouter.didShowPaidFeatureAdGuideWith, self.applyReason)
+        self.spyRouter.didShowPaidFeatureAdGuideWith = nil
         viewModel.selectTheme(self.paidTheme)
-        XCTAssertNil(self.spyRouter.didShowColorThemeAdGuideWith)
+        XCTAssertNil(self.spyRouter.didShowPaidFeatureAdGuideWith)
     }
     
     func testViewModel_whenApplyGuideClosedWithoutAd_allowsSelectionAgain() {
         // given
         let viewModel = self.makeViewModel(canApplyWithoutAd: false)
         viewModel.selectTheme(self.paidTheme)
-        self.spyRouter.didShowColorThemeAdGuideOnFinished?(nil)
-        self.spyRouter.didShowColorThemeAdGuideWith = nil
+        self.spyRouter.finishAdGuide(shouldProceed: false)
+        self.spyRouter.didShowPaidFeatureAdGuideWith = nil
         
         // when
         viewModel.selectTheme(self.paidTheme)
         
         // then
-        XCTAssertEqual(self.spyRouter.didShowColorThemeAdGuideWith, .applyTheme)
+        XCTAssertEqual(self.spyRouter.didShowPaidFeatureAdGuideWith, self.applyReason)
         XCTAssertNil(self.spyUISettingUsecase.didChangeAppearanceSetting)
-        XCTAssertNil(self.stubGateUsecase.didGrantLicenseAt)
     }
     
     func testViewModel_whenApplyGuideFinishedTwice_handlesFirstResultOnly() {
         // given
         let viewModel = self.makeViewModel(canApplyWithoutAd: false)
         viewModel.selectTheme(self.paidTheme)
+        let firstFinished = self.spyRouter.didShowPaidFeatureAdGuideOnFinished
         
         // when
-        self.spyRouter.didShowColorThemeAdGuideOnFinished?(.unavailable)
-        self.spyRouter.didShowColorThemeAdGuideOnFinished?(.rewarded)
+        firstFinished?(false)
+        self.stubGateUsecase.mockBlockedReason = nil
+        firstFinished?(true)
         
         // then
-        XCTAssertEqual(self.appliedColorSetKey, .appTheme(.tomato))
-        XCTAssertNil(self.stubGateUsecase.didGrantLicenseAt)
+        XCTAssertNil(self.spyUISettingUsecase.didChangeAppearanceSetting)
     }
     
     func testViewModel_whenNewThemeSaved_appliesWithoutGuide() {
@@ -487,7 +471,7 @@ extension ColorThemeSelectViewModelImpleTests {
         
         // then
         XCTAssertEqual(self.spyUISettingUsecase.didSelectCustomColorTheme, newTheme)
-        XCTAssertNil(self.spyRouter.didShowColorThemeAdGuideWith)
+        XCTAssertNil(self.spyRouter.didShowPaidFeatureAdGuideWith)
     }
 }
 
@@ -506,16 +490,17 @@ private final class SpyRouter: BaseSpyRouter, ColorThemeSelectRouting, @unchecke
         self.didRouteToEditCustomThemeListener = listener
     }
 
-    var stubAdResult: RewardedAdResult?
-    var didShowColorThemeAdGuideWith: ColorThemeAdGuidePurpose?
-    var didShowColorThemeAdGuideOnFinished: (@Sendable (RewardedAdResult?) -> Void)?
-    func showColorThemeAdGuide(
-        _ purpose: ColorThemeAdGuidePurpose,
-        onFinished: @escaping @Sendable (RewardedAdResult?) -> Void
+    var didShowPaidFeatureAdGuideWith: PaidFeatureGateFailReason?
+    var didShowPaidFeatureAdGuideOnFinished: (@Sendable (Bool) -> Void)?
+    func showPaidFeatureAdGuide(
+        _ reason: PaidFeatureGateFailReason,
+        onFinished: @escaping @Sendable (Bool) -> Void
     ) {
-        self.didShowColorThemeAdGuideWith = purpose
-        self.didShowColorThemeAdGuideOnFinished = onFinished
-        guard let result = self.stubAdResult else { return }
-        onFinished(result)
+        self.didShowPaidFeatureAdGuideWith = reason
+        self.didShowPaidFeatureAdGuideOnFinished = onFinished
+    }
+
+    func finishAdGuide(shouldProceed: Bool) {
+        self.didShowPaidFeatureAdGuideOnFinished?(shouldProceed)
     }
 }

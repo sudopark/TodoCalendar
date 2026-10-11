@@ -12,6 +12,7 @@ import Domain
 import Extensions
 import CommonPresentation
 import SnapshotTestHelpKit
+import Scenes
 
 @testable import BillingScenes
 
@@ -484,6 +485,41 @@ extension BillingScenesSnapshots {
                 ]
                 state.topupTitle = "billing::paywall::topup::title".localized()
                 state.isPurchasing = false
+            }
+        }
+    }
+
+    // MARK: - AdGuide/PaidFeatureAdGuideView
+
+    @MainActor
+    private func makeAdGuideView(
+        _ appearance: ViewAppearance, _ reason: PaidFeatureGateFailReason
+    ) -> some View {
+        var container = PaidFeatureAdGuideContainerView(
+            viewAppearance: appearance, eventHandlers: PaidFeatureAdGuideViewEventHandler()
+        )
+        container.stateBinding = { $0.reason = reason }
+        return container
+    }
+
+    @MainActor
+    func test_paidFeatureAdGuide_colorTheme() {
+        captureSnapshotPair(named: "paidFeatureAdGuide_colorTheme", layout: .fullScreen) { theme in
+            let appearance = self.makeAppearance(theme)
+            return ZStack {
+                appearance.colorSet.bg1.asColor.ignoresSafeArea()
+                self.makeAdGuideView(appearance, .init(feature: .colorTheme(.appTheme(.tomato)), licenseDays: 7))
+            }
+        }
+    }
+
+    @MainActor
+    func test_paidFeatureAdGuide_customizeWidget() {
+        captureSnapshotPair(named: "paidFeatureAdGuide_customizeWidget", layout: .fullScreen) { theme in
+            let appearance = self.makeAppearance(theme)
+            return ZStack {
+                appearance.colorSet.bg1.asColor.ignoresSafeArea()
+                self.makeAdGuideView(appearance, .init(feature: .customizeWidget, licenseDays: 7))
             }
         }
     }
