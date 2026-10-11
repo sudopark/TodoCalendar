@@ -12,11 +12,9 @@ import Scenes
 import CommonPresentation
 
 
-protocol WidgetStyleEditRouting: Routing {
+protocol WidgetStyleEditRouting: WidgetStyleLicenseGuideRouting {
 
     func routeToPhotoPick(onPick: @escaping @Sendable (Data?) -> Void)
-    func routeToRewardedAd(completion: @escaping @Sendable (RewardedAdResult) -> Void)
-    func routeToPaywall()
 }
 
 final class WidgetStyleEditRouter: BaseRouterImple, WidgetStyleEditRouting, @unchecked Sendable {

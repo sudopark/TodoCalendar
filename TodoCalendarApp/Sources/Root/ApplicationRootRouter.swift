@@ -438,7 +438,21 @@ extension ApplicationRootRouter {
         let mainScene = builder.makeMainScene()
         self.window.rootViewController = mainScene
         self.window.makeKeyAndVisible()
+        self.deepLinkHandler.attach(widgetHandler: self.widgetDeepLinkHandler())
         return mainScene.interactor
+    }
+
+    private func widgetDeepLinkHandler() -> any DeepLinkHandler {
+        return WidgetDeepLinkHandlerImple(
+            paidFeatureGateUsecase: self.usecaseFactory.makeWidgetStylePaidFeatureGateUsecase(),
+            rewardedAdRouter: self.rewardedAdRouter(),
+            paywallSceneBuilder: self.paywallSceneBuilder(),
+            topScene: { [weak self] in
+                let top = self?.window.rootViewController?.topPresentedViewController()
+                let visible = (top as? UINavigationController)?.topViewController ?? top
+                return visible as? any Scenes.Scene
+            }
+        )
     }
     
     private func adViewBuilder() -> any AdViewBuilder {

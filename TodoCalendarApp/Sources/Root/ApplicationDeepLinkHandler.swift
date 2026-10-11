@@ -20,6 +20,9 @@ final class ApplicationDeepLinkHandlerImple: @unchecked Sendable {
     weak var appRouter: (any ApplicationRouting)?
     private weak var calendarHandler: (any DeepLinkHandler)?
     private var pendingCalendarLink: PendingDeepLink?
+    // 위젯 핸들러는 화면 트리 밖이라 여기서 붙잡지 않으면 곧바로 해제된다
+    private var widgetHandler: (any DeepLinkHandler)?
+    private var pendingWidgetLink: PendingDeepLink?
     
     init() { }
 }
@@ -31,6 +34,13 @@ extension ApplicationDeepLinkHandlerImple {
         guard let pending = self.pendingCalendarLink else { return }
         self.pendingCalendarLink = nil
         _ = calendarHandler.handleLink(pending)
+    }
+    
+    func attach(widgetHandler: any DeepLinkHandler) {
+        self.widgetHandler = widgetHandler
+        guard let pending = self.pendingWidgetLink else { return }
+        self.pendingWidgetLink = nil
+        _ = widgetHandler.handleLink(pending)
     }
     
     func handleLink(_ url: URL) -> Bool {
@@ -47,6 +57,14 @@ extension ApplicationDeepLinkHandlerImple {
                 guard let handler = self.calendarHandler
                 else {
                     self.pendingCalendarLink = link
+                    return .handle
+                }
+                return handler.handleLink(link)
+                
+            case "widget":
+                guard let handler = self.widgetHandler
+                else {
+                    self.pendingWidgetLink = link
                     return .handle
                 }
                 return handler.handleLink(link)
