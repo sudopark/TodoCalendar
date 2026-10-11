@@ -148,11 +148,13 @@ struct ColorThemeEditView: View {
         NavigationStack {
             ZStack {
                 VStack(spacing: 0) {
-                    CalendarAppearanceSampleView(
-                        model: self.state.sampleModel,
-                        colorSet: self.state.previewColorSet
-                    )
-                    .padding(.vertical, spacing: .xlarge)
+                    if let previewColorSet = self.state.previewColorSet {
+                        ColorThemeEditPreviewView(
+                            model: self.state.sampleModel,
+                            colorSet: previewColorSet
+                        )
+                        .padding(.vertical, spacing: .xlarge)
+                    }
 
                     self.formView
                 }
@@ -255,6 +257,7 @@ extension ColorThemeEditView {
     private func backgroundRow(_ seeds: CustomColorThemeSeeds) -> some View {
         return AppearanceRow(
             "setting.appearance.calendar.colorTheme.edit::background".localized(),
+            subTitle: "setting.appearance.calendar.colorTheme.edit::background::explain".localized(),
             ColorSelectView(Color.from(seeds.background) ?? .clear)
                 .eventHandler(\.colorSelected) { color in
                     self.eventHandlers.selectBackground(UIColor(color).rgbHexString)
@@ -265,6 +268,7 @@ extension ColorThemeEditView {
     private func accentRow(_ seeds: CustomColorThemeSeeds) -> some View {
         return AppearanceRow(
             "setting.appearance.calendar.colorTheme.edit::accent".localized(),
+            subTitle: "setting.appearance.calendar.colorTheme.edit::accent::explain".localized(),
             ColorSelectView(Color.from(seeds.accent) ?? .clear)
                 .eventHandler(\.colorSelected) { color in
                     self.eventHandlers.selectAccent(UIColor(color).rgbHexString)
@@ -279,6 +283,7 @@ extension ColorThemeEditView {
         )
         return AppearanceRow(
             "setting.appearance.calendar.colorTheme.edit::form".localized(),
+            subTitle: seeds.form.explain,
             Picker("", selection: selection) {
                 ForEach(self.forms, id: \.rawValue) { form in
                     Text(form.title).tag(form)
@@ -286,6 +291,7 @@ extension ColorThemeEditView {
             }
             .pickerStyle(.segmented)
             .frame(maxWidth: 210)
+            .layoutPriority(1)
         )
     }
 
@@ -335,6 +341,7 @@ extension ColorThemeEditView {
         )
         return AppearanceRow(
             slot.title,
+            subTitle: slot.explain,
             HStack(spacing: Metric.Spacing.regular) {
                 if let seedHex {
                     ColorSelectView(Color.from(seedHex) ?? .clear)
@@ -393,6 +400,17 @@ private extension ColorThemeEditSeedSlot {
         case .ai: return "setting.appearance.calendar.colorTheme.edit::seed::ai".localized()
         }
     }
+
+    var explain: String {
+        switch self {
+        case .text: return "setting.appearance.calendar.colorTheme.edit::seed::text::explain".localized()
+        case .surface: return "setting.appearance.calendar.colorTheme.edit::seed::surface::explain".localized()
+        case .today: return "setting.appearance.calendar.colorTheme.edit::seed::today::explain".localized()
+        case .selectedDay: return "setting.appearance.calendar.colorTheme.edit::seed::selectedDay::explain".localized()
+        case .holidayOrWeekEnd: return "setting.appearance.calendar.colorTheme.edit::seed::holidayOrWeekEnd::explain".localized()
+        case .ai: return "setting.appearance.calendar.colorTheme.edit::seed::ai::explain".localized()
+        }
+    }
 }
 
 private extension CustomColorThemeForm {
@@ -402,6 +420,14 @@ private extension CustomColorThemeForm {
         case .filled: return "setting.appearance.calendar.colorTheme.edit::form::filled".localized()
         case .grouped: return "setting.appearance.calendar.colorTheme.edit::form::grouped".localized()
         case .outlined: return "setting.appearance.calendar.colorTheme.edit::form::outlined".localized()
+        }
+    }
+
+    var explain: String {
+        switch self {
+        case .filled: return "setting.appearance.calendar.colorTheme.edit::form::filled::explain".localized()
+        case .grouped: return "setting.appearance.calendar.colorTheme.edit::form::grouped::explain".localized()
+        case .outlined: return "setting.appearance.calendar.colorTheme.edit::form::outlined::explain".localized()
         }
     }
 }
