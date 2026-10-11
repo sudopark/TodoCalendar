@@ -834,3 +834,50 @@ extension PaidFeatureGateUsecaseImpleTests {
         #expect(self.stubWidgetLicenseRepository.didUpdatedLicense == .init(grantedAt: self.now))
     }
 }
+
+
+// MARK: - 위젯 사용권 기간과 광고 결과 해석
+
+extension PaidFeatureGateUsecaseImpleTests {
+
+    @Test("위젯 사용권 기간은 위젯 정책에서 해석한 값이고, 해석할 수 없으면 nil 이다")
+    func widgetStyleLicenseDays_returnsResolvedDays() {
+        // given
+        let fromPolicy = self.makeUsecase(
+            plan: self.userPlan(.free),
+            policy: AppPolicy(
+                colorThemeLicense: .init(isEnabled: true, licenseDays: 14),
+                widgetStyleLicense: .init(isEnabled: true, licenseDays: 9)
+            )
+        )
+        let fromDefault = self.makeUsecase(plan: self.userPlan(.free), policy: nil)
+        let undecidable = self.makeUsecase(
+            plan: self.userPlan(.free), policy: nil, defaultPolicy: AppPolicy()
+        )
+
+        // when
+        let days = [fromPolicy, fromDefault, undecidable].map { $0.widgetStyleLicenseDays() }
+
+        // then
+        #expect(days == [9, 21, nil])
+    }
+
+    @Test("위젯 광고 결과를 사용권 부여·광고 없음 알림·취소로 해석한다", arguments: [
+        (RewardedAdResult.rewarded, RewardedAdLicenseDecision.grantLicenseAndContinue),
+        (.fallbackFullScreenShown, .grantLicenseAndContinue),
+        (.unavailable, .notifyAdUnavailable),
+        (.dismissedBeforeReward, .cancel)
+    ])
+    func widgetStyleLicenseDecision_mapsEachResult(
+        _ result: RewardedAdResult, _ expected: RewardedAdLicenseDecision
+    ) {
+        // given
+        let usecase = self.makeUsecase(plan: self.userPlan(.free))
+
+        // when
+        let decision = usecase.widgetStyleLicenseDecision(for: result)
+
+        // then
+        #expect(decision == expected)
+    }
+}
