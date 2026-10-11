@@ -52,7 +52,8 @@ struct EventAndForemostStyleQuery: EntityQuery, @unchecked Sendable {
     }
 
     func suggestedEntities() async throws -> [EventAndForemostStyleEntity] {
-        return self.savedStyleEntities()
+        return self.factory.loadSelectableStyles(of: .eventAndForemostMedium)
+            .map { EventAndForemostStyleEntity(style: $0) }
     }
 
     private func savedStyleEntities() -> [EventAndForemostStyleEntity] {

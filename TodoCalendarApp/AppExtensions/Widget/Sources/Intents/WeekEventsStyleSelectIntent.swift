@@ -51,7 +51,8 @@ struct WeekEventsStyleQuery: EntityQuery, @unchecked Sendable {
     }
 
     func suggestedEntities() async throws -> [WeekEventsStyleEntity] {
-        return self.savedStyleEntities()
+        return self.factory.loadSelectableStyles(of: .oneWeekEvents)
+            .map { WeekEventsStyleEntity(style: $0) }
     }
 
     private func savedStyleEntities() -> [WeekEventsStyleEntity] {

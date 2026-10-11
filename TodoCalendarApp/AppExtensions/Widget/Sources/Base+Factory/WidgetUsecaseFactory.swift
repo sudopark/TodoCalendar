@@ -56,6 +56,27 @@ extension WidgetUsecaseFactory {
         return repository
     }
     
+    func makeWidgetStylePaidFeatureGateUsecase() -> any WidgetStylePaidFeatureGateUsecase {
+        return PaidFeatureGateUsecaseImple(
+            planSource: BillingUserPlanSnapshotSource(
+                repository: BillingUserPlanLocalRepositoryImple(
+                    sqliteService: self.base.commonSqliteService
+                )
+            ),
+            licenseRepository: ColorThemeLicenseLocalRepositoryImple(
+                environmentStorage: self.base.userDefaultEnvironmentStorage
+            ),
+            widgetStyleLicenseRepository: WidgetStyleLicenseLocalRepositoryImple(
+                environmentStorage: self.base.userDefaultEnvironmentStorage
+            ),
+            policyRepository: AppPolicyRepositoryImple(
+                remoteAPI: self.base.remoteAPI,
+                environmentStorage: self.base.userDefaultEnvironmentStorage
+            ),
+            defaultPolicy: AppEnvironment.defaultAppPolicy
+        )
+    }
+    
     func makeTodoToggleRepository() -> any TodoEventRepository {
         return TodoEventRepositoryFactory(base: self.base).makeRepository()
     }

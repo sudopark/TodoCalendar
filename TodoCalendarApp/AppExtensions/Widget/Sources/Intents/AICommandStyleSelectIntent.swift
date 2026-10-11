@@ -52,7 +52,8 @@ struct AICommandStyleQuery: EntityQuery, @unchecked Sendable {
     }
 
     func suggestedEntities() async throws -> [AICommandStyleEntity] {
-        return self.savedStyleEntities()
+        return self.factory.loadSelectableStyles(of: .aiCommandSmall)
+            .map { AICommandStyleEntity(style: $0) }
     }
 
     private func savedStyleEntities() -> [AICommandStyleEntity] {

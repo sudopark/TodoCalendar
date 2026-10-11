@@ -50,7 +50,8 @@ struct DDayStyleQuery: EntityQuery, @unchecked Sendable {
     }
 
     func suggestedEntities() async throws -> [DDayStyleEntity] {
-        return self.savedStyleEntities()
+        return self.factory.loadSelectableStyles(of: .ddaySmall)
+            .map { DDayStyleEntity(style: $0) }
     }
 
     private func savedStyleEntities() -> [DDayStyleEntity] {

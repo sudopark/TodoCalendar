@@ -52,7 +52,8 @@ struct TodayAndNextStyleQuery: EntityQuery, @unchecked Sendable {
     }
 
     func suggestedEntities() async throws -> [TodayAndNextStyleEntity] {
-        return self.savedStyleEntities()
+        return self.factory.loadSelectableStyles(of: .todayAndNextMedium)
+            .map { TodayAndNextStyleEntity(style: $0) }
     }
 
     private func savedStyleEntities() -> [TodayAndNextStyleEntity] {

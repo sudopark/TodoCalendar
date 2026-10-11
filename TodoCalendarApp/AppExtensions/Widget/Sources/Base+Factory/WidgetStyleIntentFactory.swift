@@ -32,4 +32,25 @@ extension WidgetStyleIntentFactory {
             sharedDataStore: SharedDataStore()
         )
     }
+
+    /// 후보에만 쓴다 — 복원까지 거르면 걸린 커스텀이 기본 스타일로 바뀐다
+    func loadSelectableStyles(of variant: WidgetVariant) -> [WidgetStyle] {
+        let gate = WidgetUsecaseFactory(base: self.base).makeWidgetStylePaidFeatureGateUsecase()
+        return self.makeStyleUsecase().loadStyles(of: variant)
+            .selectable(by: gate, at: Date())
+    }
+}
+
+
+// MARK: - 후보 거르기
+
+extension Array where Element == WidgetStyle {
+
+    func selectable(
+        by gate: any WidgetStylePaidFeatureGateUsecase, at now: Date
+    ) -> [WidgetStyle] {
+        guard gate.canCreateCustomWidgetStyleWithoutAd(at: now) == false
+        else { return self }
+        return self.filter { $0.id.style == .default }
+    }
 }

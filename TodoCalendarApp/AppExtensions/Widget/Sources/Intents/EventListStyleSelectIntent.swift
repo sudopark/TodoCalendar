@@ -52,7 +52,8 @@ struct EventListStyleQuery: EntityQuery, @unchecked Sendable {
     }
 
     func suggestedEntities() async throws -> [EventListStyleEntity] {
-        return self.savedStyleEntities()
+        return self.factory.loadSelectableStyles(of: .eventListSmall)
+            .map { EventListStyleEntity(style: $0) }
     }
 
     private func savedStyleEntities() -> [EventListStyleEntity] {

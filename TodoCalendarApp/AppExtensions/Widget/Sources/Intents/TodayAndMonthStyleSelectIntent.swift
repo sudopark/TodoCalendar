@@ -52,7 +52,8 @@ struct TodayAndMonthStyleQuery: EntityQuery, @unchecked Sendable {
     }
 
     func suggestedEntities() async throws -> [TodayAndMonthStyleEntity] {
-        return self.savedStyleEntities()
+        return self.factory.loadSelectableStyles(of: .todayAndMonthMedium)
+            .map { TodayAndMonthStyleEntity(style: $0) }
     }
 
     private func savedStyleEntities() -> [TodayAndMonthStyleEntity] {
