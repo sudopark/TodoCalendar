@@ -24,6 +24,7 @@ import CommonPresentation
     
     @ObservationIgnored private var didBind = false
     @ObservationIgnored private let cancellables = CancelBag()
+    @ObservationIgnored private var lastListAppearedNavigationBarId: String?
     
     fileprivate var sampleModel: CalendarAppearanceModel = .init(.sunday)
     fileprivate var themeModels: [ColorThemeModel] = []
@@ -55,6 +56,16 @@ import CommonPresentation
                 self?.customThemeModels = models
             })
             .store(in: self.cancellables)
+    }
+
+    func scrollTarget(onListAppearWith navigationBarId: String) -> String? {
+        let previousId = self.lastListAppearedNavigationBarId
+        self.lastListAppearedNavigationBarId = navigationBarId
+        guard let previousId, previousId != navigationBarId else { return nil }
+
+        return (self.themeModels + self.customThemeModels)
+            .first(where: { $0.isSelected })?
+            .key.rawValue
     }
 }
 
@@ -118,6 +129,7 @@ struct ColorThemeSelectView: View {
     @Environment(ColorThemeSelectViewState.self) private var state
     @Environment(ColorThemeSelectViewEventHandler.self) private var eventHandlers
     @Environment(ViewAppearance.self) private var appearance
+    @State private var scrolledThemeId: String?
     
     private let gridRow: [GridItem] = [
         .init(.flexible(minimum: 60, maximum: 100)),
@@ -133,17 +145,24 @@ struct ColorThemeSelectView: View {
                 
                 ScrollView {
                     LazyVGrid(columns: gridRow) {
-                        ForEach(0..<state.themeModels.count, id: \.self) { index in
-                            ColorThemeItemView(model: state.themeModels[index])
+                        ForEach(state.themeModels, id: \.key.rawValue) { model in
+                            ColorThemeItemView(model: model)
                                 .onTapGesture {
                                     appearance.impactIfNeed()
-                                    eventHandlers.selectTheme(state.themeModels[index])
+                                    eventHandlers.selectTheme(model)
                                 }
                         }
                     }
+                    .scrollTargetLayout()
                     .padding(.top, 40)
                     
                     self.customThemeSection
+                }
+                .scrollPosition(id: $scrolledThemeId, anchor: .center)
+                .onAppear {
+                    guard let target = state.scrollTarget(onListAppearWith: appearance.navigationBarId)
+                    else { return }
+                    scrolledThemeId = target
                 }
                 .background(
                     appearance.colorSet.bg2.asColor
@@ -182,7 +201,7 @@ extension ColorThemeSelectView {
                 .padding(.horizontal, spacing: .large)
             
             LazyVGrid(columns: gridRow) {
-                ForEach(state.customThemeModels, id: \.customColorTheme?.uuid) { model in
+                ForEach(state.customThemeModels, id: \.key.rawValue) { model in
                     ColorThemeItemView(model: model)
                         .onTapGesture {
                             appearance.impactIfNeed()
@@ -203,6 +222,7 @@ extension ColorThemeSelectView {
                         eventHandlers.createCustomTheme()
                     }
             }
+            .scrollTargetLayout()
         }
         .padding(.top, spacing: .xlarge)
         .padding(.bottom, spacing: .xlarge)
