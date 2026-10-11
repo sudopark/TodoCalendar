@@ -291,7 +291,8 @@ extension MainViewController {
     private func setupBottomBannerLayout(_ bannerView: UIView) {
         self.view.addSubview(bannerView)
         bannerView.autoLayout.active(with: self.view) {
-            $0.centerXAnchor.constraint(equalTo: $1.centerXAnchor)
+            $0.leadingAnchor.constraint(equalTo: $1.safeAreaLayoutGuide.leadingAnchor)
+            $0.trailingAnchor.constraint(equalTo: $1.safeAreaLayoutGuide.trailingAnchor)
             $0.bottomAnchor.constraint(equalTo: $1.safeAreaLayoutGuide.bottomAnchor)
         }
     }
