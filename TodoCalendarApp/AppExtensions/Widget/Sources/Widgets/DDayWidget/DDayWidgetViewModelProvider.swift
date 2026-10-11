@@ -23,18 +23,18 @@ final class DDayWidgetViewModelProvider {
     private let eventFetchUsecase: any CalendarEventFetchUsecase
     private let calendarSettingRepository: any CalendarSettingRepository
     private let appSettingRepository: any AppSettingRepository
-    private let styleRepository: any WidgetStyleRepository
+    private let styleResolver: WidgetStyleResolver
 
     init(
         eventFetchUsecase: any CalendarEventFetchUsecase,
         calendarSettingRepository: any CalendarSettingRepository,
         appSettingRepository: any AppSettingRepository,
-        styleRepository: any WidgetStyleRepository
+        styleResolver: WidgetStyleResolver
     ) {
         self.eventFetchUsecase = eventFetchUsecase
         self.calendarSettingRepository = calendarSettingRepository
         self.appSettingRepository = appSettingRepository
-        self.styleRepository = styleRepository
+        self.styleResolver = styleResolver
     }
 }
 
@@ -50,7 +50,7 @@ extension DDayWidgetViewModelProvider {
 
         let timeZone = self.calendarSettingRepository.loadUserSelectedTImeZone() ?? .current
         let setting = self.appSettingRepository.loadWidgetAppearanceSetting()
-        let resolved = self.styleRepository.resolveStyle(of: .ddaySmall, style: style)
+        let resolved = try self.styleResolver.resolveStyle(of: .ddaySmall, style: style, at: now)
         let refreshAfter = self.nextMidnight(after: now, in: timeZone)
 
         guard let target,

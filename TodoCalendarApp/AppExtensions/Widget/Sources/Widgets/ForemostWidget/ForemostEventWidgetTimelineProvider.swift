@@ -29,9 +29,8 @@ extension ForemostEventWidgetTimelineProvider {
         let builder = WidgetViewModelProviderBuilder(base: .init())
         let look = WidgetLook(
             globalSetting: builder.loadWidgetAppearanceSetting(),
-            appliedStyle: builder.resolveWidgetStyle(
-                of: context.family == .accessoryInline ? .foremostInline : .foremostSmall,
-                style: .default
+            appliedStyle: builder.resolveDefaultWidgetStyle(
+                of: context.family == .accessoryInline ? .foremostInline : .foremostSmall
             )
         )
         let sample = ForemostEventWidgetViewModel.sample() |> \.look .~ look

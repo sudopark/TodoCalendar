@@ -20,16 +20,16 @@ struct EventAndMonthWidgetViewModelProvider {
     
     private let eventListViewModelProvider: EventListWidgetViewModelProvider
     private let monthViewModelProvider: MonthWidgetViewModelProvider
-    private let styleRepository: any WidgetStyleRepository
+    private let styleResolver: WidgetStyleResolver
     
     init(
         eventListViewModelProvider: EventListWidgetViewModelProvider,
         monthViewModelProvider: MonthWidgetViewModelProvider,
-        styleRepository: any WidgetStyleRepository
+        styleResolver: WidgetStyleResolver
     ) {
         self.eventListViewModelProvider = eventListViewModelProvider
         self.monthViewModelProvider = monthViewModelProvider
-        self.styleRepository = styleRepository
+        self.styleResolver = styleResolver
     }
     
     func getViewModel(
@@ -40,7 +40,7 @@ struct EventAndMonthWidgetViewModelProvider {
             for: time, widgetSize: .small
         )
         let month = try await monthViewModelProvider.getMonthViewModel(time)
-        let resolved = self.styleRepository.resolveStyle(of: .eventAndMonthMedium, style: style)
+        let resolved = try self.styleResolver.resolveStyle(of: .eventAndMonthMedium, style: style, at: time)
         let look = WidgetLook(globalSetting: event.look.globalSetting, appliedStyle: resolved)
         return EventAndMonthWidgetViewModel(event: event, month: month)
             .applying(look)
@@ -56,7 +56,7 @@ struct EventAndMonthWidgetTimelineProvider: AppIntentTimelineProvider {
         let builder = WidgetViewModelProviderBuilder(base: .init())
         let look = WidgetLook(
             globalSetting: builder.loadWidgetAppearanceSetting(),
-            appliedStyle: builder.resolveWidgetStyle(of: .eventAndMonthMedium, style: .default)
+            appliedStyle: builder.resolveDefaultWidgetStyle(of: .eventAndMonthMedium)
         )
         let entry = Entry(date: Date()) {
             EventAndMonthWidgetViewModel(

@@ -116,7 +116,7 @@ final class EventListWidgetViewModelProvider {
     private let appSettingRepository: any AppSettingRepository
     private let calendarSettingRepository: any CalendarSettingRepository
     private let localeProvider: any LocaleProvider
-    private let styleRepository: any WidgetStyleRepository
+    private let styleResolver: WidgetStyleResolver
     
     init(
         targetEventTagIds: [EventTagId]?,
@@ -125,7 +125,7 @@ final class EventListWidgetViewModelProvider {
         appSettingRepository: any AppSettingRepository,
         calendarSettingRepository: any CalendarSettingRepository,
         localeProvider: any LocaleProvider,
-        styleRepository: any WidgetStyleRepository
+        styleResolver: WidgetStyleResolver
     ) {
         self.targetEventTagIds = targetEventTagIds
         self.excludeAllDayEvents = excludeAllDayEvents
@@ -133,7 +133,7 @@ final class EventListWidgetViewModelProvider {
         self.appSettingRepository = appSettingRepository
         self.calendarSettingRepository = calendarSettingRepository
         self.localeProvider = localeProvider
-        self.styleRepository = styleRepository
+        self.styleResolver = styleResolver
     }
 }
 
@@ -148,7 +148,7 @@ extension EventListWidgetViewModelProvider {
         
         let timeZone = self.calendarSettingRepository.loadUserSelectedTImeZone() ?? .current
         let setting = self.appSettingRepository.loadSavedViewAppearance()
-        let resolved = self.styleRepository.resolveStyle(of: .eventListSmall, style: style)
+        let resolved = try self.styleResolver.resolveStyle(of: .eventListSmall, style: style, at: refDate)
         
         let dayEventLists = try await self.loadDayEventListModel(
             refDate, timeZone, localeProvider.is24HourFormat()

@@ -24,7 +24,7 @@ final class MonthWidgetViewModelProvider {
     private let appSettingRepository: any AppSettingRepository
     private let holidayFetchUsecase: any HolidaysFetchUsecase
     private let eventFetchUsecase: any CalendarEventFetchUsecase
-    private let styleRepository: any WidgetStyleRepository
+    private let styleResolver: WidgetStyleResolver
     
     init(
         calendarUsecase: any CalendarUsecase,
@@ -32,14 +32,14 @@ final class MonthWidgetViewModelProvider {
         appSettingRepository: any AppSettingRepository,
         holidayFetchUsecase: any HolidaysFetchUsecase,
         eventFetchUsecase: any CalendarEventFetchUsecase,
-        styleRepository: any WidgetStyleRepository
+        styleResolver: WidgetStyleResolver
     ) {
         self.calendarUsecase = calendarUsecase
         self.settingRepository = settingRepository
         self.appSettingRepository = appSettingRepository
         self.holidayFetchUsecase = holidayFetchUsecase
         self.eventFetchUsecase = eventFetchUsecase
-        self.styleRepository = styleRepository
+        self.styleResolver = styleResolver
     }
 }
 
@@ -51,7 +51,7 @@ extension MonthWidgetViewModelProvider {
     ) async throws -> MonthWidgetViewModel {
         let timeZone = self.settingRepository.loadUserSelectedTImeZone() ?? .current
         let setting = self.appSettingRepository.loadWidgetAppearanceSetting()
-        let resolved = self.styleRepository.resolveStyle(of: .monthSmall, style: style)
+        let resolved = try self.styleResolver.resolveStyle(of: .monthSmall, style: style, at: now)
         var model = try await self.currentMonthModel(now, timeZone)
         if let ranges = model.eventRange {
             model.hasEventDaysIdentifiers = await self.loadEventExistsDayIdentifiers(

@@ -31,7 +31,7 @@ extension TodayWidgetTimelineProvider {
         let builder = WidgetViewModelProviderBuilder(base: .init())
         let look = WidgetLook(
             globalSetting: builder.loadWidgetAppearanceSetting(),
-            appliedStyle: builder.resolveWidgetStyle(of: .todaySummarySmall, style: .default)
+            appliedStyle: builder.resolveDefaultWidgetStyle(of: .todaySummarySmall)
         )
         let entry = Entry(date: now) {
             TodayWidgetViewModel.sample() |> \.look .~ look

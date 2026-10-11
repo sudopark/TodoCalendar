@@ -47,7 +47,7 @@ struct ComposedWidgetLookTests {
             appSettingRepository: StubAppSettingRepository(),
             calendarSettingRepository: StubCalendarSettingRepository(),
             localeProvider: Locale.current,
-            styleRepository: StubWidgetStyleRepository(styles: styles)
+            styleResolver: StubWidgetStyleRepository(styles: styles).asResolver()
         )
     }
 
@@ -59,7 +59,7 @@ struct ComposedWidgetLookTests {
             calendarSettingRepository: StubCalendarSettingRepository(),
             appSettingRepository: StubAppSettingRepository(),
             localeProvider: Locale.current,
-            styleRepository: StubWidgetStyleRepository(styles: styles)
+            styleResolver: StubWidgetStyleRepository(styles: styles).asResolver()
         )
     }
 }
@@ -69,13 +69,30 @@ extension ComposedWidgetLookTests {
 
     private func makeProvider(
         childStyles: [WidgetStyleId: WidgetStyle] = [:],
-        composedStyles: [WidgetStyleId: WidgetStyle] = [:]
+        composedStyles: [WidgetStyleId: WidgetStyle] = [:],
+        canRenderCustom: Bool = true
     ) -> EventAndForemostWidgetViewModelProvider {
         return EventAndForemostWidgetViewModelProvider(
             eventListViewModelProvider: self.makeEventListProvider(styles: childStyles),
             foremostEventViewModelProvider: self.makeForemostProvider(styles: childStyles),
-            styleRepository: StubWidgetStyleRepository(styles: composedStyles)
+            styleResolver: StubWidgetStyleRepository(styles: composedStyles)
+                .asResolver(canRender: canRenderCustom)
         )
+    }
+
+    @Test("합성 위젯이 고른 커스텀을 그릴 권한이 없으면 잠김 에러로 끝난다")
+    func eventAndForemost_whenPickedCustomRenderDenied_throwsLocked() async {
+        // given
+        let provider = self.makeProvider(
+            composedStyles: self.composedStyle(.default)
+                .merging(self.composedStyle(.custom(id: "picked"))) { $1 },
+            canRenderCustom: false
+        )
+
+        // when + then
+        await #expect(throws: WidgetCustomStyleLockedError.self) {
+            try await provider.getViewModel(self.now, style: .custom(id: "picked"))
+        }
     }
 
     private func composedStyle(
@@ -182,7 +199,7 @@ extension ComposedWidgetLookTests {
                 holidayUsecase: StubHolidayUsecase(), cached: .init()
             ),
             eventFetchUsecase: StubCalendarEventsFetchUescase(),
-            styleRepository: StubWidgetStyleRepository(styles: [:])
+            styleResolver: StubWidgetStyleRepository(styles: [:]).asResolver()
         )
     }
 
@@ -191,7 +208,7 @@ extension ComposedWidgetLookTests {
             eventsFetchusecase: StubCalendarEventsFetchUescase(),
             appSettingRepository: StubAppSettingRepository(),
             calednarSettingRepository: StubCalendarSettingRepository(),
-            styleRepository: StubWidgetStyleRepository(styles: [:])
+            styleResolver: StubWidgetStyleRepository(styles: [:]).asResolver()
         )
     }
 
@@ -210,10 +227,10 @@ extension ComposedWidgetLookTests {
         let provider = DoubleMonthWidgetViewModelProvider(
             settingRepository: StubCalendarSettingRepository(),
             monthViewModelProvider: self.makeMonthProvider(),
-            styleRepository: self.onlyStyle(
+            styleResolver: self.onlyStyle(
                 of: .doubleMonthMedium,
                 setting: DoubleMonthStyleSetting.initial |> \.month.showMonthName .~ false
-            )
+            ).asResolver()
         )
 
         // when
@@ -230,10 +247,10 @@ extension ComposedWidgetLookTests {
         let provider = EventAndMonthWidgetViewModelProvider(
             eventListViewModelProvider: self.makeEventListProvider(styles: [:]),
             monthViewModelProvider: self.makeMonthProvider(),
-            styleRepository: self.onlyStyle(
+            styleResolver: self.onlyStyle(
                 of: .eventAndMonthMedium,
                 setting: EventAndMonthStyleSetting.initial |> \.month.highlightToday .~ false
-            )
+            ).asResolver()
         )
 
         // when
@@ -249,12 +266,12 @@ extension ComposedWidgetLookTests {
         let provider = TodayAndMonthWidgetViewModelProvider(
             todayViewModelProvider: self.makeTodayProvider(),
             monthViewModelProvider: self.makeMonthProvider(),
-            styleRepository: self.onlyStyle(
+            styleResolver: self.onlyStyle(
                 of: .todayAndMonthMedium,
                 setting: TodayAndMonthStyleSetting.initial
                     |> \.today.showTimeZone .~ false
                     |> \.month.showWeekDayHeader .~ false
-            )
+            ).asResolver()
         )
 
         // when

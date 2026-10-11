@@ -20,16 +20,16 @@ struct EventAndForemostWidgetViewModelProvider {
     
     private let eventListViewModelProvider: EventListWidgetViewModelProvider
     private let foremostEventViewModelProvider: ForemostEventWidgetViewModelProvider
-    private let styleRepository: any WidgetStyleRepository
+    private let styleResolver: WidgetStyleResolver
     
     init(
         eventListViewModelProvider: EventListWidgetViewModelProvider,
         foremostEventViewModelProvider: ForemostEventWidgetViewModelProvider,
-        styleRepository: any WidgetStyleRepository
+        styleResolver: WidgetStyleResolver
     ) {
         self.eventListViewModelProvider = eventListViewModelProvider
         self.foremostEventViewModelProvider = foremostEventViewModelProvider
-        self.styleRepository = styleRepository
+        self.styleResolver = styleResolver
     }
     
     func getViewModel(
@@ -39,7 +39,7 @@ struct EventAndForemostWidgetViewModelProvider {
             for: time, widgetSize: .small
         )
         let foremost = try await self.foremostEventViewModelProvider.getViewModel(time)
-        let resolved = self.styleRepository.resolveStyle(of: .eventAndForemostMedium, style: style)
+        let resolved = try self.styleResolver.resolveStyle(of: .eventAndForemostMedium, style: style, at: time)
         let look = WidgetLook(globalSetting: eventList.look.globalSetting, appliedStyle: resolved)
         return EventAndForemostWidgetViewModel(event: eventList, foremost: foremost)
             .applying(look)
@@ -56,7 +56,7 @@ struct EventAndForemostWidgetViewTimelineProvider: AppIntentTimelineProvider {
         let builder = WidgetViewModelProviderBuilder(base: .init())
         let look = WidgetLook(
             globalSetting: builder.loadWidgetAppearanceSetting(),
-            appliedStyle: builder.resolveWidgetStyle(of: .eventAndForemostMedium, style: .default)
+            appliedStyle: builder.resolveDefaultWidgetStyle(of: .eventAndForemostMedium)
         )
         let model = EventAndForemostWidgetViewModel(
             event: EventListWidgetViewModel.sample(size: .small),

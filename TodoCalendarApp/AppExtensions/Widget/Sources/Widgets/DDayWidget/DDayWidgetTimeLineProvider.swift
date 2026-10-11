@@ -29,7 +29,7 @@ extension DDayWidgetTimeLineProvider {
         let builder = WidgetViewModelProviderBuilder(base: .init())
         let look = WidgetLook(
             globalSetting: builder.loadWidgetAppearanceSetting(),
-            appliedStyle: builder.resolveWidgetStyle(of: .ddaySmall, style: .default)
+            appliedStyle: builder.resolveDefaultWidgetStyle(of: .ddaySmall)
         )
         let sample = DDayWidgetViewModel.sample |> \.look .~ look
         return .init(date: Date(), result: .success(sample))

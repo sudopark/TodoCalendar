@@ -10,6 +10,8 @@ import Foundation
 import Combine
 import Domain
 import Extensions
+import WidgetScenes
+import TestDoubles
 
 
 final class StubExternalCalendarRepository: ExternalCalendarIntegrateRepository, @unchecked Sendable {
@@ -185,4 +187,13 @@ final class StubWidgetStyleRepository: WidgetStyleRepository, @unchecked Sendabl
     func makeDraftPhoto(from picked: Data) -> WidgetStylePhoto? { return nil }
 
     func makeDraftPhoto(copying photo: WidgetStylePhoto) -> WidgetStylePhoto? { return nil }
+}
+
+extension StubWidgetStyleRepository {
+
+    func asResolver(canRender: Bool = true) -> WidgetStyleResolver {
+        let gate = StubWidgetStylePaidFeatureGateUsecase()
+        gate.canRender = canRender
+        return WidgetStyleResolver(styleRepository: self, paidFeatureGateUsecase: gate)
+    }
 }

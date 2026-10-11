@@ -36,18 +36,18 @@ final class TodayWidgetViewModelProvider {
     private let eventsFetchusecase: any CalendarEventFetchUsecase
     private let appSettingRepository: any AppSettingRepository
     private let calednarSettingRepository: any CalendarSettingRepository
-    private let styleRepository: any WidgetStyleRepository
+    private let styleResolver: WidgetStyleResolver
     
     init(
         eventsFetchusecase: any CalendarEventFetchUsecase,
         appSettingRepository: any AppSettingRepository,
         calednarSettingRepository: any CalendarSettingRepository,
-        styleRepository: any WidgetStyleRepository
+        styleResolver: WidgetStyleResolver
     ) {
         self.eventsFetchusecase = eventsFetchusecase
         self.appSettingRepository = appSettingRepository
         self.calednarSettingRepository = calednarSettingRepository
-        self.styleRepository = styleRepository
+        self.styleResolver = styleResolver
     }
 }
 
@@ -60,7 +60,7 @@ extension TodayWidgetViewModelProvider {
     ) async throws -> TodayWidgetViewModel {
         
         let setting = self.appSettingRepository.loadWidgetAppearanceSetting()
-        let resolved = self.styleRepository.resolveStyle(of: .todaySummarySmall, style: style)
+        let resolved = try self.styleResolver.resolveStyle(of: .todaySummarySmall, style: style, at: today)
         let timeZone = self.calednarSettingRepository.loadUserSelectedTImeZone() ?? .current
         let calednar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
         let todayRange = try calednar.dayRange(today).unwrap()

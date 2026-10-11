@@ -652,6 +652,8 @@
 "widget.style.license::watchAd" = "광고 보고 쓰기";
 "widget.style.license::showPlans" = "플랜 보기";
 "widget.style.license::adUnavailable" = "광고를 불러오지 못했어요. 잠시 뒤 다시 시도해주세요.";
+"widget.style.locked::title" = "커스텀 스타일이 잠겼어요";
+"widget.style.locked::action" = "탭해서 다시 열기";
 "widget.doubleMonth::name" = "캘린더 + 캘린더";
 "widget.eventAndMonth::name" = "이벤트 + 캘린더";
 "widget.todayAndMonth::name" = "TODAY + 캘린더";

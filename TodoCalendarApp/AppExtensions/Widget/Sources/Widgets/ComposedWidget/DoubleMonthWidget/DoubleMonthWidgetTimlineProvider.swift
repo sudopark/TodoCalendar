@@ -19,16 +19,16 @@ struct DoubleMonthWidgetViewModelProvider {
     
     private let settingRepository: any CalendarSettingRepository
     private let monthViewModelProvider: MonthWidgetViewModelProvider
-    private let styleRepository: any WidgetStyleRepository
+    private let styleResolver: WidgetStyleResolver
     
     init(
         settingRepository: any CalendarSettingRepository,
         monthViewModelProvider: MonthWidgetViewModelProvider,
-        styleRepository: any WidgetStyleRepository
+        styleResolver: WidgetStyleResolver
     ) {
         self.settingRepository = settingRepository
         self.monthViewModelProvider = monthViewModelProvider
-        self.styleRepository = styleRepository
+        self.styleResolver = styleResolver
     }
     
     func getviewModel(
@@ -44,7 +44,7 @@ struct DoubleMonthWidgetViewModelProvider {
         let nextMonthModel = try await self.monthViewModelProvider.getMonthViewModel(nextMonth)
         |> \.todayIdentifier .~ nil
         
-        let resolved = self.styleRepository.resolveStyle(of: .doubleMonthMedium, style: style)
+        let resolved = try self.styleResolver.resolveStyle(of: .doubleMonthMedium, style: style, at: now)
         let look = WidgetLook(globalSetting: currentMonthModel.look.globalSetting, appliedStyle: resolved)
         return DoubleMonthWidgetViewModel(current: currentMonthModel, next: nextMonthModel)
             .applying(look)
@@ -60,7 +60,7 @@ struct DoubleMonthWidgetTimlineProvider: AppIntentTimelineProvider {
         let builder = WidgetViewModelProviderBuilder(base: .init())
         let look = WidgetLook(
             globalSetting: builder.loadWidgetAppearanceSetting(),
-            appliedStyle: builder.resolveWidgetStyle(of: .doubleMonthMedium, style: .default)
+            appliedStyle: builder.resolveDefaultWidgetStyle(of: .doubleMonthMedium)
         )
         let entry = Entry(date: Date()) {
             DoubleMonthWidgetViewModel(

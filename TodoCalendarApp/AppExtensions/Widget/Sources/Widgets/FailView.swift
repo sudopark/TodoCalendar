@@ -11,11 +11,13 @@ import WidgetKit
 import Domain
 import CommonPresentation
 import Extensions
+import WidgetScenes
 
 
 struct FailView: View {
     
     @Environment(\.colorScheme) var colorScheme
+    @Environment(\.widgetFamily) private var widgetFamily
     var colorSet: any ColorSet {
         return ColorSetKeys.systemTheme.convert(isSystemDarkTheme: colorScheme != .light)
     }
@@ -26,6 +28,23 @@ struct FailView: View {
     }
     
     var body: some View {
+        if self.errorModel.isCustomStyleLocked {
+            WidgetCustomStyleLockedView(family: self.lockedViewFamily)
+                .widgetURL(WidgetStyleLicenseLink.url)
+        } else {
+            self.failMessageView
+        }
+    }
+
+    private var lockedViewFamily: WidgetCustomStyleLockedView.Family {
+        switch self.widgetFamily {
+        case .systemMedium: return .medium
+        case .systemLarge, .systemExtraLarge: return .large
+        default: return .small
+        }
+    }
+
+    private var failMessageView: some View {
         VStack(spacing: 8) {
             Text(errorModel.message)
                 .font(.system(size: 14))

@@ -23,20 +23,20 @@ final class ForemostEventWidgetViewModelProvider {
     private let calendarSettingRepository: any CalendarSettingRepository
     private let appSettingRepository: any AppSettingRepository
     private let localeProvider: any LocaleProvider
-    private let styleRepository: any WidgetStyleRepository
+    private let styleResolver: WidgetStyleResolver
     
     init(
         eventFetchUsecase: any CalendarEventFetchUsecase,
         calendarSettingRepository: any CalendarSettingRepository,
         appSettingRepository: any AppSettingRepository,
         localeProvider: any LocaleProvider,
-        styleRepository: any WidgetStyleRepository
+        styleResolver: WidgetStyleResolver
     ) {
         self.eventFetchUsecase = eventFetchUsecase
         self.calendarSettingRepository = calendarSettingRepository
         self.appSettingRepository = appSettingRepository
         self.localeProvider = localeProvider
-        self.styleRepository = styleRepository
+        self.styleResolver = styleResolver
     }
 }
 
@@ -50,8 +50,8 @@ extension ForemostEventWidgetViewModelProvider {
     ) async throws -> ForemostEventWidgetViewModel {
         
         let setting = self.appSettingRepository.loadSavedViewAppearance()
-        let resolved = variant.isCustomizable
-            ? self.styleRepository.resolveStyle(of: variant, style: style)
+        let resolved = try variant.isCustomizable
+            ? self.styleResolver.resolveStyle(of: variant, style: style, at: refTime)
             : nil
         let eventModel = try await self.loadForemostEventModel(refTime, setting.calendar)
         return ForemostEventWidgetViewModel(

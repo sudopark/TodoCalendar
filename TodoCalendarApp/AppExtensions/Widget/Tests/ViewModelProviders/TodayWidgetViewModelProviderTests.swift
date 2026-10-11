@@ -72,9 +72,9 @@ class TodayWidgetViewModelProviderTests: BaseTestCase {
             eventsFetchusecase: fetchUsecase,
             appSettingRepository: appSettingRepository,
             calednarSettingRepository: repository,
-            styleRepository: StubWidgetStyleRepository(
+            styleResolver: StubWidgetStyleRepository(
                 styles: defaultStyle.merging(customs) { _, custom in custom }
-            )
+            ).asResolver()
         )
     }
     

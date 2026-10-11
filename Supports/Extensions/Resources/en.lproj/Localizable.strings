@@ -651,6 +651,8 @@
 "widget.style.license::watchAd" = "Watch ad";
 "widget.style.license::showPlans" = "See plans";
 "widget.style.license::adUnavailable" = "Couldn't load an ad. Please try again later.";
+"widget.style.locked::title" = "Custom style locked";
+"widget.style.locked::action" = "Tap to unlock";
 "widget.doubleMonth::name" = "Calendar + Calendar";
 "widget.eventAndMonth::name" = "Events + Calendar";
 "widget.todayAndMonth::name" = "TODAY + Calendar";
