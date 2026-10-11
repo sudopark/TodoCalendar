@@ -16,12 +16,19 @@ import Extensions
 
 public final class AdBannerUIView: UIView {
 
+    private enum Constant {
+        static let initialRetryDelay: Duration = .seconds(1)
+        static let maxRetryDelay: Duration = .seconds(64)
+    }
+
     private let size: AdBannerSize
     private let bannerView: BannerView
     private let onVisibleHeightChange: (@MainActor (CGFloat) -> Void)?
     private var isLoaded: Bool = false
     private var isAllowed: Bool = false
     private var isLoadingAd: Bool = false
+    private var retryAttempt: Int = 0
+    private var retrying: Task<Void, Never>?
     private lazy var heightConstraint: NSLayoutConstraint = self.heightAnchor.constraint(equalToConstant: 0)
     private let cancellables = CancelBag()
 
@@ -44,6 +51,10 @@ public final class AdBannerUIView: UIView {
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    deinit {
+        self.retrying?.cancel()
     }
 
     public override func layoutSubviews() {
@@ -94,6 +105,10 @@ public final class AdBannerUIView: UIView {
         self.isAllowed = isAllowed
         self.bannerView.isHidden = !isAllowed
         self.applyVisibleHeight()
+        guard isAllowed else {
+            self.cancelRetry()
+            return
+        }
         self.loadIfNeeded()
     }
 
@@ -109,12 +124,41 @@ public final class AdBannerUIView: UIView {
 }
 
 
+// MARK: - retry
+
+extension AdBannerUIView {
+
+    // SDK 는 광고를 한 번 받기 전까지 스스로 다시 요청하지 않는다 — 첫 실패를 앱이 풀어줘야 한다
+    private func scheduleRetry() {
+        guard self.isAllowed, self.isLoaded == false else { return }
+        let delay = min(
+            Constant.initialRetryDelay * pow(2, Double(self.retryAttempt)),
+            Constant.maxRetryDelay
+        )
+        self.retryAttempt += 1
+        self.retrying?.cancel()
+        self.retrying = Task { @MainActor [weak self] in
+            try? await Task.sleep(for: delay)
+            guard Task.isCancelled == false else { return }
+            self?.loadIfNeeded()
+        }
+    }
+
+    private func cancelRetry() {
+        self.retrying?.cancel()
+        self.retrying = nil
+        self.retryAttempt = 0
+    }
+}
+
+
 // MARK: - BannerViewDelegate
 
 extension AdBannerUIView: BannerViewDelegate {
 
     public func bannerViewDidReceiveAd(_ bannerView: BannerView) {
         self.isLoadingAd = false
+        self.cancelRetry()
         if self.isLoaded == false {
             self.isLoaded = true
             self.bannerView.isHidden = !self.isAllowed
@@ -139,6 +183,7 @@ extension AdBannerUIView: BannerViewDelegate {
     ) {
         logger.log(level: .error, "banner ad load failed: \(error)")
         self.isLoadingAd = false
+        self.scheduleRetry()
     }
 }
 
