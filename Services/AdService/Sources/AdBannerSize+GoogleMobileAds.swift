@@ -13,14 +13,15 @@ import Domain
 
 extension AdBannerSize {
 
-    var asAdSize: AdSize {
+    // SDK 는 화면 짧은 변을 넘는 폭을 "Ad size will not fit on screen" 으로 거부한다 — 가로가 긴 화면에서 걸린다
+    func adSize(fittingWidth width: CGFloat, within screenSize: CGSize) -> AdSize? {
         switch self {
-        case .banner: return AdSizeBanner
-        case .mediumRectangle: return AdSizeMediumRectangle
+        case .banner:
+            let limit = min(screenSize.width, screenSize.height)
+            guard width > 0, limit > 0 else { return nil }
+            return currentOrientationAnchoredAdaptiveBanner(width: min(width, limit))
+        case .mediumRectangle:
+            return AdSizeMediumRectangle
         }
-    }
-
-    var asCGSize: CGSize {
-        return cgSize(for: self.asAdSize)
     }
 }
