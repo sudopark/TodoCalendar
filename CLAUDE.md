@@ -96,7 +96,7 @@ tuist generate --no-open      # 파일 추가/삭제 후 재실행 필수
 | 코드 분석 (로직·추적·관계·영향도) | analyze 스킬 → code-analyzer subagent |
 | 커밋 / PR / 이슈 | commit / pr / issue 스킬 |
 | 공개 PR 에이전트 리뷰 | review 스킬 → code-reviewer subagent |
-| 하네스 수정분 리뷰 (PR·PR 없는 커밋) | harness-review 스킬 → harness-reviewer subagent |
+| 하네스 수정분 리뷰 (PR·푸시된 커밋 — develop 직행은 커밋 전) | harness-review 스킬 → harness-reviewer subagent |
 | 계획 문서 승인 전 1차 리뷰 (strategy·campaign·opord) | plan-review 스킬 |
 | 하위 세션에 통제 관문 재공지·일괄 지시 | control-brief 스킬 |
 | 하위 세션이 유저에게 낼 보고·커밋 메시지·PR 본문 초안 검수 | report-review 스킬 |
