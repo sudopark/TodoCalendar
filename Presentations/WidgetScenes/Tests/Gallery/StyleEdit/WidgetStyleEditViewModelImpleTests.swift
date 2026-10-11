@@ -1910,3 +1910,184 @@ extension WidgetStyleEditViewModelImpleTests {
         #expect(emitted.map { $0.name }.dropFirst(2) == [self.copyOfSummerName])
     }
 }
+
+
+// MARK: - 잠긴 커스텀 카드
+
+extension WidgetStyleEditViewModelImpleTests {
+
+    private func lockedGate() -> StubWidgetStylePaidFeatureGateUsecase {
+        let gate = self.blockedGate()
+        gate.canRender = false
+        return gate
+    }
+
+    private func lockedFlags(
+        of viewModel: WidgetStyleEditViewModelImple
+    ) async throws -> [Bool] {
+        return try await self.styles(of: viewModel).map { $0.isLocked }
+    }
+
+    @Test("커스텀을 그릴 수 없으면 저장된 커스텀 카드만 잠긴다")
+    func viewModel_whenRenderNotAllowed_marksSavedCustomCardsLocked() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModelWithCustom(gate: self.lockedGate())
+
+        // when
+        let flags = try await self.lockedFlags(of: viewModel)
+
+        // then
+        #expect(flags == [false, true])
+    }
+
+    @Test("커스텀을 그릴 수 없어도 기본 카드는 잠그지 않는다")
+    func viewModel_whenRenderNotAllowed_doesNotLockDefaultCard() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModel(
+            saved: [self.todayStyle(.default)], gate: self.lockedGate()
+        )
+
+        // when
+        let flags = try await self.lockedFlags(of: viewModel)
+
+        // then
+        #expect(flags == [false])
+    }
+
+    @Test("커스텀을 그릴 수 없어도 아직 저장 안 한 초안 카드는 잠그지 않는다")
+    func viewModel_whenRenderNotAllowed_doesNotLockDraftCard() async throws {
+        // given
+        let gate = self.lockedGate()
+        gate.canCreateWithoutAd = true
+        let (viewModel, _) = self.makeViewModelWithCustom(gate: gate)
+        gate.canRender = false
+
+        // when
+        viewModel.appendStyle(copying: self.defaultId)
+
+        // then
+        let flags = try await self.lockedFlags(of: viewModel)
+        #expect(flags.count == 3)
+        #expect(flags.last == false)
+    }
+
+    @Test("커스텀을 그릴 수 있으면 어떤 카드도 잠그지 않는다")
+    func viewModel_whenRenderAllowed_noCardLocked() async throws {
+        // given
+        let (viewModel, _) = self.makeViewModelWithCustom()
+
+        // when
+        let flags = try await self.lockedFlags(of: viewModel)
+
+        // then
+        #expect(flags == [false, false])
+    }
+
+    @Test("잠긴 카드를 누르면 안내를 띄우고 그 카드를 고르지 않는다")
+    func viewModel_whenLockedCardTapped_showsLicenseSheetWithoutSelecting() async throws {
+        // given
+        let router = SpyWidgetStyleEditRouter()
+        let (viewModel, _) = self.makeViewModelWithCustom(router: router, gate: self.lockedGate())
+
+        // when
+        viewModel.selectStyle(self.customId)
+
+        // then
+        #expect(router.didShowActionSheetWith?.title == "widget.style.license::title".localized())
+        let selected = try await self.selectedStyleId(of: viewModel)
+        #expect(selected == self.defaultId)
+    }
+
+    @Test("잠긴 카드에서 광고로 사용권을 받으면 잠김이 풀리고 그 카드를 고른다")
+    func viewModel_whenLicenseGrantedFromLockedCard_unlocksAndSelectsCard() async throws {
+        // given
+        let router = SpyWidgetStyleEditRouter()
+        let gate = self.lockedGate()
+        let (viewModel, _) = self.makeViewModelWithCustom(router: router, gate: gate)
+        self.mockSheetSelection(router, key: "widget.style.license::watchAd")
+        viewModel.selectStyle(self.customId)
+        gate.canCreateWithoutAd = true
+        gate.canRender = true
+
+        // when
+        router.finishRewardedAd(with: .rewarded)
+
+        // then
+        #expect(gate.didGrantLicenseAt != nil)
+        let flags = try await self.lockedFlags(of: viewModel)
+        #expect(flags == [false, false])
+        let selected = try await self.selectedStyleId(of: viewModel)
+        #expect(selected == self.customId)
+    }
+
+    @Test("구매로 이미 풀린 뒤 배지가 남은 카드를 누르면 안내 없이 풀리고 고른다")
+    func viewModel_whenLockedCardTappedAfterAccessGranted_unlocksAndSelectsCard() async throws {
+        // given
+        let router = SpyWidgetStyleEditRouter()
+        let gate = self.lockedGate()
+        let (viewModel, _) = self.makeViewModelWithCustom(router: router, gate: gate)
+        gate.canCreateWithoutAd = true
+        gate.canRender = true
+
+        // when
+        viewModel.selectStyle(self.customId)
+
+        // then
+        #expect(router.didShowActionSheetWith == nil)
+        let flags = try await self.lockedFlags(of: viewModel)
+        #expect(flags == [false, false])
+        let selected = try await self.selectedStyleId(of: viewModel)
+        #expect(selected == self.customId)
+    }
+
+    @Test("다시 열 때 커스텀을 그릴 수 없게 됐으면 저장된 커스텀 카드를 잠근다")
+    func viewModel_whenRenderTurnsOffOnRefresh_locksSavedCustomCard() async throws {
+        // given
+        let gate = StubWidgetStylePaidFeatureGateUsecase()
+        let (viewModel, _) = self.makeViewModelWithCustom(gate: gate)
+        gate.canRender = false
+
+        // when
+        viewModel.refresh()
+
+        // then
+        let flags = try await self.lockedFlags(of: viewModel)
+        #expect(flags == [false, true])
+    }
+
+    @Test("구독 중인 화면은 사용권을 받아 잠김이 풀리는 변화를 받는다")
+    func viewModel_whenLicenseGranted_emitsUnlockedCardsToSubscriber() async throws {
+        // given
+        let router = SpyWidgetStyleEditRouter()
+        let gate = self.lockedGate()
+        let (viewModel, _) = self.makeViewModelWithCustom(router: router, gate: gate)
+        self.mockSheetSelection(router, key: "widget.style.license::watchAd")
+        let expect = self.expectConfirm("잠김이 바뀐 카드 목록")
+        expect.count = 2
+
+        // when
+        let emitted = try await self.outputs(expect, for: viewModel.styles.map { $0.map { $0.isLocked } }) {
+            viewModel.selectStyle(self.customId)
+            gate.canCreateWithoutAd = true
+            gate.canRender = true
+            router.finishRewardedAd(with: .rewarded)
+        }
+
+        // then
+        #expect(emitted == [[false, true], [false, false]])
+    }
+
+    @Test("잠긴 카드도 지울 수 있다")
+    func viewModel_lockedCard_canBeRemoved() async throws {
+        // given
+        let (viewModel, usecase) = self.makeViewModelWithCustom(gate: self.lockedGate())
+
+        // when
+        viewModel.removeStyle(self.customId)
+
+        // then
+        let emitted = try await self.styles(of: viewModel)
+        #expect(emitted.map { $0.styleId } == [self.defaultId])
+        #expect(self.savedStyles(usecase).map { $0.id } == [self.defaultId])
+    }
+}

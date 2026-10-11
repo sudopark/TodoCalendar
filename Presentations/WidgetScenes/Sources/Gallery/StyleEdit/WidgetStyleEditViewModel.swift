@@ -26,6 +26,7 @@ struct WidgetStyleCellViewModel: Equatable {
     let setting: any WidgetStyleSetting
     let background: WidgetAppearanceSettings.Background?
     let photo: WidgetStylePhoto?
+    var isLocked: Bool = false
     
     var appliedStyle: WidgetStyle {
         return .init(
@@ -40,6 +41,7 @@ struct WidgetStyleCellViewModel: Equatable {
             && lhs.hasUnsavedChange == rhs.hasUnsavedChange
             && lhs.background == rhs.background
             && lhs.photo == rhs.photo
+            && lhs.isLocked == rhs.isLocked
             && lhs.setting.isSame(rhs.setting)
     }
 }
@@ -96,6 +98,7 @@ final class WidgetStyleEditViewModelImple: WidgetStyleEditViewModel, @unchecked 
         let editingStyles = CurrentValueSubject<[WidgetStyle]?, Never>(nil)
         let selectedStyleId = CurrentValueSubject<WidgetStyleId?, Never>(nil)
         let editingName = CurrentValueSubject<String?, Never>(nil)
+        let isCustomRenderAllowed = CurrentValueSubject<Bool?, Never>(nil)
     }
     private let subject = Subject()
 }
@@ -106,6 +109,7 @@ final class WidgetStyleEditViewModelImple: WidgetStyleEditViewModel, @unchecked 
 extension WidgetStyleEditViewModelImple {
     
     func refresh() {
+        self.refreshCustomRenderAllowed()
         let styles = self.loadedStyles()
         self.subject.savedStyles.send(styles.asDictionary { $0.id })
         self.subject.editingStyles.send(styles)
@@ -115,6 +119,13 @@ extension WidgetStyleEditViewModelImple {
     
     func selectStyle(_ styleId: WidgetStyleId) {
         guard self.editingStyle(of: styleId) != nil else { return }
+        if self.isLocked(styleId) {
+            self.refreshCustomRenderAllowed()
+        }
+        guard self.isLocked(styleId) == false else {
+            self.showLicenseGuide { [weak self] in self?.selectStyle(styleId) }
+            return
+        }
         self.select(styleId)
     }
     
@@ -362,6 +373,19 @@ extension WidgetStyleEditViewModelImple {
 
 extension WidgetStyleEditViewModelImple {
 
+    private func refreshCustomRenderAllowed() {
+        self.subject.isCustomRenderAllowed.send(
+            self.paidFeatureGateUsecase.canRenderCustomWidgetStyle(at: Date())
+        )
+    }
+
+    private func isLocked(_ styleId: WidgetStyleId) -> Bool {
+        return styleId.isLocked(
+            saved: self.subject.savedStyles.value ?? [:],
+            isCustomRenderAllowed: self.subject.isCustomRenderAllowed.value ?? true
+        )
+    }
+
     private func showLicenseGuide(then retry: @escaping @Sendable () -> Void) {
         guard let licenseDays = self.paidFeatureGateUsecase.widgetStyleLicenseDays() else {
             self.notifyAdUnavailable()
@@ -388,6 +412,7 @@ extension WidgetStyleEditViewModelImple {
         switch self.paidFeatureGateUsecase.widgetStyleLicenseDecision(for: result) {
         case .grantLicenseAndContinue:
             self.paidFeatureGateUsecase.grantCustomWidgetStyleLicense(at: Date())
+            self.refreshCustomRenderAllowed()
             retry()
         case .notifyAdUnavailable:
             self.notifyAdUnavailable()
@@ -407,11 +432,12 @@ extension WidgetStyleEditViewModelImple {
 extension WidgetStyleEditViewModelImple {
     
     var styles: AnyPublisher<[WidgetStyleCellViewModel], Never> {
-        return Publishers.CombineLatest(
+        return Publishers.CombineLatest3(
             self.subject.editingStyles.compactMap { $0 },
-            self.subject.savedStyles.compactMap { $0 }
+            self.subject.savedStyles.compactMap { $0 },
+            self.subject.isCustomRenderAllowed.compactMap { $0 }
         )
-        .map { editings, saved in
+        .map { editings, saved, isCustomRenderAllowed in
             return editings.map { style in
                 WidgetStyleCellViewModel(
                     styleId: style.id,
@@ -419,7 +445,10 @@ extension WidgetStyleEditViewModelImple {
                     hasUnsavedChange: style.isSame(saved[style.id]) == false,
                     setting: style.setting,
                     background: style.background,
-                    photo: style.photo
+                    photo: style.photo,
+                    isLocked: style.id.isLocked(
+                        saved: saved, isCustomRenderAllowed: isCustomRenderAllowed
+                    )
                 )
             }
         }
@@ -512,5 +541,16 @@ private extension Array where Element == WidgetStyle {
 
     func hasUnsavedEdit(against saved: [WidgetStyleId: Element]) -> Bool {
         return self.contains { $0.isSame(saved[$0.id]) == false }
+    }
+}
+
+
+// MARK: - 잠김 판정
+
+private extension WidgetStyleId {
+
+    func isLocked(saved: [WidgetStyleId: WidgetStyle], isCustomRenderAllowed: Bool) -> Bool {
+        guard case .custom = self.style else { return false }
+        return saved[self] != nil && isCustomRenderAllowed == false
     }
 }
