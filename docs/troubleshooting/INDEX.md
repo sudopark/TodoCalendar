@@ -38,3 +38,4 @@
 - [2026-09-16 취소된 event sync 가 완료를 보고해, 뒤이어 시작된 sync 의 종료 신호가 사라진다](2026-09-16-cancelled-sync-reports-idle.md) — Event / fixed / AI 커맨드 결과 이벤트 안보임·포그라운드 복귀 이벤트 누락·syncEnd 안옴·removeDuplicates 유령 idle
 - [2026-09-19 Month 위젯 오늘 강조가 배경과 같은 계열로 나와 안 보인다](2026-09-19-month-widget-today-highlight-invisible.md) — Calendar / fixed / 오늘 강조·selectedDayBackground·다크모드·backgroundColor 미적용
 - [2026-09-22 위젯 스타일에 건 사진이 저장 뒤 편집 화면에서만 빈칸이 된다](2026-09-22-widget-style-photo-blank-after-save.md) — Settings / fixed / 사진 사라짐·편집 카드 빈칸·이름 바꾸니 없어짐·위젯은 정상·초안 임시 파일 삭제
+- [2026-10-11 가로가 긴 화면에서 adaptive 배너가 거부된다](2026-10-11-adaptive-banner-rejected-on-wide-screen.md) — Billing / fixed / Ad size will not fit on screen·adaptive banner 미표시·duo 펼침 배너·admob Code=0
