@@ -23,6 +23,7 @@ import CommonPresentation
     var setting: WidgetAppearanceSettings = .init()
     var selectedVariantId: String?
     var previewStyles: [String: WidgetPreviewStyleStack] = [:]
+    var isCustomRenderAllowed: Bool = true
 
     func bind(_ viewModel: any WidgetGalleryDetailViewModel) {
         guard self.didBind == false else { return }
@@ -54,6 +55,13 @@ import CommonPresentation
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] styles in
                 self?.previewStyles = styles
+            })
+            .store(in: self.cancellables)
+
+        viewModel.isCustomRenderAllowed
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] allowed in
+                self?.isCustomRenderAllowed = allowed
             })
             .store(in: self.cancellables)
     }
@@ -236,10 +244,19 @@ struct WidgetGalleryDetailView: View {
         _ variant: WidgetVariant, style: WidgetStyle, depth: Int
     ) -> some View {
         let direction: CGFloat = depth.isMultiple(of: 2) ? -1 : 1
+        let isLocked = state.isCustomRenderAllowed == false
         return WidgetVariantPreviewView(
             variant: variant,
             look: .init(globalSetting: state.setting, appliedStyle: style)
         )
+        .opacity(isLocked ? 0.4 : 1)
+        .overlay {
+            if isLocked {
+                Image(systemName: "lock.fill")
+                    .font(appearance.fontSet.normal.asFont)
+                    .foregroundStyle(appearance.colorSet.text0.asColor)
+            }
+        }
         .cardDepthShadow()
         .scaleEffect(Constant.overlayScale)
         .rotationEffect(.degrees(Constant.overlayAngle * direction))

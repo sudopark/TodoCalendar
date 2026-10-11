@@ -36,10 +36,12 @@ final class WidgetGalleryDetailViewModelImpleTests: PublisherWaitable {
         _ item: WidgetGalleryItem,
         router: SpyWidgetGalleryDetailRouter,
         setting: WidgetAppearanceSettings = .init(),
-        styleUsecase: StubWidgetStyleUsecase = .init()
+        styleUsecase: StubWidgetStyleUsecase = .init(),
+        paidFeatureGateUsecase: StubWidgetStylePaidFeatureGateUsecase = .init()
     ) -> WidgetGalleryDetailViewModelImple {
         let viewModel = WidgetGalleryDetailViewModelImple(
-            item: item, setting: setting, widgetStyleUsecase: styleUsecase
+            item: item, setting: setting, widgetStyleUsecase: styleUsecase,
+            paidFeatureGateUsecase: paidFeatureGateUsecase
         )
         viewModel.router = router
         return viewModel
@@ -144,6 +146,24 @@ extension WidgetGalleryDetailViewModelImpleTests {
             stack?.base.setting as? TodayStyleSetting,
             stack?.overlays.compactMap { $0.setting as? TodayStyleSetting } ?? []
         )
+    }
+
+    @Test("커스텀을 그릴 권한이 없으면 새로고침 때 오버레이 잠김을 알린다")
+    func viewModel_renderDenied_publishesNotAllowed() async throws {
+        // given + when
+        let allowed = try await self.customRenderAllowedAfterRefresh(canRender: false)
+
+        // then
+        #expect(allowed == false)
+    }
+
+    @Test("커스텀을 그릴 권한이 있으면 새로고침 때 오버레이를 그대로 둔다")
+    func viewModel_renderAllowed_publishesAllowed() async throws {
+        // given + when
+        let allowed = try await self.customRenderAllowedAfterRefresh(canRender: true)
+
+        // then
+        #expect(allowed == true)
     }
 
     @Test("저장된 기본 스타일이 프리뷰 스택의 맨 앞 장이 된다")
@@ -308,6 +328,21 @@ extension WidgetGalleryDetailViewModelImpleTests {
 // MARK: - 출력 읽기
 
 extension WidgetGalleryDetailViewModelImpleTests {
+
+    private func customRenderAllowedAfterRefresh(
+        canRender: Bool
+    ) async throws -> Bool? {
+        let gate = StubWidgetStylePaidFeatureGateUsecase()
+        gate.canRender = canRender
+        let viewModel = self.makeViewModel(
+            self.ddayItem, router: .init(), paidFeatureGateUsecase: gate
+        )
+        return try await self.firstOutput(
+            self.expectConfirm("커스텀 렌더 허용 여부"), for: viewModel.isCustomRenderAllowed
+        ) {
+            viewModel.refresh()
+        }
+    }
 
     private func current<P: Publisher>(
         _ description: String, of source: P

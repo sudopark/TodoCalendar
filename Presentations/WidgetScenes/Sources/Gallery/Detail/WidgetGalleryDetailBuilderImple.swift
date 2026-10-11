@@ -44,7 +44,9 @@ extension WidgetGalleryDetailBuilderImple: WidgetGalleryDetailSceneBuilder {
     ) -> any WidgetGalleryDetailScene {
         
         let viewModel = WidgetGalleryDetailViewModelImple(
-            item: item, setting: setting, widgetStyleUsecase: self.widgetStyleUsecase
+            item: item, setting: setting,
+            widgetStyleUsecase: self.widgetStyleUsecase,
+            paidFeatureGateUsecase: self.paidFeatureGateUsecase
         )
         let viewController = WidgetGalleryDetailViewController(
             viewModel: viewModel, viewAppearance: viewAppearance

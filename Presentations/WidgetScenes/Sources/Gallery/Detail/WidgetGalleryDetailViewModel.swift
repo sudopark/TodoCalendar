@@ -23,6 +23,7 @@ protocol WidgetGalleryDetailViewModel: AnyObject, WidgetGalleryDetailSceneIntera
     var variants: AnyPublisher<[WidgetVariant], Never> { get }
     var setting: AnyPublisher<WidgetAppearanceSettings, Never> { get }
     var previewStyles: AnyPublisher<[String: WidgetPreviewStyleStack], Never> { get }
+    var isCustomRenderAllowed: AnyPublisher<Bool, Never> { get }
 }
 
 final class WidgetGalleryDetailViewModelImple: WidgetGalleryDetailViewModel, @unchecked Sendable {
@@ -30,17 +31,22 @@ final class WidgetGalleryDetailViewModelImple: WidgetGalleryDetailViewModel, @un
     private let item: WidgetGalleryItem
     private let currentSetting: WidgetAppearanceSettings
     private let widgetStyleUsecase: any WidgetStyleUsecase
+    private let paidFeatureGateUsecase: any WidgetStylePaidFeatureGateUsecase
     var router: (any WidgetGalleryDetailRouting)?
     
     init(
         item: WidgetGalleryItem,
         setting: WidgetAppearanceSettings,
-        widgetStyleUsecase: any WidgetStyleUsecase
+        widgetStyleUsecase: any WidgetStyleUsecase,
+        paidFeatureGateUsecase: any WidgetStylePaidFeatureGateUsecase
     ) {
         self.item = item
         self.currentSetting = setting
         self.widgetStyleUsecase = widgetStyleUsecase
+        self.paidFeatureGateUsecase = paidFeatureGateUsecase
     }
+    
+    private let customRenderAllowedSubject = CurrentValueSubject<Bool?, Never>(nil)
 }
 
 extension WidgetGalleryDetailViewModelImple {
@@ -49,6 +55,9 @@ extension WidgetGalleryDetailViewModelImple {
         self.customizableVariants.forEach {
             self.widgetStyleUsecase.refreshStyles(of: $0)
         }
+        self.customRenderAllowedSubject.send(
+            self.paidFeatureGateUsecase.canRenderCustomWidgetStyle(at: Date())
+        )
     }
     
     /// 리로드가 이 집합의 kind 를 훑는다 — 하나만 넘기면 7종 중 하나만 갱신된다.
@@ -75,6 +84,12 @@ extension WidgetGalleryDetailViewModelImple {
     
     var setting: AnyPublisher<WidgetAppearanceSettings, Never> {
         return Just(self.currentSetting).eraseToAnyPublisher()
+    }
+    
+    var isCustomRenderAllowed: AnyPublisher<Bool, Never> {
+        return self.customRenderAllowedSubject
+            .compactMap { $0 }
+            .eraseToAnyPublisher()
     }
     
     private var customizableVariants: [WidgetVariant] {
