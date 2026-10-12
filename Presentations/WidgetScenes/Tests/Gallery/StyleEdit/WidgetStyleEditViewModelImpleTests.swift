@@ -11,6 +11,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Scenes
 import Extensions
 import UnitTestHelpKit
 import TestDoubles
@@ -32,21 +33,19 @@ final class SpyWidgetStyleEditRouter: BaseSpyRouter, WidgetStyleEditRouting, @un
         self.onPick?(data)
     }
 
-    var didRequestRewardedAd: Bool = false
-    private var onAdFinished: (@Sendable (RewardedAdResult) -> Void)?
+    var didShowPaidFeatureAdGuideWith: PaidFeatureGateFailReason?
+    private var onAdGuideFinished: (@Sendable (Bool) -> Void)?
 
-    func routeToRewardedAd(completion: @escaping @Sendable (RewardedAdResult) -> Void) {
-        self.didRequestRewardedAd = true
-        self.onAdFinished = completion
+    func showPaidFeatureAdGuide(
+        _ reason: PaidFeatureGateFailReason,
+        onFinished: @escaping @Sendable (Bool) -> Void
+    ) {
+        self.didShowPaidFeatureAdGuideWith = reason
+        self.onAdGuideFinished = onFinished
     }
 
-    func finishRewardedAd(with result: RewardedAdResult) {
-        self.onAdFinished?(result)
-    }
-
-    var didRouteToPaywall: Bool = false
-    func routeToPaywall() {
-        self.didRouteToPaywall = true
+    func finishAdGuide(shouldProceed: Bool) {
+        self.onAdGuideFinished?(shouldProceed)
     }
 }
 
@@ -132,13 +131,11 @@ extension WidgetStyleEditViewModelImpleTests {
     private func makeViewModel(
         _ usecase: StubWidgetStyleUsecase,
         variants: [WidgetVariant] = [.todaySummarySmall],
-        router: SpyWidgetStyleEditRouter = .init(),
-        gate: StubPaidFeatureGateUsecase = .init()
+        router: SpyWidgetStyleEditRouter = .init()
     ) -> WidgetStyleEditViewModelImple {
         let viewModel = WidgetStyleEditViewModelImple(
             variants: variants,
-            widgetStyleUsecase: usecase,
-            paidFeatureGateUsecase: gate
+            widgetStyleUsecase: usecase
         )
         viewModel.router = router
         return viewModel
@@ -148,10 +145,11 @@ extension WidgetStyleEditViewModelImpleTests {
     private func makeViewModel(
         saved styles: [WidgetStyle],
         router: SpyWidgetStyleEditRouter = .init(),
-        gate: StubPaidFeatureGateUsecase = .init()
+        customizeBlocked: Bool = false
     ) -> (WidgetStyleEditViewModelImple, StubWidgetStyleUsecase) {
         let usecase = self.makeUsecase(saved: styles)
-        let viewModel = self.makeViewModel(usecase, router: router, gate: gate)
+        usecase.mockCustomizeBlockedReason = customizeBlocked ? PaidFeatureGateFailReason(feature: .customizeWidget, licenseDays: 7) : nil
+        let viewModel = self.makeViewModel(usecase, router: router)
         viewModel.refresh()
         return (viewModel, usecase)
     }
@@ -172,7 +170,7 @@ extension WidgetStyleEditViewModelImpleTests {
         name: String? = nil,
         showHolidayName: Bool = true,
         router: SpyWidgetStyleEditRouter = .init(),
-        gate: StubPaidFeatureGateUsecase = .init()
+        customizeBlocked: Bool = false
     ) -> (WidgetStyleEditViewModelImple, StubWidgetStyleUsecase) {
         return self.makeViewModel(
             saved: [
@@ -180,7 +178,7 @@ extension WidgetStyleEditViewModelImpleTests {
                 self.todayStyle(.custom(id: "c1"), name: name, showHolidayName: showHolidayName)
             ],
             router: router,
-            gate: gate
+            customizeBlocked: customizeBlocked
         )
     }
 
@@ -1121,6 +1119,23 @@ extension WidgetStyleEditViewModelImpleTests {
         #expect(emitted.map { $0.styleId } == [self.defaultId])
     }
 
+    @Test("꾸미기가 막혀도 저장된 커스텀 카드는 안내 없이 확인 뒤 지울 수 있다")
+    func removeStyle_whenCustomizeBlocked_removesWithoutAdGuide() async throws {
+        // given
+        let router = SpyWidgetStyleEditRouter()
+        let (viewModel, usecase) = self.makeViewModelWithCustom(router: router, customizeBlocked: true)
+
+        // when
+        viewModel.removeStyle(self.customId)
+
+        // then
+        let emitted = try await self.styles(of: viewModel)
+        #expect(router.didShowConfirmWith != nil)
+        #expect(router.didShowPaidFeatureAdGuideWith == nil)
+        #expect(self.savedStyles(usecase).map { $0.id } == [self.defaultId])
+        #expect(emitted.map { $0.styleId } == [self.defaultId])
+    }
+
     @Test("저장된 적 없는 초안 카드를 지워도 저장분은 그대로다")
     func removeStyle_whenDraft_keepsStorageIntact() async throws {
         // given
@@ -1672,33 +1687,16 @@ extension WidgetStyleEditViewModelImpleTests {
 }
 
 
-// MARK: - 커스텀 생성 게이트
+// MARK: - 꾸미기 게이트
 
 extension WidgetStyleEditViewModelImpleTests {
-
-    private func blockedGate(licenseDays: Int = 9) -> StubPaidFeatureGateUsecase {
-        let gate = StubPaidFeatureGateUsecase()
-        gate.mockBlockedReason = .init(feature: .customizeWidget, licenseDays: licenseDays)
-        return gate
-    }
 
     private var copyOfSummerName: String {
         return "widget.style::custom::copy_format".localized(with: "여름")
     }
 
-    /// 무료 유저가 커스텀 카드를 복제하려다 시트에서 광고를 고르고, 광고가 끝나기 전 상태까지 세운다.
-    private func makeViewModelWaitingAd(
-        router: SpyWidgetStyleEditRouter,
-        gate: StubPaidFeatureGateUsecase
-    ) -> WidgetStyleEditViewModelImple {
-        let (viewModel, _) = self.makeViewModelWithCustom(name: "여름", router: router, gate: gate)
-        self.mockSheetSelection(router, key: "widget.style.license::watchAd")
-        viewModel.appendStyle(copying: self.customId)
-        return viewModel
-    }
-
-    @Test("생성이 허용되면 안내 없이 바로 카드를 더한다")
-    func viewModel_whenCreationAllowed_addStyleAppendsWithoutSheet() async throws {
+    @Test("꾸미기 권한이 있으면 안내 없이 바로 카드를 더한다")
+    func viewModel_whenCustomizeAllowed_addStyleAppendsWithoutGuide() async throws {
         // given
         let router = SpyWidgetStyleEditRouter()
         let (viewModel, _) = self.makeViewModelWithCustom(router: router)
@@ -1709,349 +1707,344 @@ extension WidgetStyleEditViewModelImpleTests {
         // then
         let emitted = try await self.styles(of: viewModel)
         #expect(emitted.count == 3)
-        #expect(router.didShowActionSheetWith == nil)
+        #expect(router.didShowPaidFeatureAdGuideWith == nil)
     }
 
-    @Test("생성이 막히면 추가 카드는 사용권 기간을 담은 안내를 띄우고 카드를 더하지 않는다")
-    func viewModel_whenCreationBlocked_addStyleShowsLicenseSheet() async throws {
+    @Test("꾸미기 권한이 없으면 복제는 위젯 꾸미기 안내를 띄우고 카드를 더하지 않는다")
+    func viewModel_whenCustomizeBlocked_appendStyleShowsGuide() async throws {
         // given
         let router = SpyWidgetStyleEditRouter()
-        let (viewModel, _) = self.makeViewModelWithCustom(router: router, gate: self.blockedGate())
-
-        // when
-        viewModel.addStyle()
-
-        // then
-        let form = try #require(router.didShowActionSheetWith)
-        #expect(form.title == "widget.style.license::title".localized())
-        #expect(form.message == "widget.style.license::message".localized(with: 9))
-        #expect(form.actions.map { $0.text } == [
-            "widget.style.license::watchAd".localized(),
-            "widget.style.license::showPlans".localized(),
-            "common.cancel".localized()
-        ])
-        let emitted = try await self.styles(of: viewModel)
-        #expect(emitted.count == 2)
-    }
-
-    @Test("생성이 막히면 복제도 안내를 띄우고 카드를 더하지 않는다")
-    func viewModel_whenCreationBlocked_appendStyleShowsLicenseSheet() async throws {
-        // given
-        let router = SpyWidgetStyleEditRouter()
-        let (viewModel, _) = self.makeViewModelWithCustom(router: router, gate: self.blockedGate())
+        let (viewModel, _) = self.makeViewModelWithCustom(router: router, customizeBlocked: true)
 
         // when
         viewModel.appendStyle(copying: self.customId)
 
         // then
-        #expect(router.didShowActionSheetWith?.title == "widget.style.license::title".localized())
+        #expect(router.didShowPaidFeatureAdGuideWith == PaidFeatureGateFailReason(feature: .customizeWidget, licenseDays: 7))
         let emitted = try await self.styles(of: viewModel)
         #expect(emitted.count == 2)
     }
 
-    @Test("광고 보상을 받으면 사용권을 기록하고 막혔던 복제를 이어서 한다")
-    func viewModel_whenAdRewarded_grantsLicenseAndAppends() async throws {
+    @Test("꾸미기 권한이 없으면 설정 수정은 안내를 띄우고 편집분을 남기지 않는다")
+    func viewModel_whenCustomizeBlocked_updateSettingShowsGuideWithoutEdit() async throws {
         // given
         let router = SpyWidgetStyleEditRouter()
-        let gate = self.blockedGate()
-        let viewModel = self.makeViewModelWaitingAd(router: router, gate: gate)
-        gate.mockBlockedReason = nil
+        let (viewModel, _) = self.makeViewModelWithCustom(router: router, customizeBlocked: true)
 
         // when
-        router.finishRewardedAd(with: .rewarded)
+        viewModel.updateSetting(self.settingTurningOff(.showTodoCount))
 
         // then
-        let grantedAt = try #require(gate.didGrantLicenseWith?.at)
-        #expect(abs(grantedAt.timeIntervalSinceNow) < 10)
+        #expect(router.didShowPaidFeatureAdGuideWith == PaidFeatureGateFailReason(feature: .customizeWidget, licenseDays: 7))
+        let emitted = try await self.styles(of: viewModel)
+        #expect(emitted.map { $0.hasUnsavedChange } == [false, false])
+    }
+
+    @Test("꾸미기 권한이 없으면 저장은 안내를 띄우고 저장하지 않는다")
+    func viewModel_whenCustomizeBlocked_confirmShowsGuideWithoutSave() async throws {
+        // given
+        let router = SpyWidgetStyleEditRouter()
+        let (viewModel, usecase) = self.makeViewModelWithCustom(router: router)
+        viewModel.updateSetting(self.settingTurningOff(.showTodoCount))
+        usecase.mockCustomizeBlockedReason = PaidFeatureGateFailReason(feature: .customizeWidget, licenseDays: 7)
+
+        // when
+        viewModel.confirm()
+
+        // then
+        #expect(router.didShowPaidFeatureAdGuideWith == PaidFeatureGateFailReason(feature: .customizeWidget, licenseDays: 7))
+        let emitted = try await self.styles(of: viewModel)
+        #expect(emitted.map { $0.hasUnsavedChange } == [true, false])
+        #expect(router.didShowToastWithMessage == nil)
+    }
+
+    @Test("안내가 진행으로 끝나면 막혔던 복제를 이어서 한다")
+    func viewModel_whenGuideProceeds_appendsBlockedCopy() async throws {
+        // given
+        let router = SpyWidgetStyleEditRouter()
+        let (viewModel, usecase) = self.makeViewModelWithCustom(name: "여름", router: router, customizeBlocked: true)
+        viewModel.appendStyle(copying: self.customId)
+        usecase.mockCustomizeBlockedReason = nil
+
+        // when
+        router.finishAdGuide(shouldProceed: true)
+
+        // then
         let emitted = try await self.styles(of: viewModel)
         #expect(emitted.map { $0.name } == [
             "widget.style::default".localized(), "여름", self.copyOfSummerName
         ])
     }
 
-    @Test("보상형 대신 전면 광고를 보여줘도 사용권을 기록하고 복제를 이어서 한다")
-    func viewModel_whenAdFallbackShown_grantsLicenseAndAppends() async throws {
+    @Test("안내가 진행으로 끝나면 막혔던 수정을 이어서 한다")
+    func viewModel_whenGuideProceeds_updatesBlockedSetting() async throws {
         // given
         let router = SpyWidgetStyleEditRouter()
-        let gate = self.blockedGate()
-        let viewModel = self.makeViewModelWaitingAd(router: router, gate: gate)
-        gate.mockBlockedReason = nil
+        let (viewModel, usecase) = self.makeViewModelWithCustom(router: router, customizeBlocked: true)
+        viewModel.updateSetting(self.settingTurningOff(.showTodoCount))
+        usecase.mockCustomizeBlockedReason = nil
 
         // when
-        router.finishRewardedAd(with: .fallbackFullScreenShown)
+        router.finishAdGuide(shouldProceed: true)
 
         // then
-        #expect(gate.didGrantLicenseWith != nil)
         let emitted = try await self.styles(of: viewModel)
-        #expect(emitted.last?.name == self.copyOfSummerName)
+        #expect(emitted.map { $0.hasUnsavedChange } == [true, false])
     }
 
-    @Test("사용권을 기록한 뒤에도 게이트가 막으면 복제하지 않는다")
-    func viewModel_whenStillBlockedAfterGrant_doesNotAppend() async throws {
+    @Test("안내가 진행 없이 끝나면 편집분을 남기지 않는다")
+    func viewModel_whenGuideNotProceed_keepsNoEdit() async throws {
         // given
         let router = SpyWidgetStyleEditRouter()
-        let gate = self.blockedGate()
-        let viewModel = self.makeViewModelWaitingAd(router: router, gate: gate)
-
-        // when
-        router.finishRewardedAd(with: .rewarded)
-
-        // then
-        #expect(gate.didGrantLicenseWith != nil)
-        let emitted = try await self.styles(of: viewModel)
-        #expect(emitted.count == 2)
-    }
-
-    @Test("보상 전에 광고를 닫으면 사용권도 카드도 남기지 않는다")
-    func viewModel_whenAdDismissedBeforeReward_doesNotGrantOrAppend() async throws {
-        // given
-        let router = SpyWidgetStyleEditRouter()
-        let gate = self.blockedGate()
-        let viewModel = self.makeViewModelWaitingAd(router: router, gate: gate)
-        gate.mockBlockedReason = nil
-
-        // when
-        router.finishRewardedAd(with: .dismissedBeforeReward)
-
-        // then
-        #expect(gate.didGrantLicenseWith == nil)
-        #expect(router.didShowToastWithMessage == nil)
-        let emitted = try await self.styles(of: viewModel)
-        #expect(emitted.count == 2)
-    }
-
-    @Test("광고를 못 불러오면 사용권 없이 알리고 카드를 더하지 않는다")
-    func viewModel_whenAdUnavailable_showsToastWithoutGrant() async throws {
-        // given
-        let router = SpyWidgetStyleEditRouter()
-        let gate = self.blockedGate()
-        let viewModel = self.makeViewModelWaitingAd(router: router, gate: gate)
-        gate.mockBlockedReason = nil
-
-        // when
-        router.finishRewardedAd(with: .unavailable)
-
-        // then
-        #expect(router.didShowToastWithMessage == "widget.style.license::adUnavailable".localized())
-        #expect(gate.didGrantLicenseWith == nil)
-        let emitted = try await self.styles(of: viewModel)
-        #expect(emitted.count == 2)
-    }
-
-    @Test("플랜 보기를 고르면 paywall 만 열고 광고도 카드도 없다")
-    func viewModel_whenShowPlansSelected_opensPaywallWithoutAppending() async throws {
-        // given
-        let router = SpyWidgetStyleEditRouter()
-        let (viewModel, _) = self.makeViewModelWithCustom(router: router, gate: self.blockedGate())
-        self.mockSheetSelection(router, key: "widget.style.license::showPlans")
-
-        // when
-        viewModel.addStyle()
-
-        // then
-        #expect(router.didRouteToPaywall == true)
-        #expect(router.didRequestRewardedAd == false)
-        let emitted = try await self.styles(of: viewModel)
-        #expect(emitted.count == 2)
-    }
-
-    @Test("안내를 취소하면 광고도 paywall 도 카드도 없다")
-    func viewModel_whenSheetCanceled_doesNotAppend() async throws {
-        // given
-        let router = SpyWidgetStyleEditRouter()
-        let (viewModel, _) = self.makeViewModelWithCustom(router: router, gate: self.blockedGate())
-        self.mockSheetSelection(router, key: "common.cancel")
-
-        // when
-        viewModel.addStyle()
-
-        // then
-        #expect(router.didRequestRewardedAd == false)
-        #expect(router.didRouteToPaywall == false)
-        let emitted = try await self.styles(of: viewModel)
-        #expect(emitted.count == 2)
-    }
-
-    @Test("안내가 떠 있는 동안 다른 카드를 다시 누르면 마지막에 누른 복제를 이어서 한다")
-    func viewModel_whenTappedAgainWhilePending_continuesLatestIntent() async throws {
-        // given
-        let router = SpyWidgetStyleEditRouter()
-        let gate = self.blockedGate()
-        let (viewModel, _) = self.makeViewModelWithCustom(name: "여름", router: router, gate: gate)
-        viewModel.appendStyle(copying: self.defaultId)
-        self.mockSheetSelection(router, key: "widget.style.license::watchAd")
+        let (viewModel, usecase) = self.makeViewModelWithCustom(router: router, customizeBlocked: true)
         viewModel.appendStyle(copying: self.customId)
-        gate.mockBlockedReason = nil
 
         // when
-        router.finishRewardedAd(with: .rewarded)
+        router.finishAdGuide(shouldProceed: false)
 
         // then
         let emitted = try await self.styles(of: viewModel)
-        #expect(emitted.map { $0.name }.dropFirst(2) == [self.copyOfSummerName])
+        #expect(emitted.count == 2)
+    }
+
+    @Test("안내를 닫거나 플랜 보기를 고르면 아무것도 이어서 하지 않는다")
+    func viewModel_whenGuideClosed_doesNothing() async throws {
+        // given
+        let router = SpyWidgetStyleEditRouter()
+        let (viewModel, usecase) = self.makeViewModelWithCustom(router: router, customizeBlocked: true)
+        viewModel.appendStyle(copying: self.customId)
+
+        // when
+        router.finishAdGuide(shouldProceed: false)
+
+        // then
+        let emitted = try await self.styles(of: viewModel)
+        #expect(emitted.count == 2)
+    }
+
+    @Test("꾸미기 권한이 없으면 초기화는 안내만 띄우고 확인을 묻지 않는다")
+    func viewModel_whenCustomizeBlocked_resetShowsGuideWithoutConfirm() {
+        // given
+        let router = SpyWidgetStyleEditRouter()
+        let (viewModel, _) = self.makeViewModelWithCustom(router: router, customizeBlocked: true)
+
+        // when
+        viewModel.resetStyle(self.customId)
+
+        // then
+        #expect(router.didShowPaidFeatureAdGuideWith == PaidFeatureGateFailReason(feature: .customizeWidget, licenseDays: 7))
+        #expect(router.didShowConfirmWith == nil)
+    }
+
+    @Test("꾸미기 권한이 없으면 이름을 바꾸려 할 때 안내를 띄우고 이름을 바꾸지 않는다")
+    func viewModel_whenCustomizeBlocked_editNameShowsGuideWithoutRename() async throws {
+        // given
+        let router = SpyWidgetStyleEditRouter()
+        let (viewModel, _) = self.makeViewModelWithCustom(router: router, customizeBlocked: true)
+
+        // when
+        viewModel.editName("새 이름")
+
+        // then
+        #expect(router.didShowPaidFeatureAdGuideWith == PaidFeatureGateFailReason(feature: .customizeWidget, licenseDays: 7))
+        let emitted = try await self.styles(of: viewModel)
+        #expect(emitted.map { $0.hasUnsavedChange } == [false, false])
+    }
+
+    @Test("이름이 그대로면 권한이 없어도 안내를 띄우지 않는다")
+    func viewModel_whenCustomizeBlockedAndNameUnchanged_noGuide() {
+        // given
+        let router = SpyWidgetStyleEditRouter()
+        let (viewModel, _) = self.makeViewModelWithCustom(
+            name: "밤", router: router, customizeBlocked: true
+        )
+        viewModel.selectStyle(self.customId)
+
+        // when
+        viewModel.editName("밤")
+
+        // then
+        #expect(router.didShowPaidFeatureAdGuideWith == nil)
+    }
+
+    @Test("꾸미기 권한이 없으면 배경 수정은 안내를 띄우고 편집분을 남기지 않는다")
+    func viewModel_whenCustomizeBlocked_updateBackgroundShowsGuideWithoutEdit() async throws {
+        // given
+        let router = SpyWidgetStyleEditRouter()
+        let (viewModel, _) = self.makeViewModelWithCustom(router: router, customizeBlocked: true)
+
+        // when
+        viewModel.updateBackground(.custom(hex: "#101820"))
+
+        // then
+        #expect(router.didShowPaidFeatureAdGuideWith == PaidFeatureGateFailReason(feature: .customizeWidget, licenseDays: 7))
+        let emitted = try await self.styles(of: viewModel)
+        #expect(emitted.map { $0.hasUnsavedChange } == [false, false])
+    }
+
+    @Test("꾸미기 권한이 없으면 사진 고르기는 안내만 띄우고 사진 선택을 열지 않는다")
+    func viewModel_whenCustomizeBlocked_selectPhotoShowsGuideWithoutPicker() {
+        // given
+        let router = SpyWidgetStyleEditRouter()
+        let (viewModel, _) = self.makeViewModelWithCustom(router: router, customizeBlocked: true)
+
+        // when
+        viewModel.selectPhoto()
+
+        // then
+        #expect(router.didShowPaidFeatureAdGuideWith == PaidFeatureGateFailReason(feature: .customizeWidget, licenseDays: 7))
+        #expect(router.didRequestPhotoPick == false)
+    }
+
+    @Test("안내가 떠 있는 동안 들어온 수정은 안내를 겹쳐 띄우지 않는다")
+    func viewModel_whenGuideInProgress_doesNotStackGuides() {
+        // given
+        let router = SpyWidgetStyleEditRouter()
+        let (viewModel, _) = self.makeViewModelWithCustom(router: router, customizeBlocked: true)
+        viewModel.updateBackground(.custom(hex: "#101820"))
+        router.didShowPaidFeatureAdGuideWith = nil
+
+        // when
+        viewModel.updateBackground(.custom(hex: "#ffffff"))
+
+        // then
+        #expect(router.didShowPaidFeatureAdGuideWith == nil)
+    }
+
+    @Test("안내를 닫고 나면 다음 수정에서 안내를 다시 띄운다")
+    func viewModel_whenGuideClosed_showsGuideAgainOnNextEdit() {
+        // given
+        let router = SpyWidgetStyleEditRouter()
+        let (viewModel, _) = self.makeViewModelWithCustom(router: router, customizeBlocked: true)
+        viewModel.updateBackground(.custom(hex: "#101820"))
+        router.finishAdGuide(shouldProceed: false)
+        router.didShowPaidFeatureAdGuideWith = nil
+
+        // when
+        viewModel.updateBackground(.custom(hex: "#ffffff"))
+
+        // then
+        #expect(router.didShowPaidFeatureAdGuideWith == PaidFeatureGateFailReason(feature: .customizeWidget, licenseDays: 7))
+    }
+
+    @Test("꾸미기 권한이 없으면 닫기에서 저장을 골라도 안내를 띄우고 닫지 않는다")
+    func viewModel_whenCustomizeBlocked_closeSaveShowsGuideWithoutClosing() {
+        // given
+        let router = SpyWidgetStyleEditRouter()
+        self.mockSheetSelection(router, key: "widget.style.edit::unsaved::save")
+        let (viewModel, usecase) = self.makeViewModelWithCustom(router: router)
+        viewModel.updateSetting(self.settingTurningOff(.showTodoCount))
+        usecase.mockCustomizeBlockedReason = PaidFeatureGateFailReason(feature: .customizeWidget, licenseDays: 7)
+
+        // when
+        viewModel.close()
+
+        // then
+        #expect(router.didShowPaidFeatureAdGuideWith == PaidFeatureGateFailReason(feature: .customizeWidget, licenseDays: 7))
+        #expect(router.didClosed == nil)
+        #expect(self.savedSetting(usecase)?.showTodoCount == true)
+    }
+
+    @Test("저장이 막혀 띄운 안내가 진행으로 끝나면 다시 저장하고 저장 알림을 띄운다")
+    func viewModel_whenConfirmBlockedAndGuideProceeds_savesWithToast() async throws {
+        // given
+        let router = SpyWidgetStyleEditRouter()
+        let (viewModel, usecase) = self.makeViewModelWithCustom(router: router)
+        viewModel.updateSetting(self.settingTurningOff(.showTodoCount))
+        usecase.mockCustomizeBlockedReason = PaidFeatureGateFailReason(feature: .customizeWidget, licenseDays: 7)
+        viewModel.confirm()
+        usecase.mockCustomizeBlockedReason = nil
+
+        // when
+        router.finishAdGuide(shouldProceed: true)
+
+        // then
+        #expect(self.savedSetting(usecase)?.showTodoCount == false)
+        #expect(router.didShowToastWithMessage == "widget.style.edit::saved::message".localized())
+    }
+
+    @Test("닫기 저장이 막혀 띄운 안내가 진행으로 끝나면 저장하고 저장 알림을 띄운 뒤 닫는다")
+    func viewModel_whenCloseSaveBlockedAndGuideProceeds_savesAndCloses() {
+        // given
+        let router = SpyWidgetStyleEditRouter()
+        self.mockSheetSelection(router, key: "widget.style.edit::unsaved::save")
+        let (viewModel, usecase) = self.makeViewModelWithCustom(router: router)
+        viewModel.updateSetting(self.settingTurningOff(.showTodoCount))
+        usecase.mockCustomizeBlockedReason = PaidFeatureGateFailReason(feature: .customizeWidget, licenseDays: 7)
+        viewModel.close()
+        usecase.mockCustomizeBlockedReason = nil
+
+        // when
+        router.finishAdGuide(shouldProceed: true)
+
+        // then
+        #expect(self.savedSetting(usecase)?.showTodoCount == false)
+        #expect(router.didShowToastWithMessage == "widget.style.edit::saved::message".localized())
+        #expect(router.didClosed == true)
+    }
+
+    @Test("닫기에서 저장하면 저장 알림을 띄우고 닫는다")
+    func viewModel_whenCloseSaves_showsToastAndCloses() {
+        // given
+        let router = SpyWidgetStyleEditRouter()
+        self.mockSheetSelection(router, key: "widget.style.edit::unsaved::save")
+        let (viewModel, _) = self.makeViewModelWithEdit(router: router)
+
+        // when
+        viewModel.close()
+
+        // then
+        #expect(router.didShowToastWithMessage == "widget.style.edit::saved::message".localized())
+        #expect(router.didClosed == true)
+    }
+
+    @Test("카드를 고르는 것은 권한이 없어도 막지 않는다")
+    func viewModel_whenCustomizeBlocked_selectStyleWithoutGuide() async throws {
+        // given
+        let router = SpyWidgetStyleEditRouter()
+        let (viewModel, _) = self.makeViewModelWithCustom(router: router, customizeBlocked: true)
+
+        // when
+        viewModel.selectStyle(self.customId)
+
+        // then
+        #expect(router.didShowPaidFeatureAdGuideWith == nil)
+        let selected = try await self.firstOutput(
+            self.expectConfirm("고른 카드"), for: viewModel.selectedStyleId
+        )
+        #expect(selected == self.customId)
     }
 }
 
 
-// MARK: - 잠긴 커스텀 카드
+// MARK: - 저장 알림
 
 extension WidgetStyleEditViewModelImpleTests {
 
-    private func lockedGate() -> StubPaidFeatureGateUsecase {
-        let gate = self.blockedGate()
-        gate.mockBlockedReason = .init(feature: .customizeWidget, licenseDays: 7)
-        return gate
-    }
-
-    private func lockedFlags(
-        of viewModel: WidgetStyleEditViewModelImple
-    ) async throws -> [Bool] {
-        return try await self.styles(of: viewModel).map { $0.isLocked }
-    }
-
-    @Test("커스텀을 그릴 수 없으면 저장된 커스텀 카드만 잠긴다")
-    func viewModel_whenRenderNotAllowed_marksSavedCustomCardsLocked() async throws {
-        // given
-        let (viewModel, _) = self.makeViewModelWithCustom(gate: self.lockedGate())
-
-        // when
-        let flags = try await self.lockedFlags(of: viewModel)
-
-        // then
-        #expect(flags == [false, true])
-    }
-
-    @Test("커스텀을 그릴 수 없어도 기본 카드는 잠그지 않는다")
-    func viewModel_whenRenderNotAllowed_doesNotLockDefaultCard() async throws {
-        // given
-        let (viewModel, _) = self.makeViewModel(
-            saved: [self.todayStyle(.default)], gate: self.lockedGate()
-        )
-
-        // when
-        let flags = try await self.lockedFlags(of: viewModel)
-
-        // then
-        #expect(flags == [false])
-    }
-
-    @Test("커스텀을 그릴 수 있으면 어떤 카드도 잠그지 않는다")
-    func viewModel_whenRenderAllowed_noCardLocked() async throws {
-        // given
-        let (viewModel, _) = self.makeViewModelWithCustom()
-
-        // when
-        let flags = try await self.lockedFlags(of: viewModel)
-
-        // then
-        #expect(flags == [false, false])
-    }
-
-    @Test("잠긴 카드를 누르면 안내를 띄우고 그 카드를 고르지 않는다")
-    func viewModel_whenLockedCardTapped_showsLicenseSheetWithoutSelecting() async throws {
+    @Test("저장하면 저장했다는 알림을 띄운다")
+    func viewModel_whenConfirmSaves_showsSavedToast() {
         // given
         let router = SpyWidgetStyleEditRouter()
-        let (viewModel, _) = self.makeViewModelWithCustom(router: router, gate: self.lockedGate())
+        let (viewModel, _) = self.makeViewModelWithCustom(router: router)
+        viewModel.updateSetting(self.settingTurningOff(.showTodoCount))
 
         // when
-        viewModel.selectStyle(self.customId)
+        viewModel.confirm()
 
         // then
-        #expect(router.didShowActionSheetWith?.title == "widget.style.license::title".localized())
-        let selected = try await self.selectedStyleId(of: viewModel)
-        #expect(selected == self.defaultId)
+        #expect(router.didShowToastWithMessage == "widget.style.edit::saved::message".localized())
     }
 
-    @Test("잠긴 카드에서 광고로 사용권을 받으면 잠김이 풀리고 그 카드를 고른다")
-    func viewModel_whenLicenseGrantedFromLockedCard_unlocksAndSelectsCard() async throws {
+    @Test("바뀐 게 없어 저장하지 않으면 알림도 없다")
+    func viewModel_whenNothingToSave_showsNoToast() {
         // given
         let router = SpyWidgetStyleEditRouter()
-        let gate = self.lockedGate()
-        let (viewModel, _) = self.makeViewModelWithCustom(router: router, gate: gate)
-        self.mockSheetSelection(router, key: "widget.style.license::watchAd")
-        viewModel.selectStyle(self.customId)
-        gate.mockBlockedReason = nil
-        gate.mockBlockedReason = nil
+        let (viewModel, _) = self.makeViewModelWithCustom(router: router)
 
         // when
-        router.finishRewardedAd(with: .rewarded)
+        viewModel.confirm()
 
         // then
-        #expect(gate.didGrantLicenseWith != nil)
-        let flags = try await self.lockedFlags(of: viewModel)
-        #expect(flags == [false, false])
-        let selected = try await self.selectedStyleId(of: viewModel)
-        #expect(selected == self.customId)
-    }
-
-    @Test("구매로 이미 풀린 뒤 배지가 남은 카드를 누르면 안내 없이 풀리고 고른다")
-    func viewModel_whenLockedCardTappedAfterAccessGranted_unlocksAndSelectsCard() async throws {
-        // given
-        let router = SpyWidgetStyleEditRouter()
-        let gate = self.lockedGate()
-        let (viewModel, _) = self.makeViewModelWithCustom(router: router, gate: gate)
-        gate.mockBlockedReason = nil
-        gate.mockBlockedReason = nil
-
-        // when
-        viewModel.selectStyle(self.customId)
-
-        // then
-        #expect(router.didShowActionSheetWith == nil)
-        let flags = try await self.lockedFlags(of: viewModel)
-        #expect(flags == [false, false])
-        let selected = try await self.selectedStyleId(of: viewModel)
-        #expect(selected == self.customId)
-    }
-
-    @Test("다시 열 때 커스텀을 그릴 수 없게 됐으면 저장된 커스텀 카드를 잠근다")
-    func viewModel_whenRenderTurnsOffOnRefresh_locksSavedCustomCard() async throws {
-        // given
-        let gate = StubPaidFeatureGateUsecase()
-        let (viewModel, _) = self.makeViewModelWithCustom(gate: gate)
-        gate.mockBlockedReason = .init(feature: .customizeWidget, licenseDays: 7)
-
-        // when
-        viewModel.refresh()
-
-        // then
-        let flags = try await self.lockedFlags(of: viewModel)
-        #expect(flags == [false, true])
-    }
-
-    @Test("구독 중인 화면은 사용권을 받아 잠김이 풀리는 변화를 받는다")
-    func viewModel_whenLicenseGranted_emitsUnlockedCardsToSubscriber() async throws {
-        // given
-        let router = SpyWidgetStyleEditRouter()
-        let gate = self.lockedGate()
-        let (viewModel, _) = self.makeViewModelWithCustom(router: router, gate: gate)
-        self.mockSheetSelection(router, key: "widget.style.license::watchAd")
-        let expect = self.expectConfirm("잠김이 바뀐 카드 목록")
-        expect.count = 2
-
-        // when
-        let emitted = try await self.outputs(expect, for: viewModel.styles.map { $0.map { $0.isLocked } }) {
-            viewModel.selectStyle(self.customId)
-            gate.mockBlockedReason = nil
-            gate.mockBlockedReason = nil
-            router.finishRewardedAd(with: .rewarded)
-        }
-
-        // then
-        #expect(emitted == [[false, true], [false, false]])
-    }
-
-    @Test("잠긴 카드도 지울 수 있다")
-    func viewModel_lockedCard_canBeRemoved() async throws {
-        // given
-        let (viewModel, usecase) = self.makeViewModelWithCustom(gate: self.lockedGate())
-
-        // when
-        viewModel.removeStyle(self.customId)
-
-        // then
-        let emitted = try await self.styles(of: viewModel)
-        #expect(emitted.map { $0.styleId } == [self.defaultId])
-        #expect(self.savedStyles(usecase).map { $0.id } == [self.defaultId])
+        #expect(router.didShowToastWithMessage == nil)
     }
 }

@@ -263,7 +263,9 @@ extension LoginUsecaseFactoryImple {
     }
 
     func makeWidgetStyleUsecase() -> any WidgetStyleUsecase {
-        return self.settingFactory.makeWidgetStyleUsecase()
+        return self.settingFactory.makeWidgetStyleUsecase(
+            paidFeatureGateUsecase: self.makePaidFeatureGateUsecase()
+        )
     }
 
     func makeEventSettingUsecase() -> any EventSettingUsecase {
@@ -569,13 +571,16 @@ private struct LoginSettingFactory {
         return self.makeAppSettingUsecase()
     }
 
-    func makeWidgetStyleUsecase() -> any WidgetStyleUsecase {
+    func makeWidgetStyleUsecase(
+        paidFeatureGateUsecase: any PaidFeatureGateUsecase
+    ) -> any WidgetStyleUsecase {
         return WidgetStyleUsecaseImple(
             styleRepository: WidgetStyleLocalRepositoryImple(
                 environmentStorage: applicationBase.userDefaultEnvironmentStorage,
                 photoDirectory: AppEnvironment.widgetPhotoDirectory
             ),
-            sharedDataStore: applicationBase.sharedDataStore
+            sharedDataStore: applicationBase.sharedDataStore,
+            paidFeatureGateUsecase: paidFeatureGateUsecase
         )
     }
 

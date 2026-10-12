@@ -646,6 +646,7 @@
 "widget.style.edit::discard" = "Discard";
 "widget.style.edit::reset" = "Reset to default";
 "widget.style.edit::reset::confirm" = "Reset";
+"widget.style.edit::saved::message" = "Saved";
 "widget.style.edit::reset::message" = "Reset this style to its default?";
 "widget.style.edit::unsaved::message" = "You have unsaved changes.";
 "widget.style.edit::unsaved::save" = "Save changes";
@@ -660,10 +661,6 @@
 "widget.style.edit::background::photo::remove" = "Remove photo";
 "widget.style.edit::items::section" = "Details";
 "widget.style::custom::copy_format" = "%@ - Copy";
-"widget.style.license::title" = "Custom styles need a paid plan";
-"widget.style.license::message" = "Watch a short ad to use them free for %d days.";
-"widget.style.license::watchAd" = "Watch ad";
-"widget.style.license::showPlans" = "See plans";
 "widget.style.license::adUnavailable" = "Couldn't load an ad. Please try again later.";
 "widget.style.adGuide::title" = "Watch an ad to customize widgets";
 "widget.style.adGuide::message" = "Watch one ad to customize your widgets freely for %d days.";

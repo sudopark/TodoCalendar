@@ -21,7 +21,9 @@ public protocol WidgetStyleUsecase: Sendable {
 
     func loadStyles(of variant: WidgetVariant) -> [WidgetStyle]
 
-    func updateStyle(_ style: WidgetStyle)
+    func checkCustomizable() throws
+
+    func updateStyle(_ style: WidgetStyle) throws
 
     func makeNewStyleId(for variant: WidgetVariant) -> WidgetStyleId
 
@@ -37,13 +39,16 @@ public final class WidgetStyleUsecaseImple: WidgetStyleUsecase {
 
     private let styleRepository: any WidgetStyleRepository
     private let sharedDataStore: SharedDataStore
+    private let paidFeatureGateUsecase: any PaidFeatureGateUsecase
 
     public init(
         styleRepository: any WidgetStyleRepository,
-        sharedDataStore: SharedDataStore
+        sharedDataStore: SharedDataStore,
+        paidFeatureGateUsecase: any PaidFeatureGateUsecase
     ) {
         self.styleRepository = styleRepository
         self.sharedDataStore = sharedDataStore
+        self.paidFeatureGateUsecase = paidFeatureGateUsecase
     }
 
     /// 변형이 아니라 스타일 좌표 기준이다 — 스타일을 공유하는 변형군은 스트림도 하나를 본다.
@@ -85,8 +90,13 @@ extension WidgetStyleUsecaseImple {
         return [defaultStyle] + customStyles
     }
 
+    public func checkCustomizable() throws {
+        try self.paidFeatureGateUsecase.check(.customizeWidget, at: Date())
+    }
+
     /// 변형이 쓰는 payload 타입이 아니면 저장하지 않는다 — 다른 변형의 설정이 이 좌표를 덮는다.
-    public func updateStyle(_ style: WidgetStyle) {
+    public func updateStyle(_ style: WidgetStyle) throws {
+        try self.checkCustomizable()
         guard style.id.variant.isOwnSetting(style.setting) else { return }
         self.styleRepository.updateStyle(style.withNormalizedName())
         self.shareLatestStyles(of: style.id.variant)

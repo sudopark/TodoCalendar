@@ -535,9 +535,7 @@ extension ApplicationRootRouter {
         return WidgetGalleryBuilderImple(
             uiSettingUsecase: self.usecaseFactory.makeUISettingUsecase(),
             widgetStyleUsecase: self.usecaseFactory.makeWidgetStyleUsecase(),
-            paidFeatureGateUsecase: self.usecaseFactory.makePaidFeatureGateUsecase(),
-            paywallSceneBuilder: self.paywallSceneBuilder(),
-            rewardedAdRouter: self.rewardedAdRouter(),
+            adGuideSceneBuilder: self.paidFeatureAdGuideSceneBuilder(),
             viewAppearance: self.viewAppearanceStore.appearance
         )
     }

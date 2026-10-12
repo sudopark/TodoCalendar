@@ -12,6 +12,7 @@ import Combine
 import Prelude
 import Optics
 import UnitTestHelpKit
+import TestDoubles
 
 @testable import Domain
 
@@ -85,10 +86,14 @@ final class WidgetStyleUsecaseImpleTests: PublisherWaitable {
         )
     }
 
-    private func makeUsecase(with repository: StubRepository) -> WidgetStyleUsecaseImple {
+    private func makeUsecase(
+        with repository: StubRepository,
+        gate: StubPaidFeatureGateUsecase = .init()
+    ) -> WidgetStyleUsecaseImple {
         return WidgetStyleUsecaseImple(
             styleRepository: repository,
-            sharedDataStore: self.sharedDataStore
+            sharedDataStore: self.sharedDataStore,
+            paidFeatureGateUsecase: gate
         )
     }
 }
@@ -300,7 +305,7 @@ extension WidgetStyleUsecaseImpleTests {
             expect, for: usecase.styles(of: .todaySummarySmall)
         ) {
             usecase.refreshStyles(of: .todaySummarySmall)
-            usecase.updateStyle(self.todayStyle(.default, showHolidayName: false))
+            try usecase.updateStyle(self.todayStyle(.default, showHolidayName: false))
         }
 
         // then
@@ -364,10 +369,10 @@ extension WidgetStyleUsecaseImpleTests {
             expect, for: usecase.styles(of: .todaySummarySmall)
         ) {
             usecase.refreshStyles(of: .todaySummarySmall)
-            usecase.updateStyle(
+            try usecase.updateStyle(
                 self.todayStyle(.custom(id: "m1"), variant: .monthSmall, showHolidayName: true)
             )
-            usecase.updateStyle(self.todayStyle(.default, showHolidayName: false))
+            try usecase.updateStyle(self.todayStyle(.default, showHolidayName: false))
         }
 
         // then
@@ -382,14 +387,14 @@ extension WidgetStyleUsecaseImpleTests {
 extension WidgetStyleUsecaseImpleTests {
 
     @Test("갱신할 스타일을 저장소에 그대로 넘긴다")
-    func updateStyle_passStyleToRepository() {
+    func updateStyle_passStyleToRepository() throws {
         // given
         let repository = StubRepository()
         let usecase = self.makeUsecase(with: repository)
         let style = self.todayStyle(.custom(id: "c1"), name: "밤 모드", showHolidayName: false)
 
         // when
-        usecase.updateStyle(style)
+        try usecase.updateStyle(style)
 
         // then
         let saved = usecase.loadStyles(of: .todaySummarySmall).last
@@ -397,7 +402,7 @@ extension WidgetStyleUsecaseImpleTests {
     }
 
     @Test("좌표의 변형이 쓰는 타입이 아닌 설정은 저장소로 가지 않는다")
-    func updateStyle_whenSettingTypeDoesNotMatchVariant_doesNotSave() {
+    func updateStyle_whenSettingTypeDoesNotMatchVariant_doesNotSave() throws {
         // given
         let repository = StubRepository()
         let usecase = self.makeUsecase(with: repository)
@@ -408,14 +413,14 @@ extension WidgetStyleUsecaseImpleTests {
         )
 
         // when
-        usecase.updateStyle(style)
+        try usecase.updateStyle(style)
 
         // then
         #expect(usecase.loadStyles(of: .todaySummarySmall).map { $0.id.style } == [.default])
     }
 
     @Test("비대표 WeekEvents 변형으로 저장해도 공유 좌표에 들어가 다른 변형이 읽는다")
-    func updateStyle_fromAnyWeekEventsVariant_savesToSharedCoordinate() {
+    func updateStyle_fromAnyWeekEventsVariant_savesToSharedCoordinate() throws {
         // given
         let usecase = self.makeUsecase(with: .init())
         let style = self.weekEventsStyle(
@@ -423,7 +428,7 @@ extension WidgetStyleUsecaseImpleTests {
         )
 
         // when
-        usecase.updateStyle(style)
+        try usecase.updateStyle(style)
         let styles = usecase.loadStyles(of: .lastMonthEvents)
 
         // then
@@ -437,14 +442,14 @@ extension WidgetStyleUsecaseImpleTests {
     }
 
     @Test("공백뿐인 이름은 없는 것으로 저장된다")
-    func updateStyle_whenNameIsBlank_savesWithoutName() {
+    func updateStyle_whenNameIsBlank_savesWithoutName() throws {
         // given
         let repository = StubRepository()
         let usecase = self.makeUsecase(with: repository)
         let style = self.todayStyle(.custom(id: "c1"), name: "   ", showHolidayName: false)
 
         // when
-        usecase.updateStyle(style)
+        try usecase.updateStyle(style)
 
         // then
         let saved = usecase.loadStyles(of: .todaySummarySmall).last
@@ -536,12 +541,12 @@ private extension WidgetStyleSetting {
 extension WidgetStyleUsecaseImpleTests {
 
     @Test("저장하면 고른 배경색과 다듬은 이름이 함께 실린다")
-    func updateStyle_carriesBackgroundAndTrimmedName() {
+    func updateStyle_carriesBackgroundAndTrimmedName() throws {
         // given
         let usecase = self.makeUsecase(with: .init())
 
         // when
-        usecase.updateStyle(
+        try usecase.updateStyle(
             self.todayStyle(
                 .custom(id: "c1"), name: "  밤 모드  ", showHolidayName: false,
                 background: .custom(hex: "#101820")
@@ -555,11 +560,11 @@ extension WidgetStyleUsecaseImpleTests {
     }
 
     @Test("저장한 배경색이 다시 조회한 목록에도 실린다")
-    func loadStyles_afterUpdate_carriesBackground() {
+    func loadStyles_afterUpdate_carriesBackground() throws {
         // given
         let repository = StubRepository()
         let usecase = self.makeUsecase(with: repository)
-        usecase.updateStyle(
+        try usecase.updateStyle(
             self.todayStyle(
                 .custom(id: "c1"), showHolidayName: false, background: .custom(hex: "#101820")
             )
@@ -585,5 +590,72 @@ extension WidgetStyleUsecaseImpleTests {
 
         // then
         #expect(styles.first?.background == .custom(hex: "#ffffff"))
+    }
+}
+
+
+// MARK: - 꾸미기 권한
+
+extension WidgetStyleUsecaseImpleTests {
+
+    private var customizeReason: PaidFeatureGateFailReason { .init(feature: .customizeWidget, licenseDays: 7) }
+
+    private func blockedGate() -> StubPaidFeatureGateUsecase {
+        let gate = StubPaidFeatureGateUsecase()
+        gate.mockBlockedReason = self.customizeReason
+        return gate
+    }
+
+    private func thrownReason(_ action: () throws -> Void) -> PaidFeatureGateFailReason? {
+        do {
+            try action()
+            return nil
+        } catch let reason as PaidFeatureGateFailReason {
+            return reason
+        } catch {
+            Issue.record(error)
+            return nil
+        }
+    }
+
+    @Test("꾸미기 권한이 없으면 검사가 게이트의 사유를 던진다")
+    func checkCustomizable_whenBlocked_throwsGateReason() {
+        // given
+        let usecase = self.makeUsecase(with: .init(), gate: self.blockedGate())
+
+        // when
+        let reason = self.thrownReason { try usecase.checkCustomizable() }
+
+        // then
+        #expect(reason == self.customizeReason)
+    }
+
+    @Test("꾸미기 권한이 있으면 위젯 꾸미기로 검사해 통과한다")
+    func checkCustomizable_whenAllowed_passes() {
+        // given
+        let gate = StubPaidFeatureGateUsecase()
+        let usecase = self.makeUsecase(with: .init(), gate: gate)
+
+        // when
+        let reason = self.thrownReason { try usecase.checkCustomizable() }
+
+        // then
+        #expect(reason == nil)
+        #expect(gate.didCheckFeature == .customizeWidget)
+    }
+
+    @Test("꾸미기 권한이 없으면 저장이 사유를 던지고 저장소에 쓰지 않는다")
+    func updateStyle_whenBlocked_throwsAndDoesNotSave() {
+        // given
+        let repository = StubRepository()
+        let usecase = self.makeUsecase(with: repository, gate: self.blockedGate())
+        let style = self.todayStyle(.custom(id: "c1"), showHolidayName: false)
+
+        // when
+        let reason = self.thrownReason { try usecase.updateStyle(style) }
+
+        // then
+        #expect(reason == self.customizeReason)
+        #expect(repository.loadStyle(for: style.id) == nil)
     }
 }

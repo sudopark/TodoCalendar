@@ -45,6 +45,12 @@ final class StubWidgetStyleUsecase: WidgetStyleUsecase, @unchecked Sendable {
     func loadStyles(of variant: WidgetVariant) -> [WidgetStyle] {
         return self.styles(in: self.stubStyles, of: variant)
     }
+
+    var mockCustomizeBlockedReason: PaidFeatureGateFailReason?
+    func checkCustomizable() throws {
+        guard let reason = self.mockCustomizeBlockedReason else { return }
+        throw reason
+    }
     
     private func subject(
         of variant: WidgetVariant
@@ -64,7 +70,8 @@ final class StubWidgetStyleUsecase: WidgetStyleUsecase, @unchecked Sendable {
     
     /// 기존 좌표는 자리를 지키고 새 좌표만 뒤에 붙는다 — 저장소도 정렬 키로 순서를 정해
     /// 갱신이 목록 순서를 바꾸지 않는다.
-    func updateStyle(_ style: WidgetStyle) {
+    func updateStyle(_ style: WidgetStyle) throws {
+        try self.checkCustomizable()
         let stored = self.storing(style)
         guard self.stubStyles.contains(where: { $0.id == stored.id })
         else {
