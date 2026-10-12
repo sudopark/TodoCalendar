@@ -33,17 +33,20 @@ public final class FullScreenAdRouterImple: NSObject, @unchecked Sendable {
         scope: FullScreenAdExposureRecord.Scope,
         isFromAppLaunch: Bool
     ) {
-        guard viewController.viewIfLoaded?.window != nil else { return }
-        let now = Date()
-        guard self.adExposureUsecase.canExposeFullScreenAd(
-            scope: scope, isFromAppLaunch: isFromAppLaunch, at: now
-        ), let ad = self.adService.takePreloadedFullScreenAd()
-        else { return }
+        // 닫힘 콜백 시점에는 루트 교체가 아직 관측되지 않는다 — 윈도우 판정을 한 턴 미룬다
+        Task { @MainActor [weak self] in
+            guard let self, viewController.viewIfLoaded?.window != nil else { return }
+            let now = Date()
+            guard self.adExposureUsecase.canExposeFullScreenAd(
+                scope: scope, isFromAppLaunch: isFromAppLaunch, at: now
+            ), let ad = self.adService.takePreloadedFullScreenAd()
+            else { return }
 
-        ad.fullScreenContentDelegate = self
-        self.presentingAd = ad
-        ad.present(from: viewController)
-        self.adExposureUsecase.recordFullScreenAdExposed(scope: scope, at: now)
+            ad.fullScreenContentDelegate = self
+            self.presentingAd = ad
+            ad.present(from: viewController)
+            self.adExposureUsecase.recordFullScreenAdExposed(scope: scope, at: now)
+        }
     }
 }
 

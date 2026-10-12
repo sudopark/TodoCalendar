@@ -39,3 +39,4 @@
 - [2026-09-19 Month 위젯 오늘 강조가 배경과 같은 계열로 나와 안 보인다](2026-09-19-month-widget-today-highlight-invisible.md) — Calendar / fixed / 오늘 강조·selectedDayBackground·다크모드·backgroundColor 미적용
 - [2026-09-22 위젯 스타일에 건 사진이 저장 뒤 편집 화면에서만 빈칸이 된다](2026-09-22-widget-style-photo-blank-after-save.md) — Settings / fixed / 사진 사라짐·편집 카드 빈칸·이름 바꾸니 없어짐·위젯은 정상·초안 임시 파일 삭제
 - [2026-10-11 가로가 긴 화면에서 adaptive 배너가 거부된다](2026-10-11-adaptive-banner-rejected-on-wide-screen.md) — Billing / fixed / Ad size will not fit on screen·adaptive banner 미표시·duo 펼침 배너·admob Code=0
+- [2026-10-13 계정 전환으로 설정 화면이 내려가면 전면광고가 떠 앱 설치 시트까지 보인다](2026-10-13-ad-on-account-switch-install-sheet.md) — Billing / fixed / 전환 중 광고·앱 설치 시트·설정 나가면 광고·viewIfLoaded window 가드 무효
