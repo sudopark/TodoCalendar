@@ -63,6 +63,10 @@ final class ApplicationRootBuilder {
                 )
             ),
             mobileAdService: applicationBase.mobileAdService,
+            appPolicyRepository: AppPolicyRepositoryImple(
+                remoteAPI: applicationBase.remoteAPI,
+                environmentStorage: applicationBase.userDefaultEnvironmentStorage
+            ),
             database: applicationBase.commonSqliteService,
             appDataMigration: appDataMigration
         )

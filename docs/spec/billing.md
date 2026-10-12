@@ -203,6 +203,7 @@ isBannerAdAllowed = adAvailability.isStarted && userPlan.planId == .free
 | (앱 시작 트리거일 때만) 오늘 첫 콜드런치 | 이어야 함 |
 | (앱 시작 트리거일 때만) 누적 콜드런치 | 10회 이상 |
 | (앱 시작 트리거일 때만) 첫 실행 후 경과일 | 7일 이상 |
+| (앱 시작 트리거일 때만) 지금 테마의 사용권 | 만료로 막히지 않아야 함 ([`color-themes.md`](color-themes.md) §4 만료 게이트) |
 
 `scope`는 `.application`(앱 시작)과 `.service(identifier:)`(기능 진입)로 나뉘고, 노출 이력은 scope별로 하루 한 번을 센다.
 

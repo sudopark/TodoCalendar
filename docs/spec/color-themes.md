@@ -322,6 +322,28 @@ Radix 스케일은 12단계이고 단계마다 쓰임이 정해져 있다 — 1 
 | `.unavailable` | 기록 없이 진행을 넘긴다. 다시 검사하면 막혀 시트가 다시 뜬다. 보상형과 대체 전면이 모두 없을 때만 나온다 |
 | `.dismissedBeforeReward` | 걸지 않고 저장하지 않는다. 편집 화면은 그대로 남는다 |
 
+### 만료 게이트
+
+지금 걸린 테마가 사용권 만료로 막히면 메인 화면이 안내 시트를 띄운다. `MainViewModelImple` 이 `PaidFeatureGateUsecase.check(.colorTheme(_), at:)` 로 지금 테마 키를 판정하고, 판정 시점은 넷이다.
+
+- `prepare()` 직후
+- 포그라운드 복귀(`willEnterForegroundNotification`)
+- 유료 여부가 바뀔 때 (`billingUsecase.currentUserPlan` 의 `isPaid` 를 `removeDuplicates` 로 거른다)
+- 테마 키가 바뀔 때
+
+만료가 아니면 떠 있는 화면을 건드리지 않는다. 만료면 진행 중 플래그를 세워 시트가 겹쳐 뜨지 않게 하고, `router.dismissPresented` 로 떠 있는 화면을 닫은 뒤 `MainRouter.showColorThemeLicenseExpiredGuide` 로 시트를 띄운다. 이 시트는 `makePaidFeatureAdGuideScene(reason:onFinished:onUseDefault:)` 에 `onUseDefault` 를 넘겨 만든다. 그래서 취소 줄 대신 "기본 테마 쓰기" 버튼이 보이고, 딤을 탭해도 닫히지 않는다.
+
+| 유저 선택 | 동작 |
+|---|---|
+| 광고 보기 → `.rewarded`·`.fallbackFullScreenShown` | 시트가 사용권을 지금 시각으로 기록하고 닫힌다. 테마는 그대로다 |
+| 광고 보기 → `.unavailable` | 기록 없이 시트가 닫히고 이번 실행은 그 테마를 그대로 쓴다. 다음 판정 시점에 다시 막혀 시트가 다시 뜬다 |
+| 광고 보기 → `.dismissedBeforeReward` | 시트가 닫히고 테마는 그대로다. 다음 판정 시점에 시트가 다시 뜬다 |
+| 기본 테마 쓰기 | 시트가 닫힌 뒤 `changeCalendarAppearanceSetting` 으로 테마를 `.systemTheme` 으로 바꾼다 |
+
+시트가 끝나면(`onFinished`) 진행 중 플래그를 내린다. 그 뒤로는 다음 판정 시점마다 처음부터 다시 판정한다.
+
+지금 테마가 사용권 만료로 막힌 실행은 앱 시작 전면광고를 띄우지 않는다. `AdExposureUsecaseImple.canExposeFullScreenAd` 가 앱 시작 트리거일 때 공유 저장소의 외관 설정 테마 키를 같은 게이트로 판정해, 막히면 false 를 낸다. 외관 설정이 아직 없으면 막지 않는다.
+
 ### 만료 기산
 
 `grantLicense(for: .colorTheme(_), at:)` 가 기존 기록을 부여 시각으로 덮어쓴다. 사용권은 `부여 시각 <= now < 부여 시각 + n×24시간` 일 때만 유효하다. 달력 일수가 아니라 24시간 단위로 센다.
@@ -337,7 +359,7 @@ Radix 스케일은 12단계이고 단계마다 쓰임이 정해져 있다 — 1 
 | `license_days` 가 없거나 0 이하 | 정책 값 | 기본값 |
 | 둘 다 유효 | 정책 값 | 정책 값 |
 
-`enabled` 가 `false` 이면 기간과 상관없이 허용한다. 원격 설정 실수 하나로 사용권 광고가 통째로 꺼지지 않게, 판단할 수 없는 속성은 기본값으로 채운다. 기본값으로도 판단할 수 없으면 허용한다. 앱 정책 갱신 호출은 앱 시작 쪽 작업이 맡는다.
+`enabled` 가 `false` 이면 기간과 상관없이 허용한다. 원격 설정 실수 하나로 사용권 광고가 통째로 꺼지지 않게, 판단할 수 없는 속성은 기본값으로 채운다. 기본값으로도 판단할 수 없으면 허용한다. 원격 정책을 받아 오는 시점은 `infrastructure.md` §9.2 가 다룬다.
 
 ### 기록
 
