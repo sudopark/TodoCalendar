@@ -399,6 +399,9 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
     
     // do nothing
     func toggleIsTodo() { }
+
+    // 일정은 완료 대상이 아니다
+    func completeTodo() { }
     
     func showTodoGuide() { }
     
@@ -586,6 +589,10 @@ extension EditScheduleEventDetailViewModelImple {
             .eraseToAnyPublisher()
     }
     
+    var isCompletable: AnyPublisher<Bool, Never> {
+        return Just(false).eraseToAnyPublisher()
+    }
+
     var moreActions: AnyPublisher<[[EventDetailMoreAction]], Never> {
         let scheduleId = self.scheduleId
         let targetTime = self.repeatingEventTargetTime

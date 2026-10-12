@@ -1360,5 +1360,7 @@ extension EditScheduleEventDetailViewModelImpleTests {
         // then
         XCTAssertEqual(isRegistered, false)
     }
+
+
 }
 

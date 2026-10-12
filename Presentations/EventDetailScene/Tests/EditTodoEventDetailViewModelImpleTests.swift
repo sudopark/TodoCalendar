@@ -19,7 +19,7 @@ import TestDoubles
 @testable import EventDetailScene
 
 
-class EditTodoEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitable {
+class EditTodoEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitable, AsyncEffectWaitable {
     
     var cancelBag: Set<AnyCancellable>!
     private var spyTodoUsecase: StubTodoEventUsecase!
@@ -61,7 +61,8 @@ class EditTodoEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitable {
         shouldFailToSaveDetail: Bool = false,
         shouldFailToRemoveTodo: Bool = false,
         registeredLiveActivityTarget: LiveActivityTarget? = nil,
-        liveActivityStartError: (any Error)? = nil
+        liveActivityStartError: (any Error)? = nil,
+        shouldFailComplete: Bool = false
     ) -> EditTodoEventDetailViewModelImple {
         
         let (todo, detail) = (customTodo ?? self.dummyRepeatingTodo, self.dummyDetail)
@@ -74,6 +75,7 @@ class EditTodoEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.spyEventDetailDataUsecase.shouldFailSaveDetail = shouldFailToSaveDetail
         self.spyTodoUsecase.shouldUpdateEventFail = shouldFailSave
         self.spyTodoUsecase.shouldFailRemoveTodo = shouldFailToRemoveTodo
+        self.spyTodoUsecase.shouldFailCompleteTodo = shouldFailComplete
         
         let tagUsecase = StubEventTagUsecase()
         
@@ -528,7 +530,8 @@ extension EditTodoEventDetailViewModelImpleTests {
         shouldFailToSaveDetail: Bool = false,
         shouldFailToRemoveTodo: Bool = false,
         registeredLiveActivityTarget: LiveActivityTarget? = nil,
-        liveActivityStartError: (any Error)? = nil
+        liveActivityStartError: (any Error)? = nil,
+        shouldFailComplete: Bool = false
     ) -> EditTodoEventDetailViewModelImple {
         // given
         let expect = expectation(description: "wait prepared")
@@ -546,7 +549,8 @@ extension EditTodoEventDetailViewModelImpleTests {
             shouldFailToSaveDetail: shouldFailToSaveDetail,
             shouldFailToRemoveTodo: shouldFailToRemoveTodo,
             registeredLiveActivityTarget: registeredLiveActivityTarget,
-            liveActivityStartError: liveActivityStartError
+            liveActivityStartError: liveActivityStartError,
+            shouldFailComplete: shouldFailComplete
         )
         
         // when
@@ -940,5 +944,177 @@ extension EditTodoEventDetailViewModelImpleTests {
 
         // then
         XCTAssertEqual(isRegistered, false)
+    }
+}
+
+
+// MARK: - 할일 완료
+
+extension EditTodoEventDetailViewModelImpleTests {
+
+    func testViewModel_whenCompleteTodo_callsUsecase() async throws {
+        // given
+        let viewModel = self.makeViewModelWithPrepare()
+
+        // when
+        viewModel.completeTodo()
+
+        // then
+        try await self.waitEffect("완료가 usecase 까지 감") {
+            self.spyTodoUsecase.didCompleteTodoIds.isEmpty == false
+        }
+        XCTAssertEqual(self.spyTodoUsecase.didCompleteTodoIds, [self.dummyRepeatingTodo.uuid])
+        XCTAssertNil(self.spyRouter.didShowActionSheetWith)
+    }
+
+    func testViewModel_whenCompleteSucceed_closeScene() {
+        // given
+        let expect = expectation(description: "완료되면 화면을 닫음")
+        self.spyRouter.didCloseCallback = { expect.fulfill() }
+        let viewModel = self.makeViewModelWithPrepare()
+
+        // when
+        viewModel.completeTodo()
+        self.wait(for: [expect], timeout: self.timeout)
+
+        // then
+        XCTAssertEqual(self.spyRouter.didClosed, true)
+    }
+
+    func testViewModel_whenCompleteFail_showErrorAndNotClose() async throws {
+        // given
+        let viewModel = self.makeViewModelWithPrepare(shouldFailComplete: true)
+
+        // when
+        viewModel.completeTodo()
+
+        // then
+        try await self.waitEffect("완료 실패가 에러로 알려짐") {
+            self.spyRouter.didShowError != nil
+        }
+        XCTAssertEqual(self.spyRouter.didClosed, nil)
+    }
+
+    func testViewModel_whenCompleteWithUnsavedBasicChanges_showActionSheet() async throws {
+        // given
+        let viewModel = self.makeViewModelWithPrepare()
+        self.enter(viewModel) { $0 |> \.name .~ "edited" }
+
+        // when
+        viewModel.completeTodo()
+
+        // then
+        let form = self.spyRouter.didShowActionSheetWith
+        XCTAssertEqual(form?.title, "eventDetail::complete::unsaved::title".localized())
+        XCTAssertEqual(form?.message, "eventDetail::complete::unsaved::message".localized())
+        XCTAssertEqual(
+            form?.actions.map { $0.text },
+            ["common.done".localized(), "common.cancel".localized()]
+        )
+        try await Task.sleep(nanoseconds: 50_000_000)
+        XCTAssertEqual(self.spyTodoUsecase.didCompleteTodoIds, [])
+    }
+
+    // 메모만 고쳐도 묻는다 — 변경 판정의 추가 데이터 항을 지킨다
+    func testViewModel_whenCompleteWithUnsavedDetailChanges_showActionSheet() async throws {
+        // given
+        let viewModel = self.makeViewModelWithPrepare()
+        self.enter(viewModel, basic: { $0 }, detaiil: { $0 |> \.memo .~ "edited memo" })
+
+        // when
+        viewModel.completeTodo()
+
+        // then
+        XCTAssertEqual(
+            self.spyRouter.didShowActionSheetWith?.title,
+            "eventDetail::complete::unsaved::title".localized()
+        )
+        try await Task.sleep(nanoseconds: 50_000_000)
+        XCTAssertEqual(self.spyTodoUsecase.didCompleteTodoIds, [])
+    }
+
+    func testViewModel_whenConfirmComplete_completesWithoutSaving() async throws {
+        // given
+        let viewModel = self.makeViewModelWithPrepare()
+        self.enter(viewModel) { $0 |> \.name .~ "edited" }
+        viewModel.completeTodo()
+
+        // when
+        self.spyRouter.didShowActionSheetWith?.actions.first?.selected?()
+
+        // then
+        try await self.waitEffect("저장 없이 완료가 출발함") {
+            self.spyTodoUsecase.didCompleteTodoIds.isEmpty == false
+        }
+        XCTAssertEqual(self.spyTodoUsecase.didCompleteTodoIds, [self.dummyRepeatingTodo.uuid])
+        XCTAssertNil(self.spyTodoUsecase.didUpdateEditParams)
+        XCTAssertNil(self.spyEventDetailDataUsecase.savedDetail)
+    }
+
+    func testViewModel_whenCancelCompleteConfirm_doesNotComplete() async throws {
+        // given
+        let viewModel = self.makeViewModelWithPrepare()
+        self.enter(viewModel) { $0 |> \.name .~ "edited" }
+        viewModel.completeTodo()
+
+        // when
+        let cancelAction = self.spyRouter.didShowActionSheetWith?.actions.last
+        cancelAction?.selected?()
+
+        // then
+        XCTAssertEqual(cancelAction?.style, .cancel)
+        try await Task.sleep(nanoseconds: 50_000_000)
+        XCTAssertEqual(self.spyTodoUsecase.didCompleteTodoIds, [])
+        XCTAssertEqual(self.spyRouter.didClosed, nil)
+    }
+
+    func testViewModel_whenCompleteTwice_callsUsecaseOnce() async throws {
+        // given
+        let viewModel = self.makeViewModelWithPrepare()
+
+        // when
+        viewModel.completeTodo()
+        viewModel.completeTodo()
+
+        // then
+        try await self.waitEffect("완료가 한 번은 감") {
+            self.spyTodoUsecase.didCompleteTodoIds.isEmpty == false
+        }
+        try await Task.sleep(nanoseconds: 50_000_000)
+        XCTAssertEqual(self.spyTodoUsecase.didCompleteTodoIds.count, 1)
+    }
+
+
+    // 실패한 뒤에는 다시 누를 수 있어야 한다
+    func testViewModel_whenCompleteFail_canRetry() async throws {
+        // given
+        let viewModel = self.makeViewModelWithPrepare(shouldFailComplete: true)
+        viewModel.completeTodo()
+        try await self.waitEffect("첫 완료가 실패로 끝남") {
+            self.spyRouter.didShowError != nil
+        }
+
+        // when
+        viewModel.completeTodo()
+
+        // then
+        try await self.waitEffect("두 번째 완료도 usecase 까지 감") {
+            self.spyTodoUsecase.didCompleteTodoIds.count == 2
+        }
+        XCTAssertEqual(self.spyTodoUsecase.didCompleteTodoIds.count, 2)
+    }
+
+    func testViewModel_whenCompleteBeforePrepare_completesWithoutActionSheet() async throws {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when
+        viewModel.completeTodo()
+
+        // then
+        try await self.waitEffect("준비 전에도 완료가 출발함") {
+            self.spyTodoUsecase.didCompleteTodoIds.isEmpty == false
+        }
+        XCTAssertNil(self.spyRouter.didShowActionSheetWith)
     }
 }
