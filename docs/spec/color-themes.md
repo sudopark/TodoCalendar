@@ -290,13 +290,13 @@ Radix 스케일은 12단계이고 단계마다 쓰임이 정해져 있다 — 1 
 
 ## 4. 사용권
 
-무료 유저가 유료 테마를 쓰는 권리다. 판단은 `PaidFeatureGateUsecase.check(.colorTheme(_), at:)`(`Domain/Sources/Usecases/Billing/PaidFeatureGateUsecase.swift`)가 내린다. 테마를 걸 때는 `AppSettingUsecaseImple.selectColorTheme`, 새 테마를 저장할 때는 `saveCustomColorTheme` 이 이 검사를 부른다. 일반 외관 설정 변경(`changeCalendarAppearanceSetting`)은 검사하지 않는다. 사용권은 전체 테마에 하나다 (#1197).
+무료 유저가 커스텀 테마를 쓰는 권리다. 판단은 `PaidFeatureGateUsecase.check(.colorTheme(_), at:)`(`Domain/Sources/Usecases/Billing/PaidFeatureGateUsecase.swift`)가 내린다. 테마를 걸 때는 `AppSettingUsecaseImple.selectColorTheme`, 새 테마를 저장할 때는 `saveCustomColorTheme` 이 이 검사를 부른다. 일반 외관 설정 변경(`changeCalendarAppearanceSetting`)은 검사하지 않는다. 사용권은 커스텀 테마 전체에 하나다 (#1197).
 
-무료 테마는 `.systemTheme`·`.defaultLight`·`.defaultDark` 다. `.appTheme(_)` 와 커스텀 테마는 유료 테마다.
+무료 테마는 커스텀이 아닌 모든 테마다. 시스템·라이트·다크와 `.appTheme(_)` 라인업처럼 앱이 기본 제공하는 테마는 누구나 조건 없이 쓴다. 유료 테마는 커스텀 테마(`.custom(_)`)다.
 
 ### 판정표
 
-| plan 상태 | 무료 테마 | 유료 테마, 사용권 유효 | 유료 테마, 사용권 없음·만료 |
+| plan 상태 | 기본 제공 테마 | 커스텀 테마, 사용권 유효 | 커스텀 테마, 사용권 없음·만료 |
 |---|---|---|---|
 | 보류 | 허용 | 허용 | 허용 |
 | 유료 | 허용 | 허용 | 허용 |

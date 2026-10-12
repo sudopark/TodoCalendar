@@ -27,7 +27,6 @@ public final class PaidFeatureGateUsecaseImple: PaidFeatureGateUsecase {
     private let widgetStyleLicenseRepository: any WidgetStyleLicenseRepository
     private let policyRepository: any AppPolicyRepository
     private let defaultPolicy: AppPolicy
-    private let freeThemeKeys: [ColorSetKeys] = [.systemTheme, .defaultLight, .defaultDark]
 
     public init(
         planSource: any BillingUserPlanSource,
@@ -62,8 +61,10 @@ extension PaidFeatureGateUsecaseImple {
     private func isExemptByPlanOrTheme(_ feature: PaidFeature) -> Bool {
         let plan = self.planSource.latestUserPlan()
         switch feature {
-        case .colorTheme(let key):
-            return self.freeThemeKeys.contains(key) || plan?.isPaid != false
+        case .colorTheme(.custom):
+            return plan?.isPaid != false
+        case .colorTheme:
+            return true
         case .customizeWidget:
             let isPaid = plan.map { $0.isPaid } ?? false
             return isPaid != false

@@ -527,10 +527,10 @@
 "setting.appearance.calendar.colorTheme.edit::delete::confirm::message" = "이 테마를 삭제할까요? 사용 중이면 시스템 테마로 돌아가요.";
 "setting.appearance.calendar.colorTheme.edit::saved::message" = "테마를 저장했어요";
 "setting.appearance.calendar.colorTheme.edit::removed::message" = "테마를 삭제했어요";
-"setting.appearance.calendar.colorTheme.adGuide::title" = "테마는 광고를 보고 쓸 수 있어요";
-"setting.appearance.calendar.colorTheme.adGuide::message" = "광고를 한 번 보면 %d일 동안 모든 테마를 자유롭게 쓸 수 있어요.";
-"setting.appearance.calendar.colorTheme.adGuide::freeThemes::message" = "시스템·라이트·다크 테마는 언제나 무료예요.";
-"setting.appearance.calendar.colorTheme.adGuide::plan::message" = "유료 플랜은 광고 없이 쓸 수 있어요";
+"setting.appearance.calendar.colorTheme.adGuide::title" = "커스텀 테마는 광고를 보고 쓸 수 있어요";
+"setting.appearance.calendar.colorTheme.adGuide::message" = "광고를 한 번 보면 %d일 동안 커스텀 테마를 자유롭게 쓸 수 있어요.";
+"setting.appearance.calendar.colorTheme.adGuide::freeThemes::message" = "기본 제공 테마는 언제나 무료예요.";
+"setting.appearance.calendar.colorTheme.adGuide::plan::message" = "유료 플랜은 광고 없이 커스텀 테마를 쓸 수 있어요";
 "paidFeature.adGuide::plan::button" = "플랜 보기";
 "paidFeature.adGuide::watchAd::button" = "광고 보고 %d일 동안 쓰기";
 "setting.appearance.calendar.underline" = "이벤트있는 날에 밑줄표시";

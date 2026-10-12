@@ -353,13 +353,13 @@ extension ColorThemeSelectViewModelImpleTests {
 
 extension ColorThemeSelectViewModelImpleTests {
     
-    private var paidTheme: ColorThemeModel { .init(.appTheme(.tomato)) }
+    private var paidTheme: ColorThemeModel { .init(.custom("paid")) }
     
     private var requestedColorSetKeys: [ColorSetKeys] {
         return self.spyUISettingUsecase.didRequestSelectColorThemeKeys
     }
     
-    private var applyReason: PaidFeatureGateFailReason { .init(feature: .colorTheme(.appTheme(.tomato)), licenseDays: 7) }
+    private var applyReason: PaidFeatureGateFailReason { .init(feature: .colorTheme(.custom("paid")), licenseDays: 7) }
     
     private func selectUntilGuideShown(
         _ viewModel: ColorThemeSelectViewModelImple, _ model: ColorThemeModel
@@ -381,9 +381,9 @@ extension ColorThemeSelectViewModelImpleTests {
         try await self.waitEffect("테마 저장") { self.spyUISettingUsecase.didChangeAppearanceSetting != nil }
         
         // then
-        XCTAssertEqual(self.requestedColorSetKeys, [.appTheme(.tomato)])
+        XCTAssertEqual(self.requestedColorSetKeys, [.custom("paid")])
         XCTAssertEqual(
-            self.spyUISettingUsecase.didChangeAppearanceSetting?.calendar.colorSetKey, .appTheme(.tomato)
+            self.spyUISettingUsecase.didChangeAppearanceSetting?.calendar.colorSetKey, .custom("paid")
         )
         XCTAssertNil(self.spyRouter.didShowPaidFeatureAdGuideWith)
     }
@@ -396,8 +396,8 @@ extension ColorThemeSelectViewModelImpleTests {
         try await self.selectUntilGuideShown(viewModel, self.paidTheme)
         
         // then
-        XCTAssertEqual(self.spyRouter.didShowPaidFeatureAdGuideWith, .init(feature: .colorTheme(.appTheme(.tomato)), licenseDays: 7))
-        XCTAssertEqual(self.requestedColorSetKeys, [.appTheme(.tomato)])
+        XCTAssertEqual(self.spyRouter.didShowPaidFeatureAdGuideWith, .init(feature: .colorTheme(.custom("paid")), licenseDays: 7))
+        XCTAssertEqual(self.requestedColorSetKeys, [.custom("paid")])
         XCTAssertNil(self.spyUISettingUsecase.didChangeAppearanceSetting)
         XCTAssertNil(self.spyRouter.didShowError)
     }
@@ -412,9 +412,9 @@ extension ColorThemeSelectViewModelImpleTests {
         try await self.waitEffect("다시 건 테마 저장") { self.spyUISettingUsecase.didChangeAppearanceSetting != nil }
         
         // then
-        XCTAssertEqual(self.requestedColorSetKeys, [.appTheme(.tomato), .appTheme(.tomato)])
+        XCTAssertEqual(self.requestedColorSetKeys, [.custom("paid"), .custom("paid")])
         XCTAssertEqual(
-            self.spyUISettingUsecase.didChangeAppearanceSetting?.calendar.colorSetKey, .appTheme(.tomato)
+            self.spyUISettingUsecase.didChangeAppearanceSetting?.calendar.colorSetKey, .custom("paid")
         )
     }
     
@@ -443,7 +443,7 @@ extension ColorThemeSelectViewModelImpleTests {
         try await self.settle()
         
         // then
-        XCTAssertEqual(self.requestedColorSetKeys, [.appTheme(.tomato)])
+        XCTAssertEqual(self.requestedColorSetKeys, [.custom("paid")])
         XCTAssertNil(self.spyUISettingUsecase.didChangeAppearanceSetting)
     }
     
@@ -472,7 +472,7 @@ extension ColorThemeSelectViewModelImpleTests {
         try await self.settle()
         
         // then
-        XCTAssertEqual(self.requestedColorSetKeys, [.appTheme(.tomato)])
+        XCTAssertEqual(self.requestedColorSetKeys, [.custom("paid")])
         XCTAssertNil(self.spyRouter.didShowPaidFeatureAdGuideWith)
         XCTAssertNil(self.spyUISettingUsecase.didChangeAppearanceSetting)
     }
@@ -488,7 +488,7 @@ extension ColorThemeSelectViewModelImpleTests {
         try await self.waitEffect("다른 테마 저장") { self.spyUISettingUsecase.didChangeAppearanceSetting != nil }
         
         // then
-        XCTAssertEqual(self.requestedColorSetKeys, [.appTheme(.tomato), .appTheme(.ruby)])
+        XCTAssertEqual(self.requestedColorSetKeys, [.custom("paid"), .appTheme(.ruby)])
         XCTAssertEqual(
             self.spyUISettingUsecase.didChangeAppearanceSetting?.calendar.colorSetKey, .appTheme(.ruby)
         )
@@ -508,7 +508,7 @@ extension ColorThemeSelectViewModelImpleTests {
         try await self.waitEffect("새 테마 걸기") { self.spyUISettingUsecase.didSelectColorThemeKey != nil }
         
         // then
-        XCTAssertEqual(reasonBeforeFinish, .init(feature: .colorTheme(.appTheme(.tomato)), licenseDays: 7))
+        XCTAssertEqual(reasonBeforeFinish, .init(feature: .colorTheme(.custom("paid")), licenseDays: 7))
         XCTAssertEqual(self.requestedColorSetKeys, [.custom("new"), .custom("new")])
         XCTAssertEqual(self.spyUISettingUsecase.didSelectColorThemeKey, .custom("new"))
         XCTAssertNil(self.spyRouter.didShowError)
@@ -526,7 +526,7 @@ extension ColorThemeSelectViewModelImpleTests {
         try await self.settle()
         
         // then
-        XCTAssertEqual(self.requestedColorSetKeys, [.appTheme(.tomato)])
+        XCTAssertEqual(self.requestedColorSetKeys, [.custom("paid")])
         XCTAssertNil(self.spyUISettingUsecase.didChangeAppearanceSetting)
     }
 }

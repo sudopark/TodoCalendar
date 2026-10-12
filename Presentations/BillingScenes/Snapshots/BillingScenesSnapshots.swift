@@ -508,7 +508,7 @@ extension BillingScenesSnapshots {
             let appearance = self.makeAppearance(theme)
             return ZStack {
                 appearance.colorSet.bg1.asColor.ignoresSafeArea()
-                self.makeAdGuideView(appearance, .init(feature: .colorTheme(.appTheme(.tomato)), licenseDays: 7))
+                self.makeAdGuideView(appearance, .init(feature: .colorTheme(.custom("my-theme")), licenseDays: 7))
             }
         }
     }

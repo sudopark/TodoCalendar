@@ -652,7 +652,7 @@ extension AppSettingUsecaseImpleTests {
     func testUsecase_changeCalendarSetting_withColorKey_doesNotAskGate() throws {
         // given
         let gate = StubPaidFeatureGateUsecase()
-        gate.mockBlockedReason = PaidFeatureGateFailReason(feature: .colorTheme(.appTheme(.tomato)), licenseDays: 3)
+        gate.mockBlockedReason = PaidFeatureGateFailReason(feature: .colorTheme(.custom("c1")), licenseDays: 3)
         let appSettingRepository = StubAppSettingRepository()
         let usecase = self.makeUsecase(repository: appSettingRepository, paidFeatureGate: gate)
 
@@ -667,7 +667,7 @@ extension AppSettingUsecaseImpleTests {
 
     func testUsecase_selectColorTheme_whenBlocked_throwsReasonWithoutSaving() async {
         // given
-        let reason = PaidFeatureGateFailReason(feature: .colorTheme(.appTheme(.tomato)), licenseDays: 3)
+        let reason = PaidFeatureGateFailReason(feature: .colorTheme(.custom("c1")), licenseDays: 3)
         let gate = StubPaidFeatureGateUsecase()
         gate.mockBlockedReason = reason
         let appSettingRepository = StubAppSettingRepository()
@@ -678,7 +678,7 @@ extension AppSettingUsecaseImpleTests {
 
         // when
         var failed: Error?
-        do { _ = try await usecase.selectColorTheme(.appTheme(.tomato)) } catch { failed = error }
+        do { _ = try await usecase.selectColorTheme(.custom("c1")) } catch { failed = error }
 
         // then
         XCTAssertEqual(failed as? PaidFeatureGateFailReason, reason)

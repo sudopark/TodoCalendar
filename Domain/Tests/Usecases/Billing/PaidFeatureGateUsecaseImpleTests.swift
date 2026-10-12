@@ -19,7 +19,7 @@ final class PaidFeatureGateUsecaseImpleTests {
     private let now = Date(timeIntervalSince1970: 1_787_000_000)
     private let licenseDays = 7
     private let widgetLicenseDays = 5
-    private let paidTheme: ColorSetKeys = .appTheme(.tomato)
+    private let paidTheme: ColorSetKeys = .custom("paid-custom")
     private let newCustomTheme: ColorSetKeys = .custom("new-theme")
 
     private var stubLicenseRepository: StubColorThemeLicenseRepository!
@@ -97,6 +97,32 @@ extension PaidFeatureGateUsecaseImpleTests {
 
         // then
         #expect(can == true)
+    }
+
+    @Test("앱이 기본 제공하는 테마는 무료 plan 에 사용권이 없어도 허용한다", arguments: [
+        ColorSetKeys.appTheme(.tomato), .appTheme(.midnight), .appTheme(.sunset)
+    ])
+    func checkColorTheme_appTheme_whenFreeAndNoLicense_passes(_ key: ColorSetKeys) {
+        // given
+        let usecase = self.makeUsecase(plan: self.userPlan(.free))
+
+        // when
+        let can = self.passes { try usecase.check(.colorTheme(key), at: self.now) }
+
+        // then
+        #expect(can == true)
+    }
+
+    @Test("커스텀 테마는 무료 plan 에 사용권이 없으면 막는다")
+    func checkColorTheme_customTheme_whenFreeAndNoLicense_blocks() {
+        // given
+        let usecase = self.makeUsecase(plan: self.userPlan(.free))
+
+        // when
+        let reason = self.blockedReason { try usecase.check(.colorTheme(.custom("some-custom")), at: self.now) }
+
+        // then
+        #expect(reason == .init(feature: .colorTheme(.custom("some-custom")), licenseDays: 7))
     }
 
     @Test("plan 을 아직 못 받았으면 유료 테마도 허용한다")
