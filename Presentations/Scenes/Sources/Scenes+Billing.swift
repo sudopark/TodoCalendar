@@ -36,6 +36,7 @@ public protocol PaidFeatureAdGuideSceneBuilder: AnyObject {
     @MainActor
     func makePaidFeatureAdGuideScene(
         reason: PaidFeatureGateFailReason,
-        onFinished: @escaping @Sendable (Bool) -> Void
+        onFinished: @escaping @Sendable (Bool) -> Void,
+        onUseDefault: (@Sendable () -> Void)?
     ) -> UIViewController
 }

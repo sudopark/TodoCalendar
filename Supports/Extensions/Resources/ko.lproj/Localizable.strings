@@ -533,6 +533,7 @@
 "setting.appearance.calendar.colorTheme.adGuide::plan::message" = "유료 플랜은 광고 없이 커스텀 테마를 쓸 수 있어요";
 "paidFeature.adGuide::plan::button" = "플랜 보기";
 "paidFeature.adGuide::watchAd::button" = "광고 보고 %d일 동안 쓰기";
+"paidFeature.adGuide::useDefaultTheme::button" = "기본 테마 쓰기";
 "setting.appearance.calendar.underline" = "이벤트있는 날에 밑줄표시";
 "setting.appearance.event.edit::name_old" = "이벤트 수정";
 "setting.appearance.event.edit::name" = "이벤트 설정 및 외부 캘린더";

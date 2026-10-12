@@ -255,7 +255,7 @@ final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
     
     
     @MainActor var window: UIWindow!
-    @MainActor private weak var updatePopupViewController: UIViewController?
+    @MainActor private var updatePopupWindow: UIWindow?
     var viewAppearanceStore: ApplicationViewAppearanceStoreImple!
     private let authUsecase: any AuthUsecase
     private let accountUsecase: any AccountUsecase
@@ -366,9 +366,8 @@ extension ApplicationRootRouter {
 
     func showUpdatePopup(_ requirement: AppUpdateRequirement) {
         Task { @MainActor in
-            guard self.updatePopupViewController == nil else { return }
-            guard let topViewController = self.window.rootViewController?.topPresentedViewController()
-            else { return }
+            guard self.updatePopupWindow == nil else { return }
+            guard let windowScene = self.window.windowScene else { return }
 
             let onUpdate: () -> Void = {
                 if let url = URL(string: AppEnvironment.appstoreLinkPath) {
@@ -376,8 +375,8 @@ extension ApplicationRootRouter {
                 }
             }
             let onClose: (() -> Void)? = requirement == .recommended ? { [weak self] in
-                self?.updatePopupViewController?.dismiss(animated: false)
-                self?.updatePopupViewController = nil
+                self?.updatePopupWindow?.isHidden = true
+                self?.updatePopupWindow = nil
             } : nil
 
             let view = ForceUpdatePopupView(
@@ -387,13 +386,25 @@ extension ApplicationRootRouter {
             )
             .environment(self.viewAppearanceStore.appearance)
             let hostingVC = UIHostingController(rootView: view)
-            hostingVC.modalPresentationStyle = .overFullScreen
-            hostingVC.isModalInPresentation = true
             hostingVC.view.backgroundColor = .clear
 
-            self.updatePopupViewController = hostingVC
-            topViewController.present(hostingVC, animated: false)
+            self.updatePopupWindow = self.makeUpdatePopupWindow(windowScene, hostingVC)
         }
+    }
+
+    // 앱 창에 present 하면 다른 화면을 닫는 dismiss 에 강제 업데이트 팝업도 같이 닫힌다
+    @MainActor
+    private func makeUpdatePopupWindow(
+        _ windowScene: UIWindowScene, _ popupViewController: UIViewController
+    ) -> UIWindow {
+        let popupWindow = UIWindow(windowScene: windowScene)
+        popupWindow.windowLevel = .alert
+        popupWindow.backgroundColor = .clear
+        popupWindow.overrideUserInterfaceStyle = self.window.overrideUserInterfaceStyle
+        popupWindow.tintColor = self.window.tintColor
+        popupWindow.rootViewController = popupViewController
+        popupWindow.isHidden = false
+        return popupWindow
     }
     
     @MainActor
@@ -446,6 +457,7 @@ extension ApplicationRootRouter {
             mobileAdService: self.applicationBase.mobileAdService,
             fullScreenAdRouter: self.fullScreenAdRouter(),
             adViewBuilder: self.adViewBuilder(),
+            adGuideSceneBuilder: self.paidFeatureAdGuideSceneBuilder(),
             isInitialScene: isInitialScene
         )
         let mainScene = builder.makeMainScene()

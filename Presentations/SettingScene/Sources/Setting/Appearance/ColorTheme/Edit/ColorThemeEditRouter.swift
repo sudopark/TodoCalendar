@@ -42,7 +42,9 @@ final class ColorThemeEditRouter: BaseRouterImple, ColorThemeEditRouting, @unche
         _ reason: PaidFeatureGateFailReason, onFinished: @escaping @Sendable (Bool) -> Void
     ) {
         Task { @MainActor in
-            let guide = self.adGuideSceneBuilder.makePaidFeatureAdGuideScene(reason: reason, onFinished: onFinished)
+            let guide = self.adGuideSceneBuilder.makePaidFeatureAdGuideScene(
+                reason: reason, onFinished: onFinished, onUseDefault: nil
+            )
             self.showBottomSlide(guide)
         }
     }

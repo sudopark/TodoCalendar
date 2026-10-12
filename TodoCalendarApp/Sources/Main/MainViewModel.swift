@@ -76,6 +76,7 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
     private let guideTodoUsecase: any GuideTodoUsecase
     private let legalNoticeUsecase: any LegalNoticeUsecase
     private let foremostEventUsecase: any ForemostEventUsecase
+    private let paidFeatureGateUsecase: any PaidFeatureGateUsecase
     var router: (any MainRouting)?
 
     init(
@@ -92,7 +93,8 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
         eventLiveActivityUsecase: any EventLiveActivityUsecase,
         guideTodoUsecase: any GuideTodoUsecase,
         legalNoticeUsecase: any LegalNoticeUsecase,
-        foremostEventUsecase: any ForemostEventUsecase
+        foremostEventUsecase: any ForemostEventUsecase,
+        paidFeatureGateUsecase: any PaidFeatureGateUsecase
     ) {
         self.uiSettingUsecase = uiSettingUsecase
         self.temporaryUserDataMigrationUsecase = temporaryUserDataMigrationUsecase
@@ -108,6 +110,7 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
         self.guideTodoUsecase = guideTodoUsecase
         self.legalNoticeUsecase = legalNoticeUsecase
         self.foremostEventUsecase = foremostEventUsecase
+        self.paidFeatureGateUsecase = paidFeatureGateUsecase
 
         self.internalBinding()
     }
@@ -121,6 +124,7 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
     private let cancellables = CancelBag()
     private let subject = Subject()
     private var calendarSceneInteractor: (any CalendarSceneInteractor)?
+    private var isLicenseGateInProgress: Bool = false
     
     private func internalBinding() {
         
@@ -188,6 +192,7 @@ extension MainViewModelImple {
         Task { [weak self] in
             await self?.eventLiveActivityUsecase.prepare()
         }
+        self.bindColorThemeLicenseGate()
     }
 
     private func handleWillEnterForeground() {
@@ -276,6 +281,76 @@ extension MainViewModelImple {
 
     func closeLegalNoticeBanner(_ documentType: LegalDocumentType) {
         self.legalNoticeUsecase.confirmNotice(documentType)
+    }
+}
+
+
+// MARK: - 컬러 테마 사용권 만료 게이트
+
+extension MainViewModelImple {
+
+    private func bindColorThemeLicenseGate() {
+        let colorThemeKey = self.uiSettingUsecase.currentCalendarUISeting
+            .map { $0.colorSetKey }
+            .removeDuplicates()
+        let enterForeground = NotificationCenter.default
+            .publisher(for: UIApplication.willEnterForegroundNotification)
+            .map { _ in () }
+        let userPlanChanged = self.billingUsecase.currentUserPlan
+            .map { $0.isPaid }
+            .removeDuplicates()
+            .map { _ in () }
+        let checkTriggers = Publishers.Merge3(Just(()), enterForeground, userPlanChanged)
+
+        Publishers.CombineLatest(colorThemeKey, checkTriggers)
+            .map { key, _ in key }
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] key in
+                self?.showColorThemeLicenseExpiredGuideIfNeeded(key)
+            })
+            .store(in: self.cancellables)
+    }
+
+    private func colorThemeLicenseExpiredReason(_ key: ColorSetKeys) -> PaidFeatureGateFailReason? {
+        do {
+            try self.paidFeatureGateUsecase.check(.colorTheme(key), at: Date())
+            return nil
+        } catch {
+            return error as? PaidFeatureGateFailReason
+        }
+    }
+
+    private func showColorThemeLicenseExpiredGuideIfNeeded(_ key: ColorSetKeys) {
+        let reason = self.colorThemeLicenseExpiredReason(key)
+        guard let reason, self.isLicenseGateInProgress == false else { return }
+
+        self.isLicenseGateInProgress = true
+        // 메인이 띄운 화면이 남아 있으면 UIKit 이 present 를 거부해 onFinished 가 오지 않는다
+        self.router?.dismissPresented(animated: true) { [weak self] in
+            self?.showColorThemeLicenseExpiredGuide(reason)
+        }
+    }
+
+    private func showColorThemeLicenseExpiredGuide(_ reason: PaidFeatureGateFailReason) {
+        self.router?.showColorThemeLicenseExpiredGuide(
+            reason,
+            onFinished: { [weak self] _ in
+                self?.isLicenseGateInProgress = false
+            },
+            onUseDefault: { [weak self] in
+                self?.changeColorThemeToSystemTheme()
+            }
+        )
+    }
+
+    private func changeColorThemeToSystemTheme() {
+        let params = EditCalendarAppearanceSettingParams()
+            |> \.newColorSetKey .~ .systemTheme
+        do {
+            _ = try self.uiSettingUsecase.changeCalendarAppearanceSetting(params)
+        } catch {
+            self.router?.showError(error)
+        }
     }
 }
 

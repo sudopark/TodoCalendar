@@ -20,10 +20,12 @@ protocol PaidFeatureAdGuideViewModel: AnyObject, Sendable {
     func watchAd()
     func showPlans()
     func close()
+    func useDefault()
     func handleSheetDismissed()
 
     // presenter
     var reason: AnyPublisher<PaidFeatureGateFailReason, Never> { get }
+    var canUseDefault: AnyPublisher<Bool, Never> { get }
 }
 
 
@@ -34,17 +36,20 @@ final class PaidFeatureAdGuideViewModelImple: PaidFeatureAdGuideViewModel, @unch
     private let failReason: PaidFeatureGateFailReason
     private let paidFeatureGateUsecase: any PaidFeatureGateUsecase
     private let onFinished: @Sendable (Bool) -> Void
-    private var isWatchingAd: Bool = false
+    private let onUseDefault: (@Sendable () -> Void)?
+    private var hasChosenToFinish: Bool = false
     var router: (any PaidFeatureAdGuideRouting)?
 
     init(
         reason: PaidFeatureGateFailReason,
         paidFeatureGateUsecase: any PaidFeatureGateUsecase,
-        onFinished: @escaping @Sendable (Bool) -> Void
+        onFinished: @escaping @Sendable (Bool) -> Void,
+        onUseDefault: (@Sendable () -> Void)?
     ) {
         self.failReason = reason
         self.paidFeatureGateUsecase = paidFeatureGateUsecase
         self.onFinished = onFinished
+        self.onUseDefault = onUseDefault
     }
 }
 
@@ -54,25 +59,34 @@ final class PaidFeatureAdGuideViewModelImple: PaidFeatureAdGuideViewModel, @unch
 extension PaidFeatureAdGuideViewModelImple {
 
     func watchAd() {
-        guard self.isWatchingAd == false else { return }
-        self.isWatchingAd = true
+        guard self.hasChosenToFinish == false else { return }
+        self.hasChosenToFinish = true
         self.router?.routeToRewardedAd { [weak self] result in
             self?.finishAfterAd(result)
         }
     }
 
     func showPlans() {
-        guard self.isWatchingAd == false else { return }
+        guard self.hasChosenToFinish == false else { return }
         self.router?.routeToPaywall()
     }
 
     func close() {
-        guard self.isWatchingAd == false else { return }
+        guard self.hasChosenToFinish == false else { return }
         self.router?.closeScene()
     }
 
+    func useDefault() {
+        guard self.hasChosenToFinish == false else { return }
+        self.hasChosenToFinish = true
+        self.router?.closeScene { [onUseDefault, onFinished] in
+            onUseDefault?()
+            onFinished(false)
+        }
+    }
+
     func handleSheetDismissed() {
-        guard self.isWatchingAd == false else { return }
+        guard self.hasChosenToFinish == false else { return }
         self.onFinished(false)
     }
 
@@ -104,5 +118,9 @@ extension PaidFeatureAdGuideViewModelImple {
 
     var reason: AnyPublisher<PaidFeatureGateFailReason, Never> {
         return Just(self.failReason).eraseToAnyPublisher()
+    }
+
+    var canUseDefault: AnyPublisher<Bool, Never> {
+        return Just(self.onUseDefault != nil).eraseToAnyPublisher()
     }
 }

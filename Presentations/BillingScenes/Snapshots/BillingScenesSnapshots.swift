@@ -493,12 +493,17 @@ extension BillingScenesSnapshots {
 
     @MainActor
     private func makeAdGuideView(
-        _ appearance: ViewAppearance, _ reason: PaidFeatureGateFailReason
+        _ appearance: ViewAppearance,
+        _ reason: PaidFeatureGateFailReason,
+        canUseDefault: Bool = false
     ) -> some View {
         var container = PaidFeatureAdGuideContainerView(
             viewAppearance: appearance, eventHandlers: PaidFeatureAdGuideViewEventHandler()
         )
-        container.stateBinding = { $0.reason = reason }
+        container.stateBinding = {
+            $0.reason = reason
+            $0.canUseDefault = canUseDefault
+        }
         return container
     }
 
@@ -509,6 +514,21 @@ extension BillingScenesSnapshots {
             return ZStack {
                 appearance.colorSet.bg1.asColor.ignoresSafeArea()
                 self.makeAdGuideView(appearance, .init(feature: .colorTheme(.custom("my-theme")), licenseDays: 7))
+            }
+        }
+    }
+
+    @MainActor
+    func test_paidFeatureAdGuide_colorTheme_useDefault() {
+        captureSnapshotPair(named: "paidFeatureAdGuide_colorTheme_useDefault", layout: .fullScreen) { theme in
+            let appearance = self.makeAppearance(theme)
+            return ZStack {
+                appearance.colorSet.bg1.asColor.ignoresSafeArea()
+                self.makeAdGuideView(
+                    appearance,
+                    .init(feature: .colorTheme(.custom("my-theme")), licenseDays: 7),
+                    canUseDefault: true
+                )
             }
         }
     }

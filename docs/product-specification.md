@@ -355,11 +355,11 @@
 
 | 요구 | 팝업 | 닫기 | dismiss 스와이프 | "업데이트" 동작 |
 |---|---|---|---|---|
-| forceRequired | `UpdatePopupView` (`.forceRequired`) | 버튼 없음 | 차단 (`isModalInPresentation=true`) | App Store 이동, 팝업 유지 |
-| recommended | `UpdatePopupView` (`.recommended`) | "나중에" 버튼 | 차단 (force와 동일 설정) | App Store 이동 + 팝업 닫힘 |
+| forceRequired | `UpdatePopupView` (`.forceRequired`) | 버튼 없음 | 차단 (overlay window 라 스와이프 dismiss 대상이 아님) | App Store 이동, 팝업 유지 |
+| recommended | `UpdatePopupView` (`.recommended`) | "나중에" 버튼 | 차단 (force와 동일) | App Store 이동 + 팝업 닫힘 |
 
-- 루트 레벨 팝업: `ApplicationRootRouter.showUpdatePopup(_:)`이 `UIHostingController`를 `overFullScreen`으로 present.
-- 중복 노출 방지: Router가 현재 팝업 VC 참조(`updatePopupViewController`)를 보관하고 nil일 때만 새로 present.
+- 루트 레벨 팝업: `ApplicationRootRouter.showUpdatePopup(_:)`이 `UIHostingController`를 앱 window 와 별개인 overlay window 에 띄운다. 다른 화면 닫기에 같이 닫히지 않는다.
+- 중복 노출 방지: Router가 overlay window 참조(`updatePopupWindow`)를 보관하고 nil일 때만 새로 띄운다.
 
 ### 20.4 한계 / 후속 과제
 

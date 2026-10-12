@@ -34,12 +34,14 @@ public final class PaidFeatureAdGuideBuilderImple: PaidFeatureAdGuideSceneBuilde
     @MainActor
     public func makePaidFeatureAdGuideScene(
         reason: PaidFeatureGateFailReason,
-        onFinished: @escaping @Sendable (Bool) -> Void
+        onFinished: @escaping @Sendable (Bool) -> Void,
+        onUseDefault: (@Sendable () -> Void)?
     ) -> UIViewController {
         let viewModel = PaidFeatureAdGuideViewModelImple(
             reason: reason,
             paidFeatureGateUsecase: self.usecaseFactory.makePaidFeatureGateUsecase(),
-            onFinished: onFinished
+            onFinished: onFinished,
+            onUseDefault: onUseDefault
         )
         let viewController = PaidFeatureAdGuideViewController(
             viewModel: viewModel, viewAppearance: self.viewAppearance

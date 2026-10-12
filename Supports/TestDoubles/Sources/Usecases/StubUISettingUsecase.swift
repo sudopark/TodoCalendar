@@ -81,7 +81,10 @@ open class StubUISettingUsecase: UISettingUsecase, @unchecked Sendable {
     
     public var didChangeAppearanceSetting: AppearanceSettings?
 
+    public var shouldFailChangeCalendarAppearance: Bool = false
     open func changeCalendarAppearanceSetting(_ params: EditCalendarAppearanceSettingParams) throws -> CalendarAppearanceSettings {
+        guard self.shouldFailChangeCalendarAppearance == false
+        else { throw RuntimeError("failed") }
         let old = self.readSetting()
         let newSetting = old |> \.calendar .~ old.calendar.update(params)
         self.didChangeAppearanceSetting = newSetting
