@@ -8,6 +8,7 @@
 
 import XCTest
 import SwiftUI
+import WidgetKit
 import Prelude
 import Optics
 import Domain
@@ -119,6 +120,27 @@ final class WidgetViewSnapshots: XCTestCase {
     func test_ddayMediumWidgetView() {
         self.capture("dday-medium", canvas: WidgetCanvas.medium) {
             DDayMediumWidgetView(model: self.fixedDDayModel())
+        }
+    }
+
+    @MainActor
+    func test_customStyleLockedView_small() {
+        self.capture("customStyleLocked-small", canvas: WidgetCanvas.small) {
+            WidgetCustomStyleLockedView(family: .systemSmall)
+        }
+    }
+
+    @MainActor
+    func test_customStyleLockedView_medium() {
+        self.capture("customStyleLocked-medium", canvas: WidgetCanvas.medium) {
+            WidgetCustomStyleLockedView(family: .systemMedium)
+        }
+    }
+
+    @MainActor
+    func test_customStyleLockedView_large() {
+        self.capture("customStyleLocked-large", canvas: WidgetCanvas.large) {
+            WidgetCustomStyleLockedView(family: .systemLarge)
         }
     }
 
