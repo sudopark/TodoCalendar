@@ -28,7 +28,7 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
     let eventLiveActivityUsecase: any EventLiveActivityUsecase
     let adExposureUsecase: any AdExposureUsecase
     let imageTextRecognizeService: any ImageTextRecognizeService = ImageTextRecognizeServiceImple()
-    private let planSource: any BillingUserPlanSource
+    private let paidFeatureGateUsecase: any PaidFeatureGateUsecase
     private let applicationBase: ApplicationBase
 
     private let eventFactory: NonLoginEventFactory
@@ -61,7 +61,6 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
                 sqliteService: applicationBase.commonSqliteService
             )
         )
-        self.planSource = planStore
         let billingUsecase = NotNeedBillingUsecase(planStore: planStore)
         self.billingUsecase = billingUsecase
         self.aiAgentOrchestrationUsecase = NotNeedAIAgentOrchestrationUsecase()
@@ -92,6 +91,21 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
             sharedDataStore: applicationBase.sharedDataStore,
             eventDetailDataUsecase: eventFactory.makeEventDetailDataUsecase()
         )
+        let paidFeatureGateUsecase = PaidFeatureGateUsecaseImple(
+            planSource: planStore,
+            licenseRepository: ColorThemeLicenseLocalRepositoryImple(
+                environmentStorage: applicationBase.userDefaultEnvironmentStorage
+            ),
+            widgetStyleLicenseRepository: WidgetStyleLicenseLocalRepositoryImple(
+                environmentStorage: applicationBase.userDefaultEnvironmentStorage
+            ),
+            policyRepository: AppPolicyRepositoryImple(
+                remoteAPI: applicationBase.remoteAPI,
+                environmentStorage: applicationBase.userDefaultEnvironmentStorage
+            ),
+            defaultPolicy: AppEnvironment.defaultAppPolicy
+        )
+        self.paidFeatureGateUsecase = paidFeatureGateUsecase
         self.adExposureUsecase = AdExposureUsecaseImple(
             adAvailability: applicationBase.mobileAdService,
             billingUsecase: billingUsecase,
@@ -100,25 +114,14 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
             ),
             coldLaunchHistoryRepository: AppColdLaunchHistoryLocalRepositoryImple(
                 environmentStorage: applicationBase.userDefaultEnvironmentStorage
-            )
+            ),
+            paidFeatureGateUsecase: paidFeatureGateUsecase,
+            sharedDataStore: applicationBase.sharedDataStore
         )
     }
 
     func makePaidFeatureGateUsecase() -> any PaidFeatureGateUsecase {
-        return PaidFeatureGateUsecaseImple(
-            planSource: self.planSource,
-            licenseRepository: ColorThemeLicenseLocalRepositoryImple(
-                environmentStorage: self.applicationBase.userDefaultEnvironmentStorage
-            ),
-            widgetStyleLicenseRepository: WidgetStyleLicenseLocalRepositoryImple(
-                environmentStorage: self.applicationBase.userDefaultEnvironmentStorage
-            ),
-            policyRepository: AppPolicyRepositoryImple(
-                remoteAPI: self.applicationBase.remoteAPI,
-                environmentStorage: self.applicationBase.userDefaultEnvironmentStorage
-            ),
-            defaultPolicy: AppEnvironment.defaultAppPolicy
-        )
+        return self.paidFeatureGateUsecase
     }
 
     var eventNotifyService: SharedEventNotifyService {
