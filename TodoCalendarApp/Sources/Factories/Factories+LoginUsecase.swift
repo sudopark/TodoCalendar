@@ -259,7 +259,9 @@ extension LoginUsecaseFactoryImple {
     }
 
     func makeUISettingUsecase() -> any UISettingUsecase {
-        return self.settingFactory.makeUISettingUsecase()
+        return self.settingFactory.makeUISettingUsecase(
+            paidFeatureGateUsecase: self.makePaidFeatureGateUsecase()
+        )
     }
 
     func makeWidgetStyleUsecase() -> any WidgetStyleUsecase {
@@ -267,11 +269,15 @@ extension LoginUsecaseFactoryImple {
     }
 
     func makeEventSettingUsecase() -> any EventSettingUsecase {
-        return self.settingFactory.makeEventSettingUsecase()
+        return self.settingFactory.makeEventSettingUsecase(
+            paidFeatureGateUsecase: self.makePaidFeatureGateUsecase()
+        )
     }
 
     func makeEventShareSettingUsecase() -> any EventShareSettingUsecase {
-        return self.settingFactory.makeEventShareSettingUsecase()
+        return self.settingFactory.makeEventShareSettingUsecase(
+            paidFeatureGateUsecase: self.makePaidFeatureGateUsecase()
+        )
     }
 
     func makeNotificationPermissionUsecase() -> any NotificationPermissionUsecase {
@@ -546,7 +552,9 @@ private struct LoginSettingFactory {
     let userId: String
     let viewAppearanceStore: ApplicationViewAppearanceStoreImple
 
-    private func makeAppSettingUsecase() -> AppSettingUsecaseImple {
+    private func makeAppSettingUsecase(
+        paidFeatureGateUsecase: any PaidFeatureGateUsecase
+    ) -> AppSettingUsecaseImple {
         let repository = AppSettingRemoteRepositoryImple(
             userId: userId,
             remoteAPI: applicationBase.remoteAPI,
@@ -561,12 +569,15 @@ private struct LoginSettingFactory {
                 )
             ),
             viewAppearanceStore: self.viewAppearanceStore,
-            sharedDataStore: applicationBase.sharedDataStore
+            sharedDataStore: applicationBase.sharedDataStore,
+            paidFeatureGateUsecase: paidFeatureGateUsecase
         )
     }
 
-    func makeUISettingUsecase() -> any UISettingUsecase {
-        return self.makeAppSettingUsecase()
+    func makeUISettingUsecase(
+        paidFeatureGateUsecase: any PaidFeatureGateUsecase
+    ) -> any UISettingUsecase {
+        return self.makeAppSettingUsecase(paidFeatureGateUsecase: paidFeatureGateUsecase)
     }
 
     func makeWidgetStyleUsecase() -> any WidgetStyleUsecase {
@@ -579,12 +590,16 @@ private struct LoginSettingFactory {
         )
     }
 
-    func makeEventSettingUsecase() -> any EventSettingUsecase {
-        return self.makeAppSettingUsecase()
+    func makeEventSettingUsecase(
+        paidFeatureGateUsecase: any PaidFeatureGateUsecase
+    ) -> any EventSettingUsecase {
+        return self.makeAppSettingUsecase(paidFeatureGateUsecase: paidFeatureGateUsecase)
     }
 
-    func makeEventShareSettingUsecase() -> any EventShareSettingUsecase {
-        return self.makeAppSettingUsecase()
+    func makeEventShareSettingUsecase(
+        paidFeatureGateUsecase: any PaidFeatureGateUsecase
+    ) -> any EventShareSettingUsecase {
+        return self.makeAppSettingUsecase(paidFeatureGateUsecase: paidFeatureGateUsecase)
     }
 
     func makeNotificationPermissionUsecase() -> any NotificationPermissionUsecase {

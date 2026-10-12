@@ -19,17 +19,20 @@ public final class AppSettingUsecaseImple: @unchecked Sendable {
     private let customColorThemeRepository: any CustomColorThemeRepository
     private let viewAppearanceStore: any ViewAppearanceStore
     private let sharedDataStore: SharedDataStore
+    private let paidFeatureGateUsecase: any PaidFeatureGateUsecase
     
     public init(
         appSettingRepository: any AppSettingRepository,
         customColorThemeRepository: any CustomColorThemeRepository,
         viewAppearanceStore: any ViewAppearanceStore,
-        sharedDataStore: SharedDataStore
+        sharedDataStore: SharedDataStore,
+        paidFeatureGateUsecase: any PaidFeatureGateUsecase
     ) {
         self.appSettingRepository = appSettingRepository
         self.customColorThemeRepository = customColorThemeRepository
         self.viewAppearanceStore = viewAppearanceStore
         self.sharedDataStore = sharedDataStore
+        self.paidFeatureGateUsecase = paidFeatureGateUsecase
     }
 }
 
@@ -83,6 +86,9 @@ extension AppSettingUsecaseImple: UISettingUsecase {
         else {
             throw RuntimeError("invalid edit appearance params")
         }
+        if let newColorSetKey = params.newColorSetKey {
+            try self.paidFeatureGateUsecase.check(.colorTheme(newColorSetKey), at: Date())
+        }
         let changed = try self.appSettingRepository.changeCalendarAppearanceSetting(params)
         let newSetting = self.carryingCurrentCustomColorTheme(changed)
         self.viewAppearanceStore.notifyCalendarSettingChanged(newSetting)
@@ -93,6 +99,7 @@ extension AppSettingUsecaseImple: UISettingUsecase {
     }
 
     public func selectCustomColorTheme(_ theme: CustomColorTheme) throws -> CalendarAppearanceSettings {
+        try self.paidFeatureGateUsecase.check(.colorTheme(.custom(theme.uuid)), at: Date())
         let params = EditCalendarAppearanceSettingParams() |> \.newColorSetKey .~ .custom(theme.uuid)
         let changed = try self.appSettingRepository.changeCalendarAppearanceSetting(params)
         let newSetting = changed |> \.currentCustomColorTheme .~ theme
@@ -135,6 +142,9 @@ extension AppSettingUsecaseImple: UISettingUsecase {
     }
     
     public func saveCustomColorTheme(_ theme: CustomColorTheme) async throws {
+        if await self.isNewCustomColorTheme(theme.uuid) {
+            try self.paidFeatureGateUsecase.check(.colorTheme(.custom(theme.uuid)), at: Date())
+        }
         try await self.customColorThemeRepository.saveTheme(theme)
         self.replaceCurrentCustomColorTheme(of: theme.uuid, with: theme)
     }
@@ -151,6 +161,11 @@ extension AppSettingUsecaseImple: UISettingUsecase {
 
         let params = EditCalendarAppearanceSettingParams() |> \.newColorSetKey .~ .systemTheme
         _ = try self.changeCalendarAppearanceSetting(params)
+    }
+    
+    private func isNewCustomColorTheme(_ uuid: String) async -> Bool {
+        let saved = try? await self.customColorThemeRepository.fetchTheme(uuid)
+        return saved == nil
     }
     
     private func loadCustomColorTheme(for colorSetKey: ColorSetKeys) async -> CustomColorTheme? {
