@@ -34,9 +34,19 @@ open class StubUISettingUsecase: UISettingUsecase, @unchecked Sendable {
         return self.stubCustomColorThemes
     }
     
+    public var stubNextColorThemeCallError: (any Error)?
+    private func throwNextColorThemeCallErrorIfStubbed() throws {
+        guard let error = self.stubNextColorThemeCallError else { return }
+        self.stubNextColorThemeCallError = nil
+        throw error
+    }
+    
     public var shouldFailSaveCustomColorTheme: Bool = false
     public var didSaveCustomColorTheme: CustomColorTheme?
+    public var didRequestSaveCustomColorThemes: [CustomColorTheme] = []
     open func saveCustomColorTheme(_ theme: CustomColorTheme) async throws {
+        self.didRequestSaveCustomColorThemes.append(theme)
+        try self.throwNextColorThemeCallErrorIfStubbed()
         guard self.shouldFailSaveCustomColorTheme == false
         else { throw RuntimeError("failed") }
         self.didSaveCustomColorTheme = theme
@@ -70,8 +80,11 @@ open class StubUISettingUsecase: UISettingUsecase, @unchecked Sendable {
     }
     
     public var didChangeAppearanceSetting: AppearanceSettings?
+    public var didRequestChangeCalendarAppearanceParams: [EditCalendarAppearanceSettingParams] = []
 
     open func changeCalendarAppearanceSetting(_ params: EditCalendarAppearanceSettingParams) throws -> CalendarAppearanceSettings {
+        self.didRequestChangeCalendarAppearanceParams.append(params)
+        try self.throwNextColorThemeCallErrorIfStubbed()
         let old = self.readSetting()
         let newSetting = old |> \.calendar .~ old.calendar.update(params)
         self.didChangeAppearanceSetting = newSetting
@@ -81,7 +94,10 @@ open class StubUISettingUsecase: UISettingUsecase, @unchecked Sendable {
     }
 
     public var didSelectCustomColorTheme: CustomColorTheme?
+    public var didRequestSelectCustomColorThemes: [CustomColorTheme] = []
     open func selectCustomColorTheme(_ theme: CustomColorTheme) throws -> CalendarAppearanceSettings {
+        self.didRequestSelectCustomColorThemes.append(theme)
+        try self.throwNextColorThemeCallErrorIfStubbed()
         let old = self.readSetting()
         let params = EditCalendarAppearanceSettingParams() |> \.newColorSetKey .~ .custom(theme.uuid)
         let calendarAfterUpdate = old.calendar.update(params)

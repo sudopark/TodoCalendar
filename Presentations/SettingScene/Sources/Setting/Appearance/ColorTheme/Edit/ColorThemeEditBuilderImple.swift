@@ -46,13 +46,11 @@ extension ColorThemeEditSceneBuilerImple: ColorThemeEditSceneBuiler {
             form: .filled
         )
 
-        let paidFeatureGateUsecase = self.usecaseFactory.makePaidFeatureGateUsecase()
         let viewModel = ColorThemeEditViewModelImple(
             original: original,
             initialSeeds: initialSeeds,
             calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
-            uiSettingUsecase: self.usecaseFactory.makeUISettingUsecase(),
-            paidFeatureGateUsecase: paidFeatureGateUsecase
+            uiSettingUsecase: self.usecaseFactory.makeUISettingUsecase()
         )
 
         let viewController = ColorThemeEditViewController(
