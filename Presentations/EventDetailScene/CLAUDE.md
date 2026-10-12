@@ -49,6 +49,8 @@ graph TD
 - 닫기 시 변경사항이 있으면 확인 다이얼로그
 - More 액션: 삭제, 복사, 타입 변환 (Todo↔Schedule), ForemostEvent 토글
 
+**할일 완료 (EditTodo 전용, #1240)**: 하단 바의 `TodoCompleteButton`(`EventDetailView.swift` 의 private struct)이 `completeTodo()` 를 부른다. 버튼을 그릴지는 `isCompletable` 하나로 정하고, 다른 두 ViewModel 은 `Just(false)` 빈 구현으로 받는다. 누르면 곧바로 완료하고 화면을 닫는다 — 되돌릴 틈은 두지 않고, 오탭은 완료 할일 상세의 되돌리기가 받는다. 저장하지 않은 변경이 있으면 액션 시트로 먼저 묻고, 완료를 고르면 **저장하지 않은 채 저장된 내용 그대로** 완료한다. 저장 경로를 거치지 않는 이유는 반복 할일을 `.onlyThisTime` 으로 저장하면 id 가 바뀌어(`TodoLocalRepositoryImple.replaceRepeatingTodo`) 완료 대상이 다음 회차로 어긋나기 때문이다.
+
 **Listener** (`EventDetailSceneListener`):
 - `eventDetail(copyFromTodo:detail:)` / `eventDetail(copyFromSchedule:detail:)` — 복사
 - `eventDetail(transformTo schedule:)` / `eventDetail(transformTo todo:)` — 타입 변환

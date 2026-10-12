@@ -73,7 +73,8 @@ final class EventDetailSceneSnapshots: XCTestCase {
     @MainActor
     private func makeEventDetailView(
         _ appearance: ViewAppearance,
-        selectedTime: SelectedTime? = nil
+        selectedTime: SelectedTime? = nil,
+        isCompletable: Bool = false
     ) -> some View {
         let state = EventDetailViewState()
         state.eventDetailTypeModel = .makeCase(true)
@@ -83,11 +84,25 @@ final class EventDetailSceneSnapshots: XCTestCase {
         )
         state.selectedRepeat = "some repeat"
         state.selectedPlace = .customPlace("경복궁")
+        state.isCompletable = isCompletable
+        if isCompletable {
+            state.isSavable = true
+            state.availableMoreActions = [[.remove(onlyThisEvent: false)], [.copy]]
+        }
         return EventDetailView()
             .environment(state)
             .environment(EventDetailViewEventHandlers())
             .environment(appearance)
     }
+
+    // 할일 상세의 하단 바 — 저장·완료·더보기 셋이 나란히 선다
+    @MainActor
+    func test_eventDetail_todoComplete() {
+        captureSnapshotPair(named: "eventDetail_todoComplete", layout: .fullScreen) { theme in
+            self.makeEventDetailView(self.makeAppearance(theme), isCompletable: true)
+        }
+    }
+
 
     @MainActor
     func test_eventDetail_narrowWidth() {
