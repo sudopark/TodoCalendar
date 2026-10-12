@@ -30,7 +30,7 @@ struct WidgetCustomStyleLockedEntryTests {
     @Test("위젯 꾸미기가 아닌 게이트 사유로 끝난 실패 엔트리는 잠김이 아니다")
     func errorModel_whenOtherGateReason_isNotCustomStyleLocked() {
         // given + when
-        let model = WidgetErrorModel(error: PaidFeatureGateFailReason(feature: .colorTheme(.appTheme(.tomato)), licenseDays: 7))
+        let model = WidgetErrorModel(error: PaidFeatureGateFailReason(feature: .colorTheme(.custom("my-theme")), licenseDays: 7))
 
         // then
         #expect(model.isCustomStyleLocked == false)

@@ -526,10 +526,10 @@
 "setting.appearance.calendar.colorTheme.edit::delete::confirm::message" = "Delete this theme? If it's in use, the system theme will be applied.";
 "setting.appearance.calendar.colorTheme.edit::saved::message" = "Theme saved";
 "setting.appearance.calendar.colorTheme.edit::removed::message" = "Theme deleted";
-"setting.appearance.calendar.colorTheme.adGuide::title" = "Watch an ad to use themes";
-"setting.appearance.calendar.colorTheme.adGuide::message" = "Watch one ad to use any theme freely for %d days.";
-"setting.appearance.calendar.colorTheme.adGuide::freeThemes::message" = "System, Light, and Dark themes are always free.";
-"setting.appearance.calendar.colorTheme.adGuide::plan::message" = "Paid plans let you use themes without ads";
+"setting.appearance.calendar.colorTheme.adGuide::title" = "Watch an ad to use custom themes";
+"setting.appearance.calendar.colorTheme.adGuide::message" = "Watch one ad to use custom themes freely for %d days.";
+"setting.appearance.calendar.colorTheme.adGuide::freeThemes::message" = "Built-in themes are always free.";
+"setting.appearance.calendar.colorTheme.adGuide::plan::message" = "Paid plans let you use custom themes without ads";
 "paidFeature.adGuide::plan::button" = "View plans";
 "paidFeature.adGuide::watchAd::button" = "Watch ad and use for %d days";
 "setting.appearance.calendar.underline" = "Underline on event days";
