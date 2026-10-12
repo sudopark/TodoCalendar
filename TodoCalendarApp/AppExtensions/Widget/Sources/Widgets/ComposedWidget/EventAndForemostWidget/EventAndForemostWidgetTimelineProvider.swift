@@ -20,26 +20,26 @@ struct EventAndForemostWidgetViewModelProvider {
     
     private let eventListViewModelProvider: EventListWidgetViewModelProvider
     private let foremostEventViewModelProvider: ForemostEventWidgetViewModelProvider
-    private let styleRepository: any WidgetStyleRepository
+    private let styleFetchUsecase: any WidgetStyleFetchUsecase
     
     init(
         eventListViewModelProvider: EventListWidgetViewModelProvider,
         foremostEventViewModelProvider: ForemostEventWidgetViewModelProvider,
-        styleRepository: any WidgetStyleRepository
+        styleFetchUsecase: any WidgetStyleFetchUsecase
     ) {
         self.eventListViewModelProvider = eventListViewModelProvider
         self.foremostEventViewModelProvider = foremostEventViewModelProvider
-        self.styleRepository = styleRepository
+        self.styleFetchUsecase = styleFetchUsecase
     }
     
     func getViewModel(
         _ time: Date, style: WidgetStyleId.Style = .default
     ) async throws -> EventAndForemostWidgetViewModel {
         let eventList = try await self.eventListViewModelProvider.getEventListViewModel(
-            for: time, widgetSize: .small
+            for: time, widgetSize: .small, style: nil
         )
-        let foremost = try await self.foremostEventViewModelProvider.getViewModel(time)
-        let resolved = self.styleRepository.resolveStyle(of: .eventAndForemostMedium, style: style)
+        let foremost = try await self.foremostEventViewModelProvider.getViewModel(time, style: nil)
+        let resolved = try self.styleFetchUsecase.fetchStyle(of: .eventAndForemostMedium, selected: style)
         let look = WidgetLook(globalSetting: eventList.look.globalSetting, appliedStyle: resolved)
         return EventAndForemostWidgetViewModel(event: eventList, foremost: foremost)
             .applying(look)
@@ -56,7 +56,7 @@ struct EventAndForemostWidgetViewTimelineProvider: AppIntentTimelineProvider {
         let builder = WidgetViewModelProviderBuilder(base: .init())
         let look = WidgetLook(
             globalSetting: builder.loadWidgetAppearanceSetting(),
-            appliedStyle: builder.resolveWidgetStyle(of: .eventAndForemostMedium, style: .default)
+            appliedStyle: builder.fetchDefaultStyle(of: .eventAndForemostMedium)
         )
         let model = EventAndForemostWidgetViewModel(
             event: EventListWidgetViewModel.sample(size: .small),

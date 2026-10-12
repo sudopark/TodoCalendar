@@ -31,7 +31,7 @@ extension MonthWidgetTimelineProvider {
         let builder = WidgetViewModelProviderBuilder(base: .init())
         let look = WidgetLook(
             globalSetting: builder.loadWidgetAppearanceSetting(),
-            appliedStyle: builder.resolveWidgetStyle(of: .monthSmall, style: .default)
+            appliedStyle: builder.fetchDefaultStyle(of: .monthSmall)
         )
         let entry = Entry(date: now) {
             try MonthWidgetViewModel.makeSample() |> \.look .~ look

@@ -36,20 +36,20 @@ final class WeekEventsWidgetViewModelProvider {
     private let eventFetchUsecase: any CalendarEventFetchUsecase
     private let settingRepository: any CalendarSettingRepository
     private let appSettingRepository: any AppSettingRepository
-    private let styleRepository: any WidgetStyleRepository
+    private let styleFetchUsecase: any WidgetStyleFetchUsecase
     
     init(
         calendarUsecase: any CalendarUsecase,
         eventFetchUsecase: any CalendarEventFetchUsecase,
         settingRepository: any CalendarSettingRepository,
         appSettingRepository: any AppSettingRepository,
-        styleRepository: any WidgetStyleRepository
+        styleFetchUsecase: any WidgetStyleFetchUsecase
     ) {
         self.calendarUsecase = calendarUsecase
         self.eventFetchUsecase = eventFetchUsecase
         self.settingRepository = settingRepository
         self.appSettingRepository = appSettingRepository
-        self.styleRepository = styleRepository
+        self.styleFetchUsecase = styleFetchUsecase
     }
 }
 
@@ -63,7 +63,7 @@ extension WeekEventsWidgetViewModelProvider {
         let timeZone = self.settingRepository.loadUserSelectedTImeZone() ?? .current
         let firstWeekDay = self.settingRepository.firstWeekDay() ?? .sunday
         let appearSetting = self.appSettingRepository.loadSavedViewAppearance()
-        let resolved = self.styleRepository.resolveStyle(of: .oneWeekEvents, style: style)
+        let resolved = try self.styleFetchUsecase.fetchStyle(of: .oneWeekEvents, selected: style)
         let defaultTagColorSetting = appearSetting.defaultTagColor
         let calenar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
         let targetMonthDate = calenar.targetMonthRefDate(date, for: range)

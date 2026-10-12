@@ -292,7 +292,7 @@ final class TodayAndNextWidgetViewModelProvider {
     private let calendarSettingRepository: any CalendarSettingRepository
     private let appSettingRepository: any AppSettingRepository
     private let localeProvider: any LocaleProvider
-    private let styleRepository: any WidgetStyleRepository
+    private let styleFetchUsecase: any WidgetStyleFetchUsecase
     
     init(
         targetEventTagIds: [EventTagId]?,
@@ -301,7 +301,7 @@ final class TodayAndNextWidgetViewModelProvider {
         calendarSettingRepository: any CalendarSettingRepository,
         appSettingRepository: any AppSettingRepository,
         localeProvider: any LocaleProvider,
-        styleRepository: any WidgetStyleRepository
+        styleFetchUsecase: any WidgetStyleFetchUsecase
     ) {
         self.targetEventTagIds = targetEventTagIds
         self.excludeAllDayEvents = excludeAllDayEvents
@@ -309,7 +309,7 @@ final class TodayAndNextWidgetViewModelProvider {
         self.calendarSettingRepository = calendarSettingRepository
         self.appSettingRepository = appSettingRepository
         self.localeProvider = localeProvider
-        self.styleRepository = styleRepository
+        self.styleFetchUsecase = styleFetchUsecase
     }
 }
 
@@ -322,7 +322,7 @@ extension TodayAndNextWidgetViewModelProvider {
         
         let timeZone = self.calendarSettingRepository.loadUserSelectedTImeZone() ?? .current
         let setting = self.appSettingRepository.loadSavedViewAppearance()
-        let resolved = self.styleRepository.resolveStyle(of: .todayAndNextMedium, style: style)
+        let resolved = try self.styleFetchUsecase.fetchStyle(of: .todayAndNextMedium, selected: style)
         let events = try await self.loadEvnets(from: refDate, timeZone)
         let builder = TodayAndNextWidgetViewModelBuilder(
             max: Constant.maxRowSpaceWeight, daysRangeSize: Constant.daysRangeCount,

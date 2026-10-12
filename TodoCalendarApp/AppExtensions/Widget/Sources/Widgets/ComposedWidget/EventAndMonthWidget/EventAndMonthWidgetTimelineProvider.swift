@@ -20,16 +20,16 @@ struct EventAndMonthWidgetViewModelProvider {
     
     private let eventListViewModelProvider: EventListWidgetViewModelProvider
     private let monthViewModelProvider: MonthWidgetViewModelProvider
-    private let styleRepository: any WidgetStyleRepository
+    private let styleFetchUsecase: any WidgetStyleFetchUsecase
     
     init(
         eventListViewModelProvider: EventListWidgetViewModelProvider,
         monthViewModelProvider: MonthWidgetViewModelProvider,
-        styleRepository: any WidgetStyleRepository
+        styleFetchUsecase: any WidgetStyleFetchUsecase
     ) {
         self.eventListViewModelProvider = eventListViewModelProvider
         self.monthViewModelProvider = monthViewModelProvider
-        self.styleRepository = styleRepository
+        self.styleFetchUsecase = styleFetchUsecase
     }
     
     func getViewModel(
@@ -37,10 +37,10 @@ struct EventAndMonthWidgetViewModelProvider {
     ) async throws -> EventAndMonthWidgetViewModel {
         
         let event = try await eventListViewModelProvider.getEventListViewModel(
-            for: time, widgetSize: .small
+            for: time, widgetSize: .small, style: nil
         )
-        let month = try await monthViewModelProvider.getMonthViewModel(time)
-        let resolved = self.styleRepository.resolveStyle(of: .eventAndMonthMedium, style: style)
+        let month = try await monthViewModelProvider.getMonthViewModel(time, style: nil)
+        let resolved = try self.styleFetchUsecase.fetchStyle(of: .eventAndMonthMedium, selected: style)
         let look = WidgetLook(globalSetting: event.look.globalSetting, appliedStyle: resolved)
         return EventAndMonthWidgetViewModel(event: event, month: month)
             .applying(look)
@@ -56,7 +56,7 @@ struct EventAndMonthWidgetTimelineProvider: AppIntentTimelineProvider {
         let builder = WidgetViewModelProviderBuilder(base: .init())
         let look = WidgetLook(
             globalSetting: builder.loadWidgetAppearanceSetting(),
-            appliedStyle: builder.resolveWidgetStyle(of: .eventAndMonthMedium, style: .default)
+            appliedStyle: builder.fetchDefaultStyle(of: .eventAndMonthMedium)
         )
         let entry = Entry(date: Date()) {
             EventAndMonthWidgetViewModel(

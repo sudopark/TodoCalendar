@@ -29,7 +29,7 @@ extension TodayAndNextWidgetTimeLineProvider {
         let builder = WidgetViewModelProviderBuilder(base: .init())
         let look = WidgetLook(
             globalSetting: builder.loadWidgetAppearanceSetting(),
-            appliedStyle: builder.resolveWidgetStyle(of: .todayAndNextMedium, style: .default)
+            appliedStyle: builder.fetchDefaultStyle(of: .todayAndNextMedium)
         )
         let sample = TodayAndNextWidgetViewModel.sample() |> \.look .~ look
         return .init(date: Date(), result: .success(sample))

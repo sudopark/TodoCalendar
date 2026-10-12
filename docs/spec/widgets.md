@@ -351,7 +351,7 @@ hex 색상으로 UIColor 생성
 
 **전역 설정과 고른 스타일은 한 값으로 소비된다** — `WidgetLook { globalSetting, appliedStyle }`(Domain). 뷰모델·provider·프리뷰가 둘을 따로 주입받지 않고 이 봉투 하나를 든다.
 
-- `background` 는 위 배경색 계약의 두 걸음을 푼다 — `appliedStyle?.background ?? globalSetting.background`. 스타일이 색을 안 걸었으면 전역이고, 변형 기본의 색을 빌려오지 않는다. 변형 기본으로 내려가는 것은 `WidgetStyleRepository.resolveStyle(of:style:)` 이 `appliedStyle` 을 채울 때 이미 끝난다.
+- `background` 는 위 배경색 계약의 두 걸음을 푼다 — `appliedStyle?.background ?? globalSetting.background`. 스타일이 색을 안 걸었으면 전역이고, 변형 기본의 색을 빌려오지 않는다. 변형 기본으로 내려가는 것은 `WidgetStyleFetchUsecase.fetchStyle(of:selected:)` 가 `appliedStyle` 을 채울 때 이미 끝난다.
 - `setting<S>()` 는 payload 를 그 타입으로 돌려주고, 타입이 어긋나면 `S.initial` 이다 — 다른 변형 payload 가 섞여도 크래시하지 않는다. 뷰모델은 `var style: <Group>StyleSetting { self.look.setting() }` 계산 프로퍼티로 받아, 뷰의 표기는 `model.style.showXxx` 그대로다.
 - 비제네릭인 이유는 표현 층 계약과 같다 — 프리뷰가 런타임에 변형을 정하므로 payload 타입을 컴파일 타임에 못 박을 수 없다.
 

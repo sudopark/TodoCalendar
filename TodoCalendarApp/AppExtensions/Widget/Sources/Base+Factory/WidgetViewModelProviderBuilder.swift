@@ -11,6 +11,7 @@ import Domain
 import Repository
 import SQLiteService
 import Alamofire
+import WidgetScenes
 
 
 // MARK: - WidgetViewModelProviderBuilder
@@ -33,20 +34,21 @@ struct WidgetViewModelProviderBuilder {
         return repository.loadWidgetAppearanceSetting()
     }
 
-    /// 뷰모델 provider 를 두지 않는 위젯이 스타일을 읽는 자리.
-    func resolveWidgetStyle(
-        of variant: WidgetVariant, style: WidgetStyleId.Style = .default
-    ) -> WidgetStyle? {
-        guard variant.isCustomizable else { return nil }
-        let repository = self.makeStyleRepository()
-        return repository.resolveStyle(of: variant, style: style)
+    /// placeholder 처럼 인스턴스 선택 없이 변형 기본 스타일을 읽는 자리.
+    func fetchDefaultStyle(of variant: WidgetVariant) -> WidgetStyle? {
+        return try? self.fetchStyle(of: variant, selected: .default)
     }
 
-    private func makeStyleRepository() -> WidgetStyleLocalRepositoryImple {
-        return WidgetStyleLocalRepositoryImple(
-            environmentStorage: base.userDefaultEnvironmentStorage,
-            photoDirectory: AppEnvironment.widgetPhotoDirectory
-        )
+    /// 뷰모델 provider 를 두지 않는 위젯이 고른 스타일을 읽는 자리.
+    func fetchStyle(
+        of variant: WidgetVariant, selected style: WidgetStyleId.Style
+    ) throws -> WidgetStyle? {
+        guard variant.isCustomizable else { return nil }
+        return try self.makeStyleFetchUsecase().fetchStyle(of: variant, selected: style)
+    }
+
+    private func makeStyleFetchUsecase() -> any WidgetStyleFetchUsecase {
+        return self.usecaseFactory.makeWidgetStyleFetchUsecase()
     }
 
     private func checkShouldReset() async {
@@ -130,7 +132,7 @@ extension WidgetViewModelProviderBuilder {
             appSettingRepository: appSettingRepository,
             holidayFetchUsecase: holidaysFetchUsecase,
             eventFetchUsecase: eventsFetchUsecase,
-            styleRepository: self.makeStyleRepository()
+            styleFetchUsecase: self.makeStyleFetchUsecase()
         )
     }
     
@@ -143,7 +145,7 @@ extension WidgetViewModelProviderBuilder {
         )
         return DoubleMonthWidgetViewModelProvider(
             settingRepository: repository, monthViewModelProvider: provider,
-            styleRepository: self.makeStyleRepository()
+            styleFetchUsecase: self.makeStyleFetchUsecase()
         )
     }
 }
@@ -182,7 +184,7 @@ extension WidgetViewModelProviderBuilder {
             appSettingRepository: appSettingRepository,
             calendarSettingRepository: calendarSettingRepository,
             localeProvider: Locale.current,
-            styleRepository: self.makeStyleRepository()
+            styleFetchUsecase: self.makeStyleFetchUsecase()
         )
     }
 }
@@ -221,7 +223,7 @@ extension WidgetViewModelProviderBuilder {
             calendarSettingRepository: calendarSettingRepository,
             appSettingRepository: appSettingRepository,
             localeProvider: Locale.current,
-            styleRepository: self.makeStyleRepository()
+            styleFetchUsecase: self.makeStyleFetchUsecase()
         )
     }
 }
@@ -250,7 +252,7 @@ extension WidgetViewModelProviderBuilder {
             eventsFetchusecase: fetchUsecase,
             appSettingRepository: appSettingRepository,
             calednarSettingRepository: calendarSettingRepository,
-            styleRepository: self.makeStyleRepository()
+            styleFetchUsecase: self.makeStyleFetchUsecase()
         )
     }
 }
@@ -295,7 +297,7 @@ extension WidgetViewModelProviderBuilder {
             eventFetchUsecase: eventFetchUsecase,
             settingRepository: calendarSettingRepository,
             appSettingRepository: appSettingRepository,
-            styleRepository: self.makeStyleRepository()
+            styleFetchUsecase: self.makeStyleFetchUsecase()
         )
     }
     
@@ -330,7 +332,7 @@ extension WidgetViewModelProviderBuilder {
             calendarSettingRepository: calendarSettingRepository,
             appSettingRepository: appSettingRepository,
             localeProvider: Locale.current,
-            styleRepository: self.makeStyleRepository()
+            styleFetchUsecase: self.makeStyleFetchUsecase()
         )
     }
 }
@@ -385,7 +387,7 @@ extension WidgetViewModelProviderBuilder {
             eventFetchUsecase: self.usecaseFactory.makeEventsFetchUsecase(),
             calendarSettingRepository: calendarSettingRepository,
             appSettingRepository: appSettingRepository,
-            styleRepository: self.makeStyleRepository()
+            styleFetchUsecase: self.makeStyleFetchUsecase()
         )
     }
 }
@@ -413,7 +415,7 @@ extension WidgetViewModelProviderBuilder {
         return EventAndMonthWidgetViewModelProvider(
             eventListViewModelProvider: eventList,
             monthViewModelProvider: month,
-            styleRepository: self.makeStyleRepository()
+            styleFetchUsecase: self.makeStyleFetchUsecase()
         )
     }
     
@@ -430,7 +432,7 @@ extension WidgetViewModelProviderBuilder {
         return TodayAndMonthWidgetViewModelProvider(
             todayViewModelProvider: today,
             monthViewModelProvider: month,
-            styleRepository: self.makeStyleRepository()
+            styleFetchUsecase: self.makeStyleFetchUsecase()
         )
     }
     
@@ -451,7 +453,7 @@ extension WidgetViewModelProviderBuilder {
         return .init(
             eventListViewModelProvider: eventList,
             foremostEventViewModelProvider: foremost,
-            styleRepository: self.makeStyleRepository()
+            styleFetchUsecase: self.makeStyleFetchUsecase()
         )
     }
 }

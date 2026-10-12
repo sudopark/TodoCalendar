@@ -37,9 +37,9 @@ struct DDayWidgetViewModelProviderTests {
             eventFetchUsecase: eventFetchUsecase,
             calendarSettingRepository: calendarSettingRepository,
             appSettingRepository: StubAppSettingRepository(),
-            styleRepository: StubWidgetStyleRepository(
+            styleFetchUsecase: StubWidgetStyleRepository(
                 styles: savedStyles.asDictionary { $0.id }
-            )
+            ).asStyleFetchUsecase()
         )
     }
 

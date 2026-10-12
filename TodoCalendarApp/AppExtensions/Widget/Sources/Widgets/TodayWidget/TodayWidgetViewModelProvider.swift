@@ -36,31 +36,32 @@ final class TodayWidgetViewModelProvider {
     private let eventsFetchusecase: any CalendarEventFetchUsecase
     private let appSettingRepository: any AppSettingRepository
     private let calednarSettingRepository: any CalendarSettingRepository
-    private let styleRepository: any WidgetStyleRepository
+    private let styleFetchUsecase: any WidgetStyleFetchUsecase
     
     init(
         eventsFetchusecase: any CalendarEventFetchUsecase,
         appSettingRepository: any AppSettingRepository,
         calednarSettingRepository: any CalendarSettingRepository,
-        styleRepository: any WidgetStyleRepository
+        styleFetchUsecase: any WidgetStyleFetchUsecase
     ) {
         self.eventsFetchusecase = eventsFetchusecase
         self.appSettingRepository = appSettingRepository
         self.calednarSettingRepository = calednarSettingRepository
-        self.styleRepository = styleRepository
+        self.styleFetchUsecase = styleFetchUsecase
     }
 }
 
 extension TodayWidgetViewModelProvider {
     
     
-    /// 인스턴스가 스타일을 안 고르는 합성 위젯도 같은 경로를 쓴다 — 그쪽은 변형 기본 스타일이다.
     func getTodayViewModel(
-        for today: Date, style: WidgetStyleId.Style = .default
+        for today: Date, style: WidgetStyleId.Style? = .default
     ) async throws -> TodayWidgetViewModel {
         
         let setting = self.appSettingRepository.loadWidgetAppearanceSetting()
-        let resolved = self.styleRepository.resolveStyle(of: .todaySummarySmall, style: style)
+        let resolved = try style.flatMap {
+            try self.styleFetchUsecase.fetchStyle(of: .todaySummarySmall, selected: $0)
+        }
         let timeZone = self.calednarSettingRepository.loadUserSelectedTImeZone() ?? .current
         let calednar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
         let todayRange = try calednar.dayRange(today).unwrap()

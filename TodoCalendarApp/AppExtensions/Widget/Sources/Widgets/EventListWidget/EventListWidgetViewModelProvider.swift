@@ -116,7 +116,7 @@ final class EventListWidgetViewModelProvider {
     private let appSettingRepository: any AppSettingRepository
     private let calendarSettingRepository: any CalendarSettingRepository
     private let localeProvider: any LocaleProvider
-    private let styleRepository: any WidgetStyleRepository
+    private let styleFetchUsecase: any WidgetStyleFetchUsecase
     
     init(
         targetEventTagIds: [EventTagId]?,
@@ -125,7 +125,7 @@ final class EventListWidgetViewModelProvider {
         appSettingRepository: any AppSettingRepository,
         calendarSettingRepository: any CalendarSettingRepository,
         localeProvider: any LocaleProvider,
-        styleRepository: any WidgetStyleRepository
+        styleFetchUsecase: any WidgetStyleFetchUsecase
     ) {
         self.targetEventTagIds = targetEventTagIds
         self.excludeAllDayEvents = excludeAllDayEvents
@@ -133,22 +133,23 @@ final class EventListWidgetViewModelProvider {
         self.appSettingRepository = appSettingRepository
         self.calendarSettingRepository = calendarSettingRepository
         self.localeProvider = localeProvider
-        self.styleRepository = styleRepository
+        self.styleFetchUsecase = styleFetchUsecase
     }
 }
 
 extension EventListWidgetViewModelProvider {
     
-    /// 인스턴스가 스타일을 안 고르는 합성 위젯도 같은 경로를 쓴다 — 그쪽은 변형 기본 스타일이다.
     func getEventListViewModel(
         for refDate: Date,
         widgetSize: EventListWidgetSize,
-        style: WidgetStyleId.Style = .default
+        style: WidgetStyleId.Style? = .default
     ) async throws -> EventListWidgetViewModel {
         
         let timeZone = self.calendarSettingRepository.loadUserSelectedTImeZone() ?? .current
         let setting = self.appSettingRepository.loadSavedViewAppearance()
-        let resolved = self.styleRepository.resolveStyle(of: .eventListSmall, style: style)
+        let resolved = try style.flatMap {
+            try self.styleFetchUsecase.fetchStyle(of: .eventListSmall, selected: $0)
+        }
         
         let dayEventLists = try await self.loadDayEventListModel(
             refDate, timeZone, localeProvider.is24HourFormat()

@@ -36,7 +36,7 @@ class ForemostEventWidgetViewModelProviderTests: XCTestCase {
             calendarSettingRepository: calendarSettingRepository,
             appSettingRepository: appSettingRepository,
             localeProvider: Locale.current,
-            styleRepository: StubWidgetStyleRepository(styles: styles)
+            styleFetchUsecase: StubWidgetStyleRepository(styles: styles).asStyleFetchUsecase()
         )
     }
     

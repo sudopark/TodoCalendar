@@ -56,6 +56,26 @@ extension WidgetUsecaseFactory {
         return repository
     }
     
+    func makeWidgetStyleFetchUsecase() -> any WidgetStyleFetchUsecase {
+        return WidgetStyleFetchUsecaseImple(
+            styleRepository: WidgetStyleLocalRepositoryImple(
+                environmentStorage: self.base.userDefaultEnvironmentStorage,
+                photoDirectory: AppEnvironment.widgetPhotoDirectory
+            ),
+            planRepository: BillingUserPlanLocalRepositoryImple(
+                sqliteService: self.base.commonSqliteService
+            ),
+            licenseRepository: WidgetStyleLicenseLocalRepositoryImple(
+                environmentStorage: self.base.userDefaultEnvironmentStorage
+            ),
+            policyRepository: AppPolicyRepositoryImple(
+                remoteAPI: self.base.remoteAPI,
+                environmentStorage: self.base.userDefaultEnvironmentStorage
+            ),
+            defaultPolicy: AppEnvironment.defaultAppPolicy
+        )
+    }
+    
     func makeTodoToggleRepository() -> any TodoEventRepository {
         return TodoEventRepositoryFactory(base: self.base).makeRepository()
     }

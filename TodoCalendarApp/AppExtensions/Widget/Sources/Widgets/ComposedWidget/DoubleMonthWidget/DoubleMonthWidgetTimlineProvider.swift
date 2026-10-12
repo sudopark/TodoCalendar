@@ -19,32 +19,32 @@ struct DoubleMonthWidgetViewModelProvider {
     
     private let settingRepository: any CalendarSettingRepository
     private let monthViewModelProvider: MonthWidgetViewModelProvider
-    private let styleRepository: any WidgetStyleRepository
+    private let styleFetchUsecase: any WidgetStyleFetchUsecase
     
     init(
         settingRepository: any CalendarSettingRepository,
         monthViewModelProvider: MonthWidgetViewModelProvider,
-        styleRepository: any WidgetStyleRepository
+        styleFetchUsecase: any WidgetStyleFetchUsecase
     ) {
         self.settingRepository = settingRepository
         self.monthViewModelProvider = monthViewModelProvider
-        self.styleRepository = styleRepository
+        self.styleFetchUsecase = styleFetchUsecase
     }
     
     func getviewModel(
         _ now: Date, style: WidgetStyleId.Style = .default
     ) async throws -> DoubleMonthWidgetViewModel {
         
-        let currentMonthModel = try await self.monthViewModelProvider.getMonthViewModel(now)
+        let currentMonthModel = try await self.monthViewModelProvider.getMonthViewModel(now, style: nil)
         
         let timeZone = self.settingRepository.loadUserSelectedTImeZone() ?? .current
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
         let nextMonth = try calendar.addMonth(1, from: now).unwrap()
         
-        let nextMonthModel = try await self.monthViewModelProvider.getMonthViewModel(nextMonth)
+        let nextMonthModel = try await self.monthViewModelProvider.getMonthViewModel(nextMonth, style: nil)
         |> \.todayIdentifier .~ nil
         
-        let resolved = self.styleRepository.resolveStyle(of: .doubleMonthMedium, style: style)
+        let resolved = try self.styleFetchUsecase.fetchStyle(of: .doubleMonthMedium, selected: style)
         let look = WidgetLook(globalSetting: currentMonthModel.look.globalSetting, appliedStyle: resolved)
         return DoubleMonthWidgetViewModel(current: currentMonthModel, next: nextMonthModel)
             .applying(look)
@@ -60,7 +60,7 @@ struct DoubleMonthWidgetTimlineProvider: AppIntentTimelineProvider {
         let builder = WidgetViewModelProviderBuilder(base: .init())
         let look = WidgetLook(
             globalSetting: builder.loadWidgetAppearanceSetting(),
-            appliedStyle: builder.resolveWidgetStyle(of: .doubleMonthMedium, style: .default)
+            appliedStyle: builder.fetchDefaultStyle(of: .doubleMonthMedium)
         )
         let entry = Entry(date: Date()) {
             DoubleMonthWidgetViewModel(

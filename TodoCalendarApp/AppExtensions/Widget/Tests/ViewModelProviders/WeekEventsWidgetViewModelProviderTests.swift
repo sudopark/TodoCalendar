@@ -71,9 +71,9 @@ class WeekEventsWidgetViewModelProviderTests: BaseTestCase {
             eventFetchUsecase: fetchUsecase,
             settingRepository: calendarSettingRepository,
             appSettingRepository: StubAppSettingRepository(),
-            styleRepository: StubWidgetStyleRepository(
+            styleFetchUsecase: StubWidgetStyleRepository(
                 styles: defaultStyle.merging(customs) { _, custom in custom }
-            )
+            ).asStyleFetchUsecase()
         )
     }
 }

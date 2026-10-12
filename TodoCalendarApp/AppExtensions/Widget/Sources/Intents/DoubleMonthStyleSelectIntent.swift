@@ -9,6 +9,7 @@
 import Foundation
 import AppIntents
 import Domain
+import Extensions
 
 
 // MARK: - DoubleMonthStyleEntity
@@ -20,16 +21,21 @@ struct DoubleMonthStyleEntity: AppEntity, Sendable {
 
     var id: String
     var name: String
+    var isSelectable: Bool = true
 
     var displayRepresentation: DisplayRepresentation {
+        guard self.isSelectable else {
+            let locked = "widget.style.candidate::locked".localized()
+            return DisplayRepresentation(title: "\(name)", subtitle: "\(locked)")
+        }
         return DisplayRepresentation(title: "\(name)")
     }
 }
 
 extension DoubleMonthStyleEntity {
 
-    init(style: WidgetStyle) {
-        self.init(id: style.id.style.entityId, name: style.displayName)
+    init(style: WidgetStyle, isSelectable: Bool = true) {
+        self.init(id: style.id.style.entityId, name: style.displayName, isSelectable: isSelectable)
     }
 }
 
@@ -39,7 +45,7 @@ extension DoubleMonthStyleEntity {
 /// 조회할 변형을 타입 안에 박으므로 위젯군마다 엔티티·쿼리가 따로 선다.
 struct DoubleMonthStyleQuery: EntityQuery, @unchecked Sendable {
 
-    private let factory: WidgetStyleIntentFactory
+    private let factory: WidgetUsecaseFactory
 
     init() {
         self.factory = .init(base: AppExtensionBase())
@@ -48,16 +54,16 @@ struct DoubleMonthStyleQuery: EntityQuery, @unchecked Sendable {
     /// 저장된 id 를 라벨로 복원한다 — 지워진 스타일은 목록에 없어 자연히 빠진다.
     func entities(for identifiers: [String]) async throws -> [DoubleMonthStyleEntity] {
         let selectedIds = Set(identifiers)
-        return self.savedStyleEntities().filter { selectedIds.contains($0.id) }
+        return self.candidateEntities().filter { selectedIds.contains($0.id) }
     }
 
     func suggestedEntities() async throws -> [DoubleMonthStyleEntity] {
-        return self.savedStyleEntities()
+        return self.candidateEntities()
     }
 
-    private func savedStyleEntities() -> [DoubleMonthStyleEntity] {
-        return self.factory.makeStyleUsecase()
-            .loadStyles(of: .doubleMonthMedium)
-            .map { DoubleMonthStyleEntity(style: $0) }
+    private func candidateEntities() -> [DoubleMonthStyleEntity] {
+        return self.factory.makeWidgetStyleFetchUsecase()
+            .fetchStyleCandidates(of: .doubleMonthMedium)
+            .map { DoubleMonthStyleEntity(style: $0.style, isSelectable: $0.isSelectable) }
     }
 }

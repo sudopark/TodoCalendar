@@ -24,7 +24,7 @@ final class MonthWidgetViewModelProvider {
     private let appSettingRepository: any AppSettingRepository
     private let holidayFetchUsecase: any HolidaysFetchUsecase
     private let eventFetchUsecase: any CalendarEventFetchUsecase
-    private let styleRepository: any WidgetStyleRepository
+    private let styleFetchUsecase: any WidgetStyleFetchUsecase
     
     init(
         calendarUsecase: any CalendarUsecase,
@@ -32,26 +32,27 @@ final class MonthWidgetViewModelProvider {
         appSettingRepository: any AppSettingRepository,
         holidayFetchUsecase: any HolidaysFetchUsecase,
         eventFetchUsecase: any CalendarEventFetchUsecase,
-        styleRepository: any WidgetStyleRepository
+        styleFetchUsecase: any WidgetStyleFetchUsecase
     ) {
         self.calendarUsecase = calendarUsecase
         self.settingRepository = settingRepository
         self.appSettingRepository = appSettingRepository
         self.holidayFetchUsecase = holidayFetchUsecase
         self.eventFetchUsecase = eventFetchUsecase
-        self.styleRepository = styleRepository
+        self.styleFetchUsecase = styleFetchUsecase
     }
 }
 
 extension MonthWidgetViewModelProvider {
     
-    /// 인스턴스가 스타일을 안 고르는 합성 위젯도 같은 경로를 쓴다 — 그쪽은 변형 기본 스타일이다.
     func getMonthViewModel(
-        _ now: Date, style: WidgetStyleId.Style = .default
+        _ now: Date, style: WidgetStyleId.Style? = .default
     ) async throws -> MonthWidgetViewModel {
         let timeZone = self.settingRepository.loadUserSelectedTImeZone() ?? .current
         let setting = self.appSettingRepository.loadWidgetAppearanceSetting()
-        let resolved = self.styleRepository.resolveStyle(of: .monthSmall, style: style)
+        let resolved = try style.flatMap {
+            try self.styleFetchUsecase.fetchStyle(of: .monthSmall, selected: $0)
+        }
         var model = try await self.currentMonthModel(now, timeZone)
         if let ranges = model.eventRange {
             model.hasEventDaysIdentifiers = await self.loadEventExistsDayIdentifiers(
