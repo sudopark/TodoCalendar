@@ -629,7 +629,7 @@ protocol LegalNoticeRepository: Sendable {
 
 Repository 는 받아 둔 원격 정책(캐시)만 돌려준다. 캐시가 없으면 정책 없음이다. 번들 기본값 파일은 없다.
 
-`refreshPolicy()` 가 원격을 받아 캐시에 쓴다. 요청이나 디코딩이 실패하면 throw 하고 캐시를 그대로 둔다. 호출은 앱 시작 쪽 작업이 맡는다.
+`refreshPolicy()` 가 원격을 받아 캐시에 쓴다. 요청이나 디코딩이 실패하면 throw 하고 캐시를 그대로 둔다. 앱을 켤 때 `ApplicationPrepareUsecaseImple.prepareLaunch` 가 결과를 기다리지 않고 부르며, 실패해도 앱 시작을 막지 않는다.
 
 기본 정책은 앱이 정의해 정책을 쓰는 usecase 에 주입하고, usecase 가 원격 정책에서 판단할 수 없는 속성만 기본값으로 채운다. 사용권은 `color-themes.md` §4 가 다룬다. 기능 스위치의 속성별 기본값은 그 스위치를 쓰는 작업이 정한다.
 

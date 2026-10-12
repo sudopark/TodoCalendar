@@ -54,6 +54,7 @@ final class ApplicationPrepareUsecaseImple: ApplicationPrepareUsecase {
     private let coldLaunchHistoryRepository: any AppColdLaunchHistoryRepository
     private let customColorThemeRepository: any CustomColorThemeRepository
     private let mobileAdService: any MobileAdService
+    private let appPolicyRepository: any AppPolicyRepository
     private let database: SQLiteService
     private let appDataMigration: AppDataMigrationImple
     private let databasePathFinding: (String?) -> String
@@ -70,6 +71,7 @@ final class ApplicationPrepareUsecaseImple: ApplicationPrepareUsecase {
         coldLaunchHistoryRepository: any AppColdLaunchHistoryRepository,
         customColorThemeRepository: any CustomColorThemeRepository,
         mobileAdService: any MobileAdService,
+        appPolicyRepository: any AppPolicyRepository,
         database: SQLiteService,
         appDataMigration: AppDataMigrationImple,
         databasePathFinding: @escaping (String?) -> String = { AppEnvironment.dbFilePath(for: $0) }
@@ -83,6 +85,7 @@ final class ApplicationPrepareUsecaseImple: ApplicationPrepareUsecase {
         self.coldLaunchHistoryRepository = coldLaunchHistoryRepository
         self.customColorThemeRepository = customColorThemeRepository
         self.mobileAdService = mobileAdService
+        self.appPolicyRepository = appPolicyRepository
         self.database = database
         self.appDataMigration = appDataMigration
         self.databasePathFinding = databasePathFinding
@@ -95,6 +98,9 @@ extension ApplicationPrepareUsecaseImple {
     func prepareLaunch() async throws -> ApplicationPrepareResult {
         self.recordColdLaunch()
         self.mobileAdService.start()
+        Task { [appPolicyRepository] in
+            try? await appPolicyRepository.refreshPolicy()
+        }
         let latestLoginAccount = try await self.accountUsecase.prepareLastSignInAccount()
         try? await self.prepareDatabase(for: latestLoginAccount?.auth.uid)
         let appearance = try await self.prepareLatestAppearanceSeting()
