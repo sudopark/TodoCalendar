@@ -33,7 +33,9 @@ class AppSettingUsecaseImpleTests: BaseTestCase, PublisherWaitable {
     private func makeUsecase(
         selectedColorSetKey: ColorSetKeys? = nil,
         customColorThemeRepository: StubCustomColorThemeRepository = .init(),
-        repository: StubAppSettingRepository = .init()
+        repository: StubAppSettingRepository = .init(),
+        paidFeatureGate: StubPaidFeatureGateUsecase = .init(),
+        sharedDataStore: SharedDataStore = .init()
     ) -> AppSettingUsecaseImple {
         if let key = selectedColorSetKey {
             repository.stubAppearanceSetting = AppearanceSettings(
@@ -45,7 +47,8 @@ class AppSettingUsecaseImpleTests: BaseTestCase, PublisherWaitable {
             appSettingRepository: repository,
             customColorThemeRepository: customColorThemeRepository,
             viewAppearanceStore: self.spyViewAppearanceStore,
-            sharedDataStore: SharedDataStore()
+            sharedDataStore: sharedDataStore,
+            paidFeatureGateUsecase: paidFeatureGate
         )
         return usecase
     }
@@ -560,14 +563,17 @@ extension AppSettingUsecaseImpleTests {
         XCTAssertNil(appSettingRepository.didChangeCalendarAppearanceSettingParams)
     }
 
-    func testUsecase_selectCustomColorTheme_savesKeyAndCarriesTheme() throws {
+    func testUsecase_selectColorTheme_withCustomKey_savesKeyAndCarriesFetchedTheme() async throws {
         // given
         let theme = self.makeCustomTheme("c1")
         let appSettingRepository = StubAppSettingRepository()
-        let usecase = self.makeUsecase(repository: appSettingRepository)
+        let usecase = self.makeUsecase(
+            customColorThemeRepository: .init(themes: [self.makeCustomTheme("c2"), theme]),
+            repository: appSettingRepository
+        )
 
         // when
-        let result = try usecase.selectCustomColorTheme(theme)
+        let result = try await usecase.selectColorTheme(.custom("c1"))
 
         // then
         XCTAssertEqual(appSettingRepository.didChangeCalendarAppearanceSettingParams?.newColorSetKey, .custom("c1"))
@@ -575,24 +581,24 @@ extension AppSettingUsecaseImpleTests {
         XCTAssertEqual(result.colorSetKey, .custom("c1"))
     }
 
-    func testUsecase_selectCustomColorTheme_notifiesViewAppearanceStoreWithTheme() throws {
+    func testUsecase_selectColorTheme_withCustomKey_notifiesViewAppearanceStoreWithTheme() async throws {
         // given
         let theme = self.makeCustomTheme("c1")
-        let usecase = self.makeUsecase()
+        let usecase = self.makeUsecase(customColorThemeRepository: .init(themes: [theme]))
 
         // when
-        _ = try usecase.selectCustomColorTheme(theme)
+        _ = try await usecase.selectColorTheme(.custom("c1"))
 
         // then
         XCTAssertEqual(self.spyViewAppearanceStore.didChangedCalendarSetting?.colorSetKey, .custom("c1"))
         XCTAssertEqual(self.spyViewAppearanceStore.didChangedCalendarSetting?.currentCustomColorTheme, theme)
     }
 
-    func testUsecase_selectCustomColorTheme_thenChangeOtherSetting_keepsTheme() throws {
+    func testUsecase_selectColorTheme_withCustomKey_thenChangeOtherSetting_keepsTheme() async throws {
         // given
         let theme = self.makeCustomTheme("c1")
-        let usecase = self.makeUsecase()
-        _ = try usecase.selectCustomColorTheme(theme)
+        let usecase = self.makeUsecase(customColorThemeRepository: .init(themes: [theme]))
+        _ = try await usecase.selectColorTheme(.custom("c1"))
 
         // when
         let params = EditCalendarAppearanceSettingParams() |> \.animationEffectIsOn .~ true
@@ -601,6 +607,158 @@ extension AppSettingUsecaseImpleTests {
         // then
         XCTAssertEqual(result.colorSetKey, .custom("c1"))
         XCTAssertEqual(result.currentCustomColorTheme, theme)
+    }
+
+    func testUsecase_selectColorTheme_withMissingCustomTheme_throwsWithoutSaving() async {
+        // given
+        let appSettingRepository = StubAppSettingRepository()
+        let usecase = self.makeUsecase(
+            customColorThemeRepository: .init(themes: [self.makeCustomTheme("c2")]),
+            repository: appSettingRepository
+        )
+
+        // when
+        var failed: Error?
+        do { _ = try await usecase.selectColorTheme(.custom("c1")) } catch { failed = error }
+
+        // then
+        XCTAssertNotNil(failed)
+        XCTAssertNil(appSettingRepository.didChangeCalendarAppearanceSettingParams)
+    }
+
+    func testUsecase_selectColorTheme_withAppThemeKey_savesKeyWithoutCustomTheme() async throws {
+        // given
+        let appSettingRepository = StubAppSettingRepository()
+        let usecase = self.makeUsecase(
+            customColorThemeRepository: .init(themes: [self.makeCustomTheme("c1")]),
+            repository: appSettingRepository
+        )
+
+        // when
+        let result = try await usecase.selectColorTheme(.appTheme(.tomato))
+
+        // then
+        XCTAssertEqual(appSettingRepository.didChangeCalendarAppearanceSettingParams?.newColorSetKey, .appTheme(.tomato))
+        XCTAssertEqual(result.colorSetKey, .appTheme(.tomato))
+        XCTAssertNil(result.currentCustomColorTheme)
+    }
+}
+
+
+// MARK: - test color theme paid feature gate
+
+extension AppSettingUsecaseImpleTests {
+
+    func testUsecase_changeCalendarSetting_withColorKey_doesNotAskGate() throws {
+        // given
+        let gate = StubPaidFeatureGateUsecase()
+        gate.mockBlockedReason = PaidFeatureGateFailReason(feature: .colorTheme(.appTheme(.tomato)), licenseDays: 3)
+        let appSettingRepository = StubAppSettingRepository()
+        let usecase = self.makeUsecase(repository: appSettingRepository, paidFeatureGate: gate)
+
+        // when
+        let params = EditCalendarAppearanceSettingParams() |> \.newColorSetKey .~ .appTheme(.tomato)
+        let newValue = try usecase.changeCalendarAppearanceSetting(params)
+
+        // then
+        XCTAssertNil(gate.didCheckFeature)
+        XCTAssertEqual(newValue.colorSetKey, .appTheme(.tomato))
+    }
+
+    func testUsecase_selectColorTheme_whenBlocked_throwsReasonWithoutSaving() async {
+        // given
+        let reason = PaidFeatureGateFailReason(feature: .colorTheme(.appTheme(.tomato)), licenseDays: 3)
+        let gate = StubPaidFeatureGateUsecase()
+        gate.mockBlockedReason = reason
+        let appSettingRepository = StubAppSettingRepository()
+        let sharedDataStore = SharedDataStore()
+        let usecase = self.makeUsecase(
+            repository: appSettingRepository, paidFeatureGate: gate, sharedDataStore: sharedDataStore
+        )
+
+        // when
+        var failed: Error?
+        do { _ = try await usecase.selectColorTheme(.appTheme(.tomato)) } catch { failed = error }
+
+        // then
+        XCTAssertEqual(failed as? PaidFeatureGateFailReason, reason)
+        XCTAssertNil(appSettingRepository.didChangeCalendarAppearanceSettingParams)
+        XCTAssertNil(self.spyViewAppearanceStore.didChangedCalendarSetting)
+        XCTAssertNil(
+            sharedDataStore.value(CalendarAppearanceSettings.self, key: ShareDataKeys.calendarAppearance.rawValue)
+        )
+    }
+
+    func testUsecase_selectColorTheme_whenAllowed_checksGateWithSelectedKey() async throws {
+        // given
+        let gate = StubPaidFeatureGateUsecase()
+        let usecase = self.makeUsecase(
+            customColorThemeRepository: .init(themes: [self.makeCustomTheme("c1")]), paidFeatureGate: gate
+        )
+
+        // when
+        _ = try await usecase.selectColorTheme(.custom("c1"))
+
+        // then
+        XCTAssertEqual(gate.didCheckFeature, .colorTheme(.custom("c1")))
+    }
+
+    func testUsecase_removeSelectedCustomColorTheme_resetsToSystemThemeWithoutAskingGate() async throws {
+        // given
+        let gate = StubPaidFeatureGateUsecase()
+        gate.mockBlockedReason = PaidFeatureGateFailReason(feature: .colorTheme(.systemTheme), licenseDays: 3)
+        let appSettingRepository = StubAppSettingRepository()
+        let usecase = self.makeUsecase(
+            selectedColorSetKey: .custom("c1"),
+            customColorThemeRepository: .init(themes: [self.makeCustomTheme("c1")]),
+            repository: appSettingRepository,
+            paidFeatureGate: gate
+        )
+        _ = try await usecase.refreshAppearanceSetting()
+
+        // when
+        try await usecase.removeCustomColorTheme("c1")
+
+        // then
+        XCTAssertNil(gate.didCheckFeature)
+        XCTAssertEqual(appSettingRepository.didChangeCalendarAppearanceSettingParams?.newColorSetKey, .systemTheme)
+    }
+
+    func testUsecase_saveNewCustomColorTheme_whenBlocked_throwsReasonWithoutSaving() async {
+        // given
+        let gate = StubPaidFeatureGateUsecase()
+        gate.mockBlockedReason = PaidFeatureGateFailReason(feature: .colorTheme(.custom("new")), licenseDays: 7)
+        let repository = StubCustomColorThemeRepository(themes: [self.makeCustomTheme("c1")])
+        let usecase = self.makeUsecase(customColorThemeRepository: repository, paidFeatureGate: gate)
+
+        // when
+        var failed: Error?
+        do { try await usecase.saveCustomColorTheme(self.makeCustomTheme("new")) } catch { failed = error }
+
+        // then
+        XCTAssertEqual(failed as? PaidFeatureGateFailReason, PaidFeatureGateFailReason(feature: .colorTheme(.custom("new")), licenseDays: 7))
+        XCTAssertEqual(gate.didCheckFeature, .colorTheme(.custom("new")))
+        XCTAssertEqual(repository.didSavedThemes, [])
+    }
+
+    func testUsecase_saveExistingCustomColorTheme_doesNotAskGate() async throws {
+        // given
+        let gate = StubPaidFeatureGateUsecase()
+        gate.mockBlockedReason = PaidFeatureGateFailReason(feature: .colorTheme(.custom("c1")), licenseDays: 7)
+        let repository = StubCustomColorThemeRepository(themes: [self.makeCustomTheme("c1")])
+        let usecase = self.makeUsecase(customColorThemeRepository: repository, paidFeatureGate: gate)
+        let edited = CustomColorTheme(
+            uuid: "c1", name: "renamed", schemaVersion: 1,
+            seeds: .init(background: "#000000", accent: "#112233", form: .filled),
+            colors: [:], createdAt: 0, updatedAt: 5
+        )
+
+        // when
+        try await usecase.saveCustomColorTheme(edited)
+
+        // then
+        XCTAssertNil(gate.didCheckFeature)
+        XCTAssertEqual(repository.didSavedThemes, [edited])
     }
 }
 
