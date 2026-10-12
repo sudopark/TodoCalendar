@@ -223,7 +223,7 @@ Radix 스케일은 12단계이고 단계마다 쓰임이 정해져 있다 — 1 
 
 **읽는 시점** — 앱을 켤 때는 DB 를 먼저 열고, 외형 설정을 읽으면서 선택값이 커스텀이면 그 테마 하나만 읽어 설정에 담는다. 계정이 바뀌면 DB 를 다시 연 뒤 저장된 설정 키가 커스텀일 때 새 계정 DB 에서 그 테마 하나를 읽어 store 에 갈아 끼우고 루트 화면을 새로 만든다. 메인 화면이 외형 설정을 새로 읽을 때도 같은 방식으로 채운다.
 
-**관리** — 테마 목록 조회·저장·삭제는 `UISettingUsecase`(`loadCustomColorThemes`·`saveCustomColorTheme`·`removeCustomColorTheme`)가 맡고, 목록은 메모리에 올리지 않고 커스텀 테마 화면이 직접 조회한다. 커스텀 테마를 고를 때는 `selectCustomColorTheme`이 키와 그 테마를 함께 넣어 통지한다. 저장한 테마가 현재 선택이면 usecase 가 calendar 설정의 현재 테마를 갈아 끼워 설정 통지를 보내고, 삭제한 테마가 현재 선택이면 선택 키를 시스템 테마로 되돌리고 설정 통지를 보낸다. 그 외에는 통지하지 않는다. 폰트처럼 다른 항목만 바꿔도 키가 그대로면 들고 있던 현재 테마를 이어 담고, 다른 커스텀 키로 바뀌면 비운다.
+**관리** — 테마 목록 조회·저장·삭제는 `UISettingUsecase`(`loadCustomColorThemes`·`saveCustomColorTheme`·`removeCustomColorTheme`)가 맡고, 목록은 메모리에 올리지 않고 커스텀 테마 화면이 직접 조회한다. 테마를 고를 때는 기본 제공 테마와 커스텀 테마를 가르지 않고 `selectColorTheme(_:)` 이 색 키를 받는다. 커스텀 키면 저장된 테마를 찾아 키와 함께 넣어 통지한다. 저장한 테마가 현재 선택이면 usecase 가 calendar 설정의 현재 테마를 갈아 끼워 설정 통지를 보내고, 삭제한 테마가 현재 선택이면 선택 키를 시스템 테마로 되돌리고 설정 통지를 보낸다. 그 외에는 통지하지 않는다. 폰트처럼 다른 항목만 바꿔도 키가 그대로면 들고 있던 현재 테마를 이어 담고, 다른 커스텀 키로 바뀌면 비운다.
 
 ## 3. 검사
 
@@ -290,7 +290,7 @@ Radix 스케일은 12단계이고 단계마다 쓰임이 정해져 있다 — 1 
 
 ## 4. 사용권
 
-무료 유저가 유료 테마를 쓰는 권리다. 판단은 `PaidFeatureGateUsecase.check(.colorTheme(_), at:)`(`Domain/Sources/Usecases/Billing/PaidFeatureGateUsecase.swift`)가 내리고, 선택 화면·생성 저장·앱 시작 게이트는 이 답만 읽는다. 사용권은 전체 테마에 하나다 (#1197).
+무료 유저가 유료 테마를 쓰는 권리다. 판단은 `PaidFeatureGateUsecase.check(.colorTheme(_), at:)`(`Domain/Sources/Usecases/Billing/PaidFeatureGateUsecase.swift`)가 내린다. 테마를 걸 때는 `AppSettingUsecaseImple.selectColorTheme`, 새 테마를 저장할 때는 `saveCustomColorTheme` 이 이 검사를 부른다. 일반 외관 설정 변경(`changeCalendarAppearanceSetting`)은 검사하지 않는다. 사용권은 전체 테마에 하나다 (#1197).
 
 무료 테마는 `.systemTheme`·`.defaultLight`·`.defaultDark` 다. `.appTheme(_)` 와 커스텀 테마는 유료 테마다.
 
@@ -309,11 +309,11 @@ Radix 스케일은 12단계이고 단계마다 쓰임이 정해져 있다 — 1 
 
 ### 테마 생성 광고
 
-새 커스텀 테마를 저장할 때 그 테마 키(`.custom(uuid)`)로 `check(.colorTheme(_), at:)` 를 불러 막히면 광고 안내 시트를 띄운다. 판정표대로 무료 플랜이라도 사용권이 유효하면 광고 없이 만든다. 기존 테마 수정 저장은 이 판정을 보지 않는다. 저장 직후 그 테마를 걸 때는 다시 광고를 띄우지 않는다.
+새 커스텀 테마를 저장할 때 `AppSettingUsecaseImple.saveCustomColorTheme` 이 그 테마 키(`.custom(uuid)`)로 `check(.colorTheme(_), at:)` 를 부른다. 막히면 사유를 던지고 편집 화면이 광고 안내 시트를 띄운다. 판정표대로 무료 플랜이라도 사용권이 유효하면 광고 없이 만든다. 기존 테마 수정 저장은 이 판정을 보지 않는다. 저장이 끝나면 선택 화면이 그 테마를 건다.
 
 ### 광고 결과 처리
 
-선택 화면의 걸기와 편집 화면의 생성 저장은 BillingScenes 의 하단 안내 시트를 먼저 띄운다. 광고 결과는 시트 VM 이 해석해 진행 여부만 돌려준다. 진행이면 화면이 같은 걸기·저장을 다시 부르고 게이트가 다시 검사한다. 시트를 취소하거나 딤을 탭하거나 플랜 보기로 넘어가면 걸지도 저장하지도 않는다. 시트와 광고가 끝날 때까지 다른 테마 선택·저장 재탭은 받지 않는다. 시트 문구의 사용권 기간은 막힌 사유에 실린 값이다.
+선택 화면의 걸기와 편집 화면의 생성 저장은 유즈케이스가 던진 사유로 BillingScenes 의 하단 안내 시트를 띄운다. 광고 결과는 시트 VM 이 해석해 진행 여부만 돌려준다. 진행이면 화면이 같은 걸기·저장을 다시 부르고 게이트가 다시 검사한다. 시트를 취소하거나 딤을 탭하거나 플랜 보기로 넘어가면 걸지도 저장하지도 않는다. 시트와 광고가 끝날 때까지 다른 테마 선택·저장 재탭은 받지 않는다. 시트 문구의 사용권 기간은 막힌 사유에 실린 값이다.
 
 | 광고 결과 | 동작 |
 |---|---|
