@@ -120,7 +120,7 @@ extension WidgetGalleryViewModelImpleTests {
         // when
         let styleMaps = try await self.outputs(expect, for: viewModel.defaultStyles) {
             viewModel.refresh()
-            styleUsecase.updateStyle(self.todayStyle(.default, showHolidayName: true))
+            try styleUsecase.updateStyle(self.todayStyle(.default, showHolidayName: true))
         }
 
         // then

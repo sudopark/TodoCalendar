@@ -631,6 +631,7 @@
 "widget.style.edit::discard" = "되돌리기";
 "widget.style.edit::reset" = "기본값으로 초기화";
 "widget.style.edit::reset::confirm" = "초기화";
+"widget.style.edit::saved::message" = "저장했어요";
 "widget.style.edit::reset::message" = "이 스타일을 기본값으로 되돌릴까요?";
 "widget.style.edit::unsaved::message" = "저장하지 않은 변경이 있습니다.";
 "widget.style.edit::unsaved::save" = "변경 저장";
@@ -645,10 +646,6 @@
 "widget.style.edit::background::photo::remove" = "사진 지우기";
 "widget.style.edit::items::section" = "세부 옵션";
 "widget.style::custom::copy_format" = "%@ - 복사됨";
-"widget.style.license::title" = "커스텀 스타일은 유료 플랜에서 쓸 수 있어요";
-"widget.style.license::message" = "짧은 광고를 보면 %d일 동안 무료로 쓸 수 있어요.";
-"widget.style.license::watchAd" = "광고 보고 쓰기";
-"widget.style.license::showPlans" = "플랜 보기";
 "widget.style.license::adUnavailable" = "광고를 불러오지 못했어요. 잠시 뒤 다시 시도해주세요.";
 "widget.style.adGuide::title" = "광고 보고 위젯 꾸미기";
 "widget.style.adGuide::message" = "광고를 한 번 보면 %d일 동안 위젯을 마음껏 꾸밀 수 있어요.";

@@ -26,7 +26,6 @@ struct WidgetStyleCellViewModel: Equatable {
     let setting: any WidgetStyleSetting
     let background: WidgetAppearanceSettings.Background?
     let photo: WidgetStylePhoto?
-    var isLocked: Bool = false
     
     var appliedStyle: WidgetStyle {
         return .init(
@@ -41,7 +40,6 @@ struct WidgetStyleCellViewModel: Equatable {
             && lhs.hasUnsavedChange == rhs.hasUnsavedChange
             && lhs.background == rhs.background
             && lhs.photo == rhs.photo
-            && lhs.isLocked == rhs.isLocked
             && lhs.setting.isSame(rhs.setting)
     }
 }
@@ -80,17 +78,14 @@ final class WidgetStyleEditViewModelImple: WidgetStyleEditViewModel, @unchecked 
     
     private let variants: [WidgetVariant]
     private let widgetStyleUsecase: any WidgetStyleUsecase
-    private let paidFeatureGateUsecase: any PaidFeatureGateUsecase
     var router: (any WidgetStyleEditRouting)?
     
     init(
         variants: [WidgetVariant],
-        widgetStyleUsecase: any WidgetStyleUsecase,
-        paidFeatureGateUsecase: any PaidFeatureGateUsecase
+        widgetStyleUsecase: any WidgetStyleUsecase
     ) {
         self.variants = variants
         self.widgetStyleUsecase = widgetStyleUsecase
-        self.paidFeatureGateUsecase = paidFeatureGateUsecase
     }
     
     private struct Subject {
@@ -98,7 +93,7 @@ final class WidgetStyleEditViewModelImple: WidgetStyleEditViewModel, @unchecked 
         let editingStyles = CurrentValueSubject<[WidgetStyle]?, Never>(nil)
         let selectedStyleId = CurrentValueSubject<WidgetStyleId?, Never>(nil)
         let editingName = CurrentValueSubject<String?, Never>(nil)
-        let isCustomRenderAllowed = CurrentValueSubject<Bool?, Never>(nil)
+        let isAdGuideInProgress = CurrentValueSubject<Bool, Never>(false)
     }
     private let subject = Subject()
 }
@@ -109,7 +104,6 @@ final class WidgetStyleEditViewModelImple: WidgetStyleEditViewModel, @unchecked 
 extension WidgetStyleEditViewModelImple {
     
     func refresh() {
-        self.refreshCustomRenderAllowed()
         let styles = self.loadedStyles()
         self.subject.savedStyles.send(styles.asDictionary { $0.id })
         self.subject.editingStyles.send(styles)
@@ -119,17 +113,6 @@ extension WidgetStyleEditViewModelImple {
     
     func selectStyle(_ styleId: WidgetStyleId) {
         guard self.editingStyle(of: styleId) != nil else { return }
-        if self.isLocked(styleId) {
-            self.refreshCustomRenderAllowed()
-        }
-        guard self.isLocked(styleId) == false else {
-            do {
-                try self.paidFeatureGateUsecase.check(.customizeWidget, at: Date())
-            } catch let reason as PaidFeatureGateFailReason {
-                self.showLicenseGuide(reason) { [weak self] in self?.selectStyle(styleId) }
-            } catch { }
-            return
-        }
         self.select(styleId)
     }
     
@@ -140,26 +123,21 @@ extension WidgetStyleEditViewModelImple {
     }
     
     func appendStyle(copying styleId: WidgetStyleId) {
-        do {
-            try self.paidFeatureGateUsecase.check(.customizeWidget, at: Date())
-        } catch let reason as PaidFeatureGateFailReason {
-            self.showLicenseGuide(reason) { [weak self] in self?.appendStyle(copying: styleId) }
-            return
-        } catch {
-            return
+        self.editAfterAdGuideIfBlocked { [weak self] in
+            guard let self,
+                  let styles = self.subject.editingStyles.value,
+                  let source = styles.first(where: { $0.id == styleId })
+            else { return }
+            let newStyle = WidgetStyle(
+                id: self.widgetStyleUsecase.makeNewStyleId(for: source.id.variant),
+                name: self.copiedName(from: source, in: styles),
+                setting: source.setting,
+                background: source.background,
+                photo: source.photo.flatMap { self.widgetStyleUsecase.makeDraftPhoto(copying: $0) }
+            )
+            self.subject.editingStyles.send(styles + [newStyle])
+            self.select(newStyle.id)
         }
-        guard let styles = self.subject.editingStyles.value,
-              let source = styles.first(where: { $0.id == styleId })
-        else { return }
-        let newStyle = WidgetStyle(
-            id: self.widgetStyleUsecase.makeNewStyleId(for: source.id.variant),
-            name: self.copiedName(from: source, in: styles),
-            setting: source.setting,
-            background: source.background,
-            photo: source.photo.flatMap { self.widgetStyleUsecase.makeDraftPhoto(copying: $0) }
-        )
-        self.subject.editingStyles.send(styles + [newStyle])
-        self.select(newStyle.id)
     }
     
     func removeStyle(_ styleId: WidgetStyleId) {
@@ -173,20 +151,22 @@ extension WidgetStyleEditViewModelImple {
     }
     
     func resetStyle(_ styleId: WidgetStyleId) {
-        guard let initialSetting = styleId.variant.initialSetting else { return }
-        let confirmed: () -> Void = { [weak self] in
-            self?.replaceStyle(styleId) {
-                $0 |> \.setting .~ initialSetting |> \.name .~ nil
-                    |> \.background .~ nil |> \.photo .~ nil
+        self.editAfterAdGuideIfBlocked { [weak self] in
+            guard let initialSetting = styleId.variant.initialSetting else { return }
+            let confirmed: () -> Void = { [weak self] in
+                self?.replaceStyle(styleId) {
+                    $0 |> \.setting .~ initialSetting |> \.name .~ nil
+                        |> \.background .~ nil |> \.photo .~ nil
+                }
+                self?.refreshEditingName()
             }
-            self?.refreshEditingName()
+            let info = ConfirmDialogInfo()
+                |> \.message .~ pure("widget.style.edit::reset::message".localized())
+                |> \.confirmText .~ "widget.style.edit::reset::confirm".localized()
+                |> \.confirmed .~ pure(confirmed)
+                |> \.withCancel .~ true
+            self?.router?.showConfirm(dialog: info)
         }
-        let info = ConfirmDialogInfo()
-            |> \.message .~ pure("widget.style.edit::reset::message".localized())
-            |> \.confirmText .~ "widget.style.edit::reset::confirm".localized()
-            |> \.confirmed .~ pure(confirmed)
-            |> \.withCancel .~ true
-        self.router?.showConfirm(dialog: info)
     }
     
     /// 저장본이 없는 초안을 되돌리면 남길 값이 없어 목록에서 뺀다.
@@ -200,26 +180,38 @@ extension WidgetStyleEditViewModelImple {
         self.refreshEditingName()
     }
     
+    /// 카드를 바꿔 입력칸이 새 이름을 받을 때도 불려서, 이름이 그대로면 수정이 아니다
     func editName(_ name: String) {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines).emptyAsNil()
-        self.updateSelectedStyle { $0 |> \.name .~ trimmed }
+        guard let selectedId = self.subject.selectedStyleId.value,
+              self.editingStyle(of: selectedId)?.name != trimmed
+        else { return }
+        self.editAfterAdGuideIfBlocked { [weak self] in
+            self?.updateSelectedStyle { $0 |> \.name .~ trimmed }
+        }
     }
     
     /// 다른 변형의 설정이 섞이면 저장 때 조용히 막힌다 — 들어오는 자리에서 끊는다.
     func updateSetting(_ setting: any WidgetStyleSetting) {
         guard self.variants.first?.isOwnSetting(setting) == true else { return }
-        self.updateSelectedStyle { $0 |> \.setting .~ setting }
+        self.editAfterAdGuideIfBlocked { [weak self] in
+            self?.updateSelectedStyle { $0 |> \.setting .~ setting }
+        }
     }
     
     /// nil 은 전역 설정을 따른다는 뜻이라, 되돌리는 것도 색을 고르는 것과 같은 명령이다.
     func updateBackground(_ background: WidgetAppearanceSettings.Background?) {
-        self.updateSelectedStyle { $0 |> \.background .~ background }
+        self.editAfterAdGuideIfBlocked { [weak self] in
+            self?.updateSelectedStyle { $0 |> \.background .~ background }
+        }
     }
     
     func selectPhoto() {
-        self.router?.routeToPhotoPick { [weak self] data in
-            guard let data else { return }
-            self?.updatePhoto(data)
+        self.editAfterAdGuideIfBlocked { [weak self] in
+            self?.router?.routeToPhotoPick { [weak self] data in
+                guard let data else { return }
+                self?.updatePhoto(data)
+            }
         }
     }
     
@@ -243,8 +235,7 @@ extension WidgetStyleEditViewModelImple {
             |> \.message .~ pure("widget.style.edit::unsaved::message".localized())
             |> \.actions .~ [
                 .init("widget.style.edit::unsaved::save".localized()) { [weak self] in
-                    self?.saveAllEditingStyles()
-                    self?.router?.closeScene()
+                    self?.saveAllAndClose()
                 },
                 .init(
                     "widget.style.edit::unsaved::discard".localized(), style: .destructive
@@ -256,6 +247,12 @@ extension WidgetStyleEditViewModelImple {
         self.router?.showActionSheet(form)
     }
     
+    private func saveAllAndClose() {
+        let isSaved = self.saveAllEditingStyles { [weak self] in self?.saveAllAndClose() }
+        guard isSaved else { return }
+        self.router?.closeScene()
+    }
+
     /// 스타일을 공유하는 변형끼리는 좌표가 같아 그대로 훑으면 같은 목록이 여러 벌 이어붙는다.
     private func styleVariants() -> [WidgetVariant] {
         return self.variants.map { $0.styleVariant }.removeDuplicates { $0 }
@@ -296,21 +293,34 @@ extension WidgetStyleEditViewModelImple {
               let editing = self.editingStyle(of: selectedId),
               editing.isSame(self.subject.savedStyles.value?[selectedId]) == false
         else { return }
-        self.save([editing])
+        self.save([editing], retryAfterGuide: { [weak self] in self?.confirm() })
     }
 
     /// 이탈 경로에서만 쓴다 — 화면을 떠나면 남은 편집분을 되살릴 자리가 없다.
-    private func saveAllEditingStyles() {
-        guard let editings = self.subject.editingStyles.value else { return }
+    private func saveAllEditingStyles(retryAfterGuide retry: @escaping @Sendable () -> Void) -> Bool {
+        guard let editings = self.subject.editingStyles.value else { return true }
         let saved = self.subject.savedStyles.value ?? [:]
-        self.save(editings.filter { $0.isSame(saved[$0.id]) == false })
+        return self.save(editings.filter { $0.isSame(saved[$0.id]) == false }, retryAfterGuide: retry)
     }
 
-    private func save(_ styles: [WidgetStyle]) {
-        guard !styles.isEmpty else { return }
-        styles.forEach { self.widgetStyleUsecase.updateStyle($0) }
+    @discardableResult
+    private func save(
+        _ styles: [WidgetStyle], retryAfterGuide retry: @escaping @Sendable () -> Void
+    ) -> Bool {
+        guard !styles.isEmpty else { return true }
+        do {
+            try styles.forEach { try self.widgetStyleUsecase.updateStyle($0) }
+        } catch let reason as PaidFeatureGateFailReason {
+            self.showAdGuide(reason, thenRetry: retry)
+            return false
+        } catch {
+            self.router?.showError(error)
+            return false
+        }
         self.reloadWidgetTimelines()
         self.takeStoredStyles(of: styles)
+        self.router?.showToast("widget.style.edit::saved::message".localized())
+        return true
     }
 
     private func reloadWidgetTimelines() {
@@ -377,60 +387,33 @@ extension WidgetStyleEditViewModelImple {
 }
 
 
-// MARK: - 커스텀 사용권
+// MARK: - 꾸미기 사용권
 
 extension WidgetStyleEditViewModelImple {
 
-    private func refreshCustomRenderAllowed() {
-        self.subject.isCustomRenderAllowed.send(
-            (try? self.paidFeatureGateUsecase.check(.customizeWidget, at: Date())) != nil
-        )
-    }
-
-    private func isLocked(_ styleId: WidgetStyleId) -> Bool {
-        return styleId.isLocked(
-            saved: self.subject.savedStyles.value ?? [:],
-            isCustomRenderAllowed: self.subject.isCustomRenderAllowed.value ?? true
-        )
-    }
-
-    private func showLicenseGuide(
-        _ reason: PaidFeatureGateFailReason, then retry: @escaping @Sendable () -> Void
-    ) {
-        let form = ActionSheetForm()
-            |> \.title .~ pure("widget.style.license::title".localized())
-            |> \.message .~ pure("widget.style.license::message".localized(with: reason.licenseDays))
-            |> \.actions .~ [
-                .init("widget.style.license::watchAd".localized()) { [weak self] in
-                    self?.router?.routeToRewardedAd { [weak self] result in
-                        self?.handleAdResult(result, for: reason, then: retry)
-                    }
-                },
-                .init("widget.style.license::showPlans".localized()) { [weak self] in
-                    self?.router?.routeToPaywall()
-                },
-                .init("common.cancel".localized(), style: .cancel)
-            ]
-        self.router?.showActionSheet(form)
-    }
-
-    private func handleAdResult(
-        _ result: RewardedAdResult, for reason: PaidFeatureGateFailReason, then retry: () -> Void
-    ) {
-        switch result {
-        case .rewarded, .fallbackFullScreenShown:
-            self.paidFeatureGateUsecase.grantLicense(for: reason.feature, at: Date())
-            self.refreshCustomRenderAllowed()
-            retry()
-        case .unavailable:
-            self.notifyAdUnavailable()
-        case .dismissedBeforeReward:
-            break
+    private func editAfterAdGuideIfBlocked(_ edit: @escaping @Sendable () -> Void) {
+        do {
+            try self.widgetStyleUsecase.checkCustomizable()
+            edit()
+        } catch let reason as PaidFeatureGateFailReason {
+            self.showAdGuide(reason) { [weak self] in self?.editAfterAdGuideIfBlocked(edit) }
+        } catch {
+            self.router?.showError(error)
         }
     }
 
-    private func notifyAdUnavailable() {
-        self.router?.showToast("widget.style.license::adUnavailable".localized())
+    /// 슬라이더처럼 연달아 들어오는 수정이 시트를 겹쳐 띄우지 않게 한 번에 하나만 띄운다
+    private func showAdGuide(
+        _ reason: PaidFeatureGateFailReason, thenRetry retry: @escaping @Sendable () -> Void
+    ) {
+        guard self.subject.isAdGuideInProgress.value == false else { return }
+        self.subject.isAdGuideInProgress.send(true)
+        self.router?.showPaidFeatureAdGuide(reason) { [weak self] shouldProceed in
+            self?.subject.isAdGuideInProgress.send(false)
+            guard shouldProceed else { return }
+            WidgetCenter.shared.reloadAllTimelines()
+            retry()
+        }
     }
 }
 
@@ -440,12 +423,11 @@ extension WidgetStyleEditViewModelImple {
 extension WidgetStyleEditViewModelImple {
     
     var styles: AnyPublisher<[WidgetStyleCellViewModel], Never> {
-        return Publishers.CombineLatest3(
+        return Publishers.CombineLatest(
             self.subject.editingStyles.compactMap { $0 },
-            self.subject.savedStyles.compactMap { $0 },
-            self.subject.isCustomRenderAllowed.compactMap { $0 }
+            self.subject.savedStyles.compactMap { $0 }
         )
-        .map { editings, saved, isCustomRenderAllowed in
+        .map { editings, saved in
             return editings.map { style in
                 WidgetStyleCellViewModel(
                     styleId: style.id,
@@ -453,10 +435,7 @@ extension WidgetStyleEditViewModelImple {
                     hasUnsavedChange: style.isSame(saved[style.id]) == false,
                     setting: style.setting,
                     background: style.background,
-                    photo: style.photo,
-                    isLocked: style.id.isLocked(
-                        saved: saved, isCustomRenderAllowed: isCustomRenderAllowed
-                    )
+                    photo: style.photo
                 )
             }
         }
@@ -549,16 +528,5 @@ private extension Array where Element == WidgetStyle {
 
     func hasUnsavedEdit(against saved: [WidgetStyleId: Element]) -> Bool {
         return self.contains { $0.isSame(saved[$0.id]) == false }
-    }
-}
-
-
-// MARK: - 잠김 판정
-
-private extension WidgetStyleId {
-
-    func isLocked(saved: [WidgetStyleId: WidgetStyle], isCustomRenderAllowed: Bool) -> Bool {
-        guard case .custom = self.style else { return false }
-        return saved[self] != nil && isCustomRenderAllowed == false
     }
 }

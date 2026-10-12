@@ -15,22 +15,16 @@ import CommonPresentation
 final class WidgetStyleEditBuilderImple {
     
     private let widgetStyleUsecase: any WidgetStyleUsecase
-    private let paidFeatureGateUsecase: any PaidFeatureGateUsecase
-    private let paywallSceneBuilder: any PaywallSceneBuilder
-    private let rewardedAdRouter: any RewardedAdRouter
+    private let adGuideSceneBuilder: any PaidFeatureAdGuideSceneBuilder
     private let viewAppearance: ViewAppearance
     
     init(
         widgetStyleUsecase: any WidgetStyleUsecase,
-        paidFeatureGateUsecase: any PaidFeatureGateUsecase,
-        paywallSceneBuilder: any PaywallSceneBuilder,
-        rewardedAdRouter: any RewardedAdRouter,
+        adGuideSceneBuilder: any PaidFeatureAdGuideSceneBuilder,
         viewAppearance: ViewAppearance
     ) {
         self.widgetStyleUsecase = widgetStyleUsecase
-        self.paidFeatureGateUsecase = paidFeatureGateUsecase
-        self.paywallSceneBuilder = paywallSceneBuilder
-        self.rewardedAdRouter = rewardedAdRouter
+        self.adGuideSceneBuilder = adGuideSceneBuilder
         self.viewAppearance = viewAppearance
     }
 }
@@ -45,8 +39,7 @@ extension WidgetStyleEditBuilderImple: WidgetStyleEditSceneBuilder {
         
         let viewModel = WidgetStyleEditViewModelImple(
             variants: variants,
-            widgetStyleUsecase: self.widgetStyleUsecase,
-            paidFeatureGateUsecase: self.paidFeatureGateUsecase
+            widgetStyleUsecase: self.widgetStyleUsecase
         )
         let viewController = WidgetStyleEditViewController(
             variants: variants,
@@ -54,10 +47,7 @@ extension WidgetStyleEditBuilderImple: WidgetStyleEditSceneBuilder {
             viewModel: viewModel,
             viewAppearance: viewAppearance
         )
-        let router = WidgetStyleEditRouter(
-            paywallSceneBuilder: self.paywallSceneBuilder,
-            rewardedAdRouter: self.rewardedAdRouter
-        )
+        let router = WidgetStyleEditRouter(adGuideSceneBuilder: self.adGuideSceneBuilder)
         router.scene = viewController
         viewModel.router = router
         return viewController

@@ -282,14 +282,6 @@ struct WidgetStyleEditView: View {
                 look: .init(globalSetting: setting, appliedStyle: style.appliedStyle)
             )
                 .frame(width: Constant.cardWidth, height: self.previewHeight)
-                .opacity(style.isLocked ? 0.4 : 1)
-                .overlay {
-                    if style.isLocked {
-                        Image(systemName: "lock.fill")
-                            .font(appearance.fontSet.normal.asFont)
-                            .foregroundStyle(appearance.colorSet.text0.asColor)
-                    }
-                }
                 .overlay(
                     style.styleId.variant.canvas.previewPlateShape(self.previewScale)
                         .strokeBorder(

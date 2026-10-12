@@ -16,24 +16,18 @@ public final class WidgetGalleryBuilderImple {
 
     private let uiSettingUsecase: any UISettingUsecase
     private let widgetStyleUsecase: any WidgetStyleUsecase
-    private let paidFeatureGateUsecase: any PaidFeatureGateUsecase
-    private let paywallSceneBuilder: any PaywallSceneBuilder
-    private let rewardedAdRouter: any RewardedAdRouter
+    private let adGuideSceneBuilder: any PaidFeatureAdGuideSceneBuilder
     private let viewAppearance: ViewAppearance
 
     public init(
         uiSettingUsecase: any UISettingUsecase,
         widgetStyleUsecase: any WidgetStyleUsecase,
-        paidFeatureGateUsecase: any PaidFeatureGateUsecase,
-        paywallSceneBuilder: any PaywallSceneBuilder,
-        rewardedAdRouter: any RewardedAdRouter,
+        adGuideSceneBuilder: any PaidFeatureAdGuideSceneBuilder,
         viewAppearance: ViewAppearance
     ) {
         self.uiSettingUsecase = uiSettingUsecase
         self.widgetStyleUsecase = widgetStyleUsecase
-        self.paidFeatureGateUsecase = paidFeatureGateUsecase
-        self.paywallSceneBuilder = paywallSceneBuilder
-        self.rewardedAdRouter = rewardedAdRouter
+        self.adGuideSceneBuilder = adGuideSceneBuilder
         self.viewAppearance = viewAppearance
     }
 }
@@ -56,9 +50,7 @@ extension WidgetGalleryBuilderImple: WidgetGallerySceneBuilder {
         let router = WidgetGalleryRouter(
             detailSceneBuilder: WidgetGalleryDetailBuilderImple(
                 widgetStyleUsecase: self.widgetStyleUsecase,
-                paidFeatureGateUsecase: self.paidFeatureGateUsecase,
-                paywallSceneBuilder: self.paywallSceneBuilder,
-                rewardedAdRouter: self.rewardedAdRouter,
+                adGuideSceneBuilder: self.adGuideSceneBuilder,
                 viewAppearance: viewAppearance
             )
         )
