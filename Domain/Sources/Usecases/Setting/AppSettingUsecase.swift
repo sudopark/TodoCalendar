@@ -19,17 +19,20 @@ public final class AppSettingUsecaseImple: @unchecked Sendable {
     private let customColorThemeRepository: any CustomColorThemeRepository
     private let viewAppearanceStore: any ViewAppearanceStore
     private let sharedDataStore: SharedDataStore
+    private let paidFeatureGateUsecase: any PaidFeatureGateUsecase
     
     public init(
         appSettingRepository: any AppSettingRepository,
         customColorThemeRepository: any CustomColorThemeRepository,
         viewAppearanceStore: any ViewAppearanceStore,
-        sharedDataStore: SharedDataStore
+        sharedDataStore: SharedDataStore,
+        paidFeatureGateUsecase: any PaidFeatureGateUsecase
     ) {
         self.appSettingRepository = appSettingRepository
         self.customColorThemeRepository = customColorThemeRepository
         self.viewAppearanceStore = viewAppearanceStore
         self.sharedDataStore = sharedDataStore
+        self.paidFeatureGateUsecase = paidFeatureGateUsecase
     }
 }
 
@@ -92,10 +95,26 @@ extension AppSettingUsecaseImple: UISettingUsecase {
         return newSetting
     }
 
-    public func selectCustomColorTheme(_ theme: CustomColorTheme) throws -> CalendarAppearanceSettings {
-        let params = EditCalendarAppearanceSettingParams() |> \.newColorSetKey .~ .custom(theme.uuid)
+    public func selectColorTheme(_ key: ColorSetKeys) async throws -> CalendarAppearanceSettings {
+        try self.paidFeatureGateUsecase.check(.colorTheme(key), at: Date())
+        switch key {
+        case .custom(let uuid):
+            guard let theme = try await self.customColorThemeRepository.fetchTheme(uuid)
+            else {
+                throw RuntimeError("custom color theme not found")
+            }
+            return try self.saveSelectedColorTheme(key, customTheme: theme)
+        default:
+            return try self.saveSelectedColorTheme(key, customTheme: nil)
+        }
+    }
+
+    private func saveSelectedColorTheme(
+        _ key: ColorSetKeys, customTheme: CustomColorTheme?
+    ) throws -> CalendarAppearanceSettings {
+        let params = EditCalendarAppearanceSettingParams() |> \.newColorSetKey .~ key
         let changed = try self.appSettingRepository.changeCalendarAppearanceSetting(params)
-        let newSetting = changed |> \.currentCustomColorTheme .~ theme
+        let newSetting = changed |> \.currentCustomColorTheme .~ customTheme
         self.viewAppearanceStore.notifyCalendarSettingChanged(newSetting)
         self.sharedDataStore.put(
             CalendarAppearanceSettings.self, key: self.calednarSettingKey, newSetting
@@ -135,6 +154,9 @@ extension AppSettingUsecaseImple: UISettingUsecase {
     }
     
     public func saveCustomColorTheme(_ theme: CustomColorTheme) async throws {
+        if await self.isNewCustomColorTheme(theme.uuid) {
+            try self.paidFeatureGateUsecase.check(.colorTheme(.custom(theme.uuid)), at: Date())
+        }
         try await self.customColorThemeRepository.saveTheme(theme)
         self.replaceCurrentCustomColorTheme(of: theme.uuid, with: theme)
     }
@@ -151,6 +173,11 @@ extension AppSettingUsecaseImple: UISettingUsecase {
 
         let params = EditCalendarAppearanceSettingParams() |> \.newColorSetKey .~ .systemTheme
         _ = try self.changeCalendarAppearanceSetting(params)
+    }
+    
+    private func isNewCustomColorTheme(_ uuid: String) async -> Bool {
+        let saved = try? await self.customColorThemeRepository.fetchTheme(uuid)
+        return saved == nil
     }
     
     private func loadCustomColorTheme(for colorSetKey: ColorSetKeys) async -> CustomColorTheme? {

@@ -37,7 +37,7 @@ public protocol UISettingUsecase: Sendable {
         _ params: EditCalendarAppearanceSettingParams
     ) throws -> CalendarAppearanceSettings
 
-    func selectCustomColorTheme(_ theme: CustomColorTheme) throws -> CalendarAppearanceSettings
+    func selectColorTheme(_ key: ColorSetKeys) async throws -> CalendarAppearanceSettings
 
     func changeDefaultEventTagColor(
         _ params: EditDefaultEventTagColorParams
