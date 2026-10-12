@@ -167,7 +167,8 @@ extension AppleCalendarUsecaseImple {
 extension AppleCalendarUsecaseImple {
 
     public func refreshEvents(in period: Range<TimeInterval>) {
-        refreshEventBag.cancelAll()
+        // 범위마다 들어오는 요청은 서로 덧붙는다 — 끊을 대상은 같은 범위의 앞선 요청뿐이다
+        refreshEventBag.cancelAll(forKey: period)
 
         integrationUsecase.currentOrNewIntegratedAccount(for: appleService.identifier)
             .flatMap { [weak self] _ -> AnyPublisher<[AppleCalendar.Event], Never> in
@@ -177,7 +178,7 @@ extension AppleCalendarUsecaseImple {
                     .eraseToAnyPublisher()
             }
             .sink { [weak self] events in self?.updateStoredEvents(events, in: period) }
-            .store(in: refreshEventBag)
+            .store(in: refreshEventBag, forKey: period)
     }
 
     private func updateStoredEvents(_ refreshed: [AppleCalendar.Event], in period: Range<TimeInterval>) {

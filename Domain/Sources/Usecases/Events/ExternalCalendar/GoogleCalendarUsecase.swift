@@ -309,12 +309,9 @@ extension GoogleCalendarUsecaseImple {
 
 extension GoogleCalendarUsecaseImple {
 
-    private func cancelRefresh() {
-        refreshEventBag.cancelAll()
-    }
-
     public func refreshEvents(in period: Range<TimeInterval>) {
-        self.cancelRefresh()
+        // 범위마다 들어오는 요청은 서로 덧붙는다 — 끊을 대상은 같은 범위의 앞선 요청뿐이다
+        self.refreshEventBag.cancelAll(forKey: period)
 
         let accounts = self.integrationUsecase.currentOrNewIntegratedAccount(for: googleService.identifier)
         let activeCalendarTagPerAccount = accounts
@@ -328,7 +325,7 @@ extension GoogleCalendarUsecaseImple {
                     self.refreshEvents(calendar.id, accountId: calendar.ownerId, in: period)
                 }
             })
-            .store(in: self.refreshEventBag)
+            .store(in: self.refreshEventBag, forKey: period)
     }
 
     public func refreshRepeatingEvent(
@@ -374,7 +371,7 @@ extension GoogleCalendarUsecaseImple {
 
         repository.loadEvents(calendarId, in: period)
             .sink(receiveValue: updateEvents)
-            .store(in: self.refreshEventBag)
+            .store(in: self.refreshEventBag, forKey: period)
     }
 
     public func events(

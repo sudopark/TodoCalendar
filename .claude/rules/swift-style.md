@@ -97,7 +97,8 @@ private let cancellables = CancelBag()
 
 **Why:** 뷰모델·유스케이스는 대개 `@unchecked Sendable` 이고, `Task` 본문 안에서 구독을 담는 순간 메인 스레드의 `store` 와 겹쳐 Set 저장소가 깨진다. 손상된 Set 은 `member:` unrecognized selector 로 프로세스를 죽이는데, 수신 클래스가 런마다 바뀌어 원인 추적이 어렵다 (`docs/troubleshooting/2026-08-24-cancelbag-data-race-crash.md`). `CancelBag` 은 잠금으로 그 경로를 막는다.
 
-- 비우기는 `cancelAll()`.
+- 비우기는 `cancelAll()` — 키로 보관한 구독까지 함께 끊는다.
+- 구독을 **묶음별로 끊어야 하면** 키를 달아 보관한다 — `store(in: bag, forKey: period)` 로 넣고 `bag.cancelAll(forKey: period)` 로 그 묶음만 끊는다. 서로 덧붙는 요청(범위·계정별 병렬 조회 등)이 한 보관함을 공유하면, `cancelAll()` 은 끊을 의도가 없던 앞 요청까지 끊는다 (#1277 — 범위마다 들어오는 외부 캘린더 새로고침이 서로를 끊어 앞 범위의 이벤트가 사라졌다).
 - 예외는 `UnitTestHelpKit.PublisherWaitable` 뿐이다. 테스트마다 인스턴스가 새로 생겨 레이스가 없다.
 
 ### 검증

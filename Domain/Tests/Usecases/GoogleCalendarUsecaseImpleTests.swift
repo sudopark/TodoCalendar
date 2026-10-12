@@ -15,7 +15,7 @@ import TestDoubles
 
 @testable import Domain
 
-final class GoogleCalendarUsecaseImpleTests: PublisherWaitable {
+final class GoogleCalendarUsecaseImpleTests: PublisherWaitable, AsyncEffectWaitable {
 
     private let spyViewAppearanceStore = SpyGoogleCalendarViewAppearanceStore()
     private let stubStore = SharedDataStore()
@@ -46,6 +46,14 @@ final class GoogleCalendarUsecaseImpleTests: PublisherWaitable {
                 .disconnected(serviceId: serviceId, accountId: email)
             )
         }
+    }
+
+    private func storedEvents() -> [GoogleCalendar.Event] {
+        let stored = stubStore.value(
+            [String: GoogleCalendar.Event].self,
+            key: ShareDataKeys.googleCalendarEvents.rawValue
+        )
+        return stored?.values.map { $0 } ?? []
     }
 
     private func makeUsecase(
@@ -438,6 +446,67 @@ extension GoogleCalendarUsecaseImpleTests {
         }
 
         #expect(eventLists.isEmpty)
+    }
+
+    /// #1277 — 범위마다 들어오는 새로고침은 서로 덧붙는 요청이다. 앞 범위의 로드를 끊으면
+    /// 그 범위의 이벤트가 영영 안 들어오고, 화면에는 나중 범위만 남는다.
+    @Test("다른 범위를 이어서 새로고침해도 앞 범위의 이벤트가 들어온다")
+    func refreshEvents_whenNextPeriodRequestedBeforeLoadArrives_keepsBothPeriods() async throws {
+        // given
+        let repository = PrivateStubRepository(loadEventsDelayMillis: 400)
+        let usecase = makeUsecase(
+            accounts: ["account@google.com"],
+            defaultRepo: repository
+        )
+        usecase.prepare()
+        usecase.refreshEvents(in: 0..<100)
+        try await self.waitEffect("앞 범위의 조회가 시작됨") {
+            repository.didLoadEventsWith.contains { $0.period == 0..<100 }
+        }
+        // 조회 호출 기록은 구독을 보관하기 직전에 남아, 보관이 끝날 틈을 준다
+        try await Task.sleep(for: .milliseconds(50))
+
+        // when
+        usecase.refreshEvents(in: 1000..<1100)
+        try await self.waitEffect("나중 범위의 이벤트가 들어옴") {
+            self.storedEvents().contains { $0.eventTime.isRoughlyOverlap(with: 1000..<1100) }
+        }
+        try await Task.sleep(for: .milliseconds(50))
+
+        // then
+        let stored = self.storedEvents()
+        #expect(stored.contains { $0.eventTime.isRoughlyOverlap(with: 0..<100) } == true)
+        #expect(stored.contains { $0.eventTime.isRoughlyOverlap(with: 1000..<1100) } == true)
+    }
+
+    /// #1277 — 같은 범위를 다시 요청하면 앞선 구독을 대체해야 한다. 쌓이면 캘린더 목록이
+    /// 한 번 바뀔 때마다 같은 범위를 요청 횟수만큼 다시 읽는다.
+    @Test("같은 범위를 두 번 새로고침해도 캘린더 목록 변화에 한 벌만 다시 읽는다")
+    func refreshEvents_whenSamePeriodRefreshedTwice_reloadsOneSetPerCalendarChange() async throws {
+        // given
+        let repository = PrivateStubRepository()
+        let usecase = makeUsecase(accounts: ["account@google.com"], defaultRepo: repository)
+        usecase.prepare()
+        usecase.refreshEvents(in: 0..<100)
+        usecase.refreshEvents(in: 0..<100)
+        try await self.waitEffect("두 캘린더의 초기 조회가 들어옴") {
+            repository.didLoadEventsWith.count >= 2
+        }
+        try await Task.sleep(for: .milliseconds(50))
+        let loadCountBeforeChange = repository.didLoadEventsWith.count
+
+        // when
+        stubEventTagUsecase.toggleEventTagIsOnCalendar(
+            .externalCalendar(serviceId: GoogleCalendarService.id, id: "tag1")
+        )
+        try await self.waitEffect("캘린더 목록이 바뀌어 다시 읽음") {
+            repository.didLoadEventsWith.count > loadCountBeforeChange
+        }
+        try await Task.sleep(for: .milliseconds(50))
+
+        // then
+        let reloaded = repository.didLoadEventsWith.count - loadCountBeforeChange
+        #expect(reloaded == 1)
     }
 }
 
@@ -1099,6 +1168,7 @@ private final class PrivateStubRepository: GoogleCalendarRepository, @unchecked 
     private let customUpdateEventOriginStubbing: GoogleCalendar.EventOrigin?
     private let customRespondOriginStubbing: GoogleCalendar.EventOrigin?
     private let respondToEventShouldFail: Bool
+    private let loadEventsDelayMillis: Int
     var didUpdateEventWith: (eventId: String, params: GoogleCalendar.EventEditParams)?
     var didRespondToEventWith: (
         calendarId: String, timeZone: String, eventId: String,
@@ -1110,8 +1180,10 @@ private final class PrivateStubRepository: GoogleCalendarRepository, @unchecked 
         eventsMocking: PassthroughSubject<[GoogleCalendar.Event], any Error>? = nil,
         customUpdateEventOriginStubbing: GoogleCalendar.EventOrigin? = nil,
         customRespondOriginStubbing: GoogleCalendar.EventOrigin? = nil,
-        respondToEventShouldFail: Bool = false
+        respondToEventShouldFail: Bool = false,
+        loadEventsDelayMillis: Int = 0
     ) {
+        self.loadEventsDelayMillis = loadEventsDelayMillis
         self.customUpdateEventOriginStubbing = customUpdateEventOriginStubbing
         self.customRespondOriginStubbing = customRespondOriginStubbing
         self.respondToEventShouldFail = respondToEventShouldFail
@@ -1151,21 +1223,31 @@ private final class PrivateStubRepository: GoogleCalendarRepository, @unchecked 
         return Just(stubCalendarTags.removeFirst()).mapAsAnyError().eraseToAnyPublisher()
     }
 
+    var didLoadEventsWith: [(calendarId: String, period: Range<TimeInterval>)] = []
     func loadEvents(
         _ calendarId: String, in period: Range<TimeInterval>
     ) -> AnyPublisher<[GoogleCalendar.Event], any Error> {
+        self.didLoadEventsWith.append((calendarId, period))
         if let mocking = eventsMocking {
             return mocking.eraseToAnyPublisher()
         }
         let events = (0..<10).map { i -> GoogleCalendar.Event in
             .init(
-                "event:\(i)-\(calendarId)", calendarId,
+                "event:\(Int(period.lowerBound) + i)-\(calendarId)", calendarId,
                 accountId: "stub@gmail.com",
                 name: "some name", colorId: "color",
                 time: .period(period.lowerBound..<period.lowerBound + TimeInterval(i + 1))
             )
         }
-        return Just(events).mapAsAnyError().eraseToAnyPublisher()
+        guard self.loadEventsDelayMillis > 0 else {
+            return Just(events).mapAsAnyError().eraseToAnyPublisher()
+        }
+        return Just(events)
+            .delay(
+                for: .milliseconds(self.loadEventsDelayMillis), scheduler: DispatchQueue.main
+            )
+            .mapAsAnyError()
+            .eraseToAnyPublisher()
     }
 
     func loadEventDetail(

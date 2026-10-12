@@ -15,7 +15,7 @@ import TestDoubles
 
 @testable import Domain
 
-final class AppleCalendarUsecaseImpleTests: PublisherWaitable {
+final class AppleCalendarUsecaseImpleTests: PublisherWaitable, AsyncEffectWaitable {
 
     private let appleService = AppleCalendarService()
     private let stubIntegrationUsecase = PrivateStubIntegrationUsecase()
@@ -28,7 +28,8 @@ final class AppleCalendarUsecaseImpleTests: PublisherWaitable {
 
     private func makeUsecase(
         isIntegrated: Bool = false,
-        stubEvents: [AppleCalendar.Event] = []
+        stubEvents: [AppleCalendar.Event] = [],
+        repository: StubAppleCalendarRepository? = nil
     ) -> AppleCalendarUsecaseImple {
         if isIntegrated {
             let account = ExternalServiceAccountinfo(AppleCalendarService.id, email: "local")
@@ -38,7 +39,7 @@ final class AppleCalendarUsecaseImpleTests: PublisherWaitable {
         return .init(
             appleService: appleService,
             integrationUsecase: stubIntegrationUsecase,
-            repository: stubRepository,
+            repository: repository ?? stubRepository,
             eventTagUsecase: stubEventTagUsecase,
             appearanceStore: spyAppearanceStore,
             sharedDataStore: stubStore
@@ -297,6 +298,62 @@ extension AppleCalendarUsecaseImpleTests {
         // then
         let ids = emitted.last?.map { $0.eventId }.sorted() ?? []
         #expect(ids == ["event:3", "event:4", "event:5", "event:6"])
+    }
+
+    /// #1277 — 범위마다 들어오는 새로고침은 서로 덧붙는 요청이다. 앞 범위의 조회를 끊으면
+    /// 그 범위의 이벤트가 영영 안 들어오고, 화면에는 나중 범위만 남는다.
+    @Test("다른 범위를 이어서 새로고침해도 앞 범위의 이벤트가 들어온다")
+    func refreshEvents_whenNextPeriodRequestedBeforeLoadArrives_keepsBothPeriods() async throws {
+        // given
+        let repository = DelayedLoadAppleCalendarRepository(loadDelayMillis: 400)
+        let usecase = makeUsecase(isIntegrated: true, repository: repository)
+        usecase.refreshEvents(in: 0..<100)
+        try await self.waitEffect("앞 범위의 조회가 시작됨") {
+            repository.didLoadEventsWith.contains(0..<100)
+        }
+        // 조회 호출 기록은 구독을 보관하기 직전에 남아, 보관이 끝날 틈을 준다
+        try await Task.sleep(for: .milliseconds(50))
+
+        // when
+        usecase.refreshEvents(in: 1000..<1100)
+        try await self.waitEffect("나중 범위의 이벤트가 들어옴") {
+            self.cachedEvents().values.contains {
+                $0.eventTime.isRoughlyOverlap(with: 1000..<1100)
+            }
+        }
+        try await Task.sleep(for: .milliseconds(50))
+
+        // then
+        let cached = self.cachedEvents().values
+        #expect(cached.contains { $0.eventTime.isRoughlyOverlap(with: 0..<100) } == true)
+        #expect(cached.contains { $0.eventTime.isRoughlyOverlap(with: 1000..<1100) } == true)
+    }
+
+    /// #1277 — 같은 범위를 다시 요청하면 앞선 구독을 대체해야 한다. 쌓이면 재연동마다
+    /// 같은 범위를 요청 횟수만큼 다시 읽는다.
+    @Test("같은 범위를 두 번 새로고침해도 재연동에 한 벌만 다시 읽는다")
+    func refreshEvents_whenSamePeriodRefreshedTwice_reloadsOneSetOnReintegration() async throws {
+        // given
+        let repository = DelayedLoadAppleCalendarRepository(loadDelayMillis: 0)
+        let usecase = makeUsecase(isIntegrated: true, repository: repository)
+        usecase.refreshEvents(in: 0..<100)
+        usecase.refreshEvents(in: 0..<100)
+        try await self.waitEffect("초기 조회가 들어옴") {
+            repository.didLoadEventsWith.isEmpty == false
+        }
+        try await Task.sleep(for: .milliseconds(50))
+        let loadCountBeforeReintegration = repository.didLoadEventsWith.count
+
+        // when
+        self.sendIntegration(true)
+        try await self.waitEffect("재연동으로 다시 읽음") {
+            repository.didLoadEventsWith.count > loadCountBeforeReintegration
+        }
+        try await Task.sleep(for: .milliseconds(50))
+
+        // then
+        let reloaded = repository.didLoadEventsWith.count - loadCountBeforeReintegration
+        #expect(reloaded == 1)
     }
 
     @Test func refreshEvents_whenNotIntegrated_doesNotLoadEvents() async throws {
@@ -657,6 +714,36 @@ extension AppleCalendarUsecaseImpleTests {
 
 
 // MARK: - Stubs
+
+private final class DelayedLoadAppleCalendarRepository: StubAppleCalendarRepository, @unchecked Sendable {
+
+    private let loadDelayMillis: Int
+    var didLoadEventsWith: [Range<TimeInterval>] = []
+
+    init(loadDelayMillis: Int) {
+        self.loadDelayMillis = loadDelayMillis
+        super.init()
+    }
+
+    override func loadEvents(
+        in period: Range<TimeInterval>
+    ) -> AnyPublisher<[AppleCalendar.Event], any Error> {
+        self.didLoadEventsWith.append(period)
+        let events = (0..<3).map { i in
+            AppleCalendar.Event(
+                eventId: "event:\(Int(period.lowerBound) + i)",
+                originalEventId: "event:\(Int(period.lowerBound) + i)",
+                calendarId: "cal:0",
+                name: "Event",
+                eventTime: .period(period.lowerBound..<period.lowerBound + TimeInterval(i + 1))
+            )
+        }
+        return Just(events)
+            .delay(for: .milliseconds(self.loadDelayMillis), scheduler: DispatchQueue.main)
+            .setFailureType(to: (any Error).self)
+            .eraseToAnyPublisher()
+    }
+}
 
 private final class PrivateStubIntegrationUsecase: ExternalCalendarIntegrationUsecase, @unchecked Sendable {
 

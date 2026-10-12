@@ -16,6 +16,7 @@ public final class CancelBag: @unchecked Sendable {
     
     private let lock = NSLock()
     private var cancellables: Set<AnyCancellable> = []
+    private var keyedCancellables: [AnyHashable: Set<AnyCancellable>] = [:]
     
     public init() { }
     
@@ -25,10 +26,26 @@ public final class CancelBag: @unchecked Sendable {
         self.cancellables.insert(cancellable)
     }
     
+    public func insert(_ cancellable: AnyCancellable, forKey key: AnyHashable) {
+        self.lock.lock()
+        defer { self.lock.unlock() }
+        self.keyedCancellables[key, default: []].insert(cancellable)
+    }
+    
     public func cancelAll() {
         self.lock.lock()
         let stored = self.cancellables
+        let keyedStored = self.keyedCancellables.values.flatMap { $0 }
         self.cancellables.removeAll()
+        self.keyedCancellables.removeAll()
+        self.lock.unlock()
+        stored.forEach { $0.cancel() }
+        keyedStored.forEach { $0.cancel() }
+    }
+    
+    public func cancelAll(forKey key: AnyHashable) {
+        self.lock.lock()
+        let stored = self.keyedCancellables.removeValue(forKey: key) ?? []
         self.lock.unlock()
         stored.forEach { $0.cancel() }
     }
@@ -39,5 +56,9 @@ extension AnyCancellable {
     
     public func store(in bag: CancelBag) {
         bag.insert(self)
+    }
+    
+    public func store(in bag: CancelBag, forKey key: AnyHashable) {
+        bag.insert(self, forKey: key)
     }
 }
