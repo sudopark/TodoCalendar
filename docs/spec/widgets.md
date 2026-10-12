@@ -17,7 +17,7 @@
 | 5 | ForemostEventWidget | `ForemostEventWidget` | `.accessoryInline`, `.systemSmall`, `.systemMedium` | Static |
 | 6 | NextEventWidget | `NextEventWidget` | `.accessoryInline`, `.accessoryRectangular` | Static |
 | 7 | NextRemainEventWidget | `NextRemainEventWidget` | `.accessoryRectangular` | Static |
-| 8 | AICommandShortcutWidget | `AICommandShortcutWidget` | `.accessoryCircular`, `.systemSmall` | Static — 잠금화면·홈에서 원탭 AI 입력 진입 (#768) |
+| 8 | AICommandShortcutWidget | `AICommandShortcutWidget` | `.accessoryCircular`, `.systemSmall` | 스타일 선택 Intent, 정규 갱신 — 잠금화면·홈에서 원탭 AI 입력 진입 (#768) |
 | 9 | DDayWidget | `DDayWidget` | `.systemSmall`, `.systemMedium`, `.accessoryCircular`, `.accessoryRectangular`, `.accessoryInline` | `DDayWidgetConfigurationIntent` |
 
 ### 1.2 ComposedWidgetBundle (4종)
@@ -271,6 +271,14 @@ tc.app://calendar/ai
 
 AICommandShortcutWidget·AICommandControlWidget 탭 시 인앱 AI 버튼과 같은 동선으로 진입 (#768).
 
+### 7.4 위젯 꾸미기 잠김 해제
+
+```
+tc.app://calendar/widgetLicense
+```
+
+잠긴 위젯(8.3 꾸미기 잠김 계약) 탭 시 진입한다 (#1260). `CalendarDeepLinkHandlerImple` 이 캘린더에 넘기고, 캘린더가 붙기 전에 온 링크는 붙을 때 넘긴다. `CalendarViewModelImple.requestWidgetStyleLicense` 가 첫 달 구성을 기다려 떠 있는 화면을 닫은 뒤 권한을 다시 묻는다 — 막혔으면 공용 광고 안내 시트를 띄우고 진행이면 위젯을 다시 그리며, 막히지 않았으면 다시 그리기만 한다.
+
 ---
 
 ## 8. 위젯 외형 설정
@@ -369,7 +377,7 @@ hex 색상으로 UIColor 생성
 | TodayAndMonth | `TodayAndMonthStyleSetting { today, month }` | Today 6 + Month 4 | `todayAndMonthMedium` |
 | DDay | `DDayStyleSetting` | 없음 (사진·배경색만) | `ddaySmall` (홈 2변형 공유) |
 
-- AICommand 는 뷰모델이 없어 뷰가 봉투에서 직접 설정을 꺼내고, 타임라인 entry 가 그 봉투를 담는다(`WidgetViewModelProviderBuilder.resolveWidgetStyle(of:style:)`).
+- AICommand 는 뷰모델이 없어 뷰가 봉투에서 직접 설정을 꺼내고, 타임라인 entry 가 그 봉투를 담는다(`WidgetViewModelProviderBuilder.fetchStyle(of:selected:)`).
 - **합성 위젯은 제 스타일로 그린다** (#1133) — 합성 payload 가 하위 위젯군 payload 를 필드로 담고(위 표), 배경색은 봉투가 담는다. 하위 위젯군의 스타일과는 끊겨, 하위 쪽 토글·배경색을 바꿔도 합성 위젯은 안 바뀐다 — 놓이는 자리가 달라 따로 꾸민다.
 - **두 절반은 한 합성 봉투에서 읽는다** — `WidgetLook.part(_:)` 가 합성 봉투에서 한 절반의 봉투를 꺼낸다: 하위 payload 를 keyPath 로 꺼내 `setting` 에 꽂고, 판 색은 합성 스타일 것을 그대로 둔다. 판과 두 절반의 글자색이 한 배경에서 파생돼야 한 절반이 안 읽히는 일이 없다. 토글이 없는 이벤트 절반은 합성 봉투를 그대로 받는다. 이 배선은 `<합성>WidgetViewModel.applying(_:)` 한 곳에 있고 provider 와 갤러리 프리뷰가 같이 쓴다.
 - **편집 폼은 하위 폼을 절반마다 재사용한다** — 하위 폼이 내보낸 하위 payload 를 `<합성>StyleSetting.replacingPart(_:)` 로 합성 payload 에 감싸 올린다. 감싸지 않으면 좌표의 payload 타입이 아니어서 저장되지 않는다(표현 층 계약). 섹션 제목은 절반의 위젯 이름이다.
@@ -398,7 +406,7 @@ hex 색상으로 UIColor 생성
 - **배치 가능한 위젯을 새로 더할 때, 그 provider 가 `snapshot` 을 `placeholder` 로 위임한다면 `placeholder` 에도 이 조립을 넣는다.** 안 넣으면 홈 실물과 앱 갤러리 미리보기는 꾸민 대로 나오는데 추가 화면만 기본 모양으로 남는다.
 - **구형 `TimelineProvider` 는 `placeholder` 를 안 거친다** — `getSnapshot(in:completion:)` 이 샘플 엔트리를 그 자리에서 만든다. `NextEventWidget`·`NextRemainEventWidget` 이 그 형태다. 이런 provider 는 `getSnapshot` 쪽에 같은 조립이 필요하다. 규약대로 넣었는데 추가 화면이 안 바뀌면 여기를 먼저 본다.
 - **조립은 provider 마다 복제한다** — 공용 함수를 두지 않는 것이 결정이다(#1144, 2026-09-22). builder 를 만들고 두 함수를 부르고 `WidgetLook` 을 세우는 네 줄인데 넷 다 이미 있는 public API 라, 간접층을 세워 얻을 것이 없다.
-- **잠금화면 전용 변형은 대상이 아니다** — `isCustomizable` 이 false 라 `resolveWidgetStyle` 이 nil 을 내고, 봉투엔 전역 설정만 남는다.
+- **잠금화면 전용 변형은 대상이 아니다** — `isCustomizable` 이 false 라 `WidgetViewModelProviderBuilder.fetchStyle` 이 판정 없이 nil 을 내고, 봉투엔 전역 설정만 남는다.
 
 #### 스타일 공유 변형군 (#1112)
 
@@ -413,6 +421,18 @@ hex 색상으로 UIColor 생성
 - **편집 화면은 공유 변형 전부를 받는다** (`WidgetGalleryDetailViewModelImple.editStyle` 이 `styleSharingVariants` 를 넘긴다). 저장 후 리로드가 받은 변형들의 kind 를 훑기 때문에, 한 변형만 넘기면 7종 중 하나만 갱신된다. 받는 쪽은 좌표로 접어 중복을 걷는다 — 그대로 훑으면 같은 목록이 7벌 이어붙는다.
 - **인스턴스 선택도 대표 변형 기준이다** — `WeekEventsStyleQuery` 가 `.oneWeekEvents` 로 조회하므로 7종 어디서 편집 시트를 열어도 같은 후보 목록이 뜬다.
 - 그 대가로 `WidgetStyleId.variant` 는 "그 위젯의 변형"이 아니라 **"스타일 좌표의 변형"** 이라는 뜻을 갖는다.
+
+#### 꾸미기 잠김 계약 (#1260)
+
+**꾸미기 권한은 위젯 전체에 하나다** — 위젯군·스타일마다 따로 묻지 않는다. 막는 규칙(유료 플랜·광고 사용권·원격 정책)은 [`billing.md`](billing.md) §6 이 정본이고, 여기는 그 답을 어디서 묻고 어떻게 그리는지만 적는다.
+
+- **앱과 확장은 같은 규칙을 따로 판정한다.** 앱은 `WidgetStyleUsecase.checkCustomizable`·`updateStyle` 이 게이트 `check(.customizeWidget)` 로 묻는다. 확장은 앱의 플랜 스토어가 없어 `WidgetStyleFetchUsecase` 가 플랜·사용권·정책 저장소를 직접 읽어 같은 규칙으로 판정한다. 막히면 둘 다 `PaidFeatureGateFailReason(feature: .customizeWidget, licenseDays:)` 를 던진다.
+- **앱은 꾸미는 동작마다 막는다** — 갤러리 상세의 편집 진입(`WidgetGalleryDetailViewModelImple.editStyle`), 편집 화면의 카드 추가·이름·설정·배경·사진 선택·초기화, 저장이다. 사진 제거는 막지 않고 저장 때 걸리며, 카드 삭제는 막지 않아 저장된 카드도 바로 지워진다. 막히면 BillingScenes 공용 광고 안내 시트가 뜨고, 진행으로 닫히면 위젯을 다시 그린 뒤 막혔던 동작을 다시 한다. 편집 화면 카드에는 잠김 표시가 없다 — 막는 자리가 동작이라 카드는 평소대로 그린다.
+- **확장은 저장분이 있는 스타일만 잠근다.** `fetchStyle(of:selected:)` 는 고른 스타일, 지워졌으면 기본 저장분을 읽고, 읽은 것이 있을 때만 권한을 본다. 꾸민 적 없는 기본은 저장분이 없어 잠기지 않고, 잠금화면 변형은 판정 전에 nil 로 빠진다.
+- **잠김은 실패 엔트리로 그린다.** provider 가 사유를 실패로 흘리면 `WidgetErrorModel.isCustomStyleLocked` 가 참이 되고, `FailView` 가 `WidgetCustomStyleLockedView(family:)` 를 그린다 — medium 이상은 가로, 그 밖은 세로 배치다. 뷰모델이 없는 AICommand 는 entry 의 `isCustomStyleLocked` 로 같은 뷰를 그린다.
+- **인텐트 후보는 막혀도 목록을 다 보여준다.** `fetchStyleCandidates(of:)` 가 기본을 맨 앞에 두고, 막히면 커스텀과 꾸며 저장한 기본에 선택 불가를 표시해 부제(`widget.style.candidate::locked`)가 붙는다. 꾸민 적 없는 기본은 늘 고를 수 있다.
+- **잠긴 위젯을 탭하면 앱이 권한을 다시 묻는다** — `widgetURL` 이 7.4 링크로 간다.
+- **풀림은 다시 그리기로 따라간다.** 트리거는 10.3 이다. 사용권 만료 시점에 리로드를 걸지 않는다 — 만료는 정규 갱신이 따라간다.
 
 ---
 
@@ -581,6 +601,8 @@ WidgetViewModelProviderBuilder.checkShouldReset()
 | 앱 백그라운드 진입 | `WidgetCenter.shared.reloadAllTimelines()` |
 | Timeline `.after()` | 시스템이 다음 업데이트 시간에 자동 갱신 |
 | 이벤트 CRUD (메인 앱) | 앱 → UserDefaults 플래그 → 위젯 갱신 |
+| 유료 여부 변경 | `ApplicationRootRouter.reloadWidgetsOnPlanChange` 가 `WidgetCenter.shared.reloadAllTimelines()` — 꾸미기 잠김이 유료 여부를 본다 |
+| 위젯 꾸미기 광고 안내 진행 | `WidgetCenter.shared.reloadAllTimelines()` — 갤러리 상세·편집 화면·7.4 진입이 각각 건다 |
 
 ---
 
