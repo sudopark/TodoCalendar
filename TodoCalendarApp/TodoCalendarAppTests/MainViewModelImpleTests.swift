@@ -557,6 +557,7 @@ extension MainViewModelImpleTests {
         }
 
         func requestAIEntry() { }
+        func requestWidgetStyleLicense() { }
     }
 
     private final class SpyEventNotificationUsecase: EventNotificationUsecase, @unchecked Sendable {

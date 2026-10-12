@@ -18,6 +18,7 @@ public final class CalendarDeepLinkHandlerImple: DeepLinkHandler, @unchecked Sen
     private var pendingEventLink: PendingDeepLink?
     private var pendingSelectCalendar: [String: String]?
     private var pendingAIEntry: Bool = false
+    private var pendingWidgetStyleLicense: Bool = false
     
     public init() { }
 }
@@ -39,6 +40,11 @@ extension CalendarDeepLinkHandlerImple {
         if let pending = self.pendingSelectCalendar {
             self.pendingSelectCalendar = nil
             _ = self.handleMoveDate(calendarInteractor, pending)
+        }
+
+        if self.pendingWidgetStyleLicense {
+            self.pendingWidgetStyleLicense = false
+            calendarInteractor.requestWidgetStyleLicense()
         }
 
         guard self.pendingAIEntry else { return }
@@ -66,6 +72,15 @@ extension CalendarDeepLinkHandlerImple {
                 return .handle
             }
             interactor.requestAIEntry()
+            return .handle
+
+        case "widgetLicense":
+            guard let interactor = self.calendarInteractor
+            else {
+                self.pendingWidgetStyleLicense = true
+                return .handle
+            }
+            interactor.requestWidgetStyleLicense()
             return .handle
 
         case nil:
