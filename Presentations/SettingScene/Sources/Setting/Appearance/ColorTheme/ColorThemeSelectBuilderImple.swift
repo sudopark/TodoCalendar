@@ -41,11 +41,9 @@ extension ColorThemeSelectSceneBuilerImple: ColorThemeSelectSceneBuiler {
     @MainActor
     func makeColorThemeSelectScene() -> any ColorThemeSelectScene {
         
-        let paidFeatureGateUsecase = self.usecaseFactory.makePaidFeatureGateUsecase()
         let viewModel = ColorThemeSelectViewModelImple(
             calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
-            uiSettingUsecase: self.usecaseFactory.makeUISettingUsecase(),
-            paidFeatureGateUsecase: paidFeatureGateUsecase
+            uiSettingUsecase: self.usecaseFactory.makeUISettingUsecase()
         )
         
         let viewController = ColorThemeSelectViewController(

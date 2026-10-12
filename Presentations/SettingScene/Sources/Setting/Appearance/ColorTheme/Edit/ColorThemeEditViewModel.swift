@@ -61,7 +61,6 @@ final class ColorThemeEditViewModelImple: ColorThemeEditViewModel, @unchecked Se
     private let original: CustomColorTheme?
     private let calendarSettingUsecase: any CalendarSettingUsecase
     private let uiSettingUsecase: any UISettingUsecase
-    private let paidFeatureGateUsecase: any PaidFeatureGateUsecase
     var router: (any ColorThemeEditRouting)?
     weak var listener: (any ColorThemeEditSceneListener)?
 
@@ -69,13 +68,11 @@ final class ColorThemeEditViewModelImple: ColorThemeEditViewModel, @unchecked Se
         original: CustomColorTheme?,
         initialSeeds: CustomColorThemeSeeds,
         calendarSettingUsecase: any CalendarSettingUsecase,
-        uiSettingUsecase: any UISettingUsecase,
-        paidFeatureGateUsecase: any PaidFeatureGateUsecase
+        uiSettingUsecase: any UISettingUsecase
     ) {
         self.original = original
         self.calendarSettingUsecase = calendarSettingUsecase
         self.uiSettingUsecase = uiSettingUsecase
-        self.paidFeatureGateUsecase = paidFeatureGateUsecase
 
         self.subject.name.send(original?.name ?? "")
         self.subject.seeds.send(initialSeeds)
@@ -136,29 +133,7 @@ extension ColorThemeEditViewModelImple {
 
     func save() {
         guard self.isSavableNow, let theme = self.makeThemeToSave() else { return }
-        do {
-            try self.checkCreatableIfNew(theme)
-            self.saveTheme(theme)
-        } catch let reason as PaidFeatureGateFailReason {
-            self.saveThemeAfterAdGuide(reason)
-        } catch {
-            self.router?.showError(error)
-        }
-    }
-
-    private func checkCreatableIfNew(_ theme: CustomColorTheme) throws {
-        guard self.original == nil else { return }
-        try self.paidFeatureGateUsecase.check(.colorTheme(.custom(theme.uuid)), at: Date())
-    }
-
-    private func saveThemeAfterAdGuide(_ reason: PaidFeatureGateFailReason) {
-        self.subject.isAdGuideInProgress.send(true)
-        self.router?.showPaidFeatureAdGuide(reason) { [weak self] shouldProceed in
-            guard self?.subject.isAdGuideInProgress.value == true else { return }
-            self?.subject.isAdGuideInProgress.send(false)
-            guard shouldProceed else { return }
-            self?.save()
-        }
+        self.saveTheme(theme)
     }
 
     private func saveTheme(_ theme: CustomColorTheme) {
@@ -171,12 +146,25 @@ extension ColorThemeEditViewModelImple {
                 ) { [weak self] in
                     self?.listener?.customColorTheme(saved: theme)
                 }
+            } catch let reason as PaidFeatureGateFailReason {
+                await self?.saveThemeAgainAfterAdGuide(theme, reason)
             } catch {
                 self?.router?.showError(error)
             }
             self?.subject.isProcessing.send(false)
         }
         .store(in: self.cancellables)
+    }
+
+    @MainActor
+    private func saveThemeAgainAfterAdGuide(_ theme: CustomColorTheme, _ reason: PaidFeatureGateFailReason) {
+        self.subject.isAdGuideInProgress.send(true)
+        self.router?.showPaidFeatureAdGuide(reason) { [weak self] shouldProceed in
+            guard self?.subject.isAdGuideInProgress.value == true else { return }
+            self?.subject.isAdGuideInProgress.send(false)
+            guard shouldProceed else { return }
+            self?.saveTheme(theme)
+        }
     }
 
     func delete() {

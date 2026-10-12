@@ -67,17 +67,14 @@ final class ColorThemeSelectViewModelImple: ColorThemeSelectViewModel, @unchecke
     
     private let calendarSettingUsecase: any CalendarSettingUsecase
     private let uiSettingUsecase: any UISettingUsecase
-    private let paidFeatureGateUsecase: any PaidFeatureGateUsecase
     var router: (any ColorThemeSelectRouting)?
     
     init(
         calendarSettingUsecase: any CalendarSettingUsecase,
-        uiSettingUsecase: any UISettingUsecase,
-        paidFeatureGateUsecase: any PaidFeatureGateUsecase
+        uiSettingUsecase: any UISettingUsecase
     ) {
         self.calendarSettingUsecase = calendarSettingUsecase
         self.uiSettingUsecase = uiSettingUsecase
-        self.paidFeatureGateUsecase = paidFeatureGateUsecase
     }
     
     
@@ -120,17 +117,21 @@ extension ColorThemeSelectViewModelImple {
     
     func selectTheme(_ model: ColorThemeModel) {
         guard self.subject.isAdGuideInProgress.value == false else { return }
-        do {
-            try self.paidFeatureGateUsecase.check(.colorTheme(model.key), at: Date())
-            self.applyTheme(model)
-        } catch let reason as PaidFeatureGateFailReason {
-            self.applyThemeAfterAdGuide(model, reason)
-        } catch {
-            self.router?.showError(error)
+        Task { [weak self] in
+            do {
+                _ = try await self?.uiSettingUsecase.selectColorTheme(model.key)
+            } catch let reason as PaidFeatureGateFailReason {
+                await self?.selectThemeAgainAfterAdGuide(model, reason)
+            } catch {
+                self?.router?.showError(error)
+            }
         }
+        .store(in: self.cancellables)
     }
 
-    private func applyThemeAfterAdGuide(_ model: ColorThemeModel, _ reason: PaidFeatureGateFailReason) {
+    @MainActor
+    private func selectThemeAgainAfterAdGuide(_ model: ColorThemeModel, _ reason: PaidFeatureGateFailReason) {
+        guard self.subject.isAdGuideInProgress.value == false else { return }
         self.subject.isAdGuideInProgress.send(true)
         self.router?.showPaidFeatureAdGuide(reason) { [weak self] shouldProceed in
             guard self?.subject.isAdGuideInProgress.value == true else { return }
@@ -147,20 +148,6 @@ extension ColorThemeSelectViewModelImple {
     func editCustomTheme(_ model: ColorThemeModel) {
         guard let theme = model.customColorTheme else { return }
         self.router?.routeToEditCustomTheme(original: theme, listener: self)
-    }
-    
-    private func applyTheme(_ model: ColorThemeModel) {
-        do {
-            if let theme = model.customColorTheme {
-                let _ = try self.uiSettingUsecase.selectCustomColorTheme(theme)
-            } else {
-                let params = EditCalendarAppearanceSettingParams()
-                    |> \.newColorSetKey .~ model.key
-                let _ = try self.uiSettingUsecase.changeCalendarAppearanceSetting(params)
-            }
-        } catch {
-            self.router?.showError(error)
-        }
     }
     
     func close() {
@@ -228,7 +215,7 @@ extension ColorThemeSelectViewModelImple: ColorThemeEditSceneListener {
         guard let index = themes.firstIndex(where: { $0.uuid == theme.uuid })
         else {
             self.subject.customThemes.send(themes + [theme])
-            self.applyTheme(ColorThemeModel(theme))
+            self.selectTheme(ColorThemeModel(theme))
             return
         }
         let replaced = themes.enumerated().map { $0.offset == index ? theme : $0.element }
