@@ -62,6 +62,7 @@ final class EditTodoEventDetailViewModelImple: EventDetailViewModel, @unchecked 
     
     private let cancellables = CancelBag()
     private let subject = Subject()
+    private var isCompleting = false
     private weak var inputInteractor: (any EventDetailInputInteractor)?
     
     private func internalBinding() {
@@ -442,6 +443,50 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
         .store(in: self.cancellables)
     }
     
+    func completeTodo() {
+        
+        guard self.isCompleting == false else { return }
+        
+        let basicIsChanged = self.subject.basicData.value?.isChanged == true
+        let additionIsChanged = self.subject.additionalData.value?.isChanged == true
+        
+        basicIsChanged || additionIsChanged
+            ? self.completeAfterUnsavedConfirm()
+            : self.markAsDone()
+    }
+    
+    private func completeAfterUnsavedConfirm() {
+        
+        var form = ActionSheetForm()
+            |> \.title .~ pure("eventDetail::complete::unsaved::title".localized())
+            |> \.message .~ pure("eventDetail::complete::unsaved::message".localized())
+        let completeAction = ActionSheetForm.Action("common.done".localized()) { [weak self] in
+            self?.markAsDone()
+        }
+        form.actions.append(completeAction)
+        form.actions.append(.init("common.cancel".localized(), style: .cancel))
+        
+        self.router?.showActionSheet(form)
+    }
+    
+    private func markAsDone() {
+        
+        let todoId = self.todoId
+        self.isCompleting = true
+        
+        Task { [weak self] in
+            do {
+                let _ = try await self?.todoUsecase.completeTodo(todoId)
+                self?.router?.closeScene(animate: true, nil)
+            } catch {
+                self?.router?.showError(error)
+                // 성공하면 화면이 닫히므로 풀지 않는다 — 닫히기 전 한 프레임의 재탭을 막는다
+                self?.isCompleting = false
+            }
+        }
+        .store(in: self.cancellables)
+    }
+    
     private func todoEditParams(from basic: EventDetailBasicData, _ timeZone: TimeZone) -> TodoEditParams {
         return TodoEditParams(.put)
             |> \.name .~ basic.name
@@ -501,6 +546,10 @@ extension EditTodoEventDetailViewModelImple {
             .map(transform)
             .removeDuplicates()
             .eraseToAnyPublisher()
+    }
+    
+    var isCompletable: AnyPublisher<Bool, Never> {
+        return Just(true).eraseToAnyPublisher()
     }
     
     var isSaving: AnyPublisher<Bool, Never> {

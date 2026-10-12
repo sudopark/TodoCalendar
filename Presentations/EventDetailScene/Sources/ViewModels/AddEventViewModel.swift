@@ -210,6 +210,9 @@ extension AddEventViewModelImple: EventDetailInputListener {
     
     func showTodoGuide() { }
     func showForemostEventGuide() { }
+
+    // 새 이벤트는 완료할 대상이 아직 없다
+    func completeTodo() { }
     
     func save() {
         let isTodo = self.subject.isTodo.value
@@ -303,6 +306,10 @@ extension AddEventViewModelImple {
     }
 
     var isLiveActivityRegistered: AnyPublisher<Bool, Never> {
+        return Just(false).eraseToAnyPublisher()
+    }
+
+    var isCompletable: AnyPublisher<Bool, Never> {
         return Just(false).eraseToAnyPublisher()
     }
 
