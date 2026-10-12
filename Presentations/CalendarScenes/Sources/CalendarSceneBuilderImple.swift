@@ -23,6 +23,7 @@ public struct CalendarSceneBuilderImple {
     private let aiAgentImageCommandSceneBuilder: any AIAgentImageCommandSceneBuilder
     private let paywallSceneBuilder: any PaywallSceneBuilder
     private let fullScreenAdRouter: (any FullScreenAdRouter)?
+    private let adGuideSceneBuilder: any PaidFeatureAdGuideSceneBuilder
     private let pendingCompleteTodoState: PendingCompleteTodoState = .init()
     public let calendarDeepLinkHandler = CalendarDeepLinkHandlerImple()
     private let eventDeepLinkHandler = EventDeepLinkHandlerImple()
@@ -38,7 +39,8 @@ public struct CalendarSceneBuilderImple {
         aiAgentKeyboardInputSceneBuilder: any AIAgentKeyboardInputSceneBuilder,
         aiAgentImageCommandSceneBuilder: any AIAgentImageCommandSceneBuilder,
         paywallSceneBuilder: any PaywallSceneBuilder,
-        fullScreenAdRouter: (any FullScreenAdRouter)?
+        fullScreenAdRouter: (any FullScreenAdRouter)?,
+        adGuideSceneBuilder: any PaidFeatureAdGuideSceneBuilder
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
@@ -51,6 +53,7 @@ public struct CalendarSceneBuilderImple {
         self.aiAgentImageCommandSceneBuilder = aiAgentImageCommandSceneBuilder
         self.paywallSceneBuilder = paywallSceneBuilder
         self.fullScreenAdRouter = fullScreenAdRouter
+        self.adGuideSceneBuilder = adGuideSceneBuilder
     }
 
     private var eventListCellEventHanleViewModelBuilder: (any EventListCellEventHanleViewModelBuilder)?
@@ -79,7 +82,8 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
             eventUploadService: self.usecaseFactory.eventUploadService,
             eventSyncUsecase: self.usecaseFactory.eventSyncUsecase,
             aiAgentOrchestrationUsecase: self.usecaseFactory.aiAgentOrchestrationUsecase,
-            accountUsecase: self.accountUsecase
+            accountUsecase: self.accountUsecase,
+            widgetStyleUsecase: self.usecaseFactory.makeWidgetStyleUsecase()
         )
         viewModel.listener = listener
         let viewController = CalendarViewController(
@@ -140,7 +144,8 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
             twoColumnsSceneBuilder: twoColumnsSceneBuilder,
             aiAgentCommandSceneBuilder: self.aiAgentCommandSceneBuilder,
             memberSceneBuilder: self.memberSceneBuilder,
-            paywallSceneBuilder: self.paywallSceneBuilder
+            paywallSceneBuilder: self.paywallSceneBuilder,
+            adGuideSceneBuilder: self.adGuideSceneBuilder
         )
         router.scene = viewController
         viewModel.router = router

@@ -7,6 +7,8 @@
 
 import UIKit
 import SwiftUI
+import Combine
+import WidgetKit
 import Domain
 import Extensions
 import StoreKitService
@@ -263,6 +265,7 @@ final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
     private let deepLinkHandler: ApplicationDeepLinkHandlerImple
     private let appUpdateCheckUsecase: any AppUpdateCheckUsecase
     private var usecaseFactory: (any UsecaseFactory)!
+    private var widgetReloadOnPlanChange: AnyCancellable?
 
     init(
         authUsecase: any AuthUsecase,
@@ -421,6 +424,15 @@ extension ApplicationRootRouter {
             )
         }
         self.backgroundEventSyncUsecase.change(factory: self.usecaseFactory)
+        self.reloadWidgetsOnPlanChange()
+    }
+
+    // 잠김 판정이 유료 여부를 보므로 그 값이 바뀔 때만 위젯을 다시 그린다
+    private func reloadWidgetsOnPlanChange() {
+        self.widgetReloadOnPlanChange = self.usecaseFactory.billingUsecase.currentUserPlan
+            .map(\.isPaid)
+            .removeDuplicates()
+            .sink { _ in WidgetCenter.shared.reloadAllTimelines() }
     }
     
     @MainActor
@@ -471,7 +483,8 @@ extension ApplicationRootRouter {
             aiAgentKeyboardInputSceneBuilder: self.aiAgentKeyboardInputSceneBuilder(),
             aiAgentImageCommandSceneBuilder: self.aiAgentImageCommandSceneBuilder(),
             paywallSceneBuilder: self.paywallSceneBuilder(),
-            fullScreenAdRouter: self.fullScreenAdRouter()
+            fullScreenAdRouter: self.fullScreenAdRouter(),
+            adGuideSceneBuilder: self.paidFeatureAdGuideSceneBuilder()
         )
         self.deepLinkHandler.attach(calendarHandler: builder.calendarDeepLinkHandler)
         return builder
