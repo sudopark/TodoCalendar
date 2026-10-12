@@ -37,6 +37,8 @@ public final class AdExposureUsecaseImple: AdExposureUsecase, Sendable {
     private let billingUsecase: any BillingUsecase
     private let adRepository: any AdRepository
     private let coldLaunchHistoryRepository: any AppColdLaunchHistoryRepository
+    private let paidFeatureGateUsecase: any PaidFeatureGateUsecase
+    private let sharedDataStore: SharedDataStore
     private let calendar: Calendar
 
     public init(
@@ -44,12 +46,16 @@ public final class AdExposureUsecaseImple: AdExposureUsecase, Sendable {
         billingUsecase: any BillingUsecase,
         adRepository: any AdRepository,
         coldLaunchHistoryRepository: any AppColdLaunchHistoryRepository,
+        paidFeatureGateUsecase: any PaidFeatureGateUsecase,
+        sharedDataStore: SharedDataStore,
         calendar: Calendar = .current
     ) {
         self.adAvailability = adAvailability
         self.billingUsecase = billingUsecase
         self.adRepository = adRepository
         self.coldLaunchHistoryRepository = coldLaunchHistoryRepository
+        self.paidFeatureGateUsecase = paidFeatureGateUsecase
+        self.sharedDataStore = sharedDataStore
         self.calendar = calendar
     }
 }
@@ -88,7 +94,8 @@ extension AdExposureUsecaseImple {
               self.isExposedToday(scope, at: now) == false
         else { return false }
         guard isFromAppLaunch else { return true }
-        return self.satisfiesAppLaunchConditions(at: now)
+        return self.isUsingExpiredPaidTheme(at: now) == false
+            && self.satisfiesAppLaunchConditions(at: now)
     }
 
     public func recordFullScreenAdExposed(
@@ -112,5 +119,18 @@ extension AdExposureUsecaseImple {
         return history.isFirstLaunchOfDay(self.calendar)
             && history.count >= Constant.appLaunchColdLaunchCountThreshold
             && history.elapsedDaysFromFirstLaunch(to: now, self.calendar) >= Constant.appLaunchElapsedDaysThreshold
+    }
+
+    private func isUsingExpiredPaidTheme(at now: Date) -> Bool {
+        let setting = self.sharedDataStore.value(
+            CalendarAppearanceSettings.self, key: ShareDataKeys.calendarAppearance.rawValue
+        )
+        guard let colorSetKey = setting?.colorSetKey else { return false }
+        do {
+            try self.paidFeatureGateUsecase.check(.colorTheme(colorSetKey), at: now)
+            return false
+        } catch {
+            return true
+        }
     }
 }
