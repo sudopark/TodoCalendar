@@ -38,7 +38,7 @@ struct ComposedWidgetLookTests {
     }
 
     private func makeEventListProvider(
-        styles: [WidgetStyleId: WidgetStyle]
+        styles: [WidgetStyleId: WidgetStyle], canRenderCustom: Bool = true
     ) -> EventListWidgetViewModelProvider {
         return .init(
             targetEventTagIds: nil,
@@ -47,19 +47,19 @@ struct ComposedWidgetLookTests {
             appSettingRepository: StubAppSettingRepository(),
             calendarSettingRepository: StubCalendarSettingRepository(),
             localeProvider: Locale.current,
-            styleRepository: StubWidgetStyleRepository(styles: styles)
+            styleFetchUsecase: StubWidgetStyleRepository(styles: styles).asStyleFetchUsecase(canRender: canRenderCustom)
         )
     }
 
     private func makeForemostProvider(
-        styles: [WidgetStyleId: WidgetStyle]
+        styles: [WidgetStyleId: WidgetStyle], canRenderCustom: Bool = true
     ) -> ForemostEventWidgetViewModelProvider {
         return .init(
             eventFetchUsecase: StubCalendarEventsFetchUescase(),
             calendarSettingRepository: StubCalendarSettingRepository(),
             appSettingRepository: StubAppSettingRepository(),
             localeProvider: Locale.current,
-            styleRepository: StubWidgetStyleRepository(styles: styles)
+            styleFetchUsecase: StubWidgetStyleRepository(styles: styles).asStyleFetchUsecase(canRender: canRenderCustom)
         )
     }
 }
@@ -69,13 +69,50 @@ extension ComposedWidgetLookTests {
 
     private func makeProvider(
         childStyles: [WidgetStyleId: WidgetStyle] = [:],
-        composedStyles: [WidgetStyleId: WidgetStyle] = [:]
+        composedStyles: [WidgetStyleId: WidgetStyle] = [:],
+        canRenderCustom: Bool = true
     ) -> EventAndForemostWidgetViewModelProvider {
         return EventAndForemostWidgetViewModelProvider(
-            eventListViewModelProvider: self.makeEventListProvider(styles: childStyles),
-            foremostEventViewModelProvider: self.makeForemostProvider(styles: childStyles),
-            styleRepository: StubWidgetStyleRepository(styles: composedStyles)
+            eventListViewModelProvider: self.makeEventListProvider(
+                styles: childStyles, canRenderCustom: canRenderCustom
+            ),
+            foremostEventViewModelProvider: self.makeForemostProvider(
+                styles: childStyles, canRenderCustom: canRenderCustom
+            ),
+            styleFetchUsecase: StubWidgetStyleRepository(styles: composedStyles)
+                .asStyleFetchUsecase(canRender: canRenderCustom)
         )
+    }
+
+    @Test("합성 위젯이 고른 커스텀을 그릴 권한이 없으면 잠김 에러로 끝난다")
+    func eventAndForemost_whenPickedCustomRenderDenied_throwsLocked() async {
+        // given
+        let provider = self.makeProvider(
+            composedStyles: self.composedStyle(.default)
+                .merging(self.composedStyle(.custom(id: "picked"))) { $1 },
+            canRenderCustom: false
+        )
+
+        // when + then
+        await #expect(throws: PaidFeatureGateFailReason.self) {
+            try await provider.getViewModel(self.now, style: .custom(id: "picked"))
+        }
+    }
+
+    @Test("하위 위젯군을 꾸몄어도 합성 위젯이 꾸민 게 없으면 그릴 권한이 없어도 잠기지 않는다")
+    func eventAndForemost_whenOnlyChildCustomizedAndRenderDenied_isNotLocked() async throws {
+        // given
+        let provider = self.makeProvider(
+            childStyles: self.style(.eventListSmall, background: .custom(hex: "#ffffff"))
+                .merging(self.style(.foremostSmall, background: .custom(hex: "#ffffff"))) { $1 },
+            canRenderCustom: false
+        )
+
+        // when
+        let model = try await provider.getViewModel(self.now)
+
+        // then
+        #expect(model.event.look.background == .system)
     }
 
     private func composedStyle(
@@ -182,7 +219,7 @@ extension ComposedWidgetLookTests {
                 holidayUsecase: StubHolidayUsecase(), cached: .init()
             ),
             eventFetchUsecase: StubCalendarEventsFetchUescase(),
-            styleRepository: StubWidgetStyleRepository(styles: [:])
+            styleFetchUsecase: StubWidgetStyleRepository(styles: [:]).asStyleFetchUsecase()
         )
     }
 
@@ -191,7 +228,7 @@ extension ComposedWidgetLookTests {
             eventsFetchusecase: StubCalendarEventsFetchUescase(),
             appSettingRepository: StubAppSettingRepository(),
             calednarSettingRepository: StubCalendarSettingRepository(),
-            styleRepository: StubWidgetStyleRepository(styles: [:])
+            styleFetchUsecase: StubWidgetStyleRepository(styles: [:]).asStyleFetchUsecase()
         )
     }
 
@@ -210,10 +247,10 @@ extension ComposedWidgetLookTests {
         let provider = DoubleMonthWidgetViewModelProvider(
             settingRepository: StubCalendarSettingRepository(),
             monthViewModelProvider: self.makeMonthProvider(),
-            styleRepository: self.onlyStyle(
+            styleFetchUsecase: self.onlyStyle(
                 of: .doubleMonthMedium,
                 setting: DoubleMonthStyleSetting.initial |> \.month.showMonthName .~ false
-            )
+            ).asStyleFetchUsecase()
         )
 
         // when
@@ -230,10 +267,10 @@ extension ComposedWidgetLookTests {
         let provider = EventAndMonthWidgetViewModelProvider(
             eventListViewModelProvider: self.makeEventListProvider(styles: [:]),
             monthViewModelProvider: self.makeMonthProvider(),
-            styleRepository: self.onlyStyle(
+            styleFetchUsecase: self.onlyStyle(
                 of: .eventAndMonthMedium,
                 setting: EventAndMonthStyleSetting.initial |> \.month.highlightToday .~ false
-            )
+            ).asStyleFetchUsecase()
         )
 
         // when
@@ -249,12 +286,12 @@ extension ComposedWidgetLookTests {
         let provider = TodayAndMonthWidgetViewModelProvider(
             todayViewModelProvider: self.makeTodayProvider(),
             monthViewModelProvider: self.makeMonthProvider(),
-            styleRepository: self.onlyStyle(
+            styleFetchUsecase: self.onlyStyle(
                 of: .todayAndMonthMedium,
                 setting: TodayAndMonthStyleSetting.initial
                     |> \.today.showTimeZone .~ false
                     |> \.month.showWeekDayHeader .~ false
-            )
+            ).asStyleFetchUsecase()
         )
 
         // when

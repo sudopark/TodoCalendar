@@ -32,7 +32,7 @@ extension EventListWidgetTimeLineProvider {
         let builder = WidgetViewModelProviderBuilder(base: .init())
         let look = WidgetLook(
             globalSetting: builder.loadWidgetAppearanceSetting(),
-            appliedStyle: builder.resolveWidgetStyle(of: .eventListSmall, style: .default)
+            appliedStyle: builder.fetchDefaultStyle(of: .eventListSmall)
         )
         let sample = EventListWidgetViewModel.sample(
             size: .init(context.family)

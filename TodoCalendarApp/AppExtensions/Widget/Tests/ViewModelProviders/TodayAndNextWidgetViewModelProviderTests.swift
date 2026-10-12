@@ -529,7 +529,7 @@ struct TodayAndNextWidgetViewModelProviderTests {
             calendarSettingRepository: StubCalendarSettingRepository(),
             appSettingRepository: StubAppSettingRepository(),
             localeProvider: Locale.current,
-            styleRepository: StubWidgetStyleRepository(styles: styles)
+            styleFetchUsecase: StubWidgetStyleRepository(styles: styles).asStyleFetchUsecase()
         )
     }
 }

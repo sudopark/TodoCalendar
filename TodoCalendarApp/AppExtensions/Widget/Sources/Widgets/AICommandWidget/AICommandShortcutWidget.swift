@@ -20,6 +20,11 @@ import WidgetScenes
 struct AICommandShortcutWidgetEntry: TimelineEntry {
     let date: Date
     var look: WidgetLook = .init(globalSetting: .init())
+    var isCustomStyleLocked: Bool = false
+
+    var widgetURL: URL? {
+        return self.isCustomStyleLocked ? WidgetStyleLicenseLink.url : AICommandEntryLink.url
+    }
 
     var backgroundShape: AnyShapeStyle {
         return WidgetBackgroundStyle(self.look.background).shape
@@ -46,7 +51,7 @@ struct AICommandShortcutWidgetTimeLineProvider: AppIntentTimelineProvider {
         in context: Context
     ) async -> Timeline<AICommandShortcutWidgetEntry> {
         let entry = self.entry(context.family, configuration.resolvedStyle)
-        return Timeline(entries: [entry], policy: .never)
+        return Timeline(entries: [entry], policy: .after(entry.date.nextUpdateTime))
     }
 
     private func entry(
@@ -55,13 +60,23 @@ struct AICommandShortcutWidgetTimeLineProvider: AppIntentTimelineProvider {
         let builder = WidgetViewModelProviderBuilder(base: .init())
         let variant: WidgetVariant =
             family == .accessoryCircular ? .aiCommandCircular : .aiCommandSmall
-        return .init(
-            date: Date(),
-            look: .init(
-                globalSetting: builder.loadWidgetAppearanceSetting(),
-                appliedStyle: builder.resolveWidgetStyle(of: variant, style: style)
+        let now = Date()
+        let globalSetting = builder.loadWidgetAppearanceSetting()
+        do {
+            let appliedStyle = try builder.fetchStyle(of: variant, selected: style)
+            return .init(
+                date: now,
+                look: .init(globalSetting: globalSetting, appliedStyle: appliedStyle)
             )
-        )
+        } catch is PaidFeatureGateFailReason {
+            return .init(
+                date: now,
+                look: .init(globalSetting: globalSetting),
+                isCustomStyleLocked: true
+            )
+        } catch {
+            return .init(date: now, look: .init(globalSetting: globalSetting))
+        }
     }
 }
 
@@ -73,9 +88,12 @@ struct AICommandShortcutWidgetView: View {
     @Environment(\.widgetFamily) private var family
 
     let look: WidgetLook
+    var isCustomStyleLocked: Bool = false
 
     var body: some View {
         switch self.family {
+        case .systemSmall where self.isCustomStyleLocked:
+            WidgetCustomStyleLockedView(family: .systemSmall)
         case .accessoryCircular:
             ZStack {
                 AccessoryWidgetBackground()
@@ -101,9 +119,11 @@ struct AICommandShortcutWidget: Widget {
             intent: AICommandWidgetConfigurationIntent.self,
             provider: AICommandShortcutWidgetTimeLineProvider()
         ) { entry in
-            AICommandShortcutWidgetView(look: entry.look)
+            AICommandShortcutWidgetView(
+                look: entry.look, isCustomStyleLocked: entry.isCustomStyleLocked
+            )
                 .containerBackground(entry.backgroundShape, for: .widget)
-                .widgetURL(AICommandEntryLink.url)
+                .widgetURL(entry.widgetURL)
         }
         .supportedFamilies([.accessoryCircular, .systemSmall])
         .configurationDisplayName("widget.aiCommand::title".localized())

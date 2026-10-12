@@ -23,20 +23,20 @@ final class ForemostEventWidgetViewModelProvider {
     private let calendarSettingRepository: any CalendarSettingRepository
     private let appSettingRepository: any AppSettingRepository
     private let localeProvider: any LocaleProvider
-    private let styleRepository: any WidgetStyleRepository
+    private let styleFetchUsecase: any WidgetStyleFetchUsecase
     
     init(
         eventFetchUsecase: any CalendarEventFetchUsecase,
         calendarSettingRepository: any CalendarSettingRepository,
         appSettingRepository: any AppSettingRepository,
         localeProvider: any LocaleProvider,
-        styleRepository: any WidgetStyleRepository
+        styleFetchUsecase: any WidgetStyleFetchUsecase
     ) {
         self.eventFetchUsecase = eventFetchUsecase
         self.calendarSettingRepository = calendarSettingRepository
         self.appSettingRepository = appSettingRepository
         self.localeProvider = localeProvider
-        self.styleRepository = styleRepository
+        self.styleFetchUsecase = styleFetchUsecase
     }
 }
 
@@ -46,13 +46,15 @@ extension ForemostEventWidgetViewModelProvider {
     func getViewModel(
         _ refTime: Date,
         variant: WidgetVariant = .foremostSmall,
-        style: WidgetStyleId.Style = .default
+        style: WidgetStyleId.Style? = .default
     ) async throws -> ForemostEventWidgetViewModel {
         
         let setting = self.appSettingRepository.loadSavedViewAppearance()
-        let resolved = variant.isCustomizable
-            ? self.styleRepository.resolveStyle(of: variant, style: style)
-            : nil
+        let resolved = try style.flatMap {
+            variant.isCustomizable
+                ? try self.styleFetchUsecase.fetchStyle(of: variant, selected: $0)
+                : nil
+        }
         let eventModel = try await self.loadForemostEventModel(refTime, setting.calendar)
         return ForemostEventWidgetViewModel(
             eventModel: eventModel.0,

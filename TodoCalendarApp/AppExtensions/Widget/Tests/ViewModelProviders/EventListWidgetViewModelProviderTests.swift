@@ -45,7 +45,7 @@ class EventListWidgetViewModelProviderTests: BaseTestCase {
             appSettingRepository: appSettingRepository,
             calendarSettingRepository: calendarSettingRepository,
             localeProvider: Locale.current,
-            styleRepository: StubWidgetStyleRepository(styles: styles)
+            styleFetchUsecase: StubWidgetStyleRepository(styles: styles).asStyleFetchUsecase()
         )
     }
 }
@@ -258,7 +258,7 @@ extension EventListWidgetViewModelProviderTests {
             appSettingRepository: appSettingRepository,
             calendarSettingRepository: calendarSettingRepository,
             localeProvider: Locale.current,
-            styleRepository: StubWidgetStyleRepository()
+            styleFetchUsecase: StubWidgetStyleRepository().asStyleFetchUsecase()
         )
     }
     
@@ -282,7 +282,7 @@ extension EventListWidgetViewModelProviderTests {
             appSettingRepository: StubAppSettingRepository(),
             calendarSettingRepository: StubCalendarSettingRepository(),
             localeProvider: Locale.current,
-            styleRepository: StubWidgetStyleRepository()
+            styleFetchUsecase: StubWidgetStyleRepository().asStyleFetchUsecase()
         )
         
         // when
@@ -533,7 +533,7 @@ extension EventListWidgetViewModelProviderTests {
             appSettingRepository: appSettingRepository,
             calendarSettingRepository: calendarSettingRepository,
             localeProvider: Locale.current,
-            styleRepository: StubWidgetStyleRepository()
+            styleFetchUsecase: StubWidgetStyleRepository().asStyleFetchUsecase()
         )
     }
     
@@ -634,7 +634,7 @@ extension EventListWidgetViewModelProviderTests {
             appSettingRepository: appSettingRepository,
             calendarSettingRepository: calendarSettingRepository,
             localeProvider: Locale.current,
-            styleRepository: StubWidgetStyleRepository()
+            styleFetchUsecase: StubWidgetStyleRepository().asStyleFetchUsecase()
         )
     }
     
@@ -720,7 +720,7 @@ extension EventListWidgetViewModelProviderTests {
             appSettingRepository: appSettingRepository,
             calendarSettingRepository: calendarSettingRepository,
             localeProvider: Locale.current,
-            styleRepository: StubWidgetStyleRepository()
+            styleFetchUsecase: StubWidgetStyleRepository().asStyleFetchUsecase()
         )
     }
     

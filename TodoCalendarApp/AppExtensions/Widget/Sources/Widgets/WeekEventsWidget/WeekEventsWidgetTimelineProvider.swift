@@ -34,7 +34,7 @@ extension WeekEventsWidgetTimelineProvider {
         let builder = WidgetViewModelProviderBuilder(base: .init())
         let look = WidgetLook(
             globalSetting: builder.loadWidgetAppearanceSetting(),
-            appliedStyle: builder.resolveWidgetStyle(of: .oneWeekEvents, style: .default)
+            appliedStyle: builder.fetchDefaultStyle(of: .oneWeekEvents)
         )
         let entry = Entry(date: now) {
             WeekEventsViewModel.sample(range) |> \.look .~ look

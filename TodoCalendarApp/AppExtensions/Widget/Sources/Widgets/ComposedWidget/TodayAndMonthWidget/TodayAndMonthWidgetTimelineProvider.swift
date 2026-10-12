@@ -20,25 +20,25 @@ struct TodayAndMonthWidgetViewModelProvider {
     
     private let todayViewModelProvider: TodayWidgetViewModelProvider
     private let monthViewModelProvider: MonthWidgetViewModelProvider
-    private let styleRepository: any WidgetStyleRepository
+    private let styleFetchUsecase: any WidgetStyleFetchUsecase
     
     init(
         todayViewModelProvider: TodayWidgetViewModelProvider,
         monthViewModelProvider: MonthWidgetViewModelProvider,
-        styleRepository: any WidgetStyleRepository
+        styleFetchUsecase: any WidgetStyleFetchUsecase
     ) {
         self.todayViewModelProvider = todayViewModelProvider
         self.monthViewModelProvider = monthViewModelProvider
-        self.styleRepository = styleRepository
+        self.styleFetchUsecase = styleFetchUsecase
     }
     
     func getViewModel(
         _ time: Date, style: WidgetStyleId.Style = .default
     ) async throws -> TodayAndMonthWidgetViewModel {
         
-        let today = try await todayViewModelProvider.getTodayViewModel(for: time)
-        let month = try await monthViewModelProvider.getMonthViewModel(time)
-        let resolved = self.styleRepository.resolveStyle(of: .todayAndMonthMedium, style: style)
+        let today = try await todayViewModelProvider.getTodayViewModel(for: time, style: nil)
+        let month = try await monthViewModelProvider.getMonthViewModel(time, style: nil)
+        let resolved = try self.styleFetchUsecase.fetchStyle(of: .todayAndMonthMedium, selected: style)
         let look = WidgetLook(globalSetting: today.look.globalSetting, appliedStyle: resolved)
         return TodayAndMonthWidgetViewModel(today: today, month: month)
             .applying(look)
@@ -54,7 +54,7 @@ struct TodayAndMonthWidgetTimelineProvider: AppIntentTimelineProvider {
         let builder = WidgetViewModelProviderBuilder(base: .init())
         let look = WidgetLook(
             globalSetting: builder.loadWidgetAppearanceSetting(),
-            appliedStyle: builder.resolveWidgetStyle(of: .todayAndMonthMedium, style: .default)
+            appliedStyle: builder.fetchDefaultStyle(of: .todayAndMonthMedium)
         )
         let entry = Entry(date: Date()) {
             TodayAndMonthWidgetViewModel(

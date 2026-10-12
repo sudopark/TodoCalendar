@@ -8,6 +8,8 @@
 
 import Foundation
 import Combine
+import Prelude
+import Optics
 import Domain
 import Extensions
 
@@ -175,7 +177,9 @@ final class StubWidgetStyleRepository: WidgetStyleRepository, @unchecked Sendabl
     }
 
     func loadStyles(of variant: WidgetVariant) -> [WidgetStyle] {
-        return []
+        return self.styles.values
+            .filter { $0.id.variant == variant }
+            .sorted { "\($0.id.style)" < "\($1.id.style)" }
     }
 
     func updateStyle(_ style: WidgetStyle) { }
@@ -185,4 +189,58 @@ final class StubWidgetStyleRepository: WidgetStyleRepository, @unchecked Sendabl
     func makeDraftPhoto(from picked: Data) -> WidgetStylePhoto? { return nil }
 
     func makeDraftPhoto(copying photo: WidgetStylePhoto) -> WidgetStylePhoto? { return nil }
+}
+
+extension StubWidgetStyleRepository {
+
+    func asStyleFetchUsecase(canRender: Bool = true) -> any WidgetStyleFetchUsecase {
+        return WidgetStyleFetchUsecaseImple(
+            styleRepository: self,
+            planRepository: StubBillingUserPlanRepository(
+                plan: BillingUserPlan() |> \.planId .~ (canRender ? .standard : .free)
+            ),
+            licenseRepository: StubWidgetStyleLicenseRepository(),
+            policyRepository: StubAppPolicyRepository(),
+            defaultPolicy: AppPolicy(widgetStyleLicense: .init(isEnabled: true, licenseDays: 7))
+        )
+    }
+}
+
+
+final class StubBillingUserPlanRepository: BillingUserPlanRepository, @unchecked Sendable {
+
+    private let plan: BillingUserPlan?
+    init(plan: BillingUserPlan?) {
+        self.plan = plan
+    }
+
+    func fetchPlan() -> BillingUserPlan? { return self.plan }
+
+    func updatePlan(_ plan: BillingUserPlan) { }
+}
+
+
+final class StubWidgetStyleLicenseRepository: WidgetStyleLicenseRepository, @unchecked Sendable {
+
+    private let license: WidgetStyleLicense?
+    init(license: WidgetStyleLicense? = nil) {
+        self.license = license
+    }
+
+    func loadLicense() -> WidgetStyleLicense? { return self.license }
+
+    func updateLicense(_ license: WidgetStyleLicense) { }
+}
+
+
+final class StubAppPolicyRepository: AppPolicyRepository, @unchecked Sendable {
+
+    private let policy: AppPolicy?
+    init(policy: AppPolicy? = nil) {
+        self.policy = policy
+    }
+
+    func loadPolicy() -> AppPolicy? { return self.policy }
+
+    func refreshPolicy() async throws { }
 }

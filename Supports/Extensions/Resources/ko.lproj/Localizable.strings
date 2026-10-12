@@ -669,6 +669,9 @@
 "widget.style.adGuide::title" = "광고 보고 위젯 꾸미기";
 "widget.style.adGuide::message" = "광고를 한 번 보면 %d일 동안 위젯을 마음껏 꾸밀 수 있어요.";
 "widget.style.adGuide::plan::message" = "유료 플랜은 광고 없이 위젯을 꾸밀 수 있어요";
+"widget.style.locked::title" = "위젯 꾸미기가 잠겼어요";
+"widget.style.locked::action" = "탭해서 다시 열기";
+"widget.style.candidate::locked" = "선택 불가";
 "widget.doubleMonth::name" = "캘린더 + 캘린더";
 "widget.eventAndMonth::name" = "이벤트 + 캘린더";
 "widget.todayAndMonth::name" = "TODAY + 캘린더";

@@ -9,6 +9,7 @@
 import Foundation
 import AppIntents
 import Domain
+import Extensions
 
 
 // MARK: - EventAndMonthStyleEntity
@@ -20,16 +21,21 @@ struct EventAndMonthStyleEntity: AppEntity, Sendable {
 
     var id: String
     var name: String
+    var isSelectable: Bool = true
 
     var displayRepresentation: DisplayRepresentation {
+        guard self.isSelectable else {
+            let locked = "widget.style.candidate::locked".localized()
+            return DisplayRepresentation(title: "\(name)", subtitle: "\(locked)")
+        }
         return DisplayRepresentation(title: "\(name)")
     }
 }
 
 extension EventAndMonthStyleEntity {
 
-    init(style: WidgetStyle) {
-        self.init(id: style.id.style.entityId, name: style.displayName)
+    init(style: WidgetStyle, isSelectable: Bool = true) {
+        self.init(id: style.id.style.entityId, name: style.displayName, isSelectable: isSelectable)
     }
 }
 
@@ -39,7 +45,7 @@ extension EventAndMonthStyleEntity {
 /// 조회할 변형을 타입 안에 박으므로 위젯군마다 엔티티·쿼리가 따로 선다.
 struct EventAndMonthStyleQuery: EntityQuery, @unchecked Sendable {
 
-    private let factory: WidgetStyleIntentFactory
+    private let factory: WidgetUsecaseFactory
 
     init() {
         self.factory = .init(base: AppExtensionBase())
@@ -48,16 +54,16 @@ struct EventAndMonthStyleQuery: EntityQuery, @unchecked Sendable {
     /// 저장된 id 를 라벨로 복원한다 — 지워진 스타일은 목록에 없어 자연히 빠진다.
     func entities(for identifiers: [String]) async throws -> [EventAndMonthStyleEntity] {
         let selectedIds = Set(identifiers)
-        return self.savedStyleEntities().filter { selectedIds.contains($0.id) }
+        return self.candidateEntities().filter { selectedIds.contains($0.id) }
     }
 
     func suggestedEntities() async throws -> [EventAndMonthStyleEntity] {
-        return self.savedStyleEntities()
+        return self.candidateEntities()
     }
 
-    private func savedStyleEntities() -> [EventAndMonthStyleEntity] {
-        return self.factory.makeStyleUsecase()
-            .loadStyles(of: .eventAndMonthMedium)
-            .map { EventAndMonthStyleEntity(style: $0) }
+    private func candidateEntities() -> [EventAndMonthStyleEntity] {
+        return self.factory.makeWidgetStyleFetchUsecase()
+            .fetchStyleCandidates(of: .eventAndMonthMedium)
+            .map { EventAndMonthStyleEntity(style: $0.style, isSelectable: $0.isSelectable) }
     }
 }
