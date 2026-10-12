@@ -9,6 +9,7 @@ import XCTest
 import UIKit
 import Combine
 import Domain
+import Extensions
 import Scenes
 import UnitTestHelpKit
 import TestDoubles
@@ -33,6 +34,7 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var stubGuideTodoUsecase: StubGuideTodoUsecase!
     private var stubLegalNoticeUsecase: StubLegalNoticeUsecase!
     private var stubForemostEventUsecase: StubForemostEventUsecase!
+    private var spyPaidFeatureGateUsecase: SpyPaidFeatureGateUsecase!
     var cancelBag: Set<AnyCancellable>!
 
     override func setUpWithError() throws {
@@ -51,6 +53,7 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubGuideTodoUsecase = .init()
         self.stubLegalNoticeUsecase = .init()
         self.stubForemostEventUsecase = .init()
+        self.spyPaidFeatureGateUsecase = .init()
         self.cancelBag = .init()
         self.timeout = 0.01
     }
@@ -71,6 +74,7 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubGuideTodoUsecase = nil
         self.stubLegalNoticeUsecase = nil
         self.stubForemostEventUsecase = nil
+        self.spyPaidFeatureGateUsecase = nil
         self.cancelBag = nil
     }
 
@@ -95,7 +99,8 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
             eventLiveActivityUsecase: self.spyEventLiveActivityUsecase,
             guideTodoUsecase: self.stubGuideTodoUsecase,
             legalNoticeUsecase: self.stubLegalNoticeUsecase,
-            foremostEventUsecase: self.stubForemostEventUsecase
+            foremostEventUsecase: self.stubForemostEventUsecase,
+            paidFeatureGateUsecase: self.spyPaidFeatureGateUsecase
         )
         viewModel.router = self.spyRouter
         self.spyRouter.didCalendarAttached = {
@@ -127,7 +132,8 @@ extension MainViewModelImpleTests {
             eventLiveActivityUsecase: self.spyEventLiveActivityUsecase,
             guideTodoUsecase: self.stubGuideTodoUsecase,
             legalNoticeUsecase: self.stubLegalNoticeUsecase,
-            foremostEventUsecase: self.stubForemostEventUsecase
+            foremostEventUsecase: self.stubForemostEventUsecase,
+            paidFeatureGateUsecase: self.spyPaidFeatureGateUsecase
         )
         viewModel.router = self.spyRouter
         return viewModel
@@ -537,6 +543,30 @@ extension MainViewModelImpleTests {
         func showJumpDaySelectDialog(current: CalendarDay) {
             self.didShowJumpDaySelectDialogWith = current
         }
+
+        var didShowColorThemeLicenseExpiredGuideWith: [PaidFeatureGateFailReason] = []
+        var didDismissPresentedWhenShowColorThemeLicenseExpiredGuide: [Bool?] = []
+        var didShowColorThemeLicenseExpiredGuideOnFinished: (@Sendable (Bool) -> Void)?
+        var didShowColorThemeLicenseExpiredGuideOnUseDefault: (@Sendable () -> Void)?
+        func showColorThemeLicenseExpiredGuide(
+            _ reason: PaidFeatureGateFailReason,
+            onFinished: @escaping @Sendable (Bool) -> Void,
+            onUseDefault: @escaping @Sendable () -> Void
+        ) {
+            self.didShowColorThemeLicenseExpiredGuideWith.append(reason)
+            self.didDismissPresentedWhenShowColorThemeLicenseExpiredGuide.append(self.didDismissPresented)
+            self.didShowColorThemeLicenseExpiredGuideOnFinished = onFinished
+            self.didShowColorThemeLicenseExpiredGuideOnUseDefault = onUseDefault
+        }
+    }
+
+    private final class SpyPaidFeatureGateUsecase: StubPaidFeatureGateUsecase, @unchecked Sendable {
+
+        var didCheckCallback: (() -> Void)?
+        override func check(_ feature: PaidFeature, at now: Date) throws {
+            defer { self.didCheckCallback?() }
+            try super.check(feature, at: now)
+        }
     }
     
     private class SpyCalendarInteractor: CalendarSceneInteractor, @unchecked Sendable {
@@ -619,8 +649,13 @@ extension MainViewModelImpleTests {
         func applyUnfinishedTransactions() async throws -> BillingUserPlan? { return nil }
         func latestUserPlan() -> BillingUserPlan? { return nil }
 
+        private let userPlanSubject = PassthroughSubject<BillingUserPlan, Never>()
         var currentUserPlan: AnyPublisher<BillingUserPlan, Never> {
-            return Empty().eraseToAnyPublisher()
+            return self.userPlanSubject.eraseToAnyPublisher()
+        }
+
+        func sendUserPlan(_ plan: BillingUserPlan) {
+            self.userPlanSubject.send(plan)
         }
     }
 
@@ -914,5 +949,262 @@ extension MainViewModelImpleTests {
         // then
         XCTAssertEqual(self.stubLegalNoticeUsecase.didCheckNoticeIsNeed, true)
         withExtendedLifetime(viewModel) { }
+    }
+}
+
+
+// MARK: - 컬러 테마 사용권 만료 게이트
+
+extension MainViewModelImpleTests {
+
+    private var customThemeKey: ColorSetKeys { .custom("custom_theme_uuid") }
+
+    private var licenseExpiredReason: PaidFeatureGateFailReason {
+        return PaidFeatureGateFailReason(feature: .colorTheme(self.customThemeKey), licenseDays: 3)
+    }
+
+    private func makeViewModelUsingCustomTheme(isLicenseExpired: Bool) -> MainViewModelImple {
+        self.spyUISettingUsecase.stubAppearanceSetting = AppearanceSettings(
+            calendar: .init(colorSetKey: self.customThemeKey, fontSetKey: .systemDefault),
+            defaultTagColor: .init(holiday: "holiday", default: "default")
+        )
+        self.spyPaidFeatureGateUsecase.mockBlockedReason = isLicenseExpired ? self.licenseExpiredReason : nil
+        return self.makeViewModelWithoutPrepare()
+    }
+
+    private func waitLicenseGateChecked(_ action: () throws -> Void) rethrows {
+        let expect = expectation(description: "사용권 게이트를 검사한다")
+        expect.assertForOverFulfill = false
+        self.spyPaidFeatureGateUsecase.didCheckCallback = { expect.fulfill() }
+        try action()
+        self.wait(for: [expect], timeout: 1)
+        self.spyPaidFeatureGateUsecase.didCheckCallback = nil
+    }
+
+    private func waitLicenseGateNotChecked(_ action: () throws -> Void) rethrows {
+        let expect = expectation(description: "사용권 게이트를 다시 검사하지 않는다")
+        expect.isInverted = true
+        self.spyPaidFeatureGateUsecase.didCheckCallback = { expect.fulfill() }
+        try action()
+        self.wait(for: [expect], timeout: 0.1)
+        self.spyPaidFeatureGateUsecase.didCheckCallback = nil
+    }
+
+    private func makeUserPlan(_ planId: BillingPlanId, topupRemaining: Int? = nil) -> BillingUserPlan {
+        var plan = BillingUserPlan()
+        plan.planId = planId
+        plan.topupRemaining = topupRemaining
+        return plan
+    }
+
+    private func postWillEnterForeground() {
+        NotificationCenter.default.post(
+            name: UIApplication.willEnterForegroundNotification, object: nil
+        )
+    }
+
+    func testViewModel_whenLicenseExpiredAndPrepare_showLicenseExpiredGuideWithReason() {
+        // given
+        let viewModel = self.makeViewModelUsingCustomTheme(isLicenseExpired: true)
+
+        // when
+        self.waitLicenseGateChecked { viewModel.prepare() }
+
+        // then
+        XCTAssertEqual(
+            self.spyRouter.didShowColorThemeLicenseExpiredGuideWith, [self.licenseExpiredReason]
+        )
+    }
+
+    func testViewModel_whenLicenseNotExpiredAndPrepare_notShowGuideAndNotDismissPresented() {
+        // given
+        let viewModel = self.makeViewModelUsingCustomTheme(isLicenseExpired: false)
+
+        // when
+        self.waitLicenseGateChecked { viewModel.prepare() }
+
+        // then
+        XCTAssertEqual(self.spyRouter.didShowColorThemeLicenseExpiredGuideWith, [])
+        XCTAssertNil(self.spyRouter.didDismissPresented)
+    }
+
+    func testViewModel_whenCheckLicense_checkCurrentColorTheme() {
+        // given
+        let viewModel = self.makeViewModelUsingCustomTheme(isLicenseExpired: false)
+
+        // when
+        self.waitLicenseGateChecked { viewModel.prepare() }
+
+        // then
+        XCTAssertEqual(self.spyPaidFeatureGateUsecase.didCheckFeature, .colorTheme(self.customThemeKey))
+    }
+
+    func testViewModel_whenLicenseExpiredAndEnterForeground_dismissPresentedBeforeShowGuide() {
+        // given
+        let viewModel = self.makeViewModelUsingCustomTheme(isLicenseExpired: false)
+        self.waitLicenseGateChecked { viewModel.prepare() }
+        self.spyPaidFeatureGateUsecase.mockBlockedReason = self.licenseExpiredReason
+
+        // when
+        self.waitLicenseGateChecked { self.postWillEnterForeground() }
+
+        // then
+        XCTAssertEqual(
+            self.spyRouter.didShowColorThemeLicenseExpiredGuideWith, [self.licenseExpiredReason]
+        )
+        XCTAssertEqual(
+            self.spyRouter.didDismissPresentedWhenShowColorThemeLicenseExpiredGuide, [true]
+        )
+    }
+
+    func testViewModel_whenLicenseNotExpiredAndEnterForeground_notDismissPresented() {
+        // given
+        let viewModel = self.makeViewModelUsingCustomTheme(isLicenseExpired: false)
+        self.waitLicenseGateChecked { viewModel.prepare() }
+
+        // when
+        self.waitLicenseGateChecked { self.postWillEnterForeground() }
+
+        // then
+        XCTAssertNil(self.spyRouter.didDismissPresented)
+        XCTAssertEqual(self.spyRouter.didShowColorThemeLicenseExpiredGuideWith, [])
+    }
+
+    func testViewModel_whenGuideInProgressAndEnterForeground_notShowGuideAgain() {
+        // given
+        let viewModel = self.makeViewModelUsingCustomTheme(isLicenseExpired: true)
+        self.waitLicenseGateChecked { viewModel.prepare() }
+
+        // when
+        self.waitLicenseGateChecked { self.postWillEnterForeground() }
+
+        // then
+        XCTAssertEqual(
+            self.spyRouter.didShowColorThemeLicenseExpiredGuideWith, [self.licenseExpiredReason]
+        )
+    }
+
+    func testViewModel_whenGuideFinishedWithoutProceedAndEnterForeground_showGuideAgain() {
+        // given
+        let viewModel = self.makeViewModelUsingCustomTheme(isLicenseExpired: true)
+        self.waitLicenseGateChecked { viewModel.prepare() }
+        self.spyRouter.didShowColorThemeLicenseExpiredGuideOnFinished?(false)
+
+        // when
+        self.waitLicenseGateChecked { self.postWillEnterForeground() }
+
+        // then
+        XCTAssertEqual(
+            self.spyRouter.didShowColorThemeLicenseExpiredGuideWith,
+            [self.licenseExpiredReason, self.licenseExpiredReason]
+        )
+    }
+
+    func testViewModel_whenLicenseExpiresAndUserPlanChanged_showGuide() {
+        // given
+        let viewModel = self.makeViewModelUsingCustomTheme(isLicenseExpired: false)
+        self.waitLicenseGateChecked { viewModel.prepare() }
+        self.spyPaidFeatureGateUsecase.mockBlockedReason = self.licenseExpiredReason
+
+        // when
+        self.waitLicenseGateChecked { self.spyBillingUsecase.sendUserPlan(self.makeUserPlan(.free)) }
+
+        // then
+        XCTAssertEqual(
+            self.spyRouter.didShowColorThemeLicenseExpiredGuideWith, [self.licenseExpiredReason]
+        )
+    }
+
+    func testViewModel_whenGuideFinishedAndUserPlanWithSamePaidStatusEmitted_notShowGuideAgain() {
+        // given
+        let viewModel = self.makeViewModelUsingCustomTheme(isLicenseExpired: true)
+        self.waitLicenseGateChecked { viewModel.prepare() }
+        self.spyRouter.didShowColorThemeLicenseExpiredGuideOnFinished?(false)
+        self.waitLicenseGateChecked { self.spyBillingUsecase.sendUserPlan(self.makeUserPlan(.free)) }
+        self.spyRouter.didShowColorThemeLicenseExpiredGuideOnFinished?(false)
+        self.spyRouter.didDismissPresented = nil
+
+        // when
+        self.waitLicenseGateNotChecked {
+            self.spyBillingUsecase.sendUserPlan(self.makeUserPlan(.free, topupRemaining: 3))
+        }
+
+        // then
+        XCTAssertEqual(
+            self.spyRouter.didShowColorThemeLicenseExpiredGuideWith,
+            [self.licenseExpiredReason, self.licenseExpiredReason]
+        )
+        XCTAssertNil(self.spyRouter.didDismissPresented)
+    }
+
+    func testViewModel_whenGuideFinishedAndAppearanceChangedWithSameColorTheme_notShowGuideAgain() throws {
+        // given
+        let viewModel = self.makeViewModelUsingCustomTheme(isLicenseExpired: true)
+        self.waitLicenseGateChecked { viewModel.prepare() }
+        self.spyRouter.didShowColorThemeLicenseExpiredGuideOnFinished?(false)
+        self.spyRouter.didDismissPresented = nil
+        var params = EditCalendarAppearanceSettingParams()
+        params.showHoliday = false
+
+        // when
+        try self.waitLicenseGateNotChecked {
+            _ = try self.spyUISettingUsecase.changeCalendarAppearanceSetting(params)
+        }
+
+        // then
+        XCTAssertEqual(
+            self.spyRouter.didShowColorThemeLicenseExpiredGuideWith, [self.licenseExpiredReason]
+        )
+        XCTAssertNil(self.spyRouter.didDismissPresented)
+    }
+
+    func testViewModel_whenChangedToSystemThemeAndEnterForeground_notShowGuideAgain() throws {
+        // given
+        let viewModel = self.makeViewModelUsingCustomTheme(isLicenseExpired: true)
+        self.waitLicenseGateChecked { viewModel.prepare() }
+        self.spyRouter.didShowColorThemeLicenseExpiredGuideOnFinished?(false)
+        self.spyPaidFeatureGateUsecase.mockBlockedReason = nil
+        var params = EditCalendarAppearanceSettingParams()
+        params.newColorSetKey = .systemTheme
+        try self.waitLicenseGateChecked {
+            _ = try self.spyUISettingUsecase.changeCalendarAppearanceSetting(params)
+        }
+
+        // when
+        self.waitLicenseGateChecked { self.postWillEnterForeground() }
+
+        // then
+        XCTAssertEqual(
+            self.spyRouter.didShowColorThemeLicenseExpiredGuideWith, [self.licenseExpiredReason]
+        )
+        XCTAssertEqual(self.spyPaidFeatureGateUsecase.didCheckFeature, .colorTheme(.systemTheme))
+    }
+
+    func testViewModel_whenUseDefaultSelected_changeColorThemeToSystemTheme() {
+        // given
+        let viewModel = self.makeViewModelUsingCustomTheme(isLicenseExpired: true)
+        self.waitLicenseGateChecked { viewModel.prepare() }
+
+        // when
+        self.spyRouter.didShowColorThemeLicenseExpiredGuideOnUseDefault?()
+
+        // then
+        XCTAssertEqual(
+            self.spyUISettingUsecase.didChangeAppearanceSetting?.calendar.colorSetKey, .systemTheme
+        )
+    }
+
+    func testViewModel_whenUseDefaultSelectedAndChangeFailed_showError() {
+        // given
+        let viewModel = self.makeViewModelUsingCustomTheme(isLicenseExpired: true)
+        self.waitLicenseGateChecked { viewModel.prepare() }
+        self.spyUISettingUsecase.shouldFailChangeCalendarAppearance = true
+
+        // when
+        self.spyRouter.didShowColorThemeLicenseExpiredGuideOnUseDefault?()
+
+        // then
+        XCTAssertEqual((self.spyRouter.didShowError as? RuntimeError)?.message, "failed")
+        XCTAssertNil(self.spyUISettingUsecase.didChangeAppearanceSetting)
     }
 }

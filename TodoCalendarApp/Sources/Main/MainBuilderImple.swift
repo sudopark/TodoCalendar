@@ -25,6 +25,7 @@ public final class MainSceneBuilerImple {
     private let mobileAdService: any MobileAdService
     private let fullScreenAdRouter: (any FullScreenAdRouter)?
     private let adViewBuilder: (any AdViewBuilder)?
+    private let adGuideSceneBuilder: any PaidFeatureAdGuideSceneBuilder
     private let isInitialScene: Bool
 
     public init(
@@ -35,6 +36,7 @@ public final class MainSceneBuilerImple {
         mobileAdService: any MobileAdService,
         fullScreenAdRouter: (any FullScreenAdRouter)?,
         adViewBuilder: (any AdViewBuilder)?,
+        adGuideSceneBuilder: any PaidFeatureAdGuideSceneBuilder,
         isInitialScene: Bool
     ) {
         self.usecaseFactory = usecaseFactory
@@ -44,6 +46,7 @@ public final class MainSceneBuilerImple {
         self.mobileAdService = mobileAdService
         self.fullScreenAdRouter = fullScreenAdRouter
         self.adViewBuilder = adViewBuilder
+        self.adGuideSceneBuilder = adGuideSceneBuilder
         self.isInitialScene = isInitialScene
     }
 }
@@ -68,7 +71,8 @@ extension MainSceneBuilerImple: MainSceneBuiler {
             eventLiveActivityUsecase: self.usecaseFactory.eventLiveActivityUsecase,
             guideTodoUsecase: self.usecaseFactory.makeGuideTodoUsecase(),
             legalNoticeUsecase: self.usecaseFactory.makeLegalNoticeUsecase(),
-            foremostEventUsecase: self.usecaseFactory.makeForemostEventUsecase()
+            foremostEventUsecase: self.usecaseFactory.makeForemostEventUsecase(),
+            paidFeatureGateUsecase: self.usecaseFactory.makePaidFeatureGateUsecase()
         )
         
         let viewController = MainViewController(
@@ -84,7 +88,8 @@ extension MainSceneBuilerImple: MainSceneBuiler {
         let router = MainRouter(
             calendarSceneBulder: self.calendarSceneBulder,
             settingSceneBuilder: self.settingSceneBuilder,
-            fullScreenAdRouter: self.fullScreenAdRouter
+            fullScreenAdRouter: self.fullScreenAdRouter,
+            adGuideSceneBuilder: self.adGuideSceneBuilder
         )
         router.scene = viewController
         viewModel.router = router

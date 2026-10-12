@@ -532,6 +532,7 @@
 "setting.appearance.calendar.colorTheme.adGuide::plan::message" = "Paid plans let you use custom themes without ads";
 "paidFeature.adGuide::plan::button" = "View plans";
 "paidFeature.adGuide::watchAd::button" = "Watch ad and use for %d days";
+"paidFeature.adGuide::useDefaultTheme::button" = "Use default theme";
 "setting.appearance.calendar.underline" = "Underline on event days";
 "setting.appearance.event.edit::name_old" = "Edit Event";
 "setting.appearance.event.edit::name" = "Event settings and external calendars";

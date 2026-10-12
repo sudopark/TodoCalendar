@@ -436,11 +436,11 @@ private func runMigrationVersion6to7(_ database: any DataBase) throws {
 
 ### 7.4 팝업 동작
 
-`ApplicationRootRouter.showUpdatePopup(_:)` — 루트 레벨 `UIHostingController`를 `overFullScreen`으로 present.
+`ApplicationRootRouter.showUpdatePopup(_:)` — 팝업 `UIHostingController` 를 앱 window 와 별개인 overlay window(`windowLevel = .alert`)의 rootViewController 로 띄운다. 앱 window 에 present 하지 않으므로, 다른 화면을 닫는 `dismissPresented` 같은 호출에 팝업이 같이 닫히지 않는다.
 
-- 중복 노출 방지: 현재 팝업 VC 참조(`updatePopupViewController`, `weak`)를 보관하고 nil일 때만 새로 present.
-- `isModalInPresentation = true` — **force/recommended 모두** 스와이프 dismiss 차단.
-- 배경은 clear(딤은 SwiftUI 내부), 전환 애니메이션은 present `animated: false` + SwiftUI opacity 페이드(0.25s)로 통일.
+- 중복 노출 방지: overlay window 참조(`updatePopupWindow`)를 보관하고 nil일 때만 새로 띄운다. recommended 의 "나중에" 는 그 window 를 숨기고 참조를 놓는다.
+- overlay window 는 앱 window 의 `overrideUserInterfaceStyle`·`tintColor` 를 복사한다.
+- 배경은 clear(딤은 SwiftUI 내부), 전환 애니메이션은 SwiftUI opacity 페이드(0.25s)다.
 
 **View (`UpdatePopupView`/`ForceUpdatePopupView`) 구조**:
 - `switch requirement`로 `forceRequiredContent` / `recommendedContent` 서브뷰 분기.

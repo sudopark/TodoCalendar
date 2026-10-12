@@ -62,6 +62,7 @@ private extension PaidFeature {
     @ObservationIgnored private let cancellables = CancelBag()
 
     var reason: PaidFeatureGateFailReason?
+    var canUseDefault: Bool = false
 
     func bind(_ viewModel: any PaidFeatureAdGuideViewModel) {
         guard self.didBind == false else { return }
@@ -70,6 +71,11 @@ private extension PaidFeature {
         viewModel.reason
             .receive(on: RunLoop.main)
             .sink { [weak self] in self?.reason = $0 }
+            .store(in: self.cancellables)
+
+        viewModel.canUseDefault
+            .receive(on: RunLoop.main)
+            .sink { [weak self] in self?.canUseDefault = $0 }
             .store(in: self.cancellables)
     }
 }
@@ -82,11 +88,13 @@ final class PaidFeatureAdGuideViewEventHandler: Observable {
     var watchAd: () -> Void = { }
     var showPlans: () -> Void = { }
     var close: () -> Void = { }
+    var useDefault: () -> Void = { }
 
     func bind(_ viewModel: any PaidFeatureAdGuideViewModel) {
         self.watchAd = viewModel.watchAd
         self.showPlans = viewModel.showPlans
         self.close = viewModel.close
+        self.useDefault = viewModel.useDefault
     }
 }
 
@@ -171,18 +179,35 @@ private struct PaidFeatureAdGuideView: View {
                     )
                     .eventHandler(\.onTap, eventHandlers.watchAd)
 
-                    Text("common.cancel".localized())
-                        .font(appearance.fontSet.normal.asFont)
-                        .foregroundStyle(appearance.colorSet.text2.asColor)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, spacing: .regular)
-                        .contentShape(Rectangle())
-                        .onTapGesture(perform: eventHandlers.close)
+                    if self.state.canUseDefault {
+                        self.useDefaultButton
+                    } else {
+                        self.cancelRow
+                    }
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .eventHandler(\.outsideTap, eventHandlers.close)
+        .eventHandler(\.outsideTap, self.state.canUseDefault ? { } : eventHandlers.close)
+    }
+
+    private var useDefaultButton: some View {
+        ConfirmButton(
+            title: "paidFeature.adGuide::useDefaultTheme::button".localized(),
+            textColor: appearance.colorSet.secondaryBtnText.asColor,
+            backgroundColor: appearance.colorSet.secondaryBtnBackground.asColor
+        )
+        .eventHandler(\.onTap, eventHandlers.useDefault)
+    }
+
+    private var cancelRow: some View {
+        Text("common.cancel".localized())
+            .font(appearance.fontSet.normal.asFont)
+            .foregroundStyle(appearance.colorSet.text2.asColor)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, spacing: .regular)
+            .contentShape(Rectangle())
+            .onTapGesture(perform: eventHandlers.close)
     }
 
     private func planRow(_ reason: PaidFeatureGateFailReason) -> some View {
