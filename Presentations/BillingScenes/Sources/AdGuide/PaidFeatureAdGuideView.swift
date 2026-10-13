@@ -63,6 +63,7 @@ private extension PaidFeature {
 
     var reason: PaidFeatureGateFailReason?
     var canUseDefault: Bool = false
+    var canShowPlans: Bool = false
 
     func bind(_ viewModel: any PaidFeatureAdGuideViewModel) {
         guard self.didBind == false else { return }
@@ -76,6 +77,11 @@ private extension PaidFeature {
         viewModel.canUseDefault
             .receive(on: RunLoop.main)
             .sink { [weak self] in self?.canUseDefault = $0 }
+            .store(in: self.cancellables)
+
+        viewModel.canShowPlans
+            .receive(on: RunLoop.main)
+            .sink { [weak self] in self?.canShowPlans = $0 }
             .store(in: self.cancellables)
     }
 }
@@ -170,7 +176,9 @@ private struct PaidFeatureAdGuideView: View {
                     }
                 }
 
-                self.planRow(reason)
+                if self.state.canShowPlans {
+                    self.planRow(reason)
+                }
 
                 VStack(spacing: Metric.Spacing.xsmall) {
                     ConfirmButton(

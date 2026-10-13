@@ -62,7 +62,8 @@ final class PaidFeatureAdGuideViewModelImpleTests: PublisherWaitable {
     private func makeViewModel(
         _ reason: PaidFeatureGateFailReason,
         adResult: RewardedAdResult = .rewarded,
-        withUseDefault: Bool = false
+        withUseDefault: Bool = false,
+        isSignedIn: Bool = true
     ) -> PaidFeatureAdGuideViewModelImple {
         let router = SpyAdGuideRouter(adResult: adResult)
         self.router = router
@@ -73,6 +74,7 @@ final class PaidFeatureAdGuideViewModelImpleTests: PublisherWaitable {
         let viewModel = PaidFeatureAdGuideViewModelImple(
             reason: reason,
             paidFeatureGateUsecase: self.gate,
+            accountUsecase: StubAccountUsecase(isSignedIn ? AccountInfo("uid") : nil),
             onFinished: { [recorder, router] in
                 recorder.didFinishWith.append($0)
                 recorder.wasSheetClosedAtFinish.append(router.didClosed == true)
@@ -276,6 +278,7 @@ extension PaidFeatureAdGuideViewModelImpleTests {
         let viewModel = PaidFeatureAdGuideViewModelImple(
             reason: .init(feature: .colorTheme(.custom("my-theme")), licenseDays: 7),
             paidFeatureGateUsecase: self.gate,
+            accountUsecase: StubAccountUsecase(AccountInfo("uid")),
             onFinished: { [recorder] in recorder.callbacks.append(.finished($0)) },
             onUseDefault: { [recorder] in recorder.callbacks.append(.useDefault(wasSheetClosed: false)) }
         )
@@ -303,5 +306,21 @@ extension PaidFeatureAdGuideViewModelImpleTests {
 
         // then
         #expect(canUseDefault == withUseDefault)
+    }
+
+    @Test("로그인 계정에만 플랜 보기 선택지를 노출한다", arguments: [true, false])
+    func canShowPlans_onlyWhenSignedIn(_ isSignedIn: Bool) async throws {
+        // given
+        let viewModel = self.makeViewModel(
+            .init(feature: .colorTheme(.custom("my-theme")), licenseDays: 7), isSignedIn: isSignedIn
+        )
+
+        // when
+        let canShowPlans = try await self.firstOutput(
+            self.expectConfirm("플랜 보기 노출"), for: viewModel.canShowPlans
+        )
+
+        // then
+        #expect(canShowPlans == isSignedIn)
     }
 }

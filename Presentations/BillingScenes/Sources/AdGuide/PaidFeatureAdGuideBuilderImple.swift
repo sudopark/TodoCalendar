@@ -40,6 +40,7 @@ public final class PaidFeatureAdGuideBuilderImple: PaidFeatureAdGuideSceneBuilde
         let viewModel = PaidFeatureAdGuideViewModelImple(
             reason: reason,
             paidFeatureGateUsecase: self.usecaseFactory.makePaidFeatureGateUsecase(),
+            accountUsecase: self.usecaseFactory.accountUescase,
             onFinished: onFinished,
             onUseDefault: onUseDefault
         )
