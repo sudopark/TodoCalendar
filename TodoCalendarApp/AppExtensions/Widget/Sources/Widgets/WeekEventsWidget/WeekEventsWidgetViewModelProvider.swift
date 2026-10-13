@@ -63,7 +63,7 @@ extension WeekEventsWidgetViewModelProvider {
         let timeZone = self.settingRepository.loadUserSelectedTImeZone() ?? .current
         let firstWeekDay = self.settingRepository.firstWeekDay() ?? .sunday
         let appearSetting = self.appSettingRepository.loadSavedViewAppearance()
-        let resolved = try self.styleFetchUsecase.fetchStyle(of: .oneWeekEvents, selected: style)
+        let resolved = self.styleFetchUsecase.fetchStyle(of: .oneWeekEvents, selected: style)
         let defaultTagColorSetting = appearSetting.defaultTagColor
         let calenar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
         let targetMonthDate = calenar.targetMonthRefDate(date, for: range)

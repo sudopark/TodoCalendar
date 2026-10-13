@@ -36,15 +36,15 @@ struct WidgetViewModelProviderBuilder {
 
     /// placeholder 처럼 인스턴스 선택 없이 변형 기본 스타일을 읽는 자리.
     func fetchDefaultStyle(of variant: WidgetVariant) -> WidgetStyle? {
-        return try? self.fetchStyle(of: variant, selected: .default)
+        return self.fetchStyle(of: variant, selected: .default)
     }
 
     /// 뷰모델 provider 를 두지 않는 위젯이 고른 스타일을 읽는 자리.
     func fetchStyle(
         of variant: WidgetVariant, selected style: WidgetStyleId.Style
-    ) throws -> WidgetStyle? {
+    ) -> WidgetStyle? {
         guard variant.isCustomizable else { return nil }
-        return try self.makeStyleFetchUsecase().fetchStyle(of: variant, selected: style)
+        return self.makeStyleFetchUsecase().fetchStyle(of: variant, selected: style)
     }
 
     private func makeStyleFetchUsecase() -> any WidgetStyleFetchUsecase {

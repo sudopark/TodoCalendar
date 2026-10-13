@@ -36,8 +36,7 @@ class MonthWidgetViewModelProviderImpleTests: BaseTestCase {
         showMonthNameStyle: Bool? = nil,
         customStyles: [String: MonthStyleSetting] = [:],
         defaultStyleBackground: WidgetAppearanceSettings.Background? = nil,
-        customStyleBackgrounds: [String: WidgetAppearanceSettings.Background] = [:],
-        canRenderCustom: Bool = true
+        customStyleBackgrounds: [String: WidgetAppearanceSettings.Background] = [:]
     ) -> MonthWidgetViewModelProvider {
         let calendarUsecase = StubCalendarUsecase()
         let settingRepository = StubCalendarSettingRepository()
@@ -102,7 +101,7 @@ class MonthWidgetViewModelProviderImpleTests: BaseTestCase {
             eventFetchUsecase: eventsFetchUsecase,
             styleFetchUsecase: StubWidgetStyleRepository(
                 styles: defaultStyle.merging(customs) { _, custom in custom }
-            ).asStyleFetchUsecase(canRender: canRenderCustom)
+            ).asStyleFetchUsecase()
         )
     }
 }
@@ -143,26 +142,6 @@ extension MonthWidgetViewModelProviderImpleTests {
         XCTAssertEqual(model.showsMonthName, true)
     }
     
-    func testProvider_whenSelectedCustomRenderDenied_throwsLocked() async {
-        // given
-        let provider = self.makeProvider(
-            showMonthNameStyle: true,
-            customStyles: ["c1": MonthStyleSetting.initial],
-            canRenderCustom: false
-        )
-
-        // when
-        var thrown: (any Error)?
-        do {
-            _ = try await provider.getMonthViewModel(self.dummyNow, style: .custom(id: "c1"))
-        } catch {
-            thrown = error
-        }
-
-        // then
-        XCTAssertTrue(thrown is PaidFeatureGateFailReason)
-    }
-
     func testProvider_whenSelectedCustomStyleRemoved_fallbackToVariantDefaultStyle() async throws {
         // given
         let provider = self.makeProvider(showMonthNameStyle: false)

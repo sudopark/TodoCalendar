@@ -50,9 +50,9 @@ extension ForemostEventWidgetViewModelProvider {
     ) async throws -> ForemostEventWidgetViewModel {
         
         let setting = self.appSettingRepository.loadSavedViewAppearance()
-        let resolved = try style.flatMap {
+        let resolved = style.flatMap {
             variant.isCustomizable
-                ? try self.styleFetchUsecase.fetchStyle(of: variant, selected: $0)
+                ? self.styleFetchUsecase.fetchStyle(of: variant, selected: $0)
                 : nil
         }
         let eventModel = try await self.loadForemostEventModel(refTime, setting.calendar)

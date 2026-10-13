@@ -40,7 +40,7 @@ struct EventAndMonthWidgetViewModelProvider {
             for: time, widgetSize: .small, style: nil
         )
         let month = try await monthViewModelProvider.getMonthViewModel(time, style: nil)
-        let resolved = try self.styleFetchUsecase.fetchStyle(of: .eventAndMonthMedium, selected: style)
+        let resolved = self.styleFetchUsecase.fetchStyle(of: .eventAndMonthMedium, selected: style)
         let look = WidgetLook(globalSetting: event.look.globalSetting, appliedStyle: resolved)
         return EventAndMonthWidgetViewModel(event: event, month: month)
             .applying(look)

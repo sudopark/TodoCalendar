@@ -38,7 +38,7 @@ struct ComposedWidgetLookTests {
     }
 
     private func makeEventListProvider(
-        styles: [WidgetStyleId: WidgetStyle], canRenderCustom: Bool = true
+        styles: [WidgetStyleId: WidgetStyle]
     ) -> EventListWidgetViewModelProvider {
         return .init(
             targetEventTagIds: nil,
@@ -47,19 +47,19 @@ struct ComposedWidgetLookTests {
             appSettingRepository: StubAppSettingRepository(),
             calendarSettingRepository: StubCalendarSettingRepository(),
             localeProvider: Locale.current,
-            styleFetchUsecase: StubWidgetStyleRepository(styles: styles).asStyleFetchUsecase(canRender: canRenderCustom)
+            styleFetchUsecase: StubWidgetStyleRepository(styles: styles).asStyleFetchUsecase()
         )
     }
 
     private func makeForemostProvider(
-        styles: [WidgetStyleId: WidgetStyle], canRenderCustom: Bool = true
+        styles: [WidgetStyleId: WidgetStyle]
     ) -> ForemostEventWidgetViewModelProvider {
         return .init(
             eventFetchUsecase: StubCalendarEventsFetchUescase(),
             calendarSettingRepository: StubCalendarSettingRepository(),
             appSettingRepository: StubAppSettingRepository(),
             localeProvider: Locale.current,
-            styleFetchUsecase: StubWidgetStyleRepository(styles: styles).asStyleFetchUsecase(canRender: canRenderCustom)
+            styleFetchUsecase: StubWidgetStyleRepository(styles: styles).asStyleFetchUsecase()
         )
     }
 }
@@ -69,43 +69,22 @@ extension ComposedWidgetLookTests {
 
     private func makeProvider(
         childStyles: [WidgetStyleId: WidgetStyle] = [:],
-        composedStyles: [WidgetStyleId: WidgetStyle] = [:],
-        canRenderCustom: Bool = true
+        composedStyles: [WidgetStyleId: WidgetStyle] = [:]
     ) -> EventAndForemostWidgetViewModelProvider {
         return EventAndForemostWidgetViewModelProvider(
-            eventListViewModelProvider: self.makeEventListProvider(
-                styles: childStyles, canRenderCustom: canRenderCustom
-            ),
-            foremostEventViewModelProvider: self.makeForemostProvider(
-                styles: childStyles, canRenderCustom: canRenderCustom
-            ),
+            eventListViewModelProvider: self.makeEventListProvider(styles: childStyles),
+            foremostEventViewModelProvider: self.makeForemostProvider(styles: childStyles),
             styleFetchUsecase: StubWidgetStyleRepository(styles: composedStyles)
-                .asStyleFetchUsecase(canRender: canRenderCustom)
+                .asStyleFetchUsecase()
         )
     }
 
-    @Test("합성 위젯이 고른 커스텀을 그릴 권한이 없으면 잠김 에러로 끝난다")
-    func eventAndForemost_whenPickedCustomRenderDenied_throwsLocked() async {
-        // given
-        let provider = self.makeProvider(
-            composedStyles: self.composedStyle(.default)
-                .merging(self.composedStyle(.custom(id: "picked"))) { $1 },
-            canRenderCustom: false
-        )
-
-        // when + then
-        await #expect(throws: PaidFeatureGateFailReason.self) {
-            try await provider.getViewModel(self.now, style: .custom(id: "picked"))
-        }
-    }
-
-    @Test("하위 위젯군을 꾸몄어도 합성 위젯이 꾸민 게 없으면 그릴 권한이 없어도 잠기지 않는다")
-    func eventAndForemost_whenOnlyChildCustomizedAndRenderDenied_isNotLocked() async throws {
+    @Test("하위 위젯군을 꾸몄어도 합성 위젯이 꾸민 게 없으면 합성 위젯의 기본 모양으로 그린다")
+    func eventAndForemost_whenOnlyChildCustomized_usesComposedStyle() async throws {
         // given
         let provider = self.makeProvider(
             childStyles: self.style(.eventListSmall, background: .custom(hex: "#ffffff"))
-                .merging(self.style(.foremostSmall, background: .custom(hex: "#ffffff"))) { $1 },
-            canRenderCustom: false
+                .merging(self.style(.foremostSmall, background: .custom(hex: "#ffffff"))) { $1 }
         )
 
         // when

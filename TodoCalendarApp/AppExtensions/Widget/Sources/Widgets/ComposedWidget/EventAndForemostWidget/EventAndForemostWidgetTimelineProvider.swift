@@ -39,7 +39,7 @@ struct EventAndForemostWidgetViewModelProvider {
             for: time, widgetSize: .small, style: nil
         )
         let foremost = try await self.foremostEventViewModelProvider.getViewModel(time, style: nil)
-        let resolved = try self.styleFetchUsecase.fetchStyle(of: .eventAndForemostMedium, selected: style)
+        let resolved = self.styleFetchUsecase.fetchStyle(of: .eventAndForemostMedium, selected: style)
         let look = WidgetLook(globalSetting: eventList.look.globalSetting, appliedStyle: resolved)
         return EventAndForemostWidgetViewModel(event: eventList, foremost: foremost)
             .applying(look)
