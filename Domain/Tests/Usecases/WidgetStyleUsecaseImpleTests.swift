@@ -618,30 +618,21 @@ extension WidgetStyleUsecaseImpleTests {
         }
     }
 
-    @Test("꾸미기 권한이 없으면 검사가 게이트의 사유를 던진다")
-    func checkCustomizable_whenBlocked_throwsGateReason() {
-        // given
-        let usecase = self.makeUsecase(with: .init(), gate: self.blockedGate())
-
-        // when
-        let reason = self.thrownReason { try usecase.checkCustomizable() }
-
-        // then
-        #expect(reason == self.customizeReason)
-    }
-
-    @Test("꾸미기 권한이 있으면 위젯 꾸미기로 검사해 통과한다")
-    func checkCustomizable_whenAllowed_passes() {
+    @Test("저장은 위젯 꾸미기 권한을 검사한 뒤 저장소에 쓴다")
+    func updateStyle_checksCustomizeWidgetGate() {
         // given
         let gate = StubPaidFeatureGateUsecase()
-        let usecase = self.makeUsecase(with: .init(), gate: gate)
+        let repository = StubRepository()
+        let usecase = self.makeUsecase(with: repository, gate: gate)
+        let style = self.todayStyle(.custom(id: "c1"), showHolidayName: false)
 
         // when
-        let reason = self.thrownReason { try usecase.checkCustomizable() }
+        let reason = self.thrownReason { try usecase.updateStyle(style) }
 
         // then
         #expect(reason == nil)
         #expect(gate.didCheckFeature == .customizeWidget)
+        #expect(repository.loadStyle(for: style.id) != nil)
     }
 
     @Test("꾸미기 권한이 없으면 저장이 사유를 던지고 저장소에 쓰지 않는다")
@@ -650,6 +641,21 @@ extension WidgetStyleUsecaseImpleTests {
         let repository = StubRepository()
         let usecase = self.makeUsecase(with: repository, gate: self.blockedGate())
         let style = self.todayStyle(.custom(id: "c1"), showHolidayName: false)
+
+        // when
+        let reason = self.thrownReason { try usecase.updateStyle(style) }
+
+        // then
+        #expect(reason == self.customizeReason)
+        #expect(repository.loadStyle(for: style.id) == nil)
+    }
+
+    @Test("꾸미기 권한이 없으면 기본 스타일 저장도 사유를 던지고 저장소에 쓰지 않는다")
+    func updateStyle_whenDefaultStyleAndBlocked_throwsAndDoesNotSave() {
+        // given
+        let repository = StubRepository()
+        let usecase = self.makeUsecase(with: repository, gate: self.blockedGate())
+        let style = self.todayStyle(.default, showHolidayName: false)
 
         // when
         let reason = self.thrownReason { try usecase.updateStyle(style) }

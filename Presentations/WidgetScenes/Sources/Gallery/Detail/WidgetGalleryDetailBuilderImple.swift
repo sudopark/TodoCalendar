@@ -48,8 +48,7 @@ extension WidgetGalleryDetailBuilderImple: WidgetGalleryDetailSceneBuilder {
                 widgetStyleUsecase: self.widgetStyleUsecase,
                 adGuideSceneBuilder: self.adGuideSceneBuilder,
                 viewAppearance: viewAppearance
-            ),
-            adGuideSceneBuilder: self.adGuideSceneBuilder
+            )
         )
         router.scene = viewController
         viewModel.router = router

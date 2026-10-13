@@ -21,8 +21,6 @@ public protocol WidgetStyleUsecase: Sendable {
 
     func loadStyles(of variant: WidgetVariant) -> [WidgetStyle]
 
-    func checkCustomizable() throws
-
     func updateStyle(_ style: WidgetStyle) throws
 
     func makeNewStyleId(for variant: WidgetVariant) -> WidgetStyleId
@@ -90,13 +88,9 @@ extension WidgetStyleUsecaseImple {
         return [defaultStyle] + customStyles
     }
 
-    public func checkCustomizable() throws {
-        try self.paidFeatureGateUsecase.check(.customizeWidget, at: Date())
-    }
-
     /// 변형이 쓰는 payload 타입이 아니면 저장하지 않는다 — 다른 변형의 설정이 이 좌표를 덮는다.
     public func updateStyle(_ style: WidgetStyle) throws {
-        try self.checkCustomizable()
+        try self.paidFeatureGateUsecase.check(.customizeWidget, at: Date())
         guard style.id.variant.isOwnSetting(style.setting) else { return }
         self.styleRepository.updateStyle(style.withNormalizedName())
         self.shareLatestStyles(of: style.id.variant)
