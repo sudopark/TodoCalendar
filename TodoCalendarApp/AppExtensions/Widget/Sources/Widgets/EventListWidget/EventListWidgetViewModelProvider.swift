@@ -147,8 +147,8 @@ extension EventListWidgetViewModelProvider {
         
         let timeZone = self.calendarSettingRepository.loadUserSelectedTImeZone() ?? .current
         let setting = self.appSettingRepository.loadSavedViewAppearance()
-        let resolved = try style.flatMap {
-            try self.styleFetchUsecase.fetchStyle(of: .eventListSmall, selected: $0)
+        let resolved = style.flatMap {
+            self.styleFetchUsecase.fetchStyle(of: .eventListSmall, selected: $0)
         }
         
         let dayEventLists = try await self.loadDayEventListModel(

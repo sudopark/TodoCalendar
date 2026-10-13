@@ -44,7 +44,7 @@ struct DoubleMonthWidgetViewModelProvider {
         let nextMonthModel = try await self.monthViewModelProvider.getMonthViewModel(nextMonth, style: nil)
         |> \.todayIdentifier .~ nil
         
-        let resolved = try self.styleFetchUsecase.fetchStyle(of: .doubleMonthMedium, selected: style)
+        let resolved = self.styleFetchUsecase.fetchStyle(of: .doubleMonthMedium, selected: style)
         let look = WidgetLook(globalSetting: currentMonthModel.look.globalSetting, appliedStyle: resolved)
         return DoubleMonthWidgetViewModel(current: currentMonthModel, next: nextMonthModel)
             .applying(look)

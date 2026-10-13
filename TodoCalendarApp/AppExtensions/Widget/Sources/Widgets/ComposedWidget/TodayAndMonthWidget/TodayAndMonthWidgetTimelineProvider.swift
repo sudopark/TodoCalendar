@@ -38,7 +38,7 @@ struct TodayAndMonthWidgetViewModelProvider {
         
         let today = try await todayViewModelProvider.getTodayViewModel(for: time, style: nil)
         let month = try await monthViewModelProvider.getMonthViewModel(time, style: nil)
-        let resolved = try self.styleFetchUsecase.fetchStyle(of: .todayAndMonthMedium, selected: style)
+        let resolved = self.styleFetchUsecase.fetchStyle(of: .todayAndMonthMedium, selected: style)
         let look = WidgetLook(globalSetting: today.look.globalSetting, appliedStyle: resolved)
         return TodayAndMonthWidgetViewModel(today: today, month: month)
             .applying(look)

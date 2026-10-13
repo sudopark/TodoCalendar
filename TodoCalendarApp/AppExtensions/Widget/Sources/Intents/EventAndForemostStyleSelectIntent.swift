@@ -9,7 +9,6 @@
 import Foundation
 import AppIntents
 import Domain
-import Extensions
 
 
 // MARK: - EventAndForemostStyleEntity
@@ -21,21 +20,16 @@ struct EventAndForemostStyleEntity: AppEntity, Sendable {
 
     var id: String
     var name: String
-    var isSelectable: Bool = true
 
     var displayRepresentation: DisplayRepresentation {
-        guard self.isSelectable else {
-            let locked = "widget.style.candidate::locked".localized()
-            return DisplayRepresentation(title: "\(name)", subtitle: "\(locked)")
-        }
         return DisplayRepresentation(title: "\(name)")
     }
 }
 
 extension EventAndForemostStyleEntity {
 
-    init(style: WidgetStyle, isSelectable: Bool = true) {
-        self.init(id: style.id.style.entityId, name: style.displayName, isSelectable: isSelectable)
+    init(style: WidgetStyle) {
+        self.init(id: style.id.style.entityId, name: style.displayName)
     }
 }
 
@@ -64,6 +58,6 @@ struct EventAndForemostStyleQuery: EntityQuery, @unchecked Sendable {
     private func candidateEntities() -> [EventAndForemostStyleEntity] {
         return self.factory.makeWidgetStyleFetchUsecase()
             .fetchStyleCandidates(of: .eventAndForemostMedium)
-            .map { EventAndForemostStyleEntity(style: $0.style, isSelectable: $0.isSelectable) }
+            .map { EventAndForemostStyleEntity(style: $0) }
     }
 }

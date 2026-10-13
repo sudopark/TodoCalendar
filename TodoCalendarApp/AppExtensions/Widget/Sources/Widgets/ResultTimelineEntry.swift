@@ -23,10 +23,6 @@ struct WidgetErrorModel: Error {
         self.message = message ?? "widget.fail.message".localized()
         self.reason = "\(error)"
     }
-
-    var isCustomStyleLocked: Bool {
-        return (self.error as? PaidFeatureGateFailReason)?.feature == .customizeWidget
-    }
 }
 
 struct ResultTimelineEntry<T>: TimelineEntry {

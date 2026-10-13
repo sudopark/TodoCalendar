@@ -14,9 +14,9 @@ import Domain
 
 protocol WidgetStyleFetchUsecase: Sendable {
 
-    func fetchStyle(of variant: WidgetVariant, selected style: WidgetStyleId.Style) throws -> WidgetStyle?
+    func fetchStyle(of variant: WidgetVariant, selected style: WidgetStyleId.Style) -> WidgetStyle?
 
-    func fetchStyleCandidates(of variant: WidgetVariant) -> [(style: WidgetStyle, isSelectable: Bool)]
+    func fetchStyleCandidates(of variant: WidgetVariant) -> [WidgetStyle]
 }
 
 
@@ -24,28 +24,10 @@ protocol WidgetStyleFetchUsecase: Sendable {
 
 final class WidgetStyleFetchUsecaseImple: WidgetStyleFetchUsecase, @unchecked Sendable {
 
-    private enum Constant {
-        static let secondsPerDay: TimeInterval = 24 * 3600
-    }
-
     private let styleRepository: any WidgetStyleRepository
-    private let planRepository: any BillingUserPlanRepository
-    private let licenseRepository: any WidgetStyleLicenseRepository
-    private let policyRepository: any AppPolicyRepository
-    private let defaultPolicy: AppPolicy
 
-    init(
-        styleRepository: any WidgetStyleRepository,
-        planRepository: any BillingUserPlanRepository,
-        licenseRepository: any WidgetStyleLicenseRepository,
-        policyRepository: any AppPolicyRepository,
-        defaultPolicy: AppPolicy
-    ) {
+    init(styleRepository: any WidgetStyleRepository) {
         self.styleRepository = styleRepository
-        self.planRepository = planRepository
-        self.licenseRepository = licenseRepository
-        self.policyRepository = policyRepository
-        self.defaultPolicy = defaultPolicy
     }
 }
 
@@ -57,61 +39,24 @@ extension WidgetStyleFetchUsecaseImple {
     /// 고른 커스텀이 지워졌으면 기본 저장분으로 돌아간다
     func fetchStyle(
         of variant: WidgetVariant, selected style: WidgetStyleId.Style
-    ) throws -> WidgetStyle? {
+    ) -> WidgetStyle? {
         let selected = self.styleRepository.loadStyle(for: .init(variant: variant, style: style))
         let fallback = style == .default
             ? nil
             : self.styleRepository.loadStyle(for: .init(variant: variant, style: .default))
-        guard let saved = selected ?? fallback else { return nil }
-        if let licenseDays = self.blockedLicenseDays(at: Date()) {
-            throw PaidFeatureGateFailReason(feature: .customizeWidget, licenseDays: licenseDays)
-        }
-        return saved
+        return selected ?? fallback
     }
 
-    /// 후보는 기본 스타일을 맨 앞에 항상 두고, 꾸민 적 없는 기본만 막혀도 고를 수 있다
-    func fetchStyleCandidates(
-        of variant: WidgetVariant
-    ) -> [(style: WidgetStyle, isSelectable: Bool)] {
+    /// 후보는 기본 스타일을 맨 앞에 항상 둔다 — 꾸민 적 없는 기본은 초기 설정으로 세운다
+    func fetchStyleCandidates(of variant: WidgetVariant) -> [WidgetStyle] {
         let styleVariant = variant.styleVariant
         guard let initialSetting = styleVariant.initialSetting else { return [] }
         let savedStyles = self.styleRepository.loadStyles(of: styleVariant)
-        let isCustomizable = self.blockedLicenseDays(at: Date()) == nil
         let savedDefault = savedStyles.first { $0.id.style == .default }
-            .map { (style: $0, isSelectable: isCustomizable) }
-        let initialDefault = (
-            style: WidgetStyle(id: .init(variant: variant, style: .default), name: nil, setting: initialSetting),
-            isSelectable: true
+        let initialDefault = WidgetStyle(
+            id: .init(variant: variant, style: .default), name: nil, setting: initialSetting
         )
-        let customStyles = savedStyles
-            .filter { $0.id.style != .default }
-            .map { (style: $0, isSelectable: isCustomizable) }
+        let customStyles = savedStyles.filter { $0.id.style != .default }
         return [savedDefault ?? initialDefault] + customStyles
-    }
-}
-
-
-// MARK: - 꾸미기 권한
-
-extension WidgetStyleFetchUsecaseImple {
-
-    /// 플랜을 모르면 무료로 본다 — 광고로 받은 사용권은 그대로 통과시킨다
-    private func blockedLicenseDays(at now: Date) -> Int? {
-        let isPaid = self.planRepository.fetchPlan().map { $0.isPaid } ?? false
-        let received = self.policyRepository.loadPolicy()?.widgetStyleLicense
-        let fallback = self.defaultPolicy.widgetStyleLicense
-        guard isPaid == false,
-              (received?.isEnabled ?? fallback?.isEnabled) == true,
-              let licenseDays = received?.licenseDays ?? fallback?.licenseDays,
-              licenseDays > 0,
-              self.isLicenseValid(licenseDays: licenseDays, at: now) == false
-        else { return nil }
-        return licenseDays
-    }
-
-    private func isLicenseValid(licenseDays: Int, at now: Date) -> Bool {
-        guard let grantedAt = self.licenseRepository.loadLicense()?.grantedAt else { return false }
-        let expiresAt = grantedAt.addingTimeInterval(TimeInterval(licenseDays) * Constant.secondsPerDay)
-        return grantedAt <= now && now < expiresAt
     }
 }

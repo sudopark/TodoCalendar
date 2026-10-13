@@ -50,7 +50,7 @@ extension DDayWidgetViewModelProvider {
 
         let timeZone = self.calendarSettingRepository.loadUserSelectedTImeZone() ?? .current
         let setting = self.appSettingRepository.loadWidgetAppearanceSetting()
-        let resolved = try self.styleFetchUsecase.fetchStyle(of: .ddaySmall, selected: style)
+        let resolved = self.styleFetchUsecase.fetchStyle(of: .ddaySmall, selected: style)
         let refreshAfter = self.nextMidnight(after: now, in: timeZone)
 
         guard let target,

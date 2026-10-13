@@ -50,8 +50,8 @@ extension MonthWidgetViewModelProvider {
     ) async throws -> MonthWidgetViewModel {
         let timeZone = self.settingRepository.loadUserSelectedTImeZone() ?? .current
         let setting = self.appSettingRepository.loadWidgetAppearanceSetting()
-        let resolved = try style.flatMap {
-            try self.styleFetchUsecase.fetchStyle(of: .monthSmall, selected: $0)
+        let resolved = style.flatMap {
+            self.styleFetchUsecase.fetchStyle(of: .monthSmall, selected: $0)
         }
         var model = try await self.currentMonthModel(now, timeZone)
         if let ranges = model.eventRange {

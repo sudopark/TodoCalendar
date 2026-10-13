@@ -322,7 +322,7 @@ extension TodayAndNextWidgetViewModelProvider {
         
         let timeZone = self.calendarSettingRepository.loadUserSelectedTImeZone() ?? .current
         let setting = self.appSettingRepository.loadSavedViewAppearance()
-        let resolved = try self.styleFetchUsecase.fetchStyle(of: .todayAndNextMedium, selected: style)
+        let resolved = self.styleFetchUsecase.fetchStyle(of: .todayAndNextMedium, selected: style)
         let events = try await self.loadEvnets(from: refDate, timeZone)
         let builder = TodayAndNextWidgetViewModelBuilder(
             max: Constant.maxRowSpaceWeight, daysRangeSize: Constant.daysRangeCount,

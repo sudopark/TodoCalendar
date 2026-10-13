@@ -59,8 +59,8 @@ extension TodayWidgetViewModelProvider {
     ) async throws -> TodayWidgetViewModel {
         
         let setting = self.appSettingRepository.loadWidgetAppearanceSetting()
-        let resolved = try style.flatMap {
-            try self.styleFetchUsecase.fetchStyle(of: .todaySummarySmall, selected: $0)
+        let resolved = style.flatMap {
+            self.styleFetchUsecase.fetchStyle(of: .todaySummarySmall, selected: $0)
         }
         let timeZone = self.calednarSettingRepository.loadUserSelectedTImeZone() ?? .current
         let calednar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone

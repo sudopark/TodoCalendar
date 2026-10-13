@@ -61,18 +61,7 @@ extension WidgetUsecaseFactory {
             styleRepository: WidgetStyleLocalRepositoryImple(
                 environmentStorage: self.base.userDefaultEnvironmentStorage,
                 photoDirectory: AppEnvironment.widgetPhotoDirectory
-            ),
-            planRepository: BillingUserPlanLocalRepositoryImple(
-                sqliteService: self.base.commonSqliteService
-            ),
-            licenseRepository: WidgetStyleLicenseLocalRepositoryImple(
-                environmentStorage: self.base.userDefaultEnvironmentStorage
-            ),
-            policyRepository: AppPolicyRepositoryImple(
-                remoteAPI: self.base.remoteAPI,
-                environmentStorage: self.base.userDefaultEnvironmentStorage
-            ),
-            defaultPolicy: AppEnvironment.defaultAppPolicy
+            )
         )
     }
     

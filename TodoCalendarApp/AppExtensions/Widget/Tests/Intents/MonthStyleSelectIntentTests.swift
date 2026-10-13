@@ -55,20 +55,6 @@ struct MonthStyleEntityListTests {
         // then
         #expect(entities.map { $0.name } == ["Untitled"])
     }
-
-    @Test("선택할 수 없는 후보만 선택 불가 부제를 단다")
-    func styleEntity_whenUnselectable_showsLockedSubtitle() {
-        // given
-        let custom = self.style(.custom(id: "c1"), name: "Night")
-
-        // when
-        let selectable = MonthStyleEntity(style: custom, isSelectable: true)
-        let unselectable = MonthStyleEntity(style: custom, isSelectable: false)
-
-        // then
-        #expect(selectable.displayRepresentation.subtitle == nil)
-        #expect(unselectable.displayRepresentation.subtitle != nil)
-    }
 }
 
 
