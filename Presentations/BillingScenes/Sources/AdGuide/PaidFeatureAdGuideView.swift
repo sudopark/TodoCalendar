@@ -213,6 +213,8 @@ private struct PaidFeatureAdGuideView: View {
     private func planRow(_ reason: PaidFeatureGateFailReason) -> some View {
         HStack(spacing: Metric.Spacing.small) {
             Text(reason.feature.planMessageKey.localized())
+                .lineLimit(nil)
+                .fixedSize(horizontal: false, vertical: true)
                 .font(appearance.fontSet.subNormal.asFont)
                 .foregroundStyle(appearance.colorSet.text0.asColor)
                 .multilineTextAlignment(.leading)
