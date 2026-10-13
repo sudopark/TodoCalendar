@@ -141,8 +141,11 @@ struct ColorThemeSelectView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                CalendarAppearanceSampleView(model: state.sampleModel)
-                    .padding(.vertical, 60)
+                ColorThemeEditPreviewView(
+                    model: state.sampleModel,
+                    colorSet: appearance.colorSet
+                )
+                .padding(.vertical, spacing: .xlarge)
                 
                 ScrollView {
                     LazyVGrid(columns: gridRow) {
