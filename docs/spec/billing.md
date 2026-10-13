@@ -182,7 +182,7 @@ enum PaywallScreenState {
 
 테마 사용권 광고는 `PaidFeatureGateUsecase.check(.colorTheme(_), at:)` 가 판정한다. 규칙은 [`color-themes.md`](color-themes.md) §4 사용권 절이 다룬다.
 
-위젯 꾸미기 사용권 광고는 `check(.customizeWidget, at:)` 가 판정한다. 컬러 테마와 달리 플랜을 아직 모르면 무료 플랜으로 보고 검사한다. 그때도 광고로 받은 사용권이 유효하면 통과시킨다. 위젯 확장은 앱의 플랜 스토어가 없어 `WidgetStyleFetchUsecase` 가 같은 규칙으로 판정한다.
+위젯 꾸미기 사용권 광고는 위젯 스타일을 저장할 때 `check(.customizeWidget, at:)` 가 판정한다. 컬러 테마와 달리 플랜을 아직 모르면 무료 플랜으로 보고 검사한다. 그때도 광고로 받은 사용권이 유효하면 통과시킨다.
 
 무료 플랜에만 광고를 노출한다. Google Mobile Ads(`AdService`).
 
