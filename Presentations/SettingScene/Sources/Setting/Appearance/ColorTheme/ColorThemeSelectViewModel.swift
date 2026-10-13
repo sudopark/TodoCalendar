@@ -18,28 +18,53 @@ import Scenes
 import CommonPresentation
 
 
-struct ColorThemeModel: Equatable {
-    let title: String
+protocol ColorThemeModel: Sendable {
+    var key: ColorSetKeys { get }
+    var title: String { get }
+    var isSelected: Bool { get }
+    func colorSet(isSystemDarkTheme: Bool) -> any ColorSet
+}
+
+struct BuiltInColorThemeModel: ColorThemeModel, Equatable {
     let key: ColorSetKeys
     var isSelected: Bool = false
-    let customColorTheme: CustomColorTheme?
-    
-    init(_ theme: CustomColorTheme) {
-        self.key = .custom(theme.uuid)
-        self.title = theme.name
-        self.customColorTheme = theme
-    }
-    
+
+    /// 정의 없는 커스텀 키는 그릴 때 시스템 테마로 폴백하므로 모델도 시스템 테마로 둔다
     init(_ colorSetKey: ColorSetKeys) {
-        self.key = colorSetKey
-        self.customColorTheme = nil
-        switch colorSetKey {
-        case .systemTheme: self.title = "setting.appearance.calendar.colorTheme::system".localized()
-        case .defaultLight: self.title = "setting.appearance.calendar.colorTheme::light".localized()
-        case .defaultDark: self.title = "setting.appearance.calendar.colorTheme::dark".localized()
-        case .appTheme(let key): self.title = key.definition.name.localized
-        case .custom(let id): self.title = id
+        if case .custom = colorSetKey {
+            self.key = .systemTheme
+        } else {
+            self.key = colorSetKey
         }
+    }
+
+    var title: String {
+        switch self.key {
+        case .systemTheme, .custom: return "setting.appearance.calendar.colorTheme::system".localized()
+        case .defaultLight: return "setting.appearance.calendar.colorTheme::light".localized()
+        case .defaultDark: return "setting.appearance.calendar.colorTheme::dark".localized()
+        case .appTheme(let key): return key.definition.name.localized
+        }
+    }
+
+    func colorSet(isSystemDarkTheme: Bool) -> any ColorSet {
+        return self.key.convert(isSystemDarkTheme: isSystemDarkTheme, customColorTheme: nil)
+    }
+}
+
+struct CustomColorThemeModel: ColorThemeModel, Equatable {
+    let theme: CustomColorTheme
+    var isSelected: Bool = false
+
+    init(_ theme: CustomColorTheme) {
+        self.theme = theme
+    }
+
+    var key: ColorSetKeys { .custom(self.theme.uuid) }
+    var title: String { self.theme.name }
+
+    func colorSet(isSystemDarkTheme: Bool) -> any ColorSet {
+        return self.key.convert(isSystemDarkTheme: isSystemDarkTheme, customColorTheme: self.theme)
     }
 }
 
@@ -49,15 +74,15 @@ protocol ColorThemeSelectViewModel: AnyObject, Sendable, ColorThemeSelectSceneIn
 
     // interactor
     func prepare()
-    func selectTheme(_ model: ColorThemeModel)
+    func selectTheme(_ model: any ColorThemeModel)
     func createCustomTheme()
-    func editCustomTheme(_ model: ColorThemeModel)
+    func editCustomTheme(_ model: CustomColorThemeModel)
     func close()
     
     // presenter
     var sampleModel: AnyPublisher<CalendarAppearanceModel, Never> { get }
-    var colorThemeModels: AnyPublisher<[ColorThemeModel], Never> { get }
-    var customColorThemeModels: AnyPublisher<[ColorThemeModel], Never> { get }
+    var colorThemeModels: AnyPublisher<[BuiltInColorThemeModel], Never> { get }
+    var customColorThemeModels: AnyPublisher<[CustomColorThemeModel], Never> { get }
 }
 
 
@@ -115,7 +140,7 @@ extension ColorThemeSelectViewModelImple {
         .store(in: self.cancellables)
     }
     
-    func selectTheme(_ model: ColorThemeModel) {
+    func selectTheme(_ model: any ColorThemeModel) {
         guard self.subject.isAdGuideInProgress.value == false else { return }
         Task { [weak self] in
             do {
@@ -130,7 +155,7 @@ extension ColorThemeSelectViewModelImple {
     }
 
     @MainActor
-    private func selectThemeAgainAfterAdGuide(_ model: ColorThemeModel, _ reason: PaidFeatureGateFailReason) {
+    private func selectThemeAgainAfterAdGuide(_ model: any ColorThemeModel, _ reason: PaidFeatureGateFailReason) {
         guard self.subject.isAdGuideInProgress.value == false else { return }
         self.subject.isAdGuideInProgress.send(true)
         self.router?.showPaidFeatureAdGuide(reason) { [weak self] shouldProceed in
@@ -145,9 +170,8 @@ extension ColorThemeSelectViewModelImple {
         self.router?.routeToEditCustomTheme(original: nil, listener: self)
     }
     
-    func editCustomTheme(_ model: ColorThemeModel) {
-        guard let theme = model.customColorTheme else { return }
-        self.router?.routeToEditCustomTheme(original: theme, listener: self)
+    func editCustomTheme(_ model: CustomColorThemeModel) {
+        self.router?.routeToEditCustomTheme(original: model.theme, listener: self)
     }
     
     func close() {
@@ -167,12 +191,12 @@ extension ColorThemeSelectViewModelImple {
             .eraseToAnyPublisher()
     }
     
-    var colorThemeModels: AnyPublisher<[ColorThemeModel], Never> {
+    var colorThemeModels: AnyPublisher<[BuiltInColorThemeModel], Never> {
         
-        let transform: (ColorSetKeys, [ColorSetKeys]) -> [ColorThemeModel]
+        let transform: (ColorSetKeys, [ColorSetKeys]) -> [BuiltInColorThemeModel]
         transform = { current, availables in
             return availables.map { key in
-                return ColorThemeModel(key) |> \.isSelected .~ (key == current)
+                return BuiltInColorThemeModel(key) |> \.isSelected .~ (key == current)
             }
         }
         
@@ -185,12 +209,12 @@ extension ColorThemeSelectViewModelImple {
         .eraseToAnyPublisher()
     }
     
-    var customColorThemeModels: AnyPublisher<[ColorThemeModel], Never> {
+    var customColorThemeModels: AnyPublisher<[CustomColorThemeModel], Never> {
         
-        let transform: (ColorSetKeys, [CustomColorTheme]) -> [ColorThemeModel]
+        let transform: (ColorSetKeys, [CustomColorTheme]) -> [CustomColorThemeModel]
         transform = { current, themes in
             return themes.map { theme in
-                let model = ColorThemeModel(theme)
+                let model = CustomColorThemeModel(theme)
                 return model |> \.isSelected .~ (model.key == current)
             }
         }
@@ -215,7 +239,7 @@ extension ColorThemeSelectViewModelImple: ColorThemeEditSceneListener {
         guard let index = themes.firstIndex(where: { $0.uuid == theme.uuid })
         else {
             self.subject.customThemes.send(themes + [theme])
-            self.selectTheme(ColorThemeModel(theme))
+            self.selectTheme(CustomColorThemeModel(theme))
             return
         }
         let replaced = themes.enumerated().map { $0.offset == index ? theme : $0.element }

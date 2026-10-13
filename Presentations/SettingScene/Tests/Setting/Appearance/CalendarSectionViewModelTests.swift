@@ -35,9 +35,14 @@ class CalendarSectionViewModelTests: BaseTestCase, PublisherWaitable {
         ], showUnderLineOnEventDay: true)
     }
     
-    private func makeViewModel() -> CalendarSectionViewModelImple {
+    private func makeViewModel(
+        calendarAppearance: CalendarAppearanceSettings? = nil
+    ) -> CalendarSectionViewModelImple {
         
         let uiSettingUsecase = StubUISettingUsecase()
+        uiSettingUsecase.stubAppearanceSetting = calendarAppearance.map {
+            AppearanceSettings(calendar: $0, defaultTagColor: .init(holiday: "holiday", default: "default"))
+        }
         let calendarSettingUsecase = StubCalendarSettingUsecase()
         calendarSettingUsecase.prepare()
         _ = uiSettingUsecase.loadSavedAppearanceSetting()
@@ -243,6 +248,41 @@ extension CalendarSectionViewModelTests {
         
         // then
         XCTAssertEqual(model?.key, .defaultLight)
+    }
+    
+    func testViewModel_provideCurrentColorTheme_withCustomThemeDefinition() {
+        // given
+        let expect = expectation(description: "커스텀 테마 정의가 있으면 그 테마로 현재 컬러테마값 제공")
+        let theme = CustomColorTheme(
+            uuid: "c1", name: "Forest", schemaVersion: 1,
+            seeds: .init(background: "#F1F5EF", accent: "#2E7D32", form: .filled),
+            colors: [:], createdAt: 0, updatedAt: 0
+        )
+        var calendarAppearance = CalendarAppearanceSettings(colorSetKey: .custom("c1"), fontSetKey: .systemDefault)
+        calendarAppearance.currentCustomColorTheme = theme
+        let viewModel = self.makeViewModel(calendarAppearance: calendarAppearance)
+        
+        // when
+        let model = self.waitFirstOutput(expect, for: viewModel.selectedColorTheme)
+        
+        // then
+        XCTAssertEqual((model as? CustomColorThemeModel)?.theme, theme)
+        XCTAssertEqual(model?.key, .custom("c1"))
+    }
+    
+    func testViewModel_provideSystemColorTheme_whenCustomThemeDefinitionMissing() {
+        // given
+        let expect = expectation(description: "커스텀 테마 정의가 없으면 시스템 테마로 현재 컬러테마값 제공")
+        let viewModel = self.makeViewModel(
+            calendarAppearance: .init(colorSetKey: .custom("c1"), fontSetKey: .systemDefault)
+        )
+        
+        // when
+        let model = self.waitFirstOutput(expect, for: viewModel.selectedColorTheme)
+        
+        // then
+        XCTAssertTrue(model is BuiltInColorThemeModel)
+        XCTAssertEqual(model?.key, .systemTheme)
     }
     
     func testViewModel_routeSelectToColorTheme() {

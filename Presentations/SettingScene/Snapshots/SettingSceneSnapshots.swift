@@ -454,7 +454,7 @@ private final class FakeColorThemeSelectViewModel: ColorThemeSelectViewModel, @u
     var sampleModel: AnyPublisher<CalendarAppearanceModel, Never> {
         Just(.init(.sunday)).eraseToAnyPublisher()
     }
-    var colorThemeModels: AnyPublisher<[ColorThemeModel], Never> {
+    var colorThemeModels: AnyPublisher<[BuiltInColorThemeModel], Never> {
         Just([
             .init(.systemTheme) |> \.isSelected .~ true,
             .init(.defaultLight),
@@ -463,7 +463,7 @@ private final class FakeColorThemeSelectViewModel: ColorThemeSelectViewModel, @u
         ]).eraseToAnyPublisher()
     }
 
-    var customColorThemeModels: AnyPublisher<[ColorThemeModel], Never> {
+    var customColorThemeModels: AnyPublisher<[CustomColorThemeModel], Never> {
         Just([
             .init(self.makeCustomTheme(uuid: "c1", name: "Forest", background: "#F1F5EF", accent: "#2E7D32")),
             .init(self.makeCustomTheme(uuid: "c2", name: "Dusk", background: "#2B2438", accent: "#E5A04D"))
@@ -481,8 +481,8 @@ private final class FakeColorThemeSelectViewModel: ColorThemeSelectViewModel, @u
     }
 
     func prepare() { }
-    func selectTheme(_ model: ColorThemeModel) { }
+    func selectTheme(_ model: any ColorThemeModel) { }
     func createCustomTheme() { }
-    func editCustomTheme(_ model: ColorThemeModel) { }
+    func editCustomTheme(_ model: CustomColorThemeModel) { }
     func close() { }
 }
