@@ -172,21 +172,16 @@ extension ApplicationViewAppearanceStoreImpleTests {
     }
 
     @MainActor
-    @Test("계정 전환 뒤 받은 현재 테마로 갈아 끼우고, 없으면 시스템 테마로 돌아간다")
-    func store_replaceCurrentTheme_afterAccountChange() {
+    @Test("계정 전환 뒤 커스텀 테마를 쓰고 있었으면 선택 키까지 시스템 테마로 돌린다")
+    func store_resetCustomColorTheme_afterAccountChanged() {
         // given
         let store = self.makeStore(.custom("c1"), theme: self.makeTheme("c1", background: "#18181A"))
-        let lightBg0 = self.expectedDefinition(background: 0xF1F0EF).bg0
 
         // when
-        store.replaceCurrentCustomColorTheme(self.makeTheme("c1", background: "#F1F0EF"))
-        let replacedBg0 = store.appearance.colorSet.bg0
-        let replacedUuid = store.appearance.customColorTheme?.uuid
-        store.replaceCurrentCustomColorTheme(nil)
+        store.resetCustomColorThemeAfterAccountChanged()
 
         // then
-        #expect(replacedBg0 == lightBg0)
-        #expect(replacedUuid == "c1")
+        #expect(store.appearance.colorSetKey == .systemTheme)
         #expect(store.appearance.customColorTheme == nil)
         #expect(store.appearance.colorSet.bg0 == UIColor.white)
     }

@@ -24,20 +24,14 @@ struct ApplicationPrepareResult {
 }
 
 
-struct AccountChangePrepareResult {
-    
-    let currentCustomColorTheme: CustomColorTheme?
-}
-
-
 // MARK: - ApplicationRootUsecase
 
 protocol ApplicationPrepareUsecase {
     
     func prepareLaunch() async throws -> ApplicationPrepareResult
     func prepareEnterBackground()
-    func prepareSignedIn(_ auth: Auth) async -> AccountChangePrepareResult
-    func prepareSignedOut() async -> AccountChangePrepareResult
+    func prepareSignedIn(_ auth: Auth) async
+    func prepareSignedOut() async
     func prepareExternalCalendarIntegrated(_ serviceId: String)
     func prepareExternalCalendarStopIntegrated(_ serviceId: String)
 }
@@ -137,7 +131,7 @@ extension ApplicationPrepareUsecaseImple {
         self.environmentStorage.synchronize()
     }
     
-    func prepareSignedIn(_ auth: Auth) async -> AccountChangePrepareResult {
+    func prepareSignedIn(_ auth: Auth) async {
         await self.endLiveActivities()
         self.sharedDataStore.clearAll {
             $0 != ShareDataKeys.accountInfo.rawValue
@@ -151,10 +145,11 @@ extension ApplicationPrepareUsecaseImple {
         } catch let error {
             logger.log(level: .critical, "signIn -> close db failed..: \(error)")
         }
-        return await self.prepareAccountChangeResult()
+        self.resetSelectedCustomColorTheme()
+        _ = try? await self.prepareLatestAppearanceSeting()
     }
     
-    func prepareSignedOut() async -> AccountChangePrepareResult {
+    func prepareSignedOut() async {
         await self.endLiveActivities()
         self.sharedDataStore.clearAll {
             $0 != ShareDataKeys.externalCalendarAccounts.rawValue
@@ -167,12 +162,15 @@ extension ApplicationPrepareUsecaseImple {
         } catch let error {
             logger.log(level: .critical, "signOut -> close db failed..: \(error)")
         }
-        return await self.prepareAccountChangeResult()
+        self.resetSelectedCustomColorTheme()
+        _ = try? await self.prepareLatestAppearanceSeting()
     }
     
-    private func prepareAccountChangeResult() async -> AccountChangePrepareResult {
-        let appearance = try? await self.prepareLatestAppearanceSeting()
-        return .init(currentCustomColorTheme: appearance?.calendar.currentCustomColorTheme)
+    private func resetSelectedCustomColorTheme() {
+        let saved = self.latestAppSettingRepository.loadSavedViewAppearance()
+        guard case .custom = saved.calendar.colorSetKey else { return }
+        let params = EditCalendarAppearanceSettingParams() |> \.newColorSetKey .~ .systemTheme
+        _ = try? self.latestAppSettingRepository.changeCalendarAppearanceSetting(params)
     }
     
     private func loadCustomColorTheme(for colorSetKey: ColorSetKeys) async -> CustomColorTheme? {

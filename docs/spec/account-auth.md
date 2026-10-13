@@ -63,6 +63,7 @@
    - SharedDataStore 초기화 (accountInfo, externalCalendarAccounts 키는 유지)
    - 비로그인 DB close → 100ms 대기
    - 사용자별 DB open (`models_<uid>.db`)
+   - 선택된 컬러 테마가 커스텀이면 `systemTheme` 으로 초기화 ([`color-themes.md`](color-themes.md) 읽는 시점)
 7. `ApplicationRootRouter.changeUsecaseFactroy(auth)`:
    - `LoginUsecaseFactoryImple` 생성 (Remote + Upload 인프라 포함)
    - `backgroundEventSyncUsecase.change(factory:)` 호출
@@ -79,6 +80,7 @@
 6. `ApplicationPrepareUsecase.prepareSignedOut()`:
    - 사용자 DB close → 100ms 대기
    - 비로그인 DB open (`models.db` — uid 없음)
+   - 선택된 컬러 테마가 커스텀이면 `systemTheme` 으로 초기화
 7. `NonLoginUsecaseFactoryImple`로 전환 → UI 재구성
 
 **계정 삭제 시** (`AccountUsecaseImple.deleteAccount`):
