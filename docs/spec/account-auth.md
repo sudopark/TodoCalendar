@@ -123,6 +123,8 @@
 
 1~4 중 하나라도 실패하면 이전 전체가 실패하고 임시 DB 가 남는다. 5·6 의 실패는 무시한다. 이전 필요 건수는 할일·일정·커스텀 테마 개수의 합이다.
 
+**계정 로컬 DB 반영**: 각 단계는 업로드에 성공하면 임시 행을 지우기 전에 같은 데이터를 계정 로컬 DB(`models_{uid}.db`)에도 쓴다. 이전이 끝나면 서버를 다시 조회하지 않아도 옮긴 이벤트와 테마가 바로 보인다. 계정 로컬 쓰기가 실패하면 로그만 남기고 이전은 성공으로 끝낸다. 서버에는 이미 올라갔으니 이후 동기화나 조회가 계정 로컬을 채운다 — 태그·할일·일정은 동기화가(`SyncDataType` 이 그 셋이다), 상세·완료 할일·테마는 그 화면의 조회가 캐시를 갱신한다.
+
 **UI 상태 Publishers**:
 - `isNeedMigration: AnyPublisher<Bool, Never>` — 마이그레이션 필요 여부
 - `migrationNeedEventCount: AnyPublisher<Int, Never>` — 마이그레이션 필요 건수 (ManageAccount 화면에 표시)
@@ -178,6 +180,7 @@ sequenceDiagram
     participant Med as EventSyncMediator
     participant Local as 비로그인 DB
     participant Remote as 서버 API
+    participant Account as 계정 DB
 
     User->>VM: 마이그레이션 시작
     VM->>Mig: startMigration()
@@ -188,21 +191,27 @@ sequenceDiagram
         Mig->>Local: 1. EventTag 로드
         Local-->>Mig: [CustomEventTag]
         Mig->>Remote: PUT /tags (일괄 업로드)
+        Mig->>Account: EventTag 쓰기
 
         Mig->>Local: 2. TodoEvent 로드
         Mig->>Remote: PUT /todos
+        Mig->>Account: TodoEvent 쓰기
 
         Mig->>Local: 3. ScheduleEvent 로드
         Mig->>Remote: PUT /schedules
+        Mig->>Account: ScheduleEvent 쓰기
 
         Mig->>Local: 4. CustomColorTheme 로드
         Mig->>Remote: POST /migration/color_themes
+        Mig->>Account: CustomColorTheme 쓰기
 
         Mig->>Local: 5. EventDetailData 로드
         Mig->>Remote: POST /event_details
+        Mig->>Account: EventDetailData 쓰기
 
         Mig->>Local: 6. DoneTodoEvent 로드
         Mig->>Remote: PUT /done_todos
+        Mig->>Account: DoneTodoEvent·상세 쓰기
     end
 
     Mig->>Med: isTemporaryUserDataMigration = false
