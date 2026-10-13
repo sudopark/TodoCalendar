@@ -11,7 +11,6 @@ import Combine
 import Prelude
 import Optics
 import Domain
-import Scenes
 import Extensions
 import UnitTestHelpKit
 import TestDoubles
@@ -25,21 +24,6 @@ final class SpyWidgetGalleryDetailRouter: BaseSpyRouter, WidgetGalleryDetailRout
 
     func routeToStyleEdit(_ variants: [WidgetVariant], setting: WidgetAppearanceSettings) {
         self.routedStyleEditVariants = variants
-    }
-
-    private(set) var didShowPaidFeatureAdGuideWith: PaidFeatureGateFailReason?
-    private var onAdGuideFinished: (@Sendable (Bool) -> Void)?
-
-    func showPaidFeatureAdGuide(
-        _ reason: PaidFeatureGateFailReason,
-        onFinished: @escaping @Sendable (Bool) -> Void
-    ) {
-        self.didShowPaidFeatureAdGuideWith = reason
-        self.onAdGuideFinished = onFinished
-    }
-
-    func finishAdGuide(shouldProceed: Bool) {
-        self.onAdGuideFinished?(shouldProceed)
     }
 }
 
@@ -317,66 +301,6 @@ extension WidgetGalleryDetailViewModelImpleTests {
             .oneWeekEvents, .twoWeekEvents, .threeWeekEvents, .fourWeekEvents,
             .currentMonthEvents, .lastMonthEvents, .nextMonthEvents
         ])
-    }
-}
-
-
-// MARK: - customize 진입 게이트
-
-extension WidgetGalleryDetailViewModelImpleTests {
-
-    private var customizeReason: PaidFeatureGateFailReason { .init(feature: .customizeWidget, licenseDays: 7) }
-
-    private func makeBlockedViewModel(
-        router: SpyWidgetGalleryDetailRouter
-    ) -> (WidgetGalleryDetailViewModelImple, StubWidgetStyleUsecase) {
-        let usecase = StubWidgetStyleUsecase()
-        usecase.mockCustomizeBlockedReason = self.customizeReason
-        let viewModel = self.makeViewModel(.todaySummary, router: router, styleUsecase: usecase)
-        return (viewModel, usecase)
-    }
-
-    @Test("꾸미기 권한이 없으면 편집 화면 대신 게이트가 막은 사유로 안내를 띄운다")
-    func editStyle_whenCustomizeBlocked_showsGuideInsteadOfRouting() {
-        // given
-        let router = SpyWidgetGalleryDetailRouter()
-        let (viewModel, _) = self.makeBlockedViewModel(router: router)
-
-        // when
-        viewModel.editStyle(.todaySummarySmall)
-
-        // then
-        #expect(router.didShowPaidFeatureAdGuideWith == self.customizeReason)
-        #expect(router.routedStyleEditVariants == nil)
-    }
-
-    @Test("안내가 진행으로 끝나면 다시 검사하고 편집 화면으로 간다")
-    func editStyle_whenGuideFinishedToProceed_routes() {
-        // given
-        let router = SpyWidgetGalleryDetailRouter()
-        let (viewModel, usecase) = self.makeBlockedViewModel(router: router)
-        viewModel.editStyle(.todaySummarySmall)
-        usecase.mockCustomizeBlockedReason = nil
-
-        // when
-        router.finishAdGuide(shouldProceed: true)
-
-        // then
-        #expect(router.routedStyleEditVariants == [.todaySummarySmall])
-    }
-
-    @Test("안내가 진행 없이 끝나면 편집 화면으로 가지 않는다")
-    func editStyle_whenGuideFinishedWithoutProceed_doesNotRoute() {
-        // given
-        let router = SpyWidgetGalleryDetailRouter()
-        let (viewModel, _) = self.makeBlockedViewModel(router: router)
-        viewModel.editStyle(.todaySummarySmall)
-
-        // when
-        router.finishAdGuide(shouldProceed: false)
-
-        // then
-        #expect(router.routedStyleEditVariants == nil)
     }
 }
 

@@ -123,21 +123,18 @@ extension WidgetStyleEditViewModelImple {
     }
     
     func appendStyle(copying styleId: WidgetStyleId) {
-        self.editAfterAdGuideIfBlocked { [weak self] in
-            guard let self,
-                  let styles = self.subject.editingStyles.value,
-                  let source = styles.first(where: { $0.id == styleId })
-            else { return }
-            let newStyle = WidgetStyle(
-                id: self.widgetStyleUsecase.makeNewStyleId(for: source.id.variant),
-                name: self.copiedName(from: source, in: styles),
-                setting: source.setting,
-                background: source.background,
-                photo: source.photo.flatMap { self.widgetStyleUsecase.makeDraftPhoto(copying: $0) }
-            )
-            self.subject.editingStyles.send(styles + [newStyle])
-            self.select(newStyle.id)
-        }
+        guard let styles = self.subject.editingStyles.value,
+              let source = styles.first(where: { $0.id == styleId })
+        else { return }
+        let newStyle = WidgetStyle(
+            id: self.widgetStyleUsecase.makeNewStyleId(for: source.id.variant),
+            name: self.copiedName(from: source, in: styles),
+            setting: source.setting,
+            background: source.background,
+            photo: source.photo.flatMap { self.widgetStyleUsecase.makeDraftPhoto(copying: $0) }
+        )
+        self.subject.editingStyles.send(styles + [newStyle])
+        self.select(newStyle.id)
     }
     
     func removeStyle(_ styleId: WidgetStyleId) {
@@ -151,22 +148,20 @@ extension WidgetStyleEditViewModelImple {
     }
     
     func resetStyle(_ styleId: WidgetStyleId) {
-        self.editAfterAdGuideIfBlocked { [weak self] in
-            guard let initialSetting = styleId.variant.initialSetting else { return }
-            let confirmed: () -> Void = { [weak self] in
-                self?.replaceStyle(styleId) {
-                    $0 |> \.setting .~ initialSetting |> \.name .~ nil
-                        |> \.background .~ nil |> \.photo .~ nil
-                }
-                self?.refreshEditingName()
+        guard let initialSetting = styleId.variant.initialSetting else { return }
+        let confirmed: () -> Void = { [weak self] in
+            self?.replaceStyle(styleId) {
+                $0 |> \.setting .~ initialSetting |> \.name .~ nil
+                    |> \.background .~ nil |> \.photo .~ nil
             }
-            let info = ConfirmDialogInfo()
-                |> \.message .~ pure("widget.style.edit::reset::message".localized())
-                |> \.confirmText .~ "widget.style.edit::reset::confirm".localized()
-                |> \.confirmed .~ pure(confirmed)
-                |> \.withCancel .~ true
-            self?.router?.showConfirm(dialog: info)
+            self?.refreshEditingName()
         }
+        let info = ConfirmDialogInfo()
+            |> \.message .~ pure("widget.style.edit::reset::message".localized())
+            |> \.confirmText .~ "widget.style.edit::reset::confirm".localized()
+            |> \.confirmed .~ pure(confirmed)
+            |> \.withCancel .~ true
+        self.router?.showConfirm(dialog: info)
     }
     
     /// 저장본이 없는 초안을 되돌리면 남길 값이 없어 목록에서 뺀다.
@@ -186,32 +181,24 @@ extension WidgetStyleEditViewModelImple {
         guard let selectedId = self.subject.selectedStyleId.value,
               self.editingStyle(of: selectedId)?.name != trimmed
         else { return }
-        self.editAfterAdGuideIfBlocked { [weak self] in
-            self?.updateSelectedStyle { $0 |> \.name .~ trimmed }
-        }
+        self.updateSelectedStyle { $0 |> \.name .~ trimmed }
     }
     
     /// 다른 변형의 설정이 섞이면 저장 때 조용히 막힌다 — 들어오는 자리에서 끊는다.
     func updateSetting(_ setting: any WidgetStyleSetting) {
         guard self.variants.first?.isOwnSetting(setting) == true else { return }
-        self.editAfterAdGuideIfBlocked { [weak self] in
-            self?.updateSelectedStyle { $0 |> \.setting .~ setting }
-        }
+        self.updateSelectedStyle { $0 |> \.setting .~ setting }
     }
     
     /// nil 은 전역 설정을 따른다는 뜻이라, 되돌리는 것도 색을 고르는 것과 같은 명령이다.
     func updateBackground(_ background: WidgetAppearanceSettings.Background?) {
-        self.editAfterAdGuideIfBlocked { [weak self] in
-            self?.updateSelectedStyle { $0 |> \.background .~ background }
-        }
+        self.updateSelectedStyle { $0 |> \.background .~ background }
     }
     
     func selectPhoto() {
-        self.editAfterAdGuideIfBlocked { [weak self] in
-            self?.router?.routeToPhotoPick { [weak self] data in
-                guard let data else { return }
-                self?.updatePhoto(data)
-            }
+        self.router?.routeToPhotoPick { [weak self] data in
+            guard let data else { return }
+            self?.updatePhoto(data)
         }
     }
     
@@ -387,22 +374,11 @@ extension WidgetStyleEditViewModelImple {
 }
 
 
-// MARK: - 꾸미기 사용권
+// MARK: - 저장 게이트
 
 extension WidgetStyleEditViewModelImple {
 
-    private func editAfterAdGuideIfBlocked(_ edit: @escaping @Sendable () -> Void) {
-        do {
-            try self.widgetStyleUsecase.checkCustomizable()
-            edit()
-        } catch let reason as PaidFeatureGateFailReason {
-            self.showAdGuide(reason) { [weak self] in self?.editAfterAdGuideIfBlocked(edit) }
-        } catch {
-            self.router?.showError(error)
-        }
-    }
-
-    /// 슬라이더처럼 연달아 들어오는 수정이 시트를 겹쳐 띄우지 않게 한 번에 하나만 띄운다
+    /// 저장 버튼 연타나 닫기 저장이 시트를 겹쳐 띄우지 않게 한 번에 하나만 띄운다
     private func showAdGuide(
         _ reason: PaidFeatureGateFailReason, thenRetry retry: @escaping @Sendable () -> Void
     ) {
@@ -411,7 +387,6 @@ extension WidgetStyleEditViewModelImple {
         self.router?.showPaidFeatureAdGuide(reason) { [weak self] shouldProceed in
             self?.subject.isAdGuideInProgress.send(false)
             guard shouldProceed else { return }
-            WidgetCenter.shared.reloadAllTimelines()
             retry()
         }
     }

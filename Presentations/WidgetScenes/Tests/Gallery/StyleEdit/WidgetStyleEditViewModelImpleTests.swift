@@ -1687,13 +1687,9 @@ extension WidgetStyleEditViewModelImpleTests {
 }
 
 
-// MARK: - 꾸미기 게이트
+// MARK: - 저장 게이트
 
 extension WidgetStyleEditViewModelImpleTests {
-
-    private var copyOfSummerName: String {
-        return "widget.style::custom::copy_format".localized(with: "여름")
-    }
 
     @Test("꾸미기 권한이 있으면 안내 없이 바로 카드를 더한다")
     func viewModel_whenCustomizeAllowed_addStyleAppendsWithoutGuide() async throws {
@@ -1710,34 +1706,87 @@ extension WidgetStyleEditViewModelImpleTests {
         #expect(router.didShowPaidFeatureAdGuideWith == nil)
     }
 
-    @Test("꾸미기 권한이 없으면 복제는 위젯 꾸미기 안내를 띄우고 카드를 더하지 않는다")
-    func viewModel_whenCustomizeBlocked_appendStyleShowsGuide() async throws {
+    @Test("꾸미기 권한이 없어도 복제·설정·이름·배경 편집은 안내 없이 편집분으로 남는다")
+    func viewModel_whenCustomizeBlocked_editsWithoutAdGuide() async throws {
         // given
         let router = SpyWidgetStyleEditRouter()
-        let (viewModel, _) = self.makeViewModelWithCustom(router: router, customizeBlocked: true)
-
-        // when
-        viewModel.appendStyle(copying: self.customId)
-
-        // then
-        #expect(router.didShowPaidFeatureAdGuideWith == PaidFeatureGateFailReason(feature: .customizeWidget, licenseDays: 7))
-        let emitted = try await self.styles(of: viewModel)
-        #expect(emitted.count == 2)
-    }
-
-    @Test("꾸미기 권한이 없으면 설정 수정은 안내를 띄우고 편집분을 남기지 않는다")
-    func viewModel_whenCustomizeBlocked_updateSettingShowsGuideWithoutEdit() async throws {
-        // given
-        let router = SpyWidgetStyleEditRouter()
-        let (viewModel, _) = self.makeViewModelWithCustom(router: router, customizeBlocked: true)
+        let (viewModel, _) = self.makeViewModelWithCustom(name: "여름", router: router, customizeBlocked: true)
+        viewModel.selectStyle(self.customId)
 
         // when
         viewModel.updateSetting(self.settingTurningOff(.showTodoCount))
+        viewModel.editName("가을")
+        viewModel.updateBackground(.custom(hex: "#101820"))
+        viewModel.appendStyle(copying: self.customId)
+
+        // then
+        #expect(router.didShowPaidFeatureAdGuideWith == nil)
+        let emitted = try await self.styles(of: viewModel)
+        #expect(emitted.count == 3)
+        #expect(emitted.map { $0.hasUnsavedChange } == [false, true, true])
+        #expect(emitted[1].name == "가을")
+        #expect(emitted[1].background == .custom(hex: "#101820"))
+    }
+
+    @Test("꾸미기 권한이 없어도 초기화는 안내 없이 확인을 묻는다")
+    func viewModel_whenCustomizeBlocked_resetShowsConfirm() {
+        // given
+        let router = SpyWidgetStyleEditRouter()
+        let (viewModel, _) = self.makeViewModelWithCustom(router: router, customizeBlocked: true)
+
+        // when
+        viewModel.resetStyle(self.customId)
+
+        // then
+        #expect(router.didShowPaidFeatureAdGuideWith == nil)
+        #expect(router.didShowConfirmWith != nil)
+    }
+
+    @Test("꾸미기 권한이 없어도 사진 고르기는 안내 없이 사진 선택을 연다")
+    func viewModel_whenCustomizeBlocked_selectPhotoRoutesToPicker() {
+        // given
+        let router = SpyWidgetStyleEditRouter()
+        let (viewModel, _) = self.makeViewModelWithCustom(router: router, customizeBlocked: true)
+
+        // when
+        viewModel.selectPhoto()
+
+        // then
+        #expect(router.didShowPaidFeatureAdGuideWith == nil)
+        #expect(router.didRequestPhotoPick == true)
+    }
+
+    @Test("저장 안내가 떠 있는 동안 다시 저장해도 안내를 겹쳐 띄우지 않는다")
+    func viewModel_whenSaveGuideInProgress_doesNotStackGuides() {
+        // given
+        let router = SpyWidgetStyleEditRouter()
+        let (viewModel, _) = self.makeViewModelWithCustom(router: router, customizeBlocked: true)
+        viewModel.updateSetting(self.settingTurningOff(.showTodoCount))
+        viewModel.confirm()
+        router.didShowPaidFeatureAdGuideWith = nil
+
+        // when
+        viewModel.confirm()
+
+        // then
+        #expect(router.didShowPaidFeatureAdGuideWith == nil)
+    }
+
+    @Test("저장 안내를 닫고 나면 다음 저장에서 안내를 다시 띄운다")
+    func viewModel_whenSaveGuideClosed_showsGuideAgainOnNextSave() {
+        // given
+        let router = SpyWidgetStyleEditRouter()
+        let (viewModel, _) = self.makeViewModelWithCustom(router: router, customizeBlocked: true)
+        viewModel.updateSetting(self.settingTurningOff(.showTodoCount))
+        viewModel.confirm()
+        router.finishAdGuide(shouldProceed: false)
+        router.didShowPaidFeatureAdGuideWith = nil
+
+        // when
+        viewModel.confirm()
 
         // then
         #expect(router.didShowPaidFeatureAdGuideWith == PaidFeatureGateFailReason(feature: .customizeWidget, licenseDays: 7))
-        let emitted = try await self.styles(of: viewModel)
-        #expect(emitted.map { $0.hasUnsavedChange } == [false, false])
     }
 
     @Test("꾸미기 권한이 없으면 저장은 안내를 띄우고 저장하지 않는다")
@@ -1756,175 +1805,6 @@ extension WidgetStyleEditViewModelImpleTests {
         let emitted = try await self.styles(of: viewModel)
         #expect(emitted.map { $0.hasUnsavedChange } == [true, false])
         #expect(router.didShowToastWithMessage == nil)
-    }
-
-    @Test("안내가 진행으로 끝나면 막혔던 복제를 이어서 한다")
-    func viewModel_whenGuideProceeds_appendsBlockedCopy() async throws {
-        // given
-        let router = SpyWidgetStyleEditRouter()
-        let (viewModel, usecase) = self.makeViewModelWithCustom(name: "여름", router: router, customizeBlocked: true)
-        viewModel.appendStyle(copying: self.customId)
-        usecase.mockCustomizeBlockedReason = nil
-
-        // when
-        router.finishAdGuide(shouldProceed: true)
-
-        // then
-        let emitted = try await self.styles(of: viewModel)
-        #expect(emitted.map { $0.name } == [
-            "widget.style::default".localized(), "여름", self.copyOfSummerName
-        ])
-    }
-
-    @Test("안내가 진행으로 끝나면 막혔던 수정을 이어서 한다")
-    func viewModel_whenGuideProceeds_updatesBlockedSetting() async throws {
-        // given
-        let router = SpyWidgetStyleEditRouter()
-        let (viewModel, usecase) = self.makeViewModelWithCustom(router: router, customizeBlocked: true)
-        viewModel.updateSetting(self.settingTurningOff(.showTodoCount))
-        usecase.mockCustomizeBlockedReason = nil
-
-        // when
-        router.finishAdGuide(shouldProceed: true)
-
-        // then
-        let emitted = try await self.styles(of: viewModel)
-        #expect(emitted.map { $0.hasUnsavedChange } == [true, false])
-    }
-
-    @Test("안내가 진행 없이 끝나면 편집분을 남기지 않는다")
-    func viewModel_whenGuideNotProceed_keepsNoEdit() async throws {
-        // given
-        let router = SpyWidgetStyleEditRouter()
-        let (viewModel, usecase) = self.makeViewModelWithCustom(router: router, customizeBlocked: true)
-        viewModel.appendStyle(copying: self.customId)
-
-        // when
-        router.finishAdGuide(shouldProceed: false)
-
-        // then
-        let emitted = try await self.styles(of: viewModel)
-        #expect(emitted.count == 2)
-    }
-
-    @Test("안내를 닫거나 플랜 보기를 고르면 아무것도 이어서 하지 않는다")
-    func viewModel_whenGuideClosed_doesNothing() async throws {
-        // given
-        let router = SpyWidgetStyleEditRouter()
-        let (viewModel, usecase) = self.makeViewModelWithCustom(router: router, customizeBlocked: true)
-        viewModel.appendStyle(copying: self.customId)
-
-        // when
-        router.finishAdGuide(shouldProceed: false)
-
-        // then
-        let emitted = try await self.styles(of: viewModel)
-        #expect(emitted.count == 2)
-    }
-
-    @Test("꾸미기 권한이 없으면 초기화는 안내만 띄우고 확인을 묻지 않는다")
-    func viewModel_whenCustomizeBlocked_resetShowsGuideWithoutConfirm() {
-        // given
-        let router = SpyWidgetStyleEditRouter()
-        let (viewModel, _) = self.makeViewModelWithCustom(router: router, customizeBlocked: true)
-
-        // when
-        viewModel.resetStyle(self.customId)
-
-        // then
-        #expect(router.didShowPaidFeatureAdGuideWith == PaidFeatureGateFailReason(feature: .customizeWidget, licenseDays: 7))
-        #expect(router.didShowConfirmWith == nil)
-    }
-
-    @Test("꾸미기 권한이 없으면 이름을 바꾸려 할 때 안내를 띄우고 이름을 바꾸지 않는다")
-    func viewModel_whenCustomizeBlocked_editNameShowsGuideWithoutRename() async throws {
-        // given
-        let router = SpyWidgetStyleEditRouter()
-        let (viewModel, _) = self.makeViewModelWithCustom(router: router, customizeBlocked: true)
-
-        // when
-        viewModel.editName("새 이름")
-
-        // then
-        #expect(router.didShowPaidFeatureAdGuideWith == PaidFeatureGateFailReason(feature: .customizeWidget, licenseDays: 7))
-        let emitted = try await self.styles(of: viewModel)
-        #expect(emitted.map { $0.hasUnsavedChange } == [false, false])
-    }
-
-    @Test("이름이 그대로면 권한이 없어도 안내를 띄우지 않는다")
-    func viewModel_whenCustomizeBlockedAndNameUnchanged_noGuide() {
-        // given
-        let router = SpyWidgetStyleEditRouter()
-        let (viewModel, _) = self.makeViewModelWithCustom(
-            name: "밤", router: router, customizeBlocked: true
-        )
-        viewModel.selectStyle(self.customId)
-
-        // when
-        viewModel.editName("밤")
-
-        // then
-        #expect(router.didShowPaidFeatureAdGuideWith == nil)
-    }
-
-    @Test("꾸미기 권한이 없으면 배경 수정은 안내를 띄우고 편집분을 남기지 않는다")
-    func viewModel_whenCustomizeBlocked_updateBackgroundShowsGuideWithoutEdit() async throws {
-        // given
-        let router = SpyWidgetStyleEditRouter()
-        let (viewModel, _) = self.makeViewModelWithCustom(router: router, customizeBlocked: true)
-
-        // when
-        viewModel.updateBackground(.custom(hex: "#101820"))
-
-        // then
-        #expect(router.didShowPaidFeatureAdGuideWith == PaidFeatureGateFailReason(feature: .customizeWidget, licenseDays: 7))
-        let emitted = try await self.styles(of: viewModel)
-        #expect(emitted.map { $0.hasUnsavedChange } == [false, false])
-    }
-
-    @Test("꾸미기 권한이 없으면 사진 고르기는 안내만 띄우고 사진 선택을 열지 않는다")
-    func viewModel_whenCustomizeBlocked_selectPhotoShowsGuideWithoutPicker() {
-        // given
-        let router = SpyWidgetStyleEditRouter()
-        let (viewModel, _) = self.makeViewModelWithCustom(router: router, customizeBlocked: true)
-
-        // when
-        viewModel.selectPhoto()
-
-        // then
-        #expect(router.didShowPaidFeatureAdGuideWith == PaidFeatureGateFailReason(feature: .customizeWidget, licenseDays: 7))
-        #expect(router.didRequestPhotoPick == false)
-    }
-
-    @Test("안내가 떠 있는 동안 들어온 수정은 안내를 겹쳐 띄우지 않는다")
-    func viewModel_whenGuideInProgress_doesNotStackGuides() {
-        // given
-        let router = SpyWidgetStyleEditRouter()
-        let (viewModel, _) = self.makeViewModelWithCustom(router: router, customizeBlocked: true)
-        viewModel.updateBackground(.custom(hex: "#101820"))
-        router.didShowPaidFeatureAdGuideWith = nil
-
-        // when
-        viewModel.updateBackground(.custom(hex: "#ffffff"))
-
-        // then
-        #expect(router.didShowPaidFeatureAdGuideWith == nil)
-    }
-
-    @Test("안내를 닫고 나면 다음 수정에서 안내를 다시 띄운다")
-    func viewModel_whenGuideClosed_showsGuideAgainOnNextEdit() {
-        // given
-        let router = SpyWidgetStyleEditRouter()
-        let (viewModel, _) = self.makeViewModelWithCustom(router: router, customizeBlocked: true)
-        viewModel.updateBackground(.custom(hex: "#101820"))
-        router.finishAdGuide(shouldProceed: false)
-        router.didShowPaidFeatureAdGuideWith = nil
-
-        // when
-        viewModel.updateBackground(.custom(hex: "#ffffff"))
-
-        // then
-        #expect(router.didShowPaidFeatureAdGuideWith == PaidFeatureGateFailReason(feature: .customizeWidget, licenseDays: 7))
     }
 
     @Test("꾸미기 권한이 없으면 닫기에서 저장을 골라도 안내를 띄우고 닫지 않는다")

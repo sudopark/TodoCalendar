@@ -8,7 +8,6 @@
 
 import Foundation
 import Combine
-import WidgetKit
 import Domain
 import Extensions
 import Scenes
@@ -54,19 +53,6 @@ extension WidgetGalleryDetailViewModelImple {
     
     /// 리로드가 이 집합의 kind 를 훑는다 — 하나만 넘기면 7종 중 하나만 갱신된다.
     func editStyle(_ variant: WidgetVariant) {
-        do {
-            try self.widgetStyleUsecase.checkCustomizable()
-        } catch let reason as PaidFeatureGateFailReason {
-            self.router?.showPaidFeatureAdGuide(reason) { [weak self] shouldProceed in
-                guard shouldProceed else { return }
-                WidgetCenter.shared.reloadAllTimelines()
-                self?.editStyle(variant)
-            }
-            return
-        } catch {
-            self.router?.showError(error)
-            return
-        }
         self.router?.routeToStyleEdit(
             variant.styleSharingVariants, setting: self.currentSetting
         )
