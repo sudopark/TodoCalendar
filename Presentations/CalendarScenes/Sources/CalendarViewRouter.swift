@@ -28,10 +28,6 @@ protocol CalendarViewRouting: Routing, Sendable {
     func routeToPaywall()
 
     func routeToSignIn()
-
-    func showPaidFeatureAdGuide(
-        _ reason: PaidFeatureGateFailReason, onFinished: @escaping @Sendable (Bool) -> Void
-    )
 }
 
 final class CalendarViewRouterImple: BaseRouterImple, CalendarViewRouting, @unchecked Sendable {
@@ -41,21 +37,18 @@ final class CalendarViewRouterImple: BaseRouterImple, CalendarViewRouting, @unch
     private let aiAgentCommandSceneBuilder: any AIAgentCommandSceneBuilder
     private let memberSceneBuilder: any MemberSceneBuilder
     private let paywallSceneBuilder: any PaywallSceneBuilder
-    private let adGuideSceneBuilder: any PaidFeatureAdGuideSceneBuilder
     init(
         _ paperSceneBuilder: any CalendarPaperSceneBuiler,
         twoColumnsSceneBuilder: any CalendarTwoColumnsSceneBuilder,
         aiAgentCommandSceneBuilder: any AIAgentCommandSceneBuilder,
         memberSceneBuilder: any MemberSceneBuilder,
-        paywallSceneBuilder: any PaywallSceneBuilder,
-        adGuideSceneBuilder: any PaidFeatureAdGuideSceneBuilder
+        paywallSceneBuilder: any PaywallSceneBuilder
     ) {
         self.paperSceneBuilder = paperSceneBuilder
         self.twoColumnsSceneBuilder = twoColumnsSceneBuilder
         self.aiAgentCommandSceneBuilder = aiAgentCommandSceneBuilder
         self.memberSceneBuilder = memberSceneBuilder
         self.paywallSceneBuilder = paywallSceneBuilder
-        self.adGuideSceneBuilder = adGuideSceneBuilder
     }
     private var currentScene: (any CalendarScene)? { self.scene as? (any CalendarScene) }
     private var calendarViewController: CalendarViewController? { self.scene as? CalendarViewController }
@@ -135,17 +128,6 @@ final class CalendarViewRouterImple: BaseRouterImple, CalendarViewRouting, @unch
         Task { @MainActor in
             let next = self.memberSceneBuilder.makeSignInScene()
             self.showBottomSlide(next)
-        }
-    }
-
-    func showPaidFeatureAdGuide(
-        _ reason: PaidFeatureGateFailReason, onFinished: @escaping @Sendable (Bool) -> Void
-    ) {
-        Task { @MainActor in
-            let guide = self.adGuideSceneBuilder.makePaidFeatureAdGuideScene(
-                reason: reason, onFinished: onFinished, onUseDefault: nil
-            )
-            self.showBottomSlide(guide)
         }
     }
 }

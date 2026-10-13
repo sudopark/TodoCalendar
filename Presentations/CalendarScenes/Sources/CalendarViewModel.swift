@@ -7,7 +7,6 @@
 
 import UIKit
 import Combine
-import WidgetKit
 import CombineExt
 import Prelude
 import Optics
@@ -51,7 +50,6 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
     private let eventSyncUsecase: any EventSyncUsecase
     private let aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
     private let accountUsecase: any AccountUsecase
-    private let widgetStyleUsecase: any WidgetStyleUsecase
     var router: (any CalendarViewRouting)?
     private var calendarPaperInteractors: [any CalendarPaperSceneInteractor]?
     private var twoColumnsInteractor: (any CalendarTwoColumnsSceneInteractor)?
@@ -74,8 +72,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         eventUploadService: any EventUploadService,
         eventSyncUsecase: any EventSyncUsecase,
         aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase,
-        accountUsecase: any AccountUsecase,
-        widgetStyleUsecase: any WidgetStyleUsecase
+        accountUsecase: any AccountUsecase
     ) {
         self.calendarUsecase = calendarUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
@@ -93,7 +90,6 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         self.eventSyncUsecase = eventSyncUsecase
         self.aiAgentOrchestrationUsecase = aiAgentOrchestrationUsecase
         self.accountUsecase = accountUsecase
-        self.widgetStyleUsecase = widgetStyleUsecase
 
         self.internalBind()
     }
@@ -727,42 +723,6 @@ extension CalendarViewModelImple {
         switch state {
         case .processing, .confirm, .done, .failed: return true
         case .idle, .listening: return false
-        }
-    }
-}
-
-
-// MARK: - 잠긴 위젯 탭 요청
-
-extension CalendarViewModelImple {
-
-    func requestWidgetStyleLicense() {
-        self.subject.monthsInCurrentRange.compactMap { $0 }.first()
-            .sink(receiveValue: { [weak self] _ in
-                self?.router?.dismissPresented(animated: true) { [weak self] in
-                    self?.showWidgetStyleLicenseAdGuide()
-                }
-            })
-            .store(in: self.cancellables)
-    }
-
-    private func showWidgetStyleLicenseAdGuide() {
-        guard let reason = self.widgetCustomizeBlockedReason() else {
-            WidgetCenter.shared.reloadAllTimelines()
-            return
-        }
-        self.router?.showPaidFeatureAdGuide(reason) { shouldProceed in
-            guard shouldProceed else { return }
-            WidgetCenter.shared.reloadAllTimelines()
-        }
-    }
-
-    private func widgetCustomizeBlockedReason() -> PaidFeatureGateFailReason? {
-        do {
-            try self.widgetStyleUsecase.checkCustomizable()
-            return nil
-        } catch {
-            return error as? PaidFeatureGateFailReason
         }
     }
 }

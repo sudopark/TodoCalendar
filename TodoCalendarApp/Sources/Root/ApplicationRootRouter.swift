@@ -495,8 +495,7 @@ extension ApplicationRootRouter {
             aiAgentKeyboardInputSceneBuilder: self.aiAgentKeyboardInputSceneBuilder(),
             aiAgentImageCommandSceneBuilder: self.aiAgentImageCommandSceneBuilder(),
             paywallSceneBuilder: self.paywallSceneBuilder(),
-            fullScreenAdRouter: self.fullScreenAdRouter(),
-            adGuideSceneBuilder: self.paidFeatureAdGuideSceneBuilder()
+            fullScreenAdRouter: self.fullScreenAdRouter()
         )
         self.deepLinkHandler.attach(calendarHandler: builder.calendarDeepLinkHandler)
         return builder

@@ -83,8 +83,7 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable, AsyncEffectW
     
     private func makeViewModel(
         today: CalendarComponent.Day = .init(year: 2023, month: 02, day: 02, weekDay: 5),
-        isSignedIn: Bool = true,
-        widgetCustomizeBlockedReason: PaidFeatureGateFailReason? = nil
+        isSignedIn: Bool = true
     ) -> CalendarViewModelImple {
 
         let calendarUsecase = StubCalendarUsecase(today: today)
@@ -107,10 +106,7 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable, AsyncEffectW
             eventUploadService: self.spyEventUploadService,
             eventSyncUsecase: self.spyEventSyncUsecase,
             aiAgentOrchestrationUsecase: self.stubOrchestration,
-            accountUsecase: StubAccountUsecase(account),
-            widgetStyleUsecase: StubWidgetStyleUsecase(
-                customizeBlockedReason: widgetCustomizeBlockedReason
-            )
+            accountUsecase: StubAccountUsecase(account)
         )
         viewModel.router = self.spyRouter
         viewModel.listener = self.spyListener
@@ -1627,56 +1623,6 @@ extension CalendarViewModelImpleTests {
     }
 }
 
-// MARK: - 잠긴 위젯 탭 요청
-
-extension CalendarViewModelImpleTests {
-
-    func testViewModel_whenWidgetStyleLicenseRequestedAndBlocked_closesPresentedAndShowsAdGuide() async throws {
-        // given
-        let reason = PaidFeatureGateFailReason(feature: .customizeWidget, licenseDays: 7)
-        let viewModel = self.makeViewModel(widgetCustomizeBlockedReason: reason)
-        try await self.prepareInitialMonths(viewModel)
-        self.spyRouter.didDismissPresented = nil
-
-        // when
-        viewModel.requestWidgetStyleLicense()
-
-        // then
-        XCTAssertEqual(self.spyRouter.didDismissPresented, true)
-        XCTAssertEqual(self.spyRouter.didShowPaidFeatureAdGuideWith, reason)
-    }
-
-    func testViewModel_whenWidgetStyleLicenseRequestedAndAllowed_closesPresentedWithoutAdGuide() async throws {
-        // given
-        let viewModel = self.makeViewModel()
-        try await self.prepareInitialMonths(viewModel)
-        self.spyRouter.didDismissPresented = nil
-
-        // when
-        viewModel.requestWidgetStyleLicense()
-
-        // then
-        XCTAssertEqual(self.spyRouter.didDismissPresented, true)
-        XCTAssertNil(self.spyRouter.didShowPaidFeatureAdGuideWith)
-    }
-
-    func testViewModel_whenWidgetStyleLicenseRequestedBeforeMonthsReady_waitsUntilMonthsReady() async throws {
-        // given
-        let reason = PaidFeatureGateFailReason(feature: .customizeWidget, licenseDays: 7)
-        let viewModel = self.makeViewModel(widgetCustomizeBlockedReason: reason)
-
-        // when
-        viewModel.requestWidgetStyleLicense()
-        let beforeReady = self.spyRouter.didShowPaidFeatureAdGuideWith
-        try await self.prepareInitialMonths(viewModel)
-
-        // then
-        XCTAssertNil(beforeReady)
-        XCTAssertEqual(self.spyRouter.didShowPaidFeatureAdGuideWith, reason)
-    }
-}
-
-
 // MARK: - 외부 진입점의 AI 입력 요청 (requestAIEntry)
 
 extension CalendarViewModelImpleTests {
@@ -2087,13 +2033,6 @@ private extension CalendarViewModelImpleTests {
         var didRouteToPaywallCount: Int = 0
         func routeToPaywall() {
             self.didRouteToPaywallCount += 1
-        }
-
-        var didShowPaidFeatureAdGuideWith: PaidFeatureGateFailReason?
-        func showPaidFeatureAdGuide(
-            _ reason: PaidFeatureGateFailReason, onFinished: @escaping @Sendable (Bool) -> Void
-        ) {
-            self.didShowPaidFeatureAdGuideWith = reason
         }
 
         var didRouteToSignIn: Bool?

@@ -65,10 +65,3 @@ public enum AICommandEntryLink {
         return URL(string: "\(AppDeepLink.scheme)://calendar/ai")
     }
 }
-
-
-public enum WidgetStyleLicenseLink {
-    public static var url: URL? {
-        return URL(string: "\(AppDeepLink.scheme)://calendar/widgetLicense")
-    }
-}

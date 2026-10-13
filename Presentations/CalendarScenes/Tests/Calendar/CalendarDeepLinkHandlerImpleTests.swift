@@ -51,10 +51,6 @@ struct CalendarDeepLinkHandlerImpleTests {
         return PendingDeepLink(URL(string: "tc.app://calendar/ai")!)!
     }
 
-    private var widgetLicenseLink: PendingDeepLink {
-        return PendingDeepLink(WidgetStyleLicenseLink.url!)!
-    }
-
     private var unknownPathLink: PendingDeepLink {
         return PendingDeepLink(URL(string: "tc.app://calendar/unknown")!)!
     }
@@ -162,34 +158,6 @@ extension CalendarDeepLinkHandlerImpleTests {
         #expect(self.spyCalendarInteractor.didCalls == [.moveDay, .requestAIEntry])
     }
 
-    @Test("잠긴 위젯 링크면 캘린더에 위젯 사용권 요청을 넘긴다")
-    func handler_whenWidgetLicenseLink_requestWidgetStyleLicense() {
-        // given
-        let handler = self.makeHandler()
-
-        // when
-        let result = handler.handleLink(self.widgetLicenseLink)
-
-        // then
-        #expect(result == .handle)
-        #expect(self.spyCalendarInteractor.didCalls == [.requestWidgetStyleLicense])
-    }
-
-    @Test("캘린더가 붙기 전에 온 잠긴 위젯 링크는 붙을 때 넘긴다")
-    func handler_whenWidgetLicenseLinkBeforeAttach_pendingAndFlush() {
-        // given
-        let handler = self.makeHandler(withCalendarInteractor: false)
-        let result = handler.handleLink(self.widgetLicenseLink)
-        #expect(self.spyCalendarInteractor.didCalls == [])
-
-        // when
-        handler.attach(calendarInteractor: self.spyCalendarInteractor)
-
-        // then
-        #expect(result == .handle)
-        #expect(self.spyCalendarInteractor.didCalls == [.requestWidgetStyleLicense])
-    }
-
     // handle unknown path link
     @Test func handler_whenUnknownPath_needUpdate() {
         // given
@@ -208,7 +176,6 @@ private final class SpyCalendarInteractor: CalendarSceneInteractor, @unchecked S
     enum Call: Equatable {
         case moveDay
         case requestAIEntry
-        case requestWidgetStyleLicense
     }
     var didCalls: [Call] = []
 
@@ -235,10 +202,6 @@ private final class SpyCalendarInteractor: CalendarSceneInteractor, @unchecked S
     func requestAIEntry() {
         self.didRequestAIEntry = true
         self.didCalls.append(.requestAIEntry)
-    }
-
-    func requestWidgetStyleLicense() {
-        self.didCalls.append(.requestWidgetStyleLicense)
     }
 }
 
