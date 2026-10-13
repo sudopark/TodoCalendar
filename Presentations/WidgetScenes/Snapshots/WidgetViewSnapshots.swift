@@ -124,27 +124,6 @@ final class WidgetViewSnapshots: XCTestCase {
     }
 
     @MainActor
-    func test_customStyleLockedView_small() {
-        self.capture("customStyleLocked-small", canvas: WidgetCanvas.small) {
-            WidgetCustomStyleLockedView(family: .systemSmall)
-        }
-    }
-
-    @MainActor
-    func test_customStyleLockedView_medium() {
-        self.capture("customStyleLocked-medium", canvas: WidgetCanvas.medium) {
-            WidgetCustomStyleLockedView(family: .systemMedium)
-        }
-    }
-
-    @MainActor
-    func test_customStyleLockedView_large() {
-        self.capture("customStyleLocked-large", canvas: WidgetCanvas.large) {
-            WidgetCustomStyleLockedView(family: .systemLarge)
-        }
-    }
-
-    @MainActor
     func test_ddaySmallWidgetView_photoBackground() {
         let model = self.fixedDDayModel(
             photo: GradientPhotoFixture(WidgetCanvas.small).photo

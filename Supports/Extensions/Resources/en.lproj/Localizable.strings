@@ -666,9 +666,6 @@
 "widget.style.adGuide::title" = "Watch an ad to customize widgets";
 "widget.style.adGuide::message" = "Watch one ad to customize your widgets freely for %d days.";
 "widget.style.adGuide::plan::message" = "Paid plans let you customize widgets without ads";
-"widget.style.locked::title" = "Widget customization locked";
-"widget.style.locked::action" = "Tap to unlock";
-"widget.style.candidate::locked" = "Unavailable";
 "widget.doubleMonth::name" = "Calendar + Calendar";
 "widget.eventAndMonth::name" = "Events + Calendar";
 "widget.todayAndMonth::name" = "TODAY + Calendar";
