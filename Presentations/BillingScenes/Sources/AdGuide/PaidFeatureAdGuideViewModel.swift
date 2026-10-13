@@ -26,6 +26,7 @@ protocol PaidFeatureAdGuideViewModel: AnyObject, Sendable {
     // presenter
     var reason: AnyPublisher<PaidFeatureGateFailReason, Never> { get }
     var canUseDefault: AnyPublisher<Bool, Never> { get }
+    var canShowPlans: AnyPublisher<Bool, Never> { get }
 }
 
 
@@ -35,6 +36,7 @@ final class PaidFeatureAdGuideViewModelImple: PaidFeatureAdGuideViewModel, @unch
 
     private let failReason: PaidFeatureGateFailReason
     private let paidFeatureGateUsecase: any PaidFeatureGateUsecase
+    private let accountUsecase: any AccountUsecase
     private let onFinished: @Sendable (Bool) -> Void
     private let onUseDefault: (@Sendable () -> Void)?
     private var hasChosenToFinish: Bool = false
@@ -43,11 +45,13 @@ final class PaidFeatureAdGuideViewModelImple: PaidFeatureAdGuideViewModel, @unch
     init(
         reason: PaidFeatureGateFailReason,
         paidFeatureGateUsecase: any PaidFeatureGateUsecase,
+        accountUsecase: any AccountUsecase,
         onFinished: @escaping @Sendable (Bool) -> Void,
         onUseDefault: (@Sendable () -> Void)?
     ) {
         self.failReason = reason
         self.paidFeatureGateUsecase = paidFeatureGateUsecase
+        self.accountUsecase = accountUsecase
         self.onFinished = onFinished
         self.onUseDefault = onUseDefault
     }
@@ -122,5 +126,12 @@ extension PaidFeatureAdGuideViewModelImple {
 
     var canUseDefault: AnyPublisher<Bool, Never> {
         return Just(self.onUseDefault != nil).eraseToAnyPublisher()
+    }
+
+    var canShowPlans: AnyPublisher<Bool, Never> {
+        return self.accountUsecase.currentAccountInfo
+            .map { $0 != nil }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
     }
 }
