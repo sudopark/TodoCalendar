@@ -64,7 +64,8 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
         let migrationRepository = TemporaryUserDataMigrationRepositoryImple(
             tempUserDBPath: temporaryUserDataFilePath,
             remoteAPI: applicationBase.remoteAPI,
-            environmentStorage: applicationBase.userDefaultEnvironmentStorage
+            environmentStorage: applicationBase.userDefaultEnvironmentStorage,
+            accountSqliteService: applicationBase.commonSqliteService
         )
         let migrationUsecase = TemporaryUserDataMigrationUescaseImple(
             migrationRepository: migrationRepository
