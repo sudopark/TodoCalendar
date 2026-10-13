@@ -17,7 +17,6 @@ public protocol CalendarSceneInteractor: Sendable, AnyObject {
     func moveToPreviousMonth()
     func moveToNextMonth()
     func requestAIEntry()
-    func requestWidgetStyleLicense()
 }
 
 extension CalendarSceneInteractor {
