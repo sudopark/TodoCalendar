@@ -20,7 +20,7 @@ import CommonPresentation
     var accentDays: [AccentDays: Bool] = [:]
     var showUnderLine: Bool = false
     var selectedWeekDay: DayOfWeeks = .sunday
-    var selectedColorTheme: ColorThemeModel = .init(.systemTheme)
+    var selectedColorTheme: any ColorThemeModel = BuiltInColorThemeModel(.systemTheme)
     @ObservationIgnored private var didFirstCalendarModelUpdated = false
     
     init(_ setting: CalendarSectionAppearanceSetting) {

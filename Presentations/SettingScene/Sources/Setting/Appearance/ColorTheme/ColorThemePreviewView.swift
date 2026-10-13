@@ -20,18 +20,13 @@ struct ColorThemePreviewView: View {
         let circlePadding: CGFloat
     }
     
-    private let model: ColorThemeModel
     private let metric: Layout
-    private let colorSet: ColorSet
+    private let colorSet: any ColorSet
     @Environment(ViewAppearance.self) private var appearance
     
-    init(model: ColorThemeModel, metric: Layout, isSystemDark: Bool) {
-        self.model = model
+    init(model: any ColorThemeModel, metric: Layout, isSystemDark: Bool) {
         self.metric = metric
-        self.colorSet = model.key.convert(
-            isSystemDarkTheme: isSystemDark,
-            customColorTheme: model.customColorTheme
-        )
+        self.colorSet = model.colorSet(isSystemDarkTheme: isSystemDark)
     }
     
     var body: some View {
@@ -77,10 +72,10 @@ struct ColorThemePreviewView: View {
 
 struct ColorThemeItemView: View {
     
-    private let model: ColorThemeModel
+    private let model: any ColorThemeModel
     @Environment(ViewAppearance.self) private var appearance
     
-    init(model: ColorThemeModel) {
+    init(model: any ColorThemeModel) {
         self.model = model
     }
     

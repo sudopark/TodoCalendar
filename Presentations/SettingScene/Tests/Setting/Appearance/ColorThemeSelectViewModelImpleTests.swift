@@ -135,9 +135,9 @@ extension ColorThemeSelectViewModelImpleTests {
             .store(in: &self.cancelBag)
 
         try await Task.sleep(for: .milliseconds(50))
-        viewModel.selectTheme(.init(.systemTheme))
+        viewModel.selectTheme(BuiltInColorThemeModel(.systemTheme))
         try await Task.sleep(for: .milliseconds(50))
-        viewModel.selectTheme(.init(.defaultDark))
+        viewModel.selectTheme(BuiltInColorThemeModel(.defaultDark))
         try await Task.sleep(for: .milliseconds(50))
 
         // then
@@ -156,9 +156,9 @@ extension ColorThemeSelectViewModelImpleTests {
         viewModel.prepare()
         
         // when
-        viewModel.selectTheme(.init(.systemTheme))
+        viewModel.selectTheme(BuiltInColorThemeModel(.systemTheme))
         try await self.waitEffect("시스템 테마 저장") { colorThemeKeys.last == .systemTheme }
-        viewModel.selectTheme(.init(.defaultDark))
+        viewModel.selectTheme(BuiltInColorThemeModel(.defaultDark))
         try await self.waitEffect("다크 테마 저장") { colorThemeKeys.last == .defaultDark }
         
         // then
@@ -175,7 +175,7 @@ extension ColorThemeSelectViewModelImpleTests {
     
     private func prepareAndWaitCustomModels(
         _ viewModel: ColorThemeSelectViewModelImple
-    ) -> [ColorThemeModel] {
+    ) -> [CustomColorThemeModel] {
         let expect = expectation(description: "커스텀 테마 목록 준비")
         expect.assertForOverFulfill = false
         return self.waitFirstOutput(expect, for: viewModel.customColorThemeModels) {
@@ -194,7 +194,7 @@ extension ColorThemeSelectViewModelImpleTests {
         
         // then
         XCTAssertEqual(models.map { $0.key }, [.custom("b"), .custom("a"), .custom("c")])
-        XCTAssertEqual(models.map { $0.customColorTheme?.uuid }, ["b", "a", "c"])
+        XCTAssertEqual(models.map { $0.theme.uuid }, ["b", "a", "c"])
         XCTAssertEqual(models.map { $0.isSelected }, [false, false, false])
     }
     
@@ -223,7 +223,6 @@ extension ColorThemeSelectViewModelImpleTests {
         
         // then
         XCTAssertEqual(models.count, 3 + AppThemeColorSetKey.allCases.count)
-        XCTAssertEqual(models.filter { $0.customColorTheme != nil }.count, 0)
         XCTAssertEqual(models.filter { $0.key == .custom("a") }.count, 0)
     }
     
@@ -238,7 +237,7 @@ extension ColorThemeSelectViewModelImpleTests {
         
         // when
         let outputs = self.waitOutputs(expect, for: viewModel.customColorThemeModels) {
-            viewModel.selectTheme(ColorThemeModel(themeB))
+            viewModel.selectTheme(CustomColorThemeModel(themeB))
         }
         
         // then
@@ -251,7 +250,7 @@ extension ColorThemeSelectViewModelImpleTests {
         let viewModel = self.makeViewModel(customThemes: [self.makeCustomTheme("a")])
         
         // when
-        viewModel.selectTheme(.init(.defaultDark))
+        viewModel.selectTheme(BuiltInColorThemeModel(.defaultDark))
         try await self.waitEffect("테마 저장") { self.spyUISettingUsecase.didChangeAppearanceSetting != nil }
         
         // then
@@ -278,8 +277,7 @@ extension ColorThemeSelectViewModelImpleTests {
         let viewModel = self.makeViewModel(customThemes: [themeA])
         
         // when
-        viewModel.editCustomTheme(ColorThemeModel(themeA))
-        viewModel.editCustomTheme(.init(.defaultDark))
+        viewModel.editCustomTheme(CustomColorThemeModel(themeA))
         
         // then
         XCTAssertEqual(self.spyRouter.didRouteToEditCustomTheme, true)
@@ -353,7 +351,7 @@ extension ColorThemeSelectViewModelImpleTests {
 
 extension ColorThemeSelectViewModelImpleTests {
     
-    private var paidTheme: ColorThemeModel { .init(.custom("paid")) }
+    private var paidTheme: CustomColorThemeModel { .init(self.makeCustomTheme("paid")) }
     
     private var requestedColorSetKeys: [ColorSetKeys] {
         return self.spyUISettingUsecase.didRequestSelectColorThemeKeys
@@ -362,7 +360,7 @@ extension ColorThemeSelectViewModelImpleTests {
     private var applyReason: PaidFeatureGateFailReason { .init(feature: .colorTheme(.custom("paid")), licenseDays: 7) }
     
     private func selectUntilGuideShown(
-        _ viewModel: ColorThemeSelectViewModelImple, _ model: ColorThemeModel
+        _ viewModel: ColorThemeSelectViewModelImple, _ model: any ColorThemeModel
     ) async throws {
         viewModel.selectTheme(model)
         try await self.waitEffect("광고 안내 표시") { self.spyRouter.didShowPaidFeatureAdGuideWith != nil }
@@ -422,7 +420,7 @@ extension ColorThemeSelectViewModelImpleTests {
         // given
         let themeA = self.makeCustomTheme("a")
         let viewModel = self.makeViewModel(customThemes: [themeA], nextApplyError: self.applyReason)
-        try await self.selectUntilGuideShown(viewModel, ColorThemeModel(themeA))
+        try await self.selectUntilGuideShown(viewModel, CustomColorThemeModel(themeA))
         
         // when
         self.spyRouter.finishAdGuide(shouldProceed: true)
@@ -467,7 +465,7 @@ extension ColorThemeSelectViewModelImpleTests {
         self.spyRouter.didShowPaidFeatureAdGuideWith = nil
         
         // when
-        viewModel.selectTheme(.init(.appTheme(.ruby)))
+        viewModel.selectTheme(BuiltInColorThemeModel(.appTheme(.ruby)))
         viewModel.selectTheme(self.paidTheme)
         try await self.settle()
         
@@ -484,7 +482,7 @@ extension ColorThemeSelectViewModelImpleTests {
         self.spyRouter.finishAdGuide(shouldProceed: false)
         
         // when
-        viewModel.selectTheme(.init(.appTheme(.ruby)))
+        viewModel.selectTheme(BuiltInColorThemeModel(.appTheme(.ruby)))
         try await self.waitEffect("다른 테마 저장") { self.spyUISettingUsecase.didChangeAppearanceSetting != nil }
         
         // then

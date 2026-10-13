@@ -27,8 +27,8 @@ import CommonPresentation
     @ObservationIgnored private var lastListAppearedNavigationBarId: String?
     
     fileprivate var sampleModel: CalendarAppearanceModel = .init(.sunday)
-    fileprivate var themeModels: [ColorThemeModel] = []
-    fileprivate var customThemeModels: [ColorThemeModel] = []
+    fileprivate var themeModels: [BuiltInColorThemeModel] = []
+    fileprivate var customThemeModels: [CustomColorThemeModel] = []
     
     func bind(_ viewModel: any ColorThemeSelectViewModel) {
         
@@ -63,7 +63,8 @@ import CommonPresentation
         self.lastListAppearedNavigationBarId = navigationBarId
         guard let previousId, previousId != navigationBarId else { return nil }
 
-        return (self.themeModels + self.customThemeModels)
+        let models: [any ColorThemeModel] = self.themeModels + self.customThemeModels
+        return models
             .first(where: { $0.isSelected })?
             .key.rawValue
     }
@@ -76,9 +77,9 @@ final class ColorThemeSelectViewEventHandler: Observable {
     // TODO: add handlers
     var onAppear: () -> Void = { }
     var close: () -> Void = { }
-    var selectTheme: (ColorThemeModel) -> Void = { _ in }
+    var selectTheme: (any ColorThemeModel) -> Void = { _ in }
     var createCustomTheme: () -> Void = { }
-    var editCustomTheme: (ColorThemeModel) -> Void = { _ in }
+    var editCustomTheme: (CustomColorThemeModel) -> Void = { _ in }
 
     func bind(_ viewModel: any ColorThemeSelectViewModel) {
         // TODO: bind handlers

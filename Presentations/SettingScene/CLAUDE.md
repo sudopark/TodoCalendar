@@ -183,7 +183,7 @@ graph TD
 | 컴포넌트 | 위치 | 역할 | 사용처 |
 |---|---|---|---|
 | `CalendarAppearanceSampleView` | `Setting/Appearance/CalendarSection/CalendarAppearancePreviewView.swift` | 설정 미리보기용 미니 월간 캘린더 샘플. 색 세트를 주입하면 그 색으로 칠한다 | CalendarAppearancePreviewView, ColorThemeSelectView |
-| `ColorThemePreviewView` / `ColorThemeItemView` | `Setting/Appearance/ColorTheme/ColorThemePreviewView.swift` | 색 테마 미리보기 / 선택 아이템 셀 | ColorTheme 내부 + CalendarAppearancePreviewView |
+| `ColorThemePreviewView` / `ColorThemeItemView` | `Setting/Appearance/ColorTheme/ColorThemePreviewView.swift` | 색 테마 미리보기 / 선택 아이템 셀. 모델은 `ColorThemeModel` 프로토콜(`BuiltInColorThemeModel`·`CustomColorThemeModel`) | ColorTheme 내부 + CalendarAppearancePreviewView |
 
 ---
 
