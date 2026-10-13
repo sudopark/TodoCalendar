@@ -51,14 +51,14 @@ extension PaidFeatureGateUsecaseImple {
     private typealias LicenseTerms = (isEnabled: Bool?, licenseDays: Int?)
 
     public func check(_ feature: PaidFeature, at now: Date) throws {
-        guard self.isExemptByPlanOrTheme(feature) == false,
+        guard self.isFreeToUse(feature) == false,
               let licenseDays = self.enforcedLicenseDays(of: feature),
               self.isLicenseValid(of: feature, licenseDays: licenseDays, at: now) == false
         else { return }
         throw PaidFeatureGateFailReason(feature: feature, licenseDays: licenseDays)
     }
 
-    private func isExemptByPlanOrTheme(_ feature: PaidFeature) -> Bool {
+    private func isFreeToUse(_ feature: PaidFeature) -> Bool {
         let plan = self.planSource.latestUserPlan()
         switch feature {
         case .colorTheme(.custom):
