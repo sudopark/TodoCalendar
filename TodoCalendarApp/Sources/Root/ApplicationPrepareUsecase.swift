@@ -139,10 +139,7 @@ extension ApplicationPrepareUsecaseImple {
     
     func prepareSignedIn(_ auth: Auth) async -> AccountChangePrepareResult {
         await self.endLiveActivities()
-        self.sharedDataStore.clearAll {
-            $0 != ShareDataKeys.accountInfo.rawValue
-            && $0 != ShareDataKeys.externalCalendarAccounts.rawValue
-        }
+        self.sharedDataStore.clearAllForAccountChange(keeping: [.accountInfo])
         
         do {
             try await self.database.async.close()
@@ -156,9 +153,7 @@ extension ApplicationPrepareUsecaseImple {
     
     func prepareSignedOut() async -> AccountChangePrepareResult {
         await self.endLiveActivities()
-        self.sharedDataStore.clearAll {
-            $0 != ShareDataKeys.externalCalendarAccounts.rawValue
-        }
+        self.sharedDataStore.clearAllForAccountChange()
         
         do {
             try await self.database.async.close()

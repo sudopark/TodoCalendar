@@ -120,3 +120,78 @@ extension SharedDataStoreTests {
         XCTAssertEqual(intWillNotRemove, 10)
     }
 }
+
+
+// MARK: - 계정 전환 초기화
+
+extension SharedDataStoreTests {
+
+    private func putAccountChangeFixture() {
+        self.store.put([String].self, key: ShareDataKeys.todos.rawValue, ["todo"])
+        self.store.put(String.self, key: ShareDataKeys.accountInfo.rawValue, "me")
+        self.store.put([String].self, key: ShareDataKeys.googleCalendarEvents.rawValue, ["google-event"])
+        self.store.put([String].self, key: ShareDataKeys.googleCalendarTags.rawValue, ["google-tag"])
+        self.store.put([String].self, key: ShareDataKeys.appleCalendarEvents.rawValue, ["apple-event"])
+        self.store.put([String].self, key: ShareDataKeys.externalCalendarAccounts.rawValue, ["account"])
+        self.store.put(Set<EventTagId>.self, key: ShareDataKeys.offEventTagSet.rawValue, [
+            .custom("app-tag"),
+            .externalCalendar(serviceId: "google", id: "cal-1")
+        ])
+    }
+
+    private func storedStrings(_ key: ShareDataKeys) -> [String]? {
+        return self.store.value([String].self, key: key.rawValue)
+    }
+
+    func testStore_whenAccountChanged_keepExternalCalendarData() {
+        // given
+        self.putAccountChangeFixture()
+
+        // when
+        self.store.clearAllForAccountChange()
+
+        // then
+        XCTAssertEqual(self.storedStrings(.googleCalendarEvents), ["google-event"])
+        XCTAssertEqual(self.storedStrings(.googleCalendarTags), ["google-tag"])
+        XCTAssertEqual(self.storedStrings(.appleCalendarEvents), ["apple-event"])
+        XCTAssertEqual(self.storedStrings(.externalCalendarAccounts), ["account"])
+    }
+
+    func testStore_whenAccountChanged_clearAppAccountData() {
+        // given
+        self.putAccountChangeFixture()
+
+        // when
+        self.store.clearAllForAccountChange()
+
+        // then
+        XCTAssertEqual(self.storedStrings(.todos), nil)
+        XCTAssertEqual(self.store.value(String.self, key: ShareDataKeys.accountInfo.rawValue), nil)
+    }
+
+    func testStore_whenAccountChanged_keepOnlyExternalCalendarOffTags() {
+        // given
+        self.putAccountChangeFixture()
+
+        // when
+        self.store.clearAllForAccountChange()
+
+        // then
+        let offTags = self.store.value(
+            Set<EventTagId>.self, key: ShareDataKeys.offEventTagSet.rawValue
+        )
+        XCTAssertEqual(offTags, [.externalCalendar(serviceId: "google", id: "cal-1")])
+    }
+
+    func testStore_whenAccountChangedWithKeepingKey_keepThatKeyToo() {
+        // given
+        self.putAccountChangeFixture()
+
+        // when
+        self.store.clearAllForAccountChange(keeping: [.accountInfo])
+
+        // then
+        XCTAssertEqual(self.store.value(String.self, key: ShareDataKeys.accountInfo.rawValue), "me")
+        XCTAssertEqual(self.storedStrings(.todos), nil)
+    }
+}

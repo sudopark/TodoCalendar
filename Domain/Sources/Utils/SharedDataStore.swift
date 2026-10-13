@@ -76,6 +76,41 @@ public final class SharedDataStore: @unchecked Sendable {
 }
 
 
+// MARK: - 계정 전환
+
+extension ShareDataKeys {
+
+    // 외부 캘린더 토큰은 KeyChain 에 남아 로그아웃이 안 지운다
+    var survivesAccountChange: Bool {
+        switch self {
+        case .externalCalendarAccounts,
+             .googleCalendarTags, .googleCalendarColors, .googleCalendarEvents,
+             .appleCalendarTags, .appleCalendarEvents:
+            return true
+        default:
+            return false
+        }
+    }
+}
+
+
+extension SharedDataStore {
+
+    public func clearAllForAccountChange(keeping: Set<ShareDataKeys> = []) {
+        let offTagKey = ShareDataKeys.offEventTagSet.rawValue
+        let externalOffTags = (self.value(Set<EventTagId>.self, key: offTagKey) ?? [])
+            .filter { $0.externalServiceId != nil }
+
+        self.clearAll { key in
+            guard key != offTagKey else { return false }
+            guard let dataKey = ShareDataKeys(rawValue: key) else { return true }
+            return dataKey.survivesAccountChange == false && keeping.contains(dataKey) == false
+        }
+        self.put(Set<EventTagId>.self, key: offTagKey, externalOffTags)
+    }
+}
+
+
 extension SharedDataStore {
     
     public func put<V>(_ type: V.Type, key: String, _ value: V) {
