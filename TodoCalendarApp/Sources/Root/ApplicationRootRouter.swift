@@ -85,9 +85,10 @@ final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked
     }
     
     @MainActor
-    func replaceCurrentCustomColorTheme(_ theme: CustomColorTheme?) {
-        self.appearance.customColorTheme = theme
+    func resetCustomColorThemeAfterAccountChanged() {
         guard case .custom = self.appearance.colorSetKey else { return }
+        self.appearance.colorSetKey = .systemTheme
+        self.appearance.customColorTheme = nil
         self.reconvertColorSet()
     }
     
@@ -243,9 +244,7 @@ protocol ApplicationRouting: Routing {
     func setupInitialScene(_ prepareResult: ApplicationPrepareResult) -> (any MainSceneInteractor)?
 
     @MainActor
-    func changeRootSceneAfter(
-        signIn auth: Auth?, prepareResult: AccountChangePrepareResult?
-    ) -> (any MainSceneInteractor)?
+    func changeRootSceneAfter(signIn auth: Auth?) -> (any MainSceneInteractor)?
     func showUpdatePopup(_ requirement: AppUpdateRequirement)
 }
 
@@ -343,10 +342,8 @@ extension ApplicationRootRouter {
     }
 
     @MainActor
-    func changeRootSceneAfter(
-        signIn auth: Auth?, prepareResult: AccountChangePrepareResult?
-    ) -> (any MainSceneInteractor)? {
-        self.viewAppearanceStore.replaceCurrentCustomColorTheme(prepareResult?.currentCustomColorTheme)
+    func changeRootSceneAfter(signIn auth: Auth?) -> (any MainSceneInteractor)? {
+        self.viewAppearanceStore.resetCustomColorThemeAfterAccountChanged()
         self.changeUsecaseFactroy(by: auth)
         return self.refreshRoot(isInitialScene: false)
     }
