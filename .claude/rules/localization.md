@@ -73,7 +73,7 @@ gh issue create --label localization -t "다국어 번역 대기 — en/ko 선�
 - 링크 대상 파일·이미지 URL·헤딩 구조는 en 과 같게 두고, **헤딩 앵커만 번역된 헤딩을 따라간다**
   (`#foremost-event` → ko `#제일-중요한-이벤트`).
 - **스크린샷은 언어별로 찍는다.** `scripts/capture-guide-screenshots.sh <언어>...` 로 촬영해
-  (언어당 약 1분 40초, 백그라운드로 돌리면 시간 제한에 걸리니 **4개씩 포그라운드**로 끊는다)
+  (언어당 4~5분 — #1295 가 WidgetScenes 화면을 더해 19장이다. 백그라운드로 돌리면 시간 제한에 걸리니 **한 언어씩 포그라운드**로 끊는다 — 두 언어를 묶으면 포그라운드 타임아웃 10분에 닿는다)
   `guide/images/<언어>/` 에 넣고, `scripts/rewrite-guide-image-lang.py <terms-repo> --write` 로
   본문 URL 을 그 언어 경로로 돌린다. **en 만은 `en/` 을 만들지 말고 루트 `guide/images/` 를 덮어쓴다** —
   거기가 en 겸 폴백 자리다. md 는 정적이라 폴백이 없어서, 촬영이 밀린 언어는 루트를 계속 가리켜야
