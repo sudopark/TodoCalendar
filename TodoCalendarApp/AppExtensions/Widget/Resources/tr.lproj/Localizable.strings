@@ -10,6 +10,8 @@
 
 "Event" = "Etkinlik";
 "Turn" = "Tekrarlama turu";
+"WidgetStyle" = "Widget stili";
+"Style" = "Stil";
 "EventType" = "Etkinlik türü";
 "Event Types" = "Etkinlik türleri";
 "Exclude all day event" = "Tüm gün etkinliklerini hariç tut";

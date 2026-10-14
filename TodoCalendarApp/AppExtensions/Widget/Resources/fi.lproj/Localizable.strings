@@ -10,6 +10,8 @@
 
 "Event" = "Tapahtuma";
 "Turn" = "Toistokierros";
+"WidgetStyle" = "Widgetin tyyli";
+"Style" = "Tyyli";
 "EventType" = "Tapahtumatyyppi";
 "Event Types" = "Tapahtumatyypit";
 "Exclude all day event" = "Sulje pois koko päivän tapahtumat";
