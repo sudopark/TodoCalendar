@@ -41,6 +41,7 @@ SUITES=(
     "EventListScenesSnapshots|EventListScenesCatalogSnapshots|EventListScenes"
     "SettingSceneSnapshots|SettingSceneCatalogSnapshots|SettingScene"
     "AIAgentSceneSnapshots|AIAgentSceneCatalogSnapshots|AIAgentScene"
+    "WidgetScenesSnapshots|WidgetScenesCatalogSnapshots|WidgetScenes"
     "TodoCalendarAppWidgetSnapshots|WidgetCatalogSnapshots|Widget"
 )
 
@@ -53,6 +54,8 @@ MAPPING=(
     "settings|SettingScene/SettingSceneCatalogSnapshots/test_settingItemList.settingItemList-light.png"
     "event-type-list|SettingScene/SettingSceneCatalogSnapshots/test_eventTypeList.eventTypeList-light.png"
     "appearance-setting|SettingScene/SettingSceneCatalogSnapshots/test_appearanceSetting.appearanceSetting-light.png"
+    "color-theme-select|SettingScene/SettingSceneCatalogSnapshots/test_colorThemeSelect.colorThemeSelect-light.png"
+    "color-theme-edit|SettingScene/SettingSceneCatalogSnapshots/test_colorThemeEdit.colorThemeEdit-light.png"
     "ai-input|AIAgentScene/AIAgentSceneCatalogSnapshots/test_aiInput.aiInput-light.png"
     "ai-result|AIAgentScene/AIAgentSceneCatalogSnapshots/test_aiResult.aiResult-light.png"
     "widget-today-and-next|Widget/WidgetCatalogSnapshots/test_widgetTodayAndNext.widget-today-and-next-light.png"
@@ -60,6 +63,9 @@ MAPPING=(
     "widget-today|Widget/WidgetCatalogSnapshots/test_widgetToday.widget-today-light.png"
     "widget-foremost|Widget/WidgetCatalogSnapshots/test_widgetForemost.widget-foremost-light.png"
     "widget-month|Widget/WidgetCatalogSnapshots/test_widgetMonth.widget-month-light.png"
+    "widget-dday|Widget/WidgetCatalogSnapshots/test_widgetDDay.widget-dday-light.png"
+    "widget-gallery|WidgetScenes/WidgetScenesCatalogSnapshots/test_widgetGallery.widgetGallery-light.png"
+    "widget-style-edit|WidgetScenes/WidgetScenesCatalogSnapshots/test_widgetStyleEdit.widgetStyleEdit-light.png"
 )
 
 capture_lang() {
