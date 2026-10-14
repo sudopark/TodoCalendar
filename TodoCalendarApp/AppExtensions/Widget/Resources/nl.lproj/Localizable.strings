@@ -10,6 +10,8 @@
 
 "Event" = "Gebeurtenis";
 "Turn" = "Herhalingsbeurt";
+"WidgetStyle" = "Widgetstijl";
+"Style" = "Stijl";
 "EventType" = "Gebeurtenistype";
 "Event Types" = "Gebeurtenistypen";
 "Exclude all day event" = "Hele-dag-gebeurtenissen uitsluiten";

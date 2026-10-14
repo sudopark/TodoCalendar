@@ -10,6 +10,8 @@
 
 "Event" = "Ereignis";
 "Turn" = "Wiederholungsrunde";
+"WidgetStyle" = "Widget-Stil";
+"Style" = "Stil";
 "EventType" = "Ereignistyp";
 "Event Types" = "Ereignistypen";
 "Exclude all day event" = "Ganztägige Ereignisse ausschließen";

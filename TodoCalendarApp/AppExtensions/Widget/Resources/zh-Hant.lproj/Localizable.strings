@@ -10,6 +10,8 @@
 
 "Event" = "活動";
 "Turn" = "重複次數";
+"WidgetStyle" = "小工具樣式";
+"Style" = "樣式";
 "EventType" = "活動類型";
 "Event Types" = "活動類型";
 "Exclude all day event" = "排除整天活動";

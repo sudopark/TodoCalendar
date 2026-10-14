@@ -10,6 +10,8 @@
 
 "Event" = "Händelse";
 "Turn" = "Upprepningsomgång";
+"WidgetStyle" = "Widget-stil";
+"Style" = "Stil";
 "EventType" = "Händelsetyp";
 "Event Types" = "Händelsetyper";
 "Exclude all day event" = "Exkludera heldagshändelser";

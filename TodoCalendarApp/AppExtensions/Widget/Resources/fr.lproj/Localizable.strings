@@ -10,6 +10,8 @@
 
 "Event" = "Événement";
 "Turn" = "Tour de répétition";
+"WidgetStyle" = "Style du widget";
+"Style" = "Style";
 "EventType" = "Type d'événement";
 "Event Types" = "Types d'événement";
 "Exclude all day event" = "Exclure les événements toute la journée";

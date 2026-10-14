@@ -10,6 +10,8 @@
 
 "Event" = "Συμβάν";
 "Turn" = "Γύρος επανάληψης";
+"WidgetStyle" = "Στυλ widget";
+"Style" = "Στυλ";
 "EventType" = "Τύπος συμβάντος";
 "Event Types" = "Τύποι συμβάντων";
 "Exclude all day event" = "Εξαίρεση συμβάντων όλης της ημέρας";

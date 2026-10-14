@@ -10,6 +10,8 @@
 
 "Event" = "Esemény";
 "Turn" = "Ismétlési forduló";
+"WidgetStyle" = "Widget stílusa";
+"Style" = "Stílus";
 "EventType" = "Eseménytípus";
 "Event Types" = "Eseménytípusok";
 "Exclude all day event" = "Egész napos események kizárása";

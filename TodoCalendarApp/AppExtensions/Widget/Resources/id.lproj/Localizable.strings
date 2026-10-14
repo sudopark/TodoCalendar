@@ -10,6 +10,8 @@
 
 "Event" = "Acara";
 "Turn" = "Putaran pengulangan";
+"WidgetStyle" = "Gaya widget";
+"Style" = "Gaya";
 "EventType" = "Jenis acara";
 "Event Types" = "Jenis acara";
 "Exclude all day event" = "Kecualikan acara sepanjang hari";

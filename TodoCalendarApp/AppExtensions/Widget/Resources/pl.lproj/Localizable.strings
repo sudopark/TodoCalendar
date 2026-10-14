@@ -10,6 +10,8 @@
 
 "Event" = "Wydarzenie";
 "Turn" = "Runda powtórzenia";
+"WidgetStyle" = "Styl widżetu";
+"Style" = "Styl";
 "EventType" = "Typ wydarzenia";
 "Event Types" = "Typy wydarzeń";
 "Exclude all day event" = "Wyklucz wydarzenia całodniowe";

@@ -10,6 +10,8 @@
 
 "Event" = "इवेंट";
 "Turn" = "दोहराव चक्र";
+"WidgetStyle" = "विजेट स्टाइल";
+"Style" = "स्टाइल";
 "EventType" = "इवेंट प्रकार";
 "Event Types" = "इवेंट प्रकार";
 "Exclude all day event" = "पूरे दिन के इवेंट को बाहर रखें";
