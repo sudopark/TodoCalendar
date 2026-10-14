@@ -1,7 +1,18 @@
-■ Responder aos convites do Google Agenda
-· Toque em "Você" na lista de participantes de um evento do Google Agenda e responda Sim, Talvez ou Não
-· A resposta vai direto para o Google Agenda e, num evento repetido, vale para a série inteira
+■ Personalize seus widgets
+· Dê a cada widget da Tela de Início sua própria cor de fundo e escolha o que ele mostra: nome do mês, cabeçalho dos dias da semana, destaque de hoje e mais
+· Salve vários estilos e escolha um diferente para cada cópia de um widget
+· Veja a prévia de cada widget em Galeria de widgets, dentro de Ajustes, e vá direto para Personalizar
 
-■ Falar com a Siri
-· Comece com uma frase curta que só diz o nome do app — "Ei, To-do Calendar" ou "Perguntar ao To-do Calendar"
-· Não só adicionar: mudar o horário, renomear, marcar como concluído ou excluir, dito do mesmo jeito
+■ Temas de cores
+· Além de Sistema, Claro e Escuro, há 19 novos temas integrados: 11 claros e 8 escuros
+· Escolha um fundo e uma cor de destaque em Novo tema, e o app monta uma paleta que mantém o texto fácil de ler
+· Faça login e seus temas acompanham você nos outros dispositivos
+
+■ Widget de Contagem Regressiva
+· Faça a contagem regressiva dos eventos que importam, na Tela de Início e na Tela Bloqueada
+· Escolha "Adicionar ao widget de Contagem Regressiva" no menu de um evento e ele aparece no topo da lista quando você edita o widget
+· Coloque uma foto atrás e a contagem fica por cima
+
+■ Dois painéis em uma tela maior
+· Abra o iPhone Duo e os eventos do dia escolhido aparecem ao lado do calendário
+· Dobre e volta na hora para uma só coluna, no mesmo mês e dia que você estava vendo

@@ -1,7 +1,18 @@
-■ Trả lời lời mời trên Google Calendar
-· Chạm vào "Bạn" trong danh sách người tham dự của một sự kiện Google Calendar rồi trả lời Có, Có thể hoặc Không
-· Câu trả lời được gửi thẳng lên Google Calendar, và với sự kiện lặp lại thì áp dụng cho cả chuỗi
+■ Tùy chỉnh tiện ích
+· Chọn màu nền và các mục hiển thị (tên tháng, hàng thứ trong tuần, làm nổi bật hôm nay...) riêng cho từng tiện ích trên Màn hình chính
+· Lưu nhiều kiểu và chọn một kiểu khác nhau cho từng bản sao của cùng một tiện ích
+· Xem trước từng tiện ích trong Thư viện tiện ích ở Cài đặt rồi vào thẳng Tùy chỉnh
 
-■ Nói với Siri
-· Bắt đầu bằng một câu ngắn chỉ gọi tên ứng dụng — "Này To-do Calendar" hoặc "Hỏi To-do Calendar"
-· Không chỉ thêm mà còn dời giờ, đổi tên, đánh dấu hoàn thành hay xóa, nói y như vậy
+■ Chủ đề màu
+· Ngoài Hệ thống, Sáng và Tối, có thêm 19 chủ đề tích hợp sẵn: 11 chủ đề sáng và 8 chủ đề tối
+· Chọn màu nền và màu nhấn trong Chủ đề mới, ứng dụng sẽ phối bảng màu để chữ dễ đọc
+· Đăng nhập là các chủ đề của bạn có mặt trên những thiết bị khác
+
+■ Tiện ích D-Day
+· Đếm ngược đến những sự kiện quan trọng ngay trên Màn hình chính và Màn hình khóa
+· Chọn "Thêm vào tiện ích D-Day" trong menu của sự kiện, nó sẽ hiện ở đầu danh sách khi bạn chỉnh sửa tiện ích
+· Đặt ảnh làm nền, số ngày đếm ngược sẽ nằm trên ảnh
+
+■ Hai khung trên màn hình rộng
+· Mở iPhone Duo ra, các sự kiện của ngày bạn chọn sẽ hiện cạnh lịch
+· Gập lại là về một cột ngay, vẫn giữ nguyên tháng và ngày bạn đang xem

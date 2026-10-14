@@ -1,7 +1,18 @@
-■ Auf Einladungen im Google Kalender antworten
-· Tippe in der Teilnehmerliste eines Google-Kalender-Ereignisses auf „Sie“ und antworte mit Ja, Vielleicht oder Nein
-· Die Antwort geht direkt in den Google Kalender, bei einer Wiederholung gilt sie für die ganze Reihe
+■ Widgets anpassen
+· Geben Sie jedem Widget auf dem Home-Bildschirm eine eigene Hintergrundfarbe und wählen Sie, was es zeigt: Monatsname, Wochentagskopf, Hervorhebung von heute und mehr
+· Speichern Sie mehrere Stile und wählen Sie für jede Kopie eines Widgets einen anderen
+· Sehen Sie jedes Widget in der Widget-Galerie unter Einstellungen in der Vorschau und springen Sie direkt zu Anpassen
 
-■ Mit Siri sprechen
-· Fang mit einem kurzen Satz an, der nur den App-Namen nennt – „Hey To-do Calendar“ oder „To-do Calendar etwas fragen“
-· Nicht nur anlegen: Zeit verschieben, umbenennen, als erledigt markieren oder löschen – genauso gesagt
+■ Farbschemata
+· Zusätzlich zu System, Hell und Dunkel gibt es 19 neue integrierte Farbschemata: 11 helle und 8 dunkle
+· Wählen Sie unter Neues Farbschema einen Hintergrund und eine Akzentfarbe, und die App berechnet eine Palette, die den Text gut lesbar hält
+· Melden Sie sich an, und Ihre Farbschemata folgen Ihnen auf Ihre anderen Geräte
+
+■ Countdown-Widget
+· Zählen Sie bis zu den wichtigen Ereignissen herunter, auf dem Home-Bildschirm und auf dem Sperrbildschirm
+· Wählen Sie im Menü eines Ereignisses „Zum Countdown-Widget hinzufügen“, dann steht es beim Bearbeiten des Widgets oben in der Liste
+· Legen Sie ein Foto dahinter, und der Countdown erscheint darauf
+
+■ Zwei Bereiche auf einem breiteren Bildschirm
+· Klappen Sie das iPhone Duo auf, und die Ereignisse des gewählten Tags erscheinen neben dem Kalender
+· Klappen Sie es zu, und Sie sind sofort wieder in einer Spalte, im selben Monat und an demselben Tag wie zuvor

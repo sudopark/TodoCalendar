@@ -1,7 +1,18 @@
-■ Vastaaminen Google-kalenterin kutsuihin
-· Napauta "Sinä" Google-kalenterin tapahtuman osallistujalistassa ja vastaa Kyllä, Ehkä tai Ei
-· Vastaus menee suoraan Google-kalenteriin, ja toistuvassa tapahtumassa se koskee koko sarjaa
+■ Mukauta widgetit
+· Anna jokaiselle Koti-valikon widgetille oma taustaväri ja valitse, mitä se näyttää – kuukauden nimi, viikonpäivien otsikko, tämän päivän korostus ja muuta
+· Tallenna useita tyylejä ja valitse eri tyyli jokaiselle widgetin kopiolle
+· Esikatsele jokaista widgetiä kohdassa Widget-galleria Asetuksissa ja siirry suoraan kohtaan Mukauta
 
-■ Sirille puhuminen
-· Aloita lyhyellä lauseella, joka vain nimeää sovelluksen — "Hei To-do Calendar" tai "Kysy sovellukselta To-do Calendar"
-· Ei pelkkää lisäämistä: ajan siirtäminen, uudelleennimeäminen, valmiiksi merkitseminen tai poistaminen samalla tavalla sanottuna
+■ Väriteemat
+· Kohtien Järjestelmä, Vaalea ja Tumma lisäksi on 19 uutta sisäänrakennettua teemaa – 11 vaaleaa ja 8 tummaa
+· Valitse taustaväri ja korostusväri kohdassa Uusi teema, niin sovellus laskee paletin, jossa teksti pysyy helppolukuisena
+· Kirjaudu sisään, niin teemasi seuraavat mukana muille laitteillesi
+
+■ Lähtölaskenta-widget
+· Laske päiviä tärkeisiin tapahtumiin Koti-valikossa ja lukitusnäytöllä
+· Valitse tapahtuman valikosta "Lisää Lähtölaskenta-widgetiin", niin se ilmestyy luettelon kärkeen, kun muokkaat widgetiä
+· Aseta sen taakse valokuva, niin lähtölaskenta näkyy kuvan päällä
+
+■ Kaksi ruutua leveämmällä näytöllä
+· Avaa iPhone Duo, niin valitun päivän tapahtumat näkyvät kalenterin vieressä
+· Taita se kiinni, niin palaat heti yhteen sarakkeeseen, yhä siihen kuukauteen ja päivään, jota katsoit

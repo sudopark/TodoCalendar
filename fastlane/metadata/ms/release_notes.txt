@@ -1,7 +1,18 @@
-■ Menjawab jemputan Kalendar Google
-· Ketik "Anda" dalam senarai peserta acara Kalendar Google, lalu jawab Ya, Mungkin atau Tidak
-· Jawapan terus masuk ke Kalendar Google, dan bagi acara berulang ia digunakan pada seluruh siri
+■ Suaikan widget
+· Pilih warna latar dan item yang dipaparkan (nama bulan, pengepala hari dalam minggu, serlahan hari ini dan banyak lagi) untuk setiap widget di Skrin Utama
+· Simpan beberapa gaya, kemudian pilih gaya yang berbeza untuk setiap salinan widget
+· Pratonton setiap widget dalam Galeri widget di Tetapan, lalu terus masuk ke Suaikan
 
-■ Bercakap dengan Siri
-· Mulakan dengan ayat pendek yang sekadar menyebut nama apl — "Hai To-do Calendar" atau "Tanya To-do Calendar"
-· Bukan sekadar menambah: alih masa, tukar nama, tanda selesai atau padam dengan cara yang sama
+■ Tema warna
+· Selain Sistem, Cerah dan Gelap, terdapat 19 tema terbina dalam yang baharu: 11 tema cerah dan 8 tema gelap
+· Pilih warna latar dan warna aksen dalam Tema baharu, dan aplikasi akan menyusun palet yang memastikan teks mudah dibaca
+· Log masuk dan tema anda turut tersedia pada peranti lain
+
+■ Widget Hari-D
+· Kira detik ke acara yang penting, di Skrin Utama dan Skrin Kunci
+· Pilih "Tambah ke widget Hari-D" daripada menu sesuatu acara, dan acara itu muncul di bahagian atas senarai apabila anda mengedit widget
+· Letakkan foto sebagai latar, dan kiraan detik dipaparkan di atasnya
+
+■ Dua anak tetingkap pada skrin yang lebih lebar
+· Buka iPhone Duo, dan acara pada hari yang anda pilih muncul di sebelah kalendar
+· Lipat semula, dan paparan terus kembali kepada satu lajur, kekal pada bulan dan hari yang sedang anda lihat
