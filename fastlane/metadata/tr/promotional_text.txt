@@ -1,1 +1,1 @@
-3.1.0 — Hızlı AI girişi geldi. Etkinliği sesle, klavyeyle veya fotoğrafla anlatın; Siri'den, Aksiyon Düğmesi'nden veya Kontrol Merkezi'nden. Uygulamayı açmaya gerek yok.
+3.1.0 — Widget'larınızı özelleştirin, uygulama rengini 19 yerleşik temayla ya da kendi temanızla değiştirin. Yeni Geri Sayım widget'ı ve iPhone Duo'da iki bölme var.
