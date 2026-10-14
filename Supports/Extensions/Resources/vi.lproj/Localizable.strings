@@ -417,7 +417,7 @@
 "manage_account::email" = "Email";
 "manage_account::last_signedIn_at" = "Thời gian đăng nhập gần nhất";
 "manage_account::migration::title" = "Chuyển dữ liệu người dùng tạm thời";
-"manage_account::migration::description" = "Tất cả sự kiện được tạo trước khi đăng nhập (%d sự kiện) đang được chuyển vào tài khoản của bạn.\nCác sự kiện liên kết với tài khoản có thể truy cập từ bất kỳ thiết bị nào.";
+"manage_account::migration::description" = "Tất cả sự kiện và chủ đề màu được tạo trước khi đăng nhập (%d mục) đang được chuyển vào tài khoản của bạn.\nDữ liệu liên kết với tài khoản có thể truy cập từ bất kỳ thiết bị nào.";
 "manage_account::migration_finished::message" = "Đã hoàn tất chuyển dữ liệu!";
 "manage_account::signout_button::title" = "Đăng xuất";
 "manage_account::sign_out::confirm::title" = "Đăng xuất";

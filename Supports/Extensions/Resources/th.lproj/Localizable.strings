@@ -417,7 +417,7 @@
 "manage_account::email" = "อีเมล";
 "manage_account::last_signedIn_at" = "เวลาเข้าสู่ระบบล่าสุด";
 "manage_account::migration::title" = "ย้ายข้อมูลผู้ใช้ชั่วคราว";
-"manage_account::migration::description" = "กิจกรรมทั้งหมดที่สร้างก่อนเข้าสู่ระบบ (%dรายการ) กำลังถูกย้ายไปยังบัญชีของคุณ\nกิจกรรมที่เชื่อมกับบัญชีจะเข้าถึงได้จากทุกอุปกรณ์";
+"manage_account::migration::description" = "กิจกรรมและธีมสีทั้งหมดที่สร้างก่อนเข้าสู่ระบบ (%dรายการ) กำลังถูกย้ายไปยังบัญชีของคุณ\nข้อมูลที่เชื่อมกับบัญชีจะเข้าถึงได้จากทุกอุปกรณ์";
 "manage_account::migration_finished::message" = "ย้ายข้อมูลเสร็จสมบูรณ์!";
 "manage_account::signout_button::title" = "ออกจากระบบ";
 "manage_account::sign_out::confirm::title" = "ออกจากระบบ";

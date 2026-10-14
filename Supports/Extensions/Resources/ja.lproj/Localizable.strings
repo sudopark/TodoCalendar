@@ -416,7 +416,7 @@
 "manage_account::email" = "メールアドレス";
 "manage_account::last_signedIn_at" = "最終ログイン日時";
 "manage_account::migration::title" = "一時ユーザーデータの移行";
-"manage_account::migration::description" = "ログイン前に作成したすべてのイベント（%d件）をアカウントに移行しています。\nアカウントに紐づいたイベントはどの端末からでもアクセスできます。";
+"manage_account::migration::description" = "ログイン前に作成したイベントとカラーテーマ（%d件）をアカウントに移行しています。\nアカウントに紐づいたデータはどの端末からでもアクセスできます。";
 "manage_account::migration_finished::message" = "移行が完了しました！";
 "manage_account::signout_button::title" = "ログアウト";
 "manage_account::sign_out::confirm::title" = "ログアウト";

@@ -417,7 +417,7 @@
 "manage_account::email" = "Correo electrónico";
 "manage_account::last_signedIn_at" = "Última hora de inicio de sesión";
 "manage_account::migration::title" = "Migrar datos de usuario temporales";
-"manage_account::migration::description" = "Todos los eventos creados antes de iniciar sesión (%d evento(s)) se están migrando a tu cuenta.\nLos eventos vinculados a tu cuenta se pueden ver desde cualquier dispositivo.";
+"manage_account::migration::description" = "Los eventos y temas de color creados antes de iniciar sesión (%d elemento(s)) se están migrando a tu cuenta.\nLos datos vinculados a tu cuenta se pueden ver desde cualquier dispositivo.";
 "manage_account::migration_finished::message" = "¡La migración se completó!";
 "manage_account::signout_button::title" = "Cerrar sesión";
 "manage_account::sign_out::confirm::title" = "Cerrar sesión";

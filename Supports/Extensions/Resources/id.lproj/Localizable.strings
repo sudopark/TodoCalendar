@@ -417,7 +417,7 @@
 "manage_account::email" = "Email";
 "manage_account::last_signedIn_at" = "Waktu masuk terakhir";
 "manage_account::migration::title" = "Migrasikan data pengguna sementara";
-"manage_account::migration::description" = "Semua acara yang dibuat sebelum masuk (%d acara) sedang dimigrasikan ke akun Anda.\nAcara yang terhubung ke akun Anda dapat diakses dari perangkat mana pun.";
+"manage_account::migration::description" = "Semua acara dan tema warna yang dibuat sebelum masuk (%d item) sedang dimigrasikan ke akun Anda.\nData yang terhubung ke akun Anda dapat diakses dari perangkat mana pun.";
 "manage_account::migration_finished::message" = "Migrasi selesai!";
 "manage_account::signout_button::title" = "Keluar";
 "manage_account::sign_out::confirm::title" = "Keluar";

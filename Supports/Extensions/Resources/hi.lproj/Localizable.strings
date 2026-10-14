@@ -417,7 +417,7 @@
 "manage_account::email" = "ईमेल";
 "manage_account::last_signedIn_at" = "अंतिम लॉगिन समय";
 "manage_account::migration::title" = "अस्थायी उपयोगकर्ता डेटा माइग्रेट करें";
-"manage_account::migration::description" = "लॉगिन से पहले बनाए गए सभी इवेंट (%d इवेंट) आपके खाते में माइग्रेट किए जा रहे हैं।\nआपके खाते से जुड़े इवेंट किसी भी डिवाइस से एक्सेस किए जा सकते हैं।";
+"manage_account::migration::description" = "लॉगिन से पहले बनाए गए सभी इवेंट और रंग थीम (%d आइटम) आपके खाते में माइग्रेट किए जा रहे हैं।\nआपके खाते से जुड़ा डेटा किसी भी डिवाइस से एक्सेस किया जा सकता है।";
 "manage_account::migration_finished::message" = "माइग्रेशन पूर्ण हुआ!";
 "manage_account::signout_button::title" = "लॉगआउट";
 "manage_account::sign_out::confirm::title" = "लॉगआउट";

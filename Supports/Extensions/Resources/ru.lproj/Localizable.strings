@@ -416,7 +416,7 @@
 "manage_account::email" = "Эл. почта";
 "manage_account::last_signedIn_at" = "Время последнего входа";
 "manage_account::migration::title" = "Перенос временных данных пользователя";
-"manage_account::migration::description" = "Все события, созданные до входа (%d событий), переносятся в ваш аккаунт.\nСобытия, связанные с вашим аккаунтом, доступны с любого устройства.";
+"manage_account::migration::description" = "События и цветовые темы, созданные до входа (количество элементов: %d), переносятся в ваш аккаунт.\nДанные, связанные с вашим аккаунтом, доступны с любого устройства.";
 "manage_account::migration_finished::message" = "Перенос завершён!";
 "manage_account::signout_button::title" = "Выйти";
 "manage_account::sign_out::confirm::title" = "Выйти";

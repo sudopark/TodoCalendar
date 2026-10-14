@@ -416,7 +416,7 @@
 "manage_account::email" = "電子郵件";
 "manage_account::last_signedIn_at" = "上次登入時間";
 "manage_account::migration::title" = "遷移暫存使用者資料";
-"manage_account::migration::description" = "登入前建立的所有活動（共%d項）正在遷移至您的帳號。\n連結至帳號的活動可在任何裝置上存取。";
+"manage_account::migration::description" = "登入前建立的活動和色彩主題（共%d項）正在遷移至您的帳號。\n連結至帳號的資料可在任何裝置上存取。";
 "manage_account::migration_finished::message" = "遷移完成！";
 "manage_account::signout_button::title" = "登出";
 "manage_account::sign_out::confirm::title" = "登出";
