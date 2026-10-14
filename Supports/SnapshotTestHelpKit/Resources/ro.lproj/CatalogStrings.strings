@@ -40,3 +40,8 @@
 
 "catalog.ai::command" = "prânz cu Sara vineri la ora 12";
 "catalog.ai::result" = "„Prânz cu Sara” a fost adăugat vineri, 13 martie, la 12:00.";
+
+// MARK: - 컬러 테마
+
+"catalog.colorTheme::forest" = "Pădure";
+"catalog.colorTheme::dusk" = "Amurg";

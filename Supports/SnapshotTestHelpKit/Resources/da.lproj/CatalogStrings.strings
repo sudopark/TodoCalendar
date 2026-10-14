@@ -40,3 +40,8 @@
 
 "catalog.ai::command" = "frokost med Sara fredag kl. 12";
 "catalog.ai::result" = "“Frokost med Sara” er tilføjet fredag den 13. marts kl. 12:00.";
+
+// MARK: - 컬러 테마
+
+"catalog.colorTheme::forest" = "Skov";
+"catalog.colorTheme::dusk" = "Tusmørke";

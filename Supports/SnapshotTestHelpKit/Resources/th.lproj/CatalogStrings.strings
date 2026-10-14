@@ -40,3 +40,8 @@
 
 "catalog.ai::command" = "มื้อเที่ยงกับซาร่าวันศุกร์เที่ยงตรง";
 "catalog.ai::result" = "เพิ่ม “มื้อเที่ยงกับซาร่า” ในวันศุกร์ที่ 13 มีนาคม เวลา 12:00 แล้ว";
+
+// MARK: - 컬러 테마
+
+"catalog.colorTheme::forest" = "ป่าไม้";
+"catalog.colorTheme::dusk" = "สนธยา";

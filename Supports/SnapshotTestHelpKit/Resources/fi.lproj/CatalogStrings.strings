@@ -40,3 +40,8 @@
 
 "catalog.ai::command" = "lounas Saran kanssa perjantaina keskipäivällä";
 "catalog.ai::result" = "”Lounas Saran kanssa” lisättiin perjantaille 13. maaliskuuta klo 12:00.";
+
+// MARK: - 컬러 테마
+
+"catalog.colorTheme::forest" = "Metsä";
+"catalog.colorTheme::dusk" = "Hämärä";

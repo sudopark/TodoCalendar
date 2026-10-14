@@ -40,3 +40,8 @@
 
 "catalog.ai::command" = "Mittagessen mit Sara am Freitag um 12 Uhr";
 "catalog.ai::result" = "„Mittagessen mit Sara“ wurde für Freitag, 13. März, 12:00 Uhr hinzugefügt.";
+
+// MARK: - 컬러 테마
+
+"catalog.colorTheme::forest" = "Wald";
+"catalog.colorTheme::dusk" = "Dämmerung";

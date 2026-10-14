@@ -40,3 +40,8 @@
 
 "catalog.ai::command" = "makan tengah hari dengan Sara Jumaat tengah hari";
 "catalog.ai::result" = "“Makan tengah hari dengan Sara” ditambah pada Jumaat, 13 Mac jam 12:00.";
+
+// MARK: - 컬러 테마
+
+"catalog.colorTheme::forest" = "Hutan";
+"catalog.colorTheme::dusk" = "Senja";

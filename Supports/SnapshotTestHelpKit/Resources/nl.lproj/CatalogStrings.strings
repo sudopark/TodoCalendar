@@ -40,3 +40,8 @@
 
 "catalog.ai::command" = "vrijdag om twaalf uur lunchen met Sara";
 "catalog.ai::result" = "“Lunch met Sara” toegevoegd op vrijdag 13 maart om 12:00.";
+
+// MARK: - 컬러 테마
+
+"catalog.colorTheme::forest" = "Bos";
+"catalog.colorTheme::dusk" = "Schemering";

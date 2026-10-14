@@ -40,3 +40,8 @@
 
 "catalog.ai::command" = "dinar amb la Sara divendres al migdia";
 "catalog.ai::result" = "«Dinar amb la Sara» afegit al divendres 13 de març a les 12:00.";
+
+// MARK: - 컬러 테마
+
+"catalog.colorTheme::forest" = "Bosc";
+"catalog.colorTheme::dusk" = "Capvespre";

@@ -40,3 +40,8 @@
 
 "catalog.ai::command" = "обід із Сарою в п'ятницю опівдні";
 "catalog.ai::result" = "«Обід із Сарою» додано на п'ятницю, 13 березня, 12:00.";
+
+// MARK: - 컬러 테마
+
+"catalog.colorTheme::forest" = "Ліс";
+"catalog.colorTheme::dusk" = "Сутінки";

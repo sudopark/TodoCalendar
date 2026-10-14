@@ -40,3 +40,8 @@
 
 "catalog.ai::command" = "cuma öğlen Sara ile öğle yemeği";
 "catalog.ai::result" = "“Sara ile öğle yemeği” 13 Mart Cuma 12:00'ye eklendi.";
+
+// MARK: - 컬러 테마
+
+"catalog.colorTheme::forest" = "Orman";
+"catalog.colorTheme::dusk" = "Alacakaranlık";

@@ -40,3 +40,8 @@
 
 "catalog.ai::command" = "oběd se Sárou v pátek v poledne";
 "catalog.ai::result" = "„Oběd se Sárou“ byl přidán na pátek 13. března ve 12:00.";
+
+// MARK: - 컬러 테마
+
+"catalog.colorTheme::forest" = "Les";
+"catalog.colorTheme::dusk" = "Soumrak";
