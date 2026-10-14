@@ -416,7 +416,7 @@
 "manage_account::email" = "E-mail";
 "manage_account::last_signedIn_at" = "Czas ostatniego logowania";
 "manage_account::migration::title" = "Migracja tymczasowych danych użytkownika";
-"manage_account::migration::description" = "Wszystkie wydarzenia utworzone przed zalogowaniem (%d wydarzeń) są migrowane na Twoje konto.\nWydarzenia powiązane z Twoim kontem są dostępne z każdego urządzenia.";
+"manage_account::migration::description" = "Wydarzenia i motywy kolorystyczne utworzone przed zalogowaniem (liczba elementów: %d) są migrowane na Twoje konto.\nDane powiązane z Twoim kontem są dostępne z każdego urządzenia.";
 "manage_account::migration_finished::message" = "Migracja zakończona!";
 "manage_account::signout_button::title" = "Wyloguj się";
 "manage_account::sign_out::confirm::title" = "Wyloguj się";

@@ -417,7 +417,7 @@
 "manage_account::email" = "E-Mail";
 "manage_account::last_signedIn_at" = "Letzte Anmeldezeit";
 "manage_account::migration::title" = "Temporäre Benutzerdaten übertragen";
-"manage_account::migration::description" = "Alle vor der Anmeldung erstellten Ereignisse (%d Ereignis(se)) werden auf Ihr Konto übertragen.\nMit Ihrem Konto verknüpfte Ereignisse können von jedem Gerät aus aufgerufen werden.";
+"manage_account::migration::description" = "Alle vor der Anmeldung erstellten Ereignisse und Farbschemas (%d Element(e)) werden auf Ihr Konto übertragen.\nMit Ihrem Konto verknüpfte Daten können von jedem Gerät aus aufgerufen werden.";
 "manage_account::migration_finished::message" = "Die Übertragung ist abgeschlossen!";
 "manage_account::signout_button::title" = "Abmelden";
 "manage_account::sign_out::confirm::title" = "Abmelden";

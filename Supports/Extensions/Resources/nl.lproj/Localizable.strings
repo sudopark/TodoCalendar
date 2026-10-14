@@ -417,7 +417,7 @@
 "manage_account::email" = "E-mail";
 "manage_account::last_signedIn_at" = "Laatste inlogtijd";
 "manage_account::migration::title" = "Tijdelijke gebruikersgegevens migreren";
-"manage_account::migration::description" = "Alle gebeurtenissen die zijn aangemaakt voordat je inlogde (%d gebeurtenis(sen)) worden gemigreerd naar je account.\nGebeurtenissen die aan je account zijn gekoppeld, zijn toegankelijk vanaf elk apparaat.";
+"manage_account::migration::description" = "Alle gebeurtenissen en kleurthema's die zijn aangemaakt voordat je inlogde (%d item(s)) worden gemigreerd naar je account.\nGegevens die aan je account zijn gekoppeld, zijn toegankelijk vanaf elk apparaat.";
 "manage_account::migration_finished::message" = "Migratie voltooid!";
 "manage_account::signout_button::title" = "Uitloggen";
 "manage_account::sign_out::confirm::title" = "Uitloggen";

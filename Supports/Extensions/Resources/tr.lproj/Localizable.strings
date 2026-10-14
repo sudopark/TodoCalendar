@@ -417,7 +417,7 @@
 "manage_account::email" = "E-posta";
 "manage_account::last_signedIn_at" = "Son giriş zamanı";
 "manage_account::migration::title" = "Geçici kullanıcı verilerini taşı";
-"manage_account::migration::description" = "Giriş yapmadan önce oluşturulan tüm etkinlikler (%d etkinlik) hesabınıza taşınıyor.\nHesabınıza bağlı etkinliklere herhangi bir cihazdan erişebilirsiniz.";
+"manage_account::migration::description" = "Giriş yapmadan önce oluşturulan etkinlikler ve renk temaları (%d öğe) hesabınıza taşınıyor.\nHesabınıza bağlı verilere herhangi bir cihazdan erişebilirsiniz.";
 "manage_account::migration_finished::message" = "Taşıma tamamlandı!";
 "manage_account::signout_button::title" = "Çıkış Yap";
 "manage_account::sign_out::confirm::title" = "Çıkış Yap";

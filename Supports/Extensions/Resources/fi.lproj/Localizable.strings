@@ -417,7 +417,7 @@
 "manage_account::email" = "Sähköposti";
 "manage_account::last_signedIn_at" = "Viimeisin kirjautumisaika";
 "manage_account::migration::title" = "Väliaikaisten käyttäjätietojen siirto";
-"manage_account::migration::description" = "Kaikki ennen kirjautumista luodut tapahtumat (%d tapahtumaa) siirretään tilillesi.\nTiliisi linkitetyt tapahtumat ovat käytettävissä miltä tahansa laitteelta.";
+"manage_account::migration::description" = "Kaikki ennen kirjautumista luodut tapahtumat ja väriteemat (%d kohdetta) siirretään tilillesi.\nTiliisi linkitetyt tiedot ovat käytettävissä miltä tahansa laitteelta.";
 "manage_account::migration_finished::message" = "Siirto on valmis!";
 "manage_account::signout_button::title" = "Kirjaudu ulos";
 "manage_account::sign_out::confirm::title" = "Kirjaudu ulos";

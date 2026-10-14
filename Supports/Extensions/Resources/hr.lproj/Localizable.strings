@@ -416,7 +416,7 @@
 "manage_account::email" = "E-pošta";
 "manage_account::last_signedIn_at" = "Vrijeme zadnje prijave";
 "manage_account::migration::title" = "Prijenos privremenih korisničkih podataka";
-"manage_account::migration::description" = "Svi događaji stvoreni prije prijave (%d događaja) prenose se na vaš račun.\nDogađajima povezanima s vašim računom možete pristupiti s bilo kojeg uređaja.";
+"manage_account::migration::description" = "Događaji i teme boja stvoreni prije prijave (broj stavki: %d) prenose se na vaš račun.\nPodacima povezanima s vašim računom možete pristupiti s bilo kojeg uređaja.";
 "manage_account::migration_finished::message" = "Prijenos je dovršen!";
 "manage_account::signout_button::title" = "Odjava";
 "manage_account::sign_out::confirm::title" = "Odjava";

@@ -417,7 +417,7 @@
 "manage_account::email" = "E-post";
 "manage_account::last_signedIn_at" = "Senaste inloggningstid";
 "manage_account::migration::title" = "Migrera tillfälliga användardata";
-"manage_account::migration::description" = "Alla händelser som skapades innan du loggade in (%d händelse/händelser) migreras till ditt konto.\nHändelser kopplade till ditt konto kan nås från alla enheter.";
+"manage_account::migration::description" = "Alla händelser och färgteman som skapades innan du loggade in (%d objekt) migreras till ditt konto.\nData som är kopplad till ditt konto kan nås från alla enheter.";
 "manage_account::migration_finished::message" = "Migreringen är klar!";
 "manage_account::signout_button::title" = "Logga ut";
 "manage_account::sign_out::confirm::title" = "Logga ut";

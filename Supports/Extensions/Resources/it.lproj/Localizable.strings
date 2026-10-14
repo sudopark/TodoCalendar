@@ -417,7 +417,7 @@
 "manage_account::email" = "Email";
 "manage_account::last_signedIn_at" = "Ultimo accesso";
 "manage_account::migration::title" = "Migra i dati utente temporanei";
-"manage_account::migration::description" = "Tutti gli eventi creati prima dell'accesso (%d evento/i) vengono migrati al tuo account.\nGli eventi collegati al tuo account sono accessibili da qualsiasi dispositivo.";
+"manage_account::migration::description" = "Gli eventi e i temi colore creati prima dell'accesso (%d elemento/i) vengono migrati al tuo account.\nI dati collegati al tuo account sono accessibili da qualsiasi dispositivo.";
 "manage_account::migration_finished::message" = "Migrazione completata!";
 "manage_account::signout_button::title" = "Esci";
 "manage_account::sign_out::confirm::title" = "Esci";

@@ -416,7 +416,7 @@
 "manage_account::email" = "邮箱";
 "manage_account::last_signedIn_at" = "上次登录时间";
 "manage_account::migration::title" = "迁移临时用户数据";
-"manage_account::migration::description" = "登录前创建的所有事件（%d个）正在迁移到您的账户。\n关联到账户的事件可在任何设备上访问。";
+"manage_account::migration::description" = "登录前创建的事件和颜色主题（%d个）正在迁移到您的账户。\n关联到账户的数据可在任何设备上访问。";
 "manage_account::migration_finished::message" = "迁移已完成！";
 "manage_account::signout_button::title" = "退出登录";
 "manage_account::sign_out::confirm::title" = "退出登录";

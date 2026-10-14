@@ -416,7 +416,7 @@
 "manage_account::email" = "E-mail";
 "manage_account::last_signedIn_at" = "Čas posledného prihlásenia";
 "manage_account::migration::title" = "Migrácia dočasných používateľských údajov";
-"manage_account::migration::description" = "Všetky udalosti vytvorené pred prihlásením (%d udalostí) sa migrujú do vášho účtu.\nUdalosti prepojené s vaším účtom sú dostupné z ľubovoľného zariadenia.";
+"manage_account::migration::description" = "Udalosti a farebné témy vytvorené pred prihlásením (počet položiek: %d) sa migrujú do vášho účtu.\nÚdaje prepojené s vaším účtom sú dostupné z ľubovoľného zariadenia.";
 "manage_account::migration_finished::message" = "Migrácia je dokončená!";
 "manage_account::signout_button::title" = "Odhlásiť sa";
 "manage_account::sign_out::confirm::title" = "Odhlásiť sa";

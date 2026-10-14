@@ -417,7 +417,7 @@
 "manage_account::email" = "E-mail";
 "manage_account::last_signedIn_at" = "Ultima autentificare";
 "manage_account::migration::title" = "Migrarea datelor temporare ale utilizatorului";
-"manage_account::migration::description" = "Toate evenimentele create înainte de autentificare (%d evenimente) sunt migrate în contul dvs.\nEvenimentele asociate contului dvs. pot fi accesate de pe orice dispozitiv.";
+"manage_account::migration::description" = "Evenimentele și temele de culoare create înainte de autentificare (%d element(e)) sunt migrate în contul dvs.\nDatele asociate contului dvs. pot fi accesate de pe orice dispozitiv.";
 "manage_account::migration_finished::message" = "Migrarea este completă!";
 "manage_account::signout_button::title" = "Deconectare";
 "manage_account::sign_out::confirm::title" = "Deconectare";

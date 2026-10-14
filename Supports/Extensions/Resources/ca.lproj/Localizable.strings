@@ -417,7 +417,7 @@
 "manage_account::email" = "Correu electrònic";
 "manage_account::last_signedIn_at" = "Última hora d'inici de sessió";
 "manage_account::migration::title" = "Migra les dades temporals de l'usuari";
-"manage_account::migration::description" = "Tots els esdeveniments creats abans d'iniciar sessió (%d esdeveniments) s'estan migrant al vostre compte.\nPodeu accedir als esdeveniments vinculats al vostre compte des de qualsevol dispositiu.";
+"manage_account::migration::description" = "Els esdeveniments i els temes de color creats abans d'iniciar sessió (%d element(s)) s'estan migrant al vostre compte.\nPodeu accedir a les dades vinculades al vostre compte des de qualsevol dispositiu.";
 "manage_account::migration_finished::message" = "La migració ha finalitzat!";
 "manage_account::signout_button::title" = "Tanca la sessió";
 "manage_account::sign_out::confirm::title" = "Tanca la sessió";

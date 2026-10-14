@@ -417,7 +417,7 @@
 "manage_account::email" = "E-mail";
 "manage_account::last_signedIn_at" = "Dernière connexion";
 "manage_account::migration::title" = "Migrer les données utilisateur temporaires";
-"manage_account::migration::description" = "Tous les événements créés avant la connexion (%d événement(s)) sont en cours de migration vers votre compte.\nLes événements liés à votre compte sont accessibles depuis n'importe quel appareil.";
+"manage_account::migration::description" = "Les événements et thèmes de couleur créés avant la connexion (%d élément(s)) sont en cours de migration vers votre compte.\nLes données liées à votre compte sont accessibles depuis n'importe quel appareil.";
 "manage_account::migration_finished::message" = "La migration est terminée !";
 "manage_account::signout_button::title" = "Déconnexion";
 "manage_account::sign_out::confirm::title" = "Déconnexion";
