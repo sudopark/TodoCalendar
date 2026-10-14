@@ -169,6 +169,13 @@ final class WidgetCatalogSnapshots: XCTestCase {
     }
 
     @MainActor
+    func test_widgetDDay() {
+        self.capture("widget-dday", family: .systemSmall, canvas: WidgetCanvas.small) {
+            DDaySmallWidgetView(model: .sample)
+        }
+    }
+
+    @MainActor
     func test_widgetMonth() {
         self.capture("widget-month", family: .systemLarge, canvas: WidgetCanvas.large) {
             let model = WeekEventsViewModel.sample(.wholeMonth(.current))
