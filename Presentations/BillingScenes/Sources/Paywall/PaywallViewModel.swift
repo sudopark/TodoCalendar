@@ -670,6 +670,8 @@ extension PaywallViewModelImple {
         return [
             "billing::paywall::feature::dailyCredits".localized(with: plan.dailyLimit.formatted()),
             plan.isTopupAllowed ? "billing::paywall::feature::topup".localized() : nil,
+            "billing::paywall::feature::customizeWidget".localized(),
+            "billing::paywall::feature::customColorTheme".localized(),
             "billing::paywall::feature::noAds".localized()
         ].compactMap { $0 }
     }
