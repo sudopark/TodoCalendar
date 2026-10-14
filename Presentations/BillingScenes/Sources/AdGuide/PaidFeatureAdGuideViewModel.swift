@@ -99,10 +99,8 @@ extension PaidFeatureAdGuideViewModelImple {
         case (.rewarded, _), (.fallbackFullScreenShown, _):
             self.paidFeatureGateUsecase.grantLicense(for: self.failReason.feature, at: Date())
             self.closeScene(thenFinish: true)
-        case (.unavailable, .colorTheme):
-            self.closeScene(thenFinish: true)
-        case (.unavailable, .customizeWidget):
-            self.router?.showToast("widget.style.license::adUnavailable".localized())
+        case (.unavailable, _):
+            self.router?.showToast("paidFeature.adGuide::adUnavailable".localized())
             self.closeScene(thenFinish: false)
         case (.dismissedBeforeReward, _):
             self.closeScene(thenFinish: false)

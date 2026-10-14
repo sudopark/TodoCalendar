@@ -113,27 +113,14 @@ extension PaidFeatureAdGuideViewModelImpleTests {
         #expect(self.gate.didGrantLicenseWith?.feature == feature)
     }
 
-    @Test("컬러 테마는 광고가 없으면 사용권 없이 진행을 넘긴다")
-    func watchAd_whenColorThemeAdUnavailable_proceedsWithoutLicense() {
+    @Test("광고가 없으면 기능에 상관없이 광고 없음 토스트를 띄우고 진행하지 않는다", arguments: [
+        PaidFeature.customizeWidget,
+        .colorTheme(.custom("my-theme"))
+    ])
+    func watchAd_whenAdUnavailable_showsToastWithoutProceed(_ feature: PaidFeature) {
         // given
         let viewModel = self.makeViewModel(
-            .init(feature: .colorTheme(.custom("my-theme")), licenseDays: 7), adResult: .unavailable
-        )
-
-        // when
-        viewModel.watchAd()
-
-        // then
-        #expect(self.recorder.didFinishWith == [true])
-        #expect(self.gate.didGrantLicenseWith == nil)
-        #expect(self.router?.didShowToastWithMessage == nil)
-    }
-
-    @Test("위젯 꾸미기는 광고가 없으면 광고 없음 토스트를 띄우고 진행하지 않는다")
-    func watchAd_whenWidgetAdUnavailable_showsToastWithoutProceed() {
-        // given
-        let viewModel = self.makeViewModel(
-            .init(feature: .customizeWidget, licenseDays: 7), adResult: .unavailable
+            .init(feature: feature, licenseDays: 7), adResult: .unavailable
         )
 
         // when
@@ -143,7 +130,7 @@ extension PaidFeatureAdGuideViewModelImpleTests {
         #expect(self.recorder.didFinishWith == [false])
         #expect(self.recorder.wasSheetClosedAtFinish == [true])
         #expect(self.gate.didGrantLicenseWith == nil)
-        #expect(self.router?.didShowToastWithMessage == "widget.style.license::adUnavailable".localized())
+        #expect(self.router?.didShowToastWithMessage == "paidFeature.adGuide::adUnavailable".localized())
     }
 
     @Test("보상 전에 광고를 닫으면 기록 없이 진행하지 않는다")

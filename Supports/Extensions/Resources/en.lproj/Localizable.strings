@@ -534,6 +534,7 @@
 "paidFeature.adGuide::plan::button" = "View plans";
 "paidFeature.adGuide::watchAd::button" = "Watch ad and use for %d days";
 "paidFeature.adGuide::useDefaultTheme::button" = "Use default theme";
+"paidFeature.adGuide::adUnavailable" = "Couldn't load an ad. Please try again later.";
 "setting.appearance.calendar.underline" = "Underline on event days";
 "setting.appearance.event.edit::name_old" = "Edit Event";
 "setting.appearance.event.edit::name" = "Event settings and external calendars";
@@ -663,7 +664,6 @@
 "widget.style.edit::background::photo::remove" = "Remove photo";
 "widget.style.edit::items::section" = "Details";
 "widget.style::custom::copy_format" = "%@ - Copy";
-"widget.style.license::adUnavailable" = "Couldn't load an ad. Please try again later.";
 "widget.style.adGuide::title" = "Watch an ad to customize widgets";
 "widget.style.adGuide::message" = "Watch one ad to customize your widgets freely for %d days.";
 "widget.style.adGuide::plan::message" = "Paid plans let you customize widgets without ads";
