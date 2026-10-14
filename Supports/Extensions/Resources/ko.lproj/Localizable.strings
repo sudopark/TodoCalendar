@@ -535,6 +535,7 @@
 "paidFeature.adGuide::plan::button" = "플랜 보기";
 "paidFeature.adGuide::watchAd::button" = "광고 보고 %d일 동안 쓰기";
 "paidFeature.adGuide::useDefaultTheme::button" = "기본 테마 쓰기";
+"paidFeature.adGuide::adUnavailable" = "광고를 불러오지 못했어요. 잠시 뒤 다시 시도해주세요.";
 "setting.appearance.calendar.underline" = "이벤트있는 날에 밑줄표시";
 "setting.appearance.event.edit::name_old" = "이벤트 수정";
 "setting.appearance.event.edit::name" = "이벤트 설정 및 외부 캘린더";
@@ -664,7 +665,6 @@
 "widget.style.edit::background::photo::remove" = "사진 지우기";
 "widget.style.edit::items::section" = "세부 옵션";
 "widget.style::custom::copy_format" = "%@ - 복사됨";
-"widget.style.license::adUnavailable" = "광고를 불러오지 못했어요. 잠시 뒤 다시 시도해주세요.";
 "widget.style.adGuide::title" = "광고 보고 위젯 꾸미기";
 "widget.style.adGuide::message" = "광고를 한 번 보면 %d일 동안 위젯을 마음껏 꾸밀 수 있어요.";
 "widget.style.adGuide::plan::message" = "유료 플랜은 광고 없이 위젯을 꾸밀 수 있어요";
