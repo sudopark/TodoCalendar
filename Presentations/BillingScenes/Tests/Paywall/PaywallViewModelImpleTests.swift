@@ -387,6 +387,26 @@ extension PaywallViewModelImpleTests {
         #expect(detail?.features.contains("billing::paywall::feature::topup".localized()) == false)
         #expect(detail?.features.contains("billing::paywall::feature::noAds".localized()) == true)
     }
+
+    // 위젯 꾸미기·커스텀 테마 게이트는 유료 플랜 전부를 면제하므로 top-up 허용 여부와 무관하게 남는다
+    @Test(arguments: [true, false])
+    func paywall_planDetail_containsCustomizationFeatures(isTopupAllowed: Bool) async throws {
+        // given
+        let standard = self.purchasableOffering(
+            .standard, productId: "product.standard", isTopupAllowed: isTopupAllowed
+        )
+        let (viewModel, _, _) = self.makeViewModel(offerings: [standard])
+
+        // when
+        _ = try await self.waitOfferingsLoaded(viewModel)
+        viewModel.selectPlan(.standard)
+        let detailExpect = expectConfirm("꾸미기 혜택 features")
+        let detail = try await self.firstOutput(detailExpect, for: viewModel.selectedPlanDetail) ?? nil
+
+        // then
+        #expect(detail?.features.contains("billing::paywall::feature::customizeWidget".localized()) == true)
+        #expect(detail?.features.contains("billing::paywall::feature::customColorTheme".localized()) == true)
+    }
 }
 
 
