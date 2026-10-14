@@ -40,3 +40,8 @@
 
 "catalog.ai::command" = "ebéd Sárával pénteken délben";
 "catalog.ai::result" = "Az „Ebéd Sárával” hozzáadva péntekre, március 13-ra, 12:00-ra.";
+
+// MARK: - 컬러 테마
+
+"catalog.colorTheme::forest" = "Erdő";
+"catalog.colorTheme::dusk" = "Alkonyat";

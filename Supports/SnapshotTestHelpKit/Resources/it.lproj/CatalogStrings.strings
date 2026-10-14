@@ -40,3 +40,8 @@
 
 "catalog.ai::command" = "pranzo con Sara venerdì a mezzogiorno";
 "catalog.ai::result" = "«Pranzo con Sara» aggiunto a venerdì 13 marzo alle 12:00.";
+
+// MARK: - 컬러 테마
+
+"catalog.colorTheme::forest" = "Foresta";
+"catalog.colorTheme::dusk" = "Crepuscolo";

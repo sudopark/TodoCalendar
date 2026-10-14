@@ -40,3 +40,8 @@
 
 "catalog.ai::command" = "Lunch with Sara on Friday at noon";
 "catalog.ai::result" = "Added “Lunch with Sara” to Friday, March 13 at 12:00 PM.";
+
+// MARK: - 컬러 테마
+
+"catalog.colorTheme::forest" = "Forest";
+"catalog.colorTheme::dusk" = "Dusk";
