@@ -12,6 +12,7 @@
 "catalog.event::team_workshop" = "チームワークショップ";
 "catalog.event::release_day" = "リリース日";
 "catalog.event::lunch" = "サラとランチ";
+"catalog.event::anniversary" = "結婚記念日";
 
 // MARK: - 할일
 

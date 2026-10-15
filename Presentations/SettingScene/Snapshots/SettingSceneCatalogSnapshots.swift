@@ -294,3 +294,78 @@ private final class FakeColorThemeEditViewModel: ColorThemeEditViewModel, @unche
     func delete() { }
     func close() { }
 }
+
+
+// MARK: - App Store 스샷용 화면
+
+extension SettingSceneCatalogSnapshots {
+
+    private var storeLineupThemeKeys: [AppThemeColorSetKey] {
+        return [.indigo, .amethyst, .ruby, .wine]
+    }
+
+    @MainActor
+    func test_storeThemeLineup() {
+        self.storeLineupThemeKeys.forEach { key in
+            let appearance = self.makeStoreLineupAppearance(key)
+            captureSnapshot(
+                named: "storeThemeLineup-\(key.rawValue)",
+                theme: appearance.colorSet.isLightTheme ? .light : .dark,
+                layout: .fullScreen,
+                snapshotDirectory: catalogSnapshotDirectory()
+            ) {
+                self.makeStoreSettingItemListView(appearance)
+                    .tint(appearance.colorSet.accent.asColor)
+            }
+        }
+    }
+
+    @MainActor
+    private func makeStoreLineupAppearance(_ key: AppThemeColorSetKey) -> ViewAppearance {
+        let colorSetKey = ColorSetKeys.appTheme(key)
+        let isLightTheme = colorSetKey.convert(isSystemDarkTheme: false).isLightTheme
+        let calendar = CalendarAppearanceSettings(colorSetKey: colorSetKey, fontSetKey: .systemDefault)
+        let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")
+        let setting = AppearanceSettings(calendar: calendar, defaultTagColor: tag)
+        return ViewAppearance(setting: setting, isSystemDarkTheme: !isLightTheme)
+    }
+
+    @MainActor
+    private func makeStoreSettingItemListView(_ appearance: ViewAppearance) -> some View {
+        let state = SettingItemListViewState()
+        let baseSection = SettingSectionModel(
+            headerText: nil,
+            items: [
+                SettingItemModel(.appearance),
+                SettingItemModel(.editEvent),
+                SettingItemModel(.holidaySetting),
+                SettingItemModel(.billingPlan),
+                AccountSettingItemModel(AccountInfo("some"))
+            ]
+        )
+        let supportSection = SettingSectionModel(
+            headerText: "setting.section.support::name".localized(),
+            items: [
+                SettingItemModel(.openWeb),
+                SettingItemModel(.feedback),
+                SettingItemModel(.help)
+            ]
+        )
+        let appInfoSection = AppInfoSectionModel(
+            headerText: "setting.section.app::name".localized(),
+            version: "v3.1.0",
+            isUpdateAvailable: false,
+            items: [
+                SettingItemModel(.shareApp),
+                SettingItemModel(.addReview),
+                SettingItemModel(.openSourceLicense)
+            ]
+        )
+        state.sections = [baseSection, supportSection, appInfoSection]
+
+        return SettingItemListView()
+            .environment(state)
+            .environment(SettingItemListViewEventHandler())
+            .environment(appearance)
+    }
+}

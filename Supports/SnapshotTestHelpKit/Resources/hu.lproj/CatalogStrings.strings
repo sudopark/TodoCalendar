@@ -12,6 +12,7 @@
 "catalog.event::team_workshop" = "Csapatworkshop";
 "catalog.event::release_day" = "Kiadás napja";
 "catalog.event::lunch" = "Ebéd Sárával";
+"catalog.event::anniversary" = "Házassági évforduló";
 
 // MARK: - 할일
 

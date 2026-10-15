@@ -12,6 +12,7 @@
 "catalog.event::team_workshop" = "Atelier de echipă";
 "catalog.event::release_day" = "Ziua lansării";
 "catalog.event::lunch" = "Prânz cu Sara";
+"catalog.event::anniversary" = "Aniversarea căsătoriei";
 
 // MARK: - 할일
 

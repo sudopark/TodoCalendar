@@ -12,6 +12,7 @@
 "catalog.event::team_workshop" = "Tiimityöpaja";
 "catalog.event::release_day" = "Julkaisupäivä";
 "catalog.event::lunch" = "Lounas Saran kanssa";
+"catalog.event::anniversary" = "Hääpäivä";
 
 // MARK: - 할일
 

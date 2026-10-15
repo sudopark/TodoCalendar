@@ -163,6 +163,7 @@ private enum StoreCaptionSlot: CaseIterable {
     case googleEvent
     case widgets
     case appearance
+    case widgetStyle
 
     var slug: String {
         switch self {
@@ -172,6 +173,7 @@ private enum StoreCaptionSlot: CaseIterable {
         case .googleEvent: return "04-google-event"
         case .widgets: return "05-widgets"
         case .appearance: return "06-appearance"
+        case .widgetStyle: return "07-widget-style"
         }
     }
 
@@ -181,7 +183,7 @@ private enum StoreCaptionSlot: CaseIterable {
         case .widgets: return 2
         case .googleEvent: return 3
         case .appearance: return 4
-        case .repeatOptions, .eventDetail: return nil
+        case .repeatOptions, .eventDetail, .widgetStyle: return nil
         }
     }
 
@@ -254,6 +256,40 @@ private enum StoreCaptionSlot: CaseIterable {
                 "vi": "Vị trí, liên kết, ghi chú, nhắc nhở",
                 "zh-Hans": "地点、链接、备注、事件提醒",
                 "zh-Hant": "地點、連結、備註、活動提醒"
+            ]
+        case .widgetStyle:
+            return [
+                "ca": "Un estil propi per a cada widget",
+                "cs": "Každý widget s vlastním vzhledem",
+                "da": "Hver widget med sit eget udseende",
+                "de": "Jedes Widget im eigenen Look",
+                "el": "Κάθε widget με το δικό του στυλ",
+                "en": "Style each widget your way",
+                "es": "Cada widget con su propio estilo",
+                "fi": "Jokaiselle widgetille oma tyyli",
+                "fr": "Un style pour chaque widget",
+                "hi": "हर विजेट का अपना अंदाज़",
+                "hr": "Svaki widget u svom stilu",
+                "hu": "Minden widget a saját stílusában",
+                "id": "Gaya sendiri untuk tiap widget",
+                "it": "Ogni widget con il suo stile",
+                "ja": "ウィジェットごとに好きなデザインで",
+                "ko": "위젯마다 원하는 모양으로",
+                "ms": "Gaya tersendiri untuk setiap widget",
+                "nb": "Hver widget med sitt eget utseende",
+                "nl": "Elke widget in een eigen stijl",
+                "pl": "Każdy widżet we własnym stylu",
+                "pt-BR": "Cada widget com seu próprio estilo",
+                "ro": "Fiecare widget cu stilul lui",
+                "ru": "Свой стиль для каждого виджета",
+                "sk": "Každý widget s vlastným vzhľadom",
+                "sv": "Varje widget med sin egen stil",
+                "th": "แต่งวิดเจ็ตแต่ละตัวได้ตามใจ",
+                "tr": "Her widget'a kendi stili",
+                "uk": "Свій стиль для кожного віджета",
+                "vi": "Mỗi tiện ích một phong cách",
+                "zh-Hans": "每个小组件，都有自己的样式",
+                "zh-Hant": "每個小工具，都有自己的樣式"
             ]
         case .calendar, .googleEvent, .widgets, .appearance: return [:]
         }

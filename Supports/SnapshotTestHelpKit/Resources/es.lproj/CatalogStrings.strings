@@ -12,6 +12,7 @@
 "catalog.event::team_workshop" = "Taller de equipo";
 "catalog.event::release_day" = "Día de lanzamiento";
 "catalog.event::lunch" = "Comida con Sara";
+"catalog.event::anniversary" = "Aniversario de boda";
 
 // MARK: - 할일
 

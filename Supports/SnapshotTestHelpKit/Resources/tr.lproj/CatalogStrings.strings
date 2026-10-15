@@ -12,6 +12,7 @@
 "catalog.event::team_workshop" = "Ekip atölyesi";
 "catalog.event::release_day" = "Yayın günü";
 "catalog.event::lunch" = "Sara ile öğle yemeği";
+"catalog.event::anniversary" = "Evlilik yıldönümü";
 
 // MARK: - 할일
 

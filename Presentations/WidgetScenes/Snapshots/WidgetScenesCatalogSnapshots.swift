@@ -9,6 +9,7 @@
 import XCTest
 import SwiftUI
 import Domain
+import Extensions
 import CommonPresentation
 import SnapshotTestHelpKit
 
@@ -84,5 +85,94 @@ final class WidgetScenesCatalogSnapshots: XCTestCase {
                 .environment(WidgetStyleEditViewEventHandler())
                 .environment(self.makeAppearance(theme))
         }
+    }
+}
+
+
+// MARK: - App Store 스샷용 화면
+
+extension WidgetScenesCatalogSnapshots {
+
+    @MainActor
+    func test_storeWidgetStyleEdit() {
+        let appearance = self.makeAppearance(.light)
+
+        captureSnapshot(
+            named: "storeWidgetStyleEdit-light",
+            theme: .light,
+            layout: .fullScreen,
+            snapshotDirectory: catalogSnapshotDirectory()
+        ) {
+            WidgetStyleEditView(variants: [.todaySummarySmall], setting: .init())
+                .environment(self.storeStyleEditState())
+                .environment(WidgetStyleEditViewEventHandler())
+                .environment(appearance)
+                .overlay(alignment: .top) {
+                    self.storeNavigationBarView(appearance)
+                }
+        }
+    }
+
+    /// 호스트 앱 없는 러너는 iOS 26 유리 내비게이션 바 제목을 흰색으로 그려서 앱과 같은 바를 덮어 그린다
+    @MainActor
+    private func storeNavigationBarView(_ appearance: ViewAppearance) -> some View {
+        let textColor = appearance.colorSet.text0.asColor
+        return ZStack {
+            appearance.colorSet.bg1.asColor
+
+            HStack(spacing: Metric.Spacing.xsmall) {
+                Image(systemName: "chevron.backward")
+                    .font(appearance.fontSet.size(17, weight: .semibold).asFont)
+                Text(R.String.commonBack)
+                    .font(appearance.fontSet.size(17).asFont)
+                Spacer()
+            }
+            .foregroundStyle(textColor)
+            .padding(.leading, spacing: .xlarge)
+
+            Text("widget.style.edit::title".localized())
+                .font(appearance.fontSet.size(17, weight: .semibold).asFont)
+                .foregroundStyle(textColor)
+        }
+        .frame(height: 64)
+    }
+
+    @MainActor
+    private func storeStyleEditState() -> WidgetStyleEditViewState {
+        let variant = WidgetVariant.todaySummarySmall
+        var withoutHoliday = TodayStyleSetting.initial
+        withoutHoliday.showHolidayName = false
+        var countsOnly = TodayStyleSetting.initial
+        countsOnly.showTimeZone = false
+        countsOnly.showMonthYear = false
+        let styles = [
+            WidgetStyle(id: .init(variant: variant, style: .default), name: nil, setting: TodayStyleSetting.initial),
+            WidgetStyle(
+                id: .init(variant: variant, style: .custom(id: "c1")),
+                name: "catalog.tag::work".catalogLocalized(),
+                setting: withoutHoliday,
+                background: .custom(hex: "#1F3A5F")
+            ),
+            WidgetStyle(
+                id: .init(variant: variant, style: .custom(id: "c2")),
+                name: "catalog.tag::family".catalogLocalized(),
+                setting: countsOnly,
+                background: .custom(hex: "#F6D6DE")
+            )
+        ]
+        let selected = styles[1]
+        let state = WidgetStyleEditViewState()
+        state.styles = styles.map { style in
+            .init(
+                styleId: style.id, name: style.displayName,
+                hasUnsavedChange: false, setting: style.setting,
+                background: style.background, photo: style.photo
+            )
+        }
+        state.selectedStyleId = selected.id
+        state.editingName = selected.name ?? ""
+        state.selectedSetting = selected.setting
+        state.selectedBackground = selected.background
+        return state
     }
 }

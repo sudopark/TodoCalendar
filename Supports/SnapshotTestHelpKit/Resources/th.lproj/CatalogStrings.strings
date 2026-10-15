@@ -12,6 +12,7 @@
 "catalog.event::team_workshop" = "เวิร์กช็อปทีม";
 "catalog.event::release_day" = "วันปล่อยเวอร์ชัน";
 "catalog.event::lunch" = "มื้อเที่ยงกับซาร่า";
+"catalog.event::anniversary" = "วันครบรอบแต่งงาน";
 
 // MARK: - 할일
 

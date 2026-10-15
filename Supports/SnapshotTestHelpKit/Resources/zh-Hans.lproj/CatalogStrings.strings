@@ -12,6 +12,7 @@
 "catalog.event::team_workshop" = "团队工作坊";
 "catalog.event::release_day" = "发布日";
 "catalog.event::lunch" = "和 Sara 吃午饭";
+"catalog.event::anniversary" = "结婚纪念日";
 
 // MARK: - 할일
 
