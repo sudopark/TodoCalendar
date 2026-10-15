@@ -8,6 +8,7 @@
 # 결과: snapshot-appstore/<lang>/<NN-슬러그>.png (gitignore 대상, 언어별 격리)
 #       snapshot-appstore/<lang>/captions/<NN-슬러그>.png — 합성 캔버스 상단에 얹을 캡션
 #       snapshot-appstore/<lang>/captions/cpp/<장면>.png — 맞춤형 제품 페이지 캡션
+#       snapshot-appstore/<lang>/captions/creative/<배치>.png — 헤더·검색 결과 크리에이티브 에셋 캡션
 #       snapshot-appstore/<lang>/widgets/<슬러그>.png — 홈화면·잠금화면 합성 전 위젯 원본
 #       snapshot-appstore/<lang>/sheets/<슬러그>.png — 캘린더 위에 얹을 시트 조각
 #       snapshot-appstore/<lang>/appearance/<테마>.png — 06 에 겹쳐 놓을 테마별 화면
@@ -129,6 +130,12 @@ CPP_CAPTION_MAPPING=(
     "C10|CommonPresentation/AppStoreCaptionSnapshots/test_customProductPageCaptions.C10-light.png"
 )
 
+# 크리에이티브 에셋 캡션 — assets.json 의 captionKey 가 곧 파일명이다
+CREATIVE_CAPTION_MAPPING=(
+    "header|CommonPresentation/AppStoreCaptionSnapshots/test_creativeAssetCaptions.header-light.png"
+    "search|CommonPresentation/AppStoreCaptionSnapshots/test_creativeAssetCaptions.search-light.png"
+)
+
 latest_ios_runtime() {
     xcrun simctl list runtimes \
         | sed -nE 's/^iOS [0-9.]+ \(([0-9.]+) - [^)]*\) - (com\.apple\.CoreSimulator\.SimRuntime\.iOS-[0-9-]+)$/\1 \2/p' \
@@ -224,7 +231,7 @@ capture_lang() {
 
     local out="$ROOT/snapshot-appstore/$lang"
     rm -rf "$out"
-    mkdir -p "$out/captions/cpp" "$out/widgets" "$out/sheets" "$out/duo" "$out/appearance"
+    mkdir -p "$out/captions/cpp" "$out/captions/creative" "$out/widgets" "$out/sheets" "$out/duo" "$out/appearance"
     for entry in "${MAPPING[@]}" ; do
         IFS='|' read -r name source <<< "$entry"
         local src="$ROOT/snapshot-catalog/$source"
@@ -267,7 +274,13 @@ capture_lang() {
         [ -f "$src" ] || { echo "  ✗ 누락: $source — fastlane/custom_product_pages/captions.json 에 $lang 원고가 있는지 확인해라"; return 1; }
         cp "$src" "$out/captions/cpp/$name.png"
     done
-    echo "  ✓ [$lang] ${#MAPPING[@]}장 + 캡션 ${#CAPTION_MAPPING[@]}+${#CPP_CAPTION_MAPPING[@]}장 + 위젯 원본 ${#WIDGET_MAPPING[@]}종 + 시트 ${#SHEET_MAPPING[@]}종 + 테마 ${#THEME_MAPPING[@]}장 + Duo ${#DUO_MAPPING[@]}장 → snapshot-appstore/$lang/"
+    for entry in "${CREATIVE_CAPTION_MAPPING[@]}" ; do
+        IFS='|' read -r name source <<< "$entry"
+        local src="$ROOT/snapshot-catalog/$source"
+        [ -f "$src" ] || { echo "  ✗ 누락: $source — fastlane/creative_assets/captions.json 에 $lang 원고가 있는지 확인해라"; return 1; }
+        cp "$src" "$out/captions/creative/$name.png"
+    done
+    echo "  ✓ [$lang] ${#MAPPING[@]}장 + 캡션 ${#CAPTION_MAPPING[@]}+${#CPP_CAPTION_MAPPING[@]}+${#CREATIVE_CAPTION_MAPPING[@]}장 + 위젯 원본 ${#WIDGET_MAPPING[@]}종 + 시트 ${#SHEET_MAPPING[@]}종 + 테마 ${#THEME_MAPPING[@]}장 + Duo ${#DUO_MAPPING[@]}장 → snapshot-appstore/$lang/"
 
     verify_and_strip_alpha "$python_bin" "$out" || return 1
     verify_and_strip_alpha "$python_bin" "$out/appearance" || return 1
