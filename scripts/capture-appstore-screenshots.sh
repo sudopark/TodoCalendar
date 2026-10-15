@@ -79,7 +79,7 @@ CAPTION_MAPPING=(
     "07-widget-style|CommonPresentation/AppStoreCaptionSnapshots/test_storeCaptions.07-widget-style-light.png"
 )
 
-# 06 에 겹쳐 놓을 테마별 화면 — 테마 이름이 곧 파일명이고, 합성 쪽 THEME_LINEUP 과 같은 목록이어야 한다
+# 06 에 겹쳐 놓을 테마별 화면 — 테마 이름이 곧 파일명이고, store_canvas.THEME_LINEUP 과 같은 목록이어야 한다
 THEME_MAPPING=(
     "indigo|SettingScene/SettingSceneCatalogSnapshots/test_storeThemeLineup.storeThemeLineup-indigo.png"
     "amethyst|SettingScene/SettingSceneCatalogSnapshots/test_storeThemeLineup.storeThemeLineup-amethyst.png"
@@ -125,6 +125,8 @@ CPP_CAPTION_MAPPING=(
     "C6|CommonPresentation/AppStoreCaptionSnapshots/test_customProductPageCaptions.C6-light.png"
     "C7|CommonPresentation/AppStoreCaptionSnapshots/test_customProductPageCaptions.C7-light.png"
     "C8|CommonPresentation/AppStoreCaptionSnapshots/test_customProductPageCaptions.C8-light.png"
+    "C9|CommonPresentation/AppStoreCaptionSnapshots/test_customProductPageCaptions.C9-light.png"
+    "C10|CommonPresentation/AppStoreCaptionSnapshots/test_customProductPageCaptions.C10-light.png"
 )
 
 latest_ios_runtime() {

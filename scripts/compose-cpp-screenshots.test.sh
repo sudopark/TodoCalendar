@@ -22,7 +22,8 @@ mkdir -p "$CONFIG_DIR"
 cat > "$CONFIG_DIR/pages.json" <<'JSON'
 {
   "page-a": { "ascPageId": "", "scenes": ["C1", "C2", "C3", "C4", "C5", "C6"] },
-  "page-b": { "ascPageId": "", "scenes": ["C3", "C1", "C2", "C6", "C5", "C4"] }
+  "page-b": { "ascPageId": "", "scenes": ["C3", "C1", "C2", "C6", "C5", "C4"] },
+  "page-c": { "ascPageId": "", "scenes": ["C9", "C10", "C7", "C8", "C1", "C2"] }
 }
 JSON
 
@@ -37,6 +38,7 @@ root = Path(sys.argv[1])
 (root / "widgets").mkdir(parents=True, exist_ok=True)
 (root / "sheets").mkdir(parents=True, exist_ok=True)
 (root / "captions" / "cpp").mkdir(parents=True, exist_ok=True)
+(root / "appearance").mkdir(parents=True, exist_ok=True)
 
 
 def block(size, background, box, fill):
@@ -45,11 +47,14 @@ def block(size, background, box, fill):
     return image
 
 
-for slug in ["01-calendar", "02-repeat-options", "07-todo-list", "08-share-preview"]:
+for slug in ["01-calendar", "03-event-detail", "07-todo-list", "07-widget-style", "08-share-preview"]:
     block((1320, 2868), (245, 245, 247), (80, 200, 1240, 2400), (30, 90, 200)).save(root / f"{slug}.png")
 
+for theme in ["indigo", "amethyst", "ruby", "wine"]:
+    block((1320, 2868), (245, 245, 247), (80, 200, 1240, 2400), (120, 60, 160)).save(root / "appearance" / f"{theme}.png")
+
 widgets = [
-    "today-and-next", "month",
+    "dday-photo", "today-and-next-styled", "month",
     "lockscreen-foremost", "lockscreen-next", "lockscreen-next-remain", "lockscreen-live-activity",
 ]
 for name in widgets:
@@ -58,7 +63,7 @@ for name in widgets:
 for name in ["ai-command-processing", "ai-command-done"]:
     block((1320, 900), (255, 255, 255), (120, 300, 1200, 800), (60, 60, 90)).save(root / "sheets" / f"{name}.png")
 
-for index in range(1, 9):
+for index in range(1, 11):
     block((1320, 420), (245, 245, 247), (200, 150, 1120, 270), (29, 29, 31)).save(
         root / "captions" / "cpp" / f"C{index}.png"
     )
@@ -79,6 +84,7 @@ failures = []
 expected = {
     "page-a": ["01_C1.png", "02_C2.png", "03_C3.png", "04_C4.png", "05_C5.png", "06_C6.png"],
     "page-b": ["01_C3.png", "02_C1.png", "03_C2.png", "04_C6.png", "05_C5.png", "06_C4.png"],
+    "page-c": ["01_C9.png", "02_C10.png", "03_C7.png", "04_C8.png", "05_C1.png", "06_C2.png"],
 }
 for page, names in expected.items():
     out = config / page / "images" / "_cpp_test"
@@ -99,6 +105,13 @@ a_c3 = (config / "page-a" / "images" / "_cpp_test" / "03_C3.png").read_bytes()
 b_c3 = (config / "page-b" / "images" / "_cpp_test" / "01_C3.png").read_bytes()
 if a_c3 != b_c3:
     failures.append("C3 이 페이지마다 다르게 합성됐다")
+
+# 테마 장면은 기기 네 대를 계단으로 겹친다 — 한 대짜리 장면과 기기 배치가 달라야 한다
+with Image.open(config / "page-c" / "images" / "_cpp_test" / "02_C10.png") as lineup, \
+        Image.open(config / "page-c" / "images" / "_cpp_test" / "01_C9.png") as single:
+    # 단일 기기는 캔버스 좌우 중앙(x=660)을 덮고, 계단 첫 기기는 왼쪽 여백(x=60) 근처에 걸친다
+    if lineup.getpixel((60, 1400)) == single.getpixel((60, 1400)):
+        failures.append("C10 이 테마 계단으로 합성되지 않았다")
 
 if failures:
     print("\n".join(failures))
@@ -139,6 +152,14 @@ rm -f "$SOURCE_DIR/captions/cpp/C1.png"
 python3 scripts/compose-cpp-screenshots.py --locale "$LANG_ID" > /dev/null 2>&1
 test $? -ne 0
 assert "캡션이 없으면 끊는다" $?
+
+cat > "$CONFIG_DIR/pages.json" <<'JSON'
+{ "page-a": { "ascPageId": "", "scenes": ["C10", "C2", "C3", "C4", "C5", "C6"] } }
+JSON
+rm -f "$SOURCE_DIR/appearance/wine.png"
+python3 scripts/compose-cpp-screenshots.py --locale "$LANG_ID" > /dev/null 2>&1
+test $? -ne 0
+assert "테마 화면이 없으면 끊는다" $?
 
 echo "PASS=$PASS FAIL=$FAIL"
 [ "$FAIL" -eq 0 ]
