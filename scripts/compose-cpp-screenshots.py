@@ -8,7 +8,7 @@ usage:
 입력: snapshot-appstore/<lang>/ 촬영 산출물 + captions/cpp/<장면>.png
 출력: fastlane/custom_product_pages/<page_id>/images/<ASC 로케일>/<NN>_<장면>.png (1320×2868 / 알파 없음)
 
-기하는 `compose-appstore-screenshots.py` 와 같은 값을 쓴다 — 기본 스토어 페이지와 네 CPP 가
+기하는 기본 스토어 페이지와 같은 `store_canvas.py` 를 쓴다 — 기본 스토어 페이지와 네 CPP 가
 한 앱으로 보여야 한다 (명세 §4-1).
 
 **인앱 이벤트와 달리 캡션을 이미지 안에 넣는다** — 스토어 스샷은 그게 표준이다 (명세 §4 서두).
@@ -25,16 +25,14 @@ from PIL import Image
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import cpp_scenes  # noqa: E402
 from device_bezel import load_bezel, screen_hole  # noqa: E402
+from store_canvas import (  # noqa: E402
+    UPLOAD_SIZE, compose, compose_theme_lineup, theme_lineup_screens,
+)
 
 ROOT = Path(__file__).resolve().parent.parent
 # 회귀 테스트가 실제 원고를 안 건드리게 덮어쓸 수 있어야 한다 (asc-in-app-event.rb 의 ASC_SECRET_FILE 과 같은 처리)
 CONFIG_ROOT = Path(os.environ.get("CPP_CONFIG_ROOT") or (ROOT / "fastlane" / "custom_product_pages"))
 
-UPLOAD_SIZE = (1320, 2868)
-CANVAS_COLOR = "#F5F5F7"
-DEVICE_WIDTH = 1150
-DEVICE_TOP = 620
-CAPTION_TOP = 100
 SCENES_PER_PAGE = 6
 
 ALL_LANGS = [
@@ -74,19 +72,11 @@ def upload_name(order, scene_id):
 
 def compose_scene(scene_id, source_dir, caption, bezel, hole_mask, hole_box):
     hole_size = (hole_box[2] - hole_box[0], hole_box[3] - hole_box[1])
+    if scene_id == cpp_scenes.THEME_LINEUP_SCENE:
+        screens = theme_lineup_screens(source_dir, hole_size)
+        return compose_theme_lineup(screens, caption.convert("RGBA"), bezel, hole_mask, hole_box)
     screen = cpp_scenes.scene(scene_id, source_dir, hole_size)
-
-    device = Image.new("RGBA", bezel.size, (0, 0, 0, 0))
-    device.paste(screen, (hole_box[0], hole_box[1]), hole_mask.crop(hole_box))
-    device.paste(bezel, (0, 0), bezel)
-
-    device_height = round(DEVICE_WIDTH * bezel.height / bezel.width)
-    device = device.resize((DEVICE_WIDTH, device_height), Image.LANCZOS)
-
-    canvas = Image.new("RGB", UPLOAD_SIZE, CANVAS_COLOR)
-    canvas.paste(caption.convert("RGB"), ((UPLOAD_SIZE[0] - caption.width) // 2, CAPTION_TOP))
-    canvas.paste(device, ((UPLOAD_SIZE[0] - DEVICE_WIDTH) // 2, DEVICE_TOP), device)
-    return canvas
+    return compose(screen, caption.convert("RGBA"), bezel, hole_mask, hole_box)
 
 
 def caption_image(scene_id, source_dir):

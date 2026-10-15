@@ -5,7 +5,7 @@ ASC에 올릴 6.9" 스크린샷을 담는 곳은 `fastlane/screenshots/<ASC 로�
 
 슬롯은 `01_calendar`·`02_repeat-options`·`03_event-detail`·`04_google-event`·`05_widgets`·`06_appearance`·
 `07_widget-style` 순이다. 대부분 화면 한 장을 베젤에 넣지만 둘은 합성한다. `05` 는 위젯 원본을 홈화면에 얹고,
-`06` 은 설정 화면을 테마 네 개로 칠한 기기를 계단처럼 겹친다 (테마 목록은 합성 스크립트의 `THEME_LINEUP`).
+`06` 은 설정 화면을 테마 네 개로 칠한 기기를 계단처럼 겹친다 (테마 목록은 `scripts/store_canvas.py` 의 `THEME_LINEUP`).
 
 자격증명·실행환경·업로드 검증·제출 순서는 [`docs/appstore-connect-operations.md`](../docs/appstore-connect-operations.md).
 
