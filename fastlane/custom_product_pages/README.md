@@ -61,4 +61,5 @@ bundle exec ruby scripts/asc-custom-product-page.rb push-images --all-pages --al
 ```
 
 **텍스트가 먼저다** — 이미지는 로케일에 매달리므로 부모가 없으면 못 올린다.
+승인된 페이지는 고칠 수 없어서, `push-text` 가 편집할 수 있는 버전이 없으면 새 버전을 만들어 거기에 올린다. 심사 중인 버전이 있으면 멈춘다.
 심사 제출은 콘솔에서 유저가 한다.
