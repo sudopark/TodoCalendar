@@ -12,6 +12,7 @@
 "catalog.event::team_workshop" = "Tímový workshop";
 "catalog.event::release_day" = "Deň vydania";
 "catalog.event::lunch" = "Obed so Sárou";
+"catalog.event::anniversary" = "Výročie svadby";
 
 // MARK: - 할일
 

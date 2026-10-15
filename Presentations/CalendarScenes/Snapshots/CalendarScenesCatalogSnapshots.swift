@@ -149,40 +149,155 @@ extension CalendarScenesCatalogSnapshots {
     }
 
     @MainActor
+    private func makeStoreSingleColumnCalendarView(_ theme: SnapshotTheme, bottomCoverHeight: CGFloat = 0) -> some View {
+        let appearance = self.makeStoreAppearance(theme)
+
+        let monthState = MonthViewState()
+        monthState.bind(StoreCatalogMonthViewModel(), appearance)
+        RunLoop.main.run(until: Date().addingTimeInterval(0.05))
+
+        let dayListState = DayEventListViewState()
+        dayListState.bind(CatalogDayEventListViewModel(), appearance)
+        RunLoop.main.run(until: Date().addingTimeInterval(0.05))
+
+        return VStack(spacing: 0) {
+            self.storeCalendarHeaderView(appearance)
+            ScrollView {
+                VStack(spacing: 0) {
+                    MonthView()
+                        .environment(monthState)
+                        .environment(MonthViewEventHandler())
+                        .onAppear {
+                            RunLoop.main.run(until: Date().addingTimeInterval(0.1))
+                        }
+                    DayEventListView()
+                        .environment(dayListState)
+                        .environment(PendingCompleteTodoState())
+                        .environment(DayEventListViewEventHandler())
+                }
+            }
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                appearance.colorSet.bg0.asColor.frame(height: bottomCoverHeight)
+            }
+        }
+        .background(appearance.colorSet.bg0.asColor)
+        .environment(appearance)
+    }
+
+    @MainActor
     func test_storeCalendar() {
         captureSnapshotPair(
             named: "storeCalendar", layout: .fullScreen, snapshotDirectory: catalogSnapshotDirectory()
         ) { theme in
+            self.makeStoreSingleColumnCalendarView(theme)
+        }
+    }
+
+    @MainActor
+    func test_storeDuoCoverCalendar() {
+        captureSnapshotPair(
+            named: "storeDuoCoverCalendar", layout: .duoCover, snapshotDirectory: catalogSnapshotDirectory()
+        ) { theme in
+            // 화면 끝에 다음 섹션 머리가 몇 pt 걸려 가로선처럼 비친다
+            self.makeStoreSingleColumnCalendarView(theme, bottomCoverHeight: Metric.Spacing.regular)
+        }
+    }
+
+    /// CalendarTwoColumnsViewController 를 호스팅하면 안쪽 바인딩이 캡처보다 늦어 빈 화면이 찍힌다 — 배치를 SwiftUI 로 재현한다.
+    @MainActor
+    func test_storeDuoInnerCalendar() {
+        captureSnapshotPair(
+            named: "storeDuoInnerCalendar", layout: .duoInner, snapshotDirectory: catalogSnapshotDirectory()
+        ) { theme in
             let appearance = self.makeStoreAppearance(theme)
-
-            let monthState = MonthViewState()
-            monthState.bind(StoreCatalogMonthViewModel(), appearance)
-            RunLoop.main.run(until: Date().addingTimeInterval(0.05))
-
-            let dayListState = DayEventListViewState()
-            dayListState.bind(CatalogDayEventListViewModel(), appearance)
-            RunLoop.main.run(until: Date().addingTimeInterval(0.05))
+            let listWidth = min(StoreDuoInnerLayout.width * StoreDuoInnerLayout.listWidthRatio, StoreDuoInnerLayout.maxListWidth)
+            let monthsWidth = StoreDuoInnerLayout.width - listWidth - StoreDuoInnerLayout.dividerWidth
 
             return VStack(spacing: 0) {
                 self.storeCalendarHeaderView(appearance)
-                ScrollView {
-                    VStack(spacing: 0) {
-                        MonthView()
-                            .environment(monthState)
-                            .environment(MonthViewEventHandler())
-                            .onAppear {
-                                RunLoop.main.run(until: Date().addingTimeInterval(0.1))
-                            }
-                        DayEventListView()
-                            .environment(dayListState)
-                            .environment(PendingCompleteTodoState())
-                            .environment(DayEventListViewEventHandler())
-                    }
+                HStack(spacing: 0) {
+                    self.storeContinuousMonthsView(appearance, width: monthsWidth)
+                        .frame(width: monthsWidth)
+                    appearance.colorSet.line.asColor
+                        .frame(width: StoreDuoInnerLayout.dividerWidth)
+                    self.storeTwoColumnsListView(appearance)
+                        .frame(width: listWidth)
                 }
             }
             .background(appearance.colorSet.bg0.asColor)
             .environment(appearance)
         }
+    }
+
+    @MainActor
+    private func storeContinuousMonthsView(_ appearance: ViewAppearance, width: CGFloat) -> some View {
+        let viewModel = StoreCatalogContinuousMonthsViewModel()
+        let state = ContinuousMonthsViewState()
+        state.rowWidth = width - Metric.Spacing.small * 2
+        state.bind(viewModel)
+        var sections: [ContinuousMonthSection] = []
+        let subscription = viewModel.sections.sink { sections = $0 }
+        subscription.cancel()
+        RunLoop.main.run(until: Date().addingTimeInterval(0.05))
+        let weeks = sections.flatMap { $0.weeks }
+
+        return VStack(spacing: 0) {
+            ContinuousMonthsHeaderView()
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 0) {
+                    ForEach(weeks, id: \.id) { week in
+                        ContinuousMonthsWeekCellView(week: week)
+                            .padding([.leading, .trailing], spacing: .small)
+                    }
+                }
+            }
+            .background(ContinuousMonthsBackgroundView())
+        }
+        .environment(state)
+        .environment(ContinuousMonthsViewEventHandler())
+        .onAppear {
+            RunLoop.main.run(until: Date().addingTimeInterval(0.1))
+        }
+    }
+
+    @MainActor
+    private func storeTwoColumnsListView(_ appearance: ViewAppearance) -> some View {
+        let pendingDoneState = PendingCompleteTodoState()
+
+        let dayListState = DayEventListViewState()
+        dayListState.bind(CatalogDayEventListViewModel(scheduleLineup: .reviewDentist), appearance)
+
+        let nextDayState = NextDayEventListViewState()
+        nextDayState.bind(self.makeStoreNextDayViewModel(), appearance)
+        RunLoop.main.run(until: Date().addingTimeInterval(0.05))
+
+        return ScrollView {
+            VStack {
+                DayEventListView()
+                    .environment(dayListState)
+                    .environment(DayEventListViewEventHandler())
+                NextDayEventListView()
+                    .environment(nextDayState)
+                    .environment(NextDayEventListViewEventHandler())
+            }
+        }
+        .environment(pendingDoneState)
+        .background(appearance.colorSet.bg0.asColor)
+    }
+
+    private func makeStoreNextDayViewModel() -> DummyNextDayEventListViewModel {
+        let timeZone = TimeZone(identifier: "Asia/Seoul")!
+        let nextDayRange: Range<TimeInterval> = 1_773_327_600..<1_773_414_000          // 03-13(금) KST
+        let lunchPeriod: Range<TimeInterval> = 1_773_370_800..<1_773_374_400          // 03-13 12:00~13:00
+        let nextDay = CurrentSelectDayModel(2026, 3, 13, weekId: "week:1", range: nextDayRange)
+        let lunch = ScheduleEvent(
+            uuid: "next-lunch", name: "catalog.event::lunch".catalogLocalized(), time: .period(lunchPeriod)
+        ) |> \.eventTagId .~ StoreCatalogEventTag.family.tagId
+        let cells: [any EventCellViewModel] = ScheduleCalendarEvent.events(from: lunch, in: timeZone)
+            .compactMap { ScheduleEventCellViewModel($0, in: nextDayRange, timeZone: timeZone, false) }
+        return DummyNextDayEventListViewModel(
+            dayModel: SelectedDayModel(timeZone, currentModel: nextDay), cellViewModels: cells
+        )
     }
     /// 달력을 위로 스크롤해 일별 목록만 남은 상태 — 앱에 별도의 할일 목록 화면은 없다.
     @MainActor
@@ -390,14 +505,22 @@ private struct CatalogCalendarEvent: CalendarEvent {
     }
 }
 
+/// 2단 컷은 연속 달력 12일 칸과 목록을 맞추려고 점심·여행 대신 치과를 둔다.
+private enum CatalogDayScheduleLineup {
+    case reviewLunchTrip
+    case reviewDentist
+}
+
 /// DayEventListViewState 의 필드가 fileprivate 라 bind(viewModel:appearance:) 경로로만 채울 수 있다.
 private final class CatalogDayEventListViewModel: DayEventListViewModel, @unchecked Sendable {
 
     /// 달력 없이 목록만 채우는 화면은 기본 구성으로는 아래가 비어, 그 화면만 할일을 더 얹는다.
     private let extraTodoKeys: [String]
+    private let scheduleLineup: CatalogDayScheduleLineup
 
-    init(extraTodoKeys: [String] = []) {
+    init(extraTodoKeys: [String] = [], scheduleLineup: CatalogDayScheduleLineup = .reviewLunchTrip) {
         self.extraTodoKeys = extraTodoKeys
+        self.scheduleLineup = scheduleLineup
     }
 
     private enum Constant {
@@ -408,6 +531,7 @@ private final class CatalogDayEventListViewModel: DayEventListViewModel, @unchec
         static let lunchPeriod: Range<TimeInterval> = 1_773_284_400..<1_773_288_000  // 12:00~13:00
         /// 03-09 ~ 03-11 종일 — upperBound 가 03-11 00:00 이라 3일로 표시된다
         static let tripPeriod: Range<TimeInterval> = 1_772_982_000..<1_773_154_800
+        static let dentistPeriod: Range<TimeInterval> = 1_773_295_200..<1_773_298_800  // 15:00~16:00
     }
 
     private let timeZone = TimeZone(identifier: "Asia/Seoul")!
@@ -431,20 +555,37 @@ private final class CatalogDayEventListViewModel: DayEventListViewModel, @unchec
         ] + self.extraTodoKeys.enumerated().map { index, key in
             self.currentTodoCell("todo-extra-\(index)", key.catalogLocalized())
         }
-        let schedules: [ScheduleEventCellViewModel] = [
-            ScheduleEvent(uuid: "sc1", name: "catalog.event::design_review".catalogLocalized(), time: .at(Constant.designReviewTime)),
-            ScheduleEvent(uuid: "sc2", name: "catalog.event::lunch".catalogLocalized(), time: .period(Constant.lunchPeriod)),
-            ScheduleEvent(
-                uuid: "sc3", name: "catalog.event::trip".catalogLocalized(),
-                time: .allDay(Constant.tripPeriod, secondsFromGMT: TimeInterval(self.timeZone.secondsFromGMT()))
-            )
-        ]
+        let schedules: [ScheduleEventCellViewModel] = self.scheduleEvents
         .flatMap { ScheduleCalendarEvent.events(from: $0, in: self.timeZone) }
         .compactMap {
             ScheduleEventCellViewModel($0, in: Constant.todayRange, timeZone: self.timeZone, false)
         }
         return todos + schedules
     }()
+
+    private var scheduleEvents: [ScheduleEvent] {
+        let review = ScheduleEvent(
+            uuid: "sc1", name: "catalog.event::design_review".catalogLocalized(), time: .at(Constant.designReviewTime)
+        )
+        switch self.scheduleLineup {
+        case .reviewLunchTrip:
+            return [
+                review,
+                ScheduleEvent(uuid: "sc2", name: "catalog.event::lunch".catalogLocalized(), time: .period(Constant.lunchPeriod)),
+                ScheduleEvent(
+                    uuid: "sc3", name: "catalog.event::trip".catalogLocalized(),
+                    time: .allDay(Constant.tripPeriod, secondsFromGMT: TimeInterval(self.timeZone.secondsFromGMT()))
+                )
+            ]
+        case .reviewDentist:
+            return [
+                review,
+                ScheduleEvent(
+                    uuid: "sc4", name: "catalog.event::dentist".catalogLocalized(), time: .period(Constant.dentistPeriod)
+                ) |> \.eventTagId .~ StoreCatalogEventTag.health.tagId
+            ]
+        }
+    }
 
     private func currentTodoCell(
         _ id: String, _ name: String, isForemost: Bool = false
@@ -672,6 +813,98 @@ private enum StoreCatalogEventTag: String {
     var customTag: CustomEventTag {
         return CustomEventTag(uuid: self.key, name: self.key.catalogLocalized(), colorHex: self.colorHex)
     }
+}
+
+private enum StoreDuoInnerLayout {
+    /// 연속 달력 행 폭을 첫 렌더 전에 정해야 해서 duoInner 폭을 따로 둔다
+    static let width: CGFloat = 951
+    static let listWidthRatio: CGFloat = 0.4
+    static let maxListWidth: CGFloat = 420
+    static let dividerWidth: CGFloat = 0.5
+}
+
+private final class StoreCatalogContinuousMonthsViewModel: ContinuousMonthsViewModel, @unchecked Sendable {
+
+    private let month = StoreCatalogMonthViewModel()
+
+    var weekDays: AnyPublisher<[WeekDayModel], Never> {
+        return self.month.weekDays
+    }
+
+    var sections: AnyPublisher<[ContinuousMonthSection], Never> {
+        return self.month.weekModels
+            .map { [weak self] weeks in
+                let march = ContinuousMonthSection(month: .init(year: 2026, month: 3), weeks: Array(weeks.prefix(4)))
+                let april = ContinuousMonthSection(
+                    month: .init(year: 2026, month: 4),
+                    weeks: Array(weeks.dropFirst(4)) + (self?.aprilTailWeeks() ?? [])
+                )
+                return [march, april]
+            }
+            .eraseToAnyPublisher()
+    }
+
+    private func aprilTailWeeks() -> [WeekRowModel] {
+        let calendar = Calendar(identifier: .gregorian)
+            |> \.timeZone .~ (TimeZone(abbreviation: "UTC") ?? .current)
+        guard let firstSunday = calendar.date(from: DateComponents(year: 2026, month: 4, day: 5))
+        else { return [] }
+        return (0..<4).map { weekIndex in
+            let days = (0..<7).compactMap { offset -> DayCellViewModel? in
+                calendar.date(byAdding: .day, value: weekIndex * 7 + offset, to: firstSunday)
+                    .map { calendar.dateComponents([.year, .month, .day], from: $0) }
+                    .map { components in
+                        DayCellViewModel(
+                            year: components.year ?? 0, month: components.month ?? 0, day: components.day ?? 0,
+                            isNotCurrentMonth: true,
+                            accentDay: offset == 0 ? .sunday : offset == 6 ? .saturday : nil
+                        )
+                    }
+            }
+            return WeekRowModel("april-week:\(weekIndex)", days)
+        }
+    }
+
+    var focusedMonth: AnyPublisher<CalendarMonth, Never> {
+        return Just(.init(year: 2026, month: 3)).eraseToAnyPublisher()
+    }
+
+    var selectedDayIdentifier: AnyPublisher<String?, Never> {
+        return self.month.currentSelectDayIdentifier.map { Optional($0) }.eraseToAnyPublisher()
+    }
+
+    var todayIdentifier: AnyPublisher<String, Never> {
+        return self.month.todayIdentifier
+    }
+
+    func eventStack(at weekId: String) -> AnyPublisher<WeekEventStackViewModel, Never> {
+        let lines = self.duoInnerEventLines(at: weekId)
+        return Just(.init(linesStack: lines, shouldMarkEventDays: !lines.isEmpty))
+            .eraseToAnyPublisher()
+    }
+
+    private func duoInnerEventLines(at weekId: String) -> [[EventOnWeek]] {
+        var lines = self.month.eventLines(at: weekId)
+        guard weekId == "week:1", lines.count > 2 else { return lines }
+        let dentist = self.month.event(
+            "dentist-duo", "catalog.event::dentist".catalogLocalized(),
+            days: [12], seq: 5...5, ids: ["2026-3-12"],
+            tagId: StoreCatalogEventTag.health.tagId, hasPeriod: false
+        )
+        lines[2].insert(dentist, at: 1)
+        return lines
+    }
+
+    func eventsPerDay(at weekId: String) -> AnyPublisher<[[any CalendarEvent]], Never> {
+        return self.month.eventsPerDay(at: weekId)
+    }
+
+    func attachListener(_ listener: any ContinuousMonthsSceneListener) { }
+    func select(_ day: DayCellViewModel) { }
+    func shareEvents(_ kind: CalendarShareRangeKind, for day: DayCellViewModel) { }
+    func scrolled(to month: CalendarMonth) { }
+    func changeFocusedMonth(to month: CalendarMonth) { }
+    func selectDay(_ day: CalendarDay) { }
 }
 
 /// 3월 19일에 다섯 줄을 겹쳐 `+N` 오버플로우가 나오게 한다.

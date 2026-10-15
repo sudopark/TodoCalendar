@@ -12,6 +12,7 @@
 "catalog.event::team_workshop" = "Workshop nhóm";
 "catalog.event::release_day" = "Ngày phát hành";
 "catalog.event::lunch" = "Ăn trưa với Sara";
+"catalog.event::anniversary" = "Kỷ niệm ngày cưới";
 
 // MARK: - 할일
 

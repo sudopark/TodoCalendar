@@ -12,6 +12,7 @@
 "catalog.event::team_workshop" = "टीम वर्कशॉप";
 "catalog.event::release_day" = "रिलीज़ का दिन";
 "catalog.event::lunch" = "सारा के साथ लंच";
+"catalog.event::anniversary" = "शादी की सालगिरह";
 
 // MARK: - 할일
 

@@ -12,6 +12,7 @@
 "catalog.event::team_workshop" = "Timska radionica";
 "catalog.event::release_day" = "Dan izdanja";
 "catalog.event::lunch" = "Ručak sa Sarom";
+"catalog.event::anniversary" = "Godišnjica braka";
 
 // MARK: - 할일
 

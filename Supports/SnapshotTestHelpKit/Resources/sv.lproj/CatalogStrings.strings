@@ -12,6 +12,7 @@
 "catalog.event::team_workshop" = "Teamworkshop";
 "catalog.event::release_day" = "Releasedag";
 "catalog.event::lunch" = "Lunch med Sara";
+"catalog.event::anniversary" = "Bröllopsdag";
 
 // MARK: - 할일
 

@@ -12,6 +12,7 @@
 "catalog.event::team_workshop" = "Командний воркшоп";
 "catalog.event::release_day" = "День релізу";
 "catalog.event::lunch" = "Обід із Сарою";
+"catalog.event::anniversary" = "Річниця весілля";
 
 // MARK: - 할일
 

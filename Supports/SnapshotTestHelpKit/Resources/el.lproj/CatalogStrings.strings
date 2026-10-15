@@ -12,6 +12,7 @@
 "catalog.event::team_workshop" = "Εργαστήριο ομάδας";
 "catalog.event::release_day" = "Ημέρα κυκλοφορίας";
 "catalog.event::lunch" = "Μεσημεριανό με τη Σάρα";
+"catalog.event::anniversary" = "Επέτειος γάμου";
 
 // MARK: - 할일
 

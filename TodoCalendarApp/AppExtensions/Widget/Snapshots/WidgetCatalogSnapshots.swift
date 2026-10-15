@@ -12,6 +12,7 @@ import WidgetKit
 import Prelude
 import Optics
 import Domain
+import Extensions
 import SnapshotTestHelpKit
 import WidgetScenes
 
@@ -49,6 +50,22 @@ final class WidgetCatalogSnapshots: XCTestCase {
         testName: String = #function,
         @ViewBuilder makeView: @escaping () -> V
     ) {
+        self.capture(
+            name, family: family, canvas: canvas,
+            plateView: { Rectangle().fill(.background) },
+            testName: testName, makeView: makeView
+        )
+    }
+
+    @MainActor
+    private func capture<P: View, V: View>(
+        _ name: String,
+        family: WidgetFamily,
+        canvas: CGSize,
+        @ViewBuilder plateView: @escaping () -> P,
+        testName: String = #function,
+        @ViewBuilder makeView: @escaping () -> V
+    ) {
         let inset = WidgetCanvas.outerInset
         captureSnapshotPair(
             named: name,
@@ -60,8 +77,7 @@ final class WidgetCatalogSnapshots: XCTestCase {
             testName: testName
         ) { _ in
             ZStack {
-                Rectangle()
-                    .fill(.background)
+                plateView()
                 makeView()
                     .previewContext(WidgetPreviewContext(family: family))
                     .padding(WidgetCanvas.contentMargin)
@@ -91,6 +107,82 @@ final class WidgetCatalogSnapshots: XCTestCase {
                 )
             }
         }
+    }
+
+    @MainActor
+    func test_widgetTodayAndNextStyled() {
+        let background = WidgetAppearanceSettings.Background.custom(hex: "#101820")
+        let style = WidgetStyle(
+            id: .init(variant: .todayAndNextMedium, style: .custom(id: "night")),
+            name: nil,
+            setting: TodayAndNextStyleSetting.initial,
+            background: background
+        )
+        let model = TodayAndNextWidgetViewModel.sample()
+            |> \.look .~ WidgetLook(globalSetting: .init(), appliedStyle: style)
+        self.capture(
+            "widget-today-and-next-styled",
+            family: .systemMedium,
+            canvas: WidgetCanvas.medium,
+            plateView: { Rectangle().fill(WidgetBackgroundStyle(background).shape) }
+        ) {
+            TodayAndNextWidgetView(model: model) { _, color in
+                AnyView(
+                    Toggle("", isOn: .constant(false))
+                        .toggleStyle(
+                            TodoToggleStyle(
+                                colorSet: model.look.background.colorSet(true),
+                                size: 16, customColor: color
+                            )
+                        )
+                )
+            }
+        }
+    }
+
+    @MainActor
+    func test_widgetDDayPhoto() {
+        let target = Calendar.current.date(
+            from: DateComponents(year: 2026, month: 3, day: 26, hour: 7)
+        ) ?? Date()
+        let targetTime = EventTime.at(target.timeIntervalSince1970)
+        let style = WidgetStyle(
+            id: .init(variant: .ddayMedium, style: .custom(id: "photo")),
+            name: nil,
+            setting: DDayStyleSetting.initial,
+            photo: self.bokehPhoto()
+        )
+        let model = DDayWidgetViewModel(
+            eventTitle: "catalog.event::anniversary".catalogLocalized(),
+            ddayText: DDayText(14).text,
+            dateText: targetTime.ddayDateText(in: .current),
+            timeText: targetTime.ddayTimeText(in: .current),
+            repeatText: ""
+        )
+        |> \.look .~ WidgetLook(globalSetting: .init(), appliedStyle: style)
+        self.capture(
+            "widget-dday-photo",
+            family: .systemMedium,
+            canvas: WidgetCanvas.medium,
+            plateView: {
+                WidgetBackgroundView(
+                    look: model.look,
+                    in: RoundedRectangle(cornerRadius: WidgetCanvas.cornerRadius, style: .continuous)
+                )
+            }
+        ) {
+            DDayMediumWidgetView(model: model)
+        }
+    }
+
+    @MainActor
+    private func bokehPhoto() -> WidgetStylePhoto {
+        let renderer = ImageRenderer(content: BokehPhotoFixtureView())
+        renderer.scale = BokehPhotoFixture.renderScale
+        let url = FileManager.default.temporaryDirectory
+            .appending(path: "widget-catalog-photo-\(UUID().uuidString).png")
+        try? renderer.uiImage?.pngData()?.write(to: url, options: .atomic)
+        return .init(id: nil, original: url, rendering: url)
     }
 
     @MainActor
@@ -275,5 +367,124 @@ final class WidgetCatalogSnapshots: XCTestCase {
         self.capture("widget-ai-command", family: .systemSmall, canvas: WidgetCanvas.small) {
             AICommandShortcutWidgetView(look: .init(globalSetting: .init()))
         }
+    }
+}
+
+
+// MARK: - 디데이 위젯 배경 사진 픽스처
+
+private struct BokehLight {
+    let x: CGFloat
+    let y: CGFloat
+    let radius: CGFloat
+    let color: Int
+    let alpha: Double
+}
+
+// 좌표는 미디엄 위젯의 2배(pt) 공간 기준이고 renderScale 로 되돌린다
+private enum BokehPhotoFixture {
+    static let canvas = CGSize(width: 2184, height: 1020)
+    static let renderScale: CGFloat = 0.5
+    static let blurRadius: CGFloat = 10
+    static let backgroundColors: [Color] = [
+        Color(red: 20 / 255, green: 24 / 255, blue: 58 / 255),
+        Color(red: 70 / 255, green: 36 / 255, blue: 80 / 255)
+    ]
+    static let lightColors: [Color] = [
+        Color(red: 255 / 255, green: 206 / 255, blue: 120 / 255),
+        Color(red: 255 / 255, green: 170 / 255, blue: 90 / 255),
+        Color(red: 255 / 255, green: 236 / 255, blue: 180 / 255),
+        Color(red: 255 / 255, green: 140 / 255, blue: 160 / 255)
+    ]
+    static let lights: [BokehLight] = [
+        .init(x: 617, y: 404, radius: 61, color: 0, alpha: 69),
+        .init(x: 385, y: 374, radius: 88, color: 0, alpha: 124),
+        .init(x: 153, y: 88, radius: 47, color: 3, alpha: 113),
+        .init(x: 985, y: 92, radius: 28, color: 3, alpha: 67),
+        .init(x: 914, y: 645, radius: 35, color: 0, alpha: 133),
+        .init(x: 203, y: 999, radius: 70, color: 1, alpha: 65),
+        .init(x: 1186, y: 429, radius: 37, color: 1, alpha: 129),
+        .init(x: 1263, y: 573, radius: 35, color: 1, alpha: 73),
+        .init(x: 1525, y: 99, radius: 44, color: 0, alpha: 132),
+        .init(x: 843, y: 508, radius: 27, color: 3, alpha: 100),
+        .init(x: 1856, y: 370, radius: 79, color: 2, alpha: 91),
+        .init(x: 999, y: 83, radius: 43, color: 2, alpha: 127),
+        .init(x: 1406, y: 746, radius: 83, color: 3, alpha: 96),
+        .init(x: 483, y: 524, radius: 29, color: 3, alpha: 81),
+        .init(x: 622, y: 955, radius: 63, color: 3, alpha: 113),
+        .init(x: 317, y: 782, radius: 25, color: 2, alpha: 103),
+        .init(x: 2034, y: 593, radius: 64, color: 3, alpha: 68),
+        .init(x: 1105, y: 485, radius: 31, color: 0, alpha: 67),
+        .init(x: 1825, y: 291, radius: 59, color: 3, alpha: 104),
+        .init(x: 1891, y: 363, radius: 22, color: 1, alpha: 138),
+        .init(x: 2022, y: 60, radius: 34, color: 1, alpha: 96),
+        .init(x: 1014, y: 407, radius: 36, color: 3, alpha: 123),
+        .init(x: 681, y: 459, radius: 30, color: 3, alpha: 130),
+        .init(x: 560, y: 838, radius: 55, color: 3, alpha: 130),
+        .init(x: 1701, y: 1010, radius: 55, color: 2, alpha: 108),
+        .init(x: 618, y: 84, radius: 49, color: 1, alpha: 79),
+        .init(x: 955, y: 12, radius: 49, color: 3, alpha: 135),
+        .init(x: 1076, y: 288, radius: 43, color: 0, alpha: 78),
+        .init(x: 1512, y: 624, radius: 73, color: 2, alpha: 76),
+        .init(x: 221, y: 467, radius: 85, color: 3, alpha: 110),
+        .init(x: 1614, y: 106, radius: 71, color: 3, alpha: 111),
+        .init(x: 780, y: 68, radius: 27, color: 1, alpha: 116),
+        .init(x: 450, y: 348, radius: 40, color: 0, alpha: 73),
+        .init(x: 619, y: 549, radius: 20, color: 0, alpha: 106),
+        .init(x: 288, y: 895, radius: 23, color: 1, alpha: 138),
+        .init(x: 608, y: 649, radius: 68, color: 2, alpha: 104),
+        .init(x: 1942, y: 125, radius: 66, color: 0, alpha: 122),
+        .init(x: 1967, y: 495, radius: 79, color: 2, alpha: 70),
+        .init(x: 418, y: 767, radius: 38, color: 2, alpha: 93),
+        .init(x: 661, y: 528, radius: 81, color: 0, alpha: 86),
+        .init(x: 1481, y: 150, radius: 87, color: 0, alpha: 127),
+        .init(x: 372, y: 712, radius: 58, color: 2, alpha: 126),
+        .init(x: 684, y: 364, radius: 66, color: 1, alpha: 128),
+        .init(x: 2059, y: 337, radius: 89, color: 1, alpha: 138),
+        .init(x: 980, y: 837, radius: 44, color: 3, alpha: 89),
+        .init(x: 2120, y: 504, radius: 45, color: 2, alpha: 63),
+        .init(x: 1144, y: 483, radius: 23, color: 2, alpha: 84),
+        .init(x: 1831, y: 827, radius: 64, color: 2, alpha: 106),
+        .init(x: 903, y: 104, radius: 30, color: 1, alpha: 120),
+        .init(x: 1383, y: 209, radius: 45, color: 3, alpha: 139),
+        .init(x: 1963, y: 931, radius: 20, color: 2, alpha: 70),
+        .init(x: 1591, y: 801, radius: 35, color: 1, alpha: 121),
+        .init(x: 1777, y: 808, radius: 42, color: 2, alpha: 71),
+        .init(x: 1897, y: 411, radius: 70, color: 0, alpha: 80),
+        .init(x: 520, y: 28, radius: 41, color: 1, alpha: 135),
+        .init(x: 598, y: 626, radius: 79, color: 3, alpha: 104),
+        .init(x: 536, y: 21, radius: 39, color: 0, alpha: 73),
+        .init(x: 570, y: 444, radius: 87, color: 1, alpha: 87),
+        .init(x: 1031, y: 217, radius: 23, color: 2, alpha: 124),
+        .init(x: 1335, y: 265, radius: 50, color: 3, alpha: 76)
+    ]
+}
+
+private struct BokehPhotoFixtureView: View {
+
+    var body: some View {
+        ZStack(alignment: .topLeading) {
+            LinearGradient(
+                colors: BokehPhotoFixture.backgroundColors,
+                startPoint: .topLeading, endPoint: .bottomTrailing
+            )
+            ZStack(alignment: .topLeading) {
+                ForEach(BokehPhotoFixture.lights.indices, id: \.self) { index in
+                    let light = BokehPhotoFixture.lights[index]
+                    Circle()
+                        .fill(BokehPhotoFixture.lightColors[light.color].opacity(light.alpha / 255))
+                        .frame(width: light.radius * 2, height: light.radius * 2)
+                        .offset(x: light.x - light.radius, y: light.y - light.radius)
+                }
+            }
+            .frame(
+                width: BokehPhotoFixture.canvas.width,
+                height: BokehPhotoFixture.canvas.height,
+                alignment: .topLeading
+            )
+            .blur(radius: BokehPhotoFixture.blurRadius)
+        }
+        .frame(width: BokehPhotoFixture.canvas.width, height: BokehPhotoFixture.canvas.height)
+        .clipped()
     }
 }
