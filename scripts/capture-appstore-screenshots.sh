@@ -10,6 +10,8 @@
 #       snapshot-appstore/<lang>/captions/cpp/<장면>.png — 맞춤형 제품 페이지 캡션
 #       snapshot-appstore/<lang>/widgets/<슬러그>.png — 홈화면·잠금화면 합성 전 위젯 원본
 #       snapshot-appstore/<lang>/sheets/<슬러그>.png — 캘린더 위에 얹을 시트 조각
+#       snapshot-appstore/<lang>/appearance/<테마>.png — 06 에 겹쳐 놓을 테마별 화면
+#       snapshot-appstore/<lang>/duo/<NN-슬러그>.png — iPhone Duo 업로드 원본 (내부·커버 두 규격)
 # 홈화면·잠금화면 스샷은 위젯 원본을 배경에 합성해 만드는 별도 단계다 — 여기서는 원본까지만 뽑는다.
 # 기본 스토어 페이지와 맞춤형 제품 페이지가 장면을 나눠 쓰므로 한 실행이 양쪽을 다 뜬다.
 #
@@ -25,6 +27,7 @@ SIMULATOR_NAME='iPhone 16 Pro Max - appstore_ref'
 SIMULATOR_DEVICE_TYPE='com.apple.CoreSimulator.SimDeviceType.iPhone-16-Pro-Max'
 UPLOAD_WIDTH=1320
 UPLOAD_HEIGHT=2868
+DUO_SIZES="2853x2007 1398x2034"
 
 ALL_LANGS=(en ko ja zh-Hans zh-Hant vi th es fr it pt-BR ca de nl sv da nb fi pl cs sk hu ru uk ro el hr tr id ms hi)
 
@@ -51,6 +54,7 @@ SUITES=(
     "CommonPresentationSnapshots|AppStoreCaptionSnapshots|CommonPresentation"
     "TodoCalendarAppWidgetSnapshots|WidgetCatalogSnapshots|Widget"
     "AIAgentSceneSnapshots|AIAgentSceneCatalogSnapshots|AIAgentScene"
+    "WidgetScenesSnapshots|WidgetScenesCatalogSnapshots|WidgetScenes"
 )
 
 # <업로드 파일명>|<모듈 디렉토리>/<스위트>/<캡처 파일명>
@@ -59,7 +63,7 @@ MAPPING=(
     "02-repeat-options|EventDetailScene/EventDetailSceneCatalogSnapshots/test_storeRepeatOptions.storeRepeatOptions-light.png"
     "03-event-detail|EventDetailScene/EventDetailSceneCatalogSnapshots/test_eventDetail.eventDetail-light.png"
     "04-google-event|EventDetailScene/EventDetailSceneCatalogSnapshots/test_storeGoogleEventDetail.storeGoogleEventDetail-light.png"
-    "06-appearance|SettingScene/SettingSceneCatalogSnapshots/test_appearanceSetting.appearanceSetting-light.png"
+    "07-widget-style|WidgetScenes/WidgetScenesCatalogSnapshots/test_storeWidgetStyleEdit.storeWidgetStyleEdit-light.png"
     "07-todo-list|CalendarScenes/CalendarScenesCatalogSnapshots/test_storeTodoList.storeTodoList-light.png"
     "08-share-preview|CalendarScenes/CalendarScenesCatalogSnapshots/test_storeSharePreview.storeSharePreview-light.png"
 )
@@ -72,10 +76,21 @@ CAPTION_MAPPING=(
     "04-google-event|CommonPresentation/AppStoreCaptionSnapshots/test_storeCaptions.04-google-event-light.png"
     "05-widgets|CommonPresentation/AppStoreCaptionSnapshots/test_storeCaptions.05-widgets-light.png"
     "06-appearance|CommonPresentation/AppStoreCaptionSnapshots/test_storeCaptions.06-appearance-light.png"
+    "07-widget-style|CommonPresentation/AppStoreCaptionSnapshots/test_storeCaptions.07-widget-style-light.png"
+)
+
+# 06 에 겹쳐 놓을 테마별 화면 — 테마 이름이 곧 파일명이고, 합성 쪽 THEME_LINEUP 과 같은 목록이어야 한다
+THEME_MAPPING=(
+    "indigo|SettingScene/SettingSceneCatalogSnapshots/test_storeThemeLineup.storeThemeLineup-indigo.png"
+    "amethyst|SettingScene/SettingSceneCatalogSnapshots/test_storeThemeLineup.storeThemeLineup-amethyst.png"
+    "ruby|SettingScene/SettingSceneCatalogSnapshots/test_storeThemeLineup.storeThemeLineup-ruby.png"
+    "wine|SettingScene/SettingSceneCatalogSnapshots/test_storeThemeLineup.storeThemeLineup-wine.png"
 )
 
 WIDGET_MAPPING=(
     "today-and-next|Widget/WidgetCatalogSnapshots/test_widgetTodayAndNext.widget-today-and-next-light.png"
+    "today-and-next-styled|Widget/WidgetCatalogSnapshots/test_widgetTodayAndNextStyled.widget-today-and-next-styled-light.png"
+    "dday-photo|Widget/WidgetCatalogSnapshots/test_widgetDDayPhoto.widget-dday-photo-light.png"
     "event-list|Widget/WidgetCatalogSnapshots/test_widgetEventList.widget-event-list-light.png"
     "today|Widget/WidgetCatalogSnapshots/test_widgetToday.widget-today-light.png"
     "foremost|Widget/WidgetCatalogSnapshots/test_widgetForemost.widget-foremost-light.png"
@@ -86,6 +101,12 @@ WIDGET_MAPPING=(
     "lockscreen-next|Widget/WidgetCatalogSnapshots/test_widgetLockScreenNext.lockscreen-next-dark.png"
     "lockscreen-next-remain|Widget/WidgetCatalogSnapshots/test_widgetLockScreenNextRemain.lockscreen-next-remain-dark.png"
     "lockscreen-live-activity|Widget/WidgetCatalogSnapshots/test_widgetLockScreenLiveActivity.lockscreen-live-activity-dark.png"
+)
+
+# iPhone Duo 업로드 원본 — 캔버스가 화면 크기라 합성 없이 그대로 올린다
+DUO_MAPPING=(
+    "01-calendar-two-columns|CalendarScenes/CalendarScenesCatalogSnapshots/test_storeDuoInnerCalendar.storeDuoInnerCalendar-light.png"
+    "02-calendar-cover|CalendarScenes/CalendarScenesCatalogSnapshots/test_storeDuoCoverCalendar.storeDuoCoverCalendar-light.png"
 )
 
 # 캘린더 위에 얹을 시트 조각 — 화면 규격이 아니라 시트 자기 크기다
@@ -142,20 +163,23 @@ python_with_pillow() {
 
 # 규격 실측 + 알파 제거. 흰/검으로 flatten 하지 않고 채널만 떨어뜨리므로,
 # 이미 불투명한지(alpha == 255) 먼저 확인하고 아니면 실패로 끊는다
+# 규격은 "<가로>x<세로>" 를 공백으로 이어 넘긴다 — 그중 하나면 통과다
 verify_and_strip_alpha() {
-    local python_bin="$1" dir="$2"
-    "$python_bin" - "$dir" "$UPLOAD_WIDTH" "$UPLOAD_HEIGHT" <<'PY'
+    local python_bin="$1" dir="$2" sizes="${3:-${UPLOAD_WIDTH}x${UPLOAD_HEIGHT}}"
+    "$python_bin" - "$dir" "$sizes" <<'PY'
 import sys
 from pathlib import Path
 from PIL import Image
 
-directory, width, height = Path(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3])
+directory = Path(sys.argv[1])
+sizes = [tuple(int(value) for value in size.split("x")) for size in sys.argv[2].split()]
+size_text = " / ".join(f"{width}x{height}" for width, height in sizes)
 failures = []
 paths = sorted(p for p in directory.glob("*.png"))
 for path in paths:
     with Image.open(path) as image:
-        if image.size != (width, height):
-            failures.append(f"{path.name}: {image.size[0]}x{image.size[1]} — {width}x{height} 아님")
+        if image.size not in sizes:
+            failures.append(f"{path.name}: {image.size[0]}x{image.size[1]} — {size_text} 아님")
             continue
         if image.mode not in ("RGBA", "LA", "P"):
             continue
@@ -174,7 +198,7 @@ for path in paths:
 if failures:
     print("\n".join(f"  ✗ {message}" for message in failures), file=sys.stderr)
     sys.exit(1)
-print(f"  ✓ {len(paths)}장 {width}x{height} / 알파 없음")
+print(f"  ✓ {len(paths)}장 {size_text} / 알파 없음")
 PY
 }
 
@@ -198,7 +222,7 @@ capture_lang() {
 
     local out="$ROOT/snapshot-appstore/$lang"
     rm -rf "$out"
-    mkdir -p "$out/captions/cpp" "$out/widgets" "$out/sheets"
+    mkdir -p "$out/captions/cpp" "$out/widgets" "$out/sheets" "$out/duo" "$out/appearance"
     for entry in "${MAPPING[@]}" ; do
         IFS='|' read -r name source <<< "$entry"
         local src="$ROOT/snapshot-catalog/$source"
@@ -223,15 +247,29 @@ capture_lang() {
         [ -f "$src" ] || { echo "  ✗ 누락: $source"; return 1; }
         cp "$src" "$out/sheets/$name.png"
     done
+    for entry in "${THEME_MAPPING[@]}" ; do
+        IFS='|' read -r name source <<< "$entry"
+        local src="$ROOT/snapshot-catalog/$source"
+        [ -f "$src" ] || { echo "  ✗ 누락: $source"; return 1; }
+        cp "$src" "$out/appearance/$name.png"
+    done
+    for entry in "${DUO_MAPPING[@]}" ; do
+        IFS='|' read -r name source <<< "$entry"
+        local src="$ROOT/snapshot-catalog/$source"
+        [ -f "$src" ] || { echo "  ✗ 누락: $source"; return 1; }
+        cp "$src" "$out/duo/$name.png"
+    done
     for entry in "${CPP_CAPTION_MAPPING[@]}" ; do
         IFS='|' read -r name source <<< "$entry"
         local src="$ROOT/snapshot-catalog/$source"
         [ -f "$src" ] || { echo "  ✗ 누락: $source — fastlane/custom_product_pages/captions.json 에 $lang 원고가 있는지 확인해라"; return 1; }
         cp "$src" "$out/captions/cpp/$name.png"
     done
-    echo "  ✓ [$lang] ${#MAPPING[@]}장 + 캡션 ${#CAPTION_MAPPING[@]}+${#CPP_CAPTION_MAPPING[@]}장 + 위젯 원본 ${#WIDGET_MAPPING[@]}종 + 시트 ${#SHEET_MAPPING[@]}종 → snapshot-appstore/$lang/"
+    echo "  ✓ [$lang] ${#MAPPING[@]}장 + 캡션 ${#CAPTION_MAPPING[@]}+${#CPP_CAPTION_MAPPING[@]}장 + 위젯 원본 ${#WIDGET_MAPPING[@]}종 + 시트 ${#SHEET_MAPPING[@]}종 + 테마 ${#THEME_MAPPING[@]}장 + Duo ${#DUO_MAPPING[@]}장 → snapshot-appstore/$lang/"
 
     verify_and_strip_alpha "$python_bin" "$out" || return 1
+    verify_and_strip_alpha "$python_bin" "$out/appearance" || return 1
+    verify_and_strip_alpha "$python_bin" "$out/duo" "$DUO_SIZES" || return 1
 
     # 검증 스위트 png 가 섞여 들어가지 않았는지 — 섞였다면 -only-testing 이 안 먹은 것이다
     if ! git -C "$ROOT" diff --quiet -- '*__Snapshots__*'; then
@@ -243,7 +281,7 @@ capture_lang() {
 if [ "${1:-}" = "--all" ]; then
     set -- "${ALL_LANGS[@]}"
 fi
-[ $# -gt 0 ] || { sed -n '2,12p' "$0"; exit 1; }
+[ $# -gt 0 ] || { sed -n '2,14p' "$0"; exit 1; }
 
 PYTHON_BIN="$(python_with_pillow)" || {
     echo "Pillow 를 쓸 수 있는 python3 가 없다 — 알파 제거 단계를 돌릴 수 없다 (pip3 install Pillow)" >&2

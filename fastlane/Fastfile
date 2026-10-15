@@ -91,7 +91,7 @@ end
 
 # 6.9" 디스플레이 업로드 규격. 다른 크기·알파 채널은 ASC 가 업로드 단계에서 거부한다
 APP_STORE_SCREENSHOT_SIZE = [1320, 2868].freeze
-APP_STORE_SCREENSHOT_SLOTS = %w[01 02 03 04 05 06].freeze
+APP_STORE_SCREENSHOT_SLOTS = %w[01 02 03 04 05 06 07].freeze
 
 def screenshot_locale_dirs(screenshots_path)
   return [] unless File.directory?(screenshots_path)
@@ -137,7 +137,7 @@ def ensure_screenshot_slots_complete!(screenshots_path)
   return if broken.empty?
 
   UI.user_error!(<<~MESSAGE)
-    로케일 #{broken.size}개의 스크린샷 슬롯이 #{APP_STORE_SCREENSHOT_SLOTS.first}~#{APP_STORE_SCREENSHOT_SLOTS.last} 6장과 다르다.
+    로케일 #{broken.size}개의 스크린샷 슬롯이 #{APP_STORE_SCREENSHOT_SLOTS.first}~#{APP_STORE_SCREENSHOT_SLOTS.last} #{APP_STORE_SCREENSHOT_SLOTS.size}장과 다르다.
     빠진 슬롯은 ASC 에 그냥 안 올라가고, 남는 슬롯은 다른 언어와 순서가 어긋난다.
 
     #{broken.map { |locale, slots| "  #{locale} — #{slots.empty? ? '없음' : slots.join(', ')}" }.join("\n")}
@@ -146,7 +146,7 @@ def ensure_screenshot_slots_complete!(screenshots_path)
   MESSAGE
 end
 
-# PNG IHDR 을 직접 읽는다 — 186장 검사에 이미지 gem 을 새로 끌어오지 않으려는 선택
+# PNG IHDR 을 직접 읽는다 — 217장 검사에 이미지 gem 을 새로 끌어오지 않으려는 선택
 def png_header(path)
   header = File.binread(path, 26).to_s
   return nil unless header.bytesize == 26 && header.byteslice(12, 4) == "IHDR"
@@ -325,7 +325,7 @@ platform :ios do
       # 재업로드가 기존 스샷 뒤에 덧붙는 걸 막는다 — ASC 는 디스플레이당 10장이 상한이라 두 번만 돌려도 넘친다
       overwrite_screenshots: true,
       submit_for_review: false,
-      # 186장 업로드는 한 시간대 단위라 프롬프트를 지키고 있을 수 없다. 위 가드 3종이 사전 확인을 대신한다
+      # 217장 업로드는 한 시간대 단위라 프롬프트를 지키고 있을 수 없다. 위 가드 3종이 사전 확인을 대신한다
       force: true,
       # precheck 는 텍스트 메타데이터 검사라 스샷 업로드와 무관하다
       run_precheck_before_submit: false
