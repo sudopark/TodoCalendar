@@ -9,8 +9,8 @@ usage:
       05-widgets 만 화면 원본이 없다 — snapshot-appstore/<lang>/widgets/ 의 위젯 원본을 홈화면으로 합성해 만든다
       06-appearance 는 snapshot-appstore/<lang>/appearance/<테마>.png 여러 장을 기기마다 하나씩 겹쳐 놓는다
 출력: fastlane/screenshots/<ASC 로케일>/<NN>_<슬러그>.png (1320×2868 / 알파 없음)
-      fastlane/screenshots_duo/<ASC 로케일>/<NN>_<슬러그>.png — snapshot-appstore/<lang>/duo/ 원본을 그대로 옮긴다.
-      캔버스가 화면 크기라 캡션 자리가 없다. 6.9" 와 폴더를 나누는 이유는 fastlane/screenshots.md 의 Duo 절
+      같은 폴더의 duo_<NN>_<슬러그>.png — snapshot-appstore/<lang>/duo/ 원본을 그대로 옮긴다.
+      캔버스가 화면 크기라 캡션 자리가 없다. deliver 가 해상도로 화면 종류를 가른다
 
 기기 프레임은 애플 공식 베젤만 쓴다 (마케팅·아이덴티티 가이드라인). 동봉 라이선스가
 non-transferable 이라 public 레포에 커밋하지 않고 캐시 디렉토리에 받아 쓴다.
@@ -68,15 +68,16 @@ DUO_SLUGS = [
     "02-calendar-cover",
 ]
 DUO_SIZES = [(2853, 2007), (1398, 2034)]
+DUO_PREFIX = "duo_"
 
 
 def asc_locale(lang):
     return ASC_LOCALES.get(lang, lang)
 
 
-def upload_name(slug):
+def upload_name(slug, prefix=""):
     number, _, rest = slug.partition("-")
-    return f"{number}_{rest}.png"
+    return f"{prefix}{number}_{rest}.png"
 
 
 # MARK: - 합성
@@ -166,27 +167,22 @@ def compose_lang(lang, bezel, hole_mask, hole_box):
     return output_dir
 
 
-def copy_duo_lang(lang):
+def copy_duo_lang(lang, output_dir):
     source_dir = ROOT / "snapshot-appstore" / lang / "duo"
-    output_dir = ROOT / "fastlane/screenshots_duo" / asc_locale(lang)
-    output_dir.mkdir(parents=True, exist_ok=True)
-    for stale in output_dir.glob("*.png"):
-        stale.unlink()
-    print(f"▶︎ [{lang}] Duo 원본 → fastlane/screenshots_duo/{asc_locale(lang)}/")
+    print(f"▶︎ [{lang}] Duo 원본 → fastlane/screenshots/{asc_locale(lang)}/{DUO_PREFIX}*")
 
     for slug in DUO_SLUGS:
         path = source_dir / f"{slug}.png"
         if not path.exists():
             raise SystemExit(f"  ✗ 누락: {path.relative_to(ROOT)} — 먼저 촬영 스크립트를 돌려라")
         with Image.open(path) as screenshot:
-            screenshot.convert("RGB").save(output_dir / upload_name(slug))
+            screenshot.convert("RGB").save(output_dir / upload_name(slug, DUO_PREFIX))
     print(f"  ✓ [{lang}] Duo {len(DUO_SLUGS)}장")
-    return output_dir
 
 
-def verify(output_dir, sizes=(UPLOAD_SIZE,)):
+def verify(output_dir, pattern, sizes):
     failures = []
-    for path in sorted(output_dir.glob("*.png")):
+    for path in sorted(output_dir.glob(pattern)):
         with Image.open(path) as image:
             if image.size not in sizes:
                 failures.append(f"{path.name}: {image.size[0]}x{image.size[1]} — 규격 아님")
@@ -209,8 +205,10 @@ def main(argv):
     print(f"▶︎ 화면 구멍 {hole_box[2]-hole_box[0]}x{hole_box[3]-hole_box[1]} @ ({hole_box[0]}, {hole_box[1]})")
 
     for lang in langs:
-        verify(compose_lang(lang, bezel, hole_mask, hole_box))
-        verify(copy_duo_lang(lang), DUO_SIZES)
+        output_dir = compose_lang(lang, bezel, hole_mask, hole_box)
+        copy_duo_lang(lang, output_dir)
+        verify(output_dir, "[0-9]*.png", (UPLOAD_SIZE,))
+        verify(output_dir, f"{DUO_PREFIX}*.png", DUO_SIZES)
     print(f"✓ 전체 완료 — {len(langs)} 개 언어")
 
 
