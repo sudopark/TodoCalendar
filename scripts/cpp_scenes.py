@@ -23,6 +23,10 @@ CALENDAR_SCREEN = "01-calendar"
 LOCK_SCREEN_WIDGETS = [
     "lockscreen-foremost", "lockscreen-next", "lockscreen-next-remain", "lockscreen-live-activity"
 ]
+# 기본 스토어 페이지 05 의 라인업을 바꿔도 이미 올린 C2 장면이 따라 바뀌지 않게 따로 고정한다
+HOME_SCREEN_WIDGETS = ["today-and-next", "month"]
+HOME_SCREEN_WIDGET_TOP = 430
+HOME_SCREEN_WIDGET_GAP = 90
 
 
 def opened(path):
@@ -40,7 +44,10 @@ def lock_screen_scene(source_dir, size):
 
 
 def home_screen_scene(source_dir, size):
-    return store_screen.home_screen(source_dir, size)
+    return store_screen.home_screen(
+        source_dir, size, HOME_SCREEN_WIDGETS,
+        widget_top=HOME_SCREEN_WIDGET_TOP, widget_gap=HOME_SCREEN_WIDGET_GAP,
+    )
 
 
 def app_screen_scene(slug, top_inset=True):
