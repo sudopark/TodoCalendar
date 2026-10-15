@@ -1,1 +1,1 @@
-tehtävälista,muistilista,ajanhallinta,widget,muistutukset,tarkistuslista,google-kalenteri,tekoäly
+tehtävälista,muistilista,ajanhallinta,widget,teema,lähtölaskenta,muistutukset,google,tekoäly

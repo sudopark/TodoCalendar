@@ -1,1 +1,1 @@
-to-do,todo,task,planner,agenda,widget,recurring,google calendar,voice,checklist,lock screen,ai
+task,planner,schedule,reminder,widget,theme,dday,countdown,recurring,google,voice,checklist,ai

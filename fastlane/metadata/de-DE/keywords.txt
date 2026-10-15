@@ -1,1 +1,1 @@
-todo liste,aufgabenliste,terminplaner,tagesplaner,widget,erinnerung,checkliste,google kalender,ki
+todo liste,terminplaner,tagesplaner,widget,farbschema,countdown,erinnerung,checkliste,google,ki
