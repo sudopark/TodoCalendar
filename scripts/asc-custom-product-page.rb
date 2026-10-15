@@ -37,6 +37,10 @@ PROMOTIONAL_TEXT_LIMIT = 170
 SCREENSHOT_DISPLAY_TYPE = "APP_IPHONE_67"
 SCENES_PER_PAGE = 6
 
+# 승인된 버전은 고칠 수 없다 — 원고를 갈려면 이 상태의 버전이 있어야 한다
+EDITABLE_VERSION_STATES = %w[PREPARE_FOR_SUBMISSION READY_FOR_REVIEW REJECTED].freeze
+IN_REVIEW_VERSION_STATES = %w[WAITING_FOR_REVIEW IN_REVIEW].freeze
+
 # deliver 가 로케일이 아닌 용도로 쓰는 하위 디렉토리 (fastlane/Fastfile 과 같은 목록)
 NON_LOCALE_METADATA_DIRS = %w[
   review_information
@@ -171,12 +175,12 @@ class ASCCustomProductPageClient
     @client.get(v1("apps/#{app_id}")).body.dig("data", "attributes", "primaryLocale")
   end
 
-  # 페이지를 만들면 버전이 딸려 오는 것이 보통이지만 보장은 없다 — 없으면 만든다.
-  def version(page_id:)
+  def version(page_id:, create:)
     existing = paged(
       v1("appCustomProductPages/#{page_id}/appCustomProductPageVersions"), { "limit" => 50 }
     )
-    return existing.first unless existing.empty?
+    editable = editable_version(existing)
+    return editable if editable || !create
 
     body = {
       data: {
@@ -311,6 +315,15 @@ class ASCCustomProductPageClient
     end
     collected
   end
+end
+
+# 심사 중인 버전이 있으면 새 버전을 못 만든다 — 그 심사가 끝나야 고칠 수 있다.
+def editable_version(versions)
+  state_of = ->(version) { version.dig("attributes", "state") }
+  in_review = versions.find { |version| IN_REVIEW_VERSION_STATES.include?(state_of.call(version)) }
+  abort_with("버전 #{in_review["id"]} 이 심사 중(#{state_of.call(in_review)})이다 — 심사가 끝난 뒤 다시 올려라") if in_review
+
+  versions.find { |version| EDITABLE_VERSION_STATES.include?(state_of.call(version)) }
 end
 
 def page_client
@@ -489,11 +502,19 @@ def run_push_text(page_option, all_pages, locale_option, all_locales, dry_run)
   end
 
   client = page_client
-  versions = page_ids.to_h { |page_id| [page_id, client.version(page_id: asc_page_id(pages, page_id))["id"]] }
-  existing_by_page = versions.transform_values { |version_id| client.localizations(version_id: version_id) }
+  versions = page_ids.to_h do |page_id|
+    [page_id, client.version(page_id: asc_page_id(pages, page_id), create: !dry_run)&.dig("id")]
+  end
+  existing_by_page = versions.transform_values do |version_id|
+    version_id ? client.localizations(version_id: version_id) : {}
+  end
   print_text_plan(page_ids, locales, existing_by_page)
 
   if dry_run
+    new_version_pages = versions.select { |_, version_id| version_id.nil? }.keys
+    unless new_version_pages.empty?
+      puts("\n편집할 수 있는 버전이 없어 올릴 때 새 버전을 만든다: #{new_version_pages.join(" ")}")
+    end
     puts("\n--dry-run — 아무것도 올리지 않았다")
     return
   end
@@ -582,8 +603,9 @@ def run_push_images(page_option, all_pages, locale_option, all_locales, dry_run)
   client = page_client
   failed = []
   page_ids.each do |page_id|
-    version_id = client.version(page_id: asc_page_id(pages, page_id))["id"]
-    existing = client.localizations(version_id: version_id)
+    version = client.version(page_id: asc_page_id(pages, page_id), create: false)
+    abort_with("#{page_id} 에 편집할 수 있는 버전이 없다 — push-text 를 먼저 돌려라") unless version
+    existing = client.localizations(version_id: version["id"])
     orphans = locales - existing.keys
     unless orphans.empty?
       abort_with("이미지가 매달릴 로케일이 ASC 에 없다: #{page_id} — #{orphans.join(" ")}\n\npush-text 를 먼저 돌려라")
