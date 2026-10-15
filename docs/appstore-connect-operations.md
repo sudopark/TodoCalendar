@@ -8,6 +8,7 @@ ASC에 무언가를 올리는 작업의 **공통 앞단**(자격증명·실행�
 | 텍스트 메타데이터 (설명·키워드·subtitle·홍보문구) | [`fastlane/metadata/README.md`](../fastlane/metadata/README.md) |
 | 스크린샷 | [`fastlane/screenshots.md`](../fastlane/screenshots.md) |
 | 릴리즈 노트 (버전마다 갈림) | `release-notes` 스킬 |
+| 제품 페이지 헤더·검색 결과 크리에이티브 에셋 | `creative-assets` 스킬 |
 | IAP 상품·심사 정보·데모 계정 | 이슈 #996 본문 |
 
 ---
