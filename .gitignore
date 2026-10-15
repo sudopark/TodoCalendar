@@ -125,3 +125,6 @@ secret/*
 
 fastlane/custom_product_pages/*
 !fastlane/custom_product_pages/README.md
+
+fastlane/creative_assets/*
+!fastlane/creative_assets/README.md
