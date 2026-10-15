@@ -1,1 +1,1 @@
-zoznam úloh,todo list,diár,plánovač,organizér,denný plán,widget,pripomienky,kalendár google,ai
+zoznam úloh,todo,diár,plánovač,organizér,denný plán,widget,téma,odpočet,pripomienky,google,ai

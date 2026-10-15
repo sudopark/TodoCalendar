@@ -1,1 +1,1 @@
-listă de sarcini,agenda,planificator,organizator,memento,widget,checklist,calendar google,ai
+listă de sarcini,agenda,planificator,organizator,memento,widget,temă,numărătoare inversă,google,ai
