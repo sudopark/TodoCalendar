@@ -1,6 +1,6 @@
 ---
 name: custom-product-page
-description: Use when building or updating App Store custom product pages (맞춤형 제품 페이지 / CPP) — 페이지별 스크린샷 라인업·프로모션 문구를 로케일별로 만들어 App Store Connect 에 올리는 절차. Triggers on "맞춤형 제품 페이지 만들어", "CPP 올려", "커스텀 프로덕트 페이지 현지화". Does NOT trigger on 앱 내 이벤트(in-app-event 스킬)·기본 스토어 페이지 스샷 교체(deliver)·가이드 이미지(localization rules §1).
+description: Use when building or updating App Store custom product pages (맞춤형 제품 페이지 / CPP) — 페이지별 스크린샷 라인업·프로모션 문구를 로케일별로 만들어 App Store Connect 에 올리는 절차. Triggers on "맞춤형 제품 페이지 만들어", "CPP 올려", "커스텀 프로덕트 페이지 현지화". Does NOT trigger on 앱 내 이벤트(in-app-event 스킬)·기본 스토어 페이지 스샷 교체(deliver)·제품 페이지 헤더·검색 결과 가로 이미지(creative-assets 스킬)·가이드 이미지(localization rules §1).
 ---
 
 # Custom Product Page — 맞춤형 제품 페이지 현지화·업로드
