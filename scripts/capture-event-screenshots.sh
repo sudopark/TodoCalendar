@@ -55,8 +55,8 @@ def catalog_scenes(spec):
             yield from catalog_scenes(item)
     elif isinstance(spec, str):
         yield spec
-    elif isinstance(spec, dict) and not spec.get("from"):
-        # from 은 카탈로그가 아니라 다른 파이프라인 산출물이다 — 검사 대상이 아니다
+    elif isinstance(spec, dict) and not spec.get("from") and spec.get("assemble") != "home-screen":
+        # from 과 home-screen 위젯은 카탈로그가 아니라 앱스토어 파이프라인 산출물이다 — 검사 대상이 아니다
         for key, value in spec.items():
             if key != "assemble":
                 yield from catalog_scenes(value)

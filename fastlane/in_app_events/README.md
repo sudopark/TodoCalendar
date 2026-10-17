@@ -87,6 +87,7 @@ App Store 앱 내 이벤트(In-App Event)의 원고·설정 자리다. 절차는
 |---|---|---|
 | `lock-screen` | `foremost` · `next` · `nextRemain` · `liveActivity` | 벽지 + 시계 + accessory 위젯 + 라이브 액티비티 |
 | `ai-sheet` | `background` · `sheet` | 배경 화면에 딤 30% + 하단 시트 (`showBottomSlide` 와 같은 모양) |
+| `home-screen` | `widgets` (생략하면 `store_screen.HOME_SCREEN_WIDGETS`) | 벽지 위에 `snapshot-appstore/<lang>/widgets/<이름>.png` 를 위에서부터 얹은 1320×2868 홈 화면. 조각이 장면 값이 아니라 위젯 촬영본 이름이고, 앱스토어 스샷 파이프라인으로 그 언어를 먼저 찍어 둬야 한다 |
 
 ### 카드에 기기 여러 대
 
