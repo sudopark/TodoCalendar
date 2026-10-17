@@ -40,3 +40,4 @@
 - [2026-09-22 위젯 스타일에 건 사진이 저장 뒤 편집 화면에서만 빈칸이 된다](2026-09-22-widget-style-photo-blank-after-save.md) — Settings / fixed / 사진 사라짐·편집 카드 빈칸·이름 바꾸니 없어짐·위젯은 정상·초안 임시 파일 삭제
 - [2026-10-11 가로가 긴 화면에서 adaptive 배너가 거부된다](2026-10-11-adaptive-banner-rejected-on-wide-screen.md) — Billing / fixed / Ad size will not fit on screen·adaptive banner 미표시·duo 펼침 배너·admob Code=0
 - [2026-10-13 계정 전환으로 설정 화면이 내려가면 전면광고가 떠 앱 설치 시트까지 보인다](2026-10-13-ad-on-account-switch-install-sheet.md) — Billing / fixed / 전환 중 광고·앱 설치 시트·설정 나가면 광고·viewIfLoaded window 가드 무효
+- [2026-10-17 실측 플레이키 15건+편입 4건 — 타이밍 결합이 전체 실행 부하에서만 드러난다](2026-10-17-measured-flaky-timing-coupling.md) — Infra / fixed / 전체 실행에서만 실패·confirmation 미달·fulfill 초과·방출 횟수 결합·고정 sleep·벽시계 타임아웃

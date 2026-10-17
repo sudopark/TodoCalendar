@@ -17,7 +17,7 @@ import TestDoubles
 @testable import SettingScene
 
 
-class FeedbackPostViewModelImpleTests: BaseTestCase, PublisherWaitable {
+class FeedbackPostViewModelImpleTests: BaseTestCase, PublisherWaitable, AsyncEffectWaitable {
     
     var cancelBag: Set<AnyCancellable>!
     private var spyRouter: SpyRouter!
@@ -62,19 +62,20 @@ extension FeedbackPostViewModelImpleTests {
         XCTAssertEqual(isPostables, [false, true, false, true, false, true])
     }
     
-    func testViewModel_postFeedback_andCloseWithAlert() {
+    func testViewModel_postFeedback_andCloseWithAlert() async throws {
         // given
         let expect = expectation(description: "피드백 등록 이후 알림노출하고 화면 닫음")
         let viewModel = self.makeViewModel()
         self.spyRouter.didShowConfirmWithCallback = { _ in expect.fulfill() }
-        
+
         // when
         viewModel.enter(contact: "contact")
         viewModel.enter(message: "message")
         viewModel.post()
-        self.wait(for: [expect], timeout: self.timeout)
-        
+        await self.fulfillment(of: [expect], timeout: self.timeout)
+
         // then
+        try await self.waitEffect("알림 확인 뒤 화면이 닫힘") { self.spyRouter.didClosed == true }
         XCTAssertEqual(self.spyRouter.didClosed, true)
     }
     

@@ -120,13 +120,16 @@ extension PublisherWaitable {
         for source: P,
         _ action: (() async throws -> Void)? = nil
     ) async throws -> [P.Output] where P.Output: Sendable {
-        return try await confirmation(confirmExpect.comment, expectedCount: confirmExpect.count) { confirm in
+        // 기대치는 최소 도달이다 — 초과 방출을 위반으로 치면 방출 횟수에 단언이 결합된다 (testability §9)
+        let expectedRange: ClosedRange<Int> = confirmExpect.count == 0
+            ? 0...0 : confirmExpect.count...Int.max
+        return try await confirmation(confirmExpect.comment, expectedCount: expectedRange) { confirm in
 
             let store = WaitableOutputStore<P.Output>()
             let cancellable = source
                 .sink { _ in } receiveValue: { output in
-                    store.append(output)
                     confirm()
+                    store.append(output)
                 }
             cancellable.store(in: &self.cancelBag)
 
@@ -163,8 +166,8 @@ extension PublisherWaitable {
             let cancellable = source
                 .sink { completion in
                     guard case let .failure(failure) = completion else { return }
-                    store.append(failure)
                     confirm()
+                    store.append(failure)
                 } receiveValue: { _ in }
             cancellable.store(in: &self.cancelBag)
 

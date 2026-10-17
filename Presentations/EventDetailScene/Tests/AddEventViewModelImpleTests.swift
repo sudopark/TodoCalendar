@@ -18,7 +18,7 @@ import TestDoubles
 @testable import EventDetailScene
 
 
-class AddEventViewModelImpleTests: BaseTestCase, PublisherWaitable {
+class AddEventViewModelImpleTests: BaseTestCase, PublisherWaitable, AsyncEffectWaitable {
     
     var cancelBag: Set<AnyCancellable>!
     private var spyTodoUsecase: PrivateStubTodoUsecase!
@@ -338,30 +338,43 @@ extension AddEventViewModelImpleTests {
     }
     
     // schedule event의 경우 이름 및 시간이 입력되어야함
-    func testViewModel_whenMakeScheduleEvent_hasChangesWhenEnterNameAndSelectTime() {
+    func testViewModel_whenMakeScheduleEvent_hasChangesWhenEnterNameAndSelectTime() async throws {
         // given
-        let expect = expectation(description: "schedule event의 경우 이름 및 시간이 입력해야 변경되었다 판단")
-        expect.expectedFulfillmentCount = 3
         let viewModel = self.makeViewModel()
+        let changesLock = NSLock()
+        var values: [Bool] = []
 
-        // when - 느린 CI에서 마지막 방출을 놓치지 않도록 timeout 여유
-        let isSavables = self.waitOutputs(expect, for: viewModel.hasChanges, timeout: 1.0) {
-            viewModel.prepare()
+        // when
+        let subscription = viewModel.hasChanges
+            .handleEvents(receiveOutput: { value in
+                changesLock.lock(); defer { changesLock.unlock() }
+                values.append(value)
+            })
+            .sink { _ in }
+        subscription.store(in: &self.cancelBag)
 
-            self.enter(viewModel) {
-                $0
-                |> \.name .~ "some"
-                |> \.selectedTime .~ self.defaultCurrentAndNextHourSelectTime
-            }
-            self.enter(viewModel) {
-                $0
-                |> \.name .~ "some"
-                |> \.selectedTime .~ nil
-            }
+        viewModel.prepare()
+
+        self.enter(viewModel) {
+            $0
+            |> \.name .~ "some"
+            |> \.selectedTime .~ self.defaultCurrentAndNextHourSelectTime
+        }
+        self.enter(viewModel) {
+            $0
+            |> \.name .~ "some"
+            |> \.selectedTime .~ nil
+        }
+
+        try await self.waitEffect("변경 상태 도달: true 포함 및 마지막 false") {
+            changesLock.lock(); defer { changesLock.unlock() }
+            return values.contains(true) && values.last == false
         }
 
         // then
-        XCTAssertEqual(isSavables, [false, true, false])
+        changesLock.lock(); defer { changesLock.unlock() }
+        XCTAssertEqual(values.last, false)
+        XCTAssertTrue(values.contains(true))
     }
 
     private var dummyNewSelectTime: SelectedTime {
