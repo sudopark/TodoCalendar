@@ -61,10 +61,10 @@ extension RemoteAPIImpleTests {
         // when
         let endpoint = EventSyncEndPoints.check
         let task = Task {
+            withUnsafeCurrentTask { $0?.cancel() }
             let data = try await remote.request(.get, endpoint, with: [:], parameters: [:])
             return data
         }
-        task.cancel()
 
         // then
         let result = await task.result
