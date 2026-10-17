@@ -52,6 +52,24 @@ write_config '[]'
 assert_contains "captureSuites 가 비면 두 장면 다 짚는다" "CalendarScenesCatalogSnapshots" \
   "$(scripts/capture-event-screenshots.sh "$EVENT" ko 2>&1)"
 
+# home-screen 의 widgets 는 snapshot-appstore 위젯 촬영본 이름이라 카탈로그 스위트 검사 대상이 아니다.
+# detail 은 일부러 안 덮어 가드가 촬영 전에 끊게 두고, 짚은 장면에 위젯 이름이 없는지만 본다
+python3 - "$EVENT_DIR/event.json" <<'PY'
+import json, sys
+from pathlib import Path
+path = Path(sys.argv[1])
+config = json.loads(path.read_text())
+config["scenes"]["card"] = {"assemble": "home-screen", "widgets": ["foremost", "month"]}
+path.write_text(json.dumps(config))
+PY
+HOME_SCREEN="$(scripts/capture-event-screenshots.sh "$EVENT" ko 2>&1)"
+assert_contains "home-screen 옆 장면은 여전히 짚는다" "EventDetailSceneCatalogSnapshots" "$HOME_SCREEN"
+if printf '%s' "$HOME_SCREEN" | grep -qE "^ +(foremost|month)"; then
+  FAIL=$((FAIL+1)); echo "FAIL: home-screen 위젯 이름을 카탈로그 장면으로 짚었다"; printf '%s\n' "$HOME_SCREEN" | sed 's/^/    /'
+else
+  PASS=$((PASS+1))
+fi
+
 python3 - "$EVENT_DIR/event.json" <<'PY'
 import json, sys
 from pathlib import Path
