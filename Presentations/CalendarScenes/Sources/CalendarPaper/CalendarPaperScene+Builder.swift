@@ -20,6 +20,8 @@ protocol CalendarPaperSceneInteractor: Sendable, AnyObject, MonthSceneListener, 
     func selectToday()
     func selectDay(_ day: CalendarDay)
     func scrollToVoiceInput()
+    func selectedDayIsToday(_ isToday: Bool)
+    func updateMonthCollapsed(_ isCollapsed: Bool)
 }
 //
 protocol CalendarPaperSceneListener: AnyObject {
@@ -28,6 +30,8 @@ protocol CalendarPaperSceneListener: AnyObject {
         on month: CalendarMonth, didChange selectedDay: CurrentSelectDayModel
     )
     func calendarPaperDidRequestShowAICommand()
+    func calendarPaperDidRequestReturnToToday()
+    func calendarPaperDidRequestToggleMonthCollapse()
 }
 
 // MARK: - CalendarPaperScene

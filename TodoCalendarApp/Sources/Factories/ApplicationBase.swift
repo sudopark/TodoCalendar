@@ -28,7 +28,7 @@ final class ApplicationBase {
     let eventNotifyService: SharedEventNotifyService = .init()
 
     let userDefaultEnvironmentStorage = UserDefaultEnvironmentStorageImple(
-        suiteName: AppEnvironment.groupID
+        suiteName: AppEnvironment.userDefaultSuiteName
     )
     
     let keyChainStorage: KeyChainStorageImple = {
@@ -50,24 +50,14 @@ final class ApplicationBase {
     }()
     
     lazy var externalCalendarDBConnectionPool: ExternalCalendarSQLiteConnectionPoolImple = {
+        let migration = ExternalCalendarDBMigrationImple(
+            googleCalendarDBVersion: AppEnvironment.googleCalendarDBVersion,
+            appleCalendarDBVersion: AppEnvironment.appleCalendarDBVersion
+        )
         return ExternalCalendarSQLiteConnectionPoolImple(
             dbPathMap: AppEnvironment.externalCalendarDBPaths(),
-            onFirstOpen: { service in
-                let googleDBVersion = AppEnvironment.googleCalendarDBVersion
-                let _ = try await service.async.migrate(
-                    upto: googleDBVersion,
-                    steps: { version, database in
-                        switch version {
-                        case 0:
-                            try GoogleCalendarEventTagTableMigration.runMigration(for: version, database: database)
-                        default: break
-                        }
-                    },
-                    finalized: { version, database in
-                        logger.log(.sql, level: .info, "external calendar db migration finished to: \(version)")
-                        try? database.updateJournalMode("WAL")
-                    }
-                )
+            onFirstOpen: { serviceId, service in
+                try await migration.runMigration(serviceId: serviceId, dbService: service)
             }
         )
     }()
@@ -84,9 +74,7 @@ final class ApplicationBase {
             return (try? JSONSerialization.jsonObject(with: jsonData, options: .allowFragments) as? [String: Any]) ?? [:]
         }
         let secrets = readSecret()
-        let host = AppEnvironment.useEmulator 
-            ? secrets["emulator_caleandar_api_host"] as? String
-            : secrets["caleandar_api_host"] as? String
+        let host = AppEnvironment.calendarAPIHost(secrets: secrets)
         let csAPi = secrets["cs_api"] as? String
         let environment = RemoteEnvironment(
             calendarAPIHost: host ?? "https://dummy.com",
@@ -98,7 +86,7 @@ final class ApplicationBase {
     }()
     
     let firebaseAuthService: any FirebaseAuthService = {
-        if AppEnvironment.isTestBuild {
+        if AppEnvironment.isExternalDependencyBlocked {
             return DummyFirebaseAuthService()
         } else {
             return FirebaseAuthServiceImple(
@@ -178,12 +166,13 @@ final class ApplicationBase {
     }()
     
     let mobileAdService: any MobileAdService & PrivacyOptionsFormRouter = {
-        if AppEnvironment.isTestBuild {
+        if AppEnvironment.isExternalDependencyBlocked {
             return DummyMobileAdService()
         }
         return GoogleMobileAdsServiceImple(
             testDeviceIdentifiers: AppEnvironment.admobTestDeviceIdentifiers,
-            fullScreenAdUnitId: AppEnvironment.admobUnitIds.fullScreen
+            fullScreenAdUnitId: AppEnvironment.admobUnitIds.fullScreen,
+            rewardedAdUnitId: AppEnvironment.admobUnitIds.rewarded
         )
     }()
 }
@@ -300,6 +289,10 @@ private final class DummyMobileAdService: MobileAdService, PrivacyOptionsFormRou
 
     func takePreloadedFullScreenAd() -> InterstitialAd? { nil }
 
+    func preloadRewardedAd() async { }
+
+    func takeRewardedAd(waitingUpTo timeout: TimeInterval) async -> RewardedAd? { nil }
+
     @MainActor
     func isPrivacyOptionsRequired() -> Bool { false }
 
@@ -315,23 +308,4 @@ private final class DummyMobileAdService: MobileAdService, PrivacyOptionsFormRou
     var isStartedNow: Bool { false }
 }
 
-private class DummyFirebaseAuthService: FirebaseAuthService {
-    
-    func setup() throws { }
-    
-    func signOut() throws {
-        
-    }
-    
-    func deleteAccount() async throws {
-        
-    }
-    
-    func authorize(with credential: any OAuth2Credential) async throws -> any FirebaseAuthDataResult {
-        throw RuntimeError("failed")
-    }
-    
-    func refreshToken(_ resultHandler: @escaping (Result<AuthRefreshResult, Error>) -> Void) {
-        
-    }
-}
+

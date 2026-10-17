@@ -13,6 +13,8 @@ import Domain
 @Observable public class ViewAppearance: @unchecked Sendable {
     
     @ObservationIgnored public var colorSetKey: ColorSetKeys
+    @ObservationIgnored public var customColorTheme: CustomColorTheme?
+    public var isSystemDarkTheme: Bool
     public var tagColors: EventTagColorSet
     public var colorSet: any ColorSet
     public var fontSet: any FontSet
@@ -117,7 +119,10 @@ import Domain
         return appleCalendarColor(calendarId)
     }
     
-    public init(setting: AppearanceSettings, isSystemDarkTheme: Bool) {
+    public init(
+        setting: AppearanceSettings,
+        isSystemDarkTheme: Bool
+    ) {
         
         let (calendar, defaultTagColor) = (setting.calendar, setting.defaultTagColor)
         
@@ -126,7 +131,11 @@ import Domain
             defaultColor: UIColor.from(hex: defaultTagColor.default) ?? .clear
         )
         self.colorSetKey = calendar.colorSetKey
-        self.colorSet = calendar.colorSetKey.convert(isSystemDarkTheme: isSystemDarkTheme)
+        self.isSystemDarkTheme = isSystemDarkTheme
+        self.customColorTheme = calendar.currentCustomColorTheme
+        self.colorSet = calendar.colorSetKey.convert(
+            isSystemDarkTheme: isSystemDarkTheme, customColorTheme: calendar.currentCustomColorTheme
+        )
         self.fontSet = calendar.fontSetKey.convert()
         
         self.accnetDayPolicy = calendar.accnetDayPolicy
@@ -157,16 +166,35 @@ import Domain
 
 extension ViewAppearance {
     
+    public var isFollowingSystemTheme: Bool {
+        switch self.colorSetKey {
+        case .systemTheme: return true
+        case .custom(let id):
+            guard let theme = self.customColorTheme, theme.uuid == id else { return true }
+            return theme.hasReadableRequiredSeeds == false
+        case .defaultLight, .defaultDark, .appTheme: return false
+        }
+    }
+
+    public var preferredColorScheme: ColorScheme? {
+        guard self.isFollowingSystemTheme == false else { return nil }
+        return self.colorSet.isLightTheme ? .light : .dark
+    }
+    
     public func accentCalendarDayColor(_ accent: AccentDays?) -> UIColor {
+        return self.accentCalendarDayColor(accent, on: self.colorSet)
+    }
+    
+    public func accentCalendarDayColor(_ accent: AccentDays?, on colorSet: any ColorSet) -> UIColor {
         switch accent {
         case .holiday:
-            return self.accnetDayPolicy[.holiday] == true ? self.colorSet.holidayOrWeekEndWithAccent : self.colorSet.holidayText
+            return self.accnetDayPolicy[.holiday] == true ? colorSet.holidayOrWeekEndWithAccent : colorSet.holidayText
         case .sunday:
-            return self.accnetDayPolicy[.sunday] == true ? self.colorSet.holidayOrWeekEndWithAccent : self.colorSet.weekEndText
+            return self.accnetDayPolicy[.sunday] == true ? colorSet.holidayOrWeekEndWithAccent : colorSet.weekEndText
         case .saturday:
-            return self.accnetDayPolicy[.saturday] == true ? self.colorSet.holidayOrWeekEndWithAccent : self.colorSet.weekEndText
+            return self.accnetDayPolicy[.saturday] == true ? colorSet.holidayOrWeekEndWithAccent : colorSet.weekEndText
         default:
-            return self.colorSet.weekDayText
+            return colorSet.weekDayText
         }
     }
     
@@ -257,22 +285,6 @@ extension ViewAppearance {
 
 extension ViewAppearance: AppleCalendarViewAppearanceStore { }
 
-
-extension ColorSetKeys {
-    
-    public func convert(isSystemDarkTheme: Bool) -> any ColorSet {
-        switch self {
-        case .systemTheme where isSystemDarkTheme:
-            return DefaultDarkColorSet()
-        case .systemTheme:
-            return DefaultLightColorSet()
-        case .defaultLight:
-            return DefaultLightColorSet()
-        case .defaultDark:
-            return DefaultDarkColorSet()
-        }
-    }
-}
 
 extension FontSetKeys {
     

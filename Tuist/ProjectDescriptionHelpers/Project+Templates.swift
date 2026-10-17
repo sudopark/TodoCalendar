@@ -15,9 +15,10 @@ extension Project {
         iOSTargetVersion: String,
         dependencies: [TargetDependency] = [],
         extensionTargets: [Target] = [],
-        schemes: [Scheme] = []
+        schemes: [Scheme] = [],
+        e2eTests: Bool = false
     ) -> Project {
-        let targets = makeAppTargets(
+        var targets = makeAppTargets(
             name: name,
             destinations: destinations,
             iOSTargetVersion: iOSTargetVersion,
@@ -33,6 +34,15 @@ extension Project {
                 )
             ]
         )
+        if e2eTests {
+            targets.append(
+                makeE2ETarget(
+                    name: name,
+                    destinations: destinations,
+                    iOSTargetVersion: iOSTargetVersion
+                )
+            )
+        }
         return Project(
             name: name,
             organizationName: organizationName,
@@ -128,6 +138,25 @@ extension Project {
                                 .target(name: name),
                                 .project(target: "SnapshotTestHelpKit", path: .relativeToRoot("Supports/SnapshotTestHelpKit")),
                                 .project(target: "TestDoubles", path: .relativeToRoot("Supports/TestDoubles")),
+                             ])
+    }
+
+    private static func makeE2ETarget(
+        name: String,
+        destinations: Destinations,
+        iOSTargetVersion: String
+    ) -> Target {
+        return Target.target(name: "\(name)E2E",
+                             destinations: destinations,
+                             product: .uiTests,
+                             bundleId: "\(organizationName).\(name)E2E",
+                             deploymentTargets: .iOS(iOSTargetVersion),
+                             infoPlist: .default,
+                             sources: ["E2E/**"],
+                             resources: ["E2E/Fixtures/**/*.json"],
+                             dependencies: [
+                                .target(name: name),
+                                .project(target: "Scenes", path: .relativeToRoot("Presentations/Scenes")),
                              ])
     }
 
@@ -338,6 +367,8 @@ extension Project {
             "AppExtensions/Base/**",
             "AppExtensions/\(extensionName)/Sources/**",
             "Sources/AppEnvironment.swift",
+            "Sources/DummyFirebaseAuthService.swift",
+            "Sources/E2ERunMarker.swift",
             "Sources/NeverRemoveAuthStorage.swift",
             // 컨트롤이 참조하는 AppIntent — 앱을 열려면 앱·확장 양쪽 타겟에 속해야 한다 (Apple 문서 요구)
             "Sources/AppIntents/OpenAICommandInputIntent.swift",

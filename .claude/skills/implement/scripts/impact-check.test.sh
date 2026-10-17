@@ -10,7 +10,7 @@ tuist_for() {
   printf '%b\n' "$1" | bash impact-check.sh --stdin | awk '/^## tuist generate/{getline; print; exit}'
 }
 pairs_for() {
-  printf '%b\n' "$1" | bash impact-check.sh --stdin | awk '/^## 짝지어진 두 위치/{flag=1; next} flag'
+  printf '%b\n' "$1" | bash impact-check.sh --stdin | awk '/^## 짝지어진 두 위치/{flag=1; next} /^## /{flag=0} flag'
 }
 
 assert_eq() { # desc expected actual
@@ -20,7 +20,7 @@ assert_contains() { # desc pattern actual
   if printf '%s' "$3" | grep -q "$2"; then PASS=$((PASS+1)); else FAIL=$((FAIL+1)); echo "FAIL: $1"; echo "  pattern [$2] not in: [$3]"; fi
 }
 
-ALL="AIAgentScene AuthService BillingScenes CalendarScenes Domain EventDetailScene EventListScenes MemberScenes Repository SettingScene TodoCalendarApp TodoCalendarAppShare TodoCalendarAppWidget"
+ALL="AIAgentScene AuthService BillingScenes CalendarPresentation CalendarScenes CommonPresentation Domain EventDetailScene EventListScenes MemberScenes Repository SettingScene TodoCalendarApp TodoCalendarAppShare TodoCalendarAppWidget WidgetScenes"
 
 # --- 스킴 매핑 (pr_test.yml detect-changes 미러) ---
 assert_eq "Domain/Sources → 전체" "$ALL" "$(schemes_for 'M\tDomain/Sources/Events/TodoEvent.swift')"
@@ -29,7 +29,7 @@ assert_eq "Repository/Sources → Repo+App+Widget+Share" "Repository TodoCalenda
 assert_eq "Repository/Tests → Repository만" "Repository" "$(schemes_for 'M\tRepository/Tests/FooTests.swift')"
 assert_eq "Services/AuthService/Sources → AuthService+App" "AuthService TodoCalendarApp" "$(schemes_for 'M\tServices/AuthService/Sources/Foo.swift')"
 assert_eq "Services/AuthService/Tests → AuthService만" "AuthService" "$(schemes_for 'M\tServices/AuthService/Tests/FooTests.swift')"
-assert_eq "Services/FirstPartyServices → App(테스트 스킴 없음)" "TodoCalendarApp" "$(schemes_for 'M\tServices/FirstPartyServices/Sources/Foo.swift')"
+assert_eq "Services/FirstPartyServices → App+Share(Share 확장이 FirstPartyServices 를 문다)" "TodoCalendarApp TodoCalendarAppShare" "$(schemes_for 'M\tServices/FirstPartyServices/Sources/Foo.swift')"
 assert_eq "Services/SpeechService → App(테스트 스킴 없음)" "TodoCalendarApp" "$(schemes_for 'M\tServices/SpeechService/Sources/Foo.swift')"
 assert_eq "Services/PlaceService → App(테스트 스킴 없음)" "TodoCalendarApp" "$(schemes_for 'M\tServices/PlaceService/Sources/Foo.swift')"
 assert_eq "Services/ExternalServices → App(테스트 스킴 없음)" "TodoCalendarApp" "$(schemes_for 'M\tServices/ExternalServices/Sources/Foo.swift')"
@@ -37,12 +37,14 @@ assert_eq "Services/StoreKitService → App(테스트 스킴 없음)" "TodoCalen
 assert_eq "Services/AdService → App(테스트 스킴 없음)" "TodoCalendarApp" "$(schemes_for 'M\tServices/AdService/Sources/Foo.swift')"
 assert_eq "AIAgentScene → 단독" "AIAgentScene" "$(schemes_for 'M\tPresentations/AIAgentScene/Sources/Foo.swift')"
 assert_eq "BillingScenes → 단독" "BillingScenes" "$(schemes_for 'M\tPresentations/BillingScenes/Sources/Foo.swift')"
-assert_eq "CalendarScenes → +App+Widget" "CalendarScenes TodoCalendarApp TodoCalendarAppWidget" "$(schemes_for 'M\tPresentations/CalendarScenes/Sources/Foo.swift')"
+assert_eq "CalendarPresentation → +CalendarScenes+App+Widget" "CalendarPresentation CalendarScenes TodoCalendarApp TodoCalendarAppWidget" "$(schemes_for 'M\tPresentations/CalendarPresentation/Sources/Foo.swift')"
+assert_eq "CalendarScenes → +App (위젯 확장은 #1060 으로 의존을 뗐다)" "CalendarScenes TodoCalendarApp" "$(schemes_for 'M\tPresentations/CalendarScenes/Sources/Foo.swift')"
+assert_eq "WidgetScenes → +App+Widget" "TodoCalendarApp TodoCalendarAppWidget WidgetScenes" "$(schemes_for 'M\tPresentations/WidgetScenes/Sources/Foo.swift')"
 assert_eq "EventDetailScene → +App" "EventDetailScene TodoCalendarApp" "$(schemes_for 'M\tPresentations/EventDetailScene/Sources/Foo.swift')"
-assert_eq "CommonPresentation → 전 Presentation+App+Widget+Share" "AIAgentScene BillingScenes CalendarScenes EventDetailScene EventListScenes MemberScenes SettingScene TodoCalendarApp TodoCalendarAppShare TodoCalendarAppWidget" "$(schemes_for 'M\tPresentations/CommonPresentation/Sources/Foo.swift')"
-assert_eq "Scenes → 전 Presentation+App (Widget 미의존)" "AIAgentScene BillingScenes CalendarScenes EventDetailScene EventListScenes MemberScenes SettingScene TodoCalendarApp" "$(schemes_for 'M\tPresentations/Scenes/Foo.swift')"
+assert_eq "CommonPresentation → 자기+전 Presentation+App+Widget+Share" "AIAgentScene BillingScenes CalendarPresentation CalendarScenes CommonPresentation EventDetailScene EventListScenes MemberScenes SettingScene TodoCalendarApp TodoCalendarAppShare TodoCalendarAppWidget WidgetScenes" "$(schemes_for 'M\tPresentations/CommonPresentation/Sources/Foo.swift')"
+assert_eq "Scenes → 전 Presentation+App (Widget 미의존, WidgetScenes·CalendarPresentation 은 Scenes 를 안 물어 과대 매핑)" "AIAgentScene BillingScenes CalendarPresentation CalendarScenes CommonPresentation EventDetailScene EventListScenes MemberScenes SettingScene TodoCalendarApp WidgetScenes" "$(schemes_for 'M\tPresentations/Scenes/Foo.swift')"
 assert_eq "Tuist/ → 전체" "$ALL" "$(schemes_for 'M\tTuist/ProjectDescriptionHelpers/Foo.swift')"
-assert_eq "TestDoubles → Domain 제외 전체" "AIAgentScene BillingScenes CalendarScenes EventDetailScene EventListScenes MemberScenes Repository SettingScene TodoCalendarApp TodoCalendarAppShare TodoCalendarAppWidget" "$(schemes_for 'M\tSupports/TestDoubles/Sources/Foo.swift')"
+assert_eq "TestDoubles → Domain 제외 전체" "AIAgentScene BillingScenes CalendarPresentation CalendarScenes CommonPresentation EventDetailScene EventListScenes MemberScenes Repository SettingScene TodoCalendarApp TodoCalendarAppShare TodoCalendarAppWidget WidgetScenes" "$(schemes_for 'M\tSupports/TestDoubles/Sources/Foo.swift')"
 assert_eq "App Sources → App만" "TodoCalendarApp" "$(schemes_for 'M\tTodoCalendarApp/Sources/Root/Foo.swift')"
 assert_eq "Widget → Widget만" "TodoCalendarAppWidget" "$(schemes_for 'M\tTodoCalendarApp/AppExtensions/Widget/Foo.swift')"
 assert_eq "확장 Base → App+Widget+Share (두 테스트 타겟이 Base를 컴파일)" "TodoCalendarApp TodoCalendarAppShare TodoCalendarAppWidget" "$(schemes_for 'M\tTodoCalendarApp/AppExtensions/Base/Foo.swift')"
@@ -51,7 +53,7 @@ assert_eq "LiveActivity → App+Widget+Share" "TodoCalendarApp TodoCalendarAppSh
 assert_eq "docs만 → 테스트 무관" "(테스트 무관 변경)" "$(schemes_for 'M\tdocs/spec/foo.md')"
 assert_eq "복수 영역 합산·중복 제거" "AIAgentScene Repository TodoCalendarApp TodoCalendarAppShare TodoCalendarAppWidget" "$(schemes_for 'M\tRepository/Sources/A.swift\nM\tPresentations/AIAgentScene/Sources/B.swift')"
 
-ALL_WITH_EXTENSIONS="AIAgentScene AuthService BillingScenes CalendarScenes Domain EventDetailScene EventListScenes Extensions MemberScenes Repository SettingScene TodoCalendarApp TodoCalendarAppShare TodoCalendarAppWidget"
+ALL_WITH_EXTENSIONS="AIAgentScene AuthService BillingScenes CalendarPresentation CalendarScenes CommonPresentation Domain EventDetailScene EventListScenes Extensions MemberScenes Repository SettingScene TodoCalendarApp TodoCalendarAppShare TodoCalendarAppWidget WidgetScenes"
 assert_eq "Extensions/Sources → 전체+Extensions" "$ALL_WITH_EXTENSIONS" "$(schemes_for 'M\tSupports/Extensions/Sources/Foo.swift')"
 assert_eq "Extensions/Tests → Extensions만" "Extensions" "$(schemes_for 'M\tSupports/Extensions/Tests/FooTests.swift')"
 
@@ -70,13 +72,24 @@ assert_contains "Package.swift 수정(M) → 필요" "필요" "$(tuist_for 'M\tP
 assert_contains "pr_test.yml 변경 → 3곳 동기화 경고" "impact-check.sh" "$(pairs_for 'M\t.github/workflows/pr_test.yml')"
 assert_eq "경고 없음 → 해당 없음" "(해당 없음)" "$(pairs_for 'M\tdocs/foo.md')"
 
-# --- dbVersion 짝 경고 (git 모드 전용 — 임시 repo 를 만들어 --base 로 돌린다) ---
+# --- git 모드 테스트 공통 (임시 repo 를 만들어 --base 로 돌린다) ---
 SCRIPT_DIR="$(pwd)"
-pairs_in_repo() { # migrateCase(빈문자열이면 미추가) migrationImpleTouched(y/n) → 짝 섹션
+init_temp_repo() { # → 새 repo 경로
   local repo; repo=$(mktemp -d)
+  git -C "$repo" init -q .
+  git -C "$repo" config user.email t@t
+  git -C "$repo" config user.name t
+  printf '%s' "$repo"
+}
+section_in_repo() { # repo 섹션이름 → 그 섹션 본문
+  (cd "$1" && bash "$SCRIPT_DIR/impact-check.sh" --base HEAD | awk -v h="## $2" '$0 == h {flag=1; next} /^## /{flag=0} flag')
+}
+
+# --- dbVersion 짝 경고 ---
+pairs_in_repo() { # migrateCase(빈문자열이면 미추가) migrationImpleTouched(y/n) → 짝 섹션
+  local repo; repo=$(init_temp_repo)
   (
     cd "$repo" || exit 1
-    git init -q .; git config user.email t@t; git config user.name t
     mkdir -p TodoCalendarApp/Sources Repository/A Repository/B "Repository/Setting/Migration"
     printf '    static let dbVersion: Int32 = 6\n    static let googleCalendarDBVersion: Int32 = 0\n' > TodoCalendarApp/Sources/AppEnvironment.swift
     printf 'struct TableA {\n    static func migrateStatement(for v: Int32) -> String? {\n        switch v {\n        case 0: return nil\n        default: return nil\n        }\n    }\n    var pad = 0\n}\n' > Repository/A/TableA.swift
@@ -88,13 +101,63 @@ pairs_in_repo() { # migrateCase(빈문자열이면 미추가) migrationImpleTouc
     sed -i '' 's/var pad = 0/var pad = 1/' Repository/B/TableB.swift
     [ -n "$1" ] && sed -i '' "s/        case 0: return nil/        case $1: return nil\n        case 0: return nil/" Repository/A/TableA.swift
     [ "$2" = "y" ] && sed -i '' 's/var pad = 0/var pad = 1/' Repository/Setting/Migration/AppDataMigrationImple.swift
-    bash "$SCRIPT_DIR/impact-check.sh" --base HEAD | awk '/^## 짝지어진 두 위치/{flag=1; next} flag'
   )
+  section_in_repo "$repo" "짝지어진 두 위치"
   rm -rf "$repo"
 }
 assert_contains "dbVersion↑ + case 미추가 → migrateStatement 경고" "case 6 추가가 함께 안 됨" "$(pairs_in_repo '' y)"
 assert_contains "dbVersion↑ + 마이그레이션 스텝 미변경 → AppDataMigrationImple 경고" "AppDataMigrationImple" "$(pairs_in_repo 6 n)"
 assert_eq "dbVersion↑ + 세 위치 전부 → 경고 없음" "(해당 없음)" "$(pairs_in_repo 6 y)"
+
+# --- 외부 캘린더 DB 짝 경고 (서비스별로 따로 센다) ---
+pairs_in_external_repo() { # migrateCase(빈문자열이면 미추가) externalMigrationTouched(y/n) → 짝 섹션
+  local repo; repo=$(init_temp_repo)
+  (
+    cd "$repo" || exit 1
+    mkdir -p TodoCalendarApp/Sources Repository/A "Repository/Event/ExternalCalendar" "Repository/Setting/Migration"
+    printf '    static let dbVersion: Int32 = 7\n    static let googleCalendarDBVersion: Int32 = 1\n    static let appleCalendarDBVersion: Int32 = 1\n' > TodoCalendarApp/Sources/AppEnvironment.swift
+    printf 'struct TableA {\n    static func migrateStatement(for v: Int32) -> String? {\n        switch v {\n        case 0: return nil\n        default: return nil\n        }\n    }\n    var pad = 0\n}\n' > Repository/A/TableA.swift
+    printf 'final class ExternalCalendarDBMigrationImple {\n    var pad = 0\n}\n' > Repository/Event/ExternalCalendar/ExternalCalendarDBMigrationImple.swift
+    printf 'final class AppDataMigrationImple {\n    var pad = 0\n}\n' > Repository/Setting/Migration/AppDataMigrationImple.swift
+    git add -A; git commit -qm base
+    sed -i '' 's/googleCalendarDBVersion: Int32 = 1/googleCalendarDBVersion: Int32 = 2/' TodoCalendarApp/Sources/AppEnvironment.swift
+    [ -n "$1" ] && sed -i '' "s/        case 0: return nil/        case $1: return nil\n        case 0: return nil/" Repository/A/TableA.swift
+    [ "$2" = "y" ] && sed -i '' 's/var pad = 0/var pad = 1/' Repository/Event/ExternalCalendar/ExternalCalendarDBMigrationImple.swift
+  )
+  section_in_repo "$repo" "짝지어진 두 위치"
+  rm -rf "$repo"
+}
+assert_contains "googleCalendarDBVersion↑ + case 미추가 → migrateStatement 경고" "case 1 추가가 함께 안 됨" "$(pairs_in_external_repo '' y)"
+assert_contains "googleCalendarDBVersion↑ + 외부 마이그레이션 미변경 → ExternalCalendarDBMigrationImple 경고" "runGoogleCalendarDBMigration" "$(pairs_in_external_repo 1 n)"
+assert_eq "googleCalendarDBVersion↑ + 세 위치 전부 → 경고 없음" "(해당 없음)" "$(pairs_in_external_repo 1 y)"
+
+# --- 테스트 고정 sleep 경고 (testability §9) ---
+sleep_in_repo() { # 추가할 테스트 줄 · 대상(tracked/untracked/source) → 테스트 대기 섹션
+  local repo; repo=$(init_temp_repo)
+  (
+    cd "$repo" || exit 1
+    mkdir -p Domain/Tests Domain/Sources
+    printf 'final class FooTests {\n}\n' > Domain/Tests/FooTests.swift
+    printf 'final class Foo {\n}\n' > Domain/Sources/Foo.swift
+    git add -A; git commit -qm base
+    case "$2" in
+      tracked) printf '%s\n' "$1" >> Domain/Tests/FooTests.swift ;;
+      untracked) printf '%s\n' "$1" > Domain/Tests/NewTests.swift ;;
+      source) printf '%s\n' "$1" >> Domain/Sources/Foo.swift ;;
+      renamed)
+        printf 'final class SleepTests {\n%s\n}\n' "$1" > Domain/Tests/SleepTests.swift
+        git add -A; git commit -q --amend -m base
+        git mv Domain/Tests/SleepTests.swift Domain/Tests/RenamedTests.swift ;;
+    esac
+  )
+  section_in_repo "$repo" "테스트 대기"
+  rm -rf "$repo"
+}
+assert_contains "기존 테스트에 Task.sleep 추가 → 경고" "FooTests.swift" "$(sleep_in_repo '        try await Task.sleep(for: .milliseconds(50))' tracked)"
+assert_contains "새 테스트 파일의 Task.sleep → 경고" "NewTests.swift" "$(sleep_in_repo '        try await Task.sleep(nanoseconds: 50_000_000)' untracked)"
+assert_eq "프로덕션 코드의 Task.sleep → 경고 없음" "(해당 없음)" "$(sleep_in_repo '        try await Task.sleep(for: .seconds(1))' source)"
+assert_eq "sleep 이 든 테스트 파일을 rename 만 함 → 경고 없음" "(해당 없음)" "$(sleep_in_repo '        try await Task.sleep(for: .milliseconds(50))' renamed)"
+assert_eq "sleep 없는 테스트 변경 → 경고 없음" "(해당 없음)" "$(sleep_in_repo '        #expect(value == 1)' tracked)"
 
 echo "---"
 echo "PASS: $PASS / FAIL: $FAIL"

@@ -159,6 +159,13 @@ struct SharePreviewView: View {
     @Environment(ViewAppearance.self) private var appearance
 
     var body: some View {
+        GeometryReader { proxy in
+            self.contentView(contentWidth: proxy.size.width)
+        }
+        .background(self.appearance.colorSet.bg0.asColor)
+    }
+
+    private func contentView(contentWidth: CGFloat) -> some View {
         VStack(spacing: 0) {
             SheetHeaderView(title: "share_preview::title".localized())
                 .eventHandler(\.onClose, self.eventHandlers.close)
@@ -173,7 +180,7 @@ struct SharePreviewView: View {
                 .padding(.top, spacing: .regular)
 
             ScrollView {
-                self.formatBodyView()
+                self.formatBodyView(contentWidth: contentWidth)
                     .padding(spacing: .regular)
             }
 
@@ -187,7 +194,6 @@ struct SharePreviewView: View {
             )
             .eventHandler(\.onTap, self.eventHandlers.share)
         }
-        .background(self.appearance.colorSet.bg0.asColor)
     }
 
     // MARK: - format picker
@@ -208,7 +214,7 @@ struct SharePreviewView: View {
         }
         .pickerStyle(.segmented)
         // 세그먼트 색은 시스템 트레이트를 따라가므로 앱 테마에 국소 고정한다.
-        .colorScheme(self.appearance.colorSet is DefaultDarkColorSet ? .dark : .light)
+        .colorScheme(self.appearance.colorSet.isLightTheme ? .light : .dark)
     }
 
     // MARK: - tag filter dropdown
@@ -303,14 +309,14 @@ struct SharePreviewView: View {
     // MARK: - event line list
 
     @ViewBuilder
-    private func formatBodyView() -> some View {
+    private func formatBodyView(contentWidth: CGFloat) -> some View {
         switch self.state.format {
         case .text:
             self.bodyView()
         case .image:
             if let content = self.state.imageContentModel {
                 ShareImageCardView(
-                    headerText: self.state.imageHeaderText, content: content, cardWidth: self.cardWidth
+                    headerText: self.state.imageHeaderText, content: content, cardWidth: self.cardWidth(contentWidth: contentWidth)
                 )
                 .eventHandler(\.lineTapped, self.eventHandlers.toggleLine)
             } else {
@@ -320,8 +326,8 @@ struct SharePreviewView: View {
     }
 
     // SharePreviewRouter의 cardWidth와 같은 값이어야 미리보기와 공유 이미지가 어긋나지 않는다.
-    private var cardWidth: CGFloat {
-        UIScreen.main.bounds.width - Metric.Spacing.regular * 2
+    private func cardWidth(contentWidth: CGFloat) -> CGFloat {
+        max(contentWidth - Metric.Spacing.regular * 2, 0)
     }
 
     private func bodyView() -> some View {

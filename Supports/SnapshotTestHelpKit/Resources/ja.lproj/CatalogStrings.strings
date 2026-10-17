@@ -12,6 +12,7 @@
 "catalog.event::team_workshop" = "チームワークショップ";
 "catalog.event::release_day" = "リリース日";
 "catalog.event::lunch" = "サラとランチ";
+"catalog.event::anniversary" = "結婚記念日";
 
 // MARK: - 할일
 
@@ -40,3 +41,8 @@
 
 "catalog.ai::command" = "金曜のお昼にサラとランチ";
 "catalog.ai::result" = "「サラとランチ」を3月13日(金)の12:00に追加しました。";
+
+// MARK: - 컬러 테마
+
+"catalog.colorTheme::forest" = "フォレスト";
+"catalog.colorTheme::dusk" = "夕暮れ";

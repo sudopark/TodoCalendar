@@ -14,6 +14,8 @@
 
 "Event" = "이벤트";
 "Turn" = "반복 회차";
+"WidgetStyle" = "위젯 스타일";
+"Style" = "스타일";
 "EventType" = "이벤트 종류";
 "Event Types" = "이벤트 종류";
 "Exclude all day event" = "종일 일정 제외";

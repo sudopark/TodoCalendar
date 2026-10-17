@@ -11,7 +11,8 @@ import SwiftUI
 import Domain
 import Extensions
 import CommonPresentation
-import CalendarScenes
+import CalendarPresentation
+import WidgetScenes
 
 
 // MARK: - EventAndMonthWidgetView
@@ -28,9 +29,9 @@ struct EventAndMonthWidgetView: View {
     var body: some View {
         switch self.entry.result {
         case .success(let model):
-            HStack(spacing: 12) {
-                EventListView(model: model.event)
-                SingleMonthView(model: model.month)
+            let colorSet = model.event.look.background.colorSet(colorScheme == .light)
+            EventAndMonthWidgetContentView(model: model) { todo in
+                AnyView(TodoToggleButton(todo: todo, colorSet: colorSet))
             }
         case .failure(let error):
             FailView(errorModel: error)
@@ -46,7 +47,11 @@ struct EventAndMonthWidget: Widget {
     nonisolated static let kind = "EventAndMonthWidget"
     
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: EventAndMonthWidget.kind, provider: EventAndMonthWidgetTimelineProvider()) { entry in
+        AppIntentConfiguration(
+            kind: EventAndMonthWidget.kind,
+            intent: EventAndMonthWidgetConfigurationIntent.self,
+            provider: EventAndMonthWidgetTimelineProvider()
+        ) { entry in
             EventAndMonthWidgetView(entry: entry)
                 .containerBackground(entry.backgroundShape, for: .widget)
         }

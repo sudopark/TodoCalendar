@@ -8,6 +8,7 @@
 import Foundation
 import Combine
 import Domain
+import Extensions
 import Prelude
 import Optics
 
@@ -25,6 +26,38 @@ open class StubUISettingUsecase: UISettingUsecase, @unchecked Sendable {
     
     public func loadAvailableColorThemes() async throws -> [ColorSetKeys] {
         return [.systemTheme, .defaultLight, .defaultDark]
+            + AppThemeColorSetKey.allCases.map { ColorSetKeys.appTheme($0) }
+    }
+    
+    public var stubCustomColorThemes: [CustomColorTheme] = []
+    open func loadCustomColorThemes() async throws -> [CustomColorTheme] {
+        return self.stubCustomColorThemes
+    }
+    
+    public var stubNextColorThemeCallError: (any Error)?
+    private func throwNextColorThemeCallErrorIfStubbed() throws {
+        guard let error = self.stubNextColorThemeCallError else { return }
+        self.stubNextColorThemeCallError = nil
+        throw error
+    }
+    
+    public var shouldFailSaveCustomColorTheme: Bool = false
+    public var didSaveCustomColorTheme: CustomColorTheme?
+    public var didRequestSaveCustomColorThemes: [CustomColorTheme] = []
+    open func saveCustomColorTheme(_ theme: CustomColorTheme) async throws {
+        self.didRequestSaveCustomColorThemes.append(theme)
+        try self.throwNextColorThemeCallErrorIfStubbed()
+        guard self.shouldFailSaveCustomColorTheme == false
+        else { throw RuntimeError("failed") }
+        self.didSaveCustomColorTheme = theme
+    }
+    
+    public var shouldFailRemoveCustomColorTheme: Bool = false
+    public var didRemoveCustomColorThemeUuid: String?
+    public func removeCustomColorTheme(_ uuid: String) async throws {
+        guard self.shouldFailRemoveCustomColorTheme == false
+        else { throw RuntimeError("failed") }
+        self.didRemoveCustomColorThemeUuid = uuid
     }
     
     private let settingSubject = CurrentValueSubject<AppearanceSettings?, Never>(nil)
@@ -47,10 +80,30 @@ open class StubUISettingUsecase: UISettingUsecase, @unchecked Sendable {
     }
     
     public var didChangeAppearanceSetting: AppearanceSettings?
-    
+
+    public var shouldFailChangeCalendarAppearance: Bool = false
     open func changeCalendarAppearanceSetting(_ params: EditCalendarAppearanceSettingParams) throws -> CalendarAppearanceSettings {
+        guard self.shouldFailChangeCalendarAppearance == false
+        else { throw RuntimeError("failed") }
         let old = self.readSetting()
         let newSetting = old |> \.calendar .~ old.calendar.update(params)
+        self.didChangeAppearanceSetting = newSetting
+        self.stubAppearanceSetting = newSetting
+        self.settingSubject.send(newSetting)
+        return newSetting.calendar
+    }
+
+    public var didSelectColorThemeKey: ColorSetKeys?
+    public var didRequestSelectColorThemeKeys: [ColorSetKeys] = []
+    open func selectColorTheme(_ key: ColorSetKeys) async throws -> CalendarAppearanceSettings {
+        self.didRequestSelectColorThemeKeys.append(key)
+        try self.throwNextColorThemeCallErrorIfStubbed()
+        let old = self.readSetting()
+        let params = EditCalendarAppearanceSettingParams() |> \.newColorSetKey .~ key
+        let customTheme = self.stubCustomColorThemes.first { ColorSetKeys.custom($0.uuid) == key }
+        let newCalendar = old.calendar.update(params) |> \.currentCustomColorTheme .~ customTheme
+        let newSetting = old |> \.calendar .~ newCalendar
+        self.didSelectColorThemeKey = key
         self.didChangeAppearanceSetting = newSetting
         self.stubAppearanceSetting = newSetting
         self.settingSubject.send(newSetting)
@@ -68,7 +121,7 @@ open class StubUISettingUsecase: UISettingUsecase, @unchecked Sendable {
         return newSetting.defaultTagColor
     }
     
-    public func changeWidgetAppearanceSetting(_ params: EditWidgetAppearanceSettingParams) throws -> WidgetAppearanceSettings {
+    open func changeWidgetAppearanceSetting(_ params: EditWidgetAppearanceSettingParams) throws -> WidgetAppearanceSettings {
         let old = self.readSetting()
         let new = old.widget.update(params)
         let newSetting = old |> \.widget .~ new

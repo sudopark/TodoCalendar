@@ -12,6 +12,7 @@
 "catalog.event::team_workshop" = "Bengkel pasukan";
 "catalog.event::release_day" = "Hari pelancaran";
 "catalog.event::lunch" = "Makan tengah hari dengan Sara";
+"catalog.event::anniversary" = "Ulang tahun perkahwinan";
 
 // MARK: - 할일
 
@@ -40,3 +41,8 @@
 
 "catalog.ai::command" = "makan tengah hari dengan Sara Jumaat tengah hari";
 "catalog.ai::result" = "“Makan tengah hari dengan Sara” ditambah pada Jumaat, 13 Mac jam 12:00.";
+
+// MARK: - 컬러 테마
+
+"catalog.colorTheme::forest" = "Hutan";
+"catalog.colorTheme::dusk" = "Senja";

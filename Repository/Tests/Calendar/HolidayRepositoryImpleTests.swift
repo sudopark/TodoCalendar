@@ -158,6 +158,31 @@ extension HolidayRepositoryImpleTests {
         ])
     }
     
+    func testRepository_whenCacheHolidayWithEveryColumn_loadRestoresSameValues() async throws {
+        // given
+        let repository = await self.makeRepositoryWithHolidayCaches([
+            (2031, "NL", "nl"), (2031, "NL", "en"), (2032, "NL", "nl")
+        ])
+        
+        // when
+        let nl2031 = try await repository.loadHolidays(2031, "NL", "nl")
+        let en2031 = try await repository.loadHolidays(2031, "NL", "en")
+        let nl2032 = try await repository.loadHolidays(2032, "NL", "nl")
+        
+        // then
+        XCTAssertEqual(nl2031, [
+            .init(uuid: "hd-nl-2031-a", dateString: "2031-04-27", name: "Koningsdag"),
+            .init(uuid: "hd-nl-2031-b", dateString: "2031-12-25", name: "Eerste Kerstdag")
+        ])
+        XCTAssertEqual(en2031, [
+            .init(uuid: "hd-nl-2031-en", dateString: "2031-04-27", name: "King's Day")
+        ])
+        XCTAssertEqual(nl2032, [
+            .init(uuid: "hd-nl-2032", dateString: "2032-04-27", name: "Koningsdag 2032")
+        ])
+        XCTAssertNil(self.spyRemote.didRequestedPath)
+    }
+    
     // 캐시 삭제 이후에 다시 로드
     func testRepository_loadHolidaysAfterInvalidateCache() async {
         // given
@@ -172,6 +197,45 @@ extension HolidayRepositoryImpleTests {
             .init(uuid: "hd2023", dateString: "2023-01-01", name: "새해")
         ])
         XCTAssertNotNil(self.spyRemote.didRequestedPath)
+    }
+}
+
+
+// MARK: - 변환이 컬럼을 다 채우는지 (DB 미사용)
+
+extension HolidayRepositoryImpleTests {
+    
+    func testHolidayEntity_serialize_leavesNoColumnUnmapped() throws {
+        // given
+        let holiday = Holiday(uuid: "hd-serialize", dateString: "2033-04-27", name: "Koningsdag 2033")
+        
+        // when
+        let values = try HolidayRepositoryImple.HolidayTable.serialize(
+            entity: .init("NL", "nl", 2033, holiday)
+        )
+        
+        // then
+        let unmapped = zip(HolidayRepositoryImple.HolidayTable.Columns.allCases, values)
+            .filter { $0.1 == nil }
+            .map { $0.0 }
+        XCTAssertEqual(values.count, HolidayRepositoryImple.HolidayTable.Columns.allCases.count)
+        XCTAssertFalse(values.isEmpty)
+        XCTAssertTrue(unmapped.isEmpty)
+    }
+}
+
+
+// MARK: - 선언이 만드는 CREATE 문이 전환 전 스키마와 같은지 (DB 미사용)
+
+extension HolidayRepositoryImpleTests {
+
+    func testHolidayTableCreateStatement_matchesPreMigrationSchema() {
+        // given
+        // when
+        let statement = HolidayRepositoryImple.HolidayTable.createStatement
+
+        // then
+        XCTAssertEqual(statement, "CREATE TABLE IF NOT EXISTS Holidays_v3 (c_code TEXT NOT NULL, year INTEGER NOT NULL, locale TEXT NOT NULL, uuid TEXT NOT NULL, d_txt TEXT NOT NULL, name TEXT NOT NULL);")
     }
 }
 
@@ -299,6 +363,79 @@ extension HolidayRepositoryImpleTests {
                             "date": "2023-01-01"
                         },
                         "summary": "New Year's Day"
+                      }
+                    ]
+                }
+                """
+            )),
+            .init(
+                endpoint: HolidayAPIEndpoints.holidays,
+                parameterCompare: { _, req in
+                    return req["year"] as? Int == 2031
+                    && req["locale"] as? String == "nl"
+                    && req["code"] as? String == "NL"
+                },
+                resultJsonString: .success(
+                """
+                {
+                    "items": [
+                      {
+                        "id": "hd-nl-2031-a",
+                        "start": {
+                            "date": "2031-04-27"
+                        },
+                        "summary": "Koningsdag"
+                      },
+                      {
+                        "id": "hd-nl-2031-b",
+                        "start": {
+                            "date": "2031-12-25"
+                        },
+                        "summary": "Eerste Kerstdag"
+                      }
+                    ]
+                }
+                """
+            )),
+            .init(
+                endpoint: HolidayAPIEndpoints.holidays,
+                parameterCompare: { _, req in
+                    return req["year"] as? Int == 2031
+                    && req["locale"] as? String == "en"
+                    && req["code"] as? String == "NL"
+                },
+                resultJsonString: .success(
+                """
+                {
+                    "items": [
+                      {
+                        "id": "hd-nl-2031-en",
+                        "start": {
+                            "date": "2031-04-27"
+                        },
+                        "summary": "King's Day"
+                      }
+                    ]
+                }
+                """
+            )),
+            .init(
+                endpoint: HolidayAPIEndpoints.holidays,
+                parameterCompare: { _, req in
+                    return req["year"] as? Int == 2032
+                    && req["locale"] as? String == "nl"
+                    && req["code"] as? String == "NL"
+                },
+                resultJsonString: .success(
+                """
+                {
+                    "items": [
+                      {
+                        "id": "hd-nl-2032",
+                        "start": {
+                            "date": "2032-04-27"
+                        },
+                        "summary": "Koningsdag 2032"
                       }
                     ]
                 }

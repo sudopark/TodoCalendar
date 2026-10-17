@@ -12,92 +12,96 @@ import Prelude
 import Optics
 import Domain
 import Extensions
-import CalendarScenes
-
-
-// MARK: - widgetViewModel
-
-struct DoubleMonthWidgetViewModel {
-    
-    let current: MonthWidgetViewModel
-    let next: MonthWidgetViewModel
-}
+import CalendarPresentation
+import WidgetScenes
 
 struct DoubleMonthWidgetViewModelProvider {
     
     private let settingRepository: any CalendarSettingRepository
     private let monthViewModelProvider: MonthWidgetViewModelProvider
+    private let styleFetchUsecase: any WidgetStyleFetchUsecase
     
     init(
         settingRepository: any CalendarSettingRepository,
-        monthViewModelProvider: MonthWidgetViewModelProvider
+        monthViewModelProvider: MonthWidgetViewModelProvider,
+        styleFetchUsecase: any WidgetStyleFetchUsecase
     ) {
         self.settingRepository = settingRepository
         self.monthViewModelProvider = monthViewModelProvider
+        self.styleFetchUsecase = styleFetchUsecase
     }
     
-    func getviewModel(_ now: Date) async throws -> DoubleMonthWidgetViewModel {
+    func getviewModel(
+        _ now: Date, style: WidgetStyleId.Style = .default
+    ) async throws -> DoubleMonthWidgetViewModel {
         
-        let currentMonthModel = try await self.monthViewModelProvider.getMonthViewModel(now)
+        let currentMonthModel = try await self.monthViewModelProvider.getMonthViewModel(now, style: nil)
         
         let timeZone = self.settingRepository.loadUserSelectedTImeZone() ?? .current
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
         let nextMonth = try calendar.addMonth(1, from: now).unwrap()
         
-        let nextMonthModel = try await self.monthViewModelProvider.getMonthViewModel(nextMonth)
+        let nextMonthModel = try await self.monthViewModelProvider.getMonthViewModel(nextMonth, style: nil)
         |> \.todayIdentifier .~ nil
         
-        return .init(current: currentMonthModel, next: nextMonthModel)
+        let resolved = self.styleFetchUsecase.fetchStyle(of: .doubleMonthMedium, selected: style)
+        let look = WidgetLook(globalSetting: currentMonthModel.look.globalSetting, appliedStyle: resolved)
+        return DoubleMonthWidgetViewModel(current: currentMonthModel, next: nextMonthModel)
+            .applying(look)
     }
 }
 
-struct DoubleMonthWidgetTimlineProvider: TimelineProvider {
+struct DoubleMonthWidgetTimlineProvider: AppIntentTimelineProvider {
     
+    typealias Intent = DoubleMonthWidgetConfigurationIntent
     typealias Entry = ResultTimelineEntry<DoubleMonthWidgetViewModel>
     
     func placeholder(in context: Context) -> Entry {
-        return .init(date: Date()) {
-            .init(
+        let builder = WidgetViewModelProviderBuilder(base: .init())
+        let look = WidgetLook(
+            globalSetting: builder.loadWidgetAppearanceSetting(),
+            appliedStyle: builder.fetchDefaultStyle(of: .doubleMonthMedium)
+        )
+        let entry = Entry(date: Date()) {
+            DoubleMonthWidgetViewModel(
                 current: try MonthWidgetViewModel.makeSample(),
                 next: try MonthWidgetViewModel.makeSampleNextMonth()
             )
+            .applying(look)
         }
+        guard case .success(let model) = entry.result else { return entry }
+        return entry |> \.background .~ model.current.look.background
     }
     
-    func getSnapshot(in context: Context, completion: @Sendable @escaping (Entry) -> Void) {
+    func snapshot(
+        for configuration: DoubleMonthWidgetConfigurationIntent,
+        in context: Context
+    ) async -> Entry {
         guard context.isPreview == false
         else {
-            completion(placeholder(in: context))
-            return
+            return self.placeholder(in: context)
         }
-        self.getEntry { entry in
-            completion(entry)
-        }
+        return await self.loadEntry(configuration.resolvedStyle)
     }
     
-    func getTimeline(in context: Context, completion: @Sendable @escaping (Timeline<Entry>) -> Void) {
-        
-        self.getEntry { entry in
-            let timeline = Timeline(entries: [entry], policy: .after(Date().nextUpdateTime))
-            completion(timeline)
-        }
+    func timeline(
+        for configuration: DoubleMonthWidgetConfigurationIntent,
+        in context: Context
+    ) async -> Timeline<Entry> {
+        let entry = await self.loadEntry(configuration.resolvedStyle)
+        return Timeline(entries: [entry], policy: .after(Date().nextUpdateTime))
     }
     
-    private func getEntry(_ completion: @Sendable @escaping (Entry) -> Void) {
-     
-        Task {
-            let builer = WidgetViewModelProviderBuilder(base: .init())
-            let viewModelProvider = await builer.makeDoubleMonthViewModelProvider()
-            let now = Date()
-            do {
-                let model = try await viewModelProvider.getviewModel(now)
-                completion(
-                    .init(date: now, result: .success(model))
-                    |> \.background .~ model.current.widgetSetting.background
-                )
-            } catch {
-                completion(.init(date: now, result: .failure(.init(error: error))))
-            }
+    private func loadEntry(_ style: WidgetStyleId.Style) async -> Entry {
+        let builder = WidgetViewModelProviderBuilder(base: .init())
+        let viewModelProvider = await builder.makeDoubleMonthViewModelProvider()
+        let now = Date()
+        do {
+            let model = try await viewModelProvider.getviewModel(now, style: style)
+            return .init(date: now, result: .success(model))
+                |> \.background .~ model.current.look.background
+        } catch {
+            return .init(date: now, result: .failure(.init(error: error)))
         }
     }
 }

@@ -12,53 +12,8 @@ import Optics
 import Domain
 import Extensions
 import CommonPresentation
-
-
-// MARK: - DDayWidgetViewModel
-
-struct DDayWidgetViewModel: Sendable {
-
-    let eventTitle: String
-    let ddayText: String
-    let dateText: String
-    let timeText: String
-    let repeatText: String
-    var refreshAfter: Date?
-    var link: URL?
-    var widgetSetting: WidgetAppearanceSettings = .init()
-
-    var isRepeating: Bool {
-        return self.repeatText.isEmpty == false
-    }
-
-    /// 잠금화면 inline 한 줄. D-n을 앞에 두는 이유 — inline은 폭이 좁아 뒤에서부터 잘리는데,
-    /// 제목이 길 때 남은 일수가 사라지면 이 위젯을 둘 이유가 없어진다.
-    var lockScreenInlineText: String {
-        return [self.ddayText, self.eventTitle].joinedNonEmpty(separator: " · ")
-    }
-
-    static var sample: Self {
-        return .init(
-            eventTitle: "widget.dday.sample::title".localized(),
-            ddayText: "D-14",
-            dateText: DDayTargetDateFormatter.dateText(
-                of: .at(Date().timeIntervalSince1970 + 3600 * 24 * 14), in: .current
-            ),
-            timeText: "",
-            repeatText: ""
-        )
-    }
-
-    static func noTarget() -> Self {
-        return .init(
-            eventTitle: "widget.dday::noTarget".localized(),
-            ddayText: "–",
-            dateText: "",
-            timeText: "",
-            repeatText: ""
-        )
-    }
-}
+import CalendarPresentation
+import WidgetScenes
 
 
 // MARK: - DDayWidgetViewModelProvider
@@ -68,15 +23,18 @@ final class DDayWidgetViewModelProvider {
     private let eventFetchUsecase: any CalendarEventFetchUsecase
     private let calendarSettingRepository: any CalendarSettingRepository
     private let appSettingRepository: any AppSettingRepository
+    private let styleFetchUsecase: any WidgetStyleFetchUsecase
 
     init(
         eventFetchUsecase: any CalendarEventFetchUsecase,
         calendarSettingRepository: any CalendarSettingRepository,
-        appSettingRepository: any AppSettingRepository
+        appSettingRepository: any AppSettingRepository,
+        styleFetchUsecase: any WidgetStyleFetchUsecase
     ) {
         self.eventFetchUsecase = eventFetchUsecase
         self.calendarSettingRepository = calendarSettingRepository
         self.appSettingRepository = appSettingRepository
+        self.styleFetchUsecase = styleFetchUsecase
     }
 }
 
@@ -87,11 +45,12 @@ extension DDayWidgetViewModelProvider {
     }
 
     func getDDayModel(
-        for now: Date, target: DDayTargetEventId?
+        for now: Date, target: DDayTargetEventId?, style: WidgetStyleId.Style = .default
     ) async throws -> DDayWidgetViewModel {
 
         let timeZone = self.calendarSettingRepository.loadUserSelectedTImeZone() ?? .current
         let setting = self.appSettingRepository.loadWidgetAppearanceSetting()
+        let resolved = self.styleFetchUsecase.fetchStyle(of: .ddaySmall, selected: style)
         let refreshAfter = self.nextMidnight(after: now, in: timeZone)
 
         guard let target,
@@ -99,7 +58,7 @@ extension DDayWidgetViewModelProvider {
         else {
             return DDayWidgetViewModel.noTarget()
                 |> \.refreshAfter .~ refreshAfter
-                |> \.widgetSetting .~ setting
+                |> \.look .~ .init(globalSetting: setting, appliedStyle: resolved)
         }
 
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
@@ -111,13 +70,13 @@ extension DDayWidgetViewModelProvider {
         return DDayWidgetViewModel(
             eventTitle: event.name,
             ddayText: DDayText(interval).text,
-            dateText: DDayTargetDateFormatter.dateText(of: event.time, in: timeZone),
-            timeText: DDayTargetDateFormatter.timeText(of: event.time, in: timeZone),
+            dateText: event.time.ddayDateText(in: timeZone),
+            timeText: event.time.ddayTimeText(in: timeZone),
             repeatText: self.repeatText(event, timeZone)
         )
         |> \.refreshAfter .~ refreshAfter
         |> \.link .~ self.link(for: event, in: timeZone)
-        |> \.widgetSetting .~ setting
+        |> \.look .~ .init(globalSetting: setting, appliedStyle: resolved)
     }
 
     /// 일정은 그 회차 상세로, 공휴일은 해당 날짜 선택으로 보낸다.

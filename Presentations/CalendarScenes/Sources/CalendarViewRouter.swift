@@ -14,11 +14,14 @@ protocol CalendarViewRouting: Routing, Sendable {
     @MainActor
     func attachInitialMonths(_ months: [CalendarMonth]) -> [any CalendarPaperSceneInteractor]
 
-    @MainActor
     func changeFocus(at index: Int)
 
-    @MainActor
     func slideFocus(to index: Int, isNext: Bool, completed: @escaping @Sendable () -> Void)
+
+    @MainActor
+    func attachTwoColumns(initialMonth: CalendarMonth) -> (any CalendarTwoColumnsSceneInteractor)?
+
+    func showColumnLayout(_ layout: CalendarColumnLayout)
 
     func routeToAICommand(listener: (any AIAgentCommandSceneListener)?)
 
@@ -30,21 +33,25 @@ protocol CalendarViewRouting: Routing, Sendable {
 final class CalendarViewRouterImple: BaseRouterImple, CalendarViewRouting, @unchecked Sendable {
 
     private let paperSceneBuilder: any CalendarPaperSceneBuiler
+    private let twoColumnsSceneBuilder: any CalendarTwoColumnsSceneBuilder
     private let aiAgentCommandSceneBuilder: any AIAgentCommandSceneBuilder
     private let memberSceneBuilder: any MemberSceneBuilder
     private let paywallSceneBuilder: any PaywallSceneBuilder
     init(
         _ paperSceneBuilder: any CalendarPaperSceneBuiler,
+        twoColumnsSceneBuilder: any CalendarTwoColumnsSceneBuilder,
         aiAgentCommandSceneBuilder: any AIAgentCommandSceneBuilder,
         memberSceneBuilder: any MemberSceneBuilder,
         paywallSceneBuilder: any PaywallSceneBuilder
     ) {
         self.paperSceneBuilder = paperSceneBuilder
+        self.twoColumnsSceneBuilder = twoColumnsSceneBuilder
         self.aiAgentCommandSceneBuilder = aiAgentCommandSceneBuilder
         self.memberSceneBuilder = memberSceneBuilder
         self.paywallSceneBuilder = paywallSceneBuilder
     }
     private var currentScene: (any CalendarScene)? { self.scene as? (any CalendarScene) }
+    private var calendarViewController: CalendarViewController? { self.scene as? CalendarViewController }
 
     @MainActor
     func attachInitialMonths(_ months: [CalendarMonth]) -> [any CalendarPaperSceneInteractor] {
@@ -59,16 +66,33 @@ final class CalendarViewRouterImple: BaseRouterImple, CalendarViewRouting, @unch
         return childScenes.compactMap { $0.interactor }
     }
     
-    @MainActor
     func changeFocus(at index: Int) {
-        guard let current = self.currentScene else { return }
-        current.changeFocus(at: index)
+        Task { @MainActor in
+            self.currentScene?.changeFocus(at: index)
+        }
+    }
+
+    func slideFocus(to index: Int, isNext: Bool, completed: @escaping @Sendable () -> Void) {
+        Task { @MainActor in
+            self.currentScene?.slideFocus(to: index, isNext: isNext, completed: completed)
+        }
     }
 
     @MainActor
-    func slideFocus(to index: Int, isNext: Bool, completed: @escaping @Sendable () -> Void) {
-        guard let current = self.currentScene else { return }
-        current.slideFocus(to: index, isNext: isNext, completed: completed)
+    func attachTwoColumns(initialMonth: CalendarMonth) -> (any CalendarTwoColumnsSceneInteractor)? {
+        guard let current = self.calendarViewController else { return nil }
+        let twoColumns = self.twoColumnsSceneBuilder.makeTwoColumnsScene(
+            initialMonth: initialMonth,
+            listener: current.interactor as? CalendarTwoColumnsSceneListener
+        )
+        current.attachTwoColumns(twoColumns)
+        return twoColumns.interactor
+    }
+
+    func showColumnLayout(_ layout: CalendarColumnLayout) {
+        Task { @MainActor in
+            self.calendarViewController?.showColumnLayout(layout)
+        }
     }
 
     func routeToAICommand(listener: (any AIAgentCommandSceneListener)?) {

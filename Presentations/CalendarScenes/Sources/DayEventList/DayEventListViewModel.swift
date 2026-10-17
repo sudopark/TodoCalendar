@@ -14,6 +14,7 @@ import Optics
 import Domain
 import Scenes
 import Extensions
+import CalendarPresentation
 
 
 struct SelectedDayModel: Equatable {
@@ -67,6 +68,7 @@ protocol DayEventListViewModel: AnyObject, Sendable, DayEventListSceneInteractor
     func submitAIAgent(_ text: String)
     func handleAIEntryButtonTap()
     func showAIGuide()
+    func returnToToday()
     func attachListener(_ listener: any DayEventListSceneListener)
 
     // presenter
@@ -78,6 +80,7 @@ protocol DayEventListViewModel: AnyObject, Sendable, DayEventListSceneInteractor
     var aiAgentState: AnyPublisher<AIAgentState, Never> { get }
     var recognizingText: AnyPublisher<String, Never> { get }
     var voiceLevel: AnyPublisher<Float, Never> { get }
+    var isShowReturnToToday: AnyPublisher<Bool, Never> { get }
 }
 
 
@@ -94,6 +97,7 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
     private let accountUsecase: any AccountUsecase
     private let aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
     private let eventLiveActivityUsecase: any EventLiveActivityUsecase
+    private let ddayCandidateUsecase: any DDayCandidateUsecase
     private let guideTodoUsecase: any GuideTodoUsecase
     var router: (any DayEventListRouting)?
     private weak var listener: (any DayEventListSceneListener)?
@@ -108,6 +112,7 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
         accountUsecase: any AccountUsecase,
         aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase,
         eventLiveActivityUsecase: any EventLiveActivityUsecase,
+        ddayCandidateUsecase: any DDayCandidateUsecase,
         guideTodoUsecase: any GuideTodoUsecase
     ) {
         self.calendarUsecase = calendarUsecase
@@ -119,6 +124,7 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
         self.accountUsecase = accountUsecase
         self.aiAgentOrchestrationUsecase = aiAgentOrchestrationUsecase
         self.eventLiveActivityUsecase = eventLiveActivityUsecase
+        self.ddayCandidateUsecase = ddayCandidateUsecase
         self.guideTodoUsecase = guideTodoUsecase
 
         self.internalBind()
@@ -136,6 +142,7 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
         let pendingTodoEvents = CurrentValueSubject<[PendingTodoEventCellViewModel], Never>([])
         let isSignedIn = CurrentValueSubject<Bool, Never>(false)
         let aiAgentState = CurrentValueSubject<AIAgentState?, Never>(nil)
+        let selectedDayIsToday = CurrentValueSubject<Bool, Never>(true)
     }
 
     private let cancellables = CancelBag()
@@ -170,6 +177,10 @@ extension DayEventListViewModelImple {
         self.subject.currentDayAndEventLists.send(
             .init(currentDay: newDay, events: eventThatDay)
         )
+    }
+
+    func selectedDayIsToday(_ isToday: Bool) {
+        self.subject.selectedDayIsToday.send(isToday)
     }
 
     func addNewTodoQuickly(withName: String) {
@@ -293,6 +304,10 @@ extension DayEventListViewModelImple {
         self.router?.routeToAIGuide()
     }
 
+    func returnToToday() {
+        self.listener?.dayEventListDidRequestReturnToToday()
+    }
+
     private static func isCommandPhase(_ state: AIAgentState) -> Bool {
         switch state {
         case .processing, .confirm, .done, .failed: return true
@@ -312,6 +327,13 @@ extension DayEventListViewModelImple {
 // MARK: - DayEventListViewModelImple Presenter
 
 extension DayEventListViewModelImple {
+
+    var isShowReturnToToday: AnyPublisher<Bool, Never> {
+        return self.subject.selectedDayIsToday
+            .map { !$0 }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
 
     var foremostEventModel: AnyPublisher<
         (any EventCellViewModel)?, Never
@@ -346,9 +368,12 @@ extension DayEventListViewModelImple {
             default: return nil
             }
         }
-        let applyRegistration: ((any EventCellViewModel)?, LiveActivityTarget?) -> (any EventCellViewModel)?
-        applyRegistration = { cvm, target in
+        let applyRegistration: (
+            (any EventCellViewModel)?, LiveActivityTarget?, [DDayCandidate]
+        ) -> (any EventCellViewModel)?
+        applyRegistration = { cvm, target, candidates in
             cvm?.liveActivityRegistrationApplied(target)
+                .ddayCandidateRegistrationApplied(candidates)
         }
 
         let foremostModel = Publishers.CombineLatest4(
@@ -359,7 +384,11 @@ extension DayEventListViewModelImple {
         )
         .map(asCellViewModel)
 
-        return Publishers.CombineLatest(foremostModel, self.eventLiveActivityUsecase.registeredTarget)
+        return Publishers.CombineLatest3(
+            foremostModel,
+            self.eventLiveActivityUsecase.registeredTarget,
+            self.ddayCandidateUsecase.candidates
+        )
             .map(applyRegistration)
             .removeDuplicates(by: { $0?.customCompareKey == $1?.customCompareKey })
             .eraseToAnyPublisher()
@@ -419,9 +448,14 @@ extension DayEventListViewModelImple {
                 ? [GuideTodoEventCellViewModel()] : []
             return guides + pair.0 + pending + pair.1
         }
-        let applyRegistration: ([any EventCellViewModel], LiveActivityTarget?) -> [any EventCellViewModel]
-        applyRegistration = { cvms, target in
-            cvms.map { $0.liveActivityRegistrationApplied(target) }
+        let applyRegistration: (
+            [any EventCellViewModel], LiveActivityTarget?, [DDayCandidate]
+        ) -> [any EventCellViewModel]
+        applyRegistration = { cvms, target, candidates in
+            cvms.map {
+                $0.liveActivityRegistrationApplied(target)
+                    .ddayCandidateRegistrationApplied(candidates)
+            }
         }
 
         let cells = Publishers.CombineLatest3(
@@ -431,7 +465,11 @@ extension DayEventListViewModelImple {
         )
         .map(combineEvents)
 
-        return Publishers.CombineLatest(cells, self.eventLiveActivityUsecase.registeredTarget)
+        return Publishers.CombineLatest3(
+            cells,
+            self.eventLiveActivityUsecase.registeredTarget,
+            self.ddayCandidateUsecase.candidates
+        )
             .map(applyRegistration)
             .removeDuplicates(by: { $0.map { $0.customCompareKey } == $1.map { $0.customCompareKey } })
             .eraseToAnyPublisher()
@@ -495,26 +533,6 @@ extension DayEventListViewModelImple {
 
 
 // MARK: - private helpers
-
-private extension EventCellViewModel {
-
-    func liveActivityRegistrationApplied(_ registered: LiveActivityTarget?) -> any EventCellViewModel {
-        switch self {
-        case let todo as TodoEventCellViewModel:
-            return todo |> \.isLiveActivityRegistered .~ (registered != nil && todo.liveActivityTarget == registered)
-        case let schedule as ScheduleEventCellViewModel:
-            return schedule |> \.isLiveActivityRegistered .~ (registered != nil && schedule.liveActivityTarget == registered)
-        case let holiday as HolidayEventCellViewModel:
-            return holiday |> \.isLiveActivityRegistered .~ (registered != nil && holiday.liveActivityTarget == registered)
-        case let apple as AppleCalendarEventCellViewModel:
-            return apple |> \.isLiveActivityRegistered .~ (registered != nil && apple.liveActivityTarget == registered)
-        case let google as GoogleCalendarEventCellViewModel:
-            return google |> \.isLiveActivityRegistered .~ (registered != nil && google.liveActivityTarget == registered)
-        default:
-            return self
-        }
-    }
-}
 
 private extension EventTime {
 

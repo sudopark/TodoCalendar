@@ -24,4 +24,15 @@ extension FullScreenAdRouterImple: @retroactive FullScreenAdRouter {
     }
 }
 
+extension RewardedAdRouterImple: @retroactive RewardedAdRouter {
+
+    @MainActor
+    public func showRewardedAd(
+        from viewController: UIViewController,
+        completion: @escaping (RewardedAdResult) -> Void
+    ) {
+        self.show(from: viewController, completion: completion)
+    }
+}
+
 extension GoogleMobileAdsServiceImple: @retroactive PrivacyOptionsFormRouter { }

@@ -12,6 +12,7 @@
 "catalog.event::team_workshop" = "टीम वर्कशॉप";
 "catalog.event::release_day" = "रिलीज़ का दिन";
 "catalog.event::lunch" = "सारा के साथ लंच";
+"catalog.event::anniversary" = "शादी की सालगिरह";
 
 // MARK: - 할일
 
@@ -40,3 +41,8 @@
 
 "catalog.ai::command" = "शुक्रवार दोपहर सारा के साथ लंच";
 "catalog.ai::result" = "“सारा के साथ लंच” शुक्रवार, 13 मार्च दोपहर 12:00 बजे जोड़ दिया गया।";
+
+// MARK: - 컬러 테마
+
+"catalog.colorTheme::forest" = "वन";
+"catalog.colorTheme::dusk" = "गोधूलि";

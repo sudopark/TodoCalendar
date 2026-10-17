@@ -41,9 +41,9 @@ public final class AppDataMigrationImple: @unchecked Sendable {
                     case 1: try self?.runMigrationVersion1to2(database)
                     case 2: try self?.runMigrationVersion2to3(database)
                     case 3: try self?.runMigrationVersion3to4(database)
-                    case 4: try? self?.runMigrationVersion4to5(database)
-                    case 5: try? self?.runMigrationVersion5to6(database)
-                    case 6: try? self?.runMigrationVersion6to7(database)
+                    case 4: try self?.runMigrationVersion4to5(database)
+                    case 5: try self?.runMigrationVersion5to6(database)
+                    case 6: try self?.runMigrationVersion6to7(database)
                     default: break
                     }
                 },
@@ -74,6 +74,7 @@ public final class AppDataMigrationImple: @unchecked Sendable {
             try? db.createTableOrNot(EventUploadPendingQueueTable.self)
             try? db.createTableOrNot(EventNotificationIdTable.self)
             try? db.createTableOrNot(ProcessingAICommandTable.self)
+            try? db.createTableOrNot(CustomColorThemeTable.self)
         }
     }
 }
@@ -85,6 +86,7 @@ extension AppDataMigrationImple {
 
     private func runMigrationVersion0To1(_ database: any DataBase) throws {
         do {
+            try database.createTableOrNot(TodoEventTableV0.self)
             try database.migrate(TodoEventTable.self, version: 0)
             logger.log(.sql, level: .info, "migration version 0 -> 1, TodoEventTable finished")
         } catch {
@@ -92,6 +94,7 @@ extension AppDataMigrationImple {
             try? database.dropTable(TodoEventTable.self)
         }
         do {
+            try database.createTableOrNot(ScheduleEventTableV0.self)
             try database.migrate(ScheduleEventTable.self, version: 0)
             logger.log(.sql, level: .info, "migration version 0 -> 1, ScheduleEventTable finished")
         } catch {
@@ -99,6 +102,7 @@ extension AppDataMigrationImple {
             try? database.dropTable(ScheduleEventTable.self)
         }
         do {
+            try database.createTableOrNot(PendingDoneTodoEventTableV0.self)
             try database.migrate(PendingDoneTodoEventTable.self, version: 0)
             logger.log(.sql, level: .info, "migration version 0 -> 1, PendingDoneTodoEventTable finished")
         } catch {
@@ -109,31 +113,31 @@ extension AppDataMigrationImple {
 
     private func runMigrationVersion1to2(_ database: any DataBase) throws {
         do {
-            try database.migrate(OldGoogleCalendarEventOriginTable.self, version: 1)
-            logger.log(.sql, level: .info, "migration version 1 -> 2, OldGoogleCalendarEventOriginTable finished")
+            try database.migrate(GoogleCalendarEventOriginTableV0.self, version: 1)
+            logger.log(.sql, level: .info, "migration version 1 -> 2, GoogleCalendarEventOriginTableV0 finished")
         } catch {
-            logger.log(.sql, level: .error, "migration version 1 -> 2 failed.. will drop OldGoogleCalendarEventOriginTable")
-            try? database.dropTable(OldGoogleCalendarEventOriginTable.self)
+            logger.log(.sql, level: .error, "migration version 1 -> 2 failed.. will drop GoogleCalendarEventOriginTableV0")
+            try? database.dropTable(GoogleCalendarEventOriginTableV0.self)
         }
     }
 
     private func runMigrationVersion2to3(_ database: any DataBase) throws {
         do {
-            try database.migrate(OldGoogleCalendarEventTagTable.self, version: 2)
-            logger.log(.sql, level: .info, "migration version 2 -> 3, OldGoogleCalendarEventTagTable finished")
+            try database.migrate(GoogleCalendarEventTagTableV0.self, version: 2)
+            logger.log(.sql, level: .info, "migration version 2 -> 3, GoogleCalendarEventTagTableV0 finished")
         } catch {
-            logger.log(.sql, level: .error, "migration version 2 -> 3 failed.. will drop OldGoogleCalendarEventTagTable")
-            try? database.dropTable(OldGoogleCalendarEventTagTable.self)
+            logger.log(.sql, level: .error, "migration version 2 -> 3 failed.. will drop GoogleCalendarEventTagTableV0")
+            try? database.dropTable(GoogleCalendarEventTagTableV0.self)
         }
     }
 
     private func runMigrationVersion3to4(_ database: any DataBase) throws {
         do {
-            try database.migrate(OldGoogleCalendarEventOriginTable.self, version: 3)
-            logger.log(.sql, level: .info, "migration version 3 -> 4, OldGoogleCalendarEventOriginTable finished")
+            try database.migrate(GoogleCalendarEventOriginTableV0.self, version: 3)
+            logger.log(.sql, level: .info, "migration version 3 -> 4, GoogleCalendarEventOriginTableV0 finished")
         } catch {
-            logger.log(.sql, level: .error, "migration version 3 -> 4 failed.. will drop OldGoogleCalendarEventOriginTable")
-            try? database.dropTable(OldGoogleCalendarEventOriginTable.self)
+            logger.log(.sql, level: .error, "migration version 3 -> 4 failed.. will drop GoogleCalendarEventOriginTableV0")
+            try? database.dropTable(GoogleCalendarEventOriginTableV0.self)
         }
     }
 
@@ -150,7 +154,7 @@ extension AppDataMigrationImple {
 
     private func runMigrationVersion5to6(_ database: any DataBase) throws {
         do {
-            try database.createTableOrNot(TodoEventTable.self)
+            try database.createTableOrNot(TodoEventTableV1.self)
             try database.migrate(TodoEventTable.self, version: 5)
             logger.log(.sql, level: .info, "migration version 5 -> 6, TodoEventTable finished")
         } catch {
@@ -204,7 +208,7 @@ extension AppDataMigrationImple {
         }
 
         if let (colors, tags, origins) = try? await readFromMainDB() {
-            let eventIds = origins.map { $0.origin.id }
+            let eventIds = origins.map { $0.id }
             let times = (try? await readEventTimes(eventIds: eventIds)) ?? []
             try? await writeToGoogleCalendarDB(
                 accountId: accountId,
@@ -220,26 +224,27 @@ extension AppDataMigrationImple {
     }
 
     private func readFromMainDB() async throws -> (
-        [OldGoogleCalendarColorsTable.Entity],
+        [GoogleCalendarColorsTableV0.Entity],
         [GoogleCalendar.Tag],
-        [OldGoogleCalendarEventOriginTable.Entity]
+        [GoogleCalendarEventOriginTableV0.Entity]
     ) {
-        let colors = try await mainDB.async.run { db -> [OldGoogleCalendarColorsTable.Entity] in
-            try? db.createTableOrNot(OldGoogleCalendarColorsTable.self)
-            let query = OldGoogleCalendarColorsTable.selectAll()
-            return (try? db.load(OldGoogleCalendarColorsTable.self, query: query)) ?? []
+        let colors = try await mainDB.async.run { db -> [GoogleCalendarColorsTableV0.Entity] in
+            try? db.createTableOrNot(GoogleCalendarColorsTableV0.self)
+            let query = GoogleCalendarColorsTableV0.selectAll()
+            return (try? db.load(GoogleCalendarColorsTableV0.self, query: query)) ?? []
         }
 
         let tags = try await mainDB.async.run { db -> [GoogleCalendar.Tag] in
-            try? db.createTableOrNot(OldGoogleCalendarEventTagTable.self)
-            let query = OldGoogleCalendarEventTagTable.selectAll()
-            return (try? db.load(query)) ?? []
+            try? db.createTableOrNot(GoogleCalendarEventTagTableV0.self)
+            let query = GoogleCalendarEventTagTableV0.selectAll()
+            let entities = (try? db.load(GoogleCalendarEventTagTableV0.self, query: query)) ?? []
+            return entities.map { $0.asTag() }
         }
 
-        let origins = try await mainDB.async.run { db -> [OldGoogleCalendarEventOriginTable.Entity] in
-            try? db.createTableOrNot(OldGoogleCalendarEventOriginTable.self)
-            let query = OldGoogleCalendarEventOriginTable.selectAll()
-            return (try? db.load(OldGoogleCalendarEventOriginTable.self, query: query)) ?? []
+        let origins = try await mainDB.async.run { db -> [GoogleCalendarEventOriginTableV0.Entity] in
+            try? db.createTableOrNot(GoogleCalendarEventOriginTableV0.self)
+            let query = GoogleCalendarEventOriginTableV0.selectAll()
+            return (try? db.load(GoogleCalendarEventOriginTableV0.self, query: query)) ?? []
         }
 
         return (colors, tags, origins)
@@ -255,9 +260,9 @@ extension AppDataMigrationImple {
 
     private func writeToGoogleCalendarDB(
         accountId: String,
-        colors: [OldGoogleCalendarColorsTable.Entity],
+        colors: [GoogleCalendarColorsTableV0.Entity],
         tags: [GoogleCalendar.Tag],
-        origins: [OldGoogleCalendarEventOriginTable.Entity],
+        origins: [GoogleCalendarEventOriginTableV0.Entity],
         times: [EventTimeTable.Entity]
     ) async throws {
         let googleDB = try await googleCalendarDBPool.connection(serviceId: GoogleCalendarService.id)
@@ -279,7 +284,7 @@ extension AppDataMigrationImple {
 
             try db.createTableOrNot(GoogleCalendarEventOriginTable.self)
             let originEntities = origins.map {
-                GoogleCalendarEventOriginTable.Entity(accountId: accountId, $0.calendarId, $0.defaultTimeZone, $0.origin)
+                GoogleCalendarEventOriginTable.Entity(accountId: accountId, $0.calendarId, $0.defaultTimeZone, $0.asEventOrigin())
             }
             if !originEntities.isEmpty {
                 try db.insert(GoogleCalendarEventOriginTable.self, entities: originEntities)
@@ -294,9 +299,9 @@ extension AppDataMigrationImple {
 
     private func cleanupMainDB(eventIds: [String]) async throws {
         try await mainDB.async.run { db in
-            try? db.dropTable(OldGoogleCalendarColorsTable.self)
-            try? db.dropTable(OldGoogleCalendarEventTagTable.self)
-            try? db.dropTable(OldGoogleCalendarEventOriginTable.self)
+            try? db.dropTable(GoogleCalendarColorsTableV0.self)
+            try? db.dropTable(GoogleCalendarEventTagTableV0.self)
+            try? db.dropTable(GoogleCalendarEventOriginTableV0.self)
             if !eventIds.isEmpty {
                 let deleteQuery = EventTimeTable.delete().where { $0.eventId.in(eventIds) }
                 try? db.delete(EventTimeTable.self, query: deleteQuery)
@@ -310,11 +315,13 @@ extension AppDataMigrationImple {
 
 private extension GoogleCalendarColorsTable.Entity {
 
-    init(accountId: String, migrating old: OldGoogleCalendarColorsTable.Entity) {
-        self.accountId = accountId
-        self.colorType = old.colorType
-        self.colorKey = old.colorKey
-        self.background = old.background
-        self.foreground = old.foreground
+    init(accountId: String, migrating old: GoogleCalendarColorsTableV0.Entity) {
+        self.init(
+            accountId: accountId,
+            colorType: old.colorType,
+            colorKey: old.colorKey,
+            background: old.background,
+            foreground: old.foreground
+        )
     }
 }

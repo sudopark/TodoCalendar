@@ -10,6 +10,8 @@
 
 "Event" = "Подія";
 "Turn" = "Повтор";
+"WidgetStyle" = "Стиль віджета";
+"Style" = "Стиль";
 "EventType" = "Тип події";
 "Event Types" = "Типи подій";
 "Exclude all day event" = "Виключити події на весь день";

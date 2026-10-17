@@ -19,6 +19,11 @@ import AdService
 
 // MARK: - MainViewController
 
+private enum Constant {
+    // iPhone Duo 는 상태바가 옆 띠로 가 safe area 위쪽이 0 이라, 헤더가 화면 모서리에 붙지 않게 최소 여백을 둔다
+    static let minimumHeaderTopInset: CGFloat = 20
+}
+
 final class MainViewController: UIViewController, MainScene {
     
     private let headerAreaStackView = UIStackView()
@@ -33,6 +38,8 @@ final class MainViewController: UIViewController, MainScene {
     let viewAppearance: ViewAppearance
     private let mobileAdService: any MobileAdService
     private let fullScreenAdRouter: (any FullScreenAdRouter)?
+    private let adExposureUsecase: any AdExposureUsecase
+    private let isInitialScene: Bool
     private var didPrepareAd: Bool = false
 
     @MainActor
@@ -45,13 +52,17 @@ final class MainViewController: UIViewController, MainScene {
         viewAppearance: ViewAppearance,
         mobileAdService: any MobileAdService,
         fullScreenAdRouter: (any FullScreenAdRouter)?,
-        adViewBuilder: (any AdViewBuilder)?
+        adExposureUsecase: any AdExposureUsecase,
+        adViewBuilder: (any AdViewBuilder)?,
+        isInitialScene: Bool
     ) {
         self.viewModel = viewModel
         self.viewAppearance = viewAppearance
         self.mobileAdService = mobileAdService
         self.fullScreenAdRouter = fullScreenAdRouter
+        self.adExposureUsecase = adExposureUsecase
         self.bottomBannerView = adViewBuilder?.makeBannerUIView(size: .banner)
+        self.isInitialScene = isInitialScene
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -78,9 +89,14 @@ final class MainViewController: UIViewController, MainScene {
         Task { @MainActor [weak self] in
             guard let self else { return }
             await self.mobileAdService.presentConsentFormAndTrackingPromptIfNeeded(from: self)
-            await self.mobileAdService.preloadFullScreenAd()
+            if self.adExposureUsecase.shouldPreloadFullScreenAds() {
+                await self.mobileAdService.preloadFullScreenAd()
+                Task { [weak self] in
+                    await self?.mobileAdService.preloadRewardedAd()
+                }
+            }
             
-            guard self.isLaunchedFromAppIcon else { return }
+            guard self.isInitialScene, self.isLaunchedFromAppIcon else { return }
             self.fullScreenAdRouter?.showFullScreenAd(
                 from: self, scope: .application, isFromAppLaunch: true
             )
@@ -117,19 +133,19 @@ extension MainViewController {
             })
             .store(in: self.cancellables)
         
+        self.viewModel.isMonthNavigationHidden
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] isHidden in
+                self?.headerView.updateMonthNavigation(isHidden: isHidden)
+            })
+            .store(in: self.cancellables)
+
         self.viewModel.currentMonth
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] month in
                 self?.headerView.monthLabel.text = month.monthText
                 self?.headerView.yearLabel.text = month.yearText
                 self?.headerView.yearLabel.isHidden = month.yearText == nil
-            })
-            .store(in: self.cancellables)
-        
-        self.viewModel.isShowReturnToToday
-            .receive(on: RunLoop.main)
-            .sink(receiveValue: { [weak self] show in
-                self?.headerView.returnTodayView.isHidden = !show
             })
             .store(in: self.cancellables)
         
@@ -177,12 +193,6 @@ extension MainViewController {
             })
             .store(in: self.cancellables)
 
-        self.headerView.returnTodayView.addTapGestureRecognizerPublisher()
-            .sink(receiveValue: { [weak self] in
-                self?.viewModel.returnToToday()
-            })
-            .store(in: self.cancellables)
-        
         self.headerView.migrationButton.addTapGestureRecognizerPublisher()
             .sink(receiveValue: { [weak self] in
                 self?.viewAppearance.impactIfNeed()
@@ -238,8 +248,14 @@ extension MainViewController {
         headerAreaStackView.autoLayout.active(with: self.view) {
             $0.leadingAnchor.constraint(equalTo: $1.safeAreaLayoutGuide.leadingAnchor)
             $0.trailingAnchor.constraint(equalTo: $1.safeAreaLayoutGuide.trailingAnchor)
-            $0.topAnchor.constraint(equalTo: $1.safeAreaLayoutGuide.topAnchor)
+            $0.topAnchor.constraint(greaterThanOrEqualTo: $1.safeAreaLayoutGuide.topAnchor)
+            $0.topAnchor.constraint(greaterThanOrEqualTo: $1.topAnchor, constant: Constant.minimumHeaderTopInset)
         }
+        let headerTopAtSafeArea = headerAreaStackView.topAnchor.constraint(
+            equalTo: self.view.safeAreaLayoutGuide.topAnchor
+        )
+        headerTopAtSafeArea.priority = .defaultHigh
+        headerTopAtSafeArea.isActive = true
         headerAreaStackView.axis = .vertical
         headerAreaStackView.spacing = 0
         
@@ -278,7 +294,8 @@ extension MainViewController {
     private func setupBottomBannerLayout(_ bannerView: UIView) {
         self.view.addSubview(bannerView)
         bannerView.autoLayout.active(with: self.view) {
-            $0.centerXAnchor.constraint(equalTo: $1.centerXAnchor)
+            $0.leadingAnchor.constraint(equalTo: $1.safeAreaLayoutGuide.leadingAnchor)
+            $0.trailingAnchor.constraint(equalTo: $1.safeAreaLayoutGuide.trailingAnchor)
             $0.bottomAnchor.constraint(equalTo: $1.safeAreaLayoutGuide.bottomAnchor)
         }
     }
@@ -305,9 +322,8 @@ private final class HeaderView: UIView {
     private let titleStackView = UIStackView()
     let previousMonthButton = UIButton()
     let nextMonthButton = UIButton()
-    let returnTodayView = UIView()
-    private let returnTodayImage = UIImageView()
-    private let returnTodayLabel = UILabel()
+    private var titleLeadingAfterPreviousButton: NSLayoutConstraint?
+    private var titleLeadingAtEdge: NSLayoutConstraint?
     private let buttonsStackView = UIStackView()
     let migrationButton = UIButton()
     let jumpButton = UIButton()
@@ -350,6 +366,16 @@ private final class HeaderView: UIView {
         self.migrationButton.layer.removeAllAnimations()
     }
     
+    func updateMonthNavigation(isHidden: Bool) {
+        self.previousMonthButton.isHidden = isHidden
+        self.nextMonthButton.isHidden = isHidden
+        let (activating, deactivating) = isHidden
+            ? (self.titleLeadingAtEdge, self.titleLeadingAfterPreviousButton)
+            : (self.titleLeadingAfterPreviousButton, self.titleLeadingAtEdge)
+        deactivating?.isActive = false
+        activating?.isActive = true
+    }
+
     func setupLayout() {
         
         self.addSubview(previousMonthButton)
@@ -362,9 +388,13 @@ private final class HeaderView: UIView {
 
         self.addSubview(titleStackView)
         titleStackView.autoLayout.active(with: self) {
-            $0.leadingAnchor.constraint(equalTo: self.previousMonthButton.trailingAnchor, constant: 8)
             $0.centerYAnchor.constraint(equalTo: $1.centerYAnchor)
         }
+        self.titleLeadingAfterPreviousButton = titleStackView.leadingAnchor
+            .constraint(equalTo: self.previousMonthButton.trailingAnchor, constant: 8)
+        self.titleLeadingAtEdge = titleStackView.leadingAnchor
+            .constraint(equalTo: self.leadingAnchor, constant: 16)
+        self.titleLeadingAfterPreviousButton?.isActive = true
         titleStackView.axis = .horizontal
         titleStackView.alignment = .lastBaseline
         titleStackView.spacing = 4
@@ -380,40 +410,11 @@ private final class HeaderView: UIView {
             $0.heightAnchor.constraint(equalToConstant: 44)
         }
 
-        self.addSubview(returnTodayView)
-        returnTodayView.autoLayout.active(with: self) {
-            $0.centerXAnchor.constraint(equalTo: $1.centerXAnchor).setupPriority(.defaultLow)
-            $0.centerYAnchor.constraint(equalTo: $1.centerYAnchor)
-            $0.leadingAnchor.constraint(greaterThanOrEqualTo: self.nextMonthButton.trailingAnchor, constant: 8).setupPriority(.defaultHigh)
-        }
-        
-        self.returnTodayView.addSubview(returnTodayImage)
-        returnTodayImage.autoLayout.active {
-            $0.widthAnchor.constraint(equalToConstant: 15)
-            $0.heightAnchor.constraint(equalToConstant: 15)
-            $0.leadingAnchor.constraint(equalTo: returnTodayView.leadingAnchor, constant: 8)
-            $0.centerYAnchor.constraint(equalTo: returnTodayView.centerYAnchor)
-        }
-        
-        self.returnTodayView.addSubview(returnTodayLabel)
-        returnTodayLabel.autoLayout.active {
-            $0.leadingAnchor.constraint(equalTo: returnTodayImage.trailingAnchor, constant: 4)
-            $0.trailingAnchor.constraint(equalTo: returnTodayView.trailingAnchor, constant: -8)
-            $0.topAnchor.constraint(equalTo: returnTodayView.topAnchor, constant: 6)
-            $0.bottomAnchor.constraint(equalTo: returnTodayView.bottomAnchor, constant: -6)
-        }
-        
-        self.returnTodayView.layer.borderWidth = 1.5
-        self.returnTodayView.clipsToBounds = true
-        self.returnTodayView.layer.cornerRadius = 12
-        self.returnTodayLabel.text = "TODAY".localized()
-        self.returnTodayView.isHidden = true
-        
         self.addSubview(buttonsStackView)
         buttonsStackView.autoLayout.active {
             $0.centerYAnchor.constraint(equalTo: self.centerYAnchor)
             $0.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -16)
-            $0.leadingAnchor.constraint(greaterThanOrEqualTo: returnTodayView.trailingAnchor, constant: 4)
+            $0.leadingAnchor.constraint(greaterThanOrEqualTo: self.nextMonthButton.trailingAnchor, constant: 4)
         }
         buttonsStackView.spacing = 8
         
@@ -451,16 +452,8 @@ private final class HeaderView: UIView {
         self.monthLabel.font = fontSet.bigMonth
         self.monthLabel.textColor = colorSet.text0
         
-        self.yearLabel.font = fontSet.normal
+        self.yearLabel.font = fontSet.size(22, weight: .semibold)
         self.yearLabel.textColor = colorSet.text0
-        
-        self.returnTodayImage.tintColor = colorSet.text0
-        self.returnTodayImage.image = UIImage(systemName: "arrow.uturn.right")
-        
-        self.returnTodayLabel.font = fontSet.subNormalWithBold
-        self.returnTodayLabel.textColor = colorSet.text0
-        
-        self.returnTodayView.layer.borderColor = colorSet.text0.cgColor
         
         switch self.migrationStatus {
         case .migrating:

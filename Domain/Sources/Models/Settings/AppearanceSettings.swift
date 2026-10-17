@@ -9,10 +9,81 @@ import Foundation
 import Prelude
 import Optics
 
-public enum ColorSetKeys: String, Sendable {
+public enum AppThemeColorSetKey: String, CaseIterable, Sendable {
+    case tomato
+    case ruby
+    case crimson
+    case pink
+    case plum
+    case purple
+    case violet
+    case indigo
+    case blue
+    case jade
+    case scarlet
+    case midnight
+    case ink
+    case abyss
+    case wine
+    case dusk
+    case amethyst
+    case camellia
+    case sunset
+}
+
+public enum ColorSetKeys: Sendable, Equatable {
     case systemTheme
     case defaultLight
     case defaultDark
+    case appTheme(AppThemeColorSetKey)
+    case custom(String)
+}
+
+extension ColorSetKeys: RawRepresentable {
+    
+    private enum Constant {
+        static let categorySeparator: Character = ":"
+        static let appThemeCategory: String = "appTheme"
+        static let customCategory: String = "custom"
+    }
+    
+    public var rawValue: String {
+        switch self {
+        case .systemTheme: return "systemTheme"
+        case .defaultLight: return "defaultLight"
+        case .defaultDark: return "defaultDark"
+        case .appTheme(let key):
+            return "\(Constant.appThemeCategory)\(Constant.categorySeparator)\(key.rawValue)"
+        case .custom(let id):
+            return "\(Constant.customCategory)\(Constant.categorySeparator)\(id)"
+        }
+    }
+    
+    public init?(rawValue: String) {
+        switch rawValue {
+        case "systemTheme": self = .systemTheme
+        case "defaultLight": self = .defaultLight
+        case "defaultDark": self = .defaultDark
+        default:
+            let components = rawValue.split(
+                separator: Constant.categorySeparator,
+                maxSplits: 1,
+                omittingEmptySubsequences: false
+            )
+            guard components.count == 2 else { return nil }
+            let value = String(components[1])
+            switch components[0] {
+            case Constant.appThemeCategory:
+                guard let key = AppThemeColorSetKey(rawValue: value) else { return nil }
+                self = .appTheme(key)
+            case Constant.customCategory:
+                guard value.isEmpty == false else { return nil }
+                self = .custom(value)
+            default:
+                return nil
+            }
+        }
+    }
 }
 
 public enum FontSetKeys: String, Sendable {
@@ -56,6 +127,7 @@ public struct CalendarAppearanceSettings: Equatable, Sendable {
     
     public let colorSetKey: ColorSetKeys
     public let fontSetKey: FontSetKeys
+    public var currentCustomColorTheme: CustomColorTheme?
     
     // calendar
     public var accnetDayPolicy: [AccentDays: Bool] = [:]

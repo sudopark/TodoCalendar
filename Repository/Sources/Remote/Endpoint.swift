@@ -192,10 +192,14 @@ enum EventDetailEndpoints: Endpoint {
 
 enum AppSettingEndpoints: Endpoint {
     case defaultEventTagColor
+    case colorThemes
+    case colorTheme(uuid: String)
     
     var subPath: String {
         switch self {
         case .defaultEventTagColor: return "event/tag/default/color"
+        case .colorThemes: return "color_themes"
+        case .colorTheme(let uuid): return "color_themes/\(uuid)"
         }
     }
 }
@@ -209,6 +213,7 @@ enum MigrationEndpoints: Endpoint {
     case eventDetails
     case doneTodos
     case doneTodoDetails
+    case customColorThemes
     
     var subPath: String {
         switch self {
@@ -218,6 +223,7 @@ enum MigrationEndpoints: Endpoint {
         case .eventDetails: return "event_details"
         case .doneTodos: return "todos/done"
         case .doneTodoDetails: return "todos/done/details"
+        case .customColorThemes: return "color_themes"
         }
     }
 }
@@ -254,6 +260,7 @@ enum EventSyncEndPoints: Endpoint {
 public enum AppEndpoints: Endpoint {
     case updateInfo
     case legalNotice
+    case appPolicy
 
     public var subPath: String {
         switch self {
@@ -261,6 +268,8 @@ public enum AppEndpoints: Endpoint {
             return "update-info.json"
         case .legalNotice:
             return "legal-notice.json"
+        case .appPolicy:
+            return "app-policy.json"
         }
     }
 }

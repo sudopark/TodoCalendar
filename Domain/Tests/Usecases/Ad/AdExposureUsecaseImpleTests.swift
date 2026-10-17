@@ -12,6 +12,7 @@ import Combine
 import Prelude
 import Optics
 import UnitTestHelpKit
+import TestDoubles
 
 @testable import Domain
 
@@ -53,7 +54,9 @@ final class AdExposureUsecaseImpleTests: PublisherWaitable {
         isAdStarted: Bool = true,
         userPlan: BillingUserPlan? = nil,
         exposureRecords: [FullScreenAdExposureRecord] = [],
-        coldLaunchHistory: AppColdLaunchHistory = .init()
+        coldLaunchHistory: AppColdLaunchHistory = .init(),
+        gate: StubPaidFeatureGateUsecase = .init(),
+        sharedDataStore: SharedDataStore = .init()
     ) -> AdExposureUsecaseImple {
         self.spyAdRepository = SpyAdRepository(records: exposureRecords)
         self.stubBillingUsecase = StubBillingUsecase(stubUserPlan: userPlan)
@@ -63,8 +66,32 @@ final class AdExposureUsecaseImpleTests: PublisherWaitable {
             billingUsecase: self.stubBillingUsecase,
             adRepository: self.spyAdRepository,
             coldLaunchHistoryRepository: StubAppColdLaunchHistoryRepository(history: coldLaunchHistory),
+            paidFeatureGateUsecase: gate,
+            sharedDataStore: sharedDataStore,
             calendar: self.calendar
         )
+    }
+
+    private func expiredGate() -> StubPaidFeatureGateUsecase {
+        let gate = StubPaidFeatureGateUsecase()
+        gate.mockBlockedReason = .init(feature: .colorTheme(self.usingThemeKey), licenseDays: 1)
+        return gate
+    }
+
+    private let usingThemeKey: ColorSetKeys = .custom("expired-theme")
+
+    private func sharedDataStoreUsingTheme() -> SharedDataStore {
+        let store = SharedDataStore()
+        store.put(
+            CalendarAppearanceSettings.self,
+            key: ShareDataKeys.calendarAppearance.rawValue,
+            .init(colorSetKey: self.usingThemeKey, fontSetKey: .systemDefault)
+        )
+        return store
+    }
+
+    private func appLaunchConditionsMetHistory() -> AppColdLaunchHistory {
+        return self.coldLaunchHistory(count: 20, firstLaunchDaysAgo: 30, isFirstLaunchOfToday: true)
     }
 
     private var spyAdRepository: SpyAdRepository!
@@ -144,6 +171,48 @@ extension AdExposureUsecaseImpleTests {
 
         // then
         #expect(isAlloweds.isEmpty == true)
+    }
+}
+
+
+// MARK: - 전면 광고 미리 로드 여부
+
+extension AdExposureUsecaseImpleTests {
+
+    @Test("무료 플랜이면 전면 광고를 미리 로드한다")
+    func usecase_whenFreePlan_shouldPreloadFullScreenAds() {
+        // given
+        let usecase = self.makeUsecase(userPlan: self.userPlan(.free))
+
+        // when
+        let shouldPreload = usecase.shouldPreloadFullScreenAds()
+
+        // then
+        #expect(shouldPreload == true)
+    }
+
+    @Test("유료 플랜이면 전면 광고를 미리 로드하지 않는다")
+    func usecase_whenPaidPlan_shouldNotPreloadFullScreenAds() {
+        // given
+        let usecase = self.makeUsecase(userPlan: self.userPlan(.standard))
+
+        // when
+        let shouldPreload = usecase.shouldPreloadFullScreenAds()
+
+        // then
+        #expect(shouldPreload == false)
+    }
+
+    @Test("플랜을 아직 모르면 전면 광고를 미리 로드한다")
+    func usecase_whenUserPlanUnknown_shouldPreloadFullScreenAds() {
+        // given
+        let usecase = self.makeUsecase(userPlan: nil)
+
+        // when
+        let shouldPreload = usecase.shouldPreloadFullScreenAds()
+
+        // then
+        #expect(shouldPreload == true)
     }
 }
 
@@ -269,6 +338,87 @@ extension AdExposureUsecaseImpleTests {
         // when
         let canExpose = usecase.canExposeFullScreenAd(
             scope: .application, isFromAppLaunch: false, at: self.now
+        )
+
+        // then
+        #expect(canExpose == true)
+    }
+}
+
+
+// MARK: - 사용권이 만료된 유료 테마를 쓰는 실행
+
+extension AdExposureUsecaseImpleTests {
+
+    @Test("앱 실행 직후 지금 테마의 사용권이 만료됐으면 다른 조건을 다 만족해도 전면 광고를 허용하지 않는다")
+    func usecase_fromAppLaunch_whenUsingExpiredPaidTheme_isNotAllowed() {
+        // given
+        let gate = self.expiredGate()
+        let usecase = self.makeUsecase(
+            userPlan: self.userPlan(.free),
+            coldLaunchHistory: self.appLaunchConditionsMetHistory(),
+            gate: gate,
+            sharedDataStore: self.sharedDataStoreUsingTheme()
+        )
+
+        // when
+        let canExpose = usecase.canExposeFullScreenAd(
+            scope: .application, isFromAppLaunch: true, at: self.now
+        )
+
+        // then
+        #expect(canExpose == false)
+        #expect(gate.didCheckFeature == .colorTheme(self.usingThemeKey))
+    }
+
+    @Test("앱 실행 직후 지금 테마의 사용권이 살아 있으면 전면 광고를 허용한다")
+    func usecase_fromAppLaunch_whenUsingThemeIsNotExpired_isAllowed() {
+        // given
+        let usecase = self.makeUsecase(
+            userPlan: self.userPlan(.free),
+            coldLaunchHistory: self.appLaunchConditionsMetHistory(),
+            sharedDataStore: self.sharedDataStoreUsingTheme()
+        )
+
+        // when
+        let canExpose = usecase.canExposeFullScreenAd(
+            scope: .application, isFromAppLaunch: true, at: self.now
+        )
+
+        // then
+        #expect(canExpose == true)
+    }
+
+    @Test("앱 실행 직후가 아니면 지금 테마의 사용권이 만료됐어도 전면 광고를 허용한다")
+    func usecase_notFromAppLaunch_whenUsingExpiredPaidTheme_isStillAllowed() {
+        // given
+        let usecase = self.makeUsecase(
+            userPlan: self.userPlan(.free),
+            gate: self.expiredGate(),
+            sharedDataStore: self.sharedDataStoreUsingTheme()
+        )
+
+        // when
+        let canExpose = usecase.canExposeFullScreenAd(
+            scope: .application, isFromAppLaunch: false, at: self.now
+        )
+
+        // then
+        #expect(canExpose == true)
+    }
+
+    @Test("공유 저장소에 외관 설정이 없으면 테마 사용권을 판정하지 않고 전면 광고를 허용한다")
+    func usecase_fromAppLaunch_whenNoAppearanceSetting_isAllowed() {
+        // given
+        let usecase = self.makeUsecase(
+            userPlan: self.userPlan(.free),
+            coldLaunchHistory: self.appLaunchConditionsMetHistory(),
+            gate: self.expiredGate()
+        )
+
+        // when
+        let canExpose = usecase.canExposeFullScreenAd(
+            scope: .application, isFromAppLaunch: true, at: self.now
         )
 
         // then

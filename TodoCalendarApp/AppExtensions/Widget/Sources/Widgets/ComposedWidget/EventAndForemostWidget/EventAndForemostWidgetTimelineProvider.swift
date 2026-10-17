@@ -12,100 +12,92 @@ import Prelude
 import Optics
 import Domain
 import Extensions
-import CalendarScenes
-
-
-struct EventAndForemostWidgetViewModel {
-    let event: EventListWidgetViewModel
-    let foremost: ForemostEventWidgetViewModel
-}
+import CalendarPresentation
+import WidgetScenes
 
 
 struct EventAndForemostWidgetViewModelProvider {
     
     private let eventListViewModelProvider: EventListWidgetViewModelProvider
     private let foremostEventViewModelProvider: ForemostEventWidgetViewModelProvider
+    private let styleFetchUsecase: any WidgetStyleFetchUsecase
     
     init(
         eventListViewModelProvider: EventListWidgetViewModelProvider,
-        foremostEventViewModelProvider: ForemostEventWidgetViewModelProvider
+        foremostEventViewModelProvider: ForemostEventWidgetViewModelProvider,
+        styleFetchUsecase: any WidgetStyleFetchUsecase
     ) {
         self.eventListViewModelProvider = eventListViewModelProvider
         self.foremostEventViewModelProvider = foremostEventViewModelProvider
+        self.styleFetchUsecase = styleFetchUsecase
     }
     
-    func getViewModel(_ time: Date) async throws -> EventAndForemostWidgetViewModel {
+    func getViewModel(
+        _ time: Date, style: WidgetStyleId.Style = .default
+    ) async throws -> EventAndForemostWidgetViewModel {
         let eventList = try await self.eventListViewModelProvider.getEventListViewModel(
-            for: time, widgetSize: .small
+            for: time, widgetSize: .small, style: nil
         )
-        let foremost = try await self.foremostEventViewModelProvider.getViewModel(time)
-        return .init(event: eventList, foremost: foremost)
+        let foremost = try await self.foremostEventViewModelProvider.getViewModel(time, style: nil)
+        let resolved = self.styleFetchUsecase.fetchStyle(of: .eventAndForemostMedium, selected: style)
+        let look = WidgetLook(globalSetting: eventList.look.globalSetting, appliedStyle: resolved)
+        return EventAndForemostWidgetViewModel(event: eventList, foremost: foremost)
+            .applying(look)
     }
 }
 
 
-struct EventAndForemostWidgetViewTimelineProvider: TimelineProvider {
+struct EventAndForemostWidgetViewTimelineProvider: AppIntentTimelineProvider {
     
+    typealias Intent = EventAndForemostWidgetConfigurationIntent
     typealias Entry = ResultTimelineEntry<EventAndForemostWidgetViewModel>
     
-    func placeholder(
-        in context: Context
-    ) -> ResultTimelineEntry<EventAndForemostWidgetViewModel> {
-        
-        return .init(date: Date()) {
-            .init(
-                event: EventListWidgetViewModel.sample(size: .small),
-                foremost: ForemostEventWidgetViewModel.sample()
-            )
-        }
+    func placeholder(in context: Context) -> Entry {
+        let builder = WidgetViewModelProviderBuilder(base: .init())
+        let look = WidgetLook(
+            globalSetting: builder.loadWidgetAppearanceSetting(),
+            appliedStyle: builder.fetchDefaultStyle(of: .eventAndForemostMedium)
+        )
+        let model = EventAndForemostWidgetViewModel(
+            event: EventListWidgetViewModel.sample(size: .small),
+            foremost: ForemostEventWidgetViewModel.sample()
+        )
+        .applying(look)
+        return .init(date: Date(), result: .success(model))
+            |> \.background .~ model.event.look.background
     }
     
-    func getSnapshot(
-        in context: Context,
-        completion: @Sendable @escaping (ResultTimelineEntry<EventAndForemostWidgetViewModel>
-        ) -> Void) {
-        
+    func snapshot(
+        for configuration: EventAndForemostWidgetConfigurationIntent,
+        in context: Context
+    ) async -> Entry {
         guard context.isPreview == false
         else {
-            completion(placeholder(in: context))
-            return
+            return self.placeholder(in: context)
         }
-        self.getEntry(context) { entry in
-            completion(entry)
-        }
+        return await self.loadEntry(configuration.resolvedStyle)
     }
     
-    func getTimeline(
-        in context: Context,
-        completion: @Sendable @escaping (Timeline<ResultTimelineEntry<EventAndForemostWidgetViewModel>>) -> Void
-    ) {
-        self.getEntry(context) { entry in
-            let timeline = Timeline(entries: [entry], policy: .after(Date().nextUpdateTime))
-            completion(timeline)
-        }
+    func timeline(
+        for configuration: EventAndForemostWidgetConfigurationIntent,
+        in context: Context
+    ) async -> Timeline<Entry> {
+        let entry = await self.loadEntry(configuration.resolvedStyle)
+        return Timeline(entries: [entry], policy: .after(Date().nextUpdateTime))
     }
     
-    private func getEntry(
-        _ context: Context,
-        _ completion: @Sendable @escaping (Entry) -> Void
-    ) {
-        
-        Task {
-            
-            let builder = WidgetViewModelProviderBuilder(base: .init())
-            let viewModelProvider = await builder.makeEventListAndForemostWidgetViewModelProvider(
-                targetEventTagId: .default
-            )
-            let now = Date()
-            do {
-                let model = try await viewModelProvider.getViewModel(now)
-                completion(
-                    .init(date: now, result: .success(model))
-                    |> \.background .~ model.event.widgetSetting.background
-                )
-            } catch {
-                completion(.init(date: now, result: .failure(.init(error: error))))
-            }
+    private func loadEntry(_ style: WidgetStyleId.Style) async -> Entry {
+        let builder = WidgetViewModelProviderBuilder(base: .init())
+        let viewModelProvider = await builder.makeEventListAndForemostWidgetViewModelProvider(
+            targetEventTagId: .default
+        )
+        let now = Date()
+        do {
+            let model = try await viewModelProvider.getViewModel(now, style: style)
+            return .init(date: now, result: .success(model))
+                |> \.background .~ model.event.look.background
+        } catch {
+            return .init(date: now, result: .failure(.init(error: error)))
         }
     }
 }

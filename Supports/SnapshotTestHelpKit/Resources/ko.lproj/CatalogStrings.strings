@@ -12,6 +12,7 @@
 "catalog.event::team_workshop" = "팀 워크숍";
 "catalog.event::release_day" = "릴리즈 날";
 "catalog.event::lunch" = "사라랑 점심";
+"catalog.event::anniversary" = "결혼기념일";
 
 // MARK: - 할일
 
@@ -40,3 +41,8 @@
 
 "catalog.ai::command" = "금요일 12시에 사라랑 점심";
 "catalog.ai::result" = "“사라랑 점심”을 3월 13일 금요일 오후 12시에 추가했어요.";
+
+// MARK: - 컬러 테마
+
+"catalog.colorTheme::forest" = "숲";
+"catalog.colorTheme::dusk" = "황혼";

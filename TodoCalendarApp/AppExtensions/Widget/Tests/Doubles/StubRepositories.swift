@@ -161,3 +161,37 @@ final class PrivateStubAppleCalendarRepository: AppleCalendarRepository, @unchec
 
     func resetCache() async throws { }
 }
+
+
+final class StubWidgetStyleRepository: WidgetStyleRepository, @unchecked Sendable {
+
+    private let styles: [WidgetStyleId: WidgetStyle]
+    init(styles: [WidgetStyleId: WidgetStyle] = [:]) {
+        self.styles = styles
+    }
+
+    func loadStyle(for id: WidgetStyleId) -> WidgetStyle? {
+        return self.styles[id]
+    }
+
+    func loadStyles(of variant: WidgetVariant) -> [WidgetStyle] {
+        return self.styles.values
+            .filter { $0.id.variant == variant }
+            .sorted { "\($0.id.style)" < "\($1.id.style)" }
+    }
+
+    func updateStyle(_ style: WidgetStyle) { }
+
+    func removeStyle(_ id: WidgetStyleId) { }
+
+    func makeDraftPhoto(from picked: Data) -> WidgetStylePhoto? { return nil }
+
+    func makeDraftPhoto(copying photo: WidgetStylePhoto) -> WidgetStylePhoto? { return nil }
+}
+
+extension StubWidgetStyleRepository {
+
+    func asStyleFetchUsecase() -> any WidgetStyleFetchUsecase {
+        return WidgetStyleFetchUsecaseImple(styleRepository: self)
+    }
+}

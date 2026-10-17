@@ -1,6 +1,6 @@
 ---
 name: orchestrate
-description: Use when executing decomposed large work as multiple PRs from one session — 분해된 하위 작업들을 한 세션이 서브에이전트 dispatch로 실행하고, 하위 작업 단위로 개별 PR(병렬 또는 stacked)을 내보내는 실행 모드. Triggers on campaign 작전계획의 DP 들을 같은 세션에서 실행 지시("이어서 실행하자", "오케스트레이션 하자"), 작전명령 실행 중 규모 초과로 campaign 승격을 거친 뒤의 DP 실행, 유저의 병렬·stacked PR 작업 지시. Does NOT trigger on 단일 PR 규모의 플랜 실행(superpowers subagent-driven-development·executing-plans), DP 이슈를 별도 세션이 각자 킥오프하는 경로(kickoff 재진입), 계획·평가(campaign), 사이즈 판정(kickoff).
+description: Use when executing decomposed large work as multiple PRs from one session — 분해된 하위 작업들을 한 세션이 서브에이전트 dispatch로 실행하고, 하위 작업 단위로 개별 PR(병렬 또는 stacked)을 내보내는 실행 모드. Triggers on campaign 캠페인 계획의 DP 들을 같은 세션에서 실행 지시("이어서 실행하자", "오케스트레이션 하자"), 작업 지침 실행 중 규모 초과로 campaign 승격을 거친 뒤의 DP 실행, 유저의 병렬·stacked PR 작업 지시. Does NOT trigger on 단일 PR 규모의 플랜 실행(superpowers subagent-driven-development·executing-plans), DP 이슈를 별도 세션이 각자 킥오프하는 경로(kickoff 재진입), 계획·평가(campaign), 사이즈 판정(kickoff).
 ---
 
 # Orchestrate — 멀티 PR 실행 오케스트레이션
@@ -11,7 +11,7 @@ description: Use when executing decomposed large work as multiple PRs from one s
 
 ## 단위 정의 — 두 층을 혼동하지 않는다
 
-- **sub-work = DP = PR 하나.** 분할 정본은 campaign.md 7항 DP 목록(또는 유저와 합의한 분할)이다. PR로서 의미 있는 서사(문제→접근)가 서는 크기로 가른다 — 자잘한 PR 남발은 이 스킬의 목적이 아니다.
+- **sub-work = DP = PR 하나.** 분할 정본은 campaign.md 9항 DP 목록(또는 유저와 합의한 분할)이다. PR 하나가 무엇을 바꿨는지 한두 문장으로 말할 수 있는 크기로 가른다 — 자잘한 PR 남발은 이 스킬의 목적이 아니다.
 - **dispatch = 서브에이전트 한 번이 완주 가능한 크기.** sub-work 하나는 1~N개의 순차 dispatch로 구현된다. sub-work을 PR 크기에 맞추고, dispatch를 완주 크기에 맞춘다 — 두 축은 독립이다.
 - **dispatch가 넘치면 쪼개는 게 답이다 — "이어받기" 재dispatch 금지.** 브리프 작성 시점에 "한 번에 끝낼 수 있나"를 판단하고, 아니면 dispatch를 나눈다. 실행 중 넘침이 드러나면(중단·미완 보고) 잔여를 새 dispatch로 정의해 다시 브리프한다 — "하던거 계속해"로 잇지 않는다. 단, **검수 findings 교정을 위한 재개는 이어받기가 아니다**(§4-3) — 이어받기 금지는 크기 오판의 연장을 막는 것이고, findings 교정은 완결된 작업의 수정이라 원 에이전트 재개가 정당하다.
 
@@ -19,28 +19,30 @@ description: Use when executing decomposed large work as multiple PRs from one s
 
 ### 1. 분할 입력 — campaign.md 가 정본
 
-분할은 이 스킬이 확정하지 않는다 — campaign.md 7항 DP 목록·선행 관계·소유 범위를 그대로 받아 실행한다. DP 이슈 생성은 L 실행 루프의 issue 단계(campaign 스킬 참조) — DP = 이슈 = PR 필수, 커밋·PR은 `[#DP이슈]`. 계획이 없으면 campaign 스킬로 먼저 간다.
+분할은 이 스킬이 확정하지 않는다 — campaign.md 9항 DP 목록·선행 관계·소유 범위를 그대로 받아 실행한다. DP 이슈 생성은 L 실행 루프의 issue 단계(campaign 스킬 참조) — DP = 이슈 = PR 필수, 커밋·PR은 `[#DP이슈]`. 계획이 없으면 campaign 스킬로 먼저 간다.
 
 ### 2. 실행 모드 판정 — 의존성 그래프
 
 - **독립 sub-work → 병렬 가능.** 단 셋 다 충족할 때만: 파일 겹침 없음 / 각자 워크트리 확보 / **동시 진행 sub-work 2개 상한** (상한의 단위는 sub-work — 각 sub-work 내부 dispatch는 순차라, 동시에 활성인 워크트리·xcodebuild가 2개를 넘지 않게 하는 기준이다).
-- **의존 sub-work → stacked 체인.** 앞 sub-work의 PR 머지를 기다리지 않는다 — 앞 브랜치를 베이스로 다음 sub-work을 진행하고, PR도 앞 브랜치를 base로 올린다. **단 sub-work이 campaign DP 면 기본은 opord 착수 자격(선행 DP 머지)이다** — stacked 는 유저가 명시 허용할 때만 타고, 그때 게이트의 "선행 DP 머지"는 "선행 DP PR 존재 + 인터페이스 계약 확정(campaign.md 6항 통제수단)"으로 완화된다 (opord §3-2). 리뷰 반영으로 앞이 바뀌는 리스크는 §5 rebase 규정이 흡수한다.
+- **의존 sub-work → stacked 체인.** 앞 sub-work의 PR 머지를 기다리지 않는다 — 앞 브랜치를 베이스로 다음 sub-work을 진행하고, PR도 앞 브랜치를 base로 올린다. **단 sub-work이 campaign DP 면 기본은 opord 착수 자격(선행 DP 머지)이다** — stacked 는 유저가 명시 허용할 때만 타고, 그때 게이트의 "선행 DP 머지"는 "선행 DP PR 존재 + 인터페이스 계약 확정(campaign.md 8항 작업 순서의 작업 간 약속)"으로 완화된다 (opord §3-2). 리뷰 반영으로 앞이 바뀌는 리스크는 §5 rebase 규정이 흡수한다. 완화된 조건도 `회귀` 앞에선 무효다 — 선행 DP 가 되돌려지면 그 PR 로 확정했던 인터페이스 계약이 사라지므로, 스택 뒤를 잇지 않고 멈춘다.
 
 ### 3. 원장 — 컴팩션 생존 장부
 
 sub-work(DP)별 상태(브랜치·base·PR#·머지)는 campaign 원장 `.operations/<상위이슈번호>/campaign-progress.md` 가 정본이다 — PR 생성·머지·rebase마다 갱신하고 상위 이슈 본문 미러를 재조립한다(campaign 스킬 §5). dispatch 내부 진행(몇 번째 dispatch, 보고 파일 경로)만 세션 장부로 같은 파일 하단에 둔다. 컴팩션 후엔 기억보다 이슈 본문 미러와 `git log`를 믿는다.
 
+**런이 열려 있다는 사실도 원장에 둔다.** 착수 시 그 세션 장부(원장 하단)의 첫 줄에 `orchestrate 런: <대상 DP 목록> — 진행` 을 쓴다. 원장 전체가 이슈 미러에 실리므로 `/clear` 뒤 세션도 미러에서 이 줄을 찾는다. 런은 DP 경계의 `/clear` 를 넘어 이어지는데, 대화에만 있으면 마지막 PR 을 만드는 세션이 런이 열린 줄 몰라 종료 기록이 빠진다.
+
 ### 4. sub-work 실행 루프
 
 1. **브랜치**: `features/` 브랜치를 base(develop 또는 앞 sub-work 브랜치)에서 딴다.
-2. **브리프·dispatch**: implement 스킬을 invoke하고 §착수의 서브에이전트 dispatch 조항을 따른다 — rules 요지 발췌, 테스트 스킴, 구조 패턴, "갭 발견 시 추측 금지·보고 후 중단" 명시. 보고는 report 파일로 받는다 (전문을 컨트롤러 컨텍스트에 싣지 않는다).
+2. **브리프·dispatch**: sub-work이 DP 면 브리프 = 해당 DP의 작업 지침(`docs/operations/<DP이슈>/opord-<DP>.md`)이고, 첫 보고에 착수 보고(`report-backbrief.md` 7항)를 요구한다 — 명령을 쓴 세션이 아니어도 같다 (opord §3-9). implement 스킬을 invoke하고 §착수의 서브에이전트 dispatch 조항을 따른다 — rules 요지 발췌, CLAUDE.md §1 글 규범 발췌, 테스트 스킴, 구조 패턴, "갭 발견 시 추측 금지·보고 후 중단" 명시. 보고는 report 파일로 받는다 (전문을 컨트롤러 컨텍스트에 싣지 않는다).
 3. **검수**: dispatch 보고마다 브리프에 실은 rules 조항 위반 여부를 항목별로 스캔하고, 테스트 통과를 확인한다. 결함이면 **원 서브에이전트를 재개해**(SendMessage) findings를 되돌린다 — 자기 작업 컨텍스트가 남아 있어 싸다. 재개가 불가하면 브리프·report 경로·findings를 실어 새 dispatch. 컨트롤러가 직접 고치지 않는다.
 4. **커밋·PR**: 커밋은 서브에이전트가 논리 단위로 만든다(commit 스킬 컨벤션 승계). sub-work의 dispatch가 모두 끝나면 컨트롤러가 pr 스킬로 PR을 올린다 — stacked면 `gh pr create --base <앞 브랜치>`.
 5. 원장(§3) 갱신 후 다음 sub-work으로.
 
 ### 5. stacked 체인 유지보수
 
-- **앞 PR에 수정 커밋이 생기면**(유저 리뷰 반영 등) 뒷 브랜치를 앞 브랜치에 rebase하고 원장(§3)에 기록한다.
+- **앞 PR에 수정 커밋이 생기면**(유저 리뷰 반영 등) 뒷 브랜치를 앞 브랜치에 rebase하고 원장(§3)에 기록한다. **단 앞 PR 이 유저 리뷰 라운드 중이면 변경마다 rebase 하지 않는다** — 뒷 작업은 rebase 만 멈추고(다른 sub-work 진행은 그대로), 확정 신호가 온 뒤 한 번만 rebase 한다. 확정 신호는 둘뿐이다: 머지, 또는 유저의 명시 선언("리뷰 끝났다"·승인) — 불분명하면 유저에게 묻는다. 대기 사실은 원장(§3)에 적는다. 라운드마다 따라가면 앞이 바뀔 때마다 뒷 브랜치가 헛돈다 (#1268 리뷰 중 #1274 를 변경마다 rebase 시킨 교정).
 - **앞 PR이 머지되면**(rebase merge라 커밋이 재작성된다) 머지된 브랜치를 base로 갖던 바로 뒤 sub-work만 처리한다: 브랜치를 `git rebase --onto develop <머지된 브랜치>`로 옮기고 PR base를 develop으로 바꾼다. 체인 더 뒤의 sub-work은 그대로 자기 앞 브랜치를 base로 유지한다.
 - rebase 후 뒷 브랜치의 테스트 스킴을 재실행해 체인 파손을 즉시 잡는다.
 
@@ -56,4 +58,4 @@ sub-work(DP)별 상태(브랜치·base·PR#·머지)는 campaign 원장 `.operat
 
 ## 종료 기록 — skill_end
 
-모든 sub-work의 PR 생성이 끝나 오케스트레이션이 마무리되는 시점에 `log-record.py skill_end`를 기록한다 (명령·compliance 규칙은 CLAUDE.md §1). 런당 1회 — sub-work 하나의 PR 생성은 런의 끝이 아니다. 런이 완주 못 하고 접히면(유저의 중단 선언) 그 시점에 partial + 사유로 기록한다.
+모든 sub-work의 PR 생성이 끝나 오케스트레이션이 마무리되는 시점에 `log-record.py skill_end`를 기록한다 (명령·compliance 규칙은 CLAUDE.md §1). 기록 주체는 원장의 `orchestrate 런:` 줄을 보고 마지막 PR 을 만든 세션이다 — 런을 시작한 세션이 아니어도 된다. 기록한 뒤 그 줄을 `— 종료` 로 바꾼다. 런당 1회 — sub-work 하나의 PR 생성은 런의 끝이 아니다. 런이 완주 못 하고 접히면(유저의 중단 선언) 그 시점에 partial + 사유로 기록한다.

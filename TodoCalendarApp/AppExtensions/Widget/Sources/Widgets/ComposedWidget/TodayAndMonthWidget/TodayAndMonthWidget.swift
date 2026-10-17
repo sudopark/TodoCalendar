@@ -11,14 +11,13 @@ import SwiftUI
 import Domain
 import Extensions
 import CommonPresentation
-import CalendarScenes
+import CalendarPresentation
+import WidgetScenes
 
 
 // MARK: - TodayAndMonthWidgetView
 
 struct TodayAndMonthWidgetView: View {
-    
-    @Environment(\.colorScheme) var colorScheme
     
     private let entry: ResultTimelineEntry<TodayAndMonthWidgetViewModel>
     init(entry: ResultTimelineEntry<TodayAndMonthWidgetViewModel>) {
@@ -28,10 +27,7 @@ struct TodayAndMonthWidgetView: View {
     var body: some View {
         switch self.entry.result {
         case .success(let model):
-            HStack(spacing: 12) {
-                TodaySummaryView(model: model.today)
-                SingleMonthView(model: model.month)
-            }
+            TodayAndMonthWidgetContentView(model: model)
         case .failure(let error):
             FailView(errorModel: error)
         }
@@ -46,7 +42,11 @@ struct TodayAndMonthWidget: Widget {
     let kind = "TodayAndMonthWidget"
     
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: TodayAndMonthWidgetTimelineProvider()) { entry in
+        AppIntentConfiguration(
+            kind: kind,
+            intent: TodayAndMonthWidgetConfigurationIntent.self,
+            provider: TodayAndMonthWidgetTimelineProvider()
+        ) { entry in
             TodayAndMonthWidgetView(entry: entry)
                 .containerBackground(entry.backgroundShape, for: .widget)
         }

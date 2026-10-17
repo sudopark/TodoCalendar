@@ -1,7 +1,18 @@
-■ Odpoveď na pozvánky z Google Kalendára
-· Ťukni na „Vy“ v zozname účastníkov udalosti z Google Kalendára a odpovedz Áno, Možno alebo Nie
-· Odpoveď ide rovno do Google Kalendára a pri opakovanej udalosti platí pre celú sériu
+■ Prispôsobte widgety
+· Dajte každému widgetu na domovskej obrazovke vlastnú farbu pozadia a vyberte, čo zobrazuje – názov mesiaca, záhlavie dní v týždni, zvýraznenie dnešného dňa a ďalšie
+· Uložte si niekoľko štýlov a pre každú kópiu widgetu vyberte iný
+· Pozrite si každý widget v Galéria widgetov v Nastaveniach a prejdite rovno na Prispôsobiť
 
-■ Rozhovor so Siri
-· Začni krátkou frázou, ktorá len pomenuje aplikáciu — „Hej, To-do Calendar“ alebo „Opýtať sa aplikácie To-do Calendar“
-· Nielen pridávať: posunúť čas, premenovať, označiť za hotové alebo odstrániť — povedané rovnako
+■ Farebné témy
+· Okrem možností Systémová, Svetlá a Tmavá pribudlo 19 nových vstavaných tém – 11 svetlých a 8 tmavých
+· V Nová téma vyberte farbu pozadia a farbu zvýraznenia a aplikácia sama zostaví paletu, v ktorej je text dobre čitateľný
+· Prihláste sa a vaše témy vás budú sprevádzať aj na ďalších zariadeniach
+
+■ Widget Odpočet
+· Odpočítavajte dni do dôležitých udalostí na domovskej obrazovke aj na uzamknutej obrazovke
+· V ponuke udalosti zvoľte „Pridať do widgetu Odpočet“ a pri úprave widgetu sa zobrazí na začiatku zoznamu
+· Dajte mu na pozadie fotku a odpočet bude vidieť nad ňou
+
+■ Dva panely na širšej obrazovke
+· Rozložte iPhone Duo a udalosti vybraného dňa sa zobrazia vedľa kalendára
+· Zložte ho a okamžite sa vrátite k jednému stĺpcu, stále na mesiaci a dni, ktoré ste si prezerali

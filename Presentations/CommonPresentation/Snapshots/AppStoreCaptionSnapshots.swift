@@ -46,7 +46,7 @@ final class AppStoreCaptionSnapshots: XCTestCase {
                 layout: .fixed(width: self.canvasWidth, height: self.canvasHeight),
                 snapshotDirectory: catalogSnapshotDirectory()
             ) { _ in
-                self.captionView(caption)
+                self.captionView(caption, layout: self.captionLayout)
             }
         }
     }
@@ -84,7 +84,55 @@ extension AppStoreCaptionSnapshots {
                 layout: .fixed(width: self.canvasWidth, height: self.canvasHeight),
                 snapshotDirectory: catalogSnapshotDirectory()
             ) { _ in
-                self.captionView(caption)
+                self.captionView(caption, layout: self.captionLayout)
+            }
+        }
+    }
+}
+
+
+// MARK: - 크리에이티브 에셋 캡션 (#1301)
+
+extension AppStoreCaptionSnapshots {
+
+    private var creativeAssetCaptionsPath: String {
+        return "\(self.repositoryRootPath)/fastlane/creative_assets/captions.json"
+    }
+
+    private func creativeAssetCanvas(_ captionKey: String) -> (width: CGFloat, height: CGFloat, maxFontSize: CGFloat, maxLines: Int) {
+        switch captionKey {
+        case "header": return (420, 540, 60, 4)
+        default: return (1280, 170, 56, 2)
+        }
+    }
+
+    @MainActor
+    func test_creativeAssetCaptions() throws {
+        let path = self.creativeAssetCaptionsPath
+        guard let data = FileManager.default.contents(atPath: path) else {
+            throw XCTSkip("captions.json 이 없다 — 크리에이티브 에셋 원고를 아직 안 채웠다 (\(path))")
+        }
+        guard let language = self.currentTestLanguage else {
+            XCTFail("AppleLanguages 를 읽을 수 없다 — -testLanguage 없이 돌린 것이다")
+            return
+        }
+        let captions = try JSONDecoder().decode([String: [String: String]].self, from: data)
+
+        captions.keys.sorted().forEach { captionKey in
+            guard let caption = captions[captionKey]?[language] else {
+                XCTFail("\(captionKey): \(language) 캡션 원고가 없다")
+                return
+            }
+            let canvas = self.creativeAssetCanvas(captionKey)
+            let layout = StoreCaptionLayout(
+                maxWidth: canvas.width - 48, maxFontSize: canvas.maxFontSize, minFontSize: 28, maxLines: canvas.maxLines
+            )
+            captureSnapshotPair(
+                named: captionKey,
+                layout: .fixed(width: canvas.width, height: canvas.height),
+                snapshotDirectory: catalogSnapshotDirectory()
+            ) { _ in
+                self.captionView(caption, layout: layout)
             }
         }
     }
@@ -96,8 +144,8 @@ extension AppStoreCaptionSnapshots {
 extension AppStoreCaptionSnapshots {
 
     @MainActor
-    private func captionView(_ caption: String) -> some View {
-        let resolved = self.captionLayout.resolve(caption)
+    private func captionView(_ caption: String, layout: StoreCaptionLayout) -> some View {
+        let resolved = layout.resolve(caption)
         return VStack(spacing: 8) {
             ForEach(Array(resolved.lines.enumerated()), id: \.offset) { _, line in
                 Text(line)
@@ -163,6 +211,7 @@ private enum StoreCaptionSlot: CaseIterable {
     case googleEvent
     case widgets
     case appearance
+    case widgetStyle
 
     var slug: String {
         switch self {
@@ -172,6 +221,7 @@ private enum StoreCaptionSlot: CaseIterable {
         case .googleEvent: return "04-google-event"
         case .widgets: return "05-widgets"
         case .appearance: return "06-appearance"
+        case .widgetStyle: return "07-widget-style"
         }
     }
 
@@ -181,7 +231,7 @@ private enum StoreCaptionSlot: CaseIterable {
         case .widgets: return 2
         case .googleEvent: return 3
         case .appearance: return 4
-        case .repeatOptions, .eventDetail: return nil
+        case .repeatOptions, .eventDetail, .widgetStyle: return nil
         }
     }
 
@@ -255,6 +305,40 @@ private enum StoreCaptionSlot: CaseIterable {
                 "zh-Hans": "地点、链接、备注、事件提醒",
                 "zh-Hant": "地點、連結、備註、活動提醒"
             ]
+        case .widgetStyle:
+            return [
+                "ca": "Un estil propi per a cada widget",
+                "cs": "Každý widget s vlastním vzhledem",
+                "da": "Hver widget med sit eget udseende",
+                "de": "Jedes Widget im eigenen Look",
+                "el": "Κάθε widget με το δικό του στυλ",
+                "en": "Style each widget your way",
+                "es": "Cada widget con su propio estilo",
+                "fi": "Jokaiselle widgetille oma tyyli",
+                "fr": "Un style pour chaque widget",
+                "hi": "हर विजेट का अपना अंदाज़",
+                "hr": "Svaki widget u svom stilu",
+                "hu": "Minden widget a saját stílusában",
+                "id": "Gaya sendiri untuk tiap widget",
+                "it": "Ogni widget con il suo stile",
+                "ja": "ウィジェットごとに好きなデザインで",
+                "ko": "위젯마다 원하는 모양으로",
+                "ms": "Gaya tersendiri untuk setiap widget",
+                "nb": "Hver widget med sitt eget utseende",
+                "nl": "Elke widget in een eigen stijl",
+                "pl": "Każdy widżet we własnym stylu",
+                "pt-BR": "Cada widget com seu próprio estilo",
+                "ro": "Fiecare widget cu stilul lui",
+                "ru": "Свой стиль для каждого виджета",
+                "sk": "Každý widget s vlastným vzhľadom",
+                "sv": "Varje widget med sin egen stil",
+                "th": "แต่งวิดเจ็ตแต่ละตัวได้ตามใจ",
+                "tr": "Her widget'a kendi stili",
+                "uk": "Свій стиль для кожного віджета",
+                "vi": "Mỗi tiện ích một phong cách",
+                "zh-Hans": "每个小组件，都有自己的样式",
+                "zh-Hant": "每個小工具，都有自己的樣式"
+            ]
         case .calendar, .googleEvent, .widgets, .appearance: return [:]
         }
     }
@@ -277,37 +361,55 @@ private struct StoreCaptionLayout {
     let maxWidth: CGFloat
     let maxFontSize: CGFloat
     let minFontSize: CGFloat
+    var maxLines: Int = 2
 
     func resolve(_ caption: String) -> (font: UIFont, lines: [String]) {
-        let sizes: [CGFloat] = stride(from: self.maxFontSize, through: self.minFontSize, by: -1).map { $0 }
-        let fitted = sizes.compactMap { size -> (font: UIFont, lines: [String])? in
-            let font = UIFont.systemFont(ofSize: size, weight: .bold)
-            guard let lines = self.lines(caption, with: font) else { return nil }
-            return (font, lines)
+        let fitted = self.lineBudgets.lazy.compactMap { budget in
+            self.fontSizes(downTo: budget.minFontSize).lazy.compactMap { size -> (font: UIFont, lines: [String])? in
+                let font = UIFont.systemFont(ofSize: size, weight: .bold)
+                guard let lines = self.lines(caption, with: font, maxLines: budget.maxLines) else { return nil }
+                return (font, lines)
+            }.first
         }.first
         return fitted ?? (UIFont.systemFont(ofSize: self.minFontSize, weight: .bold), [caption])
     }
 
-    private func lines(_ caption: String, with font: UIFont) -> [String]? {
-        guard self.width(caption, font) > self.maxWidth else { return [caption] }
-        return self.balancedPair(caption, font)
+    /// 줄을 늘리기 전에 글자를 3/4 까지만 줄인다 — 줄 여유가 큰 칸에서 짧은 문장이 쓸데없이 쪼개지지 않게.
+    private var lineBudgets: [(maxLines: Int, minFontSize: CGFloat)] {
+        guard self.maxLines > 2 else { return [(2, self.minFontSize)] }
+        let shrinkLimit = max(self.minFontSize, self.maxFontSize * 0.75)
+        return (2..<self.maxLines).map { ($0, shrinkLimit) } + [(self.maxLines, self.minFontSize)]
     }
 
-    private func balancedPair(_ caption: String, _ font: UIFont) -> [String]? {
-        let pairs = self.wordStarts(of: caption).map { index in
-            return [
-                String(caption[..<index]).trimmingCharacters(in: .whitespaces),
-                String(caption[index...]).trimmingCharacters(in: .whitespaces)
-            ]
-        }
-        let fitting = pairs.filter { pair in
-            pair.allSatisfy { !$0.isEmpty && self.width($0, font) <= self.maxWidth }
+    private func fontSizes(downTo minFontSize: CGFloat) -> [CGFloat] {
+        return stride(from: self.maxFontSize, through: minFontSize, by: -1).map { $0 }
+    }
+
+    private func lines(_ caption: String, with font: UIFont, maxLines: Int) -> [String]? {
+        guard self.width(caption, font) > self.maxWidth else { return [caption] }
+        return (2...maxLines).lazy
+            .compactMap { self.balancedLines(caption, font, count: $0) }
+            .first
+    }
+
+    private func balancedLines(_ caption: String, _ font: UIFont, count: Int) -> [String]? {
+        let fitting = self.splits(of: caption, into: count).filter { lines in
+            lines.allSatisfy { !$0.isEmpty && self.width($0, font) <= self.maxWidth }
         }
         return fitting.min { self.widthGap($0, font) < self.widthGap($1, font) }
     }
 
-    private func widthGap(_ pair: [String], _ font: UIFont) -> CGFloat {
-        return abs(self.width(pair[0], font) - self.width(pair[1], font))
+    private func splits(of text: String, into count: Int) -> [[String]] {
+        guard count > 1 else { return [[text.trimmingCharacters(in: .whitespaces)]] }
+        return self.wordStarts(of: text).flatMap { index in
+            let head = String(text[..<index]).trimmingCharacters(in: .whitespaces)
+            return self.splits(of: String(text[index...]), into: count - 1).map { [head] + $0 }
+        }
+    }
+
+    private func widthGap(_ lines: [String], _ font: UIFont) -> CGFloat {
+        let widths = lines.map { self.width($0, font) }
+        return (widths.max() ?? 0) - (widths.min() ?? 0)
     }
 
     private func wordStarts(of caption: String) -> [String.Index] {

@@ -1,7 +1,18 @@
-■ Svar på invitasjoner i Google Kalender
-· Trykk på "Deg" i deltakerlisten for en hendelse i Google Kalender og svar Ja, Kanskje eller Nei
-· Svaret går rett til Google Kalender, og på en gjentakende hendelse gjelder det hele serien
+■ Tilpass widgetene
+· Gi hver widget på Hjem-skjermen sin egen bakgrunnsfarge, og velg hva den viser – månedsnavn, ukedagsoverskrift, uthevet i dag og mer
+· Lagre flere stiler, og velg en ulik stil for hver kopi av en widget
+· Se hver widget på forhånd i Widget-galleri under Innstillinger, og gå rett videre til Tilpass
 
-■ Snakk med Siri
-· Start med en kort setning som bare nevner appen — "Hei To-do Calendar" eller "Spør To-do Calendar"
-· Ikke bare opprette: flytte tidspunktet, gi nytt navn, merke som ferdig eller slette — sagt på samme måte
+■ Fargetemaer
+· I tillegg til System, Lyst og Mørkt er det 19 nye innebygde temaer – 11 lyse og 8 mørke
+· Velg en bakgrunnsfarge og en aksentfarge i Nytt tema, så finner appen selv en palett der teksten er lett å lese
+· Logg inn, så følger temaene dine med til de andre enhetene dine
+
+■ D-dag-widget
+· Tell ned til hendelsene som betyr noe, på Hjem-skjermen og låseskjermen
+· Velg "Legg til i D-dag-widgeten" i menyen til en hendelse, så havner den øverst i listen når du redigerer widgeten
+· Legg et bilde bak, så ligger nedtellingen oppå bildet
+
+■ To ruter på en bredere skjerm
+· Brett ut iPhone Duo, så vises hendelsene for dagen du valgte ved siden av kalenderen
+· Brett den sammen, og du er med en gang tilbake til én kolonne, fortsatt på måneden og dagen du så på

@@ -20,24 +20,35 @@ struct ColorThemePreviewView: View {
         let circlePadding: CGFloat
     }
     
-    private let model: ColorThemeModel
     private let metric: Layout
-    private let colorSet: ColorSet
+    private let colorSet: any ColorSet
     @Environment(ViewAppearance.self) private var appearance
     
-    init(model: ColorThemeModel, metric: Layout, isSystemDark: Bool) {
-        self.model = model
+    init(model: any ColorThemeModel, metric: Layout, isSystemDark: Bool) {
         self.metric = metric
-        self.colorSet = model.key.convert(isSystemDarkTheme: isSystemDark)
+        self.colorSet = model.colorSet(isSystemDarkTheme: isSystemDark)
     }
     
     var body: some View {
+        self.card
+            .padding(metric.circlePadding)
+            .background(
+                RoundedRectangle(cornerRadius: Metric.Radius.regular)
+                    .fill(colorSet.bg0.asColor)
+                    .shadow(
+                        color: appearance.colorSet.text0.withAlphaComponent(0.1).asColor,
+                        radius: 8
+                    )
+            )
+    }
+    
+    private var card: some View {
         ZStack {
             VStack {
                 HStack {
                     Spacer()
                     Circle()
-                        .fill(colorSet.holidayOrWeekEndWithAccent.asColor)
+                        .fill(colorSet.accent.asColor)
                         .frame(width: metric.circleSize, height: metric.circleSize)
                         .padding(.trailing, metric.circlePadding)
                         .padding(.top, metric.circlePadding)
@@ -53,23 +64,18 @@ struct ColorThemePreviewView: View {
             }
         }
         .background(
-            RoundedRectangle(cornerRadius: Metric.Radius.regular)
-                .fill(colorSet.bg0.asColor)
-                .shadow(
-                    color: appearance.colorSet.text0.withAlphaComponent(0.1).asColor,
-                    radius: 8
-                )
+            RoundedRectangle(cornerRadius: Metric.Radius.chip)
+                .fill(colorSet.bg1.asColor)
         )
     }
 }
 
 struct ColorThemeItemView: View {
     
-    private let model: ColorThemeModel
+    private let model: any ColorThemeModel
     @Environment(ViewAppearance.self) private var appearance
-    @Environment(\.colorScheme) var colorScheme
     
-    init(model: ColorThemeModel) {
+    init(model: any ColorThemeModel) {
         self.model = model
     }
     
@@ -79,7 +85,7 @@ struct ColorThemeItemView: View {
             ColorThemePreviewView(
                 model: model,
                 metric: .init(fontSize: 20, circleSize: 8, circlePadding: 8),
-                isSystemDark: self.colorScheme == .dark
+                isSystemDark: self.appearance.isSystemDarkTheme
             )
             .frame(width: 60, height: 60)
          
@@ -99,6 +105,31 @@ struct ColorThemeItemView: View {
                             : .clear
                         )
                 )
+        }
+    }
+}
+
+
+struct NewColorThemeItemView: View {
+    
+    @Environment(ViewAppearance.self) private var appearance
+    
+    var body: some View {
+        VStack(spacing: Metric.Spacing.xlarge) {
+            
+            Image(systemName: "plus")
+                .font(appearance.fontSet.bigBold.asFont)
+                .foregroundStyle(appearance.colorSet.accent.asColor)
+                .frame(width: 60, height: 60)
+                .background(
+                    RoundedRectangle(cornerRadius: Metric.Radius.regular)
+                        .fill(appearance.colorSet.bg1.asColor)
+                )
+            
+            Text("setting.appearance.calendar.colorTheme::newTheme".localized())
+                .font(appearance.fontSet.normal.asFont)
+                .foregroundStyle(appearance.colorSet.weekDayText.asColor)
+                .padding(spacing: .small)
         }
     }
 }

@@ -56,6 +56,7 @@ paths:
 |---|---|---|
 | `AdViewBuilder` | 배너 광고 뷰 팩토리 — Domain `AdBannerSize` 로 요청 (#898·#956·#981) | `makeBannerView(size:)` / `makeBannerUIView(size:)` |
 | `FullScreenAdRouter` | 전면 광고 노출 커맨드 — 씬 Router가 재위임. 노출 지점은 Domain `FullScreenAdExposureRecord.Scope` 로 표현하고, AdService의 `FullScreenAdRouterImple`이 앱 타겟 extension으로 채택 (#898·#956·#981) | `showFullScreenAd(from:scope:isFromAppLaunch:)` |
+| `RewardedAdRouter` | 보상형 광고 노출 커맨드 — 보상 완료·전면 대체·보상 전 닫음·광고 없음 네 결과를 Domain `RewardedAdResult` 로 돌려준다. AdService의 `RewardedAdRouterImple`이 앱 타겟 extension으로 채택 (#1246) | `showRewardedAd(from:completion:)` |
 | `PrivacyOptionsFormRouter` | UMP 개인정보 옵션 폼 — 요구 여부 조회 + 폼 표시. AdService의 `GoogleMobileAdsServiceImple`이 앱 타겟 extension으로 채택 (#958·#956) | `isPrivacyOptionsRequired()` / `showPrivacyOptionsForm(from:)` |
 | `SignInButtonProvider` | OAuth 로그인 버튼 팩토리 (§4 custom provider 선례) | init property 주입 |
 | `LiveActivityActionModel` | 라이브액티비티 등록/해제 메뉴 항목 문구 — 상세·리스트 두 진입점이 공유 (#910·#911) | `init(isRegistered:)` → `itemText` |
@@ -221,7 +222,7 @@ private struct Subject {
 
 `import CalendarScenes`, `import EventDetailScene` 등 모듈 간 직접 참조 ❌. `Scenes` 프레임워크 공유 프로토콜로만:
 
-| 파일 | 포함 프로토콜 |
+| 파일 | 포함 심볼 |
 |---|---|
 | `Scenes/Sources/Scenes+Calendar.swift` | CalendarScene, SelectDayDialogScene |
 | `Scenes/Sources/Scenes+EventDetail.swift` | EventDetailScene, HolidayEventDetailScene, GoogleCalendarEventDetailScene, AppleCalendarEventDetailScene, DoneTodoDetailScene |
@@ -229,9 +230,12 @@ private struct Subject {
 | `Scenes/Sources/Scenes+Member.swift` | SignInScene, ManageAccountScene |
 | `Scenes/Sources/Scenes+Setting.swift` | SettingItemListScene, EventTagListScene, EventTagDetailScene |
 | `Scenes/Sources/Scenes+AIAgent.swift` | AIAgentCommandScene, AIAgentKeyboardInputScene, AIAgentImageCommandScene |
-| `Scenes/Sources/Scenes+Billing.swift` | PaywallScene |
+| `Scenes/Sources/Scenes+Billing.swift` | PaywallScene, PaidFeatureAdGuideSceneBuilder |
+| `Scenes/Sources/AccessibilityID.swift` | AccessibilityID (e2e 접근성 식별자 정본) |
 
 다른 모듈에서 참조 필요한 신규 Scene 프로토콜은 위 파일에 추가. 모듈 내부 전용은 해당 모듈 `XxxScene+Builder.swift`.
+
+**접근성 식별자는 `AccessibilityID` 에만 정의하고 뷰에 문자열 리터럴을 쓰지 말 것.** 리터럴이 흩어지면 e2e 작성자가 화면별 단언 대상을 못 찾고, 오타를 컴파일러가 안 막는다.
 
 **ViewController가 보관하는 `viewAppearance`를 `private`으로 두지 말 것.** `Scene` 프로토콜이 `interactor`와 함께 요구하는 값이고, `BaseRouterImple`이 `self.scene?.viewAppearance`를 읽어 `showWebView` 같은 공통 화면의 테마를 맞춘다.
 

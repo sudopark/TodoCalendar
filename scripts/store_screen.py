@@ -18,13 +18,13 @@ ROOT = Path(__file__).resolve().parent.parent
 # iPhone 16 Pro Max 상단 safe area 62pt @3x — 콘텐츠가 Dynamic Island 밑에 깔리지 않게 한다
 SCREEN_TOP_INSET = 186
 
-HOME_SCREEN_WIDGETS = ["today-and-next", "month"]
+HOME_SCREEN_WIDGETS = ["dday-photo", "today-and-next-styled", "month"]
 # 라이트 테마 위젯이 떠 보이는 배경 — 홈화면 벽지 자리라 앱 컬러셋과 무관하다
 WALLPAPER_TOP_COLOR = (58, 74, 128)
 WALLPAPER_BOTTOM_COLOR = (146, 122, 168)
 WIDGET_RADIUS = 78                  # 위젯 코너 26pt @3x — 캡처에 구워진 곡률과 같은 값
-WIDGET_TOP = 430
-WIDGET_GAP = 90
+WIDGET_TOP = 330
+WIDGET_GAP = 70
 WIDGET_SHADOW_BLUR = 34
 WIDGET_SHADOW_OFFSET = 14
 WIDGET_SHADOW_ALPHA = 90
@@ -82,7 +82,7 @@ def paste_with_shadow(screen, widget, position):
     screen.alpha_composite(widget, position)
 
 
-def home_screen(source_dir, size, widget_names=None):
+def home_screen(source_dir, size, widget_names=None, widget_top=WIDGET_TOP, widget_gap=WIDGET_GAP):
     widgets = []
     for name in widget_names or HOME_SCREEN_WIDGETS:
         path = source_dir / "widgets" / f"{name}.png"
@@ -92,8 +92,8 @@ def home_screen(source_dir, size, widget_names=None):
             widgets.append(rounded(trim_widget_margin(capture), WIDGET_RADIUS))
 
     screen = wallpaper(size)
-    top = WIDGET_TOP
+    top = widget_top
     for widget in widgets:
         paste_with_shadow(screen, widget, ((size[0] - widget.width) // 2, top))
-        top += widget.height + WIDGET_GAP
+        top += widget.height + widget_gap
     return screen

@@ -48,15 +48,18 @@ public final class BillingUsecaseImple: BillingUsecase, @unchecked Sendable {
 
     private let repository: any BillingRepository
     private let appStoreService: any AppStoreBillingService
+    private let planStore: any BillingUserPlanStore
     private let sharedDataStore: SharedDataStore
 
     public init(
         repository: any BillingRepository,
         appStoreService: any AppStoreBillingService,
+        planStore: any BillingUserPlanStore,
         sharedDataStore: SharedDataStore
     ) {
         self.repository = repository
         self.appStoreService = appStoreService
+        self.planStore = planStore
         self.sharedDataStore = sharedDataStore
     }
 
@@ -140,7 +143,7 @@ extension BillingUsecaseImple {
             try await self.repository.postPurchase(signedTransaction: transaction.jws)
         }
         await self.appStoreService.finishTransaction(id: transaction.id)
-        self.updateSharedUserPlan(userPlan)
+        self.planStore.updatePlan(userPlan)
         return userPlan
     }
 
@@ -152,7 +155,7 @@ extension BillingUsecaseImple {
         }
         await self.appStoreService.finishTransaction(id: transaction.id)
         guard !Task.isCancelled else { return userPlan }
-        self.updateSharedUserPlan(userPlan)
+        self.planStore.updatePlan(userPlan)
         return userPlan
     }
 
@@ -164,14 +167,6 @@ extension BillingUsecaseImple {
         } catch {
             throw BillingReflectFailure(error)
         }
-    }
-
-    private func updateSharedUserPlan(_ userPlan: BillingUserPlan) {
-        self.sharedDataStore.put(
-            BillingUserPlan.self,
-            key: ShareDataKeys.billingUserPlan.rawValue,
-            userPlan
-        )
     }
 
     // 한 건이 영구 실패해도 나머지는 반영돼야 한다 — fail-fast 면 앞의 실패가
@@ -211,7 +206,7 @@ extension BillingUsecaseImple {
     private func loadAndShareUserAccount() async throws -> BillingUserAccount {
         let account = try await self.repository.loadUserAccount()
         self.updateSharedAppAccountToken(account.appAccountToken)
-        self.updateSharedUserPlan(account.plan)
+        self.planStore.updatePlan(account.plan)
         return account
     }
 
@@ -243,9 +238,7 @@ extension BillingUsecaseImple {
     }
 
     public func latestUserPlan() -> BillingUserPlan? {
-        return self.sharedDataStore.value(
-            BillingUserPlan.self, key: ShareDataKeys.billingUserPlan.rawValue
-        )
+        return self.planStore.latestUserPlan()
     }
 }
 
@@ -300,11 +293,8 @@ extension BillingUsecaseImple {
     }
 
     public var currentUserPlan: AnyPublisher<BillingUserPlan, Never> {
-        return self.sharedDataStore.observe(
-            BillingUserPlan.self,
-            key: ShareDataKeys.billingUserPlan.rawValue
-        )
-        .compactMap { $0 }
-        .eraseToAnyPublisher()
+        return self.planStore.observePlan()
+            .compactMap { $0 }
+            .eraseToAnyPublisher()
     }
 }

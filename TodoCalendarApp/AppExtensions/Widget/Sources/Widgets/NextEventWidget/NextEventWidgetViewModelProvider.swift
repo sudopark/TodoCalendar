@@ -11,59 +11,8 @@ import Prelude
 import Optics
 import Domain
 import Extensions
-import CalendarScenes
-
-
-// MARK: - NextEventWidgetViewModel
-
-struct NextEventWidgetViewModel: Sendable {
-    let timeText: EventTimeText?
-    let eventTitle: String
-    var locationText: String?
-    var refreshAfter: Date?
-    fileprivate var timeRawValue: EventTime?
-    var eventLink: URL?
-    
-    init(
-        timeText: EventTimeText?,
-        eventTitle: String,
-        refreshAfter: Date? = nil
-    ) {
-        self.timeText = timeText
-        self.eventTitle = eventTitle
-        self.refreshAfter = refreshAfter
-    }
-    
-    static var empty: Self {
-        return .init(
-            timeText: nil, eventTitle: "widget.next.noEvent".localized(), refreshAfter: nil
-        )
-    }
-    
-    static var sample: Self {
-        return .init(timeText: .init(text: "11:29"), eventTitle: "widget.next.sample".localized())
-    }
-}
-
-
-// MARK: - NextEventListWidgetViewModel
-
-struct NextEventListWidgetViewModel: Sendable {
-    let models: [NextEventWidgetViewModel]
-    var refreshAfter: Date?
-    
-    static var empty: Self {
-        return .init(models: [])
-    }
-    
-    static var sample: Self {
-        return .init(models: [
-            .init(timeText: .init(text: "10:00"), eventTitle: "widget.next.sample".localized()),
-            .init(timeText: .init(text: "12:00"), eventTitle: "widget.weeks.sample::lunch".localized()),
-            .init(timeText: .init(text: "16:30"), eventTitle: "widget.weeks.sample::call".localized())
-        ])
-    }
-}
+import CalendarPresentation
+import WidgetScenes
 
 
 // MARK: - NextEventWidgetViewModelBuilder

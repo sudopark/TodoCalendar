@@ -1,0 +1,221 @@
+//
+//  ColorThemeDefinition.swift
+//  CommonPresentation
+//
+//  Created by sudo.park on 9/23/26.
+//  Copyright © 2026 com.sudo.park. All rights reserved.
+//
+
+import UIKit
+import Extensions
+
+
+// MARK: - ColorThemeName
+
+public enum ColorThemeName: Sendable, Equatable {
+    case `default`(localizeKey: String)
+    case custom(String)
+
+    public var localized: String {
+        switch self {
+        case .default(let localizeKey): return localizeKey.localized()
+        case .custom(let name): return name
+        }
+    }
+}
+
+
+// MARK: - ColorThemeDefinition
+
+public struct ColorThemeDefinition: Sendable {
+
+    public let name: ColorThemeName
+
+    // 값 14개는 스펙 §2 의 라인업 10·명시 4 다.
+    public let bg0: UIColor
+    public let bg1: UIColor
+    public let todayBackground: UIColor
+    public let line: UIColor
+    public let text0: UIColor
+    public let text1: UIColor
+    public let accent: UIColor
+    public let selectedDayBackground: UIColor
+    public let selectedDayText: UIColor
+    public let holidayOrWeekEndWithAccent: UIColor
+
+    public let bg2: UIColor
+    public let text2: UIColor
+    public let placeHolder: UIColor
+    public let secondaryBtnBackground: UIColor
+
+    public let accentAI: UIColor
+    public let aiListeningBackgroundBase: [UIColor]
+
+    public let eventTextOverride: UIColor?
+    public let primaryBtnTextOverride: UIColor?
+    public let weekDayTextOverride: UIColor?
+    public let holidayTextOverride: UIColor?
+    public let weekEndTextOverride: UIColor?
+    public let eventTextSelectedOverride: UIColor?
+    public let aiUserBubbleBackgroundOverride: UIColor?
+    public let negativeBtnBackgroundOverride: UIColor?
+
+    public init(
+        name: ColorThemeName,
+        bg0: UIColor,
+        bg1: UIColor,
+        todayBackground: UIColor,
+        line: UIColor,
+        text0: UIColor,
+        text1: UIColor,
+        accent: UIColor,
+        selectedDayBackground: UIColor,
+        selectedDayText: UIColor,
+        holidayOrWeekEndWithAccent: UIColor,
+        bg2: UIColor,
+        text2: UIColor,
+        placeHolder: UIColor,
+        secondaryBtnBackground: UIColor,
+        accentAI: UIColor,
+        aiListeningBackgroundBase: [UIColor],
+        eventTextOverride: UIColor? = nil,
+        primaryBtnTextOverride: UIColor? = nil,
+        weekDayTextOverride: UIColor? = nil,
+        holidayTextOverride: UIColor? = nil,
+        weekEndTextOverride: UIColor? = nil,
+        eventTextSelectedOverride: UIColor? = nil,
+        aiUserBubbleBackgroundOverride: UIColor? = nil,
+        negativeBtnBackgroundOverride: UIColor? = nil
+    ) {
+        self.name = name
+        self.bg0 = bg0
+        self.bg1 = bg1
+        self.todayBackground = todayBackground
+        self.line = line
+        self.text0 = text0
+        self.text1 = text1
+        self.accent = accent
+        self.selectedDayBackground = selectedDayBackground
+        self.selectedDayText = selectedDayText
+        self.holidayOrWeekEndWithAccent = holidayOrWeekEndWithAccent
+        self.bg2 = bg2
+        self.text2 = text2
+        self.placeHolder = placeHolder
+        self.secondaryBtnBackground = secondaryBtnBackground
+        self.accentAI = accentAI
+        self.aiListeningBackgroundBase = aiListeningBackgroundBase
+        self.eventTextOverride = eventTextOverride
+        self.primaryBtnTextOverride = primaryBtnTextOverride
+        self.weekDayTextOverride = weekDayTextOverride
+        self.holidayTextOverride = holidayTextOverride
+        self.weekEndTextOverride = weekEndTextOverride
+        self.eventTextSelectedOverride = eventTextSelectedOverride
+        self.aiUserBubbleBackgroundOverride = aiUserBubbleBackgroundOverride
+        self.negativeBtnBackgroundOverride = negativeBtnBackgroundOverride
+    }
+}
+
+
+// MARK: - ColorSet
+
+extension ColorThemeDefinition: ColorSet {
+
+    // 관계로 채우는 토큰
+
+    public var dayBackground: UIColor {
+        return self.bg0
+    }
+
+    public var weekDayText: UIColor {
+        return self.weekDayTextOverride ?? self.text0
+    }
+
+    public var holidayText: UIColor {
+        return self.holidayTextOverride ?? self.text0
+    }
+
+    public var weekEndText: UIColor {
+        return self.weekEndTextOverride ?? self.text1
+    }
+
+    public var eventText: UIColor {
+        return self.eventTextOverride ?? self.text1
+    }
+
+    public var eventTextSelected: UIColor {
+        return self.eventTextSelectedOverride ?? self.selectedDayText
+    }
+
+    public var aiUserBubbleBackground: UIColor {
+        return self.aiUserBubbleBackgroundOverride ?? self.selectedDayBackground
+    }
+
+    public var aiUserBubbleText: UIColor {
+        return self.selectedDayText
+    }
+
+    public var secondaryBtnText: UIColor {
+        return self.text0
+    }
+
+    public var primaryBtnBackground: UIColor {
+        return self.accent
+    }
+
+    public var text0_inverted: UIColor {
+        return self.isLightTheme ? self.bg0 : self.bg2
+    }
+
+    // 테마와 무관한 토큰
+
+    public var uncompletedTodo: UIColor {
+        return Constant.uncompletedTodo
+    }
+
+    public var accentInfo: UIColor {
+        return Constant.accentInfo
+    }
+
+    public var accentWarn: UIColor {
+        return Constant.accentWarn
+    }
+
+    public var primaryBtnText: UIColor {
+        return self.primaryBtnTextOverride ?? Constant.white
+    }
+
+    public var negativeBtnText: UIColor {
+        return Constant.white
+    }
+
+    public var negativeBtnBackground: UIColor {
+        return self.negativeBtnBackgroundOverride ?? (
+            self.isLightTheme
+                ? Constant.negativeBtnBackgroundLight
+                : Constant.negativeBtnBackgroundDark
+        )
+    }
+
+    public var aiListeningBackground: [UIColor] {
+        let alphas = self.isLightTheme
+            ? Constant.aiListeningBackgroundAlphasLight
+            : Constant.aiListeningBackgroundAlphasDark
+        return zip(self.aiListeningBackgroundBase, alphas)
+            .map { color, alpha in color.withAlphaComponent(alpha) }
+    }
+}
+
+
+// UIColor.white 는 색공간이 달라 hex 로 만든 흰색과 == 가 false 다.
+private enum Constant {
+
+    static let uncompletedTodo: UIColor = UIColor(rgb: 0xea4444)
+    static let accentInfo: UIColor = UIColor(rgb: 0xff7417)
+    static let accentWarn: UIColor = UIColor(rgb: 0xea4444)
+    static let white: UIColor = UIColor(rgb: 0xffffff)
+    static let negativeBtnBackgroundLight: UIColor = UIColor(rgb: 0xff3b30)
+    static let negativeBtnBackgroundDark: UIColor = UIColor(rgb: 0xff453a)
+
+    static let aiListeningBackgroundAlphasLight: [CGFloat] = [0.20, 0.13, 0.20]
+    static let aiListeningBackgroundAlphasDark: [CGFloat] = [0.28, 0.18, 0.26]
+}

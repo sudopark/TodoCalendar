@@ -23,6 +23,11 @@ protocol MainRouting: Routing, Sendable {
     func routeToEventTypeFilterSetting()
     func routeToSettingScene()
     func showJumpDaySelectDialog(current: CalendarDay)
+    func showColorThemeLicenseExpiredGuide(
+        _ reason: PaidFeatureGateFailReason,
+        onFinished: @escaping @Sendable (Bool) -> Void,
+        onUseDefault: @escaping @Sendable () -> Void
+    )
 }
 
 // MARK: - Router
@@ -32,14 +37,17 @@ final class MainRouter: BaseRouterImple, MainRouting, @unchecked Sendable {
     private let calendarSceneBulder: any CalendarSceneBuilder
     private let settingSceneBuilder: any SettingSceneBuiler
     private let fullScreenAdRouter: (any FullScreenAdRouter)?
+    private let adGuideSceneBuilder: any PaidFeatureAdGuideSceneBuilder
     init(
         calendarSceneBulder: any CalendarSceneBuilder,
         settingSceneBuilder: any SettingSceneBuiler,
-        fullScreenAdRouter: (any FullScreenAdRouter)?
+        fullScreenAdRouter: (any FullScreenAdRouter)?,
+        adGuideSceneBuilder: any PaidFeatureAdGuideSceneBuilder
     ) {
         self.calendarSceneBulder = calendarSceneBulder
         self.settingSceneBuilder = settingSceneBuilder
         self.fullScreenAdRouter = fullScreenAdRouter
+        self.adGuideSceneBuilder = adGuideSceneBuilder
     }
 }
 
@@ -98,6 +106,19 @@ extension MainRouter {
                 current: current, self.currentScene?.interactor
             )
             self.showBottomSlide(dialog)
+        }
+    }
+
+    func showColorThemeLicenseExpiredGuide(
+        _ reason: PaidFeatureGateFailReason,
+        onFinished: @escaping @Sendable (Bool) -> Void,
+        onUseDefault: @escaping @Sendable () -> Void
+    ) {
+        Task { @MainActor in
+            let guide = self.adGuideSceneBuilder.makePaidFeatureAdGuideScene(
+                reason: reason, onFinished: onFinished, onUseDefault: onUseDefault
+            )
+            self.showBottomSlide(guide)
         }
     }
 }

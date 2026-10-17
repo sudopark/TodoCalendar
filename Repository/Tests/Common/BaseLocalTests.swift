@@ -38,8 +38,16 @@ class BaseLocalTests: BaseTestCase {
     
     override func tearDown() async throws {
         let path = self.testDBPath()
-        try? await self.sqliteService?.async.close()
+        let service = self.sqliteService
         self.sqliteService = nil
+        
+        guard let service
+        else {
+            try? FileManager.default.removeItem(atPath: path)
+            return
+        }
+        // 열린 커넥션이 물고 있는 vnode 를 unlink 하면 sqlite 가 프로세스를 죽인다 — 닫기가 실패하면 파일을 남긴다
+        guard (try? await service.async.close()) != nil else { return }
         try? FileManager.default.removeItem(atPath: path)
     }
 }
@@ -72,13 +80,15 @@ extension LocalTestable {
     }
     
     func runTestWithOpenClose(_ fileName: String, _ testing: @escaping() async throws -> Void) async throws {
-        try? await self.open(db: fileName)
+        // 앞 테스트의 커넥션이 아직 살아 있어도 같은 vnode 를 물지 않도록 테스트마다 다른 파일을 연다
+        let dbFileName = "\(fileName)_\(UUID().uuidString)"
+        try? await self.open(db: dbFileName)
         
         do {
             try await testing()
-            try? await self.closeAndRemove(db: fileName)
+            try? await self.closeAndRemove(db: dbFileName)
         } catch {
-            try? await self.closeAndRemove(db: fileName)
+            try? await self.closeAndRemove(db: dbFileName)
             throw error
         }
     }

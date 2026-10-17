@@ -23,7 +23,10 @@ open class StubForemostEventUsecase: ForemostEventUsecase, @unchecked Sendable {
         self.initialForemostID = foremostId
     }
     
+    public var didRefreshRequested: Bool = false
+    
     open func refresh() {
+        self.didRefreshRequested = true
         let event = self.initialForemostID.map { self.makeDummyEvent($0) }
         self.foremostEventSubject.send(event)
     }

@@ -11,9 +11,10 @@ import Prelude
 import Optics
 import Domain
 import Extensions
-import CalendarScenes
+import CalendarPresentation
 import UnitTestHelpKit
 import TestDoubles
+import WidgetScenes
 
 
 // MARK: - TodayAndNextWidgetViewModelBuilderTests
@@ -451,6 +452,28 @@ extension TodayAndNextWidgetViewModelBuilderTests {
     }
     
     // fill right with other day events
+    // 이틀에 걸친 일정은 날짜별로 그날 범위 기준의 시간이 표기된다
+    @Test func builder_multiDayEvent_periodTextIsBuiltPerDayRange() throws {
+        // given
+        let builder = self.makeBuilder()
+        let schedule = ScheduleEvent(
+            uuid: "spanning", name: "spanning", time: .period(0..<90000)
+        )
+        let events = CalendarEvents()
+            |> \.eventWithTimes .~ ScheduleCalendarEvent.events(from: schedule, in: kst)
+        
+        // when
+        let model = builder.build(refDate, events)
+        
+        // then
+        let periodTexts = (model.left.rows + model.right.rows)
+            .compactMap { ($0 as? TodayAndNextWidgetViewModel.EventModel)?.cvm }
+            .filter { $0.name == "spanning" }
+            .map { $0.periodText }
+        try #require(periodTexts.count == 2)
+        #expect(periodTexts[0] != periodTexts[1])
+    }
+    
     @Test func builder_fillRightWithOtherDayEvents() throws {
         // given
         let builder = self.makeBuilder()
@@ -495,7 +518,8 @@ struct TodayAndNextWidgetViewModelProviderTests {
     
     private func makeProvider(
         targetTags: [EventTagId]? = nil,
-        excludeAllDay: Bool = false
+        excludeAllDay: Bool = false,
+        styles: [WidgetStyleId: WidgetStyle] = [:]
     ) -> TodayAndNextWidgetViewModelProvider {
         
         return TodayAndNextWidgetViewModelProvider(
@@ -504,7 +528,8 @@ struct TodayAndNextWidgetViewModelProviderTests {
             eventsFetchUsecase: PrivateStubCalendarEventsFetchUsecase(),
             calendarSettingRepository: StubCalendarSettingRepository(),
             appSettingRepository: StubAppSettingRepository(),
-            localeProvider: Locale.current
+            localeProvider: Locale.current,
+            styleFetchUsecase: StubWidgetStyleRepository(styles: styles).asStyleFetchUsecase()
         )
     }
 }
@@ -634,5 +659,99 @@ private final class PrivateStubCalendarEventsFetchUsecase: StubCalendarEventsFet
         let events = CalendarEvents()
             |> \.eventWithTimes .~ (todayAll + tomorrowAll + schedules)
         return events
+    }
+}
+
+
+// MARK: - 스타일 해석
+
+extension TodayAndNextWidgetViewModelProviderTests {
+
+    private func todayAndNextStyle(
+        _ style: WidgetStyleId.Style,
+        showTimeZone: Bool = true,
+        background: WidgetAppearanceSettings.Background? = nil
+    ) -> (WidgetStyleId, WidgetStyle) {
+        let id = WidgetStyleId(variant: .todayAndNextMedium, style: style)
+        return (
+            id,
+            WidgetStyle(
+                id: id, name: nil,
+                setting: TodayAndNextStyleSetting.initial |> \.showTimeZone .~ showTimeZone,
+                background: background
+            )
+        )
+    }
+
+    @Test func provider_whenNoSavedStyle_usesInitialAndGlobalBackground() async throws {
+        // given
+        let provider = self.makeProvider()
+
+        // when
+        let model = try await provider.getViewModel(for: Date(timeIntervalSince1970: 0))
+
+        // then
+        #expect(model.style == TodayAndNextStyleSetting.initial)
+        #expect(model.look.background == .system)
+    }
+
+    @Test func provider_whenDefaultStyleSaved_appliesItsSettingAndBackground() async throws {
+        // given
+        let saved = self.todayAndNextStyle(
+            .default, showTimeZone: false, background: .custom(hex: "#101820")
+        )
+        let provider = self.makeProvider(styles: [saved.0: saved.1])
+
+        // when
+        let model = try await provider.getViewModel(for: Date(timeIntervalSince1970: 0))
+
+        // then
+        #expect(model.showsTimeZone == false)
+        #expect(model.look.background == .custom(hex: "#101820"))
+    }
+
+    @Test func provider_whenInstanceStyleSaved_appliesThatStyle() async throws {
+        // given
+        let def = self.todayAndNextStyle(.default, showTimeZone: true)
+        let custom = self.todayAndNextStyle(.custom(id: "c1"), showTimeZone: false)
+        let provider = self.makeProvider(styles: [def.0: def.1, custom.0: custom.1])
+
+        // when
+        let model = try await provider.getViewModel(
+            for: Date(timeIntervalSince1970: 0), style: .custom(id: "c1")
+        )
+
+        // then
+        #expect(model.showsTimeZone == false)
+    }
+
+    @Test func provider_whenInstanceStyleRemoved_fallsBackToDefaultStyle() async throws {
+        // given
+        let def = self.todayAndNextStyle(.default, showTimeZone: false)
+        let provider = self.makeProvider(styles: [def.0: def.1])
+
+        // when
+        let model = try await provider.getViewModel(
+            for: Date(timeIntervalSince1970: 0), style: .custom(id: "removed")
+        )
+
+        // then
+        #expect(model.showsTimeZone == false)
+    }
+
+    /// 폴백이 스타일 단위라, 고른 스타일이 색을 안 걸었으면 기본 스타일 색을 빌려오지 않는다.
+    @Test func provider_whenStyleHasNoBackground_usesGlobalNotDefaultStyle() async throws {
+        // given
+        let def = self.todayAndNextStyle(.default, background: .custom(hex: "#ffffff"))
+        let custom = self.todayAndNextStyle(.custom(id: "c1"))
+        let provider = self.makeProvider(styles: [def.0: def.1, custom.0: custom.1])
+
+        // when
+        let model = try await provider.getViewModel(
+            for: Date(timeIntervalSince1970: 0), style: .custom(id: "c1")
+        )
+
+        // then
+        #expect(model.look.background == .system)
     }
 }

@@ -11,6 +11,7 @@ import Domain
 import Repository
 import SQLiteService
 import Alamofire
+import WidgetScenes
 
 
 // MARK: - WidgetViewModelProviderBuilder
@@ -24,6 +25,32 @@ struct WidgetViewModelProviderBuilder {
         self.usecaseFactory = .init(base: base)
     }
     
+    func loadWidgetAppearanceSetting() -> WidgetAppearanceSettings {
+        let repository = AppSettingLocalRepositoryImple(
+            storage: AppSettingLocalStorage(
+                environmentStorage: base.userDefaultEnvironmentStorage
+            )
+        )
+        return repository.loadWidgetAppearanceSetting()
+    }
+
+    /// placeholder 처럼 인스턴스 선택 없이 변형 기본 스타일을 읽는 자리.
+    func fetchDefaultStyle(of variant: WidgetVariant) -> WidgetStyle? {
+        return self.fetchStyle(of: variant, selected: .default)
+    }
+
+    /// 뷰모델 provider 를 두지 않는 위젯이 고른 스타일을 읽는 자리.
+    func fetchStyle(
+        of variant: WidgetVariant, selected style: WidgetStyleId.Style
+    ) -> WidgetStyle? {
+        guard variant.isCustomizable else { return nil }
+        return self.makeStyleFetchUsecase().fetchStyle(of: variant, selected: style)
+    }
+
+    private func makeStyleFetchUsecase() -> any WidgetStyleFetchUsecase {
+        return self.usecaseFactory.makeWidgetStyleFetchUsecase()
+    }
+
     private func checkShouldReset() async {
         
         let storage = base.userDefaultEnvironmentStorage
@@ -104,7 +131,8 @@ extension WidgetViewModelProviderBuilder {
             settingRepository: calendarSettingRepository,
             appSettingRepository: appSettingRepository,
             holidayFetchUsecase: holidaysFetchUsecase,
-            eventFetchUsecase: eventsFetchUsecase
+            eventFetchUsecase: eventsFetchUsecase,
+            styleFetchUsecase: self.makeStyleFetchUsecase()
         )
     }
     
@@ -116,7 +144,8 @@ extension WidgetViewModelProviderBuilder {
             calendarSettingRepository: repository
         )
         return DoubleMonthWidgetViewModelProvider(
-            settingRepository: repository, monthViewModelProvider: provider
+            settingRepository: repository, monthViewModelProvider: provider,
+            styleFetchUsecase: self.makeStyleFetchUsecase()
         )
     }
 }
@@ -128,7 +157,8 @@ extension WidgetViewModelProviderBuilder {
     
     func makeEventListViewModelProvider(
         shouldSkipCheckCacheReset: Bool = false,
-        targetEventTagIds: [EventTagId]?
+        targetEventTagIds: [EventTagId]?,
+        excludeAllDayEvent: Bool
     ) async -> EventListWidgetViewModelProvider {
         
         if !shouldSkipCheckCacheReset {
@@ -149,10 +179,12 @@ extension WidgetViewModelProviderBuilder {
         
         return EventListWidgetViewModelProvider(
             targetEventTagIds: targetEventTagIds,
+            excludeAllDayEvents: excludeAllDayEvent,
             eventsFetchUsecase: fetchUsecase,
             appSettingRepository: appSettingRepository,
             calendarSettingRepository: calendarSettingRepository,
-            localeProvider: Locale.current
+            localeProvider: Locale.current,
+            styleFetchUsecase: self.makeStyleFetchUsecase()
         )
     }
 }
@@ -190,7 +222,8 @@ extension WidgetViewModelProviderBuilder {
             eventsFetchUsecase: fetchUsecase,
             calendarSettingRepository: calendarSettingRepository,
             appSettingRepository: appSettingRepository,
-            localeProvider: Locale.current
+            localeProvider: Locale.current,
+            styleFetchUsecase: self.makeStyleFetchUsecase()
         )
     }
 }
@@ -218,7 +251,8 @@ extension WidgetViewModelProviderBuilder {
         return TodayWidgetViewModelProvider(
             eventsFetchusecase: fetchUsecase,
             appSettingRepository: appSettingRepository,
-            calednarSettingRepository: calendarSettingRepository
+            calednarSettingRepository: calendarSettingRepository,
+            styleFetchUsecase: self.makeStyleFetchUsecase()
         )
     }
 }
@@ -262,7 +296,8 @@ extension WidgetViewModelProviderBuilder {
             calendarUsecase: calendarUsecase,
             eventFetchUsecase: eventFetchUsecase,
             settingRepository: calendarSettingRepository,
-            appSettingRepository: appSettingRepository
+            appSettingRepository: appSettingRepository,
+            styleFetchUsecase: self.makeStyleFetchUsecase()
         )
     }
     
@@ -296,7 +331,8 @@ extension WidgetViewModelProviderBuilder {
             eventFetchUsecase: eventFetchUsecase,
             calendarSettingRepository: calendarSettingRepository,
             appSettingRepository: appSettingRepository,
-            localeProvider: Locale.current
+            localeProvider: Locale.current,
+            styleFetchUsecase: self.makeStyleFetchUsecase()
         )
     }
 }
@@ -350,7 +386,8 @@ extension WidgetViewModelProviderBuilder {
         return DDayWidgetViewModelProvider(
             eventFetchUsecase: self.usecaseFactory.makeEventsFetchUsecase(),
             calendarSettingRepository: calendarSettingRepository,
-            appSettingRepository: appSettingRepository
+            appSettingRepository: appSettingRepository,
+            styleFetchUsecase: self.makeStyleFetchUsecase()
         )
     }
 }
@@ -367,7 +404,8 @@ extension WidgetViewModelProviderBuilder {
         
         let eventList = await self.makeEventListViewModelProvider(
             shouldSkipCheckCacheReset: true,
-            targetEventTagIds: [targetEventTagId]
+            targetEventTagIds: [targetEventTagId],
+            excludeAllDayEvent: false
         )
         
         let month = await self.makeMonthViewModelProvider(
@@ -375,8 +413,9 @@ extension WidgetViewModelProviderBuilder {
         )
 
         return EventAndMonthWidgetViewModelProvider(
-            eventListViewModelProvider: eventList, 
-            monthViewModelProvider: month
+            eventListViewModelProvider: eventList,
+            monthViewModelProvider: month,
+            styleFetchUsecase: self.makeStyleFetchUsecase()
         )
     }
     
@@ -392,7 +431,8 @@ extension WidgetViewModelProviderBuilder {
 
         return TodayAndMonthWidgetViewModelProvider(
             todayViewModelProvider: today,
-            monthViewModelProvider: month
+            monthViewModelProvider: month,
+            styleFetchUsecase: self.makeStyleFetchUsecase()
         )
     }
     
@@ -404,14 +444,16 @@ extension WidgetViewModelProviderBuilder {
         
         let eventList = await self.makeEventListViewModelProvider(
             shouldSkipCheckCacheReset: true,
-            targetEventTagIds: [targetEventTagId]
+            targetEventTagIds: [targetEventTagId],
+            excludeAllDayEvent: false
         )
 
         let foremost = await self.makeForemostEventWidgetViewModelProvider()
         
         return .init(
             eventListViewModelProvider: eventList,
-            foremostEventViewModelProvider: foremost
+            foremostEventViewModelProvider: foremost,
+            styleFetchUsecase: self.makeStyleFetchUsecase()
         )
     }
 }

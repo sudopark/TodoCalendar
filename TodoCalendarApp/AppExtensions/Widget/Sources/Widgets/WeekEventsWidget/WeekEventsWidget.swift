@@ -11,7 +11,8 @@ import SwiftUI
 import Domain
 import Extensions
 import CommonPresentation
-import CalendarScenes
+import CalendarPresentation
+import WidgetScenes
 
 // MARK: - WeekEventsWidgetView
 
@@ -19,7 +20,7 @@ struct WeekEventsWidgetView: View {
  
     @Environment(\.colorScheme) var colorScheme
     var colorSet: any ColorSet {
-        return colorScheme == .light ? DefaultLightColorSet() : DefaultDarkColorSet()
+        return ColorSetKeys.systemTheme.convert(isSystemDarkTheme: colorScheme != .light)
     }
     
     private let entry: ResultTimelineEntry<WeekEventsViewModel>
@@ -49,7 +50,11 @@ struct OneWeekEventsWidget: Widget {
     let kind: String = "OneWeekEventsWidget"
     
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: self.kind, provider: WeekEventsWidgetTimelineProvider(.weeks(count: 1))) { entry in
+        AppIntentConfiguration(
+            kind: self.kind,
+            intent: WeekEventsWidgetConfigurationIntent.self,
+            provider: WeekEventsWidgetTimelineProvider(.weeks(count: 1))
+        ) { entry in
             
             WeekEventsWidgetView(entry: entry)
                 .containerBackground(entry.backgroundShape, for: .widget)
@@ -67,7 +72,11 @@ struct TwoWeekEventsWidget: Widget {
     let kind: String = "TwoWeekEventsWidget"
     
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: self.kind, provider: WeekEventsWidgetTimelineProvider(.weeks(count: 2))) { entry in
+        AppIntentConfiguration(
+            kind: self.kind,
+            intent: WeekEventsWidgetConfigurationIntent.self,
+            provider: WeekEventsWidgetTimelineProvider(.weeks(count: 2))
+        ) { entry in
             
             WeekEventsWidgetView(entry: entry)
                 .containerBackground(entry.backgroundShape, for: .widget)
@@ -85,7 +94,11 @@ struct ThreeWeekEventsWidget: Widget {
     let kind: String = "ThreeWeekEventsWidget"
     
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: self.kind, provider: WeekEventsWidgetTimelineProvider(.weeks(count: 3))) { entry in
+        AppIntentConfiguration(
+            kind: self.kind,
+            intent: WeekEventsWidgetConfigurationIntent.self,
+            provider: WeekEventsWidgetTimelineProvider(.weeks(count: 3))
+        ) { entry in
             
             WeekEventsWidgetView(entry: entry)
                 .containerBackground(entry.backgroundShape, for: .widget)
@@ -103,7 +116,11 @@ struct FourWeekEventsWidget: Widget {
     let kind: String = "FourWeekEventsWidget"
     
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: self.kind, provider: WeekEventsWidgetTimelineProvider(.weeks(count: 4))) { entry in
+        AppIntentConfiguration(
+            kind: self.kind,
+            intent: WeekEventsWidgetConfigurationIntent.self,
+            provider: WeekEventsWidgetTimelineProvider(.weeks(count: 4))
+        ) { entry in
             
             WeekEventsWidgetView(entry: entry)
                 .containerBackground(entry.backgroundShape, for: .widget)
@@ -121,7 +138,11 @@ struct LastMonthEventsWidget: Widget {
     let kind: String = "LastMonthEventsWidget"
     
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: self.kind, provider: WeekEventsWidgetTimelineProvider(.wholeMonth(.previous))) { entry in
+        AppIntentConfiguration(
+            kind: self.kind,
+            intent: WeekEventsWidgetConfigurationIntent.self,
+            provider: WeekEventsWidgetTimelineProvider(.wholeMonth(.previous))
+        ) { entry in
             
             WeekEventsWidgetView(entry: entry)
                 .containerBackground(entry.backgroundShape, for: .widget)
@@ -139,7 +160,11 @@ struct CurrentMonthEventsWidget: Widget {
     let kind: String = "CurrentMonthEventsWidget"
     
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: self.kind, provider: WeekEventsWidgetTimelineProvider(.wholeMonth(.current))) { entry in
+        AppIntentConfiguration(
+            kind: self.kind,
+            intent: WeekEventsWidgetConfigurationIntent.self,
+            provider: WeekEventsWidgetTimelineProvider(.wholeMonth(.current))
+        ) { entry in
             
             WeekEventsWidgetView(entry: entry)
                 .containerBackground(entry.backgroundShape, for: .widget)
@@ -157,7 +182,11 @@ struct NextMonthEventsWidget: Widget {
     let kind: String = "NextMonthEventsWidget"
     
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: self.kind, provider: WeekEventsWidgetTimelineProvider(.wholeMonth(.next))) { entry in
+        AppIntentConfiguration(
+            kind: self.kind,
+            intent: WeekEventsWidgetConfigurationIntent.self,
+            provider: WeekEventsWidgetTimelineProvider(.wholeMonth(.next))
+        ) { entry in
             
             WeekEventsWidgetView(entry: entry)
                 .containerBackground(entry.backgroundShape, for: .widget)

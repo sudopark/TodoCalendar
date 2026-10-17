@@ -34,3 +34,9 @@
 - [2026-08-26 `Text(timerInterval:)` 을 좁은 행에 넣으면 크래시하거나 자릿수가 `--` 로 빠진다](2026-08-26-live-activity-timer-text-layout-traps.md) — Event / fixed / 라이브액티비티 잠금화면 크래시·LayoutSubview.place·GeometryReaderLayout·카운트다운 1:15:--·fixedSize
 - [2026-08-29 `upload_app_store_metadata` 가 에러 없이 아무것도 안 올린다](2026-08-29-deliver-metadata-upload-silent-noop.md) — Infra / fixed / fastlane deliver 무반응·ASC 로케일 활성화 안 됨·Preview.html 비어 있음·precheck found google·metadata_path 상대경로
 - [2026-09-03 구글 캘린더 만료 알림이 다시 떴는데, 재현 빌드가 수정 이전 버전이었다](2026-09-03-google-token-expiry-recurs-on-pre-fix-build.md) — ExternalCalendar / non-issue / 구글 연동 만료·401 Invalid Credentials·토큰 갱신 타임아웃·재현 빌드가 수정 이전
+- [2026-09-10 위젯 갤러리에서 AI·다음이벤트 위젯 아이콘이 빈칸으로 나온다](2026-09-10-widget-gallery-named-image-assets-blank.md) — Settings / fixed / 갤러리 아이콘 안보임·AI 위젯 빈칸·Bundle.main 이름 해석·확장 카탈로그 전용 에셋
+- [2026-09-16 취소된 event sync 가 완료를 보고해, 뒤이어 시작된 sync 의 종료 신호가 사라진다](2026-09-16-cancelled-sync-reports-idle.md) — Event / fixed / AI 커맨드 결과 이벤트 안보임·포그라운드 복귀 이벤트 누락·syncEnd 안옴·removeDuplicates 유령 idle
+- [2026-09-19 Month 위젯 오늘 강조가 배경과 같은 계열로 나와 안 보인다](2026-09-19-month-widget-today-highlight-invisible.md) — Calendar / fixed / 오늘 강조·selectedDayBackground·다크모드·backgroundColor 미적용
+- [2026-09-22 위젯 스타일에 건 사진이 저장 뒤 편집 화면에서만 빈칸이 된다](2026-09-22-widget-style-photo-blank-after-save.md) — Settings / fixed / 사진 사라짐·편집 카드 빈칸·이름 바꾸니 없어짐·위젯은 정상·초안 임시 파일 삭제
+- [2026-10-11 가로가 긴 화면에서 adaptive 배너가 거부된다](2026-10-11-adaptive-banner-rejected-on-wide-screen.md) — Billing / fixed / Ad size will not fit on screen·adaptive banner 미표시·duo 펼침 배너·admob Code=0
+- [2026-10-13 계정 전환으로 설정 화면이 내려가면 전면광고가 떠 앱 설치 시트까지 보인다](2026-10-13-ad-on-account-switch-install-sheet.md) — Billing / fixed / 전환 중 광고·앱 설치 시트·설정 나가면 광고·viewIfLoaded window 가드 무효

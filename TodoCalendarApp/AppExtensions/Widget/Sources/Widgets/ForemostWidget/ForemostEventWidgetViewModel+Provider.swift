@@ -11,30 +11,8 @@ import Prelude
 import Optics
 import Domain
 import Extensions
-import CalendarScenes
-
-
-// MARK: - ForemostEventWidgetViewModel
-
-struct ForemostEventWidgetViewModel {
-    
-    var eventModel: (any EventCellViewModel)?
-    let defaultTagColorSetting: DefaultEventTagColorSetting
-    var tag: CustomEventTag?
-    var widgetSetting = WidgetAppearanceSettings()
-    
-    static func sample() -> ForemostEventWidgetViewModel {
-        
-        let event = TodoEventCellViewModel("tood", name: "widget.events.foremost::sample::message".localized())
-            |> \.periodText .~ .doubleText(
-                .init(text: "calendar::event_time::todo".localized()), .init(text: "13:00")
-            )
-        let defaultTagColorSetting = DefaultEventTagColorSetting(
-            holiday: "#D6236A", default: "#088CDA"
-        )
-        return .init(eventModel: event, defaultTagColorSetting: defaultTagColorSetting)
-    }
-}
+import CalendarPresentation
+import WidgetScenes
 
 
 // MARK: ForemostEventWidgetViewModelProvider
@@ -45,32 +23,45 @@ final class ForemostEventWidgetViewModelProvider {
     private let calendarSettingRepository: any CalendarSettingRepository
     private let appSettingRepository: any AppSettingRepository
     private let localeProvider: any LocaleProvider
+    private let styleFetchUsecase: any WidgetStyleFetchUsecase
     
     init(
         eventFetchUsecase: any CalendarEventFetchUsecase,
         calendarSettingRepository: any CalendarSettingRepository,
         appSettingRepository: any AppSettingRepository,
-        localeProvider: any LocaleProvider
+        localeProvider: any LocaleProvider,
+        styleFetchUsecase: any WidgetStyleFetchUsecase
     ) {
         self.eventFetchUsecase = eventFetchUsecase
         self.calendarSettingRepository = calendarSettingRepository
         self.appSettingRepository = appSettingRepository
         self.localeProvider = localeProvider
+        self.styleFetchUsecase = styleFetchUsecase
     }
 }
 
 extension ForemostEventWidgetViewModelProvider {
     
-    func getViewModel(_ refTime: Date) async throws -> ForemostEventWidgetViewModel {
+    /// 잠금화면 변형은 꾸미기 대상이 아니라 스타일 좌표를 읽지 않는다 — 전역 설정만 따른다.
+    func getViewModel(
+        _ refTime: Date,
+        variant: WidgetVariant = .foremostSmall,
+        style: WidgetStyleId.Style? = .default
+    ) async throws -> ForemostEventWidgetViewModel {
         
         let setting = self.appSettingRepository.loadSavedViewAppearance()
+        let resolved = style.flatMap {
+            variant.isCustomizable
+                ? self.styleFetchUsecase.fetchStyle(of: variant, selected: $0)
+                : nil
+        }
         let eventModel = try await self.loadForemostEventModel(refTime, setting.calendar)
         return ForemostEventWidgetViewModel(
             eventModel: eventModel.0,
             defaultTagColorSetting: setting.defaultTagColor,
             tag: eventModel.1
         )
-        |> \.widgetSetting .~ setting.widget
+        |> \.look .~ .init(globalSetting: setting.widget, appliedStyle: resolved)
     }
     
     private func loadForemostEventModel(

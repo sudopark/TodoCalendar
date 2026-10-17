@@ -109,11 +109,7 @@ extension GoogleCalendarLocalStorageImple {
             let query = Calendars.selectAll { $0.accountId == accountId }
             return try db.load(query)
         }
-        return entities.map { entity in
-            var tag = entity.tag
-            tag.ownerId = entity.accountId
-            return tag
-        }
+        return entities.map { $0.asTag() }
     }
 
     public func updateCalendarList(_ calendars: [GoogleCalendar.Tag], accountId: String) async throws {
@@ -143,7 +139,7 @@ extension GoogleCalendarLocalStorageImple {
             .selectSome { [$0.id, $0.summary, $0.colorId, $0.htmlLink, $0.location, $0.visibility] }
             .where { $0.accountId == accountId && $0.calendarId == calendarId }
         let query = eventQuery.innerJoin(with: timeQuery, on: { ($0.id, $1.eventId) })
-        let mapping: (CursorIterator) throws -> GoogleCalendar.Event = { cursor in
+        let mapping: @Sendable (CursorIterator) throws -> GoogleCalendar.Event = { cursor in
             let eventId: String = try cursor.next().unwrap()
             let summary: String? = cursor.next()
             let colorId: String? = cursor.next()
@@ -213,7 +209,7 @@ extension GoogleCalendarLocalStorageImple {
         let entity = try await connection.async.run { db in
             return try db.loadOne(Events.self, query: query)
         }
-        return try entity.unwrap().origin
+        return try entity.unwrap().asEventOrigin()
     }
 
     public func updateEventDetail(

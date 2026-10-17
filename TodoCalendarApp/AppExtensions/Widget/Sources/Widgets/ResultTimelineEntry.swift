@@ -12,6 +12,7 @@ import WidgetKit
 import Domain
 import CommonPresentation
 import Extensions
+import WidgetScenes
 
 struct WidgetErrorModel: Error {
     let error: any Error
@@ -47,27 +48,8 @@ struct ResultTimelineEntry<T>: TimelineEntry {
         }
     }
     
-    var backgroundShape: some ShapeStyle {
-        switch self.background {
-        case .system:
-            return AnyShapeStyle(.background)
-        case .custom(let hex):
-            guard let color = UIColor.from(hex: hex)
-            else {
-                return AnyShapeStyle(.background)
-            }
-            let isLight = color.isLight
-            let colors: any ColorSet = isLight ? DefaultLightColorSet() : DefaultDarkColorSet()
-            return AnyShapeStyle(
-                color.asColor.gradient.shadow(
-                    .drop(
-                        color: colors.text0.withAlphaComponent(0.4).asColor,
-                        radius: 10
-                    )
-                )
-            )
-        }
-        
+    var backgroundShape: AnyShapeStyle {
+        return WidgetBackgroundStyle(self.background).shape
     }
 }
 
@@ -85,17 +67,5 @@ extension Date {
         let nextDayStartTime = calendar.startOfDay(for: nextDayTime)
         let interval = nextDayStartTime.timeIntervalSince(self)
         return interval < 3600 ? nextDayStartTime : nextHour
-    }
-}
-
-
-extension WidgetAppearanceSettings.Background {
-    
-    func colorSet(_ systemIsLight: Bool) -> any ColorSet {
-        let isLight = switch self {
-            case .system: systemIsLight
-            case .custom(let hex): UIColor.from(hex: hex)?.isLight ?? systemIsLight
-        }
-        return isLight ? DefaultLightColorSet() : DefaultDarkColorSet()
     }
 }

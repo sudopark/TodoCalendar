@@ -54,7 +54,7 @@ extension AppleCalendarLocalStorageImple {
         try await connection.async.run { db in
             try db.createTableOrNot(Tags.self)
             try db.delete(Tags.self, query: Tags.delete())
-            try db.insert(Tags.self, entities: tags)
+            try db.insert(Tags.self, entities: tags.map { Tags.Entity($0) })
         }
     }
 
@@ -62,7 +62,7 @@ extension AppleCalendarLocalStorageImple {
         let connection = try await self.connection()
         return try await connection.async.run { db in
             try db.createTableOrNot(Tags.self)
-            return try db.load(Tags.self, query: Tags.selectAll())
+            return try db.load(Tags.self, query: Tags.selectAll()).map { $0.asTag() }
         }
     }
 }
@@ -108,7 +108,7 @@ extension AppleCalendarLocalStorageImple {
             .selectSome { [$0.eventId, $0.originalEventId, $0.calendarId, $0.name, $0.isRepeating, $0.location] }
             .innerJoin(with: timeQuery, on: { ($0.eventId, $1.eventId) })
 
-        let mapping: (CursorIterator) throws -> AppleCalendar.Event = { cursor in
+        let mapping: @Sendable (CursorIterator) throws -> AppleCalendar.Event = { cursor in
             let eventId: String = try cursor.next().unwrap()
             let originalEventId: String = try cursor.next().unwrap()
             let calendarId: String = try cursor.next().unwrap()
@@ -141,7 +141,7 @@ extension AppleCalendarLocalStorageImple {
             .selectAll()
             .innerJoin(with: Times.selectAll { $0.eventId == id }, on: { ($0.eventId, $1.eventId) })
 
-        let mapping: (CursorIterator) throws -> AppleCalendar.EventOrigin = { cursor in
+        let mapping: @Sendable (CursorIterator) throws -> AppleCalendar.EventOrigin = { cursor in
             let entity = try Events.Entity(cursor)
             let time = try Times.Entity(cursor).eventTime.unwrap()
             return entity.asEventOrigin(eventTime: time)

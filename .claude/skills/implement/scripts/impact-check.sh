@@ -9,8 +9,8 @@
 #   impact-check.sh --stdin          # "STATUS<TAB>PATH" 라인들을 stdin으로 (테스트용)
 set -o pipefail
 
-ALL_SCHEMES="Domain Repository AuthService BillingScenes CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene TodoCalendarApp TodoCalendarAppWidget TodoCalendarAppShare"
-ALL_PRESENTATION="BillingScenes CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene"
+ALL_SCHEMES="Domain Repository AuthService CommonPresentation BillingScenes CalendarPresentation CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene WidgetScenes TodoCalendarApp TodoCalendarAppWidget TodoCalendarAppShare"
+ALL_PRESENTATION="CommonPresentation BillingScenes CalendarPresentation CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene WidgetScenes"
 
 MODE="git"; BASE="origin/develop"
 while [ $# -gt 0 ]; do
@@ -83,8 +83,11 @@ fi
 if printf '%s\n' "$FILES" | grep -q "^Presentations/BillingScenes/"; then
   schemes+=("BillingScenes")
 fi
+if printf '%s\n' "$FILES" | grep -q "^Presentations/CalendarPresentation/"; then
+  schemes+=("CalendarPresentation" "CalendarScenes" "TodoCalendarApp" "TodoCalendarAppWidget")
+fi
 if printf '%s\n' "$FILES" | grep -q "^Presentations/CalendarScenes/"; then
-  schemes+=("CalendarScenes" "TodoCalendarApp" "TodoCalendarAppWidget")
+  schemes+=("CalendarScenes" "TodoCalendarApp")
 fi
 if printf '%s\n' "$FILES" | grep -q "^Presentations/EventDetailScene/"; then
   schemes+=("EventDetailScene" "TodoCalendarApp")
@@ -100,6 +103,9 @@ if printf '%s\n' "$FILES" | grep -q "^Presentations/MemberScenes/"; then
 fi
 if printf '%s\n' "$FILES" | grep -q "^Presentations/AIAgentScene/"; then
   schemes+=("AIAgentScene")
+fi
+if printf '%s\n' "$FILES" | grep -q "^Presentations/WidgetScenes/"; then
+  schemes+=("WidgetScenes" "TodoCalendarApp" "TodoCalendarAppWidget")
 fi
 if printf '%s\n' "$FILES" | grep -qE "^TodoCalendarApp/(Sources|Tests)/"; then
   schemes+=("TodoCalendarApp")
@@ -149,7 +155,6 @@ fi
 if [ "$MODE" = "git" ] && printf '%s\n' "$FILES" | grep -q "^TodoCalendarApp/Sources/AppEnvironment\.swift$"; then
   # 떠나는 버전 N 을 뽑아 case N 추가 여부로 판정한다. migrateStatement 문자열 grep 은
   # 컨텍스트를 좁히면 case 만 추가한 변경을 놓치고, 넓히면 무관한 테이블 편집이 누락을 가린다.
-  # let dbVersion 앵커 — googleCalendarDBVersion·appleCalendarDBVersion 은 별개 짝이다.
   oldMainDBVersion=$(git diff "$BASE" -- TodoCalendarApp/Sources/AppEnvironment.swift 2>/dev/null \
     | sed -n 's/^-[[:space:]]*static let dbVersion: Int32 = \([0-9][0-9]*\).*/\1/p' | head -1)
   if [ -n "$oldMainDBVersion" ]; then
@@ -160,9 +165,49 @@ if [ "$MODE" = "git" ] && printf '%s\n' "$FILES" | grep -q "^TodoCalendarApp/Sou
       warns+=("- ⚠️ dbVersion 변경 감지 — AppDataMigrationImple 의 runDBMigration case + runMigrationVersionNtoM 이 함께 안 됨. 없으면 migrateStatement 가 호출조차 안 된다")
     fi
   fi
+  # 외부 캘린더 DB 는 서비스마다 같은 짝을 따로 가진다. 스텝 메서드 이름이 runMigrationVersionNtoM
+  # 패턴이 아니라 대상 테이블을 담으므로, 위 메인 DB 검사의 앵커로는 안 걸린다.
+  for externalDBPair in "googleCalendarDBVersion:runGoogleCalendarDBMigration" \
+                        "appleCalendarDBVersion:runAppleCalendarDBMigration"; do
+    externalDBConst=${externalDBPair%%:*}
+    externalDBFunc=${externalDBPair##*:}
+    oldExternalDBVersion=$(git diff "$BASE" -- TodoCalendarApp/Sources/AppEnvironment.swift 2>/dev/null \
+      | sed -n "s/^-[[:space:]]*static let ${externalDBConst}: Int32 = \([0-9][0-9]*\).*/\1/p" | head -1)
+    [ -n "$oldExternalDBVersion" ] || continue
+    if ! git diff "$BASE" -- Repository 2>/dev/null | grep -qE "^\+[[:space:]]*case ${oldExternalDBVersion}:"; then
+      warns+=("- ⚠️ ${externalDBConst} 변경 감지 — Table.migrateStatement(for:) 에 case ${oldExternalDBVersion} 추가가 함께 안 됨. 짝 확인 필요")
+    fi
+    if ! printf '%s\n' "$FILES" | grep -q 'ExternalCalendarDBMigrationImple\.swift$'; then
+      warns+=("- ⚠️ ${externalDBConst} 변경 감지 — ExternalCalendarDBMigrationImple 의 ${externalDBFunc} switch case + 스텝 메서드가 함께 안 됨. 없으면 migrateStatement 가 호출조차 안 된다")
+    fi
+  done
 fi
 if [ ${#warns[@]} -eq 0 ]; then
   echo "(해당 없음)"
 else
   printf '%s\n' "${warns[@]}"
+fi
+
+# ---- 테스트 고정 sleep (testability §9) ----
+# §9 는 "안 일어남" 단언·정착 대기에만 sleep 을 허용한다. 줄만 보고는 그 판별이 안 돼 경고만 낸다.
+echo "## 테스트 대기"
+sleepHits=()
+if [ "$MODE" = "git" ]; then
+  # rename 은 old 경로를 pathspec 에 같이 넣어야 git 이 쌍으로 보고 추가 줄을 0 으로 센다
+  while IFS=$'\t' read -r status firstPath secondPath; do
+    testFile=${secondPath:-$firstPath}
+    case "$status" in D*) continue ;; esac
+    printf '%s' "$testFile" | grep -qE '/Tests/.*\.swift$' || continue
+    if git ls-files --error-unmatch "$testFile" >/dev/null 2>&1; then
+      addedSleeps=$(git diff -M "$BASE" -- "$firstPath" "$testFile" 2>/dev/null | grep -E '^\+' | grep -cE 'Task\.sleep|usleep\(|asyncAfter')
+    else
+      addedSleeps=$(grep -cE 'Task\.sleep|usleep\(|asyncAfter' "$testFile" 2>/dev/null)
+    fi
+    [ "${addedSleeps:-0}" -gt 0 ] && sleepHits+=("- ⚠️ ${testFile} — 고정 대기 ${addedSleeps}건 추가. 각각이 \"안 일어남\" 단언이나 50ms 정착 대기인지 확인하고, 효과 도착을 기다리는 자리면 waitEffect 로 바꾼다")
+  done < <(printf '%s\n' "$CHANGES" | sort -u)
+fi
+if [ ${#sleepHits[@]} -eq 0 ]; then
+  echo "(해당 없음)"
+else
+  printf '%s\n' "${sleepHits[@]}"
 fi

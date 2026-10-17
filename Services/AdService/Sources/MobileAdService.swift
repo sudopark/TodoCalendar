@@ -22,6 +22,10 @@ public protocol MobileAdService: MobileAdAvailability {
 
     func takePreloadedFullScreenAd() -> InterstitialAd?
 
+    func preloadRewardedAd() async
+
+    func takeRewardedAd(waitingUpTo timeout: TimeInterval) async -> RewardedAd?
+
     @MainActor
     func isPrivacyOptionsRequired() -> Bool
 

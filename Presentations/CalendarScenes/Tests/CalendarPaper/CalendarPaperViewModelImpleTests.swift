@@ -11,6 +11,7 @@ import UnitTestHelpKit
 import TestDoubles
 
 @testable import CalendarScenes
+import CalendarPresentation
 
 
 class CalendarPaperViewModelImpleTests: BaseTestCase {
@@ -140,6 +141,74 @@ extension CalendarPaperViewModelImpleTests {
         )
     }
 
+    func testViewModel_whenSelectedDayIsTodayChanged_notifyToEventList() {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when
+        viewModel.selectedDayIsToday(false)
+
+        // then
+        XCTAssertEqual(self.spyEventListInteractor.didSelectedDayIsToday, false)
+    }
+
+    func testViewModel_whenEventListRequestReturnToToday_notifyToListener() {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when
+        viewModel.dayEventListDidRequestReturnToToday()
+
+        // then
+        XCTAssertEqual(self.spyListner.didRequestReturnToToday, true)
+    }
+
+    func testViewModel_whenUpdateMonthCollapsed_notifyToMonth() {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when
+        viewModel.updateMonthCollapsed(true)
+
+        // then
+        XCTAssertEqual(self.spyMonthInteractor.didUpdateMonthCollapsed, true)
+    }
+
+    func testViewModel_whenMonthRequestToggleCollapse_notifyToListener() {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when
+        viewModel.monthSceneDidRequestToggleMonthCollapse()
+
+        // then
+        XCTAssertEqual(self.spyListner.didRequestToggleMonthCollapse, true)
+    }
+
+    func testViewModel_whenExpandMonthWhileCollapsed_requestToggleToListener() {
+        // given
+        let viewModel = self.makeViewModel()
+        viewModel.updateMonthCollapsed(true)
+
+        // when
+        viewModel.expandMonthIfCollapsed()
+
+        // then
+        XCTAssertEqual(self.spyListner.didRequestToggleMonthCollapse, true)
+    }
+
+    func testViewModel_whenExpandMonthWhileNotCollapsed_notRequestToggle() {
+        // given
+        let viewModel = self.makeViewModel()
+        viewModel.updateMonthCollapsed(false)
+
+        // when
+        viewModel.expandMonthIfCollapsed()
+
+        // then
+        XCTAssertNil(self.spyListner.didRequestToggleMonthCollapse)
+    }
+
     func testViewModel_whenMonthSceneRequestsShare_routesToSharePreview() {
         // given
         let viewModel = self.makeViewModel()
@@ -183,6 +252,11 @@ extension CalendarPaperViewModelImpleTests {
         func selectDay(_ day: CalendarDay) {
             self.didSelectDay = day
         }
+
+        var didUpdateMonthCollapsed: Bool?
+        func updateMonthCollapsed(_ isCollapsed: Bool) {
+            self.didUpdateMonthCollapsed = isCollapsed
+        }
     }
     
     private class SpyEventInteractor: DayEventListSceneInteractor {
@@ -192,6 +266,11 @@ extension CalendarPaperViewModelImpleTests {
         func selectedDayChanaged(_ newDay: CurrentSelectDayModel, and eventThatDay: [any CalendarEvent]) {
             self.selectedDays.append(newDay)
             self.selectedDayEvents.append(eventThatDay)
+        }
+
+        var didSelectedDayIsToday: Bool?
+        func selectedDayIsToday(_ isToday: Bool) {
+            self.didSelectedDayIsToday = isToday
         }
     }
     
@@ -205,6 +284,16 @@ extension CalendarPaperViewModelImpleTests {
         var didRequestShowAICommand: Bool?
         func calendarPaperDidRequestShowAICommand() {
             self.didRequestShowAICommand = true
+        }
+
+        var didRequestReturnToToday: Bool?
+        func calendarPaperDidRequestReturnToToday() {
+            self.didRequestReturnToToday = true
+        }
+
+        var didRequestToggleMonthCollapse: Bool?
+        func calendarPaperDidRequestToggleMonthCollapse() {
+            self.didRequestToggleMonthCollapse = true
         }
     }
 }

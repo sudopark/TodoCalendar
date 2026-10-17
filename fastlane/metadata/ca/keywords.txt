@@ -1,1 +1,1 @@
-tasques,llista de tasques,agenda,planificador,organitzador,recordatoris,widget,recurrent,veu,ia
+llista de tasques,agenda,planificador,organitzador,recordatoris,widget,tema,compte enrere,veu,ia

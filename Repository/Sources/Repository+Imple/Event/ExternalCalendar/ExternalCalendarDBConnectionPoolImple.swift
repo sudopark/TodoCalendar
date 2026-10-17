@@ -31,11 +31,11 @@ public actor ExternalCalendarSQLiteConnectionPoolImple: ExternalCalendarDBConnec
     }
     
     private let dbPathMap: [String: String]
-    private let onFirstOpen: (@Sendable (SQLiteService) async throws -> Void)?
+    private let onFirstOpen: (@Sendable (String, SQLiteService) async throws -> Void)?
     private var connectionPool: [String: DBConnection] = [:]
     public init(
         dbPathMap: [String : String],
-        onFirstOpen: (@Sendable (SQLiteService) async throws -> Void)? = nil
+        onFirstOpen: (@Sendable (String, SQLiteService) async throws -> Void)? = nil
     ) {
         self.dbPathMap = dbPathMap
         self.onFirstOpen = onFirstOpen
@@ -62,7 +62,11 @@ extension ExternalCalendarSQLiteConnectionPoolImple {
         
         let service = SQLiteService()
         try await service.async.open(path: path)
-        try? await self.onFirstOpen?(service)
+        do {
+            try await self.onFirstOpen?(serviceId, service)
+        } catch {
+            logger.log(.sql, level: .error, "external calendar db migration failed, service: \(serviceId), reason: \(error)")
+        }
         let newConnection = DBConnection(sqliteService: service)
         self.connectionPool[serviceId] = newConnection
     }

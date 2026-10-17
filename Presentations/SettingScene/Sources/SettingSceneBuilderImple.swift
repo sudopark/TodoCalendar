@@ -19,7 +19,9 @@ public final class SettingSceneBuilderImple: SettingSceneBuiler {
     private let viewAppearance: ViewAppearance
     private let memberSceneBuilder: any MemberSceneBuilder
     private let paywallSceneBuilder: any PaywallSceneBuilder
+    private let widgetGallerySceneBuilder: any WidgetGallerySceneBuilder
     private let privacyOptionsFormRouter: (any PrivacyOptionsFormRouter)?
+    private let adGuideSceneBuilder: any PaidFeatureAdGuideSceneBuilder
 
     public init(
         appstoreLinkPath: String,
@@ -28,7 +30,9 @@ public final class SettingSceneBuilderImple: SettingSceneBuiler {
         viewAppearance: ViewAppearance,
         memberSceneBuilder: any MemberSceneBuilder,
         paywallSceneBuilder: any PaywallSceneBuilder,
-        privacyOptionsFormRouter: (any PrivacyOptionsFormRouter)?
+        widgetGallerySceneBuilder: any WidgetGallerySceneBuilder,
+        privacyOptionsFormRouter: (any PrivacyOptionsFormRouter)?,
+        adGuideSceneBuilder: any PaidFeatureAdGuideSceneBuilder
     ) {
         self.appstoreLinkPath = appstoreLinkPath
         self.supportExternalCalendarServices = supportExternalCalendarServices
@@ -36,7 +40,9 @@ public final class SettingSceneBuilderImple: SettingSceneBuiler {
         self.viewAppearance = viewAppearance
         self.memberSceneBuilder = memberSceneBuilder
         self.paywallSceneBuilder = paywallSceneBuilder
+        self.widgetGallerySceneBuilder = widgetGallerySceneBuilder
         self.privacyOptionsFormRouter = privacyOptionsFormRouter
+        self.adGuideSceneBuilder = adGuideSceneBuilder
     }
 }
 
@@ -84,14 +90,17 @@ extension SettingSceneBuilderImple {
     @MainActor
     public func makeSettingItemListScene() -> any SettingItemListScene {
         
-        let colorThemeSelectSceneBuilder = ColorThemeSelectSceneBuilerImple(
+        let colorThemeEditSceneBuilder = ColorThemeEditSceneBuilerImple(
             usecaseFactory: self.usecaseFactory,
-            viewAppearance: self.viewAppearance
+            viewAppearance: self.viewAppearance,
+            adGuideSceneBuilder: self.adGuideSceneBuilder
         )
         
-        let widgetSettingSceneBuilder = WidgetAppearanceSettingSceneBuilderImple(
+        let colorThemeSelectSceneBuilder = ColorThemeSelectSceneBuilerImple(
             usecaseFactory: self.usecaseFactory,
-            viewAppearance: self.viewAppearance
+            viewAppearance: self.viewAppearance,
+            editSceneBuilder: colorThemeEditSceneBuilder,
+            adGuideSceneBuilder: self.adGuideSceneBuilder
         )
         
         let timeZoneSelectSceneBuilder = TimeZoneSelectSceneBuilerImple(
@@ -103,7 +112,7 @@ extension SettingSceneBuilderImple {
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearance,
             colorThemeSelectSceneBuiler: colorThemeSelectSceneBuilder,
-            widgetSettingSceneBuilder: widgetSettingSceneBuilder,
+            widgetGallerySceneBuilder: self.widgetGallerySceneBuilder,
             timeZoneSelectSceneBuilder: timeZoneSelectSceneBuilder
         )
         

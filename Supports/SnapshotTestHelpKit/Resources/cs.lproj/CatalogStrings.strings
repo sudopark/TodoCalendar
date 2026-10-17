@@ -12,6 +12,7 @@
 "catalog.event::team_workshop" = "Týmový workshop";
 "catalog.event::release_day" = "Den vydání";
 "catalog.event::lunch" = "Oběd se Sárou";
+"catalog.event::anniversary" = "Výročí svatby";
 
 // MARK: - 할일
 
@@ -40,3 +41,8 @@
 
 "catalog.ai::command" = "oběd se Sárou v pátek v poledne";
 "catalog.ai::result" = "„Oběd se Sárou“ byl přidán na pátek 13. března ve 12:00.";
+
+// MARK: - 컬러 테마
+
+"catalog.colorTheme::forest" = "Les";
+"catalog.colorTheme::dusk" = "Soumrak";

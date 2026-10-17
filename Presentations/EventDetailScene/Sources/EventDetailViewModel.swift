@@ -89,6 +89,7 @@ protocol EventDetailViewModel: Sendable, AnyObject {
     func showTodoGuide()
     func showForemostEventGuide()
     func save()
+    func completeTodo()
     
     // presenter
     var isForemost: AnyPublisher<Bool, Never> { get }
@@ -99,4 +100,6 @@ protocol EventDetailViewModel: Sendable, AnyObject {
     var isSavable: AnyPublisher<Bool, Never> { get }
     var isSaving: AnyPublisher<Bool, Never> { get }
     var moreActions: AnyPublisher<[[EventDetailMoreAction]], Never> { get }
+    /// 거짓은 완료할 수 없는 화면이다 — 할일 편집이 아닌 변형은 버튼을 그리지 않는다
+    var isCompletable: AnyPublisher<Bool, Never> { get }
 }

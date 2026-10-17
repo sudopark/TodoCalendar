@@ -12,6 +12,7 @@ import Prelude
 import Optics
 import Domain
 import Extensions
+import WidgetScenes
 
 
 struct DDayWidgetTimeLineProvider: AppIntentTimelineProvider {
@@ -25,7 +26,14 @@ struct DDayWidgetTimeLineProvider: AppIntentTimelineProvider {
 extension DDayWidgetTimeLineProvider {
 
     func placeholder(in context: Context) -> Entry {
-        return .init(date: Date(), result: .success(.sample))
+        let builder = WidgetViewModelProviderBuilder(base: .init())
+        let look = WidgetLook(
+            globalSetting: builder.loadWidgetAppearanceSetting(),
+            appliedStyle: builder.fetchDefaultStyle(of: .ddaySmall)
+        )
+        let sample = DDayWidgetViewModel.sample |> \.look .~ look
+        return .init(date: Date(), result: .success(sample))
+            |> \.background .~ look.background
     }
 
     func snapshot(
@@ -58,10 +66,12 @@ extension DDayWidgetTimeLineProvider {
         let now = Date()
         do {
             let model = try await viewModelProvider.getDDayModel(
-                for: now, target: configuration.resolvedTargetId
+                for: now,
+                target: configuration.resolvedTargetId,
+                style: configuration.resolvedStyle
             )
             return .init(date: now, result: .success(model))
-                |> \.background .~ model.widgetSetting.background
+                |> \.background .~ model.look.background
         } catch {
             return .init(date: now, result: .failure(.init(error: error)))
         }

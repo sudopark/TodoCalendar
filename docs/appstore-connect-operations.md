@@ -8,6 +8,7 @@ ASC에 무언가를 올리는 작업의 **공통 앞단**(자격증명·실행�
 | 텍스트 메타데이터 (설명·키워드·subtitle·홍보문구) | [`fastlane/metadata/README.md`](../fastlane/metadata/README.md) |
 | 스크린샷 | [`fastlane/screenshots.md`](../fastlane/screenshots.md) |
 | 릴리즈 노트 (버전마다 갈림) | `release-notes` 스킬 |
+| 제품 페이지 헤더·검색 결과 크리에이티브 에셋 | `creative-assets` 스킬 |
 | IAP 상품·심사 정보·데모 계정 | 이슈 #996 본문 |
 
 ---
@@ -60,7 +61,7 @@ bundle exec fastlane ios upload_app_store_screenshots   # 스크린샷만
 
 - 메타데이터 lane은 `force: false`라 업로드 직전 HTML 프리뷰 확인 프롬프트가 뜬다 — **TTY에서 돌린다.**
   비대화형에서 돌리면 그 프롬프트에서 죽는다
-- 스크린샷 lane은 186장 업로드가 시간 단위라 프롬프트 없이 돌고, 대신 진입 가드 3종이 사전 확인을 대신한다
+- 스크린샷 lane은 279장(6.9" 217장 + Duo 62장) 업로드가 시간 단위라 프롬프트 없이 돌고, 대신 진입 가드 3종이 사전 확인을 대신한다
 - 두 lane 다 `precheck`의 `other_platforms` 룰과 무관하게 통과해야 한다 — 구글 캘린더 연동은 앱의 실제
   기능이라 competitor 언급이 아니다. 그래서 이 룰만 `warn`으로 낮췄고 나머지는 `error`다
 

@@ -37,6 +37,7 @@ import Scenes
     var availableMoreActions: [[EventDetailMoreAction]] = []
     var isForemost: Bool = false
     var isLiveActivityRegistered: Bool = false
+    var isCompletable: Bool = false
 
     @ObservationIgnored var suggestEventEndTime: () -> Date? = { nil }
     var selectedStartDate: Date = Date()
@@ -192,6 +193,13 @@ import Scenes
             })
             .store(in: self.cancellables)
         
+        viewModel.isCompletable
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] canComplete in
+                self?.isCompletable = canComplete
+            })
+            .store(in: self.cancellables)
+        
         viewModel.moreActions
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] actions in
@@ -223,6 +231,7 @@ final class EventDetailViewEventHandlers: Observable {
     var openURL: () -> Void = { }
     var enterMemo: (String) -> Void = { _ in }
     var save: () -> Void = { }
+    var completeTodo: () -> Void = { }
     var doMoreAction: (EventDetailMoreAction) -> Void = { _ in }
     var showTodoEventGuide: () -> Void = { }
     var showForemostEventGuide: () -> Void = { }
@@ -255,6 +264,7 @@ final class EventDetailViewEventHandlers: Observable {
         self.openURL = inputViewModel.openURL
         self.enterMemo = inputViewModel.enter(memo:)
         self.save = viewModel.save
+        self.completeTodo = viewModel.completeTodo
         self.doMoreAction = viewModel.handleMoreAction(_:)
         self.showTodoEventGuide = viewModel.showTodoGuide
         self.showForemostEventGuide = viewModel.showForemostEventGuide
@@ -509,6 +519,7 @@ struct EventDetailView: View {
                 : appearance.colorSet.text1.asColor
 
             return EventTimeTextView(timeText, textColor: textColor, isStrikethrough: isInvalid)
+                .minimumScaleFactor(0.8)
                 .onTapGesture {
                     self.appearance.impactIfNeed()
                     self.updateTimePickerShowing(position)
@@ -577,11 +588,11 @@ struct EventDetailView: View {
         
         func backGroundView() -> some View {
             if self.state.isAllDay {
-                return RoundedRectangle(cornerRadius: Metric.Radius.sheet)
+                return RoundedRectangle(cornerRadius: Metric.Radius.sheet, style: .circular)
                     .fill(self.appearance.colorSet.selectedDayBackground.asColor)
                     .asAnyView()
             } else {
-                return RoundedRectangle(cornerRadius: Metric.Radius.sheet)
+                return RoundedRectangle(cornerRadius: Metric.Radius.sheet, style: .circular)
                     .stroke(self.appearance.colorSet.text2.asColor, lineWidth: 1)
                     .asAnyView()
             }
@@ -594,9 +605,11 @@ struct EventDetailView: View {
             
         } label: {
             Text("calendar::event_time::allday".localized())
+                .font(self.appearance.fontSet.size(14).asFont)
                 .foregroundStyle(textColor)
                 .padding(.vertical, spacing: .small)
                 .padding(.horizontal, spacing: .large)
+                .fixedSize()
         }
         .background(
             backGroundView()
@@ -613,6 +626,7 @@ struct EventDetailView: View {
                     .foregroundStyle(self.appearance.colorSet.text1.asColor)
 
                 selectedTimeView()
+                    .layoutPriority(1)
 
                 Spacer()
 
@@ -684,7 +698,6 @@ struct EventDetailView: View {
                 }
             }
             .labelsHidden()
-            .invertColorIfNeed(appearance)
             
             HStack {
                 removeEventTimeView
@@ -1062,6 +1075,11 @@ struct EventDetailView: View {
             )
             .eventHandler(\.onTap, eventHandlers.save)
             
+            if state.isCompletable {
+                TodoCompleteButton(isEnable: !state.isSaving)
+                    .eventHandler(\.onTap, eventHandlers.completeTodo)
+            }
+            
             if !state.availableMoreActions.isEmpty {
                 Menu {
                     ForEach(0..<self.state.availableMoreActions.count, id: \.self) { sectionIndex in
@@ -1128,6 +1146,38 @@ private extension SelectedTime {
         }
     }
 }
+
+// MARK: - TodoCompleteButton
+
+private struct TodoCompleteButton: View {
+    
+    let isEnable: Bool
+    
+    @Environment(ViewAppearance.self) private var appearance
+    var onTap: () -> Void = { }
+    
+    var body: some View {
+        Button {
+            self.appearance.impactIfNeed(.light)
+            self.onTap()
+        } label: {
+            Text("common.done".localized())
+                .font(self.appearance.fontSet.bottomButton.asFont)
+                .foregroundStyle(self.appearance.colorSet.secondaryBtnText.asColor)
+        }
+        .disabled(!self.isEnable)
+        .padding(.horizontal, spacing: .large)
+        .frame(height: 50)
+        .background(
+            RoundedRectangle(cornerRadius: Metric.Radius.regular)
+                .fill(
+                    self.appearance.colorSet.secondaryBtnBackground.asColor
+                        .opacity(self.isEnable ? 1.0 : 0.5)
+                )
+        )
+    }
+}
+
 
 extension EventDetailMoreAction: Identifiable {
     var id: String {

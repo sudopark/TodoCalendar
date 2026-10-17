@@ -19,6 +19,7 @@ import SettingScene
 import MemberScenes
 import AIAgentScene
 import BillingScenes
+import WidgetScenes
 import SQLiteService
 import AdService
 
@@ -36,31 +37,67 @@ final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked
         self.window = window
         self.appearance = .init(
             setting: setting, 
-            isSystemDarkTheme: window?.traitCollection.userInterfaceStyle == .dark
+            isSystemDarkTheme: window?.windowScene?.traitCollection.userInterfaceStyle == .dark
         )
         self.bindSystemColorThemeChanged()
         self.changeNavigationBarAppearnace(self.appearance.colorSet)
+        self.applyColorThemeToWindow()
     }
     
+    // 창에 스킴을 덮으면 창의 trait 은 기기 모드를 잃는다. 기기 모드는 윈도우 씬에서 받는다.
     @MainActor
     private func bindSystemColorThemeChanged() {
-        guard let window = self.window else { return }
+        guard let windowScene = self.window?.windowScene else { return }
         
-        window.registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (wd: UIWindow, _) in
-            let isDark = wd.traitCollection.userInterfaceStyle == .dark
+        windowScene.registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (scene: UIWindowScene, _) in
+            let isDark = scene.traitCollection.userInterfaceStyle == .dark
+            if self.appearance.isSystemDarkTheme != isDark {
+                self.appearance.isSystemDarkTheme = isDark
+            }
             self.notifySystemColorThemeChangedIfNeed(isDark: isDark)
         }
     }
     
     @MainActor
+    private func applyColorThemeToWindow() {
+        self.window?.overrideUserInterfaceStyle = self.appearance.preferredColorScheme
+            .map { UIUserInterfaceStyle($0) } ?? .unspecified
+        self.window?.tintColor = self.appearance.colorSet.accent
+    }
+    
+    @MainActor
     private func notifySystemColorThemeChangedIfNeed(isDark: Bool) {
-        guard self.appearance.colorSetKey == .systemTheme else { return }
-        let newSet = self.appearance.colorSetKey.convert(isSystemDarkTheme: isDark)
-        let didSetChanged = type(of: self.appearance.colorSet) != type(of: newSet)
+        guard self.appearance.isFollowingSystemTheme else { return }
+        let newSet = self.appearance.colorSetKey.convert(
+            isSystemDarkTheme: isDark, customColorTheme: self.appearance.customColorTheme
+        )
+        let didSetChanged = self.appearance.colorSet.isLightTheme != newSet.isLightTheme
         guard didSetChanged else { return }
+        self.replaceColorSet(newSet)
+    }
+    
+    @MainActor
+    private func replaceColorSet(_ newSet: any ColorSet) {
         self.changeNavigationBarAppearnace(newSet)
         self.appearance.colorSet = newSet
         self.appearance.forceReloadNavigationBar()
+        self.applyColorThemeToWindow()
+    }
+    
+    @MainActor
+    func resetCustomColorThemeAfterAccountChanged() {
+        guard case .custom = self.appearance.colorSetKey else { return }
+        self.appearance.colorSetKey = .systemTheme
+        self.appearance.customColorTheme = nil
+        self.reconvertColorSet()
+    }
+    
+    @MainActor
+    private func reconvertColorSet() {
+        self.replaceColorSet(self.appearance.colorSetKey.convert(
+            isSystemDarkTheme: self.appearance.isSystemDarkTheme,
+            customColorTheme: self.appearance.customColorTheme
+        ))
     }
     
     func notifySettingChanged(_ newSetting: AppearanceSettings) {
@@ -70,14 +107,12 @@ final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked
     
     func notifyCalendarSettingChanged(_ newSetting: CalendarAppearanceSettings) {
         Task { @MainActor in
-            if self.appearance.colorSetKey != newSetting.colorSetKey {
+            let didColorSetChanged = self.appearance.colorSetKey != newSetting.colorSetKey
+                || self.appearance.customColorTheme != newSetting.currentCustomColorTheme
+            if didColorSetChanged {
                 self.appearance.colorSetKey = newSetting.colorSetKey
-                let newSet = newSetting.colorSetKey.convert(
-                    isSystemDarkTheme: self.window?.traitCollection.userInterfaceStyle == .dark
-                )
-                self.changeNavigationBarAppearnace(newSet)
-                self.appearance.colorSet = newSet
-                self.appearance.forceReloadNavigationBar()
+                self.appearance.customColorTheme = newSetting.currentCustomColorTheme
+                self.reconvertColorSet()
             }
             if self.appearance.fontSet.key != newSetting.fontSetKey {
                 self.appearance.fontSet = newSetting.fontSetKey.convert()
@@ -217,7 +252,7 @@ final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
     
     
     @MainActor var window: UIWindow!
-    @MainActor private weak var updatePopupViewController: UIViewController?
+    @MainActor private var updatePopupWindow: UIWindow?
     var viewAppearanceStore: ApplicationViewAppearanceStoreImple!
     private let authUsecase: any AuthUsecase
     private let accountUsecase: any AccountUsecase
@@ -297,7 +332,7 @@ extension ApplicationRootRouter {
         self.changeUsecaseFactroy(
             by: prepareResult.latestLoginAcount?.auth
         )
-        let interactor = self.refreshRoot()
+        let interactor = self.refreshRoot(isInitialScene: true)
         self.setupBaseViewAppearanceSetting()
         return interactor
     }
@@ -308,8 +343,9 @@ extension ApplicationRootRouter {
 
     @MainActor
     func changeRootSceneAfter(signIn auth: Auth?) -> (any MainSceneInteractor)? {
+        self.viewAppearanceStore.resetCustomColorThemeAfterAccountChanged()
         self.changeUsecaseFactroy(by: auth)
-        return self.refreshRoot()
+        return self.refreshRoot(isInitialScene: false)
     }
     
     func showConfirm(dialog info: ConfirmDialogInfo) {
@@ -324,9 +360,8 @@ extension ApplicationRootRouter {
 
     func showUpdatePopup(_ requirement: AppUpdateRequirement) {
         Task { @MainActor in
-            guard self.updatePopupViewController == nil else { return }
-            guard let topViewController = self.window.rootViewController?.topPresentedViewController()
-            else { return }
+            guard self.updatePopupWindow == nil else { return }
+            guard let windowScene = self.window.windowScene else { return }
 
             let onUpdate: () -> Void = {
                 if let url = URL(string: AppEnvironment.appstoreLinkPath) {
@@ -334,8 +369,8 @@ extension ApplicationRootRouter {
                 }
             }
             let onClose: (() -> Void)? = requirement == .recommended ? { [weak self] in
-                self?.updatePopupViewController?.dismiss(animated: false)
-                self?.updatePopupViewController = nil
+                self?.updatePopupWindow?.isHidden = true
+                self?.updatePopupWindow = nil
             } : nil
 
             let view = ForceUpdatePopupView(
@@ -345,13 +380,25 @@ extension ApplicationRootRouter {
             )
             .environment(self.viewAppearanceStore.appearance)
             let hostingVC = UIHostingController(rootView: view)
-            hostingVC.modalPresentationStyle = .overFullScreen
-            hostingVC.isModalInPresentation = true
             hostingVC.view.backgroundColor = .clear
 
-            self.updatePopupViewController = hostingVC
-            topViewController.present(hostingVC, animated: false)
+            self.updatePopupWindow = self.makeUpdatePopupWindow(windowScene, hostingVC)
         }
+    }
+
+    // 앱 창에 present 하면 다른 화면을 닫는 dismiss 에 강제 업데이트 팝업도 같이 닫힌다
+    @MainActor
+    private func makeUpdatePopupWindow(
+        _ windowScene: UIWindowScene, _ popupViewController: UIViewController
+    ) -> UIWindow {
+        let popupWindow = UIWindow(windowScene: windowScene)
+        popupWindow.windowLevel = .alert
+        popupWindow.backgroundColor = .clear
+        popupWindow.overrideUserInterfaceStyle = self.window.overrideUserInterfaceStyle
+        popupWindow.tintColor = self.window.tintColor
+        popupWindow.rootViewController = popupViewController
+        popupWindow.isHidden = false
+        return popupWindow
     }
     
     @MainActor
@@ -385,7 +432,7 @@ extension ApplicationRootRouter {
     }
     
     @MainActor
-    private func refreshRoot() -> (any MainSceneInteractor)? {
+    private func refreshRoot(isInitialScene: Bool) -> (any MainSceneInteractor)? {
         
         let builder = MainSceneBuilerImple(
             usecaseFactory: self.usecaseFactory,
@@ -394,7 +441,9 @@ extension ApplicationRootRouter {
             settingSceneBuilder: self.settingSceneBuilder(),
             mobileAdService: self.applicationBase.mobileAdService,
             fullScreenAdRouter: self.fullScreenAdRouter(),
-            adViewBuilder: self.adViewBuilder()
+            adViewBuilder: self.adViewBuilder(),
+            adGuideSceneBuilder: self.paidFeatureAdGuideSceneBuilder(),
+            isInitialScene: isInitialScene
         )
         let mainScene = builder.makeMainScene()
         self.window.rootViewController = mainScene
@@ -413,6 +462,10 @@ extension ApplicationRootRouter {
             adService: self.applicationBase.mobileAdService,
             adExposureUsecase: self.usecaseFactory.adExposureUsecase
         )
+    }
+
+    private func rewardedAdRouter() -> any RewardedAdRouter {
+        return RewardedAdRouterImple(adService: self.applicationBase.mobileAdService)
     }
     
     private func calendarSceneBulder() -> any CalendarSceneBuilder {
@@ -472,7 +525,27 @@ extension ApplicationRootRouter {
             viewAppearance: self.viewAppearanceStore.appearance,
             memberSceneBuilder: self.memberSceneBuilder(),
             paywallSceneBuilder: self.paywallSceneBuilder(),
-            privacyOptionsFormRouter: self.applicationBase.mobileAdService
+            widgetGallerySceneBuilder: self.widgetGallerySceneBuilder(),
+            privacyOptionsFormRouter: self.applicationBase.mobileAdService,
+            adGuideSceneBuilder: self.paidFeatureAdGuideSceneBuilder()
+        )
+    }
+
+    private func paidFeatureAdGuideSceneBuilder() -> any PaidFeatureAdGuideSceneBuilder {
+        return PaidFeatureAdGuideBuilderImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearanceStore.appearance,
+            rewardedAdRouter: self.rewardedAdRouter(),
+            paywallSceneBuilder: self.paywallSceneBuilder()
+        )
+    }
+
+    private func widgetGallerySceneBuilder() -> any WidgetGallerySceneBuilder {
+        return WidgetGalleryBuilderImple(
+            uiSettingUsecase: self.usecaseFactory.makeUISettingUsecase(),
+            widgetStyleUsecase: self.usecaseFactory.makeWidgetStyleUsecase(),
+            adGuideSceneBuilder: self.paidFeatureAdGuideSceneBuilder(),
+            viewAppearance: self.viewAppearanceStore.appearance
         )
     }
 

@@ -1,7 +1,18 @@
-■ Google Takvim davetlerini yanıtlama
-· Google Takvim etkinliğinin katılımcı listesinde "Siz" öğesine dokun ve Evet, Belki ya da Hayır olarak yanıtla
-· Yanıt doğrudan Google Takvim'e gider, yinelenen bir etkinlikte ise serinin tamamına uygulanır
+■ Widget'ları özelleştirme
+· Ana Ekran'daki her widget için ayrı bir arka plan rengi seçin ve neyin görüneceğine karar verin: ay adı, hafta günü başlığı, bugünün vurgusu ve daha fazlası
+· Birkaç stil kaydedin ve bir widget'ın her kopyası için farklı bir stil seçin
+· Ayarlar'daki Widget galerisinde her widget'ı önizleyin ve doğrudan Özelleştir'e geçin
 
-■ Siri ile konuşma
-· Yalnızca uygulamanın adını söyleyen kısa bir ifadeyle başla — "Hey To-do Calendar" ya da "To-do Calendar uygulamasına sor"
-· Yalnızca ekleme değil: saati taşıma, yeniden adlandırma, tamamlandı olarak işaretleme ya da silme de aynı şekilde söylenir
+■ Renk temaları
+· Sistem, Açık ve Koyu'nun yanı sıra 19 yeni yerleşik tema geldi: 11 açık, 8 koyu
+· Yeni tema'da bir arka plan ve bir vurgu rengi seçin, uygulama metnin rahat okunduğu bir palet hazırlasın
+· Oturum açın, temalarınız diğer cihazlarınızda da sizinle olsun
+
+■ Geri Sayım widget'ı
+· Önemli etkinliklere kalan günleri Ana Ekran'da ve Kilit Ekranı'nda geri sayın
+· Bir etkinliğin menüsünden "Geri Sayım widget'ına ekle" seçeneğini seçin, widget'ı düzenlerken listenin en üstünde görünsün
+· Arkasına bir fotoğraf koyun, geri sayım fotoğrafın üzerinde görünsün
+
+■ Geniş ekranda iki bölme
+· iPhone Duo'yu açtığınızda seçtiğiniz günün etkinlikleri takvimin yanında görünür
+· Katladığınızda hemen tek sütuna döner, baktığınız ay ve gün de aynen kalır

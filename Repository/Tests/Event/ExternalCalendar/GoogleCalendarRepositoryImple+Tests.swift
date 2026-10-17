@@ -26,6 +26,7 @@ final class GoogleCalendarRepositoryImple_Tests: PublisherWaitable, LocalTestabl
     let cacheStorage: GoogleCalendarLocalStorageImple
     private let stubRemote: StubRemoteAPI
     private let testAccountId = "test@google.com"
+    private let migration = ExternalCalendarDBMigrationImple(googleCalendarDBVersion: 1, appleCalendarDBVersion: 1)
 
     init() {
         self.stubRemote = .init(responses: DummyResponse().reponse)
@@ -271,23 +272,22 @@ extension GoogleCalendarRepositoryImple_Tests {
     @Test func migration_addsAccessRoleColumn_toExistingTable_withoutLosingData() async throws {
         try await self.runTestWithOpenClose("test_google_access_role_migration") {
             // given
+            let accountId = self.testAccountId
             let legacyTag = GoogleCalendar.Tag(id: "legacy_calendar", name: "legacy calendar")
                 |> \.colorId .~ "9"
                 |> \.isSelected .~ true
             try await self.sqliteService.async.run { db in
-                try db.createTableOrNot(GoogleCalendarEventTagTableV0LegacyTable.self)
-                let entity = GoogleCalendarEventTagTable.Entity(accountId: self.testAccountId, legacyTag)
-                try db.insert(GoogleCalendarEventTagTableV0LegacyTable.self, entities: [entity], shouldReplace: true)
+                try db.createTableOrNot(GoogleCalendarEventTagTableV1.self)
+                let entity = GoogleCalendarEventTagTableV1.Entity(accountId: accountId, legacyTag)
+                try db.insert(GoogleCalendarEventTagTableV1.self, entities: [entity], shouldReplace: true)
             }
 
             // when
-            try await self.sqliteService.async.run { db in
-                try GoogleCalendarEventTagTableMigration.runMigration(for: 0, database: db)
-            }
+            try await self.migration.runMigration(serviceId: GoogleCalendarService.id, dbService: self.sqliteService)
             let migratedInTag = GoogleCalendar.Tag(id: "migrated_in_calendar", name: "migrated in calendar")
                 |> \.accessRole .~ .owner
             try await self.sqliteService.async.run { db in
-                let entity = GoogleCalendarEventTagTable.Entity(accountId: self.testAccountId, migratedInTag)
+                let entity = GoogleCalendarEventTagTable.Entity(accountId: accountId, migratedInTag)
                 try db.insert(GoogleCalendarEventTagTable.self, entities: [entity], shouldReplace: false)
             }
             let loaded = try await self.cacheStorage.loadCalendarList(accountId: self.testAccountId)
@@ -306,17 +306,16 @@ extension GoogleCalendarRepositoryImple_Tests {
     @Test func migration_whenTableNotCreatedYet_succeedsAndTableAcceptsAccessRole() async throws {
         try await self.runTestWithOpenClose("test_google_access_role_migration_fresh") {
             // given - 신규 설치: 캘린더 목록을 아직 한 번도 로드하지 않아 테이블이 없다
+            let accountId = self.testAccountId
 
             // when
-            try await self.sqliteService.async.run { db in
-                try GoogleCalendarEventTagTableMigration.runMigration(for: 0, database: db)
-            }
+            try await self.migration.runMigration(serviceId: GoogleCalendarService.id, dbService: self.sqliteService)
 
             // then
             let tag = GoogleCalendar.Tag(id: "fresh_calendar", name: "fresh calendar")
                 |> \.accessRole .~ .writer
             try await self.sqliteService.async.run { db in
-                let entity = GoogleCalendarEventTagTable.Entity(accountId: self.testAccountId, tag)
+                let entity = GoogleCalendarEventTagTable.Entity(accountId: accountId, tag)
                 try db.insert(GoogleCalendarEventTagTable.self, entities: [entity], shouldReplace: false)
             }
             let loaded = try await self.cacheStorage.loadCalendarList(accountId: self.testAccountId)
@@ -326,54 +325,389 @@ extension GoogleCalendarRepositoryImple_Tests {
     }
 }
 
-private struct GoogleCalendarEventTagTableV0LegacyTable: Table {
+// MARK: - 전 컬럼 왕복 (매크로 전환 전 기준선)
 
-    enum Columns: String, TableColumn {
-        case accountId = "account_id"
-        case tagId = "tag_id"
-        case name
-        case description
-        case background
-        case foreground
-        case colorId = "color_id"
-        case isSelected = "is_selected"
+extension GoogleCalendarRepositoryImple_Tests {
 
-        var dataType: ColumnDataType {
-            switch self {
-            case .accountId: return .text([.notNull])
-            case .tagId: return .text([.primaryKey(autoIncrement: false), .unique, .notNull])
-            case .name: return .text([.notNull])
-            case .description: return .text([])
-            case .background: return .text([])
-            case .foreground: return .text([])
-            case .colorId: return .text([])
-            case .isSelected: return .integer([])
-            }
+    @Test func cacheStorage_whenSaveColorsWithEveryColumn_loadRestoresSameValues() async throws {
+        try await self.runTestWithOpenClose("test_google_colors_every_column") {
+            // given
+            let colors = GoogleCalendar.Colors(
+                ownerId: self.testAccountId,
+                calendars: ["calendar-key-1": .init(foregroundHex: "#calendarFore", backgroudHex: "#calendarBack")],
+                events: ["event-key-2": .init(foregroundHex: "#eventFore", backgroudHex: "#eventBack")]
+            )
+
+            // when
+            try await self.cacheStorage.updateColors(colors, accountId: self.testAccountId)
+            let restored = try await self.cacheStorage.loadColors(accountId: self.testAccountId)
+
+            // then
+            #expect(restored?.ownerId == self.testAccountId)
+            #expect(restored?.calendars.count == 1)
+            #expect(restored?.calendars["calendar-key-1"]?.foregroundHex == "#calendarFore")
+            #expect(restored?.calendars["calendar-key-1"]?.backgroudHex == "#calendarBack")
+            #expect(restored?.events.count == 1)
+            #expect(restored?.events["event-key-2"]?.foregroundHex == "#eventFore")
+            #expect(restored?.events["event-key-2"]?.backgroudHex == "#eventBack")
         }
     }
 
-    typealias ColumnType = Columns
-    typealias EntityType = GoogleCalendarEventTagTable.Entity
-    static var tableName: String { GoogleCalendarEventTagTable.tableName }
+    @Test func cacheStorage_whenSaveCalendarListWithEveryColumn_loadRestoresSameValues() async throws {
+        try await self.runTestWithOpenClose("test_google_list_every_column") {
+            // given
+            let filled = self.everyColumnTag
+            let blank = GoogleCalendar.Tag(id: "blank-calendar", name: "blank calendar name")
 
-    static func scalar(_ entity: EntityType, for column: Columns) -> (any ScalarType)? {
-        switch column {
-        case .accountId: return entity.accountId
-        case .tagId: return entity.tag.id
-        case .name: return entity.tag.name
-        case .description: return entity.tag.description
-        case .background: return entity.tag.backgroundColorHex
-        case .foreground: return entity.tag.foregroundColorHex
-        case .colorId: return entity.tag.colorId
-        case .isSelected: return entity.tag.isSelected ?? false
+            // when
+            try await self.cacheStorage.updateCalendarList([filled, blank], accountId: self.testAccountId)
+            let restored = try await self.cacheStorage.loadCalendarList(accountId: self.testAccountId)
+
+            // then
+            let restoredFilled = try #require(restored.first { $0.id == "filled-calendar" })
+            #expect(restoredFilled.ownerId == self.testAccountId)
+            #expect(restoredFilled.tagId == .externalCalendar(serviceId: GoogleCalendarService.id, id: "filled-calendar"))
+            #expect(restoredFilled.name == "filled calendar name")
+            #expect(restoredFilled.description == "filled calendar description")
+            #expect(restoredFilled.backgroundColorHex == "#listBack")
+            #expect(restoredFilled.foregroundColorHex == "#listFore")
+            #expect(restoredFilled.colorId == "19")
+            #expect(restoredFilled.isSelected == true)
+            #expect(restoredFilled.accessRole == .freeBusyReader)
+
+            let restoredBlank = try #require(restored.first { $0.id == "blank-calendar" })
+            #expect(restoredBlank.name == "blank calendar name")
+            #expect(restoredBlank.description == nil)
+            #expect(restoredBlank.backgroundColorHex == nil)
+            #expect(restoredBlank.foregroundColorHex == nil)
+            #expect(restoredBlank.colorId == nil)
+            #expect(restoredBlank.isSelected == false)
+            #expect(restoredBlank.accessRole == nil)
         }
+    }
+
+    @Test func cacheStorage_whenSaveEventOriginWithEveryColumn_loadRestoresSameValues() async throws {
+        try await self.runTestWithOpenClose("test_google_origin_every_column") {
+            // given
+            let filled = self.everyColumnEventOrigin
+            let hidden = self.hiddenEventOrigin
+
+            // when
+            try await self.cacheStorage.updateEventDetail(
+                "roundtrip-calendar", "Asia/Seoul", filled, accountId: self.testAccountId
+            )
+            try await self.cacheStorage.updateEventDetail(
+                "roundtrip-calendar", "Asia/Seoul", hidden, accountId: self.testAccountId
+            )
+            let restoredFilled = try await self.cacheStorage.loadEventDetail(
+                "roundtrip-origin", accountId: self.testAccountId
+            )
+            let restoredHidden = try await self.cacheStorage.loadEventDetail(
+                "roundtrip-hidden-origin", accountId: self.testAccountId
+            )
+            let events = try await self.cacheStorage.loadEvents(
+                "roundtrip-calendar", self.range, accountId: self.testAccountId
+            )
+
+            // then
+            self.assertEveryColumnEventOrigin(restoredFilled)
+
+            #expect(restoredHidden.summary == "")
+            #expect(restoredHidden.visibility == .private)
+            #expect(restoredHidden.summaryText == "external_service::google::hidden_event".localized())
+
+            let filledEvent = try #require(events.first { $0.eventId == "roundtrip-origin" })
+            #expect(filledEvent.name == "roundtrip summary")
+            #expect(filledEvent.colorId == "17")
+            #expect(filledEvent.htmlLink == "https://example.com/roundtrip-html-link")
+            #expect(filledEvent.location == "roundtrip location")
+            #expect(filledEvent.eventTime == .period(
+                try self.internetDate("2025-04-11T10:00:00+09:00").timeIntervalSince1970
+                ..< self.internetDate("2025-04-11T11:30:00+09:00").timeIntervalSince1970
+            ))
+
+            let hiddenEvent = try #require(events.first { $0.eventId == "roundtrip-hidden-origin" })
+            #expect(hiddenEvent.name == "external_service::google::hidden_event".localized())
+        }
+    }
+
+    private var everyColumnTag: GoogleCalendar.Tag {
+        var tag = GoogleCalendar.Tag(id: "filled-calendar", name: "filled calendar name")
+        tag.description = "filled calendar description"
+        tag.backgroundColorHex = "#listBack"
+        tag.foregroundColorHex = "#listFore"
+        tag.colorId = "19"
+        tag.isSelected = true
+        tag.accessRole = .freeBusyReader
+        return tag
+    }
+
+    private var everyColumnEventOrigin: GoogleCalendar.EventOrigin {
+        var creator = GoogleCalendar.EventOrigin.Creator()
+        creator.id = "creator-id"
+        creator.email = "creator@example.com"
+        creator.displayName = "creator name"
+        creator.`self` = false
+
+        var organizer = GoogleCalendar.EventOrigin.Organizer()
+        organizer.id = "organizer-id"
+        organizer.email = "organizer@example.com"
+        organizer.displayName = "organizer name"
+        organizer.`self` = true
+
+        var attendee = GoogleCalendar.EventOrigin.Attendee()
+        attendee.id = "attendee-id"
+        attendee.email = "attendee@example.com"
+        attendee.displayName = "attendee name"
+        attendee.organizer = false
+        attendee.selfValue = true
+        attendee.resource = false
+        attendee.optional = true
+        attendee.responseStatus = "tentative"
+
+        var solution = GoogleCalendar.EventOrigin.ConferenceData.Solution()
+        solution.iconUri = "https://example.com/solution-icon"
+        solution.name = "solution name"
+
+        var entryPoint = GoogleCalendar.EventOrigin.ConferenceData.EntryPoint()
+        entryPoint.entryPointType = "video"
+        entryPoint.uri = "https://example.com/entry-uri"
+        entryPoint.label = "entry label"
+        entryPoint.pin = "entry-pin"
+        entryPoint.accessCode = "entry-access-code"
+        entryPoint.meetingCode = "entry-meeting-code"
+        entryPoint.passcode = "entry-passcode"
+        entryPoint.password = "entry-password"
+
+        var conferenceData = GoogleCalendar.EventOrigin.ConferenceData()
+        conferenceData.conferenceId = "conference-id"
+        conferenceData.conferenceSolution = solution
+        conferenceData.entryPoints = [entryPoint]
+
+        var attachment = GoogleCalendar.EventOrigin.Attachment()
+        attachment.fileUrl = "https://example.com/attachment-file"
+        attachment.title = "attachment title"
+        attachment.mimeType = "application/pdf"
+        attachment.iconLink = "https://example.com/attachment-icon"
+        attachment.fileId = "attachment-file-id"
+
+        var origin = GoogleCalendar.EventOrigin(id: "roundtrip-origin", summary: "roundtrip summary")
+        origin.htmlLink = "https://example.com/roundtrip-html-link"
+        origin.description = "roundtrip description"
+        origin.location = "roundtrip location"
+        origin.colorId = "17"
+        origin.creator = creator
+        origin.organizer = organizer
+        origin.start = self.eventTime(dateTime: "2025-04-11T10:00:00+09:00", timeZone: "Asia/Seoul")
+        origin.end = self.eventTime(dateTime: "2025-04-11T11:30:00+09:00", timeZone: "Asia/Tokyo")
+        origin.endTimeUnspecified = true
+        origin.recurrence = ["RRULE:FREQ=WEEKLY;COUNT=5", "EXDATE;TZID=Asia/Seoul:20250418T100000"]
+        origin.recurringEventId = "roundtrip-recurring-id"
+        origin.sequence = 13
+        origin.attendees = [attendee]
+        origin.hangoutLink = "https://example.com/roundtrip-hangout"
+        origin.conferenceData = conferenceData
+        origin.attachments = [attachment]
+        origin.eventType = "outOfOffice"
+        origin.status = .tentative
+        origin.visibility = .confidential
+        return origin
+    }
+
+    private var hiddenEventOrigin: GoogleCalendar.EventOrigin {
+        var origin = GoogleCalendar.EventOrigin(id: "roundtrip-hidden-origin", summary: nil)
+        origin.start = self.eventTime(dateTime: "2025-04-12T10:00:00+09:00", timeZone: "Asia/Seoul")
+        origin.end = self.eventTime(dateTime: "2025-04-12T11:30:00+09:00", timeZone: "Asia/Seoul")
+        origin.visibility = .private
+        return origin
+    }
+
+    private func eventTime(
+        dateTime: String, timeZone: String
+    ) -> GoogleCalendar.EventOrigin.GoogleEventTime {
+        var time = GoogleCalendar.EventOrigin.GoogleEventTime()
+        time.dateTime = dateTime
+        time.timeZone = timeZone
+        return time
+    }
+
+    private func internetDate(_ text: String) throws -> Date {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime]
+        return try formatter.date(from: text).unwrap()
+    }
+
+    private func assertEveryColumnEventOrigin(_ origin: GoogleCalendar.EventOrigin) {
+        #expect(origin.id == "roundtrip-origin")
+        #expect(origin.summary == "roundtrip summary")
+        #expect(origin.htmlLink == "https://example.com/roundtrip-html-link")
+        #expect(origin.description == "roundtrip description")
+        #expect(origin.location == "roundtrip location")
+        #expect(origin.colorId == "17")
+
+        #expect(origin.creator?.id == "creator-id")
+        #expect(origin.creator?.email == "creator@example.com")
+        #expect(origin.creator?.displayName == "creator name")
+        #expect(origin.creator?.`self` == false)
+
+        #expect(origin.organizer?.id == "organizer-id")
+        #expect(origin.organizer?.email == "organizer@example.com")
+        #expect(origin.organizer?.displayName == "organizer name")
+        #expect(origin.organizer?.`self` == true)
+
+        #expect(origin.start?.date == nil)
+        #expect(origin.start?.dateTime == "2025-04-11T10:00:00+09:00")
+        #expect(origin.start?.timeZone == "Asia/Seoul")
+        #expect(origin.end?.date == nil)
+        #expect(origin.end?.dateTime == "2025-04-11T11:30:00+09:00")
+        #expect(origin.end?.timeZone == "Asia/Tokyo")
+
+        #expect(origin.endTimeUnspecified == true)
+        #expect(origin.recurrence == ["RRULE:FREQ=WEEKLY;COUNT=5", "EXDATE;TZID=Asia/Seoul:20250418T100000"])
+        #expect(origin.recurringEventId == "roundtrip-recurring-id")
+        #expect(origin.sequence == 13)
+
+        #expect(origin.attendees?.count == 1)
+        #expect(origin.attendees?.first?.id == "attendee-id")
+        #expect(origin.attendees?.first?.email == "attendee@example.com")
+        #expect(origin.attendees?.first?.displayName == "attendee name")
+        #expect(origin.attendees?.first?.organizer == false)
+        #expect(origin.attendees?.first?.selfValue == true)
+        #expect(origin.attendees?.first?.resource == false)
+        #expect(origin.attendees?.first?.optional == true)
+        #expect(origin.attendees?.first?.responseStatus == "tentative")
+
+        #expect(origin.hangoutLink == "https://example.com/roundtrip-hangout")
+
+        #expect(origin.conferenceData?.conferenceId == "conference-id")
+        #expect(origin.conferenceData?.conferenceSolution?.iconUri == "https://example.com/solution-icon")
+        #expect(origin.conferenceData?.conferenceSolution?.name == "solution name")
+        let entryPoint = origin.conferenceData?.entryPoints?.first
+        #expect(origin.conferenceData?.entryPoints?.count == 1)
+        #expect(entryPoint?.entryPointType == "video")
+        #expect(entryPoint?.uri == "https://example.com/entry-uri")
+        #expect(entryPoint?.label == "entry label")
+        #expect(entryPoint?.pin == "entry-pin")
+        #expect(entryPoint?.accessCode == "entry-access-code")
+        #expect(entryPoint?.meetingCode == "entry-meeting-code")
+        #expect(entryPoint?.passcode == "entry-passcode")
+        #expect(entryPoint?.password == "entry-password")
+
+        #expect(origin.attachments?.count == 1)
+        #expect(origin.attachments?.first?.fileUrl == "https://example.com/attachment-file")
+        #expect(origin.attachments?.first?.title == "attachment title")
+        #expect(origin.attachments?.first?.mimeType == "application/pdf")
+        #expect(origin.attachments?.first?.iconLink == "https://example.com/attachment-icon")
+        #expect(origin.attachments?.first?.fileId == "attachment-file-id")
+
+        #expect(origin.eventType == "outOfOffice")
+        #expect(origin.status == .tentative)
+        #expect(origin.visibility == .confidential)
     }
 }
+
+
+// MARK: - 변환이 컬럼을 다 채우는지 (DB 미사용)
+
+extension GoogleCalendarRepositoryImple_Tests {
+
+    @Test func colorsEntity_serialize_leavesNoColumnUnmapped() throws {
+        // given
+        let colorSet = GoogleCalendar.Colors.ColorSet(
+            foregroundHex: "#calendarFore", backgroudHex: "#calendarBack"
+        )
+        let current = GoogleCalendarColorsTable.Entity(
+            accountId: self.testAccountId, calendar: "calendar-key-1", colorSet
+        )
+        let legacy = GoogleCalendarColorsTableV0.Entity(event: "event-key-2", colorSet)
+
+        // when
+        let currentValues = try GoogleCalendarColorsTable.serialize(entity: current)
+        let legacyValues = try GoogleCalendarColorsTableV0.serialize(entity: legacy)
+
+        // then
+        #expect(currentValues.count == GoogleCalendarColorsTable.Columns.allCases.count)
+        #expect(currentValues.isEmpty == false)
+        #expect(currentValues.allSatisfy { $0 != nil })
+        #expect(legacyValues.count == GoogleCalendarColorsTableV0.Columns.allCases.count)
+        #expect(legacyValues.isEmpty == false)
+        #expect(legacyValues.allSatisfy { $0 != nil })
+    }
+
+    @Test func tagEntity_serialize_leavesNoColumnUnmapped() throws {
+        // given
+        let entity = GoogleCalendarEventTagTable.Entity(
+            accountId: self.testAccountId, self.everyColumnTag
+        )
+
+        // when
+        let values = try GoogleCalendarEventTagTable.serialize(entity: entity)
+
+        // then
+        #expect(values.count == GoogleCalendarEventTagTable.Columns.allCases.count)
+        #expect(values.isEmpty == false)
+        #expect(values.allSatisfy { $0 != nil })
+    }
+
+    @Test func legacyTagEntity_serialize_leavesNoColumnUnmapped() throws {
+        // given
+        let mainDBEntity = GoogleCalendarEventTagTableV0.Entity(self.everyColumnTag)
+        let externalV1Entity = GoogleCalendarEventTagTableV1.Entity(
+            accountId: self.testAccountId, self.everyColumnTag
+        )
+
+        // when
+        let mainDBValues = try GoogleCalendarEventTagTableV0.serialize(entity: mainDBEntity)
+        let externalV1Values = try GoogleCalendarEventTagTableV1.serialize(entity: externalV1Entity)
+
+        // then
+        #expect(mainDBValues.count == GoogleCalendarEventTagTableV0.Columns.allCases.count)
+        #expect(mainDBValues.isEmpty == false)
+        #expect(mainDBValues.allSatisfy { $0 != nil })
+        #expect(externalV1Values.count == GoogleCalendarEventTagTableV1.Columns.allCases.count)
+        #expect(externalV1Values.isEmpty == false)
+        #expect(externalV1Values.allSatisfy { $0 != nil })
+    }
+
+    @Test func eventOriginEntity_serialize_leavesNoColumnUnmapped() throws {
+        // given
+        let entity = GoogleCalendarEventOriginTable.Entity(
+            accountId: self.testAccountId,
+            "serialize-calendar",
+            "Asia/Seoul",
+            self.everyColumnEventOrigin
+        )
+
+        // when
+        let values = try GoogleCalendarEventOriginTable.serialize(entity: entity)
+
+        // then
+        #expect(values.count == GoogleCalendarEventOriginTable.Columns.allCases.count)
+        #expect(values.isEmpty == false)
+        #expect(values.allSatisfy { $0 != nil })
+    }
+
+    @Test func legacyEventOriginEntity_serialize_leavesNoColumnUnmapped() throws {
+        // given
+        let entity = GoogleCalendarEventOriginTableV0.Entity(
+            "serialize-calendar", "Asia/Seoul", self.everyColumnEventOrigin
+        )
+
+        // when
+        let values = try GoogleCalendarEventOriginTableV0.serialize(entity: entity)
+
+        // then
+        #expect(values.count == GoogleCalendarEventOriginTableV0.Columns.allCases.count)
+        #expect(values.isEmpty == false)
+        #expect(values.allSatisfy { $0 != nil })
+    }
+}
+
 
 // MARK: - events
 
 extension GoogleCalendarRepositoryImple_Tests {
-    
+
     private var range: Range<TimeInterval> {
         let start = "2025.04.01 00:00:00".date()
         let end = "2025.05.01 00:00:00".date()

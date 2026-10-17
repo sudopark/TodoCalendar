@@ -81,6 +81,29 @@ extension AppSettingLocalRepositoryImpleTests {
         XCTAssertEqual(settingAfterUpdate.rowHeight, .large)
     }
     
+    func testStorage_saveCalendarSettingWithCurrentCustomTheme_doesNotPersistTheme() {
+        // given
+        let storage = AppSettingLocalStorage(environmentStorage: FakeEnvironmentStorage())
+        let theme = CustomColorTheme(
+            uuid: "c1", name: "t", schemaVersion: 1,
+            seeds: .init(background: "#FFFFFF", accent: "#112233", form: .filled),
+            colors: [:], createdAt: 0, updatedAt: 0
+        )
+        let calendar = CalendarAppearanceSettings(colorSetKey: .custom("c1"), fontSetKey: .systemDefault)
+            |> \.currentCustomColorTheme .~ theme
+        let appearance = AppearanceSettings(
+            calendar: calendar, defaultTagColor: .init(holiday: "", default: "")
+        )
+        
+        // when
+        storage.saveViewAppearance(appearance, for: nil)
+        let loaded = storage.loadCalendarAppearanceSetting(for: nil)
+        
+        // then
+        XCTAssertEqual(loaded.colorSetKey, .custom("c1"))
+        XCTAssertNil(loaded.currentCustomColorTheme)
+    }
+    
     func testRepository_saveAndLoadEventSetting() {
         // given
         let repository = self.makeRepository()

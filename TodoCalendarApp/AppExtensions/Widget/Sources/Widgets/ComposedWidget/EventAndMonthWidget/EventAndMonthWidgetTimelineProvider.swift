@@ -12,87 +12,92 @@ import Prelude
 import Optics
 import Domain
 import Extensions
-import CalendarScenes
-
-
-struct EventAndMonthWidgetViewModel {
-    let event: EventListWidgetViewModel
-    let month: MonthWidgetViewModel
-}
+import CalendarPresentation
+import WidgetScenes
 
 
 struct EventAndMonthWidgetViewModelProvider {
     
     private let eventListViewModelProvider: EventListWidgetViewModelProvider
     private let monthViewModelProvider: MonthWidgetViewModelProvider
+    private let styleFetchUsecase: any WidgetStyleFetchUsecase
     
     init(
         eventListViewModelProvider: EventListWidgetViewModelProvider,
-        monthViewModelProvider: MonthWidgetViewModelProvider
+        monthViewModelProvider: MonthWidgetViewModelProvider,
+        styleFetchUsecase: any WidgetStyleFetchUsecase
     ) {
         self.eventListViewModelProvider = eventListViewModelProvider
         self.monthViewModelProvider = monthViewModelProvider
+        self.styleFetchUsecase = styleFetchUsecase
     }
     
-    func getViewModel(_ time: Date) async throws -> EventAndMonthWidgetViewModel {
+    func getViewModel(
+        _ time: Date, style: WidgetStyleId.Style = .default
+    ) async throws -> EventAndMonthWidgetViewModel {
         
-        return EventAndMonthWidgetViewModel(
-            event: try await eventListViewModelProvider.getEventListViewModel(
-                for: time, widgetSize: .small
-            ),
-            month: try await monthViewModelProvider.getMonthViewModel(time)
+        let event = try await eventListViewModelProvider.getEventListViewModel(
+            for: time, widgetSize: .small, style: nil
         )
+        let month = try await monthViewModelProvider.getMonthViewModel(time, style: nil)
+        let resolved = self.styleFetchUsecase.fetchStyle(of: .eventAndMonthMedium, selected: style)
+        let look = WidgetLook(globalSetting: event.look.globalSetting, appliedStyle: resolved)
+        return EventAndMonthWidgetViewModel(event: event, month: month)
+            .applying(look)
     }
 }
 
-struct EventAndMonthWidgetTimelineProvider: TimelineProvider {
+struct EventAndMonthWidgetTimelineProvider: AppIntentTimelineProvider {
     
+    typealias Intent = EventAndMonthWidgetConfigurationIntent
     typealias Entry = ResultTimelineEntry<EventAndMonthWidgetViewModel>
     
     func placeholder(in context: Context) -> Entry {
-        return .init(date: Date()) {
-            .init(
-                event: EventListWidgetViewModel.sample(
-                    size: .small
-                ),
+        let builder = WidgetViewModelProviderBuilder(base: .init())
+        let look = WidgetLook(
+            globalSetting: builder.loadWidgetAppearanceSetting(),
+            appliedStyle: builder.fetchDefaultStyle(of: .eventAndMonthMedium)
+        )
+        let entry = Entry(date: Date()) {
+            EventAndMonthWidgetViewModel(
+                event: EventListWidgetViewModel.sample(size: .small),
                 month: try MonthWidgetViewModel.makeSample()
             )
+            .applying(look)
         }
+        guard case .success(let model) = entry.result else { return entry }
+        return entry |> \.background .~ model.event.look.background
     }
     
-    func getSnapshot(in context: Context, completion: @Sendable @escaping (Entry) -> Void) {
+    func snapshot(
+        for configuration: EventAndMonthWidgetConfigurationIntent,
+        in context: Context
+    ) async -> Entry {
         guard context.isPreview == false
         else {
-            completion(placeholder(in: context))
-            return
+            return self.placeholder(in: context)
         }
-        getEntry(context) { entry in
-            completion(entry)
-        }
+        return await self.loadEntry(configuration.resolvedStyle)
     }
     
-    func getTimeline(in context: Context, completion: @Sendable @escaping (Timeline<Entry>) -> Void) {
-        self.getEntry(context) { entry in
-            let timeline = Timeline(entries: [entry], policy: .after(Date().nextUpdateTime))
-            completion(timeline)
-        }
+    func timeline(
+        for configuration: EventAndMonthWidgetConfigurationIntent,
+        in context: Context
+    ) async -> Timeline<Entry> {
+        let entry = await self.loadEntry(configuration.resolvedStyle)
+        return Timeline(entries: [entry], policy: .after(Date().nextUpdateTime))
     }
     
-    private func getEntry(_ context: Context, _ completion: @Sendable @escaping (Entry) -> Void) {
-        
-        Task {
-            let builer = WidgetViewModelProviderBuilder(base: .init())
-            let viewModelProvider = await builer.makeEventAndMonthWidgetViewModelProvider(targetEventTagId: .default)
-            let now = Date()
-            do {
-                let model = try await viewModelProvider.getViewModel(now)
-                completion(
-                    .init(date: now, result: .success(model))
-                    |> \.background .~ model.event.widgetSetting.background
-                )
-            } catch {
-                completion(.init(date: now, result: .failure(.init(error: error))))
-            }
+    private func loadEntry(_ style: WidgetStyleId.Style) async -> Entry {
+        let builder = WidgetViewModelProviderBuilder(base: .init())
+        let viewModelProvider = await builder.makeEventAndMonthWidgetViewModelProvider(targetEventTagId: .default)
+        let now = Date()
+        do {
+            let model = try await viewModelProvider.getViewModel(now, style: style)
+            return .init(date: now, result: .success(model))
+                |> \.background .~ model.event.look.background
+        } catch {
+            return .init(date: now, result: .failure(.init(error: error)))
         }
     }
 }

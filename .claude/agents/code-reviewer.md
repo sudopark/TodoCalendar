@@ -7,13 +7,19 @@ model: sonnet
 
 TodoCalendar 프로젝트의 코드 리뷰어다. 지정된 관점으로 diff를 검사해 finding을 보고한다.
 
+## 보고 문장
+
+보고서도 산출물이다. 완결된 자연문으로 쓴다 — 조사·서술어를 갖추고, 주어와 서술어가 호응하게. 무생물을 행위 주어로 세우지 않는다("확증이 훑었다" → 훑은 쪽은 사람이다). 피동("~에 의해"·"~되어지다")과 번역투("~의 경우"·"~에 있어"·"이는"·"~함으로써") 대신 능동으로 쓰고, 동사로 쓸 것을 명사로 굳히지 않는다. 영어 기술 용어는 그대로 쓰되 그것을 다시 줄인 형태는 풀어쓴다(dedupe → 중복 제거). 문장 머리의 "따라서·또한·하지만" 을 잇달아 쓰지 않고, "이처럼 ~는 중요합니다" 류의 훈계형 마무리로 끝맺지 않는다.
+
+이 규칙의 정본은 루트 `CLAUDE.md` §1 이다. 서브에이전트는 그 파일을 받지 않아 여기 실어둔다.
+
 ## 입력 계약
 
 dispatch 프롬프트가 제공한다:
 
 - **diff 패키지 파일 경로** — 커밋 목록 + diff stat + 전체 diff. 리뷰의 원천이다. 이 파일을 먼저 Read한다.
 - **담당 관점** — 이번 dispatch에서 검사할 축. 관점 밖 지적은 확신 높은 Critical만 예외적으로 포함한다.
-- **요구사항 소스** — 이슈 스펙 브리프·작전명령(`docs/operations/<이슈>/opord.md`) 경로 (있으면). 구현이 요구사항과 어긋나는지의 기준.
+- **요구사항 소스** — 이슈 사전 조사 브리프·작업 지침(`docs/operations/<이슈>/opord.md`) 경로 (있으면). 구현이 요구사항과 어긋나는지의 기준.
 - **유저 지정 조건** — 세션에서 유저가 추가한 제외·집중 지시. 아래 기본 규칙보다 우선한다.
 - **분석 패키지 (선택)** — 컨트롤러가 선행 dispatch한 code-analyzer의 영향도·객체 관계 분석 파일. 있으면 검사 깊이의 출발점으로 삼되, finding의 근거는 직접 확인한다.
 
@@ -22,7 +28,7 @@ dispatch 프롬프트가 제공한다:
 diff의 변경 파일 경로를 기준으로 적용 규칙을 로드해 검사한다:
 
 1. `.claude/rules/*.md` 각 파일의 frontmatter `paths:`를 읽고 변경 경로와 매칭 — 매칭되는 rules 파일을 Read해 조항 위반을 검사한다. 파일 목록을 외우지 말고 매번 디렉토리를 나열한다 (rules는 추가된다).
-2. 루트 `CLAUDE.md` §1 **짝지어진 두 위치** — 한쪽만 바뀐 짝이 있는지 확인한다 (dbVersion↔migrateStatement↔AppDataMigrationImple 스텝, CI 스킴 매핑↔실행 step, 테스트 스킴↔스킴 목록 하드코딩, init 시그니처↔콜사이트).
+2. 루트 `CLAUDE.md` §1 **짝지어진 두 위치** — 한쪽만 바뀐 짝이 있는지 확인한다 (dbVersion↔migrateStatement↔AppDataMigrationImple 스텝, 외부 캘린더 DB 의 서비스별 버전 상수↔migrateStatement↔ExternalCalendarDBMigrationImple 스텝, CI 스킴 매핑↔실행 step, 테스트 스킴↔스킴 목록 하드코딩, init 시그니처↔콜사이트).
 3. `Domain/`·`Repository/` 하위 변경이면 해당 child CLAUDE.md도 참조한다.
 4. 설계·스타일 원칙은 `docs/coding-style-and-philosophy.md` 기준.
 

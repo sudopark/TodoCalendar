@@ -7,57 +7,42 @@
 //
 
 import Foundation
-import SQLiteService
+import SQLiteServiceMacros
 import Domain
 import Extensions
 
 
-struct TodoToggleStateTable: Table {
+typealias TodoToggleStateTable = TodoToggleStateTableV0
+
+@Table("TodoToggleStates")
+struct TodoToggleStateTableV0 {
     
-    enum Columns: String, TableColumn {
-        case todoId
-        case state
-        
-        var dataType: ColumnDataType {
-            switch self {
-            case .todoId: return .text([.primaryKey(autoIncrement: false), .unique, .notNull])
-            case .state: return .text([.notNull])
-            }
-        }
+    @Column(.primaryKey(autoIncrement: false), .unique, .notNull)
+    let todoId: String
+    
+    @Column(.notNull)
+    var state: String
+}
+
+
+// MARK: - State 변환
+
+extension TodoToggleStateTable {
+    
+    enum State: String {
+        case idle
+        case completing
+        case reverting
+    }
+}
+
+extension TodoToggleStateTable.Entity {
+    
+    init(todoId: String, state: TodoToggleStateTable.State) {
+        self.init(todoId: todoId, state: state.rawValue)
     }
     
-    struct ToggleState: RowValueType {
-        
-        enum State: String {
-            case idle
-            case completing
-            case reverting
-        }
-        
-        let todoId: String
-        let state: State
-        
-        init(todoId: String, state: State) {
-            self.todoId = todoId
-            self.state = state
-        }
-        
-        init(_ cursor: CursorIterator) throws {
-            self.init(
-                todoId: try cursor.next().unwrap(),
-                state: try .init(rawValue: try cursor.next().unwrap()).unwrap()
-            )
-        }
-    }
-    
-    typealias ColumnType = Columns
-    typealias EntityType = ToggleState
-    static var tableName: String { "TodoToggleStates"}
-    
-    static func scalar(_ entity: EntityType, for column: Columns) -> (any ScalarType)? {
-        switch column {
-        case .todoId: return entity.todoId
-        case .state: return entity.state.rawValue
-        }
+    func asState() throws -> TodoToggleStateTable.State {
+        return try TodoToggleStateTable.State(rawValue: self.state).unwrap()
     }
 }

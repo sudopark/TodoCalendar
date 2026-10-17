@@ -1,7 +1,18 @@
-■ Responder a las invitaciones de Google Calendar
-· Toca "Tú" en la lista de invitados de un evento de Google Calendar y responde Sí, Quizás o No
-· La respuesta va directa a Google Calendar y, si el evento se repite, se aplica a toda la serie
+■ Personaliza tus widgets
+· Dale a cada widget de la pantalla de inicio su propio color de fondo y elige qué muestra: nombre del mes, encabezado de días de la semana, resaltado de hoy y más
+· Guarda varios estilos y elige uno distinto para cada copia de un widget
+· Previsualiza cada widget en Galería de widgets, dentro de Ajustes, y entra directo a Personalizar
 
-■ Hablar con Siri
-· Empieza con una frase corta que solo diga el nombre de la app: "Oye, To-do Calendar" o "Preguntarle a To-do Calendar"
-· No solo añadir: cambiar la hora, renombrar, marcar como hecho o eliminar, dicho igual
+■ Temas de color
+· Además de Sistema, Claro y Oscuro, hay 19 temas integrados nuevos: 11 claros y 8 oscuros
+· Elige un fondo y un color de acento en Nuevo tema, y la app calcula una paleta que mantiene el texto fácil de leer
+· Inicia sesión y tus temas te siguen a tus otros dispositivos
+
+■ Widget de Día D
+· Cuenta atrás hasta los eventos que importan, en la pantalla de inicio y en la pantalla de bloqueo
+· Elige "Añadir al widget de Día D" en el menú de un evento y aparece al principio de la lista cuando editas el widget
+· Pon una foto detrás y la cuenta atrás se muestra encima
+
+■ Dos paneles en una pantalla más grande
+· Al desplegar el iPhone Duo, los eventos del día que elegiste aparecen junto al calendario
+· Al plegarlo, vuelve al instante a una sola columna, en el mismo mes y día que estabas viendo

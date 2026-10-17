@@ -10,35 +10,47 @@ import Testing
 import Combine
 import Domain
 import Extensions
-import SQLiteService
 import UnitTestHelpKit
 
 @testable import Repository
 
 
 @Suite("AppleCalendarLocalAggregatedRepositoryImpleTests", .serialized)
-final class AppleCalendarLocalAggregatedRepositoryImpleTests: PublisherWaitable, LocalTestable {
+final class AppleCalendarLocalAggregatedRepositoryImpleTests: PublisherWaitable {
 
     var cancelBag: Set<AnyCancellable>! = []
-    let sqliteService: SQLiteService = .init()
+
+    private let dbNameSuffix: String = UUID().uuidString
 
     private func dbPath(_ name: String) -> String {
         try! FileManager.default
             .url(for: .cachesDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
-            .appendingPathComponent("\(name).db")
+            .appendingPathComponent("\(name)_\(dbNameSuffix).db")
             .path
     }
 
     private var appleDBPath: String { dbPath("aggregated_apple") }
 
-    private func cleanup() {
-        try? FileManager.default.removeItem(atPath: appleDBPath)
-    }
+    // 커넥션을 닫은 뒤 파일을 지운다 — 열린 채로 unlink 하면 sqlite 가
+    // "vnode unlinked while in use" 로 프로세스를 죽인다
+    private func withOpenedPool(
+        _ body: (ExternalCalendarSQLiteConnectionPoolImple) async throws -> Void
+    ) async throws {
+        let path = appleDBPath
+        let pool = ExternalCalendarSQLiteConnectionPoolImple(dbPathMap: [AppleCalendarService.id: path])
 
-    private func makePool() async throws -> ExternalCalendarSQLiteConnectionPoolImple {
-        let pool = ExternalCalendarSQLiteConnectionPoolImple(dbPathMap: [AppleCalendarService.id: appleDBPath])
-        try await pool.open(serviceId: AppleCalendarService.id)
-        return pool
+        let outcome: Result<Void, any Error>
+        do {
+            try await pool.open(serviceId: AppleCalendarService.id)
+            try await body(pool)
+            outcome = .success(())
+        } catch {
+            outcome = .failure(error)
+        }
+
+        try? await pool.close(serviceId: AppleCalendarService.id)
+        try? FileManager.default.removeItem(atPath: path)
+        try outcome.get()
     }
 
     private func makeRepository(
@@ -58,47 +70,43 @@ final class AppleCalendarLocalAggregatedRepositoryImpleTests: PublisherWaitable,
 extension AppleCalendarLocalAggregatedRepositoryImpleTests {
 
     @Test func tags_returnsCachedTags() async throws {
-        defer { cleanup() }
-        let pool = try await makePool()
-        defer { Task { try? await pool.close(serviceId: AppleCalendarService.id) } }
+        try await withOpenedPool { pool in
+            // given
+            let storage = localStorage(pool: pool)
+            let tags: [AppleCalendar.Tag] = [
+                .init(id: "cal-1", name: "Work", colorHex: "FF0000"),
+                .init(id: "cal-2", name: "Personal", colorHex: nil)
+            ]
+            try await storage.saveCalendarTags(tags)
+            let repo = makeRepository(pool: pool)
 
-        // given
-        let storage = localStorage(pool: pool)
-        let tags: [AppleCalendar.Tag] = [
-            .init(id: "cal-1", name: "Work", colorHex: "FF0000"),
-            .init(id: "cal-2", name: "Personal", colorHex: nil)
-        ]
-        try await storage.saveCalendarTags(tags)
-        let repo = makeRepository(pool: pool)
+            // when
+            let loaded = try await repo.loadCalendarTags().values.first(where: { _ in true })
 
-        // when
-        let loaded = try await repo.loadCalendarTags().values.first(where: { _ in true })
-
-        // then
-        #expect(loaded?.count == 2)
+            // then
+            #expect(loaded?.count == 2)
+        }
     }
 
     @Test func events_returnsCachedEvents() async throws {
-        defer { cleanup() }
-        let pool = try await makePool()
-        defer { Task { try? await pool.close(serviceId: AppleCalendarService.id) } }
+        try await withOpenedPool { pool in
+            // given
+            let period: Range<TimeInterval> = 0..<1000
+            let storage = localStorage(pool: pool)
+            let origins: [AppleCalendar.EventOrigin] = [
+                .init(eventId: "e-1", originalEventId: "e-1", calendarId: "cal-1", name: "Meeting", eventTime: .period(100..<300)),
+                .init(eventId: "e-2", originalEventId: "e-2", calendarId: "cal-2", name: "Lunch", eventTime: .period(400..<600))
+            ]
+            try await storage.saveEventOrigins(origins, in: period)
 
-        // given
-        let period: Range<TimeInterval> = 0..<1000
-        let storage = localStorage(pool: pool)
-        let origins: [AppleCalendar.EventOrigin] = [
-            .init(eventId: "e-1", originalEventId: "e-1", calendarId: "cal-1", name: "Meeting", eventTime: .period(100..<300)),
-            .init(eventId: "e-2", originalEventId: "e-2", calendarId: "cal-2", name: "Lunch", eventTime: .period(400..<600))
-        ]
-        try await storage.saveEventOrigins(origins, in: period)
+            let repo = makeRepository(pool: pool)
 
-        let repo = makeRepository(pool: pool)
+            // when
+            let loaded = try await repo.loadEvents(in: period).values.first(where: { _ in true })
 
-        // when
-        let loaded = try await repo.loadEvents(in: period).values.first(where: { _ in true })
-
-        // then
-        #expect(loaded?.count == 2)
+            // then
+            #expect(loaded?.count == 2)
+        }
     }
 }
 

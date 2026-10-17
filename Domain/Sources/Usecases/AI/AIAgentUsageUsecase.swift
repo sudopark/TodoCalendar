@@ -25,13 +25,16 @@ public protocol AIAgentUsageUsecase: AnyObject {
 public final class AIAgentUsageUsecaseImple: AIAgentUsageUsecase, @unchecked Sendable {
     
     private let repository: any AICommandRepository
+    private let planStore: any BillingUserPlanStore
     private let sharedDataStore: SharedDataStore
     
     public init(
         repository: any AICommandRepository,
+        planStore: any BillingUserPlanStore,
         sharedDataStore: SharedDataStore
     ) {
         self.repository = repository
+        self.planStore = planStore
         self.sharedDataStore = sharedDataStore
         
         self.internalBind()
@@ -76,11 +79,7 @@ extension AIAgentUsageUsecaseImple {
         )
         // nil 이면 put 하지 않는다 — 기존 값을 덮어 구매로 갱신된 최신 플랜을 지우면 안 된다 (#739)
         if let userPlan = result.userPlan {
-            self.sharedDataStore.put(
-                BillingUserPlan.self,
-                key: ShareDataKeys.billingUserPlan.rawValue,
-                userPlan
-            )
+            self.planStore.updatePlan(userPlan)
         }
         return result.usage
     }
@@ -98,9 +97,7 @@ extension AIAgentUsageUsecaseImple {
         guard let usage = self.sharedDataStore.value(
             AIAgentUsage.self, key: ShareDataKeys.aiAgentUsage.rawValue
         ) else { return false }
-        let userPlan = self.sharedDataStore.value(
-            BillingUserPlan.self, key: ShareDataKeys.billingUserPlan.rawValue
-        )
+        let userPlan = self.planStore.latestUserPlan()
         return usage.isCreditExhausted(topupRemaining: userPlan?.topupRemaining)
     }
 }

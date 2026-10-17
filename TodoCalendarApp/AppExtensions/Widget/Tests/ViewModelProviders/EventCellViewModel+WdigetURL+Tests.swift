@@ -9,7 +9,7 @@
 import Testing
 import Domain
 import Scenes
-import CalendarScenes
+import CalendarPresentation
 import TestDoubles
 
 struct EventCellViewModelWidgetURL_Tests {

@@ -22,15 +22,6 @@ extension View {
         return self |> keyPath .~ handler
     }
     
-    public func invertColorIfNeed(_ appearance: ViewAppearance) -> some View {
-        let currentScheme = UITraitCollection.current.userInterfaceStyle
-        switch (currentScheme, appearance.colorSetKey) {
-        case (.light, .defaultDark): return self.colorInvert().asAnyView()
-        case (.dark, .defaultLight): return self.colorInvert().asAnyView()
-        default: return self.asAnyView()
-        }
-    }
-    
     public func asLinkIfPossible(_ url: URL?) -> some View {
         if let url {
             return Link(destination: url) { self }.asAnyView()

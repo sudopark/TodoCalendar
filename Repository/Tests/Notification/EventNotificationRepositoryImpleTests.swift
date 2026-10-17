@@ -107,4 +107,58 @@ extension EventNotificationRepositoryImpleTests {
         XCTAssertEqual(removeEv1Result, [])
         XCTAssertEqual(removeEv3Result.sorted(), ["n3-1", "n3-2"])
     }
+
+    func testRepository_whenSaveNotificationIdsOfTwoEvents_removeReturnsIdsOfRequestedEventOnly() async throws {
+        // given
+        let repository = self.makeRepository()
+        try await repository.batchSaveNotificationId([
+            "event-id-A": ["noti-a1", "noti-a2"],
+            "event-id-B": ["noti-b1"]
+        ])
+
+        // when
+        let removeB = try await repository.removeAllSavedNotificationId(of: ["event-id-B"])
+        let removeA = try await repository.removeAllSavedNotificationId(of: ["event-id-A"])
+
+        // then
+        XCTAssertEqual(removeB, ["noti-b1"])
+        XCTAssertEqual(removeA.sorted(), ["noti-a1", "noti-a2"])
+    }
+}
+
+
+// MARK: - 변환이 컬럼을 다 채우는지 (DB 미사용)
+
+extension EventNotificationRepositoryImpleTests {
+
+    func testNotificationIdEntity_serialize_leavesNoColumnUnmapped() throws {
+        // given
+        let entity = EventNotificationIdTable.Entity(eventId: "event-1", notificationReqId: "noti-1")
+
+        // when
+        let values = try EventNotificationIdTable.serialize(entity: entity)
+
+        // then
+        let unmapped = zip(EventNotificationIdTable.Columns.allCases, values)
+            .filter { $0.1 == nil }
+            .map { $0.0 }
+        XCTAssertEqual(values.count, EventNotificationIdTable.Columns.allCases.count)
+        XCTAssertFalse(values.isEmpty)
+        XCTAssertTrue(unmapped.isEmpty)
+    }
+}
+
+
+// MARK: - 선언이 만드는 CREATE 문이 전환 전 스키마와 같은지 (DB 미사용)
+
+extension EventNotificationRepositoryImpleTests {
+
+    func testNotificationIdTableCreateStatement_matchesPreMigrationSchema() {
+        // given
+        // when
+        let statement = EventNotificationIdTable.createStatement
+
+        // then
+        XCTAssertEqual(statement, "CREATE TABLE IF NOT EXISTS EventNotificationIds (event_id TEXT NOT NULL, not_req_id TEXT NOT NULL);")
+    }
 }

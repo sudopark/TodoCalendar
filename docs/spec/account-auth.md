@@ -62,7 +62,8 @@
 6. `ApplicationPrepareUsecase.prepareSignedIn(auth)`:
    - SharedDataStore 초기화 (accountInfo, externalCalendarAccounts 키는 유지)
    - 비로그인 DB close → 100ms 대기
-   - 사용자별 DB open (`todocal_<uid>.db`)
+   - 사용자별 DB open (`models_<uid>.db`)
+   - 선택된 컬러 테마가 커스텀이면 `systemTheme` 으로 초기화 ([`color-themes.md`](color-themes.md) 읽는 시점)
 7. `ApplicationRootRouter.changeUsecaseFactroy(auth)`:
    - `LoginUsecaseFactoryImple` 생성 (Remote + Upload 인프라 포함)
    - `backgroundEventSyncUsecase.change(factory:)` 호출
@@ -78,7 +79,8 @@
 5. `AccountChangedEvent.signOut` 이벤트 발행
 6. `ApplicationPrepareUsecase.prepareSignedOut()`:
    - 사용자 DB close → 100ms 대기
-   - 비로그인 DB open (`todocal.db` — uid 없음)
+   - 비로그인 DB open (`models.db` — uid 없음)
+   - 선택된 컬러 테마가 커스텀이면 `systemTheme` 으로 초기화
 7. `NonLoginUsecaseFactoryImple`로 전환 → UI 재구성
 
 **계정 삭제 시** (`AccountUsecaseImple.deleteAccount`):
@@ -99,12 +101,12 @@
 | EventUpload Service | `NotNeedEventUploadService` (no-op) | `EventUploadServiceImple` (오프라인 큐) |
 | 데이터 마이그레이션 | `NotNeedTemporaryUserDataMigrationUescaseImple` | `TemporaryUserDataMigrationUescaseImple` |
 
-**DB 분리 정책**
+**DB 분리 정책** (파일명 정본은 `AppEnvironment.dbFileName`·`dbFilePath(for:)` — `AppEnvironment.swift:91-97`·`:123-126`)
 
 | 상태 | DB 경로 | 설명 |
 |---|---|---|
-| 비로그인 | `todocal.db` | 공용 로컬 DB |
-| 로그인 (uid: abc123) | `todocal_abc123.db` | 사용자별 격리 DB |
+| 비로그인 | `models.db` | 공용 로컬 DB |
+| 로그인 (uid: abc123) | `models_abc123.db` | 사용자별 격리 DB |
 | 외부 캘린더 | `google_calendar.db` | 서비스별 별도 DB (ExternalCalendarDBConnectionPool) |
 
 ### 3. 데이터 마이그레이션
@@ -115,8 +117,13 @@
 1. 이벤트 태그 (EventTag) — 태그가 이벤트에 선행해야 참조 무결
 2. 할일 (TodoEvent)
 3. 일정 (ScheduleEvent)
-4. 이벤트 상세 (EventDetailData)
-5. 완료 할일 (DoneTodoEvent)
+4. 커스텀 컬러 테마 (CustomColorTheme)
+5. 이벤트 상세 (EventDetailData)
+6. 완료 할일 (DoneTodoEvent)
+
+1~4 중 하나라도 실패하면 이전 전체가 실패하고 임시 DB 가 남는다. 5·6 의 실패는 무시한다. 이전 필요 건수는 할일·일정·커스텀 테마 개수의 합이다.
+
+**계정 로컬 DB 반영**: 각 단계는 업로드에 성공하면 임시 행을 지우기 전에 같은 데이터를 계정 로컬 DB(`models_{uid}.db`)에도 쓴다. 이전이 끝나면 서버를 다시 조회하지 않아도 옮긴 이벤트와 테마가 바로 보인다. 계정 로컬 쓰기가 실패하면 로그만 남기고 이전은 성공으로 끝낸다. 서버에는 이미 올라갔으니 이후 동기화나 조회가 계정 로컬을 채운다 — 태그·할일·일정은 동기화가(`SyncDataType` 이 그 셋이다), 상세·완료 할일·테마는 그 화면의 조회가 캐시를 갱신한다.
 
 **UI 상태 Publishers**:
 - `isNeedMigration: AnyPublisher<Bool, Never>` — 마이그레이션 필요 여부
@@ -142,7 +149,7 @@ stateDiagram-v2
 
     state NonLogin {
         note right of NonLogin
-            DB: todocal.db
+            DB: models.db
             Repository: Local only
             Sync: no-op
             Upload: no-op
@@ -151,7 +158,7 @@ stateDiagram-v2
 
     state Login {
         note right of Login
-            DB: todocal_{uid}.db
+            DB: models_{uid}.db
             Repository: Upload Decorator
             Sync: EventSyncUsecaseImple
             Upload: EventUploadServiceImple
@@ -173,6 +180,7 @@ sequenceDiagram
     participant Med as EventSyncMediator
     participant Local as 비로그인 DB
     participant Remote as 서버 API
+    participant Account as 계정 DB
 
     User->>VM: 마이그레이션 시작
     VM->>Mig: startMigration()
@@ -183,18 +191,27 @@ sequenceDiagram
         Mig->>Local: 1. EventTag 로드
         Local-->>Mig: [CustomEventTag]
         Mig->>Remote: PUT /tags (일괄 업로드)
+        Mig->>Account: EventTag 쓰기
 
         Mig->>Local: 2. TodoEvent 로드
         Mig->>Remote: PUT /todos
+        Mig->>Account: TodoEvent 쓰기
 
         Mig->>Local: 3. ScheduleEvent 로드
         Mig->>Remote: PUT /schedules
+        Mig->>Account: ScheduleEvent 쓰기
 
-        Mig->>Local: 4. EventDetailData 로드
+        Mig->>Local: 4. CustomColorTheme 로드
+        Mig->>Remote: POST /migration/color_themes
+        Mig->>Account: CustomColorTheme 쓰기
+
+        Mig->>Local: 5. EventDetailData 로드
         Mig->>Remote: POST /event_details
+        Mig->>Account: EventDetailData 쓰기
 
-        Mig->>Local: 5. DoneTodoEvent 로드
+        Mig->>Local: 6. DoneTodoEvent 로드
         Mig->>Remote: PUT /done_todos
+        Mig->>Account: DoneTodoEvent·상세 쓰기
     end
 
     Mig->>Med: isTemporaryUserDataMigration = false
@@ -213,7 +230,7 @@ sequenceDiagram
 
 전환 과정:
   1. OAuth 완료 → uid 획득
-  2. LoginUsecaseFactory 생성 (todocal_{uid}.db)
+  2. LoginUsecaseFactory 생성 (models_{uid}.db)
   3. SharedDataStore 초기화:
      - todos: [:] (비로그인 할일 제거)
      - schedules: MemorizedEventsContainer() (빈 컨테이너)

@@ -16,11 +16,19 @@ import Extensions
 
 public final class AdBannerUIView: UIView {
 
+    private enum Constant {
+        static let initialRetryDelay: Duration = .seconds(1)
+        static let maxRetryDelay: Duration = .seconds(64)
+    }
+
+    private let size: AdBannerSize
     private let bannerView: BannerView
-    private let onVisibilityChange: (@MainActor (Bool) -> Void)?
+    private let onVisibleHeightChange: (@MainActor (CGFloat) -> Void)?
     private var isLoaded: Bool = false
     private var isAllowed: Bool = false
-    private var didRequestLoad: Bool = false
+    private var isLoadingAd: Bool = false
+    private var retryAttempt: Int = 0
+    private var retrying: Task<Void, Never>?
     private lazy var heightConstraint: NSLayoutConstraint = self.heightAnchor.constraint(equalToConstant: 0)
     private let cancellables = CancelBag()
 
@@ -28,10 +36,11 @@ public final class AdBannerUIView: UIView {
         adUnitId: String,
         size: AdBannerSize,
         adExposureUsecase: any AdExposureUsecase,
-        onVisibilityChange: (@MainActor (Bool) -> Void)? = nil
+        onVisibleHeightChange: (@MainActor (CGFloat) -> Void)? = nil
     ) {
-        self.bannerView = BannerView(adSize: size.asAdSize)
-        self.onVisibilityChange = onVisibilityChange
+        self.size = size
+        self.bannerView = BannerView(adSize: AdSizeInvalid)
+        self.onVisibleHeightChange = onVisibleHeightChange
         super.init(frame: .zero)
 
         self.bannerView.adUnitID = adUnitId
@@ -44,16 +53,43 @@ public final class AdBannerUIView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    private var isVisible: Bool { self.isLoaded && self.isAllowed }
+    deinit {
+        self.retrying?.cancel()
+    }
 
+    public override func layoutSubviews() {
+        super.layoutSubviews()
+        guard let adSize = self.size.adSize(
+                fittingWidth: self.bounds.width,
+                within: self.window?.screen.bounds.size ?? .zero
+              ),
+              isAdSizeEqualToSize(size1: self.bannerView.adSize, size2: adSize) == false
+        else { return }
+        // 광고가 떠 있는 동안 adSize 를 바꾸면 SDK 가 새 크기로 다시 요청한다 — load 를 겹쳐 부르지 않는다
+        self.bannerView.adSize = adSize
+        self.invalidateIntrinsicContentSize()
+        self.applyVisibleHeight()
+        self.loadIfNeeded()
+    }
+
+    // SwiftUI 경로엔 폭 제약이 없어 이 값이 MREC 폭을 정한다
     public override var intrinsicContentSize: CGSize {
+        guard self.hasValidAdSize else { return .zero }
         return cgSize(for: self.bannerView.adSize)
     }
 
-    private func applyHeight() {
-        self.heightConstraint.constant = self.isVisible
-            ? cgSize(for: self.bannerView.adSize).height
-            : 0
+    private var hasValidAdSize: Bool {
+        return isAdSizeValid(size: self.bannerView.adSize)
+    }
+
+    private var visibleHeight: CGFloat {
+        guard self.isLoaded, self.isAllowed, self.hasValidAdSize else { return 0 }
+        return cgSize(for: self.bannerView.adSize).height
+    }
+
+    private func applyVisibleHeight() {
+        self.heightConstraint.constant = self.visibleHeight
+        self.onVisibleHeightChange?(self.visibleHeight)
     }
 
     private func bindLoadWhenBannerAdAllowed(_ adExposureUsecase: any AdExposureUsecase) {
@@ -68,11 +104,50 @@ public final class AdBannerUIView: UIView {
     private func apply(isAllowed: Bool) {
         self.isAllowed = isAllowed
         self.bannerView.isHidden = !isAllowed
-        self.applyHeight()
-        self.onVisibilityChange?(self.isVisible)
-        guard isAllowed, self.didRequestLoad == false else { return }
-        self.didRequestLoad = true
+        self.applyVisibleHeight()
+        guard isAllowed else {
+            self.cancelRetry()
+            return
+        }
+        self.loadIfNeeded()
+    }
+
+    private func loadIfNeeded() {
+        guard self.isAllowed,
+              self.isLoaded == false,
+              self.isLoadingAd == false,
+              self.hasValidAdSize
+        else { return }
+        self.isLoadingAd = true
         self.bannerView.load(Request())
+    }
+}
+
+
+// MARK: - retry
+
+extension AdBannerUIView {
+
+    // SDK 는 광고를 한 번 받기 전까지 스스로 다시 요청하지 않는다 — 첫 실패를 앱이 풀어줘야 한다
+    private func scheduleRetry() {
+        guard self.isAllowed, self.isLoaded == false else { return }
+        let delay = min(
+            Constant.initialRetryDelay * pow(2, Double(self.retryAttempt)),
+            Constant.maxRetryDelay
+        )
+        self.retryAttempt += 1
+        self.retrying?.cancel()
+        self.retrying = Task { @MainActor [weak self] in
+            try? await Task.sleep(for: delay)
+            guard Task.isCancelled == false else { return }
+            self?.loadIfNeeded()
+        }
+    }
+
+    private func cancelRetry() {
+        self.retrying?.cancel()
+        self.retrying = nil
+        self.retryAttempt = 0
     }
 }
 
@@ -81,31 +156,34 @@ public final class AdBannerUIView: UIView {
 
 extension AdBannerUIView: BannerViewDelegate {
 
-    // 로드에 성공한 뒤에야 계층에 붙어 실패한 배너가 자리를 차지하지 않는다
     public func bannerViewDidReceiveAd(_ bannerView: BannerView) {
-        guard self.isLoaded == false else { return }
-        self.isLoaded = true
-        self.bannerView.isHidden = !self.isAllowed
+        self.isLoadingAd = false
+        self.cancelRetry()
+        if self.isLoaded == false {
+            self.isLoaded = true
+            self.bannerView.isHidden = !self.isAllowed
 
-        self.addSubview(bannerView)
-        bannerView.translatesAutoresizingMaskIntoConstraints = false
-        let bottom = bannerView.bottomAnchor.constraint(equalTo: self.bottomAnchor)
-        bottom.priority = .defaultHigh
-        NSLayoutConstraint.activate([
-            bannerView.topAnchor.constraint(equalTo: self.topAnchor),
-            bannerView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
-            bannerView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
-            bottom
-        ])
-        self.applyHeight()
-        self.onVisibilityChange?(self.isVisible)
+            // 로드에 성공한 뒤에야 계층에 붙어 실패한 배너가 자리를 차지하지 않는다
+            self.addSubview(bannerView)
+            bannerView.translatesAutoresizingMaskIntoConstraints = false
+            let bottom = bannerView.bottomAnchor.constraint(equalTo: self.bottomAnchor)
+            bottom.priority = .defaultHigh
+            NSLayoutConstraint.activate([
+                bannerView.topAnchor.constraint(equalTo: self.topAnchor),
+                bannerView.centerXAnchor.constraint(equalTo: self.centerXAnchor),
+                bottom
+            ])
+        }
+        self.applyVisibleHeight()
     }
-    
+
     public func bannerView(
         _ bannerView: BannerView,
         didFailToReceiveAdWithError error: any Error
     ) {
         logger.log(level: .error, "banner ad load failed: \(error)")
+        self.isLoadingAd = false
+        self.scheduleRetry()
     }
 }
 
@@ -117,7 +195,7 @@ public struct AdBannerView: View {
     private let adUnitId: String
     private let size: AdBannerSize
     private let adExposureUsecase: any AdExposureUsecase
-    @State private var isVisible: Bool = false
+    @State private var visibleHeight: CGFloat = 0
 
     public init(
         adUnitId: String,
@@ -134,9 +212,9 @@ public struct AdBannerView: View {
             adUnitId: self.adUnitId,
             size: self.size,
             adExposureUsecase: self.adExposureUsecase,
-            isVisible: self.$isVisible
+            visibleHeight: self.$visibleHeight
         )
-        .frame(height: self.isVisible ? self.size.asCGSize.height : 0)
+        .frame(height: self.visibleHeight)
     }
 }
 
@@ -145,14 +223,14 @@ private struct BannerRepresentable: UIViewRepresentable {
     let adUnitId: String
     let size: AdBannerSize
     let adExposureUsecase: any AdExposureUsecase
-    @Binding var isVisible: Bool
+    @Binding var visibleHeight: CGFloat
 
     func makeUIView(context: Context) -> AdBannerUIView {
         return AdBannerUIView(
             adUnitId: self.adUnitId,
             size: self.size,
             adExposureUsecase: self.adExposureUsecase,
-            onVisibilityChange: { self.isVisible = $0 }
+            onVisibleHeightChange: { self.visibleHeight = $0 }
         )
     }
 

@@ -13,7 +13,8 @@ import Optics
 import Domain
 import Extensions
 import CommonPresentation
-import CalendarScenes
+import CalendarPresentation
+import WidgetScenes
 
 
 // MARK: - EventAndForemostWidgetView
@@ -30,10 +31,17 @@ struct EventAndForemostWidgetView: View {
     var body: some View {
         switch self.entry.result {
         case .success(let model):
-            HStack(alignment: .center, spacing: 12) {
-                EventListView(model: model.event)
-                SystemSizeForemostEventView(model: model.foremost, isSmallSize: true)
-            }
+            let eventColorSet = model.event.look.background.colorSet(colorScheme == .light)
+            let foremostColorSet = model.foremost.look.background.colorSet(colorScheme == .light)
+            EventAndForemostWidgetContentView(
+                model: model,
+                todoToggle: { todo in
+                    AnyView(TodoToggleButton(todo: todo, colorSet: eventColorSet))
+                },
+                foremostTodoToggle: { todo in
+                    AnyView(ForemostTodoToggleButton(todo: todo, colorSet: foremostColorSet))
+                }
+            )
         case .failure(let error):
             FailView(errorModel: error)
         }
@@ -48,7 +56,11 @@ struct EventAndForemostWidget: Widget {
     nonisolated static let kind: String = "EventAndForemostWidget"
     
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: EventAndForemostWidget.kind, provider: EventAndForemostWidgetViewTimelineProvider()) { entry in
+        AppIntentConfiguration(
+            kind: EventAndForemostWidget.kind,
+            intent: EventAndForemostWidgetConfigurationIntent.self,
+            provider: EventAndForemostWidgetViewTimelineProvider()
+        ) { entry in
             
             EventAndForemostWidgetView(entry: entry)
                 .containerBackground(entry.backgroundShape, for: .widget)

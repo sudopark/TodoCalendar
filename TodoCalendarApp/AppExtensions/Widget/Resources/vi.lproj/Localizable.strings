@@ -10,6 +10,8 @@
 
 "Event" = "Sự kiện";
 "Turn" = "Lượt lặp lại";
+"WidgetStyle" = "Kiểu tiện ích";
+"Style" = "Kiểu";
 "EventType" = "Loại sự kiện";
 "Event Types" = "Loại sự kiện";
 "Exclude all day event" = "Loại trừ sự kiện cả ngày";

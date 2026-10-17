@@ -717,6 +717,8 @@ extension AddEventViewModelImpleTests {
         XCTAssertEqual(addition?.url, "url address")
         XCTAssertEqual(addition?.memo, "memo")
     }
+
+
 }
 
 

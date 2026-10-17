@@ -21,7 +21,10 @@ graph TD
     SIL -->|bottomSlide| SI[SignIn<br/>MemberScenes]
 
     AS -->|push| CT[ColorThemeSelect<br/>색상 테마]
-    AS -->|push| WA[WidgetAppearance<br/>위젯 외형]
+    CT -->|push| CTE[ColorThemeEdit<br/>커스텀 테마 편집]
+    CT -.->|bottomSlide| CTAG[PaidFeatureAdGuide<br/>BillingScenes 광고 안내]
+    CTE -.->|bottomSlide| CTAG
+    AS -->|push| WG[WidgetGallery<br/>WidgetScenes]
     AS -->|push| TZ[TimeZoneSelect<br/>타임존]
 
     ES -->|push| ETS[EventDefaultTagSelect<br/>기본 태그]
@@ -58,7 +61,25 @@ graph TD
 | `EventOnCalendarViewModelImple` | 캘린더 이벤트 | 태그 색상 표시, 할일 표시 등 |
 | `EventListAppearnaceSettingViewModelImple` | 이벤트 목록 | 12/24시 형식 등 |
 
-하위 화면: ColorThemeSelect, WidgetAppearanceSetting, TimeZoneSelect (모두 leaf)
+하위 화면: ColorThemeSelect (커스텀 테마 편집 ColorThemeEdit으로 push, 두 화면 모두 무료 유저에게 BillingScenes 의 공용 광고 안내 시트(`PaidFeatureAdGuideSceneBuilder`)를 띄운다), TimeZoneSelect (leaf), WidgetGallery (WidgetScenes — 위젯 기본 테마 설정을 그 화면 상단이 담는다)
+
+### ColorThemeEdit — 편집 화면 입력 항목
+
+입력은 `CustomColorThemeBuilder` 시드로 들어가 토큰이 된다. 미리보기(`ColorThemeEditPreviewView`)는 편집 중인 초안 색으로 각 토큰이 쓰이는 자리를 칠하고, 입력 행마다 설명이 붙는다. 설명 키 접두는 `setting.appearance.calendar.colorTheme.` 이다.
+
+| 입력 | 들어가는 토큰 | 미리보기에서 칠하는 자리 | 설명 키 |
+|---|---|---|---|
+| 배경 | `bg0`(=`dayBackground`), 나머지 토큰의 밝기 기준 | 미리보기 카드 바탕 | `edit::background::explain` |
+| 강조 | `accent` | "+ 일정" 캡슐 | `edit::accent::explain` |
+| 형 | `bg1`·`bg2`·`line` 대비(배경 대비 카드 면) | 일정 카드 면과 구분선 | `edit::form::{filled,grouped,outlined}::explain` — 고른 형을 따른다 |
+| 글자 | `text0`(=`weekDayText`)·`text1` | 평일 날짜·일정 제목·시간 | `edit::seed::text::explain` |
+| 카드 | `bg1` | 일정 카드 | `edit::seed::surface::explain` |
+| 오늘 | `todayBackground` | 3일 칸 | `edit::seed::today::explain` |
+| 선택일 | `selectedDayBackground`(글자 `selectedDayText` 는 대비로 정한다) | 9일 칸 | `edit::seed::selectedDay::explain` |
+| 휴일·주말 | `holidayOrWeekEndWithAccent` | 일·토요일과 공휴일 날짜 글자 | `edit::seed::holidayOrWeekEnd::explain` |
+| AI | `accentAI` | AI 캡슐 | `edit::seed::ai::explain` |
+
+휴일·주말 글자는 강조 요일 설정과 무관하게 칠한다 — 설정이 꺼져 있어도 그 입력이 칠하는 자리가 보여야 한다.
 
 ### EventSetting (이벤트 기본값)
 
@@ -142,7 +163,8 @@ graph TD
     SSB -->|생성| OSLB[OpenSourceLicenseBuilder]
 
     ASB -->|하위| CTB[ColorThemeSelectBuilder]
-    ASB -->|하위| WAB[WidgetAppearanceBuilder]
+    CTB -->|하위| CTEB[ColorThemeEditBuilder]
+    ASB -->|주입받음| WGB[WidgetGallerySceneBuilder<br/>구현체는 WidgetScenes]
     ASB -->|하위| TZB[TimeZoneSelectBuilder]
 
     ESB -->|하위| ETSB[EventDefaultTagSelectBuilder]
@@ -160,8 +182,9 @@ graph TD
 
 | 컴포넌트 | 위치 | 역할 | 사용처 |
 |---|---|---|---|
-| `CalendarAppearanceSampleView` | `Setting/Appearance/CalendarSection/CalendarAppearancePreviewView.swift` | 설정 미리보기용 미니 월간 캘린더 샘플 | CalendarAppearancePreviewView, ColorThemeSelectView |
-| `ColorThemePreviewView` / `ColorThemeItemView` | `Setting/Appearance/ColorTheme/ColorThemePreviewView.swift` | 색 테마 미리보기 / 선택 아이템 셀 | ColorTheme 내부 + CalendarAppearancePreviewView |
+| `CalendarAppearanceSampleView` | `Setting/Appearance/CalendarSection/CalendarAppearancePreviewView.swift` | 설정 미리보기용 미니 월간 캘린더 샘플. 색 세트를 주입하면 그 색으로 칠한다 | CalendarAppearancePreviewView |
+| `ColorThemeEditPreviewView` | `Setting/Appearance/ColorTheme/Edit/ColorThemeEditPreviewView.swift` | 토큰이 쓰이는 자리(일정 카드·캡슐·오늘·선택일)를 담은 테마 미리보기 카드. 주입한 색 세트로 칠한다 | ColorThemeEditView, ColorThemeSelectView |
+| `ColorThemePreviewView` / `ColorThemeItemView` | `Setting/Appearance/ColorTheme/ColorThemePreviewView.swift` | 색 테마 미리보기 / 선택 아이템 셀. 모델은 `ColorThemeModel` 프로토콜(`BuiltInColorThemeModel`·`CustomColorThemeModel`) | ColorTheme 내부 + CalendarAppearancePreviewView |
 
 ---
 
@@ -170,5 +193,6 @@ graph TD
 | 방향 | 대상 | 용도 |
 |---|---|---|
 | → | MemberScenes | 로그인/계정 관리 (MemberSceneBuilder) |
+| → | `Scenes.WidgetGallerySceneBuilder` | 위젯 갤러리 (구현체는 WidgetScenes — 앱 루트가 `SettingSceneBuilderImple` 에 주입) |
 | ← | TodoCalendarApp | ApplicationRootBuilder에서 생성 |
 | ← | EventDetailScene | SelectEventTag에서 태그 관리 화면 사용 (SettingSceneBuilder) |

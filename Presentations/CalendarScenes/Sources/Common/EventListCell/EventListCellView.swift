@@ -14,6 +14,7 @@ import Domain
 import Scenes
 import Extensions
 import CommonPresentation
+import CalendarPresentation
 
 
 // MARK: - state
@@ -123,6 +124,8 @@ struct EventListCellView: View {
             return removeButton(scope).asAnyView()
         case .toggleTo(let isForemost):
             return toggleForemostButton(isForemost).asAnyView()
+        case .toggleDDayCandidate(let isRegistered):
+            return toggleDDayCandidateButton(isRegistered).asAnyView()
         case .toggleLiveActivity(let isRegistered):
             return toggleLiveActivityButton(isRegistered).asAnyView()
         case .skipTodo:
@@ -174,6 +177,22 @@ struct EventListCellView: View {
         }
     }
     
+    private func toggleDDayCandidateButton(_ isRegistered: Bool) -> some View {
+        return Button {
+            self.handleMoreAction(
+                self.cellViewModel, .toggleDDayCandidate(isRegistered: isRegistered)
+            )
+        } label: {
+            HStack {
+                Text(isRegistered
+                     ? "calendar::event::more_action:dday_candidate:unregister:item_name".localized()
+                     : "calendar::event::more_action:dday_candidate:register:item_name".localized()
+                )
+                Image(systemName: "calendar.badge.clock")
+            }
+        }
+    }
+
     private func toggleLiveActivityButton(_ isRegistered: Bool) -> some View {
         return Button {
             self.handleMoreAction(

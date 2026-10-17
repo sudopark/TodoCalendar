@@ -29,11 +29,16 @@ public protocol UISettingUsecase: Sendable {
     func refreshAppearanceSetting() async throws -> AppearanceSettings
     func loadAvailableColorThemes() async throws -> [ColorSetKeys]
     func applyEventTagColors(_ tags: [any EventTag])
+    func loadCustomColorThemes() async throws -> [CustomColorTheme]
+    func saveCustomColorTheme(_ theme: CustomColorTheme) async throws
+    func removeCustomColorTheme(_ uuid: String) async throws
     
     func changeCalendarAppearanceSetting(
         _ params: EditCalendarAppearanceSettingParams
     ) throws -> CalendarAppearanceSettings
-    
+
+    func selectColorTheme(_ key: ColorSetKeys) async throws -> CalendarAppearanceSettings
+
     func changeDefaultEventTagColor(
         _ params: EditDefaultEventTagColorParams
     ) async throws -> DefaultEventTagColorSetting

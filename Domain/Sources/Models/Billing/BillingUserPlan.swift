@@ -32,3 +32,13 @@ public struct BillingUserPlan: Sendable, Equatable {
         }
     }
 }
+
+
+// MARK: - 유료 판정
+
+extension BillingUserPlan {
+
+    public var isPaid: Bool? {
+        return self.planId?.covers(.standard)
+    }
+}

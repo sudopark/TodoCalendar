@@ -12,6 +12,7 @@
 "catalog.event::team_workshop" = "Workshop nhóm";
 "catalog.event::release_day" = "Ngày phát hành";
 "catalog.event::lunch" = "Ăn trưa với Sara";
+"catalog.event::anniversary" = "Kỷ niệm ngày cưới";
 
 // MARK: - 할일
 
@@ -40,3 +41,8 @@
 
 "catalog.ai::command" = "ăn trưa với Sara thứ Sáu lúc 12 giờ";
 "catalog.ai::result" = "Đã thêm “Ăn trưa với Sara” vào thứ Sáu, 13 tháng 3 lúc 12:00.";
+
+// MARK: - 컬러 테마
+
+"catalog.colorTheme::forest" = "Rừng";
+"catalog.colorTheme::dusk" = "Hoàng hôn";

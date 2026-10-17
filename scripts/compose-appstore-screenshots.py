@@ -7,7 +7,10 @@ usage:
 
 입력: snapshot-appstore/<lang>/<NN-슬러그>.png + snapshot-appstore/<lang>/captions/<NN-슬러그>.png
       05-widgets 만 화면 원본이 없다 — snapshot-appstore/<lang>/widgets/ 의 위젯 원본을 홈화면으로 합성해 만든다
+      06-appearance 는 snapshot-appstore/<lang>/appearance/<테마>.png 여러 장을 기기마다 하나씩 겹쳐 놓는다
 출력: fastlane/screenshots/<ASC 로케일>/<NN>_<슬러그>.png (1320×2868 / 알파 없음)
+      같은 폴더의 duo_<NN>_<슬러그>.png — snapshot-appstore/<lang>/duo/ 원본을 그대로 옮긴다.
+      캔버스가 화면 크기라 캡션 자리가 없다. deliver 가 해상도로 화면 종류를 가른다
 
 기기 프레임은 애플 공식 베젤만 쓴다 (마케팅·아이덴티티 가이드라인). 동봉 라이선스가
 non-transferable 이라 public 레포에 커밋하지 않고 캐시 디렉토리에 받아 쓴다.
@@ -20,15 +23,12 @@ from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from device_bezel import load_bezel, screen_hole  # noqa: E402
+from store_canvas import (  # noqa: E402
+    UPLOAD_SIZE, compose, compose_theme_lineup, theme_lineup_screens,
+)
 from store_screen import home_screen, inset_screenshot  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
-
-UPLOAD_SIZE = (1320, 2868)
-CANVAS_COLOR = "#F5F5F7"
-DEVICE_WIDTH = 1150
-DEVICE_TOP = 620
-CAPTION_TOP = 100
 
 ALL_LANGS = [
     "en", "ko", "ja", "zh-Hans", "zh-Hant", "vi", "th", "es", "fr", "it", "pt-BR",
@@ -48,18 +48,28 @@ SLUGS = [
     "04-google-event",
     "05-widgets",
     "06-appearance",
+    "07-widget-style",
 ]
 
 HOME_SCREEN_SLUG = "05-widgets"
+
+THEME_LINEUP_SLUG = "06-appearance"
+
+DUO_SLUGS = [
+    "01-calendar-two-columns",
+    "02-calendar-cover",
+]
+DUO_SIZES = [(2853, 2007), (1398, 2034)]
+DUO_PREFIX = "duo_"
 
 
 def asc_locale(lang):
     return ASC_LOCALES.get(lang, lang)
 
 
-def upload_name(slug):
+def upload_name(slug, prefix=""):
     number, _, rest = slug.partition("-")
-    return f"{number}_{rest}.png"
+    return f"{prefix}{number}_{rest}.png"
 
 
 # MARK: - 합성
@@ -72,20 +82,6 @@ def screen_image(slug, source_dir, size):
         raise SystemExit(f"  ✗ 누락: {path.relative_to(ROOT)} — 먼저 촬영 스크립트를 돌려라")
     with Image.open(path) as screenshot:
         return inset_screenshot(screenshot.convert("RGBA"), size)
-
-
-def compose(screen, caption, bezel, hole_mask, hole_box):
-    device = Image.new("RGBA", bezel.size, (0, 0, 0, 0))
-    device.paste(screen, (hole_box[0], hole_box[1]), hole_mask.crop(hole_box))
-    device.paste(bezel, (0, 0), bezel)
-
-    device_height = round(DEVICE_WIDTH * bezel.height / bezel.width)
-    device = device.resize((DEVICE_WIDTH, device_height), Image.LANCZOS)
-
-    canvas = Image.new("RGB", UPLOAD_SIZE, CANVAS_COLOR)
-    canvas.paste(caption.convert("RGB"), ((UPLOAD_SIZE[0] - caption.width) // 2, CAPTION_TOP))
-    canvas.paste(device, ((UPLOAD_SIZE[0] - DEVICE_WIDTH) // 2, DEVICE_TOP), device)
-    return canvas
 
 
 def compose_lang(lang, bezel, hole_mask, hole_box):
@@ -103,26 +99,43 @@ def compose_lang(lang, bezel, hole_mask, hole_box):
         if not caption_path.exists():
             raise SystemExit(f"  ✗ 누락: {caption_path.relative_to(ROOT)} — 먼저 촬영 스크립트를 돌려라")
 
-        screen = screen_image(slug, source_dir, hole_size)
         with Image.open(caption_path) as caption:
-            composed = compose(screen, caption.convert("RGBA"), bezel, hole_mask, hole_box)
+            if slug == THEME_LINEUP_SLUG:
+                screens = theme_lineup_screens(source_dir, hole_size)
+                composed = compose_theme_lineup(screens, caption.convert("RGBA"), bezel, hole_mask, hole_box)
+            else:
+                screen = screen_image(slug, source_dir, hole_size)
+                composed = compose(screen, caption.convert("RGBA"), bezel, hole_mask, hole_box)
         composed.save(output_dir / upload_name(slug))
     print(f"  ✓ [{lang}] {len(SLUGS)}장")
     return output_dir
 
 
-def verify(output_dir):
+def copy_duo_lang(lang, output_dir):
+    source_dir = ROOT / "snapshot-appstore" / lang / "duo"
+    print(f"▶︎ [{lang}] Duo 원본 → fastlane/screenshots/{asc_locale(lang)}/{DUO_PREFIX}*")
+
+    for slug in DUO_SLUGS:
+        path = source_dir / f"{slug}.png"
+        if not path.exists():
+            raise SystemExit(f"  ✗ 누락: {path.relative_to(ROOT)} — 먼저 촬영 스크립트를 돌려라")
+        with Image.open(path) as screenshot:
+            screenshot.convert("RGB").save(output_dir / upload_name(slug, DUO_PREFIX))
+    print(f"  ✓ [{lang}] Duo {len(DUO_SLUGS)}장")
+
+
+def verify(output_dir, pattern, sizes):
     failures = []
-    for path in sorted(output_dir.glob("*.png")):
+    for path in sorted(output_dir.glob(pattern)):
         with Image.open(path) as image:
-            if image.size != UPLOAD_SIZE:
+            if image.size not in sizes:
                 failures.append(f"{path.name}: {image.size[0]}x{image.size[1]} — 규격 아님")
             if image.mode == "RGBA" or "transparency" in image.info:
                 failures.append(f"{path.name}: 알파 채널이 남아 있다")
     if failures:
         print("\n".join(f"  ✗ {message}" for message in failures), file=sys.stderr)
         raise SystemExit(1)
-    print(f"  ✓ {UPLOAD_SIZE[0]}x{UPLOAD_SIZE[1]} / 알파 없음")
+    print(f"  ✓ {' / '.join(f'{width}x{height}' for width, height in sizes)} / 알파 없음")
 
 
 def main(argv):
@@ -136,7 +149,10 @@ def main(argv):
     print(f"▶︎ 화면 구멍 {hole_box[2]-hole_box[0]}x{hole_box[3]-hole_box[1]} @ ({hole_box[0]}, {hole_box[1]})")
 
     for lang in langs:
-        verify(compose_lang(lang, bezel, hole_mask, hole_box))
+        output_dir = compose_lang(lang, bezel, hole_mask, hole_box)
+        copy_duo_lang(lang, output_dir)
+        verify(output_dir, "[0-9]*.png", (UPLOAD_SIZE,))
+        verify(output_dir, f"{DUO_PREFIX}*.png", DUO_SIZES)
     print(f"✓ 전체 완료 — {len(langs)} 개 언어")
 
 

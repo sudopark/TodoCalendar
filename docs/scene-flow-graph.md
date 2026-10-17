@@ -48,6 +48,7 @@ graph TD
         SettingList[SettingItemList]
         AppearanceSetting[AppearanceSetting]
         ColorTheme[ColorThemeSelect]
+        ColorThemeEdit[ColorThemeEdit]
         WidgetAppearance[WidgetAppearanceSetting]
         TimeZoneSelect[TimeZoneSelect]
         EventSetting[EventSetting]
@@ -59,6 +60,15 @@ graph TD
         HolidayList[HolidayList]
         CountrySelect[CountrySelect]
         FeedbackPost[FeedbackPost]
+    end
+
+    subgraph Widget["WidgetScenes"]
+        WidgetGalleryDetail[WidgetGalleryDetail]
+        WidgetStyleEdit[WidgetStyleEdit]
+    end
+
+    subgraph Billing["BillingScenes"]
+        PaidFeatureAdGuide[PaidFeatureAdGuide]
     end
 
     subgraph Member["MemberScenes"]
@@ -131,6 +141,13 @@ graph TD
     SettingList -.-> SignIn
 
     AppearanceSetting --> ColorTheme
+    ColorTheme --> ColorThemeEdit
+    ColorTheme -.-> PaidFeatureAdGuide
+    ColorThemeEdit -.-> PaidFeatureAdGuide
+    WidgetGalleryDetail --> WidgetStyleEdit
+    WidgetGalleryDetail -.-> PaidFeatureAdGuide
+    WidgetStyleEdit -.-> PaidFeatureAdGuide
+    CalendarView -.-> PaidFeatureAdGuide
     AppearanceSetting --> WidgetAppearance
     AppearanceSetting --> TimeZoneSelect
 

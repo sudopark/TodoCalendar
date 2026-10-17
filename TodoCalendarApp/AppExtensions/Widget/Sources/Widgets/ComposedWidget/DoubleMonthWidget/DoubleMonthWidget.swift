@@ -11,17 +11,13 @@ import SwiftUI
 import Domain
 import Extensions
 import CommonPresentation
-import CalendarScenes
+import CalendarPresentation
+import WidgetScenes
 
 
 // MARK: - DoubleMonthWidgetView
 
 struct DoubleMonthWidgetView: View {
-    
-    @Environment(\.colorScheme) var colorScheme
-    var colorSet: any ColorSet {
-        return colorScheme == .light ? DefaultLightColorSet() : DefaultDarkColorSet()
-    }
     
     private let entry: ResultTimelineEntry<DoubleMonthWidgetViewModel>
     init(entry: ResultTimelineEntry<DoubleMonthWidgetViewModel>) {
@@ -31,10 +27,7 @@ struct DoubleMonthWidgetView: View {
     var body: some View {
         switch self.entry.result {
         case .success(let model):
-            HStack {
-                SingleMonthView(model: model.current)
-                SingleMonthView(model: model.next)
-            }
+            DoubleMonthWidgetContentView(model: model)
         case .failure(let error):
             FailView(errorModel: error)
         }
@@ -49,7 +42,11 @@ struct DoubleMonthWidget: Widget {
     let kind = "DoubleMonthWidget"
     
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: DoubleMonthWidgetTimlineProvider()) { entry in
+        AppIntentConfiguration(
+            kind: kind,
+            intent: DoubleMonthWidgetConfigurationIntent.self,
+            provider: DoubleMonthWidgetTimlineProvider()
+        ) { entry in
             DoubleMonthWidgetView(entry: entry)
                 .containerBackground(entry.backgroundShape, for: .widget)
         }

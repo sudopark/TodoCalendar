@@ -27,7 +27,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         logger.prepare()
         #endif
         
-        if AppEnvironment.isTestBuild == false {
+        self.syncE2ERunMarker()
+        self.resetStateForUITestRunIfNeeded()
+        
+        if AppEnvironment.isExternalDependencyBlocked == false {
             FirebaseApp.configure()
             Messaging.messaging().delegate = self
             UNUserNotificationCenter.current().delegate = self
@@ -54,6 +57,48 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Called when the user discards a scene session.
         // If any sessions were discarded while the application was not running, this will be called shortly after application:didFinishLaunchingWithOptions.
         // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
+    }
+}
+
+
+// MARK: - reset state for ui test
+
+extension AppDelegate {
+    
+    // 잔존 마커를 걷는 것이 아래 격리 축 판정보다 앞이어야 지난 실행이 이번 실행을 오염시키지 않는다
+    fileprivate func syncE2ERunMarker() {
+#if DEBUG
+        guard AppEnvironment.isUITestRun else {
+            // 일반 실행이 잔존 마커를 걷는다 — 만료 시각과 함께 fail-safe 를 이룬다
+            AppEnvironment.removeE2ERunMarker()
+            return
+        }
+        guard let host = AppEnvironment.e2eLaunchAPIHost else { return }
+        AppEnvironment.writeE2ERunMarker(host: host)
+#endif
+    }
+    
+    // ApplicationBase 가 UserDefaults 를 읽어 잡으므로 루트 조립보다 앞이어야 한다
+    fileprivate func resetStateForUITestRunIfNeeded() {
+        guard AppEnvironment.isUITestRun else { return }
+        
+        let testDBFilePath = AppEnvironment.dbFilePath(for: nil)
+        guard testDBFilePath.isEmpty == false else { return }
+        
+        let testDBFileURL = URL(fileURLWithPath: testDBFilePath)
+        let namePrefix = testDBFileURL.deletingPathExtension().lastPathComponent
+        let containerURL = testDBFileURL.deletingLastPathComponent()
+        
+        let manager = FileManager.default
+        let files = (try? manager.contentsOfDirectory(
+            at: containerURL, includingPropertiesForKeys: nil
+        )) ?? []
+        files
+            .filter { $0.lastPathComponent.hasPrefix(namePrefix) }
+            .forEach { try? manager.removeItem(at: $0) }
+        
+        let suiteName = AppEnvironment.userDefaultSuiteName
+        UserDefaults(suiteName: suiteName)?.removePersistentDomain(forName: suiteName)
     }
 }
 

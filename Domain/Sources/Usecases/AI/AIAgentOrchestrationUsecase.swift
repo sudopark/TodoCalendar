@@ -54,6 +54,7 @@ public final class AIAgentOrchestrationUsecaseImple: AIAgentOrchestrationUsecase
     private let usageUsecase: any AIAgentUsageUsecase
     private let speechRecognizeUsecase: any SpeechRecognizeUsecase
     private let eventSyncUsecase: any EventSyncUsecase
+    private let foremostEventUsecase: any ForemostEventUsecase
     private let notificationPermissionUsecase: any NotificationPermissionUsecase
 
     public init(
@@ -61,12 +62,14 @@ public final class AIAgentOrchestrationUsecaseImple: AIAgentOrchestrationUsecase
         usageUsecase: any AIAgentUsageUsecase,
         speechRecognizeUsecase: any SpeechRecognizeUsecase,
         eventSyncUsecase: any EventSyncUsecase,
+        foremostEventUsecase: any ForemostEventUsecase,
         notificationPermissionUsecase: any NotificationPermissionUsecase
     ) {
         self.commandUsecase = commandUsecase
         self.usageUsecase = usageUsecase
         self.speechRecognizeUsecase = speechRecognizeUsecase
         self.eventSyncUsecase = eventSyncUsecase
+        self.foremostEventUsecase = foremostEventUsecase
         self.notificationPermissionUsecase = notificationPermissionUsecase
     }
 
@@ -106,6 +109,7 @@ public final class AIAgentOrchestrationUsecaseImple: AIAgentOrchestrationUsecase
             self.currentProcessingJobId = nil
         }
         self.triggerEventSyncIfNeeded(job.result)
+        self.triggerForemostRefreshIfNeeded(job.result)
         if job.status == .rejected || job.status == .canceled {
             self.subject.state.send(.idle)
             return
@@ -138,6 +142,13 @@ public final class AIAgentOrchestrationUsecaseImple: AIAgentOrchestrationUsecase
               result.mutations.contains(where: { $0.dataType.requiresEventSync })
         else { return }
         self.eventSyncUsecase.sync()
+    }
+
+    private func triggerForemostRefreshIfNeeded(_ result: AIJobResult?) {
+        guard let result,
+              result.mutations.contains(where: { $0.dataType == .foremost })
+        else { return }
+        self.foremostEventUsecase.refresh()
     }
 }
 

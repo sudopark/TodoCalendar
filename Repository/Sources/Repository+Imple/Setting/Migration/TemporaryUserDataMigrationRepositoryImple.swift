@@ -17,15 +17,18 @@ public final class TemporaryUserDataMigrationRepositoryImple: TemporaryUserDataM
     private let tempUserDBPath: String
     private let remoteAPI: any RemoteAPI
     private let environmentStorage: any EnvironmentStorage
+    private let accountSqliteService: SQLiteService
     
     public init(
         tempUserDBPath: String,
         remoteAPI: any RemoteAPI,
-        environmentStorage: any EnvironmentStorage
+        environmentStorage: any EnvironmentStorage,
+        accountSqliteService: SQLiteService
     ) {
         self.tempUserDBPath = tempUserDBPath
         self.remoteAPI = remoteAPI
         self.environmentStorage = environmentStorage
+        self.accountSqliteService = accountSqliteService
     }
 }
 
@@ -40,6 +43,19 @@ extension TemporaryUserDataMigrationRepositoryImple {
         return service
     }
     
+    private func writeIntoAccountDBIgnoringFailure(
+        _ dataName: String, _ writing: () async throws -> Void
+    ) async {
+        do {
+            try await writing()
+        } catch {
+            logger.log(
+                .sql, level: .error,
+                "temporary user data migration: account db write failed(\(dataName)) => \(error)"
+            )
+        }
+    }
+    
     public func loadMigrationNeedEventCount() async throws -> Int {
     
         let service = try await self.prepareTempDBsqliteService()
@@ -49,8 +65,11 @@ extension TemporaryUserDataMigrationRepositoryImple {
         
         let scheduleEventStorage = ScheduleEventLocalStorageImple(sqliteService: service)
         let schedules = try await scheduleEventStorage.loadAllEvents()
+        
+        let themeStorage = CustomColorThemeLocalStorageImple(sqliteService: service)
+        let themes = try await themeStorage.fetchThemes()
                 
-        return todos.count + schedules.count
+        return todos.count + schedules.count + themes.count
     }
 }
 
@@ -74,6 +93,13 @@ extension TemporaryUserDataMigrationRepositoryImple {
             endpoint,
             parameters: payload.asJson()
         )
+        let accountStorage = EventTagLocalStorageImple(
+            sqliteService: self.accountSqliteService, environmentStorage: self.environmentStorage
+        )
+        await self.writeIntoAccountDBIgnoringFailure("event tags") {
+            try await accountStorage.updateTags(alltags)
+        }
+        
         try? await storage.removeAllTags()
     }
     
@@ -93,6 +119,11 @@ extension TemporaryUserDataMigrationRepositoryImple {
             endpoint,
             parameters: payload.asJson()
         )
+        let accountStorage = TodoLocalStorageImple(sqliteService: self.accountSqliteService)
+        await self.writeIntoAccountDBIgnoringFailure("todo events") {
+            try await accountStorage.updateTodoEvents(todos)
+        }
+        
         try? await storage.removeAll()
     }
     
@@ -112,6 +143,11 @@ extension TemporaryUserDataMigrationRepositoryImple {
             endpoint,
             parameters: payload.asJson()
         )
+        
+        let accountStorage = ScheduleEventLocalStorageImple(sqliteService: self.accountSqliteService)
+        await self.writeIntoAccountDBIgnoringFailure("schedule events") {
+            try await accountStorage.updateScheduleEvents(schedules)
+        }
         
         try? await storage.removeAll()
     }
@@ -133,6 +169,15 @@ extension TemporaryUserDataMigrationRepositoryImple {
             parameters: payload.asJson()
         )
         
+        let accountStorage = EventDetailDataLocalStorageImple<EventDetailDataTable>(
+            sqliteService: self.accountSqliteService
+        )
+        await self.writeIntoAccountDBIgnoringFailure("event details") {
+            for detail in details {
+                try await accountStorage.saveDetail(detail)
+            }
+        }
+        
         try? await storage.removeAll()
     }
     
@@ -153,6 +198,11 @@ extension TemporaryUserDataMigrationRepositoryImple {
             parameters: payload.asJson()
         )
         
+        let accountStorage = TodoLocalStorageImple(sqliteService: self.accountSqliteService)
+        await self.writeIntoAccountDBIgnoringFailure("done todo events") {
+            try await accountStorage.updateDoneTodos(doneEvents)
+        }
+        
         let detailStorage = EventDetailDataLocalStorageImple<DoneTodoEventDetailTable>(sqliteService: service)
         let details = try await detailStorage.loadAll()
         if !details.isEmpty {
@@ -164,9 +214,47 @@ extension TemporaryUserDataMigrationRepositoryImple {
                 detailEndpoint,
                 parameters: payload.asJson()
             )
+            
+            let accountDetailStorage = EventDetailDataLocalStorageImple<DoneTodoEventDetailTable>(
+                sqliteService: self.accountSqliteService
+            )
+            await self.writeIntoAccountDBIgnoringFailure("done todo details") {
+                for detail in details {
+                    try await accountDetailStorage.saveDetail(detail)
+                }
+            }
         }
         
         try? await storage.removeAllDoneEvents()
+    }
+    
+    public func migrateCustomColorThemes() async throws {
+        let service = try await self.prepareTempDBsqliteService()
+        defer { service.close() }
+        
+        let storage = CustomColorThemeLocalStorageImple(sqliteService: service)
+        let themes = try await storage.fetchThemes()
+        
+        guard !themes.isEmpty else { return }
+        
+        let endpoint = MigrationEndpoints.customColorThemes
+        let payload = BatchCustomColorThemePayload(themes: themes)
+        let _: BatchWriteResult = try await self.remoteAPI.request(
+            .post,
+            endpoint,
+            parameters: payload.asJson()
+        )
+        
+        let accountStorage = CustomColorThemeLocalStorageImple(
+            sqliteService: self.accountSqliteService
+        )
+        await self.writeIntoAccountDBIgnoringFailure("custom color themes") {
+            for theme in themes {
+                try await accountStorage.saveTheme(theme)
+            }
+        }
+        
+        try? await storage.removeThemes(themes.map { $0.uuid })
     }
     
     public func clearTemporaryUserData() async throws {

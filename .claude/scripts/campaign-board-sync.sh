@@ -1,0 +1,34 @@
+#!/bin/bash
+# 상황판 sync — 전략·캠페인·작업 지침의 계획·진행 파일을 레포 밖 스풀로 복사하고 정적 미러를 다시 렌더한다.
+# 부수 작업이라 어떤 실패도 본 절차를 막지 않는다 (항상 exit 0, stderr 로만 남긴다).
+ISSUE="$1"
+BOARD="${CAMPAIGN_BOARD_DIR:-$HOME/.claude/campaign-board}"
+REPO="${REPO_ROOT:-$(cd "$(dirname "$0")/../.." && pwd)}"
+
+[ -z "$ISSUE" ] && { echo "campaign-board-sync: 이슈번호가 없다" >&2; exit 0; }
+[ -d "$BOARD/state" ] || exit 0   # 상황판을 안 쓰는 환경 — 조용히 no-op
+
+DEST="$BOARD/state/$ISSUE"
+mkdir -p "$DEST" 2>/dev/null || { echo "campaign-board-sync: $DEST 생성 실패" >&2; exit 0; }
+
+COPIED=0
+for SRC in "$REPO/docs/operations/$ISSUE/strategy.md" \
+           "$REPO/docs/operations/$ISSUE/campaign.md" \
+           "$REPO/docs/operations/$ISSUE"/opord*.md \
+           "$REPO/.operations/$ISSUE/strategy-progress.md" \
+           "$REPO/.operations/$ISSUE/campaign-progress.md" \
+           "$REPO/.operations/$ISSUE/progress.md" \
+           "$REPO/.operations/$ISSUE/activity.md"; do
+  [ -f "$SRC" ] || continue
+  if cp "$SRC" "$DEST/" 2>/dev/null; then COPIED=$((COPIED+1)); else echo "campaign-board-sync: 복사 실패 — $SRC" >&2; fi
+done
+# 원본 0건은 정상 no-op 이 아니다 — 계획 파일이 없는 워크트리에서 부른 잘못된 호출일 가능성이 높다
+[ "$COPIED" -eq 0 ] && echo "campaign-board-sync: $ISSUE 원본이 이 워크트리에 하나도 없다 — 스풀이 갱신되지 않았다" >&2
+
+# 스풀만 갱신하면 화면은 옛 상태로 남는다 — 렌더까지가 한 호출이다.
+if [ -f "$BOARD/render.py" ]; then
+  python3 "$BOARD/render.py" >/dev/null 2>&1 || echo "campaign-board-sync: 렌더 실패" >&2
+fi
+
+# Artifact 재게시는 수동이다 (#1070) — 유저가 요청한 세션만 board.html 을 artifact-url.txt 의 URL 로 재게시한다.
+exit 0

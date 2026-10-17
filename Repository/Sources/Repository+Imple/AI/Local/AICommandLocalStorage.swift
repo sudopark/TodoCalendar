@@ -35,7 +35,7 @@ extension AICommandLocalStorageImple {
         return try await self.sqliteService.async.run { db -> ProcessingAICommand? in
             try? db.createTableOrNot(ProcessingAICommandTable.self)
             let query = ProcessingAICommandTable.selectAll()
-            return try db.loadOne(ProcessingAICommandTable.self, query: query)
+            return try db.loadOne(ProcessingAICommandTable.self, query: query).map { $0.asProcessingAICommand() }
         }
     }
 
@@ -43,7 +43,7 @@ extension AICommandLocalStorageImple {
         try await self.sqliteService.async.run { db in
             try? db.createTableOrNot(ProcessingAICommandTable.self)
             try db.delete(ProcessingAICommandTable.self, query: ProcessingAICommandTable.delete())
-            try db.insert(ProcessingAICommandTable.self, entities: [cmd])
+            try db.insert(ProcessingAICommandTable.self, entities: [.init(cmd)])
         }
     }
 

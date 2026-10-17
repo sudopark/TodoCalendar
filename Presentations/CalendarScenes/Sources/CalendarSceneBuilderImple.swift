@@ -70,6 +70,7 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
             todoEventUsecase: self.usecaseFactory.makeTodoEventUsecase(),
             scheduleEventUsecase: self.usecaseFactory.makeScheduleEventUsecase(),
             foremostEventusecase: self.usecaseFactory.makeForemostEventUsecase(),
+            ddayCandidateUsecase: self.usecaseFactory.makeDDayCandidateUsecase(),
             eventTagUsecase: self.usecaseFactory.makeEventTagUsecase(),
             migrationUsecase: self.usecaseFactory.temporaryUserDataMigrationUsecase,
             uiSettingUsecase: self.usecaseFactory.makeUISettingUsecase(),
@@ -126,8 +127,17 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
             sharePreviewSceneBuilder: sharePreviewSceneBuilder,
             pendingCompleteTodoState: pendingCompleteTodoState
         )
+        let twoColumnsSceneBuilder = CalendarTwoColumnsBuilderImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearance,
+            eventListSceneBuilder: eventListSceneBuilder,
+            eventListCellEventHanleViewModelBuilder: handleViewModelBuilder,
+            sharePreviewSceneBuilder: sharePreviewSceneBuilder,
+            pendingCompleteTodoState: pendingCompleteTodoState
+        )
         let router = CalendarViewRouterImple(
             paperSceneBuilder,
+            twoColumnsSceneBuilder: twoColumnsSceneBuilder,
             aiAgentCommandSceneBuilder: self.aiAgentCommandSceneBuilder,
             memberSceneBuilder: self.memberSceneBuilder,
             paywallSceneBuilder: self.paywallSceneBuilder

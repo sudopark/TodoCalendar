@@ -101,3 +101,10 @@ private extension CalendarComponent {
         return .init(year: self.year, month: self.month, weeks: newWeeks)
     }
 }
+
+extension AppThemeColorSetKey {
+
+    public static let snapshotRepresentatives: [AppThemeColorSetKey] = [
+        .tomato, .ruby, .crimson, .midnight, .ink, .abyss
+    ]
+}

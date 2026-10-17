@@ -12,6 +12,7 @@ import Domain
 import Extensions
 import CommonPresentation
 import SnapshotTestHelpKit
+import Scenes
 
 @testable import BillingScenes
 
@@ -78,6 +79,8 @@ final class BillingScenesSnapshots: XCTestCase {
             features: [
                 "billing::paywall::feature::dailyCredits".localized(with: "\(dailyLimit)"),
                 isTopupAllowed ? "billing::paywall::feature::topup".localized() : nil,
+                "billing::paywall::feature::customizeWidget".localized(),
+                "billing::paywall::feature::customColorTheme".localized(),
                 "billing::paywall::feature::noAds".localized()
             ].compactMap { $0 },
             disclosure: disclosureKey.localized(),
@@ -484,6 +487,78 @@ extension BillingScenesSnapshots {
                 ]
                 state.topupTitle = "billing::paywall::topup::title".localized()
                 state.isPurchasing = false
+            }
+        }
+    }
+
+    // MARK: - AdGuide/PaidFeatureAdGuideView
+
+    @MainActor
+    private func makeAdGuideView(
+        _ appearance: ViewAppearance,
+        _ reason: PaidFeatureGateFailReason,
+        canUseDefault: Bool = false,
+        canShowPlans: Bool = true
+    ) -> some View {
+        var container = PaidFeatureAdGuideContainerView(
+            viewAppearance: appearance, eventHandlers: PaidFeatureAdGuideViewEventHandler()
+        )
+        container.stateBinding = {
+            $0.reason = reason
+            $0.canUseDefault = canUseDefault
+            $0.canShowPlans = canShowPlans
+        }
+        return container
+    }
+
+    @MainActor
+    func test_paidFeatureAdGuide_colorTheme() {
+        captureSnapshotPair(named: "paidFeatureAdGuide_colorTheme", layout: .fullScreen) { theme in
+            let appearance = self.makeAppearance(theme)
+            return ZStack {
+                appearance.colorSet.bg1.asColor.ignoresSafeArea()
+                self.makeAdGuideView(appearance, .init(feature: .colorTheme(.custom("my-theme")), licenseDays: 7))
+            }
+        }
+    }
+
+    @MainActor
+    func test_paidFeatureAdGuide_colorTheme_useDefault() {
+        captureSnapshotPair(named: "paidFeatureAdGuide_colorTheme_useDefault", layout: .fullScreen) { theme in
+            let appearance = self.makeAppearance(theme)
+            return ZStack {
+                appearance.colorSet.bg1.asColor.ignoresSafeArea()
+                self.makeAdGuideView(
+                    appearance,
+                    .init(feature: .colorTheme(.custom("my-theme")), licenseDays: 7),
+                    canUseDefault: true
+                )
+            }
+        }
+    }
+
+    @MainActor
+    func test_paidFeatureAdGuide_customizeWidget() {
+        captureSnapshotPair(named: "paidFeatureAdGuide_customizeWidget", layout: .fullScreen) { theme in
+            let appearance = self.makeAppearance(theme)
+            return ZStack {
+                appearance.colorSet.bg1.asColor.ignoresSafeArea()
+                self.makeAdGuideView(appearance, .init(feature: .customizeWidget, licenseDays: 7))
+            }
+        }
+    }
+
+    @MainActor
+    func test_paidFeatureAdGuide_signedOut() {
+        captureSnapshotPair(named: "paidFeatureAdGuide_signedOut", layout: .fullScreen) { theme in
+            let appearance = self.makeAppearance(theme)
+            return ZStack {
+                appearance.colorSet.bg1.asColor.ignoresSafeArea()
+                self.makeAdGuideView(
+                    appearance,
+                    .init(feature: .colorTheme(.custom("my-theme")), licenseDays: 7),
+                    canShowPlans: false
+                )
             }
         }
     }

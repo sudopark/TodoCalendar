@@ -12,6 +12,7 @@
 "catalog.event::team_workshop" = "Warsztaty zespołowe";
 "catalog.event::release_day" = "Dzień wydania";
 "catalog.event::lunch" = "Obiad z Sarą";
+"catalog.event::anniversary" = "Rocznica ślubu";
 
 // MARK: - 할일
 
@@ -40,3 +41,8 @@
 
 "catalog.ai::command" = "obiad z Sarą w piątek w południe";
 "catalog.ai::result" = "„Obiad z Sarą” dodano na piątek 13 marca o 12:00.";
+
+// MARK: - 컬러 테마
+
+"catalog.colorTheme::forest" = "Las";
+"catalog.colorTheme::dusk" = "Zmierzch";

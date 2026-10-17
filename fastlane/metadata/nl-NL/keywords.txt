@@ -1,1 +1,1 @@
-takenlijst,to do lijst,agenda,planner,dagplanner,widget,herinnering,checklist,google agenda,ai
+takenlijst,to do lijst,agenda,dagplanner,widget,thema,aftellen,herinnering,checklist,google,ai

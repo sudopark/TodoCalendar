@@ -13,7 +13,6 @@ import Domain
 
 public protocol CalendarSceneInteractor: Sendable, AnyObject {
 
-    func moveFocusToToday()
     func moveDay(_ day: CalendarDay, withClearPresented: Bool)
     func moveToPreviousMonth()
     func moveToNextMonth()
@@ -27,9 +26,15 @@ extension CalendarSceneInteractor {
     }
 }
 
+public enum CalendarColumnLayout: Sendable, Equatable {
+    case singleColumn
+    case twoColumns
+}
+
 public protocol CalendarSceneListener: Sendable, AnyObject {
     
     func calendarScene(focusChangedTo selected: SelectDayInfo)
+    func calendarScene(didChangeColumnLayout layout: CalendarColumnLayout)
 }
 
 public protocol CalendarScene: Scene where Interactor == any CalendarSceneInteractor {

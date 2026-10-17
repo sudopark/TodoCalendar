@@ -26,7 +26,8 @@ import CommonPresentation
     @ObservationIgnored private let cancellables = CancelBag()
     
     fileprivate var sampleModel: CalendarAppearanceModel = .init(.sunday)
-    fileprivate var themeModels: [ColorThemeModel] = []
+    fileprivate var themeModels: [BuiltInColorThemeModel] = []
+    fileprivate var customThemeModels: [CustomColorThemeModel] = []
     
     func bind(_ viewModel: any ColorThemeSelectViewModel) {
         
@@ -47,6 +48,22 @@ import CommonPresentation
                 self?.themeModels = models
             })
             .store(in: self.cancellables)
+        
+        viewModel.customColorThemeModels
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] models in
+                self?.customThemeModels = models
+            })
+            .store(in: self.cancellables)
+    }
+
+    fileprivate var currentThemeModel: (any ColorThemeModel)? {
+        let models: [any ColorThemeModel] = self.themeModels + self.customThemeModels
+        guard let selected = models.first(where: { $0.isSelected }) else { return nil }
+        switch selected.key {
+        case .appTheme, .custom: return selected
+        case .systemTheme, .defaultLight, .defaultDark: return nil
+        }
     }
 }
 
@@ -57,7 +74,9 @@ final class ColorThemeSelectViewEventHandler: Observable {
     // TODO: add handlers
     var onAppear: () -> Void = { }
     var close: () -> Void = { }
-    var selectTheme: (ColorThemeModel) -> Void = { _ in }
+    var selectTheme: (any ColorThemeModel) -> Void = { _ in }
+    var createCustomTheme: () -> Void = { }
+    var editCustomTheme: (CustomColorThemeModel) -> Void = { _ in }
 
     func bind(_ viewModel: any ColorThemeSelectViewModel) {
         // TODO: bind handlers
@@ -65,6 +84,8 @@ final class ColorThemeSelectViewEventHandler: Observable {
         self.onAppear = viewModel.prepare
         self.close = viewModel.close
         self.selectTheme = viewModel.selectTheme(_:)
+        self.createCustomTheme = viewModel.createCustomTheme
+        self.editCustomTheme = viewModel.editCustomTheme(_:)
     }
 }
 
@@ -116,20 +137,29 @@ struct ColorThemeSelectView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                CalendarAppearanceSampleView(model: state.sampleModel)
-                    .padding(.vertical, 60)
+                ColorThemeEditPreviewView(
+                    model: state.sampleModel,
+                    colorSet: appearance.colorSet
+                )
+                .padding(.vertical, spacing: .xlarge)
                 
                 ScrollView {
+                    if let current = state.currentThemeModel {
+                        self.currentThemeSection(current)
+                    }
+
                     LazyVGrid(columns: gridRow) {
-                        ForEach(0..<state.themeModels.count, id: \.self) { index in
-                            ColorThemeItemView(model: state.themeModels[index])
+                        ForEach(state.themeModels, id: \.key.rawValue) { model in
+                            ColorThemeItemView(model: model)
                                 .onTapGesture {
                                     appearance.impactIfNeed()
-                                    eventHandlers.selectTheme(state.themeModels[index])
+                                    eventHandlers.selectTheme(model)
                                 }
                         }
                     }
                     .padding(.top, 40)
+                    
+                    self.customThemeSection
                 }
                 .background(
                     appearance.colorSet.bg2.asColor
@@ -141,11 +171,20 @@ struct ColorThemeSelectView: View {
                 )
             }
             .background(appearance.colorSet.bg0.asColor)
-            .navigationTitle("setting.appearance.calendar.colorTheme".localized())
+            .navigationBarTitleDisplayMode(.inline)
             .if(condition: ProcessInfo.isAvailiOS26()) {
                 $0.toolbarBackground(.ultraThinMaterial, for: .navigationBar)
             }
+            .if(condition: !ProcessInfo.isAvailiOS26()) {
+                $0.toolbarBackground(appearance.colorSet.bg0.asColor, for: .navigationBar)
+                    .toolbarBackground(.visible, for: .navigationBar)
+            }
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("setting.appearance.calendar.colorTheme".localized())
+                        .font(appearance.fontSet.size(17, weight: .semibold).asFont)
+                        .foregroundStyle(appearance.colorSet.text0.asColor)
+                }
                 ToolbarItem(placement: .topBarLeading) {
                     NavigationBackButton {
                         eventHandlers.close()
@@ -153,7 +192,58 @@ struct ColorThemeSelectView: View {
                 }
             }
         }
-            .id(appearance.navigationBarId)
+    }
+}
+
+
+extension ColorThemeSelectView {
+
+    private func currentThemeSection(_ model: any ColorThemeModel) -> some View {
+        VStack(alignment: .leading, spacing: Metric.Spacing.regular) {
+            Text("setting.appearance.calendar.colorTheme::currentTheme".localized())
+                .font(appearance.fontSet.normal.asFont)
+                .foregroundStyle(appearance.colorSet.text1.asColor)
+                .padding(.horizontal, spacing: .large)
+
+            LazyVGrid(columns: gridRow) {
+                ColorThemeItemView(model: model)
+            }
+        }
+        .padding(.top, spacing: .xlarge)
+    }
+    
+    private var customThemeSection: some View {
+        VStack(alignment: .leading, spacing: Metric.Spacing.regular) {
+            Text("setting.appearance.calendar.colorTheme::myThemes".localized())
+                .font(appearance.fontSet.normal.asFont)
+                .foregroundStyle(appearance.colorSet.text1.asColor)
+                .padding(.horizontal, spacing: .large)
+            
+            LazyVGrid(columns: gridRow) {
+                ForEach(state.customThemeModels, id: \.key.rawValue) { model in
+                    ColorThemeItemView(model: model)
+                        .onTapGesture {
+                            appearance.impactIfNeed()
+                            eventHandlers.selectTheme(model)
+                        }
+                        .contextMenu {
+                            Button(
+                                "setting.appearance.calendar.colorTheme::edit".localized()
+                            ) {
+                                eventHandlers.editCustomTheme(model)
+                            }
+                        }
+                }
+                
+                NewColorThemeItemView()
+                    .onTapGesture {
+                        appearance.impactIfNeed()
+                        eventHandlers.createCustomTheme()
+                    }
+            }
+        }
+        .padding(.top, spacing: .xlarge)
+        .padding(.bottom, spacing: .xlarge)
     }
 }
 

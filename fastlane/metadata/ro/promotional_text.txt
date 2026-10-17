@@ -1,1 +1,1 @@
-3.0.1 — Noua introducere rapidă AI: descrieți evenimentul prin voce, tastatură sau poză, din Siri, butonul de Acțiune sau Centrul de control, fără a deschide aplicația.
+3.1.0 — Personalizați widgeturile și schimbați culorile aplicației cu 19 teme noi sau una proprie. În plus, un widget Numărătoare inversă și două panouri pe iPhone Duo.

@@ -9,6 +9,7 @@
 
 import UIKit
 import Scenes
+import CalendarPresentation
 
 
 // MARK: - DayEventListScene Interactable & Listenable
@@ -19,11 +20,13 @@ protocol DayEventListSceneInteractor: AnyObject {
         _ newDay: CurrentSelectDayModel,
         and eventThatDay: [any CalendarEvent]
     )
+    func selectedDayIsToday(_ isToday: Bool)
 }
 
 protocol DayEventListSceneListener: AnyObject {
 
     func dayEventListDidRequestShowAICommand()
+    func dayEventListDidRequestReturnToToday()
 }
 
 // MARK: - DayEventListScene

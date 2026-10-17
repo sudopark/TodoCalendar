@@ -220,18 +220,16 @@
 
 ---
 
-## 9. 위젯 (19종 + Control Widget 1종)
+## 9. 위젯 (20종 + Control Widget 1종)
 
 > **상세 스펙**: [spec/widgets.md](spec/widgets.md) — 위젯별 사이즈 매트릭스, Timeline 갱신 정책, Intent 파라미터, 데이터 소스, App Group 공유, 딥링크 URL, 캐시 메커니즘
 
 | 분류 | 위젯 |
 |---|---|
-| 기본 (8) | TodayAndNext, Today, NextEvent, NextRemainEvent, ForemostEvent, Month, EventList, AICommandShortcut |
+| 기본 (9) | TodayAndNext, Today, NextEvent, NextRemainEvent, ForemostEvent, Month, EventList, AICommandShortcut, DDay |
 | 주/월 (7) | 1~4주, 이번달/지난달/다음달 |
 | 조합 (4) | TodayAndMonth, EventAndMonth, EventAndForemost, DoubleMonth |
 | Control (1, iOS 18+) | AICommandControl — 제어 센터에서 AI 입력 진입 |
-
-`DDayWidget`은 #741로 배포 보류 중이다. 갤러리 노출은 `TodoCalendarWidgetBundle`에서 주석으로 막혀 있고(`@WidgetBundleBuilder`가 런타임 조건을 못 받는다), 앱 쪽 후보 등록 메뉴는 `FeatureFlag.ddayWidget`이 가린다. 재개할 땐 **둘 다** 되살려야 한다.
 
 - `TodoToggleIntent`: 위젯에서 할일 완료 토글 (SQLite 직접 쓰기 + 캐시 리셋)
 - `EventTypeSelectIntent`: 태그 기반 위젯 필터링 (커스텀+외부 캘린더 태그 지원)
@@ -282,7 +280,7 @@
 
 ### 타임존/테마/태그 색상
 - 타임존: 시스템 기본, 전체 목록에서 선택
-- 컬러 테마: systemTheme, defaultLight, defaultDark
+- 컬러 테마: 시스템 따라가기 · 기본 라이트/다크 · 앱이 기본 제공하는 테마 (라인업은 [spec/color-themes.md](spec/color-themes.md))
 - 기본 태그 색상: default=`#088CDA`, holiday=`#D6236A`
 
 ---
@@ -313,8 +311,9 @@
 - 타임존 인지 일수 계산, 1초 타이머 실시간 업데이트
 
 ### DB 마이그레이션
-- 메인 DB v7. 외부 캘린더 DB는 서비스별로 따로 센다 — Google v1, Apple v0
-- `AppEnvironment.dbVersion` + `Table.migrateStatement` + `AppDataMigrationImple` 스텝, 세 위치 동시 변경 필수
+- 메인 DB v7. 외부 캘린더 DB는 서비스별로 따로 센다 — Google v1, Apple v1 (애플의 1 은 어떤 스키마 변경에도 대응하지 않는 빈 번호다)
+- 메인 DB 는 `AppEnvironment.dbVersion` + `Table.migrateStatement` + `AppDataMigrationImple` 스텝, 세 위치 동시 변경 필수
+- 외부 캘린더 DB 는 서비스별 버전 상수 + `Table.migrateStatement` + `ExternalCalendarDBMigrationImple` 의 서비스별 스텝, 역시 세 위치 동시 변경 필수
 
 ### 외부 의존성
 - 네트워크·데이터: Alamofire, SQLiteService, Kingfisher, Pulse
@@ -356,11 +355,11 @@
 
 | 요구 | 팝업 | 닫기 | dismiss 스와이프 | "업데이트" 동작 |
 |---|---|---|---|---|
-| forceRequired | `UpdatePopupView` (`.forceRequired`) | 버튼 없음 | 차단 (`isModalInPresentation=true`) | App Store 이동, 팝업 유지 |
-| recommended | `UpdatePopupView` (`.recommended`) | "나중에" 버튼 | 차단 (force와 동일 설정) | App Store 이동 + 팝업 닫힘 |
+| forceRequired | `UpdatePopupView` (`.forceRequired`) | 버튼 없음 | 차단 (overlay window 라 스와이프 dismiss 대상이 아님) | App Store 이동, 팝업 유지 |
+| recommended | `UpdatePopupView` (`.recommended`) | "나중에" 버튼 | 차단 (force와 동일) | App Store 이동 + 팝업 닫힘 |
 
-- 루트 레벨 팝업: `ApplicationRootRouter.showUpdatePopup(_:)`이 `UIHostingController`를 `overFullScreen`으로 present.
-- 중복 노출 방지: Router가 현재 팝업 VC 참조(`updatePopupViewController`)를 보관하고 nil일 때만 새로 present.
+- 루트 레벨 팝업: `ApplicationRootRouter.showUpdatePopup(_:)`이 `UIHostingController`를 앱 window 와 별개인 overlay window 에 띄운다. 다른 화면 닫기에 같이 닫히지 않는다.
+- 중복 노출 방지: Router가 overlay window 참조(`updatePopupWindow`)를 보관하고 nil일 때만 새로 띄운다.
 
 ### 20.4 한계 / 후속 과제
 
@@ -500,3 +499,4 @@
 | [spec/apple-calendar.md](spec/apple-calendar.md) | Apple 캘린더 — 권한 분기, EventKit 캐시, RRULE 변환, 쓰기 범위 |
 | [spec/ai-agent.md](spec/ai-agent.md) | AI 에이전트 — Command/Job/Mutation, 상태 머신, 폴링·푸시, 확인 플로우, 사용량 |
 | [spec/billing.md](spec/billing.md) | 과금 — 플랜·top-up, 구매·복원 순서, paywall, 광고 노출 판정 |
+| [spec/adaptive-layout.md](spec/adaptive-layout.md) | 적응형 레이아웃 — Duo·창 크기 표, 2단 기준 |

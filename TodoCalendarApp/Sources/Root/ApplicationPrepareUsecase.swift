@@ -8,6 +8,8 @@
 import Foundation
 import Combine
 @preconcurrency import ActivityKit
+import Prelude
+import Optics
 import Domain
 import CommonPresentation
 import Extensions
@@ -44,7 +46,9 @@ final class ApplicationPrepareUsecaseImple: ApplicationPrepareUsecase {
     private let sharedDataStore: SharedDataStore
     private let environmentStorage: any EnvironmentStorage
     private let coldLaunchHistoryRepository: any AppColdLaunchHistoryRepository
+    private let customColorThemeRepository: any CustomColorThemeRepository
     private let mobileAdService: any MobileAdService
+    private let appPolicyRepository: any AppPolicyRepository
     private let database: SQLiteService
     private let appDataMigration: AppDataMigrationImple
     private let databasePathFinding: (String?) -> String
@@ -59,7 +63,9 @@ final class ApplicationPrepareUsecaseImple: ApplicationPrepareUsecase {
         sharedDataStore: SharedDataStore,
         environmentStorage: any EnvironmentStorage,
         coldLaunchHistoryRepository: any AppColdLaunchHistoryRepository,
+        customColorThemeRepository: any CustomColorThemeRepository,
         mobileAdService: any MobileAdService,
+        appPolicyRepository: any AppPolicyRepository,
         database: SQLiteService,
         appDataMigration: AppDataMigrationImple,
         databasePathFinding: @escaping (String?) -> String = { AppEnvironment.dbFilePath(for: $0) }
@@ -71,7 +77,9 @@ final class ApplicationPrepareUsecaseImple: ApplicationPrepareUsecase {
         self.sharedDataStore = sharedDataStore
         self.environmentStorage = environmentStorage
         self.coldLaunchHistoryRepository = coldLaunchHistoryRepository
+        self.customColorThemeRepository = customColorThemeRepository
         self.mobileAdService = mobileAdService
+        self.appPolicyRepository = appPolicyRepository
         self.database = database
         self.appDataMigration = appDataMigration
         self.databasePathFinding = databasePathFinding
@@ -84,10 +92,12 @@ extension ApplicationPrepareUsecaseImple {
     func prepareLaunch() async throws -> ApplicationPrepareResult {
         self.recordColdLaunch()
         self.mobileAdService.start()
+        Task { [appPolicyRepository] in
+            try? await appPolicyRepository.refreshPolicy()
+        }
         let latestLoginAccount = try await self.accountUsecase.prepareLastSignInAccount()
-        let appearance = try await self.prepareLatestAppearanceSeting()
-
         try? await self.prepareDatabase(for: latestLoginAccount?.auth.uid)
+        let appearance = try await self.prepareLatestAppearanceSeting()
 
         try? await self.externalCalenarIntegrationUsecase.prepareIntegratedAccounts()
 
@@ -135,6 +145,8 @@ extension ApplicationPrepareUsecaseImple {
         } catch let error {
             logger.log(level: .critical, "signIn -> close db failed..: \(error)")
         }
+        self.resetSelectedCustomColorTheme()
+        _ = try? await self.prepareLatestAppearanceSeting()
     }
     
     func prepareSignedOut() async {
@@ -150,6 +162,20 @@ extension ApplicationPrepareUsecaseImple {
         } catch let error {
             logger.log(level: .critical, "signOut -> close db failed..: \(error)")
         }
+        self.resetSelectedCustomColorTheme()
+        _ = try? await self.prepareLatestAppearanceSeting()
+    }
+    
+    private func resetSelectedCustomColorTheme() {
+        let saved = self.latestAppSettingRepository.loadSavedViewAppearance()
+        guard case .custom = saved.calendar.colorSetKey else { return }
+        let params = EditCalendarAppearanceSettingParams() |> \.newColorSetKey .~ .systemTheme
+        _ = try? self.latestAppSettingRepository.changeCalendarAppearanceSetting(params)
+    }
+    
+    private func loadCustomColorTheme(for colorSetKey: ColorSetKeys) async -> CustomColorTheme? {
+        guard case .custom(let themeId) = colorSetKey else { return nil }
+        return try? await self.customColorThemeRepository.fetchTheme(themeId)
     }
     
     /// 라이브액티비티는 계정 스코프다 — 안 끄면 전환된 계정 잠금화면에 이전 계정 이벤트가 남는다.
@@ -159,8 +185,10 @@ extension ApplicationPrepareUsecaseImple {
         }
     }
     
-    private func prepareLatestAppearanceSeting() async throws -> AppearanceSettings  {
-        let appearance = self.latestAppSettingRepository.loadSavedViewAppearance()
+    private func prepareLatestAppearanceSeting() async throws -> AppearanceSettings {
+        let saved = self.latestAppSettingRepository.loadSavedViewAppearance()
+        let currentTheme = await self.loadCustomColorTheme(for: saved.calendar.colorSetKey)
+        let appearance = saved |> \.calendar.currentCustomColorTheme .~ currentTheme
         self.sharedDataStore.put(
             CalendarAppearanceSettings.self,
             key: ShareDataKeys.calendarAppearance.rawValue,

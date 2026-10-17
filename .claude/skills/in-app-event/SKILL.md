@@ -1,6 +1,6 @@
 ---
 name: in-app-event
-description: Use when filling in an App Store in-app event's localized copy and images — 절차·순서·게이트는 본문이 정한다. Triggers on "앱 내 이벤트 현지화하자", "인앱 이벤트 이미지 만들어줘", "인앱 이벤트 텍스트 올려줘". Does NOT trigger on 도메인 이벤트(Todo·Schedule) 편집, 버전별 변경내용(release-notes 스킬), 앱 설명·키워드 등 버전 무관 메타데이터(fastlane/metadata/README.md), 앱스토어 스크린샷(fastlane/screenshots.md), 앱 내 문구 번역(.claude/rules/localization.md), 이벤트 생성·일정·territory 설정(ASC 콘솔에서 유저가 한다).
+description: Use when filling in an App Store in-app event's localized copy and images — 절차·순서·게이트는 본문이 정한다. Triggers on "앱 내 이벤트 현지화하자", "인앱 이벤트 이미지 만들어줘", "인앱 이벤트 텍스트 올려줘". Does NOT trigger on 도메인 이벤트(Todo·Schedule) 편집, 버전별 변경내용(release-notes 스킬), 앱 설명·키워드 등 버전 무관 메타데이터(fastlane/metadata/README.md), 앱스토어 스크린샷(fastlane/screenshots.md), 제품 페이지 헤더·검색 결과 가로 이미지(creative-assets 스킬), 앱 내 문구 번역(.claude/rules/localization.md), 이벤트 생성·일정·territory 설정(ASC 콘솔에서 유저가 한다).
 ---
 
 # In-App Event — 앱 내 이벤트 현지화·업로드

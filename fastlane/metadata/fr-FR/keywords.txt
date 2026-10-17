@@ -1,1 +1,1 @@
-tâches,liste de tâches,agenda,organiseur,rappels,widget,récurrent,voix,écran verrouillé,ia
+liste de tâches,agenda,organiseur,rappels,widget,thème,compte à rebours,jour j,récurrent,ia

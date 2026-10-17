@@ -98,6 +98,26 @@ git add -A && git commit -qm "space path"
 OUT=$(python3 "$SCRIPT" HEAD~1 HEAD 2>&1)
 assert_contains "공백 포함 경로도 파싱" "My File.swift" "$OUT"
 
+# --- 짧은 한 줄이 한 구간에 몰리면 밀도 축이 잡는다 (낱개 판정으로는 전부 미검출) ---
+cat > Sources/Crowded.swift << 'SWIFT'
+struct Crowded {
+    func decide(_ n: Int) -> Int {
+        // 컨테이너가 없으면 그냥 둔다
+        guard n > 0 else { return 0 }
+        // 사진을 안 받는 변형은 버린다
+        guard n < 100 else { return 1 }
+        // 파일이 사라진 식별자는 지운다
+        guard n != 7 else { return 2 }
+        return n
+    }
+}
+SWIFT
+git add -A && git commit -qm crowded
+OUT=$(python3 "$SCRIPT" HEAD~1 HEAD 2>&1)
+assert_contains "몰린 구간 검출" "주석 블록 3개" "$OUT"
+assert_contains "몰린 구간 경로 표시" "Crowded.swift" "$OUT"
+assert_contains "낱개 판정으로는 한 건도 안 잡힌다" "검토 필요 0건" "$OUT"
+
 # --- 주석을 안 건드린 커밋 ---
 echo "struct Plain { let a = 1 }" > Sources/Plain.swift
 git add -A && git commit -qm plain

@@ -21,6 +21,12 @@ protocol CalendarViewModel: AnyObject, Sendable, CalendarSceneInteractor {
     
     func prepare()
     func focusChanged(from previousIndex: Int, to nextIndex: Int)
+
+    func changeFocusedMonth(to month: CalendarMonth)
+    func selectDay(_ day: CalendarDay)
+    func columnLayoutChanged(_ layout: CalendarColumnLayout)
+    var focusedMonth: AnyPublisher<CalendarMonth, Never> { get }
+    var selectedDay: AnyPublisher<CalendarDay, Never> { get }
 }
 
 
@@ -34,6 +40,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
     private let todoEventUsecase: any TodoEventUsecase
     private let scheduleEventUsecase: any ScheduleEventUsecase
     private let foremostEventusecase: any ForemostEventUsecase
+    private let ddayCandidateUsecase: any DDayCandidateUsecase
     private let eventTagUsecase: any EventTagUsecase
     private let migrationUsecase: any TemporaryUserDataMigrationUescase
     private let uiSettingUsecase: any UISettingUsecase
@@ -45,6 +52,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
     private let accountUsecase: any AccountUsecase
     var router: (any CalendarViewRouting)?
     private var calendarPaperInteractors: [any CalendarPaperSceneInteractor]?
+    private var twoColumnsInteractor: (any CalendarTwoColumnsSceneInteractor)?
     // TODO: calendarVC load 이후 바로 prepare를 할것이기때문에 라이프사이클상 listener는 setter 주입이 아니라 생성시에 받아야 할수도있음
     weak var listener: (any CalendarSceneListener)?
     
@@ -55,6 +63,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         todoEventUsecase: any TodoEventUsecase,
         scheduleEventUsecase: any ScheduleEventUsecase,
         foremostEventusecase: any ForemostEventUsecase,
+        ddayCandidateUsecase: any DDayCandidateUsecase,
         eventTagUsecase: any EventTagUsecase,
         migrationUsecase: any TemporaryUserDataMigrationUescase,
         uiSettingUsecase: any UISettingUsecase,
@@ -71,6 +80,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         self.todoEventUsecase = todoEventUsecase
         self.scheduleEventUsecase = scheduleEventUsecase
         self.foremostEventusecase = foremostEventusecase
+        self.ddayCandidateUsecase = ddayCandidateUsecase
         self.eventTagUsecase = eventTagUsecase
         self.migrationUsecase = migrationUsecase
         self.uiSettingUsecase = uiSettingUsecase
@@ -93,9 +103,12 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
     }
     private struct Subject {
         let monthsInCurrentRange = CurrentValueSubject<TotalMonthsInRange?, Never>(nil)
-        let selectedDayPerMonths = CurrentValueSubject<[CalendarMonth: CurrentSelectDayModel], Never>([:])
+        let selectedDayPerMonths = CurrentValueSubject<[CalendarMonth: CalendarDay], Never>([:])
         let aiAgentState = CurrentValueSubject<AIAgentState?, Never>(nil)
         let isSignedIn = CurrentValueSubject<Bool, Never>(false)
+        let isMonthCollapsed = CurrentValueSubject<Bool, Never>(false)
+        let columnLayout = CurrentValueSubject<CalendarColumnLayout?, Never>(nil)
+        let selectedDayInfo = CurrentValueSubject<SelectDayInfo?, Never>(nil)
     }
     private let cancellables = CancelBag()
     private let subject = Subject()
@@ -184,7 +197,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
     private func bindFocusedMonthChanged() {
         typealias CurrentAndFocusInfo = (
             focusedMonth: CalendarMonth,
-            focusedDayMap: [CalendarMonth: CurrentSelectDayModel],
+            focusedDayMap: [CalendarMonth: CalendarDay],
             currentDay: CalendarComponent.Day
         )
         let transformWithFocusedMonthAnsIsCurrentDay: (CurrentAndFocusInfo) -> SelectDayInfo?
@@ -215,9 +228,17 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         .removeDuplicates()
         .sink(receiveValue: { [weak self] selected in
             logger.log(level: .debug, "select day changed: \(selected)")
+            self?.subject.selectedDayInfo.send(selected)
             self?.listener?.calendarScene(focusChangedTo: selected)
+            self?.notifySelectedDayIsTodayToFocusedPaper(selected.isCurrentDay)
         })
         .store(in: self.cancellables)
+    }
+
+    private func notifySelectedDayIsTodayToFocusedPaper(_ isToday: Bool) {
+        guard let focusedIndex = self.subject.monthsInCurrentRange.value?.focusedIndex
+        else { return }
+        self.calendarPaperInteractors?[safe: focusedIndex]?.selectedDayIsToday(isToday)
     }
     
     private func bindRefreshHoliday() {
@@ -326,17 +347,21 @@ extension CalendarViewModelImple {
         self.eventTagUsecase.prepare()
         
         self.foremostEventusecase.refresh()
-        
+
+        self.ddayCandidateUsecase.refresh()
+
         self.bindUncompletedTodoRefresh()
 
         self.bindShowAICommandResultIfNeed()
         self.bindVoiceInputLifecycle()
         self.bindScrollToVoiceInputOnFocusedMonth()
+        self.bindColumnLayout()
         self.aiAgentOrchestrationUsecase.prepare()
     }
     
     private func prepareInitialMonths(around today: CalendarComponent.Day) {
         let totalMonths = self.makeTotalMonths(around: today.year, today.month)
+        self.updateSelectedDay(CalendarDay(today.year, today.month, today.day))
         Task { @MainActor in
             self.calendarPaperInteractors = self.router?.attachInitialMonths(totalMonths.totalMonths)
             self.subject.monthsInCurrentRange.send(totalMonths)
@@ -372,11 +397,7 @@ extension CalendarViewModelImple {
         self.calendarUsecase.currentDay
             .first()
             .sink(receiveValue: { [weak self] today in
-                guard let self = self else { return }
-                let totalMonths = self.makeTotalMonths(around: today.year, today.month)
-                self.changeChilds(totalMonths) { thisMonthInteractor in
-                    thisMonthInteractor?.selectToday()
-                }
+                self?.moveFocus(toToday: today)
             })
             .store(in: self.cancellables)
     }
@@ -384,12 +405,7 @@ extension CalendarViewModelImple {
     func moveDay(_ day: CalendarDay, withClearPresented: Bool) {
         
         self.router?.dismissPresented(animated: true) { [weak self] in
-            guard let self = self else { return }
-            
-            let totalMonths = self.makeTotalMonths(around: day.year, day.month)
-            self.changeChilds(totalMonths) { selectMontthInteractor in
-                selectMontthInteractor?.selectDay(day)
-            }
+            self?.moveFocus(to: day) { $0?.selectDay(day) }
         }
     }
     
@@ -452,6 +468,156 @@ extension CalendarViewModelImple {
 }
 
 
+// MARK: - 포커스 월·선택일
+
+extension CalendarViewModelImple {
+
+    var focusedMonth: AnyPublisher<CalendarMonth, Never> {
+        return self.subject.monthsInCurrentRange
+            .compactMap { $0?.focusedMonth }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+
+    var selectedDay: AnyPublisher<CalendarDay, Never> {
+        return Publishers.CombineLatest(
+            self.focusedMonth,
+            self.subject.selectedDayPerMonths
+        )
+        .compactMap { month, selectedDays in selectedDays[month] }
+        .removeDuplicates()
+        .eraseToAnyPublisher()
+    }
+
+    func changeFocusedMonth(to month: CalendarMonth) {
+        guard self.subject.monthsInCurrentRange.value?.focusedMonth != month else { return }
+        self.calendarUsecase.currentDay
+            .first()
+            .sink(receiveValue: { [weak self] today in
+                let isTodayMonth = today.year == month.year && today.month == month.month
+                if isTodayMonth {
+                    self?.moveFocus(toToday: today)
+                } else {
+                    let firstDay = CalendarDay(month.year, month.month, 1)
+                    self?.moveFocus(to: firstDay) { $0?.selectDay(firstDay) }
+                }
+            })
+            .store(in: self.cancellables)
+    }
+
+    func selectDay(_ day: CalendarDay) {
+        let month = CalendarMonth(year: day.year, month: day.month)
+        guard let range = self.subject.monthsInCurrentRange.value,
+              range.focusedMonth == month
+        else {
+            self.moveFocus(to: day) { $0?.selectDay(day) }
+            return
+        }
+        self.updateSelectedDay(day)
+        self.calendarPaperInteractors?[safe: range.focusedIndex]?.selectDay(day)
+    }
+
+    private func moveFocus(toToday today: CalendarComponent.Day) {
+        self.moveFocus(to: CalendarDay(today.year, today.month, today.day)) { $0?.selectToday() }
+    }
+
+    private func moveFocus(
+        to day: CalendarDay,
+        andSelectDay: @Sendable @escaping ((any CalendarPaperSceneInteractor)?) -> Void
+    ) {
+        self.updateSelectedDay(day)
+        let totalMonths = self.makeTotalMonths(around: day.year, day.month)
+        self.changeChilds(totalMonths, andSelectDay: andSelectDay)
+    }
+
+    private func updateSelectedDay(_ day: CalendarDay) {
+        let month = CalendarMonth(year: day.year, month: day.month)
+        let newMap = self.subject.selectedDayPerMonths.value |> key(month) .~ day
+        self.subject.selectedDayPerMonths.send(newMap)
+    }
+}
+
+
+// MARK: - 단 수
+
+extension CalendarViewModelImple {
+
+    func columnLayoutChanged(_ layout: CalendarColumnLayout) {
+        self.subject.columnLayout.send(layout)
+    }
+
+    private func bindColumnLayout() {
+        Publishers.CombineLatest(
+            self.subject.columnLayout.compactMap { $0 },
+            self.focusedMonth
+        )
+        .removeDuplicates(by: { $0.0 == $1.0 })
+        .sink(receiveValue: { [weak self] layout, focusedMonth in
+            self?.applyColumnLayout(layout, focusedMonth: focusedMonth)
+        })
+        .store(in: self.cancellables)
+    }
+
+    private func applyColumnLayout(_ layout: CalendarColumnLayout, focusedMonth: CalendarMonth) {
+        if layout == .twoColumns {
+            self.attachTwoColumnsIfNeeded(focusedMonth)
+        }
+        self.router?.showColumnLayout(layout)
+        self.listener?.calendarScene(didChangeColumnLayout: layout)
+    }
+
+    private func attachTwoColumnsIfNeeded(_ initialMonth: CalendarMonth) {
+        Task { @MainActor in
+            guard self.twoColumnsInteractor == nil,
+                  let interactor = self.router?.attachTwoColumns(initialMonth: initialMonth)
+            else { return }
+            self.twoColumnsInteractor = interactor
+            self.bindTwoColumnsForwarding(interactor)
+        }
+    }
+
+    // MainActor 클로저 안에서 만든 구독 클로저는 그 격리를 물려받아, 메인 밖에서 오는 방출에 격리 검사로 죽는다
+    private func bindTwoColumnsForwarding(_ interactor: any CalendarTwoColumnsSceneInteractor) {
+        self.focusedMonth
+            .sink(receiveValue: { [weak interactor] month in
+                interactor?.changeFocusedMonth(to: month)
+            })
+            .store(in: self.cancellables)
+
+        self.selectedDay
+            .sink(receiveValue: { [weak interactor] day in
+                interactor?.selectDay(day)
+            })
+            .store(in: self.cancellables)
+
+        self.subject.selectedDayInfo.compactMap { $0?.isCurrentDay }
+            .sink(receiveValue: { [weak interactor] isToday in
+                interactor?.selectedDayIsToday(isToday)
+            })
+            .store(in: self.cancellables)
+    }
+}
+
+extension CalendarViewModelImple: CalendarTwoColumnsSceneListener {
+
+    func calendarTwoColumns(didScrollTo month: CalendarMonth) {
+        self.changeFocusedMonth(to: month)
+    }
+
+    func calendarTwoColumns(didSelect day: CalendarDay) {
+        self.selectDay(day)
+    }
+
+    func calendarTwoColumnsDidRequestShowAICommand() {
+        self.router?.routeToAICommand(listener: self)
+    }
+
+    func calendarTwoColumnsDidRequestReturnToToday() {
+        self.moveFocusToToday()
+    }
+}
+
+
 // MARK: - uncompleted todo
 
 extension CalendarViewModelImple {
@@ -486,13 +652,21 @@ extension CalendarViewModelImple {
 extension CalendarViewModelImple: CalendarPaperSceneListener {
 
     func calendarPaper(on month: CalendarMonth, didChange selectedDay: CurrentSelectDayModel) {
-        let newMap = self.subject.selectedDayPerMonths.value
-            |> key(month) .~ selectedDay
-        self.subject.selectedDayPerMonths.send(newMap)
+        self.updateSelectedDay(CalendarDay(month.year, month.month, selectedDay.day))
+    }
+
+    func calendarPaperDidRequestReturnToToday() {
+        self.moveFocusToToday()
     }
 
     func calendarPaperDidRequestShowAICommand() {
         self.router?.routeToAICommand(listener: self)
+    }
+
+    func calendarPaperDidRequestToggleMonthCollapse() {
+        let newValue = !self.subject.isMonthCollapsed.value
+        self.subject.isMonthCollapsed.send(newValue)
+        self.calendarPaperInteractors?.forEach { $0.updateMonthCollapsed(newValue) }
     }
 }
 
@@ -529,11 +703,20 @@ extension CalendarViewModelImple {
             .removeDuplicates()
             .filter { $0 }
             .sink { [weak self] _ in
-                guard let focusedIndex = self?.subject.monthsInCurrentRange.value?.focusedIndex
-                else { return }
-                self?.calendarPaperInteractors?[safe: focusedIndex]?.scrollToVoiceInput()
+                self?.scrollToVoiceInputOnVisibleColumn()
             }
             .store(in: self.cancellables)
+    }
+
+    private func scrollToVoiceInputOnVisibleColumn() {
+        switch self.subject.columnLayout.value {
+        case .twoColumns:
+            self.twoColumnsInteractor?.scrollToVoiceInput()
+        case .singleColumn, .none:
+            guard let focusedIndex = self.subject.monthsInCurrentRange.value?.focusedIndex
+            else { return }
+            self.calendarPaperInteractors?[safe: focusedIndex]?.scrollToVoiceInput()
+        }
     }
 
     private static func isAICommandPhase(_ state: AIAgentState) -> Bool {

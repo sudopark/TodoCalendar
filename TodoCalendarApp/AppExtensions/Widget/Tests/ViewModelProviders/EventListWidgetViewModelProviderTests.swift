@@ -11,7 +11,7 @@ import Prelude
 import Optics
 import Domain
 import Extensions
-import CalendarScenes
+import CalendarPresentation
 import UnitTestHelpKit
 import TestDoubles
 
@@ -22,7 +22,10 @@ class EventListWidgetViewModelProviderTests: BaseTestCase {
         selectTagIds: [EventTagId]? = nil,
         withCurrentTodo: Bool = true,
         withStartDateEvent: Bool = true,
-        withoutAnyEventsIncludeHoliday: Bool = false
+        withoutAnyEventsIncludeHoliday: Bool = false,
+        withAllDayEvent: Bool = false,
+        excludeAllDayEvents: Bool = false,
+        styles: [WidgetStyleId: WidgetStyle] = [:]
     ) -> EventListWidgetViewModelProvider {
         
         let fetchUsecase = StubCalendarEventsFetchUescase()
@@ -30,16 +33,19 @@ class EventListWidgetViewModelProviderTests: BaseTestCase {
         fetchUsecase.hasEventAtStartDate = withStartDateEvent
         fetchUsecase.withoutAnyEvents = withoutAnyEventsIncludeHoliday
         fetchUsecase.hasHoliday = !withoutAnyEventsIncludeHoliday
+        fetchUsecase.hasAllDayEvent = withAllDayEvent
         
         let calendarSettingRepository = StubCalendarSettingRepository()
         let appSettingRepository = StubAppSettingRepository()
         
         return .init(
             targetEventTagIds: selectTagIds,
+            excludeAllDayEvents: excludeAllDayEvents,
             eventsFetchUsecase: fetchUsecase,
             appSettingRepository: appSettingRepository,
             calendarSettingRepository: calendarSettingRepository,
-            localeProvider: Locale.current
+            localeProvider: Locale.current,
+            styleFetchUsecase: StubWidgetStyleRepository(styles: styles).asStyleFetchUsecase()
         )
     }
 }
@@ -85,6 +91,33 @@ extension EventListWidgetViewModelProviderTests {
         XCTAssertEqual(firstDateModel?.events.map { $0.name }, [
             "todo_at_start"
         ])
+    }
+    
+    func testProvider_whenNotExcludeAllDayEvents_containsAllDayEvent() async throws {
+        // given
+        let provider = self.makeProvider(withAllDayEvent: true)
+        
+        // when
+        let viewModel = try await provider.getEventListViewModel(for: self.refDate, widgetSize: .small)
+        
+        // then
+        let firstDateModel = viewModel.pages.first?.sections[safe: 1]
+        XCTAssertEqual(
+            firstDateModel?.events.map { $0.name }.sorted(),
+            ["allday_event", "todo_at_start"]
+        )
+    }
+    
+    func testProvider_whenExcludeAllDayEvents_filterOutAllDayEvent() async throws {
+        // given
+        let provider = self.makeProvider(withAllDayEvent: true, excludeAllDayEvents: true)
+        
+        // when
+        let viewModel = try await provider.getEventListViewModel(for: self.refDate, widgetSize: .small)
+        
+        // then
+        let firstDateModel = viewModel.pages.first?.sections[safe: 1]
+        XCTAssertEqual(firstDateModel?.events.map { $0.name }, ["todo_at_start"])
     }
     
     func testProvider_whenCurrentTodoNotExists_doNotProvideCurrentTodoDayModel() async throws {
@@ -220,11 +253,50 @@ extension EventListWidgetViewModelProviderTests {
         
         return EventListWidgetViewModelProvider(
             targetEventTagIds: nil,
+            excludeAllDayEvents: false,
             eventsFetchUsecase: usecase,
             appSettingRepository: appSettingRepository,
             calendarSettingRepository: calendarSettingRepository,
-            localeProvider: Locale.current
+            localeProvider: Locale.current,
+            styleFetchUsecase: StubWidgetStyleRepository().asStyleFetchUsecase()
         )
+    }
+    
+    // 이틀에 걸친 일정은 날짜별 섹션에서 그날 범위 기준으로 시간이 표기된다
+    func testProvider_multiDayEvent_periodTextIsBuiltPerDayRange() async throws {
+        // given
+        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ kst
+        let startOfDay = calendar.startOfDay(for: self.refDate).timeIntervalSince1970
+        let schedule = ScheduleEvent(
+            uuid: "spanning", name: "spanning",
+            time: .period(startOfDay + 10*3600 ..< startOfDay + 34*3600)
+        )
+        let usecase = PrivateStubEventFetchUsecase(
+            currentTodos: [],
+            eventWithTimes: ScheduleCalendarEvent.events(from: schedule, in: kst)
+        )
+        let provider = EventListWidgetViewModelProvider(
+            targetEventTagIds: nil,
+            excludeAllDayEvents: false,
+            eventsFetchUsecase: usecase,
+            appSettingRepository: StubAppSettingRepository(),
+            calendarSettingRepository: StubCalendarSettingRepository(),
+            localeProvider: Locale.current,
+            styleFetchUsecase: StubWidgetStyleRepository().asStyleFetchUsecase()
+        )
+        
+        // when
+        let model = try await provider.getEventListViewModel(for: self.refDate, widgetSize: .large)
+        
+        // then
+        let sections = model.pages.flatMap { $0.sections }
+        let firstDayText = sections.first(where: { $0.sectionTitle == "Fri, Mar 1" })?
+            .events.first?.periodText
+        let secondDayText = sections.first(where: { $0.sectionTitle == "Sat, Mar 2" })?
+            .events.first?.periodText
+        XCTAssertNotNil(firstDayText)
+        XCTAssertNotNil(secondDayText)
+        XCTAssertNotEqual(firstDayText, secondDayText)
     }
     
     // 첫날에 해당하는 이벤트는 없는경우 빈 모델로 반환
@@ -456,10 +528,12 @@ extension EventListWidgetViewModelProviderTests {
         
         return EventListWidgetViewModelProvider(
             targetEventTagIds: nil,
+            excludeAllDayEvents: false,
             eventsFetchUsecase: usecase,
             appSettingRepository: appSettingRepository,
             calendarSettingRepository: calendarSettingRepository,
-            localeProvider: Locale.current
+            localeProvider: Locale.current,
+            styleFetchUsecase: StubWidgetStyleRepository().asStyleFetchUsecase()
         )
     }
     
@@ -555,10 +629,12 @@ extension EventListWidgetViewModelProviderTests {
         let appSettingRepository = StubAppSettingRepository()
         return .init(
             targetEventTagIds: nil,
+            excludeAllDayEvents: false,
             eventsFetchUsecase: fetchUsecase,
             appSettingRepository: appSettingRepository,
             calendarSettingRepository: calendarSettingRepository,
-            localeProvider: Locale.current
+            localeProvider: Locale.current,
+            styleFetchUsecase: StubWidgetStyleRepository().asStyleFetchUsecase()
         )
     }
     
@@ -639,10 +715,12 @@ extension EventListWidgetViewModelProviderTests {
         let appSettingRepository = StubAppSettingRepository()
         return .init(
             targetEventTagIds: tagIds,
+            excludeAllDayEvents: false,
             eventsFetchUsecase: fetchUsecase,
             appSettingRepository: appSettingRepository,
             calendarSettingRepository: calendarSettingRepository,
-            localeProvider: Locale.current
+            localeProvider: Locale.current,
+            styleFetchUsecase: StubWidgetStyleRepository().asStyleFetchUsecase()
         )
     }
     
@@ -672,5 +750,116 @@ extension EventListWidgetViewModelProviderTests {
         try await parameterizeTest([.custom("t3"), .custom("t5")], expectIds: ["0", "3", "5", "6", "9"])
         try await parameterizeTest([.custom("t5")], expectIds: ["5"])
         try await parameterizeTest([], expectIds: nil)
+    }
+}
+
+
+// MARK: - 스타일 해석
+
+extension EventListWidgetViewModelProviderTests {
+
+    private func eventListStyle(
+        _ style: WidgetStyleId.Style,
+        background: WidgetAppearanceSettings.Background? = nil
+    ) -> (WidgetStyleId, WidgetStyle) {
+        let id = WidgetStyleId(variant: .eventListSmall, style: style)
+        return (
+            id,
+            WidgetStyle(
+                id: id, name: nil,
+                setting: EventListStyleSetting.initial, background: background
+            )
+        )
+    }
+
+    func testProvider_whenNoSavedStyle_usesGlobalBackground() async throws {
+        // given
+        let provider = self.makeProvider()
+
+        // when
+        let model = try await provider.getEventListViewModel(
+            for: self.refDate, widgetSize: .small
+        )
+
+        // then
+        XCTAssertEqual(model.look.appliedStyle == nil, true)
+        XCTAssertEqual(model.look.background, .system)
+    }
+
+    func testProvider_whenDefaultStyleSaved_appliesItsBackground() async throws {
+        // given
+        let saved = self.eventListStyle(.default, background: .custom(hex: "#101820"))
+        let provider = self.makeProvider(styles: [saved.0: saved.1])
+
+        // when
+        let model = try await provider.getEventListViewModel(
+            for: self.refDate, widgetSize: .small
+        )
+
+        // then
+        XCTAssertEqual(model.look.background, .custom(hex: "#101820"))
+    }
+
+    /// 3변형이 좌표 하나를 공유하므로 medium·large 도 같은 저장분을 읽는다.
+    func testProvider_whenSizeDiffers_readsSameSharedCoordinate() async throws {
+        // given
+        let saved = self.eventListStyle(.default, background: .custom(hex: "#101820"))
+        let provider = self.makeProvider(styles: [saved.0: saved.1])
+
+        // when
+        let large = try await provider.getEventListViewModel(
+            for: self.refDate, widgetSize: .large
+        )
+
+        // then
+        XCTAssertEqual(large.look.background, .custom(hex: "#101820"))
+    }
+
+    func testProvider_whenInstanceStyleSaved_appliesThatStyle() async throws {
+        // given
+        let def = self.eventListStyle(.default, background: .custom(hex: "#ffffff"))
+        let custom = self.eventListStyle(
+            .custom(id: "c1"), background: .custom(hex: "#101820")
+        )
+        let provider = self.makeProvider(styles: [def.0: def.1, custom.0: custom.1])
+
+        // when
+        let model = try await provider.getEventListViewModel(
+            for: self.refDate, widgetSize: .small, style: .custom(id: "c1")
+        )
+
+        // then
+        XCTAssertEqual(model.look.background, .custom(hex: "#101820"))
+    }
+
+    func testProvider_whenInstanceStyleRemoved_fallsBackToDefaultStyle() async throws {
+        // given
+        let def = self.eventListStyle(.default, background: .custom(hex: "#ffffff"))
+        let provider = self.makeProvider(styles: [def.0: def.1])
+
+        // when
+        let model = try await provider.getEventListViewModel(
+            for: self.refDate, widgetSize: .small, style: .custom(id: "removed")
+        )
+
+        // then
+        XCTAssertEqual(model.look.background, .custom(hex: "#ffffff"))
+    }
+
+    /// 폴백이 스타일 단위라, 고른 스타일이 색을 안 걸었으면 기본 스타일 색을 빌려오지 않는다.
+    func testProvider_whenStyleHasNoBackground_usesGlobalNotDefaultStyle() async throws {
+        // given
+        let def = self.eventListStyle(.default, background: .custom(hex: "#ffffff"))
+        let custom = self.eventListStyle(.custom(id: "c1"))
+        let provider = self.makeProvider(styles: [def.0: def.1, custom.0: custom.1])
+
+        // when
+        let model = try await provider.getEventListViewModel(
+            for: self.refDate, widgetSize: .small, style: .custom(id: "c1")
+        )
+
+        // then
+        XCTAssertNotEqual(model.look.background, .custom(hex: "#ffffff"))
+        XCTAssertEqual(model.look.background, .system)
     }
 }

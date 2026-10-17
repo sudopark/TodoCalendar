@@ -109,6 +109,9 @@ extension EventSyncUsecaseImple {
             }
         }
 
+        // 취소된 task 의 완료는 알리지 않는다 - 뒤이어 시작된 sync 의 진행 상태를 덮어쓴다
+        try Task.checkCancellation()
+
         logger.log(level: .debug, "event sync process end")
         self.subject.syncStatus.send(.idle)
     }

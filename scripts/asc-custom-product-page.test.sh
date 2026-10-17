@@ -105,5 +105,18 @@ assert_contains "검증을 통과한 dry-run 은 계획을 찍는다" \
 assert_contains "push-text 는 dry-run 도 ASC 를 읽어야 해 자격증명을 요구한다" \
   "자격증명을 못 찾았다" "$(run push-text --page page-a --locale ko --dry-run)"
 
+# --- 고칠 버전 고르기 ---
+pick() { # 버전 상태들 (id = v<순번>)
+  bundle exec ruby -e '
+    require_relative "scripts/asc-custom-product-page"
+    versions = ARGV.each_with_index.map { |state, index| { "id" => "v#{index}", "attributes" => { "state" => state } } }
+    puts(editable_version(versions)&.dig("id") || "none")
+  ' "$@" 2>&1
+}
+assert_contains "승인된 버전만 있으면 새 버전이 필요하다" "none" "$(pick APPROVED)"
+assert_contains "승인된 버전보다 편집 중인 버전을 고른다" "v1" "$(pick APPROVED PREPARE_FOR_SUBMISSION)"
+assert_contains "반려된 버전은 고쳐서 다시 낼 수 있다" "v1" "$(pick REPLACED_WITH_NEW_VERSION REJECTED)"
+assert_contains "심사 중인 버전이 있으면 끊는다" "심사 중(IN_REVIEW)" "$(pick APPROVED IN_REVIEW)"
+
 echo "PASS=$PASS FAIL=$FAIL"
 [ "$FAIL" -eq 0 ]

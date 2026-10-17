@@ -10,6 +10,8 @@
 
 "Event" = "Eveniment";
 "Turn" = "Rundă de repetare";
+"WidgetStyle" = "Stilul widgetului";
+"Style" = "Stil";
 "EventType" = "Tip de eveniment";
 "Event Types" = "Tipuri de evenimente";
 "Exclude all day event" = "Exclude evenimentele de toată ziua";

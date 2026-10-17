@@ -25,6 +25,8 @@ public final class MainSceneBuilerImple {
     private let mobileAdService: any MobileAdService
     private let fullScreenAdRouter: (any FullScreenAdRouter)?
     private let adViewBuilder: (any AdViewBuilder)?
+    private let adGuideSceneBuilder: any PaidFeatureAdGuideSceneBuilder
+    private let isInitialScene: Bool
 
     public init(
         usecaseFactory: any UsecaseFactory,
@@ -33,7 +35,9 @@ public final class MainSceneBuilerImple {
         settingSceneBuilder: any SettingSceneBuiler,
         mobileAdService: any MobileAdService,
         fullScreenAdRouter: (any FullScreenAdRouter)?,
-        adViewBuilder: (any AdViewBuilder)?
+        adViewBuilder: (any AdViewBuilder)?,
+        adGuideSceneBuilder: any PaidFeatureAdGuideSceneBuilder,
+        isInitialScene: Bool
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
@@ -42,6 +46,8 @@ public final class MainSceneBuilerImple {
         self.mobileAdService = mobileAdService
         self.fullScreenAdRouter = fullScreenAdRouter
         self.adViewBuilder = adViewBuilder
+        self.adGuideSceneBuilder = adGuideSceneBuilder
+        self.isInitialScene = isInitialScene
     }
 }
 
@@ -64,7 +70,9 @@ extension MainSceneBuilerImple: MainSceneBuiler {
             aiAgentOrchestrationUsecase: self.usecaseFactory.aiAgentOrchestrationUsecase,
             eventLiveActivityUsecase: self.usecaseFactory.eventLiveActivityUsecase,
             guideTodoUsecase: self.usecaseFactory.makeGuideTodoUsecase(),
-            legalNoticeUsecase: self.usecaseFactory.makeLegalNoticeUsecase()
+            legalNoticeUsecase: self.usecaseFactory.makeLegalNoticeUsecase(),
+            foremostEventUsecase: self.usecaseFactory.makeForemostEventUsecase(),
+            paidFeatureGateUsecase: self.usecaseFactory.makePaidFeatureGateUsecase()
         )
         
         let viewController = MainViewController(
@@ -72,13 +80,16 @@ extension MainSceneBuilerImple: MainSceneBuiler {
             viewAppearance: self.viewAppearance,
             mobileAdService: self.mobileAdService,
             fullScreenAdRouter: self.fullScreenAdRouter,
-            adViewBuilder: self.adViewBuilder
+            adExposureUsecase: self.usecaseFactory.adExposureUsecase,
+            adViewBuilder: self.adViewBuilder,
+            isInitialScene: self.isInitialScene
         )
         
         let router = MainRouter(
             calendarSceneBulder: self.calendarSceneBulder,
             settingSceneBuilder: self.settingSceneBuilder,
-            fullScreenAdRouter: self.fullScreenAdRouter
+            fullScreenAdRouter: self.fullScreenAdRouter,
+            adGuideSceneBuilder: self.adGuideSceneBuilder
         )
         router.scene = viewController
         viewModel.router = router

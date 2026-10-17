@@ -120,10 +120,9 @@ flowchart TD
         C --> D[ExternalCalendarAccountRemotePool\n— Remote API 클라이언트 생성]
         D --> E[ExternalCalendarDBConnectionPool\n— DB 연결 open 참조카운트 +1]
         E --> F{첫 번째 open?}
-        F -->|Yes| G[onFirstOpen: 테이블 생성 + 마이그레이션]
+        F -->|Yes| G[onFirstOpen: 서비스별 DB 마이그레이션\n— 테이블 생성은 안 한다, LocalStorage 가 접근 시 만든다]
         F -->|No| H[기존 연결 재사용]
-        G --> I[AppDataMigrationImple\n— 레거시 데이터 마이그레이션 1회]
-        I --> J[Integration 상태 broadcast\n— .integrated]
+        G --> J[Integration 상태 broadcast\n— .integrated]
         H --> J
         J --> K[GoogleCalendarUsecase\n— 색상/태그/이벤트 refresh]
         K --> L[SharedDataStore 업데이트\n→ UI 자동 반영]
@@ -142,10 +141,11 @@ flowchart TD
         U --> V[SharedDataStore 업데이트\n→ UI 자동 반영]
     end
 
-    subgraph "앱 시작 시 (prepareIntegratedAccounts)"
+    subgraph "앱 시작 시 (prepareLaunch)"
         W[앱 실행] --> X[저장된 Credential 로드]
-        X --> Y[계정별 Remote/DB 설정]
-        Y --> Z[GoogleCalendarUsecase\n— 전체 계정 refresh]
+        X --> Y[계정별 Remote/DB 설정\n— prepareIntegratedAccounts]
+        Y --> I[AppDataMigrationImple\n— 레거시 구글 데이터 이관 1회, 로그인 계정이 있을 때만]
+        I --> Z[GoogleCalendarUsecase\n— 전체 계정 refresh]
         Z --> AA[SharedDataStore → UI]
     end
 ```

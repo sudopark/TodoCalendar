@@ -87,7 +87,7 @@ public final class SharedDataStore: @unchecked Sendable {
 
 | 항목 | 값 |
 |---|---|
-| 스킴 | `tc.app` (`AppEnvironment.appScheme`) |
+| 스킴 | `tc.app` (`AppDeepLink.scheme`) |
 | 호스트 | `calendar` |
 | 처리 | `ApplicationDeepLinkHandlerImple` |
 
@@ -211,7 +211,9 @@ ApplicationDeepLinkHandlerImple:
 
 ## 5. DB 마이그레이션
 
-### 5.1 메인 DB (`todo_calendar.db`)
+### 5.1 메인 DB (`models.db`)
+
+**파일**: 비로그인은 `models.db`, 로그인 계정이 있으면 `models_{userId}.db` 로 갈린다 (`AppEnvironment.dbFilePath(for:)`).
 
 **현재 버전**: `AppEnvironment.dbVersion = 7`
 
@@ -220,8 +222,8 @@ ApplicationDeepLinkHandlerImple:
 2. `mainDB.async.migrate(upto: dbVersion, steps:finalized:)`
 3. SQLite `user_version` pragma로 현재 버전 확인
 4. 현재 → 목표까지 1단계씩 순차 실행
-5. 각 단계에서 `Table.migrateStatement(for: version)` → SQL 실행
-6. 성공 시 `user_version` 증가
+5. 각 단계의 스텝 함수가 `migrate(_:version:)` 를 불러 `Table.migrateStatement(for: version)` 의 SQL 을 실행한다. 스텝이 테이블을 먼저 세우는지, 세운다면 어느 선언으로 세우는지는 스텝마다 다르다 — 규칙과 예외는 §5.5 에 있다
+6. 스텝 함수가 돌아오면 `user_version` 이 증가한다 — 스텝 안에서 실패를 삼키므로 실패해도 전진한다 (§5.2)
 7. 최종 단계 후 `finalized` 콜백 (WAL 모드 설정)
 
 **버전별 변경 이력**
@@ -239,7 +241,7 @@ ApplicationDeepLinkHandlerImple:
 **전체 테이블 목록** (`prepareTables()` 순서):
 
 1. `KeyValueTable`
-2. `HolidayTable`
+2. `HolidayRepositoryImple.HolidayTable`
 3. `EventTimeTable`
 4. `EventDetailDataTable`
 5. `CustomEventTagTable`
@@ -252,31 +254,33 @@ ApplicationDeepLinkHandlerImple:
 12. `TodoToggleStateTable`
 13. `EventUploadPendingQueueTable`
 14. `EventNotificationIdTable`
+15. `ProcessingAICommandTable`
+16. `CustomColorThemeTable`
 
 ### 5.2 실패 처리 전략
 
 **테이블별 개별 try-catch**:
 - 각 테이블 마이그레이션이 독립적으로 에러 처리
-- 마이그레이션 실패 시 → 해당 테이블 drop → 다음 앱 실행의 `prepareTables()`에서 재생성 (데이터 손실 감수)
+- 마이그레이션 실패 시 → 해당 테이블 drop → 같은 실행의 `prepareTables()`에서 재생성 (데이터 손실 감수). `runDBMigration()` 바로 뒤에 `prepareTables()` 가 붙어 있어 다음 실행을 기다리지 않는다 (`ApplicationPrepareUsecase.swift:207-208`)
+- 재생성되는 것은 `prepareTables()` 목록에 있는 테이블뿐이다. 1→2·2→3·3→4 가 드롭하는 메인 DB 의 구글 레거시 테이블은 그 목록에 없어 다시 서지 않는다
 
-**버전별 에러 강도**:
+**일곱 스텝의 실패 강도는 같다.** 전부 `do`/`catch` 로 감싸 에러를 로그로 삼키고 대상 테이블을 `try? dropTable` 한 뒤 정상 반환한다 (`AppDataMigrationImple.swift:87-176`). 버전에 따라 hard fail·soft fail 로 갈리는 구분은 없다.
 
-| 버전 | 에러 처리 | 이유 |
-|---|---|---|
-| 0→1, 1→2, 2→3, 3→4 | `try` (hard fail) | 핵심 스키마 변경 |
-| 4→5, 5→6, 6→7 | `try?` (soft fail) | 큐 재구성/부가 컬럼, 실패해도 앱 동작에 큰 영향 없음 |
+**그래서 `user_version` 은 실패해도 전진한다.** 라이브러리는 스텝 클로저가 던지지 않으면 `updateUserVersion(현재+1)` 을 하고 다음 스텝으로 재귀한다 (`SQLiteService.swift:177-190`). 스텝이 에러를 삼키므로 드롭된 테이블을 남긴 채 목표 버전까지 올라간다 — 그 테이블이 `prepareTables()` 목록에 있으면 같은 실행에서 최신 스키마로 다시 선다.
 
-**전체 실패 시**: 최상위 try-catch에서 에러 로깅만 수행, 앱 크래시 방지.
+**전체 실패 시**: `runDBMigration()` 최상위 try-catch 가 에러 로깅만 수행해 앱 크래시를 막는다 (`AppDataMigrationImple.swift:55-57`).
 
-### 5.3 외부 캘린더 DB (`google_calendar.db`)
+### 5.3 외부 캘린더 DB — 서비스마다 따로
 
-**현재 버전**: `AppEnvironment.googleCalendarDBVersion = 0`
+**파일과 버전**은 서비스별이다. 구글은 `google_calendar.db` 에 `AppEnvironment.googleCalendarDBVersion = 1`, 애플은 `apple__calendar.db` 에 `appleCalendarDBVersion = 1` 이다 (`AppEnvironment.swift:128-139`·`:209-211`). **애플의 1 은 어떤 스키마 변경에도 대응하지 않는 빈 번호다** — 구글 스텝이 모든 외부 DB 에 돌던 시절 올라간 값이고, 애플 선언은 V0 이다.
 
-- DB 연결은 `ExternalCalendarDBConnectionPool`이 관리 (참조 카운팅, lazy open)
-- `onFirstOpen` 시 테이블 생성 + 마이그레이션 실행
-- 현재 v0이므로 마이그레이션 없음 (모든 테이블이 최신 스키마로 생성)
+- DB 연결은 `ExternalCalendarSQLiteConnectionPoolImple` 이 관리한다 (참조 카운팅, lazy open).
+- **`onFirstOpen` 은 서비스별 마이그레이션만 돌린다** (`ApplicationBase.swift:52-63` → `ExternalCalendarDBMigrationImple.runMigration(serviceId:dbService:)`). 테이블은 거기서 안 만든다 — 각 `LocalStorage` 가 처음 접근할 때 `createTableOrNot` 으로 세운다.
+- 구글은 0→1 스텝이 있다 — `google_calendar_list` 에 `access_role` 을 붙인다 (`ExternalCalendarDBMigrationImple.swift:39-52`). 애플은 `steps` switch 가 비어 있어 도는 스텝이 없다 (`:54-66`).
 
-**테이블**: `GoogleCalendarColorsTable`, `GoogleCalendarEventOriginTable`, `GoogleCalendarEventTagTable` — 모두 `account_id` 컬럼으로 다중 계정 지원.
+**구글 DB 테이블**: `GoogleCalendarColorsTable`(`google_calendar_colors`), `GoogleCalendarEventTagTable`(`google_calendar_list`), `GoogleCalendarEventOriginTable`(`google_calendar_event_origin`) 셋은 `account_id` 컬럼으로 다중 계정을 지원하고, 여기에 `EventTimeTable`(`EventTimes`)이 함께 선다 (`GoogleCalendarLocalStorage.swift:57-58`·`:131-132`·`:166-167`). `EventTimeTable` 은 메인 DB 와 같은 선언을 쓰므로 `account_id` 가 없다.
+
+**애플 DB 테이블**: `AppleCalendarTagTable`(`apple_calendar_tags`), `AppleCalendarEventTable`(`apple_calendar_events`), `EventTimeTable`(`EventTimes`) 셋이다 (`AppleCalendarLocalStorage.swift:42-44`). 애플은 단일 계정 서비스라 `account_id` 컬럼을 두지 않는다.
 
 ### 5.4 레거시 데이터 이관
 
@@ -287,17 +291,27 @@ ApplicationDeepLinkHandlerImple:
 
 ### 5.5 새 마이그레이션 추가 절차
 
-**세 위치를 반드시 함께 변경한다:**
+**0. 바뀐 스키마를 새 버전 타입으로 선언한다.** 타입명은 `<테이블명>V<그 스키마가 선 버전>` 이고 테이블과 같은 파일에 둔다. 접미사 없는 이름은 최신을 가리키는 `typealias` 라, 새 타입을 더한 뒤 alias 를 그리로 옮긴다. 상세 규약은 [`Repository/CLAUDE.md`](../../Repository/CLAUDE.md) "버전 선언" 절이 정본이다.
 
-1. `AppEnvironment.dbVersion` (또는 `googleCalendarDBVersion`) 증가
-2. 해당 `Table` 타입의 `migrateStatement(for version:)`에 새 case 추가
+**메인 DB 는 세 위치를 반드시 함께 변경한다:**
+
+1. `AppEnvironment.dbVersion` 증가
+2. 해당 `Table` 타입의 `migrateStatement(for version:)`에 새 case 추가 — **`typealias` 쪽 이름에 단다**
 3. `AppDataMigrationImple` — `runDBMigration`의 switch에 case 추가 + `runMigrationVersionNtoM` 메서드 작성
 
-**3번이 빠지면 `migrateStatement`는 호출조차 되지 않는다.** 컴파일도 테스트도 통과하고 마이그레이션만 조용히 안 돈다.
+**외부 캘린더 DB 는 같은 짝을 서비스별로 가진다** — `googleCalendarDBVersion`·`appleCalendarDBVersion` 중 해당 상수를 올리고, 그 테이블의 `migrateStatement` case 를 더하고, `ExternalCalendarDBMigrationImple` 의 서비스별 `steps` switch 에 case 와 스텝 메서드를 더한다. 스텝 메서드 이름이 `runMigrationVersionNtoM` 패턴이 아니라 대상 테이블을 담아서(`runGoogleCalendarEventTagMigration`), 메인 DB 짝을 이름으로 훑으면 이쪽은 안 걸린다.
+
+**2번을 구체 타입 이름에 달면 마이그레이션이 조용히 멈춘다.** `Table` 프로토콜에 `nil` 을 돌려주는 기본 구현이 있고(`Table.swift:106-108`), `migrate(_:version:)` 는 `migrateStatement` 가 `nil` 이면 아무것도 하지 않고 돌아온다(`SQLiteDataBase.swift:280-292`). alias 가 새 타입으로 옮겨간 뒤 그 기본값이 집히므로 옛 스텝만 안 돈다. 예외는 alias 가 영영 안 가리키는 얼린 선언이다 — 메인 DB 의 구글 테이블 둘이 그 경우고, 스텝도 구체 이름을 부른다.
+
+**3번이 빠지면 `migrateStatement`는 호출조차 되지 않는다.** 컴파일은 통과하고, 마이그레이션 회귀 테스트를 안 쓰면 테스트도 통과한다 — 스텝별 회귀가 `AppDataMigrationImpleTests` 에 있으니 새 스텝에도 케이스를 둔다.
+
+**스텝 안에서 만드는 쪽은 출발 버전, 옮기는 쪽은 최신이다.** 생성 뒤 ALTER 가 따르는 스텝은 `createTableOrNot` 에 출발 시점 스키마 선언을 준다. `typealias` 를 주면 테이블이 아직 없는 신선 설치에서 최신 스키마가 서고, 뒤따르는 ALTER 가 중복 컬럼으로 던져 스텝 catch 가 그 테이블을 드롭한다.
+
+**이 규칙의 대상이 아닌 스텝이 셋이다.** temp 테이블로 복사·교체하는 스텝(`modfiyColumns`)은 원본을 통째로 갈아끼우므로 `createTableOrNot` 에 출발 선언이 아니라 temp 테이블을 준다 (`AppDataMigrationImple.swift:146` · `:168-169`). 메인 DB 의 구글 스텝 셋(1→2·2→3·3→4)은 `V0` 선언이 이미 ALTER 를 거친 뒤의 스키마라 주면 중복 컬럼으로 던지고, 출발 스키마를 주려면 중간 선언을 새로 만들어야 하는데 그러면 구글을 안 붙이는 사용자의 메인 DB 에 빈 테이블 셋이 영영 남는다. 외부 DB 의 구글 0→1 은 그 테이블을 `LocalStorage` 가 접근할 때 만들어 신선 설치엔 생성 자체가 없다. 뒤 둘은 `createTableOrNot` 을 아예 부르지 않는다 (`AppDataMigrationImple.swift:114-142` · `ExternalCalendarDBMigrationImple.swift:73-81`).
 
 `migrateStatement(for:)`가 받는 숫자는 **떠나는 버전**이다 — `case 5`는 5 → 6 스텝에서 돈다.
 
-위 표에 새 행을 추가하고 §5.1의 "현재 버전"도 함께 올린다.
+메인 DB 면 §5.1 의 버전별 변경 이력 표에 새 행을 추가하고 "현재 버전"도 함께 올린다. 외부 DB 면 §5.3 의 버전·스텝 서술과 [`google-calendar.md`](google-calendar.md) 의 마이그레이션 절을 갱신한다.
 
 ### 5.6 컬럼 순서 변경·삭제 — temp 테이블 재생성
 
@@ -308,6 +322,7 @@ SQLite의 `ALTER TABLE ADD COLUMN`은 **맨 뒤에 붙이는 것만** 된다. �
 - **새로 추가하는 컬럼은 두 리스트에서 뺀다.** 원본에 없어 SELECT가 실패한다. 빠진 컬럼은 NULL로 남는다.
 - **temp 테이블의 `Columns`는 그 버전 스키마로 동결한다.** 살아있는 원본 `Columns`를 typealias·참조로 끌어쓰면, 이후 컬럼을 추가하는 순간 과거 마이그레이션의 복사 목록에 그 버전 원본엔 없는 이름이 실려 SELECT가 깨진다. 그러면 위 예시의 실패 경로를 타 원본 테이블이 드롭되고 사용자 데이터가 사라진다. 컬럼 나열이 중복돼 보여도 각 temp 테이블은 자기 case를 통째로 적는다.
 - 선례: `EventUploadPendingQueueTableV4TempTable`(v4 → v5), `PendingDoneTodoEventTableV6TempTable`(v6 → v7)
+- **큐 쪽 선례는 위 동결 규칙을 아직 안 따른다.** `EventUploadPendingQueueTable.migrateStatement` 의 `case 4` 가 복사 목록 `to`·`from` 을 살아있는 alias 의 `Columns.allCases` 로 만든다 (`EventUploadPendingQueueTable.swift:46-48`). 현재 컬럼 구성에서는 같은 결과가 나오지만, 그 테이블에 컬럼을 더하는 순간 v4 원본에 없는 이름이 SELECT 에 실린다. 따라 쓸 선례는 `PendingDoneTodoEventTableV6TempTable` 쪽이다
 
 ```swift
 private func runMigrationVersion6to7(_ database: any DataBase) throws {
@@ -327,21 +342,23 @@ private func runMigrationVersion6to7(_ database: any DataBase) throws {
 
 ## 6. 주요 외부 의존성
 
-| 라이브러리 | 버전 | 용도 | 빌드 타입 |
-|---|---|---|---|
-| Alamofire | 5.7.1 | HTTP 클라이언트 (Remote API) | dynamic framework |
-| Kingfisher | 7.10.0 | 이미지 캐싱 & 다운로드 | dynamic framework |
-| swift-prelude | main | 함수형 프로그래밍 연산자 (`\|>`, `.~` 렌즈) | dynamic framework |
-| swift-async-algorithms | 0.1.0 | Async sequence 연산 | dynamic framework |
-| publisher-async-bind | 0.0.2 | Combine ↔ async/await 브릿지 | dynamic framework |
-| SQLiteService | 0.2.0 | SQLite DB 래퍼 (Table 프로토콜, 마이그레이션) | dynamic framework |
-| CombineCocoa | 0.4.1 | UIKit + Combine 확장 | dynamic framework |
-| Pulse | 4.0.3 | 네트워크 로깅 & 디버깅 | dynamic framework |
-| Firebase (Messaging) | — | 푸시 알림 (FCM 토큰 등록/해제) | — |
-| AppAuth | — | Google OAuth2 인증 플로우 | — |
-| Combine | 시스템 | 반응형 스트림 (메인 상태 관리) | 시스템 프레임워크 |
+**버전은 루트 [`Package.swift`](../../Package.swift) 가 정본이다** — 여기 적지 않는다. 버전 제약의 사유(핀·exact)도 그 파일의 주석이 담는다.
 
-**의존성 관리**: Tuist v3 + SPM. `Tuist/Dependencies.swift`에서 모든 외부 패키지 선언. 모두 dynamic framework로 컴파일.
+| 라이브러리 | 용도 |
+|---|---|
+| Alamofire | HTTP 클라이언트 (Remote API) |
+| Kingfisher | 이미지 캐싱 & 다운로드 |
+| swift-prelude | 함수형 프로그래밍 연산자 (`\|>`, `.~` 렌즈) |
+| swift-async-algorithms | Async sequence 연산 |
+| publisher-async-bind | Combine ↔ async/await 브릿지 |
+| SQLiteService | SQLite DB 래퍼 (Table 프로토콜, 마이그레이션) |
+| CombineCocoa | UIKit + Combine 확장 |
+| Pulse | 네트워크 로깅 & 디버깅 |
+| Firebase (Messaging) | 푸시 알림 (FCM 토큰 등록/해제) |
+| AppAuth | Google OAuth2 인증 플로우 (GoogleSignIn-iOS 의 전이 의존) |
+| Combine | 반응형 스트림 (메인 상태 관리) — 시스템 프레임워크 |
+
+**의존성 관리**: Tuist v4 + SPM (`mise.toml` 이 버전을 못박는다). 외부 패키지는 루트 `Package.swift` 에서 선언한다. 이 레포의 자체 프레임워크는 전부 `.staticFramework` 로 빌드한다 (`Project+Templates.swift:175`·`:219`) — 외부 패키지의 빌드 타입은 Tuist 기본값을 따르고 여기서 지정하지 않는다.
 
 ---
 
@@ -419,11 +436,11 @@ private func runMigrationVersion6to7(_ database: any DataBase) throws {
 
 ### 7.4 팝업 동작
 
-`ApplicationRootRouter.showUpdatePopup(_:)` — 루트 레벨 `UIHostingController`를 `overFullScreen`으로 present.
+`ApplicationRootRouter.showUpdatePopup(_:)` — 팝업 `UIHostingController` 를 앱 window 와 별개인 overlay window(`windowLevel = .alert`)의 rootViewController 로 띄운다. 앱 window 에 present 하지 않으므로, 다른 화면을 닫는 `dismissPresented` 같은 호출에 팝업이 같이 닫히지 않는다.
 
-- 중복 노출 방지: 현재 팝업 VC 참조(`updatePopupViewController`, `weak`)를 보관하고 nil일 때만 새로 present.
-- `isModalInPresentation = true` — **force/recommended 모두** 스와이프 dismiss 차단.
-- 배경은 clear(딤은 SwiftUI 내부), 전환 애니메이션은 present `animated: false` + SwiftUI opacity 페이드(0.25s)로 통일.
+- 중복 노출 방지: overlay window 참조(`updatePopupWindow`)를 보관하고 nil일 때만 새로 띄운다. recommended 의 "나중에" 는 그 window 를 숨기고 참조를 놓는다.
+- overlay window 는 앱 window 의 `overrideUserInterfaceStyle`·`tintColor` 를 복사한다.
+- 배경은 clear(딤은 SwiftUI 내부), 전환 애니메이션은 SwiftUI opacity 페이드(0.25s)다.
 
 **View (`UpdatePopupView`/`ForceUpdatePopupView`) 구조**:
 - `switch requirement`로 `forceRequiredContent` / `recommendedContent` 서브뷰 분기.
@@ -583,6 +600,49 @@ protocol LegalNoticeRepository: Sendable {
 | Main VM | `TodoCalendarApp/Sources/Main/MainViewModel.swift` (`openLegalNoticeDocument` / `closeLegalNoticeBanner` / `legalNoticeBanners` publisher) |
 | Factory | `Presentations/Scenes/Sources/Factories.swift` / `TodoCalendarApp/Sources/Factories/Factories+Usecase.swift` (`SupportUsecaseFactory.makeLegalNoticeUsecase`) |
 | 원격 설정 | `sudopark/TodoCalendar-Terms` 레포의 `app-config/legal-notice.json` |
+
+---
+
+## 9. 앱 정책 (`app-policy.json`)
+
+앱 코드를 바꾸지 않고 도메인별 정책 값과 기능 스위치를 내려 보내는 통로다. 정책 값은 코드 상수로 두지 않는다.
+
+### 9.1 원격 설정
+
+**위치**: `sudopark/TodoCalendar-Terms` 레포 `main` 브랜치의 `app-config/app-policy.json`
+**서빙**: `https://raw.githubusercontent.com/sudopark/TodoCalendar-Terms/main/app-config/app-policy.json` (GitHub raw URL)
+**포맷**:
+```json
+{
+  "color_theme_license": { "enabled": true, "license_days": 7 },
+  "feature_switches": {
+    "<기능키>": { "enabled": true, "min_app_version": "3.1.0", "rollout_percentage": 30 }
+  }
+}
+```
+
+- `color_theme_license` — 테마 사용권 게이트다. `enabled` 가 `false` 이면 게이트를 끈다. `enabled`·`license_days` 는 각각 읽는다. 없거나 `license_days` 가 0 이하인 속성은 그 속성만 비워 두고(nil), 기본값은 `PaidFeatureGateUsecaseImple` 이 채운다. 항목이 없어도 파일 전체를 버리지 않는다.
+- `feature_switches` — 기능 키별 스위치다. `min_app_version` 은 없을 수 있다. `rollout_percentage`(0~100)가 없으면 전체 배포로 본다. 범위 밖 값은 읽을 때 0~100 으로 맞춘다 — 150 은 전체, -5 는 배포 안 함이다. 이 절은 모델과 저장까지만 다룬다. 기능 플래그 연결과 실제 사용은 각 기능 작업이 한다.
+- 디코딩은 Repository 의 `AppPolicyMapper` 가 맡고, Domain 모델 `AppPolicy`·`FeatureSwitch` 는 Decodable 을 채택하지 않는다.
+
+### 9.2 읽는 순서
+
+Repository 는 받아 둔 원격 정책(캐시)만 돌려준다. 캐시가 없으면 정책 없음이다. 번들 기본값 파일은 없다.
+
+`refreshPolicy()` 가 원격을 받아 캐시에 쓴다. 요청이나 디코딩이 실패하면 throw 하고 캐시를 그대로 둔다. 앱을 켤 때 `ApplicationPrepareUsecaseImple.prepareLaunch` 가 결과를 기다리지 않고 부르며, 실패해도 앱 시작을 막지 않는다.
+
+기본 정책은 앱이 정의해 정책을 쓰는 usecase 에 주입하고, usecase 가 원격 정책에서 판단할 수 없는 속성만 기본값으로 채운다. 사용권은 `color-themes.md` §4 가 다룬다. 기능 스위치의 속성별 기본값은 그 스위치를 쓰는 작업이 정한다.
+
+### 9.3 관련 파일
+
+| 레이어 | 파일 |
+|---|---|
+| Domain Model | `Domain/Sources/Models/AppPolicy.swift` |
+| Domain Repo | `Domain/Sources/Repositories/AppPolicyRepository.swift` |
+| Repository Impl | `Repository/Sources/Repository+Imple/Support/AppPolicyRepositoryImple.swift` |
+| Mapper | `Repository/Sources/Repository+Imple/Support/AppPolicy+Mapping.swift` |
+| Endpoint | `Repository/Sources/Remote/Endpoint.swift` (`AppEndpoints.appPolicy`) |
+| 기본 정책 | `TodoCalendarApp/Sources/AppEnvironment.swift` (`defaultAppPolicy`) |
 
 ---
 

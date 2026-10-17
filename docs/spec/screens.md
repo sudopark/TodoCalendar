@@ -100,6 +100,8 @@ stateDiagram-v2
 
 월별 캘린더 그리드 + 선택일 이벤트 목록으로 구성된 메인 화면.
 
+> 넓은 창(size class 가 가로·세로 모두 Regular)에서는 왼쪽 연속 달력과 오른쪽 일별 목록의 2단으로 바뀐다. 전환 기준과 2단 구성은 [`adaptive-layout.md`](adaptive-layout.md) §2~§4 가 정본이다. 아래 절은 1단 기준이다.
+
 ### 1.1 캘린더 그리드
 
 좌우 스와이프로 월 이동하는 캘린더 그리드. UIPageViewController 기반 무한 페이징.
@@ -206,7 +208,7 @@ maxDrawableEventRowCount = (셀높이 - eventTopMargin) / eventRowHeightWithSpac
 | 모드 | ViewModel | 설명 |
 |---|---|---|
 | 생성 (Add) | `AddEventViewModelImple` | 할일/일정 타입 선택 후 새 이벤트 생성 |
-| 할일 수정 (EditTodo) | `EditTodoEventDetailViewModelImple` | 기존 할일 편집 |
+| 할일 수정 (EditTodo) | `EditTodoEventDetailViewModelImple` | 기존 할일 편집. 하단 바의 완료 버튼으로 끝낼 수도 있다 — 저장하지 않은 변경이 있으면 완료 기록에 남지 않는다고 먼저 묻는다 |
 | 일정 수정 (EditSchedule) | `EditScheduleEventDetailViewModelImple` | 기존 일정 편집 |
 | 공휴일 상세 (Holiday) | `HolidayEventDetailViewModelImple` | 읽기 전용, D-Day 카운트다운 |
 | 구글 캘린더 상세 (GoogleCalendar) | `GoogleCalendarEventDetailViewModelImple` | 상시 편집 폼 — 편집 가능 필드는 인라인 편집, 나머지는 탭 시 안내 토스트 |

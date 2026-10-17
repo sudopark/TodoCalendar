@@ -106,21 +106,21 @@ protocol CalendarSectionAppearnaceSettingViewModel: AnyObject, Sendable {
     func changeStartOfWeekDay(_ day: DayOfWeeks)
     func toggleAccentDay(_ type: AccentDays)
     func changeColorTheme()
-    func changeWidgetTheme()
+    func showWidgetGallery()
     func toggleIsShowUnderLineOnEventDay(_ newValue: Bool)
     
  
     var currentWeekStartDay: AnyPublisher<DayOfWeeks, Never> { get }
     var calendarAppearanceModel: AnyPublisher<CalendarAppearanceModel, Never> { get }
     var accentDaysActivatedMap: AnyPublisher<[AccentDays: Bool], Never> { get }
-    var selectedColorTheme: AnyPublisher<ColorThemeModel, Never> { get }
+    var selectedColorTheme: AnyPublisher<any ColorThemeModel, Never> { get }
     var isShowUnderLineOnEventDay: AnyPublisher<Bool, Never> { get }
 }
 
 protocol CalendarSectionRouting: Routing {
     
     func routeToSelectColorTheme()
-    func routeToChangeWidgetTheme(_ setting: WidgetAppearanceSettings)
+    func routeToWidgetGallery(_ setting: WidgetAppearanceSettings)
 }
 
 final class CalendarSectionViewModelImple: CalendarSectionAppearnaceSettingViewModel, @unchecked Sendable {
@@ -167,9 +167,9 @@ extension CalendarSectionViewModelImple {
         self.calendarSettingUsecase.updateFirstWeekDay(day)
     }
     
-    func changeWidgetTheme() {
+    func showWidgetGallery() {
         let setting = self.uiSettingUsecase.loadSavedAppearanceSetting()
-        self.router?.routeToChangeWidgetTheme(setting.widget)
+        self.router?.routeToWidgetGallery(setting.widget)
     }
     
     func changeColorTheme() {
@@ -234,10 +234,14 @@ extension CalendarSectionViewModelImple {
             .eraseToAnyPublisher()
     }
     
-    var selectedColorTheme: AnyPublisher<ColorThemeModel, Never> {
+    var selectedColorTheme: AnyPublisher<any ColorThemeModel, Never> {
         return self.uiSettingUsecase.currentCalendarUISeting
-            .map { ColorThemeModel($0.colorSetKey) }
-            .removeDuplicates()
+            .map { setting -> any ColorThemeModel in
+                guard case .custom = setting.colorSetKey,
+                      let theme = setting.currentCustomColorTheme
+                else { return BuiltInColorThemeModel(setting.colorSetKey) }
+                return CustomColorThemeModel(theme)
+            }
             .eraseToAnyPublisher()
     }
     

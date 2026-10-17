@@ -9,17 +9,39 @@
 //
 
 import UIKit
+import Domain
 import Scenes
 import CommonPresentation
 
 
 // MARK: - Routing
 
-protocol ColorThemeSelectRouting: Routing, Sendable { }
+protocol ColorThemeSelectRouting: Routing, Sendable {
+
+    func showPaidFeatureAdGuide(
+        _ reason: PaidFeatureGateFailReason, onFinished: @escaping @Sendable (Bool) -> Void
+    )
+    
+    func routeToEditCustomTheme(
+        original: CustomColorTheme?,
+        listener: (any ColorThemeEditSceneListener)?
+    )
+}
 
 // MARK: - Router
 
 final class ColorThemeSelectRouter: BaseRouterImple, ColorThemeSelectRouting, @unchecked Sendable { 
+    
+    private let editSceneBuilder: any ColorThemeEditSceneBuiler
+    private let adGuideSceneBuilder: any PaidFeatureAdGuideSceneBuilder
+    
+    init(
+        editSceneBuilder: any ColorThemeEditSceneBuiler,
+        adGuideSceneBuilder: any PaidFeatureAdGuideSceneBuilder
+    ) {
+        self.editSceneBuilder = editSceneBuilder
+        self.adGuideSceneBuilder = adGuideSceneBuilder
+    }
     
     override func closeScene(animate: Bool, _ dismissed: (() -> Void)?) {
         Task { @MainActor in
@@ -35,5 +57,26 @@ extension ColorThemeSelectRouter {
         self.scene as? (any ColorThemeSelectScene)
     }
     
-    // TODO: router implememnts
+    func routeToEditCustomTheme(
+        original: CustomColorTheme?,
+        listener: (any ColorThemeEditSceneListener)?
+    ) {
+        Task { @MainActor in
+            let next = self.editSceneBuilder.makeColorThemeEditScene(
+                original: original, listener: listener
+            )
+            self.currentScene?.navigationController?.pushViewController(next, animated: true)
+        }
+    }
+
+    func showPaidFeatureAdGuide(
+        _ reason: PaidFeatureGateFailReason, onFinished: @escaping @Sendable (Bool) -> Void
+    ) {
+        Task { @MainActor in
+            let guide = self.adGuideSceneBuilder.makePaidFeatureAdGuideScene(
+                reason: reason, onFinished: onFinished, onUseDefault: nil
+            )
+            self.showBottomSlide(guide)
+        }
+    }
 }

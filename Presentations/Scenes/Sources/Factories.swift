@@ -47,6 +47,7 @@ public protocol SettingUsecaseFactory {
     func makeEventShareSettingUsecase() -> any EventShareSettingUsecase
     func makeNotificationPermissionUsecase() -> any NotificationPermissionUsecase
     func makeEventNotificationSettingUsecase() -> any EventNotificationSettingUsecase
+    func makeWidgetStyleUsecase() -> any WidgetStyleUsecase
     var temporaryUserDataMigrationUsecase: any TemporaryUserDataMigrationUescase { get }
 }
 
@@ -86,6 +87,7 @@ public protocol AIAgentUsecaseFactory {
 public protocol BillingUsecaseFactory {
 
     var billingUsecase: any BillingUsecase { get }
+    func makePaidFeatureGateUsecase() -> any PaidFeatureGateUsecase
 }
 
 public protocol AdUsecaseFactory {

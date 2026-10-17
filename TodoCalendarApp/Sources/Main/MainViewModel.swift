@@ -39,7 +39,6 @@ protocol MainViewModel: AnyObject, Sendable, MainSceneInteractor {
 
     // interactor
     func prepare()
-    func returnToToday()
     func moveToPreviousMonth()
     func moveToNextMonth()
     func handleMigration()
@@ -51,7 +50,7 @@ protocol MainViewModel: AnyObject, Sendable, MainSceneInteractor {
 
     // presenter
     var currentMonth: AnyPublisher<CurrentMonth, Never> { get }
-    var isShowReturnToToday: AnyPublisher<Bool, Never> { get }
+    var isMonthNavigationHidden: AnyPublisher<Bool, Never> { get }
     var temporaryUserDataMigrationStatus: AnyPublisher<TemporaryUserDataMigrationStatus?, Never> { get }
     var isLoadingCalendarEvents: AnyPublisher<Bool, Never> { get }
     var isLoadingAllEvents: AnyPublisher<Bool, Never> { get }
@@ -76,6 +75,8 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
     private let eventLiveActivityUsecase: any EventLiveActivityUsecase
     private let guideTodoUsecase: any GuideTodoUsecase
     private let legalNoticeUsecase: any LegalNoticeUsecase
+    private let foremostEventUsecase: any ForemostEventUsecase
+    private let paidFeatureGateUsecase: any PaidFeatureGateUsecase
     var router: (any MainRouting)?
 
     init(
@@ -91,7 +92,9 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
         aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase,
         eventLiveActivityUsecase: any EventLiveActivityUsecase,
         guideTodoUsecase: any GuideTodoUsecase,
-        legalNoticeUsecase: any LegalNoticeUsecase
+        legalNoticeUsecase: any LegalNoticeUsecase,
+        foremostEventUsecase: any ForemostEventUsecase,
+        paidFeatureGateUsecase: any PaidFeatureGateUsecase
     ) {
         self.uiSettingUsecase = uiSettingUsecase
         self.temporaryUserDataMigrationUsecase = temporaryUserDataMigrationUsecase
@@ -106,18 +109,22 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
         self.eventLiveActivityUsecase = eventLiveActivityUsecase
         self.guideTodoUsecase = guideTodoUsecase
         self.legalNoticeUsecase = legalNoticeUsecase
+        self.foremostEventUsecase = foremostEventUsecase
+        self.paidFeatureGateUsecase = paidFeatureGateUsecase
 
         self.internalBinding()
     }
 
     private struct Subject {
         let focusedDayInfo = CurrentValueSubject<SelectDayInfo?, Never>(nil)
+        let calendarColumnLayout = CurrentValueSubject<CalendarColumnLayout?, Never>(nil)
         let temporaryUserDataMigrationStatus = CurrentValueSubject<TemporaryUserDataMigrationStatus?, Never>(nil)
     }
     
     private let cancellables = CancelBag()
     private let subject = Subject()
     private var calendarSceneInteractor: (any CalendarSceneInteractor)?
+    private var isLicenseGateInProgress: Bool = false
     
     private func internalBinding() {
         
@@ -155,6 +162,7 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
                 self?.aiAgentOrchestrationUsecase.refreshNotificationPermissionStatus()
                 self?.handleWillEnterForeground()
                 self?.legalNoticeUsecase.checkNoticeIsNeed()
+                self?.foremostEventUsecase.refresh()
             })
             .store(in: self.cancellables)
     }
@@ -184,6 +192,7 @@ extension MainViewModelImple {
         Task { [weak self] in
             await self?.eventLiveActivityUsecase.prepare()
         }
+        self.bindColorThemeLicenseGate()
     }
 
     private func handleWillEnterForeground() {
@@ -209,10 +218,6 @@ extension MainViewModelImple {
             .store(in: self.cancellables)
     }
     
-    func returnToToday() {
-        self.calendarSceneInteractor?.moveFocusToToday()
-    }
-
     func moveToPreviousMonth() {
         self.calendarSceneInteractor?.moveToPreviousMonth()
     }
@@ -248,6 +253,11 @@ extension MainViewModelImple {
     func calendarScene(focusChangedTo selected: SelectDayInfo) {
         self.subject.focusedDayInfo.send(selected)
     }
+
+    func calendarScene(didChangeColumnLayout layout: CalendarColumnLayout) {
+        self.subject.calendarColumnLayout.send(layout)
+    }
+
     
     func jumpDate() {
         guard let current = self.subject.focusedDayInfo.value else { return }
@@ -275,9 +285,87 @@ extension MainViewModelImple {
 }
 
 
+// MARK: - 컬러 테마 사용권 만료 게이트
+
+extension MainViewModelImple {
+
+    private func bindColorThemeLicenseGate() {
+        let colorThemeKey = self.uiSettingUsecase.currentCalendarUISeting
+            .map { $0.colorSetKey }
+            .removeDuplicates()
+        let enterForeground = NotificationCenter.default
+            .publisher(for: UIApplication.willEnterForegroundNotification)
+            .map { _ in () }
+        let userPlanChanged = self.billingUsecase.currentUserPlan
+            .map { $0.isPaid }
+            .removeDuplicates()
+            .map { _ in () }
+        let checkTriggers = Publishers.Merge3(Just(()), enterForeground, userPlanChanged)
+
+        Publishers.CombineLatest(colorThemeKey, checkTriggers)
+            .map { key, _ in key }
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] key in
+                self?.showColorThemeLicenseExpiredGuideIfNeeded(key)
+            })
+            .store(in: self.cancellables)
+    }
+
+    private func colorThemeLicenseExpiredReason(_ key: ColorSetKeys) -> PaidFeatureGateFailReason? {
+        do {
+            try self.paidFeatureGateUsecase.check(.colorTheme(key), at: Date())
+            return nil
+        } catch {
+            return error as? PaidFeatureGateFailReason
+        }
+    }
+
+    private func showColorThemeLicenseExpiredGuideIfNeeded(_ key: ColorSetKeys) {
+        let reason = self.colorThemeLicenseExpiredReason(key)
+        guard let reason, self.isLicenseGateInProgress == false else { return }
+
+        self.isLicenseGateInProgress = true
+        // 메인이 띄운 화면이 남아 있으면 UIKit 이 present 를 거부해 onFinished 가 오지 않는다
+        self.router?.dismissPresented(animated: true) { [weak self] in
+            self?.showColorThemeLicenseExpiredGuide(reason)
+        }
+    }
+
+    private func showColorThemeLicenseExpiredGuide(_ reason: PaidFeatureGateFailReason) {
+        self.router?.showColorThemeLicenseExpiredGuide(
+            reason,
+            onFinished: { [weak self] _ in
+                self?.isLicenseGateInProgress = false
+            },
+            onUseDefault: { [weak self] in
+                self?.changeColorThemeToSystemTheme()
+            }
+        )
+    }
+
+    private func changeColorThemeToSystemTheme() {
+        let params = EditCalendarAppearanceSettingParams()
+            |> \.newColorSetKey .~ .systemTheme
+        do {
+            _ = try self.uiSettingUsecase.changeCalendarAppearanceSetting(params)
+        } catch {
+            self.router?.showError(error)
+        }
+    }
+}
+
+
 // MARK: - MainViewModelImple Presenter
 
 extension MainViewModelImple {
+
+    var isMonthNavigationHidden: AnyPublisher<Bool, Never> {
+        return self.subject.calendarColumnLayout
+            .compactMap { $0 }
+            .map { $0 == .twoColumns }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
     
     var currentMonth: AnyPublisher<CurrentMonth, Never> {
         
@@ -297,14 +385,6 @@ extension MainViewModelImple {
         
         return self.subject.focusedDayInfo
             .compactMap(transform)
-            .removeDuplicates()
-            .eraseToAnyPublisher()
-    }
-    
-    var isShowReturnToToday: AnyPublisher<Bool, Never> {
-        return self.subject.focusedDayInfo
-            .compactMap { $0 }
-            .map { !$0.isCurrentDay }
             .removeDuplicates()
             .eraseToAnyPublisher()
     }

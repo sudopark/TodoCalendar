@@ -61,6 +61,27 @@ extension RemoteEnvironmentPathTests {
         #expect(path == "https://api.example.com/v2/setting/event/tag/default/color")
     }
 
+    @Test func path_appSettingColorThemesEndpoint_returnsV2SettingColorThemesURL() {
+        // when
+        let path = self.env.path(AppSettingEndpoints.colorThemes)
+        // then
+        #expect(path == "https://api.example.com/v2/setting/color_themes")
+    }
+
+    @Test func path_appSettingColorThemeEndpoint_returnsV2SettingColorThemeURLWithUUID() {
+        // when
+        let path = self.env.path(AppSettingEndpoints.colorTheme(uuid: "theme-1"))
+        // then
+        #expect(path == "https://api.example.com/v2/setting/color_themes/theme-1")
+    }
+
+    @Test func path_migrationCustomColorThemesEndpoint_returnsV2MigrationColorThemesURL() {
+        // when
+        let path = self.env.path(MigrationEndpoints.customColorThemes)
+        // then
+        #expect(path == "https://api.example.com/v2/migration/color_themes")
+    }
+
     @Test func path_eventSyncCheckEndpoint_returnsV2SyncCheckURL() {
         // when
         let path = self.env.path(EventSyncEndPoints.check)
@@ -100,5 +121,12 @@ extension RemoteEnvironmentPathTests {
         let path = self.env.path(AppEndpoints.legalNotice)
         // then
         #expect(path == "https://raw.githubusercontent.com/sudopark/TodoCalendar-Terms/main/app-config/legal-notice.json")
+    }
+
+    @Test func path_appPolicyEndpoint_returnsTermsRepositoryRawURL() {
+        // when
+        let path = self.env.path(AppEndpoints.appPolicy)
+        // then
+        #expect(path == "https://raw.githubusercontent.com/sudopark/TodoCalendar-Terms/main/app-config/app-policy.json")
     }
 }

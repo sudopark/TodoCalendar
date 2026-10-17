@@ -280,7 +280,7 @@ extension TodoLocalRepositoryImple { ... }
 extension TodoLocalRepositoryImple { ... }
 ```
 
-- **기능/관심사별** 분리 (프로토콜 적합성이 아닌 기능 단위)
+- **기능/관심사별**로 extension 블록을 나눈다 (프로토콜 적합성이 아닌 기능 단위). 나누는 단위는 같은 파일 안의 `// MARK: -` 블록이다 — 별도 파일로 떼는 기준은 `.claude/rules/file-conventions.md` §4
 - 타입 내 순서: init → 프로토콜 필수 메서드 → public 헬퍼 → private 헬퍼
 
 ### 2.9 접근 제어

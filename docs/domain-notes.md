@@ -36,4 +36,6 @@
 
 ## DB 마이그레이션
 
-절차·버전 이력 정본은 [`docs/spec/infrastructure.md §5`](spec/infrastructure.md). 짝은 **세 위치**다 — `AppEnvironment.dbVersion` ↔ `Table.migrateStatement(for:)` case ↔ `AppDataMigrationImple`의 `runDBMigration` case + `runMigrationVersionNtoM`. 마지막이 빠지면 `migrateStatement`가 호출조차 안 되고 조용히 안 돈다.
+절차·버전 이력 정본은 [`docs/spec/infrastructure.md §5`](spec/infrastructure.md). 메인 DB 의 짝은 **세 위치**다 — `AppEnvironment.dbVersion` ↔ `Table.migrateStatement(for:)` case ↔ `AppDataMigrationImple`의 `runDBMigration` case + `runMigrationVersionNtoM`. 마지막이 빠지면 `migrateStatement`가 호출조차 안 되고 조용히 안 돈다.
+
+외부 캘린더 DB 는 서비스마다 같은 짝을 따로 가진다 — 구글은 `AppEnvironment.googleCalendarDBVersion` ↔ 그 테이블의 `migrateStatement(for:)` case ↔ `ExternalCalendarDBMigrationImple.runGoogleCalendarDBMigration` 의 switch case + 그 case 가 부르는 스텝 메서드이고, 애플은 `appleCalendarDBVersion` ↔ 그 테이블의 `migrateStatement(for:)` case ↔ `runAppleCalendarDBMigration` 의 switch 다. 실패하는 모양은 메인 DB 와 같다.

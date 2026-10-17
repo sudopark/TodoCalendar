@@ -20,6 +20,10 @@ let project = Project.app(
             path: .relativeToRoot("Presentations/CalendarScenes")
         ),
         .project(
+            target: "CalendarPresentation",
+            path: .relativeToRoot("Presentations/CalendarPresentation")
+        ),
+        .project(
             target: "Common3rdParty",
             path: .relativeToRoot("Supports/Common3rdParty")
         ),
@@ -54,6 +58,10 @@ let project = Project.app(
         .project(
             target: "MemberScenes",
             path: .relativeToRoot("Presentations/MemberScenes")
+        ),
+        .project(
+            target: "WidgetScenes",
+            path: .relativeToRoot("Presentations/WidgetScenes")
         ),
         .project(
             target: "EventListScenes",
@@ -132,8 +140,12 @@ let project = Project.app(
                     path: .relativeToRoot("Presentations/CommonPresentation")
                 ),
                 .project(
-                    target: "CalendarScenes",
-                    path: .relativeToRoot("Presentations/CalendarScenes")
+                    target: "CalendarPresentation",
+                    path: .relativeToRoot("Presentations/CalendarPresentation")
+                ),
+                .project(
+                    target: "WidgetScenes",
+                    path: .relativeToRoot("Presentations/WidgetScenes")
                 )
             ],
             signingConfigures: [
@@ -269,5 +281,6 @@ let project = Project.app(
                 )
             )
         )
-    ]
+    ],
+    e2eTests: true
 )

@@ -99,7 +99,9 @@ loadEvents(in: period)
 
 ### 저장소
 
-App Group 안의 `{AppleCalendarService.id}__calendar.db`. 테이블은 `AppleCalendarTagTable`·`AppleCalendarEventTable` 둘이고, 반복 규칙과 참석자는 JSON 문자열 컬럼으로 직렬화한다. 외부 캘린더 DB 버전은 `AppEnvironment.appleCalendarDBVersion`으로 메인 DB와 따로 센다.
+App Group 안의 `apple__calendar.db` (`{AppleCalendarService.id}__calendar`). 테이블은 `AppleCalendarTagTable`·`AppleCalendarEventTable` 과 메인 DB 와 같은 선언을 쓰는 `EventTimeTable` 셋이고 (`AppleCalendarLocalStorage.swift:42-44`·`:80`), 반복 규칙과 참석자는 JSON 문자열 컬럼으로 직렬화한다. 애플은 단일 계정 서비스라 `account_id` 컬럼이 없다.
+
+버전은 `AppEnvironment.appleCalendarDBVersion` 으로 메인 DB 와 따로 센다. **지금 값 1 은 선언 `V0` 과 안 맞는 빈 번호다** — 구글 스텝이 모든 외부 DB 에 돌던 시절 올라간 값이고, 어떤 스키마 변경에도 대응하지 않는다. 마이그레이션은 `ExternalCalendarDBMigrationImple.runAppleCalendarDBMigration` 소관인데 그 `steps` switch 가 비어 있어 도는 스텝이 없다 (`ExternalCalendarDBMigrationImple.swift:54-66`).
 
 ---
 

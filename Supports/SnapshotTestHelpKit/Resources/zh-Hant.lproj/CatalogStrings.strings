@@ -12,6 +12,7 @@
 "catalog.event::team_workshop" = "團隊工作坊";
 "catalog.event::release_day" = "發布日";
 "catalog.event::lunch" = "和 Sara 吃午餐";
+"catalog.event::anniversary" = "結婚紀念日";
 
 // MARK: - 할일
 
@@ -40,3 +41,8 @@
 
 "catalog.ai::command" = "星期五中午和 Sara 吃午餐";
 "catalog.ai::result" = "已將「和 Sara 吃午餐」加到 3 月 13 日星期五 12:00。";
+
+// MARK: - 컬러 테마
+
+"catalog.colorTheme::forest" = "森林";
+"catalog.colorTheme::dusk" = "黃昏";

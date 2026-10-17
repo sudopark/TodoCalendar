@@ -1,6 +1,6 @@
 ---
 name: harness-review
-description: Use when the user requests an agent review of pushed harness changes — 하네스 변경분(.claude 스킬·agents·rules·hooks, CLAUDE.md 계층, 지시문 정본 docs)이 포함된 공개 PR(또는 PR 없이 푸시된 하네스 커밋)에 대해 harness-reviewer subagent를 관점별 병렬 dispatch하고 결과를 합산·검증해 인라인 코멘트로 게시한다 — 게시할 앵커가 없으면 대화 보고로 갈음. Triggers on "하네스 리뷰 돌려", "스킬 수정분 리뷰해줘" (PR 또는 푸시된 커밋이 있는 상태에서). Does NOT trigger on 프로덕트 코드 리뷰(review 스킬), 스킬 신규 작성 중 검증(superpowers:writing-skills), usage-log 기반 정비(improve-skill), PR 올리기 전 셀프리뷰(수행하지 않음), PR 공개 시점 자동 실행(유저 지시가 유일한 트리거), 리뷰 반영 커밋 구성(commit 스킬), PR 본문 작성(pr 스킬).
+description: Use when harness changes need an agent review — 하네스 변경분(.claude 스킬·agents·rules·hooks, CLAUDE.md 계층, 지시문 정본 docs)이 포함된 공개 PR·푸시된 커밋에 대한 유저 지시 리뷰, 그리고 develop 직행으로 커밋할 하네스 변경의 커밋 전 리뷰(유저 지시 불요). harness-reviewer subagent를 관점별 병렬 dispatch하고 결과를 합산·검증해 인라인 코멘트로 게시한다 — 게시할 앵커가 없으면 대화 보고로 갈음. Triggers on "하네스 리뷰 돌려", "스킬 수정분 리뷰해줘" (PR 또는 푸시된 커밋이 있는 상태에서), develop 직행 하네스 커밋 직전. Does NOT trigger on 프로덕트 코드 리뷰(review 스킬), 계획 문서 리뷰(plan-review 스킬), 스킬 신규 작성 중 검증(superpowers:writing-skills), usage-log 기반 정비(improve-skill), PR 올리기 전 셀프리뷰(유저 지시 없이는 수행하지 않음 — 자동 커밋 전 레인은 develop 직행만), PR 공개 시점 자동 실행(PR 레인은 유저 지시가 유일한 트리거), 리뷰 반영 커밋 구성(commit 스킬), PR 본문 작성(pr 스킬).
 ---
 
 # Harness Review — 하네스 수정분 에이전트 리뷰
@@ -9,19 +9,23 @@ description: Use when the user requests an agent review of pushed harness change
 
 ## 0. 실행 시점
 
-**유저가 지시했을 때만** 돈다 — 하네스 파일이 바뀌었다고 자동 실행하지 않고, PR 올리기 전 셀프리뷰도 없다.
+레인이 둘이다:
 
-대상은 **공개된 PR** 또는 **PR 없이 푸시된 하네스 커밋**이다. 후자는 대상이 develop 직행 커밋이거나, 유저가 게시 전 반영을 지시해 앵커 커밋이 rebase로 사라진 경우다 — §1~4는 동일하게 돌고 §5 인라인 게시만 대화 보고로 갈음한다. 이 경로는 이행이다.
+- **공개된 PR·이미 푸시된 하네스 커밋** — **유저가 지시했을 때만** 돈다. 하네스 파일이 바뀌었다고 자동 실행하지 않고, PR 레인에는 올리기 전 셀프리뷰도 없다.
+- **develop 직행 커밋은 커밋 전에 돈다 — 유저 지시 없이.** PR 을 거치지 않을 하네스 변경은 공유 브랜치라 푸시 뒤 흡수(rebase)가 불가하고, 리뷰 반영이 후속 커밋으로만 남는다. 그래서 커밋하기 전에 워킹트리 상태로 리뷰하고, 확정 finding 을 반영한 뒤 커밋한다.
+
+**워킹트리 변경을 리뷰할 때는**(커밋 전 레인, 유저가 지시한 커밋 전 리뷰, 게시 전 반영 지시로 앵커 커밋이 rebase 로 사라진 경우) diff 패키지를 워킹트리 diff(`git diff HEAD -U10 -- <하네스 경로>` — ref 없는 `git diff` 는 staged 변경을 누락한다)로 만들고, §1~4 는 동일하게 돌며 §5 게시만 대화 보고로 갈음한다. 이 경로는 이행이다.
 
 ## 1. 범위 확정 — 하네스 diff 패키지
 
+- **워킹트리 변경(§0 커밋 전 레인 포함)은 BASE 분기를 건너뛴다** — 패키지는 `git diff HEAD -U10 -- "${HARNESS_PATHS[@]}"` 하나로 만들고(log·stat 은 커밋이 없어 담을 것이 없다), 파일명은 `harness-review-worktree.diff` 로 한다. 아래 BASE 공식은 커밋된 범위 전용이다.
 - **먼저 `git fetch origin develop`** — 로컬이 stale이면 merge-base가 뒤로 밀려 남의 커밋이 섞인다. HEAD = 리뷰 대상 최신 커밋이고, BASE는 대상이 어디 있느냐로 갈린다:
-  - **PR·미머지 브랜치** — `git merge-base origin/develop HEAD`. §0 후자 중 **앵커가 rebase로 사라진 경우**도 여기다 — 브랜치가 아직 develop에 안 들어가 공식이 그대로 성립한다
+  - **PR·미머지 브랜치** — `git merge-base origin/develop HEAD`. §0 의 "게시 전 반영 지시로 앵커 커밋이 rebase 로 사라진 경우"도 여기다 — 브랜치가 아직 develop에 안 들어가 공식이 그대로 성립한다
   - **develop 직행 커밋** — 대상 범위에서 가장 오래된 커밋의 부모(`<가장 오래된 커밋>^`). 대상이 이미 `origin/develop`의 조상이라 merge-base 공식은 HEAD로 수렴해 빈 패키지를 만든다
 - **하네스 경로만** 필터해 스크래치패드에 diff 패키지를 만든다 (리뷰어들이 공유해 Read):
 
 ```bash
-HARNESS_PATHS=(.claude CLAUDE.md Domain/CLAUDE.md Repository/CLAUDE.md scripts docs/coding-style-and-philosophy.md docs/화면단위구조.md docs/domain-context-map.md)
+HARNESS_PATHS=(.claude CLAUDE.md Domain/CLAUDE.md Repository/CLAUDE.md scripts docs/coding-style-and-philosophy.md docs/화면단위구조.md docs/domain-context-map.md docs/operations/templates)
 { git log --oneline <BASE>..<HEAD> -- "${HARNESS_PATHS[@]}"; echo '---'; git diff --stat <BASE>..<HEAD> -- "${HARNESS_PATHS[@]}"; echo '---'; git diff -U10 <BASE>..<HEAD> -- "${HARNESS_PATHS[@]}"; } > <scratchpad>/harness-review-<PR번호 또는 커밋 SHA 앞7자>.diff
 wc -l <scratchpad>/harness-review-<PR번호 또는 커밋 SHA 앞7자>.diff
 ```
@@ -62,5 +66,5 @@ review 스킬 §4를 그대로 따른다 — "코드"를 "문서"로 바꿔 읽�
 
 review 스킬 §5와 동일 — `mcp__github-reviewer__create_pull_request_review`로 인라인 코멘트(full SHA), 게시 후 대화로 요약. 반영은 유저 지시 시 원본 커밋에 흡수. 축 누수 태깅(§6)은 수행하지 않는다 — 그건 프로덕트 코드 관문 채점용.
 
-- **게시가 반영에 선행한다** — 지적을 원본 커밋에 흡수·rebase 하면 인라인 앵커가 사라진다. 반영은 게시 후 유저 지시로.
+- **게시가 반영에 선행한다** — 지적을 원본 커밋에 흡수·rebase 하면 인라인 앵커가 사라진다. 반영은 게시 후 유저 지시로. **이 둘은 PR 레인 한정이다** — 커밋 전 레인은 앵커가 없으니 대화 보고 직후 확정 finding 을 반영하고 커밋한다 (§0).
 - **앵커가 없으면 대화 보고로 갈음한다** — PR 없는 대상, 또는 유저가 게시 전 반영을 지시한 경우. 확정 finding을 review 스킬 §4 보고 기준(인용·위치·reasoning)대로 대화에 실으면 게시 의무를 채운 것이다 (review §0 pre-PR 레인과 같은 규정).

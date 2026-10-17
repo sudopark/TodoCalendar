@@ -17,16 +17,12 @@ import Extensions
 // 이걸 주입한다. 소비자는 로그인 여부를 모른 채 그대로 호출하고 여기서 전부 무동작으로 끝난다.
 public final class NotNeedBillingUsecase: BillingUsecase, Sendable {
 
-    private let sharedDataStore: SharedDataStore
+    private let planStore: any BillingUserPlanStore
 
     // 결제 계정이 없으면 free 확정 — clearAll 뒤 팩토리가 재생성되는 시점이라 seed 는 항상 clear 다음이다
-    public init(sharedDataStore: SharedDataStore) {
-        self.sharedDataStore = sharedDataStore
-        self.sharedDataStore.put(
-            BillingUserPlan.self,
-            key: ShareDataKeys.billingUserPlan.rawValue,
-            BillingUserPlan() |> \.planId .~ .free
-        )
+    public init(planStore: any BillingUserPlanStore) {
+        self.planStore = planStore
+        self.planStore.updatePlan(BillingUserPlan() |> \.planId .~ .free)
     }
 
     public func loadPlanOfferings() async throws -> [BillingPlanOffering] { return [] }
@@ -51,19 +47,14 @@ public final class NotNeedBillingUsecase: BillingUsecase, Sendable {
     public func applyUnfinishedTransactions() async throws -> BillingUserPlan? { return nil }
 
     public func latestUserPlan() -> BillingUserPlan? {
-        return self.sharedDataStore.value(
-            BillingUserPlan.self, key: ShareDataKeys.billingUserPlan.rawValue
-        )
+        return self.planStore.latestUserPlan()
     }
 
     // 플랜 정보는 결제 기능이 아니다 — AI usage 응답도 같은 키를 채우므로
     // paywall 이 닫혀도 사용량 게이지는 플랜을 읽어야 한다
     public var currentUserPlan: AnyPublisher<BillingUserPlan, Never> {
-        return self.sharedDataStore.observe(
-            BillingUserPlan.self,
-            key: ShareDataKeys.billingUserPlan.rawValue
-        )
-        .compactMap { $0 }
-        .eraseToAnyPublisher()
+        return self.planStore.observePlan()
+            .compactMap { $0 }
+            .eraseToAnyPublisher()
     }
 }

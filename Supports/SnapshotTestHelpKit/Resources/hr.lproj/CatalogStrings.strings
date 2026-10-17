@@ -12,6 +12,7 @@
 "catalog.event::team_workshop" = "Timska radionica";
 "catalog.event::release_day" = "Dan izdanja";
 "catalog.event::lunch" = "Ručak sa Sarom";
+"catalog.event::anniversary" = "Godišnjica braka";
 
 // MARK: - 할일
 
@@ -40,3 +41,8 @@
 
 "catalog.ai::command" = "ručak sa Sarom u petak u podne";
 "catalog.ai::result" = "„Ručak sa Sarom” dodan je u petak 13. ožujka u 12:00.";
+
+// MARK: - 컬러 테마
+
+"catalog.colorTheme::forest" = "Šuma";
+"catalog.colorTheme::dusk" = "Sumrak";

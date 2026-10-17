@@ -1,1 +1,1 @@
-3.0.1 — Itt az AI gyorsbevitel. Mondja el, gépelje be vagy fotózza le az eseményt — Siriből, az Action gombból vagy a Vezérlőközpontból, az alkalmazás megnyitása nélkül.
+3.1.0 — Alakítsa ízlése szerint a widgeteket, és színezze át az appot 19 beépített vagy saját témával. Új a Visszaszámlálás widget, az iPhone Duón pedig kétpaneles nézet.

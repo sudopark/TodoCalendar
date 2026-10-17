@@ -11,6 +11,7 @@ import Foundation
 import Combine
 import Domain
 import Scenes
+import CalendarPresentation
 
 
 // MARK: - CalendarPaperViewModel
@@ -19,6 +20,7 @@ protocol CalendarPaperViewModel: AnyObject, Sendable, CalendarPaperSceneInteract
 
     // interactor
     func prepare()
+    func expandMonthIfCollapsed()
 
     // presenter
     var requestScrollToVoiceInput: AnyPublisher<Void, Never> { get }
@@ -47,6 +49,7 @@ final class CalendarPaperViewModelImple: CalendarPaperViewModel, @unchecked Send
     }
     
     private var currentSelectedDayAndEvents: (CurrentSelectDayModel, [any CalendarEvent])?
+    private var isMonthCollapsed: Bool = false
 
     private struct Subject {
         let requestScrollToVoiceInput = PassthroughSubject<Void, Never>()
@@ -87,8 +90,30 @@ extension CalendarPaperViewModelImple {
         self.listener?.calendarPaper(on: self.currentMonth, didChange: currentSelectedDay)
     }
 
+    func selectedDayIsToday(_ isToday: Bool) {
+        self.eventListInteractor.selectedDayIsToday(isToday)
+    }
+
+    func updateMonthCollapsed(_ isCollapsed: Bool) {
+        self.isMonthCollapsed = isCollapsed
+        self.monthInteractor.updateMonthCollapsed(isCollapsed)
+    }
+
+    func expandMonthIfCollapsed() {
+        guard self.isMonthCollapsed else { return }
+        self.listener?.calendarPaperDidRequestToggleMonthCollapse()
+    }
+
+    func monthSceneDidRequestToggleMonthCollapse() {
+        self.listener?.calendarPaperDidRequestToggleMonthCollapse()
+    }
+
     func dayEventListDidRequestShowAICommand() {
         self.listener?.calendarPaperDidRequestShowAICommand()
+    }
+
+    func dayEventListDidRequestReturnToToday() {
+        self.listener?.calendarPaperDidRequestReturnToToday()
     }
 
     func monthScene(didRequestShare range: Range<TimeInterval>, kind: CalendarShareRangeKind) {

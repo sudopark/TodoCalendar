@@ -12,7 +12,8 @@ import Prelude
 import Optics
 import Domain
 import Extensions
-import CalendarScenes
+import CalendarPresentation
+import WidgetScenes
 
 
 struct TodayAndNextWidgetTimeLineProvider: AppIntentTimelineProvider {
@@ -25,8 +26,14 @@ struct TodayAndNextWidgetTimeLineProvider: AppIntentTimelineProvider {
 extension TodayAndNextWidgetTimeLineProvider {
     
     func placeholder(in context: Context) -> ResultTimelineEntry<TodayAndNextWidgetViewModel> {
-        let sample = TodayAndNextWidgetViewModel.sample()
+        let builder = WidgetViewModelProviderBuilder(base: .init())
+        let look = WidgetLook(
+            globalSetting: builder.loadWidgetAppearanceSetting(),
+            appliedStyle: builder.fetchDefaultStyle(of: .todayAndNextMedium)
+        )
+        let sample = TodayAndNextWidgetViewModel.sample() |> \.look .~ look
         return .init(date: Date(), result: .success(sample))
+            |> \.background .~ look.background
     }
     
     func snapshot(
@@ -41,7 +48,8 @@ extension TodayAndNextWidgetTimeLineProvider {
         
         return await self.loadEntry(
             selected: configuration.eventTypes,
-            excludeAllDayEvent: configuration.excludeAllDayEvent
+            excludeAllDayEvent: configuration.excludeAllDayEvent,
+            style: configuration.resolvedStyle
         )
     }
     
@@ -50,7 +58,9 @@ extension TodayAndNextWidgetTimeLineProvider {
         in context: Context
     ) async -> Timeline<ResultTimelineEntry<TodayAndNextWidgetViewModel>> {
         let entry = await self.loadEntry(
-            selected: configuration.eventTypes, excludeAllDayEvent: configuration.excludeAllDayEvent
+            selected: configuration.eventTypes,
+            excludeAllDayEvent: configuration.excludeAllDayEvent,
+            style: configuration.resolvedStyle
         )
         switch entry.result {
         case .success(let model):
@@ -66,7 +76,8 @@ extension TodayAndNextWidgetTimeLineProvider {
     
     private func loadEntry(
         selected: [EventTypeEntity]?,
-        excludeAllDayEvent: Bool
+        excludeAllDayEvent: Bool,
+        style: WidgetStyleId.Style
     ) async -> Entry {
         
         let tagIds = selected?.map { EventTagId($0) }
@@ -76,9 +87,9 @@ extension TodayAndNextWidgetTimeLineProvider {
         )
         let now = Date()
         do {
-            let model = try await viewModelProvider.getViewModel(for: now)
+            let model = try await viewModelProvider.getViewModel(for: now, style: style)
             return .init(date: now, result: .success(model))
-                |> \.background .~ model.widgetSetting.background
+                |> \.background .~ model.look.background
         } catch {
             return .init(date: now, result: .failure(.init(error: error)))
         }

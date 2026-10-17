@@ -269,7 +269,6 @@ struct SelectEventNotificationTimeView: View {
             )
             .datePickerStyle(.compact)
             .labelsHidden()
-            .invertColorIfNeed(appearance)
             
             Spacer()
             

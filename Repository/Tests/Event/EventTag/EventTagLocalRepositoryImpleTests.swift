@@ -270,6 +270,22 @@ extension EventTagLocalRepositoryImpleTests {
         // then
         XCTAssertEqual(tags?.map { $0.uuid }, totalTags.map { $0.uuid })
     }
+    
+    func testRepository_whenSaveTagWithEveryColumn_loadRestoresSameValues() async throws {
+        // given
+        let origin = CustomEventTag(uuid: "tag-uuid", name: "tag name", colorHex: "#FF8800")
+        
+        // when
+        try await self.localStorage.saveTag(origin)
+        let restored = try await self.localStorage.loadTags(in: ["tag-uuid"])
+        
+        // then
+        let tag = try XCTUnwrap(restored.first)
+        XCTAssertEqual(restored.count, 1)
+        XCTAssertEqual(tag.uuid, "tag-uuid")
+        XCTAssertEqual(tag.name, "tag name")
+        XCTAssertEqual(tag.colorHex, "#FF8800")
+    }
 }
 
 extension EventTagLocalRepositoryImpleTests {
@@ -289,5 +305,24 @@ extension EventTagLocalRepositoryImpleTests {
         XCTAssertEqual(ids, [.custom("t2")])
         ids = repository.toggleTagIsOn(.holiday)
         XCTAssertEqual(ids, [.custom("t2"), .holiday])
+    }
+}
+
+
+// MARK: - 변환이 컬럼을 다 채우는지 (DB 미사용)
+
+extension EventTagLocalRepositoryImpleTests {
+    
+    func testTagEntity_serialize_leavesNoColumnUnmapped() throws {
+        // given
+        let tag = CustomEventTag(uuid: "tag-uuid", name: "tag name", colorHex: "#FF8800")
+        
+        // when
+        let values = try CustomEventTagTable.serialize(entity: .init(tag))
+        
+        // then
+        XCTAssertEqual(values.count, CustomEventTagTable.Columns.allCases.count)
+        XCTAssertFalse(values.isEmpty)
+        XCTAssertTrue(values.allSatisfy { $0 != nil })
     }
 }

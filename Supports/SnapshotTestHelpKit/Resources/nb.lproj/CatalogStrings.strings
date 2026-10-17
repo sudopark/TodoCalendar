@@ -12,6 +12,7 @@
 "catalog.event::team_workshop" = "Teamworkshop";
 "catalog.event::release_day" = "Lanseringsdag";
 "catalog.event::lunch" = "Lunsj med Sara";
+"catalog.event::anniversary" = "Bryllupsdag";
 
 // MARK: - 할일
 
@@ -40,3 +41,8 @@
 
 "catalog.ai::command" = "lunsj med Sara fredag kl. 12";
 "catalog.ai::result" = "«Lunsj med Sara» er lagt til fredag 13. mars kl. 12:00.";
+
+// MARK: - 컬러 테마
+
+"catalog.colorTheme::forest" = "Skog";
+"catalog.colorTheme::dusk" = "Skumring";

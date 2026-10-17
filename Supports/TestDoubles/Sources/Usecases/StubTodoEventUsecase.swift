@@ -69,7 +69,9 @@ open class StubTodoEventUsecase: TodoEventUsecase {
     }
     
     public var shouldFailCompleteTodo: Bool = false
+    public var didCompleteTodoIds: [String] = []
     open func completeTodo(_ eventId: String) async throws -> DoneTodoEvent {
+        self.didCompleteTodoIds.append(eventId)
         guard shouldFailCompleteTodo == false
         else {
             throw RuntimeError("not implemented")

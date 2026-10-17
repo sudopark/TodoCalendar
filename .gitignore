@@ -89,6 +89,10 @@ docs/superpowers/
 .superpowers/
 .operations/
 
+### 계획 산출물(작전명령·작전계획·전략) 미커밋 — 정본 공유는 이슈 본문 미러·상황판 스풀 (campaign 스킬 §1) ###
+docs/operations/*
+!docs/operations/templates
+
 ### Snapshot testing ###
 snapshot-catalog/
 
@@ -113,7 +117,7 @@ fastlane/in_app_events/*
 !fastlane/in_app_events/README.md
 
 # importlib 로 하이픈 파일명 스크립트를 불러올 때 생긴다
-scripts/__pycache__/
+__pycache__/
 
 # 자격증명 — README 만 커밋한다
 secret/*
@@ -121,3 +125,6 @@ secret/*
 
 fastlane/custom_product_pages/*
 !fastlane/custom_product_pages/README.md
+
+fastlane/creative_assets/*
+!fastlane/creative_assets/README.md

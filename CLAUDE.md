@@ -4,21 +4,39 @@
 
 - **수정 전 파일 먼저 read.** 추측 수정 금지.
 - **미확정 산출물의 수정은 비용이 아니다.** 머지 전 코드·플랜·문서는 전부 초안이다. 유저 지시로 이미 쓴 구현을 바꿀 때 재작업 분량을 반문("이미 X로 짰는데 괜찮아?")·범위 축소·트레이드오프 어느 형태로도 반영하지 않는다 — 고려 대상 자체가 아니다. 충언은 전역 규칙의 충언 조건이 설 때만 하고, 재작업 분량은 그 조건이 아니다. 비용으로 세는 건 이미 머지돼 다른 작업이 의존하는 것뿐이다.
+- **글은 완결된 자연문으로 쓴다.** 대화 응답과 파일로 남는 것 전부 — 커밋·PR·이슈·플랜·명령·스펙·문서·보고 — 가 대상이다. 읽는 사람이 뜻을 되물으면 작업 사이클이 한 번 더 돈다.
+  - **비문 금지** — 조사·서술어를 갖춰, 소리 내 읽으면 말이 되게 쓴다. 주어와 서술어가 호응해야 한다 ("적어둔 사실이 `파일:33` 이다" 는 사실을 파일이라 부른 꼴이다). 무생물을 행위 주어로 세우지 않는다 ("확증이 네 자리를 훑었다" → 훑은 쪽은 사람이다). 간결은 이 요건 안에서다: 단어만 나열하거나 조사를 떼어 줄인 것은 간결이 아니라 비문이다. 템플릿의 축약 표기(`·` 나열, `—` 대시)는 항목 라벨이지 문체 지시가 아니다.
+  - **번역체·피동 금지** — "~의 경우"·"~에 있어"·"이는"·"~함으로써"·"~에 의해"·"~되어지다"·"~를 가능하게 하다"·"~에 대해 고려하다" 를 쓰지 않는다. 능동으로 쓰고, 동사로 쓸 것을 명사로 굳히지 않는다 ("산출 주체에 안 닿는다" → 글 쓰는 쪽에 안 닿는다, "같은 필요가 발생했다" → 같은 규칙이 두 번 필요했다). 문장 길이를 다 같게 맞추지 않는다 — 짧은 문장과 긴 문장을 섞어야 읽힌다.
+  - **줄임말·상투어 금지** — 영어 기술 용어는 그대로 쓰되(deploy·schema·refactor) 그것을 다시 줄인 형태는 풀어쓴다 (dedupe → 중복 제거). 코드 심볼은 이름 그대로 인용하고, 그 개념을 서술할 땐 풀어쓴다. 문맥으로 알 수 있는 대명사(이것·그것·당신)는 뺀다. 문장 머리의 "따라서·또한·하지만·이를 통해·결과적으로" 를 잇달아 쓰지 않는다. "매우 중요한·혁신적인·놀라운·필수적인" 같은 수식어와 "도모하다·증진시키다·활용하여" 같은 한자어는 쉬운 말로 바꾼다.
+  - **훈계형 마무리 금지** — "이처럼 ~는 중요한 의미를 지닙니다"·"결론적으로 ~가 필요합니다" 류로 끝맺지 않는다. 할 말이 끝나면 끝낸다.
+  - **내보내기 전에 훑는다** — 대명사·피동·연속 접속사·훈계형 마무리 넷을 스스로 확인하고, 걸리면 능동 단문으로 고쳐 최종본만 낸다.
+  - **서브에이전트는 이 파일을 받지 않는다** — dispatch 브리프에 이 절을 발췌해 실어야 닿는다 (implement §착수).
 - **Query/Command 분리.** 읽기와 사이드이펙트를 한 흐름에 섞지 말 것.
 - **`static func` 금지.** 로직은 인스턴스 소속으로 배치한다 — 네임스페이스 enum(`enum XxxFormatter { static func ... }`)으로 감싸는 우회도 같은 금지 대상이다. 배치 원칙·예외는 `.claude/rules/swift-style.md` §2·§3.
 - **객체 변경 시** 참조하는 다른 객체 영향도 확인 (빌드 + 테스트) — 절차는 implement 스킬의 impact-check가 기계화.
 - **짝지어진 두 위치는 함께 갱신.** 한쪽만 바꾸면 무효가 되는 쌍은 추가/변경 시 대응처도 반드시 확인:
   - `AppEnvironment.dbVersion` ↔ `Table.migrateStatement(for:)` case ↔ `AppDataMigrationImple`의 `runDBMigration` case + `runMigrationVersionNtoM` (셋 다여야 한다 — 마지막이 빠지면 `migrateStatement`가 호출조차 안 되고 조용히 안 돈다)
+  - 외부 캘린더 DB 는 서비스마다 같은 짝을 따로 가진다 — `AppEnvironment.googleCalendarDBVersion` ↔ 그 테이블의 `migrateStatement(for:)` case ↔ `ExternalCalendarDBMigrationImple.runGoogleCalendarDBMigration` 의 switch case + 그 case 가 부르는 스텝 메서드이고, 애플은 `appleCalendarDBVersion` ↔ 그 테이블의 `migrateStatement(for:)` case ↔ `runAppleCalendarDBMigration` 의 switch 다. 스텝 메서드 이름이 `runMigrationVersionNtoM` 패턴이 아니라 `runGoogleCalendarEventTagMigration` 처럼 대상 테이블을 담아서, 위 메인 DB 짝을 이름으로 훑으면 이쪽은 안 걸린다. 빠졌을 때 실패하는 모양은 메인 DB 와 같다 — `migrateStatement` 가 호출조차 안 되고 조용히 안 돈다
+  - 커밋 메시지 기준(§5) ↔ `commit` 스킬 §메시지 ↔ `report-review` P2 (작성 기준 둘과 검수 기준 하나가 같은 것을 말해야 한다 — 검수 쪽만 고치면 §5 가 ❌ 로 든 예시가 관문을 통과한다)
   - CI `pr_test.yml` — `detect-changes`의 scheme 매핑(grep) ↔ `test` job의 `Test <scheme>` 실행 step (둘 중 하나만 추가하면 감지만 되고 실행 안 됨)
-  - 신규 테스트 스킴 ↔ 스킴 목록 하드코딩 전부 (`pr_test.yml` 3곳·`scripts/run-all-tests.sh`·`impact-check.sh`+테스트·`run-tests` 스킬 — 상세는 add-framework 스킬. 단 `<Name>Snapshots` 스킴은 의도된 예외 — 로컬 전용, snapshot-check 스킬)
+  - 신규 테스트 스킴 ↔ 스킴 목록 하드코딩 전부 (`pr_test.yml` 3곳·`scripts/run-all-tests.sh`·`impact-check.sh`+테스트·`run-tests` 스킬 — 상세는 add-framework 스킬. 단 `<Name>Snapshots`·`<Name>E2E` 스킴은 의도된 예외 — 둘 다 로컬 전용이라 CI 가 안 돌린다. 스냅샷은 snapshot-check 스킬, e2e 는 #826 캠페인 계획 0항 결심으로 CI 미배선)
   - init 시그니처 ↔ 콜사이트
   - 인증 필요 신규 Endpoint enum ↔ `CalendarAPIAutenticator.shouldAdapt` case ↔ 회귀 테스트 (누락 시 무인증 요청 → 401, 리트라이도 안 됨)
   - CommonPresentation 신규 컴포넌트 ↔ `.claude/rules/presentations-rules.md` §2 카탈로그 표 등재 (누락 시 다음 사람이 못 찾아 같은 컴포넌트를 또 만든다)
   - en `Localizable.strings` 키 추가/삭제 ↔ ko lproj 반영 ↔ 번역 대기 트래킹 이슈에 작업 링크 기록 (등록처는 `localization` 라벨 열린 이슈 중 최신 — 없으면 신설. 나머지 29개 언어는 그 이슈 처리 시점에 일괄 번역 — 상세는 `.claude/rules/localization.md`)
+  - opord 명령 상태 값(§6 표) 추가·개명 ↔ 상황판 `~/.claude/campaign-board/index.html` 의 뱃지 규칙·종결 필터(`o.state !== "종결"`) (레포 밖 앱이라 path 매칭이 안 걸린다 — 종결류 값을 새로 만들고 필터를 안 고치면 끝난 작업이 진행 중으로 계속 뜬다)
+  - campaign 원장 DP 상태 값(`docs/operations/templates/campaign.md` 18항 표) 추가·개명 ↔ `campaign` 스킬 §5 서식 줄 ↔ 상황판 `~/.claude/campaign-board/index.html` 의 `STATUSES`·`COLORS`·`.dp.s<상태>` CSS ↔ `parser.py` 종결 튜플 (같은 레포 밖 앱이다. 색을 안 넣으면 그 DP 가 격자에서 색을 잃고, 진행 상태를 종결 튜플에 넣으면 캠페인이 조기 종결로 판정된다)
+  - campaign 원장 `대기:` 줄 서식(campaign 스킬 §5·`docs/operations/templates/campaign.md` 18항) ↔ 상황판 `~/.claude/campaign-board/parser.py` 의 `WAITING_RE`·`_parse_waiting` ↔ `index.html` 의 대기 칩 (같은 레포 밖 앱이다. 줄 머리 `대기:` 를 바꾸고 정규식을 안 고치면 상황판에서 대기가 조용히 사라진다)
+  - strategy 원장 캠페인 상태 값(`docs/operations/templates/strategy.md` 12항 표) 추가·개명 ↔ `campaign` 스킬 §3 서식 줄 ↔ 상황판 `~/.claude/campaign-board/index.html` 의 `STRATEGY_STATUSES`·`STRATEGY_COLORS`·`.dp.s<상태>` CSS ↔ `parser.py` 의 `_parse_strategy` 종결 판정 (DP 상태와 같은 구조의 레포 밖 짝이다. 전략 격자는 캠페인 노드를 이 값으로 칠하므로, 색이 없는 값을 새로 만들면 그 캠페인이 격자에서 무채색이 된다)
+  - strategy 6항 캠페인 목록의 `C<n>` id ↔ 12항 원장 첫 칸 ↔ 8항 가정의 검증 방법 칸·9항 위험의 영향 칸 (상황판이 이 id 로 원장 상태를 붙이고 가정·위험을 캠페인 노드에 건다 — 6항에만 있고 원장에 없는 id 는 영영 `미착수` 로 뜬다)
+  - `CLAUDE.md` §1 글 규범 ↔ `.claude/agents/code-analyzer.md`·`code-reviewer.md`·`harness-reviewer.md` 의 `## 보고 문장` 문단 (넷이 같은 규칙을 말해야 한다 — 서브에이전트는 이 파일을 못 받아 body 에 실물을 복제했다. 참조로 바꾸면 규칙이 body 밖에 남아 안 닿는다)
+  - 계획–명령 체계 하네스(`opord`·`campaign`·`orchestrate`·`doctrine`·kickoff 탐색·implement 실행 보고 계약·`docs/operations/templates/`) 변경 ↔ #1098 본문의 이관 대상·선결 과제·미정 목록 갱신 (plugin `mission` 레포가 매 세션 이 본문과 develop 하네스 커밋을 끌어가 반영한다 — 본문이 실물과 어긋나면 mission 이 틀린 경계로 옮긴다. 절차 정본은 `~/Documents/codebase/mission/CLAUDE.local.md` (gitignore 된 로컬 파일))
 - **스킬 종료·유저 교정은 레코드로 남긴다** (#690 flywheel 측정 신호):
   - 발동한 스킬의 절차가 끝나면: `python3 .claude/hooks/log-record.py skill_end --name <스킬> --compliance full|partial [--deviation "조항::사유" --deviation-reviewed]` — 조항을 의도적으로 이행 안 했으면 partial + 이탈 조항·사유 필수.
   - **partial은 조항이 허용하지 않은 이탈에만 쓴다.** 조항이 조건부 생략·갈음·대체 경로를 규정하고 그 조건을 충족해 그 경로를 탔으면 **full**이다 — 규정된 선택지를 고른 것은 이행이지 이탈이 아니다. 판정 기준은 규범 판단이 아니라 "그 조항이 이 생략을 문언으로 규정하고 있나"라는 사실 확인이다. 허용된 생략까지 partial로 세면 지표가 오염돼 진짜 이탈이 묻힌다. 그래서 `--deviation-reviewed` 없는 partial은 스크립트가 이 기준을 stderr로 되돌려주며 거부한다 — 재판정해 full이면 `--compliance full`로, 진짜 이탈이면 플래그를 붙여 다시 호출한다.
   - 유저가 작업 결과·방식을 교정하면 그 자리에서: `python3 .claude/hooks/log-record.py correction --skills <귀속 스킬(쉼표 구분)> --summary "교정 요지" --gist "발화 요지"`. **귀속은 발동 중이던 스킬이 아니라 교정 대상의 소관으로 정한다** — 그 사안을 다루는 조항이 그 스킬에 **실제로 있을 때만** `--skills`에 넣고(규범 판단이 아니라 조항 존재라는 사실 확인), 응답 톤·글쓰기처럼 전역 규칙(CLAUDE.md) 소관인 교정은 `--skills` 생략. 발동 중이라는 이유로 붙이면 스킬 신호가 오염돼 엉뚱한 조항이 정비 대상으로 올라온다.
+- **조항은 적용 범위 문언까지 읽는다.** 조항이 덮는 사안에서 다르게 처리하고 싶으면, "내 처리가 더 옳은가"가 아니라 "조항이 이 케이스를 문언으로 규정하나"를 확인한다. 규정하고 있으면 자체 판정하지 말고 근거와 함께 반문한다. "이 케이스는 성격이 다르다"는 생각이 그 신호다 — 조항이 예외를 두지 않았으면 예외는 만드는 게 아니다. 서브에이전트 브리프에도 재해석본이 아니라 원문을 싣는다.
+- **워크트리 경로(`TodoCalendar_worktrees/...`)로 파일을 받으면 매번 어느 워크트리에 반영할지 먼저 묻는다.** 경로 그대로 그 워크트리를 고칠지, 지금 세션의 같은 파일을 고칠지 추측하지 않는다 — 다른 세션이 작업 중인 워크트리를 건드리면 그 작업과 충돌한다.
 - **`.claude/rules/*.md`는 path 매칭 시 자동 로드** — 로드된 조항을 구현 결정 시점에 적극 invoke.
 - **외운 지식 말고 이 문서를 보고 판단할 것.** (도메인 경계·용어는 [`docs/domain-context-map.md`](docs/domain-context-map.md) 정본 기준)
 
@@ -61,9 +79,10 @@ tuist generate --no-open      # 파일 추가/삭제 후 재실행 필수
 | 분해된 큰 작업의 멀티 PR 실행 | orchestrate 스킬 |
 | 페어 프로그래밍 선언 | pair-programming 스킬 |
 | 방향 수렴 선언 | converge 스킬 |
-| 작전계획 작성·평가 (L·XL 멀티 PR) | campaign 스킬 |
-| 작전명령 작성 (M·DP 플랜) | opord 스킬 |
+| 캠페인 계획 작성·평가 (L·XL 멀티 PR) | campaign 스킬 |
+| 작업 지침 작성 (M·DP 플랜) | opord 스킬 |
 | 코드 작성·수정 | implement 스킬 (superpowers 코딩 절차 컴패니언) |
+| 룰·선례 없어 결정이 막힘 | doctrine 스킬 (실행 교리 신설·보강 요구) |
 | 버그·논리 모순 수정 | troubleshoot 스킬 (superpowers systematic-debugging 컴패니언 — 아카이브 `docs/troubleshooting/`) |
 | 파일·프레임워크 추가 | add-file / add-framework 스킬 |
 | 테스트 실행 | run-tests 스킬 (스킴 목록 정본) |
@@ -72,14 +91,20 @@ tuist generate --no-open      # 파일 추가/삭제 후 재실행 필수
 | 새 버전 출시 변경내용 작성 | release-notes 스킬 (한글 초안 → 31개 로케일 → ASC 업로드) |
 | 앱 내 이벤트 현지화·이미지·업로드 | in-app-event 스킬 (한글 원고 → 31개 로케일 → 촬영·합성 → ASC 업로드) |
 | 맞춤형 제품 페이지 제작·업로드 | custom-product-page 스킬 (한글 원고 → 31개 로케일 → 촬영·합성 → ASC 업로드) |
+| 제품 페이지 헤더·검색 결과 이미지 제작·업로드 | creative-assets 스킬 (한글 원고 → 31개 로케일 → 촬영·합성 → Asset Library 업로드) |
 | UI 디자인 | design 스킬 |
 | 스냅샷 검증·화면 카탈로그 | snapshot-check / app-catalog 스킬 |
 | 코드 분석 (로직·추적·관계·영향도) | analyze 스킬 → code-analyzer subagent |
 | 커밋 / PR / 이슈 | commit / pr / issue 스킬 |
 | 공개 PR 에이전트 리뷰 | review 스킬 → code-reviewer subagent |
-| 하네스 수정분 리뷰 (PR·PR 없는 커밋) | harness-review 스킬 → harness-reviewer subagent |
+| 하네스 수정분 리뷰 (PR·푸시된 커밋 — develop 직행은 커밋 전) | harness-review 스킬 → harness-reviewer subagent |
+| 계획 문서 승인 전 1차 리뷰 (strategy·campaign·opord) | plan-review 스킬 |
+| 하위 세션에 통제 관문 재공지·일괄 지시 | control-brief 스킬 |
+| 하위 세션이 유저에게 낼 보고·커밋 메시지·PR 본문 초안 검수 | report-review 스킬 |
 
 > 테스트 작성 원칙: [`.claude/rules/testability.md`](.claude/rules/testability.md) (path 매칭 자동 로드)
+
+> `docs/` 의 큰 문서(기획서·스펙)는 메인 파일을 개요로 두고 상세는 하위 md 로 떼어 링크한다 (`docs/spec/*` 처럼).
 
 > 서비스 이용 가이드(`sudopark/TodoCalendar-Terms` `guide/`) 번역·수정은 [`.claude/rules/localization.md`](.claude/rules/localization.md) §1 소관. 원고가 다른 레포라 path 매칭에 안 걸리니 그 작업을 시작할 땐 여기서 찾아 연다.
 
@@ -108,7 +133,7 @@ tuist generate --no-open      # 파일 추가/삭제 후 재실행 필수
 | SharedDataStore 키·구독 | [`Domain/CLAUDE.md`](Domain/CLAUDE.md) |
 | 앱 버전 체크 | [`docs/spec/infrastructure.md §7`](docs/spec/infrastructure.md) |
 | App Store Connect 업로드 운영 | [`docs/appstore-connect-operations.md`](docs/appstore-connect-operations.md) |
-| DB 마이그레이션 | §1 짝규칙 (`dbVersion` ↔ `migrateStatement` ↔ `AppDataMigrationImple` 스텝) + [`Repository/CLAUDE.md`](Repository/CLAUDE.md) |
+| DB 마이그레이션 | §1 짝규칙 (메인 DB 는 `dbVersion` ↔ `migrateStatement` ↔ `AppDataMigrationImple` 스텝, 외부 캘린더 DB 는 서비스별 버전 상수 ↔ `migrateStatement` ↔ `ExternalCalendarDBMigrationImple` 스텝) + [`Repository/CLAUDE.md`](Repository/CLAUDE.md) |
 
 ---
 
@@ -129,12 +154,20 @@ tuist generate --no-open      # 파일 추가/삭제 후 재실행 필수
 
 ### 커밋 메시지
 
-`[#이슈번호] 동작 변화 요약`. 파일/클래스 목록 ❌ → 동작이 어떻게 달라졌나 ✅.
+`[#이슈번호] 동작 변화 요약`. 파일/클래스 목록 ❌ → 동작이 어떻게 달라졌나 ✅. **"왜"는 이 첫 줄이 전담하고, 본문 불릿은 한 줄로 앵커와 동작 변화만 담는다** — 상세는 commit 스킬.
 
 ```
 ❌ [#563] AppleCalendarOAuth2ServiceUsecaseImple 로직 변경 및 테스트 추가
-✅ [#563] AppleCalendar 권한 상태별 분기 체크 도입
-   — fullAccess → 바로 성공, denied/restricted → 즉시 throw, notDetermined → 시스템 요청 후 재확인
+✅ [#563] AppleCalendar 권한을 상태별로 갈라 확인한다
+   — fullAccess 는 바로 성공, denied·restricted 는 즉시 throw, notDetermined 는 시스템 요청 후 재확인
+```
+
+불릿은 제목의 해설문이 아니다 — 근거를 불릿에 달면 제목이 한 말을 두 번 한다:
+
+```
+❌ - Package.swift — 핀을 `branch: "master"` 에서 `from: "1.0.0"` 으로 되돌렸다. 승격 전 형태인
+     `from:` 으로 돌아가 re-resolve 가 말없이 다른 커밋을 집지 않는다
+✅ - Package.swift — SQLiteService 핀을 `branch: "master"` 에서 `from: "1.0.0"` 으로 되돌렸다
 ```
 
 ---

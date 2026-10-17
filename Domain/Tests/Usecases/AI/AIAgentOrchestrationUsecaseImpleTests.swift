@@ -25,6 +25,7 @@ class AIAgentOrchestrationUsecaseImpleTests: PublisherWaitable, AsyncEffectWaita
     private var stubUsage: StubAIAgentUsageUsecase!
     private var stubSpeech: StubSpeechRecognizeUsecase!
     private var stubSync: StubEventSyncUsecase!
+    private var stubForemost: StubForemostEventUsecase!
     private var stubNotificationPermission: StubNotificationPermissionUsecase!
 
     private func makeUsecase(
@@ -39,6 +40,7 @@ class AIAgentOrchestrationUsecaseImpleTests: PublisherWaitable, AsyncEffectWaita
         self.stubUsage.stubIsCreditExhausted = isCreditExhausted
         self.stubSpeech = .init()
         self.stubSync = .init()
+        self.stubForemost = .init()
         self.stubNotificationPermission = .init()
         self.stubNotificationPermission.stubAuthorizationStatusCheckResult = .success(notificationStatus)
         self.stubNotificationPermission.stubRequestPermissionResult = .success(shouldGrantNotification)
@@ -47,6 +49,7 @@ class AIAgentOrchestrationUsecaseImpleTests: PublisherWaitable, AsyncEffectWaita
             usageUsecase: self.stubUsage,
             speechRecognizeUsecase: self.stubSpeech,
             eventSyncUsecase: self.stubSync,
+            foremostEventUsecase: self.stubForemost,
             notificationPermissionUsecase: self.stubNotificationPermission
         )
     }
@@ -766,6 +769,77 @@ extension AIAgentOrchestrationUsecaseImpleTests {
         try? usecase.submit("여러 작업 후 거부")
         // then
         #expect(self.stubSync.didSyncRequested == true)
+    }
+}
+
+
+// MARK: - job 종료 시 foremost mutation 기반 최상위 재조회 트리거
+
+// event sync 트리거와 같은 동기 흐름이라 submit 반환 시점에 판정이 끝나 있다.
+extension AIAgentOrchestrationUsecaseImpleTests {
+
+    @Test("done 결과에 foremost mutation이 있으면 최상위 재조회를 트리거한다")
+    func usecase_whenDoneWithForemostMutation_triggersForemostRefresh() async throws {
+        // given
+        let usecase = self.makeUsecaseWithCommandJob(
+            self.dummyJob(self.doneResult(with: [self.mutation(.foremost, .updated)]))
+        )
+        // when
+        try? usecase.submit("그거 제일 중요한 일로 등록해줘")
+        // then
+        #expect(self.stubForemost.didRefreshRequested == true)
+    }
+
+    @Test("foremost mutation만 있으면 event sync는 트리거하지 않는다")
+    func usecase_whenDoneWithForemostMutation_doesNotTriggerEventSync() async throws {
+        // given
+        let usecase = self.makeUsecaseWithCommandJob(
+            self.dummyJob(self.doneResult(with: [self.mutation(.foremost, .deleted)]))
+        )
+        // when
+        try? usecase.submit("최상위 해제해줘")
+        // then
+        #expect(self.stubSync.didSyncRequested == false)
+    }
+
+    @Test("foremost와 todo mutation이 함께 오면 최상위 재조회와 event sync가 둘 다 나간다")
+    func usecase_whenDoneWithForemostAndTodoMutation_triggersBothRefreshAndSync() async throws {
+        // given
+        let usecase = self.makeUsecaseWithCommandJob(
+            self.dummyJob(self.doneResult(with: [
+                self.mutation(.todo), self.mutation(.foremost, .updated)
+            ]))
+        )
+        // when
+        try? usecase.submit("할 일 만들고 제일 중요한 일로 등록해줘")
+        // then
+        #expect(self.stubForemost.didRefreshRequested == true)
+        #expect(self.stubSync.didSyncRequested == true)
+    }
+
+    @Test("foremost mutation이 없으면 최상위 재조회를 트리거하지 않는다")
+    func usecase_whenNoForemostMutation_doesNotTriggerForemostRefresh() async throws {
+        // given
+        let usecase = self.makeUsecaseWithCommandJob(
+            self.dummyJob(self.doneResult(with: [self.mutation(.todo), self.mutation(.tag)]))
+        )
+        // when
+        try? usecase.submit("할 일 추가해줘")
+        // then
+        #expect(self.stubForemost.didRefreshRequested == false)
+    }
+
+    @Test("failed 결과에 커밋된 foremost mutation이 있어도 최상위 재조회를 트리거한다")
+    func usecase_whenFailedWithForemostMutation_triggersForemostRefresh() async throws {
+        // given
+        var fail = AIJobResult.FailResult()
+        fail.reason = "일부만 처리됨"
+        fail.mutations = [self.mutation(.foremost, .updated)]
+        let usecase = self.makeUsecaseWithCommandJob(self.dummyJob(.failed(fail)))
+        // when
+        try? usecase.submit("여러 작업 하다 실패")
+        // then
+        #expect(self.stubForemost.didRefreshRequested == true)
     }
 }
 

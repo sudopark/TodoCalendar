@@ -20,7 +20,7 @@ import CommonPresentation
     var accentDays: [AccentDays: Bool] = [:]
     var showUnderLine: Bool = false
     var selectedWeekDay: DayOfWeeks = .sunday
-    var selectedColorTheme: ColorThemeModel = .init(.systemTheme)
+    var selectedColorTheme: any ColorThemeModel = BuiltInColorThemeModel(.systemTheme)
     @ObservationIgnored private var didFirstCalendarModelUpdated = false
     
     init(_ setting: CalendarSectionAppearanceSetting) {
@@ -83,7 +83,7 @@ final class CalendarSectionAppearanceSettingViewEventHandler: Observable {
     var onAppear: () -> Void = { }
     var weekStartDaySelected: (DayOfWeeks) -> Void = { _ in }
     var changeColorTheme: () -> Void = { }
-    var changeWidgetTheme: () -> Void = { }
+    var showWidgetGallery: () -> Void = { }
     var toggleAccentDay: (AccentDays) -> Void = { _ in }
     var toggleShowUnderline: (Bool) -> Void = { _ in }
 }
@@ -93,10 +93,16 @@ final class CalendarSectionAppearanceSettingViewEventHandler: Observable {
 struct CalendarAppearanceSampleView: View {
     
     private let model: CalendarAppearanceModel
+    private let injectedColorSet: (any ColorSet)?
     @Environment(ViewAppearance.self) private var appearance
     
-    init(model: CalendarAppearanceModel) {
+    init(model: CalendarAppearanceModel, colorSet: (any ColorSet)? = nil) {
         self.model = model
+        self.injectedColorSet = colorSet
+    }
+    
+    private var colorSet: any ColorSet {
+        self.injectedColorSet ?? self.appearance.colorSet
     }
     
     var body: some View {
@@ -105,7 +111,7 @@ struct CalendarAppearanceSampleView: View {
             VStack(alignment: .leading, spacing: Metric.Spacing.xsmall) {
                 Text("setting.appearance.calendar.samplemonth::march".localized())
                     .font(self.appearance.fontSet.size(12, weight: .semibold).asFont)
-                    .foregroundStyle(self.appearance.colorSet.text0.asColor)
+                    .foregroundStyle(self.colorSet.text0.asColor)
                 Grid(alignment: .center, horizontalSpacing: 4, verticalSpacing: 5) {
                     GridRow {
                         ForEach(model.weekDays, id: \.rawValue) { day in
@@ -129,9 +135,9 @@ struct CalendarAppearanceSampleView: View {
             .padding(.horizontal, spacing: .large)
             .background(
                 RoundedRectangle(cornerRadius: Metric.Radius.large)
-                    .fill(self.appearance.colorSet.dayBackground.asColor)
+                    .fill(self.colorSet.dayBackground.asColor)
                     .shadow(
-                        color: appearance.colorSet.text0.withAlphaComponent(0.4).asColor,
+                        color: colorSet.text0.withAlphaComponent(0.4).asColor,
                         radius: 10
                     )
             )
@@ -158,9 +164,9 @@ struct CalendarAppearanceSampleView: View {
     ) -> some View {
         let textColor: UIColor = {
             if isSelected {
-                return self.appearance.colorSet.selectedDayText
+                return self.colorSet.selectedDayText
             } else {
-                return self.appearance.accentCalendarDayColor(accent)
+                return self.appearance.accentCalendarDayColor(accent, on: self.colorSet)
             }
         }()
         
@@ -174,7 +180,7 @@ struct CalendarAppearanceSampleView: View {
                     Spacer()
                     
                     RoundedRectangle(cornerRadius: 0.5)
-                        .fill(self.appearance.colorSet.eventText.asColor)
+                        .fill(self.colorSet.eventText.asColor)
                         .frame(height: 0.5)
                         .padding(.horizontal, 2.5)
                         .padding(.vertical, 1)
@@ -184,7 +190,7 @@ struct CalendarAppearanceSampleView: View {
         .frame(width: 15, height: 16)
         .background(
             RoundedRectangle(cornerRadius: 2)
-                .fill(isSelected ? self.appearance.colorSet.selectedDayBackground.asColor : self.appearance.colorSet.dayBackground.asColor)
+                .fill(isSelected ? self.colorSet.selectedDayBackground.asColor : self.colorSet.dayBackground.asColor)
         )
     }
 }
@@ -197,7 +203,6 @@ struct CalendarSectionAppearanceSettingView: View {
     @State private var state: CalendarSectionAppearanceSettingViewState
     @Environment(CalendarSectionAppearanceSettingViewEventHandler.self) private var eventHandlers
     @Environment(ViewAppearance.self) private var appearance
-    @Environment(\.colorScheme) var colorScheme
     
     var stateBinding: (CalendarSectionAppearanceSettingViewState) -> Void = { _ in }
     
@@ -229,8 +234,12 @@ struct CalendarSectionAppearanceSettingView: View {
                 AppearanceRow("setting.appearance.calendar.colorTheme".localized(), colorThemePreview)
                     .onTapGesture(perform: eventHandlers.changeColorTheme)
                 
-                AppearanceRow("setting.appearance.widget::title".localized(), widgetthemeView)
-                    .onTapGesture(perform: eventHandlers.changeWidgetTheme)
+                AppearanceRow(
+                    "setting.appearance.widget::gallery::title".localized(),
+                    subTitle: "setting.appearance.widget::gallery::explain".localized(),
+                    widgetGalleryEnterView
+                )
+                .onTapGesture(perform: eventHandlers.showWidgetGallery)
                 
                 AppearanceRow("setting.appearance.calendar.underline".localized(),  showUnderlineView)
                     .onChange(of: state.showUnderLine) { _, new in
@@ -314,7 +323,7 @@ extension CalendarSectionAppearanceSettingView {
             ColorThemePreviewView(
                 model: self.state.selectedColorTheme,
                 metric: .init(fontSize: 15, circleSize: 4, circlePadding: 6),
-                isSystemDark: colorScheme == .dark
+                isSystemDark: self.appearance.isSystemDarkTheme
             )
             .frame(width: 40, height: 40)
             
@@ -324,7 +333,7 @@ extension CalendarSectionAppearanceSettingView {
         }
     }
     
-    private var widgetthemeView: some View {
+    private var widgetGalleryEnterView: some View {
         Image(systemName: "chevron.right")
             .font(self.appearance.fontSet.subNormal.asFont)
             .foregroundStyle(self.appearance.colorSet.text2.asColor)

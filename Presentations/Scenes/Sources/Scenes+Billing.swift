@@ -27,3 +27,16 @@ public protocol PaywallSceneBuilder: AnyObject {
     @MainActor
     func makePaywallScene(closesAfterPurchase: Bool) -> any PaywallScene
 }
+
+
+// MARK: - PaidFeatureAdGuide
+
+public protocol PaidFeatureAdGuideSceneBuilder: AnyObject {
+
+    @MainActor
+    func makePaidFeatureAdGuideScene(
+        reason: PaidFeatureGateFailReason,
+        onFinished: @escaping @Sendable (Bool) -> Void,
+        onUseDefault: (@Sendable () -> Void)?
+    ) -> UIViewController
+}

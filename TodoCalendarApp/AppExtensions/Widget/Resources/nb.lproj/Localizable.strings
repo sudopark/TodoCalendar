@@ -10,6 +10,8 @@
 
 "Event" = "Hendelse";
 "Turn" = "Gjentakelsesrunde";
+"WidgetStyle" = "Widget-stil";
+"Style" = "Stil";
 "EventType" = "Hendelsestype";
 "Event Types" = "Hendelsestyper";
 "Exclude all day event" = "Ekskluder hendelser som varer hele dagen";

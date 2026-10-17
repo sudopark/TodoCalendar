@@ -139,6 +139,7 @@ public struct AIJobDataMutation: Sendable {
         case schedule
         case tag
         case eventDetail = "event_detail"
+        case foremost
     }
     
     public enum Operation: String, Sendable {
@@ -176,7 +177,7 @@ extension AIJobDataMutation.DataType {
     public var requiresEventSync: Bool {
         switch self {
         case .todo, .schedule, .tag: return true
-        case .doneTodo, .eventDetail: return false
+        case .doneTodo, .eventDetail, .foremost: return false
         }
     }
 }

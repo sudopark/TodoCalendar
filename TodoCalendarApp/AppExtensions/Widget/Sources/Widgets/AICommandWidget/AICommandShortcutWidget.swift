@@ -8,34 +8,60 @@
 
 import WidgetKit
 import SwiftUI
+import AppIntents
 import Extensions
 import CommonPresentation
+import Domain
+import WidgetScenes
 
 
 // MARK: - AICommandShortcutWidgetEntry
 
 struct AICommandShortcutWidgetEntry: TimelineEntry {
     let date: Date
+    var look: WidgetLook = .init(globalSetting: .init())
+
+    var backgroundShape: AnyShapeStyle {
+        return WidgetBackgroundStyle(self.look.background).shape
+    }
 }
 
-struct AICommandShortcutWidgetTimeLineProvider: TimelineProvider {
+struct AICommandShortcutWidgetTimeLineProvider: AppIntentTimelineProvider {
+
+    typealias Intent = AICommandWidgetConfigurationIntent
 
     func placeholder(in context: Context) -> AICommandShortcutWidgetEntry {
-        return .init(date: Date())
+        return self.entry(context.family, .default)
     }
 
-    func getSnapshot(
-        in context: Context,
-        completion: @escaping (AICommandShortcutWidgetEntry) -> Void
-    ) {
-        completion(.init(date: Date()))
+    func snapshot(
+        for configuration: AICommandWidgetConfigurationIntent,
+        in context: Context
+    ) async -> AICommandShortcutWidgetEntry {
+        return self.entry(context.family, configuration.resolvedStyle)
     }
 
-    func getTimeline(
-        in context: Context,
-        completion: @escaping (Timeline<AICommandShortcutWidgetEntry>) -> Void
-    ) {
-        completion(Timeline(entries: [.init(date: Date())], policy: .never))
+    func timeline(
+        for configuration: AICommandWidgetConfigurationIntent,
+        in context: Context
+    ) async -> Timeline<AICommandShortcutWidgetEntry> {
+        let entry = self.entry(context.family, configuration.resolvedStyle)
+        return Timeline(entries: [entry], policy: .never)
+    }
+
+    private func entry(
+        _ family: WidgetFamily, _ style: WidgetStyleId.Style
+    ) -> AICommandShortcutWidgetEntry {
+        let builder = WidgetViewModelProviderBuilder(base: .init())
+        let variant: WidgetVariant =
+            family == .accessoryCircular ? .aiCommandCircular : .aiCommandSmall
+        return .init(
+            date: Date(),
+            look: .init(
+                globalSetting: builder.loadWidgetAppearanceSetting(),
+                appliedStyle: builder.fetchStyle(of: variant, selected: style)
+            )
+        )
     }
 }
 
@@ -45,43 +71,20 @@ struct AICommandShortcutWidgetTimeLineProvider: TimelineProvider {
 struct AICommandShortcutWidgetView: View {
 
     @Environment(\.widgetFamily) private var family
-    @Environment(\.colorScheme) private var colorScheme
-    var colorSet: any ColorSet {
-        return colorScheme == .light ? DefaultLightColorSet() : DefaultDarkColorSet()
-    }
+
+    let look: WidgetLook
 
     var body: some View {
         switch self.family {
         case .accessoryCircular:
-            self.circularView
+            ZStack {
+                AccessoryWidgetBackground()
+                AICommandCircularView()
+            }
+            .widgetAccentable()
         default:
-            self.smallView
+            AICommandSmallView(look: self.look)
         }
-    }
-
-    private var circularView: some View {
-        ZStack {
-            AccessoryWidgetBackground()
-            Image("custom.calendar.badge.sparkles")
-                .font(.system(size: 20, weight: .semibold))
-        }
-        .widgetAccentable()
-    }
-
-    private var smallView: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Image("custom.calendar.badge.sparkles")
-                .font(.system(size: 22, weight: .semibold))
-                .foregroundStyle(colorSet.accentAI.asColor)
-            Spacer()
-            Text("widget.aiCommand::title".localized())
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(colorSet.text0.asColor)
-            Text("widget.aiCommand::explain".localized())
-                .font(.system(size: 11))
-                .foregroundStyle(colorSet.text1.asColor)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
     }
 }
 
@@ -93,12 +96,13 @@ struct AICommandShortcutWidget: Widget {
     nonisolated static let kind: String = "AICommandShortcutWidget"
 
     var body: some WidgetConfiguration {
-        StaticConfiguration(
+        AppIntentConfiguration(
             kind: Self.kind,
+            intent: AICommandWidgetConfigurationIntent.self,
             provider: AICommandShortcutWidgetTimeLineProvider()
-        ) { _ in
-            AICommandShortcutWidgetView()
-                .containerBackground(.background, for: .widget)
+        ) { entry in
+            AICommandShortcutWidgetView(look: entry.look)
+                .containerBackground(entry.backgroundShape, for: .widget)
                 .widgetURL(AICommandEntryLink.url)
         }
         .supportedFamilies([.accessoryCircular, .systemSmall])
@@ -114,11 +118,11 @@ struct AICommandShortcutWidget_PreviewProvider: PreviewProvider {
 
     static var previews: some View {
         Group {
-            AICommandShortcutWidgetView()
+            AICommandShortcutWidgetView(look: .init(globalSetting: .init()))
                 .previewContext(WidgetPreviewContext(family: .accessoryCircular))
                 .containerBackground(.background, for: .widget)
 
-            AICommandShortcutWidgetView()
+            AICommandShortcutWidgetView(look: .init(globalSetting: .init()))
                 .previewContext(WidgetPreviewContext(family: .systemSmall))
                 .containerBackground(.background, for: .widget)
         }

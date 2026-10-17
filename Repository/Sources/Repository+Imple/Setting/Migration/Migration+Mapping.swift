@@ -32,6 +32,20 @@ struct BatchEventTagPayload {
     }
 }
 
+struct BatchCustomColorThemePayload {
+
+    private let themes: [CustomColorTheme]
+    init(themes: [CustomColorTheme]) {
+        self.themes = themes
+    }
+
+    func asJson() -> [String: Any] {
+        return self.themes.reduce(into: [String: Any]()) { acc, theme in
+            acc[theme.uuid] = theme.asJson()
+        }
+    }
+}
+
 struct BatchTodoEventPayload {
     
     private let todos: [TodoEvent]

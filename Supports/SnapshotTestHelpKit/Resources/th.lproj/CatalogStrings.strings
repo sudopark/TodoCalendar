@@ -12,6 +12,7 @@
 "catalog.event::team_workshop" = "เวิร์กช็อปทีม";
 "catalog.event::release_day" = "วันปล่อยเวอร์ชัน";
 "catalog.event::lunch" = "มื้อเที่ยงกับซาร่า";
+"catalog.event::anniversary" = "วันครบรอบแต่งงาน";
 
 // MARK: - 할일
 
@@ -40,3 +41,8 @@
 
 "catalog.ai::command" = "มื้อเที่ยงกับซาร่าวันศุกร์เที่ยงตรง";
 "catalog.ai::result" = "เพิ่ม “มื้อเที่ยงกับซาร่า” ในวันศุกร์ที่ 13 มีนาคม เวลา 12:00 แล้ว";
+
+// MARK: - 컬러 테마
+
+"catalog.colorTheme::forest" = "ป่าไม้";
+"catalog.colorTheme::dusk" = "สนธยา";

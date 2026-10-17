@@ -10,6 +10,8 @@
 
 "Event" = "イベント";
 "Turn" = "繰り返し回数";
+"WidgetStyle" = "ウィジェットスタイル";
+"Style" = "スタイル";
 "EventType" = "イベントの種類";
 "Event Types" = "イベントの種類";
 "Exclude all day event" = "終日イベントを除外";

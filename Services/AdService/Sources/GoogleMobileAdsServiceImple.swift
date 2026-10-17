@@ -19,14 +19,22 @@ public final class GoogleMobileAdsServiceImple: MobileAdService, @unchecked Send
 
     private enum Constant {
         static let fullScreenAdExpirationInterval: TimeInterval = 60 * 60
+        static let rewardedAdExpirationInterval: TimeInterval = 60 * 60
+        static let rewardedAdPollingInterval: Duration = .milliseconds(100)
     }
 
     private let testDeviceIdentifiers: [String]
     private let fullScreenAdUnitId: String
+    private let rewardedAdUnitId: String
 
-    public init(testDeviceIdentifiers: [String], fullScreenAdUnitId: String) {
+    public init(
+        testDeviceIdentifiers: [String],
+        fullScreenAdUnitId: String,
+        rewardedAdUnitId: String
+    ) {
         self.testDeviceIdentifiers = testDeviceIdentifiers
         self.fullScreenAdUnitId = fullScreenAdUnitId
+        self.rewardedAdUnitId = rewardedAdUnitId
     }
 
     private struct Subject {
@@ -38,6 +46,9 @@ public final class GoogleMobileAdsServiceImple: MobileAdService, @unchecked Send
     private var loadedFullScreenAd: InterstitialAd?
     private var loadedFullScreenAdAt: Date?
     private var isLoadingFullScreenAd: Bool = false
+    private var loadedRewardedAd: RewardedAd?
+    private var loadedRewardedAdAt: Date?
+    private var isLoadingRewardedAd: Bool = false
     @MainActor private var applicationActiveObserving: AnyCancellable?
 }
 
@@ -194,6 +205,76 @@ extension GoogleMobileAdsServiceImple {
     private var hasValidLoadedFullScreenAd: Bool {
         guard let loadedAt = self.loadedFullScreenAdAt else { return false }
         return Date().timeIntervalSince(loadedAt) < Constant.fullScreenAdExpirationInterval
+    }
+}
+
+
+// MARK: - rewarded ad preload
+
+extension GoogleMobileAdsServiceImple {
+
+    public func preloadRewardedAd() async {
+        guard self.isStartedNow else { return }
+        let shouldLoad = self.lock.withLock {
+            guard self.isLoadingRewardedAd == false,
+                  self.hasValidLoadedRewardedAd == false
+            else { return false }
+            self.isLoadingRewardedAd = true
+            return true
+        }
+        guard shouldLoad else { return }
+
+        do {
+            let ad = try await RewardedAd.load(
+                with: self.rewardedAdUnitId, request: Request()
+            )
+            self.lock.withLock {
+                self.loadedRewardedAd = ad
+                self.loadedRewardedAdAt = Date()
+                self.isLoadingRewardedAd = false
+            }
+        } catch {
+            logger.log(level: .error, "rewarded ad preload failed: \(error)")
+            self.lock.withLock { self.isLoadingRewardedAd = false }
+        }
+    }
+
+    public func takeRewardedAd(waitingUpTo timeout: TimeInterval) async -> RewardedAd? {
+        guard self.isStartedNow else { return nil }
+        let deadline: Date = Date().addingTimeInterval(timeout)
+
+        // 로드는 호출자 시한과 무관하게 끝까지 돌아 캐시를 채운다
+        Task { [weak self] in
+            await self?.preloadRewardedAd()
+        }
+
+        while true {
+            if let ad = self.takeValidLoadedRewardedAd() {
+                Task { [weak self] in
+                    await self?.preloadRewardedAd()
+                }
+                return ad
+            }
+            guard Date() < deadline else { return nil }
+            try? await Task.sleep(for: Constant.rewardedAdPollingInterval)
+            guard Task.isCancelled == false else { return nil }
+        }
+    }
+
+    private func takeValidLoadedRewardedAd() -> RewardedAd? {
+        return self.lock.withLock {
+            guard let loadedAd = self.loadedRewardedAd else { return nil }
+            defer {
+                self.loadedRewardedAd = nil
+                self.loadedRewardedAdAt = nil
+            }
+            return self.hasValidLoadedRewardedAd ? loadedAd : nil
+        }
+    }
+
+    private var hasValidLoadedRewardedAd: Bool {
+        guard let loadedAt = self.loadedRewardedAdAt else { return false }
+        return Date().timeIntervalSince(loadedAt) < Constant.rewardedAdExpirationInterval
     }
 }
 

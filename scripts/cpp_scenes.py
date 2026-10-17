@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""맞춤형 제품 페이지(CPP) 장면 C1~C8 을 목업 구멍 크기의 화면 한 장으로 만든다.
+"""맞춤형 제품 페이지(CPP) 장면 C1~C10 을 목업 구멍 크기의 화면 한 장으로 만든다.
 
 명세의 장면 목록은 유저 문서 `CPP지침-맞춤형-제품-페이지-3종-명세.md` §2 가 정본이다.
 입력은 전부 `scripts/capture-appstore-screenshots.sh` 가 언어별로 남긴 촬영 산출물이고,
@@ -23,6 +23,8 @@ CALENDAR_SCREEN = "01-calendar"
 LOCK_SCREEN_WIDGETS = [
     "lockscreen-foremost", "lockscreen-next", "lockscreen-next-remain", "lockscreen-live-activity"
 ]
+# 기기 한 대에 안 들어가는 장면 — 합성기가 기본 스토어 06 과 같은 테마 계단으로 그린다
+THEME_LINEUP_SCENE = "C10"
 
 
 def opened(path):
@@ -76,6 +78,7 @@ SCENES = {
     "C6": app_screen_scene("08-share-preview", top_inset=False),
     "C7": ai_sheet_scene("ai-command-processing"),
     "C8": ai_sheet_scene("ai-command-done"),
+    "C9": app_screen_scene("07-widget-style"),
 }
 
 

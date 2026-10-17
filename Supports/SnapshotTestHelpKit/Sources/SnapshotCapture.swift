@@ -38,6 +38,8 @@ public enum SnapshotLayout {
     case component
     case fullScreen
     case fixed(width: CGFloat, height: CGFloat)
+    case duoCover
+    case duoInner
 
     @MainActor
     var swiftUILayout: SwiftUISnapshotLayout {
@@ -49,6 +51,11 @@ public enum SnapshotLayout {
             return .fixed(width: size.width, height: size.height)
         case .fixed(let width, let height):
             return .fixed(width: width, height: height)
+        // iPhone Duo 시뮬레이터 디스플레이 px ÷ scale 3
+        case .duoCover:
+            return .fixed(width: 466, height: 678)
+        case .duoInner:
+            return .fixed(width: 951, height: 669)
         }
     }
 }
@@ -65,31 +72,56 @@ public func captureSnapshotPair<V: View>(
     @ViewBuilder makeView: (_ theme: SnapshotTheme) -> V
 ) {
     for theme in SnapshotTheme.allCases {
-        let view = makeView(theme)
-            .environment(\.colorScheme, theme.colorScheme)
-        let startTime = Date()
-        var libraryMessage: String?
-        withSnapshotTesting(record: .all) {
-            libraryMessage = verifySnapshot(
-                of: view,
-                as: .image(
-                    layout: layout.swiftUILayout,
-                    traits: snapshotTraits(theme)
-                ),
-                named: "\(name)-\(theme.rawValue)",
-                snapshotDirectory: snapshotDirectory,
-                file: file,
-                testName: testName
-            )
-        }
-        assertRecorded(
-            fileNameKey: "\(name)-\(theme.rawValue)",
-            since: startTime,
+        captureSnapshot(
+            named: "\(name)-\(theme.rawValue)",
+            theme: theme,
+            layout: layout,
             snapshotDirectory: snapshotDirectory,
-            libraryMessage: libraryMessage,
-            file: file, line: line
+            file: file,
+            testName: testName,
+            line: line
+        ) {
+            makeView(theme)
+        }
+    }
+}
+
+
+@MainActor
+public func captureSnapshot<V: View>(
+    named name: String,
+    theme: SnapshotTheme,
+    layout: SnapshotLayout = .component,
+    snapshotDirectory: String? = nil,
+    file: StaticString = #filePath,
+    testName: String = #function,
+    line: UInt = #line,
+    @ViewBuilder makeView: () -> V
+) {
+    let view = makeView()
+        .environment(\.colorScheme, theme.colorScheme)
+    let startTime = Date()
+    var libraryMessage: String?
+    withSnapshotTesting(record: .all) {
+        libraryMessage = verifySnapshot(
+            of: view,
+            as: .image(
+                layout: layout.swiftUILayout,
+                traits: snapshotTraits(theme)
+            ),
+            named: name,
+            snapshotDirectory: snapshotDirectory,
+            file: file,
+            testName: testName
         )
     }
+    assertRecorded(
+        fileNameKey: name,
+        since: startTime,
+        snapshotDirectory: snapshotDirectory,
+        libraryMessage: libraryMessage,
+        file: file, line: line
+    )
 }
 
 

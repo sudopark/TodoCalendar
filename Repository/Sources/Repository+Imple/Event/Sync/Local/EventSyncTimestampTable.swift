@@ -7,43 +7,36 @@
 //
 
 import Foundation
-import SQLiteService
+import SQLiteServiceMacros
 import Domain
 
 
-struct EventSyncTimestampTable: Table {
+typealias EventSyncTimestampTable = EventSyncTimestampTableV0
+
+@Table("SyncTimestamp")
+struct EventSyncTimestampTableV0 {
     
-    enum Columns: String, TableColumn {
-        case dataType = "data_type"
-        case timestamp = "timestamp"
-        
-        var dataType: ColumnDataType {
-            switch self {
-            case .dataType: return .text([.primaryKey(autoIncrement: false), .unique, .notNull])
-            case .timestamp: return .integer([.notNull])
-            }
-        }
-    }
+    @Column(.primaryKey(autoIncrement: false), .unique, .notNull, name: "data_type")
+    let dataType: String
     
-    typealias ColumnType = Columns
-    typealias EntityType = EventSyncTimestamp
-    static var tableName: String { "SyncTimestamp" }
-    
-    static func scalar(_ entity: EventSyncTimestamp, for column: Columns) -> (any ScalarType)? {
-        switch column {
-        case .dataType: return entity.dataType.rawValue
-        case .timestamp: return entity.timeStampInt
-        }
-    }
+    @Column(.notNull)
+    let timestamp: Int
 }
 
 
-extension EventSyncTimestamp: @retroactive RowValueType {
-    
-    public init(_ cursor: CursorIterator) throws {
+extension EventSyncTimestampTable.Entity {
+
+    init(_ timestamp: EventSyncTimestamp) {
         self.init(
-            try SyncDataType(rawValue: try cursor.next().unwrap()).unwrap(),
-            try cursor.next().unwrap()
+            dataType: timestamp.dataType.rawValue,
+            timestamp: timestamp.timeStampInt
+        )
+    }
+
+    func asSyncTimestamp() throws -> EventSyncTimestamp {
+        return try EventSyncTimestamp(
+            try SyncDataType(rawValue: self.dataType).unwrap(),
+            self.timestamp
         )
     }
 }

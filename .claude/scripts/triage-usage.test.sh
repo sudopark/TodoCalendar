@@ -63,6 +63,19 @@ OUT=$(python3 triage-usage.py --json --skills-root "$SKILLS")
 assert_contains "정비가 나중에 들어간 스킬은 stale" "stale" "$(verdict_of pr correction "$OUT")"
 assert_contains "정비가 없던 스킬은 actionable" "actionable" "$(verdict_of commit correction "$OUT")"
 
+# --- 개정보다 과거인 레코드는 떨어내고 센다 — 남은 신선 레코드가 임계 미달이면 below_threshold
+MIXED="$TMP_DIR/2026-02-02.jsonl"
+cat > "$MIXED" << 'JSONL'
+{"ts":"2026-02-02T09:00:00+09:00","event":"correction","session_id":"m1","skills":["pr"],"summary":"개정 뒤 첫 건","gist":"g7"}
+JSONL
+OUT=$(python3 triage-usage.py --json --skills-root "$SKILLS")
+assert_contains "흡수된 과거 3건 + 신선 1건은 below_threshold" \
+  "below_threshold" "$(verdict_of pr correction "$OUT")"
+OUT=$(python3 triage-usage.py --skills-root "$SKILLS")
+assert_not_contains "below_threshold 는 보고되지 않는다" "⚠️ pr —" "$OUT"
+assert_not_contains "below_threshold 는 마킹 안내도 하지 않는다" "improvement --name pr" "$OUT"
+rm -f "$MIXED"
+
 # --- 이미 기록된 신호는 duplicate (재보고 금지)
 RECORDED="$TMP_DIR/recorded.md"
 echo '<!-- signal: commit/correction -->' > "$RECORDED"

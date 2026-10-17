@@ -8,6 +8,9 @@
 
 import XCTest
 import SwiftUI
+import Combine
+import Prelude
+import Optics
 import Domain
 import CommonPresentation
 import SnapshotTestHelpKit
@@ -169,5 +172,200 @@ extension SettingSceneCatalogSnapshots {
                 $0.isShowEventTagColor = true
             }
         }
+    }
+
+    @MainActor
+    func test_colorThemeSelect() {
+        captureSnapshotPair(
+            named: "colorThemeSelect", layout: .fullScreen, snapshotDirectory: catalogSnapshotDirectory()
+        ) { theme in
+            let state = ColorThemeSelectViewState()
+            state.bind(FakeColorThemeSelectViewModel())
+            RunLoop.main.run(until: Date().addingTimeInterval(0.05))
+
+            return ColorThemeSelectView()
+                .environment(state)
+                .environment(ColorThemeSelectViewEventHandler())
+                .environment(self.makeAppearance(theme))
+        }
+    }
+
+    @MainActor
+    func test_colorThemeEdit() {
+        captureSnapshotPair(
+            named: "colorThemeEdit", layout: .fullScreen, snapshotDirectory: catalogSnapshotDirectory()
+        ) { theme in
+            let state = ColorThemeEditViewState()
+            state.bind(FakeColorThemeEditViewModel())
+            RunLoop.main.run(until: Date().addingTimeInterval(0.05))
+
+            return ColorThemeEditView()
+                .environment(state)
+                .environment(ColorThemeEditViewEventHandler())
+                .environment(self.makeAppearance(theme))
+        }
+    }
+}
+
+
+// MARK: - Test Doubles
+
+private enum Constant {
+    static let forestSeeds = CustomColorThemeSeeds(background: "#F1F5EF", accent: "#2E7D32", form: .filled)
+    static let duskSeeds = CustomColorThemeSeeds(background: "#2B2438", accent: "#E5A04D", form: .filled)
+}
+
+private final class FakeColorThemeSelectViewModel: ColorThemeSelectViewModel, @unchecked Sendable {
+
+    var sampleModel: AnyPublisher<CalendarAppearanceModel, Never> {
+        Just(.init(.sunday)).eraseToAnyPublisher()
+    }
+
+    var colorThemeModels: AnyPublisher<[BuiltInColorThemeModel], Never> {
+        Just([
+            .init(.systemTheme) |> \.isSelected .~ true,
+            .init(.defaultLight),
+            .init(.defaultDark),
+            .init(.appTheme(.tomato))
+        ]).eraseToAnyPublisher()
+    }
+
+    var customColorThemeModels: AnyPublisher<[CustomColorThemeModel], Never> {
+        Just([
+            .init(self.makeCustomTheme(
+                uuid: "c1", name: "catalog.colorTheme::forest".catalogLocalized(), seeds: Constant.forestSeeds
+            )),
+            .init(self.makeCustomTheme(
+                uuid: "c2", name: "catalog.colorTheme::dusk".catalogLocalized(), seeds: Constant.duskSeeds
+            ))
+        ]).eraseToAnyPublisher()
+    }
+
+    private func makeCustomTheme(uuid: String, name: String, seeds: CustomColorThemeSeeds) -> CustomColorTheme {
+        return CustomColorTheme(
+            uuid: uuid, name: name, schemaVersion: 1,
+            seeds: seeds, colors: [:], createdAt: 0, updatedAt: 0
+        )
+    }
+
+    func prepare() { }
+    func selectTheme(_ model: any ColorThemeModel) { }
+    func createCustomTheme() { }
+    func editCustomTheme(_ model: CustomColorThemeModel) { }
+    func close() { }
+}
+
+private final class FakeColorThemeEditViewModel: ColorThemeEditViewModel, @unchecked Sendable {
+
+    var initialName: String? { "catalog.colorTheme::forest".catalogLocalized() }
+    var isDeletable: Bool { true }
+
+    var sampleModel: AnyPublisher<CalendarAppearanceModel, Never> {
+        Just(.init(.sunday)).eraseToAnyPublisher()
+    }
+
+    var seeds: AnyPublisher<CustomColorThemeSeeds, Never> {
+        Just(Constant.forestSeeds).eraseToAnyPublisher()
+    }
+
+    var previewColorSet: AnyPublisher<ColorThemeDefinition, Never> {
+        let forest = CustomColorTheme(
+            uuid: "c1", name: "catalog.colorTheme::forest".catalogLocalized(), schemaVersion: 1,
+            seeds: Constant.forestSeeds, colors: [:], createdAt: 0, updatedAt: 0
+        )
+        return Just(forest).compactMap { $0.definition() }.eraseToAnyPublisher()
+    }
+
+    var isSavable: AnyPublisher<Bool, Never> {
+        Just(true).eraseToAnyPublisher()
+    }
+
+    var isProcessing: AnyPublisher<Bool, Never> {
+        Just(false).eraseToAnyPublisher()
+    }
+
+    func enterName(_ name: String) { }
+    func selectBackground(hex: String) { }
+    func selectAccent(hex: String) { }
+    func selectForm(_ form: CustomColorThemeForm) { }
+    func toggleSeed(_ slot: ColorThemeEditSeedSlot, isOn: Bool) { }
+    func selectSeed(_ slot: ColorThemeEditSeedSlot, hex: String) { }
+    func save() { }
+    func delete() { }
+    func close() { }
+}
+
+
+// MARK: - App Store 스샷용 화면
+
+extension SettingSceneCatalogSnapshots {
+
+    private var storeLineupThemeKeys: [AppThemeColorSetKey] {
+        return [.indigo, .amethyst, .ruby, .wine]
+    }
+
+    @MainActor
+    func test_storeThemeLineup() {
+        self.storeLineupThemeKeys.forEach { key in
+            let appearance = self.makeStoreLineupAppearance(key)
+            captureSnapshot(
+                named: "storeThemeLineup-\(key.rawValue)",
+                theme: appearance.colorSet.isLightTheme ? .light : .dark,
+                layout: .fullScreen,
+                snapshotDirectory: catalogSnapshotDirectory()
+            ) {
+                self.makeStoreSettingItemListView(appearance)
+                    .tint(appearance.colorSet.accent.asColor)
+            }
+        }
+    }
+
+    @MainActor
+    private func makeStoreLineupAppearance(_ key: AppThemeColorSetKey) -> ViewAppearance {
+        let colorSetKey = ColorSetKeys.appTheme(key)
+        let isLightTheme = colorSetKey.convert(isSystemDarkTheme: false).isLightTheme
+        let calendar = CalendarAppearanceSettings(colorSetKey: colorSetKey, fontSetKey: .systemDefault)
+        let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")
+        let setting = AppearanceSettings(calendar: calendar, defaultTagColor: tag)
+        return ViewAppearance(setting: setting, isSystemDarkTheme: !isLightTheme)
+    }
+
+    @MainActor
+    private func makeStoreSettingItemListView(_ appearance: ViewAppearance) -> some View {
+        let state = SettingItemListViewState()
+        let baseSection = SettingSectionModel(
+            headerText: nil,
+            items: [
+                SettingItemModel(.appearance),
+                SettingItemModel(.editEvent),
+                SettingItemModel(.holidaySetting),
+                SettingItemModel(.billingPlan),
+                AccountSettingItemModel(AccountInfo("some"))
+            ]
+        )
+        let supportSection = SettingSectionModel(
+            headerText: "setting.section.support::name".localized(),
+            items: [
+                SettingItemModel(.openWeb),
+                SettingItemModel(.feedback),
+                SettingItemModel(.help)
+            ]
+        )
+        let appInfoSection = AppInfoSectionModel(
+            headerText: "setting.section.app::name".localized(),
+            version: "v3.1.0",
+            isUpdateAvailable: false,
+            items: [
+                SettingItemModel(.shareApp),
+                SettingItemModel(.addReview),
+                SettingItemModel(.openSourceLicense)
+            ]
+        )
+        state.sections = [baseSection, supportSection, appInfoSection]
+
+        return SettingItemListView()
+            .environment(state)
+            .environment(SettingItemListViewEventHandler())
+            .environment(appearance)
     }
 }

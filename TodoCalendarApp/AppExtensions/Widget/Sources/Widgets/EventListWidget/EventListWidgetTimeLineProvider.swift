@@ -12,7 +12,8 @@ import Prelude
 import Optics
 import Domain
 import Extensions
-import CalendarScenes
+import CalendarPresentation
+import WidgetScenes
 
 
 struct EventListWidgetTimeLineProvider: AppIntentTimelineProvider {
@@ -28,10 +29,16 @@ extension EventListWidgetTimeLineProvider {
     func placeholder(
         in context: Context
     ) -> ResultTimelineEntry<EventListWidgetViewModel> {
+        let builder = WidgetViewModelProviderBuilder(base: .init())
+        let look = WidgetLook(
+            globalSetting: builder.loadWidgetAppearanceSetting(),
+            appliedStyle: builder.fetchDefaultStyle(of: .eventListSmall)
+        )
         let sample = EventListWidgetViewModel.sample(
             size: .init(context.family)
-        )
+        ) |> \.look .~ look
         return .init(date: Date(), result: .success(sample))
+            |> \.background .~ look.background
     }
     
     func snapshot(
@@ -44,35 +51,46 @@ extension EventListWidgetTimeLineProvider {
             return self.placeholder(in: context)
         }
         
-        return await self.loadEntry(configuration.eventTypes, context)
+        return await self.loadEntry(
+            configuration.eventTypes, configuration.excludeAllDayEvent,
+            context, configuration.resolvedStyle
+        )
     }
     
     func timeline(
         for configuration: EventTypeSelectIntent, in context: Context
     ) async -> Timeline<ResultTimelineEntry<EventListWidgetViewModel>> {
         
-        let entry = await self.loadEntry(configuration.eventTypes, context)
+        let entry = await self.loadEntry(
+            configuration.eventTypes, configuration.excludeAllDayEvent,
+            context, configuration.resolvedStyle
+        )
         return Timeline(entries: [entry], policy: .after(Date().nextUpdateTime))
     }
     
     private func loadEntry(
         _ selected: [EventTypeEntity]?,
-        _ context: Context
+        _ excludeAllDayEvent: Bool,
+        _ context: Context,
+        _ style: WidgetStyleId.Style
     ) async -> Entry {
         
         let tagIds = selected?.map { EventTagId($0) }
         let size = EventListWidgetSize(context.family)
         
         let builder = WidgetViewModelProviderBuilder(base: .init())
-        let viewModelProvider = await builder.makeEventListViewModelProvider(targetEventTagIds: tagIds)
+        let viewModelProvider = await builder.makeEventListViewModelProvider(
+            targetEventTagIds: tagIds, excludeAllDayEvent: excludeAllDayEvent
+        )
         let now = Date()
         do {
             let model = try await viewModelProvider.getEventListViewModel(
                 for: now,
-                widgetSize: size
+                widgetSize: size,
+                style: style
             )
             return .init(date: now, result: .success(model))
-                |> \.background .~ model.widgetSetting.background
+                |> \.background .~ model.look.background
             
         } catch {
             return .init(date: now, result: .failure(.init(error: error)))

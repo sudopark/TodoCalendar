@@ -31,9 +31,11 @@ open class StubAppSettingRepository: AppSettingRepository, @unchecked Sendable {
         return self.loadSavedViewAppearance()
     }
     
+    public private(set) var didChangeCalendarAppearanceSettingParams: EditCalendarAppearanceSettingParams?
     open func changeCalendarAppearanceSetting(
         _ params: EditCalendarAppearanceSettingParams
     ) throws -> CalendarAppearanceSettings {
+        self.didChangeCalendarAppearanceSettingParams = params
         let old = self.loadSavedViewAppearance()
         let new = old |> \.calendar .~ old.calendar.update(params)
         self.stubAppearanceSetting = new

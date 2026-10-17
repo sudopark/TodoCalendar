@@ -10,6 +10,8 @@
 
 "Event" = "Udalosť";
 "Turn" = "Kolo opakovania";
+"WidgetStyle" = "Štýl widgetu";
+"Style" = "Štýl";
 "EventType" = "Typ udalosti";
 "Event Types" = "Typy udalostí";
 "Exclude all day event" = "Vylúčiť celodenné udalosti";

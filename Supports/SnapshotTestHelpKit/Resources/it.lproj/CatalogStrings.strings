@@ -12,6 +12,7 @@
 "catalog.event::team_workshop" = "Workshop di team";
 "catalog.event::release_day" = "Giorno del rilascio";
 "catalog.event::lunch" = "Pranzo con Sara";
+"catalog.event::anniversary" = "Anniversario di matrimonio";
 
 // MARK: - 할일
 
@@ -40,3 +41,8 @@
 
 "catalog.ai::command" = "pranzo con Sara venerdì a mezzogiorno";
 "catalog.ai::result" = "«Pranzo con Sara» aggiunto a venerdì 13 marzo alle 12:00.";
+
+// MARK: - 컬러 테마
+
+"catalog.colorTheme::forest" = "Foresta";
+"catalog.colorTheme::dusk" = "Crepuscolo";

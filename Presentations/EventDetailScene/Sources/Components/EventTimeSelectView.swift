@@ -155,7 +155,6 @@ struct EventTimeSelectView: View {
             )
             .datePickerStyle(.compact)
             .labelsHidden()
-            .invertColorIfNeed(appearance)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }

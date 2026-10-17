@@ -89,9 +89,13 @@ def app_store_screenshots_path
   File.expand_path(File.join(FastlaneCore::FastlaneFolder.path.to_s, "screenshots"))
 end
 
-# 6.9" 디스플레이 업로드 규격. 다른 크기·알파 채널은 ASC 가 업로드 단계에서 거부한다
+# 디스플레이별 업로드 규격. 다른 크기·알파 채널은 ASC 가 업로드 단계에서 거부한다.
+# deliver 는 해상도로 화면 종류를 가르므로 6.9" 와 iPhone Duo 가 한 로케일 폴더에 같이 산다
 APP_STORE_SCREENSHOT_SIZE = [1320, 2868].freeze
-APP_STORE_SCREENSHOT_SLOTS = %w[01 02 03 04 05 06].freeze
+APP_STORE_SCREENSHOT_SLOTS = %w[01 02 03 04 05 06 07].freeze
+DUO_SCREENSHOT_PREFIX = "duo_".freeze
+DUO_SCREENSHOT_SIZES = [[2853, 2007], [1398, 2034]].freeze
+DUO_SCREENSHOT_SLOTS = %w[01 02].freeze
 
 def screenshot_locale_dirs(screenshots_path)
   return [] unless File.directory?(screenshots_path)
@@ -125,28 +129,35 @@ def ensure_screenshot_locales_match_metadata!(screenshots_path, metadata_path)
   MESSAGE
 end
 
-def screenshot_slots(dir)
-  Dir.glob(File.join(dir, "*.png")).map { |path| File.basename(path)[0, 2] }.sort
+def screenshot_slots(dir, prefix: "")
+  Dir.glob(File.join(dir, "#{prefix}*.png"))
+     .map { |path| File.basename(path) }
+     .select { |name| prefix.empty? ? !name.start_with?(DUO_SCREENSHOT_PREFIX) : true }
+     .map { |name| name.delete_prefix(prefix)[0, 2] }
+     .sort
 end
 
 def ensure_screenshot_slots_complete!(screenshots_path)
   broken = screenshot_locale_dirs(screenshots_path).each_with_object({}) do |(locale, dir), acc|
     slots = screenshot_slots(dir)
-    acc[locale] = slots unless slots == APP_STORE_SCREENSHOT_SLOTS
+    duo_slots = screenshot_slots(dir, prefix: DUO_SCREENSHOT_PREFIX)
+    next if slots == APP_STORE_SCREENSHOT_SLOTS && duo_slots == DUO_SCREENSHOT_SLOTS
+
+    acc[locale] = "6.9\" #{slots.empty? ? '없음' : slots.join(', ')} / Duo #{duo_slots.empty? ? '없음' : duo_slots.join(', ')}"
   end
   return if broken.empty?
 
   UI.user_error!(<<~MESSAGE)
-    로케일 #{broken.size}개의 스크린샷 슬롯이 #{APP_STORE_SCREENSHOT_SLOTS.first}~#{APP_STORE_SCREENSHOT_SLOTS.last} 6장과 다르다.
+    로케일 #{broken.size}개의 스크린샷 슬롯이 6.9" #{APP_STORE_SCREENSHOT_SLOTS.first}~#{APP_STORE_SCREENSHOT_SLOTS.last} #{APP_STORE_SCREENSHOT_SLOTS.size}장 + Duo #{DUO_SCREENSHOT_PREFIX}#{DUO_SCREENSHOT_SLOTS.first}~#{DUO_SCREENSHOT_SLOTS.last} #{DUO_SCREENSHOT_SLOTS.size}장과 다르다.
     빠진 슬롯은 ASC 에 그냥 안 올라가고, 남는 슬롯은 다른 언어와 순서가 어긋난다.
 
-    #{broken.map { |locale, slots| "  #{locale} — #{slots.empty? ? '없음' : slots.join(', ')}" }.join("\n")}
+    #{broken.map { |locale, summary| "  #{locale} — #{summary}" }.join("\n")}
 
     해당 언어를 다시 합성해라: python3 scripts/compose-appstore-screenshots.py <lang> ...
   MESSAGE
 end
 
-# PNG IHDR 을 직접 읽는다 — 186장 검사에 이미지 gem 을 새로 끌어오지 않으려는 선택
+# PNG IHDR 을 직접 읽는다 — 279장 검사에 이미지 gem 을 새로 끌어오지 않으려는 선택
 def png_header(path)
   header = File.binread(path, 26).to_s
   return nil unless header.bytesize == 26 && header.byteslice(12, 4) == "IHDR"
@@ -176,7 +187,8 @@ def screenshot_spec_violation(path)
   return "PNG 헤더를 못 읽는다" if header.nil?
 
   size = [header[:width], header[:height]]
-  return "#{size.join('x')} — 규격 #{APP_STORE_SCREENSHOT_SIZE.join('x')} 이 아니다" unless size == APP_STORE_SCREENSHOT_SIZE
+  allowed = File.basename(path).start_with?(DUO_SCREENSHOT_PREFIX) ? DUO_SCREENSHOT_SIZES : [APP_STORE_SCREENSHOT_SIZE]
+  return "#{size.join('x')} — 규격 #{allowed.map { |s| s.join('x') }.join(' / ')} 이 아니다" unless allowed.include?(size)
   return "알파 채널 있음 (color type #{header[:color_type]})" unless (header[:color_type] & 4).zero?
   return "tRNS 투명도 있음" if png_transparency_chunk?(path)
 
@@ -325,7 +337,7 @@ platform :ios do
       # 재업로드가 기존 스샷 뒤에 덧붙는 걸 막는다 — ASC 는 디스플레이당 10장이 상한이라 두 번만 돌려도 넘친다
       overwrite_screenshots: true,
       submit_for_review: false,
-      # 186장 업로드는 한 시간대 단위라 프롬프트를 지키고 있을 수 없다. 위 가드 3종이 사전 확인을 대신한다
+      # 279장 업로드는 한 시간대 단위라 프롬프트를 지키고 있을 수 없다. 위 가드 3종이 사전 확인을 대신한다
       force: true,
       # precheck 는 텍스트 메타데이터 검사라 스샷 업로드와 무관하다
       run_precheck_before_submit: false

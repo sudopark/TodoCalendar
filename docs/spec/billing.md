@@ -115,6 +115,19 @@ StoreKit purchase
 
 플랜 정보를 얻는 자리가 셋(플랜 카탈로그 / AI usage 응답 / 구매 응답)이라 어디서 온 값인지 헷갈리기 쉽다. **화면이 믿을 것은 `currentUserPlan` 하나**다.
 
+### 유료 판정
+
+유료 기능 게이트는 플랜 id 를 직접 비교하지 않고 `BillingUserPlan.isPaid` 를 읽는다.
+
+| 상태 | 판정 |
+|---|---|
+| `isPaid == true` | 유료 — standard·lifetime |
+| `isPaid == false` | 무료 — free. 미로그인 세션도 `NotNeedBillingUsecase` 가 plan 을 `.free` 로 채우므로 여기에 든다 |
+| `isPaid == nil` | 판단 불가 — 앱이 모르는 플랜 id(`planId == nil`) |
+| plan 미수신 | 판정 보류 — 로그인 직후 AI usage 응답 전엔 `billingUserPlan` 키가 비어 있다 |
+
+판단 불가와 판정 보류를 유료·무료 중 어느 쪽으로 다룰지, 보류 중에 게이트를 걸지는 소비자가 맥락에 따라 정한다. 광고(§6)는 이 판정을 쓰지 않고 `== .free` 일치 판정을 그대로 쓴다.
+
 ---
 
 ## 5. Paywall 화면 (`BillingScenes`)
@@ -167,6 +180,10 @@ enum PaywallScreenState {
 
 ## 6. 광고 노출 판정
 
+테마 사용권 광고는 `PaidFeatureGateUsecase.check(.colorTheme(_), at:)` 가 판정한다. 규칙은 [`color-themes.md`](color-themes.md) §4 사용권 절이 다룬다.
+
+위젯 꾸미기 사용권 광고는 위젯 스타일을 저장할 때 `check(.customizeWidget, at:)` 가 판정한다. 컬러 테마와 달리 플랜을 아직 모르면 무료 플랜으로 보고 검사한다. 그때도 광고로 받은 사용권이 유효하면 통과시킨다.
+
 무료 플랜에만 광고를 노출한다. Google Mobile Ads(`AdService`).
 
 ### 배너
@@ -186,8 +203,26 @@ isBannerAdAllowed = adAvailability.isStarted && userPlan.planId == .free
 | (앱 시작 트리거일 때만) 오늘 첫 콜드런치 | 이어야 함 |
 | (앱 시작 트리거일 때만) 누적 콜드런치 | 10회 이상 |
 | (앱 시작 트리거일 때만) 첫 실행 후 경과일 | 7일 이상 |
+| (앱 시작 트리거일 때만) 지금 테마의 사용권 | 만료로 막히지 않아야 함 ([`color-themes.md`](color-themes.md) §4 만료 게이트) |
 
 `scope`는 `.application`(앱 시작)과 `.service(identifier:)`(기능 진입)로 나뉘고, 노출 이력은 scope별로 하루 한 번을 센다.
+
+### 보상형 광고 (RewardedAdRouter)
+
+`RewardedAdRouter.showRewardedAd(from:completion:)` 는 Domain `RewardedAdResult` 네 case 중 하나를 돌려준다. 무료 판정과 사용권 기록은 호출자가 정책으로 정하며, 라우터는 광고를 보여주고 결과만 돌려준다.
+
+| 결과 | 의미 |
+|---|---|
+| `.rewarded` | 보상형을 끝까지 보고 보상을 받음 |
+| `.dismissedBeforeReward` | 보상형을 보상 전에 닫음 |
+| `.fallbackFullScreenShown` | 보상형이 없어 미리 로드된 전면을 보여줌 |
+| `.unavailable` | 보상형도 전면도 없거나 노출 중 다시 불림 |
+
+이 결과는 BillingScenes 의 광고 안내 시트 VM(`PaidFeatureAdGuideViewModelImple`)이 해석한다. 사용권 기록은 `PaidFeatureGateUsecase.grantLicense(for:at:)` 에 맡긴다 (`color-themes.md` §4).
+
+시도 순서는 보상형 → 미리 로드된 전면 → 없음이다. 보상형은 최대 5초 기다리고, 보상형 노출이 실패해도 전면으로 넘어간다. 대체 전면은 로드를 기다리지 않으며 `canExposeFullScreenAd` 를 거치지 않고 노출 이력도 남기지 않는다.
+
+보상형은 메인 화면이 UMP 동의·ATT 를 마친 뒤 전면과 함께 미리 로드하고, 캐시는 1시간 뒤 만료된다. 5초 안에 로드가 끝나지 않아도 로드는 이어져 다음 호출이 그 광고를 쓴다. 미리 로드는 `AdExposureUsecase.shouldPreloadFullScreenAds()` 가 정한다 — 무료 플랜이거나 플랜을 아직 모르면 하고, 유료로 확인되면 전면·보상형 모두 하지 않는다.
 
 설정의 `adPrivacyOptions` 항목에서 광고 개인정보 옵션을 다시 열 수 있다.
 
