@@ -5,7 +5,7 @@ description: Use when fixing a bug or logical contradiction in this project — 
 
 # Troubleshoot — 결함 수정 컴패니언
 
-**superpowers:systematic-debugging의 대체가 아니다.** 4-Phase 규명 절차는 그 스킬이 이끈다. 이 스킬은 세 지점에 게이트를 주입한다: 착수 전(아카이브 조회) · 규명 후(방향 판정) · 종료 시(아카이브 기록). 방향 확정 후 구현은 implement 스킬 + superpowers TDD 소관.
+**superpowers:systematic-debugging의 대체가 아니다.** 4-Phase 규명 절차는 그 스킬이 이끈다 — 규명을 시작할 때 함께 invoke 한다. 코드 추론으로 빨리 확정될 것 같다는 예상은 생략 사유가 아니고, 착수 시점에 이미 원인·수정 방향이 확정돼 반영만 남았을 때만 생략한다. 이 스킬은 세 지점에 게이트를 주입한다: 착수 전(아카이브 조회) · 규명 후(방향 판정) · 종료 시(아카이브 기록). 방향 확정 후 구현은 implement 스킬 + superpowers TDD 소관.
 
 ## ① 착수 — 아카이브 조회 (Phase 1 전)
 
@@ -48,7 +48,7 @@ systematic-debugging Phase 3(가설 검증)이 끝난 뒤, Phase 4(구현) 진�
 
 ## ③ 종료 — 아카이브 기록 (매 건)
 
-**규명이 끝난 모든 건**에 남긴다 — 세 종착 상태 전부가 기록 시점이다:
+**규명이 끝난 모든 건**에 남긴다 — 세 종착 상태 전부가 기록 시점이다. 규명 도중 유저가 인수하거나 중단을 지시하면 거기까지가 이행이다 — 종착 상태에 닿지 않았으므로 아카이브 레코드 의무가 없고, skill_end 는 그 시점에 `--compliance full` 로 남긴다 (kickoff 의 유저 개입 종료와 같은 규칙).
 
 - **수정 완료** (`fixed`·`workaround`) — commit/pr 스킬 전이 직전 (skill_end와 같은 타이밍)
 - **non-issue 판정** — 판정 확정 시점에
@@ -77,6 +77,7 @@ pattern: 패턴명         # patterns/ 승격분 있으면
 
 2. `INDEX.md`에 한 줄 추가: `- [YYYY-MM-DD 제목](파일.md) — 서브도메인 / resolution / 증상 키워드`
 3. **패턴 승격**: 같은 근본 원인 구조의 레코드가 2건 이상 쌓이면 `patterns/<패턴명>.md`로 추출하고 레코드들의 `pattern:`에서 참조한다. 1건짜리를 선제 승격하지 않는다 (YAGNI).
+4. **레코드 착지** — 레코드를 실은 브랜치가 머지돼야 아카이브가 develop 에 들어간다. 작업 브랜치를 철회·교체하면 그 자리에서 레코드를 새 브랜치로 옮기고 커밋한다: 옛 브랜치에 커밋돼 있으면 `git checkout <옛 브랜치> -- 'docs/troubleshooting/<레코드 파일>'` 로 레코드 파일만 가져오고, 미커밋이면 작업 트리 파일을 그대로 쓴다. INDEX.md 는 파일째 가져오지 않고, 새 브랜치의 INDEX.md 에 그 줄이 없으면 한 줄만 다시 추가한다. 재개 시 할 일로 미루면 브랜치와 함께 레코드를 잃는다 (#1277).
 
 ## Red Flags — 이 생각이 들면 STOP
 
@@ -92,4 +93,4 @@ pattern: 패턴명         # patterns/ 승격분 있으면
 
 ## 종료 기록 — skill_end
 
-commit/pr 스킬 전이 시점에 `log-record.py skill_end` (명령·compliance 규칙은 CLAUDE.md §1). 동반 발동된 superpowers:systematic-debugging도 같은 시점에 별도 기록한다 — 자체 종료 조항이 없어 여기가 기록 주체다 (implement 스킬 §종료 기록과 동일 규칙).
+commit/pr 스킬로 넘어가는 시점에 `log-record.py skill_end` 를 남긴다 (명령·compliance 규칙은 CLAUDE.md §1). 유저가 규명을 인수하거나 중단시키면 그 시점에 남긴다. 동반 발동된 superpowers:systematic-debugging도 같은 시점에 별도 기록한다 — 자체 종료 조항이 없어 여기가 기록 주체다 (implement 스킬 §종료 기록과 동일 규칙).
