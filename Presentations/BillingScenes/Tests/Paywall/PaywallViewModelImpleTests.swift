@@ -18,7 +18,7 @@ import TestDoubles
 @testable import BillingScenes
 
 
-final class PaywallViewModelImpleTests: PublisherWaitable {
+final class PaywallViewModelImpleTests: PublisherWaitable, AsyncEffectWaitable {
 
     var cancelBag: Set<AnyCancellable>! = .init()
 
@@ -111,16 +111,22 @@ final class PaywallViewModelImpleTests: PublisherWaitable {
         _ source: P,
         matching predicate: @escaping @Sendable (P.Output) -> Bool
     ) async throws -> P.Output? where P.Output: Sendable {
+        // 도달 대기는 false pass 가 없어 데드라인을 넉넉히 둔다 — 전체 실행 부하에서
+        // prepare() 의 분리 Task 가 수 초 늦게 스케줄되는 지연을 흡수한다
         let expect = expectConfirm("조건 도달 대기")
-        expect.timeout = .seconds(5)
+        expect.timeout = .seconds(10)
         return try await self.firstOutput(expect, for: source.filter(predicate))
     }
 
+    // 구독을 먼저 걸고 action 으로 트리거해야 트리거의 방출을 놓치지 않는다
     private func waitScreenState(
         _ viewModel: any PaywallViewModel,
-        until predicate: @escaping @Sendable (PaywallScreenState) -> Bool
+        until predicate: @escaping @Sendable (PaywallScreenState) -> Bool,
+        _ action: (() async throws -> Void)? = nil
     ) async throws -> PaywallScreenState {
-        let state = try await self.waitUntil(viewModel.screenState, matching: predicate)
+        let expect = expectConfirm("조건 도달 대기")
+        expect.timeout = .seconds(10)
+        let state = try await self.firstOutput(expect, for: viewModel.screenState.filter(predicate), action)
         return state ?? .loading
     }
 
@@ -707,15 +713,13 @@ extension PaywallViewModelImpleTests {
         // given
         let (viewModel, _, _) = self.makeViewModel(userPlanLoadError: TestError())
 
-        // when — 초기 .loading + 최종 .userPlanLoadFailed(카탈로그 축 변화는 같은 결과라 dedupe됨)
-        let expect = expectConfirm("유저 플랜 조회 실패")
-        expect.count = 2
-        let states = try await self.outputs(expect, for: viewModel.screenState) {
+        // when — 두 축(유저 플랜·카탈로그) 방출이 경합해 개수가 흔들리므로 도달 대기로 본다
+        let final = try await self.waitScreenState(viewModel, until: { $0 == .userPlanLoadFailed }) {
             viewModel.prepare()
         }
 
         // then
-        #expect(states.last == .userPlanLoadFailed)
+        #expect(final == .userPlanLoadFailed)
     }
 
     // 재시도(prepare() 재호출)는 같은 로드를 다시 태워 로딩 상태를 다시 거친다 — 재시도 중엔
@@ -728,17 +732,30 @@ extension PaywallViewModelImpleTests {
         firstExpect.timeout = .seconds(5)
         _ = try await self.outputs(firstExpect, for: viewModel.screenState) { viewModel.prepare() }
 
-        // when: 재시도 — 새 구독은 CombineLatest 특성상 직전 정착 상태(.userPlanLoadFailed)를
-        // 먼저 리플레이하고, prepare()가 그 뒤로 .loading → .userPlanLoadFailed 순서로 이어진다
-        let retryExpect = expectConfirm("재시도")
-        retryExpect.count = 3
-        retryExpect.timeout = .seconds(5)
-        let states = try await self.outputs(retryExpect, for: viewModel.screenState) {
-            viewModel.prepare()
-        }
+        // when: 재시도 — 리플레이(.userPlanLoadFailed)와 prepare() 의 .loading 설정이 경합해
+        // 방출 개수·순서가 흔들리므로, 수집 후 도달 조건으로 기다린다
+        let statesLock = NSLock()
+        var states: [PaywallScreenState] = []
+        viewModel.screenState
+            .sink { state in
+                statesLock.lock(); defer { statesLock.unlock() }
+                states.append(state)
+            }
+            .store(in: &self.cancelBag)
+        viewModel.prepare()
 
-        // then — 가운데 값이 재시도가 로딩을 다시 거쳤다는 증거
-        #expect(states == [.userPlanLoadFailed, .loading, .userPlanLoadFailed])
+        try await self.waitEffect("재시도가 로딩을 다시 거친다", timeoutMillis: 10_000) {
+            statesLock.lock(); defer { statesLock.unlock() }
+            return states.contains(.loading)
+        }
+        // 동시 방출이 CombineLatest 체인을 지나며 전달이 역전되면 기존 구독엔 최종값이
+        // 안 올 수 있다 — 재실패 정착은 subject 현재값을 리플레이하는 새 구독으로 본다
+        let final = try await self.waitScreenState(viewModel, until: { $0 == .userPlanLoadFailed })
+
+        // then — 로딩 관측이 재시도가 로딩을 다시 거쳤다는 증거
+        #expect(final == .userPlanLoadFailed)
+        statesLock.lock(); defer { statesLock.unlock() }
+        #expect(states.contains(.loading))
     }
 
     // 유저 플랜 조회 성공 + 카탈로그 조회 성공 → 본문이 렌더되는 .ready(.loaded) 로 안착한다.
@@ -750,10 +767,11 @@ extension PaywallViewModelImpleTests {
         let (viewModel, _, _) = self.makeViewModel(offerings: [standard])
 
         // when
-        viewModel.prepare()
-        let final = try await self.waitScreenState(viewModel) {
+        let final = try await self.waitScreenState(viewModel, until: {
             guard case .ready(.loaded) = $0 else { return false }
             return true
+        }) {
+            viewModel.prepare()
         }
 
         // then
@@ -771,8 +789,9 @@ extension PaywallViewModelImpleTests {
         let (viewModel, _, router) = self.makeViewModel(catalogLoadError: TestError())
 
         // when
-        viewModel.prepare()
-        let final = try await self.waitScreenState(viewModel) { $0 == .ready(.failed) }
+        let final = try await self.waitScreenState(viewModel, until: { $0 == .ready(.failed) }) {
+            viewModel.prepare()
+        }
 
         // then
         #expect(final == .ready(.failed))

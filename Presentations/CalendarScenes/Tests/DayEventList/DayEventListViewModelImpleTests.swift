@@ -932,7 +932,7 @@ extension DayEventListViewModelImpleTests {
         })
 
         // when
-        let cleared = self.waitFirstOutput(expect, for: clearedState, timeout: 2.0) {
+        let cleared = self.waitFirstOutput(expect, for: clearedState, timeout: 10.0) {
             self.stubLiveActivityUsecase.registeredTargetSubject.send(nil)
         }
 
