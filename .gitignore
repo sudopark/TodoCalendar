@@ -128,3 +128,6 @@ fastlane/custom_product_pages/*
 
 fastlane/creative_assets/*
 !fastlane/creative_assets/README.md
+
+# 마케팅 촬영 케이스 입력 사진 — 외부 라이선스 사진이라 커밋하지 않는다 (#1313)
+snapshot-fixtures/

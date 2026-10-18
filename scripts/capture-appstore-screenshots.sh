@@ -97,6 +97,9 @@ WIDGET_MAPPING=(
     "foremost|Widget/WidgetCatalogSnapshots/test_widgetForemost.widget-foremost-light.png"
     "month|Widget/WidgetCatalogSnapshots/test_widgetMonth.widget-month-light.png"
     "ai-command|Widget/WidgetCatalogSnapshots/test_widgetAICommand.widget-ai-command-light.png"
+    "marketing-dday-photo|Widget/WidgetCatalogSnapshots/test_marketingDDayPhoto.marketing-dday-photo-light.png"
+    "marketing-today-pink|Widget/WidgetCatalogSnapshots/test_marketingTodayPink.marketing-today-pink-light.png"
+    "marketing-foremost-sky|Widget/WidgetCatalogSnapshots/test_marketingForemostSky.marketing-foremost-sky-light.png"
     # 잠금화면 조각만 dark 다 — lock_screen.py 가 검정 배경을 lighten 으로 떨궈 벽지 위에 얹는다
     "lockscreen-foremost|Widget/WidgetCatalogSnapshots/test_widgetLockScreenForemost.lockscreen-foremost-dark.png"
     "lockscreen-next|Widget/WidgetCatalogSnapshots/test_widgetLockScreenNext.lockscreen-next-dark.png"
@@ -247,6 +250,8 @@ capture_lang() {
     for entry in "${WIDGET_MAPPING[@]}" ; do
         IFS='|' read -r name source <<< "$entry"
         local src="$ROOT/snapshot-catalog/$source"
+        # 마케팅 사진 원본은 gitignore 자리라 없으면 케이스가 건너뛴다 — 스토어 촬영까지 막지 않는다
+        if [[ "$name" == marketing-dday-photo && ! -f "$src" ]]; then echo "  ⚠︎ 건너뜀: $source"; continue; fi
         [ -f "$src" ] || { echo "  ✗ 누락: $source"; return 1; }
         cp "$src" "$out/widgets/$name.png"
     done
