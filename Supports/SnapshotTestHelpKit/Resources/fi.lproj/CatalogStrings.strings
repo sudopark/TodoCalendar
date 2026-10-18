@@ -5,6 +5,7 @@
 "catalog.event::holiday" = "Itsenäisyysliikkeen päivä";
 "catalog.event::project_kickoff" = "Projektin aloitus";
 "catalog.event::dentist" = "Hammaslääkäri";
+"catalog.event::plan_deadline" = "Ehdotuksen määräaika";
 "catalog.event::trip" = "Matka Jejulle";
 "catalog.event::design_review" = "Designkatselmus";
 "catalog.event::dinner" = "Illallinen Saran kanssa";
@@ -26,6 +27,7 @@
 "catalog.todo::send_invoice" = "Lähetä lasku";
 "catalog.todo::cancel_subscription" = "Irtisano käyttämätön tilaus";
 "catalog.todo::return_books" = "Palauta kirjastokirjat";
+"catalog.todo::send_report_draft" = "Lähetä raporttiluonnos";
 
 // MARK: - 이벤트 상세
 
@@ -43,6 +45,8 @@
 
 "catalog.ai::command" = "lounas Saran kanssa perjantaina keskipäivällä";
 "catalog.ai::result" = "”Lounas Saran kanssa” lisättiin perjantaille 13. maaliskuuta klo 12:00.";
+"catalog.ai::move_dentist" = "Siirrä hammaslääkäri ensi tiistaille";
+"catalog.share::flea_market_text" = "Syyskirpputori\nLauantai 24. lokakuuta klo 14\nKorttelipuiston nurmikko";
 
 // MARK: - 컬러 테마
 

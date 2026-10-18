@@ -5,6 +5,7 @@
 "catalog.event::holiday" = "Giorno del Movimento d'indipendenza";
 "catalog.event::project_kickoff" = "Avvio del progetto";
 "catalog.event::dentist" = "Dentista";
+"catalog.event::plan_deadline" = "Scadenza della proposta";
 "catalog.event::trip" = "Viaggio a Jeju";
 "catalog.event::design_review" = "Revisione del design";
 "catalog.event::dinner" = "Cena con Sara";
@@ -26,6 +27,7 @@
 "catalog.todo::send_invoice" = "Inviare la fattura";
 "catalog.todo::cancel_subscription" = "Disdire l'abbonamento inutilizzato";
 "catalog.todo::return_books" = "Restituire i libri della biblioteca";
+"catalog.todo::send_report_draft" = "Inviare la bozza del report";
 
 // MARK: - 이벤트 상세
 
@@ -43,6 +45,8 @@
 
 "catalog.ai::command" = "pranzo con Sara venerdì a mezzogiorno";
 "catalog.ai::result" = "«Pranzo con Sara» aggiunto a venerdì 13 marzo alle 12:00.";
+"catalog.ai::move_dentist" = "Sposta il dentista a martedì prossimo";
+"catalog.share::flea_market_text" = "Mercatino d'autunno\nSabato 24 ottobre, ore 14:00\nPrato del parco di quartiere";
 
 // MARK: - 컬러 테마
 

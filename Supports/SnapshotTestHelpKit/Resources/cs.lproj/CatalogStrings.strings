@@ -5,6 +5,7 @@
 "catalog.event::holiday" = "Den hnutí za nezávislost";
 "catalog.event::project_kickoff" = "Zahájení projektu";
 "catalog.event::dentist" = "Zubař";
+"catalog.event::plan_deadline" = "Termín návrhu";
 "catalog.event::trip" = "Cesta na Čedžu";
 "catalog.event::design_review" = "Design review";
 "catalog.event::dinner" = "Večeře se Sárou";
@@ -26,6 +27,7 @@
 "catalog.todo::send_invoice" = "Poslat fakturu";
 "catalog.todo::cancel_subscription" = "Zrušit nepoužívané předplatné";
 "catalog.todo::return_books" = "Vrátit knihy do knihovny";
+"catalog.todo::send_report_draft" = "Poslat koncept zprávy";
 
 // MARK: - 이벤트 상세
 
@@ -43,6 +45,8 @@
 
 "catalog.ai::command" = "oběd se Sárou v pátek v poledne";
 "catalog.ai::result" = "„Oběd se Sárou“ byl přidán na pátek 13. března ve 12:00.";
+"catalog.ai::move_dentist" = "Přesuň zubaře na příští úterý";
+"catalog.share::flea_market_text" = "Podzimní bleší trh\nSobota 24. října, 14:00\nTrávník v parku";
 
 // MARK: - 컬러 테마
 

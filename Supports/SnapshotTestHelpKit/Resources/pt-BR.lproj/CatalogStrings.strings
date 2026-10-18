@@ -5,6 +5,7 @@
 "catalog.event::holiday" = "Dia do Movimento de Independência";
 "catalog.event::project_kickoff" = "Início do projeto";
 "catalog.event::dentist" = "Dentista";
+"catalog.event::plan_deadline" = "Prazo da proposta";
 "catalog.event::trip" = "Viagem a Jeju";
 "catalog.event::design_review" = "Revisão de design";
 "catalog.event::dinner" = "Jantar com a Sara";
@@ -26,6 +27,7 @@
 "catalog.todo::send_invoice" = "Enviar a fatura";
 "catalog.todo::cancel_subscription" = "Cancelar a assinatura que não uso";
 "catalog.todo::return_books" = "Devolver os livros da biblioteca";
+"catalog.todo::send_report_draft" = "Enviar rascunho do relatório";
 
 // MARK: - 이벤트 상세
 
@@ -43,6 +45,8 @@
 
 "catalog.ai::command" = "almoço com a Sara sexta ao meio-dia";
 "catalog.ai::result" = "“Almoço com a Sara” adicionado na sexta, 13 de março, às 12:00.";
+"catalog.ai::move_dentist" = "Passa o dentista para a próxima terça";
+"catalog.share::flea_market_text" = "Feira de trocas de outono\nSábado, 24 de outubro, 14h\nGramado do parque do bairro";
 
 // MARK: - 컬러 테마
 

@@ -5,6 +5,7 @@
 "catalog.event::holiday" = "Hari Gerakan Kemerdekaan";
 "catalog.event::project_kickoff" = "Permulaan projek";
 "catalog.event::dentist" = "Doktor gigi";
+"catalog.event::plan_deadline" = "Tarikh akhir cadangan";
 "catalog.event::trip" = "Percutian ke Jeju";
 "catalog.event::design_review" = "Semakan reka bentuk";
 "catalog.event::dinner" = "Makan malam dengan Sara";
@@ -26,6 +27,7 @@
 "catalog.todo::send_invoice" = "Hantar invois";
 "catalog.todo::cancel_subscription" = "Batalkan langganan yang tidak digunakan";
 "catalog.todo::return_books" = "Pulangkan buku perpustakaan";
+"catalog.todo::send_report_draft" = "Hantar draf laporan";
 
 // MARK: - 이벤트 상세
 
@@ -43,6 +45,8 @@
 
 "catalog.ai::command" = "makan tengah hari dengan Sara Jumaat tengah hari";
 "catalog.ai::result" = "“Makan tengah hari dengan Sara” ditambah pada Jumaat, 13 Mac jam 12:00.";
+"catalog.ai::move_dentist" = "Pindahkan doktor gigi ke Selasa depan";
+"catalog.share::flea_market_text" = "Pasar Lambak Musim Luruh\nSabtu, 24 Oktober, 2:00 petang\nPadang rumput taman kejiranan";
 
 // MARK: - 컬러 테마
 

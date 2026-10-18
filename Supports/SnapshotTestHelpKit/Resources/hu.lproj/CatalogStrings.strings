@@ -5,6 +5,7 @@
 "catalog.event::holiday" = "A függetlenségi mozgalom napja";
 "catalog.event::project_kickoff" = "Projektindító";
 "catalog.event::dentist" = "Fogorvos";
+"catalog.event::plan_deadline" = "Javaslat határideje";
 "catalog.event::trip" = "Csedzsu-i utazás";
 "catalog.event::design_review" = "Design review";
 "catalog.event::dinner" = "Vacsora Sárával";
@@ -26,6 +27,7 @@
 "catalog.todo::send_invoice" = "Számla elküldése";
 "catalog.todo::cancel_subscription" = "Nem használt előfizetés lemondása";
 "catalog.todo::return_books" = "Könyvtári könyvek visszavitele";
+"catalog.todo::send_report_draft" = "Jelentésvázlat elküldése";
 
 // MARK: - 이벤트 상세
 
@@ -43,6 +45,8 @@
 
 "catalog.ai::command" = "ebéd Sárával pénteken délben";
 "catalog.ai::result" = "Az „Ebéd Sárával” hozzáadva péntekre, március 13-ra, 12:00-ra.";
+"catalog.ai::move_dentist" = "Tedd át a fogorvost jövő keddre";
+"catalog.share::flea_market_text" = "Őszi bolhapiac\nOktóber 24., szombat 14:00\nA környékbeli park füves része";
 
 // MARK: - 컬러 테마
 

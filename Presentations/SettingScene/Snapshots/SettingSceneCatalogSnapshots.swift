@@ -369,3 +369,78 @@ extension SettingSceneCatalogSnapshots {
             .environment(appearance)
     }
 }
+
+
+// MARK: - 마케팅 소재
+
+extension SettingSceneCatalogSnapshots {
+
+    /// 호스트 앱 없이 xctest 로 돌아 앱 에셋 카탈로그의 구글 아이콘을 못 찾는다 — 같은 원본을 행의 아이콘 자리에 얹는다.
+    private enum GoogleIconOverlay {
+        static let size: CGFloat = 25
+        static let leading: CGFloat = 32
+        static let rowCenters: [CGFloat] = [468.5, 527.5]
+    }
+
+    private var googleCalendarIcon: UIImage? {
+        let filePath = "\(#filePath)"
+        guard let range = filePath.range(of: "/Presentations/") else { return nil }
+        let root = filePath[..<range.lowerBound]
+        return UIImage(
+            contentsOfFile: "\(root)/TodoCalendarApp/Resources/Assets.xcassets/google_calendar_icon.imageset/google_calendar_icon.png"
+        )
+    }
+
+    @MainActor
+    private func makeMarketingAppearance() -> ViewAppearance {
+        let calendar = CalendarAppearanceSettings(colorSetKey: .defaultLight, fontSetKey: .systemDefault)
+        let tag = DefaultEventTagColorSetting(holiday: "#D6236A", default: "#9CC3F5")
+        let appearance = ViewAppearance(
+            setting: AppearanceSettings(calendar: calendar, defaultTagColor: tag), isSystemDarkTheme: false
+        )
+        appearance.updateEventColorMap(by: [DefaultEventTag.default("#9CC3F5"), DefaultEventTag.holiday("#D6236A")])
+        return appearance
+    }
+
+    @MainActor
+    func test_marketingGoogleConnect() {
+        captureSnapshot(
+            named: "marketingGoogleConnect",
+            theme: .light,
+            layout: .fullScreen,
+            snapshotDirectory: catalogSnapshotDirectory()
+        ) {
+            let state = EventSettingViewState()
+            state.tagModel = .init(DefaultEventTag.default("#9CC3F5"))
+            state.periodModel = .init(EventSettings.DefaultNewEventPeriod.hour1)
+            state.selectedEventNotificationTimeText = DefaultTimeOptionModel(option: .before(seconds: 600)).text
+            state.selectedAllDayEventNotificationTimeText = DefaultTimeOptionModel(option: .allDay9AM).text
+            state.externalCalendarServiceModels = [
+                ExternalCalanserServiceModel(
+                    GoogleCalendarService(scopes: [.readonly]),
+                    accountId: "team@example.com"
+                ),
+                ExternalCalanserServiceModel(
+                    GoogleCalendarService(scopes: [.readonly]),
+                    accountId: nil
+                )
+            ].compactMap { $0 }
+
+            return EventSettingView()
+                .environment(state)
+                .environment(EventSettingViewEventHandler())
+                .environment(self.makeMarketingAppearance())
+                .overlay(alignment: .topLeading) {
+                    ForEach(GoogleIconOverlay.rowCenters, id: \.self) { centerY in
+                        self.googleCalendarIcon.map { icon in
+                            Image(uiImage: icon)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: GoogleIconOverlay.size, height: GoogleIconOverlay.size)
+                                .offset(x: GoogleIconOverlay.leading, y: centerY - GoogleIconOverlay.size / 2)
+                        }
+                    }
+                }
+        }
+    }
+}

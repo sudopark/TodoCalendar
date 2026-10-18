@@ -5,6 +5,7 @@
 "catalog.event::holiday" = "Bağımsızlık Hareketi Günü";
 "catalog.event::project_kickoff" = "Proje başlangıcı";
 "catalog.event::dentist" = "Diş hekimi";
+"catalog.event::plan_deadline" = "Teklif son tarihi";
 "catalog.event::trip" = "Jeju gezisi";
 "catalog.event::design_review" = "Tasarım incelemesi";
 "catalog.event::dinner" = "Sara ile akşam yemeği";
@@ -26,6 +27,7 @@
 "catalog.todo::send_invoice" = "Faturayı gönder";
 "catalog.todo::cancel_subscription" = "Kullanmadığım aboneliği iptal et";
 "catalog.todo::return_books" = "Kütüphane kitaplarını iade et";
+"catalog.todo::send_report_draft" = "Rapor taslağını gönder";
 
 // MARK: - 이벤트 상세
 
@@ -43,6 +45,8 @@
 
 "catalog.ai::command" = "cuma öğlen Sara ile öğle yemeği";
 "catalog.ai::result" = "“Sara ile öğle yemeği” 13 Mart Cuma 12:00'ye eklendi.";
+"catalog.ai::move_dentist" = "Diş hekimini gelecek salıya al";
+"catalog.share::flea_market_text" = "Sonbahar Bit Pazarı\n24 Ekim Cumartesi, 14.00\nMahalle parkının çimenliği";
 
 // MARK: - 컬러 테마
 

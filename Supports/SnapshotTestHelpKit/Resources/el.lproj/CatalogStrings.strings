@@ -5,6 +5,7 @@
 "catalog.event::holiday" = "Ημέρα του Κινήματος Ανεξαρτησίας";
 "catalog.event::project_kickoff" = "Εκκίνηση έργου";
 "catalog.event::dentist" = "Οδοντίατρος";
+"catalog.event::plan_deadline" = "Προθεσμία πρότασης";
 "catalog.event::trip" = "Ταξίδι στο Τζέτζου";
 "catalog.event::design_review" = "Επισκόπηση σχεδιασμού";
 "catalog.event::dinner" = "Δείπνο με τη Σάρα";
@@ -26,6 +27,7 @@
 "catalog.todo::send_invoice" = "Αποστολή τιμολογίου";
 "catalog.todo::cancel_subscription" = "Ακύρωση αχρησιμοποίητης συνδρομής";
 "catalog.todo::return_books" = "Επιστροφή βιβλίων στη βιβλιοθήκη";
+"catalog.todo::send_report_draft" = "Αποστολή προσχεδίου αναφοράς";
 
 // MARK: - 이벤트 상세
 
@@ -43,6 +45,8 @@
 
 "catalog.ai::command" = "μεσημεριανό με τη Σάρα την Παρασκευή στις 12";
 "catalog.ai::result" = "Το «Μεσημεριανό με τη Σάρα» προστέθηκε την Παρασκευή 13 Μαρτίου στις 12:00.";
+"catalog.ai::move_dentist" = "Μετάφερε τον οδοντίατρο την επόμενη Τρίτη";
+"catalog.share::flea_market_text" = "Φθινοπωρινό παζάρι\nΣάββατο 24 Οκτωβρίου, 14:00\nΓκαζόν του πάρκου της γειτονιάς";
 
 // MARK: - 컬러 테마
 

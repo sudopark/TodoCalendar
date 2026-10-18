@@ -56,6 +56,7 @@ SUITES=(
     "TodoCalendarAppWidgetSnapshots|WidgetCatalogSnapshots|Widget"
     "AIAgentSceneSnapshots|AIAgentSceneCatalogSnapshots|AIAgentScene"
     "WidgetScenesSnapshots|WidgetScenesCatalogSnapshots|WidgetScenes"
+    "TodoCalendarAppShareSnapshots|ShareCommandCatalogSnapshots|Share"
 )
 
 # <업로드 파일명>|<모듈 디렉토리>/<스위트>/<캡처 파일명>
@@ -68,6 +69,10 @@ MAPPING=(
     "07-todo-list|CalendarScenes/CalendarScenesCatalogSnapshots/test_storeTodoList.storeTodoList-light.png"
     "08-share-preview|CalendarScenes/CalendarScenesCatalogSnapshots/test_storeSharePreview.storeSharePreview-light.png"
     "marketing-calendar|CalendarScenes/CalendarScenesCatalogSnapshots/test_marketingCalendar.marketingCalendar-light.png"
+    "marketing-google-connect|SettingScene/SettingSceneCatalogSnapshots/test_marketingGoogleConnect.marketingGoogleConnect.png"
+    "marketing-uncompleted-todo|CalendarScenes/CalendarScenesCatalogSnapshots/test_marketingUncompletedTodo.marketingUncompletedTodo.png"
+    "marketing-moved-dentist|CalendarScenes/CalendarScenesCatalogSnapshots/test_marketingMovedDentist.marketingMovedDentist.png"
+    "marketing-share-poster|Share/ShareCommandCatalogSnapshots/test_marketingSharePoster.marketingSharePoster.png"
 )
 
 # 캡션·위젯 원본 — 화면 규격이 아니라 각자의 캔버스 규격이라 규격 검사·알파 제거 대상이 아니다
@@ -101,6 +106,10 @@ WIDGET_MAPPING=(
     "marketing-dday-photo|Widget/WidgetCatalogSnapshots/test_marketingDDayPhoto.marketing-dday-photo-light.png"
     "marketing-today-pink|Widget/WidgetCatalogSnapshots/test_marketingTodayPink.marketing-today-pink-light.png"
     "marketing-foremost-sky|Widget/WidgetCatalogSnapshots/test_marketingForemostSky.marketing-foremost-sky-light.png"
+    "marketing-todo-check-before|Widget/WidgetCatalogSnapshots/test_marketingTodoCheck.marketing-todo-check-before-light.png"
+    "marketing-todo-check-after|Widget/WidgetCatalogSnapshots/test_marketingTodoCheck.marketing-todo-check-after-light.png"
+    "marketing-lockscreen-live-activity|Widget/WidgetCatalogSnapshots/test_marketingLockScreenLiveActivity.marketing-lockscreen-live-activity-dark.png"
+    "marketing-dynamic-island|Widget/WidgetCatalogSnapshots/test_marketingDynamicIsland.marketing-dynamic-island-dark.png"
     # 잠금화면 조각만 dark 다 — lock_screen.py 가 검정 배경을 lighten 으로 떨궈 벽지 위에 얹는다
     "lockscreen-foremost|Widget/WidgetCatalogSnapshots/test_widgetLockScreenForemost.lockscreen-foremost-dark.png"
     "lockscreen-next|Widget/WidgetCatalogSnapshots/test_widgetLockScreenNext.lockscreen-next-dark.png"
@@ -118,6 +127,7 @@ DUO_MAPPING=(
 SHEET_MAPPING=(
     "ai-command-processing|AIAgentScene/AIAgentSceneCatalogSnapshots/test_storeAICommandProcessing.storeAICommandProcessing-light.png"
     "ai-command-done|AIAgentScene/AIAgentSceneCatalogSnapshots/test_storeAICommandDone.storeAICommandDone-light.png"
+    "marketing-ai-command|AIAgentScene/AIAgentSceneCatalogSnapshots/test_marketingAICommand.marketingAICommand.png"
 )
 
 # 맞춤형 제품 페이지 캡션 — 장면 id 가 곧 파일명이다
@@ -219,6 +229,8 @@ capture_lang() {
     local lang="$1" destination="$2" python_bin="$3" region
     region="$(region_of "$lang")"
     echo "▶︎ [$lang] 촬영 시작 (region=$region)"
+    # 언어별 포스터가 없으면 케이스가 건너뛰어 앞 언어의 촬영본이 남는다 — 그걸 이 언어로 옮기지 않게 먼저 지운다
+    rm -f "$ROOT/snapshot-catalog/Share/ShareCommandCatalogSnapshots/test_marketingSharePoster.marketingSharePoster.png"
 
     for entry in "${SUITES[@]}"; do
         IFS='|' read -r scheme suite _ <<< "$entry"
@@ -239,6 +251,8 @@ capture_lang() {
     for entry in "${MAPPING[@]}" ; do
         IFS='|' read -r name source <<< "$entry"
         local src="$ROOT/snapshot-catalog/$source"
+        # 포스터 원본도 gitignore 자리라 없으면 케이스가 건너뛴다
+        if [[ "$name" == marketing-share-poster && ! -f "$src" ]]; then echo "  ⚠︎ 건너뜀: $source"; continue; fi
         [ -f "$src" ] || { echo "  ✗ 누락: $source"; return 1; }
         cp "$src" "$out/$name.png"
     done

@@ -5,6 +5,7 @@
 "catalog.event::holiday" = "Ngày Phong trào Độc lập";
 "catalog.event::project_kickoff" = "Khởi động dự án";
 "catalog.event::dentist" = "Nha sĩ";
+"catalog.event::plan_deadline" = "Hạn nộp đề xuất";
 "catalog.event::trip" = "Chuyến đi Jeju";
 "catalog.event::design_review" = "Duyệt thiết kế";
 "catalog.event::dinner" = "Ăn tối với Sara";
@@ -26,6 +27,7 @@
 "catalog.todo::send_invoice" = "Gửi hóa đơn";
 "catalog.todo::cancel_subscription" = "Hủy gói đăng ký không dùng";
 "catalog.todo::return_books" = "Trả sách thư viện";
+"catalog.todo::send_report_draft" = "Gửi bản nháp báo cáo";
 
 // MARK: - 이벤트 상세
 
@@ -43,6 +45,8 @@
 
 "catalog.ai::command" = "ăn trưa với Sara thứ Sáu lúc 12 giờ";
 "catalog.ai::result" = "Đã thêm “Ăn trưa với Sara” vào thứ Sáu, 13 tháng 3 lúc 12:00.";
+"catalog.ai::move_dentist" = "Dời nha sĩ sang thứ Ba tuần sau";
+"catalog.share::flea_market_text" = "Chợ đồ cũ mùa thu\nThứ Bảy, 24 tháng 10, 14:00\nBãi cỏ công viên khu phố";
 
 // MARK: - 컬러 테마
 
