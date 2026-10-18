@@ -371,6 +371,100 @@ final class WidgetCatalogSnapshots: XCTestCase {
 }
 
 
+// MARK: - 마케팅 소재
+
+extension WidgetCatalogSnapshots {
+
+    private var marketingPhotoPath: String {
+        let filePath = "\(#filePath)"
+        guard let range = filePath.range(of: "/TodoCalendarApp/") else { return filePath }
+        return "\(filePath[..<range.lowerBound])/snapshot-fixtures/marketing/dday-photo.jpg"
+    }
+
+    @MainActor
+    func test_marketingDDayPhoto() throws {
+        let path = self.marketingPhotoPath
+        guard FileManager.default.fileExists(atPath: path) else {
+            throw XCTSkip("마케팅 사진 원본이 없다 — gitignore 자리라 클론마다 넣어야 한다 (\(path))")
+        }
+        let url = URL(fileURLWithPath: path)
+        let target = Calendar.current.date(
+            from: DateComponents(year: 2026, month: 3, day: 26, hour: 7)
+        ) ?? Date()
+        let targetTime = EventTime.at(target.timeIntervalSince1970)
+        let style = WidgetStyle(
+            id: .init(variant: .ddayMedium, style: .custom(id: "photo")),
+            name: nil,
+            setting: DDayStyleSetting.initial,
+            photo: .init(id: nil, original: url, rendering: url)
+        )
+        let model = DDayWidgetViewModel(
+            eventTitle: "catalog.event::anniversary".catalogLocalized(),
+            ddayText: DDayText(14).text,
+            dateText: targetTime.ddayDateText(in: .current),
+            timeText: targetTime.ddayTimeText(in: .current),
+            repeatText: ""
+        )
+        |> \.look .~ WidgetLook(globalSetting: .init(), appliedStyle: style)
+        self.capture(
+            "marketing-dday-photo",
+            family: .systemMedium,
+            canvas: WidgetCanvas.medium,
+            plateView: {
+                WidgetBackgroundView(
+                    look: model.look,
+                    in: RoundedRectangle(cornerRadius: WidgetCanvas.cornerRadius, style: .continuous)
+                )
+            }
+        ) {
+            DDayMediumWidgetView(model: model)
+        }
+    }
+
+    @MainActor
+    func test_marketingTodayPink() {
+        let background = WidgetAppearanceSettings.Background.custom(hex: "#FBD3E0")
+        let style = WidgetStyle(
+            id: .init(variant: .todaySummarySmall, style: .custom(id: "pink")),
+            name: nil,
+            setting: TodayStyleSetting.initial,
+            background: background
+        )
+        let model = TodayWidgetViewModel.sample()
+            |> \.look .~ WidgetLook(globalSetting: .init(), appliedStyle: style)
+        self.capture(
+            "marketing-today-pink",
+            family: .systemSmall,
+            canvas: WidgetCanvas.small,
+            plateView: { Rectangle().fill(WidgetBackgroundStyle(background).shape) }
+        ) {
+            TodayWidgetView(entry: ResultTimelineEntry(date: Date(), result: .success(model)))
+        }
+    }
+
+    @MainActor
+    func test_marketingForemostSky() {
+        let background = WidgetAppearanceSettings.Background.custom(hex: "#D6E4FF")
+        let style = WidgetStyle(
+            id: .init(variant: .foremostSmall, style: .custom(id: "sky")),
+            name: nil,
+            setting: ForemostStyleSetting.initial,
+            background: background
+        )
+        let model = ForemostEventWidgetViewModel.sample()
+            |> \.look .~ WidgetLook(globalSetting: .init(), appliedStyle: style)
+        self.capture(
+            "marketing-foremost-sky",
+            family: .systemSmall,
+            canvas: WidgetCanvas.small,
+            plateView: { Rectangle().fill(WidgetBackgroundStyle(background).shape) }
+        ) {
+            ForemostEventWidgetView(entry: ResultTimelineEntry(date: Date(), result: .success(model)))
+        }
+    }
+}
+
+
 // MARK: - 디데이 위젯 배경 사진 픽스처
 
 private struct BokehLight {
