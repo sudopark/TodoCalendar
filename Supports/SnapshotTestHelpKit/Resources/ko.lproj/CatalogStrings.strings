@@ -13,6 +13,8 @@
 "catalog.event::release_day" = "릴리즈 날";
 "catalog.event::lunch" = "사라랑 점심";
 "catalog.event::anniversary" = "결혼기념일";
+"catalog.event::lunch_plans" = "점심 약속";
+"catalog.event::family_dinner" = "가족 외식";
 
 // MARK: - 할일
 

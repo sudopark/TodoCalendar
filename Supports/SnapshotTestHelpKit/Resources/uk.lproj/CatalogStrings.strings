@@ -13,6 +13,8 @@
 "catalog.event::release_day" = "День релізу";
 "catalog.event::lunch" = "Обід із Сарою";
 "catalog.event::anniversary" = "Річниця весілля";
+"catalog.event::lunch_plans" = "Обід із друзями";
+"catalog.event::family_dinner" = "Сімейна вечеря";
 
 // MARK: - 할일
 

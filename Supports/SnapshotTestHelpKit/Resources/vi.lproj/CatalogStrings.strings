@@ -13,6 +13,8 @@
 "catalog.event::release_day" = "Ngày phát hành";
 "catalog.event::lunch" = "Ăn trưa với Sara";
 "catalog.event::anniversary" = "Kỷ niệm ngày cưới";
+"catalog.event::lunch_plans" = "Hẹn ăn trưa";
+"catalog.event::family_dinner" = "Ăn tối cùng gia đình";
 
 // MARK: - 할일
 

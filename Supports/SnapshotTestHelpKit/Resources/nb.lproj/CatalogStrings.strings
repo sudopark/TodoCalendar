@@ -13,6 +13,8 @@
 "catalog.event::release_day" = "Lanseringsdag";
 "catalog.event::lunch" = "Lunsj med Sara";
 "catalog.event::anniversary" = "Bryllupsdag";
+"catalog.event::lunch_plans" = "Lunsjavtale";
+"catalog.event::family_dinner" = "Familiemiddag";
 
 // MARK: - 할일
 

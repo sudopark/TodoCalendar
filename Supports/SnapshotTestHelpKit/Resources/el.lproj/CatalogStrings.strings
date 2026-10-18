@@ -13,6 +13,8 @@
 "catalog.event::release_day" = "Ημέρα κυκλοφορίας";
 "catalog.event::lunch" = "Μεσημεριανό με τη Σάρα";
 "catalog.event::anniversary" = "Επέτειος γάμου";
+"catalog.event::lunch_plans" = "Ραντεβού για μεσημεριανό";
+"catalog.event::family_dinner" = "Οικογενειακό δείπνο";
 
 // MARK: - 할일
 

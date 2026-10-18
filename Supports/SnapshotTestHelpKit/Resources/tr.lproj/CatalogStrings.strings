@@ -13,6 +13,8 @@
 "catalog.event::release_day" = "Yayın günü";
 "catalog.event::lunch" = "Sara ile öğle yemeği";
 "catalog.event::anniversary" = "Evlilik yıldönümü";
+"catalog.event::lunch_plans" = "Öğle yemeği buluşması";
+"catalog.event::family_dinner" = "Aile yemeği";
 
 // MARK: - 할일
 

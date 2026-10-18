@@ -67,6 +67,7 @@ MAPPING=(
     "07-widget-style|WidgetScenes/WidgetScenesCatalogSnapshots/test_storeWidgetStyleEdit.storeWidgetStyleEdit-light.png"
     "07-todo-list|CalendarScenes/CalendarScenesCatalogSnapshots/test_storeTodoList.storeTodoList-light.png"
     "08-share-preview|CalendarScenes/CalendarScenesCatalogSnapshots/test_storeSharePreview.storeSharePreview-light.png"
+    "marketing-calendar|CalendarScenes/CalendarScenesCatalogSnapshots/test_marketingCalendar.marketingCalendar-light.png"
 )
 
 # 캡션·위젯 원본 — 화면 규격이 아니라 각자의 캔버스 규격이라 규격 검사·알파 제거 대상이 아니다

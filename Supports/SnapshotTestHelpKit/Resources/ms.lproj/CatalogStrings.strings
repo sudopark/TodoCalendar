@@ -13,6 +13,8 @@
 "catalog.event::release_day" = "Hari pelancaran";
 "catalog.event::lunch" = "Makan tengah hari dengan Sara";
 "catalog.event::anniversary" = "Ulang tahun perkahwinan";
+"catalog.event::lunch_plans" = "Janji makan tengah hari";
+"catalog.event::family_dinner" = "Makan malam keluarga";
 
 // MARK: - 할일
 
