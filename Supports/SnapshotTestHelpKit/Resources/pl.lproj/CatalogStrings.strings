@@ -5,6 +5,7 @@
 "catalog.event::holiday" = "Dzień Ruchu Niepodległościowego";
 "catalog.event::project_kickoff" = "Kick-off projektu";
 "catalog.event::dentist" = "Dentysta";
+"catalog.event::plan_deadline" = "Termin oddania projektu";
 "catalog.event::trip" = "Wyjazd na Jeju";
 "catalog.event::design_review" = "Przegląd projektu graficznego";
 "catalog.event::dinner" = "Kolacja z Sarą";
@@ -26,6 +27,7 @@
 "catalog.todo::send_invoice" = "Wysłać fakturę";
 "catalog.todo::cancel_subscription" = "Anulować nieużywaną subskrypcję";
 "catalog.todo::return_books" = "Oddać książki do biblioteki";
+"catalog.todo::send_report_draft" = "Wyślij szkic raportu";
 
 // MARK: - 이벤트 상세
 
@@ -43,6 +45,8 @@
 
 "catalog.ai::command" = "obiad z Sarą w piątek w południe";
 "catalog.ai::result" = "„Obiad z Sarą” dodano na piątek 13 marca o 12:00.";
+"catalog.ai::move_dentist" = "Przenieś dentystę na przyszły wtorek";
+"catalog.share::flea_market_text" = "Jesienny pchli targ\nSobota, 24 października, 14:00\nTrawnik w osiedlowym parku";
 
 // MARK: - 컬러 테마
 

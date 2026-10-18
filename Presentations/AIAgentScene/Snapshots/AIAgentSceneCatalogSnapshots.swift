@@ -32,16 +32,18 @@ final class AIAgentSceneCatalogSnapshots: XCTestCase {
 
     @MainActor
     private func commandStageView(
-        _ theme: SnapshotTheme, commandState: AIAgentCommandState? = nil
+        _ theme: SnapshotTheme, commandState: AIAgentCommandState? = nil, showsUsage: Bool = true
     ) -> some View {
         let state = AIAgentCommandViewState()
         state.commandState = commandState ?? .done(
             command: "catalog.ai::command".catalogLocalized(),
             message: "catalog.ai::result".catalogLocalized()
         )
-        state.usage = AIAgentUsage(input: 3200, output: 0, limit: 20000)
-            |> \.creditsUsed .~ 3200
-        state.userPlan = BillingUserPlan() |> \.planId .~ .standard
+        if showsUsage {
+            state.usage = AIAgentUsage(input: 3200, output: 0, limit: 20000)
+                |> \.creditsUsed .~ 3200
+            state.userPlan = BillingUserPlan() |> \.planId .~ .standard
+        }
         return AIAgentCommandStageView()
             .environment(state)
             .environment(AIAgentCommandViewEventHandler())
@@ -101,6 +103,26 @@ extension AIAgentSceneCatalogSnapshots {
             snapshotDirectory: catalogSnapshotDirectory()
         ) { theme in
             self.commandStageView(theme)
+        }
+    }
+}
+
+
+// MARK: - 마케팅 소재
+
+extension AIAgentSceneCatalogSnapshots {
+
+    @MainActor
+    func test_marketingAICommand() {
+        captureSnapshot(
+            named: "marketingAICommand", theme: .light, layout: .fixed(width: 440, height: 300),
+            snapshotDirectory: catalogSnapshotDirectory()
+        ) {
+            self.commandStageView(
+                .light,
+                commandState: .processing(command: "catalog.ai::move_dentist".catalogLocalized()),
+                showsUsage: false
+            )
         }
     }
 }

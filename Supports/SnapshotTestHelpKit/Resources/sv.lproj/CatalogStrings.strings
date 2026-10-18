@@ -5,6 +5,7 @@
 "catalog.event::holiday" = "Självständighetsrörelsens dag";
 "catalog.event::project_kickoff" = "Projektstart";
 "catalog.event::dentist" = "Tandläkare";
+"catalog.event::plan_deadline" = "Deadline för förslaget";
 "catalog.event::trip" = "Resa till Jeju";
 "catalog.event::design_review" = "Designgenomgång";
 "catalog.event::dinner" = "Middag med Sara";
@@ -26,6 +27,7 @@
 "catalog.todo::send_invoice" = "Skicka fakturan";
 "catalog.todo::cancel_subscription" = "Säga upp prenumerationen jag inte använder";
 "catalog.todo::return_books" = "Lämna tillbaka biblioteksböckerna";
+"catalog.todo::send_report_draft" = "Skicka rapportutkast";
 
 // MARK: - 이벤트 상세
 
@@ -43,6 +45,8 @@
 
 "catalog.ai::command" = "lunch med Sara på fredag kl. 12";
 "catalog.ai::result" = "”Lunch med Sara” har lagts till fredag 13 mars kl. 12:00.";
+"catalog.ai::move_dentist" = "Flytta tandläkaren till nästa tisdag";
+"catalog.share::flea_market_text" = "Höstloppis\nLördag 24 oktober kl. 14.00\nGräsmattan i kvarterets park";
 
 // MARK: - 컬러 테마
 

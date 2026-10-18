@@ -5,6 +5,7 @@
 "catalog.event::holiday" = "День руху за незалежність";
 "catalog.event::project_kickoff" = "Старт проєкту";
 "catalog.event::dentist" = "Стоматолог";
+"catalog.event::plan_deadline" = "Дедлайн проєкту";
 "catalog.event::trip" = "Подорож на Чеджу";
 "catalog.event::design_review" = "Дизайн-рев'ю";
 "catalog.event::dinner" = "Вечеря із Сарою";
@@ -26,6 +27,7 @@
 "catalog.todo::send_invoice" = "Надіслати рахунок";
 "catalog.todo::cancel_subscription" = "Скасувати непотрібну підписку";
 "catalog.todo::return_books" = "Повернути книжки до бібліотеки";
+"catalog.todo::send_report_draft" = "Надіслати чернетку звіту";
 
 // MARK: - 이벤트 상세
 
@@ -43,6 +45,8 @@
 
 "catalog.ai::command" = "обід із Сарою в п'ятницю опівдні";
 "catalog.ai::result" = "«Обід із Сарою» додано на п'ятницю, 13 березня, 12:00.";
+"catalog.ai::move_dentist" = "Перенеси стоматолога на наступний вівторок";
+"catalog.share::flea_market_text" = "Осінній блошиний ринок\nСубота, 24 жовтня, 14:00\nГазон у районному парку";
 
 // MARK: - 컬러 테마
 

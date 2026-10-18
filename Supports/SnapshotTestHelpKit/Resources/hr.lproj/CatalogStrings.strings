@@ -5,6 +5,7 @@
 "catalog.event::holiday" = "Dan pokreta za nezavisnost";
 "catalog.event::project_kickoff" = "Početak projekta";
 "catalog.event::dentist" = "Zubar";
+"catalog.event::plan_deadline" = "Rok za prijedlog";
 "catalog.event::trip" = "Putovanje na Jeju";
 "catalog.event::design_review" = "Pregled dizajna";
 "catalog.event::dinner" = "Večera sa Sarom";
@@ -26,6 +27,7 @@
 "catalog.todo::send_invoice" = "Poslati račun";
 "catalog.todo::cancel_subscription" = "Otkazati pretplatu koju ne koristim";
 "catalog.todo::return_books" = "Vratiti knjige u knjižnicu";
+"catalog.todo::send_report_draft" = "Pošalji nacrt izvješća";
 
 // MARK: - 이벤트 상세
 
@@ -43,6 +45,8 @@
 
 "catalog.ai::command" = "ručak sa Sarom u petak u podne";
 "catalog.ai::result" = "„Ručak sa Sarom” dodan je u petak 13. ožujka u 12:00.";
+"catalog.ai::move_dentist" = "Premjesti zubara na idući utorak";
+"catalog.share::flea_market_text" = "Jesenski buvljak\nSubota, 24. listopada, 14:00\nTravnjak u kvartovskom parku";
 
 // MARK: - 컬러 테마
 
