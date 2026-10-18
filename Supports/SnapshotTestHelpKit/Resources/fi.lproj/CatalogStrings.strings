@@ -13,6 +13,8 @@
 "catalog.event::release_day" = "Julkaisupäivä";
 "catalog.event::lunch" = "Lounas Saran kanssa";
 "catalog.event::anniversary" = "Hääpäivä";
+"catalog.event::lunch_plans" = "Lounastreffit";
+"catalog.event::family_dinner" = "Perheillallinen";
 
 // MARK: - 할일
 

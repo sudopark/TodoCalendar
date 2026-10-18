@@ -13,6 +13,8 @@
 "catalog.event::release_day" = "Dia del llançament";
 "catalog.event::lunch" = "Dinar amb la Sara";
 "catalog.event::anniversary" = "Aniversari de casament";
+"catalog.event::lunch_plans" = "Dinar amb amics";
+"catalog.event::family_dinner" = "Sopar en família";
 
 // MARK: - 할일
 

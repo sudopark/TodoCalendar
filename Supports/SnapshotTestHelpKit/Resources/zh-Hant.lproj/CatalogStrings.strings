@@ -13,6 +13,8 @@
 "catalog.event::release_day" = "發布日";
 "catalog.event::lunch" = "和 Sara 吃午餐";
 "catalog.event::anniversary" = "結婚紀念日";
+"catalog.event::lunch_plans" = "午餐約會";
+"catalog.event::family_dinner" = "家庭聚餐";
 
 // MARK: - 할일
 

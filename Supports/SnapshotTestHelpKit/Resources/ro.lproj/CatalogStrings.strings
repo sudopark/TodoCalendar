@@ -13,6 +13,8 @@
 "catalog.event::release_day" = "Ziua lansării";
 "catalog.event::lunch" = "Prânz cu Sara";
 "catalog.event::anniversary" = "Aniversarea căsătoriei";
+"catalog.event::lunch_plans" = "Prânz în oraș";
+"catalog.event::family_dinner" = "Cină în familie";
 
 // MARK: - 할일
 

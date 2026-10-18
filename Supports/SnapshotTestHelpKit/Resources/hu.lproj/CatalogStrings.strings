@@ -13,6 +13,8 @@
 "catalog.event::release_day" = "Kiadás napja";
 "catalog.event::lunch" = "Ebéd Sárával";
 "catalog.event::anniversary" = "Házassági évforduló";
+"catalog.event::lunch_plans" = "Ebédrandi";
+"catalog.event::family_dinner" = "Családi vacsora";
 
 // MARK: - 할일
 

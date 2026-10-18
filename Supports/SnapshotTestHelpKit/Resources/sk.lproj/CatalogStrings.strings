@@ -13,6 +13,8 @@
 "catalog.event::release_day" = "Deň vydania";
 "catalog.event::lunch" = "Obed so Sárou";
 "catalog.event::anniversary" = "Výročie svadby";
+"catalog.event::lunch_plans" = "Dohodnutý obed";
+"catalog.event::family_dinner" = "Rodinná večera";
 
 // MARK: - 할일
 

@@ -13,6 +13,8 @@
 "catalog.event::release_day" = "Dan izdanja";
 "catalog.event::lunch" = "Ručak sa Sarom";
 "catalog.event::anniversary" = "Godišnjica braka";
+"catalog.event::lunch_plans" = "Dogovoreni ručak";
+"catalog.event::family_dinner" = "Obiteljska večera";
 
 // MARK: - 할일
 

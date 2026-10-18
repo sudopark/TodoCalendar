@@ -13,6 +13,8 @@
 "catalog.event::release_day" = "リリース日";
 "catalog.event::lunch" = "サラとランチ";
 "catalog.event::anniversary" = "結婚記念日";
+"catalog.event::lunch_plans" = "ランチの約束";
+"catalog.event::family_dinner" = "家族で外食";
 
 // MARK: - 할일
 
