@@ -16,10 +16,12 @@ import TestDoubles
 
 @testable import Domain
 
-class ForemostEventUsecaseImpleTests: BaseTestCase, PublisherWaitable {
-    
+class ForemostEventUsecaseImpleTests: BaseTestCase, PublisherWaitable, AsyncEffectWaitable {
+
     var cancelBag: Set<AnyCancellable>!
     private var spyEventNotifyService: SharedEventNotifyService!
+    private let foremostEventReceivedLock = NSLock()
+    private var foremostEventReceivedCount: Int = 0
     
     override func setUpWithError() throws {
         self.cancelBag = .init()
@@ -28,6 +30,19 @@ class ForemostEventUsecaseImpleTests: BaseTestCase, PublisherWaitable {
     override func tearDownWithError() throws {
         self.cancelBag = nil
         self.spyEventNotifyService = nil
+        self.foremostEventReceivedCount = 0
+    }
+
+    private func recordingForemostEventCount(
+        _ source: AnyPublisher<(any ForemostMarkableEvent)?, Never>
+    ) -> AnyPublisher<(any ForemostMarkableEvent)?, Never> {
+        return source
+            .handleEvents(receiveOutput: { [weak self] _ in
+                guard let self else { return }
+                self.foremostEventReceivedLock.lock(); defer { self.foremostEventReceivedLock.unlock() }
+                self.foremostEventReceivedCount += 1
+            })
+            .eraseToAnyPublisher()
     }
     
     private func makeUsecase(
@@ -62,26 +77,40 @@ class ForemostEventUsecaseImpleTests: BaseTestCase, PublisherWaitable {
 extension ForemostEventUsecaseImpleTests {
     
     // 조회해서 이벤트 방출
-    func testUsecase_whenAfterRefresh_updateFeatureId() {
+    func testUsecase_whenAfterRefresh_updateFeatureId() async throws {
         // given
-        func parameterizeTest(isTodo: Bool) {
+        func parameterizeTest(isTodo: Bool) async throws {
             // given
-            let expect = expectation(description: "refresh 이후에 이벤트 방출")
-            expect.expectedFulfillmentCount = 2
             let usecase = self.makeUsecase(foremostIsTodo: isTodo)
-            
+            let foremostEventLock = NSLock()
+            var foremostEventEmissions: [any ForemostMarkableEvent?] = []
+
             // when
-            let events = self.waitOutputs(expect, for: usecase.foremostEvent) {
-                usecase.refresh()
-            }
-            
-            // then
+            let subscription = usecase.foremostEvent
+                .handleEvents(receiveOutput: { event in
+                    foremostEventLock.lock(); defer { foremostEventLock.unlock() }
+                    foremostEventEmissions.append(event)
+                })
+                .sink { _ in }
+            subscription.store(in: &self.cancelBag)
+
+            usecase.refresh()
+
             let expectId = isTodo ? "foremost_todo" : "foremost_schedule"
-            XCTAssertEqual(events.map { $0?.eventId }, [nil, expectId])
+            try await self.waitEffect("refresh 이후 이벤트 도달") {
+                foremostEventLock.lock(); defer { foremostEventLock.unlock() }
+                return foremostEventEmissions.last??.eventId == expectId
+            }
+
+            // then
+            foremostEventLock.lock(); defer { foremostEventLock.unlock() }
+            XCTAssertGreaterThanOrEqual(foremostEventEmissions.count, 2)
+            XCTAssertNil(foremostEventEmissions[0])
+            XCTAssertEqual(foremostEventEmissions.last??.eventId, expectId)
         }
         // when + then
-        parameterizeTest(isTodo: true)
-        parameterizeTest(isTodo: false)
+        try await parameterizeTest(isTodo: true)
+        try await parameterizeTest(isTodo: false)
     }
     
     func testUsecase_whenAfterRefresh_updateForemostIdIsNilWhenNotExists() {
@@ -250,18 +279,25 @@ extension ForemostEventUsecaseImpleTests {
         let expect = expectation(description: "업데이트, 삭제 이후에 foremost 업데이트")
         expect.expectedFulfillmentCount = 4
         let usecase = self.makeUsecase()
-        
+
         // when
-        let events = self.waitOutputs(expect, for: usecase.foremostEvent, timeout: 0.1) {
+        self.foremostEventReceivedCount = 0
+        let events = self.waitOutputs(expect, for: self.recordingForemostEventCount(usecase.foremostEvent)) {
             Task {
                 usecase.refresh()
-                try await Task.sleep(for: .milliseconds(10))
+                try await self.waitEffect("refresh 방출 도착") {
+                    self.foremostEventReceivedLock.lock(); defer { self.foremostEventReceivedLock.unlock() }
+                    return self.foremostEventReceivedCount >= 2
+                }
                 try await usecase.update(foremost: .init("new", true))
-                try await Task.sleep(for: .milliseconds(10))
+                try await self.waitEffect("update 방출 도착") {
+                    self.foremostEventReceivedLock.lock(); defer { self.foremostEventReceivedLock.unlock() }
+                    return self.foremostEventReceivedCount >= 3
+                }
                 try await usecase.remove()
             }
         }
-        
+
         // then
         let ids = events.map { $0?.eventId }
         XCTAssertEqual(ids, [

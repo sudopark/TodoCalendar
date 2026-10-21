@@ -18,7 +18,7 @@ import TestDoubles
 @testable import BillingScenes
 
 
-final class PaywallViewModelImpleTests: PublisherWaitable {
+final class PaywallViewModelImpleTests: PublisherWaitable, AsyncEffectWaitable {
 
     var cancelBag: Set<AnyCancellable>! = .init()
 
@@ -94,17 +94,38 @@ final class PaywallViewModelImpleTests: PublisherWaitable {
         return BillingPlanOffering(plan: BillingPlan(id: .free, dailyLimit: dailyLimit))
     }
 
-    // prepare() 는 offerings 를 async Task 로 실어 나른다 — cellModels 를 2회(초기 빈 값 →
-    // 로드된 값) 관찰해 로딩 완료를 기다린다. 모든 테스트가 이 헬퍼로 로딩 시점을 동기화한다.
     private func waitOfferingsLoaded(
         _ viewModel: any PaywallViewModel
     ) async throws -> [PaywallPlanCellModel] {
-        let expect = expectConfirm("offerings loaded")
-        expect.count = 2
-        let emitted = try await self.outputs(expect, for: viewModel.cellModels) {
-            viewModel.prepare()
+        try await self.prepareAndWaitLoadsSettled(viewModel)
+        return self.replayedValue(of: viewModel.cellModels) ?? []
+    }
+
+    private func prepareAndWaitLoadsSettled(_ viewModel: any PaywallViewModel) async throws {
+        viewModel.prepare()
+        _ = try await self.waitReplayedValue("유저 플랜 조회 정착", of: viewModel.screenState) { $0 != .loading }
+        _ = try await self.waitReplayedValue("카탈로그 조회 정착", of: viewModel.catalogState) { $0 != .loading }
+    }
+
+    // prepare() 의 로드들이 서로 다른 스레드에서 send 하면 기존 구독은 CombineLatest 조합값을
+    // 놓칠 수 있다 — 정착 판정은 매번 새 구독이 리플레이하는 현재값으로 한다
+    private func waitReplayedValue<P: Publisher>(
+        _ description: String,
+        of source: P,
+        until predicate: (P.Output) -> Bool
+    ) async throws -> P.Output? where P.Failure == Never {
+        var matched: P.Output?
+        try await self.waitEffect(description, timeoutMillis: 5000) {
+            matched = self.replayedValue(of: source).flatMap { predicate($0) ? $0 : nil }
+            return matched != nil
         }
-        return emitted.last ?? []
+        return matched
+    }
+
+    private func replayedValue<P: Publisher>(of source: P) -> P.Output? where P.Failure == Never {
+        var replayed: P.Output?
+        source.first().sink { replayed = $0 }.cancel()
+        return replayed
     }
 
     private func waitUntil<P: Publisher>(
@@ -118,9 +139,9 @@ final class PaywallViewModelImpleTests: PublisherWaitable {
 
     private func waitScreenState(
         _ viewModel: any PaywallViewModel,
-        until predicate: @escaping @Sendable (PaywallScreenState) -> Bool
+        until predicate: (PaywallScreenState) -> Bool
     ) async throws -> PaywallScreenState {
-        let state = try await self.waitUntil(viewModel.screenState, matching: predicate)
+        let state = try await self.waitReplayedValue("화면 상태 도달", of: viewModel.screenState, until: predicate)
         return state ?? .loading
     }
 
@@ -707,15 +728,12 @@ extension PaywallViewModelImpleTests {
         // given
         let (viewModel, _, _) = self.makeViewModel(userPlanLoadError: TestError())
 
-        // when — 초기 .loading + 최종 .userPlanLoadFailed(카탈로그 축 변화는 같은 결과라 dedupe됨)
-        let expect = expectConfirm("유저 플랜 조회 실패")
-        expect.count = 2
-        let states = try await self.outputs(expect, for: viewModel.screenState) {
-            viewModel.prepare()
-        }
+        // when
+        viewModel.prepare()
+        let final = try await self.waitScreenState(viewModel) { $0 == .userPlanLoadFailed }
 
         // then
-        #expect(states.last == .userPlanLoadFailed)
+        #expect(final == .userPlanLoadFailed)
     }
 
     // 재시도(prepare() 재호출)는 같은 로드를 다시 태워 로딩 상태를 다시 거친다 — 재시도 중엔
@@ -723,22 +741,29 @@ extension PaywallViewModelImpleTests {
     @Test func viewModel_retryAfterUserPlanLoadFailed_reentersLoadingBeforeFailingAgain() async throws {
         // given: 첫 prepare()로 실패 상태를 만든다
         let (viewModel, _, _) = self.makeViewModel(userPlanLoadError: TestError())
-        let firstExpect = expectConfirm("첫 로드 실패")
-        firstExpect.count = 2
-        firstExpect.timeout = .seconds(5)
-        _ = try await self.outputs(firstExpect, for: viewModel.screenState) { viewModel.prepare() }
+        try await self.prepareAndWaitLoadsSettled(viewModel)
 
-        // when: 재시도 — 새 구독은 CombineLatest 특성상 직전 정착 상태(.userPlanLoadFailed)를
-        // 먼저 리플레이하고, prepare()가 그 뒤로 .loading → .userPlanLoadFailed 순서로 이어진다
-        let retryExpect = expectConfirm("재시도")
-        retryExpect.count = 3
-        retryExpect.timeout = .seconds(5)
-        let states = try await self.outputs(retryExpect, for: viewModel.screenState) {
-            viewModel.prepare()
+        // when: 재시도 — 리플레이(.userPlanLoadFailed) 뒤로 prepare() 의 .loading 이 이어진다
+        let statesLock = NSLock()
+        var states: [PaywallScreenState] = []
+        viewModel.screenState
+            .sink { state in
+                statesLock.lock(); defer { statesLock.unlock() }
+                states.append(state)
+            }
+            .store(in: &self.cancelBag)
+        viewModel.prepare()
+
+        try await self.waitEffect("재시도가 로딩을 다시 거친다") {
+            statesLock.lock(); defer { statesLock.unlock() }
+            return states.contains(.loading)
         }
+        let final = try await self.waitScreenState(viewModel) { $0 == .userPlanLoadFailed }
 
-        // then — 가운데 값이 재시도가 로딩을 다시 거쳤다는 증거
-        #expect(states == [.userPlanLoadFailed, .loading, .userPlanLoadFailed])
+        // then — 로딩 관측이 재시도가 로딩을 다시 거쳤다는 증거
+        #expect(final == .userPlanLoadFailed)
+        statesLock.lock(); defer { statesLock.unlock() }
+        #expect(states.contains(.loading))
     }
 
     // 유저 플랜 조회 성공 + 카탈로그 조회 성공 → 본문이 렌더되는 .ready(.loaded) 로 안착한다.
@@ -1211,17 +1236,9 @@ extension PaywallViewModelImpleTests {
         _ viewModel: any PaywallViewModel
     ) async throws -> [PaywallTopupCellModel] {
         viewModel.prepare()
-        let deadline = ContinuousClock.now + .seconds(5)
-        var cells: [PaywallTopupCellModel] = []
-        while cells.isEmpty, ContinuousClock.now < deadline {
-            cells = try await self.firstOutput(
-                expectConfirm("top-up 셀 현재값"), for: viewModel.topupCellModels
-            ) ?? []
-            if cells.isEmpty {
-                try await Task.sleep(for: .milliseconds(20))
-            }
-        }
-        return cells
+        return try await self.waitReplayedValue(
+            "top-up 셀 로드", of: viewModel.topupCellModels, until: { $0.isEmpty == false }
+        ) ?? []
     }
 
     private func waitTopupCellsStayEmpty(

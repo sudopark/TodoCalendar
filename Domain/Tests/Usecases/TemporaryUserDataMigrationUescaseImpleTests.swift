@@ -15,7 +15,7 @@ import UnitTestHelpKit
 
 @testable import Domain
 
-class TemporaryUserDataMigrationUescaseImpleTests: BaseTestCase, PublisherWaitable {
+class TemporaryUserDataMigrationUescaseImpleTests: BaseTestCase, PublisherWaitable, AsyncEffectWaitable {
     
     var cancelBag: Set<AnyCancellable>!
     private var stubRepository: StubRepository!
@@ -72,35 +72,48 @@ extension TemporaryUserDataMigrationUescaseImpleTests {
     }
     
     // check migration need event count
-    func testUsecase_checkMigrationNeedEventCounts() {
+    func testUsecase_checkMigrationNeedEventCounts() async throws {
         // given
         func parameterizeTest(
             _ description: String,
             expectNeedCounts: [Int],
             _ stubbing: @escaping (StubRepository) -> Void
-        ) {
+        ) async throws {
             // given
-            let expect = expectation(description: description)
-            expect.expectedFulfillmentCount = expectNeedCounts.count
+            let countsLock = NSLock()
+            var counts: [Int] = []
             stubbing(self.stubRepository)
             let usecase = self.makeUsecase()
-            
+            usecase.migrationNeedEventCount
+                .sink { count in
+                    countsLock.lock(); defer { countsLock.unlock() }
+                    counts.append(count)
+                }
+                .store(in: &self.cancelBag)
+
             // when
-            let counts = self.waitOutputs(expect, for: usecase.migrationNeedEventCount) {
-                usecase.checkIsNeedMigration()
+            usecase.checkIsNeedMigration()
+            try await self.waitEffect(description) {
+                countsLock.lock(); defer { countsLock.unlock() }
+                return counts.last == expectNeedCounts.last
             }
-            
-            // then
-            XCTAssertEqual(counts, expectNeedCounts)
+            try await Task.sleep(for: .milliseconds(50))
+
+            // then — 초깃값 리플레이와 체크 결과가 같은 값이면 중복 방출이 끼므로 인접 중복을 걷어 비교한다
+            countsLock.lock(); defer { countsLock.unlock() }
+            let distinctCounts = counts.reduce(into: [Int]()) { acc, count in
+                if acc.last != count { acc.append(count) }
+            }
+            XCTAssertEqual(distinctCounts, expectNeedCounts)
         }
         // when + then
-        parameterizeTest("미이그레이션 불필요함", expectNeedCounts: [0]) {
+        try await parameterizeTest("미이그레이션 불필요함", expectNeedCounts: [0]) {
             $0.stubMigrationTargetEventCountLoadResult = .success(0)
         }
-        parameterizeTest("마이그레이션 필요함", expectNeedCounts: [0, 1]) {
+        try await parameterizeTest("마이그레이션 필요함", expectNeedCounts: [0, 1]) {
             $0.stubMigrationTargetEventCountLoadResult = .success(1)
         }
-        parameterizeTest("마이그레이션 필요여부 체크 실패시 불필요함으로 간주", expectNeedCounts: [0]) {
+        try await parameterizeTest("마이그레이션 필요여부 체크 실패시 불필요함으로 간주", expectNeedCounts: [0]) {
             $0.stubMigrationTargetEventCountLoadResult = .failure(RuntimeError("failed"))
         }
     }
