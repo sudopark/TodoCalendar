@@ -5,6 +5,7 @@
 "catalog.event::holiday" = "วันขบวนการเอกราช";
 "catalog.event::project_kickoff" = "คิกออฟโปรเจกต์";
 "catalog.event::dentist" = "หมอฟัน";
+"catalog.event::plan_deadline" = "กำหนดส่งข้อเสนอโครงการ";
 "catalog.event::trip" = "เที่ยวเชจู";
 "catalog.event::design_review" = "รีวิวงานออกแบบ";
 "catalog.event::dinner" = "มื้อเย็นกับซาร่า";
@@ -13,6 +14,8 @@
 "catalog.event::release_day" = "วันปล่อยเวอร์ชัน";
 "catalog.event::lunch" = "มื้อเที่ยงกับซาร่า";
 "catalog.event::anniversary" = "วันครบรอบแต่งงาน";
+"catalog.event::lunch_plans" = "นัดกินข้าวกลางวัน";
+"catalog.event::family_dinner" = "ทานข้าวเย็นกับครอบครัว";
 
 // MARK: - 할일
 
@@ -24,6 +27,7 @@
 "catalog.todo::send_invoice" = "ส่งใบแจ้งหนี้";
 "catalog.todo::cancel_subscription" = "ยกเลิกสมาชิกที่ไม่ได้ใช้";
 "catalog.todo::return_books" = "คืนหนังสือห้องสมุด";
+"catalog.todo::send_report_draft" = "ส่งร่างรายงาน";
 
 // MARK: - 이벤트 상세
 
@@ -41,6 +45,8 @@
 
 "catalog.ai::command" = "มื้อเที่ยงกับซาร่าวันศุกร์เที่ยงตรง";
 "catalog.ai::result" = "เพิ่ม “มื้อเที่ยงกับซาร่า” ในวันศุกร์ที่ 13 มีนาคม เวลา 12:00 แล้ว";
+"catalog.ai::move_dentist" = "เลื่อนหมอฟันไปวันอังคารหน้า";
+"catalog.share::flea_market_text" = "ตลาดนัดมือสองฤดูใบไม้ร่วง\nวันเสาร์ที่ 24 ตุลาคม 14:00 น.\nสนามหญ้าสวนสาธารณะในชุมชน";
 
 // MARK: - 컬러 테마
 

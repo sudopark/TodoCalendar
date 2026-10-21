@@ -5,6 +5,7 @@
 "catalog.event::holiday" = "Ziua Mișcării de Independență";
 "catalog.event::project_kickoff" = "Startul proiectului";
 "catalog.event::dentist" = "Dentist";
+"catalog.event::plan_deadline" = "Termen pentru propunere";
 "catalog.event::trip" = "Călătorie în Jeju";
 "catalog.event::design_review" = "Revizuire de design";
 "catalog.event::dinner" = "Cină cu Sara";
@@ -13,6 +14,8 @@
 "catalog.event::release_day" = "Ziua lansării";
 "catalog.event::lunch" = "Prânz cu Sara";
 "catalog.event::anniversary" = "Aniversarea căsătoriei";
+"catalog.event::lunch_plans" = "Prânz în oraș";
+"catalog.event::family_dinner" = "Cină în familie";
 
 // MARK: - 할일
 
@@ -24,6 +27,7 @@
 "catalog.todo::send_invoice" = "Trimite factura";
 "catalog.todo::cancel_subscription" = "Anulează abonamentul nefolosit";
 "catalog.todo::return_books" = "Returnează cărțile la bibliotecă";
+"catalog.todo::send_report_draft" = "Trimite ciorna raportului";
 
 // MARK: - 이벤트 상세
 
@@ -41,6 +45,8 @@
 
 "catalog.ai::command" = "prânz cu Sara vineri la ora 12";
 "catalog.ai::result" = "„Prânz cu Sara” a fost adăugat vineri, 13 martie, la 12:00.";
+"catalog.ai::move_dentist" = "Mută dentistul marțea viitoare";
+"catalog.share::flea_market_text" = "Târg de vechituri de toamnă\nSâmbătă, 24 octombrie, ora 14:00\nPajiștea din parcul cartierului";
 
 // MARK: - 컬러 테마
 

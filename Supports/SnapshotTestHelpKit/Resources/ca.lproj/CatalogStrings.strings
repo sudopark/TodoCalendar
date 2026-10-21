@@ -5,6 +5,7 @@
 "catalog.event::holiday" = "Dia del Moviment d'Independència";
 "catalog.event::project_kickoff" = "Inici del projecte";
 "catalog.event::dentist" = "Dentista";
+"catalog.event::plan_deadline" = "Termini del projecte";
 "catalog.event::trip" = "Viatge a Jeju";
 "catalog.event::design_review" = "Revisió de disseny";
 "catalog.event::dinner" = "Sopar amb la Sara";
@@ -13,6 +14,8 @@
 "catalog.event::release_day" = "Dia del llançament";
 "catalog.event::lunch" = "Dinar amb la Sara";
 "catalog.event::anniversary" = "Aniversari de casament";
+"catalog.event::lunch_plans" = "Dinar amb amics";
+"catalog.event::family_dinner" = "Sopar en família";
 
 // MARK: - 할일
 
@@ -24,6 +27,7 @@
 "catalog.todo::send_invoice" = "Enviar la factura";
 "catalog.todo::cancel_subscription" = "Cancel·lar la subscripció que no faig servir";
 "catalog.todo::return_books" = "Tornar els llibres de la biblioteca";
+"catalog.todo::send_report_draft" = "Enviar l'esborrany de l'informe";
 
 // MARK: - 이벤트 상세
 
@@ -41,6 +45,8 @@
 
 "catalog.ai::command" = "dinar amb la Sara divendres al migdia";
 "catalog.ai::result" = "«Dinar amb la Sara» afegit al divendres 13 de març a les 12:00.";
+"catalog.ai::move_dentist" = "Passa el dentista al dimarts que ve";
+"catalog.share::flea_market_text" = "Mercat d'intercanvi de tardor\nDissabte 24 d'octubre, 14:00\nGespa del parc del barri";
 
 // MARK: - 컬러 테마
 

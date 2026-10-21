@@ -5,6 +5,7 @@
 "catalog.event::holiday" = "День движения за независимость";
 "catalog.event::project_kickoff" = "Старт проекта";
 "catalog.event::dentist" = "Стоматолог";
+"catalog.event::plan_deadline" = "Дедлайн по проекту";
 "catalog.event::trip" = "Поездка на Чеджу";
 "catalog.event::design_review" = "Дизайн-ревью";
 "catalog.event::dinner" = "Ужин с Сарой";
@@ -13,6 +14,8 @@
 "catalog.event::release_day" = "День релиза";
 "catalog.event::lunch" = "Обед с Сарой";
 "catalog.event::anniversary" = "Годовщина свадьбы";
+"catalog.event::lunch_plans" = "Обед с друзьями";
+"catalog.event::family_dinner" = "Семейный ужин";
 
 // MARK: - 할일
 
@@ -24,6 +27,7 @@
 "catalog.todo::send_invoice" = "Отправить счёт";
 "catalog.todo::cancel_subscription" = "Отменить неиспользуемую подписку";
 "catalog.todo::return_books" = "Вернуть книги в библиотеку";
+"catalog.todo::send_report_draft" = "Отправить черновик отчёта";
 
 // MARK: - 이벤트 상세
 
@@ -41,6 +45,8 @@
 
 "catalog.ai::command" = "обед с Сарой в пятницу в полдень";
 "catalog.ai::result" = "«Обед с Сарой» добавлен на пятницу, 13 марта, 12:00.";
+"catalog.ai::move_dentist" = "Перенеси стоматолога на следующий вторник";
+"catalog.share::flea_market_text" = "Осенняя барахолка\nСуббота, 24 октября, 14:00\nГазон в районном парке";
 
 // MARK: - 컬러 테마
 

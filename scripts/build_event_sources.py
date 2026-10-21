@@ -7,7 +7,8 @@ event.json 의 scenes 값은 셋 중 하나이고, 조립 조각도 같은 셋�
   - 문자열   — snapshot-catalog 기준 상대 경로
   - {"from": "snapshot-appstore", "file": "..."} — 앱스토어 스샷 파이프라인의 **캡션 얹기 전 원본**을
     언어별로 가져온다. 캡션이 구워진 fastlane/screenshots 쪽은 홍보 문구 금지 조항에 걸려 못 쓴다
-  - {"assemble": "<종류>", ...조각} — 잠금화면처럼 합성이 필요한 장면을 조립한다
+  - {"assemble": "<종류>", ...조각} — 잠금화면처럼 합성이 필요한 장면을 조립한다.
+    home-screen 은 조각 대신 그 언어의 snapshot-appstore/<lang>/widgets/ 촬영본을 홈 화면에 얹는다
 
 scenes.card 는 리스트도 받는다 — 카드에 기기를 여러 대 세우는 경우다. 리스트 순서가 좌→우이고
 가운데가 히어로다. 세부사항은 풀블리드 한 장이라 리스트를 받지 않는다.
@@ -23,16 +24,25 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import ai_sheet  # noqa: E402
 import lock_screen  # noqa: E402
 import status_bar  # noqa: E402
+import store_screen  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 CATALOG = ROOT / "snapshot-catalog"
 SLOTS = {"card": "s1-card-source", "detail": "s2-detail-source"}
 MULTI_SLOTS = {"card"}
+APPSTORE_SCREEN = (1320, 2868)  # snapshot-appstore 촬영 규격 — 위젯 촬영본의 배율이 이 화면에 맞춰져 있다
 
 ASSEMBLERS = {
     "lock-screen": (lock_screen.compose, ["foremost", "next", "nextRemain", "liveActivity"]),
     "ai-sheet": (ai_sheet.compose, ["background", "sheet"]),
 }
+
+
+def home_screen_scene(spec, lang):
+    return store_screen.home_screen(ROOT / "snapshot-appstore" / lang, APPSTORE_SCREEN, spec.get("widgets"))
+
+
+LANG_ASSEMBLERS = {"home-screen": home_screen_scene}
 
 
 def catalog_path(relative):
@@ -54,9 +64,12 @@ def appstore_source(spec, lang):
 
 def assemble(spec, lang):
     kind = spec.get("assemble")
+    if kind in LANG_ASSEMBLERS:
+        return LANG_ASSEMBLERS[kind](spec, lang)
     entry = ASSEMBLERS.get(kind)
     if entry is None:
-        raise SystemExit(f"✗ 모르는 assemble 종류: {kind} — 아는 것은 {', '.join(ASSEMBLERS)}")
+        known = [*ASSEMBLERS, *LANG_ASSEMBLERS]
+        raise SystemExit(f"✗ 모르는 assemble 종류: {kind} — 아는 것은 {', '.join(known)}")
     compose, keys = entry
     missing = [key for key in keys if not spec.get(key)]
     if missing:

@@ -5,6 +5,7 @@
 "catalog.event::holiday" = "三一节";
 "catalog.event::project_kickoff" = "项目启动会";
 "catalog.event::dentist" = "牙医";
+"catalog.event::plan_deadline" = "方案截止";
 "catalog.event::trip" = "济州岛旅行";
 "catalog.event::design_review" = "设计评审";
 "catalog.event::dinner" = "和 Sara 吃晚饭";
@@ -13,6 +14,8 @@
 "catalog.event::release_day" = "发布日";
 "catalog.event::lunch" = "和 Sara 吃午饭";
 "catalog.event::anniversary" = "结婚纪念日";
+"catalog.event::lunch_plans" = "午餐约会";
+"catalog.event::family_dinner" = "家庭聚餐";
 
 // MARK: - 할일
 
@@ -24,6 +27,7 @@
 "catalog.todo::send_invoice" = "发送账单";
 "catalog.todo::cancel_subscription" = "退订不用的订阅";
 "catalog.todo::return_books" = "还图书馆的书";
+"catalog.todo::send_report_draft" = "发送报告草稿";
 
 // MARK: - 이벤트 상세
 
@@ -41,6 +45,8 @@
 
 "catalog.ai::command" = "周五中午和 Sara 吃午饭";
 "catalog.ai::result" = "已把“和 Sara 吃午饭”添加到 3 月 13 日周五 12:00。";
+"catalog.ai::move_dentist" = "把牙医改到下周二";
+"catalog.share::flea_market_text" = "秋季跳蚤市场\n10月24日（周六）下午2点\n社区公园草坪";
 
 // MARK: - 컬러 테마
 

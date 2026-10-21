@@ -1,18 +1,1 @@
-■ Dostosuj widżety
-· Nadaj każdemu widżetowi na ekranie początkowym własny kolor tła i wybierz, co pokazuje — nazwę miesiąca, nagłówek dni tygodnia, wyróżnienie dzisiejszego dnia i inne
-· Zapisz kilka stylów i wybierz inny dla każdej kopii widżetu
-· Obejrzyj każdy widżet w Galeria widżetów w Ustawieniach i przejdź od razu do Dostosuj
-
-■ Motywy kolorystyczne
-· Oprócz opcji System, Jasny i Ciemny jest 19 nowych wbudowanych motywów — 11 jasnych i 8 ciemnych
-· Wybierz kolor tła i kolor akcentu w Nowy motyw, a aplikacja dobierze paletę, w której tekst jest czytelny
-· Zaloguj się, a Twoje motywy pojawią się na innych urządzeniach
-
-■ Widżet Odliczanie
-· Odliczaj dni do ważnych wydarzeń na ekranie początkowym i ekranie blokady
-· Wybierz "Dodaj do widżetu Odliczanie" w menu wydarzenia, a pojawi się na początku listy, gdy edytujesz widżet
-· Dodaj zdjęcie w tle, a odliczanie będzie widoczne na zdjęciu
-
-■ Dwa panele na szerszym ekranie
-· Rozłóż iPhone Duo, a wydarzenia wybranego dnia pojawią się obok kalendarza
-· Złóż go, a od razu wrócisz do jednej kolumny, wciąż na miesiącu i dniu, które oglądasz
+· Poprawki błędów

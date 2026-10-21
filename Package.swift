@@ -31,5 +31,6 @@ let package = Package(
         .package(url: "https://github.com/devxoul/Toaster.git", branch: "master"),
         .package(url: "https://github.com/pointfreeco/swift-snapshot-testing.git", from: "1.18.0"),
         .package(url: "https://github.com/googleads/swift-package-manager-google-mobile-ads.git", from: "12.0.0"),
+        .package(url: "https://github.com/facebook/facebook-ios-sdk", from: "19.0.0"),
     ]
 )

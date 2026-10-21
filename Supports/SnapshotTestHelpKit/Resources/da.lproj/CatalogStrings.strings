@@ -5,6 +5,7 @@
 "catalog.event::holiday" = "Uafhængighedsbevægelsens dag";
 "catalog.event::project_kickoff" = "Projektopstart";
 "catalog.event::dentist" = "Tandlæge";
+"catalog.event::plan_deadline" = "Deadline for forslag";
 "catalog.event::trip" = "Rejse til Jeju";
 "catalog.event::design_review" = "Designgennemgang";
 "catalog.event::dinner" = "Middag med Sara";
@@ -13,6 +14,8 @@
 "catalog.event::release_day" = "Releasedag";
 "catalog.event::lunch" = "Frokost med Sara";
 "catalog.event::anniversary" = "Bryllupsdag";
+"catalog.event::lunch_plans" = "Frokostaftale";
+"catalog.event::family_dinner" = "Familiemiddag";
 
 // MARK: - 할일
 
@@ -24,6 +27,7 @@
 "catalog.todo::send_invoice" = "Send fakturaen";
 "catalog.todo::cancel_subscription" = "Opsig det abonnement jeg ikke bruger";
 "catalog.todo::return_books" = "Aflever biblioteksbøgerne";
+"catalog.todo::send_report_draft" = "Send rapportudkast";
 
 // MARK: - 이벤트 상세
 
@@ -41,6 +45,8 @@
 
 "catalog.ai::command" = "frokost med Sara fredag kl. 12";
 "catalog.ai::result" = "“Frokost med Sara” er tilføjet fredag den 13. marts kl. 12:00.";
+"catalog.ai::move_dentist" = "Flyt tandlæge til næste tirsdag";
+"catalog.share::flea_market_text" = "Efterårsloppemarked\nLørdag 24. oktober kl. 14.00\nPlænen i kvarterets park";
 
 // MARK: - 컬러 테마
 

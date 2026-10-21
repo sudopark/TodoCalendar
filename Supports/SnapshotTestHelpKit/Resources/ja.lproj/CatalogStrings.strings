@@ -5,6 +5,7 @@
 "catalog.event::holiday" = "三一節";
 "catalog.event::project_kickoff" = "プロジェクトキックオフ";
 "catalog.event::dentist" = "歯医者";
+"catalog.event::plan_deadline" = "企画書の締め切り";
 "catalog.event::trip" = "済州旅行";
 "catalog.event::design_review" = "デザインレビュー";
 "catalog.event::dinner" = "サラと夕食";
@@ -13,6 +14,8 @@
 "catalog.event::release_day" = "リリース日";
 "catalog.event::lunch" = "サラとランチ";
 "catalog.event::anniversary" = "結婚記念日";
+"catalog.event::lunch_plans" = "ランチの約束";
+"catalog.event::family_dinner" = "家族で外食";
 
 // MARK: - 할일
 
@@ -24,6 +27,7 @@
 "catalog.todo::send_invoice" = "請求書を送る";
 "catalog.todo::cancel_subscription" = "使っていないサブスクを解約する";
 "catalog.todo::return_books" = "図書館の本を返す";
+"catalog.todo::send_report_draft" = "報告書の下書きを送る";
 
 // MARK: - 이벤트 상세
 
@@ -41,6 +45,8 @@
 
 "catalog.ai::command" = "金曜のお昼にサラとランチ";
 "catalog.ai::result" = "「サラとランチ」を3月13日(金)の12:00に追加しました。";
+"catalog.ai::move_dentist" = "歯医者を来週の火曜に移して";
+"catalog.share::flea_market_text" = "秋のフリーマーケット\n10月24日（土）14:00\n近所の公園 芝生広場";
 
 // MARK: - 컬러 테마
 

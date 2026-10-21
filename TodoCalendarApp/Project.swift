@@ -27,6 +27,7 @@ let project = Project.app(
             target: "Common3rdParty",
             path: .relativeToRoot("Supports/Common3rdParty")
         ),
+        .external(name: "FacebookCore"),
         .project(
             target: "CommonPresentation",
             path: .relativeToRoot("Presentations/CommonPresentation")

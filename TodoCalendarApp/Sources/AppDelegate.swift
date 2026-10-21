@@ -10,6 +10,7 @@ import Domain
 import Extensions
 import FirebaseCore
 import FirebaseMessaging
+import FacebookCore
 import UserNotifications
 
 
@@ -32,6 +33,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         if AppEnvironment.isExternalDependencyBlocked == false {
             FirebaseApp.configure()
+            ApplicationDelegate.shared.application(application, didFinishLaunchingWithOptions: launchOptions)
             Messaging.messaging().delegate = self
             UNUserNotificationCenter.current().delegate = self
             application.registerForRemoteNotifications()

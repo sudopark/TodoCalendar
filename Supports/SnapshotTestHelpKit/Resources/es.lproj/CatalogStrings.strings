@@ -5,6 +5,7 @@
 "catalog.event::holiday" = "Día del Movimiento de Independencia";
 "catalog.event::project_kickoff" = "Inicio del proyecto";
 "catalog.event::dentist" = "Dentista";
+"catalog.event::plan_deadline" = "Plazo de la propuesta";
 "catalog.event::trip" = "Viaje a Jeju";
 "catalog.event::design_review" = "Revisión de diseño";
 "catalog.event::dinner" = "Cena con Sara";
@@ -13,6 +14,8 @@
 "catalog.event::release_day" = "Día de lanzamiento";
 "catalog.event::lunch" = "Comida con Sara";
 "catalog.event::anniversary" = "Aniversario de boda";
+"catalog.event::lunch_plans" = "Comida con amigos";
+"catalog.event::family_dinner" = "Cena familiar";
 
 // MARK: - 할일
 
@@ -24,6 +27,7 @@
 "catalog.todo::send_invoice" = "Enviar la factura";
 "catalog.todo::cancel_subscription" = "Cancelar la suscripción que no uso";
 "catalog.todo::return_books" = "Devolver los libros de la biblioteca";
+"catalog.todo::send_report_draft" = "Enviar borrador del informe";
 
 // MARK: - 이벤트 상세
 
@@ -41,6 +45,8 @@
 
 "catalog.ai::command" = "comida con Sara el viernes a mediodía";
 "catalog.ai::result" = "Se ha añadido «Comida con Sara» al viernes 13 de marzo a las 12:00.";
+"catalog.ai::move_dentist" = "Pasa el dentista al martes que viene";
+"catalog.share::flea_market_text" = "Mercadillo de otoño\nSábado 24 de octubre, 14:00\nCésped del parque del barrio";
 
 // MARK: - 컬러 테마
 

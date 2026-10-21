@@ -5,6 +5,7 @@
 "catalog.event::holiday" = "Tag der Unabhängigkeitsbewegung";
 "catalog.event::project_kickoff" = "Projekt-Kickoff";
 "catalog.event::dentist" = "Zahnarzt";
+"catalog.event::plan_deadline" = "Konzept-Deadline";
 "catalog.event::trip" = "Reise nach Jeju";
 "catalog.event::design_review" = "Design-Review";
 "catalog.event::dinner" = "Abendessen mit Sara";
@@ -13,6 +14,8 @@
 "catalog.event::release_day" = "Release-Tag";
 "catalog.event::lunch" = "Mittagessen mit Sara";
 "catalog.event::anniversary" = "Hochzeitstag";
+"catalog.event::lunch_plans" = "Mittagessen verabredet";
+"catalog.event::family_dinner" = "Familienessen";
 
 // MARK: - 할일
 
@@ -24,6 +27,7 @@
 "catalog.todo::send_invoice" = "Rechnung verschicken";
 "catalog.todo::cancel_subscription" = "Ungenutztes Abo kündigen";
 "catalog.todo::return_books" = "Bibliotheksbücher zurückgeben";
+"catalog.todo::send_report_draft" = "Berichtsentwurf senden";
 
 // MARK: - 이벤트 상세
 
@@ -41,6 +45,8 @@
 
 "catalog.ai::command" = "Mittagessen mit Sara am Freitag um 12 Uhr";
 "catalog.ai::result" = "„Mittagessen mit Sara“ wurde für Freitag, 13. März, 12:00 Uhr hinzugefügt.";
+"catalog.ai::move_dentist" = "Verschieb Zahnarzt auf nächsten Dienstag";
+"catalog.share::flea_market_text" = "Herbstflohmarkt\nSamstag, 24. Oktober, 14:00 Uhr\nWiese im Stadtteilpark";
 
 // MARK: - 컬러 테마
 

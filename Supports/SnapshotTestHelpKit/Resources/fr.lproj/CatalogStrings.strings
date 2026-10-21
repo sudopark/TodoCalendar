@@ -5,6 +5,7 @@
 "catalog.event::holiday" = "Jour du Mouvement d'indépendance";
 "catalog.event::project_kickoff" = "Lancement du projet";
 "catalog.event::dentist" = "Dentiste";
+"catalog.event::plan_deadline" = "Échéance du projet";
 "catalog.event::trip" = "Voyage à Jeju";
 "catalog.event::design_review" = "Revue de design";
 "catalog.event::dinner" = "Dîner avec Sara";
@@ -13,6 +14,8 @@
 "catalog.event::release_day" = "Jour de la release";
 "catalog.event::lunch" = "Déjeuner avec Sara";
 "catalog.event::anniversary" = "Anniversaire de mariage";
+"catalog.event::lunch_plans" = "Déjeuner prévu";
+"catalog.event::family_dinner" = "Dîner en famille";
 
 // MARK: - 할일
 
@@ -24,6 +27,7 @@
 "catalog.todo::send_invoice" = "Envoyer la facture";
 "catalog.todo::cancel_subscription" = "Résilier l'abonnement inutilisé";
 "catalog.todo::return_books" = "Rendre les livres de la bibliothèque";
+"catalog.todo::send_report_draft" = "Envoyer le brouillon du rapport";
 
 // MARK: - 이벤트 상세
 
@@ -41,6 +45,8 @@
 
 "catalog.ai::command" = "déjeuner avec Sara vendredi à midi";
 "catalog.ai::result" = "« Déjeuner avec Sara » ajouté au vendredi 13 mars à 12:00.";
+"catalog.ai::move_dentist" = "Décale le dentiste à mardi prochain";
+"catalog.share::flea_market_text" = "Vide-grenier d'automne\nSamedi 24 octobre, 14 h\nPelouse du parc du quartier";
 
 // MARK: - 컬러 테마
 

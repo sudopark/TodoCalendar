@@ -1,18 +1,1 @@
-■ Personnalisez vos widgets
-· Donnez à chaque widget de l'écran d'accueil sa propre couleur de fond et choisissez ce qu'il affiche : nom du mois, en-tête des jours de la semaine, mise en valeur d'aujourd'hui, etc.
-· Enregistrez plusieurs styles et choisissez-en un différent pour chaque exemplaire d'un widget
-· Prévisualisez chaque widget dans Galerie de widgets, dans Réglages, et passez directement à Personnaliser
-
-■ Thèmes de couleur
-· En plus de Système, Clair et Sombre, 19 nouveaux thèmes intégrés sont disponibles : 11 clairs et 8 sombres
-· Choisissez un fond et une couleur d'accent dans Nouveau thème, et l'app compose une palette qui garde le texte facile à lire
-· Connectez-vous et vos thèmes vous suivent sur vos autres appareils
-
-■ Widget Jour J
-· Comptez à rebours jusqu'aux événements qui comptent, sur l'écran d'accueil et l'écran verrouillé
-· Choisissez « Ajouter au widget Jour J » dans le menu d'un événement et il apparaît en haut de la liste quand vous modifiez le widget
-· Placez une photo derrière et le compte à rebours s'affiche par-dessus
-
-■ Deux volets sur un écran plus large
-· Dépliez l'iPhone Duo et les événements du jour choisi s'affichent à côté du calendrier
-· Repliez-le et vous revenez aussitôt à une seule colonne, sur le mois et le jour que vous consultiez
+· Corrections de bugs

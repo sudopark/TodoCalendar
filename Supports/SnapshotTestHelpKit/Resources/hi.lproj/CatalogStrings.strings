@@ -5,6 +5,7 @@
 "catalog.event::holiday" = "स्वतंत्रता आंदोलन दिवस";
 "catalog.event::project_kickoff" = "प्रोजेक्ट किकऑफ़";
 "catalog.event::dentist" = "डेंटिस्ट";
+"catalog.event::plan_deadline" = "प्रस्ताव की डेडलाइन";
 "catalog.event::trip" = "जेजू की यात्रा";
 "catalog.event::design_review" = "डिज़ाइन रिव्यू";
 "catalog.event::dinner" = "सारा के साथ डिनर";
@@ -13,6 +14,8 @@
 "catalog.event::release_day" = "रिलीज़ का दिन";
 "catalog.event::lunch" = "सारा के साथ लंच";
 "catalog.event::anniversary" = "शादी की सालगिरह";
+"catalog.event::lunch_plans" = "लंच का प्लान";
+"catalog.event::family_dinner" = "परिवार के साथ डिनर";
 
 // MARK: - 할일
 
@@ -24,6 +27,7 @@
 "catalog.todo::send_invoice" = "इनवॉइस भेजना";
 "catalog.todo::cancel_subscription" = "बेकार पड़ा सब्सक्रिप्शन बंद करना";
 "catalog.todo::return_books" = "लाइब्रेरी की किताबें लौटाना";
+"catalog.todo::send_report_draft" = "रिपोर्ट का ड्राफ़्ट भेजें";
 
 // MARK: - 이벤트 상세
 
@@ -41,6 +45,8 @@
 
 "catalog.ai::command" = "शुक्रवार दोपहर सारा के साथ लंच";
 "catalog.ai::result" = "“सारा के साथ लंच” शुक्रवार, 13 मार्च दोपहर 12:00 बजे जोड़ दिया गया।";
+"catalog.ai::move_dentist" = "डेंटिस्ट को अगले मंगलवार पर करो";
+"catalog.share::flea_market_text" = "शरद फ़्ली मार्केट\nशनिवार, 24 अक्टूबर, दोपहर 2:00 बजे\nमोहल्ले के पार्क का लॉन";
 
 // MARK: - 컬러 테마
 

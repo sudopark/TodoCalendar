@@ -149,15 +149,21 @@ extension CalendarScenesCatalogSnapshots {
     }
 
     @MainActor
-    private func makeStoreSingleColumnCalendarView(_ theme: SnapshotTheme, bottomCoverHeight: CGFloat = 0) -> some View {
-        let appearance = self.makeStoreAppearance(theme)
+    private func makeStoreSingleColumnCalendarView(
+        _ theme: SnapshotTheme,
+        bottomCoverHeight: CGFloat = 0,
+        appearance: ViewAppearance? = nil,
+        monthViewModel: StoreCatalogMonthViewModel = StoreCatalogMonthViewModel(),
+        dayListViewModel: CatalogDayEventListViewModel = CatalogDayEventListViewModel()
+    ) -> some View {
+        let appearance = appearance ?? self.makeStoreAppearance(theme)
 
         let monthState = MonthViewState()
-        monthState.bind(StoreCatalogMonthViewModel(), appearance)
+        monthState.bind(monthViewModel, appearance)
         RunLoop.main.run(until: Date().addingTimeInterval(0.05))
 
         let dayListState = DayEventListViewState()
-        dayListState.bind(CatalogDayEventListViewModel(), appearance)
+        dayListState.bind(dayListViewModel, appearance)
         RunLoop.main.run(until: Date().addingTimeInterval(0.05))
 
         return VStack(spacing: 0) {
@@ -460,8 +466,14 @@ private class CatalogMonthViewModel: MonthViewModel, @unchecked Sendable {
     ) -> EventOnWeek {
         return EventOnWeek(
             0..<1, days, seq, ids,
-            CatalogCalendarEvent(id, name, hasPeriod: hasPeriod, tagId: tagId)
+            self.calendarEvent(id, name, hasPeriod: hasPeriod, tagId: tagId)
         )
+    }
+
+    fileprivate func calendarEvent(
+        _ id: String, _ name: String, hasPeriod: Bool, tagId: EventTagId
+    ) -> any CalendarEvent {
+        return CatalogCalendarEvent(id, name, hasPeriod: hasPeriod, tagId: tagId)
     }
 
     var currentSelectDayIdentifier: AnyPublisher<String, Never> {
@@ -509,6 +521,7 @@ private struct CatalogCalendarEvent: CalendarEvent {
 private enum CatalogDayScheduleLineup {
     case reviewLunchTrip
     case reviewDentist
+    case marketing
 }
 
 /// DayEventListViewState 의 필드가 fileprivate 라 bind(viewModel:appearance:) 경로로만 채울 수 있다.
@@ -517,10 +530,19 @@ private final class CatalogDayEventListViewModel: DayEventListViewModel, @unchec
     /// 달력 없이 목록만 채우는 화면은 기본 구성으로는 아래가 비어, 그 화면만 할일을 더 얹는다.
     private let extraTodoKeys: [String]
     private let scheduleLineup: CatalogDayScheduleLineup
+    private let excludedEventIdPrefixes: [String]
+    private let injectedUncompleteds: [TodoEventCellViewModel]?
 
-    init(extraTodoKeys: [String] = [], scheduleLineup: CatalogDayScheduleLineup = .reviewLunchTrip) {
+    init(
+        extraTodoKeys: [String] = [],
+        scheduleLineup: CatalogDayScheduleLineup = .reviewLunchTrip,
+        excludedEventIdPrefixes: [String] = [],
+        uncompleteds: [TodoEventCellViewModel]? = nil
+    ) {
         self.extraTodoKeys = extraTodoKeys
         self.scheduleLineup = scheduleLineup
+        self.excludedEventIdPrefixes = excludedEventIdPrefixes
+        self.injectedUncompleteds = uncompleteds
     }
 
     private enum Constant {
@@ -532,6 +554,7 @@ private final class CatalogDayEventListViewModel: DayEventListViewModel, @unchec
         /// 03-09 ~ 03-11 종일 — upperBound 가 03-11 00:00 이라 3일로 표시된다
         static let tripPeriod: Range<TimeInterval> = 1_772_982_000..<1_773_154_800
         static let dentistPeriod: Range<TimeInterval> = 1_773_295_200..<1_773_298_800  // 15:00~16:00
+        static let sprintPeriod: Range<TimeInterval> = 1_773_291_600..<1_773_295_200  // 14:00~15:00
     }
 
     private let timeZone = TimeZone(identifier: "Asia/Seoul")!
@@ -541,6 +564,7 @@ private final class CatalogDayEventListViewModel: DayEventListViewModel, @unchec
     )
 
     private lazy var uncompleteds: [TodoEventCellViewModel] = {
+        if let injected = self.injectedUncompleteds { return injected }
         let todo = TodoEvent(uuid: "uncompleted", name: "catalog.todo::reply_landlord".catalogLocalized())
             |> \.time .~ .at(Constant.uncompletedTodoTime)
         let event = TodoCalendarEvent(todo, in: self.timeZone)
@@ -549,10 +573,7 @@ private final class CatalogDayEventListViewModel: DayEventListViewModel, @unchec
     }()
 
     private lazy var cells: [any EventCellViewModel] = {
-        let todos: [TodoEventCellViewModel] = [
-            self.currentTodoCell("todo1", "catalog.todo::water_plants".catalogLocalized()),
-            self.currentTodoCell("todo2", "catalog.todo::book_flight".catalogLocalized())
-        ] + self.extraTodoKeys.enumerated().map { index, key in
+        let todos: [TodoEventCellViewModel] = self.baseTodoCells + self.extraTodoKeys.enumerated().map { index, key in
             self.currentTodoCell("todo-extra-\(index)", key.catalogLocalized())
         }
         let schedules: [ScheduleEventCellViewModel] = self.scheduleEvents
@@ -560,8 +581,34 @@ private final class CatalogDayEventListViewModel: DayEventListViewModel, @unchec
         .compactMap {
             ScheduleEventCellViewModel($0, in: Constant.todayRange, timeZone: self.timeZone, false)
         }
-        return todos + schedules
+        guard self.scheduleLineup == .marketing else { return todos + schedules }
+        // 하루 목록은 시간순이라 구글 일정(09:30·14:00)을 내 일정(12:00·15:00) 사이에 끼운다
+        let googles = self.googleCells
+        return todos + [googles[0], schedules[0], googles[1], schedules[1]]
     }()
+
+    private var baseTodoCells: [TodoEventCellViewModel] {
+        guard self.scheduleLineup == .marketing else {
+            return [
+                self.currentTodoCell("todo1", "catalog.todo::water_plants".catalogLocalized()),
+                self.currentTodoCell("todo2", "catalog.todo::book_flight".catalogLocalized())
+            ]
+        }
+        return [
+            self.currentTodoCell("todo1", "catalog.todo::water_plants".catalogLocalized(), tagId: StoreCatalogEventTag.family.tagId),
+            self.currentTodoCell("todo2", "catalog.todo::book_flight".catalogLocalized(), tagId: StoreCatalogEventTag.study.tagId)
+        ]
+    }
+
+    private let googleCalendar = MarketingGoogleCalendar()
+
+    private var googleCells: [any EventCellViewModel] {
+        return [
+            self.googleCalendar.event("g-review", "catalog.event::design_review".catalogLocalized(), time: .at(Constant.designReviewTime)),
+            self.googleCalendar.event("g-sprint", "catalog.event::sprint_planning".catalogLocalized(), time: .period(Constant.sprintPeriod))
+        ]
+        .compactMap { GoogleCalendarEventCellViewModel($0, in: Constant.todayRange, self.timeZone, false) }
+    }
 
     private var scheduleEvents: [ScheduleEvent] {
         let review = ScheduleEvent(
@@ -577,6 +624,14 @@ private final class CatalogDayEventListViewModel: DayEventListViewModel, @unchec
                     time: .allDay(Constant.tripPeriod, secondsFromGMT: TimeInterval(self.timeZone.secondsFromGMT()))
                 )
             ]
+        case .marketing:
+            return [
+                ScheduleEvent(uuid: "sc2", name: "catalog.event::lunch_plans".catalogLocalized(), time: .period(Constant.lunchPeriod))
+                    |> \.eventTagId .~ StoreCatalogEventTag.family.tagId,
+                ScheduleEvent(
+                    uuid: "sc4", name: "catalog.event::dentist".catalogLocalized(), time: .period(Constant.dentistPeriod)
+                ) |> \.eventTagId .~ StoreCatalogEventTag.health.tagId
+            ]
         case .reviewDentist:
             return [
                 review,
@@ -588,11 +643,11 @@ private final class CatalogDayEventListViewModel: DayEventListViewModel, @unchec
     }
 
     private func currentTodoCell(
-        _ id: String, _ name: String, isForemost: Bool = false
+        _ id: String, _ name: String, isForemost: Bool = false, tagId: EventTagId? = nil
     ) -> TodoEventCellViewModel {
         return TodoEventCellViewModel(
             currentTodo: TodoCalendarEvent(
-                current: TodoEvent(uuid: id, name: name), isForemost: isForemost
+                current: TodoEvent(uuid: id, name: name) |> \.eventTagId .~ tagId, isForemost: isForemost
             )
         )
     }
@@ -611,7 +666,10 @@ private final class CatalogDayEventListViewModel: DayEventListViewModel, @unchec
             .eraseToAnyPublisher()
     }
     var cellViewModels: AnyPublisher<[any EventCellViewModel], Never> {
-        Just(self.cells).eraseToAnyPublisher()
+        let cells = self.cells.filter { cell in
+            !self.excludedEventIdPrefixes.contains(where: { cell.eventIdentifier.hasPrefix($0) })
+        }
+        return Just(cells).eraseToAnyPublisher()
     }
     var foremostEventMarkingStatus: AnyPublisher<ForemostMarkingStatus, Never> {
         Just(.idle).eraseToAnyPublisher()
@@ -908,7 +966,7 @@ private final class StoreCatalogContinuousMonthsViewModel: ContinuousMonthsViewM
 }
 
 /// 3월 19일에 다섯 줄을 겹쳐 `+N` 오버플로우가 나오게 한다.
-private final class StoreCatalogMonthViewModel: CatalogMonthViewModel, @unchecked Sendable {
+private class StoreCatalogMonthViewModel: CatalogMonthViewModel, @unchecked Sendable {
 
     override fileprivate func eventLines(at weekId: String) -> [[EventOnWeek]] {
         switch weekId {
@@ -1008,5 +1066,179 @@ private final class StoreCatalogMonthViewModel: CatalogMonthViewModel, @unchecke
             days: days, seq: seq, ids: days.map { "2026-\(month)-\($0)" },
             tagId: tagId, hasPeriod: hasPeriod
         )
+    }
+}
+
+
+// MARK: - 마케팅 소재
+
+/// 회사 캘린더(구글)는 파스텔 보라 하나로, 내 일정은 파스텔 푸른 계열로 칠해 두 출처가 색으로 갈리게 한다.
+private struct MarketingGoogleCalendar {
+    let accountId = "catalog"
+    let calendarId = "team@example.com"
+
+    var tag: GoogleCalendar.Tag {
+        return GoogleCalendar.Tag(id: self.calendarId, name: self.calendarId)
+            |> \.ownerId .~ self.accountId
+            |> \.backgroundColorHex .~ "#B9A4E3"
+    }
+
+    func event(_ id: String, _ name: String, time: EventTime) -> GoogleCalendarEvent {
+        let origin = GoogleCalendar.Event(
+            id, self.calendarId, accountId: self.accountId, name: name, colorId: nil, time: time
+        )
+        return GoogleCalendarEvent(origin, in: TimeZone(identifier: "Asia/Seoul")!)
+    }
+}
+
+private struct MarketingEventTagPalette {
+
+    var tags: [any EventTag] {
+        let hexes: [StoreCatalogEventTag: String] = [
+            .work: "#8DB6EF", .family: "#7BA7E6", .health: "#A8C8F4", .study: "#6E98DB"
+        ]
+        return [DefaultEventTag.default("#8DB6EF"), DefaultEventTag.holiday("#D6236A")]
+            + hexes.map { tag, hex in CustomEventTag(uuid: tag.key, name: tag.key.catalogLocalized(), colorHex: hex) }
+    }
+}
+
+/// 업무 성격 일정을 구글 캘린더 일정으로 바꿔 끼우고, 사람 이름이 든 약속은 이름 없는 일정으로 바꾼다 — 배치는 스토어 달력과 같다.
+private final class MarketingCatalogMonthViewModel: StoreCatalogMonthViewModel, @unchecked Sendable {
+
+    /// 치과를 3월 한 칸으로만 옮겨 놓을 때 그 칸 — 나머지 날의 치과는 지운다
+    struct DentistDay {
+        let weekId: String
+        let day: Int
+        let weekdaySeq: Int
+    }
+
+    private let googleEventPrefixes = ["sprint", "review", "workshop", "kickoff", "release"]
+    private let removedEventIds: Set<String> = ["holiday"]
+    private let renamedEventKeys = ["lunch": "catalog.event::lunch_plans", "dinner": "catalog.event::family_dinner"]
+    private let movedDentistDay: DentistDay?
+
+    init(movedDentistDay: DentistDay? = nil) {
+        self.movedDentistDay = movedDentistDay
+    }
+
+    // 한국 공휴일은 일본·미국 소재에서 남의 나라 날짜로 읽혀 뺀다
+    override fileprivate func eventLines(at weekId: String) -> [[EventOnWeek]] {
+        let lines = super.eventLines(at: weekId)
+            .map { line in line.filter { !self.removedEventIds.contains($0.eventId) } }
+            .filter { !$0.isEmpty }
+        guard let moved = self.movedDentistDay else { return lines }
+        return self.movingDentist(to: moved, lines: lines, at: weekId)
+    }
+
+    private func movingDentist(to moved: DentistDay, lines: [[EventOnWeek]], at weekId: String) -> [[EventOnWeek]] {
+        let withoutDentist = lines
+            .map { line in line.filter { !$0.eventId.hasPrefix("dentist") } }
+            .filter { !$0.isEmpty }
+        guard weekId == moved.weekId, let first = withoutDentist.first else { return withoutDentist }
+        let dentist = self.event(
+            "dentist-moved", "catalog.event::dentist".catalogLocalized(),
+            days: [moved.day], seq: moved.weekdaySeq...moved.weekdaySeq, ids: ["2026-3-\(moved.day)"],
+            tagId: StoreCatalogEventTag.health.tagId, hasPeriod: false
+        )
+        return [[dentist] + first] + withoutDentist.dropFirst()
+    }
+
+    override fileprivate func calendarEvent(
+        _ id: String, _ name: String, hasPeriod: Bool, tagId: EventTagId
+    ) -> any CalendarEvent {
+        guard self.googleEventPrefixes.contains(where: { id.hasPrefix($0) }) else {
+            let renamed = self.renamedEventKeys.first(where: { id.hasPrefix($0.key) }).map { $0.value.catalogLocalized() }
+            return super.calendarEvent(id, renamed ?? name, hasPeriod: hasPeriod, tagId: tagId)
+        }
+        return MarketingGoogleCalendar().event(id, name, time: hasPeriod ? .period(0..<1) : .at(0))
+    }
+}
+
+extension CalendarScenesCatalogSnapshots {
+
+    @MainActor
+    func test_marketingCalendar() {
+        captureSnapshotPair(
+            named: "marketingCalendar", layout: .fullScreen, snapshotDirectory: catalogSnapshotDirectory()
+        ) { theme in
+            let googleCalendar = MarketingGoogleCalendar()
+            let appearance = self.makeStoreAppearance(theme)
+            appearance.updateEventColorMap(by: MarketingEventTagPalette().tags)
+            appearance.applyCalendarTags([googleCalendar.tag], for: googleCalendar.accountId)
+            return self.makeStoreSingleColumnCalendarView(
+                theme,
+                appearance: appearance,
+                monthViewModel: MarketingCatalogMonthViewModel(),
+                dayListViewModel: CatalogDayEventListViewModel(scheduleLineup: .marketing)
+            )
+        }
+    }
+}
+
+extension CalendarScenesCatalogSnapshots {
+
+    private enum MarketingDayListConstant {
+        /// 2026-03-11(수) 18:00 KST — 카탈로그 오늘(3/12) 전날
+        static let reportDraftTime: TimeInterval = 1_773_219_600
+        static let todayRange: Range<TimeInterval> = 1_773_241_200..<1_773_327_600
+    }
+
+    @MainActor
+    private func makeMarketingCalendarAppearance() -> ViewAppearance {
+        let googleCalendar = MarketingGoogleCalendar()
+        let appearance = self.makeStoreAppearance(.light)
+        appearance.updateEventColorMap(by: MarketingEventTagPalette().tags)
+        appearance.applyCalendarTags([googleCalendar.tag], for: googleCalendar.accountId)
+        return appearance
+    }
+
+    @MainActor
+    func test_marketingUncompletedTodo() {
+        let timeZone = TimeZone(identifier: "Asia/Seoul")!
+        let reportDraft = TodoEvent(uuid: "uncompleted-report", name: "catalog.todo::send_report_draft".catalogLocalized())
+            |> \.time .~ .at(MarketingDayListConstant.reportDraftTime)
+            |> \.eventTagId .~ StoreCatalogEventTag.work.tagId
+        let uncompleteds = TodoEventCellViewModel(
+            TodoCalendarEvent(reportDraft, in: timeZone),
+            in: MarketingDayListConstant.todayRange, timeZone, false,
+            forceShowEventDateDurationText: true
+        )
+        .map { [$0 |> \.isUncompletedTodo .~ true] } ?? []
+
+        captureSnapshot(
+            named: "marketingUncompletedTodo", theme: .light, layout: .fullScreen,
+            snapshotDirectory: catalogSnapshotDirectory()
+        ) {
+            self.makeStoreSingleColumnCalendarView(
+                .light,
+                appearance: self.makeMarketingCalendarAppearance(),
+                monthViewModel: MarketingCatalogMonthViewModel(),
+                dayListViewModel: CatalogDayEventListViewModel(
+                    scheduleLineup: .marketing,
+                    excludedEventIdPrefixes: ["g-sprint"],
+                    uncompleteds: uncompleteds
+                )
+            )
+        }
+    }
+
+    @MainActor
+    func test_marketingMovedDentist() {
+        captureSnapshot(
+            named: "marketingMovedDentist", theme: .light, layout: .fullScreen,
+            snapshotDirectory: catalogSnapshotDirectory()
+        ) {
+            self.makeStoreSingleColumnCalendarView(
+                .light,
+                appearance: self.makeMarketingCalendarAppearance(),
+                monthViewModel: MarketingCatalogMonthViewModel(
+                    movedDentistDay: .init(weekId: "week:2", day: 17, weekdaySeq: 3)
+                ),
+                dayListViewModel: CatalogDayEventListViewModel(
+                    scheduleLineup: .marketing,
+                    excludedEventIdPrefixes: ["sc4"]
+                )
+            )
+        }
     }
 }

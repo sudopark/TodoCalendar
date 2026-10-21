@@ -5,6 +5,7 @@
 "catalog.event::holiday" = "Independence Movement Day";
 "catalog.event::project_kickoff" = "Project kickoff";
 "catalog.event::dentist" = "Dentist";
+"catalog.event::plan_deadline" = "Proposal deadline";
 "catalog.event::trip" = "Jeju trip";
 "catalog.event::design_review" = "Design review";
 "catalog.event::dinner" = "Dinner with Sara";
@@ -13,6 +14,8 @@
 "catalog.event::release_day" = "Release day";
 "catalog.event::lunch" = "Lunch with Sara";
 "catalog.event::anniversary" = "Wedding anniversary";
+"catalog.event::lunch_plans" = "Lunch plans";
+"catalog.event::family_dinner" = "Family dinner";
 
 // MARK: - 할일
 
@@ -24,6 +27,7 @@
 "catalog.todo::send_invoice" = "Send the invoice";
 "catalog.todo::cancel_subscription" = "Cancel the old subscription";
 "catalog.todo::return_books" = "Return the library books";
+"catalog.todo::send_report_draft" = "Send report draft";
 
 // MARK: - 이벤트 상세
 
@@ -41,6 +45,8 @@
 
 "catalog.ai::command" = "Lunch with Sara on Friday at noon";
 "catalog.ai::result" = "Added “Lunch with Sara” to Friday, March 13 at 12:00 PM.";
+"catalog.ai::move_dentist" = "Move dentist to next Tuesday";
+"catalog.share::flea_market_text" = "Autumn Flea Market\nSat, Oct 24 · 2:00 PM\nNeighborhood Park Lawn";
 
 // MARK: - 컬러 테마
 

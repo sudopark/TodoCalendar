@@ -5,6 +5,7 @@
 "catalog.event::holiday" = "삼일절";
 "catalog.event::project_kickoff" = "프로젝트 킥오프";
 "catalog.event::dentist" = "치과";
+"catalog.event::plan_deadline" = "기획안 마감";
 "catalog.event::trip" = "제주 여행";
 "catalog.event::design_review" = "디자인 리뷰";
 "catalog.event::dinner" = "사라랑 저녁";
@@ -13,6 +14,8 @@
 "catalog.event::release_day" = "릴리즈 날";
 "catalog.event::lunch" = "사라랑 점심";
 "catalog.event::anniversary" = "결혼기념일";
+"catalog.event::lunch_plans" = "점심 약속";
+"catalog.event::family_dinner" = "가족 외식";
 
 // MARK: - 할일
 
@@ -24,6 +27,7 @@
 "catalog.todo::send_invoice" = "청구서 보내기";
 "catalog.todo::cancel_subscription" = "안 쓰는 구독 해지하기";
 "catalog.todo::return_books" = "도서관 책 반납하기";
+"catalog.todo::send_report_draft" = "보고서 초안 보내기";
 
 // MARK: - 이벤트 상세
 
@@ -41,6 +45,8 @@
 
 "catalog.ai::command" = "금요일 12시에 사라랑 점심";
 "catalog.ai::result" = "“사라랑 점심”을 3월 13일 금요일 오후 12시에 추가했어요.";
+"catalog.ai::move_dentist" = "치과 다음 주 화요일로 옮겨줘";
+"catalog.share::flea_market_text" = "가을 플리마켓\n10월 24일 (토) 오후 2시\n동네 공원 잔디광장";
 
 // MARK: - 컬러 테마
 

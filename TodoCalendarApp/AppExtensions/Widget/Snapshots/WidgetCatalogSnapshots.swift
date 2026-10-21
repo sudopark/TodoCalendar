@@ -15,6 +15,7 @@ import Domain
 import Extensions
 import SnapshotTestHelpKit
 import WidgetScenes
+import CalendarPresentation
 
 @testable import TodoCalendarAppWidget
 
@@ -366,6 +367,209 @@ final class WidgetCatalogSnapshots: XCTestCase {
     func test_widgetAICommand() {
         self.capture("widget-ai-command", family: .systemSmall, canvas: WidgetCanvas.small) {
             AICommandShortcutWidgetView(look: .init(globalSetting: .init()))
+        }
+    }
+}
+
+
+// MARK: - 마케팅 소재
+
+extension WidgetCatalogSnapshots {
+
+    private var marketingPhotoPath: String {
+        let filePath = "\(#filePath)"
+        guard let range = filePath.range(of: "/TodoCalendarApp/") else { return filePath }
+        return "\(filePath[..<range.lowerBound])/snapshot-fixtures/marketing/dday-photo.jpg"
+    }
+
+    @MainActor
+    func test_marketingDDayPhoto() throws {
+        let path = self.marketingPhotoPath
+        guard FileManager.default.fileExists(atPath: path) else {
+            throw XCTSkip("마케팅 사진 원본이 없다 — gitignore 자리라 클론마다 넣어야 한다 (\(path))")
+        }
+        let url = URL(fileURLWithPath: path)
+        let target = Calendar.current.date(
+            from: DateComponents(year: 2026, month: 3, day: 26, hour: 7)
+        ) ?? Date()
+        let targetTime = EventTime.at(target.timeIntervalSince1970)
+        let style = WidgetStyle(
+            id: .init(variant: .ddayMedium, style: .custom(id: "photo")),
+            name: nil,
+            setting: DDayStyleSetting.initial,
+            photo: .init(id: nil, original: url, rendering: url)
+        )
+        let model = DDayWidgetViewModel(
+            eventTitle: "catalog.event::anniversary".catalogLocalized(),
+            ddayText: DDayText(14).text,
+            dateText: targetTime.ddayDateText(in: .current),
+            timeText: targetTime.ddayTimeText(in: .current),
+            repeatText: ""
+        )
+        |> \.look .~ WidgetLook(globalSetting: .init(), appliedStyle: style)
+        self.capture(
+            "marketing-dday-photo",
+            family: .systemMedium,
+            canvas: WidgetCanvas.medium,
+            plateView: {
+                WidgetBackgroundView(
+                    look: model.look,
+                    in: RoundedRectangle(cornerRadius: WidgetCanvas.cornerRadius, style: .continuous)
+                )
+            }
+        ) {
+            DDayMediumWidgetView(model: model)
+        }
+    }
+
+    @MainActor
+    func test_marketingTodayPink() {
+        let background = WidgetAppearanceSettings.Background.custom(hex: "#FBD3E0")
+        let style = WidgetStyle(
+            id: .init(variant: .todaySummarySmall, style: .custom(id: "pink")),
+            name: nil,
+            setting: TodayStyleSetting.initial,
+            background: background
+        )
+        let model = TodayWidgetViewModel.sample()
+            |> \.look .~ WidgetLook(globalSetting: .init(), appliedStyle: style)
+        self.capture(
+            "marketing-today-pink",
+            family: .systemSmall,
+            canvas: WidgetCanvas.small,
+            plateView: { Rectangle().fill(WidgetBackgroundStyle(background).shape) }
+        ) {
+            TodayWidgetView(entry: ResultTimelineEntry(date: Date(), result: .success(model)))
+        }
+    }
+
+    @MainActor
+    func test_marketingForemostSky() {
+        let background = WidgetAppearanceSettings.Background.custom(hex: "#D6E4FF")
+        let style = WidgetStyle(
+            id: .init(variant: .foremostSmall, style: .custom(id: "sky")),
+            name: nil,
+            setting: ForemostStyleSetting.initial,
+            background: background
+        )
+        let model = ForemostEventWidgetViewModel.sample()
+            |> \.look .~ WidgetLook(globalSetting: .init(), appliedStyle: style)
+        self.capture(
+            "marketing-foremost-sky",
+            family: .systemSmall,
+            canvas: WidgetCanvas.small,
+            plateView: { Rectangle().fill(WidgetBackgroundStyle(background).shape) }
+        ) {
+            ForemostEventWidgetView(entry: ResultTimelineEntry(date: Date(), result: .success(model)))
+        }
+    }
+}
+
+
+// MARK: - 마케팅 영상 장면
+
+extension WidgetCatalogSnapshots {
+
+    private enum DynamicIslandCanvas {
+        static let size = CGSize(width: 400, height: 190)
+        static let island = CGSize(width: 371, height: 160)
+        static let cornerRadius: CGFloat = 44
+    }
+
+    private func makeMarketingDeadlineActivityModel() -> EventCountdownActivityViewModel {
+        let eventDate = Date().addingTimeInterval(1 * 3600 + 58 * 60 + 23)
+        let displayTime = Calendar.current.date(
+            bySettingHour: 11, minute: 40, second: 0, of: Date()
+        ) ?? eventDate
+        let timeFormatter = DateFormatter()
+        timeFormatter.dateStyle = .none
+        timeFormatter.timeStyle = .short
+        let attributes = EventCountdownActivityAttributes(target: .todo(id: "plan-deadline"))
+        let state = EventCountdownActivityAttributes.State(
+            eventName: "catalog.event::plan_deadline".catalogLocalized(),
+            eventTimeText: timeFormatter.string(from: displayTime),
+            tagColorHex: "#2F6FED",
+            eventDate: eventDate,
+            startDate: eventDate.addingTimeInterval(-3 * 3600)
+        )
+        return EventCountdownActivityViewModel(attributes, state)
+    }
+
+    @MainActor
+    private func makeMarketingTodoCheckView(isChecked: Bool) -> some View {
+        let report = TodoEventCellViewModel(
+            currentTodo: TodoCalendarEvent(
+                current: TodoEvent(uuid: "report-draft", name: "catalog.todo::send_report_draft".catalogLocalized()),
+                isForemost: false
+            )
+        )
+        var model = TodayAndNextWidgetViewModel.sample()
+        let todayRows = model.left.rows.filter { $0 is TodayAndNextWidgetViewModel.TodayModel }
+        let otherRows = model.left.rows.filter { row in
+            guard let event = row as? TodayAndNextWidgetViewModel.EventModel else { return false }
+            return !(event.cvm is TodoEventCellViewModel)
+        }
+        model.left = .init(rows: todayRows + [TodayAndNextWidgetViewModel.EventModel(cvm: report)] + otherRows)
+        return TodayAndNextWidgetView(model: model) { cvm, color in
+            AnyView(
+                Toggle("", isOn: .constant(isChecked && cvm.eventIdentifier == report.eventIdentifier))
+                    .toggleStyle(
+                        TodoToggleStyle(
+                            colorSet: model.look.background.colorSet(true),
+                            size: 16, customColor: color
+                        )
+                    )
+            )
+        }
+    }
+
+    @MainActor
+    func test_marketingTodoCheck() {
+        self.capture("marketing-todo-check-before", family: .systemMedium, canvas: WidgetCanvas.medium) {
+            self.makeMarketingTodoCheckView(isChecked: false)
+        }
+        self.capture("marketing-todo-check-after", family: .systemMedium, canvas: WidgetCanvas.medium) {
+            self.makeMarketingTodoCheckView(isChecked: true)
+        }
+    }
+
+    @MainActor
+    func test_marketingLockScreenLiveActivity() {
+        self.captureLockScreen("marketing-lockscreen-live-activity", canvas: LockScreenCanvas.liveActivity) {
+            EventCountdownLockScreenView(model: self.makeMarketingDeadlineActivityModel(), isStale: false)
+        }
+    }
+
+    /// 아일랜드는 ActivityConfiguration 안에서만 그려져 스냅샷이 못 잡는다 — 펼친 영역 배치를 검은 알약 위에 같은 조각 뷰로 다시 세운다.
+    @MainActor
+    func test_marketingDynamicIsland() {
+        let model = self.makeMarketingDeadlineActivityModel()
+        self.captureLockScreen("marketing-dynamic-island", canvas: DynamicIslandCanvas.size) {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(alignment: .center) {
+                    EventCountdownSymbolBadge(diameter: 26)
+                        .padding(.leading, 6)
+                    Spacer()
+                    EventCountdownTimerText(
+                        model: model, isStale: false,
+                        liveFont: .system(size: 22, weight: .semibold),
+                        staleFont: .system(size: 14)
+                    )
+                    .padding(.trailing, 6)
+                }
+                Spacer(minLength: 0)
+                EventCountdownTitleBlock(model: model)
+                EventCountdownProgressBar(model: model)
+                EventCountdownActionButtonRow(model: model)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+            .frame(width: DynamicIslandCanvas.island.width, height: DynamicIslandCanvas.island.height)
+            .background(
+                RoundedRectangle(cornerRadius: DynamicIslandCanvas.cornerRadius, style: .continuous)
+                    .fill(Color.black)
+            )
+            .foregroundStyle(.white)
         }
     }
 }

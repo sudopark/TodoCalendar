@@ -1,18 +1,1 @@
-■ Tilpas widgets
-· Giv hver widget på Hjemmeskærmen sin egen baggrundsfarve, og vælg, hvad den viser – månedsnavn, ugedagsoverskrift, fremhævning af i dag og mere
-· Gem flere stilarter, og vælg en forskellig for hver kopi af en widget
-· Se hver widget på forhånd i Widget-galleri under Indstillinger, og gå direkte videre til Tilpas
-
-■ Farvetemaer
-· Ud over System, Lys og Mørk er der 19 nye indbyggede temaer – 11 lyse og 8 mørke
-· Vælg en baggrundsfarve og en accentfarve i Nyt tema, så finder appen selv en palet, hvor teksten er nem at læse
-· Log ind, så følger dine temaer med til dine andre enheder
-
-■ D-dag-widget
-· Tæl ned til de begivenheder, der betyder noget, på Hjemmeskærmen og Låseskærmen
-· Vælg "Føj til D-dag-widgeten" i en begivenheds menu, så står den øverst på listen, når du redigerer widgeten
-· Læg et foto bag den, så ligger nedtællingen oven på billedet
-
-■ To ruder på en bredere skærm
-· Med iPhone Duo foldet ud vises den valgte dags begivenheder ved siden af kalenderen
-· Fold den sammen, og du er straks tilbage til én kolonne, stadig på den måned og dag, du kiggede på
+· Fejlrettelser
