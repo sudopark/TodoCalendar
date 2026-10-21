@@ -12,6 +12,8 @@ extension Project {
     
     static let googleClientId: String = "dummy.id"
     static let googleReverseAppId: String = "id.dummy"
+    static let facebookAppId: String = "dummy.facebook.app.id"
+    static let facebookClientToken: String = "dummy.facebook.client.token"
 
     // debug signing
     public static let debugAppSigningSetting: SettingsDictionary = [:]

@@ -271,6 +271,9 @@ extension Project {
                 ],
                 "GIDClientID": "\(googleClientId)",
                 "GADApplicationIdentifier": "\(admobAppId)",
+                "FacebookAppID": "\(facebookAppId)",
+                "FacebookClientToken": "\(facebookClientToken)",
+                "FacebookDisplayName": "To-do Calendar",
                 "NSUserTrackingUsageDescription": "Tracking permission is used to show you more relevant ads.",
                 "SKAdNetworkItems": .array(
                     Project.skAdNetworkIdentifiers.map {
