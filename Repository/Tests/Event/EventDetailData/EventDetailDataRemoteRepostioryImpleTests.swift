@@ -59,7 +59,7 @@ extension EventDetailDataRemoteRepostioryImpleTests {
         
         // when
         let loading = repository.loadDetail("some")
-        let details = self.waitOutputs(expect, for: loading, timeout: 0.01)
+        let details = self.waitOutputs(expect, for: loading)
         
         // then
         XCTAssertEqual(details.count, 2)
@@ -84,7 +84,7 @@ extension EventDetailDataRemoteRepostioryImpleTests {
         
         // when
         let loading = repository.loadDetail("some")
-        let details = self.waitOutputs(expect, for: loading, timeout: 0.01)
+        let details = self.waitOutputs(expect, for: loading)
         
         // then
         XCTAssertEqual(details.count, 1)

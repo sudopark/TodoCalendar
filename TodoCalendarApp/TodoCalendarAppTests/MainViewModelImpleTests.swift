@@ -968,6 +968,8 @@ extension MainViewModelImpleTests {
             defaultTagColor: .init(holiday: "holiday", default: "default")
         )
         self.spyPaidFeatureGateUsecase.mockBlockedReason = isLicenseExpired ? self.licenseExpiredReason : nil
+        // 앱 기동(ApplicationPrepareUsecase)이 메인 진입 전에 저장된 외형 설정을 실어 둔다
+        _ = self.spyUISettingUsecase.loadSavedAppearanceSetting()
         return self.makeViewModelWithoutPrepare()
     }
 

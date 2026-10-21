@@ -14,7 +14,7 @@ import TestDoubles
 @testable import Domain
 
 
-class HolidayUsecaseImpleTests: BaseTestCase, PublisherWaitable {
+class HolidayUsecaseImpleTests: BaseTestCase, PublisherWaitable, AsyncEffectWaitable {
     
     var cancelBag: Set<AnyCancellable>!
     private var stubRepository: StubHolidayRepository!
@@ -268,24 +268,33 @@ extension HolidayUsecaseImpleTests {
         ])
     }
     
-    func testUsecase_refreshHolidays() {
+    func testUsecase_refreshHolidays() async throws {
         // given
-        let expect = expectation(description: "현재 공휴일 refresh")
         let usecase = self.makeUsecase(latestSelectedCountryCode: "kr")
-        expect.expectedFulfillmentCount = 3
-        
+        let holidayMapLock = NSLock()
+        var holidayMapEmissions: [[Int: [Holiday]]] = []
+
         // when
-        let holidayMap = self.waitOutputs(expect, for: usecase.holidays()) {
-            Task {
-                try await usecase.prepare()
-                try await usecase.refreshHolidays(2023)
-                
-                try await usecase.refreshHolidays()
-            }
+        let subscription = usecase.holidays()
+            .handleEvents(receiveOutput: { map in
+                holidayMapLock.lock(); defer { holidayMapLock.unlock() }
+                holidayMapEmissions.append(map)
+            })
+            .sink { _ in }
+        subscription.store(in: &self.cancelBag)
+
+        try await usecase.prepare()
+        try await usecase.refreshHolidays(2023)
+        try await usecase.refreshHolidays()
+
+        try await self.waitEffect("3개 공휴일 맵 도달") {
+            holidayMapLock.lock(); defer { holidayMapLock.unlock() }
+            return holidayMapEmissions.count >= 3
         }
-        
+
         // then
-        XCTAssertEqual(holidayMap, [
+        holidayMapLock.lock(); defer { holidayMapLock.unlock() }
+        XCTAssertEqual(holidayMapEmissions, [
             [:],
             [2023: [.init(uuid: "id-2023", dateString: "2023", name: "kr")]],
             [2023: [.init(uuid: "id-2023", dateString: "2023", name: "kr-v2")]]

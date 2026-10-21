@@ -17,7 +17,7 @@ import TestDoubles
 @testable import EventListScenes
 
 
-class DoneTodoListSectionModelImpleTests: BaseTestCase, PublisherWaitable {
+class DoneTodoListSectionModelImpleTests: BaseTestCase, PublisherWaitable, AsyncEffectWaitable {
     
     var cancelBag: Set<AnyCancellable>!
     private var spyRouter: SpyRouter!
@@ -35,14 +35,16 @@ class DoneTodoListSectionModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubTodoUsecase = nil
     }
     
-    private func makeViewModel() -> DoneTodoEventListViewModelImple {
+    private func makeViewModel(revertIsDelayed: Bool = false) -> DoneTodoEventListViewModelImple {
         let pagingUsecase = StubPagingUsecase()
         let calendarSettingUsecase = StubCalendarSettingUsecase()
         calendarSettingUsecase.prepare()
-        
+
         let uiSettingUsecase = StubUISettingUsecase()
         _ = uiSettingUsecase.loadSavedAppearanceSetting()
-        
+
+        self.stubTodoUsecase.revertIsDelayed = revertIsDelayed
+
         let viewModel = DoneTodoEventListViewModelImple(
             todoUsecase: self.stubTodoUsecase,
             pagingUsecase: pagingUsecase,
@@ -294,22 +296,36 @@ extension DoneTodoListSectionModelImpleTests {
         XCTAssertEqual(self.spyRouter.didRouteToDoneTodoDetail, "some")
     }
     
-    func testViewModel_cancelRevertingTodo() {
+    func testViewModel_cancelRevertingTodo() async throws {
         // given
-        let expect = expectation(description: "cancel reverting todo")
-        let viewModel = self.makeViewModel()
-        
+        let viewModel = self.makeViewModel(revertIsDelayed: true)
+        let sectionModelsLock = NSLock()
+        var sectionModelsEmissions: [[DoneTodoListSectionModel]] = []
+
         // when
-        let sections = self.waitOutputs(expect, for: viewModel.sectionModels) {
-            viewModel.loadList()
-            viewModel.revertDoneTodo("did:4")
-            viewModel.cancelRevertDoneTodo("did:4")
+        let subscription = viewModel.sectionModels
+            .handleEvents(receiveOutput: { sections in
+                sectionModelsLock.lock(); defer { sectionModelsLock.unlock() }
+                sectionModelsEmissions.append(sections)
+            })
+            .sink { _ in }
+        subscription.store(in: &self.cancelBag)
+
+        viewModel.loadList()
+        viewModel.revertDoneTodo("did:4")
+        viewModel.cancelRevertDoneTodo("did:4")
+
+        try await self.waitEffect("섹션 모델 첫 도달") {
+            sectionModelsLock.lock(); defer { sectionModelsLock.unlock() }
+            return sectionModelsEmissions.count >= 1
         }
-        
-        // then
-        let cellLists = sections.flatMap { ss in ss.map { $0.cells } }
-        XCTAssertEqual(cellLists.count, 1)
+
+        // then — 정착 창은 stub 의 revert 지연(100ms)보다 길어야 cancel 회귀의 두 번째 방출이 잡힌다
+        try? await Task.sleep(for: .milliseconds(200))
+        sectionModelsLock.lock(); defer { sectionModelsLock.unlock() }
+        let cellLists = sectionModelsEmissions.flatMap { ss in ss.map { $0.cells } }
         XCTAssertEqual(cellLists.first?.contains(where: { $0.uuid == "did:4" }), true)
+        XCTAssertEqual(sectionModelsEmissions.count, 1)
     }
     
     func testViewModel_removeDoneTodos() {

@@ -66,12 +66,21 @@ open class StubHolidayUsecase: HolidayUsecase {
     }
     
     public func refreshHolidays() async throws {
-        let oldValue = self.holidaysSubject.value ?? [:]
-        self.holidaysSubject.send(oldValue)
+        self.mutateHolidaysAtomically { $0 }
     }
-    
+
+    private func mutateHolidaysAtomically(
+        _ mutating: ([String: [Int: [Holiday]]]) -> [String: [Int: [Holiday]]]
+    ) {
+        self.holidaysRefreshLock.lock(); defer { self.holidaysRefreshLock.unlock() }
+        let oldMap = self.holidaysSubject.value ?? [:]
+        self.holidaysSubject.send(mutating(oldMap))
+    }
+
+    // 동시 refresh 의 read-modify-write 가 겹치면 먼저 쓴 연도가 유실된다
+    private let holidaysRefreshLock = NSLock()
     let holidaysSubject = CurrentValueSubject<[String: [Int: [Holiday]]]?, Never>(nil)
-    
+
     open func refreshHolidays(_ year: Int) async throws {
         guard let country = self.currentSelectedCountrySubject.value
         else { return }
@@ -82,10 +91,10 @@ open class StubHolidayUsecase: HolidayUsecase {
                 name: "holiday-\(int)-\(country.code)"
             )
         }
-        let oldMap = self.holidaysSubject.value ?? [:]
-        let newHolidays = (oldMap[country.code] ?? [:]) |> key(year) .~ holidays
-        let newMap = oldMap |> key(country.code) .~ newHolidays
-        self.holidaysSubject.send(newMap)
+        self.mutateHolidaysAtomically { oldMap in
+            let newHolidays = (oldMap[country.code] ?? [:]) |> key(year) .~ holidays
+            return oldMap |> key(country.code) .~ newHolidays
+        }
     }
     
     open func loadHolidays(_ year: Int) async throws -> [Holiday] {

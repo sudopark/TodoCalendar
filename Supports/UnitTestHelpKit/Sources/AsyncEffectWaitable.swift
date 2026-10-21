@@ -14,7 +14,7 @@ public struct AsyncEffectWaitTimeout: Error, CustomStringConvertible {
     public let timeoutMillis: Int
     public let description: String
     
-    init(timeoutMillis: Int, description: String) {
+    public init(timeoutMillis: Int, description: String) {
         self.timeoutMillis = timeoutMillis
         self.description = description
     }
