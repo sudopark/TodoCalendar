@@ -1,18 +1,1 @@
-■ Personalizați widgeturile
-· Dați fiecărui widget de pe ecranul principal propria culoare de fundal și alegeți ce afișează: numele lunii, antetul zilelor săptămânii, evidențierea zilei de azi și altele
-· Salvați mai multe stiluri și alegeți unul diferit pentru fiecare copie a unui widget
-· Previzualizați fiecare widget în Galerie de widgeturi, din Setări, și treceți direct la Personalizează
-
-■ Teme de culoare
-· În afară de Sistem, Deschisă și Întunecată, există 19 teme integrate noi: 11 deschise și 8 întunecate
-· Alegeți un fundal și o culoare de accent în Temă nouă, iar aplicația calculează o paletă care păstrează textul ușor de citit
-· Autentificați-vă și temele vă urmează pe celelalte dispozitive
-
-■ Widget Numărătoare inversă
-· Numărați invers până la evenimentele care contează, pe ecranul principal și pe ecranul de blocare
-· Alegeți „Adaugă la widgetul Numărătoare inversă” din meniul unui eveniment și apare în capul listei când editați widgetul
-· Puneți o fotografie în spate și numărătoarea apare deasupra
-
-■ Două panouri pe un ecran mai lat
-· Desfaceți iPhone Duo și evenimentele zilei alese apar lângă calendar
-· Închideți-l și reveniți imediat la o singură coloană, pe aceeași lună și zi pe care o vedeați
+· Remedieri de erori

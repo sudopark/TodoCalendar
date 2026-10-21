@@ -1,18 +1,1 @@
-■ Personalizza i widget
-· Dai a ogni widget della schermata Home un colore di sfondo tutto suo e scegli che cosa mostra: nome del mese, intestazione dei giorni della settimana, evidenziazione di oggi e altro
-· Salva più stili e scegline uno diverso per ogni copia di un widget
-· Guarda l'anteprima di ogni widget in Galleria widget, dentro Impostazioni, e passa direttamente a Personalizza
-
-■ Temi colore
-· Oltre a Sistema, Chiaro e Scuro, ci sono 19 nuovi temi integrati: 11 chiari e 8 scuri
-· Scegli uno sfondo e un colore d'accento in Nuovo tema, e l'app calcola una tavolozza che mantiene il testo facile da leggere
-· Accedi e i tuoi temi ti seguono sugli altri dispositivi
-
-■ Widget Giorno X
-· Conta alla rovescia gli eventi che contano, nella schermata Home e nella schermata di blocco
-· Scegli "Aggiungi al widget Giorno X" dal menu di un evento e compare in cima all'elenco quando modifichi il widget
-· Metti una foto dietro e il conto alla rovescia resta sopra
-
-■ Due pannelli su uno schermo più largo
-· Apri iPhone Duo e gli eventi del giorno scelto compaiono accanto al calendario
-· Chiudilo e torni subito a una sola colonna, sul mese e sul giorno che stavi guardando
+· Correzioni di bug

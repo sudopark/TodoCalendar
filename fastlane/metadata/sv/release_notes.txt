@@ -1,18 +1,1 @@
-■ Anpassa widgetar
-· Ge varje widget på hemskärmen sin egen bakgrundsfärg och välj vad den visar: månadens namn, veckodagsrubrik, markering av idag och mer
-· Spara flera stilar och välj en annan för varje kopia av en widget
-· Förhandsvisa varje widget i Widgetgalleri under Inställningar och gå direkt till Anpassa
-
-■ Färgteman
-· Förutom System, Ljust och Mörkt finns 19 nya inbyggda teman: 11 ljusa och 8 mörka
-· Välj bakgrund och accentfärg i Nytt tema, så räknar appen fram en palett som gör texten lätt att läsa
-· Logga in så följer dina teman med till dina andra enheter
-
-■ D-dag-widget
-· Räkna ner till de händelser som betyder något, på hemskärmen och låsskärmen
-· Välj ”Lägg till i D-dag-widgeten” i en händelses meny, så hamnar den överst i listan när du redigerar widgeten
-· Lägg ett foto bakom så syns nedräkningen ovanpå
-
-■ Två paneler på en bredare skärm
-· Vik ut iPhone Duo så visas händelserna för den valda dagen bredvid kalendern
-· Vik ihop den så är du genast tillbaka i en kolumn, kvar på månaden och dagen du tittade på
+· Buggfixar

@@ -1,18 +1,1 @@
-■ Prispôsobte widgety
-· Dajte každému widgetu na domovskej obrazovke vlastnú farbu pozadia a vyberte, čo zobrazuje – názov mesiaca, záhlavie dní v týždni, zvýraznenie dnešného dňa a ďalšie
-· Uložte si niekoľko štýlov a pre každú kópiu widgetu vyberte iný
-· Pozrite si každý widget v Galéria widgetov v Nastaveniach a prejdite rovno na Prispôsobiť
-
-■ Farebné témy
-· Okrem možností Systémová, Svetlá a Tmavá pribudlo 19 nových vstavaných tém – 11 svetlých a 8 tmavých
-· V Nová téma vyberte farbu pozadia a farbu zvýraznenia a aplikácia sama zostaví paletu, v ktorej je text dobre čitateľný
-· Prihláste sa a vaše témy vás budú sprevádzať aj na ďalších zariadeniach
-
-■ Widget Odpočet
-· Odpočítavajte dni do dôležitých udalostí na domovskej obrazovke aj na uzamknutej obrazovke
-· V ponuke udalosti zvoľte „Pridať do widgetu Odpočet“ a pri úprave widgetu sa zobrazí na začiatku zoznamu
-· Dajte mu na pozadie fotku a odpočet bude vidieť nad ňou
-
-■ Dva panely na širšej obrazovke
-· Rozložte iPhone Duo a udalosti vybraného dňa sa zobrazia vedľa kalendára
-· Zložte ho a okamžite sa vrátite k jednému stĺpcu, stále na mesiaci a dni, ktoré ste si prezerali
+· Opravy chýb

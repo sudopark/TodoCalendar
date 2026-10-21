@@ -1,18 +1,1 @@
-■ Personalitzeu els widgets
-· Doneu a cada widget de la pantalla d'inici el seu propi color de fons i trieu què mostra: nom del mes, capçalera dels dies de la setmana, ressaltat d'avui i més
-· Deseu diversos estils i trieu-ne un de diferent per a cada còpia d'un widget
-· Previsualitzeu cada widget a Galeria de widgets, dins de Configuració, i aneu directament a Personalitza
-
-■ Temes de color
-· A més de Sistema, Clar i Fosc, hi ha 19 temes integrats nous: 11 de clars i 8 de foscos
-· Trieu un fons i un color d'accent a Tema nou, i l'app calcula una paleta que manté el text fàcil de llegir
-· Inicieu sessió i els vostres temes us segueixen als altres dispositius
-
-■ Widget de Dia D
-· Compteu enrere fins als esdeveniments que importen, a la pantalla d'inici i a la pantalla de bloqueig
-· Trieu "Afegeix al widget de Dia D" al menú d'un esdeveniment i apareix al capdamunt de la llista quan editeu el widget
-· Poseu-hi una foto al darrere i el compte enrere es mostra a sobre
-
-■ Dos panells en una pantalla més ampla
-· Desplegueu l'iPhone Duo i els esdeveniments del dia triat apareixen al costat del calendari
-· Plegueu-lo i torneu a l'instant a una sola columna, al mateix mes i dia que miràveu
+· Correccions d'errors

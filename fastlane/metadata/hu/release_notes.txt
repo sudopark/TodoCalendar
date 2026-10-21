@@ -1,18 +1,1 @@
-■ Widgetek testreszabása
-· Minden kezdőképernyős widgetnek külön háttérszínt adhat, és kiválaszthatja, mi jelenjen meg rajta: hónapnév, hétköznapok fejléce, a mai nap kiemelése és sok más
-· Több stílust is elmenthet, és a widget minden példányához más stílust választhat
-· A Beállítások Widgetgaléria részében megnézheti az egyes widgetek előnézetét, és innen egyből a Testreszabás oldalra léphet
-
-■ Színtémák
-· A Rendszer, a Világos és a Sötét mellett 19 új beépített téma érhető el: 11 világos és 8 sötét
-· Az Új téma oldalon kiválaszthatja a háttér- és a kiemelőszínt, az alkalmazás pedig olyan színkombinációt állít össze, amelyben a szöveg jól olvasható marad
-· Jelentkezzen be, és a témái követik Önt a többi eszközére is
-
-■ Visszaszámlálás widget
-· Számolja vissza a napokat a fontos eseményekig a kezdőképernyőn és a zárolt képernyőn is
-· Válassza az esemény menüjében a „Hozzáadás a Visszaszámlálás widgethez” lehetőséget, és a widget szerkesztésekor az esemény a lista elejére kerül
-· Tegyen mögé egy fotót, és a visszaszámlálás a fotón jelenik meg
-
-■ Két panel a szélesebb képernyőn
-· Nyissa szét az iPhone Duót, és a kiválasztott nap eseményei a naptár mellett jelennek meg
-· Csukja össze, és azonnal újra egyoszlopos lesz a nézet, ugyanazon a hónapon és napon, amelyet éppen nézett
+· Hibajavítások

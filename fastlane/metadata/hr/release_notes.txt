@@ -1,18 +1,1 @@
-■ Prilagodite widgete
-· Svakom widgetu na početnom zaslonu dajte vlastitu boju pozadine i odaberite što prikazuje – naziv mjeseca, zaglavlje dana u tjednu, isticanje današnjeg dana i više
-· Spremite nekoliko stilova i za svaku kopiju widgeta odaberite drukčiji
-· Pregledajte svaki widget u Galerija widgeta u Postavkama i odmah prijeđite na Prilagodi
-
-■ Teme boja
-· Uz Sustav, Svijetla i Tamna dostupno je 19 novih ugrađenih tema – 11 svijetlih i 8 tamnih
-· U Nova tema odaberite boju pozadine i boju isticanja, a aplikacija će složiti paletu na kojoj se tekst lako čita
-· Prijavite se i vaše će vas teme pratiti na drugim uređajima
-
-■ Widget Odbrojavanje
-· Odbrojavajte dane do važnih događaja na početnom zaslonu i zaslonu zaključavanja
-· U izborniku događaja odaberite „Dodaj u widget Odbrojavanje“ i on će se pojaviti na vrhu popisa kad uređujete widget
-· Postavite fotografiju iza njega i odbrojavanje će biti vidljivo preko slike
-
-■ Dva okvira na širem zaslonu
-· Otvorite iPhone Duo i događaji odabranog dana prikazat će se pokraj kalendara
-· Sklopite ga i odmah ste opet u jednom stupcu, još uvijek na mjesecu i danu koje ste gledali
+· Ispravci pogrešaka

@@ -1,1 +1,1 @@
-3.1.0 — Alakítsa ízlése szerint a widgeteket, és színezze át az appot 19 beépített vagy saját témával. Új a Visszaszámlálás widget, az iPhone Duón pedig kétpaneles nézet.
+3.1.1 — Alakítsa ízlése szerint a widgeteket, és színezze át az appot 19 beépített vagy saját témával. Új a Visszaszámlálás widget, az iPhone Duón pedig kétpaneles nézet.

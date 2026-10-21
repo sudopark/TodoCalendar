@@ -1,18 +1,1 @@
-■ Customize widgets
-· Give each Home Screen widget its own background color and choose what it shows — month name, weekday header, today highlight and more
-· Save several styles and pick a different one for each copy of a widget
-· Preview every widget in Widget gallery in Settings and go straight to Customize
-
-■ Color themes
-· Beyond System, Light and Dark, there are 19 new built-in themes — 11 light and 8 dark
-· Pick a background and an accent color in New theme, and the app works out a palette that keeps text easy to read
-· Sign in and your themes follow you to your other devices
-
-■ D-Day widget
-· Count down to the events that matter, on the Home Screen and the Lock Screen
-· Choose "Add to D-day widget" from an event's menu and it appears at the top of the list when you edit the widget
-· Put a photo behind it and the countdown sits on top
-
-■ Two panes on a wider screen
-· With iPhone Duo unfolded, the events of the day you picked appear beside the calendar
-· Fold it and it's back to one column at once, still on the month and day you were viewing
+· Bug fixes

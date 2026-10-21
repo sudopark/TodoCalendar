@@ -1,18 +1,1 @@
-■ Widgets aanpassen
-· Geef elke widget op het beginscherm een eigen achtergrondkleur en kies wat hij toont: maandnaam, kop met weekdagen, markering van vandaag en meer
-· Bewaar meerdere stijlen en kies voor elke kopie van een widget een andere
-· Bekijk elke widget vooraf in Widgetgalerij onder Instellingen en ga direct naar Aanpassen
-
-■ Kleurthema's
-· Naast Systeem, Licht en Donker zijn er 19 nieuwe ingebouwde thema's: 11 lichte en 8 donkere
-· Kies in Nieuw thema een achtergrond en een accentkleur, en de app stelt een palet samen waarin de tekst goed leesbaar blijft
-· Log in en je thema's volgen je naar je andere apparaten
-
-■ D-Day-widget
-· Tel af naar de gebeurtenissen die ertoe doen, op het beginscherm en het toegangsscherm
-· Kies „Toevoegen aan D-Day-widget” in het menu van een gebeurtenis en hij staat bovenaan de lijst als je de widget bewerkt
-· Zet er een foto achter en de aftelling staat erbovenop
-
-■ Twee vensters op een breder scherm
-· Vouw de iPhone Duo open en de gebeurtenissen van de gekozen dag verschijnen naast de kalender
-· Vouw hem dicht en je zit meteen weer in één kolom, nog op de maand en dag die je bekeek
+· Bugfixes

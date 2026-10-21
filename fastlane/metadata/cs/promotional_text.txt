@@ -1,1 +1,1 @@
-3.1.0 — Upravte si widgety a změňte barvy aplikace pomocí 19 nových vestavěných témat nebo vlastního. K tomu nový widget Odpočet a dva panely na iPhone Duo.
+3.1.1 — Upravte si widgety a změňte barvy aplikace pomocí 19 nových vestavěných témat nebo vlastního. K tomu nový widget Odpočet a dva panely na iPhone Duo.

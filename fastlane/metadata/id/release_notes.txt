@@ -1,18 +1,1 @@
-■ Kustomisasi widget
-· Pilih warna latar dan item yang ditampilkan (nama bulan, header hari, sorotan hari ini, dan lainnya) untuk setiap widget di Layar Utama
-· Simpan beberapa gaya, lalu pilih gaya yang berbeda untuk tiap salinan widget
-· Pratinjau setiap widget di Galeri widget pada Pengaturan, lalu langsung masuk ke Sesuaikan
-
-■ Tema warna
-· Selain Sistem, Terang, dan Gelap, ada 19 tema bawaan baru: 11 tema terang dan 8 tema gelap
-· Pilih warna latar dan warna aksen di Tema baru, dan aplikasi akan menyusun palet yang membuat teks tetap mudah dibaca
-· Masuk ke akun Anda, dan tema Anda ikut tersedia di perangkat lain
-
-■ Widget H-Day
-· Hitung mundur menuju acara penting, di Layar Utama maupun Layar Kunci
-· Pilih "Tambahkan ke widget H-Day" dari menu sebuah acara, dan acara itu muncul di urutan teratas daftar saat Anda mengedit widget
-· Pasang foto sebagai latar, dan hitung mundur tampil di atasnya
-
-■ Dua panel di layar lebar
-· Buka iPhone Duo, dan acara pada hari yang Anda pilih muncul di samping kalender
-· Lipat kembali, dan tampilan langsung kembali ke satu kolom, tetap di bulan dan hari yang sedang Anda lihat
+· Perbaikan bug
