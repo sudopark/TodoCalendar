@@ -75,7 +75,6 @@ extension ApplicationDeepLinkHandlerImple {
             |> \.confirmText .~ "common.update".localized()
             |> \.confirmed .~ confirmed
             |> \.withCancel .~ true
-            |> \.cancelText .~ "common.cancel"
         
         self.appRouter?.showConfirm(dialog: info)
     }
