@@ -231,7 +231,9 @@ extension CalendarViewModelImpleTests {
         // given
         let expect = expectation(description: "초기 월 세팅 대기")
         let viewModel = self.makeViewModel(today: today)
-        self.spyRouter.didInitialMonthsAttached = { expect.fulfill() }
+        viewModel.focusedMonth.first()
+            .sink(receiveValue: { _ in expect.fulfill() })
+            .store(in: &self.cancelBag)
         
         // when
         viewModel.prepare()
@@ -587,8 +589,12 @@ extension CalendarViewModelImpleTests {
 
         // when
         viewModel.changeFocusedMonth(to: .init(year: 2023, month: 11))
-        try await self.waitEffect("포커스 월이 11월로 바뀜") {
+        try await self.waitEffect("포커스 월이 11월로 바뀌고 창이 재구성됨") {
             focusedMonths.values.last == .init(year: 2023, month: 11)
+                && self.spyRouter.didChangedFocusIndex == 1
+                && self.spyRouter.spyInteractors.map { $0.currentMonth } == [
+                    .init(year: 2023, month: 10), .init(year: 2023, month: 11), .init(year: 2023, month: 12)
+                ]
         }
 
         // then
@@ -611,7 +617,9 @@ extension CalendarViewModelImpleTests {
         viewModel.changeFocusedMonth(to: .init(year: 2023, month: 08))
         try await self.waitEffect("오늘이 속한 달로 포커스가 오면 오늘을 선택") {
             selectedDays.values.last == .init(2023, 08, 02)
+                && self.spyRouter.spyInteractors[1].didSelectTodayRequested == true
         }
+        try await self.settle()
 
         // then
         XCTAssertEqual(self.spyRouter.spyInteractors[1].didSelectTodayRequested, true)
@@ -629,7 +637,9 @@ extension CalendarViewModelImpleTests {
         viewModel.changeFocusedMonth(to: .init(year: 2023, month: 11))
         try await self.waitEffect("다른 달로 포커스가 오면 1일을 선택") {
             selectedDays.values.last == .init(2023, 11, 01)
+                && self.spyRouter.spyInteractors[1].didSelectDay == .init(2023, 11, 01)
         }
+        try await self.settle()
 
         // then
         XCTAssertEqual(self.spyRouter.spyInteractors[1].didSelectDay, .init(2023, 11, 01))
@@ -714,7 +724,10 @@ extension CalendarViewModelImpleTests {
         viewModel.selectDay(.init(2023, 08, 20))
         try await self.waitEffect("헤더에 8월 20일 통지") {
             notifications.values.last?.dayInfo == .init(2023, 08, 20)
+                && selectedDays.values.last == .init(2023, 08, 20)
+                && self.spyRouter.spyInteractors[1].didSelectDay == .init(2023, 08, 20)
         }
+        try await self.settle()
 
         // then
         XCTAssertEqual(selectedDays.values.last, .init(2023, 08, 20))
@@ -734,7 +747,9 @@ extension CalendarViewModelImpleTests {
         viewModel.selectDay(.init(2023, 09, 20))
         try await self.waitEffect("9월 20일 선택") {
             selectedDays.values.last == .init(2023, 09, 20)
+                && self.spyRouter.spyInteractors[2].didSelectDay == .init(2023, 09, 20)
         }
+        try await self.settle()
 
         // then
         XCTAssertEqual(self.spyRouter.spyInteractors[2].didSelectDay, .init(2023, 09, 20))
@@ -770,8 +785,13 @@ extension CalendarViewModelImpleTests {
 
         // when
         viewModel.selectDay(.init(2023, 09, 20))
-        try await self.waitEffect("9월 20일 선택") {
-            selectedDays.values.last == .init(2023, 09, 20)
+        try await self.waitEffect("9월 20일 선택이 포커스 이동·가운데 칸까지 전파") {
+            self.spyRouter.spyInteractors.count > 1
+                && self.spyRouter.spyInteractors[1].didSelectDay == .init(2023, 09, 20)
+                && self.spyRouter.spyInteractors.map { $0.currentMonth } == [
+                    .init(year: 2023, month: 08), .init(year: 2023, month: 09), .init(year: 2023, month: 10)
+                ]
+                && focusedMonths.values.last == .init(year: 2023, month: 09)
         }
 
         // then
@@ -791,12 +811,11 @@ extension CalendarViewModelImpleTests {
         viewModel.focusChanged(from: 1, to: 2)
         viewModel.focusChanged(from: 2, to: 0)
         viewModel.calendarPaper(on: .init(year: 2023, month: 11), didChange: .dummy(2023, 11, 15))
-        let selectedDays = self.record(viewModel.selectedDay)
 
         // when
         viewModel.changeFocusedMonth(to: .init(year: 2023, month: 11))
         try await self.waitEffect("가운데 칸에 있던 11월로 포커스가 오면 1일로 다시 선택") {
-            selectedDays.values.last == .init(2023, 11, 01)
+            self.spyRouter.spyInteractors[1].didSelectDay == .init(2023, 11, 01)
         }
 
         // then
@@ -1574,11 +1593,7 @@ extension CalendarViewModelImpleTests {
 
         // then
         try await self.waitEffect("오늘이 속한 달로 되돌아온다") {
-            self.spyRouter.spyInteractors.map { $0.currentMonth } == [
-                .init(year: 2023, month: 07),
-                .init(year: 2023, month: 08),
-                .init(year: 2023, month: 09)
-            ]
+            self.spyRouter.spyInteractors.map { $0.didSelectTodayRequested } == [nil, true, nil]
         }
         XCTAssertEqual(self.spyRouter.spyInteractors.map { $0.didSelectTodayRequested }, [nil, true, nil])
     }
@@ -1627,15 +1642,11 @@ extension CalendarViewModelImpleTests {
 
 extension CalendarViewModelImpleTests {
 
-    // prepare() → prepareInitialMonths의 Task가 monthsInCurrentRange를 채울 때까지 대기.
-    // didInitialMonthsAttached는 send 직전에 불려 한 틱 양보가 필요하다.
     private func prepareInitialMonths(_ viewModel: CalendarViewModelImple) async throws {
-        let expect = expectation(description: "초기 월 구성 완료 대기")
-        self.spyRouter.didInitialMonthsAttached = { expect.fulfill() }
+        let focusedMonths = self.record(viewModel.focusedMonth)
         viewModel.prepare()
-        await self.fulfillment(of: [expect], timeout: self.timeout)
-        self.spyRouter.didInitialMonthsAttached = nil
-        try await Task.sleep(for: .milliseconds(10))
+        try await self.waitEffect("초기 월 구성 완료") { !focusedMonths.values.isEmpty }
+        await MainActor.run { }
     }
 
     func testViewModel_whenRequestAIEntryOnCommandPhase_routeToAICommand() async throws {
@@ -1929,6 +1940,7 @@ extension CalendarViewModelImpleTests {
 
         // then
         try await self.waitEffect("포커스 paper 로 스크롤") { self.scrollToVoiceInputCountsOfPapers == [0, 1, 0] }
+        try await self.settle()
         XCTAssertEqual(self.spyRouter.spyTwoColumnsInteractor?.didScrollToVoiceInputCount, 0)
     }
 
@@ -1960,7 +1972,10 @@ extension CalendarViewModelImpleTests {
         viewModel.calendarTwoColumnsDidRequestReturnToToday()
 
         // then
-        try await self.waitEffect("오늘로 돌아온다") { twoColumns.didSelectDays.last == .init(2023, 08, 02) }
+        try await self.waitEffect("오늘로 돌아온다") {
+            twoColumns.didSelectDays.last == .init(2023, 08, 02)
+                && twoColumns.didChangeFocusedMonths.last == .init(year: 2023, month: 08)
+        }
         XCTAssertEqual(twoColumns.didChangeFocusedMonths.last, .init(year: 2023, month: 08))
     }
 

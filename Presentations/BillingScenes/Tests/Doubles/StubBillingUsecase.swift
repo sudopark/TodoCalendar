@@ -27,6 +27,9 @@ final class StubBillingUsecase: BillingUsecase, @unchecked Sendable {
     private let userPlanSubject: CurrentValueSubject<BillingUserPlan?, Never>
     private let hasUnfinished: Bool
     private let applyUnfinishedResult: Result<BillingUserPlan?, any Error>
+    // 연타 시나리오는 첫 처리가 끝나기 전에 두 번째 탭이 들어와야 성립한다 — 풀어 줄 때까지 처리를 붙잡는다
+    private let heldActionRelease: AsyncStream<Void>?
+    private let heldActionReleaseContinuation: AsyncStream<Void>.Continuation?
 
     // 호출 기록 — 검증은 테스트 케이스가 한다
     var didPurchasedProductId: String?
@@ -51,7 +54,8 @@ final class StubBillingUsecase: BillingUsecase, @unchecked Sendable {
         restoreError: (any Error)? = nil,
         userPlanLoadError: (any Error)? = nil,
         hasUnfinished: Bool = false,
-        applyUnfinishedResult: Result<BillingUserPlan?, any Error> = .success(nil)
+        applyUnfinishedResult: Result<BillingUserPlan?, any Error> = .success(nil),
+        holdsActionsUntilReleased: Bool = false
     ) {
         self.stubOfferings = offerings
         self.stubTopupOfferings = topupOfferings
@@ -64,6 +68,23 @@ final class StubBillingUsecase: BillingUsecase, @unchecked Sendable {
         self.userPlanSubject = .init(userPlan)
         self.hasUnfinished = hasUnfinished
         self.applyUnfinishedResult = applyUnfinishedResult
+        if holdsActionsUntilReleased {
+            let (stream, continuation) = AsyncStream<Void>.makeStream()
+            self.heldActionRelease = stream
+            self.heldActionReleaseContinuation = continuation
+        } else {
+            self.heldActionRelease = nil
+            self.heldActionReleaseContinuation = nil
+        }
+    }
+
+    func releaseHeldActions() {
+        self.heldActionReleaseContinuation?.yield(())
+    }
+
+    private func waitReleaseIfHeld() async {
+        guard let heldActionRelease else { return }
+        for await _ in heldActionRelease { break }
     }
 
     func loadPlanOfferings() async throws -> [BillingPlanOffering] {
@@ -79,6 +100,7 @@ final class StubBillingUsecase: BillingUsecase, @unchecked Sendable {
     // 재방출된다 — 스텁도 push 해야 "구매 후 화면이 갱신된다"가 테스트로 관찰된다
     func purchase(productId: String) async throws -> BillingPurchaseResult {
         self.didPurchasedProductId = productId
+        await self.waitReleaseIfHeld()
         let result = try self.stubPurchaseResult.get()
         if case .applied(let plan) = result {
             self.userPlanSubject.send(plan)
@@ -119,6 +141,7 @@ final class StubBillingUsecase: BillingUsecase, @unchecked Sendable {
 
     func applyUnfinishedTransactions() async throws -> BillingUserPlan? {
         self.didApplyUnfinishedTimes += 1
+        await self.waitReleaseIfHeld()
         let applied = try self.applyUnfinishedResult.get()
         if let applied {
             self.userPlanSubject.send(applied)

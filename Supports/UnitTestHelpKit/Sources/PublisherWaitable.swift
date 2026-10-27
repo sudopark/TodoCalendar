@@ -125,8 +125,8 @@ extension PublisherWaitable {
             let store = WaitableOutputStore<P.Output>()
             let cancellable = source
                 .sink { _ in } receiveValue: { output in
-                    store.append(output)
                     confirm()
+                    store.append(output)
                 }
             cancellable.store(in: &self.cancelBag)
 
@@ -163,8 +163,8 @@ extension PublisherWaitable {
             let cancellable = source
                 .sink { completion in
                     guard case let .failure(failure) = completion else { return }
-                    store.append(failure)
                     confirm()
+                    store.append(failure)
                 } receiveValue: { _ in }
             cancellable.store(in: &self.cancelBag)
 

@@ -17,7 +17,7 @@ import TestDoubles
 @testable import Domain
 
 
-class EventNotificationUsecaseImpleTests: BaseTestCase {
+class EventNotificationUsecaseImpleTests: BaseTestCase, AsyncEffectWaitable {
 
     private var stubTodoUsecase: PrivateStubTodoEventUsecase!
     private var stubScheduleUsecase: PrivateStubScheduleEventUsecase!
@@ -140,29 +140,35 @@ extension EventNotificationUsecaseImpleTests {
     }
 
     // 이미 등록된 todo 삭제된 경우 알림 해제
-    func testUsecase_whenAlreadyScheduledTodoRemoved_removePendingNotification() {
+    func testUsecase_whenAlreadyScheduledTodoRemoved_removePendingNotification() async throws {
         // given
         let usecase = self.makeUsecaseWithInitialSync()
-        let expectForRemove = expectation(description: "이미 등록된 todo 삭제된 경우 알림 해제")
-        let expectForAdd = expectation(description: "신규 등록 없어서 add는 안됨")
-        expectForAdd.isInverted = true
-
+        let recordLock = NSLock()
         var removedPendingNotificationIds: [String]?
-        self.spyNotificationService.didPendingNotificationsRemoved = {
-            removedPendingNotificationIds = $0
-            expectForRemove.fulfill()
+        var didScheduleNewNotification = false
+
+        self.spyNotificationService.didPendingNotificationsRemoved = { ids in
+            recordLock.lock(); defer { recordLock.unlock() }
+            removedPendingNotificationIds = ids
         }
         self.spyNotificationService.didNotificationScheduled = { _ in
-            expectForAdd.fulfill()
+            recordLock.lock(); defer { recordLock.unlock() }
+            didScheduleNewNotification = true
         }
 
         // when
         self.stubTodoUsecase.makeTodoChangeInPeriodEvent([
             pastTodo, todoWithoutTime, futureTodoEvent1, futureTodoWithCustomTime
         ])
-        self.wait(for: [expectForRemove, expectForAdd], timeout: 0.5)
+        try await self.waitEffect("이미 등록된 todo 삭제된 경우 알림 해제") {
+            recordLock.lock(); defer { recordLock.unlock() }
+            return removedPendingNotificationIds != nil
+        }
+        try await Task.sleep(for: .milliseconds(50))
 
         // then
+        recordLock.lock(); defer { recordLock.unlock() }
+        XCTAssertFalse(didScheduleNewNotification)
         XCTAssertEqual(removedPendingNotificationIds?.count, 1)
         XCTAssertEqual(self.spyNotificationRepository.eventAndNotificationSets.count, 2)
         XCTAssertEqual(self.spyNotificationRepository.eventAndNotificationSets[futureTodoEvent2.uuid], nil)
@@ -253,29 +259,35 @@ extension EventNotificationUsecaseImpleTests {
     }
 
     // 이미 등록된 일정이 삭제된 경우 알림 삭제
-    func testUsecase_whenScheduleEventRemoved_cancelPendingTodo() {
+    func testUsecase_whenScheduleEventRemoved_cancelPendingTodo() async throws {
         // given
         let usecase = self.makeUsecaseWithInitialSyncSchedules()
-        let expectForRemove = expectation(description: "이미 등록된 일정이 삭제된 경우 알림 삭제")
-        let expectForAdd = expectation(description: "변경사항 없어서 신규추가 없음")
-        expectForAdd.isInverted = true
-
+        let recordLock = NSLock()
         var removedIds: [String]?
-        self.spyNotificationService.didPendingNotificationsRemoved = {
-            removedIds = $0
-            expectForRemove.fulfill()
+        var didScheduleNewNotification = false
+
+        self.spyNotificationService.didPendingNotificationsRemoved = { ids in
+            recordLock.lock(); defer { recordLock.unlock() }
+            removedIds = ids
         }
         self.spyNotificationService.didNotificationScheduled = { _ in
-            expectForAdd.fulfill()
+            recordLock.lock(); defer { recordLock.unlock() }
+            didScheduleNewNotification = true
         }
 
         // when
         self.stubScheduleUsecase.makeScheduleChangeInPeriodEvent([
             pastSchedule, scheduleWithRepeat, schedule2WithCustomTime
         ])
-        self.wait(for: [expectForRemove, expectForAdd], timeout: 0.5)
+        try await self.waitEffect("이미 등록된 일정이 삭제된 경우 알림 삭제") {
+            recordLock.lock(); defer { recordLock.unlock() }
+            return removedIds != nil
+        }
+        try await Task.sleep(for: .milliseconds(50))
 
         // then
+        recordLock.lock(); defer { recordLock.unlock() }
+        XCTAssertFalse(didScheduleNewNotification)
         XCTAssertEqual(removedIds?.count, 1)
         XCTAssertEqual(
             self.spyNotificationRepository.eventAndNotificationSets[schedule1.uuid], nil

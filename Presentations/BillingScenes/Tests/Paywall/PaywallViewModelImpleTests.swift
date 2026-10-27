@@ -34,7 +34,8 @@ final class PaywallViewModelImpleTests: PublisherWaitable {
         userPlanLoadError: (any Error)? = nil,
         hasUnfinished: Bool = false,
         applyUnfinishedResult: Result<BillingUserPlan?, any Error> = .success(nil),
-        closesAfterPurchase: Bool = false
+        closesAfterPurchase: Bool = false,
+        holdsActionsUntilReleased: Bool = false
     ) -> (PaywallViewModelImple, StubBillingUsecase, SpyPaywallRouter) {
         let stub = StubBillingUsecase(
             offerings: offerings,
@@ -47,7 +48,8 @@ final class PaywallViewModelImpleTests: PublisherWaitable {
             restoreError: restoreError,
             userPlanLoadError: userPlanLoadError,
             hasUnfinished: hasUnfinished,
-            applyUnfinishedResult: applyUnfinishedResult
+            applyUnfinishedResult: applyUnfinishedResult,
+            holdsActionsUntilReleased: holdsActionsUntilReleased
         )
         let viewModel = PaywallViewModelImple(billingUsecase: stub, closesAfterPurchase: closesAfterPurchase)
         let router = SpyPaywallRouter()
@@ -890,7 +892,7 @@ extension PaywallViewModelImpleTests {
     @Test("복구가 진행 중이면 연타해도 한 번만 반영한다")
     func viewModel_whenRecoverUnfinishedRepeatedly_appliesOnlyOnce() async throws {
         // given
-        let (viewModel, stub, _) = self.makeViewModel(hasUnfinished: true)
+        let (viewModel, stub, _) = self.makeViewModel(hasUnfinished: true, holdsActionsUntilReleased: true)
 
         // when
         let expect = expectConfirm("연타 무시")
@@ -898,6 +900,7 @@ extension PaywallViewModelImpleTests {
         let states = try await self.outputs(expect, for: viewModel.isPurchasing) {
             viewModel.recoverUnfinished()
             viewModel.recoverUnfinished()
+            stub.releaseHeldActions()
         }
 
         // then
@@ -1210,18 +1213,13 @@ extension PaywallViewModelImpleTests {
     private func waitTopupCellsLoaded(
         _ viewModel: any PaywallViewModel
     ) async throws -> [PaywallTopupCellModel] {
-        viewModel.prepare()
-        let deadline = ContinuousClock.now + .seconds(5)
-        var cells: [PaywallTopupCellModel] = []
-        while cells.isEmpty, ContinuousClock.now < deadline {
-            cells = try await self.firstOutput(
-                expectConfirm("top-up 셀 현재값"), for: viewModel.topupCellModels
-            ) ?? []
-            if cells.isEmpty {
-                try await Task.sleep(for: .milliseconds(20))
-            }
+        // 초기 빈 목록 → 카탈로그·top-up 이 모두 실린 셀 목록 (중간 빈 목록은 removeDuplicates 로 접힌다)
+        let expect = expectConfirm("top-up 셀 로드")
+        expect.count = 2
+        let emitted = try await self.outputs(expect, for: viewModel.topupCellModels) {
+            viewModel.prepare()
         }
-        return cells
+        return emitted.last ?? []
     }
 
     private func waitTopupCellsStayEmpty(
@@ -1413,7 +1411,8 @@ extension PaywallViewModelImpleTests {
     private func topupPurchaseViewModel(
         purchaseResult: Result<BillingPurchaseResult, any Error>,
         closesAfterPurchase: Bool = false,
-        topupOfferings: [BillingTopupOffering]? = nil
+        topupOfferings: [BillingTopupOffering]? = nil,
+        holdsActionsUntilReleased: Bool = false
     ) -> (PaywallViewModelImple, StubBillingUsecase, SpyPaywallRouter) {
         return self.makeViewModel(
             offerings: [
@@ -1424,7 +1423,8 @@ extension PaywallViewModelImpleTests {
             topupOfferings: topupOfferings ?? [self.topupOffering("topup.tier.1", credits: 30000)],
             purchaseResult: purchaseResult,
             userPlan: BillingUserPlan() |> \.planId .~ .standard,
-            closesAfterPurchase: closesAfterPurchase
+            closesAfterPurchase: closesAfterPurchase,
+            holdsActionsUntilReleased: holdsActionsUntilReleased
         )
     }
 
@@ -1555,7 +1555,8 @@ extension PaywallViewModelImpleTests {
             topupOfferings: [
                 self.topupOffering("topup.tier.1", credits: 30000),
                 self.topupOffering("topup.tier.2", credits: 150000, price: "$4.99")
-            ]
+            ],
+            holdsActionsUntilReleased: true
         )
         _ = try await self.waitTopupCellsLoaded(viewModel)
 
@@ -1563,6 +1564,7 @@ extension PaywallViewModelImpleTests {
         try await self.waitProcessingCompleted(viewModel) {
             viewModel.purchaseTopup("topup.tier.1")
             viewModel.purchaseTopup("topup.tier.2")
+            stub.releaseHeldActions()
         }
 
         // then
