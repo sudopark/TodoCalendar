@@ -19,7 +19,7 @@ import UnitTestHelpKit
 
 
 @Suite("EventUploadServiceImpleTests", .serialized)
-final class EventUploadServiceImpleTests: LocalTestable {
+final class EventUploadServiceImpleTests: LocalTestable, AsyncEffectWaitable {
     
     let sqliteService: SQLiteService = .init()
     private let spyRemote = PrivateStubRemote()
@@ -109,6 +109,26 @@ final class EventUploadServiceImpleTests: LocalTestable {
             query = query.orderBy(isAscending: true) { $0.timestamp }
             return try db.load(EventUploadPendingQueueTable.self, query: query).map { try $0.asUploadingTask() }
         }
+    }
+
+    private func waitPendingUploadTasks(
+        _ description: String,
+        timeoutMillis: Int = 3000,
+        until condition: ([EventUploadingTask]) -> Bool
+    ) async throws -> [EventUploadingTask] {
+        let deadline = Date().addingTimeInterval(TimeInterval(timeoutMillis) / 1000)
+        var tasks = try await self.allPendingUploadTasks()
+        while !condition(tasks), Date() < deadline {
+            try await Task.sleep(nanoseconds: 5_000_000)
+            tasks = try await self.allPendingUploadTasks()
+        }
+        guard condition(tasks) else {
+            throw AsyncEffectWaitTimeout(
+                timeoutMillis: timeoutMillis,
+                description: "\(timeoutMillis)ms 안에 조건이 참이 되지 않았다 — \(description)"
+            )
+        }
+        return tasks
     }
 }
 
@@ -206,15 +226,17 @@ extension EventUploadServiceImpleTests {
             
             // when
             try await service.resume()
-            try await Task.sleep(for: .milliseconds(10))
+            try await self.waitEffect("tag 업로드 진입") { self.spyRemote.didEnterEditTag }
             await service.pause()
             
             // then
             try await service.waitUntilUploadingEnd()
             
-            let pendingTasks = try await self.allPendingUploadTasks()
+            let pendingTasks = try await self.waitPendingUploadTasks("중단된 tag 가 재스케줄됨") { tasks in
+                tasks.contains { $0.uuid == "tag" }
+            }
             #expect(pendingTasks.map { $0.uuid } == [
-                "schedule"
+                "schedule", "tag"
             ])
             #expect(self.spyRemote.deleteOrUpdateIds == [
                 "todo"
@@ -286,13 +308,14 @@ extension EventUploadServiceImpleTests {
             
             // when
             try await service.resume()
-            try await Task.sleep(for: .milliseconds(10))
+            try await self.waitEffect("tag 업로드 진입") { self.spyRemote.didEnterEditTag }
             await service.pause()
             try await service.waitUntilUploadingEnd()
             
             // then
-            try await Task.sleep(for: .milliseconds(10))
-            let pendingTasks = try await self.allPendingUploadTasks()
+            let pendingTasks = try await self.waitPendingUploadTasks("tag 가 failCount 1 로 재스케줄됨") { tasks in
+                tasks.contains { $0.uuid == "tag" && $0.uploadFailCount == 1 }
+            }
             #expect(pendingTasks.map { $0.uuid } == [
                 "schedule", "tag"
             ])
@@ -514,6 +537,7 @@ private final class PrivateStubRemote: @unchecked Sendable {
     var editTagMocking: PassthroughSubject<CustomEventTag, Never>?
     var shouldFailEditTag: Bool = false
     
+    var didEnterEditTag: Bool = false
     var didRemoveTagIds: [String] = []
     var didEditTagIds: [String] = []
     var didRemoveTodoIds: [String] = []
@@ -536,6 +560,7 @@ extension PrivateStubRemote: EventTagRemote {
         }
         
         if let mocking = self.editTagMocking {
+            self.didEnterEditTag = true
             let tag = try await mocking.values.first(where: { _ in true }).unwrap()
             self.deleteOrUpdateIds.append(tagId)
             self.didEditTagIds.append(tagId)

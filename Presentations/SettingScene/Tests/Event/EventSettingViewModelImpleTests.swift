@@ -16,7 +16,7 @@ import TestDoubles
 
 @testable import SettingScene
 
-class EventSettingViewModelImpleTests: BaseTestCase, PublisherWaitable {
+class EventSettingViewModelImpleTests: BaseTestCase, PublisherWaitable, AsyncEffectWaitable {
     
     var cancelBag: Set<AnyCancellable>!
     private var spyRouter: SpyRouter!
@@ -258,22 +258,32 @@ extension EventSettingViewModelImpleTests {
     }
     
     // 로그인 - read to sync -> sync -> read to sync
-    func testViewModel_whenLogin_forceEventSync() {
+    func testViewModel_whenLogin_forceEventSync() async throws {
         // given
-        let expect = expectation(description: "로그인 - read to sync -> sync -> read to sync")
-        expect.expectedFulfillmentCount = 3
         let viewModel = self.makeViewModel(isLogin: true)
-        
-        // when
-        let models = self.waitOutputs(expect, for: viewModel.eventSyncModel, timeout: 0.1) {
-            viewModel.prepare()
-            
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
-                viewModel.forceSync()
+        let modelsLock = NSLock()
+        var models: [EventSyncModel?] = []
+        viewModel.eventSyncModel
+            .sink { model in
+                modelsLock.lock(); defer { modelsLock.unlock() }
+                models.append(model)
             }
+            .store(in: &self.cancelBag)
+
+        // when — 첫 상태가 도달한 뒤에 forceSync 를 불러 방출 순서를 결정적으로 만든다
+        viewModel.prepare()
+        try await self.waitEffect("로그인 후 동기화 대기 상태 도달") {
+            modelsLock.lock(); defer { modelsLock.unlock() }
+            return models.last == .readToSync(lastSyncDataTime: "01/01/1970 10:00")
         }
-        
+        viewModel.forceSync()
+        try await self.waitEffect("동기화 완료 상태 도달") {
+            modelsLock.lock(); defer { modelsLock.unlock() }
+            return models.last == .readToSync(lastSyncDataTime: "01/01/1970 11:00")
+        }
+
         // then
+        modelsLock.lock(); defer { modelsLock.unlock() }
         XCTAssertEqual(models, [
             .readToSync(lastSyncDataTime: "01/01/1970 10:00"),
             .syncInProgress,
@@ -308,20 +318,21 @@ extension EventSettingViewModelImpleTests {
     }
     
     // 외부서비스 연동
-    func testViewModel_connect_externalCalendar() {
+    func testViewModel_connect_externalCalendar() async throws {
         // given
         let expect = expectation(description: "외부서비스 연동")
         expect.expectedFulfillmentCount = 3
         let viewModel = self.makeViewModel()
-        
+
         // when
         let isConnectings = self.waitOutputs(expect, for: viewModel.isConnectOrDisconnectExternalCalednar) {
-            
+
             let service = GoogleCalendarService(scopes: [.readWrite])
             viewModel.connectExternalCalendar(service.identifier)
         }
-        
+
         // then
+        try await self.waitEffect("토스트 표시") { self.spyRouter.didShowToastWithMessage != nil }
         XCTAssertEqual(isConnectings, [false, true, false])
         XCTAssertEqual(self.spyRouter.didShowToastWithMessage, "event_setting::external_calendar::start::message".localized())
     }

@@ -18,10 +18,30 @@ import TestDoubles
 @testable import Domain
 
 
-final class AICommandUsecaseImpleTests: PublisherWaitable {
+final class AICommandUsecaseImpleTests: PublisherWaitable, AsyncEffectWaitable {
     
     var cancelBag: Set<AnyCancellable>! = []
     private var stubRepository = BaseStubAICommandRepository()
+    
+    private let jobReceivedLock = NSLock()
+    private var isJobReceived: Bool = false
+    
+    private var didReceiveJob: Bool {
+        self.jobReceivedLock.lock(); defer { self.jobReceivedLock.unlock() }
+        return self.isJobReceived
+    }
+    
+    private func recordingJobReceived(
+        _ source: AnyPublisher<AICommandProcessing, any Error>
+    ) -> AnyPublisher<AICommandProcessing, any Error> {
+        return source
+            .handleEvents(receiveOutput: { [weak self] processing in
+                guard let self, case .job = processing else { return }
+                self.jobReceivedLock.lock(); defer { self.jobReceivedLock.unlock() }
+                self.isJobReceived = true
+            })
+            .eraseToAnyPublisher()
+    }
     
     private func makeUsecase(
         shouldFailMakeJob: Bool = false,
@@ -69,7 +89,9 @@ extension AICommandUsecaseImpleTests {
 
         // when
         usecase.rejectConfirmCommand(action)
-        try await Task.sleep(for: .milliseconds(50))
+        try await self.waitEffect("repository 에 거부가 위임됨") {
+            self.stubRepository.didRejectParentJobId != nil
+        }
 
         // then
         #expect(self.stubRepository.didRejectParentJobId == "parent-job")
@@ -85,7 +107,9 @@ extension AICommandUsecaseImpleTests {
 
         // when
         usecase.rejectConfirmCommand(.init())
-        try await Task.sleep(for: .milliseconds(50))
+        try await self.waitEffect("처리중 기록이 정리됨") {
+            self.stubRepository.didClearProcessing
+        }
 
         // then
         let processingCmd = try await self.stubRepository.loadProcessingAICommand()
@@ -199,6 +223,7 @@ extension AICommandUsecaseImpleTests {
         #expect(statuses == [.pending, .running, .running, .done])
         #expect(jobs.last?.isFinish == true)
 
+        try await self.waitEffect("처리중 기록이 정리됨") { self.stubRepository.didClearProcessing }
         let processingCmd = try await self.stubRepository.loadProcessingAICommand()
         #expect(processingCmd == nil)
     }
@@ -236,13 +261,15 @@ extension AICommandUsecaseImpleTests {
         self.stubRepository.loadJobMocking = .success(.dummyRunningJob)
         
         // when
-        let processing = usecase.processCommand("cmd").jobsOnly()
+        let processing = self.recordingJobReceived(usecase.processCommand("cmd")).jobsOnly()
         let jobs = try await self.outputs(expect, for: processing) {
             
-            try await Task.sleep(for: .milliseconds(10))
             self.stubRepository.loadJobMocking = .success(.dummyConfirmJob)
-            
-            usecase.refreshJobStatus("some_job")
+            // 알림 구독 시점 전에 보낸 refresh 는 유실되므로 job 이 도착할 때까지 다시 보낸다
+            try await self.waitEffect("refresh 알림으로 job 이 방출됨") {
+                usecase.refreshJobStatus("some_job")
+                return self.didReceiveJob
+            }
         }
         
         // then
@@ -297,6 +324,7 @@ extension AICommandUsecaseImpleTests {
         // then
         #expect(fail != nil)
         
+        try await self.waitEffect("처리중 기록이 정리됨") { self.stubRepository.didClearProcessing }
         let processingCmd = try await self.stubRepository.loadProcessingAICommand()
         #expect(processingCmd == nil)
     }
@@ -319,6 +347,7 @@ extension AICommandUsecaseImpleTests {
         #expect(fail != nil)
         #expect((fail as? RuntimeError)?.key == "timeout")
         
+        try await self.waitEffect("처리중 기록이 정리됨") { self.stubRepository.didClearProcessing }
         let processingCmd = try await self.stubRepository.loadProcessingAICommand()
         #expect(processingCmd == nil)
     }
@@ -390,6 +419,7 @@ extension AICommandUsecaseImpleTests {
         #expect(statuses == [.pending, .running, .running, .done])
         #expect(jobs.last?.isFinish == true)
 
+        try await self.waitEffect("처리중 기록이 정리됨") { self.stubRepository.didClearProcessing }
         let processingCmd = try await self.stubRepository.loadProcessingAICommand()
         #expect(processingCmd == nil)
     }
@@ -457,6 +487,7 @@ extension AICommandUsecaseImpleTests {
         #expect(statuses == [.pending, .running, .running, .done])
         #expect(jobs.last?.isFinish == true)
         
+        try await self.waitEffect("처리중 기록이 정리됨") { self.stubRepository.didClearProcessing }
         let processingCmd = try await self.stubRepository.loadProcessingAICommand()
         #expect(processingCmd == nil)
     }
@@ -474,13 +505,15 @@ extension AICommandUsecaseImpleTests {
         self.stubRepository.loadJobMocking = .success(.dummyRunningJob)
 
         // when
-        let processing = usecase.processConfirmCommand(.init()).jobsOnly()
+        let processing = self.recordingJobReceived(usecase.processConfirmCommand(.init())).jobsOnly()
         let jobs = try await self.outputs(expect, for: processing) {
 
-            try await Task.sleep(for: .milliseconds(10))
             self.stubRepository.loadJobMocking = .success(.dummyDoneJob)
-
-            usecase.refreshJobStatus("some_job")
+            // 알림 구독 시점 전에 보낸 refresh 는 유실되므로 job 이 도착할 때까지 다시 보낸다
+            try await self.waitEffect("refresh 알림으로 job 이 방출됨") {
+                usecase.refreshJobStatus("some_job")
+                return self.didReceiveJob
+            }
         }
 
         // then
@@ -535,6 +568,7 @@ extension AICommandUsecaseImpleTests {
         // then
         #expect(fail != nil)
         
+        try await self.waitEffect("처리중 기록이 정리됨") { self.stubRepository.didClearProcessing }
         let processingCmd = try await self.stubRepository.loadProcessingAICommand()
         #expect(processingCmd == nil)
     }
@@ -557,6 +591,7 @@ extension AICommandUsecaseImpleTests {
         #expect(fail != nil)
         #expect((fail as? RuntimeError)?.key == "timeout")
         
+        try await self.waitEffect("처리중 기록이 정리됨") { self.stubRepository.didClearProcessing }
         let processingCmd = try await self.stubRepository.loadProcessingAICommand()
         #expect(processingCmd == nil)
     }
@@ -589,7 +624,9 @@ extension AICommandUsecaseImpleTests {
         let usecase = self.makeUsecase()
         // when
         usecase.cancelOngoingCommand("some_job")
-        try await Task.sleep(nanoseconds: 50_000_000)
+        try await self.waitEffect("repository cancel + clear 가 위임됨") {
+            self.stubRepository.didCancelJobId != nil && self.stubRepository.didClearProcessing
+        }
         // then — 전달받은 jobId로 repository cancel + clear 위임
         #expect(self.stubRepository.didCancelJobId == "some_job")
         #expect(self.stubRepository.didClearProcessing == true)
@@ -650,6 +687,7 @@ extension AICommandUsecaseImpleTests {
         let statuses = jobs.compactMap { $0?.status }
         #expect(statuses == [.running, .done])
         
+        try await self.waitEffect("처리중 기록이 정리됨") { self.stubRepository.didClearProcessing }
         let processingCmd = try await self.stubRepository.loadProcessingAICommand()
         #expect(processingCmd == nil)
     }
@@ -670,6 +708,7 @@ extension AICommandUsecaseImpleTests {
         let statuses = jobs.compactMap { $0?.status }
         #expect(statuses == [.running, .done])
         
+        try await self.waitEffect("처리중 기록이 정리됨") { self.stubRepository.didClearProcessing }
         let processingCmd = try await self.stubRepository.loadProcessingAICommand()
         #expect(processingCmd == nil)
     }
@@ -691,6 +730,7 @@ extension AICommandUsecaseImpleTests {
         // then
         #expect(error != nil)
         
+        try await self.waitEffect("처리중 기록이 정리됨") { self.stubRepository.didClearProcessing }
         let processingCmd = try await self.stubRepository.loadProcessingAICommand()
         #expect(processingCmd == nil)
     }
