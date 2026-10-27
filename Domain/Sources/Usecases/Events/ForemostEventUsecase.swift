@@ -64,9 +64,9 @@ extension ForemostEventUsecaseImple {
                 return
             }
             
-            let eventId = ForemostEventId(event: event)
-            self?.updateForemostEventId(eventId)
+            // 본문을 id 보다 먼저 싣는다 — id 가 먼저 닿으면 본문 조회가 일시적으로 nil 을 방출한다
             self?.updateForemostEvent(event)
+            self?.updateForemostEventId(ForemostEventId(event: event))
         }
         
         self.repository.foremostEvent()
@@ -81,9 +81,8 @@ extension ForemostEventUsecaseImple {
         self.updateMarkingStatus(.marking(evnetId: eventId.eventId))
         defer { self.updateMarkingStatus(.idle) }
         let event = try await self.repository.updateForemostEvent(eventId)
-        let eventId = ForemostEventId(event: event)
-        self.updateForemostEventId(eventId)
         self.updateForemostEvent(event)
+        self.updateForemostEventId(ForemostEventId(event: event))
     }
     
     public func remove() async throws {
@@ -176,6 +175,8 @@ private extension SharedDataStore {
         let dataKey = ShareDataKeys.todos.rawValue
         return self.observe([String: TodoEvent].self, key: dataKey)
             .map { $0?[id] }
+            .removeDuplicates()
+            .map { $0 as (any ForemostMarkableEvent)? }
             .eraseToAnyPublisher()
     }
     
@@ -183,6 +184,8 @@ private extension SharedDataStore {
         let dataKey = ShareDataKeys.schedules.rawValue
         return self.observe(MemorizedEventsContainer<ScheduleEvent>.self, key: dataKey)
             .map { $0?.evnet(id) }
+            .removeDuplicates()
+            .map { $0 as (any ForemostMarkableEvent)? }
             .eraseToAnyPublisher()
     }
 }

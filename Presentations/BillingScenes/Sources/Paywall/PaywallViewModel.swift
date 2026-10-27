@@ -385,7 +385,9 @@ extension PaywallViewModelImple {
     }
 
     var screenState: AnyPublisher<PaywallScreenState, Never> {
-        return Publishers.CombineLatest(self.subject.userPlanState, self.catalogStatePublisher)
+        return Publishers.CombineLatest(
+            self.subject.userPlanState.receive(on: DispatchQueue.main), self.catalogStatePublisher
+        )
             .map { [weak self] userPlanState, catalogState -> PaywallScreenState in
                 self?.resolveScreenState(userPlanState: userPlanState, catalogState: catalogState) ?? .loading
             }
@@ -403,7 +405,8 @@ extension PaywallViewModelImple {
 
     var topupCellModels: AnyPublisher<[PaywallTopupCellModel], Never> {
         return Publishers.CombineLatest3(
-            self.currentPlanIdPublisher, self.offeringsPublisher, self.subject.topupOfferings
+            self.currentPlanIdPublisher, self.offeringsPublisher,
+            self.subject.topupOfferings.receive(on: DispatchQueue.main)
         )
         .map { [weak self] currentPlanId, planOfferings, topupOfferings -> [PaywallTopupCellModel] in
             self?.makeTopupCellModels(
@@ -427,7 +430,8 @@ extension PaywallViewModelImple {
 
     var selectedPlanId: AnyPublisher<BillingPlanId?, Never> {
         return Publishers.CombineLatest3(
-            self.subject.userSelectedPlanId, self.currentPlanIdPublisher, self.offeringsPublisher
+            self.subject.userSelectedPlanId.receive(on: DispatchQueue.main),
+            self.currentPlanIdPublisher, self.offeringsPublisher
         )
         // self?.resolve(...) ?? userSelected 로 쓰면 "self 가 nil" 과 "선택이 무효라 nil" 이
         // 같은 nil 로 뭉개져, 커버된 선택이 userSelected 로 되살아난다 (C1, #739)
@@ -468,12 +472,17 @@ extension PaywallViewModelImple {
             .eraseToAnyPublisher()
     }
 
+    // 로드들이 서로 다른 스레드에서 send 하면 CombineLatest 하류가 동시에 불려 화면이 중간 상태에 멈춘다
     private var catalogStatePublisher: AnyPublisher<PaywallCatalogState, Never> {
-        return self.subject.catalogState.removeDuplicates().eraseToAnyPublisher()
+        return self.subject.catalogState
+            .receive(on: DispatchQueue.main)
+            .removeDuplicates().eraseToAnyPublisher()
     }
 
     private var currentPlanIdPublisher: AnyPublisher<BillingPlanId?, Never> {
-        return self.subject.currentPlanId.removeDuplicates().eraseToAnyPublisher()
+        return self.subject.currentPlanId
+            .receive(on: DispatchQueue.main)
+            .removeDuplicates().eraseToAnyPublisher()
     }
 
     private var offeringsPublisher: AnyPublisher<[BillingPlanOffering], Never> {
