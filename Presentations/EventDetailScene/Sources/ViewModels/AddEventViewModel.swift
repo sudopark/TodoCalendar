@@ -102,6 +102,8 @@ extension AddEventViewModelImple: EventDetailInputListener {
                 let addition = await self.prepareAdditional(params) ?? .init("pending")
                 return Pair(basic, addition)
             }
+            // 입력은 main 에서 send 된다 — 준비 결과도 main 에서 보내야 isSavable 조합이 동시에 불리지 않는다
+            .receive(on: DispatchQueue.main)
             .sink(receiveValue: { [weak self] pair in
                 self?.inputInteractor?.prepared(basic: pair.0, additional: pair.1)
                 self?.subject.isTodo.send(params.isTodoCase)

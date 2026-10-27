@@ -302,9 +302,9 @@ extension MainViewModelImple {
             .map { _ in () }
         let checkTriggers = Publishers.Merge3(Just(()), enterForeground, userPlanChanged)
 
-        Publishers.CombineLatest(colorThemeKey, checkTriggers)
+        // 두 입력이 서로 다른 스레드에서 send 하면 CombineLatest 하류가 동시에 불려 검사가 유실된다
+        Publishers.CombineLatest(colorThemeKey.receive(on: RunLoop.main), checkTriggers.receive(on: RunLoop.main))
             .map { key, _ in key }
-            .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] key in
                 self?.showColorThemeLicenseExpiredGuideIfNeeded(key)
             })
