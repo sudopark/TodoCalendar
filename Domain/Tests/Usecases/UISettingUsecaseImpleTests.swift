@@ -652,7 +652,7 @@ extension AppSettingUsecaseImpleTests {
     func testUsecase_changeCalendarSetting_withColorKey_doesNotAskGate() throws {
         // given
         let gate = StubPaidFeatureGateUsecase()
-        gate.mockBlockedReason = PaidFeatureGateFailReason(feature: .colorTheme(.custom("c1")), licenseDays: 3)
+        gate.mockBlockedReason = PaidFeatureGateFailReason(feature: .colorTheme(isCustom: true), licenseDays: 3)
         let appSettingRepository = StubAppSettingRepository()
         let usecase = self.makeUsecase(repository: appSettingRepository, paidFeatureGate: gate)
 
@@ -667,7 +667,7 @@ extension AppSettingUsecaseImpleTests {
 
     func testUsecase_selectColorTheme_whenBlocked_throwsReasonWithoutSaving() async {
         // given
-        let reason = PaidFeatureGateFailReason(feature: .colorTheme(.custom("c1")), licenseDays: 3)
+        let reason = PaidFeatureGateFailReason(feature: .colorTheme(isCustom: true), licenseDays: 3)
         let gate = StubPaidFeatureGateUsecase()
         gate.mockBlockedReason = reason
         let appSettingRepository = StubAppSettingRepository()
@@ -689,7 +689,7 @@ extension AppSettingUsecaseImpleTests {
         )
     }
 
-    func testUsecase_selectColorTheme_whenAllowed_checksGateWithSelectedKey() async throws {
+    func testUsecase_selectColorTheme_whenAllowed_checksGateAsCustomTheme() async throws {
         // given
         let gate = StubPaidFeatureGateUsecase()
         let usecase = self.makeUsecase(
@@ -700,13 +700,25 @@ extension AppSettingUsecaseImpleTests {
         _ = try await usecase.selectColorTheme(.custom("c1"))
 
         // then
-        XCTAssertEqual(gate.didCheckFeature, .colorTheme(.custom("c1")))
+        XCTAssertEqual(gate.didCheckFeature, .colorTheme(isCustom: true))
+    }
+
+    func testUsecase_selectColorTheme_withAppThemeKey_checksGateAsNotCustom() async throws {
+        // given
+        let gate = StubPaidFeatureGateUsecase()
+        let usecase = self.makeUsecase(paidFeatureGate: gate)
+
+        // when
+        _ = try await usecase.selectColorTheme(.appTheme(.tomato))
+
+        // then
+        XCTAssertEqual(gate.didCheckFeature, .colorTheme(isCustom: false))
     }
 
     func testUsecase_removeSelectedCustomColorTheme_resetsToSystemThemeWithoutAskingGate() async throws {
         // given
         let gate = StubPaidFeatureGateUsecase()
-        gate.mockBlockedReason = PaidFeatureGateFailReason(feature: .colorTheme(.systemTheme), licenseDays: 3)
+        gate.mockBlockedReason = PaidFeatureGateFailReason(feature: .colorTheme(isCustom: false), licenseDays: 3)
         let appSettingRepository = StubAppSettingRepository()
         let usecase = self.makeUsecase(
             selectedColorSetKey: .custom("c1"),
@@ -727,7 +739,7 @@ extension AppSettingUsecaseImpleTests {
     func testUsecase_saveNewCustomColorTheme_whenBlocked_throwsReasonWithoutSaving() async {
         // given
         let gate = StubPaidFeatureGateUsecase()
-        gate.mockBlockedReason = PaidFeatureGateFailReason(feature: .colorTheme(.custom("new")), licenseDays: 7)
+        gate.mockBlockedReason = PaidFeatureGateFailReason(feature: .colorTheme(isCustom: true), licenseDays: 7)
         let repository = StubCustomColorThemeRepository(themes: [self.makeCustomTheme("c1")])
         let usecase = self.makeUsecase(customColorThemeRepository: repository, paidFeatureGate: gate)
 
@@ -736,15 +748,15 @@ extension AppSettingUsecaseImpleTests {
         do { try await usecase.saveCustomColorTheme(self.makeCustomTheme("new")) } catch { failed = error }
 
         // then
-        XCTAssertEqual(failed as? PaidFeatureGateFailReason, PaidFeatureGateFailReason(feature: .colorTheme(.custom("new")), licenseDays: 7))
-        XCTAssertEqual(gate.didCheckFeature, .colorTheme(.custom("new")))
+        XCTAssertEqual(failed as? PaidFeatureGateFailReason, PaidFeatureGateFailReason(feature: .colorTheme(isCustom: true), licenseDays: 7))
+        XCTAssertEqual(gate.didCheckFeature, .colorTheme(isCustom: true))
         XCTAssertEqual(repository.didSavedThemes, [])
     }
 
     func testUsecase_saveExistingCustomColorTheme_doesNotAskGate() async throws {
         // given
         let gate = StubPaidFeatureGateUsecase()
-        gate.mockBlockedReason = PaidFeatureGateFailReason(feature: .colorTheme(.custom("c1")), licenseDays: 7)
+        gate.mockBlockedReason = PaidFeatureGateFailReason(feature: .colorTheme(isCustom: true), licenseDays: 7)
         let repository = StubCustomColorThemeRepository(themes: [self.makeCustomTheme("c1")])
         let usecase = self.makeUsecase(customColorThemeRepository: repository, paidFeatureGate: gate)
         let edited = CustomColorTheme(

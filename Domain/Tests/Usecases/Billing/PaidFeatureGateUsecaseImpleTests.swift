@@ -93,7 +93,7 @@ extension PaidFeatureGateUsecaseImpleTests {
         let usecase = self.makeUsecase(plan: self.userPlan(.free))
 
         // when
-        let can = self.passes { try usecase.check(.colorTheme(key), at: self.now) }
+        let can = self.passes { try usecase.check(key.paidFeature, at: self.now) }
 
         // then
         #expect(can == true)
@@ -107,7 +107,7 @@ extension PaidFeatureGateUsecaseImpleTests {
         let usecase = self.makeUsecase(plan: self.userPlan(.free))
 
         // when
-        let can = self.passes { try usecase.check(.colorTheme(key), at: self.now) }
+        let can = self.passes { try usecase.check(key.paidFeature, at: self.now) }
 
         // then
         #expect(can == true)
@@ -119,10 +119,10 @@ extension PaidFeatureGateUsecaseImpleTests {
         let usecase = self.makeUsecase(plan: self.userPlan(.free))
 
         // when
-        let reason = self.blockedReason { try usecase.check(.colorTheme(.custom("some-custom")), at: self.now) }
+        let reason = self.blockedReason { try usecase.check(.colorTheme(isCustom: true), at: self.now) }
 
         // then
-        #expect(reason == .init(feature: .colorTheme(.custom("some-custom")), licenseDays: 7))
+        #expect(reason == .init(feature: .colorTheme(isCustom: true), licenseDays: 7))
     }
 
     @Test("plan 을 아직 못 받았으면 유료 테마도 허용한다")
@@ -131,7 +131,7 @@ extension PaidFeatureGateUsecaseImpleTests {
         let usecase = self.makeUsecase(plan: nil)
 
         // when
-        let can = self.passes { try usecase.check(.colorTheme(self.paidTheme), at: self.now) }
+        let can = self.passes { try usecase.check(self.paidTheme.paidFeature, at: self.now) }
 
         // then
         #expect(can == true)
@@ -143,7 +143,7 @@ extension PaidFeatureGateUsecaseImpleTests {
         let usecase = self.makeUsecase(plan: self.userPlan(nil))
 
         // when
-        let can = self.passes { try usecase.check(.colorTheme(self.paidTheme), at: self.now) }
+        let can = self.passes { try usecase.check(self.paidTheme.paidFeature, at: self.now) }
 
         // then
         #expect(can == true)
@@ -157,7 +157,7 @@ extension PaidFeatureGateUsecaseImpleTests {
         let usecase = self.makeUsecase(plan: self.userPlan(planId))
 
         // when
-        let can = self.passes { try usecase.check(.colorTheme(self.paidTheme), at: self.now) }
+        let can = self.passes { try usecase.check(self.paidTheme.paidFeature, at: self.now) }
 
         // then
         #expect(can == true)
@@ -169,7 +169,7 @@ extension PaidFeatureGateUsecaseImpleTests {
         let usecase = self.makeUsecase(plan: self.userPlan(.free))
 
         // when
-        let can = self.passes { try usecase.check(.colorTheme(self.paidTheme), at: self.now) }
+        let can = self.passes { try usecase.check(self.paidTheme.paidFeature, at: self.now) }
 
         // then
         #expect(can == false)
@@ -181,7 +181,7 @@ extension PaidFeatureGateUsecaseImpleTests {
         let usecase = self.makeUsecase(plan: self.userPlan(.free), grantedDaysFromNow: -3)
 
         // when
-        let can = self.passes { try usecase.check(.colorTheme(self.paidTheme), at: self.now) }
+        let can = self.passes { try usecase.check(self.paidTheme.paidFeature, at: self.now) }
 
         // then
         #expect(can == true)
@@ -193,7 +193,7 @@ extension PaidFeatureGateUsecaseImpleTests {
         let usecase = self.makeUsecase(plan: self.userPlan(.free), grantedDaysFromNow: -8)
 
         // when
-        let can = self.passes { try usecase.check(.colorTheme(self.paidTheme), at: self.now) }
+        let can = self.passes { try usecase.check(self.paidTheme.paidFeature, at: self.now) }
 
         // then
         #expect(can == false)
@@ -207,8 +207,8 @@ extension PaidFeatureGateUsecaseImpleTests {
         let exactly = self.now.addingTimeInterval(TimeInterval(self.licenseDays * 24 * 3600))
 
         // when
-        let canJustBefore = self.passes { try usecase.check(.colorTheme(self.paidTheme), at: justBefore) }
-        let canExactly = self.passes { try usecase.check(.colorTheme(self.paidTheme), at: exactly) }
+        let canJustBefore = self.passes { try usecase.check(self.paidTheme.paidFeature, at: justBefore) }
+        let canExactly = self.passes { try usecase.check(self.paidTheme.paidFeature, at: exactly) }
 
         // then
         #expect(canJustBefore == true)
@@ -221,7 +221,7 @@ extension PaidFeatureGateUsecaseImpleTests {
         let usecase = self.makeUsecase(plan: self.userPlan(.free), grantedDaysFromNow: 1)
 
         // when
-        let can = self.passes { try usecase.check(.colorTheme(self.paidTheme), at: self.now) }
+        let can = self.passes { try usecase.check(self.paidTheme.paidFeature, at: self.now) }
 
         // then
         #expect(can == false)
@@ -234,7 +234,7 @@ extension PaidFeatureGateUsecaseImpleTests {
         let usecase = self.makeUsecase(plan: self.userPlan(.free), policy: policy)
 
         // when
-        let can = self.passes { try usecase.check(.colorTheme(self.paidTheme), at: self.now) }
+        let can = self.passes { try usecase.check(self.paidTheme.paidFeature, at: self.now) }
 
         // then
         #expect(can == true)
@@ -245,11 +245,11 @@ extension PaidFeatureGateUsecaseImpleTests {
         // given
         let policy = AppPolicy(colorThemeLicense: .init(isEnabled: true, licenseDays: 14))
         let within = self.makeUsecase(plan: self.userPlan(.free), grantedDaysFromNow: -10, policy: policy)
-        let canWithin = self.passes { try within.check(.colorTheme(self.paidTheme), at: self.now) }
+        let canWithin = self.passes { try within.check(self.paidTheme.paidFeature, at: self.now) }
         let past = self.makeUsecase(plan: self.userPlan(.free), grantedDaysFromNow: -20, policy: policy)
 
         // when
-        let canPast = self.passes { try past.check(.colorTheme(self.paidTheme), at: self.now) }
+        let canPast = self.passes { try past.check(self.paidTheme.paidFeature, at: self.now) }
 
         // then
         #expect(canWithin == true)
@@ -261,11 +261,11 @@ extension PaidFeatureGateUsecaseImpleTests {
         // given
         let policy = AppPolicy(colorThemeLicense: .init(isEnabled: nil, licenseDays: 3))
         let within = self.makeUsecase(plan: self.userPlan(.free), grantedDaysFromNow: -2, policy: policy)
-        let canWithin = self.passes { try within.check(.colorTheme(self.paidTheme), at: self.now) }
+        let canWithin = self.passes { try within.check(self.paidTheme.paidFeature, at: self.now) }
         let past = self.makeUsecase(plan: self.userPlan(.free), grantedDaysFromNow: -4, policy: policy)
 
         // when
-        let canPast = self.passes { try past.check(.colorTheme(self.paidTheme), at: self.now) }
+        let canPast = self.passes { try past.check(self.paidTheme.paidFeature, at: self.now) }
 
         // then
         #expect(canWithin == true)
@@ -279,12 +279,12 @@ extension PaidFeatureGateUsecaseImpleTests {
         let within = self.makeUsecase(
             plan: self.userPlan(.free), grantedDaysFromNow: -20, policy: enabledPolicy
         )
-        let canWithin = self.passes { try within.check(.colorTheme(self.paidTheme), at: self.now) }
+        let canWithin = self.passes { try within.check(self.paidTheme.paidFeature, at: self.now) }
         let disabledPolicy = AppPolicy(colorThemeLicense: .init(isEnabled: false, licenseDays: nil))
         let disabled = self.makeUsecase(plan: self.userPlan(.free), policy: disabledPolicy)
 
         // when
-        let canWhenDisabled = self.passes { try disabled.check(.colorTheme(self.paidTheme), at: self.now) }
+        let canWhenDisabled = self.passes { try disabled.check(self.paidTheme.paidFeature, at: self.now) }
 
         // then
         #expect(canWithin == true)
@@ -296,11 +296,11 @@ extension PaidFeatureGateUsecaseImpleTests {
         // given
         let policy = AppPolicy(featureSwitches: ["someFeature": .init(isEnabled: true)])
         let withoutRecord = self.makeUsecase(plan: self.userPlan(.free), policy: policy)
-        let canWithoutRecord = self.passes { try withoutRecord.check(.colorTheme(self.paidTheme), at: self.now) }
+        let canWithoutRecord = self.passes { try withoutRecord.check(self.paidTheme.paidFeature, at: self.now) }
         let within = self.makeUsecase(plan: self.userPlan(.free), grantedDaysFromNow: -20, policy: policy)
 
         // when
-        let canWithin = self.passes { try within.check(.colorTheme(self.paidTheme), at: self.now) }
+        let canWithin = self.passes { try within.check(self.paidTheme.paidFeature, at: self.now) }
 
         // then
         #expect(canWithoutRecord == false)
@@ -311,13 +311,13 @@ extension PaidFeatureGateUsecaseImpleTests {
     func checkColorTheme_whenNoPolicy_usesInjectedDefault() {
         // given
         let withoutRecord = self.makeUsecase(plan: self.userPlan(.free), policy: nil)
-        let canWithoutRecord = self.passes { try withoutRecord.check(.colorTheme(self.paidTheme), at: self.now) }
+        let canWithoutRecord = self.passes { try withoutRecord.check(self.paidTheme.paidFeature, at: self.now) }
         let within = self.makeUsecase(plan: self.userPlan(.free), grantedDaysFromNow: -20, policy: nil)
-        let canWithin = self.passes { try within.check(.colorTheme(self.paidTheme), at: self.now) }
+        let canWithin = self.passes { try within.check(self.paidTheme.paidFeature, at: self.now) }
         let past = self.makeUsecase(plan: self.userPlan(.free), grantedDaysFromNow: -40, policy: nil)
 
         // when
-        let canPast = self.passes { try past.check(.colorTheme(self.paidTheme), at: self.now) }
+        let canPast = self.passes { try past.check(self.paidTheme.paidFeature, at: self.now) }
 
         // then
         #expect(canWithoutRecord == false)
@@ -333,7 +333,7 @@ extension PaidFeatureGateUsecaseImpleTests {
         )
 
         // when
-        let can = self.passes { try usecase.check(.colorTheme(self.paidTheme), at: self.now) }
+        let can = self.passes { try usecase.check(self.paidTheme.paidFeature, at: self.now) }
 
         // then
         #expect(can == true)
@@ -343,11 +343,11 @@ extension PaidFeatureGateUsecaseImpleTests {
     func checkColorTheme_afterPaidToFree_usesRecordedGrantTime() {
         // given
         let expiredGrant = self.makeUsecase(plan: self.userPlan(.free), grantedDaysFromNow: -30)
-        let canWithExpired = self.passes { try expiredGrant.check(.colorTheme(self.paidTheme), at: self.now) }
+        let canWithExpired = self.passes { try expiredGrant.check(self.paidTheme.paidFeature, at: self.now) }
         let validGrant = self.makeUsecase(plan: self.userPlan(.free), grantedDaysFromNow: -2)
 
         // when
-        let canWithValid = self.passes { try validGrant.check(.colorTheme(self.paidTheme), at: self.now) }
+        let canWithValid = self.passes { try validGrant.check(self.paidTheme.paidFeature, at: self.now) }
 
         // then
         #expect(canWithExpired == false)
@@ -362,7 +362,7 @@ extension PaidFeatureGateUsecaseImpleTests {
         )
 
         // when
-        let can = self.passes { try usecase.check(.colorTheme(self.paidTheme), at: self.now) }
+        let can = self.passes { try usecase.check(self.paidTheme.paidFeature, at: self.now) }
 
         // then
         #expect(can == true)
@@ -380,11 +380,11 @@ extension PaidFeatureGateUsecaseImpleTests {
         let usecase = self.makeUsecase(plan: self.userPlan(.free), grantedDaysFromNow: -30)
 
         // when
-        usecase.grantLicense(for: .colorTheme(self.paidTheme), at: self.now)
+        usecase.grantLicense(for: self.paidTheme.paidFeature, at: self.now)
 
         // then
         #expect(self.stubLicenseRepository.didUpdatedLicense == .init(grantedAt: self.now))
-        #expect(self.passes { try usecase.check(.colorTheme(self.paidTheme), at: self.now) } == true)
+        #expect(self.passes { try usecase.check(self.paidTheme.paidFeature, at: self.now) } == true)
     }
 }
 
@@ -407,13 +407,13 @@ extension PaidFeatureGateUsecaseImpleTests {
 
         // when
         let reasons = [fromPolicy, fromDefault, undecidable].map { usecase in
-            self.blockedReason { try usecase.check(.colorTheme(self.paidTheme), at: self.now) }
+            self.blockedReason { try usecase.check(self.paidTheme.paidFeature, at: self.now) }
         }
 
         // then
         #expect(reasons == [
-            .init(feature: .colorTheme(self.paidTheme), licenseDays: 14),
-            .init(feature: .colorTheme(self.paidTheme), licenseDays: 30),
+            .init(feature: .colorTheme(isCustom: true), licenseDays: 14),
+            .init(feature: .colorTheme(isCustom: true), licenseDays: 30),
             nil
         ])
     }
@@ -796,10 +796,10 @@ extension PaidFeatureGateUsecaseImpleTests {
         let usecase = self.makeUsecase(plan: self.userPlan(.free))
 
         // when
-        let reason = self.blockedReason { try usecase.check(.colorTheme(self.newCustomTheme), at: self.now) }
+        let reason = self.blockedReason { try usecase.check(self.newCustomTheme.paidFeature, at: self.now) }
 
         // then
-        #expect(reason == .init(feature: .colorTheme(self.newCustomTheme), licenseDays: 7))
+        #expect(reason == .init(feature: .colorTheme(isCustom: true), licenseDays: 7))
     }
 
     @Test("유료 plan 이거나 사용권이 유효하면 새 테마 만들기를 막지 않는다")
@@ -810,7 +810,7 @@ extension PaidFeatureGateUsecaseImpleTests {
 
         // when
         let results = [paid, licensed].map { usecase in
-            self.passes { try usecase.check(.colorTheme(self.newCustomTheme), at: self.now) }
+            self.passes { try usecase.check(self.newCustomTheme.paidFeature, at: self.now) }
         }
 
         // then
@@ -823,7 +823,7 @@ extension PaidFeatureGateUsecaseImpleTests {
         let usecase = self.makeUsecase(plan: self.userPlan(.free))
 
         // when
-        usecase.grantLicense(for: .colorTheme(self.newCustomTheme), at: self.now)
+        usecase.grantLicense(for: self.newCustomTheme.paidFeature, at: self.now)
 
         // then
         #expect(self.stubLicenseRepository.didUpdatedLicense == .init(grantedAt: self.now))

@@ -127,7 +127,7 @@ extension AdExposureUsecaseImple {
         )
         guard let colorSetKey = setting?.colorSetKey else { return false }
         do {
-            try self.paidFeatureGateUsecase.check(.colorTheme(colorSetKey), at: now)
+            try self.paidFeatureGateUsecase.check(colorSetKey.paidFeature, at: now)
             return false
         } catch {
             return true

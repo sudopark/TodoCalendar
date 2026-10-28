@@ -10,7 +10,7 @@ import Foundation
 
 
 public enum PaidFeature: Sendable, Equatable {
-    case colorTheme(ColorSetKeys)
+    case colorTheme(isCustom: Bool)
     case customizeWidget
 }
 

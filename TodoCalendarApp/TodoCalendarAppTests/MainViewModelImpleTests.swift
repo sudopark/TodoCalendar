@@ -959,7 +959,7 @@ extension MainViewModelImpleTests {
     private var customThemeKey: ColorSetKeys { .custom("custom_theme_uuid") }
 
     private var licenseExpiredReason: PaidFeatureGateFailReason {
-        return PaidFeatureGateFailReason(feature: .colorTheme(self.customThemeKey), licenseDays: 3)
+        return PaidFeatureGateFailReason(feature: .colorTheme(isCustom: true), licenseDays: 3)
     }
 
     private func makeViewModelUsingCustomTheme(isLicenseExpired: Bool) -> MainViewModelImple {
@@ -1027,7 +1027,7 @@ extension MainViewModelImpleTests {
         XCTAssertNil(self.spyRouter.didDismissPresented)
     }
 
-    func testViewModel_whenCheckLicense_checkCurrentColorTheme() {
+    func testViewModel_whenCheckLicense_checksCurrentThemeAsCustom() {
         // given
         let viewModel = self.makeViewModelUsingCustomTheme(isLicenseExpired: false)
 
@@ -1035,7 +1035,7 @@ extension MainViewModelImpleTests {
         self.waitLicenseGateChecked { viewModel.prepare() }
 
         // then
-        XCTAssertEqual(self.spyPaidFeatureGateUsecase.didCheckFeature, .colorTheme(self.customThemeKey))
+        XCTAssertEqual(self.spyPaidFeatureGateUsecase.didCheckFeature, .colorTheme(isCustom: true))
     }
 
     func testViewModel_whenLicenseExpiredAndEnterForeground_dismissPresentedBeforeShowGuide() {
@@ -1176,7 +1176,7 @@ extension MainViewModelImpleTests {
         XCTAssertEqual(
             self.spyRouter.didShowColorThemeLicenseExpiredGuideWith, [self.licenseExpiredReason]
         )
-        XCTAssertEqual(self.spyPaidFeatureGateUsecase.didCheckFeature, .colorTheme(.systemTheme))
+        XCTAssertEqual(self.spyPaidFeatureGateUsecase.didCheckFeature, .colorTheme(isCustom: false))
     }
 
     func testViewModel_whenUseDefaultSelected_changeColorThemeToSystemTheme() {

@@ -357,7 +357,7 @@ extension ColorThemeSelectViewModelImpleTests {
         return self.spyUISettingUsecase.didRequestSelectColorThemeKeys
     }
     
-    private var applyReason: PaidFeatureGateFailReason { .init(feature: .colorTheme(.custom("paid")), licenseDays: 7) }
+    private var applyReason: PaidFeatureGateFailReason { .init(feature: .colorTheme(isCustom: true), licenseDays: 7) }
     
     private func selectUntilGuideShown(
         _ viewModel: ColorThemeSelectViewModelImple, _ model: any ColorThemeModel
@@ -394,7 +394,7 @@ extension ColorThemeSelectViewModelImpleTests {
         try await self.selectUntilGuideShown(viewModel, self.paidTheme)
         
         // then
-        XCTAssertEqual(self.spyRouter.didShowPaidFeatureAdGuideWith, .init(feature: .colorTheme(.custom("paid")), licenseDays: 7))
+        XCTAssertEqual(self.spyRouter.didShowPaidFeatureAdGuideWith, .init(feature: .colorTheme(isCustom: true), licenseDays: 7))
         XCTAssertEqual(self.requestedColorSetKeys, [.custom("paid")])
         XCTAssertNil(self.spyUISettingUsecase.didChangeAppearanceSetting)
         XCTAssertNil(self.spyRouter.didShowError)
@@ -506,7 +506,7 @@ extension ColorThemeSelectViewModelImpleTests {
         try await self.waitEffect("새 테마 걸기") { self.spyUISettingUsecase.didSelectColorThemeKey != nil }
         
         // then
-        XCTAssertEqual(reasonBeforeFinish, .init(feature: .colorTheme(.custom("paid")), licenseDays: 7))
+        XCTAssertEqual(reasonBeforeFinish, .init(feature: .colorTheme(isCustom: true), licenseDays: 7))
         XCTAssertEqual(self.requestedColorSetKeys, [.custom("new"), .custom("new")])
         XCTAssertEqual(self.spyUISettingUsecase.didSelectColorThemeKey, .custom("new"))
         XCTAssertNil(self.spyRouter.didShowError)

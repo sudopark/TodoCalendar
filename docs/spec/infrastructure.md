@@ -637,8 +637,8 @@ Repository 는 받아 둔 원격 정책(캐시)만 돌려준다. 캐시가 없�
 
 | 레이어 | 파일 |
 |---|---|
-| Domain Model | `Domain/Sources/Models/AppPolicy.swift` |
-| Domain Repo | `Domain/Sources/Repositories/AppPolicyRepository.swift` |
+| Domain Model | `Domain/Sources/Models/Billing/AppPolicy.swift` |
+| Domain Repo | `Domain/Sources/Repositories/Billing/AppPolicyRepository.swift` |
 | Repository Impl | `Repository/Sources/Repository+Imple/Support/AppPolicyRepositoryImple.swift` |
 | Mapper | `Repository/Sources/Repository+Imple/Support/AppPolicy+Mapping.swift` |
 | Endpoint | `Repository/Sources/Remote/Endpoint.swift` (`AppEndpoints.appPolicy`) |

@@ -61,9 +61,9 @@ extension PaidFeatureGateUsecaseImple {
     private func isFreeToUse(_ feature: PaidFeature) -> Bool {
         let plan = self.planSource.latestUserPlan()
         switch feature {
-        case .colorTheme(.custom):
+        case .colorTheme(isCustom: true):
             return plan?.isPaid != false
-        case .colorTheme:
+        case .colorTheme(isCustom: false):
             return true
         case .customizeWidget:
             let isPaid = plan.map { $0.isPaid } ?? false
