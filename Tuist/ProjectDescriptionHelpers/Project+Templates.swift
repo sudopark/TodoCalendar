@@ -86,6 +86,52 @@ extension Project {
         )
     }
 
+    public static func frameworkWithInterfaceAndTesting(
+        name: String,
+        destinations: Destinations,
+        iOSTargetVersion: String,
+        interfaceDependencies: [TargetDependency] = [],
+        dependencies: [TargetDependency] = [],
+        testingDependencies: [TargetDependency] = []
+    ) -> Project {
+        let interfaceName = "\(name)Interface"
+        let testingName = "\(name)Testing"
+        let targets = [
+            makeStaticFrameworkTarget(
+                name: interfaceName,
+                destinations: destinations,
+                iOSTargetVersion: iOSTargetVersion,
+                sourceDirectory: "Interface",
+                dependencies: interfaceDependencies
+            ),
+            makeStaticFrameworkTarget(
+                name: name,
+                destinations: destinations,
+                iOSTargetVersion: iOSTargetVersion,
+                sourceDirectory: "Sources",
+                dependencies: [.target(name: interfaceName)] + dependencies
+            ),
+            makeStaticFrameworkTarget(
+                name: testingName,
+                destinations: destinations,
+                iOSTargetVersion: iOSTargetVersion,
+                sourceDirectory: "Testing",
+                dependencies: [.target(name: interfaceName)] + testingDependencies
+            ),
+            makeUnitTestsTarget(
+                name: name,
+                destinations: destinations,
+                iOSTargetVersion: iOSTargetVersion,
+                testedTargets: [name, testingName]
+            )
+        ]
+        return Project(
+            name: name,
+            organizationName: organizationName,
+            targets: targets
+        )
+    }
+
     public static func framework(
         name: String,
         destinations: Destinations,
@@ -170,13 +216,38 @@ extension Project {
     )
     -> [Target]
     {
-        let sources = Target.target(name: name,
+        let sources = makeStaticFrameworkTarget(
+            name: name,
+            destinations: destinations,
+            iOSTargetVersion: iOSTargetVersion,
+            sourceDirectory: "Sources",
+            resources: resources,
+            dependencies: dependencies
+        )
+        let tests = makeUnitTestsTarget(
+            name: name,
+            destinations: destinations,
+            iOSTargetVersion: iOSTargetVersion,
+            testedTargets: [name]
+        )
+        return [sources, tests]
+    }
+
+    private static func makeStaticFrameworkTarget(
+        name: String,
+        destinations: Destinations,
+        iOSTargetVersion: String,
+        sourceDirectory: String,
+        resources: ResourceFileElements? = nil,
+        dependencies: [TargetDependency]
+    ) -> Target {
+        return Target.target(name: name,
                              destinations: destinations,
                              product: .staticFramework,
                              bundleId: "\(organizationName).\(name)",
                              deploymentTargets: .iOS(iOSTargetVersion),
                              infoPlist: .default,
-                             sources: ["Sources/**"],
+                             sources: ["\(sourceDirectory)/**"],
                              resources: resources,
                              headers: Headers.headers(public: "\(name).h"),
                              dependencies: dependencies,
@@ -185,21 +256,27 @@ extension Project {
                                 configurations: []
                              )
         )
-        let tests = Target.target(name: "\(name)Tests",
-                           destinations: destinations,
-                           product: .unitTests,
-                           bundleId: "\(organizationName).\(name)Tests",
-                           deploymentTargets: .iOS(iOSTargetVersion),
-                           infoPlist: .default,
-                           sources: ["Tests/**"],
-                           resources: [],
-                           dependencies: [
-                            .target(name: name),
-                            .project(target: "UnitTestHelpKit", path: .relativeToRoot("Supports/UnitTestHelpKit")),
-                            .project(target: "TestDoubles", path: .relativeToRoot("Supports/TestDoubles")),
-                            .project(target: "Common3rdParty", path: .relativeToRoot("Supports/Common3rdParty")),
-                           ])
-        return [sources, tests]
+    }
+
+    private static func makeUnitTestsTarget(
+        name: String,
+        destinations: Destinations,
+        iOSTargetVersion: String,
+        testedTargets: [String]
+    ) -> Target {
+        return Target.target(name: "\(name)Tests",
+                             destinations: destinations,
+                             product: .unitTests,
+                             bundleId: "\(organizationName).\(name)Tests",
+                             deploymentTargets: .iOS(iOSTargetVersion),
+                             infoPlist: .default,
+                             sources: ["Tests/**"],
+                             resources: [],
+                             dependencies: testedTargets.map { .target(name: $0) } + [
+                                .project(target: "UnitTestHelpKit", path: .relativeToRoot("Supports/UnitTestHelpKit")),
+                                .project(target: "TestDoubles", path: .relativeToRoot("Supports/TestDoubles")),
+                                .project(target: "Common3rdParty", path: .relativeToRoot("Supports/Common3rdParty")),
+                             ])
     }
 
     private static func makeFrameworkTargets(

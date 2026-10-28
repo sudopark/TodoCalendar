@@ -16,6 +16,7 @@ import sys
 HELPERS = {
     "app": True,
     "frameworkWithTest": True,
+    "frameworkWithInterfaceAndTesting": True,
     "framework": False,
     "makeAppExtensionTargets": True,
 }

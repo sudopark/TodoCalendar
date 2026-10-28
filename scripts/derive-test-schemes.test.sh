@@ -96,17 +96,20 @@ out=$(changed "$FIXTURE" Mods/A/Sources/x.swift)
 [ "$out" = "A BB" ]; check "nested_parent_change_reaches_dependent" $? "$out"
 
 cat > "$FIXTURE/Mods/C/Project.swift" <<'SWIFT'
-let project = Project.frameworkWithTest(
+let project = Project.frameworkWithInterfaceAndTesting(
     name: "C",
     destinations: [.iPhone],
     iOSTargetVersion: "17.0",
-    dependencies: [.project(target: "A", path: .relativeToRoot("Mods/A"))]
+    interfaceDependencies: [.project(target: "A", path: .relativeToRoot("Mods/A"))],
+    testingDependencies: [.project(target: "BB", path: .relativeToRoot("Mods/A/BB"))]
 )
 SWIFT
 out=$(python3 "$SCRIPT" --root "$FIXTURE" --all | tr '\n' ' ' | sed 's/ $//')
 [ "$out" = "A BB C" ]; check "new_module_detected_without_registration" $? "$out"
 out=$(changed "$FIXTURE" Mods/A/Sources/x.swift)
-[ "$out" = "A BB C" ]; check "new_module_reached_by_dependency_change" $? "$out"
+[ "$out" = "A BB C" ]; check "interface_dependency_reaches_dependent" $? "$out"
+out=$(changed "$FIXTURE" Mods/A/BB/Sources/x.swift)
+[ "$out" = "BB C" ]; check "testing_dependency_reaches_dependent" $? "$out"
 
 mkdir -p "$FIXTURE/Mods/D"
 cat > "$FIXTURE/Mods/D/Project.swift" <<'SWIFT'
@@ -170,7 +173,7 @@ template_helpers=$(grep -oE 'public static func [A-Za-z]+' "$TEMPLATE" | awk '{p
 diff <(echo "$template_helpers") <(tables HELPERS) >/dev/null
 check "every_public_helper_is_classified" $? "$(diff <(echo "$template_helpers") <(tables HELPERS) | tr '\n' ' ')"
 
-template_test_deps=$(awk '/func (makeFrameworkTargetsWithTest|makeAppTargets|makeAppExtensionTargets)\(/{f=1} /func (makeSnapshotsTarget|makeE2ETarget|makeFrameworkTargets)\(/{f=0} /snapshotTests \{/{f=0} f' "$TEMPLATE" \
+template_test_deps=$(awk '/func (makeUnitTestsTarget|makeAppTargets|makeAppExtensionTargets)\(/{f=1} /func (makeSnapshotsTarget|makeE2ETarget|makeFrameworkTargets|makeFrameworkTargetsWithTest|makeStaticFrameworkTarget)\(/{f=0} /snapshotTests \{/{f=0} f' "$TEMPLATE" \
   | grep -oE 'relativeToRoot\("[^"]+"\)' | sed -E 's/relativeToRoot\("(.*)"\)/\1/' | sort -u)
 diff <(echo "$template_test_deps") <(tables IMPLICIT_TEST_DEPENDENCIES) >/dev/null
 check "implicit_test_deps_match_template" $? "$(diff <(echo "$template_test_deps") <(tables IMPLICIT_TEST_DEPENDENCIES) | tr '\n' ' ')"
