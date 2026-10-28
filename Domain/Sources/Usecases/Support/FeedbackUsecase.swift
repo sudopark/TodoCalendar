@@ -18,12 +18,6 @@ public protocol FeedbackUsecase: Sendable {
     func postFeedback(_ message: FeedbackPostMessage) async throws
 }
 
-public protocol DeviceInfoFetchService: Sendable {
-    @MainActor
-    func fetchDeviceInfo() async -> DeviceInfo
-    func fetchAppVersion() -> String?
-}
-
 public final class FeedbackUsecaseImple: FeedbackUsecase, @unchecked Sendable {
     
     private let accountUsecase: any AccountUsecase
