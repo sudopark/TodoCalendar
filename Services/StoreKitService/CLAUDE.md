@@ -13,7 +13,7 @@ TodoCalendarApp → Domain ← StoreKitService
 
 **테스트 타겟을 두지 않는다.** 실 StoreKit 샌드박스가 있어야만 의미 있는 검증이라 유닛 테스트 가치가 없다. 대신 **Domain 쪽 스텁으로 계약을 검증한다** — `StubAppStoreBillingService` + `BillingUsecaseImpleTests`. 어댑터를 SDK 호출 변환만 남을 만큼 얇게 유지하는 게 이 선택의 전제다. 로직이 붙기 시작하면 그 로직은 Domain 으로 올려야 한다.
 
-**그래서 테스트 스킴도 없다.** `ALL_SCHEMES`·`run-all-tests.sh`·`run-tests` 스킬의 스킴 목록에 넣지 않는다. 대신 **경로→스킴 매핑에는 넣어** 변경이 앱 빌드를 트리거하게 한다 (`impact-check.sh`·`pr_test.yml` 의 테스트 없는 Services 묶음 alternation). 안 넣으면 이 프레임워크를 깨뜨려도 CI 가 아무것도 안 돈다.
+**그래서 테스트 스킴도 없다.** 그래도 이 프레임워크를 고치면 CI 가 앱 스킴을 돌린다 — 앱이 이 프레임워크에 의존해서, 도출 스크립트(`scripts/derive-test-schemes.py`)가 변경 경로에서 앱 스킴을 고른다.
 
 **프로토콜은 Domain 에, 구현체만 여기.** 프로토콜 시그니처에 StoreKit 타입이 새어나오면 안 된다 — 경계 타입(`BillingProduct`·`BillingSignedTransaction`·`BillingTransactionOutcome`)으로 감싼다. 지켜졌는지는 **Domain 파일의 import 목록으로 검증된다** (`AppStoreBillingService.swift` 는 `import Foundation` 뿐).
 

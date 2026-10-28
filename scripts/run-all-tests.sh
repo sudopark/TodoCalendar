@@ -18,25 +18,7 @@ if [ -z "${DESTINATION:-}" ]; then
   DESTINATION="platform=iOS Simulator,id=${SIMULATOR_UDID}"
 fi
 
-ALL_SCHEMES=(
-  "Extensions"
-  "Domain"
-  "Repository"
-  "AuthService"
-  "CommonPresentation"
-  "BillingScenes"
-  "CalendarPresentation"
-  "CalendarScenes"
-  "EventDetailScene"
-  "EventListScenes"
-  "SettingScene"
-  "MemberScenes"
-  "AIAgentScene"
-  "WidgetScenes"
-  "TodoCalendarApp"
-  "TodoCalendarAppWidget"
-  "TodoCalendarAppShare"
-)
+ALL_SCHEMES=($(python3 "$(dirname "${BASH_SOURCE[0]}")/derive-test-schemes.py" --all)) || exit 1
 
 # 인자가 있으면 해당 스킴만 실행
 if [ $# -gt 0 ]; then
