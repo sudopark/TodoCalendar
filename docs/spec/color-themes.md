@@ -309,7 +309,7 @@ Radix 스케일은 12단계이고 단계마다 쓰임이 정해져 있다 — 1 
 
 ### 테마 생성 광고
 
-새 커스텀 테마를 저장할 때 `AppSettingUsecaseImple.saveCustomColorTheme` 이 그 테마 키(`.custom(uuid)`)로 `check(.colorTheme(_), at:)` 를 부른다. 막히면 사유를 던지고 편집 화면이 광고 안내 시트를 띄운다. 판정표대로 무료 플랜이라도 사용권이 유효하면 광고 없이 만든다. 기존 테마 수정 저장은 이 판정을 보지 않는다. 저장이 끝나면 선택 화면이 그 테마를 건다.
+새 커스텀 테마를 저장할 때 `AppSettingUsecaseImple.saveCustomColorTheme` 이 커스텀 테마로 `check(.colorTheme(isCustom: true), at:)` 를 부른다. 막히면 사유를 던지고 편집 화면이 광고 안내 시트를 띄운다. 판정표대로 무료 플랜이라도 사용권이 유효하면 광고 없이 만든다. 기존 테마 수정 저장은 이 판정을 보지 않는다. 저장이 끝나면 선택 화면이 그 테마를 건다.
 
 ### 광고 결과 처리
 
@@ -324,7 +324,7 @@ Radix 스케일은 12단계이고 단계마다 쓰임이 정해져 있다 — 1 
 
 ### 만료 게이트
 
-지금 걸린 테마가 사용권 만료로 막히면 메인 화면이 안내 시트를 띄운다. `MainViewModelImple` 이 `PaidFeatureGateUsecase.check(.colorTheme(_), at:)` 로 지금 테마 키를 판정하고, 판정 시점은 넷이다.
+지금 걸린 테마가 사용권 만료로 막히면 메인 화면이 안내 시트를 띄운다. `MainViewModelImple` 이 지금 테마 키의 `paidFeature`(커스텀 여부)로 `PaidFeatureGateUsecase.check(_:at:)` 를 부르고, 판정 시점은 넷이다.
 
 - `prepare()` 직후
 - 포그라운드 복귀(`willEnterForegroundNotification`)

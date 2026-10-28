@@ -74,18 +74,16 @@ final class AdExposureUsecaseImpleTests: PublisherWaitable {
 
     private func expiredGate() -> StubPaidFeatureGateUsecase {
         let gate = StubPaidFeatureGateUsecase()
-        gate.mockBlockedReason = .init(feature: .colorTheme(self.usingThemeKey), licenseDays: 1)
+        gate.mockBlockedReason = .init(feature: .colorTheme(isCustom: true), licenseDays: 1)
         return gate
     }
 
-    private let usingThemeKey: ColorSetKeys = .custom("expired-theme")
-
-    private func sharedDataStoreUsingTheme() -> SharedDataStore {
+    private func sharedDataStoreUsingTheme(_ key: ColorSetKeys = .custom("expired-theme")) -> SharedDataStore {
         let store = SharedDataStore()
         store.put(
             CalendarAppearanceSettings.self,
             key: ShareDataKeys.calendarAppearance.rawValue,
-            .init(colorSetKey: self.usingThemeKey, fontSetKey: .systemDefault)
+            .init(colorSetKey: key, fontSetKey: .systemDefault)
         )
         return store
     }
@@ -368,7 +366,27 @@ extension AdExposureUsecaseImpleTests {
 
         // then
         #expect(canExpose == false)
-        #expect(gate.didCheckFeature == .colorTheme(self.usingThemeKey))
+        #expect(gate.didCheckFeature == .colorTheme(isCustom: true))
+    }
+
+    @Test("앱 실행 직후 지금 테마가 커스텀이 아니면 커스텀이 아닌 테마로 사용권을 묻는다")
+    func usecase_fromAppLaunch_whenUsingAppTheme_checksGateAsNotCustom() {
+        // given
+        let gate = StubPaidFeatureGateUsecase()
+        let usecase = self.makeUsecase(
+            userPlan: self.userPlan(.free),
+            coldLaunchHistory: self.appLaunchConditionsMetHistory(),
+            gate: gate,
+            sharedDataStore: self.sharedDataStoreUsingTheme(.appTheme(.tomato))
+        )
+
+        // when
+        _ = usecase.canExposeFullScreenAd(
+            scope: .application, isFromAppLaunch: true, at: self.now
+        )
+
+        // then
+        #expect(gate.didCheckFeature == .colorTheme(isCustom: false))
     }
 
     @Test("앱 실행 직후 지금 테마의 사용권이 살아 있으면 전면 광고를 허용한다")

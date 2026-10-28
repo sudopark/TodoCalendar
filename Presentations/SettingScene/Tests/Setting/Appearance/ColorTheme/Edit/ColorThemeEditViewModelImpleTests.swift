@@ -498,7 +498,7 @@ extension ColorThemeEditViewModelImpleTests {
 extension ColorThemeEditViewModelImpleTests {
 
     private var createReason: PaidFeatureGateFailReason {
-        .init(feature: .colorTheme(.custom("new")), licenseDays: 7)
+        .init(feature: .colorTheme(isCustom: true), licenseDays: 7)
     }
 
     private func saveUntilGuideShown(
@@ -521,7 +521,7 @@ extension ColorThemeEditViewModelImpleTests {
         let processing = try await self.saveUntilGuideShown(viewModel)
 
         // then
-        #expect(self.spyRouter.didShowPaidFeatureAdGuideWith == .init(feature: .colorTheme(.custom("new")), licenseDays: 7))
+        #expect(self.spyRouter.didShowPaidFeatureAdGuideWith == .init(feature: .colorTheme(isCustom: true), licenseDays: 7))
         #expect(processing.values == [false, true, false])
         #expect(usecase.didRequestSaveCustomColorThemes.map { $0.name } == ["new theme"])
         #expect(usecase.didSaveCustomColorTheme == nil)

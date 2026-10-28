@@ -96,7 +96,7 @@ extension AppSettingUsecaseImple: UISettingUsecase {
     }
 
     public func selectColorTheme(_ key: ColorSetKeys) async throws -> CalendarAppearanceSettings {
-        try self.paidFeatureGateUsecase.check(.colorTheme(key), at: Date())
+        try self.paidFeatureGateUsecase.check(key.paidFeature, at: Date())
         switch key {
         case .custom(let uuid):
             guard let theme = try await self.customColorThemeRepository.fetchTheme(uuid)
@@ -155,7 +155,7 @@ extension AppSettingUsecaseImple: UISettingUsecase {
     
     public func saveCustomColorTheme(_ theme: CustomColorTheme) async throws {
         if await self.isNewCustomColorTheme(theme.uuid) {
-            try self.paidFeatureGateUsecase.check(.colorTheme(.custom(theme.uuid)), at: Date())
+            try self.paidFeatureGateUsecase.check(.colorTheme(isCustom: true), at: Date())
         }
         try await self.customColorThemeRepository.saveTheme(theme)
         self.replaceCurrentCustomColorTheme(of: theme.uuid, with: theme)

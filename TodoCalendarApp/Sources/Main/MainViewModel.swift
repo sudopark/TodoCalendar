@@ -313,7 +313,7 @@ extension MainViewModelImple {
 
     private func colorThemeLicenseExpiredReason(_ key: ColorSetKeys) -> PaidFeatureGateFailReason? {
         do {
-            try self.paidFeatureGateUsecase.check(.colorTheme(key), at: Date())
+            try self.paidFeatureGateUsecase.check(key.paidFeature, at: Date())
             return nil
         } catch {
             return error as? PaidFeatureGateFailReason

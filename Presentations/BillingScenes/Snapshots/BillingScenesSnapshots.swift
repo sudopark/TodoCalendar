@@ -517,7 +517,7 @@ extension BillingScenesSnapshots {
             let appearance = self.makeAppearance(theme)
             return ZStack {
                 appearance.colorSet.bg1.asColor.ignoresSafeArea()
-                self.makeAdGuideView(appearance, .init(feature: .colorTheme(.custom("my-theme")), licenseDays: 7))
+                self.makeAdGuideView(appearance, .init(feature: .colorTheme(isCustom: true), licenseDays: 7))
             }
         }
     }
@@ -530,7 +530,7 @@ extension BillingScenesSnapshots {
                 appearance.colorSet.bg1.asColor.ignoresSafeArea()
                 self.makeAdGuideView(
                     appearance,
-                    .init(feature: .colorTheme(.custom("my-theme")), licenseDays: 7),
+                    .init(feature: .colorTheme(isCustom: true), licenseDays: 7),
                     canUseDefault: true
                 )
             }
@@ -556,7 +556,7 @@ extension BillingScenesSnapshots {
                 appearance.colorSet.bg1.asColor.ignoresSafeArea()
                 self.makeAdGuideView(
                     appearance,
-                    .init(feature: .colorTheme(.custom("my-theme")), licenseDays: 7),
+                    .init(feature: .colorTheme(isCustom: true), licenseDays: 7),
                     canShowPlans: false
                 )
             }

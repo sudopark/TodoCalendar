@@ -95,8 +95,8 @@ extension PaidFeatureAdGuideViewModelImpleTests {
     @Test("광고 보상을 받거나 대체 전면광고를 보면 막힌 기능의 사용권을 기록하고 진행을 넘긴다", arguments: [
         (RewardedAdResult.rewarded, PaidFeature.customizeWidget),
         (.fallbackFullScreenShown, .customizeWidget),
-        (.rewarded, .colorTheme(.custom("my-theme"))),
-        (.fallbackFullScreenShown, .colorTheme(.custom("my-theme")))
+        (.rewarded, .colorTheme(isCustom: true)),
+        (.fallbackFullScreenShown, .colorTheme(isCustom: true))
     ])
     func watchAd_whenRewarded_grantsLicenseOfFeatureAndProceeds(
         _ result: RewardedAdResult, _ feature: PaidFeature
@@ -115,7 +115,7 @@ extension PaidFeatureAdGuideViewModelImpleTests {
 
     @Test("광고가 없으면 기능에 상관없이 광고 없음 토스트를 띄우고 진행하지 않는다", arguments: [
         PaidFeature.customizeWidget,
-        .colorTheme(.custom("my-theme"))
+        .colorTheme(isCustom: true)
     ])
     func watchAd_whenAdUnavailable_showsToastWithoutProceed(_ feature: PaidFeature) {
         // given
@@ -210,7 +210,7 @@ extension PaidFeatureAdGuideViewModelImpleTests {
     func useDefault_closesSheetThenNotifiesUseDefaultAndFinishesWithoutProceed() {
         // given
         let viewModel = self.makeViewModel(
-            .init(feature: .colorTheme(.custom("my-theme")), licenseDays: 7), withUseDefault: true
+            .init(feature: .colorTheme(isCustom: true), licenseDays: 7), withUseDefault: true
         )
 
         // when
@@ -227,7 +227,7 @@ extension PaidFeatureAdGuideViewModelImpleTests {
     func useDefault_thenSheetDismissed_finishesOnlyOnce() {
         // given
         let viewModel = self.makeViewModel(
-            .init(feature: .colorTheme(.custom("my-theme")), licenseDays: 7), withUseDefault: true
+            .init(feature: .colorTheme(isCustom: true), licenseDays: 7), withUseDefault: true
         )
 
         // when
@@ -244,7 +244,7 @@ extension PaidFeatureAdGuideViewModelImpleTests {
     func useDefault_calledTwice_notifiesOnlyOnce() {
         // given
         let viewModel = self.makeViewModel(
-            .init(feature: .colorTheme(.custom("my-theme")), licenseDays: 7), withUseDefault: true
+            .init(feature: .colorTheme(isCustom: true), licenseDays: 7), withUseDefault: true
         )
 
         // when
@@ -263,7 +263,7 @@ extension PaidFeatureAdGuideViewModelImpleTests {
         let router = SpyAdGuideRouter(adResult: .rewarded)
         let recorder = self.recorder
         let viewModel = PaidFeatureAdGuideViewModelImple(
-            reason: .init(feature: .colorTheme(.custom("my-theme")), licenseDays: 7),
+            reason: .init(feature: .colorTheme(isCustom: true), licenseDays: 7),
             paidFeatureGateUsecase: self.gate,
             accountUsecase: StubAccountUsecase(AccountInfo("uid")),
             onFinished: { [recorder] in recorder.callbacks.append(.finished($0)) },
@@ -283,7 +283,7 @@ extension PaidFeatureAdGuideViewModelImpleTests {
     func canUseDefault_followsWhetherUseDefaultCallbackGiven(_ withUseDefault: Bool) async throws {
         // given
         let viewModel = self.makeViewModel(
-            .init(feature: .colorTheme(.custom("my-theme")), licenseDays: 7), withUseDefault: withUseDefault
+            .init(feature: .colorTheme(isCustom: true), licenseDays: 7), withUseDefault: withUseDefault
         )
 
         // when
@@ -299,7 +299,7 @@ extension PaidFeatureAdGuideViewModelImpleTests {
     func canShowPlans_onlyWhenSignedIn(_ isSignedIn: Bool) async throws {
         // given
         let viewModel = self.makeViewModel(
-            .init(feature: .colorTheme(.custom("my-theme")), licenseDays: 7), isSignedIn: isSignedIn
+            .init(feature: .colorTheme(isCustom: true), licenseDays: 7), isSignedIn: isSignedIn
         )
 
         // when
