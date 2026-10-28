@@ -136,19 +136,4 @@ public struct ExternalCalendarEventTag: EventTag {
         self.colorHex = colorHex
         self.ownerId = ownerId
     }
-
-    public init(_ tag: GoogleCalendar.Tag) {
-        self.tagId = tag.tagId
-        self.name = tag.name
-        self.colorHex = tag.colorHex
-        self.foregroundColorHex = tag.foregroundColorHex
-        self.colorId = tag.colorId
-        self.ownerId = tag.ownerId
-    }
-
-    public init(_ tag: AppleCalendar.Tag) {
-        self.tagId = tag.tagId
-        self.name = tag.name
-        self.colorHex = tag.colorHex
-    }
 }
