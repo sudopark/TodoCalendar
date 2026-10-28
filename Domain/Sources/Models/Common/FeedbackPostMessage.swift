@@ -9,14 +9,6 @@
 import Foundation
 
 
-public struct DeviceInfo: Sendable {
-    public var osVersion: String?
-    public var appVersion: String?
-    public var deviceModel: String?
-    public var isiOSAppOnMac: Bool?
-    public init() { }
-}
-
 public struct FeedbackPostMessage {
     
     public let contactEmail: String
