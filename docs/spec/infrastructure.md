@@ -460,7 +460,7 @@ private func runMigrationVersion6to7(_ database: any DataBase) throws {
 | Domain Usecase | `Domain/Sources/Usecases/Support/AppUpdateCheckUsecase.swift` |
 | Repository Impl | `Repository/Sources/Repository+Imple/Support/AppRemoteRepositoryImple.swift` |
 | Mapper | `Repository/Sources/Repository+Imple/Support/AppUpdateInfo+Mapping.swift` |
-| Endpoint | `Repository/Sources/Remote/Endpoint.swift` (`AppEndpoints.updateInfo`) |
+| Endpoint | `Repository/Infra/RemoteInfra/Interface/Endpoint.swift` (`AppEndpoints.updateInfo`) |
 | Root View | `TodoCalendarApp/Sources/Root/ForceUpdatePopupView.swift` |
 | Root Router | `TodoCalendarApp/Sources/Root/ApplicationRootRouter.swift`의 `showUpdatePopup` |
 | Root VM | `TodoCalendarApp/Sources/Root/ApplicationRootViewModel.swift`의 `bindUpdateRequirement` + `handleWillEnterForeground` |
@@ -594,7 +594,7 @@ protocol LegalNoticeRepository: Sendable {
 | Domain Usecase | `Domain/Sources/Usecases/Support/LegalNoticeUsecase.swift` |
 | Repository Impl | `Repository/Sources/Repository+Imple/Support/LegalNoticeRepositoryImple.swift` |
 | Mapper | `Repository/Sources/Repository+Imple/Support/LegalNotice+Mapping.swift` |
-| Endpoint | `Repository/Sources/Remote/Endpoint.swift` (`AppEndpoints.legalNotice`) |
+| Endpoint | `Repository/Infra/RemoteInfra/Interface/Endpoint.swift` (`AppEndpoints.legalNotice`) |
 | Main View | `TodoCalendarApp/Sources/Main/LegalNoticeBannerView.swift` |
 | Main ViewController | `TodoCalendarApp/Sources/Main/MainViewController.swift` (배너 layout) |
 | Main VM | `TodoCalendarApp/Sources/Main/MainViewModel.swift` (`openLegalNoticeDocument` / `closeLegalNoticeBanner` / `legalNoticeBanners` publisher) |
@@ -641,7 +641,7 @@ Repository 는 받아 둔 원격 정책(캐시)만 돌려준다. 캐시가 없�
 | Domain Repo | `Domain/Sources/Repositories/Billing/AppPolicyRepository.swift` |
 | Repository Impl | `Repository/Sources/Repository+Imple/Support/AppPolicyRepositoryImple.swift` |
 | Mapper | `Repository/Sources/Repository+Imple/Support/AppPolicy+Mapping.swift` |
-| Endpoint | `Repository/Sources/Remote/Endpoint.swift` (`AppEndpoints.appPolicy`) |
+| Endpoint | `Repository/Infra/RemoteInfra/Interface/Endpoint.swift` (`AppEndpoints.appPolicy`) |
 | 기본 정책 | `TodoCalendarApp/Sources/AppEnvironment.swift` (`defaultAppPolicy`) |
 
 ---
