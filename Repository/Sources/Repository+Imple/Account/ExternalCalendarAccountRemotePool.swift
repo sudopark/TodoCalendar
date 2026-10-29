@@ -9,6 +9,7 @@
 import Foundation
 import Domain
 import Extensions
+import RemoteInfraInterface
 
 
 // MARK: - ExternalCalendarRemoteFactory

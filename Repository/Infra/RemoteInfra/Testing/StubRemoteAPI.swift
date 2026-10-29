@@ -1,6 +1,6 @@
 //
 //  StubRemoteAPI.swift
-//  RepositoryTests
+//  RemoteInfraTesting
 //
 //  Created by sudo.park on 2023/06/11.
 //
@@ -8,20 +8,20 @@
 import Foundation
 import Domain
 import Extensions
-@testable import Repository
+import RemoteInfraInterface
 
 
-final class StubRemoteAPI: RemoteAPI, @unchecked Sendable {
+public final class StubRemoteAPI: RemoteAPI, @unchecked Sendable {
     
-    struct Response {
-        let method: RemoteAPIMethod
-        let endpoint: any Endpoint
-        let header: [String: String]?
-        let parameters: [String: Any]
-        let parameterCompare: (([String: Any], [String: Any]) -> Bool)?
-        let resultJsonString: Result<String, Error>
+    public struct Response {
+        public let method: RemoteAPIMethod
+        public let endpoint: any Endpoint
+        public let header: [String: String]?
+        public let parameters: [String: Any]
+        public let parameterCompare: (([String: Any], [String: Any]) -> Bool)?
+        public let resultJsonString: Result<String, Error>
         
-        init(
+        public init(
             method: RemoteAPIMethod = .get,
             endpoint: any Endpoint,
             header: [String : String]? = nil,
@@ -39,33 +39,33 @@ final class StubRemoteAPI: RemoteAPI, @unchecked Sendable {
     }
     
     private let responses: [Response]
-    init(responses: [Response]) {
+    public init(responses: [Response]) {
         self.responses = responses
     }
     
-    let environment: RemoteEnvironment = .init(
+    public let environment: RemoteEnvironment = .init(
         calendarAPIHost: "dummy_calendar_api_host",
         csAPI: "cs_channel_api",
         deviceId: "device_id",
         acceptLanguage: { "en" }
     )
-    var didRequestedMethod: RemoteAPIMethod?
-    var didRequestedPath: String?
-    var didRequestedParams: [String: Any]?
-    var didRequestedPaths: [String] = []
+    public var didRequestedMethod: RemoteAPIMethod?
+    public var didRequestedPath: String?
+    public var didRequestedParams: [String: Any]?
+    public var didRequestedPaths: [String] = []
     
-    func attach(listener: any AutenticatorTokenRefreshListener) {
+    public func attach(listener: any AutenticatorTokenRefreshListener) {
         
     }
     
-    var credential: APICredential?
-    func setup(credential: APICredential?) {
+    public var credential: APICredential?
+    public func setup(credential: APICredential?) {
         self.credential = credential
     }
     
-    var shouldFailRequest: Bool = false
+    public var shouldFailRequest: Bool = false
     
-    func request(
+    public func request(
         _ method: RemoteAPIMethod,
         _ endpoint: any Endpoint,
         with header: [String : String]?,

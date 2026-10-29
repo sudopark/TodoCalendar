@@ -14,6 +14,7 @@ import Optics
 import AsyncFlatMap
 import Domain
 import Extensions
+import RemoteInfraInterface
 
 
 public final class ForemostEventRemoteRepositoryImple: ForemostEventRepository {

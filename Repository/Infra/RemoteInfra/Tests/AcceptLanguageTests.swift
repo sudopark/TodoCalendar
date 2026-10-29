@@ -1,14 +1,15 @@
 //
 //  AcceptLanguageTests.swift
-//  RepositoryTests
+//  RemoteInfraTests
 //
 //  Created by sudo.park on 5/30/26.
 //  Copyright © 2026 com.sudo.park. All rights reserved.
 //
 
 import Testing
+import RemoteInfraInterface
 
-@testable import Repository
+@testable import RemoteInfra
 
 
 struct AcceptLanguageTests {

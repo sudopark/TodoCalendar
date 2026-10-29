@@ -10,3 +10,5 @@
 @_exported import StorageInfra
 @_exported import DBInfraInterface
 @_exported import DBInfra
+@_exported import RemoteInfraInterface
+@_exported import RemoteInfra

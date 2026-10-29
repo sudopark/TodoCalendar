@@ -1,6 +1,6 @@
 //
 //  AuthStore.swift
-//  Repository
+//  RemoteInfra
 //
 //  Created by sudo.park on 3/3/24.
 //  Copyright © 2024 com.sudo.park. All rights reserved.
@@ -9,13 +9,7 @@
 import Foundation
 import Domain
 import StorageInfraInterface
-
-public protocol AuthStore: Sendable {
-    
-    func loadCurrentAuth() -> Auth?
-    func saveAuth(_ auth: Auth)
-    func removeAuth()
-}
+import RemoteInfraInterface
 
 public struct AuthStoreImple: AuthStore, APICredentialStore {
     

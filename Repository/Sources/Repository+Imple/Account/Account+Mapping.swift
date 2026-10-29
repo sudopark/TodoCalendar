@@ -10,6 +10,7 @@ import Foundation
 import Prelude
 import Optics
 import Domain
+import RemoteInfra
 
 
 private enum CodingKeys: String, CodingKey {
@@ -22,33 +23,6 @@ private enum CodingKeys: String, CodingKey {
     case method
     case firstSignedIn = "first_signed_in"
     case lastSignedIn = "last_sign_in"
-}
-
-struct AuthMapper: Codable {
-    
-    let auth: Auth
-    
-    init(auth: Auth) {
-        self.auth = auth
-    }
-    
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.init(
-            auth: .init(
-                uid: try container.decode(String.self, forKey: .uid),
-                accessToken: try container.decode(String.self, forKey: .access_token),
-                refreshToken: try container.decode(String.self, forKey: .refresh_token)
-            )
-        )
-    }
-    
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(self.auth.uid, forKey: .uid)
-        try container.encode(self.auth.accessToken, forKey: .access_token)
-        try container.encode(self.auth.refreshToken, forKey: .refresh_token)
-    }
 }
 
 struct AccountInfoMapper: Codable {

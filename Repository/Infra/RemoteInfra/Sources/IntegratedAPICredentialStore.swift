@@ -1,6 +1,6 @@
 //
 //  IntegratedAPICredentialStore.swift
-//  Repository
+//  RemoteInfra
 //
 //  Created by sudo.park on 1/26/25.
 //  Copyright © 2025 com.sudo.park. All rights reserved.
@@ -8,6 +8,7 @@
 
 import Foundation
 import StorageInfraInterface
+import RemoteInfraInterface
 
 
 public final class IntegratedAPICredentialStore {

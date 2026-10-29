@@ -1,6 +1,6 @@
 //
 //  GoogleAPICredentialStore.swift
-//  Repository
+//  RemoteInfra
 //
 //  Created by sudo.park on 1/22/25.
 //  Copyright © 2025 com.sudo.park. All rights reserved.
@@ -8,6 +8,7 @@
 
 import Foundation
 import StorageInfraInterface
+import RemoteInfraInterface
 
 
 // MARK: - GoogleAPICredentialStore

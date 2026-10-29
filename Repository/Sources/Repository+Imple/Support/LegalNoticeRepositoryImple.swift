@@ -9,6 +9,7 @@
 import Foundation
 import Domain
 import StorageInfraInterface
+import RemoteInfraInterface
 
 
 public final class LegalNoticeRepositoryImple: LegalNoticeRepository, @unchecked Sendable {

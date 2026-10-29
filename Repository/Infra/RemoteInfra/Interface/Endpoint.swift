@@ -1,6 +1,6 @@
 //
 //  Endpoint.swift
-//  Repository
+//  RemoteInfraInterface
 //
 //  Created by sudo.park on 2/25/24.
 //  Copyright © 2024 com.sudo.park. All rights reserved.
@@ -53,10 +53,10 @@ public enum AccountAPIEndpoints: Endpoint {
 
 // MARK: - User
 
-enum UserAPIEndpoints: Endpoint {
+public enum UserAPIEndpoints: Endpoint {
     case notification
     
-    var subPath: String {
+    public var subPath: String {
         switch self {
         case .notification: return "notification"
         }
@@ -120,14 +120,14 @@ public enum TodoAPIEndpoints: Endpoint {
 
 // MARK: - ScheduleEventEndpoints
 
-enum ScheduleEventEndpoints: Endpoint {
+public enum ScheduleEventEndpoints: Endpoint {
     case make
     case schedule(id: String)
     case exclude(id: String)
     case branchRepeating(id: String)
     case schedules
     
-    var subPath: String {
+    public var subPath: String {
         switch self {
         case .make: return "schedule"
         case .schedule(let id): return "schedule/\(id)"
@@ -140,10 +140,10 @@ enum ScheduleEventEndpoints: Endpoint {
 
 // MARK: - ForemostEventEndpoints
 
-enum ForemostEventEndpoints: Endpoint {
+public enum ForemostEventEndpoints: Endpoint {
     case event
     
-    var subPath: String {
+    public var subPath: String {
         switch self {
         case .event:
             return "event"
@@ -153,7 +153,7 @@ enum ForemostEventEndpoints: Endpoint {
 
 // MARK: - EventTag
 
-enum EventTagEndpoints: Endpoint {
+public enum EventTagEndpoints: Endpoint {
     case make
     case tag(id: String)
     case tagAndEvents(id: String)
@@ -161,7 +161,7 @@ enum EventTagEndpoints: Endpoint {
     case tags
     case allTags
     
-    var subPath: String {
+    public var subPath: String {
         switch self {
         case .make: return "tag"
         case .tag(let id): return "tag/\(id)"
@@ -176,11 +176,11 @@ enum EventTagEndpoints: Endpoint {
 
 // MARK: - event detail
 
-enum EventDetailEndpoints: Endpoint {
+public enum EventDetailEndpoints: Endpoint {
     case detail(eventId: String)
     case doneTodoDetail(eventId: String)
     
-    var subPath: String {
+    public var subPath: String {
         switch self {
         case .detail(let eventId): return "\(eventId)"
         case .doneTodoDetail(let eventId): return "done/\(eventId)"
@@ -190,12 +190,12 @@ enum EventDetailEndpoints: Endpoint {
 
 // MARK: - AppSetting
 
-enum AppSettingEndpoints: Endpoint {
+public enum AppSettingEndpoints: Endpoint {
     case defaultEventTagColor
     case colorThemes
     case colorTheme(uuid: String)
     
-    var subPath: String {
+    public var subPath: String {
         switch self {
         case .defaultEventTagColor: return "event/tag/default/color"
         case .colorThemes: return "color_themes"
@@ -206,7 +206,7 @@ enum AppSettingEndpoints: Endpoint {
 
 // MARK: - migration
 
-enum MigrationEndpoints: Endpoint {
+public enum MigrationEndpoints: Endpoint {
     case eventTags
     case todos
     case schedules
@@ -215,7 +215,7 @@ enum MigrationEndpoints: Endpoint {
     case doneTodoDetails
     case customColorThemes
     
-    var subPath: String {
+    public var subPath: String {
         switch self {
         case .eventTags: return "event_tags"
         case .todos: return "todos"
@@ -228,10 +228,10 @@ enum MigrationEndpoints: Endpoint {
     }
 }
 
-enum FeedbackEndpoints: Endpoint {
+public enum FeedbackEndpoints: Endpoint {
     case post
     
-    var subPath: String {
+    public var subPath: String {
         switch self {
         case .post: return ""
         }
@@ -240,13 +240,13 @@ enum FeedbackEndpoints: Endpoint {
 
 // MARK: - sync api
 
-enum EventSyncEndPoints: Endpoint {
+public enum EventSyncEndPoints: Endpoint {
     
     case check
     case start
     case `continue`
     
-    var subPath: String {
+    public var subPath: String {
         switch self {
         case .check: return "check"
         case .start: return "start"
@@ -277,7 +277,7 @@ public enum AppEndpoints: Endpoint {
 
 // MARK: - AI
 
-enum AIAPIEndpoints: Endpoint {
+public enum AIAPIEndpoints: Endpoint {
     case command
     case interpretCommand
     case confirmCommand
@@ -286,7 +286,7 @@ enum AIAPIEndpoints: Endpoint {
     case job(id: String)
     case usage
 
-    var subPath: String {
+    public var subPath: String {
         switch self {
         case .command: return "command"
         case .interpretCommand: return "command/interpret"
@@ -302,14 +302,14 @@ enum AIAPIEndpoints: Endpoint {
 
 // MARK: - Billing
 
-enum BillingAPIEndpoints: Endpoint {
+public enum BillingAPIEndpoints: Endpoint {
     case plans
     case topups
     case purchases
     case transactions
     case userPlan
 
-    var subPath: String {
+    public var subPath: String {
         switch self {
         case .plans: return "plans"
         case .topups: return "topups"
@@ -323,10 +323,10 @@ enum BillingAPIEndpoints: Endpoint {
 
 // MARK: - google account endpoint
 
-enum GoogleAuthEndpoint: Endpoint {
+public enum GoogleAuthEndpoint: Endpoint {
     case token
     
-    var subPath: String {
+    public var subPath: String {
         switch self {
         case .token: return "token"
         }
@@ -335,14 +335,14 @@ enum GoogleAuthEndpoint: Endpoint {
 
 // MARK: - google calendar endpoint
 
-enum GoogleCalendarEndpoint: Endpoint {
+public enum GoogleCalendarEndpoint: Endpoint {
     case colors
     case calednarList
     case eventList(calendarId: String)
     case event(calendarId: String, eventId: String)
     case eventInstances(calendarId: String, eventId: String)
 
-    var subPath: String {
+    public var subPath: String {
         switch self {
         case .colors:
             return "colors"
@@ -365,8 +365,8 @@ public struct RemoteEnvironment: Sendable {
     
     let calendarAPIHost: String
     private let csAPI: String
-    let deviceId: String
-    let acceptLanguage: @Sendable () -> String
+    public let deviceId: String
+    public let acceptLanguage: @Sendable () -> String
     public init(
         calendarAPIHost: String,
         csAPI: String,
@@ -379,7 +379,7 @@ public struct RemoteEnvironment: Sendable {
         self.acceptLanguage = acceptLanguage
     }
     
-    func path(_ endpoint: any Endpoint) -> String? {
+    public func path(_ endpoint: any Endpoint) -> String? {
         
         func appendSubpathIfNotEmpty(_ prefix: String, _ subPath: String) -> String {
             return subPath.isEmpty ? prefix : "\(prefix)/\(subPath)"

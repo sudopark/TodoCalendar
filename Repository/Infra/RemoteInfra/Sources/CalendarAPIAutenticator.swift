@@ -1,6 +1,6 @@
 //
-//  OAuthAutenticator.swift
-//  Repository
+//  CalendarAPIAutenticator.swift
+//  RemoteInfra
 //
 //  Created by sudo.park on 3/1/24.
 //  Copyright © 2024 com.sudo.park. All rights reserved.
@@ -12,6 +12,7 @@ import Optics
 import Alamofire
 import Domain
 import Extensions
+import RemoteInfraInterface
 
 public final class CalendarAPIAutenticator: APIAuthenticator, @unchecked Sendable {
     

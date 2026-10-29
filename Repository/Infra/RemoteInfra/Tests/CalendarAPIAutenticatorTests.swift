@@ -1,6 +1,6 @@
 //
 //  CalendarAPIAutenticatorTests.swift
-//  Repository
+//  RemoteInfraTests
 //
 //  Created by sudo.park on 3/2/24.
 //  Copyright © 2024 com.sudo.park. All rights reserved.
@@ -13,8 +13,10 @@ import Optics
 import Domain
 import Extensions
 import UnitTestHelpKit
+import RemoteInfraInterface
+import RemoteInfraTesting
 
-@testable import Repository
+@testable import RemoteInfra
 
 
 class CalendarAPIAutenticatorTests: BaseTestCase {

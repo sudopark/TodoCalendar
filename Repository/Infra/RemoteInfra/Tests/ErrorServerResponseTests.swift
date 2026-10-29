@@ -1,6 +1,6 @@
 //
 //  ErrorServerResponseTests.swift
-//  RepositoryTests
+//  RemoteInfraTests
 //
 //  Created by sudo.park on 8/28/26.
 //  Copyright © 2026 com.sudo.park. All rights reserved.
@@ -12,8 +12,9 @@ import Prelude
 import Optics
 import Domain
 import Extensions
+import RemoteInfraInterface
 
-@testable import Repository
+@testable import RemoteInfra
 
 struct ErrorServerResponseTests {
 
