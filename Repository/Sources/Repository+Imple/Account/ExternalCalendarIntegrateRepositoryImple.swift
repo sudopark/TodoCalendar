@@ -11,6 +11,7 @@ import Prelude
 import Optics
 import Domain
 import Extensions
+import StorageInfraInterface
 
 
 public final class ExternalCalendarIntegrateRepositoryImple: ExternalCalendarIntegrateRepository, @unchecked Sendable {

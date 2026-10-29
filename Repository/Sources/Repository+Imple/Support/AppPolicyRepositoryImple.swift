@@ -8,6 +8,7 @@
 
 import Foundation
 import Domain
+import StorageInfraInterface
 
 
 public final class AppPolicyRepositoryImple: AppPolicyRepository, Sendable {

@@ -7,6 +7,7 @@
 
 import XCTest
 import UnitTestHelpKit
+import StorageInfraTesting
 
 @testable import Repository
 

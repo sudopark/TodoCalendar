@@ -9,6 +9,7 @@
 import Foundation
 import Domain
 import Extensions
+import StorageInfraInterface
 
 
 public final class GuideTodoLocalRepositoryImple: GuideTodoRepository {

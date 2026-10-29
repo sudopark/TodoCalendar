@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import StorageInfraInterface
 
 
 public final class IntegratedAPICredentialStore {

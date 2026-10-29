@@ -10,6 +10,7 @@ import Foundation
 import Domain
 import Extensions
 import SQLiteService
+import StorageInfraInterface
 
 
 public final class TemporaryUserDataMigrationRepositoryImple: TemporaryUserDataMigrationRepository, @unchecked Sendable {

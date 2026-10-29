@@ -11,6 +11,7 @@ import CoreGraphics
 import ImageIO
 import UniformTypeIdentifiers
 import Domain
+import StorageInfraInterface
 
 
 public final class WidgetStyleLocalRepositoryImple: WidgetStyleRepository {
