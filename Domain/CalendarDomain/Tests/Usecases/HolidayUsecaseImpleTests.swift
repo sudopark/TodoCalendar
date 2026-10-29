@@ -1,6 +1,6 @@
 //
 //  HolidayUsecaseImpleTests.swift
-//  DomainTests
+//  CalendarDomainTests
 //
 //  Created by sudo.park on 2023/06/10.
 //
@@ -11,7 +11,10 @@ import Extensions
 import UnitTestHelpKit
 import TestDoubles
 
-@testable import Domain
+import KernelUtils
+import CalendarDomainInterface
+import CalendarRepositoryInterface
+@testable import CalendarDomain
 
 
 class HolidayUsecaseImpleTests: BaseTestCase, PublisherWaitable, AsyncEffectWaitable {

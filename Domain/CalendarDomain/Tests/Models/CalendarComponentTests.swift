@@ -1,6 +1,6 @@
 //
 //  CalendarComponentTests.swift
-//  DomainTests
+//  CalendarDomainTests
 //
 //  Created by sudo.park on 8/15/26.
 //  Copyright © 2026 com.sudo.park. All rights reserved.
@@ -11,7 +11,8 @@ import Foundation
 import Prelude
 import Optics
 
-@testable import Domain
+import CalendarDomainInterface
+@testable import CalendarDomain
 
 
 struct CalendarComponentTests {

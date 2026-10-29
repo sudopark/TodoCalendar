@@ -1,11 +1,12 @@
 //
 //  CalendarSettingRepository.swift
-//  Domain
+//  CalendarRepositoryInterface
 //
 //  Created by sudo.park on 2023/06/03.
 //
 
 import Foundation
+import CalendarDomainInterface
 
 
 public protocol CalendarSettingRepository: AnyObject, Sendable {

@@ -1,6 +1,6 @@
 //
 //  CalendarUsecaseImpleTests.swift
-//  DomainTests
+//  CalendarDomainTests
 //
 //  Created by sudo.park on 2023/06/26.
 //
@@ -9,11 +9,11 @@ import XCTest
 import Combine
 import Prelude
 import Optics
-import Domain
 import UnitTestHelpKit
 import TestDoubles
 
-@testable import Domain
+import CalendarDomainInterface
+@testable import CalendarDomain
 
 
 class CalendarUsecaseImpleTests: BaseTestCase, PublisherWaitable {

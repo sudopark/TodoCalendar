@@ -12,6 +12,7 @@ import Optics
 import Extensions
 import UnitTestHelpKit
 
+@testable import CalendarDomainInterface
 @testable import Domain
 
 private let testTimeZone = TimeZone(abbreviation: "KST")!
