@@ -72,14 +72,15 @@ extension MainSceneBuilerImple: MainSceneBuiler {
             guideTodoUsecase: self.usecaseFactory.makeGuideTodoUsecase(),
             legalNoticeUsecase: self.usecaseFactory.makeLegalNoticeUsecase(),
             foremostEventUsecase: self.usecaseFactory.makeForemostEventUsecase(),
-            paidFeatureGateUsecase: self.usecaseFactory.makePaidFeatureGateUsecase()
+            paidFeatureGateUsecase: self.usecaseFactory.makePaidFeatureGateUsecase(),
+            adExposureUsecase: self.usecaseFactory.adExposureUsecase,
+            mobileAdService: self.mobileAdService
         )
         
         let viewController = MainViewController(
             viewModel: viewModel,
             viewAppearance: self.viewAppearance,
             mobileAdService: self.mobileAdService,
-            fullScreenAdRouter: self.fullScreenAdRouter,
             adExposureUsecase: self.usecaseFactory.adExposureUsecase,
             adViewBuilder: self.adViewBuilder,
             isInitialScene: self.isInitialScene

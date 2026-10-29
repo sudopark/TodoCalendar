@@ -13,11 +13,13 @@ import Extensions
 import Scenes
 import UnitTestHelpKit
 import TestDoubles
+import AdService
+import GoogleMobileAds
 
 @testable import TodoCalendarApp
 
 
-class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
+class MainViewModelImpleTests: BaseTestCase, PublisherWaitable, AsyncEffectWaitable {
     
     private var spyRouter: SpyRouter!
     private var spyUISettingUsecase: StubUISettingUsecase!
@@ -35,6 +37,8 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var stubLegalNoticeUsecase: StubLegalNoticeUsecase!
     private var stubForemostEventUsecase: StubForemostEventUsecase!
     private var spyPaidFeatureGateUsecase: SpyPaidFeatureGateUsecase!
+    private var stubAdExposureUsecase: StubAdExposureUsecase!
+    private var spyMobileAdService: SpyMobileAdService!
     var cancelBag: Set<AnyCancellable>!
 
     override func setUpWithError() throws {
@@ -54,6 +58,8 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubLegalNoticeUsecase = .init()
         self.stubForemostEventUsecase = .init()
         self.spyPaidFeatureGateUsecase = .init()
+        self.stubAdExposureUsecase = .init()
+        self.spyMobileAdService = .init()
         self.cancelBag = .init()
         self.timeout = 0.01
     }
@@ -100,7 +106,9 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
             guideTodoUsecase: self.stubGuideTodoUsecase,
             legalNoticeUsecase: self.stubLegalNoticeUsecase,
             foremostEventUsecase: self.stubForemostEventUsecase,
-            paidFeatureGateUsecase: self.spyPaidFeatureGateUsecase
+            paidFeatureGateUsecase: self.spyPaidFeatureGateUsecase,
+            adExposureUsecase: self.stubAdExposureUsecase,
+            mobileAdService: self.spyMobileAdService
         )
         viewModel.router = self.spyRouter
         self.spyRouter.didCalendarAttached = {
@@ -133,7 +141,9 @@ extension MainViewModelImpleTests {
             guideTodoUsecase: self.stubGuideTodoUsecase,
             legalNoticeUsecase: self.stubLegalNoticeUsecase,
             foremostEventUsecase: self.stubForemostEventUsecase,
-            paidFeatureGateUsecase: self.spyPaidFeatureGateUsecase
+            paidFeatureGateUsecase: self.spyPaidFeatureGateUsecase,
+            adExposureUsecase: self.stubAdExposureUsecase,
+            mobileAdService: self.spyMobileAdService
         )
         viewModel.router = self.spyRouter
         return viewModel
@@ -557,6 +567,22 @@ extension MainViewModelImpleTests {
             self.didDismissPresentedWhenShowColorThemeLicenseExpiredGuide.append(self.didDismissPresented)
             self.didShowColorThemeLicenseExpiredGuideOnFinished = onFinished
             self.didShowColorThemeLicenseExpiredGuideOnUseDefault = onUseDefault
+        }
+
+        var didShowTrackingGuide: Bool = false
+        var stubIsGuideContinued: Bool = false
+        @MainActor
+        func showTrackingGuide(
+            onContinue: @escaping @Sendable () -> Void,
+            onDecline: @escaping @Sendable () -> Void
+        ) {
+            self.didShowTrackingGuide = true
+            self.stubIsGuideContinued ? onContinue() : onDecline()
+        }
+
+        var didShowLaunchFullScreenAd: Bool = false
+        func showLaunchFullScreenAd() {
+            self.didShowLaunchFullScreenAd = true
         }
     }
 
@@ -1206,4 +1232,186 @@ extension MainViewModelImpleTests {
         XCTAssertEqual((self.spyRouter.didShowError as? RuntimeError)?.message, "failed")
         XCTAssertNil(self.spyUISettingUsecase.didChangeAppearanceSetting)
     }
+}
+
+
+// MARK: - 추적 권한 요청
+
+extension MainViewModelImpleTests {
+
+    private func makeViewModelForTracking(
+        canRequest: Bool = true,
+        isGuideContinued: Bool = false
+    ) -> MainViewModelImple {
+        self.stubAdExposureUsecase.stubCanRequestTrackingAuthorization = canRequest
+        self.spyRouter.stubIsGuideContinued = isGuideContinued
+        return self.makeViewModelWithoutPrepare()
+    }
+
+    // 효과가 '안 일어남'을 보는 케이스는 기다릴 조건이 없어 정착 시간만 둔다
+    private func waitForTrackingEffects() async throws {
+        try await Task.sleep(for: .milliseconds(50))
+    }
+
+    func testViewModel_whenTrackingNotNeededAndLaunchAdAllowed_showLaunchAdWithoutGuide() async throws {
+        // given
+        let viewModel = self.makeViewModelForTracking(canRequest: false)
+
+        // when
+        viewModel.requestTrackingThenShowLaunchAd(canShowLaunchAd: true)
+
+        // then
+        try await self.waitEffect("앱 시작 광고가 뜬다") { self.spyRouter.didShowLaunchFullScreenAd }
+        XCTAssertEqual(self.spyRouter.didShowTrackingGuide, false)
+        XCTAssertEqual(self.spyMobileAdService.didRequestTrackingAuthorization, false)
+    }
+
+    func testViewModel_whenContinueFromGuide_requestTrackingThenShowLaunchAd() async throws {
+        // given
+        let viewModel = self.makeViewModelForTracking(isGuideContinued: true)
+
+        // when
+        viewModel.requestTrackingThenShowLaunchAd(canShowLaunchAd: true)
+
+        // then
+        try await self.waitEffect("시스템 추적 요청 뒤 광고가 뜬다") {
+            self.spyRouter.didShowLaunchFullScreenAd
+        }
+        XCTAssertEqual(self.spyRouter.didShowTrackingGuide, true)
+        XCTAssertEqual(self.spyMobileAdService.didRequestTrackingAuthorization, true)
+    }
+
+    func testViewModel_whenDeclineFromGuide_showLaunchAdWithoutTrackingRequest() async throws {
+        // given
+        let viewModel = self.makeViewModelForTracking(isGuideContinued: false)
+
+        // when
+        viewModel.requestTrackingThenShowLaunchAd(canShowLaunchAd: true)
+
+        // then
+        try await self.waitEffect("앱 시작 광고가 뜬다") { self.spyRouter.didShowLaunchFullScreenAd }
+        XCTAssertEqual(self.spyRouter.didShowTrackingGuide, true)
+        XCTAssertEqual(self.spyMobileAdService.didRequestTrackingAuthorization, false)
+    }
+
+    func testViewModel_whenLaunchAdNotAllowed_showGuideOnly() async throws {
+        // given
+        let viewModel = self.makeViewModelForTracking(isGuideContinued: true)
+
+        // when
+        viewModel.requestTrackingThenShowLaunchAd(canShowLaunchAd: false)
+
+        // then
+        try await self.waitEffect("시스템 추적 요청이 간다") {
+            self.spyMobileAdService.didRequestTrackingAuthorization
+        }
+        try await self.waitForTrackingEffects()
+        XCTAssertEqual(self.spyRouter.didShowTrackingGuide, true)
+        XCTAssertEqual(self.spyRouter.didShowLaunchFullScreenAd, false)
+    }
+
+    func testViewModel_whenNeitherTrackingNorLaunchAdNeeded_doNothing() async throws {
+        // given
+        let viewModel = self.makeViewModelForTracking(canRequest: false)
+
+        // when
+        viewModel.requestTrackingThenShowLaunchAd(canShowLaunchAd: false)
+
+        // then
+        try await self.waitForTrackingEffects()
+        XCTAssertEqual(self.spyRouter.didShowTrackingGuide, false)
+        XCTAssertEqual(self.spyRouter.didShowLaunchFullScreenAd, false)
+        XCTAssertEqual(self.spyMobileAdService.didRequestTrackingAuthorization, false)
+    }
+
+    func testViewModel_whenShowGuide_recordGuideShown() async throws {
+        // given
+        let viewModel = self.makeViewModelForTracking()
+
+        // when
+        viewModel.requestTrackingThenShowLaunchAd(canShowLaunchAd: false)
+
+        // then
+        try await self.waitEffect("안내가 뜬다") { self.spyRouter.didShowTrackingGuide }
+        XCTAssertEqual(self.stubAdExposureUsecase.didRecordTrackingGuideShown, true)
+    }
+
+    func testViewModel_whenCannotRequestTracking_notRecordGuideShown() async throws {
+        // given
+        let viewModel = self.makeViewModelForTracking(canRequest: false)
+
+        // when
+        viewModel.requestTrackingThenShowLaunchAd(canShowLaunchAd: false)
+
+        // then
+        try await self.waitForTrackingEffects()
+        XCTAssertEqual(self.stubAdExposureUsecase.didRecordTrackingGuideShown, false)
+    }
+}
+
+
+private final class StubAdExposureUsecase: AdExposureUsecase, @unchecked Sendable {
+
+    var stubCanRequestTrackingAuthorization: Bool = false
+
+    var isBannerAdAllowed: AnyPublisher<Bool, Never> {
+        return Just(false).eraseToAnyPublisher()
+    }
+
+    func shouldPreloadFullScreenAds() -> Bool { false }
+
+    func canExposeFullScreenAd(
+        scope: FullScreenAdExposureRecord.Scope,
+        isFromAppLaunch: Bool,
+        at now: Date
+    ) -> Bool { false }
+
+    func recordFullScreenAdExposed(scope: FullScreenAdExposureRecord.Scope, at now: Date) { }
+
+    func canRequestTrackingAuthorization() async -> Bool {
+        return self.stubCanRequestTrackingAuthorization
+    }
+
+    private(set) var didRecordTrackingGuideShown: Bool = false
+    func recordTrackingGuideShown() {
+        self.didRecordTrackingGuideShown = true
+    }
+}
+
+
+private final class SpyMobileAdService: MobileAdService, @unchecked Sendable {
+
+    private(set) var didRequestTrackingAuthorization: Bool = false
+
+    var isStarted: AnyPublisher<Bool, Never> {
+        return Just(false).eraseToAnyPublisher()
+    }
+
+    var isStartedNow: Bool { false }
+
+    var isTrackingAuthorizationDetermined: Bool { false }
+
+    func start() { }
+
+    @MainActor
+    func presentConsentFormIfNeeded(from viewController: UIViewController) async { }
+
+    @MainActor
+    func requestTrackingAuthorization() async {
+        self.didRequestTrackingAuthorization = true
+    }
+
+    func preloadFullScreenAd() async { }
+
+    func takePreloadedFullScreenAd() -> InterstitialAd? { nil }
+
+    func preloadRewardedAd() async { }
+
+    func takeRewardedAd(waitingUpTo timeout: TimeInterval) async -> RewardedAd? { nil }
+
+    @MainActor
+    func isPrivacyOptionsRequired() -> Bool { false }
+
+    @MainActor
+    func showPrivacyOptionsForm(from viewController: UIViewController) async throws { }
 }

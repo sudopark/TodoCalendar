@@ -28,6 +28,11 @@ protocol MainRouting: Routing, Sendable {
         onFinished: @escaping @Sendable (Bool) -> Void,
         onUseDefault: @escaping @Sendable () -> Void
     )
+    func showTrackingGuide(
+        onContinue: @escaping @Sendable () -> Void,
+        onDecline: @escaping @Sendable () -> Void
+    )
+    func showLaunchFullScreenAd()
 }
 
 // MARK: - Router
@@ -95,8 +100,21 @@ extension MainRouter {
 
     @MainActor
     private func showFullScreenAdAfterSettingExit() {
+        self.presentFullScreenAd(isFromAppLaunch: false)
+    }
+
+    func showLaunchFullScreenAd() {
+        Task { @MainActor in
+            self.presentFullScreenAd(isFromAppLaunch: true)
+        }
+    }
+
+    @MainActor
+    private func presentFullScreenAd(isFromAppLaunch: Bool) {
         guard let scene = self.currentScene, let adRouter = self.fullScreenAdRouter else { return }
-        adRouter.showFullScreenAd(from: scene, scope: .application, isFromAppLaunch: false)
+        adRouter.showFullScreenAd(
+            from: scene, scope: .application, isFromAppLaunch: isFromAppLaunch
+        )
     }
     
     func showJumpDaySelectDialog(current: CalendarDay) {
@@ -117,6 +135,29 @@ extension MainRouter {
         Task { @MainActor in
             let guide = self.adGuideSceneBuilder.makePaidFeatureAdGuideScene(
                 reason: reason, onFinished: onFinished, onUseDefault: onUseDefault
+            )
+            self.showBottomSlide(guide)
+        }
+    }
+
+    func showTrackingGuide(
+        onContinue: @escaping @Sendable () -> Void,
+        onDecline: @escaping @Sendable () -> Void
+    ) {
+        Task { @MainActor in
+            // 안내를 못 띄우는 자리에서도 거절로 흘려 뒤따르는 광고 단계가 멈추지 않게 한다
+            guard let appearance = self.currentScene?.viewAppearance else {
+                onDecline()
+                return
+            }
+            let guide = TrackingGuideHostingViewController(
+                appearance: appearance,
+                onContinue: { [weak self] in
+                    self?.dismissPresented(animated: true) { onContinue() }
+                },
+                onDecline: { [weak self] in
+                    self?.dismissPresented(animated: true) { onDecline() }
+                }
             )
             self.showBottomSlide(guide)
         }
