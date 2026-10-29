@@ -1,6 +1,6 @@
 //
 //  AppColdLaunchHistoryTests.swift
-//  DomainTests
+//  KernelUtilsTests
 //
 //  Created by sudo.park on 8/24/26.
 //  Copyright © 2026 com.sudo.park. All rights reserved.
@@ -9,7 +9,7 @@
 import Testing
 import Foundation
 
-@testable import Domain
+@testable import KernelUtils
 
 
 struct AppColdLaunchHistoryTests {

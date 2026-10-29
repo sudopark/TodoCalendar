@@ -1,6 +1,6 @@
 //
 //  FeatureFlag.swift
-//  Domain
+//  KernelUtils
 //
 //  Created by sudo.park on 2/28/25.
 //  Copyright © 2025 com.sudo.park. All rights reserved.

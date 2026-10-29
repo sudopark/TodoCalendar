@@ -1,6 +1,6 @@
 //
 //  GuideLink.swift
-//  Domain
+//  KernelUtils
 //
 //  Created by sudo.park on 8/22/26.
 //  Copyright © 2026 com.sudo.park. All rights reserved.

@@ -1,6 +1,6 @@
 //
 //  SharedDataStoreTests.swift
-//  DomainTests
+//  KernelUtilsTests
 //
 //  Created by sudo.park on 2023/03/24.
 //
@@ -11,7 +11,7 @@ import Prelude
 import Optics
 import UnitTestHelpKit
 
-@testable import Domain
+@testable import KernelUtils
 
 
 final class SharedDataStoreTests: XCTestCase, PublisherWaitable {
