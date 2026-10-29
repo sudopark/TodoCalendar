@@ -12,7 +12,7 @@ import os
 import re
 import sys
 
-# 헬퍼 → 테스트 스킴을 내는지. makeAppExtensionTargets 는 withTest 인자가 따로 정한다
+# 헬퍼 → 테스트 스킴을 내는지. frameworkWithInterfaceAndTesting·makeAppExtensionTargets 는 withTest 인자가 따로 정한다
 HELPERS = {
     "app": True,
     "frameworkWithTest": True,
@@ -46,7 +46,7 @@ FULL_RUN_TRIGGERS = ("Package.swift", "Package.resolved", "Tuist/", "Tuist.swift
 
 UNTESTED_DIRS = ("Snapshots/", "E2E/")
 
-DEPENDENCY_LABELS = ("dependencies", "interfaceDependencies", "testingDependencies")
+DEPENDENCY_LABELS = ("dependencies", "interfaceDependencies", "testingDependencies", "testDependencies")
 
 SYSTEM_DEPENDENCIES = (".external(", ".sdk(", ".xctest")
 
@@ -174,7 +174,8 @@ class Graph:
         helper = m.group(1)
         arguments = call_arguments(text, m.end() - 1)
         name = string_literal(arguments.get("name"))
-        node = self.add_node(project_dir, name if HELPERS[helper] else None, arguments)
+        with_test = HELPERS[helper] and arguments.get("withTest", "true") != "false"
+        node = self.add_node(project_dir, name if with_test else None, arguments)
         node.target_names.append(name)
         self.project_dirs.append(project_dir)
         if helper == "app":

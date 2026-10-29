@@ -111,6 +111,31 @@ out=$(changed "$FIXTURE" Mods/A/Sources/x.swift)
 out=$(changed "$FIXTURE" Mods/A/BB/Sources/x.swift)
 [ "$out" = "BB C" ]; check "testing_dependency_reaches_dependent" $? "$out"
 
+mkdir -p "$FIXTURE/Mods/E" "$FIXTURE/Mods/F" "$FIXTURE/Mods/G"
+cat > "$FIXTURE/Mods/E/Project.swift" <<'SWIFT'
+let project = Project.frameworkWithTest(name: "E", destinations: [.iPhone], iOSTargetVersion: "17.0",
+    testDependencies: [.project(target: "BB", path: .relativeToRoot("Mods/A/BB"))])
+SWIFT
+out=$(changed "$FIXTURE" Mods/A/BB/Sources/x.swift)
+[ "$out" = "BB C E" ]; check "test_dependency_reaches_dependent" $? "$out"
+
+cat > "$FIXTURE/Mods/F/Project.swift" <<'SWIFT'
+let project = Project.frameworkWithInterfaceAndTesting(
+    name: "F",
+    destinations: [.iPhone],
+    iOSTargetVersion: "17.0",
+    interfaceDependencies: [.project(target: "A", path: .relativeToRoot("Mods/A"))],
+    withTest: false
+)
+SWIFT
+cat > "$FIXTURE/Mods/G/Project.swift" <<'SWIFT'
+let project = Project.frameworkWithTest(name: "G", destinations: [.iPhone], iOSTargetVersion: "17.0",
+    dependencies: [.project(target: "FInterface", path: .relativeToRoot("Mods/F"))])
+SWIFT
+all=$(python3 "$SCRIPT" --root "$FIXTURE" --all | tr '\n' ' ' | sed 's/ $//')
+out=$(changed "$FIXTURE" Mods/F/Interface/x.swift)
+[ "$all" = "A BB C E G" ] && [ "$out" = "G" ]; check "test_interface_helper_without_test_has_no_scheme" $? "$all / $out"
+
 mkdir -p "$FIXTURE/Mods/D"
 cat > "$FIXTURE/Mods/D/Project.swift" <<'SWIFT'
 let project = Project.frameworkWithTest(name: "D", destinations: [.iPhone], iOSTargetVersion: "17.0",
