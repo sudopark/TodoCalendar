@@ -8,3 +8,5 @@
 
 @_exported import StorageInfraInterface
 @_exported import StorageInfra
+@_exported import DBInfraInterface
+@_exported import DBInfra

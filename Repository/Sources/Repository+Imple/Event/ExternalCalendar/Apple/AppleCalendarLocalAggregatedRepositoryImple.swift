@@ -11,6 +11,7 @@ import Combine
 import CombineExt
 import Domain
 import Extensions
+import DBInfraInterface
 
 
 /// 위젯용 read-only Apple Calendar Repository.
