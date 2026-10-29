@@ -8,6 +8,7 @@
 import XCTest
 import Domain
 import UnitTestHelpKit
+import StorageInfraTesting
 
 @testable import Repository
 

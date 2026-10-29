@@ -1,6 +1,6 @@
 //
 //  UserDefaultEnvironmentStorageImpleTests.swift
-//  RepositoryTests
+//  StorageInfraTests
 //
 //  Created by sudo.park on 12/8/23.
 //
@@ -8,7 +8,7 @@
 import XCTest
 import UnitTestHelpKit
 
-@testable import Repository
+@testable import StorageInfra
 
 
 class UserDefaultEnvironmentStorageImpleTests: BaseTestCase {

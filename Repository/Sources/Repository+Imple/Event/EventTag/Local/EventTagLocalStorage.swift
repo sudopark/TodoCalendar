@@ -10,6 +10,7 @@ import Foundation
 import Domain
 import Prelude
 import Optics
+import StorageInfraInterface
 
 
 public protocol EventTagLocalStorage: Sendable {

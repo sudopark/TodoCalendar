@@ -12,6 +12,7 @@ import SQLiteServiceMacros
 import Domain
 import Extensions
 import SQLiteService
+import StorageInfraInterface
 
 
 public final class HolidayRepositoryImple: HolidayRepository {

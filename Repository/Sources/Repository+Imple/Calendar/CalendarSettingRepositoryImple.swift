@@ -7,6 +7,7 @@
 
 import Foundation
 import Domain
+import StorageInfraInterface
 
 
 public final class CalendarSettingRepositoryImple: CalendarSettingRepository, Sendable {

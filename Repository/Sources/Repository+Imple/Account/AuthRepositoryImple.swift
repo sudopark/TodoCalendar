@@ -10,6 +10,7 @@ import Foundation
 import FirebaseAuth
 import Domain
 import Extensions
+import StorageInfraInterface
 
 
 // MARK: - firebase auth service

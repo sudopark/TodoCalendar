@@ -10,6 +10,7 @@ import Foundation
 @preconcurrency import SQLiteService
 import Domain
 import Extensions
+import StorageInfraInterface
 
 
 public final class EventNotificationRepositoryImple: EventNotificationRepository {

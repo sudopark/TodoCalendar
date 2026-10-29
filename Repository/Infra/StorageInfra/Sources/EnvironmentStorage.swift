@@ -1,29 +1,12 @@
 //
 //  EnvironmentStorage.swift
-//  Repository
+//  StorageInfra
 //
 //  Created by sudo.park on 2023/06/04.
 //
 
 import Foundation
-
-public enum EnvironmentKeys: String {
-    case needCheckResetWidgetCache
-    case needCheckResetCurrentTodo
-    case fullScreenAdExposureRecords
-    case appColdLaunchHistory
-    case colorThemeLicense
-    case widgetStyleLicense
-    case appPolicy
-}
-
-public protocol EnvironmentStorage: AnyObject, Sendable {
-    
-    func load<T: Decodable>(_ key: String) -> T?
-    func update<T: Encodable>(_ key: String, _ value: T)
-    func remove(_ key: String)
-    func synchronize()
-}
+import StorageInfraInterface
 
 
 public final class UserDefaultEnvironmentStorageImple: EnvironmentStorage, @unchecked Sendable {

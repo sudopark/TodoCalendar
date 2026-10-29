@@ -8,6 +8,7 @@
 
 import Foundation
 import Domain
+import StorageInfraInterface
 
 public protocol AuthStore: Sendable {
     
