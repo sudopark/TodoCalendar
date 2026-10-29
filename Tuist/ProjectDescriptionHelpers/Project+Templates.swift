@@ -274,7 +274,7 @@ extension Project {
                 "FacebookAppID": "\(facebookAppId)",
                 "FacebookClientToken": "\(facebookClientToken)",
                 "FacebookDisplayName": "To-do Calendar",
-                "NSUserTrackingUsageDescription": "Tracking permission is used to show you more relevant ads.",
+                "NSUserTrackingUsageDescription": "To-do Calendar is free thanks to ads. Allowing tracking makes those ads more relevant to you.",
                 "SKAdNetworkItems": .array(
                     Project.skAdNetworkIdentifiers.map {
                         .dictionary(["SKAdNetworkIdentifier": .string($0)])

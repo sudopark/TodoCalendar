@@ -3,3 +3,4 @@
 "NSSpeechRecognitionUsageDescription" = "Rozpoznávání řeči je vyžadováno pro převod vašeho hlasu na události a úkoly.";
 "NSCameraUsageDescription" = "Přístup k fotoaparátu je vyžadován pro čtení textu z pořízené fotografie.";
 "NSPhotoLibraryAddUsageDescription" = "Přístup k fotkám je vyžadován pro uložení sdíleného obrázku události do vašich fotek.";
+"NSUserTrackingUsageDescription" = "To-do Calendar je zdarma díky reklamám. Povolením sledování se tyto reklamy stanou pro vás relevantnější.";

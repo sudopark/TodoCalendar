@@ -3,3 +3,4 @@
 "NSSpeechRecognitionUsageDescription" = "Sesinizi etkinlik ve görevlere dönüştürmek için konuşma tanıma gereklidir.";
 "NSCameraUsageDescription" = "Çektiğiniz bir fotoğraftaki metni okumak için kamera erişimi gereklidir.";
 "NSPhotoLibraryAddUsageDescription" = "Paylaşılan etkinlik görselini fotoğraflarınıza kaydetmek için fotoğraf kitaplığı erişimi gereklidir.";
+"NSUserTrackingUsageDescription" = "To-do Calendar reklamlar sayesinde ücretsizdir. Takibe izin verdiğinizde bu reklamlar sizin için daha alakalı hale gelir.";
