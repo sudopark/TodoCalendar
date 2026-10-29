@@ -1,13 +1,14 @@
 //
 //  StubCalendarSetingRepository.swift
-//  TestDoubles
+//  CalendarRepositoryTesting
 //
 //  Created by sudo.park on 5/23/24.
 //  Copyright © 2024 com.sudo.park. All rights reserved.
 //
 
 import Foundation
-import Domain
+import CalendarDomainInterface
+import CalendarRepositoryInterface
 
 open class StubCalendarSettingRepository: CalendarSettingRepository, @unchecked Sendable {
     

@@ -1,6 +1,6 @@
 //
 //  StubCalendarUsecase.swift
-//  TestDoubles
+//  CalendarDomainTesting
 //
 //  Created by sudo.park on 2023/06/29.
 //
@@ -9,7 +9,7 @@ import Foundation
 import Combine
 import Prelude
 import Optics
-import Domain
+import CalendarDomainInterface
 
 
 open class StubCalendarUsecase: CalendarUsecase {
