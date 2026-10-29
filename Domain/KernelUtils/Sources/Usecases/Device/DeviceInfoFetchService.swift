@@ -1,6 +1,6 @@
 //
 //  DeviceInfoFetchService.swift
-//  Domain
+//  KernelUtils
 //
 //  Created by sudo.park on 10/28/26.
 //  Copyright © 2026 com.sudo.park. All rights reserved.

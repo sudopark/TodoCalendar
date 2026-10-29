@@ -1,6 +1,6 @@
 //
 //  RRuleParser.swift
-//  Domain
+//  KernelUtils
 //
 //  Created by sudo.park on 5/24/25.
 //  Copyright © 2025 com.sudo.park. All rights reserved.
@@ -38,7 +38,7 @@ public struct RRule: Sendable {
         public var ordinal: Int?
         public var weekDay: WeekDay
         
-        init(ordinal: Int? = nil, weekDay: WeekDay) {
+        public init(ordinal: Int? = nil, weekDay: WeekDay) {
             self.ordinal = ordinal
             self.weekDay = weekDay
         }
@@ -64,6 +64,26 @@ public struct RRule: Sendable {
     public var until: Date?
     public var count: Int?
     public var unsupportedKeys: [String] = []
+    
+    public init(
+        freq: Frequency,
+        interval: Int = 1,
+        byDays: [ByDay] = [],
+        byMonthDays: [Int] = [],
+        byMonths: [Int] = [],
+        until: Date? = nil,
+        count: Int? = nil,
+        unsupportedKeys: [String] = []
+    ) {
+        self.freq = freq
+        self.interval = interval
+        self.byDays = byDays
+        self.byMonthDays = byMonthDays
+        self.byMonths = byMonths
+        self.until = until
+        self.count = count
+        self.unsupportedKeys = unsupportedKeys
+    }
 }
 
 // MARK: - RFC5545 RRULE parser

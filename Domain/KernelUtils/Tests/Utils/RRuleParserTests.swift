@@ -1,6 +1,6 @@
 //
 //  RRuleParserTests.swift
-//  DomainTests
+//  KernelUtilsTests
 //
 //  Created by sudo.park on 5/25/25.
 //  Copyright © 2025 com.sudo.park. All rights reserved.
@@ -10,7 +10,7 @@ import Testing
 import Extensions
 import UnitTestHelpKit
 
-@testable import Domain
+@testable import KernelUtils
 
 struct RRuleParserTests {
     
