@@ -61,14 +61,16 @@ extension Project {
         iOSTargetVersion: String,
         resources: ResourceFileElements? = nil,
         snapshotTests: Bool = false,
-        dependencies: [TargetDependency] = []
+        dependencies: [TargetDependency] = [],
+        testDependencies: [TargetDependency] = []
     ) -> Project {
         var targets = makeFrameworkTargetsWithTest(
             name: name,
             destinations: destinations,
             iOSTargetVersion: iOSTargetVersion,
             resources: resources,
-            dependencies: dependencies
+            dependencies: dependencies,
+            testDependencies: testDependencies
         )
         if snapshotTests {
             targets.append(
@@ -90,13 +92,15 @@ extension Project {
         name: String,
         destinations: Destinations,
         iOSTargetVersion: String,
+        resources: ResourceFileElements? = nil,
         interfaceDependencies: [TargetDependency] = [],
         dependencies: [TargetDependency] = [],
-        testingDependencies: [TargetDependency] = []
+        testingDependencies: [TargetDependency] = [],
+        withTest: Bool = true
     ) -> Project {
         let interfaceName = "\(name)Interface"
         let testingName = "\(name)Testing"
-        let targets = [
+        let frameworkTargets = [
             makeStaticFrameworkTarget(
                 name: interfaceName,
                 destinations: destinations,
@@ -109,6 +113,7 @@ extension Project {
                 destinations: destinations,
                 iOSTargetVersion: iOSTargetVersion,
                 sourceDirectory: "Sources",
+                resources: resources,
                 dependencies: [.target(name: interfaceName)] + dependencies
             ),
             makeStaticFrameworkTarget(
@@ -117,18 +122,20 @@ extension Project {
                 iOSTargetVersion: iOSTargetVersion,
                 sourceDirectory: "Testing",
                 dependencies: [.target(name: interfaceName)] + testingDependencies
-            ),
+            )
+        ]
+        let testTargets = withTest ? [
             makeUnitTestsTarget(
                 name: name,
                 destinations: destinations,
                 iOSTargetVersion: iOSTargetVersion,
-                testedTargets: [name, testingName]
+                testedTargets: [interfaceName, name, testingName]
             )
-        ]
+        ] : []
         return Project(
             name: name,
             organizationName: organizationName,
-            targets: targets
+            targets: frameworkTargets + testTargets
         )
     }
 
@@ -212,7 +219,8 @@ extension Project {
         destinations: Destinations,
         iOSTargetVersion: String,
         resources: ResourceFileElements? = nil,
-        dependencies: [TargetDependency] = []
+        dependencies: [TargetDependency] = [],
+        testDependencies: [TargetDependency] = []
     )
     -> [Target]
     {
@@ -228,7 +236,8 @@ extension Project {
             name: name,
             destinations: destinations,
             iOSTargetVersion: iOSTargetVersion,
-            testedTargets: [name]
+            testedTargets: [name],
+            testDependencies: testDependencies
         )
         return [sources, tests]
     }
@@ -262,7 +271,8 @@ extension Project {
         name: String,
         destinations: Destinations,
         iOSTargetVersion: String,
-        testedTargets: [String]
+        testedTargets: [String],
+        testDependencies: [TargetDependency] = []
     ) -> Target {
         return Target.target(name: "\(name)Tests",
                              destinations: destinations,
@@ -276,7 +286,7 @@ extension Project {
                                 .project(target: "UnitTestHelpKit", path: .relativeToRoot("Supports/UnitTestHelpKit")),
                                 .project(target: "TestDoubles", path: .relativeToRoot("Supports/TestDoubles")),
                                 .project(target: "Common3rdParty", path: .relativeToRoot("Supports/Common3rdParty")),
-                             ])
+                             ] + testDependencies)
     }
 
     private static func makeFrameworkTargets(
