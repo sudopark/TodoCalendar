@@ -1,6 +1,6 @@
 //
-//  ExternalCalendarDBConnectionPool.swift
-//  Repository
+//  ExternalCalendarDBConnectionPoolImple.swift
+//  DBInfra
 //
 //  Created by sudo.park on 3/10/26.
 //  Copyright © 2026 com.sudo.park. All rights reserved.
@@ -10,13 +10,7 @@ import Foundation
 import Domain
 import SQLiteService
 import Extensions
-
-
-public protocol ExternalCalendarDBConnectionPool: Sendable {
-
-    func hasConnection(serviceId: String) async -> Bool
-    func connection(serviceId: String) async throws -> SQLiteService
-}
+import DBInfraInterface
 
 
 public actor ExternalCalendarSQLiteConnectionPoolImple: ExternalCalendarDBConnectionControl, ExternalCalendarDBConnectionPool {

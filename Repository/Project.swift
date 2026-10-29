@@ -14,7 +14,11 @@ let project = Project.frameworkWithTest(name: "Repository",
                                             .project(target: "StorageInfraInterface",
                                                      path: .relativeToRoot("Repository/Infra/StorageInfra")),
                                             .project(target: "StorageInfra",
-                                                     path: .relativeToRoot("Repository/Infra/StorageInfra"))
+                                                     path: .relativeToRoot("Repository/Infra/StorageInfra")),
+                                            .project(target: "DBInfraInterface",
+                                                     path: .relativeToRoot("Repository/Infra/DBInfra")),
+                                            .project(target: "DBInfra",
+                                                     path: .relativeToRoot("Repository/Infra/DBInfra"))
                                         ],
                                         testDependencies: [
                                             .project(target: "StorageInfraTesting",

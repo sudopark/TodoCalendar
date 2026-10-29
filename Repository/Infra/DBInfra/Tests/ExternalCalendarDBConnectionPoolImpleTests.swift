@@ -1,6 +1,6 @@
 //
-//  ExternalCalendarSQLiteConnectionPoolImpleTests.swift
-//  RepositoryTests
+//  ExternalCalendarDBConnectionPoolImpleTests.swift
+//  DBInfraTests
 //
 //  Created by sudo.park on 3/10/26.
 //  Copyright © 2026 com.sudo.park. All rights reserved.
@@ -8,10 +8,11 @@
 
 import Testing
 import SQLiteService
+import SQLiteServiceMacros
 import Extensions
 import UnitTestHelpKit
 
-@testable import Repository
+@testable import DBInfra
 
 
 @Suite("ExternalCalendarSQLiteConnectionPoolImpleTests", .serialized)
@@ -65,9 +66,17 @@ final class ExternalCalendarSQLiteConnectionPoolImpleTests {
     // 실제 SQLite 작업으로 연결 열림 여부 검증
     private func verifyDBIsOpen(_ service: SQLiteService) async throws {
         try await service.async.run { db in
-            try db.createTableOrNot(GoogleCalendarColorsTable.self)
+            try db.createTableOrNot(ConnectionProbeTable.self)
         }
     }
+}
+
+
+@Table("connection_probe")
+private struct ConnectionProbeTable {
+
+    @Column(.primaryKey(autoIncrement: false), .notNull)
+    let id: String
 }
 
 

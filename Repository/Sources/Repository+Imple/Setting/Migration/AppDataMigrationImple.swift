@@ -11,6 +11,7 @@ import Domain
 import SQLiteService
 import Extensions
 import StorageInfraInterface
+import DBInfraInterface
 
 
 public final class AppDataMigrationImple: @unchecked Sendable {
