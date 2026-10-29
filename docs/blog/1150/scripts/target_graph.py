@@ -1,10 +1,16 @@
 import os,re,sys
 from collections import defaultdict
-ROOT=os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__),"../../../..")),"Domain/Sources")
+REPO=os.path.abspath(os.path.join(os.path.dirname(__file__),"../../../.."))
+# 아직 Domain 에 남은 파일은 경로 규칙으로, 모듈로 떼어 낸 파일은 그 디렉터리로 서브도메인을 정한다
+ROOTS=[("Domain/Sources",None),
+       ("Domain/KernelUtils/Sources","Kernel_Utils"),
+       ("Domain/CalendarDomain/Interface","CalendarDomain"),
+       ("Domain/CalendarDomain/Sources","CalendarDomain"),
+       ("Repository/CalendarRepository/Interface","CalendarDomain")]
 
 def module_of(rel):
     r=rel.replace(os.sep,"/")
-    if "/Device/" in r: return "DeviceInterface"
+    if "/Device/" in r: return "Kernel_Utils"
     if "/Migration/" in r: return "MigrationDomain"
     if r.startswith("Models/Place/"): return "PlaceServiceInterface"
     if "Events/ExternalCalendar/" in r or "Account/ExternalServiceIntegration/" in r \
@@ -28,12 +34,15 @@ def module_of(rel):
     return "Kernel_Utils"                                        # SharedDataStore/FeatureFlag/Link 류
 
 files={}
-for dp,_,fns in os.walk(ROOT):
-    for fn in fns:
-        if fn.endswith(".swift"):
-            rel=os.path.relpath(os.path.join(dp,fn),ROOT)
-            src=open(os.path.join(dp,fn),encoding="utf-8",errors="ignore").read()
-            files[rel]=(module_of(rel),re.sub(r'//.*','',src))
+for root,fixed in ROOTS:
+    base=os.path.join(REPO,root)
+    for dp,_,fns in os.walk(base):
+        for fn in fns:
+            if fn.endswith(".swift"):
+                rel=os.path.relpath(os.path.join(dp,fn),base)
+                src=open(os.path.join(dp,fn),encoding="utf-8",errors="ignore").read()
+                key=rel if fixed is None else f"{root}/{rel}"
+                files[key]=(fixed or module_of(rel),re.sub(r'//.*','',src))
 
 DECL=re.compile(r'^\s*(?:public |internal |private |final |@\w+\s+)*(?:struct|class|enum|protocol|typealias|actor)\s+([A-Z]\w+)',re.M)
 owner={}
