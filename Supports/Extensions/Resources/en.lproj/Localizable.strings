@@ -913,3 +913,8 @@
 "legal_notice.message::terms" = "Our Terms of Service have been updated.";
 "legal_notice.message::privacy" = "Our Privacy Policy has been updated.";
 "legal_notice.effectiveDate" = "Effective %@";
+
+"ad.trackingGuide::title" = "A quick word about ads";
+"ad.trackingGuide::message1" = "To-do Calendar shows ads. That revenue covers development and server costs.";
+"ad.trackingGuide::message2" = "On the next screen, allowing tracking means you see ads that match your interests. Declining leaves the app exactly as it is.";
+"ad.trackingGuide::continue::button" = "Continue";

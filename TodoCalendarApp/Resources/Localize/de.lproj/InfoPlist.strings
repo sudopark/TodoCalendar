@@ -3,3 +3,4 @@
 "NSSpeechRecognitionUsageDescription" = "Die Spracherkennung ist erforderlich, um Ihre Sprache in Ereignisse und Aufgaben umzuwandeln.";
 "NSCameraUsageDescription" = "Der Kamerazugriff ist erforderlich, um Text aus einem aufgenommenen Foto zu lesen.";
 "NSPhotoLibraryAddUsageDescription" = "Der Zugriff auf die Fotomediathek ist erforderlich, um ein geteiltes Ereignisbild in Ihren Fotos zu sichern.";
+"NSUserTrackingUsageDescription" = "To-do Calendar ist dank Werbung kostenlos. Wenn du Tracking erlaubst, wird diese Werbung für dich relevanter.";

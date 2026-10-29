@@ -914,3 +914,8 @@
 "legal_notice.message::terms" = "이용약관이 개정됐어요.";
 "legal_notice.message::privacy" = "개인정보처리방침이 개정됐어요.";
 "legal_notice.effectiveDate" = "시행일 %@";
+
+"ad.trackingGuide::title" = "잠깐, 광고 이야기예요";
+"ad.trackingGuide::message1" = "To-do Calendar 에는 광고가 붙어요. 그 수익으로 개발과 서버 비용을 대고 있어요.";
+"ad.trackingGuide::message2" = "다음 화면에서 추적을 허용하면 내 관심사에 맞는 광고가 떠요. 거절해도 앱은 그대로 쓸 수 있어요.";
+"ad.trackingGuide::continue::button" = "다음으로";

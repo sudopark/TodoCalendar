@@ -3,3 +3,4 @@
 "NSSpeechRecognitionUsageDescription" = "音声をイベントやタスクに変換するために音声認識が必要です。";
 "NSCameraUsageDescription" = "撮影した写真からテキストを読み取るためにカメラへのアクセスが必要です。";
 "NSPhotoLibraryAddUsageDescription" = "共有するイベント画像を写真に保存するために写真へのアクセスが必要です。";
+"NSUserTrackingUsageDescription" = "To-do Calendarは広告のおかげで無料で提供されています。トラッキングを許可すると、より関連性の高い広告が表示されます。";

@@ -3,3 +3,4 @@
 "NSSpeechRecognitionUsageDescription" = "Rozpoznawanie mowy jest wymagane do zamiany Twojego głosu na wydarzenia i zadania.";
 "NSCameraUsageDescription" = "Dostęp do aparatu jest wymagany do odczytania tekstu ze zrobionego zdjęcia.";
 "NSPhotoLibraryAddUsageDescription" = "Dostęp do zdjęć jest wymagany do zapisania udostępnianego obrazu wydarzenia w Twoich zdjęciach.";
+"NSUserTrackingUsageDescription" = "To-do Calendar jest bezpłatny dzięki reklamom. Zezwolenie na śledzenie sprawia, że reklamy są dla Ciebie trafniejsze.";

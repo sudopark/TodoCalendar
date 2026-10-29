@@ -3,3 +3,4 @@
 "NSSpeechRecognitionUsageDescription" = "Taligenkänning krävs för att omvandla din röst till händelser och uppgifter.";
 "NSCameraUsageDescription" = "Åtkomst till kameran krävs för att läsa text från ett foto du tar.";
 "NSPhotoLibraryAddUsageDescription" = "Åtkomst till bildbiblioteket krävs för att spara en delad händelsebild bland dina bilder.";
+"NSUserTrackingUsageDescription" = "To-do Calendar är gratis tack vare annonser. Om du tillåter spårning blir annonserna mer relevanta för dig.";

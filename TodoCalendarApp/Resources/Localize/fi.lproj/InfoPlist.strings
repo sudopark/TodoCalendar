@@ -3,3 +3,4 @@
 "NSSpeechRecognitionUsageDescription" = "Puheentunnistus tarvitaan äänesi muuntamiseen tapahtumiksi ja tehtäviksi.";
 "NSCameraUsageDescription" = "Kameran käyttöoikeus tarvitaan tekstin lukemiseen ottamastasi kuvasta.";
 "NSPhotoLibraryAddUsageDescription" = "Kuvakirjaston käyttöoikeus tarvitaan jaetun tapahtumakuvan tallentamiseen kuviisi.";
+"NSUserTrackingUsageDescription" = "To-do Calendar on ilmainen mainosten ansiosta. Kun sallit seurannan, mainokset ovat sinulle osuvampia.";
