@@ -10,6 +10,7 @@ let project = Project.frameworkWithInterfaceAndTesting(
         .project(target: "Common3rdParty", path: .relativeToRoot("Supports/Common3rdParty"))
     ],
     testingDependencies: [
+        .project(target: "CalendarDomainInterface", path: .relativeToRoot("Domain/CalendarDomain")),
         .project(target: "Common3rdParty", path: .relativeToRoot("Supports/Common3rdParty"))
     ],
     withTest: false

@@ -1,13 +1,14 @@
 //
 //  StubHolidayRepository.swift
-//  TestDoubles
+//  CalendarRepositoryTesting
 //
 //  Created by sudo.park on 6/1/24.
 //  Copyright © 2024 com.sudo.park. All rights reserved.
 //
 
 import Foundation
-import Domain
+import CalendarDomainInterface
+import CalendarRepositoryInterface
 
 
 open class StubHolidayRepository: HolidayRepository {

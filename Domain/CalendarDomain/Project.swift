@@ -16,6 +16,7 @@ let project = Project.frameworkWithInterfaceAndTesting(
         .project(target: "Extensions", path: .relativeToRoot("Supports/Extensions"))
     ],
     testingDependencies: [
-        .project(target: "Common3rdParty", path: .relativeToRoot("Supports/Common3rdParty"))
+        .project(target: "Common3rdParty", path: .relativeToRoot("Supports/Common3rdParty")),
+        .project(target: "Extensions", path: .relativeToRoot("Supports/Extensions"))
     ]
 )
