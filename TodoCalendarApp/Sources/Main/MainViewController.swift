@@ -88,7 +88,7 @@ final class MainViewController: UIViewController, MainScene {
         self.didPrepareAd = true
         Task { @MainActor [weak self] in
             guard let self else { return }
-            await self.mobileAdService.presentConsentFormAndTrackingPromptIfNeeded(from: self)
+            await self.mobileAdService.presentConsentFormIfNeeded(from: self)
             if self.adExposureUsecase.shouldPreloadFullScreenAds() {
                 await self.mobileAdService.preloadFullScreenAd()
                 Task { [weak self] in

@@ -19,6 +19,7 @@ public final class AdLocalRepositoryImple: AdRepository, Sendable {
     }
 
     private var exposureRecordsKey: String { EnvironmentKeys.fullScreenAdExposureRecords.rawValue }
+    private var trackingGuideShownKey: String { EnvironmentKeys.trackingGuideShown.rawValue }
 }
 
 extension AdLocalRepositoryImple {
@@ -34,5 +35,14 @@ extension AdLocalRepositoryImple {
         let others = self.loadFullScreenAdExposureRecords().filter { $0.scope != record.scope }
         let mappers = (others + [record]).map { FullScreenAdExposureRecordMapper(record: $0) }
         self.environmentStorage.update(self.exposureRecordsKey, mappers)
+    }
+
+    public func loadHasShownTrackingGuide() -> Bool {
+        return self.environmentStorage.load(self.trackingGuideShownKey) ?? false
+    }
+
+    public func markTrackingGuideShown() {
+        self.environmentStorage.update(self.trackingGuideShownKey, true)
+        self.environmentStorage.synchronize()
     }
 }

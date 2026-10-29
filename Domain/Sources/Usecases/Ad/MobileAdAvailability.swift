@@ -14,4 +14,5 @@ public protocol MobileAdAvailability: Sendable {
 
     var isStarted: AnyPublisher<Bool, Never> { get }
     var isStartedNow: Bool { get }
+    var isTrackingAuthorizationDetermined: Bool { get }
 }

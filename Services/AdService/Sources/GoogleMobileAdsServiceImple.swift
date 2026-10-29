@@ -68,13 +68,12 @@ extension GoogleMobileAdsServiceImple {
         }
     }
 
-    public func presentConsentFormAndTrackingPromptIfNeeded(from viewController: UIViewController) async {
+    public func presentConsentFormIfNeeded(from viewController: UIViewController) async {
         
         await self.updateConsentInfo()
         
         _ = await Task { @MainActor [weak self] in
             await self?.presentConsentFormIfRequired(from: viewController)
-            await self?.requestTrackingAuthorization()
         }.value
     }
 }
@@ -133,8 +132,12 @@ extension GoogleMobileAdsServiceImple {
 
 extension GoogleMobileAdsServiceImple {
     
+    public var isTrackingAuthorizationDetermined: Bool {
+        return ATTrackingManager.trackingAuthorizationStatus != .notDetermined
+    }
+
     @MainActor
-    private func requestTrackingAuthorization() async {
+    public func requestTrackingAuthorization() async {
         await self.waitUntilApplicationIsActive()
         _ = await ATTrackingManager.requestTrackingAuthorization()
     }
