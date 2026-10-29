@@ -20,42 +20,31 @@ assert_contains() { # desc pattern actual
   if printf '%s' "$3" | grep -q "$2"; then PASS=$((PASS+1)); else FAIL=$((FAIL+1)); echo "FAIL: $1"; echo "  pattern [$2] not in: [$3]"; fi
 }
 
-ALL="AIAgentScene AuthService BillingScenes CalendarPresentation CalendarScenes CommonPresentation Domain EventDetailScene EventListScenes MemberScenes Repository SettingScene TodoCalendarApp TodoCalendarAppShare TodoCalendarAppWidget WidgetScenes"
-
-# --- 스킴 매핑 (pr_test.yml detect-changes 미러) ---
-assert_eq "Domain/Sources → 전체" "$ALL" "$(schemes_for 'M\tDomain/Sources/Events/TodoEvent.swift')"
-assert_eq "Domain/Tests → Domain만" "Domain" "$(schemes_for 'M\tDomain/Tests/FooTests.swift')"
-assert_eq "Repository/Sources → Repo+App+Widget+Share" "Repository TodoCalendarApp TodoCalendarAppShare TodoCalendarAppWidget" "$(schemes_for 'M\tRepository/Sources/Todo/TodoLocalRepositoryImple.swift')"
-assert_eq "Repository/Tests → Repository만" "Repository" "$(schemes_for 'M\tRepository/Tests/FooTests.swift')"
-assert_eq "Services/AuthService/Sources → AuthService+App" "AuthService TodoCalendarApp" "$(schemes_for 'M\tServices/AuthService/Sources/Foo.swift')"
-assert_eq "Services/AuthService/Tests → AuthService만" "AuthService" "$(schemes_for 'M\tServices/AuthService/Tests/FooTests.swift')"
-assert_eq "Services/FirstPartyServices → App+Share(Share 확장이 FirstPartyServices 를 문다)" "TodoCalendarApp TodoCalendarAppShare" "$(schemes_for 'M\tServices/FirstPartyServices/Sources/Foo.swift')"
-assert_eq "Services/SpeechService → App(테스트 스킴 없음)" "TodoCalendarApp" "$(schemes_for 'M\tServices/SpeechService/Sources/Foo.swift')"
-assert_eq "Services/PlaceService → App(테스트 스킴 없음)" "TodoCalendarApp" "$(schemes_for 'M\tServices/PlaceService/Sources/Foo.swift')"
-assert_eq "Services/ExternalServices → App(테스트 스킴 없음)" "TodoCalendarApp" "$(schemes_for 'M\tServices/ExternalServices/Sources/Foo.swift')"
-assert_eq "Services/StoreKitService → App(테스트 스킴 없음)" "TodoCalendarApp" "$(schemes_for 'M\tServices/StoreKitService/Sources/Foo.swift')"
-assert_eq "Services/AdService → App(테스트 스킴 없음)" "TodoCalendarApp" "$(schemes_for 'M\tServices/AdService/Sources/Foo.swift')"
-assert_eq "AIAgentScene → 단독" "AIAgentScene" "$(schemes_for 'M\tPresentations/AIAgentScene/Sources/Foo.swift')"
-assert_eq "BillingScenes → 단독" "BillingScenes" "$(schemes_for 'M\tPresentations/BillingScenes/Sources/Foo.swift')"
-assert_eq "CalendarPresentation → +CalendarScenes+App+Widget" "CalendarPresentation CalendarScenes TodoCalendarApp TodoCalendarAppWidget" "$(schemes_for 'M\tPresentations/CalendarPresentation/Sources/Foo.swift')"
-assert_eq "CalendarScenes → +App (위젯 확장은 #1060 으로 의존을 뗐다)" "CalendarScenes TodoCalendarApp" "$(schemes_for 'M\tPresentations/CalendarScenes/Sources/Foo.swift')"
-assert_eq "WidgetScenes → +App+Widget" "TodoCalendarApp TodoCalendarAppWidget WidgetScenes" "$(schemes_for 'M\tPresentations/WidgetScenes/Sources/Foo.swift')"
-assert_eq "EventDetailScene → +App" "EventDetailScene TodoCalendarApp" "$(schemes_for 'M\tPresentations/EventDetailScene/Sources/Foo.swift')"
-assert_eq "CommonPresentation → 자기+전 Presentation+App+Widget+Share" "AIAgentScene BillingScenes CalendarPresentation CalendarScenes CommonPresentation EventDetailScene EventListScenes MemberScenes SettingScene TodoCalendarApp TodoCalendarAppShare TodoCalendarAppWidget WidgetScenes" "$(schemes_for 'M\tPresentations/CommonPresentation/Sources/Foo.swift')"
-assert_eq "Scenes → 전 Presentation+App (Widget 미의존, WidgetScenes·CalendarPresentation 은 Scenes 를 안 물어 과대 매핑)" "AIAgentScene BillingScenes CalendarPresentation CalendarScenes CommonPresentation EventDetailScene EventListScenes MemberScenes SettingScene TodoCalendarApp WidgetScenes" "$(schemes_for 'M\tPresentations/Scenes/Foo.swift')"
-assert_eq "Tuist/ → 전체" "$ALL" "$(schemes_for 'M\tTuist/ProjectDescriptionHelpers/Foo.swift')"
-assert_eq "TestDoubles → Domain 제외 전체" "AIAgentScene BillingScenes CalendarPresentation CalendarScenes CommonPresentation EventDetailScene EventListScenes MemberScenes Repository SettingScene TodoCalendarApp TodoCalendarAppShare TodoCalendarAppWidget WidgetScenes" "$(schemes_for 'M\tSupports/TestDoubles/Sources/Foo.swift')"
-assert_eq "App Sources → App만" "TodoCalendarApp" "$(schemes_for 'M\tTodoCalendarApp/Sources/Root/Foo.swift')"
-assert_eq "Widget → Widget만" "TodoCalendarAppWidget" "$(schemes_for 'M\tTodoCalendarApp/AppExtensions/Widget/Foo.swift')"
-assert_eq "확장 Base → App+Widget+Share (두 테스트 타겟이 Base를 컴파일)" "TodoCalendarApp TodoCalendarAppShare TodoCalendarAppWidget" "$(schemes_for 'M\tTodoCalendarApp/AppExtensions/Base/Foo.swift')"
-assert_eq "확장 Share → App+Share" "TodoCalendarApp TodoCalendarAppShare" "$(schemes_for 'M\tTodoCalendarApp/AppExtensions/Share/Sources/Foo.swift')"
-assert_eq "LiveActivity → App+Widget+Share" "TodoCalendarApp TodoCalendarAppShare TodoCalendarAppWidget" "$(schemes_for 'M\tTodoCalendarApp/Sources/LiveActivity/Foo.swift')"
+# --- 테스트 스킴 (매핑 정본은 scripts/derive-test-schemes.py — 그 표는 derive-test-schemes.test.sh 가 검증한다) ---
+REPO_ROOT="$(cd ../../../.. && pwd)"
+derived_for() { # 경로들 → 도출 스크립트가 직접 낸 스킴
+  printf '%b\n' "$1" | python3 "$REPO_ROOT/scripts/derive-test-schemes.py" --changed | tr '\n' ' ' | sed 's/ $//'
+}
+WIDE='M\tDomain/Sources/Events/TodoEvent.swift\nM\tTodoCalendarApp/AppExtensions/Widget/Foo.swift\nM\tPresentations/AIAgentScene/Sources/B.swift'
+assert_eq "스킴 섹션 = 도출 스크립트 결과" "$(derived_for 'Domain/Sources/Events/TodoEvent.swift\nTodoCalendarApp/AppExtensions/Widget/Foo.swift\nPresentations/AIAgentScene/Sources/B.swift')" "$(schemes_for "$WIDE")"
+assert_contains "스킴 섹션이 손 매핑에 없던 스킴까지 낸다 (위 단언이 빈 값끼리 같아 통과하지 않게)" "UnitTestHelpKit" "$(schemes_for "$WIDE")"
+assert_eq "모듈 테스트 경로 → 그 스킴만" "Repository" "$(schemes_for 'M\tRepository/Tests/FooTests.swift')"
+assert_eq "rename → 옛 경로·새 경로 둘 다 도출에 넘긴다" "AIAgentScene Repository" "$(schemes_for 'R100\tRepository/Tests/OldTests.swift\tPresentations/AIAgentScene/Tests/NewTests.swift')"
 assert_eq "docs만 → 테스트 무관" "(테스트 무관 변경)" "$(schemes_for 'M\tdocs/spec/foo.md')"
-assert_eq "복수 영역 합산·중복 제거" "AIAgentScene Repository TodoCalendarApp TodoCalendarAppShare TodoCalendarAppWidget" "$(schemes_for 'M\tRepository/Sources/A.swift\nM\tPresentations/AIAgentScene/Sources/B.swift')"
 
-ALL_WITH_EXTENSIONS="AIAgentScene AuthService BillingScenes CalendarPresentation CalendarScenes CommonPresentation Domain EventDetailScene EventListScenes Extensions MemberScenes Repository SettingScene TodoCalendarApp TodoCalendarAppShare TodoCalendarAppWidget WidgetScenes"
-assert_eq "Extensions/Sources → 전체+Extensions" "$ALL_WITH_EXTENSIONS" "$(schemes_for 'M\tSupports/Extensions/Sources/Foo.swift')"
-assert_eq "Extensions/Tests → Extensions만" "Extensions" "$(schemes_for 'M\tSupports/Extensions/Tests/FooTests.swift')"
+failing_derive_run() { # 도출 스크립트가 실패하는 트리에서 impact-check 를 돌린다 → "exit=<코드>" + stderr
+  local tree; tree=$(mktemp -d)
+  mkdir -p "$tree/.claude/skills/implement/scripts" "$tree/scripts"
+  cp impact-check.sh "$tree/.claude/skills/implement/scripts/"
+  printf 'import sys\nsys.stderr.write("Foo/Project.swift: 못 읽는 의존\\n")\nsys.exit(1)\n' > "$tree/scripts/derive-test-schemes.py"
+  local err
+  err=$(printf 'M\tDomain/Sources/Foo.swift\n' | bash "$tree/.claude/skills/implement/scripts/impact-check.sh" --stdin 2>&1 >/dev/null)
+  echo "exit=$? $err"
+  rm -rf "$tree"
+}
+FAILED_RUN=$(failing_derive_run)
+assert_contains "도출 실패 → 0 아닌 코드로 끝난다" "^exit=[1-9]" "$FAILED_RUN"
+assert_contains "도출 실패 → 도출 스크립트의 stderr 를 그대로 낸다" "Foo/Project.swift: 못 읽는 의존" "$FAILED_RUN"
 
 # --- tuist generate 감지 ---
 assert_eq "수정만 → 불필요" "불필요" "$(tuist_for 'M\tDomain/Sources/Foo.swift')"
@@ -69,7 +58,7 @@ assert_contains "Tuist helper 수정(M) → 필요" "필요" "$(tuist_for 'M\tTu
 assert_contains "Package.swift 수정(M) → 필요" "필요" "$(tuist_for 'M\tPackage.swift')"
 
 # --- 짝 위치 경고 (stdin 모드는 파일 존재 기반 경고만) ---
-assert_contains "pr_test.yml 변경 → 3곳 동기화 경고" "impact-check.sh" "$(pairs_for 'M\t.github/workflows/pr_test.yml')"
+assert_eq "pr_test.yml 변경 → 경고 없음 (스킴 목록이 도출로 바뀌어 동기화할 짝이 없다)" "(해당 없음)" "$(pairs_for 'M\t.github/workflows/pr_test.yml')"
 assert_eq "경고 없음 → 해당 없음" "(해당 없음)" "$(pairs_for 'M\tdocs/foo.md')"
 
 # --- git 모드 테스트 공통 (임시 repo 를 만들어 --base 로 돌린다) ---

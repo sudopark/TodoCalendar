@@ -37,7 +37,7 @@ xcodebuild test -workspace TodoCalendar.xcworkspace \
 
 - 기기·OS 오버라이드: 유저 지정 시 `-destination`의 name/OS만 교체 (`xcrun simctl list devices available`로 가용 확인).
 - 기본 시뮬레이터가 없으면 생성: `xcrun simctl create 'iPhone 17 - snapshot_ref' 'iPhone 17' iOS26.2`.
-- **CI·run-all-tests.sh에 Snapshots 스킴을 등재하지 않는다** — 로컬 전용이 설계다 (CLAUDE.md 스킴 짝 규칙의 의도된 예외).
+- **CI·run-all-tests.sh 는 Snapshots 스킴을 돌리지 않는다** — 로컬 전용이 설계다. 두 곳이 쓰는 `scripts/derive-test-schemes.py` 가 `Snapshots/` 를 도출에서 뺀다.
 
 ## 4. 확인·대조
 

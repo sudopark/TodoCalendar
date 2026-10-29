@@ -1,16 +1,15 @@
 #!/bin/bash
 # impact-check.sh — 변경 파일 기반 영향도 판정: 테스트 스킴 / tuist generate / 짝지어진 두 위치
 #
-# ⚠️ 짝지어진 두 위치: 아래 스킴 매핑은 .github/workflows/pr_test.yml 의
-#    "Map changes to test schemes" 스텝을 미러링한다. 한쪽 수정 시 반드시 동기화.
+# 테스트 스킴은 CI detect-changes 와 같은 scripts/derive-test-schemes.py --changed 가 계산한다.
 #
 # Usage:
 #   impact-check.sh [--base <ref>]   # git 변경분(작업트리+커밋 vs ref, 기본 origin/develop) 분석
 #   impact-check.sh --stdin          # "STATUS<TAB>PATH" 라인들을 stdin으로 (테스트용)
 set -o pipefail
 
-ALL_SCHEMES="Domain Repository AuthService CommonPresentation BillingScenes CalendarPresentation CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene WidgetScenes TodoCalendarApp TodoCalendarAppWidget TodoCalendarAppShare"
-ALL_PRESENTATION="CommonPresentation BillingScenes CalendarPresentation CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene WidgetScenes"
+# git 모드 테스트는 임시 repo 에서 돈다 — 도출 스크립트는 작업 디렉터리가 아니라 이 스크립트의 레포에서 찾는다
+DERIVE_TEST_SCHEMES="$(dirname "${BASH_SOURCE[0]}")/../../../../scripts/derive-test-schemes.py"
 
 MODE="git"; BASE="origin/develop"
 while [ $# -gt 0 ]; do
@@ -36,95 +35,8 @@ fi
 # R100<TAB>old<TAB>new 같은 rename은 old/new 경로 모두 영향 대상
 FILES=$(printf '%s\n' "$CHANGES" | awk -F'\t' 'NF>=2 {for (i=2; i<=NF; i++) print $i}')
 
-# ---- 테스트 스킴 (pr_test.yml detect-changes 미러) ----
-schemes=()
-if printf '%s\n' "$FILES" | grep -qE "^(Package\.swift|Package\.resolved|Tuist/|Tuist\.swift|mise\.toml)"; then
-  schemes+=($ALL_SCHEMES)
-fi
-if printf '%s\n' "$FILES" | grep -qE "^Supports/(Common3rdParty|Extensions/Sources|UnitTestHelpKit/Sources)/"; then
-  schemes+=($ALL_SCHEMES)
-fi
-if printf '%s\n' "$FILES" | grep -q "^Supports/Extensions/"; then
-  schemes+=("Extensions")
-fi
-if printf '%s\n' "$FILES" | grep -q "^Supports/TestDoubles/Sources/"; then
-  schemes+=("Repository" $ALL_PRESENTATION "TodoCalendarApp" "TodoCalendarAppWidget" "TodoCalendarAppShare")
-fi
-if printf '%s\n' "$FILES" | grep -q "^Domain/Sources/"; then
-  schemes+=($ALL_SCHEMES)
-fi
-if printf '%s\n' "$FILES" | grep -q "^Domain/Tests/"; then
-  schemes+=("Domain")
-fi
-if printf '%s\n' "$FILES" | grep -q "^Repository/Sources/"; then
-  schemes+=("Repository" "TodoCalendarApp" "TodoCalendarAppWidget" "TodoCalendarAppShare")
-fi
-if printf '%s\n' "$FILES" | grep -q "^Repository/Tests/"; then
-  schemes+=("Repository")
-fi
-if printf '%s\n' "$FILES" | grep -q "^Services/AuthService/Sources/"; then
-  schemes+=("AuthService" "TodoCalendarApp")
-fi
-if printf '%s\n' "$FILES" | grep -q "^Services/AuthService/Tests/"; then
-  schemes+=("AuthService")
-fi
-if printf '%s\n' "$FILES" | grep -qE "^Services/(FirstPartyServices|SpeechService|PlaceService|ExternalServices|StoreKitService|AdService)/"; then
-  schemes+=("TodoCalendarApp")
-fi
-if printf '%s\n' "$FILES" | grep -q "^Services/FirstPartyServices/"; then
-  schemes+=("TodoCalendarAppShare")
-fi
-if printf '%s\n' "$FILES" | grep -q "^Presentations/CommonPresentation/"; then
-  schemes+=($ALL_PRESENTATION "TodoCalendarApp" "TodoCalendarAppWidget" "TodoCalendarAppShare")
-fi
-if printf '%s\n' "$FILES" | grep -q "^Presentations/Scenes/"; then
-  schemes+=($ALL_PRESENTATION "TodoCalendarApp")
-fi
-if printf '%s\n' "$FILES" | grep -q "^Presentations/BillingScenes/"; then
-  schemes+=("BillingScenes")
-fi
-if printf '%s\n' "$FILES" | grep -q "^Presentations/CalendarPresentation/"; then
-  schemes+=("CalendarPresentation" "CalendarScenes" "TodoCalendarApp" "TodoCalendarAppWidget")
-fi
-if printf '%s\n' "$FILES" | grep -q "^Presentations/CalendarScenes/"; then
-  schemes+=("CalendarScenes" "TodoCalendarApp")
-fi
-if printf '%s\n' "$FILES" | grep -q "^Presentations/EventDetailScene/"; then
-  schemes+=("EventDetailScene" "TodoCalendarApp")
-fi
-if printf '%s\n' "$FILES" | grep -q "^Presentations/EventListScenes/"; then
-  schemes+=("EventListScenes" "TodoCalendarApp")
-fi
-if printf '%s\n' "$FILES" | grep -q "^Presentations/SettingScene/"; then
-  schemes+=("SettingScene" "TodoCalendarApp")
-fi
-if printf '%s\n' "$FILES" | grep -q "^Presentations/MemberScenes/"; then
-  schemes+=("MemberScenes" "TodoCalendarApp")
-fi
-if printf '%s\n' "$FILES" | grep -q "^Presentations/AIAgentScene/"; then
-  schemes+=("AIAgentScene")
-fi
-if printf '%s\n' "$FILES" | grep -q "^Presentations/WidgetScenes/"; then
-  schemes+=("WidgetScenes" "TodoCalendarApp" "TodoCalendarAppWidget")
-fi
-if printf '%s\n' "$FILES" | grep -qE "^TodoCalendarApp/(Sources|Tests)/"; then
-  schemes+=("TodoCalendarApp")
-fi
-if printf '%s\n' "$FILES" | grep -q "^TodoCalendarApp/AppExtensions/Widget/"; then
-  schemes+=("TodoCalendarAppWidget")
-fi
-# Base는 embed가 아니라 각 확장 타겟이 소스로 직접 컴파일한다(Project+Templates의 sources 글롭).
-# 위젯·공유 확장 모두 테스트 타겟이 있고 그 소스에도 Base가 들어가므로 두 스킴까지 켜야 실행된다.
-if printf '%s\n' "$FILES" | grep -q "^TodoCalendarApp/AppExtensions/Base/"; then
-  schemes+=("TodoCalendarApp" "TodoCalendarAppWidget" "TodoCalendarAppShare")
-fi
-if printf '%s\n' "$FILES" | grep -q "^TodoCalendarApp/AppExtensions/Share/"; then
-  schemes+=("TodoCalendarApp" "TodoCalendarAppShare")
-fi
-# LiveActivity 소스는 App+Widget+Share 세 타겟이 각자 직접 컴파일한다(Project+Templates의 sources 글롭).
-if printf '%s\n' "$FILES" | grep -q "^TodoCalendarApp/Sources/LiveActivity/"; then
-  schemes+=("TodoCalendarApp" "TodoCalendarAppWidget" "TodoCalendarAppShare")
-fi
+# ---- 테스트 스킴 ----
+SCHEMES=$(printf '%s\n' "$FILES" | python3 "$DERIVE_TEST_SCHEMES" --changed) || exit 1
 
 # ---- tuist generate (테스트보다 선행 액션 — 첫 섹션으로 출력) ----
 # tuist 재생성 필요: (1) .swift 소스 멤버십 추가/삭제/이동(ADRC), (2) 매니페스트(Project/Workspace/Package/Tuist) 변경(수정 포함).
@@ -139,19 +51,16 @@ else
 fi
 
 echo "## 테스트 스킴"
-if [ ${#schemes[@]} -eq 0 ]; then
+if [ -z "$SCHEMES" ]; then
   echo "(테스트 무관 변경)"
 else
-  printf '%s\n' "${schemes[@]}" | sort -u | tr '\n' ' ' | sed 's/ $//'
+  printf '%s\n' "$SCHEMES" | tr '\n' ' ' | sed 's/ $//'
   echo ""
 fi
 
 # ---- 짝지어진 두 위치 ----
 echo "## 짝지어진 두 위치"
 warns=()
-if printf '%s\n' "$FILES" | grep -q "^\.github/workflows/pr_test\.yml$"; then
-  warns+=("- ⚠️ pr_test.yml 변경 — detect-changes 매핑 ↔ Test step ↔ impact-check.sh 매핑 3곳 동기화 확인")
-fi
 if [ "$MODE" = "git" ] && printf '%s\n' "$FILES" | grep -q "^TodoCalendarApp/Sources/AppEnvironment\.swift$"; then
   # 떠나는 버전 N 을 뽑아 case N 추가 여부로 판정한다. migrateStatement 문자열 grep 은
   # 컨텍스트를 좁히면 case 만 추가한 변경을 놓치고, 넓히면 무관한 테이블 편집이 누락을 가린다.

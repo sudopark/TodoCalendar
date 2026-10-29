@@ -18,8 +18,7 @@
   - `AppEnvironment.dbVersion` ↔ `Table.migrateStatement(for:)` case ↔ `AppDataMigrationImple`의 `runDBMigration` case + `runMigrationVersionNtoM` (셋 다여야 한다 — 마지막이 빠지면 `migrateStatement`가 호출조차 안 되고 조용히 안 돈다)
   - 외부 캘린더 DB 는 서비스마다 같은 짝을 따로 가진다 — `AppEnvironment.googleCalendarDBVersion` ↔ 그 테이블의 `migrateStatement(for:)` case ↔ `ExternalCalendarDBMigrationImple.runGoogleCalendarDBMigration` 의 switch case + 그 case 가 부르는 스텝 메서드이고, 애플은 `appleCalendarDBVersion` ↔ 그 테이블의 `migrateStatement(for:)` case ↔ `runAppleCalendarDBMigration` 의 switch 다. 스텝 메서드 이름이 `runMigrationVersionNtoM` 패턴이 아니라 `runGoogleCalendarEventTagMigration` 처럼 대상 테이블을 담아서, 위 메인 DB 짝을 이름으로 훑으면 이쪽은 안 걸린다. 빠졌을 때 실패하는 모양은 메인 DB 와 같다 — `migrateStatement` 가 호출조차 안 되고 조용히 안 돈다
   - 커밋 메시지 기준(§5) ↔ `commit` 스킬 §메시지 ↔ `report-review` P2 (작성 기준 둘과 검수 기준 하나가 같은 것을 말해야 한다 — 검수 쪽만 고치면 §5 가 ❌ 로 든 예시가 관문을 통과한다)
-  - CI `pr_test.yml` — `detect-changes`의 scheme 매핑(grep) ↔ `test` job의 `Test <scheme>` 실행 step (둘 중 하나만 추가하면 감지만 되고 실행 안 됨)
-  - 신규 테스트 스킴 ↔ 스킴 목록 하드코딩 전부 (`pr_test.yml` 3곳·`scripts/run-all-tests.sh`·`impact-check.sh`+테스트·`run-tests` 스킬 — 상세는 add-framework 스킬. 단 `<Name>Snapshots`·`<Name>E2E` 스킴은 의도된 예외 — 둘 다 로컬 전용이라 CI 가 안 돌린다. 스냅샷은 snapshot-check 스킬, e2e 는 #826 캠페인 계획 0항 결심으로 CI 미배선)
+  - `scripts/derive-test-schemes.py` 의 `HELPERS`·`IMPLICIT_TEST_DEPENDENCIES`·`EXTENSION_SHARED_PATHS` 표 ↔ `Project+Templates.swift` 의 공개 헬퍼·테스트 타겟 암묵 의존·확장 소스 글롭 (스킴 목록과 변경→스킴 매핑은 이 스크립트가 매니페스트에서 도출해 CI·`run-all-tests.sh`·`impact-check.sh` 가 같이 쓴다. 손으로 맞추는 건 이 표뿐이고, 어긋나면 CI detect-changes 의 `derive-test-schemes.test.sh` 가 실패한다 — 상세는 add-framework 스킬)
   - init 시그니처 ↔ 콜사이트
   - 인증 필요 신규 Endpoint enum ↔ `CalendarAPIAutenticator.shouldAdapt` case ↔ 회귀 테스트 (누락 시 무인증 요청 → 401, 리트라이도 안 됨)
   - CommonPresentation 신규 컴포넌트 ↔ `.claude/rules/presentations-rules.md` §2 카탈로그 표 등재 (누락 시 다음 사람이 못 찾아 같은 컴포넌트를 또 만든다)
@@ -85,7 +84,7 @@ tuist generate --no-open      # 파일 추가/삭제 후 재실행 필수
 | 룰·선례 없어 결정이 막힘 | doctrine 스킬 (실행 교리 신설·보강 요구) |
 | 버그·논리 모순 수정 | troubleshoot 스킬 (superpowers systematic-debugging 컴패니언 — 아카이브 `docs/troubleshooting/`) |
 | 파일·프레임워크 추가 | add-file / add-framework 스킬 |
-| 테스트 실행 | run-tests 스킬 (스킴 목록 정본) |
+| 테스트 실행 | run-tests 스킬 (스킴 목록은 `scripts/derive-test-schemes.py --all`) |
 | 테스트 빌드 배포 | test-deploy 스킬 (Firebase App Distribution) |
 | TestFlight 업로드 | testflight-deploy 스킬 (App Store 서명 + dSYM Crashlytics 업로드) |
 | 새 버전 출시 변경내용 작성 | release-notes 스킬 (한글 초안 → 31개 로케일 → ASC 업로드) |
