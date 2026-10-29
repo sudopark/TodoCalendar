@@ -88,3 +88,49 @@ extension AdLocalRepositoryImpleTests {
         #expect(records.map { $0.lastExposeDate } == [self.date(100), self.date(200)])
     }
 }
+
+
+// MARK: - 추적 안내 노출 기록
+
+extension AdLocalRepositoryImpleTests {
+
+    @Test("기록이 없으면 추적 안내를 보여준 적 없다고 답한다")
+    func repository_loadHasShownTrackingGuide_whenEmpty_isFalse() {
+        // given
+        let repository = self.makeRepository()
+
+        // when
+        let hasShown = repository.loadHasShownTrackingGuide()
+
+        // then
+        #expect(hasShown == false)
+    }
+
+    @Test("기록한 뒤에는 추적 안내를 보여준 적 있다고 답한다")
+    func repository_markTrackingGuideShown_thenLoadIsTrue() {
+        // given
+        let repository = self.makeRepository()
+
+        // when
+        repository.markTrackingGuideShown()
+        let hasShown = repository.loadHasShownTrackingGuide()
+
+        // then
+        #expect(hasShown == true)
+    }
+
+    @Test("추적 안내 기록이 전면 광고 노출 이력을 덮지 않는다")
+    func repository_markTrackingGuideShown_keepsExposureRecords() {
+        // given
+        let repository = self.makeRepository()
+        let record = FullScreenAdExposureRecord(scope: .application, lastExposeDate: self.date(100))
+        repository.updateFullScreenAdExposureRecord(record)
+
+        // when
+        repository.markTrackingGuideShown()
+
+        // then
+        #expect(repository.loadFullScreenAdExposureRecords() == [record])
+        #expect(repository.loadHasShownTrackingGuide() == true)
+    }
+}

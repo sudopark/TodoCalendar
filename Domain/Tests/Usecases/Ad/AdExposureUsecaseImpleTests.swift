@@ -55,17 +55,30 @@ final class AdExposureUsecaseImpleTests: PublisherWaitable {
         userPlan: BillingUserPlan? = nil,
         exposureRecords: [FullScreenAdExposureRecord] = [],
         coldLaunchHistory: AppColdLaunchHistory = .init(),
+        hasAnyEvent: Bool = false,
+        shouldFailEventExistenceFetch: Bool = false,
+        hasShownTrackingGuide: Bool = false,
+        isTrackingAuthorizationDetermined: Bool = false,
         gate: StubPaidFeatureGateUsecase = .init(),
         sharedDataStore: SharedDataStore = .init()
     ) -> AdExposureUsecaseImple {
-        self.spyAdRepository = SpyAdRepository(records: exposureRecords)
+        self.spyAdRepository = SpyAdRepository(
+            records: exposureRecords, hasShownTrackingGuide: hasShownTrackingGuide
+        )
+        self.stubUserEventExistenceRepository = StubUserEventExistenceRepository(
+            hasAnyEvent: hasAnyEvent, shouldFailFetch: shouldFailEventExistenceFetch
+        )
         self.stubBillingUsecase = StubBillingUsecase(stubUserPlan: userPlan)
-        self.stubAdAvailability = StubMobileAdAvailability(isStarted: isAdStarted)
+        self.stubAdAvailability = StubMobileAdAvailability(
+            isStarted: isAdStarted,
+            isTrackingAuthorizationDetermined: isTrackingAuthorizationDetermined
+        )
         return AdExposureUsecaseImple(
             adAvailability: self.stubAdAvailability,
             billingUsecase: self.stubBillingUsecase,
             adRepository: self.spyAdRepository,
             coldLaunchHistoryRepository: StubAppColdLaunchHistoryRepository(history: coldLaunchHistory),
+            userEventExistenceRepository: self.stubUserEventExistenceRepository,
             paidFeatureGateUsecase: gate,
             sharedDataStore: sharedDataStore,
             calendar: self.calendar
@@ -95,6 +108,7 @@ final class AdExposureUsecaseImpleTests: PublisherWaitable {
     }
 
     private var spyAdRepository: SpyAdRepository!
+    private var stubUserEventExistenceRepository: StubUserEventExistenceRepository!
     private var stubBillingUsecase: StubBillingUsecase!
     private var stubAdAvailability: StubMobileAdAvailability!
 }
@@ -526,5 +540,102 @@ extension AdExposureUsecaseImpleTests {
                 == [self.now, self.date(daysFromNow: 1)])
         #expect(self.spyAdRepository.loadFullScreenAdExposureRecords()
                 == [.init(scope: .application, lastExposeDate: self.date(daysFromNow: 1))])
+    }
+}
+
+
+// MARK: - 추적 요청 가부
+
+extension AdExposureUsecaseImpleTests {
+
+    @Test("저장된 이벤트가 있고 안내를 아직 안 봤으면 추적을 요청할 수 있다")
+    func usecase_whenUserHasEvent_canRequestTrackingAuthorization() async {
+        // given
+        let usecase = self.makeUsecase(hasAnyEvent: true, hasShownTrackingGuide: false)
+
+        // when
+        let canRequest = await usecase.canRequestTrackingAuthorization()
+
+        // then
+        #expect(canRequest == true)
+    }
+
+    @Test("저장된 이벤트가 없으면 추적을 요청하지 않는다")
+    func usecase_whenUserHasNoEvent_cannotRequestTrackingAuthorization() async {
+        // given
+        let usecase = self.makeUsecase(hasAnyEvent: false, hasShownTrackingGuide: false)
+
+        // when
+        let canRequest = await usecase.canRequestTrackingAuthorization()
+
+        // then
+        #expect(canRequest == false)
+    }
+
+    @Test("이벤트 조회가 실패하면 추적을 요청하지 않는다")
+    func usecase_whenEventExistenceFetchFails_cannotRequestTrackingAuthorization() async {
+        // given
+        let usecase = self.makeUsecase(
+            hasAnyEvent: true, shouldFailEventExistenceFetch: true
+        )
+
+        // when
+        let canRequest = await usecase.canRequestTrackingAuthorization()
+
+        // then
+        #expect(canRequest == false)
+    }
+
+    @Test("안내를 이미 본 유저에게는 다시 요청하지 않는다")
+    func usecase_whenTrackingGuideAlreadyShown_cannotRequestTrackingAuthorization() async {
+        // given
+        let usecase = self.makeUsecase(hasAnyEvent: true, hasShownTrackingGuide: true)
+
+        // when
+        let canRequest = await usecase.canRequestTrackingAuthorization()
+
+        // then
+        #expect(canRequest == false)
+    }
+
+    @Test("추적 권한을 이미 정한 유저에게는 다시 요청하지 않는다")
+    func usecase_whenTrackingAuthorizationDetermined_cannotRequestTrackingAuthorization() async {
+        // given
+        let usecase = self.makeUsecase(
+            hasAnyEvent: true, isTrackingAuthorizationDetermined: true
+        )
+
+        // when
+        let canRequest = await usecase.canRequestTrackingAuthorization()
+
+        // then
+        #expect(canRequest == false)
+    }
+
+    @Test("유료 플랜이어도 추적 요청 가부는 플랜을 보지 않는다")
+    func usecase_whenPaidPlan_canRequestTrackingAuthorization() async {
+        // given
+        let usecase = self.makeUsecase(
+            userPlan: self.userPlan(.standard), hasAnyEvent: true
+        )
+
+        // when
+        let canRequest = await usecase.canRequestTrackingAuthorization()
+
+        // then
+        #expect(canRequest == true)
+    }
+
+    @Test("안내 노출을 기록하면 저장소에 남고 다음부터 요청하지 않는다")
+    func usecase_recordTrackingGuideShown_marksShownOnRepository() async {
+        // given
+        let usecase = self.makeUsecase(hasAnyEvent: true)
+
+        // when
+        usecase.recordTrackingGuideShown()
+
+        // then
+        #expect(self.spyAdRepository.didMarkTrackingGuideShown == true)
+        #expect(await usecase.canRequestTrackingAuthorization() == false)
     }
 }

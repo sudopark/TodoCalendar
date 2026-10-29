@@ -191,6 +191,14 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
             coldLaunchHistoryRepository: AppColdLaunchHistoryLocalRepositoryImple(
                 environmentStorage: applicationBase.userDefaultEnvironmentStorage
             ),
+            userEventExistenceRepository: UserEventExistenceLocalRepositoryImple(
+                todoLocalStorage: TodoLocalStorageImple(
+                    sqliteService: applicationBase.commonSqliteService
+                ),
+                scheduleLocalStorage: ScheduleEventLocalStorageImple(
+                    sqliteService: applicationBase.commonSqliteService
+                )
+            ),
             paidFeatureGateUsecase: paidFeatureGateUsecase,
             sharedDataStore: applicationBase.sharedDataStore
         )

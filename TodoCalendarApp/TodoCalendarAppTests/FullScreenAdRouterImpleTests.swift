@@ -154,7 +154,12 @@ private final class SpyMobileAdService: MobileAdService, @unchecked Sendable {
     func start() { }
 
     @MainActor
-    func presentConsentFormAndTrackingPromptIfNeeded(from viewController: UIViewController) async { }
+    var isTrackingAuthorizationDetermined: Bool { false }
+
+    func presentConsentFormIfNeeded(from viewController: UIViewController) async { }
+
+    @MainActor
+    func requestTrackingAuthorization() async { }
 
     func preloadFullScreenAd() async { }
 
@@ -192,4 +197,8 @@ private final class StubAdExposureUsecase: AdExposureUsecase, @unchecked Sendabl
     }
 
     func recordFullScreenAdExposed(scope: FullScreenAdExposureRecord.Scope, at now: Date) { }
+
+    func canRequestTrackingAuthorization() async -> Bool { false }
+
+    func recordTrackingGuideShown() { }
 }

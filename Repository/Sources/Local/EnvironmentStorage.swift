@@ -15,6 +15,7 @@ public enum EnvironmentKeys: String {
     case colorThemeLicense
     case widgetStyleLicense
     case appPolicy
+    case trackingGuideShown
 }
 
 public protocol EnvironmentStorage: AnyObject, Sendable {
