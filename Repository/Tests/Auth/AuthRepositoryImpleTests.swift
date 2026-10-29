@@ -12,6 +12,8 @@ import Domain
 import Extensions
 import UnitTestHelpKit
 import TestDoubles
+import RemoteInfraInterface
+import RemoteInfraTesting
 
 @testable import Repository
 
@@ -137,107 +139,6 @@ extension AuthRepositoryImpleTests {
     }
 }
 
-
-class StubFirebaseAuthService: FirebaseAuthService {
-    
-    func setup() throws { }
-    
-    struct DummyResult: FirebaseAuthDataResult {
-        var uid: String { "some" }
-        
-        func idTokenWithoutRefreshing() async throws -> String {
-            return "access"
-        }
-        
-        var refreshToken: String? { "refresh" }
-    }
-    
-    var shouldFail: Bool = false
-    func authorize(with credential: any OAuth2Credential) async throws -> any FirebaseAuthDataResult {
-        guard self.shouldFail == false
-        else {
-            throw RuntimeError("failed")
-        }
-        
-        return DummyResult()
-    }
-    
-    var refreshFailError: (any Error)?
-    func refreshToken(_ resultHandler: @escaping (Result<AuthRefreshResult, Error>) -> Void) {
-        if let refreshFailError = self.refreshFailError {
-            resultHandler(.failure(refreshFailError))
-        } else {
-            let result = AuthRefreshResult(uid: "uid", idToken: "access-new", refreshToken: "refresh-new")
-            resultHandler(.success(result))
-        }
-    }
-    
-    var didSignout: Bool?
-    func signOut() throws {
-        self.didSignout = true
-    }
-    
-    var didDelete: Bool?
-    func deleteAccount() async throws {
-        self.didDelete = true
-    }
-}
-
-
-class SpyKeyChainStorage: KeyChainStorage, AuthStore, APICredentialStore, @unchecked Sendable {
-    
-    func loadCredential() -> APICredential? {
-        nil
-    }
-    
-    func saveCredential(_ credential: APICredential) {
-        
-    }
-    
-    private var storage: [String: any Codable] = [:]
-    
-    func setupSharedGroup(_ identifier: String) {}
-    
-    func load<T>(_ key: String) -> T? where T : Decodable {
-        return self.storage[key] as? T
-    }
-    
-    func loadCurrentAuth() -> Domain.Auth? {
-        let mapper: AuthMapper? = self.load("current_auth")
-        return mapper?.auth
-    }
-    
-    func saveAuth(_ auth: Domain.Auth) {
-        let mapper = AuthMapper(auth: auth)
-        self.update("current_auth", mapper)
-    }
-    
-    func update<T>(_ key: String, _ value: T) where T : Encodable {
-        self.storage[key] = value as? Codable
-    }
-    
-    func updateCredential(_ credential: APICredential) {
-        guard let auth = self.loadCurrentAuth() else { return }
-        let newAuth = Auth(
-            uid: auth.uid,
-            accessToken: credential.accessToken,
-            refreshToken: credential.refreshToken
-        )
-        self.saveAuth(newAuth)
-    }
-    
-    func remove(_ key: String) {
-        self.storage[key] = nil
-    }
-    
-    func removeAuth() {
-        self.storage.removeValue(forKey: "current_auth")
-    }
-    
-    func removeCredential() {
-        self.removeAuth()
-    }
-}
 
 extension AuthRepositoryImpleTests {
     

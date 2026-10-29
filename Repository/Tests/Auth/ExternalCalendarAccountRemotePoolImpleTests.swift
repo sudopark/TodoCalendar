@@ -9,6 +9,7 @@
 import Testing
 import Domain
 import Extensions
+import RemoteInfraInterface
 
 @testable import Repository
 

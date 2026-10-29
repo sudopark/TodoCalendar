@@ -10,6 +10,7 @@ import Foundation
 import Domain
 import Extensions
 import SQLiteService
+import RemoteInfraInterface
 
 // MARK: - UserNotificationRepository
 

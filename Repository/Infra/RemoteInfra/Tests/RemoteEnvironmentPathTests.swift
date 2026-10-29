@@ -1,6 +1,6 @@
 //
 //  RemoteEnvironmentPathTests.swift
-//  RepositoryTests
+//  RemoteInfraTests
 //
 //  Created by sudo.park on 5/10/26.
 //  Copyright © 2026 com.sudo.park. All rights reserved.
@@ -8,8 +8,9 @@
 
 import Testing
 import Domain
+import RemoteInfraInterface
 
-@testable import Repository
+@testable import RemoteInfra
 
 
 // MARK: - calendarAPIHost 기반 엔드포인트 v2 prefix 매핑 검증

@@ -13,6 +13,7 @@ import Domain
 import Extensions
 import SQLiteService
 import StorageInfraInterface
+import RemoteInfraInterface
 
 
 public final class HolidayRepositoryImple: HolidayRepository {

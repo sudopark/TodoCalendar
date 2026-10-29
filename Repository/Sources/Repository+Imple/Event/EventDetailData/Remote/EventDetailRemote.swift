@@ -9,6 +9,7 @@
 import Foundation
 import Combine
 import Domain
+import RemoteInfraInterface
 
 
 public protocol EventDetailRemote: Sendable {

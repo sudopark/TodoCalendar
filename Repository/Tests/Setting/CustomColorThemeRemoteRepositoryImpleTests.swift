@@ -12,6 +12,8 @@ import Prelude
 import Optics
 import Domain
 import Extensions
+import RemoteInfraInterface
+import RemoteInfraTesting
 
 @testable import Repository
 

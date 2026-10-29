@@ -1,6 +1,6 @@
 //
 //  AcceptLanguage.swift
-//  Repository
+//  RemoteInfra
 //
 //  Created by sudo.park on 5/30/26.
 //  Copyright © 2026 com.sudo.park. All rights reserved.

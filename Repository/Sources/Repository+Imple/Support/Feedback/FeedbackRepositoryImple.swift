@@ -9,6 +9,7 @@
 import Foundation
 import Domain
 import Extensions
+import RemoteInfraInterface
 
 
 public final class FeedbackRepositoryImple: FeedbackRepository {

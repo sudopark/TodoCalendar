@@ -9,6 +9,7 @@
 import Foundation
 import SQLiteService
 import Domain
+import RemoteInfraInterface
 
 
 public final class EventSyncRepositoryImple: EventSyncRepository {

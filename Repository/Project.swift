@@ -18,11 +18,21 @@ let project = Project.frameworkWithTest(name: "Repository",
                                             .project(target: "DBInfraInterface",
                                                      path: .relativeToRoot("Repository/Infra/DBInfra")),
                                             .project(target: "DBInfra",
-                                                     path: .relativeToRoot("Repository/Infra/DBInfra"))
+                                                     path: .relativeToRoot("Repository/Infra/DBInfra")),
+                                            .project(target: "RemoteInfraInterface",
+                                                     path: .relativeToRoot("Repository/Infra/RemoteInfra")),
+                                            .project(target: "RemoteInfra",
+                                                     path: .relativeToRoot("Repository/Infra/RemoteInfra"))
                                         ],
                                         testDependencies: [
                                             .project(target: "StorageInfraTesting",
-                                                     path: .relativeToRoot("Repository/Infra/StorageInfra"))
+                                                     path: .relativeToRoot("Repository/Infra/StorageInfra")),
+                                            .project(target: "RemoteInfraTesting",
+                                                     path: .relativeToRoot("Repository/Infra/RemoteInfra")),
+                                            .project(target: "RemoteInfraInterface",
+                                                     path: .relativeToRoot("Repository/Infra/RemoteInfra")),
+                                            .project(target: "RemoteInfra",
+                                                     path: .relativeToRoot("Repository/Infra/RemoteInfra"))
                                         ])
 
 

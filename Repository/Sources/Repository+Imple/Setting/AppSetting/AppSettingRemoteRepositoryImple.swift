@@ -10,6 +10,7 @@ import Foundation
 import Prelude
 import Optics
 import Domain
+import RemoteInfraInterface
 
 
 public final class AppSettingRemoteRepositoryImple: AppSettingRepository {

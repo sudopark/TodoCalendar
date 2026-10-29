@@ -10,6 +10,8 @@ import XCTest
 import Domain
 import UnitTestHelpKit
 import StorageInfraTesting
+import RemoteInfraInterface
+import RemoteInfraTesting
 
 @testable import Repository
 

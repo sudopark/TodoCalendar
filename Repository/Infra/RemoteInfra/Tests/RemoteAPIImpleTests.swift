@@ -1,6 +1,6 @@
 //
 //  RemoteAPIImpleTests.swift
-//  RepositoryTests
+//  RemoteInfraTests
 //
 //  Created by sudo.park on 8/10/25.
 //  Copyright © 2025 com.sudo.park. All rights reserved.
@@ -10,8 +10,9 @@ import Testing
 @testable import Alamofire
 import Domain
 import UnitTestHelpKit
+import RemoteInfraInterface
 
-@testable import Repository
+@testable import RemoteInfra
 
 
 class RemoteAPIImpleTests {

@@ -1,6 +1,6 @@
 //
 //  GoogleAPIAuthenticator.swift
-//  Repository
+//  RemoteInfra
 //
 //  Created by sudo.park on 1/19/25.
 //  Copyright © 2025 com.sudo.park. All rights reserved.
@@ -12,6 +12,7 @@ import Optics
 @preconcurrency import Alamofire
 import Domain
 import Extensions
+import RemoteInfraInterface
 
 
 public final class GoogleAPIAuthenticator: APIAuthenticator, @unchecked Sendable {

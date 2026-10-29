@@ -1,6 +1,6 @@
 //
 //  GoogleAPIAuthenticatorTests.swift
-//  RepositoryTests
+//  RemoteInfraTests
 //
 //  Created by sudo.park on 1/19/25.
 //  Copyright © 2025 com.sudo.park. All rights reserved.
@@ -13,8 +13,11 @@ import Optics
 import Domain
 import Extensions
 import UnitTestHelpKit
+import StorageInfraInterface
+import RemoteInfraInterface
+import RemoteInfraTesting
 
-@testable import Repository
+@testable import RemoteInfra
 
 struct GoogleAPIAuthenticatorTests {
     

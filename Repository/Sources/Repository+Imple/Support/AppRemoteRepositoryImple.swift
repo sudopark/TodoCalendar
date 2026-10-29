@@ -5,6 +5,7 @@
 
 import Foundation
 import Domain
+import RemoteInfraInterface
 
 public final class AppRemoteRepositoryImple: AppRepository, @unchecked Sendable {
 

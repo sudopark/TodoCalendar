@@ -9,6 +9,7 @@
 import Foundation
 import Domain
 import StorageInfraInterface
+import RemoteInfraInterface
 
 
 public final class AppPolicyRepositoryImple: AppPolicyRepository, Sendable {

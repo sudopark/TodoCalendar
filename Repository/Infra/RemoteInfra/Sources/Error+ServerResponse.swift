@@ -1,6 +1,6 @@
 //
 //  Error+ServerResponse.swift
-//  Repository
+//  RemoteInfra
 //
 //  Created by sudo.park on 8/28/26.
 //  Copyright © 2026 com.sudo.park. All rights reserved.
