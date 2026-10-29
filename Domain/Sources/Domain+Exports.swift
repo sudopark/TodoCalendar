@@ -7,3 +7,6 @@
 //
 
 @_exported import KernelUtils
+@_exported import CalendarDomainInterface
+@_exported import CalendarDomain
+@_exported import CalendarRepositoryInterface

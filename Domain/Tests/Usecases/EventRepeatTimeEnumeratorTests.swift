@@ -10,6 +10,7 @@ import Prelude
 import Optics
 import UnitTestHelpKit
 
+@testable import CalendarDomainInterface
 @testable import Domain
 
 

@@ -1,6 +1,6 @@
 //
 //  Times.swift
-//  Domain
+//  CalendarDomainInterface
 //
 //  Created by sudo.park on 2023/03/19.
 //
@@ -92,7 +92,7 @@ extension TimeInterval {
 
 extension Range where Bound == TimeInterval {
     
-    func intervalRanges(secondsFromGMT: TimeInterval) -> Range<TimeInterval> {
+    public func intervalRanges(secondsFromGMT: TimeInterval) -> Range<TimeInterval> {
         return self.lowerBound.earlistTimeZoneInterval(secondsFromGMT)
             ..<
         self.upperBound.latestTimeZoneInterval(secondsFromGMT)
