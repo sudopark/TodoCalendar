@@ -101,7 +101,7 @@ final class SpyEventDetailRouter: BaseSpyRouter, EventDetailRouting {
 
 ### 검증 우선순위
 - **1순위: 검증 대상의 public interface** — 반환값, throw, publisher 방출, 외부 관찰 가능 상태(DB write 등)
-- Spy 호출 추적은 public interface로 관찰 불가능할 때만.
+- Spy 호출 추적은 public interface로 관찰 불가능할 때만. **호출 횟수 단언은 이슈·spec·명세 항목이 횟수 요건을 문언으로 적은 자리에서만 쓴다** (네트워크 중복 요청 제거, 과금 1회 보장). 그 밖에는 반환값·저장 상태로 단언하고, 결과 상태로 못 가르는 분기(두 번 불려도 결과가 같은 멱등 가드)는 지운다.
 
 ---
 
