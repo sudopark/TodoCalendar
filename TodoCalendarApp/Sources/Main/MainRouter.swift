@@ -159,7 +159,7 @@ extension MainRouter {
                     self?.dismissPresented(animated: true) { onDecline() }
                 }
             )
-            self.showBottomSlide(guide)
+            self.showBottomSlide(guide, onPullDismissed: onDecline)
         }
     }
 }
