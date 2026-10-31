@@ -294,10 +294,13 @@ public final class BottomSlideTransitionAnimationManager: NSObject, UIViewContro
 
 extension UIViewController {
     
-    public func attachBottomSlideDismiss(interactor: BottomPullPangestureDimissalInteractor) {
+    public func attachBottomSlideDismiss(
+        interactor: BottomPullPangestureDimissalInteractor,
+        onDismissed: (@Sendable () -> Void)? = nil
+    ) {
         
         let dimissAction: () -> Void = { [weak self] in
-            self?.dismiss(animated: true, completion: nil)
+            self?.dismiss(animated: true, completion: onDismissed)
         }
         
         interactor.addDismissPangesture(self.view, dimissAction)

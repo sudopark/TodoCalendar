@@ -279,11 +279,16 @@ open class BaseRouterImple: Routing, @unchecked Sendable {
     }
 
     @MainActor
-    public func showBottomSlide(_ slide: UIViewController) {
+    public func showBottomSlide(
+        _ slide: UIViewController,
+        onPullDismissed: (@Sendable () -> Void)? = nil
+    ) {
         slide.modalPresentationStyle = .custom
         let manager = self.prepareBottomSlideTransition()
         slide.transitioningDelegate = manager
-        slide.attachBottomSlideDismiss(interactor: manager.interactor)
+        slide.attachBottomSlideDismiss(
+            interactor: manager.interactor, onDismissed: onPullDismissed
+        )
         self.scene?.present(slide, animated: true)
     }
 
