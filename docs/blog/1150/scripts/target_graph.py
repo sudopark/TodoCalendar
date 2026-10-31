@@ -1,48 +1,25 @@
 import os,re,sys
 from collections import defaultdict
 REPO=os.path.abspath(os.path.join(os.path.dirname(__file__),"../../../.."))
-# 아직 Domain 에 남은 파일은 경로 규칙으로, 모듈로 떼어 낸 파일은 그 디렉터리로 서브도메인을 정한다
-ROOTS=[("Domain/Sources",None),
-       ("Domain/KernelUtils/Sources","Kernel_Utils"),
-       ("Domain/CalendarDomain/Interface","CalendarDomain"),
-       ("Domain/CalendarDomain/Sources","CalendarDomain"),
-       ("Repository/CalendarRepository/Interface","CalendarDomain")]
-
-def module_of(rel):
-    r=rel.replace(os.sep,"/")
-    if "/Device/" in r: return "Kernel_Utils"
-    if "/Migration/" in r: return "MigrationDomain"
-    if r.startswith("Models/Place/"): return "PlaceServiceInterface"
-    if "Events/ExternalCalendar/" in r or "Account/ExternalServiceIntegration/" in r \
-       or r.endswith("Repositories/Auth/ExternalServiceIntegrateRepository.swift"):
-        return "ExternalCalendarDomain"
-    if r.startswith(("Models/Events","Usecases/Events","Repositories/Events")): return "EventDomain"
-    if r in ("Utils/RRule+EventRepeating.swift","Utils/EventDeepLink.swift",
-             "Utils/SharedEventNotifyService.swift","Repositories/DDayCandidateRepository.swift"):
-        return "EventDomain"
-    if r.startswith(("Models/Calendar","Usecases/Calendar","Repositories/Calendar")): return "CalendarDomain"
-    if r.startswith(("Models/Account","Usecases/Account","Repositories/Auth")): return "AccountDomain"
-    if r.startswith(("Models/Notifications","Usecases/Notification","Repositories/Notification")): return "NotificationDomain"
-    if r.startswith(("Models/Billing","Usecases/Billing","Repositories/Billing")): return "BillingDomain"
-    if r.startswith(("Models/AI","Usecases/AI","Repositories/AI")): return "AIDomain"
-    if r.startswith(("Models/Ad","Usecases/Ad","Repositories/Ad")): return "AdDomain"
-    if r.startswith(("Models/Settings","Usecases/Setting","Repositories/Setting")): return "SettingDomain"
-    if r.startswith(("Usecases/Support","Usecases/Speech","Usecases/ImageText",
-                     "Usecases/Common","Models/Common")): return "SupportDomain"
-    if r.startswith("Repositories/"): return "SupportDomain"     # 미분류 포트(App/Guide/LegalNotice/ColdLaunch)
-    if r.startswith("Models/"): return "SupportDomain"           # AppUpdateInfo/LegalNotice
-    return "Kernel_Utils"                                        # SharedDataStore/FeatureFlag/Link 류
+# 서브도메인은 디렉터리로 정한다 — 리포지토리 구현은 구현하는 포트의 서브도메인 디렉터리(Sources/Repositories)에 산다
+import glob
+def roots():
+    out=[("Domain/KernelUtils/Sources","Kernel_Utils"),("Domain/PlaceServiceInterface/Sources","PlaceServiceInterface")]
+    for d in sorted(glob.glob(os.path.join(REPO,"Domain/*Domain"))):
+        name=os.path.basename(d)
+        impl=f"{name}(구현)" if name=="MigrationDomain" else name   # 마이그레이션 구현만 다른 서브도메인 구현을 안다 — 층 계산에서 따로 센다
+        out+=[(f"Domain/{name}/Interface",name),(f"Domain/{name}/Sources",impl)]
+    return out
 
 files={}
-for root,fixed in ROOTS:
+for root,mod in roots():
     base=os.path.join(REPO,root)
     for dp,_,fns in os.walk(base):
         for fn in fns:
             if fn.endswith(".swift"):
                 rel=os.path.relpath(os.path.join(dp,fn),base)
                 src=open(os.path.join(dp,fn),encoding="utf-8",errors="ignore").read()
-                key=rel if fixed is None else f"{root}/{rel}"
-                files[key]=(fixed or module_of(rel),re.sub(r'//.*','',src))
+                files[f"{root}/{rel}"]=(mod,re.sub(r'//.*','',src))
 
 DECL=re.compile(r'^\s*(?:public |internal |private |final |@\w+\s+)*(?:struct|class|enum|protocol|typealias|actor)\s+([A-Z]\w+)',re.M)
 owner={}
@@ -51,7 +28,7 @@ for rel,(mod,src) in files.items():
         t=m.group(1)
         owner.setdefault(t,(mod,rel))
 NOISE={"CodingKeys","Query","Status","DataType","QueryType","ResultType","Error","Key","Item","Option","Result","Element","Value","Failure","Output","Input",
-       "Event","Scope","Subject","Tag","Constant"}
+       "Event","Scope","Subject","Tag","Constant","Entity","KV","Columns"}
 edges=defaultdict(list)
 for rel,(mod,src) in files.items():
     for t in set(re.findall(r'\b([A-Z]\w+)\b',src)):
