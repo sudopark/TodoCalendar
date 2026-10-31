@@ -172,6 +172,13 @@ extension MainViewController {
             })
             .store(in: self.cancellables)
 
+        self.viewModel.hasNewFeatureBadge
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] hasBadge in
+                self?.headerView.settingBadgeView.isHidden = !hasBadge
+            })
+            .store(in: self.cancellables)
+
         self.legalNoticeBannerView.documentTapped
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] documentType in
@@ -324,6 +331,7 @@ private final class HeaderView: UIView {
     let jumpButton = UIButton()
     let eventTypeFilterButton = UIButton()
     let settingButton = UIButton()
+    let settingBadgeView = UIView()
     
     func updateMigrationStatus(_ status: TemporaryUserDataMigrationStatus?) {
          self.migrationStatus = status
@@ -437,6 +445,17 @@ private final class HeaderView: UIView {
             $0.widthAnchor.constraint(equalToConstant: 25)
             $0.heightAnchor.constraint(equalToConstant: 25)
         }
+
+        settingButton.addSubview(settingBadgeView)
+        settingBadgeView.isHidden = true
+        settingBadgeView.isUserInteractionEnabled = false
+        settingBadgeView.layer.cornerRadius = 3.5
+        settingBadgeView.autoLayout.active(with: settingButton) {
+            $0.widthAnchor.constraint(equalToConstant: 7)
+            $0.heightAnchor.constraint(equalToConstant: 7)
+            $0.topAnchor.constraint(equalTo: $1.topAnchor)
+            $0.trailingAnchor.constraint(equalTo: $1.trailingAnchor)
+        }
     }
     
     func setupStyling(
@@ -472,5 +491,6 @@ private final class HeaderView: UIView {
         self.eventTypeFilterButton.setImage(UIImage(systemName: "line.3.horizontal.decrease.circle"), for: .normal)
         self.settingButton.tintColor = colorSet.text0
         self.settingButton.setImage(UIImage(systemName: "gearshape"), for: .normal)
+        self.settingBadgeView.backgroundColor = colorSet.accentWarn
     }
 }

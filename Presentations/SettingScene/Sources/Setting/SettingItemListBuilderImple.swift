@@ -20,6 +20,7 @@ final class SettingItemListSceneBuilerImple {
     private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
     private let appearanceSceneBuilder: any AppearanceSettingSceneBuiler
+    private let widgetGallerySceneBuilder: any WidgetGallerySceneBuilder
     private let eventSettingSceneBuilder: any EventSettingSceneBuiler
     private let holidayListSceneBuilder: any HolidayListSceneBuiler
     private let memberSceneBuilder: any MemberSceneBuilder
@@ -33,6 +34,7 @@ final class SettingItemListSceneBuilerImple {
         usecaseFactory: any UsecaseFactory,
         viewAppearance: ViewAppearance,
         appearanceSceneBuilder: any AppearanceSettingSceneBuiler,
+        widgetGallerySceneBuilder: any WidgetGallerySceneBuilder,
         eventSettingSceneBuilder: any EventSettingSceneBuiler,
         holidayListSceneBuilder: any HolidayListSceneBuiler,
         memberSceneBuilder: any MemberSceneBuilder,
@@ -45,6 +47,7 @@ final class SettingItemListSceneBuilerImple {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
         self.appearanceSceneBuilder = appearanceSceneBuilder
+        self.widgetGallerySceneBuilder = widgetGallerySceneBuilder
         self.eventSettingSceneBuilder = eventSettingSceneBuilder
         self.holidayListSceneBuilder = holidayListSceneBuilder
         self.memberSceneBuilder = memberSceneBuilder
@@ -67,6 +70,7 @@ extension SettingItemListSceneBuilerImple: SettingItemListSceneBuiler {
             uiSettingUsecase: self.usecaseFactory.makeUISettingUsecase(),
             deviceInfoFetchService: self.usecaseFactory.deviceInfoFetchService(),
             appUpdateCheckUsecase: self.usecaseFactory.appUpdateCheckUsecase,
+            newFeatureBadgeUsecase: self.usecaseFactory.makeNewFeatureBadgeUsecase(),
             privacyOptionsFormRouter: self.privacyOptionsFormRouter
         )
         
@@ -77,6 +81,7 @@ extension SettingItemListSceneBuilerImple: SettingItemListSceneBuiler {
     
         let router = SettingItemListRouter(
             appearanceSceneBuilder: self.appearanceSceneBuilder,
+            widgetGallerySceneBuilder: self.widgetGallerySceneBuilder,
             eventSettingSceneBuilder: self.eventSettingSceneBuilder,
             holidayListSceneBuilder: self.holidayListSceneBuilder,
             memberSceneBuilder: self.memberSceneBuilder,

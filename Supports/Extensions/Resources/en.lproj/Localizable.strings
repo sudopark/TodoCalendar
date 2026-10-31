@@ -556,8 +556,8 @@
 "setting.appearance.widget::useSystemTheme::title" = "Use system theme";
 "setting.appearance.widget::useSystemTheme::background" = "Widget background color";
 "setting.appearance.widget::useCustomTheme::title" = "Select custom color";
-"setting.appearance.widget::gallery::title" = "Widget gallery";
-"setting.appearance.widget::gallery::explain" = "See how each widget looks";
+"setting.widget::title" = "Widgets";
+"setting.widget::setting::title" = "Widget Settings";
 "setting.appearance.widget::gallery::section" = "Widgets";
 "widget.gallery::lockScreen::label" = "%@ · Lock Screen";
 "widget.weeks::group" = "Weekly events";

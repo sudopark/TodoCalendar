@@ -112,7 +112,6 @@ extension SettingSceneBuilderImple {
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearance,
             colorThemeSelectSceneBuiler: colorThemeSelectSceneBuilder,
-            widgetGallerySceneBuilder: self.widgetGallerySceneBuilder,
             timeZoneSelectSceneBuilder: timeZoneSelectSceneBuilder
         )
         
@@ -143,6 +142,7 @@ extension SettingSceneBuilderImple {
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearance,
             appearanceSceneBuilder: apperanceSceneBuilder,
+            widgetGallerySceneBuilder: self.widgetGallerySceneBuilder,
             eventSettingSceneBuilder: eventSettingSceneBuilder,
             holidayListSceneBuilder: holidayListSceneBuilder,
             memberSceneBuilder: self.memberSceneBuilder,

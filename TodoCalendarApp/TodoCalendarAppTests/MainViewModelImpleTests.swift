@@ -34,6 +34,7 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable, AsyncEffectWaita
     private var stubAIOrchestrationUsecase: StubAIAgentOrchestrationUsecase!
     private var spyEventLiveActivityUsecase: SpyEventLiveActivityUsecase!
     private var stubGuideTodoUsecase: StubGuideTodoUsecase!
+    private var stubNewFeatureBadgeUsecase: StubNewFeatureBadgeUsecase!
     private var stubLegalNoticeUsecase: StubLegalNoticeUsecase!
     private var stubForemostEventUsecase: StubForemostEventUsecase!
     private var spyPaidFeatureGateUsecase: SpyPaidFeatureGateUsecase!
@@ -55,6 +56,7 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable, AsyncEffectWaita
         self.stubAIOrchestrationUsecase = .init()
         self.spyEventLiveActivityUsecase = .init()
         self.stubGuideTodoUsecase = .init()
+        self.stubNewFeatureBadgeUsecase = .init()
         self.stubLegalNoticeUsecase = .init()
         self.stubForemostEventUsecase = .init()
         self.spyPaidFeatureGateUsecase = .init()
@@ -78,6 +80,7 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable, AsyncEffectWaita
         self.stubAIOrchestrationUsecase = nil
         self.spyEventLiveActivityUsecase = nil
         self.stubGuideTodoUsecase = nil
+        self.stubNewFeatureBadgeUsecase = nil
         self.stubLegalNoticeUsecase = nil
         self.stubForemostEventUsecase = nil
         self.spyPaidFeatureGateUsecase = nil
@@ -104,6 +107,7 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable, AsyncEffectWaita
             aiAgentOrchestrationUsecase: self.stubAIOrchestrationUsecase,
             eventLiveActivityUsecase: self.spyEventLiveActivityUsecase,
             guideTodoUsecase: self.stubGuideTodoUsecase,
+            newFeatureBadgeUsecase: self.stubNewFeatureBadgeUsecase,
             legalNoticeUsecase: self.stubLegalNoticeUsecase,
             foremostEventUsecase: self.stubForemostEventUsecase,
             paidFeatureGateUsecase: self.spyPaidFeatureGateUsecase,
@@ -125,7 +129,10 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable, AsyncEffectWaita
 
 extension MainViewModelImpleTests {
     
-    private func makeViewModelWithoutPrepare() -> MainViewModelImple {
+    private func makeViewModelWithoutPrepare(
+        uncheckedBadges: Set<NewFeatureBadge> = []
+    ) -> MainViewModelImple {
+        self.stubNewFeatureBadgeUsecase = StubNewFeatureBadgeUsecase(uncheckedBadges: uncheckedBadges)
         let viewModel = MainViewModelImple(
             uiSettingUsecase: self.spyUISettingUsecase,
             temporaryUserDataMigrationUsecase: self.stubMigrationUsecase,
@@ -139,6 +146,7 @@ extension MainViewModelImpleTests {
             aiAgentOrchestrationUsecase: self.stubAIOrchestrationUsecase,
             eventLiveActivityUsecase: self.spyEventLiveActivityUsecase,
             guideTodoUsecase: self.stubGuideTodoUsecase,
+            newFeatureBadgeUsecase: self.stubNewFeatureBadgeUsecase,
             legalNoticeUsecase: self.stubLegalNoticeUsecase,
             foremostEventUsecase: self.stubForemostEventUsecase,
             paidFeatureGateUsecase: self.spyPaidFeatureGateUsecase,
@@ -858,6 +866,62 @@ extension MainViewModelImpleTests {
 
         // then
         XCTAssertEqual(self.stubGuideTodoUsecase.didPrepare, true)
+    }
+}
+
+
+// MARK: - 새 기능 뱃지
+
+extension MainViewModelImpleTests {
+
+    func testViewModel_whenPrepare_prepareNewFeatureBadge() {
+        // given
+        let viewModel = self.makeViewModelWithoutPrepare()
+
+        // when
+        viewModel.prepare()
+
+        // then
+        XCTAssertEqual(self.stubNewFeatureBadgeUsecase.didPrepare, true)
+    }
+
+    func testViewModel_whenUncheckedBadgeExists_showsSettingBadge() {
+        // given
+        let expect = expectation(description: "확인 안 한 뱃지가 있으면 설정 버튼 뱃지 노출")
+        let viewModel = self.makeViewModelWithoutPrepare(uncheckedBadges: [.widgetSetting])
+
+        // when
+        let hasBadge = self.waitFirstOutput(expect, for: viewModel.hasNewFeatureBadge)
+
+        // then
+        XCTAssertEqual(hasBadge, true)
+    }
+
+    func testViewModel_whenAllChecked_hidesSettingBadge() {
+        // given
+        let expect = expectation(description: "확인 안 한 뱃지가 없으면 설정 버튼 뱃지 숨김")
+        let viewModel = self.makeViewModelWithoutPrepare(uncheckedBadges: [])
+
+        // when
+        let hasBadge = self.waitFirstOutput(expect, for: viewModel.hasNewFeatureBadge)
+
+        // then
+        XCTAssertEqual(hasBadge, false)
+    }
+
+    func testViewModel_whenBadgeChecked_hidesSettingBadge() {
+        // given
+        let expect = expectation(description: "뱃지를 확인하면 설정 버튼 뱃지가 사라짐")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModelWithoutPrepare(uncheckedBadges: [.widgetSetting])
+
+        // when
+        let hasBadges = self.waitOutputs(expect, for: viewModel.hasNewFeatureBadge) {
+            self.stubNewFeatureBadgeUsecase.markChecked(.widgetSetting)
+        }
+
+        // then
+        XCTAssertEqual(hasBadges, [true, false])
     }
 }
 
