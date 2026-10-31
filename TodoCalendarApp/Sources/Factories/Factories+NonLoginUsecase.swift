@@ -250,6 +250,10 @@ extension NonLoginUsecaseFactoryImple {
         return self.supportFactory.makeGuideTodoUsecase()
     }
 
+    func makeNewFeatureBadgeUsecase() -> any NewFeatureBadgeUsecase {
+        return self.supportFactory.makeNewFeatureBadgeUsecase()
+    }
+
     func makeLegalNoticeUsecase() -> any LegalNoticeUsecase {
         return self.supportFactory.makeLegalNoticeUsecase()
     }

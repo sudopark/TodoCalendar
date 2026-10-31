@@ -102,6 +102,15 @@ struct SupportFactory {
         )
     }
 
+    func makeNewFeatureBadgeUsecase() -> any NewFeatureBadgeUsecase {
+        return NewFeatureBadgeUsecaseImple(
+            repository: NewFeatureBadgeLocalRepositoryImple(
+                environmentStorage: self.applicationBase.userDefaultEnvironmentStorage
+            ),
+            sharedDataStore: self.applicationBase.sharedDataStore
+        )
+    }
+
     func makeLegalNoticeUsecase() -> any LegalNoticeUsecase {
         return LegalNoticeUsecaseImple(
             legalNoticeRepository: LegalNoticeRepositoryImple(
