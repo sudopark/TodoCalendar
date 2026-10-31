@@ -560,7 +560,7 @@
 "setting.widget::setting::title" = "Widget Settings";
 "setting.appearance.widget::gallery::section" = "Widgets";
 "setting.appearance.widget::ddayCount::title" = "Count D-Day as D+1";
-"setting.appearance.widget::ddayCount::description" = "When on, the D-Day counts as D+1. Applies to both the app and widgets";
+"setting.appearance.widget::ddayCount::description" = "When on, the D-Day counts as D+1. Applies to both the app and widgets. You can also turn it on for a single D-Day widget in its widget edit settings";
 "widget.gallery::lockScreen::label" = "%@ · Lock Screen";
 "widget.weeks::group" = "Weekly events";
 "widget.size::small" = "Small";

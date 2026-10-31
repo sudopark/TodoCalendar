@@ -45,7 +45,10 @@ extension DDayWidgetViewModelProvider {
     }
 
     func getDDayModel(
-        for now: Date, target: DDayTargetEventId?, style: WidgetStyleId.Style = .default
+        for now: Date,
+        target: DDayTargetEventId?,
+        style: WidgetStyleId.Style = .default,
+        widgetCountsTargetDayAsOne: Bool = false
     ) async throws -> DDayWidgetViewModel {
 
         let timeZone = self.calendarSettingRepository.loadUserSelectedTImeZone() ?? .current
@@ -65,7 +68,8 @@ extension DDayWidgetViewModelProvider {
         let targetDate = Date(
             timeIntervalSince1970: event.time.rangeWithShifttingifNeed(on: timeZone).lowerBound
         )
-        let countsTargetDayAsOne = self.calendarSettingRepository.loadDDayCountsTargetDayAsOne() ?? false
+        let countsTargetDayAsOne = widgetCountsTargetDayAsOne
+            || (self.calendarSettingRepository.loadDDayCountsTargetDayAsOne() ?? false)
         let interval = calendar.ddayInterval(now, targetDate, countsTargetDayAsOne: countsTargetDayAsOne) ?? 0
 
         return DDayWidgetViewModel(
