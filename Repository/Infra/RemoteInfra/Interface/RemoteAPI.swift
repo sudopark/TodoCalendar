@@ -10,7 +10,7 @@ import Foundation
 import Alamofire
 import Prelude
 import Optics
-import Domain
+import KernelUtils
 
 
 // MARK: - RemoteAPI

@@ -7,9 +7,9 @@
 //
 
 import Foundation
-import Domain
 import StorageInfraInterface
 import RemoteInfraInterface
+import AccountDomainInterface
 
 public struct AuthStoreImple: AuthStore, APICredentialStore {
     
@@ -67,5 +67,17 @@ public struct AuthStoreImple: AuthStore, APICredentialStore {
     
     public func removeCredential() {
         self.removeAuth()
+    }
+}
+
+
+// MARK: - APICredential from Auth
+
+extension APICredential {
+    
+    public init(auth: Auth) {
+        self.init(accessToken: auth.accessToken)
+        self.refreshToken = auth.refreshToken
+        self.shouldCheckAccessTokenExpirationBeforeRequest = false
     }
 }

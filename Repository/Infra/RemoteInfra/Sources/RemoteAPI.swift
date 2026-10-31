@@ -9,9 +9,9 @@ import Foundation
 import Alamofire
 import Prelude
 import Optics
-import Domain
 import Extensions
 import RemoteInfraInterface
+import KernelUtils
 
 
 // MARK: - RemoteAPIImple
@@ -54,10 +54,7 @@ extension RemoteAPIImple {
         
         try Task.checkCancellation()
         
-        guard let path = self.environment.path(endpoint)
-        else {
-            throw RuntimeError("not support endpoint: \(endpoint)")
-        }
+        let path = self.environment.path(endpoint)
         
         let shouldAdapt = self.interceptor?.shouldAdapt(endpoint) ?? false
         

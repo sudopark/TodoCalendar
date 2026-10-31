@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Domain
 import Extensions
 import RemoteInfraInterface
 
@@ -77,10 +76,7 @@ public final class StubRemoteAPI: RemoteAPI, @unchecked Sendable {
             throw RuntimeError("failed")
         }
         
-        guard let path = environment.path(endpoint)
-        else {
-            throw RuntimeError("invalid params")
-        }
+        let path = environment.path(endpoint)
         self.didRequestedMethod = method
         self.didRequestedPath = path
         self.didRequestedPaths.append(path)

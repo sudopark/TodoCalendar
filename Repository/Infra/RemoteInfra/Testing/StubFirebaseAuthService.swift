@@ -7,9 +7,9 @@
 //
 
 import Foundation
-import Domain
 import Extensions
 import RemoteInfraInterface
+import AccountDomainInterface
 
 
 public class StubFirebaseAuthService: FirebaseAuthService {

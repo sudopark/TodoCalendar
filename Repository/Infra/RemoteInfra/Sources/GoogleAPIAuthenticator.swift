@@ -10,7 +10,6 @@ import Foundation
 import Prelude
 import Optics
 @preconcurrency import Alamofire
-import Domain
 import Extensions
 import RemoteInfraInterface
 
@@ -40,12 +39,7 @@ public final class GoogleAPIAuthenticator: APIAuthenticator, @unchecked Sendable
 extension GoogleAPIAuthenticator {
     
     public func shouldAdapt(_ endpoint: any Endpoint) -> Bool {
-        
-        switch endpoint {
-        case let auth as GoogleAuthEndpoint where auth == .token: return false
-        case is GoogleCalendarEndpoint: return true
-        default: return false
-        }
+        return endpoint.authorization == .google
     }
     
     public func apply(_ credential: APICredential, to urlRequest: inout URLRequest) {

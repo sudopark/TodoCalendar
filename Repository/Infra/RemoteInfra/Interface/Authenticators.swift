@@ -8,7 +8,6 @@
 
 import Foundation
 import Alamofire
-import Domain
 import Extensions
 
 
@@ -24,12 +23,6 @@ public struct APICredential: AuthenticationCredential, Sendable {
     
     public init(accessToken: String) {
         self.accessToken = accessToken
-    }
-    
-    public init(auth: Auth) {
-        self.init(accessToken: auth.accessToken)
-        self.refreshToken = auth.refreshToken
-        self.shouldCheckAccessTokenExpirationBeforeRequest = false
     }
     
     public var requiresRefresh: Bool {

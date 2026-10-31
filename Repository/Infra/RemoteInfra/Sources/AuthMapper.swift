@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import Domain
+import AccountDomainInterface
 
 
 private enum CodingKeys: String, CodingKey {

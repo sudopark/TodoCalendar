@@ -10,13 +10,13 @@ import XCTest
 import Alamofire
 import Prelude
 import Optics
-import Domain
 import Extensions
 import UnitTestHelpKit
 import RemoteInfraInterface
 import RemoteInfraTesting
 
 @testable import RemoteInfra
+import AccountDomainInterface
 
 
 class CalendarAPIAutenticatorTests: BaseTestCase {
@@ -59,8 +59,7 @@ class CalendarAPIAutenticatorTests: BaseTestCase {
 extension CalendarAPIAutenticatorTests {
     
     private func makeRequest(_ endpoint: any Endpoint, method: HTTPMethod) -> URLRequest? {
-        guard let path = self.remoteEnvironment.path(endpoint),
-              let url = URL(string: path)
+        guard let url = URL(string: self.remoteEnvironment.path(endpoint))
         else {
             return nil
         }
@@ -87,60 +86,16 @@ extension CalendarAPIAutenticatorTests {
         }
         // when + then
         parameterizeTest(
-            HolidayAPIEndpoints.supportCountry, method: .get, expecthasToken: false
+            DummyEndpoint.external, method: .get, expecthasToken: false
         )
         parameterizeTest(
-            AccountAPIEndpoints.info, method: .put, expecthasToken: false
+            DummyEndpoint.calendarAPIWithoutAuthorization, method: .put, expecthasToken: false
         )
         parameterizeTest(
-            TodoAPIEndpoints.currentTodo, method: .get, expecthasToken: true
+            DummyEndpoint.google, method: .get, expecthasToken: false
         )
         parameterizeTest(
-            EventSyncEndPoints.check, method: .get, expecthasToken: true
-        )
-        // 회귀: AI Front API도 인증 토큰이 붙어야 한다 (whitelist 누락 수정)
-        parameterizeTest(
-            AIAPIEndpoints.command, method: .post, expecthasToken: true
-        )
-        parameterizeTest(
-            AIAPIEndpoints.interpretCommand, method: .post, expecthasToken: true
-        )
-        parameterizeTest(
-            AIAPIEndpoints.confirmCommand, method: .post, expecthasToken: true
-        )
-        parameterizeTest(
-            AIAPIEndpoints.rejectCommand, method: .post, expecthasToken: true
-        )
-        parameterizeTest(
-            AIAPIEndpoints.cancelCommand, method: .post, expecthasToken: true
-        )
-        parameterizeTest(
-            AIAPIEndpoints.job(id: "job-1"), method: .get, expecthasToken: true
-        )
-        parameterizeTest(
-            AIAPIEndpoints.usage, method: .get, expecthasToken: true
-        )
-        // 회귀: billing API도 인증 토큰이 붙어야 한다 (whitelist 누락)
-        parameterizeTest(
-            BillingAPIEndpoints.plans, method: .get, expecthasToken: true
-        )
-        parameterizeTest(
-            BillingAPIEndpoints.topups, method: .get, expecthasToken: true
-        )
-        parameterizeTest(
-            BillingAPIEndpoints.purchases, method: .post, expecthasToken: true
-        )
-        parameterizeTest(
-            BillingAPIEndpoints.transactions, method: .post, expecthasToken: true
-        )
-        parameterizeTest(
-            AppSettingEndpoints.colorThemes, method: .get, expecthasToken: true
-        )
-        parameterizeTest(
-            AppSettingEndpoints.colorTheme(uuid: "theme-1"), method: .put, expecthasToken: true
-        )
-        parameterizeTest(
-            MigrationEndpoints.customColorThemes, method: .post, expecthasToken: true
+            DummyEndpoint.calendarAPI, method: .get, expecthasToken: true
         )
     }
 }
@@ -148,8 +103,7 @@ extension CalendarAPIAutenticatorTests {
 extension CalendarAPIAutenticatorTests {
     
     private func makeRequestAndResponse(_ endpoint: any Endpoint, method: HTTPMethod, statusCode: Int) -> (URLRequest, HTTPURLResponse)? {
-        guard let path = self.remoteEnvironment.path(endpoint),
-              let url = URL(string: path),
+        guard let url = URL(string: self.remoteEnvironment.path(endpoint)),
               let request = try? URLRequest(url: url, method: method),
               let response = HTTPURLResponse(url: url, statusCode: statusCode, httpVersion: nil, headerFields: [:])
         else { return nil }
@@ -187,16 +141,16 @@ extension CalendarAPIAutenticatorTests {
         }
         // when + then
         parameterizeTest(
-            HolidayAPIEndpoints.supportCountry, .get, 403, isNeed: false
+            DummyEndpoint.external, .get, 403, isNeed: false
         )
         parameterizeTest(
-            AccountAPIEndpoints.info, .put, 403, isNeed: false
+            DummyEndpoint.calendarAPIWithoutAuthorization, .put, 403, isNeed: false
         )
         parameterizeTest(
-            TodoAPIEndpoints.currentTodo, .get, 403, isNeed: false
+            DummyEndpoint.calendarAPI, .get, 403, isNeed: false
         )
         parameterizeTest(
-            TodoAPIEndpoints.currentTodo, .get, 401, isNeed: true
+            DummyEndpoint.calendarAPI, .get, 401, isNeed: true
         )
     }
     
@@ -283,7 +237,7 @@ extension CalendarAPIAutenticatorTests {
             isEqual: Bool
         ) {
             // given
-            guard var request = self.makeRequest(TodoAPIEndpoints.currentTodo, method: .get)
+            guard var request = self.makeRequest(DummyEndpoint.calendarAPI, method: .get)
             else {
                 XCTFail("invalid endpoint")
                 return

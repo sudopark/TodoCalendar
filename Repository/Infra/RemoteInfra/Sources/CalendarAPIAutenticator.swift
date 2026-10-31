@@ -10,9 +10,9 @@ import Foundation
 import Prelude
 import Optics
 import Alamofire
-import Domain
 import Extensions
 import RemoteInfraInterface
+import AccountDomainInterface
 
 public final class CalendarAPIAutenticator: APIAuthenticator, @unchecked Sendable {
     
@@ -38,22 +38,7 @@ public final class CalendarAPIAutenticator: APIAuthenticator, @unchecked Sendabl
 extension CalendarAPIAutenticator {
     
     public func shouldAdapt(_ endpoint: any Endpoint) -> Bool {
-        switch endpoint {
-        case let account as AccountAPIEndpoints where account == .info:
-            return false
-        case is UserAPIEndpoints: return true
-        case is TodoAPIEndpoints: return true
-        case is ScheduleEventEndpoints: return true
-        case is ForemostEventEndpoints: return true
-        case is EventTagEndpoints: return true
-        case is EventDetailEndpoints: return true
-        case is AppSettingEndpoints: return true
-        case is MigrationEndpoints: return true
-        case is EventSyncEndPoints: return true
-        case is AIAPIEndpoints: return true
-        case is BillingAPIEndpoints: return true
-        default: return false
-        }
+        return endpoint.authorization == .calendarAPI
     }
     
     public func apply(_ credential: Credential, to urlRequest: inout URLRequest) {
