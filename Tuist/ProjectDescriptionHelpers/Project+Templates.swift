@@ -14,6 +14,7 @@ extension Project {
         destinations: Destinations,
         iOSTargetVersion: String,
         dependencies: [TargetDependency] = [],
+        testDependencies: [TargetDependency] = [],
         extensionTargets: [Target] = [],
         schemes: [Scheme] = [],
         e2eTests: Bool = false
@@ -23,6 +24,7 @@ extension Project {
             destinations: destinations,
             iOSTargetVersion: iOSTargetVersion,
             dependencies: dependencies,
+            testDependencies: testDependencies,
             signingConfigures: [
                 .debug(
                     name: "Debug",
@@ -77,7 +79,8 @@ extension Project {
                 makeSnapshotsTarget(
                     name: name,
                     destinations: destinations,
-                    iOSTargetVersion: iOSTargetVersion
+                    iOSTargetVersion: iOSTargetVersion,
+                    dependencies: testDependencies
                 )
             )
         }
@@ -96,7 +99,7 @@ extension Project {
         interfaceDependencies: [TargetDependency] = [],
         dependencies: [TargetDependency] = [],
         testingDependencies: [TargetDependency] = [],
-        withTest: Bool = true
+        testDependencies: [TargetDependency] = []
     ) -> Project {
         let interfaceName = "\(name)Interface"
         let testingName = "\(name)Testing"
@@ -124,18 +127,17 @@ extension Project {
                 dependencies: [.target(name: interfaceName)] + testingDependencies
             )
         ]
-        let testTargets = withTest ? [
-            makeUnitTestsTarget(
-                name: name,
-                destinations: destinations,
-                iOSTargetVersion: iOSTargetVersion,
-                testedTargets: [interfaceName, name, testingName]
-            )
-        ] : []
+        let testTarget = makeUnitTestsTarget(
+            name: name,
+            destinations: destinations,
+            iOSTargetVersion: iOSTargetVersion,
+            testedTargets: [interfaceName, name, testingName],
+            testDependencies: testDependencies
+        )
         return Project(
             name: name,
             organizationName: organizationName,
-            targets: frameworkTargets + testTargets
+            targets: frameworkTargets + [testTarget]
         )
     }
 
@@ -177,7 +179,8 @@ extension Project {
     private static func makeSnapshotsTarget(
         name: String,
         destinations: Destinations,
-        iOSTargetVersion: String
+        iOSTargetVersion: String,
+        dependencies: [TargetDependency] = []
     ) -> Target {
         return Target.target(name: "\(name)Snapshots",
                              destinations: destinations,
@@ -190,8 +193,7 @@ extension Project {
                              dependencies: [
                                 .target(name: name),
                                 .project(target: "SnapshotTestHelpKit", path: .relativeToRoot("Supports/SnapshotTestHelpKit")),
-                                .project(target: "TestDoubles", path: .relativeToRoot("Supports/TestDoubles")),
-                             ])
+                             ] + dependencies)
     }
 
     private static func makeE2ETarget(
@@ -209,7 +211,7 @@ extension Project {
                              resources: ["E2E/Fixtures/**/*.json"],
                              dependencies: [
                                 .target(name: name),
-                                .project(target: "Scenes", path: .relativeToRoot("Presentations/Scenes")),
+                                .project(target: "SceneInfra", path: .relativeToRoot("Presentations/Scenes/SceneInfra")),
                              ])
     }
 
@@ -284,7 +286,6 @@ extension Project {
                              resources: [],
                              dependencies: testedTargets.map { .target(name: $0) } + [
                                 .project(target: "UnitTestHelpKit", path: .relativeToRoot("Supports/UnitTestHelpKit")),
-                                .project(target: "TestDoubles", path: .relativeToRoot("Supports/TestDoubles")),
                                 .project(target: "Common3rdParty", path: .relativeToRoot("Supports/Common3rdParty")),
                              ] + testDependencies)
     }
@@ -325,6 +326,7 @@ extension Project {
         destinations: Destinations,
         iOSTargetVersion: String,
         dependencies: [TargetDependency],
+        testDependencies: [TargetDependency],
         signingConfigures: [ProjectDescription.Configuration]
     )
     -> [Target]
@@ -431,9 +433,8 @@ extension Project {
                 .target(name: "\(name)"),
                 .project(target: "UnitTestHelpKit", path:
                         .relativeToRoot("Supports/UnitTestHelpKit")),
-                .project(target: "TestDoubles", path: .relativeToRoot("Supports/TestDoubles")),
                 .project(target: "Common3rdParty", path: .relativeToRoot("Supports/Common3rdParty")),
-            ])
+            ] + testDependencies)
         return [mainTarget, testTarget]
     }
 
@@ -444,6 +445,7 @@ extension Project {
         iOSTargetVersion: String,
         infoPlist: [String: Plist.Value] = [:],
         dependencies: [TargetDependency],
+        testDependencies: [TargetDependency] = [],
         signingConfigures: [ProjectDescription.Configuration],
         withTest: Bool = true,
         snapshotTests: Bool = false
@@ -506,14 +508,10 @@ extension Project {
                     path: .relativeToRoot("Supports/UnitTestHelpKit")
                 ),
                 .project(
-                    target: "TestDoubles",
-                    path: .relativeToRoot("Supports/TestDoubles")
-                ),
-                .project(
                     target: "Common3rdParty",
                     path: .relativeToRoot("Supports/Common3rdParty")
                 )
-            ]
+            ] + testDependencies
         )
 
         var targets: [Target] = [target]
@@ -538,14 +536,10 @@ extension Project {
                             path: .relativeToRoot("Supports/SnapshotTestHelpKit")
                         ),
                         .project(
-                            target: "TestDoubles",
-                            path: .relativeToRoot("Supports/TestDoubles")
-                        ),
-                        .project(
                             target: "Common3rdParty",
                             path: .relativeToRoot("Supports/Common3rdParty")
                         )
-                    ]
+                    ] + testDependencies
                 )
             )
         }
