@@ -4,7 +4,7 @@ Domain 을 한 모듈로 둔 채 파일·타입만 옮겨서, 나중에 모듈�
 
 ## 측정 기준
 
-- 파일 경로로 서브도메인을 정한다. `Device/` 는 `Kernel_Utils` 로, `Migration/`·`Models/Place/` 는 일반 규칙보다 먼저 각각 `MigrationDomain`·`PlaceServiceInterface` 로 본다. 모듈로 떼어 낸 파일은 경로 규칙 대신 그 모듈 디렉터리로 서브도메인을 정한다.
+- 당시에는 파일 경로로 서브도메인을 정했다. `Device/` 는 `Kernel_Utils` 로, `Migration/`·`Models/Place/` 는 일반 규칙보다 먼저 각각 `MigrationDomain`·`PlaceServiceInterface` 로 봤다. 분할이 끝난 지금은 스크립트가 서브도메인 디렉터리(`Domain/<X>Domain`)로 정한다.
 - 다른 서브도메인이 선언한 타입 이름이 소스에 나오면 간선 하나로 센다. 중첩 타입 이름(`Event`·`Scope`·`Subject`·`Tag`·`Constant` 등)과 `//` 주석 속 이름은 오탐이라 뺀다.
 - 순환이 없으면 의존이 없는 쪽부터 추출 층을 낸다.
 
