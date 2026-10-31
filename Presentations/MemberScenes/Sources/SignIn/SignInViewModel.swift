@@ -10,9 +10,9 @@
 
 import Foundation
 import Combine
-import Domain
 import Extensions
-import Scenes
+import AccountDomainInterface
+import MemberSceneInterface
 
 
 // MARK: - SignInViewModel

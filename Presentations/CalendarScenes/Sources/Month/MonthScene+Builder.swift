@@ -6,9 +6,9 @@
 //
 
 import Foundation
-import Domain
-import Scenes
 import CalendarPresentation
+import CalendarDomainInterface
+import SceneInfra
 
 
 // MARK: CurrentSelectedDay and Event components

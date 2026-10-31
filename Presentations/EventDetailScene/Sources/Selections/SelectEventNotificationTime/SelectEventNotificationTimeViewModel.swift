@@ -12,10 +12,11 @@ import Foundation
 import Combine
 import Prelude
 import Optics
-import Domain
 import Extensions
-import Scenes
 import CommonPresentation
+import EventDomainInterface
+import NotificationDomainInterface
+import SettingDomainInterface
 
 
 struct NotificationTimeOptionModel: Equatable {

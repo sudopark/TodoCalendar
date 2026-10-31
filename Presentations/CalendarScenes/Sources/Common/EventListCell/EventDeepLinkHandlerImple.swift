@@ -7,8 +7,8 @@
 //
 
 import Foundation
-import Domain
-import Scenes
+import EventDomainInterface
+import SceneInfra
 
 
 protocol EventDeepLinkHandler: DeepLinkHandler {

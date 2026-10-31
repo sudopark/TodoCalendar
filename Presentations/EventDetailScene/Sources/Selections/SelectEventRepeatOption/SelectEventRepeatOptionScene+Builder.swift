@@ -10,8 +10,8 @@
 import UIKit
 import Prelude
 import Optics
-import Domain
-import Scenes
+import EventDomainInterface
+import SceneInfra
 
 
 // MARK: - SelectEventRepeatOptionScene Interactable & Listenable

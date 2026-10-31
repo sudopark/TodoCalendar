@@ -7,9 +7,10 @@
 //
 
 import UIKit
-import Domain
-import Scenes
 import CommonPresentation
+import SceneInfra
+import SettingDomainInterface
+import WidgetGallerySceneInterface
 
 
 protocol WidgetGalleryRouting: Routing {

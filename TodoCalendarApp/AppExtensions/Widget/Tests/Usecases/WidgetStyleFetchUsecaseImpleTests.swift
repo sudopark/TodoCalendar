@@ -8,9 +8,10 @@
 
 import Testing
 import Foundation
-import Domain
 
 @testable import TodoCalendarAppWidget
+import SettingDomainInterface
+import SettingDomainTesting
 
 
 final class WidgetStyleFetchUsecaseImpleTests {

@@ -11,9 +11,11 @@
 
 import SwiftUI
 import Combine
-import Domain
 import Extensions
 import CommonPresentation
+import EventDomainInterface
+import ExternalCalendarDomainInterface
+import SettingDomainInterface
 
 
 // MARK: - EventSettingViewState

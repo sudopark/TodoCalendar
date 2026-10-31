@@ -11,9 +11,9 @@
 
 import SwiftUI
 import Combine
-import Domain
 import Extensions
 import CommonPresentation
+import SettingDomainInterface
 
 
 // MARK: - FeedbackPostViewState

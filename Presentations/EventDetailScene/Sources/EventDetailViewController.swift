@@ -13,8 +13,9 @@ import Optics
 import Extensions
 import SwiftUI
 import Combine
-import Scenes
 import CommonPresentation
+import EventDetailSceneInterface
+import SceneInfra
 
 
 // MARK: - EventDetailViewController

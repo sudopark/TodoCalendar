@@ -9,8 +9,10 @@ import Foundation
 import Combine
 import Prelude
 import Optics
-import Domain
 import CommonPresentation
+import CalendarDomainInterface
+import EventDomainInterface
+import ExternalCalendarDomainInterface
 
 
 public enum EventTimeOnCalendar: Hashable, Sendable {

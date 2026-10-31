@@ -9,13 +9,14 @@
 import XCTest
 import Prelude
 import Optics
-import Domain
 import Extensions
 import CalendarPresentation
 import CommonPresentation
 import WidgetScenes
 import UnitTestHelpKit
-import TestDoubles
+import CalendarDomainTesting
+import SettingDomainInterface
+import SettingDomainTesting
 
 
 class TodayWidgetViewModelProviderTests: BaseTestCase {

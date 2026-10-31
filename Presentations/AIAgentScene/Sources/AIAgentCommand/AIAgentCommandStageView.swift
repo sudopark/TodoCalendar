@@ -8,9 +8,13 @@
 
 import SwiftUI
 import Combine
-import Domain
 import Extensions
 import CommonPresentation
+import AIDomainInterface
+import BillingDomainInterface
+import CalendarDomainInterface
+import KernelUtils
+import SettingDomainInterface
 
 
 // MARK: - AIAgentCommandViewState

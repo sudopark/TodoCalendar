@@ -7,10 +7,11 @@
 //
 
 import Testing
-import Domain
 import Extensions
 
 @testable import WidgetScenes
+import SettingDomainInterface
+import SettingDomainTesting
 
 
 struct WidgetGalleryItemTests {

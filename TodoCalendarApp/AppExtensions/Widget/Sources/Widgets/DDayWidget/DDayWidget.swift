@@ -10,9 +10,10 @@ import WidgetKit
 import SwiftUI
 import Prelude
 import Optics
-import Domain
 import Extensions
 import WidgetScenes
+import EventDomainInterface
+import SettingDomainInterface
 
 
 // MARK: - EntryView

@@ -9,10 +9,11 @@
 import Foundation
 import Prelude
 import Optics
-import Domain
 import Extensions
 import CalendarPresentation
 import WidgetScenes
+import CalendarDomainInterface
+import SettingDomainInterface
 
 
 // MARK: - TodayWidgetViewModel + CalendarEvents

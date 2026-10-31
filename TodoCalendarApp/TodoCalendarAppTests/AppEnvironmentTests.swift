@@ -8,9 +8,10 @@
 
 import Foundation
 import Testing
-import Domain
 
 @testable import TodoCalendarApp
+import BillingDomainInterface
+import BillingDomainTesting
 
 
 final class AppEnvironmentTests {

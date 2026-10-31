@@ -7,11 +7,14 @@
 
 import XCTest
 import Combine
-import Domain
 import UnitTestHelpKit
-import TestDoubles
 
 @testable import SettingScene
+import CalendarDomainInterface
+import CalendarDomainTesting
+import SettingDomainInterface
+import SettingDomainTesting
+import TestDoubles
 
 
 class CalendarSectionViewModelTests: BaseTestCase, PublisherWaitable {

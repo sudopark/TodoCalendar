@@ -8,7 +8,7 @@
 
 import SwiftUI
 import MapKit
-import Domain
+import PlaceServiceInterface
 
 
 public struct LandmarkMapView: View {

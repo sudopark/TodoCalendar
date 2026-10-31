@@ -12,9 +12,13 @@ import Foundation
 import Combine
 import Prelude
 import Optics
-import Domain
 import Extensions
-import Scenes
+import AccountDomainInterface
+import CalendarDomainInterface
+import EventDomainInterface
+import ExternalCalendarDomainInterface
+import SceneInfra
+import SettingDomainInterface
 
 
 struct SelectedPeriodModel: Hashable {

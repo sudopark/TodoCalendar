@@ -9,12 +9,20 @@
 import UIKit
 import Testing
 import Combine
-import Domain
-import Scenes
-import TestDoubles
 import UnitTestHelpKit
 
 @testable import TodoCalendarApp
+import AccountDomainInterface
+import AccountDomainTesting
+import CalendarSceneInterface
+import ExternalCalendarDomainTesting
+import NotificationDomainInterface
+import NotificationDomainTesting
+import SceneInfra
+import SettingDomainInterface
+import SettingDomainTesting
+import SupportDomainInterface
+import SupportDomainTesting
 
 
 final class ApplicationRootViewModelImpleTests {

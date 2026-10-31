@@ -6,7 +6,7 @@
 //
 
 import UIKit
-import Domain
+import SettingDomainInterface
 
 
 // MARK: - FontSet

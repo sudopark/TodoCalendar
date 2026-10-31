@@ -11,10 +11,9 @@
 
 import SwiftUI
 import Combine
-import Domain
 import Extensions
 import CommonPresentation
-import Scenes
+import SettingDomainInterface
 
 
 // MARK: - HolidayEventDetailViewState

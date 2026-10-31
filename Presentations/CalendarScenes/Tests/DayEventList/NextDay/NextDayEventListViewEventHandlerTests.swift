@@ -9,11 +9,11 @@
 import Foundation
 import Testing
 import Combine
-import Domain
-import Scenes
 
 @testable import CalendarScenes
 import CalendarPresentation
+import EventDomainInterface
+import EventDomainTesting
 
 
 struct NextDayEventListViewEventHandlerTests {

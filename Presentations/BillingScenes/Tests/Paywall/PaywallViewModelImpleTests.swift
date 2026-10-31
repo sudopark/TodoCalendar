@@ -10,12 +10,13 @@ import Testing
 import Combine
 import Prelude
 import Optics
-import Domain
 import Extensions
 import UnitTestHelpKit
-import TestDoubles
 
 @testable import BillingScenes
+import BillingDomainInterface
+import BillingDomainTesting
+import KernelUtils
 
 
 final class PaywallViewModelImpleTests: PublisherWaitable {

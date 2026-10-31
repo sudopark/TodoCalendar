@@ -10,7 +10,10 @@ import Foundation
 import Combine
 import Prelude
 import Optics
-import Domain
+import BillingDomainInterface
+import BillingDomainTesting
+import SettingDomainInterface
+import SettingDomainTesting
 
 
 final class StubWidgetStyleUsecase: WidgetStyleUsecase, @unchecked Sendable {

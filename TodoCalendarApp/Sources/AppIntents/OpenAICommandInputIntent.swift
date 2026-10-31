@@ -8,7 +8,8 @@
 
 import SwiftUI
 import AppIntents
-import Domain
+import EventDomainInterface
+import KernelUtils
 
 
 @available(iOS 18.0, *)

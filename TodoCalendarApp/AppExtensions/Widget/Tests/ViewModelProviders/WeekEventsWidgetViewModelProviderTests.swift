@@ -9,11 +9,16 @@
 import XCTest
 import Prelude
 import Optics
-import Domain
 import Extensions
 import CalendarPresentation
 import UnitTestHelpKit
-import TestDoubles
+import CalendarDomain
+import CalendarDomainInterface
+import CalendarDomainTesting
+import EventDomainInterface
+import EventDomainTesting
+import SettingDomainInterface
+import SettingDomainTesting
 
 
 class WeekEventsWidgetViewModelProviderTests: BaseTestCase {

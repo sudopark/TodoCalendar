@@ -9,8 +9,9 @@
 //
 
 import UIKit
-import Scenes
 import CommonPresentation
+import EventDetailSceneInterface
+import SceneInfra
 
 
 // MARK: - DoneTodoDetailSceneBuilerImple

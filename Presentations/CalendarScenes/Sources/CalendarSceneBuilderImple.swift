@@ -6,9 +6,16 @@
 //
 
 import Foundation
-import Domain
-import Scenes
 import CommonPresentation
+import AIAgentSceneInterface
+import AccountDomainInterface
+import BillingSceneInterface
+import CalendarDomainInterface
+import CalendarSceneInterface
+import EventDetailSceneInterface
+import EventListSceneInterface
+import MemberSceneInterface
+import SceneInfra
 
 public struct CalendarSceneBuilderImple {
 

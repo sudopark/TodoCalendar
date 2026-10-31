@@ -9,10 +9,10 @@
 import Foundation
 import Prelude
 import Optics
-import Domain
-import Scenes
 import CalendarScenes
 import Extensions
+import KernelUtils
+import SceneInfra
 
 
 final class ApplicationDeepLinkHandlerImple: @unchecked Sendable {

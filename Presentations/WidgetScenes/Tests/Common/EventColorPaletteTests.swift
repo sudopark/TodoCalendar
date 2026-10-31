@@ -8,10 +8,13 @@
 
 import Testing
 import UIKit
-import Domain
 import CommonPresentation
 
 @testable import WidgetScenes
+import EventDomainInterface
+import EventDomainTesting
+import ExternalCalendarDomainInterface
+import ExternalCalendarDomainTesting
 
 
 struct EventColorPaletteTests {

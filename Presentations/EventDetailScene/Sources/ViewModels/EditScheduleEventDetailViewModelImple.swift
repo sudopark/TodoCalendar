@@ -9,10 +9,12 @@ import Foundation
 import Combine
 import Prelude
 import Optics
-import Domain
 import Extensions
-import Scenes
 import CommonPresentation
+import CalendarDomainInterface
+import EventDetailSceneInterface
+import EventDomainInterface
+import SceneInfra
 
 
 final class EditScheduleEventDetailViewModelImple: EventDetailViewModel, @unchecked Sendable {

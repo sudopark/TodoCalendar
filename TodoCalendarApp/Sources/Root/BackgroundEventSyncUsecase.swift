@@ -10,9 +10,8 @@ import Foundation
 @preconcurrency import BackgroundTasks
 @preconcurrency import UIKit
 import WidgetKit
-import Domain
-import Scenes
 import Extensions
+import SceneInfra
 
 
 protocol BackgroundEventSyncUsecase: Sendable {

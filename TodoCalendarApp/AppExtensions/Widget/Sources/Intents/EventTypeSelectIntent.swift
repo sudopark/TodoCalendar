@@ -11,8 +11,9 @@ import WidgetKit
 import AppIntents
 import Prelude
 import Optics
-import Domain
-import Repository
+import EventDomainInterface
+import ExternalCalendarDomainInterface
+import SettingDomainInterface
 
 
 // MARK: - EventTypeEntity

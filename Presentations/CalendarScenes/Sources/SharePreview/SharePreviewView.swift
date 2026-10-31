@@ -8,10 +8,10 @@
 
 import SwiftUI
 import Combine
-import Domain
-import Scenes
 import CommonPresentation
 import Extensions
+import EventDomainInterface
+import ExternalCalendarDomainInterface
 
 
 // MARK: - SharePreviewViewState

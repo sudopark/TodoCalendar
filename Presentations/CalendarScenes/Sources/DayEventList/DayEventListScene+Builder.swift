@@ -8,8 +8,8 @@
 //
 
 import UIKit
-import Scenes
 import CalendarPresentation
+import SceneInfra
 
 
 // MARK: - DayEventListScene Interactable & Listenable

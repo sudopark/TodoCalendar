@@ -8,10 +8,15 @@
 
 import Foundation
 import Testing
-import Domain
-import Repository
 
 @testable import TodoCalendarApp
+import AccountDomain
+import AccountDomainInterface
+import AccountDomainTesting
+import RemoteInfra
+import RemoteInfraInterface
+import StorageInfraInterface
+import StorageInfraTesting
 
 
 final class NeverRemoveAuthStorageTests {

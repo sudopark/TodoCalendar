@@ -10,12 +10,18 @@ import Combine
 @preconcurrency import ActivityKit
 import Prelude
 import Optics
-import Domain
 import CommonPresentation
 import Extensions
-import Repository
 import SQLiteService
 import AdService
+import AccountDomainInterface
+import BillingDomainInterface
+import EventDomainInterface
+import ExternalCalendarDomainInterface
+import KernelUtils
+import MigrationDomain
+import SettingDomainInterface
+import StorageInfraInterface
 
 struct ApplicationPrepareResult {
     

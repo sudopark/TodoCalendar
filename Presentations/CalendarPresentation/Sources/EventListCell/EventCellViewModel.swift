@@ -6,11 +6,11 @@
 //
 
 import Foundation
-import Domain
 import Extensions
 import Prelude
 import Optics
 import CommonPresentation
+import EventDomainInterface
 
 // MARK: - EventPeriodText
 

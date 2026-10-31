@@ -10,10 +10,11 @@ import SwiftUI
 import Combine
 import Prelude
 import Optics
-import Domain
 import Extensions
 import CommonPresentation
 import CalendarPresentation
+import CalendarDomainInterface
+import EventDomainInterface
 
 
 @Observable final class ContinuousMonthsViewState {

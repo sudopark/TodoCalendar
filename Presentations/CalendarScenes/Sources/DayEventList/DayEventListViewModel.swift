@@ -11,10 +11,16 @@ import Foundation
 import Combine
 import Prelude
 import Optics
-import Domain
-import Scenes
 import Extensions
 import CalendarPresentation
+import AIDomainInterface
+import AccountDomainInterface
+import CalendarDomainInterface
+import EventDetailSceneInterface
+import EventDomainInterface
+import SceneInfra
+import SettingDomainInterface
+import SupportDomainInterface
 
 
 struct SelectedDayModel: Equatable {

@@ -7,11 +7,15 @@
 //
 
 import Foundation
-import Domain
-import Repository
 import SQLiteService
 import Alamofire
 import WidgetScenes
+import CalendarDomain
+import CalendarDomainInterface
+import EventDomainInterface
+import SettingDomain
+import SettingDomainInterface
+import StorageInfraInterface
 
 
 // MARK: - WidgetViewModelProviderBuilder

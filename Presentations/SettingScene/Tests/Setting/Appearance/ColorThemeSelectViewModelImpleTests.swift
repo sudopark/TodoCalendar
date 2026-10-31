@@ -10,13 +10,16 @@ import XCTest
 import Combine
 import Prelude
 import Optics
-import Domain
-import Scenes
 import Extensions
 import UnitTestHelpKit
-import TestDoubles
 
 @testable import SettingScene
+import BillingDomainInterface
+import BillingDomainTesting
+import CalendarDomainTesting
+import SettingDomainInterface
+import SettingDomainTesting
+import TestDoubles
 
 
 class ColorThemeSelectViewModelImpleTests: BaseTestCase, PublisherWaitable, AsyncEffectWaitable {

@@ -6,10 +6,19 @@
 //
 
 import UIKit
-import Domain
 import AuthService
-import Repository
 import Extensions
+import AccountDomain
+import AccountDomainInterface
+import BillingDomain
+import ExternalCalendarDomain
+import ExternalCalendarDomainInterface
+import KernelUtils
+import MigrationDomain
+import NotificationDomain
+import RemoteInfraInterface
+import SettingDomain
+import SupportDomain
 
 
 final class ApplicationRootBuilder {

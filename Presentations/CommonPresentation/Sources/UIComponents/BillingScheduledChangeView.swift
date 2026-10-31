@@ -7,8 +7,8 @@
 //
 
 import SwiftUI
-import Domain
 import Extensions
+import BillingDomainInterface
 
 
 public struct BillingScheduledChangeView: View {

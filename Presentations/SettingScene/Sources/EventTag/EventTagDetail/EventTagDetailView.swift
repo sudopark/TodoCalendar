@@ -10,10 +10,10 @@
 
 import SwiftUI
 import Combine
-import Domain
 import Extensions
-import Scenes
 import CommonPresentation
+import EventDomainInterface
+import SettingDomainInterface
 
 
 // MARK: - EventTagDetailViewController

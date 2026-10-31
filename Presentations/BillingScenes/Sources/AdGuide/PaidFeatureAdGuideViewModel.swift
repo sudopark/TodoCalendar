@@ -8,8 +8,10 @@
 
 import Foundation
 import Combine
-import Domain
 import Extensions
+import AccountDomainInterface
+import AdDomainInterface
+import BillingDomainInterface
 
 
 // MARK: - PaidFeatureAdGuideViewModel

@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import Domain
+import EventDomainInterface
 
 
 extension EventCellViewModel {

@@ -7,15 +7,15 @@
 //
 
 import Foundation
-import Domain
 import Extensions
-import Repository
+import AccountDomainInterface
+import RemoteInfraInterface
 
 
 // MARK: - DummyFirebaseAuthService
 
 // 격리 실행에서 Firebase SDK 를 아예 띄우지 않으려고 계약만 만족시킨다
-final class DummyFirebaseAuthService: FirebaseAuthService {
+final class DummyFirebaseAuthService: FirebaseAuthService, FirebaseTokenRefreshService {
     
     func setup() throws { }
     

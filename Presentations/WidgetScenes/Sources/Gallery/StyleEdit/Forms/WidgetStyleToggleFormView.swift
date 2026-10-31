@@ -9,9 +9,9 @@
 import SwiftUI
 import Prelude
 import Optics
-import Domain
 import Extensions
 import CommonPresentation
+import SettingDomainInterface
 
 
 struct WidgetStyleToggleFormView<Item: WidgetStyleItem>: View {

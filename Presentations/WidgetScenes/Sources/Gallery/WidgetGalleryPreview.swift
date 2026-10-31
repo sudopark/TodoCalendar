@@ -9,10 +9,11 @@
 import SwiftUI
 import Prelude
 import Optics
-import Domain
 import Extensions
 import CommonPresentation
 import CalendarPresentation
+import EventDomainInterface
+import SettingDomainInterface
 
 
 // MARK: - canvas layout

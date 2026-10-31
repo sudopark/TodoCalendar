@@ -8,9 +8,13 @@
 //
 
 import UIKit
-import Domain
-import Scenes
 import CommonPresentation
+import AIAgentSceneInterface
+import AccountDomainInterface
+import EventDetailSceneInterface
+import EventListSceneInterface
+import MemberSceneInterface
+import SceneInfra
 
 
 // MARK: - DayEventListSceneBuilerImple

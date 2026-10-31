@@ -6,7 +6,8 @@
 //
 
 import XCTest
-import Scenes
+import CalendarSceneInterface
+import SceneInfra
 
 
 final class AppLaunchE2ETests: E2ETestCase {

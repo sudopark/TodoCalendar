@@ -8,9 +8,11 @@
 
 import Testing
 import UIKit
-import Domain
 
 @testable import CommonPresentation
+import EventDomainTesting
+import SettingDomainInterface
+import SettingDomainTesting
 
 
 struct CustomColorThemeDefinitionTests {

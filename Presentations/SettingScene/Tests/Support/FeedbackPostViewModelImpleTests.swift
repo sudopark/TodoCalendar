@@ -10,11 +10,12 @@ import XCTest
 import Combine
 import Prelude
 import Optics
-import Domain
 import UnitTestHelpKit
-import TestDoubles
 
 @testable import SettingScene
+import SupportDomainInterface
+import SupportDomainTesting
+import TestDoubles
 
 
 class FeedbackPostViewModelImpleTests: BaseTestCase, PublisherWaitable, AsyncEffectWaitable {

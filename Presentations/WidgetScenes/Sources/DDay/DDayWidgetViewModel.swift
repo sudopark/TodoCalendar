@@ -7,8 +7,9 @@
 //
 
 import Foundation
-import Domain
 import Extensions
+import EventDomainInterface
+import SettingDomainInterface
 
 
 // MARK: - DDayWidgetViewModel

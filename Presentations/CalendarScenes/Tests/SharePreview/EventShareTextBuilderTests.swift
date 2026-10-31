@@ -8,10 +8,11 @@
 
 import Testing
 import Foundation
-import Domain
 import Extensions
 
 @testable import CalendarScenes
+import CalendarDomainInterface
+import CalendarDomainTesting
 
 
 struct EventShareTextBuilderTests {

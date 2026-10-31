@@ -7,8 +7,8 @@
 //
 
 import UIKit
-import Scenes
-import Domain
+import CalendarDomainInterface
+import SceneInfra
 
 
 // MARK: - CalendarTwoColumnsScene Interactable & Listenable

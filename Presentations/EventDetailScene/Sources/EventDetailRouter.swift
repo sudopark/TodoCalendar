@@ -10,9 +10,11 @@
 import UIKit
 import Prelude
 import Optics
-import Domain
-import Scenes
 import CommonPresentation
+import EventDetailSceneInterface
+import EventDomainInterface
+import SceneInfra
+import SettingDomainInterface
 
 
 // MARK: - Routing

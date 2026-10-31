@@ -8,12 +8,14 @@
 
 import Testing
 import Combine
-import Domain
 import Extensions
 import UnitTestHelpKit
-import TestDoubles
 
 @testable import EventDetailScene
+import EventDetailSceneInterface
+import SettingDomainInterface
+import SettingDomainTesting
+import TestDoubles
 
 class SelectMapAppDialogViewModelImpleTests: PublisherWaitable {
     

@@ -7,7 +7,8 @@
 //
 
 import UIKit
-import Domain
+import SettingDomainInterface
+import SettingDomainTesting
 
 
 struct GradientPhotoFixture {

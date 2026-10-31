@@ -11,13 +11,18 @@ import SwiftUI
 import WidgetKit
 import Prelude
 import Optics
-import Domain
 import Extensions
 import SnapshotTestHelpKit
 import WidgetScenes
 import CalendarPresentation
 
 @testable import TodoCalendarAppWidget
+import CalendarDomainInterface
+import CalendarDomainTesting
+import EventDomainInterface
+import EventDomainTesting
+import SettingDomainInterface
+import SettingDomainTesting
 
 
 final class WidgetCatalogSnapshots: XCTestCase {

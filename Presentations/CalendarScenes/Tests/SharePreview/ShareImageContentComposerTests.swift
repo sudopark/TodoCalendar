@@ -10,11 +10,14 @@ import Testing
 import Foundation
 import Prelude
 import Optics
-import Domain
 import Extensions
 
 @testable import CalendarScenes
 import CalendarPresentation
+import CalendarDomainInterface
+import CalendarDomainTesting
+import EventDomainInterface
+import EventDomainTesting
 
 
 final class ShareImageContentComposerTests {

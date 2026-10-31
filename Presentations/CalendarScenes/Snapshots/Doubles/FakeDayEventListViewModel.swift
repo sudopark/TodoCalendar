@@ -8,11 +8,14 @@
 
 import Foundation
 import Combine
-import Domain
 import CommonPresentation
 
 @testable import CalendarScenes
 import CalendarPresentation
+import AIDomainInterface
+import AIDomainTesting
+import EventDomainInterface
+import EventDomainTesting
 
 
 /// DayEventListViewState의 필드가 fileprivate라 state를 직접 채울 수 없어

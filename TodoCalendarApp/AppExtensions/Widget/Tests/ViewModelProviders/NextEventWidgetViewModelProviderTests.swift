@@ -10,11 +10,15 @@ import Testing
 import Combine
 import Prelude
 import Optics
-import Domain
 import Extensions
 import CalendarPresentation
 import UnitTestHelpKit
-import TestDoubles
+import CalendarDomainTesting
+import EventDomainInterface
+import EventDomainTesting
+import ExternalCalendarDomainInterface
+import ExternalCalendarDomainTesting
+import SettingDomainTesting
 
 
 class NextEventWidgetViewModelProviderTests: PublisherWaitable {

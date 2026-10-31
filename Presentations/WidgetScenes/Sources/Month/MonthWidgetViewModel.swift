@@ -9,9 +9,10 @@
 import Foundation
 import Prelude
 import Optics
-import Domain
 import Extensions
 import CalendarPresentation
+import CalendarDomainInterface
+import SettingDomainInterface
 
 
 // MARK: - MonthWidgetViewModel

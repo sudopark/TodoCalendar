@@ -9,13 +9,16 @@
 import Testing
 import Foundation
 import Combine
-import Domain
-import Scenes
 import Extensions
 import UnitTestHelpKit
-import TestDoubles
 
 @testable import BillingScenes
+import AccountDomainInterface
+import AccountDomainTesting
+import AdDomainInterface
+import BillingDomainInterface
+import BillingDomainTesting
+import TestDoubles
 
 
 private final class SpyAdGuideRouter: BaseSpyRouter, PaidFeatureAdGuideRouting, @unchecked Sendable {

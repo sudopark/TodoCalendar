@@ -9,8 +9,7 @@
 import Foundation
 import WidgetKit
 import AppIntents
-import Domain
-import Repository
+import StorageInfraInterface
 
 
 struct EndLiveActivityIntent: LiveActivityIntent {

@@ -10,13 +10,15 @@ import Testing
 import Combine
 import Prelude
 import Optics
-import Domain
-import Scenes
 import Extensions
 import UnitTestHelpKit
-import TestDoubles
 
 @testable import WidgetScenes
+import BillingDomainInterface
+import BillingDomainTesting
+import SettingDomainInterface
+import SettingDomainTesting
+import TestDoubles
 
 
 final class SpyWidgetStyleEditRouter: BaseSpyRouter, WidgetStyleEditRouting, @unchecked Sendable {

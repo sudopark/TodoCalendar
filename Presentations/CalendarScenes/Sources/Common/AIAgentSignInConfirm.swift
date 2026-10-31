@@ -9,8 +9,8 @@
 import Foundation
 import Prelude
 import Optics
-import Scenes
 import Extensions
+import SceneInfra
 
 
 extension ConfirmDialogInfo {

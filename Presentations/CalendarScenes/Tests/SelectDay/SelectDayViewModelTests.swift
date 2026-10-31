@@ -8,12 +8,13 @@
 
 import Testing
 import Combine
-import Domain
-import Scenes
-import TestDoubles
 import UnitTestHelpKit
 
 @testable import CalendarScenes
+import CalendarDomainInterface
+import CalendarDomainTesting
+import CalendarSceneInterface
+import TestDoubles
 
 
 struct SelectDayViewModelTests {

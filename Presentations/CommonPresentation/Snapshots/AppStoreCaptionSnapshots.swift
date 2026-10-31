@@ -12,6 +12,7 @@ import UIKit
 import SnapshotTestHelpKit
 
 @testable import CommonPresentation
+import EventDomainTesting
 
 
 /// Pillow 로는 31개 언어(데바나가리·타이·CJK)를 한 TTF 로 못 그려 시스템 폰트 폴백에 맡긴다.

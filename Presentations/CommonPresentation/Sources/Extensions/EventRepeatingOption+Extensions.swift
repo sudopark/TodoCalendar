@@ -9,8 +9,9 @@
 import Foundation
 import Prelude
 import Optics
-import Domain
 import Extensions
+import CalendarDomainInterface
+import EventDomainInterface
 
 
 private typealias Options = EventRepeatingOptions

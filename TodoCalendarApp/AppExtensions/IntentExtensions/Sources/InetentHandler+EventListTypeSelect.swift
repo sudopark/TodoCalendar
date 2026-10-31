@@ -7,8 +7,9 @@
 //
 
 import Intents
-import Domain
 import Extensions
+import EventDomainInterface
+import ExternalCalendarDomainInterface
 
 @available(*, deprecated, message: "EventTypeSelectIntent으로 변경됨")
 extension IntentHandler: EventListTypeSelectIntentHandling {

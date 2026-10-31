@@ -9,8 +9,9 @@
 import SwiftUI
 import Prelude
 import Optics
-import Domain
 import CommonPresentation
+import ExternalCalendarDomainInterface
+import SettingDomainInterface
 
 
 /// 해석만 여기서 하고 적용은 각자 한다 — 확장은 `.containerBackground(for: .widget)`, 갤러리는 미리보기 프레임.

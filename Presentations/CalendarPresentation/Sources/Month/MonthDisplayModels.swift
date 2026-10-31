@@ -7,8 +7,9 @@
 //
 
 import Foundation
-import Domain
 import Extensions
+import CalendarDomainInterface
+import SettingDomainInterface
 
 
 // MARK: - week components

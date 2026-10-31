@@ -8,10 +8,10 @@
 
 import Testing
 import Foundation
-import Domain
-import TestDoubles
 
 @testable import TodoCalendarAppWidget
+import EventDomainInterface
+import EventDomainTesting
 
 
 struct EventCountdownTodoCompletionTests {

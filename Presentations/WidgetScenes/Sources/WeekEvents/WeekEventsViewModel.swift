@@ -9,9 +9,12 @@
 import Foundation
 import Prelude
 import Optics
-import Domain
 import Extensions
 import CalendarPresentation
+import CalendarDomainInterface
+import EventDomainInterface
+import ExternalCalendarDomainInterface
+import SettingDomainInterface
 
 
 public enum WeekEventsRange: Sendable {

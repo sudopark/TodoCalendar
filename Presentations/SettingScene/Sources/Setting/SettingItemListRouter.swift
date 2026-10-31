@@ -8,9 +8,12 @@
 //
 
 import UIKit
-import Domain
-import Scenes
 import CommonPresentation
+import BillingSceneInterface
+import MemberSceneInterface
+import SceneInfra
+import SettingDomainInterface
+import SettingSceneInterface
 
 
 // MARK: - Routing

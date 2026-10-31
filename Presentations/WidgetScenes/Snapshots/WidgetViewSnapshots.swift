@@ -11,10 +11,11 @@ import SwiftUI
 import WidgetKit
 import Prelude
 import Optics
-import Domain
 import SnapshotTestHelpKit
 
 @testable import WidgetScenes
+import SettingDomainInterface
+import SettingDomainTesting
 
 
 final class WidgetViewSnapshots: XCTestCase {

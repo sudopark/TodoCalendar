@@ -11,8 +11,9 @@ import SwiftUI
 import AppIntents
 import Extensions
 import CommonPresentation
-import Domain
 import WidgetScenes
+import EventDomainInterface
+import SettingDomainInterface
 
 
 // MARK: - AICommandShortcutWidgetEntry

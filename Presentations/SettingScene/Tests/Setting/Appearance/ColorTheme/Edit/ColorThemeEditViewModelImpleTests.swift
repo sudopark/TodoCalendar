@@ -11,13 +11,17 @@ import UIKit
 import Combine
 import Prelude
 import Optics
-import Domain
-import Scenes
 import CommonPresentation
 import UnitTestHelpKit
-import TestDoubles
 
 @testable import SettingScene
+import BillingDomainInterface
+import BillingDomainTesting
+import CalendarDomainInterface
+import CalendarDomainTesting
+import SettingDomainInterface
+import SettingDomainTesting
+import TestDoubles
 
 
 final class ColorThemeEditViewModelImpleTests: PublisherWaitable, AsyncEffectWaitable {

@@ -7,9 +7,9 @@
 //
 
 import Foundation
-import Domain
 import Extensions
-import Repository
+import AIDomainInterface
+import AccountDomainInterface
 
 
 enum ShareSubmitPrecondition {

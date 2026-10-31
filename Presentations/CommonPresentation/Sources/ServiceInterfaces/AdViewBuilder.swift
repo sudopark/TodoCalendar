@@ -8,7 +8,7 @@
 
 import UIKit
 import SwiftUI
-import Domain
+import AdDomainInterface
 
 
 public protocol AdViewBuilder {

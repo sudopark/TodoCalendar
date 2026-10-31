@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import Domain
+import SettingDomainInterface
 
 
 struct WidgetPreviewStyleStack {

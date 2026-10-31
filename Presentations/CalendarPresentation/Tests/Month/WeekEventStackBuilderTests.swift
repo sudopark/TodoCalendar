@@ -6,14 +6,18 @@
 //
 
 import XCTest
-import Domain
 import Prelude
 import Optics
 import UnitTestHelpKit
-import TestDoubles
 import CommonPresentation
 
 @testable import CalendarPresentation
+import CalendarDomainInterface
+import CalendarDomainTesting
+import EventDomainInterface
+import EventDomainTesting
+import ExternalCalendarDomainInterface
+import ExternalCalendarDomainTesting
 
 
 class WeekEventStackBuilderTests: BaseTestCase {

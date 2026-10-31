@@ -14,10 +14,11 @@ import SwiftUI
 import Combine
 import Prelude
 import Optics
-import Domain
 import Extensions
-import Scenes
 import CommonPresentation
+import EventDomainInterface
+import ExternalCalendarDomainInterface
+import SettingDomainInterface
 
 
 // MARK: - GoogleCalendarEventDetailViewState

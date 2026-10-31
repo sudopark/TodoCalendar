@@ -9,8 +9,7 @@
 //
 
 import UIKit
-import Domain
-import Scenes
+import EventDetailSceneInterface
 
 
 // MARK: - Builder + DependencyInjector Extension

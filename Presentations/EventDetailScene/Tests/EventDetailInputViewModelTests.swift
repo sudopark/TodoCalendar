@@ -9,13 +9,20 @@ import XCTest
 import Combine
 import Prelude
 import Optics
-import Domain
-import Scenes
 import CommonPresentation
 import UnitTestHelpKit
-import TestDoubles
 
 @testable import EventDetailScene
+import CalendarDomainInterface
+import CalendarDomainTesting
+import EventDetailSceneInterface
+import EventDomainInterface
+import EventDomainTesting
+import PlaceServiceInterface
+import SettingDomainInterface
+import SettingDomainTesting
+import SupportDomainTesting
+import TestDoubles
 
 
 class EventDetailInputViewModelTests: BaseTestCase, PublisherWaitable {

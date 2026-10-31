@@ -9,6 +9,7 @@
 import UIKit
 import Combine
 import CommonPresentation
+import ExternalCalendarDomainInterface
 
 
 final class CompositeLoadingBarView: UIView {

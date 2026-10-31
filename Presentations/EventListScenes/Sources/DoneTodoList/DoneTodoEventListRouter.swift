@@ -9,8 +9,10 @@
 //
 
 import UIKit
-import Scenes
 import CommonPresentation
+import EventDetailSceneInterface
+import EventListSceneInterface
+import SceneInfra
 
 
 // MARK: - Routing

@@ -9,12 +9,17 @@ import XCTest
 import Combine
 import Prelude
 import Optics
-import Domain
 import UnitTestHelpKit
-import TestDoubles
 
 @testable import CalendarScenes
 import CalendarPresentation
+import CalendarDomainInterface
+import CalendarDomainTesting
+import EventDomainInterface
+import EventDomainTesting
+import ExternalCalendarDomainTesting
+import SettingDomainInterface
+import SettingDomainTesting
 
 
 class MonthViewModelImpleTests: BaseTestCase, PublisherWaitable {

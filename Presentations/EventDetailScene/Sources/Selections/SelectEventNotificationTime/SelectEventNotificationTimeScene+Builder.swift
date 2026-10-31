@@ -9,8 +9,8 @@
 //
 
 import UIKit
-import Domain
-import Scenes
+import EventDomainInterface
+import SceneInfra
 
 
 // MARK: - SelectEventNotificationTimeScene Interactable & Listenable

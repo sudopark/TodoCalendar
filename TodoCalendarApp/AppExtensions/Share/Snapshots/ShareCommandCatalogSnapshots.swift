@@ -9,12 +9,15 @@
 import XCTest
 import UIKit
 import SwiftUI
-import Domain
 import Extensions
 import CommonPresentation
 import SnapshotTestHelpKit
 
 @testable import TodoCalendarAppShare
+import EventDomainInterface
+import EventDomainTesting
+import SettingDomainInterface
+import SettingDomainTesting
 
 
 final class ShareCommandCatalogSnapshots: XCTestCase {

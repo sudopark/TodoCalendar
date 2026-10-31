@@ -7,10 +7,14 @@
 //
 
 import Testing
-import Domain
-import Scenes
 import CalendarPresentation
-import TestDoubles
+import CalendarDomainInterface
+import CalendarDomainTesting
+import EventDomainInterface
+import EventDomainTesting
+import ExternalCalendarDomainInterface
+import ExternalCalendarDomainTesting
+import SceneInfra
 
 struct EventCellViewModelWidgetURL_Tests {
     

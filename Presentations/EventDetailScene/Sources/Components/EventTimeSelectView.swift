@@ -8,6 +8,7 @@
 
 import SwiftUI
 import CommonPresentation
+import CalendarDomainInterface
 
 
 // MARK: - EventTimeSelectView

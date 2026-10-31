@@ -8,9 +8,9 @@
 
 import Foundation
 import Combine
-import Domain
 import Extensions
-import Scenes
+import CalendarDomainInterface
+import CalendarSceneInterface
 
 
 protocol SelectDayDialogViewModel: Sendable, AnyObject {

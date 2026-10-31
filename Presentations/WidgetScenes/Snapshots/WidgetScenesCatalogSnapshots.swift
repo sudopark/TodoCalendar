@@ -8,12 +8,15 @@
 
 import XCTest
 import SwiftUI
-import Domain
 import Extensions
 import CommonPresentation
 import SnapshotTestHelpKit
 
 @testable import WidgetScenes
+import EventDomainInterface
+import EventDomainTesting
+import SettingDomainInterface
+import SettingDomainTesting
 
 
 final class WidgetScenesCatalogSnapshots: XCTestCase {

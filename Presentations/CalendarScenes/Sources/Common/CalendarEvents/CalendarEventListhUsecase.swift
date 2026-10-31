@@ -8,9 +8,12 @@
 
 import Foundation
 import Combine
-import Domain
 import Extensions
 import CalendarPresentation
+import CalendarDomainInterface
+import EventDomainInterface
+import ExternalCalendarDomainInterface
+import SettingDomainInterface
 
 protocol CalendarEventListhUsecase: Sendable {
     

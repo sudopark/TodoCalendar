@@ -9,12 +9,13 @@
 
 import UIKit
 import Combine
-import Domain
 import CombineCocoa
-import Scenes
 import CommonPresentation
 import Extensions
 import AdService
+import AdDomainInterface
+import CalendarSceneInterface
+import ExternalCalendarDomainInterface
 
 
 // MARK: - MainViewController

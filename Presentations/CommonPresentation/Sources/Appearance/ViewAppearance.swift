@@ -7,7 +7,9 @@
 
 import SwiftUI
 import Combine
-import Domain
+import EventDomainInterface
+import ExternalCalendarDomainInterface
+import SettingDomainInterface
 @preconcurrency import CombineExt
 
 @Observable public class ViewAppearance: @unchecked Sendable {

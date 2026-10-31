@@ -7,8 +7,9 @@
 //
 
 import Foundation
-import Domain
 import Extensions
+import BillingDomainInterface
+import KernelUtils
 
 
 enum PaywallFailReason: Equatable {

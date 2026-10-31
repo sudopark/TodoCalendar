@@ -7,8 +7,9 @@
 //
 
 import Foundation
-import Domain
 import Extensions
+import EventDomainInterface
+import KernelUtils
 
 
 // MARK: - RRule display text helpers (shared across Google/Apple calendar detail)

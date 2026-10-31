@@ -12,9 +12,9 @@ import Foundation
 import Prelude
 import Optics
 import Combine
-import Domain
 import Extensions
-import Scenes
+import SceneInfra
+import SupportDomainInterface
 
 
 // MARK: - FeedbackPostViewModel

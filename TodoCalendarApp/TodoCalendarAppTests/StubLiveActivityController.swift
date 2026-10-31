@@ -9,9 +9,10 @@
 import Foundation
 import Combine
 
-import Domain
 
 @testable import TodoCalendarApp
+import EventDomainInterface
+import EventDomainTesting
 
 
 final class StubLiveActivityController: LiveActivityController, @unchecked Sendable {

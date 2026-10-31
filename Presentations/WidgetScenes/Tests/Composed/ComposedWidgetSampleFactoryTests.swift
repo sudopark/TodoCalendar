@@ -9,6 +9,8 @@
 import Testing
 
 @testable import WidgetScenes
+import EventDomainInterface
+import EventDomainTesting
 
 
 struct ComposedWidgetSampleFactoryTests {

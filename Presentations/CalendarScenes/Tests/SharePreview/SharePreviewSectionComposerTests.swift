@@ -13,6 +13,8 @@ import Optics
 import Extensions
 
 @testable import CalendarScenes
+import CalendarDomainInterface
+import CalendarDomainTesting
 
 
 final class SharePreviewSectionComposerTests {

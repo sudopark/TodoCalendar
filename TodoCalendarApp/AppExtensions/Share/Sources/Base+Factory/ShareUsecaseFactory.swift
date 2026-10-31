@@ -7,10 +7,15 @@
 //
 
 import Foundation
-import Domain
-import Repository
 import CommonPresentation
 import FirstPartyServices
+import AIDomain
+import AIDomainInterface
+import RemoteInfraInterface
+import SettingDomain
+import SupportDomainInterface
+import AccountDomain
+import BillingDomain
 
 
 struct ShareUsecaseFactory {
@@ -37,7 +42,8 @@ extension ShareUsecaseFactory {
         )
         return AICommandRepositoryImple(
             remote: self.base.remoteAPI,
-            localStorage: localStorage
+            localStorage: localStorage,
+            userPlanParser: BillingUserPlanResponseParserImple()
         )
     }
 

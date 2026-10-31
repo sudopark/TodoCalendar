@@ -7,8 +7,9 @@
 //
 
 import SwiftUI
-import Domain
 import CommonPresentation
+import EventDomainInterface
+import SettingDomainInterface
 
 struct TodoEventGuideView: View {
     

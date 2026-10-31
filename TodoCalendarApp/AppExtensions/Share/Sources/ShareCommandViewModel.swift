@@ -8,8 +8,9 @@
 
 import Foundation
 import Combine
-import Domain
 import Extensions
+import AIDomainInterface
+import SupportDomainInterface
 
 
 // MARK: - ShareCommandSource

@@ -10,10 +10,11 @@ import Foundation
 import WidgetKit
 import Prelude
 import Optics
-import Domain
 import Extensions
 import CalendarPresentation
 import WidgetScenes
+import EventDomainInterface
+import SettingDomainInterface
 
 
 struct EventListWidgetTimeLineProvider: AppIntentTimelineProvider {

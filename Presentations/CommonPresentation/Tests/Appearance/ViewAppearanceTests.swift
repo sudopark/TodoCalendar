@@ -8,9 +8,10 @@
 
 import Testing
 import SwiftUI
-import Domain
 
 @testable import CommonPresentation
+import SettingDomainInterface
+import SettingDomainTesting
 
 
 struct ViewAppearanceTests {

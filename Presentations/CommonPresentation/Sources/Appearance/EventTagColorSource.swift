@@ -5,13 +5,16 @@
 //  Created by sudo.park on 2026/03/10.
 //
 
-import Domain
 
 
 // MARK: - EventTagColorSource
 
 /// 이벤트 태그 색상 결정에 필요한 정보를 제공하는 마커 프로토콜.
 /// 구체 타입별로 색상 결정 로직이 달라지며, EventTagColorView 내부에서 타입으로 분기.
+
+
+import EventDomainInterface
+
 public protocol EventTagColorSource: Sendable { }
 
 

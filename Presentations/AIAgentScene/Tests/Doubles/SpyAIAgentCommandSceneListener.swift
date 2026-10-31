@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import Scenes
+import AIAgentSceneInterface
 
 
 final class SpyAIAgentCommandSceneListener: AIAgentCommandSceneListener, @unchecked Sendable {

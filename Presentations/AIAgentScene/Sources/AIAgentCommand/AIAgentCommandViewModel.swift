@@ -10,9 +10,12 @@ import Foundation
 import Combine
 import Prelude
 import Optics
-import Domain
 import Extensions
-import Scenes
+import AIAgentSceneInterface
+import AIDomainInterface
+import BillingDomainInterface
+import KernelUtils
+import SceneInfra
 
 
 // MARK: - AIAgentCommandState

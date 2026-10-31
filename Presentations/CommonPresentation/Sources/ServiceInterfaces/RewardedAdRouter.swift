@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import Domain
+import AdDomainInterface
 
 
 public protocol RewardedAdRouter {

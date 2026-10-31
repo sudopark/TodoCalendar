@@ -9,7 +9,7 @@
 //
 
 import UIKit
-import Scenes
+import MemberSceneInterface
 
 
 // MARK: - Builder + DependencyInjector Extension

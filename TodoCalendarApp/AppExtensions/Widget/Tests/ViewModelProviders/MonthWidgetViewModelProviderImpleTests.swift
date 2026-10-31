@@ -10,11 +10,15 @@ import XCTest
 import Combine
 import Prelude
 import Optics
-import Domain
 import Extensions
 import UnitTestHelpKit
-import TestDoubles
 import WidgetScenes
+import CalendarDomainInterface
+import CalendarDomainTesting
+import EventDomainInterface
+import EventDomainTesting
+import SettingDomainInterface
+import SettingDomainTesting
 
 
 class MonthWidgetViewModelProviderImpleTests: BaseTestCase {

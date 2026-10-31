@@ -7,10 +7,11 @@
 //
 
 import SwiftUI
-import Domain
 import CommonPresentation
 import Extensions
 import CalendarPresentation
+import CalendarDomainInterface
+import SettingDomainInterface
 
 
 // MARK: - ShareImageCardView

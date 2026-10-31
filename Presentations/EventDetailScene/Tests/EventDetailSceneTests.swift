@@ -7,6 +7,7 @@
 
 import XCTest
 @testable import EventDetailScene
+import EventDetailSceneInterface
 
 final class EventDetailSceneTests: XCTestCase {
 

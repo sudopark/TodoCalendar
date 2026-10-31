@@ -7,10 +7,12 @@
 //
 
 import Testing
-import Domain
-import Scenes
 
 @testable import CalendarScenes
+import CalendarDomainInterface
+import CalendarDomainTesting
+import CalendarSceneInterface
+import SceneInfra
 
 
 struct CalendarDeepLinkHandlerImpleTests {

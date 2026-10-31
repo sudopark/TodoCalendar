@@ -7,9 +7,9 @@
 //
 
 import UIKit
-import Domain
 import CommonPresentation
 import AdService
+import AdDomainInterface
 
 
 extension FullScreenAdRouterImple: @retroactive FullScreenAdRouter {

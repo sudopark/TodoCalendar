@@ -8,9 +8,14 @@
 
 import Testing
 import Foundation
-import Domain
 
 @testable import CalendarPresentation
+import CalendarDomainInterface
+import CalendarDomainTesting
+import EventDomainInterface
+import EventDomainTesting
+import ExternalCalendarDomainInterface
+import ExternalCalendarDomainTesting
 
 
 final class EventCellViewModelMapperTests {

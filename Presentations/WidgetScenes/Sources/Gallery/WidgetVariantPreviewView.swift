@@ -7,8 +7,8 @@
 //
 
 import SwiftUI
-import Domain
 import CommonPresentation
+import SettingDomainInterface
 
 
 struct WidgetVariantPreviewView: View {

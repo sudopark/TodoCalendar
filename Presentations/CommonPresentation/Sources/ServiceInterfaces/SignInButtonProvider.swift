@@ -7,11 +7,11 @@
 //
 
 import SwiftUI
-import Domain
 import Extensions
 import GoogleSignInSwift
 import AuthenticationServices
 import CryptoKit
+import AccountDomainInterface
 
 
 public protocol SignInButtonProvider {

@@ -8,9 +8,10 @@
 
 import Testing
 import Foundation
-import Domain
 
 @testable import CalendarPresentation
+import ExternalCalendarDomainInterface
+import ExternalCalendarDomainTesting
 
 
 class CalendarEventTests {

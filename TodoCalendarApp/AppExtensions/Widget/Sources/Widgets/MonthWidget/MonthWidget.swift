@@ -8,10 +8,10 @@
 
 import WidgetKit
 import SwiftUI
-import Domain
 import Extensions
 import CalendarPresentation
 import WidgetScenes
+import CalendarDomainInterface
 
 
 // MARK: - MonthWidgetView

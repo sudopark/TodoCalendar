@@ -10,9 +10,12 @@ import Testing
 import Foundation
 import Prelude
 import Optics
-import Domain
 
 @testable import WidgetScenes
+import EventDomainInterface
+import EventDomainTesting
+import SettingDomainInterface
+import SettingDomainTesting
 
 
 struct ComposedWidgetViewModelsTests {

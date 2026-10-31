@@ -11,9 +11,8 @@ import Foundation
 import Combine
 import Prelude
 import Optics
-import Domain
 import Extensions
-import Scenes
+import CalendarDomainInterface
 
 
 struct HolidayItemModel {

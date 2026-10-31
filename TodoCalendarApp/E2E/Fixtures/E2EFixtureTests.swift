@@ -6,6 +6,8 @@
 //
 
 import XCTest
+import CalendarDomainInterface
+import CalendarDomainTesting
 
 
 final class E2EFixtureTests: XCTestCase {

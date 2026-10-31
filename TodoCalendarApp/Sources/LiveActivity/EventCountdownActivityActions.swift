@@ -8,7 +8,7 @@
 
 import Foundation
 import ActivityKit
-import Domain
+import EventDomainInterface
 
 
 protocol EventCountdownActivityEnding: Sendable {

@@ -10,12 +10,15 @@ import Testing
 import Foundation
 import Prelude
 import Optics
-import Domain
 import UnitTestHelpKit
-import TestDoubles
 import WidgetScenes
 
 @testable import TodoCalendarAppWidget
+import CalendarDomainTesting
+import EventDomainInterface
+import EventDomainTesting
+import SettingDomainInterface
+import SettingDomainTesting
 
 
 struct DDayWidgetViewModelProviderTests {

@@ -9,10 +9,11 @@
 import Testing
 import Prelude
 import Optics
-import Domain
-import Scenes
 
 @testable import CalendarScenes
+import EventDomainInterface
+import EventDomainTesting
+import SceneInfra
 
 
 class EventDeepLinkHandlerImpleTests {

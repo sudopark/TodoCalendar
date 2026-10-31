@@ -12,6 +12,9 @@ import Extensions
 import CommonPresentation
 
 @testable import EventDetailScene
+import CalendarDomainInterface
+import CalendarDomainTesting
+import EventDetailSceneInterface
 
 
 struct EventDetailShareTextBuilderTests {

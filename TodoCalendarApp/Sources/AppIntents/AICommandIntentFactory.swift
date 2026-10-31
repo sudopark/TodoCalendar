@@ -7,17 +7,25 @@
 //
 
 import Foundation
-import Domain
-import Repository
 import SQLiteService
 import Alamofire
+import AccountDomain
+import AuthService
+import AIDomain
+import AIDomainInterface
+import AccountDomainInterface
+import CalendarDomain
+import RemoteInfra
+import RemoteInfraInterface
+import StorageInfra
+import BillingDomain
 
 
 struct AICommandIntentFactory {
 
     private let environmentStorage: UserDefaultEnvironmentStorageImple
     private let authStore: AuthStoreImple
-    private let firebaseAuthService: any FirebaseAuthService
+    private let firebaseAuthService: any FirebaseAuthService & FirebaseTokenRefreshService
 
     init() {
         let environmentStorage = UserDefaultEnvironmentStorageImple(
@@ -28,7 +36,7 @@ struct AICommandIntentFactory {
         )
         keyChainStorage.setupSharedGroup(AppEnvironment.groupID)
 
-        let firebaseAuthService: any FirebaseAuthService = {
+        let firebaseAuthService: any FirebaseAuthService & FirebaseTokenRefreshService = {
             if AppEnvironment.isExternalDependencyBlocked {
                 return DummyFirebaseAuthService()
             }
@@ -72,7 +80,8 @@ extension AICommandIntentFactory {
         _ = sqliteService.open(path: AppEnvironment.dbFilePath(for: auth?.uid))
         return AICommandRepositoryImple(
             remote: remoteAPI,
-            localStorage: AICommandLocalStorageImple(sqliteService: sqliteService)
+            localStorage: AICommandLocalStorageImple(sqliteService: sqliteService),
+            userPlanParser: BillingUserPlanResponseParserImple()
         )
     }
 

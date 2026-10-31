@@ -7,8 +7,8 @@
 //
 
 import Foundation
-import Domain
 import CalendarPresentation
+import EventDomainInterface
 
 
 extension LiveActivityEventTarget {

@@ -9,9 +9,9 @@
 //
 
 import UIKit
-import Domain
-import Scenes
 import CommonPresentation
+import EventDetailSceneInterface
+import SceneInfra
 
 
 // MARK: - HolidayEventDetailSceneBuilerImple

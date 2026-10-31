@@ -11,10 +11,14 @@ import Foundation
 import Combine
 import Prelude
 import Optics
-import Domain
 import Extensions
-import Scenes
 import CommonPresentation
+import AccountDomainInterface
+import KernelUtils
+import SceneInfra
+import SettingDomainInterface
+import SettingSceneInterface
+import SupportDomainInterface
 
 
 protocol SettingItemModelType {

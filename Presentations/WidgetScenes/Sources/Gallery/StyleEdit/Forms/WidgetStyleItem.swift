@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import Domain
+import SettingDomainInterface
 
 
 /// 위젯군이 켜고 끌 수 있는 표시 항목 — 나열 순서는 위젯 뷰의 위에서 아래 순이다.

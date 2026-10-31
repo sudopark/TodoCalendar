@@ -10,7 +10,6 @@ import Foundation
 import WidgetKit
 import Prelude
 import Optics
-import Domain
 import Extensions
 import CalendarPresentation
 import WidgetScenes

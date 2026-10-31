@@ -10,10 +10,12 @@ import Foundation
 import Combine
 import Prelude
 import Optics
-import Domain
-import Scenes
 import Extensions
 import CalendarPresentation
+import CalendarDomainInterface
+import EventDomainInterface
+import ExternalCalendarDomainInterface
+import SettingDomainInterface
 
 
 // MARK: - SharePreviewTagCellViewModel

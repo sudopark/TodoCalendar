@@ -11,13 +11,22 @@ import SwiftUI
 import Combine
 import Prelude
 import Optics
-import Domain
 import Extensions
 import CommonPresentation
 import SnapshotTestHelpKit
 
 @testable import CalendarScenes
 import CalendarPresentation
+import AIDomainInterface
+import AIDomainTesting
+import CalendarDomainInterface
+import CalendarDomainTesting
+import EventDomainInterface
+import EventDomainTesting
+import ExternalCalendarDomainInterface
+import ExternalCalendarDomainTesting
+import SettingDomainInterface
+import SettingDomainTesting
 
 
 final class CalendarScenesCatalogSnapshots: XCTestCase {

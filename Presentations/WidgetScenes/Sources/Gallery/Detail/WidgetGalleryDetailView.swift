@@ -8,9 +8,10 @@
 
 import SwiftUI
 import Combine
-import Domain
 import Extensions
 import CommonPresentation
+import EventDomainInterface
+import SettingDomainInterface
 
 
 @Observable final class WidgetGalleryDetailViewState {

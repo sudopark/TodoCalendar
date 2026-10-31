@@ -8,8 +8,12 @@
 
 import Testing
 import Foundation
-import Domain
 import CommonPresentation
+import CalendarDomainInterface
+import CalendarDomainTesting
+import EventDomainInterface
+import EventDomainTesting
+import KernelUtils
 
 
 struct RRuleDisplayTextTests {

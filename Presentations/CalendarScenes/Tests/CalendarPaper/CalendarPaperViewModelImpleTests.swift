@@ -6,12 +6,13 @@
 //
 
 import XCTest
-import Domain
 import UnitTestHelpKit
-import TestDoubles
 
 @testable import CalendarScenes
 import CalendarPresentation
+import CalendarDomainInterface
+import CalendarDomainTesting
+import TestDoubles
 
 
 class CalendarPaperViewModelImpleTests: BaseTestCase {

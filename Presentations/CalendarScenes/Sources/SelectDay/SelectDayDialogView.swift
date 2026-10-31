@@ -8,8 +8,10 @@
 
 import SwiftUI
 import Combine
-import Domain
 import CommonPresentation
+import CalendarDomainInterface
+import EventDomainInterface
+import SettingDomainInterface
 
 
 @Observable final class SelectDayDialogViewState {

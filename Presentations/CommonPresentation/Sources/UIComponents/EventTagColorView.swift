@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import Domain
+import EventDomainInterface
 
 
 // MARK: - EventTagColorView

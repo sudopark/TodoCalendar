@@ -8,9 +8,10 @@
 
 import UIKit
 import Combine
-import Domain
 import Extensions
 import CommonPresentation
+import ExternalCalendarDomainInterface
+import SupportDomainInterface
 
 
 // MARK: - LegalNoticeBannerRowView

@@ -6,10 +6,10 @@
 //
 
 import Foundation
-import Domain
 import Prelude
 import Optics
 import CommonPresentation
+import CalendarDomainInterface
 
 
 // MARK: - EventOnWeek + WeekEventStack

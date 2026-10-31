@@ -9,12 +9,15 @@
 import Testing
 import Prelude
 import Optics
-import Domain
 import Extensions
 import CalendarPresentation
 import UnitTestHelpKit
-import TestDoubles
 import WidgetScenes
+import CalendarDomainTesting
+import EventDomainInterface
+import EventDomainTesting
+import SettingDomainInterface
+import SettingDomainTesting
 
 
 // MARK: - TodayAndNextWidgetViewModelBuilderTests

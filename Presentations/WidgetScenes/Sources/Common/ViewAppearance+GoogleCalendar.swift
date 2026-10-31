@@ -6,8 +6,8 @@
 //  Copyright © 2026 com.sudo.park. All rights reserved.
 //
 
-import Domain
 import CommonPresentation
+import ExternalCalendarDomainInterface
 
 
 extension ViewAppearance {

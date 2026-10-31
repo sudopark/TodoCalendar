@@ -10,11 +10,18 @@ import XCTest
 import Combine
 import Prelude
 import Optics
-import Domain
 import UnitTestHelpKit
-import TestDoubles
 
 @testable import SettingScene
+import AccountDomainTesting
+import CalendarDomainTesting
+import EventDomainInterface
+import EventDomainTesting
+import ExternalCalendarDomainInterface
+import ExternalCalendarDomainTesting
+import SettingDomainInterface
+import SettingDomainTesting
+import TestDoubles
 
 class EventSettingViewModelImpleTests: BaseTestCase, PublisherWaitable, AsyncEffectWaitable {
     

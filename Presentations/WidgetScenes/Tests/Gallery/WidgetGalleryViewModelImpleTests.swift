@@ -10,12 +10,13 @@ import Testing
 import Combine
 import Prelude
 import Optics
-import Domain
 import Extensions
 import UnitTestHelpKit
-import TestDoubles
 
 @testable import WidgetScenes
+import SettingDomainInterface
+import SettingDomainTesting
+import TestDoubles
 
 
 private final class FailingUISettingUsecase: StubUISettingUsecase, @unchecked Sendable {

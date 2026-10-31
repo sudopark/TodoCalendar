@@ -8,8 +8,8 @@
 
 import UIKit
 import SwiftUI
-import Scenes
 import CommonPresentation
+import BillingSceneInterface
 
 
 final class PaywallViewController: UIHostingController<PaywallContainerView>, PaywallScene {

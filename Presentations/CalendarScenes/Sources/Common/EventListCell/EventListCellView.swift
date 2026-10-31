@@ -10,11 +10,10 @@ import SwiftUI
 import Combine
 import Prelude
 import Optics
-import Domain
-import Scenes
 import Extensions
 import CommonPresentation
 import CalendarPresentation
+import EventDomainInterface
 
 
 // MARK: - state

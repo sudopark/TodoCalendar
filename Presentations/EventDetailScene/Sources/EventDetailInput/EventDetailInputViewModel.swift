@@ -9,10 +9,14 @@ import Foundation
 import Combine
 import Prelude
 import Optics
-import Domain
 import Extensions
-import Scenes
 import CommonPresentation
+import CalendarDomainInterface
+import EventDomainInterface
+import PlaceServiceInterface
+import SceneInfra
+import SettingDomainInterface
+import SupportDomainInterface
 
 
 // MARK: - event detail input interactor + listener

@@ -8,7 +8,8 @@
 
 import Foundation
 import Combine
-import Domain
+import AIDomainInterface
+import AIDomainTesting
 
 
 final class StubAIAgentOrchestrationUsecase: AIAgentOrchestrationUsecase, @unchecked Sendable {

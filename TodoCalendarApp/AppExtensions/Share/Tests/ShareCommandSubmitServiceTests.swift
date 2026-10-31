@@ -10,11 +10,15 @@ import Foundation
 import Testing
 import Prelude
 import Optics
-import Domain
-import Repository
 import Extensions
 
 @testable import TodoCalendarAppShare
+import AIDomainInterface
+import AIDomainTesting
+import AccountDomainInterface
+import AccountDomainTesting
+import BillingDomainInterface
+import BillingDomainTesting
 
 
 final class ShareCommandSubmitServiceTests {

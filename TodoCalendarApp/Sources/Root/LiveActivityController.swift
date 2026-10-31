@@ -8,7 +8,7 @@
 
 import Foundation
 import Combine
-import Domain
+import EventDomainInterface
 
 
 struct LiveActivityRegistration: Equatable {

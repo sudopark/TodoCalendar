@@ -7,7 +7,7 @@
 //
 
 import SwiftUI
-import Domain
+import BillingDomainInterface
 
 
 // MARK: - BillingPlanId + 표시 이름

@@ -9,7 +9,7 @@
 //
 
 import UIKit
-import Scenes
+import SceneInfra
 
 
 // MARK: - EventNotificationDefaultTimeOptionScene Interactable & Listenable

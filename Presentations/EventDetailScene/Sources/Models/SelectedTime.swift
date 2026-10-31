@@ -8,9 +8,10 @@
 import Foundation
 import Prelude
 import Optics
-import Domain
 import Extensions
 import CommonPresentation
+import CalendarDomainInterface
+import EventDomainInterface
 
 
 // MARK: - selectedTime

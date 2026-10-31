@@ -7,9 +7,10 @@
 //
 
 import UIKit
-import Domain
-import Scenes
 import CommonPresentation
+import BillingSceneInterface
+import SceneInfra
+import SettingDomainInterface
 
 
 // MARK: - ColorThemeEditSceneBuilerImple

@@ -8,9 +8,9 @@
 
 import UIKit
 import SwiftUI
-import Domain
 import CommonPresentation
 import AdService
+import AdDomainInterface
 
 
 final class ApplicationAdViewBuilder: AdViewBuilder {
