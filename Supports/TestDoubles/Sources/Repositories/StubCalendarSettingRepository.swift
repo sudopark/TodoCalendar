@@ -30,4 +30,13 @@ open class StubCalendarSettingRepository: CalendarSettingRepository, @unchecked 
     open func saveFirstWeekDay(_ newValue: DayOfWeeks) {
         self.firstWeekDayStub = newValue
     }
+    
+    private var ddayCountsTargetDayAsOneStub: Bool?
+    open func loadDDayCountsTargetDayAsOne() -> Bool? {
+        return self.ddayCountsTargetDayAsOneStub
+    }
+    
+    open func saveDDayCountsTargetDayAsOne(_ newValue: Bool) {
+        self.ddayCountsTargetDayAsOneStub = newValue
+    }
 }

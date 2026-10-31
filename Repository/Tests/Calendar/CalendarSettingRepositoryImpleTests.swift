@@ -49,4 +49,27 @@ extension CalendarSettingRepositoryImpleTests {
         // then
         XCTAssertEqual(weekDay, .wednesday)
     }
+    
+    func testRepository_whenNotSaved_ddayCountsTargetDayAsOneIsNil() {
+        // given
+        let repository = self.makeRepository()
+        
+        // when
+        let value = repository.loadDDayCountsTargetDayAsOne()
+        
+        // then
+        XCTAssertNil(value)
+    }
+    
+    func testRepository_saveAndLoadDDayCountsTargetDayAsOne() {
+        // given
+        let repository = self.makeRepository()
+        
+        // when
+        repository.saveDDayCountsTargetDayAsOne(true)
+        let value = repository.loadDDayCountsTargetDayAsOne()
+        
+        // then
+        XCTAssertEqual(value, true)
+    }
 }

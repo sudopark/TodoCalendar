@@ -19,6 +19,7 @@ public final class CalendarSettingRepositoryImple: CalendarSettingRepository, Se
     
     private var timeZoneKey: String { "user_timeZone" }
     private var firstWeekDayKey: String { "first_week_day" }
+    private var ddayCountsTargetDayAsOneKey: String { "dday_counts_target_day_as_one" }
 }
 
 extension CalendarSettingRepositoryImple {
@@ -42,5 +43,13 @@ extension CalendarSettingRepositoryImple {
     public func saveTimeZone(_ timeZone: TimeZone) {
         let identifier = timeZone.identifier
         self.environmentStorage.update(self.timeZoneKey, identifier)
+    }
+    
+    public func loadDDayCountsTargetDayAsOne() -> Bool? {
+        return self.environmentStorage.load(self.ddayCountsTargetDayAsOneKey)
+    }
+    
+    public func saveDDayCountsTargetDayAsOne(_ newValue: Bool) {
+        self.environmentStorage.update(self.ddayCountsTargetDayAsOneKey, newValue)
     }
 }

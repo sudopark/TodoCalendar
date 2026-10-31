@@ -15,4 +15,7 @@ public protocol CalendarSettingRepository: AnyObject, Sendable {
     
     func firstWeekDay() -> DayOfWeeks?
     func saveFirstWeekDay(_ newValue: DayOfWeeks)
+    
+    func loadDDayCountsTargetDayAsOne() -> Bool?
+    func saveDDayCountsTargetDayAsOne(_ newValue: Bool)
 }
