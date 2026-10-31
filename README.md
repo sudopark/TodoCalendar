@@ -54,54 +54,95 @@
 
 ```bash
 ./scripts/run-all-tests.sh              # 전체
-./scripts/run-all-tests.sh Domain       # 특정 스킴만
+./scripts/run-all-tests.sh EventDomain  # 특정 스킴만
 ```
 
 
 
 ## 프로젝트 구조
-<img src=./graph.png>
 
 iOS 17+ / Swift 6.0 / SwiftUI + UIKit 하이브리드. 모든 프레임워크는 static framework로 빌드되며, Tuist 4로 워크스페이스를 생성합니다. 의존성 방향은 아래 한 방향입니다.
 
+```mermaid
+flowchart TB
+    APP["TodoCalendarApp<br/>composition root"]
+    PRES["Presentations"]
+    SCI["Scene 계약<br/>SceneInfra · &lt;X&gt;SceneInterface"]
+    DOM["서브도메인 구현<br/>&lt;X&gt;Domain"]
+    SVC["Services"]
+    INF["Infra<br/>Storage · DB · Remote"]
+    DI["서브도메인 계약<br/>&lt;X&gt;DomainInterface"]
+    K["KernelUtils"]
+
+    APP --> PRES
+    APP --> DOM
+    APP --> SVC
+    PRES --> SCI
+    PRES --> DI
+    SCI --> DI
+    DOM --> DI
+    DOM --> INF
+    SVC --> DI
+    DI --> K
+    INF --> K
 ```
-TodoCalendarApp → Presentations → Scenes / CommonPresentation → Domain ← Repository · Services
-```
+
+화면은 서브도메인 계약만 보고, 서브도메인 구현은 앱 조립 시점(composition root)에만 등장합니다.
 
 ### Domain
 ```
-Domain/Sources
-├── Models
-├── Repositories
-├── Usecases
-└── Utils
+Domain
+├── KernelUtils             # 서브도메인이 공유하는 저장소 · 링크 · 기기 계약 · RRule
+├── PlaceServiceInterface   # 장소 모델 · 장소 검색 계약
+├── AIDomain
+├── AccountDomain
+├── AdDomain
+├── BillingDomain
+├── CalendarDomain
+├── EventDomain
+├── ExternalCalendarDomain
+├── MigrationDomain
+├── NotificationDomain
+├── SettingDomain
+└── SupportDomain
 ```
-서비스 구현을 위한 Model과 Usecase 구현체가 포함됩니다. `Usecase`는 서브도메인(Events, Calendar, Account, AI, Billing, Notification, Setting, Speech, Ad, ImageText, Support)에 따라 역할이 나뉘어져 있으며, 앱 내에서 재사용되기 위한 로직들이 구현되어있습니다. 또한 `Usecase` 구현을 위한 `Repository`의 인터페이스들을 포함합니다.
+서브도메인마다 하나의 프로젝트이고, 각 프로젝트는 네 타겟으로 나뉩니다.
 
-Domain은 데이터 소스도, 실행 환경도 모릅니다. 어떤 구현체를 쓸지는 앱 조립 시점(composition root)에 결정됩니다.
+```
+Domain/<X>Domain
+├── Interface   # <X>DomainInterface — 모델 · usecase 프로토콜 · repository 포트
+├── Sources     # <X>Domain — usecase 구현(Usecases) · repository 구현 · 테이블 · 엔드포인트(Repositories)
+├── Testing     # <X>DomainTesting — 다른 모듈 테스트가 쓰는 stub
+└── Tests       # <X>DomainTests
+```
 
-### Repository
+다른 모듈은 `<X>DomainInterface` 와 `<X>DomainTesting` 만 의존하고, `<X>Domain` 구현은 앱이 조립할 때만 씁니다. Usecase는 데이터 소스도, 실행 환경도 모릅니다. 같은 서브도메인의 repository 구현도 포트 프로토콜로만 받습니다. 온라인(로그인)/오프라인 유저의 데이터를 처리하기 위해 repository 구현이 Remote, Local로 나뉘는 경우가 있고, 외부 캘린더(Google/Apple)는 계정별 Pool로 다중 계정을 처리합니다.
+
+### Repository/Infra
 ```
-Repository/Sources
-├── Extensions
-├── Local
-├── Remote
-└── Repository+Imple
+Repository/Infra
+├── StorageInfra   # 환경 값 저장소(UserDefaults) · 키체인
+├── DBInfra        # 외부 캘린더 계정별 SQLite 연결 Pool · 키-값 테이블
+└── RemoteInfra    # Endpoint · RemoteAPI · 인증 인터셉터 · 인증 정보 저장
 ```
-`Repository` 구현체들을 포함하며, 이들은 데이터를 저장/조회 하는 역할을 합니다. 구현체가 하나만 있는 경우도 있지만, 온라인(로그인)/오프라인 유저의 데이터를 처리하기 위해 Remote, Local 구현체로 분리되어 구현되는 경우도 있습니다. 외부 캘린더(Google/Apple)는 계정별 Pool로 다중 계정을 처리합니다.
+서브도메인 repository 구현이 쓰는 저장·통신 기반입니다. 각 Infra도 Interface · 구현 · Testing 타겟으로 나뉩니다. 엔드포인트는 각 서브도메인의 `Sources/Repositories/<X>Endpoints.swift` 가 자기 호스트 · 경로 · 인증 방식을 직접 정의합니다.
 
 ### Presentations
 ```
 Presentations
-├── Scenes              # Scene 간 공유 프로토콜 (경계)
-├── CommonPresentation  # 공통 UI 컴포넌트 · 테마
+├── Scenes
+│   ├── SceneInfra          # Scene 기반 타입 · AccessibilityID · usecase factory 프로토콜
+│   └── Interfaces          # 화면별 Scene 계약 (<X>SceneInterface)
+├── CommonPresentation      # 공통 UI 컴포넌트 · 테마
+├── CalendarPresentation    # 앱과 위젯이 같이 쓰는 달력 · 이벤트 표현
 ├── CalendarScenes
 ├── EventDetailScene
 ├── EventListScenes
 ├── MemberScenes
 ├── SettingScene
 ├── AIAgentScene
-└── BillingScenes
+├── BillingScenes
+└── WidgetScenes
 ```
 ui를 구현하는 framework들을 포함합니다. 응집도가 높은 화면들을 묶어 하나의 framework를 구현합니다.
 - `CalendarScenes`: 달력 및 해당 날짜에 속한 이벤트 리스트를 표현하기 위한 화면을 포함합니다.
@@ -111,8 +152,9 @@ ui를 구현하는 framework들을 포함합니다. 응집도가 높은 화면�
 - `SettingScene`: 설정과 관련된 화면들이 포함됩니다.
 - `AIAgentScene`: AI 입력 화면들을 포함합니다. 음성/키보드/이미지 입력과 진행 상태·확인 요청 표시가 여기에 속합니다.
 - `BillingScenes`: 플랜과 크레딧 top-up을 구매하는 paywall 화면을 포함합니다.
+- `WidgetScenes`: 위젯 뷰와 위젯 갤러리 화면을 포함합니다.
 
-Presentation framework끼리는 직접 import 하지 않습니다. 다른 framework에 속한 화면으로 전환해야 하는 경우 `Scenes` framework에 정의된 Scene 프로토콜만 참조합니다. ui구현을 위한 공통 로직은 `CommonPresentation` framework에 위치합니다.
+Presentation framework끼리는 직접 import 하지 않습니다. 다른 framework에 속한 화면으로 전환해야 하는 경우 그 화면의 `<X>SceneInterface` 에 정의된 Scene 프로토콜만 참조합니다. ui구현을 위한 공통 로직은 `CommonPresentation` framework에 위치합니다.
 
 Scene 하나를 구성하는 파일과 컴포넌트 간 관계는 [화면단위 구조](./docs/화면단위구조.md) 문서를 참고해주세요.
 
@@ -127,7 +169,7 @@ Services
 ├── StoreKitService     # StoreKit 2 구매 · 구독 관리 시트
 └── AdService           # Google Mobile Ads
 ```
-외부 SDK에 결합되는 service 구현체들을 SDK 단위로 분리한 그룹입니다. Usecase는 Domain에 남고 여기 있는 service 프로토콜을 소비하기 때문에, SDK 교체가 Domain으로 번지지 않습니다.
+외부 SDK에 결합되는 service 구현체들을 SDK 단위로 분리한 그룹입니다. Usecase는 서브도메인에 남고 서브도메인 계약에 정의된 service 프로토콜을 소비하기 때문에, SDK 교체가 서브도메인으로 번지지 않습니다.
 
 ### Supports
 ```
@@ -135,7 +177,7 @@ Supports
 ├── Extensions          # 공통 확장 · 유틸
 ├── Common3rdParty      # 공통 3rd party 의존성 재노출
 ├── UnitTestHelpKit     # 테스트 베이스 클래스 · 헬퍼
-├── TestDoubles         # 공유 stub/spy
+├── TestDoubles         # 화면 테스트용 BaseSpyRouter (도메인 stub 은 <X>DomainTesting)
 └── SnapshotTestHelpKit # 스냅샷 테스트 헬퍼
 ```
 
@@ -159,7 +201,7 @@ TodoCalendarApp
 ```
 TodoCalendarApp Target은 To-do calendar 앱에 해당합니다. 앱의 구현을 위해 위에 나열된 framework 및 다른 framework를 모두 포함합니다.
 - `AppEnvironment.swift`: DB 버전, App Group ID, 외부 캘린더 서비스 목록 등 앱 실행 환경에 관련된 값을 모아둡니다.
-- `Factories`: `Scenes` framework에 정의된 usecaseFactory 구현체들을 포함합니다. 구현체는 로그인 여부에 따라 `NonLoginUsecaseFactoryImple`, `LoginUsecaseFactoryImple` 으로 나눠지게되며, 어떤 객체가 사용될지는 로그인/로그아웃 시점에 분기됩니다.
+- `Factories`: `SceneInfra` framework에 정의된 usecaseFactory 구현체들을 포함합니다. 구현체는 로그인 여부에 따라 `NonLoginUsecaseFactoryImple`, `LoginUsecaseFactoryImple` 으로 나눠지게되며, 어떤 객체가 사용될지는 로그인/로그아웃 시점에 분기됩니다.
 - `Main`: 앱 메인화면에 해당하는 코드 파일을 포함하는 폴더입니다.
 - `Root`: 앱 루트에 해당하는 객체를 포함하는 폴더입니다. `AppDelegate`, `SceneDelegate`에서 해당 폴더에 구현된 객체를 사용하여 필요 동작을 수행합니다. 모든 Repository/Usecase/Factory 조립은 `ApplicationRootBuilder`에서 이루어집니다.
 - `AppExtensions`: 위젯·공유 시트·위젯 설정 intent 확장 타겟입니다. 앱과 App Group을 통해 같은 DB를 공유합니다.
