@@ -189,10 +189,12 @@ let todo = try TodoEventTable.Entity(cursor).asTodoEvent()
 | 위치 | 역할 |
 |---|---|
 | `Repository/Infra/RemoteInfra/Interface/RemoteAPI.swift` | `RemoteAPI` 프로토콜 (구현은 같은 모듈 `Sources/RemoteAPI.swift` 의 Alamofire `Session` 래퍼) |
-| `Repository/Infra/RemoteInfra/Interface/Endpoint.swift` | `Endpoint` 프로토콜 |
-| `Domain/<X>Domain/Sources/Repositories/<X>Endpoints.swift` | 서브도메인의 엔드포인트 enum (`TodoAPIEndpoints`, `ScheduleAPIEndpoints` 등) |
+| `Repository/Infra/RemoteInfra/Interface/Endpoint.swift` | `Endpoint` 프로토콜 — 엔드포인트가 `host`·`subPath`·`authorization` 을 낸다 |
+| `Domain/<X>Domain/Sources/Repositories/<X>Endpoints.swift` | 서브도메인의 엔드포인트 enum (`TodoAPIEndpoints`, `ScheduleAPIEndpoints` 등). case 마다 자기 호스트·경로·인증 방식을 정한다 |
 | `XXRemote` (protocol) | 엔티티별 원격 API 인터페이스 (예: `TodoRemote`) |
 | `XX+Mapping.swift` | JSON 인코딩/디코딩 (`asJson()`, `TodoEventMapper`) |
+
+**인증이 필요한 엔드포인트는 `authorization` 에 `.calendarAPI` 를 낸다.** `CalendarAPIAutenticator.shouldAdapt` 는 이 값만 보고 토큰을 붙인다. `.none` 을 내면 무인증 요청이 나가 401 을 받고, 리트라이도 안 된다. 새 case 는 그 서브도메인의 `<X>EndpointsTests` 기대표에 경로·인증 방식 한 줄을 더한다 — 표에 없는 case 는 테스트가 안 본다.
 
 ### 인증
 

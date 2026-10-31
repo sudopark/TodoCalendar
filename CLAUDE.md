@@ -20,7 +20,7 @@
   - 커밋 메시지 기준(§5) ↔ `commit` 스킬 §메시지 ↔ `report-review` P2 (작성 기준 둘과 검수 기준 하나가 같은 것을 말해야 한다 — 검수 쪽만 고치면 §5 가 ❌ 로 든 예시가 관문을 통과한다)
   - `scripts/derive-test-schemes.py` 의 `HELPERS`·`IMPLICIT_TEST_DEPENDENCIES`·`EXTENSION_SHARED_PATHS` 표 ↔ `Project+Templates.swift` 의 공개 헬퍼·테스트 타겟 암묵 의존·확장 소스 글롭 (스킴 목록과 변경→스킴 매핑은 이 스크립트가 매니페스트에서 도출해 CI·`run-all-tests.sh`·`impact-check.sh` 가 같이 쓴다. 손으로 맞추는 건 이 표뿐이고, 어긋나면 CI detect-changes 의 `derive-test-schemes.test.sh` 가 실패한다 — 상세는 add-framework 스킬)
   - init 시그니처 ↔ 콜사이트
-  - 인증 필요 신규 Endpoint enum ↔ `CalendarAPIAutenticator.shouldAdapt` case ↔ 회귀 테스트 (누락 시 무인증 요청 → 401, 리트라이도 안 됨)
+  - 서브도메인 `<X>Endpoints.swift` 의 신규 case ↔ 같은 서브도메인 `<X>EndpointsTests` 기대표의 경로·인증 방식 줄 (`CalendarAPIAutenticator.shouldAdapt` 는 엔드포인트가 낸 `authorization` 만 본다 — 인증 필요 case 가 `.calendarAPI` 를 안 내면 무인증 요청 → 401, 리트라이도 안 된다. 기대표에 없는 case 는 테스트가 안 본다)
   - CommonPresentation 신규 컴포넌트 ↔ `.claude/rules/presentations-rules.md` §2 카탈로그 표 등재 (누락 시 다음 사람이 못 찾아 같은 컴포넌트를 또 만든다)
   - en `Localizable.strings` 키 추가/삭제 ↔ ko lproj 반영 ↔ 번역 대기 트래킹 이슈에 작업 링크 기록 (등록처는 `localization` 라벨 열린 이슈 중 최신 — 없으면 신설. 나머지 29개 언어는 그 이슈 처리 시점에 일괄 번역 — 상세는 `.claude/rules/localization.md`)
   - opord 명령 상태 값(§6 표) 추가·개명 ↔ 상황판 `~/.claude/campaign-board/index.html` 의 뱃지 규칙·종결 필터(`o.state !== "종결"`) (레포 밖 앱이라 path 매칭이 안 걸린다 — 종결류 값을 새로 만들고 필터를 안 고치면 끝난 작업이 진행 중으로 계속 뜬다)
