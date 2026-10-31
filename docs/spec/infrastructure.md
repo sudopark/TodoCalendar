@@ -190,6 +190,16 @@ ApplicationDeepLinkHandlerImple:
 - 대상: 2025-04-05 09:15 → 정규화: 2025-04-05 00:00
 - 결과: **5일** (양수 = 미래, 음수 = 과거)
 
+**당일을 D+1 로 세는 옵션** — `Calendar.ddayInterval(_:_:countsTargetDayAsOne:)` 이 위 일수에 기기 단위 옵션(`CalendarSettingUsecase.ddayCountsTargetDayAsOne`, 기본 off)을 적용한다. 옵션이 켜져 있으면 일수가 0 이하일 때만 1을 더 뺀다. 문자열 변환(`DDayText`)은 그대로라 표시는 아래처럼 바뀐다.
+
+| 대상일 기준 | 옵션 off | 옵션 on |
+|---|---|---|
+| N일 전 | D-N | D-N |
+| 당일 | D-Day | D+1 |
+| N일 지남 | D+N | D+(N+1) |
+
+앱 상세 화면(`DaysIntervalCountUsecaseImple`)과 디데이 위젯(`DDayWidgetViewModelProvider`)이 같은 함수와 같은 저장 키 `dday_counts_target_day_as_one` 을 쓴다. 디데이 위젯은 위젯 편집에서 그 위젯만 옵션을 켤 수 있고, 켜진 위젯은 `위젯 값 || 앱 값` 으로 센다 ([`widgets.md §9.8`](widgets.md)).
+
 ### 4.2 타임존 처리
 
 - `Calendar(identifier: .gregorian)`에 `CalendarSettingUsecase.currentTimeZone` 적용
@@ -203,7 +213,7 @@ ApplicationDeepLinkHandlerImple:
 
 ### 4.3 실시간 업데이트
 
-- 1초 간격 타이머 (`secondTicks`) + 타임존 변경 Publisher를 `CombineLatest`
+- 1초 간격 타이머 (`secondTicks`) + 타임존 변경 Publisher + 디데이 카운트 옵션 Publisher를 `CombineLatest3`
 - `removeDuplicates()`: 일수가 실제로 변경될 때만 UI 갱신
 - 사용 화면: 공휴일 상세, 이벤트 상세 등
 
@@ -721,6 +731,18 @@ D-Day 계산:
   이벤트가 KST 4/15로 저장되었으나,
   PST 기준으로는 4/14~4/15에 걸침.
   D-Day는 "이벤트 시작 날짜"(원본 타임존) 기준으로 계산.
+```
+
+### D-Day 당일을 D+1 로 세는 옵션
+
+```
+상황: 옵션 on, 대상 4/15
+4/14 → D-1 (대상일 전은 바뀌지 않는다)
+4/15 → D+1 (당일이 1일째)
+4/18 → D+4 (3일 지남 + 1)
+
+옵션은 prepare 때 저장 값(없으면 false)을 SharedDataStore 에 싣는다.
+값이 실리기 전엔 CombineLatest3 가 방출하지 않아 디데이가 비어 보인다.
 ```
 
 ### SharedDataStore — 로그인/로그아웃 시 조건부 초기화

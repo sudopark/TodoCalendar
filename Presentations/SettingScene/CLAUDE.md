@@ -13,6 +13,7 @@
 ```mermaid
 graph TD
     SIL[SettingItemList<br/>설정 메인 메뉴] -->|push| AS[AppearanceSetting<br/>외형 설정]
+    SIL -->|push| WG[WidgetGallery<br/>WidgetScenes 위젯 설정]
     SIL -->|push| ES[EventSetting<br/>이벤트 설정]
     SIL -->|push| HL[HolidayList<br/>공휴일 설정]
     SIL -->|push| OSL[OpenSourceLicense<br/>오픈소스 라이선스]
@@ -24,7 +25,6 @@ graph TD
     CT -->|push| CTE[ColorThemeEdit<br/>커스텀 테마 편집]
     CT -.->|bottomSlide| CTAG[PaidFeatureAdGuide<br/>BillingScenes 광고 안내]
     CTE -.->|bottomSlide| CTAG
-    AS -->|push| WG[WidgetGallery<br/>WidgetScenes]
     AS -->|push| TZ[TimeZoneSelect<br/>타임존]
 
     ES -->|push| ETS[EventDefaultTagSelect<br/>기본 태그]
@@ -47,7 +47,8 @@ graph TD
 
 | 항목 | 설명 |
 |---|---|
-| 표시 항목 | 외형, 이벤트 설정, 공휴일, 요금제, 계정, 공유, 피드백 |
+| 표시 항목 | 외형, 위젯, 이벤트 설정, 공휴일, 요금제, 계정, 공유, 피드백 |
+| 위젯 | 위젯 설정 화면(WidgetScenes `WidgetGallerySceneBuilder`)의 유일한 진입점. 확인 전엔 "new" 캡슐을 달고, 누르면 `NewFeatureBadgeUsecase.markChecked(.widgetSetting)` 후 이동한다 |
 | 계정 상태 | 로그인 여부에 따라 "로그인" 또는 "계정 관리" 표시 |
 | 요금제 | 로그인 여부와 무관하게 노출. 미로그인이면 탭 시 Paywall 대신 로그인 확인 다이얼로그 → SignIn |
 
@@ -61,7 +62,7 @@ graph TD
 | `EventOnCalendarViewModelImple` | 캘린더 이벤트 | 태그 색상 표시, 할일 표시 등 |
 | `EventListAppearnaceSettingViewModelImple` | 이벤트 목록 | 12/24시 형식 등 |
 
-하위 화면: ColorThemeSelect (커스텀 테마 편집 ColorThemeEdit으로 push, 두 화면 모두 무료 유저에게 BillingScenes 의 공용 광고 안내 시트(`PaidFeatureAdGuideSceneBuilder`)를 띄운다), TimeZoneSelect (leaf), WidgetGallery (WidgetScenes — 위젯 기본 테마 설정을 그 화면 상단이 담는다)
+하위 화면: ColorThemeSelect (커스텀 테마 편집 ColorThemeEdit으로 push, 두 화면 모두 무료 유저에게 BillingScenes 의 공용 광고 안내 시트(`PaidFeatureAdGuideSceneBuilder`)를 띄운다), TimeZoneSelect (leaf)
 
 ### ColorThemeEdit — 편집 화면 입력 항목
 
@@ -154,6 +155,7 @@ graph TD
 ```mermaid
 graph TD
     SSB[SettingSceneBuilderImple] -->|생성| SIL[SettingItemListBuilder]
+    SIL -->|주입받음| WGB[WidgetGallerySceneBuilder<br/>구현체는 WidgetScenes]
     SSB -->|생성| ASB[AppearanceSettingBuilder]
     SSB -->|생성| ESB[EventSettingBuilder]
     SSB -->|생성| ETLB[EventTagListBuilder]
@@ -164,7 +166,6 @@ graph TD
 
     ASB -->|하위| CTB[ColorThemeSelectBuilder]
     CTB -->|하위| CTEB[ColorThemeEditBuilder]
-    ASB -->|주입받음| WGB[WidgetGallerySceneBuilder<br/>구현체는 WidgetScenes]
     ASB -->|하위| TZB[TimeZoneSelectBuilder]
 
     ESB -->|하위| ETSB[EventDefaultTagSelectBuilder]
@@ -193,6 +194,6 @@ graph TD
 | 방향 | 대상 | 용도 |
 |---|---|---|
 | → | MemberScenes | 로그인/계정 관리 (MemberSceneBuilder) |
-| → | `Scenes.WidgetGallerySceneBuilder` | 위젯 갤러리 (구현체는 WidgetScenes — 앱 루트가 `SettingSceneBuilderImple` 에 주입) |
+| → | `Scenes.WidgetGallerySceneBuilder` | 위젯 설정 화면 (구현체는 WidgetScenes — 앱 루트가 `SettingSceneBuilderImple` 에 주입하고 설정 목록 Router 가 연다) |
 | ← | TodoCalendarApp | ApplicationRootBuilder에서 생성 |
 | ← | EventDetailScene | SelectEventTag에서 태그 관리 화면 사용 (SettingSceneBuilder) |
