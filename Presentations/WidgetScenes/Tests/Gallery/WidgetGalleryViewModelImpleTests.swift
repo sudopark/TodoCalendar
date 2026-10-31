@@ -47,14 +47,18 @@ final class WidgetGalleryViewModelImpleTests: PublisherWaitable {
         router: SpyWidgetGalleryRouter = .init(),
         setting: WidgetAppearanceSettings = .init(),
         shouldFailChangeSetting: Bool = false,
-        styleUsecase: StubWidgetStyleUsecase = .init()
+        styleUsecase: StubWidgetStyleUsecase = .init(),
+        calendarSettingUsecase: StubCalendarSettingUsecase = .init(),
+        ddayCountsTargetDayAsOne: Bool = false
     ) -> WidgetGalleryViewModelImple {
         let usecase = shouldFailChangeSetting
             ? FailingUISettingUsecase() : StubUISettingUsecase()
+        calendarSettingUsecase.updateDDayCountsTargetDayAsOne(ddayCountsTargetDayAsOne)
         let viewModel = WidgetGalleryViewModelImple(
             setting: setting,
             uiSettingUsecase: usecase,
-            widgetStyleUsecase: styleUsecase
+            widgetStyleUsecase: styleUsecase,
+            calendarSettingUsecase: calendarSettingUsecase
         )
         viewModel.router = router
         return viewModel
@@ -307,5 +311,43 @@ extension WidgetGalleryViewModelImpleTests {
 
         // then
         #expect(router.didShowError != nil)
+    }
+}
+
+
+// MARK: - 디데이 카운트 옵션
+
+extension WidgetGalleryViewModelImpleTests {
+
+    @Test
+    func viewModel_ddayCountsTargetDayAsOne_emitsCurrentValue() async throws {
+        // given
+        let expect = expectConfirm("저장된 디데이 카운트 옵션을 낸다")
+        let viewModel = self.makeViewModel(ddayCountsTargetDayAsOne: true)
+
+        // when
+        let value = try await self.firstOutput(expect, for: viewModel.ddayCountsTargetDayAsOne)
+
+        // then
+        #expect(value == true)
+    }
+
+    @Test
+    func viewModel_whenToggleDDayCount_updatesSetting() async throws {
+        // given
+        let expect = expectConfirm("토글하면 옵션이 바뀌어 다시 방출된다")
+        expect.count = 2
+        let calendarSettingUsecase = StubCalendarSettingUsecase()
+        let viewModel = self.makeViewModel(
+            calendarSettingUsecase: calendarSettingUsecase, ddayCountsTargetDayAsOne: false
+        )
+
+        // when
+        let values = try await self.outputs(expect, for: viewModel.ddayCountsTargetDayAsOne) {
+            viewModel.toggleDDayCountsTargetDayAsOne(true)
+        }
+
+        // then
+        #expect(values == [false, true])
     }
 }
