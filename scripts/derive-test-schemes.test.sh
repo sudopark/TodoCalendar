@@ -21,8 +21,8 @@ changed() { # root paths...
 ALL=$(python3 "$SCRIPT" --all | tr '\n' ' ' | sed 's/ $//')
 
 # --- 전체 목록 ---
-echo " $ALL " | grep -q " Scenes " && echo " $ALL " | grep -q " UnitTestHelpKit "
-check "all_includes_Scenes_and_UnitTestHelpKit" $? "$ALL"
+echo " $ALL " | grep -q " SceneInfra " && echo " $ALL " | grep -q " UnitTestHelpKit "
+check "all_includes_SceneInfra_and_UnitTestHelpKit" $? "$ALL"
 
 # --- 실제 매니페스트 매핑 ---
 out=$(changed "$ROOT" Presentations/AIAgentScene/Sources/x.swift)
@@ -30,17 +30,21 @@ out=$(changed "$ROOT" Presentations/AIAgentScene/Sources/x.swift)
 out=$(changed "$ROOT" Presentations/BillingScenes/Sources/x.swift)
 [ "$out" = "BillingScenes TodoCalendarApp" ]; check "BillingScenes_source_selects_app" $? "$out"
 out=$(changed "$ROOT" Supports/TestDoubles/Sources/x.swift)
-echo " $out " | grep -q " Domain "; check "TestDoubles_source_selects_Domain" $? "$out"
+echo " $out " | grep -q " CalendarScenes " && ! echo " $out " | grep -q " EventDomain "
+check "TestDoubles_source_selects_only_presentation_tests" $? "$out"
 for p in Sources/AppEnvironment.swift Resources/secrets.json Project.swift; do
   out=$(changed "$ROOT" "TodoCalendarApp/$p")
   [ "$out" = "TodoCalendarApp TodoCalendarAppShare TodoCalendarAppWidget" ]; check "app_$p selects_app_widget_share" $? "$out"
 done
-out=$(changed "$ROOT" Domain/Sources/x.swift)
-echo " $out " | grep -q " UnitTestHelpKit "; check "Domain_source_reaches_tests_through_TestDoubles_closure" $? "$out"
+out=$(changed "$ROOT" Domain/CalendarDomain/Sources/x.swift)
+echo " $out " | grep -q " CalendarDomain " && ! echo " $out " | grep -q " SettingScene "
+check "subdomain_impl_change_skips_interface_only_consumers" $? "$out"
+out=$(changed "$ROOT" Domain/CalendarDomain/Interface/x.swift)
+echo " $out " | grep -q " SettingScene "; check "subdomain_interface_change_reaches_interface_consumers" $? "$out"
 out=$(changed "$ROOT" Services/StoreKitService/Sources/x.swift)
 [ "$out" = "TodoCalendarApp" ]; check "untested_framework_source_selects_dependent_app" $? "$out"
-out=$(changed "$ROOT" Domain/Tests/x.swift)
-[ "$out" = "Domain" ]; check "Domain_tests_select_only_Domain" $? "$out"
+out=$(changed "$ROOT" Domain/EventDomain/Tests/x.swift)
+[ "$out" = "EventDomain" ]; check "subdomain_tests_select_only_that_subdomain" $? "$out"
 out=$(changed "$ROOT" TodoCalendarApp/AppExtensions/Base/x.swift)
 [ "$out" = "TodoCalendarApp TodoCalendarAppShare TodoCalendarAppWidget" ]; check "Base_source_selects_app_widget_share" $? "$out"
 out=$(changed "$ROOT" TodoCalendarApp/Sources/LiveActivity/x.swift)
@@ -124,8 +128,7 @@ let project = Project.frameworkWithInterfaceAndTesting(
     name: "F",
     destinations: [.iPhone],
     iOSTargetVersion: "17.0",
-    interfaceDependencies: [.project(target: "A", path: .relativeToRoot("Mods/A"))],
-    withTest: false
+    interfaceDependencies: [.project(target: "A", path: .relativeToRoot("Mods/A"))]
 )
 SWIFT
 cat > "$FIXTURE/Mods/G/Project.swift" <<'SWIFT'
@@ -134,7 +137,9 @@ let project = Project.frameworkWithTest(name: "G", destinations: [.iPhone], iOST
 SWIFT
 all=$(python3 "$SCRIPT" --root "$FIXTURE" --all | tr '\n' ' ' | sed 's/ $//')
 out=$(changed "$FIXTURE" Mods/F/Interface/x.swift)
-[ "$all" = "A BB C E G" ] && [ "$out" = "G" ]; check "test_interface_helper_without_test_has_no_scheme" $? "$all / $out"
+[ "$all" = "A BB C E F G" ] && [ "$out" = "F G" ]; check "interface_change_reaches_interface_consumer" $? "$all / $out"
+out=$(changed "$FIXTURE" Mods/F/Sources/x.swift)
+[ "$out" = "F" ]; check "implementation_change_skips_interface_consumer" $? "$out"
 
 mkdir -p "$FIXTURE/Mods/D"
 cat > "$FIXTURE/Mods/D/Project.swift" <<'SWIFT'

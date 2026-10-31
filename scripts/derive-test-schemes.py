@@ -12,7 +12,7 @@ import os
 import re
 import sys
 
-# 헬퍼 → 테스트 스킴을 내는지. frameworkWithInterfaceAndTesting·makeAppExtensionTargets 는 withTest 인자가 따로 정한다
+# 헬퍼 → 테스트 스킴을 내는지. makeAppExtensionTargets 는 withTest 인자가 따로 정한다. frameworkWithInterfaceAndTesting 은 타겟 넷을 따로 세운다
 HELPERS = {
     "app": True,
     "frameworkWithTest": True,
@@ -24,7 +24,6 @@ HELPERS = {
 # 테스트 타겟에 템플릿이 암묵으로 붙이는 의존 (Project+Templates.swift 테스트 타겟)
 IMPLICIT_TEST_DEPENDENCIES = {
     "Supports/UnitTestHelpKit",
-    "Supports/TestDoubles",
     "Supports/Common3rdParty",
 }
 
@@ -136,6 +135,7 @@ class Graph:
         self.nodes = {}
         self.project_dirs = []
         self.app_projects = {}
+        self.interface_projects = set()
 
     def load(self):
         for project_dir in self.discover_projects():
@@ -174,12 +174,30 @@ class Graph:
         helper = m.group(1)
         arguments = call_arguments(text, m.end() - 1)
         name = string_literal(arguments.get("name"))
-        with_test = HELPERS[helper] and arguments.get("withTest", "true") != "false"
-        node = self.add_node(project_dir, name if with_test else None, arguments)
-        node.target_names.append(name)
         self.project_dirs.append(project_dir)
+        if helper == "frameworkWithInterfaceAndTesting":
+            self.load_interface_project(project_dir, name, arguments)
+            return
+        node = self.add_node(project_dir, name if HELPERS[helper] else None, arguments)
+        node.target_names.append(name)
         if helper == "app":
             self.load_extensions(project_dir, name, arguments.get("extensionTargets", ""))
+
+    def load_interface_project(self, project_dir, name, arguments):
+        interface = f'.target(name: "{name}Interface")'
+        targets = [
+            (f"{project_dir}#Interface", f"{name}Interface", ["interfaceDependencies"], []),
+            (project_dir, name, ["dependencies"], [interface]),
+            (f"{project_dir}#Testing", f"{name}Testing", ["testingDependencies"], [interface]),
+            (f"{project_dir}#Tests", f"{name}Tests", ["testDependencies"],
+             [interface, f'.target(name: "{name}")', f'.target(name: "{name}Testing")']),
+        ]
+        for key, target_name, labels, implicit in targets:
+            scheme = name if key.endswith("#Tests") else None
+            node = self.add_node(key, scheme, {label: arguments[label] for label in labels if label in arguments})
+            node.raw_dependencies += [(project_dir, element) for element in implicit]
+            node.target_names.append(target_name)
+        self.interface_projects.add(project_dir)
 
     def load_extensions(self, project_dir, app_name, text):
         extensions = {}
@@ -217,8 +235,12 @@ class Graph:
             return set()
         if element.startswith(".project("):
             path = re.search(r'relativeToRoot\("([^"]+)"\)', element)
-            if not path or path.group(1) not in self.nodes:
+            if not path or path.group(1) not in self.project_dirs:
                 raise ManifestError(f"{manifest}: 워크스페이스에 없는 프로젝트 의존: {element}")
+            target = re.search(r'target:\s*"([^"]+)"', element)
+            key = by_target.get(target.group(1)) if target else None
+            if key and key.split("#")[0] == path.group(1):
+                return {key}
             return {path.group(1)}
         if element.startswith(".target("):
             name = string_literal(call_arguments(element, element.index("(")).get("name"))
@@ -269,12 +291,24 @@ class Graph:
         return self.schemes_for_framework_path(project_dir, relative)
 
     def schemes_for_framework_path(self, project_dir, relative):
+        if project_dir in self.interface_projects:
+            return self.schemes_for_interface_project_path(project_dir, relative)
         node = self.nodes[project_dir]
         if relative.startswith(UNTESTED_DIRS):
             return set()
         if relative.startswith("Tests/"):
             return {node.scheme} if node.scheme else set()
         return self.schemes_affected_by({project_dir})
+
+    def schemes_for_interface_project_path(self, project_dir, relative):
+        tests = self.nodes[f"{project_dir}#Tests"]
+        if relative.startswith("Tests/"):
+            return {tests.scheme}
+        by_directory = {"Interface/": f"{project_dir}#Interface", "Sources/": project_dir, "Testing/": f"{project_dir}#Testing"}
+        for directory, key in by_directory.items():
+            if relative.startswith(directory):
+                return self.schemes_affected_by({key})
+        return self.schemes_affected_by(set(by_directory.values()))
 
     def schemes_for_app_path(self, project_dir, relative):
         app = self.nodes[project_dir]
