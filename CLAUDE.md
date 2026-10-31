@@ -46,19 +46,22 @@
 ### 의존성 방향
 
 ```
-TodoCalendarApp → Presentations → Scenes / CommonPresentation → Domain ← Repository · Services
+TodoCalendarApp → Presentations → SceneInfra · <X>SceneInterface / CommonPresentation → <X>DomainInterface → KernelUtils
+TodoCalendarApp → <X>Domain → <X>DomainInterface · Repository/Infra(Storage·DB·Remote)
+TodoCalendarApp → Services → <X>DomainInterface
 ```
 
-Presentation 모듈끼리 직접 import 금지. `Scenes` 프레임워크의 공유 프로토콜로만 참조.
+서브도메인(`Domain/<X>Domain`)은 `Interface`·구현·`Testing` 타겟으로 나뉜다. 다른 모듈은 `<X>DomainInterface`·`<X>DomainTesting` 만 의존하고, `<X>Domain` 구현은 앱 조립(composition root)에서만 쓴다. Presentation 모듈끼리 직접 import 금지 — 그 화면 묶음의 `<X>SceneInterface` 공유 프로토콜로만 참조.
 
 ### 주요 파일
 
 | 파일 | 역할 |
 |---|---|
 | `TodoCalendarApp/Sources/AppEnvironment.swift` | DB version, App Group ID, 외부 캘린더 서비스 목록 |
-| `TodoCalendarApp/Sources/Root/ApplicationRootBuilder.swift` | 앱 시작 시 모든 Repository/Usecase/Factory 조립 |
+| `TodoCalendarApp/Sources/Root/ApplicationRootBuilder.swift` | 앱 시작 시 서브도메인 구현(Repository/Usecase)과 Factory 조립 |
 | `TodoCalendarApp/Sources/Factories/ApplicationBase.swift` | Pool/Factory 인스턴스 생성 (다중 계정 인프라 포함) |
-| `Tuist/ProjectDescriptionHelpers/Project+Templates.swift` | `Project.app()` / `Project.framework()` 팩토리 헬퍼 |
+| `Tuist/ProjectDescriptionHelpers/Project+Templates.swift` | `Project.app()` / `Project.framework()` / `Project.frameworkWithTest()` / `Project.frameworkWithInterfaceAndTesting()` 팩토리 헬퍼 |
+| `Domain/KernelUtils/` | 서브도메인이 공유하는 저장소(`SharedDataStore`)·링크·기기 계약·RRule·`FeatureFlag` |
 
 ---
 
