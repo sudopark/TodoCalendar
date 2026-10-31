@@ -12,8 +12,8 @@ import Optics
 import FirebaseCore
 import FirebaseAuth
 @preconcurrency import GoogleSignIn
-import Domain
 import Extensions
+import AccountDomainInterface
 
 
 public final class GoogleOAuth2ServiceUsecaseImple: OAuth2ServiceUsecase, @unchecked Sendable {

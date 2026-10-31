@@ -7,7 +7,8 @@
 //
 
 import UIKit
-import Domain
+import AccountDomainInterface
+import ExternalCalendarDomainInterface
 
 
 public final class ExternalCalendarOAuthUsecaseProviderImple: ExternalCalendarOAuthUsecaseProvider, @unchecked Sendable {

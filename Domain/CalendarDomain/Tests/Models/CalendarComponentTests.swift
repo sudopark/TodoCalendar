@@ -10,9 +10,9 @@ import Testing
 import Foundation
 import Prelude
 import Optics
-
-import CalendarDomainInterface
 @testable import CalendarDomain
+@testable import CalendarDomainInterface
+
 
 
 struct CalendarComponentTests {

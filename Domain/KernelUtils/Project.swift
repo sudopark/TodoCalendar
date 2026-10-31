@@ -6,5 +6,10 @@ let project = Project.frameworkWithTest(name: "KernelUtils",
                                         iOSTargetVersion: "17.0",
                                         dependencies: [
                                             .project(target: "Common3rdParty", path: .relativeToRoot("Supports/Common3rdParty")),
-                                            .project(target: "Extensions", path: .relativeToRoot("Supports/Extensions"))
+                                            .project(target: "Extensions", path: .relativeToRoot("Supports/Extensions")),
+                                            .project(target: "StorageInfraInterface", path: .relativeToRoot("Repository/Infra/StorageInfra"))
+                                        ],
+                                        testDependencies: [
+                                            .project(target: "StorageInfraInterface", path: .relativeToRoot("Repository/Infra/StorageInfra")),
+                                            .project(target: "StorageInfraTesting", path: .relativeToRoot("Repository/Infra/StorageInfra"))
                                         ])

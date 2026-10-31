@@ -1,0 +1,60 @@
+//
+//  GoogleCalendarRepository.swift
+//  ExternalCalendarDomainInterface
+//
+//  Created by sudo.park on 2/9/25.
+//  Copyright © 2025 com.sudo.park. All rights reserved.
+//
+
+import Foundation
+import Combine
+
+public protocol GoogleCalendarRepositoryPool: Sendable {
+
+    func repository(for accountId: String) -> any GoogleCalendarRepository
+    func removeRepository(for accountId: String)
+}
+
+
+public protocol GoogleCalendarRepository: Sendable {
+    
+    func loadColors() -> AnyPublisher<GoogleCalendar.Colors, any Error>
+    
+    func loadCalendarTags() -> AnyPublisher<[GoogleCalendar.Tag], any Error>
+    
+    func loadEvents(
+        _ calendarId: String,
+        in period: Range<TimeInterval>
+    ) -> AnyPublisher<[GoogleCalendar.Event], any Error>
+    
+    func loadRepeatingEventInstances(
+        _ calendarId: String,
+        _ eventId: String,
+        in period: Range<TimeInterval>
+    ) -> AnyPublisher<[GoogleCalendar.Event], any Error>
+
+    func loadEventDetail(
+        _ calendarId: String, _ timeZone: String, _ eventId: String
+    ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error>
+
+    func updateEvent(
+        _ calendarId: String,
+        _ timeZone: String,
+        _ eventId: String,
+        _ params: GoogleCalendar.EventEditParams
+    ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error>
+
+    func respondToEvent(
+        _ calendarId: String,
+        _ timeZone: String,
+        _ eventId: String,
+        _ responseStatus: GoogleCalendar.AttendeeResponseStatus
+    ) async throws -> GoogleCalendar.EventOrigin
+
+    func removeEvent(
+        _ calendarId: String,
+        _ eventId: String
+    ) -> AnyPublisher<Void, any Error>
+
+    func resetCache() async throws
+}

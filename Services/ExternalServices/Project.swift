@@ -6,10 +6,7 @@ let project = Project.framework(
     destinations: [.iPhone],
     iOSTargetVersion: "17.0",
     dependencies: [
-        .project(
-            target: "Domain",
-            path: .relativeToRoot("Domain")
-        ),
-        .external(name: "SwiftLinkPreview")
+        .project(target: "SupportDomainInterface", path: .relativeToRoot("Domain/SupportDomain")),
+                .external(name: "SwiftLinkPreview")
     ]
 )

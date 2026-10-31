@@ -16,14 +16,13 @@ import RemoteInfraInterface
 import RemoteInfraTesting
 
 @testable import RemoteInfra
-import AccountDomainInterface
 
 
 class CalendarAPIAutenticatorTests: BaseTestCase {
     
     private var remoteEnvironment: RemoteEnvironment!
     private var spyAuthStore: SpyKeyChainStorage!
-    private var stubFirebaseService: StubFirebaseAuthService!
+    private var stubFirebaseService: StubFirebaseTokenRefreshService!
     private var spyListener: SpyAutenticatorTokenRefreshListener?
     
     override func setUpWithError() throws {
@@ -51,8 +50,11 @@ class CalendarAPIAutenticatorTests: BaseTestCase {
         return authenticator
     }
     
-    private var dummyAuth: Auth {
-        return .init(uid: "uid", accessToken: "access", refreshToken: "refresh")
+    private var dummyCredential: APICredential {
+        var credential = APICredential(accessToken: "access")
+        credential.refreshToken = "refresh"
+        credential.shouldCheckAccessTokenExpirationBeforeRequest = false
+        return credential
     }
 }
 
@@ -161,13 +163,13 @@ extension CalendarAPIAutenticatorTests {
         let authenticator = self.makeAuthenticator()
         func parameterizeTest(_ shouldFail: Bool) {
             // given
-            self.spyAuthStore.saveAuth(self.dummyAuth)
+            self.spyAuthStore.saveCredential(self.dummyCredential)
             self.stubFirebaseService.refreshFailError = shouldFail ? RuntimeError("failed") : nil
             let expect = expectation(description: "wait-refresh")
             var result: Result<APICredential, any Error>?
             
             // when
-            let credential = APICredential(auth: self.dummyAuth)
+            let credential = self.dummyCredential
             authenticator.refresh(credential, for: Session()) {
                 result = $0
                 expect.fulfill()
@@ -179,12 +181,12 @@ extension CalendarAPIAutenticatorTests {
             case .success:
                 XCTAssertEqual(shouldFail, false)
                 XCTAssertEqual(self.spyListener?.didTokenRefreshed, true)
-                XCTAssertEqual(self.spyAuthStore.loadCurrentAuth()?.accessToken, "access-new")
+                XCTAssertEqual(self.spyAuthStore.loadCredential()?.accessToken, "access-new")
                 
             case .failure:
                 XCTAssertEqual(shouldFail, true)
                 XCTAssertEqual(self.spyListener?.didTokenRefreshFailed, true)
-                XCTAssertEqual(self.spyAuthStore.loadCurrentAuth()?.accessToken, nil)
+                XCTAssertEqual(self.spyAuthStore.loadCredential()?.accessToken, nil)
                 XCTAssertEqual(self.stubFirebaseService.didSignout, true)
             default:
                 XCTFail("refresh failed without response")
@@ -204,12 +206,12 @@ extension CalendarAPIAutenticatorTests {
             userInfo: [NSUnderlyingErrorKey: URLError(.timedOut)]
         )
         let authenticator = self.makeAuthenticator(refreshFailError: refreshFailError)
-        self.spyAuthStore.saveAuth(self.dummyAuth)
+        self.spyAuthStore.saveCredential(self.dummyCredential)
         let expect = expectation(description: "wait-refresh")
         var result: Result<APICredential, any Error>?
 
         // when
-        let credential = APICredential(auth: self.dummyAuth)
+        let credential = self.dummyCredential
         authenticator.refresh(credential, for: Session()) {
             result = $0
             expect.fulfill()
@@ -222,7 +224,7 @@ extension CalendarAPIAutenticatorTests {
             XCTFail("refresh should fail")
             return
         }
-        XCTAssertEqual(self.spyAuthStore.loadCurrentAuth()?.accessToken, "access")
+        XCTAssertEqual(self.spyAuthStore.loadCredential()?.accessToken, "access")
         XCTAssertEqual(self.spyListener?.didTokenRefreshFailed, nil)
         XCTAssertEqual(self.stubFirebaseService.didSignout, nil)
     }
@@ -231,7 +233,6 @@ extension CalendarAPIAutenticatorTests {
     func testAuthenticator_checkTokenChanged() {
         // given
         let authenticator = self.makeAuthenticator()
-        let newAuth = Auth(uid: "uid", accessToken: "access-new", refreshToken: "refresh-new")
         func parameterizeTest(
             _ stubToken: String?,
             isEqual: Bool
@@ -245,7 +246,7 @@ extension CalendarAPIAutenticatorTests {
             request.setValue(stubToken, forHTTPHeaderField: "Authorization")
             
             // when
-            let credential = APICredential(auth: newAuth)
+            let credential = APICredential(accessToken: "access-new")
             let result = authenticator.isRequest(request, authenticatedWith: credential)
             
             // then

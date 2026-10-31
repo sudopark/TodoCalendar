@@ -10,8 +10,8 @@ import Foundation
 import StoreKit
 import Prelude
 import Optics
-import Domain
 import Extensions
+import BillingDomainInterface
 
 
 public final class AppStoreBillingServiceImple: AppStoreBillingService, Sendable {

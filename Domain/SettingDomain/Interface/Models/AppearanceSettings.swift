@@ -1,0 +1,275 @@
+//
+//  AppearanceSettings.swift
+//  SettingDomainInterface
+//
+//  Created by sudo.park on 2023/08/07.
+//
+
+import Foundation
+import Prelude
+import Optics
+import EventDomainInterface
+
+public enum AppThemeColorSetKey: String, CaseIterable, Sendable {
+    case tomato
+    case ruby
+    case crimson
+    case pink
+    case plum
+    case purple
+    case violet
+    case indigo
+    case blue
+    case jade
+    case scarlet
+    case midnight
+    case ink
+    case abyss
+    case wine
+    case dusk
+    case amethyst
+    case camellia
+    case sunset
+}
+
+public enum ColorSetKeys: Sendable, Equatable {
+    case systemTheme
+    case defaultLight
+    case defaultDark
+    case appTheme(AppThemeColorSetKey)
+    case custom(String)
+}
+
+extension ColorSetKeys: RawRepresentable {
+    
+    private enum Constant {
+        static let categorySeparator: Character = ":"
+        static let appThemeCategory: String = "appTheme"
+        static let customCategory: String = "custom"
+    }
+    
+    public var rawValue: String {
+        switch self {
+        case .systemTheme: return "systemTheme"
+        case .defaultLight: return "defaultLight"
+        case .defaultDark: return "defaultDark"
+        case .appTheme(let key):
+            return "\(Constant.appThemeCategory)\(Constant.categorySeparator)\(key.rawValue)"
+        case .custom(let id):
+            return "\(Constant.customCategory)\(Constant.categorySeparator)\(id)"
+        }
+    }
+    
+    public init?(rawValue: String) {
+        switch rawValue {
+        case "systemTheme": self = .systemTheme
+        case "defaultLight": self = .defaultLight
+        case "defaultDark": self = .defaultDark
+        default:
+            let components = rawValue.split(
+                separator: Constant.categorySeparator,
+                maxSplits: 1,
+                omittingEmptySubsequences: false
+            )
+            guard components.count == 2 else { return nil }
+            let value = String(components[1])
+            switch components[0] {
+            case Constant.appThemeCategory:
+                guard let key = AppThemeColorSetKey(rawValue: value) else { return nil }
+                self = .appTheme(key)
+            case Constant.customCategory:
+                guard value.isEmpty == false else { return nil }
+                self = .custom(value)
+            default:
+                return nil
+            }
+        }
+    }
+}
+
+public enum FontSetKeys: String, Sendable {
+    case systemDefault
+}
+
+public enum AccentDays: Sendable {
+    case holiday
+    case saturday
+    case sunday
+}
+
+public enum RowHeightOnCalendar: Int, Sendable {
+    case small = -1
+    case medium = 0
+    case large
+}
+
+public struct CalendarAppearanceSettings: Equatable, Sendable {
+    
+    public let colorSetKey: ColorSetKeys
+    public let fontSetKey: FontSetKeys
+    public var currentCustomColorTheme: CustomColorTheme?
+    
+    // calendar
+    public var accnetDayPolicy: [AccentDays: Bool] = [:]
+    public var showUnderLineOnEventDay: Bool = false
+    public var rowHeight: RowHeightOnCalendar = .medium
+    
+    // event on calendar
+    public var eventOnCalenarTextAdditionalSize: CGFloat = 0
+    public var eventOnCalendarIsBold: Bool = false
+    public var eventOnCalendarShowEventTagColor: Bool = true
+    
+    // event list
+    public var eventTextAdditionalSize: CGFloat = 0
+    public var showHoliday: Bool = false
+    public var showLunarCalendarDate: Bool = false
+    public var is24hourForm: Bool = false
+    public var showUncompletedTodos: Bool = true
+    
+    // general
+    public var hapticEffectIsOn: Bool = false
+    public var animationEffectIsOn: Bool = false
+    
+    public init(
+        colorSetKey: ColorSetKeys,
+        fontSetKey: FontSetKeys
+    ) {
+        self.colorSetKey = colorSetKey
+        self.fontSetKey = fontSetKey
+    }
+    
+    public func update(_ params: EditCalendarAppearanceSettingParams) -> CalendarAppearanceSettings {
+
+        var newSetting = CalendarAppearanceSettings(
+            colorSetKey: params.newColorSetKey ?? self.colorSetKey,
+            fontSetKey: params.newFontSetKcy ?? self.fontSetKey
+        )
+        newSetting.accnetDayPolicy = (params.accnetDayPolicy ?? self.accnetDayPolicy)
+        newSetting.showUnderLineOnEventDay = (params.showUnderLineOnEventDay ?? self.showUnderLineOnEventDay)
+        newSetting.rowHeight = (params.rowHeight ?? self.rowHeight)
+        newSetting.eventOnCalenarTextAdditionalSize = (params.eventOnCalenarTextAdditionalSize ?? self.eventOnCalenarTextAdditionalSize)
+        newSetting.eventOnCalendarIsBold = (params.eventOnCalendarIsBold ?? self.eventOnCalendarIsBold)
+        newSetting.eventOnCalendarShowEventTagColor = (params.eventOnCalendarShowEventTagColor ?? self.eventOnCalendarShowEventTagColor)
+        newSetting.eventTextAdditionalSize = (params.eventTextAdditionalSize ?? self.eventTextAdditionalSize)
+        newSetting.showHoliday = (params.showHoliday ?? self.showHoliday)
+        newSetting.showLunarCalendarDate = (params.showLunarCalendarDate ?? self.showLunarCalendarDate)
+        newSetting.is24hourForm = (params.is24hourForm ?? self.is24hourForm)
+        newSetting.showUncompletedTodos = (params.showUncompletedTodos ?? self.showUncompletedTodos)
+        newSetting.hapticEffectIsOn = (params.hapticEffectIsOn ?? self.hapticEffectIsOn)
+        newSetting.animationEffectIsOn = (params.animationEffectIsOn ?? self.animationEffectIsOn)
+        return newSetting
+    }
+}
+
+public struct WidgetAppearanceSettings: Sendable, Equatable {
+    
+    public enum Background: Hashable, Sendable, Codable {
+        case system
+        case custom(hex: String)
+    }
+    
+    public var background: Background = .system
+    public init() { }
+    
+    public func update(_ params: EditWidgetAppearanceSettingParams) -> WidgetAppearanceSettings {
+        return WidgetAppearanceSettings()
+            |> \.background .~ (params.background ?? self.background)
+    }
+}
+
+public struct AppearanceSettings: Sendable {
+    
+    public var calendar: CalendarAppearanceSettings
+    public var defaultTagColor: DefaultEventTagColorSetting
+    public var widget: WidgetAppearanceSettings
+    
+    public init(
+        calendar: CalendarAppearanceSettings,
+        defaultTagColor: DefaultEventTagColorSetting,
+        widget: WidgetAppearanceSettings = .init()
+    ) {
+        self.calendar = calendar
+        self.defaultTagColor = defaultTagColor
+        self.widget = widget
+    }
+}
+
+// MARK: - edit params
+
+public struct EditCalendarAppearanceSettingParams {
+    
+    public var newColorSetKey: ColorSetKeys?
+    public var newFontSetKcy: FontSetKeys?
+    
+    public var accnetDayPolicy: [AccentDays: Bool]?
+    public var showUnderLineOnEventDay: Bool?
+    public var rowHeight: RowHeightOnCalendar?
+    
+    // event on calendar
+    public var eventOnCalenarTextAdditionalSize: CGFloat?
+    public var eventOnCalendarIsBold: Bool?
+    public var eventOnCalendarShowEventTagColor: Bool?
+    
+    // event list
+    public var eventTextAdditionalSize: CGFloat?
+    public var showHoliday: Bool?
+    public var showLunarCalendarDate: Bool?
+    public var is24hourForm: Bool?
+    public var showUncompletedTodos: Bool?
+    
+    // general
+    public var hapticEffectIsOn: Bool?
+    public var animationEffectIsOn: Bool?
+    
+    public init() { }
+    
+    public var isValid: Bool {
+        
+        return isValidBaseValues 
+            || isValidCalendarValues
+            || isValidEventOnCalendarValues
+            || isValidEventListValues
+            || isValidGeneralValues
+    }
+    
+    private var isValidBaseValues: Bool {
+        return self.newColorSetKey != nil
+            || self.newFontSetKcy != nil
+    }
+    
+    private var isValidCalendarValues: Bool {
+        return self.accnetDayPolicy != nil
+            || self.showUnderLineOnEventDay != nil
+            || self.rowHeight != nil
+    }
+    
+    private var isValidEventOnCalendarValues: Bool {
+        return self.eventOnCalenarTextAdditionalSize != nil
+            || self.eventOnCalendarIsBold != nil
+            || self.eventOnCalendarShowEventTagColor != nil
+    }
+    
+    private var isValidEventListValues: Bool {
+        return self.eventTextAdditionalSize != nil
+            || self.showHoliday != nil
+            || self.showLunarCalendarDate != nil
+            || self.is24hourForm != nil
+            || self.showUncompletedTodos != nil
+    }
+    
+    private var isValidGeneralValues: Bool {
+        return self.hapticEffectIsOn != nil
+            || self.animationEffectIsOn != nil
+    }
+}
+
+public struct EditWidgetAppearanceSettingParams {
+    
+    public var background: WidgetAppearanceSettings.Background?
+    
+    public init() { }
+    
+    public var isValid: Bool {
+        return self.background != nil
+    }
+}

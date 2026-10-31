@@ -15,3 +15,9 @@ public protocol ExternalCalendarDBConnectionPool: Sendable {
     func hasConnection(serviceId: String) async -> Bool
     func connection(serviceId: String) async throws -> SQLiteService
 }
+
+public protocol ExternalCalendarDBConnectionControl: Sendable {
+
+    func open(serviceId: String) async throws
+    func close(serviceId: String) async throws
+}

@@ -11,7 +11,7 @@ import UserNotifications
 import Prelude
 import Optics
 import Extensions
-import Domain
+import NotificationDomainInterface
 
 
 public final class UNLocalNotificationServiceImple: LocalNotificationService, @unchecked Sendable {

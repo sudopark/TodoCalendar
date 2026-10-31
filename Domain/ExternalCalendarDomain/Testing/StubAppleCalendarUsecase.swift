@@ -1,0 +1,95 @@
+//
+//  StubAppleCalendarUsecase.swift
+//  ExternalCalendarDomainTesting
+//
+//  Created by sudo.park on 3/30/26.
+//  Copyright © 2026 com.sudo.park. All rights reserved.
+//
+
+import Foundation
+import Combine
+import Extensions
+import ExternalCalendarDomainInterface
+
+
+open class StubAppleCalendarUsecase: AppleCalendarUsecase, @unchecked Sendable {
+
+    public init() { }
+
+    public var didPrepared = false
+    open func prepare() {
+        didPrepared = true
+    }
+
+    open func refreshCalendarTags() {
+        let tags = self.stubCalendarTags ?? (0..<5).map { int -> AppleCalendar.Tag in
+            return .init(id: "a:\(int)", name: "a:\(int)", colorHex: "hex")
+        }
+        self.tagsSubject.send(tags)
+    }
+
+    open func refreshEvents(in period: Range<TimeInterval>) { }
+
+    private let tagsSubject = CurrentValueSubject<[AppleCalendar.Tag]?, Never>(nil)
+    public var stubCalendarTags: [AppleCalendar.Tag]?
+    open var calendarTags: AnyPublisher<[AppleCalendar.Tag], Never> {
+        tagsSubject.compactMap { $0 }.eraseToAnyPublisher()
+    }
+
+    public func sendCalendarTags(_ tags: [AppleCalendar.Tag]) {
+        tagsSubject.send(tags)
+    }
+
+    public var stubEvents: [AppleCalendar.Event] = []
+    open func events(in period: Range<TimeInterval>) -> AnyPublisher<[AppleCalendar.Event], Never> {
+        Just(stubEvents).eraseToAnyPublisher()
+    }
+
+    public var stubEventOrigin: AppleCalendar.EventOrigin?
+    open func eventOrigin(id: String) -> AnyPublisher<AppleCalendar.EventOrigin?, Never> {
+        if let stubEventOrigin {
+            return Just(stubEventOrigin).eraseToAnyPublisher()
+        }
+        let origin = stubEvents.first(where: { $0.eventId == id }).map { event in
+            AppleCalendar.EventOrigin(
+                eventId: event.eventId, originalEventId: event.originalEventId,
+                calendarId: event.calendarId, name: event.name, eventTime: event.eventTime
+            )
+        }
+        return Just(origin).eraseToAnyPublisher()
+    }
+
+    public var stubIsCalendarWritable: Bool? = true
+    open func isCalendarWritable(_ calendarId: String) -> AnyPublisher<Bool?, Never> {
+        return Just<Bool?>(stubIsCalendarWritable).eraseToAnyPublisher()
+    }
+
+    public var stubUpdatedOrigin: AppleCalendar.EventOrigin?
+    public var shouldFailWrite: Bool = false
+    public var didUpdateEventWith: (eventId: String, params: AppleCalendar.EventEditParams, scope: AppleCalendar.EventEditScope)?
+    open func updateEvent(
+        _ eventId: String,
+        params: AppleCalendar.EventEditParams,
+        scope: AppleCalendar.EventEditScope
+    ) async throws -> AppleCalendar.EventOrigin {
+        didUpdateEventWith = (eventId, params, scope)
+        if shouldFailWrite {
+            throw RuntimeError("failed to update apple calendar event")
+        }
+        return stubUpdatedOrigin ?? AppleCalendar.EventOrigin(
+            eventId: eventId, originalEventId: eventId,
+            calendarId: "cal-1", name: "Updated", eventTime: .period(0..<500)
+        )
+    }
+
+    public var didRemoveEventWith: (eventId: String, scope: AppleCalendar.EventEditScope)?
+    open func removeEvent(
+        _ eventId: String,
+        scope: AppleCalendar.EventEditScope
+    ) async throws {
+        didRemoveEventWith = (eventId, scope)
+        if shouldFailWrite {
+            throw RuntimeError("failed to remove apple calendar event")
+        }
+    }
+}

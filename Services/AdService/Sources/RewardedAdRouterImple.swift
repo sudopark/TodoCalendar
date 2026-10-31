@@ -8,8 +8,8 @@
 
 import UIKit
 import GoogleMobileAds
-import Domain
 import Extensions
+import AdDomainInterface
 
 
 public final class RewardedAdRouterImple: NSObject, @unchecked Sendable {

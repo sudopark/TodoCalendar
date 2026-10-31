@@ -72,11 +72,11 @@ public enum WeekOrdinal: Equatable, Hashable, Sendable {
 
 extension TimeInterval {
     
-    static func days(_ number: Int) -> TimeInterval {
+    public static func days(_ number: Int) -> TimeInterval {
         return TimeInterval(number) * .hours(24)
     }
     
-    static func hours(_ number: Int) -> TimeInterval {
+    public static func hours(_ number: Int) -> TimeInterval {
         return TimeInterval(number) * 3600
     }
     

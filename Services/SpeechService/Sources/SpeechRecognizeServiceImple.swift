@@ -11,7 +11,7 @@ import Combine
 import Speech
 import AVFoundation
 import Extensions
-import Domain
+import SupportDomainInterface
 
 
 public final class SpeechRecognizeServiceImple: SpeechRecognizeService, @unchecked Sendable {

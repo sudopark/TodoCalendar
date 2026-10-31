@@ -15,7 +15,7 @@ import CombineExt
 import Prelude
 import Optics
 import Extensions
-import Domain
+import PlaceServiceInterface
 
 
 private struct SubscriberHolder<Output, Failure: Error>: @unchecked Sendable {

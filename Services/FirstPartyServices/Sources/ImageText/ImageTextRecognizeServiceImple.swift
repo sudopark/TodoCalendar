@@ -10,7 +10,7 @@ import Foundation
 import Vision
 import ImageIO
 import Extensions
-import Domain
+import SupportDomainInterface
 
 
 public final class ImageTextRecognizeServiceImple: ImageTextRecognizeService, Sendable {

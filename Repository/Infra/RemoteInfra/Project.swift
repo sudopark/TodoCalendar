@@ -11,13 +11,13 @@ let project = Project.frameworkWithInterfaceAndTesting(
         .project(target: "KernelUtils",
                  path: .relativeToRoot("Domain/KernelUtils")),
         .project(target: "Extensions",
-                 path: .relativeToRoot("Supports/Extensions"))
+                 path: .relativeToRoot("Supports/Extensions")),
+        .project(target: "StorageInfraInterface",
+                 path: .relativeToRoot("Repository/Infra/StorageInfra"))
     ],
     dependencies: [
         .project(target: "Common3rdParty",
                  path: .relativeToRoot("Supports/Common3rdParty")),
-        .project(target: "AccountDomainInterface",
-                 path: .relativeToRoot("Domain/AccountDomain")),
         .project(target: "KernelUtils",
                  path: .relativeToRoot("Domain/KernelUtils")),
         .project(target: "Extensions",
@@ -26,9 +26,6 @@ let project = Project.frameworkWithInterfaceAndTesting(
                  path: .relativeToRoot("Repository/Infra/StorageInfra"))
     ],
     testingDependencies: [
-        .target(name: "RemoteInfra"),
-        .project(target: "AccountDomainInterface",
-                 path: .relativeToRoot("Domain/AccountDomain")),
         .project(target: "KernelUtils",
                  path: .relativeToRoot("Domain/KernelUtils")),
         .project(target: "Extensions",

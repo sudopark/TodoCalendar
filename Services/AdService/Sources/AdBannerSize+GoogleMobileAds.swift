@@ -8,7 +8,7 @@
 
 import Foundation
 import GoogleMobileAds
-import Domain
+import AdDomainInterface
 
 
 extension AdBannerSize {

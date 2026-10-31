@@ -7,6 +7,7 @@
 
 import Foundation
 import Combine
+import CombineExt
 
 
 extension Publisher {
@@ -86,3 +87,6 @@ extension Publisher {
             .map { $0.0 }
     }
 }
+
+
+extension Publishers.Create.Subscriber: @unchecked Sendable { }

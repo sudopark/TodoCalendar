@@ -10,8 +10,8 @@ import UIKit
 import SwiftUI
 import Combine
 import GoogleMobileAds
-import Domain
 import Extensions
+import AdDomainInterface
 
 
 public final class AdBannerUIView: UIView {

@@ -1,0 +1,87 @@
+//
+//  StubAppleCalendarRepository.swift
+//  ExternalCalendarDomainTesting
+//
+//  Created by sudo.park on 3/30/26.
+//  Copyright © 2026 com.sudo.park. All rights reserved.
+//
+
+import Foundation
+import Combine
+import UnitTestHelpKit
+import ExternalCalendarDomainInterface
+
+
+open class StubAppleCalendarRepository: AppleCalendarRepository, @unchecked Sendable {
+
+    public init() { }
+
+    public var stubCalendarTags: [AppleCalendar.Tag] = (0..<3).map {
+        .init(id: "cal:\($0)", name: "Calendar \($0)", colorHex: nil)
+    }
+    open func loadCalendarTags() -> AnyPublisher<[AppleCalendar.Tag], any Error> {
+        return Just(stubCalendarTags)
+            .setFailureType(to: (any Error).self)
+            .eraseToAnyPublisher()
+    }
+
+    public var stubEvents: [AppleCalendar.Event] = []
+    public var didLoadEvents = false
+    public var didLoadEventsIn: Range<TimeInterval>?
+    open func loadEvents(
+        in period: Range<TimeInterval>
+    ) -> AnyPublisher<[AppleCalendar.Event], any Error> {
+        didLoadEvents = true
+        didLoadEventsIn = period
+        return Just(stubEvents)
+            .setFailureType(to: (any Error).self)
+            .eraseToAnyPublisher()
+    }
+
+    public var stubEventOrigin: AppleCalendar.EventOrigin?
+    open func loadEventOrigin(id: String) -> AnyPublisher<AppleCalendar.EventOrigin?, Never> {
+        if let stubEventOrigin {
+            return Just(stubEventOrigin).eraseToAnyPublisher()
+        }
+        let origin = stubEvents.first(where: { $0.eventId == id }).map { event in
+            AppleCalendar.EventOrigin(
+                eventId: event.eventId, originalEventId: event.originalEventId,
+                calendarId: event.calendarId, name: event.name, eventTime: event.eventTime
+            )
+        }
+        return Just(origin).eraseToAnyPublisher()
+    }
+
+    public var stubUpdatedOrigin: AppleCalendar.EventOrigin?
+    public var shouldFailUpdate: Bool = false
+    public var didUpdateEventWith: (String, AppleCalendar.EventEditParams, AppleCalendar.EventEditScope)?
+    open func updateEvent(
+        _ eventId: String,
+        _ params: AppleCalendar.EventEditParams,
+        scope: AppleCalendar.EventEditScope
+    ) async throws -> AppleCalendar.EventOrigin {
+        didUpdateEventWith = (eventId, params, scope)
+        if shouldFailUpdate {
+            throw TestError()
+        }
+        return stubUpdatedOrigin ?? AppleCalendar.EventOrigin(
+            eventId: eventId, originalEventId: eventId,
+            calendarId: "cal-1", name: "Updated", eventTime: .period(0..<500)
+        )
+    }
+
+    public var shouldFailRemove: Bool = false
+    open func removeEvent(
+        _ eventId: String,
+        scope: AppleCalendar.EventEditScope
+    ) async throws {
+        if shouldFailRemove {
+            throw TestError()
+        }
+    }
+
+    public var didResetCache = false
+    open func resetCache() async throws {
+        didResetCache = true
+    }
+}

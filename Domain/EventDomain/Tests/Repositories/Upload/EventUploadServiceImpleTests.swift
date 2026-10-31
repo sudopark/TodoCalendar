@@ -1,0 +1,708 @@
+//
+//  EventUploadServiceImpleTests.swift
+//  EventDomainTests
+//
+//  Created by sudo.park on 8/6/25.
+//  Copyright © 2025 com.sudo.park. All rights reserved.
+//
+
+import Testing
+import SQLiteService
+import AsyncAlgorithms
+import Combine
+import Prelude
+import Optics
+import Extensions
+import UnitTestHelpKit
+import StorageInfraTesting
+import DBInfraTesting
+@testable import EventDomain
+@testable import EventDomainInterface
+
+
+
+@Suite("EventUploadServiceImpleTests", .serialized)
+final class EventUploadServiceImpleTests: LocalTestable, AsyncEffectWaitable {
+    
+    let sqliteService: SQLiteService = .init()
+    private let spyRemote = PrivateStubRemote()
+    
+    private func makeService(
+        with tasks: [EventUploadingTask],
+        editTagMocking: PassthroughSubject<CustomEventTag, Never>? = nil,
+        shouldFailEditTag: Bool = false
+    ) async throws -> EventUploadServiceImple {
+        
+        self.spyRemote.editTagMocking = editTagMocking
+        self.spyRemote.shouldFailEditTag = shouldFailEditTag
+        
+        let pendingQueueStorage = EventUploadPendingQueueLocalStorageImple(
+            maxFailCount: 3,
+            sqliteService: self.sqliteService
+        )
+        for try await task in tasks.async {
+            try await pendingQueueStorage.pushTask(task)
+        }
+        
+        let tagLocal = EventTagLocalStorageImple(sqliteService: self.sqliteService, environmentStorage: FakeEnvironmentStorage())
+        try await tagLocal.updateTags([
+            .init(uuid: "tag", name: "name", colorHex: "hex")
+        ])
+        
+        let todoLocal = TodoLocalStorageImple(sqliteService: self.sqliteService)
+        let repeatingTodo = TodoEvent(uuid: "repeating-todo", name: "name")
+            |> \.time .~ .at(100)
+            |> \.repeating .~ pure(
+                EventRepeating(
+                    repeatingStartTime: 100,
+                    repeatOption: EventRepeatingOptions.EveryDay()
+                )
+                |> \.repeatingEndOption .~ .count(10)
+            )
+            |> \.repeatingTurn .~ 4
+        try await todoLocal.updateTodoEvents([
+            .init(uuid: "todo", name: "name"),
+            repeatingTodo
+        ])
+        let done = DoneTodoEvent(uuid: "done", name: "name", originEventId: "origin", doneTime: Date())
+        try await todoLocal.saveDoneTodoEvent(done)
+        
+        let scheduleLocal = ScheduleEventLocalStorageImple(sqliteService: self.sqliteService)
+        try await scheduleLocal.updateScheduleEvents([
+            .init(uuid: "schedule", name: "name", time: .at(0))
+        ])
+        
+        let eventDetailLocal = EventDetailDataLocalStorageImple<EventDetailDataTable>(sqliteService: self.sqliteService)
+        try await eventDetailLocal.saveDetail(.init("detail"))
+        
+        let doneDetailLocal = EventDetailDataLocalStorageImple<DoneTodoEventDetailTable>(sqliteService: self.sqliteService)
+        try await doneDetailLocal.saveDetail(.init("done"))
+        
+        return EventUploadServiceImple(
+            pendingQueueStorage: pendingQueueStorage,
+            eventTagRemote: self.spyRemote,
+            eventTagLocalStorage: tagLocal,
+            todoRemote: self.spyRemote,
+            todoLocalStorage: todoLocal,
+            scheduleRemote: self.spyRemote,
+            scheduleLocalStorage: scheduleLocal,
+            eventDetailRemote: self.spyRemote,
+            eventDetailLocalStorage: eventDetailLocal,
+            doneTodoDetailRemote: self.spyRemote,
+            doneTodoDetailLocalStorage: doneDetailLocal
+        )
+    }
+    
+    private func nextPendingUploadTask() async throws -> EventUploadingTask? {
+        return try await self.sqliteService.async.run { db in
+            let query = EventUploadPendingQueueTable.selectAll()
+                .where { $0.uploadFailCount < 3 }
+                .orderBy(isAscending: true) { $0.timestamp }
+            return try db.loadOne(EventUploadPendingQueueTable.self, query: query)?.asUploadingTask()
+        }
+    }
+    
+    private func allPendingUploadTasks(withoutCountLimit: Bool = false) async throws -> [EventUploadingTask] {
+        return try await self.sqliteService.async.run { db in
+            
+            var query = EventUploadPendingQueueTable.selectAll()
+            if !withoutCountLimit {
+                query = query.where { $0.uploadFailCount < 3 }
+            }
+            query = query.orderBy(isAscending: true) { $0.timestamp }
+            return try db.load(EventUploadPendingQueueTable.self, query: query).map { try $0.asUploadingTask() }
+        }
+    }
+
+    private func waitPendingUploadTasks(
+        _ description: String,
+        timeoutMillis: Int = 3000,
+        until condition: ([EventUploadingTask]) -> Bool
+    ) async throws -> [EventUploadingTask] {
+        let deadline = Date().addingTimeInterval(TimeInterval(timeoutMillis) / 1000)
+        var tasks = try await self.allPendingUploadTasks()
+        while !condition(tasks), Date() < deadline {
+            try await Task.sleep(nanoseconds: 5_000_000)
+            tasks = try await self.allPendingUploadTasks()
+        }
+        guard condition(tasks) else {
+            throw AsyncEffectWaitTimeout(
+                timeoutMillis: timeoutMillis,
+                description: "\(timeoutMillis)ms 안에 조건이 참이 되지 않았다 — \(description)"
+            )
+        }
+        return tasks
+    }
+}
+
+
+extension EventUploadServiceImpleTests {
+    
+    // task 추가 -> 업로드
+    @Test func service_appendAndUploadTask() async throws {
+        try await self.runTestWithOpenClose("upload_tc1") {
+            // given
+            let service = try await self.makeService(with: [])
+            
+            // when
+            let task = EventUploadingTask(dataType: .eventTag, uuid: "tag", isRemovingTask: false)
+            try await service.append(task)
+            
+            // then
+            try await service.waitUntilUploadingEnd()
+            
+            let nextTask = try await self.nextPendingUploadTask()
+            #expect(nextTask == nil)
+            
+            #expect(self.spyRemote.deleteOrUpdateIds == [
+                "tag"
+            ])
+        }
+    }
+    
+    // 업로딩 시작 -> 순차적으로 업로드
+    @Test func service_uploadingTask_sequentially() async throws {
+        try await self.runTestWithOpenClose("upload_tc2") {
+            // given
+            let service = try await self.makeService(with: [
+                .init(timestamp: 0, dataType: .eventTag, uuid: "tag", isRemovingTask: false),
+                .init(timestamp: 1, dataType: .todo, uuid: "todo", isRemovingTask: false),
+                .init(timestamp: 2, dataType: .schedule, uuid: "schedule", isRemovingTask: false)
+            ])
+            
+            // when
+            try await service.resume()
+            
+            // then
+            try await service.waitUntilUploadingEnd()
+            
+            let nextTask = try await self.nextPendingUploadTask()
+            #expect(nextTask == nil)
+            
+            #expect(self.spyRemote.deleteOrUpdateIds == [
+                "tag",
+                "todo",
+                "schedule"
+            ])
+        }
+    }
+    
+    // 업로딩 시작중에 task 추가 -> 마지막에 업로드
+    @Test func service_whenAppendTaskDuringUploading_uploadingAtLast() async throws {
+        try await self.runTestWithOpenClose("upload_tc3") {
+            // given
+            let service = try await self.makeService(with: [
+                .init(timestamp: 0, dataType: .eventTag, uuid: "tag", isRemovingTask: false),
+                .init(timestamp: 1, dataType: .todo, uuid: "todo", isRemovingTask: false),
+                .init(timestamp: 2, dataType: .schedule, uuid: "schedule", isRemovingTask: false)
+            ])
+            
+            // when
+            try await service.resume()
+            try await service.append(.init(timestamp: 4, dataType: .eventTag, uuid: "tag-delete", isRemovingTask: true))
+            
+            // then
+            try await service.waitUntilUploadingEnd()
+            
+            let nextTask = try await self.nextPendingUploadTask()
+            #expect(nextTask == nil)
+            
+            #expect(self.spyRemote.deleteOrUpdateIds == [
+                "tag",
+                "todo",
+                "schedule",
+                "tag-delete",
+            ])
+        }
+    }
+    
+    // 업로딩 중에 pause됨 -> 업로딩 loop 중지
+    @Test func service_whenPausedDuringUploading_endUploadLoop() async throws {
+        try await self.runTestWithOpenClose("upload_tc4") {
+            // given
+            let mocking = PassthroughSubject<CustomEventTag, Never>()
+            let service = try await self.makeService(with: [
+                .init(timestamp: 0, dataType: .todo, uuid: "todo", isRemovingTask: false),
+                .init(timestamp: 1, dataType: .eventTag, uuid: "tag", isRemovingTask: false),
+                .init(timestamp: 2, dataType: .schedule, uuid: "schedule", isRemovingTask: false)
+            ], editTagMocking: mocking)
+            
+            // when
+            try await service.resume()
+            try await self.waitEffect("tag 업로드 진입") { self.spyRemote.didEnterEditTag }
+            await service.pause()
+            
+            // then
+            try await service.waitUntilUploadingEnd()
+            
+            let pendingTasks = try await self.waitPendingUploadTasks("중단된 tag 가 재스케줄됨") { tasks in
+                tasks.contains { $0.uuid == "tag" }
+            }
+            #expect(pendingTasks.map { $0.uuid } == [
+                "schedule", "tag"
+            ])
+            #expect(self.spyRemote.deleteOrUpdateIds == [
+                "todo"
+            ])
+        }
+    }
+    
+    // 중단에 업로드 실패해도 무시하고 다음으로 넘어감
+    @Test func service_whenUploadFail_skipToNext() async throws {
+        try await self.runTestWithOpenClose("upload_tc5") {
+            // given
+            let service = try await self.makeService(with: [
+                .init(timestamp: 0, dataType: .todo, uuid: "todo", isRemovingTask: false),
+                .init(timestamp: 1, dataType: .eventTag, uuid: "tag", isRemovingTask: false),
+                .init(timestamp: 2, dataType: .schedule, uuid: "schedule", isRemovingTask: false)
+            ], shouldFailEditTag: true)
+            
+            // when
+            try await service.resume()
+            
+            // then
+            try await service.waitUntilUploadingEnd()
+            
+            let nextPendingTask = try await self.nextPendingUploadTask()
+            #expect(nextPendingTask == nil)
+            #expect(self.spyRemote.deleteOrUpdateIds == [
+                "todo", "schedule"
+            ])
+        }
+    }
+    
+    // 업로드 실패된 task 다시 업로딩 큐에 저장
+    @Test func service_whenUploadFailTaskAndResheduleFailJob_appendPendingQueue() async throws {
+        try await self.runTestWithOpenClose("upload_tc6") {
+            // given
+            let service = try await self.makeService(with: [
+                .init(timestamp: 0, dataType: .todo, uuid: "todo", isRemovingTask: false),
+                .init(timestamp: 1, dataType: .eventTag, uuid: "tag", isRemovingTask: false),
+                .init(timestamp: 2, dataType: .schedule, uuid: "schedule", isRemovingTask: false)
+            ], shouldFailEditTag: true)
+            
+            // when
+            try await service.resume()
+            try await service.waitUntilUploadingEnd()
+                        
+            // then
+            let pendingTasks = try await self.allPendingUploadTasks(withoutCountLimit: true)
+            #expect(pendingTasks.map { $0.uuid } == [
+                "tag"
+            ])
+            let tagTask = pendingTasks.first(where: { $0.uuid == "tag" })
+            #expect(tagTask?.uploadFailCount == 3)
+            #expect(self.spyRemote.deleteOrUpdateIds == [
+                "todo", "schedule"
+            ])
+        }
+    }
+    
+    // 업로드 중지된 task도 임시 저장했다 rescheduleUploadFailedJobs시에 다시 업로딩 큐에 저장
+    @Test func service_whenPauseUploading_rescheduleCanceledTask() async throws {
+        try await self.runTestWithOpenClose("upload_tc7") {
+            // given
+            let mocking = PassthroughSubject<CustomEventTag, Never>()
+            let service = try await self.makeService(with: [
+                .init(timestamp: 0, dataType: .todo, uuid: "todo", isRemovingTask: false),
+                .init(timestamp: 1, dataType: .eventTag, uuid: "tag", isRemovingTask: false),
+                .init(timestamp: 2, dataType: .schedule, uuid: "schedule", isRemovingTask: false)
+            ], editTagMocking: mocking)
+            
+            // when
+            try await service.resume()
+            try await self.waitEffect("tag 업로드 진입") { self.spyRemote.didEnterEditTag }
+            await service.pause()
+            try await service.waitUntilUploadingEnd()
+            
+            // then
+            let pendingTasks = try await self.waitPendingUploadTasks("tag 가 failCount 1 로 재스케줄됨") { tasks in
+                tasks.contains { $0.uuid == "tag" && $0.uploadFailCount == 1 }
+            }
+            #expect(pendingTasks.map { $0.uuid } == [
+                "schedule", "tag"
+            ])
+            let tagTask = pendingTasks.first(where: { $0.uuid == "tag" })
+            #expect(tagTask?.uploadFailCount == 1)
+            #expect(self.spyRemote.deleteOrUpdateIds == [
+                "todo"
+            ])
+        }
+    }
+}
+
+extension EventUploadServiceImpleTests {
+    
+    // uploading task - delete tag
+    @Test func service_deleteTag() async throws {
+        try await self.runTestWithOpenClose("upload_tc10_tag") {
+            // given
+            let service = try await self.makeService(with: [
+                .init(timestamp: 100, dataType: .eventTag, uuid: "tag", isRemovingTask: true)
+            ])
+            
+            // when
+            try await service.resume()
+            try await service.waitUntilUploadingEnd()
+            
+            // then
+            #expect(self.spyRemote.didRemoveTagIds == ["tag"])
+        }
+    }
+    
+    // uploading task - update event tag
+    @Test func service_updateTag() async throws {
+        try await self.runTestWithOpenClose("upload_tc11_tag") {
+            // given
+            let service = try await self.makeService(with: [
+                .init(timestamp: 100, dataType: .eventTag, uuid: "tag", isRemovingTask: false)
+            ])
+            
+            // when
+            try await service.resume()
+            try await service.waitUntilUploadingEnd()
+            
+            // then
+            #expect(self.spyRemote.didEditTagIds == ["tag"])
+        }
+    }
+    
+    // uploading task - delete todo
+    @Test func service_deleteTodo() async throws {
+        try await self.runTestWithOpenClose("upload_tc12_todo") {
+            // given
+            let service = try await self.makeService(with: [
+                .init(timestamp: 100, dataType: .todo, uuid: "todo", isRemovingTask: true)
+            ])
+            
+            // when
+            try await service.resume()
+            try await service.waitUntilUploadingEnd()
+            
+            // then
+            #expect(self.spyRemote.didRemoveTodoIds == ["todo"])
+        }
+    }
+    
+    // uploading task - update todo
+    @Test func service_updateTodo() async throws {
+        try await self.runTestWithOpenClose("upload_tc13_todo") {
+            // given
+            let service = try await self.makeService(with: [
+                .init(timestamp: 100, dataType: .todo, uuid: "todo", isRemovingTask: false)
+            ])
+            
+            // when
+            try await service.resume()
+            try await service.waitUntilUploadingEnd()
+            
+            // then
+            #expect(self.spyRemote.didEditTodoIds == ["todo"])
+        }
+    }
+
+    // uploading task - update repeating todo: 반복 회차도 함께 업로드
+    @Test func service_updateRepeatingTodo_uploadRepeatingTurn() async throws {
+        try await self.runTestWithOpenClose("upload_tc13_todo_turn") {
+            // given
+            let service = try await self.makeService(with: [
+                .init(timestamp: 100, dataType: .todo, uuid: "repeating-todo", isRemovingTask: false)
+            ])
+
+            // when
+            try await service.resume()
+            try await service.waitUntilUploadingEnd()
+
+            // then
+            #expect(self.spyRemote.didEditTodoIds == ["repeating-todo"])
+            #expect(self.spyRemote.didEditTodoParams?.repeatingTurn == 4)
+        }
+    }
+
+    // uploading task - delete schedule
+    @Test func service_deleteSchedule() async throws {
+        try await self.runTestWithOpenClose("upload_tc14_sc") {
+            // given
+            let service = try await self.makeService(with: [
+                .init(timestamp: 100, dataType: .schedule, uuid: "schedule", isRemovingTask: true)
+            ])
+            
+            // when
+            try await service.resume()
+            try await service.waitUntilUploadingEnd()
+            
+            // then
+            #expect(self.spyRemote.didRemoveScheduleIds == ["schedule"])
+        }
+    }
+    
+    // uploading task - update schedule
+    @Test func service_updateSchedule() async throws {
+        try await self.runTestWithOpenClose("upload_tc15_sc") {
+            // given
+            let service = try await self.makeService(with: [
+                .init(timestamp: 100, dataType: .schedule, uuid: "schedule", isRemovingTask: false)
+            ])
+            
+            // when
+            try await service.resume()
+            try await service.waitUntilUploadingEnd()
+            
+            // then
+            #expect(self.spyRemote.didEditScheduleIds == ["schedule"])
+        }
+    }
+    
+    @Test func service_updateEventDetail() async throws {
+        try await self.runTestWithOpenClose("upload_tc16_detail") {
+            // given
+            let servie = try await self.makeService(with: [
+                .init(timestamp: 100, dataType: .eventDetail, uuid: "detail", isRemovingTask: false)
+            ])
+            
+            // when
+            try await servie.resume()
+            try await servie.waitUntilUploadingEnd()
+            
+            // then
+            #expect(self.spyRemote.didEditEventDetailIds == ["detail"])
+        }
+    }
+    
+    @Test func service_deleteEventDetail() async throws {
+        try await self.runTestWithOpenClose("upload_tc_17_detail_remove") {
+            // given
+            let servie = try await self.makeService(with: [
+                .init(timestamp: 100, dataType: .eventDetail, uuid: "detail", isRemovingTask: true)
+            ])
+            
+            // when
+            try await servie.resume()
+            try await servie.waitUntilUploadingEnd()
+            
+            // then
+            #expect(self.spyRemote.didRemoveEventDetailIds == ["detail"])
+        }
+    }
+    
+    @Test func service_updateDoneTodo() async throws {
+        try await self.runTestWithOpenClose("upload_tc_18_done") {
+            // given
+            let service = try await self.makeService(with: [
+                .init(dataType: .doneTodo, uuid: "done", isRemovingTask: false)
+            ])
+            
+            // when
+            try await service.resume()
+            try await service.waitUntilUploadingEnd()
+            
+            // then
+            #expect(self.spyRemote.didEditDoneTodoIds == ["done"])
+        }
+    }
+    
+    @Test func service_removeDoneTodo() async throws {
+        try await self.runTestWithOpenClose("upload_tc_19_done") {
+            // given
+            let service = try await self.makeService(with: [
+                .init(dataType: .doneTodo, uuid: "done", isRemovingTask: true)
+            ])
+            
+            // when
+            try await service.resume()
+            try await service.waitUntilUploadingEnd()
+            
+            // then
+            #expect(self.spyRemote.didRemoveDoneTodoId == "done")
+        }
+    }
+    
+    @Test func service_uploadDoneTodoDetail() async throws {
+        try await self.runTestWithOpenClose("upload_tc_20_done") {
+            // given
+            let service = try await self.makeService(with: [
+                .init(dataType: .doneTodoDetail, uuid: "done", isRemovingTask: false)
+            ])
+            
+            // when
+            try await service.resume()
+            try await service.waitUntilUploadingEnd()
+            
+            // then
+            #expect(self.spyRemote.didEditEventDetailIds == ["done"])
+        }
+    }
+}
+
+private final class PrivateStubRemote: @unchecked Sendable {
+    
+    var deleteOrUpdateIds: [String] = []
+    var editTagMocking: PassthroughSubject<CustomEventTag, Never>?
+    var shouldFailEditTag: Bool = false
+    
+    var didEnterEditTag: Bool = false
+    var didRemoveTagIds: [String] = []
+    var didEditTagIds: [String] = []
+    var didRemoveTodoIds: [String] = []
+    var didEditTodoIds: [String] = []
+    var didEditTodoParams: TodoEditParams?
+    var didRemoveScheduleIds: [String] = []
+    var didEditScheduleIds: [String] = []
+    var didEditEventDetailIds: [String] = []
+    var didRemoveEventDetailIds: [String] = []
+    var didEditDoneTodoIds: [String] = []
+    var didRemoveDoneTodoId: String?
+}
+
+extension PrivateStubRemote: EventTagRemote {
+    
+    func editTag(_ tagId: String, _ params: CustomEventTagEditParams) async throws -> CustomEventTag {
+        
+        if shouldFailEditTag {
+            throw RuntimeError("failed")
+        }
+        
+        if let mocking = self.editTagMocking {
+            self.didEnterEditTag = true
+            let tag = try await mocking.values.first(where: { _ in true }).unwrap()
+            self.deleteOrUpdateIds.append(tagId)
+            self.didEditTagIds.append(tagId)
+            return tag
+        }
+        self.deleteOrUpdateIds.append(tagId)
+        self.didEditTagIds.append(tagId)
+        return .init(uuid: tagId, name: params.name, colorHex: params.colorHex)
+    }
+    func deleteTag(_ tagId: String) async throws {
+        self.deleteOrUpdateIds.append(tagId)
+        self.didRemoveTagIds.append(tagId)
+    }
+    
+    func makeTag(_ params: CustomEventTagMakeParams) async throws -> CustomEventTag { return .init(uuid: "", name: "", colorHex: "") }
+    
+    func deleteTagWithAllEvents(_ tagId: String) async throws -> RemoveCustomEventTagWithEventsResult { return .init(todoIds: [], scheduleIds: []) }
+    func deleteTagWithEvents(_ tagId: String, todos: [String], schedules: [String]) async throws { }
+    func loadAllEventTags() async throws -> [CustomEventTag] {[] }
+    func loadCustomTags(_ ids: [String]) async throws -> [CustomEventTag] { [] }
+}
+
+extension PrivateStubRemote: TodoRemote {
+    
+    func updateTodoEvent(_ eventId: String, _ params: TodoEditParams) async throws -> TodoEvent {
+        self.deleteOrUpdateIds.append(eventId)
+        self.didEditTodoIds.append(eventId)
+        self.didEditTodoParams = params
+        return .init(uuid: eventId, name: params.name ?? "")
+    }
+    
+    func removeTodo(eventId: String) async throws -> RemoveTodoResult {
+        self.deleteOrUpdateIds.append(eventId)
+        self.didRemoveTodoIds.append(eventId)
+        return .init()
+    }
+    
+    func updateDoneTodo(_ doneTodo: DoneTodoEvent) async throws -> DoneTodoEvent {
+        self.deleteOrUpdateIds.append(doneTodo.uuid)
+        self.didEditDoneTodoIds.append(doneTodo.uuid)
+        return doneTodo
+    }
+    
+    func makeTodoEvent(_ params: TodoMakeParams) async throws -> TodoEvent {
+        throw RuntimeError("failed")
+    }
+    
+    
+    func completeTodo(origin: TodoEvent, nextTime: EventTime?, nextTurn: Int?) async throws -> CompleteTodoResult {
+        throw RuntimeError("failed")
+    }
+
+    func replaceRepeatingTodo(origin: TodoEvent, to newParams: TodoMakeParams, nextTime: EventTime?, nextTurn: Int?) async throws -> ReplaceRepeatingTodoEventResult {
+        throw RuntimeError("failed")
+    }
+    
+    func loadCurrentTodos() async throws -> [TodoEvent] { [] }
+    
+    func loadTodos(in range: Range<TimeInterval>) async throws -> [TodoEvent] { [] }
+    
+    func loadDoneTodo(_ doneTodoId: String) async throws -> DoneTodoEvent {
+        throw RuntimeError("failed")
+    }
+    
+    func loadTodo(_ id: String) async throws -> TodoEvent {
+        throw RuntimeError("failed")
+    }
+    
+    func loadUncompletedTodosFromRemote(_ now: Date) async throws -> [TodoEvent] { [] }
+    
+    func loadDoneTodoEvents(_ params: DoneTodoLoadPagingParams) async throws -> [DoneTodoEvent] { [] }
+    
+    func removeDoneTodos(_ scope: RemoveDoneTodoScope) async throws { }
+    
+    func removeDoneTodo(_ doneTodoId: String) async throws {
+        self.didRemoveDoneTodoId = doneTodoId
+    }
+    
+    func revertDoneTodo(_ doneTodoId: String) async throws -> RevertTodoResult {
+        throw RuntimeError("failed")
+    }
+    
+    func cancelDoneTodo(_ origin: TodoEvent, _ doneTodoId: String?) async throws -> RevertToggleTodoDoneResult {
+        throw RuntimeError("failed")
+    }
+}
+
+extension PrivateStubRemote: ScheduleEventRemote {
+    
+    func updateScheduleEvent(_ eventId: String, _ params: SchedulePutParams) async throws -> ScheduleEvent {
+        self.deleteOrUpdateIds.append(eventId)
+        self.didEditScheduleIds.append(eventId)
+        return .init(uuid: eventId, name: params.name ?? "", time: params.time ?? .at(100))
+    }
+    
+    func removeScheduleEvent(_ eventId: String) async throws {
+        self.deleteOrUpdateIds.append(eventId)
+        self.didRemoveScheduleIds.append(eventId)
+    }
+    
+    func makeScheduleEvent(_ params: ScheduleMakeParams) async throws -> ScheduleEvent {
+        throw RuntimeError("failed")
+    }
+    
+    func excludeRepeatingEvent(_ originEventId: String, at currentTime: EventTime, asNew params: ScheduleMakeParams) async throws -> ExcludeRepeatingEventResult {
+        throw RuntimeError("failed")
+    }
+    
+    func branchNewRepeatingEvent(_ originEventId: String, fromTime: TimeInterval, _ params: SchedulePutParams) async throws -> BranchNewRepeatingScheduleFromOriginResult {
+        throw RuntimeError("failed")
+    }
+    
+    func removeRepeatingScheduleEventTime(_ eventId: String, _ time: EventTime) async throws -> ScheduleEvent {
+        throw RuntimeError("failed")
+    }
+    
+    func loadScheduleEvents(in range: Range<TimeInterval>) async throws -> [ScheduleEvent] {
+        throw RuntimeError("failed")
+    }
+    
+    func loadScheduleEvent(_ eventId: String) async throws -> ScheduleEvent {
+        throw RuntimeError("failed")
+    }
+}
+
+extension PrivateStubRemote: EventDetailRemote {
+    
+    func loadDetail(_ id: String) async throws -> EventDetailData {
+        throw RuntimeError("failed")
+    }
+    
+    func saveDetail(_ detail: EventDetailData) async throws -> EventDetailData {
+        self.deleteOrUpdateIds.append(detail.eventId)
+        self.didEditEventDetailIds.append(detail.eventId)
+        return detail
+    }
+    
+    func removeDetail(_ id: String) async throws {
+        self.deleteOrUpdateIds.append(id)
+        self.didRemoveEventDetailIds.append(id)
+    }
+}
