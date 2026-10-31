@@ -70,6 +70,7 @@ extension MainSceneBuilerImple: MainSceneBuiler {
             aiAgentOrchestrationUsecase: self.usecaseFactory.aiAgentOrchestrationUsecase,
             eventLiveActivityUsecase: self.usecaseFactory.eventLiveActivityUsecase,
             guideTodoUsecase: self.usecaseFactory.makeGuideTodoUsecase(),
+            newFeatureBadgeUsecase: self.usecaseFactory.makeNewFeatureBadgeUsecase(),
             legalNoticeUsecase: self.usecaseFactory.makeLegalNoticeUsecase(),
             foremostEventUsecase: self.usecaseFactory.makeForemostEventUsecase(),
             paidFeatureGateUsecase: self.usecaseFactory.makePaidFeatureGateUsecase(),

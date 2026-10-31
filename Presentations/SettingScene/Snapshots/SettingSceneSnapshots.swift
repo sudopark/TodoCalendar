@@ -89,6 +89,7 @@ final class SettingSceneSnapshots: XCTestCase {
             headerText: nil,
             items: [
                 SettingItemModel(.appearance),
+                SettingItemModel(.widgetSetting, isNewBadgeVisible: true),
                 SettingItemModel(.editEvent),
                 SettingItemModel(.holidaySetting),
                 SettingItemModel(.billingPlan),

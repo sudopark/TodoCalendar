@@ -132,7 +132,7 @@ struct WidgetGalleryView: View {
                 }
             }
             .background(appearance.colorSet.bg0.asColor)
-            .navigationTitle("setting.appearance.widget::gallery::title".localized())
+            .navigationTitle("setting.widget::setting::title".localized())
             .if(condition: ProcessInfo.isAvailiOS26()) {
                 $0.toolbarBackground(.ultraThinMaterial, for: .navigationBar)
             }

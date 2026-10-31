@@ -57,6 +57,7 @@ protocol MainViewModel: AnyObject, Sendable, MainSceneInteractor {
     var isLoadingCalendarEvents: AnyPublisher<Bool, Never> { get }
     var isLoadingAllEvents: AnyPublisher<Bool, Never> { get }
     var legalNoticeBanners: AnyPublisher<[LegalNoticeBannerModel], Never> { get }
+    var hasNewFeatureBadge: AnyPublisher<Bool, Never> { get }
 }
 
 
@@ -76,6 +77,7 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
     private let aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
     private let eventLiveActivityUsecase: any EventLiveActivityUsecase
     private let guideTodoUsecase: any GuideTodoUsecase
+    private let newFeatureBadgeUsecase: any NewFeatureBadgeUsecase
     private let legalNoticeUsecase: any LegalNoticeUsecase
     private let foremostEventUsecase: any ForemostEventUsecase
     private let paidFeatureGateUsecase: any PaidFeatureGateUsecase
@@ -96,6 +98,7 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
         aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase,
         eventLiveActivityUsecase: any EventLiveActivityUsecase,
         guideTodoUsecase: any GuideTodoUsecase,
+        newFeatureBadgeUsecase: any NewFeatureBadgeUsecase,
         legalNoticeUsecase: any LegalNoticeUsecase,
         foremostEventUsecase: any ForemostEventUsecase,
         paidFeatureGateUsecase: any PaidFeatureGateUsecase,
@@ -114,6 +117,7 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
         self.aiAgentOrchestrationUsecase = aiAgentOrchestrationUsecase
         self.eventLiveActivityUsecase = eventLiveActivityUsecase
         self.guideTodoUsecase = guideTodoUsecase
+        self.newFeatureBadgeUsecase = newFeatureBadgeUsecase
         self.legalNoticeUsecase = legalNoticeUsecase
         self.foremostEventUsecase = foremostEventUsecase
         self.paidFeatureGateUsecase = paidFeatureGateUsecase
@@ -196,6 +200,7 @@ extension MainViewModelImple {
         self.billingUsecase.startObservingTransactions()
         self.billingUsecase.recoverUnfinishedTransactions()
         self.guideTodoUsecase.prepare()
+        self.newFeatureBadgeUsecase.prepare()
         self.legalNoticeUsecase.checkNoticeIsNeed()
         Task { [weak self] in
             await self?.eventLiveActivityUsecase.prepare()
@@ -400,6 +405,12 @@ extension MainViewModelImple {
     var temporaryUserDataMigrationStatus: AnyPublisher<TemporaryUserDataMigrationStatus?, Never> {
         return self.subject.temporaryUserDataMigrationStatus
             .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+    
+    var hasNewFeatureBadge: AnyPublisher<Bool, Never> {
+        return self.newFeatureBadgeUsecase.uncheckedBadges
+            .map { !$0.isEmpty }
             .eraseToAnyPublisher()
     }
     
