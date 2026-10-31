@@ -1,1 +1,1 @@
-lista de tareas,agenda,planificador,organizador,recordatorios,widget,tema,cuenta atrás,día d,ia
+planificador,organizador,horario,lista de tareas,recordatorios,widget,cuenta atrás,día d,google,ia

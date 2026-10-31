@@ -1,1 +1,1 @@
-task,planner,schedule,reminder,widget,theme,dday,countdown,recurring,google,voice,checklist,ai
+agenda,google,organizer,monthly,weekly,reminder,task,widget,countdown,dday,recurring,checklist,ai

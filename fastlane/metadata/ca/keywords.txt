@@ -1,1 +1,1 @@
-llista de tasques,agenda,planificador,organitzador,recordatoris,widget,tema,compte enrere,veu,ia
+planificador,organitzador,horari,llista de tasques,recordatoris,widget,compte enrere,google,veu,ia

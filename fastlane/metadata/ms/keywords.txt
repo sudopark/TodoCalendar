@@ -1,1 +1,1 @@
-senarai tugasan,agenda,peringatan,perancang harian,jadual,widget,tema,kira detik,nota,google,ai
+jadual,agenda,planner,senarai tugasan,peringatan,nota,widget,kira detik,google,ai

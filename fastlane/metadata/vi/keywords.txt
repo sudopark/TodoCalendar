@@ -1,1 +1,1 @@
-danh sách việc,lịch biểu,nhắc nhở,tiện ích,chủ đề,đếm ngược,d-day,lặp lại,giọng nói,ghi chú,ai
+lịch biểu,thời gian biểu,danh sách việc,nhắc nhở,tiện ích,đếm ngược,d-day,lặp lại,ghi chú,google,ai
