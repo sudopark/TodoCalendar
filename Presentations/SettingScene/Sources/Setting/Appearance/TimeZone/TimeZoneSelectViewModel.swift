@@ -10,9 +10,8 @@
 
 import Foundation
 import Combine
-import Domain
 import Extensions
-import Scenes
+import CalendarDomainInterface
 
 
 struct TimeZoneModel: Equatable {

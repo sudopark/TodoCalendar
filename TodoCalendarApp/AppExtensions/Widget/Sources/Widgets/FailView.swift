@@ -8,9 +8,10 @@
 
 import SwiftUI
 import WidgetKit
-import Domain
 import CommonPresentation
 import Extensions
+import ExternalCalendarDomainInterface
+import SettingDomainInterface
 
 
 struct FailView: View {

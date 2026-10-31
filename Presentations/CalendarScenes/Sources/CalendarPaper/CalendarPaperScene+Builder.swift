@@ -8,8 +8,8 @@
 //
 
 import UIKit
-import Scenes
-import Domain
+import CalendarDomainInterface
+import SceneInfra
 
 
 // MARK: - CalendarPaperScene Interactable & Listenable

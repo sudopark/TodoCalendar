@@ -6,10 +6,12 @@
 //
 
 import SwiftUI
-import Domain
 import Extensions
 import Combine
 import CommonPresentation
+import CalendarDomainInterface
+import ExternalCalendarDomainInterface
+import SettingDomainInterface
 
 
 @Observable final class CalendarSectionAppearanceSettingViewState {

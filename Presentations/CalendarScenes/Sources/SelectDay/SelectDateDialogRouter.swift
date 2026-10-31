@@ -7,8 +7,7 @@
 //
 
 import Foundation
-import Domain
-import Scenes
+import SceneInfra
 
 
 protocol SelectDayDialogRouting: Routing, Sendable { }

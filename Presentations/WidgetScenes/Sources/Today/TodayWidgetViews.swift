@@ -10,6 +10,8 @@ import SwiftUI
 import Extensions
 import CommonPresentation
 import CalendarPresentation
+import EventDomainInterface
+import ExternalCalendarDomainInterface
 
 
 // MARK: - TodaySummaryView

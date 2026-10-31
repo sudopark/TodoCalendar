@@ -7,8 +7,10 @@
 //
 
 import Foundation
-import Domain
-import Repository
+import DBInfraInterface
+import ExternalCalendarDomain
+import ExternalCalendarDomainInterface
+import EventDomain
 
 // MARK: - GoogleCalendarRepositoryPoolImple
 
@@ -32,7 +34,12 @@ final class GoogleCalendarRepositoryPoolImple: GoogleCalendarRepositoryPool, @un
         guard let remote = try? accountRemotePool.remote(for: GoogleCalendarService.id, accountId: accountId) else {
             preconditionFailure("remote not prepared for accountId: \(accountId)")
         }
-        let cacheStorage = GoogleCalendarLocalStorageImple(connectionPool: self.connectionPool)
+        let cacheStorage = GoogleCalendarLocalStorageImple(
+            connectionPool: self.connectionPool,
+            timeStorage: EventTimeLocalStorageImple(
+                connectionPool: self.connectionPool, serviceId: GoogleCalendarService.id
+            )
+        )
         let repository = GoogleCalendarRepositoryImple(
             remote: remote,
             cacheStorage: cacheStorage,

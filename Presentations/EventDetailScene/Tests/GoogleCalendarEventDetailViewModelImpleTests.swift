@@ -10,14 +10,21 @@ import Testing
 import Combine
 import Prelude
 import Optics
-import Domain
-import Scenes
 import CommonPresentation
 import Extensions
 import UnitTestHelpKit
-import TestDoubles
 
 @testable import EventDetailScene
+import CalendarDomainInterface
+import CalendarDomainTesting
+import EventDetailSceneInterface
+import EventDomainInterface
+import EventDomainTesting
+import ExternalCalendarDomainInterface
+import ExternalCalendarDomainTesting
+import KernelUtils
+import SceneInfra
+import TestDoubles
 
 
 final class GoogleCalendarEventDetailViewModelImpleTests: PublisherWaitable {

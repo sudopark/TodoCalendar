@@ -8,7 +8,7 @@
 //
 
 import UIKit
-import Scenes
+import SceneInfra
 
 
 // MARK: - HolidayListScene Interactable & Listenable

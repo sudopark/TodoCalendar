@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import Scenes
+import SceneInfra
 
 
 // MARK: - Routing

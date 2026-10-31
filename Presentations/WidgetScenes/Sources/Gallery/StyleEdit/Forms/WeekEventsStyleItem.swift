@@ -7,8 +7,8 @@
 //
 
 import Foundation
-import Domain
 import Extensions
+import SettingDomainInterface
 
 
 enum WeekEventsStyleItem: String, WidgetStyleItem {

@@ -5,7 +5,8 @@
 
 import Foundation
 import Combine
-import Domain
+import AIDomainInterface
+import BillingDomainInterface
 
 
 // MARK: - AIAgentKeyboardInputViewModel

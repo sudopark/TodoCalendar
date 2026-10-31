@@ -8,13 +8,15 @@
 
 import Testing
 import UIKit
-import Domain
-import Scenes
 import CommonPresentation
 import UnitTestHelpKit
-import TestDoubles
 
 @testable import BillingScenes
+import AdDomainInterface
+import BillingSceneInterface
+import SceneInfra
+import SettingDomainInterface
+import SettingDomainTesting
 
 
 private final class StubRewardedAdRouter: RewardedAdRouter, @unchecked Sendable {
@@ -64,7 +66,7 @@ private final class SpyPresenter: UIViewController {
     }
 }
 
-private final class DummySheetScene: UIViewController, Scenes.Scene {
+private final class DummySheetScene: UIViewController, SceneInfra.Scene {
 
     var interactor: EmptyInteractor? { nil }
     let viewAppearance: ViewAppearance = makeDummyAppearance()

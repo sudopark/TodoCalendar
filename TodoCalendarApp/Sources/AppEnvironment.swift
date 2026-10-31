@@ -6,8 +6,9 @@
 //
 
 import Foundation
-import Domain
-import Repository
+import BillingDomainInterface
+import ExternalCalendarDomainInterface
+import StorageInfraInterface
 
 struct AppEnvironment {
     

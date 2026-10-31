@@ -8,9 +8,10 @@
 //
 
 import UIKit
-import Domain
 import Extensions
-import Scenes
+import EventDomainInterface
+import SceneInfra
+import SettingSceneInterface
 
 
 // MARK: - SelectedTag

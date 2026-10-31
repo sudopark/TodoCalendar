@@ -7,7 +7,6 @@
 
 import UIKit
 import Prelude
-import Domain
 
 
 extension UIColor {

@@ -7,7 +7,8 @@
 //
 
 import Foundation
-import Domain
+import SupportDomainInterface
+import SupportDomainTesting
 
 
 final class StubImageTextRecognizeService: ImageTextRecognizeService, @unchecked Sendable {

@@ -7,13 +7,16 @@
 
 import XCTest
 import Combine
-import Domain
-import Scenes
 import Extensions
-import TestDoubles
 import UnitTestHelpKit
 
 @testable import SettingScene
+import EventDomainInterface
+import EventDomainTesting
+import ExternalCalendarDomainInterface
+import ExternalCalendarDomainTesting
+import SettingSceneInterface
+import TestDoubles
 
 
 class EventTagListViewModelImpleTests: BaseTestCase, PublisherWaitable {

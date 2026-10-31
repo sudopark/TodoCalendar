@@ -6,8 +6,12 @@
 //
 
 import UIKit
-import Domain
-import Scenes
+import AIAgentSceneInterface
+import BillingSceneInterface
+import CalendarDomainInterface
+import CalendarSceneInterface
+import MemberSceneInterface
+import SceneInfra
 
 protocol CalendarViewRouting: Routing, Sendable {
 

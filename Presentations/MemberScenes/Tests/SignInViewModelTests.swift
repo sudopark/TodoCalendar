@@ -8,12 +8,13 @@
 
 import XCTest
 import Combine
-import Domain
 import Extensions
 import UnitTestHelpKit
-import TestDoubles
 
 @testable import MemberScenes
+import AccountDomainInterface
+import AccountDomainTesting
+import TestDoubles
 
 class SignInViewModelTests: BaseTestCase, PublisherWaitable {
     

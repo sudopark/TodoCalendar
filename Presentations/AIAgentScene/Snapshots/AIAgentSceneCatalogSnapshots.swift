@@ -10,11 +10,18 @@ import XCTest
 import SwiftUI
 import Prelude
 import Optics
-import Domain
 import CommonPresentation
 import SnapshotTestHelpKit
 
 @testable import AIAgentScene
+import AIDomainInterface
+import AIDomainTesting
+import BillingDomainInterface
+import BillingDomainTesting
+import EventDomainInterface
+import EventDomainTesting
+import SettingDomainInterface
+import SettingDomainTesting
 
 
 final class AIAgentSceneCatalogSnapshots: XCTestCase {

@@ -9,12 +9,15 @@
 import UIKit
 import Testing
 import Combine
-import Domain
 import CommonPresentation
 import UnitTestHelpKit
 
 @testable import CalendarScenes
 import CalendarPresentation
+import CalendarDomainInterface
+import CalendarDomainTesting
+import SettingDomainInterface
+import SettingDomainTesting
 
 
 @MainActor

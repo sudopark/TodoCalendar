@@ -6,8 +6,8 @@
 //
 
 import Foundation
-import Domain
 import CommonPresentation
+import EventDomainInterface
 
 struct EventDetailBasicData: Equatable {
     var name: String?

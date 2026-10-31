@@ -7,14 +7,18 @@
 
 import XCTest
 import Combine
-import Domain
 import Extensions
 import Prelude
 import Optics
 import UnitTestHelpKit
-import TestDoubles
 
 @testable import EventDetailScene
+import CalendarDomainInterface
+import CalendarDomainTesting
+import EventDetailSceneInterface
+import EventDomainInterface
+import EventDomainTesting
+import TestDoubles
 
 
 class SelectEventRepeatOptionViewModelTests: BaseTestCase, PublisherWaitable {

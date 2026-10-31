@@ -8,9 +8,9 @@
 //
 
 import UIKit
-import Scenes
-import Domain
 import CommonPresentation
+import EventDomainInterface
+import SceneInfra
 
 
 // MARK: - SelectEventRepeatOptionSceneBuilerImple

@@ -6,12 +6,13 @@
 //
 
 import Foundation
-import Domain
-import Scenes
 import UnitTestHelpKit
-import TestDoubles
 
 @testable import EventDetailScene
+import EventDetailSceneInterface
+import EventDomainInterface
+import EventDomainTesting
+import TestDoubles
 
 
 final class SpyEventDetailInputInteractor: EventDetailInputInteractor {

@@ -7,8 +7,10 @@
 //
 
 import Foundation
-import Domain
-import Repository
+import EventDomain
+import EventDomainInterface
+import RemoteInfraInterface
+import AccountDomain
 
 
 // MARK: - TodoEventRepositoryFactory

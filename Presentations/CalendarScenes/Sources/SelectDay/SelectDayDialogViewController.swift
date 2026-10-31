@@ -8,8 +8,9 @@
 
 import UIKit
 import SwiftUI
-import Scenes
 import CommonPresentation
+import CalendarSceneInterface
+import SceneInfra
 
 
 final class SelectDayDialogViewController: UIHostingController<SelectDayDialogContainerView>, SelectDayDialogScene {

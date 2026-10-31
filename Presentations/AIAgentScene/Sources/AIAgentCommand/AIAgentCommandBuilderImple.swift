@@ -4,9 +4,9 @@
 //
 
 import UIKit
-import Domain
-import Scenes
 import CommonPresentation
+import AIAgentSceneInterface
+import SceneInfra
 
 
 public final class AIAgentCommandBuilderImple: AIAgentCommandSceneBuilder {

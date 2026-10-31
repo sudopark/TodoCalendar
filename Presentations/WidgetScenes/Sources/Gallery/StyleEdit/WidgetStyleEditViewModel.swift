@@ -11,9 +11,10 @@ import Combine
 import WidgetKit
 import Prelude
 import Optics
-import Domain
 import Extensions
-import Scenes
+import BillingDomainInterface
+import SceneInfra
+import SettingDomainInterface
 
 
 // MARK: - cell view models

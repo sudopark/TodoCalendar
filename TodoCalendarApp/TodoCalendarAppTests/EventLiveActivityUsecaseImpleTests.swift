@@ -12,12 +12,18 @@ import Foundation
 import Prelude
 import Optics
 import UnitTestHelpKit
-import TestDoubles
 import Extensions
 
-import Domain
 
 @testable import TodoCalendarApp
+import CalendarDomainInterface
+import CalendarDomainTesting
+import EventDomainInterface
+import EventDomainTesting
+import ExternalCalendarDomainInterface
+import ExternalCalendarDomainTesting
+import KernelUtils
+import PlaceServiceInterface
 
 
 final class EventLiveActivityUsecaseImpleTests: PublisherWaitable, AsyncEffectWaitable {

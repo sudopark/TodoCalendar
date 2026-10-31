@@ -1,0 +1,112 @@
+//
+//  Factories.swift
+//  SceneInfra
+//
+//  Created by sudo.park on 2023/08/01.
+//
+
+import Foundation
+import AIDomainInterface
+import AccountDomainInterface
+import AdDomainInterface
+import BillingDomainInterface
+import CalendarDomainInterface
+import EventDomainInterface
+import ExternalCalendarDomainInterface
+import KernelUtils
+import MigrationDomainInterface
+import NotificationDomainInterface
+import SettingDomainInterface
+import SupportDomainInterface
+
+// MARK: - Usecase Factory
+
+public protocol AccountUsecaseFactory {
+    
+    var authUsecase: any AuthUsecase { get }
+    var accountUescase: any AccountUsecase { get }
+    var externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase { get }
+}
+
+public protocol CalendarUsecaseFactory {
+    
+    func makeCalendarUsecase() -> any CalendarUsecase
+    func makeCalendarSettingUsecase() -> any CalendarSettingUsecase
+    func makeHolidayUsecase() -> any HolidayUsecase
+}
+
+public protocol EventUsecaseFactory {
+    
+    func makeTodoEventUsecase() -> any TodoEventUsecase
+    func makeScheduleEventUsecase() -> any ScheduleEventUsecase
+    func makeEventTagUsecase() -> any EventTagUsecase
+    func makeEventDetailDataUsecase() -> any EventDetailDataUsecase
+    func makeDoneTodoDetailDataUsecase() -> any EventDetailDataUsecase
+    func makeDoneTodoPagingUsecase() -> any DoneTodoEventsPagingUsecase
+    func makeForemostEventUsecase() -> any ForemostEventUsecase
+    func makeDDayCandidateUsecase() -> any DDayCandidateUsecase
+    func makeDaysIntervalCountUsecase() -> any DaysIntervalCountUsecase
+    var eventSyncUsecase: any EventSyncUsecase { get }
+    var eventUploadService: any EventUploadService { get }
+    var eventLiveActivityUsecase: any EventLiveActivityUsecase { get }
+}
+
+public protocol SettingUsecaseFactory {
+    
+    func makeUISettingUsecase() -> any UISettingUsecase
+    func makeEventSettingUsecase() -> any EventSettingUsecase
+    func makeEventShareSettingUsecase() -> any EventShareSettingUsecase
+    func makeNotificationPermissionUsecase() -> any NotificationPermissionUsecase
+    func makeEventNotificationSettingUsecase() -> any EventNotificationSettingUsecase
+    func makeWidgetStyleUsecase() -> any WidgetStyleUsecase
+    var temporaryUserDataMigrationUsecase: any TemporaryUserDataMigrationUescase { get }
+}
+
+public protocol NotificationUsecaseFactory {
+    
+    func makeEventNotificationUsecase() -> any EventNotificationUsecase
+}
+
+public protocol CommonUsecaseFactory {
+    
+    func makeLinkPreviewFetchUsecase() -> any LinkPreviewFetchUsecase
+    func makePlaceSuggestUsecase() -> any PlaceSuggestUsecase
+    func deviceInfoFetchService() -> any DeviceInfoFetchService
+}
+
+public protocol SupportUsecaseFactory {
+
+    func makeFeedbackUsecase() -> any FeedbackUsecase
+    func makeGuideTodoUsecase() -> any GuideTodoUsecase
+    func makeLegalNoticeUsecase() -> any LegalNoticeUsecase
+    var appUpdateCheckUsecase: any AppUpdateCheckUsecase { get }
+}
+
+public protocol ExternalCalendarUsecaseFactory {
+
+    func makeGoogleCalendarUsecase() -> any GoogleCalendarUsecase
+    func makeAppleCalendarUsecase() -> any AppleCalendarUsecase
+}
+
+public protocol AIAgentUsecaseFactory {
+
+    var aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase { get }
+    var imageTextRecognizeService: any ImageTextRecognizeService { get }
+    func makeSpeechRecognizeUsecase() -> any SpeechRecognizeUsecase
+}
+
+public protocol BillingUsecaseFactory {
+
+    var billingUsecase: any BillingUsecase { get }
+    func makePaidFeatureGateUsecase() -> any PaidFeatureGateUsecase
+}
+
+public protocol AdUsecaseFactory {
+
+    var adExposureUsecase: any AdExposureUsecase { get }
+}
+
+public protocol UsecaseFactory: AccountUsecaseFactory, CalendarUsecaseFactory, EventUsecaseFactory, NotificationUsecaseFactory, SettingUsecaseFactory, CommonUsecaseFactory, SupportUsecaseFactory, ExternalCalendarUsecaseFactory, AIAgentUsecaseFactory, BillingUsecaseFactory, AdUsecaseFactory {
+
+    var eventNotifyService: SharedEventNotifyService { get }
+}

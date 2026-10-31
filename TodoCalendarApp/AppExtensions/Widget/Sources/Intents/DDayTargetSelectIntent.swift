@@ -11,11 +11,12 @@ import WidgetKit
 import AppIntents
 import Prelude
 import Optics
-import Domain
 import Extensions
 import CommonPresentation
 import CalendarPresentation
 import WidgetScenes
+import EventDomainInterface
+import SettingDomainInterface
 
 
 // MARK: - DDayTargetEventId + entity id

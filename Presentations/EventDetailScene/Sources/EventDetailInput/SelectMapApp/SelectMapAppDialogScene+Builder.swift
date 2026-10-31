@@ -9,8 +9,8 @@
 //
 
 import UIKit
-import Domain
-import Scenes
+import SceneInfra
+import SettingDomainInterface
 
 
 // MARK: - SelectMapAppDialogScene Interactable & Listenable

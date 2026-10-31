@@ -11,8 +11,12 @@ import Combine
 import CombineExt
 import Prelude
 import Optics
-import Domain
 import Extensions
+import CalendarDomainInterface
+import EventDomainInterface
+import ExternalCalendarDomainInterface
+import KernelUtils
+import SettingDomainInterface
 
 
 /// 실제 액티비티 상태의 진실은 `controller.activityTargetUpdates`다 — 유저 스와이프 해제·

@@ -10,14 +10,18 @@ import Testing
 import Combine
 import Prelude
 import Optics
-import Domain
 import Extensions
 import UnitTestHelpKit
-import TestDoubles
-import Scenes
 import CommonPresentation
 
 @testable import EventDetailScene
+import CalendarDomainInterface
+import CalendarDomainTesting
+import EventDetailSceneInterface
+import EventDomainInterface
+import EventDomainTesting
+import SceneInfra
+import TestDoubles
 
 
 final class HolidayEventDetailViewModelImpleTests: PublisherWaitable {

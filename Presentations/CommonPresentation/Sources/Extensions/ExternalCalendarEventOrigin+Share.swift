@@ -7,8 +7,10 @@
 //
 
 import Foundation
-import Domain
 import Extensions
+import EventDomainInterface
+import ExternalCalendarDomainInterface
+import KernelUtils
 
 
 // MARK: - GoogleCalendar.EventOrigin time <-> SelectedTime mapping

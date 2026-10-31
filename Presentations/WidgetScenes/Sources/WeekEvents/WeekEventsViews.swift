@@ -7,10 +7,13 @@
 //
 
 import SwiftUI
-import Domain
 import Extensions
 import CommonPresentation
 import CalendarPresentation
+import CalendarDomainInterface
+import EventDomainInterface
+import ExternalCalendarDomainInterface
+import SettingDomainInterface
 
 
 // MARK: - WeekEventsView

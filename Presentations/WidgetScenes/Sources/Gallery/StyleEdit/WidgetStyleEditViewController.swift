@@ -9,10 +9,9 @@
 import UIKit
 import SwiftUI
 import Combine
-import Domain
 import Extensions
-import Scenes
 import CommonPresentation
+import SettingDomainInterface
 
 
 final class WidgetStyleEditViewController: UIHostingController<WidgetStyleEditContainerView>, WidgetStyleEditScene {

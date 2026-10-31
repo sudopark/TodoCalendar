@@ -10,9 +10,10 @@ import Testing
 import Foundation
 import Prelude
 import Optics
-import Domain
 
 @testable import WidgetScenes
+import SettingDomainInterface
+import SettingDomainTesting
 
 
 struct TodayWidgetViewModelTests {

@@ -9,8 +9,8 @@
 //
 
 import Foundation
-import Scenes
 import CommonPresentation
+import SceneInfra
 
 
 // MARK: - Routing

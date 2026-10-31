@@ -8,8 +8,8 @@
 //
 
 import UIKit
-import Domain
-import Scenes
+import SceneInfra
+import SettingDomainInterface
 
 
 // MARK: - AppearanceSettingScene Interactable & Listenable

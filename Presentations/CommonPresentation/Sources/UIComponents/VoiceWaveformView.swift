@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import CalendarDomainInterface
 
 
 // MARK: - VoiceWaveformView

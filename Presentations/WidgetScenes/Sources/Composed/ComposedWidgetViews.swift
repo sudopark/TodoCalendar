@@ -8,6 +8,7 @@
 
 import SwiftUI
 import CalendarPresentation
+import EventDomainInterface
 
 
 // MARK: - DoubleMonthWidgetContentView

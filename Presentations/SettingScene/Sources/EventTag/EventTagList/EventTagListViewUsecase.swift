@@ -10,8 +10,9 @@ import Foundation
 import Combine
 import Prelude
 import Optics
-import Domain
 import Extensions
+import EventDomainInterface
+import ExternalCalendarDomainInterface
 
 
 // MARK: - base calednar event tag

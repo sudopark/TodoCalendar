@@ -10,10 +10,13 @@ import Testing
 import Foundation
 import Prelude
 import Optics
-import Domain
 import CommonPresentation
 
 @testable import WidgetScenes
+import ExternalCalendarDomainInterface
+import ExternalCalendarDomainTesting
+import SettingDomainInterface
+import SettingDomainTesting
 
 
 struct WidgetBackgroundColorSetTests {

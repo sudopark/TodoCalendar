@@ -10,10 +10,13 @@ import XCTest
 import Combine
 import Prelude
 import Optics
-import Domain
 import UnitTestHelpKit
 
 @testable import AIAgentScene
+import AIDomainInterface
+import AIDomainTesting
+import BillingDomainInterface
+import BillingDomainTesting
 
 
 class AIAgentCommandViewModelImpleTests: BaseTestCase, PublisherWaitable {

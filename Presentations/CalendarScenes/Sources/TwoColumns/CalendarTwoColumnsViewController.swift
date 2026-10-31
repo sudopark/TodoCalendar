@@ -10,8 +10,8 @@ import UIKit
 import SwiftUI
 import Combine
 import Extensions
-import Scenes
 import CommonPresentation
+import ExternalCalendarDomainInterface
 
 
 private enum Constant {

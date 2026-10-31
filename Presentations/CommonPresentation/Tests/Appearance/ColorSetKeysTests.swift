@@ -8,9 +8,12 @@
 
 import Testing
 import UIKit
-import Domain
 
 @testable import CommonPresentation
+import ExternalCalendarDomainInterface
+import ExternalCalendarDomainTesting
+import SettingDomainInterface
+import SettingDomainTesting
 
 
 struct ColorSetKeysTests {

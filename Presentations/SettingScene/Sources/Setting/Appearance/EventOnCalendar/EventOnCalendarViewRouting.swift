@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import Scenes
 import CommonPresentation
+import SceneInfra
 
 protocol EventOnCalendarViewRouting: Routing, Sendable { }

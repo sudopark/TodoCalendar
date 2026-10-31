@@ -10,9 +10,12 @@ import Testing
 import Foundation
 import Prelude
 import Optics
-import Domain
 
 @testable import CalendarPresentation
+import EventDomainInterface
+import EventDomainTesting
+import ExternalCalendarDomainInterface
+import ExternalCalendarDomainTesting
 
 
 class EventCellViewModelTests {

@@ -212,6 +212,9 @@ extension Project {
                              dependencies: [
                                 .target(name: name),
                                 .project(target: "SceneInfra", path: .relativeToRoot("Presentations/Scenes/SceneInfra")),
+                                .project(target: "CalendarSceneInterface", path: .relativeToRoot("Presentations/Scenes/Interfaces/CalendarSceneInterface")),
+                                .project(target: "CalendarDomainInterface", path: .relativeToRoot("Domain/CalendarDomain")),
+                                .project(target: "CalendarDomainTesting", path: .relativeToRoot("Domain/CalendarDomain")),
                              ])
     }
 

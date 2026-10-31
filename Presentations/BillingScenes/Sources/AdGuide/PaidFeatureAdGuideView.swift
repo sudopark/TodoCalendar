@@ -8,9 +8,9 @@
 
 import SwiftUI
 import Combine
-import Domain
 import Extensions
 import CommonPresentation
+import BillingDomainInterface
 
 
 // MARK: - 기능별 문구

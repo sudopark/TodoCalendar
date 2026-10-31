@@ -9,12 +9,15 @@
 import Foundation
 import Testing
 import Combine
-import Domain
 import UnitTestHelpKit
-import TestDoubles
 
 @testable import CalendarScenes
 import CalendarPresentation
+import CalendarDomainInterface
+import CalendarDomainTesting
+import EventDomainInterface
+import EventDomainTesting
+import TestDoubles
 
 
 final class CalendarTwoColumnsViewModelImpleTests: PublisherWaitable {

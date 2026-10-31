@@ -8,8 +8,11 @@
 //
 
 import UIKit
-import Scenes
 import CommonPresentation
+import BillingSceneInterface
+import MemberSceneInterface
+import SceneInfra
+import SettingSceneInterface
 
 
 // MARK: - SettingItemListSceneBuilerImple

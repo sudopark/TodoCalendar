@@ -8,13 +8,17 @@
 
 import XCTest
 import SwiftUI
-import Domain
 import Extensions
 import CommonPresentation
 import SnapshotTestHelpKit
-import Scenes
 
 @testable import BillingScenes
+import BillingDomainInterface
+import BillingDomainTesting
+import EventDomainInterface
+import EventDomainTesting
+import SettingDomainInterface
+import SettingDomainTesting
 
 
 final class BillingScenesSnapshots: XCTestCase {

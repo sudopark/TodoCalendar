@@ -10,13 +10,18 @@ import Testing
 import Combine
 import Prelude
 import Optics
-import Domain
 import Extensions
 import UnitTestHelpKit
-import TestDoubles
 
 @testable import CalendarScenes
 import CalendarPresentation
+import CalendarDomainTesting
+import EventDomainInterface
+import EventDomainTesting
+import ExternalCalendarDomainInterface
+import ExternalCalendarDomainTesting
+import SettingDomainInterface
+import SettingDomainTesting
 
 
 final class CalendarEventListhUsecaseImpleTests: PublisherWaitable {

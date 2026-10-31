@@ -9,8 +9,11 @@
 import Foundation
 import Prelude
 import Optics
-import Domain
 import CalendarPresentation
+import CalendarDomainInterface
+import CalendarDomainTesting
+import EventDomainInterface
+import EventDomainTesting
 
 
 class StubCalendarEventsFetchUescase: CalendarEventFetchUsecase {

@@ -7,9 +7,9 @@
 //
 
 import SwiftUI
-import Domain
 import Extensions
 import CommonPresentation
+import ExternalCalendarDomainInterface
 
 
 struct ColorThemePreviewView: View {

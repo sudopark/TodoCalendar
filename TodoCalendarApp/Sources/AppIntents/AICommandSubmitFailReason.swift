@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import Domain
+import KernelUtils
 
 
 enum AICommandSubmitFailReason: Error, Equatable {

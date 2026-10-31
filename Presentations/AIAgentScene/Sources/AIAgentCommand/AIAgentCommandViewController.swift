@@ -5,8 +5,8 @@
 
 import UIKit
 import SwiftUI
-import Scenes
 import CommonPresentation
+import AIAgentSceneInterface
 
 
 final class AIAgentCommandViewController: UIHostingController<AIAgentCommandStageContainerView>,

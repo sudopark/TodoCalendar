@@ -8,11 +8,13 @@
 
 import WidgetKit
 import SwiftUI
-import Domain
 import Extensions
 import CommonPresentation
 import CalendarPresentation
 import WidgetScenes
+import EventDomainInterface
+import ExternalCalendarDomainInterface
+import SettingDomainInterface
 
 // MARK: - WeekEventsWidgetView
 

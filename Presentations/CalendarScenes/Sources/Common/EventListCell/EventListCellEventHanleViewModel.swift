@@ -10,11 +10,16 @@ import Foundation
 import Combine
 import Prelude
 import Optics
-import Domain
-import Scenes
 import Extensions
 import CommonPresentation
 import CalendarPresentation
+import CalendarDomainInterface
+import EventDetailSceneInterface
+import EventDomainInterface
+import ExternalCalendarDomainInterface
+import KernelUtils
+import SceneInfra
+import SupportDomainInterface
 
 enum DoneTodoResult {
     case success(_ id: String)

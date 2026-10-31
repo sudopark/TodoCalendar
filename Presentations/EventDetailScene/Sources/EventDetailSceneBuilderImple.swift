@@ -6,9 +6,11 @@
 //
 
 import Foundation
-import Domain
-import Scenes
 import CommonPresentation
+import EventDetailSceneInterface
+import EventDomainInterface
+import SceneInfra
+import SettingSceneInterface
 
 
 public final class EventDetailSceneBuilderImple {

@@ -7,9 +7,10 @@
 //
 
 import Foundation
-import Domain
 import Extensions
 import CalendarPresentation
+import CalendarDomainInterface
+import EventDomainInterface
 
 
 struct SharePreviewLineModel: Equatable, Sendable, Identifiable {

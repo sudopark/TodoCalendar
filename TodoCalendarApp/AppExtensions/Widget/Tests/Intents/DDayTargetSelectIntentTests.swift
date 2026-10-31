@@ -8,7 +8,6 @@
 
 import Testing
 import Foundation
-import Domain
 
 @testable import TodoCalendarAppWidget
 

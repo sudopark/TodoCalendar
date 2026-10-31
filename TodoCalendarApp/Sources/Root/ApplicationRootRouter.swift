@@ -7,10 +7,8 @@
 
 import UIKit
 import SwiftUI
-import Domain
 import Extensions
 import StoreKitService
-import Scenes
 import CommonPresentation
 import CalendarScenes
 import EventDetailScene
@@ -22,6 +20,20 @@ import BillingScenes
 import WidgetScenes
 import SQLiteService
 import AdService
+import AIAgentSceneInterface
+import AccountDomainInterface
+import BillingSceneInterface
+import CalendarSceneInterface
+import EventDetailSceneInterface
+import EventDomainInterface
+import EventListSceneInterface
+import ExternalCalendarDomainInterface
+import MemberSceneInterface
+import SceneInfra
+import SettingDomainInterface
+import SettingSceneInterface
+import SupportDomainInterface
+import WidgetGallerySceneInterface
 
 
 // MARK: - ApplicationViewAppearanceStore

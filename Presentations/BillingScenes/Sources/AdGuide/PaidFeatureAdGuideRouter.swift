@@ -7,9 +7,10 @@
 //
 
 import UIKit
-import Domain
-import Scenes
 import CommonPresentation
+import AdDomainInterface
+import BillingSceneInterface
+import SceneInfra
 
 
 // MARK: - PaidFeatureAdGuideRouting

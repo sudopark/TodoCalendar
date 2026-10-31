@@ -7,9 +7,10 @@
 //
 
 import Foundation
-import Domain
 import CommonPresentation
-import Scenes
+import EventDetailSceneInterface
+import EventListSceneInterface
+import SceneInfra
 
 
 public final class EventListSceneBuilerImple: EventListSceneBuiler {

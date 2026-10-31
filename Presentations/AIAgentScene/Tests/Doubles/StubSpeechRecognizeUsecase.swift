@@ -8,7 +8,8 @@
 
 import Foundation
 import Combine
-import Domain
+import SupportDomainInterface
+import SupportDomainTesting
 
 
 final class StubSpeechRecognizeUsecase: SpeechRecognizeUsecase, @unchecked Sendable {

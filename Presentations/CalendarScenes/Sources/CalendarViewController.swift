@@ -7,10 +7,11 @@
 
 import UIKit
 import Combine
-import Domain
 import Extensions
-import Scenes
 import CommonPresentation
+import CalendarSceneInterface
+import ExternalCalendarDomainInterface
+import SceneInfra
 
 final class CalendarViewController: UIViewController, CalendarScene {
     

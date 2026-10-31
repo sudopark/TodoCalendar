@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import Scenes
+import SceneInfra
 
 
 // MARK: - SharePreviewScene Interactable

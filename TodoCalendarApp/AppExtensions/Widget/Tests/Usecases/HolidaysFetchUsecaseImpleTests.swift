@@ -9,10 +9,11 @@
 import XCTest
 import Prelude
 import Optics
-import Domain
 import Extensions
 import UnitTestHelpKit
-import TestDoubles
+import CalendarDomain
+import CalendarDomainInterface
+import CalendarDomainTesting
 
 
 class HolidaysFetchUsecaseImpleTests: BaseTestCase {

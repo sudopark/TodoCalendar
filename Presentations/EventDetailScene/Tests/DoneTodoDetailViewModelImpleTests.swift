@@ -10,13 +10,18 @@ import Testing
 import Combine
 import Prelude
 import Optics
-import Domain
-import Scenes
 import Extensions
 import UnitTestHelpKit
-import TestDoubles
 
 @testable import EventDetailScene
+import CalendarDomainTesting
+import EventDetailSceneInterface
+import EventDomainInterface
+import EventDomainTesting
+import PlaceServiceInterface
+import SettingDomainInterface
+import SettingDomainTesting
+import TestDoubles
 
 
 final class DoneTodoDetailViewModelImpleTests: PublisherWaitable {

@@ -13,11 +13,14 @@ import Combine
 import AudioToolbox
 import Prelude
 import Optics
-import Domain
-import Scenes
 import Extensions
 import CommonPresentation
 import CalendarPresentation
+import AIDomainInterface
+import CalendarDomainInterface
+import EventDomainInterface
+import ExternalCalendarDomainInterface
+import SettingDomainInterface
 
 
 // MARK: - AICommandBadge

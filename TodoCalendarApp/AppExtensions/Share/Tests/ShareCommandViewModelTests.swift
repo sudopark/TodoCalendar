@@ -11,11 +11,18 @@ import Combine
 import Testing
 import Prelude
 import Optics
-import Domain
 import Extensions
 import UnitTestHelpKit
 
 @testable import TodoCalendarAppShare
+import AIDomainInterface
+import AIDomainTesting
+import AccountDomainInterface
+import AccountDomainTesting
+import BillingDomainInterface
+import BillingDomainTesting
+import SupportDomainInterface
+import SupportDomainTesting
 
 
 final class ShareCommandViewModelTests: PublisherWaitable {

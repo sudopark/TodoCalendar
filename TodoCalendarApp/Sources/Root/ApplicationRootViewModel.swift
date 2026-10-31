@@ -10,10 +10,14 @@ import WidgetKit
 import Combine
 import Prelude
 import Optics
-import Domain
-import Repository
-import Scenes
 import Extensions
+import AccountDomainInterface
+import ExternalCalendarDomainInterface
+import NotificationDomainInterface
+import RemoteInfra
+import RemoteInfraInterface
+import SceneInfra
+import SupportDomainInterface
 
 
 final class ApplicationRootViewModelImple: @unchecked Sendable {

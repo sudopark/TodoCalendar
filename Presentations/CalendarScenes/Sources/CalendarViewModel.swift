@@ -10,9 +10,17 @@ import Combine
 import CombineExt
 import Prelude
 import Optics
-import Domain
-import Scenes
 import Extensions
+import AIAgentSceneInterface
+import AIDomainInterface
+import AccountDomainInterface
+import CalendarDomainInterface
+import CalendarSceneInterface
+import EventDomainInterface
+import ExternalCalendarDomainInterface
+import MigrationDomainInterface
+import SceneInfra
+import SettingDomainInterface
 
 
 // MARK: - CalendarViewModel

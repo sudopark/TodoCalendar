@@ -11,12 +11,20 @@ import SwiftUI
 import Combine
 import Prelude
 import Optics
-import Domain
 import CommonPresentation
 import SnapshotTestHelpKit
-import TestDoubles
 
 @testable import SettingScene
+import AccountDomainInterface
+import AccountDomainTesting
+import CalendarDomainInterface
+import CalendarDomainTesting
+import EventDomainInterface
+import EventDomainTesting
+import ExternalCalendarDomainInterface
+import ExternalCalendarDomainTesting
+import SettingDomainInterface
+import SettingDomainTesting
 
 
 final class SettingSceneSnapshots: XCTestCase {

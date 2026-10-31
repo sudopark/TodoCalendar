@@ -8,9 +8,11 @@
 
 import Foundation
 import Combine
-import Domain
 import Extensions
 import CalendarPresentation
+import CalendarDomainInterface
+import EventDomainInterface
+import SettingDomainInterface
 
 
 // MARK: - ContinuousMonthsViewModel

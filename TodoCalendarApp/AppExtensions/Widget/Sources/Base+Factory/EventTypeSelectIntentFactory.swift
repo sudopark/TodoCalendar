@@ -9,9 +9,13 @@
 import Foundation
 import Prelude
 import Optics
-import Domain
 import Extensions
-import Repository
+import EventDomain
+import EventDomainInterface
+import ExternalCalendarDomain
+import ExternalCalendarDomainInterface
+import RemoteInfraInterface
+import AccountDomain
 
 
 struct EventTypeSelectIntentFactory {
@@ -70,13 +74,19 @@ extension EventTypeSelectIntentFactory {
     func makeGoogleCalendarRepository() -> any GoogleCalendarRepository {
         return GoogleCalendarLocalAggregatedRepositoryImple(
             connectionPool: base.externalCalendarDBConnectionPool,
+            timeStorage: EventTimeLocalStorageImple(
+                connectionPool: base.externalCalendarDBConnectionPool, serviceId: GoogleCalendarService.id
+            ),
             accountRepository: makeExternalCalendarAcountRepository()
         )
     }
 
     func makeAppleCalendarRepository() -> any AppleCalendarRepository {
         return AppleCalendarLocalAggregatedRepositoryImple(
-            connectionPool: base.externalCalendarDBConnectionPool
+            connectionPool: base.externalCalendarDBConnectionPool,
+            timeStorage: EventTimeLocalStorageImple(
+                connectionPool: base.externalCalendarDBConnectionPool, serviceId: AppleCalendarService.id
+            )
         )
     }
 }

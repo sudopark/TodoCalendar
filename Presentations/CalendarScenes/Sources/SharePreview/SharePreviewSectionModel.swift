@@ -10,6 +10,7 @@ import Foundation
 import Prelude
 import Optics
 import Extensions
+import CalendarDomainInterface
 
 
 struct SharePreviewSectionModel: Equatable, Sendable, Identifiable {

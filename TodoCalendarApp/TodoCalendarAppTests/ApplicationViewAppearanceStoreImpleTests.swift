@@ -8,11 +8,12 @@
 
 import UIKit
 import Testing
-import Domain
 import CommonPresentation
 import UnitTestHelpKit
 
 @testable import TodoCalendarApp
+import SettingDomainInterface
+import SettingDomainTesting
 
 
 final class ApplicationViewAppearanceStoreImpleTests: AsyncEffectWaitable {

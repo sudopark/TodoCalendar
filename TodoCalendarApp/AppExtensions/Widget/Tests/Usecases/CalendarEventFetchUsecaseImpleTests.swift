@@ -10,11 +10,15 @@ import XCTest
 import Combine
 import Prelude
 import Optics
-import Domain
 import Extensions
 import CalendarPresentation
 import UnitTestHelpKit
-import TestDoubles
+import CalendarDomainInterface
+import CalendarDomainTesting
+import EventDomainInterface
+import EventDomainTesting
+import ExternalCalendarDomainInterface
+import ExternalCalendarDomainTesting
 
 
 class CalendarEventFetchUsecaseImpleTests: BaseTestCase {

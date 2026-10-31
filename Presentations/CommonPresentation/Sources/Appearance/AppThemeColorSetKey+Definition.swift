@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import Domain
+import SettingDomainInterface
 
 
 extension AppThemeColorSetKey {

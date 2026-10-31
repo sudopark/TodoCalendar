@@ -8,9 +8,9 @@
 //
 
 import UIKit
-import Domain
-import Scenes
 import CommonPresentation
+import CalendarDomainInterface
+import SceneInfra
 
 
 // MARK: - CalendarPaperSceneBuilerImple

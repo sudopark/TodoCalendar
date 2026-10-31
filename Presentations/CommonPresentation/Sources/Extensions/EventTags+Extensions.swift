@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import Domain
+import EventDomainInterface
 
 
 extension Array where Element == any EventTag {

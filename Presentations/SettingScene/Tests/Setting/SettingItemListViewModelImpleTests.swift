@@ -9,13 +9,18 @@ import XCTest
 import Combine
 import Prelude
 import Optics
-import Domain
-import Scenes
 import CommonPresentation
 import UnitTestHelpKit
-import TestDoubles
 
 @testable import SettingScene
+import AccountDomainInterface
+import AccountDomainTesting
+import KernelUtils
+import SettingDomainInterface
+import SettingDomainTesting
+import SupportDomainInterface
+import SupportDomainTesting
+import TestDoubles
 
 
 class SettingItemListViewModelImpleTests: BaseTestCase, PublisherWaitable {

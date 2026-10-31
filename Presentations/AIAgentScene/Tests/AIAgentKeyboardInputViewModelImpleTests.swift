@@ -10,10 +10,12 @@ import Testing
 import Combine
 import Prelude
 import Optics
-import Domain
 import UnitTestHelpKit
 
 @testable import AIAgentScene
+import AIDomainTesting
+import BillingDomainInterface
+import BillingDomainTesting
 
 
 final class AIAgentKeyboardInputViewModelImpleTests: PublisherWaitable {

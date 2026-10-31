@@ -7,9 +7,9 @@
 //
 
 import Foundation
-import Domain
-import Scenes
 import CommonPresentation
+import EventDetailSceneInterface
+import SceneInfra
 
 
 protocol EventListCellEventHanleViewModelBuilder {

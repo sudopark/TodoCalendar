@@ -14,8 +14,9 @@ import Combine
 import Prelude
 import Optics
 import Extensions
-import Scenes
 import CommonPresentation
+import EventDetailSceneInterface
+import SceneInfra
 
 
 // MARK: - GoogleCalendarEventDetailViewController

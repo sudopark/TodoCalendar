@@ -8,7 +8,7 @@
 
 import UIKit
 import Extensions
-import Scenes
+import SceneInfra
 
 
 final class CalendarMonthPagerViewController: UIPageViewController {

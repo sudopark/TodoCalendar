@@ -7,10 +7,14 @@
 //
 
 import Foundation
-import Domain
 import SpeechService
 import PlaceService
-import Repository
+import AccountDomainInterface
+import CalendarDomain
+import CalendarDomainInterface
+import KernelUtils
+import SupportDomain
+import SupportDomainInterface
 
 
 // MARK: - CalendarFactory

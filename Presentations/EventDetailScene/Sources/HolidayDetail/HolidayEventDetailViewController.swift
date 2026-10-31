@@ -12,8 +12,8 @@ import UIKit
 import SwiftUI
 import Combine
 import Extensions
-import Scenes
 import CommonPresentation
+import EventDetailSceneInterface
 
 
 // MARK: - HolidayEventDetailViewController

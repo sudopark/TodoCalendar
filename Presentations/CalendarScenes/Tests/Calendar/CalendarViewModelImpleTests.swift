@@ -10,13 +10,24 @@ import UIKit
 import Combine
 import Prelude
 import Optics
-import Domain
-import Scenes
-import TestDoubles
 import UnitTestHelpKit
 
 @testable import CalendarScenes
 import CalendarPresentation
+import AIAgentSceneInterface
+import AIDomainInterface
+import AIDomainTesting
+import AccountDomainInterface
+import AccountDomainTesting
+import CalendarDomainInterface
+import CalendarDomainTesting
+import CalendarSceneInterface
+import EventDomainInterface
+import EventDomainTesting
+import ExternalCalendarDomainTesting
+import MigrationDomainTesting
+import SettingDomainTesting
+import TestDoubles
 
 
 class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable, AsyncEffectWaitable {

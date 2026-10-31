@@ -10,11 +10,15 @@ import XCTest
 import Combine
 import Prelude
 import Optics
-import Domain
 import UnitTestHelpKit
-import TestDoubles
 
 @testable import EventListScenes
+import CalendarDomainInterface
+import CalendarDomainTesting
+import EventDomainInterface
+import EventDomainTesting
+import SettingDomainTesting
+import TestDoubles
 
 
 class DoneTodoListSectionModelImpleTests: BaseTestCase, PublisherWaitable, AsyncEffectWaitable {

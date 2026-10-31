@@ -7,9 +7,9 @@
 //
 
 import SwiftUI
-import Domain
 import CommonPresentation
 import CalendarPresentation
+import SettingDomainInterface
 
 
 struct WeekDaysHeaderView: View {

@@ -8,11 +8,16 @@
 
 import XCTest
 import SwiftUI
-import Domain
 import CommonPresentation
 import SnapshotTestHelpKit
 
 @testable import MemberScenes
+import AccountDomainInterface
+import AccountDomainTesting
+import EventDomainInterface
+import EventDomainTesting
+import SettingDomainInterface
+import SettingDomainTesting
 
 
 final class MemberScenesSnapshots: XCTestCase {

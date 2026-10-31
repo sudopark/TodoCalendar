@@ -9,9 +9,9 @@
 import Testing
 import Combine
 import UnitTestHelpKit
-import TestDoubles
 
 @testable import SettingScene
+import TestDoubles
 
 
 final class OpenSourceLicenseViewModelImpleTests: PublisherWaitable {

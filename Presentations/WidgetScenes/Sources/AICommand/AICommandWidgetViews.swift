@@ -7,9 +7,10 @@
 //
 
 import SwiftUI
-import Domain
 import Extensions
 import CommonPresentation
+import ExternalCalendarDomainInterface
+import SettingDomainInterface
 
 
 /// 잠금화면 배경(`AccessoryWidgetBackground`)과 accent 처리는 WidgetKit 타입이라 확장의 엔트리 뷰가 씌운다.

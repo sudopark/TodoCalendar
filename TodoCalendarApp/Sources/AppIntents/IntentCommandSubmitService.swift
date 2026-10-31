@@ -7,8 +7,9 @@
 //
 
 import Foundation
-import Domain
-import Repository
+import AIDomainInterface
+import AccountDomainInterface
+import CalendarDomainInterface
 
 
 struct IntentCommandSubmitService: Sendable {

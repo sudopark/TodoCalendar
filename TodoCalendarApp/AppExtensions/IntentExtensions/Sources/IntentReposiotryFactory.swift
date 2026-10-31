@@ -9,9 +9,13 @@
 import Foundation
 import Prelude
 import Optics
-import Domain
 import Extensions
-import Repository
+import EventDomain
+import EventDomainInterface
+import ExternalCalendarDomain
+import ExternalCalendarDomainInterface
+import RemoteInfraInterface
+import AccountDomain
 
 @available(*, deprecated, message: "EventTypeSelectIntentFactory으로 변경됨")
 struct IntentReposiotryFactory {
@@ -73,6 +77,9 @@ extension IntentReposiotryFactory {
     func makeGoogleCalendarRepository() -> any GoogleCalendarRepository {
         return GoogleCalendarLocalAggregatedRepositoryImple(
             connectionPool: base.externalCalendarDBConnectionPool,
+            timeStorage: EventTimeLocalStorageImple(
+                connectionPool: base.externalCalendarDBConnectionPool, serviceId: GoogleCalendarService.id
+            ),
             accountRepository: makeExternalCalendarAcountRepository()
         )
     }

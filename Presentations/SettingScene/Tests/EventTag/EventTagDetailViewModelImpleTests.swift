@@ -9,12 +9,14 @@ import XCTest
 import Combine
 import Prelude
 import Optics
-import Domain
-import Scenes
 import UnitTestHelpKit
-import TestDoubles
 
 @testable import SettingScene
+import EventDomainInterface
+import EventDomainTesting
+import SettingDomainTesting
+import SettingSceneInterface
+import TestDoubles
 
 
 class EventTagDetailViewModelImpleTests: BaseTestCase, PublisherWaitable {

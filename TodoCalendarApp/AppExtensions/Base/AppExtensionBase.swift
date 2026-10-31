@@ -1,13 +1,19 @@
 
 
 import Foundation
-import Domain
 import Extensions
-import Repository
 import FirebaseCore
 import FirebaseAuth
 import SQLiteService
 import Alamofire
+import AccountDomain
+import AuthService
+import AccountDomainInterface
+import DBInfraInterface
+import ExternalCalendarDomain
+import RemoteInfra
+import RemoteInfraInterface
+import StorageInfra
 
 
 // MARK: - AppExtensionBase
@@ -64,7 +70,7 @@ final class AppExtensionBase {
         return AppleCalendarPermissionCheckerImple(storeAccessor: EKEventStoreWrapper())
     }()
     
-    lazy var firebaseAuthService: any FirebaseAuthService = {
+    lazy var firebaseAuthService: any FirebaseAuthService & FirebaseTokenRefreshService = {
         if AppEnvironment.isExternalDependencyBlocked {
             return DummyFirebaseAuthService()
         } else {

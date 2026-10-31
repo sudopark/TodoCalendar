@@ -9,10 +9,11 @@
 import Foundation
 import SwiftUI
 import WidgetKit
-import Domain
 import CommonPresentation
 import Extensions
 import WidgetScenes
+import CalendarDomainInterface
+import SettingDomainInterface
 
 struct WidgetErrorModel: Error {
     let error: any Error

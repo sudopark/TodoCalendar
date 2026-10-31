@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import Domain
 import CommonPresentation
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {

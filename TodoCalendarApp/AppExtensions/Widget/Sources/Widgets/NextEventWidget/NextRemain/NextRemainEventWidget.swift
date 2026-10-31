@@ -8,7 +8,6 @@
 
 import WidgetKit
 import SwiftUI
-import Domain
 import Extensions
 import CommonPresentation
 import CalendarPresentation

@@ -10,9 +10,11 @@
 
 import SwiftUI
 import Combine
-import Domain
 import Extensions
 import CommonPresentation
+import CalendarDomainInterface
+import EventDomainInterface
+import SettingDomainInterface
 
 
 // MARK: - CountrySelectViewState

@@ -8,11 +8,11 @@
 
 import UIKit
 import SwiftUI
-import Scenes
 import CommonPresentation
+import SceneInfra
 
 
-final class PaidFeatureAdGuideViewController: UIHostingController<PaidFeatureAdGuideContainerView>, Scenes.Scene {
+final class PaidFeatureAdGuideViewController: UIHostingController<PaidFeatureAdGuideContainerView>, SceneInfra.Scene {
 
     var interactor: EmptyInteractor? { nil }
     let viewAppearance: ViewAppearance

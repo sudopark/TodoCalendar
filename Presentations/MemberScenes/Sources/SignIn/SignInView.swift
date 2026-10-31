@@ -11,9 +11,11 @@
 
 import SwiftUI
 import Combine
-import Domain
 import Extensions
 import CommonPresentation
+import AccountDomainInterface
+import EventDomainInterface
+import SettingDomainInterface
 
 
 // MARK: - SignInViewState

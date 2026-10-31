@@ -8,10 +8,10 @@
 
 import UIKit
 import SwiftUI
-import Scenes
 import CommonPresentation
+import SceneInfra
 
-protocol GuideScene: Scenes.Scene { }
+protocol GuideScene: SceneInfra.Scene { }
 
 protocol GuideSceneBuilder {
     

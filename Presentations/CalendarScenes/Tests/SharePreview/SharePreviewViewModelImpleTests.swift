@@ -10,13 +10,19 @@ import Testing
 import Combine
 import Prelude
 import Optics
-import Domain
-import Scenes
 import Extensions
 import UnitTestHelpKit
-import TestDoubles
 
 @testable import CalendarScenes
+import CalendarDomainInterface
+import CalendarDomainTesting
+import EventDomainInterface
+import EventDomainTesting
+import ExternalCalendarDomainInterface
+import ExternalCalendarDomainTesting
+import SettingDomainInterface
+import SettingDomainTesting
+import TestDoubles
 
 
 final class SharePreviewViewModelImpleTests: PublisherWaitable {

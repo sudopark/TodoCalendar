@@ -12,9 +12,10 @@ import Foundation
 import Combine
 import Prelude
 import Optics
-import Domain
 import Extensions
-import Scenes
+import EventDomainInterface
+import ExternalCalendarDomainInterface
+import SettingDomainInterface
 
 
 // MARK: - EventDefaultTagSelectViewModel

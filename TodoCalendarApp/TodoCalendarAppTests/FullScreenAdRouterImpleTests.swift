@@ -10,11 +10,11 @@ import UIKit
 import Testing
 import Combine
 import GoogleMobileAds
-import Domain
 import AdService
 import UnitTestHelpKit
 
 @testable import TodoCalendarApp
+import AdDomainInterface
 
 
 @MainActor

@@ -7,9 +7,9 @@
 //
 
 import UIKit
-import Domain
-import Scenes
 import CommonPresentation
+import AIAgentSceneInterface
+import SceneInfra
 
 
 // MARK: - AIAgentImageCommandBuilderImple

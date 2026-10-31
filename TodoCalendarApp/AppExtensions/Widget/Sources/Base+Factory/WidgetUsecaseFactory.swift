@@ -7,8 +7,14 @@
 //
 
 import Foundation
-import Domain
-import Repository
+import CalendarDomain
+import CalendarDomainInterface
+import EventDomain
+import ExternalCalendarDomainInterface
+import EventDomainInterface
+import ExternalCalendarDomain
+import RemoteInfra
+import SettingDomain
 
 
 // MARK: - FetchCacheStores
@@ -129,10 +135,16 @@ extension WidgetUsecaseFactory {
         )
         let googleCalendarRepository = GoogleCalendarLocalAggregatedRepositoryImple(
             connectionPool: base.externalCalendarDBConnectionPool,
+            timeStorage: EventTimeLocalStorageImple(
+                connectionPool: base.externalCalendarDBConnectionPool, serviceId: GoogleCalendarService.id
+            ),
             accountRepository: externalCalendarRepository
         )
         let appleCalendarRepository = AppleCalendarLocalAggregatedRepositoryImple(
-            connectionPool: base.externalCalendarDBConnectionPool
+            connectionPool: base.externalCalendarDBConnectionPool,
+            timeStorage: EventTimeLocalStorageImple(
+                connectionPool: base.externalCalendarDBConnectionPool, serviceId: AppleCalendarService.id
+            )
         )
 
         let eventDetailRepository = EventDetailDataLocalRepostioryImple(

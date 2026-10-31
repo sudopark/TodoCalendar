@@ -7,9 +7,9 @@
 //
 
 import Foundation
-import Domain
-import Scenes
 import CommonPresentation
+import MemberSceneInterface
+import SceneInfra
 
 
 public final class MemberSceneBuilderImple: MemberSceneBuilder {

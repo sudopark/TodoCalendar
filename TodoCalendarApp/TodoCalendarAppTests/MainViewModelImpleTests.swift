@@ -8,13 +8,27 @@
 import XCTest
 import UIKit
 import Combine
-import Domain
 import Extensions
-import Scenes
 import UnitTestHelpKit
-import TestDoubles
 
 @testable import TodoCalendarApp
+import AIDomainTesting
+import BillingDomainInterface
+import BillingDomainTesting
+import CalendarDomainInterface
+import CalendarDomainTesting
+import CalendarSceneInterface
+import EventDomainInterface
+import EventDomainTesting
+import ExternalCalendarDomainTesting
+import MigrationDomainTesting
+import NotificationDomainInterface
+import NotificationDomainTesting
+import SettingDomainInterface
+import SettingDomainTesting
+import SupportDomainInterface
+import SupportDomainTesting
+import TestDoubles
 
 
 class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {

@@ -9,8 +9,8 @@ import Foundation
 import Combine
 import Prelude
 import Optics
-import Domain
 import Extensions
+import SettingDomainInterface
 
 
 struct EventListAppearanceSetting {

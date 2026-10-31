@@ -8,8 +8,8 @@
 
 import Foundation
 import Combine
+import EventDomainInterface
 @preconcurrency import ActivityKit
-import Domain
 
 
 final class EventCountdownLiveActivityController: LiveActivityController, @unchecked Sendable {

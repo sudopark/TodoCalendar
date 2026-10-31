@@ -10,8 +10,6 @@ import Combine
 import EventKit
 import Prelude
 import Optics
-import Domain
-import Repository
 import Extensions
 import FirebaseAuth
 import Alamofire
@@ -20,6 +18,20 @@ import ExternalServices
 import CommonPresentation
 import GoogleMobileAds
 import AdService
+import AccountDomain
+import AuthService
+import AccountDomainInterface
+import DBInfra
+import EventDomainInterface
+import ExternalCalendarDomain
+import ExternalCalendarDomainInterface
+import KernelUtils
+import RemoteInfra
+import RemoteInfraInterface
+import StorageInfra
+import StorageInfraInterface
+import SupportDomainInterface
+import EventDomain
 
 
 final class ApplicationBase {
@@ -85,7 +97,7 @@ final class ApplicationBase {
         return environment
     }()
     
-    let firebaseAuthService: any FirebaseAuthService = {
+    let firebaseAuthService: any FirebaseAuthService & FirebaseTokenRefreshService = {
         if AppEnvironment.isExternalDependencyBlocked {
             return DummyFirebaseAuthService()
         } else {
@@ -157,7 +169,10 @@ final class ApplicationBase {
 
     lazy var appleCalendarRepository: AppleCalendarRepositoryImple = {
         let cacheStorage = AppleCalendarLocalStorageImple(
-            connectionPool: self.externalCalendarDBConnectionPool
+            connectionPool: self.externalCalendarDBConnectionPool,
+            timeStorage: EventTimeLocalStorageImple(
+                connectionPool: self.externalCalendarDBConnectionPool, serviceId: AppleCalendarService.id
+            )
         )
         return AppleCalendarRepositoryImple(
             storeAccessor: self.ekEventStoreWrapper,

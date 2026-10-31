@@ -8,8 +8,10 @@
 
 import Foundation
 import Combine
-import Domain
 import Extensions
+import AIDomainInterface
+import BillingDomainInterface
+import SupportDomainInterface
 
 
 // MARK: - AIAgentImageCommandStage

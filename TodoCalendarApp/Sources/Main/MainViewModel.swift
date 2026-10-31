@@ -12,9 +12,18 @@ import UIKit
 import Combine
 import Prelude
 import Optics
-import Domain
 import Extensions
-import Scenes
+import AIDomainInterface
+import BillingDomainInterface
+import CalendarDomainInterface
+import CalendarSceneInterface
+import EventDomainInterface
+import ExternalCalendarDomainInterface
+import MigrationDomainInterface
+import NotificationDomainInterface
+import SceneInfra
+import SettingDomainInterface
+import SupportDomainInterface
 
 
 // MARK: - MainViewModel

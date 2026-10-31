@@ -7,8 +7,9 @@
 //
 
 import Foundation
-import Domain
-import Scenes
+import CalendarDomainInterface
+import CalendarSceneInterface
+import SceneInfra
 
 
 public final class CalendarDeepLinkHandlerImple: DeepLinkHandler, @unchecked Sendable {

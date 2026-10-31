@@ -8,10 +8,11 @@
 
 import Foundation
 import Combine
-import Domain
 
 @testable import CalendarScenes
 import CalendarPresentation
+import CalendarDomainInterface
+import CalendarDomainTesting
 
 
 final class SpyContinuousMonthsViewModel: ContinuousMonthsViewModel, @unchecked Sendable {

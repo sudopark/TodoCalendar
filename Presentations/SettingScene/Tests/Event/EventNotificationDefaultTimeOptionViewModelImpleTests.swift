@@ -10,12 +10,13 @@ import XCTest
 import Combine
 import Prelude
 import Optics
-import Domain
 import Extensions
 import UnitTestHelpKit
-import TestDoubles
 
 @testable import SettingScene
+import NotificationDomainTesting
+import SettingDomainTesting
+import TestDoubles
 
 class EventNotificationDefaultTimeOptionViewModelImpleTests: BaseTestCase, PublisherWaitable {
     

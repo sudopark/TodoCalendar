@@ -8,8 +8,9 @@
 
 import Foundation
 import Combine
-import Domain
 import Extensions
+import BillingDomainInterface
+import BillingDomainTesting
 
 
 final class StubBillingUsecase: BillingUsecase, @unchecked Sendable {

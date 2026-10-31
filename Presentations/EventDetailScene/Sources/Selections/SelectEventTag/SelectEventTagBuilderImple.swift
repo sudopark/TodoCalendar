@@ -8,9 +8,10 @@
 //
 
 import UIKit
-import Domain
-import Scenes
 import CommonPresentation
+import EventDomainInterface
+import SceneInfra
+import SettingSceneInterface
 
 
 // MARK: - SelectEventTagSceneBuilerImple

@@ -7,8 +7,10 @@
 //
 
 import Foundation
-import Domain
-import Repository
+import AccountDomain
+import AccountDomainInterface
+import RemoteInfra
+import RemoteInfraInterface
 
 
 struct NeverRemoveAuthStorage: AuthStore, APICredentialStore {

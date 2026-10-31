@@ -10,13 +10,16 @@ import Testing
 import Foundation
 import Prelude
 import Optics
-import Domain
 import Extensions
 import UnitTestHelpKit
-import TestDoubles
 import WidgetScenes
 
 @testable import TodoCalendarAppWidget
+import CalendarDomainTesting
+import EventDomainInterface
+import EventDomainTesting
+import SettingDomainInterface
+import SettingDomainTesting
 
 
 /// 합성 위젯은 제 스타일로 그린다 — 하위 위젯군의 스타일은 합성 위젯으로 새지 않는다.

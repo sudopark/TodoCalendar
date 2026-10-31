@@ -9,15 +9,27 @@ import XCTest
 import Combine
 import Prelude
 import Optics
-import Domain
-import Scenes
 import Extensions
 import UnitTestHelpKit
-import TestDoubles
 import CommonPresentation
 
 @testable import CalendarScenes
 import CalendarPresentation
+import AIDomainTesting
+import AccountDomainInterface
+import AccountDomainTesting
+import CalendarDomainInterface
+import CalendarDomainTesting
+import EventDetailSceneInterface
+import EventDomainInterface
+import EventDomainTesting
+import ExternalCalendarDomainInterface
+import ExternalCalendarDomainTesting
+import SceneInfra
+import SettingDomainInterface
+import SettingDomainTesting
+import SupportDomainTesting
+import TestDoubles
 
 
 class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {

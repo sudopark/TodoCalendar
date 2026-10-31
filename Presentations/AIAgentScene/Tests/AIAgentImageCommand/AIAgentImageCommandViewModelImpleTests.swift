@@ -8,11 +8,13 @@
 
 import Testing
 import Combine
-import Domain
 import Extensions
 import UnitTestHelpKit
 
 @testable import AIAgentScene
+import AIDomainInterface
+import AIDomainTesting
+import BillingDomainTesting
 
 
 final class AIAgentImageCommandViewModelImpleTests: PublisherWaitable {

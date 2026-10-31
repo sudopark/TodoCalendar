@@ -6,7 +6,7 @@
 //
 
 import UIKit
-import Domain
+import EventDomainInterface
 
 // MARK: - event tag color set
 

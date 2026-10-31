@@ -8,9 +8,10 @@
 
 import Testing
 import Foundation
-import Domain
 
 @testable import TodoCalendarAppWidget
+import SettingDomainInterface
+import SettingDomainTesting
 
 
 // MARK: - 편집 시트 후보 목록

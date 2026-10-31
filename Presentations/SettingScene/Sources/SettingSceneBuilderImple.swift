@@ -6,9 +6,13 @@
 //
 
 import Foundation
-import Domain
-import Scenes
 import CommonPresentation
+import BillingSceneInterface
+import ExternalCalendarDomainInterface
+import MemberSceneInterface
+import SceneInfra
+import SettingSceneInterface
+import WidgetGallerySceneInterface
 
 
 public final class SettingSceneBuilderImple: SettingSceneBuiler {

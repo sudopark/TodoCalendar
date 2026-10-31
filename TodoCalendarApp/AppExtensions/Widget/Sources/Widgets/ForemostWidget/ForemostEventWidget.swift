@@ -11,11 +11,12 @@ import SwiftUI
 import AppIntents
 import Prelude
 import Optics
-import Domain
 import Extensions
 import CommonPresentation
 import CalendarPresentation
 import WidgetScenes
+import ExternalCalendarDomainInterface
+import SettingDomainInterface
 
 
 // MARK: - ForemostTodoToggleButton

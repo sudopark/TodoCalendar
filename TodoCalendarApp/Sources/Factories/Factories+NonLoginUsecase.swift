@@ -7,10 +7,29 @@
 //
 
 import Foundation
-import Domain
 import FirstPartyServices
-import Repository
-import Scenes
+import AIDomain
+import AIDomainInterface
+import AccountDomainInterface
+import AdDomain
+import AdDomainInterface
+import BillingDomain
+import BillingDomainInterface
+import CalendarDomain
+import CalendarDomainInterface
+import EventDomain
+import EventDomainInterface
+import ExternalCalendarDomain
+import ExternalCalendarDomainInterface
+import KernelUtils
+import MigrationDomain
+import MigrationDomainInterface
+import NotificationDomain
+import NotificationDomainInterface
+import SceneInfra
+import SettingDomain
+import SettingDomainInterface
+import SupportDomainInterface
 
 // MARK: - NonLoginUsecaseFactoryImple
 

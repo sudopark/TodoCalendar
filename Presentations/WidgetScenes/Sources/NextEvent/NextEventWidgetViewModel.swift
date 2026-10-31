@@ -7,9 +7,9 @@
 //
 
 import Foundation
-import Domain
 import Extensions
 import CalendarPresentation
+import EventDomainInterface
 
 
 // MARK: - NextEventWidgetViewModel

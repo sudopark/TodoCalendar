@@ -10,10 +10,9 @@
 import UIKit
 import SwiftUI
 import Combine
-import Domain
 import Extensions
-import Scenes
 import CommonPresentation
+import SettingDomainInterface
 
 
 // MARK: - AppearanceSettingViewController

@@ -7,7 +7,8 @@
 //
 
 import UIKit
-import Domain
+import ExternalCalendarDomainInterface
+import SettingDomainInterface
 
 
 extension ColorSetKeys {

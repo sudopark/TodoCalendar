@@ -7,10 +7,9 @@
 //
 
 import Foundation
-import Scenes
-import TestDoubles
 
 @testable import AIAgentScene
+import TestDoubles
 
 
 final class SpyAIAgentImageCommandRouter: BaseSpyRouter, AIAgentImageCommandRouting, @unchecked Sendable { }

@@ -12,9 +12,11 @@ import SwiftUI
 import Combine
 import Prelude
 import Optics
-import Domain
 import CommonPresentation
 import Extensions
+import EventDomainInterface
+import ExternalCalendarDomainInterface
+import SettingDomainInterface
 
 
 // MARK: - EventTagListViewController

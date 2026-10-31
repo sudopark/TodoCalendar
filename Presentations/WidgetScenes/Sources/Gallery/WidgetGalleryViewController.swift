@@ -10,8 +10,8 @@ import UIKit
 import SwiftUI
 import Combine
 import Extensions
-import Scenes
 import CommonPresentation
+import WidgetGallerySceneInterface
 
 
 final class WidgetGalleryViewController: UIHostingController<WidgetGalleryContainerView>, WidgetGalleryScene {

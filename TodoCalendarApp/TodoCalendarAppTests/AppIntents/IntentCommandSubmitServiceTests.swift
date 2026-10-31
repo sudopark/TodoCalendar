@@ -10,12 +10,17 @@ import Foundation
 import Testing
 import Prelude
 import Optics
-import Domain
-import Repository
 import Extensions
-import TestDoubles
 
 @testable import TodoCalendarApp
+import AIDomainInterface
+import AIDomainTesting
+import AccountDomainInterface
+import AccountDomainTesting
+import BillingDomainInterface
+import BillingDomainTesting
+import CalendarDomainTesting
+import KernelUtils
 
 
 final class IntentCommandSubmitServiceTests {

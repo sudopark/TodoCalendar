@@ -11,9 +11,12 @@ import Combine
 import Prelude
 import Optics
 import AsyncAlgorithms
-import Domain
 import Extensions
 import CalendarPresentation
+import CalendarDomainInterface
+import EventDomainInterface
+import ExternalCalendarDomainInterface
+import PlaceServiceInterface
 
 
 // MARK: - CalendarEventFetchUsecase + CalendarEvents

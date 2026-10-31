@@ -10,11 +10,12 @@ import WidgetKit
 import SwiftUI
 import Prelude
 import Optics
-import Domain
 import Extensions
 import CommonPresentation
 import CalendarPresentation
 import WidgetScenes
+import CalendarDomainInterface
+import EventDomainInterface
 
 
 // MARK: - entry view

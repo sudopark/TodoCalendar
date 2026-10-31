@@ -9,9 +9,9 @@
 //
 
 import UIKit
-import Domain
-import Scenes
 import CommonPresentation
+import ExternalCalendarDomainInterface
+import SceneInfra
 
 
 // MARK: - EventSettingSceneBuilerImple

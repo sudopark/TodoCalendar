@@ -9,11 +9,14 @@ import SwiftUI
 import Combine
 import Prelude
 import Optics
-import Domain
 import Extensions
-import Scenes
 import CommonPresentation
 import CalendarPresentation
+import CalendarDomainInterface
+import CalendarSceneInterface
+import EventDomainInterface
+import SceneInfra
+import SettingDomainInterface
 
 @Observable final class MonthViewState {
     
@@ -327,7 +330,7 @@ final class DummyMonthViewModel: MonthViewModel, @unchecked Sendable {
             .eraseToAnyPublisher()
     }
 
-    func updateMonthIfNeed(_ newMonth: Domain.CalendarMonth) { }
+    func updateMonthIfNeed(_ newMonth: CalendarDomainInterface.CalendarMonth) { }
 }
 
 

@@ -10,15 +10,24 @@ import XCTest
 import Combine
 import Prelude
 import Optics
-import Domain
 import Extensions
-import Scenes
 import CommonPresentation
 import UnitTestHelpKit
-import TestDoubles
 
 @testable import CalendarScenes
 import CalendarPresentation
+import CalendarDomainInterface
+import CalendarDomainTesting
+import EventDetailSceneInterface
+import EventDomainInterface
+import EventDomainTesting
+import ExternalCalendarDomainInterface
+import ExternalCalendarDomainTesting
+import KernelUtils
+import PlaceServiceInterface
+import SceneInfra
+import SupportDomainTesting
+import TestDoubles
 
 class EventListCellEventHanleViewModelImpleTests: BaseTestCase, PublisherWaitable {
     

@@ -9,9 +9,10 @@
 //
 
 import UIKit
-import Domain
-import Scenes
 import CommonPresentation
+import EventDetailSceneInterface
+import EventListSceneInterface
+import SceneInfra
 
 
 // MARK: - DoneTodoEventListSceneBuilerImple

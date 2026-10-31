@@ -8,9 +8,8 @@
 
 import Foundation
 import Combine
-import Domain
 import Extensions
-import Scenes
+import SettingDomainInterface
 
 
 protocol WidgetGalleryDetailViewModel: AnyObject, WidgetGalleryDetailSceneInteractor {

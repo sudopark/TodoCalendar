@@ -7,8 +7,8 @@
 //
 
 import SwiftUI
-import Domain
 import Extensions
+import SettingDomainInterface
 
 
 // MARK: - variant style form

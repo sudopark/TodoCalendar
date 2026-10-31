@@ -8,8 +8,8 @@
 //
 
 import UIKit
-import Scenes
 import CommonPresentation
+import SceneInfra
 
 
 // MARK: - Routing

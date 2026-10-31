@@ -8,7 +8,7 @@
 
 import Foundation
 import AppIntents
-import Domain
+import SettingDomainInterface
 
 
 // MARK: - EventAndMonthStyleEntity

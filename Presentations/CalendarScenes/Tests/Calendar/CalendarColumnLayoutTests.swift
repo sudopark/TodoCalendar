@@ -8,9 +8,9 @@
 
 import UIKit
 import Testing
-import Scenes
 
 @testable import CalendarScenes
+import CalendarSceneInterface
 
 
 struct CalendarColumnLayoutTests {

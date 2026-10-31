@@ -8,10 +8,13 @@
 
 import XCTest
 import SwiftUI
-import Domain
 import SnapshotTestHelpKit
 
 @testable import CommonPresentation
+import EventDomainInterface
+import EventDomainTesting
+import SettingDomainInterface
+import SettingDomainTesting
 
 
 final class CommonComponentSnapshots: XCTestCase {

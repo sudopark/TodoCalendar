@@ -12,9 +12,11 @@ import Foundation
 import Combine
 import Prelude
 import Optics
-import Domain
 import Extensions
-import Scenes
+import AccountDomainInterface
+import MemberSceneInterface
+import MigrationDomainInterface
+import SceneInfra
 
 
 struct AccountInfoModel: Equatable {

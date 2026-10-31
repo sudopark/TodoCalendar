@@ -8,12 +8,15 @@
 
 import Foundation
 import Testing
-import Domain
-import Scenes
 import Extensions
-import TestDoubles
 
 @testable import TodoCalendarApp
+import AccountDomainInterface
+import AccountDomainTesting
+import KernelUtils
+import SupportDomainInterface
+import SupportDomainTesting
+import TestDoubles
 
 
 final class ApplicationDeepLinkHandlerImpleTests {

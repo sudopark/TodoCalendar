@@ -8,9 +8,12 @@
 
 import SwiftUI
 import Combine
-import Domain
 import Extensions
 import CommonPresentation
+import AIDomainInterface
+import BillingDomainInterface
+import EventDomainInterface
+import SettingDomainInterface
 
 
 // MARK: - ViewState

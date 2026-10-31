@@ -7,8 +7,9 @@
 //
 
 import UIKit
-import Domain
 import CommonPresentation
+import EventDomainInterface
+import ExternalCalendarDomainInterface
 
 
 public struct EventColorPalette: Sendable {

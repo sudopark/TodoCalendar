@@ -11,12 +11,17 @@ import SwiftUI
 import Combine
 import Prelude
 import Optics
-import Domain
 import CommonPresentation
 import SnapshotTestHelpKit
 
 @testable import CalendarScenes
 import CalendarPresentation
+import CalendarDomainInterface
+import CalendarDomainTesting
+import EventDomainInterface
+import EventDomainTesting
+import SettingDomainInterface
+import SettingDomainTesting
 
 
 final class NextDayEventListSnapshots: XCTestCase {

@@ -8,9 +8,8 @@
 
 import Foundation
 import Combine
-import Domain
-import Scenes
 import CalendarPresentation
+import CalendarDomainInterface
 
 
 // MARK: - CalendarTwoColumnsViewModel

@@ -7,8 +7,9 @@
 //
 
 import Foundation
-import Domain
-import Repository
+import CalendarDomain
+import EventDomain
+import EventDomainInterface
 
 
 struct DDayTargetSelectIntentFactory {

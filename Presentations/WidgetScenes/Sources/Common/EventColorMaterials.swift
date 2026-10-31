@@ -6,8 +6,12 @@
 //  Copyright © 2026 com.sudo.park. All rights reserved.
 //
 
-import Domain
 
+
+
+
+import EventDomainInterface
+import ExternalCalendarDomainInterface
 
 public protocol EventColorMaterials {
     

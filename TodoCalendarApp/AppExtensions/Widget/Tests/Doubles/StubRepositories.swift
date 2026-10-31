@@ -8,8 +8,13 @@
 
 import Foundation
 import Combine
-import Domain
 import Extensions
+import AccountDomainInterface
+import AccountDomainTesting
+import ExternalCalendarDomainInterface
+import ExternalCalendarDomainTesting
+import SettingDomainInterface
+import SettingDomainTesting
 
 
 final class StubExternalCalendarRepository: ExternalCalendarIntegrateRepository, @unchecked Sendable {

@@ -12,10 +12,12 @@ import Foundation
 import Combine
 import Prelude
 import Optics
-import Domain
-import Scenes
 import CommonPresentation
 import Extensions
+import CalendarDomainInterface
+import EventDetailSceneInterface
+import EventDomainInterface
+import SceneInfra
 
 
 struct CountryModel: Equatable {
