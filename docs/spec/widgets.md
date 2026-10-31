@@ -529,6 +529,8 @@ WeekEventsRange
 
 **표시**: 대상 이벤트 이름 + D-n 카운트 + 대상 날짜. 대상을 아직 안 고른 상태면 안내 문구를 띄운다.
 
+**카운트 방식**: `DDayWidgetViewModelProvider` 가 기기 단위 옵션 `dday_counts_target_day_as_one`(App Group 공유)을 읽어 `Calendar.ddayInterval` 로 일수를 낸다 — 켜면 당일이 D+1, N일 지난 날이 D+(N+1)이다 (규칙은 [`infrastructure.md §4.1`](infrastructure.md)). 옵션은 위젯 설정 화면 "위젯 테마" 섹션의 토글이 바꾸고, 바꾼 즉시 `WidgetVariant.ddaySmall.kind` 타임라인을 다시 그린다. 위젯마다 따로 켤 수도 있다 — 위젯 편집의 `DDayWidgetConfigurationIntent.countsTargetDayAsOne`("Count D-Day as D+1", 기본 끔)을 켜면 그 위젯은 앱 옵션과 무관하게 D+1 규칙으로 세고, 끄면 앱 옵션을 따른다.
+
 **대상 선택 — `DDayWidgetConfigurationIntent`**
 
 | 파라미터 | 타입 | 노출 조건 |

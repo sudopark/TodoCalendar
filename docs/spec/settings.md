@@ -101,6 +101,25 @@
 
 색상 변경 시 SharedDataStore `defaultEventTagColor` 키로 전파 → 캘린더, 이벤트 목록, 위젯 모두 반영.
 
+### 7 위젯 설정
+
+설정 메인 목록의 외관 바로 아래 "위젯" 항목이 위젯 설정 화면(WidgetScenes 의 갤러리)을 연다. 진입점은 이 항목 하나다.
+
+| 설정 | 저장 키 | 기본값 | 반영 |
+|---|---|---|---|
+| 위젯 테마 (시스템·커스텀 배경) | `widget_background` | 시스템 | 위젯 배경 |
+| D-Day 를 D+1 로 세기 | `dday_counts_target_day_as_one` | off | 이벤트 상세 4종·디데이 위젯 (규칙은 [`infrastructure.md §4.1`](infrastructure.md)) |
+
+### 8 새 기능 뱃지
+
+`NewFeatureBadgeUsecase` 가 기능별 키(`NewFeatureBadge`)로 확인 여부를 기기에 남긴다 (저장 키 `checked_new_feature_badges`). 확인 안 한 기능이 있으면 메인 화면 설정 버튼에 빨간 점이, 해당 설정 항목에 "new" 캡슐이 붙는다. 그 항목을 눌러 화면을 열면 확인으로 기록되어 둘 다 사라진다.
+
+| 뱃지 | 붙는 항목 |
+|---|---|
+| `widgetSetting` | 설정 메인 "위젯" |
+
+새 기능을 알리려면 `NewFeatureBadge` 에 case 를 더하고 그 항목 진입에서 `markChecked` 를 부른다. 신규 설치 유저에게도 뜬다.
+
 ---
 
 ## 결정 트리 & 상태 전이
