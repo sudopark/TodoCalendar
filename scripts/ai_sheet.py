@@ -2,7 +2,7 @@
 """AI 빠른 입력 시트가 캘린더 위에 떠 있는 장면을 조립한다.
 
 카탈로그는 시트를 화면과 따로 찍지만, 실제로는 `showBottomSlide` 가 캘린더 위에 띄운다
-(`Presentations/Scenes/Sources/BaseComponents.swift`). 그 모습을 여기서 만든다.
+(`Presentations/Scenes/SceneInfra/Sources/BaseComponents.swift`). 그 모습을 여기서 만든다.
 딤·코너는 프로덕션 값을 그대로 쓴다 — 딤은 검정 30%(`BottomSlideTransitions.swift`),
 시트는 상단 좌우 코너 10pt(`BottomSlideView.swift`).
 """

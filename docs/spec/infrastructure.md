@@ -336,7 +336,7 @@ private func runMigrationVersion6to7(_ database: any DataBase) throws {
 }
 ```
 
-> 컬럼 순서가 곧 cursor 읽기 순서라는 위치 결합은 [`Repository/CLAUDE.md`](../../Repository/CLAUDE.md) 참조.
+> 컬럼 순서가 곧 cursor 읽기 순서라는 위치 결합은 [`repository-rules.md`](../../.claude/rules/repository-rules.md) 참조.
 
 ---
 

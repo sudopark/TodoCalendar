@@ -11,14 +11,15 @@ description: Use when adding new source or test files to an existing framework i
 
 | 추가 대상 | 위치 | 세부 기준 |
 |---|---|---|
-| Domain 모델 | `Domain/Sources/Models/<서브도메인>/` | 서브도메인 분리 기준: `Domain/CLAUDE.md` |
-| Usecase | `Domain/Sources/Usecases/<서브도메인>/` | bypass만 하면 typealias (`Domain/CLAUDE.md`) |
+| Domain 모델 | `Domain/<X>Domain/Interface/Models/` | 서브도메인 분리 기준: `Domain/CLAUDE.md` |
+| Usecase | 프로토콜 `Domain/<X>Domain/Interface/Usecases/` · 구현 `Domain/<X>Domain/Sources/Usecases/` | bypass만 하면 typealias (`Domain/CLAUDE.md`) |
 | Service 구현체 (플랫폼·서드파티 SDK 결합) | `Services/<프레임워크>/Sources/` | 프로토콜은 Domain에 두고 구현만 — 소속 프레임워크 축은 add-framework 스킬 §1 |
-| Repository 프로토콜 | `Domain/Sources/Repositories/<서브도메인>/` | |
-| Repository 구현 | `Repository/Sources/Repository+Imple/<서브도메인>/` | 3-Layer 패턴: `Repository/CLAUDE.md`. JSON 매핑은 같은 폴더 `Xxx+Mapping.swift` (repository-rules §2) |
+| Repository 프로토콜 | `Domain/<X>Domain/Interface/Repositories/` | |
+| Repository 구현 | `Domain/<X>Domain/Sources/Repositories/` | 3-Layer 패턴·엔드포인트(`<X>Endpoints.swift`): repository-rules. JSON 매핑은 같은 폴더 `Xxx+Mapping.swift` (repository-rules §2) |
 | 새 Scene (6파일) | 해당 Scene 프레임워크 | 템플릿·생성 순서·체크리스트: `docs/화면단위구조.md`. 폴더 위치: presentations-rules §3 |
 | 공용 UI 컴포넌트 | `Presentations/CommonPresentation/Sources/` | 작성 전 인벤토리 확인 (presentations-rules §2) |
-| 공유 Scene 프로토콜 | `Presentations/Scenes/Sources/Scenes+*.swift` | 모듈 간 직접 import 금지 (presentations-rules §7) |
+| 다른 서브도메인·화면 테스트가 쓰는 stub·더미 | `Domain/<X>Domain/Testing/` | 그 서브도메인 안에서만 쓰면 `Tests/Doubles/` (testability §8) |
+| 공유 Scene 프로토콜 | `Presentations/Scenes/Interfaces/<X>SceneInterface/Sources/Scenes+*.swift` | 모듈 간 직접 import 금지 (presentations-rules §7) |
 
 ## 2. 테스트 파일 동반
 

@@ -1,13 +1,12 @@
 # Domain Framework
 
-앱의 모든 **비즈니스 모델**, **Repository 프로토콜**, **Usecase 구현**이 위치하는 프레임워크.
-Repository 구현체는 여기 없고 프로토콜만 정의한다. 구현은 `Repository/` 프레임워크에 있다.
+앱의 **비즈니스 모델**, **Usecase**, **Repository** 가 서브도메인 모듈(`Domain/<X>Domain`)마다 나뉘어 있다. 각 모듈은 네 타겟이다 — `Interface/`(`<X>DomainInterface` — 모델·usecase 프로토콜·repository 포트), `Sources/`(`<X>Domain` — usecase 구현·repository 구현·테이블·엔드포인트), `Testing/`(`<X>DomainTesting` — 다른 모듈 테스트가 쓰는 stub), `Tests/`. 다른 모듈은 `<X>DomainInterface`·`<X>DomainTesting` 만 의존하고, `<X>Domain` 구현은 앱이 조립할 때만 쓴다. 서브도메인이 함께 쓰는 저장소·링크·기기 계약은 `Domain/KernelUtils` 에, repository 구현이 쓰는 저장·통신 기반은 `Repository/Infra/` 에 있다. repository 구현 규칙은 `.claude/rules/repository-rules.md` 가 path 로 로드된다.
 플랫폼·서드파티 SDK와 결합하는 service 구현체도 여기 없다 — 프로토콜만 남기고 구현은 `Services/*` 프레임워크에 있다 (#639, 분할 축은 add-framework 스킬 §1).
 
 ## Usecase 작성 규칙
 
 ### 서브도메인 분리 기준
-응집도가 높고 결합도가 낮은 기능끼리 묶는다. 폴더 구조가 이를 반영한다.
+응집도가 높고 결합도가 낮은 기능끼리 묶는다. 서브도메인 모듈 경계가 이를 반영한다.
 
 각 Usecase는 Presentation layer에서 **재사용**된다. 이때 공유되는 것은 두 가지:
 - **로직**: Usecase 인스턴스 자체
@@ -28,9 +27,9 @@ public typealias EventDetailDataUsecase = EventDetailDataRepository
 ## SharedDataStore
 
 모든 Usecase가 공유하는 중앙 상태 저장소. Combine 기반으로 변화가 즉시 전파된다.
-`Domain/Sources/Utils/SharedDataStore.swift`
+`Domain/KernelUtils/Sources/Utils/SharedDataStore.swift`
 
-키 목록은 `Domain/Sources/Utils/SharedDataStore.swift`의 `ShareDataKeys` enum 참조.
+키 목록은 같은 파일의 `ShareDataKeys` enum 참조.
 
 ### 사용 패턴
 
@@ -57,7 +56,7 @@ let current = sharedDataStore.value([TodoEvent].self, key: shareKey)
 ## SharedEventNotifyService
 
 이벤트 로딩 진행 상태처럼 **SharedDataStore로 표현하기 어려운 일시적 이벤트**를 전파할 때 사용한다.
-`Domain/Sources/Utils/SharedEventNotifyService.swift`
+`Domain/EventDomain/Interface/Utils/SharedEventNotifyService.swift`
 
 ### RefreshingEvent (5가지)
 - `refreshingTodo(Bool)` — Todo 목록 로딩
@@ -86,7 +85,7 @@ self.eventNotifyService.event<RefreshingEvent>()
 ## MemorizedEventsContainer
 
 반복 이벤트(ScheduleEvent)의 발생 인스턴스를 기간별로 캐싱하는 컨테이너.
-`Domain/Sources/Usecases/Events/MemorizedEventsContainer.swift`
+`Domain/EventDomain/Interface/Usecases/MemorizedEventsContainer.swift`
 
 - **ScheduleEvent에만 사용**. TodoEvent는 평면 딕셔너리(`[String: TodoEvent]`)로 충분.
 - **Immutable**: 모든 변경 메서드가 새 컨테이너를 반환.

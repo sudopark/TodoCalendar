@@ -16,7 +16,7 @@ description: Use when producing full-screen snapshot images of app scenes for ex
 ## 2. 화면 구성 — 더미 데이터
 
 - 화면당 대표 상태 1개(정보가 풍부한 상태)로 구성. 상태 조합 나열 금지 — 그건 snapshot-check의 검증 영역.
-- 구성 소스 우선순위: ① 대상 뷰 파일의 #Preview/PreviewProvider (더미 구성 그대로 재사용) ② TestDoubles의 Dummies·Stub ③ 직접 구성.
+- 구성 소스 우선순위: ① 대상 뷰 파일의 #Preview/PreviewProvider (더미 구성 그대로 재사용) ② 서브도메인 `<X>DomainTesting` 의 더미·Stub ③ 직접 구성.
 - 라이트·다크 pair 자동(captureSnapshotPair). layout은 풀스크린 화면이면 `.fullScreen`, 위젯·부분 컴포넌트면 `.fixed`.
 - **더미 텍스트는 하드코딩하지 않는다.** 화면에 뜨는 문구는 두 갈래다:
   - 실제 화면에서 로컬라이즈된 값이 들어가는 자리(반복 주기·알림 시각·태그명·`Todo` 배지)는 **프로덕션 경로로 만든다** — 키를 `.localized()` 로 부르거나, 도메인 모델을 세워 프로덕션 이니셜라이저(`TodoEventCellViewModel(_:in:_:_:)` 등)에 넘긴다. 손으로 적은 문자열은 프로덕션이 실제로 그리는 값과 어긋나기 쉽다.

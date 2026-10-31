@@ -37,8 +37,9 @@ import Foundation   // 또는 UIKit / SwiftUI
 import Combine
 import Prelude
 import Optics
-import Domain
-import Scenes
+import EventDomainInterface
+import SceneInfra
+import EventDetailSceneInterface
 import CommonPresentation
 ```
 

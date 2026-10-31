@@ -117,14 +117,14 @@ tuist generate --no-open      # 파일 추가/삭제 후 재실행 필수
 >
 > 🟥 Core: **Event**(Todo/Schedule·반복·완료·태깅·강조), **Calendar**(시간프레임·공휴일) · 🟧 Supporting: **External Calendar**(Google/Apple 다중계정), **Account/Auth**, **AI Agent**(command→Event 변경, Core 승격 유력), **Notification**, **Billing**(플랜·top-up·StoreKit 구매. AI 하위 아닌 독립) · 🟩 Generic: **Settings**, **Support**(업데이트·피드백·STT 등)
 
-세부 도메인 규칙은 CLAUDE.md에 중복하지 않는다. 각 정본을 읽고 판단할 것 (`Domain/CLAUDE.md`·`Repository/CLAUDE.md`는 해당 경로 작업 시 자동 로드):
+세부 도메인 규칙은 CLAUDE.md에 중복하지 않는다. 각 정본을 읽고 판단할 것 (`Domain/CLAUDE.md` 와 `.claude/rules/repository-rules.md` 는 해당 경로 작업 시 자동 로드):
 
 | 주제 | 정본 |
 |---|---|
 | 이벤트 모델·EventTime·완료 | [`docs/spec/todo-event.md`](docs/spec/todo-event.md), [`schedule-event.md`](docs/spec/schedule-event.md) |
 | 반복 이벤트·turn 규칙·수정 범위 | [`docs/spec/repeating-events.md`](docs/spec/repeating-events.md) |
 | 이벤트 태그·색상·보이기숨기기 | [`Domain/CLAUDE.md`](Domain/CLAUDE.md), [`docs/spec/tags-foremost-notifications.md`](docs/spec/tags-foremost-notifications.md) |
-| 외부 캘린더 다중 계정·Pool | [`Domain/CLAUDE.md`](Domain/CLAUDE.md), [`Repository/CLAUDE.md`](Repository/CLAUDE.md), [`docs/spec/google-calendar.md`](docs/spec/google-calendar.md) |
+| 외부 캘린더 다중 계정·Pool | [`Domain/CLAUDE.md`](Domain/CLAUDE.md), [`repository-rules.md`](.claude/rules/repository-rules.md), [`docs/spec/google-calendar.md`](docs/spec/google-calendar.md) |
 | Apple 캘린더 권한·EventKit·쓰기 | [`docs/spec/apple-calendar.md`](docs/spec/apple-calendar.md) |
 | AI 에이전트 command·job·사용량 | [`docs/spec/ai-agent.md`](docs/spec/ai-agent.md) |
 | 플랜·구매·광고 노출 | [`docs/spec/billing.md`](docs/spec/billing.md) |
@@ -132,7 +132,7 @@ tuist generate --no-open      # 파일 추가/삭제 후 재실행 필수
 | SharedDataStore 키·구독 | [`Domain/CLAUDE.md`](Domain/CLAUDE.md) |
 | 앱 버전 체크 | [`docs/spec/infrastructure.md §7`](docs/spec/infrastructure.md) |
 | App Store Connect 업로드 운영 | [`docs/appstore-connect-operations.md`](docs/appstore-connect-operations.md) |
-| DB 마이그레이션 | §1 짝규칙 (메인 DB 는 `dbVersion` ↔ `migrateStatement` ↔ `AppDataMigrationImple` 스텝, 외부 캘린더 DB 는 서비스별 버전 상수 ↔ `migrateStatement` ↔ `ExternalCalendarDBMigrationImple` 스텝) + [`Repository/CLAUDE.md`](Repository/CLAUDE.md) |
+| DB 마이그레이션 | §1 짝규칙 (메인 DB 는 `dbVersion` ↔ `migrateStatement` ↔ `AppDataMigrationImple` 스텝, 외부 캘린더 DB 는 서비스별 버전 상수 ↔ `migrateStatement` ↔ `ExternalCalendarDBMigrationImple` 스텝) + [`repository-rules.md`](.claude/rules/repository-rules.md) |
 
 ---
 

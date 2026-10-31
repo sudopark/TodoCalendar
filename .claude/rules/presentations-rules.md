@@ -220,20 +220,21 @@ private struct Subject {
 
 ## 7. Presentation 모듈 간 직접 import 금지
 
-`import CalendarScenes`, `import EventDetailScene` 등 모듈 간 직접 참조 ❌. `Scenes` 프레임워크 공유 프로토콜로만:
+`import CalendarScenes`, `import EventDetailScene` 등 모듈 간 직접 참조 ❌. 화면별 Scene 계약 모듈 `<X>SceneInterface`(`Presentations/Scenes/Interfaces/<X>SceneInterface/`)의 공유 프로토콜로만:
 
 | 파일 | 포함 심볼 |
 |---|---|
-| `Scenes/Sources/Scenes+Calendar.swift` | CalendarScene, SelectDayDialogScene |
-| `Scenes/Sources/Scenes+EventDetail.swift` | EventDetailScene, HolidayEventDetailScene, GoogleCalendarEventDetailScene, AppleCalendarEventDetailScene, DoneTodoDetailScene |
-| `Scenes/Sources/Scenes+EventList.swift` | DoneTodoEventListScene |
-| `Scenes/Sources/Scenes+Member.swift` | SignInScene, ManageAccountScene |
-| `Scenes/Sources/Scenes+Setting.swift` | SettingItemListScene, EventTagListScene, EventTagDetailScene |
-| `Scenes/Sources/Scenes+AIAgent.swift` | AIAgentCommandScene, AIAgentKeyboardInputScene, AIAgentImageCommandScene |
-| `Scenes/Sources/Scenes+Billing.swift` | PaywallScene, PaidFeatureAdGuideSceneBuilder |
-| `Scenes/Sources/AccessibilityID.swift` | AccessibilityID (e2e 접근성 식별자 정본) |
+| `CalendarSceneInterface/Sources/Scenes+Calendar.swift` | CalendarScene, SelectDayDialogScene |
+| `EventDetailSceneInterface/Sources/Scenes+EventDetail.swift` | EventDetailScene, HolidayEventDetailScene, GoogleCalendarEventDetailScene, AppleCalendarEventDetailScene, DoneTodoDetailScene |
+| `EventListSceneInterface/Sources/Scenes+EventList.swift` | DoneTodoEventListScene |
+| `MemberSceneInterface/Sources/Scenes+Member.swift` | SignInScene, ManageAccountScene |
+| `SettingSceneInterface/Sources/Scenes+Setting.swift` | SettingItemListScene, EventTagListScene, EventTagDetailScene |
+| `AIAgentSceneInterface/Sources/Scenes+AIAgent.swift` | AIAgentCommandScene, AIAgentKeyboardInputScene, AIAgentImageCommandScene |
+| `BillingSceneInterface/Sources/Scenes+Billing.swift` | PaywallScene, PaidFeatureAdGuideSceneBuilder |
+| `WidgetGallerySceneInterface/Sources/Scenes+WidgetGallery.swift` | WidgetGalleryScene |
+| `Presentations/Scenes/SceneInfra/Sources/AccessibilityID.swift` | AccessibilityID (e2e 접근성 식별자 정본) |
 
-다른 모듈에서 참조 필요한 신규 Scene 프로토콜은 위 파일에 추가. 모듈 내부 전용은 해당 모듈 `XxxScene+Builder.swift`.
+다른 모듈에서 참조 필요한 신규 Scene 프로토콜은 위 파일에 추가하고, 표에 없는 화면 묶음이면 `<X>SceneInterface` 모듈을 새로 만든다 (add-framework 스킬). 모듈 내부 전용은 해당 모듈 `XxxScene+Builder.swift`.
 
 **접근성 식별자는 `AccessibilityID` 에만 정의하고 뷰에 문자열 리터럴을 쓰지 말 것.** 리터럴이 흩어지면 e2e 작성자가 화면별 단언 대상을 못 찾고, 오타를 컴파일러가 안 막는다.
 

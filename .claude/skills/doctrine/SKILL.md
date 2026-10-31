@@ -22,7 +22,7 @@ description: Use when a decision has no rule or precedent to stand on — 구현
 **"선례를 못 찾겠다"와 "안 찾았다"를 구분한다.** 넷을 전부 훑고 빈손일 때만 갭이다. 하나라도 걸리면 갭이 아니라 못 찾은 것이고, 찾은 것을 따른다.
 
 1. **`.claude/rules/` 전문** — path 매칭 자동 로드는 경로가 안 맞으면 안 뜬다. 로드된 것만 보지 말고 전 파일을 grep 한다
-2. **CLAUDE.md 계층** — 루트 + 해당 경로의 child (`Domain/CLAUDE.md`·`Repository/CLAUDE.md`)
+2. **CLAUDE.md 계층** — 루트 + 해당 경로의 child (`Domain/CLAUDE.md`)
 3. **`docs/` 정본** — `docs/spec/`·`coding-style-and-philosophy.md`·`화면단위구조.md`·`domain-context-map.md`
 4. **동종 컴포넌트** — 형제가 같은 문제를 어떻게 풀었나. 선례는 문서가 아니라 코드에도 산다
 
@@ -70,7 +70,7 @@ CLAUDE.md 는 `--include` 로 따로 훑는다 — child 가 `Presentations/<Sce
 | 결정의 성격 | 목적지 |
 |---|---|
 | 코드를 이렇게 쓴다 — 작성·구현 규칙 | `.claude/rules/` — 기존 파일의 `paths:` 가 그 경로를 덮으면 보강, 안 덮으면 신설 |
-| 여기에 무엇이 있고 어떻게 얽힌다 — 모듈의 구조·개념·도메인 지식 | 그 모듈의 child CLAUDE.md (`Domain/CLAUDE.md`·`Repository/CLAUDE.md`) |
+| 여기에 무엇이 있고 어떻게 얽힌다 — 모듈의 구조·개념·도메인 지식 | 그 모듈의 child CLAUDE.md (`Domain/CLAUDE.md`) |
 | 경로와 무관하게 상시 — 절대 규칙·짝지어진 두 위치 | 루트 CLAUDE.md 해당 절 |
 
 **범위로 가르려 하면 안 갈린다** — `.claude/rules/domain-rules.md` 의 `paths:`(`Domain/**`·`Services/**`)와 `Domain/CLAUDE.md` 는 같은 모듈을 덮고, Repository 도 같다. 둘 다 스코프가 겹치는 게 정상이고, 가르는 건 위 표의 성격이다.

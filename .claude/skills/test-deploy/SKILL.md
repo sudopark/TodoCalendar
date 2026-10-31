@@ -59,9 +59,9 @@ Firebase 콘솔 링크: `https://console.firebase.google.com/project/todocalenda
 
 호출 형식은 `/test-deploy <플래그명>`. 요청에 켤 플래그 지정이 있으면 이 경로, 없으면 위 플래그 없음 경로를 탄다.
 
-1. **플래그명 검증** — `Domain/Sources/Utils/FeatureFlag.swift`의 `Flags` enum case와 대조한다. 목록에 없는 이름이 하나라도 있으면 배포하지 않고 중단하고 유효한 case 목록을 보고한다.
+1. **플래그명 검증** — `Domain/KernelUtils/Sources/Utils/FeatureFlag.swift`의 `Flags` enum case와 대조한다. 목록에 없는 이름이 하나라도 있으면 배포하지 않고 중단하고 유효한 case 목록을 보고한다.
    ```bash
-   grep -oE "case [a-zA-Z]+" Domain/Sources/Utils/FeatureFlag.swift
+   grep -oE "case [a-zA-Z]+" Domain/KernelUtils/Sources/Utils/FeatureFlag.swift
    ```
 2. **배포 브랜치 생성** — 먼저 `git status --porcelain`이 비어 있는지 확인한다. 비어 있지 않으면 중단하고 사용자에게 알린다 (브랜치를 갈아타면 미커밋 변경이 배포 브랜치로 따라오고 배포 커밋에 딸려 들어간다). 그다음 대상 브랜치가 원격에 push 돼 있는지 확인한다.
    ```bash
@@ -71,7 +71,7 @@ Firebase 콘솔 링크: `https://console.firebase.google.com/project/todocalenda
    ```
    `-B`라 같은 이름의 배포 브랜치가 이미 있으면 대상 브랜치 기준으로 다시 만든다. 유지하는 것은 배포 브랜치의 **존재**이지 커밋 이력이 아니다 — 매 배포마다 대상 브랜치 기준으로 다시 만들어 강제 갱신한다.
    이후 단계는 이 블록의 셸 변수를 넘겨받지 못한다 — 매 단계가 현재 체크아웃 상태에서 브랜치명을 다시 읽는다.
-3. **플래그 활성** — `Domain/Sources/Utils/FeatureFlag.swift`의 아래 한 줄만 고친다. 다른 줄은 건드리지 않는다.
+3. **플래그 활성** — `Domain/KernelUtils/Sources/Utils/FeatureFlag.swift`의 아래 한 줄만 고친다. 다른 줄은 건드리지 않는다.
    ```swift
    private var enableFlags: Set<Flags> = []
    ```
@@ -83,7 +83,7 @@ Firebase 콘솔 링크: `https://console.firebase.google.com/project/todocalenda
 4. **커밋** — 메시지에 켠 플래그 목록을 반드시 넣는다. 워크플로우가 릴리즈 노트에 브랜치명과 커밋 subject를 싣기 때문에, 이 목록이 곧 Firebase 릴리즈 노트에서 "어떤 플래그가 켜진 빌드인가"를 알려주는 유일한 단서다.
    대상 브랜치명에서 이슈번호를 뽑을 수 있으면(`features/920-...` → `920`) `[#920]`을 쓰고, 못 뽑으면 `[test-deploy]`를 쓴다 (CLAUDE.md §5는 `[#이슈번호]` 형식을 못 박는다 — 이슈번호를 못 뽑을 때만 쓰는 예외).
    ```bash
-   git add Domain/Sources/Utils/FeatureFlag.swift
+   git add Domain/KernelUtils/Sources/Utils/FeatureFlag.swift
    git commit -m "[#920] 테스트 배포용 피처플래그 활성 — <플래그명>"
    ```
    이 커밋은 이 스킬이 형식을 규정한다 — commit 스킬을 별도로 발동하지 않는다.

@@ -45,7 +45,7 @@ extension DaysIntervalCountUsecaseImpleTests {
 }
 ```
 
-대표 예: `Domain/Tests/Usecases/DaysIntervalCountUsecaseImpleTests.swift`
+대표 예: `Domain/EventDomain/Tests/Usecases/DaysIntervalCountUsecaseImpleTests.swift`
 
 ---
 
@@ -196,20 +196,21 @@ extension AppDataMigrationImpleTests {
 | Module | Contents |
 |---|---|
 | `UnitTestHelpKit` | `BaseTestCase`, `PublisherWaitable`, `AsyncEffectWaitable`, `BaseStub`, `TestError` |
-| `TestDoubles` | 공유 Stub repositories / stub usecases |
+| `<X>DomainTesting`·`<X>InfraTesting` | 서브도메인의 공유 stub·더미(`Domain/<X>Domain/Testing/`), 인프라 더블 `FakeEnvironmentStorage`·`BaseLocalTests`·`StubRemoteAPI`(`Repository/Infra/<X>Infra/Testing/`) |
+| `TestDoubles` | 화면 테스트용 `BaseSpyRouter` |
 | `SnapshotTestHelpKit` | `captureSnapshotPair`·`captureSnapshot`·`SnapshotTheme`·`catalogSnapshotDirectory` — 스냅샷 캡처 (snapshot-check 스킬) |
 
 ---
 
 ## 8. 테스트 파일 배치·네이밍
 
-- 테스트 소스는 각 프레임워크의 `Tests/` 밑 — Tuist 팩토리가 테스트 타겟 소스를 `Tests/**`로 고정한다. **예외 둘** — **스냅샷 캡처 스위트**는 프레임워크 최상위 `Snapshots/`에 (팩토리 `snapshotTests` 옵션의 소스가 `Snapshots/**` — 상세는 snapshot-check 스킬), **e2e 스위트**는 앱 최상위 `E2E/`에 배치한다 (팩토리 `e2eTests` 옵션의 소스가 `E2E/**`). **`Domain/DomainTests/`는 폐기된 폴더 — 새 테스트 금지, `Domain/Tests/` 사용.**
+- 테스트 소스는 각 프레임워크의 `Tests/` 밑 — Tuist 팩토리가 테스트 타겟 소스를 `Tests/**`로 고정한다. **예외 둘** — **스냅샷 캡처 스위트**는 프레임워크 최상위 `Snapshots/`에 (팩토리 `snapshotTests` 옵션의 소스가 `Snapshots/**` — 상세는 snapshot-check 스킬), **e2e 스위트**는 앱 최상위 `E2E/`에 배치한다 (팩토리 `e2eTests` 옵션의 소스가 `E2E/**`).
 - `Tests/`는 `Sources/`의 폴더 구조를 미러링한다 (예: `Sources/Usecases/…` → `Tests/Usecases/…`).
 - 구현체 테스트 파일명은 대상 타입명 + `Tests`: `XxxImpleTests.swift` (예: `EventTagDetailViewModelImpleTests.swift`).
-- 테스트 더블은 해당 프레임워크 `Tests/Doubles/`에. 여러 프레임워크가 공유하면 `TestDoubles` 모듈에 (§7).
+- 테스트 더블은 해당 프레임워크 `Tests/Doubles/`에. 다른 모듈 테스트도 쓰면 그 서브도메인의 `<X>DomainTesting`(인프라 더블은 `<X>InfraTesting`)에 (§7).
 
 ### 검증 대상 이름 — 역할 이름으로
-테스트에서 검증 대상 인스턴스와 그 팩토리를 `sut`·`makeSut`·`makeSUT` 로 부르지 않는다. 역할 이름을 쓴다 — `let usecase`·`makeUsecase(...)`, `let viewModel`·`makeViewModel(...)`, `let repository` 처럼. `sut` 는 어떤 타입인지 이름에서 안 읽혀 케이스를 읽는 사람이 팩토리까지 따라가야 한다 (유저 지시 2026-10-04, PR #1203). 선례: `Domain/Tests/Usecases/Ad/AdExposureUsecaseImpleTests.swift`.
+테스트에서 검증 대상 인스턴스와 그 팩토리를 `sut`·`makeSut`·`makeSUT` 로 부르지 않는다. 역할 이름을 쓴다 — `let usecase`·`makeUsecase(...)`, `let viewModel`·`makeViewModel(...)`, `let repository` 처럼. `sut` 는 어떤 타입인지 이름에서 안 읽혀 케이스를 읽는 사람이 팩토리까지 따라가야 한다 (유저 지시 2026-10-04, PR #1203). 선례: `Domain/AdDomain/Tests/Usecases/AdExposureUsecaseImpleTests.swift`.
 
 ---
 

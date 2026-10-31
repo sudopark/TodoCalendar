@@ -9,7 +9,7 @@
 
 ## Bounded Context 지도
 
-단일 도메인 + 9개 서브도메인. 폴더 구조(`Domain/Sources/{Models,Usecases,Repositories}/*`)가 곧 context 경계.
+단일 도메인 + 9개 서브도메인. 서브도메인 모듈(`Domain/<X>Domain`)이 곧 context 경계다.
 
 | # | Bounded Context | 분류 | 핵심 책임 | 상세 |
 |---|---|---|---|---|
