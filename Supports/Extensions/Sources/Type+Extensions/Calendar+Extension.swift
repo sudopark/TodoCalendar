@@ -137,4 +137,9 @@ extension Calendar {
         let toDate = self.startOfDay(for: rhs)
         return self.dateComponents([.day], from: fromDate, to: toDate).day
     }
+
+    public func ddayInterval(_ now: Date, _ target: Date, countsTargetDayAsOne: Bool) -> Int? {
+        guard let interval = self.diffDays(now, target) else { return nil }
+        return countsTargetDayAsOne && interval <= 0 ? interval - 1 : interval
+    }
 }

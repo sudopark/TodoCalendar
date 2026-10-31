@@ -65,7 +65,8 @@ extension DDayWidgetViewModelProvider {
         let targetDate = Date(
             timeIntervalSince1970: event.time.rangeWithShifttingifNeed(on: timeZone).lowerBound
         )
-        let interval = calendar.diffDays(now, targetDate) ?? 0
+        let countsTargetDayAsOne = self.calendarSettingRepository.loadDDayCountsTargetDayAsOne() ?? false
+        let interval = calendar.ddayInterval(now, targetDate, countsTargetDayAsOne: countsTargetDayAsOne) ?? 0
 
         return DDayWidgetViewModel(
             eventTitle: event.name,

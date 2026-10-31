@@ -41,6 +41,7 @@ public enum ShareDataKeys: String {
     case ddayCandidates
     case isGuideTodoCompleted
     case widgetStyles
+    case ddayCountsTargetDayAsOne
 }
 
 
