@@ -10,11 +10,11 @@ import Testing
 import Alamofire
 import Prelude
 import Optics
-import Domain
 import Extensions
 import RemoteInfraInterface
 
 @testable import RemoteInfra
+import KernelUtils
 
 struct ErrorServerResponseTests {
 

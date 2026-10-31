@@ -7,10 +7,10 @@
 //
 
 import Foundation
-import Domain
 import StorageInfraInterface
 import RemoteInfraInterface
 import RemoteInfra
+import AccountDomainInterface
 
 
 public class SpyKeyChainStorage: KeyChainStorage, AuthStore, APICredentialStore, @unchecked Sendable {
@@ -33,12 +33,12 @@ public class SpyKeyChainStorage: KeyChainStorage, AuthStore, APICredentialStore,
         return self.storage[key] as? T
     }
     
-    public func loadCurrentAuth() -> Domain.Auth? {
+    public func loadCurrentAuth() -> AccountDomainInterface.Auth? {
         let mapper: AuthMapper? = self.load("current_auth")
         return mapper?.auth
     }
     
-    public func saveAuth(_ auth: Domain.Auth) {
+    public func saveAuth(_ auth: AccountDomainInterface.Auth) {
         let mapper = AuthMapper(auth: auth)
         self.update("current_auth", mapper)
     }

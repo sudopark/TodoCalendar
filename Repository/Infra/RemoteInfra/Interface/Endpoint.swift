@@ -13,312 +13,24 @@ import Foundation
 
 public protocol Endpoint: Sendable {
     
+    var host: EndpointHost { get }
     var subPath: String { get }
+    var authorization: EndpointAuthorization { get }
+}
+
+public enum EndpointHost: Sendable, Equatable {
+    case calendarAPI(path: String)
+    case customerService
+    case external(String)
+}
+
+public enum EndpointAuthorization: Sendable, Equatable {
+    case none
+    case calendarAPI
+    case google
 }
 
 
-// MARK: - HolidayAPIEndpoints
-
-public enum HolidayAPIEndpoints: Endpoint {
-    case supportCountry
-    case holidays
-    
-    public var subPath: String {
-        switch self {
-        case .supportCountry: 
-            return "31ca6b64687c1436ca7e5f705017071a/raw/251dd3885ab5b7ac112140e7b0e6a542fe2901f5/google_calendar_country"
-            
-        case .holidays:
-            return ""
-        }
-    }
-}
-
-
-// MARK: - AccountAPIEndpoints
-
-public enum AccountAPIEndpoints: Endpoint {
-    case info
-    case account
-    
-    public var subPath: String {
-        switch self {
-        case .info:
-            return "info"
-        case .account:
-            return "account"
-        }
-    }
-}
-
-// MARK: - User
-
-public enum UserAPIEndpoints: Endpoint {
-    case notification
-    
-    public var subPath: String {
-        switch self {
-        case .notification: return "notification"
-        }
-    }
-}
-
-
-// MARK: - TodoAPIEndpoints
-
-public enum TodoAPIEndpoints: Endpoint {
-    case make
-    case todo(String)
-    case todos
-    case uncompleteds
-    case currentTodo
-    case complete(String)
-    case done(String)
-    case dones
-    case revertDone(String)
-    case replaceRepeating(String)
-    case cancelDone
-    
-    public var subPath: String {
-        switch self {
-        case .make:
-            return "todo"
-            
-        case .todo(let id):
-            return "todo/\(id)"
-            
-        case .todos:
-            return ""
-            
-        case .uncompleteds:
-            return "uncompleted"
-            
-        case .currentTodo:
-            return ""
-            
-        case .complete(let id):
-            return "todo/\(id)/complete"
-            
-        case .done(let id):
-            return "dones/\(id)"
-            
-        case .dones:
-            return "dones"
-            
-        case .revertDone(let id):
-            return "dones/\(id)/revert"
-            
-        case .replaceRepeating(let id):
-            return "todo/\(id)/replace"
-            
-        case .cancelDone:
-            return "dones/cancel"
-        }
-    }
-}
-
-
-// MARK: - ScheduleEventEndpoints
-
-public enum ScheduleEventEndpoints: Endpoint {
-    case make
-    case schedule(id: String)
-    case exclude(id: String)
-    case branchRepeating(id: String)
-    case schedules
-    
-    public var subPath: String {
-        switch self {
-        case .make: return "schedule"
-        case .schedule(let id): return "schedule/\(id)"
-        case .exclude(let id): return "schedule/\(id)/exclude"
-        case .branchRepeating(id: let id): return "schedule/\(id)/branch_repeating"
-        case .schedules: return ""
-        }
-    }
-}
-
-// MARK: - ForemostEventEndpoints
-
-public enum ForemostEventEndpoints: Endpoint {
-    case event
-    
-    public var subPath: String {
-        switch self {
-        case .event:
-            return "event"
-        }
-    }
-}
-
-// MARK: - EventTag
-
-public enum EventTagEndpoints: Endpoint {
-    case make
-    case tag(id: String)
-    case tagAndEvents(id: String)
-    case tagWithEvents(id: String)
-    case tags
-    case allTags
-    
-    public var subPath: String {
-        switch self {
-        case .make: return "tag"
-        case .tag(let id): return "tag/\(id)"
-        case .tagAndEvents(let id): return "tag_and_events/\(id)"
-        case .tagWithEvents(let id): return "tag_with_events/\(id)"
-        case .tags: return ""
-        case .allTags: return "all"
-        }
-    }
-}
-
-
-// MARK: - event detail
-
-public enum EventDetailEndpoints: Endpoint {
-    case detail(eventId: String)
-    case doneTodoDetail(eventId: String)
-    
-    public var subPath: String {
-        switch self {
-        case .detail(let eventId): return "\(eventId)"
-        case .doneTodoDetail(let eventId): return "done/\(eventId)"
-        }
-    }
-}
-
-// MARK: - AppSetting
-
-public enum AppSettingEndpoints: Endpoint {
-    case defaultEventTagColor
-    case colorThemes
-    case colorTheme(uuid: String)
-    
-    public var subPath: String {
-        switch self {
-        case .defaultEventTagColor: return "event/tag/default/color"
-        case .colorThemes: return "color_themes"
-        case .colorTheme(let uuid): return "color_themes/\(uuid)"
-        }
-    }
-}
-
-// MARK: - migration
-
-public enum MigrationEndpoints: Endpoint {
-    case eventTags
-    case todos
-    case schedules
-    case eventDetails
-    case doneTodos
-    case doneTodoDetails
-    case customColorThemes
-    
-    public var subPath: String {
-        switch self {
-        case .eventTags: return "event_tags"
-        case .todos: return "todos"
-        case .schedules: return "schedules"
-        case .eventDetails: return "event_details"
-        case .doneTodos: return "todos/done"
-        case .doneTodoDetails: return "todos/done/details"
-        case .customColorThemes: return "color_themes"
-        }
-    }
-}
-
-public enum FeedbackEndpoints: Endpoint {
-    case post
-    
-    public var subPath: String {
-        switch self {
-        case .post: return ""
-        }
-    }
-}
-
-// MARK: - sync api
-
-public enum EventSyncEndPoints: Endpoint {
-    
-    case check
-    case start
-    case `continue`
-    
-    public var subPath: String {
-        switch self {
-        case .check: return "check"
-        case .start: return "start"
-        case .continue: return "continue"
-        }
-    }
-}
-
-// MARK: - App
-
-public enum AppEndpoints: Endpoint {
-    case updateInfo
-    case legalNotice
-    case appPolicy
-
-    public var subPath: String {
-        switch self {
-        case .updateInfo:
-            return "update-info.json"
-        case .legalNotice:
-            return "legal-notice.json"
-        case .appPolicy:
-            return "app-policy.json"
-        }
-    }
-}
-
-
-// MARK: - AI
-
-public enum AIAPIEndpoints: Endpoint {
-    case command
-    case interpretCommand
-    case confirmCommand
-    case rejectCommand
-    case cancelCommand
-    case job(id: String)
-    case usage
-
-    public var subPath: String {
-        switch self {
-        case .command: return "command"
-        case .interpretCommand: return "command/interpret"
-        case .confirmCommand: return "command/confirm"
-        case .rejectCommand: return "command/reject"
-        case .cancelCommand: return "command/cancel"
-        case .job(let id): return "jobs/\(id)"
-        case .usage: return "usage"
-        }
-    }
-}
-
-
-// MARK: - Billing
-
-public enum BillingAPIEndpoints: Endpoint {
-    case plans
-    case topups
-    case purchases
-    case transactions
-    case userPlan
-
-    public var subPath: String {
-        switch self {
-        case .plans: return "plans"
-        case .topups: return "topups"
-        case .purchases: return "purchases"
-        case .transactions: return "transactions"
-        case .userPlan: return "user-plan"
-        }
-    }
-}
 
 
 // MARK: - google account endpoint
@@ -326,35 +38,18 @@ public enum BillingAPIEndpoints: Endpoint {
 public enum GoogleAuthEndpoint: Endpoint {
     case token
     
+    public var host: EndpointHost {
+        return .external("https://oauth2.googleapis.com")
+    }
+    
     public var subPath: String {
         switch self {
         case .token: return "token"
         }
     }
-}
-
-// MARK: - google calendar endpoint
-
-public enum GoogleCalendarEndpoint: Endpoint {
-    case colors
-    case calednarList
-    case eventList(calendarId: String)
-    case event(calendarId: String, eventId: String)
-    case eventInstances(calendarId: String, eventId: String)
-
-    public var subPath: String {
-        switch self {
-        case .colors:
-            return "colors"
-        case .calednarList:
-            return "users/me/calendarList"
-        case .eventList(let calendarId):
-            return "calendars/\(calendarId)/events"
-        case .event(let calendarId, let eventId):
-            return "calendars/\(calendarId)/events/\(eventId)"
-        case .eventInstances(let calendarId, let eventId):
-            return "calendars/\(calendarId)/events/\(eventId)/instances"
-        }
+    
+    public var authorization: EndpointAuthorization {
+        return .none
     }
 }
 
@@ -379,81 +74,13 @@ public struct RemoteEnvironment: Sendable {
         self.acceptLanguage = acceptLanguage
     }
     
-    public func path(_ endpoint: any Endpoint) -> String? {
-        
-        func appendSubpathIfNotEmpty(_ prefix: String, _ subPath: String) -> String {
-            return subPath.isEmpty ? prefix : "\(prefix)/\(subPath)"
+    public func path(_ endpoint: any Endpoint) -> String {
+        let prefix: String
+        switch endpoint.host {
+        case .calendarAPI(let path): prefix = "\(self.calendarAPIHost)/\(path)"
+        case .customerService: prefix = self.csAPI
+        case .external(let base): prefix = base
         }
-        
-        switch endpoint {
-        case .supportCountry as HolidayAPIEndpoints:
-            return "https://gist.githubusercontent.com/sudopark/\(endpoint.subPath)"
-            
-        case let holiday as HolidayAPIEndpoints:
-            let prefix = "\(calendarAPIHost)/v2/holiday"
-            return appendSubpathIfNotEmpty(prefix, holiday.subPath)
-
-        case let account as AccountAPIEndpoints:
-            return "\(calendarAPIHost)/v2/accounts/\(account.subPath)"
-
-        case let user as UserAPIEndpoints:
-            return "\(calendarAPIHost)/v2/user/\(user.subPath)"
-
-        case let todo as TodoAPIEndpoints:
-            let prefix = "\(calendarAPIHost)/v2/todos"
-            return appendSubpathIfNotEmpty(prefix, todo.subPath)
-
-        case let schedule as ScheduleEventEndpoints:
-            let prefix = "\(calendarAPIHost)/v2/schedules"
-            return appendSubpathIfNotEmpty(prefix, schedule.subPath)
-
-        case let foremost as ForemostEventEndpoints:
-            let prefix = "\(calendarAPIHost)/v2/foremost"
-            return appendSubpathIfNotEmpty(prefix, foremost.subPath)
-
-        case let eventTag as EventTagEndpoints:
-            let prefix = "\(calendarAPIHost)/v2/tags"
-            return appendSubpathIfNotEmpty(prefix, eventTag.subPath)
-
-        case let detail as EventDetailEndpoints:
-            let prefix = "\(calendarAPIHost)/v2/event_details"
-            return appendSubpathIfNotEmpty(prefix, detail.subPath)
-
-        case let setting as AppSettingEndpoints:
-            let prefix = "\(calendarAPIHost)/v2/setting"
-            return appendSubpathIfNotEmpty(prefix, setting.subPath)
-
-        case let migration as MigrationEndpoints:
-            let prefix = "\(calendarAPIHost)/v2/migration"
-            return appendSubpathIfNotEmpty(prefix, migration.subPath)
-
-        case let feedback as FeedbackEndpoints:
-            return appendSubpathIfNotEmpty(self.csAPI, feedback.subPath)
-
-        case let sync as EventSyncEndPoints:
-            let prefix = "\(calendarAPIHost)/v2/sync"
-            return appendSubpathIfNotEmpty(prefix, sync.subPath)
-            
-        case let googleAuth as GoogleAuthEndpoint:
-            return appendSubpathIfNotEmpty("https://oauth2.googleapis.com", googleAuth.subPath)
-            
-        case let googleCalendar as GoogleCalendarEndpoint:
-            let prefix = "https://www.googleapis.com/calendar/v3"
-            return appendSubpathIfNotEmpty(prefix, googleCalendar.subPath)
-
-        case let app as AppEndpoints:
-            let prefix = "https://raw.githubusercontent.com/sudopark/TodoCalendar-Terms/main/app-config"
-            return appendSubpathIfNotEmpty(prefix, app.subPath)
-
-        case let ai as AIAPIEndpoints:
-            let prefix = "\(calendarAPIHost)/v1/ai"
-            return appendSubpathIfNotEmpty(prefix, ai.subPath)
-
-        case let billing as BillingAPIEndpoints:
-            let prefix = "\(calendarAPIHost)/v1/billing"
-            return appendSubpathIfNotEmpty(prefix, billing.subPath)
-
-        default: return nil
-        }
+        return endpoint.subPath.isEmpty ? prefix : "\(prefix)/\(endpoint.subPath)"
     }
 }

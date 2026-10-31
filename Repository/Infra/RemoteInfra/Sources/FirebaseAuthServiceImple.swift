@@ -8,9 +8,9 @@
 
 import Foundation
 import FirebaseAuth
-import Domain
 import Extensions
 import RemoteInfraInterface
+import AccountDomainInterface
 
 
 extension AuthDataResult: FirebaseAuthDataResult {

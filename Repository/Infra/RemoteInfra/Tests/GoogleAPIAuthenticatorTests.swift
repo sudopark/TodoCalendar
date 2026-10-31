@@ -10,7 +10,6 @@ import Testing
 import Alamofire
 import Prelude
 import Optics
-import Domain
 import Extensions
 import UnitTestHelpKit
 import StorageInfraInterface
@@ -54,11 +53,11 @@ extension GoogleAPIAuthenticatorTests {
     }
     
     @Test("endpoint에 따라 adapt 적용 여부 판단", arguments: [
-        EndpointAndNeedToken(endpoint: HolidayAPIEndpoints.supportCountry, isNeed: false),
-        EndpointAndNeedToken(endpoint: TodoAPIEndpoints.cancelDone, isNeed: false),
-        EndpointAndNeedToken(endpoint: FeedbackEndpoints.post, isNeed: false),
+        EndpointAndNeedToken(endpoint: DummyEndpoint.external, isNeed: false),
+        EndpointAndNeedToken(endpoint: DummyEndpoint.calendarAPI, isNeed: false),
+        EndpointAndNeedToken(endpoint: DummyEndpoint.customerService, isNeed: false),
         EndpointAndNeedToken(endpoint: GoogleAuthEndpoint.token, isNeed: false),
-        EndpointAndNeedToken(endpoint: GoogleCalendarEndpoint.calednarList, isNeed: true),
+        EndpointAndNeedToken(endpoint: DummyEndpoint.google, isNeed: true),
     ])
     func authenticator_applyTokenIfNeed(_ endpointPerNeed: EndpointAndNeedToken) {
         // given
@@ -226,7 +225,7 @@ extension GoogleAPIAuthenticatorTests {
             ),
             .init(
                 method: .get,
-                endpoint: GoogleCalendarEndpoint.calednarList,
+                endpoint: DummyEndpoint.google,
                 resultJsonString: .success(
                 """
                 { }

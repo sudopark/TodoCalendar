@@ -8,7 +8,6 @@
 
 import Testing
 @testable import Alamofire
-import Domain
 import UnitTestHelpKit
 import RemoteInfraInterface
 
@@ -38,7 +37,7 @@ extension RemoteAPIImpleTests {
         let remote = self.makeRemote()
         
         // when
-        let endpoint = EventSyncEndPoints.check
+        let endpoint = DummyEndpoint.calendarAPI
         let task = Task {
             let data = try await remote.request(.get, endpoint, with: [:], parameters: [:])
             return data
@@ -60,7 +59,7 @@ extension RemoteAPIImpleTests {
         let remote = self.makeRemote()
 
         // when
-        let endpoint = EventSyncEndPoints.check
+        let endpoint = DummyEndpoint.calendarAPI
         let task = Task {
             withUnsafeCurrentTask { $0?.cancel() }
             let data = try await remote.request(.get, endpoint, with: [:], parameters: [:])
@@ -79,7 +78,7 @@ extension RemoteAPIImpleTests {
 
         // when
         let task = Task {
-            try await remote.request(.get, EventSyncEndPoints.check, with: [:], parameters: [:])
+            try await remote.request(.get, DummyEndpoint.calendarAPI, with: [:], parameters: [:])
         }
         try await Task.sleep(for: .milliseconds(10))
         task.cancel()

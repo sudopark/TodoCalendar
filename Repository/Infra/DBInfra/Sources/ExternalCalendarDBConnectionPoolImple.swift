@@ -7,10 +7,10 @@
 //
 
 import Foundation
-import Domain
 import SQLiteService
 import Extensions
 import DBInfraInterface
+import ExternalCalendarDomainInterface
 
 
 public actor ExternalCalendarSQLiteConnectionPoolImple: ExternalCalendarDBConnectionControl, ExternalCalendarDBConnectionPool {

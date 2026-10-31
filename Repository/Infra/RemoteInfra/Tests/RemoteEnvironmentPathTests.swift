@@ -7,13 +7,12 @@
 //
 
 import Testing
-import Domain
 import RemoteInfraInterface
 
 @testable import RemoteInfra
 
 
-// MARK: - calendarAPIHost 기반 엔드포인트 v2 prefix 매핑 검증
+// MARK: - 엔드포인트 호스트 종류별 경로 조립 검증
 
 struct RemoteEnvironmentPathTests {
 
@@ -27,107 +26,31 @@ struct RemoteEnvironmentPathTests {
 
 extension RemoteEnvironmentPathTests {
 
-    @Test func path_holidaysEndpoint_returnsV2HolidayURL() {
+    @Test func path_calendarAPIHost_joinsHostPathAndSubPath() {
         // when
-        let path = self.env.path(HolidayAPIEndpoints.holidays)
+        let path = self.env.path(DummyEndpoint.calendarAPI)
         // then
-        #expect(path == "https://api.example.com/v2/holiday")
+        #expect(path == "https://api.example.com/v2/dummy/some")
     }
 
-    @Test func path_accountInfoEndpoint_returnsV2AccountsInfoURL() {
+    @Test func path_calendarAPIHostWithEmptySubPath_returnsPrefixOnly() {
         // when
-        let path = self.env.path(AccountAPIEndpoints.info)
+        let path = self.env.path(DummyEndpoint.calendarAPIRoot)
         // then
-        #expect(path == "https://api.example.com/v2/accounts/info")
+        #expect(path == "https://api.example.com/v2/dummy")
     }
 
-    @Test func path_foremostEventEndpoint_returnsV2ForemostEventURL() {
+    @Test func path_customerServiceHost_usesCSAPI() {
         // when
-        let path = self.env.path(ForemostEventEndpoints.event)
+        let path = self.env.path(DummyEndpoint.customerService)
         // then
-        #expect(path == "https://api.example.com/v2/foremost/event")
+        #expect(path == "https://cs.example.com/some")
     }
 
-    @Test func path_eventDetailEndpoint_returnsV2EventDetailsURL() {
+    @Test func path_externalHost_usesGivenBase() {
         // when
-        let path = self.env.path(EventDetailEndpoints.detail(eventId: "id"))
+        let path = self.env.path(DummyEndpoint.external)
         // then
-        #expect(path == "https://api.example.com/v2/event_details/id")
-    }
-
-    @Test func path_appSettingDefaultColorEndpoint_returnsV2SettingURL() {
-        // when
-        let path = self.env.path(AppSettingEndpoints.defaultEventTagColor)
-        // then
-        #expect(path == "https://api.example.com/v2/setting/event/tag/default/color")
-    }
-
-    @Test func path_appSettingColorThemesEndpoint_returnsV2SettingColorThemesURL() {
-        // when
-        let path = self.env.path(AppSettingEndpoints.colorThemes)
-        // then
-        #expect(path == "https://api.example.com/v2/setting/color_themes")
-    }
-
-    @Test func path_appSettingColorThemeEndpoint_returnsV2SettingColorThemeURLWithUUID() {
-        // when
-        let path = self.env.path(AppSettingEndpoints.colorTheme(uuid: "theme-1"))
-        // then
-        #expect(path == "https://api.example.com/v2/setting/color_themes/theme-1")
-    }
-
-    @Test func path_migrationCustomColorThemesEndpoint_returnsV2MigrationColorThemesURL() {
-        // when
-        let path = self.env.path(MigrationEndpoints.customColorThemes)
-        // then
-        #expect(path == "https://api.example.com/v2/migration/color_themes")
-    }
-
-    @Test func path_eventSyncCheckEndpoint_returnsV2SyncCheckURL() {
-        // when
-        let path = self.env.path(EventSyncEndPoints.check)
-        // then
-        #expect(path == "https://api.example.com/v2/sync/check")
-    }
-
-    @Test func path_billingEndpoint_returnsV1BillingURL() {
-        // when
-        let path = self.env.path(BillingAPIEndpoints.purchases)
-        // then
-        #expect(path == "https://api.example.com/v1/billing/purchases")
-    }
-
-    @Test func path_billingUserPlanEndpoint_returnsV1BillingUserPlanURL() {
-        // when
-        let path = self.env.path(BillingAPIEndpoints.userPlan)
-        // then
-        #expect(path == "https://api.example.com/v1/billing/user-plan")
-    }
-}
-
-
-// MARK: - calendarAPIHost 밖 고정 호스트 엔드포인트 검증
-
-extension RemoteEnvironmentPathTests {
-
-    @Test func path_appUpdateInfoEndpoint_returnsTermsRepositoryRawURL() {
-        // when
-        let path = self.env.path(AppEndpoints.updateInfo)
-        // then
-        #expect(path == "https://raw.githubusercontent.com/sudopark/TodoCalendar-Terms/main/app-config/update-info.json")
-    }
-
-    @Test func path_legalNoticeEndpoint_returnsTermsRepositoryRawURL() {
-        // when
-        let path = self.env.path(AppEndpoints.legalNotice)
-        // then
-        #expect(path == "https://raw.githubusercontent.com/sudopark/TodoCalendar-Terms/main/app-config/legal-notice.json")
-    }
-
-    @Test func path_appPolicyEndpoint_returnsTermsRepositoryRawURL() {
-        // when
-        let path = self.env.path(AppEndpoints.appPolicy)
-        // then
-        #expect(path == "https://raw.githubusercontent.com/sudopark/TodoCalendar-Terms/main/app-config/app-policy.json")
+        #expect(path == "https://external.example.com/some")
     }
 }
