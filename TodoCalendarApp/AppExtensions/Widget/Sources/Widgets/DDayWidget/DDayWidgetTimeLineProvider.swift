@@ -68,7 +68,8 @@ extension DDayWidgetTimeLineProvider {
             let model = try await viewModelProvider.getDDayModel(
                 for: now,
                 target: configuration.resolvedTargetId,
-                style: configuration.resolvedStyle
+                style: configuration.resolvedStyle,
+                widgetCountsTargetDayAsOne: configuration.countsTargetDayAsOne
             )
             return .init(date: now, result: .success(model))
                 |> \.background .~ model.look.background
