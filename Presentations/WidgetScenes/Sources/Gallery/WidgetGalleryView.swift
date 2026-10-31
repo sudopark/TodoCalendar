@@ -23,6 +23,7 @@ import CommonPresentation
     var defaultStyles: [String: WidgetStyle] = [:]
     var isSystemTheme: Bool = true
     var customBackground: Color?
+    var ddayCountsTargetDayAsOne: Bool = false
 
     func bind(_ viewModel: any WidgetGalleryViewModel) {
         guard self.didBind == false else { return }
@@ -55,6 +56,13 @@ import CommonPresentation
                 }
             })
             .store(in: self.cancellables)
+
+        viewModel.ddayCountsTargetDayAsOne
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] isOn in
+                self?.ddayCountsTargetDayAsOne = isOn
+            })
+            .store(in: self.cancellables)
     }
 }
 
@@ -64,6 +72,7 @@ final class WidgetGalleryViewEventHandler: Observable {
     var selectItem: (String) -> Void = { _ in }
     var selectSystemTheme: () -> Void = { }
     var selectCustomColorHex: (String) -> Void = { _ in }
+    var toggleDDayCountsTargetDayAsOne: (Bool) -> Void = { _ in }
     var close: () -> Void = { }
 
     func bind(_ viewModel: any WidgetGalleryViewModel) {
@@ -71,6 +80,7 @@ final class WidgetGalleryViewEventHandler: Observable {
         self.selectItem = viewModel.selectItem(_:)
         self.selectSystemTheme = viewModel.selectSystemTheme
         self.selectCustomColorHex = viewModel.selectCustomBackground(hex:)
+        self.toggleDDayCountsTargetDayAsOne = viewModel.toggleDDayCountsTargetDayAsOne(_:)
         self.close = viewModel.close
     }
 }
@@ -173,6 +183,12 @@ extension WidgetGalleryView {
                         colorSelectView
                     )
                 }
+
+                settingRow(
+                    "setting.appearance.widget::ddayCount::title".localized(),
+                    subTitle: "setting.appearance.widget::ddayCount::description".localized(),
+                    ddayCountToggleView
+                )
             }
         }
         .padding(.horizontal, spacing: .xlarge)
@@ -215,6 +231,16 @@ extension WidgetGalleryView {
             .onChange(of: state.isSystemTheme) { old, new in
                 guard old != new, new else { return }
                 eventHandlers.selectSystemTheme()
+            }
+    }
+
+    private var ddayCountToggleView: some View {
+        @Bindable var state = self.state
+        return Toggle("", isOn: $state.ddayCountsTargetDayAsOne)
+            .controlSize(.small)
+            .labelsHidden()
+            .onChange(of: state.ddayCountsTargetDayAsOne) { _, new in
+                eventHandlers.toggleDDayCountsTargetDayAsOne(new)
             }
     }
 

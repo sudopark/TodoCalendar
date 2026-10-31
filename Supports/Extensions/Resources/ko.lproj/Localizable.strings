@@ -560,6 +560,8 @@
 "setting.widget::title" = "위젯";
 "setting.widget::setting::title" = "위젯 설정";
 "setting.appearance.widget::gallery::section" = "위젯";
+"setting.appearance.widget::ddayCount::title" = "D-Day를 D+1로 세기";
+"setting.appearance.widget::ddayCount::description" = "켜면 디데이 당일을 D+1로 셉니다. 앱과 위젯에 함께 적용됩니다";
 "widget.gallery::lockScreen::label" = "%@ · 잠금화면";
 "widget.weeks::group" = "주 단위 일정";
 "widget.size::small" = "작게";

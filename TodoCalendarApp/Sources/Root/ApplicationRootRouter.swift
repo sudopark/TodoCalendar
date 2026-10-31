@@ -544,6 +544,7 @@ extension ApplicationRootRouter {
         return WidgetGalleryBuilderImple(
             uiSettingUsecase: self.usecaseFactory.makeUISettingUsecase(),
             widgetStyleUsecase: self.usecaseFactory.makeWidgetStyleUsecase(),
+            calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
             adGuideSceneBuilder: self.paidFeatureAdGuideSceneBuilder(),
             viewAppearance: self.viewAppearanceStore.appearance
         )
