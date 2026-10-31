@@ -9,7 +9,7 @@
 import Foundation
 import Speech
 import AVFoundation
-import Domain
+import SupportDomainInterface
 
 
 public final class SpeechRecognizePermissionCheckerImple: SpeechRecognizePermissionChecker, @unchecked Sendable {

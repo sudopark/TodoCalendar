@@ -11,9 +11,8 @@ import Combine
 import Prelude
 import Optics
 import Extensions
-import KernelUtils
 import CalendarDomainInterface
-import CalendarRepositoryInterface
+import KernelUtils
 
 
 // MARK: - LocaleProvider

@@ -1,0 +1,36 @@
+//
+//  AppSettingRepository.swift
+//  SettingDomainInterface
+//
+//  Created by sudo.park on 2023/08/07.
+//
+
+import Foundation
+import EventDomainInterface
+
+
+public protocol AppSettingRepository: Sendable {
+    
+    func loadSavedViewAppearance() -> AppearanceSettings
+    func refreshAppearanceSetting() async throws -> AppearanceSettings
+    
+    func changeCalendarAppearanceSetting(
+        _ params: EditCalendarAppearanceSettingParams
+    ) throws -> CalendarAppearanceSettings
+    
+    func changeDefaultEventTagColor(
+        _ params: EditDefaultEventTagColorParams
+    ) async throws -> DefaultEventTagColorSetting
+    
+    
+    func loadEventSetting() -> EventSettings
+    func changeEventSetting(_ params: EditEventSettingsParams) -> EventSettings
+
+    func loadEventShareSetting() -> EventShareSettings
+    func changeEventShareSetting(_ params: EditEventShareSettingsParams) -> EventShareSettings
+
+    func loadWidgetAppearanceSetting() -> WidgetAppearanceSettings
+    func updateWidgetAppearance(
+        _ params: EditWidgetAppearanceSettingParams
+    ) -> WidgetAppearanceSettings
+}

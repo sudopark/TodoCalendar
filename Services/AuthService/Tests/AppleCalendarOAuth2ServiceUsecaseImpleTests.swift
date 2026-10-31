@@ -10,9 +10,12 @@ import Testing
 import Combine
 import Extensions
 import UnitTestHelpKit
-import Domain
 
 @testable import AuthService
+import AccountDomainInterface
+import AccountDomainTesting
+import ExternalCalendarDomainInterface
+import ExternalCalendarDomainTesting
 
 
 final class AppleCalendarOAuth2ServiceUsecaseImpleTests {

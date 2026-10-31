@@ -7,18 +7,8 @@ let project = Project.framework(name: "TestDoubles",
                                 dependencies: [
                                     .project(target: "Common3rdParty",
                                              path: .relativeToRoot("Supports/Common3rdParty")),
-                                    .project(target: "Domain",
-                                             path: .relativeToRoot("Domain")),
-                                    .project(target: "CalendarDomainTesting",
-                                             path: .relativeToRoot("Domain/CalendarDomain")),
-                                    .project(target: "CalendarRepositoryTesting",
-                                             path: .relativeToRoot("Repository/CalendarRepository")),
                                     .project(target: "Extensions",
                                              path: .relativeToRoot("Supports/Extensions")),
-                                    .project(target: "Scenes",
-                                             path: .relativeToRoot("Presentations/Scenes")),
-                                    .project(target: "UnitTestHelpKit",
-                                             path: .relativeToRoot("Supports/UnitTestHelpKit")),
-                                    .xctest
+                                    .project(target: "SceneInfra",
+                                             path: .relativeToRoot("Presentations/Scenes/SceneInfra"))
                                 ])
-

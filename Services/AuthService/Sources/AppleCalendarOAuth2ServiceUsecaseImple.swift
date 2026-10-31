@@ -7,8 +7,9 @@
 //
 
 import Foundation
-import Domain
 import Extensions
+import AccountDomainInterface
+import ExternalCalendarDomainInterface
 
 
 public final class AppleCalendarOAuth2ServiceUsecaseImple: OAuth2ServiceUsecase, @unchecked Sendable {

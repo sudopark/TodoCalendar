@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import Domain
+import AccountDomainInterface
 
 
 public final class OAuth2ServiceUsecaseProviderImple: OAuth2ServiceUsecaseProvider, @unchecked Sendable {

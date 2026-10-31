@@ -1,0 +1,87 @@
+//
+//  StubExternalCalendarIntegrationUsecase.swift
+//  ExternalCalendarDomainTesting
+//
+//  Created by sudo.park on 2/7/25.
+//  Copyright © 2025 com.sudo.park. All rights reserved.
+//
+
+import Foundation
+import Combine
+import Extensions
+import ExternalCalendarDomainInterface
+
+
+open class StubExternalCalendarIntegrationUsecase: ExternalCalendarIntegrationUsecase, @unchecked Sendable {
+
+    private let fakeAccountMapSubject = CurrentValueSubject<[String: [ExternalServiceAccountinfo]], Never>([:])
+
+    public init(_ accounts: [ExternalServiceAccountinfo]) {
+        let map = accounts.reduce(into: [String: [ExternalServiceAccountinfo]]()) { map, account in
+            map[account.serviceIdentifier, default: []].append(account)
+        }
+        self.fakeAccountMapSubject.send(map)
+    }
+
+    open func prepareIntegratedAccounts() async throws { }
+
+    open func integrate(external service: any ExternalCalendarService) async throws -> ExternalServiceAccountinfo {
+        let account = ExternalServiceAccountinfo(service.identifier, email: "email")
+        var map = self.fakeAccountMapSubject.value
+        map[service.identifier, default: []].removeAll { $0.email == account.email }
+        map[service.identifier, default: []].append(account)
+        self.fakeAccountMapSubject.send(map)
+        return account
+    }
+
+    public var didReauthenticateForWriteScopeWith: (serviceId: String, accountId: String)?
+    public var didReauthenticateForWriteScopeWithService: (any ExternalCalendarService)?
+    public var shouldFailReauthenticate: Bool = false
+    public var shouldFailReauthenticateWithNotGranted: Bool = false
+    open func reauthenticateForWriteScope(
+        external service: any ExternalCalendarService, accountId: String
+    ) async throws -> ExternalServiceAccountinfo {
+        self.didReauthenticateForWriteScopeWith = (service.identifier, accountId)
+        self.didReauthenticateForWriteScopeWithService = service
+        guard !self.shouldFailReauthenticateWithNotGranted
+        else {
+            throw GoogleCalendarWriteScopeFailReason.notGranted
+        }
+        guard !self.shouldFailReauthenticate
+        else {
+            throw RuntimeError("failed to reauthenticate")
+        }
+        let account = ExternalServiceAccountinfo(service.identifier, email: accountId)
+        var map = self.fakeAccountMapSubject.value
+        map[service.identifier, default: []].removeAll { $0.email == account.email }
+        map[service.identifier, default: []].append(account)
+        self.fakeAccountMapSubject.send(map)
+        return account
+    }
+
+    open func stopIntegrate(external service: any ExternalCalendarService, accountId: String) async throws {
+        var map = self.fakeAccountMapSubject.value
+        map[service.identifier]?.removeAll { $0.email == accountId }
+        if map[service.identifier]?.isEmpty == true {
+            map[service.identifier] = nil
+        }
+        self.fakeAccountMapSubject.send(map)
+    }
+
+    open func handleAuthenticationResultOrNot(open url: URL) -> Bool {
+        return url.absoluteString.starts(with: "https://google.com")
+    }
+
+    open var integratedServiceAccounts: AnyPublisher<[String: [ExternalServiceAccountinfo]], Never> {
+        return self.fakeAccountMapSubject
+            .eraseToAnyPublisher()
+    }
+
+    public var integrationStatusChanged: AnyPublisher<ExternalCalendarIntegrationStatus, Never> {
+        return Empty().eraseToAnyPublisher()
+    }
+
+    public func currentIntegratedAccounts() -> [ExternalServiceAccountinfo] {
+        return self.fakeAccountMapSubject.value.values.flatMap { $0 }
+    }
+}

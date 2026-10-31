@@ -7,9 +7,9 @@
 
 import Foundation
 import Combine
-import CalendarDomainInterface
 import Prelude
 import Optics
+import CalendarDomainInterface
 
 
 open class StubHolidayUsecase: HolidayUsecase {

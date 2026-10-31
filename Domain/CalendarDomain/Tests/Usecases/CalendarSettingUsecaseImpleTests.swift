@@ -9,12 +9,11 @@ import XCTest
 import Combine
 import UnitTestHelpKit
 import Extensions
-import TestDoubles
-
-import KernelUtils
-import CalendarDomainInterface
-import CalendarRepositoryInterface
 @testable import CalendarDomain
+@testable import CalendarDomainInterface
+@testable import CalendarDomainTesting
+@testable import KernelUtils
+
 
 
 class CalendarSettingUsecaseImpleTests: BaseTestCase, PublisherWaitable {

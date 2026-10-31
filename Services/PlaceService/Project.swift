@@ -6,13 +6,10 @@ let project = Project.framework(
     destinations: [.iPhone],
     iOSTargetVersion: "17.0",
     dependencies: [
+        .project(target: "PlaceServiceInterface", path: .relativeToRoot("Domain/PlaceServiceInterface")),
         .project(
             target: "Common3rdParty",
             path: .relativeToRoot("Supports/Common3rdParty")
-        ),
-        .project(
-            target: "Domain",
-            path: .relativeToRoot("Domain")
         ),
         .project(
             target: "Extensions",

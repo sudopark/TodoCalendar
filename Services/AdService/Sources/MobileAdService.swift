@@ -8,7 +8,7 @@
 
 import UIKit
 import GoogleMobileAds
-import Domain
+import AdDomainInterface
 
 
 public protocol MobileAdService: MobileAdAvailability {

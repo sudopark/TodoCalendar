@@ -12,20 +12,19 @@ import Optics
 import Alamofire
 import Extensions
 import RemoteInfraInterface
-import AccountDomainInterface
 
 public final class CalendarAPIAutenticator: APIAuthenticator, @unchecked Sendable {
     
     public typealias Credential = APICredential
     
     private let credentialStore: any APICredentialStore
-    private let firebaseAuthService: any FirebaseAuthService
+    private let firebaseAuthService: any FirebaseTokenRefreshService
     
     public weak var listener: (any AutenticatorTokenRefreshListener)?
     
     public init(
         credentialStore: any APICredentialStore,
-        firebaseAuthService: any FirebaseAuthService
+        firebaseAuthService: any FirebaseTokenRefreshService
     ) {
         self.credentialStore = credentialStore
         self.firebaseAuthService = firebaseAuthService

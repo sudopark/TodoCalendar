@@ -8,7 +8,7 @@
 
 import Foundation
 import SwiftLinkPreview
-import Domain
+import SupportDomainInterface
 
 
 public final class SwiftLinkPreviewBaseFetchEngineImple: LinkPreviewFetchEngine, @unchecked Sendable {

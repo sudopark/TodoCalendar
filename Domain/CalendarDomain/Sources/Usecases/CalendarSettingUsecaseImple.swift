@@ -8,9 +8,8 @@
 
 import Foundation
 import Combine
-import KernelUtils
 import CalendarDomainInterface
-import CalendarRepositoryInterface
+import KernelUtils
 
 
 // MARK: - CalendarSettingUsecaseImple

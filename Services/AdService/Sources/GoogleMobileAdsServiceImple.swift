@@ -11,8 +11,8 @@ import Combine
 import AppTrackingTransparency
 import GoogleMobileAds
 import UserMessagingPlatform
-import Domain
 import Extensions
+import AdDomainInterface
 
 
 public final class GoogleMobileAdsServiceImple: MobileAdService, @unchecked Sendable {

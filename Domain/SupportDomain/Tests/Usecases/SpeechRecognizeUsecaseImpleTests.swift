@@ -1,0 +1,526 @@
+//
+//  SpeechRecognizeUsecaseImpleTests.swift
+//  SupportDomainTests
+//
+//  Created by sudo.park on 6/7/26.
+//  Copyright © 2026 com.sudo.park. All rights reserved.
+//
+
+import Testing
+import Foundation
+import Combine
+import UnitTestHelpKit
+import Extensions
+@testable import SupportDomain
+@testable import SupportDomainInterface
+
+
+
+class SpeechRecognizeUsecaseImpleTests: PublisherWaitable {
+
+    var cancelBag: Set<AnyCancellable>! = []
+
+    private func makeUsecase(
+        autoStopAfterSilence: TimeInterval = 3,
+        accessError: (any Error)? = nil,
+        startError: (any Error)? = nil
+    ) -> (SpeechRecognizeUsecaseImple, StubSpeechRecognizeService) {
+        let service = StubSpeechRecognizeService()
+        service.startError = startError
+        let permission = StubSpeechRecognizePermissionChecker()
+        permission.accessError = accessError
+        let usecase = SpeechRecognizeUsecaseImple(
+            service: service,
+            permissionChecker: permission,
+            autoStopAfterSilence: autoStopAfterSilence
+        )
+        return (usecase, service)
+    }
+
+    private func captureResult(
+        for usecase: SpeechRecognizeUsecaseImple,
+        timeout: Duration = .milliseconds(150),
+        _ action: () async throws -> Void
+    ) async throws -> Result<SpeechRecognizeResult, any Error>? {
+        let box = ResultBox()
+        usecase.recognizeResult
+            .sink { box.value = $0 }
+            .store(in: &self.cancelBag)
+        try await action()
+        try await Task.sleep(for: timeout)
+        return box.value
+    }
+
+    private func waitUntilListening(_ service: StubSpeechRecognizeService) async throws {
+        let deadline = ContinuousClock.now + .milliseconds(500)
+        while service.didStartCount == 0, ContinuousClock.now < deadline {
+            try await Task.sleep(for: .milliseconds(5))
+        }
+    }
+}
+
+
+// MARK: - 음성 인식 결과
+
+extension SpeechRecognizeUsecaseImpleTests {
+
+    @Test func usecase_whenUserFinishesSpeaking_emitsRecognizedText() async throws {
+        // given
+        let (usecase, service) = self.makeUsecase()
+
+        // when
+        let captured = try await self.captureResult(for: usecase) {
+            usecase.startListening()
+            try await Task.sleep(for: .milliseconds(50))
+            service.emit(.init(text: "안녕하세요", isFinal: true))
+        }
+
+        // then
+        let result = try #require(captured)
+        guard case .success(.recognized(let text)) = result else {
+            Issue.record("성공 결과가 아님")
+            return
+        }
+        #expect(text == "안녕하세요")
+    }
+
+    @Test func usecase_whenUserKeepsSpeaking_emitsFinalText() async throws {
+        // given
+        let (usecase, service) = self.makeUsecase()
+
+        // when
+        let captured = try await self.captureResult(for: usecase) {
+            usecase.startListening()
+            try await Task.sleep(for: .milliseconds(50))
+            service.emit(.init(text: "오늘", isFinal: false))
+            service.emit(.init(text: "오늘 일정", isFinal: false))
+            service.emit(.init(text: "오늘 일정 추가", isFinal: false))
+            service.emit(.init(text: "오늘 일정 추가해줘", isFinal: true))
+        }
+
+        // then
+        let result = try #require(captured)
+        guard case .success(.recognized(let text)) = result else {
+            Issue.record("성공 결과가 아님")
+            return
+        }
+        #expect(text == "오늘 일정 추가해줘")
+    }
+
+    @Test func usecase_whenUserPausesAfterSpeaking_emitsRecognizedTextSoFar() async throws {
+        // given
+        let (usecase, service) = self.makeUsecase(autoStopAfterSilence: 0.1)
+
+        // when
+        let captured = try await self.captureResult(for: usecase) {
+            usecase.startListening()
+            try await Task.sleep(for: .milliseconds(50))
+            service.emit(.init(text: "오늘 일정", isFinal: false))
+            try await Task.sleep(for: .milliseconds(200))
+        }
+
+        // then
+        let result = try #require(captured)
+        guard case .success(.recognized(let text)) = result else {
+            Issue.record("성공 결과가 아님")
+            return
+        }
+        #expect(text == "오늘 일정")
+    }
+
+    @Test func usecase_whenPermissionDenied_emitsFailure() async throws {
+        // given
+        let (usecase, _) = self.makeUsecase(
+            accessError: SpeechRecognizeAuthError(micNotAvail: .denied)
+        )
+
+        // when
+        let captured = try await self.captureResult(for: usecase) {
+            usecase.startListening()
+            try await Task.sleep(for: .milliseconds(80))
+        }
+
+        // then
+        let result = try #require(captured)
+        guard case .failure(let error) = result else {
+            Issue.record("실패 결과가 아님")
+            return
+        }
+        let authError = try #require(error as? SpeechRecognizeAuthError)
+        guard case .denied? = authError.micNotAvail else {
+            Issue.record("micNotAvail이 denied가 아님")
+            return
+        }
+        #expect(authError.speechNotAvail == nil)
+    }
+
+    @Test func usecase_whenListeningCannotStart_emitsFailure() async throws {
+        // given
+        let startError = RuntimeError(key: "engineStartFail", "audio engine could not start")
+        let (usecase, _) = self.makeUsecase(startError: startError)
+
+        // when
+        let captured = try await self.captureResult(for: usecase) {
+            usecase.startListening()
+            try await Task.sleep(for: .milliseconds(80))
+        }
+
+        // then
+        let result = try #require(captured)
+        guard case .failure(let error) = result else {
+            Issue.record("실패 결과가 아님")
+            return
+        }
+        let runtimeError = try #require(error as? RuntimeError)
+        #expect(runtimeError.key == "engineStartFail")
+        #expect(runtimeError.message == "audio engine could not start")
+    }
+
+    @Test func usecase_whenRecognitionFails_emitsFailure() async throws {
+        // given
+        let (usecase, service) = self.makeUsecase()
+
+        // when
+        let captured = try await self.captureResult(for: usecase) {
+            usecase.startListening()
+            try await Task.sleep(for: .milliseconds(50))
+            service.emitError(RuntimeError("recognition interrupted"))
+        }
+
+        // then
+        let result = try #require(captured)
+        guard case .failure = result else {
+            Issue.record("실패 결과가 아님")
+            return
+        }
+    }
+
+    @Test func usecase_whenSilentWithoutSpeech_emitsEndedWithoutRecognizing() async throws {
+        // given
+        let (usecase, _) = self.makeUsecase(autoStopAfterSilence: 0.1)
+
+        // when
+        let captured = try await self.captureResult(for: usecase, timeout: .milliseconds(300)) {
+            usecase.startListening()
+        }
+
+        // then
+        let result = try #require(captured)
+        guard case .success(let recognizeResult) = result else {
+            Issue.record("성공 결과가 아님")
+            return
+        }
+        #expect(recognizeResult == .endedWithoutRecognizing)
+    }
+
+    @Test func usecase_whenAudioInputDisrupted_emitsEndedWithoutRecognizing() async throws {
+        // given
+        let (usecase, service) = self.makeUsecase()
+
+        // when
+        let captured = try await self.captureResult(for: usecase) {
+            usecase.startListening()
+            try await self.waitUntilListening(service)
+            service.emitAudioDisruption()
+        }
+
+        // then
+        let result = try #require(captured)
+        guard case .success(let recognizeResult) = result else {
+            Issue.record("성공 결과가 아님")
+            return
+        }
+        #expect(recognizeResult == .endedWithoutRecognizing)
+    }
+
+    @Test func usecase_whenAudioInputDisruptedWhileSpeaking_discardsPartialText() async throws {
+        // given
+        let (usecase, service) = self.makeUsecase()
+
+        // when
+        let captured = try await self.captureResult(for: usecase) {
+            usecase.startListening()
+            try await self.waitUntilListening(service)
+            service.emit(.init(text: "오늘 회의", isFinal: false))
+            try await Task.sleep(for: .milliseconds(20))
+            service.emitAudioDisruption()
+        }
+
+        // then
+        let result = try #require(captured)
+        guard case .success(let recognizeResult) = result else {
+            Issue.record("성공 결과가 아님")
+            return
+        }
+        #expect(recognizeResult == .endedWithoutRecognizing)
+    }
+}
+
+
+// MARK: - 실시간 인식 텍스트 / 수동 완료
+
+extension SpeechRecognizeUsecaseImpleTests {
+
+    @Test func usecase_whileRecognizing_emitsPartialTextInRealtime() async throws {
+        // given
+        let expect = expectConfirm("부분 인식 텍스트 실시간 방출")
+        expect.count = 3
+        let (usecase, service) = self.makeUsecase()
+
+        // when
+        let texts = try await self.outputs(expect, for: usecase.recognizingText) {
+            usecase.startListening()
+            try await Task.sleep(for: .milliseconds(60))
+            service.emit(.init(text: "오늘", isFinal: false))
+            service.emit(.init(text: "오늘 회의", isFinal: false))
+            try await Task.sleep(for: .milliseconds(40))
+        }
+
+        // then
+        #expect(texts == ["", "오늘", "오늘 회의"])
+    }
+
+    @Test func usecase_whenFinishListening_emitsCurrentTextAsResult() async throws {
+        // given
+        let (usecase, service) = self.makeUsecase()
+
+        // when
+        let captured = try await self.captureResult(for: usecase) {
+            usecase.startListening()
+            try await Task.sleep(for: .milliseconds(60))
+            service.emit(.init(text: "회의 잡아줘", isFinal: false))
+            try await Task.sleep(for: .milliseconds(20))
+            usecase.finishListening()
+        }
+
+        // then
+        let result = try #require(captured)
+        guard case .success(.recognized(let text)) = result else {
+            Issue.record("성공 결과가 아님")
+            return
+        }
+        #expect(text == "회의 잡아줘")
+    }
+
+    @Test func usecase_whenFinishListeningWithoutSpeech_emitsEmptyText() async throws {
+        // given
+        let (usecase, _) = self.makeUsecase()
+
+        // when
+        let captured = try await self.captureResult(for: usecase) {
+            usecase.startListening()
+            try await Task.sleep(for: .milliseconds(60))
+            usecase.finishListening()
+        }
+
+        // then
+        let result = try #require(captured)
+        guard case .success(.recognized(let text)) = result else {
+            Issue.record("성공 결과가 아님")
+            return
+        }
+        #expect(text == "")
+    }
+}
+
+
+// MARK: - 듣기 상태와 입력 레벨
+
+extension SpeechRecognizeUsecaseImpleTests {
+
+    @Test func usecase_whenNotListening_hasNoInputLevel() async throws {
+        // given
+        let (usecase, _) = self.makeUsecase()
+
+        // when
+        let value = try await self.firstOutput(
+            expectConfirm("듣고 있지 않을 때"), for: usecase.isRecognizingWithLevel
+        )
+
+        // then
+        guard case .some(let level) = value else {
+            Issue.record("방출이 없었음")
+            return
+        }
+        #expect(level == nil)
+    }
+
+    @Test func usecase_whileListening_providesInputLevels() async throws {
+        // given
+        let expect = expectConfirm("듣는 동안 입력 레벨")
+        expect.count = 5
+        let (usecase, service) = self.makeUsecase()
+
+        // when
+        let levels = try await self.outputs(expect, for: usecase.isRecognizingWithLevel) {
+            usecase.startListening()
+            try await Task.sleep(for: .milliseconds(60))
+            service.sendLevel(0.3)
+            service.sendLevel(0.6)
+            service.sendLevel(0.9)
+            try await Task.sleep(for: .milliseconds(40))
+        }
+
+        // then
+        #expect(levels == [nil, 0.0, 0.3, 0.6, 0.9])
+    }
+
+    @Test func usecase_whenSilentWithoutSpeech_stopsListening() async throws {
+        // given
+        let expect = expectConfirm("발화 없이 침묵이 지속될 때")
+        expect.count = 3
+        let (usecase, _) = self.makeUsecase(autoStopAfterSilence: 0.1)
+
+        // when
+        let levels = try await self.outputs(expect, for: usecase.isRecognizingWithLevel) {
+            usecase.startListening()
+            try await Task.sleep(for: .milliseconds(250))
+        }
+
+        // then
+        #expect(levels.last == .some(nil))
+    }
+
+    @Test func usecase_whenAudioInputDisrupted_stopsListening() async throws {
+        // given
+        let expect = expectConfirm("오디오 입력이 끊기면 듣기 종료")
+        expect.count = 4
+        let (usecase, service) = self.makeUsecase()
+
+        // when
+        let levels = try await self.outputs(expect, for: usecase.isRecognizingWithLevel) {
+            usecase.startListening()
+            try await self.waitUntilListening(service)
+            service.sendLevel(0.5)
+            try await Task.sleep(for: .milliseconds(20))
+            service.emitAudioDisruption()
+            try await Task.sleep(for: .milliseconds(40))
+        }
+
+        // then
+        #expect(levels == [nil, 0.0, 0.5, nil])
+    }
+
+    @Test func usecase_whenAudioInputDisrupted_releasesMicrophone() async throws {
+        // given
+        let (usecase, service) = self.makeUsecase()
+
+        // when
+        usecase.startListening()
+        try await self.waitUntilListening(service)
+        service.emitAudioDisruption()
+        try await Task.sleep(for: .milliseconds(40))
+
+        // then
+        #expect(service.didStop == true)
+    }
+}
+
+
+// MARK: - 중복 시작 방지
+
+extension SpeechRecognizeUsecaseImpleTests {
+
+    @Test func usecase_whenAlreadyListening_ignoresStart() async throws {
+        // given
+        let expect = expectConfirm("이미 듣는 중에 다시 시작")
+        expect.count = 3
+        let (usecase, service) = self.makeUsecase()
+
+        // when
+        let levels = try await self.outputs(expect, for: usecase.isRecognizingWithLevel) {
+            usecase.startListening()
+            try await Task.sleep(for: .milliseconds(60))
+            service.sendLevel(0.5)
+            try await Task.sleep(for: .milliseconds(30))
+            usecase.startListening()
+            try await Task.sleep(for: .milliseconds(40))
+        }
+
+        // then
+        #expect(levels == [nil, 0.0, 0.5])
+    }
+
+    @Test func usecase_whenStoppedBeforeAccessGranted_doesNotStartRecognizing() async throws {
+        // given
+        let (usecase, service) = self.makeUsecase()
+
+        // when
+        usecase.startListening()
+        usecase.stopListening()
+        try await Task.sleep(for: .milliseconds(100))
+
+        // then
+        #expect(service.didStartCount == 0)
+    }
+
+    @Test func usecase_whenStartCalledTwiceBeforeReady_startsOnlyOnce() async throws {
+        // given
+        let (usecase, service) = self.makeUsecase()
+
+        // when
+        usecase.startListening()
+        usecase.startListening()
+        try await Task.sleep(for: .milliseconds(100))
+
+        // then
+        #expect(service.didStartCount == 1)
+    }
+}
+
+
+// MARK: - test doubles
+
+private final class ResultBox: @unchecked Sendable {
+    var value: Result<SpeechRecognizeResult, any Error>?
+}
+
+private final class StubSpeechRecognizeService: SpeechRecognizeService, @unchecked Sendable {
+
+    private let recognizedSubject = PassthroughSubject<SpeechRecognizeFragment, any Error>()
+    private let voiceLevelSubject = CurrentValueSubject<Float, Never>(0)
+    private let audioInputDisruptedSubject = PassthroughSubject<Void, Never>()
+
+    var startError: (any Error)?
+    private(set) var didStartCount: Int = 0
+    private(set) var didStop: Bool = false
+
+    var recognized: AnyPublisher<SpeechRecognizeFragment, any Error> {
+        return self.recognizedSubject.eraseToAnyPublisher()
+    }
+    var voiceLevel: AnyPublisher<Float, Never> {
+        return self.voiceLevelSubject.eraseToAnyPublisher()
+    }
+    var audioInputDisrupted: AnyPublisher<Void, Never> {
+        return self.audioInputDisruptedSubject.eraseToAnyPublisher()
+    }
+    func start() throws {
+        self.didStartCount += 1
+        if let startError { throw startError }
+    }
+    func stop() {
+        self.didStop = true
+    }
+
+    func emit(_ fragment: SpeechRecognizeFragment) {
+        self.recognizedSubject.send(fragment)
+    }
+    func emitError(_ error: any Error) {
+        self.recognizedSubject.send(completion: .failure(error))
+    }
+    func sendLevel(_ level: Float) {
+        self.voiceLevelSubject.send(level)
+    }
+    func emitAudioDisruption() {
+        self.audioInputDisruptedSubject.send(())
+    }
+}
+
+private final class StubSpeechRecognizePermissionChecker: SpeechRecognizePermissionChecker, @unchecked Sendable {
+
+    var accessError: (any Error)?
+
+    func requestAccess() async throws {
+        if let accessError { throw accessError }
+    }
+}

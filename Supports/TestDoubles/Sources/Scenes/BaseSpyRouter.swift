@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import Scenes
+import SceneInfra
 
 
 open class BaseSpyRouter: Routing {

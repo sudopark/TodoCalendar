@@ -7,8 +7,8 @@
 //
 
 import Foundation
-import Domain
 import Extensions
+import AccountDomainInterface
 
 
 public final class AppleOAuth2ServiceUsecaseImple: OAuth2ServiceUsecase, @unchecked Sendable {

@@ -12,8 +12,6 @@ let project = Project.frameworkWithInterfaceAndTesting(
     dependencies: [
         .project(target: "Common3rdParty",
                  path: .relativeToRoot("Supports/Common3rdParty")),
-        .project(target: "ExternalCalendarDomainInterface",
-                 path: .relativeToRoot("Domain/ExternalCalendarDomain")),
         .project(target: "Extensions",
                  path: .relativeToRoot("Supports/Extensions"))
     ],
