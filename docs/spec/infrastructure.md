@@ -455,17 +455,17 @@ private func runMigrationVersion6to7(_ database: any DataBase) throws {
 
 | 레이어 | 파일 |
 |---|---|
-| Domain Model | `Domain/Sources/Models/AppUpdateInfo.swift` |
-| Domain Repo | `Domain/Sources/Repositories/AppRepository.swift` |
-| Domain Usecase | `Domain/Sources/Usecases/Support/AppUpdateCheckUsecase.swift` |
-| Repository Impl | `Repository/Sources/Repository+Imple/Support/AppRemoteRepositoryImple.swift` |
-| Mapper | `Repository/Sources/Repository+Imple/Support/AppUpdateInfo+Mapping.swift` |
-| Endpoint | `Repository/Infra/RemoteInfra/Interface/Endpoint.swift` (`AppEndpoints.updateInfo`) |
+| Domain Model | `Domain/SupportDomain/Interface/Models/AppUpdateInfo.swift` |
+| Domain Repo | `Domain/SupportDomain/Interface/Repositories/AppRepository.swift` |
+| Domain Usecase | `Domain/SupportDomain/Sources/Usecases/AppUpdateCheckUsecaseImple.swift` |
+| Repository Impl | `Domain/SupportDomain/Sources/Repositories/AppRemoteRepositoryImple.swift` |
+| Mapper | `Domain/SupportDomain/Sources/Repositories/AppUpdateInfo+Mapping.swift` |
+| Endpoint | `Domain/SupportDomain/Sources/Repositories/SupportEndpoints.swift` (`AppEndpoints.updateInfo`) |
 | Root View | `TodoCalendarApp/Sources/Root/ForceUpdatePopupView.swift` |
 | Root Router | `TodoCalendarApp/Sources/Root/ApplicationRootRouter.swift`의 `showUpdatePopup` |
 | Root VM | `TodoCalendarApp/Sources/Root/ApplicationRootViewModel.swift`의 `bindUpdateRequirement` + `handleWillEnterForeground` |
 | Setting VM | `Presentations/SettingScene/Sources/Setting/SettingItemListViewModel.swift`의 `isUpdateAvailable` 구독 + `openAppUpdate()` |
-| Factory | `Presentations/Scenes/Sources/Factories.swift` `SupportUsecaseFactory.appUpdateCheckUsecase` (단일 인스턴스 공유 계약) |
+| Factory | `Presentations/Scenes/SceneInfra/Sources/Factories.swift` `SupportUsecaseFactory.appUpdateCheckUsecase` (단일 인스턴스 공유 계약) |
 | 원격 설정 | `sudopark/TodoCalendar-Terms` 레포의 `app-config/update-info.json` |
 
 ### 7.6 한계 / 후속 과제
@@ -589,16 +589,16 @@ protocol LegalNoticeRepository: Sendable {
 
 | 레이어 | 파일 |
 |---|---|
-| Domain Model | `Domain/Sources/Models/LegalNotice.swift` |
-| Domain Repo | `Domain/Sources/Repositories/LegalNoticeRepository.swift` |
-| Domain Usecase | `Domain/Sources/Usecases/Support/LegalNoticeUsecase.swift` |
-| Repository Impl | `Repository/Sources/Repository+Imple/Support/LegalNoticeRepositoryImple.swift` |
-| Mapper | `Repository/Sources/Repository+Imple/Support/LegalNotice+Mapping.swift` |
-| Endpoint | `Repository/Infra/RemoteInfra/Interface/Endpoint.swift` (`AppEndpoints.legalNotice`) |
+| Domain Model | `Domain/SupportDomain/Interface/Models/LegalNotice.swift` |
+| Domain Repo | `Domain/SupportDomain/Interface/Repositories/LegalNoticeRepository.swift` |
+| Domain Usecase | `Domain/SupportDomain/Sources/Usecases/LegalNoticeUsecaseImple.swift` |
+| Repository Impl | `Domain/SupportDomain/Sources/Repositories/LegalNoticeRepositoryImple.swift` |
+| Mapper | `Domain/SupportDomain/Sources/Repositories/LegalNotice+Mapping.swift` |
+| Endpoint | `Domain/SupportDomain/Sources/Repositories/SupportEndpoints.swift` (`AppEndpoints.legalNotice`) |
 | Main View | `TodoCalendarApp/Sources/Main/LegalNoticeBannerView.swift` |
 | Main ViewController | `TodoCalendarApp/Sources/Main/MainViewController.swift` (배너 layout) |
 | Main VM | `TodoCalendarApp/Sources/Main/MainViewModel.swift` (`openLegalNoticeDocument` / `closeLegalNoticeBanner` / `legalNoticeBanners` publisher) |
-| Factory | `Presentations/Scenes/Sources/Factories.swift` / `TodoCalendarApp/Sources/Factories/Factories+Usecase.swift` (`SupportUsecaseFactory.makeLegalNoticeUsecase`) |
+| Factory | `Presentations/Scenes/SceneInfra/Sources/Factories.swift` / `TodoCalendarApp/Sources/Factories/Factories+Usecase.swift` (`SupportUsecaseFactory.makeLegalNoticeUsecase`) |
 | 원격 설정 | `sudopark/TodoCalendar-Terms` 레포의 `app-config/legal-notice.json` |
 
 ---
@@ -637,11 +637,11 @@ Repository 는 받아 둔 원격 정책(캐시)만 돌려준다. 캐시가 없�
 
 | 레이어 | 파일 |
 |---|---|
-| Domain Model | `Domain/Sources/Models/Billing/AppPolicy.swift` |
-| Domain Repo | `Domain/Sources/Repositories/Billing/AppPolicyRepository.swift` |
-| Repository Impl | `Repository/Sources/Repository+Imple/Support/AppPolicyRepositoryImple.swift` |
-| Mapper | `Repository/Sources/Repository+Imple/Support/AppPolicy+Mapping.swift` |
-| Endpoint | `Repository/Infra/RemoteInfra/Interface/Endpoint.swift` (`AppEndpoints.appPolicy`) |
+| Domain Model | `Domain/BillingDomain/Interface/Models/AppPolicy.swift` |
+| Domain Repo | `Domain/BillingDomain/Interface/Repositories/AppPolicyRepository.swift` |
+| Repository Impl | `Domain/BillingDomain/Sources/Repositories/AppPolicyRepositoryImple.swift` |
+| Mapper | `Domain/BillingDomain/Sources/Repositories/AppPolicy+Mapping.swift` |
+| Endpoint | `Domain/BillingDomain/Sources/Repositories/BillingEndpoints.swift` (`AppPolicyEndpoints.appPolicy`) |
 | 기본 정책 | `TodoCalendarApp/Sources/AppEnvironment.swift` (`defaultAppPolicy`) |
 
 ---

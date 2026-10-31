@@ -246,10 +246,10 @@ isBannerAdAllowed = adAvailability.isStarted && userPlan.planId == .free
 
 | 파일 | 역할 |
 |---|---|
-| `Domain/Sources/Models/Billing/` | 플랜·top-up·구매 결과·반영 실패 모델 |
-| `Domain/Sources/Usecases/Billing/BillingUsecase.swift` | 카탈로그·구매·복원·트랜잭션 관찰 |
-| `Domain/Sources/Usecases/Billing/NotNeedBillingUsecase.swift` | 과금이 필요 없는 조립에서 쓰는 no-op 구현 |
+| `Domain/BillingDomain/Interface/Models/` | 플랜·top-up·구매 결과·반영 실패 모델 |
+| `Domain/BillingDomain/Sources/Usecases/BillingUsecaseImple.swift` | 카탈로그·구매·복원·트랜잭션 관찰 |
+| `Domain/BillingDomain/Sources/Usecases/NotNeedBillingUsecase.swift` | 과금이 필요 없는 조립에서 쓰는 no-op 구현 |
 | `Services/StoreKitService/` | StoreKit 2 구매·구독 관리 시트 |
 | `Presentations/BillingScenes/Sources/Paywall/` | paywall 화면 |
-| `Domain/Sources/Usecases/Ad/AdExposureUsecase.swift` | 광고 노출 판정 |
+| `Domain/AdDomain/Sources/Usecases/AdExposureUsecaseImple.swift` | 광고 노출 판정 |
 | `Services/AdService/` | Google Mobile Ads 구현체 |

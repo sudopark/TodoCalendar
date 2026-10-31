@@ -157,10 +157,10 @@ Live Activity 대상으로도 지정할 수 있다 — `LiveActivityTarget.apple
 
 | 파일 | 역할 |
 |---|---|
-| `Domain/Sources/Models/Events/ExternalCalendar/AppleCalendarEvent.swift` | Tag·Event·EventOrigin·Attendee·OccurrenceId |
-| `Domain/Sources/Models/Events/ExternalCalendar/AppleCalendarEventEditParams.swift` | 수정 파라미터·범위 |
-| `Domain/Sources/Models/Events/ExternalCalendar/AppleCalendarPermissionFailReason.swift` | 권한 실패 사유 |
-| `Domain/Sources/Usecases/Events/ExternalCalendar/AppleCalendarUsecase.swift` | 태그·이벤트 갱신, 쓰기 가능 판정, 수정·삭제 |
-| `Domain/Sources/Usecases/Account/OAuth2/AppleCalendarPermissionChecker.swift` | 권한 상태 조회·요청 |
+| `Domain/ExternalCalendarDomain/Interface/Models/ExternalCalendar/AppleCalendarEvent.swift` | Tag·Event·EventOrigin·Attendee·OccurrenceId |
+| `Domain/ExternalCalendarDomain/Interface/Models/ExternalCalendar/AppleCalendarEventEditParams.swift` | 수정 파라미터·범위 |
+| `Domain/ExternalCalendarDomain/Interface/Models/ExternalCalendar/AppleCalendarPermissionFailReason.swift` | 권한 실패 사유 |
+| `Domain/ExternalCalendarDomain/Sources/Usecases/ExternalCalendar/AppleCalendarUsecaseImple.swift` | 태그·이벤트 갱신, 쓰기 가능 판정, 수정·삭제 |
+| `Domain/AccountDomain/Interface/Usecases/OAuth2/AppleCalendarPermissionChecker.swift` | 권한 상태 조회·요청 |
 | `Services/AuthService/Sources/AppleCalendarOAuth2ServiceUsecaseImple.swift` | 권한 상태별 연동 분기 |
-| `Repository/Sources/Repository+Imple/Event/ExternalCalendar/Apple/` | EventKit 접근·캐시·RRULE 변환 |
+| `Domain/ExternalCalendarDomain/Sources/Repositories/Apple/` | EventKit 접근·캐시·RRULE 변환 |

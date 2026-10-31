@@ -229,12 +229,12 @@ job 결과는 푸시로 온다. 알림이 꺼져 있으면 앱을 다시 열기 
 
 | 파일 | 역할 |
 |---|---|
-| `Domain/Sources/Models/AI/AICommand+Job.swift` | Command·Job·Mutation·ConfirmAction 모델 |
-| `Domain/Sources/Models/AI/AIAgentState.swift` | 상태 머신 정의 |
-| `Domain/Sources/Models/AI/AIAgentUsage.swift` | 사용량·한도 파생 |
-| `Domain/Sources/Usecases/AI/AIAgentOrchestrationUsecase.swift` | 입력·상태 전이·동기화 판정 |
-| `Domain/Sources/Usecases/AI/AICommandUsecase.swift` | job 발급·폴링·복원 |
-| `Domain/Sources/Usecases/AI/AIAgentUsageUsecase.swift` | 사용량 갱신 |
+| `Domain/AIDomain/Interface/Models/AICommand+Job.swift` | Command·Job·Mutation·ConfirmAction 모델 |
+| `Domain/AIDomain/Interface/Models/AIAgentState.swift` | 상태 머신 정의 |
+| `Domain/AIDomain/Interface/Models/AIAgentUsage.swift` | 사용량·한도 파생 |
+| `Domain/AIDomain/Sources/Usecases/AIAgentOrchestrationUsecaseImple.swift` | 입력·상태 전이·동기화 판정 |
+| `Domain/AIDomain/Sources/Usecases/AICommandUsecaseImple.swift` | job 발급·폴링·복원 |
+| `Domain/AIDomain/Sources/Usecases/AIAgentUsageUsecaseImple.swift` | 사용량 갱신 |
 | `Presentations/AIAgentScene/` | 입력·결과 화면 |
 | `TodoCalendarApp/Sources/AppIntents/` | Siri·단축어·액션 버튼 진입 |
 | `TodoCalendarApp/AppExtensions/Share/` | 공유 시트 진입 |
