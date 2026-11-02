@@ -29,6 +29,7 @@ final class AddEventViewModelImple: EventDetailViewModel, @unchecked Sendable {
     private let eventDetailDataUsecase: any EventDetailDataUsecase
     private let eventSettingUsecase: any EventSettingUsecase
     private let eventNotificationSettingUsecase: any EventNotificationSettingUsecase
+    private let appReviewRequestUsecase: any AppReviewRequestUsecase
     var router: (any EventDetailRouting)?
     
     init(
@@ -39,7 +40,8 @@ final class AddEventViewModelImple: EventDetailViewModel, @unchecked Sendable {
         calendarSettingUsecase: any CalendarSettingUsecase,
         eventDetailDataUsecase: any EventDetailDataUsecase,
         eventSettingUsecase: any EventSettingUsecase,
-        eventNotificationSettingUsecase: any EventNotificationSettingUsecase
+        eventNotificationSettingUsecase: any EventNotificationSettingUsecase,
+        appReviewRequestUsecase: any AppReviewRequestUsecase
     ) {
         
         self.initailMakeParams = params
@@ -50,6 +52,7 @@ final class AddEventViewModelImple: EventDetailViewModel, @unchecked Sendable {
         self.eventDetailDataUsecase = eventDetailDataUsecase
         self.eventSettingUsecase = eventSettingUsecase
         self.eventNotificationSettingUsecase = eventNotificationSettingUsecase
+        self.appReviewRequestUsecase = appReviewRequestUsecase
         
         self.internalBinding()
     }
@@ -247,7 +250,7 @@ extension AddEventViewModelImple: EventDetailInputListener {
                 await self?.saveEventDetailWithoutError(newTodo?.uuid)
                 
                 self?.router?.showToast(R.String.EventDetail.addNewTodoMessage)
-                self?.router?.closeScene(animate: true, nil)
+                self?.closeSceneAfterNewEventSaved()
             } catch {
                 self?.router?.showError(error)
             }
@@ -276,7 +279,7 @@ extension AddEventViewModelImple: EventDetailInputListener {
                 await self?.saveEventDetailWithoutError(newSchedule?.uuid)
                 
                 self?.router?.showToast(R.String.EventDetail.addNewScheduleMessage)
-                self?.router?.closeScene(animate: true, nil)
+                self?.closeSceneAfterNewEventSaved()
             } catch {
                 self?.router?.showError(error)
             }
@@ -285,6 +288,17 @@ extension AddEventViewModelImple: EventDetailInputListener {
         .store(in: self.cancellables)
     }
     
+    private func closeSceneAfterNewEventSaved() {
+        self.appReviewRequestUsecase.recordNewEventSaved()
+        guard self.appReviewRequestUsecase.canRequestReview()
+        else {
+            self.router?.closeScene(animate: true, nil)
+            return
+        }
+        self.appReviewRequestUsecase.markReviewRequested()
+        self.router?.closeSceneThenRequestAppReview()
+    }
+
     private func saveEventDetailWithoutError(_ eventId: String?) async {
         guard let eventId, let addition = self.subject.additional.value
         else { return }

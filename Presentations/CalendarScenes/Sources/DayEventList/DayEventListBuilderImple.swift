@@ -26,6 +26,7 @@ final class DayEventListSceneBuilerImple {
     private let aiKeyboardInputSceneBuilder: any AIAgentKeyboardInputSceneBuilder
     private let aiImageCommandSceneBuilder: any AIAgentImageCommandSceneBuilder
     private let sharePreviewSceneBuilder: any SharePreviewSceneBuilder
+    private let appStoreReviewRouter: any AppStoreReviewRouter
 
     init(
         usecaseFactory: any UsecaseFactory,
@@ -36,7 +37,8 @@ final class DayEventListSceneBuilerImple {
         memberSceneBuilder: any MemberSceneBuilder,
         aiKeyboardInputSceneBuilder: any AIAgentKeyboardInputSceneBuilder,
         aiImageCommandSceneBuilder: any AIAgentImageCommandSceneBuilder,
-        sharePreviewSceneBuilder: any SharePreviewSceneBuilder
+        sharePreviewSceneBuilder: any SharePreviewSceneBuilder,
+        appStoreReviewRouter: any AppStoreReviewRouter
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
@@ -47,6 +49,7 @@ final class DayEventListSceneBuilerImple {
         self.aiKeyboardInputSceneBuilder = aiKeyboardInputSceneBuilder
         self.aiImageCommandSceneBuilder = aiImageCommandSceneBuilder
         self.sharePreviewSceneBuilder = sharePreviewSceneBuilder
+        self.appStoreReviewRouter = appStoreReviewRouter
     }
 }
 
@@ -79,7 +82,8 @@ extension DayEventListSceneBuilerImple: DayEventListSceneBuiler {
             aiAgentOrchestrationUsecase: self.usecaseFactory.aiAgentOrchestrationUsecase,
             eventLiveActivityUsecase: self.usecaseFactory.eventLiveActivityUsecase,
             ddayCandidateUsecase: self.usecaseFactory.makeDDayCandidateUsecase(),
-            guideTodoUsecase: self.usecaseFactory.makeGuideTodoUsecase()
+            guideTodoUsecase: self.usecaseFactory.makeGuideTodoUsecase(),
+            appReviewRequestUsecase: self.usecaseFactory.makeAppReviewRequestUsecase()
         )
         let router = DayEventListRouter(
             eventDetailSceneBuilder: self.eventDetailSceneBuilder,
@@ -88,7 +92,8 @@ extension DayEventListSceneBuilerImple: DayEventListSceneBuiler {
             aiKeyboardInputSceneBuilder: self.aiKeyboardInputSceneBuilder,
             aiImageCommandSceneBuilder: self.aiImageCommandSceneBuilder,
             sharePreviewSceneBuilder: self.sharePreviewSceneBuilder,
-            viewAppearance: self.viewAppearance
+            viewAppearance: self.viewAppearance,
+            appStoreReviewRouter: self.appStoreReviewRouter
         )
         viewModel.router = router
         return .init(viewModel: viewModel, router: router)

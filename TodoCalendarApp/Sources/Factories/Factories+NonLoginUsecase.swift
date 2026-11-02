@@ -29,6 +29,7 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
     let adExposureUsecase: any AdExposureUsecase
     let imageTextRecognizeService: any ImageTextRecognizeService = ImageTextRecognizeServiceImple()
     private let paidFeatureGateUsecase: any PaidFeatureGateUsecase
+    private let appReviewRequestUsecase: any AppReviewRequestUsecase
     private let applicationBase: ApplicationBase
 
     private let eventFactory: NonLoginEventFactory
@@ -106,6 +107,13 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
             defaultPolicy: AppEnvironment.defaultAppPolicy
         )
         self.paidFeatureGateUsecase = paidFeatureGateUsecase
+        self.appReviewRequestUsecase = AppReviewRequestUsecaseImple(
+            repository: AppUsageRecordLocalRepositoryImple(
+                environmentStorage: applicationBase.userDefaultEnvironmentStorage
+            ),
+            planSource: planStore,
+            deviceInfoFetchService: DeviceInfoFetchServiceImple()
+        )
         self.adExposureUsecase = AdExposureUsecaseImple(
             adAvailability: applicationBase.mobileAdService,
             billingUsecase: billingUsecase,
@@ -248,6 +256,10 @@ extension NonLoginUsecaseFactoryImple {
 
     func makeGuideTodoUsecase() -> any GuideTodoUsecase {
         return self.supportFactory.makeGuideTodoUsecase()
+    }
+
+    func makeAppReviewRequestUsecase() -> any AppReviewRequestUsecase {
+        return self.appReviewRequestUsecase
     }
 
     func makeNewFeatureBadgeUsecase() -> any NewFeatureBadgeUsecase {
