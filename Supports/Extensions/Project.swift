@@ -3,7 +3,7 @@ import ProjectDescription
 
 let project = Project.frameworkWithTest(
     name: "Extensions",
-    destinations: [.iPhone],
+    destinations: [.iPhone, .iPad],
     iOSTargetVersion: "15.0",
     resources: ["Resources/**"],
     dependencies: [

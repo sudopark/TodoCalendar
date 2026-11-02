@@ -3,7 +3,7 @@ import ProjectDescription
 
 let project = Project.framework(
     name: "Common3rdParty",
-    destinations: [.iPhone],
+    destinations: [.iPhone, .iPad],
     iOSTargetVersion: "15.0",
     withSourceFile: false,
     dependencies: [

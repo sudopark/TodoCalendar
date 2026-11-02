@@ -3,7 +3,7 @@ import ProjectDescription
 
 let project = Project.frameworkWithInterfaceAndTesting(
     name: "NotificationDomain",
-    destinations: [.iPhone],
+    destinations: [.iPhone, .iPad],
     iOSTargetVersion: "17.0",
     interfaceDependencies: [
         .project(target: "EventDomainInterface", path: .relativeToRoot("Domain/EventDomain")),

@@ -3,7 +3,7 @@ import ProjectDescription
 
 let project = Project.frameworkWithInterfaceAndTesting(
     name: "RemoteInfra",
-    destinations: [.iPhone],
+    destinations: [.iPhone, .iPad],
     iOSTargetVersion: "17.0",
     interfaceDependencies: [
         .project(target: "Common3rdParty",

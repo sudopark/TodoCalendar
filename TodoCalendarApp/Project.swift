@@ -3,7 +3,7 @@ import ProjectDescription
 
 let project = Project.app(
     name: "TodoCalendarApp",
-    destinations: [.iPhone],
+    destinations: [.iPhone, .iPad],
     iOSTargetVersion: "17.0",
     dependencies: [
         .project(target: "AIAgentSceneInterface", path: .relativeToRoot("Presentations/Scenes/Interfaces/AIAgentSceneInterface")),
@@ -150,7 +150,7 @@ let project = Project.app(
         Project.makeAppExtensionTargets(
             appName: "TodoCalendarApp",
             extensionName: "Widget",
-            destinations: [.iPhone],
+            destinations: [.iPhone, .iPad],
             iOSTargetVersion: "17.0",
             infoPlist: [
                 "NSExtension": .dictionary([
@@ -224,7 +224,7 @@ let project = Project.app(
     + Project.makeAppExtensionTargets(
         appName: "TodoCalendarApp",
         extensionName: "IntentExtensions",
-        destinations: [.iPhone],
+        destinations: [.iPhone, .iPad],
         iOSTargetVersion: "17.0",
         infoPlist: [
             "INIntentsSupported": .array([.string("EventListTypeSelect")]),
@@ -279,7 +279,7 @@ let project = Project.app(
     + Project.makeAppExtensionTargets(
         appName: "TodoCalendarApp",
         extensionName: "Share",
-        destinations: [.iPhone],
+        destinations: [.iPhone, .iPad],
         iOSTargetVersion: "17.0",
         infoPlist: [
             "NSExtension": .dictionary([

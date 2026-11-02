@@ -3,7 +3,7 @@ import ProjectDescription
 
 let project = Project.framework(
     name: "SnapshotTestHelpKit",
-    destinations: [.iPhone],
+    destinations: [.iPhone, .iPad],
     iOSTargetVersion: "17.0",
     resources: ["Resources/**"],
     dependencies: [

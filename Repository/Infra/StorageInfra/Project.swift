@@ -3,7 +3,7 @@ import ProjectDescription
 
 let project = Project.frameworkWithInterfaceAndTesting(
     name: "StorageInfra",
-    destinations: [.iPhone],
+    destinations: [.iPhone, .iPad],
     iOSTargetVersion: "17.0",
     resources: ["Sources/PrivacyInfo.xcprivacy"],
     dependencies: [

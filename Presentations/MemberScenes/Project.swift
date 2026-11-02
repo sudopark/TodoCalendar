@@ -3,7 +3,7 @@ import ProjectDescription
 
 let project = Project.frameworkWithTest(
     name: "MemberScenes",
-    destinations: [.iPhone],
+    destinations: [.iPhone, .iPad],
     iOSTargetVersion: "17.0",
     snapshotTests: true,
     dependencies: [
