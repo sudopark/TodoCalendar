@@ -140,7 +140,7 @@ struct MonthView: View {
             } else {
                 self.gridWeeksView()
             }
-            if state.isCollapsed {
+            if state.isCollapsed && appearance.rowHeightOnCalendar != .small {
                 self.expandMonthButton()
             }
         }
