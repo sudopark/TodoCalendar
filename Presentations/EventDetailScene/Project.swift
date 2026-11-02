@@ -2,7 +2,7 @@ import ProjectDescriptionHelpers
 import ProjectDescription
 
 let project = Project.frameworkWithTest(name: "EventDetailScene",
-                                        destinations: [.iPhone],
+                                        destinations: [.iPhone, .iPad],
                                         iOSTargetVersion: "17.0",
                                         snapshotTests: true,
                                         dependencies: [

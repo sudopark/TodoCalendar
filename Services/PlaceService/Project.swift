@@ -3,7 +3,7 @@ import ProjectDescription
 
 let project = Project.framework(
     name: "PlaceService",
-    destinations: [.iPhone],
+    destinations: [.iPhone, .iPad],
     iOSTargetVersion: "17.0",
     dependencies: [
         .project(target: "PlaceServiceInterface", path: .relativeToRoot("Domain/PlaceServiceInterface")),

@@ -3,7 +3,7 @@ import ProjectDescription
 
 let project = Project.frameworkWithTest(
     name: "AuthService",
-    destinations: [.iPhone],
+    destinations: [.iPhone, .iPad],
     iOSTargetVersion: "17.0",
     dependencies: [
         .project(target: "AccountDomainInterface", path: .relativeToRoot("Domain/AccountDomain")),

@@ -3,7 +3,7 @@ import ProjectDescription
 
 let project = Project.framework(
     name: "AdService",
-    destinations: [.iPhone],
+    destinations: [.iPhone, .iPad],
     iOSTargetVersion: "17.0",
     dependencies: [
         .project(target: "AdDomainInterface", path: .relativeToRoot("Domain/AdDomain")),

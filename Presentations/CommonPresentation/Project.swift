@@ -3,7 +3,7 @@ import ProjectDescription
 
 let project = Project.frameworkWithTest(
     name: "CommonPresentation",
-    destinations: [.iPhone],
+    destinations: [.iPhone, .iPad],
     iOSTargetVersion: "17.0",
     snapshotTests: true,
     dependencies: [

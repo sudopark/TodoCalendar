@@ -3,7 +3,7 @@ import ProjectDescription
 
 let project = Project.frameworkWithInterfaceAndTesting(
     name: "EventDomain",
-    destinations: [.iPhone],
+    destinations: [.iPhone, .iPad],
     iOSTargetVersion: "17.0",
     interfaceDependencies: [
         .project(target: "CalendarDomainInterface", path: .relativeToRoot("Domain/CalendarDomain")),
