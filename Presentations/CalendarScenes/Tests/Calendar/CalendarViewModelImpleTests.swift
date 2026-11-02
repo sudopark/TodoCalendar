@@ -1608,6 +1608,56 @@ extension CalendarViewModelImpleTests {
         XCTAssertEqual(self.monthCollapsedsPerPaper, [[true, false], [true, false], [true, false]])
     }
 
+    private func makeViewModelWithRowHeight(_ rowHeight: RowHeightOnCalendar) -> CalendarViewModelImple {
+        self.changeRowHeight(rowHeight)
+        return self.makeViewModel()
+    }
+
+    private func changeRowHeight(_ rowHeight: RowHeightOnCalendar) {
+        _ = try? self.stubUISettingUsecase.changeCalendarAppearanceSetting(
+            .init() |> \.rowHeight .~ rowHeight
+        )
+    }
+
+    func testViewModel_whenRowHeightIsSmall_ignoreToggleCollapse() async throws {
+        // given
+        let viewModel = self.makeViewModelWithRowHeight(.small)
+        try await self.prepareInitialMonths(viewModel)
+
+        // when
+        viewModel.calendarPaperDidRequestToggleMonthCollapse()
+
+        // then
+        XCTAssertEqual(self.monthCollapsedsPerPaper, [[], [], []])
+    }
+
+    func testViewModel_whenRowHeightChangedToSmallWhileCollapsed_ignoreToggleExpand() async throws {
+        // given
+        let viewModel = self.makeViewModelWithRowHeight(.medium)
+        try await self.prepareInitialMonths(viewModel)
+        viewModel.calendarPaperDidRequestToggleMonthCollapse()
+        self.changeRowHeight(.small)
+
+        // when
+        viewModel.calendarPaperDidRequestToggleMonthCollapse()
+
+        // then
+        XCTAssertEqual(self.monthCollapsedsPerPaper, [[true], [true], [true]])
+    }
+
+    func testViewModel_whenRowHeightRestoredFromSmall_collapseOnToggleAgain() async throws {
+        // given
+        let viewModel = self.makeViewModelWithRowHeight(.small)
+        try await self.prepareInitialMonths(viewModel)
+        self.changeRowHeight(.medium)
+
+        // when
+        viewModel.calendarPaperDidRequestToggleMonthCollapse()
+
+        // then
+        XCTAssertEqual(self.monthCollapsedsPerPaper, [[true], [true], [true]])
+    }
+
     private var monthCollapsedsPerPaper: [[Bool]] {
         return self.spyRouter.spyInteractors.map { $0.didUpdateMonthCollapseds }
     }

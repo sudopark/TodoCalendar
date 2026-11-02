@@ -107,6 +107,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         let aiAgentState = CurrentValueSubject<AIAgentState?, Never>(nil)
         let isSignedIn = CurrentValueSubject<Bool, Never>(false)
         let isMonthCollapsed = CurrentValueSubject<Bool, Never>(false)
+        let isCalendarRowHeightSmall = CurrentValueSubject<Bool, Never>(false)
         let columnLayout = CurrentValueSubject<CalendarColumnLayout?, Never>(nil)
         let selectedDayInfo = CurrentValueSubject<SelectDayInfo?, Never>(nil)
     }
@@ -136,6 +137,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         self.bindEventUploadService()
         self.bindRefreshEvents()
         self.bindFocusedMonthChanged()
+        self.bindCalendarRowHeightSmall()
 
         self.accountUsecase.currentAccountInfo
             .map { $0 != nil }
@@ -151,6 +153,16 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
             .store(in: self.cancellables)
     }
     
+    private func bindCalendarRowHeightSmall() {
+
+        self.uiSettingUsecase.currentCalendarUISeting
+            .map { $0.rowHeight == .small }
+            .sink(receiveValue: { [weak self] isSmall in
+                self?.subject.isCalendarRowHeightSmall.send(isSmall)
+            })
+            .store(in: self.cancellables)
+    }
+
     private func bindRefreshEvents() {
         
         // Timezone 변경시에 조회중인 달력은 안바뀜 하지만 조회 가능한 범위는 달라짐
@@ -664,6 +676,7 @@ extension CalendarViewModelImple: CalendarPaperSceneListener {
     }
 
     func calendarPaperDidRequestToggleMonthCollapse() {
+        guard !self.subject.isCalendarRowHeightSmall.value else { return }
         let newValue = !self.subject.isMonthCollapsed.value
         self.subject.isMonthCollapsed.send(newValue)
         self.calendarPaperInteractors?.forEach { $0.updateMonthCollapsed(newValue) }
