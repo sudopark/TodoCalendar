@@ -480,7 +480,8 @@ extension ApplicationRootRouter {
             aiAgentKeyboardInputSceneBuilder: self.aiAgentKeyboardInputSceneBuilder(),
             aiAgentImageCommandSceneBuilder: self.aiAgentImageCommandSceneBuilder(),
             paywallSceneBuilder: self.paywallSceneBuilder(),
-            fullScreenAdRouter: self.fullScreenAdRouter()
+            fullScreenAdRouter: self.fullScreenAdRouter(),
+            appStoreReviewRouter: AppStoreReviewSheet()
         )
         self.deepLinkHandler.attach(calendarHandler: builder.calendarDeepLinkHandler)
         return builder
@@ -513,7 +514,8 @@ extension ApplicationRootRouter {
             holidayEventDetailSceneBuilder: self.holidayEventDetailSceneBuilder(),
             googleCalendarEventDetailSceneBuilder: self.googleCalendarEventDetailBuilder(),
             appleCalendarEventDetailSceneBuilder: self.appleCalendarEventDetailBuilder(),
-            settingSceneBuilder: settingSceneBuilder()
+            settingSceneBuilder: settingSceneBuilder(),
+            appStoreReviewRouter: AppStoreReviewSheet()
         )
     }
     
