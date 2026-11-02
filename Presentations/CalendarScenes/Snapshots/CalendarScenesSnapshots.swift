@@ -76,11 +76,11 @@ final class CalendarScenesSnapshots: XCTestCase {
         }
     }
 
-    // MARK: - Month/MonthView (접힘 — 선택 주 한 줄 + eventDotsView, rowHeight 설정 무관)
+    // MARK: - Month/MonthView (접힘 — 모든 주 small 높이 + eventDotsView + chevron, rowHeight 설정 무관)
 
     @MainActor
     func test_month_collapsed() {
-        captureSnapshotPair(named: "month_collapsed", layout: .fixed(width: 393, height: 100)) { theme in
+        captureSnapshotPair(named: "month_collapsed", layout: .fixed(width: 393, height: 390)) { theme in
             let appearance = self.makeAppearance(theme)
             appearance.rowHeightOnCalendar = .medium
 

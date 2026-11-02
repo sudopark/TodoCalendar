@@ -164,7 +164,7 @@ struct MonthView: View {
     private func gridWeeksView() -> some View {
         let isCollapsed = self.state.isCollapsed
         let rowHeight = isCollapsed ? RowHeightOnCalendar.small.cgValue : appearance.rowHeightOnCalendar.cgValue
-        let weeks = isCollapsed ? self.collapsedWeeks : self.state.weeks
+        let weeks = self.state.weeks
         return GeometryReader { proxy in
             let expectSize = CGSize(width: proxy.size.width, height: rowHeight)
             VStack(spacing: 0) {
@@ -191,14 +191,6 @@ struct MonthView: View {
         .accessibilityIdentifier(AccessibilityID.CalendarScene.monthGrid)
     }
     
-    private var collapsedWeeks: [WeekRowModel] {
-        let weekOfSelectedDay = self.state.weeks.first { week in
-            week.days.contains { $0.identifier == self.state.selectedDay }
-        }
-        guard let week = weekOfSelectedDay ?? self.state.weeks.first else { return [] }
-        return [week]
-    }
-
     private func emptyGridView() -> some View {
         Rectangle()
             .fill(appearance.colorSet.dayBackground.asColor)
