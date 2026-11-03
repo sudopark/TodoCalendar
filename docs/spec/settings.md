@@ -15,6 +15,7 @@
 | 첫째 요일 | Repository (SQLite) | 일~토 | `.sunday` |
 | 이벤트 있는 날 밑줄 | `show_underline_eventday` | on/off | `true` |
 | 행 높이 | `calendar_row_height` | 소/중/대 | `.medium` (rawValue: 0) |
+| 달력 자동 접기 | `calendar_month_auto_collapse` | on/off | `false` |
 | 캘린더 내 이벤트 텍스트 크기 | `event_on_calendar_additional_font_size` | CGFloat 조절 | `0` |
 | 캘린더 내 이벤트 볼드 | `bold_text_event_on_calendar` | on/off | `false` |
 | 캘린더 내 태그 색상 표시 | `not_show_event_tag_color_on_calendar` | on/off | `false` (반전 키: 표시=true) |

@@ -40,6 +40,7 @@ extension AppSettingLocalRepositoryImpleTests {
             .holiday: false, .sunday: false, .saturday: false
         ])
         XCTAssertEqual(appearance.calendar.rowHeight, .medium)
+        XCTAssertEqual(appearance.calendar.monthAutoCollapseIsOn, false)
         XCTAssertEqual(appearance.calendar.showUncompletedTodos, true)
         XCTAssertEqual(appearance.widget.background, .system)
     }
@@ -79,6 +80,32 @@ extension AppSettingLocalRepositoryImpleTests {
         XCTAssertEqual(settingBeforeUpdate.rowHeight, .medium)
         XCTAssertEqual(changed.rowHeight, .large)
         XCTAssertEqual(settingAfterUpdate.rowHeight, .large)
+    }
+    
+    func testRepository_updateCalendarSetting_monthAutoCollapse() throws {
+        // given
+        let repository = self.makeRepository()
+        
+        // when
+        let turnOn = EditCalendarAppearanceSettingParams()
+            |> \.monthAutoCollapseIsOn .~ true
+        _ = try repository.changeCalendarAppearanceSetting(turnOn)
+        let afterTurnOn = repository.loadSavedViewAppearance().calendar
+        
+        let changeOtherField = EditCalendarAppearanceSettingParams()
+            |> \.rowHeight .~ .large
+        _ = try repository.changeCalendarAppearanceSetting(changeOtherField)
+        let afterOtherFieldChanged = repository.loadSavedViewAppearance().calendar
+        
+        let turnOff = EditCalendarAppearanceSettingParams()
+            |> \.monthAutoCollapseIsOn .~ false
+        _ = try repository.changeCalendarAppearanceSetting(turnOff)
+        let afterTurnOff = repository.loadSavedViewAppearance().calendar
+        
+        // then
+        XCTAssertEqual(afterTurnOn.monthAutoCollapseIsOn, true)
+        XCTAssertEqual(afterOtherFieldChanged.monthAutoCollapseIsOn, true)
+        XCTAssertEqual(afterTurnOff.monthAutoCollapseIsOn, false)
     }
     
     func testStorage_saveCalendarSettingWithCurrentCustomTheme_doesNotPersistTheme() {
