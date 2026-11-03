@@ -540,6 +540,7 @@
 "setting.appearance.event.edit::name_old" = "이벤트 수정";
 "setting.appearance.event.edit::name" = "이벤트 설정 및 외부 캘린더";
 "setting.appearance.day_row_height" = "이벤트에 표시되는 정보의 양";
+"setting.appearance.month_auto_collapse" = "달력 자동 접기";
 "setting.appearance.day_row_height::small::text" = "최소한";
 "setting.appearance.day_row_height::medium::text" = "보통";
 "setting.appearance.day_row_height::large::text" = "모두";
