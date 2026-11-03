@@ -36,15 +36,26 @@ class EventOnCalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
             eventOnCalenarTextAdditionalSize: 3,
             eventOnCalendarIsBold: false,
             eventOnCalendarShowEventTagColor: true,
-            weekRowHeight: .medium
+            weekRowHeight: .medium,
+            monthAutoCollapseIsOn: false
         )
     }
     
-    private func makeViewModel() -> EventOnCalendarViewModelImple {
+    private func makeViewModel(
+        setting: EventOnCalendarAppearanceSetting? = nil
+    ) -> EventOnCalendarViewModelImple {
         return EventOnCalendarViewModelImple(
-            setting: self.dummySetting,
+            setting: setting ?? self.dummySetting,
             uiSettingUsecase: self.spyUISettingUsecase
         )
+    }
+    
+    private func makeViewModelWithSavedMonthAutoCollapseOn() -> EventOnCalendarViewModelImple {
+        _ = try? self.spyUISettingUsecase.changeCalendarAppearanceSetting(
+            .init() |> \.monthAutoCollapseIsOn .~ true
+        )
+        let saved = self.spyUISettingUsecase.loadSavedAppearanceSetting().calendar
+        return self.makeViewModel(setting: .init(saved))
     }
 }
 
@@ -105,6 +116,20 @@ extension EventOnCalendarViewModelImpleTests {
         
         // then
         XCTAssertEqual(height?.height, .medium)
+    }
+    
+    func testViewModel_whenPrepare_provideLatestIsMonthAutoCollapseOn() {
+        // given
+        let expect = expectation(description: "prepare시에 마지막에 저장된 설정 로드 - month auto collapse: true")
+        let saved = CalendarAppearanceSettings(colorSetKey: .defaultLight, fontSetKey: .systemDefault)
+            |> \.monthAutoCollapseIsOn .~ true
+        let viewModel = self.makeViewModel(setting: .init(saved))
+        
+        // when
+        let isOn = self.waitFirstOutput(expect, for: viewModel.isMonthAutoCollapseOn)
+        
+        // then
+        XCTAssertEqual(isOn, true)
     }
     
     // font size 증가하다 끝까지(+7 max)
@@ -225,5 +250,100 @@ extension EventOnCalendarViewModelImpleTests {
         
         // then
         XCTAssertEqual(heights.map { $0.height }, [.medium, .large, .small])
+    }
+    
+    func testViewModel_updateMonthAutoCollapse() {
+        // given
+        let expect = expectation(description: "month auto collapse 업데이트")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let isOns = self.waitOutputs(expect, for: viewModel.isMonthAutoCollapseOn) {
+            viewModel.toggleMonthAutoCollapse(true)
+        }
+        
+        // then
+        XCTAssertEqual(isOns, [false, true])
+        let setting = self.spyUISettingUsecase.loadSavedAppearanceSetting().calendar
+        XCTAssertEqual(setting.monthAutoCollapseIsOn, true)
+    }
+    
+    func testViewModel_whenOtherSettingChanged_notRepeatMonthAutoCollapse() {
+        // given
+        let expect = expectation(description: "다른 설정이 바뀌어도 자동 접기 값은 다시 방출하지 않음")
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let isOns = self.waitOutputs(expect, for: viewModel.isMonthAutoCollapseOn) {
+            viewModel.toggleBoldText(true)
+        }
+        
+        // then
+        XCTAssertEqual(isOns, [false])
+    }
+    
+    func testViewModel_whenToggleMonthAutoCollapseToSameValue_notSave() {
+        // given
+        let viewModel = self.makeViewModel()
+        
+        // when
+        viewModel.toggleMonthAutoCollapse(false)
+        
+        // then
+        XCTAssertNil(self.spyUISettingUsecase.didChangeAppearanceSetting)
+    }
+    
+    func testViewModel_whenRowHeightIsSmall_monthAutoCollapseNotEditable() {
+        // given
+        let expect = expectation(description: "행 높이가 small 이면 자동 접기를 바꿀 수 없음")
+        let setting = EventOnCalendarAppearanceSetting(
+            eventOnCalenarTextAdditionalSize: 0,
+            eventOnCalendarIsBold: false,
+            eventOnCalendarShowEventTagColor: true,
+            weekRowHeight: .small,
+            monthAutoCollapseIsOn: false
+        )
+        let viewModel = self.makeViewModel(setting: setting)
+        
+        // when
+        let isEditable = self.waitFirstOutput(expect, for: viewModel.isMonthAutoCollapseEditable)
+        
+        // then
+        XCTAssertEqual(isEditable, false)
+    }
+    
+    func testViewModel_whenRowHeightChanged_updateMonthAutoCollapseEditable() {
+        // given
+        let expect = expectation(description: "행 높이가 바뀌면 자동 접기 변경 가능 여부도 바뀜")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let isEditables = self.waitOutputs(expect, for: viewModel.isMonthAutoCollapseEditable) {
+            viewModel.toggleBoldText(true)
+            viewModel.selectRowHeightOnCalendar(.small)
+            viewModel.selectRowHeightOnCalendar(.large)
+        }
+        
+        // then
+        XCTAssertEqual(isEditables, [true, false, true])
+    }
+    
+    func testViewModel_whenRowHeightChangedToSmall_keepMonthAutoCollapseValue() {
+        // given
+        let expect = expectation(description: "행 높이가 small 로 바뀌어도 자동 접기 값은 그대로")
+        let viewModel = self.makeViewModelWithSavedMonthAutoCollapseOn()
+        
+        // when
+        let isOns = self.waitOutputs(expect, for: viewModel.isMonthAutoCollapseOn) {
+            viewModel.selectRowHeightOnCalendar(.small)
+        }
+        
+        // then
+        XCTAssertEqual(isOns, [true])
+        let setting = self.spyUISettingUsecase.loadSavedAppearanceSetting().calendar
+        XCTAssertEqual(setting.rowHeight, .small)
+        XCTAssertEqual(setting.monthAutoCollapseIsOn, true)
     }
 }

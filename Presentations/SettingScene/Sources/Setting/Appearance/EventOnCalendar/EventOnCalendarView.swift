@@ -23,12 +23,15 @@ import CommonPresentation
     var isBold: Bool = false
     var isShowEventTagColor: Bool = false
     var selectedRowHeight: RowHeightOnCalendarViewModel = .init(.medium)
+    var isMonthAutoCollapseOn: Bool = false
+    var isMonthAutoCollapseEditable: Bool = true
     
     init(_ setting: EventOnCalendarAppearanceSetting) {
         self.additionalFontSizeModel = .init(setting.eventOnCalenarTextAdditionalSize)
         self.isBold = setting.eventOnCalendarIsBold
         self.isShowEventTagColor = setting.eventOnCalendarShowEventTagColor
         self.selectedRowHeight = .init(setting.weekRowHeight)
+        self.isMonthAutoCollapseOn = setting.monthAutoCollapseIsOn
     }
     
     func bind(_ viewModel: any EventOnCalendarViewModel) {
@@ -62,6 +65,20 @@ import CommonPresentation
                 self?.isShowEventTagColor = isShow
             })
             .store(in: self.cancellables)
+        
+        viewModel.isMonthAutoCollapseOn
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] isOn in
+                self?.isMonthAutoCollapseOn = isOn
+            })
+            .store(in: self.cancellables)
+        
+        viewModel.isMonthAutoCollapseEditable
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] isEditable in
+                self?.isMonthAutoCollapseEditable = isEditable
+            })
+            .store(in: self.cancellables)
     }
 }
 
@@ -73,6 +90,7 @@ final class EventOnCalendarViewEventHandler: Observable {
     var decreaseFontSize: () -> Void = { }
     var toggleIsBold: (Bool) -> Void = { _ in }
     var toggleShowEventTagColor: (Bool) -> Void = { _ in }
+    var toggleMonthAutoCollapse: (Bool) -> Void = { _ in }
 }
 
 struct EventOnCalendarViewPreviewView: View {
@@ -209,6 +227,11 @@ struct EventOnCalendarView: View {
                         eventHandler.selectHeight(new.height)
                     }
                 
+                AppearanceRow("setting.appearance.month_auto_collapse".localized(), monthAutoCollapseView)
+                    .onChange(of: state.isMonthAutoCollapseOn) { _, new in
+                        eventHandler.toggleMonthAutoCollapse(new)
+                    }
+                
                 AppearanceRow("setting.appearance.event.fontSize".localized(), fontSizeSettingView)
                 
                 AppearanceRow("setting.appearance.event.boldText".localized(), boldTextView)
@@ -306,6 +329,12 @@ struct EventOnCalendarView: View {
     private var showEventTagColorView: some View {
         Toggle("", isOn: $state.isShowEventTagColor)
             .labelsHidden()
+    }
+    
+    private var monthAutoCollapseView: some View {
+        Toggle("", isOn: $state.isMonthAutoCollapseOn)
+            .labelsHidden()
+            .disabled(!state.isMonthAutoCollapseEditable)
     }
 }
 

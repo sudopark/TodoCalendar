@@ -57,6 +57,7 @@ final class AppearanceSettingViewController: UIHostingController<AppearanceSetti
         eventOnCalendarEventHandler.decreaseFontSize = eventOnCalednarSectionViewModel.decreaseTextSize
         eventOnCalendarEventHandler.toggleIsBold = eventOnCalednarSectionViewModel.toggleBoldText(_:)
         eventOnCalendarEventHandler.toggleShowEventTagColor = eventOnCalednarSectionViewModel.toggleShowEventTagColor(_:)
+        eventOnCalendarEventHandler.toggleMonthAutoCollapse = eventOnCalednarSectionViewModel.toggleMonthAutoCollapse(_:)
         
         let eventListSettingHandler = EventListAppearanceSettingViewEventHandler()
         eventListSettingHandler.increaseFontSize = eventListAppearanceSettingViewModel.increaseFontSize
