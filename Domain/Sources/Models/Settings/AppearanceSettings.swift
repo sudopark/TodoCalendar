@@ -133,6 +133,7 @@ public struct CalendarAppearanceSettings: Equatable, Sendable {
     public var accnetDayPolicy: [AccentDays: Bool] = [:]
     public var showUnderLineOnEventDay: Bool = false
     public var rowHeight: RowHeightOnCalendar = .medium
+    public var monthAutoCollapseIsOn: Bool = false
     
     // event on calendar
     public var eventOnCalenarTextAdditionalSize: CGFloat = 0
@@ -167,6 +168,7 @@ public struct CalendarAppearanceSettings: Equatable, Sendable {
         newSetting.accnetDayPolicy = (params.accnetDayPolicy ?? self.accnetDayPolicy)
         newSetting.showUnderLineOnEventDay = (params.showUnderLineOnEventDay ?? self.showUnderLineOnEventDay)
         newSetting.rowHeight = (params.rowHeight ?? self.rowHeight)
+        newSetting.monthAutoCollapseIsOn = (params.monthAutoCollapseIsOn ?? self.monthAutoCollapseIsOn)
         newSetting.eventOnCalenarTextAdditionalSize = (params.eventOnCalenarTextAdditionalSize ?? self.eventOnCalenarTextAdditionalSize)
         newSetting.eventOnCalendarIsBold = (params.eventOnCalendarIsBold ?? self.eventOnCalendarIsBold)
         newSetting.eventOnCalendarShowEventTagColor = (params.eventOnCalendarShowEventTagColor ?? self.eventOnCalendarShowEventTagColor)
@@ -235,6 +237,7 @@ public struct EditCalendarAppearanceSettingParams {
     public var accnetDayPolicy: [AccentDays: Bool]?
     public var showUnderLineOnEventDay: Bool?
     public var rowHeight: RowHeightOnCalendar?
+    public var monthAutoCollapseIsOn: Bool?
     
     // event on calendar
     public var eventOnCalenarTextAdditionalSize: CGFloat?
@@ -272,6 +275,7 @@ public struct EditCalendarAppearanceSettingParams {
         return self.accnetDayPolicy != nil
             || self.showUnderLineOnEventDay != nil
             || self.rowHeight != nil
+            || self.monthAutoCollapseIsOn != nil
     }
     
     private var isValidEventOnCalendarValues: Bool {
