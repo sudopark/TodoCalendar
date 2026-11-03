@@ -108,6 +108,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         let isSignedIn = CurrentValueSubject<Bool, Never>(false)
         let isMonthCollapsed = CurrentValueSubject<Bool, Never>(false)
         let isCalendarRowHeightSmall = CurrentValueSubject<Bool, Never>(false)
+        let isMonthAutoCollapseOn = CurrentValueSubject<Bool, Never>(false)
         let columnLayout = CurrentValueSubject<CalendarColumnLayout?, Never>(nil)
         let selectedDayInfo = CurrentValueSubject<SelectDayInfo?, Never>(nil)
     }
@@ -138,6 +139,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         self.bindRefreshEvents()
         self.bindFocusedMonthChanged()
         self.bindCalendarRowHeightSmall()
+        self.bindMonthAutoCollapse()
 
         self.accountUsecase.currentAccountInfo
             .map { $0 != nil }
@@ -161,6 +163,27 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
                 self?.subject.isCalendarRowHeightSmall.send(isSmall)
             })
             .store(in: self.cancellables)
+    }
+
+    private func bindMonthAutoCollapse() {
+
+        self.uiSettingUsecase.currentCalendarUISeting
+            .map { $0.monthAutoCollapseIsOn }
+            .sink(receiveValue: { [weak self] isOn in
+                self?.subject.isMonthAutoCollapseOn.send(isOn)
+                if !isOn { self?.expandMonthIfCollapsed() }
+            })
+            .store(in: self.cancellables)
+    }
+
+    private func expandMonthIfCollapsed() {
+        guard self.subject.isMonthCollapsed.value else { return }
+        self.changeMonthCollapsed(false)
+    }
+
+    private func changeMonthCollapsed(_ isCollapsed: Bool) {
+        self.subject.isMonthCollapsed.send(isCollapsed)
+        self.calendarPaperInteractors?.forEach { $0.updateMonthCollapsed(isCollapsed) }
     }
 
     private func bindRefreshEvents() {
@@ -676,10 +699,10 @@ extension CalendarViewModelImple: CalendarPaperSceneListener {
     }
 
     func calendarPaperDidRequestToggleMonthCollapse() {
-        guard !self.subject.isCalendarRowHeightSmall.value else { return }
-        let newValue = !self.subject.isMonthCollapsed.value
-        self.subject.isMonthCollapsed.send(newValue)
-        self.calendarPaperInteractors?.forEach { $0.updateMonthCollapsed(newValue) }
+        guard self.subject.isMonthAutoCollapseOn.value,
+              !self.subject.isCalendarRowHeightSmall.value
+        else { return }
+        self.changeMonthCollapsed(!self.subject.isMonthCollapsed.value)
     }
 }
 
