@@ -3,3 +3,4 @@
 "NSSpeechRecognitionUsageDescription" = "Cần nhận dạng giọng nói để chuyển đổi giọng nói của bạn thành sự kiện và việc cần làm.";
 "NSCameraUsageDescription" = "Cần quyền truy cập camera để đọc văn bản từ ảnh bạn chụp.";
 "NSPhotoLibraryAddUsageDescription" = "Cần quyền truy cập thư viện ảnh để lưu ảnh sự kiện được chia sẻ vào ảnh của bạn.";
+"NSUserTrackingUsageDescription" = "To-do Calendar miễn phí nhờ quảng cáo. Cho phép theo dõi sẽ giúp hiển thị quảng cáo phù hợp hơn với bạn.";

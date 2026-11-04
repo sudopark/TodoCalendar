@@ -149,7 +149,12 @@ private final class DummyMobileAdService: MobileAdService, @unchecked Sendable {
     func start() { }
 
     @MainActor
-    func presentConsentFormAndTrackingPromptIfNeeded(from viewController: UIViewController) async { }
+    var isTrackingAuthorizationDetermined: Bool { false }
+
+    func presentConsentFormIfNeeded(from viewController: UIViewController) async { }
+
+    @MainActor
+    func requestTrackingAuthorization() async { }
 
     func preloadFullScreenAd() async { }
     func takePreloadedFullScreenAd() -> InterstitialAd? { nil }

@@ -539,6 +539,7 @@
 "setting.appearance.event.edit::name_old" = "Chỉnh sửa sự kiện";
 "setting.appearance.event.edit::name" = "Cài đặt sự kiện và lịch bên ngoài";
 "setting.appearance.day_row_height" = "Mức hiển thị chi tiết sự kiện";
+"setting.appearance.month_auto_collapse" = "Tự động thu gọn lịch";
 "setting.appearance.day_row_height::small::text" = "Tối thiểu";
 "setting.appearance.day_row_height::medium::text" = "Trung bình";
 "setting.appearance.day_row_height::large::text" = "Đầy đủ";
@@ -556,9 +557,11 @@
 "setting.appearance.widget::useSystemTheme::title" = "Dùng chủ đề hệ thống";
 "setting.appearance.widget::useSystemTheme::background" = "Màu nền tiện ích";
 "setting.appearance.widget::useCustomTheme::title" = "Chọn màu tùy chỉnh";
-"setting.appearance.widget::gallery::title" = "Thư viện tiện ích";
-"setting.appearance.widget::gallery::explain" = "Xem trước hình dạng của từng tiện ích";
+"setting.widget::title" = "Tiện ích";
+"setting.widget::setting::title" = "Cài đặt tiện ích";
 "setting.appearance.widget::gallery::section" = "Tiện ích";
+"setting.appearance.widget::ddayCount::title" = "Tính D-Day là D+1";
+"setting.appearance.widget::ddayCount::description" = "Khi bật, D-Day được tính là D+1. Áp dụng cho cả ứng dụng và tiện ích. Bạn cũng có thể bật riêng cho từng tiện ích D-Day khi chỉnh sửa tiện ích đó";
 "widget.gallery::lockScreen::label" = "%@ · Màn hình khóa";
 "widget.weeks::group" = "Sự kiện theo tuần";
 "widget.size::small" = "Nhỏ";
@@ -913,3 +916,8 @@
 "legal_notice.message::terms" = "Điều khoản dịch vụ đã được cập nhật.";
 "legal_notice.message::privacy" = "Chính sách quyền riêng tư đã được cập nhật.";
 "legal_notice.effectiveDate" = "Có hiệu lực từ %@";
+
+"ad.trackingGuide::title" = "Đôi lời về quảng cáo";
+"ad.trackingGuide::message1" = "To-do Calendar có hiển thị quảng cáo. Doanh thu đó trang trải chi phí phát triển và máy chủ.";
+"ad.trackingGuide::message2" = "Ở màn hình tiếp theo, nếu cho phép theo dõi, bạn sẽ thấy quảng cáo phù hợp với sở thích của mình. Nếu từ chối, ứng dụng vẫn y như cũ.";
+"ad.trackingGuide::continue::button" = "Tiếp tục";

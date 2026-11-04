@@ -23,6 +23,7 @@ class SettingItemListViewModelImpleTests: BaseTestCase, PublisherWaitable {
     var cancelBag: Set<AnyCancellable>!
     private var spyRouter: SpyRouter!
     private var stubAppUpdateCheckUsecase: StubAppUpdateCheckUsecase!
+    private var stubNewFeatureBadgeUsecase: StubNewFeatureBadgeUsecase!
 
     override func setUpWithError() throws {
         self.cancelBag = .init()
@@ -34,21 +35,30 @@ class SettingItemListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.cancelBag = nil
         self.spyRouter = nil
         self.stubAppUpdateCheckUsecase = nil
+        self.stubNewFeatureBadgeUsecase = nil
     }
 
     private func makeViewModel(
         _ account: AccountInfo? = nil,
         isUpdateAvailable: Bool = false,
-        privacyOptionsFormRouter: (any PrivacyOptionsFormRouter)? = nil
+        privacyOptionsFormRouter: (any PrivacyOptionsFormRouter)? = nil,
+        uncheckedBadges: Set<NewFeatureBadge> = [],
+        savedWidgetBackground: WidgetAppearanceSettings.Background = .system
     ) -> SettingItemListViewModelImple {
         self.stubAppUpdateCheckUsecase.isUpdateAvailableSubject.send(isUpdateAvailable)
         let accountUsecase = StubAccountUsecase(account)
+        let uiSettingUsecase = StubUISettingUsecase()
+        _ = try? uiSettingUsecase.changeWidgetAppearanceSetting(
+            EditWidgetAppearanceSettingParams() |> \.background .~ savedWidgetBackground
+        )
+        self.stubNewFeatureBadgeUsecase = StubNewFeatureBadgeUsecase(uncheckedBadges: uncheckedBadges)
         let viewModel = SettingItemListViewModelImple(
             appstoreLinkPath: "some",
             accountUsecase: accountUsecase,
-            uiSettingUsecase: StubUISettingUsecase(),
+            uiSettingUsecase: uiSettingUsecase,
             deviceInfoFetchService: StubDeviceInfoFetchService(),
             appUpdateCheckUsecase: self.stubAppUpdateCheckUsecase,
+            newFeatureBadgeUsecase: self.stubNewFeatureBadgeUsecase,
             privacyOptionsFormRouter: privacyOptionsFormRouter
         )
         viewModel.router = self.spyRouter
@@ -93,7 +103,7 @@ extension SettingItemListViewModelImpleTests {
         let baseSection = sections?[safe: 0]
         let baseItemIds = baseSection?.items.compactMap { $0 as? SettingItemModel }.map { $0.itemId }
         XCTAssertEqual(baseItemIds, [
-            .appearance, .editEvent, .holidaySetting, .billingPlan
+            .appearance, .widgetSetting, .editEvent, .holidaySetting, .billingPlan
         ])
         let accountItem = baseSection?.items.last as? AccountSettingItemModel
         XCTAssertEqual(accountItem?.isSignIn, false)
@@ -135,7 +145,7 @@ extension SettingItemListViewModelImpleTests {
         let baseSection = sections?[safe: 0]
         let baseItemIds = baseSection?.items.compactMap { $0 as? SettingItemModel }.map { $0.itemId }
         XCTAssertEqual(baseItemIds, [
-            .appearance, .editEvent, .holidaySetting, .billingPlan
+            .appearance, .widgetSetting, .editEvent, .holidaySetting, .billingPlan
         ])
         let accountItem = baseSection?.items.last as? AccountSettingItemModel
         XCTAssertEqual(accountItem?.isSignIn, true)
@@ -383,6 +393,11 @@ private class SpyRouter: BaseSpyRouter, SettingItemListRouting, @unchecked Senda
     var didRouteToOpenSourceLicense: Bool?
     func routeToOpenSourceLicense() {
         self.didRouteToOpenSourceLicense = true
+    }
+
+    var didRouteToWidgetSettingWith: WidgetAppearanceSettings?
+    func routeToWidgetSetting(_ setting: WidgetAppearanceSettings) {
+        self.didRouteToWidgetSettingWith = setting
     }
 }
 
@@ -857,4 +872,99 @@ private final class StubPrivacyOptionsFormRouter: PrivacyOptionsFormRouter {
     
     @MainActor
     func showPrivacyOptionsForm(from viewController: UIViewController) async throws { }
+}
+
+
+// MARK: - 위젯 설정 항목과 새 기능 뱃지
+
+extension SettingItemListViewModelImpleTests {
+
+    private func waitBaseItems(
+        _ viewModel: SettingItemListViewModelImple,
+        count: Int = 1,
+        allowsLaterOutputs: Bool = false,
+        _ action: (() -> Void)? = nil
+    ) -> [[SettingItemModel]] {
+        let expect = expectation(description: "wait base section items")
+        expect.expectedFulfillmentCount = count
+        expect.assertForOverFulfill = !allowsLaterOutputs
+        let source = viewModel.sectionModels
+            .map { $0.first?.items.compactMap { $0 as? SettingItemModel } ?? [] }
+        return self.waitOutputs(expect, for: source, action)
+    }
+
+    func testViewModel_whenWidgetSettingUnchecked_widgetItemShowsNewBadge() {
+        // given
+        let viewModel = self.makeViewModel(uncheckedBadges: [.widgetSetting])
+
+        // when
+        let items = self.waitBaseItems(viewModel).first ?? []
+
+        // then
+        let badgeVisibleIds = items.filter { $0.isNewBadgeVisible }.map { $0.itemId }
+        XCTAssertEqual(badgeVisibleIds, [.widgetSetting])
+    }
+
+    func testViewModel_whenWidgetSettingChecked_widgetItemHidesNewBadge() {
+        // given
+        let viewModel = self.makeViewModel(uncheckedBadges: [])
+
+        // when
+        let items = self.waitBaseItems(viewModel).first ?? []
+
+        // then
+        let widgetItem = items.first(where: { $0.itemId == .widgetSetting })
+        XCTAssertEqual(widgetItem?.isNewBadgeVisible, false)
+    }
+
+    func testViewModel_selectWidgetSetting_marksCheckedAndRoutesWithSavedSetting() {
+        // given
+        let viewModel = self.makeViewModel(
+            uncheckedBadges: [.widgetSetting],
+            savedWidgetBackground: .custom(hex: "#123456")
+        )
+        let items = self.waitBaseItems(viewModel, allowsLaterOutputs: true).first ?? []
+        guard let widgetItem = items.first(where: { $0.itemId == .widgetSetting })
+        else {
+            XCTFail("위젯 항목 없음")
+            return
+        }
+
+        // when
+        viewModel.selectItem(widgetItem)
+
+        // then
+        XCTAssertEqual(self.stubNewFeatureBadgeUsecase.didMarkCheckedWith, .widgetSetting)
+        XCTAssertEqual(
+            self.spyRouter.didRouteToWidgetSettingWith?.background, .custom(hex: "#123456")
+        )
+    }
+
+    func testViewModel_whenWidgetSettingChecked_removesNewBadgeFromItem() {
+        // given
+        let viewModel = self.makeViewModel(uncheckedBadges: [.widgetSetting])
+
+        // when
+        let itemsList = self.waitBaseItems(viewModel, count: 2) {
+            viewModel.selectItem(SettingItemModel(.widgetSetting, isNewBadgeVisible: true))
+        }
+
+        // then
+        let widgetBadges = itemsList.map { items in
+            items.first(where: { $0.itemId == .widgetSetting })?.isNewBadgeVisible
+        }
+        XCTAssertEqual(widgetBadges, [true, false])
+    }
+
+    func testItemModel_whenNewBadgeVisibilityDiffers_compareKeyDiffers() {
+        // given
+        let withBadge = SettingItemModel(.widgetSetting, isNewBadgeVisible: true)
+        let withoutBadge = SettingItemModel(.widgetSetting, isNewBadgeVisible: false)
+
+        // when
+        let keys = [withBadge.compareKey, withoutBadge.compareKey]
+
+        // then
+        XCTAssertNotEqual(keys[0], keys[1])
+    }
 }

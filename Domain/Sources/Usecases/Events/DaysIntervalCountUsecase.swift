@@ -58,15 +58,16 @@ extension DaysIntervalCountUsecaseImple {
         _ selectToDate: @escaping (TimeZone) -> Date?
     ) -> AnyPublisher<Int, Never> {
         
-        let transform: (Date, TimeZone) -> Int? = { fromDate, timeZone in
+        let transform: (Date, TimeZone, Bool) -> Int? = { fromDate, timeZone, countsTargetDayAsOne in
             guard let toDate = selectToDate(timeZone) else { return nil }
             let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
-            return calendar.diffDays(fromDate, toDate)
+            return calendar.ddayInterval(fromDate, toDate, countsTargetDayAsOne: countsTargetDayAsOne)
         }
      
-        return Publishers.CombineLatest(
+        return Publishers.CombineLatest3(
             self.secondTicks,
-            self.calendarSettingUsecase.currentTimeZone
+            self.calendarSettingUsecase.currentTimeZone,
+            self.calendarSettingUsecase.ddayCountsTargetDayAsOne
         )
         .compactMap(transform)
         .removeDuplicates()

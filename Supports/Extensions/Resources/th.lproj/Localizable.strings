@@ -539,6 +539,7 @@
 "setting.appearance.event.edit::name_old" = "แก้ไขกิจกรรม";
 "setting.appearance.event.edit::name" = "ตั้งค่ากิจกรรมและปฏิทินภายนอก";
 "setting.appearance.day_row_height" = "ระดับการแสดงรายละเอียดกิจกรรม";
+"setting.appearance.month_auto_collapse" = "ย่อปฏิทินอัตโนมัติ";
 "setting.appearance.day_row_height::small::text" = "น้อยที่สุด";
 "setting.appearance.day_row_height::medium::text" = "ปานกลาง";
 "setting.appearance.day_row_height::large::text" = "เต็มรูปแบบ";
@@ -556,9 +557,11 @@
 "setting.appearance.widget::useSystemTheme::title" = "ใช้ธีมระบบ";
 "setting.appearance.widget::useSystemTheme::background" = "สีพื้นหลังวิดเจ็ต";
 "setting.appearance.widget::useCustomTheme::title" = "เลือกสีกำหนดเอง";
-"setting.appearance.widget::gallery::title" = "แกลเลอรีวิดเจ็ต";
-"setting.appearance.widget::gallery::explain" = "ดูตัวอย่างหน้าตาของวิดเจ็ตแต่ละแบบ";
+"setting.widget::title" = "วิดเจ็ต";
+"setting.widget::setting::title" = "การตั้งค่าวิดเจ็ต";
 "setting.appearance.widget::gallery::section" = "วิดเจ็ต";
+"setting.appearance.widget::ddayCount::title" = "นับ D-Day เป็น D+1";
+"setting.appearance.widget::ddayCount::description" = "เมื่อเปิด จะนับวัน D-Day เป็น D+1 ใช้กับทั้งแอปและวิดเจ็ต และยังเปิดเฉพาะวิดเจ็ตดีเดย์แต่ละอันได้ในหน้าแก้ไขวิดเจ็ต";
 "widget.gallery::lockScreen::label" = "%@ · หน้าจอล็อก";
 "widget.weeks::group" = "กิจกรรมรายสัปดาห์";
 "widget.size::small" = "เล็ก";
@@ -913,3 +916,8 @@
 "legal_notice.message::terms" = "ข้อกำหนดในการให้บริการมีการอัปเดต";
 "legal_notice.message::privacy" = "นโยบายความเป็นส่วนตัวมีการอัปเดต";
 "legal_notice.effectiveDate" = "มีผลวันที่ %@";
+
+"ad.trackingGuide::title" = "ขอเล่าเรื่องโฆษณาสักนิด";
+"ad.trackingGuide::message1" = "To-do Calendar มีโฆษณา รายได้นั้นใช้เป็นค่าพัฒนาและค่าเซิร์ฟเวอร์";
+"ad.trackingGuide::message2" = "ในหน้าถัดไป หากอนุญาตให้ติดตาม คุณจะเห็นโฆษณาที่ตรงกับความสนใจ หากปฏิเสธ แอปก็ยังใช้งานได้เหมือนเดิมทุกอย่าง";
+"ad.trackingGuide::continue::button" = "ต่อไป";

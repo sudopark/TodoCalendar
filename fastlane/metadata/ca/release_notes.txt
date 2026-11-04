@@ -1,1 +1,9 @@
-· Correccions d'errors
+■ Recompte del D-Day
+· Activeu "Compta el D-Day com a D+1" a "Widgets" de la Configuració i el mateix D-Day compta com a D+1, tant a l'app com als widgets
+· També podeu activar-ho només per a un widget de Dia D quan l'editeu
+· La configuració dels widgets ara és a "Widgets", a la pantalla principal de la Configuració
+
+■ Plegar el calendari
+· Tornar a tocar la data seleccionada per plegar el calendari ara és una opció que podeu activar o desactivar. Està desactivada per defecte
+· Activeu "Plega el calendari automàticament" a Configuració > Aparença i toqueu un cop més la data seleccionada per plegar el calendari
+· Totes les setmanes del mes continuen a la vista i només s'empetiteixen les cel·les dels dies. Toqueu de nou per desplegar-lo

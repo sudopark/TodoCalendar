@@ -222,7 +222,9 @@ isBannerAdAllowed = adAvailability.isStarted && userPlan.planId == .free
 
 시도 순서는 보상형 → 미리 로드된 전면 → 없음이다. 보상형은 최대 5초 기다리고, 보상형 노출이 실패해도 전면으로 넘어간다. 대체 전면은 로드를 기다리지 않으며 `canExposeFullScreenAd` 를 거치지 않고 노출 이력도 남기지 않는다.
 
-보상형은 메인 화면이 UMP 동의·ATT 를 마친 뒤 전면과 함께 미리 로드하고, 캐시는 1시간 뒤 만료된다. 5초 안에 로드가 끝나지 않아도 로드는 이어져 다음 호출이 그 광고를 쓴다. 미리 로드는 `AdExposureUsecase.shouldPreloadFullScreenAds()` 가 정한다 — 무료 플랜이거나 플랜을 아직 모르면 하고, 유료로 확인되면 전면·보상형 모두 하지 않는다.
+보상형은 메인 화면이 UMP 동의 폼을 마친 뒤 전면과 함께 미리 로드하고, 캐시는 1시간 뒤 만료된다. 5초 안에 로드가 끝나지 않아도 로드는 이어져 다음 호출이 그 광고를 쓴다. 미리 로드는 `AdExposureUsecase.shouldPreloadFullScreenAds()` 가 정한다 — 무료 플랜이거나 플랜을 아직 모르면 하고, 유료로 확인되면 전면·보상형 모두 하지 않는다.
+
+추적 요청은 프리로드와 앱 시작 전면 광고 사이에 선다. 메인 화면은 UMP 동의 폼과 프리로드를 마치면 `MainViewModel.requestTrackingThenShowLaunchAd(canShowLaunchAd:)` 하나를 부르고, 그 안에서 `AdExposureUsecase.canRequestTrackingAuthorization()` 을 물어 참일 때만 사전 안내 시트를 띄운 뒤 거기서 계속을 고른 유저에게 `MobileAdService.requestTrackingAuthorization()` 을 보낸다. 앱 시작 전면 광고는 그 흐름이 끝난 뒤에 뜨고, 안내가 필요 없으면 곧바로 뜬다 — 안내 시트와 광고가 한 화면에서 겹치지 않는다. 판정은 유저가 할일이나 일정을 만든 적 있고 아직 안내를 보지 않았을 때 참이다 — 첫 실행에서는 추적을 묻지 않는다. 안내를 띄운 사실은 계속·거절 어느 쪽이든 기록해, 시스템 프롬프트를 쓰지 않은 거절도 다시 묻지 않는다. 이미 추적 권한을 정한 유저에게는 안내도 띄우지 않는다 — 시스템 프롬프트가 더 뜨지 않아 안내할 것이 없다.
 
 설정의 `adPrivacyOptions` 항목에서 광고 개인정보 옵션을 다시 열 수 있다.
 

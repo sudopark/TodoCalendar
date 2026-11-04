@@ -26,7 +26,10 @@ final class DaysIntervalCountUsecaseImpleTests: PublisherWaitable {
         self.stubCalendarSettingUsecase.selectTimeZone(self.utc)
     }
     
-    private func makeusecase() -> DaysIntervalCountUsecaseImple {
+    private func makeusecase(
+        countsTargetDayAsOne: Bool = false
+    ) -> DaysIntervalCountUsecaseImple {
+        self.stubCalendarSettingUsecase.updateDDayCountsTargetDayAsOne(countsTargetDayAsOne)
         return DaysIntervalCountUsecaseImple(
             calendarSettingUsecase: self.stubCalendarSettingUsecase
         )
@@ -100,5 +103,43 @@ extension DaysIntervalCountUsecaseImpleTests {
         
         // then
         #expect(interval == 10)
+    }
+}
+
+// MARK: - 디데이 당일을 D+1 로 세는 옵션
+
+extension DaysIntervalCountUsecaseImpleTests {
+    
+    @Test("옵션을 켜면 당일과 지난 날만 하루 더 센다", arguments: [(-4, -5), (0, -1), (4, 4)])
+    func usecase_whenCountsTargetDayAsOne_shiftsTargetDayAndPast(
+        _ intervalDays: Int, _ expected: Int
+    ) async throws {
+        // given
+        let now = Date().timeIntervalSince1970
+        let expect = expectConfirm("옵션 켜고 count days: \(intervalDays)")
+        let usecase = self.makeusecase(countsTargetDayAsOne: true)
+        
+        // when
+        let time: EventTime = .at(now+TimeInterval(intervalDays)*24*3600)
+        let interval = try await self.firstOutput(expect, for: usecase.countDays(to: time))
+        
+        // then
+        #expect(interval == expected)
+    }
+    
+    @Test func usecase_whenOptionChanges_recountsInterval() async throws {
+        // given
+        let now = Date().timeIntervalSince1970
+        let expect = expectConfirm("옵션 변경시에 날짜 간격 다시 계산")
+        expect.count = 2; expect.timeout = .seconds(1)
+        let usecase = self.makeusecase(countsTargetDayAsOne: false)
+        
+        // when
+        let intervals = try await self.outputs(expect, for: usecase.countDays(to: .at(now))) {
+            self.stubCalendarSettingUsecase.updateDDayCountsTargetDayAsOne(true)
+        }
+        
+        // then
+        #expect(intervals == [0, -1])
     }
 }

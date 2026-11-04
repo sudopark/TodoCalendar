@@ -538,6 +538,7 @@
 "setting.appearance.event.edit::name_old" = "編輯活動";
 "setting.appearance.event.edit::name" = "活動設定與外部日曆";
 "setting.appearance.day_row_height" = "活動顯示詳細程度";
+"setting.appearance.month_auto_collapse" = "自動收合行事曆";
 "setting.appearance.day_row_height::small::text" = "最簡";
 "setting.appearance.day_row_height::medium::text" = "適中";
 "setting.appearance.day_row_height::large::text" = "完整";
@@ -555,9 +556,11 @@
 "setting.appearance.widget::useSystemTheme::title" = "使用系統主題";
 "setting.appearance.widget::useSystemTheme::background" = "小工具背景色";
 "setting.appearance.widget::useCustomTheme::title" = "選擇自訂色彩";
-"setting.appearance.widget::gallery::title" = "小工具圖庫";
-"setting.appearance.widget::gallery::explain" = "預覽各個小工具的外觀";
+"setting.widget::title" = "小工具";
+"setting.widget::setting::title" = "小工具設定";
 "setting.appearance.widget::gallery::section" = "小工具";
+"setting.appearance.widget::ddayCount::title" = "將 D-Day 算作 D+1";
+"setting.appearance.widget::ddayCount::description" = "開啟後，D-Day 當天會算作 D+1。同時套用於 App 和小工具。也可以在編輯 D-Day 小工具時，為單一小工具個別開啟";
 "widget.gallery::lockScreen::label" = "%@ · 鎖定畫面";
 "widget.weeks::group" = "以週為單位的活動";
 "widget.size::small" = "小";
@@ -912,3 +915,8 @@
 "legal_notice.message::terms" = "我們的服務條款已更新。";
 "legal_notice.message::privacy" = "我們的隱私權政策已更新。";
 "legal_notice.effectiveDate" = "生效日期 %@";
+
+"ad.trackingGuide::title" = "關於廣告的幾句話";
+"ad.trackingGuide::message1" = "To-do Calendar 會顯示廣告。這筆收入用來支付開發和伺服器費用。";
+"ad.trackingGuide::message2" = "在下一個畫面允許追蹤後，您會看到符合興趣的廣告。即使拒絕，App 也完全不受影響。";
+"ad.trackingGuide::continue::button" = "繼續";

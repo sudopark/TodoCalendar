@@ -1585,7 +1585,7 @@ extension CalendarViewModelImpleTests {
 
     func testViewModel_whenPaperRequestToggleCollapse_broadcastToAllPapers() async throws {
         // given
-        let viewModel = self.makeViewModel()
+        let viewModel = self.makeViewModelWithMonthAutoCollapse()
         try await self.prepareInitialMonths(viewModel)
 
         // when
@@ -1597,7 +1597,7 @@ extension CalendarViewModelImpleTests {
 
     func testViewModel_whenPaperRequestToggleCollapseTwice_returnToExpanded() async throws {
         // given
-        let viewModel = self.makeViewModel()
+        let viewModel = self.makeViewModelWithMonthAutoCollapse()
         try await self.prepareInitialMonths(viewModel)
 
         // when
@@ -1606,6 +1606,130 @@ extension CalendarViewModelImpleTests {
 
         // then
         XCTAssertEqual(self.monthCollapsedsPerPaper, [[true, false], [true, false], [true, false]])
+    }
+
+    private func makeViewModelWithMonthAutoCollapse(
+        rowHeight: RowHeightOnCalendar = .medium
+    ) -> CalendarViewModelImple {
+        self.changeMonthAutoCollapse(true)
+        self.changeRowHeight(rowHeight)
+        return self.makeViewModel()
+    }
+
+    private func changeRowHeight(_ rowHeight: RowHeightOnCalendar) {
+        _ = try? self.stubUISettingUsecase.changeCalendarAppearanceSetting(
+            .init() |> \.rowHeight .~ rowHeight
+        )
+    }
+
+    func testViewModel_whenRowHeightIsSmall_ignoreToggleCollapse() async throws {
+        // given
+        let viewModel = self.makeViewModelWithMonthAutoCollapse(rowHeight: .small)
+        try await self.prepareInitialMonths(viewModel)
+
+        // when
+        viewModel.calendarPaperDidRequestToggleMonthCollapse()
+
+        // then
+        XCTAssertEqual(self.monthCollapsedsPerPaper, [[], [], []])
+    }
+
+    func testViewModel_whenRowHeightChangedToSmallWhileCollapsed_ignoreToggleExpand() async throws {
+        // given
+        let viewModel = self.makeViewModelWithMonthAutoCollapse(rowHeight: .medium)
+        try await self.prepareInitialMonths(viewModel)
+        viewModel.calendarPaperDidRequestToggleMonthCollapse()
+        self.changeRowHeight(.small)
+
+        // when
+        viewModel.calendarPaperDidRequestToggleMonthCollapse()
+
+        // then
+        XCTAssertEqual(self.monthCollapsedsPerPaper, [[true], [true], [true]])
+    }
+
+    func testViewModel_whenRowHeightRestoredFromSmall_collapseOnToggleAgain() async throws {
+        // given
+        let viewModel = self.makeViewModelWithMonthAutoCollapse(rowHeight: .small)
+        try await self.prepareInitialMonths(viewModel)
+        self.changeRowHeight(.medium)
+
+        // when
+        viewModel.calendarPaperDidRequestToggleMonthCollapse()
+
+        // then
+        XCTAssertEqual(self.monthCollapsedsPerPaper, [[true], [true], [true]])
+    }
+
+    private func changeMonthAutoCollapse(_ isOn: Bool) {
+        _ = try? self.stubUISettingUsecase.changeCalendarAppearanceSetting(
+            .init() |> \.monthAutoCollapseIsOn .~ isOn
+        )
+    }
+
+    func testViewModel_whenMonthAutoCollapseIsOff_ignoreToggleCollapse() async throws {
+        // given
+        let viewModel = self.makeViewModel()
+        try await self.prepareInitialMonths(viewModel)
+
+        // when
+        viewModel.calendarPaperDidRequestToggleMonthCollapse()
+
+        // then
+        XCTAssertEqual(self.monthCollapsedsPerPaper, [[], [], []])
+    }
+
+    func testViewModel_whenMonthAutoCollapseTurnedOffWhileCollapsed_expandAllPapers() async throws {
+        // given
+        let viewModel = self.makeViewModelWithMonthAutoCollapse()
+        try await self.prepareInitialMonths(viewModel)
+        viewModel.calendarPaperDidRequestToggleMonthCollapse()
+
+        // when
+        self.changeMonthAutoCollapse(false)
+
+        // then
+        XCTAssertEqual(self.monthCollapsedsPerPaper, [[true, false], [true, false], [true, false]])
+    }
+
+    func testViewModel_whenMonthAutoCollapseTurnedOffWhileCollapsedAndRowHeightSmall_expandAllPapers() async throws {
+        // given
+        let viewModel = self.makeViewModelWithMonthAutoCollapse()
+        try await self.prepareInitialMonths(viewModel)
+        viewModel.calendarPaperDidRequestToggleMonthCollapse()
+        self.changeRowHeight(.small)
+
+        // when
+        self.changeMonthAutoCollapse(false)
+
+        // then
+        XCTAssertEqual(self.monthCollapsedsPerPaper, [[true, false], [true, false], [true, false]])
+    }
+
+    func testViewModel_whenMonthAutoCollapseTurnedOffWhileExpanded_notBroadcast() async throws {
+        // given
+        let viewModel = self.makeViewModelWithMonthAutoCollapse()
+        try await self.prepareInitialMonths(viewModel)
+
+        // when
+        self.changeMonthAutoCollapse(false)
+
+        // then
+        XCTAssertEqual(self.monthCollapsedsPerPaper, [[], [], []])
+    }
+
+    func testViewModel_whenMonthAutoCollapseTurnedOnAgain_collapseOnToggle() async throws {
+        // given
+        let viewModel = self.makeViewModelWithMonthAutoCollapse()
+        try await self.prepareInitialMonths(viewModel)
+        self.changeMonthAutoCollapse(false)
+        self.changeMonthAutoCollapse(true)
+
+        // when
+        viewModel.calendarPaperDidRequestToggleMonthCollapse()
+
+        // then
+        XCTAssertEqual(self.monthCollapsedsPerPaper, [[true], [true], [true]])
     }
 
     private var monthCollapsedsPerPaper: [[Bool]] {

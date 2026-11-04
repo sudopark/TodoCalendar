@@ -17,6 +17,7 @@ import TestDoubles
 class CalendarSettingUsecaseImpleTests: BaseTestCase, PublisherWaitable {
     
     var cancelBag: Set<AnyCancellable>!
+    private var stubRepository: StubCalendarSettingRepository!
     
     override func setUpWithError() throws {
         self.cancelBag = .init()
@@ -24,11 +25,13 @@ class CalendarSettingUsecaseImpleTests: BaseTestCase, PublisherWaitable {
     
     override func tearDownWithError() throws {
         self.cancelBag = nil
+        self.stubRepository = nil
     }
     
     private func makeUsecase(
         savedTimeZone: TimeZone? = nil,
-        savedFirstWeekDay: DayOfWeeks? = nil
+        savedFirstWeekDay: DayOfWeeks? = nil,
+        savedDDayCountsTargetDayAsOne: Bool? = nil
     ) -> CalendarSettingUsecaseImple {
         
         let repository = StubCalendarSettingRepository()
@@ -38,6 +41,10 @@ class CalendarSettingUsecaseImpleTests: BaseTestCase, PublisherWaitable {
         if let savedFirstWeekDay {
             repository.saveFirstWeekDay(savedFirstWeekDay)
         }
+        if let savedDDayCountsTargetDayAsOne {
+            repository.saveDDayCountsTargetDayAsOne(savedDDayCountsTargetDayAsOne)
+        }
+        self.stubRepository = repository
         
         let dataStore = SharedDataStore()
         
@@ -117,5 +124,55 @@ extension CalendarSettingUsecaseImpleTests {
         
         // then
         XCTAssertEqual(days, [.friday, .saturday])
+    }
+}
+
+extension CalendarSettingUsecaseImpleTests {
+    
+    func testUsecase_whenPrepareWithoutSavedValue_ddayCountsTargetDayAsOneIsFalse() {
+        // given
+        let expect = expectation(description: "저장된 디데이 카운트 옵션이 없으면 false 로 방출")
+        let usecase = self.makeUsecase(savedDDayCountsTargetDayAsOne: nil)
+        
+        // when
+        let value = self.waitFirstOutput(expect, for: usecase.ddayCountsTargetDayAsOne) {
+            usecase.prepare()
+        }
+        
+        // then
+        XCTAssertEqual(value, false)
+    }
+    
+    func testUsecase_whenPrepareWithSavedValue_emitsSavedValue() {
+        // given
+        let expect = expectation(description: "저장된 디데이 카운트 옵션으로 방출")
+        let usecase = self.makeUsecase(savedDDayCountsTargetDayAsOne: true)
+        
+        // when
+        let value = self.waitFirstOutput(expect, for: usecase.ddayCountsTargetDayAsOne) {
+            usecase.prepare()
+        }
+        
+        // then
+        XCTAssertEqual(value, true)
+    }
+    
+    func testUsecase_updateDDayCountsTargetDayAsOne_savesAndEmitsWithoutDuplicates() {
+        // given
+        let expect = expectation(description: "디데이 카운트 옵션 변경시 저장하고 중복 없이 방출")
+        expect.expectedFulfillmentCount = 3
+        let usecase = self.makeUsecase(savedDDayCountsTargetDayAsOne: nil)
+        
+        // when
+        let values = self.waitOutputs(expect, for: usecase.ddayCountsTargetDayAsOne) {
+            usecase.prepare()
+            usecase.updateDDayCountsTargetDayAsOne(true)
+            usecase.updateDDayCountsTargetDayAsOne(true)
+            usecase.updateDDayCountsTargetDayAsOne(false)
+        }
+        
+        // then
+        XCTAssertEqual(values, [false, true, false])
+        XCTAssertEqual(self.stubRepository.loadDDayCountsTargetDayAsOne(), false)
     }
 }

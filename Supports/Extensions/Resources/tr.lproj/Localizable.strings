@@ -539,6 +539,7 @@
 "setting.appearance.event.edit::name_old" = "Etkinliği Düzenle";
 "setting.appearance.event.edit::name" = "Etkinlik ayarları ve harici takvimler";
 "setting.appearance.day_row_height" = "Etkinlik detay gösterim seviyesi";
+"setting.appearance.month_auto_collapse" = "Takvimi otomatik daralt";
 "setting.appearance.day_row_height::small::text" = "Minimal";
 "setting.appearance.day_row_height::medium::text" = "Orta";
 "setting.appearance.day_row_height::large::text" = "Tam";
@@ -556,9 +557,11 @@
 "setting.appearance.widget::useSystemTheme::title" = "Sistem temasını kullan";
 "setting.appearance.widget::useSystemTheme::background" = "Widget arka plan rengi";
 "setting.appearance.widget::useCustomTheme::title" = "Özel renk seç";
-"setting.appearance.widget::gallery::title" = "Widget galerisi";
-"setting.appearance.widget::gallery::explain" = "Her widget'ın nasıl göründüğüne bakın";
+"setting.widget::title" = "Widget'lar";
+"setting.widget::setting::title" = "Widget Ayarları";
 "setting.appearance.widget::gallery::section" = "Widget'lar";
+"setting.appearance.widget::ddayCount::title" = "D-Day'i D+1 olarak say";
+"setting.appearance.widget::ddayCount::description" = "Açıkken D-Day, D+1 olarak sayılır. Hem uygulamaya hem widget'lara uygulanır. Bunu tek bir Geri Sayım widget'ı için de düzenleme ekranından açabilirsiniz";
 "widget.gallery::lockScreen::label" = "%@ · Kilit Ekranı";
 "widget.weeks::group" = "Haftalık etkinlikler";
 "widget.size::small" = "Küçük";
@@ -913,3 +916,8 @@
 "legal_notice.message::terms" = "Hizmet Şartlarımız güncellendi.";
 "legal_notice.message::privacy" = "Gizlilik Politikamız güncellendi.";
 "legal_notice.effectiveDate" = "Yürürlük tarihi: %@";
+
+"ad.trackingGuide::title" = "Reklamlar hakkında kısa bir not";
+"ad.trackingGuide::message1" = "To-do Calendar reklam gösterir. Bu gelir geliştirme ve sunucu maliyetlerini karşılar.";
+"ad.trackingGuide::message2" = "Sonraki ekranda takibe izin verirseniz ilgi alanlarınıza uygun reklamlar görürsünüz. Reddederseniz uygulama tamamen aynı kalır.";
+"ad.trackingGuide::continue::button" = "Devam";

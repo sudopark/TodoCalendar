@@ -539,6 +539,7 @@
 "setting.appearance.event.edit::name_old" = "Muokkaa tapahtumaa";
 "setting.appearance.event.edit::name" = "Tapahtuma-asetukset ja ulkoiset kalenterit";
 "setting.appearance.day_row_height" = "Tapahtuman tietojen näyttötaso";
+"setting.appearance.month_auto_collapse" = "Kalenterin automaattinen kutistus";
 "setting.appearance.day_row_height::small::text" = "Minimaalinen";
 "setting.appearance.day_row_height::medium::text" = "Keskitaso";
 "setting.appearance.day_row_height::large::text" = "Täysi";
@@ -556,9 +557,11 @@
 "setting.appearance.widget::useSystemTheme::title" = "Käytä järjestelmän teemaa";
 "setting.appearance.widget::useSystemTheme::background" = "Widgetin taustaväri";
 "setting.appearance.widget::useCustomTheme::title" = "Valitse oma väri";
-"setting.appearance.widget::gallery::title" = "Widget-galleria";
-"setting.appearance.widget::gallery::explain" = "Katso, miltä kukin widget näyttää";
+"setting.widget::title" = "Widgetit";
+"setting.widget::setting::title" = "Widgetien asetukset";
 "setting.appearance.widget::gallery::section" = "Widgetit";
+"setting.appearance.widget::ddayCount::title" = "Laske D-Day päiväksi D+1";
+"setting.appearance.widget::ddayCount::description" = "Kun tämä on päällä, D-Day lasketaan päiväksi D+1. Koskee sekä sovellusta että widgetejä. Voit ottaa sen käyttöön myös yksittäiselle Lähtölaskenta-widgetille sen muokkauksessa";
 "widget.gallery::lockScreen::label" = "%@ · Lukitusnäyttö";
 "widget.weeks::group" = "Viikon tapahtumat";
 "widget.size::small" = "Pieni";
@@ -913,3 +916,8 @@
 "legal_notice.message::terms" = "Käyttöehtomme on päivitetty.";
 "legal_notice.message::privacy" = "Tietosuojakäytäntömme on päivitetty.";
 "legal_notice.effectiveDate" = "Voimassa %@ alkaen";
+
+"ad.trackingGuide::title" = "Pari sanaa mainoksista";
+"ad.trackingGuide::message1" = "To-do Calendar näyttää mainoksia. Niiden tuotoilla katetaan kehitys- ja palvelinkulut.";
+"ad.trackingGuide::message2" = "Jos sallit seurannan seuraavassa näkymässä, näet kiinnostuksen kohteisiisi sopivia mainoksia. Jos kieltäydyt, sovellus pysyy täsmälleen ennallaan.";
+"ad.trackingGuide::continue::button" = "Jatka";

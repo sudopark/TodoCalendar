@@ -8,6 +8,7 @@
 
 import Foundation
 import Combine
+import WidgetKit
 import Prelude
 import Optics
 import Domain
@@ -21,26 +22,31 @@ protocol WidgetGalleryViewModel: AnyObject, WidgetGallerySceneInteractor {
     func selectItem(_ itemId: String)
     func selectSystemTheme()
     func selectCustomBackground(hex: String)
+    func toggleDDayCountsTargetDayAsOne(_ newValue: Bool)
     func close()
 
     var items: AnyPublisher<[WidgetGalleryItem], Never> { get }
     var setting: AnyPublisher<WidgetAppearanceSettings, Never> { get }
     var defaultStyles: AnyPublisher<[String: WidgetStyle], Never> { get }
+    var ddayCountsTargetDayAsOne: AnyPublisher<Bool, Never> { get }
 }
 
 final class WidgetGalleryViewModelImple: WidgetGalleryViewModel, @unchecked Sendable {
 
     private let uiSettingUsecase: any UISettingUsecase
     private let widgetStyleUsecase: any WidgetStyleUsecase
+    private let calendarSettingUsecase: any CalendarSettingUsecase
     var router: (any WidgetGalleryRouting)?
 
     init(
         setting: WidgetAppearanceSettings,
         uiSettingUsecase: any UISettingUsecase,
-        widgetStyleUsecase: any WidgetStyleUsecase
+        widgetStyleUsecase: any WidgetStyleUsecase,
+        calendarSettingUsecase: any CalendarSettingUsecase
     ) {
         self.uiSettingUsecase = uiSettingUsecase
         self.widgetStyleUsecase = widgetStyleUsecase
+        self.calendarSettingUsecase = calendarSettingUsecase
         self.subject.setting.send(setting)
     }
 
@@ -89,6 +95,11 @@ extension WidgetGalleryViewModelImple {
         }
     }
 
+    func toggleDDayCountsTargetDayAsOne(_ newValue: Bool) {
+        self.calendarSettingUsecase.updateDDayCountsTargetDayAsOne(newValue)
+        WidgetCenter.shared.reloadTimelines(ofKind: WidgetVariant.ddaySmall.kind)
+    }
+
     func close() {
         self.router?.closeScene()
     }
@@ -118,6 +129,10 @@ extension WidgetGalleryViewModelImple {
             .compactMap { $0 }
             .removeDuplicates()
             .eraseToAnyPublisher()
+    }
+
+    var ddayCountsTargetDayAsOne: AnyPublisher<Bool, Never> {
+        return self.calendarSettingUsecase.ddayCountsTargetDayAsOne
     }
 
     var defaultStyles: AnyPublisher<[String: WidgetStyle], Never> {

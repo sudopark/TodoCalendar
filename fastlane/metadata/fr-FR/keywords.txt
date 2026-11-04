@@ -1,1 +1,1 @@
-liste de tâches,agenda,organiseur,rappels,widget,thème,compte à rebours,jour j,récurrent,ia
+organiseur,planificateur,emploi du temps,liste de tâches,rappels,widget,compte à rebours,google,ia

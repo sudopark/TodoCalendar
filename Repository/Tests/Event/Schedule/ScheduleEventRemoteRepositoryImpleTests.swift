@@ -496,6 +496,11 @@ class SpyScheduleEventLocalStorage: ScheduleEventLocalStorage, @unchecked Sendab
         return []
     }
     
+    var stubHasAnyEvent: Bool = false
+    func hasAnyEvent() async throws -> Bool {
+        return self.stubHasAnyEvent
+    }
+    
     var shouldFailLoadEvent: Bool = false
     func loadScheduleEvent(_ eventId: String) async throws -> ScheduleEvent {
         guard self.shouldFailLoadEvent == false

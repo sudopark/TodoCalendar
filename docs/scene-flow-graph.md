@@ -49,7 +49,7 @@ graph TD
         AppearanceSetting[AppearanceSetting]
         ColorTheme[ColorThemeSelect]
         ColorThemeEdit[ColorThemeEdit]
-        WidgetAppearance[WidgetAppearanceSetting]
+        WidgetAppearance[WidgetGallery]
         TimeZoneSelect[TimeZoneSelect]
         EventSetting[EventSetting]
         EventDefaultTagSelect[EventDefaultTagSelect]
@@ -134,6 +134,7 @@ graph TD
 
     %% Setting flow
     SettingList --> AppearanceSetting
+    SettingList --> WidgetAppearance
     SettingList --> EventSetting
     SettingList --> HolidayList
     SettingList --> ManageAccount
@@ -148,7 +149,6 @@ graph TD
     WidgetGalleryDetail -.-> PaidFeatureAdGuide
     WidgetStyleEdit -.-> PaidFeatureAdGuide
     CalendarView -.-> PaidFeatureAdGuide
-    AppearanceSetting --> WidgetAppearance
     AppearanceSetting --> TimeZoneSelect
 
     EventSetting --> EventDefaultTagSelect

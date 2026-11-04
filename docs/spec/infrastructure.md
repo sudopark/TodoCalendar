@@ -190,6 +190,16 @@ ApplicationDeepLinkHandlerImple:
 - 대상: 2025-04-05 09:15 → 정규화: 2025-04-05 00:00
 - 결과: **5일** (양수 = 미래, 음수 = 과거)
 
+**당일을 D+1 로 세는 옵션** — `Calendar.ddayInterval(_:_:countsTargetDayAsOne:)` 이 위 일수에 기기 단위 옵션(`CalendarSettingUsecase.ddayCountsTargetDayAsOne`, 기본 off)을 적용한다. 옵션이 켜져 있으면 일수가 0 이하일 때만 1을 더 뺀다. 문자열 변환(`DDayText`)은 그대로라 표시는 아래처럼 바뀐다.
+
+| 대상일 기준 | 옵션 off | 옵션 on |
+|---|---|---|
+| N일 전 | D-N | D-N |
+| 당일 | D-Day | D+1 |
+| N일 지남 | D+N | D+(N+1) |
+
+앱 상세 화면(`DaysIntervalCountUsecaseImple`)과 디데이 위젯(`DDayWidgetViewModelProvider`)이 같은 함수와 같은 저장 키 `dday_counts_target_day_as_one` 을 쓴다. 디데이 위젯은 위젯 편집에서 그 위젯만 옵션을 켤 수 있고, 켜진 위젯은 `위젯 값 || 앱 값` 으로 센다 ([`widgets.md §9.8`](widgets.md)).
+
 ### 4.2 타임존 처리
 
 - `Calendar(identifier: .gregorian)`에 `CalendarSettingUsecase.currentTimeZone` 적용
@@ -203,7 +213,7 @@ ApplicationDeepLinkHandlerImple:
 
 ### 4.3 실시간 업데이트
 
-- 1초 간격 타이머 (`secondTicks`) + 타임존 변경 Publisher를 `CombineLatest`
+- 1초 간격 타이머 (`secondTicks`) + 타임존 변경 Publisher + 디데이 카운트 옵션 Publisher를 `CombineLatest3`
 - `removeDuplicates()`: 일수가 실제로 변경될 때만 UI 갱신
 - 사용 화면: 공휴일 상세, 이벤트 상세 등
 
@@ -646,6 +656,42 @@ Repository 는 받아 둔 원격 정책(캐시)만 돌려준다. 캐시가 없�
 
 ---
 
+## 10. 앱 리뷰 요청
+
+무료 유저가 이벤트를 새로 저장해 누적 5회를 채우면, 앱 버전마다 한 번 App Store 리뷰 시트를 요청한다. 시트는 시스템 API(`AppStore.requestReview(in:)`)로만 띄우고, 앞에 만족도 팝업을 붙이지 않는다 (App Store 심사 지침 5.6.1).
+
+### 10.1 트리거
+
+- **이벤트 추가 화면** — 새 todo·schedule 저장에 성공하면 기록한다. 요청 대상이면 화면을 닫은 뒤 시트를 띄운다. 닫기 전에 창을 잡아 두지 않으면 시트를 붙일 곳이 없다.
+- **빠른 todo 추가** — 이벤트 목록에서 이름만으로 todo 를 저장하는 데 성공하면 기록하고, 요청 대상이면 그 자리에서 시트를 띄운다.
+
+저장에 실패하면 기록도 요청도 하지 않는다. 기존 이벤트 수정, todo↔schedule 전환, Live Activity 완료는 세지 않는다 — 세는 자리가 이 두 호출처이고 `TodoEventUsecase`·`ScheduleEventUsecase` 안이 아니라서다.
+
+### 10.2 요청 조건
+
+`AppReviewRequestUsecase.canRequestReview()` 는 아래를 모두 만족할 때 참이다.
+
+- 현재 앱 버전을 읽을 수 있다
+- 마지막으로 요청한 앱 버전이 현재 버전과 다르다
+- 새 이벤트 저장 수가 5 이상이다
+- 유료 유저가 아니다 — 플랜을 아직 못 받았으면 무료로 본다. 플랜은 받았는데 플랜 id 를 모르면 유료로 보고 제외한다 (`PaidFeatureGateUsecase` 와 같은 해석)
+
+요청하면 `markReviewRequested()` 가 현재 버전을 저장한다. 시트를 실제로 띄울지는 시스템이 정한다 — 시스템이 안 띄워도 그 버전의 요청은 쓴 것으로 기록되고, TestFlight 빌드에서는 시트가 뜨지 않는다. 저장 수와 마지막 요청 버전은 `AppUsageRecordRepository` 가 UserDefaults 에 둔다.
+
+### 10.3 관련 파일
+
+| 레이어 | 파일 |
+|---|---|
+| Domain Repo | `Domain/Sources/Repositories/AppUsageRecordRepository.swift` |
+| Domain Usecase | `Domain/Sources/Usecases/Support/AppReviewRequestUsecase.swift` |
+| Repository Impl | `Repository/Sources/Repository+Imple/Support/AppUsageRecord/AppUsageRecordLocalRepositoryImple.swift` |
+| 이벤트 추가 화면 | `Presentations/EventDetailScene/Sources/ViewModels/AddEventViewModel.swift` · `EventDetailRouter.swift` (`closeSceneThenRequestAppReview`) |
+| 빠른 todo 추가 | `Presentations/CalendarScenes/Sources/DayEventList/DayEventListViewModel.swift` · `DayEventListRouter.swift` (`requestAppReview`) |
+| 시트 요청 | `Presentations/CommonPresentation/Sources/ServiceInterfaces/AppStoreReviewRouter.swift` · `Services/StoreKitService/Sources/AppStoreReviewSheet.swift` (앱 타겟 `StoreKitService+Routing.swift` 가 채택) |
+| Factory | `Presentations/Scenes/Sources/Factories.swift` (`SupportUsecaseFactory.makeAppReviewRequestUsecase`) |
+
+---
+
 ## 상태 전이 다이어그램
 
 ### SharedDataStore 동시성 모델
@@ -721,6 +767,18 @@ D-Day 계산:
   이벤트가 KST 4/15로 저장되었으나,
   PST 기준으로는 4/14~4/15에 걸침.
   D-Day는 "이벤트 시작 날짜"(원본 타임존) 기준으로 계산.
+```
+
+### D-Day 당일을 D+1 로 세는 옵션
+
+```
+상황: 옵션 on, 대상 4/15
+4/14 → D-1 (대상일 전은 바뀌지 않는다)
+4/15 → D+1 (당일이 1일째)
+4/18 → D+4 (3일 지남 + 1)
+
+옵션은 prepare 때 저장 값(없으면 false)을 SharedDataStore 에 싣는다.
+값이 실리기 전엔 CombineLatest3 가 방출하지 않아 디데이가 비어 보인다.
 ```
 
 ### SharedDataStore — 로그인/로그아웃 시 조건부 초기화

@@ -99,6 +99,7 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
     private let eventLiveActivityUsecase: any EventLiveActivityUsecase
     private let ddayCandidateUsecase: any DDayCandidateUsecase
     private let guideTodoUsecase: any GuideTodoUsecase
+    private let appReviewRequestUsecase: any AppReviewRequestUsecase
     var router: (any DayEventListRouting)?
     private weak var listener: (any DayEventListSceneListener)?
 
@@ -113,7 +114,8 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
         aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase,
         eventLiveActivityUsecase: any EventLiveActivityUsecase,
         ddayCandidateUsecase: any DDayCandidateUsecase,
-        guideTodoUsecase: any GuideTodoUsecase
+        guideTodoUsecase: any GuideTodoUsecase,
+        appReviewRequestUsecase: any AppReviewRequestUsecase
     ) {
         self.calendarUsecase = calendarUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
@@ -126,6 +128,7 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
         self.eventLiveActivityUsecase = eventLiveActivityUsecase
         self.ddayCandidateUsecase = ddayCandidateUsecase
         self.guideTodoUsecase = guideTodoUsecase
+        self.appReviewRequestUsecase = appReviewRequestUsecase
 
         self.internalBind()
     }
@@ -193,6 +196,7 @@ extension DayEventListViewModelImple {
         Task { [weak self] in
             do {
                 _ = try await self?.todoEventUsecase.makeTodoEvent(params)
+                self?.requestAppReviewIfNeeded()
             } catch let error {
                 self?.router?.showError(error)
             }
@@ -201,6 +205,13 @@ extension DayEventListViewModelImple {
             }
         }
         .store(in: self.cancellables)
+    }
+
+    private func requestAppReviewIfNeeded() {
+        self.appReviewRequestUsecase.recordNewEventSaved()
+        guard self.appReviewRequestUsecase.canRequestReview() else { return }
+        self.appReviewRequestUsecase.markReviewRequested()
+        self.router?.requestAppReview()
     }
 
     private func updatePendingTodos(

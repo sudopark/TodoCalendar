@@ -1381,6 +1381,11 @@ class SpyTodoLocalStorage: TodoLocalStorage, @unchecked Sendable {
     func loadAllEvents() async throws -> [TodoEvent] {
         return []
     }
+    
+    var stubHasAnyEvent: Bool = false
+    func hasAnyEvent() async throws -> Bool {
+        return self.stubHasAnyEvent
+    }
     func loadAllDoneEvents() async throws -> [DoneTodoEvent] {
         return []
     }

@@ -24,6 +24,7 @@ protocol SettingItemModelType {
 struct SettingItemModel: SettingItemModelType {
     enum ItemId: String, Equatable {
         case appearance
+        case widgetSetting
         case editEvent
         case holidaySetting
         case openWeb
@@ -42,13 +43,18 @@ struct SettingItemModel: SettingItemModelType {
     let itemId: ItemId
     let iconNamge: String
     let text: String
+    let isNewBadgeVisible: Bool
     
-    init(_ itemId: ItemId) {
+    init(_ itemId: ItemId, isNewBadgeVisible: Bool = false) {
         self.itemId = itemId
+        self.isNewBadgeVisible = isNewBadgeVisible
         switch itemId {
         case .appearance:
             self.iconNamge = "eyeglasses"
             self.text = "setting.appearance.title".localized()
+        case .widgetSetting:
+            self.iconNamge = "widget.small"
+            self.text = "setting.widget::title".localized()
         case .editEvent:
             self.iconNamge = "calendar"
             self.text = "setting.appearance.event.edit::name".localized()
@@ -91,7 +97,7 @@ struct SettingItemModel: SettingItemModelType {
         }
     }
     
-    var compareKey: String { self.itemId.rawValue }
+    var compareKey: String { "\(self.itemId.rawValue)-\(self.isNewBadgeVisible)" }
 }
 
 struct AccountSettingItemModel: SettingItemModelType {
@@ -182,6 +188,7 @@ final class SettingItemListViewModelImple: SettingItemListViewModel, @unchecked 
     private let uiSettingUsecase: any UISettingUsecase
     private let deviceInfoFetchService: any DeviceInfoFetchService
     private let appUpdateCheckUsecase: any AppUpdateCheckUsecase
+    private let newFeatureBadgeUsecase: any NewFeatureBadgeUsecase
     private let privacyOptionsFormRouter: (any PrivacyOptionsFormRouter)?
     var router: (any SettingItemListRouting)?
 
@@ -191,6 +198,7 @@ final class SettingItemListViewModelImple: SettingItemListViewModel, @unchecked 
         uiSettingUsecase: any UISettingUsecase,
         deviceInfoFetchService: any DeviceInfoFetchService,
         appUpdateCheckUsecase: any AppUpdateCheckUsecase,
+        newFeatureBadgeUsecase: any NewFeatureBadgeUsecase,
         privacyOptionsFormRouter: (any PrivacyOptionsFormRouter)?
     ) {
         self.appstoreLinkPath = appstoreLinkPath
@@ -198,6 +206,7 @@ final class SettingItemListViewModelImple: SettingItemListViewModel, @unchecked 
         self.uiSettingUsecase = uiSettingUsecase
         self.deviceInfoFetchService = deviceInfoFetchService
         self.appUpdateCheckUsecase = appUpdateCheckUsecase
+        self.newFeatureBadgeUsecase = newFeatureBadgeUsecase
         self.privacyOptionsFormRouter = privacyOptionsFormRouter
 
         self.bindIsSignedIn()
@@ -273,6 +282,9 @@ extension SettingItemListViewModelImple {
         switch model.itemId {
         case .appearance:
             self.routeApearanceSetting()
+
+        case .widgetSetting:
+            self.routeToWidgetSetting()
             
         case .editEvent:
             self.router?.routeToEventSetting()
@@ -340,6 +352,12 @@ extension SettingItemListViewModelImple {
         let setting = self.uiSettingUsecase.loadSavedAppearanceSetting()
         self.router?.routeToAppearanceSetting(inital: setting.calendar)
     }
+
+    private func routeToWidgetSetting() {
+        self.newFeatureBadgeUsecase.markChecked(.widgetSetting)
+        let setting = self.uiSettingUsecase.loadSavedAppearanceSetting()
+        self.router?.routeToWidgetSetting(setting.widget)
+    }
 }
 
 
@@ -349,9 +367,10 @@ extension SettingItemListViewModelImple {
     
     var sectionModels: AnyPublisher<[any SettingSectionModelType], Never> {
 
-        let transform: (AccountInfo?, DeviceInfo?, Bool, Bool) -> [any SettingSectionModelType] = { account, device, isUpdateAvailable, isAdPrivacyOptionsRequired in
+        let transform: (AccountInfo?, DeviceInfo?, Bool, Bool, Set<NewFeatureBadge>) -> [any SettingSectionModelType] = { account, device, isUpdateAvailable, isAdPrivacyOptionsRequired, uncheckedBadges in
             let baseSectionItems: [SettingItemModel] = [
                 .init(.appearance),
+                .init(.widgetSetting, isNewBadgeVisible: uncheckedBadges.contains(.widgetSetting)),
                 .init(.editEvent),
                 .init(.holidaySetting),
                 .init(.billingPlan)
@@ -394,13 +413,16 @@ extension SettingItemListViewModelImple {
         }
 
         return Publishers
-            .CombineLatest4(
-                self.accountUsecase.currentAccountInfo,
-                self.subject.deviceInfo,
-                self.appUpdateCheckUsecase.isUpdateAvailable,
-                self.subject.isAdPrivacyOptionsRequired
+            .CombineLatest(
+                Publishers.CombineLatest4(
+                    self.accountUsecase.currentAccountInfo,
+                    self.subject.deviceInfo,
+                    self.appUpdateCheckUsecase.isUpdateAvailable,
+                    self.subject.isAdPrivacyOptionsRequired
+                ),
+                self.newFeatureBadgeUsecase.uncheckedBadges
             )
-            .map(transform)
+            .map { transform($0.0, $0.1, $0.2, $0.3, $1) }
             .eraseToAnyPublisher()
     }
 }

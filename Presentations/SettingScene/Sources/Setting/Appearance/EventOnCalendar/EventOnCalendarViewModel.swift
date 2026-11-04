@@ -19,17 +19,20 @@ struct EventOnCalendarAppearanceSetting {
     let eventOnCalendarIsBold: Bool
     let eventOnCalendarShowEventTagColor: Bool
     let weekRowHeight: RowHeightOnCalendar
+    let monthAutoCollapseIsOn: Bool
     
     init(
         eventOnCalenarTextAdditionalSize: CGFloat,
         eventOnCalendarIsBold: Bool, 
         eventOnCalendarShowEventTagColor: Bool,
-        weekRowHeight: RowHeightOnCalendar
+        weekRowHeight: RowHeightOnCalendar,
+        monthAutoCollapseIsOn: Bool
     ) {
         self.eventOnCalenarTextAdditionalSize = eventOnCalenarTextAdditionalSize
         self.eventOnCalendarIsBold = eventOnCalendarIsBold
         self.eventOnCalendarShowEventTagColor = eventOnCalendarShowEventTagColor
         self.weekRowHeight = weekRowHeight
+        self.monthAutoCollapseIsOn = monthAutoCollapseIsOn
     }
     
     init(_ setting: CalendarAppearanceSettings) {
@@ -37,6 +40,7 @@ struct EventOnCalendarAppearanceSetting {
         self.eventOnCalendarIsBold = setting.eventOnCalendarIsBold
         self.eventOnCalendarShowEventTagColor = setting.eventOnCalendarShowEventTagColor
         self.weekRowHeight = setting.rowHeight
+        self.monthAutoCollapseIsOn = setting.monthAutoCollapseIsOn
     }
 }
 
@@ -81,11 +85,14 @@ protocol EventOnCalendarViewModel: AnyObject, Sendable {
     func decreaseTextSize()
     func toggleBoldText(_ isOn: Bool)
     func toggleShowEventTagColor(_ isOn: Bool)
+    func toggleMonthAutoCollapse(_ isOn: Bool)
     
     var rowHeight: AnyPublisher<RowHeightOnCalendarViewModel, Never> { get }
     var textIncreasedSizeText: AnyPublisher<EventTextAdditionalSizeModel, Never> { get }
     var isBoldTextOnCalendar: AnyPublisher<Bool, Never> { get }
     var showEvnetTagColor: AnyPublisher<Bool, Never> { get }
+    var isMonthAutoCollapseOn: AnyPublisher<Bool, Never> { get }
+    var isMonthAutoCollapseEditable: AnyPublisher<Bool, Never> { get }
 }
 
 final class EventOnCalendarViewModelImple: EventOnCalendarViewModel, @unchecked Sendable {
@@ -158,6 +165,14 @@ extension EventOnCalendarViewModelImple {
         self.updateSetting(params)
     }
     
+    func toggleMonthAutoCollapse(_ isOn: Bool) {
+        guard let setting = self.subject.setting.value,
+              setting.monthAutoCollapseIsOn != isOn
+        else { return }
+        let params = EditCalendarAppearanceSettingParams() |> \.monthAutoCollapseIsOn .~ isOn
+        self.updateSetting(params)
+    }
+    
     private func updateSetting(_ params: EditCalendarAppearanceSettingParams) {
         do {
             let newSetting = try self.uiSettingUsecase.changeCalendarAppearanceSetting(params)
@@ -202,6 +217,21 @@ extension EventOnCalendarViewModelImple {
     var showEvnetTagColor: AnyPublisher<Bool, Never> {
         return self.subject.setting
             .compactMap { $0?.eventOnCalendarShowEventTagColor }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+    
+    var isMonthAutoCollapseOn: AnyPublisher<Bool, Never> {
+        return self.subject.setting
+            .compactMap { $0?.monthAutoCollapseIsOn }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+    
+    var isMonthAutoCollapseEditable: AnyPublisher<Bool, Never> {
+        return self.subject.setting
+            .compactMap { $0?.weekRowHeight }
+            .map { $0 != .small }
             .removeDuplicates()
             .eraseToAnyPublisher()
     }

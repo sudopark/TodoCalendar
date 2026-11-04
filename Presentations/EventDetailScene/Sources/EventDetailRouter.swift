@@ -29,6 +29,8 @@ protocol EventDetailRouting: Routing, Sendable, AnyObject {
     func showForemostEventGuide()
 
     func showShareSheet(text: String)
+
+    func closeSceneThenRequestAppReview()
 }
 
 
@@ -59,6 +61,7 @@ final class EventDetailRouter: BaseRouterImple, EventDetailRouting, EventDetailI
     private let selectNotificationTimeSceneBuilder: any SelectEventNotificationTimeSceneBuiler
     private let guideSceneBuilder: any GuideSceneBuilder
     private let selectMapSceneBuilder: any SelectMapAppDialogSceneBuiler
+    private let appStoreReviewRouter: any AppStoreReviewRouter
     weak var inputViewModel: (any EventDetailInputViewModel)?
     
     init(
@@ -66,13 +69,15 @@ final class EventDetailRouter: BaseRouterImple, EventDetailRouting, EventDetailI
         selectEventTagSceneBuilder: any SelectEventTagSceneBuiler,
         selectNotificationTimeSceneBuilder: any SelectEventNotificationTimeSceneBuiler,
         guideSceneBuilder: any GuideSceneBuilder,
-        selectMapSceneBuilder: any SelectMapAppDialogSceneBuiler
+        selectMapSceneBuilder: any SelectMapAppDialogSceneBuiler,
+        appStoreReviewRouter: any AppStoreReviewRouter
     ) {
         self.selectRepeatOptionSceneBuilder = selectRepeatOptionSceneBuilder
         self.selectEventTagSceneBuilder = selectEventTagSceneBuilder
         self.selectNotificationTimeSceneBuilder = selectNotificationTimeSceneBuilder
         self.guideSceneBuilder = guideSceneBuilder
         self.selectMapSceneBuilder = selectMapSceneBuilder
+        self.appStoreReviewRouter = appStoreReviewRouter
     }
 }
 
@@ -90,6 +95,19 @@ extension EventDetailRouter {
         return inputViewModel
     }
     
+    func closeSceneThenRequestAppReview() {
+        Task { @MainActor in
+            // 리뷰 시트는 씬에 붙어야 뜬다 — 화면을 닫기 전에 붙일 창을 잡아 둔다
+            guard let windowScene = self.scene?.view.window?.windowScene
+            else {
+                self.scene?.dismiss(animated: true)
+                return
+            }
+            await self.scene?.dismiss(animated: true)
+            self.appStoreReviewRouter.requestAppReview(in: windowScene)
+        }
+    }
+
     func showTodoEventGuide() {
         Task { @MainActor in
             let vc = self.guideSceneBuilder.makeTodoEventGuide()

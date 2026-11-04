@@ -280,10 +280,15 @@ struct DeviceInfoFetchServiceImple: DeviceInfoFetchService {
 
 private final class DummyMobileAdService: MobileAdService, PrivacyOptionsFormRouter, @unchecked Sendable {
 
+    var isTrackingAuthorizationDetermined: Bool { false }
+
     func start() { }
 
     @MainActor
-    func presentConsentFormAndTrackingPromptIfNeeded(from viewController: UIViewController) async { }
+    func presentConsentFormIfNeeded(from viewController: UIViewController) async { }
+
+    @MainActor
+    func requestTrackingAuthorization() async { }
 
     func preloadFullScreenAd() async { }
 

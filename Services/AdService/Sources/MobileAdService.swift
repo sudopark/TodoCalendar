@@ -16,7 +16,10 @@ public protocol MobileAdService: MobileAdAvailability {
     func start()
 
     @MainActor
-    func presentConsentFormAndTrackingPromptIfNeeded(from viewController: UIViewController) async
+    func presentConsentFormIfNeeded(from viewController: UIViewController) async
+
+    @MainActor
+    func requestTrackingAuthorization() async
 
     func preloadFullScreenAd() async
 

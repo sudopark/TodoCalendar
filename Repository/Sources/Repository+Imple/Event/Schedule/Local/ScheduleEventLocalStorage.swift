@@ -13,6 +13,7 @@ import Extensions
 
 public protocol ScheduleEventLocalStorage: Sendable {
     func loadAllEvents() async throws -> [ScheduleEvent]
+    func hasAnyEvent() async throws -> Bool
     func loadScheduleEvent(_ eventId: String) async throws -> ScheduleEvent
     func loadScheduleEvents(in range: Range<TimeInterval>) async throws -> [ScheduleEvent]
     func saveScheduleEvent(_ event: ScheduleEvent) async throws
@@ -52,6 +53,16 @@ extension ScheduleEventLocalStorageImple {
         let timeQuery = Times.selectAll()
         let eventQuery = Schedules.selectAll()
         return try await self.loadScheduleEvents(timeQuery, eventQuery)
+    }
+    
+    public func hasAnyEvent() async throws -> Bool {
+        let query = Schedules.selectAll().limit(1)
+        let mapping: @Sendable (CursorIterator) throws -> Bool = { _ in true }
+        let rows = try await self.sqliteService.async.run([Bool].self) { db in
+            try db.createTableOrNot(Schedules.self)
+            return try db.load(query, mapping: mapping)
+        }
+        return rows.isEmpty == false
     }
     
     public func loadScheduleEvent(_ eventId: String) async throws -> ScheduleEvent {

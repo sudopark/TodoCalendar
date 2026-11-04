@@ -83,7 +83,6 @@ final class CalendarSectionAppearanceSettingViewEventHandler: Observable {
     var onAppear: () -> Void = { }
     var weekStartDaySelected: (DayOfWeeks) -> Void = { _ in }
     var changeColorTheme: () -> Void = { }
-    var showWidgetGallery: () -> Void = { }
     var toggleAccentDay: (AccentDays) -> Void = { _ in }
     var toggleShowUnderline: (Bool) -> Void = { _ in }
 }
@@ -234,13 +233,6 @@ struct CalendarSectionAppearanceSettingView: View {
                 AppearanceRow("setting.appearance.calendar.colorTheme".localized(), colorThemePreview)
                     .onTapGesture(perform: eventHandlers.changeColorTheme)
                 
-                AppearanceRow(
-                    "setting.appearance.widget::gallery::title".localized(),
-                    subTitle: "setting.appearance.widget::gallery::explain".localized(),
-                    widgetGalleryEnterView
-                )
-                .onTapGesture(perform: eventHandlers.showWidgetGallery)
-                
                 AppearanceRow("setting.appearance.calendar.underline".localized(),  showUnderlineView)
                     .onChange(of: state.showUnderLine) { _, new in
                         eventHandlers.toggleShowUnderline(new)
@@ -331,12 +323,6 @@ extension CalendarSectionAppearanceSettingView {
                 .font(self.appearance.fontSet.subNormal.asFont)
                 .foregroundStyle(self.appearance.colorSet.text2.asColor)
         }
-    }
-    
-    private var widgetGalleryEnterView: some View {
-        Image(systemName: "chevron.right")
-            .font(self.appearance.fontSet.subNormal.asFont)
-            .foregroundStyle(self.appearance.colorSet.text2.asColor)
     }
     
     private var showUnderlineView: some View {

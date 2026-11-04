@@ -25,6 +25,7 @@ class AddEventViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var spyScheduleUsecase: PrivateStubScheduleUsecase!
     private var spyEventDetailDataUsecase: PrivateEventDetailUsecase!
     private var spyRouter: SpyEventDetailRouter!
+    private var stubAppReviewRequestUsecase: StubAppReviewRequestUsecase!
     private var refDate: Date!
     private var timeZone: TimeZone {
         return TimeZone(abbreviation: "KST")!
@@ -47,6 +48,7 @@ class AddEventViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.spyScheduleUsecase = nil
         self.spyEventDetailDataUsecase = nil
         self.spyRouter = nil
+        self.stubAppReviewRequestUsecase = nil
         self.refDate = nil
     }
     
@@ -54,8 +56,13 @@ class AddEventViewModelImpleTests: BaseTestCase, PublisherWaitable {
         params: MakeEventParams? = nil,
         latestTagExists: Bool = true,
         defaultPeriod: EventSettings.DefaultNewEventPeriod = .hour1,
-        shouldFailSaveDetailData: Bool = false
+        shouldFailSaveDetailData: Bool = false,
+        canRequestAppReview: Bool = false,
+        shouldFailMakeTodo: Bool = false
     ) -> AddEventViewModelImple {
+        
+        self.stubAppReviewRequestUsecase = StubAppReviewRequestUsecase(canRequest: canRequestAppReview)
+        self.spyTodoUsecase.shouldFailMakeTodo = shouldFailMakeTodo
         
         let tagUsecase = StubEventTagUsecase()
         tagUsecase.prepare()
@@ -80,7 +87,8 @@ class AddEventViewModelImpleTests: BaseTestCase, PublisherWaitable {
             calendarSettingUsecase: settingUsecase,
             eventDetailDataUsecase: self.spyEventDetailDataUsecase,
             eventSettingUsecase: eventSettingUsecase,
-            eventNotificationSettingUsecase: eventNotificationSettingUsecase
+            eventNotificationSettingUsecase: eventNotificationSettingUsecase,
+            appReviewRequestUsecase: self.stubAppReviewRequestUsecase
         )
         viewModel.router = self.spyRouter
         viewModel.attachInput()
@@ -389,10 +397,16 @@ extension AddEventViewModelImpleTests {
     }
     
     private func makeViewModelWithPrepare(
-        shouldFailSaveDetailData: Bool = false
+        shouldFailSaveDetailData: Bool = false,
+        canRequestAppReview: Bool = false,
+        shouldFailMakeTodo: Bool = false
     ) -> AddEventViewModelImple {
         let expect = expectation(description: "wait")
-        let viewModel = self.makeViewModel(shouldFailSaveDetailData: shouldFailSaveDetailData)
+        let viewModel = self.makeViewModel(
+            shouldFailSaveDetailData: shouldFailSaveDetailData,
+            canRequestAppReview: canRequestAppReview,
+            shouldFailMakeTodo: shouldFailMakeTodo
+        )
 
         self.spyRouter.spyInteractor.didPreparedCallback = { expect.fulfill() }
 
@@ -512,6 +526,90 @@ extension AddEventViewModelImpleTests {
         XCTAssertEqual(isSavings, [false, true, false])
         XCTAssertEqual(self.spyRouter.didShowToastWithMessage, "eventDetail.add_new_todo::message".localized())
         XCTAssertEqual(self.spyRouter.didClosed, true)
+    }
+    
+    private func saveNewEvent(
+        _ viewModel: AddEventViewModelImple,
+        isTodo: Bool
+    ) {
+        let expect = expectation(description: "저장 완료")
+        expect.expectedFulfillmentCount = 3
+        let _ = self.waitOutputs(expect, for: viewModel.isSaving, timeout: 1.0) {
+            if isTodo {
+                viewModel.toggleIsTodo()
+            }
+            self.enterAllInfo(viewModel)
+            viewModel.save()
+        }
+    }
+    
+    // 새 todo 를 저장하면 새 이벤트 저장을 기록한다
+    func testViewModel_whenSaveNewTodo_recordNewEventSaved() {
+        // given
+        let viewModel = self.makeViewModelWithPrepare()
+        
+        // when
+        self.saveNewEvent(viewModel, isTodo: true)
+        
+        // then
+        XCTAssertEqual(self.stubAppReviewRequestUsecase.recordedNewEventSavedCount, 1)
+    }
+    
+    // 새 todo 를 저장했고 리뷰 요청 대상이면 요청을 기록하고 화면을 닫은 뒤 리뷰를 요청한다
+    func testViewModel_whenSaveNewTodoAndCanRequestReview_closeSceneThenRequestReview() {
+        // given
+        let viewModel = self.makeViewModelWithPrepare(canRequestAppReview: true)
+        
+        // when
+        self.saveNewEvent(viewModel, isTodo: true)
+        
+        // then
+        XCTAssertEqual(self.stubAppReviewRequestUsecase.didMarkReviewRequested, true)
+        XCTAssertEqual(self.spyRouter.didCloseSceneThenRequestAppReview, true)
+        XCTAssertNil(self.spyRouter.didClosed)
+    }
+    
+    // 새 todo 를 저장했지만 리뷰 요청 대상이 아니면 화면만 닫는다
+    func testViewModel_whenSaveNewTodoAndCannotRequestReview_closeSceneOnly() {
+        // given
+        let viewModel = self.makeViewModelWithPrepare(canRequestAppReview: false)
+        
+        // when
+        self.saveNewEvent(viewModel, isTodo: true)
+        
+        // then
+        XCTAssertEqual(self.spyRouter.didClosed, true)
+        XCTAssertNil(self.spyRouter.didCloseSceneThenRequestAppReview)
+        XCTAssertNil(self.stubAppReviewRequestUsecase.didMarkReviewRequested)
+    }
+    
+    // 새 schedule 을 저장했고 리뷰 요청 대상이면 화면을 닫은 뒤 리뷰를 요청한다
+    func testViewModel_whenSaveNewScheduleAndCanRequestReview_closeSceneThenRequestReview() {
+        // given
+        let viewModel = self.makeViewModelWithPrepare(canRequestAppReview: true)
+        
+        // when
+        self.saveNewEvent(viewModel, isTodo: false)
+        
+        // then
+        XCTAssertEqual(self.stubAppReviewRequestUsecase.recordedNewEventSavedCount, 1)
+        XCTAssertEqual(self.stubAppReviewRequestUsecase.didMarkReviewRequested, true)
+        XCTAssertEqual(self.spyRouter.didCloseSceneThenRequestAppReview, true)
+        XCTAssertNil(self.spyRouter.didClosed)
+    }
+    
+    // 새 todo 저장에 실패하면 저장을 기록하지 않고 리뷰도 요청하지 않는다
+    func testViewModel_whenSaveNewTodoFails_notRecordNewEventSaved() {
+        // given
+        let viewModel = self.makeViewModelWithPrepare(canRequestAppReview: true, shouldFailMakeTodo: true)
+        
+        // when
+        self.saveNewEvent(viewModel, isTodo: true)
+        
+        // then
+        XCTAssertNotNil(self.spyRouter.didShowError)
+        XCTAssertEqual(self.stubAppReviewRequestUsecase.recordedNewEventSavedCount, 0)
+        XCTAssertNil(self.spyRouter.didCloseSceneThenRequestAppReview)
     }
 }
 

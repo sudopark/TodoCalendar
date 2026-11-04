@@ -12,6 +12,7 @@
 "Turn" = "Gentagelsesrunde";
 "WidgetStyle" = "Widget-stil";
 "Style" = "Stil";
+"Count D-Day as D+1" = "Tæl D-Day som D+1";
 "EventType" = "Begivenhedstype";
 "Event Types" = "Begivenhedstyper";
 "Exclude all day event" = "Udelad heldagsbegivenheder";

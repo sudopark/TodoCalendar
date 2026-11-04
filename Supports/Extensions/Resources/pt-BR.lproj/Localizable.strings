@@ -539,6 +539,7 @@
 "setting.appearance.event.edit::name_old" = "Editar Evento";
 "setting.appearance.event.edit::name" = "Ajustes de evento e calendários externos";
 "setting.appearance.day_row_height" = "Nível de detalhes do evento";
+"setting.appearance.month_auto_collapse" = "Recolher o calendário automaticamente";
 "setting.appearance.day_row_height::small::text" = "Mínimo";
 "setting.appearance.day_row_height::medium::text" = "Médio";
 "setting.appearance.day_row_height::large::text" = "Completo";
@@ -556,9 +557,11 @@
 "setting.appearance.widget::useSystemTheme::title" = "Usar tema do sistema";
 "setting.appearance.widget::useSystemTheme::background" = "Cor de fundo do widget";
 "setting.appearance.widget::useCustomTheme::title" = "Selecionar cor personalizada";
-"setting.appearance.widget::gallery::title" = "Galeria de widgets";
-"setting.appearance.widget::gallery::explain" = "Veja como fica cada widget";
+"setting.widget::title" = "Widgets";
+"setting.widget::setting::title" = "Ajustes de Widgets";
 "setting.appearance.widget::gallery::section" = "Widgets";
+"setting.appearance.widget::ddayCount::title" = "Contar o D-Day como D+1";
+"setting.appearance.widget::ddayCount::description" = "Quando ativado, o D-Day conta como D+1. Vale para o app e para os widgets. Você também pode ativar só para um widget de Contagem Regressiva ao editá-lo";
 "widget.gallery::lockScreen::label" = "%@ · Tela de Bloqueio";
 "widget.weeks::group" = "Eventos semanais";
 "widget.size::small" = "Pequeno";
@@ -913,3 +916,8 @@
 "legal_notice.message::terms" = "Nossos Termos de Serviço foram atualizados.";
 "legal_notice.message::privacy" = "Nossa Política de Privacidade foi atualizada.";
 "legal_notice.effectiveDate" = "Em vigor a partir de %@";
+
+"ad.trackingGuide::title" = "Uma palavrinha sobre anúncios";
+"ad.trackingGuide::message1" = "O To-do Calendar exibe anúncios. Essa receita cobre os custos de desenvolvimento e de servidores.";
+"ad.trackingGuide::message2" = "Na próxima tela, se você permitir o rastreamento, verá anúncios de acordo com seus interesses. Se recusar, o app continua exatamente igual.";
+"ad.trackingGuide::continue::button" = "Continuar";

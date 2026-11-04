@@ -22,6 +22,7 @@ public enum TodoToggleStateUpdateParamas {
 public protocol TodoLocalStorage: Sendable { 
     
     func loadAllEvents() async throws -> [TodoEvent]
+    func hasAnyEvent() async throws -> Bool
     func loadTodoEvent(_ eventId: String) async throws -> TodoEvent
     func loadCurrentTodoEvents() async throws -> [TodoEvent]
     func loadTodoEvents(in range: Range<TimeInterval>) async throws -> [TodoEvent]
@@ -73,6 +74,16 @@ extension TodoLocalStorageImple {
         let eventQuery = Todo.selectAll()
         let todos = try await self.loadTodoEvents(timeQuery, eventQuery)
         return todos
+    }
+    
+    public func hasAnyEvent() async throws -> Bool {
+        let query = Todo.selectAll().limit(1)
+        let mapping: @Sendable (CursorIterator) throws -> Bool = { _ in true }
+        let rows = try await self.sqliteService.async.run([Bool].self) { db in
+            try db.createTableOrNot(Todo.self)
+            return try db.load(query, mapping: mapping)
+        }
+        return rows.isEmpty == false
     }
     
     public func loadTodoEvent(_ eventId: String) async throws -> TodoEvent {

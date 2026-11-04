@@ -3,3 +3,4 @@
 "NSSpeechRecognitionUsageDescription" = "Il riconoscimento vocale è necessario per convertire la tua voce in eventi e da fare.";
 "NSCameraUsageDescription" = "L'accesso alla fotocamera è necessario per leggere il testo da una foto che scatti.";
 "NSPhotoLibraryAddUsageDescription" = "L'accesso alla libreria foto è necessario per salvare nelle tue foto l'immagine di un evento condiviso.";
+"NSUserTrackingUsageDescription" = "To-do Calendar è gratuito grazie alla pubblicità. Consentire il tracciamento rende questi annunci più pertinenti per te.";
