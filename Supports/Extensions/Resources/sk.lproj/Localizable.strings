@@ -538,6 +538,7 @@
 "setting.appearance.event.edit::name_old" = "Upraviť udalosť";
 "setting.appearance.event.edit::name" = "Nastavenia udalostí a externé kalendáre";
 "setting.appearance.day_row_height" = "Úroveň zobrazenia detailu udalosti";
+"setting.appearance.month_auto_collapse" = "Automaticky zbaliť kalendár";
 "setting.appearance.day_row_height::small::text" = "Minimálna";
 "setting.appearance.day_row_height::medium::text" = "Stredná";
 "setting.appearance.day_row_height::large::text" = "Plná";
@@ -555,9 +556,11 @@
 "setting.appearance.widget::useSystemTheme::title" = "Použiť systémový motív";
 "setting.appearance.widget::useSystemTheme::background" = "Farba pozadia widgetu";
 "setting.appearance.widget::useCustomTheme::title" = "Vybrať vlastnú farbu";
-"setting.appearance.widget::gallery::title" = "Galéria widgetov";
-"setting.appearance.widget::gallery::explain" = "Pozrite si, ako vyzerá každý widget";
+"setting.widget::title" = "Widgety";
+"setting.widget::setting::title" = "Nastavenia widgetov";
 "setting.appearance.widget::gallery::section" = "Widgety";
+"setting.appearance.widget::ddayCount::title" = "Počítať D-Day ako D+1";
+"setting.appearance.widget::ddayCount::description" = "Keď je zapnuté, D-Day sa počíta ako D+1. Platí pre aplikáciu aj widgety. Môžete to zapnúť aj len pre jeden widget Odpočet v jeho úpravách";
 "widget.gallery::lockScreen::label" = "%@ · Uzamknutá obrazovka";
 "widget.weeks::group" = "Týždenné udalosti";
 "widget.size::small" = "Malý";
@@ -912,3 +915,8 @@
 "legal_notice.message::terms" = "Naše Podmienky používania služby boli aktualizované.";
 "legal_notice.message::privacy" = "Naše Zásady ochrany osobných údajov boli aktualizované.";
 "legal_notice.effectiveDate" = "Účinné od %@";
+
+"ad.trackingGuide::title" = "Krátko o reklamách";
+"ad.trackingGuide::message1" = "To-do Calendar zobrazuje reklamy. Z týchto príjmov sa platí vývoj a servery.";
+"ad.trackingGuide::message2" = "Ak na ďalšej obrazovke povolíte sledovanie, uvidíte reklamy podľa svojich záujmov. Ak odmietnete, aplikácia zostane úplne rovnaká.";
+"ad.trackingGuide::continue::button" = "Pokračovať";

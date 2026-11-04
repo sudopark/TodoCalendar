@@ -12,6 +12,7 @@
 "Turn" = "Повтор";
 "WidgetStyle" = "Стиль віджета";
 "Style" = "Стиль";
+"Count D-Day as D+1" = "Рахувати D-Day як D+1";
 "EventType" = "Тип події";
 "Event Types" = "Типи подій";
 "Exclude all day event" = "Виключити події на весь день";

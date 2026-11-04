@@ -539,6 +539,7 @@
 "setting.appearance.event.edit::name_old" = "Ereignis bearbeiten";
 "setting.appearance.event.edit::name" = "Ereigniseinstellungen und externe Kalender";
 "setting.appearance.day_row_height" = "Detailgrad der Ereignisanzeige";
+"setting.appearance.month_auto_collapse" = "Kalender automatisch einklappen";
 "setting.appearance.day_row_height::small::text" = "Minimal";
 "setting.appearance.day_row_height::medium::text" = "Mittel";
 "setting.appearance.day_row_height::large::text" = "Vollständig";
@@ -556,9 +557,11 @@
 "setting.appearance.widget::useSystemTheme::title" = "Systemdesign verwenden";
 "setting.appearance.widget::useSystemTheme::background" = "Widget-Hintergrundfarbe";
 "setting.appearance.widget::useCustomTheme::title" = "Eigene Farbe auswählen";
-"setting.appearance.widget::gallery::title" = "Widget-Galerie";
-"setting.appearance.widget::gallery::explain" = "So sieht jedes Widget aus";
+"setting.widget::title" = "Widgets";
+"setting.widget::setting::title" = "Widget-Einstellungen";
 "setting.appearance.widget::gallery::section" = "Widgets";
+"setting.appearance.widget::ddayCount::title" = "D-Day als D+1 zählen";
+"setting.appearance.widget::ddayCount::description" = "Wenn aktiviert, wird der D-Day als D+1 gezählt. Gilt für die App und die Widgets. Sie können es auch für ein einzelnes Countdown-Widget in dessen Bearbeitung aktivieren";
 "widget.gallery::lockScreen::label" = "%@ · Sperrbildschirm";
 "widget.weeks::group" = "Wochenereignisse";
 "widget.size::small" = "Klein";
@@ -913,3 +916,8 @@
 "legal_notice.message::terms" = "Unsere Nutzungsbedingungen wurden aktualisiert.";
 "legal_notice.message::privacy" = "Unsere Datenschutzrichtlinie wurde aktualisiert.";
 "legal_notice.effectiveDate" = "Gültig ab %@";
+
+"ad.trackingGuide::title" = "Kurz zur Werbung";
+"ad.trackingGuide::message1" = "To-do Calendar zeigt Werbung. Diese Einnahmen decken die Entwicklungs- und Serverkosten.";
+"ad.trackingGuide::message2" = "Wenn Sie auf dem nächsten Bildschirm Tracking erlauben, sehen Sie Werbung, die zu Ihren Interessen passt. Wenn Sie ablehnen, bleibt die App genau so, wie sie ist.";
+"ad.trackingGuide::continue::button" = "Weiter";

@@ -538,6 +538,7 @@
 "setting.appearance.event.edit::name_old" = "イベントを編集";
 "setting.appearance.event.edit::name" = "イベント設定と外部カレンダー";
 "setting.appearance.day_row_height" = "イベント表示の詳細度";
+"setting.appearance.month_auto_collapse" = "カレンダーを自動で折りたたむ";
 "setting.appearance.day_row_height::small::text" = "最小限";
 "setting.appearance.day_row_height::medium::text" = "標準";
 "setting.appearance.day_row_height::large::text" = "すべて";
@@ -555,9 +556,11 @@
 "setting.appearance.widget::useSystemTheme::title" = "システムテーマを使用";
 "setting.appearance.widget::useSystemTheme::background" = "ウィジェットの背景色";
 "setting.appearance.widget::useCustomTheme::title" = "カスタムカラーを選択";
-"setting.appearance.widget::gallery::title" = "ウィジェットギャラリー";
-"setting.appearance.widget::gallery::explain" = "各ウィジェットの見た目を確認できます";
+"setting.widget::title" = "ウィジェット";
+"setting.widget::setting::title" = "ウィジェット設定";
 "setting.appearance.widget::gallery::section" = "ウィジェット";
+"setting.appearance.widget::ddayCount::title" = "D-DayをD+1として数える";
+"setting.appearance.widget::ddayCount::description" = "オンにすると、D-DayをD+1として数えます。アプリとウィジェットの両方に適用されます。D-Dayウィジェットの編集で、ウィジェットごとに個別にオンにすることもできます";
 "widget.gallery::lockScreen::label" = "%@・ロック画面";
 "widget.weeks::group" = "週単位のイベント";
 "widget.size::small" = "小";
@@ -912,3 +915,8 @@
 "legal_notice.message::terms" = "利用規約が改定されました。";
 "legal_notice.message::privacy" = "プライバシーポリシーが改定されました。";
 "legal_notice.effectiveDate" = "施行日 %@";
+
+"ad.trackingGuide::title" = "広告について少しだけ";
+"ad.trackingGuide::message1" = "To-do Calendarには広告が表示されます。その収益で開発費とサーバー費用をまかなっています。";
+"ad.trackingGuide::message2" = "次の画面でトラッキングを許可すると、興味に合った広告が表示されます。許可しなくても、アプリはこれまでどおり使えます。";
+"ad.trackingGuide::continue::button" = "次へ";
