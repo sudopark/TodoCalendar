@@ -539,6 +539,7 @@
 "setting.appearance.event.edit::name_old" = "Editează evenimentul";
 "setting.appearance.event.edit::name" = "Setări evenimente și calendare externe";
 "setting.appearance.day_row_height" = "Nivelul de afișare a detaliilor evenimentului";
+"setting.appearance.month_auto_collapse" = "Restrânge automat calendarul";
 "setting.appearance.day_row_height::small::text" = "Minim";
 "setting.appearance.day_row_height::medium::text" = "Mediu";
 "setting.appearance.day_row_height::large::text" = "Complet";
@@ -556,9 +557,11 @@
 "setting.appearance.widget::useSystemTheme::title" = "Folosește tema sistemului";
 "setting.appearance.widget::useSystemTheme::background" = "Culoarea fundalului widgetului";
 "setting.appearance.widget::useCustomTheme::title" = "Selectează o culoare personalizată";
-"setting.appearance.widget::gallery::title" = "Galerie de widgeturi";
-"setting.appearance.widget::gallery::explain" = "Vedeți cum arată fiecare widget";
+"setting.widget::title" = "Widgeturi";
+"setting.widget::setting::title" = "Setări widgeturi";
 "setting.appearance.widget::gallery::section" = "Widgeturi";
+"setting.appearance.widget::ddayCount::title" = "Numără D-Day ca D+1";
+"setting.appearance.widget::ddayCount::description" = "Când este activat, D-Day se numără ca D+1. Se aplică aplicației și widgeturilor. Îl puteți activa și pentru un singur widget Numărătoare inversă, la editarea lui";
 "widget.gallery::lockScreen::label" = "%@ · Ecran de blocare";
 "widget.weeks::group" = "Evenimente săptămânale";
 "widget.size::small" = "Mic";
@@ -913,3 +916,8 @@
 "legal_notice.message::terms" = "Termenii și condițiile noastre au fost actualizate.";
 "legal_notice.message::privacy" = "Politica noastră de confidențialitate a fost actualizată.";
 "legal_notice.effectiveDate" = "În vigoare de la %@";
+
+"ad.trackingGuide::title" = "Câteva cuvinte despre reclame";
+"ad.trackingGuide::message1" = "To-do Calendar afișează reclame. Aceste venituri acoperă costurile de dezvoltare și de servere.";
+"ad.trackingGuide::message2" = "Dacă pe ecranul următor permiteți urmărirea, veți vedea reclame potrivite intereselor dvs. Dacă refuzați, aplicația rămâne exact la fel.";
+"ad.trackingGuide::continue::button" = "Continuați";

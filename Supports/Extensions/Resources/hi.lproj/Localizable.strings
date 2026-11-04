@@ -539,6 +539,7 @@
 "setting.appearance.event.edit::name_old" = "इवेंट संपादित करें";
 "setting.appearance.event.edit::name" = "इवेंट सेटिंग्स और बाहरी कैलेंडर";
 "setting.appearance.day_row_height" = "इवेंट विवरण प्रदर्शन स्तर";
+"setting.appearance.month_auto_collapse" = "कैलेंडर अपने-आप समेटें";
 "setting.appearance.day_row_height::small::text" = "न्यूनतम";
 "setting.appearance.day_row_height::medium::text" = "मध्यम";
 "setting.appearance.day_row_height::large::text" = "पूर्ण";
@@ -556,9 +557,11 @@
 "setting.appearance.widget::useSystemTheme::title" = "सिस्टम थीम का उपयोग करें";
 "setting.appearance.widget::useSystemTheme::background" = "विजेट पृष्ठभूमि रंग";
 "setting.appearance.widget::useCustomTheme::title" = "कस्टम रंग चुनें";
-"setting.appearance.widget::gallery::title" = "विजेट गैलरी";
-"setting.appearance.widget::gallery::explain" = "देखें कि हर विजेट कैसा दिखता है";
+"setting.widget::title" = "विजेट";
+"setting.widget::setting::title" = "विजेट सेटिंग्स";
 "setting.appearance.widget::gallery::section" = "विजेट";
+"setting.appearance.widget::ddayCount::title" = "D-Day को D+1 गिनें";
+"setting.appearance.widget::ddayCount::description" = "चालू करने पर D-Day को D+1 गिना जाता है। यह ऐप और विजेट दोनों पर लागू होता है। आप इसे किसी एक डी-डे विजेट के लिए उसके संपादन में भी चालू कर सकते हैं";
 "widget.gallery::lockScreen::label" = "%@ · लॉक स्क्रीन";
 "widget.weeks::group" = "साप्ताहिक इवेंट";
 "widget.size::small" = "छोटा";
@@ -913,3 +916,8 @@
 "legal_notice.message::terms" = "हमारी सेवा की शर्तें अपडेट की गई हैं।";
 "legal_notice.message::privacy" = "हमारी गोपनीयता नीति अपडेट की गई है।";
 "legal_notice.effectiveDate" = "%@ से प्रभावी";
+
+"ad.trackingGuide::title" = "विज्ञापनों के बारे में एक बात";
+"ad.trackingGuide::message1" = "To-do Calendar में विज्ञापन दिखते हैं। उसी कमाई से डेवलपमेंट और सर्वर का खर्च चलता है।";
+"ad.trackingGuide::message2" = "अगली स्क्रीन पर ट्रैकिंग की अनुमति देने पर आपको अपनी रुचि के विज्ञापन दिखेंगे। मना करने पर भी ऐप बिल्कुल वैसा ही रहेगा।";
+"ad.trackingGuide::continue::button" = "आगे बढ़ें";

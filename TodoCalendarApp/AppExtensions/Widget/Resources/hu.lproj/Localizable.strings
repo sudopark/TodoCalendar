@@ -12,6 +12,7 @@
 "Turn" = "Ismétlési forduló";
 "WidgetStyle" = "Widget stílusa";
 "Style" = "Stílus";
+"Count D-Day as D+1" = "D-Day számolása D+1-ként";
 "EventType" = "Eseménytípus";
 "Event Types" = "Eseménytípusok";
 "Exclude all day event" = "Egész napos események kizárása";

@@ -12,6 +12,7 @@
 "Turn" = "Toistokierros";
 "WidgetStyle" = "Widgetin tyyli";
 "Style" = "Tyyli";
+"Count D-Day as D+1" = "Laske D-Day päiväksi D+1";
 "EventType" = "Tapahtumatyyppi";
 "Event Types" = "Tapahtumatyypit";
 "Exclude all day event" = "Sulje pois koko päivän tapahtumat";

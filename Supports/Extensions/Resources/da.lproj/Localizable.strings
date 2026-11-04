@@ -539,6 +539,7 @@
 "setting.appearance.event.edit::name_old" = "Rediger begivenhed";
 "setting.appearance.event.edit::name" = "Begivenhedsindstillinger og eksterne kalendere";
 "setting.appearance.day_row_height" = "Detaljeniveau for begivenhedsvisning";
+"setting.appearance.month_auto_collapse" = "Fold kalenderen sammen automatisk";
 "setting.appearance.day_row_height::small::text" = "Minimal";
 "setting.appearance.day_row_height::medium::text" = "Mellem";
 "setting.appearance.day_row_height::large::text" = "Fuld";
@@ -556,9 +557,11 @@
 "setting.appearance.widget::useSystemTheme::title" = "Brug systemtema";
 "setting.appearance.widget::useSystemTheme::background" = "Widget-baggrundsfarve";
 "setting.appearance.widget::useCustomTheme::title" = "Vælg brugerdefineret farve";
-"setting.appearance.widget::gallery::title" = "Widget-galleri";
-"setting.appearance.widget::gallery::explain" = "Se, hvordan hver widget ser ud";
+"setting.widget::title" = "Widgets";
+"setting.widget::setting::title" = "Widgetindstillinger";
 "setting.appearance.widget::gallery::section" = "Widgets";
+"setting.appearance.widget::ddayCount::title" = "Tæl D-Day som D+1";
+"setting.appearance.widget::ddayCount::description" = "Når det er slået til, tælles D-Day som D+1. Gælder både appen og widgets. Du kan også slå det til for en enkelt D-dag-widget, når du redigerer den";
 "widget.gallery::lockScreen::label" = "%@ · Låseskærm";
 "widget.weeks::group" = "Ugens begivenheder";
 "widget.size::small" = "Lille";
@@ -913,3 +916,8 @@
 "legal_notice.message::terms" = "Vores servicevilkår er blevet opdateret.";
 "legal_notice.message::privacy" = "Vores privatlivspolitik er blevet opdateret.";
 "legal_notice.effectiveDate" = "Gælder fra %@";
+
+"ad.trackingGuide::title" = "Et par ord om annoncer";
+"ad.trackingGuide::message1" = "To-do Calendar viser annoncer. Indtægterne dækker udvikling og servere.";
+"ad.trackingGuide::message2" = "Hvis du tillader sporing på næste skærm, ser du annoncer, der passer til dine interesser. Hvis du afviser, forbliver appen præcis, som den er.";
+"ad.trackingGuide::continue::button" = "Fortsæt";

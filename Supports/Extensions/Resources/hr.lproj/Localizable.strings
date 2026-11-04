@@ -538,6 +538,7 @@
 "setting.appearance.event.edit::name_old" = "Uredi događaj";
 "setting.appearance.event.edit::name" = "Postavke događaja i vanjski kalendari";
 "setting.appearance.day_row_height" = "Razina prikaza detalja događaja";
+"setting.appearance.month_auto_collapse" = "Automatski sklopi kalendar";
 "setting.appearance.day_row_height::small::text" = "Minimalna";
 "setting.appearance.day_row_height::medium::text" = "Srednja";
 "setting.appearance.day_row_height::large::text" = "Puna";
@@ -555,9 +556,11 @@
 "setting.appearance.widget::useSystemTheme::title" = "Koristi temu sustava";
 "setting.appearance.widget::useSystemTheme::background" = "Boja pozadine widgeta";
 "setting.appearance.widget::useCustomTheme::title" = "Odaberi prilagođenu boju";
-"setting.appearance.widget::gallery::title" = "Galerija widgeta";
-"setting.appearance.widget::gallery::explain" = "Pogledajte kako izgleda svaki widget";
+"setting.widget::title" = "Widgeti";
+"setting.widget::setting::title" = "Postavke widgeta";
 "setting.appearance.widget::gallery::section" = "Widgeti";
+"setting.appearance.widget::ddayCount::title" = "Računaj D-Day kao D+1";
+"setting.appearance.widget::ddayCount::description" = "Kad je uključeno, D-Day se računa kao D+1. Vrijedi za aplikaciju i widgete. Možete to uključiti i samo za jedan widget Odbrojavanje u njegovom uređivanju";
 "widget.gallery::lockScreen::label" = "%@ · Zaključani zaslon";
 "widget.weeks::group" = "Tjedni događaji";
 "widget.size::small" = "Mali";
@@ -912,3 +915,8 @@
 "legal_notice.message::terms" = "Naši Uvjeti korištenja su ažurirani.";
 "legal_notice.message::privacy" = "Naša Pravila o privatnosti su ažurirana.";
 "legal_notice.effectiveDate" = "Na snazi od %@";
+
+"ad.trackingGuide::title" = "Ukratko o oglasima";
+"ad.trackingGuide::message1" = "To-do Calendar prikazuje oglase. Taj prihod pokriva troškove razvoja i poslužitelja.";
+"ad.trackingGuide::message2" = "Ako na sljedećem zaslonu dopustite praćenje, vidjet ćete oglase prema svojim interesima. Ako odbijete, aplikacija ostaje potpuno ista.";
+"ad.trackingGuide::continue::button" = "Nastavi";
