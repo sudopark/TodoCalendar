@@ -30,19 +30,25 @@ jobs:
         id: map
         run: |
           set -euo pipefail
-          schemes=$(git diff --name-only --no-renames origin/${{ github.base_ref }}...HEAD | python3 scripts/derive-test-schemes.py --changed | tr '\n' ' ' | sed 's/ $//')
+          schemes=$(git diff --name-only --no-renames origin/${{ github.base_ref }}...HEAD | python3 scripts/derive-test-schemes.py --changed | jq -R -s -c 'split("\n") | map(select(length > 0))')
           echo "schemes=${schemes}" >> "$GITHUB_OUTPUT"
-          echo "Detected schemes: ${schemes:-none}"
+          echo "Detected schemes: ${schemes}"
 
   test:
     needs: detect-changes
-    if: needs.detect-changes.outputs.schemes != ''
+    if: needs.detect-changes.outputs.schemes != '[]'
     runs-on: Maggie-m1
+    strategy:
+      fail-fast: false
+      matrix:
+        scheme: ${{ fromJSON(needs.detect-changes.outputs.schemes) }}
     defaults:
       run:
         shell: bash -eo pipefail {0}
     steps:
       - uses: actions/checkout@v5
+        with:
+          clean: false
 
       - name: Ensure test simulator
         run: |
@@ -50,16 +56,34 @@ jobs:
           udid="$(scripts/ensure-test-simulator.sh)"
           echo "DESTINATION=platform=iOS Simulator,id=${udid}" >> "$GITHUB_ENV"
 
+      # 러너 하나의 워크스페이스를 잡들이 물려 쓴다. 같은 커밋으로 준비돼 있을 때만 setup 과 빌드 결과를 이어 쓴다.
+      - name: Check workspace is prepared for this commit
+        id: workspace
+        run: |
+          set -euo pipefail
+          if [ "$(cat DerivedData/.prepared-commit 2>/dev/null || true)" = "$GITHUB_SHA" ]; then
+            echo "prepared=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "prepared=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Clean workspace
+        if: steps.workspace.outputs.prepared != 'true'
+        run: git clean -ffdx
+
       - name: Setup dummy config
+        if: steps.workspace.outputs.prepared != 'true'
         run: |
           cd install && bash install.sh
 
       - name: Install toolchain (tuist via mise)
+        if: steps.workspace.outputs.prepared != 'true'
         run: |
           mise install
           echo "$(mise where tuist)" >> "$GITHUB_PATH"
 
       - name: Cache SPM packages
+        if: steps.workspace.outputs.prepared != 'true'
         uses: actions/cache@v4
         with:
           path: |
@@ -70,29 +94,29 @@ jobs:
             spm-
 
       - name: Install dependencies
+        if: steps.workspace.outputs.prepared != 'true'
         run: tuist install
 
       - name: Generate project
+        if: steps.workspace.outputs.prepared != 'true'
         run: tuist generate --no-open
 
-      - name: Reset DerivedData
+      - name: Mark workspace as prepared
+        if: steps.workspace.outputs.prepared != 'true'
         run: |
           set -euo pipefail
-          rm -rf ./DerivedData
+          mkdir -p DerivedData
+          echo "$GITHUB_SHA" > DerivedData/.prepared-commit
 
-      - name: Test schemes
+      - name: Test ${{ matrix.scheme }}
         env:
-          SCHEMES: ${{ needs.detect-changes.outputs.schemes }}
+          SCHEME: ${{ matrix.scheme }}
         run: |
           set -euo pipefail
-          for scheme in $SCHEMES; do
-            echo "::group::${scheme}"
-            xcodebuild test \
-              -workspace TodoCalendar.xcworkspace \
-              -scheme "$scheme" \
-              -derivedDataPath ./DerivedData \
-              -destination "$DESTINATION" \
-              -testLanguage en -testRegion en_US \
-              | xcpretty
-            echo "::endgroup::"
-          done
+          xcodebuild test \
+            -workspace TodoCalendar.xcworkspace \
+            -scheme "$SCHEME" \
+            -derivedDataPath ./DerivedData \
+            -destination "$DESTINATION" \
+            -testLanguage en -testRegion en_US \
+            | xcpretty
