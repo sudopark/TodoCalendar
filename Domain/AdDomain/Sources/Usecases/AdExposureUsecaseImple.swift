@@ -10,6 +10,7 @@ import Foundation
 import Combine
 import AdDomainInterface
 import BillingDomainInterface
+import EventDomainInterface
 import KernelUtils
 import SettingDomainInterface
 
@@ -24,6 +25,7 @@ public final class AdExposureUsecaseImple: AdExposureUsecase, Sendable {
     private let billingUsecase: any BillingUsecase
     private let adRepository: any AdRepository
     private let coldLaunchHistoryRepository: any AppColdLaunchHistoryRepository
+    private let userEventExistenceRepository: any UserEventExistenceRepository
     private let paidFeatureGateUsecase: any PaidFeatureGateUsecase
     private let sharedDataStore: SharedDataStore
     private let calendar: Calendar
@@ -33,6 +35,7 @@ public final class AdExposureUsecaseImple: AdExposureUsecase, Sendable {
         billingUsecase: any BillingUsecase,
         adRepository: any AdRepository,
         coldLaunchHistoryRepository: any AppColdLaunchHistoryRepository,
+        userEventExistenceRepository: any UserEventExistenceRepository,
         paidFeatureGateUsecase: any PaidFeatureGateUsecase,
         sharedDataStore: SharedDataStore,
         calendar: Calendar = .current
@@ -41,6 +44,7 @@ public final class AdExposureUsecaseImple: AdExposureUsecase, Sendable {
         self.billingUsecase = billingUsecase
         self.adRepository = adRepository
         self.coldLaunchHistoryRepository = coldLaunchHistoryRepository
+        self.userEventExistenceRepository = userEventExistenceRepository
         self.paidFeatureGateUsecase = paidFeatureGateUsecase
         self.sharedDataStore = sharedDataStore
         self.calendar = calendar
@@ -119,5 +123,22 @@ extension AdExposureUsecaseImple {
         } catch {
             return true
         }
+    }
+}
+
+
+// MARK: - tracking authorization
+
+extension AdExposureUsecaseImple {
+
+    public func canRequestTrackingAuthorization() async -> Bool {
+        guard self.adAvailability.isTrackingAuthorizationDetermined == false,
+              self.adRepository.loadHasShownTrackingGuide() == false
+        else { return false }
+        return (try? await self.userEventExistenceRepository.fetchHasAnyEvent()) ?? false
+    }
+
+    public func recordTrackingGuideShown() {
+        self.adRepository.markTrackingGuideShown()
     }
 }

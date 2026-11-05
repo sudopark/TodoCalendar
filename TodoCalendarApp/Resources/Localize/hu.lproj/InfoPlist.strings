@@ -3,3 +3,4 @@
 "NSSpeechRecognitionUsageDescription" = "A beszédfelismerés szükséges ahhoz, hogy a hangját eseményekké és feladatokká alakítsuk.";
 "NSCameraUsageDescription" = "A kamerához való hozzáférés szükséges a készített fotó szövegének beolvasásához.";
 "NSPhotoLibraryAddUsageDescription" = "A fotókönyvtárhoz való hozzáférés szükséges a megosztott eseménykép Fotók alkalmazásba mentéséhez.";
+"NSUserTrackingUsageDescription" = "A To-do Calendar a hirdetéseknek köszönhetően ingyenes. Ha engedélyezed a követést, a hirdetések relevánsabbak lesznek számodra.";

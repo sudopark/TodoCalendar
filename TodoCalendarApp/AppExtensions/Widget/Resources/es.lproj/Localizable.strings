@@ -12,6 +12,7 @@
 "Turn" = "Turno de repetición";
 "WidgetStyle" = "Estilo del widget";
 "Style" = "Estilo";
+"Count D-Day as D+1" = "Contar el D-Day como D+1";
 "EventType" = "Tipo de evento";
 "Event Types" = "Tipos de evento";
 "Exclude all day event" = "Excluir eventos de todo el día";

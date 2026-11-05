@@ -539,6 +539,7 @@
 "setting.appearance.event.edit::name_old" = "Επεξεργασία συμβάντος";
 "setting.appearance.event.edit::name" = "Ρυθμίσεις συμβάντων και εξωτερικά ημερολόγια";
 "setting.appearance.day_row_height" = "Επίπεδο εμφάνισης λεπτομερειών συμβάντος";
+"setting.appearance.month_auto_collapse" = "Αυτόματη σύμπτυξη ημερολογίου";
 "setting.appearance.day_row_height::small::text" = "Ελάχιστο";
 "setting.appearance.day_row_height::medium::text" = "Μεσαίο";
 "setting.appearance.day_row_height::large::text" = "Πλήρες";
@@ -556,9 +557,11 @@
 "setting.appearance.widget::useSystemTheme::title" = "Χρήση θέματος συστήματος";
 "setting.appearance.widget::useSystemTheme::background" = "Χρώμα φόντου widget";
 "setting.appearance.widget::useCustomTheme::title" = "Επιλογή προσαρμοσμένου χρώματος";
-"setting.appearance.widget::gallery::title" = "Συλλογή widget";
-"setting.appearance.widget::gallery::explain" = "Δείτε πώς φαίνεται κάθε widget";
+"setting.widget::title" = "Widget";
+"setting.widget::setting::title" = "Ρυθμίσεις widget";
 "setting.appearance.widget::gallery::section" = "Widget";
+"setting.appearance.widget::ddayCount::title" = "Μέτρηση της D-Day ως D+1";
+"setting.appearance.widget::ddayCount::description" = "Όταν είναι ενεργό, η D-Day μετράει ως D+1. Ισχύει για την εφαρμογή και τα widget. Μπορείτε επίσης να το ενεργοποιήσετε για ένα μόνο widget Αντίστροφη μέτρηση από την επεξεργασία του";
 "widget.gallery::lockScreen::label" = "%@ · Οθόνη κλειδώματος";
 "widget.weeks::group" = "Εβδομαδιαία συμβάντα";
 "widget.size::small" = "Μικρό";
@@ -913,3 +916,8 @@
 "legal_notice.message::terms" = "Οι Όροι υπηρεσίας μας ενημερώθηκαν.";
 "legal_notice.message::privacy" = "Η Πολιτική απορρήτου μας ενημερώθηκε.";
 "legal_notice.effectiveDate" = "Ισχύει από %@";
+
+"ad.trackingGuide::title" = "Λίγα λόγια για τις διαφημίσεις";
+"ad.trackingGuide::message1" = "Το To-do Calendar εμφανίζει διαφημίσεις. Αυτά τα έσοδα καλύπτουν το κόστος ανάπτυξης και διακομιστών.";
+"ad.trackingGuide::message2" = "Αν στην επόμενη οθόνη επιτρέψετε την παρακολούθηση, θα βλέπετε διαφημίσεις που ταιριάζουν στα ενδιαφέροντά σας. Αν αρνηθείτε, η εφαρμογή μένει ακριβώς όπως είναι.";
+"ad.trackingGuide::continue::button" = "Συνέχεια";

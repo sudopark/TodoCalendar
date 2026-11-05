@@ -16,9 +16,14 @@ import Combine
 final class StubMobileAdAvailability: MobileAdAvailability, @unchecked Sendable {
 
     let isStartedSubject: CurrentValueSubject<Bool, Never>
+    private let trackingAuthorizationDetermined: Bool
 
-    init(isStarted: Bool = false) {
+    init(
+        isStarted: Bool = false,
+        isTrackingAuthorizationDetermined: Bool = false
+    ) {
         self.isStartedSubject = .init(isStarted)
+        self.trackingAuthorizationDetermined = isTrackingAuthorizationDetermined
     }
 
     var isStarted: AnyPublisher<Bool, Never> {
@@ -27,5 +32,9 @@ final class StubMobileAdAvailability: MobileAdAvailability, @unchecked Sendable 
 
     var isStartedNow: Bool {
         return self.isStartedSubject.value
+    }
+
+    var isTrackingAuthorizationDetermined: Bool {
+        return self.trackingAuthorizationDetermined
     }
 }

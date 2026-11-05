@@ -539,6 +539,7 @@
 "setting.appearance.event.edit::name_old" = "Esemény szerkesztése";
 "setting.appearance.event.edit::name" = "Eseménybeállítások és külső naptárak";
 "setting.appearance.day_row_height" = "Esemény részletezettségi szintje";
+"setting.appearance.month_auto_collapse" = "Naptár automatikus összecsukása";
 "setting.appearance.day_row_height::small::text" = "Minimális";
 "setting.appearance.day_row_height::medium::text" = "Közepes";
 "setting.appearance.day_row_height::large::text" = "Teljes";
@@ -556,9 +557,11 @@
 "setting.appearance.widget::useSystemTheme::title" = "Rendszertéma használata";
 "setting.appearance.widget::useSystemTheme::background" = "Widget háttérszíne";
 "setting.appearance.widget::useCustomTheme::title" = "Egyéni szín kiválasztása";
-"setting.appearance.widget::gallery::title" = "Widgetgaléria";
-"setting.appearance.widget::gallery::explain" = "Nézze meg, hogyan néz ki az egyes widgetek";
+"setting.widget::title" = "Widgetek";
+"setting.widget::setting::title" = "Widgetbeállítások";
 "setting.appearance.widget::gallery::section" = "Widgetek";
+"setting.appearance.widget::ddayCount::title" = "D-Day számolása D+1-ként";
+"setting.appearance.widget::ddayCount::description" = "Bekapcsolva a D-Day D+1-nek számít. Az appra és a widgetekre is vonatkozik. Egyetlen Visszaszámlálás widgetnél is bekapcsolhatja annak szerkesztésében";
 "widget.gallery::lockScreen::label" = "%@ · Zárolt képernyő";
 "widget.weeks::group" = "Heti események";
 "widget.size::small" = "Kicsi";
@@ -913,3 +916,8 @@
 "legal_notice.message::terms" = "Frissítettük a felhasználási feltételeinket.";
 "legal_notice.message::privacy" = "Frissítettük az adatvédelmi irányelveinket.";
 "legal_notice.effectiveDate" = "Hatályos: %@";
+
+"ad.trackingGuide::title" = "Néhány szó a hirdetésekről";
+"ad.trackingGuide::message1" = "A To-do Calendar hirdetéseket jelenít meg. Ebből a bevételből fedezzük a fejlesztés és a szerverek költségeit.";
+"ad.trackingGuide::message2" = "Ha a következő képernyőn engedélyezi a követést, az érdeklődésének megfelelő hirdetéseket lát. Ha elutasítja, az app pontosan ugyanolyan marad.";
+"ad.trackingGuide::continue::button" = "Tovább";

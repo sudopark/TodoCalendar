@@ -1,1 +1,1 @@
-teendőlista,feladatlista,határidőnapló,tervező,napirend,widget,téma,visszaszámlálás,google,ai
+határidőnapló,napirend,szervező,teendőlista,widget,visszaszámlálás,emlékeztető,google,ai

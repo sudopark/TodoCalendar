@@ -13,6 +13,7 @@ let project = Project.frameworkWithInterfaceAndTesting(
     ],
     dependencies: [
         .project(target: "AccountDomainInterface", path: .relativeToRoot("Domain/AccountDomain")),
+        .project(target: "BillingDomainInterface", path: .relativeToRoot("Domain/BillingDomain")),
         .project(target: "KernelUtils", path: .relativeToRoot("Domain/KernelUtils")),
         .project(target: "PlaceServiceInterface", path: .relativeToRoot("Domain/PlaceServiceInterface")),
         .project(target: "RemoteInfraInterface", path: .relativeToRoot("Repository/Infra/RemoteInfra")),
@@ -28,6 +29,8 @@ let project = Project.frameworkWithInterfaceAndTesting(
     testDependencies: [
         .project(target: "AccountDomainInterface", path: .relativeToRoot("Domain/AccountDomain")),
         .project(target: "AccountDomainTesting", path: .relativeToRoot("Domain/AccountDomain")),
+        .project(target: "BillingDomainInterface", path: .relativeToRoot("Domain/BillingDomain")),
+        .project(target: "BillingDomainTesting", path: .relativeToRoot("Domain/BillingDomain")),
         .project(target: "KernelUtils", path: .relativeToRoot("Domain/KernelUtils")),
         .project(target: "PlaceServiceInterface", path: .relativeToRoot("Domain/PlaceServiceInterface")),
         .project(target: "RemoteInfraInterface", path: .relativeToRoot("Repository/Infra/RemoteInfra")),

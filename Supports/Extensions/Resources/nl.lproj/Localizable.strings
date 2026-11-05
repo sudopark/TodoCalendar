@@ -539,6 +539,7 @@
 "setting.appearance.event.edit::name_old" = "Gebeurtenis bewerken";
 "setting.appearance.event.edit::name" = "Gebeurtenisinstellingen en externe agenda's";
 "setting.appearance.day_row_height" = "Detailniveau van gebeurtenisweergave";
+"setting.appearance.month_auto_collapse" = "Kalender automatisch inklappen";
 "setting.appearance.day_row_height::small::text" = "Minimaal";
 "setting.appearance.day_row_height::medium::text" = "Gemiddeld";
 "setting.appearance.day_row_height::large::text" = "Volledig";
@@ -556,9 +557,11 @@
 "setting.appearance.widget::useSystemTheme::title" = "Systeemthema gebruiken";
 "setting.appearance.widget::useSystemTheme::background" = "Achtergrondkleur van widget";
 "setting.appearance.widget::useCustomTheme::title" = "Aangepaste kleur selecteren";
-"setting.appearance.widget::gallery::title" = "Widgetgalerij";
-"setting.appearance.widget::gallery::explain" = "Bekijk hoe elke widget eruitziet";
+"setting.widget::title" = "Widgets";
+"setting.widget::setting::title" = "Widgetinstellingen";
 "setting.appearance.widget::gallery::section" = "Widgets";
+"setting.appearance.widget::ddayCount::title" = "D-Day tellen als D+1";
+"setting.appearance.widget::ddayCount::description" = "Als dit aan staat, telt de D-Day als D+1. Geldt voor de app en de widgets. Je kunt het ook voor één D-Day-widget aanzetten bij het bewerken ervan";
 "widget.gallery::lockScreen::label" = "%@ · Toegangsscherm";
 "widget.weeks::group" = "Gebeurtenissen per week";
 "widget.size::small" = "Klein";
@@ -913,3 +916,8 @@
 "legal_notice.message::terms" = "Onze servicevoorwaarden zijn bijgewerkt.";
 "legal_notice.message::privacy" = "Ons privacybeleid is bijgewerkt.";
 "legal_notice.effectiveDate" = "Geldig vanaf %@";
+
+"ad.trackingGuide::title" = "Even over advertenties";
+"ad.trackingGuide::message1" = "To-do Calendar toont advertenties. Die inkomsten dekken de ontwikkel- en serverkosten.";
+"ad.trackingGuide::message2" = "Als je op het volgende scherm tracking toestaat, zie je advertenties die bij je interesses passen. Als je weigert, blijft de app precies zoals hij is.";
+"ad.trackingGuide::continue::button" = "Doorgaan";

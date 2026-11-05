@@ -539,6 +539,7 @@
 "setting.appearance.event.edit::name_old" = "Modifica evento";
 "setting.appearance.event.edit::name" = "Impostazioni evento e calendari esterni";
 "setting.appearance.day_row_height" = "Livello di visualizzazione dettagli evento";
+"setting.appearance.month_auto_collapse" = "Comprimi il calendario automaticamente";
 "setting.appearance.day_row_height::small::text" = "Minimo";
 "setting.appearance.day_row_height::medium::text" = "Medio";
 "setting.appearance.day_row_height::large::text" = "Completo";
@@ -556,9 +557,11 @@
 "setting.appearance.widget::useSystemTheme::title" = "Usa tema di sistema";
 "setting.appearance.widget::useSystemTheme::background" = "Colore di sfondo del widget";
 "setting.appearance.widget::useCustomTheme::title" = "Seleziona colore personalizzato";
-"setting.appearance.widget::gallery::title" = "Galleria widget";
-"setting.appearance.widget::gallery::explain" = "Scopri l'aspetto di ogni widget";
+"setting.widget::title" = "Widget";
+"setting.widget::setting::title" = "Impostazioni widget";
 "setting.appearance.widget::gallery::section" = "Widget";
+"setting.appearance.widget::ddayCount::title" = "Conta il D-Day come D+1";
+"setting.appearance.widget::ddayCount::description" = "Se attivo, il D-Day viene contato come D+1. Vale per l'app e per i widget. Puoi attivarlo anche per un singolo widget Giorno X modificandolo";
 "widget.gallery::lockScreen::label" = "%@ · Schermata di blocco";
 "widget.weeks::group" = "Eventi settimanali";
 "widget.size::small" = "Piccolo";
@@ -913,3 +916,8 @@
 "legal_notice.message::terms" = "I nostri Termini di servizio sono stati aggiornati.";
 "legal_notice.message::privacy" = "La nostra Informativa sulla privacy è stata aggiornata.";
 "legal_notice.effectiveDate" = "In vigore dal %@";
+
+"ad.trackingGuide::title" = "Due parole sulla pubblicità";
+"ad.trackingGuide::message1" = "To-do Calendar mostra pubblicità. Questi ricavi coprono i costi di sviluppo e dei server.";
+"ad.trackingGuide::message2" = "Nella schermata successiva, se consenti il tracciamento, vedrai annunci in linea con i tuoi interessi. Se rifiuti, l'app resta esattamente com'è.";
+"ad.trackingGuide::continue::button" = "Continua";

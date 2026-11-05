@@ -3,3 +3,4 @@
 "NSSpeechRecognitionUsageDescription" = "Speech recognition is required to convert your voice into events and to-dos.";
 "NSCameraUsageDescription" = "Camera access is required to read text from a photo you take.";
 "NSPhotoLibraryAddUsageDescription" = "Photo library access is required to save a shared event image to your photos.";
+"NSUserTrackingUsageDescription" = "To-do Calendar is free thanks to ads. Allowing tracking makes those ads more relevant to you.";

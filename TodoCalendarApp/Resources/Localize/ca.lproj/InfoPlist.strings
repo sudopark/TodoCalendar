@@ -3,3 +3,4 @@
 "NSSpeechRecognitionUsageDescription" = "Cal el reconeixement de veu per convertir la vostra veu en esdeveniments i tasques.";
 "NSCameraUsageDescription" = "Cal accés a la càmera per llegir text d'una foto que feu.";
 "NSPhotoLibraryAddUsageDescription" = "Cal accés a la fototeca per desar a les vostres fotos la imatge d'un esdeveniment compartit.";
+"NSUserTrackingUsageDescription" = "To-do Calendar és gratuït gràcies als anuncis. Permetre el seguiment fa que aquests anuncis siguin més rellevants per a tu.";

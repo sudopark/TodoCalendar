@@ -31,6 +31,7 @@ import SceneInfra
 import SettingDomain
 import SettingDomainInterface
 import SupportDomainInterface
+import SupportDomain
 
 // MARK: - LoginUsecaseFactoryImple
 
@@ -51,6 +52,7 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
     let adExposureUsecase: any AdExposureUsecase
     let imageTextRecognizeService: any ImageTextRecognizeService = ImageTextRecognizeServiceImple()
     private let paidFeatureGateUsecase: any PaidFeatureGateUsecase
+    private let appReviewRequestUsecase: any AppReviewRequestUsecase
     private let applicationBase: ApplicationBase
 
     private let eventFactory: LoginEventFactory
@@ -202,6 +204,13 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
             defaultPolicy: AppEnvironment.defaultAppPolicy
         )
         self.paidFeatureGateUsecase = paidFeatureGateUsecase
+        self.appReviewRequestUsecase = AppReviewRequestUsecaseImple(
+            repository: AppUsageRecordLocalRepositoryImple(
+                environmentStorage: applicationBase.userDefaultEnvironmentStorage
+            ),
+            planSource: planStore,
+            deviceInfoFetchService: DeviceInfoFetchServiceImple()
+        )
         self.adExposureUsecase = AdExposureUsecaseImple(
             adAvailability: applicationBase.mobileAdService,
             billingUsecase: billingUsecase,
@@ -210,6 +219,14 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
             ),
             coldLaunchHistoryRepository: AppColdLaunchHistoryLocalRepositoryImple(
                 environmentStorage: applicationBase.userDefaultEnvironmentStorage
+            ),
+            userEventExistenceRepository: UserEventExistenceLocalRepositoryImple(
+                todoLocalStorage: TodoLocalStorageImple(
+                    sqliteService: applicationBase.commonSqliteService
+                ),
+                scheduleLocalStorage: ScheduleEventLocalStorageImple(
+                    sqliteService: applicationBase.commonSqliteService
+                )
             ),
             paidFeatureGateUsecase: paidFeatureGateUsecase,
             sharedDataStore: applicationBase.sharedDataStore
@@ -332,6 +349,14 @@ extension LoginUsecaseFactoryImple {
 
     func makeGuideTodoUsecase() -> any GuideTodoUsecase {
         return self.supportFactory.makeGuideTodoUsecase()
+    }
+
+    func makeAppReviewRequestUsecase() -> any AppReviewRequestUsecase {
+        return self.appReviewRequestUsecase
+    }
+
+    func makeNewFeatureBadgeUsecase() -> any NewFeatureBadgeUsecase {
+        return self.supportFactory.makeNewFeatureBadgeUsecase()
     }
 
     func makeLegalNoticeUsecase() -> any LegalNoticeUsecase {

@@ -27,7 +27,8 @@ struct DDayWidgetViewModelProviderTests {
 
     private func makeProvider(
         stubTarget: DDayTargetEvent?,
-        savedStyles: [WidgetStyle] = []
+        savedStyles: [WidgetStyle] = [],
+        savedDDayCountsTargetDayAsOne: Bool? = nil
     ) -> DDayWidgetViewModelProvider {
 
         let eventFetchUsecase = StubCalendarEventsFetchUescase()
@@ -35,6 +36,9 @@ struct DDayWidgetViewModelProviderTests {
 
         let calendarSettingRepository = StubCalendarSettingRepository()
         calendarSettingRepository.saveTimeZone(self.utc)
+        if let savedDDayCountsTargetDayAsOne {
+            calendarSettingRepository.saveDDayCountsTargetDayAsOne(savedDDayCountsTargetDayAsOne)
+        }
 
         return DDayWidgetViewModelProvider(
             eventFetchUsecase: eventFetchUsecase,
@@ -116,6 +120,148 @@ extension DDayWidgetViewModelProviderTests {
 
         // then
         #expect(model.ddayText == "D+3")
+    }
+}
+
+
+// MARK: - 디데이 당일을 D+1 로 세는 옵션
+
+extension DDayWidgetViewModelProviderTests {
+
+    @Test("옵션을 켜면 당일은 D+1")
+    func getDDayModel_whenCountsTargetDayAsOne_targetDayIsDPlusOne() async throws {
+        // given
+        let now = Date(timeIntervalSince1970: 3600)
+        let provider = self.makeProvider(
+            stubTarget: self.makeTarget(time: .at(7200)),
+            savedDDayCountsTargetDayAsOne: true
+        )
+
+        // when
+        let model = try await provider.getDDayModel(
+            for: now, target: .init(kind: .schedule, rawId: "s1")
+        )
+
+        // then
+        #expect(model.ddayText == "D+1")
+    }
+
+    @Test("옵션을 켜면 N일 지난 대상은 D+(N+1)")
+    func getDDayModel_whenCountsTargetDayAsOne_pastIsDPlusNPlusOne() async throws {
+        // given
+        let now = Date(timeIntervalSince1970: 3 * 24 * 3600)
+        let provider = self.makeProvider(
+            stubTarget: self.makeTarget(time: .at(0)),
+            savedDDayCountsTargetDayAsOne: true
+        )
+
+        // when
+        let model = try await provider.getDDayModel(
+            for: now, target: .init(kind: .schedule, rawId: "s1")
+        )
+
+        // then
+        #expect(model.ddayText == "D+4")
+    }
+
+    @Test("옵션을 켜도 다가오는 대상은 D-n 그대로")
+    func getDDayModel_whenCountsTargetDayAsOne_futureKeepsDMinusN() async throws {
+        // given
+        let now = Date(timeIntervalSince1970: 0)
+        let provider = self.makeProvider(
+            stubTarget: self.makeTarget(time: .at(14 * 24 * 3600)),
+            savedDDayCountsTargetDayAsOne: true
+        )
+
+        // when
+        let model = try await provider.getDDayModel(
+            for: now, target: .init(kind: .schedule, rawId: "s1")
+        )
+
+        // then
+        #expect(model.ddayText == "D-14")
+    }
+}
+
+
+// MARK: - 위젯 편집에서 디데이 당일을 D+1 로 세는 옵션
+
+extension DDayWidgetViewModelProviderTests {
+
+    @Test("위젯에서 켜면 앱 옵션이 꺼져 있어도 당일은 D+1")
+    func getDDayModel_whenWidgetOptionOnAndAppOptionOff_targetDayIsDPlusOne() async throws {
+        // given
+        let now = Date(timeIntervalSince1970: 3600)
+        let provider = self.makeProvider(
+            stubTarget: self.makeTarget(time: .at(7200))
+        )
+
+        // when
+        let model = try await provider.getDDayModel(
+            for: now,
+            target: .init(kind: .schedule, rawId: "s1"),
+            widgetCountsTargetDayAsOne: true
+        )
+
+        // then
+        #expect(model.ddayText == "D+1")
+    }
+
+    @Test("위젯에서 켜면 앱 옵션이 꺼져 있어도 N일 지난 대상은 D+(N+1)")
+    func getDDayModel_whenWidgetOptionOnAndAppOptionOff_pastIsDPlusNPlusOne() async throws {
+        // given
+        let now = Date(timeIntervalSince1970: 3 * 24 * 3600)
+        let provider = self.makeProvider(
+            stubTarget: self.makeTarget(time: .at(0))
+        )
+
+        // when
+        let model = try await provider.getDDayModel(
+            for: now,
+            target: .init(kind: .schedule, rawId: "s1"),
+            widgetCountsTargetDayAsOne: true
+        )
+
+        // then
+        #expect(model.ddayText == "D+4")
+    }
+
+    @Test("위젯에서 켜도 다가오는 대상은 D-n 그대로")
+    func getDDayModel_whenWidgetOptionOnAndAppOptionOff_futureKeepsDMinusN() async throws {
+        // given
+        let now = Date(timeIntervalSince1970: 0)
+        let provider = self.makeProvider(
+            stubTarget: self.makeTarget(time: .at(14 * 24 * 3600))
+        )
+
+        // when
+        let model = try await provider.getDDayModel(
+            for: now,
+            target: .init(kind: .schedule, rawId: "s1"),
+            widgetCountsTargetDayAsOne: true
+        )
+
+        // then
+        #expect(model.ddayText == "D-14")
+    }
+
+    @Test("위젯과 앱 옵션이 모두 꺼져 있으면 당일은 D-Day")
+    func getDDayModel_whenWidgetOptionOffAndAppOptionOff_targetDayIsDDay() async throws {
+        // given
+        let now = Date(timeIntervalSince1970: 3600)
+        let provider = self.makeProvider(
+            stubTarget: self.makeTarget(time: .at(7200))
+        )
+
+        // when
+        let model = try await provider.getDDayModel(
+            for: now,
+            target: .init(kind: .schedule, rawId: "s1"),
+            widgetCountsTargetDayAsOne: false
+        )
+
+        // then
+        #expect(model.ddayText == "D-Day")
     }
 }
 

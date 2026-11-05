@@ -3,3 +3,4 @@
 "NSSpeechRecognitionUsageDescription" = "Pengenalan suara diperlukan untuk mengubah suara Anda menjadi acara dan tugas.";
 "NSCameraUsageDescription" = "Akses kamera diperlukan untuk membaca teks dari foto yang Anda ambil.";
 "NSPhotoLibraryAddUsageDescription" = "Akses galeri foto diperlukan untuk menyimpan gambar acara yang dibagikan ke foto Anda.";
+"NSUserTrackingUsageDescription" = "To-do Calendar gratis berkat iklan. Mengizinkan pelacakan membuat iklan tersebut lebih relevan untuk Anda.";

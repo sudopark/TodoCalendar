@@ -20,7 +20,7 @@
 | 5 | **AI Agent** | 🟧→🟥 Supporting (Core 승격 유력) | 음성/키보드/이미지 command → 이벤트 변경 오케스트레이션 | [ai-agent](spec/ai-agent.md) |
 | 6 | **Notification** | 🟧 Supporting | 이벤트 알림 스케줄링·권한 | [tags/foremost/notifications](spec/tags-foremost-notifications.md) |
 | 7 | **Settings** | 🟩 Generic | 외형·이벤트 표시·UI 설정 | [settings](spec/settings.md) |
-| 8 | **Support** | 🟩 Generic | 앱 업데이트·피드백·링크프리뷰·장소검색·STT | [infrastructure](spec/infrastructure.md) |
+| 8 | **Support** | 🟩 Generic | 앱 업데이트·피드백·링크프리뷰·장소검색·STT·리뷰 요청 | [infrastructure](spec/infrastructure.md) |
 | 9 | **Billing** | 🟧 Supporting | 플랜·top-up 카탈로그, StoreKit 구매 → 서명 서버 반영, 광고 노출 판정 | [billing](spec/billing.md) |
 
 **분류 의미** — 🟥 Core: 제품 차별점, 투자 집중 / 🟧 Supporting: Core를 떠받침 / 🟩 Generic: 어디서든 동일, 대체 가능.
@@ -49,3 +49,4 @@
 - **Calendar → Event**: Calendar가 시간 프레임/포커스를 제공, 그 위에 Event가 배치됨.
 - **Notification → Event**: Event 시간 기준으로 알림 스케줄.
 - **AI Agent → Billing**: AI 사용 한도가 Billing 플랜에서 나온다. 단방향 — Billing 은 AI 를 모른다. 서버가 같은 방향으로 갈랐고, 위젯 Pro 도 같은 인프라를 쓸 예정이라 Billing 은 AI 하위가 아닌 독립 context 다.
+- **Support → Billing**: 리뷰 요청 대상이 플랜에서 나온다. 유료 유저에게는 App Store 리뷰를 요청하지 않는다. 단방향 — Billing 은 리뷰 요청을 모른다.

@@ -538,6 +538,7 @@
 "setting.appearance.event.edit::name_old" = "Изменить событие";
 "setting.appearance.event.edit::name" = "Настройки событий и внешние календари";
 "setting.appearance.day_row_height" = "Уровень отображения деталей события";
+"setting.appearance.month_auto_collapse" = "Автоматически сворачивать календарь";
 "setting.appearance.day_row_height::small::text" = "Минимальный";
 "setting.appearance.day_row_height::medium::text" = "Средний";
 "setting.appearance.day_row_height::large::text" = "Полный";
@@ -555,9 +556,11 @@
 "setting.appearance.widget::useSystemTheme::title" = "Использовать системную тему";
 "setting.appearance.widget::useSystemTheme::background" = "Цвет фона виджета";
 "setting.appearance.widget::useCustomTheme::title" = "Выбрать свой цвет";
-"setting.appearance.widget::gallery::title" = "Галерея виджетов";
-"setting.appearance.widget::gallery::explain" = "Посмотрите, как выглядит каждый виджет";
+"setting.widget::title" = "Виджеты";
+"setting.widget::setting::title" = "Настройки виджетов";
 "setting.appearance.widget::gallery::section" = "Виджеты";
+"setting.appearance.widget::ddayCount::title" = "Считать D-Day как D+1";
+"setting.appearance.widget::ddayCount::description" = "Если включено, D-Day считается как D+1. Действует и в приложении, и в виджетах. Можно также включить это для отдельного виджета обратного отсчёта при его редактировании";
 "widget.gallery::lockScreen::label" = "%@ · Экран блокировки";
 "widget.weeks::group" = "События по неделям";
 "widget.size::small" = "Маленький";
@@ -912,3 +915,8 @@
 "legal_notice.message::terms" = "Наши Условия использования обновлены.";
 "legal_notice.message::privacy" = "Наша Политика конфиденциальности обновлена.";
 "legal_notice.effectiveDate" = "Вступает в силу %@";
+
+"ad.trackingGuide::title" = "Пара слов о рекламе";
+"ad.trackingGuide::message1" = "В To-do Calendar показывается реклама. Этот доход покрывает расходы на разработку и серверы.";
+"ad.trackingGuide::message2" = "Если на следующем экране вы разрешите отслеживание, вы будете видеть рекламу по своим интересам. Если откажетесь, приложение останется точно таким же.";
+"ad.trackingGuide::continue::button" = "Продолжить";

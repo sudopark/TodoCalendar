@@ -539,6 +539,7 @@
 "setting.appearance.event.edit::name_old" = "Rediger hendelse";
 "setting.appearance.event.edit::name" = "Hendelsesinnstillinger og eksterne kalendere";
 "setting.appearance.day_row_height" = "Detaljnivå for hendelser";
+"setting.appearance.month_auto_collapse" = "Slå sammen kalenderen automatisk";
 "setting.appearance.day_row_height::small::text" = "Minimal";
 "setting.appearance.day_row_height::medium::text" = "Middels";
 "setting.appearance.day_row_height::large::text" = "Full";
@@ -556,9 +557,11 @@
 "setting.appearance.widget::useSystemTheme::title" = "Bruk systemtema";
 "setting.appearance.widget::useSystemTheme::background" = "Bakgrunnsfarge for widget";
 "setting.appearance.widget::useCustomTheme::title" = "Velg egendefinert farge";
-"setting.appearance.widget::gallery::title" = "Widget-galleri";
-"setting.appearance.widget::gallery::explain" = "Se hvordan hver widget ser ut";
+"setting.widget::title" = "Widgets";
+"setting.widget::setting::title" = "Widgetinnstillinger";
 "setting.appearance.widget::gallery::section" = "Widgets";
+"setting.appearance.widget::ddayCount::title" = "Tell D-Day som D+1";
+"setting.appearance.widget::ddayCount::description" = "Når dette er på, telles D-Day som D+1. Gjelder både appen og widgetene. Du kan også slå det på for én enkelt D-dag-widget når du redigerer den";
 "widget.gallery::lockScreen::label" = "%@ · Låseskjerm";
 "widget.weeks::group" = "Ukehendelser";
 "widget.size::small" = "Liten";
@@ -913,3 +916,8 @@
 "legal_notice.message::terms" = "Brukervilkårene våre er oppdatert.";
 "legal_notice.message::privacy" = "Personvernerklæringen vår er oppdatert.";
 "legal_notice.effectiveDate" = "Gjelder fra %@";
+
+"ad.trackingGuide::title" = "Et par ord om annonser";
+"ad.trackingGuide::message1" = "To-do Calendar viser annonser. Inntektene dekker utvikling og servere.";
+"ad.trackingGuide::message2" = "Hvis du tillater sporing på neste skjerm, ser du annonser som passer interessene dine. Hvis du avslår, forblir appen nøyaktig som den er.";
+"ad.trackingGuide::continue::button" = "Fortsett";

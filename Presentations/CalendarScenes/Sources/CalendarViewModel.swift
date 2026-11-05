@@ -115,6 +115,8 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         let aiAgentState = CurrentValueSubject<AIAgentState?, Never>(nil)
         let isSignedIn = CurrentValueSubject<Bool, Never>(false)
         let isMonthCollapsed = CurrentValueSubject<Bool, Never>(false)
+        let isCalendarRowHeightSmall = CurrentValueSubject<Bool, Never>(false)
+        let isMonthAutoCollapseOn = CurrentValueSubject<Bool, Never>(false)
         let columnLayout = CurrentValueSubject<CalendarColumnLayout?, Never>(nil)
         let selectedDayInfo = CurrentValueSubject<SelectDayInfo?, Never>(nil)
     }
@@ -144,6 +146,8 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         self.bindEventUploadService()
         self.bindRefreshEvents()
         self.bindFocusedMonthChanged()
+        self.bindCalendarRowHeightSmall()
+        self.bindMonthAutoCollapse()
 
         self.accountUsecase.currentAccountInfo
             .map { $0 != nil }
@@ -159,6 +163,37 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
             .store(in: self.cancellables)
     }
     
+    private func bindCalendarRowHeightSmall() {
+
+        self.uiSettingUsecase.currentCalendarUISeting
+            .map { $0.rowHeight == .small }
+            .sink(receiveValue: { [weak self] isSmall in
+                self?.subject.isCalendarRowHeightSmall.send(isSmall)
+            })
+            .store(in: self.cancellables)
+    }
+
+    private func bindMonthAutoCollapse() {
+
+        self.uiSettingUsecase.currentCalendarUISeting
+            .map { $0.monthAutoCollapseIsOn }
+            .sink(receiveValue: { [weak self] isOn in
+                self?.subject.isMonthAutoCollapseOn.send(isOn)
+                if !isOn { self?.expandMonthIfCollapsed() }
+            })
+            .store(in: self.cancellables)
+    }
+
+    private func expandMonthIfCollapsed() {
+        guard self.subject.isMonthCollapsed.value else { return }
+        self.changeMonthCollapsed(false)
+    }
+
+    private func changeMonthCollapsed(_ isCollapsed: Bool) {
+        self.subject.isMonthCollapsed.send(isCollapsed)
+        self.calendarPaperInteractors?.forEach { $0.updateMonthCollapsed(isCollapsed) }
+    }
+
     private func bindRefreshEvents() {
         
         // Timezone 변경시에 조회중인 달력은 안바뀜 하지만 조회 가능한 범위는 달라짐
@@ -672,9 +707,10 @@ extension CalendarViewModelImple: CalendarPaperSceneListener {
     }
 
     func calendarPaperDidRequestToggleMonthCollapse() {
-        let newValue = !self.subject.isMonthCollapsed.value
-        self.subject.isMonthCollapsed.send(newValue)
-        self.calendarPaperInteractors?.forEach { $0.updateMonthCollapsed(newValue) }
+        guard self.subject.isMonthAutoCollapseOn.value,
+              !self.subject.isCalendarRowHeightSmall.value
+        else { return }
+        self.changeMonthCollapsed(!self.subject.isMonthCollapsed.value)
     }
 }
 

@@ -164,11 +164,20 @@ struct SettingItemListView: View {
     }
 
     private var updateBadge: some View {
+        self.newBadge(showsChevron: true)
+            .onTapGesture {
+                self.eventHandlers.openAppUpdate()
+            }
+    }
+
+    private func newBadge(showsChevron: Bool) -> some View {
         HStack(spacing: Metric.Spacing.xxsmall) {
             Text("new")
                 .font(self.appearance.fontSet.size(12, weight: .semibold).asFont)
-            Image(systemName: "chevron.right")
-                .font(self.appearance.fontSet.size(10, weight: .semibold).asFont)
+            if showsChevron {
+                Image(systemName: "chevron.right")
+                    .font(self.appearance.fontSet.size(10, weight: .semibold).asFont)
+            }
         }
         .foregroundStyle(self.appearance.colorSet.primaryBtnText.asColor)
         .padding(.horizontal, spacing: .small)
@@ -177,9 +186,6 @@ struct SettingItemListView: View {
             RoundedRectangle(cornerRadius: Metric.Radius.regular)
                 .fill(self.appearance.colorSet.primaryBtnBackground.asColor)
         )
-        .onTapGesture {
-            self.eventHandlers.openAppUpdate()
-        }
     }
     
     private func normalItemView(_ item: SettingItemModel) -> some View {
@@ -194,6 +200,12 @@ struct SettingItemListView: View {
                 .foregroundStyle(self.appearance.colorSet.text0.asColor)
             
             Spacer()
+                .overlay(alignment: .trailing) {
+                    if item.isNewBadgeVisible {
+                        self.newBadge(showsChevron: false)
+                            .padding(.trailing, spacing: .small)
+                    }
+                }
             
             Image(systemName: "chevron.right")
                 .font(self.appearance.fontSet.size(8).asFont)

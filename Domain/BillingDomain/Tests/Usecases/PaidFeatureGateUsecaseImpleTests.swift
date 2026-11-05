@@ -10,6 +10,7 @@ import Testing
 import Foundation
 import Prelude
 import Optics
+import BillingDomainTesting
 @testable import BillingDomain
 @testable import BillingDomainInterface
 @testable import SettingDomainInterface

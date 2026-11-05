@@ -148,7 +148,20 @@ extension AppSettingUsecaseImpleTests {
         // then
         XCTAssertEqual(newValue?.animationEffectIsOn, true)
     }
-    
+
+    func testUsecase_changeCalendarAppearanceSetting_onlyMonthAutoCollapse() throws {
+        // given
+        let usecase = self.makeUsecase()
+
+        // when
+        let params = EditCalendarAppearanceSettingParams()
+            |> \.monthAutoCollapseIsOn .~ true
+        let newValue = try usecase.changeCalendarAppearanceSetting(params)
+
+        // then
+        XCTAssertEqual(newValue.monthAutoCollapseIsOn, true)
+    }
+
     func testUsecase_whenAfterchangeCalendarSetting_notifyToViewAppearanceStore() {
         // given
         let usecase = self.makeUsecase()

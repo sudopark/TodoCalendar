@@ -538,6 +538,7 @@
 "setting.appearance.event.edit::name_old" = "编辑事件";
 "setting.appearance.event.edit::name" = "事件设置与外部日历";
 "setting.appearance.day_row_height" = "事件详情显示程度";
+"setting.appearance.month_auto_collapse" = "自动收起日历";
 "setting.appearance.day_row_height::small::text" = "最少";
 "setting.appearance.day_row_height::medium::text" = "适中";
 "setting.appearance.day_row_height::large::text" = "完整";
@@ -555,9 +556,11 @@
 "setting.appearance.widget::useSystemTheme::title" = "使用系统主题";
 "setting.appearance.widget::useSystemTheme::background" = "小组件背景颜色";
 "setting.appearance.widget::useCustomTheme::title" = "选择自定义颜色";
-"setting.appearance.widget::gallery::title" = "小组件图库";
-"setting.appearance.widget::gallery::explain" = "预览各个小组件的外观";
+"setting.widget::title" = "小组件";
+"setting.widget::setting::title" = "小组件设置";
 "setting.appearance.widget::gallery::section" = "小组件";
+"setting.appearance.widget::ddayCount::title" = "将 D-Day 计为 D+1";
+"setting.appearance.widget::ddayCount::description" = "开启后，D-Day 当天计为 D+1。同时适用于应用和小组件。也可以在编辑倒计时小组件时，为单个小组件单独开启";
 "widget.gallery::lockScreen::label" = "%@ · 锁定屏幕";
 "widget.weeks::group" = "按周显示的事件";
 "widget.size::small" = "小";
@@ -912,3 +915,8 @@
 "legal_notice.message::terms" = "我们的服务条款已更新。";
 "legal_notice.message::privacy" = "我们的隐私政策已更新。";
 "legal_notice.effectiveDate" = "生效日期 %@";
+
+"ad.trackingGuide::title" = "关于广告的几句话";
+"ad.trackingGuide::message1" = "To-do Calendar 会显示广告。这部分收入用于支付开发和服务器费用。";
+"ad.trackingGuide::message2" = "在下一个界面允许跟踪后，您会看到符合兴趣的广告。即使拒绝，应用也完全不受影响。";
+"ad.trackingGuide::continue::button" = "继续";

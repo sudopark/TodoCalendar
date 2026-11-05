@@ -43,6 +43,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var stubLiveActivityUsecase: StubEventLiveActivityUsecase!
     private var stubDDayCandidateUsecase: StubDDayCandidateUsecase!
     private var stubGuideTodoUsecase: StubGuideTodoUsecase!
+    private var stubAppReviewRequestUsecase: StubAppReviewRequestUsecase!
     private var spyRouter: SpyRouter!
     private var spyListener: SpyListener!
 
@@ -68,6 +69,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubLiveActivityUsecase = nil
         self.stubDDayCandidateUsecase = nil
         self.stubGuideTodoUsecase = nil
+        self.stubAppReviewRequestUsecase = nil
         self.spyRouter = nil
         self.spyListener = nil
         self.stubOrchestrationUsecase = nil
@@ -85,7 +87,8 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         isCreditExhausted: Bool = false,
         registeredLiveActivityTarget: LiveActivityTarget? = nil,
         registeredDDayCandidates: [DDayCandidate] = [],
-        isGuideTodoVisible: Bool = true
+        isGuideTodoVisible: Bool = true,
+        canRequestAppReview: Bool = false
     ) -> DayEventListViewModelImple {
         let currentTodos: [TodoEvent] = [
             .init(uuid: "current-todo-1", name: "current-todo-1") |> \.creatTimeStamp .~ 100,
@@ -125,6 +128,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubLiveActivityUsecase = StubEventLiveActivityUsecase(registeredTarget: registeredLiveActivityTarget)
         self.stubDDayCandidateUsecase = .init(registeredDDayCandidates)
         self.stubGuideTodoUsecase = .init(isVisible: isGuideTodoVisible)
+        self.stubAppReviewRequestUsecase = .init(canRequest: canRequestAppReview)
         let account: AccountInfo? = isSignedIn ? AccountInfo("uid") : nil
         let viewModel = DayEventListViewModelImple(
             calendarUsecase: StubCalendarUsecase(),
@@ -137,7 +141,8 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
             aiAgentOrchestrationUsecase: self.stubOrchestrationUsecase,
             eventLiveActivityUsecase: self.stubLiveActivityUsecase,
             ddayCandidateUsecase: self.stubDDayCandidateUsecase,
-            guideTodoUsecase: self.stubGuideTodoUsecase
+            guideTodoUsecase: self.stubGuideTodoUsecase,
+            appReviewRequestUsecase: self.stubAppReviewRequestUsecase
         )
         viewModel.router = self.spyRouter
         viewModel.attachListener(self.spyListener)
@@ -792,7 +797,8 @@ extension DayEventListViewModelImpleTests {
         shouldFailDoneTodo: Bool = false,
         shouldFailMakeTodo: Bool = false,
         registeredLiveActivityTarget: LiveActivityTarget? = nil,
-        registeredDDayCandidates: [DDayCandidate] = []
+        registeredDDayCandidates: [DDayCandidate] = [],
+        canRequestAppReview: Bool = false
     ) -> DayEventListViewModelImple {
         // given
         let expect = expectation(description: "wait first cells loaded")
@@ -801,7 +807,8 @@ extension DayEventListViewModelImpleTests {
             shouldFailDoneTodo: shouldFailDoneTodo,
             shouldFailMakeTodo: shouldFailMakeTodo,
             registeredLiveActivityTarget: registeredLiveActivityTarget,
-            registeredDDayCandidates: registeredDDayCandidates
+            registeredDDayCandidates: registeredDDayCandidates,
+            canRequestAppReview: canRequestAppReview
         )
 
         // when
@@ -1208,6 +1215,64 @@ extension DayEventListViewModelImpleTests {
         // then
         self.wait(for: [expect], timeout: self.timeout)
     }
+    
+    // pending cell 이 빠지는 방출이 저장 처리의 끝이다
+    private func addNewTodoQuicklyUntilPendingRemoved(_ viewModel: DayEventListViewModelImple) {
+        let expect = expectation(description: "빠른 todo 추가 처리 끝")
+        expect.expectedFulfillmentCount = 3
+        let _ = self.waitOutputs(expect, for: viewModel.cellViewModels, timeout: 0.1) {
+            viewModel.addNewTodoQuickly(withName: "pending-quick-todo")
+        }
+    }
+    
+    func testViewModel_whenAddNewTodoQuickly_recordNewEventSaved() {
+        // given
+        let viewModel = self.makeViewModelWithInitialListLoaded()
+        
+        // when
+        self.addNewTodoQuicklyUntilPendingRemoved(viewModel)
+        
+        // then
+        XCTAssertEqual(self.stubAppReviewRequestUsecase.recordedNewEventSavedCount, 1)
+    }
+    
+    func testViewModel_whenAddNewTodoQuicklyAndCanRequestReview_requestReview() {
+        // given
+        let viewModel = self.makeViewModelWithInitialListLoaded(canRequestAppReview: true)
+        
+        // when
+        self.addNewTodoQuicklyUntilPendingRemoved(viewModel)
+        
+        // then
+        XCTAssertEqual(self.stubAppReviewRequestUsecase.didMarkReviewRequested, true)
+        XCTAssertEqual(self.spyRouter.didRequestAppReview, true)
+    }
+    
+    func testViewModel_whenAddNewTodoQuicklyAndCannotRequestReview_notRequestReview() {
+        // given
+        let viewModel = self.makeViewModelWithInitialListLoaded(canRequestAppReview: false)
+        
+        // when
+        self.addNewTodoQuicklyUntilPendingRemoved(viewModel)
+        
+        // then
+        XCTAssertNil(self.stubAppReviewRequestUsecase.didMarkReviewRequested)
+        XCTAssertNil(self.spyRouter.didRequestAppReview)
+    }
+    
+    func testViewModel_whenAddNewTodoQuicklyFails_notRecordNewEventSaved() {
+        // given
+        let viewModel = self.makeViewModelWithInitialListLoaded(
+            shouldFailMakeTodo: true, canRequestAppReview: true
+        )
+        
+        // when
+        self.addNewTodoQuicklyUntilPendingRemoved(viewModel)
+        
+        // then
+        XCTAssertEqual(self.stubAppReviewRequestUsecase.recordedNewEventSavedCount, 0)
+        XCTAssertNil(self.spyRouter.didRequestAppReview)
+    }
 }
 
 // MARK: - test make events
@@ -1412,6 +1477,11 @@ extension DayEventListViewModelImpleTests {
         var didRouteToAIGuide: Bool?
         func routeToAIGuide() {
             self.didRouteToAIGuide = true
+        }
+
+        var didRequestAppReview: Bool?
+        func requestAppReview() {
+            self.didRequestAppReview = true
         }
 
         var didRouteToImageSourceSelectOnCancel: (@Sendable () -> Void)?

@@ -11,6 +11,7 @@ let project = Project.frameworkWithInterfaceAndTesting(
     ],
     dependencies: [
         .project(target: "BillingDomainInterface", path: .relativeToRoot("Domain/BillingDomain")),
+        .project(target: "EventDomainInterface", path: .relativeToRoot("Domain/EventDomain")),
         .project(target: "KernelUtils", path: .relativeToRoot("Domain/KernelUtils")),
         .project(target: "SettingDomainInterface", path: .relativeToRoot("Domain/SettingDomain")),
         .project(target: "StorageInfraInterface", path: .relativeToRoot("Repository/Infra/StorageInfra")),
@@ -24,6 +25,7 @@ let project = Project.frameworkWithInterfaceAndTesting(
     testDependencies: [
         .project(target: "BillingDomainInterface", path: .relativeToRoot("Domain/BillingDomain")),
         .project(target: "BillingDomainTesting", path: .relativeToRoot("Domain/BillingDomain")),
+        .project(target: "EventDomainInterface", path: .relativeToRoot("Domain/EventDomain")),
         .project(target: "KernelUtils", path: .relativeToRoot("Domain/KernelUtils")),
         .project(target: "SettingDomainInterface", path: .relativeToRoot("Domain/SettingDomain")),
         .project(target: "SettingDomainTesting", path: .relativeToRoot("Domain/SettingDomain")),

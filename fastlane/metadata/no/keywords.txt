@@ -1,1 +1,1 @@
-gjøremål,huskeliste,to do liste,planlegger,dagsplan,widget,tema,nedtelling,d-dag,påminnelser,ai
+planlegger,ukeplan,avtaler,gjøremål,huskeliste,to do liste,widget,nedtelling,påminnelser,google,ai

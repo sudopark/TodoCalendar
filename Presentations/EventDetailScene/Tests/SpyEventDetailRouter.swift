@@ -48,6 +48,11 @@ final class SpyEventDetailRouter: BaseSpyRouter, EventDetailRouting, @unchecked 
     func showShareSheet(text: String) {
         self.didShareText = text
     }
+
+    var didCloseSceneThenRequestAppReview: Bool?
+    func closeSceneThenRequestAppReview() {
+        self.didCloseSceneThenRequestAppReview = true
+    }
 }
 
 final class SpyEventDetailListener: EventDetailSceneListener {

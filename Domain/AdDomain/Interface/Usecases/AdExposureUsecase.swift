@@ -22,4 +22,8 @@ public protocol AdExposureUsecase: Sendable {
     ) -> Bool
 
     func recordFullScreenAdExposed(scope: FullScreenAdExposureRecord.Scope, at now: Date)
+
+    func canRequestTrackingAuthorization() async -> Bool
+
+    func recordTrackingGuideShown()
 }

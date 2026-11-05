@@ -39,6 +39,9 @@ extension CalendarSettingUsecaseImple {
         
         let currentTimeZone = self.settingRepository.loadUserSelectedTImeZone() ?? TimeZone.current
         self.shareDataStore.put(TimeZone.self, key: ShareDataKeys.timeZone.rawValue, currentTimeZone)
+        
+        let ddayCountsTargetDayAsOne = self.settingRepository.loadDDayCountsTargetDayAsOne() ?? false
+        self.shareDataStore.put(Bool.self, key: ShareDataKeys.ddayCountsTargetDayAsOne.rawValue, ddayCountsTargetDayAsOne)
     }
 }
 
@@ -88,6 +91,32 @@ extension CalendarSettingUsecaseImple {
         
         return self.shareDataStore
             .observe(TimeZone.self, key: shareKey)
+            .compactMap { $0 }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+}
+
+
+// MARK: - manage dday count option
+
+extension CalendarSettingUsecaseImple {
+    
+    public func updateDDayCountsTargetDayAsOne(_ newValue: Bool) {
+        self.settingRepository.saveDDayCountsTargetDayAsOne(newValue)
+        self.shareDataStore.put(
+            Bool.self,
+            key: ShareDataKeys.ddayCountsTargetDayAsOne.rawValue,
+            newValue
+        )
+    }
+    
+    public var ddayCountsTargetDayAsOne: AnyPublisher<Bool, Never> {
+        
+        let shareKey = ShareDataKeys.ddayCountsTargetDayAsOne.rawValue
+        
+        return self.shareDataStore
+            .observe(Bool.self, key: shareKey)
             .compactMap { $0 }
             .removeDuplicates()
             .eraseToAnyPublisher()
