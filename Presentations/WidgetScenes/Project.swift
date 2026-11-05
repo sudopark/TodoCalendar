@@ -26,6 +26,7 @@ let project = Project.frameworkWithTest(name: "WidgetScenes",
                                         ],
                                         testDependencies: [
                                             .project(target: "BillingDomainTesting", path: .relativeToRoot("Domain/BillingDomain")),
+                                            .project(target: "CalendarDomainTesting", path: .relativeToRoot("Domain/CalendarDomain")),
                                             .project(target: "EventDomainTesting", path: .relativeToRoot("Domain/EventDomain")),
                                             .project(target: "ExternalCalendarDomainTesting", path: .relativeToRoot("Domain/ExternalCalendarDomain")),
                                             .project(target: "SettingDomainTesting", path: .relativeToRoot("Domain/SettingDomain")),

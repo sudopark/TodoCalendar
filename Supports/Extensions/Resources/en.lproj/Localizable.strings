@@ -539,6 +539,7 @@
 "setting.appearance.event.edit::name_old" = "Edit Event";
 "setting.appearance.event.edit::name" = "Event settings and external calendars";
 "setting.appearance.day_row_height" = "Event detail display level";
+"setting.appearance.month_auto_collapse" = "Auto-collapse calendar";
 "setting.appearance.day_row_height::small::text" = "Minimal";
 "setting.appearance.day_row_height::medium::text" = "Medium";
 "setting.appearance.day_row_height::large::text" = "Full";
@@ -556,9 +557,11 @@
 "setting.appearance.widget::useSystemTheme::title" = "Use system theme";
 "setting.appearance.widget::useSystemTheme::background" = "Widget background color";
 "setting.appearance.widget::useCustomTheme::title" = "Select custom color";
-"setting.appearance.widget::gallery::title" = "Widget gallery";
-"setting.appearance.widget::gallery::explain" = "See how each widget looks";
+"setting.widget::title" = "Widgets";
+"setting.widget::setting::title" = "Widget Settings";
 "setting.appearance.widget::gallery::section" = "Widgets";
+"setting.appearance.widget::ddayCount::title" = "Count D-Day as D+1";
+"setting.appearance.widget::ddayCount::description" = "When on, the D-Day counts as D+1. Applies to both the app and widgets. You can also turn it on for a single D-Day widget in its widget edit settings";
 "widget.gallery::lockScreen::label" = "%@ · Lock Screen";
 "widget.weeks::group" = "Weekly events";
 "widget.size::small" = "Small";
@@ -913,3 +916,8 @@
 "legal_notice.message::terms" = "Our Terms of Service have been updated.";
 "legal_notice.message::privacy" = "Our Privacy Policy has been updated.";
 "legal_notice.effectiveDate" = "Effective %@";
+
+"ad.trackingGuide::title" = "A quick word about ads";
+"ad.trackingGuide::message1" = "To-do Calendar shows ads. That revenue covers development and server costs.";
+"ad.trackingGuide::message2" = "On the next screen, allowing tracking means you see ads that match your interests. Declining leaves the app exactly as it is.";
+"ad.trackingGuide::continue::button" = "Continue";

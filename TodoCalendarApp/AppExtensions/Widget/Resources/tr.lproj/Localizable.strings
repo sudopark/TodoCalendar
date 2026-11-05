@@ -12,6 +12,7 @@
 "Turn" = "Tekrarlama turu";
 "WidgetStyle" = "Widget stili";
 "Style" = "Stil";
+"Count D-Day as D+1" = "D-Day'i D+1 olarak say";
 "EventType" = "Etkinlik türü";
 "Event Types" = "Etkinlik türleri";
 "Exclude all day event" = "Tüm gün etkinliklerini hariç tut";

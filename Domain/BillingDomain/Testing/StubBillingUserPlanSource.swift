@@ -1,26 +1,25 @@
 //
 //  StubBillingUserPlanSource.swift
-//  BillingDomainTests
+//  BillingDomainTesting
 //
 //  Created by sudo.park on 10/9/26.
 //  Copyright © 2026 com.sudo.park. All rights reserved.
 //
 
 import Foundation
-@testable import BillingDomain
-@testable import BillingDomainInterface
+import BillingDomainInterface
 
 
 
-final class StubBillingUserPlanSource: BillingUserPlanSource, Sendable {
+public final class StubBillingUserPlanSource: BillingUserPlanSource, Sendable {
 
     private let plan: BillingUserPlan?
 
-    init(plan: BillingUserPlan?) {
+    public init(plan: BillingUserPlan?) {
         self.plan = plan
     }
 
-    func latestUserPlan() -> BillingUserPlan? {
+    public func latestUserPlan() -> BillingUserPlan? {
         return self.plan
     }
 }

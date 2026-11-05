@@ -3,3 +3,4 @@
 "NSSpeechRecognitionUsageDescription" = "Prepoznavanje govora potrebno je za pretvaranje vašeg glasa u događaje i zadatke.";
 "NSCameraUsageDescription" = "Pristup kameri potreban je za čitanje teksta s fotografije koju snimite.";
 "NSPhotoLibraryAddUsageDescription" = "Pristup fotografijama potreban je za spremanje slike događaja u vaše fotografije.";
+"NSUserTrackingUsageDescription" = "To-do Calendar je besplatan zahvaljujući oglasima. Ako dopustite praćenje, ti će oglasi biti relevantniji za vas.";

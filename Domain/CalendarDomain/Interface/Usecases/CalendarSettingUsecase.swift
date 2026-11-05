@@ -24,4 +24,8 @@ public protocol CalendarSettingUsecase {
     func loadAllTimeZones() -> [TimeZone]
     func selectTimeZone(_ timeZone: TimeZone)
     var currentTimeZone: AnyPublisher<TimeZone, Never> { get }
+    
+    // manage dday count option
+    func updateDDayCountsTargetDayAsOne(_ newValue: Bool)
+    var ddayCountsTargetDayAsOne: AnyPublisher<Bool, Never> { get }
 }

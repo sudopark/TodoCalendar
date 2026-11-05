@@ -38,7 +38,6 @@ final class MainViewController: UIViewController, MainScene {
     private let viewModel: any MainViewModel
     let viewAppearance: ViewAppearance
     private let mobileAdService: any MobileAdService
-    private let fullScreenAdRouter: (any FullScreenAdRouter)?
     private let adExposureUsecase: any AdExposureUsecase
     private let isInitialScene: Bool
     private var didPrepareAd: Bool = false
@@ -52,7 +51,6 @@ final class MainViewController: UIViewController, MainScene {
         viewModel: any MainViewModel,
         viewAppearance: ViewAppearance,
         mobileAdService: any MobileAdService,
-        fullScreenAdRouter: (any FullScreenAdRouter)?,
         adExposureUsecase: any AdExposureUsecase,
         adViewBuilder: (any AdViewBuilder)?,
         isInitialScene: Bool
@@ -60,7 +58,6 @@ final class MainViewController: UIViewController, MainScene {
         self.viewModel = viewModel
         self.viewAppearance = viewAppearance
         self.mobileAdService = mobileAdService
-        self.fullScreenAdRouter = fullScreenAdRouter
         self.adExposureUsecase = adExposureUsecase
         self.bottomBannerView = adViewBuilder?.makeBannerUIView(size: .banner)
         self.isInitialScene = isInitialScene
@@ -89,17 +86,15 @@ final class MainViewController: UIViewController, MainScene {
         self.didPrepareAd = true
         Task { @MainActor [weak self] in
             guard let self else { return }
-            await self.mobileAdService.presentConsentFormAndTrackingPromptIfNeeded(from: self)
+            await self.mobileAdService.presentConsentFormIfNeeded(from: self)
             if self.adExposureUsecase.shouldPreloadFullScreenAds() {
                 await self.mobileAdService.preloadFullScreenAd()
                 Task { [weak self] in
                     await self?.mobileAdService.preloadRewardedAd()
                 }
             }
-            
-            guard self.isInitialScene, self.isLaunchedFromAppIcon else { return }
-            self.fullScreenAdRouter?.showFullScreenAd(
-                from: self, scope: .application, isFromAppLaunch: true
+            self.viewModel.requestTrackingThenShowLaunchAd(
+                canShowLaunchAd: self.isInitialScene && self.isLaunchedFromAppIcon
             )
         }
     }
@@ -175,6 +170,13 @@ extension MainViewController {
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] models in
                 self?.legalNoticeBannerView.update(models)
+            })
+            .store(in: self.cancellables)
+
+        self.viewModel.hasNewFeatureBadge
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] hasBadge in
+                self?.headerView.settingBadgeView.isHidden = !hasBadge
             })
             .store(in: self.cancellables)
 
@@ -330,6 +332,7 @@ private final class HeaderView: UIView {
     let jumpButton = UIButton()
     let eventTypeFilterButton = UIButton()
     let settingButton = UIButton()
+    let settingBadgeView = UIView()
     
     func updateMigrationStatus(_ status: TemporaryUserDataMigrationStatus?) {
          self.migrationStatus = status
@@ -443,6 +446,17 @@ private final class HeaderView: UIView {
             $0.widthAnchor.constraint(equalToConstant: 25)
             $0.heightAnchor.constraint(equalToConstant: 25)
         }
+
+        settingButton.addSubview(settingBadgeView)
+        settingBadgeView.isHidden = true
+        settingBadgeView.isUserInteractionEnabled = false
+        settingBadgeView.layer.cornerRadius = 3.5
+        settingBadgeView.autoLayout.active(with: settingButton) {
+            $0.widthAnchor.constraint(equalToConstant: 7)
+            $0.heightAnchor.constraint(equalToConstant: 7)
+            $0.topAnchor.constraint(equalTo: $1.topAnchor)
+            $0.trailingAnchor.constraint(equalTo: $1.trailingAnchor)
+        }
     }
     
     func setupStyling(
@@ -478,5 +492,6 @@ private final class HeaderView: UIView {
         self.eventTypeFilterButton.setImage(UIImage(systemName: "line.3.horizontal.decrease.circle"), for: .normal)
         self.settingButton.tintColor = colorSet.text0
         self.settingButton.setImage(UIImage(systemName: "gearshape"), for: .normal)
+        self.settingBadgeView.backgroundColor = colorSet.accentWarn
     }
 }

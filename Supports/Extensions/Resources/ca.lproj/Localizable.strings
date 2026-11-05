@@ -539,6 +539,7 @@
 "setting.appearance.event.edit::name_old" = "Edita l'esdeveniment";
 "setting.appearance.event.edit::name" = "Configuració d'esdeveniments i calendaris externs";
 "setting.appearance.day_row_height" = "Nivell de detall dels esdeveniments";
+"setting.appearance.month_auto_collapse" = "Plega el calendari automàticament";
 "setting.appearance.day_row_height::small::text" = "Mínim";
 "setting.appearance.day_row_height::medium::text" = "Mitjà";
 "setting.appearance.day_row_height::large::text" = "Complet";
@@ -556,9 +557,11 @@
 "setting.appearance.widget::useSystemTheme::title" = "Utilitza el tema del sistema";
 "setting.appearance.widget::useSystemTheme::background" = "Color de fons del widget";
 "setting.appearance.widget::useCustomTheme::title" = "Selecciona un color personalitzat";
-"setting.appearance.widget::gallery::title" = "Galeria de widgets";
-"setting.appearance.widget::gallery::explain" = "Mireu com és cada widget";
+"setting.widget::title" = "Widgets";
+"setting.widget::setting::title" = "Configuració dels widgets";
 "setting.appearance.widget::gallery::section" = "Widgets";
+"setting.appearance.widget::ddayCount::title" = "Compta el D-Day com a D+1";
+"setting.appearance.widget::ddayCount::description" = "Si s'activa, el D-Day es compta com a D+1. S'aplica a l'app i als widgets. També el podeu activar per a un sol widget de Dia D des de la seva edició";
 "widget.gallery::lockScreen::label" = "%@ · Pantalla de bloqueig";
 "widget.weeks::group" = "Esdeveniments setmanals";
 "widget.size::small" = "Petit";
@@ -913,3 +916,8 @@
 "legal_notice.message::terms" = "Hem actualitzat les nostres Condicions del servei.";
 "legal_notice.message::privacy" = "Hem actualitzat la nostra Política de privadesa.";
 "legal_notice.effectiveDate" = "Vigent des del %@";
+
+"ad.trackingGuide::title" = "Unes paraules sobre els anuncis";
+"ad.trackingGuide::message1" = "To-do Calendar mostra anuncis. Aquests ingressos cobreixen el desenvolupament i els servidors.";
+"ad.trackingGuide::message2" = "A la pantalla següent, si permeteu el seguiment, veureu anuncis que s'ajusten als vostres interessos. Si ho rebutgeu, l'app continua exactament igual.";
+"ad.trackingGuide::continue::button" = "Continua";

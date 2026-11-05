@@ -14,6 +14,7 @@ import MemberSceneInterface
 import SceneInfra
 import SettingDomainInterface
 import SettingSceneInterface
+import WidgetGallerySceneInterface
 
 
 // MARK: - Routing
@@ -23,6 +24,7 @@ protocol SettingItemListRouting: Routing, Sendable {
     func routeToAppearanceSetting(
         inital setting: CalendarAppearanceSettings
     )
+    func routeToWidgetSetting(_ setting: WidgetAppearanceSettings)
     func routeToEventSetting()
     func routeToHolidaySetting()
     func routeToFeedbackPost()
@@ -39,6 +41,7 @@ protocol SettingItemListRouting: Routing, Sendable {
 final class SettingItemListRouter: BaseRouterImple, SettingItemListRouting, @unchecked Sendable {
 
     private let appearanceSceneBuilder: any AppearanceSettingSceneBuiler
+    private let widgetGallerySceneBuilder: any WidgetGallerySceneBuilder
     private let eventSettingSceneBuilder: any EventSettingSceneBuiler
     private let holidayListSceneBuilder: any HolidayListSceneBuiler
     private let memberSceneBuilder: any MemberSceneBuilder
@@ -49,6 +52,7 @@ final class SettingItemListRouter: BaseRouterImple, SettingItemListRouting, @unc
 
     init(
         appearanceSceneBuilder: any AppearanceSettingSceneBuiler,
+        widgetGallerySceneBuilder: any WidgetGallerySceneBuilder,
         eventSettingSceneBuilder: any EventSettingSceneBuiler,
         holidayListSceneBuilder: any HolidayListSceneBuiler,
         memberSceneBuilder: any MemberSceneBuilder,
@@ -58,6 +62,7 @@ final class SettingItemListRouter: BaseRouterImple, SettingItemListRouting, @unc
         privacyOptionsFormRouter: (any PrivacyOptionsFormRouter)?
     ) {
         self.appearanceSceneBuilder = appearanceSceneBuilder
+        self.widgetGallerySceneBuilder = widgetGallerySceneBuilder
         self.eventSettingSceneBuilder = eventSettingSceneBuilder
         self.holidayListSceneBuilder = holidayListSceneBuilder
         self.memberSceneBuilder = memberSceneBuilder
@@ -83,6 +88,13 @@ extension SettingItemListRouter {
             let next = self.appearanceSceneBuilder.makeAppearanceSettingScene(
                 inital: setting
             )
+            self.currentScene?.navigationController?.pushViewController(next, animated: true)
+        }
+    }
+    
+    func routeToWidgetSetting(_ setting: WidgetAppearanceSettings) {
+        Task { @MainActor in
+            let next = self.widgetGallerySceneBuilder.makeWidgetGalleryScene(setting: setting)
             self.currentScene?.navigationController?.pushViewController(next, animated: true)
         }
     }

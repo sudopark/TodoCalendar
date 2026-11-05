@@ -21,6 +21,7 @@ public final class EventDetailSceneBuilderImple {
     private let googleCalendarEventDetailSceneBuilder: any GoogleCalendarEventDetailSceneBuiler
     private let appleCalendarEventDetailSceneBuilder: any AppleCalendarEventDetailSceneBuilder
     private let settingSceneBuilder: any SettingSceneBuiler
+    private let appStoreReviewRouter: any AppStoreReviewRouter
 
     public init(
         usecaseFactory: any UsecaseFactory,
@@ -28,7 +29,8 @@ public final class EventDetailSceneBuilderImple {
         holidayEventDetailSceneBuilder: any HolidayEventDetailSceneBuiler,
         googleCalendarEventDetailSceneBuilder: any GoogleCalendarEventDetailSceneBuiler,
         appleCalendarEventDetailSceneBuilder: any AppleCalendarEventDetailSceneBuilder,
-        settingSceneBuilder: any SettingSceneBuiler
+        settingSceneBuilder: any SettingSceneBuiler,
+        appStoreReviewRouter: any AppStoreReviewRouter
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
@@ -36,6 +38,7 @@ public final class EventDetailSceneBuilderImple {
         self.googleCalendarEventDetailSceneBuilder = googleCalendarEventDetailSceneBuilder
         self.appleCalendarEventDetailSceneBuilder = appleCalendarEventDetailSceneBuilder
         self.settingSceneBuilder = settingSceneBuilder
+        self.appStoreReviewRouter = appStoreReviewRouter
     }
 }
 
@@ -52,7 +55,8 @@ extension EventDetailSceneBuilderImple: EventDetailSceneBuilder {
             calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
             eventDetailDataUsecase: self.usecaseFactory.makeEventDetailDataUsecase(),
             eventSettingUsecase: self.usecaseFactory.makeEventSettingUsecase(),
-            eventNotificationSettingUsecase: self.usecaseFactory.makeEventNotificationSettingUsecase()
+            eventNotificationSettingUsecase: self.usecaseFactory.makeEventNotificationSettingUsecase(),
+            appReviewRequestUsecase: self.usecaseFactory.makeAppReviewRequestUsecase()
         )
         
         return self.makeEventDetailScene(viewModel)
@@ -155,7 +159,8 @@ extension EventDetailSceneBuilderImple: EventDetailSceneBuilder {
             selectEventTagSceneBuilder: selectTagSceneBuilder,
             selectNotificationTimeSceneBuilder: selectNotificationTimeSceneBuilder,
             guideSceneBuilder: guideSceneBuilder,
-            selectMapSceneBuilder: selectMapSceneBuilder
+            selectMapSceneBuilder: selectMapSceneBuilder,
+            appStoreReviewRouter: self.appStoreReviewRouter
         )
         router.inputViewModel = inputViewModel
         router.scene = viewController

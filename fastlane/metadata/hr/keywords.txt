@@ -1,1 +1,1 @@
-popis zadataka,planer,rokovnik,organizator,podsjetnici,widget,tema,odbrojavanje,obveze,google,ai
+rokovnik,organizator,raspored,popis zadataka,obveze,podsjetnici,widget,odbrojavanje,google,ai

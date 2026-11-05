@@ -33,6 +33,7 @@ protocol DayEventListRouting: Routing, Sendable {
     func routeToAIKeyboardInput()
     func routeToImageSourceSelect(onCancel: @escaping @Sendable () -> Void)
     func routeToAIGuide()
+    func requestAppReview()
 }
 
 // MARK: - Router
@@ -47,6 +48,7 @@ final class DayEventListRouter: BaseRouterImple, DayEventListRouting, @unchecked
     private let sharePreviewSceneBuilder: any SharePreviewSceneBuilder
     private let imagePicker: ImagePicker = .init()
     private let viewAppearance: ViewAppearance
+    private let appStoreReviewRouter: any AppStoreReviewRouter
 
     init(
         eventDetailSceneBuilder: any EventDetailSceneBuilder,
@@ -55,7 +57,8 @@ final class DayEventListRouter: BaseRouterImple, DayEventListRouting, @unchecked
         aiKeyboardInputSceneBuilder: any AIAgentKeyboardInputSceneBuilder,
         aiImageCommandSceneBuilder: any AIAgentImageCommandSceneBuilder,
         sharePreviewSceneBuilder: any SharePreviewSceneBuilder,
-        viewAppearance: ViewAppearance
+        viewAppearance: ViewAppearance,
+        appStoreReviewRouter: any AppStoreReviewRouter
     ) {
         self.eventDetailSceneBuilder = eventDetailSceneBuilder
         self.eventListSceneBuilder = eventListSceneBuilder
@@ -64,6 +67,7 @@ final class DayEventListRouter: BaseRouterImple, DayEventListRouting, @unchecked
         self.aiImageCommandSceneBuilder = aiImageCommandSceneBuilder
         self.sharePreviewSceneBuilder = sharePreviewSceneBuilder
         self.viewAppearance = viewAppearance
+        self.appStoreReviewRouter = appStoreReviewRouter
     }
 }
 
@@ -175,5 +179,12 @@ extension DayEventListRouter {
 
     func routeToAIGuide() {
         self.showWebView(GuideLink.aiInputPath)
+    }
+
+    func requestAppReview() {
+        Task { @MainActor in
+            guard let windowScene = self.scene?.view.window?.windowScene else { return }
+            self.appStoreReviewRouter.requestAppReview(in: windowScene)
+        }
     }
 }

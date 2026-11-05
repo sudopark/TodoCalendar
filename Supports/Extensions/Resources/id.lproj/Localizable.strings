@@ -539,6 +539,7 @@
 "setting.appearance.event.edit::name_old" = "Edit Acara";
 "setting.appearance.event.edit::name" = "Pengaturan acara dan kalender eksternal";
 "setting.appearance.day_row_height" = "Tingkat tampilan detail acara";
+"setting.appearance.month_auto_collapse" = "Ciutkan kalender otomatis";
 "setting.appearance.day_row_height::small::text" = "Minimal";
 "setting.appearance.day_row_height::medium::text" = "Sedang";
 "setting.appearance.day_row_height::large::text" = "Penuh";
@@ -556,9 +557,11 @@
 "setting.appearance.widget::useSystemTheme::title" = "Gunakan tema sistem";
 "setting.appearance.widget::useSystemTheme::background" = "Warna latar belakang widget";
 "setting.appearance.widget::useCustomTheme::title" = "Pilih warna kustom";
-"setting.appearance.widget::gallery::title" = "Galeri widget";
-"setting.appearance.widget::gallery::explain" = "Lihat tampilan setiap widget";
+"setting.widget::title" = "Widget";
+"setting.widget::setting::title" = "Pengaturan Widget";
 "setting.appearance.widget::gallery::section" = "Widget";
+"setting.appearance.widget::ddayCount::title" = "Hitung D-Day sebagai D+1";
+"setting.appearance.widget::ddayCount::description" = "Jika aktif, D-Day dihitung sebagai D+1. Berlaku untuk aplikasi dan widget. Anda juga bisa mengaktifkannya untuk satu widget H-Day saja saat mengeditnya";
 "widget.gallery::lockScreen::label" = "%@ · Layar Kunci";
 "widget.weeks::group" = "Acara mingguan";
 "widget.size::small" = "Kecil";
@@ -913,3 +916,8 @@
 "legal_notice.message::terms" = "Ketentuan Layanan kami telah diperbarui.";
 "legal_notice.message::privacy" = "Kebijakan Privasi kami telah diperbarui.";
 "legal_notice.effectiveDate" = "Berlaku %@";
+
+"ad.trackingGuide::title" = "Sedikit tentang iklan";
+"ad.trackingGuide::message1" = "To-do Calendar menampilkan iklan. Pendapatan itu menutup biaya pengembangan dan server.";
+"ad.trackingGuide::message2" = "Di layar berikutnya, jika Anda mengizinkan pelacakan, iklan yang tampil akan sesuai minat Anda. Jika menolak, aplikasi tetap sama persis.";
+"ad.trackingGuide::continue::button" = "Lanjutkan";

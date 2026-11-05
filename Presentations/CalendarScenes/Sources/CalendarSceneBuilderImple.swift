@@ -30,6 +30,7 @@ public struct CalendarSceneBuilderImple {
     private let aiAgentImageCommandSceneBuilder: any AIAgentImageCommandSceneBuilder
     private let paywallSceneBuilder: any PaywallSceneBuilder
     private let fullScreenAdRouter: (any FullScreenAdRouter)?
+    private let appStoreReviewRouter: any AppStoreReviewRouter
     private let pendingCompleteTodoState: PendingCompleteTodoState = .init()
     public let calendarDeepLinkHandler = CalendarDeepLinkHandlerImple()
     private let eventDeepLinkHandler = EventDeepLinkHandlerImple()
@@ -45,7 +46,8 @@ public struct CalendarSceneBuilderImple {
         aiAgentKeyboardInputSceneBuilder: any AIAgentKeyboardInputSceneBuilder,
         aiAgentImageCommandSceneBuilder: any AIAgentImageCommandSceneBuilder,
         paywallSceneBuilder: any PaywallSceneBuilder,
-        fullScreenAdRouter: (any FullScreenAdRouter)?
+        fullScreenAdRouter: (any FullScreenAdRouter)?,
+        appStoreReviewRouter: any AppStoreReviewRouter
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
@@ -58,6 +60,7 @@ public struct CalendarSceneBuilderImple {
         self.aiAgentImageCommandSceneBuilder = aiAgentImageCommandSceneBuilder
         self.paywallSceneBuilder = paywallSceneBuilder
         self.fullScreenAdRouter = fullScreenAdRouter
+        self.appStoreReviewRouter = appStoreReviewRouter
     }
 
     private var eventListCellEventHanleViewModelBuilder: (any EventListCellEventHanleViewModelBuilder)?
@@ -112,7 +115,8 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
             memberSceneBuilder: self.memberSceneBuilder,
             aiKeyboardInputSceneBuilder: self.aiAgentKeyboardInputSceneBuilder,
             aiImageCommandSceneBuilder: self.aiAgentImageCommandSceneBuilder,
-            sharePreviewSceneBuilder: sharePreviewSceneBuilder
+            sharePreviewSceneBuilder: sharePreviewSceneBuilder,
+            appStoreReviewRouter: self.appStoreReviewRouter
         )
 
         let handleViewModelBuilder = EventListCellEventHanleViewModelBuilderImple(

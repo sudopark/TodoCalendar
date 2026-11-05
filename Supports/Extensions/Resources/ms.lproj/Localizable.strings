@@ -539,6 +539,7 @@
 "setting.appearance.event.edit::name_old" = "Edit Acara";
 "setting.appearance.event.edit::name" = "Tetapan acara dan kalendar luaran";
 "setting.appearance.day_row_height" = "Tahap paparan perincian acara";
+"setting.appearance.month_auto_collapse" = "Lipat kalendar secara automatik";
 "setting.appearance.day_row_height::small::text" = "Minimum";
 "setting.appearance.day_row_height::medium::text" = "Sederhana";
 "setting.appearance.day_row_height::large::text" = "Penuh";
@@ -556,9 +557,11 @@
 "setting.appearance.widget::useSystemTheme::title" = "Guna tema sistem";
 "setting.appearance.widget::useSystemTheme::background" = "Warna latar belakang widget";
 "setting.appearance.widget::useCustomTheme::title" = "Pilih warna tersuai";
-"setting.appearance.widget::gallery::title" = "Galeri widget";
-"setting.appearance.widget::gallery::explain" = "Lihat rupa setiap widget";
+"setting.widget::title" = "Widget";
+"setting.widget::setting::title" = "Tetapan Widget";
 "setting.appearance.widget::gallery::section" = "Widget";
+"setting.appearance.widget::ddayCount::title" = "Kira D-Day sebagai D+1";
+"setting.appearance.widget::ddayCount::description" = "Apabila dihidupkan, D-Day dikira sebagai D+1. Terpakai pada apl dan widget. Anda juga boleh menghidupkannya untuk satu widget Hari-D sahaja semasa mengeditnya";
 "widget.gallery::lockScreen::label" = "%@ · Skrin Kunci";
 "widget.weeks::group" = "Acara mingguan";
 "widget.size::small" = "Kecil";
@@ -913,3 +916,8 @@
 "legal_notice.message::terms" = "Terma Perkhidmatan kami telah dikemas kini.";
 "legal_notice.message::privacy" = "Dasar Privasi kami telah dikemas kini.";
 "legal_notice.effectiveDate" = "Berkuat kuasa %@";
+
+"ad.trackingGuide::title" = "Sedikit tentang iklan";
+"ad.trackingGuide::message1" = "To-do Calendar memaparkan iklan. Hasilnya menampung kos pembangunan dan pelayan.";
+"ad.trackingGuide::message2" = "Pada skrin seterusnya, jika anda membenarkan penjejakan, anda akan melihat iklan yang sesuai dengan minat anda. Jika anda menolak, apl kekal sama seperti sedia ada.";
+"ad.trackingGuide::continue::button" = "Teruskan";

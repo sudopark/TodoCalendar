@@ -11,23 +11,27 @@ import CommonPresentation
 import BillingSceneInterface
 import SettingDomainInterface
 import WidgetGallerySceneInterface
+import CalendarDomainInterface
 
 
 public final class WidgetGalleryBuilderImple {
 
     private let uiSettingUsecase: any UISettingUsecase
     private let widgetStyleUsecase: any WidgetStyleUsecase
+    private let calendarSettingUsecase: any CalendarSettingUsecase
     private let adGuideSceneBuilder: any PaidFeatureAdGuideSceneBuilder
     private let viewAppearance: ViewAppearance
 
     public init(
         uiSettingUsecase: any UISettingUsecase,
         widgetStyleUsecase: any WidgetStyleUsecase,
+        calendarSettingUsecase: any CalendarSettingUsecase,
         adGuideSceneBuilder: any PaidFeatureAdGuideSceneBuilder,
         viewAppearance: ViewAppearance
     ) {
         self.uiSettingUsecase = uiSettingUsecase
         self.widgetStyleUsecase = widgetStyleUsecase
+        self.calendarSettingUsecase = calendarSettingUsecase
         self.adGuideSceneBuilder = adGuideSceneBuilder
         self.viewAppearance = viewAppearance
     }
@@ -43,7 +47,8 @@ extension WidgetGalleryBuilderImple: WidgetGallerySceneBuilder {
         let viewModel = WidgetGalleryViewModelImple(
             setting: setting,
             uiSettingUsecase: self.uiSettingUsecase,
-            widgetStyleUsecase: self.widgetStyleUsecase
+            widgetStyleUsecase: self.widgetStyleUsecase,
+            calendarSettingUsecase: self.calendarSettingUsecase
         )
         let viewController = WidgetGalleryViewController(
             viewModel: viewModel, viewAppearance: viewAppearance

@@ -540,6 +540,7 @@
 "setting.appearance.event.edit::name_old" = "이벤트 수정";
 "setting.appearance.event.edit::name" = "이벤트 설정 및 외부 캘린더";
 "setting.appearance.day_row_height" = "이벤트에 표시되는 정보의 양";
+"setting.appearance.month_auto_collapse" = "달력 자동 접기";
 "setting.appearance.day_row_height::small::text" = "최소한";
 "setting.appearance.day_row_height::medium::text" = "보통";
 "setting.appearance.day_row_height::large::text" = "모두";
@@ -557,9 +558,11 @@
 "setting.appearance.widget::useSystemTheme::title" = "시스템 테마";
 "setting.appearance.widget::useSystemTheme::background" = "위젯 배경 색";
 "setting.appearance.widget::useCustomTheme::title" = "커스텀 색상 선택";
-"setting.appearance.widget::gallery::title" = "위젯 갤러리";
-"setting.appearance.widget::gallery::explain" = "위젯별 모양을 미리 봅니다";
+"setting.widget::title" = "위젯";
+"setting.widget::setting::title" = "위젯 설정";
 "setting.appearance.widget::gallery::section" = "위젯";
+"setting.appearance.widget::ddayCount::title" = "D-Day를 D+1로 세기";
+"setting.appearance.widget::ddayCount::description" = "켜면 디데이 당일을 D+1로 셉니다. 앱과 위젯에 함께 적용되고, 디데이 위젯 편집에서 위젯마다 따로 켤 수도 있습니다";
 "widget.gallery::lockScreen::label" = "%@ · 잠금화면";
 "widget.weeks::group" = "주 단위 일정";
 "widget.size::small" = "작게";
@@ -914,3 +917,8 @@
 "legal_notice.message::terms" = "이용약관이 개정됐어요.";
 "legal_notice.message::privacy" = "개인정보처리방침이 개정됐어요.";
 "legal_notice.effectiveDate" = "시행일 %@";
+
+"ad.trackingGuide::title" = "잠깐, 광고 이야기예요";
+"ad.trackingGuide::message1" = "To-do Calendar 에는 광고가 붙어요. 그 수익으로 개발과 서버 비용을 대고 있어요.";
+"ad.trackingGuide::message2" = "다음 화면에서 추적을 허용하면 내 관심사에 맞는 광고가 떠요. 거절해도 앱은 그대로 쓸 수 있어요.";
+"ad.trackingGuide::continue::button" = "다음으로";

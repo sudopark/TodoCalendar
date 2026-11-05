@@ -1,1 +1,1 @@
-tehtävälista,muistilista,ajanhallinta,widget,teema,lähtölaskenta,muistutukset,google,tekoäly
+päivyri,suunnittelija,aikataulu,tehtävälista,widget,lähtölaskenta,muistutukset,google,tekoäly

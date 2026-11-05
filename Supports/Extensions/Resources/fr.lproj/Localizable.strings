@@ -539,6 +539,7 @@
 "setting.appearance.event.edit::name_old" = "Modifier l'événement";
 "setting.appearance.event.edit::name" = "Réglages des événements et calendriers externes";
 "setting.appearance.day_row_height" = "Niveau de détail des événements";
+"setting.appearance.month_auto_collapse" = "Réduire le calendrier automatiquement";
 "setting.appearance.day_row_height::small::text" = "Minimal";
 "setting.appearance.day_row_height::medium::text" = "Moyen";
 "setting.appearance.day_row_height::large::text" = "Complet";
@@ -556,9 +557,11 @@
 "setting.appearance.widget::useSystemTheme::title" = "Utiliser le thème système";
 "setting.appearance.widget::useSystemTheme::background" = "Couleur de fond du widget";
 "setting.appearance.widget::useCustomTheme::title" = "Sélectionner une couleur personnalisée";
-"setting.appearance.widget::gallery::title" = "Galerie de widgets";
-"setting.appearance.widget::gallery::explain" = "Découvrez l'aspect de chaque widget";
+"setting.widget::title" = "Widgets";
+"setting.widget::setting::title" = "Réglages des widgets";
 "setting.appearance.widget::gallery::section" = "Widgets";
+"setting.appearance.widget::ddayCount::title" = "Compter le D-Day comme D+1";
+"setting.appearance.widget::ddayCount::description" = "Une fois activé, le D-Day compte comme D+1. S'applique à l'app et aux widgets. Vous pouvez aussi l'activer pour un seul widget Jour J en le modifiant";
 "widget.gallery::lockScreen::label" = "%@ · Écran verrouillé";
 "widget.weeks::group" = "Événements de la semaine";
 "widget.size::small" = "Petit";
@@ -913,3 +916,8 @@
 "legal_notice.message::terms" = "Nos conditions d'utilisation ont été mises à jour.";
 "legal_notice.message::privacy" = "Notre politique de confidentialité a été mise à jour.";
 "legal_notice.effectiveDate" = "En vigueur le %@";
+
+"ad.trackingGuide::title" = "Un mot sur les publicités";
+"ad.trackingGuide::message1" = "To-do Calendar affiche des publicités. Ces revenus couvrent les coûts de développement et de serveurs.";
+"ad.trackingGuide::message2" = "Sur l'écran suivant, si vous autorisez le suivi, vous verrez des publicités adaptées à vos centres d'intérêt. Si vous refusez, l'app reste exactement la même.";
+"ad.trackingGuide::continue::button" = "Continuer";

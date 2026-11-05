@@ -13,6 +13,8 @@ import Combine
 import Prelude
 import Optics
 import Extensions
+import AdService
+import AdDomainInterface
 import AIDomainInterface
 import BillingDomainInterface
 import CalendarDomainInterface
@@ -56,6 +58,7 @@ protocol MainViewModel: AnyObject, Sendable, MainSceneInteractor {
     func jumpDate()
     func openLegalNoticeDocument(_ documentType: LegalDocumentType)
     func closeLegalNoticeBanner(_ documentType: LegalDocumentType)
+    func requestTrackingThenShowLaunchAd(canShowLaunchAd: Bool)
 
     // presenter
     var currentMonth: AnyPublisher<CurrentMonth, Never> { get }
@@ -64,6 +67,7 @@ protocol MainViewModel: AnyObject, Sendable, MainSceneInteractor {
     var isLoadingCalendarEvents: AnyPublisher<Bool, Never> { get }
     var isLoadingAllEvents: AnyPublisher<Bool, Never> { get }
     var legalNoticeBanners: AnyPublisher<[LegalNoticeBannerModel], Never> { get }
+    var hasNewFeatureBadge: AnyPublisher<Bool, Never> { get }
 }
 
 
@@ -83,9 +87,12 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
     private let aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
     private let eventLiveActivityUsecase: any EventLiveActivityUsecase
     private let guideTodoUsecase: any GuideTodoUsecase
+    private let newFeatureBadgeUsecase: any NewFeatureBadgeUsecase
     private let legalNoticeUsecase: any LegalNoticeUsecase
     private let foremostEventUsecase: any ForemostEventUsecase
     private let paidFeatureGateUsecase: any PaidFeatureGateUsecase
+    private let adExposureUsecase: any AdExposureUsecase
+    private let mobileAdService: any MobileAdService
     var router: (any MainRouting)?
 
     init(
@@ -101,9 +108,12 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
         aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase,
         eventLiveActivityUsecase: any EventLiveActivityUsecase,
         guideTodoUsecase: any GuideTodoUsecase,
+        newFeatureBadgeUsecase: any NewFeatureBadgeUsecase,
         legalNoticeUsecase: any LegalNoticeUsecase,
         foremostEventUsecase: any ForemostEventUsecase,
-        paidFeatureGateUsecase: any PaidFeatureGateUsecase
+        paidFeatureGateUsecase: any PaidFeatureGateUsecase,
+        adExposureUsecase: any AdExposureUsecase,
+        mobileAdService: any MobileAdService
     ) {
         self.uiSettingUsecase = uiSettingUsecase
         self.temporaryUserDataMigrationUsecase = temporaryUserDataMigrationUsecase
@@ -117,9 +127,12 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
         self.aiAgentOrchestrationUsecase = aiAgentOrchestrationUsecase
         self.eventLiveActivityUsecase = eventLiveActivityUsecase
         self.guideTodoUsecase = guideTodoUsecase
+        self.newFeatureBadgeUsecase = newFeatureBadgeUsecase
         self.legalNoticeUsecase = legalNoticeUsecase
         self.foremostEventUsecase = foremostEventUsecase
         self.paidFeatureGateUsecase = paidFeatureGateUsecase
+        self.adExposureUsecase = adExposureUsecase
+        self.mobileAdService = mobileAdService
 
         self.internalBinding()
     }
@@ -197,6 +210,7 @@ extension MainViewModelImple {
         self.billingUsecase.startObservingTransactions()
         self.billingUsecase.recoverUnfinishedTransactions()
         self.guideTodoUsecase.prepare()
+        self.newFeatureBadgeUsecase.prepare()
         self.legalNoticeUsecase.checkNoticeIsNeed()
         Task { [weak self] in
             await self?.eventLiveActivityUsecase.prepare()
@@ -404,6 +418,12 @@ extension MainViewModelImple {
             .eraseToAnyPublisher()
     }
     
+    var hasNewFeatureBadge: AnyPublisher<Bool, Never> {
+        return self.newFeatureBadgeUsecase.uncheckedBadges
+            .map { !$0.isEmpty }
+            .eraseToAnyPublisher()
+    }
+    
     var isLoadingCalendarEvents: AnyPublisher<Bool, Never> {
         return self.eventSyncUsecase.isSyncInProgress
             .eraseToAnyPublisher()
@@ -442,5 +462,43 @@ extension MainViewModelImple {
                 }
             }
             .eraseToAnyPublisher()
+    }
+}
+
+
+// MARK: - 추적 권한 요청
+
+extension MainViewModelImple {
+
+    func requestTrackingThenShowLaunchAd(canShowLaunchAd: Bool) {
+        Task { [weak self] in
+            guard let self else { return }
+            guard await self.adExposureUsecase.canRequestTrackingAuthorization() else {
+                self.showLaunchAdIfCan(canShowLaunchAd)
+                return
+            }
+
+            self.adExposureUsecase.recordTrackingGuideShown()
+            self.router?.showTrackingGuide(
+                onContinue: { [weak self] in
+                    self?.requestSystemTrackingThenShowLaunchAd(canShowLaunchAd)
+                },
+                onDecline: { [weak self] in
+                    self?.showLaunchAdIfCan(canShowLaunchAd)
+                }
+            )
+        }
+    }
+
+    private func requestSystemTrackingThenShowLaunchAd(_ canShowLaunchAd: Bool) {
+        Task { @MainActor [weak self] in
+            await self?.mobileAdService.requestTrackingAuthorization()
+            self?.showLaunchAdIfCan(canShowLaunchAd)
+        }
+    }
+
+    private func showLaunchAdIfCan(_ canShowLaunchAd: Bool) {
+        guard canShowLaunchAd else { return }
+        self.router?.showLaunchFullScreenAd()
     }
 }

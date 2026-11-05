@@ -539,6 +539,7 @@
 "setting.appearance.event.edit::name_old" = "Redigera händelse";
 "setting.appearance.event.edit::name" = "Händelseinställningar och externa kalendrar";
 "setting.appearance.day_row_height" = "Detaljnivå för händelser";
+"setting.appearance.month_auto_collapse" = "Fäll ihop kalendern automatiskt";
 "setting.appearance.day_row_height::small::text" = "Minimal";
 "setting.appearance.day_row_height::medium::text" = "Medium";
 "setting.appearance.day_row_height::large::text" = "Full";
@@ -556,9 +557,11 @@
 "setting.appearance.widget::useSystemTheme::title" = "Använd systemtema";
 "setting.appearance.widget::useSystemTheme::background" = "Bakgrundsfärg för widget";
 "setting.appearance.widget::useCustomTheme::title" = "Välj anpassad färg";
-"setting.appearance.widget::gallery::title" = "Widgetgalleri";
-"setting.appearance.widget::gallery::explain" = "Se hur varje widget ser ut";
+"setting.widget::title" = "Widgetar";
+"setting.widget::setting::title" = "Widgetinställningar";
 "setting.appearance.widget::gallery::section" = "Widgetar";
+"setting.appearance.widget::ddayCount::title" = "Räkna D-Day som D+1";
+"setting.appearance.widget::ddayCount::description" = "När det är på räknas D-Day som D+1. Gäller både appen och widgetarna. Du kan också slå på det för en enskild D-dag-widget när du redigerar den";
 "widget.gallery::lockScreen::label" = "%@ · Låsskärm";
 "widget.weeks::group" = "Veckohändelser";
 "widget.size::small" = "Liten";
@@ -913,3 +916,8 @@
 "legal_notice.message::terms" = "Våra användarvillkor har uppdaterats.";
 "legal_notice.message::privacy" = "Vår integritetspolicy har uppdaterats.";
 "legal_notice.effectiveDate" = "Gäller från %@";
+
+"ad.trackingGuide::title" = "Kort om annonser";
+"ad.trackingGuide::message1" = "To-do Calendar visar annonser. Intäkterna täcker utveckling och servrar.";
+"ad.trackingGuide::message2" = "Om du tillåter spårning på nästa skärm ser du annonser som passar dina intressen. Om du nekar förblir appen precis som den är.";
+"ad.trackingGuide::continue::button" = "Fortsätt";

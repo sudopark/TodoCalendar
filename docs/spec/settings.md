@@ -15,6 +15,7 @@
 | 첫째 요일 | Repository (SQLite) | 일~토 | `.sunday` |
 | 이벤트 있는 날 밑줄 | `show_underline_eventday` | on/off | `true` |
 | 행 높이 | `calendar_row_height` | 소/중/대 | `.medium` (rawValue: 0) |
+| 달력 자동 접기 | `calendar_month_auto_collapse` | on/off | `false` |
 | 캘린더 내 이벤트 텍스트 크기 | `event_on_calendar_additional_font_size` | CGFloat 조절 | `0` |
 | 캘린더 내 이벤트 볼드 | `bold_text_event_on_calendar` | on/off | `false` |
 | 캘린더 내 태그 색상 표시 | `not_show_event_tag_color_on_calendar` | on/off | `false` (반전 키: 표시=true) |
@@ -43,6 +44,7 @@
 |---|---|---|---|
 | 첫째 요일 | ✅ 그리드 재구성 | — | ✅ 주/월 위젯 |
 | 행 높이 | ✅ 셀 높이 + "+N" 재계산 | — | — |
+| 달력 자동 접기 | ✅ 켜져 있을 때만 같은 날짜 재탭으로 접힘, 접힌 채 끄면 펼침 | — | — |
 | 이벤트 텍스트 크기/볼드 | ✅ 이벤트 바 폰트 | — | — |
 | 태그 색상 표시 | ✅ 색상 바 표시/숨김 | — | — |
 | 목록 텍스트 크기 | — | ✅ 셀 폰트 | — |
@@ -100,6 +102,25 @@
 | 공휴일(holiday) 태그 | `holiday_tag_color` | `"#D6236A"` (분홍색) |
 
 색상 변경 시 SharedDataStore `defaultEventTagColor` 키로 전파 → 캘린더, 이벤트 목록, 위젯 모두 반영.
+
+### 7 위젯 설정
+
+설정 메인 목록의 외관 바로 아래 "위젯" 항목이 위젯 설정 화면(WidgetScenes 의 갤러리)을 연다. 진입점은 이 항목 하나다.
+
+| 설정 | 저장 키 | 기본값 | 반영 |
+|---|---|---|---|
+| 위젯 테마 (시스템·커스텀 배경) | `widget_background` | 시스템 | 위젯 배경 |
+| D-Day 를 D+1 로 세기 | `dday_counts_target_day_as_one` | off | 이벤트 상세 4종·디데이 위젯 (규칙은 [`infrastructure.md §4.1`](infrastructure.md)) |
+
+### 8 새 기능 뱃지
+
+`NewFeatureBadgeUsecase` 가 기능별 키(`NewFeatureBadge`)로 확인 여부를 기기에 남긴다 (저장 키 `checked_new_feature_badges`). 확인 안 한 기능이 있으면 메인 화면 설정 버튼에 빨간 점이, 해당 설정 항목에 "new" 캡슐이 붙는다. 그 항목을 눌러 화면을 열면 확인으로 기록되어 둘 다 사라진다.
+
+| 뱃지 | 붙는 항목 |
+|---|---|
+| `widgetSetting` | 설정 메인 "위젯" |
+
+새 기능을 알리려면 `NewFeatureBadge` 에 case 를 더하고 그 항목 진입에서 `markChecked` 를 부른다. 신규 설치 유저에게도 뜬다.
 
 ---
 
