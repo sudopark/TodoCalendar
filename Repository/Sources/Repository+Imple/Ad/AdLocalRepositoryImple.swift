@@ -18,23 +18,23 @@ public final class AdLocalRepositoryImple: AdRepository, Sendable {
         self.environmentStorage = environmentStorage
     }
 
-    private var exposureRecordsKey: String { EnvironmentKeys.fullScreenAdExposureRecords.rawValue }
+    private var exposureRecordKey: String { EnvironmentKeys.fullScreenAdExposureRecord.rawValue }
     private var trackingGuideShownKey: String { EnvironmentKeys.trackingGuideShown.rawValue }
 }
 
 extension AdLocalRepositoryImple {
 
-    public func loadFullScreenAdExposureRecords() -> [FullScreenAdExposureRecord] {
-        let mappers: [FullScreenAdExposureRecordMapper]? = self.environmentStorage.load(
-            self.exposureRecordsKey
+    public func loadFullScreenAdExposureRecord() -> FullScreenAdExposureRecord? {
+        let mapper: FullScreenAdExposureRecordMapper? = self.environmentStorage.load(
+            self.exposureRecordKey
         )
-        return mappers?.map { $0.record } ?? []
+        return mapper?.record
     }
 
     public func updateFullScreenAdExposureRecord(_ record: FullScreenAdExposureRecord) {
-        let others = self.loadFullScreenAdExposureRecords().filter { $0.scope != record.scope }
-        let mappers = (others + [record]).map { FullScreenAdExposureRecordMapper(record: $0) }
-        self.environmentStorage.update(self.exposureRecordsKey, mappers)
+        self.environmentStorage.update(
+            self.exposureRecordKey, FullScreenAdExposureRecordMapper(record: record)
+        )
     }
 
     public func loadHasShownTrackingGuide() -> Bool {

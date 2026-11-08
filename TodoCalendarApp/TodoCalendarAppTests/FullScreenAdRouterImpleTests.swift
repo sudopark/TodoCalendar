@@ -57,7 +57,7 @@ final class FullScreenAdRouterImpleTests: AsyncEffectWaitable {
         )
         presented.setting.onDismissed = {
             presented.didRequestAd = true
-            router.show(from: presented.host, scope: .application, isFromAppLaunch: false)
+            router.show(from: presented.host)
         }
         var didPresent = false
         host.present(presented.setting, animated: false) { didPresent = true }
@@ -127,7 +127,7 @@ extension FullScreenAdRouterImpleTests {
         viewController.loadViewIfNeeded()
 
         // when
-        router.show(from: viewController, scope: .application, isFromAppLaunch: false)
+        router.show(from: viewController)
         try await Task.sleep(for: .milliseconds(50))
 
         // then
@@ -188,15 +188,11 @@ private final class StubAdExposureUsecase: AdExposureUsecase, @unchecked Sendabl
 
     func shouldPreloadFullScreenAds() -> Bool { true }
 
-    func canExposeFullScreenAd(
-        scope: FullScreenAdExposureRecord.Scope,
-        isFromAppLaunch: Bool,
-        at now: Date
-    ) -> Bool {
+    func canExposeFullScreenAd(at now: Date) -> Bool {
         return self.canExpose
     }
 
-    func recordFullScreenAdExposed(scope: FullScreenAdExposureRecord.Scope, at now: Date) { }
+    func recordFullScreenAdExposed(at now: Date) { }
 
     func canRequestTrackingAuthorization() async -> Bool { false }
 

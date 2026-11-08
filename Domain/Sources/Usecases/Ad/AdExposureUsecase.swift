@@ -16,13 +16,9 @@ public protocol AdExposureUsecase: Sendable {
 
     func shouldPreloadFullScreenAds() -> Bool
 
-    func canExposeFullScreenAd(
-        scope: FullScreenAdExposureRecord.Scope,
-        isFromAppLaunch: Bool,
-        at now: Date
-    ) -> Bool
+    func canExposeFullScreenAd(at now: Date) -> Bool
 
-    func recordFullScreenAdExposed(scope: FullScreenAdExposureRecord.Scope, at now: Date)
+    func recordFullScreenAdExposed(at now: Date)
 
     func canRequestTrackingAuthorization() async -> Bool
 
@@ -33,8 +29,8 @@ public protocol AdExposureUsecase: Sendable {
 public final class AdExposureUsecaseImple: AdExposureUsecase, Sendable {
 
     private enum Constant {
-        static let appLaunchColdLaunchCountThreshold: Int = 10
-        static let appLaunchElapsedDaysThreshold: Int = 7
+        static let fullScreenAdDailyLimit: Int = 3
+        static let fullScreenAdMinInterval: TimeInterval = 30 * 60
     }
 
     private let adAvailability: any MobileAdAvailability
@@ -42,8 +38,6 @@ public final class AdExposureUsecaseImple: AdExposureUsecase, Sendable {
     private let adRepository: any AdRepository
     private let coldLaunchHistoryRepository: any AppColdLaunchHistoryRepository
     private let userEventExistenceRepository: any UserEventExistenceRepository
-    private let paidFeatureGateUsecase: any PaidFeatureGateUsecase
-    private let sharedDataStore: SharedDataStore
     private let calendar: Calendar
 
     public init(
@@ -52,8 +46,6 @@ public final class AdExposureUsecaseImple: AdExposureUsecase, Sendable {
         adRepository: any AdRepository,
         coldLaunchHistoryRepository: any AppColdLaunchHistoryRepository,
         userEventExistenceRepository: any UserEventExistenceRepository,
-        paidFeatureGateUsecase: any PaidFeatureGateUsecase,
-        sharedDataStore: SharedDataStore,
         calendar: Calendar = .current
     ) {
         self.adAvailability = adAvailability
@@ -61,8 +53,6 @@ public final class AdExposureUsecaseImple: AdExposureUsecase, Sendable {
         self.adRepository = adRepository
         self.coldLaunchHistoryRepository = coldLaunchHistoryRepository
         self.userEventExistenceRepository = userEventExistenceRepository
-        self.paidFeatureGateUsecase = paidFeatureGateUsecase
-        self.sharedDataStore = sharedDataStore
         self.calendar = calendar
     }
 }
@@ -92,53 +82,30 @@ extension AdExposureUsecaseImple {
         return planId == .free
     }
 
-    public func canExposeFullScreenAd(
-        scope: FullScreenAdExposureRecord.Scope,
-        isFromAppLaunch: Bool,
-        at now: Date
-    ) -> Bool {
+    public func canExposeFullScreenAd(at now: Date) -> Bool {
         guard self.billingUsecase.latestUserPlan()?.planId == .free,
-              self.isExposedToday(scope, at: now) == false
+              self.isPastInstallDay(at: now)
         else { return false }
-        guard isFromAppLaunch else { return true }
-        return self.isUsingExpiredPaidTheme(at: now) == false
-            && self.satisfiesAppLaunchConditions(at: now)
+        guard let record = self.adRepository.loadFullScreenAdExposureRecord() else { return true }
+        return self.countOfToday(record, at: now) < Constant.fullScreenAdDailyLimit
+            && now.timeIntervalSince(record.lastExposeDate) >= Constant.fullScreenAdMinInterval
     }
 
-    public func recordFullScreenAdExposed(
-        scope: FullScreenAdExposureRecord.Scope, at now: Date
-    ) {
+    public func recordFullScreenAdExposed(at now: Date) {
+        let countOfToday = self.adRepository.loadFullScreenAdExposureRecord()
+            .map { self.countOfToday($0, at: now) } ?? 0
         self.adRepository.updateFullScreenAdExposureRecord(
-            .init(scope: scope, lastExposeDate: now)
+            .init(lastExposeDate: now, countOfDay: countOfToday + 1)
         )
     }
 
-    private func isExposedToday(
-        _ scope: FullScreenAdExposureRecord.Scope, at now: Date
-    ) -> Bool {
-        return self.adRepository.loadFullScreenAdExposureRecords()
-            .first { $0.scope == scope }
-            .map { self.calendar.isDate($0.lastExposeDate, inSameDayAs: now) } ?? false
+    private func isPastInstallDay(at now: Date) -> Bool {
+        return self.coldLaunchHistoryRepository.loadColdLaunchHistory()
+            .elapsedDaysFromFirstLaunch(to: now, self.calendar) >= 1
     }
 
-    private func satisfiesAppLaunchConditions(at now: Date) -> Bool {
-        let history = self.coldLaunchHistoryRepository.loadColdLaunchHistory()
-        return history.isFirstLaunchOfDay(self.calendar)
-            && history.count >= Constant.appLaunchColdLaunchCountThreshold
-            && history.elapsedDaysFromFirstLaunch(to: now, self.calendar) >= Constant.appLaunchElapsedDaysThreshold
-    }
-
-    private func isUsingExpiredPaidTheme(at now: Date) -> Bool {
-        let setting = self.sharedDataStore.value(
-            CalendarAppearanceSettings.self, key: ShareDataKeys.calendarAppearance.rawValue
-        )
-        guard let colorSetKey = setting?.colorSetKey else { return false }
-        do {
-            try self.paidFeatureGateUsecase.check(.colorTheme(colorSetKey), at: now)
-            return false
-        } catch {
-            return true
-        }
+    private func countOfToday(_ record: FullScreenAdExposureRecord, at now: Date) -> Int {
+        return self.calendar.isDate(record.lastExposeDate, inSameDayAs: now) ? record.countOfDay : 0
     }
 }
 

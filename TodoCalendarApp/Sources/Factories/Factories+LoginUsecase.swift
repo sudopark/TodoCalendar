@@ -206,9 +206,7 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
                 scheduleLocalStorage: ScheduleEventLocalStorageImple(
                     sqliteService: applicationBase.commonSqliteService
                 )
-            ),
-            paidFeatureGateUsecase: paidFeatureGateUsecase,
-            sharedDataStore: applicationBase.sharedDataStore
+            )
         )
     }
 

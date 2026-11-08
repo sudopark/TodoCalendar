@@ -10,7 +10,7 @@ import Foundation
 public enum EnvironmentKeys: String {
     case needCheckResetWidgetCache
     case needCheckResetCurrentTodo
-    case fullScreenAdExposureRecords
+    case fullScreenAdExposureRecord
     case appColdLaunchHistory
     case colorThemeLicense
     case widgetStyleLicense

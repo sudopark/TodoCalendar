@@ -1387,13 +1387,9 @@ private final class StubAdExposureUsecase: AdExposureUsecase, @unchecked Sendabl
 
     func shouldPreloadFullScreenAds() -> Bool { false }
 
-    func canExposeFullScreenAd(
-        scope: FullScreenAdExposureRecord.Scope,
-        isFromAppLaunch: Bool,
-        at now: Date
-    ) -> Bool { false }
+    func canExposeFullScreenAd(at now: Date) -> Bool { false }
 
-    func recordFullScreenAdExposed(scope: FullScreenAdExposureRecord.Scope, at now: Date) { }
+    func recordFullScreenAdExposed(at now: Date) { }
 
     func canRequestTrackingAuthorization() async -> Bool {
         return self.stubCanRequestTrackingAuthorization
