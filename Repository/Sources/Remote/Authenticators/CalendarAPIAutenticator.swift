@@ -38,8 +38,11 @@ extension CalendarAPIAutenticator {
     
     public func shouldAdapt(_ endpoint: any Endpoint) -> Bool {
         switch endpoint {
-        case let account as AccountAPIEndpoints where account == .info:
-            return false
+        case let account as AccountAPIEndpoints:
+            switch account {
+            case .info: return false
+            case .account: return true
+            }
         case is UserAPIEndpoints: return true
         case is TodoAPIEndpoints: return true
         case is ScheduleEventEndpoints: return true
