@@ -16,9 +16,9 @@ import ExternalCalendarDomainInterface
 
 private enum Constant {
     static let listWidthRatio: CGFloat = 0.4
-    static let maxListWidth: CGFloat = 420
+    static let maxListWidth: CGFloat = 560
     static let dividerWidth: CGFloat = 0.5
-    // 호스팅 뷰의 압축 저항(750)보다 높아야 intrinsic 폭에 밀리지 않고, 상한(required)보다는 낮아야 넓은 창에서 420pt 로 멈춘다
+    // 호스팅 뷰의 압축 저항(750)보다 높아야 intrinsic 폭에 밀리지 않고, 상한(required)보다는 낮아야 넓은 창에서 상한에 멈춘다
     static let proportionalWidthPriority = UILayoutPriority(999)
 }
 
