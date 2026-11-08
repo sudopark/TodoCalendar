@@ -26,6 +26,7 @@ class AddEventViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var spyEventDetailDataUsecase: PrivateEventDetailUsecase!
     private var spyRouter: SpyEventDetailRouter!
     private var stubAppReviewRequestUsecase: StubAppReviewRequestUsecase!
+    private var stubAdExposureUsecase: StubAdExposureUsecase!
     private var refDate: Date!
     private var timeZone: TimeZone {
         return TimeZone(abbreviation: "KST")!
@@ -49,6 +50,7 @@ class AddEventViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.spyEventDetailDataUsecase = nil
         self.spyRouter = nil
         self.stubAppReviewRequestUsecase = nil
+        self.stubAdExposureUsecase = nil
         self.refDate = nil
     }
     
@@ -58,10 +60,12 @@ class AddEventViewModelImpleTests: BaseTestCase, PublisherWaitable {
         defaultPeriod: EventSettings.DefaultNewEventPeriod = .hour1,
         shouldFailSaveDetailData: Bool = false,
         canRequestAppReview: Bool = false,
+        isFullScreenAdTurn: Bool = false,
         shouldFailMakeTodo: Bool = false
     ) -> AddEventViewModelImple {
         
         self.stubAppReviewRequestUsecase = StubAppReviewRequestUsecase(canRequest: canRequestAppReview)
+        self.stubAdExposureUsecase = StubAdExposureUsecase(isFullScreenAdTurn: isFullScreenAdTurn)
         self.spyTodoUsecase.shouldFailMakeTodo = shouldFailMakeTodo
         
         let tagUsecase = StubEventTagUsecase()
@@ -88,7 +92,8 @@ class AddEventViewModelImpleTests: BaseTestCase, PublisherWaitable {
             eventDetailDataUsecase: self.spyEventDetailDataUsecase,
             eventSettingUsecase: eventSettingUsecase,
             eventNotificationSettingUsecase: eventNotificationSettingUsecase,
-            appReviewRequestUsecase: self.stubAppReviewRequestUsecase
+            appReviewRequestUsecase: self.stubAppReviewRequestUsecase,
+            adExposureUsecase: self.stubAdExposureUsecase
         )
         viewModel.router = self.spyRouter
         viewModel.attachInput()
@@ -399,12 +404,14 @@ extension AddEventViewModelImpleTests {
     private func makeViewModelWithPrepare(
         shouldFailSaveDetailData: Bool = false,
         canRequestAppReview: Bool = false,
+        isFullScreenAdTurn: Bool = false,
         shouldFailMakeTodo: Bool = false
     ) -> AddEventViewModelImple {
         let expect = expectation(description: "wait")
         let viewModel = self.makeViewModel(
             shouldFailSaveDetailData: shouldFailSaveDetailData,
             canRequestAppReview: canRequestAppReview,
+            isFullScreenAdTurn: isFullScreenAdTurn,
             shouldFailMakeTodo: shouldFailMakeTodo
         )
 
@@ -541,6 +548,80 @@ extension AddEventViewModelImpleTests {
             self.enterAllInfo(viewModel)
             viewModel.save()
         }
+    }
+    
+    // 새 todo 를 저장해 전면 광고 차례가 되면 저장을 기록한 뒤 화면을 닫고 전면 광고를 띄운다
+    func testViewModel_whenSaveNewEventAndAdTurn_closeThenShowFullScreenAd() {
+        // given
+        let viewModel = self.makeViewModelWithPrepare(isFullScreenAdTurn: true)
+        
+        // when
+        self.saveNewEvent(viewModel, isTodo: true)
+        
+        // then
+        XCTAssertEqual(self.stubAdExposureUsecase.didRecordEventSaved, true)
+        XCTAssertEqual(self.stubAdExposureUsecase.didCheckTurnAfterRecordSaved, true)
+        XCTAssertEqual(self.spyRouter.didCloseSceneThenShowFullScreenAd, true)
+        XCTAssertNil(self.spyRouter.didClosed)
+    }
+    
+    // 새 schedule 을 저장해 전면 광고 차례가 되면 화면을 닫고 전면 광고를 띄운다
+    func testViewModel_whenSaveNewScheduleAndAdTurn_closeThenShowFullScreenAd() {
+        // given
+        let viewModel = self.makeViewModelWithPrepare(isFullScreenAdTurn: true)
+        
+        // when
+        self.saveNewEvent(viewModel, isTodo: false)
+        
+        // then
+        XCTAssertEqual(self.stubAdExposureUsecase.didRecordEventSaved, true)
+        XCTAssertEqual(self.spyRouter.didCloseSceneThenShowFullScreenAd, true)
+        XCTAssertNil(self.spyRouter.didClosed)
+    }
+    
+    // 전면 광고 차례가 아니면 저장만 기록하고 화면을 닫는다
+    func testViewModel_whenSaveNewEventAndNotAdTurn_closeOnly() {
+        // given
+        let viewModel = self.makeViewModelWithPrepare(isFullScreenAdTurn: false)
+        
+        // when
+        self.saveNewEvent(viewModel, isTodo: true)
+        
+        // then
+        XCTAssertEqual(self.stubAdExposureUsecase.didRecordEventSaved, true)
+        XCTAssertEqual(self.spyRouter.didClosed, true)
+        XCTAssertNil(self.spyRouter.didCloseSceneThenShowFullScreenAd)
+    }
+    
+    // 리뷰를 요청하는 저장에는 전면 광고를 띄우지 않지만 횟수는 센다
+    func testViewModel_whenCanRequestReview_notShowFullScreenAdButRecordSaved() {
+        // given
+        let viewModel = self.makeViewModelWithPrepare(
+            canRequestAppReview: true, isFullScreenAdTurn: true
+        )
+        
+        // when
+        self.saveNewEvent(viewModel, isTodo: true)
+        
+        // then
+        XCTAssertEqual(self.stubAdExposureUsecase.didRecordEventSaved, true)
+        XCTAssertEqual(self.spyRouter.didCloseSceneThenRequestAppReview, true)
+        XCTAssertNil(self.spyRouter.didCloseSceneThenShowFullScreenAd)
+    }
+    
+    // 저장에 실패하면 횟수를 세지 않고 전면 광고도 띄우지 않는다
+    func testViewModel_whenSaveNewEventFail_notRecordSaved() {
+        // given
+        let viewModel = self.makeViewModelWithPrepare(
+            isFullScreenAdTurn: true, shouldFailMakeTodo: true
+        )
+        
+        // when
+        self.saveNewEvent(viewModel, isTodo: true)
+        
+        // then
+        XCTAssertNil(self.stubAdExposureUsecase.didRecordEventSaved)
+        XCTAssertNil(self.spyRouter.didCloseSceneThenShowFullScreenAd)
     }
     
     // 새 todo 를 저장하면 새 이벤트 저장을 기록한다

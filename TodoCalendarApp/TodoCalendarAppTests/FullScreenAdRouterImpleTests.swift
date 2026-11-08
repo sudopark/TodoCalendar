@@ -194,6 +194,10 @@ private final class StubAdExposureUsecase: AdExposureUsecase, @unchecked Sendabl
 
     func recordFullScreenAdExposed(at now: Date) { }
 
+    func recordEventSavedForFullScreenAd() { }
+
+    func isFullScreenAdTurnAfterEventSave() -> Bool { false }
+
     func canRequestTrackingAuthorization() async -> Bool { false }
 
     func recordTrackingGuideShown() { }

@@ -53,6 +53,7 @@ final class AdExposureUsecaseImpleTests: PublisherWaitable {
         isAdStarted: Bool = true,
         userPlan: BillingUserPlan? = nil,
         exposureRecord: FullScreenAdExposureRecord? = nil,
+        eventSavedCount: Int = 0,
         coldLaunchHistory: AppColdLaunchHistory = .init(),
         hasAnyEvent: Bool = false,
         shouldFailEventExistenceFetch: Bool = false,
@@ -60,7 +61,9 @@ final class AdExposureUsecaseImpleTests: PublisherWaitable {
         isTrackingAuthorizationDetermined: Bool = false
     ) -> AdExposureUsecaseImple {
         self.spyAdRepository = SpyAdRepository(
-            record: exposureRecord, hasShownTrackingGuide: hasShownTrackingGuide
+            record: exposureRecord,
+            eventSavedCount: eventSavedCount,
+            hasShownTrackingGuide: hasShownTrackingGuide
         )
         self.stubUserEventExistenceRepository = StubUserEventExistenceRepository(
             hasAnyEvent: hasAnyEvent, shouldFailFetch: shouldFailEventExistenceFetch
@@ -414,6 +417,72 @@ extension AdExposureUsecaseImpleTests {
         // then
         #expect(self.spyAdRepository.didUpdatedExposureRecord
                 == .init(lastExposeDate: self.now, countOfDay: 1))
+    }
+}
+
+
+// MARK: - 이벤트 저장 차례
+
+extension AdExposureUsecaseImpleTests {
+
+    @Test("이벤트를 저장한 적 없으면 전면 차례가 아니다")
+    func usecase_whenNeverSavedEvent_isNotFullScreenAdTurn() {
+        // given
+        let usecase = self.makeUsecase(eventSavedCount: 0)
+
+        // when
+        let isTurn = usecase.isFullScreenAdTurnAfterEventSave()
+
+        // then
+        #expect(isTurn == false)
+    }
+
+    @Test("이벤트를 한 번 저장했으면 전면 차례가 아니다")
+    func usecase_whenSavedEventOnce_isNotFullScreenAdTurn() {
+        // given
+        let usecase = self.makeUsecase(eventSavedCount: 1)
+
+        // when
+        let isTurn = usecase.isFullScreenAdTurnAfterEventSave()
+
+        // then
+        #expect(isTurn == false)
+    }
+
+    @Test("이벤트를 두 번 저장했으면 전면 차례다")
+    func usecase_whenSavedEventTwice_isFullScreenAdTurn() {
+        // given
+        let usecase = self.makeUsecase(eventSavedCount: 2)
+
+        // when
+        let isTurn = usecase.isFullScreenAdTurnAfterEventSave()
+
+        // then
+        #expect(isTurn == true)
+    }
+
+    @Test("이벤트를 세 번 저장했으면 전면 차례가 아니다")
+    func usecase_whenSavedEventThreeTimes_isNotFullScreenAdTurn() {
+        // given
+        let usecase = self.makeUsecase(eventSavedCount: 3)
+
+        // when
+        let isTurn = usecase.isFullScreenAdTurnAfterEventSave()
+
+        // then
+        #expect(isTurn == false)
+    }
+
+    @Test("이벤트 저장을 기록하면 횟수가 1 늘어난다")
+    func usecase_recordEventSaved_increaseCount() {
+        // given
+        let usecase = self.makeUsecase(eventSavedCount: 3)
+
+        // when
+        usecase.recordEventSavedForFullScreenAd()
+
+        // then
+        #expect(self.spyAdRepository.didUpdatedEventSavedCount == 4)
     }
 }
 

@@ -20,6 +20,10 @@ public protocol AdExposureUsecase: Sendable {
 
     func recordFullScreenAdExposed(at now: Date)
 
+    func recordEventSavedForFullScreenAd()
+
+    func isFullScreenAdTurnAfterEventSave() -> Bool
+
     func canRequestTrackingAuthorization() async -> Bool
 
     func recordTrackingGuideShown()
@@ -31,6 +35,7 @@ public final class AdExposureUsecaseImple: AdExposureUsecase, Sendable {
     private enum Constant {
         static let fullScreenAdDailyLimit: Int = 3
         static let fullScreenAdMinInterval: TimeInterval = 30 * 60
+        static let eventSaveCountPerFullScreenAd: Int = 2
     }
 
     private let adAvailability: any MobileAdAvailability
@@ -97,6 +102,16 @@ extension AdExposureUsecaseImple {
         self.adRepository.updateFullScreenAdExposureRecord(
             .init(lastExposeDate: now, countOfDay: countOfToday + 1)
         )
+    }
+
+    public func recordEventSavedForFullScreenAd() {
+        let count = self.adRepository.loadEventSavedCountForFullScreenAd()
+        self.adRepository.updateEventSavedCountForFullScreenAd(count + 1)
+    }
+
+    public func isFullScreenAdTurnAfterEventSave() -> Bool {
+        let count = self.adRepository.loadEventSavedCountForFullScreenAd()
+        return count > 0 && count % Constant.eventSaveCountPerFullScreenAd == 0
     }
 
     private func isPastInstallDay(at now: Date) -> Bool {

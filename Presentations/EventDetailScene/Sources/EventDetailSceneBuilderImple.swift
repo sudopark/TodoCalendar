@@ -20,6 +20,7 @@ public final class EventDetailSceneBuilderImple {
     private let appleCalendarEventDetailSceneBuilder: any AppleCalendarEventDetailSceneBuilder
     private let settingSceneBuilder: any SettingSceneBuiler
     private let appStoreReviewRouter: any AppStoreReviewRouter
+    private let fullScreenAdRouter: any FullScreenAdRouter
 
     public init(
         usecaseFactory: any UsecaseFactory,
@@ -28,7 +29,8 @@ public final class EventDetailSceneBuilderImple {
         googleCalendarEventDetailSceneBuilder: any GoogleCalendarEventDetailSceneBuiler,
         appleCalendarEventDetailSceneBuilder: any AppleCalendarEventDetailSceneBuilder,
         settingSceneBuilder: any SettingSceneBuiler,
-        appStoreReviewRouter: any AppStoreReviewRouter
+        appStoreReviewRouter: any AppStoreReviewRouter,
+        fullScreenAdRouter: any FullScreenAdRouter
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
@@ -37,6 +39,7 @@ public final class EventDetailSceneBuilderImple {
         self.appleCalendarEventDetailSceneBuilder = appleCalendarEventDetailSceneBuilder
         self.settingSceneBuilder = settingSceneBuilder
         self.appStoreReviewRouter = appStoreReviewRouter
+        self.fullScreenAdRouter = fullScreenAdRouter
     }
 }
 
@@ -54,7 +57,8 @@ extension EventDetailSceneBuilderImple: EventDetailSceneBuilder {
             eventDetailDataUsecase: self.usecaseFactory.makeEventDetailDataUsecase(),
             eventSettingUsecase: self.usecaseFactory.makeEventSettingUsecase(),
             eventNotificationSettingUsecase: self.usecaseFactory.makeEventNotificationSettingUsecase(),
-            appReviewRequestUsecase: self.usecaseFactory.makeAppReviewRequestUsecase()
+            appReviewRequestUsecase: self.usecaseFactory.makeAppReviewRequestUsecase(),
+            adExposureUsecase: self.usecaseFactory.adExposureUsecase
         )
         
         return self.makeEventDetailScene(viewModel)
@@ -76,7 +80,8 @@ extension EventDetailSceneBuilderImple: EventDetailSceneBuilder {
             scheduleEventUsecase: self.usecaseFactory.makeScheduleEventUsecase(),
             calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
             foremostEventUsecase: self.usecaseFactory.makeForemostEventUsecase(),
-            liveActivityToggleViewModel: liveActivityToggleViewModel
+            liveActivityToggleViewModel: liveActivityToggleViewModel,
+            adExposureUsecase: self.usecaseFactory.adExposureUsecase
         )
         viewModel.listener = listener
         return self.makeEventDetailScene(viewModel, liveActivityToggleViewModel: liveActivityToggleViewModel)
@@ -101,7 +106,8 @@ extension EventDetailSceneBuilderImple: EventDetailSceneBuilder {
             calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
             foremostEventUsecase: self.usecaseFactory.makeForemostEventUsecase(),
             ddayCandidateUsecase: self.usecaseFactory.makeDDayCandidateUsecase(),
-            liveActivityToggleViewModel: liveActivityToggleViewModel
+            liveActivityToggleViewModel: liveActivityToggleViewModel,
+            adExposureUsecase: self.usecaseFactory.adExposureUsecase
         )
         viewModel.listener = listener
         return self.makeEventDetailScene(viewModel, liveActivityToggleViewModel: liveActivityToggleViewModel)
@@ -158,7 +164,8 @@ extension EventDetailSceneBuilderImple: EventDetailSceneBuilder {
             selectNotificationTimeSceneBuilder: selectNotificationTimeSceneBuilder,
             guideSceneBuilder: guideSceneBuilder,
             selectMapSceneBuilder: selectMapSceneBuilder,
-            appStoreReviewRouter: self.appStoreReviewRouter
+            appStoreReviewRouter: self.appStoreReviewRouter,
+            fullScreenAdRouter: self.fullScreenAdRouter
         )
         router.inputViewModel = inputViewModel
         router.scene = viewController

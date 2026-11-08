@@ -14,6 +14,9 @@ public protocol AdRepository: Sendable {
     func loadFullScreenAdExposureRecord() -> FullScreenAdExposureRecord?
     func updateFullScreenAdExposureRecord(_ record: FullScreenAdExposureRecord)
 
+    func loadEventSavedCountForFullScreenAd() -> Int
+    func updateEventSavedCountForFullScreenAd(_ count: Int)
+
     func loadHasShownTrackingGuide() -> Bool
     func markTrackingGuideShown()
 }
