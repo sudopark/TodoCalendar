@@ -8,6 +8,10 @@
 
 import SwiftUI
 
+private enum Constant {
+    static let maxContentWidth: CGFloat = 580
+}
+
 public struct BottomSlideView<ContentView: View>: View {
     
     private let customBackgroundColor: Color?
@@ -27,10 +31,7 @@ public struct BottomSlideView<ContentView: View>: View {
     public var body: some View {
         
         VStack {
-            ZStack {
-                Color.black.opacity(0.001).onTapGesture(perform: self.outsideTap)
-                Spacer()
-            }
+            Color.clear
             
             ZStack {
                 self.contentView
@@ -44,6 +45,12 @@ public struct BottomSlideView<ContentView: View>: View {
                     ))
                     .ignoresSafeArea(edges: .bottom)
             )
+            .frame(maxWidth: Constant.maxContentWidth)
         }
+        .background(
+            Color.black.opacity(0.001)
+                .onTapGesture(perform: self.outsideTap)
+                .ignoresSafeArea(edges: .bottom)
+        )
     }
 }

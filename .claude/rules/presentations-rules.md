@@ -27,7 +27,7 @@ paths:
 |---|---|---|
 | `ConfirmButton` | 표준 액션 버튼 — isEnable·isProcessing(로딩) 내장, 색 nil→appearance 폴백 | `.eventHandler(\.onTap)` |
 | `BottomConfirmButton` | 화면 하단 고정 ConfirmButton 래퍼 (패딩+배경+safe-area) | `.eventHandler(\.onTap)` |
-| `BottomSlideView` | 바텀시트 컨테이너 — 딤 영역 + 제네릭 content. 딤 탭 닫기는 자동 아님(아래 참고) | `.eventHandler(\.outsideTap)` |
+| `BottomSlideView` | 바텀시트 컨테이너 — 딤 영역 + 제네릭 content. 본문 폭 상한 580pt, 하단 가운데. 딤 탭 닫기는 자동 아님(아래 참고) | `.eventHandler(\.outsideTap)` |
 | `SheetHeaderView` | 시트 상단 헤더 — 타이틀+닫기, iOS26 리퀴드 글래스 분기 | `.eventHandler(\.onClose)` |
 | `CloseButton` | `xmark.circle.fill` 닫기 버튼 | `.eventHandler(\.onTap)` |
 | `NavigationBackButton` | chevron 커스텀 뒤로가기 | `init(tapHandler:)` 클로저 |
