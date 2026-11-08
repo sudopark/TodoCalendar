@@ -514,7 +514,8 @@ extension ApplicationRootRouter {
             googleCalendarEventDetailSceneBuilder: self.googleCalendarEventDetailBuilder(),
             appleCalendarEventDetailSceneBuilder: self.appleCalendarEventDetailBuilder(),
             settingSceneBuilder: settingSceneBuilder(),
-            appStoreReviewRouter: AppStoreReviewSheet()
+            appStoreReviewRouter: AppStoreReviewSheet(),
+            fullScreenAdRouter: self.fullScreenAdRouter()
         )
     }
     

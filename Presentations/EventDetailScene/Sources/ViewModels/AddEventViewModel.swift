@@ -30,6 +30,7 @@ final class AddEventViewModelImple: EventDetailViewModel, @unchecked Sendable {
     private let eventSettingUsecase: any EventSettingUsecase
     private let eventNotificationSettingUsecase: any EventNotificationSettingUsecase
     private let appReviewRequestUsecase: any AppReviewRequestUsecase
+    private let adExposureUsecase: any AdExposureUsecase
     var router: (any EventDetailRouting)?
     
     init(
@@ -41,7 +42,8 @@ final class AddEventViewModelImple: EventDetailViewModel, @unchecked Sendable {
         eventDetailDataUsecase: any EventDetailDataUsecase,
         eventSettingUsecase: any EventSettingUsecase,
         eventNotificationSettingUsecase: any EventNotificationSettingUsecase,
-        appReviewRequestUsecase: any AppReviewRequestUsecase
+        appReviewRequestUsecase: any AppReviewRequestUsecase,
+        adExposureUsecase: any AdExposureUsecase
     ) {
         
         self.initailMakeParams = params
@@ -53,6 +55,7 @@ final class AddEventViewModelImple: EventDetailViewModel, @unchecked Sendable {
         self.eventSettingUsecase = eventSettingUsecase
         self.eventNotificationSettingUsecase = eventNotificationSettingUsecase
         self.appReviewRequestUsecase = appReviewRequestUsecase
+        self.adExposureUsecase = adExposureUsecase
         
         self.internalBinding()
     }
@@ -290,9 +293,12 @@ extension AddEventViewModelImple: EventDetailInputListener {
     
     private func closeSceneAfterNewEventSaved() {
         self.appReviewRequestUsecase.recordNewEventSaved()
+        self.adExposureUsecase.recordEventSavedForFullScreenAd()
         guard self.appReviewRequestUsecase.canRequestReview()
         else {
-            self.router?.closeScene(animate: true, nil)
+            self.router?.closeSceneAfterEventSaved(
+                isFullScreenAdTurn: self.adExposureUsecase.isFullScreenAdTurnAfterEventSave()
+            )
             return
         }
         self.appReviewRequestUsecase.markReviewRequested()

@@ -16,13 +16,17 @@ final class SpyAdRepository: AdRepository, @unchecked Sendable {
     private var record: FullScreenAdExposureRecord?
     private var hasShownTrackingGuide: Bool
     private(set) var didUpdatedExposureRecord: FullScreenAdExposureRecord?
+    private var eventSavedCount: Int
+    private(set) var didUpdatedEventSavedCount: Int?
     private(set) var didMarkTrackingGuideShown: Bool = false
 
     init(
         record: FullScreenAdExposureRecord? = nil,
+        eventSavedCount: Int = 0,
         hasShownTrackingGuide: Bool = false
     ) {
         self.record = record
+        self.eventSavedCount = eventSavedCount
         self.hasShownTrackingGuide = hasShownTrackingGuide
     }
 
@@ -33,6 +37,15 @@ final class SpyAdRepository: AdRepository, @unchecked Sendable {
     func updateFullScreenAdExposureRecord(_ record: FullScreenAdExposureRecord) {
         self.didUpdatedExposureRecord = record
         self.record = record
+    }
+
+    func loadEventSavedCountForFullScreenAd() -> Int {
+        return self.eventSavedCount
+    }
+
+    func updateEventSavedCountForFullScreenAd(_ count: Int) {
+        self.didUpdatedEventSavedCount = count
+        self.eventSavedCount = count
     }
 
     func loadHasShownTrackingGuide() -> Bool {

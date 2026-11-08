@@ -71,6 +71,37 @@ extension AdLocalRepositoryImpleTests {
 }
 
 
+// MARK: - 전면 광고용 이벤트 저장 횟수
+
+extension AdLocalRepositoryImpleTests {
+
+    @Test("저장된 이벤트 저장 횟수가 없으면 0 을 준다")
+    func repository_whenNoStoredEventSavedCount_loadZero() {
+        // given
+        let repository = self.makeRepository()
+
+        // when
+        let count = repository.loadEventSavedCountForFullScreenAd()
+
+        // then
+        #expect(count == 0)
+    }
+
+    @Test("이벤트 저장 횟수를 저장하고 다시 읽는다")
+    func repository_updateAndLoadEventSavedCount() {
+        // given
+        let repository = self.makeRepository()
+
+        // when
+        repository.updateEventSavedCountForFullScreenAd(3)
+        let count = repository.loadEventSavedCountForFullScreenAd()
+
+        // then
+        #expect(count == 3)
+    }
+}
+
+
 // MARK: - 추적 안내 노출 기록
 
 extension AdLocalRepositoryImpleTests {
