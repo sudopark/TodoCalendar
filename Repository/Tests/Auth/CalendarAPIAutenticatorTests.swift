@@ -90,6 +90,10 @@ extension CalendarAPIAutenticatorTests {
         parameterizeTest(
             AccountAPIEndpoints.info, method: .put, expecthasToken: false
         )
+        // 회귀: 계정 삭제 API도 인증 토큰이 붙어야 한다 (whitelist 누락 시 서버가 403)
+        parameterizeTest(
+            AccountAPIEndpoints.account, method: .delete, expecthasToken: true
+        )
         parameterizeTest(
             TodoAPIEndpoints.currentTodo, method: .get, expecthasToken: true
         )
