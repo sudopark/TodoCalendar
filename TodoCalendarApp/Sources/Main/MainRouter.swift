@@ -97,9 +97,7 @@ extension MainRouter {
     @MainActor
     private func showFullScreenAdAfterSettingExit() {
         guard let scene = self.currentScene, let adRouter = self.fullScreenAdRouter else { return }
-        adRouter.showFullScreenAd(
-            from: scene, scope: .application, isFromAppLaunch: false
-        )
+        adRouter.showFullScreenAd(from: scene)
     }
     
     func showJumpDaySelectDialog(current: CalendarDay) {

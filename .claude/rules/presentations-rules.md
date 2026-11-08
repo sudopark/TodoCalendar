@@ -55,7 +55,7 @@ paths:
 | 타입 | 역할 | 진입 |
 |---|---|---|
 | `AdViewBuilder` | 배너 광고 뷰 팩토리 — Domain `AdBannerSize` 로 요청 (#898·#956·#981) | `makeBannerView(size:)` / `makeBannerUIView(size:)` |
-| `FullScreenAdRouter` | 전면 광고 노출 커맨드 — 씬 Router가 재위임. 노출 지점은 Domain `FullScreenAdExposureRecord.Scope` 로 표현하고, AdService의 `FullScreenAdRouterImple`이 앱 타겟 extension으로 채택 (#898·#956·#981) | `showFullScreenAd(from:scope:isFromAppLaunch:)` |
+| `FullScreenAdRouter` | 전면 광고 노출 커맨드 — 씬 Router가 재위임. 노출 판정은 자리와 무관하게 Domain `AdExposureUsecase` 하나가 맡고, AdService의 `FullScreenAdRouterImple`이 앱 타겟 extension으로 채택 (#898·#956·#981·#1361) | `showFullScreenAd(from:)` |
 | `RewardedAdRouter` | 보상형 광고 노출 커맨드 — 보상 완료·전면 대체·보상 전 닫음·광고 없음 네 결과를 Domain `RewardedAdResult` 로 돌려준다. AdService의 `RewardedAdRouterImple`이 앱 타겟 extension으로 채택 (#1246) | `showRewardedAd(from:completion:)` |
 | `PrivacyOptionsFormRouter` | UMP 개인정보 옵션 폼 — 요구 여부 조회 + 폼 표시. AdService의 `GoogleMobileAdsServiceImple`이 앱 타겟 extension으로 채택 (#958·#956) | `isPrivacyOptionsRequired()` / `showPrivacyOptionsForm(from:)` |
 | `AppStoreReviewRouter` | App Store 리뷰 시트 요청 — 창(`UIWindowScene`)을 받아 요청한다. StoreKitService 의 `AppStoreReviewSheet` 가 앱 타겟 extension 으로 채택 (#1343) | `requestAppReview(in:)` |

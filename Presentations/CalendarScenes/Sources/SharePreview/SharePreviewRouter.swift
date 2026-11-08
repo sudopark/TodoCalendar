@@ -24,10 +24,6 @@ protocol SharePreviewRouting: Routing, Sendable {
 
 final class SharePreviewRouter: BaseRouterImple, SharePreviewRouting, @unchecked Sendable {
 
-    private enum Constant {
-        static let shareScopeIdentifier: String = "eventShare"
-    }
-
     private let fullScreenAdRouter: (any FullScreenAdRouter)?
 
     init(fullScreenAdRouter: (any FullScreenAdRouter)?) {
@@ -65,8 +61,6 @@ final class SharePreviewRouter: BaseRouterImple, SharePreviewRouting, @unchecked
     @MainActor
     private func presentFullScreenAdIfPossible() {
         guard let scene = self.scene, let adRouter = self.fullScreenAdRouter else { return }
-        adRouter.showFullScreenAd(
-            from: scene, scope: .service(identifier: Constant.shareScopeIdentifier), isFromAppLaunch: false
-        )
+        adRouter.showFullScreenAd(from: scene)
     }
 }

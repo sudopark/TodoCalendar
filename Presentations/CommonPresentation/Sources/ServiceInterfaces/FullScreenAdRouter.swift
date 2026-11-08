@@ -7,15 +7,10 @@
 //
 
 import UIKit
-import Domain
 
 
 public protocol FullScreenAdRouter {
 
     @MainActor
-    func showFullScreenAd(
-        from viewController: UIViewController,
-        scope: FullScreenAdExposureRecord.Scope,
-        isFromAppLaunch: Bool
-    )
+    func showFullScreenAd(from viewController: UIViewController)
 }

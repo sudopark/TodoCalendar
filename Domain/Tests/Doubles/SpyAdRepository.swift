@@ -13,26 +13,26 @@ import Foundation
 
 final class SpyAdRepository: AdRepository, @unchecked Sendable {
 
-    private var records: [FullScreenAdExposureRecord]
+    private var record: FullScreenAdExposureRecord?
     private var hasShownTrackingGuide: Bool
-    private(set) var didUpdatedExposureRecords: [FullScreenAdExposureRecord] = []
+    private(set) var didUpdatedExposureRecord: FullScreenAdExposureRecord?
     private(set) var didMarkTrackingGuideShown: Bool = false
 
     init(
-        records: [FullScreenAdExposureRecord] = [],
+        record: FullScreenAdExposureRecord? = nil,
         hasShownTrackingGuide: Bool = false
     ) {
-        self.records = records
+        self.record = record
         self.hasShownTrackingGuide = hasShownTrackingGuide
     }
 
-    func loadFullScreenAdExposureRecords() -> [FullScreenAdExposureRecord] {
-        return self.records
+    func loadFullScreenAdExposureRecord() -> FullScreenAdExposureRecord? {
+        return self.record
     }
 
     func updateFullScreenAdExposureRecord(_ record: FullScreenAdExposureRecord) {
-        self.didUpdatedExposureRecords.append(record)
-        self.records = self.records.filter { $0.scope != record.scope } + [record]
+        self.didUpdatedExposureRecord = record
+        self.record = record
     }
 
     func loadHasShownTrackingGuide() -> Bool {
