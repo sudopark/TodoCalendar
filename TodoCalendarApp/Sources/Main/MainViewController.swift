@@ -38,7 +38,6 @@ final class MainViewController: UIViewController, MainScene {
     let viewAppearance: ViewAppearance
     private let mobileAdService: any MobileAdService
     private let adExposureUsecase: any AdExposureUsecase
-    private let isInitialScene: Bool
     private var didPrepareAd: Bool = false
 
     @MainActor
@@ -51,15 +50,13 @@ final class MainViewController: UIViewController, MainScene {
         viewAppearance: ViewAppearance,
         mobileAdService: any MobileAdService,
         adExposureUsecase: any AdExposureUsecase,
-        adViewBuilder: (any AdViewBuilder)?,
-        isInitialScene: Bool
+        adViewBuilder: (any AdViewBuilder)?
     ) {
         self.viewModel = viewModel
         self.viewAppearance = viewAppearance
         self.mobileAdService = mobileAdService
         self.adExposureUsecase = adExposureUsecase
         self.bottomBannerView = adViewBuilder?.makeBannerUIView(size: .banner)
-        self.isInitialScene = isInitialScene
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -92,14 +89,8 @@ final class MainViewController: UIViewController, MainScene {
                     await self?.mobileAdService.preloadRewardedAd()
                 }
             }
-            self.viewModel.requestTrackingThenShowLaunchAd(
-                canShowLaunchAd: self.isInitialScene && self.isLaunchedFromAppIcon
-            )
+            self.viewModel.requestTrackingIfNeeded()
         }
-    }
-    
-    private var isLaunchedFromAppIcon: Bool {
-        return self.view.window?.windowScene?.session.isLaunchedFromAppIcon ?? false
     }
 
     func addCalendar(_ calendarScene: any CalendarScene) {
