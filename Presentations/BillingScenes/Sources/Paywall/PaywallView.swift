@@ -184,8 +184,7 @@ private struct PaywallView: View {
     var body: some View {
         ZStack {
             VStack(spacing: 0) {
-                SheetHeaderView(title: "billing::paywall::title".localized())
-                    .eventHandler(\.onClose) { self.eventHandlers.close() }
+                self.headerView
                     .padding(.horizontal, spacing: .xlarge)
 
                 switch self.state.screenState {
@@ -205,6 +204,19 @@ private struct PaywallView: View {
             }
         }
         .background(self.appearance.colorSet.bg0.asColor.ignoresSafeArea())
+    }
+
+    // MARK: - 헤더
+
+    @ViewBuilder
+    private var headerView: some View {
+        let header = SheetHeaderView(title: "billing::paywall::title".localized())
+            .eventHandler(\.onClose) { self.eventHandlers.close() }
+        if #available(iOS 26.0, *), UIDevice.current.userInterfaceIdiom == .pad {
+            header.containerCornerOffset(.leading, sizeToFit: true)
+        } else {
+            header
+        }
     }
 
     // MARK: - 결제 처리 중 오버레이
