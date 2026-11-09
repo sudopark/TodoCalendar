@@ -14,17 +14,20 @@ public struct AppPolicy: Equatable, Sendable {
     public var colorThemeLicense: ColorThemeLicensePolicy?
     public var widgetStyleLicense: WidgetStyleLicensePolicy?
     public var mainBannerExposure: MainBannerExposurePolicy?
+    public var fullScreenAdEventSaveInterval: Int?
     public var featureSwitches: [String: FeatureSwitch]
 
     public init(
         colorThemeLicense: ColorThemeLicensePolicy? = nil,
         widgetStyleLicense: WidgetStyleLicensePolicy? = nil,
         mainBannerExposure: MainBannerExposurePolicy? = nil,
+        fullScreenAdEventSaveInterval: Int? = nil,
         featureSwitches: [String: FeatureSwitch] = [:]
     ) {
         self.colorThemeLicense = colorThemeLicense
         self.widgetStyleLicense = widgetStyleLicense
         self.mainBannerExposure = mainBannerExposure
+        self.fullScreenAdEventSaveInterval = fullScreenAdEventSaveInterval
         self.featureSwitches = featureSwitches
     }
 }

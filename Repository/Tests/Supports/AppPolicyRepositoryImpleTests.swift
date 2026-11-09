@@ -390,6 +390,68 @@ extension AppPolicyRepositoryImpleTests {
 }
 
 
+// MARK: - 전면 저장 간격
+
+extension AppPolicyRepositoryImpleTests {
+
+    private func refreshedEventSaveInterval(_ json: String) async throws -> Int? {
+        let repository = self.makeRepository(remoteResult: .success(json))
+        try await repository.refreshPolicy()
+        return repository.loadPolicy()?.fullScreenAdEventSaveInterval
+    }
+
+    @Test("전면 저장 간격을 읽고 0 은 끄는 값으로 살린다", arguments: [3, 0])
+    func repository_refreshPolicy_readsEventSaveInterval(raw: Int) async throws {
+        // given + when
+        let interval = try await self.refreshedEventSaveInterval(
+            #"{"full_screen_ad_event_save_interval": \#(raw)}"#
+        )
+
+        // then
+        #expect(interval == raw)
+    }
+
+    @Test("전면 저장 간격이 음수면 없는 값으로 본다")
+    func repository_refreshPolicy_whenEventSaveIntervalNegative_leavesItNil() async throws {
+        // given + when
+        let interval = try await self.refreshedEventSaveInterval(
+            #"{"full_screen_ad_event_save_interval": -1}"#
+        )
+
+        // then
+        #expect(interval == nil)
+    }
+
+    @Test("전면 저장 간격이 없어도 나머지를 읽는다")
+    func repository_refreshPolicy_whenEventSaveIntervalMissing_isNil() async throws {
+        // given
+        let repository = self.makeRepository()
+
+        // when
+        try await repository.refreshPolicy()
+
+        // then
+        #expect(repository.loadPolicy()?.fullScreenAdEventSaveInterval == nil)
+        #expect(repository.loadPolicy()?.colorThemeLicense == .init(isEnabled: true, licenseDays: 14))
+    }
+
+    @Test("받아 둔 전면 저장 간격을 새 인스턴스에서도 읽는다")
+    func repository_loadPolicy_whenCached_returnsEventSaveInterval() async throws {
+        // given
+        let storage = FakeEnvironmentStorage()
+        try await self.makeRepository(storage: storage, remoteResult: .success(
+            #"{"full_screen_ad_event_save_interval": 3}"#
+        )).refreshPolicy()
+
+        // when
+        let policy = self.makeRepository(storage: storage).loadPolicy()
+
+        // then
+        #expect(policy?.fullScreenAdEventSaveInterval == 3)
+    }
+}
+
+
 // MARK: - 갱신 실패
 
 extension AppPolicyRepositoryImpleTests {

@@ -107,8 +107,8 @@ extension AppEnvironmentTests {
 
 extension AppEnvironmentTests {
 
-    @Test("기본 앱 정책은 사용권 게이트를 켜고 7일로 두며, 메인 배너는 75%·60~300초로 둔다")
-    func defaultAppPolicy_hasLicenseAndMainBannerDefaults() {
+    @Test("기본 앱 정책은 사용권 게이트를 켜고 7일로 두며, 메인 배너는 75%·60~300초, 저장 전면은 2회당 1번으로 둔다")
+    func defaultAppPolicy_hasLicenseAndAdDefaults() {
         // when
         let policy = AppEnvironment.defaultAppPolicy
 
@@ -118,7 +118,8 @@ extension AppEnvironmentTests {
             widgetStyleLicense: .init(isEnabled: true, licenseDays: 7),
             mainBannerExposure: .init(
                 exposurePercentage: 75, minDelaySeconds: 60, maxDelaySeconds: 300
-            )
+            ),
+            fullScreenAdEventSaveInterval: 2
         ))
     }
 }

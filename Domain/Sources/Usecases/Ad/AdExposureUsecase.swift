@@ -38,7 +38,6 @@ public final class AdExposureUsecaseImple: AdExposureUsecase, Sendable {
     private enum Constant {
         static let fullScreenAdDailyLimit: Int = 3
         static let fullScreenAdMinInterval: TimeInterval = 30 * 60
-        static let eventSaveCountPerFullScreenAd: Int = 2
     }
 
     private let adAvailability: any MobileAdAvailability
@@ -46,6 +45,8 @@ public final class AdExposureUsecaseImple: AdExposureUsecase, Sendable {
     private let adRepository: any AdRepository
     private let coldLaunchHistoryRepository: any AppColdLaunchHistoryRepository
     private let userEventExistenceRepository: any UserEventExistenceRepository
+    private let policyRepository: any AppPolicyRepository
+    private let defaultPolicy: AppPolicy
     private let calendar: Calendar
     private let scheduler: AnySchedulerOf<DispatchQueue>
     private let mainBannerDelayOfThisLaunch: TimeInterval?
@@ -67,6 +68,8 @@ public final class AdExposureUsecaseImple: AdExposureUsecase, Sendable {
         self.adRepository = adRepository
         self.coldLaunchHistoryRepository = coldLaunchHistoryRepository
         self.userEventExistenceRepository = userEventExistenceRepository
+        self.policyRepository = policyRepository
+        self.defaultPolicy = defaultPolicy
         self.calendar = calendar
         self.scheduler = scheduler
         self.mainBannerDelayOfThisLaunch = (defaultPolicy.mainBannerExposure ?? .init())
@@ -157,7 +160,10 @@ extension AdExposureUsecaseImple {
 
     public func isFullScreenAdTurnAfterEventSave() -> Bool {
         let count = self.adRepository.loadEventSavedCountForFullScreenAd()
-        return count > 0 && count % Constant.eventSaveCountPerFullScreenAd == 0
+        let interval = self.policyRepository.loadPolicy()?.fullScreenAdEventSaveInterval
+            ?? self.defaultPolicy.fullScreenAdEventSaveInterval
+            ?? 0
+        return interval > 0 && count > 0 && count % interval == 0
     }
 
     private func isPastInstallDay(at now: Date) -> Bool {
