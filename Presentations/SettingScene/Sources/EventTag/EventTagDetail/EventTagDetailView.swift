@@ -140,7 +140,7 @@ struct EventTagDetailView: View {
                     
                     self.nameInputView
                     
-                    Text("Event color".localized())
+                    Text("setting.appearance.event.eventColor".localized())
                         .font(self.appearance.fontSet.normal.asFont)
                         .foregroundStyle(self.appearance.colorSet.text1.asColor)
                         .padding(.top, 24)
