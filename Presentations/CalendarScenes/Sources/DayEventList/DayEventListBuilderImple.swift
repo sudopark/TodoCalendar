@@ -27,6 +27,7 @@ final class DayEventListSceneBuilerImple {
     private let aiImageCommandSceneBuilder: any AIAgentImageCommandSceneBuilder
     private let sharePreviewSceneBuilder: any SharePreviewSceneBuilder
     private let appStoreReviewRouter: any AppStoreReviewRouter
+    private let fullScreenAdRouter: (any FullScreenAdRouter)?
 
     init(
         usecaseFactory: any UsecaseFactory,
@@ -38,7 +39,8 @@ final class DayEventListSceneBuilerImple {
         aiKeyboardInputSceneBuilder: any AIAgentKeyboardInputSceneBuilder,
         aiImageCommandSceneBuilder: any AIAgentImageCommandSceneBuilder,
         sharePreviewSceneBuilder: any SharePreviewSceneBuilder,
-        appStoreReviewRouter: any AppStoreReviewRouter
+        appStoreReviewRouter: any AppStoreReviewRouter,
+        fullScreenAdRouter: (any FullScreenAdRouter)?
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
@@ -50,6 +52,7 @@ final class DayEventListSceneBuilerImple {
         self.aiImageCommandSceneBuilder = aiImageCommandSceneBuilder
         self.sharePreviewSceneBuilder = sharePreviewSceneBuilder
         self.appStoreReviewRouter = appStoreReviewRouter
+        self.fullScreenAdRouter = fullScreenAdRouter
     }
 }
 
@@ -83,7 +86,8 @@ extension DayEventListSceneBuilerImple: DayEventListSceneBuiler {
             eventLiveActivityUsecase: self.usecaseFactory.eventLiveActivityUsecase,
             ddayCandidateUsecase: self.usecaseFactory.makeDDayCandidateUsecase(),
             guideTodoUsecase: self.usecaseFactory.makeGuideTodoUsecase(),
-            appReviewRequestUsecase: self.usecaseFactory.makeAppReviewRequestUsecase()
+            appReviewRequestUsecase: self.usecaseFactory.makeAppReviewRequestUsecase(),
+            adExposureUsecase: self.usecaseFactory.adExposureUsecase
         )
         let router = DayEventListRouter(
             eventDetailSceneBuilder: self.eventDetailSceneBuilder,
@@ -93,7 +97,8 @@ extension DayEventListSceneBuilerImple: DayEventListSceneBuiler {
             aiImageCommandSceneBuilder: self.aiImageCommandSceneBuilder,
             sharePreviewSceneBuilder: self.sharePreviewSceneBuilder,
             viewAppearance: self.viewAppearance,
-            appStoreReviewRouter: self.appStoreReviewRouter
+            appStoreReviewRouter: self.appStoreReviewRouter,
+            fullScreenAdRouter: self.fullScreenAdRouter
         )
         viewModel.router = router
         return .init(viewModel: viewModel, router: router)
