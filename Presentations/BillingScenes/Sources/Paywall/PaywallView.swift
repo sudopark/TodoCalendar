@@ -12,6 +12,10 @@ import Extensions
 import CommonPresentation
 import BillingDomainInterface
 
+private enum Constant {
+    static let maxContentWidth: CGFloat = 580
+}
+
 
 // MARK: - ViewState
 
@@ -193,6 +197,8 @@ private struct PaywallView: View {
                     self.planSelectionView
                 }
             }
+            .frame(maxWidth: Constant.maxContentWidth)
+            .frame(maxWidth: .infinity)
 
             if self.state.isPurchasing {
                 self.processingOverlay
