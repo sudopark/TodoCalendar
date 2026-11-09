@@ -8,11 +8,14 @@
 
 import Foundation
 import Combine
+import CombineSchedulers
 
 
 public protocol AdExposureUsecase: Sendable {
 
     var isBannerAdAllowed: AnyPublisher<Bool, Never> { get }
+
+    var isMainBannerAdAllowed: AnyPublisher<Bool, Never> { get }
 
     func shouldPreloadFullScreenAds() -> Bool
 
@@ -44,6 +47,8 @@ public final class AdExposureUsecaseImple: AdExposureUsecase, Sendable {
     private let coldLaunchHistoryRepository: any AppColdLaunchHistoryRepository
     private let userEventExistenceRepository: any UserEventExistenceRepository
     private let calendar: Calendar
+    private let scheduler: AnySchedulerOf<DispatchQueue>
+    private let mainBannerDelayOfThisLaunch: TimeInterval?
 
     public init(
         adAvailability: any MobileAdAvailability,
@@ -51,7 +56,11 @@ public final class AdExposureUsecaseImple: AdExposureUsecase, Sendable {
         adRepository: any AdRepository,
         coldLaunchHistoryRepository: any AppColdLaunchHistoryRepository,
         userEventExistenceRepository: any UserEventExistenceRepository,
-        calendar: Calendar = .current
+        policyRepository: any AppPolicyRepository,
+        defaultPolicy: AppPolicy,
+        calendar: Calendar = .current,
+        scheduler: AnySchedulerOf<DispatchQueue> = .main,
+        randomUnit: @Sendable () -> Double = { Double.random(in: 0..<1) }
     ) {
         self.adAvailability = adAvailability
         self.billingUsecase = billingUsecase
@@ -59,6 +68,29 @@ public final class AdExposureUsecaseImple: AdExposureUsecase, Sendable {
         self.coldLaunchHistoryRepository = coldLaunchHistoryRepository
         self.userEventExistenceRepository = userEventExistenceRepository
         self.calendar = calendar
+        self.scheduler = scheduler
+        self.mainBannerDelayOfThisLaunch = (defaultPolicy.mainBannerExposure ?? .init())
+            .overriding(with: policyRepository.loadPolicy()?.mainBannerExposure)
+            .drawDelay(randomUnit)
+    }
+}
+
+
+private extension MainBannerExposurePolicy {
+
+    func overriding(with received: MainBannerExposurePolicy?) -> MainBannerExposurePolicy {
+        return .init(
+            exposurePercentage: received?.exposurePercentage ?? self.exposurePercentage,
+            minDelaySeconds: received?.minDelaySeconds ?? self.minDelaySeconds,
+            maxDelaySeconds: received?.maxDelaySeconds ?? self.maxDelaySeconds
+        )
+    }
+
+    func drawDelay(_ randomUnit: () -> Double) -> TimeInterval? {
+        guard randomUnit() * 100 < Double(self.exposurePercentage ?? 0) else { return nil }
+        let minDelay = TimeInterval(self.minDelaySeconds ?? 0)
+        let maxDelay = max(TimeInterval(self.maxDelaySeconds ?? 0), minDelay)
+        return minDelay + randomUnit() * (maxDelay - minDelay)
     }
 }
 
@@ -74,6 +106,20 @@ extension AdExposureUsecaseImple {
         .map { isStarted, userPlan in isStarted && userPlan.planId == .free }
         .removeDuplicates()
         .eraseToAnyPublisher()
+    }
+
+    public var isMainBannerAdAllowed: AnyPublisher<Bool, Never> {
+        guard let delay = self.mainBannerDelayOfThisLaunch,
+              self.isPastInstallDay(at: Date())
+        else { return Just(false).eraseToAnyPublisher() }
+
+        let isDelayPassed = Just(true)
+            .delay(for: .seconds(delay), scheduler: self.scheduler)
+            .prepend(false)
+        return Publishers.CombineLatest(self.isBannerAdAllowed, isDelayPassed)
+            .map { isBannerAllowed, isDelayPassed in isBannerAllowed && isDelayPassed }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
     }
 }
 

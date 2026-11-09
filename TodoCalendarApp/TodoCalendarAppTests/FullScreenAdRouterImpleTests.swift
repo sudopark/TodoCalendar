@@ -186,6 +186,10 @@ private final class StubAdExposureUsecase: AdExposureUsecase, @unchecked Sendabl
         return Just(true).eraseToAnyPublisher()
     }
 
+    var isMainBannerAdAllowed: AnyPublisher<Bool, Never> {
+        return Just(true).eraseToAnyPublisher()
+    }
+
     func shouldPreloadFullScreenAds() -> Bool { true }
 
     func canExposeFullScreenAd(at now: Date) -> Bool {

@@ -42,7 +42,7 @@ final class ApplicationAdViewBuilder: AdViewBuilder {
         return AdBannerUIView(
             adUnitId: self.adUnitId(for: size),
             size: size,
-            adExposureUsecase: self.adExposureUsecase
+            isAllowed: self.adExposureUsecase.isMainBannerAdAllowed
         )
     }
 }

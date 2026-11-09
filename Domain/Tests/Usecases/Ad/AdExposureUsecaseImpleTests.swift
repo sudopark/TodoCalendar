@@ -9,6 +9,7 @@
 import Testing
 import Foundation
 import Combine
+import CombineSchedulers
 import Prelude
 import Optics
 import UnitTestHelpKit
@@ -58,7 +59,10 @@ final class AdExposureUsecaseImpleTests: PublisherWaitable {
         hasAnyEvent: Bool = false,
         shouldFailEventExistenceFetch: Bool = false,
         hasShownTrackingGuide: Bool = false,
-        isTrackingAuthorizationDetermined: Bool = false
+        isTrackingAuthorizationDetermined: Bool = false,
+        remotePolicy: AppPolicy? = nil,
+        randomUnits: [Double] = [],
+        scheduler: AnySchedulerOf<DispatchQueue> = .main
     ) -> AdExposureUsecaseImple {
         self.spyAdRepository = SpyAdRepository(
             record: exposureRecord,
@@ -79,7 +83,15 @@ final class AdExposureUsecaseImpleTests: PublisherWaitable {
             adRepository: self.spyAdRepository,
             coldLaunchHistoryRepository: StubAppColdLaunchHistoryRepository(history: coldLaunchHistory),
             userEventExistenceRepository: self.stubUserEventExistenceRepository,
-            calendar: self.calendar
+            policyRepository: StubAppPolicyRepository(policy: remotePolicy),
+            defaultPolicy: AppPolicy(
+                mainBannerExposure: .init(
+                    exposurePercentage: 75, minDelaySeconds: 60, maxDelaySeconds: 300
+                )
+            ),
+            calendar: self.calendar,
+            scheduler: scheduler,
+            randomUnit: StubRandomUnits(randomUnits).next
         )
     }
 
@@ -161,6 +173,241 @@ extension AdExposureUsecaseImpleTests {
 
         // then
         #expect(isAlloweds.isEmpty == true)
+    }
+}
+
+
+// MARK: - 메인 배너 노출 허용 여부
+
+extension AdExposureUsecaseImpleTests {
+
+    private func makeUsecaseForMainBanner(
+        userPlan: BillingPlanId = .free,
+        coldLaunchHistory: AppColdLaunchHistory? = nil,
+        remotePolicy: AppPolicy? = nil,
+        randomUnits: [Double],
+        scheduler: TestSchedulerOf<DispatchQueue>
+    ) -> AdExposureUsecaseImple {
+        return self.makeUsecase(
+            userPlan: self.userPlan(userPlan),
+            coldLaunchHistory: coldLaunchHistory ?? self.installedBeforeToday,
+            remotePolicy: remotePolicy,
+            randomUnits: randomUnits,
+            scheduler: scheduler.eraseToAnyScheduler()
+        )
+    }
+
+    private func remoteMainBannerPolicy(
+        percentage: Int? = nil, minDelay: Int? = nil, maxDelay: Int? = nil
+    ) -> AppPolicy {
+        return AppPolicy(
+            mainBannerExposure: .init(
+                exposurePercentage: percentage, minDelaySeconds: minDelay, maxDelaySeconds: maxDelay
+            )
+        )
+    }
+
+    private func observeMainBanner(
+        _ usecase: AdExposureUsecaseImple, _ receive: @escaping (Bool) -> Void
+    ) {
+        usecase.isMainBannerAdAllowed
+            .sink(receiveValue: receive)
+            .store(in: &self.cancelBag)
+    }
+
+    @Test("설치 당일이면 뽑혀도 메인 배너를 허용하지 않는다")
+    func usecase_whenInstalledToday_mainBannerIsNotAllowed() {
+        // given
+        let scheduler = DispatchQueue.test
+        let usecase = self.makeUsecaseForMainBanner(
+            coldLaunchHistory: AppColdLaunchHistory() |> \.firstLaunchDate .~ Date(),
+            randomUnits: [0, 0],
+            scheduler: scheduler
+        )
+        var alloweds: [Bool] = []
+
+        // when
+        self.observeMainBanner(usecase) { alloweds.append($0) }
+        scheduler.advance(by: .seconds(301))
+
+        // then
+        #expect(alloweds == [false])
+    }
+
+    @Test("이번 실행에 안 뽑히면 지연이 지나도 메인 배너를 허용하지 않는다")
+    func usecase_whenNotDrawn_mainBannerIsNotAllowed() {
+        // given
+        let scheduler = DispatchQueue.test
+        let usecase = self.makeUsecaseForMainBanner(randomUnits: [0.75, 0], scheduler: scheduler)
+        var alloweds: [Bool] = []
+
+        // when
+        self.observeMainBanner(usecase) { alloweds.append($0) }
+        scheduler.advance(by: .seconds(301))
+
+        // then
+        #expect(alloweds == [false])
+    }
+
+    @Test("확률 경계 바로 아래 추첨은 뽑힌다")
+    func usecase_whenDrawJustBelowPercentage_mainBannerIsAllowedAfterDelay() {
+        // given
+        let scheduler = DispatchQueue.test
+        let usecase = self.makeUsecaseForMainBanner(randomUnits: [0.7499, 0], scheduler: scheduler)
+        var alloweds: [Bool] = []
+
+        // when
+        self.observeMainBanner(usecase) { alloweds.append($0) }
+        scheduler.advance(by: .seconds(60))
+
+        // then
+        #expect(alloweds == [false, true])
+    }
+
+    @Test("뽑히면 둘째 추첨값으로 정한 지연 전엔 허용하지 않고 지연 뒤 허용한다")
+    func usecase_whenDrawn_mainBannerIsAllowedOnlyAfterDrawnDelay() {
+        // given
+        let scheduler = DispatchQueue.test
+        let usecase = self.makeUsecaseForMainBanner(randomUnits: [0.1, 0.5], scheduler: scheduler)
+        var alloweds: [Bool] = []
+
+        // when + then
+        self.observeMainBanner(usecase) { alloweds.append($0) }
+        scheduler.advance(by: .seconds(179))
+        #expect(alloweds == [false])
+
+        scheduler.advance(by: .seconds(1))
+        #expect(alloweds == [false, true])
+    }
+
+    @Test("추첨은 실행에 한 번이라 다시 구독해도 같은 지연을 쓴다")
+    func usecase_whenSubscribedAgain_usesSameDrawnDelay() {
+        // given
+        let scheduler = DispatchQueue.test
+        let usecase = self.makeUsecaseForMainBanner(randomUnits: [0.1, 0.5], scheduler: scheduler)
+        var firstAlloweds: [Bool] = []
+        var secondAlloweds: [Bool] = []
+
+        // when
+        self.observeMainBanner(usecase) { firstAlloweds.append($0) }
+        self.observeMainBanner(usecase) { secondAlloweds.append($0) }
+        scheduler.advance(by: .seconds(180))
+
+        // then
+        #expect(firstAlloweds == [false, true])
+        #expect(secondAlloweds == [false, true])
+    }
+
+    @Test("뽑혀도 유료 플랜이면 지연 뒤 메인 배너를 허용하지 않는다")
+    func usecase_whenDrawnButPaidPlan_mainBannerIsNotAllowed() {
+        // given
+        let scheduler = DispatchQueue.test
+        let usecase = self.makeUsecaseForMainBanner(
+            userPlan: .standard, randomUnits: [0, 0], scheduler: scheduler
+        )
+        var alloweds: [Bool] = []
+
+        // when
+        self.observeMainBanner(usecase) { alloweds.append($0) }
+        scheduler.advance(by: .seconds(60))
+
+        // then
+        #expect(alloweds == [false])
+    }
+
+    @Test("메인 배너가 뜬 뒤 유료로 바뀌면 내려간다")
+    func usecase_whenPlanChangesToPaidAfterShown_mainBannerBecomesNotAllowed() {
+        // given
+        let scheduler = DispatchQueue.test
+        let usecase = self.makeUsecaseForMainBanner(randomUnits: [0, 0], scheduler: scheduler)
+        var alloweds: [Bool] = []
+        self.observeMainBanner(usecase) { alloweds.append($0) }
+        scheduler.advance(by: .seconds(60))
+
+        // when
+        self.stubBillingUsecase.currentUserPlanSubject.send(self.userPlan(.lifetime))
+
+        // then
+        #expect(alloweds == [false, true, false])
+    }
+
+    @Test("리모트 값이 있으면 기본값 대신 쓴다")
+    func usecase_whenRemotePolicyExists_usesRemoteValues() {
+        // given
+        let scheduler = DispatchQueue.test
+        let usecase = self.makeUsecaseForMainBanner(
+            remotePolicy: self.remoteMainBannerPolicy(percentage: 100, minDelay: 10, maxDelay: 20),
+            randomUnits: [0.9, 0.5],
+            scheduler: scheduler
+        )
+        var alloweds: [Bool] = []
+
+        // when + then
+        self.observeMainBanner(usecase) { alloweds.append($0) }
+        scheduler.advance(by: .seconds(14))
+        #expect(alloweds == [false])
+
+        scheduler.advance(by: .seconds(1))
+        #expect(alloweds == [false, true])
+    }
+
+    @Test("리모트에 없는 속성만 기본값으로 채운다")
+    func usecase_whenRemotePolicyHasOnlyMinDelay_fillsRestWithDefault() {
+        // given
+        let scheduler = DispatchQueue.test
+        let usecase = self.makeUsecaseForMainBanner(
+            remotePolicy: self.remoteMainBannerPolicy(minDelay: 100),
+            randomUnits: [0.7, 0.5],
+            scheduler: scheduler
+        )
+        var alloweds: [Bool] = []
+
+        // when + then
+        self.observeMainBanner(usecase) { alloweds.append($0) }
+        scheduler.advance(by: .seconds(199))
+        #expect(alloweds == [false])
+
+        scheduler.advance(by: .seconds(1))
+        #expect(alloweds == [false, true])
+    }
+
+    @Test("리모트 확률이 0 이면 어떤 추첨값도 뽑히지 않는다")
+    func usecase_whenRemotePercentageIsZero_mainBannerIsNotAllowed() {
+        // given
+        let scheduler = DispatchQueue.test
+        let usecase = self.makeUsecaseForMainBanner(
+            remotePolicy: self.remoteMainBannerPolicy(percentage: 0),
+            randomUnits: [0, 0],
+            scheduler: scheduler
+        )
+        var alloweds: [Bool] = []
+
+        // when
+        self.observeMainBanner(usecase) { alloweds.append($0) }
+        scheduler.advance(by: .seconds(301))
+
+        // then
+        #expect(alloweds == [false])
+    }
+
+    @Test("최소 지연이 최대보다 크면 최소를 지연으로 쓴다")
+    func usecase_whenMinDelayIsOverMaxDelay_usesMinDelay() {
+        // given
+        let scheduler = DispatchQueue.test
+        let usecase = self.makeUsecaseForMainBanner(
+            remotePolicy: self.remoteMainBannerPolicy(minDelay: 100, maxDelay: 50),
+            randomUnits: [0, 0.9],
+            scheduler: scheduler
+        )
+        var alloweds: [Bool] = []
+
+        // when + then
+        self.observeMainBanner(usecase) { alloweds.append($0) }
+        scheduler.advance(by: .seconds(99))
+        #expect(alloweds == [false])
+
+        scheduler.advance(by: .seconds(1))
+        #expect(alloweds == [false, true])
     }
 }
 
@@ -580,5 +827,20 @@ extension AdExposureUsecaseImpleTests {
         // then
         #expect(self.spyAdRepository.didMarkTrackingGuideShown == true)
         #expect(await usecase.canRequestTrackingAuthorization() == false)
+    }
+}
+
+
+private final class StubRandomUnits: @unchecked Sendable {
+
+    private var units: [Double]
+
+    init(_ units: [Double]) {
+        self.units = units
+    }
+
+    @Sendable
+    func next() -> Double {
+        return self.units.isEmpty ? 0.99 : self.units.removeFirst()
     }
 }
