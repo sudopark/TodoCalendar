@@ -139,19 +139,8 @@ extension SettingItemListRouter {
     }
     
     func openShare(link path: String) {
-        Task { @MainActor in
-            guard let url = URL(string: path) else { return }
-            let shareItems: [Any] = [
-                "To-do Calendar" as Any,
-                url as Any
-            ]
-            let activityViewController = UIActivityViewController(
-                activityItems: shareItems,
-                applicationActivities: nil
-            )
-            activityViewController.popoverPresentationController?.sourceView = self.currentScene?.view
-            self.currentScene?.present(activityViewController, animated: true)
-        }
+        guard let url = URL(string: path) else { return }
+        self.showShareSheet(items: ["To-do Calendar", url])
     }
 
     // 전체화면으로 열어 시트 위에도 뜨게 한다 (#739)

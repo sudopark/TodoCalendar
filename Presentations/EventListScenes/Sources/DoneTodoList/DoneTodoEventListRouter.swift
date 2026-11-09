@@ -52,24 +52,13 @@ extension DoneTodoEventListRouter {
     func showSelectRemoveDoneTodoRangePicker(
         _ selected: @Sendable @escaping (RemoveDoneTodoRange) -> Void
     ) {
-        Task { @MainActor in
-         
-            let actionSheet = UIAlertController(
-                title: nil,
-                message: "eventList::remove::confirm::message".localized(),
-                preferredStyle: .actionSheet
-            )
-            RemoveDoneTodoRange.allCases.forEach { range in
-                let action = UIAlertAction(title: range.buttonTitle, style: .default) { _ in
-                    selected(range)
-                }
-                actionSheet.addAction(action)
-            }
-            actionSheet.addAction(
-                UIAlertAction(title: "common.cancel".localized(), style: .cancel)
-            )
-            self.currentScene?.present(actionSheet, animated: true)
+        var form = ActionSheetForm()
+        form.message = "eventList::remove::confirm::message".localized()
+        form.actions = RemoveDoneTodoRange.allCases.map { range in
+            .init(range.buttonTitle) { selected(range) }
         }
+        form.actions.append(.init("common.cancel".localized(), style: .cancel))
+        self.showActionSheet(form)
     }
     
     func routeToDoneTodoDetail(_ eventId: String) {
