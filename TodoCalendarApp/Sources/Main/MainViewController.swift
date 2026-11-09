@@ -380,11 +380,28 @@ private final class HeaderView: UIView {
         activating?.isActive = true
     }
 
+    // 창 제어 버튼은 safe area 에 안 잡혀 corner adaptation 으로 비킨다. iPhone 은 버튼이 없는데도 화면 모서리만큼 밀려 iPad 에서만 쓴다
+    private var windowControlAvoidingGuide: UILayoutGuide? {
+        guard #available(iOS 26.0, *), UIDevice.current.userInterfaceIdiom == .pad
+        else { return nil }
+        return self.layoutGuide(for: .safeArea(cornerAdaptation: .horizontal))
+    }
+
+    private var contentLeadingAnchor: NSLayoutXAxisAnchor {
+        return self.windowControlAvoidingGuide?.leadingAnchor ?? self.leadingAnchor
+    }
+
+    // 값을 읽지 않으면 윈도우에서 전체 화면으로 돌아와도 가이드가 옛 값에 머문다
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        _ = self.windowControlAvoidingGuide?.layoutFrame
+    }
+
     func setupLayout() {
         
         self.addSubview(previousMonthButton)
         previousMonthButton.autoLayout.active(with: self) {
-            $0.leadingAnchor.constraint(equalTo: $1.leadingAnchor, constant: 16)
+            $0.leadingAnchor.constraint(equalTo: self.contentLeadingAnchor, constant: 16)
             $0.centerYAnchor.constraint(equalTo: $1.centerYAnchor)
             $0.widthAnchor.constraint(equalToConstant: 24)
             $0.heightAnchor.constraint(equalToConstant: 44)
@@ -397,7 +414,7 @@ private final class HeaderView: UIView {
         self.titleLeadingAfterPreviousButton = titleStackView.leadingAnchor
             .constraint(equalTo: self.previousMonthButton.trailingAnchor, constant: 8)
         self.titleLeadingAtEdge = titleStackView.leadingAnchor
-            .constraint(equalTo: self.leadingAnchor, constant: 16)
+            .constraint(equalTo: self.contentLeadingAnchor, constant: 16)
         self.titleLeadingAfterPreviousButton?.isActive = true
         titleStackView.axis = .horizontal
         titleStackView.alignment = .lastBaseline
