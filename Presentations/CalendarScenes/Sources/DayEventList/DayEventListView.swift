@@ -23,6 +23,11 @@ import ExternalCalendarDomainInterface
 import SettingDomainInterface
 
 
+private enum Constant {
+    static let minimumDateTextScale: CGFloat = 0.6
+}
+
+
 // MARK: - AICommandBadge
 
 private enum AICommandBadge: Equatable {
@@ -389,6 +394,51 @@ struct DayEventListView: View {
         }
     }
 
+    private func dateTitleView() -> some View {
+        HStack {
+            Text(self.state.dayModel?.dateText ?? "")
+                .font(self.appearance.fontSet.size(22+appearance.eventTextAdditionalSize, weight: .semibold).asFont)
+                .foregroundColor(self.appearance.colorSet.text0.asColor)
+                .lineLimit(1)
+                .minimumScaleFactor(Constant.minimumDateTextScale)
+
+            if self.appearance.showLunarCalendarDate {
+                Text(self.state.dayModel?.lunarDateText ?? "")
+                    .font(
+                        self.appearance.fontSet.size(20+appearance.eventTextAdditionalSize, weight: .semibold).asFont
+                    )
+                    .foregroundColor(self.appearance.colorSet.text2.asColor)
+                    .lineLimit(1)
+                    .minimumScaleFactor(Constant.minimumDateTextScale)
+            }
+        }
+    }
+
+    private func headerButtonsView() -> some View {
+        HStack {
+            if self.state.isShowReturnToToday {
+                self.returnToTodayView()
+                    .fixedSize()
+            }
+
+            Spacer()
+
+            Button {
+                self.isFocusInput = false
+                self.eventHandler.showSharePreview()
+            } label: {
+                Image(systemName: "square.and.arrow.up")
+            }
+
+            Button {
+                self.isFocusInput = false
+                self.eventHandler.showDoneTodoList()
+            } label: {
+                Image(systemName: "checklist.checked")
+            }
+        }
+    }
+
     private func dateInfoView() -> some View {
         VStack(alignment: .leading) {
 
@@ -399,39 +449,16 @@ struct DayEventListView: View {
             }
 
             // 상단 날짜표시 헤더 - 날짜 및 음력 표시
-            HStack {
-
-                Text(self.state.dayModel?.dateText ?? "")
-                    .font(self.appearance.fontSet.size(22+appearance.eventTextAdditionalSize, weight: .semibold).asFont)
-                    .foregroundColor(self.appearance.colorSet.text0.asColor)
-
-
-                if self.appearance.showLunarCalendarDate {
-                    Text(self.state.dayModel?.lunarDateText ?? "")
-                        .font(
-                            self.appearance.fontSet.size(20+appearance.eventTextAdditionalSize, weight: .semibold).asFont
-                        )
-                        .foregroundColor(self.appearance.colorSet.text2.asColor)
+            ViewThatFits(in: .horizontal) {
+                HStack {
+                    self.dateTitleView()
+                        .layoutPriority(1)
+                    self.headerButtonsView()
                 }
 
-                if self.state.isShowReturnToToday {
-                    self.returnToTodayView()
-                }
-
-                Spacer()
-
-                Button {
-                    self.isFocusInput = false
-                    self.eventHandler.showSharePreview()
-                } label: {
-                    Image(systemName: "square.and.arrow.up")
-                }
-
-                Button {
-                    self.isFocusInput = false
-                    self.eventHandler.showDoneTodoList()
-                } label: {
-                    Image(systemName: "checklist.checked")
+                VStack(alignment: .leading, spacing: Metric.Spacing.xsmall) {
+                    self.dateTitleView()
+                    self.headerButtonsView()
                 }
             }
             .padding(.bottom, spacing: .xsmall)
