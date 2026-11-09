@@ -187,6 +187,8 @@ open class BaseRouterImple: Routing, @unchecked Sendable {
                 sheet.addAction(action)
             }
             
+            // iPadOS 는 앵커 없는 action sheet 를 띄우면 죽는다
+            self.anchorPopoverAtWindowCenter(sheet)
             self.scene?.present(sheet, animated: true)
         }
     }
@@ -233,15 +235,7 @@ open class BaseRouterImple: Routing, @unchecked Sendable {
 
     public func showShareSheet(text: String, onShared: (@Sendable @MainActor () -> Void)?) {
         Task { @MainActor in
-            let activityViewController = UIActivityViewController(
-                activityItems: [text], applicationActivities: nil
-            )
-            activityViewController.popoverPresentationController?.sourceView = self.scene?.view
-            activityViewController.completionWithItemsHandler = { _, completed, _, _ in
-                guard completed else { return }
-                Task { @MainActor in onShared?() }
-            }
-            self.scene?.present(activityViewController, animated: true)
+            self.presentShareSheet(items: [text], onShared: onShared)
         }
     }
 
@@ -253,16 +247,40 @@ open class BaseRouterImple: Routing, @unchecked Sendable {
         Task { @MainActor in
             // UIImage를 그대로 넘기면 사진 앱 저장 액션이 안 뜨고 이름도 매번 같아 덮어쓴다
             let item: Any = self.temporaryPNGFileURL(image) ?? image
-            let activityViewController = UIActivityViewController(
-                activityItems: [item], applicationActivities: nil
-            )
-            activityViewController.popoverPresentationController?.sourceView = self.scene?.view
-            activityViewController.completionWithItemsHandler = { _, completed, _, _ in
-                guard completed else { return }
-                Task { @MainActor in onShared?() }
-            }
-            self.scene?.present(activityViewController, animated: true)
+            self.presentShareSheet(items: [item], onShared: onShared)
         }
+    }
+
+    public func showShareSheet(items: sending [Any]) {
+        Task { @MainActor in
+            self.presentShareSheet(items: items, onShared: nil)
+        }
+    }
+
+    @MainActor
+    private func presentShareSheet(
+        items: [Any],
+        onShared: (@Sendable @MainActor () -> Void)?
+    ) {
+        let activityViewController = UIActivityViewController(
+            activityItems: items, applicationActivities: nil
+        )
+        self.anchorPopoverAtWindowCenter(activityViewController)
+        activityViewController.completionWithItemsHandler = { _, completed, _, _ in
+            guard completed else { return }
+            Task { @MainActor in onShared?() }
+        }
+        self.scene?.present(activityViewController, animated: true)
+    }
+
+    @MainActor
+    private func anchorPopoverAtWindowCenter(_ presented: UIViewController) {
+        guard let view = self.scene?.view,
+              let popover = presented.popoverPresentationController
+        else { return }
+        popover.sourceView = view
+        popover.sourceRect = CGRect(x: view.bounds.midX, y: view.bounds.midY, width: 0, height: 0)
+        popover.permittedArrowDirections = []
     }
 
     private func temporaryPNGFileURL(_ image: UIImage) -> URL? {
