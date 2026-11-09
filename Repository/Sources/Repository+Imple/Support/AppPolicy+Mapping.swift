@@ -16,6 +16,7 @@ struct AppPolicyMapper: Codable {
         case colorThemeLicense = "color_theme_license"
         case widgetStyleLicense = "widget_style_license"
         case mainBannerExposure = "main_banner_exposure"
+        case fullScreenAdEventSaveInterval = "full_screen_ad_event_save_interval"
         case featureSwitches = "feature_switches"
     }
 
@@ -100,6 +101,9 @@ struct AppPolicyMapper: Codable {
         let mainBannerExposure = try container.decodeIfPresent(
             MainBannerExposureEntry.self, forKey: .mainBannerExposure
         )
+        let eventSaveInterval = try container.decodeIfPresent(
+            Int.self, forKey: .fullScreenAdEventSaveInterval
+        )
         let switches = try container.decodeIfPresent(
             [String: FeatureSwitchEntry].self, forKey: .featureSwitches
         )
@@ -107,6 +111,7 @@ struct AppPolicyMapper: Codable {
             colorThemeLicense: license?.policy,
             widgetStyleLicense: widgetLicense?.policy,
             mainBannerExposure: mainBannerExposure?.policy,
+            fullScreenAdEventSaveInterval: eventSaveInterval.flatMap { $0 >= 0 ? $0 : nil },
             featureSwitches: (switches ?? [:]).mapValues { entry in
                 FeatureSwitch(
                     isEnabled: entry.enabled,
@@ -139,6 +144,10 @@ struct AppPolicyMapper: Codable {
                     )
                 },
             forKey: .mainBannerExposure
+        )
+        try container.encodeIfPresent(
+            self.policy.fullScreenAdEventSaveInterval,
+            forKey: .fullScreenAdEventSaveInterval
         )
         try container.encode(
             self.policy.featureSwitches

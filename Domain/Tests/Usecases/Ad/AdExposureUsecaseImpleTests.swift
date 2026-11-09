@@ -87,7 +87,8 @@ final class AdExposureUsecaseImpleTests: PublisherWaitable {
             defaultPolicy: AppPolicy(
                 mainBannerExposure: .init(
                     exposurePercentage: 75, minDelaySeconds: 60, maxDelaySeconds: 300
-                )
+                ),
+                fullScreenAdEventSaveInterval: 2
             ),
             calendar: self.calendar,
             scheduler: scheduler,
@@ -671,6 +672,53 @@ extension AdExposureUsecaseImpleTests {
 // MARK: - 이벤트 저장 차례
 
 extension AdExposureUsecaseImpleTests {
+
+    @Test("리모트 저장 간격이 3 이면 세 번째 저장이 전면 차례다", arguments: [(2, false), (3, true), (4, false), (6, true)])
+    func usecase_whenRemoteIntervalIsThree_isTurnOnMultipleOfThree(
+        savedCount: Int, expected: Bool
+    ) {
+        // given
+        let usecase = self.makeUsecase(
+            eventSavedCount: savedCount,
+            remotePolicy: AppPolicy(fullScreenAdEventSaveInterval: 3)
+        )
+
+        // when
+        let isTurn = usecase.isFullScreenAdTurnAfterEventSave()
+
+        // then
+        #expect(isTurn == expected)
+    }
+
+    @Test("리모트 저장 간격이 0 이면 전면 차례가 오지 않는다", arguments: [0, 1, 2])
+    func usecase_whenRemoteIntervalIsZero_isNeverTurn(savedCount: Int) {
+        // given
+        let usecase = self.makeUsecase(
+            eventSavedCount: savedCount,
+            remotePolicy: AppPolicy(fullScreenAdEventSaveInterval: 0)
+        )
+
+        // when
+        let isTurn = usecase.isFullScreenAdTurnAfterEventSave()
+
+        // then
+        #expect(isTurn == false)
+    }
+
+    @Test("리모트 정책에 저장 간격이 없으면 기본값을 쓴다")
+    func usecase_whenRemotePolicyHasNoInterval_usesDefaultInterval() {
+        // given
+        let usecase = self.makeUsecase(
+            eventSavedCount: 2,
+            remotePolicy: AppPolicy(colorThemeLicense: .init(isEnabled: true))
+        )
+
+        // when
+        let isTurn = usecase.isFullScreenAdTurnAfterEventSave()
+
+        // then
+        #expect(isTurn == true)
+    }
 
     @Test("이벤트를 저장한 적 없으면 전면 차례가 아니다")
     func usecase_whenNeverSavedEvent_isNotFullScreenAdTurn() {

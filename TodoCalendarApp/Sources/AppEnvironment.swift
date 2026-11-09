@@ -19,6 +19,7 @@ struct AppEnvironment {
         static let defaultMainBannerExposurePercentage: Int = 75
         static let defaultMainBannerMinDelaySeconds: Int = 60
         static let defaultMainBannerMaxDelaySeconds: Int = 300
+        static let defaultFullScreenAdEventSaveInterval: Int = 2
         // 1회 실행이 67초라 한 실행을 충분히 덮으면서, 잔존 시 오염 창을 짧게 남긴다
         static let e2eRunMarkerTTL: TimeInterval = 600
     }
@@ -195,7 +196,8 @@ struct AppEnvironment {
                 exposurePercentage: Constant.defaultMainBannerExposurePercentage,
                 minDelaySeconds: Constant.defaultMainBannerMinDelaySeconds,
                 maxDelaySeconds: Constant.defaultMainBannerMaxDelaySeconds
-            )
+            ),
+            fullScreenAdEventSaveInterval: Constant.defaultFullScreenAdEventSaveInterval
         )
     }
 
