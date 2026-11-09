@@ -16,6 +16,9 @@ struct AppEnvironment {
         static let e2eRunMarkerFileName: String = "e2e-run.marker"
         static let defaultColorThemeLicenseDays: Int = 7
         static let defaultWidgetStyleLicenseDays: Int = 7
+        static let defaultMainBannerExposurePercentage: Int = 75
+        static let defaultMainBannerMinDelaySeconds: Int = 60
+        static let defaultMainBannerMaxDelaySeconds: Int = 300
         // 1회 실행이 67초라 한 실행을 충분히 덮으면서, 잔존 시 오염 창을 짧게 남긴다
         static let e2eRunMarkerTTL: TimeInterval = 600
     }
@@ -187,6 +190,11 @@ struct AppEnvironment {
             ),
             widgetStyleLicense: .init(
                 isEnabled: true, licenseDays: Constant.defaultWidgetStyleLicenseDays
+            ),
+            mainBannerExposure: .init(
+                exposurePercentage: Constant.defaultMainBannerExposurePercentage,
+                minDelaySeconds: Constant.defaultMainBannerMinDelaySeconds,
+                maxDelaySeconds: Constant.defaultMainBannerMaxDelaySeconds
             )
         )
     }
