@@ -1,9 +1,4 @@
-■ Counting D-Day
-· Turn on "Count D-Day as D+1" under "Widgets" in Settings, and the D-Day itself counts as D+1, in both the app and widgets
-· You can also turn it on for just one D-Day widget when you edit that widget
-· Widget settings now live under "Widgets" on the main Settings screen
+■ Rokuyo (iOS 26 or later)
+· Turn on "Rokuyo" in Settings > Appearance to see the day's rokuyo, such as Taian or Butsumetsu, above the selected date
 
-■ Collapsing the calendar
-· Tapping the selected date again to collapse the calendar is now an option you can turn on or off. It's off by default
-· Turn on "Auto-collapse calendar" in Settings > Appearance, then tap the selected date once more to collapse the calendar
-· Every week of the month stays in view, and only the date cells get smaller. Tap again to expand it
+· Bug fixes

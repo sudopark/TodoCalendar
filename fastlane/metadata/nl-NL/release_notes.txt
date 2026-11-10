@@ -1,9 +1,4 @@
-■ D-Day tellen
-· Zet "D-Day tellen als D+1" aan onder "Widgets" in Instellingen, dan telt de D-Day zelf als D+1, in de app en in widgets
-· Je kunt het ook voor één D-Day-widget aanzetten als je die widget bewerkt
-· De widgetinstellingen staan nu onder "Widgets" op het hoofdscherm van Instellingen
+■ Rokuyo (iOS 26 of hoger)
+· Zet "Rokuyo" aan in Instellingen > Weergave om boven de gekozen datum de rokuyo van die dag te zien, zoals Taian of Butsumetsu
 
-■ Kalender inklappen
-· Of je de kalender inklapt door nog eens op de gekozen datum te tikken, kun je nu zelf aan- of uitzetten. Standaard staat het uit
-· Zet "Kalender automatisch inklappen" aan in Instellingen > Weergave en tik nog een keer op de gekozen datum om de kalender in te klappen
-· Alle weken van de maand blijven zichtbaar, alleen de datumvakjes worden kleiner. Tik opnieuw om hem uit te klappen
+· Bugfixes

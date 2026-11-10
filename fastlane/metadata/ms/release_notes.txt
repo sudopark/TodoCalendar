@@ -1,9 +1,4 @@
-■ Cara mengira D-Day
-· Hidupkan "Kira D-Day sebagai D+1" di "Widget" dalam Tetapan, dan hari D-Day itu sendiri dikira sebagai D+1, dalam apl dan widget
-· Anda juga boleh menghidupkannya untuk satu Widget Hari-D sahaja semasa menyunting widget itu
-· Tetapan widget kini berada di "Widget" pada skrin utama Tetapan
+■ Rokuyo (iOS 26 atau lebih baharu)
+· Hidupkan "Rokuyo" dalam Tetapan > Rupa untuk melihat rokuyo hari itu, seperti Taian atau Butsumetsu, di atas tarikh yang dipilih
 
-■ Melipat kalendar
-· Mengetik semula tarikh yang dipilih untuk melipat kalendar kini menjadi pilihan yang boleh anda hidupkan atau matikan. Ia dimatikan secara lalai
-· Hidupkan "Lipat kalendar secara automatik" dalam Tetapan > Rupa, kemudian ketik tarikh yang dipilih sekali lagi untuk melipat kalendar
-· Semua minggu dalam bulan itu kekal kelihatan, hanya petak tarikh menjadi lebih kecil. Ketik lagi untuk membukanya
+· Pembetulan pepijat
