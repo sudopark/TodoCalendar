@@ -22,6 +22,7 @@
 | 이벤트 목록 텍스트 크기 | `event_additiona_font_size` | CGFloat 조절 | `0` |
 | 공휴일 이름 표시 | `show_holiday_name_on_eventList` | on/off | `false` |
 | 음력 날짜 표시 | `show_lunar_calendar_date` | on/off | `false` — 음력 기준은 `LunarCalendarKind` 가 정한다(iOS 26 이상은 기기 언어별, 미만은 chinese) |
+| 로쿠요 표시 (iOS 26 이상에서만 노출) | `show_rokuyo` | on/off | `false` |
 | 12/24시간 표시 | `is_24_hourForm` | 12h/24h | `true` (24시간) |
 | 미완료 할일 상단 표시 | `hide_uncompleted_todos` | on/off | `false` (반전 키: 표시=true) |
 | 햅틱 피드백 | `haptic_effect_off` | on/off | `false` (반전 키: 켜짐=false) |
@@ -50,6 +51,7 @@
 | 목록 텍스트 크기 | — | ✅ 셀 폰트 | — |
 | 공휴일 표시 | ✅ 공휴일 강조 | ✅ 날짜 정보 섹션 | ✅ |
 | 음력 표시 | — | ✅ 날짜 정보 섹션 | — |
+| 로쿠요 표시 | — | ✅ 날짜 정보 섹션 | — |
 | 미완료 할일 | — | ✅ 섹션 표시/숨김 | — |
 | 컬러 테마 | ✅ 전체 | ✅ 전체 | ✅ 전체 |
 
