@@ -118,9 +118,10 @@ git checkout "$(git branch --show-current | sed 's|^test-deploy/||')"
 
 빌드·서명·업로드는 둘 다 같은 fastlane 레인이라 나오는 IPA는 동일하다.
 
-로컬 직접 실행 명령:
+로컬 직접 실행 명령 — 로케일 export 를 빼면 `build_app` 이 넘기는 xcpretty 가 US-ASCII 셸에서 `invalid byte sequence` 로 죽어 archive 가 실패한다:
 ```bash
 export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
+export LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
 TEST_DEPLOY_RELEASE_NOTES="<메모>" bundle exec fastlane ios test_deploy
 ```
 

@@ -52,9 +52,10 @@ Fastlane 레인 `ios testflight_deploy`로 App Store 서명 빌드를 만들어 
    cp "$SECRETS_DIR/secrets.json" TodoCalendarApp/Resources/secrets.json
    ```
 
-5. **프로젝트 생성 + 빌드번호 스탬프 + 레인 실행** — 스탬프는 `tuist generate` 뒤에 와야 한다. generate 가 Derived InfoPlist 를 `Project+AppVersion.swift` 값으로 다시 쓰기 때문이다.
+5. **프로젝트 생성 + 빌드번호 스탬프 + 레인 실행** — 스탬프는 `tuist generate` 뒤에 와야 한다. generate 가 Derived InfoPlist 를 `Project+AppVersion.swift` 값으로 다시 쓰기 때문이다. 로케일 export 를 빼면 `build_app` 이 넘기는 xcpretty 가 US-ASCII 셸에서 `invalid byte sequence` 로 죽어 archive 가 실패한다.
    ```bash
    export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
+   export LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
    source "$HOME/Documents/sudo/secrets/TodoCalendar/asc.env"
    mise exec -- tuist install
    mise exec -- tuist generate --no-open
