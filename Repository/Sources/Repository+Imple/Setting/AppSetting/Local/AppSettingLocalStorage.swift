@@ -54,6 +54,7 @@ extension AppSettingLocalStorage {
     private var eventAdditionaFontSize: String { "event_additiona_font_size" }
     private var showHolidayNameOnEventList: String { "show_holiday_name_on_eventList" }
     private var showLunarCalendarDate: String { "show_lunar_calendar_date" }
+    private var showRokuyo: String { "show_rokuyo" }
     private var is24HourForm: String { "is_24_hourForm" }
     private var hideUncompletedTodos: String { "hide_uncompleted_todos" }
     
@@ -126,12 +127,14 @@ extension AppSettingLocalStorage {
         let eventFont: Int = self.environmentStorage.load(eventAdditionaFontSize) ?? 0
         let holiday: Bool = self.environmentStorage.load(showHolidayNameOnEventList) ?? false
         let lunar: Bool = self.environmentStorage.load(showLunarCalendarDate) ?? false
+        let rokuyo: Bool = self.environmentStorage.load(showRokuyo) ?? false
         let is24From: Bool = self.environmentStorage.load(is24HourForm) ?? true
         let hideUncompletedTodos: Bool = self.environmentStorage.load(hideUncompletedTodos) ?? false
         calendar = calendar
             |> \.eventTextAdditionalSize .~ CGFloat(eventFont)
             |> \.showHoliday .~ holiday
             |> \.showLunarCalendarDate .~ lunar
+            |> \.showRokuyo .~ rokuyo
             |> \.is24hourForm .~ is24From
             |> \.showUncompletedTodos .~ !hideUncompletedTodos
         
@@ -193,6 +196,9 @@ extension AppSettingLocalStorage {
         )
         self.environmentStorage.update(
             showLunarCalendarDate, newValue.showLunarCalendarDate
+        )
+        self.environmentStorage.update(
+            showRokuyo, newValue.showRokuyo
         )
         self.environmentStorage.update(
             is24HourForm, newValue.is24hourForm
