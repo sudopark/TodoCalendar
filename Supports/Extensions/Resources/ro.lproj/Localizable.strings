@@ -546,6 +546,15 @@
 "setting.appearance.event.fontSize" = "Dimensiunea fontului textului evenimentului";
 "setting.appearance.event.show_holidayName" = "Afișează numele sărbătorii";
 "setting.appearance.event.show_lunar" = "Calendar lunar";
+"setting.appearance.event.show_lunar::explain" = "Standardul calendarului lunar (coreean, chinezesc sau vietnamez) este ales după limba dispozitivului, așa că datele lunare pot diferi cu o zi în funcție de standard.";
+"setting.appearance.event.show_rokuyo" = "Rokuyo";
+"setting.appearance.event.show_rokuyo::available_ios26" = "Disponibil pe iOS 26 sau o versiune ulterioară";
+"rokuyo::taian" = "Taian";
+"rokuyo::shakku" = "Shakku";
+"rokuyo::sensho" = "Sensho";
+"rokuyo::tomobiki" = "Tomobiki";
+"rokuyo::senbu" = "Senbu";
+"rokuyo::butsumetsu" = "Butsumetsu";
 "setting.appearance.event._24form" = "Format de 24 de ore";
 "setting.appearance.event.sample::name" = "🥗 Numele evenimentului";
 "setting.appearance.event.sample::description" = "descriere";

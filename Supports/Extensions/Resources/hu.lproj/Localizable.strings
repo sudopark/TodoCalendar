@@ -546,6 +546,15 @@
 "setting.appearance.event.fontSize" = "Esemény szövegének betűmérete";
 "setting.appearance.event.show_holidayName" = "Ünnep nevének megjelenítése";
 "setting.appearance.event.show_lunar" = "Holdnaptár";
+"setting.appearance.event.show_lunar::explain" = "A holdnaptár szabványa (koreai, kínai vagy vietnami) az eszköz nyelve alapján dől el, ezért a holdnaptári dátumok a szabványtól függően egy nappal eltérhetnek.";
+"setting.appearance.event.show_rokuyo" = "Rokuyo";
+"setting.appearance.event.show_rokuyo::available_ios26" = "iOS 26 vagy újabb rendszeren érhető el";
+"rokuyo::taian" = "Taian";
+"rokuyo::shakku" = "Shakku";
+"rokuyo::sensho" = "Sensho";
+"rokuyo::tomobiki" = "Tomobiki";
+"rokuyo::senbu" = "Senbu";
+"rokuyo::butsumetsu" = "Butsumetsu";
 "setting.appearance.event._24form" = "24 órás formátum";
 "setting.appearance.event.sample::name" = "🥗 Esemény neve";
 "setting.appearance.event.sample::description" = "leírás";

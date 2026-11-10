@@ -546,6 +546,15 @@
 "setting.appearance.event.fontSize" = "इवेंट टेक्स्ट फ़ॉन्ट आकार";
 "setting.appearance.event.show_holidayName" = "अवकाश का नाम दिखाएं";
 "setting.appearance.event.show_lunar" = "चंद्र कैलेंडर";
+"setting.appearance.event.show_lunar::explain" = "चंद्र कैलेंडर का मानक (कोरियाई, चीनी या वियतनामी) डिवाइस की भाषा के आधार पर चुना जाता है, इसलिए मानक के अनुसार चंद्र तिथियों में एक दिन का अंतर हो सकता है।";
+"setting.appearance.event.show_rokuyo" = "रोकुयो";
+"setting.appearance.event.show_rokuyo::available_ios26" = "iOS 26 या उसके बाद के वर्शन पर उपलब्ध";
+"rokuyo::taian" = "ताइआन";
+"rokuyo::shakku" = "शक्कु";
+"rokuyo::sensho" = "सेन्शो";
+"rokuyo::tomobiki" = "तोमोबिकी";
+"rokuyo::senbu" = "सेन्बु";
+"rokuyo::butsumetsu" = "बुत्सुमेत्सु";
 "setting.appearance.event._24form" = "24 घंटे प्रारूप";
 "setting.appearance.event.sample::name" = "🥗 इवेंट नाम";
 "setting.appearance.event.sample::description" = "विवरण";

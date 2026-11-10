@@ -545,6 +545,15 @@
 "setting.appearance.event.fontSize" = "イベント文字サイズ";
 "setting.appearance.event.show_holidayName" = "祝日名を表示";
 "setting.appearance.event.show_lunar" = "旧暦を表示";
+"setting.appearance.event.show_lunar::explain" = "旧暦の基準（韓国・中国・ベトナム）はデバイスの言語によって自動で決まります。基準によって旧暦の日付が1日ずれることがあります。";
+"setting.appearance.event.show_rokuyo" = "六曜を表示";
+"setting.appearance.event.show_rokuyo::available_ios26" = "iOS 26以降で利用できます";
+"rokuyo::taian" = "大安";
+"rokuyo::shakku" = "赤口";
+"rokuyo::sensho" = "先勝";
+"rokuyo::tomobiki" = "友引";
+"rokuyo::senbu" = "先負";
+"rokuyo::butsumetsu" = "仏滅";
 "setting.appearance.event._24form" = "24時間表示";
 "setting.appearance.event.sample::name" = "🥗 イベント名";
 "setting.appearance.event.sample::description" = "説明";
