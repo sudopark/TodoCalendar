@@ -41,3 +41,4 @@
 - [2026-10-11 가로가 긴 화면에서 adaptive 배너가 거부된다](2026-10-11-adaptive-banner-rejected-on-wide-screen.md) — Billing / fixed / Ad size will not fit on screen·adaptive banner 미표시·duo 펼침 배너·admob Code=0
 - [2026-10-13 계정 전환으로 설정 화면이 내려가면 전면광고가 떠 앱 설치 시트까지 보인다](2026-10-13-ad-on-account-switch-install-sheet.md) — Billing / fixed / 전환 중 광고·앱 설치 시트·설정 나가면 광고·viewIfLoaded window 가드 무효
 - [2026-10-17 실측 플레이키 15건+편입 4건 — 타이밍 결합이 전체 실행 부하에서만 드러난다](2026-10-17-measured-flaky-timing-coupling.md) — Infra / fixed / 전체 실행에서만 실패·confirmation 미달·fulfill 초과·방출 횟수 결합·고정 sleep·CombineLatest 조합값 유실·동시 send
+- [2026-11-11 시작일과 종료일이 같은 구글 종일 이벤트를 달력에 올리면 Range 생성에서 죽는다](2026-11-11-google-allday-zero-length-range-trap.md) — ExternalCalendar / deferred / GoogleCalendarEvent.init 크래시·EXC_BREAKPOINT·Range requires lowerBound <= upperBound·구글 종일 이벤트
