@@ -261,7 +261,7 @@ struct WidgetStyleEditView: View {
     /// 선택 테두리를 미리보기 판과 같은 모양으로 그리려면 판이 쓰는 배율을 그대로 써야 한다.
     private var previewScale: CGFloat {
         guard let previewVariant else { return 1 }
-        return Constant.cardWidth / previewVariant.canvas.size.width
+        return Constant.cardWidth / previewVariant.canvas.size(for: UIDevice.current.userInterfaceIdiom).width
     }
     
     private var cardAreaHeight: CGFloat {
@@ -270,7 +270,7 @@ struct WidgetStyleEditView: View {
     
     private var previewHeight: CGFloat {
         guard let previewVariant else { return 0 }
-        return Constant.cardWidth / previewVariant.canvas.previewAspect
+        return Constant.cardWidth / previewVariant.canvas.previewAspect(for: UIDevice.current.userInterfaceIdiom)
     }
     
     private func styleCard(_ style: WidgetStyleCellViewModel) -> some View {
@@ -283,7 +283,7 @@ struct WidgetStyleEditView: View {
             )
                 .frame(width: Constant.cardWidth, height: self.previewHeight)
                 .overlay(
-                    style.styleId.variant.canvas.previewPlateShape(self.previewScale)
+                    style.styleId.variant.canvas.previewPlateShape(self.previewScale, idiom: UIDevice.current.userInterfaceIdiom)
                         .strokeBorder(
                             isSelected
                             ? appearance.colorSet.accent.asColor

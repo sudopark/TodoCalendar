@@ -176,7 +176,8 @@ struct WidgetGalleryDetailView: View {
     private var pagerView: some View {
         @Bindable var state = self.state
         // 넘길 때 출렁이지 않게 모든 페이지가 가장 높은 변형의 비율을 함께 쓴다.
-        let pageAspect = state.variants.map { $0.canvas.previewAspect }.min() ?? 1
+        let idiom = UIDevice.current.userInterfaceIdiom
+        let pageAspect = state.variants.map { $0.canvas.previewAspect(for: idiom) }.min() ?? 1
 
         return TabView(selection: $state.selectedVariantId) {
             ForEach(state.variants) { variant in

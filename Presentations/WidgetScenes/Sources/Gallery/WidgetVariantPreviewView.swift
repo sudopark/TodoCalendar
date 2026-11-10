@@ -31,7 +31,7 @@ struct WidgetVariantPreviewView: View {
     var body: some View {
         // 위젯 뷰는 실제 캔버스 크기로 레이아웃한 뒤 축소해야 폰트·간격이 실물 비율을 지킨다.
         GeometryReader { proxy in
-            let scale = variant.canvas.previewScale(fitting: proxy.size)
+            let scale = variant.canvas.previewScale(fitting: proxy.size, idiom: UIDevice.current.userInterfaceIdiom)
 
             scaledContentView(scale)
                 .background { plateView(scale) }
@@ -44,11 +44,12 @@ struct WidgetVariantPreviewView: View {
 
     private func scaledContentView(_ scale: CGFloat) -> some View {
         let canvas = variant.canvas
+        let size = canvas.size(for: UIDevice.current.userInterfaceIdiom)
         return contentView
             .padding(canvas.contentMargin)
-            .frame(width: canvas.size.width, height: canvas.size.height)
+            .frame(width: size.width, height: size.height)
             .scaleEffect(scale)
-            .frame(width: canvas.size.width * scale, height: canvas.size.height * scale)
+            .frame(width: size.width * scale, height: size.height * scale)
             .padding(canvas.previewPlateInset)
             // 위젯 뷰는 본문이 Link 라 탭하면 딥링크가 열린다 — 미리보기에선 탭을 상위(페이저·카드 선택)로 넘긴다.
             .allowsHitTesting(false)
@@ -75,7 +76,7 @@ struct WidgetVariantPreviewView: View {
     }
 
     private func plateShape(_ scale: CGFloat) -> RoundedRectangle {
-        return variant.canvas.previewPlateShape(scale)
+        return variant.canvas.previewPlateShape(scale, idiom: UIDevice.current.userInterfaceIdiom)
     }
 
     @ViewBuilder

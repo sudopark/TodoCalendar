@@ -20,14 +20,18 @@ import SettingDomainInterface
 
 extension WidgetPreviewCanvas {
 
-    var size: CGSize {
-        switch self {
-        case .systemSmall: return .init(width: 170, height: 170)
-        case .systemMedium: return .init(width: 364, height: 170)
-        case .systemLarge: return .init(width: 364, height: 382)
-        case .accessoryInline: return .init(width: 240, height: 26)
-        case .accessoryRectangular: return .init(width: 160, height: 72)
-        case .accessoryCircular: return .init(width: 72, height: 72)
+    func size(for idiom: UIUserInterfaceIdiom) -> CGSize {
+        switch (self, idiom) {
+        // iPad Pro 13" iOS 26.5 홈 화면 실측값
+        case (.systemSmall, .pad): return .init(width: 160, height: 160)
+        case (.systemMedium, .pad): return .init(width: 356, height: 160)
+        case (.systemLarge, .pad): return .init(width: 356, height: 356)
+        case (.systemSmall, _): return .init(width: 170, height: 170)
+        case (.systemMedium, _): return .init(width: 364, height: 170)
+        case (.systemLarge, _): return .init(width: 364, height: 382)
+        case (.accessoryInline, _): return .init(width: 240, height: 26)
+        case (.accessoryRectangular, _): return .init(width: 160, height: 72)
+        case (.accessoryCircular, _): return .init(width: 72, height: 72)
         }
     }
 
@@ -43,11 +47,11 @@ extension WidgetPreviewCanvas {
         return self.isLockScreen ? Metric.Spacing.small : 0
     }
 
-    func previewPlateShape(_ scale: CGFloat) -> RoundedRectangle {
+    func previewPlateShape(_ scale: CGFloat, idiom: UIUserInterfaceIdiom) -> RoundedRectangle {
         switch self {
         case .accessoryCircular:
             // 판은 캔버스에 여백까지 더한 크기라 반지름도 그 크기로 잡아야 정원이 된다.
-            let plateWidth = self.size.width * scale + self.previewPlateInset * 2
+            let plateWidth = self.size(for: idiom).width * scale + self.previewPlateInset * 2
             return .init(cornerRadius: plateWidth / 2, style: .circular)
         case .accessoryInline, .accessoryRectangular:
             return .init(cornerRadius: Metric.Radius.large, style: .continuous)
@@ -56,15 +60,17 @@ extension WidgetPreviewCanvas {
         }
     }
 
-    var previewAspect: CGFloat {
-        return self.size.width / self.size.height
+    func previewAspect(for idiom: UIUserInterfaceIdiom) -> CGFloat {
+        let size = self.size(for: idiom)
+        return size.width / size.height
     }
 
-    func previewScale(fitting box: CGSize) -> CGFloat {
+    func previewScale(fitting box: CGSize, idiom: UIUserInterfaceIdiom) -> CGFloat {
+        let size = self.size(for: idiom)
         let plate = self.previewPlateInset * 2
         let width = max(box.width - plate, 1)
         let height = box.height.isFinite ? max(box.height - plate, 1) : box.height
-        return min(width / self.size.width, height / self.size.height, 1)
+        return min(width / size.width, height / size.height, 1)
     }
 }
 
