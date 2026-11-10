@@ -52,7 +52,10 @@ struct EventListAppearanceSampleModel: Equatable {
     var holidayName: String?
     var lunarDateText: String?
     
-    init?(_ setting: EventListAppearanceSetting) {
+    init?(
+        _ setting: EventListAppearanceSetting,
+        lunarCalendar: LunarCalendarKind = LunarCalendarKind(language: Locale.current.language.languageCode)
+    ) {
         let calendar = Calendar(identifier: .gregorian)
         guard let christmas = calendar.dateBySetting(from: Date(), mutating: { $0.month = 12; $0.day = 25 })
         else { return nil }
@@ -67,7 +70,7 @@ struct EventListAppearanceSampleModel: Equatable {
         if setting.showLunarCalendarDate {
             let lunarForm = DateFormatter() 
                 |> \.dateFormat .~ "date_form::MM_dd".localized()
-                |> \.calendar .~ Calendar(identifier: .chinese)
+                |> \.calendar .~ lunarCalendar.calendar(timeZone: .current)
             self.lunarDateText = lunarForm.string(from: christmas)
         }
     }

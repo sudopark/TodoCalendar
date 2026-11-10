@@ -27,7 +27,11 @@ struct SelectedDayModel: Equatable {
         self.lunarDateText = lunarDateText
     }
 
-    init(_ timeZone: TimeZone, currentModel: CurrentSelectDayModel) {
+    init(
+        _ timeZone: TimeZone,
+        currentModel: CurrentSelectDayModel,
+        lunarCalendar: LunarCalendarKind = LunarCalendarKind(language: Locale.current.language.languageCode)
+    ) {
         let date = Date(timeIntervalSince1970: currentModel.range.lowerBound)
 
         let formatter = DateFormatter() |> \.timeZone .~ timeZone
@@ -36,7 +40,7 @@ struct SelectedDayModel: Equatable {
 
         let lunarFormatter = DateFormatter()
             |> \.timeZone .~ timeZone
-            |> \.calendar .~ Calendar(identifier: .chinese)
+            |> \.calendar .~ lunarCalendar.calendar(timeZone: timeZone)
 
         lunarFormatter.dateFormat = "date_form::MM_dd".localized()
         self.lunarDateText = "🌕 \(lunarFormatter.string(from: date))"

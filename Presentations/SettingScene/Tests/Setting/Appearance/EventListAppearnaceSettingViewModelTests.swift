@@ -10,6 +10,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import UnitTestHelpKit
 import TestDoubles
 
@@ -225,5 +226,27 @@ extension EventListAppearnaceSettingViewModelTests {
         
         // then
         XCTAssertEqual(isShows, [true, false, true])
+    }
+}
+
+
+// MARK: - 미리보기 음력 날짜
+
+extension EventListAppearnaceSettingViewModelTests {
+
+    func testSampleModel_showsLunarDateWithGivenLunarCalendar() {
+        // given
+        let gregorian = Calendar(identifier: .gregorian)
+        let christmas = gregorian.dateBySetting(from: Date()) { $0.month = 12; $0.day = 25 }!
+        let chineseFormatter = DateFormatter()
+            |> \.dateFormat .~ "date_form::MM_dd".localized()
+            |> \.calendar .~ Calendar(identifier: .chinese)
+
+        // when
+        let model = EventListAppearanceSampleModel(self.dummySetting, lunarCalendar: .chinese)
+
+        // then
+        XCTAssertEqual(model?.lunarDateText, chineseFormatter.string(from: christmas))
+        XCTAssertNotEqual(model?.lunarDateText, "12/25")
     }
 }

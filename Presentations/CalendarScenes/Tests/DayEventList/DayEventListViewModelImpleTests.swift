@@ -182,6 +182,38 @@ extension DayEventListViewModelImpleTests {
             "🌕 07/27"
         ])
     }
+
+    private func february7th2027InSeoul() -> CurrentSelectDayModel {
+        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ TimeZone(identifier: "Asia/Seoul")!
+        let start = calendar.date(from: DateComponents(year: 2027, month: 2, day: 7))!.timeIntervalSince1970
+        return .init(2027, 2, 7, weekId: "some", range: start..<start+3600*24)
+    }
+
+    func testSelectedDayModel_dangi_showsKoreanLunarDate() throws {
+        try XCTSkipUnless(
+            ProcessInfo.processInfo.isOperatingSystemAtLeast(.init(majorVersion: 26, minorVersion: 0, patchVersion: 0)),
+            "dangi 달력은 iOS 26 부터 만들 수 있다"
+        )
+        // given
+        let timeZone = TimeZone(identifier: "Asia/Seoul")!
+
+        // when
+        let model = SelectedDayModel(timeZone, currentModel: self.february7th2027InSeoul(), lunarCalendar: .dangi)
+
+        // then
+        XCTAssertEqual(model.lunarDateText, "🌕 01/01")
+    }
+
+    func testSelectedDayModel_chinese_showsChineseLunarDate() {
+        // given
+        let timeZone = TimeZone(identifier: "Asia/Seoul")!
+
+        // when
+        let model = SelectedDayModel(timeZone, currentModel: self.february7th2027InSeoul(), lunarCalendar: .chinese)
+
+        // then
+        XCTAssertEqual(model.lunarDateText, "🌕 01/02")
+    }
 }
 
 // current todo -> 상시
