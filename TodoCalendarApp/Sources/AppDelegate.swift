@@ -42,6 +42,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         self.applicationViewModel = builder.makeRootViewModel()
         self.applicationRouter = self.applicationViewModel.router
         self.applicationViewModel.registerBackgroundTask()
+        if #available(iOS 27.0, *) {
+            spikeIndexSchemaEntities()
+        }
 
         return true
     }
