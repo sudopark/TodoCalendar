@@ -118,7 +118,11 @@ struct EventListAppearanceSettingView: View {
                     eventHandler.toggleIsShowHolidayName(new)
                 }
             
-            AppearanceRow("setting.appearance.event.show_lunar".localized(), showLunarCalendarView)
+            AppearanceRow(
+                "setting.appearance.event.show_lunar".localized(),
+                subTitle: self.lunarCalendarExplain,
+                showLunarCalendarView
+            )
                 .onChange(of: state.showLunarCalendarDate) { _, new in
                     eventHandler.toggleShowLunarCalendarDate(new)
                 }
@@ -292,6 +296,12 @@ struct EventListAppearanceSettingView: View {
     private var showLunarCalendarView: some View {
         Toggle("", isOn: $state.showLunarCalendarDate)
             .labelsHidden()
+    }
+
+    private var lunarCalendarExplain: String? {
+        // iOS 26 미만은 언어와 상관없이 chinese 음력이라 자동 선택 설명이 맞지 않는다
+        guard #available(iOS 26, *) else { return nil }
+        return "setting.appearance.event.show_lunar::explain".localized()
     }
     
     private var is24HourFormView: some View {
