@@ -181,6 +181,13 @@ extension DayEventListViewModelImpleTests {
             "🌕 07/26",
             "🌕 07/27"
         ])
+        let expectedRokuyos: [Rokuyo?]
+        if #available(iOS 26, *) {
+            expectedRokuyos = [.tomobiki, .senbu]
+        } else {
+            expectedRokuyos = [nil, nil]
+        }
+        XCTAssertEqual(selectedDays.map { $0.rokuyo }, expectedRokuyos)
     }
 
     private func february7th2027InSeoul() -> CurrentSelectDayModel {

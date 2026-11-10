@@ -21,10 +21,12 @@ struct SelectedDayModel: Equatable {
     let dateText: String
     var holidayName: String?
     let lunarDateText: String
+    var rokuyo: Rokuyo?
 
-    init(dateText: String, lunarDateText: String) {
+    init(dateText: String, lunarDateText: String, rokuyo: Rokuyo? = nil) {
         self.dateText = dateText
         self.lunarDateText = lunarDateText
+        self.rokuyo = rokuyo
     }
 
     init(
@@ -44,6 +46,9 @@ struct SelectedDayModel: Equatable {
 
         lunarFormatter.dateFormat = "date_form::MM_dd".localized()
         self.lunarDateText = "🌕 \(lunarFormatter.string(from: date))"
+
+        let gregorian = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
+        self.rokuyo = Rokuyo(CalendarComponent.Day(date, calendar: gregorian))
 
         self.holidayName = currentModel.holidays.isEmpty
             ? nil
