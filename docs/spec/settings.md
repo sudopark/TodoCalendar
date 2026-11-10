@@ -21,7 +21,7 @@
 | 캘린더 내 태그 색상 표시 | `not_show_event_tag_color_on_calendar` | on/off | `false` (반전 키: 표시=true) |
 | 이벤트 목록 텍스트 크기 | `event_additiona_font_size` | CGFloat 조절 | `0` |
 | 공휴일 이름 표시 | `show_holiday_name_on_eventList` | on/off | `false` |
-| 음력 날짜 표시 | `show_lunar_calendar_date` | on/off | `false` |
+| 음력 날짜 표시 | `show_lunar_calendar_date` | on/off | `false` — 음력 기준은 `LunarCalendarKind` 가 정한다(iOS 26 이상은 기기 언어별, 미만은 chinese) |
 | 12/24시간 표시 | `is_24_hourForm` | 12h/24h | `true` (24시간) |
 | 미완료 할일 상단 표시 | `hide_uncompleted_todos` | on/off | `false` (반전 키: 표시=true) |
 | 햅틱 피드백 | `haptic_effect_off` | on/off | `false` (반전 키: 켜짐=false) |
