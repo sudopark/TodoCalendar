@@ -546,6 +546,7 @@
 "setting.appearance.event.fontSize" = "Event text font size";
 "setting.appearance.event.show_holidayName" = "Show holiday name";
 "setting.appearance.event.show_lunar" = "Lunar calendar";
+"setting.appearance.event.show_lunar::explain" = "The lunar calendar standard (Korean, Chinese, or Vietnamese) is chosen from your device language, so lunar dates may differ by a day depending on the standard.";
 "setting.appearance.event._24form" = "24 hour form";
 "setting.appearance.event.sample::name" = "🥗 Event name";
 "setting.appearance.event.sample::description" = "description";

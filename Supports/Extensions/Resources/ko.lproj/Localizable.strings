@@ -547,6 +547,7 @@
 "setting.appearance.event.fontSize" = "이벤트 글자 크기";
 "setting.appearance.event.show_holidayName" = "공휴일 표시";
 "setting.appearance.event.show_lunar" = "음력 표시";
+"setting.appearance.event.show_lunar::explain" = "기기 언어에 따라 음력 기준(한국·중국·베트남)이 자동으로 정해져요. 기준에 따라 음력 날짜가 하루씩 다를 수 있어요.";
 "setting.appearance.event._24form" = "24시간 표시";
 "setting.appearance.event.sample::name" = "🥗 이벤트 이름";
 "setting.appearance.event.sample::description" = "설명";
