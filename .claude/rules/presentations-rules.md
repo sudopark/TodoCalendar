@@ -176,7 +176,7 @@ case .command: builder.makeCommandView()
 
 Router는 `BaseRouterImple` 상속 + `XxxRouting` 채택. 공통 메서드는 먼저 재사용 — 새로 만들기 전에 이 목록에 있는지 본다.
 
-`showError` · `showToast` · `closeScene` · `showConfirm` · `showActionSheet` · `openSafari` · `showWebView` · `showShareSheet`(text·image × `onShared` 유무 4종) · `showBottomSlide` · `showFullScreen` · `dismissPresented`
+`showError` · `showToast` · `closeScene` · `showConfirm` · `showActionSheet` · `openSafari` · `showWebView` · `showShareSheet`(text·image × `onShared` 유무 4종 + `items: [Any]` 1종) · `showBottomSlide` · `showFullScreen` · `dismissPresented`
 
 ### SwiftUI 타입 직접 참조 금지
 ViewModel에 `@Published` / `ObservableObject` / `@StateObject` ❌. 상태 노출은 **Combine `AnyPublisher`**, SwiftUI 변환은 `ViewState`가 담당.
