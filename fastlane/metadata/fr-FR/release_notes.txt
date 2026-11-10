@@ -1,9 +1,4 @@
-■ Compter le D-Day
-· Activez « Compter le D-Day comme D+1 » dans « Widgets » des Réglages, et le D-Day lui-même compte comme D+1, dans l'app comme dans les widgets
-· Vous pouvez aussi l'activer pour un seul widget Jour J en modifiant ce widget
-· Les réglages des widgets se trouvent désormais dans « Widgets », sur l'écran principal des Réglages
+■ Rokuyo (iOS 26 ou version ultérieure)
+· Activez « Rokuyo » dans Réglages > Apparence pour voir le rokuyo du jour, comme Taian ou Butsumetsu, au-dessus de la date sélectionnée
 
-■ Réduire le calendrier
-· Toucher à nouveau la date sélectionnée pour réduire le calendrier est désormais une option que vous pouvez activer ou désactiver. Elle est désactivée par défaut
-· Activez « Réduire le calendrier automatiquement » dans Réglages > Apparence, puis touchez encore une fois la date sélectionnée pour réduire le calendrier
-· Toutes les semaines du mois restent visibles, seules les cases des jours rétrécissent. Touchez à nouveau pour le développer
+· Corrections de bugs

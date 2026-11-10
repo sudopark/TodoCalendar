@@ -1,9 +1,4 @@
-■ D-Day zählen
-· Schalten Sie unter „Widgets“ in den Einstellungen „D-Day als D+1 zählen“ ein, und der D-Day selbst zählt als D+1, in der App und in den Widgets
-· Sie können es auch nur für ein einzelnes Countdown-Widget einschalten, wenn Sie dieses Widget bearbeiten
-· Die Widget-Einstellungen finden Sie jetzt unter „Widgets“ auf dem Hauptbildschirm der Einstellungen
+■ Rokuyo (ab iOS 26)
+· Schalten Sie unter Einstellungen > Erscheinungsbild „Rokuyo“ ein, um über dem ausgewählten Datum das Rokuyo des Tages zu sehen, etwa Taian oder Butsumetsu
 
-■ Kalender einklappen
-· Ob ein erneutes Tippen auf das ausgewählte Datum den Kalender einklappt, können Sie jetzt selbst ein- oder ausschalten. Standardmäßig ist es aus
-· Schalten Sie unter Einstellungen > Erscheinungsbild „Kalender automatisch einklappen“ ein und tippen Sie dann noch einmal auf das ausgewählte Datum, um den Kalender einzuklappen
-· Alle Wochen des Monats bleiben sichtbar, nur die Datumsfelder werden kleiner. Tippen Sie erneut, um ihn auszuklappen
+· Fehlerbehebungen

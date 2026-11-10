@@ -1,9 +1,4 @@
-■ A D-Day számolása
-· Kapcsolja be a „D-Day számolása D+1-ként” lehetőséget a Beállítások „Widgetek” részében, és maga a D-Day napja D+1-nek számít, az appban és a widgeteken is
-· Egyetlen Visszaszámlálás widgetnél is bekapcsolhatja, amikor azt szerkeszti
-· A widgetbeállítások mostantól a Beállítások főképernyőjén, a „Widgetek” részben vannak
+■ Rokuyo (iOS 26 vagy újabb)
+· Kapcsolja be a „Rokuyo” lehetőséget a Beállítások > Megjelenés részben, és a kiválasztott dátum fölött megjelenik a nap rokuyója, például Taian vagy Butsumetsu
 
-■ A naptár összecsukása
-· A kiválasztott dátum újbóli koppintása a naptár összecsukásához mostantól be- és kikapcsolható lehetőség. Alapértelmezés szerint ki van kapcsolva
-· Kapcsolja be a „Naptár automatikus összecsukása” lehetőséget a Beállítások > Megjelenés részben, majd koppintson még egyszer a kiválasztott dátumra a naptár összecsukásához
-· A hónap minden hete látható marad, csak a napok cellái lesznek kisebbek. Koppintson újra a kinyitáshoz
+· Hibajavítások
