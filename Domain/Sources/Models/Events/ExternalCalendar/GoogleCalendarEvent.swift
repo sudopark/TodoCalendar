@@ -351,8 +351,12 @@ extension GoogleCalendar {
                     st.timeIntervalSince1970..<et.timeIntervalSince1970
                 )
             case (.allDay(let st, let sz), .allDay(let et, _)):
+                // 구글은 endTimeUnspecified 이벤트에 시작일과 같은 종료일을 준다
+                let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ sz
+                guard let end = et > st ? et : calendar.date(byAdding: .day, value: 1, to: st)
+                else { return nil }
                 self.eventTime = .allDay(
-                    st.timeIntervalSince1970..<et.timeIntervalSince1970,
+                    st.timeIntervalSince1970..<end.timeIntervalSince1970,
                     secondsFromGMT: TimeInterval(sz.secondsFromGMT())
                 )
             default:
