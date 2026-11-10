@@ -546,6 +546,15 @@
 "setting.appearance.event.fontSize" = "Tamaño de fuente del evento";
 "setting.appearance.event.show_holidayName" = "Mostrar el nombre del día festivo";
 "setting.appearance.event.show_lunar" = "Calendario lunar";
+"setting.appearance.event.show_lunar::explain" = "El estándar del calendario lunar (coreano, chino o vietnamita) se elige según el idioma del dispositivo, por lo que las fechas lunares pueden variar un día según el estándar.";
+"setting.appearance.event.show_rokuyo" = "Rokuyo";
+"setting.appearance.event.show_rokuyo::available_ios26" = "Disponible en iOS 26 o posterior";
+"rokuyo::taian" = "Taian";
+"rokuyo::shakku" = "Shakku";
+"rokuyo::sensho" = "Sensho";
+"rokuyo::tomobiki" = "Tomobiki";
+"rokuyo::senbu" = "Senbu";
+"rokuyo::butsumetsu" = "Butsumetsu";
 "setting.appearance.event._24form" = "Formato de 24 horas";
 "setting.appearance.event.sample::name" = "🥗 Nombre del evento";
 "setting.appearance.event.sample::description" = "descripción";

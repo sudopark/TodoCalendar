@@ -546,6 +546,15 @@
 "setting.appearance.event.fontSize" = "Etkinlik metni yazı tipi boyutu";
 "setting.appearance.event.show_holidayName" = "Tatil adını göster";
 "setting.appearance.event.show_lunar" = "Ay takvimi";
+"setting.appearance.event.show_lunar::explain" = "Ay takvimi standardı (Kore, Çin veya Vietnam) cihaz diline göre seçilir; bu yüzden ay tarihleri standarda göre bir gün farklı olabilir.";
+"setting.appearance.event.show_rokuyo" = "Rokuyo";
+"setting.appearance.event.show_rokuyo::available_ios26" = "iOS 26 veya sonrasında kullanılabilir";
+"rokuyo::taian" = "Taian";
+"rokuyo::shakku" = "Shakku";
+"rokuyo::sensho" = "Sensho";
+"rokuyo::tomobiki" = "Tomobiki";
+"rokuyo::senbu" = "Senbu";
+"rokuyo::butsumetsu" = "Butsumetsu";
 "setting.appearance.event._24form" = "24 saat biçimi";
 "setting.appearance.event.sample::name" = "🥗 Etkinlik adı";
 "setting.appearance.event.sample::description" = "açıklama";

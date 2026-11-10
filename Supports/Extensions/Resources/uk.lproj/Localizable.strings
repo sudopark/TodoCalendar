@@ -545,6 +545,15 @@
 "setting.appearance.event.fontSize" = "Розмір шрифту тексту події";
 "setting.appearance.event.show_holidayName" = "Показувати назву свята";
 "setting.appearance.event.show_lunar" = "Місячний календар";
+"setting.appearance.event.show_lunar::explain" = "Стандарт місячного календаря (корейський, китайський або в'єтнамський) обирається за мовою пристрою, тому місячні дати можуть відрізнятися на день залежно від стандарту.";
+"setting.appearance.event.show_rokuyo" = "Рокуйо";
+"setting.appearance.event.show_rokuyo::available_ios26" = "Доступно в iOS 26 і новіших версіях";
+"rokuyo::taian" = "Тайан";
+"rokuyo::shakku" = "Сякку";
+"rokuyo::sensho" = "Сенсьо";
+"rokuyo::tomobiki" = "Томобікі";
+"rokuyo::senbu" = "Сенбу";
+"rokuyo::butsumetsu" = "Буцумецу";
 "setting.appearance.event._24form" = "24-годинний формат";
 "setting.appearance.event.sample::name" = "🥗 Назва події";
 "setting.appearance.event.sample::description" = "опис";

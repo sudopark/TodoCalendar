@@ -545,6 +545,15 @@
 "setting.appearance.event.fontSize" = "Velikost písma textu události";
 "setting.appearance.event.show_holidayName" = "Zobrazit název svátku";
 "setting.appearance.event.show_lunar" = "Lunární kalendář";
+"setting.appearance.event.show_lunar::explain" = "Standard lunárního kalendáře (korejský, čínský nebo vietnamský) se volí podle jazyka zařízení, takže se lunární data mohou podle standardu lišit o jeden den.";
+"setting.appearance.event.show_rokuyo" = "Rokuyo";
+"setting.appearance.event.show_rokuyo::available_ios26" = "Dostupné v iOS 26 nebo novějším";
+"rokuyo::taian" = "Taian";
+"rokuyo::shakku" = "Shakku";
+"rokuyo::sensho" = "Sensho";
+"rokuyo::tomobiki" = "Tomobiki";
+"rokuyo::senbu" = "Senbu";
+"rokuyo::butsumetsu" = "Butsumetsu";
 "setting.appearance.event._24form" = "24hodinový formát";
 "setting.appearance.event.sample::name" = "🥗 Název události";
 "setting.appearance.event.sample::description" = "popis";
