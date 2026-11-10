@@ -150,6 +150,9 @@ final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked
             if self.appearance.showLunarCalendarDate != newSetting.showLunarCalendarDate {
                 self.appearance.showLunarCalendarDate = newSetting.showLunarCalendarDate
             }
+            if self.appearance.showRokuyo != newSetting.showRokuyo {
+                self.appearance.showRokuyo = newSetting.showRokuyo
+            }
             if self.appearance.is24hourForm != newSetting.is24hourForm {
                 self.appearance.is24hourForm = newSetting.is24hourForm
             }

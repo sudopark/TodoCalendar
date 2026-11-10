@@ -41,6 +41,8 @@ paths:
 | `LandmarkMapView` | 단일 마커 지도 (비인터랙티브) | 없음 |
 | `BillingPlanChipView` | 플랜 이름 칩 — 무료 회색/유료 accentAI (사용량 게이지·paywall 공유, #739) | 없음 (표시 전용) |
 | `BillingScheduledChangeView` | 하향·만료 예정 안내 한 줄 — info 아이콘 + "N월 d일부터 X 플랜" (사용량 게이지·paywall 공유, #852) | 없음 (표시 전용) |
+| `RokuyoLabelView` | 로쿠요 색 점 + 이름 한 줄 — 글꼴만 받는다. 고정 6색 `Rokuyo.dotColor`·`localizedName` 도 같은 파일 (외관 설정 범례, `DayHeaderSubtitleView` 공유, #1369) | 없음 (표시 전용) |
+| `DayHeaderSubtitleView` | 날짜 위 보조 줄 — 켜진 것만 `음력 · 로쿠요 · 공휴일명` 순서로, 셋 다 없으면 안 그린다 (선택한 날 1단·다음날 헤더, 외관 설정 미리보기 공유, #1369) | 없음 (표시 전용) |
 | `ImagePicker` | 사진 라이브러리(PHPicker)·카메라 피커 뷰컨트롤러 팩토리 — 선택 결과를 `Data`로 전달 | `makeViewController(source:onPick:)` 클로저 |
 | `InAppWebViewController` | 인앱 웹뷰 화면 (UIKit) — 진행바·문서 타이틀·뒤로/앞으로·브라우저로 열기 + 로드 실패 폴백 (#806) | 모달은 `BaseRouterImple.showWebView(_:)` / `init` = push·child VC |
 
