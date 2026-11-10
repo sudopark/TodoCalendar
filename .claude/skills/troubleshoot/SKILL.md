@@ -1,6 +1,6 @@
 ---
 name: troubleshoot
-description: Use when fixing a bug or logical contradiction in this project — 버그 수정 착수, 개발·리뷰 중 논리 모순 발견, QA·CS 리포트 대응 등 결함의 원인 규명과 수정 방향 결정이 걸린 모든 시점. superpowers:systematic-debugging을 대체하지 않는 컴패니언 — root cause 규명 절차는 그 스킬이 이끌고, 이 스킬은 프로젝트 종속 절차(트러블슈팅 아카이브 조회·기록, 수정 방향 판정 게이트, 대규모 결함 escape hatch)를 주입한다. Triggers on "버그 고치자", "이거 왜 이래", 테스트 실패·재현 리포트 대응 — systematic-debugging invoke 시 함께. Does NOT trigger on 원인·수정 방향이 이미 확정돼 반영만 남은 경우(implement만), 기능 추가·리팩토링(결함 아님).
+description: Use when fixing a bug or logical contradiction in this project — 버그 수정 착수, 개발·리뷰 중 논리 모순 발견, QA·CS 리포트 대응 등 결함의 원인 규명과 수정 방향 결정이 걸린 모든 시점. superpowers:systematic-debugging을 대체하지 않는 컴패니언 — root cause 규명 절차는 그 스킬이 이끌고, 이 스킬은 프로젝트 종속 절차(트러블슈팅 아카이브 조회·기록, 수정 방향 판정 게이트, 대규모 결함 escape hatch)를 주입한다. Triggers on "버그 고치자", "이거 왜 이래", 테스트 실패·재현 리포트 대응 — systematic-debugging invoke 시 함께. Does NOT trigger on 원인·수정 방향이 이미 확정돼 반영만 남은 경우(implement만), 기능 추가·리팩토링(결함 아님), CS 문의에 답장 메일 쓰기(cs-reply 스킬 — 원인 규명이 끝난 뒤 그 스킬로 돌아간다).
 ---
 
 # Troubleshoot — 결함 수정 컴패니언

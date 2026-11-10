@@ -98,6 +98,7 @@ tuist generate --no-open      # 파일 추가/삭제 후 재실행 필수
 | 스냅샷 검증·화면 카탈로그 | snapshot-check / app-catalog 스킬 |
 | 코드 분석 (로직·추적·관계·영향도) | analyze 스킬 → code-analyzer subagent |
 | 커밋 / PR / 이슈 | commit / pr / issue 스킬 |
+| CS 문의 답장 메일 작성·발송 (Slack `#todocalendar_cs` 인입 건) | cs-reply 스킬 |
 | 공개 PR 에이전트 리뷰 | review 스킬 → code-reviewer subagent |
 | 하네스 수정분 리뷰 (PR·푸시된 커밋 — develop 직행은 커밋 전) | harness-review 스킬 → harness-reviewer subagent |
 | 계획 문서 승인 전 1차 리뷰 (strategy·campaign·opord) | plan-review 스킬 |
