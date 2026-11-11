@@ -200,6 +200,21 @@ extension CalendarScenesCatalogSnapshots {
     }
 
     @MainActor
+    func test_storeRokuyoCalendar() {
+        captureSnapshotPair(
+            named: "storeRokuyoCalendar", layout: .fullScreen, snapshotDirectory: catalogSnapshotDirectory()
+        ) { theme in
+            let appearance = self.makeStoreAppearance(theme)
+            appearance.showRokuyo = true
+            return self.makeStoreSingleColumnCalendarView(
+                theme,
+                appearance: appearance,
+                dayListViewModel: CatalogDayEventListViewModel(uncompleteds: [], showsForemost: false)
+            )
+        }
+    }
+
+    @MainActor
     func test_storeDuoCoverCalendar() {
         captureSnapshotPair(
             named: "storeDuoCoverCalendar", layout: .duoCover, snapshotDirectory: catalogSnapshotDirectory()
@@ -532,17 +547,20 @@ private final class CatalogDayEventListViewModel: DayEventListViewModel, @unchec
     private let scheduleLineup: CatalogDayScheduleLineup
     private let excludedEventIdPrefixes: [String]
     private let injectedUncompleteds: [TodoEventCellViewModel]?
+    private let showsForemost: Bool
 
     init(
         extraTodoKeys: [String] = [],
         scheduleLineup: CatalogDayScheduleLineup = .reviewLunchTrip,
         excludedEventIdPrefixes: [String] = [],
-        uncompleteds: [TodoEventCellViewModel]? = nil
+        uncompleteds: [TodoEventCellViewModel]? = nil,
+        showsForemost: Bool = true
     ) {
         self.extraTodoKeys = extraTodoKeys
         self.scheduleLineup = scheduleLineup
         self.excludedEventIdPrefixes = excludedEventIdPrefixes
         self.injectedUncompleteds = uncompleteds
+        self.showsForemost = showsForemost
     }
 
     private enum Constant {
@@ -653,7 +671,7 @@ private final class CatalogDayEventListViewModel: DayEventListViewModel, @unchec
     }
 
     var foremostEventModel: AnyPublisher<(any EventCellViewModel)?, Never> {
-        Just(self.foremost).eraseToAnyPublisher()
+        Just(self.showsForemost ? self.foremost : nil).eraseToAnyPublisher()
     }
     var uncompletedTodoEventModels: AnyPublisher<[TodoEventCellViewModel], Never> {
         Just(self.uncompleteds).eraseToAnyPublisher()

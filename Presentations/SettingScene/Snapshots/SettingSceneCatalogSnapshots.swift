@@ -175,6 +175,47 @@ extension SettingSceneCatalogSnapshots {
         }
     }
 
+    /// 외관 설정 전체는 한 화면을 넘어서 로쿠요가 든 이벤트 목록 섹션만 그린다.
+    @MainActor
+    func test_rokuyoAppearanceSetting() {
+        captureSnapshotPair(
+            named: "rokuyoAppearanceSetting", layout: .fullScreen, snapshotDirectory: catalogSnapshotDirectory()
+        ) { theme in
+            let appearance = self.makeAppearance(theme)
+            let titleMarginForEventDetailCrop: CGFloat = 56
+            let setting = EventListAppearanceSetting(
+                eventTextAdditionalSize: 0,
+                showHoliday: true,
+                showLunarCalendarDate: false,
+                is24hourForm: true,
+                showUncompletedTodos: true,
+                showRokuyo: true
+            )
+
+            return VStack(spacing: 0) {
+                appearance.colorSet.bg0.asColor.frame(height: titleMarginForEventDetailCrop)
+                NavigationStack {
+                    List {
+                        EventListAppearanceSettingView(setting)
+                            .eventHandler(\.stateBinding) {
+                                $0.sampleModel = EventListAppearanceSampleModel(setting)
+                                $0.isRokuyoSupported = true
+                            }
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(appearance.colorSet.bg0.asColor)
+                    }
+                    .listStyle(.plain)
+                    .scrollContentBackground(.hidden)
+                    .background(appearance.colorSet.bg0.asColor)
+                    .navigationTitle("setting.appearance.title".localized())
+                }
+            }
+            .background(appearance.colorSet.bg0.asColor)
+            .environment(EventListAppearanceSettingViewEventHandler())
+            .environment(appearance)
+        }
+    }
+
     @MainActor
     func test_colorThemeSelect() {
         captureSnapshotPair(
