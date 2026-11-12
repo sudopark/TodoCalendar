@@ -12,6 +12,7 @@ import Combine
 import Prelude
 import Optics
 import UnitTestHelpKit
+import Extensions
 
 @testable import CalendarScenes
 import CalendarPresentation
@@ -108,16 +109,16 @@ extension ContinuousMonthsViewModelImpleTests {
 
         // then
         #expect(sections.map { $0.weeks.first?.id } == [
-            "2023-6-25-2023-7-1",
-            "2023-7-30-2023-8-5",
-            "2023-8-27-2023-9-2",
-            "2023-10-1-2023-10-7",
-            "2023-10-29-2023-11-4"
+            "2023-7:2023-6-25-2023-7-1",
+            "2023-8:2023-7-30-2023-8-5",
+            "2023-9:2023-8-27-2023-9-2",
+            "2023-10:2023-10-1-2023-10-7",
+            "2023-11:2023-10-29-2023-11-4"
         ])
-        #expect(sections.map { $0.weeks.count } == [5, 4, 5, 4, 5])
+        #expect(sections.map { $0.weeks.count } == [6, 5, 5, 5, 5])
     }
 
-    @Test func viewModel_boundaryWeekAppearsOnce() async throws {
+    @Test func viewModel_boundaryWeekAppearsInBothMonthsWithUniqueRowIds() async throws {
         // given
         let viewModel = self.makeViewModel()
 
@@ -127,8 +128,12 @@ extension ContinuousMonthsViewModelImpleTests {
         // then
         let allIds = sections.flatMap { $0.weeks.map { $0.id } }
         #expect(allIds.count == Set(allIds).count)
-        #expect(sections[1].weeks.last?.id == "2023-8-20-2023-8-26")
-        #expect(sections[4].weeks.last?.id == "2023-11-26-2023-12-2")
+        let augustLastRow = sections[1].weeks.last
+        let septemberFirstRow = sections[2].weeks.first
+        #expect(augustLastRow?.id == "2023-8:2023-8-27-2023-9-2")
+        #expect(septemberFirstRow?.id == "2023-9:2023-8-27-2023-9-2")
+        #expect(augustLastRow?.days.map { $0.isNotCurrentMonth } == [false, false, false, false, false, true, true])
+        #expect(septemberFirstRow?.days.map { $0.isNotCurrentMonth } == [true, true, true, true, true, false, false])
     }
 
     @Test func viewModel_sectionsAcrossYearBoundary() async throws {
@@ -142,7 +147,54 @@ extension ContinuousMonthsViewModelImpleTests {
         #expect(sections.map { $0.month } == [
             month(2023, 10), month(2023, 11), month(2023, 12), month(2024, 1), month(2024, 2)
         ])
-        #expect(sections[3].weeks.first?.id == "2023-12-31-2024-1-6")
+        #expect(sections[2].weeks.last?.id == "2023-12:2023-12-31-2024-1-6")
+        #expect(sections[3].weeks.first?.id == "2024-1:2023-12-31-2024-1-6")
+    }
+
+    @Test func viewModel_sectionTitle_currentYearShowsMonthOnly() async throws {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when
+        let sections = try await self.firstSections(viewModel)
+
+        // then
+        #expect(sections.map { $0.title } == (7...11).map { self.monthTitle(2023, $0, "date_form.MMMM") })
+    }
+
+    @Test func viewModel_sectionTitle_otherYearShowsYear() async throws {
+        // given
+        let viewModel = self.makeViewModel(focus: .init(year: 2023, month: 12))
+
+        // when
+        let sections = try await self.firstSections(viewModel)
+
+        // then
+        #expect(sections.map { $0.title } == [
+            self.monthTitle(2023, 10, "date_form.MMMM"),
+            self.monthTitle(2023, 11, "date_form.MMMM"),
+            self.monthTitle(2023, 12, "date_form.MMMM"),
+            self.monthTitle(2024, 1, "date_form.MMM_yyyy"),
+            self.monthTitle(2024, 2, "date_form.MMM_yyyy")
+        ])
+    }
+
+    @Test func viewModel_sectionTitle_judgeYearByTodayNotFocus() async throws {
+        // given
+        let viewModel = self.makeViewModel(focus: .init(year: 2024, month: 2))
+
+        // when
+        let sections = try await self.firstSections(viewModel)
+
+        // then
+        #expect(sections.first?.month == CalendarMonth(year: 2023, month: 12))
+        #expect(sections.first?.title == self.monthTitle(2023, 12, "date_form.MMMM"))
+        #expect(sections[2].title == self.monthTitle(2024, 2, "date_form.MMM_yyyy"))
+    }
+
+    private func monthTitle(_ year: Int, _ month: Int, _ formKey: String) -> String {
+        let date = CalendarComponent.Day(year: year, month: month, day: 1, weekDay: 1).dayRange(self.kst)!.lowerBound
+        return Date(timeIntervalSince1970: date).text(formKey.localized(), timeZone: self.kst)
     }
 
     @Test func viewModel_whenFirstWeekDayChanged_rebuildSections() async throws {
@@ -164,7 +216,7 @@ extension ContinuousMonthsViewModelImpleTests {
         // then
         let emittedAfterChange = emitted.dropFirst()
         #expect(emittedAfterChange.allSatisfy { self.sectionStartWeekDays($0).count == 1 })
-        #expect(emitted.last?[2].weeks.first?.id == "2023-8-28-2023-9-3")
+        #expect(emitted.last?[2].weeks.first?.id == "2023-9:2023-8-28-2023-9-3")
     }
 
     private func sectionStartWeekDays(_ sections: [ContinuousMonthSection]) -> Set<Int> {
@@ -283,10 +335,10 @@ extension ContinuousMonthsViewModelImpleTests {
 
         // when
         let julyStack = try await self.firstOutput(
-            self.expectConfirm("7월 주 스택"), for: viewModel.eventStack(at: "2023-7-2-2023-7-8")
+            self.expectConfirm("7월 주 스택"), for: viewModel.eventStack(at: "2023-7:2023-7-2-2023-7-8")
         )
         let novemberStack = try await self.firstOutput(
-            self.expectConfirm("11월 주 스택"), for: viewModel.eventStack(at: "2023-11-26-2023-12-2")
+            self.expectConfirm("11월 주 스택"), for: viewModel.eventStack(at: "2023-11:2023-11-26-2023-12-2")
         )
 
         // then
@@ -305,7 +357,7 @@ extension ContinuousMonthsViewModelImpleTests {
         // given
         let viewModel = self.makeViewModel()
         var septemberWeekEmitCount = 0
-        viewModel.eventsPerDay(at: "2023-9-10-2023-9-16")
+        viewModel.eventsPerDay(at: "2023-9:2023-9-10-2023-9-16")
             .sink { _ in septemberWeekEmitCount += 1 }
             .store(in: &self.cancelBag)
         try await self.waitEffect("9월 주 첫 스택") { septemberWeekEmitCount == 1 }
@@ -316,7 +368,7 @@ extension ContinuousMonthsViewModelImpleTests {
             viewModel.scrolled(to: .init(year: 2023, month: 10))
         }
         _ = try await self.firstOutput(
-            self.expectConfirm("새로 들어온 12월 주 스택"), for: viewModel.eventsPerDay(at: "2023-12-10-2023-12-16")
+            self.expectConfirm("새로 들어온 12월 주 스택"), for: viewModel.eventsPerDay(at: "2023-12:2023-12-10-2023-12-16")
         )
         try await Task.sleep(for: .milliseconds(50))
 
@@ -332,7 +384,7 @@ extension ContinuousMonthsViewModelImpleTests {
 
         // when
         viewModel.scrolled(to: .init(year: 2023, month: 10))
-        let source = viewModel.eventStack(at: "2023-12-10-2023-12-16").filter { !$0.linesStack.isEmpty }
+        let source = viewModel.eventStack(at: "2023-12:2023-12-10-2023-12-16").filter { !$0.linesStack.isEmpty }
         let stack = try await self.firstOutput(self.expectConfirm("12월 주 스택"), for: source)
 
         // then
@@ -346,7 +398,7 @@ extension ContinuousMonthsViewModelImpleTests {
         let newEvent = StubCalendarEvent("ev-9-12", self.dayRange(2023, 9, 12))
 
         // when
-        let source = viewModel.eventStack(at: "2023-9-10-2023-9-16").filter { !$0.linesStack.isEmpty }
+        let source = viewModel.eventStack(at: "2023-9:2023-9-10-2023-9-16").filter { !$0.linesStack.isEmpty }
         let stack = try await self.firstOutput(self.expectConfirm("바뀐 이벤트 반영"), for: source) {
             self.spyEventListUsecase.mockEvents.send([newEvent])
         }
@@ -355,17 +407,40 @@ extension ContinuousMonthsViewModelImpleTests {
         #expect(stack?.linesStack.flatMap { $0 }.map { $0.event.eventId } == ["ev-9-12"])
     }
 
-    @Test func viewModel_boundaryWeekHolidayCountedOnce() async throws {
+    @Test func viewModel_boundaryWeekHolidayOnlyInItsMonthRow() async throws {
         // given
         let holiday = Holiday(uuid: "hd", dateString: "2023-08-31", name: "boundary-holiday")
         let viewModel = self.makeViewModel(holidays: [2023: [holiday]])
 
         // when
-        let eventsPerDay = try await self.settledEventsPerDay(viewModel, at: "2023-8-27-2023-9-2")
+        let augustRow = try await self.settledEventsPerDay(viewModel, at: "2023-8:2023-8-27-2023-9-2")
+        let septemberRow = try await self.settledEventsPerDay(viewModel, at: "2023-9:2023-8-27-2023-9-2")
 
         // then
-        let thursdayEvents = eventsPerDay[safe: 4] ?? []
-        #expect(thursdayEvents.map { $0.name } == ["boundary-holiday"])
+        #expect((augustRow[safe: 4] ?? []).map { $0.name } == ["boundary-holiday"])
+        #expect(septemberRow.count == 7)
+        #expect(septemberRow.flatMap { $0 }.isEmpty)
+    }
+
+    @Test func viewModel_boundaryWeekEventClippedToEachMonthRow() async throws {
+        // given
+        let range = self.dayRange(2023, 8, 30).lowerBound..<self.dayRange(2023, 9, 1).upperBound
+        let viewModel = self.makeViewModel(events: [StubCalendarEvent("ev-8-30~9-1", range)])
+        _ = try await self.firstSections(viewModel)
+
+        // when
+        let augustStack = try await self.firstOutput(
+            self.expectConfirm("8월 경계 줄 스택"),
+            for: viewModel.eventStack(at: "2023-8:2023-8-27-2023-9-2").filter { !$0.linesStack.isEmpty }
+        )
+        let septemberStack = try await self.firstOutput(
+            self.expectConfirm("9월 경계 줄 스택"),
+            for: viewModel.eventStack(at: "2023-9:2023-8-27-2023-9-2").filter { !$0.linesStack.isEmpty }
+        )
+
+        // then
+        #expect(augustStack?.linesStack.flatMap { $0 }.map { $0.daysSequence } == [4...5])
+        #expect(septemberStack?.linesStack.flatMap { $0 }.map { $0.daysSequence } == [6...6])
     }
 
     @Test func viewModel_whenHolidayTagOff_excludeHolidays() async throws {
@@ -374,7 +449,7 @@ extension ContinuousMonthsViewModelImpleTests {
         let viewModel = self.makeViewModel(holidays: [2023: [holiday]], isHolidayOff: true)
 
         // when
-        let eventsPerDay = try await self.settledEventsPerDay(viewModel, at: "2023-8-27-2023-9-2")
+        let eventsPerDay = try await self.settledEventsPerDay(viewModel, at: "2023-8:2023-8-27-2023-9-2")
 
         // then
         #expect(eventsPerDay.count == 7)
@@ -385,7 +460,7 @@ extension ContinuousMonthsViewModelImpleTests {
         _ viewModel: ContinuousMonthsViewModelImple, at weekId: String
     ) async throws -> [[any CalendarEvent]] {
         let holidayMarked = viewModel.sections
-            .filter { $0[safe: 2]?.weeks.first?.days[safe: 4]?.accentDay == .holiday }
+            .filter { $0[safe: 1]?.weeks.last?.days[safe: 4]?.accentDay == .holiday }
         _ = try await self.firstOutput(self.expectConfirm("공휴일이 입혀진 섹션"), for: holidayMarked)
         var latest: [[any CalendarEvent]]?
         viewModel.eventsPerDay(at: weekId)
@@ -560,7 +635,7 @@ extension ContinuousMonthsViewModelImpleTests {
         #expect(nextDay.1 == ["ev-10-1"])
     }
 
-    @Test func continuousMonths_whenNextDayInBoundaryWeek_notifyNextDayOfSameWeek() async throws {
+    @Test func continuousMonths_whenNextDayInBoundaryWeek_notifyNextDayFromNextMonthRow() async throws {
         // given
         let events = [
             StubCalendarEvent("ev-8-31", self.dayRange(2023, 8, 31)),
@@ -580,6 +655,45 @@ extension ContinuousMonthsViewModelImpleTests {
         #expect(nextDay.0.identifier == "2023-9-1")
         #expect(nextDay.0.weekId == "2023-8-27-2023-9-2")
         #expect(nextDay.1 == ["ev-9-1"])
+    }
+
+    @Test func continuousMonths_whenSelectLastDayOfMonth_nextDayIsFirstDayOfNextMonth() async throws {
+        // given
+        let events = [
+            StubCalendarEvent("ev-10-31", self.dayRange(2023, 10, 31)),
+            StubCalendarEvent("ev-11-1", self.dayRange(2023, 11, 1))
+        ]
+        let viewModel = self.makeViewModel(events: events)
+        _ = try await self.firstSections(viewModel)
+
+        // when
+        viewModel.selectDay(.init(2023, 10, 31))
+        let selected = try await self.waitSelectedDay { $0.0.day == 31 && !$0.1.isEmpty }
+        let nextDay = try await self.waitNextDay { $0.0.month == 11 && !$0.1.isEmpty }
+
+        // then
+        #expect(selected.1 == ["ev-10-31"])
+        #expect(nextDay.0.identifier == "2023-11-1")
+        #expect(nextDay.1 == ["ev-11-1"])
+    }
+
+    @Test func continuousMonths_whenSelectFirstDayInBoundaryWeek_notifyEventsFromItsMonthRow() async throws {
+        // given
+        let events = [
+            StubCalendarEvent("ev-9-1", self.dayRange(2023, 9, 1)),
+            StubCalendarEvent("ev-9-2", self.dayRange(2023, 9, 2))
+        ]
+        let viewModel = self.makeViewModel(events: events)
+        _ = try await self.firstSections(viewModel)
+
+        // when
+        viewModel.selectDay(.init(2023, 9, 1))
+        let selected = try await self.waitSelectedDay { $0.0.day == 1 && !$0.1.isEmpty }
+        let nextDay = try await self.waitNextDay { $0.0.day == 2 && !$0.1.isEmpty }
+
+        // then
+        #expect(selected.1 == ["ev-9-1"])
+        #expect(nextDay.1 == ["ev-9-2"])
     }
 
     @Test func continuousMonths_whenSelectedDayOutOfBuffer_notifyAfterBufferArrives() async throws {

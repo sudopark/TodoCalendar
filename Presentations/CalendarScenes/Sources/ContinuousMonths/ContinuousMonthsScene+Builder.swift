@@ -31,5 +31,12 @@ protocol ContinuousMonthsSceneListener: AnyObject {
 
 struct ContinuousMonthSection: Equatable {
     let month: CalendarMonth
+    let title: String
     let weeks: [WeekRowModel]
+
+    init(month: CalendarMonth, title: String = "", weeks: [WeekRowModel]) {
+        self.month = month
+        self.title = title
+        self.weeks = weeks
+    }
 }

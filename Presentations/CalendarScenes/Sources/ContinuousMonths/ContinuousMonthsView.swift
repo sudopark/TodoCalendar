@@ -182,7 +182,7 @@ final class DummyContinuousMonthsViewModel: ContinuousMonthsViewModel, @unchecke
     }
 
     func eventStack(at weekId: String) -> AnyPublisher<WeekEventStackViewModel, Never> {
-        guard weekId == "2023-9-3-2023-9-9"
+        guard weekId == "2023-9:2023-9-3-2023-9-9"
         else {
             return Just(.init(linesStack: [], shouldMarkEventDays: false)).eraseToAnyPublisher()
         }
@@ -196,7 +196,7 @@ final class DummyContinuousMonthsViewModel: ContinuousMonthsViewModel, @unchecke
 
     func eventsPerDay(at weekId: String) -> AnyPublisher<[[any CalendarEvent]], Never> {
         let event = DummyContinuousMonthsEvent("dot", "ev:dot")
-        let events: [[any CalendarEvent]] = weekId == "2023-9-3-2023-9-9"
+        let events: [[any CalendarEvent]] = weekId == "2023-9:2023-9-3-2023-9-9"
             ? [[], [event], [event, event], [], [], [], []]
             : Array(repeating: [], count: 7)
         return Just(events).eraseToAnyPublisher()
@@ -206,8 +206,20 @@ final class DummyContinuousMonthsViewModel: ContinuousMonthsViewModel, @unchecke
         let previous = focus.previousMonth()
         let next = focus.nextMonth()
         return [previous.previousMonth(), previous, focus, next, next.nextMonth()].map { month in
-            ContinuousMonthSection(month: month, weeks: self.dummyWeeks(of: month))
+            ContinuousMonthSection(
+                month: month,
+                title: self.dummyTitle(of: month, currentYear: focus.year),
+                weeks: self.dummyWeeks(of: month)
+            )
         }
+    }
+
+    private func dummyTitle(of month: CalendarMonth, currentYear: Int) -> String {
+        let utc = TimeZone(abbreviation: "UTC") ?? .current
+        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ utc
+        let form = month.year == currentYear ? "date_form.MMMM" : "date_form.MMM_yyyy"
+        return calendar.date(from: DateComponents(year: month.year, month: month.month, day: 1))
+            .map { $0.text(form.localized(), timeZone: utc) } ?? ""
     }
 
     private func dummyWeeks(of month: CalendarMonth) -> [WeekRowModel] {
@@ -216,8 +228,9 @@ final class DummyContinuousMonthsViewModel: ContinuousMonthsViewModel, @unchecke
             |> \.firstWeekday .~ DayOfWeeks.sunday.rawValue
         guard let firstDay = calendar.date(from: DateComponents(year: month.year, month: month.month, day: 1)),
               let nextFirstDay = calendar.date(byAdding: .month, value: 1, to: firstDay),
+              let lastDay = calendar.date(byAdding: .day, value: -1, to: nextFirstDay),
               let start = calendar.dateInterval(of: .weekOfYear, for: firstDay)?.start,
-              let end = calendar.dateInterval(of: .weekOfYear, for: nextFirstDay)?.start
+              let end = calendar.dateInterval(of: .weekOfYear, for: lastDay)?.end
         else { return [] }
         let weekCount = (calendar.dateComponents([.day], from: start, to: end).day ?? 0) / 7
         return (0..<weekCount).compactMap { weekIndex in
@@ -225,7 +238,8 @@ final class DummyContinuousMonthsViewModel: ContinuousMonthsViewModel, @unchecke
                 calendar.date(byAdding: .day, value: weekIndex * 7 + offset, to: start)
                     .map { CalendarComponent.Day($0, calendar: calendar) }
             }
-            return WeekRowModel(CalendarComponent.Week(days: days), month: month.month)
+            let week = CalendarComponent.Week(days: days)
+            return WeekRowModel("\(month.year)-\(month.month):\(week.id)", WeekRowModel(week, month: month.month).days)
         }
     }
 }

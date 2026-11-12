@@ -70,12 +70,9 @@ final class ContinuousMonthsViewModelImple: ContinuousMonthsViewModel, @unchecke
     private struct CalendarComponentRingBuffer: Equatable {
         let timeZone: TimeZone
         let components: [CalendarComponent]
-        let sectionWeeks: [[CalendarComponent.Week]]
 
         var sectionStackKeys: [SectionStackKey] {
-            return zip(self.components, self.sectionWeeks).map { component, weeks in
-                SectionStackKey(timeZone: self.timeZone, component: .init(year: component.year, month: component.month, weeks: weeks))
-            }
+            return self.components.map { SectionStackKey(timeZone: self.timeZone, component: $0) }
         }
 
         func component(containing day: DayCellViewModel) -> CalendarComponent? {
@@ -84,24 +81,36 @@ final class ContinuousMonthsViewModelImple: ContinuousMonthsViewModel, @unchecke
 
         func positions(startingAt day: CalendarDay, count: Int) -> [DayPosition] {
             let identifier = "\(day.year)-\(day.month)-\(day.day)"
-            let slots = self.sectionWeeks.flatMap { $0 }.flatMap { week in
-                week.days.indices.map { (week.days[$0], $0) }
+            let slots = self.components.flatMap { component in
+                component.weeks.flatMap { week in
+                    week.days.indices
+                        .filter { week.days[$0].month == component.month }
+                        .map { DaySlot(day: week.days[$0], indexInWeek: $0, rowId: component.rowId(of: week), component: component) }
+                }
             }
-            guard let start = slots.firstIndex(where: { $0.0.identifier == identifier }) else { return [] }
-            return slots.dropFirst(start).prefix(count).compactMap { self.position(of: $0.0, indexInWeek: $0.1) }
+            guard let start = slots.firstIndex(where: { $0.day.identifier == identifier }) else { return [] }
+            return slots.dropFirst(start).prefix(count).compactMap { self.position(of: $0) }
         }
 
-        private func position(of day: CalendarComponent.Day, indexInWeek: Int) -> DayPosition? {
-            guard let component = self.components.first(where: { $0.year == day.year && $0.month == day.month }),
-                  let model = CurrentSelectDayModel(day: .init(day.year, day.month, day.day), component, self.timeZone)
+        private func position(of slot: DaySlot) -> DayPosition? {
+            let day = slot.day
+            guard let model = CurrentSelectDayModel(day: .init(day.year, day.month, day.day), slot.component, self.timeZone)
             else { return nil }
-            return DayPosition(model: model, indexInWeek: indexInWeek)
+            return DayPosition(model: model, indexInWeek: slot.indexInWeek, rowId: slot.rowId)
         }
+    }
+
+    private struct DaySlot {
+        let day: CalendarComponent.Day
+        let indexInWeek: Int
+        let rowId: String
+        let component: CalendarComponent
     }
 
     private struct DayPosition: Equatable {
         let model: CurrentSelectDayModel
         let indexInWeek: Int
+        let rowId: String
     }
 
     private struct Subject: @unchecked Sendable {
@@ -141,7 +150,7 @@ final class ContinuousMonthsViewModelImple: ContinuousMonthsViewModel, @unchecke
 
         Publishers.CombineLatest(self.calendarSettingUsecase.currentTimeZone, components)
             .map { timeZone, components in
-                CalendarComponentRingBuffer(timeZone: timeZone, components: components, sectionWeeks: components.sectionWeeks())
+                CalendarComponentRingBuffer(timeZone: timeZone, components: components)
             }
             .removeDuplicates()
             .sink(receiveValue: { [weak self] ringBuffer in
@@ -162,9 +171,9 @@ final class ContinuousMonthsViewModelImple: ContinuousMonthsViewModel, @unchecke
     private func syncSectionStackBindings(_ keys: [SectionStackKey]) {
         let removedKeys = self.sectionStackBindings.keys.filter { !keys.contains($0) }
         removedKeys.forEach { self.sectionStackBindings.removeValue(forKey: $0)?.cancel() }
-        let removedWeekIds = Set(removedKeys.flatMap { $0.component.weeks.map { $0.id } })
-        if !removedWeekIds.isEmpty {
-            self.subject.eventStackMap.send(self.subject.eventStackMap.value.filter { !removedWeekIds.contains($0.key) })
+        let removedRowIds = Set(removedKeys.flatMap { key in key.component.weeks.map { key.component.rowId(of: $0) } })
+        if !removedRowIds.isEmpty {
+            self.subject.eventStackMap.send(self.subject.eventStackMap.value.filter { !removedRowIds.contains($0.key) })
         }
 
         keys.filter { self.sectionStackBindings[$0] == nil }.forEach { key in
@@ -179,7 +188,7 @@ final class ContinuousMonthsViewModelImple: ContinuousMonthsViewModel, @unchecke
     private func bindSelectedDayNotifying() {
         let withEvents: (DayPosition) -> AnyPublisher<SelectDayAndEvents, Never> = { [weak self] position in
             guard let self else { return Empty().eraseToAnyPublisher() }
-            return self.eventsPerDay(at: position.model.weekId)
+            return self.eventsPerDay(at: position.rowId)
                 .map { (position.model, $0[safe: position.indexInWeek] ?? []) }
                 .eraseToAnyPublisher()
         }
@@ -209,8 +218,10 @@ final class ContinuousMonthsViewModelImple: ContinuousMonthsViewModel, @unchecke
         self.stackRevision += 1
         let revision = self.stackRevision
         let stackBuilder = WeekEventStackBuilder(key.timeZone)
+        let monthRange = key.component.monthRange(key.timeZone)
         let sectionStacks = key.component.weeks.reduce(into: [String: WeekEventStackEntry]()) { acc, week in
-            acc[week.id] = .init(revision: revision, stack: stackBuilder.build(week, events: events))
+            let stack = stackBuilder.build(week, events: events, visibleRange: monthRange)
+            acc[key.component.rowId(of: week)] = .init(revision: revision, stack: stack)
         }
         self.subject.eventStackMap.send(self.subject.eventStackMap.value.merging(sectionStacks) { $1 })
     }
@@ -281,15 +292,19 @@ extension ContinuousMonthsViewModelImple {
     }
 
     var sections: AnyPublisher<[ContinuousMonthSection], Never> {
-        let transform: (CalendarComponentRingBuffer) -> [ContinuousMonthSection] = { ringBuffer in
-            return zip(ringBuffer.components, ringBuffer.sectionWeeks).map { component, weeks in
+        let transform: (CalendarComponentRingBuffer, Int) -> [ContinuousMonthSection] = { ringBuffer, currentYear in
+            return ringBuffer.components.map { component in
                 ContinuousMonthSection(
                     month: .init(year: component.year, month: component.month),
-                    weeks: weeks.map { WeekRowModel($0, month: component.month) }
+                    title: component.monthTitle(currentYear: currentYear, timeZone: ringBuffer.timeZone),
+                    weeks: component.weeks.map { week in
+                        WeekRowModel(component.rowId(of: week), WeekRowModel(week, month: component.month).days)
+                    }
                 )
             }
         }
-        return self.subject.componentRingBuffer.compactMap { $0 }
+        let currentYear = self.calendarUsecase.currentDay.map { $0.year }
+        return Publishers.CombineLatest(self.subject.componentRingBuffer.compactMap { $0 }, currentYear)
             .map(transform)
             .removeDuplicates()
             .eraseToAnyPublisher()
@@ -379,12 +394,17 @@ private extension Array where Element == CalendarComponent {
     func isSameFirstWeekDay() -> Bool {
         return Set(self.compactMap { $0.weeks.first?.days.first?.weekDay }).count == 1
     }
+}
 
-    func sectionWeeks() -> [[CalendarComponent.Week]] {
-        return self.enumerated().map { offset, component in
-            guard let nextMonth = self[safe: offset + 1] else { return component.weeks }
-            let nextMonthWeekIds = Set(nextMonth.weeks.map { $0.id })
-            return component.weeks.filter { !nextMonthWeekIds.contains($0.id) }
-        }
+private extension CalendarComponent {
+
+    func rowId(of week: CalendarComponent.Week) -> String {
+        return "\(self.year)-\(self.month):\(week.id)"
+    }
+
+    func monthTitle(currentYear: Int, timeZone: TimeZone) -> String {
+        let form = self.year == currentYear ? "date_form.MMMM" : "date_form.MMM_yyyy"
+        return self.monthRange(timeZone)
+            .map { Date(timeIntervalSince1970: $0.lowerBound).text(form.localized(), timeZone: timeZone) } ?? ""
     }
 }
