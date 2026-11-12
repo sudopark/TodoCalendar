@@ -44,3 +44,4 @@
 - [2026-11-06 계정 삭제 시 서버 삭제 요청이 항상 403 으로 실패한다](2026-11-06-account-deletion-server-request-403.md) — Account / fixed / 계정 삭제 안 됨·탈퇴 안 됨·DELETE account 403·NoAccessToken·서버 데이터 남음·퍼지 대상 누락
 - [2026-11-11 시작일과 종료일이 같은 구글 종일 이벤트를 달력에 올리면 Range 생성에서 죽는다](2026-11-11-google-allday-zero-length-range-trap.md) — ExternalCalendar / fixed / GoogleCalendarEvent.init 크래시·EXC_BREAKPOINT·Range requires lowerBound <= upperBound·구글 종일 이벤트
 - [2026-11-11 기기 달력이 그레고리력이 아니면 날짜 선택 다이얼로그를 여는 순간 죽는다](2026-11-11-select-day-picker-non-gregorian-crash.md) — Calendar / fixed / 날짜 선택 다이얼로그 크래시·NSInternalInconsistencyException·Unable to set a visible month·和暦·Calendar.current
+- [2026-11-12 포그라운드 복귀 refresh 가 SQLite 에 쓰는 동안 suspend 되면 0xdead10cc 로 죽는다](2026-11-12-suspend-while-holding-sqlite-lock-dead10cc.md) — Infra / deferred / 0xdead10cc·RUNNINGBOARD·SIGKILL·백그라운드 진입 직후 종료·SQLite 락·WAL fsync·Organizer 에만 보이는 크래시
