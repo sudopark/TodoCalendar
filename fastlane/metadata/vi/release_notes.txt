@@ -1,9 +1,4 @@
-■ Cách đếm D-Day
-· Bật "Tính D-Day là D+1" trong "Tiện ích" ở Cài đặt, ngày D-Day sẽ được tính là D+1, áp dụng cho cả ứng dụng và tiện ích
-· Bạn cũng có thể chỉ bật cho riêng một Tiện ích D-Day khi chỉnh sửa tiện ích đó
-· Cài đặt tiện ích nay nằm ở mục "Tiện ích" trên màn hình Cài đặt chính
+■ Rokuyo (iOS 26 trở lên)
+· Bật "Rokuyo" trong Cài đặt > Giao diện để xem rokuyo của ngày đó, như Đại An hay Phật Diệt, phía trên ngày đã chọn
 
-■ Thu gọn lịch
-· Việc chạm lại vào ngày đã chọn để thu gọn lịch nay là một tùy chọn bạn có thể bật hoặc tắt. Mặc định là tắt
-· Bật "Tự động thu gọn lịch" trong Cài đặt > Giao diện, rồi chạm thêm một lần vào ngày đã chọn để thu gọn lịch
-· Mọi tuần trong tháng vẫn hiển thị, chỉ các ô ngày nhỏ lại. Chạm lần nữa để mở rộng
+· Sửa lỗi

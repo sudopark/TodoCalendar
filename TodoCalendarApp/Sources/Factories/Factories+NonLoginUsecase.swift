@@ -92,6 +92,10 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
             sharedDataStore: applicationBase.sharedDataStore,
             eventDetailDataUsecase: eventFactory.makeEventDetailDataUsecase()
         )
+        let policyRepository = AppPolicyRepositoryImple(
+            remoteAPI: applicationBase.remoteAPI,
+            environmentStorage: applicationBase.userDefaultEnvironmentStorage
+        )
         let paidFeatureGateUsecase = PaidFeatureGateUsecaseImple(
             planSource: planStore,
             licenseRepository: ColorThemeLicenseLocalRepositoryImple(
@@ -100,10 +104,7 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
             widgetStyleLicenseRepository: WidgetStyleLicenseLocalRepositoryImple(
                 environmentStorage: applicationBase.userDefaultEnvironmentStorage
             ),
-            policyRepository: AppPolicyRepositoryImple(
-                remoteAPI: applicationBase.remoteAPI,
-                environmentStorage: applicationBase.userDefaultEnvironmentStorage
-            ),
+            policyRepository: policyRepository,
             defaultPolicy: AppEnvironment.defaultAppPolicy
         )
         self.paidFeatureGateUsecase = paidFeatureGateUsecase
@@ -131,8 +132,8 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
                     sqliteService: applicationBase.commonSqliteService
                 )
             ),
-            paidFeatureGateUsecase: paidFeatureGateUsecase,
-            sharedDataStore: applicationBase.sharedDataStore
+            policyRepository: policyRepository,
+            defaultPolicy: AppEnvironment.defaultAppPolicy
         )
     }
 

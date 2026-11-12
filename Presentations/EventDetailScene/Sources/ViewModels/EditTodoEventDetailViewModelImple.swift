@@ -25,6 +25,7 @@ final class EditTodoEventDetailViewModelImple: EventDetailViewModel, @unchecked 
     private let calendarSettingUsecase: any CalendarSettingUsecase
     private let foremostEventUsecase: any ForemostEventUsecase
     private let liveActivityToggleViewModel: any LiveActivityToggleViewModel
+    private let adExposureUsecase: any AdExposureUsecase
     var router: (any EventDetailRouting)?
     weak var listener: EventDetailSceneListener?
     
@@ -36,7 +37,8 @@ final class EditTodoEventDetailViewModelImple: EventDetailViewModel, @unchecked 
         scheduleEventUsecase: any ScheduleEventUsecase,
         calendarSettingUsecase: any CalendarSettingUsecase,
         foremostEventUsecase: any ForemostEventUsecase,
-        liveActivityToggleViewModel: any LiveActivityToggleViewModel
+        liveActivityToggleViewModel: any LiveActivityToggleViewModel,
+        adExposureUsecase: any AdExposureUsecase
     ) {
         self.todoId = todoId
         self.todoUsecase = todoUsecase
@@ -46,6 +48,7 @@ final class EditTodoEventDetailViewModelImple: EventDetailViewModel, @unchecked 
         self.calendarSettingUsecase = calendarSettingUsecase
         self.foremostEventUsecase = foremostEventUsecase
         self.liveActivityToggleViewModel = liveActivityToggleViewModel
+        self.adExposureUsecase = adExposureUsecase
         
         self.internalBinding()
     }
@@ -434,13 +437,20 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
                 let _ = try? await self?.eventDetailDataUsecase.saveDetail(copyAddition)
                 
                 self?.router?.showToast("eventDetail.todoEvent_saved::message".localized())
-                self?.router?.closeScene(animate: true, nil)
+                self?.closeSceneAfterEventSaved()
             } catch {
                 self?.router?.showError(error)
             }
             self?.subject.isSaving.send(false)
         }
         .store(in: self.cancellables)
+    }
+
+    private func closeSceneAfterEventSaved() {
+        self.adExposureUsecase.recordEventSavedForFullScreenAd()
+        self.router?.closeSceneAfterEventSaved(
+            isFullScreenAdTurn: self.adExposureUsecase.isFullScreenAdTurnAfterEventSave()
+        )
     }
     
     func completeTodo() {

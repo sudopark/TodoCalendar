@@ -109,7 +109,8 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
             aiKeyboardInputSceneBuilder: self.aiAgentKeyboardInputSceneBuilder,
             aiImageCommandSceneBuilder: self.aiAgentImageCommandSceneBuilder,
             sharePreviewSceneBuilder: sharePreviewSceneBuilder,
-            appStoreReviewRouter: self.appStoreReviewRouter
+            appStoreReviewRouter: self.appStoreReviewRouter,
+            fullScreenAdRouter: self.fullScreenAdRouter
         )
 
         let handleViewModelBuilder = EventListCellEventHanleViewModelBuilderImple(

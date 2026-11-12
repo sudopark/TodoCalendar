@@ -13,26 +13,39 @@ import Foundation
 
 final class SpyAdRepository: AdRepository, @unchecked Sendable {
 
-    private var records: [FullScreenAdExposureRecord]
+    private var record: FullScreenAdExposureRecord?
     private var hasShownTrackingGuide: Bool
-    private(set) var didUpdatedExposureRecords: [FullScreenAdExposureRecord] = []
+    private(set) var didUpdatedExposureRecord: FullScreenAdExposureRecord?
+    private var eventSavedCount: Int
+    private(set) var didUpdatedEventSavedCount: Int?
     private(set) var didMarkTrackingGuideShown: Bool = false
 
     init(
-        records: [FullScreenAdExposureRecord] = [],
+        record: FullScreenAdExposureRecord? = nil,
+        eventSavedCount: Int = 0,
         hasShownTrackingGuide: Bool = false
     ) {
-        self.records = records
+        self.record = record
+        self.eventSavedCount = eventSavedCount
         self.hasShownTrackingGuide = hasShownTrackingGuide
     }
 
-    func loadFullScreenAdExposureRecords() -> [FullScreenAdExposureRecord] {
-        return self.records
+    func loadFullScreenAdExposureRecord() -> FullScreenAdExposureRecord? {
+        return self.record
     }
 
     func updateFullScreenAdExposureRecord(_ record: FullScreenAdExposureRecord) {
-        self.didUpdatedExposureRecords.append(record)
-        self.records = self.records.filter { $0.scope != record.scope } + [record]
+        self.didUpdatedExposureRecord = record
+        self.record = record
+    }
+
+    func loadEventSavedCountForFullScreenAd() -> Int {
+        return self.eventSavedCount
+    }
+
+    func updateEventSavedCountForFullScreenAd(_ count: Int) {
+        self.didUpdatedEventSavedCount = count
+        self.eventSavedCount = count
     }
 
     func loadHasShownTrackingGuide() -> Bool {

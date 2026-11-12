@@ -150,6 +150,9 @@ final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked
             if self.appearance.showLunarCalendarDate != newSetting.showLunarCalendarDate {
                 self.appearance.showLunarCalendarDate = newSetting.showLunarCalendarDate
             }
+            if self.appearance.showRokuyo != newSetting.showRokuyo {
+                self.appearance.showRokuyo = newSetting.showRokuyo
+            }
             if self.appearance.is24hourForm != newSetting.is24hourForm {
                 self.appearance.is24hourForm = newSetting.is24hourForm
             }
@@ -332,7 +335,7 @@ extension ApplicationRootRouter {
         self.changeUsecaseFactroy(
             by: prepareResult.latestLoginAcount?.auth
         )
-        let interactor = self.refreshRoot(isInitialScene: true)
+        let interactor = self.refreshRoot()
         self.setupBaseViewAppearanceSetting()
         return interactor
     }
@@ -345,7 +348,7 @@ extension ApplicationRootRouter {
     func changeRootSceneAfter(signIn auth: Auth?) -> (any MainSceneInteractor)? {
         self.viewAppearanceStore.resetCustomColorThemeAfterAccountChanged()
         self.changeUsecaseFactroy(by: auth)
-        return self.refreshRoot(isInitialScene: false)
+        return self.refreshRoot()
     }
     
     func showConfirm(dialog info: ConfirmDialogInfo) {
@@ -432,7 +435,7 @@ extension ApplicationRootRouter {
     }
     
     @MainActor
-    private func refreshRoot(isInitialScene: Bool) -> (any MainSceneInteractor)? {
+    private func refreshRoot() -> (any MainSceneInteractor)? {
         
         let builder = MainSceneBuilerImple(
             usecaseFactory: self.usecaseFactory,
@@ -442,8 +445,7 @@ extension ApplicationRootRouter {
             mobileAdService: self.applicationBase.mobileAdService,
             fullScreenAdRouter: self.fullScreenAdRouter(),
             adViewBuilder: self.adViewBuilder(),
-            adGuideSceneBuilder: self.paidFeatureAdGuideSceneBuilder(),
-            isInitialScene: isInitialScene
+            adGuideSceneBuilder: self.paidFeatureAdGuideSceneBuilder()
         )
         let mainScene = builder.makeMainScene()
         self.window.rootViewController = mainScene
@@ -515,7 +517,8 @@ extension ApplicationRootRouter {
             googleCalendarEventDetailSceneBuilder: self.googleCalendarEventDetailBuilder(),
             appleCalendarEventDetailSceneBuilder: self.appleCalendarEventDetailBuilder(),
             settingSceneBuilder: settingSceneBuilder(),
-            appStoreReviewRouter: AppStoreReviewSheet()
+            appStoreReviewRouter: AppStoreReviewSheet(),
+            fullScreenAdRouter: self.fullScreenAdRouter()
         )
     }
     

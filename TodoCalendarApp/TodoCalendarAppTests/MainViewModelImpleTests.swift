@@ -580,17 +580,11 @@ extension MainViewModelImpleTests {
         var didShowTrackingGuide: Bool = false
         var stubIsGuideContinued: Bool = false
         @MainActor
-        func showTrackingGuide(
-            onContinue: @escaping @Sendable () -> Void,
-            onDecline: @escaping @Sendable () -> Void
-        ) {
+        func showTrackingGuide(onContinue: @escaping @Sendable () -> Void) {
             self.didShowTrackingGuide = true
-            self.stubIsGuideContinued ? onContinue() : onDecline()
-        }
-
-        var didShowLaunchFullScreenAd: Bool = false
-        func showLaunchFullScreenAd() {
-            self.didShowLaunchFullScreenAd = true
+            if self.stubIsGuideContinued {
+                onContinue()
+            }
         }
     }
 
@@ -1317,74 +1311,43 @@ extension MainViewModelImpleTests {
         try await Task.sleep(for: .milliseconds(50))
     }
 
-    func testViewModel_whenTrackingNotNeededAndLaunchAdAllowed_showLaunchAdWithoutGuide() async throws {
-        // given
-        let viewModel = self.makeViewModelForTracking(canRequest: false)
-
-        // when
-        viewModel.requestTrackingThenShowLaunchAd(canShowLaunchAd: true)
-
-        // then
-        try await self.waitEffect("앱 시작 광고가 뜬다") { self.spyRouter.didShowLaunchFullScreenAd }
-        XCTAssertEqual(self.spyRouter.didShowTrackingGuide, false)
-        XCTAssertEqual(self.spyMobileAdService.didRequestTrackingAuthorization, false)
-    }
-
-    func testViewModel_whenContinueFromGuide_requestTrackingThenShowLaunchAd() async throws {
+    func testViewModel_whenContinueFromGuide_requestTracking() async throws {
         // given
         let viewModel = self.makeViewModelForTracking(isGuideContinued: true)
 
         // when
-        viewModel.requestTrackingThenShowLaunchAd(canShowLaunchAd: true)
-
-        // then
-        try await self.waitEffect("시스템 추적 요청 뒤 광고가 뜬다") {
-            self.spyRouter.didShowLaunchFullScreenAd
-        }
-        XCTAssertEqual(self.spyRouter.didShowTrackingGuide, true)
-        XCTAssertEqual(self.spyMobileAdService.didRequestTrackingAuthorization, true)
-    }
-
-    func testViewModel_whenDeclineFromGuide_showLaunchAdWithoutTrackingRequest() async throws {
-        // given
-        let viewModel = self.makeViewModelForTracking(isGuideContinued: false)
-
-        // when
-        viewModel.requestTrackingThenShowLaunchAd(canShowLaunchAd: true)
-
-        // then
-        try await self.waitEffect("앱 시작 광고가 뜬다") { self.spyRouter.didShowLaunchFullScreenAd }
-        XCTAssertEqual(self.spyRouter.didShowTrackingGuide, true)
-        XCTAssertEqual(self.spyMobileAdService.didRequestTrackingAuthorization, false)
-    }
-
-    func testViewModel_whenLaunchAdNotAllowed_showGuideOnly() async throws {
-        // given
-        let viewModel = self.makeViewModelForTracking(isGuideContinued: true)
-
-        // when
-        viewModel.requestTrackingThenShowLaunchAd(canShowLaunchAd: false)
+        viewModel.requestTrackingIfNeeded()
 
         // then
         try await self.waitEffect("시스템 추적 요청이 간다") {
             self.spyMobileAdService.didRequestTrackingAuthorization
         }
-        try await self.waitForTrackingEffects()
         XCTAssertEqual(self.spyRouter.didShowTrackingGuide, true)
-        XCTAssertEqual(self.spyRouter.didShowLaunchFullScreenAd, false)
     }
 
-    func testViewModel_whenNeitherTrackingNorLaunchAdNeeded_doNothing() async throws {
+    func testViewModel_whenDeclineGuide_notRequestTracking() async throws {
         // given
-        let viewModel = self.makeViewModelForTracking(canRequest: false)
+        let viewModel = self.makeViewModelForTracking(isGuideContinued: false)
 
         // when
-        viewModel.requestTrackingThenShowLaunchAd(canShowLaunchAd: false)
+        viewModel.requestTrackingIfNeeded()
+
+        // then
+        try await self.waitEffect("안내가 뜬다") { self.spyRouter.didShowTrackingGuide }
+        try await self.waitForTrackingEffects()
+        XCTAssertEqual(self.spyMobileAdService.didRequestTrackingAuthorization, false)
+    }
+
+    func testViewModel_whenTrackingNotRequestable_notShowGuide() async throws {
+        // given
+        let viewModel = self.makeViewModelForTracking(canRequest: false, isGuideContinued: true)
+
+        // when
+        viewModel.requestTrackingIfNeeded()
 
         // then
         try await self.waitForTrackingEffects()
         XCTAssertEqual(self.spyRouter.didShowTrackingGuide, false)
-        XCTAssertEqual(self.spyRouter.didShowLaunchFullScreenAd, false)
         XCTAssertEqual(self.spyMobileAdService.didRequestTrackingAuthorization, false)
     }
 
@@ -1393,7 +1356,7 @@ extension MainViewModelImpleTests {
         let viewModel = self.makeViewModelForTracking()
 
         // when
-        viewModel.requestTrackingThenShowLaunchAd(canShowLaunchAd: false)
+        viewModel.requestTrackingIfNeeded()
 
         // then
         try await self.waitEffect("안내가 뜬다") { self.spyRouter.didShowTrackingGuide }
@@ -1405,7 +1368,7 @@ extension MainViewModelImpleTests {
         let viewModel = self.makeViewModelForTracking(canRequest: false)
 
         // when
-        viewModel.requestTrackingThenShowLaunchAd(canShowLaunchAd: false)
+        viewModel.requestTrackingIfNeeded()
 
         // then
         try await self.waitForTrackingEffects()
@@ -1422,15 +1385,19 @@ private final class StubAdExposureUsecase: AdExposureUsecase, @unchecked Sendabl
         return Just(false).eraseToAnyPublisher()
     }
 
+    var isMainBannerAdAllowed: AnyPublisher<Bool, Never> {
+        return Just(false).eraseToAnyPublisher()
+    }
+
     func shouldPreloadFullScreenAds() -> Bool { false }
 
-    func canExposeFullScreenAd(
-        scope: FullScreenAdExposureRecord.Scope,
-        isFromAppLaunch: Bool,
-        at now: Date
-    ) -> Bool { false }
+    func canExposeFullScreenAd(at now: Date) -> Bool { false }
 
-    func recordFullScreenAdExposed(scope: FullScreenAdExposureRecord.Scope, at now: Date) { }
+    func recordFullScreenAdExposed(at now: Date) { }
+
+    func recordEventSavedForFullScreenAd() { }
+
+    func isFullScreenAdTurnAfterEventSave() -> Bool { false }
 
     func canRequestTrackingAuthorization() async -> Bool {
         return self.stubCanRequestTrackingAuthorization

@@ -9,6 +9,7 @@
 import Testing
 import Foundation
 import Combine
+import CombineSchedulers
 import Prelude
 import Optics
 import UnitTestHelpKit
@@ -37,33 +38,36 @@ final class AdExposureUsecaseImpleTests: PublisherWaitable {
         return BillingUserPlan() |> \.planId .~ planId
     }
 
-    private func coldLaunchHistory(
-        count: Int, firstLaunchDaysAgo: Int, isFirstLaunchOfToday: Bool
-    ) -> AppColdLaunchHistory {
-        var history = AppColdLaunchHistory()
-        history.firstLaunchDate = self.date(daysFromNow: -firstLaunchDaysAgo)
-        history.count = count
-        history.lastLaunchDate = self.now
-        history.previousLaunchDate = isFirstLaunchOfToday
-            ? self.date(daysFromNow: -1)
-            : self.now.addingTimeInterval(-60)
-        return history
+    private var installedBeforeToday: AppColdLaunchHistory {
+        return AppColdLaunchHistory() |> \.firstLaunchDate .~ self.date(daysFromNow: -1)
+    }
+
+    private func exposureRecord(
+        secondsAgo: TimeInterval, countOfDay: Int
+    ) -> FullScreenAdExposureRecord {
+        return .init(
+            lastExposeDate: self.now.addingTimeInterval(-secondsAgo), countOfDay: countOfDay
+        )
     }
 
     private func makeUsecase(
         isAdStarted: Bool = true,
         userPlan: BillingUserPlan? = nil,
-        exposureRecords: [FullScreenAdExposureRecord] = [],
+        exposureRecord: FullScreenAdExposureRecord? = nil,
+        eventSavedCount: Int = 0,
         coldLaunchHistory: AppColdLaunchHistory = .init(),
         hasAnyEvent: Bool = false,
         shouldFailEventExistenceFetch: Bool = false,
         hasShownTrackingGuide: Bool = false,
         isTrackingAuthorizationDetermined: Bool = false,
-        gate: StubPaidFeatureGateUsecase = .init(),
-        sharedDataStore: SharedDataStore = .init()
+        remotePolicy: AppPolicy? = nil,
+        randomUnits: [Double] = [],
+        scheduler: AnySchedulerOf<DispatchQueue> = .main
     ) -> AdExposureUsecaseImple {
         self.spyAdRepository = SpyAdRepository(
-            records: exposureRecords, hasShownTrackingGuide: hasShownTrackingGuide
+            record: exposureRecord,
+            eventSavedCount: eventSavedCount,
+            hasShownTrackingGuide: hasShownTrackingGuide
         )
         self.stubUserEventExistenceRepository = StubUserEventExistenceRepository(
             hasAnyEvent: hasAnyEvent, shouldFailFetch: shouldFailEventExistenceFetch
@@ -79,32 +83,17 @@ final class AdExposureUsecaseImpleTests: PublisherWaitable {
             adRepository: self.spyAdRepository,
             coldLaunchHistoryRepository: StubAppColdLaunchHistoryRepository(history: coldLaunchHistory),
             userEventExistenceRepository: self.stubUserEventExistenceRepository,
-            paidFeatureGateUsecase: gate,
-            sharedDataStore: sharedDataStore,
-            calendar: self.calendar
+            policyRepository: StubAppPolicyRepository(policy: remotePolicy),
+            defaultPolicy: AppPolicy(
+                mainBannerExposure: .init(
+                    exposurePercentage: 75, minDelaySeconds: 60, maxDelaySeconds: 300
+                ),
+                fullScreenAdEventSaveInterval: 2
+            ),
+            calendar: self.calendar,
+            scheduler: scheduler,
+            randomUnit: StubRandomUnits(randomUnits).next
         )
-    }
-
-    private func expiredGate() -> StubPaidFeatureGateUsecase {
-        let gate = StubPaidFeatureGateUsecase()
-        gate.mockBlockedReason = .init(feature: .colorTheme(self.usingThemeKey), licenseDays: 1)
-        return gate
-    }
-
-    private let usingThemeKey: ColorSetKeys = .custom("expired-theme")
-
-    private func sharedDataStoreUsingTheme() -> SharedDataStore {
-        let store = SharedDataStore()
-        store.put(
-            CalendarAppearanceSettings.self,
-            key: ShareDataKeys.calendarAppearance.rawValue,
-            .init(colorSetKey: self.usingThemeKey, fontSetKey: .systemDefault)
-        )
-        return store
-    }
-
-    private func appLaunchConditionsMetHistory() -> AppColdLaunchHistory {
-        return self.coldLaunchHistory(count: 20, firstLaunchDaysAgo: 30, isFirstLaunchOfToday: true)
     }
 
     private var spyAdRepository: SpyAdRepository!
@@ -189,6 +178,241 @@ extension AdExposureUsecaseImpleTests {
 }
 
 
+// MARK: - 메인 배너 노출 허용 여부
+
+extension AdExposureUsecaseImpleTests {
+
+    private func makeUsecaseForMainBanner(
+        userPlan: BillingPlanId = .free,
+        coldLaunchHistory: AppColdLaunchHistory? = nil,
+        remotePolicy: AppPolicy? = nil,
+        randomUnits: [Double],
+        scheduler: TestSchedulerOf<DispatchQueue>
+    ) -> AdExposureUsecaseImple {
+        return self.makeUsecase(
+            userPlan: self.userPlan(userPlan),
+            coldLaunchHistory: coldLaunchHistory ?? self.installedBeforeToday,
+            remotePolicy: remotePolicy,
+            randomUnits: randomUnits,
+            scheduler: scheduler.eraseToAnyScheduler()
+        )
+    }
+
+    private func remoteMainBannerPolicy(
+        percentage: Int? = nil, minDelay: Int? = nil, maxDelay: Int? = nil
+    ) -> AppPolicy {
+        return AppPolicy(
+            mainBannerExposure: .init(
+                exposurePercentage: percentage, minDelaySeconds: minDelay, maxDelaySeconds: maxDelay
+            )
+        )
+    }
+
+    private func observeMainBanner(
+        _ usecase: AdExposureUsecaseImple, _ receive: @escaping (Bool) -> Void
+    ) {
+        usecase.isMainBannerAdAllowed
+            .sink(receiveValue: receive)
+            .store(in: &self.cancelBag)
+    }
+
+    @Test("설치 당일이면 뽑혀도 메인 배너를 허용하지 않는다")
+    func usecase_whenInstalledToday_mainBannerIsNotAllowed() {
+        // given
+        let scheduler = DispatchQueue.test
+        let usecase = self.makeUsecaseForMainBanner(
+            coldLaunchHistory: AppColdLaunchHistory() |> \.firstLaunchDate .~ Date(),
+            randomUnits: [0, 0],
+            scheduler: scheduler
+        )
+        var alloweds: [Bool] = []
+
+        // when
+        self.observeMainBanner(usecase) { alloweds.append($0) }
+        scheduler.advance(by: .seconds(301))
+
+        // then
+        #expect(alloweds == [false])
+    }
+
+    @Test("이번 실행에 안 뽑히면 지연이 지나도 메인 배너를 허용하지 않는다")
+    func usecase_whenNotDrawn_mainBannerIsNotAllowed() {
+        // given
+        let scheduler = DispatchQueue.test
+        let usecase = self.makeUsecaseForMainBanner(randomUnits: [0.75, 0], scheduler: scheduler)
+        var alloweds: [Bool] = []
+
+        // when
+        self.observeMainBanner(usecase) { alloweds.append($0) }
+        scheduler.advance(by: .seconds(301))
+
+        // then
+        #expect(alloweds == [false])
+    }
+
+    @Test("확률 경계 바로 아래 추첨은 뽑힌다")
+    func usecase_whenDrawJustBelowPercentage_mainBannerIsAllowedAfterDelay() {
+        // given
+        let scheduler = DispatchQueue.test
+        let usecase = self.makeUsecaseForMainBanner(randomUnits: [0.7499, 0], scheduler: scheduler)
+        var alloweds: [Bool] = []
+
+        // when
+        self.observeMainBanner(usecase) { alloweds.append($0) }
+        scheduler.advance(by: .seconds(60))
+
+        // then
+        #expect(alloweds == [false, true])
+    }
+
+    @Test("뽑히면 둘째 추첨값으로 정한 지연 전엔 허용하지 않고 지연 뒤 허용한다")
+    func usecase_whenDrawn_mainBannerIsAllowedOnlyAfterDrawnDelay() {
+        // given
+        let scheduler = DispatchQueue.test
+        let usecase = self.makeUsecaseForMainBanner(randomUnits: [0.1, 0.5], scheduler: scheduler)
+        var alloweds: [Bool] = []
+
+        // when + then
+        self.observeMainBanner(usecase) { alloweds.append($0) }
+        scheduler.advance(by: .seconds(179))
+        #expect(alloweds == [false])
+
+        scheduler.advance(by: .seconds(1))
+        #expect(alloweds == [false, true])
+    }
+
+    @Test("추첨은 실행에 한 번이라 다시 구독해도 같은 지연을 쓴다")
+    func usecase_whenSubscribedAgain_usesSameDrawnDelay() {
+        // given
+        let scheduler = DispatchQueue.test
+        let usecase = self.makeUsecaseForMainBanner(randomUnits: [0.1, 0.5], scheduler: scheduler)
+        var firstAlloweds: [Bool] = []
+        var secondAlloweds: [Bool] = []
+
+        // when
+        self.observeMainBanner(usecase) { firstAlloweds.append($0) }
+        self.observeMainBanner(usecase) { secondAlloweds.append($0) }
+        scheduler.advance(by: .seconds(180))
+
+        // then
+        #expect(firstAlloweds == [false, true])
+        #expect(secondAlloweds == [false, true])
+    }
+
+    @Test("뽑혀도 유료 플랜이면 지연 뒤 메인 배너를 허용하지 않는다")
+    func usecase_whenDrawnButPaidPlan_mainBannerIsNotAllowed() {
+        // given
+        let scheduler = DispatchQueue.test
+        let usecase = self.makeUsecaseForMainBanner(
+            userPlan: .standard, randomUnits: [0, 0], scheduler: scheduler
+        )
+        var alloweds: [Bool] = []
+
+        // when
+        self.observeMainBanner(usecase) { alloweds.append($0) }
+        scheduler.advance(by: .seconds(60))
+
+        // then
+        #expect(alloweds == [false])
+    }
+
+    @Test("메인 배너가 뜬 뒤 유료로 바뀌면 내려간다")
+    func usecase_whenPlanChangesToPaidAfterShown_mainBannerBecomesNotAllowed() {
+        // given
+        let scheduler = DispatchQueue.test
+        let usecase = self.makeUsecaseForMainBanner(randomUnits: [0, 0], scheduler: scheduler)
+        var alloweds: [Bool] = []
+        self.observeMainBanner(usecase) { alloweds.append($0) }
+        scheduler.advance(by: .seconds(60))
+
+        // when
+        self.stubBillingUsecase.currentUserPlanSubject.send(self.userPlan(.lifetime))
+
+        // then
+        #expect(alloweds == [false, true, false])
+    }
+
+    @Test("리모트 값이 있으면 기본값 대신 쓴다")
+    func usecase_whenRemotePolicyExists_usesRemoteValues() {
+        // given
+        let scheduler = DispatchQueue.test
+        let usecase = self.makeUsecaseForMainBanner(
+            remotePolicy: self.remoteMainBannerPolicy(percentage: 100, minDelay: 10, maxDelay: 20),
+            randomUnits: [0.9, 0.5],
+            scheduler: scheduler
+        )
+        var alloweds: [Bool] = []
+
+        // when + then
+        self.observeMainBanner(usecase) { alloweds.append($0) }
+        scheduler.advance(by: .seconds(14))
+        #expect(alloweds == [false])
+
+        scheduler.advance(by: .seconds(1))
+        #expect(alloweds == [false, true])
+    }
+
+    @Test("리모트에 없는 속성만 기본값으로 채운다")
+    func usecase_whenRemotePolicyHasOnlyMinDelay_fillsRestWithDefault() {
+        // given
+        let scheduler = DispatchQueue.test
+        let usecase = self.makeUsecaseForMainBanner(
+            remotePolicy: self.remoteMainBannerPolicy(minDelay: 100),
+            randomUnits: [0.7, 0.5],
+            scheduler: scheduler
+        )
+        var alloweds: [Bool] = []
+
+        // when + then
+        self.observeMainBanner(usecase) { alloweds.append($0) }
+        scheduler.advance(by: .seconds(199))
+        #expect(alloweds == [false])
+
+        scheduler.advance(by: .seconds(1))
+        #expect(alloweds == [false, true])
+    }
+
+    @Test("리모트 확률이 0 이면 어떤 추첨값도 뽑히지 않는다")
+    func usecase_whenRemotePercentageIsZero_mainBannerIsNotAllowed() {
+        // given
+        let scheduler = DispatchQueue.test
+        let usecase = self.makeUsecaseForMainBanner(
+            remotePolicy: self.remoteMainBannerPolicy(percentage: 0),
+            randomUnits: [0, 0],
+            scheduler: scheduler
+        )
+        var alloweds: [Bool] = []
+
+        // when
+        self.observeMainBanner(usecase) { alloweds.append($0) }
+        scheduler.advance(by: .seconds(301))
+
+        // then
+        #expect(alloweds == [false])
+    }
+
+    @Test("최소 지연이 최대보다 크면 최소를 지연으로 쓴다")
+    func usecase_whenMinDelayIsOverMaxDelay_usesMinDelay() {
+        // given
+        let scheduler = DispatchQueue.test
+        let usecase = self.makeUsecaseForMainBanner(
+            remotePolicy: self.remoteMainBannerPolicy(minDelay: 100, maxDelay: 50),
+            randomUnits: [0, 0.9],
+            scheduler: scheduler
+        )
+        var alloweds: [Bool] = []
+
+        // when + then
+        self.observeMainBanner(usecase) { alloweds.append($0) }
+        scheduler.advance(by: .seconds(99))
+        #expect(alloweds == [false])
+
+        scheduler.advance(by: .seconds(1))
+        #expect(alloweds == [false, true])
+    }
+}
+
+
 // MARK: - 전면 광고 미리 로드 여부
 
 extension AdExposureUsecaseImpleTests {
@@ -231,128 +455,63 @@ extension AdExposureUsecaseImpleTests {
 }
 
 
-// MARK: - 앱 실행 직후 추가 조건
+// MARK: - 플랜·설치 경과일
 
 extension AdExposureUsecaseImpleTests {
 
-    @Test("콜드 런치 이력이 없으면 앱 실행 직후 전면 광고를 허용하지 않는다")
-    func usecase_fromAppLaunch_whenNoColdLaunchHistory_isNotAllowed() {
+    @Test("유료 플랜이면 전면 광고를 허용하지 않는다")
+    func usecase_whenPaidPlan_isNotAllowed() {
         // given
-        let usecase = self.makeUsecase(userPlan: self.userPlan(.free))
+        let usecase = self.makeUsecase(
+            userPlan: self.userPlan(.standard), coldLaunchHistory: self.installedBeforeToday
+        )
 
         // when
-        let canExpose = usecase.canExposeFullScreenAd(
-            scope: .application, isFromAppLaunch: true, at: self.now
-        )
+        let canExpose = usecase.canExposeFullScreenAd(at: self.now)
 
         // then
         #expect(canExpose == false)
     }
 
-    @Test("같은 날 두 번째 콜드 런치면 앱 실행 직후 전면 광고를 허용하지 않는다")
-    func usecase_fromAppLaunch_whenSecondColdLaunchOfSameDay_isNotAllowed() {
+    @Test("플랜을 모르면 전면 광고를 허용하지 않는다")
+    func usecase_whenUserPlanUnknown_isNotAllowed() {
         // given
         let usecase = self.makeUsecase(
-            userPlan: self.userPlan(.free),
-            coldLaunchHistory: self.coldLaunchHistory(
-                count: 20, firstLaunchDaysAgo: 30, isFirstLaunchOfToday: false
-            )
+            userPlan: nil, coldLaunchHistory: self.installedBeforeToday
         )
 
         // when
-        let canExpose = usecase.canExposeFullScreenAd(
-            scope: .application, isFromAppLaunch: true, at: self.now
-        )
+        let canExpose = usecase.canExposeFullScreenAd(at: self.now)
 
         // then
         #expect(canExpose == false)
     }
 
-    @Test("첫 실행일로부터 7일이 안 지났으면 앱 실행 직후 전면 광고를 허용하지 않는다")
-    func usecase_fromAppLaunch_whenElapsedDaysFromFirstLaunchIsUnderSeven_isNotAllowed() {
+    @Test("설치 당일이면 전면 광고를 허용하지 않는다")
+    func usecase_whenInstalledToday_isNotAllowed() {
         // given
+        let history = AppColdLaunchHistory()
+            |> \.firstLaunchDate .~ self.now.addingTimeInterval(-3600)
         let usecase = self.makeUsecase(
-            userPlan: self.userPlan(.free),
-            coldLaunchHistory: self.coldLaunchHistory(
-                count: 20, firstLaunchDaysAgo: 6, isFirstLaunchOfToday: true
-            )
+            userPlan: self.userPlan(.free), coldLaunchHistory: history
         )
 
         // when
-        let canExpose = usecase.canExposeFullScreenAd(
-            scope: .application, isFromAppLaunch: true, at: self.now
-        )
+        let canExpose = usecase.canExposeFullScreenAd(at: self.now)
 
         // then
         #expect(canExpose == false)
     }
 
-    @Test("누적 콜드 런치가 10회 미만이면 앱 실행 직후 전면 광고를 허용하지 않는다")
-    func usecase_fromAppLaunch_whenColdLaunchCountIsUnderTen_isNotAllowed() {
+    @Test("설치 다음 날이고 노출 이력이 없으면 전면 광고를 허용한다")
+    func usecase_whenInstalledBeforeTodayAndNoExposure_isAllowed() {
         // given
         let usecase = self.makeUsecase(
-            userPlan: self.userPlan(.free),
-            coldLaunchHistory: self.coldLaunchHistory(
-                count: 9, firstLaunchDaysAgo: 30, isFirstLaunchOfToday: true
-            )
+            userPlan: self.userPlan(.free), coldLaunchHistory: self.installedBeforeToday
         )
 
         // when
-        let canExpose = usecase.canExposeFullScreenAd(
-            scope: .application, isFromAppLaunch: true, at: self.now
-        )
-
-        // then
-        #expect(canExpose == false)
-    }
-
-    @Test("조건을 다 만족해도 유료 플랜이면 전면 광고를 허용하지 않는다")
-    func usecase_fromAppLaunch_whenPaidPlan_isNotAllowed() {
-        // given
-        let usecase = self.makeUsecase(
-            userPlan: self.userPlan(.standard),
-            coldLaunchHistory: self.coldLaunchHistory(
-                count: 20, firstLaunchDaysAgo: 30, isFirstLaunchOfToday: true
-            )
-        )
-
-        // when
-        let canExpose = usecase.canExposeFullScreenAd(
-            scope: .application, isFromAppLaunch: true, at: self.now
-        )
-
-        // then
-        #expect(canExpose == false)
-    }
-
-    @Test("조건을 전부 만족하면 앱 실행 직후 전면 광고를 허용한다")
-    func usecase_fromAppLaunch_whenAllConditionsAreMet_isAllowed() {
-        // given
-        let usecase = self.makeUsecase(
-            userPlan: self.userPlan(.free),
-            coldLaunchHistory: self.coldLaunchHistory(
-                count: 10, firstLaunchDaysAgo: 7, isFirstLaunchOfToday: true
-            )
-        )
-
-        // when
-        let canExpose = usecase.canExposeFullScreenAd(
-            scope: .application, isFromAppLaunch: true, at: self.now
-        )
-
-        // then
-        #expect(canExpose == true)
-    }
-
-    @Test("앱 실행 직후가 아니면 콜드 런치 조건을 보지 않는다")
-    func usecase_notFromAppLaunch_whenColdLaunchConditionsAreNotMet_isStillAllowed() {
-        // given
-        let usecase = self.makeUsecase(userPlan: self.userPlan(.free))
-
-        // when
-        let canExpose = usecase.canExposeFullScreenAd(
-            scope: .application, isFromAppLaunch: false, at: self.now
-        )
+        let canExpose = usecase.canExposeFullScreenAd(at: self.now)
 
         // then
         #expect(canExpose == true)
@@ -360,186 +519,265 @@ extension AdExposureUsecaseImpleTests {
 }
 
 
-// MARK: - 사용권이 만료된 유료 테마를 쓰는 실행
+// MARK: - 하루 상한·노출 간격
 
 extension AdExposureUsecaseImpleTests {
 
-    @Test("앱 실행 직후 지금 테마의 사용권이 만료됐으면 다른 조건을 다 만족해도 전면 광고를 허용하지 않는다")
-    func usecase_fromAppLaunch_whenUsingExpiredPaidTheme_isNotAllowed() {
-        // given
-        let gate = self.expiredGate()
-        let usecase = self.makeUsecase(
+    private func makeUsecaseForExposureLimit(
+        record: FullScreenAdExposureRecord
+    ) -> AdExposureUsecaseImple {
+        return self.makeUsecase(
             userPlan: self.userPlan(.free),
-            coldLaunchHistory: self.appLaunchConditionsMetHistory(),
-            gate: gate,
-            sharedDataStore: self.sharedDataStoreUsingTheme()
+            exposureRecord: record,
+            coldLaunchHistory: self.installedBeforeToday
+        )
+    }
+
+    @Test("오늘 3회 노출했으면 전면 광고를 허용하지 않는다")
+    func usecase_whenExposedThreeTimesToday_isNotAllowed() {
+        // given
+        let usecase = self.makeUsecaseForExposureLimit(
+            record: self.exposureRecord(secondsAgo: 3600, countOfDay: 3)
         )
 
         // when
-        let canExpose = usecase.canExposeFullScreenAd(
-            scope: .application, isFromAppLaunch: true, at: self.now
-        )
+        let canExpose = usecase.canExposeFullScreenAd(at: self.now)
 
         // then
         #expect(canExpose == false)
-        #expect(gate.didCheckFeature == .colorTheme(self.usingThemeKey))
     }
 
-    @Test("앱 실행 직후 지금 테마의 사용권이 살아 있으면 전면 광고를 허용한다")
-    func usecase_fromAppLaunch_whenUsingThemeIsNotExpired_isAllowed() {
+    @Test("오늘 2회 노출했고 30분이 지났으면 전면 광고를 허용한다")
+    func usecase_whenExposedTwiceTodayAndIntervalPassed_isAllowed() {
         // given
-        let usecase = self.makeUsecase(
-            userPlan: self.userPlan(.free),
-            coldLaunchHistory: self.appLaunchConditionsMetHistory(),
-            sharedDataStore: self.sharedDataStoreUsingTheme()
+        let usecase = self.makeUsecaseForExposureLimit(
+            record: self.exposureRecord(secondsAgo: 3600, countOfDay: 2)
         )
 
         // when
-        let canExpose = usecase.canExposeFullScreenAd(
-            scope: .application, isFromAppLaunch: true, at: self.now
-        )
+        let canExpose = usecase.canExposeFullScreenAd(at: self.now)
 
         // then
         #expect(canExpose == true)
     }
 
-    @Test("앱 실행 직후가 아니면 지금 테마의 사용권이 만료됐어도 전면 광고를 허용한다")
-    func usecase_notFromAppLaunch_whenUsingExpiredPaidTheme_isStillAllowed() {
+    @Test("마지막 노출 후 30분이 안 됐으면 전면 광고를 허용하지 않는다")
+    func usecase_whenIntervalIsUnderThirtyMinutes_isNotAllowed() {
         // given
-        let usecase = self.makeUsecase(
-            userPlan: self.userPlan(.free),
-            gate: self.expiredGate(),
-            sharedDataStore: self.sharedDataStoreUsingTheme()
+        let usecase = self.makeUsecaseForExposureLimit(
+            record: self.exposureRecord(secondsAgo: 30 * 60 - 1, countOfDay: 1)
         )
 
         // when
-        let canExpose = usecase.canExposeFullScreenAd(
-            scope: .application, isFromAppLaunch: false, at: self.now
+        let canExpose = usecase.canExposeFullScreenAd(at: self.now)
+
+        // then
+        #expect(canExpose == false)
+    }
+
+    @Test("마지막 노출 후 정확히 30분이 지났으면 전면 광고를 허용한다")
+    func usecase_whenIntervalIsExactlyThirtyMinutes_isAllowed() {
+        // given
+        let usecase = self.makeUsecaseForExposureLimit(
+            record: self.exposureRecord(secondsAgo: 30 * 60, countOfDay: 1)
         )
+
+        // when
+        let canExpose = usecase.canExposeFullScreenAd(at: self.now)
 
         // then
         #expect(canExpose == true)
     }
 
-    @Test("공유 저장소에 외관 설정이 없으면 테마 사용권을 판정하지 않고 전면 광고를 허용한다")
-    func usecase_fromAppLaunch_whenNoAppearanceSetting_isAllowed() {
+    @Test("날짜가 바뀌면 횟수를 다시 센다")
+    func usecase_whenDayChanged_countRestarts() {
         // given
-        let usecase = self.makeUsecase(
-            userPlan: self.userPlan(.free),
-            coldLaunchHistory: self.appLaunchConditionsMetHistory(),
-            gate: self.expiredGate()
+        let usecase = self.makeUsecaseForExposureLimit(
+            record: self.exposureRecord(secondsAgo: 6 * 3600, countOfDay: 3)
         )
 
         // when
-        let canExpose = usecase.canExposeFullScreenAd(
-            scope: .application, isFromAppLaunch: true, at: self.now
-        )
+        let canExpose = usecase.canExposeFullScreenAd(at: self.now)
 
         // then
         #expect(canExpose == true)
+    }
+
+    @Test("날짜가 바뀌어도 30분이 안 됐으면 전면 광고를 허용하지 않는다")
+    func usecase_whenDayChangedButIntervalNotPassed_isNotAllowed() {
+        // given
+        let startOfToday = self.calendar.startOfDay(for: self.now)
+        let usecase = self.makeUsecaseForExposureLimit(
+            record: .init(lastExposeDate: startOfToday.addingTimeInterval(-600), countOfDay: 1)
+        )
+
+        // when
+        let canExpose = usecase.canExposeFullScreenAd(at: startOfToday.addingTimeInterval(300))
+
+        // then
+        #expect(canExpose == false)
     }
 }
 
 
-// MARK: - scope 별 일 1회 상한
+// MARK: - 노출 기록
 
 extension AdExposureUsecaseImpleTests {
 
-    @Test("application scope 로 오늘 노출했으면 같은 날 다시 허용하지 않는다")
-    func usecase_afterApplicationScopeExposed_applicationScopeIsNotAllowedInSameDay() {
+    @Test("같은 날 노출을 기록하면 횟수가 1 늘어난다")
+    func usecase_recordInSameDay_increaseCount() {
         // given
-        let usecase = self.makeUsecase(userPlan: self.userPlan(.free))
-
-        // when
-        usecase.recordFullScreenAdExposed(scope: .application, at: self.now)
-        let canExpose = usecase.canExposeFullScreenAd(
-            scope: .application, isFromAppLaunch: false, at: self.now.addingTimeInterval(3600)
+        let usecase = self.makeUsecase(
+            exposureRecord: self.exposureRecord(secondsAgo: 3600, countOfDay: 2)
         )
 
+        // when
+        usecase.recordFullScreenAdExposed(at: self.now)
+
         // then
-        #expect(canExpose == false)
+        #expect(self.spyAdRepository.didUpdatedExposureRecord
+                == .init(lastExposeDate: self.now, countOfDay: 3))
     }
 
-    @Test("application scope 로 노출했어도 service scope 는 같은 날 허용한다")
-    func usecase_afterApplicationScopeExposed_serviceScopeIsAllowedInSameDay() {
+    @Test("다른 날 노출을 기록하면 횟수가 1부터 시작한다")
+    func usecase_recordInOtherDay_restartCount() {
         // given
-        let usecase = self.makeUsecase(userPlan: self.userPlan(.free))
-
-        // when
-        usecase.recordFullScreenAdExposed(scope: .application, at: self.now)
-        let canExpose = usecase.canExposeFullScreenAd(
-            scope: .service(identifier: "eventShare"), isFromAppLaunch: false, at: self.now
+        let usecase = self.makeUsecase(
+            exposureRecord: self.exposureRecord(secondsAgo: 6 * 3600, countOfDay: 3)
         )
 
+        // when
+        usecase.recordFullScreenAdExposed(at: self.now)
+
         // then
-        #expect(canExpose == true)
+        #expect(self.spyAdRepository.didUpdatedExposureRecord
+                == .init(lastExposeDate: self.now, countOfDay: 1))
     }
 
-    @Test("service scope 로 오늘 노출했으면 같은 scope 는 같은 날 허용하지 않는다")
-    func usecase_afterServiceScopeExposed_sameServiceScopeIsNotAllowedInSameDay() {
+    @Test("노출 이력이 없을 때 기록하면 횟수가 1이다")
+    func usecase_recordWithoutHistory_countIsOne() {
         // given
-        let usecase = self.makeUsecase(userPlan: self.userPlan(.free))
+        let usecase = self.makeUsecase()
 
         // when
-        usecase.recordFullScreenAdExposed(scope: .service(identifier: "eventShare"), at: self.now)
-        let canExpose = usecase.canExposeFullScreenAd(
-            scope: .service(identifier: "eventShare"), isFromAppLaunch: false, at: self.now
-        )
+        usecase.recordFullScreenAdExposed(at: self.now)
 
         // then
-        #expect(canExpose == false)
+        #expect(self.spyAdRepository.didUpdatedExposureRecord
+                == .init(lastExposeDate: self.now, countOfDay: 1))
+    }
+}
+
+
+// MARK: - 이벤트 저장 차례
+
+extension AdExposureUsecaseImpleTests {
+
+    @Test("리모트 저장 간격이 3 이면 세 번째 저장이 전면 차례다", arguments: [(2, false), (3, true), (4, false), (6, true)])
+    func usecase_whenRemoteIntervalIsThree_isTurnOnMultipleOfThree(
+        savedCount: Int, expected: Bool
+    ) {
+        // given
+        let usecase = self.makeUsecase(
+            eventSavedCount: savedCount,
+            remotePolicy: AppPolicy(fullScreenAdEventSaveInterval: 3)
+        )
+
+        // when
+        let isTurn = usecase.isFullScreenAdTurnAfterEventSave()
+
+        // then
+        #expect(isTurn == expected)
     }
 
-    @Test("identifier 가 다른 service scope 는 독립적으로 허용한다")
-    func usecase_afterServiceScopeExposed_differentServiceScopeIsAllowed() {
+    @Test("리모트 저장 간격이 0 이면 전면 차례가 오지 않는다", arguments: [0, 1, 2])
+    func usecase_whenRemoteIntervalIsZero_isNeverTurn(savedCount: Int) {
         // given
-        let usecase = self.makeUsecase(userPlan: self.userPlan(.free))
-
-        // when
-        usecase.recordFullScreenAdExposed(scope: .service(identifier: "eventShare"), at: self.now)
-        let canExpose = usecase.canExposeFullScreenAd(
-            scope: .service(identifier: "other"), isFromAppLaunch: false, at: self.now
+        let usecase = self.makeUsecase(
+            eventSavedCount: savedCount,
+            remotePolicy: AppPolicy(fullScreenAdEventSaveInterval: 0)
         )
 
+        // when
+        let isTurn = usecase.isFullScreenAdTurnAfterEventSave()
+
         // then
-        #expect(canExpose == true)
+        #expect(isTurn == false)
     }
 
-    @Test("날짜가 바뀌면 모든 scope 를 다시 허용한다")
-    func usecase_afterExposed_allScopesAreAllowedInNextDay() {
+    @Test("리모트 정책에 저장 간격이 없으면 기본값을 쓴다")
+    func usecase_whenRemotePolicyHasNoInterval_usesDefaultInterval() {
         // given
-        let usecase = self.makeUsecase(userPlan: self.userPlan(.free))
+        let usecase = self.makeUsecase(
+            eventSavedCount: 2,
+            remotePolicy: AppPolicy(colorThemeLicense: .init(isEnabled: true))
+        )
 
         // when
-        usecase.recordFullScreenAdExposed(scope: .application, at: self.now)
-        usecase.recordFullScreenAdExposed(scope: .service(identifier: "eventShare"), at: self.now)
-        let tomorrow = self.date(daysFromNow: 1)
-        let canExposeApplication = usecase.canExposeFullScreenAd(
-            scope: .application, isFromAppLaunch: false, at: tomorrow
-        )
-        let canExposeService = usecase.canExposeFullScreenAd(
-            scope: .service(identifier: "eventShare"), isFromAppLaunch: false, at: tomorrow
-        )
+        let isTurn = usecase.isFullScreenAdTurnAfterEventSave()
 
         // then
-        #expect(canExposeApplication == true)
-        #expect(canExposeService == true)
+        #expect(isTurn == true)
     }
 
-    @Test("같은 scope 를 다시 기록하면 그 scope 의 레코드만 갱신한다")
-    func usecase_recordFullScreenAdExposed_replaceRecordOfSameScope() {
+    @Test("이벤트를 저장한 적 없으면 전면 차례가 아니다")
+    func usecase_whenNeverSavedEvent_isNotFullScreenAdTurn() {
         // given
-        let usecase = self.makeUsecase(userPlan: self.userPlan(.free))
+        let usecase = self.makeUsecase(eventSavedCount: 0)
 
         // when
-        usecase.recordFullScreenAdExposed(scope: .application, at: self.now)
-        usecase.recordFullScreenAdExposed(scope: .application, at: self.date(daysFromNow: 1))
+        let isTurn = usecase.isFullScreenAdTurnAfterEventSave()
 
         // then
-        #expect(self.spyAdRepository.didUpdatedExposureRecords.map { $0.lastExposeDate }
-                == [self.now, self.date(daysFromNow: 1)])
-        #expect(self.spyAdRepository.loadFullScreenAdExposureRecords()
-                == [.init(scope: .application, lastExposeDate: self.date(daysFromNow: 1))])
+        #expect(isTurn == false)
+    }
+
+    @Test("이벤트를 한 번 저장했으면 전면 차례가 아니다")
+    func usecase_whenSavedEventOnce_isNotFullScreenAdTurn() {
+        // given
+        let usecase = self.makeUsecase(eventSavedCount: 1)
+
+        // when
+        let isTurn = usecase.isFullScreenAdTurnAfterEventSave()
+
+        // then
+        #expect(isTurn == false)
+    }
+
+    @Test("이벤트를 두 번 저장했으면 전면 차례다")
+    func usecase_whenSavedEventTwice_isFullScreenAdTurn() {
+        // given
+        let usecase = self.makeUsecase(eventSavedCount: 2)
+
+        // when
+        let isTurn = usecase.isFullScreenAdTurnAfterEventSave()
+
+        // then
+        #expect(isTurn == true)
+    }
+
+    @Test("이벤트를 세 번 저장했으면 전면 차례가 아니다")
+    func usecase_whenSavedEventThreeTimes_isNotFullScreenAdTurn() {
+        // given
+        let usecase = self.makeUsecase(eventSavedCount: 3)
+
+        // when
+        let isTurn = usecase.isFullScreenAdTurnAfterEventSave()
+
+        // then
+        #expect(isTurn == false)
+    }
+
+    @Test("이벤트 저장을 기록하면 횟수가 1 늘어난다")
+    func usecase_recordEventSaved_increaseCount() {
+        // given
+        let usecase = self.makeUsecase(eventSavedCount: 3)
+
+        // when
+        usecase.recordEventSavedForFullScreenAd()
+
+        // then
+        #expect(self.spyAdRepository.didUpdatedEventSavedCount == 4)
     }
 }
 
@@ -637,5 +875,20 @@ extension AdExposureUsecaseImpleTests {
         // then
         #expect(self.spyAdRepository.didMarkTrackingGuideShown == true)
         #expect(await usecase.canRequestTrackingAuthorization() == false)
+    }
+}
+
+
+private final class StubRandomUnits: @unchecked Sendable {
+
+    private var units: [Double]
+
+    init(_ units: [Double]) {
+        self.units = units
+    }
+
+    @Sendable
+    func next() -> Double {
+        return self.units.isEmpty ? 0.99 : self.units.removeFirst()
     }
 }

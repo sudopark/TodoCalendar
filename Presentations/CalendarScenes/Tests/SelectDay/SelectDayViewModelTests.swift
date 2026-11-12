@@ -71,7 +71,7 @@ struct SelectDayViewModelTests {
 
 extension SelectDayViewModelTests {
     
-    @Test func viewModel_provideInitialCurrentDate() {
+    @Test func viewModel_provideInitialCurrentDate_asGregorianDayRegardlessOfDeviceCalendar() {
         // given
         let current = Dummies.currentDay.day
         let viewModel = self.makeViewModel()
@@ -80,7 +80,7 @@ extension SelectDayViewModelTests {
         let initial = viewModel.initialCurrentSelectDate
         
         // then
-        let day = CalendarComponent.Day(initial, calendar: .current)
+        let day = CalendarComponent.Day(initial, calendar: Calendar(identifier: .gregorian))
         #expect(day.year == current.year)
         #expect(day.month == current.month)
         #expect(day.day == current.day)
@@ -134,6 +134,6 @@ private extension CalendarDay {
         let components = DateComponents(
             year: self.year, month: self.month, day: self.day
         )
-        return Calendar.current.date(from: components) ?? Date()
+        return Calendar(identifier: .gregorian).date(from: components) ?? Date()
     }
 }

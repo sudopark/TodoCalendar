@@ -20,6 +20,8 @@ import CommonPresentation
     var additionalFontSizeModel: EventTextAdditionalSizeModel = .init(0)
     var showHolidayName: Bool = false
     var showLunarCalendarDate: Bool = false
+    var showRokuyo: Bool = false
+    var isRokuyoSupported: Bool = false
     var is24hourTimeForm: Bool = false
     var showUncompletedTodos: Bool = true
     
@@ -27,6 +29,7 @@ import CommonPresentation
         self.additionalFontSizeModel = .init(setting.eventTextAdditionalSize)
         self.showHolidayName = setting.showHoliday
         self.showLunarCalendarDate = setting.showLunarCalendarDate
+        self.showRokuyo = setting.showRokuyo
         self.is24hourTimeForm = setting.is24hourForm
         self.showUncompletedTodos = setting.showUncompletedTodos
     }
@@ -35,6 +38,7 @@ import CommonPresentation
         
         guard self.didBind == false else { return }
         self.didBind = true
+        self.isRokuyoSupported = viewModel.isRokuyoSupported
         
         viewModel.eventListSamepleModel
             .receive(on: RunLoop.main)
@@ -64,6 +68,13 @@ import CommonPresentation
             })
             .store(in: self.cancellables)
         
+        viewModel.isShowRokuyo
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] flag in
+                self?.showRokuyo = flag
+            })
+            .store(in: self.cancellables)
+        
         viewModel.isShowTimeWith24HourForm
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] flag in
@@ -88,6 +99,7 @@ final class EventListAppearanceSettingViewEventHandler: Observable {
     var decreaseFontSize: () -> Void = { }
     var toggleIsShowHolidayName: (Bool) -> Void = { _ in }
     var toggleShowLunarCalendarDate: (Bool) -> Void = { _ in }
+    var toggleShowRokuyo: (Bool) -> Void = { _ in }
     var toggleIs24HourFom: (Bool) -> Void = { _ in }
     var toggleShowUncompletedTodo: (Bool) -> Void = { _ in }
 }
@@ -118,10 +130,25 @@ struct EventListAppearanceSettingView: View {
                     eventHandler.toggleIsShowHolidayName(new)
                 }
             
-            AppearanceRow("setting.appearance.event.show_lunar".localized(), showLunarCalendarView)
+            AppearanceRow(
+                "setting.appearance.event.show_lunar".localized(),
+                subTitle: self.lunarCalendarExplain,
+                showLunarCalendarView
+            )
                 .onChange(of: state.showLunarCalendarDate) { _, new in
                     eventHandler.toggleShowLunarCalendarDate(new)
                 }
+            
+            if state.isRokuyoSupported {
+                AppearanceRow(
+                    "setting.appearance.event.show_rokuyo".localized(),
+                    subTitle: "setting.appearance.event.show_rokuyo::available_ios26".localized(),
+                    showRokuyoView
+                )
+                .onChange(of: state.showRokuyo) { _, new in
+                    eventHandler.toggleShowRokuyo(new)
+                }
+            }
             
             AppearanceRow("setting.appearance.event._24form".localized(), is24HourFormView)
                 .onChange(of: state.is24hourTimeForm) { _, new in
@@ -146,31 +173,19 @@ struct EventListAppearanceSettingView: View {
             
             VStack(alignment: .leading) {
                 
-                if let holidayName = state.sampleModel?.holidayName {
-                    Text(holidayName)
-                        .font(appearance.eventSubNormalTextFontOnList().asFont)
-                        .foregroundStyle(Color.red)
-                }
+                DayHeaderSubtitleView(
+                    lunarDateText: state.sampleModel?.lunarDateText,
+                    rokuyo: state.sampleModel?.rokuyo,
+                    holidayName: state.sampleModel?.holidayName,
+                    holidayColor: Color.red
+                )
              
-                HStack {
-                    Text(state.sampleModel?.dateText ?? "")
-                        .font(
-                            self.appearance.fontSet.size(22+appearance.eventTextAdditionalSize, weight: .semibold).asFont
-                        )
-                        .foregroundColor(self.appearance.colorSet.text0.asColor)
-                        .padding(.bottom, spacing: .xsmall)
-                    
-                    if let lunarDate = state.sampleModel?.lunarDateText {
-                        Text(lunarDate)
-                            .font(
-                                self.appearance.fontSet.size(20+appearance.eventTextAdditionalSize, weight: .semibold).asFont
-                            )
-                            .foregroundColor(self.appearance.colorSet.text2.asColor)
-                            .padding(.bottom, spacing: .xsmall)
-                    }
-                    
-                    Spacer()
-                }
+                Text(state.sampleModel?.dateText ?? "")
+                    .font(
+                        self.appearance.fontSet.size(22+appearance.eventTextAdditionalSize, weight: .semibold).asFont
+                    )
+                    .foregroundColor(self.appearance.colorSet.text0.asColor)
+                    .padding(.bottom, spacing: .xsmall)
             }
             
             HStack(spacing: Metric.Spacing.small) {
@@ -202,6 +217,19 @@ struct EventListAppearanceSettingView: View {
                 RoundedRectangle(cornerRadius: Metric.Radius.chip)
                     .fill(appearance.colorSet.bg1.asColor)
             )
+            
+            if state.sampleModel?.rokuyo != nil {
+                rokuyoLegendView
+            }
+        }
+    }
+    
+    private var rokuyoLegendView: some View {
+        let columns = Array(repeating: GridItem(.flexible(), alignment: .leading), count: 3)
+        return LazyVGrid(columns: columns, alignment: .leading, spacing: Metric.Spacing.xsmall) {
+            ForEach(Rokuyo.allCases, id: \.rawValue) { rokuyo in
+                RokuyoLabelView(rokuyo, font: self.appearance.fontSet.size(12).asFont)
+            }
         }
     }
     
@@ -291,6 +319,17 @@ struct EventListAppearanceSettingView: View {
     
     private var showLunarCalendarView: some View {
         Toggle("", isOn: $state.showLunarCalendarDate)
+            .labelsHidden()
+    }
+
+    private var lunarCalendarExplain: String? {
+        // iOS 26 미만은 언어와 상관없이 chinese 음력이라 자동 선택 설명이 맞지 않는다
+        guard #available(iOS 26, *) else { return nil }
+        return "setting.appearance.event.show_lunar::explain".localized()
+    }
+    
+    private var showRokuyoView: some View {
+        Toggle("", isOn: $state.showRokuyo)
             .labelsHidden()
     }
     

@@ -1,9 +1,4 @@
-■ Cara menghitung D-Day
-· Aktifkan "Hitung D-Day sebagai D+1" di "Widget" pada Pengaturan, maka hari D-Day dihitung sebagai D+1, baik di aplikasi maupun widget
-· Anda juga bisa mengaktifkannya hanya untuk satu Widget H-Day saat mengedit widget tersebut
-· Pengaturan widget kini ada di "Widget" pada layar utama Pengaturan
+■ Rokuyo (iOS 26 atau yang lebih baru)
+· Aktifkan "Rokuyo" di Pengaturan > Tampilan untuk melihat rokuyo hari itu, seperti Taian atau Butsumetsu, di atas tanggal yang dipilih
 
-■ Menciutkan kalender
-· Mengetuk lagi tanggal yang dipilih untuk menciutkan kalender kini menjadi opsi yang bisa Anda aktifkan atau nonaktifkan. Defaultnya nonaktif
-· Aktifkan "Ciutkan kalender otomatis" di Pengaturan > Tampilan, lalu ketuk sekali lagi tanggal yang dipilih untuk menciutkan kalender
-· Semua minggu dalam bulan itu tetap terlihat, hanya sel tanggalnya yang mengecil. Ketuk lagi untuk membentangkannya
+· Perbaikan bug

@@ -15,6 +15,8 @@ struct AppPolicyMapper: Codable {
     private enum CodingKeys: String, CodingKey {
         case colorThemeLicense = "color_theme_license"
         case widgetStyleLicense = "widget_style_license"
+        case mainBannerExposure = "main_banner_exposure"
+        case fullScreenAdEventSaveInterval = "full_screen_ad_event_save_interval"
         case featureSwitches = "feature_switches"
     }
 
@@ -52,6 +54,26 @@ struct AppPolicyMapper: Codable {
         }
     }
 
+    private struct MainBannerExposureEntry: Codable {
+        let exposurePercentage: Int?
+        let minDelaySeconds: Int?
+        let maxDelaySeconds: Int?
+
+        private enum CodingKeys: String, CodingKey {
+            case exposurePercentage = "exposure_percentage"
+            case minDelaySeconds = "min_delay_seconds"
+            case maxDelaySeconds = "max_delay_seconds"
+        }
+
+        var policy: MainBannerExposurePolicy {
+            return .init(
+                exposurePercentage: self.exposurePercentage.map { min(max($0, 0), 100) },
+                minDelaySeconds: self.minDelaySeconds.flatMap { $0 >= 0 ? $0 : nil },
+                maxDelaySeconds: self.maxDelaySeconds.flatMap { $0 >= 0 ? $0 : nil }
+            )
+        }
+    }
+
     private struct FeatureSwitchEntry: Codable {
         let enabled: Bool
         let minAppVersion: String?
@@ -76,12 +98,20 @@ struct AppPolicyMapper: Codable {
         let widgetLicense = try container.decodeIfPresent(
             WidgetStyleLicenseEntry.self, forKey: .widgetStyleLicense
         )
+        let mainBannerExposure = try container.decodeIfPresent(
+            MainBannerExposureEntry.self, forKey: .mainBannerExposure
+        )
+        let eventSaveInterval = try container.decodeIfPresent(
+            Int.self, forKey: .fullScreenAdEventSaveInterval
+        )
         let switches = try container.decodeIfPresent(
             [String: FeatureSwitchEntry].self, forKey: .featureSwitches
         )
         self.policy = AppPolicy(
             colorThemeLicense: license?.policy,
             widgetStyleLicense: widgetLicense?.policy,
+            mainBannerExposure: mainBannerExposure?.policy,
+            fullScreenAdEventSaveInterval: eventSaveInterval.flatMap { $0 >= 0 ? $0 : nil },
             featureSwitches: (switches ?? [:]).mapValues { entry in
                 FeatureSwitch(
                     isEnabled: entry.enabled,
@@ -103,6 +133,21 @@ struct AppPolicyMapper: Codable {
             self.policy.widgetStyleLicense
                 .map { WidgetStyleLicenseEntry(enabled: $0.isEnabled, licenseDays: $0.licenseDays) },
             forKey: .widgetStyleLicense
+        )
+        try container.encodeIfPresent(
+            self.policy.mainBannerExposure
+                .map {
+                    MainBannerExposureEntry(
+                        exposurePercentage: $0.exposurePercentage,
+                        minDelaySeconds: $0.minDelaySeconds,
+                        maxDelaySeconds: $0.maxDelaySeconds
+                    )
+                },
+            forKey: .mainBannerExposure
+        )
+        try container.encodeIfPresent(
+            self.policy.fullScreenAdEventSaveInterval,
+            forKey: .fullScreenAdEventSaveInterval
         )
         try container.encode(
             self.policy.featureSwitches

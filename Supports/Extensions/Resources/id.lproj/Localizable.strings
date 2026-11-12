@@ -546,6 +546,15 @@
 "setting.appearance.event.fontSize" = "Ukuran font teks acara";
 "setting.appearance.event.show_holidayName" = "Tampilkan nama hari libur";
 "setting.appearance.event.show_lunar" = "Kalender lunar";
+"setting.appearance.event.show_lunar::explain" = "Standar kalender lunar (Korea, Tiongkok, atau Vietnam) dipilih berdasarkan bahasa perangkat, sehingga tanggal lunar bisa berbeda satu hari tergantung standarnya.";
+"setting.appearance.event.show_rokuyo" = "Rokuyo";
+"setting.appearance.event.show_rokuyo::available_ios26" = "Tersedia di iOS 26 atau yang lebih baru";
+"rokuyo::taian" = "Taian";
+"rokuyo::shakku" = "Shakku";
+"rokuyo::sensho" = "Sensho";
+"rokuyo::tomobiki" = "Tomobiki";
+"rokuyo::senbu" = "Senbu";
+"rokuyo::butsumetsu" = "Butsumetsu";
 "setting.appearance.event._24form" = "Format 24 jam";
 "setting.appearance.event.sample::name" = "🥗 Nama acara";
 "setting.appearance.event.sample::description" = "deskripsi";

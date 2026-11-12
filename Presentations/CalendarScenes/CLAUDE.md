@@ -88,7 +88,7 @@ Month와 DayEventList는 독립 Scene이 아니라 **Component** (ViewModel만 �
 |---|---|
 | Interactor | `nextDayChanged(_:and:)` — 1단 `selectedDayChanaged(_:and:)` 처럼 다음날 `CurrentSelectDayModel` 과 그날 이벤트(공휴일 포함)를 밖에서 받는다. 이벤트를 고르는 일은 달력 쪽 몫이다 |
 | 셀 | 받은 이벤트를 1단과 같은 사슬(정렬 → mapper → Foremost 제외 → 등록 반영)로 만든다 |
-| 헤더 | 공휴일명·날짜·음력만 그린다. 공유·완료 할일·오늘 복귀 버튼은 1단 헤더에만 있다. 셀이 없으면 "일정 없음" 을 보인다 |
+| 헤더 | 날짜와 그 위 보조 줄(음력·로쿠요·공휴일명, `DayHeaderSubtitleView`)만 그린다. 공유·완료 할일·오늘 복귀 버튼은 1단 헤더에만 있다. 셀이 없으면 "일정 없음" 을 보인다 |
 | 셀 액션 | `NextDayEventListViewEventHandler.bind` 가 1단과 같은 `EventListCellEventHanleViewModel` 에 넘긴다 |
 | 공유 | 등록 반영 함수(`EventCellViewModel+Registration`)와 `SelectedDayModel` 을 1단 VM 과 함께 쓴다 |
 

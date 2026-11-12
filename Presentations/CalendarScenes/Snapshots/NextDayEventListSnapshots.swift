@@ -36,6 +36,7 @@ final class NextDayEventListSnapshots: XCTestCase {
         ])
         appearance.showHoliday = true
         appearance.showLunarCalendarDate = true
+        appearance.showRokuyo = true
         return appearance
     }
 
@@ -72,7 +73,7 @@ final class NextDayEventListSnapshots: XCTestCase {
         cells: [any EventCellViewModel],
         holidayName: String? = "다음날 공휴일"
     ) -> some View {
-        let dayModel = SelectedDayModel(dateText: "2026년 7월 13일(월)", lunarDateText: "🌕 5월 29일")
+        let dayModel = SelectedDayModel(dateText: "2026년 7월 13일(월)", lunarDateText: "🌕 5월 29일", rokuyo: .senbu)
             |> \.holidayName .~ holidayName
         let viewModel = DummyNextDayEventListViewModel(dayModel: dayModel, cellViewModels: cells)
         let state = NextDayEventListViewState()
@@ -88,7 +89,7 @@ final class NextDayEventListSnapshots: XCTestCase {
 
     @MainActor
     private func makeDayEventListView(_ appearance: ViewAppearance) -> some View {
-        let dayModel = SelectedDayModel(dateText: "2026년 7월 12일(일)", lunarDateText: "🌕 5월 28일")
+        let dayModel = SelectedDayModel(dateText: "2026년 7월 12일(일)", lunarDateText: "🌕 5월 28일", rokuyo: .tomobiki)
         let cells: [any EventCellViewModel] = [
             ScheduleEventCellViewModel("today-schedule", name: "today schedule")
                 |> \.periodText .~ .singleText(.init(text: "8:30", pmOram: "AM"))

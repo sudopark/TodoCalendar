@@ -300,6 +300,158 @@ extension AppPolicyRepositoryImpleTests {
 }
 
 
+// MARK: - 메인 배너 노출 정책
+
+extension AppPolicyRepositoryImpleTests {
+
+    private func refreshedMainBannerExposure(_ json: String) async throws -> MainBannerExposurePolicy? {
+        let repository = self.makeRepository(remoteResult: .success(#"""
+        {"main_banner_exposure": \#(json)}
+        """#))
+        try await repository.refreshPolicy()
+        return repository.loadPolicy()?.mainBannerExposure
+    }
+
+    @Test("메인 배너 정책을 읽는다")
+    func repository_refreshPolicy_readsMainBannerExposure() async throws {
+        // given + when
+        let policy = try await self.refreshedMainBannerExposure(
+            #"{"exposure_percentage": 30, "min_delay_seconds": 10, "max_delay_seconds": 20}"#
+        )
+
+        // then
+        #expect(policy == .init(exposurePercentage: 30, minDelaySeconds: 10, maxDelaySeconds: 20))
+    }
+
+    @Test("메인 배너 정책의 없는 속성은 nil 로 둔다")
+    func repository_refreshPolicy_whenMainBannerPropertyMissing_leavesItNil() async throws {
+        // given + when
+        let policy = try await self.refreshedMainBannerExposure(#"{"min_delay_seconds": 10}"#)
+
+        // then
+        #expect(policy == .init(minDelaySeconds: 10))
+    }
+
+    @Test(
+        "메인 배너 확률을 0~100 으로 맞춘다",
+        arguments: [(150, 100), (-5, 0), (0, 0), (100, 100)]
+    )
+    func repository_refreshPolicy_clampsMainBannerPercentage(raw: Int, expected: Int) async throws {
+        // given + when
+        let policy = try await self.refreshedMainBannerExposure(
+            #"{"exposure_percentage": \#(raw)}"#
+        )
+
+        // then
+        #expect(policy?.exposurePercentage == expected)
+    }
+
+    @Test("메인 배너의 음수 지연은 없는 값으로 보고 0 은 살린다")
+    func repository_refreshPolicy_whenMainBannerDelayNegative_leavesItNil() async throws {
+        // given + when
+        let policy = try await self.refreshedMainBannerExposure(
+            #"{"min_delay_seconds": 0, "max_delay_seconds": -1}"#
+        )
+
+        // then
+        #expect(policy == .init(minDelaySeconds: 0))
+    }
+
+    @Test("메인 배너 정책 항목이 없어도 나머지를 읽는다")
+    func repository_refreshPolicy_whenMainBannerMissing_readsRest() async throws {
+        // given
+        let repository = self.makeRepository()
+
+        // when
+        try await repository.refreshPolicy()
+
+        // then
+        #expect(repository.loadPolicy()?.mainBannerExposure == nil)
+        #expect(repository.loadPolicy()?.colorThemeLicense == .init(isEnabled: true, licenseDays: 14))
+    }
+
+    @Test("받아 둔 메인 배너 정책을 새 인스턴스에서도 읽는다")
+    func repository_loadPolicy_whenCached_returnsMainBannerExposure() async throws {
+        // given
+        let storage = FakeEnvironmentStorage()
+        try await self.makeRepository(storage: storage, remoteResult: .success(#"""
+        {"main_banner_exposure": {"exposure_percentage": 30, "min_delay_seconds": 10, "max_delay_seconds": 20}}
+        """#)).refreshPolicy()
+
+        // when
+        let policy = self.makeRepository(storage: storage).loadPolicy()
+
+        // then
+        #expect(
+            policy?.mainBannerExposure
+                == .init(exposurePercentage: 30, minDelaySeconds: 10, maxDelaySeconds: 20)
+        )
+    }
+}
+
+
+// MARK: - 전면 저장 간격
+
+extension AppPolicyRepositoryImpleTests {
+
+    private func refreshedEventSaveInterval(_ json: String) async throws -> Int? {
+        let repository = self.makeRepository(remoteResult: .success(json))
+        try await repository.refreshPolicy()
+        return repository.loadPolicy()?.fullScreenAdEventSaveInterval
+    }
+
+    @Test("전면 저장 간격을 읽고 0 은 끄는 값으로 살린다", arguments: [3, 0])
+    func repository_refreshPolicy_readsEventSaveInterval(raw: Int) async throws {
+        // given + when
+        let interval = try await self.refreshedEventSaveInterval(
+            #"{"full_screen_ad_event_save_interval": \#(raw)}"#
+        )
+
+        // then
+        #expect(interval == raw)
+    }
+
+    @Test("전면 저장 간격이 음수면 없는 값으로 본다")
+    func repository_refreshPolicy_whenEventSaveIntervalNegative_leavesItNil() async throws {
+        // given + when
+        let interval = try await self.refreshedEventSaveInterval(
+            #"{"full_screen_ad_event_save_interval": -1}"#
+        )
+
+        // then
+        #expect(interval == nil)
+    }
+
+    @Test("전면 저장 간격이 없어도 나머지를 읽는다")
+    func repository_refreshPolicy_whenEventSaveIntervalMissing_isNil() async throws {
+        // given
+        let repository = self.makeRepository()
+
+        // when
+        try await repository.refreshPolicy()
+
+        // then
+        #expect(repository.loadPolicy()?.fullScreenAdEventSaveInterval == nil)
+        #expect(repository.loadPolicy()?.colorThemeLicense == .init(isEnabled: true, licenseDays: 14))
+    }
+
+    @Test("받아 둔 전면 저장 간격을 새 인스턴스에서도 읽는다")
+    func repository_loadPolicy_whenCached_returnsEventSaveInterval() async throws {
+        // given
+        let storage = FakeEnvironmentStorage()
+        try await self.makeRepository(storage: storage, remoteResult: .success(
+            #"{"full_screen_ad_event_save_interval": 3}"#
+        )).refreshPolicy()
+
+        // when
+        let policy = self.makeRepository(storage: storage).loadPolicy()
+
+        // then
+        #expect(policy?.fullScreenAdEventSaveInterval == 3)
+    }
+}
+
+
 // MARK: - 갱신 실패
 
 extension AppPolicyRepositoryImpleTests {

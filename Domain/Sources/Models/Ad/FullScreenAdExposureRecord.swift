@@ -11,16 +11,11 @@ import Foundation
 
 public struct FullScreenAdExposureRecord: Equatable, Sendable {
 
-    public enum Scope: Hashable, Sendable {
-        case application
-        case service(identifier: String)
-    }
-
-    public let scope: Scope
     public let lastExposeDate: Date
+    public let countOfDay: Int
 
-    public init(scope: Scope, lastExposeDate: Date) {
-        self.scope = scope
+    public init(lastExposeDate: Date, countOfDay: Int) {
         self.lastExposeDate = lastExposeDate
+        self.countOfDay = countOfDay
     }
 }

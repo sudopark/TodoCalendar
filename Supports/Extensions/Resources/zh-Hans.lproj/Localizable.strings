@@ -545,6 +545,15 @@
 "setting.appearance.event.fontSize" = "事件文字字号";
 "setting.appearance.event.show_holidayName" = "显示假期名称";
 "setting.appearance.event.show_lunar" = "农历";
+"setting.appearance.event.show_lunar::explain" = "农历标准（韩国、中国或越南）会根据设备语言自动选择，因此不同标准下的农历日期可能相差一天。";
+"setting.appearance.event.show_rokuyo" = "六曜";
+"setting.appearance.event.show_rokuyo::available_ios26" = "适用于 iOS 26 或更高版本";
+"rokuyo::taian" = "大安";
+"rokuyo::shakku" = "赤口";
+"rokuyo::sensho" = "先胜";
+"rokuyo::tomobiki" = "友引";
+"rokuyo::senbu" = "先负";
+"rokuyo::butsumetsu" = "佛灭";
 "setting.appearance.event._24form" = "24小时制";
 "setting.appearance.event.sample::name" = "🥗 事件名称";
 "setting.appearance.event.sample::description" = "描述";

@@ -1,9 +1,4 @@
-■ Brojanje D-Daya
-· Uključite „Računaj D-Day kao D+1” u odjeljku „Widgeti” u Postavkama i sam D-Day računa se kao D+1, i u aplikaciji i u widgetima
-· Možete to uključiti i samo za jedan widget Odbrojavanje dok ga uređujete
-· Postavke widgeta sada su u odjeljku „Widgeti” na glavnom zaslonu Postavki
+■ Rokuyo (iOS 26 ili noviji)
+· Uključite „Rokuyo” u Postavke > Izgled da biste iznad odabranog datuma vidjeli rokuyo tog dana, primjerice Taian ili Butsumetsu
 
-■ Sklapanje kalendara
-· Ponovni dodir odabranog datuma za sklapanje kalendara sada je opcija koju možete uključiti ili isključiti. Zadano je isključena
-· Uključite „Automatski sklopi kalendar” u Postavke > Izgled, a zatim još jednom dodirnite odabrani datum da biste sklopili kalendar
-· Svi tjedni u mjesecu ostaju vidljivi, smanjuju se samo polja dana. Ponovno dodirnite za rasklapanje
+· Ispravci pogrešaka

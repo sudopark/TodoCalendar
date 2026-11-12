@@ -389,27 +389,18 @@ struct DayEventListView: View {
     private func dateInfoView() -> some View {
         VStack(alignment: .leading) {
 
-            if let holidayName = self.state.dayModel?.holidayName, self.appearance.showHoliday {
-                Text(holidayName)
-                    .font(appearance.eventSubNormalTextFontOnList().asFont)
-                    .foregroundStyle(appearance.colorSet.holidayOrWeekEndWithAccent.asColor)
-            }
+            DayHeaderSubtitleView(
+                lunarDateText: self.appearance.showLunarCalendarDate ? self.state.dayModel?.lunarDateText : nil,
+                rokuyo: self.appearance.showRokuyo ? self.state.dayModel?.rokuyo : nil,
+                holidayName: self.appearance.showHoliday ? self.state.dayModel?.holidayName : nil,
+                holidayColor: self.appearance.colorSet.holidayOrWeekEndWithAccent.asColor
+            )
 
-            // 상단 날짜표시 헤더 - 날짜 및 음력 표시
             HStack {
 
                 Text(self.state.dayModel?.dateText ?? "")
                     .font(self.appearance.fontSet.size(22+appearance.eventTextAdditionalSize, weight: .semibold).asFont)
                     .foregroundColor(self.appearance.colorSet.text0.asColor)
-
-
-                if self.appearance.showLunarCalendarDate {
-                    Text(self.state.dayModel?.lunarDateText ?? "")
-                        .font(
-                            self.appearance.fontSet.size(20+appearance.eventTextAdditionalSize, weight: .semibold).asFont
-                        )
-                        .foregroundColor(self.appearance.colorSet.text2.asColor)
-                }
 
                 if self.state.isShowReturnToToday {
                     self.returnToTodayView()

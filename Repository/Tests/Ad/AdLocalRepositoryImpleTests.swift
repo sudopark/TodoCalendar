@@ -26,66 +26,78 @@ struct AdLocalRepositoryImpleTests {
 
 extension AdLocalRepositoryImpleTests {
 
-    @Test("저장된 노출 이력이 없으면 빈 배열을 준다")
-    func repository_whenNoStoredRecord_loadEmptyExposureRecords() {
+    @Test("저장된 노출 이력이 없으면 nil 을 준다")
+    func repository_whenNoStoredRecord_loadNil() {
         // given
         let repository = self.makeRepository()
 
         // when
-        let records = repository.loadFullScreenAdExposureRecords()
+        let record = repository.loadFullScreenAdExposureRecord()
 
         // then
-        #expect(records.isEmpty == true)
+        #expect(record == nil)
     }
 
     @Test("노출 이력을 저장하고 다시 읽는다")
     func repository_updateAndLoadExposureRecord() {
         // given
         let repository = self.makeRepository()
-        let record = FullScreenAdExposureRecord(scope: .application, lastExposeDate: self.date(100))
+        let record = FullScreenAdExposureRecord(lastExposeDate: self.date(100), countOfDay: 2)
 
         // when
         repository.updateFullScreenAdExposureRecord(record)
-        let records = repository.loadFullScreenAdExposureRecords()
+        let loaded = repository.loadFullScreenAdExposureRecord()
 
         // then
-        #expect(records == [record])
+        #expect(loaded == record)
     }
 
-    @Test("같은 scope 를 다시 기록하면 누적하지 않고 교체한다")
-    func repository_updateSameScopeTwice_replaceRecord() {
+    @Test("노출 이력을 다시 저장하면 교체한다")
+    func repository_updateTwice_replaceRecord() {
         // given
         let repository = self.makeRepository()
         repository.updateFullScreenAdExposureRecord(
-            .init(scope: .application, lastExposeDate: self.date(100))
+            .init(lastExposeDate: self.date(100), countOfDay: 1)
         )
 
         // when
-        let newRecord = FullScreenAdExposureRecord(scope: .application, lastExposeDate: self.date(200))
+        let newRecord = FullScreenAdExposureRecord(lastExposeDate: self.date(200), countOfDay: 2)
         repository.updateFullScreenAdExposureRecord(newRecord)
-        let records = repository.loadFullScreenAdExposureRecords()
+        let loaded = repository.loadFullScreenAdExposureRecord()
 
         // then
-        #expect(records == [newRecord])
+        #expect(loaded == newRecord)
     }
+}
 
-    @Test("service identifier 가 다르면 각각 독립 레코드로 남는다")
-    func repository_updateDifferentServiceIdentifiers_keepBothRecords() {
+
+// MARK: - 전면 광고용 이벤트 저장 횟수
+
+extension AdLocalRepositoryImpleTests {
+
+    @Test("저장된 이벤트 저장 횟수가 없으면 0 을 준다")
+    func repository_whenNoStoredEventSavedCount_loadZero() {
         // given
         let repository = self.makeRepository()
 
         // when
-        repository.updateFullScreenAdExposureRecord(
-            .init(scope: .service(identifier: "eventShare"), lastExposeDate: self.date(100))
-        )
-        repository.updateFullScreenAdExposureRecord(
-            .init(scope: .service(identifier: "other"), lastExposeDate: self.date(200))
-        )
-        let records = repository.loadFullScreenAdExposureRecords()
+        let count = repository.loadEventSavedCountForFullScreenAd()
 
         // then
-        #expect(records.count == 2)
-        #expect(records.map { $0.lastExposeDate } == [self.date(100), self.date(200)])
+        #expect(count == 0)
+    }
+
+    @Test("이벤트 저장 횟수를 저장하고 다시 읽는다")
+    func repository_updateAndLoadEventSavedCount() {
+        // given
+        let repository = self.makeRepository()
+
+        // when
+        repository.updateEventSavedCountForFullScreenAd(3)
+        let count = repository.loadEventSavedCountForFullScreenAd()
+
+        // then
+        #expect(count == 3)
     }
 }
 
@@ -123,14 +135,14 @@ extension AdLocalRepositoryImpleTests {
     func repository_markTrackingGuideShown_keepsExposureRecords() {
         // given
         let repository = self.makeRepository()
-        let record = FullScreenAdExposureRecord(scope: .application, lastExposeDate: self.date(100))
+        let record = FullScreenAdExposureRecord(lastExposeDate: self.date(100), countOfDay: 1)
         repository.updateFullScreenAdExposureRecord(record)
 
         // when
         repository.markTrackingGuideShown()
 
         // then
-        #expect(repository.loadFullScreenAdExposureRecords() == [record])
+        #expect(repository.loadFullScreenAdExposureRecord() == record)
         #expect(repository.loadHasShownTrackingGuide() == true)
     }
 }

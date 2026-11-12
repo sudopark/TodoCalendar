@@ -10,6 +10,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import UnitTestHelpKit
 import TestDoubles
 
@@ -31,20 +32,21 @@ class EventListAppearnaceSettingViewModelTests: BaseTestCase, PublisherWaitable 
         self.spyUsecase = nil
     }
     
-    private var dummySetting: EventListAppearanceSetting {
+    private func dummySetting(showRokuyo: Bool) -> EventListAppearanceSetting {
         return .init(
             eventTextAdditionalSize: 3,
             showHoliday: true,
             showLunarCalendarDate: true,
             is24hourForm: true,
-            showUncompletedTodos: true
+            showUncompletedTodos: true,
+            showRokuyo: showRokuyo
         )
     }
     
-    private func makeViewModel() -> EventListAppearnaceSettingViewModelImple {
+    private func makeViewModel(showRokuyo: Bool = true) -> EventListAppearnaceSettingViewModelImple {
     
         let viewModel = EventListAppearnaceSettingViewModelImple(
-            setting: self.dummySetting,
+            setting: self.dummySetting(showRokuyo: showRokuyo),
             uiSettingUsecase: self.spyUsecase
         )
         return viewModel
@@ -178,6 +180,58 @@ extension EventListAppearnaceSettingViewModelTests {
         XCTAssertEqual(self.spyUsecase.didChangeAppearanceSetting?.calendar.showLunarCalendarDate, false)
     }
     
+    // 로쿠요 표시여부 토글
+    func testViewModel_toggleShowRokuyo() {
+        // given
+        let expect = expectation(description: "로쿠요 표시여부 토글")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let isShows = self.waitOutputs(expect, for: viewModel.isShowRokuyo) {
+            
+            viewModel.toggleShowRokuyo(false)
+            viewModel.toggleShowRokuyo(true)
+        }
+        
+        // then
+        XCTAssertEqual(isShows, [true, false, true])
+    }
+    
+    func testViewModel_whenAfterToggleShowRokuyo_saveUpdates() {
+        // given
+        let expect = expectation(description: "로쿠요 표시여부 토글 이후에 변경사항 저장")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let _ = self.waitOutputs(expect, for: viewModel.isShowRokuyo) {
+            viewModel.toggleShowRokuyo(false)
+        }
+        
+        // then
+        XCTAssertEqual(self.spyUsecase.didChangeAppearanceSetting?.calendar.showRokuyo, false)
+    }
+    
+    func testViewModel_whenShowRokuyo_sampleModelRokuyoFollowsSupport() {
+        // given
+        let expectOn = expectation(description: "로쿠요를 켠 샘플")
+        let expectOff = expectation(description: "로쿠요를 끈 샘플")
+        let isDangiAvailable: Bool
+        if #available(iOS 26, *) { isDangiAvailable = true } else { isDangiAvailable = false }
+        let viewModelShowingRokuyo = self.makeViewModel(showRokuyo: true)
+        let viewModelHidingRokuyo = self.makeViewModel(showRokuyo: false)
+        
+        // when
+        let sampleShowingRokuyo = self.waitFirstOutput(expectOn, for: viewModelShowingRokuyo.eventListSamepleModel)
+        let sampleHidingRokuyo = self.waitFirstOutput(expectOff, for: viewModelHidingRokuyo.eventListSamepleModel)
+        
+        // then
+        XCTAssertEqual(viewModelShowingRokuyo.isRokuyoSupported, isDangiAvailable)
+        XCTAssertEqual(sampleShowingRokuyo?.rokuyo != nil, isDangiAvailable)
+        XCTAssertNil(sampleHidingRokuyo?.rokuyo)
+    }
+    
     // 24시 포맷으로 출력 여부 토글
     func testViewModel_toggle24HourForm() {
         // given
@@ -225,5 +279,27 @@ extension EventListAppearnaceSettingViewModelTests {
         
         // then
         XCTAssertEqual(isShows, [true, false, true])
+    }
+}
+
+
+// MARK: - 미리보기 음력 날짜
+
+extension EventListAppearnaceSettingViewModelTests {
+
+    func testSampleModel_showsLunarDateWithGivenLunarCalendar() {
+        // given
+        let gregorian = Calendar(identifier: .gregorian)
+        let christmas = gregorian.dateBySetting(from: Date()) { $0.month = 12; $0.day = 25 }!
+        let chineseFormatter = DateFormatter()
+            |> \.dateFormat .~ "date_form::MM_dd".localized()
+            |> \.calendar .~ Calendar(identifier: .chinese)
+
+        // when
+        let model = EventListAppearanceSampleModel(self.dummySetting(showRokuyo: false), lunarCalendar: .chinese)
+
+        // then
+        XCTAssertEqual(model?.lunarDateText, "🌕 \(chineseFormatter.string(from: christmas))")
+        XCTAssertNotEqual(model?.lunarDateText, "12/25")
     }
 }
