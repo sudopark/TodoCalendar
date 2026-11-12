@@ -30,8 +30,14 @@ public struct EventOnWeek: Equatable {
     
     fileprivate var length: Int { self.overlapDays.count }
     
-    public init?(_ event: any CalendarEvent, on weekRange: Range<TimeInterval>, with calendar: Calendar) {
-        guard let overlapRange = event.eventTimeOnCalendar?.clamped(to: weekRange) else { return nil }
+    public init?(
+        _ event: any CalendarEvent,
+        on weekRange: Range<TimeInterval>,
+        within visibleRange: Range<TimeInterval>? = nil,
+        with calendar: Calendar
+    ) {
+        let drawableRange = visibleRange.map { weekRange.clamped(to: $0) } ?? weekRange
+        guard let overlapRange = event.eventTimeOnCalendar?.clamped(to: drawableRange) else { return nil }
         self.event = event
         self.eventRangesOnWeek = overlapRange
         
@@ -86,12 +92,16 @@ public struct WeekEventStackBuilder {
 
 extension WeekEventStackBuilder {
     
-    public func build(_ week: CalendarComponent.Week, events: [any CalendarEvent]) -> WeekEventStack {
+    public func build(
+        _ week: CalendarComponent.Week,
+        events: [any CalendarEvent],
+        visibleRange: Range<TimeInterval>? = nil
+    ) -> WeekEventStack {
         guard let weekRange = week.range(self.calendar.timeZone)
         else { return .init(eventStacks: [], eventsPerDay: []) }
         
         let eventsOnThisWeek = events
-            .compactMap { EventOnWeek($0, on: weekRange, with: self.calendar) }
+            .compactMap { EventOnWeek($0, on: weekRange, within: visibleRange, with: self.calendar) }
             .filter { !$0.daysSequence.isEmpty }
             .sortUnStackedEvents()
         
