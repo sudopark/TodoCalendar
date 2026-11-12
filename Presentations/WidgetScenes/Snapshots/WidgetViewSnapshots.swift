@@ -25,6 +25,8 @@ final class WidgetViewSnapshots: XCTestCase {
         static let small = CGSize(width: 170, height: 170)
         static let medium = CGSize(width: 364, height: 170)
         static let large = CGSize(width: 364, height: 382)
+        /// iOS 17 지원 기기 중 medium 이 가장 낮은 자리 — iPad 768×1024·744×1133 캔버스 (HIG Widgets 규격표)
+        static let lowestMedium = CGSize(width: 305.5, height: 141)
         /// WidgetKit이 시스템 위젯에 넣는 기본 content margin
         static let contentMargin: CGFloat = 16
         /// 홈 화면 위젯 모서리 곡률
@@ -211,6 +213,16 @@ extension WidgetViewSnapshots {
         )
     }
 
+    private func eventTextSizeLook(_ size: Int) -> WidgetLook {
+        let setting = WeekEventsStyleSetting.initial |> \.eventTextSize .~ size
+        return WidgetLook(
+            globalSetting: WidgetAppearanceSettings(),
+            appliedStyle: WidgetStyle(
+                id: .init(variant: .twoWeekEvents, style: .default), name: nil, setting: setting
+            )
+        )
+    }
+
     @MainActor
     func test_monthView_allTogglesOff() {
         let look = self.allOffLook(.monthSmall, MonthStyleItem.self)
@@ -224,6 +236,24 @@ extension WidgetViewSnapshots {
         let look = self.allOffLook(.twoWeekEvents, WeekEventsStyleItem.self)
         self.capture("weekEvents-allTogglesOff", canvas: WidgetCanvas.medium) {
             WidgetVariant.twoWeekEvents.previewView(look)
+        }
+    }
+
+    @MainActor
+    func test_weekEventsView_eventTextSizeMax() {
+        let look = self.eventTextSizeLook(10)
+        self.capture("weekEvents-eventTextSizeMax", canvas: WidgetCanvas.medium) {
+            WidgetVariant.twoWeekEvents.previewView(look)
+        }
+    }
+
+    @MainActor
+    func test_weekEventsView_lowestMedium_eventTextSizeMinMax() {
+        [8, 10].forEach { size in
+            let look = self.eventTextSizeLook(size)
+            self.capture("weekEvents-lowestMedium-\(size)pt", canvas: WidgetCanvas.lowestMedium) {
+                WidgetVariant.twoWeekEvents.previewView(look)
+            }
         }
     }
 

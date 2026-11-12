@@ -30,6 +30,13 @@ public enum WeekEventsRange: Sendable {
 }
 
 
+private enum Constant {
+    static let eventRowSpacing: CGFloat = 2
+    static let smallestTextMinimumScaleFactor: CGFloat = 0.5
+    static let largestTextMinimumScaleFactor: CGFloat = 0.8
+}
+
+
 public struct WeekEventsViewModel {
     
     public let range: WeekEventsRange
@@ -47,6 +54,20 @@ public struct WeekEventsViewModel {
     public var style: WeekEventsStyleSetting { self.look.setting() }
     
     public var showsWeekDayHeader: Bool { self.style.showWeekDayHeader }
+
+    public var eventTextSize: CGFloat { CGFloat(self.style.eventTextSize) }
+
+    public var eventRowHeightWithSpacing: CGFloat {
+        self.eventTextSize + Constant.eventRowSpacing
+    }
+
+    public var eventTextMinimumScaleFactor: CGFloat {
+        let range = self.style.eventTextSizeRange
+        let progress = CGFloat(self.style.eventTextSize - range.lowerBound)
+            / CGFloat(range.upperBound - range.lowerBound)
+        return Constant.smallestTextMinimumScaleFactor
+            + progress * (Constant.largestTextMinimumScaleFactor - Constant.smallestTextMinimumScaleFactor)
+    }
     
     public init(
         range: WeekEventsRange,
