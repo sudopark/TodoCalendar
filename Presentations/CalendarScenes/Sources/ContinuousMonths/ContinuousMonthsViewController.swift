@@ -20,6 +20,7 @@ private enum Constant {
     static let snapProgressThreshold: CGFloat = 0.5
     static let horizontalInset: CGFloat = Metric.Spacing.small
     static let anchorTolerance: CGFloat = 0.5
+    static let estimatedMonthLabelHeight: CGFloat = 48
 }
 
 
@@ -148,6 +149,12 @@ private extension UICollectionViewCompositionalLayout {
         let group = NSCollectionLayoutGroup.vertical(layoutSize: size, subitems: [item])
         let section = NSCollectionLayoutSection(group: group)
         section.contentInsets = .init(top: 0, leading: inset, bottom: 0, trailing: inset)
+        let monthLabel = NSCollectionLayoutBoundarySupplementaryItem(
+            layoutSize: .init(widthDimension: .fractionalWidth(1), heightDimension: .estimated(Constant.estimatedMonthLabelHeight)),
+            elementKind: UICollectionView.elementKindSectionHeader,
+            alignment: .top
+        )
+        section.boundarySupplementaryItems = [monthLabel]
         self.init(section: section)
     }
 }
@@ -224,9 +231,23 @@ extension ContinuousMonthsViewController {
             }
             .margins(.all, 0)
         }
-        return UICollectionViewDiffableDataSource(collectionView: self.collectionView) { collectionView, indexPath, item in
+        let labelRegistration = UICollectionView.SupplementaryRegistration<UICollectionViewCell>(
+            elementKind: UICollectionView.elementKindSectionHeader
+        ) { [weak self] cell, _, indexPath in
+            guard let self else { return }
+            cell.contentConfiguration = UIHostingConfiguration {
+                ContinuousMonthLabelView(title: self.sections[safe: indexPath.section]?.title ?? "")
+                    .environment(self.viewAppearance)
+            }
+            .margins(.all, 0)
+        }
+        let dataSource = UICollectionViewDiffableDataSource<CalendarMonth, WeekItem>(collectionView: self.collectionView) { collectionView, indexPath, item in
             collectionView.dequeueConfiguredReusableCell(using: registration, for: indexPath, item: item)
         }
+        dataSource.supplementaryViewProvider = { collectionView, _, indexPath in
+            collectionView.dequeueConfiguredReusableSupplementary(using: labelRegistration, for: indexPath)
+        }
+        return dataSource
     }
 }
 

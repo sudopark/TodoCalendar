@@ -28,6 +28,7 @@ struct WeekRowView: View {
     private let selectedDay: String?
     private let today: String?
     private let focusedMonth: CalendarMonth?
+    private let hidesOtherMonthDays: Bool
     private let eventsPerDay: AnyPublisher<[[any CalendarEvent]], Never>
     private let eventStack: AnyPublisher<WeekEventStackViewModel, Never>
     private var dayWidth: CGFloat { expectSize.width / 7 }
@@ -48,7 +49,8 @@ struct WeekRowView: View {
         today: String?,
         focusedMonth: CalendarMonth?,
         eventsPerDay: AnyPublisher<[[any CalendarEvent]], Never>,
-        eventStack: AnyPublisher<WeekEventStackViewModel, Never>
+        eventStack: AnyPublisher<WeekEventStackViewModel, Never>,
+        hidesOtherMonthDays: Bool = false
     ) {
         self.week = week
         self.expectSize = expectSize
@@ -56,6 +58,7 @@ struct WeekRowView: View {
         self.selectedDay = selectedDay
         self.today = today
         self.focusedMonth = focusedMonth
+        self.hidesOtherMonthDays = hidesOtherMonthDays
         self.eventsPerDay = eventsPerDay
         self.eventStack = eventStack
     }
@@ -74,7 +77,13 @@ struct WeekRowView: View {
     private func weekContentView() -> some View {
         ZStack(alignment: .top) {
             HStack(spacing: 0) {
-                ForEach(week.days, id: \.identifier) { dayView($0) }
+                ForEach(week.days, id: \.identifier) { day in
+                    if self.isHidden(day) {
+                        Color.clear.frame(maxWidth: .infinity)
+                    } else {
+                        dayView(day)
+                    }
+                }
             }
             if isCollapsed || appearance.rowHeightOnCalendar == .small {
                 eventDotPerDaysView()
@@ -90,20 +99,32 @@ struct WeekRowView: View {
     private func dayInteractionLayer() -> some View {
         HStack(spacing: 0) {
             ForEach(Array(week.days.enumerated()), id: \.element.identifier) { sequence, day in
-                Color.clear
-                    .frame(width: dayWidth)
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        appearance.impactIfNeed()
-                        self.daySelected(day)
-                    }
-                    .contextMenu {
-                        self.shareEventsMenuItems(day)
-                    } preview: {
-                        self.dayColumnPreview(at: sequence)
-                    }
+                if self.isHidden(day) {
+                    Color.clear.frame(width: dayWidth)
+                } else {
+                    self.dayTouchArea(day, at: sequence)
+                }
             }
         }
+    }
+
+    private func dayTouchArea(_ day: DayCellViewModel, at sequence: Int) -> some View {
+        Color.clear
+            .frame(width: dayWidth)
+            .contentShape(Rectangle())
+            .onTapGesture {
+                appearance.impactIfNeed()
+                self.daySelected(day)
+            }
+            .contextMenu {
+                self.shareEventsMenuItems(day)
+            } preview: {
+                self.dayColumnPreview(at: sequence)
+            }
+    }
+
+    private func isHidden(_ day: DayCellViewModel) -> Bool {
+        return self.hidesOtherMonthDays && day.isNotCurrentMonth
     }
 
     @ViewBuilder

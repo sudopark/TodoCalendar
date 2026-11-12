@@ -103,6 +103,23 @@ struct ContinuousMonthsBackgroundView: View {
     }
 }
 
+struct ContinuousMonthLabelView: View {
+
+    let title: String
+
+    @Environment(ViewAppearance.self) private var appearance
+
+    var body: some View {
+        Text(self.title)
+            .font(self.appearance.fontSet.size(20, weight: .bold).asFont)
+            .foregroundStyle(self.appearance.colorSet.text1.asColor)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.leading, spacing: .regular)
+            .padding(.top, spacing: .large)
+            .padding(.bottom, spacing: .xsmall)
+    }
+}
+
 struct ContinuousMonthsWeekCellView: View {
 
     let week: WeekRowModel
@@ -119,7 +136,8 @@ struct ContinuousMonthsWeekCellView: View {
             today: self.state.today,
             focusedMonth: self.state.focusedMonth,
             eventsPerDay: self.state.eventsPerDay(self.week.id),
-            eventStack: self.state.eventStacks(self.week.id)
+            eventStack: self.state.eventStacks(self.week.id),
+            hidesOtherMonthDays: true
         )
         .eventHandler(\.daySelected, self.eventHandler.daySelected)
         .eventHandler(\.shareEvents, self.eventHandler.shareEvents)
