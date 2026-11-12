@@ -7,6 +7,8 @@
 //
 
 import SwiftUI
+import Prelude
+import Optics
 import Extensions
 import SettingDomainInterface
 
@@ -34,7 +36,13 @@ extension WidgetVariant {
              .currentMonthEvents, .lastMonthEvents, .nextMonthEvents:
             if let weekEvents = setting as? WeekEventsStyleSetting {
                 WidgetStyleToggleFormView<WeekEventsStyleItem>(
-                    setting: weekEvents, onChange: onChange
+                    setting: weekEvents, onChange: onChange,
+                    textSizeStep: (
+                        name: "widget.style.weekEvents::eventTextSize".localized(),
+                        value: weekEvents.eventTextSize,
+                        range: weekEvents.eventTextSizeRange,
+                        onChange: { onChange(weekEvents |> \.eventTextSize .~ $0) }
+                    )
                 )
             }
         case .todayAndNextMedium:
