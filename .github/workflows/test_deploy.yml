@@ -22,8 +22,9 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Use homebrew ruby
-        run: echo "/opt/homebrew/opt/ruby/bin" >> "$GITHUB_PATH"
+      # 의존성으로 딸려 오는 homebrew ruby 는 버전이 올라가면 gem 이 비어 bundle install 이 깨진다
+      - name: Use homebrew ruby 3.3
+        run: echo "/opt/homebrew/opt/ruby@3.3/bin" >> "$GITHUB_PATH"
 
       - name: Install ruby gems
         run: bundle install
