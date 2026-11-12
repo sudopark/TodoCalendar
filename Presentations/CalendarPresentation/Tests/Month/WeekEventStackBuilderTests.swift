@@ -277,3 +277,96 @@ extension WeekEventStackBuilderTests {
         XCTAssertEqual(googleColorSource?.colorId, colorId)
     }
 }
+
+// MARK: - visible range
+
+extension WeekEventStackBuilderTests {
+
+    private func visibleRange(_ days: ClosedRange<Int>) -> Range<TimeInterval> {
+        let start = self.calendar.date(from: .init(year: 2023, month: 7, day: days.lowerBound))!
+            |> self.calendar.startOfDay(for:)
+        let end = self.calendar.date(from: .init(year: 2023, month: 7, day: days.upperBound))!
+            |> { self.calendar.endOfDay(for: $0)! }
+        return start.timeIntervalSince1970..<end.timeIntervalSince1970
+    }
+
+    private func dummyAtEvent(on day: Int) -> any CalendarEvent {
+        let time = self.calendar.date(from: .init(year: 2023, month: 7, day: day, hour: 12))!
+            .timeIntervalSince1970
+        let todo = TodoEvent(uuid: "at-\(day)", name: "at") |> \.time .~ .at(time)
+        return TodoCalendarEvent(todo, in: TimeZone(abbreviation: "KST")!)
+    }
+
+    func testBuild_whenVisibleRangeNil_sameAsBefore() {
+        // given
+        let builder = self.makeBuilder()
+        let event = self.dummyEvent(on: 10...14)
+
+        // when
+        let stack = builder.build(self.dummyWeek, events: [event], visibleRange: nil)
+
+        // then
+        let sequences = stack.eventStacks.map { row in row.map { $0.daysSequence } }
+        XCTAssertEqual(sequences, [[2...6]])
+    }
+
+    func testBuild_whenEventCrossesVisibleRangeEnd_clipToVisibleDays() {
+        // given
+        let builder = self.makeBuilder()
+        let event = self.dummyEvent(on: 11...14)
+        let visible = self.visibleRange(1...12)
+
+        // when
+        let stack = builder.build(self.dummyWeek, events: [event], visibleRange: visible)
+
+        // then
+        let onWeek = stack.eventStacks.first?.first
+        XCTAssertEqual(onWeek?.daysSequence, 3...4)
+        XCTAssertEqual(onWeek?.overlapDays, [11, 12])
+        XCTAssertEqual(onWeek?.eventRangesOnWeek.upperBound, visible.upperBound)
+    }
+
+    func testBuild_whenEventCrossesVisibleRangeStart_clipToVisibleDays() {
+        // given
+        let builder = self.makeBuilder()
+        let event = self.dummyEvent(on: 8...14)
+        let visible = self.visibleRange(13...31)
+
+        // when
+        let stack = builder.build(self.dummyWeek, events: [event], visibleRange: visible)
+
+        // then
+        let onWeek = stack.eventStacks.first?.first
+        XCTAssertEqual(onWeek?.daysSequence, 5...6)
+        XCTAssertEqual(onWeek?.eventRangesOnWeek.lowerBound, visible.lowerBound)
+    }
+
+    func testBuild_whenEventOutsideVisibleRange_excluded() {
+        // given
+        let builder = self.makeBuilder()
+        let periodEvent = self.dummyEvent(on: 13...14)
+        let atEvent = self.dummyAtEvent(on: 14)
+        let visible = self.visibleRange(1...12)
+
+        // when
+        let stack = builder.build(self.dummyWeek, events: [periodEvent, atEvent], visibleRange: visible)
+
+        // then
+        XCTAssertEqual(stack.eventStacks.flatMap { $0 }.count, 0)
+        XCTAssertEqual(stack.eventsPerDay.flatMap { $0 }.count, 0)
+    }
+
+    func testBuild_eventsPerDay_emptyOutsideVisibleRange() {
+        // given
+        let builder = self.makeBuilder()
+        let event = self.dummyEvent(on: 9...15)
+        let visible = self.visibleRange(1...12)
+
+        // when
+        let stack = builder.build(self.dummyWeek, events: [event], visibleRange: visible)
+
+        // then
+        let countsPerDay = stack.eventsPerDay.map { $0.count }
+        XCTAssertEqual(countsPerDay, [1, 1, 1, 1, 0, 0, 0])
+    }
+}
