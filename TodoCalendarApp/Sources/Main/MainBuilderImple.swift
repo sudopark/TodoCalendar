@@ -28,7 +28,6 @@ public final class MainSceneBuilerImple {
     private let fullScreenAdRouter: (any FullScreenAdRouter)?
     private let adViewBuilder: (any AdViewBuilder)?
     private let adGuideSceneBuilder: any PaidFeatureAdGuideSceneBuilder
-    private let isInitialScene: Bool
 
     public init(
         usecaseFactory: any UsecaseFactory,
@@ -38,8 +37,7 @@ public final class MainSceneBuilerImple {
         mobileAdService: any MobileAdService,
         fullScreenAdRouter: (any FullScreenAdRouter)?,
         adViewBuilder: (any AdViewBuilder)?,
-        adGuideSceneBuilder: any PaidFeatureAdGuideSceneBuilder,
-        isInitialScene: Bool
+        adGuideSceneBuilder: any PaidFeatureAdGuideSceneBuilder
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
@@ -49,7 +47,6 @@ public final class MainSceneBuilerImple {
         self.fullScreenAdRouter = fullScreenAdRouter
         self.adViewBuilder = adViewBuilder
         self.adGuideSceneBuilder = adGuideSceneBuilder
-        self.isInitialScene = isInitialScene
     }
 }
 
@@ -85,8 +82,7 @@ extension MainSceneBuilerImple: MainSceneBuiler {
             viewAppearance: self.viewAppearance,
             mobileAdService: self.mobileAdService,
             adExposureUsecase: self.usecaseFactory.adExposureUsecase,
-            adViewBuilder: self.adViewBuilder,
-            isInitialScene: self.isInitialScene
+            adViewBuilder: self.adViewBuilder
         )
         
         let router = MainRouter(

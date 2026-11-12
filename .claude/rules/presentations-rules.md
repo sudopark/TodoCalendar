@@ -41,6 +41,8 @@ paths:
 | `LandmarkMapView` | 단일 마커 지도 (비인터랙티브) | 없음 |
 | `BillingPlanChipView` | 플랜 이름 칩 — 무료 회색/유료 accentAI (사용량 게이지·paywall 공유, #739) | 없음 (표시 전용) |
 | `BillingScheduledChangeView` | 하향·만료 예정 안내 한 줄 — info 아이콘 + "N월 d일부터 X 플랜" (사용량 게이지·paywall 공유, #852) | 없음 (표시 전용) |
+| `RokuyoLabelView` | 로쿠요 색 점 + 이름 한 줄 — 글꼴만 받는다. 고정 6색 `Rokuyo.dotColor`·`localizedName` 도 같은 파일 (외관 설정 범례, `DayHeaderSubtitleView` 공유, #1369) | 없음 (표시 전용) |
+| `DayHeaderSubtitleView` | 날짜 위 보조 줄 — 켜진 것만 `음력 · 로쿠요 · 공휴일명` 순서로, 셋 다 없으면 안 그린다 (선택한 날 1단·다음날 헤더, 외관 설정 미리보기 공유, #1369) | 없음 (표시 전용) |
 | `ImagePicker` | 사진 라이브러리(PHPicker)·카메라 피커 뷰컨트롤러 팩토리 — 선택 결과를 `Data`로 전달 | `makeViewController(source:onPick:)` 클로저 |
 | `InAppWebViewController` | 인앱 웹뷰 화면 (UIKit) — 진행바·문서 타이틀·뒤로/앞으로·브라우저로 열기 + 로드 실패 폴백 (#806) | 모달은 `BaseRouterImple.showWebView(_:)` / `init` = push·child VC |
 
@@ -55,7 +57,7 @@ paths:
 | 타입 | 역할 | 진입 |
 |---|---|---|
 | `AdViewBuilder` | 배너 광고 뷰 팩토리 — Domain `AdBannerSize` 로 요청 (#898·#956·#981) | `makeBannerView(size:)` / `makeBannerUIView(size:)` |
-| `FullScreenAdRouter` | 전면 광고 노출 커맨드 — 씬 Router가 재위임. 노출 지점은 Domain `FullScreenAdExposureRecord.Scope` 로 표현하고, AdService의 `FullScreenAdRouterImple`이 앱 타겟 extension으로 채택 (#898·#956·#981) | `showFullScreenAd(from:scope:isFromAppLaunch:)` |
+| `FullScreenAdRouter` | 전면 광고 노출 커맨드 — 씬 Router가 재위임. 노출 판정은 자리와 무관하게 Domain `AdExposureUsecase` 하나가 맡고, AdService의 `FullScreenAdRouterImple`이 앱 타겟 extension으로 채택 (#898·#956·#981·#1361) | `showFullScreenAd(from:)` |
 | `RewardedAdRouter` | 보상형 광고 노출 커맨드 — 보상 완료·전면 대체·보상 전 닫음·광고 없음 네 결과를 Domain `RewardedAdResult` 로 돌려준다. AdService의 `RewardedAdRouterImple`이 앱 타겟 extension으로 채택 (#1246) | `showRewardedAd(from:completion:)` |
 | `PrivacyOptionsFormRouter` | UMP 개인정보 옵션 폼 — 요구 여부 조회 + 폼 표시. AdService의 `GoogleMobileAdsServiceImple`이 앱 타겟 extension으로 채택 (#958·#956) | `isPrivacyOptionsRequired()` / `showPrivacyOptionsForm(from:)` |
 | `AppStoreReviewRouter` | App Store 리뷰 시트 요청 — 창(`UIWindowScene`)을 받아 요청한다. StoreKitService 의 `AppStoreReviewSheet` 가 앱 타겟 extension 으로 채택 (#1343) | `requestAppReview(in:)` |

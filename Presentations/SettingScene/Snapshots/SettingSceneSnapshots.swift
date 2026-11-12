@@ -416,6 +416,21 @@ final class SettingSceneSnapshots: XCTestCase {
                 $0.additionalFontSizeModel = .init(3)
                 $0.isShowEventTagColor = true
             }
+            .eventHandler(\.eventListSettingStateBinding) {
+                let setting = EventListAppearanceSetting(
+                    eventTextAdditionalSize: 0,
+                    showHoliday: true,
+                    showLunarCalendarDate: true,
+                    is24hourForm: true,
+                    showUncompletedTodos: true,
+                    showRokuyo: true
+                )
+                $0.sampleModel = EventListAppearanceSampleModel(setting)
+                $0.showHolidayName = true
+                $0.showLunarCalendarDate = true
+                $0.showRokuyo = true
+                $0.isRokuyoSupported = true
+            }
         }
     }
 }

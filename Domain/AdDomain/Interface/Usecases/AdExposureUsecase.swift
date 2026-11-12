@@ -13,15 +13,17 @@ public protocol AdExposureUsecase: Sendable {
 
     var isBannerAdAllowed: AnyPublisher<Bool, Never> { get }
 
+    var isMainBannerAdAllowed: AnyPublisher<Bool, Never> { get }
+
     func shouldPreloadFullScreenAds() -> Bool
 
-    func canExposeFullScreenAd(
-        scope: FullScreenAdExposureRecord.Scope,
-        isFromAppLaunch: Bool,
-        at now: Date
-    ) -> Bool
+    func canExposeFullScreenAd(at now: Date) -> Bool
 
-    func recordFullScreenAdExposed(scope: FullScreenAdExposureRecord.Scope, at now: Date)
+    func recordFullScreenAdExposed(at now: Date)
+
+    func recordEventSavedForFullScreenAd()
+
+    func isFullScreenAdTurnAfterEventSave() -> Bool
 
     func canRequestTrackingAuthorization() async -> Bool
 

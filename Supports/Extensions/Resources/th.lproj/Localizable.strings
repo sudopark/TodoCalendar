@@ -546,6 +546,15 @@
 "setting.appearance.event.fontSize" = "ขนาดตัวอักษรกิจกรรม";
 "setting.appearance.event.show_holidayName" = "แสดงชื่อวันหยุด";
 "setting.appearance.event.show_lunar" = "ปฏิทินจันทรคติ";
+"setting.appearance.event.show_lunar::explain" = "มาตรฐานปฏิทินจันทรคติ (เกาหลี จีน หรือเวียดนาม) จะเลือกตามภาษาของอุปกรณ์ วันที่ตามจันทรคติจึงอาจต่างกันหนึ่งวันตามมาตรฐาน";
+"setting.appearance.event.show_rokuyo" = "โรคุโย";
+"setting.appearance.event.show_rokuyo::available_ios26" = "ใช้ได้บน iOS 26 ขึ้นไป";
+"rokuyo::taian" = "ไทอัน";
+"rokuyo::shakku" = "ชักกุ";
+"rokuyo::sensho" = "เซ็นโช";
+"rokuyo::tomobiki" = "โทโมบิกิ";
+"rokuyo::senbu" = "เซ็นบุ";
+"rokuyo::butsumetsu" = "บุตสึเมตสึ";
 "setting.appearance.event._24form" = "รูปแบบ 24 ชั่วโมง";
 "setting.appearance.event.sample::name" = "🥗 ชื่อกิจกรรม";
 "setting.appearance.event.sample::description" = "คำอธิบาย";

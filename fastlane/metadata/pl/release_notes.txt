@@ -1,9 +1,4 @@
-■ Liczenie D-Day
-· Włącz „Licz D-Day jako D+1” w sekcji „Widżety” w Ustawieniach, a sam D-Day będzie liczony jako D+1, zarówno w aplikacji, jak i w widżetach
-· Możesz też włączyć to tylko dla jednego widżetu Odliczanie podczas jego edycji
-· Ustawienia widżetów są teraz w sekcji „Widżety” na głównym ekranie Ustawień
+■ Rokuyo (iOS 26 lub nowszy)
+· Włącz „Rokuyo” w Ustawienia > Wygląd, a nad wybraną datą zobaczysz rokuyo danego dnia, np. Taian lub Butsumetsu
 
-■ Zwijanie kalendarza
-· Ponowne stuknięcie wybranej daty, by zwinąć kalendarz, jest teraz opcją, którą możesz włączyć lub wyłączyć. Domyślnie jest wyłączona
-· Włącz „Automatycznie zwijaj kalendarz” w Ustawienia > Wygląd, a potem stuknij wybraną datę jeszcze raz, by zwinąć kalendarz
-· Wszystkie tygodnie miesiąca zostają na ekranie, zmniejszają się tylko pola dni. Stuknij ponownie, by go rozwinąć
+· Poprawki błędów

@@ -18,6 +18,7 @@ import CalendarPresentation
 import AIDomainTesting
 import AccountDomainInterface
 import AccountDomainTesting
+import AdDomainTesting
 import CalendarDomainInterface
 import CalendarDomainTesting
 import EventDetailSceneInterface
@@ -44,6 +45,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var stubDDayCandidateUsecase: StubDDayCandidateUsecase!
     private var stubGuideTodoUsecase: StubGuideTodoUsecase!
     private var stubAppReviewRequestUsecase: StubAppReviewRequestUsecase!
+    private var stubAdExposureUsecase: StubAdExposureUsecase!
     private var spyRouter: SpyRouter!
     private var spyListener: SpyListener!
 
@@ -70,6 +72,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubDDayCandidateUsecase = nil
         self.stubGuideTodoUsecase = nil
         self.stubAppReviewRequestUsecase = nil
+        self.stubAdExposureUsecase = nil
         self.spyRouter = nil
         self.spyListener = nil
         self.stubOrchestrationUsecase = nil
@@ -88,7 +91,8 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         registeredLiveActivityTarget: LiveActivityTarget? = nil,
         registeredDDayCandidates: [DDayCandidate] = [],
         isGuideTodoVisible: Bool = true,
-        canRequestAppReview: Bool = false
+        canRequestAppReview: Bool = false,
+        isFullScreenAdTurn: Bool = false
     ) -> DayEventListViewModelImple {
         let currentTodos: [TodoEvent] = [
             .init(uuid: "current-todo-1", name: "current-todo-1") |> \.creatTimeStamp .~ 100,
@@ -129,6 +133,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubDDayCandidateUsecase = .init(registeredDDayCandidates)
         self.stubGuideTodoUsecase = .init(isVisible: isGuideTodoVisible)
         self.stubAppReviewRequestUsecase = .init(canRequest: canRequestAppReview)
+        self.stubAdExposureUsecase = .init(isFullScreenAdTurn: isFullScreenAdTurn)
         let account: AccountInfo? = isSignedIn ? AccountInfo("uid") : nil
         let viewModel = DayEventListViewModelImple(
             calendarUsecase: StubCalendarUsecase(),
@@ -142,7 +147,8 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
             eventLiveActivityUsecase: self.stubLiveActivityUsecase,
             ddayCandidateUsecase: self.stubDDayCandidateUsecase,
             guideTodoUsecase: self.stubGuideTodoUsecase,
-            appReviewRequestUsecase: self.stubAppReviewRequestUsecase
+            appReviewRequestUsecase: self.stubAppReviewRequestUsecase,
+            adExposureUsecase: self.stubAdExposureUsecase
         )
         viewModel.router = self.spyRouter
         viewModel.attachListener(self.spyListener)
@@ -188,6 +194,45 @@ extension DayEventListViewModelImpleTests {
             "🌕 07/26",
             "🌕 07/27"
         ])
+        let expectedRokuyos: [Rokuyo?]
+        if #available(iOS 26, *) {
+            expectedRokuyos = [.tomobiki, .senbu]
+        } else {
+            expectedRokuyos = [nil, nil]
+        }
+        XCTAssertEqual(selectedDays.map { $0.rokuyo }, expectedRokuyos)
+    }
+
+    private func february7th2027InSeoul() -> CurrentSelectDayModel {
+        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ TimeZone(identifier: "Asia/Seoul")!
+        let start = calendar.date(from: DateComponents(year: 2027, month: 2, day: 7))!.timeIntervalSince1970
+        return .init(2027, 2, 7, weekId: "some", range: start..<start+3600*24)
+    }
+
+    func testSelectedDayModel_dangi_showsKoreanLunarDate() throws {
+        try XCTSkipUnless(
+            ProcessInfo.processInfo.isOperatingSystemAtLeast(.init(majorVersion: 26, minorVersion: 0, patchVersion: 0)),
+            "dangi 달력은 iOS 26 부터 만들 수 있다"
+        )
+        // given
+        let timeZone = TimeZone(identifier: "Asia/Seoul")!
+
+        // when
+        let model = SelectedDayModel(timeZone, currentModel: self.february7th2027InSeoul(), lunarCalendar: .dangi)
+
+        // then
+        XCTAssertEqual(model.lunarDateText, "🌕 01/01")
+    }
+
+    func testSelectedDayModel_chinese_showsChineseLunarDate() {
+        // given
+        let timeZone = TimeZone(identifier: "Asia/Seoul")!
+
+        // when
+        let model = SelectedDayModel(timeZone, currentModel: self.february7th2027InSeoul(), lunarCalendar: .chinese)
+
+        // then
+        XCTAssertEqual(model.lunarDateText, "🌕 01/02")
     }
 }
 
@@ -798,7 +843,8 @@ extension DayEventListViewModelImpleTests {
         shouldFailMakeTodo: Bool = false,
         registeredLiveActivityTarget: LiveActivityTarget? = nil,
         registeredDDayCandidates: [DDayCandidate] = [],
-        canRequestAppReview: Bool = false
+        canRequestAppReview: Bool = false,
+        isFullScreenAdTurn: Bool = false
     ) -> DayEventListViewModelImple {
         // given
         let expect = expectation(description: "wait first cells loaded")
@@ -808,7 +854,8 @@ extension DayEventListViewModelImpleTests {
             shouldFailMakeTodo: shouldFailMakeTodo,
             registeredLiveActivityTarget: registeredLiveActivityTarget,
             registeredDDayCandidates: registeredDDayCandidates,
-            canRequestAppReview: canRequestAppReview
+            canRequestAppReview: canRequestAppReview,
+            isFullScreenAdTurn: isFullScreenAdTurn
         )
 
         // when
@@ -1260,6 +1307,59 @@ extension DayEventListViewModelImpleTests {
         XCTAssertNil(self.spyRouter.didRequestAppReview)
     }
     
+    func testViewModel_whenAddNewTodoQuicklyAndFullScreenAdTurn_showFullScreenAdAfterRecordSaved() {
+        // given
+        let viewModel = self.makeViewModelWithInitialListLoaded(isFullScreenAdTurn: true)
+
+        // when
+        self.addNewTodoQuicklyUntilPendingRemoved(viewModel)
+
+        // then
+        XCTAssertEqual(self.stubAdExposureUsecase.didCheckTurnAfterRecordSaved, true)
+        XCTAssertEqual(self.spyRouter.didShowFullScreenAd, true)
+    }
+
+    func testViewModel_whenAddNewTodoQuicklyAndNotFullScreenAdTurn_recordSavedWithoutFullScreenAd() {
+        // given
+        let viewModel = self.makeViewModelWithInitialListLoaded(isFullScreenAdTurn: false)
+
+        // when
+        self.addNewTodoQuicklyUntilPendingRemoved(viewModel)
+
+        // then
+        XCTAssertEqual(self.stubAdExposureUsecase.didRecordEventSaved, true)
+        XCTAssertNil(self.spyRouter.didShowFullScreenAd)
+    }
+
+    func testViewModel_whenAddNewTodoQuicklyAndCanRequestReviewOnFullScreenAdTurn_requestReviewWithoutFullScreenAd() {
+        // given
+        let viewModel = self.makeViewModelWithInitialListLoaded(
+            canRequestAppReview: true, isFullScreenAdTurn: true
+        )
+
+        // when
+        self.addNewTodoQuicklyUntilPendingRemoved(viewModel)
+
+        // then
+        XCTAssertEqual(self.stubAdExposureUsecase.didRecordEventSaved, true)
+        XCTAssertEqual(self.spyRouter.didRequestAppReview, true)
+        XCTAssertNil(self.spyRouter.didShowFullScreenAd)
+    }
+
+    func testViewModel_whenAddNewTodoQuicklyFailsOnFullScreenAdTurn_notRecordSavedAndNotShowFullScreenAd() {
+        // given
+        let viewModel = self.makeViewModelWithInitialListLoaded(
+            shouldFailMakeTodo: true, isFullScreenAdTurn: true
+        )
+
+        // when
+        self.addNewTodoQuicklyUntilPendingRemoved(viewModel)
+
+        // then
+        XCTAssertNil(self.stubAdExposureUsecase.didRecordEventSaved)
+        XCTAssertNil(self.spyRouter.didShowFullScreenAd)
+    }
+
     func testViewModel_whenAddNewTodoQuicklyFails_notRecordNewEventSaved() {
         // given
         let viewModel = self.makeViewModelWithInitialListLoaded(
@@ -1482,6 +1582,11 @@ extension DayEventListViewModelImpleTests {
         var didRequestAppReview: Bool?
         func requestAppReview() {
             self.didRequestAppReview = true
+        }
+
+        var didShowFullScreenAd: Bool?
+        func showFullScreenAd() {
+            self.didShowFullScreenAd = true
         }
 
         var didRouteToImageSourceSelectOnCancel: (@Sendable () -> Void)?

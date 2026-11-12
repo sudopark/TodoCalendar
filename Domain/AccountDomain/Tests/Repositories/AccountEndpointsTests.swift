@@ -32,7 +32,7 @@ extension AccountEndpointsTests {
 
     @Test("엔드포인트가 자기 경로와 인증 종류를 낸다", arguments: [
         EndpointExpectation(endpoint: AccountAPIEndpoints.info, path: "https://api.example.com/v2/accounts/info", authorization: .none),
-        EndpointExpectation(endpoint: AccountAPIEndpoints.account, path: "https://api.example.com/v2/accounts/account", authorization: .none)
+        EndpointExpectation(endpoint: AccountAPIEndpoints.account, path: "https://api.example.com/v2/accounts/account", authorization: .calendarAPI)
     ])
     func endpoint_providesPathAndAuthorization(_ expectation: EndpointExpectation) {
         // given

@@ -545,6 +545,15 @@
 "setting.appearance.event.fontSize" = "Veľkosť písma textu udalosti";
 "setting.appearance.event.show_holidayName" = "Zobraziť názov sviatku";
 "setting.appearance.event.show_lunar" = "Lunárny kalendár";
+"setting.appearance.event.show_lunar::explain" = "Štandard lunárneho kalendára (kórejský, čínsky alebo vietnamský) sa volí podľa jazyka zariadenia, takže lunárne dátumy sa môžu podľa štandardu líšiť o jeden deň.";
+"setting.appearance.event.show_rokuyo" = "Rokuyo";
+"setting.appearance.event.show_rokuyo::available_ios26" = "Dostupné v iOS 26 alebo novšom";
+"rokuyo::taian" = "Taian";
+"rokuyo::shakku" = "Shakku";
+"rokuyo::sensho" = "Sensho";
+"rokuyo::tomobiki" = "Tomobiki";
+"rokuyo::senbu" = "Senbu";
+"rokuyo::butsumetsu" = "Butsumetsu";
 "setting.appearance.event._24form" = "24-hodinový formát";
 "setting.appearance.event.sample::name" = "🥗 Názov udalosti";
 "setting.appearance.event.sample::description" = "popis";

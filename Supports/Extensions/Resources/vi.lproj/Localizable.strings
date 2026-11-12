@@ -546,6 +546,15 @@
 "setting.appearance.event.fontSize" = "Cỡ chữ sự kiện";
 "setting.appearance.event.show_holidayName" = "Hiện tên ngày lễ";
 "setting.appearance.event.show_lunar" = "Âm lịch";
+"setting.appearance.event.show_lunar::explain" = "Chuẩn âm lịch (Hàn Quốc, Trung Quốc hoặc Việt Nam) được chọn tự động theo ngôn ngữ thiết bị, nên ngày âm lịch có thể lệch một ngày tùy theo chuẩn.";
+"setting.appearance.event.show_rokuyo" = "Rokuyo";
+"setting.appearance.event.show_rokuyo::available_ios26" = "Có trên iOS 26 trở lên";
+"rokuyo::taian" = "Đại An";
+"rokuyo::shakku" = "Xích Khẩu";
+"rokuyo::sensho" = "Tiên Thắng";
+"rokuyo::tomobiki" = "Hữu Dẫn";
+"rokuyo::senbu" = "Tiên Phụ";
+"rokuyo::butsumetsu" = "Phật Diệt";
 "setting.appearance.event._24form" = "Định dạng 24 giờ";
 "setting.appearance.event.sample::name" = "🥗 Tên sự kiện";
 "setting.appearance.event.sample::description" = "mô tả";

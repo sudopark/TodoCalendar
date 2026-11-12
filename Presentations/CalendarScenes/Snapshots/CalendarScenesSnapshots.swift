@@ -174,7 +174,7 @@ final class CalendarScenesSnapshots: XCTestCase {
     @MainActor
     private func makeDayEventListView(_ appearance: ViewAppearance) -> some View {
         let cells = self.makeDummyCells()
-        let dayModel = SelectedDayModel(dateText: "2026년 7월 12일(일)", lunarDateText: "5월 28일")
+        let dayModel = SelectedDayModel(dateText: "2026년 7월 12일(일)", lunarDateText: "5월 28일", rokuyo: .tomobiki)
             |> \.holidayName .~ "테스트 공휴일"
 
         let viewModel = FakeDayEventListViewModel(
@@ -185,6 +185,7 @@ final class CalendarScenesSnapshots: XCTestCase {
         )
         appearance.showHoliday = true
         appearance.showLunarCalendarDate = true
+        appearance.showRokuyo = true
 
         let state = DayEventListViewState()
         state.bind(viewModel, appearance)
@@ -202,7 +203,7 @@ final class CalendarScenesSnapshots: XCTestCase {
     func test_dayEventList_aiConfirmCountdown() {
         captureSnapshotPair(named: "dayEventList_aiConfirmCountdown", layout: .fixed(width: 393, height: 780)) { theme in
             let cells = self.makeDummyCells()
-            let dayModel = SelectedDayModel(dateText: "2026년 7월 12일(일)", lunarDateText: "5월 28일")
+            let dayModel = SelectedDayModel(dateText: "2026년 7월 12일(일)", lunarDateText: "5월 28일", rokuyo: .tomobiki)
                 |> \.holidayName .~ "테스트 공휴일"
 
             let viewModel = FakeDayEventListViewModel(
@@ -220,6 +221,7 @@ final class CalendarScenesSnapshots: XCTestCase {
             let appearance = self.makeAppearance(theme)
             appearance.showHoliday = true
             appearance.showLunarCalendarDate = true
+            appearance.showRokuyo = true
 
             let state = DayEventListViewState()
             state.bind(viewModel, appearance)

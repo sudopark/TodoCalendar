@@ -625,6 +625,8 @@ protocol LegalNoticeRepository: Sendable {
 ```json
 {
   "color_theme_license": { "enabled": true, "license_days": 7 },
+  "main_banner_exposure": { "exposure_percentage": 75, "min_delay_seconds": 60, "max_delay_seconds": 300 },
+  "full_screen_ad_event_save_interval": 2,
   "feature_switches": {
     "<기능키>": { "enabled": true, "min_app_version": "3.1.0", "rollout_percentage": 30 }
   }
@@ -632,6 +634,8 @@ protocol LegalNoticeRepository: Sendable {
 ```
 
 - `color_theme_license` — 테마 사용권 게이트다. `enabled` 가 `false` 이면 게이트를 끈다. `enabled`·`license_days` 는 각각 읽는다. 없거나 `license_days` 가 0 이하인 속성은 그 속성만 비워 두고(nil), 기본값은 `PaidFeatureGateUsecaseImple` 이 채운다. 항목이 없어도 파일 전체를 버리지 않는다.
+- `main_banner_exposure` — 메인 화면 하단 배너의 노출 값이다. `exposure_percentage` 는 실행마다 뽑힐 확률이고 읽을 때 0~100 으로 맞춘다. 0 이면 배너를 끈다. `min_delay_seconds`·`max_delay_seconds` 는 뽑힌 뒤 지연의 범위다. 음수는 없는 값으로 보고, 최소가 최대보다 크면 최소를 지연으로 쓴다. 없는 속성은 `AdExposureUsecaseImple` 이 기본값으로 채운다.
+- `full_screen_ad_event_save_interval` — 이벤트를 몇 번 저장할 때마다 전면 후보가 될지 정한다. 0 이면 이벤트 저장 전면을 끈다. 음수는 없는 값으로 보고, 없으면 `AdExposureUsecaseImple` 이 기본값으로 채운다.
 - `feature_switches` — 기능 키별 스위치다. `min_app_version` 은 없을 수 있다. `rollout_percentage`(0~100)가 없으면 전체 배포로 본다. 범위 밖 값은 읽을 때 0~100 으로 맞춘다 — 150 은 전체, -5 는 배포 안 함이다. 이 절은 모델과 저장까지만 다룬다. 기능 플래그 연결과 실제 사용은 각 기능 작업이 한다.
 - 디코딩은 Repository 의 `AppPolicyMapper` 가 맡고, Domain 모델 `AppPolicy`·`FeatureSwitch` 는 Decodable 을 채택하지 않는다.
 

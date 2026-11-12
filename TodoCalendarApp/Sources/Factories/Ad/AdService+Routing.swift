@@ -15,12 +15,8 @@ import AdDomainInterface
 extension FullScreenAdRouterImple: @retroactive FullScreenAdRouter {
 
     @MainActor
-    public func showFullScreenAd(
-        from viewController: UIViewController,
-        scope: FullScreenAdExposureRecord.Scope,
-        isFromAppLaunch: Bool
-    ) {
-        self.show(from: viewController, scope: scope, isFromAppLaunch: isFromAppLaunch)
+    public func showFullScreenAd(from viewController: UIViewController) {
+        self.show(from: viewController)
     }
 }
 

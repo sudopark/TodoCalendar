@@ -162,6 +162,19 @@ extension AppSettingUsecaseImpleTests {
         XCTAssertEqual(newValue.monthAutoCollapseIsOn, true)
     }
 
+    func testUsecase_changeCalendarAppearanceSetting_onlyShowRokuyo() throws {
+        // given
+        let usecase = self.makeUsecase()
+
+        // when
+        let params = EditCalendarAppearanceSettingParams()
+            |> \.showRokuyo .~ true
+        let newValue = try usecase.changeCalendarAppearanceSetting(params)
+
+        // then
+        XCTAssertEqual(newValue.showRokuyo, true)
+    }
+
     func testUsecase_whenAfterchangeCalendarSetting_notifyToViewAppearanceStore() {
         // given
         let usecase = self.makeUsecase()

@@ -136,3 +136,58 @@ extension GoogleCalendarEventTests {
         #expect(isEmpty == false)
     }
 }
+
+extension GoogleCalendarEventTests {
+
+    private func makeAllDayOrigin(
+        start: String, end: String, timeZone: String
+    ) -> GoogleCalendar.EventOrigin {
+        var origin = GoogleCalendar.EventOrigin(id: "allday", summary: "allday")
+        origin.start = .init() |> \.date .~ start |> \.timeZone .~ timeZone
+        origin.end = .init() |> \.date .~ end |> \.timeZone .~ timeZone
+        return origin
+    }
+
+    @Test(
+        "종료일이 시작일과 같은 종일 이벤트는 시작일 다음 날까지의 하루짜리가 된다",
+        arguments: [
+            ("2026-11-11", "2026-11-11", "Asia/Seoul", 1794322800.0, 1794409200.0),
+            ("2026-11-01", "2026-11-01", "America/New_York", 1793505600.0, 1793595600.0)
+        ]
+    )
+    func allDay_whenEndDateEqualsStartDate_endsOnNextDayOfStart(
+        _ args: (String, String, String, TimeInterval, TimeInterval)
+    ) throws {
+        // given
+        let origin = self.makeAllDayOrigin(start: args.0, end: args.1, timeZone: args.2)
+
+        // when
+        let event = try #require(
+            GoogleCalendar.Event(origin, "calendar", accountId: "account", nil)
+        )
+
+        // then
+        guard case .allDay(let range, _) = event.eventTime else {
+            Issue.record("종일 이벤트가 아니다: \(event.eventTime)"); return
+        }
+        #expect(range == args.3..<args.4)
+    }
+
+    @Test func allDay_whenEndDateIsAfterStartDate_keepsRange() throws {
+        // given
+        let origin = self.makeAllDayOrigin(
+            start: "2026-11-11", end: "2026-11-13", timeZone: "Asia/Seoul"
+        )
+
+        // when
+        let event = try #require(
+            GoogleCalendar.Event(origin, "calendar", accountId: "account", nil)
+        )
+
+        // then
+        guard case .allDay(let range, _) = event.eventTime else {
+            Issue.record("종일 이벤트가 아니다: \(event.eventTime)"); return
+        }
+        #expect(range == 1794322800.0..<1794495600.0)
+    }
+}

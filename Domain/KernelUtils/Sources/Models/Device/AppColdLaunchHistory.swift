@@ -35,13 +35,6 @@ extension AppColdLaunchHistory {
         self.count += 1
     }
 
-    public func isFirstLaunchOfDay(_ calendar: Calendar) -> Bool {
-        guard let previousLaunchDate = self.previousLaunchDate,
-              let lastLaunchDate = self.lastLaunchDate
-        else { return true }
-        return calendar.isDate(previousLaunchDate, inSameDayAs: lastLaunchDate) == false
-    }
-
     public func elapsedDaysFromFirstLaunch(to now: Date, _ calendar: Calendar) -> Int {
         guard let firstLaunchDate = self.firstLaunchDate else { return 0 }
         let from = calendar.startOfDay(for: firstLaunchDate)

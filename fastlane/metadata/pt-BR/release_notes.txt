@@ -1,9 +1,4 @@
-■ Contagem do D-Day
-· Ative "Contar o D-Day como D+1" em "Widgets" nos Ajustes e o próprio D-Day passa a contar como D+1, no app e nos widgets
-· Você também pode ativar só para um Widget de Contagem Regressiva ao editar esse widget
-· Os ajustes de widgets agora ficam em "Widgets", na tela principal dos Ajustes
+■ Rokuyo (iOS 26 ou posterior)
+· Ative "Rokuyo" em Ajustes > Aparência para ver o rokuyo do dia, como Taian ou Butsumetsu, acima da data selecionada
 
-■ Recolher o calendário
-· Tocar de novo na data selecionada para recolher o calendário agora é uma opção que você pode ativar ou desativar. Ela vem desativada
-· Ative "Recolher o calendário automaticamente" em Ajustes > Aparência e toque mais uma vez na data selecionada para recolher o calendário
-· Todas as semanas do mês continuam à vista, e só as células dos dias ficam menores. Toque de novo para expandir
+· Correções de bugs

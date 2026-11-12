@@ -21,10 +21,11 @@ class BaseEventRepeatTimeEnumeratorTests: BaseTestCase {
     func makeEnumerator(
         _ option: any EventRepeatingOption,
         endOption: EventRepeating.RepeatEndOption? = nil,
-        without: Set<String> = []
+        without: Set<String> = [],
+        lunarCalendar: LunarCalendarKind = .chinese
     ) -> EventRepeatTimeEnumerator {
         return EventRepeatTimeEnumerator(
-            option, endOption: endOption, without: without
+            option, endOption: endOption, without: without, lunarCalendar: lunarCalendar
         )!
     }
     
@@ -572,6 +573,40 @@ class EventRepeatEnumeratorTests_LunarCalendarEveryYear: BaseEventRepeatTimeEnum
             .init(time: eventTimeAllDay(1993, 5, 31), turn: 2),
             .init(time: eventTimeAllDay(1994, 5, 21), turn: 3)
         ])
+    }
+
+    func testEnumerator_nextLunarCalendarEveryYear_dangi_followsKoreanNewYear() throws {
+        try XCTSkipUnless(
+            ProcessInfo.processInfo.isOperatingSystemAtLeast(.init(majorVersion: 26, minorVersion: 0, patchVersion: 0)),
+            "dangi 달력은 iOS 26 부터 만들 수 있다"
+        )
+        // given
+        let option = EventRepeatingOptions.LunarCalendarEveryYear(
+            TimeZone(abbreviation: "KST")!, 1, 1
+        )
+        let enumerator = self.makeEnumerator(option, lunarCalendar: .dangi)
+        let start = eventTimeAllDay(2026, 2, 17)
+
+        // when
+        let next = enumerator.nextEventTime(from: .init(time: start, turn: 1), until: nil)
+
+        // then
+        XCTAssertEqual(next, .init(time: eventTimeAllDay(2027, 2, 7), turn: 2))
+    }
+
+    func testEnumerator_nextLunarCalendarEveryYear_chinese_followsChineseNewYear() {
+        // given
+        let option = EventRepeatingOptions.LunarCalendarEveryYear(
+            TimeZone(abbreviation: "KST")!, 1, 1
+        )
+        let enumerator = self.makeEnumerator(option, lunarCalendar: .chinese)
+        let start = eventTimeAllDay(2026, 2, 17)
+
+        // when
+        let next = enumerator.nextEventTime(from: .init(time: start, turn: 1), until: nil)
+
+        // then
+        XCTAssertEqual(next, .init(time: eventTimeAllDay(2027, 2, 6), turn: 2))
     }
 }
 

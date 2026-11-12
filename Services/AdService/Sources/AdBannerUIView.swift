@@ -35,7 +35,7 @@ public final class AdBannerUIView: UIView {
     public init(
         adUnitId: String,
         size: AdBannerSize,
-        adExposureUsecase: any AdExposureUsecase,
+        isAllowed: AnyPublisher<Bool, Never>,
         onVisibleHeightChange: (@MainActor (CGFloat) -> Void)? = nil
     ) {
         self.size = size
@@ -46,7 +46,7 @@ public final class AdBannerUIView: UIView {
         self.bannerView.adUnitID = adUnitId
         self.bannerView.delegate = self
         self.heightConstraint.isActive = true
-        self.bindLoadWhenBannerAdAllowed(adExposureUsecase)
+        self.bindLoadWhenBannerAdAllowed(isAllowed)
     }
 
     required init?(coder: NSCoder) {
@@ -92,8 +92,8 @@ public final class AdBannerUIView: UIView {
         self.onVisibleHeightChange?(self.visibleHeight)
     }
 
-    private func bindLoadWhenBannerAdAllowed(_ adExposureUsecase: any AdExposureUsecase) {
-        adExposureUsecase.isBannerAdAllowed
+    private func bindLoadWhenBannerAdAllowed(_ isAllowed: AnyPublisher<Bool, Never>) {
+        isAllowed
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] isAllowed in
                 self?.apply(isAllowed: isAllowed)
@@ -229,7 +229,7 @@ private struct BannerRepresentable: UIViewRepresentable {
         return AdBannerUIView(
             adUnitId: self.adUnitId,
             size: self.size,
-            adExposureUsecase: self.adExposureUsecase,
+            isAllowed: self.adExposureUsecase.isBannerAdAllowed,
             onVisibleHeightChange: { self.visibleHeight = $0 }
         )
     }

@@ -34,6 +34,7 @@ protocol DayEventListRouting: Routing, Sendable {
     func routeToImageSourceSelect(onCancel: @escaping @Sendable () -> Void)
     func routeToAIGuide()
     func requestAppReview()
+    func showFullScreenAd()
 }
 
 // MARK: - Router
@@ -49,6 +50,7 @@ final class DayEventListRouter: BaseRouterImple, DayEventListRouting, @unchecked
     private let imagePicker: ImagePicker = .init()
     private let viewAppearance: ViewAppearance
     private let appStoreReviewRouter: any AppStoreReviewRouter
+    private let fullScreenAdRouter: (any FullScreenAdRouter)?
 
     init(
         eventDetailSceneBuilder: any EventDetailSceneBuilder,
@@ -58,7 +60,8 @@ final class DayEventListRouter: BaseRouterImple, DayEventListRouting, @unchecked
         aiImageCommandSceneBuilder: any AIAgentImageCommandSceneBuilder,
         sharePreviewSceneBuilder: any SharePreviewSceneBuilder,
         viewAppearance: ViewAppearance,
-        appStoreReviewRouter: any AppStoreReviewRouter
+        appStoreReviewRouter: any AppStoreReviewRouter,
+        fullScreenAdRouter: (any FullScreenAdRouter)?
     ) {
         self.eventDetailSceneBuilder = eventDetailSceneBuilder
         self.eventListSceneBuilder = eventListSceneBuilder
@@ -68,6 +71,7 @@ final class DayEventListRouter: BaseRouterImple, DayEventListRouting, @unchecked
         self.sharePreviewSceneBuilder = sharePreviewSceneBuilder
         self.viewAppearance = viewAppearance
         self.appStoreReviewRouter = appStoreReviewRouter
+        self.fullScreenAdRouter = fullScreenAdRouter
     }
 }
 
@@ -185,6 +189,13 @@ extension DayEventListRouter {
         Task { @MainActor in
             guard let windowScene = self.scene?.view.window?.windowScene else { return }
             self.appStoreReviewRouter.requestAppReview(in: windowScene)
+        }
+    }
+
+    func showFullScreenAd() {
+        Task { @MainActor in
+            guard let scene = self.scene, let adRouter = self.fullScreenAdRouter else { return }
+            adRouter.showFullScreenAd(from: scene)
         }
     }
 }

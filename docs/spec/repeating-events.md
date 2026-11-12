@@ -19,7 +19,7 @@ flowchart TD
     Switch -->|EveryMonth.week| MonthW["같은 주 탐색 → 같은 달\n다음 주 탐색 → 다음 달\n(+interval) 첫 서수+요일"]
     Switch -->|EveryYear| Year["같은 주 → 같은 달\n다음 주 → 다음 달\n→ 다음 해(+interval)"]
     Switch -->|EveryYearSomeDay| YearSD["calendar.addYear(interval)"]
-    Switch -->|LunarEveryYear| Lunar["Chinese calendar\naddYear(1)"]
+    Switch -->|LunarEveryYear| Lunar["LunarCalendarKind 달력\naddYear(1)"]
 
     Day --> Shift
     Week --> Shift
@@ -249,14 +249,16 @@ flowchart TD
 | timeZone | TimeZone | **필수** |
 
 - **interval**: 항상 1 (설정 불가, 매년 고정)
-- **달력**: Chinese Calendar (`Calendar(identifier: .chinese)`) 사용
+- **달력**: `LunarCalendarKind` — iOS 26 이상은 기기 언어로 고른다(ko·ja dangi, vi vietnamese, 그 외 chinese). iOS 26 미만은 언어와 상관없이 chinese
 - 음력 날짜 → 양력 날짜 변환하여 반복 시간 결정
 - **예시**: month=1, day=1 → 음력 설날
   ```
-  2025: 1/29 (양력)
-  2026: 2/17 (양력)
-  2027: 2/6 (양력)
+          dangi   chinese
+  2025:   1/29    1/29  (양력)
+  2026:   2/17    2/17  (양력)
+  2027:   2/7     2/6   (양력)
   ```
+- 서버 반복 전개는 chinese 라, 기준이 갈리는 구간에서는 앱과 하루 차이가 날 수 있다
 
 ---
 
@@ -309,11 +311,12 @@ until=2026-06-30, 매월 15일 반복:
 EventRepeatTimeEnumerator(
   option: EventRepeatingOption,    // 6가지 중 하나
   endOption: RepeatEndOption?,     // 종료 조건
-  without: Set<String>             // 제외할 시간의 customKey 집합
+  without: Set<String>,            // 제외할 시간의 customKey 집합
+  lunarCalendar: LunarCalendarKind  // 음력 매년 반복의 기준, 기본값은 기기 언어
 )
 ```
 
-- 반복 옵션에 따라 적절한 Calendar 설정 (Gregorian or Chinese)
+- 반복 옵션에 따라 적절한 Calendar 설정 (음력 매년은 `lunarCalendar` 의 달력, 그 외는 Gregorian)
 - TimeZone을 옵션에서 가져와 Calendar에 적용
 
 ### 계산 절차
@@ -527,7 +530,7 @@ count=5 반복 할일:
 ```
 설정: LunarCalendarEveryYear(month=4, day=15)
 
-Chinese Calendar를 사용하여 음력 → 양력 변환.
+`LunarCalendarKind` 의 달력을 사용하여 음력 → 양력 변환 (아래 예시는 chinese 기준).
 윤달(leapMonth)이 있는 해에는 Calendar API가 자동으로
 윤달을 건너뛰고 정상 월을 반환.
 

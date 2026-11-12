@@ -1,9 +1,4 @@
-■ Cómo contar el D-Day
-· Activa "Contar el D-Day como D+1" en "Widgets" de Ajustes y el propio D-Day cuenta como D+1, tanto en la app como en los widgets
-· También puedes activarlo solo para un widget de Día D al editarlo
-· Los ajustes de los widgets ahora están en "Widgets", en la pantalla principal de Ajustes
+■ Rokuyo (iOS 26 o posterior)
+· Activa "Rokuyo" en Ajustes > Apariencia para ver el rokuyo del día, como Taian o Butsumetsu, encima de la fecha seleccionada
 
-■ Contraer el calendario
-· Volver a tocar la fecha seleccionada para contraer el calendario ahora es una opción que puedes activar o desactivar. Viene desactivada
-· Activa "Contraer el calendario automáticamente" en Ajustes > Apariencia y toca una vez más la fecha seleccionada para contraer el calendario
-· Todas las semanas del mes siguen a la vista y solo se reducen las casillas de los días. Vuelve a tocar para expandirlo
+· Corrección de errores

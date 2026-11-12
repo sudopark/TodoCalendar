@@ -14,6 +14,7 @@ import Extensions
 import UnitTestHelpKit
 
 @testable import EventDetailScene
+import AdDomainTesting
 import CalendarDomainTesting
 import EventDetailSceneInterface
 import EventDomainInterface
@@ -29,6 +30,7 @@ class EditScheduleEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitabl
     private var stubForemostEventUsecase: StubForemostEventUsecase!
     private var stubDDayCandidateUsecase: StubDDayCandidateUsecase!
     private var stubLiveActivityUsecase: StubEventLiveActivityUsecase!
+    private var stubAdExposureUsecase: StubAdExposureUsecase!
     private var spyRouter: SpyEventDetailRouter!
     private var spyListener: SpyEventDetailListener!
     
@@ -48,6 +50,7 @@ class EditScheduleEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitabl
         self.stubForemostEventUsecase = nil
         self.stubDDayCandidateUsecase = nil
         self.stubLiveActivityUsecase = nil
+        self.stubAdExposureUsecase = nil
         self.spyRouter = nil
         self.spyListener = nil
     }
@@ -66,9 +69,11 @@ class EditScheduleEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitabl
         shouldFailToRemoveSchedule: Bool = false,
         registeredCandidates: [DDayCandidate] = [],
         registeredLiveActivityTarget: LiveActivityTarget? = nil,
-        liveActivityStartError: (any Error)? = nil
+        liveActivityStartError: (any Error)? = nil,
+        isFullScreenAdTurn: Bool = false
     ) -> EditScheduleEventDetailViewModelImple {
 
+        self.stubAdExposureUsecase = StubAdExposureUsecase(isFullScreenAdTurn: isFullScreenAdTurn)
         let (schedule, detail) = (customSchedule ?? self.dummyRepeatingSchedule, self.dummyDetail)
         self.spyScheduleUsecase.stubEvent = schedule
         self.spyEventDetailDataUsecase.stubDetail = detail
@@ -106,7 +111,8 @@ class EditScheduleEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitabl
             calendarSettingUsecase: calendarSettingUsecase,
             foremostEventUsecase: self.stubForemostEventUsecase,
             ddayCandidateUsecase: self.stubDDayCandidateUsecase,
-            liveActivityToggleViewModel: liveActivityToggleViewModel
+            liveActivityToggleViewModel: liveActivityToggleViewModel,
+            adExposureUsecase: self.stubAdExposureUsecase
         )
         viewModel.router = self.spyRouter
         liveActivityToggleViewModel.router = self.spyRouter
@@ -682,7 +688,8 @@ extension EditScheduleEventDetailViewModelImpleTests {
         shouldFailToRemoveSchedule: Bool = false,
         registeredCandidates: [DDayCandidate] = [],
         registeredLiveActivityTarget: LiveActivityTarget? = nil,
-        liveActivityStartError: (any Error)? = nil
+        liveActivityStartError: (any Error)? = nil,
+        isFullScreenAdTurn: Bool = false
     ) -> EditScheduleEventDetailViewModelImple {
         // given
         let expect = expectation(description: "wait prepared")
@@ -702,7 +709,8 @@ extension EditScheduleEventDetailViewModelImpleTests {
             shouldFailToRemoveSchedule: shouldFailToRemoveSchedule,
             registeredCandidates: registeredCandidates,
             registeredLiveActivityTarget: registeredLiveActivityTarget,
-            liveActivityStartError: liveActivityStartError
+            liveActivityStartError: liveActivityStartError,
+            isFullScreenAdTurn: isFullScreenAdTurn
         )
 
         // when
@@ -1191,6 +1199,92 @@ extension EditScheduleEventDetailViewModelImpleTests {
         
         // then
         self.wait(for: [expect], timeout: 0.1)
+    }
+
+    private func saveChanged(_ viewModel: EditScheduleEventDetailViewModelImple) {
+        let expect = expectation(description: "저장 완료")
+        expect.expectedFulfillmentCount = 3
+        let _ = self.waitOutputs(expect, for: viewModel.isSaving) {
+            self.enter(viewModel) { $0 |> \.name .~ "new_name" }
+            viewModel.save()
+        }
+    }
+
+    // 수정을 저장해 전면 광고 차례가 되면 저장을 기록한 뒤 화면을 닫고 전면 광고를 띄운다
+    func testViewModel_whenSaveChangedAndAdTurn_closeThenShowFullScreenAd() {
+        // given
+        let viewModel = self.makeViewModelWithPrepare(isNotRepeating: true, isFullScreenAdTurn: true)
+
+        // when
+        self.saveChanged(viewModel)
+
+        // then
+        XCTAssertEqual(self.stubAdExposureUsecase.didRecordEventSaved, true)
+        XCTAssertEqual(self.stubAdExposureUsecase.didCheckTurnAfterRecordSaved, true)
+        XCTAssertEqual(self.spyRouter.didCloseSceneThenShowFullScreenAd, true)
+        XCTAssertNil(self.spyRouter.didClosed)
+    }
+
+    // 반복 일정의 수정을 저장해도 전면 광고 차례면 화면을 닫고 전면 광고를 띄운다
+    func testViewModel_whenSaveChangedRepeatingAndAdTurn_closeThenShowFullScreenAd() {
+        // given
+        let viewModel = self.makeViewModelWithPrepare(
+            isNotRepeating: false, repeatingEventTargetTime: .at(100), isFullScreenAdTurn: true
+        )
+        self.spyRouter.actionSheetSelectionMocking = { $0.actions.first }
+
+        // when
+        self.saveChanged(viewModel)
+
+        // then
+        XCTAssertEqual(self.stubAdExposureUsecase.didRecordEventSaved, true)
+        XCTAssertEqual(self.spyRouter.didCloseSceneThenShowFullScreenAd, true)
+        XCTAssertNil(self.spyRouter.didClosed)
+    }
+
+    // 전면 광고 차례가 아니면 저장만 기록하고 화면을 닫는다
+    func testViewModel_whenSaveChangedAndNotAdTurn_closeOnly() {
+        // given
+        let viewModel = self.makeViewModelWithPrepare(isNotRepeating: true, isFullScreenAdTurn: false)
+
+        // when
+        self.saveChanged(viewModel)
+
+        // then
+        XCTAssertEqual(self.stubAdExposureUsecase.didRecordEventSaved, true)
+        XCTAssertEqual(self.spyRouter.didClosed, true)
+        XCTAssertNil(self.spyRouter.didCloseSceneThenShowFullScreenAd)
+    }
+
+    // 변경 없이 저장을 누르면 횟수를 세지 않고 전면 광고도 띄우지 않는다
+    func testViewModel_whenSaveWithoutChange_notRecordSaved() {
+        // given
+        let expect = expectation(description: "화면을 닫음")
+        let viewModel = self.makeViewModelWithPrepare(isFullScreenAdTurn: true)
+        self.spyRouter.didCloseCallback = { expect.fulfill() }
+
+        // when
+        viewModel.save()
+
+        // then
+        self.wait(for: [expect], timeout: self.timeout)
+        XCTAssertNil(self.stubAdExposureUsecase.didRecordEventSaved)
+        XCTAssertNil(self.spyRouter.didCloseSceneThenShowFullScreenAd)
+    }
+
+    // 저장에 실패하면 횟수를 세지 않고 전면 광고도 띄우지 않는다
+    func testViewModel_whenSaveFail_notRecordSaved() {
+        // given
+        let viewModel = self.makeViewModelWithPrepare(
+            isNotRepeating: true, shouldFailEdit: true, isFullScreenAdTurn: true
+        )
+
+        // when
+        self.saveChanged(viewModel)
+
+        // then
+        XCTAssertNil(self.stubAdExposureUsecase.didRecordEventSaved)
+        XCTAssertNil(self.spyRouter.didCloseSceneThenShowFullScreenAd)
     }
 }
 

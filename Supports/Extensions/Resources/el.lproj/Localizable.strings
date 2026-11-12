@@ -546,6 +546,15 @@
 "setting.appearance.event.fontSize" = "Μέγεθος γραμματοσειράς κειμένου συμβάντος";
 "setting.appearance.event.show_holidayName" = "Εμφάνιση ονόματος αργίας";
 "setting.appearance.event.show_lunar" = "Σεληνιακό ημερολόγιο";
+"setting.appearance.event.show_lunar::explain" = "Το πρότυπο του σεληνιακού ημερολογίου (κορεατικό, κινεζικό ή βιετναμέζικο) επιλέγεται από τη γλώσσα της συσκευής, οπότε οι σεληνιακές ημερομηνίες μπορεί να διαφέρουν κατά μία ημέρα ανάλογα με το πρότυπο.";
+"setting.appearance.event.show_rokuyo" = "Ροκούγιο";
+"setting.appearance.event.show_rokuyo::available_ios26" = "Διαθέσιμο σε iOS 26 ή νεότερο";
+"rokuyo::taian" = "Τάιαν";
+"rokuyo::shakku" = "Σάκκου";
+"rokuyo::sensho" = "Σένσο";
+"rokuyo::tomobiki" = "Τομομπίκι";
+"rokuyo::senbu" = "Σένμπου";
+"rokuyo::butsumetsu" = "Μπουτσουμέτσου";
 "setting.appearance.event._24form" = "Μορφή 24 ωρών";
 "setting.appearance.event.sample::name" = "🥗 Όνομα συμβάντος";
 "setting.appearance.event.sample::description" = "περιγραφή";

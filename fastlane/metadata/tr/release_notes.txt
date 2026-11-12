@@ -1,9 +1,4 @@
-■ D-Day sayımı
-· Ayarlar'daki "Widget'lar" bölümünde "D-Day'i D+1 olarak say"ı açın; D-Day günü hem uygulamada hem widget'larda D+1 olarak sayılır
-· Bunu bir Geri Sayım widget'ını düzenlerken yalnızca o widget için de açabilirsiniz
-· Widget ayarları artık Ayarlar ana ekranındaki "Widget'lar" bölümünde
+■ Rokuyo (iOS 26 veya sonrası)
+· Ayarlar > Görünüm'de "Rokuyo"yu açın; seçili tarihin üstünde o günün rokuyo'su, örneğin Taian veya Butsumetsu görünür
 
-■ Takvimi daraltma
-· Takvimi daraltmak için seçili tarihe yeniden dokunmak artık açıp kapatabileceğiniz bir seçenek. Varsayılan olarak kapalıdır
-· Ayarlar > Görünüm'de "Takvimi otomatik daralt"ı açın, ardından takvimi daraltmak için seçili tarihe bir kez daha dokunun
-· Ayın tüm haftaları görünmeye devam eder, yalnızca gün hücreleri küçülür. Genişletmek için yeniden dokunun
+· Hata düzeltmeleri

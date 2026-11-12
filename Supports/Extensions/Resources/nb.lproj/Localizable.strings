@@ -546,6 +546,15 @@
 "setting.appearance.event.fontSize" = "Skriftstørrelse for hendelsestekst";
 "setting.appearance.event.show_holidayName" = "Vis navn på helligdag";
 "setting.appearance.event.show_lunar" = "Månekalender";
+"setting.appearance.event.show_lunar::explain" = "Standarden for månekalenderen (koreansk, kinesisk eller vietnamesisk) velges ut fra enhetens språk, så månedatoer kan avvike med én dag avhengig av standarden.";
+"setting.appearance.event.show_rokuyo" = "Rokuyo";
+"setting.appearance.event.show_rokuyo::available_ios26" = "Tilgjengelig på iOS 26 eller nyere";
+"rokuyo::taian" = "Taian";
+"rokuyo::shakku" = "Shakku";
+"rokuyo::sensho" = "Sensho";
+"rokuyo::tomobiki" = "Tomobiki";
+"rokuyo::senbu" = "Senbu";
+"rokuyo::butsumetsu" = "Butsumetsu";
 "setting.appearance.event._24form" = "24-timers format";
 "setting.appearance.event.sample::name" = "🥗 Hendelsesnavn";
 "setting.appearance.event.sample::description" = "beskrivelse";
