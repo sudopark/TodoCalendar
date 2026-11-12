@@ -12,10 +12,21 @@ import Foundation
 public struct WeekEventsStyleSetting: WidgetStyleSetting {
 
     public var showWeekDayHeader: Bool
+    public var eventTextSize: Int
 
     public static let initial = WeekEventsStyleSetting(
-        showWeekDayHeader: true
+        showWeekDayHeader: true,
+        eventTextSize: Constant.eventTextSizeRange.lowerBound
     )
+
+    public var eventTextSizeRange: ClosedRange<Int> {
+        Constant.eventTextSizeRange
+    }
+}
+
+
+private enum Constant {
+    static let eventTextSizeRange: ClosedRange<Int> = 8...10
 }
 
 
@@ -30,5 +41,12 @@ extension WeekEventsStyleSetting {
         self.showWeekDayHeader = try container.decodeIfPresent(
             Bool.self, forKey: .showWeekDayHeader
         ) ?? initial.showWeekDayHeader
+        let storedEventTextSize = try container.decodeIfPresent(
+            Int.self, forKey: .eventTextSize
+        ) ?? initial.eventTextSize
+        self.eventTextSize = min(
+            max(storedEventTextSize, initial.eventTextSizeRange.lowerBound),
+            initial.eventTextSizeRange.upperBound
+        )
     }
 }
