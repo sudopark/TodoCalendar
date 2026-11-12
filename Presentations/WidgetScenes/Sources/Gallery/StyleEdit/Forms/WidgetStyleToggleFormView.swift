@@ -16,16 +16,23 @@ import SettingDomainInterface
 
 struct WidgetStyleToggleFormView<Item: WidgetStyleItem>: View {
 
+    typealias TextSizeStep = (name: String, value: Int, range: ClosedRange<Int>, onChange: (Int) -> Void)
+
     @Environment(ViewAppearance.self) private var appearance
 
     var title: String = "widget.style.edit::items::section".localized()
     let setting: Item.Setting
     let onChange: (any WidgetStyleSetting) -> Void
+    var textSizeStep: TextSizeStep? = nil
 
     var body: some View {
         Section {
             ForEach(Array(Item.allCases), id: \.self) { item in
                 self.itemRow(item)
+                    .listRowBackground(appearance.colorSet.bg1.asColor)
+            }
+            if let textSizeStep {
+                self.textSizeStepRow(textSizeStep)
                     .listRowBackground(appearance.colorSet.bg1.asColor)
             }
         } header: {
@@ -59,6 +66,28 @@ struct WidgetStyleToggleFormView<Item: WidgetStyleItem>: View {
                 )
             )
             .controlSize(.small)
+            .labelsHidden()
+        }
+    }
+
+    private func textSizeStepRow(_ step: TextSizeStep) -> some View {
+        HStack {
+            Text(step.name)
+                .font(appearance.fontSet.normal.asFont)
+                .foregroundStyle(appearance.colorSet.text0.asColor)
+
+            Spacer()
+
+            Text("\(step.value)pt")
+                .font(appearance.fontSet.subNormal.asFont)
+                .foregroundStyle(appearance.colorSet.text2.asColor)
+
+            Stepper(
+                "",
+                value: .init(get: { step.value }, set: { step.onChange($0) }),
+                in: step.range,
+                step: 1
+            )
             .labelsHidden()
         }
     }

@@ -652,6 +652,7 @@
 "widget.style.month::highlightToday" = "오늘 강조";
 "widget.style.month::showEventUnderline" = "이벤트 밑줄";
 "widget.style.weekEvents::showWeekDayHeader" = "요일 헤더";
+"widget.style.weekEvents::eventTextSize" = "일정 글자 크기";
 "widget.style.todayAndNext::showTimeZone" = "타임존";
 "widget.style.foremost::showTypeLabel" = "\"가장 중요한 일정\" 라벨";
 "widget.style.aiCommand::showExplain" = "설명 문구";

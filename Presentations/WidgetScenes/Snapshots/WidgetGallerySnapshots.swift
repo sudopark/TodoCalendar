@@ -260,6 +260,40 @@ final class WidgetGallerySnapshots: XCTestCase {
     }
 
     @MainActor
+    private func weekEventsTextSizeEditState() -> WidgetStyleEditViewState {
+        let setting = WeekEventsStyleSetting.initial |> \.eventTextSize .~ 10
+        let style = WidgetStyle(
+            id: .init(variant: .twoWeekEvents, style: .default), name: nil, setting: setting
+        )
+        let state = WidgetStyleEditViewState()
+        state.styles = [
+            .init(
+                styleId: style.id, name: style.displayName,
+                hasUnsavedChange: false, setting: style.setting,
+                background: style.background, photo: style.photo
+            )
+        ]
+        state.selectedStyleId = style.id
+        state.selectedSetting = style.setting
+        state.selectedBackground = style.background
+        return state
+    }
+
+    @MainActor
+    func test_widgetStyleEdit_weekEvents_textSize() {
+        let variants: [WidgetVariant] = [
+            .oneWeekEvents, .twoWeekEvents, .threeWeekEvents, .fourWeekEvents,
+            .currentMonthEvents, .lastMonthEvents, .nextMonthEvents
+        ]
+        captureSnapshotPair(named: "widgetStyleEdit-weekEvents-textSize", layout: .fullScreen) { theme in
+            WidgetStyleEditView(variants: variants, setting: .init())
+                .environment(self.weekEventsTextSizeEditState())
+                .environment(WidgetStyleEditViewEventHandler())
+                .environment(self.makeAppearance(theme))
+        }
+    }
+
+    @MainActor
     func test_widgetStyleEdit_monthYearOff() {
         captureSnapshotPair(named: "widgetStyleEdit-monthYearOff", layout: .fullScreen) { theme in
             WidgetStyleEditView(variants: [.todaySummarySmall], setting: .init())
