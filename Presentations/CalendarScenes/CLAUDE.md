@@ -98,12 +98,12 @@ Month와 DayEventList는 독립 Scene이 아니라 **Component** (ViewModel만 �
 
 | 항목 | 설명 |
 |---|---|
-| 구성 | `UICollectionView` (섹션 = 달, 아이템 = 주, `UIHostingConfiguration` 셀) + 고정 요일 헤더 |
-| 버퍼 | 포커스 월 앞뒤 두 달씩 다섯 섹션. 섹션은 그 달 1일이 든 주부터 다음 달 1일이 든 주 직전까지라 경계 주가 한 번만 나온다 |
+| 구성 | `UICollectionView` (섹션 = 달, 아이템 = 주, `UIHostingConfiguration` 셀) + 고정 요일 헤더. 섹션 헤더가 월 라벨(`ContinuousMonthLabelView` — 올해는 월 이름만, 다른 해는 연도 포함)이고, 앵커가 첫 주라 포커스 달 라벨은 화면 위로 숨는다 |
+| 버퍼 | 포커스 월 앞뒤 두 달씩 다섯 섹션. 섹션마다 그 달 전체 주를 갖고, 경계 주는 앞뒤 두 섹션에 각각 나온다. 행 id 는 `<연>-<월>:<주 id>` 로 섹션마다 다르고, 이벤트 스택·날짜별 이벤트도 이 id 로 찾는다. 막대는 그 달 범위로 잘린다 |
 | 스크롤 | 제스처당 한 달씩 스냅(`scrollViewWillEndDragging` 이 손 뗀 위치에 관성 거리를 더한 시스템 목표 오프셋을 본다. 이웃 달 높이의 절반을 넘으면 그 달 맨 위로, 아니면 지금 달 맨 위로 바꾼다). 멈춘 뒤 버퍼를 다시 짠다. 셀 높이가 가변이라, 멈춰 있는 동안은 컬렉션 뷰 레이아웃이 끝날 때마다 포커스 섹션 맨 위로 오프셋을 다시 붙인다. 스크롤 중 도착한 섹션은 멈출 때까지 보류한다 |
 | Interactor | `changeFocusedMonth(to:)` (버퍼 안이면 애니메이션 이동), `selectDay(_:)` (강조만) |
 | Listener | `ContinuousMonthsSceneListener` — 사용자 스냅(`didScrollTo`)·탭(`didSelect`)·공유 범위 요청, 선택일과 다음날 목록의 (날짜 모델, 그날 이벤트)(`didChangeSelectedDay(_:and:)` — 다음날 개수는 VM 의 `Constant.nextDayCount`) |
-| 흐림 | 포커스 월 밖 날짜를 화면 단에서 흐리게 그린다 (`WeekRowView` 의 `focusedMonth`). `DayCellViewModel.isNotCurrentMonth` 는 쓰지 않는다 |
+| 흐림·빈칸 | 포커스 월 밖 날짜를 화면 단에서 흐리게 그린다 (`WeekRowView` 의 `focusedMonth`). 그 섹션의 달이 아닌 칸(`DayCellViewModel.isNotCurrentMonth`)은 `hidesOtherMonthDays` 로 숫자·탭 없이 비운다 |
 
 ### SelectDayDialog (날짜 선택 모달)
 
