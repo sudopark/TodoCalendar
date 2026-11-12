@@ -21,7 +21,6 @@ import SettingDomainInterface
 public struct WeekEventsView: View {
     
     private enum Metric {
-        static let eventRowHeightWithSpacing: CGFloat = 10
         static let eventTopMargin: CGFloat = 14
         static let eventInterspacing: CGFloat = 1
     }
@@ -150,7 +149,7 @@ public struct WeekEventsView: View {
         _ stackModel: WeekEventStackViewModel?
     ) -> some View {
         let totalHeight = daySize.height - Metric.eventTopMargin
-        let drawableRowCount = Int(totalHeight / Metric.eventRowHeightWithSpacing)
+        let drawableRowCount = Int(totalHeight / model.eventRowHeightWithSpacing)
         let maxDrawableEventRowCount = drawableRowCount - 1
         guard maxDrawableEventRowCount > 0, let stackModel else { return EmptyView().asAnyView() }
         
@@ -193,12 +192,12 @@ public struct WeekEventsView: View {
         return HStack(spacing: 2) {
              RoundedRectangle(cornerRadius: 12)
                  .fill(lineColor)
-                 .frame(width: 2, height: 8)
+                 .frame(width: 2, height: model.eventTextSize)
                  .padding(.leading, 1)
              
              Text(line.name)
-                .font(.system(size: 8))
-                .minimumScaleFactor(0.5)
+                .font(.system(size: model.eventTextSize))
+                .minimumScaleFactor(model.eventTextMinimumScaleFactor)
                 .foregroundColor(colorSet.eventText.asColor)
                  .lineLimit(1)
         }
