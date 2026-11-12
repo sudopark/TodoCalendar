@@ -546,6 +546,15 @@
 "setting.appearance.event.fontSize" = "Skriftstørrelse for begivenhedstekst";
 "setting.appearance.event.show_holidayName" = "Vis navn på helligdag";
 "setting.appearance.event.show_lunar" = "Månekalender";
+"setting.appearance.event.show_lunar::explain" = "Månekalenderens standard (koreansk, kinesisk eller vietnamesisk) vælges ud fra enhedens sprog, så månedatoer kan afvige med en dag afhængigt af standarden.";
+"setting.appearance.event.show_rokuyo" = "Rokuyo";
+"setting.appearance.event.show_rokuyo::available_ios26" = "Tilgængelig på iOS 26 eller nyere";
+"rokuyo::taian" = "Taian";
+"rokuyo::shakku" = "Shakku";
+"rokuyo::sensho" = "Sensho";
+"rokuyo::tomobiki" = "Tomobiki";
+"rokuyo::senbu" = "Senbu";
+"rokuyo::butsumetsu" = "Butsumetsu";
 "setting.appearance.event._24form" = "24-timers format";
 "setting.appearance.event.sample::name" = "🥗 Begivenhedsnavn";
 "setting.appearance.event.sample::description" = "beskrivelse";

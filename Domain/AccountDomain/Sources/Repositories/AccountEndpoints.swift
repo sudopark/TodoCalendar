@@ -33,7 +33,7 @@ public enum AccountAPIEndpoints: Endpoint {
     public var authorization: EndpointAuthorization {
         switch self {
         case .info: return .none
-        case .account: return .none
+        case .account: return .calendarAPI
         }
     }
 }

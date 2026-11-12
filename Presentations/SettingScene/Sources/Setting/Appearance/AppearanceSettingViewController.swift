@@ -63,6 +63,7 @@ final class AppearanceSettingViewController: UIHostingController<AppearanceSetti
         eventListSettingHandler.decreaseFontSize = eventListAppearanceSettingViewModel.decreaseFontSize
         eventListSettingHandler.toggleIsShowHolidayName = eventListAppearanceSettingViewModel.toggleShowHolidayName(_:)
         eventListSettingHandler.toggleShowLunarCalendarDate = eventListAppearanceSettingViewModel.toggleShowLunarCalendarDate(_:)
+        eventListSettingHandler.toggleShowRokuyo = eventListAppearanceSettingViewModel.toggleShowRokuyo(_:)
         eventListSettingHandler.toggleIs24HourFom = eventListAppearanceSettingViewModel.toggleIsShowTimeWith24HourForm(_:)
         eventListSettingHandler.toggleShowUncompletedTodo = eventListAppearanceSettingViewModel.toggleShowUncompletedTodos(_:)
         

@@ -546,6 +546,15 @@
 "setting.appearance.event.fontSize" = "Tapahtuman tekstin fonttikoko";
 "setting.appearance.event.show_holidayName" = "Näytä vapaapäivän nimi";
 "setting.appearance.event.show_lunar" = "Kuukalenteri";
+"setting.appearance.event.show_lunar::explain" = "Kuukalenterin standardi (korealainen, kiinalainen tai vietnamilainen) valitaan laitteen kielen mukaan, joten kuukalenterin päivämäärät voivat erota päivällä standardista riippuen.";
+"setting.appearance.event.show_rokuyo" = "Rokuyo";
+"setting.appearance.event.show_rokuyo::available_ios26" = "Käytettävissä iOS 26:ssa tai uudemmassa";
+"rokuyo::taian" = "Taian";
+"rokuyo::shakku" = "Shakku";
+"rokuyo::sensho" = "Sensho";
+"rokuyo::tomobiki" = "Tomobiki";
+"rokuyo::senbu" = "Senbu";
+"rokuyo::butsumetsu" = "Butsumetsu";
 "setting.appearance.event._24form" = "24 tunnin muoto";
 "setting.appearance.event.sample::name" = "🥗 Tapahtuman nimi";
 "setting.appearance.event.sample::description" = "kuvaus";

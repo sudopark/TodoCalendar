@@ -1,9 +1,4 @@
-■ D-Dayn laskeminen
-· Laita päälle "Laske D-Day päiväksi D+1" Asetusten kohdassa "Widgetit", niin itse D-Day lasketaan päiväksi D+1 sekä apissa että widgeteissä
-· Voit myös laittaa sen päälle vain yhteen Lähtölaskenta-widgetiin, kun muokkaat sitä
-· Widgetien asetukset löytyvät nyt Asetusten pääsivun kohdasta "Widgetit"
+■ Rokuyo (iOS 26 tai uudempi)
+· Laita päälle "Rokuyo" kohdassa Asetukset > Ulkoasu, niin valitun päivämäärän yläpuolella näkyy päivän rokuyo, esimerkiksi Taian tai Butsumetsu
 
-■ Kalenterin kutistaminen
-· Valitun päivämäärän napauttaminen uudelleen kalenterin kutistamiseksi on nyt valinta, jonka voit laittaa päälle tai pois. Oletuksena se on pois päältä
-· Laita päälle "Kalenterin automaattinen kutistus" kohdassa Asetukset > Ulkoasu ja napauta valittua päivämäärää vielä kerran, niin kalenteri kutistuu
-· Kuukauden kaikki viikot pysyvät näkyvissä, vain päivien ruudut pienenevät. Napauta uudelleen, niin kalenteri laajenee
+· Virheenkorjauksia

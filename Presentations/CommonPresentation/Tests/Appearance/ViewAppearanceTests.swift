@@ -8,6 +8,8 @@
 
 import Testing
 import SwiftUI
+import Prelude
+import Optics
 
 @testable import CommonPresentation
 import SettingDomainInterface
@@ -116,6 +118,22 @@ struct ViewAppearanceTests {
 
         // then
         #expect(appearance.isSystemDarkTheme == isSystemDarkTheme)
+    }
+
+    @Test("init 은 달력 설정의 로쿠요 표시 여부를 그대로 든다", arguments: [true, false])
+    func init_keepsShowRokuyo(_ showRokuyo: Bool) {
+        // given
+        let setting = AppearanceSettings(
+            calendar: .init(colorSetKey: .defaultLight, fontSetKey: .systemDefault)
+                |> \.showRokuyo .~ showRokuyo,
+            defaultTagColor: .init(holiday: "", default: "")
+        )
+
+        // when
+        let appearance = ViewAppearance(setting: setting, isSystemDarkTheme: false)
+
+        // then
+        #expect(appearance.showRokuyo == showRokuyo)
     }
 
     @Test("설정에 담긴 현재 커스텀 테마로 커스텀 키의 색 세트를 만든다")

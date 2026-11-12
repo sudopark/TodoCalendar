@@ -15,6 +15,7 @@ import Extensions
 import CalendarPresentation
 import AIDomainInterface
 import AccountDomainInterface
+import AdDomainInterface
 import CalendarDomainInterface
 import EventDetailSceneInterface
 import EventDomainInterface
@@ -27,13 +28,19 @@ struct SelectedDayModel: Equatable {
     let dateText: String
     var holidayName: String?
     let lunarDateText: String
+    var rokuyo: Rokuyo?
 
-    init(dateText: String, lunarDateText: String) {
+    init(dateText: String, lunarDateText: String, rokuyo: Rokuyo? = nil) {
         self.dateText = dateText
         self.lunarDateText = lunarDateText
+        self.rokuyo = rokuyo
     }
 
-    init(_ timeZone: TimeZone, currentModel: CurrentSelectDayModel) {
+    init(
+        _ timeZone: TimeZone,
+        currentModel: CurrentSelectDayModel,
+        lunarCalendar: LunarCalendarKind = LunarCalendarKind(language: Locale.current.language.languageCode)
+    ) {
         let date = Date(timeIntervalSince1970: currentModel.range.lowerBound)
 
         let formatter = DateFormatter() |> \.timeZone .~ timeZone
@@ -42,10 +49,13 @@ struct SelectedDayModel: Equatable {
 
         let lunarFormatter = DateFormatter()
             |> \.timeZone .~ timeZone
-            |> \.calendar .~ Calendar(identifier: .chinese)
+            |> \.calendar .~ lunarCalendar.calendar(timeZone: timeZone)
 
         lunarFormatter.dateFormat = "date_form::MM_dd".localized()
         self.lunarDateText = "🌕 \(lunarFormatter.string(from: date))"
+
+        let gregorian = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
+        self.rokuyo = Rokuyo(CalendarComponent.Day(date, calendar: gregorian))
 
         self.holidayName = currentModel.holidays.isEmpty
             ? nil
@@ -106,6 +116,7 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
     private let ddayCandidateUsecase: any DDayCandidateUsecase
     private let guideTodoUsecase: any GuideTodoUsecase
     private let appReviewRequestUsecase: any AppReviewRequestUsecase
+    private let adExposureUsecase: any AdExposureUsecase
     var router: (any DayEventListRouting)?
     private weak var listener: (any DayEventListSceneListener)?
 
@@ -121,7 +132,8 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
         eventLiveActivityUsecase: any EventLiveActivityUsecase,
         ddayCandidateUsecase: any DDayCandidateUsecase,
         guideTodoUsecase: any GuideTodoUsecase,
-        appReviewRequestUsecase: any AppReviewRequestUsecase
+        appReviewRequestUsecase: any AppReviewRequestUsecase,
+        adExposureUsecase: any AdExposureUsecase
     ) {
         self.calendarUsecase = calendarUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
@@ -135,6 +147,7 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
         self.ddayCandidateUsecase = ddayCandidateUsecase
         self.guideTodoUsecase = guideTodoUsecase
         self.appReviewRequestUsecase = appReviewRequestUsecase
+        self.adExposureUsecase = adExposureUsecase
 
         self.internalBind()
     }
@@ -202,7 +215,7 @@ extension DayEventListViewModelImple {
         Task { [weak self] in
             do {
                 _ = try await self?.todoEventUsecase.makeTodoEvent(params)
-                self?.requestAppReviewIfNeeded()
+                self?.requestReviewOrFullScreenAdAfterQuickTodoSaved()
             } catch let error {
                 self?.router?.showError(error)
             }
@@ -213,11 +226,15 @@ extension DayEventListViewModelImple {
         .store(in: self.cancellables)
     }
 
-    private func requestAppReviewIfNeeded() {
+    private func requestReviewOrFullScreenAdAfterQuickTodoSaved() {
         self.appReviewRequestUsecase.recordNewEventSaved()
-        guard self.appReviewRequestUsecase.canRequestReview() else { return }
-        self.appReviewRequestUsecase.markReviewRequested()
-        self.router?.requestAppReview()
+        self.adExposureUsecase.recordEventSavedForFullScreenAd()
+        if self.appReviewRequestUsecase.canRequestReview() {
+            self.appReviewRequestUsecase.markReviewRequested()
+            self.router?.requestAppReview()
+        } else if self.adExposureUsecase.isFullScreenAdTurnAfterEventSave() {
+            self.router?.showFullScreenAd()
+        }
     }
 
     private func updatePendingTodos(

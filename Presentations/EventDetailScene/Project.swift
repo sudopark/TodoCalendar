@@ -6,6 +6,7 @@ let project = Project.frameworkWithTest(name: "EventDetailScene",
                                         iOSTargetVersion: "17.0",
                                         snapshotTests: true,
                                         dependencies: [
+                                            .project(target: "AdDomainInterface", path: .relativeToRoot("Domain/AdDomain")),
                                             .project(target: "CalendarDomainInterface", path: .relativeToRoot("Domain/CalendarDomain")),
                                             .project(target: "EventDetailSceneInterface", path: .relativeToRoot("Presentations/Scenes/Interfaces/EventDetailSceneInterface")),
                                             .project(target: "EventDomainInterface", path: .relativeToRoot("Domain/EventDomain")),
@@ -25,6 +26,7 @@ let project = Project.frameworkWithTest(name: "EventDetailScene",
                                                      path: .relativeToRoot("Supports/Extensions"))
                                         ],
                                         testDependencies: [
+                                            .project(target: "AdDomainTesting", path: .relativeToRoot("Domain/AdDomain")),
                                             .project(target: "CalendarDomainTesting", path: .relativeToRoot("Domain/CalendarDomain")),
                                             .project(target: "EventDomainTesting", path: .relativeToRoot("Domain/EventDomain")),
                                             .project(target: "ExternalCalendarDomainTesting", path: .relativeToRoot("Domain/ExternalCalendarDomain")),

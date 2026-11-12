@@ -33,6 +33,8 @@ protocol EventDetailRouting: Routing, Sendable, AnyObject {
     func showShareSheet(text: String)
 
     func closeSceneThenRequestAppReview()
+
+    func closeSceneThenShowFullScreenAd()
 }
 
 
@@ -52,6 +54,14 @@ extension EventDetailRouting {
             |> \.cancelText .~ "eventDetail.cancel_edit::continue::button".localized()
         self.showConfirm(dialog: info)
     }
+
+    func closeSceneAfterEventSaved(isFullScreenAdTurn: Bool) {
+        if isFullScreenAdTurn {
+            self.closeSceneThenShowFullScreenAd()
+        } else {
+            self.closeScene(animate: true, nil)
+        }
+    }
 }
 
 // MARK: - Router
@@ -64,6 +74,7 @@ final class EventDetailRouter: BaseRouterImple, EventDetailRouting, EventDetailI
     private let guideSceneBuilder: any GuideSceneBuilder
     private let selectMapSceneBuilder: any SelectMapAppDialogSceneBuiler
     private let appStoreReviewRouter: any AppStoreReviewRouter
+    private let fullScreenAdRouter: any FullScreenAdRouter
     weak var inputViewModel: (any EventDetailInputViewModel)?
     
     init(
@@ -72,7 +83,8 @@ final class EventDetailRouter: BaseRouterImple, EventDetailRouting, EventDetailI
         selectNotificationTimeSceneBuilder: any SelectEventNotificationTimeSceneBuiler,
         guideSceneBuilder: any GuideSceneBuilder,
         selectMapSceneBuilder: any SelectMapAppDialogSceneBuiler,
-        appStoreReviewRouter: any AppStoreReviewRouter
+        appStoreReviewRouter: any AppStoreReviewRouter,
+        fullScreenAdRouter: any FullScreenAdRouter
     ) {
         self.selectRepeatOptionSceneBuilder = selectRepeatOptionSceneBuilder
         self.selectEventTagSceneBuilder = selectEventTagSceneBuilder
@@ -80,6 +92,7 @@ final class EventDetailRouter: BaseRouterImple, EventDetailRouting, EventDetailI
         self.guideSceneBuilder = guideSceneBuilder
         self.selectMapSceneBuilder = selectMapSceneBuilder
         self.appStoreReviewRouter = appStoreReviewRouter
+        self.fullScreenAdRouter = fullScreenAdRouter
     }
 }
 
@@ -107,6 +120,17 @@ extension EventDetailRouter {
             }
             await self.scene?.dismiss(animated: true)
             self.appStoreReviewRouter.requestAppReview(in: windowScene)
+        }
+    }
+
+    func closeSceneThenShowFullScreenAd() {
+        Task { @MainActor in
+            // 전환 중인 화면에서는 AdMob 이 표시를 거절한다 (Code=17)
+            let presenting = self.scene?.presentingViewController
+            self.scene?.dismiss(animated: true) { [fullScreenAdRouter] in
+                guard let presenting else { return }
+                fullScreenAdRouter.showFullScreenAd(from: presenting)
+            }
         }
     }
 

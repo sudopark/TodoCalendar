@@ -10,6 +10,7 @@ import Combine
 import Prelude
 import Optics
 import Extensions
+import CalendarDomainInterface
 import SettingDomainInterface
 
 
@@ -20,19 +21,22 @@ struct EventListAppearanceSetting {
     let showLunarCalendarDate: Bool
     let is24hourForm: Bool
     let showUncompletedTodos: Bool
+    let showRokuyo: Bool
     
     init(
         eventTextAdditionalSize: CGFloat,
         showHoliday: Bool,
         showLunarCalendarDate: Bool,
         is24hourForm: Bool,
-        showUncompletedTodos: Bool
+        showUncompletedTodos: Bool,
+        showRokuyo: Bool = false
     ) {
         self.eventTextAdditionalSize = eventTextAdditionalSize
         self.showHoliday = showHoliday
         self.showLunarCalendarDate = showLunarCalendarDate
         self.is24hourForm = is24hourForm
         self.showUncompletedTodos = showUncompletedTodos
+        self.showRokuyo = showRokuyo
     }
     
     init(_ setting: CalendarAppearanceSettings) {
@@ -41,6 +45,7 @@ struct EventListAppearanceSetting {
         self.showLunarCalendarDate = setting.showLunarCalendarDate
         self.is24hourForm = setting.is24hourForm
         self.showUncompletedTodos = setting.showUncompletedTodos
+        self.showRokuyo = setting.showRokuyo
     }
 }
 
@@ -51,8 +56,12 @@ struct EventListAppearanceSampleModel: Equatable {
     var is24HourForm: Bool = true
     var holidayName: String?
     var lunarDateText: String?
+    var rokuyo: Rokuyo?
     
-    init?(_ setting: EventListAppearanceSetting) {
+    init?(
+        _ setting: EventListAppearanceSetting,
+        lunarCalendar: LunarCalendarKind = LunarCalendarKind(language: Locale.current.language.languageCode)
+    ) {
         let calendar = Calendar(identifier: .gregorian)
         guard let christmas = calendar.dateBySetting(from: Date(), mutating: { $0.month = 12; $0.day = 25 })
         else { return nil }
@@ -67,8 +76,12 @@ struct EventListAppearanceSampleModel: Equatable {
         if setting.showLunarCalendarDate {
             let lunarForm = DateFormatter() 
                 |> \.dateFormat .~ "date_form::MM_dd".localized()
-                |> \.calendar .~ Calendar(identifier: .chinese)
-            self.lunarDateText = lunarForm.string(from: christmas)
+                |> \.calendar .~ lunarCalendar.calendar(timeZone: .current)
+            self.lunarDateText = "🌕 \(lunarForm.string(from: christmas))"
+        }
+        
+        if setting.showRokuyo {
+            self.rokuyo = Rokuyo(CalendarComponent.Day(christmas, calendar: calendar))
         }
     }
 }
@@ -79,6 +92,7 @@ protocol EventListAppearnaceSettingViewModel: AnyObject, Sendable {
     func decreaseFontSize()
     func toggleShowHolidayName(_ show: Bool)
     func toggleShowLunarCalendarDate(_ show: Bool)
+    func toggleShowRokuyo(_ show: Bool)
     func toggleIsShowTimeWith24HourForm(_ isOn: Bool)
     func toggleShowUncompletedTodos(_ show: Bool)
     
@@ -87,7 +101,9 @@ protocol EventListAppearnaceSettingViewModel: AnyObject, Sendable {
     var eventFontIncreasedSizeModel: AnyPublisher<EventTextAdditionalSizeModel, Never> { get }
     var isShowHolidayName: AnyPublisher<Bool, Never> { get }
     var isShowLunarCalendarDate: AnyPublisher<Bool, Never> { get }
+    var isShowRokuyo: AnyPublisher<Bool, Never> { get }
     var isShowTimeWith24HourForm: AnyPublisher<Bool, Never> { get }
+    var isRokuyoSupported: Bool { get }
 }
 
 final class EventListAppearnaceSettingViewModelImple: EventListAppearnaceSettingViewModel, @unchecked Sendable {
@@ -98,12 +114,16 @@ final class EventListAppearnaceSettingViewModelImple: EventListAppearnaceSetting
     }
     
     private let uiSettingUsecase: any UISettingUsecase
+    let isRokuyoSupported: Bool
     weak var router: (any EventListAppearnaceSettingViewRouting)?
     init(
         setting: EventListAppearanceSetting,
         uiSettingUsecase: any UISettingUsecase
     ) {
         self.uiSettingUsecase = uiSettingUsecase
+        self.isRokuyoSupported = Rokuyo(
+            CalendarComponent.Day(Date(), calendar: Calendar(identifier: .gregorian))
+        ) != nil
         self.subject.setting.send(setting)
     }
     
@@ -150,6 +170,15 @@ extension EventListAppearnaceSettingViewModelImple {
         else { return }
         
         let params = EditCalendarAppearanceSettingParams() |> \.showLunarCalendarDate .~ show
+        self.updateSetting(params)
+    }
+    
+    func toggleShowRokuyo(_ show: Bool) {
+        guard let setting = self.subject.setting.value,
+              setting.showRokuyo != show
+        else { return }
+        
+        let params = EditCalendarAppearanceSettingParams() |> \.showRokuyo .~ show
         self.updateSetting(params)
     }
     
@@ -223,6 +252,13 @@ extension EventListAppearnaceSettingViewModelImple {
     var isShowLunarCalendarDate: AnyPublisher<Bool, Never> {
         return self.subject.setting
             .compactMap { $0?.showLunarCalendarDate }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+    
+    var isShowRokuyo: AnyPublisher<Bool, Never> {
+        return self.subject.setting
+            .compactMap { $0?.showRokuyo }
             .removeDuplicates()
             .eraseToAnyPublisher()
     }

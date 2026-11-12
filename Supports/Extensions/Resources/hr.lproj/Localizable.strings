@@ -545,6 +545,15 @@
 "setting.appearance.event.fontSize" = "Veličina fonta teksta događaja";
 "setting.appearance.event.show_holidayName" = "Prikaži naziv blagdana";
 "setting.appearance.event.show_lunar" = "Lunarni kalendar";
+"setting.appearance.event.show_lunar::explain" = "Standard lunarnog kalendara (korejski, kineski ili vijetnamski) bira se prema jeziku uređaja, pa se lunarni datumi mogu razlikovati za jedan dan ovisno o standardu.";
+"setting.appearance.event.show_rokuyo" = "Rokuyo";
+"setting.appearance.event.show_rokuyo::available_ios26" = "Dostupno na iOS-u 26 ili novijem";
+"rokuyo::taian" = "Taian";
+"rokuyo::shakku" = "Shakku";
+"rokuyo::sensho" = "Sensho";
+"rokuyo::tomobiki" = "Tomobiki";
+"rokuyo::senbu" = "Senbu";
+"rokuyo::butsumetsu" = "Butsumetsu";
 "setting.appearance.event._24form" = "24-satni format";
 "setting.appearance.event.sample::name" = "🥗 Naziv događaja";
 "setting.appearance.event.sample::description" = "opis";

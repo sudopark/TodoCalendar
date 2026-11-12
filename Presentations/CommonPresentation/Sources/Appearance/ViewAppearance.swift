@@ -39,6 +39,7 @@ import SettingDomainInterface
     public var eventTextAdditionalSize: CGFloat
     public var showHoliday: Bool
     public var showLunarCalendarDate: Bool
+    public var showRokuyo: Bool
     public var is24hourForm: Bool
     
     // general
@@ -151,6 +152,7 @@ import SettingDomainInterface
         self.eventTextAdditionalSize = calendar.eventTextAdditionalSize
         self.showHoliday = calendar.showHoliday
         self.showLunarCalendarDate = calendar.showLunarCalendarDate
+        self.showRokuyo = calendar.showRokuyo
         self.is24hourForm = calendar.is24hourForm
         
         self.hapticEffectOff = calendar.hapticEffectIsOn

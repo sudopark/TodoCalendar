@@ -20,7 +20,8 @@ public final class EventRepeatTimeEnumerator: Sendable {
     public init?(
         _ option: any EventRepeatingOption,
         endOption: EventRepeating.RepeatEndOption?,
-        without timesKey: Set<String> = []
+        without timesKey: Set<String> = [],
+        lunarCalendar: LunarCalendarKind = LunarCalendarKind(language: Locale.current.language.languageCode)
     ) {
         self.option = option
         self.endOption = endOption
@@ -43,7 +44,7 @@ public final class EventRepeatTimeEnumerator: Sendable {
             self.calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ everyYear.timeZone
             
         case let everyYear as EventRepeatingOptions.LunarCalendarEveryYear:
-            self.calendar = Calendar(identifier: .chinese) |> \.timeZone .~ everyYear.timeZone
+            self.calendar = lunarCalendar.calendar(timeZone: everyYear.timeZone)
             
         default: return nil
         }

@@ -53,6 +53,11 @@ final class SpyEventDetailRouter: BaseSpyRouter, EventDetailRouting, @unchecked 
     func closeSceneThenRequestAppReview() {
         self.didCloseSceneThenRequestAppReview = true
     }
+
+    var didCloseSceneThenShowFullScreenAd: Bool?
+    func closeSceneThenShowFullScreenAd() {
+        self.didCloseSceneThenShowFullScreenAd = true
+    }
 }
 
 final class SpyEventDetailListener: EventDetailSceneListener {

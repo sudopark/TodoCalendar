@@ -546,6 +546,15 @@
 "setting.appearance.event.fontSize" = "Textstorlek för händelser";
 "setting.appearance.event.show_holidayName" = "Visa helgdagens namn";
 "setting.appearance.event.show_lunar" = "Månkalender";
+"setting.appearance.event.show_lunar::explain" = "Månkalenderns standard (koreansk, kinesisk eller vietnamesisk) väljs utifrån enhetens språk, så måndatum kan skilja sig med en dag beroende på standarden.";
+"setting.appearance.event.show_rokuyo" = "Rokuyo";
+"setting.appearance.event.show_rokuyo::available_ios26" = "Tillgänglig i iOS 26 eller senare";
+"rokuyo::taian" = "Taian";
+"rokuyo::shakku" = "Shakku";
+"rokuyo::sensho" = "Sensho";
+"rokuyo::tomobiki" = "Tomobiki";
+"rokuyo::senbu" = "Senbu";
+"rokuyo::butsumetsu" = "Butsumetsu";
 "setting.appearance.event._24form" = "24-timmarsformat";
 "setting.appearance.event.sample::name" = "🥗 Händelsenamn";
 "setting.appearance.event.sample::description" = "beskrivning";

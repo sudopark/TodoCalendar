@@ -14,14 +14,8 @@ import AdDomainInterface
 struct FullScreenAdExposureRecordMapper: Codable {
 
     private enum CodingKeys: String, CodingKey {
-        case scopeType = "scope_type"
-        case serviceIdentifier = "service_identifier"
         case lastExposeDate = "last_expose_date"
-    }
-
-    private enum ScopeType: String, Codable {
-        case application
-        case service
+        case countOfDay = "count_of_day"
     }
 
     let record: FullScreenAdExposureRecord
@@ -31,27 +25,15 @@ struct FullScreenAdExposureRecordMapper: Codable {
 
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        let lastExposeDate = try container.decode(Date.self, forKey: .lastExposeDate)
-        let scope: FullScreenAdExposureRecord.Scope
-        switch try container.decode(ScopeType.self, forKey: .scopeType) {
-        case .application:
-            scope = .application
-        case .service:
-            let identifier = try container.decode(String.self, forKey: .serviceIdentifier)
-            scope = .service(identifier: identifier)
-        }
-        self.record = .init(scope: scope, lastExposeDate: lastExposeDate)
+        self.record = .init(
+            lastExposeDate: try container.decode(Date.self, forKey: .lastExposeDate),
+            countOfDay: try container.decode(Int.self, forKey: .countOfDay)
+        )
     }
 
     func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(self.record.lastExposeDate, forKey: .lastExposeDate)
-        switch self.record.scope {
-        case .application:
-            try container.encode(ScopeType.application, forKey: .scopeType)
-        case .service(let identifier):
-            try container.encode(ScopeType.service, forKey: .scopeType)
-            try container.encode(identifier, forKey: .serviceIdentifier)
-        }
+        try container.encode(self.record.countOfDay, forKey: .countOfDay)
     }
 }

@@ -546,6 +546,15 @@
 "setting.appearance.event.fontSize" = "Lettergrootte van gebeurtenistekst";
 "setting.appearance.event.show_holidayName" = "Naam van feestdag tonen";
 "setting.appearance.event.show_lunar" = "Maankalender";
+"setting.appearance.event.show_lunar::explain" = "De standaard voor de maankalender (Koreaans, Chinees of Vietnamees) wordt gekozen op basis van de taal van je apparaat, dus maandata kunnen per standaard een dag verschillen.";
+"setting.appearance.event.show_rokuyo" = "Rokuyo";
+"setting.appearance.event.show_rokuyo::available_ios26" = "Beschikbaar op iOS 26 of hoger";
+"rokuyo::taian" = "Taian";
+"rokuyo::shakku" = "Shakku";
+"rokuyo::sensho" = "Sensho";
+"rokuyo::tomobiki" = "Tomobiki";
+"rokuyo::senbu" = "Senbu";
+"rokuyo::butsumetsu" = "Butsumetsu";
 "setting.appearance.event._24form" = "24-uursnotatie";
 "setting.appearance.event.sample::name" = "🥗 Naam van gebeurtenis";
 "setting.appearance.event.sample::description" = "beschrijving";

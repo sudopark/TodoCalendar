@@ -1,9 +1,4 @@
-■ Numărarea D-Day
-· Activați „Numără D-Day ca D+1” la „Widgeturi” din Setări, iar ziua D-Day se numără ca D+1, atât în aplicație, cât și în widgeturi
-· O puteți activa și doar pentru un singur widget Numărătoare inversă, când îl editați
-· Setările widgeturilor se află acum la „Widgeturi”, pe ecranul principal din Setări
+■ Rokuyo (iOS 26 sau o versiune ulterioară)
+· Activați „Rokuyo” în Setări > Aspect pentru a vedea deasupra datei selectate rokuyo-ul zilei, de exemplu Taian sau Butsumetsu
 
-■ Restrângerea calendarului
-· Atingerea din nou a datei selectate pentru a restrânge calendarul este acum o opțiune pe care o puteți activa sau dezactiva. Implicit este dezactivată
-· Activați „Restrânge automat calendarul” în Setări > Aspect, apoi atingeți încă o dată data selectată pentru a restrânge calendarul
-· Toate săptămânile lunii rămân la vedere, doar căsuțele zilelor se micșorează. Atingeți din nou pentru a-l extinde
+· Remedieri de erori

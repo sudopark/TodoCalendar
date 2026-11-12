@@ -11,6 +11,7 @@ import Prelude
 import Optics
 import Extensions
 import CommonPresentation
+import AdDomainInterface
 import CalendarDomainInterface
 import EventDetailSceneInterface
 import EventDomainInterface
@@ -29,6 +30,7 @@ final class EditScheduleEventDetailViewModelImple: EventDetailViewModel, @unchec
     private let foremostEventUsecase: any ForemostEventUsecase
     private let ddayCandidateUsecase: any DDayCandidateUsecase
     private let liveActivityToggleViewModel: any LiveActivityToggleViewModel
+    private let adExposureUsecase: any AdExposureUsecase
     var router: (any EventDetailRouting)?
     weak var listener: EventDetailSceneListener?
     
@@ -42,7 +44,8 @@ final class EditScheduleEventDetailViewModelImple: EventDetailViewModel, @unchec
         calendarSettingUsecase: any CalendarSettingUsecase,
         foremostEventUsecase: any ForemostEventUsecase,
         ddayCandidateUsecase: any DDayCandidateUsecase,
-        liveActivityToggleViewModel: any LiveActivityToggleViewModel
+        liveActivityToggleViewModel: any LiveActivityToggleViewModel,
+        adExposureUsecase: any AdExposureUsecase
     ) {
         self.scheduleId = scheduleId
         self.repeatingEventTargetTime = repeatingEventTargetTime
@@ -54,6 +57,7 @@ final class EditScheduleEventDetailViewModelImple: EventDetailViewModel, @unchec
         self.foremostEventUsecase = foremostEventUsecase
         self.ddayCandidateUsecase = ddayCandidateUsecase
         self.liveActivityToggleViewModel = liveActivityToggleViewModel
+        self.adExposureUsecase = adExposureUsecase
 
         self.internalBinding()
     }
@@ -513,13 +517,20 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
                 let _ = try? await self?.eventDetailDataUsecase.saveDetail(copyAddition)
                 
                 self?.router?.showToast("eventDetail.scheduleEvent_saved::message".localized())
-                self?.router?.closeScene(animate: true, nil)
+                self?.closeSceneAfterEventSaved()
             } catch {
                 self?.router?.showError(error)
             }
             self?.subject.isSaving.send(false)
         }
         .store(in: self.cancellables)
+    }
+
+    private func closeSceneAfterEventSaved() {
+        self.adExposureUsecase.recordEventSavedForFullScreenAd()
+        self.router?.closeSceneAfterEventSaved(
+            isFullScreenAdTurn: self.adExposureUsecase.isFullScreenAdTurnAfterEventSave()
+        )
     }
     
     private func scheduleEditParams(from basic: EventDetailBasicData, _ timeZone: TimeZone) -> SchedulePutParams {

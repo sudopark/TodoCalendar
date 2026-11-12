@@ -1,9 +1,4 @@
-■ Telling av D-Day
-· Slå på "Tell D-Day som D+1" under "Widgets" i Innstillinger, så telles selve D-Day som D+1, både i appen og i widgeter
-· Du kan også slå det på for bare én D-dag-widget når du redigerer den
-· Widgetinnstillingene ligger nå under "Widgets" på hovedskjermen i Innstillinger
+■ Rokuyo (iOS 26 eller nyere)
+· Slå på "Rokuyo" i Innstillinger > Utseende for å se dagens rokuyo, for eksempel Taian eller Butsumetsu, over den valgte datoen
 
-■ Slå sammen kalenderen
-· Å trykke på den valgte datoen igjen for å slå sammen kalenderen er nå et valg du kan slå på eller av. Det er av som standard
-· Slå på "Slå sammen kalenderen automatisk" i Innstillinger > Utseende, og trykk på den valgte datoen én gang til for å slå sammen kalenderen
-· Alle ukene i måneden blir stående, bare datorutene blir mindre. Trykk igjen for å folde den ut
+· Feilrettinger

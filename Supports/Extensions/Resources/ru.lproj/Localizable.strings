@@ -545,6 +545,15 @@
 "setting.appearance.event.fontSize" = "Размер шрифта текста события";
 "setting.appearance.event.show_holidayName" = "Показывать название праздника";
 "setting.appearance.event.show_lunar" = "Лунный календарь";
+"setting.appearance.event.show_lunar::explain" = "Стандарт лунного календаря (корейский, китайский или вьетнамский) выбирается по языку устройства, поэтому лунные даты могут отличаться на день в зависимости от стандарта.";
+"setting.appearance.event.show_rokuyo" = "Рокуё";
+"setting.appearance.event.show_rokuyo::available_ios26" = "Доступно в iOS 26 и новее";
+"rokuyo::taian" = "Тайан";
+"rokuyo::shakku" = "Сякку";
+"rokuyo::sensho" = "Сэнсё";
+"rokuyo::tomobiki" = "Томобики";
+"rokuyo::senbu" = "Сэмбу";
+"rokuyo::butsumetsu" = "Буцумэцу";
 "setting.appearance.event._24form" = "24-часовой формат";
 "setting.appearance.event.sample::name" = "🥗 Название события";
 "setting.appearance.event.sample::description" = "описание";

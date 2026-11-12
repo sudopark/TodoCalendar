@@ -1,9 +1,4 @@
-■ Počítání D-Day
-· Zapněte „Počítat D-Day jako D+1“ v části „Widgety“ v Nastavení a samotný D-Day se bude počítat jako D+1, v aplikaci i ve widgetech
-· Můžete to také zapnout jen pro jeden widget Odpočet, když ho upravujete
-· Nastavení widgetů je teď v části „Widgety“ na hlavní obrazovce Nastavení
+■ Rokuyo (iOS 26 nebo novější)
+· Zapněte „Rokuyo“ v Nastavení > Vzhled a nad vybraným datem uvidíte rokuyo daného dne, například Taian nebo Butsumetsu
 
-■ Sbalení kalendáře
-· Opětovné klepnutí na vybrané datum pro sbalení kalendáře je teď volba, kterou můžete zapnout nebo vypnout. Ve výchozím stavu je vypnutá
-· Zapněte „Automaticky sbalit kalendář“ v Nastavení > Vzhled a klepněte na vybrané datum ještě jednou, kalendář se sbalí
-· Všechny týdny měsíce zůstanou vidět, zmenší se jen políčka dnů. Dalším klepnutím ho rozbalíte
+· Opravy chyb

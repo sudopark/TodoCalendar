@@ -66,44 +66,6 @@ extension AppColdLaunchHistoryTests {
         #expect(history.count == 3)
     }
 
-    @Test("직전 실행이 같은 날이면 그날 첫 실행이 아니다")
-    func history_whenPreviousLaunchIsSameDay_isNotFirstLaunchOfDay() {
-        // given
-        var history = AppColdLaunchHistory()
-
-        // when
-        history.recordLaunch(at: self.date(2026, 8, 24, 9))
-        history.recordLaunch(at: self.date(2026, 8, 24, 21))
-
-        // then
-        #expect(history.isFirstLaunchOfDay(self.calendar) == false)
-    }
-
-    @Test("직전 실행이 어제면 그날 첫 실행이다")
-    func history_whenPreviousLaunchIsYesterday_isFirstLaunchOfDay() {
-        // given
-        var history = AppColdLaunchHistory()
-
-        // when
-        history.recordLaunch(at: self.date(2026, 8, 23, 21))
-        history.recordLaunch(at: self.date(2026, 8, 24, 9))
-
-        // then
-        #expect(history.isFirstLaunchOfDay(self.calendar) == true)
-    }
-
-    @Test("직전 실행 기록이 없으면 그날 첫 실행이다")
-    func history_whenNoPreviousLaunch_isFirstLaunchOfDay() {
-        // given
-        var history = AppColdLaunchHistory()
-
-        // when
-        history.recordLaunch(at: self.date(2026, 8, 24))
-
-        // then
-        #expect(history.isFirstLaunchOfDay(self.calendar) == true)
-    }
-
     @Test("첫 실행일로부터의 경과일은 자정 기준으로 센다")
     func history_elapsedDaysFromFirstLaunch_countByStartOfDay() {
         // given

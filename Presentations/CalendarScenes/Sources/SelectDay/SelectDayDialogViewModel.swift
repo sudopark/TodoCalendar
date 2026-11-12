@@ -60,7 +60,7 @@ final class SelectDayDialogViewModelImple: SelectDayDialogViewModel, @unchecked 
 extension SelectDayDialogViewModelImple {
     
     func select(_ date: Date) {
-        let day = CalendarComponent.Day(date, calendar: .current)
+        let day = CalendarComponent.Day(date, calendar: Calendar(identifier: .gregorian))
         self.subject.selectedDay.send(day)
     }
     
@@ -90,7 +90,7 @@ extension SelectDayDialogViewModelImple {
 extension SelectDayDialogViewModelImple {
     
     var initialCurrentSelectDate: Date {
-        let calendar = Calendar.current
+        let calendar = Calendar(identifier: .gregorian)
         let components = DateComponents(
             year: self.currentDay.year,
             month: self.currentDay.month,

@@ -124,6 +124,7 @@ public struct CalendarAppearanceSettings: Equatable, Sendable {
     public var eventTextAdditionalSize: CGFloat = 0
     public var showHoliday: Bool = false
     public var showLunarCalendarDate: Bool = false
+    public var showRokuyo: Bool = false
     public var is24hourForm: Bool = false
     public var showUncompletedTodos: Bool = true
     
@@ -155,6 +156,7 @@ public struct CalendarAppearanceSettings: Equatable, Sendable {
         newSetting.eventTextAdditionalSize = (params.eventTextAdditionalSize ?? self.eventTextAdditionalSize)
         newSetting.showHoliday = (params.showHoliday ?? self.showHoliday)
         newSetting.showLunarCalendarDate = (params.showLunarCalendarDate ?? self.showLunarCalendarDate)
+        newSetting.showRokuyo = (params.showRokuyo ?? self.showRokuyo)
         newSetting.is24hourForm = (params.is24hourForm ?? self.is24hourForm)
         newSetting.showUncompletedTodos = (params.showUncompletedTodos ?? self.showUncompletedTodos)
         newSetting.hapticEffectIsOn = (params.hapticEffectIsOn ?? self.hapticEffectIsOn)
@@ -217,6 +219,7 @@ public struct EditCalendarAppearanceSettingParams {
     public var eventTextAdditionalSize: CGFloat?
     public var showHoliday: Bool?
     public var showLunarCalendarDate: Bool?
+    public var showRokuyo: Bool?
     public var is24hourForm: Bool?
     public var showUncompletedTodos: Bool?
     
@@ -257,6 +260,7 @@ public struct EditCalendarAppearanceSettingParams {
         return self.eventTextAdditionalSize != nil
             || self.showHoliday != nil
             || self.showLunarCalendarDate != nil
+            || self.showRokuyo != nil
             || self.is24hourForm != nil
             || self.showUncompletedTodos != nil
     }

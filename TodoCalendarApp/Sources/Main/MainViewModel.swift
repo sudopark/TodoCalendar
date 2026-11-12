@@ -58,7 +58,7 @@ protocol MainViewModel: AnyObject, Sendable, MainSceneInteractor {
     func jumpDate()
     func openLegalNoticeDocument(_ documentType: LegalDocumentType)
     func closeLegalNoticeBanner(_ documentType: LegalDocumentType)
-    func requestTrackingThenShowLaunchAd(canShowLaunchAd: Bool)
+    func requestTrackingIfNeeded()
 
     // presenter
     var currentMonth: AnyPublisher<CurrentMonth, Never> { get }
@@ -470,35 +470,21 @@ extension MainViewModelImple {
 
 extension MainViewModelImple {
 
-    func requestTrackingThenShowLaunchAd(canShowLaunchAd: Bool) {
+    func requestTrackingIfNeeded() {
         Task { [weak self] in
             guard let self else { return }
-            guard await self.adExposureUsecase.canRequestTrackingAuthorization() else {
-                self.showLaunchAdIfCan(canShowLaunchAd)
-                return
-            }
+            guard await self.adExposureUsecase.canRequestTrackingAuthorization() else { return }
 
             self.adExposureUsecase.recordTrackingGuideShown()
-            self.router?.showTrackingGuide(
-                onContinue: { [weak self] in
-                    self?.requestSystemTrackingThenShowLaunchAd(canShowLaunchAd)
-                },
-                onDecline: { [weak self] in
-                    self?.showLaunchAdIfCan(canShowLaunchAd)
-                }
-            )
+            self.router?.showTrackingGuide(onContinue: { [weak self] in
+                self?.requestSystemTracking()
+            })
         }
     }
 
-    private func requestSystemTrackingThenShowLaunchAd(_ canShowLaunchAd: Bool) {
+    private func requestSystemTracking() {
         Task { @MainActor [weak self] in
             await self?.mobileAdService.requestTrackingAuthorization()
-            self?.showLaunchAdIfCan(canShowLaunchAd)
         }
-    }
-
-    private func showLaunchAdIfCan(_ canShowLaunchAd: Bool) {
-        guard canShowLaunchAd else { return }
-        self.router?.showLaunchFullScreenAd()
     }
 }
