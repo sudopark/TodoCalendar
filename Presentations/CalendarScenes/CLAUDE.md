@@ -176,7 +176,7 @@ graph LR
 |---|---|---|
 | `EventListCellView` (`Common/EventListCell/`) | 모든 이벤트(할일/일정/휴일/구글)를 렌더링하는 이벤트 셀 공용 뷰 — 완료 처리·상세 이동·more 액션 콜백 포함. 그리는 UI 모델 `EventCellViewModel` 계열은 `CalendarPresentation` 소관이다 (#1060) | DayEventListView, ForemostEventView, UncompletedTodoView |
 | `Common/AIAgentSignInConfirm` | AI 기능 미로그인 시 로그인 유도 confirm 다이얼로그 팩토리 (`ConfirmDialogInfo.aiAgentNeedSignIn`, DayEventList·Calendar VM 공유, #768) | DayEventListViewModelImple, CalendarViewModelImple |
-| `WeekRowView` (`Common/WeekRowView.swift`) | 달력 주 한 줄 — 날짜 칸·이벤트 바/점·탭·길게 눌러 공유. 선택일·오늘·포커스 월·주별 이벤트 publisher 를 파라미터로 받는다 | MonthView, ContinuousMonthsWeekCellView |
+| `WeekRowView` (`Common/WeekRowView.swift`) | 달력 주 한 줄 — 날짜 칸·이벤트 바/점·탭·길게 눌러 공유. 선택일·오늘·포커스 월·주별 이벤트 publisher 를 파라미터로 받고, 다른 달 칸 비우기(`hidesOtherMonthDays`, 기본 false)를 켤 수 있다 | MonthView, ContinuousMonthsWeekCellView |
 | `WeekDaysHeaderView` (`Common/WeekDaysHeaderView.swift`) | 요일 헤더 한 줄 | MonthView, ContinuousMonthsHeaderView |
 | `CalendarComponent+Range` (`Common/CalendarComponent+Range.swift`) | 달 구성의 조회 범위·공휴일 이벤트·날/주/달 공유 범위 계산 | MonthViewModelImple, ContinuousMonthsViewModelImple |
 | `CurrentSelectDayModel+Component` (`Common/CurrentSelectDayModel+Component.swift`) | 달 구성에서 선택일 모델(weekId·하루 범위·공휴일)을 만든다 | MonthViewModelImple, ContinuousMonthsViewModelImple |
