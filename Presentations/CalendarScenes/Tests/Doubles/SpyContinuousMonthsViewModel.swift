@@ -100,7 +100,7 @@ extension CalendarMonth {
                 }
                 return WeekRowModel("\(month.year)-\(month.month)-w\(weekIndex)", days)
             }
-            return ContinuousMonthSection(month: month, weeks: weeks)
+            return ContinuousMonthSection(month: month, title: "\(month.year).\(month.month)", weeks: weeks)
         }
     }
 }

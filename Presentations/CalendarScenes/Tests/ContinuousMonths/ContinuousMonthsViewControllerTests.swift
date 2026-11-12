@@ -71,6 +71,12 @@ final class ContinuousMonthsViewControllerTests {
         return collectionView.layoutAttributesForItem(at: IndexPath(item: 0, section: section))?.frame.minY ?? -1
     }
 
+    private func monthLabelFrame(_ collectionView: UICollectionView, _ section: Int) -> CGRect? {
+        return collectionView.layoutAttributesForSupplementaryElement(
+            ofKind: UICollectionView.elementKindSectionHeader, at: IndexPath(item: 0, section: section)
+        )?.frame
+    }
+
     private func weekCounts(_ collectionView: UICollectionView) -> [Int] {
         return (0..<collectionView.numberOfSections).map { collectionView.numberOfItems(inSection: $0) }
     }
@@ -111,6 +117,33 @@ extension ContinuousMonthsViewControllerTests {
         // then
         #expect(self.weekCounts(collectionView) == self.expectedWeekCounts(center: self.center))
         #expect(offset == self.anchor(collectionView, 2))
+    }
+
+    @Test func viewController_initialLayout_focusedSectionLabelAboveVisibleArea() async throws {
+        // given
+        let (_, _, collectionView) = try await self.makeViewController()
+
+        // when
+        let focusedLabel = try #require(self.monthLabelFrame(collectionView, 2))
+
+        // then
+        #expect(focusedLabel.height > 0)
+        #expect(focusedLabel.maxY <= collectionView.contentOffset.y)
+    }
+
+    @Test func viewController_initialLayout_nextMonthLabelBetweenMonths() async throws {
+        // given
+        let (_, _, collectionView) = try await self.makeViewController()
+        let focusedLastWeek = IndexPath(item: collectionView.numberOfItems(inSection: 2) - 1, section: 2)
+
+        // when
+        let nextLabel = try #require(self.monthLabelFrame(collectionView, 3))
+        let focusedBottom = try #require(collectionView.layoutAttributesForItem(at: focusedLastWeek)).frame.maxY
+
+        // then
+        #expect(nextLabel.height > 0)
+        #expect(nextLabel.minY >= focusedBottom)
+        #expect(nextLabel.maxY <= self.anchor(collectionView, 3))
     }
 
     @Test func viewController_whenFlickPastHalfOfMonth_targetNextSectionTop() async throws {
