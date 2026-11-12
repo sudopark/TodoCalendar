@@ -56,13 +56,19 @@ final class ContinuousMonthsSnapshots: XCTestCase {
         let subscription = viewModel.sections.sink { sections = $0 }
         subscription.cancel()
         RunLoop.main.run(until: Date().addingTimeInterval(0.05))
-        let weeks = sections.dropFirst(2).flatMap { $0.weeks }
+        let visibleSections = Array(sections.dropFirst(2))
 
         return VStack(spacing: 0) {
             ContinuousMonthsHeaderView()
-            ForEach(weeks, id: \.id) { week in
-                ContinuousMonthsWeekCellView(week: week)
-                    .padding([.leading, .trailing], spacing: .small)
+            ForEach(Array(visibleSections.enumerated()), id: \.element.month) { offset, section in
+                if offset > 0 {
+                    ContinuousMonthLabelView(title: section.title)
+                        .padding([.leading, .trailing], spacing: .small)
+                }
+                ForEach(section.weeks, id: \.id) { week in
+                    ContinuousMonthsWeekCellView(week: week)
+                        .padding([.leading, .trailing], spacing: .small)
+                }
             }
         }
         .frame(width: 456, height: 560, alignment: .top)
@@ -76,7 +82,7 @@ final class ContinuousMonthsSnapshots: XCTestCase {
         }
     }
 
-    // MARK: - 포커스 2023-09 — 경계 주·포커스 밖 흐림·선택일·오늘
+    // MARK: - 포커스 2023-09 — 달 경계 줄바꿈·월 라벨·포커스 밖 흐림·선택일·오늘
 
     @MainActor
     func test_continuousMonths_mediumRowHeight() {
