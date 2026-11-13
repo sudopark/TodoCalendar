@@ -56,7 +56,7 @@ bundle exec fastlane ios upload_app_store_metadata      # 텍스트만
 bundle exec fastlane ios upload_app_store_screenshots   # 스크린샷만
 ```
 
-둘 다 `skip_binary_upload`·`submit_for_review: false`다. **심사 제출은 콘솔에서 직접 한다.**
+둘 다 `skip_binary_upload`·`submit_for_review: false`다. **심사 제출은 콘솔에서 직접 한다.** 앱 내 이벤트 제출은 예외로 세션이 API 로 한다 (in-app-event 스킬 §5-1).
 바이너리(빌드)는 이 라인이 다루지 않는다.
 
 - 메타데이터 lane은 `force: false`라 업로드 직전 HTML 프리뷰 확인 프롬프트가 뜬다 — **TTY에서 돌린다.**

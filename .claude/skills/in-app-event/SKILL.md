@@ -7,7 +7,7 @@ description: Use when filling in an App Store in-app event's localized copy and 
 
 `deliver` 는 In-App Events 를 모른다. ASC API 를 직접 때리는 스크립트 셋을 순서대로 엮는 것이 이 스킬의 전부다.
 
-**이 스킬이 만지는 것은 로케일 텍스트·뱃지·이미지 셋뿐이다.** 이벤트 생성, 일정(`territorySchedules`), `deepLink`·`purpose`·`priority` 는 유저가 ASC 콘솔에서 한다.
+**이 스킬이 만지는 것은 로케일 텍스트·뱃지·이미지 셋과 심사 제출(§5)뿐이다.** 이벤트 생성, 일정(`territorySchedules`), `deepLink`·`purpose`·`priority` 는 유저가 ASC 콘솔에서 한다.
 
 ## 0. 준비 — 실행 환경과 자격증명
 
@@ -27,11 +27,12 @@ bundle exec ruby scripts/asc-in-app-event.rb list
 
 - `eventState` 가 `PUBLISHED`·`PAST`·`ARCHIVED` 면 스크립트가 경고한다 — **게시된 이벤트를 덮어쓰는 게 맞는지 유저에게 확인받는다.**
 - 목록이 비면 콘솔에서 먼저 만들라고 안내하고 멈춘다. 이 스킬은 이벤트를 만들지 않는다.
+- **노출 국가를 유저에게 묻는다.** 노출 국가는 콘솔 소관이라 스크립트로 안 보인다. 특정 국가에만 노출되면 채울 로케일은 그 국가 언어와 기본 로케일(en-US)뿐이다 (일본 한정이면 `ja`·`en-US`). 이 범위가 §2~§5 의 대상 로케일 전부다 — 전 로케일 옵션(`--all`·`--all-locales`)은 31개를 다 요구하니 쓰지 않고, 로케일을 도구별로 하나씩 넘긴다 (§4-2·§5 명령 블록 아래 주석).
 - 원고·설정을 담을 자리를 만든다: `fastlane/in_app_events/<event_id>/`. `event_id` 는 사람이 읽는 슬러그이고(예: `2026-03-spring`), ASC 이벤트 id 는 `event.json` 의 `ascEventId` 에 적는다.
 
 ## 2. 원고 — 승인 게이트 2개
 
-원고 정본은 `fastlane/in_app_events/<event_id>/<ASC 로케일>/{name,short_description,long_description}.txt` 31벌이다. **en 이 나머지 29개 언어의 번역 소스**라 순서가 전부다.
+원고 정본은 `fastlane/in_app_events/<event_id>/<ASC 로케일>/{name,short_description,long_description}.txt` 로, 노출 범위의 로케일마다 한 벌이다 (전 세계 노출이면 31벌). **en 이 나머지 29개 언어의 번역 소스**라 순서가 전부다.
 
 | 필드 | 상한 | 노출 위치 |
 |---|---|---|
@@ -65,7 +66,7 @@ ko 원고를 보여주고 승인받는다. **승인 전에 en 을 쓰지 않는�
 - 디렉토리명은 lproj 코드가 아니라 **ASC 코드**다 — 6개가 다르고 매핑표는 `fastlane/metadata/README.md`.
 - 번역 원칙·라벨 역추적 절차는 release-notes 스킬 §3 과 같다 (정본은 `.claude/rules/localization.md` §2). 여기서 재서술하지 않는다.
 - **각 언어의 화면 라벨은 그 언어 lproj 값을 grep 해 인용한다.** en 라벨로 en lproj 를 grep 해 키를 얻고, 같은 키를 대상 언어 lproj 에서 읽는다.
-- **번역 대기 트래킹 이슈 대상이 아니다.** 그건 lproj 소관이고, ASC 메타데이터엔 미룰 자리가 없다. 여기서 31개를 다 채운다.
+- **번역 대기 트래킹 이슈 대상이 아니다.** 그건 lproj 소관이고, ASC 메타데이터엔 미룰 자리가 없다. 노출 범위에 든 로케일은 여기서 다 채운다.
 - 상한 초과는 `--dry-run` 이 위반을 전량 모아 보여준다. 언어별로 짧게 다시 쓴다.
 
 ## 3. 뱃지
@@ -103,6 +104,8 @@ scripts/capture-event-screenshots.sh <event_id> --all       # 31개 언어 (오�
 python3 scripts/compose-event-images.py --event <event_id> --all-locales
 ```
 
+노출 국가가 한정되면 촬영은 `--all` 대신 lang 을 위치 인자로 나열하고(`... <event_id> ja en`), 합성은 `--locale <lang>` 을 lang 마다 돌린다. 둘 다 ASC 코드가 아니라 lang 을 받는다.
+
 - 촬영은 언어당 스위트 수만큼 `xcodebuild test` 를 돌린다. **31개 언어는 시간 단위다** — 백그라운드로 돌리고, 먼저 ko 한 언어로 결과를 유저에게 보여 방향을 확정한 뒤 전 언어로 간다.
 - **하단 1/3 은 배치가 보장한다** — 목업 하단이 `CARD_DEVICE_BOTTOM`(680)에 고정되고 위로만 자라므로 `cardDeviceHeight` 를 키워도 침범하지 않는다. 합성기는 그 결과를 산출물 픽셀로 재확인할 뿐이다(배치 코드가 바뀌었을 때를 위한 방어).
 - 실제로 끊기는 건 셋이다 — 좌우 96px 침범(그려진 픽셀 기준), 기울임 5~10도 이탈, 알파 잔존. 좌우 침범은 기기가 한 대면 `cardDeviceHeight`, 여러 대면 `cardFlankSpread` 나 `cardFlankScale` 을 줄여 해소한다.
@@ -128,9 +131,15 @@ bundle exec ruby scripts/asc-in-app-event.rb push-images --event <event_id> --al
 bundle exec ruby scripts/asc-in-app-event.rb push-images --event <event_id> --all-locales
 ```
 
+- 노출 국가가 한정되면 `--all-locales` 대신 `--locale <ASC 코드>` 로 로케일마다 돌린다 (`ja`·`en-US`). 이 스크립트는 lang 이 아니라 ASC 코드를 받는다.
 - `--dry-run` 을 먼저 돌려 POST/PATCH 갈림과 길이를 유저에게 보여준다.
-- `push-text` 는 올린 뒤 재조회로 31개가 실제로 찼는지 대조한다. **lane 성공이 반영을 뜻하지 않는다**는 선례가 있다 (`docs/troubleshooting/2026-08-29-deliver-metadata-upload-silent-noop.md`).
-- 심사 제출은 콘솔에서 유저가 한다.
+- `push-text` 는 올린 뒤 재조회로 대상 로케일이 실제로 다 찼는지 대조한다. **lane 성공이 반영을 뜻하지 않는다**는 선례가 있다 (`docs/troubleshooting/2026-08-29-deliver-metadata-upload-silent-noop.md`).
+
+### 5-1. 심사 제출
+
+**세션이 ASC API 로 제출한다** — 콘솔 인계로 돌리지 않는다. 스크립트엔 제출 명령이 없어 일회성 호출로 한다. 인증은 §0 자격증명이고, 순서는 `POST v1/reviewSubmissions`(platform `IOS`) → `POST v1/reviewSubmissionItems`(`appEvent` 관계) → `PATCH v1/reviewSubmissions/<id>`(`submitted: true`)다. 일회성 호출은 §6 의 스크립트 수정에 들지 않는다.
+
+**새 버전 기능을 소개하는 이벤트는 단독으로 내지 않는다.** 이벤트만 따로 심사에 내면 지금 라이브 버전에 묶여, 아직 안 나온 기능을 소개하게 된다. 이 경우인지는 제출 전에 유저에게 묻는다 — 이벤트가 소개하는 기능이 지금 라이브 버전에 있는지는 레포·스크립트로 안 보인다. 이 경우면 그 버전의 심사 건(`appStoreVersion` 이 든 reviewSubmission — `GET v1/apps/<id>/reviewSubmissions` 로 찾는다)이 열려 있을 때 거기에 `appEvent` item 만 더한다. 아직 없으면 제출하지 말고, 버전 제출(콘솔 — `docs/appstore-connect-operations.md` §5) 때 함께 담으라고 유저에게 인계한다.
 
 ## 6. 새 이벤트 추가
 
