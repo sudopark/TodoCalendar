@@ -174,13 +174,19 @@ extension SettingSceneBuilderImple {
             viewAppearance: self.viewAppearance
         )
         
+        let selectGoogleCalendarDialogSceneBuilder = SelectGoogleCalendarDialogSceneBuilerImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearance
+        )
+        
         let eventSettingSceneBuilder = EventSettingSceneBuilerImple(
             supportExternalCalendarServices: self.supportExternalCalendarServices,
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearance,
             eventTagSelectSceneBuilder: eventTagSelectSceneBuilder,
             eventDefaultNotificationTimeSceneBuilder: eventNotificationDefaultTimeOptionSceneBuilder,
-            eventDefaultMapAppSceneBuilder: eventDefaultMapAppSceneBuilder
+            eventDefaultMapAppSceneBuilder: eventDefaultMapAppSceneBuilder,
+            selectGoogleCalendarDialogSceneBuilder: selectGoogleCalendarDialogSceneBuilder
         )
         return eventSettingSceneBuilder
     }

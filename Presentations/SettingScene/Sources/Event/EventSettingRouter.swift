@@ -20,6 +20,7 @@ protocol EventSettingRouting: Routing, Sendable {
     func routeToSelectTag()
     func routeToEventNotificationTime(forAllDay: Bool)
     func routeToSelectDefaultMapApp()
+    func routeToSelectGoogleCalendars(accountId: String)
 }
 
 // MARK: - Router
@@ -29,15 +30,18 @@ final class EventSettingRouter: BaseRouterImple, EventSettingRouting, @unchecked
     private let eventTagSelectSceneBuilder: any EventDefaultTagSelectSceneBuiler
     private let eventDefaultNotificationTimeSceneBuilder: any EventNotificationDefaultTimeOptionSceneBuiler
     private let eventDefaultMapAppSceneBuilder: any EventDefaultMapAppSceneBuiler
+    private let selectGoogleCalendarDialogSceneBuilder: any SelectGoogleCalendarDialogSceneBuiler
     
     init(
         eventTagSelectSceneBuilder: any EventDefaultTagSelectSceneBuiler,
         eventDefaultNotificationTimeSceneBuilder: any EventNotificationDefaultTimeOptionSceneBuiler,
-        eventDefaultMapAppSceneBuilder: any EventDefaultMapAppSceneBuiler
+        eventDefaultMapAppSceneBuilder: any EventDefaultMapAppSceneBuiler,
+        selectGoogleCalendarDialogSceneBuilder: any SelectGoogleCalendarDialogSceneBuiler
     ) {
         self.eventTagSelectSceneBuilder = eventTagSelectSceneBuilder
         self.eventDefaultNotificationTimeSceneBuilder = eventDefaultNotificationTimeSceneBuilder
         self.eventDefaultMapAppSceneBuilder = eventDefaultMapAppSceneBuilder
+        self.selectGoogleCalendarDialogSceneBuilder = selectGoogleCalendarDialogSceneBuilder
     }
     
     override func closeScene(animate: Bool, _ dismissed: (() -> Void)?) {
@@ -73,6 +77,13 @@ extension EventSettingRouter {
         Task { @MainActor in
             let next = self.eventDefaultMapAppSceneBuilder.makeEventDefaultMapAppScene()
             self.currentScene?.navigationController?.pushViewController(next, animated: true)
+        }
+    }
+
+    func routeToSelectGoogleCalendars(accountId: String) {
+        Task { @MainActor in
+            let next = self.selectGoogleCalendarDialogSceneBuilder.makeSelectGoogleCalendarDialogScene(accountId: accountId)
+            self.showBottomSlide(next)
         }
     }
 }

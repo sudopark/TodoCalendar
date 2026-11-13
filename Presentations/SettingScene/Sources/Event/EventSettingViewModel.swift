@@ -128,6 +128,7 @@ final class EventSettingViewModelImple: EventSettingViewModel, @unchecked Sendab
     private let accountUsecase: any AccountUsecase
     private let eventSyncUsecase: any EventSyncUsecase
     private let calendarSettingUsecase: any CalendarSettingUsecase
+    private let googleCalendarUsecase: any GoogleCalendarUsecase
     var router: (any EventSettingRouting)?
     
     init(
@@ -138,7 +139,8 @@ final class EventSettingViewModelImple: EventSettingViewModel, @unchecked Sendab
         externalCalendarServiceUsecase: any ExternalCalendarIntegrationUsecase,
         accountUsecase: any AccountUsecase,
         eventSyncUsecase: any EventSyncUsecase,
-        calendarSettingUsecase: any CalendarSettingUsecase
+        calendarSettingUsecase: any CalendarSettingUsecase,
+        googleCalendarUsecase: any GoogleCalendarUsecase
     ) {
         self.eventSettingUsecase = eventSettingUsecase
         self.eventNotificationSettingUsecase = eventNotificationSettingUsecase
@@ -148,6 +150,7 @@ final class EventSettingViewModelImple: EventSettingViewModel, @unchecked Sendab
         self.accountUsecase = accountUsecase
         self.eventSyncUsecase = eventSyncUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
+        self.googleCalendarUsecase = googleCalendarUsecase
      
         self.internalBinding()
     }
@@ -229,11 +232,12 @@ extension EventSettingViewModelImple {
         self.subject.isConnectOrDisconnectExternalCalednar.send(true)
         Task { [weak self] in
             do {
-                _ = try await self?.externalCalendarServiceUsecase.integrate(external: service)
+                let account = try await self?.externalCalendarServiceUsecase.integrate(external: service)
                 self?.subject.isConnectOrDisconnectExternalCalednar.send(false)
                 self?.router?.showToast(
                     "event_setting::external_calendar::start::message".localized()
                 )
+                self?.routeToSelectGoogleCalendarsWhenArrived(account)
             } catch let reason as AppleCalendarPermissionFailReason {
                 self?.handleAppleCalendarPermissionFail(reason)
                 self?.subject.isConnectOrDisconnectExternalCalednar.send(false)
@@ -245,6 +249,20 @@ extension EventSettingViewModelImple {
         .store(in: self.cancellables)
     }
     
+    private func routeToSelectGoogleCalendarsWhenArrived(_ account: ExternalServiceAccountinfo?) {
+        guard account?.serviceIdentifier == GoogleCalendarService.id,
+              let email = account?.email
+        else { return }
+
+        self.googleCalendarUsecase.calendarTags
+            .map { tags in tags.filter { $0.ownerId == email } }
+            .first { !$0.isEmpty }
+            .sink { [weak self] _ in
+                self?.router?.routeToSelectGoogleCalendars(accountId: email)
+            }
+            .store(in: self.cancellables)
+    }
+
     private func handleAppleCalendarPermissionFail(_ reason: AppleCalendarPermissionFailReason) {
         switch reason {
         case .denied, .writeOnly:
