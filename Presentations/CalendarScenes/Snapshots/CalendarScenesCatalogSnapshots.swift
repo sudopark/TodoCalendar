@@ -127,13 +127,9 @@ extension CalendarScenesCatalogSnapshots {
                 .foregroundStyle(appearance.colorSet.text2.asColor)
                 .frame(width: 24)
 
-            HStack(alignment: .lastTextBaseline, spacing: Metric.Spacing.xsmall) {
-                Text(formatter.string(from: self.storeCalendarMonthDate).uppercased())
-                    .font(appearance.fontSet.bigMonth.asFont)
-                Text(verbatim: "\(self.storeCalendarMonth.year)")
-                    .font(appearance.fontSet.normal.asFont)
-            }
-            .foregroundStyle(appearance.colorSet.text0.asColor)
+            Text(formatter.string(from: self.storeCalendarMonthDate).uppercased())
+                .font(appearance.fontSet.bigMonth.asFont)
+                .foregroundStyle(appearance.colorSet.text0.asColor)
 
             Image(systemName: "chevron.right")
                 .font(chevronFont)
@@ -142,19 +138,29 @@ extension CalendarScenesCatalogSnapshots {
 
             Spacer()
 
-            HStack(spacing: Metric.Spacing.small) {
-                ForEach(["calendar", "line.3.horizontal.decrease.circle", "gearshape"], id: \.self) { name in
-                    Image(systemName: name)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 25, height: 25)
-                        .foregroundStyle(appearance.colorSet.text0.asColor)
-                }
-            }
+            self.storeHeaderButtonsView(appearance)
         }
         .frame(height: 44)
         .padding(.horizontal, spacing: .large)
         .background(appearance.colorSet.dayBackground.asColor)
+    }
+
+    // 앱 헤더 버튼은 25pt 칸에 기본 크기 심볼을 늘리지 않고 얹는다 (MainViewController 의 headerView)
+    @MainActor
+    private func storeHeaderButtonsView(_ appearance: ViewAppearance) -> some View {
+        HStack(spacing: Metric.Spacing.small) {
+            ForEach(["calendar", "line.3.horizontal.decrease.circle", "gearshape"], id: \.self) { name in
+                Image(systemName: name)
+                    .font(.system(size: 17))
+                    .frame(width: 25, height: 25)
+                    .foregroundStyle(appearance.colorSet.text0.asColor)
+            }
+        }
+    }
+
+    // 앱은 헤더 아래 로딩 바 3.2pt 를 두고 14pt 띄워 달력을 붙인다 (MainViewController.setupLayout)
+    private func storeHeaderToCalendarGapView() -> some View {
+        Color.clear.frame(height: 3.2 + 14)
     }
 
     @MainActor
@@ -177,6 +183,7 @@ extension CalendarScenesCatalogSnapshots {
 
         return VStack(spacing: 0) {
             self.storeCalendarHeaderView(appearance)
+            self.storeHeaderToCalendarGapView()
             ScrollView {
                 VStack(spacing: 0) {
                     MonthView()
@@ -213,9 +220,41 @@ extension CalendarScenesCatalogSnapshots {
         captureSnapshotPair(
             named: "storeDuoCoverCalendar", layout: .duoCover, snapshotDirectory: catalogSnapshotDirectory()
         ) { theme in
-            // 화면 끝에 다음 섹션 머리가 몇 pt 걸려 가로선처럼 비친다
-            self.makeStoreSingleColumnCalendarView(theme, bottomCoverHeight: Metric.Spacing.regular)
+            // iPhone Duo 커버 실측 (iOS 27.1 시뮬레이터) — 상태바가 오른쪽 84pt 세로 띠로 빠지고 위에 20pt 가 빈다
+            let statusColumnWidth: CGFloat = 84
+            let appearance = self.makeStoreAppearance(theme)
+            return HStack(spacing: 0) {
+                // 화면 끝에 다음 섹션 머리가 몇 pt 걸려 가로선처럼 비친다
+                self.makeStoreSingleColumnCalendarView(
+                    theme, bottomCoverHeight: Metric.Spacing.regular, appearance: appearance
+                )
+                .padding(.top, spacing: .xlarge)
+                self.storeDuoCoverStatusColumnView(appearance)
+                    .frame(width: statusColumnWidth)
+            }
+            .background(appearance.colorSet.dayBackground.asColor)
         }
+    }
+
+    @MainActor
+    private func storeDuoCoverStatusColumnView(_ appearance: ViewAppearance) -> some View {
+        VStack(spacing: Metric.Spacing.regular) {
+            Color.clear.frame(height: 71)
+            Text(verbatim: "9:41")
+                .font(.system(size: 16, weight: .semibold))
+            ZStack {
+                Circle()
+                    .trim(from: 0.1, to: 0.9)
+                    .stroke(style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                    .rotationEffect(.degrees(90))
+                Image(systemName: "wifi")
+                    .font(.system(size: 13, weight: .bold))
+                    .offset(y: -3)
+            }
+            .frame(width: 40, height: 40)
+            Spacer()
+        }
+        .foregroundStyle(appearance.colorSet.text0.asColor)
     }
 
     @MainActor
@@ -260,6 +299,7 @@ extension CalendarScenesCatalogSnapshots {
                 self.storeIPadStatusBarView(appearance)
             }
             self.storeTwoColumnsHeaderView(appearance)
+            self.storeHeaderToCalendarGapView()
             HStack(spacing: 0) {
                 self.storeContinuousMonthsView(appearance, width: monthsWidth)
                     .frame(width: monthsWidth)
@@ -283,15 +323,7 @@ extension CalendarScenesCatalogSnapshots {
 
             Spacer()
 
-            HStack(spacing: Metric.Spacing.small) {
-                ForEach(["calendar", "line.3.horizontal.decrease.circle", "gearshape"], id: \.self) { name in
-                    Image(systemName: name)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 25, height: 25)
-                        .foregroundStyle(appearance.colorSet.text0.asColor)
-                }
-            }
+            self.storeHeaderButtonsView(appearance)
         }
         .frame(height: 44)
         .padding(.horizontal, spacing: .large)
