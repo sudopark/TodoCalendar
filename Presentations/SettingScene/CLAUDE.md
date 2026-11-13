@@ -30,6 +30,7 @@ graph TD
     ES -->|push| ETS[EventDefaultTagSelect<br/>기본 태그]
     ES -->|push| ENT[NotificationTimeOption<br/>기본 알림 시간]
     ES -->|push| EMA[EventDefaultMapApp<br/>기본 지도 앱]
+    ES -.->|bottomSlide| SGC[SelectGoogleCalendarDialog<br/>Google 연동 직후 캘린더 선택]
 
     HL -->|push| CS[CountrySelect<br/>국가 선택]
 
@@ -89,6 +90,7 @@ graph TD
 | 기본 태그 | EventDefaultTagSelect로 선택 |
 | 기본 알림 시간 | 일반 이벤트 / 하루종일 이벤트 각각 설정 |
 | 기본 지도 앱 | EventDefaultMapApp으로 선택 |
+| 외부 캘린더 연동 | Google 연동이 성공하고 그 계정 캘린더 목록이 오면 SelectGoogleCalendarDialog 시트를 띄운다. 시트는 메인 필터와 같은 offIds 로 켜고 끈다 |
 
 ### HolidayList + CountrySelect (공휴일)
 
@@ -171,6 +173,7 @@ graph TD
     ESB -->|하위| ETSB[EventDefaultTagSelectBuilder]
     ESB -->|하위| ENTB[NotificationTimeBuilder]
     ESB -->|하위| EMAB[EventDefaultMapAppBuilder]
+    ESB -->|하위| SGCB[SelectGoogleCalendarDialogBuilder]
 
     HLB -->|하위| CSB[CountrySelectBuilder]
 ```

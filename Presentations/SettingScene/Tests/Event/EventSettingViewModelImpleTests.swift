@@ -10,6 +10,7 @@ import XCTest
 import Combine
 import Prelude
 import Optics
+import Extensions
 import UnitTestHelpKit
 
 @testable import SettingScene
@@ -30,6 +31,7 @@ class EventSettingViewModelImpleTests: BaseTestCase, PublisherWaitable, AsyncEff
     private var stubSettingUsecase: StubEventSettingUsecase!
     private var stubEventNotificationSettingUsecase: StubEventNotificationSettingUsecase!
     private var stubExternalCalednarUsecase: StubExternalCalendarIntegrationUsecase!
+    private var stubGoogleCalendarUsecase: StubGoogleCalendarUsecase!
     
     override func setUpWithError() throws {
         self.cancelBag = .init()
@@ -44,24 +46,32 @@ class EventSettingViewModelImpleTests: BaseTestCase, PublisherWaitable, AsyncEff
         self.stubSettingUsecase = nil
         self.stubEventNotificationSettingUsecase = nil
         self.stubExternalCalednarUsecase = nil
+        self.stubGoogleCalendarUsecase = nil
     }
     
     private func makeViewModel(
         isLogin: Bool = true,
         accounts: [ExternalServiceAccountinfo] = [],
-        integrateError: (any Error)? = nil
+        integrateError: (any Error)? = nil,
+        integratedAccount: ExternalServiceAccountinfo? = nil,
+        googleCalendarTags: [GoogleCalendar.Tag] = []
     ) -> EventSettingViewModelImple {
         let tagUsecase = StubEventTagUsecase()
         let externalUsecase: StubExternalCalendarIntegrationUsecase
-        if let integrateError {
-            let errorStub = StubExternalCalendarIntegrationUsecaseWithError(accounts)
-            errorStub.stubIntegrateError = integrateError
-            externalUsecase = errorStub
+        if integrateError != nil || integratedAccount != nil {
+            let resultStub = StubExternalCalendarIntegrationUsecaseWithStubResult(accounts)
+            resultStub.stubIntegrateError = integrateError
+            resultStub.stubIntegratedAccount = integratedAccount
+            externalUsecase = resultStub
         } else {
             externalUsecase = StubExternalCalendarIntegrationUsecase(accounts)
         }
         self.stubExternalCalednarUsecase = externalUsecase
         
+        let googleCalendarUsecase = StubGoogleCalendarUsecase()
+        googleCalendarUsecase.stubCalendarTags = googleCalendarTags
+        self.stubGoogleCalendarUsecase = googleCalendarUsecase
+
         let calendarSettingUsecase = StubCalendarSettingUsecase()
         calendarSettingUsecase.selectTimeZone(TimeZone(abbreviation: "KST")!)
         
@@ -76,7 +86,8 @@ class EventSettingViewModelImpleTests: BaseTestCase, PublisherWaitable, AsyncEff
             externalCalendarServiceUsecase: externalUsecase,
             accountUsecase: StubAccountUsecase(isLogin ? .init("some") : nil),
             eventSyncUsecase: StubEventSyncUsecase(),
-            calendarSettingUsecase: calendarSettingUsecase
+            calendarSettingUsecase: calendarSettingUsecase,
+            googleCalendarUsecase: googleCalendarUsecase
         )
         viewModel.router = self.spyRouter
         return viewModel
@@ -558,16 +569,148 @@ extension EventSettingViewModelImpleTests {
     }
 }
 
-private final class StubExternalCalendarIntegrationUsecaseWithError: StubExternalCalendarIntegrationUsecase {
+private final class StubExternalCalendarIntegrationUsecaseWithStubResult: StubExternalCalendarIntegrationUsecase {
 
     var stubIntegrateError: (any Error)?
+    var stubIntegratedAccount: ExternalServiceAccountinfo?
 
     override func integrate(external service: any ExternalCalendarService) async throws -> ExternalServiceAccountinfo {
         if let error = stubIntegrateError { throw error }
+        if let account = stubIntegratedAccount { return account }
         return try await super.integrate(external: service)
     }
 }
 
+
+// MARK: - Google 연동 직후 캘린더 선택 시트
+
+extension EventSettingViewModelImpleTests {
+
+    private func googleCalendarTag(_ id: String, ownerId: String) -> GoogleCalendar.Tag {
+        return GoogleCalendar.Tag(id: id, name: "name:\(id)") |> \.ownerId .~ ownerId
+    }
+
+    private func connectThenCalendarsArrive(
+        _ viewModel: EventSettingViewModelImple, serviceId: String
+    ) async throws {
+        viewModel.connectExternalCalendar(serviceId)
+        try await self.waitEffect("연동 완료 토스트") { self.spyRouter.didShowToastWithMessage != nil }
+        self.stubGoogleCalendarUsecase.refreshGoogleCalendarEventTags()
+    }
+
+    func testViewModel_whenGoogleConnectedAndCalendarsArrived_routeToSelectGoogleCalendars() async throws {
+        // given
+        let viewModel = self.makeViewModel(googleCalendarTags: [
+            self.googleCalendarTag("other:0", ownerId: "other"),
+            self.googleCalendarTag("email:0", ownerId: "email")
+        ])
+
+        // when
+        try await self.connectThenCalendarsArrive(viewModel, serviceId: GoogleCalendarService.id)
+
+        // then
+        try await self.waitEffect("방금 연동한 계정으로 시트 라우팅") {
+            !self.spyRouter.didRouteToSelectGoogleCalendarsWith.isEmpty
+        }
+        XCTAssertEqual(self.spyRouter.didRouteToSelectGoogleCalendarsWith, ["email"])
+    }
+
+    func testViewModel_whenCalendarsArrivedAgain_routeToSelectGoogleCalendarsOnlyOnce() async throws {
+        // given
+        let viewModel = self.makeViewModel(googleCalendarTags: [
+            self.googleCalendarTag("email:0", ownerId: "email")
+        ])
+        try await self.connectThenCalendarsArrive(viewModel, serviceId: GoogleCalendarService.id)
+        try await self.waitEffect("첫 목록 도착으로 시트 라우팅") {
+            !self.spyRouter.didRouteToSelectGoogleCalendarsWith.isEmpty
+        }
+
+        // when
+        self.stubGoogleCalendarUsecase.refreshGoogleCalendarEventTags()
+        try await Task.sleep(for: .milliseconds(50))
+
+        // then
+        XCTAssertEqual(self.spyRouter.didRouteToSelectGoogleCalendarsWith, ["email"])
+    }
+
+    func testViewModel_whenGoogleConnectedButCalendarsNotArrived_notRoute() async throws {
+        // given
+        let viewModel = self.makeViewModel(googleCalendarTags: [
+            self.googleCalendarTag("email:0", ownerId: "email")
+        ])
+
+        // when
+        viewModel.connectExternalCalendar(GoogleCalendarService.id)
+        try await self.waitEffect("연동 완료 토스트") { self.spyRouter.didShowToastWithMessage != nil }
+        try await Task.sleep(for: .milliseconds(50))
+
+        // then
+        XCTAssertEqual(self.spyRouter.didRouteToSelectGoogleCalendarsWith, [])
+    }
+
+    func testViewModel_whenGoogleConnectedButOnlyOtherAccountCalendars_notRoute() async throws {
+        // given
+        let viewModel = self.makeViewModel(googleCalendarTags: [
+            self.googleCalendarTag("other:0", ownerId: "other")
+        ])
+
+        // when
+        try await self.connectThenCalendarsArrive(viewModel, serviceId: GoogleCalendarService.id)
+        try await Task.sleep(for: .milliseconds(50))
+
+        // then
+        XCTAssertEqual(self.spyRouter.didRouteToSelectGoogleCalendarsWith, [])
+    }
+
+    func testViewModel_whenGoogleConnectFailed_notRouteToSelectGoogleCalendars() async throws {
+        // given
+        let viewModel = self.makeViewModel(
+            integrateError: RuntimeError("failed"),
+            googleCalendarTags: [self.googleCalendarTag("email:0", ownerId: "email")]
+        )
+
+        // when
+        viewModel.connectExternalCalendar(GoogleCalendarService.id)
+        try await self.waitEffect("연동 실패 에러") { self.spyRouter.didShowError != nil }
+        self.stubGoogleCalendarUsecase.refreshGoogleCalendarEventTags()
+        try await Task.sleep(for: .milliseconds(50))
+
+        // then
+        XCTAssertEqual(self.spyRouter.didRouteToSelectGoogleCalendarsWith, [])
+    }
+
+    func testViewModel_whenGoogleConnectedWithoutEmail_notRouteToSelectGoogleCalendars() async throws {
+        // given
+        let viewModel = self.makeViewModel(
+            integratedAccount: ExternalServiceAccountinfo(GoogleCalendarService.id, email: nil),
+            googleCalendarTags: [
+                self.googleCalendarTag("email:0", ownerId: "email"),
+                self.googleCalendarTag("empty:0", ownerId: "")
+            ]
+        )
+
+        // when
+        try await self.connectThenCalendarsArrive(viewModel, serviceId: GoogleCalendarService.id)
+        try await Task.sleep(for: .milliseconds(50))
+
+        // then
+        XCTAssertEqual(self.spyRouter.didRouteToSelectGoogleCalendarsWith, [])
+    }
+
+    func testViewModel_whenAppleConnected_notRouteToSelectGoogleCalendars() async throws {
+        // given
+        let viewModel = self.makeViewModel(googleCalendarTags: [
+            self.googleCalendarTag("email:0", ownerId: "email")
+        ])
+
+        // when
+        try await self.connectThenCalendarsArrive(viewModel, serviceId: AppleCalendarService.id)
+        try await Task.sleep(for: .milliseconds(50))
+
+        // then
+        XCTAssertEqual(self.spyRouter.didRouteToSelectGoogleCalendarsWith, [])
+    }
+}
 
 private class SpyRouter: BaseSpyRouter, EventSettingRouting, @unchecked Sendable {
 
@@ -584,5 +727,10 @@ private class SpyRouter: BaseSpyRouter, EventSettingRouting, @unchecked Sendable
     var didRouteToSelectDefaultMapApp: Bool?
     func routeToSelectDefaultMapApp() {
         self.didRouteToSelectDefaultMapApp = true
+    }
+
+    var didRouteToSelectGoogleCalendarsWith: [String] = []
+    func routeToSelectGoogleCalendars(accountId: String) {
+        self.didRouteToSelectGoogleCalendarsWith.append(accountId)
     }
 }
