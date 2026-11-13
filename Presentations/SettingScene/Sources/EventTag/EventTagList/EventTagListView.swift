@@ -237,7 +237,10 @@ struct EventTagListView: View {
                 serviceIntegrateView(section.serviceId)
             } else {
                 ForEach(section.cellViewModels) { cell in
-                    self.externalCellView(cell)
+                    ExternalCalendarEventTagCellView(cell)
+                        .eventHandler(\.onTap) {
+                            self.eventHandlers.toggleEventTagViewingIsOn(cell.id)
+                        }
                 }
             }
         }
@@ -259,53 +262,6 @@ struct EventTagListView: View {
             .foregroundStyle(appearance.colorSet.primaryBtnBackground.asColor)
         }
         .padding(.top, spacing: .small)
-    }
-
-    private func externalCellView(_ cellViewModel: ExternalCalendarEventTagCellViewModel) -> some View {
-        let colorSource: any EventTagColorSource = {
-            switch cellViewModel.id {
-            case .externalCalendar(AppleCalendarService.id, let calendarId):
-                return AppleCalendarEventColorSource(calendarId: calendarId)
-            case .externalCalendar(_, let calendarId):
-                return GoogleCalendarEventColorSource(calendarId: calendarId, colorId: nil)
-            default:
-                return cellViewModel.id
-            }
-        }()
-
-        return HStack {
-            EventTagColorView(colorSource) { color in
-                Image(systemName: cellViewModel.isOn ? "checkmark.circle.fill" : "checkmark.circle")
-                    .foregroundStyle(color)
-                    .font(.title3)
-            }
-                .animation(.easeIn, value: cellViewModel.isOn)
-                .onTapGesture {
-                    self.appearance.impactIfNeed()
-                    self.eventHandlers.toggleEventTagViewingIsOn(cellViewModel.id)
-                }
-            
-            VStack(alignment: .leading, spacing: Metric.Spacing.xxsmall) {
-                Text(cellViewModel.name)
-                    .lineLimit(1)
-                    .font(self.appearance.fontSet.normal.asFont)
-                    .foregroundStyle(self.appearance.colorSet.text0.asColor)
-                if let email = cellViewModel.accountEmail, !email.isEmpty {
-                    Text(email)
-                        .lineLimit(1)
-                        .font(self.appearance.fontSet.subNormal.asFont)
-                        .foregroundStyle(self.appearance.colorSet.text2.asColor)
-                }
-            }
-
-            Spacer()
-        }
-        .padding(.horizontal, spacing: .regular)
-        .padding(.vertical, spacing: .regular)
-        .background(
-            RoundedRectangle(cornerRadius: Metric.Radius.regular)
-                .fill(self.appearance.colorSet.bg1.asColor)
-        )
     }
 }
 
