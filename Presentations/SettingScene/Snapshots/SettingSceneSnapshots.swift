@@ -271,18 +271,25 @@ final class SettingSceneSnapshots: XCTestCase {
                 let tag = CustomEventTag(uuid: "id:\($0)", name: "name:\($0)", colorHex: "#ff0000")
                 return BaseCalendarEventTagCellViewModel(tag)
             }
+            let googleTags = (0..<4).map {
+                GoogleCalendar.Tag(id: "g:\($0)", name: "calendar:\($0)")
+                    |> \.ownerId .~ ($0 < 2 ? "alice@gmail.com" : "")
+                    |> \.backgroundColorHex .~ "#4285f4"
+            }
+            let appearance = self.makeAppearance(theme)
+            appearance.applyCalendarTags(googleTags, for: "alice@gmail.com")
             state.externalCalendarTagSections = [
                 .init(
                     serviceId: GoogleCalendarService.id,
                     serviceTitle: "Google Calendar",
-                    cellViewModels: [],
-                    offIds: []
+                    cellViewModels: googleTags.map { ExternalCalendarEventTagCellViewModel(ExternalCalendarEventTag($0)) },
+                    offIds: [googleTags[1].tagId, googleTags[3].tagId]
                 )
             ]
             let eventHandler = EventTagListEventHandlers()
 
             return EventTagListView(isRootNavigation: true)
-                .environment(self.makeAppearance(theme))
+                .environment(appearance)
                 .environment(state)
                 .environment(eventHandler)
         }
