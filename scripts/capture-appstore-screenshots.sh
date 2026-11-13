@@ -12,7 +12,7 @@
 #       snapshot-appstore/<lang>/widgets/<슬러그>.png — 홈화면·잠금화면 합성 전 위젯 원본
 #       snapshot-appstore/<lang>/sheets/<슬러그>.png — 캘린더 위에 얹을 시트 조각
 #       snapshot-appstore/<lang>/appearance/<테마>.png — 06 에 겹쳐 놓을 테마별 화면
-#       snapshot-appstore/<lang>/duo/<NN-슬러그>.png — iPhone Duo 업로드 원본 (내부·커버 두 규격)
+#       snapshot-appstore/<lang>/duo/<NN-슬러그>.png — iPhone Duo 합성 전 화면 원본 (내부·커버 두 규격)
 #       snapshot-appstore/<lang>/ipad/<NN-슬러그>.png — iPad 13" 합성 전 화면 원본 (가로·세로 두 규격)
 # 홈화면·잠금화면 스샷은 위젯 원본을 배경에 합성해 만드는 별도 단계다 — 여기서는 원본까지만 뽑는다.
 # 기본 스토어 페이지와 맞춤형 제품 페이지가 장면을 나눠 쓰므로 한 실행이 양쪽을 다 뜬다.
@@ -119,7 +119,7 @@ WIDGET_MAPPING=(
     "lockscreen-live-activity|Widget/WidgetCatalogSnapshots/test_widgetLockScreenLiveActivity.lockscreen-live-activity-dark.png"
 )
 
-# iPhone Duo 업로드 원본 — 캔버스가 화면 크기라 합성 없이 그대로 올린다
+# iPhone Duo 화면 원본 — 합성 단계가 캡션·베젤을 입힌다
 DUO_MAPPING=(
     "01-calendar-two-columns|CalendarScenes/CalendarScenesCatalogSnapshots/test_storeDuoInnerCalendar.storeDuoInnerCalendar-light.png"
     "02-calendar-cover|CalendarScenes/CalendarScenesCatalogSnapshots/test_storeDuoCoverCalendar.storeDuoCoverCalendar-light.png"
