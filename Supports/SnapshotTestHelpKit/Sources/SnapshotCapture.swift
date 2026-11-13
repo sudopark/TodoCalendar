@@ -40,6 +40,8 @@ public enum SnapshotLayout {
     case fixed(width: CGFloat, height: CGFloat)
     case duoCover
     case duoInner
+    case iPadPortrait
+    case iPadLandscape
 
     @MainActor
     var swiftUILayout: SwiftUISnapshotLayout {
@@ -56,6 +58,18 @@ public enum SnapshotLayout {
             return .fixed(width: 466, height: 678)
         case .duoInner:
             return .fixed(width: 951, height: 669)
+        // iPad 13" 업로드 규격 2064×2752 ÷ scale 2 — 2752 는 3 으로 안 나뉜다
+        case .iPadPortrait:
+            return .fixed(width: 1032, height: 1376)
+        case .iPadLandscape:
+            return .fixed(width: 1376, height: 1032)
+        }
+    }
+
+    var displayScale: CGFloat {
+        switch self {
+        case .iPadPortrait, .iPadLandscape: return 2
+        case .component, .fullScreen, .fixed, .duoCover, .duoInner: return 3
         }
     }
 }
@@ -107,7 +121,7 @@ public func captureSnapshot<V: View>(
             of: view,
             as: .image(
                 layout: layout.swiftUILayout,
-                traits: snapshotTraits(theme)
+                traits: snapshotTraits(theme, displayScale: layout.displayScale)
             ),
             named: name,
             snapshotDirectory: snapshotDirectory,
@@ -154,11 +168,11 @@ public func catalogSnapshotDirectory(
 
 // MARK: - private
 
-/// 캡처 png는 항상 iPhone 기본 @3x로 래스터라이즈 — 실행 시뮬레이터 scale 의존 제거
-private func snapshotTraits(_ theme: SnapshotTheme) -> UITraitCollection {
+/// 캡처 png는 레이아웃이 정한 배율로 래스터라이즈 — 실행 시뮬레이터 scale 의존 제거
+private func snapshotTraits(_ theme: SnapshotTheme, displayScale: CGFloat) -> UITraitCollection {
     return UITraitCollection(traitsFrom: [
         UITraitCollection(userInterfaceStyle: theme.interfaceStyle),
-        UITraitCollection(displayScale: 3)
+        UITraitCollection(displayScale: displayScale)
     ])
 }
 
