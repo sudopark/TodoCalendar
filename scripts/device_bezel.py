@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""아이폰 기기 베젤(목업) 확보와 화면 구멍 산출.
+"""기기 베젤(목업) 확보와 화면 구멍 산출.
 
 애플 공식 베젤만 쓴다 (마케팅·아이덴티티 가이드라인). 동봉 라이선스가 non-transferable 이라
 public 레포에 커밋하지 않고 캐시 디렉토리에 받아 쓴다.
@@ -8,22 +8,49 @@ public 레포에 커밋하지 않고 캐시 디렉토리에 받아 쓴다.
 import shutil
 import subprocess
 import tempfile
+from dataclasses import dataclass
 from pathlib import Path
 
 from PIL import Image, ImageDraw
 
-BEZEL_URL = "https://devimages-cdn.apple.com/design/resources/download/Bezel-iPhone-16.dmg"
-BEZEL_IN_DMG = "PNG/iPhone 16 Pro Max/iPhone 16 Pro Max - Black Titanium - Portrait.png"
 BEZEL_CACHE_DIR = Path.home() / "Library/Caches/todocalendar-appstore-bezel"
-BEZEL_CACHE_PATH = BEZEL_CACHE_DIR / "iPhone-16-Pro-Max-Black-Titanium-Portrait.png"
 
 
-def download_bezel():
+@dataclass(frozen=True)
+class BezelSpec:
+    url: str
+    path_in_dmg: str
+    cache_name: str
+
+    @property
+    def cache_path(self):
+        return BEZEL_CACHE_DIR / self.cache_name
+
+
+IPHONE_BEZEL = BezelSpec(
+    url="https://devimages-cdn.apple.com/design/resources/download/Bezel-iPhone-16.dmg",
+    path_in_dmg="PNG/iPhone 16 Pro Max/iPhone 16 Pro Max - Black Titanium - Portrait.png",
+    cache_name="iPhone-16-Pro-Max-Black-Titanium-Portrait.png",
+)
+IPAD_BEZEL_URL = "https://devimages-cdn.apple.com/design/resources/download/Bezel-iPad-Pro-(M5).dmg"
+IPAD_PORTRAIT_BEZEL = BezelSpec(
+    url=IPAD_BEZEL_URL,
+    path_in_dmg='PNG/iPad Pro (M5) 13" - Space Black - Portrait.png',
+    cache_name="iPad-Pro-M5-13-Space-Black-Portrait.png",
+)
+IPAD_LANDSCAPE_BEZEL = BezelSpec(
+    url=IPAD_BEZEL_URL,
+    path_in_dmg='PNG/iPad Pro (M5) 13" - Space Black - Landscape.png',
+    cache_name="iPad-Pro-M5-13-Space-Black-Landscape.png",
+)
+
+
+def download_bezel(spec=IPHONE_BEZEL):
     BEZEL_CACHE_DIR.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory() as workspace:
         dmg_path = Path(workspace) / "bezel.dmg"
-        print(f"▶︎ 베젤 내려받는 중 — {BEZEL_URL}")
-        subprocess.run(["curl", "-fsSL", "-o", str(dmg_path), BEZEL_URL], check=True)
+        print(f"▶︎ 베젤 내려받는 중 — {spec.url}")
+        subprocess.run(["curl", "-fsSL", "-o", str(dmg_path), spec.url], check=True)
 
         mount_point = Path(workspace) / "mount"
         mount_point.mkdir()
@@ -33,19 +60,19 @@ def download_bezel():
             shell=True, check=True, capture_output=True,
         )
         try:
-            source = mount_point / BEZEL_IN_DMG
+            source = mount_point / spec.path_in_dmg
             if not source.exists():
-                raise SystemExit(f"✗ dmg 안에 {BEZEL_IN_DMG} 가 없다 — 베젤 배포 구조가 바뀌었다")
-            shutil.copyfile(source, BEZEL_CACHE_PATH)
+                raise SystemExit(f"✗ dmg 안에 {spec.path_in_dmg} 가 없다 — 베젤 배포 구조가 바뀌었다")
+            shutil.copyfile(source, spec.cache_path)
         finally:
             subprocess.run(["hdiutil", "detach", str(mount_point)], check=False, capture_output=True)
-    print(f"  ✓ 캐시 — {BEZEL_CACHE_PATH}")
+    print(f"  ✓ 캐시 — {spec.cache_path}")
 
 
-def load_bezel():
-    if not BEZEL_CACHE_PATH.exists():
-        download_bezel()
-    return Image.open(BEZEL_CACHE_PATH).convert("RGBA")
+def load_bezel(spec=IPHONE_BEZEL):
+    if not spec.cache_path.exists():
+        download_bezel(spec)
+    return Image.open(spec.cache_path).convert("RGBA")
 
 
 def screen_hole(bezel):

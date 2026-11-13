@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""App Store 업로드 캔버스 조립 — 캡션 아래에 기기 목업을 얹어 1320×2868 한 장을 만든다.
+"""App Store 업로드 캔버스 조립 — 캡션 아래에 기기 목업을 얹어 한 장을 만든다 (6.9" 1320×2868, iPad 13" 는 화면 원본 크기).
 
 기본 스토어 페이지(`compose-appstore-screenshots.py`)와 맞춤형 제품 페이지(`compose-cpp-screenshots.py`)가
 같은 기하를 써야 다섯 라인업이 한 앱으로 보인다 (CPP 명세 §4-1).
@@ -32,17 +32,32 @@ def device_image(screen, bezel, hole_mask, hole_box, width):
     return device.resize((width, height), Image.LANCZOS)
 
 
-def caption_canvas(caption):
-    canvas = Image.new("RGB", UPLOAD_SIZE, CANVAS_COLOR)
-    canvas.paste(caption.convert("RGB"), ((UPLOAD_SIZE[0] - caption.width) // 2, CAPTION_TOP))
+def caption_canvas(caption, size=UPLOAD_SIZE, caption_top=CAPTION_TOP, caption_width=None):
+    canvas = Image.new("RGB", size, CANVAS_COLOR)
+    caption = caption.convert("RGB")
+    if caption_width is not None and caption_width != caption.width:
+        caption = caption.resize((caption_width, round(caption_width * caption.height / caption.width)), Image.LANCZOS)
+    canvas.paste(caption, ((size[0] - caption.width) // 2, caption_top))
+    return canvas
+
+
+def compose_canvas(
+    screen, caption, bezel, hole_mask, hole_box,
+    size, caption_width, caption_top, device_top, device_width,
+):
+    """기기 밑단이 캔버스 밖으로 나가면 잘린 채로 둔다."""
+    device = device_image(screen, bezel, hole_mask, hole_box, device_width)
+    canvas = caption_canvas(caption, size, caption_top, caption_width)
+    canvas.paste(device, ((size[0] - device_width) // 2, device_top), device)
     return canvas
 
 
 def compose(screen, caption, bezel, hole_mask, hole_box):
-    device = device_image(screen, bezel, hole_mask, hole_box, DEVICE_WIDTH)
-    canvas = caption_canvas(caption)
-    canvas.paste(device, ((UPLOAD_SIZE[0] - DEVICE_WIDTH) // 2, DEVICE_TOP), device)
-    return canvas
+    return compose_canvas(
+        screen, caption, bezel, hole_mask, hole_box,
+        size=UPLOAD_SIZE, caption_width=UPLOAD_SIZE[0], caption_top=CAPTION_TOP,
+        device_top=DEVICE_TOP, device_width=DEVICE_WIDTH,
+    )
 
 
 def theme_lineup_screens(source_dir, size):
