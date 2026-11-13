@@ -61,7 +61,7 @@ bundle exec fastlane ios upload_app_store_screenshots   # 스크린샷만
 
 - 메타데이터 lane은 `force: false`라 업로드 직전 HTML 프리뷰 확인 프롬프트가 뜬다 — **TTY에서 돌린다.**
   비대화형에서 돌리면 그 프롬프트에서 죽는다
-- 스크린샷 lane은 279장(6.9" 217장 + Duo 62장) 업로드가 시간 단위라 프롬프트 없이 돌고, 대신 진입 가드 3종이 사전 확인을 대신한다
+- 스크린샷 lane은 341장(6.9" 217장 + Duo 62장 + iPad 13" 62장) 업로드가 시간 단위라 프롬프트 없이 돌고, 대신 진입 가드 3종이 사전 확인을 대신한다
 - 두 lane 다 `precheck`의 `other_platforms` 룰과 무관하게 통과해야 한다 — 구글 캘린더 연동은 앱의 실제
   기능이라 competitor 언급이 아니다. 그래서 이 룰만 `warn`으로 낮췄고 나머지는 `error`다
 
@@ -82,6 +82,8 @@ puts app.fetch_edit_app_info.get_app_info_localizations.size
 
 보는 값은 두 갈래다 — `name`·`subtitle`·`privacy_url`은 **앱 정보** 로컬라이제이션,
 `description`·`keywords`·`promotional_text`·`support_url`·`release_notes`는 **버전** 로컬라이제이션에 있다.
+
+스크린샷은 로케일마다 6.9"·iPhone Duo·iPad 13" 세 세트가 각각 `COMPLETE` 인지 본다.
 
 `fastlane/Preview.html`도 진단에 쓴다. deliver가 무엇을 읽었는지 그대로 담기므로, 로케일 섹션에 본문이
 비어 있으면 파일을 못 읽은 것이다.
