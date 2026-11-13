@@ -14,7 +14,7 @@ import CommonPresentation
 import ExternalCalendarDomainInterface
 
 
-private enum Constant {
+enum CalendarTwoColumnsLayout {
     static let listWidthRatio: CGFloat = 0.4
     static let maxListWidth: CGFloat = 560
     static let dividerWidth: CGFloat = 0.5
@@ -89,9 +89,9 @@ extension CalendarTwoColumnsViewController {
         let months = self.monthsViewController.view!
         let list = self.listViewController.view!
         let proportionalListWidth = list.widthAnchor.constraint(
-            equalTo: self.view.widthAnchor, multiplier: Constant.listWidthRatio
+            equalTo: self.view.widthAnchor, multiplier: CalendarTwoColumnsLayout.listWidthRatio
         )
-        proportionalListWidth.priority = Constant.proportionalWidthPriority
+        proportionalListWidth.priority = CalendarTwoColumnsLayout.proportionalWidthPriority
         NSLayoutConstraint.activate([
             months.topAnchor.constraint(equalTo: self.view.topAnchor),
             months.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
@@ -100,13 +100,13 @@ extension CalendarTwoColumnsViewController {
 
             self.divider.topAnchor.constraint(equalTo: self.view.topAnchor),
             self.divider.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
-            self.divider.widthAnchor.constraint(equalToConstant: Constant.dividerWidth),
+            self.divider.widthAnchor.constraint(equalToConstant: CalendarTwoColumnsLayout.dividerWidth),
             self.divider.trailingAnchor.constraint(equalTo: list.leadingAnchor),
 
             list.topAnchor.constraint(equalTo: self.view.topAnchor),
             list.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
             list.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
-            list.widthAnchor.constraint(lessThanOrEqualToConstant: Constant.maxListWidth),
+            list.widthAnchor.constraint(lessThanOrEqualToConstant: CalendarTwoColumnsLayout.maxListWidth),
             proportionalListWidth
         ])
     }

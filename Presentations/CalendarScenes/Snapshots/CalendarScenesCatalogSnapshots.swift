@@ -225,8 +225,10 @@ extension CalendarScenesCatalogSnapshots {
             named: "storeDuoInnerCalendar", layout: .duoInner, snapshotDirectory: catalogSnapshotDirectory()
         ) { theme in
             let appearance = self.makeStoreAppearance(theme)
-            let listWidth = min(StoreDuoInnerLayout.width * StoreDuoInnerLayout.listWidthRatio, StoreDuoInnerLayout.maxListWidth)
-            let monthsWidth = StoreDuoInnerLayout.width - listWidth - StoreDuoInnerLayout.dividerWidth
+            let listWidth = min(
+                StoreDuoInnerLayout.width * CalendarTwoColumnsLayout.listWidthRatio, CalendarTwoColumnsLayout.maxListWidth
+            )
+            let monthsWidth = StoreDuoInnerLayout.width - listWidth - CalendarTwoColumnsLayout.dividerWidth
 
             return VStack(spacing: 0) {
                 self.storeCalendarHeaderView(appearance)
@@ -234,7 +236,7 @@ extension CalendarScenesCatalogSnapshots {
                     self.storeContinuousMonthsView(appearance, width: monthsWidth)
                         .frame(width: monthsWidth)
                     appearance.colorSet.line.asColor
-                        .frame(width: StoreDuoInnerLayout.dividerWidth)
+                        .frame(width: CalendarTwoColumnsLayout.dividerWidth)
                     self.storeTwoColumnsListView(appearance)
                         .frame(width: listWidth)
                 }
@@ -885,9 +887,6 @@ private enum StoreCatalogEventTag: String {
 private enum StoreDuoInnerLayout {
     /// 연속 달력 행 폭을 첫 렌더 전에 정해야 해서 duoInner 폭을 따로 둔다
     static let width: CGFloat = 951
-    static let listWidthRatio: CGFloat = 0.4
-    static let maxListWidth: CGFloat = 420
-    static let dividerWidth: CGFloat = 0.5
 }
 
 private final class StoreCatalogContinuousMonthsViewModel: ContinuousMonthsViewModel, @unchecked Sendable {
