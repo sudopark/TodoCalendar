@@ -453,6 +453,8 @@
 "event_setting::external_calendar::stop" = "Disconnect";
 "event_setting::external_calendar::stop::message" = "The external calendar connection has been disconnected.";
 "event_setting::external_calendar::google::serviceName" = "Google Calendar";
+"event_setting::external_calendar::google::select_calendars::title" = "Calendars to show";
+"event_setting::external_calendar::google::select_calendars::description" = "Hidden calendars keep syncing. You can change this later in the filter.";
 "event_setting::external_calendar::apple::serviceName" = "Apple Calendar";
 "event_setting::apple_calendar::permission_denied::message" = "Calendar access has been denied. Please enable it in Settings to use Apple Calendar.";
 "event_setting::apple_calendar::restricted::message" = "Calendar access is restricted on this device.";
