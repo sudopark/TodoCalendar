@@ -179,13 +179,14 @@ graph TD
 
 ## 프레임워크 내부 공용 컴포넌트
 
-전용 공용 폴더 없이 기능 하위폴더끼리 교차 참조 중 — 새 공용 뷰 추가 시 rules §2 배치 규칙(전용 폴더) 따를 것.
+새 공용 뷰는 `Sources/Components/` 에 둔다 (rules §2 배치 규칙). 그 전에 만든 아래 Appearance 계열은 기능 하위폴더끼리 교차 참조 중이다.
 
 | 컴포넌트 | 위치 | 역할 | 사용처 |
 |---|---|---|---|
 | `CalendarAppearanceSampleView` | `Setting/Appearance/CalendarSection/CalendarAppearancePreviewView.swift` | 설정 미리보기용 미니 월간 캘린더 샘플. 색 세트를 주입하면 그 색으로 칠한다 | CalendarAppearancePreviewView |
 | `ColorThemeEditPreviewView` | `Setting/Appearance/ColorTheme/Edit/ColorThemeEditPreviewView.swift` | 토큰이 쓰이는 자리(일정 카드·캡슐·오늘·선택일)를 담은 테마 미리보기 카드. 주입한 색 세트로 칠한다 | ColorThemeEditView, ColorThemeSelectView |
 | `ColorThemePreviewView` / `ColorThemeItemView` | `Setting/Appearance/ColorTheme/ColorThemePreviewView.swift` | 색 테마 미리보기 / 선택 아이템 셀. 모델은 `ColorThemeModel` 프로토콜(`BuiltInColorThemeModel`·`CustomColorThemeModel`) | ColorTheme 내부 + CalendarAppearancePreviewView |
+| `ExternalCalendarEventTagCellView` | `Components/ExternalCalendarEventTagCellView.swift` | 외부 캘린더 한 개의 켜짐 체크·이름·계정 이메일 행. 체크 탭은 `.eventHandler(\.onTap)` | EventTagListView, SelectGoogleCalendarDialogView |
 
 ---
 
