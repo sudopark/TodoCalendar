@@ -43,6 +43,17 @@ IPAD_LANDSCAPE_BEZEL = BezelSpec(
     path_in_dmg='PNG/iPad Pro (M5) 13" - Space Black - Landscape.png',
     cache_name="iPad-Pro-M5-13-Space-Black-Landscape.png",
 )
+DUO_BEZEL_URL = "https://devimages-cdn.apple.com/design/resources/download/Bezel-iPhone-Duo.dmg"
+DUO_INNER_BEZEL = BezelSpec(
+    url=DUO_BEZEL_URL,
+    path_in_dmg="PNG/iPhone Duo - Night Sky - Inner Open Landscape.png",
+    cache_name="iPhone-Duo-Night-Sky-Inner-Open-Landscape.png",
+)
+DUO_COVER_BEZEL = BezelSpec(
+    url=DUO_BEZEL_URL,
+    path_in_dmg="PNG/iPhone Duo - Night Sky - Outer Closed Portrait.png",
+    cache_name="iPhone-Duo-Night-Sky-Outer-Closed-Portrait.png",
+)
 
 
 def download_bezel(spec=IPHONE_BEZEL):
