@@ -11,6 +11,8 @@ usage:
 출력: fastlane/screenshots/<ASC 로케일>/<NN>_<슬러그>.png (1320×2868 / 알파 없음)
       같은 폴더의 duo_<NN>_<슬러그>.png — snapshot-appstore/<lang>/duo/ 원본을 그대로 옮긴다.
       캔버스가 화면 크기라 캡션 자리가 없다. deliver 가 해상도로 화면 종류를 가른다
+      같은 폴더의 ipad_<NN>_<슬러그>.png — snapshot-appstore/<lang>/ipad/ 원본에 01-calendar 캡션과
+      iPad 베젤을 입힌다. 캔버스는 원본과 같은 크기(2752×2064 / 2064×2752)다
 
 기기 프레임은 애플 공식 베젤만 쓴다 (마케팅·아이덴티티 가이드라인). 동봉 라이선스가
 non-transferable 이라 public 레포에 커밋하지 않고 캐시 디렉토리에 받아 쓴다.
@@ -22,9 +24,9 @@ from pathlib import Path
 from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from device_bezel import load_bezel, screen_hole  # noqa: E402
+from device_bezel import IPAD_LANDSCAPE_BEZEL, IPAD_PORTRAIT_BEZEL, load_bezel, screen_hole  # noqa: E402
 from store_canvas import (  # noqa: E402
-    UPLOAD_SIZE, compose, compose_theme_lineup, theme_lineup_screens,
+    UPLOAD_SIZE, compose, compose_canvas, compose_theme_lineup, theme_lineup_screens,
 )
 from store_screen import home_screen, inset_screenshot  # noqa: E402
 
@@ -61,6 +63,24 @@ DUO_SLUGS = [
 ]
 DUO_SIZES = [(2853, 2007), (1398, 2034)]
 DUO_PREFIX = "duo_"
+
+IPAD_SLUGS = [
+    "01-calendar-landscape",
+    "02-calendar-portrait",
+]
+IPAD_SIZES = [(2752, 2064), (2064, 2752)]
+IPAD_PREFIX = "ipad_"
+IPAD_CAPTION_SLUG = "01-calendar"
+IPAD_CAPTION_WIDTH = 2064
+# 슬러그 → (caption_top, device_top, device_width)
+IPAD_LAYOUTS = {
+    "01-calendar-landscape": (120, 760, 1800),
+    "02-calendar-portrait": (156, 860, 1640),
+}
+IPAD_BEZELS = {
+    "01-calendar-landscape": IPAD_LANDSCAPE_BEZEL,
+    "02-calendar-portrait": IPAD_PORTRAIT_BEZEL,
+}
 
 
 def asc_locale(lang):
@@ -124,6 +144,46 @@ def copy_duo_lang(lang, output_dir):
     print(f"  ✓ [{lang}] Duo {len(DUO_SLUGS)}장")
 
 
+def load_ipad_bezels():
+    bezels = {}
+    for slug, spec in IPAD_BEZELS.items():
+        bezel = load_bezel(spec)
+        bezels[slug] = (bezel, *screen_hole(bezel))
+    return bezels
+
+
+def compose_ipad_lang(lang, output_dir, ipad_bezels):
+    source_dir = ROOT / "snapshot-appstore" / lang
+    print(f"▶︎ [{lang}] iPad 합성 → fastlane/screenshots/{asc_locale(lang)}/{IPAD_PREFIX}*")
+
+    caption_path = source_dir / "captions" / f"{IPAD_CAPTION_SLUG}.png"
+    if not caption_path.exists():
+        raise SystemExit(f"  ✗ 누락: {caption_path.relative_to(ROOT)} — 먼저 촬영 스크립트를 돌려라")
+    with Image.open(caption_path) as caption_file:
+        caption = caption_file.convert("RGBA")
+
+    for slug in IPAD_SLUGS:
+        path = source_dir / "ipad" / f"{slug}.png"
+        if not path.exists():
+            raise SystemExit(f"  ✗ 누락: {path.relative_to(ROOT)} — 먼저 촬영 스크립트를 돌려라")
+        caption_top, device_top, device_width = IPAD_LAYOUTS[slug]
+        bezel, hole_mask, hole_box = ipad_bezels[slug]
+        hole_size = (hole_box[2] - hole_box[0], hole_box[3] - hole_box[1])
+        with Image.open(path) as screenshot:
+            screen = screenshot.convert("RGBA")
+        if screen.size != hole_size:
+            raise SystemExit(
+                f"  ✗ {path.relative_to(ROOT)}: {screen.size[0]}x{screen.size[1]} — 베젤 화면 구멍 {hole_size[0]}x{hole_size[1]} 과 다르다"
+            )
+        composed = compose_canvas(
+            screen, caption, bezel, hole_mask, hole_box,
+            size=screen.size, caption_width=IPAD_CAPTION_WIDTH, caption_top=caption_top,
+            device_top=device_top, device_width=device_width,
+        )
+        composed.save(output_dir / upload_name(slug, IPAD_PREFIX))
+    print(f"  ✓ [{lang}] iPad {len(IPAD_SLUGS)}장")
+
+
 def verify(output_dir, pattern, sizes):
     failures = []
     for path in sorted(output_dir.glob(pattern)):
@@ -147,12 +207,15 @@ def main(argv):
     bezel = load_bezel()
     hole_mask, hole_box = screen_hole(bezel)
     print(f"▶︎ 화면 구멍 {hole_box[2]-hole_box[0]}x{hole_box[3]-hole_box[1]} @ ({hole_box[0]}, {hole_box[1]})")
+    ipad_bezels = load_ipad_bezels()
 
     for lang in langs:
         output_dir = compose_lang(lang, bezel, hole_mask, hole_box)
         copy_duo_lang(lang, output_dir)
+        compose_ipad_lang(lang, output_dir, ipad_bezels)
         verify(output_dir, "[0-9]*.png", (UPLOAD_SIZE,))
         verify(output_dir, f"{DUO_PREFIX}*.png", DUO_SIZES)
+        verify(output_dir, f"{IPAD_PREFIX}*.png", IPAD_SIZES)
     print(f"✓ 전체 완료 — {len(langs)} 개 언어")
 
 
