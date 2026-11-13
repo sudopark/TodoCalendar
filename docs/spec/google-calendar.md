@@ -223,6 +223,11 @@ Google Calendar API v3 응답 전체 구조. RFC 5545 호환.
    → refreshColors(): 계정 색상 맵 로드 → AppearanceStore 적용
    → refreshCalendarTags(isNew: true): 캘린더 목록 로드
      → isSelected != true인 캘린더를 offTagIds에 추가 (기본 숨김)
+
+7. 캘린더 선택 시트 (연동 설정 화면에서 연동했을 때)
+   → EventSettingViewModelImple 이 연동 토스트 뒤 calendarTags 에서 그 계정 캘린더가 처음 올 때까지 기다린다
+   → 오면 그 계정 캘린더만 담은 선택 시트(SelectGoogleCalendarDialog)를 바텀시트로 띄운다
+   → 목록이 안 오거나 그 계정 캘린더가 0개면 시트를 띄우지 않는다
 ```
 
 ### 5.2 해제 단계
@@ -324,7 +329,7 @@ Google Calendar API v3 응답 전체 구조. RFC 5545 호환.
 
 - 구글 캘린더 API의 `isSelected` 필드 반영
 - `isSelected != true` → 기본 숨김 (offTagIds에 추가)
-- 사용자가 명시적으로 활성화 필요
+- 사용자는 연동 직후 뜨는 선택 시트(§5.1 7단계)나 메인 필터(이벤트 타입 목록)에서 켜고 끈다. 둘 다 같은 offTagIds 를 바꾸고, 끈 캘린더도 동기화는 계속된다
 
 ### 7.2 필터링 적용
 
@@ -333,7 +338,7 @@ activeCalendars() = 전체 캘린더 - offTagIds에 포함된 캘린더
   → 활성 캘린더만 이벤트 로드 대상
 ```
 
-- 캘린더 토글 시 `EventTagUsecase.toggleTagIsOn()` 호출
+- 캘린더 토글 시 `EventTagUsecase.toggleEventTagIsOnCalendar(_:)` 호출
 - 토글 결과가 즉시 SharedDataStore에 반영 → 캘린더/이벤트 목록 실시간 갱신
 
 ---
