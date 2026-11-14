@@ -1,1 +1,1 @@
-3.2.0 — Muokkaa widgetejä ja vaihda sovelluksen värit 19 uudella teemalla tai omallasi. Lisäksi uusi Lähtölaskenta-widget ja kaksi ruutua iPhone Duolla.
+3.2.0 — To-do Calendar on nyt iPadilla. Näe tehtäväsi ja aikataulusi samassa kalenterissa, nyt isommalla näytöllä.

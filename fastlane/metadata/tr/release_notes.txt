@@ -1,4 +1,10 @@
-■ Rokuyo (iOS 26 veya sonrası)
-· Ayarlar > Görünüm'de "Rokuyo"yu açın; seçili tarihin üstünde o günün rokuyo'su, örneğin Taian veya Butsumetsu görünür
+■ iPad desteği
+· To-do Calendar artık iPad'de de çalışıyor
+
+■ Widget'larda etkinlik yazı boyutu
+· Haftalık ve aylık widget'ların "Etkinlik yazı boyutu" ayarını "Widget'ı özelleştir" bölümünden değiştirebilirsiniz
+
+■ Google Takvim
+· Bir Google hesabı bağladığınız anda "Gösterilecek takvimler"i seçebilirsiniz
 
 · Hata düzeltmeleri
