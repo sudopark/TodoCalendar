@@ -120,7 +120,7 @@ git checkout "$(git branch --show-current | sed 's|^test-deploy/||')"
 
 로컬 직접 실행 명령 — 로케일 export 를 빼면 `build_app` 이 넘기는 xcpretty 가 US-ASCII 셸에서 `invalid byte sequence` 로 죽어 archive 가 실패한다:
 ```bash
-export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
+export PATH="/opt/homebrew/opt/ruby@3.3/bin:$PATH"
 export LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
 TEST_DEPLOY_RELEASE_NOTES="<메모>" bundle exec fastlane ios test_deploy
 ```

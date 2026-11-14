@@ -58,7 +58,7 @@ python3 scripts/compose-creative-assets.py --locale ko
 scripts/capture-appstore-screenshots.sh --all
 python3 scripts/compose-creative-assets.py --all-locales
 
-export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
+export PATH="/opt/homebrew/opt/ruby@3.3/bin:$PATH"
 bundle exec ruby scripts/asc-creative-assets.rb push --all-locales --dry-run
 bundle exec ruby scripts/asc-creative-assets.rb push --all-locales
 ```

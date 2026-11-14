@@ -18,7 +18,7 @@ description: Use when building or updating App Store custom product pages (맞�
 ## 0. 준비 — 실행 환경과 자격증명
 
 ```sh
-export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
+export PATH="/opt/homebrew/opt/ruby@3.3/bin:$PATH"
 ```
 
 자격증명은 `secret/asc-api-key.json` 이 정본이고, 없으면 `ASC_KEY_ID`·`ASC_ISSUER_ID`·`ASC_KEY_CONTENT` 로도 된다. 발급 절차는 [`docs/appstore-connect-operations.md`](../../../docs/appstore-connect-operations.md) §1·§2.

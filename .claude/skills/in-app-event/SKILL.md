@@ -11,7 +11,7 @@ description: Use when filling in an App Store in-app event's localized copy and 
 
 ## 0. 준비 — 실행 환경과 자격증명
 
-- ruby PATH 는 [`docs/appstore-connect-operations.md`](../../../docs/appstore-connect-operations.md) §1 이 정본이다. 명령마다 `export PATH="/opt/homebrew/opt/ruby/bin:$PATH"` 를 같은 줄에 실어 보낸다 — 에이전트 셸은 명령마다 새로 떠서 앞선 `export` 가 넘어가지 않는다.
+- ruby PATH 는 [`docs/appstore-connect-operations.md`](../../../docs/appstore-connect-operations.md) §1 이 정본이다. 명령마다 `export PATH="/opt/homebrew/opt/ruby@3.3/bin:$PATH"` 를 같은 줄에 실어 보낸다 — 에이전트 셸은 명령마다 새로 떠서 앞선 `export` 가 넘어가지 않는다.
 - 자격증명은 스크립트가 `secret/asc-api-key.json` 에서 읽는다 (형식은 [`secret/README.md`](../../../secret/README.md), 발급·권한은 ops 문서 §2). 환경변수 셋이 차 있으면 그쪽이 우선한다.
 - **파일도 환경변수도 없으면 인증이 필요한 절에서 멈추고 유저에게 인계한다** — 실행을 흉내내지 않는다.
 

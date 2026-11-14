@@ -4,7 +4,7 @@
 # App Store Connect 앱 내 이벤트(In-App Event)를 조회하고 갱신한다.
 #
 # usage (PATH 는 docs/appstore-connect-operations.md §1, 자격증명은 secret/README.md):
-#   export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
+#   export PATH="/opt/homebrew/opt/ruby@3.3/bin:$PATH"
 #   bundle exec ruby scripts/asc-in-app-event.rb list
 #   bundle exec ruby scripts/asc-in-app-event.rb show <event-id>
 #   bundle exec ruby scripts/asc-in-app-event.rb set-badge <event-id> <BADGE>

@@ -5,7 +5,7 @@
 # 앱 버전 로케일에 placement 로 건다.
 #
 # usage (PATH 는 docs/appstore-connect-operations.md §1, 자격증명은 secret/README.md):
-#   export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
+#   export PATH="/opt/homebrew/opt/ruby@3.3/bin:$PATH"
 #   bundle exec ruby scripts/asc-creative-assets.rb list [--version <x.y.z>]
 #   bundle exec ruby scripts/asc-creative-assets.rb push (--locale <ASC로케일>|--all-locales) [--version <x.y.z>] [--dry-run]
 #

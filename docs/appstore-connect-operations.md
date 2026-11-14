@@ -15,14 +15,15 @@ ASC에 무언가를 올리는 작업의 **공통 앞단**(자격증명·실행�
 
 ## 1. 실행 환경 — `bundle` 이 시스템 ruby 로 잡힌다
 
-PATH의 `bundle`은 `/usr/local/bin/bundle`(시스템 ruby 2.6)로 잡히는데 gem은 homebrew ruby(3.3)에
+PATH의 `bundle`은 `/usr/local/bin/bundle`(시스템 ruby 2.6)로 잡히는데 gem은 homebrew `ruby@3.3`에
 깔려 있다. 그대로 돌리면 `Bundler::GemNotFound`로 죽는다. 모든 fastlane 명령 앞에:
 
 ```sh
-export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
+export PATH="/opt/homebrew/opt/ruby@3.3/bin:$PATH"
 ```
 
-`Gemfile.lock`의 `BUNDLED WITH`가 homebrew bundler 버전인 것이 이 PATH가 정본이라는 근거다.
+버전 없는 `/opt/homebrew/opt/ruby/bin` 은 쓰지 않는다. homebrew `ruby` 가 메이저 버전을 올리면 gem 이 빈 새 ruby 를 가리켜 같은 에러로 죽는다.
+`Gemfile.lock`의 `BUNDLED WITH`가 `ruby@3.3` 의 bundler 버전과 같은 것이 이 PATH가 정본이라는 근거다. CI(`test_deploy.yml`)도 같은 경로를 쓴다.
 
 ## 2. 자격증명 — ASC API 키
 

@@ -56,6 +56,7 @@ python3 scripts/check-release-notes.py
 원고를 커밋한 뒤(commit 스킬) 올린다. release_notes 전용 lane 은 없다 — 텍스트 메타데이터 lane 이 같이 올린다:
 
 ```bash
+export PATH="/opt/homebrew/opt/ruby@3.3/bin:$PATH"   # 정본은 docs/appstore-connect-operations.md §1
 bundle exec fastlane ios upload_app_store_metadata
 ```
 

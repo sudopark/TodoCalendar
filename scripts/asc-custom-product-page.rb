@@ -4,7 +4,7 @@
 # App Store Connect 맞춤형 제품 페이지(Custom Product Page)를 만들고 채운다.
 #
 # usage (PATH 는 docs/appstore-connect-operations.md §1, 자격증명은 secret/README.md):
-#   export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
+#   export PATH="/opt/homebrew/opt/ruby@3.3/bin:$PATH"
 #   bundle exec ruby scripts/asc-custom-product-page.rb list
 #   bundle exec ruby scripts/asc-custom-product-page.rb create
 #   bundle exec ruby scripts/asc-custom-product-page.rb push-text   (--page <id>|--all-pages) (--locale <ASC로케일>|--all-locales) [--dry-run]

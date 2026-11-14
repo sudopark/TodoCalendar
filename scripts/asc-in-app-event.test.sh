@@ -3,7 +3,7 @@
 # 자격증명을 전부 지운 채로 돌려 "검증이 인증보다 앞선다"까지 함께 확인한다.
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT" || exit 1
-export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
+export PATH="/opt/homebrew/opt/ruby@3.3/bin:$PATH"
 PASS=0; FAIL=0
 
 FIXTURE="fastlane/in_app_events/_test_fixture"

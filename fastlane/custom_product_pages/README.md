@@ -54,7 +54,7 @@ python3 scripts/compose-cpp-screenshots.py --locale ko
 scripts/capture-appstore-screenshots.sh --all
 python3 scripts/compose-cpp-screenshots.py --all-locales
 
-export PATH="/opt/homebrew/opt/ruby/bin:$PATH"
+export PATH="/opt/homebrew/opt/ruby@3.3/bin:$PATH"
 bundle exec ruby scripts/asc-custom-product-page.rb create
 bundle exec ruby scripts/asc-custom-product-page.rb push-text   --all-pages --all-locales
 bundle exec ruby scripts/asc-custom-product-page.rb push-images --all-pages --all-locales
