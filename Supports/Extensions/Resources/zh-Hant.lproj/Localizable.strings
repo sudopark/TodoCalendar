@@ -452,6 +452,8 @@
 "event_setting::external_calendar::stop" = "取消連接";
 "event_setting::external_calendar::stop::message" = "已取消外部日曆的連接。";
 "event_setting::external_calendar::google::serviceName" = "Google 日曆";
+"event_setting::external_calendar::google::select_calendars::title" = "要顯示的日曆";
+"event_setting::external_calendar::google::select_calendars::description" = "隱藏的日曆仍會繼續同步。之後也可以在篩選中變更。";
 "event_setting::external_calendar::apple::serviceName" = "Apple 日曆";
 "event_setting::apple_calendar::permission_denied::message" = "日曆存取權限已被拒絕。請至設定開啟權限以使用 Apple 日曆。";
 "event_setting::apple_calendar::restricted::message" = "此裝置的日曆存取權限受到限制。";
@@ -650,6 +652,7 @@
 "widget.style.month::highlightToday" = "醒目標示今天";
 "widget.style.month::showEventUnderline" = "活動底線";
 "widget.style.weekEvents::showWeekDayHeader" = "星期標題";
+"widget.style.weekEvents::eventTextSize" = "活動文字大小";
 "widget.style.todayAndNext::showTimeZone" = "時區";
 "widget.style.foremost::showTypeLabel" = "「最重要活動」標籤";
 "widget.style.aiCommand::showExplain" = "說明文字";

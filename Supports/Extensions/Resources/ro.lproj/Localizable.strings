@@ -453,6 +453,8 @@
 "event_setting::external_calendar::stop" = "Deconectează";
 "event_setting::external_calendar::stop::message" = "Conexiunea la calendarul extern a fost întreruptă.";
 "event_setting::external_calendar::google::serviceName" = "Google Calendar";
+"event_setting::external_calendar::google::select_calendars::title" = "Calendare afișate";
+"event_setting::external_calendar::google::select_calendars::description" = "Calendarele ascunse continuă să se sincronizeze. Puteți modifica ulterior din filtru.";
 "event_setting::external_calendar::apple::serviceName" = "Apple Calendar";
 "event_setting::apple_calendar::permission_denied::message" = "Accesul la calendar a fost refuzat. Activați-l în Setări pentru a folosi Apple Calendar.";
 "event_setting::apple_calendar::restricted::message" = "Accesul la calendar este restricționat pe acest dispozitiv.";
@@ -651,6 +653,7 @@
 "widget.style.month::highlightToday" = "Evidențiază ziua de azi";
 "widget.style.month::showEventUnderline" = "Subliniere pentru evenimente";
 "widget.style.weekEvents::showWeekDayHeader" = "Antetul zilelor săptămânii";
+"widget.style.weekEvents::eventTextSize" = "Dimensiunea textului evenimentelor";
 "widget.style.todayAndNext::showTimeZone" = "Fus orar";
 "widget.style.foremost::showTypeLabel" = "Eticheta \"Eveniment principal\"";
 "widget.style.aiCommand::showExplain" = "Descriere";

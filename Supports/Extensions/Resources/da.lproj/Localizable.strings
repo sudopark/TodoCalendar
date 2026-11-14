@@ -453,6 +453,8 @@
 "event_setting::external_calendar::stop" = "Afbryd forbindelse";
 "event_setting::external_calendar::stop::message" = "Forbindelsen til den eksterne kalender er blevet afbrudt.";
 "event_setting::external_calendar::google::serviceName" = "Google Kalender";
+"event_setting::external_calendar::google::select_calendars::title" = "Kalendere, der vises";
+"event_setting::external_calendar::google::select_calendars::description" = "Skjulte kalendere synkroniseres fortsat. Du kan ændre det senere i filteret.";
 "event_setting::external_calendar::apple::serviceName" = "Apple Kalender";
 "event_setting::apple_calendar::permission_denied::message" = "Adgang til kalenderen er blevet nægtet. Aktiver den i Indstillinger for at bruge Apple Kalender.";
 "event_setting::apple_calendar::restricted::message" = "Adgang til kalenderen er begrænset på denne enhed.";
@@ -651,6 +653,7 @@
 "widget.style.month::highlightToday" = "Fremhæv i dag";
 "widget.style.month::showEventUnderline" = "Understregning på dage med begivenheder";
 "widget.style.weekEvents::showWeekDayHeader" = "Ugedagsrække";
+"widget.style.weekEvents::eventTextSize" = "Tekststørrelse for begivenheder";
 "widget.style.todayAndNext::showTimeZone" = "Tidszone";
 "widget.style.foremost::showTypeLabel" = "Etiketten \"Vigtigste begivenhed\"";
 "widget.style.aiCommand::showExplain" = "Beskrivelse";

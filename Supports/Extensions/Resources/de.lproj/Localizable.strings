@@ -453,6 +453,8 @@
 "event_setting::external_calendar::stop" = "Trennen";
 "event_setting::external_calendar::stop::message" = "Die Verbindung zum externen Kalender wurde getrennt.";
 "event_setting::external_calendar::google::serviceName" = "Google Kalender";
+"event_setting::external_calendar::google::select_calendars::title" = "Angezeigte Kalender";
+"event_setting::external_calendar::google::select_calendars::description" = "Ausgeblendete Kalender werden weiter synchronisiert. Sie können das später im Filter ändern.";
 "event_setting::external_calendar::apple::serviceName" = "Apple Kalender";
 "event_setting::apple_calendar::permission_denied::message" = "Der Kalenderzugriff wurde verweigert. Bitte aktivieren Sie ihn in den Einstellungen, um Apple Kalender zu nutzen.";
 "event_setting::apple_calendar::restricted::message" = "Der Kalenderzugriff ist auf diesem Gerät eingeschränkt.";
@@ -651,6 +653,7 @@
 "widget.style.month::highlightToday" = "Heute hervorheben";
 "widget.style.month::showEventUnderline" = "Unterstreichung an Ereignistagen";
 "widget.style.weekEvents::showWeekDayHeader" = "Wochentagszeile";
+"widget.style.weekEvents::eventTextSize" = "Schriftgröße der Ereignisse";
 "widget.style.todayAndNext::showTimeZone" = "Zeitzone";
 "widget.style.foremost::showTypeLabel" = "Label \"Wichtigstes Ereignis\"";
 "widget.style.aiCommand::showExplain" = "Beschreibung";

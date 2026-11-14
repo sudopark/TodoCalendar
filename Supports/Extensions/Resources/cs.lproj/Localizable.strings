@@ -452,6 +452,8 @@
 "event_setting::external_calendar::stop" = "Odpojit";
 "event_setting::external_calendar::stop::message" = "Připojení k externímu kalendáři bylo odpojeno.";
 "event_setting::external_calendar::google::serviceName" = "Google Kalendář";
+"event_setting::external_calendar::google::select_calendars::title" = "Zobrazené kalendáře";
+"event_setting::external_calendar::google::select_calendars::description" = "Skryté kalendáře se dál synchronizují. Později to můžete změnit ve filtru.";
 "event_setting::external_calendar::apple::serviceName" = "Apple Kalendář";
 "event_setting::apple_calendar::permission_denied::message" = "Přístup ke kalendáři byl odepřen. Povolte ho v Nastavení, abyste mohli používat Apple Kalendář.";
 "event_setting::apple_calendar::restricted::message" = "Přístup ke kalendáři je na tomto zařízení omezen.";
@@ -650,6 +652,7 @@
 "widget.style.month::highlightToday" = "Zvýraznit dnešek";
 "widget.style.month::showEventUnderline" = "Podtržení událostí";
 "widget.style.weekEvents::showWeekDayHeader" = "Záhlaví dnů v týdnu";
+"widget.style.weekEvents::eventTextSize" = "Velikost textu událostí";
 "widget.style.todayAndNext::showTimeZone" = "Časové pásmo";
 "widget.style.foremost::showTypeLabel" = "Štítek \"Nejdůležitější událost\"";
 "widget.style.aiCommand::showExplain" = "Popis";

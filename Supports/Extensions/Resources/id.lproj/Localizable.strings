@@ -453,6 +453,8 @@
 "event_setting::external_calendar::stop" = "Putuskan Hubungan";
 "event_setting::external_calendar::stop::message" = "Hubungan kalender eksternal telah diputuskan.";
 "event_setting::external_calendar::google::serviceName" = "Google Kalender";
+"event_setting::external_calendar::google::select_calendars::title" = "Kalender yang ditampilkan";
+"event_setting::external_calendar::google::select_calendars::description" = "Kalender yang disembunyikan tetap disinkronkan. Anda dapat mengubahnya nanti di filter.";
 "event_setting::external_calendar::apple::serviceName" = "Apple Kalender";
 "event_setting::apple_calendar::permission_denied::message" = "Akses kalender ditolak. Mohon aktifkan di Pengaturan untuk menggunakan Apple Kalender.";
 "event_setting::apple_calendar::restricted::message" = "Akses kalender dibatasi di perangkat ini.";
@@ -651,6 +653,7 @@
 "widget.style.month::highlightToday" = "Sorot hari ini";
 "widget.style.month::showEventUnderline" = "Garis bawah acara";
 "widget.style.weekEvents::showWeekDayHeader" = "Header hari dalam seminggu";
+"widget.style.weekEvents::eventTextSize" = "Ukuran teks acara";
 "widget.style.todayAndNext::showTimeZone" = "Zona waktu";
 "widget.style.foremost::showTypeLabel" = "Label \"Acara Terpenting\"";
 "widget.style.aiCommand::showExplain" = "Deskripsi";

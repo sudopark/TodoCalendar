@@ -452,6 +452,8 @@
 "event_setting::external_calendar::stop" = "Отключить";
 "event_setting::external_calendar::stop::message" = "Подключение к внешнему календарю отключено.";
 "event_setting::external_calendar::google::serviceName" = "Google Календарь";
+"event_setting::external_calendar::google::select_calendars::title" = "Показываемые календари";
+"event_setting::external_calendar::google::select_calendars::description" = "Скрытые календари продолжают синхронизироваться. Позже это можно изменить в фильтре.";
 "event_setting::external_calendar::apple::serviceName" = "Apple Календарь";
 "event_setting::apple_calendar::permission_denied::message" = "Доступ к календарю запрещён. Разрешите его в настройках, чтобы использовать Apple Календарь.";
 "event_setting::apple_calendar::restricted::message" = "Доступ к календарю ограничен на этом устройстве.";
@@ -650,6 +652,7 @@
 "widget.style.month::highlightToday" = "Выделить сегодня";
 "widget.style.month::showEventUnderline" = "Подчёркивание событий";
 "widget.style.weekEvents::showWeekDayHeader" = "Заголовок дней недели";
+"widget.style.weekEvents::eventTextSize" = "Размер текста событий";
 "widget.style.todayAndNext::showTimeZone" = "Часовой пояс";
 "widget.style.foremost::showTypeLabel" = "Метка \"Главное событие\"";
 "widget.style.aiCommand::showExplain" = "Описание";

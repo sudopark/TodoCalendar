@@ -453,6 +453,8 @@
 "event_setting::external_calendar::stop" = "Koble fra";
 "event_setting::external_calendar::stop::message" = "Tilkoblingen til den eksterne kalenderen er brutt.";
 "event_setting::external_calendar::google::serviceName" = "Google Kalender";
+"event_setting::external_calendar::google::select_calendars::title" = "Kalendere som vises";
+"event_setting::external_calendar::google::select_calendars::description" = "Skjulte kalendere synkroniseres fortsatt. Du kan endre dette senere i filteret.";
 "event_setting::external_calendar::apple::serviceName" = "Apple Kalender";
 "event_setting::apple_calendar::permission_denied::message" = "Tilgang til kalender er avslått. Aktiver det i Innstillinger for å bruke Apple Kalender.";
 "event_setting::apple_calendar::restricted::message" = "Tilgang til kalender er begrenset på denne enheten.";
@@ -651,6 +653,7 @@
 "widget.style.month::highlightToday" = "Uthev i dag";
 "widget.style.month::showEventUnderline" = "Understrek dager med hendelser";
 "widget.style.weekEvents::showWeekDayHeader" = "Ukedagsrad";
+"widget.style.weekEvents::eventTextSize" = "Tekststørrelse for hendelser";
 "widget.style.todayAndNext::showTimeZone" = "Tidssone";
 "widget.style.foremost::showTypeLabel" = "Etiketten \"Viktigste hendelse\"";
 "widget.style.aiCommand::showExplain" = "Beskrivelse";

@@ -453,6 +453,8 @@
 "event_setting::external_calendar::stop" = "Putuskan Sambungan";
 "event_setting::external_calendar::stop::message" = "Sambungan kalendar luaran telah diputuskan.";
 "event_setting::external_calendar::google::serviceName" = "Kalendar Google";
+"event_setting::external_calendar::google::select_calendars::title" = "Kalendar untuk dipaparkan";
+"event_setting::external_calendar::google::select_calendars::description" = "Kalendar yang disembunyikan terus disegerakkan. Anda boleh mengubahnya kemudian dalam penapis.";
 "event_setting::external_calendar::apple::serviceName" = "Kalendar Apple";
 "event_setting::apple_calendar::permission_denied::message" = "Akses kalendar ditolak. Sila aktifkan dalam Tetapan untuk menggunakan Kalendar Apple.";
 "event_setting::apple_calendar::restricted::message" = "Akses kalendar dihadkan pada peranti ini.";
@@ -651,6 +653,7 @@
 "widget.style.month::highlightToday" = "Serlahkan hari ini";
 "widget.style.month::showEventUnderline" = "Garis bawah acara";
 "widget.style.weekEvents::showWeekDayHeader" = "Pengepala hari dalam minggu";
+"widget.style.weekEvents::eventTextSize" = "Saiz teks acara";
 "widget.style.todayAndNext::showTimeZone" = "Zon waktu";
 "widget.style.foremost::showTypeLabel" = "Label \"Acara Paling Penting\"";
 "widget.style.aiCommand::showExplain" = "Penerangan";

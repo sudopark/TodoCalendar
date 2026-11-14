@@ -453,6 +453,8 @@
 "event_setting::external_calendar::stop" = "Desconectar";
 "event_setting::external_calendar::stop::message" = "Se desconectó el calendario externo.";
 "event_setting::external_calendar::google::serviceName" = "Google Calendar";
+"event_setting::external_calendar::google::select_calendars::title" = "Calendarios que mostrar";
+"event_setting::external_calendar::google::select_calendars::description" = "Los calendarios ocultos se siguen sincronizando. Puedes cambiarlo más tarde en el filtro.";
 "event_setting::external_calendar::apple::serviceName" = "Apple Calendar";
 "event_setting::apple_calendar::permission_denied::message" = "Se denegó el acceso al calendario. Actívalo en Ajustes para usar Apple Calendar.";
 "event_setting::apple_calendar::restricted::message" = "El acceso al calendario está restringido en este dispositivo.";
@@ -651,6 +653,7 @@
 "widget.style.month::highlightToday" = "Resaltar hoy";
 "widget.style.month::showEventUnderline" = "Subrayado de eventos";
 "widget.style.weekEvents::showWeekDayHeader" = "Encabezado de días de la semana";
+"widget.style.weekEvents::eventTextSize" = "Tamaño del texto de eventos";
 "widget.style.todayAndNext::showTimeZone" = "Zona horaria";
 "widget.style.foremost::showTypeLabel" = "Etiqueta \"Evento principal\"";
 "widget.style.aiCommand::showExplain" = "Descripción";
