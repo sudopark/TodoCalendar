@@ -1,4 +1,10 @@
-■ Rokuyo (iOS 26 vagy újabb)
-· Kapcsolja be a „Rokuyo” lehetőséget a Beállítások > Megjelenés részben, és a kiválasztott dátum fölött megjelenik a nap rokuyója, például Taian vagy Butsumetsu
+■ iPad-támogatás
+· A To-do Calendar mostantól iPaden is használható
+
+■ Események betűmérete a widgetekben
+· A "Widget testreszabása" alatt állíthatja a heti és havi widgetek "Események betűmérete" beállítását
+
+■ Google Naptár
+· Google-fiók csatlakoztatása után rögtön kiválaszthatja a "Megjelenített naptárak" körét
 
 · Hibajavítások

@@ -1,4 +1,10 @@
-■ Rokuyo (iOS 26 ou version ultérieure)
-· Activez « Rokuyo » dans Réglages > Apparence pour voir le rokuyo du jour, comme Taian ou Butsumetsu, au-dessus de la date sélectionnée
+■ Prise en charge de l'iPad
+· To-do Calendar fonctionne désormais sur iPad
+
+■ Taille du texte des événements dans les widgets
+· Réglez la "Taille du texte des événements" des widgets semaine et mois dans "Personnaliser le widget"
+
+■ Google Calendar
+· Dès que vous connectez un compte Google, vous pouvez choisir les "Calendriers à afficher"
 
 · Corrections de bugs

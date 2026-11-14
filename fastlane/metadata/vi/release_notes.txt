@@ -1,4 +1,10 @@
-■ Rokuyo (iOS 26 trở lên)
-· Bật "Rokuyo" trong Cài đặt > Giao diện để xem rokuyo của ngày đó, như Đại An hay Phật Diệt, phía trên ngày đã chọn
+■ Hỗ trợ iPad
+· Giờ đây bạn có thể dùng To-do Calendar trên iPad
+
+■ Cỡ chữ sự kiện trên tiện ích
+· Điều chỉnh "Cỡ chữ sự kiện" của tiện ích tuần và tháng trong "Tùy chỉnh tiện ích"
+
+■ Google Calendar
+· Ngay sau khi kết nối tài khoản Google, bạn có thể chọn "Lịch hiển thị"
 
 · Sửa lỗi
