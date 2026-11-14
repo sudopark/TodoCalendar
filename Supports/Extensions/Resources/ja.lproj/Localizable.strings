@@ -452,6 +452,8 @@
 "event_setting::external_calendar::stop" = "連携を解除";
 "event_setting::external_calendar::stop::message" = "外部カレンダーとの連携を解除しました。";
 "event_setting::external_calendar::google::serviceName" = "Googleカレンダー";
+"event_setting::external_calendar::google::select_calendars::title" = "表示するカレンダー";
+"event_setting::external_calendar::google::select_calendars::description" = "非表示にしたカレンダーも同期は続きます。あとでフィルターから変更できます。";
 "event_setting::external_calendar::apple::serviceName" = "Appleカレンダー";
 "event_setting::apple_calendar::permission_denied::message" = "カレンダーへのアクセスが拒否されています。Appleカレンダーを使用するには、設定でアクセスを許可してください。";
 "event_setting::apple_calendar::restricted::message" = "この端末ではカレンダーへのアクセスが制限されています。";
@@ -650,6 +652,7 @@
 "widget.style.month::highlightToday" = "今日を強調";
 "widget.style.month::showEventUnderline" = "イベントの下線";
 "widget.style.weekEvents::showWeekDayHeader" = "曜日ヘッダー";
+"widget.style.weekEvents::eventTextSize" = "イベントの文字サイズ";
 "widget.style.todayAndNext::showTimeZone" = "タイムゾーン";
 "widget.style.foremost::showTypeLabel" = "「最重要イベント」ラベル";
 "widget.style.aiCommand::showExplain" = "説明文";

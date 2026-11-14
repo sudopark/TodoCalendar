@@ -452,6 +452,8 @@
 "event_setting::external_calendar::stop" = "断开连接";
 "event_setting::external_calendar::stop::message" = "外部日历连接已断开。";
 "event_setting::external_calendar::google::serviceName" = "Google日历";
+"event_setting::external_calendar::google::select_calendars::title" = "要显示的日历";
+"event_setting::external_calendar::google::select_calendars::description" = "隐藏的日历仍会继续同步。之后也可以在筛选中更改。";
 "event_setting::external_calendar::apple::serviceName" = "Apple日历";
 "event_setting::apple_calendar::permission_denied::message" = "日历访问权限已被拒绝。请在设置中启用权限以使用Apple日历。";
 "event_setting::apple_calendar::restricted::message" = "此设备上的日历访问受到限制。";
@@ -650,6 +652,7 @@
 "widget.style.month::highlightToday" = "突出显示今天";
 "widget.style.month::showEventUnderline" = "事件下划线";
 "widget.style.weekEvents::showWeekDayHeader" = "星期标题";
+"widget.style.weekEvents::eventTextSize" = "事件文字大小";
 "widget.style.todayAndNext::showTimeZone" = "时区";
 "widget.style.foremost::showTypeLabel" = "“最重要事件”标签";
 "widget.style.aiCommand::showExplain" = "说明文字";

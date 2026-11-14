@@ -452,6 +452,8 @@
 "event_setting::external_calendar::stop" = "Prekini vezu";
 "event_setting::external_calendar::stop::message" = "Veza s vanjskim kalendarom je prekinuta.";
 "event_setting::external_calendar::google::serviceName" = "Google kalendar";
+"event_setting::external_calendar::google::select_calendars::title" = "Prikazani kalendari";
+"event_setting::external_calendar::google::select_calendars::description" = "Skriveni kalendari i dalje se sinkroniziraju. Kasnije to možete promijeniti u filtru.";
 "event_setting::external_calendar::apple::serviceName" = "Apple kalendar";
 "event_setting::apple_calendar::permission_denied::message" = "Pristup kalendaru je odbijen. Omogućite ga u Postavkama kako biste koristili Apple kalendar.";
 "event_setting::apple_calendar::restricted::message" = "Pristup kalendaru je ograničen na ovom uređaju.";
@@ -650,6 +652,7 @@
 "widget.style.month::highlightToday" = "Istakni danas";
 "widget.style.month::showEventUnderline" = "Podcrtavanje događaja";
 "widget.style.weekEvents::showWeekDayHeader" = "Zaglavlje dana u tjednu";
+"widget.style.weekEvents::eventTextSize" = "Veličina teksta događaja";
 "widget.style.todayAndNext::showTimeZone" = "Vremenska zona";
 "widget.style.foremost::showTypeLabel" = "Oznaka \"Najvažniji događaj\"";
 "widget.style.aiCommand::showExplain" = "Opis";

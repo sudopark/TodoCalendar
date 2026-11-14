@@ -453,6 +453,8 @@
 "event_setting::external_calendar::stop" = "Koppla från";
 "event_setting::external_calendar::stop::message" = "Anslutningen till den externa kalendern har kopplats från.";
 "event_setting::external_calendar::google::serviceName" = "Google Kalender";
+"event_setting::external_calendar::google::select_calendars::title" = "Kalendrar som visas";
+"event_setting::external_calendar::google::select_calendars::description" = "Dolda kalendrar fortsätter att synkas. Du kan ändra detta senare i filtret.";
 "event_setting::external_calendar::apple::serviceName" = "Apple Kalender";
 "event_setting::apple_calendar::permission_denied::message" = "Åtkomst till kalendern har nekats. Aktivera den i Inställningar för att använda Apple Kalender.";
 "event_setting::apple_calendar::restricted::message" = "Åtkomst till kalendern är begränsad på den här enheten.";
@@ -651,6 +653,7 @@
 "widget.style.month::highlightToday" = "Markera idag";
 "widget.style.month::showEventUnderline" = "Understrykning på dagar med händelser";
 "widget.style.weekEvents::showWeekDayHeader" = "Veckodagsrad";
+"widget.style.weekEvents::eventTextSize" = "Textstorlek för händelser";
 "widget.style.todayAndNext::showTimeZone" = "Tidszon";
 "widget.style.foremost::showTypeLabel" = "Etiketten \"Viktigaste händelsen\"";
 "widget.style.aiCommand::showExplain" = "Beskrivning";

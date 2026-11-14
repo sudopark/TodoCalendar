@@ -453,6 +453,8 @@
 "event_setting::external_calendar::stop" = "ยกเลิกการเชื่อมต่อ";
 "event_setting::external_calendar::stop::message" = "ยกเลิกการเชื่อมต่อปฏิทินภายนอกแล้ว";
 "event_setting::external_calendar::google::serviceName" = "Google ปฏิทิน";
+"event_setting::external_calendar::google::select_calendars::title" = "ปฏิทินที่จะแสดง";
+"event_setting::external_calendar::google::select_calendars::description" = "ปฏิทินที่ซ่อนไว้จะยังซิงค์ต่อไป คุณเปลี่ยนได้ภายหลังในตัวกรอง";
 "event_setting::external_calendar::apple::serviceName" = "Apple ปฏิทิน";
 "event_setting::apple_calendar::permission_denied::message" = "การเข้าถึงปฏิทินถูกปฏิเสธ กรุณาเปิดสิทธิ์ในการตั้งค่าเพื่อใช้งาน Apple ปฏิทิน";
 "event_setting::apple_calendar::restricted::message" = "การเข้าถึงปฏิทินถูกจำกัดบนอุปกรณ์นี้";
@@ -651,6 +653,7 @@
 "widget.style.month::highlightToday" = "เน้นวันนี้";
 "widget.style.month::showEventUnderline" = "ขีดเส้นใต้กิจกรรม";
 "widget.style.weekEvents::showWeekDayHeader" = "แถบวันในสัปดาห์";
+"widget.style.weekEvents::eventTextSize" = "ขนาดตัวอักษรกิจกรรม";
 "widget.style.todayAndNext::showTimeZone" = "เขตเวลา";
 "widget.style.foremost::showTypeLabel" = "ป้าย \"กิจกรรมสำคัญที่สุด\"";
 "widget.style.aiCommand::showExplain" = "คำอธิบาย";

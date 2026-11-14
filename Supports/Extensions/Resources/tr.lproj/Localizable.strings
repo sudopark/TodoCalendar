@@ -453,6 +453,8 @@
 "event_setting::external_calendar::stop" = "Bağlantıyı Kes";
 "event_setting::external_calendar::stop::message" = "Harici takvim bağlantısı kesildi.";
 "event_setting::external_calendar::google::serviceName" = "Google Takvim";
+"event_setting::external_calendar::google::select_calendars::title" = "Gösterilecek takvimler";
+"event_setting::external_calendar::google::select_calendars::description" = "Gizlenen takvimler senkronize edilmeye devam eder. Bunu daha sonra filtreden değiştirebilirsiniz.";
 "event_setting::external_calendar::apple::serviceName" = "Apple Takvim";
 "event_setting::apple_calendar::permission_denied::message" = "Takvim erişimi reddedildi. Apple Takvim'i kullanmak için lütfen Ayarlar'dan izin verin.";
 "event_setting::apple_calendar::restricted::message" = "Bu cihazda takvim erişimi kısıtlanmış.";
@@ -651,6 +653,7 @@
 "widget.style.month::highlightToday" = "Bugünü vurgula";
 "widget.style.month::showEventUnderline" = "Etkinlik alt çizgisi";
 "widget.style.weekEvents::showWeekDayHeader" = "Haftanın günleri başlığı";
+"widget.style.weekEvents::eventTextSize" = "Etkinlik yazı boyutu";
 "widget.style.todayAndNext::showTimeZone" = "Saat dilimi";
 "widget.style.foremost::showTypeLabel" = "\"En Önemli Etkinlik\" etiketi";
 "widget.style.aiCommand::showExplain" = "Açıklama";

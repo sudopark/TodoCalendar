@@ -452,6 +452,8 @@
 "event_setting::external_calendar::stop" = "Відключити";
 "event_setting::external_calendar::stop::message" = "Підключення до зовнішнього календаря відключено.";
 "event_setting::external_calendar::google::serviceName" = "Google Календар";
+"event_setting::external_calendar::google::select_calendars::title" = "Календарі для показу";
+"event_setting::external_calendar::google::select_calendars::description" = "Приховані календарі й далі синхронізуються. Пізніше це можна змінити у фільтрі.";
 "event_setting::external_calendar::apple::serviceName" = "Apple Календар";
 "event_setting::apple_calendar::permission_denied::message" = "Доступ до календаря заборонено. Дозвольте його в налаштуваннях, щоб використовувати Apple Календар.";
 "event_setting::apple_calendar::restricted::message" = "Доступ до календаря обмежено на цьому пристрої.";
@@ -650,6 +652,7 @@
 "widget.style.month::highlightToday" = "Виділити сьогодні";
 "widget.style.month::showEventUnderline" = "Підкреслення подій";
 "widget.style.weekEvents::showWeekDayHeader" = "Заголовок днів тижня";
+"widget.style.weekEvents::eventTextSize" = "Розмір тексту подій";
 "widget.style.todayAndNext::showTimeZone" = "Часовий пояс";
 "widget.style.foremost::showTypeLabel" = "Мітка \"Головна подія\"";
 "widget.style.aiCommand::showExplain" = "Опис";

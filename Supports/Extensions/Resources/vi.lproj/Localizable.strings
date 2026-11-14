@@ -453,6 +453,8 @@
 "event_setting::external_calendar::stop" = "Ngắt kết nối";
 "event_setting::external_calendar::stop::message" = "Đã ngắt kết nối với lịch bên ngoài.";
 "event_setting::external_calendar::google::serviceName" = "Google Calendar";
+"event_setting::external_calendar::google::select_calendars::title" = "Lịch hiển thị";
+"event_setting::external_calendar::google::select_calendars::description" = "Lịch bị ẩn vẫn tiếp tục đồng bộ. Bạn có thể thay đổi sau trong bộ lọc.";
 "event_setting::external_calendar::apple::serviceName" = "Apple Calendar";
 "event_setting::apple_calendar::permission_denied::message" = "Quyền truy cập lịch đã bị từ chối. Vui lòng bật quyền trong Cài đặt để sử dụng Apple Calendar.";
 "event_setting::apple_calendar::restricted::message" = "Quyền truy cập lịch bị hạn chế trên thiết bị này.";
@@ -651,6 +653,7 @@
 "widget.style.month::highlightToday" = "Làm nổi bật hôm nay";
 "widget.style.month::showEventUnderline" = "Gạch chân sự kiện";
 "widget.style.weekEvents::showWeekDayHeader" = "Hàng thứ trong tuần";
+"widget.style.weekEvents::eventTextSize" = "Cỡ chữ sự kiện";
 "widget.style.todayAndNext::showTimeZone" = "Múi giờ";
 "widget.style.foremost::showTypeLabel" = "Nhãn \"Sự kiện quan trọng nhất\"";
 "widget.style.aiCommand::showExplain" = "Mô tả";

@@ -453,6 +453,8 @@
 "event_setting::external_calendar::stop" = "Αποσύνδεση";
 "event_setting::external_calendar::stop::message" = "Η σύνδεση με το εξωτερικό ημερολόγιο διακόπηκε.";
 "event_setting::external_calendar::google::serviceName" = "Google Ημερολόγιο";
+"event_setting::external_calendar::google::select_calendars::title" = "Ημερολόγια προς εμφάνιση";
+"event_setting::external_calendar::google::select_calendars::description" = "Τα κρυμμένα ημερολόγια συνεχίζουν να συγχρονίζονται. Μπορείτε να το αλλάξετε αργότερα στο φίλτρο.";
 "event_setting::external_calendar::apple::serviceName" = "Apple Ημερολόγιο";
 "event_setting::apple_calendar::permission_denied::message" = "Η πρόσβαση στο ημερολόγιο απορρίφθηκε. Ενεργοποιήστε την στις Ρυθμίσεις για να χρησιμοποιήσετε το Apple Ημερολόγιο.";
 "event_setting::apple_calendar::restricted::message" = "Η πρόσβαση στο ημερολόγιο είναι περιορισμένη σε αυτήν τη συσκευή.";
@@ -651,6 +653,7 @@
 "widget.style.month::highlightToday" = "Επισήμανση σημερινής ημέρας";
 "widget.style.month::showEventUnderline" = "Υπογράμμιση συμβάντων";
 "widget.style.weekEvents::showWeekDayHeader" = "Κεφαλίδα ημερών εβδομάδας";
+"widget.style.weekEvents::eventTextSize" = "Μέγεθος κειμένου συμβάντων";
 "widget.style.todayAndNext::showTimeZone" = "Ζώνη ώρας";
 "widget.style.foremost::showTypeLabel" = "Ετικέτα \"Κύριο συμβάν\"";
 "widget.style.aiCommand::showExplain" = "Περιγραφή";

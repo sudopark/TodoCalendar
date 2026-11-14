@@ -452,6 +452,8 @@
 "event_setting::external_calendar::stop" = "Rozłącz";
 "event_setting::external_calendar::stop::message" = "Połączenie z kalendarzem zewnętrznym zostało rozłączone.";
 "event_setting::external_calendar::google::serviceName" = "Kalendarz Google";
+"event_setting::external_calendar::google::select_calendars::title" = "Kalendarze do wyświetlenia";
+"event_setting::external_calendar::google::select_calendars::description" = "Ukryte kalendarze nadal się synchronizują. Możesz to później zmienić w filtrze.";
 "event_setting::external_calendar::apple::serviceName" = "Kalendarz Apple";
 "event_setting::apple_calendar::permission_denied::message" = "Dostęp do kalendarza został odrzucony. Włącz go w Ustawieniach, aby korzystać z Kalendarza Apple.";
 "event_setting::apple_calendar::restricted::message" = "Dostęp do kalendarza jest ograniczony na tym urządzeniu.";
@@ -650,6 +652,7 @@
 "widget.style.month::highlightToday" = "Wyróżnij dzisiaj";
 "widget.style.month::showEventUnderline" = "Podkreślenie wydarzeń";
 "widget.style.weekEvents::showWeekDayHeader" = "Nagłówek dni tygodnia";
+"widget.style.weekEvents::eventTextSize" = "Rozmiar tekstu wydarzeń";
 "widget.style.todayAndNext::showTimeZone" = "Strefa czasowa";
 "widget.style.foremost::showTypeLabel" = "Etykieta \"Najważniejsze wydarzenie\"";
 "widget.style.aiCommand::showExplain" = "Opis";

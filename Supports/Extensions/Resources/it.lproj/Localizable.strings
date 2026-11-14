@@ -453,6 +453,8 @@
 "event_setting::external_calendar::stop" = "Scollega";
 "event_setting::external_calendar::stop::message" = "La connessione al calendario esterno è stata scollegata.";
 "event_setting::external_calendar::google::serviceName" = "Google Calendar";
+"event_setting::external_calendar::google::select_calendars::title" = "Calendari da mostrare";
+"event_setting::external_calendar::google::select_calendars::description" = "I calendari nascosti continuano a sincronizzarsi. Puoi cambiarlo più tardi nel filtro.";
 "event_setting::external_calendar::apple::serviceName" = "Apple Calendar";
 "event_setting::apple_calendar::permission_denied::message" = "L'accesso al calendario è stato negato. Abilitalo nelle Impostazioni per usare Apple Calendar.";
 "event_setting::apple_calendar::restricted::message" = "L'accesso al calendario è limitato su questo dispositivo.";
@@ -651,6 +653,7 @@
 "widget.style.month::highlightToday" = "Evidenzia oggi";
 "widget.style.month::showEventUnderline" = "Sottolineatura eventi";
 "widget.style.weekEvents::showWeekDayHeader" = "Intestazione dei giorni della settimana";
+"widget.style.weekEvents::eventTextSize" = "Dimensione testo eventi";
 "widget.style.todayAndNext::showTimeZone" = "Fuso orario";
 "widget.style.foremost::showTypeLabel" = "Etichetta \"Evento principale\"";
 "widget.style.aiCommand::showExplain" = "Descrizione";

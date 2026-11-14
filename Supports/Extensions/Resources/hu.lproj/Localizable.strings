@@ -453,6 +453,8 @@
 "event_setting::external_calendar::stop" = "Leválasztás";
 "event_setting::external_calendar::stop::message" = "A külső naptárral való kapcsolat megszakadt.";
 "event_setting::external_calendar::google::serviceName" = "Google Naptár";
+"event_setting::external_calendar::google::select_calendars::title" = "Megjelenített naptárak";
+"event_setting::external_calendar::google::select_calendars::description" = "Az elrejtett naptárak szinkronizálása folytatódik. Ez később a szűrőben is módosítható.";
 "event_setting::external_calendar::apple::serviceName" = "Apple Naptár";
 "event_setting::apple_calendar::permission_denied::message" = "A naptárhoz való hozzáférés megtagadva. Az Apple Naptár használatához engedélyezze azt a Beállításokban.";
 "event_setting::apple_calendar::restricted::message" = "A naptárhoz való hozzáférés korlátozott ezen az eszközön.";
@@ -651,6 +653,7 @@
 "widget.style.month::highlightToday" = "Mai nap kiemelése";
 "widget.style.month::showEventUnderline" = "Esemény aláhúzása";
 "widget.style.weekEvents::showWeekDayHeader" = "Hétköznapok fejléce";
+"widget.style.weekEvents::eventTextSize" = "Események betűmérete";
 "widget.style.todayAndNext::showTimeZone" = "Időzóna";
 "widget.style.foremost::showTypeLabel" = "\"Legfontosabb esemény\" felirat";
 "widget.style.aiCommand::showExplain" = "Leírás";

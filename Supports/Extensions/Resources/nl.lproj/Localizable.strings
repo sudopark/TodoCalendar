@@ -453,6 +453,8 @@
 "event_setting::external_calendar::stop" = "Verbinding verbreken";
 "event_setting::external_calendar::stop::message" = "De verbinding met de externe agenda is verbroken.";
 "event_setting::external_calendar::google::serviceName" = "Google Calendar";
+"event_setting::external_calendar::google::select_calendars::title" = "Te tonen agenda's";
+"event_setting::external_calendar::google::select_calendars::description" = "Verborgen agenda's blijven synchroniseren. Je kunt dit later in het filter wijzigen.";
 "event_setting::external_calendar::apple::serviceName" = "Apple Calendar";
 "event_setting::apple_calendar::permission_denied::message" = "Toegang tot de agenda is geweigerd. Schakel dit in bij Instellingen om Apple Calendar te gebruiken.";
 "event_setting::apple_calendar::restricted::message" = "Toegang tot de agenda is beperkt op dit apparaat.";
@@ -651,6 +653,7 @@
 "widget.style.month::highlightToday" = "Vandaag markeren";
 "widget.style.month::showEventUnderline" = "Onderstrepen op dagen met gebeurtenissen";
 "widget.style.weekEvents::showWeekDayHeader" = "Rij met weekdagen";
+"widget.style.weekEvents::eventTextSize" = "Tekstgrootte van gebeurtenissen";
 "widget.style.todayAndNext::showTimeZone" = "Tijdzone";
 "widget.style.foremost::showTypeLabel" = "Label \"Belangrijkste gebeurtenis\"";
 "widget.style.aiCommand::showExplain" = "Beschrijving";

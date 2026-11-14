@@ -453,6 +453,8 @@
 "event_setting::external_calendar::stop" = "Déconnecter";
 "event_setting::external_calendar::stop::message" = "La connexion au calendrier externe a été déconnectée.";
 "event_setting::external_calendar::google::serviceName" = "Google Calendar";
+"event_setting::external_calendar::google::select_calendars::title" = "Calendriers à afficher";
+"event_setting::external_calendar::google::select_calendars::description" = "Les calendriers masqués restent synchronisés. Vous pourrez modifier ce choix plus tard dans le filtre.";
 "event_setting::external_calendar::apple::serviceName" = "Apple Calendar";
 "event_setting::apple_calendar::permission_denied::message" = "L'accès au calendrier a été refusé. Veuillez l'activer dans Réglages pour utiliser Apple Calendar.";
 "event_setting::apple_calendar::restricted::message" = "L'accès au calendrier est restreint sur cet appareil.";
@@ -651,6 +653,7 @@
 "widget.style.month::highlightToday" = "Mettre en avant aujourd'hui";
 "widget.style.month::showEventUnderline" = "Soulignement des événements";
 "widget.style.weekEvents::showWeekDayHeader" = "En-tête des jours de la semaine";
+"widget.style.weekEvents::eventTextSize" = "Taille du texte des événements";
 "widget.style.todayAndNext::showTimeZone" = "Fuseau horaire";
 "widget.style.foremost::showTypeLabel" = "Libellé \"Événement principal\"";
 "widget.style.aiCommand::showExplain" = "Description";

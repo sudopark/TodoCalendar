@@ -453,6 +453,8 @@
 "event_setting::external_calendar::stop" = "Desconnecta";
 "event_setting::external_calendar::stop::message" = "S'ha desconnectat el calendari extern.";
 "event_setting::external_calendar::google::serviceName" = "Google Calendar";
+"event_setting::external_calendar::google::select_calendars::title" = "Calendaris que es mostren";
+"event_setting::external_calendar::google::select_calendars::description" = "Els calendaris amagats es continuen sincronitzant. Es pot canviar més endavant al filtre.";
 "event_setting::external_calendar::apple::serviceName" = "Apple Calendar";
 "event_setting::apple_calendar::permission_denied::message" = "S'ha denegat l'accés al calendari. Activeu-lo a Configuració per utilitzar l'Apple Calendar.";
 "event_setting::apple_calendar::restricted::message" = "L'accés al calendari està restringit en aquest dispositiu.";
@@ -651,6 +653,7 @@
 "widget.style.month::highlightToday" = "Ressalta avui";
 "widget.style.month::showEventUnderline" = "Subratllat d'esdeveniments";
 "widget.style.weekEvents::showWeekDayHeader" = "Capçalera dels dies de la setmana";
+"widget.style.weekEvents::eventTextSize" = "Mida del text dels esdeveniments";
 "widget.style.todayAndNext::showTimeZone" = "Zona horària";
 "widget.style.foremost::showTypeLabel" = "Etiqueta \"Esdeveniment principal\"";
 "widget.style.aiCommand::showExplain" = "Descripció";

@@ -453,6 +453,8 @@
 "event_setting::external_calendar::stop" = "Katkaise yhteys";
 "event_setting::external_calendar::stop::message" = "Yhteys ulkoiseen kalenteriin on katkaistu.";
 "event_setting::external_calendar::google::serviceName" = "Google-kalenteri";
+"event_setting::external_calendar::google::select_calendars::title" = "Näytettävät kalenterit";
+"event_setting::external_calendar::google::select_calendars::description" = "Piilotetut kalenterit synkronoidaan edelleen. Voit muuttaa tätä myöhemmin suodattimessa.";
 "event_setting::external_calendar::apple::serviceName" = "Apple-kalenteri";
 "event_setting::apple_calendar::permission_denied::message" = "Kalenterin käyttöoikeus on evätty. Ota se käyttöön Asetuksissa käyttääksesi Apple-kalenteria.";
 "event_setting::apple_calendar::restricted::message" = "Kalenterin käyttö on rajoitettua tällä laitteella.";
@@ -651,6 +653,7 @@
 "widget.style.month::highlightToday" = "Korosta tämä päivä";
 "widget.style.month::showEventUnderline" = "Tapahtumapäivien alleviivaus";
 "widget.style.weekEvents::showWeekDayHeader" = "Viikonpäivärivi";
+"widget.style.weekEvents::eventTextSize" = "Tapahtumien tekstikoko";
 "widget.style.todayAndNext::showTimeZone" = "Aikavyöhyke";
 "widget.style.foremost::showTypeLabel" = "Nimike \"Tärkein tapahtuma\"";
 "widget.style.aiCommand::showExplain" = "Kuvaus";

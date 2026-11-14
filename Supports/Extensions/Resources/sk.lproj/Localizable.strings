@@ -452,6 +452,8 @@
 "event_setting::external_calendar::stop" = "Odpojiť";
 "event_setting::external_calendar::stop::message" = "Pripojenie k externému kalendáru bolo odpojené.";
 "event_setting::external_calendar::google::serviceName" = "Google Kalendár";
+"event_setting::external_calendar::google::select_calendars::title" = "Zobrazené kalendáre";
+"event_setting::external_calendar::google::select_calendars::description" = "Skryté kalendáre sa naďalej synchronizujú. Neskôr to môžete zmeniť vo filtri.";
 "event_setting::external_calendar::apple::serviceName" = "Apple Kalendár";
 "event_setting::apple_calendar::permission_denied::message" = "Prístup ku kalendáru bol zamietnutý. Povoľte ho v Nastaveniach, aby ste mohli používať Apple Kalendár.";
 "event_setting::apple_calendar::restricted::message" = "Prístup ku kalendáru je na tomto zariadení obmedzený.";
@@ -650,6 +652,7 @@
 "widget.style.month::highlightToday" = "Zvýrazniť dnešok";
 "widget.style.month::showEventUnderline" = "Podčiarknutie udalostí";
 "widget.style.weekEvents::showWeekDayHeader" = "Hlavička dní v týždni";
+"widget.style.weekEvents::eventTextSize" = "Veľkosť textu udalostí";
 "widget.style.todayAndNext::showTimeZone" = "Časové pásmo";
 "widget.style.foremost::showTypeLabel" = "Štítok \"Najdôležitejšia udalosť\"";
 "widget.style.aiCommand::showExplain" = "Popis";
